@@ -425,6 +425,68 @@ Guessing is forbidden.
 
 ---
 
+## SpecKit Execution Contract
+
+All feature development must follow the Hard Mode SpecKit workflow defined in:
+
+docs/00_SPEC_KIT_HARD_MODE_WORKFLOW.md
+
+This document defines:
+
+- Mandatory execution order
+- Enforcement templates
+- Architecture drift detection
+- Safety gates before implementation
+- Spec-to-code alignment rules
+
+AI agents must not begin implementation without passing:
+
+1. Constitution alignment
+2. Specification validation
+3. Architecture consistency analysis
+4. Safety gate confirmation
+
+SpecKit workflow is mandatory for all new feature development.
+
+---
+
+## SpecKit Directory Structure (Locked)
+
+SpecKit must operate strictly within the following directory structure:
+
+specs/
+├── phases/
+│ ├── 01_platform_foundation/
+│ ├── 02_mmc/
+│ ├── 03_backoffice/
+│ ├── 04_runtime/
+│ └── 05_frontoffice/
+│
+├── templates/
+│ ├── specify_template.md
+│ ├── plan_template.md
+│ ├── tasks_template.md
+│ ├── analyze_template.md
+│ └── implement_gate_template.md
+│
+└── constitution.md
+
+Hard Rules:
+
+- SpecKit must not generate flat spec files in specs root.
+- All new features must be created inside specs/runtime/<phase_name>/.
+- No stage renumbering without architectural review.
+- No moving phases between directories.
+- No overwriting manually curated spec files.
+- SpecKit must not auto-generate architecture changes.
+- All generated files must align with ADR decisions.
+
+If SpecKit generates content outside this structure, it must be rejected.
+
+Spec directory structure is part of architectural governance.
+
+---
+
 ## Source of Truth Priority
 
 ADR (docs/architecture) > Specs > This file > Code
