@@ -1,0 +1,15 @@
+{
+  "name": "@zidney/config",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "build": "bun build src/index.ts",
+    "test": "vitest"
+  },
+  "devDependencies": {
+    "typescript": "latest",
+    "vitest": "^1.0.0"
+  }
+}
