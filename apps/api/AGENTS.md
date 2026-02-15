@@ -240,7 +240,7 @@ No exceptions.
 
 ## References
 
-- specs/01_PLATFORM_FOUNDATION/
-- specs/04_RUNTIME/
+- specs/phases/01_PLATFORM_FOUNDATION/
+- specs/phases/04_RUNTIME/
 - docs/01_ENGINEERING_GOVERNANCE/
 - docs/architecture/

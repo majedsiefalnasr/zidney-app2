@@ -32,7 +32,7 @@ AI must not perform speculative refactors.
 
 All generated code must align strictly with:
 
-- specs/
+- specs/phases/
 - docs/
 - ADR decisions
 - AGENTS.md contracts

@@ -32,7 +32,7 @@ They define HOW features must be built.
 
 ---
 
-## specs/
+## specs/phases/
 
 Purpose:
 Feature and domain specifications.
@@ -57,7 +57,7 @@ Specs define WHAT to build.
 ## Separation Rule
 
 docs/ = governance & operational rules  
-specs/ = product & system definition
+specs/phases/ = product & system definition
 
 Neither should duplicate the other.
 

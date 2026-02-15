@@ -223,7 +223,7 @@ or UI system contract — it must be rejected.
 
 See:
 
-- specs/01_PLATFORM_FOUNDATION/
-- specs/02_PLATFORM_MMC/
+- specs/phases/01_PLATFORM_FOUNDATION/
+- specs/phases/02_PLATFORM_MMC/
 - docs/01_ENGINEERING_GOVERNANCE/
 - docs/architecture/
