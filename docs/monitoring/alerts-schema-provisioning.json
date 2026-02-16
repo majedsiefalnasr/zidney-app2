@@ -1,0 +1,138 @@
+{
+  "groups": [
+    {
+      "name": "zidney.schema-provisioning",
+      "interval": "30s",
+      "rules": [
+        {
+          "alert": "SchemaProvisioningTaskFailed",
+          "expr": "increase(provisioning_tasks_total{status=\"FAILED\"}[5m]) > 0",
+          "for": "5m",
+          "labels": {
+            "severity": "warning",
+            "component": "schema-provisioning",
+            "runbook": "https://wiki.internal/runbooks/schema-provisioning-failed"
+          },
+          "annotations": {
+            "summary": "Schema provisioning task failed",
+            "description": "Tenant schema provisioning task failed. Workspace: {{ $labels.workspace_id }}. Check provisioning_tasks table for details.",
+            "dashboard": "schema-provisioning"
+          }
+        },
+        {
+          "alert": "SchemaProvisioningDLQEscalation",
+          "expr": "increase(provisioning_tasks_total{status=\"DLQ\"}[5m]) > 0",
+          "for": "1m",
+          "labels": {
+            "severity": "critical",
+            "component": "schema-provisioning",
+            "runbook": "https://wiki.internal/runbooks/schema-provisioning-dlq"
+          },
+          "annotations": {
+            "summary": "CRITICAL: Schema provisioning task in DLQ",
+            "description": "Tenant schema provisioning escalated to DLQ after max retries. Workspace: {{ $labels.workspace_id }}. Manual intervention required. Check logs for tampering_detected flag.",
+            "dashboard": "schema-provisioning"
+          }
+        },
+        {
+          "alert": "SchemaProvisioningStuckTask",
+          "expr": "provisioning_tasks_stuck_duration_seconds > 3600",
+          "for": "1h",
+          "labels": {
+            "severity": "warning",
+            "component": "schema-provisioning",
+            "runbook": "https://wiki.internal/runbooks/schema-provisioning-stuck"
+          },
+          "annotations": {
+            "summary": "Schema provisioning task stuck for 1+ hour",
+            "description": "Provisioning task {{ $labels.task_id }} stuck in {{ $labels.status }} state for {{ $value | humanizeDuration }}. Workspace: {{ $labels.workspace_id }}.",
+            "dashboard": "schema-provisioning"
+          }
+        },
+        {
+          "alert": "SchemaProvisioningHighFailureRate",
+          "expr": "(increase(provisioning_tasks_total{status=\"FAILED\"}[1h]) / increase(provisioning_tasks_total[1h])) > 0.05",
+          "for": "5m",
+          "labels": {
+            "severity": "critical",
+            "component": "schema-provisioning",
+            "runbook": "https://wiki.internal/runbooks/schema-provisioning-failure-rate"
+          },
+          "annotations": {
+            "summary": "High schema provisioning failure rate (>5%)",
+            "description": "Failure rate in last 1 hour: {{ $value | humanizePercentage }}. Check provisioning_tasks table and worker logs for root cause.",
+            "dashboard": "schema-provisioning"
+          }
+        },
+        {
+          "alert": "SchemaTampering Detected",
+          "expr": "increase(provisioning_tasks_total{tampering_detected=\"true\"}[5m]) > 0",
+          "for": "1m",
+          "labels": {
+            "severity": "critical",
+            "component": "schema-provisioning",
+            "runbook": "https://wiki.internal/runbooks/schema-tampering"
+          },
+          "annotations": {
+            "summary": "SECURITY ALERT: Schema tampering detected",
+            "description": "Schema initialization detected checksum mismatch. Possible tampering or storage corruption. Workspace: {{ $labels.workspace_id }}. DO NOT RETRY. Escalate to security team.",
+            "dashboard": "schema-provisioning"
+          }
+        },
+        {
+          "alert": "ConnectionPoolExhaustion",
+          "expr": "(pg_stat_activity_count{state=\"active\", job=\"tenant-db\"} / on() group_left() pg_settings_max_connections) > 0.8",
+          "for": "5m",
+          "labels": {
+            "severity": "warning",
+            "component": "database",
+            "runbook": "https://wiki.internal/runbooks/connection-pool-exhaustion"
+          },
+          "annotations": {
+            "summary": "Connection pool utilization > 80%",
+            "description": "Database connection pool at {{ $value | humanizePercentage }}. Risk of new connection failures.",
+            "dashboard": "schema-provisioning"
+          }
+        },
+        {
+          "alert": "MissingTenantDatabase",
+          "expr": "increase(registry_database_missing_total[5m]) > 0",
+          "for": "5m",
+          "labels": {
+            "severity": "critical",
+            "component": "registry",
+            "runbook": "https://wiki.internal/runbooks/missing-tenant-database"
+          },
+          "annotations": {
+            "summary": "CRITICAL: Tenant database missing from registry",
+            "description": "Registry entry {{ $labels.workspace_slug }} points to non-existent database {{ $labels.database_name }}. Data loss risk.",
+            "dashboard": "schema-provisioning"
+          }
+        },
+        {
+          "alert": "TaskRetryStormDetected",
+          "expr": "increase(provisioning_tasks_retry_count[5m]) > 10",
+          "for": "5m",
+          "labels": {
+            "severity": "warning",
+            "component": "schema-provisioning",
+            "runbook": "https://wiki.internal/runbooks/retry-storm"
+          },
+          "annotations": {
+            "summary": "High retry rate detected (>10 retries in 5 min)",
+            "description": "Provisioning tasks experiencing excessive retries. Workspace: {{ $labels.workspace_id }}. Check for transient database issues or network problems.",
+            "dashboard": "schema-provisioning"
+          }
+        }
+      ]
+    }
+  ],
+  "metadata": {
+    "file": "docs/monitoring/alerts-schema-provisioning.json",
+    "created": "2026-02-16",
+    "version": "1.0.0",
+    "status": "PRODUCTION",
+    "critical": true,
+    "deployment": "terraform"
+  }
+}

@@ -168,8 +168,33 @@ function enforceProductVersion(license: any) {
   }
 }
 
+/**
+ * Get or create connection pool for tenant
+ *
+ * HARDENING (STAGE_02B):
+ * - Explicit max pool size: 10 connections per workspace
+ * - Prevents silent unbounded connection pool growth
+ * - Logs warning when pool approaches limit (>8 connections)
+ * - Prevents cascade failures from connection exhaustion
+ */
 function getOrCreatePool(registry: any) {
-  return TenantPoolManager.getOrCreatePool(registry)
+  const pool = TenantPoolManager.getOrCreatePool(registry, {
+    max: 10, // Hardening: explicit limit per workspace
+    idleTimeoutMillis: 30000,
+  })
+
+  // Hardening: Monitor pool usage
+  if (pool.totalCount > 8) {
+    logger.warn('Connection pool near capacity', {
+      workspace_id: registry.id,
+      totalCount: pool.totalCount,
+      maxLimit: 10,
+      message:
+        'Approaching connection limit - consider reviewing query patterns',
+    })
+  }
+
+  return pool
 }
 
 function logResolution(slug: string, correlationId: string) {
