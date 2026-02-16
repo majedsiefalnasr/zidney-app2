@@ -42,7 +42,7 @@ Stage: <STAGE_NAME>
 Phase: <PHASE_NUMBER>
 
 Use Zidney Constitution v1.2.0 as binding authority.
-Use Zidney Specify Template (specs/templates/specify-template.md)
+Use Zidney Specify Template `specs/templates/specify-template.md`
 
 Define strict functional requirements.
 
@@ -104,7 +104,7 @@ Define HOW implementation works.
 ```
 Stage: <STAGE_NAME>
 
-Use Zidney Plan Template (specs/templates/plan-template.md)
+Use Zidney Plan Template `specs/templates/plan-template.md`
 
 Create technical implementation plan including:
 - Tables / schema changes
@@ -143,7 +143,7 @@ Break plan into atomic implementation tasks.
 Generate atomic tasks for:
 Stage: <STAGE_NAME>
 
-Use Zidney Tasks Template (specs/templates/tasks-template.md)
+Use Zidney Tasks Template `specs/templates/tasks-template.md`
 
 Each task must:
 - Be scoped to one layer
@@ -165,7 +165,7 @@ Prevent architectural violations.
 ### Prompt Template
 
 ```
-Use Zidney Analyze Template (specs/templates/analyze-template.md)
+Use Zidney Analyze Template `specs/templates/analyze-template.md`
 
 Audit tasks and plan for:
 - Isolation violations
@@ -192,7 +192,7 @@ Generate safe implementation.
 ### Prompt Template
 
 ```
-Use Zidney Implementation Template (specs/templates/implement-template.md)
+Use Zidney Implementation Template `specs/templates/implement-template.md`
 
 Implement Stage: <STAGE_NAME>
 
