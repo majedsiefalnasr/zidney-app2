@@ -62,6 +62,15 @@ Optional contextual fields:
 
 No console.log allowed.
 
+---
+
+TODO:
+Replace any temporary console-based JSON logging with a structured logger abstraction (Pino).
+All services must migrate to Pino before production release.
+Console-based logging is allowed only as a transitional mechanism during early foundation stages.
+
+---
+
 Example log structure:
 
 {

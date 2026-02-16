@@ -1,6 +1,6 @@
 # Tasks: Monorepo Setup
 
-**Input**: Design documents from `/specs/runtime/1-monorepo-setup/`
+**Input**: Design documents from `/specs/runtime/001-monorepo-setup/`
 **Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, quickstart.md
 
 **Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.

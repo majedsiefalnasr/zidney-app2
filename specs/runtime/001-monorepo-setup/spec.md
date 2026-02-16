@@ -1,6 +1,6 @@
 # Feature Specification: Monorepo Setup
 
-**Feature Branch**: `1-monorepo-setup`  
+**Feature Branch**: `001-monorepo-setup`  
 **Created**: 2026-02-15  
 **Status**: Draft  
 **Input**: User description: "Stage: STAGE_01_MONOREPO_SETUP Phase: 01"
