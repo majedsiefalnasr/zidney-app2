@@ -1,0 +1,315 @@
+openapi: 3.0.3
+info:
+  title: Tenant Baseline Schema API
+  description: |
+    Tenant provisioning and schema management endpoints.
+    
+    All endpoints require:
+    - Tenant resolver middleware (resolves workspace_id from slug)
+    - License middleware (validates ACTIVE/TRIAL status)
+    - Schema version middleware (ensures compatibility)
+    
+    Error responses follow the standard error contract:
+    ```json
+    {
+      "success": false,
+      "data": null,
+      "error": {
+        \"code\": \"ERROR_CODE\",
+        \"message\": \"Human-readable description\"
+      }
+    }
+    ```
+  version: 1.0.0
+  termsOfService: https://zidney.io/terms
+  contact:
+    name: Zidney Platform
+    url: https://zidney.io
+
+servers:
+  - url: https://api.zidney.io/mmm
+    description: MMC API (admin operations)
+  - url: http://localhost:3000/mmm
+    description: Development
+
+tags:
+  - name: Provisioning
+    description: Workspace schema initialization
+
+paths:
+  /workspaces/{workspace_id}/schema/initialize:
+    post:
+      tags:
+        - Provisioning
+      summary: Initialize tenant baseline schema
+      description: |
+        Enqueue schema initialization for a workspace. Creates all 38–40 baseline tables 
+        in the tenant database.
+        
+        **Middleware chain**:
+        1. Tenant resolver (validates workspace_id, resolves tenant)
+        2. License middleware (validates ACTIVE/TRIAL status)
+        3. Rate limiting (5 requests/minute per workspace)
+        
+        **Idempotency**: Duplicate requests with same Idempotency-Key return cached response
+        (202 Accepted). If schema_version table already exists, request is idempotent.
+        
+        **Response**:
+        - 202 Accepted: Schema initialization queued
+        - 400 Bad Request: Invalid input
+        - 401 Unauthorized: Missing/invalid auth
+        - 403 Forbidden: User not auth for workspace
+        - 404 Not Found: Workspace not found
+        - 409 Conflict: Schema already initialized (idempotent replay)
+        - 423 Locked: License soft-locked
+        - 429 Too Many Requests: Rate limit exceeded
+        - 503 Service Unavailable: Database unavailable
+      
+      operationId: initializeSchema
+      parameters:
+        - name: workspace_id
+          in: path
+          description: Workspace UUID to initialize
+          required: true
+          schema:
+            type: string
+            format: uuid
+            example: \"550e8400-e29b-41d4-a716-446655440000\"
+        
+        - name: Idempotency-Key
+          in: header
+          description: |
+            UUID for idempotent requests. If provided, duplicate requests 
+            with same key return cached response.
+          required: false
+          schema:
+            type: string
+            format: uuid
+            example: \"f47ac10b-58cc-4372-a567-0e02b2c3d479\"
+      
+      requestBody:
+        description: Schema initialization request
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                notify_on_complete:
+                  type: boolean
+                  description: Send webhook on completion (optional)
+                  default: false
+              required: []
+            example:
+              notify_on_complete: false
+      
+      responses:
+        '202':
+          description: Schema initialization queued
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      task_id:
+                        type: string
+                        format: uuid
+                        description: Worker queue task ID
+                        example: \"a1b2c3d4-e5f6-47a8-b8c9-d0e1f2a3b4c5\"
+                      workspace_id:
+                        type: string
+                        format: uuid
+                        example: \"550e8400-e29b-41d4-a716-446655440000\"
+                      status:
+                        type: string
+                        enum: [initialization_queued, already_initialized]
+                        example: \"initialization_queued\"
+                      estimated_duration_seconds:
+                        type: integer
+                        example: 5
+                  error:
+                    type: 'null'
+        
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                data: null
+                error:
+                  code: \"INVALID_REQUEST\"
+                  message: \"workspace_id must be a valid UUID\"
+        
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                data: null
+                error:
+                  code: \"UNAUTHORIZED\"
+                  message: \"JWT token missing or invalid\"
+        
+        '403':
+          description: Forbidden (not member of workspace)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                data: null
+                error:
+                  code: \"FORBIDDEN\"
+                  message: \"User not authorized for this workspace\"
+        
+        '404':
+          description: Workspace not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                data: null
+                error:
+                  code: \"WORKSPACE_NOT_FOUND\"
+                  message: \"Workspace with ID not found\"
+        
+        '409':
+          description: |
+            Conflict. Schema already initialized (idempotent replay).
+            This is a successful response (same as 202 if retry).
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: object
+                    properties:
+                      task_id:
+                        type: string
+                        format: uuid
+                      workspace_id:
+                        type: string
+                        format: uuid
+                      status:
+                        type: string
+                        enum: [already_initialized]
+                        example: \"already_initialized\"
+                      schema_version:
+                        type: string
+                        example: \"1.0.0\"
+                  error:
+                    type: 'null'
+        
+        '423':
+          description: License soft-locked
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                data: null
+                error:
+                  code: \"LICENSE_SOFT_LOCKED\"
+                  message: \"Workspace license is soft-locked. Features restricted.\"
+        
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                data: null
+                error:
+                  code: \"RATE_LIMIT_EXCEEDED\"
+                  message: \"Rate limit: 5 requests per minute per workspace\"
+        
+        '503':
+          description: Service unavailable (migration in progress or DB down)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                data: null
+                error:
+                  code: \"SERVICE_UNAVAILABLE\"
+                  message: \"Migration in progress. Retry after 30 seconds.\"
+
+components:
+  schemas:
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: 'null'
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              description: Standardized error code
+              enum:
+                - INVALID_REQUEST
+                - UNAUTHORIZED
+                - FORBIDDEN
+                - WORKSPACE_NOT_FOUND
+                - LICENSE_SOFT_LOCKED
+                - SCHEMA_VERSION_MISMATCH
+                - MIGRATION_IN_PROGRESS
+                - RATE_LIMIT_EXCEEDED
+                - SERVICE_UNAVAILABLE
+                - SCHEMA_INIT_FAILED
+                - INTERNAL_SERVER_ERROR
+            message:
+              type: string
+              description: Human-readable error message
+      required:
+        - success
+        - data
+        - error
+
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT token with embedded workspace_id and user_id.
+        Token format: JWT headers.payload.signature
+        
+        Payload must include:
+        {
+          \"sub\": \"user_id\",
+          \"workspace_id\": \"workspace_id\",
+          \"iat\": 1642598400,
+          \"exp\": 1642684800
+        }
+
+security:
+  - bearerAuth: []
