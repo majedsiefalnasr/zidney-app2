@@ -1,0 +1,125 @@
+openapi: 3.0.3
+info:
+  title: Zidney Tenant Resolver Middleware Contract
+  version: 1.0.0
+  description: Internal contract for tenant resolution middleware behavior
+
+paths: {}
+
+components:
+  schemas:
+    TenantContext:
+      type: object
+      properties:
+        workspaceId:
+          type: string
+          format: uuid
+        workspaceSlug:
+          type: string
+        tenantDb:
+          type: object
+          description: Database connection pool
+        license:
+          $ref: '#/components/schemas/License'
+        schemaVersion:
+          type: string
+        productVersion:
+          type: string
+        requestId:
+          type: string
+          format: uuid
+      required:
+        - workspaceId
+        - workspaceSlug
+        - tenantDb
+        - license
+        - schemaVersion
+        - productVersion
+        - requestId
+
+    License:
+      type: object
+      properties:
+        status:
+          type: string
+          enum: [ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED]
+        productVersion:
+          type: string
+      required:
+        - status
+        - productVersion
+
+    ErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            workspace:
+              type: string
+            request_id:
+              type: string
+          required:
+            - code
+            - message
+            - workspace
+            - request_id
+      required:
+        - error
+
+  responses:
+    TenantNotFound:
+      description: Workspace not found
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "TENANT_NOT_FOUND"
+              message: "Workspace not found"
+              workspace: "unknown"
+              request_id: "uuid"
+
+    LicenseBlocked:
+      description: License status blocks access
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "LICENSE_BLOCKED"
+              message: "License status prevents access"
+              workspace: "example"
+              request_id: "uuid"
+
+    VersionMismatch:
+      description: Schema or product version incompatible
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "VERSION_MISMATCH"
+              message: "Version incompatible"
+              workspace: "example"
+              request_id: "uuid"
+
+    DatabaseUnavailable:
+      description: Database connection failed
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/ErrorResponse'
+          example:
+            error:
+              code: "DATABASE_UNAVAILABLE"
+              message: "Database connection failed"
+              workspace: "example"
+              request_id: "uuid"

@@ -1,7 +1,7 @@
 # Implementation Plan: Monorepo Setup
 
-**Branch**: `1-monorepo-setup` | **Date**: 2026-02-15 | **Spec**: [specs/runtime/1-monorepo-setup/spec.md](specs/runtime/1-monorepo-setup/spec.md)
-**Input**: Feature specification from `/specs/runtime/1-monorepo-setup/spec.md`
+**Branch**: `001-monorepo-setup` | **Date**: 2026-02-15 | **Spec**: [specs/runtime/001-monorepo-setup/spec.md](specs/runtime/001-monorepo-setup/spec.md)
+**Input**: Feature specification from `/specs/runtime/001-monorepo-setup/spec.md`
 
 **Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
 
@@ -41,7 +41,7 @@ _GATE: Must pass before Phase 0 research. Re-check after Phase 1 design._
 ### Documentation (this feature)
 
 ```text
-specs/runtime/1-monorepo-setup/
+specs/runtime/001-monorepo-setup/
 ├── plan.md              # This file (/speckit.plan command output)
 ├── research.md          # Phase 0 output (/speckit.plan command)
 ├── data-model.md        # Phase 1 output (/speckit.plan command)
