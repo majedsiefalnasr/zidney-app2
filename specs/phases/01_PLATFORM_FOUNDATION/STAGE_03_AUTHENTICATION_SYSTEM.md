@@ -6,6 +6,13 @@ Scope: Workspace-isolated authentication, JWT governance & access enforcement
 
 ---
 
+## Stage Status
+
+Status: BACKEND CLOSED
+Closure Date: 2026-02-17
+
+---
+
 ## Objective
 
 Implement a secure, strictly isolated authentication system that guarantees:
