@@ -1,0 +1,11 @@
+{
+  "stage": null,
+  "phase": null,
+  "current_step": "idle",
+  "clarifications_resolved": false,
+  "drift_passed": null,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "last_updated": null,
+  "history": []
+}

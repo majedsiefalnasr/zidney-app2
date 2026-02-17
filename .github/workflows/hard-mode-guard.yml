@@ -1,0 +1,31 @@
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+
+jobs:
+  hard-mode-validation:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Validate workflow state file exists
+        run: |
+          if [ ! -f "specs/.workflow-state.json" ]; then
+            echo "ERROR: specs/.workflow-state.json not found."
+            exit 1
+          fi
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run Hard Mode validation script
+        run: node scripts/validate-hard-mode.js
+
+      - name: Hard Mode validation success
+        run: echo "Hard Mode validation completed successfully via validate-hard-mode.js"
