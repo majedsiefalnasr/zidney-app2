@@ -71,7 +71,7 @@ interface Product {
     "realtime_analytics": true,
     "ai_grading": false
   },
-  "created_at": "2025-02-16T10:30:00Z"
+  "created_at": "2026-02-16T10:30:00Z"
 }
 ```
 
@@ -392,7 +392,7 @@ logger.error({
 })
 
 // Outputs structured JSON:
-// {"timestamp":"2025-02-16T...","level":"INFO","service":"my-service",...}
+// {"timestamp":"2026-02-16T...","level":"INFO","service":"my-service",...}
 ```
 
 ---

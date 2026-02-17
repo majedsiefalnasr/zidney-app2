@@ -12,7 +12,7 @@
 
 # Master Database Error Codes Reference
 
-Last Updated: 2025-02-16
+Last Updated: 2026-02-16
 
 This document describes all error codes that can be returned by the master database API endpoints.
 

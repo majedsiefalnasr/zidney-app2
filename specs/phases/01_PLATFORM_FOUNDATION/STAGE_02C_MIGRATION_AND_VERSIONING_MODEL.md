@@ -10,7 +10,7 @@ Scope: Master & Tenant schema evolution governance
 
 Status: BACKEND CLOSED  
 UI Status: Deferred  
-Closure Date: 2025-02-16
+Closure Date: 2026-02-16
 
 ### Closure Scope
 

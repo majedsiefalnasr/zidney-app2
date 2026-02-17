@@ -425,6 +425,41 @@ Guessing is forbidden.
 
 ---
 
+### Stage Lifecycle Enforcement (Automatic Validator Rule)
+
+AI must validate stage status before generating, modifying, or implementing any specification.
+
+Rules:
+
+1. AI must locate the target stage file inside `specs/phases/`.
+2. AI must check for the presence of a "## Stage Status" block.
+3. If Stage Status is:
+   - DRAFT → Implementation forbidden.
+   - IN PROGRESS → Modification allowed within scope.
+   - BACKEND CLOSED → No structural backend modifications allowed.
+   - PRODUCTION READY → No structural changes; only documentation allowed.
+   - PRODUCTION HARDENED → File is frozen; changes require new stage.
+   - DEPRECATED → Must reference replacement stage.
+
+4. AI must refuse to:
+   - Modify CLOSED or HARDENED stages.
+   - Rename or renumber stages.
+   - Expand scope of a CLOSED stage.
+   - Insert new tasks into a CLOSED stage.
+
+5. If a change is required for a CLOSED stage:
+   - AI must propose creating a new stage.
+   - AI must reference the original stage.
+   - AI must maintain backward compatibility.
+
+6. SpecKit must not regenerate or overwrite any stage marked BACKEND CLOSED, PRODUCTION READY, or PRODUCTION HARDENED.
+
+If Stage Status block is missing, AI must stop and request clarification before proceeding.
+
+Stage lifecycle governance is mandatory.
+
+---
+
 ## SpecKit Execution Contract
 
 All feature development must follow the Hard Mode SpecKit workflow defined in:
