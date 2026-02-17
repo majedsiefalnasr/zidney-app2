@@ -68,7 +68,10 @@ if (state.implementation_allowed !== true) {
 
 // Migration enforcement (prevent unplanned schema changes)
 try {
-  const diff = execSync('git diff --name-only origin/develop...HEAD', {
+  const baseRef =
+    process.env.GITHUB_BASE_REF || process.env.BASE_REF || 'develop'
+
+  const diff = execSync(`git diff --name-only origin/${baseRef}...HEAD`, {
     encoding: 'utf-8',
   })
   const changedFiles = diff.split('\n').filter(Boolean)
