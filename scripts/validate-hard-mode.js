@@ -68,7 +68,7 @@ if (state.implementation_allowed !== true) {
 
 // Migration enforcement (prevent unplanned schema changes)
 try {
-  const diff = execSync('git diff --name-only origin/main...HEAD', {
+  const diff = execSync('git diff --name-only origin/develop...HEAD', {
     encoding: 'utf-8',
   })
   const changedFiles = diff.split('\n').filter(Boolean)
