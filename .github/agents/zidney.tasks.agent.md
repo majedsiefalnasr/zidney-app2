@@ -1,17 +1,25 @@
 ---
-description: This custom agent generates atomic tasks for the Zidney tenant baseline schema implementation.
+name: Zidney Orchestrator
+description: Generates atomic tasks for the Zidney tenant baseline schema.
+# 1. Enable the agent tool to allow calling subagents
+tools: ['agent']
+# 2. Whitelist the subagent you want to call
+agents: ['speckit.tasks']
 ---
 
 ## User Input
 
-```text
 $ARGUMENTS
-```
 
-Follow instructions in [speckit.tasks.prompt.md](../prompts/speckit.tasks.prompt.md).
+## Instructions
 
+**Action:**
+Use #tool:agent/runSubagent to delegate task generation to @speckit.tasks.
+
+**Task for @speckit.tasks:**
+"
 Generate atomic tasks for:
-Stage: <STAGE_NAME>
+Stage: <STAGE_NAME> (from $ARGUMENTS)
 
 Use [Zidney Tasks Template](../../specs/templates/tasks-template.md)
 
@@ -23,5 +31,4 @@ Each task must:
 - Declare middleware dependency
 - Not modify unrelated files
 - Preserve isolation guarantees
-
-$ARGUMENTS
+  "

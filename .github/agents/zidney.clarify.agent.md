@@ -1,19 +1,26 @@
 ---
+name: Zidney Clarifier
 description: This custom agent clarifies ambiguities in the Zidney tenant baseline schema implementation.
+# Enable subagent execution and user interaction tools
+tools: ['agent', 'vscode/askQuestions']
+# Whitelist the specific clarify agent
+agents: ['speckit.clarify']
 ---
 
 ## User Input
 
-```text
 $ARGUMENTS
-```
 
-Follow instructions in [speckit.clarify.prompt.md](../prompts/speckit.clarify.prompt.md).
+## Instructions
 
-Clarify specification for:
-Stage: <STAGE_NAME>
+**Action:**
+Use #tool:agent/runSubagent to identify ambiguities via @speckit.clarify.
 
-Audit ambiguities in:
+**Clarification Goal for @speckit.clarify:**
+"
+Clarify specification for Stage: <STAGE_NAME> (from $ARGUMENTS).
+
+Audit the following for ambiguities:
 
 - Transactions
 - Idempotency
@@ -24,7 +31,9 @@ Audit ambiguities in:
 - Error contract
 - Isolation boundaries
 
-List explicit clarification questions.
-Do not assume.
+**Requirement:**
 
-$ARGUMENTS
+- List explicit clarification questions.
+- DO NOT make assumptions.
+- If necessary, use #tool:vscode/askQuestions to get missing details from the user.
+  "
