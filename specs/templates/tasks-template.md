@@ -117,20 +117,15 @@ No write endpoint without transaction task.
 
 ## Idempotency Tasks
 
-If feature includes:
-
-- Submission
-- License transition
-- Provisioning
-- Grading
-- Payment
+If feature includes any operation where duplicates must be detected and handled:
 
 Tasks must include:
 
-- Add idempotency key validation
+- Add idempotency key validation (or equivalent)
 - Add unique constraint
 - Add replay-safe logic
 - Add duplicate submission test
+- (Based on idempotency strategy in plan.md)
 
 ---
 
@@ -199,14 +194,14 @@ If needed → new Stage required.
 
 Before finishing tasks, verify:
 
-- All write paths transactional
-- All critical endpoints idempotent
-- Isolation preserved
-- Version enforcement active
+- All write paths transactional (per plan.md)
+- All operations marked idempotent in plan.md tested
+- Isolation preserved (per spec.md)
+- Version enforcement active (if stage touches DB)
 - Logging structured
-- No business logic in frontend
-- No grading in API
-- No direct DB instantiation
+- No business logic in restricted layers (per spec.md)
+- No direct DB instantiation (tenant resolver only)
+- Layer boundaries respected
 
 ---
 

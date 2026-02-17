@@ -92,12 +92,12 @@ Code must:
 
 After code generation:
 
-Confirm:
+Confirm (per this stage's tasks.md):
 
-- All routes wrapped in middleware
-- All writes transactional
-- Idempotency tests included
-- Version checks active
+- All routes wrapped in required middleware
+- All writes transactional (per plan.md)
+- Idempotency tests included (per plan.md)
+- Version checks active (if applicable to stage)
 - Structured logs present
 - No console.log
 - No TODO left

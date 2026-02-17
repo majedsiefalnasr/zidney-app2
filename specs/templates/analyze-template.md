@@ -60,19 +60,14 @@ If missing → BLOCK.
 
 ## Idempotency Audit
 
-For:
-• Attempt start
-• Attempt submission
-• Grading
-• License transitions
-• Provisioning
-• Billing
+For any operation marked as idempotent in plan.md:
 
 Verify:
 • Idempotency strategy defined
 • Unique constraints defined
 • Replay protection defined
 • Tests included
+• Consistent with clarifications from this stage
 
 If missing → BLOCK.
 
@@ -80,13 +75,14 @@ If missing → BLOCK.
 
 ## Snapshot Integrity Audit
 
-If attempt-related:
+If feature involves snapshot-based operations:
 
 Verify:
 • Snapshot frozen at start
-• No grading using live exam config
-• Worker-only grading
-• API does not calculate score
+• No mutations of snapshotted data
+• Worker-only calculation (if applicable)
+• API does not override snapshotted state
+• (Per ADR-0002 if applicable)
 
 If violated → BLOCK.
 
@@ -105,10 +101,10 @@ Verify:
 ## Observability Audit
 
 Verify:
-• Structured logging
-• request_id propagation
-• workspace_slug logging
-• attempt_id logging (runtime)
+• Structured logging (Pino format)
+• correlation_id propagation (or equivalent)
+• workspace_slug logging (tenant context)
+• Domain-specific IDs (attempt_id, student_id, etc. if applicable)
 • No console.log
 
 ---

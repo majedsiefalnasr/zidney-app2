@@ -79,19 +79,19 @@ If applicable:
 - Version bump required? (Yes/No)
 - Backward compatibility strategy
 
-Must align with STAGE_02C_MIGRATION_AND_VERSIONING_MODEL.
+Must align with project versioning strategy (see STAGE_02C_MIGRATION_AND_VERSIONING_MODEL or equivalent).
 
 ---
 
 ## Transaction Boundaries
 
-Define clearly:
+Define clearly (per this stage's requirements):
 
 - Which operations require transactions
-- What must be atomic
-- What must be idempotent
-- What happens on failure
-- Retry policy (if async)
+- Atomic operation boundaries
+- Which operations must be idempotent
+- Failure handling and rollback paths
+- Retry policy (if async/worker involved)
 
 Must reference Operational Integrity principle.
 
@@ -119,13 +119,13 @@ If endpoint mutates state:
 - Replay behavior defined? (Yes/No)
 - Double submission protection? (Yes/No)
 
-Mandatory for:
+Mandatory for all operations that must be safe to retry:
 
-- Attempt submission
-- License transition
-- Provisioning
-- Payment
-- Grading
+- Financial transactions
+- State transitions
+- Resource allocation
+- External integrations
+- (Per clarifications from this stage)
 
 ---
 
@@ -144,12 +144,13 @@ Must define:
 
 ## Rate Limiting & Abuse Protection
 
-Must define:
+If applicable to this stage, must define:
 
-- Endpoint classification
-- Rate limit policy
+- Endpoint classification (public/auth/admin)
+- Rate limit policy (per endpoint)
 - Replay attack mitigation
-- Worker queue protection
+- Worker queue protection (if messaging involved)
+- (Per clarifications from this stage)
 
 ---
 
@@ -169,14 +170,15 @@ If violated → reject plan.
 
 ## Failure Modes & Recovery
 
-Define:
+Define (as applicable to this stage):
 
-- What happens on DB failure
-- What happens on version mismatch
-- What happens on license block
-- What happens on worker failure
-- What happens on timeout
-- DLQ behavior (if async)
+- DB failure handling
+- Version mismatch handling (if version checks active)
+- License enforcement handling (if license middleware required)
+- Worker failure recovery (if async operations)
+- Timeout behavior
+- DLQ/error queue handling (if worker involved)
+- Partial transaction failure recovery
 
 ---
 

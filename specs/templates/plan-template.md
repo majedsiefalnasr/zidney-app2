@@ -90,15 +90,15 @@ Must reference STAGE_02C_MIGRATION_AND_VERSIONING_MODEL.
 
 ## Transaction Design
 
-For every mutating operation:
+For every mutating operation in this stage:
 
 - Transaction required? (Yes/No)
 - Atomic operations defined?
 - Rollback behavior defined?
-- Isolation level?
-- Concurrency protection mechanism?
+- Isolation level (SERIALIZABLE/REPEATABLE READ/READ COMMITTED)?
+- Concurrency protection mechanism (FOR UPDATE/unique constraint/external lock)?
 
-Must ensure no race conditions.
+Must ensure no race conditions per clarifications from this stage.
 
 ---
 
@@ -112,7 +112,7 @@ If endpoint mutates state:
 - Duplicate submission safe?
 - Worker deduplication strategy?
 
-Mandatory for:
+Mandatory for all operations where:
 
 - Attempt submission
 - License transitions
@@ -158,15 +158,15 @@ Plan must define:
 - workspace_slug propagation
 - attempt_id propagation (if runtime)
 - Error contract adherence
-- Metrics emitted (if critical path)
+- Metrics emitted (if critical performance path)
 
-No console logs allowed.
+No console logs allowed in production code.
 
 ---
 
 ## Rate Limiting
 
-Plan must specify:
+If applicable to this stage, plan must specify:
 
 - Endpoint classification
 - Rate limit thresholds
@@ -177,7 +177,7 @@ Plan must specify:
 
 ## Failure Modes
 
-Explicitly define:
+Explicitly define (as applicable to this stage):
 
 - DB unavailable
 - Version mismatch
@@ -188,7 +188,7 @@ Explicitly define:
 - Queue backlog
 - Partial transaction failure
 
-Must define recovery path.
+Must define recovery path for each mode.
 
 ---
 
