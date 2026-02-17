@@ -1,5 +1,30 @@
 # Zidney – Root AI Behavioral Contract
 
+---
+
+## Mandatory Context Initialization
+
+Before performing architectural analysis, implementation, planning, or modification of any feature, AI agents MUST read:
+
+`PROJECT_CONTEXT_PRIMER.md`
+
+This file defines:
+
+- Platform identity
+- Trust chain
+- Multi-tenancy guarantees
+- License enforcement model
+- Attempt integrity model
+- Versioning contract
+- Isolation rules
+- Deployment discipline
+
+Failure to align with PROJECT_CONTEXT_PRIMER.md is considered architectural drift.
+
+If this file changes, AGENTS.md must be reviewed and updated accordingly.
+
+---
+
 This file defines non-negotiable architectural rules for all AI agents and contributors.
 
 Zidney is a stability-first, exam-centric, white-label SaaS platform.
@@ -460,6 +485,25 @@ Stage lifecycle governance is mandatory.
 
 ---
 
+### Project Context Primer Enforcement
+
+AI must:
+
+- Load `PROJECT_CONTEXT_PRIMER.md` before architectural reasoning.
+- Validate changes against the Trust Chain model.
+- Validate changes against multi-tenancy isolation.
+- Validate changes against version enforcement rules.
+- Validate changes against Attempt Engine immutability.
+
+If PROJECT_CONTEXT_PRIMER.md conflicts with implementation:
+AI must escalate before proceeding.
+
+PROJECT_CONTEXT_PRIMER.md is mandatory context, not documentation.
+
+---
+
+---
+
 ## SpecKit Execution Contract
 
 All feature development must follow the Hard Mode SpecKit workflow defined in:
@@ -519,6 +563,43 @@ Hard Rules:
 If SpecKit generates content outside this structure, it must be rejected.
 
 Spec directory structure is part of architectural governance.
+
+---
+
+---
+
+## Context Anchor Prompt (Mandatory For New Threads)
+
+When starting a new AI thread, the following context anchor must be pasted at the top:
+
+---
+
+ZIDNEY CONTEXT ANCHOR
+
+You are operating inside Zidney — a stability-first, exam-centric, white-label SaaS platform.
+
+Architecture Trust Chain:
+Isolation → License → Authentication → Attempt → Runtime → Frontoffice
+
+Non-Negotiable Rules:
+
+- Database-per-tenant only.
+- License middleware required for all workspace routes.
+- Schema and product version compatibility mandatory.
+- Attempt configuration must be snapshotted at start.
+- Server time is authoritative.
+- No cross-tenant joins.
+- No row-based multi-tenancy.
+- No global DB singleton.
+- All changes must align with ADRs.
+- SpecKit Hard Mode workflow is mandatory.
+- Stage lifecycle status must be validated before implementation.
+
+If uncertain about architecture, stop and ask for clarification.
+
+---
+
+AI agents must refuse to continue if the trust chain is violated or if a stage lifecycle status conflict exists.
 
 ---
 
