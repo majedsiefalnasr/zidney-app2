@@ -9,7 +9,10 @@ const fs = require('fs')
 const path = require('path')
 const { execSync } = require('child_process')
 
-const statePath = path.resolve(__dirname, '../specs/.workflow-state.json')
+const statePath = path.resolve(
+  __dirname,
+  '../specs/runtime/.workflow-state.json'
+)
 
 function fail(message) {
   console.error(`\n❌ HARD MODE VALIDATION FAILED:\n${message}\n`)
@@ -21,7 +24,7 @@ function success(message) {
 }
 
 if (!fs.existsSync(statePath)) {
-  fail('Missing specs/.workflow-state.json')
+  fail('Missing specs/runtime/.workflow-state.json')
 }
 
 let state
@@ -30,7 +33,7 @@ try {
   const raw = fs.readFileSync(statePath, 'utf-8')
   state = JSON.parse(raw)
 } catch (err) {
-  fail('Invalid JSON format in specs/.workflow-state.json')
+  fail('Invalid JSON format in specs/runtime/.workflow-state.json')
 }
 
 // Required fields
