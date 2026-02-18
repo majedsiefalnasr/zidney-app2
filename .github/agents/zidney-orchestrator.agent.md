@@ -19,69 +19,75 @@ Do NOT proceed if a stage blocks.
 
 Zidney Constitution v1.2.0 is binding authority.
 
+### Automatic Continuation Rule
+
+After completing each sub-step, evaluate the following gate before proceeding:
+
+- Are there unresolved [NEEDS CLARIFICATION] markers? → STOP and present them
+- Are there constitutional violations? → STOP and list them
+- Are there ambiguities that affect the next step? → STOP and ask
+- Are there missing required inputs? → STOP and request them
+
+If none of the above apply → **proceed automatically to the next sub-step or step.**
+
+Hard STOPs only occur when something genuinely blocks progress or requires human judgment.
+
 ---
 
-# Required Intake (Do NOT Skip)
+# Required Intake
 
-Before executing any step, you MUST collect and confirm:
+Before executing any step, collect and confirm:
 
-- STAGE_NAME
-- PHASE_NAME
-- STAGE_FILE_NAME (the actual filename inside `specs/phases/`, e.g. `STAGE_05_TENANT_PROVISIONING_SERVICE.md`)
+- `STAGE_NAME`
+- `PHASE_NUMBER`
+- `STAGE_FILE_NAME` (actual filename inside `specs/phases/`, e.g. `STAGE_05_TENANT_PROVISIONING_SERVICE.md`)
 
-Ask the user to provide:
+Ask the user:
 
 ```
 Stage:      <STAGE_NAME>
-Phase:      <PHASE_NAME>
+Phase:      <PHASE_NUMBER>
 Stage File: <STAGE_FILE_NAME>
 ```
 
-Do NOT proceed until all three values are explicitly provided.  
-Do NOT assume values.
-
-After confirmation, replace all occurrences of:
-
-- `<STAGE_NAME>`
-- `<PHASE_NAME>`
-- `<STAGE_FILE_NAME>`
-
-with the confirmed values for the remainder of the workflow.
+Do NOT proceed until all three are explicitly provided.  
+Do NOT assume values.  
+Replace all occurrences of `<STAGE_NAME>`, `<PHASE_NUMBER>`, `<STAGE_FILE_NAME>` throughout this workflow.
 
 ---
 
 # Pre-Step — Branch & Directory Initialization
 
-Execute this block ONCE before Step 1. Do NOT skip.
+Execute once before Step 1. Do NOT skip.
 
-## 1. Derive Branch/Directory Name
+## Pre.1 — Derive Branch/Directory Name
 
-From `<STAGE_FILE_NAME>`, extract the numeric prefix:
+Extract the numeric prefix from `<STAGE_FILE_NAME>`:
 
-- Strip the leading number segment (everything before the first `_` after the digits).
+- Take the leading digit segment before the first `_`.
 - Examples:
   - `STAGE_05_TENANT_PROVISIONING_SERVICE.md` → prefix = `05`
   - `STAGE_06A_LICENSE_ENFORCEMENT.md` → prefix = `06A`
-- Zero-pad the numeric part to 3 digits; preserve any trailing letter:
+- Zero-pad the numeric part to 3 digits, preserve any trailing letter:
   - `05` → `005`
   - `06A` → `006A`
 - Convert `<STAGE_NAME>` to kebab-case (lowercase, spaces/underscores → hyphens).
-- Combine: `<PADDED_PREFIX>-<kebab-stage-name>`
+- Combine as: `<PADDED_PREFIX>-<kebab-stage-name>`
   - Example: `005-tenant-provisioning-service`
 
 Store as `STAGE_DIR_NAME`.
 
-## 2. Confirm Base Branch
+## Pre.2 — Confirm Base Branch
 
 Default base branch is `develop`. Ask the user to confirm or override:
 
 ```
-Base branch for checkout: develop  ← confirm or provide alternative
+Base branch for checkout [develop]:
 ```
 
-Do NOT proceed until confirmed.
+Do NOT proceed until confirmed. Store as `BASE_BRANCH`.
 
-## 3. Create Git Branch
+## Pre.3 — Create Git Branch
 
 ```bash
 git fetch --all --prune
@@ -90,47 +96,48 @@ git pull origin <BASE_BRANCH>
 git checkout -b <STAGE_DIR_NAME>
 ```
 
-If branch already exists, stop and ask the user whether to reuse it or abort.
+If branch already exists → STOP. Ask the user whether to reuse it or abort.
 
-## 4. Create Stage Directory Structure
+## Pre.4 — Create Stage Directory Structure
 
 ```bash
 mkdir -p specs/runtime/<STAGE_DIR_NAME>/reports
 ```
 
-Create a `README.md` stub inside the stage directory:
+Create `specs/runtime/<STAGE_DIR_NAME>/README.md`:
 
 ```markdown
 # <STAGE_NAME>
 
 **Branch:** `<STAGE_DIR_NAME>`  
-**Phase:** <PHASE_NAME>  
-**Stage File:** `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`  
+**Phase:** <PHASE_NUMBER>  
+**Stage File:** `specs/phases/<STAGE_FILE_NAME>`  
 **Initiated:** <ISO_TIMESTAMP>
 
 ## Workflow Progress
 
-| Step      | Status  | Report                      |
-| --------- | ------- | --------------------------- |
-| Specify   | Pending | reports/SPECIFY_REPORT.md   |
-| Clarify   | Pending | reports/CLARIFY_REPORT.md   |
-| Plan      | Pending | reports/PLAN_REPORT.md      |
-| Tasks     | Pending | reports/TASKS_REPORT.md     |
-| Analyze   | Pending | reports/ANALYZE_REPORT.md   |
-| Implement | Pending | reports/IMPLEMENT_REPORT.md |
-| Closure   | Pending | reports/CLOSURE_REPORT.md   |
+| Step      | Status | Report                      |
+| --------- | ------ | --------------------------- |
+| Pre-Step  | ✅     | —                           |
+| Specify   | ⬜     | reports/SPECIFY_REPORT.md   |
+| Clarify   | ⬜     | reports/CLARIFY_REPORT.md   |
+| Plan      | ⬜     | reports/PLAN_REPORT.md      |
+| Tasks     | ⬜     | reports/TASKS_REPORT.md     |
+| Analyze   | ⬜     | reports/ANALYZE_REPORT.md   |
+| Implement | ⬜     | reports/IMPLEMENT_REPORT.md |
+| Closure   | ⬜     | reports/CLOSURE_REPORT.md   |
 ```
 
-## 5. Initialize workflow-state.json
+## Pre.5 — Initialize .workflow-state.json
 
-Write `.workflow-state.json` in the repository root:
+Write to repository root:
 
 ```json
 {
   "stage": "<STAGE_NAME>",
-  "phase": "<PHASE_NAME>",
+  "phase": "<PHASE_NUMBER>",
   "stage_dir": "specs/runtime/<STAGE_DIR_NAME>",
-  "stage_file": "specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>",
+  "stage_file": "specs/phases/<STAGE_FILE_NAME>",
   "branch": "<STAGE_DIR_NAME>",
   "base_branch": "<BASE_BRANCH>",
   "current_step": "pre_step",
@@ -139,6 +146,8 @@ Write `.workflow-state.json` in the repository root:
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
   "last_updated": "<ISO_TIMESTAMP>",
   "history": [
     {
@@ -150,15 +159,15 @@ Write `.workflow-state.json` in the repository root:
 }
 ```
 
-## 6. Update Stage Status Block
+## Pre.6 — Initialize Stage Status Block
 
-Open `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`.  
-Add or replace the `## Stage Status` block with:
+Open `specs/phases/<STAGE_FILE_NAME>`.  
+Add or replace the `## Stage Status` block:
 
 ```markdown
 ## Stage Status
 
-Status: DRAFT  
+Status: PENDING  
 Risk Level: UNKNOWN  
 Initiated: <ISO_TIMESTAMP>
 
@@ -174,22 +183,22 @@ Notes:
 Stage initialized. Specification in progress.
 ```
 
-STOP. Confirm Pre-Step completion before proceeding to Step 1.
+Apply the automatic continuation rule before proceeding to Step 1.
 
 ---
 
 # Step 1 — Specify
 
+## 1.1 — Execute Specify
+
 /handoff to=speckit.specify
 
 ```
 Stage: <STAGE_NAME>
-Phase: <PHASE_NAME>
+Phase: <PHASE_NUMBER>
 ```
 
-Use Zidney Specify Template `specs/templates/specify-template.md`
-
-Define strict functional requirements.
+Load and follow: `specs/templates/specify-template.md`
 
 Constraints:
 
@@ -203,21 +212,17 @@ Constraints:
 - Idempotency required for critical endpoints
 - Version compatibility enforced
 
-Do not introduce new patterns.  
-If ADR required, stop and request it.
+If ADR is required → STOP and request it before continuing.
 
-## After Specify Completes
+## 1.2 — Write Specify Report
 
-### Write SPECIFY_REPORT.md
+Load `specs/templates/reports/specify-report-template.md`.  
+Fill from step output.  
+Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/SPECIFY_REPORT.md`
 
-Create `specs/runtime/<STAGE_DIR_NAME>/reports/SPECIFY_REPORT.md`:
+## 1.3 — Update Stage Status Block
 
-Load specs/templates/reports/specify-report-template.md
-Fill from step output and write to specs/runtime/<STAGE_DIR_NAME>/reports/SPECIFY_REPORT.md
-
-### Update Stage Status Block
-
-Open `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>` and update `## Stage Status`:
+Open `specs/phases/<STAGE_FILE_NAME>`. Update `## Stage Status`:
 
 ```markdown
 ## Stage Status
@@ -242,7 +247,9 @@ Notes:
 Specification complete. Clarification step pending.
 ```
 
-### Update .workflow-state.json
+## 1.4 — Update .workflow-state.json
+
+Merge:
 
 ```json
 {
@@ -253,16 +260,17 @@ Specification complete. Clarification step pending.
 }
 ```
 
-### Update README.md Progress Table
+## 1.5 — Update README.md
 
-Mark Specify as `✅ Complete`.
+Mark Specify as `✅`.
 
-STOP after specify completes.  
-Wait for explicit confirmation before continuing.
+Apply the automatic continuation rule before proceeding to Step 2.
 
 ---
 
-# Step 2 — Clarify (Mandatory)
+# Step 2 — Clarify
+
+## 2.1 — Execute Clarify
 
 /handoff to=speckit.clarify
 
@@ -270,7 +278,9 @@ Wait for explicit confirmation before continuing.
 Stage: <STAGE_NAME>
 ```
 
-Clarify specification for ambiguities in:
+Load and follow: `specs/templates/clarify-template.md`
+
+Audit and resolve ambiguities in:
 
 - Transactions
 - Idempotency
@@ -281,20 +291,17 @@ Clarify specification for ambiguities in:
 - Error contract
 - Isolation boundaries
 
-List explicit clarification questions.  
-Do not assume.  
+List all clarification questions explicitly.  
+Do not assume answers.  
 All ambiguities must be resolved before planning.
 
-## After Clarify Completes
+## 2.2 — Write Clarify Report
 
-### Write CLARIFY_REPORT.md
+Load `specs/templates/reports/clarify-report-template.md`.  
+Fill from step output.  
+Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/CLARIFY_REPORT.md`
 
-Create `specs/runtime/<STAGE_DIR_NAME>/reports/CLARIFY_REPORT.md`:
-
-Load specs/templates/reports/clarify-report-template.md
-Fill from step output and write to specs/runtime/<STAGE_DIR_NAME>/reports/CLARIFY_REPORT.md
-
-### Update Stage Status Block
+## 2.3 — Update Stage Status Block
 
 ```markdown
 ## Stage Status
@@ -319,7 +326,9 @@ Notes:
 All specification ambiguities resolved. Ready for technical planning.
 ```
 
-### Update .workflow-state.json
+## 2.4 — Update .workflow-state.json
+
+Merge:
 
 ```json
 {
@@ -331,15 +340,17 @@ All specification ambiguities resolved. Ready for technical planning.
 }
 ```
 
-### Update README.md Progress Table
+## 2.5 — Update README.md
 
-Mark Clarify as `✅ Complete`.
+Mark Clarify as `✅`.
 
-STOP until clarifications are resolved.
+Apply the automatic continuation rule before proceeding to Step 3.
 
 ---
 
 # Step 3 — Plan
+
+## 3.1 — Execute Plan
 
 /handoff to=speckit.plan
 
@@ -347,9 +358,9 @@ STOP until clarifications are resolved.
 Stage: <STAGE_NAME>
 ```
 
-Use Zidney Plan Template `specs/templates/plan-template.md`
+Load and follow: `specs/templates/plan-template.md`
 
-Create technical implementation plan including:
+Plan must cover:
 
 - Tables / schema changes
 - Migrations
@@ -368,21 +379,18 @@ Constraints:
 - No cross-tenant logic
 - No direct DB instantiation
 - All writes transactional
-- Server authoritative time only
+- Server-authoritative time only
 - Version compatibility required
 
-If plan modifies architecture → STOP.
+If plan modifies architecture → STOP. ADR required before proceeding.
 
-## After Plan Completes
+## 3.2 — Write Plan Report
 
-### Write PLAN_REPORT.md
+Load `specs/templates/reports/plan-report-template.md`.  
+Fill from step output.  
+Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/PLAN_REPORT.md`
 
-Create `specs/runtime/<STAGE_DIR_NAME>/reports/PLAN_REPORT.md`:
-
-Load specs/templates/reports/plan-report-template.md
-Fill from step output and write to specs/runtime/<STAGE_DIR_NAME>/reports/PLAN_REPORT.md
-
-### Update Stage Status Block
+## 3.3 — Update Stage Status Block
 
 ```markdown
 ## Stage Status
@@ -407,7 +415,9 @@ Notes:
 Technical plan complete. Task breakdown in progress.
 ```
 
-### Update .workflow-state.json
+## 3.4 — Update .workflow-state.json
+
+Merge:
 
 ```json
 {
@@ -419,25 +429,25 @@ Technical plan complete. Task breakdown in progress.
 }
 ```
 
-### Update README.md Progress Table
+## 3.5 — Update README.md
 
-Mark Plan as `✅ Complete`.
+Mark Plan as `✅`.
 
-STOP after plan completes.
+Apply the automatic continuation rule before proceeding to Step 4.
 
 ---
 
 # Step 4 — Tasks
 
-/handoff to=speckit.tasks
+## 4.1 — Execute Tasks
 
-Generate atomic tasks for:
+/handoff to=speckit.tasks
 
 ```
 Stage: <STAGE_NAME>
 ```
 
-Use Zidney Tasks Template `specs/templates/tasks-template.md`
+Load and follow: `specs/templates/tasks-template.md`
 
 Each task must:
 
@@ -448,16 +458,15 @@ Each task must:
 - Not modify unrelated files
 - Preserve isolation guarantees
 
-## After Tasks Completes
+After task generation, count and record the total number of atomic tasks as `TASKS_TOTAL`.
 
-### Write TASKS_REPORT.md
+## 4.2 — Write Tasks Report
 
-Create `specs/runtime/<STAGE_DIR_NAME>/reports/TASKS_REPORT.md`:
+Load `specs/templates/reports/tasks-report-template.md`.  
+Fill from step output.  
+Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/TASKS_REPORT.md`
 
-Load specs/templates/reports/tasks-report-template.md
-Fill from step output and write to specs/runtime/<STAGE_DIR_NAME>/reports/TASKS_REPORT.md
-
-### Update Stage Status Block
+## 4.3 — Update Stage Status Block
 
 ```markdown
 ## Stage Status
@@ -468,8 +477,8 @@ Last Updated: <ISO_TIMESTAMP>
 
 Tasks Generated:
 
-- [Total task count]
-- [Key task categories]
+- Total: <TASKS_TOTAL> atomic tasks
+- [Key task categories and counts]
 
 Deferred Scope:
 
@@ -483,30 +492,40 @@ Notes:
 Atomic task set generated. Drift analysis gate pending.
 ```
 
-### Update .workflow-state.json
+## 4.4 — Update .workflow-state.json
+
+Merge:
 
 ```json
 {
   "current_step": "tasks",
   "stage_status": "TASKS READY",
+  "tasks_total": <TASKS_TOTAL>,
+  "tasks_completed": 0,
   "last_updated": "<ISO_TIMESTAMP>",
-  "history": [..., { "event": "tasks_complete", "timestamp": "<ISO_TIMESTAMP>" }]
+  "history": [..., { "event": "tasks_complete", "tasks_total": <TASKS_TOTAL>, "timestamp": "<ISO_TIMESTAMP>" }]
 }
 ```
 
-### Update README.md Progress Table
+## 4.5 — Update README.md
 
-Mark Tasks as `✅ Complete`.
+Mark Tasks as `✅`.
 
-STOP after tasks generation.
+Apply the automatic continuation rule before proceeding to Step 5.
 
 ---
 
 # Step 5 — Analyze (Drift Detector)
 
+## 5.1 — Execute Analyze
+
 /handoff to=speckit.analyze
 
-Use Zidney Analyze Template `specs/templates/analyze-template.md`
+```
+Stage: <STAGE_NAME>
+```
+
+Load and follow: `specs/templates/analyze-template.md`
 
 Audit tasks and plan for:
 
@@ -520,22 +539,25 @@ Audit tasks and plan for:
 - Logging deficiencies
 - Security violations
 
-If violation found → BLOCK implementation.
+### Strict Pass Rule
 
-STOP unless `drift_passed = true`.
+`drift_passed = true` ONLY IF **all** audit criteria pass with no exceptions.  
+A single FAILED criterion = `BLOCKED`.  
+Partial passage is NOT acceptable and must never be treated as APPROVED.  
+8/9 is BLOCKED. 9/9 is APPROVED.
 
-## After Analyze Completes
+If any violation is found → STOP. List every violation explicitly with its severity.  
+Do NOT proceed to implementation until all violations are resolved and a full clean re-audit passes.
 
-### Write ANALYZE_REPORT.md
+## 5.2 — Write Analyze Report
 
-Create `specs/runtime/<STAGE_DIR_NAME>/reports/ANALYZE_REPORT.md`:
+Load `specs/templates/reports/analyze-report-template.md`.  
+Fill from step output.  
+Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/ANALYZE_REPORT.md`
 
-Load specs/templates/reports/analyze-report-template.md
-Fill from step output and write to specs/runtime/<STAGE_DIR_NAME>/reports/ANALYZE_REPORT.md
+## 5.3 — Update Stage Status Block
 
-### Update Stage Status Block
-
-If APPROVED:
+If APPROVED (all criteria pass):
 
 ```markdown
 ## Stage Status
@@ -544,7 +566,7 @@ Status: IN PROGRESS
 Risk Level: <LOW / MEDIUM / HIGH>  
 Last Updated: <ISO_TIMESTAMP>
 
-Drift Analysis: PASSED  
+Drift Analysis: PASSED (all criteria)  
 Implementation: AUTHORIZED
 
 Scope Authorized:
@@ -553,10 +575,10 @@ Scope Authorized:
 
 Constitutional Compliance:
 
-- Drift analysis passed — implementation authorized
+- All drift criteria passed — implementation authorized
 
 Notes:
-Architecture drift analysis complete. Implementation gate open.
+Full drift analysis passed. Implementation gate open.
 ```
 
 If BLOCKED:
@@ -565,7 +587,7 @@ If BLOCKED:
 ## Stage Status
 
 Status: BLOCKED  
-Risk Level: <CRITICAL>  
+Risk Level: CRITICAL  
 Last Updated: <ISO_TIMESTAMP>
 
 Drift Analysis: FAILED  
@@ -573,13 +595,14 @@ Implementation: FORBIDDEN
 
 Violations:
 
-- [List violations]
+- [List every violation with severity]
 
 Notes:
-Implementation blocked. Violations must be resolved before proceeding.
+Implementation blocked. All violations must be resolved and a full
+re-audit must pass before implementation is authorized.
 ```
 
-### Update .workflow-state.json
+## 5.4 — Update .workflow-state.json
 
 If APPROVED:
 
@@ -607,27 +630,40 @@ If BLOCKED:
 }
 ```
 
-### Update README.md Progress Table
+## 5.5 — Update README.md
 
-Mark Analyze as `✅ Complete` or `❌ Blocked`.
+Mark Analyze as `✅ Passed` or `❌ Blocked`.
 
-STOP unless `drift_passed = true`.
+Do NOT proceed to Step 6 if `drift_passed = false`.
 
 ---
 
 # Step 6 — Implement
 
+## 6.1 — Verify Implementation Gate
+
+Before generating any code, confirm:
+
+- `drift_passed = true` in `.workflow-state.json`
+- No unresolved constitutional violations from Step 5
+- No unresolved ambiguities from any prior step
+
+If any check fails → STOP. Implementation is forbidden until resolved.
+
+## 6.2 — Execute Implement
+
 /handoff to=speckit.implement
 
-Use Zidney Implementation Template `specs/templates/implement-template.md`
+```
+Stage: <STAGE_NAME>
+Tasks Total: <TASKS_TOTAL>
+```
 
-```
-Implement Stage: <STAGE_NAME>
-```
+Load and follow: `specs/templates/implement-template.md`
 
 Rules:
 
-- Modify only relevant files
+- Modify only files within stage scope
 - Use tenant resolver only
 - No direct DB instantiation
 - All writes transactional
@@ -637,18 +673,55 @@ Rules:
 - No business logic in frontend
 - No stack traces to client
 
-If conflict with Constitution → STOP.
+Track `TASKS_COMPLETED` as implementation proceeds.
 
-## After Implement Completes
+If conflict with Constitution at any point → STOP immediately and explain before continuing.
 
-### Write IMPLEMENT_REPORT.md
+## 6.3 — Verify Implementation Completeness
 
-Create `specs/runtime/<STAGE_DIR_NAME>/reports/IMPLEMENT_REPORT.md`:
+Before writing the implement report, verify:
 
-Load specs/templates/reports/implement-report-template.md
-Fill from step output and write to specs/runtime/<STAGE_DIR_NAME>/reports/IMPLEMENT_REPORT.md
+```
+Tasks completed: <TASKS_COMPLETED> / <TASKS_TOTAL>
+```
 
-### Update Stage Status Block
+**If `TASKS_COMPLETED < TASKS_TOTAL`:**
+
+→ STOP. Do NOT write the report or proceed to closure.
+
+Present to user:
+
+```
+⚠️ Implementation Incomplete
+
+Completed: <TASKS_COMPLETED> / <TASKS_TOTAL> tasks
+
+Remaining tasks:
+- [List each incomplete task with its layer and description]
+
+Options:
+  A) Continue implementation now — list which tasks to tackle next
+  B) Formally defer remaining tasks — provide written justification
+     for each deferred task
+
+Closure is FORBIDDEN until all tasks are complete or all remaining
+tasks are formally deferred with written justification approved by you.
+```
+
+Wait for user decision. Do not proceed until explicitly instructed.  
+If deferral is approved → document each deferred task and justification before continuing.
+
+**If `TASKS_COMPLETED = TASKS_TOTAL` (or all remaining tasks formally deferred):**
+
+→ Proceed to step 6.4.
+
+## 6.4 — Write Implement Report
+
+Load `specs/templates/reports/implement-report-template.md`.  
+Fill from step output, including final task completion count and any formally deferred tasks.  
+Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/IMPLEMENT_REPORT.md`
+
+## 6.5 — Update Stage Status Block
 
 ```markdown
 ## Stage Status
@@ -658,14 +731,15 @@ Risk Level: <LOW / MEDIUM / HIGH>
 Last Updated: <ISO_TIMESTAMP>
 
 Implementation: COMPLETE  
+Tasks: <TASKS_COMPLETED> / <TASKS_TOTAL> completed
+
 Scope Closed:
 
-- [List implemented items]
-- [Task count completed]
+- [List all implemented items]
 
 Deferred Scope:
 
-- [Anything deferred]
+- [Formally deferred tasks with justification, or "None"]
 
 Constitutional Compliance:
 
@@ -676,42 +750,83 @@ Notes:
 Backend implementation complete. No structural backend modifications allowed.
 ```
 
-### Update .workflow-state.json
+## 6.6 — Update .workflow-state.json
+
+Merge:
 
 ```json
 {
   "current_step": "implement",
   "stage_status": "BACKEND CLOSED",
+  "tasks_completed": <TASKS_COMPLETED>,
   "last_updated": "<ISO_TIMESTAMP>",
-  "history": [..., { "event": "stage_backend_closed", "timestamp": "<ISO_TIMESTAMP>" }]
+  "history": [..., {
+    "event": "stage_backend_closed",
+    "tasks_completed": <TASKS_COMPLETED>,
+    "tasks_total": <TASKS_TOTAL>,
+    "timestamp": "<ISO_TIMESTAMP>"
+  }]
 }
 ```
 
-### Update README.md Progress Table
+## 6.7 — Update README.md
 
-Mark Implement as `✅ Complete`.
+Mark Implement as `✅`.
 
-STOP after implementation completes.  
-Wait for explicit confirmation before proceeding to Closure.
+---
+
+## ⏸ Mandatory Pre-Closure Review Gate
+
+**This is a hard STOP. Do NOT proceed to Step 7 under any circumstance without explicit user approval.**
+
+Present to the user:
+
+```
+⏸ Pre-Closure Review Gate
+
+All implementation steps are complete. Please review all reports
+before closure is executed.
+
+Closure will:
+  - Mark stage as PRODUCTION READY in the stage file
+  - Finalize .workflow-state.json
+  - Generate the git commit message
+  - Generate the PR summary
+
+Reports to review:
+  specs/runtime/<STAGE_DIR_NAME>/reports/SPECIFY_REPORT.md
+  specs/runtime/<STAGE_DIR_NAME>/reports/CLARIFY_REPORT.md
+  specs/runtime/<STAGE_DIR_NAME>/reports/PLAN_REPORT.md
+  specs/runtime/<STAGE_DIR_NAME>/reports/TASKS_REPORT.md
+  specs/runtime/<STAGE_DIR_NAME>/reports/ANALYZE_REPORT.md
+  specs/runtime/<STAGE_DIR_NAME>/reports/IMPLEMENT_REPORT.md
+
+Tasks completed: <TASKS_COMPLETED> / <TASKS_TOTAL>
+
+Respond with:
+  ✅ "Approved — proceed to closure"
+  ❌ "Issues found — [describe what needs fixing]"
+```
+
+If issues are reported → address them, regenerate the affected report(s), update
+the relevant stage status and workflow state, then re-present this gate.  
+Do NOT proceed to Step 7 until the user explicitly confirms approval.
 
 ---
 
 # Step 7 — Closure
 
-Execute all sub-steps below in sequence.
+Only execute after explicit user approval at the Pre-Closure Review Gate.
 
-## 7.1 — Write CLOSURE_REPORT.md
+## 7.1 — Write Closure Report
 
-Create `specs/runtime/<STAGE_DIR_NAME>/reports/CLOSURE_REPORT.md`:
-
-Load specs/templates/reports/closure-report-template.md
-Fill from step output and write to specs/runtime/<STAGE_DIR_NAME>/reports/CLOSURE_REPORT.md
-
----
+Load `specs/templates/reports/closure-report-template.md`.  
+Fill from all prior step outputs and reports.  
+Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/CLOSURE_REPORT.md`
 
 ## 7.2 — Update Stage Status Block (Final)
 
-Open `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>` and update `## Stage Status`:
+Open `specs/phases/<STAGE_FILE_NAME>`. Update `## Stage Status`:
 
 ```markdown
 ## Stage Status
@@ -722,13 +837,12 @@ Closure Date: <ISO_DATE>
 
 Scope Closed:
 
-- [All delivered scope items, with task count if applicable]
-- [e.g., X/Y tasks completed]
-- [e.g., N merge gates passed]
+- [All delivered scope items]
+- <TASKS_COMPLETED> / <TASKS_TOTAL> tasks completed
 
 Deferred Scope:
 
-- [Deferred items, or "None"]
+- [Formally deferred tasks with justification, or "None"]
 
 Constitutional Compliance:
 
@@ -743,16 +857,14 @@ Stage is production ready. No structural backend modifications allowed.
 Modifications require a new migration stage.
 ```
 
----
-
 ## 7.3 — Update .workflow-state.json (Final)
 
 ```json
 {
   "stage": "<STAGE_NAME>",
-  "phase": "<PHASE_NAME>",
+  "phase": "<PHASE_NUMBER>",
   "stage_dir": "specs/runtime/<STAGE_DIR_NAME>",
-  "stage_file": "specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>",
+  "stage_file": "specs/phases/<STAGE_FILE_NAME>",
   "branch": "<STAGE_DIR_NAME>",
   "base_branch": "<BASE_BRANCH>",
   "current_step": "stage_production_ready",
@@ -761,43 +873,44 @@ Modifications require a new migration stage.
   "drift_passed": true,
   "implementation_allowed": true,
   "plan_completed": true,
+  "tasks_total": <TASKS_TOTAL>,
+  "tasks_completed": <TASKS_COMPLETED>,
   "last_updated": "<ISO_TIMESTAMP>",
   "history": [
     { "event": "branch_created", "timestamp": "<ISO_TIMESTAMP>" },
     { "event": "specify_complete", "timestamp": "<ISO_TIMESTAMP>" },
     { "event": "clarifications_locked", "timestamp": "<ISO_TIMESTAMP>" },
     { "event": "plan_complete", "timestamp": "<ISO_TIMESTAMP>" },
-    { "event": "tasks_complete", "timestamp": "<ISO_TIMESTAMP>" },
+    { "event": "tasks_complete", "tasks_total": <TASKS_TOTAL>, "timestamp": "<ISO_TIMESTAMP>" },
     { "event": "drift_analysis_passed", "timestamp": "<ISO_TIMESTAMP>" },
-    { "event": "stage_backend_closed", "timestamp": "<ISO_TIMESTAMP>" },
+    { "event": "stage_backend_closed", "tasks_completed": <TASKS_COMPLETED>, "tasks_total": <TASKS_TOTAL>, "timestamp": "<ISO_TIMESTAMP>" },
+    { "event": "pre_closure_review_approved", "timestamp": "<ISO_TIMESTAMP>" },
     { "event": "stage_production_ready", "timestamp": "<ISO_TIMESTAMP>" }
   ]
 }
 ```
 
----
+## 7.4 — Update README.md (Final)
 
-## 7.4 — Update README.md Progress Table (Final)
-
-Mark all steps as `✅ Complete` and add final status:
+Mark Closure as `✅` and all steps complete. Append:
 
 ```markdown
-**Final Status:** 🟢 PRODUCTION READY — <ISO_DATE>
+**Final Status:** 🟢 PRODUCTION READY — <ISO_DATE>  
+**Tasks:** <TASKS_COMPLETED> / <TASKS_TOTAL> completed
 ```
-
----
 
 ## 7.5 — Generate Git Commit Message
 
-Output the following commit message for the user to apply:
+Output for the user to apply:
 
 ```
-feat(<stage-dir-name>): complete <STAGE_NAME> implementation
+feat(<STAGE_DIR_NAME>): complete <STAGE_NAME> implementation
 
-Phase: <PHASE_NAME>
+Phase: <PHASE_NUMBER>
 Stage: <STAGE_NAME>
 Branch: <STAGE_DIR_NAME>
 Status: PRODUCTION READY
+Tasks: <TASKS_COMPLETED>/<TASKS_TOTAL> completed
 
 Scope delivered:
 - [Key scope item 1]
@@ -806,7 +919,7 @@ Scope delivered:
 
 Constitutional compliance:
 - Zidney Constitution v1.2.0 enforced throughout
-- Drift analysis passed
+- All drift criteria passed (analyze step)
 - All writes transactional
 - Idempotency enforced
 - Structured logging present
@@ -815,29 +928,23 @@ Reports: specs/runtime/<STAGE_DIR_NAME>/reports/
 Closes: <STAGE_FILE_NAME>
 ```
 
----
-
 ## 7.6 — Generate PR Summary
 
-Load specs/templates/pr-template.md
-Populate from workflow artifacts and output to user in a markdown code block to be easy to copy
+Load `specs/templates/PR_TEMPLATE.md`.  
+Populate every section from workflow artifacts (all reports, stage file, task list, implementation output).  
+Do not leave any placeholder unfilled.  
+Output the completed PR summary to the user.
 
-Fill every section from the workflow artifacts (reports, stage file, tasks, implementation output).  
-Do not leave placeholder text unfilled.
-
----
-
-## Closure Complete
-
-Output final summary to the user:
+## 7.7 — Output Final Closure Summary
 
 ```
 ✅ Zidney Hard Mode Workflow — COMPLETE
 
 Stage:    <STAGE_NAME>
-Phase:    <PHASE_NAME>
+Phase:    <PHASE_NUMBER>
 Branch:   <STAGE_DIR_NAME>
 Status:   PRODUCTION READY
+Tasks:    <TASKS_COMPLETED> / <TASKS_TOTAL> completed
 
 Reports generated:
   specs/runtime/<STAGE_DIR_NAME>/reports/SPECIFY_REPORT.md
@@ -849,10 +956,13 @@ Reports generated:
   specs/runtime/<STAGE_DIR_NAME>/reports/CLOSURE_REPORT.md
 
 Stage file updated:
-  specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+  specs/phases/<STAGE_FILE_NAME> → PRODUCTION READY
 
-Workflow state updated:
+Workflow state:
   .workflow-state.json → stage_production_ready
 
-Next: Apply git commit message above, then open PR using the generated summary.
+Next actions:
+  1. Apply git commit message above
+  2. git push origin <STAGE_DIR_NAME>
+  3. Open PR using the generated PR summary above
 ```
