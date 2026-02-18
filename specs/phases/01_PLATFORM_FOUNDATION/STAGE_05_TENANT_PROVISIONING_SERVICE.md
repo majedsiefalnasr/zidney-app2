@@ -6,6 +6,12 @@ Scope: Automatic tenant database lifecycle (create, initialize, archive, restore
 
 ---
 
+## Stage Status
+
+PRODUCTION READY
+
+---
+
 ## Objective
 
 Implement the internal Tenant Provisioning Service responsible for:
