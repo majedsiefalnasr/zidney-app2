@@ -2,55 +2,43 @@
  * Zidney Worker Service
  *
  * Background job processor for:
+ * - Attempt grading (T037-T042)
  * - Archive snapshots (pg_dump → S3)
  * - License lifecycle events
  * - Async notifications
+ *
+ * STAGE_06_ATTEMPT_ENGINE_FOUNDATION - Phase E (Worker Grading Pipeline)
  */
 
-import { QUEUES, initializeQueues } from './config/queues'
-import { archiveSnapshotJob } from './jobs/archive-snapshot'
+import { WORKER_CONFIG, initializeConfig } from './config/worker-config'
+import {
+  getHealthStatus,
+  initializeWorker,
+  shutdownWorker,
+} from './grading/worker-startup'
 import { logger } from './services/logger'
 
-// Queue processor abstraction (using Bull as example; swap with BullMQ, RQ, etc.)
-interface JobQueue {
-  on(eventType: string, handler: (job: any) => Promise<void>): void
-  process(
-    queueName: string,
-    concurrency: number,
-    handler: (job: any) => Promise<void>
-  ): void
-  setRetryPolicy(name: string, policy: any): void
-  setDLQ(name: string, dlqName: string): void
-}
-
-let jobQueue: JobQueue | null = null
-
 /**
- * Initialize Worker Service
+ * Main Worker Entry Point
+ *
+ * Orchestrates startup and lifecycle of worker service.
  */
-async function initializeWorker(queue: JobQueue): Promise<void> {
-  jobQueue = queue
-
-  logger.info(
-    { action: 'worker_startup' },
-    'Initializing Zidney Worker Service'
-  )
-
+async function main(): Promise<void> {
   try {
-    // Step 1: Initialize queue configurations
-    await initializeQueues()
+    // Initialize configuration
+    initializeConfig()
 
-    // Step 2: Register job handlers
-    await registerJobHandlers()
+    logger.info(
+      { action: 'worker_startup', version: WORKER_CONFIG.SERVICE_VERSION },
+      'Zidney Worker Service starting'
+    )
 
-    // Step 3: Configure retry policies and DLQs
-    await configureQueuePolicies()
-
-    logger.info({}, '✓ Worker service initialized successfully')
+    // Start worker (runs indefinitely)
+    await initializeWorker()
   } catch (error: any) {
     logger.error(
-      { action: 'worker_initialization_error', error_message: error.message },
-      'Failed to initialize worker service'
+      { action: 'worker_startup_error', error_message: error.message },
+      'Failed to start worker service'
     )
     process.exit(1)
   }
@@ -78,6 +66,7 @@ async function registerJobHandlers(): Promise<void> {
     )
 
     if (payload.type === 'ARCHIVE_SNAPSHOT') {
+      const { archiveSnapshotJob } = await import('./jobs/archive-snapshot')
       const result = await archiveSnapshotJob(payload)
 
       if (!result.success) {
@@ -100,6 +89,8 @@ async function configureQueuePolicies(): Promise<void> {
   if (!jobQueue) throw new Error('Job queue not initialized')
 
   logger.debug({}, 'Configuring queue policies')
+
+  const { QUEUES } = await import('./config/queues')
 
   for (const queueConfig of QUEUES) {
     // Set retry policy
@@ -126,24 +117,27 @@ async function configureQueuePolicies(): Promise<void> {
 }
 
 /**
- * Health Check
+ * Health Check Endpoint
  */
 export async function healthCheck(): Promise<{
   status: string
-  queues_active: number
+  uptime_ms: number
+  db_connected: boolean
   timestamp: string
 }> {
+  const health = getHealthStatus()
   return {
-    status: 'healthy',
-    queues_active: QUEUES.length,
-    timestamp: new Date().toISOString(),
+    status: health.status,
+    uptime_ms: health.uptime_ms,
+    db_connected: health.db_connected,
+    timestamp: health.timestamp,
   }
 }
 
 /**
- * Graceful Shutdown
+ * Graceful Shutdown Handler
  */
-export async function shutdown(): Promise<void> {
+async function gracefulShutdown(): Promise<void> {
   logger.info(
     { action: 'worker_shutdown' },
     'Worker service shutting down gracefully'
@@ -152,13 +146,11 @@ export async function shutdown(): Promise<void> {
   const shutdownTimeout = setTimeout(() => {
     logger.warn({}, 'Shutdown timeout reached; force exiting')
     process.exit(1)
-  }, 30000)
+  }, WORKER_CONFIG.SHUTDOWN_TIMEOUT_MS)
 
   try {
-    logger.info({}, 'Stopping job processing')
+    await shutdownWorker(0)
     clearTimeout(shutdownTimeout)
-    logger.info({}, '✓ Worker service shut down gracefully')
-    process.exit(0)
   } catch (error: any) {
     logger.error(
       { error_message: error.message },
@@ -171,25 +163,6 @@ export async function shutdown(): Promise<void> {
 /**
  * Main Entry Point
  */
-async function main() {
-  // Mock queue implementation for baseline
-  // Replace with actual queue system (Bull, BullMQ, etc.)
-  const mockQueue: JobQueue = {
-    on: () => {},
-    process: () => {},
-    setRetryPolicy: () => {},
-    setDLQ: () => {},
-  }
-
-  await initializeWorker(mockQueue)
-
-  logger.info({}, 'Worker service ready and listening for jobs')
-
-  // Graceful shutdown on signals
-  process.on('SIGTERM', shutdown)
-  process.on('SIGINT', shutdown)
-}
-
 main().catch((err) => {
   logger.error(
     { action: 'worker_startup_error', error_message: err.message },
@@ -197,3 +170,18 @@ main().catch((err) => {
   )
   process.exit(1)
 })
+
+/**
+ * Signal Handlers
+ */
+process.on('SIGTERM', () => {
+  logger.info({ signal: 'SIGTERM' }, 'Received SIGTERM; shutting down')
+  gracefulShutdown()
+})
+
+process.on('SIGINT', () => {
+  logger.info({ signal: 'SIGINT' }, 'Received SIGINT; shutting down')
+  gracefulShutdown()
+})
+
+export { getHealthStatus, initializeWorker, shutdownWorker }
