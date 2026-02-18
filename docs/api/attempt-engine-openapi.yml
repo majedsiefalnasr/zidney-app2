@@ -1,0 +1,649 @@
+openapi: 3.0.0
+
+info:
+  title: Attempt Engine API (STAGE 06)
+  version: 1.0.0
+  description: |
+    Production-grade exam attempt management API with database-per-tenant isolation,
+    snapshot-based immutability, and pessimistic locking for high-concurrency environments.
+  x-constitutional-compliance:
+    - ADR-0001-database-per-tenant
+    - ADR-0002-snapshot-attempt-model
+    - ADR-0006-runtime-authoritative-time
+    - ADR-0007-product-version-compatibility
+  contact:
+    name: Zidney Platform Team
+  license:
+    name: Apache 2.0
+
+servers:
+  - url: /api/v1
+    description: Production API
+    variables:
+      environment:
+        default: production
+
+tags:
+  - name: Attempts
+    description: Attempt lifecycle management (create, progress, submit, grade)
+  - name: Results
+    description: Grading results polling and retrieval
+  - name: Health
+    description: System health and status checks
+
+paths:
+  /health:
+    get:
+      summary: System Health Check
+      operationId: getHealth
+      tags: [Health]
+      responses:
+        "200":
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    enum: [healthy, degraded, unavailable]
+                  uptime:
+                    type: integer
+                    description: Uptime in milliseconds
+                  timestamp:
+                    type: string
+                    format: date-time
+                    description: Server timestamp (NOW())
+                  version:
+                    type: string
+                    example: "1.0.0"
+              example:
+                status: healthy
+                uptime: 123456
+                timestamp: "2026-02-18T14:30:00Z"
+                version: "1.0.0"
+
+  /workspaces/{workspace_slug}/attempts:
+    post:
+      summary: Create Attempt
+      description: |
+        Initiate a new exam or assignment attempt. Captures configuration snapshot
+        at creation time for deterministic grading. Requires database-per-tenant
+        isolation and license validation.
+      operationId: createAttempt
+      tags: [Attempts]
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceSlugPath"
+        - name: X-Correlation-ID
+          in: header
+          required: false
+          description: Correlation ID for distributed tracing
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAttemptRequest"
+            example:
+              exam_id: "550e8400-e29b-41d4-a716-446655440000"
+              attempt_mode: "CHRONO"
+      responses:
+        "201":
+          description: Attempt created successfully
+          headers:
+            X-Correlation-ID:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttemptResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "423":
+          description: |
+            Workspace soft-locked (license status SOFT_LOCKED).
+            Attempts can be created but not submitted.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "426":
+          $ref: "#/components/responses/UpgradeRequired"
+
+  /workspaces/{workspace_slug}/attempts/{attempt_id}:
+    get:
+      summary: Get Attempt Status
+      description: Retrieve current attempt state and progress
+      operationId: getAttempt
+      tags: [Attempts]
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceSlugPath"
+        - $ref: "#/components/parameters/AttemptIdPath"
+      responses:
+        "200":
+          description: Attempt details
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttemptResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+  /workspaces/{workspace_slug}/attempts/{attempt_id}/progress:
+    patch:
+      summary: Save Progress (Autosave)
+      description: |
+        Update attempt progress with idempotent semantics.
+        Safe to retry - triple-layer idempotency (Redis + DB status + DB index).
+      operationId: updateProgress
+      tags: [Attempts]
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceSlugPath"
+        - $ref: "#/components/parameters/AttemptIdPath"
+        - name: X-Idempotency-Key
+          in: header
+          required: false
+          description: Idempotency key to prevent duplicate saves
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProgressRequest"
+      responses:
+        "200":
+          description: Progress saved (idempotent, safe to retry)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProgressResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Attempt already submitted or finalized
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /workspaces/{workspace_slug}/attempts/{attempt_id}/submit:
+    post:
+      summary: Submit Attempt (Pessimistic Lock)
+      description: |
+        Finalize and submit attempt for grading.
+        Uses pessimistic locking (FOR UPDATE NOWAIT) with 5-second timeout.
+        Returns 202 ACCEPTED with job ID for async grading via worker.
+        Safe to retry - submission is idempotent.
+      operationId: submitAttempt
+      tags: [Attempts]
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceSlugPath"
+        - $ref: "#/components/parameters/AttemptIdPath"
+        - name: X-Idempotency-Key
+          in: header
+          required: false
+          description: Idempotency key for submission
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SubmitAttemptRequest"
+      responses:
+        "202":
+          description: |
+            Submit accepted (job enqueued for async grading).
+            Poll /result endpoint for grading completion.
+          headers:
+            Retry-After:
+              description: Suggested retry interval in seconds
+              schema:
+                type: integer
+                example: 2
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SubmitResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: |
+            Submission locked (concurrent submit attempt).
+            Retry with exponential backoff (100ms → 200ms → 400ms).
+            After 3 retries, wait 5 seconds before next attempt.
+          headers:
+            Retry-After:
+              description: Minimum milliseconds before retry
+              schema:
+                type: integer
+                example: 100
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "423":
+          description: License soft-locked (create allowed, submit blocked)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+
+  /workspaces/{workspace_slug}/attempts/{attempt_id}/result:
+    get:
+      summary: Poll Grading Result
+      description: |
+        Poll for grading completion status.
+        Returns 202 ACCEPTED while processing, 200 OK when complete.
+        Long-poll friendly with Retry-After header.
+      operationId: getGradingResult
+      tags: [Results]
+      security:
+        - BearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/WorkspaceSlugPath"
+        - $ref: "#/components/parameters/AttemptIdPath"
+      responses:
+        "200":
+          description: Grading completed
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ResultResponse"
+        "202":
+          description: Still processing (poll again)
+          headers:
+            Retry-After:
+              description: Suggested retry interval in seconds
+              schema:
+                type: integer
+                example: 2
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProcessingResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+
+components:
+  parameters:
+    WorkspaceSlugPath:
+      name: workspace_slug
+      in: path
+      required: true
+      description: |
+        Unique workspace identifier (database-per-tenant).
+        Resolves to workspace_id via slug lookup.
+      schema:
+        type: string
+        pattern: '^[a-z0-9][a-z0-9\-]*[a-z0-9]$'
+        example: "tenant-acme-corp"
+
+    AttemptIdPath:
+      name: attempt_id
+      in: path
+      required: true
+      description: Unique attempt identifier
+      schema:
+        type: string
+        format: uuid
+        example: "550e8400-e29b-41d4-a716-446655440000"
+
+  schemas:
+    CreateAttemptRequest:
+      type: object
+      required:
+        - exam_id
+        - attempt_mode
+      properties:
+        exam_id:
+          type: string
+          format: uuid
+          description: Exam or assignment UUID
+        attempt_mode:
+          type: string
+          enum: [RELAX, CHRONO, RUSH]
+          description: |
+            RELAX: Unlimited time
+            CHRONO: Timed (duration from exam config)
+            RUSH: Ultra-fast mode
+        metadata:
+          type: object
+          description: Optional custom metadata (device, location, etc.)
+          additionalProperties: true
+
+    UpdateProgressRequest:
+      type: object
+      required:
+        - question_index
+        - response_data
+      properties:
+        question_index:
+          type: integer
+          minimum: 0
+          description: Question position (0-indexed)
+        response_data:
+          type: object
+          description: |
+            User response for this question.
+            Format depends on question type (MCQ, essay, code, etc.)
+          additionalProperties: true
+        elapsed_time:
+          type: integer
+          description: Elapsed time in milliseconds
+
+    SubmitAttemptRequest:
+      type: object
+      properties:
+        final_metadata:
+          type: object
+          description: Optional metadata at submission time
+          additionalProperties: true
+
+    ProgressResponse:
+      type: object
+      properties:
+        attempt_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [IN_PROGRESS, SUBMITTED, FINALIZED]
+        last_saved_question:
+          type: integer
+          description: Last question saved (0-indexed)
+        elapsed_time:
+          type: integer
+          description: Elapsed time in milliseconds
+        timestamp:
+          type: string
+          format: date-time
+          description: Server timestamp (NOW())
+
+    SubmitResponse:
+      type: object
+      properties:
+        attempt_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [SUBMITTED]
+        job_id:
+          type: string
+          format: uuid
+          description: Grading job ID for polling
+        poll_url:
+          type: string
+          format: uri
+          description: URL to poll for results
+        result_eta:
+          type: integer
+          description: Estimated time to completion in seconds
+          example: 5
+
+    ProcessingResponse:
+      type: object
+      properties:
+        attempt_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [SUBMITTED]
+        progress:
+          type: object
+          properties:
+            processed_questions:
+              type: integer
+            total_questions:
+              type: integer
+        result_eta:
+          type: integer
+          description: Updated ETA in seconds
+
+    AttemptResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        workspace_id:
+          type: string
+          format: uuid
+        user_id:
+          type: string
+          format: uuid
+        exam_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [IN_PROGRESS, SUBMITTED, FINALIZED, EXPIRED, ABORTED]
+        attempt_mode:
+          type: string
+          enum: [RELAX, CHRONO, RUSH]
+        score:
+          type: number
+          minimum: 0
+          nullable: true
+          description: Final score (null if not yet graded)
+        passed:
+          type: boolean
+          nullable: true
+          description: Pass/fail status (null if not yet graded)
+        question_snapshot:
+          type: array
+          description: Frozen question list at attempt start
+          items:
+            type: object
+        grading_config_snapshot:
+          type: object
+          description: Frozen grading configuration
+        submitted_at:
+          type: string
+          format: date-time
+          nullable: true
+        finalized_at:
+          type: string
+          format: date-time
+          nullable: true
+        created_at:
+          type: string
+          format: date-time
+          description: Attempt creation time (NOW())
+        updated_at:
+          type: string
+          format: date-time
+
+    ResultResponse:
+      type: object
+      properties:
+        attempt_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [FINALIZED, EXPIRED]
+        score:
+          type: number
+          minimum: 0
+          description: Final score
+        passed:
+          type: boolean
+          description: Pass/fail determination
+        result_snapshot:
+          type: object
+          properties:
+            total_score:
+              type: number
+            max_score:
+              type: number
+            question_scores:
+              type: array
+              items:
+                type: object
+                properties:
+                  question_id:
+                    type: string
+                  score:
+                    type: number
+                  max_score:
+                    type: number
+                  feedback:
+                    type: string
+            grading_timestamp:
+              type: string
+              format: date-time
+              description: When grading completed (NOW())
+        finalized_at:
+          type: string
+          format: date-time
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - error
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        data:
+          type: "null"
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              description: |
+                Error code (RFC 7807 compliant).
+                E.g., INVALID_EXAM_ID, ATTEMPT_LOCKED, SOFT_LOCKED, etc.
+            message:
+              type: string
+            details:
+              type: object
+              additionalProperties: true
+              description: Additional error context
+
+  responses:
+    BadRequest:
+      description: Invalid input (400)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          example:
+            success: false
+            data: null
+            error:
+              code: INVALID_EXAM_ID
+              message: Exam ID must be a valid UUID
+
+    Unauthorized:
+      description: Missing or invalid authentication (401)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    Forbidden:
+      description: User lacks permission (403)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    NotFound:
+      description: Resource not found (404)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    UpgradeRequired:
+      description: |
+        Schema or product version mismatch (426).
+        Client must upgrade to compatible version.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: |
+        JWT Bearer token (RS256 signed).
+        Token must include:
+        - sub: user_id
+        - workspace_slug: workspace identifier
+        - iat, exp: token validity
+
+x-code-examples:
+  create-attempt-curl: |
+    curl -X POST http://localhost:3000/api/v1/workspaces/tenant-acme/attempts \
+      -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type: application/json" \
+      -H "X-Correlation-ID: 550e8400-e29b-41d4-a716-446655440000" \
+      -d '{
+        "exam_id": "550e8400-e29b-41d4-a716-446655440001",
+        "attempt_mode": "CHRONO"
+      }'
+
+  create-attempt-js: |
+    const response = await fetch('/api/v1/workspaces/tenant-acme/attempts', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json',
+        'X-Correlation-ID': correlationId,
+      },
+      body: JSON.stringify({
+        exam_id: '550e8400-e29b-41d4-a716-446655440001',
+        attempt_mode: 'CHRONO',
+      }),
+    });
+
+  submit-attempt-curl: |
+    curl -X POST http://localhost:3000/api/v1/workspaces/tenant-acme/attempts/550e8400-e29b-41d4-a716-446655440000/submit \
+      -H "Authorization: Bearer $TOKEN" \
+      -H "Content-Type: application/json" \
+      -H "X-Idempotency-Key: 550e8400-e29b-41d4-a716-446655440099" \
+      -d '{}'
+
+  poll-result-curl: |
+    curl http://localhost:3000/api/v1/workspaces/tenant-acme/attempts/550e8400-e29b-41d4-a716-446655440000/result \
+      -H "Authorization: Bearer $TOKEN"

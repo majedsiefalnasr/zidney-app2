@@ -25,6 +25,13 @@ import licenseMiddleware from './middleware/license'
 // Schema version validation middleware (mandatory fourth)
 import schemaVersionMiddleware from './middleware/schema-version'
 
+// Route registration (Phase C, Phase D)
+import { registerStage06Routes } from './routes/attempts/index-stage06'
+import { registerStage06PhaseDRoutes } from './routes/attempts/submit-index'
+
+// Utility logger
+import Logger from './utils/logger'
+
 // ============================================================================
 // APPLICATION SETUP
 // ============================================================================
@@ -51,6 +58,18 @@ app.use('/api/workspaces/*', schemaVersionMiddleware)
 
 // Route handlers for workspace operations go here
 // Routes registered after middleware will have full tenant context
+
+// ============================================================================
+// STAGE 06 ATTEMPT ENGINE ROUTES
+// ============================================================================
+
+const logger = new Logger('app')
+
+// Register Phase C routes (create, progress, status)
+registerStage06Routes(app, logger)
+
+// Register Phase D routes (submit, result)
+registerStage06PhaseDRoutes(app, logger)
 
 // ============================================================================
 // PUBLIC ROUTES (no tenant context required)
