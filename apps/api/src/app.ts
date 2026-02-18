@@ -6,10 +6,13 @@ function generateId(): string {
 }
 
 // ============================================================================
-// MIDDLEWARE IMPORTS (Strict Order: correlationId → tenant → license → schema)
+// MIDDLEWARE IMPORTS (Strict Order: request-id → tenant → license → correlation → redaction)
 // ============================================================================
 
-// Correlation ID middleware (mandatory first)
+// PHASE 1: Request ID middleware (mandatory first - generates unique request tracking ID)
+import { requestIdMiddleware } from './middleware/request-id'
+
+// Correlation ID middleware (legacy, for backward compatibility)
 const correlationIdMiddleware = async (c: any, next: any) => {
   const correlationId = c.req.header('x-correlation-id') || generateId()
   c.set('correlationId', correlationId)
@@ -24,6 +27,12 @@ import licenseMiddleware from './middleware/license'
 
 // Schema version validation middleware (mandatory fourth)
 import schemaVersionMiddleware from './middleware/schema-version'
+
+// PHASE 1: Correlation context middleware (mandatory after license - binds logger context)
+import { correlationMiddleware } from './middleware/correlation'
+
+// PHASE 1: Redaction middleware (optional, applied for defense-in-depth)
+import { redactionMiddleware } from './middleware/redaction'
 
 // Route registration (Phase C, Phase D)
 import { registerStage06Routes } from './routes/attempts/index-stage06'
@@ -42,19 +51,33 @@ const app = new Hono()
 // GLOBAL MIDDLEWARE (Applied to all routes)
 // ============================================================================
 
-// Step 1: Correlation ID (must be first - generates request tracking ID)
+// STEP 1: Request ID middleware (MUST be first - generates unique request ID per request)
+// Sets: c.get('request_id'), c.req.context.request_id, response header x-request-id
+app.use('*', requestIdMiddleware())
+
+// STEP 2: Correlation ID (legacy, for backward compatibility)
 app.use('*', correlationIdMiddleware)
 
 // ============================================================================
 // WORKSPACE-SCOPED ROUTES (with full middleware stack)
 // ============================================================================
 
-// Step 2: Tenant Resolver (extract workspace from subdomain/path)
-// Step 3: License Validation (verify ACTIVE/TRIAL status)
-// Step 4: Schema Version Validation (verify schema compatibility)
+// STEP 2: Tenant Resolver (extract workspace from subdomain/path)
 app.use('/api/workspaces/*', tenantResolver)
+
+// STEP 3: License Validation (verify ACTIVE/TRIAL status)
 app.use('/api/workspaces/*', licenseMiddleware)
+
+// STEP 4: Schema Version Validation (verify schema compatibility)
 app.use('/api/workspaces/*', schemaVersionMiddleware)
+
+// STEP 5: Correlation Context middleware (bind child logger with request context)
+// Sets: c.get('logger'), c.req.context.logger
+// Logs: request_received, request_completed
+app.use('/api/workspaces/*', correlationMiddleware())
+
+// STEP 6: Redaction middleware (sanitize sensitive data)
+app.use('/api/workspaces/*', redactionMiddleware())
 
 // Route handlers for workspace operations go here
 // Routes registered after middleware will have full tenant context
