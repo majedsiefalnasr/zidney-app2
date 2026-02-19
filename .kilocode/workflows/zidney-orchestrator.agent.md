@@ -30,6 +30,23 @@ The orchestrator MUST:
 
 If any report exists outside the stage runtime directory → STOP and correct location before proceeding.
 
+PR summary artifact is mandatory and MUST be written to:
+
+specs/runtime/<STAGE_DIR_NAME>/PR_SUMMARY.md
+
+Do not store PR_SUMMARY.md outside the stage runtime directory.
+
+## Terminal Session Safety Enforcement
+
+Before running ANY terminal command, the orchestrator MUST send `CTRL+C` once to clear in-flight processes.
+
+Mandatory execution pattern:
+
+- Send `CTRL+C`
+- Run the intended command
+
+This rule applies to all terminal commands, including every git command.
+
 ## Git Hygiene Enforcement
 
 Before executing ANY git commit step, the orchestrator MUST:
@@ -1023,6 +1040,7 @@ Closure will:
   - Finalize .workflow-state.json
   - Generate the git commit message
   - Generate the PR summary
+  - Save PR summary to specs/runtime/<STAGE_DIR_NAME>/PR_SUMMARY.md
 
 Reports to review:
   specs/runtime/<STAGE_DIR_NAME>/reports/SPECIFY_REPORT.md
@@ -1182,6 +1200,7 @@ Closes: <STAGE_FILE_NAME>
 Load `specs/templates/PR_TEMPLATE.md`.  
 Populate every section from workflow artifacts (all reports, stage file, task list, implementation output).  
 Do not leave any placeholder unfilled.  
+Write to: `specs/runtime/<STAGE_DIR_NAME>/PR_SUMMARY.md`  
 Output the completed PR summary to the user.
 
 ## 7.7 — Output Final Closure Summary
@@ -1203,6 +1222,7 @@ Reports generated:
   specs/runtime/<STAGE_DIR_NAME>/reports/ANALYZE_REPORT.md
   specs/runtime/<STAGE_DIR_NAME>/reports/IMPLEMENT_REPORT.md
   specs/runtime/<STAGE_DIR_NAME>/reports/CLOSURE_REPORT.md
+  specs/runtime/<STAGE_DIR_NAME>/PR_SUMMARY.md
 
 Stage file updated:
   specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME> → PRODUCTION READY
