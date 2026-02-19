@@ -8,19 +8,17 @@ Scope: Reusable UI architecture for MMC, Backoffice, and Frontoffice
 
 ## Stage Status
 
-Status: DRAFT  
+Status: CLARIFIED  
 Risk Level: LOW  
 Last Updated: 2026-02-19T00:00:00Z
 
-Scope Defined:
+Scope Clarified:
 
-- 13 core components (Layout, Data, Forms, Utility)
-- Complete API prop/event contracts
-- TypeScript strict type definitions
-- Design token system and Tailwind integration
-- Composable utilities (useFilterBuilder, usePagination, useMultiLanguageForm)
-- Component documentation and test strategy
-- White-label customization via CSS variables
+- DataTable pagination: Agnostic strategy (server or client per app)
+- Row actions: Async support with component-managed loading state
+- Filter serialization: URL primary with localStorage fallback + visibility indicator
+- Column accessors: Optional for primitives, required for computed columns
+- Multi-language validation: Per-language with minimum 1 required language
 
 Deferred Scope:
 
@@ -40,9 +38,10 @@ Constitutional Compliance:
 - ✅ Version enforcement delegation verified
 - ✅ Layer separation verified
 - ✅ No trust chain violations
+- ✅ All 5 critical ambiguities resolved
 
 Notes:
-Specification complete. All 13 core components defined with complete API contracts. Constitutional compliance verified across all architectural concerns. Ready for Clarify step.
+All specification ambiguities resolved. 5 critical architectural decisions locked. Stakeholder decisions documented. Ready for Plan step.
 
 ---
 
