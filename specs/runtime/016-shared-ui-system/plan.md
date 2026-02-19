@@ -1147,7 +1147,7 @@ const validateGlobal = (): ValidateResult => {
   
   // Check required languages
   if (props.requiredLanguages.length === 0) {
-    console.warn('No required languages specified. Defaulting to minimum 1.')
+    emit('language-config-error', { reason: 'no_required_languages', fallback: defaultLang?.code ?? props.languages[0].code })
     props.requiredLanguages = [defaultLang?.code ?? props.languages[0].code]
   }
   
