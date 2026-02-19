@@ -5,8 +5,8 @@
   "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_16_SHARED_UI_SYSTEM.md",
   "branch": "016-shared-ui-system",
   "base_branch": "develop",
-  "current_step": "pre_step",
-  "stage_status": "PENDING",
+  "current_step": "specify",
+  "stage_status": "DRAFT",
   "clarifications_resolved": false,
   "drift_passed": false,
   "implementation_allowed": false,
@@ -18,6 +18,10 @@
     {
       "event": "branch_created",
       "branch": "016-shared-ui-system",
+      "timestamp": "2026-02-19T00:00:00Z"
+    },
+    {
+      "event": "specify_complete",
       "timestamp": "2026-02-19T00:00:00Z"
     }
   ]
