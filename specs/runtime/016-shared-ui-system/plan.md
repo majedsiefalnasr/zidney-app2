@@ -2329,7 +2329,7 @@ const handleRowAction = async (row: User, action: RowAction<User>) => {
   try {
     await action.callback(row)
   } catch (error) {
-    console.error('Action failed:', error)
+    emit('action-error', { actionId: action.id, error: error instanceof Error ? error.message : String(error) })
   } finally {
     isSubmitting.value = false
   }
@@ -2449,7 +2449,7 @@ const deserializeFilters = (encoded: string): Filter[] => {
 ```typescript
 const isValid = computed(() => {
   if (props.languages.length === 0) {
-    console.warn('MultiLanguageInputModal: No languages provided')
+    emit('language-invalid', { reason: 'no_languages_provided' })
     return false
   }
   
@@ -2481,11 +2481,11 @@ const props = withDefaults(
 
 onMounted(() => {
   if (!Array.isArray(props.rows)) {
-    console.error('DataTable: rows must be array')
+    emit('validation-error', { field: 'rows', error: 'invalid_type', message: 'rows must be array' })
   }
   
   if (!Array.isArray(props.columns) || props.columns.length === 0) {
-    console.error('DataTable: columns must be non-empty array')
+    emit('validation-error', { field: 'columns', error: 'invalid_type', message: 'columns must be non-empty array' })
   }
 })
 ```
