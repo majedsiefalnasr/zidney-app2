@@ -1,0 +1,548 @@
+openapi: 3.1.0
+info:
+  title: Zidney Rate Limiting & Security API
+  version: 1.1.0
+  description: Complete API specification for STAGE 08 - Rate Limiting & Security Baseline
+  contact:
+    name: Zidney Engineering
+servers:
+  - url: https://api.zidney.example.com
+    description: Production
+  - url: https://staging-api.zidney.example.com
+    description: Staging
+  - url: http://localhost:3000/api
+    description: Development
+
+security:
+  - bearerAuth: []
+  - csrfToken: []
+
+paths:
+  /auth/login:
+    post:
+      summary: Authenticate user and obtain JWT
+      description: |
+        Rate limited: 5 attempts per IP per minute, 5 per user per minute
+        Returns JWT token and CSRF token
+      tags:
+        - Authentication
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        '200':
+          description: Successfully authenticated
+          headers:
+            X-CSRF-TOKEN:
+              schema:
+                type: string
+                description: CSRF token for subsequent requests
+            X-Request-ID:
+              schema:
+                type: string
+                format: uuid
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LoginResponse'
+        '429':
+          description: Rate limit exceeded
+          headers:
+            Retry-After:
+              schema:
+                type: integer
+                description: Seconds to wait before retrying
+            X-Rate-Limit-Limit:
+              schema:
+                type: integer
+            X-Rate-Limit-Remaining:
+              schema:
+                type: integer
+            X-Rate-Limit-Reset:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitError'
+
+  /auth/logout:
+    post:
+      summary: Invalidate JWT and logout
+      description: Clears user session and closes WebSocket connections
+      tags:
+        - Authentication
+      requestBody:
+        required: false
+      responses:
+        '200':
+          description: Successfully logged out
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '401':
+          description: Unauthorized - invalid or missing JWT
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /auth/password-reset:
+    post:
+      summary: Reset user password
+      description: Rate limited: 1 per user per minute, 2 per IP per minute
+      tags:
+        - Authentication
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PasswordResetRequest'
+      responses:
+        '200':
+          description: Password reset initiated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitError'
+
+  /attempt/{id}/submit:
+    post:
+      summary: Submit attempt answers
+      description: |
+        Submit answers with idempotency guarantees.
+        Rate limited: 1 submission per attempt.
+        Requires idempotency_key UUID for duplicate detection.
+      tags:
+        - Attempt
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          description: Attempt ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/SubmitAttemptRequest'
+      responses:
+        '200':
+          description: Submission successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GradingResult'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '410':
+          description: Attempt expired
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+        '426':
+          description: Schema version incompatible
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SchemaVersionError'
+        '429':
+          description: Rate limit exceeded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RateLimitError'
+
+  /ws/attempt/{id}:
+    get:
+      summary: WebSocket connection for attempt monitoring
+      description: |
+        WebSocket connection for real-time attempt updates.
+        Rate limited: 100 messages per minute with 10 msg/sec burst.
+        Requires JWT in Authorization header.
+      tags:
+        - WebSocket
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '101':
+          description: Switching protocols
+        '401':
+          description: Unauthorized
+        '423':
+          description: Workspace soft-locked
+        '426':
+          description: Schema upgrade required
+
+  /admin/workspace/{wsId}/dlq:
+    get:
+      summary: List dead-letter queue jobs
+      description: |
+        List failed jobs in the dead-letter queue for a workspace.
+        Requires admin or org_admin role.
+      tags:
+        - Admin
+      parameters:
+        - name: wsId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 100
+            maximum: 1000
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+      responses:
+        '200':
+          description: DLQ jobs retrieved
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DLQListResponse'
+        '403':
+          description: Forbidden - insufficient permissions
+
+  /admin/workspace/{wsId}/dlq/{dlqId}/retry:
+    post:
+      summary: Manually retry a DLQ job
+      description: Re-enqueue a failed job from the DLQ
+      tags:
+        - Admin
+      parameters:
+        - name: wsId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: dlqId
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Job re-enqueued
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SuccessResponse'
+        '404':
+          description: Job not found
+        '403':
+          description: Forbidden
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token from login endpoint
+    csrfToken:
+      type: apiKey
+      in: header
+      name: X-CSRF-TOKEN
+      description: CSRF token for state-changing requests
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - email
+        - password
+        - workspace_slug
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+          minLength: 8
+        workspace_slug:
+          type: string
+          pattern: '^[a-z0-9-]+$'
+
+    LoginResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            jwt:
+              type: string
+              description: Bearer token for subsequent requests
+            user_id:
+              type: string
+              format: uuid
+            workspace_id:
+              type: string
+              format: uuid
+            csrf_token:
+              type: string
+              description: CSRF token from X-CSRF-TOKEN header
+        error:
+          type: null
+
+    SubmitAttemptRequest:
+      type: object
+      required:
+        - answers
+        - idempotency_key
+      properties:
+        answers:
+          type: array
+          items:
+            type: object
+            properties:
+              question_id:
+                type: string
+                format: uuid
+              answer:
+                oneOf:
+                  - type: string
+                  - type: array
+                    items:
+                      type: string
+        idempotency_key:
+          type: string
+          format: uuid
+          description: Unique key for duplicate detection
+
+    GradingResult:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            score:
+              type: number
+            max_score:
+              type: number
+            percentage:
+              type: number
+              minimum: 0
+              maximum: 100
+            feedback:
+              type: string
+            question_results:
+              type: array
+              items:
+                type: object
+                properties:
+                  question_id:
+                    type: string
+                    format: uuid
+                  earned:
+                    type: number
+                  max:
+                    type: number
+                  feedback:
+                    type: string
+        error:
+          type: null
+
+    ErrorResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: null
+        error:
+          type: object
+          required:
+            - code
+            - message
+            - correlationId
+          properties:
+            code:
+              type: string
+              enum:
+                - BAD_REQUEST
+                - UNAUTHORIZED
+                - FORBIDDEN
+                - NOT_FOUND
+                - CONFLICT
+                - GONE
+                - LOCKED
+                - UPGRADE_REQUIRED
+                - TOO_MANY_REQUESTS
+                - INTERNAL_SERVER_ERROR
+                - SERVICE_UNAVAILABLE
+                - GATEWAY_TIMEOUT
+            message:
+              type: string
+            correlationId:
+              type: string
+              format: uuid
+            details:
+              type: object
+              description: Error-specific details
+
+    RateLimitError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: null
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: TOO_MANY_REQUESTS
+            message:
+              type: string
+            correlationId:
+              type: string
+              format: uuid
+            details:
+              type: object
+              properties:
+                limit:
+                  type: integer
+                window_seconds:
+                  type: integer
+                current_count:
+                  type: integer
+                retry_after_seconds:
+                  type: integer
+                rate_limit_type:
+                  type: string
+                  enum:
+                    - per_ip
+                    - per_user
+                    - per_workspace
+                    - per_attempt
+
+    SchemaVersionError:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: false
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: UPGRADE_REQUIRED
+            message:
+              type: string
+            details:
+              type: object
+              properties:
+                tenant_version:
+                  type: string
+                  example: '1.0.0'
+                app_version:
+                  type: string
+                  example: '1.1.0'
+                action:
+                  type: string
+                  enum:
+                    - upgrade_required
+                    - downgrade_required
+
+    DLQListResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          properties:
+            jobs:
+              type: array
+              items:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  job_type:
+                    type: string
+                  attempt_id:
+                    type: string
+                    format: uuid
+                  error_message:
+                    type: string
+                  retry_count:
+                    type: integer
+                  max_retries:
+                    type: integer
+                  created_at:
+                    type: string
+                    format: date-time
+                  moved_to_dlq_at:
+                    type: string
+                    format: date-time
+            total:
+              type: integer
+
+    SuccessResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+        error:
+          type: null
+
+tags:
+  - name: Authentication
+    description: Login, logout, password reset
+  - name: Attempt
+    description: Attempt submission with idempotency
+  - name: WebSocket
+    description: Real-time attempt monitoring
+  - name: Admin
+    description: Administrative operations (requires admin role)
