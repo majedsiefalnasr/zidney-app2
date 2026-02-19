@@ -15,6 +15,37 @@ This agent MUST comply with all binding rules defined in `docs/AGENT_GOVERNANCE.
 
 ---
 
+## Report Location Enforcement
+
+All reports MUST be generated inside:
+
+specs/runtime/<STAGE_DIR_NAME>/reports/
+
+The orchestrator MUST:
+
+- Never generate reports in specs/phases/
+- Never generate reports at repository root
+- Never generate reports in templates/
+- Never duplicate reports in multiple locations
+
+If any report exists outside the stage runtime directory → STOP and correct location before proceeding.
+
+## Git Hygiene Enforcement
+
+Before executing ANY git commit step, the orchestrator MUST:
+
+- Run `git status` and verify only stage-related files are modified
+- Ensure no unrelated files are staged
+- Ensure no cross-stage modifications exist
+- Ensure no files under specs/templates/ are modified
+- Ensure no unintended root-level changes are staged
+- Ensure no modifications outside specs/runtime/<STAGE_DIR_NAME>/ or the specific stage file
+
+If any unrelated or cross-stage changes are detected:
+→ STOP immediately.
+→ List the offending files.
+→ Require manual cleanup before proceeding.
+
 ## Execution Context
 
 **Stage:** $ARGUMENTS (extracted from user request)  
@@ -142,7 +173,7 @@ Create `specs/runtime/<STAGE_DIR_NAME>/README.md`:
 
 ## Pre.5 — Initialize .workflow-state.json
 
-Write to repository root/specs/runtime:
+Write to: specs/runtime/.workflow-state.json (MUST always live inside specs/runtime root — never repository root).
 
 ```json
 {
@@ -170,6 +201,17 @@ Write to repository root/specs/runtime:
   ]
 }
 ```
+
+## Pre.5A — Workflow State Location Enforcement
+
+The file `.workflow-state.json` MUST:
+
+- Always live at: specs/runtime/.workflow-state.json
+- Never be created at repository root
+- Never be duplicated in stage directories
+- Be updated in-place throughout the workflow
+
+If a conflicting file exists → STOP and require cleanup before proceeding.
 
 ## Pre.6 — Initialize Stage Status Block
 
@@ -276,6 +318,28 @@ Merge:
 
 Mark Specify as `✅`.
 
+## 1.6 — Commit Specify Step
+
+Apply Git Hygiene Enforcement before staging files.
+
+Generate commit:
+
+git add specs/runtime/<STAGE_DIR_NAME>/reports/SPECIFY_REPORT.md \
+ specs/runtime/<STAGE_DIR_NAME>/README.md \
+ specs/runtime/.workflow-state.json \
+ specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+git commit -m "stage(<STAGE_DIR_NAME>): specify completed
+
+Step: Specify
+Stage: <STAGE_NAME>
+Phase: <PHASE_NAME>
+Status: DRAFT
+
+- Specification defined
+- Constitutional constraints enforced
+- Report generated"
+
 Apply the automatic continuation rule before proceeding to Step 2.
 
 ---
@@ -355,6 +419,24 @@ Merge:
 ## 2.5 — Update README.md
 
 Mark Clarify as `✅`.
+
+## 2.6 — Commit Clarify Step
+
+Apply Git Hygiene Enforcement before staging files.
+
+git add specs/runtime/<STAGE_DIR_NAME>/reports/CLARIFY_REPORT.md \
+ specs/runtime/<STAGE_DIR_NAME>/README.md \
+ specs/runtime/.workflow-state.json \
+ specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+git commit -m "stage(<STAGE_DIR_NAME>): clarify completed
+
+Step: Clarify
+Status: CLARIFIED
+
+- Ambiguities resolved
+- Risk level assessed
+- Planning authorized"
 
 Apply the automatic continuation rule before proceeding to Step 3.
 
@@ -466,6 +548,24 @@ Merge:
 
 Mark Plan as `✅`.
 
+## 3.6 — Commit Plan Step
+
+Apply Git Hygiene Enforcement before staging files.
+
+git add specs/runtime/<STAGE_DIR_NAME>/reports/PLAN_REPORT.md \
+ specs/runtime/<STAGE_DIR_NAME>/README.md \
+ specs/runtime/.workflow-state.json \
+ specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+git commit -m "stage(<STAGE_DIR_NAME>): plan completed
+
+Step: Plan
+Status: PLANNED
+
+- Technical design finalized
+- Guardian validation passed
+- Task generation authorized"
+
 Apply the automatic continuation rule before proceeding to Step 4.
 
 ---
@@ -543,6 +643,23 @@ Merge:
 ## 4.5 — Update README.md
 
 Mark Tasks as `✅`.
+
+## 4.6 — Commit Tasks Step
+
+Apply Git Hygiene Enforcement before staging files.
+
+git add specs/runtime/<STAGE_DIR_NAME>/reports/TASKS_REPORT.md \
+ specs/runtime/<STAGE_DIR_NAME>/README.md \
+ specs/runtime/.workflow-state.json \
+ specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+git commit -m "stage(<STAGE_DIR_NAME>): tasks generated
+
+Step: Tasks
+Status: TASKS READY
+
+- <TASKS_TOTAL> atomic tasks created
+- Drift analysis required before implementation"
 
 Apply the automatic continuation rule before proceeding to Step 5.
 
@@ -713,6 +830,24 @@ Mark Analyze as `✅ Passed` or `❌ Blocked`.
 
 Do NOT proceed to Step 6 if `drift_passed = false`.
 
+## 5.6 — Commit Analyze Step
+
+Apply Git Hygiene Enforcement before staging files.
+
+git add specs/runtime/<STAGE_DIR_NAME>/reports/ANALYZE_REPORT.md \
+ specs/runtime/<STAGE_DIR_NAME>/README.md \
+ specs/runtime/.workflow-state.json \
+ specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+git commit -m "stage(<STAGE_DIR_NAME>): analyze completed
+
+Step: Analyze
+Drift: <PASSED or BLOCKED>
+
+- Structural audit executed
+- Composite guardian audit executed
+- Implementation gate evaluated"
+
 ---
 
 # Step 6 — Implement
@@ -850,8 +985,6 @@ Merge:
 
 Mark Implement as `✅`.
 
----
-
 ## 6.8 — Pre-Closure Guardian Validation (Deployment Layer)
 
 Run in parallel:
@@ -909,6 +1042,24 @@ Respond with:
 If issues are reported → address them, regenerate the affected report(s), update
 the relevant stage status and workflow state, then re-present this gate.  
 Do NOT proceed to Step 7 until the user explicitly confirms approval.
+
+## 6.9 — Commit Implement Step
+
+Apply Git Hygiene Enforcement before staging files.
+
+git add specs/runtime/<STAGE_DIR_NAME>/reports/IMPLEMENT_REPORT.md \
+ specs/runtime/<STAGE_DIR_NAME>/README.md \
+ specs/runtime/.workflow-state.json \
+ specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+git commit -m "stage(<STAGE_DIR_NAME>): implementation completed
+
+Step: Implement
+Tasks: <TASKS_COMPLETED>/<TASKS_TOTAL>
+
+- All tasks implemented
+- Backend closed
+- Awaiting pre-closure review"
 
 ---
 
