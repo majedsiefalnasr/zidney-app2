@@ -3,6 +3,18 @@ name: Zidney Orchestrator
 description: Execute full SpecKit Hard Mode workflow sequentially with strict Zidney Constitution enforcement.
 ---
 
+# GOVERNANCE DECLARATION
+
+Governed by: Zidney Agent Governance v1.0  
+Workflow Authority: Zidney Orchestrator  
+Architectural Authority: Zidney Constitution v1.2.0  
+Lifecycle Mutation: Forbidden  
+Verdict Semantics (if enforcing): PASS | BLOCKED
+
+This agent MUST comply with all binding rules defined in `docs/AGENT_GOVERNANCE.md`.
+
+---
+
 ## Execution Context
 
 **Stage:** $ARGUMENTS (extracted from user request)  
@@ -39,20 +51,20 @@ Hard STOPs only occur when something genuinely blocks progress or requires human
 Before executing any step, collect and confirm:
 
 - `STAGE_NAME`
-- `PHASE_NUMBER`
-- `STAGE_FILE_NAME` (actual filename inside `specs/phases/`, e.g. `STAGE_05_TENANT_PROVISIONING_SERVICE.md`)
+- `PHASE_NAME`
+- `STAGE_FILE_NAME` (actual filename inside `specs/phases/<PHASE_NAME>/`, e.g. `STAGE_05_TENANT_PROVISIONING_SERVICE.md`)
 
 Ask the user:
 
 ```
 Stage:      <STAGE_NAME>
-Phase:      <PHASE_NUMBER>
+Phase:      <PHASE_NAME>
 Stage File: <STAGE_FILE_NAME>
 ```
 
 Do NOT proceed until all three are explicitly provided.  
 Do NOT assume values.  
-Replace all occurrences of `<STAGE_NAME>`, `<PHASE_NUMBER>`, `<STAGE_FILE_NAME>` throughout this workflow.
+Replace all occurrences of `<STAGE_NAME>`, `<PHASE_NAME>`, `<STAGE_FILE_NAME>` throughout this workflow.
 
 ---
 
@@ -110,8 +122,8 @@ Create `specs/runtime/<STAGE_DIR_NAME>/README.md`:
 # <STAGE_NAME>
 
 **Branch:** `<STAGE_DIR_NAME>`  
-**Phase:** <PHASE_NUMBER>  
-**Stage File:** `specs/phases/<STAGE_FILE_NAME>`  
+**Phase:** <PHASE_NAME>  
+**Stage File:** `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`  
 **Initiated:** <ISO_TIMESTAMP>
 
 ## Workflow Progress
@@ -130,14 +142,14 @@ Create `specs/runtime/<STAGE_DIR_NAME>/README.md`:
 
 ## Pre.5 — Initialize .workflow-state.json
 
-Write to repository root:
+Write to repository root/specs/runtime:
 
 ```json
 {
   "stage": "<STAGE_NAME>",
-  "phase": "<PHASE_NUMBER>",
+  "phase": "<PHASE_NAME>",
   "stage_dir": "specs/runtime/<STAGE_DIR_NAME>",
-  "stage_file": "specs/phases/<STAGE_FILE_NAME>",
+  "stage_file": "specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>",
   "branch": "<STAGE_DIR_NAME>",
   "base_branch": "<BASE_BRANCH>",
   "current_step": "pre_step",
@@ -161,7 +173,7 @@ Write to repository root:
 
 ## Pre.6 — Initialize Stage Status Block
 
-Open `specs/phases/<STAGE_FILE_NAME>`.  
+Open `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`.  
 Add or replace the `## Stage Status` block:
 
 ```markdown
@@ -195,7 +207,7 @@ Apply the automatic continuation rule before proceeding to Step 1.
 
 ```
 Stage: <STAGE_NAME>
-Phase: <PHASE_NUMBER>
+Phase: <PHASE_NAME>
 ```
 
 Load and follow: `specs/templates/specify-template.md`
@@ -222,7 +234,7 @@ Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/SPECIFY_REPORT.md`
 
 ## 1.3 — Update Stage Status Block
 
-Open `specs/phases/<STAGE_FILE_NAME>`. Update `## Stage Status`:
+Open `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`. Update `## Stage Status`:
 
 ```markdown
 ## Stage Status
@@ -383,6 +395,27 @@ Constraints:
 - Version compatibility required
 
 If plan modifies architecture → STOP. ADR required before proceeding.
+
+## 3.1A — Guardian Plan Validation (Architecture + API)
+
+Run in parallel:
+
+/handoff to=zidney-architecture-checker
+/handoff to=zidney-api-designer
+
+Both guardians MUST return:
+
+VERDICT: PASS
+
+If any guardian returns BLOCKED:
+
+- STOP immediately.
+- List all violations grouped by severity.
+- Do NOT write PLAN_REPORT.
+- Do NOT update workflow state.
+- Require remediation and re-validation.
+
+Only proceed to 3.2 if all guardians return PASS.
 
 ## 3.2 — Write Plan Report
 
@@ -548,6 +581,50 @@ Partial passage is NOT acceptable and must never be treated as APPROVED.
 
 If any violation is found → STOP. List every violation explicitly with its severity.  
 Do NOT proceed to implementation until all violations are resolved and a full clean re-audit passes.
+
+## 5.1A — Composite Guardian Audit (Parallel)
+
+Run in parallel:
+
+/handoff to=zidney-security-auditor
+/handoff to=zidney-performance-optimizer
+/handoff to=zidney-qa-engineer
+/handoff to=zidney-code-reviewer
+
+Each guardian MUST return:
+
+VERDICT: PASS | BLOCKED
+
+Collect all guardian findings.
+
+Group issues by severity across all guardians:
+
+- 🚨 Critical
+- ⚠️ High
+- ⚡ Medium
+- ℹ️ Low
+
+## 5.1B — Composite Verdict Aggregation
+
+Composite verdict rules:
+
+If:
+
+- Structural Drift Audit (5.1) = BLOCKED
+  OR
+- Any guardian = BLOCKED
+
+Then:
+
+- Final Gate = BLOCKED
+- Implementation = FORBIDDEN
+
+Else:
+
+- Final Gate = APPROVED
+- Implementation = AUTHORIZED
+
+Do NOT proceed to 5.2 until aggregation is complete.
 
 ## 5.2 — Write Analyze Report
 
@@ -775,6 +852,27 @@ Mark Implement as `✅`.
 
 ---
 
+## 6.8 — Pre-Closure Guardian Validation (Deployment Layer)
+
+Run in parallel:
+
+/handoff to=zidney-cicd-automation
+/handoff to=zidney-deployment-engineer
+/handoff to=zidney-docker-specialist
+
+Each guardian MUST return:
+
+VERDICT: PASS | BLOCKED
+
+If any guardian returns BLOCKED:
+
+- STOP immediately.
+- List all violations grouped by severity.
+- Do NOT present the Pre-Closure Review Gate.
+- Require remediation and re-validation.
+
+Only proceed to the Pre-Closure Review Gate if all guardians return PASS.
+
 ## ⏸ Mandatory Pre-Closure Review Gate
 
 **This is a hard STOP. Do NOT proceed to Step 7 under any circumstance without explicit user approval.**
@@ -826,7 +924,7 @@ Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/CLOSURE_REPORT.md`
 
 ## 7.2 — Update Stage Status Block (Final)
 
-Open `specs/phases/<STAGE_FILE_NAME>`. Update `## Stage Status`:
+Open `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`. Update `## Stage Status`:
 
 ```markdown
 ## Stage Status
@@ -862,9 +960,9 @@ Modifications require a new migration stage.
 ```json
 {
   "stage": "<STAGE_NAME>",
-  "phase": "<PHASE_NUMBER>",
+  "phase": "<PHASE_NAME>",
   "stage_dir": "specs/runtime/<STAGE_DIR_NAME>",
-  "stage_file": "specs/phases/<STAGE_FILE_NAME>",
+  "stage_file": "specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>",
   "branch": "<STAGE_DIR_NAME>",
   "base_branch": "<BASE_BRANCH>",
   "current_step": "stage_production_ready",
@@ -906,7 +1004,7 @@ Output for the user to apply:
 ```
 feat(<STAGE_DIR_NAME>): complete <STAGE_NAME> implementation
 
-Phase: <PHASE_NUMBER>
+Phase: <PHASE_NAME>
 Stage: <STAGE_NAME>
 Branch: <STAGE_DIR_NAME>
 Status: PRODUCTION READY
@@ -941,7 +1039,7 @@ Output the completed PR summary to the user.
 ✅ Zidney Hard Mode Workflow — COMPLETE
 
 Stage:    <STAGE_NAME>
-Phase:    <PHASE_NUMBER>
+Phase:    <PHASE_NAME>
 Branch:   <STAGE_DIR_NAME>
 Status:   PRODUCTION READY
 Tasks:    <TASKS_COMPLETED> / <TASKS_TOTAL> completed
@@ -956,7 +1054,7 @@ Reports generated:
   specs/runtime/<STAGE_DIR_NAME>/reports/CLOSURE_REPORT.md
 
 Stage file updated:
-  specs/phases/<STAGE_FILE_NAME> → PRODUCTION READY
+  specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME> → PRODUCTION READY
 
 Workflow state:
   .workflow-state.json → stage_production_ready

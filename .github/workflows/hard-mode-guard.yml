@@ -23,8 +23,8 @@ jobs:
 
       - name: Validate workflow state file exists
         run: |
-          if [ ! -f "specs/.workflow-state.json" ]; then
-            echo "ERROR: specs/.workflow-state.json not found."
+          if [ ! -f "specs/runtime/.workflow-state.json" ]; then
+            echo "ERROR: specs/runtime/.workflow-state.json not found."
             exit 1
           fi
 
