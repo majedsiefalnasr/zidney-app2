@@ -8,40 +8,39 @@ Scope: Reusable UI architecture for MMC, Backoffice, and Frontoffice
 
 ## Stage Status
 
-Status: CLARIFIED  
+Status: PLANNED  
 Risk Level: LOW  
 Last Updated: 2026-02-19T00:00:00Z
 
-Scope Clarified:
+Scope Planned:
 
-- DataTable pagination: Agnostic strategy (server or client per app)
-- Row actions: Async support with component-managed loading state
-- Filter serialization: URL primary with localStorage fallback + visibility indicator
-- Column accessors: Optional for primitives, required for computed columns
-- Multi-language validation: Per-language with minimum 1 required language
+- 13 core components with detailed implementation architecture
+- All 5 locked decisions embedded in technical design
+- All 3 locked constraints enforced
+- Component file structure, build system integration, type system
+- Testing strategy with coverage targets (80-90%)
+- 5-phase MMC migration strategy (12+ weeks)
+- Composable utilities and performance optimization
+- Task decomposition plan (30-35 atomic tasks, 320-400 hours)
 
 Deferred Scope:
 
-- State management library (app responsibility)
-- HTTP client abstraction (app responsibility)
-- Form validation framework (app responsibility)
-- Theme switching system (app responsibility)
+- Implementation code (reserved for Implement step)
 - Storybook documentation (future phase)
+- Dark mode runtime switching (future phase)
+- Performance optimization beyond guidelines (future phase)
 
 Constitutional Compliance:
 
-- ✅ Isolation preservation confirmed
-- ✅ License enforcement delegation verified
-- ✅ Attempt engine protection verified
-- ✅ Database integrity confirmed
-- ✅ Snapshot integrity confirmed
-- ✅ Version enforcement delegation verified
+- ✅ All locked decisions align with Constitution
 - ✅ Layer separation verified
-- ✅ No trust chain violations
-- ✅ All 5 critical ambiguities resolved
+- ✅ Tenant isolation preserved
+- ✅ No business logic in UI system
+- ✅ No database access or schema changes
+- ✅ Technical planning authorized
 
 Notes:
-All specification ambiguities resolved. 5 critical architectural decisions locked. Stakeholder decisions documented. Ready for Plan step.
+Technical design plan complete with all architectural decisions embedded. File structure specified. Composables defined. Testing and migration strategies provided. Ready for Tasks step.
 
 ---
 
