@@ -1,15 +1,91 @@
 {
   "name": "@zidney/ui-system",
-  "version": "0.0.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "Zidney shared UI system - Vue 3 + TypeScript components library",
+  "private": false,
   "type": "module",
-  "main": "src/index.ts",
+  "main": "./dist/ui-system.cjs",
+  "module": "./dist/ui-system.mjs",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist",
+    "src"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/ui-system.mjs",
+      "require": "./dist/ui-system.cjs"
+    },
+    "./components": {
+      "types": "./dist/components/index.d.ts",
+      "import": "./dist/components/index.mjs",
+      "require": "./dist/components/index.cjs"
+    },
+    "./composables": {
+      "types": "./dist/composables/index.d.ts",
+      "import": "./dist/composables/index.mjs",
+      "require": "./dist/composables/index.cjs"
+    },
+    "./utils": {
+      "types": "./dist/utils/index.d.ts",
+      "import": "./dist/utils/index.mjs",
+      "require": "./dist/utils/index.cjs"
+    },
+    "./types": {
+      "types": "./dist/types/index.d.ts",
+      "import": "./dist/types/index.mjs",
+      "require": "./dist/types/index.cjs"
+    },
+    "./styles": "./dist/styles/index.css"
+  },
   "scripts": {
-    "build": "bun build src/index.ts",
-    "test": "vitest"
+    "build": "vite build",
+    "build:watch": "vite build --watch",
+    "build:analyze": "vite build --sourcemap && bun analyze-bundle.ts",
+    "test": "vitest run",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "lint": "eslint src --ext .ts,.vue",
+    "type-check": "tsc --noEmit",
+    "preview": "vite preview"
+  },
+  "dependencies": {},
+  "peerDependencies": {
+    "vue": "^3.3.0",
+    "tailwindcss": "^3.3.0",
+    "autoprefixer": "^10.4.0"
   },
   "devDependencies": {
-    "typescript": "latest",
-    "vitest": "^1.0.0"
-  }
+    "@vue/test-utils": "^2.4.0",
+    "@vitejs/plugin-vue": "^4.4.0",
+    "@vitest/ui": "^0.34.0",
+    "autoprefixer": "^10.4.16",
+    "postcss": "^8.4.31",
+    "tailwindcss": "^3.3.5",
+    "terser": "^5.21.0",
+    "typescript": "^5.2.0",
+    "vite": "^4.5.0",
+    "vitest": "^0.34.0",
+    "vue": "^3.3.4"
+  },
+  "keywords": [
+    "vue",
+    "vue3",
+    "ui-system",
+    "components",
+    "typescript",
+    "tailwindcss",
+    "white-label",
+    "shared-ui"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zidney/zidney-app2"
+  },
+  "bugs": {
+    "url": "https://github.com/zidney/zidney-app2/issues"
+  },
+  "homepage": "https://github.com/zidney/zidney-app2/tree/main/packages/ui-system",
+  "license": "MIT"
 }
