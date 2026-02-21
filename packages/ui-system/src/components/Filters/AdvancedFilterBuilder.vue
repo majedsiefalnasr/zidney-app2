@@ -46,7 +46,7 @@
         class="filter-row"
       >
         <Select
-          v-model="filter.field"
+          v-model="filter.fieldId"
           @update:model-value="updateFilter(index)"
         >
           <SelectTrigger aria-label="Filter field" class="w-1/3">
@@ -132,17 +132,18 @@
 </template>
 
 <script setup lang="ts">
+import { Badge } from '@shadcn-vue/ui/badge'
+import { Button } from '@shadcn-vue/ui/button'
+import { Input } from '@shadcn-vue/ui/input'
 import {
-  Badge,
-  Button,
-  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@zidney/shadcn-vue'
+} from '@shadcn-vue/ui/select'
 import { computed, ref, watch } from 'vue'
+import type { Filter } from '../../types'
 import {
   checkUrlOverflow,
   serializeFilters,
@@ -176,12 +177,6 @@ interface FilterField {
   options?: Array<{ value: any; label: string }>
   placeholder?: string
   description?: string
-}
-
-interface Filter {
-  field: string
-  operator: FilterOperator
-  value: any
 }
 
 interface Props {
@@ -231,7 +226,7 @@ const isPersistedExternally = computed((): boolean => {
 
 const addFilter = (): void => {
   localFilters.value.push({
-    field: '',
+    fieldId: '',
     operator: 'eq',
     value: '',
   })
@@ -257,6 +252,8 @@ const triggerStorageFallback = (): void => {
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 .warning-banner {
   @apply p-3 bg-yellow-50 border border-yellow-200 rounded-md;
 }

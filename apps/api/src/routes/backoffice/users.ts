@@ -1,7 +1,9 @@
+import { createLogger } from '@zidney/logging'
 import { Context, Hono } from 'hono'
 import { toLicenseError } from '../../responses/license-error-handler'
-import { logger } from '../../services/logger'
 import { createUserWithLimitCheck } from '../../utils/transaction-wrapper'
+
+const logger = createLogger('backoffice-users')
 
 /**
  * Backoffice Users Router

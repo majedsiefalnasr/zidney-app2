@@ -1,5 +1,7 @@
-import { logger } from '../../infrastructure/logger'
+import { createLogger } from '@zidney/logging'
 import { redis } from '../../infrastructure/redis'
+
+const logger = createLogger('ws-rate-limiter')
 
 /**
  * T034: WebSocket message rate limiting using sliding window algorithm
@@ -39,13 +41,13 @@ export class WebSocketRateLimiter {
 
     try {
       // Remove old messages outside the 60-second window
-      await redis.zremrangebyscore(key, 0, windowStart)
+      await redis.zRemRangeByScore(key, 0, windowStart)
 
       // Count messages in current 60-second window
-      const messagesIn60s = await redis.zcard(key)
+      const messagesIn60s = await redis.zCard(key)
 
       // Count messages in last 1 second (burst window)
-      const messagesIn1s = await redis.zcount(key, burstWindowStart, now)
+      const messagesIn1s = await redis.zCount(key, burstWindowStart, now)
 
       // Check burst limit first (stricter)
       if (messagesIn1s >= this.maxBurstRate) {
@@ -74,11 +76,17 @@ export class WebSocketRateLimiter {
         })
 
         // Calculate retry-after: when oldest message expires
-        const oldestMessage = await redis.zrange(key, 0, 0, 'WITHSCORES')
-        const retryAfterMs =
-          oldestMessage.length >= 2
-            ? Number(oldestMessage[1]) + this.windowSizeMs - now
-            : this.windowSizeMs
+        // Get the oldest message (lowest score) using zRange with index
+        const oldestMessage = await redis.zRange(key, 0, 0)
+        // If we have messages, get the score of the oldest one
+        let retryAfterMs = this.windowSizeMs
+        if (oldestMessage.length >= 1) {
+          // Get the score of the oldest message
+          const score = await redis.zScore(key, oldestMessage[0])
+          if (score !== null) {
+            retryAfterMs = Number(score) + this.windowSizeMs - now
+          }
+        }
 
         return {
           allowed: false,
@@ -89,7 +97,7 @@ export class WebSocketRateLimiter {
       }
 
       // Add message to window
-      await redis.zadd(key, now, `${now}:${Math.random()}`)
+      await redis.zAdd(key, { score: now, value: `${now}:${Math.random()}` })
 
       // Set key expiration (60 seconds past last message)
       await redis.expire(key, 70)
@@ -147,8 +155,8 @@ export class WebSocketRateLimiter {
     const key = `ws:msg:${userId}:${attemptId}`
 
     try {
-      const messagesIn60s = await redis.zcount(key, windowStart, now)
-      const messagesIn1s = await redis.zcount(key, burstWindowStart, now)
+      const messagesIn60s = await redis.zCount(key, windowStart, now)
+      const messagesIn1s = await redis.zCount(key, burstWindowStart, now)
 
       return {
         allowed:

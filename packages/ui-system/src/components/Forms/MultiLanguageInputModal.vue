@@ -4,7 +4,10 @@
       <DialogHeader>
         <DialogTitle>{{ title }}</DialogTitle>
         <div class="coverage-bar mt-2">
-          <div class="coverage-fill" :style="{ width: coveragePercent + '%' }" />
+          <div
+            class="coverage-fill"
+            :style="{ width: coveragePercent + '%' }"
+          />
         </div>
         <p class="coverage-text text-xs text-gray-500 mt-1">
           {{ filledLanguagesCount }} / {{ languages.length }} languages filled
@@ -40,15 +43,25 @@
           @input="validateLanguage(activeLanguage)"
         />
         <div v-if="languageErrors[activeLanguage]" class="space-y-1 mt-2">
-          <p v-for="(error, idx) in languageErrors[activeLanguage]" :key="idx" class="text-sm text-red-500">
+          <p
+            v-for="(error, idx) in languageErrors[activeLanguage]"
+            :key="idx"
+            class="text-sm text-red-500"
+          >
             {{ error }}
           </p>
         </div>
       </div>
 
       <DialogFooter class="mt-6">
-        <Button variant="outline" @click="$emit('cancel')" :disabled="isLoading">Cancel</Button>
-        <Button @click="$emit('submit')" :disabled="isLoading || !isValid" class="gap-2">
+        <Button variant="outline" @click="$emit('cancel')" :disabled="isLoading"
+          >Cancel</Button
+        >
+        <Button
+          @click="$emit('submit')"
+          :disabled="isLoading || !isValid"
+          class="gap-2"
+        >
           <Loader v-if="isLoading" class="w-4 h-4 animate-spin" />
           Save All Languages
         </Button>
@@ -58,7 +71,16 @@
 </template>
 
 <script setup lang="ts">
-import { Button, Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle, Input, Loader, Textarea } from '@zidney/shadcn-vue'
+import { Button } from '@shadcn-vue/ui/button'
+import {
+  Dialog,
+  DialogContent,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@shadcn-vue/ui/dialog'
+import { Input } from '@shadcn-vue/ui/input'
+import { Textarea } from '@shadcn-vue/ui/textarea'
 import { computed, ref, watch } from 'vue'
 
 interface Props {
@@ -73,7 +95,7 @@ interface Props {
   maxLength?: number
 }
 
-withDefaults(defineProps<Props>(), {
+const props = withDefaults(defineProps<Props>(), {
   requiredLanguages: () => [],
   isLoading: false,
   isMultiline: true,
@@ -93,11 +115,13 @@ const languageErrors = ref<Record<string, string[]>>({})
 const filteredLanguages = computed(() => props.languages)
 
 const filledLanguagesCount = computed(
-  () => props.languages.filter(lang => formValues.value[lang]?.trim()).length
+  () => props.languages.filter((lang) => formValues.value[lang]?.trim()).length
 )
 
-const coveragePercent = computed(
-  () => props.languages.length > 0 ? Math.round((filledLanguagesCount.value / props.languages.length) * 100) : 0
+const coveragePercent = computed(() =>
+  props.languages.length > 0
+    ? Math.round((filledLanguagesCount.value / props.languages.length) * 100)
+    : 0
 )
 
 const isValid = computed(() => {
@@ -129,7 +153,9 @@ watch(
   () => props.isOpen,
   (newIsOpen) => {
     if (newIsOpen) {
-      formValues.value = props.initialValues ? { ...props.initialValues } : props.languages.reduce((acc, lang) => ({ ...acc, [lang]: '' }), {})
+      formValues.value = props.initialValues
+        ? { ...props.initialValues }
+        : props.languages.reduce((acc, lang) => ({ ...acc, [lang]: '' }), {})
       activeLanguage.value = props.languages[0] || ''
       for (const lang of props.languages) {
         validateLanguage(lang)
@@ -140,6 +166,8 @@ watch(
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 .coverage-bar {
   @apply w-full h-2 bg-gray-200 rounded-full overflow-hidden;
 }
@@ -147,10 +175,7 @@ watch(
 .coverage-fill {
   @apply h-full bg-blue-500 transition-all duration-300;
 }
-</style>
-</script>
 
-<style scoped>
 .multi-language-input-modal {
   position: fixed;
   inset: 0;

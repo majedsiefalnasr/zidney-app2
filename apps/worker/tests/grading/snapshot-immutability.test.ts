@@ -16,8 +16,8 @@
  * - Input snapshots remain unchanged
  */
 
+import type { QuestionSnapshot, UserAnswer } from '@zidney/types/attempt'
 import { beforeAll, describe, expect, test } from 'vitest'
-import type { QuestionSnapshot, UserAnswer } from '../../../types/src/attempt'
 import { computeScore } from '../../src/grading/score-engine'
 
 describe('Snapshot Immutability (ADR-0002)', () => {

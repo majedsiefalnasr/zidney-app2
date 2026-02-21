@@ -1,74 +1,102 @@
 /**
  * Rate limiter middleware (Task 21)
  * Limits upgrade attempts to 5 per hour per workspace
+ *
+ * Purpose: Enforce rate limits on schema upgrade endpoints
+ * Layer: API Middleware
+ * Transactional: No (read-only check)
+ * Idempotent: Yes
  */
 
-import { NextFunction, Request, Response } from 'express'
-import { Database } from 'pg'
+import { createLogger } from '@zidney/logging'
+import type { Context, MiddlewareHandler, Next } from 'hono'
+import { Pool } from 'pg'
+
+const logger = createLogger('rate-limiter-upgrade')
+
+/**
+ * Rate limit configuration for upgrades
+ */
+const UPGRADE_RATE_LIMIT = {
+  maxAttempts: 5,
+  windowHours: 1,
+}
 
 /**
  * Create rate limiter middleware for upgrade endpoints
+ *
+ * @param masterDb - Master database pool (MMC database)
+ * @returns Middleware handler function
  */
-export function createRateLimiterMiddleware(masterDb: Database) {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    const { workspace_id } = req.params
-    const correlation_id =
-      req.headers['x-correlation-id'] || crypto.randomUUID()
+export function createRateLimiterMiddleware(masterDb: Pool): MiddlewareHandler {
+  return async (c: Context, next: Next) => {
+    const workspaceId = c.req.param('workspace_id')
+    const correlationId = c.get('correlation_id') || crypto.randomUUID()
+
+    if (!workspaceId) {
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'MISSING_WORKSPACE_ID',
+            message: 'Workspace ID is required',
+          },
+        },
+        400
+      )
+    }
 
     try {
       // Query migration_registry for attempts in last hour
       const result = await masterDb.query(
         `SELECT COUNT(*) as count FROM migration_registry 
          WHERE workspace_id = $1 AND applied_at > now() - interval '1 hour'`,
-        [workspace_id]
+        [workspaceId]
       )
 
       const attemptCount = parseInt(result.rows[0].count, 10)
-      const limit = 5
+      const limit = UPGRADE_RATE_LIMIT.maxAttempts
 
       if (attemptCount >= limit) {
-        console.log(
-          JSON.stringify({
-            level: 'WARN',
-            service: 'rate-limiter',
-            event: 'rate_limit_exceeded',
-            workspace_id,
-            correlation_id,
-            attempts: attemptCount,
-            limit,
-            timestamp: new Date().toISOString(),
-          })
-        )
-
-        return res.status(429).json({
-          success: false,
-          data: null,
-          error: {
-            code: 'RATE_LIMIT_EXCEEDED',
-            message: `Maximum ${limit} upgrade attempts per hour. Try again later.`,
-          },
-        })
-      }
-
-      console.log(
-        JSON.stringify({
-          level: 'DEBUG',
-          service: 'rate-limiter',
-          event: 'rate_limit_check_passed',
-          workspace_id,
-          correlation_id,
+        logger.warn('Rate limit exceeded for upgrade attempts', {
+          workspace_id: workspaceId,
+          correlation_id: correlationId,
           attempts: attemptCount,
           limit,
-          timestamp: new Date().toISOString(),
         })
-      )
 
-      next()
-    } catch (err: any) {
+        return c.json(
+          {
+            success: false,
+            data: null,
+            error: {
+              code: 'RATE_LIMIT_EXCEEDED',
+              message: `Maximum ${limit} upgrade attempts per hour. Try again later.`,
+            },
+          },
+          429
+        )
+      }
+
+      logger.debug('Rate limit check passed', {
+        workspace_id: workspaceId,
+        correlation_id: correlationId,
+        attempts: attemptCount,
+        limit,
+      })
+
+      await next()
+    } catch (error) {
       // On error, allow through (fail open for availability)
-      next()
+      logger.error('Rate limit check error', {
+        workspace_id: workspaceId,
+        correlation_id: correlationId,
+        error: error instanceof Error ? error.message : String(error),
+      })
+      await next()
     }
   }
 }
 
-import crypto from 'crypto'
+export default createRateLimiterMiddleware

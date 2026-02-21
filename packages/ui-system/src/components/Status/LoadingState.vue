@@ -1,5 +1,13 @@
 <template>
-  <div :class="['loading-state flex flex-col gap-6 p-8', { 'min-h-screen flex-col justify-center': fullHeight, 'min-h-48': !fullHeight }]">
+  <div
+    :class="[
+      'loading-state flex flex-col gap-6 p-8',
+      {
+        'min-h-screen flex-col justify-center': fullHeight,
+        'min-h-48': !fullHeight,
+      },
+    ]"
+  >
     <!-- Skeleton loaders -->
     <div v-for="i in 3" :key="i" class="loading-skeleton space-y-4">
       <div class="skeleton-line skeleton-short" />
@@ -8,7 +16,9 @@
     </div>
 
     <!-- Optional message -->
-    <p v-if="message" class="text-center text-gray-600 text-sm mt-8">{{ message }}</p>
+    <p v-if="message" class="text-center text-gray-600 text-sm mt-8">
+      {{ message }}
+    </p>
   </div>
 </template>
 
@@ -24,8 +34,10 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 .skeleton-line {
-  @apply h-4 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 rounded-sm animate-pulse;
+  @apply h-4 bg-linear-to-r from-gray-100 via-gray-50 to-gray-100 rounded-sm animate-pulse;
 }
 
 .skeleton-short {

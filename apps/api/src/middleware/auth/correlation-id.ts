@@ -50,7 +50,7 @@ export async function correlationIdMiddleware(c: Context, next: Next) {
   const correlationId = clientProvidedId || uuidv4()
 
   // Validate format: allow UUIDs or alphanumeric+dash (max 50 chars)
-  const isValidFormat = /^[a-zA-Z0-9\-]{8,50}$/.test(correlationId)
+  const isValidFormat = /^[a-zA-Z0-9-]{8,50}$/.test(correlationId)
 
   if (!isValidFormat) {
     // Invalid format provided, generate new one

@@ -1,4 +1,6 @@
-import { logger } from '../../infrastructure/logger'
+import { createLogger } from '@zidney/logging'
+
+const logger = createLogger('ws-heartbeat')
 
 /**
  * T035: WebSocket heartbeat monitoring

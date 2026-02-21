@@ -22,7 +22,7 @@
  * 8. Handle failures with retry strategy (T040)
  */
 
-import { Attempt, AttemptStatus } from '@types/attempt'
+import { Attempt, AttemptStatus } from '@zidney/types/attempt'
 import { Pool } from 'pg'
 import { logger } from '../services/logger'
 import { gradeAttempt } from './grader'

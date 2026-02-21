@@ -78,8 +78,6 @@ export async function checkIdempotency(
   redis: RedisClient | null,
   pool: Pool
 ): Promise<IdempotencyRecord | null> {
-  const logger_fn = createLogger('checkIdempotency')
-
   // Generate or use provided key
   const key = idempotency_key || uuidv4()
   const cacheKey = generateIdempotencyKey(workspace_id, key)
@@ -90,7 +88,7 @@ export async function checkIdempotency(
       const cached = await redis.get(cacheKey)
       if (cached) {
         const record = JSON.parse(cached) as IdempotencyRecord
-        logger_fn.debug('Idempotency hit in Redis cache', {
+        logger.debug('Idempotency hit in Redis cache', {
           workspace_id,
           task_id: record.task_id,
           status: record.status,
@@ -108,7 +106,7 @@ export async function checkIdempotency(
     if (result.rows.length > 0) {
       // Schema already initialized
       const row = result.rows[0]
-      logger_fn.debug('Schema already initialized (DB check)', {
+      logger.debug('Schema already initialized (DB check)', {
         workspace_id,
         version: row.version,
         applied_at: row.applied_at,
@@ -127,14 +125,14 @@ export async function checkIdempotency(
     }
 
     // New request - not found in either cache or DB
-    logger_fn.debug('Idempotency check passed - new request', {
+    logger.debug('Idempotency check passed - new request', {
       workspace_id,
       idempotency_key: key,
     })
 
     return null
   } catch (error) {
-    logger_fn.error('Idempotency check failed', {
+    logger.error('Idempotency check failed', {
       workspace_id,
       error: error instanceof Error ? error.message : String(error),
     })
@@ -158,8 +156,6 @@ export async function storeIdempotencyRecord(
   redis: RedisClient | null,
   pool: Pool | null
 ): Promise<void> {
-  const logger_fn = createLogger('storeIdempotencyRecord')
-
   const record: IdempotencyRecord = {
     workspace_id,
     idempotency_key,
@@ -178,7 +174,7 @@ export async function storeIdempotencyRecord(
         'EX',
         IDEMPOTENCY_CACHE_TTL
       )
-      logger_fn.debug('Idempotency record stored in Redis', {
+      logger.debug('Idempotency record stored in Redis', {
         workspace_id,
         task_id,
         ttl: IDEMPOTENCY_CACHE_TTL,
@@ -194,7 +190,7 @@ export async function storeIdempotencyRecord(
       // );
     }
   } catch (error) {
-    logger_fn.error('Failed to store idempotency record', {
+    logger.error('Failed to store idempotency record', {
       workspace_id,
       task_id,
       error: error instanceof Error ? error.message : String(error),
@@ -221,8 +217,6 @@ export async function markIdempotencyComplete(
   response: any,
   redis: RedisClient | null
 ): Promise<void> {
-  const logger_fn = createLogger('markIdempotencyComplete')
-
   try {
     if (redis) {
       const cacheKey = generateIdempotencyKey(workspace_id, idempotency_key)
@@ -245,14 +239,14 @@ export async function markIdempotencyComplete(
         IDEMPOTENCY_CACHE_TTL
       )
 
-      logger_fn.debug('Idempotency record completed', {
+      logger.debug('Idempotency record completed', {
         workspace_id,
         task_id,
         status,
       })
     }
   } catch (error) {
-    logger_fn.error('Failed to mark idempotency complete', {
+    logger.error('Failed to mark idempotency complete', {
       workspace_id,
       task_id,
       error: error instanceof Error ? error.message : String(error),

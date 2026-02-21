@@ -145,7 +145,6 @@ describe('Schema Provisioning - Load Testing', () => {
 
           // Simulate work
           await new Promise((resolve) => setTimeout(resolve, 100))
-
           ;(client as any).release?.()
         } catch (error) {
           // Pool overflow scenario: Connection queued or rejected

@@ -11,8 +11,8 @@
  * - Determinism guaranteed for grading pipeline
  */
 
+import type { QuestionSnapshot, UserAnswer } from '@zidney/types/attempt'
 import { beforeAll, describe, expect, test } from 'vitest'
-import type { QuestionSnapshot, UserAnswer } from '../../../types/src/attempt'
 import { computeScore, scoreQuestion } from '../../src/grading/score-engine'
 
 describe('Score Engine Determinism', () => {

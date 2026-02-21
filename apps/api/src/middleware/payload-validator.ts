@@ -1,5 +1,7 @@
+import { createLogger } from '@zidney/logging'
 import { Hono } from 'hono'
-import { logger } from '../../infrastructure/logger'
+
+const logger = createLogger('payload-validator')
 
 /**
  * T041: Payload size and format validation middleware

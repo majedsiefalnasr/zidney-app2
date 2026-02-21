@@ -23,8 +23,6 @@ import {
   type InitTenantSchemaResult,
 } from '../tasks/init-tenant-schema'
 
-const logger = createLogger('TaskQueueProcessor')
-
 export interface QueuedTask {
   id: string
   type: string
@@ -77,11 +75,11 @@ export class TaskQueueProcessor {
    * @returns Updated task with result status
    */
   async processTask(task: QueuedTask): Promise<QueuedTask> {
-    const logger_task = createLogger(`TaskProcessor[${task.id}]`)
+    const logger = createLogger(`TaskProcessor[${task.id}]`)
     const startTime = Date.now()
 
     try {
-      logger_task.info('Processing task', {
+      logger.info('Processing task', {
         type: task.type,
         attempt: task.attempt,
         correlation_id: task.correlationId,
@@ -104,7 +102,7 @@ export class TaskQueueProcessor {
       // Determine next action
       const action = determineTaskAction(task.type, result, task.attempt)
 
-      logger_task.info('Task processed', {
+      logger.info('Task processed', {
         type: task.type,
         action,
         duration_ms: duration,
@@ -114,21 +112,21 @@ export class TaskQueueProcessor {
       // Route based on action
       if (action === 'SUCCESS') {
         task.status = 'SUCCESS'
-        logger_task.info('Task completed successfully', {
+        logger.info('Task completed successfully', {
           duration_ms: duration,
         })
         return task
       }
 
       if (action === 'DLQ') {
-        return this.routeToDLQ(task, result, logger_task)
+        return this.routeToDLQ(task, result, logger)
       }
 
       if (action === 'RETRY') {
-        return this.scheduleRetry(task, result, logger_task)
+        return this.scheduleRetry(task, result, logger)
       }
     } catch (error) {
-      logger_task.error('Task processing failed', {
+      logger.error('Task processing failed', {
         error: error instanceof Error ? error.message : String(error),
         attempt: task.attempt,
       })
@@ -139,7 +137,7 @@ export class TaskQueueProcessor {
           status: 'FAILED',
           error: error instanceof Error ? error.message : String(error),
         },
-        logger_task
+        logger
       )
     }
 
@@ -156,7 +154,7 @@ export class TaskQueueProcessor {
     const { workspace_id } = payload
 
     // Get or create tenant pool
-    let pool = this.tenantPoolMap.get(workspace_id)
+    const pool = this.tenantPoolMap.get(workspace_id)
     if (!pool) {
       // In production: retrieve pool from resolver
       // For now: create new pool (should be injected from resolver)
@@ -181,7 +179,7 @@ export class TaskQueueProcessor {
   private async routeToDLQ(
     task: QueuedTask,
     result: any,
-    logger_task: any
+    logger: any
   ): Promise<QueuedTask> {
     const dlqMessage = createDLQMessage(
       task.type,
@@ -192,7 +190,7 @@ export class TaskQueueProcessor {
       task.attempt
     )
 
-    logger_task.critical('Task escalated to DLQ', {
+    logger.critical('Task escalated to DLQ', {
       alert_level: dlqMessage.alertLevel,
       requires_manual_review: dlqMessage.requiresManualReview,
     })
@@ -217,13 +215,13 @@ export class TaskQueueProcessor {
   private async scheduleRetry(
     task: QueuedTask,
     result: any,
-    logger_task: any
+    logger: any
   ): Promise<QueuedTask> {
     const backoffMs = getRetryDelay(task.type, task.attempt)
     const nextAttempt = task.attempt + 1
     const nextRetryAt = new Date(Date.now() + backoffMs).toISOString()
 
-    logger_task.warn('Task scheduled for retry', {
+    logger.warn('Task scheduled for retry', {
       attempt: task.attempt,
       next_attempt: nextAttempt,
       backoff_ms: backoffMs,
@@ -232,7 +230,7 @@ export class TaskQueueProcessor {
 
     // Check if ops should be alerted (e.g., after 2 failures)
     if (shouldAlertOps(task.type, result, task.attempt)) {
-      logger_task.warn('Ops alert triggered for retry', {
+      logger.warn('Ops alert triggered for retry', {
         attempt: task.attempt,
         reason: result.error,
       })

@@ -12,8 +12,8 @@
  * - Provide safe async accessor for tenant databases
  */
 
+import { createLogger } from '@zidney/logging'
 import { Pool, PoolClient } from 'pg'
-import { createLogger } from './logging'
 
 const logger = createLogger('tenant-pool')
 

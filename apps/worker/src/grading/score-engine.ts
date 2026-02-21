@@ -19,13 +19,13 @@
  * ADRs: ADR-0002 (snapshot model)
  */
 
+import { createLogger } from '@zidney/logging'
 import {
   QuestionResult,
   QuestionSnapshot,
   ResultSnapshot,
   UserAnswer,
-} from '../../types/src/attempt'
-import { createLogger } from '../logging'
+} from '@zidney/types/attempt'
 
 const logger = createLogger('score-engine')
 

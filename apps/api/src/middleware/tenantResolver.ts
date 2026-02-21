@@ -9,9 +9,11 @@
  * Stage: STAGE_05_TENANT_PROVISIONING_SERVICE
  */
 
-import { NextFunction, Request, Response } from 'express'
+import { createLogger } from '@zidney/logging'
+import type { Context, MiddlewareHandler, Next } from 'hono'
 import { Pool } from 'pg'
-import { v4 as uuidv4 } from 'uuid'
+
+const logger = createLogger('tenant-resolver')
 
 export interface TenantContext {
   slug: string
@@ -39,9 +41,9 @@ export class TenantResolver {
    * Subdomain format: acme-university.zidney.app → acme-university
    * Path format: /workspace/acme-university/exams → acme-university
    */
-  private extractSlug(req: Request): string | null {
+  private extractSlug(c: Context): string | null {
     // Try subdomain extraction first
-    const host = req.hostname
+    const host = c.req.header('host')
     if (host && host !== 'localhost') {
       const parts = host.split('.')
       if (parts.length >= 3) {
@@ -51,14 +53,16 @@ export class TenantResolver {
     }
 
     // Try path extraction
-    const path_match = req.path.match(/^\/workspace\/([a-z0-9-]+)/)
+    const path = c.req.path
+    const path_match = path.match(/^\/workspace\/([a-z0-9-]+)/)
     if (path_match) {
       return path_match[1]
     }
 
     // Try URL parameter
-    if (req.params.workspace_slug) {
-      return req.params.workspace_slug
+    const workspaceSlug = c.req.param('workspace_slug')
+    if (workspaceSlug) {
+      return workspaceSlug
     }
 
     return null
@@ -106,7 +110,9 @@ export class TenantResolver {
         client.release()
       }
     } catch (error) {
-      console.error(`Failed to query tenants_registry:`, error)
+      logger.error('Failed to query tenants_registry', {
+        error: error instanceof Error ? error.message : String(error),
+      })
       return null
     }
   }
@@ -135,72 +141,91 @@ export class TenantResolver {
   }
 
   /**
-   * Middleware function for Express
-   * Attaches tenant context to request  or returns error
+   * Middleware function for Hono
+   * Attaches tenant context to request or returns error
    */
-  middleware() {
-    return async (req: Request, res: Response, next: NextFunction) => {
+  middleware(): MiddlewareHandler {
+    return async (c: Context, next: Next) => {
       try {
         // Extract slug
-        const slug = this.extractSlug(req)
+        const slug = this.extractSlug(c)
         if (!slug) {
-          return res.status(400).json({
-            success: false,
-            data: null,
-            error: {
-              code: 'INVALID_REQUEST',
-              message: 'Missing or invalid workspace slug',
+          return c.json(
+            {
+              success: false,
+              data: null,
+              error: {
+                code: 'INVALID_REQUEST',
+                message: 'Missing or invalid workspace slug',
+              },
             },
-          })
+            400
+          )
         }
 
         // Query registry
         const registry_entry = await this.getRegistryEntry(slug)
         if (!registry_entry) {
-          return res.status(404).json({
-            success: false,
-            data: null,
-            error: { code: 'WS_001', message: 'Workspace not found' },
-          })
+          return c.json(
+            {
+              success: false,
+              data: null,
+              error: { code: 'WS_001', message: 'Workspace not found' },
+            },
+            404
+          )
         }
 
         // Get connection pool
         const pool = this.getPool(slug)
         if (!pool) {
           // Pool not registered yet (provisioning in progress?)
-          return res.status(503).json({
-            success: false,
-            data: null,
-            error: {
-              code: 'WS_002',
-              message:
-                'Workspace is still provisioning, please try again later',
+          return c.json(
+            {
+              success: false,
+              data: null,
+              error: {
+                code: 'WS_002',
+                message:
+                  'Workspace is still provisioning, please try again later',
+              },
             },
-          })
+            503
+          )
         }
 
         // Attach tenant context to request
-        ;(req as any).tenant = {
+        c.set('tenant', {
           slug,
           database_name: registry_entry.database_name,
           pool,
           license_id: registry_entry.license_id,
           organization_id: registry_entry.organization_id,
           schema_version: registry_entry.expected_schema_version,
-        } as TenantContext
+        } as TenantContext)
 
         // Propagate or generate correlation ID
-        ;(req as any).correlation_id =
-          req.headers['x-correlation-id'] || uuidv4()
+        c.set(
+          'correlation_id',
+          c.req.header('x-correlation-id') || crypto.randomUUID()
+        )
 
-        next()
+        return next()
       } catch (error) {
-        console.error(`TenantResolver error:`, error)
-        return res.status(500).json({
-          success: false,
-          data: null,
-          error: { code: 'SYSTEM_ERROR', message: 'Failed to resolve tenant' },
+        logger.error('TenantResolver error', {
+          error: error instanceof Error ? error.message : String(error),
         })
+        return c.json(
+          {
+            success: false,
+            data: null,
+            error: {
+              code: 'SYSTEM_ERROR',
+              message: 'Failed to resolve tenant',
+            },
+          },
+          500
+        )
       }
     }
   }
@@ -220,7 +245,10 @@ export class TenantResolver {
       try {
         await pool.end()
       } catch (error) {
-        console.error(`Failed to close pool for ${slug}:`, error)
+        logger.error('Failed to close pool', {
+          slug,
+          error: error instanceof Error ? error.message : String(error),
+        })
       }
     }
     this.pool_map.clear()

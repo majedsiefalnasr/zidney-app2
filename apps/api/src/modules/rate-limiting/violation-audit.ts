@@ -1,5 +1,7 @@
-import { logger } from '../../infrastructure/logger'
+import { createLogger } from '@zidney/logging'
 import { redis } from '../../infrastructure/redis'
+
+const logger = createLogger('rate-limiting')
 
 /**
  * T070: Rate Limit Violation Audit
@@ -72,8 +74,8 @@ export async function logRateLimitViolation(params: {
   const keyViolation = `ratelimit:violations:${params.limitType}:${params.identifier}`
   const violationData = JSON.stringify(violation)
 
-  await redis.lpush(keyViolation, violationData)
-  await redis.ltrim(keyViolation, 0, 99) // Keep last 100 violations
+  await redis.lPush(keyViolation, violationData)
+  await redis.lTrim(keyViolation, 0, 99) // Keep last 100 violations
   await redis.expire(keyViolation, 86400) // 24-hour retention
 
   // Update pattern tracking
@@ -85,7 +87,10 @@ export async function logRateLimitViolation(params: {
     severity,
   }
 
-  await redis.hset(keyPattern, params.identifier, JSON.stringify(patternData))
+  await redis.hSet(keyPattern, {
+    field: params.identifier,
+    value: JSON.stringify(patternData),
+  })
   await redis.expire(keyPattern, 86400)
 
   // Structured logging
@@ -128,7 +133,7 @@ export async function getRecentViolations(
 ): Promise<RateLimitViolation[]> {
   const key = `ratelimit:violations:${limitType}:${identifier}`
 
-  const data = await redis.lrange(key, 0, limit - 1)
+  const data = await redis.lRange(key, 0, limit - 1)
 
   return data.map((item: string) => JSON.parse(item))
 }
@@ -141,7 +146,7 @@ export async function getViolationPatterns(
 ): Promise<Map<string, any>> {
   const key = `ratelimit:patterns:${limitType}`
 
-  const data = await redis.hgetall(key)
+  const data = await redis.hGetAll(key)
 
   const patterns = new Map()
   for (const [identifier, dataStr] of Object.entries(data)) {
@@ -215,7 +220,7 @@ export async function clearViolationHistory(
   const keyPattern = `ratelimit:patterns:${limitType}`
 
   await redis.del(keyViolation)
-  await redis.hdel(keyPattern, identifier)
+  await redis.hDel(keyPattern, identifier)
 
   logger.info(`rate_limit_violation_history_cleared`, {
     limit_type: limitType,

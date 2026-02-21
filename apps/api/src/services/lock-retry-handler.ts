@@ -28,8 +28,8 @@
  * ```
  */
 
+import { createLogger } from '@zidney/logging'
 import { Pool, PoolClient } from 'pg'
-import Logger from '../utils/logger'
 
 /**
  * Options for lock retry execution
@@ -65,7 +65,7 @@ export async function executeWithLockRetry<T>(
   operation: (attempt: any) => Promise<T>,
   options: LockRetryOptions = {}
 ): Promise<T> {
-  const logger = new Logger('lock-retry-handler')
+  const logger = createLogger('lock-retry-handler')
   const maxRetries = options.maxRetries ?? 3
   const initialBackoffMs = options.initialBackoffMs ?? 100
   const correlationId = options.correlationId || 'unknown'

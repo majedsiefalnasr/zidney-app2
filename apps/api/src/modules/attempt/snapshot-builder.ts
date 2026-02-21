@@ -21,13 +21,13 @@
  * ADRs: ADR-0002 (snapshot model)
  */
 
+import { createLogger } from '@zidney/logging'
 import {
   FlagsSnapshot,
   GradingConfigSnapshot,
   QuestionSnapshot,
   QuestionSnapshotContainer,
-} from '../../types/src/attempt'
-import { createLogger } from '../logging'
+} from '@zidney/types/attempt'
 
 const logger = createLogger('snapshot-builder')
 
@@ -282,9 +282,9 @@ function validatePoints(value: number): number {
  */
 function createDeterministicRng(seed: string): () => number {
   // Convert seed to number
-  let m = 0x80000000 // 2^31
-  let a = 1103515245
-  let c = 12345
+  const m = 0x80000000 // 2^31
+  const a = 1103515245
+  const c = 12345
   let state = parseInt(seed.substring(0, 8), 16) || hashString(seed)
 
   return () => {

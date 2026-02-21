@@ -315,15 +315,10 @@ export function createErrorResponse(
 }
 
 /**
- * Error handler middleware
+ * Legacy error handler middleware for Express-style error handling
  * Maps custom errors to standard responses
  */
-export function errorHandlerMiddleware(
-  err: any,
-  req: any,
-  res: any,
-  next: any
-) {
+export function legacyErrorHandlerMiddleware(err: any, req: any, res: any) {
   const correlation_id = req.headers['x-correlation-id'] || 'unknown'
 
   // Extract error code and message
@@ -346,5 +341,6 @@ export function errorHandlerMiddleware(
   )
 
   // Send response
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
   res.status(statusCode).json(createErrorResponse(errorCode, message))
 }

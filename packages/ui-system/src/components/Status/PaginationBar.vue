@@ -64,15 +64,15 @@
 </template>
 
 <script setup lang="ts">
+import { Button } from '@shadcn-vue/ui/button'
+import { Input } from '@shadcn-vue/ui/input'
 import {
-  Button,
-  Input,
   Select,
   SelectContent,
   SelectItem,
   SelectTrigger,
   SelectValue,
-} from '@zidney/shadcn-vue'
+} from '@shadcn-vue/ui/select'
 import { ref, watch } from 'vue'
 
 interface Props {
@@ -139,5 +139,7 @@ const handlePageSizeChange = (): void => {
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 /* Styles handled by Tailwind utilities and shadcn-vue components */
 </style>

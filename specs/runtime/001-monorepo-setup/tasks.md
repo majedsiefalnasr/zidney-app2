@@ -98,7 +98,7 @@ Examples of foundational tasks (adjust based on your project):
 ### Implementation for User Story 2
 
 - [x] T018 [US2] Create tsconfig.base.json with strict settings
-- [x] T019 [US2] Configure path aliases (@domain/_, @types/_, etc.)
+- [x] T019 [US2] Configure path aliases (@zidney/domain-core/_, @types/_, etc.)
 - [x] T020 [US2] Setup TypeScript configuration for each app and package
 - [x] T021 [US2] Configure Vitest for TypeScript testing
 - [x] T022 [US2] Add type checking to pre-commit hooks

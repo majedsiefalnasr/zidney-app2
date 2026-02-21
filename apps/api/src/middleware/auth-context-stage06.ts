@@ -19,8 +19,8 @@
  * - All user context thread-local (no global state)
  */
 
+import { Logger } from '@zidney/logging'
 import { Context, MiddlewareHandler } from 'hono'
-import { Logger } from '../utils/logger'
 
 export interface UserContextStage06 {
   id: string
@@ -43,8 +43,7 @@ export interface UserContextStage06 {
  * - c.get('user'): UserContextStage06
  */
 export function createAuthContextMiddlewareStage06(
-  logger: Logger,
-  jwtSecret?: string
+  logger: Logger
 ): MiddlewareHandler {
   return async (c: Context, next) => {
     const correlation_id = c.get('correlationId') || 'unknown'
@@ -91,7 +90,7 @@ export function createAuthContextMiddlewareStage06(
 
         try {
           decoded = JSON.parse(Buffer.from(payload, 'base64').toString('utf-8'))
-        } catch (e) {
+        } catch {
           throw new Error('Invalid JWT payload')
         }
       } catch (jwt_error) {

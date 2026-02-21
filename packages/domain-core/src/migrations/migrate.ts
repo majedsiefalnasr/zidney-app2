@@ -10,11 +10,11 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
+import { createLogger } from '@zidney/logging/logger'
 import { createHash } from 'crypto'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import type { Pool, QueryResult } from 'pg'
-import { createLogger } from '../logging/logger'
 
 const logger = createLogger('migrations')
 

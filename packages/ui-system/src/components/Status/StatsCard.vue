@@ -10,7 +10,7 @@
     <!-- Loading state -->
     <div
       v-if="isLoading"
-      class="h-24 bg-gradient-to-r from-gray-100 via-gray-50 to-gray-100 rounded-sm animate-pulse"
+      class="h-24 bg-linear-to-r from-gray-100 via-gray-50 to-gray-100 rounded-sm animate-pulse"
     />
 
     <!-- Content -->
@@ -46,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { Card } from '@zidney/shadcn-vue'
+import { Card } from '@shadcn-vue/ui/card'
 
 interface Trend {
   direction: 'up' | 'down'
@@ -68,5 +68,7 @@ withDefaults(defineProps<Props>(), {
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 /* Styles handled by Tailwind utilities and shadcn-vue Card */
 </style>

@@ -26,10 +26,10 @@
  * - Error responses normalized to RFC 7807 format
  */
 
+import { Logger } from '@zidney/logging'
 import { Hono } from 'hono'
-import Logger from '../utils/logger'
-import { getAttemptResultHandler } from './attempts/result'
-import { submitAttemptHandler } from './attempts/submit'
+import { getAttemptResultHandler } from './result'
+import { submitAttemptHandler } from './submit'
 
 /**
  * Register Phase D (submit + result) routes

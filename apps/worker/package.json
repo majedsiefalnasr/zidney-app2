@@ -9,10 +9,13 @@
     "start": "bun run dist/index.js"
   },
   "dependencies": {
-    "redis": "^4.6.0"
+    "redis": "^4.6.0",
+    "pg": "^8.18.0",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",
+    "@types/pg": "^8.10.0",
     "typescript": "latest"
   }
 }

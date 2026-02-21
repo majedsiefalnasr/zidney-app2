@@ -3,7 +3,7 @@
 **Phase:** 02_PLATFORM_MMC  
 **Stage:** STAGE_16_SHARED_UI_SYSTEM  
 **Plan Status:** LOCKED ARCHITECTURAL DECISIONS EMBEDDED  
-**Date:** 2026-02-19  
+**Date:** 2026-02-19
 
 ---
 
@@ -13,8 +13,9 @@
 **Stage:** 16 – Shared UI System  
 **Related Spec File:** specs/phases/02_PLATFORM_MMC/STAGE_16_SHARED_UI_SYSTEM.md  
 **Related ADRs:**
+
 - ADR-0003 (White-Label Scope is Visual Only)
-- ADR-0008 (Formalize Semantic Versioning Policy)  
+- ADR-0008 (Formalize Semantic Versioning Policy)
 - ADR-0009 (Rate Limiting)
 
 ---
@@ -842,22 +843,19 @@ export default {
   content: [
     './src/**/*.{vue,ts,tsx}',
     // When consuming app uses:
-    '../../apps/*/src/**/*.{vue,ts,tsx}'
+    '../../apps/*/src/**/*.{vue,ts,tsx}',
   ],
   theme: {
     extend: {
       colors: {
         brand: {
           primary: 'var(--color-brand-primary)',
-          secondary: 'var(--color-brand-secondary)'
-        }
-      }
-    }
+          secondary: 'var(--color-brand-secondary)',
+        },
+      },
+    },
   },
-  plugins: [
-    require('@tailwindcss/typography'),
-    require('@tailwindcss/forms')
-  ]
+  plugins: [require('@tailwindcss/typography'), require('@tailwindcss/forms')],
 }
 ```
 
@@ -870,20 +868,20 @@ Located in `packages/ui-system/styles/tokens.css`:
   /* Brand Colors */
   --color-brand-primary: #2563eb;
   --color-brand-secondary: #1e40af;
-  
+
   /* Status Colors */
   --color-status-active: #22c55e;
   --color-status-inactive: #94a3b8;
   --color-status-pending: #f59e0b;
   --color-status-archived: #6b7280;
-  
+
   /* Spacing */
   --spacing-xs: 0.25rem;
   --spacing-sm: 0.5rem;
   --spacing-md: 1rem;
   --spacing-lg: 1.5rem;
   --spacing-xl: 2rem;
-  
+
   /* Typography */
   --font-family-sans: system-ui, -apple-system, sans-serif;
   --font-size-body: 14px;
@@ -910,7 +908,7 @@ Located in `packages/ui-system/styles/tokens.css`:
 // In DataTable.vue setup()
 
 interface RowActionState {
-  [actionId: string]: boolean  // true = loading
+  [actionId: string]: boolean // true = loading
 }
 
 const rowActionLoading = reactive<Map<string, RowActionState>>(new Map())
@@ -920,47 +918,55 @@ const isActionLoading = (rowId: string, actionId: string): boolean => {
 }
 
 const executeAction = async (row: TRow, action: RowAction<TRow>) => {
-  const rowId = extractRowId(row)  // App provides ID extraction logic
-  
+  const rowId = extractRowId(row) // App provides ID extraction logic
+
   // Initialize row action state if needed
   if (!rowActionLoading.has(rowId)) {
     rowActionLoading.set(rowId, {})
   }
-  
+
   // Mark as loading
   rowActionLoading.get(rowId)![action.id] = true
   emit('action-start', { actionId: action.id, row })
-  
+
   try {
     // Execute callback (async)
     await action.callback(row)
-    
-    // Success
-    emit('action-end', { 
-      actionId: action.id, 
-      row, 
-      success: true 
+
+    // Success: clear immediately
+    rowActionLoading.get(rowId)![action.id] = false
+    emit('action-end', {
+      actionId: action.id,
+      row,
+      success: true,
     })
   } catch (error) {
-    // Error
-    emit('action-end', { 
-      actionId: action.id, 
-      row, 
-      success: false, 
-      error: error as Error
+    // Error: show error state for 2 seconds then clear
+    emit('action-end', {
+      actionId: action.id,
+      row,
+      success: false,
+      error: error as Error,
     })
-    
-    // Show error state for 2 seconds
-    setTimeout(() => {
-      rowActionLoading.get(rowId)![action.id] = false
+
+    // Schedule error state clear (guarded against unmount)
+    const timeoutId = setTimeout(() => {
+      // Check component still mounted and row still exists
+      if (!isUnmounting.value && rowActionLoading.has(rowId)) {
+        rowActionLoading.get(rowId)![action.id] = false
+      }
     }, 2000)
-  } finally {
-    // Clear loading state only on success
-    if (rowActionLoading.get(rowId)![action.id]) {
-      rowActionLoading.get(rowId)![action.id] = false
-    }
+
+    // Cleanup on unmount
+    onBeforeUnmount(() => {
+      clearTimeout(timeoutId)
+      isUnmounting.value = true
+    })
   }
 }
+
+// Unmount guard flag
+const isUnmounting = ref(false)
 ```
 
 **Row Rendering with Actions:**
@@ -973,14 +979,17 @@ const executeAction = async (row: TRow, action: RowAction<TRow>) => {
     </td>
     <td class="actions">
       <div class="flex gap-2">
-        <button 
+        <button
           v-for="action in rowActions"
           :key="action.id"
           :disabled="isActionLoading(getRowKey(row), action.id)"
           :class="{ 'is-loading': isActionLoading(getRowKey(row), action.id) }"
           @click="executeAction(row, action)"
         >
-          <span v-if="isActionLoading(getRowKey(row), action.id)" class="spinner" />
+          <span
+            v-if="isActionLoading(getRowKey(row), action.id)"
+            class="spinner"
+          />
           {{ action.label }}
         </button>
       </div>
@@ -1011,41 +1020,41 @@ const executeAction = async (row: TRow, action: RowAction<TRow>) => {
 
 const serializeFilters = (filters: Filter[]): string => {
   // Compact representation
-  const compact = filters.map(f => ({
-    f: f.fieldId,      // fieldId → f
-    op: f.operator,     // operator → op
-    v: f.value         // value → v
+  const compact = filters.map((f) => ({
+    f: f.fieldId, // fieldId → f
+    op: f.operator, // operator → op
+    v: f.value, // value → v
   }))
-  
+
   const json = JSON.stringify({ filters: compact })
   const base64 = btoa(json)
-  
-  return `v1:${base64}`  // Version prefix
+
+  return `v1:${base64}` // Version prefix
 }
 
 const deserializeFilters = (encoded: string): Filter[] => {
   if (!encoded.startsWith('v1:')) {
     throw new Error('Invalid filter encoding version')
   }
-  
+
   const base64 = encoded.slice(3)
   const json = atob(base64)
   const data = JSON.parse(json)
-  
+
   return data.filters.map((f: any) => ({
     fieldId: f.f,
     operator: f.op,
-    value: f.v
+    value: f.v,
   }))
 }
 
 const checkUrlOverflow = (filters: Filter[]): boolean => {
   const encoded = serializeFilters(filters)
-  
+
   // Add estimated query param overhead
   const fullUrl = `?filters=${encodeURIComponent(encoded)}`
-  
-  return fullUrl.length > 2000  // Typical browser URL limit
+
+  return fullUrl.length > 2000 // Typical browser URL limit
 }
 ```
 
@@ -1058,16 +1067,19 @@ const isPersistedExternally = computed(() => {
   return filterMode.value === 'localStorage'
 })
 
-watch(() => props.filters, (newFilters) => {
-  const isOverflow = checkUrlOverflow(newFilters)
-  
-  if (isOverflow && filterMode.value === 'url') {
-    showOverflowWarning.value = true
-    emit('filter-overflow', { suggestedMode: 'localStorage' })
-  } else {
-    showOverflowWarning.value = false
+watch(
+  () => props.filters,
+  (newFilters) => {
+    const isOverflow = checkUrlOverflow(newFilters)
+
+    if (isOverflow && filterMode.value === 'url') {
+      showOverflowWarning.value = true
+      emit('filter-overflow', { suggestedMode: 'localStorage' })
+    } else {
+      showOverflowWarning.value = false
+    }
   }
-})
+)
 
 const handleSwitchToStorageFallback = () => {
   filterMode.value = 'localStorage'
@@ -1081,21 +1093,26 @@ const handleSwitchToStorageFallback = () => {
 <template>
   <div class="advanced-filter-builder">
     <div v-if="showOverflowWarning" class="warning-banner">
-      <p>Filters are too complex for URL sharing. 
-         Consider reducing filter count or using session storage.</p>
+      <p>
+        Filters are too complex for URL sharing. Consider reducing filter count
+        or using session storage.
+      </p>
       <button @click="handleSwitchToStorageFallback">
         Use Session Storage
       </button>
     </div>
-    
+
     <!-- Filter rows -->
     <div class="filter-rows">
       <!-- FilterRow components -->
     </div>
-    
+
     <!-- Serialization output (read-only for debugging) -->
     <div class="serialization-info" v-if="showDebugInfo">
-      <small>Mode: {{ filterMode }} | Size: {{ serializeFilters(filters).length }} chars</small>
+      <small
+        >Mode: {{ filterMode }} | Size:
+        {{ serializeFilters(filters).length }} chars</small
+      >
       <small v-if="isPersistedExternally">Persisted externally</small>
     </div>
   </div>
@@ -1121,43 +1138,46 @@ const languageStates = reactive<Map<string, LanguageValidationState>>(new Map())
 const validateLanguage = (code: string, value: string): ValidateResult => {
   const rules = props.validationRules?.[code] ?? []
   const errors: string[] = []
-  
+
   for (const rule of rules) {
     const error = rule.validate(value)
     if (error) errors.push(error)
   }
-  
+
   languageStates.set(code, {
     errors,
-    isDirty: true
+    isDirty: true,
   })
-  
+
   return { isValid: errors.length === 0, errors }
 }
 
 const validateGlobal = (): ValidateResult => {
   const errors: string[] = []
   const values = Object.fromEntries(formValues.value)
-  
+
   // Check default language
-  const defaultLang = props.languages.find(l => l.isDefault)
+  const defaultLang = props.languages.find((l) => l.isDefault)
   if (defaultLang && !values[defaultLang.code]?.trim()) {
     errors.push(`Default language "${defaultLang.name}" is required`)
   }
-  
+
   // Check required languages
   if (props.requiredLanguages.length === 0) {
-    emit('language-config-error', { reason: 'no_required_languages', fallback: defaultLang?.code ?? props.languages[0].code })
+    emit('language-config-error', {
+      reason: 'no_required_languages',
+      fallback: defaultLang?.code ?? props.languages[0].code,
+    })
     props.requiredLanguages = [defaultLang?.code ?? props.languages[0].code]
   }
-  
+
   for (const langCode of props.requiredLanguages) {
     if (!values[langCode]?.trim()) {
-      const lang = props.languages.find(l => l.code === langCode)
+      const lang = props.languages.find((l) => l.code === langCode)
       errors.push(`Required language "${lang?.name}" must have content`)
     }
   }
-  
+
   return { isValid: errors.length === 0, errors }
 }
 
@@ -1175,25 +1195,28 @@ const isValid = computed(() => {
     <div class="multi-language-modal">
       <!-- Language tabs -->
       <div class="language-tabs">
-        <button 
+        <button
           v-for="lang in filteredLanguages"
           :key="lang.code"
           :class="{ active: activeLanguage === lang.code }"
           @click="activeLanguage = lang.code"
         >
           {{ lang.name }}
-          <span v-if="!formValues[lang.code]?.trim()" class="unfilled-indicator" />
+          <span
+            v-if="!formValues[lang.code]?.trim()"
+            class="unfilled-indicator"
+          />
         </button>
       </div>
-      
+
       <!-- Language search (optional) -->
-      <input 
+      <input
         v-if="allowLanguageSearch"
         v-model="languageSearchQuery"
         type="text"
         placeholder="Search languages..."
       />
-      
+
       <!-- Tab content -->
       <div class="language-content">
         <textarea
@@ -1201,33 +1224,28 @@ const isValid = computed(() => {
           :aria-invalid="hasError(activeLanguage)"
           @blur="validateLanguage(activeLanguage, formValues[activeLanguage])"
         />
-        
+
         <!-- Validation errors for active language -->
-        <ValidationErrors 
+        <ValidationErrors
           v-if="languageStates.get(activeLanguage)?.errors"
           :errors="languageStates.get(activeLanguage)!.errors"
         />
       </div>
-      
+
       <!-- Global validation errors -->
       <div v-if="globalErrors.length" class="global-errors">
         <p v-for="error in globalErrors" :key="error">{{ error }}</p>
       </div>
-      
+
       <!-- Coverage indicator -->
       <div class="coverage-bar">
         {{ filledLanguages.size }} / {{ languages.length }} languages filled
       </div>
-      
+
       <!-- Actions -->
       <div class="modal-actions">
         <button @click="$emit('cancel')">Cancel</button>
-        <button 
-          :disabled="!isValid"
-          @click="handleSave"
-        >
-          Save
-        </button>
+        <button :disabled="!isValid" @click="handleSave">Save</button>
       </div>
     </div>
   </DialogPrimitive>
@@ -1282,12 +1300,12 @@ Design Tokens (CSS Custom Properties)
   --color-gray-200: #cbd5e1;
   --color-gray-500: #64748b;
   --color-gray-900: #0f172a;
-  
+
   /* Brand colors */
   --color-brand-primary: #2563eb;
   --color-brand-secondary: #1e40af;
   --color-brand-accent: #0284c7;
-  
+
   /* Status colors */
   --color-status-active: #22c55e;
   --color-status-inactive: #94a3b8;
@@ -1295,7 +1313,7 @@ Design Tokens (CSS Custom Properties)
   --color-status-archived: #6b7280;
   --color-status-warning: #f59e0b;
   --color-status-error: #ef4444;
-  
+
   /* Typography */
   --font-sans: system-ui, -apple-system, sans-serif;
   --font-mono: monospace;
@@ -1307,7 +1325,7 @@ Design Tokens (CSS Custom Properties)
   --line-height-tight: 1.25;
   --line-height-normal: 1.5;
   --line-height-loose: 1.75;
-  
+
   /* Spacing */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
@@ -1315,12 +1333,12 @@ Design Tokens (CSS Custom Properties)
   --space-lg: 1.5rem;
   --space-xl: 2rem;
   --space-2xl: 3rem;
-  
+
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
   --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
   --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
-  
+
   /* Radius */
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
@@ -1343,14 +1361,14 @@ export default {
         brand: {
           primary: 'var(--color-brand-primary)',
           secondary: 'var(--color-brand-secondary)',
-          accent: 'var(--color-brand-accent)'
+          accent: 'var(--color-brand-accent)',
         },
         status: {
           active: 'var(--color-status-active)',
           inactive: 'var(--color-status-inactive)',
           pending: 'var(--color-status-pending)',
-          archived: 'var(--color-status-archived)'
-        }
+          archived: 'var(--color-status-archived)',
+        },
       },
       spacing: {
         xs: 'var(--space-xs)',
@@ -1358,32 +1376,32 @@ export default {
         md: 'var(--space-md)',
         lg: 'var(--space-lg)',
         xl: 'var(--space-xl)',
-        '2xl': 'var(--space-2xl)'
+        '2xl': 'var(--space-2xl)',
       },
       fontSize: {
         xs: 'var(--font-size-xs)',
         sm: 'var(--font-size-sm)',
         base: 'var(--font-size-base)',
         lg: 'var(--font-size-lg)',
-        xl: 'var(--font-size-xl)'
+        xl: 'var(--font-size-xl)',
       },
       fontFamily: {
         sans: 'var(--font-sans)',
-        mono: 'var(--font-mono)'
+        mono: 'var(--font-mono)',
       },
       boxShadow: {
         sm: 'var(--shadow-sm)',
         md: 'var(--shadow-md)',
-        lg: 'var(--shadow-lg)'
+        lg: 'var(--shadow-lg)',
       },
       borderRadius: {
         sm: 'var(--radius-sm)',
         md: 'var(--radius-md)',
         lg: 'var(--radius-lg)',
-        full: 'var(--radius-full)'
-      }
-    }
-  }
+        full: 'var(--radius-full)',
+      },
+    },
+  },
 }
 ```
 
@@ -1409,17 +1427,83 @@ export default {
 // In app layer setup
 const applyWorkspaceTheme = (workspace: Workspace) => {
   const root = document.documentElement
-  
+
   if (workspace.branding?.primaryColor) {
-    root.style.setProperty('--color-brand-primary', workspace.branding.primaryColor)
+    root.style.setProperty(
+      '--color-brand-primary',
+      workspace.branding.primaryColor
+    )
   }
-  
+
   if (workspace.branding?.logoUrl) {
     // Update app logo separately
-    document.querySelector('img[alt="logo"]')?.setAttribute('src', workspace.branding.logoUrl)
+    document
+      .querySelector('img[alt="logo"]')
+      ?.setAttribute('src', workspace.branding.logoUrl)
   }
 }
 ```
+
+### 6.4 CSS Scoping & Style Isolation (MANDATORY)
+
+**Requirement:** All components MUST use Vue's `<style scoped>` or CSS Modules to prevent style leakage.
+
+**Implementation Pattern (Required for all components):**
+
+```vue
+<!-- ✅ CORRECT: Using scoped styles -->
+<template>
+  <div class="data-table">
+    <table class="table">
+      <!-- content -->
+    </table>
+  </div>
+</template>
+
+<script setup lang="ts">
+// Component logic
+</script>
+
+<style scoped>
+/* All styles automatically scoped with data-v-xxx attribute */
+.data-table {
+  display: flex;
+}
+
+.table {
+  width: 100%;
+}
+</style>
+```
+
+**CSS Modules Alternative (also acceptable):**
+
+```vue
+<template>
+  <div :class="styles.dataTable">
+    <table :class="styles.table">
+      <!-- content -->
+    </table>
+  </div>
+</template>
+
+<script setup lang="ts">
+import styles from './DataTable.module.css'
+</script>
+```
+
+**Prohibition:**
+
+- ❌ NO global styles without namespace (e.g., no `.button { ... }` in global scope)
+- ❌ NO unscoped `<style>` blocks (must use `<style scoped>`)
+- ❌ NO inline `style` attributes with critical rules (must be in scoped styles)
+- ❌ NO CSS that relies on parent component class selectors
+
+**Verification (Part of Task 8A Build Config & Task 1 Type Definitions):**
+
+- Build step must fail if any component has unscoped `<style>` block
+- Linting rule (ESLint) must enforce `<style scoped>` or CSS Modules
+- CSS output must contain data-v-xxx selectors proving scoping applied
 
 ---
 
@@ -1433,7 +1517,7 @@ const applyWorkspaceTheme = (workspace: Workspace) => {
 export interface ColumnDef<TRow> {
   id: string
   header: string | ((context: HeaderContext<TRow>) => VNode)
-  accessor?: string | ((row: TRow) => any)  // Optional for primitives
+  accessor?: string | ((row: TRow) => any) // Optional for primitives
   cell?: (context: CellContext<TRow>) => VNode
   enableSorting?: boolean
   enableFiltering?: boolean
@@ -1460,21 +1544,21 @@ export type PrimitiveColumnDef<TRow> = ColumnDef<TRow> & {
 }
 
 export type ComputedColumnDef<TRow> = ColumnDef<TRow> & {
-  accessor: (row: TRow) => any  // REQUIRED
+  accessor: (row: TRow) => any // REQUIRED
 }
 
 // Strict typing example
 const columns: (PrimitiveColumnDef<User> | ComputedColumnDef<User>)[] = [
   {
     id: 'email',
-    header: 'Email'
+    header: 'Email',
     // accessor inferred from id
   },
   {
     id: 'fullName',
     header: 'Name',
-    accessor: (user) => `${user.firstName} ${user.lastName}`  // Required
-  }
+    accessor: (user) => `${user.firstName} ${user.lastName}`, // Required
+  },
 ]
 ```
 
@@ -1483,7 +1567,7 @@ const columns: (PrimitiveColumnDef<User> | ComputedColumnDef<User>)[] = [
 ```typescript
 // types/common.ts
 
-export type FilterOperator = 
+export type FilterOperator =
   | 'equals'
   | 'not_equals'
   | 'contains'
@@ -1499,14 +1583,14 @@ export interface FilterField {
   label: string
   type: FilterFieldType
   operators: FilterOperator[]
-  options?: { value: any; label: string }[]  // For select type
+  options?: { value: any; label: string }[] // For select type
   placeholder?: string
 }
 
 export interface Filter {
   fieldId: string
   operator: FilterOperator
-  value: any | [any, any]  // [min, max] for 'between'
+  value: any | [any, any] // [min, max] for 'between'
 }
 
 export interface FilterGroup {
@@ -1572,7 +1656,7 @@ export type MultiLanguageInputModalProps = {
   isOpen: boolean
   title: string
   languages: Language[]
-  requiredLanguages: string[]  // Min 1 required
+  requiredLanguages: string[] // Min 1 required
   initialValues?: Record<string, string>
   validationRules?: Record<string, ValidationRule[]>
   filterMode?: 'all' | 'filled' | 'unfilled'
@@ -1598,14 +1682,14 @@ describe('DataTable', () => {
     test('respects column visibility state')
     test('shows loading skeleton when loading=true')
   })
-  
+
   describe('Pagination', () => {
     test('server mode: emits @pagination-changed on page change')
     test('server mode: does NOT slice rows locally')
     test('client mode: slices rows based on paginationState')
     test('client mode: computes totalPages from array length')
   })
-  
+
   describe('Row Actions (LOCKED DECISION 2)', () => {
     test('renders action buttons for each row')
     test('emits @action-start when action clicked')
@@ -1617,21 +1701,21 @@ describe('DataTable', () => {
     test('does NOT auto-retry failed actions')
     test('does NOT auto-refetch data after action')
   })
-  
+
   describe('Row Selection', () => {
     test('emits @row-selected when checkbox clicked')
     test('respects selectedRows prop')
   })
-  
+
   describe('Sorting', () => {
     test('emits @sort-changed on column header click')
   })
-  
+
   describe('Quick Filter', () => {
     test('emits @quick-filter-changed on input')
     test('debounces input (300ms default)')
   })
-  
+
   describe('Column Visibility', () => {
     test('emits @column-visibility-changed on visibility toggle')
   })
@@ -1649,7 +1733,7 @@ describe('AdvancedFilterBuilder', () => {
     test('deserializeFilters() decodes and validates')
     test('serializeFilters() uses compact key names (f, op, v)')
   })
-  
+
   describe('URL Overflow Detection (LOCKED DECISION 3)', () => {
     test('detects when encoded filter > 2000 chars')
     test('emits @filter-overflow when overflow detected')
@@ -1657,13 +1741,13 @@ describe('AdvancedFilterBuilder', () => {
     test('shows warning banner when overflow active')
     test('exposes isOverflowed computed property')
   })
-  
+
   describe('Storage Fallback', () => {
     test('exposes isPersistedExternally computed property')
     test('emits @storage-fallback-triggered on mode switch')
     test('persists to localStorage when fallback active')
   })
-  
+
   describe('Filter Validation', () => {
     test('validates filter value types')
     test('rejects invalid operators for field type')
@@ -1683,36 +1767,36 @@ describe('MultiLanguageInputModal', () => {
     test('rejects submission if any requiredLanguage empty')
     test('computes isValid = false when validation fails')
   })
-  
+
   describe('Per-Language Validation (LOCKED DECISION 5)', () => {
     test('runs language-specific validation rules')
     test('accumulates errors per language')
     test('emits @validation-changed on language input')
   })
-  
+
   describe('Required Languages Constraint', () => {
     test('defaults to 1 required language if array empty')
     test('logs warning if requiredLanguages = []')
     test('requires minimum 1 language with content')
     test('rejects if no required languages specified')
   })
-  
+
   describe('Filter Modes', () => {
     test('all mode: shows all language tabs')
     test('filled mode: shows only languages with content')
     test('unfilled mode: shows only languages without content')
   })
-  
+
   describe('Language Search', () => {
     test('filters language tabs by search query')
     test('case-insensitive search')
   })
-  
+
   describe('Coverage Indicator', () => {
     test('displays filled vs total languages')
     test('updates coverage on input')
   })
-  
+
   describe('Events', () => {
     test('emits @save with language values')
     test('emits @cancel on cancel')
@@ -1738,7 +1822,7 @@ describe('DataTable with Async Row Actions', () => {
     // 6. Assert @action-end emitted with success=true
     // 7. Assert button re-enabled
   })
-  
+
   test('Error handling: action rejects → error state → 2s timeout → restore', async () => {
     // 1. Mount DataTable with failing action
     // 2. Click action button
@@ -1748,7 +1832,7 @@ describe('DataTable with Async Row Actions', () => {
     // 6. Wait 2 seconds
     // 7. Assert button restored to normal state
   })
-  
+
   test('Multiple actions per row: execute independently', async () => {
     // 1. Mount DataTable with 2 row actions
     // 2. Click first action
@@ -1793,7 +1877,7 @@ describe('MultiLanguageInputModal with Validation', () => {
     // 7. Assert @validation-changed emitted with isValid=true
     // 8. Assert submit enabled
   })
-  
+
   test('Per-language rules + global constraint', async () => {
     // 1. Mount with per-language validation (max length = 10)
     // 2. Enter text > 10 chars in language tab
@@ -1806,14 +1890,14 @@ describe('MultiLanguageInputModal with Validation', () => {
 
 ### 8.3 Coverage Targets
 
-| Area | Target | Focus |
-|------|--------|-------|
-| DataTable | 85%+ | Row actions, pagination modes, loading states |
-| AdvancedFilterBuilder | 80%+ | Serialization, overflow detection, storage fallback |
-| MultiLanguageInputModal | 85%+ | Per-language validation, required language enforcement |
-| useFilterBuilder | 90%+ | State management, serialization, URL sync |
-| useMultiLanguageForm | 90%+ | Validation logic, per-language rules |
-| Composables (general) | 85%+ | All composables tested in isolation |
+| Area                    | Target | Focus                                                  |
+| ----------------------- | ------ | ------------------------------------------------------ |
+| DataTable               | 85%+   | Row actions, pagination modes, loading states          |
+| AdvancedFilterBuilder   | 80%+   | Serialization, overflow detection, storage fallback    |
+| MultiLanguageInputModal | 85%+   | Per-language validation, required language enforcement |
+| useFilterBuilder        | 90%+   | State management, serialization, URL sync              |
+| useMultiLanguageForm    | 90%+   | Validation logic, per-language rules                   |
+| Composables (general)   | 85%+   | All composables tested in isolation                    |
 
 ---
 
@@ -1854,8 +1938,8 @@ describe('MultiLanguageInputModal with Validation', () => {
 
 ```typescript
 // BEFORE: Custom table implementation
-<CustomInstitutionTable 
-  :data="institutions" 
+<CustomInstitutionTable
+  :data="institutions"
   :loading="loading"
 />
 
@@ -1903,7 +1987,7 @@ const rowActions: RowAction<Role>[] = [
       // Show modal, wait for save
       // Component does NOT refetch
       showRoleEditModal(role)
-    }
+    },
   },
   {
     id: 'delete',
@@ -1912,8 +1996,8 @@ const rowActions: RowAction<Role>[] = [
     callback: async (role) => {
       await api.roles.delete(role.id)
       // Parent app will handle @action-end and refetch
-    }
-  }
+    },
+  },
 ]
 ```
 
@@ -1984,30 +2068,36 @@ const handleFilterChange = (filters: Filter[]) => {
 ### 9.2 Phased Adoption Approach
 
 **Week 1-2: Foundation**
+
 - Deploy ui-system package
 - Update package.json dependencies
 
 **Week 3-4: Read-Only Tables**
+
 - Migrate 3 dashboard pages
 - Collect feedback
 - Document lessons learned
 
 **Week 5-7: Interactive Tables**
+
 - Migrate 5 pages with row actions
 - Test async callback patterns
 - Refine error handling
 
 **Week 8-10: Advanced Filters**
+
 - Migrate 3 pages with filters
 - Test URL overflow detection
 - Monitor localStorage usage
 
 **Week 11-12: Multi-Language**
+
 - Migrate 4 entity editors
 - Test validation flows
 - Ensure workspace-specific language rules
 
 **Week 13+: Cleanup**
+
 - Deprecate old table components
 - Remove dual imports
 - Close stage
@@ -2055,46 +2145,48 @@ export function useFilterBuilder(options: {
 }) {
   // State
   const filters = ref<Filter[]>(options.initialFilters ?? [])
-  const serializationMode = ref<'url' | 'localStorage'>(options.serializationMode ?? 'url')
-  
+  const serializationMode = ref<'url' | 'localStorage'>(
+    options.serializationMode ?? 'url'
+  )
+
   // Computed
   const serialized = computed(() => {
     return serializeFilters(filters.value)
   })
-  
+
   const isPersistedExternally = computed(() => {
     return serializationMode.value === 'localStorage'
   })
-  
+
   const isOverflowed = computed(() => {
     return checkUrlOverflow(filters.value)
   })
-  
+
   // Methods
   const addFilter = (filter: Filter) => {
     filters.value.push(filter)
   }
-  
+
   const removeFilter = (index: number) => {
     filters.value.splice(index, 1)
   }
-  
+
   const updateFilter = (index: number, filter: Filter) => {
     filters.value.splice(index, 1, filter)
   }
-  
+
   const syncToUrl = (router: Router) => {
     router.push({ query: { filters: serialized.value } })
   }
-  
+
   const syncToStorage = (key: string) => {
     localStorage.setItem(key, serialized.value)
   }
-  
+
   const resetFilters = () => {
     filters.value = []
   }
-  
+
   return {
     filters: readonly(filters),
     serialized,
@@ -2105,7 +2197,7 @@ export function useFilterBuilder(options: {
     updateFilter,
     syncToUrl,
     syncToStorage,
-    resetFilters
+    resetFilters,
   }
 }
 ```
@@ -2124,27 +2216,27 @@ export function usePagination(options: {
 }) {
   const currentPage = ref(options.initialPage ?? 1)
   const pageSize = ref(options.pageSize ?? 25)
-  
+
   const totalPages = computed(() => {
     return Math.ceil(options.totalCount / pageSize.value)
   })
-  
+
   const isFirstPage = computed(() => currentPage.value === 1)
   const isLastPage = computed(() => currentPage.value >= totalPages.value)
-  
+
   const goToPage = (page: number) => {
     const clamped = Math.max(1, Math.min(page, totalPages.value))
     currentPage.value = clamped
   }
-  
+
   const nextPage = () => goToPage(currentPage.value + 1)
   const previousPage = () => goToPage(currentPage.value - 1)
-  
+
   const setPageSize = (size: number) => {
     pageSize.value = size
-    currentPage.value = 1  // Reset to first page
+    currentPage.value = 1 // Reset to first page
   }
-  
+
   return {
     currentPage: readonly(currentPage),
     pageSize: readonly(pageSize),
@@ -2154,7 +2246,7 @@ export function usePagination(options: {
     goToPage,
     nextPage,
     previousPage,
-    setPageSize
+    setPageSize,
   }
 }
 ```
@@ -2170,10 +2262,8 @@ export function useColumnVisibility(options: {
   availableColumns: string[]
   persistKey?: string
 }) {
-  const visibleColumns = ref<Set<string>>(
-    new Set(options.availableColumns)
-  )
-  
+  const visibleColumns = ref<Set<string>>(new Set(options.availableColumns))
+
   const onMounted = () => {
     if (options.persistKey) {
       const stored = localStorage.getItem(options.persistKey)
@@ -2187,14 +2277,14 @@ export function useColumnVisibility(options: {
       }
     }
   }
-  
+
   const toggleColumn = (columnId: string) => {
     if (visibleColumns.value.has(columnId)) {
       visibleColumns.value.delete(columnId)
     } else {
       visibleColumns.value.add(columnId)
     }
-    
+
     if (options.persistKey) {
       localStorage.setItem(
         options.persistKey,
@@ -2202,27 +2292,27 @@ export function useColumnVisibility(options: {
       )
     }
   }
-  
+
   const showAll = () => {
     visibleColumns.value = new Set(options.availableColumns)
   }
-  
+
   const hideAll = () => {
     visibleColumns.value.clear()
   }
-  
+
   const isVisible = (columnId: string): boolean => {
     return visibleColumns.value.has(columnId)
   }
-  
+
   onMounted()
-  
+
   return {
     visibleColumns: computed(() => [...visibleColumns.value]),
     toggleColumn,
     showAll,
     hideAll,
-    isVisible
+    isVisible,
   }
 }
 ```
@@ -2242,62 +2332,60 @@ export function useMultiLanguageForm(options: {
 }) {
   // Ensure minimum 1 required language
   const requiredLanguages = ref(
-    options.requiredLanguages?.length ?? 0 > 0 
-      ? options.requiredLanguages 
+    (options.requiredLanguages?.length ?? 0 > 0)
+      ? options.requiredLanguages
       : [options.languages[0].code]
   )
-  
-  const formValues = ref<Record<string, string>>(
-    options.initialValues ?? {}
-  )
-  
+
+  const formValues = ref<Record<string, string>>(options.initialValues ?? {})
+
   const languageErrors = ref<Record<string, string[]>>({})
-  
+
   const validateLanguage = (code: string): string[] => {
     const rules = options.validationRules?.[code] ?? []
     const value = formValues.value[code] ?? ''
     const errors: string[] = []
-    
+
     for (const rule of rules) {
       const error = rule.validate(value)
       if (error) errors.push(error)
     }
-    
+
     languageErrors.value[code] = errors
     return errors
   }
-  
+
   const validateGlobal = (): string[] => {
     const errors: string[] = []
-    
+
     // Check default language
-    const defaultLang = options.languages.find(l => l.isDefault)
+    const defaultLang = options.languages.find((l) => l.isDefault)
     if (defaultLang && !(formValues.value[defaultLang.code] ?? '').trim()) {
       errors.push(`Default language is required`)
     }
-    
+
     // Check required languages
     for (const code of requiredLanguages.value) {
       if (!(formValues.value[code] ?? '').trim()) {
-        const lang = options.languages.find(l => l.code === code)
+        const lang = options.languages.find((l) => l.code === code)
         errors.push(`Language "${lang?.name}" is required`)
       }
     }
-    
+
     return errors
   }
-  
+
   const isValid = computed(() => {
     return validateGlobal().length === 0
   })
-  
+
   return {
     formValues,
     languageErrors: readonly(languageErrors),
     requiredLanguages: readonly(requiredLanguages),
     validateLanguage,
     validateGlobal,
-    isValid
+    isValid,
   }
 }
 ```
@@ -2322,14 +2410,17 @@ export function useMultiLanguageForm(options: {
 const isSubmitting = ref(false)
 
 const handleRowAction = async (row: User, action: RowAction<User>) => {
-  if (isSubmitting.value) return  // Prevent duplicate
-  
+  if (isSubmitting.value) return // Prevent duplicate
+
   isSubmitting.value = true
-  
+
   try {
     await action.callback(row)
   } catch (error) {
-    emit('action-error', { actionId: action.id, error: error instanceof Error ? error.message : String(error) })
+    emit('action-error', {
+      actionId: action.id,
+      error: error instanceof Error ? error.message : String(error),
+    })
   } finally {
     isSubmitting.value = false
   }
@@ -2352,17 +2443,17 @@ const handleRowAction = async (row: User, action: RowAction<User>) => {
 ```typescript
 const serializeFilters = (filters: Filter[]): string => {
   try {
-    const compact = filters.map(f => ({
+    const compact = filters.map((f) => ({
       f: f.fieldId,
       op: f.operator,
-      v: f.value
+      v: f.value,
     }))
-    
+
     const json = JSON.stringify({ filters: compact })
     return `v1:${btoa(json)}`
   } catch (error) {
-    emit('serialization-error', { 
-      reason: `Cannot serialize filters: ${error.message}` 
+    emit('serialization-error', {
+      reason: `Cannot serialize filters: ${error.message}`,
     })
     throw error
   }
@@ -2415,16 +2506,16 @@ const deserializeFilters = (encoded: string): Filter[] => {
     if (!encoded.startsWith('v1:')) {
       throw new Error('Unknown version')
     }
-    
+
     const base64 = encoded.slice(3)
     const json = atob(base64)
     const data = JSON.parse(json)
-    
+
     // Validate structure
     if (!Array.isArray(data.filters)) {
       throw new Error('Invalid structure')
     }
-    
+
     return data.filters
   } catch (error) {
     emit('deserialization-error', { reason: error.message })
@@ -2452,7 +2543,7 @@ const isValid = computed(() => {
     emit('language-invalid', { reason: 'no_languages_provided' })
     return false
   }
-  
+
   // ... validation logic
 })
 ```
@@ -2476,16 +2567,24 @@ const props = withDefaults(
     columns: ColumnDef<TRow>[]
     paginationMode: 'server' | 'client'
   }>(),
-  { }
+  {}
 )
 
 onMounted(() => {
   if (!Array.isArray(props.rows)) {
-    emit('validation-error', { field: 'rows', error: 'invalid_type', message: 'rows must be array' })
+    emit('validation-error', {
+      field: 'rows',
+      error: 'invalid_type',
+      message: 'rows must be array',
+    })
   }
-  
+
   if (!Array.isArray(props.columns) || props.columns.length === 0) {
-    emit('validation-error', { field: 'columns', error: 'invalid_type', message: 'columns must be non-empty array' })
+    emit('validation-error', {
+      field: 'columns',
+      error: 'invalid_type',
+      message: 'columns must be non-empty array',
+    })
   }
 })
 ```
@@ -2493,6 +2592,40 @@ onMounted(() => {
 ---
 
 ## SECTION 12: PERFORMANCE OPTIMIZATION
+
+### 12.0 Service Level Objectives (SLOs) – MANDATORY
+
+**Component Rendering Performance:**
+
+- **Single component mount:** < 16ms (60fps @ 16ms/frame)
+- **Component re-render (props change):** < 8ms
+- **DataTable render (N rows, M cols):** < 16ms for N ≤ 50 rows
+- **Form validation feedback:** < 50ms total (input lag imperceptible)
+
+**Event Emission Performance:**
+
+- **@action-start emission latency:** < 1ms (button state update)
+- **@filter-changed emission latency:** < 1ms (parent state update)
+- **@pagination-changed emission latency:** < 1ms
+- **@save event (form completion):** < 1ms after validation passes
+
+**Concurrent Operation Performance (High-Concurrency Exams):**
+
+- **50 concurrent row actions:** All complete within 2000ms total
+- **DataTable re-render during action wave:** No frame drops (maintain 60fps)
+- **Filter serialization:** < 5ms for 50+ filters
+
+**Verification (Part of Task 9A & 10A):**
+
+- All unit tests must include performance assertions using `performance.now()`
+- Integration tests must measure end-to-end event flow latency
+- Build output must include timing report
+
+**Non-Compliance Consequence:**
+
+Any component exceeding these SLOs must be optimized or rejected from production. This is NOT a guideline; it is enforcement criteria.
+
+---
 
 ### 12.1 Large Dataset Handling
 
@@ -2505,17 +2638,17 @@ onMounted(() => {
 ```typescript
 // Props enforce pagination or lazy loading
 interface DataTableProps {
-  paginationMode: 'server' | 'client'  // Not 'none'
-  rows: TRow[]  // Already paginated by app or ClientPagination
-  totalCount: number  // Signals to DataTable: there's more data
+  paginationMode: 'server' | 'client' // Not 'none'
+  rows: TRow[] // Already paginated by app or ClientPagination
+  totalCount: number // Signals to DataTable: there's more data
 }
 
 // Computed still respects page size even if all rows passed
 const displayedRows = computed(() => {
   if (props.paginationMode === 'server') {
-    return props.rows  // Already sliced by app
+    return props.rows // Already sliced by app
   }
-  
+
   const start = (currentPage.value - 1) * pageSize.value
   const end = start + pageSize.value
   return props.rows.slice(start, end)
@@ -2556,7 +2689,7 @@ const query = ref('')
 
 const debouncedEmit = useDebounceFn((q: string) => {
   emit('query-changed', q)
-}, 300)  // 300ms default
+}, 300) // 300ms default
 
 watch(query, (newQuery) => {
   debouncedEmit(newQuery)
@@ -2590,8 +2723,8 @@ const rowActions: RowAction<Role>[] = [
       } else {
         throw new Error('Delete failed')
       }
-    }
-  }
+    },
+  },
 ]
 
 const handleActionEnd = (event) => {
@@ -2609,15 +2742,15 @@ const handleActionEnd = (event) => {
 ```typescript
 const handleFilterChange = async (filters: Filter[]) => {
   loading.value = true
-  
+
   try {
     // App serializes filters and makes API call
     const response = await api.roles.search({
       filters: serializeFilters(filters),
       page: currentPage.value,
-      pageSize: pageSize.value
+      pageSize: pageSize.value,
     })
-    
+
     roles.value = response.data
     totalCount.value = response.totalCount
   } finally {
@@ -2757,6 +2890,7 @@ No database changes → **Instant rollback** is trivial
 **Implementation plan compliant with Zidney Constitution v1.2.0 — No violations detected.**
 
 All 5 locked architectural decisions embedded:
+
 - ✅ Decision 1 (DataTable Pagination Agnostic)
 - ✅ Decision 2 (Row Actions Async with component-managed loading)
 - ✅ Decision 3 (Filter Serialization URL-primary with localStorage fallback)
@@ -2764,11 +2898,13 @@ All 5 locked architectural decisions embedded:
 - ✅ Decision 5 (Multi-Language Validation per-language with minimum 1 required)
 
 All 3 locked constraints embedded:
+
 - ✅ Constraint 1 (Filter serialization exposes `isPersistedExternally` or emits `@storage-fallback-triggered`)
 - ✅ Constraint 2 (Row actions emit `@action-start` and `@action-end`)
 - ✅ Constraint 3 (Multi-language modal enforces `requiredLanguages.length >= 1`)
 
 No architectural violations:
+
 - No tenant-aware code
 - No cross-app imports
 - No business logic

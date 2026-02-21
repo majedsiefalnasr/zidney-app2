@@ -5,8 +5,12 @@
  * Phase: 01 – Platform Foundation
  */
 
-import { NextFunction, Request, Response } from 'express'
+import { createLogger } from '@zidney/logging'
+import type { Context, MiddlewareHandler, Next } from 'hono'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { Pool } from 'pg'
+
+const logger = createLogger('pool-management')
 
 // ============================================================================
 // T016: Schema Version Check Middleware
@@ -47,7 +51,9 @@ export class SchemaVersionCheckMiddleware {
         ? result.rows[0].current_schema_version
         : null
     } catch (error) {
-      console.error(`Failed to query schema version:`, error)
+      logger.error('Failed to query schema version', {
+        error: error instanceof Error ? error.message : String(error),
+      })
       return null
     } finally {
       client.release()
@@ -113,59 +119,76 @@ export class SchemaVersionCheckMiddleware {
   }
 
   /**
-   * Express middleware
+   * Hono middleware
    */
-  middleware() {
-    return async (req: Request, res: Response, next: NextFunction) => {
+  middleware(): MiddlewareHandler {
+    return async (c: Context, next: Next) => {
       try {
-        const tenant = (req as any).tenant
+        const tenant = c.get('tenant')
         if (!tenant?.pool) {
-          return res.status(500).json({
-            success: false,
-            data: null,
-            error: {
-              code: 'SYSTEM_ERROR',
-              message: 'Tenant pool not available',
+          return c.json(
+            {
+              success: false,
+              data: null,
+              error: {
+                code: 'SYSTEM_ERROR',
+                message: 'Tenant pool not available',
+              },
             },
-          })
+            { status: 500 }
+          )
         }
 
         // Get schema version
         const version = await this.getSchemaVersion(tenant.pool)
         if (!version) {
-          return res.status(500).json({
-            success: false,
-            data: null,
-            error: {
-              code: 'SYSTEM_ERROR',
-              message: 'Failed to retrieve schema version',
+          return c.json(
+            {
+              success: false,
+              data: null,
+              error: {
+                code: 'SYSTEM_ERROR',
+                message: 'Failed to retrieve schema version',
+              },
             },
-          })
+            { status: 500 }
+          )
         }
 
         // Validate compatibility
         const validation = this.validateVersionCompatibility(version)
         if (!validation.compatible) {
-          return res.status(validation.http_status).json({
-            success: false,
-            data: null,
-            error: { code: validation.error_code, message: validation.message },
-          })
+          return c.json(
+            {
+              success: false,
+              data: null,
+              error: {
+                code: validation.error_code,
+                message: validation.message,
+              },
+            },
+            validation.http_status as ContentfulStatusCode
+          )
         }
 
         // Schema compatible, continue
-        ;(req as any).schema_version = version
-        next()
+        c.set('schema_version', version)
+        await next()
       } catch (error) {
-        console.error(`SchemaVersionCheck error:`, error)
-        return res.status(500).json({
-          success: false,
-          data: null,
-          error: {
-            code: 'SYSTEM_ERROR',
-            message: 'Failed to validate schema version',
-          },
+        logger.error('SchemaVersionCheck error', {
+          error: error instanceof Error ? error.message : String(error),
         })
+        return c.json(
+          {
+            success: false,
+            data: null,
+            error: {
+              code: 'SYSTEM_ERROR',
+              message: 'Failed to validate schema version',
+            },
+          },
+          { status: 500 }
+        )
       }
     }
   }
@@ -234,9 +257,12 @@ export class PoolLifecycleManager {
     try {
       await pool.end()
       this.manager.removePool(slug)
-      console.log(`[POOL] Evicted pool for ${slug}`)
+      logger.info('Pool evicted', { slug })
     } catch (error) {
-      console.error(`[POOL] Failed to evict pool ${slug}:`, error)
+      logger.error('Failed to evict pool', {
+        slug,
+        error: error instanceof Error ? error.message : String(error),
+      })
       throw error
     }
   }
@@ -258,7 +284,10 @@ export class PoolLifecycleManager {
       )
       return
     } catch (error) {
-      console.error(`[POOL] Failed to drain pool ${slug}:`, error)
+      logger.error('Failed to drain pool', {
+        slug,
+        error: error instanceof Error ? error.message : String(error),
+      })
     }
   }
 
@@ -269,9 +298,12 @@ export class PoolLifecycleManager {
     try {
       await this.evictPool(slug)
       // Note: Caller should recreate and re-register new pool
-      console.log(`[POOL] Restarted pool for ${slug}`)
+      logger.info('Pool restarted', { slug })
     } catch (error) {
-      console.error(`[POOL] Failed to restart pool ${slug}:`, error)
+      logger.error('Failed to restart pool', {
+        slug,
+        error: error instanceof Error ? error.message : String(error),
+      })
       throw error
     }
   }
@@ -280,7 +312,7 @@ export class PoolLifecycleManager {
    * On worker shutdown: Drain and close all pools
    */
   async onShutdown(): Promise<void> {
-    console.log(`[POOL] Initiating graceful shutdown, draining all pools`)
+    logger.info('Initiating graceful shutdown, draining all pools')
 
     const pools = this.manager.getAllPools()
     for (const [slug, pool] of pools.entries()) {
@@ -288,13 +320,16 @@ export class PoolLifecycleManager {
         await this.drainPoolGracefully(slug, 10000)
         await pool.end()
         this.manager.removePool(slug)
-        console.log(`[POOL] Closed pool for ${slug}`)
+        logger.info('Pool closed', { slug })
       } catch (error) {
-        console.error(`[POOL] Failed to close pool ${slug}:`, error)
+        logger.error('Failed to close pool', {
+          slug,
+          error: error instanceof Error ? error.message : String(error),
+        })
       }
     }
 
-    console.log(`[POOL] Shutdown complete, all pools closed`)
+    logger.info('Shutdown complete, all pools closed')
   }
 }
 

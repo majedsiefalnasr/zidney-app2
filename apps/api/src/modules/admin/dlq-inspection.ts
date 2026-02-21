@@ -1,6 +1,8 @@
+import { createLogger } from '@zidney/logging'
 import { Hono } from 'hono'
-import { logger } from '../../infrastructure/logger'
 import { db } from '../../infrastructure/postgres'
+
+const logger = createLogger('dlq-inspection')
 
 /**
  * T036: GET /admin/workspace/{id}/dlq

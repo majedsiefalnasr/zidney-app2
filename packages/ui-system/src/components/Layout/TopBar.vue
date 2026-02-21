@@ -40,6 +40,8 @@ withDefaults(defineProps<TopBarProps>(), {
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 .topbar-container {
   @apply flex items-center justify-between gap-8;
 }

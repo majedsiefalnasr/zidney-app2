@@ -1,5 +1,7 @@
+import { createLogger } from '@zidney/logging'
 import { jobQueue } from '../../../worker/src/queue/job-queue'
-import { logger } from '../../infrastructure/logger'
+
+const logger = createLogger('job-result-retriever')
 
 /**
  * T045: Job result retrieval from queue

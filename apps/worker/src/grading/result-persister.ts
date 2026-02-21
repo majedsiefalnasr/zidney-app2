@@ -20,7 +20,7 @@
  * ADRs: ADR-0001 (tenant isolation), ADR-0002 (snapshot immutability)
  */
 
-import { Attempt, AttemptStatus } from '@types/attempt'
+import { Attempt, AttemptStatus } from '@zidney/types/attempt'
 import { randomUUID } from 'crypto'
 import { Pool } from 'pg'
 import { logger } from '../services/logger'

@@ -4,11 +4,31 @@
   "private": true,
   "type": "module",
   "main": "src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./auth": "./src/auth/index.ts",
+    "./license": "./src/license/index.ts",
+    "./attempts": "./src/attempts/attempt-init.ts",
+    "./audit": "./src/audit/attempt-event-logger.ts",
+    "./logging": "./src/logging/master-db-logger.ts",
+    "./migration": "./src/migration/master-migration-runner.ts",
+    "./migrations": "./src/migrations/migrate.ts",
+    "./monitoring": "./src/monitoring/provisioning-metrics.ts",
+    "./provisioning": "./src/provisioning/idempotency-handler.ts",
+    "./tenant-resolver": "./src/tenant-resolver/version-check.ts",
+    "./workers": "./src/workers/tasks/apply-migration.ts"
+  },
   "scripts": {
     "build": "bun build src/index.ts",
     "test": "vitest"
   },
+  "dependencies": {
+    "pg": "^8.18.0",
+    "uuid": "^13.0.0"
+  },
   "devDependencies": {
+    "@types/pg": "^8.16.0",
+    "@types/uuid": "^11.0.0",
     "typescript": "latest",
     "vitest": "^1.0.0"
   }

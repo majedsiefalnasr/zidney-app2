@@ -1,0 +1,182 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`API Response Snapshots > 208 job failed response matches snapshot 1`] = `
+{
+  "body": {
+    "error": {
+      "code": "GRADING_FAILED",
+      "message": "Internal error during grading",
+      "timestamp": "2024-01-01T12:01:00Z",
+    },
+    "job_id": "job-snap-2",
+    "job_status": "FAILED",
+  },
+  "status": 208,
+}
+`;
+
+exports[`API Response Snapshots > 400 error response matches snapshot 1`] = `
+{
+  "body": {
+    "data": null,
+    "error": {
+      "code": "INVALID_INPUT",
+      "message": "Invalid exam_id format",
+    },
+    "success": false,
+  },
+  "status": 400,
+}
+`;
+
+exports[`API Response Snapshots > 404 error response matches snapshot 1`] = `
+{
+  "body": {
+    "data": null,
+    "error": {
+      "code": "NOT_FOUND",
+      "message": "Attempt not found",
+    },
+    "success": false,
+  },
+  "status": 404,
+}
+`;
+
+exports[`API Response Snapshots > 409 conflict response matches snapshot 1`] = `
+{
+  "body": {
+    "data": null,
+    "error": {
+      "code": "ATTEMPT_LOCKED",
+      "message": "Another submission in progress",
+    },
+    "success": false,
+  },
+  "status": 409,
+}
+`;
+
+exports[`API Response Snapshots > 423 soft-lock response matches snapshot 1`] = `
+{
+  "body": {
+    "id": "attempt-snap-2",
+    "soft_locked_warning": true,
+    "status": "IN_PROGRESS",
+    "warning_message": "Workspace is soft-locked due to payment",
+  },
+  "status": 201,
+}
+`;
+
+exports[`API Response Snapshots > Create attempt response matches snapshot 1`] = `
+{
+  "body": {
+    "attempt_mode": "CHRONO",
+    "created_at": "2024-01-01T12:00:00Z",
+    "exam_id": "exam-123",
+    "grading_config_snapshot": {
+      "pass_score_percentage": 60,
+      "show_correct_answers": false,
+      "show_explanations": false,
+      "total_points": 100,
+    },
+    "id": "attempt-snap-1",
+    "questions": [
+      {
+        "id": "q1",
+        "options": [
+          {
+            "text": "A",
+            "value": "A",
+          },
+          {
+            "text": "B",
+            "value": "B",
+          },
+        ],
+        "order_in_exam": 0,
+        "points": 10,
+        "question_text": "Question?",
+        "type": "MULTIPLE_CHOICE",
+      },
+    ],
+    "started_at": "2024-01-01T12:00:00Z",
+    "status": "IN_PROGRESS",
+    "user_id": "user-123",
+  },
+  "status": 201,
+}
+`;
+
+exports[`API Response Snapshots > Poll result completed response matches snapshot 1`] = `
+{
+  "body": {
+    "finalized_at": "2024-01-01T12:00:20Z",
+    "id": "attempt-snap-1",
+    "job_status": "COMPLETED",
+    "passed": true,
+    "result_snapshot": {
+      "pass_score_percentage": 60,
+      "question_results": [
+        {
+          "is_correct": true,
+          "points_earned": 10,
+          "question_id": "q1",
+        },
+      ],
+      "total_earned": 85,
+      "total_points": 100,
+    },
+    "score": 85,
+    "status": "FINALIZED",
+  },
+  "status": 200,
+}
+`;
+
+exports[`API Response Snapshots > Poll result pending response matches snapshot 1`] = `
+{
+  "body": {
+    "job_id": "job-snap-1",
+    "job_status": "PENDING",
+  },
+  "status": 202,
+}
+`;
+
+exports[`API Response Snapshots > Progress autosave response matches snapshot 1`] = `
+{
+  "body": {
+    "attempt_id": "attempt-snap-1",
+    "question_index": 0,
+    "saved_at": "2024-01-01T12:00:05Z",
+    "user_response": {
+      "selected": "B",
+    },
+  },
+  "status": 200,
+}
+`;
+
+exports[`API Response Snapshots > Response headers match snapshot 1`] = `
+{
+  "content-type": "application/json",
+  "x-correlation-id": "corr-12345",
+  "x-request-id": "req-12345",
+  "x-workspace-id": "ws-12345",
+}
+`;
+
+exports[`API Response Snapshots > Submit response matches snapshot 1`] = `
+{
+  "body": {
+    "id": "attempt-snap-1",
+    "job_id": "job-snap-1",
+    "polling_url": "/api/v1/attempts/attempt-snap-1/result",
+    "status": "SUBMITTED",
+    "submitted_at": "2024-01-01T12:00:10Z",
+  },
+  "status": 202,
+}
+`;

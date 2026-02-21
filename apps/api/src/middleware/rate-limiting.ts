@@ -146,7 +146,7 @@ export async function rateLimitingMiddleware(
  */
 function getEndpointRateLimit(
   endpoint: string,
-  workspaceId: string
+  _workspaceId: string
 ): RateLimitConfig | null {
   // Map endpoint to rate limit config
   const config =

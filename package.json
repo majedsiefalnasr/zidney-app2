@@ -9,13 +9,21 @@
     "type-check": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "build": "bun run build"
+    "build": "bun workspaces run build",
+    "dev:infra": "docker compose up -d",
+    "dev:api": "bun --cwd apps/api dev",
+    "dev:worker": "bun --cwd apps/worker dev",
+    "dev:mmc": "bun --cwd apps/mmc dev",
+    "dev:all": "concurrently \"bun run dev:api\" \"bun run dev:worker\" \"bun run dev:mmc\""
   },
   "devDependencies": {
-    "typescript": "latest",
-    "vitest": "^1.0.0",
+    "@typescript-eslint/eslint-plugin": "^8.56.0",
+    "@typescript-eslint/parser": "^8.56.0",
+    "concurrently": "^8.2.0",
     "eslint": "^8.0.0",
-    "@typescript-eslint/eslint-plugin": "^6.0.0",
-    "@typescript-eslint/parser": "^6.0.0"
+    "eslint-import-resolver-typescript": "^4.4.4",
+    "eslint-plugin-import": "^2.32.0",
+    "typescript": "latest",
+    "vitest": "^1.0.0"
   }
 }

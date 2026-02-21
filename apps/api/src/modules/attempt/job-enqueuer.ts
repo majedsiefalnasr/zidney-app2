@@ -1,10 +1,12 @@
+import { createLogger } from '@zidney/logging'
 import { jobQueue } from '../../../worker/src/queue/job-queue'
 import {
   AttemptSnapshot,
   SubmissionData,
   createGradeAttemptJob,
 } from '../../../worker/src/types/job-schema'
-import { logger } from '../../infrastructure/logger'
+
+const logger = createLogger('job-enqueuer')
 
 /**
  * T044: Job enqueueing in API layer

@@ -6,7 +6,7 @@
     ]"
   >
     <!-- Header -->
-    <div class="flex-shrink-0 p-4 border-b border-gray-200">
+    <div class="shrink-0 p-4 border-b border-gray-200">
       <Button
         v-if="collapsible"
         variant="ghost"
@@ -33,7 +33,7 @@
             ]"
             :title="isCollapsed && item.label ? item.label : ''"
           >
-            <span v-if="item.icon" class="flex-shrink-0">{{ item.icon }}</span>
+            <span v-if="item.icon" class="shrink-0">{{ item.icon }}</span>
             <span
               v-if="!isCollapsed"
               class="overflow-hidden text-ellipsis whitespace-nowrap"
@@ -51,10 +51,7 @@
     </nav>
 
     <!-- Footer -->
-    <div
-      v-if="$slots.footer"
-      class="flex-shrink-0 p-4 border-t border-gray-200"
-    >
+    <div v-if="$slots.footer" class="shrink-0 p-4 border-t border-gray-200">
       <slot name="footer" />
     </div>
 
@@ -63,7 +60,8 @@
 </template>
 
 <script setup lang="ts">
-import { Badge, Button } from '@zidney/shadcn-vue'
+import { Badge } from '@shadcn-vue/ui/badge'
+import { Button } from '@shadcn-vue/ui/button'
 import { ref } from 'vue'
 
 interface NavItem {
@@ -109,6 +107,8 @@ const handleItemClick = (item: NavItem) => {
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 .sidebar-nav {
   @apply flex-1 overflow-y-auto p-2;
 }

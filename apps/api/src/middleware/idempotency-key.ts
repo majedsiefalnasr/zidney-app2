@@ -4,19 +4,22 @@
  * Applied to: POST /api/admin/workspace/{workspace_id}/upgrade*
  */
 
+import { createLogger } from '@zidney/logging'
 import crypto from 'crypto'
-import { NextFunction, Request, Response } from 'express'
-import { Database } from 'pg'
+import type { Context, MiddlewareHandler, Next } from 'hono'
+import { Pool } from 'pg'
+
+const logger = createLogger('idempotency-middleware')
 
 /**
  * Create idempotency middleware
  */
-export function createIdempotencyMiddleware(masterDb: Database) {
-  return async (req: Request, res: Response, next: NextFunction) => {
-    const { workspace_id } = req.params
-    const { target_schema_version } = req.body || {}
-    const correlation_id =
-      req.headers['x-correlation-id'] || crypto.randomUUID()
+export function createIdempotencyMiddleware(masterDb: Pool): MiddlewareHandler {
+  return async (c: Context, next: Next) => {
+    const workspaceId = c.req.param('workspace_id')
+    const body = await c.req.json().catch(() => ({}))
+    const { target_schema_version } = body
+    const correlationId = c.get('correlation_id') || crypto.randomUUID()
 
     if (!target_schema_version) {
       return next()
@@ -24,7 +27,7 @@ export function createIdempotencyMiddleware(masterDb: Database) {
 
     try {
       // Generate idempotency key
-      const idempotencyKey = `upgrade-${workspace_id}-${target_schema_version}`
+      const idempotencyKey = `upgrade-${workspaceId}-${target_schema_version}`
 
       // Check if duplicate already in progress
       const result = await masterDb.query(
@@ -33,42 +36,46 @@ export function createIdempotencyMiddleware(masterDb: Database) {
          AND target_schema_version = $2 
          AND applied_at > now() - interval '5 minutes'
          AND status = 'SUCCESS'`,
-        [workspace_id, target_schema_version]
+        [workspaceId, target_schema_version]
       )
 
       if (result.rows[0].count > 0) {
         // Duplicate submission detected, return cached success
-        console.log(
-          JSON.stringify({
-            level: 'DEBUG',
-            service: 'idempotency-middleware',
-            event: 'duplicate_submission_detected',
-            correlation_id,
-            workspace_id,
-            target_version: target_schema_version,
-            timestamp: new Date().toISOString(),
-          })
-        )
-
-        return res.status(202).json({
-          success: true,
-          data: {
-            workspace_id,
-            target_schema_version,
-            status: 'QUEUED',
-            note: 'This version was recently upgraded. Returning cached status.',
-          },
-          error: null,
+        logger.debug('Duplicate submission detected', {
+          correlation_id: correlationId,
+          workspace_id: workspaceId,
+          target_version: target_schema_version,
         })
+
+        return c.json(
+          {
+            success: true,
+            data: {
+              workspace_id: workspaceId,
+              target_schema_version,
+              status: 'QUEUED',
+              note: 'This version was recently upgraded. Returning cached status.',
+            },
+            error: null,
+          },
+          202
+        )
       }
 
       // Attach idempotency context
-      ;(req as any).idempotencyKey = idempotencyKey
+      c.set('idempotencyKey', idempotencyKey)
 
-      next()
-    } catch (err: any) {
+      return next()
+    } catch (error) {
       // On error, allow through
-      next()
+      logger.error('Idempotency check error', {
+        correlation_id: correlationId,
+        workspace_id: workspaceId,
+        error: error instanceof Error ? error.message : String(error),
+      })
+      return next()
     }
   }
 }
+
+export default createIdempotencyMiddleware

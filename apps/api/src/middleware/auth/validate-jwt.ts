@@ -71,9 +71,6 @@ import { Context, Next } from 'hono'
  * - correlationId: From middleware chain
  */
 export async function validateJwtMiddleware(c: Context, next: Next) {
-  const correlationId = c.get('correlationId') || 'unknown'
-  const workspaceSlug = c.get('workspaceSlug') || 'unknown'
-
   try {
     // Extract token from "Bearer <token>" header
     const authHeader = c.req.header('Authorization')
@@ -171,7 +168,7 @@ export async function validateJwtOptionalMiddleware(c: Context, next: Next) {
     c.set('userRole', 'role' in payload ? payload.role : undefined)
 
     await next()
-  } catch (error) {
+  } catch {
     // Invalid token provided, but optional so continue as unauthenticated
     c.set('isAuthenticated', false)
     c.set('userId', undefined)

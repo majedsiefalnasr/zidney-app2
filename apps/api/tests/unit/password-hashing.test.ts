@@ -91,7 +91,7 @@ describe('Password Hashing', () => {
     const oldPassword = 'OldPassword123'
     const newPassword = 'NewPassword456'
 
-    const oldHash = await bcrypt.hash(oldPassword, COST)
+    const _oldHash = await bcrypt.hash(oldPassword, COST)
     const newHash = await bcrypt.hash(newPassword, COST)
 
     // Old password no longer works
@@ -149,8 +149,7 @@ describe('Password Hashing', () => {
 
   it('should handle null/undefined gracefully', async () => {
     try {
-      // @ts-ignore intentional
-      await bcrypt.hash(null, COST)
+      await bcrypt.hash(null as unknown as string, COST)
       expect.fail('Should throw')
     } catch (err) {
       expect(err).toBeDefined()

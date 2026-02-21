@@ -65,7 +65,7 @@ EXECUTE FUNCTION raise_immutable_violation();
 **File**: `packages/domain-core/src/audit/attempt-event-logger.ts`
 
 ```typescript
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@logging'
 import { Pool, PoolClient } from 'pg'
 
 const logger = createLogger('AttemptEventLogger')
@@ -504,7 +504,7 @@ CREATE INDEX idx_attempt_answers_question_id ON attempt_answers(question_id);
 **File**: `packages/domain-core/src/attempts/snapshot-service.ts`
 
 ```typescript
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@logging'
 import { Pool } from 'pg'
 
 const logger = createLogger('SnapshotService')
@@ -657,7 +657,7 @@ export async function getAttemptSnapshot(
 **File**: `packages/domain-core/src/attempts/attempt-init.ts`
 
 ```typescript
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@logging'
 import { Pool, PoolClient } from 'pg'
 import { captureExamSnapshot } from './snapshot-service'
 import { logAttemptEvent } from '../audit/attempt-event-logger'

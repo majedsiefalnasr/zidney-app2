@@ -114,7 +114,7 @@ export function extractWorkspaceSlug(c: any): string | null {
 
   // Check path: /workspace/<slug>/
   const path = c.req.path
-  const match = path.match(/^\/workspace\/([^\/]+)/)
+  const match = path.match(/^\/workspace\/([^/]+)/)
   if (match) {
     return match[1]
   }

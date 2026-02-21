@@ -18,7 +18,7 @@ import { db, getTenantPool } from '../../db'
 describe('Worker Throughput', () => {
   let workspaceId: string
   let pool: any
-  let jobs: any[] = []
+  const jobs: any[] = []
 
   beforeAll(async () => {
     // Setup workspace

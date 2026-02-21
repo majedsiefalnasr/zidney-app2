@@ -27,11 +27,11 @@
  * - Error responses normalized to RFC 7807 format
  */
 
+import { Logger } from '@zidney/logging'
 import { Hono } from 'hono'
-import Logger from '../utils/logger'
-import { createAttemptHandler } from './attempts/create'
-import { updateProgressHandler } from './attempts/progress'
-import { getAttemptStatusHandler } from './attempts/status'
+import { createAttemptHandler } from './create'
+import { updateProgressHandler } from './progress'
+import { getAttemptStatusHandler } from './status'
 
 /**
  * Register all Stage 06 attempt engine routes

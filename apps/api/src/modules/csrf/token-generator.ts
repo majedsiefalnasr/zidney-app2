@@ -1,7 +1,9 @@
+import { createLogger } from '@zidney/logging'
 import { randomBytes } from 'crypto'
 import { Hono } from 'hono'
-import { logger } from '../../infrastructure/logger'
 import { redis } from '../../infrastructure/redis'
+
+const logger = createLogger('csrf')
 
 /**
  * T065-T066: CSRF Protection
@@ -41,7 +43,7 @@ async function storeCSRFToken(
     created_at: new Date().toISOString(),
   })
 
-  await redis.setex(key, CSRF_TTL, value)
+  await redis.setEx(key, CSRF_TTL, value)
 }
 
 /**

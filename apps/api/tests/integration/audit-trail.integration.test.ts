@@ -13,9 +13,9 @@ import {
   getAttemptEventHistory,
   logAttemptEvent,
 } from '@zidney/domain-core/src/audit/attempt-event-logger'
-import { createLogger } from '@zidney/logging'
 import { Pool } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { createLogger } from '../../src/utils/logger'
 
 const logger = createLogger('AuditTrailIntegrationTest')
 

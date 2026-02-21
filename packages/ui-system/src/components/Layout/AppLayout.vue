@@ -1,7 +1,7 @@
 <template>
   <div class="app-layout flex flex-col h-screen bg-white">
     <!-- Topbar -->
-    <header v-if="$slots.topbar" class="flex-shrink-0 border-b border-gray-200">
+    <header v-if="$slots.topbar" class="shrink-0 border-b border-gray-200">
       <slot name="topbar" />
     </header>
 
@@ -10,7 +10,7 @@
       <!-- Sidebar -->
       <aside
         v-if="$slots.sidebar"
-        class="flex-shrink-0 w-64 border-r border-gray-200 overflow-y-auto"
+        class="shrink-0 w-64 border-r border-gray-200 overflow-y-auto"
       >
         <slot name="sidebar" />
       </aside>
@@ -22,7 +22,7 @@
     </div>
 
     <!-- Footer -->
-    <footer v-if="$slots.footer" class="flex-shrink-0 border-t border-gray-200">
+    <footer v-if="$slots.footer" class="shrink-0 border-t border-gray-200">
       <slot name="footer" />
     </footer>
   </div>
@@ -41,6 +41,8 @@ withDefaults(defineProps<AppLayoutProps>(), {
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 .app-layout__container {
   @apply flex flex-1 overflow-hidden;
 }

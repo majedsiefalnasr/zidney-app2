@@ -1,5 +1,7 @@
+import { createLogger } from '@zidney/logging'
 import { Context, Next } from 'hono'
-import { createChildLogger } from '../lib/logger'
+
+const baseLogger = createLogger('correlation')
 
 /**
  * Correlation context middleware - binds request-scoped context to child logger.
@@ -28,11 +30,11 @@ export function correlationMiddleware() {
 
     // Build context for child logger
     const childContext: {
-      request_id: string
+      correlation_id: string
       workspace_id?: string
       workspace_slug?: string
       user_id?: string
-    } = { request_id: requestId }
+    } = { correlation_id: requestId }
 
     if (workspaceId) {
       childContext.workspace_id = workspaceId
@@ -45,14 +47,13 @@ export function correlationMiddleware() {
     }
 
     // Create child logger with context (all subsequent logs include these fields)
-    const childLogger = createChildLogger(childContext)
+    const childLogger = baseLogger.child(childContext)
 
     // Attach child logger to context for handler access
     c.set('logger', childLogger)
 
     // Log request received
-    childLogger.info({
-      event: 'request_received',
+    childLogger.info('request_received', {
       method: c.req.method,
       path: c.req.path,
       remote_addr:
@@ -70,8 +71,7 @@ export function correlationMiddleware() {
     const duration = Date.now() - startTime
     const status = c.res.status
 
-    childLogger.info({
-      event: 'request_completed',
+    childLogger.info('request_completed', {
       status_code: status,
       duration_ms: duration,
       content_type: c.res.headers.get('content-type'),

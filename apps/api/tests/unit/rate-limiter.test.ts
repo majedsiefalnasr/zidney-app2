@@ -104,7 +104,7 @@ class TokenBucketLimiter {
     const lastRefillKey = `${key}:last_refill`
 
     // Get current tokens and last refill
-    let data = await this.redis.get(key)
+    const data = await this.redis.get(key)
     let currentTokens = capacity
     let lastRefill = now
 
@@ -147,7 +147,7 @@ class TokenBucketLimiter {
     refillRatePerSec: number
   ): Promise<number> {
     const now = Date.now()
-    let data = await this.redis.get(key)
+    const data = await this.redis.get(key)
     let currentTokens = capacity
     let lastRefill = now
 
@@ -299,7 +299,7 @@ describe('Rate Limiting Algorithms', () => {
 
       vi.setSystemTime(laterTime)
 
-      let data = await new Promise((resolve) => {
+      const data = await new Promise((resolve) => {
         mockRedis.set.mockImplementation((key, value) => {
           resolve(JSON.parse(value))
         })

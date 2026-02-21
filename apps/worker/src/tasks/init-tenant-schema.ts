@@ -93,13 +93,13 @@ export async function executeInitTenantSchema(
     schema_file_checksum,
   } = payload
 
-  const logger_fn = createLogger(`INIT_TENANT_SCHEMA[${task_id}]`)
+  const logger = createLogger(`INIT_TENANT_SCHEMA[${task_id}]`)
   const startTime = Date.now()
 
   let client: PoolClient | null = null
 
   try {
-    logger_fn.info('Task started', {
+    logger.info('Task started', {
       workspace_id,
       schema_version,
       idempotency_key,
@@ -119,7 +119,7 @@ export async function executeInitTenantSchema(
       // Statement timeout: 30 seconds (prevents hung transactions)
       await client.query(`SET LOCAL statement_timeout = '30000'`)
 
-      logger_fn.debug('Timeouts configured', {
+      logger.debug('Timeouts configured', {
         lock_timeout: '5s',
         statement_timeout: '30s',
       })
@@ -140,7 +140,7 @@ export async function executeInitTenantSchema(
         // Schema version record exists - VERIFY baseline tables exist
         const existingVersion = existingVersionResult.rows[0]
 
-        logger_fn.debug(
+        logger.debug(
           'Schema version record found - verifying baseline tables',
           {
             existing_version: existingVersion.version,
@@ -152,7 +152,7 @@ export async function executeInitTenantSchema(
         try {
           await verifySchemaIntegrity(client as any)
 
-          logger_fn.info(
+          logger.info(
             'IDEMPOTENT: Schema fully initialized (all baseline tables verified)',
             {
               existing_version: existingVersion.version,
@@ -174,7 +174,7 @@ export async function executeInitTenantSchema(
           }
         } catch (integrityError) {
           // CRITICAL: Partial initialization detected
-          logger_fn.error(
+          logger.error(
             'PARTIAL INITIALIZATION: schema_version exists but baseline tables incomplete',
             {
               existing_version: existingVersion.version,
@@ -197,7 +197,7 @@ export async function executeInitTenantSchema(
         }
       }
 
-      logger_fn.debug('Idempotency check passed - no existing schema_version')
+      logger.debug('Idempotency check passed - no existing schema_version')
 
       // ======================================================================
       // BEGIN TRANSACTION (READ COMMITTED isolation)
@@ -205,7 +205,7 @@ export async function executeInitTenantSchema(
 
       await client.query('BEGIN TRANSACTION ISOLATION LEVEL READ COMMITTED')
 
-      logger_fn.debug('Transaction started')
+      logger.debug('Transaction started')
 
       // ======================================================================
       // ACQUIRE SCHEMA LOCK (exclusive, prevents concurrent migrations)
@@ -213,7 +213,7 @@ export async function executeInitTenantSchema(
 
       await client.query(`LOCK TABLE schema_version IN ACCESS EXCLUSIVE MODE`)
 
-      logger_fn.debug('Schema lock acquired')
+      logger.debug('Schema lock acquired')
 
       // ======================================================================
       // READ MIGRATION FILES
@@ -231,7 +231,7 @@ export async function executeInitTenantSchema(
       const schemaSQL = readMigrationFile(schemaFilePath)
       const triggersSQL = readMigrationFile(triggersFilePath)
 
-      logger_fn.debug('Migration files read', {
+      logger.debug('Migration files read', {
         schema_bytes: schemaSQL.length,
         triggers_bytes: triggersSQL.length,
       })
@@ -244,7 +244,7 @@ export async function executeInitTenantSchema(
 
       if (calculatedChecksum !== schema_file_checksum) {
         // CRITICAL: Checksum mismatch = possible tampering or corruption
-        logger_fn.error('CHECKSUM MISMATCH DETECTED', {
+        logger.error('CHECKSUM MISMATCH DETECTED', {
           workspace_id,
           expected: schema_file_checksum,
           calculated: calculatedChecksum,
@@ -265,7 +265,7 @@ export async function executeInitTenantSchema(
         }
       }
 
-      logger_fn.debug('Checksum validation passed', {
+      logger.debug('Checksum validation passed', {
         checksum: calculatedChecksum.substring(0, 8) + '...',
       })
 
@@ -275,18 +275,18 @@ export async function executeInitTenantSchema(
 
       // Execute baseline schema SQL
       await executeMigrationSQL(client as any, schemaSQL)
-      logger_fn.debug('Baseline schema SQL executed')
+      logger.debug('Baseline schema SQL executed')
 
       // Execute trigger functions
       await executeMigrationSQL(client as any, triggersSQL)
-      logger_fn.debug('Trigger functions created')
+      logger.debug('Trigger functions created')
 
       // ======================================================================
       // VERIFY SCHEMA INTEGRITY (critical tables exist)
       // ======================================================================
 
       await verifySchemaIntegrity(client as any)
-      logger_fn.debug('Schema integrity verified')
+      logger.debug('Schema integrity verified')
 
       // ======================================================================
       // INSERT SCHEMA_VERSION RECORD (marks initialization complete)
@@ -297,7 +297,7 @@ export async function executeInitTenantSchema(
         schema_version,
         calculatedChecksum
       )
-      logger_fn.info('Schema version record inserted', {
+      logger.info('Schema version record inserted', {
         version: schema_version,
         checksum: calculatedChecksum.substring(0, 8) + '...',
       })
@@ -307,7 +307,7 @@ export async function executeInitTenantSchema(
       // ======================================================================
 
       await client.query('COMMIT')
-      logger_fn.info('Transaction committed')
+      logger.info('Transaction committed')
 
       // ======================================================================
       // SUCCESS: Return result
@@ -315,7 +315,7 @@ export async function executeInitTenantSchema(
 
       const duration = Date.now() - startTime
 
-      logger_fn.critical('TENANT SCHEMA INITIALIZED', {
+      logger.info('TENANT SCHEMA INITIALIZED', {
         workspace_id,
         version: schema_version,
         duration_ms: duration,
@@ -330,15 +330,15 @@ export async function executeInitTenantSchema(
       }
     } catch (txnError) {
       // Transaction error - ROLLBACK
-      logger_fn.error('Transaction error encountered', {
+      logger.error('Transaction error encountered', {
         error: txnError instanceof Error ? txnError.message : String(txnError),
       })
 
       try {
         await client.query('ROLLBACK')
-        logger_fn.debug('Transaction rolled back')
+        logger.debug('Transaction rolled back')
       } catch (rollbackError) {
-        logger_fn.error('Rollback failed', {
+        logger.error('Rollback failed', {
           error:
             rollbackError instanceof Error
               ? rollbackError.message
@@ -356,7 +356,7 @@ export async function executeInitTenantSchema(
       }
     }
   } catch (error) {
-    logger_fn.error('Task execution failed', {
+    logger.error('Task execution failed', {
       error: error instanceof Error ? error.message : String(error),
       duration_ms: Date.now() - startTime,
     })
@@ -373,9 +373,9 @@ export async function executeInitTenantSchema(
     if (client) {
       try {
         client.release()
-        logger_fn.debug('Client released to pool')
+        logger.debug('Client released to pool')
       } catch (releaseError) {
-        logger_fn.error('Failed to release client', {
+        logger.error('Failed to release client', {
           error:
             releaseError instanceof Error
               ? releaseError.message

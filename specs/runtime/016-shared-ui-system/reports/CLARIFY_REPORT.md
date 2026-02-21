@@ -120,26 +120,27 @@ Validation logic can't be implemented without knowing whether validation is glob
 
 ## Remaining Medium-Priority Ambiguities (Can be resolved during Plan step)
 
-| # | Ambiguity | Recommendation |
-| --- | --- | --- |
-| 1 | Form dirty state definition (touched vs. value change) | Track any interaction; form is dirty if any field was touched |
-| 2 | Modal/Drawer size presets (fixed pixels vs. responsive breakpoints) | Responsive breakpoints: sm = 400px, md = 600px, lg = 800px |
-| 3 | Empty state precedence (loading vs. no results vs. both) | Loading takes precedence; once loaded, show empty state if no results |
+| #   | Ambiguity                                                           | Recommendation                                                        |
+| --- | ------------------------------------------------------------------- | --------------------------------------------------------------------- |
+| 1   | Form dirty state definition (touched vs. value change)              | Track any interaction; form is dirty if any field was touched         |
+| 2   | Modal/Drawer size presets (fixed pixels vs. responsive breakpoints) | Responsive breakpoints: sm = 400px, md = 600px, lg = 800px            |
+| 3   | Empty state precedence (loading vs. no results vs. both)            | Loading takes precedence; once loaded, show empty state if no results |
 
 ---
 
 ## Clarification Summary
 
-| Category | Count |
-| --- | --- |
-| **Critical ambiguities requiring input** | 5 |
-| **Medium-priority (defer to Plan)** | 3 |
-| **Non-blocking (defer to implementation)** | 0 |
-| **Total** | 8 |
+| Category                                   | Count |
+| ------------------------------------------ | ----- |
+| **Critical ambiguities requiring input**   | 5     |
+| **Medium-priority (defer to Plan)**        | 3     |
+| **Non-blocking (defer to implementation)** | 0     |
+| **Total**                                  | 8     |
 
 **Risk from unresolved ambiguities:** **HIGH**
 
 Without clarity on these 5 critical decisions, each app (MMC, Backoffice, Frontoffice) will invent its own patterns, leading to:
+
 - Inconsistent component usage across the platform
 - Hidden architectural debt in state management
 - Difficult refactoring when patterns diverge
@@ -150,8 +151,9 @@ Without clarity on these 5 critical decisions, each app (MMC, Backoffice, Fronto
 ## Constitutional Compliance Note
 
 ✅ All identified ambiguities are **UI-layer specification only** and do NOT affect:
+
 - Tenant isolation
-- License enforcement  
+- License enforcement
 - Attempt engine integrity
 - Database schema or transactions
 - Snapshot handling
@@ -167,19 +169,20 @@ Without clarity on these 5 critical decisions, each app (MMC, Backoffice, Fronto
 
 Based on Zidney architecture best practices, the following decisions are proposed for all 5 critical ambiguities:
 
-| Ambiguity | Recommended Decision | Rationale |
-| --- | --- | --- |
-| 1. Pagination | **Option C (Agnostic)** | Provides flexibility while maintaining control |
-| 2. Row Actions | **Option B (Async)** | Handles common case (API calls) natively |
-| 3. Filter Serialization | **Option B (Auto Fallback)** | Seamless UX without app-side logic |
-| 4. Column Accessors | **Option A (Optional for Primitives)** | Balances DX with type safety |
-| 5. Multi-Language Validation | **Option B (Per-Language)** | Matches real-world translation workflows |
+| Ambiguity                    | Recommended Decision                   | Rationale                                      |
+| ---------------------------- | -------------------------------------- | ---------------------------------------------- |
+| 1. Pagination                | **Option C (Agnostic)**                | Provides flexibility while maintaining control |
+| 2. Row Actions               | **Option B (Async)**                   | Handles common case (API calls) natively       |
+| 3. Filter Serialization      | **Option B (Auto Fallback)**           | Seamless UX without app-side logic             |
+| 4. Column Accessors          | **Option A (Optional for Primitives)** | Balances DX with type safety                   |
+| 5. Multi-Language Validation | **Option B (Per-Language)**            | Matches real-world translation workflows       |
 
 ---
 
 ## Next Step
 
 **Gate Decision:**
+
 - ✅ **Approve recommended decisions:** Proceed immediately to Plan step with proposed resolutions
 - ❌ **Override decisions:** Provide alternative options for any of the 5 ambiguities; clarify step will resolve with your input
 
@@ -197,6 +200,7 @@ Based on Zidney architecture best practices, the following decisions are propose
 **Final Position:** APPROVE Option C (Agnostic)
 
 **Stakeholder reasoning:**
+
 - Shared UI system must not enforce backend coupling
 - MMC, Backoffice, and future apps may require different strategies
 - Server-side pagination required for large datasets
@@ -212,6 +216,7 @@ Based on Zidney architecture best practices, the following decisions are propose
 **Final Position:** APPROVE Option B (Async)
 
 **Stakeholder reasoning:**
+
 - MMC heavily action-driven (activate, archive, upgrade, regenerate, etc.)
 - Async UX state management belongs inside component
 - Prevents duplicate action triggers
@@ -229,11 +234,13 @@ Based on Zidney architecture best practices, the following decisions are propose
 **Stakeholder decision:** URL primary → localStorage fallback **with visible state indicator**
 
 **Modification rationale:**
+
 - Silent fallback creates debugging ambiguity
 - Must expose state to prevent confusion when sharing filtered URLs
 - Component must emit `onStorageFallback` event or expose `isPersistedExternally` flag
 
 **Implementation requirements:**
+
 1. Component detects URL overflow before serialization
 2. If overflow detected, fallback to localStorage automatically
 3. Expose `isPersistedExternally` flag via template ref or exposed property
@@ -249,6 +256,7 @@ Based on Zidney architecture best practices, the following decisions are propose
 **Final Position:** APPROVE Option A (Optional for Primitives)
 
 **Stakeholder reasoning:**
+
 - Cleanest DX
 - Most common case = primitive fields
 - Computed/nested requires accessor (correct)
@@ -266,6 +274,7 @@ Based on Zidney architecture best practices, the following decisions are propose
 **Stakeholder decision:** Per-language validation enforced with minimum viable language requirement
 
 **Stakeholder reasoning:**
+
 - Per-language validation is correct
 - At least one language must always be required
 - System must enforce minimum viable language set
@@ -274,6 +283,7 @@ Based on Zidney architecture best practices, the following decisions are propose
 - Avoids inconsistent CMS state
 
 **Implementation requirement:**
+
 ```typescript
 /**
  * At least one language must be marked as required
@@ -290,13 +300,13 @@ interface MultiLanguageModalProps {
 
 ## Decision Verification Matrix
 
-| Decision | Option | Approved | Rationale | Constraints |
-| --- | --- | --- | --- | --- |
-| Pagination | C | ✅ | Flexibility for different backends | None |
-| Row Actions | B | ✅ | Async handles common MMC case | Emit start/end events |
-| Filter Serialization | B-Mod | ✅ | Auto fallback with visibility | Emit `@storage-fallback-triggered` |
-| Column Accessor | A | ✅ | Optimal DX/safety balance | "—" fallback configurable |
-| Multi-Language Validation | B | ✅ | Per-language + min 1 required | Enforce `requiredLanguages.length >= 1` |
+| Decision                  | Option | Approved | Rationale                          | Constraints                             |
+| ------------------------- | ------ | -------- | ---------------------------------- | --------------------------------------- |
+| Pagination                | C      | ✅       | Flexibility for different backends | None                                    |
+| Row Actions               | B      | ✅       | Async handles common MMC case      | Emit start/end events                   |
+| Filter Serialization      | B-Mod  | ✅       | Auto fallback with visibility      | Emit `@storage-fallback-triggered`      |
+| Column Accessor           | A      | ✅       | Optimal DX/safety balance          | "—" fallback configurable               |
+| Multi-Language Validation | B      | ✅       | Per-language + min 1 required      | Enforce `requiredLanguages.length >= 1` |
 
 ---
 
@@ -307,6 +317,7 @@ interface MultiLanguageModalProps {
 Proceeding to **Step 3 – Plan**
 
 Plan step will generate technical design artifacts including:
+
 - Component implementation architecture (with all 5 decisions embedded)
 - File structure and directory layout detail
 - Build system integration strategy

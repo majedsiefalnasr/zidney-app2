@@ -13,20 +13,18 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
+import { createLogger } from '@zidney/logging'
+import type { Pool } from 'pg'
 import {
   calculateSHA256,
   getMigrationFilePath,
-} from '@zidney/domain-core/src/migrations/migrate'
-import { createLogger } from '@zidney/logging'
-import type { Pool } from 'pg'
+} from '../../../../../packages/domain-core/src/migrations/migrate'
 import {
   checkIdempotency,
   generateTaskId,
   storeIdempotencyRecord,
   type RedisClient,
 } from './idempotency.service'
-
-const logger = createLogger('schema-init-service')
 
 export interface SchemaInitPayload {
   workspace_id: string
@@ -79,12 +77,12 @@ export async function initializeTenantSchema(
   queue: WorkerQueue
 ): Promise<SchemaInitResponse> {
   const { workspace_id, idempotency_key } = payload
-  const logger_fn = createLogger('initializeTenantSchema')
+  const logger = createLogger('initializeTenantSchema')
 
   const startTime = Date.now()
 
   try {
-    logger_fn.debug('Schema initialization requested', {
+    logger.debug('Schema initialization requested', {
       workspace_id,
       idempotency_key: idempotency_key ? '***provided***' : 'not-provided',
     })
@@ -98,7 +96,7 @@ export async function initializeTenantSchema(
     )
 
     if (existing) {
-      logger_fn.info('Schema initialization idempotent replay', {
+      logger.info('Schema initialization idempotent replay', {
         workspace_id,
         existing_task_id: existing.task_id,
         duration_ms: Date.now() - startTime,
@@ -121,7 +119,7 @@ export async function initializeTenantSchema(
     const schemaFilePath = getMigrationFilePath('v1.0.0', 'baseline-schema.sql')
     const schemaChecksum = calculateSHA256(schemaFilePath)
 
-    logger_fn.debug('Schema checksum calculated', {
+    logger.debug('Schema checksum calculated', {
       workspace_id,
       checksum: schemaChecksum.substring(0, 8) + '...',
     })
@@ -140,7 +138,7 @@ export async function initializeTenantSchema(
       workerPayload
     )
 
-    logger_fn.info('INIT_TENANT_SCHEMA task enqueued', {
+    logger.info('INIT_TENANT_SCHEMA task enqueued', {
       workspace_id,
       task_id: taskId,
       enqueued_task_id: enqueuedTaskId,
@@ -166,7 +164,7 @@ export async function initializeTenantSchema(
       message: `Schema initialization started. Track progress using task_id=${taskId}`,
     }
   } catch (error) {
-    logger_fn.error('Schema initialization failed', {
+    logger.error('Schema initialization failed', {
       workspace_id,
       error: error instanceof Error ? error.message : String(error),
       duration_ms: Date.now() - startTime,
@@ -190,12 +188,12 @@ export async function getSchemaInitStatus(
   redis: RedisClient | null,
   pool: Pool
 ): Promise<any> {
-  const logger_fn = createLogger('getSchemaInitStatus')
+  const logger = createLogger('getSchemaInitStatus')
 
   try {
     // TODO: Query worker queue or Redis for task status
     // Return: { task_id, status, progress, error }
-    logger_fn.debug('Schema init status queried', {
+    logger.debug('Schema init status queried', {
       workspace_id,
       task_id,
     })
@@ -220,7 +218,7 @@ export async function getSchemaInitStatus(
       message: 'Schema initialization in progress',
     }
   } catch (error) {
-    logger_fn.error('Failed to get schema init status', {
+    logger.error('Failed to get schema init status', {
       workspace_id,
       task_id,
       error: error instanceof Error ? error.message : String(error),

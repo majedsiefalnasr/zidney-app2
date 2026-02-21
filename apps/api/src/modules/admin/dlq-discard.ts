@@ -1,7 +1,9 @@
+import { createLogger } from '@zidney/logging'
 import { Hono } from 'hono'
 import { v4 as uuidv4 } from 'uuid'
-import { logger } from '../../infrastructure/logger'
 import { db } from '../../infrastructure/postgres'
+
+const logger = createLogger('dlq-discard')
 
 /**
  * T038: POST /admin/workspace/{id}/dlq/{dlqId}/discard

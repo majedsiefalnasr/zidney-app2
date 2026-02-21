@@ -17,8 +17,8 @@
  * - Deterministic validation results
  */
 
-import { QuestionType, UserAnswer } from '../../types/src/attempt'
-import Logger from '../utils/logger'
+import { createLogger, Logger } from '@zidney/logging'
+import { QuestionType, UserAnswer } from '@zidney/types/attempt'
 
 /**
  * Response validation result
@@ -544,5 +544,5 @@ export function validateResponseForQuestionType(
  * Create null logger for cases where logger not provided
  */
 function createNullLogger(): Logger {
-  return new Logger('null-logger')
+  return createLogger('null-logger')
 }

@@ -23,8 +23,8 @@
  * Layer 3 (Status): Check attempt status (SUBMITTED/FINALIZED = no-op)
  */
 
+import { Logger } from '@zidney/logging'
 import { Pool, PoolClient } from 'pg'
-import Logger from '../utils/logger'
 
 /**
  * Idempotency check result

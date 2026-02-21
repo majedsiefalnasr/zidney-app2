@@ -19,8 +19,8 @@
  * - Type-safe validation with strict TypeScript
  */
 
+import { Logger } from '@zidney/logging'
 import { z } from 'zod'
-import { Logger } from '../utils/logger'
 
 // ============================================================================
 // T019: Attempt Creation Validation Schema

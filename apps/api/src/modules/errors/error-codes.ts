@@ -162,8 +162,8 @@ export function getStatusCode(code: ErrorCode): number {
  */
 export function formatErrorMessage(code: ErrorCode, message: string): string {
   // Remove any paths, IDs, or sensitive info
-  const sensitivePattern = /\/[\w\-\/]+\.|:\d+/g
-  let formatted = message.replace(sensitivePattern, '[redacted]')
+  const sensitivePattern = /\/[\w/-]+\.|:\d+/g
+  const formatted = message.replace(sensitivePattern, '[redacted]')
 
   // For some errors, use generic messages
   if (code === ErrorCode.DATABASE_ERROR) {

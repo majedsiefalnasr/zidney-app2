@@ -239,7 +239,7 @@ describe('Phase 6: Referential Integrity Tests', () => {
       )
 
       // Verify all relationships exist
-      let result = await client.query(
+      const result = await client.query(
         `SELECT
           (SELECT COUNT(*) FROM mcq_baskets WHERE id = $1) as baskets,
           (SELECT COUNT(*) FROM mcq_questions WHERE basket_id = $1) as questions,

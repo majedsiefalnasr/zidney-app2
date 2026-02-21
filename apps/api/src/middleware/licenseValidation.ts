@@ -17,8 +17,12 @@
  * - PROVISIONING → 503 Try Again
  */
 
-import { NextFunction, Request, Response } from 'express'
+import { createLogger } from '@zidney/logging'
+import type { Context, MiddlewareHandler, Next } from 'hono'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { Pool } from 'pg'
+
+const logger = createLogger('license-validation')
 
 export interface LicenseStatus {
   id: number
@@ -84,7 +88,9 @@ export class LicenseValidationMiddleware {
         client.release()
       }
     } catch (error) {
-      console.error(`Failed to query license status:`, error)
+      logger.error('Failed to query license status', {
+        error: error instanceof Error ? error.message : String(error),
+      })
       return null
     }
   }
@@ -141,61 +147,75 @@ export class LicenseValidationMiddleware {
   }
 
   /**
-   * Express middleware function
+   * Hono middleware function
    */
-  middleware() {
-    return async (req: Request, res: Response, next: NextFunction) => {
+  middleware(): MiddlewareHandler {
+    return async (c: Context, next: Next) => {
       try {
         // Require tenant context from tenant resolver
-        const tenant = (req as any).tenant
+        const tenant = c.get('tenant')
         if (!tenant) {
-          return res.status(500).json({
-            success: false,
-            data: null,
-            error: {
-              code: 'SYSTEM_ERROR',
-              message:
-                'Tenant context not found (tenantResolver must run first)',
+          return c.json(
+            {
+              success: false,
+              data: null,
+              error: {
+                code: 'SYSTEM_ERROR',
+                message:
+                  'Tenant context not found (tenantResolver must run first)',
+              },
             },
-          })
+            500
+          )
         }
 
         // Get license status
         const license_status = await this.getLicenseStatus(tenant.license_id)
         if (!license_status) {
-          return res.status(404).json({
-            success: false,
-            data: null,
-            error: { code: 'WS_001', message: 'License not found' },
-          })
+          return c.json(
+            {
+              success: false,
+              data: null,
+              error: { code: 'WS_001', message: 'License not found' },
+            },
+            404
+          )
         }
 
         // Validate license status
         const status_response = this.getStatusResponse(license_status)
 
         if (status_response.http_status !== 200) {
-          return res.status(status_response.http_status).json({
-            success: false,
-            data: null,
-            error: {
-              code: status_response.error_code,
-              message: status_response.message,
+          return c.json(
+            {
+              success: false,
+              data: null,
+              error: {
+                code: status_response.error_code,
+                message: status_response.message,
+              },
             },
-          })
+            status_response.http_status as ContentfulStatusCode
+          )
         }
 
         // License is ACTIVE, continue
-        next()
+        return next()
       } catch (error) {
-        console.error(`LicenseValidation error:`, error)
-        return res.status(500).json({
-          success: false,
-          data: null,
-          error: {
-            code: 'SYSTEM_ERROR',
-            message: 'Failed to validate license',
-          },
+        logger.error('LicenseValidation error', {
+          error: error instanceof Error ? error.message : String(error),
         })
+        return c.json(
+          {
+            success: false,
+            data: null,
+            error: {
+              code: 'SYSTEM_ERROR',
+              message: 'Failed to validate license',
+            },
+          },
+          500
+        )
       }
     }
   }

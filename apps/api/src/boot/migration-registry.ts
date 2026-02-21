@@ -13,13 +13,6 @@ import { sql } from 'drizzle-orm'
 
 type TenantDBConnection = any // Placeholder for actual DB connection type
 
-interface MigrationRecord {
-  name: string
-  version: string
-  appliedAt: Date
-  correlationId: string
-}
-
 /**
  * Register all tenant migrations required for 1.1.0 schema
  */
@@ -64,13 +57,6 @@ export async function registerAndApplyTenantMigrations(
 
       // Apply each migration in sequence
       for (const migrationName of TENANT_MIGRATIONS_1_1_0) {
-        const migrationRecord: MigrationRecord = {
-          name: migrationName,
-          version: '1.1.0',
-          appliedAt: new Date(),
-          correlationId,
-        }
-
         // Insert migration record for idempotence
         await db.execute(
           sql`INSERT INTO migration_history (name, version, applied_at, correlation_id)

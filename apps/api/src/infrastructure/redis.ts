@@ -38,43 +38,42 @@ export async function initializeRedisPool(
   }
 
   try {
-    // Create Redis client with connection pooling
+    // Create Redis client with connection pooling (Redis v4 API)
     redisClient = createClient({
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      db: parseInt(process.env.REDIS_DB || '0'),
-      password: process.env.REDIS_PASSWORD,
-      retry_strategy: (options: any) => {
-        if (options.error && options.error.code === 'ECONNREFUSED') {
-          return new Error('End of retry.')
-        }
-        if (options.total_retry_time > 1000 * 60 * 60) {
-          return new Error('Retry time exhausted')
-        }
-        if (options.attempt > 10) {
-          return undefined
-        }
-        // Exponential backoff: 100ms, 200ms, 400ms, etc.
-        return Math.min(options.attempt * 100, 3000)
+      socket: {
+        host: process.env.REDIS_HOST || 'localhost',
+        port: parseInt(process.env.REDIS_PORT || '6379'),
+        reconnectStrategy: (retries: number) => {
+          if (retries > 10) {
+            console.error(
+              `[${correlationId}] Redis connection retries exhausted`
+            )
+            return new Error('Redis connection retries exhausted')
+          }
+          // Exponential backoff: 100ms, 200ms, 400ms, etc.
+          return Math.min(retries * 100, 3000)
+        },
       },
-      // Enable keyspace notifications for monitoring
-      // KEY EVENTS (required for rate limit monitoring)
-      notify_keyspace_events: 'EK',
+      database: parseInt(process.env.REDIS_DB || '0'),
+      password: process.env.REDIS_PASSWORD || undefined,
     })
+
+    // Connect to Redis
+    await redisClient.connect()
 
     // Configure memory policy
     // Use LRU eviction: allkeys-lru removes any key when memory limit reached
     await redisClient.configSet('maxmemory-policy', 'allkeys-lru')
 
-    // Connect to Redis
-    await redisClient.connect()
+    // Enable keyspace notifications for monitoring (KEY EVENTS)
+    await redisClient.configSet('notify-keyspace-events', 'EK')
 
     // Health check
     const result = await redisClient.ping()
     console.log(`[${correlationId}] Redis health check: ${result}`)
 
     // Set up error handlers
-    redisClient.on('error', (err: any) => {
+    redisClient.on('error', (err: Error) => {
       console.error(`[${correlationId}] Redis client error:`, err.message)
     })
 
@@ -129,3 +128,18 @@ export async function closeRedisPool(context?: any): Promise<void> {
     console.error(`[${correlationId}] Error closing Redis pool:`, message)
   }
 }
+
+/**
+ * Redis client proxy for backward compatibility
+ * Provides direct access to Redis client methods
+ */
+export const redis = new Proxy({} as RedisClientType, {
+  get(_target, prop) {
+    const client = getRedisClient()
+    const value = client[prop as keyof RedisClientType]
+    if (typeof value === 'function') {
+      return value.bind(client)
+    }
+    return value
+  },
+})

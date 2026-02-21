@@ -9,16 +9,23 @@
     "start": "bun run dist/index.js"
   },
   "dependencies": {
+    "bcrypt": "^6.0.0",
     "drizzle-orm": "^0.45.1",
     "hono": "^4.0.0",
     "pg": "^8.18.0",
+    "pino": "^8.20.0",
+    "pino-pretty": "^10.3.0",
     "postgres": "^3.4.8",
-    "semver": "^7.7.4"
+    "redis": "^4.6.0",
+    "semver": "^7.7.4",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
     "@types/node": "^20.0.0",
     "@types/pg": "^8.16.0",
     "@types/semver": "^7.7.1",
+    "@types/uuid": "9.0.0",
     "supertest": "^7.2.2",
     "typescript": "latest"
   }

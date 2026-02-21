@@ -9,9 +9,12 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@zidney/logging": "workspace:*",
+    "@zidney/types": "workspace:*",
     "zod": "^3.22.0"
   },
   "devDependencies": {
+    "@types/node": "^22.0.0",
     "typescript": "latest",
     "vitest": "^1.0.0"
   }
