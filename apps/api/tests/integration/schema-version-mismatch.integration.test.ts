@@ -63,7 +63,7 @@ describe('Schema Version Mismatch Handling', () => {
 
   it('T059-3: Successful migration updates schema_version', async () => {
     // Setup: Tenant at v1.0.0
-    let result = await client.query(
+    const result = await client.query(
       'INSERT INTO schema_version (version, checksum) VALUES ($1, $2) RETURNING *',
       ['1.0.0', 'checksum_v1_0_0']
     )

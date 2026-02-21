@@ -1,4 +1,4 @@
-import type { RedisClientType } from 'redis'
+import { createClient } from 'redis'
 
 /**
  * T014: Sliding Window Rate Limiter Algorithm
@@ -15,6 +15,9 @@ import type { RedisClientType } from 'redis'
  * ✓ Rate limiting enforcement enabled
  * ✓ TTL-based cleanup (Redis memory efficient)
  */
+
+// Use inferred type from createClient to avoid generic type mismatches
+type RedisClient = ReturnType<typeof createClient>
 
 export interface RateLimitWindow {
   limit: number
@@ -34,7 +37,7 @@ export interface RateLimitResult {
  * Uses Redis ZSET (sorted set) to track request timestamps
  */
 export class SlidingWindowRateLimiter {
-  constructor(private redis: RedisClientType) {}
+  constructor(private redis: RedisClient) {}
 
   /**
    * Check if request is allowed under rate limit
@@ -62,20 +65,22 @@ export class SlidingWindowRateLimiter {
       if (allowed) {
         await this.redis.zAdd(key, {
           score: now,
-          member: `${now}-${Math.random()}`, // Unique member per request
+          value: `${now}-${Math.random()}`, // Unique member per request
         })
       }
 
       // Set TTL (window + 1 second buffer)
       await this.redis.expire(key, config.window + 1)
 
-      // Calculate reset time
-      const oldestTimestamp = await this.redis.zRange(key, 0, 0, {
-        withScores: true,
-      })
-      const resetAt = oldestTimestamp?.[0]?.score
-        ? Math.ceil((oldestTimestamp[0].score as number) + config.window)
-        : Math.ceil(now + config.window)
+      // Calculate reset time - get oldest entry
+      const oldestEntries = await this.redis.zRange(key, 0, 0)
+      let resetAt = Math.ceil(now + config.window)
+      if (oldestEntries.length > 0) {
+        const oldestScore = await this.redis.zScore(key, oldestEntries[0])
+        if (oldestScore !== null) {
+          resetAt = Math.ceil(oldestScore + config.window)
+        }
+      }
 
       const remaining = Math.max(0, max - count - 1)
 
@@ -137,7 +142,7 @@ export class SlidingWindowRateLimiter {
  * Helper function to create sliding window limiter
  */
 export function createSlidingWindowLimiter(
-  redis: RedisClientType
+  redis: RedisClient
 ): SlidingWindowRateLimiter {
   return new SlidingWindowRateLimiter(redis)
 }

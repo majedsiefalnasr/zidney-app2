@@ -27,14 +27,14 @@
 
 <script setup lang="ts">
 import {
-  Button,
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  Loader,
-} from '@zidney/shadcn-vue'
+} from '@shadcn-vue/ui/dialog'
+
+import { Button } from '@shadcn-vue/ui/button'
 
 interface Props {
   isOpen: boolean
@@ -60,6 +60,8 @@ defineEmits<Emits>()
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 .modal-sm {
   @apply max-w-sm;
 }

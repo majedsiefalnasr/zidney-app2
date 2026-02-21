@@ -3,16 +3,20 @@
  * Tasks 15-17: Upgrade request, status polling, rollback
  */
 
+import { createLogger } from '@zidney/logging'
 import {
   validateRollbackRequest,
   validateUpgradeRequest,
 } from '@zidney/validation'
 import crypto from 'crypto'
-import { Request, Response, Router } from 'express'
-import { Database } from 'pg'
+import type { Context, Next } from 'hono'
+import { Hono } from 'hono'
+import { Pool } from 'pg'
+
+const logger = createLogger('upgrade-routes')
 
 export interface AppDependencies {
-  masterDb: Database
+  masterDb: Pool
   jobQueue: any // Job queue service
 }
 
@@ -20,32 +24,35 @@ export interface AppDependencies {
  * POST /api/admin/workspace/{workspace_id}/upgrade
  * Queue an upgrade job (Task 15)
  */
-async function handlePostUpgrade(
-  req: Request,
-  res: Response,
-  deps: AppDependencies
-) {
-  const { workspace_id } = req.params
-  const correlation_id = req.headers['x-correlation-id'] || crypto.randomUUID()
+async function handlePostUpgrade(c: Context, deps: AppDependencies) {
+  const workspaceId = c.req.param('workspace_id')
+  const correlationId = c.get('correlation_id') || crypto.randomUUID()
 
   try {
+    // Parse request body
+    const body = await c.req.json()
+
     // Validate input
-    const validation = validateUpgradeRequest(req.body)
+    const validation = validateUpgradeRequest(body)
     if (!validation.isValid) {
-      return res.status(400).json({
-        success: false,
-        data: null,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: validation.errors.join('; '),
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: validation.errors.join('; '),
+          },
         },
-      })
+        400
+      )
     }
 
-    const { target_schema_version } = req.body
+    const { target_schema_version } = body
 
     // Get current tenant version
-    const tenantVersionResult = await req.tenantDb.query(
+    const tenantDb = c.get('tenantDb')
+    const tenantVersionResult = await tenantDb.query(
       `SELECT version FROM schema_version 
        WHERE id = '00000000-0000-0000-0000-000000000001'::uuid`
     )
@@ -54,14 +61,17 @@ async function handlePostUpgrade(
 
     // Validate upgrade path
     if (target_schema_version <= currentVersion) {
-      return res.status(400).json({
-        success: false,
-        data: null,
-        error: {
-          code: 'CANNOT_DOWNGRADE',
-          message: `Cannot downgrade from ${currentVersion} to ${target_schema_version}`,
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'CANNOT_DOWNGRADE',
+            message: `Cannot downgrade from ${currentVersion} to ${target_schema_version}`,
+          },
         },
-      })
+        400
+      )
     }
 
     // Get minimum_supported
@@ -73,27 +83,32 @@ async function handlePostUpgrade(
       platformResult.rows[0]?.minimum_supported_schema_version || '1.0.0'
 
     if (target_schema_version < minimumSupported) {
-      return res.status(400).json({
-        success: false,
-        data: null,
-        error: {
-          code: 'UPGRADE_TO_OBSOLETE_VERSION',
-          message: `Target version below minimum supported (${minimumSupported})`,
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'UPGRADE_TO_OBSOLETE_VERSION',
+            message: `Target version below minimum supported (${minimumSupported})`,
+          },
         },
-      })
+        400
+      )
     }
 
     // Enqueue job
     const upgrade_id = crypto.randomUUID()
+    const workspace = c.get('workspace')
+    const user = c.get('user')
 
     const jobData = {
       job_type: 'SCHEMA_MIGRATION',
-      workspace_id,
-      workspace_slug: req.workspace.slug,
+      workspace_id: workspaceId,
+      workspace_slug: workspace?.slug,
       target_schema_version,
-      correlation_id,
+      correlation_id: correlationId,
       migrations_to_apply: [], // Will be determined by worker
-      operator_id: req.user?.id,
+      operator_id: user?.id,
     }
 
     await deps.jobQueue.enqueue('workspace-schema-migrations', jobData, {
@@ -102,41 +117,46 @@ async function handlePostUpgrade(
       backoff: 'exponential',
     })
 
-    console.log(
-      JSON.stringify({
-        level: 'INFO',
-        service: 'api-upgrade',
-        event: 'upgrade_queued',
-        upgrade_id,
-        workspace_id,
-        correlation_id,
-        target_version: target_schema_version,
-        current_version: currentVersion,
-        timestamp: new Date().toISOString(),
-      })
-    )
+    logger.info('Upgrade queued', {
+      upgrade_id,
+      workspace_id: workspaceId,
+      correlation_id: correlationId,
+      target_version: target_schema_version,
+      current_version: currentVersion,
+    })
 
-    return res.status(202).json({
-      success: true,
-      data: {
-        upgrade_id,
-        workspace_id,
-        current_schema_version: currentVersion,
-        target_schema_version,
-        status: 'QUEUED',
-        status_url: `/api/admin/workspace/${workspace_id}/upgrade/${upgrade_id}`,
+    return c.json(
+      {
+        success: true,
+        data: {
+          upgrade_id,
+          workspace_id: workspaceId,
+          current_schema_version: currentVersion,
+          target_schema_version,
+          status: 'QUEUED',
+          status_url: `/api/admin/workspace/${workspaceId}/upgrade/${upgrade_id}`,
+        },
+        error: null,
       },
-      error: null,
-    })
+      202
+    )
   } catch (err: any) {
-    return res.status(500).json({
-      success: false,
-      data: null,
-      error: {
-        code: 'INTERNAL_ERROR',
-        message: 'Failed to queue upgrade',
-      },
+    logger.error('Failed to queue upgrade', {
+      correlation_id: correlationId,
+      workspace_id: workspaceId,
+      error: err instanceof Error ? err.message : String(err),
     })
+    return c.json(
+      {
+        success: false,
+        data: null,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: 'Failed to queue upgrade',
+        },
+      },
+      500
+    )
   }
 }
 
@@ -144,56 +164,67 @@ async function handlePostUpgrade(
  * GET /api/admin/workspace/{workspace_id}/upgrade/{upgrade_id}
  * Poll upgrade status (Task 16)
  */
-async function handleGetUpgrade(
-  req: Request,
-  res: Response,
-  deps: AppDependencies
-) {
-  const { workspace_id, upgrade_id } = req.params
+async function handleGetUpgrade(c: Context, deps: AppDependencies) {
+  const workspaceId = c.req.param('workspace_id')
+  const upgradeId = c.req.param('upgrade_id')
 
   try {
     // Query job queue for status
-    const jobStatus = await deps.jobQueue.getJob(upgrade_id)
+    const jobStatus = await deps.jobQueue.getJob(upgradeId)
 
     if (!jobStatus) {
-      return res.status(404).json({
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'UPGRADE_NOT_FOUND',
+            message: `Upgrade ${upgradeId} not found`,
+          },
+        },
+        404
+      )
+    }
+
+    return c.json(
+      {
+        success: true,
+        data: {
+          upgrade_id: upgradeId,
+          workspace_id: workspaceId,
+          status: jobStatus.state,
+          progress_percent: jobStatus.progress || 0,
+          current_migration: jobStatus.data?.current_migration,
+          target_schema_version: jobStatus.data?.target_schema_version,
+          created_at: jobStatus.createdAt,
+          completed_at: jobStatus.finishedOn,
+        },
+        error: jobStatus.failedReason
+          ? {
+              code: 'MIGRATION_FAILED',
+              message: jobStatus.failedReason,
+            }
+          : null,
+      },
+      200
+    )
+  } catch (err: any) {
+    logger.error('Failed to retrieve upgrade status', {
+      workspace_id: workspaceId,
+      upgrade_id: upgradeId,
+      error: err instanceof Error ? err.message : String(err),
+    })
+    return c.json(
+      {
         success: false,
         data: null,
         error: {
-          code: 'UPGRADE_NOT_FOUND',
-          message: `Upgrade ${upgrade_id} not found`,
+          code: 'INTERNAL_ERROR',
+          message: 'Failed to retrieve upgrade status',
         },
-      })
-    }
-
-    return res.status(200).json({
-      success: true,
-      data: {
-        upgrade_id,
-        workspace_id,
-        status: jobStatus.state,
-        progress_percent: jobStatus.progress || 0,
-        current_migration: jobStatus.data?.current_migration,
-        target_schema_version: jobStatus.data?.target_schema_version,
-        created_at: jobStatus.createdAt,
-        completed_at: jobStatus.finishedOn,
       },
-      error: jobStatus.failedReason
-        ? {
-            code: 'MIGRATION_FAILED',
-            message: jobStatus.failedReason,
-          }
-        : null,
-    })
-  } catch (err: any) {
-    return res.status(500).json({
-      success: false,
-      data: null,
-      error: {
-        code: 'INTERNAL_ERROR',
-        message: 'Failed to retrieve upgrade status',
-      },
-    })
+      500
+    )
   }
 }
 
@@ -201,73 +232,83 @@ async function handleGetUpgrade(
  * POST /api/admin/workspace/{workspace_id}/upgrade/{upgrade_id}/rollback
  * Initiate rollback (Task 17)
  */
-async function handlePostRollback(
-  req: Request,
-  res: Response,
-  deps: AppDependencies
-) {
-  const { workspace_id, upgrade_id } = req.params
+async function handlePostRollback(c: Context, deps: AppDependencies) {
+  const workspaceId = c.req.param('workspace_id')
+  const upgradeId = c.req.param('upgrade_id')
 
   try {
+    // Parse request body
+    const body = await c.req.json()
+
     // Validate input
-    const validation = validateRollbackRequest(req.body)
+    const validation = validateRollbackRequest(body)
     if (!validation.isValid) {
-      return res.status(400).json({
-        success: false,
-        data: null,
-        error: {
-          code: 'INVALID_REQUEST',
-          message: validation.errors.join('; '),
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'INVALID_REQUEST',
+            message: validation.errors.join('; '),
+          },
         },
-      })
+        400
+      )
     }
 
-    const { snapshot_id, confirmation_code } = req.body
+    const { snapshot_id, confirmation_code } = body
 
     // Verify confirmation code
     if (confirmation_code !== 'CONFIRM_ROLLBACK_TO_PREVIOUS') {
-      return res.status(400).json({
-        success: false,
-        data: null,
-        error: {
-          code: 'INVALID_CONFIRMATION',
-          message: 'Invalid confirmation code',
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'INVALID_CONFIRMATION',
+            message: 'Invalid confirmation code',
+          },
         },
-      })
+        400
+      )
     }
 
     // Verify snapshot exists and belongs to workspace
     const snapshotResult = await deps.masterDb.query(
       `SELECT * FROM upgrade_snapshots WHERE id = $1 AND workspace_id = $2`,
-      [snapshot_id, workspace_id]
+      [snapshot_id, workspaceId]
     )
 
     if (snapshotResult.rows.length === 0) {
-      return res.status(400).json({
-        success: false,
-        data: null,
-        error: {
-          code: 'INVALID_SNAPSHOT_FOR_WORKSPACE',
-          message: 'Snapshot not found for this workspace',
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'INVALID_SNAPSHOT_FOR_WORKSPACE',
+            message: 'Snapshot not found for this workspace',
+          },
         },
-      })
+        400
+      )
     }
 
     const snapshot = snapshotResult.rows[0]
+    const correlationId = c.get('correlation_id') || crypto.randomUUID()
+    const workspace = c.get('workspace')
+    const user = c.get('user')
 
     // Enqueue rollback job
     const rollback_id = crypto.randomUUID()
-    const correlation_id =
-      req.headers['x-correlation-id'] || crypto.randomUUID()
 
     const jobData = {
       job_type: 'SCHEMA_ROLLBACK',
-      workspace_id,
-      workspace_slug: req.workspace.slug,
+      workspace_id: workspaceId,
+      workspace_slug: workspace?.slug,
       snapshot_id,
       rollback_id,
-      correlation_id,
-      operator_id: req.user?.id,
+      correlation_id: correlationId,
+      operator_id: user?.id,
     }
 
     await deps.jobQueue.enqueue('workspace-schema-rollback', jobData, {
@@ -275,48 +316,53 @@ async function handlePostRollback(
       attempts: 3,
     })
 
-    console.log(
-      JSON.stringify({
-        level: 'INFO',
-        service: 'api-upgrade',
-        event: 'rollback_queued',
-        rollback_id,
-        upgrade_id,
-        workspace_id,
-        snapshot_id,
-        correlation_id,
-        timestamp: new Date().toISOString(),
-      })
-    )
+    logger.info('Rollback queued', {
+      rollback_id,
+      upgrade_id: upgradeId,
+      workspace_id: workspaceId,
+      snapshot_id,
+      correlation_id: correlationId,
+    })
 
-    return res.status(202).json({
-      success: true,
-      data: {
-        rollback_id,
-        workspace_id,
-        snapshot_id,
-        target_schema_version: snapshot.previous_schema_version,
-        status: 'QUEUED',
+    return c.json(
+      {
+        success: true,
+        data: {
+          rollback_id,
+          workspace_id: workspaceId,
+          snapshot_id,
+          target_schema_version: snapshot.previous_schema_version,
+          status: 'QUEUED',
+        },
+        error: null,
       },
-      error: null,
-    })
+      202
+    )
   } catch (err: any) {
-    return res.status(500).json({
-      success: false,
-      data: null,
-      error: {
-        code: 'INTERNAL_ERROR',
-        message: 'Failed to queue rollback',
-      },
+    logger.error('Failed to queue rollback', {
+      workspace_id: workspaceId,
+      upgrade_id: upgradeId,
+      error: err instanceof Error ? err.message : String(err),
     })
+    return c.json(
+      {
+        success: false,
+        data: null,
+        error: {
+          code: 'INTERNAL_ERROR',
+          message: 'Failed to queue rollback',
+        },
+      },
+      500
+    )
   }
 }
 
 /**
  * Create and register routes
  */
-export function createUpgradeRouter(deps: AppDependencies): Router {
-  const router = Router()
+export function createUpgradeRouter(deps: AppDependencies): Hono {
+  const app = new Hono()
 
   // Routes with middleware chain:
   // 1. Tenant resolver (attaches workspace context)
@@ -325,30 +371,32 @@ export function createUpgradeRouter(deps: AppDependencies): Router {
   // 4. Idempotency validation
   // 5. Handler
 
-  router.post(
+  app.post(
     '/api/admin/workspace/:workspace_id/upgrade',
-    (req, res, next) => {
+    async (c: Context, next: Next) => {
       // Middleware placeholder: license validation
-      // In real implementation: licenseMiddleware(req, res, next)
-      next()
+      // In real implementation: licenseMiddleware(c, next)
+      return next()
     },
-    (req, res, next) => {
+    async (c: Context, next: Next) => {
       // Middleware placeholder: rate limiting
-      // In real implementation: rateLimiter(req, res, next)
-      next()
+      // In real implementation: rateLimiter(c, next)
+      return next()
     },
-    (req, res) => handlePostUpgrade(req, res, deps)
+    async (c: Context) => handlePostUpgrade(c, deps)
   )
 
-  router.get(
+  app.get(
     '/api/admin/workspace/:workspace_id/upgrade/:upgrade_id',
-    (req, res) => handleGetUpgrade(req, res, deps)
+    async (c: Context) => handleGetUpgrade(c, deps)
   )
 
-  router.post(
+  app.post(
     '/api/admin/workspace/:workspace_id/upgrade/:upgrade_id/rollback',
-    (req, res) => handlePostRollback(req, res, deps)
+    async (c: Context) => handlePostRollback(c, deps)
   )
 
-  return router
+  return app
 }
+
+export default createUpgradeRouter

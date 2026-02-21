@@ -10,9 +10,23 @@
     ".specify/scripts/bash/": true,
     ".specify/scripts/powershell/": true,
     "git ls-remote": true,
-    "mkdir": true
+    "mkdir": true,
+    "git add": true,
+    "git commit": true,
+    "/^bash \\.specify/scripts/bash/check-prerequisites\\.sh --json --require-tasks --include-tasks 2>/dev/null \\| head -100$/": {
+      "approve": true,
+      "matchCommandLine": true
+    },
+    "bun": true
   },
+  "css.lint.unknownAtRules": "ignore",
+  "css.customData": [
+    ".vscode/css_custom_data.json"
+  ],
   "cSpell.words": [
+    "lucide",
+    "shadcn",
+    "uuidv",
     "Zidney"
   ]
 }

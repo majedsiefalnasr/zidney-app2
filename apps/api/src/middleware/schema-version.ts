@@ -16,7 +16,7 @@
  */
 
 import { createLogger } from '@zidney/logging'
-import type { Context, Next } from 'hono'
+import type { Context, MiddlewareHandler, Next } from 'hono'
 
 const logger = createLogger('schema-version-middleware')
 
@@ -32,10 +32,10 @@ export interface SchemaVersionInfo {
  * @param ctx - Hono context (with tenant and license information)
  * @param next - Next middleware function
  */
-export async function schemaVersionMiddleware(
+export const schemaVersionMiddleware: MiddlewareHandler = async (
   ctx: Context,
   next: Next
-): Promise<void> {
+) => {
   const correlationId = ctx.get('correlation_id')
   const tenant = ctx.get('tenant')
   const license = ctx.get('license')
@@ -189,7 +189,7 @@ export async function schemaVersionMiddleware(
  * TODO: Implement actual DB query
  */
 async function getCurrentSchemaVersion(
-  tenant: any
+  _tenant: any
 ): Promise<SchemaVersionInfo | null> {
   // Stub implementation
   throw new Error('Not implemented')

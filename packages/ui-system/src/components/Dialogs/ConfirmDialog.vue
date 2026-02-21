@@ -31,14 +31,14 @@
 </template>
 
 <script setup lang="ts">
+import { Button } from '@shadcn-vue/ui/button'
 import {
-  Button,
   Dialog,
   DialogContent,
   DialogFooter,
   DialogHeader,
   DialogTitle,
-} from '@zidney/shadcn-vue'
+} from '@shadcn-vue/ui/dialog'
 
 interface Props {
   isOpen: boolean
@@ -62,5 +62,6 @@ defineEmits<Emits>()
 </script>
 
 <style scoped>
+@reference "tailwindcss";
 /* Styles handled by shadcn-vue Dialog and Tailwind utilities */
 </style>

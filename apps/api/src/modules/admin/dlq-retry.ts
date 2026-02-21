@@ -1,8 +1,10 @@
+import { createLogger } from '@zidney/logging'
 import { Hono } from 'hono'
 import { v4 as uuidv4 } from 'uuid'
-import { logger } from '../../infrastructure/logger'
 import { db } from '../../infrastructure/postgres'
 import { redis } from '../../infrastructure/redis'
+
+const logger = createLogger('dlq-retry')
 
 /**
  * T037: POST /admin/workspace/{id}/dlq/{dlqId}/retry
@@ -132,7 +134,7 @@ async function dlqRetry(c: Hono): Promise<Response | void> {
       }
 
       // Push to Redis job queue
-      await redis.lpush(
+      await redis.lPush(
         `queue:jobs:${workspace.id}`,
         JSON.stringify(jobPayload)
       )

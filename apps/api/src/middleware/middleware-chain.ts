@@ -1,4 +1,4 @@
-import type { Context } from 'hono'
+import type { Context, Next } from 'hono'
 
 /**
  * T016: Middleware Composition Utility
@@ -124,12 +124,8 @@ export class MiddlewareChain {
 
 /**
  * Extend Hono Context to include middleware chain tracking
+ * Note: Hono context extensions can be added via module augmentation
  */
-declare global {
-  namespace HonoContextExtensions {
-    middlewareChain: MiddlewareChain
-  }
-}
 
 /**
  * Factory function to create middleware chain
@@ -143,11 +139,11 @@ export function createMiddlewareChain(): MiddlewareChain {
  */
 export function recordMiddlewareExecution(
   stage: MiddlewareStage
-): (c: Context, next: Function) => Promise<void> {
-  return async (c: Context, next: Function) => {
-    const chain = c.state.middlewareChain || createMiddlewareChain()
+): (c: Context, next: Next) => Promise<void> {
+  return async (c: Context, next: Next) => {
+    const chain = (c as any).state?.middlewareChain || createMiddlewareChain()
     chain.recordExecution(stage)
-    c.state.middlewareChain = chain
+    ;(c as any).state = { ...(c as any).state, middlewareChain: chain }
     await next()
   }
 }

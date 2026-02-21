@@ -9,8 +9,8 @@
  * Snapshots are locked after verification
  */
 
+import type { QuestionSnapshot, UserAnswer } from '@zidney/types/attempt'
 import { describe, expect, test } from 'vitest'
-import type { QuestionSnapshot, UserAnswer } from '../../../types/src/attempt'
 import { computeScore, scoreQuestion } from '../../src/grading/score-engine'
 
 describe('Grading Snapshots', () => {

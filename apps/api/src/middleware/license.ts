@@ -16,7 +16,7 @@
  */
 
 import { createLogger } from '@zidney/logging'
-import type { Context, Next } from 'hono'
+import type { Context, MiddlewareHandler, Next } from 'hono'
 
 const logger = createLogger('license-middleware')
 
@@ -44,10 +44,10 @@ export interface LicenseInfo {
  * @param ctx - Hono context (with tenant information from tenant resolver)
  * @param next - Next middleware function
  */
-export async function licenseMiddleware(
+export const licenseMiddleware: MiddlewareHandler = async (
   ctx: Context,
   next: Next
-): Promise<void> {
+) => {
   const correlationId = ctx.get('correlation_id')
   const tenant = ctx.get('tenant')
 
@@ -176,7 +176,7 @@ export async function licenseMiddleware(
  * TODO: Implement actual DB query
  */
 async function getLicenseInfo(
-  workspace_id: string
+  _workspace_id: string
 ): Promise<LicenseInfo | null> {
   // Stub implementation
   throw new Error('Not implemented')

@@ -12,7 +12,7 @@
 </template>
 
 <script setup lang="ts">
-import { Switch } from '@zidney/shadcn-vue'
+import { Switch } from '@shadcn-vue/ui/switch'
 
 interface Props {
   modelValue: boolean
@@ -32,5 +32,7 @@ defineEmits<Emits>()
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 /* Styles handled by shadcn-vue Switch and Tailwind utilities */
 </style>

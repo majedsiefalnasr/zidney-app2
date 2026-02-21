@@ -40,14 +40,14 @@
 
 <script setup lang="ts">
 import {
-  Button,
   Drawer,
   DrawerContent,
   DrawerFooter,
   DrawerHeader,
   DrawerTitle,
-  Loader,
-} from '@zidney/shadcn-vue'
+} from '@shadcn-vue/ui/drawer'
+
+import { Button } from '@shadcn-vue/ui/button'
 
 interface Props {
   isOpen: boolean
@@ -74,6 +74,8 @@ defineEmits<Emits>()
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 .drawer-content {
   @apply p-6;
 }

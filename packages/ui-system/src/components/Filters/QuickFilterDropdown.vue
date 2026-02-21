@@ -28,7 +28,7 @@
 </template>
 
 <script setup lang="ts">
-import { Input } from '@zidney/shadcn-vue'
+import { Input } from '@shadcn-vue/ui/input'
 import { ref, watch } from 'vue'
 
 interface Props {
@@ -91,6 +91,8 @@ const hideSuggestionsLater = (): void => {
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 .suggestion-item {
   @apply block w-full px-4 py-2 text-left text-sm bg-transparent border-none cursor-pointer hover:bg-gray-50 active:bg-gray-100 transition-colors;
 }

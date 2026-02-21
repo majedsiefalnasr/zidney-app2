@@ -12,7 +12,7 @@
  */
 
 import { computeJobPayloadHash } from '@domain-core/job-hash'
-import { JobEnvelope } from '@types/job-envelope'
+import { JobEnvelope } from '@zidney/types/job-envelope'
 import { randomUUID } from 'crypto'
 
 /** Redis client (injected from service setup) */

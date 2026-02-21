@@ -174,7 +174,7 @@ export function validateProductVersion(productVersion: string): {
     }
   }
 
-  const [, major, minor, patch] = versionMatch.map(Number)
+  const [, major] = versionMatch.map(Number)
   const currentMatch = PRODUCT_VERSION.CURRENT.match(/^(\d+)\.(\d+)\.(\d+)$/)
   if (!currentMatch) {
     return {

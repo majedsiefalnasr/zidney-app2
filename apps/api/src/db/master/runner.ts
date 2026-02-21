@@ -13,7 +13,7 @@
  * Phase: 1 - Migration Infrastructure
  */
 
-import { Logger } from '@zidney/logger'
+import { Logger } from '@zidney/logging'
 import { Pool, PoolClient } from 'pg'
 import { MigrationLoader } from './loader'
 import { MigrationValidator } from './validator'
@@ -58,14 +58,10 @@ export class MigrationExecutor {
     const startTime = Date.now()
 
     try {
-      this.logger.info({
-        timestamp: new Date().toISOString(),
-        level: 'INFO',
-        service: 'master-db-migration',
+      this.logger.info('Starting master database migrations', {
         correlation_id: correlationId,
         phase: 'startup',
         status: 'started',
-        message: 'Starting master database migrations',
       })
 
       // Load all migration files
@@ -83,14 +79,10 @@ export class MigrationExecutor {
       const unapplied = sorted.filter((m) => !applied.includes(m.version))
 
       if (unapplied.length === 0) {
-        this.logger.info({
-          timestamp: new Date().toISOString(),
-          level: 'INFO',
-          service: 'master-db-migration',
+        this.logger.info('No pending migrations', {
           correlation_id: correlationId,
           phase: 'verification',
           status: 'skipped',
-          message: 'No pending migrations',
           applied_count: applied.length,
         })
         return
@@ -102,27 +94,19 @@ export class MigrationExecutor {
       }
 
       const duration = Date.now() - startTime
-      this.logger.info({
-        timestamp: new Date().toISOString(),
-        level: 'INFO',
-        service: 'master-db-migration',
+      this.logger.info('All migrations applied successfully', {
         correlation_id: correlationId,
         phase: 'completion',
         status: 'completed',
-        message: 'All migrations applied successfully',
         migrations_applied: unapplied.length,
         duration_ms: duration,
       })
     } catch (error) {
       const duration = Date.now() - startTime
-      this.logger.error({
-        timestamp: new Date().toISOString(),
-        level: 'ERROR',
-        service: 'master-db-migration',
+      this.logger.error('Migration execution failed', {
         correlation_id: correlationId,
         phase: 'execution',
         status: 'failed',
-        message: 'Migration execution failed',
         error: {
           code: 'MIGRATION_EXECUTION_ERROR',
           message: error instanceof Error ? error.message : 'Unknown error',
@@ -148,16 +132,15 @@ export class MigrationExecutor {
       // Validate migration before execution
       await this.validator.validate(migration)
 
-      this.logger.info({
-        timestamp: new Date().toISOString(),
-        level: 'INFO',
-        service: 'master-db-migration',
-        correlation_id: correlationId,
-        migration_version: migration.version,
-        phase: 'execution',
-        status: 'started',
-        message: `Executing migration ${migration.version}: ${migration.description}`,
-      })
+      this.logger.info(
+        `Executing migration ${migration.version}: ${migration.description}`,
+        {
+          correlation_id: correlationId,
+          migration_version: migration.version,
+          phase: 'execution',
+          status: 'started',
+        }
+      )
 
       // Begin transaction
       await client.query('BEGIN')
@@ -175,28 +158,20 @@ export class MigrationExecutor {
       // Commit transaction
       await client.query('COMMIT')
 
-      this.logger.info({
-        timestamp: new Date().toISOString(),
-        level: 'INFO',
-        service: 'master-db-migration',
+      this.logger.info(`Migration ${migration.version} applied successfully`, {
         correlation_id: correlationId,
         migration_version: migration.version,
         phase: 'execution',
         status: 'completed',
-        message: `Migration ${migration.version} applied successfully`,
         duration_ms: Date.now() - startTime,
       })
     } catch (error) {
       try {
         await client.query('ROLLBACK')
       } catch (rollbackError) {
-        this.logger.error({
-          timestamp: new Date().toISOString(),
-          level: 'ERROR',
-          service: 'master-db-migration',
+        this.logger.error('Failed to rollback transaction', {
           correlation_id: correlationId,
           phase: 'rollback',
-          message: 'Failed to rollback transaction',
           error: {
             code: 'ROLLBACK_ERROR',
             message:
@@ -207,21 +182,20 @@ export class MigrationExecutor {
         })
       }
 
-      this.logger.error({
-        timestamp: new Date().toISOString(),
-        level: 'ERROR',
-        service: 'master-db-migration',
-        correlation_id: correlationId,
-        migration_version: migration.version,
-        phase: 'execution',
-        status: 'failed',
-        message: `Migration ${migration.version} failed and rolled back`,
-        error: {
-          code: 'MIGRATION_FAILURE',
-          message: error instanceof Error ? error.message : 'Unknown error',
-        },
-        duration_ms: Date.now() - startTime,
-      })
+      this.logger.error(
+        `Migration ${migration.version} failed and rolled back`,
+        {
+          correlation_id: correlationId,
+          migration_version: migration.version,
+          phase: 'execution',
+          status: 'failed',
+          error: {
+            code: 'MIGRATION_FAILURE',
+            message: error instanceof Error ? error.message : 'Unknown error',
+          },
+          duration_ms: Date.now() - startTime,
+        }
+      )
 
       throw error
     } finally {

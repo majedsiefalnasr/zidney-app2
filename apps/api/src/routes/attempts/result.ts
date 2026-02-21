@@ -18,11 +18,11 @@
  * - Structured logging with correlation_id
  */
 
+import { createLogger } from '@zidney/logging'
 import { Context } from 'hono'
 import { Pool, PoolClient } from 'pg'
-import type { UserContextStage06 } from '../middleware/auth-context-stage06'
-import { getJobByAttemptId } from '../services/job-queue-service'
-import Logger from '../utils/logger'
+import type { UserContextStage06 } from '../../middleware/auth-context-stage06'
+import { getJobByAttemptId } from '../../services/job-queue-service'
 
 /**
  * GET /api/workspaces/:slug/attempts/:id/result
@@ -32,7 +32,7 @@ export async function getAttemptResultHandler(c: Context) {
   const workspace = c.get('workspace')
   const user = c.get('user') as UserContextStage06
   const tenantDb = c.get('tenantDb') as PoolClient | Pool
-  const logger = new Logger('attempts-result')
+  const logger = createLogger('attempts-result')
 
   try {
     const { id: attemptId } = c.req.param()

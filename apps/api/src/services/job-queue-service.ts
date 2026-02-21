@@ -24,8 +24,8 @@
  * 4. Client polls GET /result → Reads from grading_jobs table
  */
 
+import { Logger } from '@zidney/logging'
 import { Pool, PoolClient } from 'pg'
-import Logger from '../utils/logger'
 
 /**
  * Job payload structure

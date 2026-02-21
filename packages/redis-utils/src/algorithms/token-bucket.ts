@@ -1,4 +1,4 @@
-import type { RedisClientType } from 'redis'
+import { createClient } from 'redis'
 
 /**
  * T015: Token Bucket Rate Limiter Algorithm
@@ -15,6 +15,9 @@ import type { RedisClientType } from 'redis'
  * ✓ Smooth rate limiting (token bucket allows bursts)
  * ✓ Tennis-friendly for message-heavy protocols
  */
+
+// Use inferred type from createClient to avoid generic type mismatches
+type RedisClient = ReturnType<typeof createClient>
 
 export interface TokenBucketConfig {
   capacity: number // Total tokens in bucket
@@ -35,7 +38,7 @@ export interface TokenBucketResult {
  * Ideal for WebSocket connections where messages may be bursty
  */
 export class TokenBucketRateLimiter {
-  constructor(private redis: RedisClientType) {}
+  constructor(private redis: RedisClient) {}
 
   /**
    * Check if tokens available and consume them
@@ -57,7 +60,7 @@ export class TokenBucketRateLimiter {
       // Get current state
       const state = await this.redis.hGetAll(bucketKey)
 
-      let lastRefillAt = state?.lastRefillAt
+      const lastRefillAt = state?.lastRefillAt
         ? parseFloat(state.lastRefillAt)
         : now
       let tokensAvailable = state?.tokensAvailable
@@ -170,7 +173,7 @@ export class TokenBucketRateLimiter {
  * Helper function to create token bucket limiter
  */
 export function createTokenBucketLimiter(
-  redis: RedisClientType
+  redis: RedisClient
 ): TokenBucketRateLimiter {
   return new TokenBucketRateLimiter(redis)
 }

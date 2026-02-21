@@ -36,8 +36,8 @@
  * - Proper HTTP status codes
  */
 
+import { Logger } from '@zidney/logging'
 import { Context } from 'hono'
-import { Logger } from '../utils/logger'
 
 export interface NormalizedErrorResponse {
   success: false

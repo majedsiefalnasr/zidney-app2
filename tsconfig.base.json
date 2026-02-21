@@ -18,19 +18,43 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@domain/*": [
-        "packages/domain-core/src/*"
-      ],
-      "@types/*": [
-        "packages/types/src/*"
-      ],
-      "@validation/*": [
-        "packages/validation/src/*"
-      ],
-      "@ui/*": [
+      "@zidney/ui/*": [
         "packages/ui-system/src/*"
       ],
-      "@config/*": [
+      "@zidney/domain-core": [
+        "packages/domain-core/src/index.ts"
+      ],
+      "@zidney/domain-core/*": [
+        "packages/domain-core/src/*"
+      ],
+      "@zidney/logging": [
+        "packages/logging/src/index.ts"
+      ],
+      "@zidney/logging/*": [
+        "packages/logging/src/*"
+      ],
+      "@zidney/types": [
+        "packages/types/src/index.ts"
+      ],
+      "@zidney/types/*": [
+        "packages/types/src/*"
+      ],
+      "@zidney/validation": [
+        "packages/validation/src/index.ts"
+      ],
+      "@zidney/validation/*": [
+        "packages/validation/src/*"
+      ],
+      "@zidney/redis-utils": [
+        "packages/redis-utils/src/index.ts"
+      ],
+      "@zidney/redis-utils/*": [
+        "packages/redis-utils/src/*"
+      ],
+      "@zidney/config": [
+        "packages/config/src/index.ts"
+      ],
+      "@zidney/config/*": [
         "packages/config/src/*"
       ]
     }

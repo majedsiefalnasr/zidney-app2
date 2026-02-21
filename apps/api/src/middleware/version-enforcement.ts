@@ -1,7 +1,9 @@
 import { VersionValidator } from '@zidney/domain-core/license'
+import { createLogger } from '@zidney/logging'
 import type { Context, Next } from 'hono'
 import { toLicenseError } from '../responses/license-error-handler'
-import { logger } from '../services/logger'
+
+const logger = createLogger('version-enforcement')
 
 /**
  * Version Enforcement Middleware (T026, T027)
@@ -17,7 +19,6 @@ import { logger } from '../services/logger'
 export async function versionEnforcementMiddleware(ctx: Context, next: Next) {
   const correlationId = ctx.get('correlation_id') || 'unknown'
   const license = ctx.get('license')
-  const masterDb = ctx.get('master_db')
   const tenantDb = ctx.get('tenant_db')
 
   try {
@@ -41,109 +42,91 @@ export async function versionEnforcementMiddleware(ctx: Context, next: Next) {
         if (tenantResult.rows.length) {
           const tenantSchemaVersion =
             tenantResult.rows[0].current_schema_version
-          const schemaValid = validator.compareVersions(
+          const schemaValid = validator.validateSchemaVersion(
             tenantSchemaVersion,
             license.expected_schema_version
           )
 
           // tenantSchemaVersion must be >= expected_schema_version
-          if (schemaValid < 0) {
-            logger.warn(
-              {
-                correlation_id: correlationId,
-                action: 'version_check',
-                type: 'schema',
-                tenant_version: tenantSchemaVersion,
-                expected_version: license.expected_schema_version,
-                result: 'fail',
-                error_code: 'SCHEMA_VERSION_MISMATCH',
-              },
-              'Schema version mismatch'
-            )
-
-            return ctx.json(toLicenseError('SCHEMA_VERSION_MISMATCH', 426), {
-              status: 426,
-            })
-          }
-
-          logger.debug(
-            {
+          if (!schemaValid) {
+            logger.warn('Schema version mismatch', {
               correlation_id: correlationId,
               action: 'version_check',
               type: 'schema',
               tenant_version: tenantSchemaVersion,
               expected_version: license.expected_schema_version,
-              result: 'pass',
-            },
-            'Schema version compatible'
-          )
+              result: 'fail',
+              error_code: 'SCHEMA_VERSION_MISMATCH',
+            })
+
+            return ctx.json(toLicenseError('SCHEMA_VERSION_MISMATCH'), {
+              status: 426,
+            })
+          }
+
+          logger.debug('Schema version compatible', {
+            correlation_id: correlationId,
+            action: 'version_check',
+            type: 'schema',
+            tenant_version: tenantSchemaVersion,
+            expected_version: license.expected_schema_version,
+            result: 'pass',
+          })
         }
       } catch (error: any) {
-        logger.warn(
-          {
-            correlation_id: correlationId,
-            action: 'version_check_schema_error',
-            error_message: error.message,
-          },
-          'Schema version check failed (non-blocking)'
-        )
+        logger.warn('Schema version check failed (non-blocking)', {
+          correlation_id: correlationId,
+          action: 'version_check_schema_error',
+          error_message: error.message,
+        })
         // Continue; schema version check is informational
       }
     }
 
     // ===========================================================================
-    // STEP 2: Validate product version (forward-compatible: runtime ≥ license)
+    // STEP 2: Validate product version (MAJOR version must match per ADR-0008)
     // ===========================================================================
-    const productValid = validator.compareVersions(
-      runtimeVersion,
-      license.expected_product_version
+    const productValid = validator.validateProductVersion(
+      license.expected_product_version,
+      runtimeVersion
     )
 
-    // runtimeVersion must be >= expected_product_version
-    if (productValid < 0) {
-      logger.warn(
-        {
-          correlation_id: correlationId,
-          action: 'version_check',
-          type: 'product',
-          runtime_version: runtimeVersion,
-          license_version: license.expected_product_version,
-          result: 'fail',
-          error_code: 'UPGRADE_REQUIRED',
-        },
-        'Product version mismatch'
-      )
-
-      return ctx.json(toLicenseError('UPGRADE_REQUIRED', 426), { status: 426 })
-    }
-
-    logger.debug(
-      {
+    // MAJOR version must match
+    if (!productValid) {
+      logger.warn('Product version mismatch', {
         correlation_id: correlationId,
         action: 'version_check',
         type: 'product',
         runtime_version: runtimeVersion,
         license_version: license.expected_product_version,
-        result: 'pass',
-      },
-      'Product version compatible'
-    )
+        result: 'fail',
+        error_code: 'UPGRADE_REQUIRED',
+      })
+
+      return ctx.json(toLicenseError('UPGRADE_REQUIRED'), { status: 426 })
+    }
+
+    logger.debug('Product version compatible', {
+      correlation_id: correlationId,
+      action: 'version_check',
+      type: 'product',
+      runtime_version: runtimeVersion,
+      license_version: license.expected_product_version,
+      result: 'pass',
+    })
 
     // ===========================================================================
     // STEP 3: Proceed to next middleware
     // ===========================================================================
     return await next()
   } catch (error: any) {
-    logger.error(
-      {
-        correlation_id: correlationId,
-        action: 'version_enforcement_error',
-        error_message: error.message,
-      },
-      'Version enforcement middleware error'
-    )
+    logger.error('Version enforcement middleware error', {
+      correlation_id: correlationId,
+      action: 'version_enforcement_error',
+      error_message: error.message,
+    })
 
-    return ctx.json(toLicenseError('INTERNAL_ERROR', 500), { status: 500 })
+    return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })
   }
 }
 

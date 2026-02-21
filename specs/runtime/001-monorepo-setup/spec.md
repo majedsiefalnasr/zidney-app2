@@ -66,7 +66,7 @@ As a developer, I want Docker services running so that development environment i
 - **FR-001**: Repository MUST have the exact directory structure specified (apps/, packages/, docker/, specs/, docs/, AGENTS.md, etc.)
 - **FR-002**: Bun workspaces MUST be configured with single bun.lockb and shared dependency graph
 - **FR-003**: Import boundaries MUST be enforced: apps import from packages only, packages import from packages only
-- **FR-004**: TypeScript baseline MUST include strict settings and path aliases (@domain/_ , @types/_ , etc.)
+- **FR-004**: TypeScript baseline MUST include strict settings and path aliases (@zidney/domain-core/_ , @types/_ , etc.)
 - **FR-005**: Docker infrastructure MUST run Postgres 15+, Redis 7+, pgbouncer, nginx
 - **FR-006**: Runtime versions MUST be frozen: Bun stable 1.x, TypeScript latest stable, Postgres 15+, Redis 7+
 - **FR-007**: Testing baseline MUST use Vitest with coverage command at root

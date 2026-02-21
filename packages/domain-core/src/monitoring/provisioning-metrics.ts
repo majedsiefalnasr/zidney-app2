@@ -349,7 +349,7 @@ export class InMemoryMetricsCollector implements MetricsCollector {
   recordTamperingDetected(workspace_id: string): void {
     this.metrics.tampering_detected++
 
-    logger.critical('SECURITY: Tampering detected', {
+    logger.error('SECURITY: Tampering detected', {
       workspace_id,
       total_tampering_events: this.metrics.tampering_detected,
     })

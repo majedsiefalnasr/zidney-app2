@@ -2,7 +2,7 @@
 
 **Purpose:** Prevent architectural violations in artifact placement and naming.
 
-**When to Use:** BEFORE ANY create_file() call for SpecKit artifacts (plan.md, tasks.md, spec.md, *_REPORT.md)
+**When to Use:** BEFORE ANY create_file() call for SpecKit artifacts (plan.md, tasks.md, spec.md, \*\_REPORT.md)
 
 **MANDATORY: Complete this checklist before writing any file**
 
@@ -42,7 +42,7 @@
 - [ ] **Correct Filename:** `spec.md` (NOT `STAGE_16_SPEC.md`)
 - [ ] **Directory exists:** Verify `specs/runtime/<STAGE_DIR_NAME>/` exists
 
-### For *_REPORT.md files
+### For \*\_REPORT.md files
 
 - [ ] **Artifact Type:** Step report (SPECIFY_REPORT, CLARIFY_REPORT, PLAN_REPORT, etc.)
 - [ ] **Correct Location:** `specs/runtime/<STAGE_DIR_NAME>/reports/<REPORT_NAME>.md`
@@ -57,6 +57,7 @@
 ## Stage Directory Structure Reference
 
 **CORRECT structure (all files go here):**
+
 ```
 specs/runtime/<STAGE_DIR_NAME>/
 ├── README.md                    ← Workflow progress tracker
@@ -74,6 +75,7 @@ specs/runtime/<STAGE_DIR_NAME>/
 ```
 
 **WRONG structure (anti-patterns to prevent):**
+
 ```
 ❌ specs/phases/<PHASE_NAME>/STAGE_16_PLAN.md
 ❌ specs/phases/<PHASE_NAME>/STAGE_16_TASKS.md
@@ -112,6 +114,7 @@ specs/runtime/<STAGE_DIR_NAME>/
 ## Git Hook Enforcement
 
 **Automated Prevention:** `.git/hooks/pre-commit` will block commits with:
+
 - ❌ `specs/phases/.../plan.md`
 - ❌ `specs/phases/.../tasks.md`
 - ❌ `specs/phases/.../spec.md`
@@ -125,6 +128,7 @@ If hook blocks your commit, review this checklist and fix the artifact location.
 ## Violation History
 
 **Past Violation (FIXED):**
+
 - ❌ Created: `specs/phases/02_PLATFORM_MMC/STAGE_16_PLAN.md`
 - ❌ Created: `specs/phases/02_PLATFORM_MMC/STAGE_16_TASKS.md`
 - ✅ Fixed: Moved to `specs/runtime/016-shared-ui-system/plan.md` and `tasks.md`

@@ -24,8 +24,8 @@
  * 5. Phase G admin panel enables manual retry/inspection
  */
 
+import { createLogger, Logger } from '@zidney/logging'
 import { Pool, PoolClient } from 'pg'
-import Logger from '../utils/logger'
 
 /**
  * DLQ entry structure
@@ -68,7 +68,7 @@ export async function moveToDLQ(
   diagnostics?: Record<string, any>,
   logger?: Logger
 ): Promise<void> {
-  const log = logger || new Logger('dlq-strategy')
+  const log = logger || createLogger('dlq-strategy')
   const now = new Date().toISOString()
 
   const dlqEntry: DLQEntry = {

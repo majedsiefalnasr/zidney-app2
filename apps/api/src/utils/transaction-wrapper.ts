@@ -1,6 +1,8 @@
 import { StudentStaffCounter } from '@zidney/domain-core/license'
-import { Database } from 'pg'
-import { logger } from '../services/logger'
+import { createLogger } from '@zidney/logging'
+import { Pool, PoolClient } from 'pg'
+
+const logger = createLogger('transaction-wrapper')
 
 export interface UserCreationOptions {
   workspace_id: string
@@ -38,12 +40,12 @@ export interface TransactionResult {
  * @returns Transaction result with user_id or error
  */
 export async function createUserWithLimitCheck(
-  masterDb: Database,
-  tenantDb: Database,
+  masterDb: Pool,
+  tenantDb: Pool,
   options: UserCreationOptions
 ): Promise<TransactionResult> {
-  const masterClient = await masterDb.connect()
-  const tenantClient = await tenantDb.connect()
+  const masterClient: PoolClient = await masterDb.connect()
+  const tenantClient: PoolClient = await tenantDb.connect()
 
   try {
     // Begin transaction with SERIALIZABLE isolation on both DBs
@@ -107,17 +109,14 @@ export async function createUserWithLimitCheck(
       await masterClient.query('ROLLBACK')
       await tenantClient.query('ROLLBACK')
 
-      logger.warn(
-        {
-          action: 'user_creation_limit_exceeded',
-          workspace_id: options.workspace_id,
-          role: options.role,
-          current_count: currentCount,
-          limit,
-          error_code: 'LIMIT_EXCEEDED',
-        },
-        'Student limit exceeded during user creation'
-      )
+      logger.warn('Student limit exceeded during user creation', {
+        action: 'user_creation_limit_exceeded',
+        workspace_id: options.workspace_id,
+        role: options.role,
+        current_count: currentCount,
+        limit,
+        error_code: 'LIMIT_EXCEEDED',
+      })
 
       return {
         success: false,
@@ -131,17 +130,14 @@ export async function createUserWithLimitCheck(
       await masterClient.query('ROLLBACK')
       await tenantClient.query('ROLLBACK')
 
-      logger.warn(
-        {
-          action: 'user_creation_limit_exceeded',
-          workspace_id: options.workspace_id,
-          role: options.role,
-          current_count: currentCount,
-          limit,
-          error_code: 'LIMIT_EXCEEDED',
-        },
-        'Staff limit exceeded during user creation'
-      )
+      logger.warn('Staff limit exceeded during user creation', {
+        action: 'user_creation_limit_exceeded',
+        workspace_id: options.workspace_id,
+        role: options.role,
+        current_count: currentCount,
+        limit,
+        error_code: 'LIMIT_EXCEEDED',
+      })
 
       return {
         success: false,
@@ -180,17 +176,14 @@ export async function createUserWithLimitCheck(
     await masterClient.query('COMMIT')
     await tenantClient.query('COMMIT')
 
-    logger.info(
-      {
-        action: 'user_created_with_limit_check',
-        workspace_id: options.workspace_id,
-        user_id: userId,
-        role: options.role,
-        current_count: currentCount,
-        limit,
-      },
-      'User created with limit enforcement'
-    )
+    logger.info('User created with limit enforcement', {
+      action: 'user_created_with_limit_check',
+      workspace_id: options.workspace_id,
+      user_id: userId,
+      role: options.role,
+      current_count: currentCount,
+      limit,
+    })
 
     return {
       success: true,
@@ -200,15 +193,12 @@ export async function createUserWithLimitCheck(
     await masterClient.query('ROLLBACK').catch(() => {})
     await tenantClient.query('ROLLBACK').catch(() => {})
 
-    logger.error(
-      {
-        action: 'user_creation_transaction_error',
-        workspace_id: options.workspace_id,
-        role: options.role,
-        error_message: error.message,
-      },
-      'User creation transaction failed'
-    )
+    logger.error('User creation transaction failed', {
+      action: 'user_creation_transaction_error',
+      workspace_id: options.workspace_id,
+      role: options.role,
+      error_message: error.message,
+    })
 
     return {
       success: false,
@@ -229,7 +219,7 @@ export async function createUserWithLimitCheck(
  * @returns Success or error
  */
 export async function softDeleteUser(
-  tenantDb: Database,
+  tenantDb: Pool,
   user_id: string
 ): Promise<TransactionResult> {
   try {
@@ -246,27 +236,21 @@ export async function softDeleteUser(
       }
     }
 
-    logger.info(
-      {
-        action: 'user_soft_deleted',
-        user_id,
-      },
-      'User soft-deleted'
-    )
+    logger.info('User soft-deleted', {
+      action: 'user_soft_deleted',
+      user_id,
+    })
 
     return {
       success: true,
       user_id,
     }
   } catch (error: any) {
-    logger.error(
-      {
-        action: 'user_soft_delete_error',
-        user_id,
-        error_message: error.message,
-      },
-      'User soft-delete failed'
-    )
+    logger.error('User soft-delete failed', {
+      action: 'user_soft_delete_error',
+      user_id,
+      error_message: error.message,
+    })
 
     return {
       success: false,

@@ -1,4 +1,4 @@
-import { Database } from 'pg'
+import { Pool } from 'pg'
 import { v4 as uuidv4 } from 'uuid'
 import { logger } from '../../services/logger'
 
@@ -54,7 +54,7 @@ export interface TransitionResult {
  * @throws Error if workspace_slug already exists (409) or product not found (404)
  */
 export async function createLicense(
-  masterDb: Database,
+  masterDb: Pool,
   options: CreateLicenseOptions
 ): Promise<License> {
   const client = await masterDb.connect()
@@ -157,7 +157,7 @@ export async function createLicense(
  * @returns Transition result with updated license or error details
  */
 export async function transitionLicenseState(
-  masterDb: Database,
+  masterDb: Pool,
   options: TransitionOptions
 ): Promise<TransitionResult> {
   const client = await masterDb.connect()
@@ -285,7 +285,7 @@ export async function transitionLicenseState(
  * @returns License object or null if not found
  */
 export async function getLicenseById(
-  masterDb: Database,
+  masterDb: Pool,
   license_id: string
 ): Promise<License | null> {
   const result = await masterDb.query(
@@ -305,7 +305,7 @@ export async function getLicenseById(
  * @returns License object or null if not found
  */
 export async function getLicenseByWorkspaceId(
-  masterDb: Database,
+  masterDb: Pool,
   workspace_id: string
 ): Promise<License | null> {
   const result = await masterDb.query(
@@ -333,7 +333,7 @@ export async function getLicenseByWorkspaceId(
  * @returns Success or error
  */
 export async function deleteLicense(
-  masterDb: Database,
+  masterDb: Pool,
   license_id: string,
   confirm_deletion: boolean
 ): Promise<{

@@ -82,7 +82,9 @@
             <TableCell v-if="enableRowSelection" class="w-12">
               <Checkbox
                 :checked="isRowSelected(getRowKey(row))"
-                @update:checked="(checked) => handleSelectRow(row, checked)"
+                @update:checked="
+                  (checked: boolean) => handleSelectRow(row, checked)
+                "
               />
             </TableCell>
 
@@ -166,19 +168,17 @@
 </template>
 
 <script setup lang="ts">
+import { Button } from '@shadcn-vue/ui/button'
+import { Checkbox } from '@shadcn-vue/ui/checkbox'
 import {
-  Button,
-  Checkbox,
-  ChevronDown,
-  ChevronUp,
-  Loader,
   Table,
   TableBody,
   TableCell,
   TableHead,
   TableHeader,
   TableRow,
-} from '@zidney/shadcn-vue'
+} from '@shadcn-vue/ui/table'
+import { ChevronDown, ChevronUp, Loader } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 
 // STORIES & COMPOSABLES
@@ -287,15 +287,18 @@ const getCellValue = (row: any, column: Column): any => {
   return row[column.id]
 }
 
+// Methods: Row actions
 const isActionLoading = (rowKey: string, actionId: string): boolean => {
   return actionLoading.value.get(rowKey)?.has(actionId) ?? false
 }
 
 // EVENT HANDLERS
-
-const handleSelectAll = (checked: boolean) => {
+// Methods: Row selection
+const handleSelectAll = (checked: boolean): void => {
   if (checked) {
-    displayedRows.value.forEach((row) => selectedRows.value.add(getRowKey(row)))
+    displayedRows.value.forEach((row) => {
+      selectedRows.value.add(getRowKey(row))
+    })
   } else {
     selectedRows.value.clear()
   }
@@ -309,17 +312,18 @@ const handleSelectRow = (row: any, checked: boolean) => {
   } else {
     selectedRows.value.delete(key)
   }
-  emit('selectRow', [key, checked])
+  emit('selectRow', key, checked)
 }
 
-const handleSort = (columnId: string) => {
-  if (sortState.value?.column === columnId) {
-    sortState.value.direction =
-      sortState.value.direction === 'asc' ? 'desc' : 'asc'
-  } else {
-    sortState.value = { column: columnId, direction: 'asc' }
-  }
-  emit('sort', [columnId, sortState.value.direction])
+// Methods: Sorting
+const handleSort = (columnId: string): void => {
+  const newDirection =
+    sortState.value?.column === columnId && sortState.value?.direction === 'asc'
+      ? 'desc'
+      : 'asc'
+
+  sortState.value = { column: columnId, direction: newDirection }
+  emit('sort', columnId, newDirection)
 }
 
 const executeAction = async (row: any, action: RowAction) => {
@@ -330,14 +334,15 @@ const executeAction = async (row: any, action: RowAction) => {
   actionLoading.value.get(rowKey)!.add(action.id)
 
   try {
-    emit('action', [rowKey, action.id])
+    emit('action', rowKey, action.id)
     await new Promise((resolve) => setTimeout(resolve, 500))
   } finally {
     actionLoading.value.get(rowKey)!.delete(action.id)
   }
 }
 
-const handlePreviousPage = () => {
+// Methods: Pagination
+const handlePreviousPage = (): void => {
   if (currentPageInternal.value > 1) {
     currentPageInternal.value--
     emit('update:page', currentPageInternal.value)
@@ -359,95 +364,11 @@ watch(
     selectedRows.value.clear()
   }
 )
-
-// Methods: Pagination
-const handlePreviousPage = (): void => {
-  if (currentPageInternal.value > 1) {
-    currentPageInternal.value--
-    emit('update:page', currentPageInternal.value)
-  }
-}
-
-const handleNextPage = (): void => {
-  if (currentPageInternal.value < totalPages.value) {
-    currentPageInternal.value++
-    emit('update:page', currentPageInternal.value)
-  }
-}
-
-// Methods: Sorting
-const handleSort = (columnId: string): void => {
-  const newDirection =
-    sortState.value?.column === columnId && sortState.value?.direction === 'asc'
-      ? 'desc'
-      : 'asc'
-
-  sortState.value = { column: columnId, direction: newDirection }
-  emit('sort', [columnId, newDirection])
-}
-
-// Methods: Row selection
-const handleSelectAll = (event: Event): void => {
-  const target = event.target as HTMLInputElement
-  if (target.checked) {
-    displayedRows.value.forEach((row) => {
-      selectedRows.value.add(getRowKey(row))
-    })
-  } else {
-    selectedRows.value.clear()
-  }
-  emit('selectAll', Array.from(selectedRows.value))
-}
-
-const handleSelectRow = (row: any): void => {
-  const key = getRowKey(row)
-  if (selectedRows.value.has(key)) {
-    selectedRows.value.delete(key)
-  } else {
-    selectedRows.value.add(key)
-  }
-  emit('selectRow', [key, selectedRows.value.has(key)])
-}
-
-const isRowSelected = (rowKey: string): boolean => {
-  return selectedRows.value.has(rowKey)
-}
-
-// Methods: Row actions
-const isActionLoading = (rowKey: string, actionId: string): boolean => {
-  return rowActionLoading.value.get(rowKey)?.get(actionId) ?? false
-}
-
-const executeAction = async (row: any, action: RowAction): Promise<void> => {
-  const rowKey = getRowKey(row)
-
-  if (!rowActionLoading.value.has(rowKey)) {
-    rowActionLoading.value.set(rowKey, new Map())
-  }
-
-  // Mark as loading
-  rowActionLoading.value.get(rowKey)!.set(action.id, true)
-
-  try {
-    // Execute action
-    emit('action', [rowKey, action.id])
-    await new Promise((resolve) => setTimeout(resolve, 500))
-  } finally {
-    rowActionLoading.value.get(rowKey)!.set(action.id, false)
-  }
-}
-
-// Lifecycle
-watch(
-  () => props.rows,
-  () => {
-    // Reset selection when rows change
-    selectedRows.value.clear()
-  }
-)
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 .data-table-wrapper {
   @apply flex flex-col gap-4 w-full;
 }
@@ -457,7 +378,7 @@ watch(
 }
 
 .skeleton-loader {
-  @apply w-full h-12 bg-gradient-to-r from-gray-300 via-gray-200 to-gray-300 rounded animate-pulse;
+  @apply w-full h-12 bg-linear-to-r from-gray-300 via-gray-200 to-gray-300 rounded animate-pulse;
 }
 
 .empty-state {
@@ -484,5 +405,3 @@ watch(
   @apply text-sm text-gray-600 font-medium;
 }
 </style>
-
-<script lang="ts"></script>

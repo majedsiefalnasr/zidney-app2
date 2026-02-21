@@ -11,7 +11,7 @@
  * Phase: 1 - Migration Infrastructure
  */
 
-import { Logger } from '@zidney/logger'
+import { Logger } from '@zidney/logging'
 import { Pool } from 'pg'
 import { up as initTrackingTable } from './init-tracking-table'
 import { MigrationExecutor } from './runner'
@@ -40,35 +40,23 @@ export class MasterDatabaseInitializer {
       // Step 1: Ensure tracking table exists
       await initTrackingTable(client)
 
-      this.logger.info({
-        timestamp: new Date().toISOString(),
-        level: 'INFO',
-        service: 'master-db-init',
+      this.logger.info('_schema_migrations table ready', {
         phase: 'bootstrap',
         status: 'tracking-table-ready',
-        message: '_schema_migrations table ready',
       })
 
       // Step 2: Execute migrations
       const executor = new MigrationExecutor(this.pool, this.logger)
       await executor.executeAll()
 
-      this.logger.info({
-        timestamp: new Date().toISOString(),
-        level: 'INFO',
-        service: 'master-db-init',
+      this.logger.info('Master database initialization complete', {
         phase: 'complete',
         status: 'success',
-        message: 'Master database initialization complete',
       })
     } catch (error) {
-      this.logger.error({
-        timestamp: new Date().toISOString(),
-        level: 'ERROR',
-        service: 'master-db-init',
+      this.logger.error('Master database initialization failed', {
         phase: 'initialization',
         status: 'failed',
-        message: 'Master database initialization failed',
         error: {
           code: 'INIT_FAILURE',
           message: error instanceof Error ? error.message : 'Unknown error',

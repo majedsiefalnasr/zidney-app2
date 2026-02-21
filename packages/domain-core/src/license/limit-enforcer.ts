@@ -37,22 +37,18 @@ export class StudentStaffCounter {
    * @returns Number of ENABLED students (status = 'ENABLED' AND role = 'STUDENT')
    */
   async countStudents(tenantDb: any, workspace_id: string): Promise<number> {
-    try {
-      const result = await tenantDb.query(
-        `
-        SELECT COUNT(*) as count
-        FROM users
-        WHERE workspace_id = $1
-          AND status = 'ENABLED'
-          AND role = 'STUDENT'
-        `,
-        [workspace_id]
-      )
+    const result = await tenantDb.query(
+      `
+      SELECT COUNT(*) as count
+      FROM users
+      WHERE workspace_id = $1
+        AND status = 'ENABLED'
+        AND role = 'STUDENT'
+      `,
+      [workspace_id]
+    )
 
-      return parseInt(result.rows[0].count, 10)
-    } catch (error) {
-      throw error
-    }
+    return parseInt(result.rows[0].count, 10)
   }
 
   /**
@@ -63,22 +59,18 @@ export class StudentStaffCounter {
    * @returns Number of ENABLED staff (status = 'ENABLED' AND role = 'STAFF')
    */
   async countStaff(tenantDb: any, workspace_id: string): Promise<number> {
-    try {
-      const result = await tenantDb.query(
-        `
-        SELECT COUNT(*) as count
-        FROM users
-        WHERE workspace_id = $1
-          AND status = 'ENABLED'
-          AND role = 'STAFF'
-        `,
-        [workspace_id]
-      )
+    const result = await tenantDb.query(
+      `
+      SELECT COUNT(*) as count
+      FROM users
+      WHERE workspace_id = $1
+        AND status = 'ENABLED'
+        AND role = 'STAFF'
+      `,
+      [workspace_id]
+    )
 
-      return parseInt(result.rows[0].count, 10)
-    } catch (error) {
-      throw error
-    }
+    return parseInt(result.rows[0].count, 10)
   }
 
   /**

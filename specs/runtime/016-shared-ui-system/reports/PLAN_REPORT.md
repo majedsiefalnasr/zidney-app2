@@ -32,7 +32,7 @@ The plan covers all 12 required design sections:
 ✅ **Section 9:** Migration Strategy for MMC (5-phase approach, backwards compatibility)  
 ✅ **Section 10:** Composable Utilities (useFilterBuilder, usePagination, useColumnVisibility, useMultiLanguageForm)  
 ✅ **Section 11:** Error Handling & Edge Cases (action interruption, localStorage unavailability, validation failure)  
-✅ **Section 12:** Performance Optimization, API Integration, Non-Goals, Rollback Strategy, Compliance Statement  
+✅ **Section 12:** Performance Optimization, API Integration, Non-Goals, Rollback Strategy, Compliance Statement
 
 ---
 
@@ -43,6 +43,7 @@ The plan covers all 12 required design sections:
 **Plan Section:** 1.1 + 2.1
 
 **Implementation Approach:**
+
 - Component accepts `paginationMode: 'server' | 'client'` prop
 - Emits `@pagination-changed` event
 - Parent app manages state and data fetching in server mode
@@ -58,6 +59,7 @@ The plan covers all 12 required design sections:
 **Plan Section:** 1.2 + 2.1
 
 **Implementation Approach:**
+
 - Row actions defined as async callbacks: `(row: TRow) => Promise<void>`
 - Component manages loading state during execution
 - Emits `@action-start` event (with action ID and row data)
@@ -76,6 +78,7 @@ The plan covers all 12 required design sections:
 **Plan Section:** 1.3 + 5.2
 
 **Implementation Approach:**
+
 - Primary: URL query params (`?filters=base64-encoded-json`)
 - Fallback: localStorage key `{workspaceSlug}:filter-state`
 - AdvancedFilterBuilder detects overflow: if serialized string > 2000 chars, emit warning and `@storage-fallback-triggered`
@@ -84,11 +87,12 @@ The plan covers all 12 required design sections:
 - Component provides serialization/deserialization utilities only
 
 **Type Definition:**
+
 ```typescript
 interface FilterSerializationConfig {
-  maxUrlLength: 2000  // Overflow threshold
+  maxUrlLength: 2000 // Overflow threshold
   localStorageKey: string
-  version: number  // For future migration
+  version: number // For future migration
 }
 ```
 
@@ -101,6 +105,7 @@ interface FilterSerializationConfig {
 **Plan Section:** 1.4 + 2.1 + 7.1
 
 **Implementation Approach:**
+
 - Primitive columns: `accessor` optional; inferred from column `id` (e.g., `id: 'email'` → `row.email`)
 - Computed columns: `accessor` required (enforced via TypeScript)
 - Type system enforces distinction
@@ -108,20 +113,21 @@ interface FilterSerializationConfig {
 - Accessor can handle dot notation: `'user.email'` or `row => row.user.email`
 
 **TypeScript Discriminated Union:**
+
 ```typescript
 type ColumnDef<TRow> = PrimitiveColumn<TRow> | ComputedColumn<TRow>
 
 type PrimitiveColumn<TRow> = {
   id: string
   header: string
-  accessor?: string  // OPTIONAL
+  accessor?: string // OPTIONAL
   // ...
 }
 
 type ComputedColumn<TRow> = {
   id: string
   header: string
-  accessor: (row: TRow) => any  // REQUIRED
+  accessor: (row: TRow) => any // REQUIRED
   // ...
 }
 ```
@@ -135,6 +141,7 @@ type ComputedColumn<TRow> = {
 **Plan Section:** 1.5 + 2.4 + 7.3
 
 **Implementation Approach:**
+
 - Per-language validation rules: `validationRules: { [languageCode: string]: ValidationRule[] }`
 - Each language validated independently
 - Global constraint: `requiredLanguages.length >= 1` (enforced)
@@ -152,12 +159,12 @@ type ComputedColumn<TRow> = {
 
 **13 Core Components Organized by Category:**
 
-| Category | Components | Status |
-| --- | --- | --- |
-| **Layout** | AppLayout, SidebarLayout, TopBar | Specified |
-| **Data** | DataTable, ColumnVisibilityDropdown, QuickFilterDropdown, AdvancedFilterBuilder, PaginationBar, StatsCard | Specified |
-| **Forms** | DrawerFormLayout, ModalFormLayout, MultiLanguageInputModal | Specified |
-| **Utility** | ConfirmDialog, StatusToggle, BadgeStatus, EmptyState, LoadingState | Specified |
+| Category    | Components                                                                                                | Status    |
+| ----------- | --------------------------------------------------------------------------------------------------------- | --------- |
+| **Layout**  | AppLayout, SidebarLayout, TopBar                                                                          | Specified |
+| **Data**    | DataTable, ColumnVisibilityDropdown, QuickFilterDropdown, AdvancedFilterBuilder, PaginationBar, StatsCard | Specified |
+| **Forms**   | DrawerFormLayout, ModalFormLayout, MultiLanguageInputModal                                                | Specified |
+| **Utility** | ConfirmDialog, StatusToggle, BadgeStatus, EmptyState, LoadingState                                        | Specified |
 
 **Total: 13 components**
 
@@ -228,6 +235,7 @@ packages/ui-system/
 - TypeScript: Strict mode, declarations emitted
 
 **Package.json Configuration:**
+
 ```json
 {
   "name": "@zidney/ui-system",
@@ -274,13 +282,13 @@ type AdvancedFilter = {
   fieldId: string
   operator: FilterOperator
   value: any
-  valueSecond?: any  // For 'between'
+  valueSecond?: any // For 'between'
 }
 
 // Multi-language
 type MultiLanguageModalProps = {
   languages: LanguageConfig[]
-  requiredLanguages: string[]  // Minimum 1
+  requiredLanguages: string[] // Minimum 1
   validationRules: Record<string, ValidationRule[]>
   translations?: Record<string, string>
 }
@@ -293,6 +301,7 @@ type MultiLanguageModalProps = {
 ### Unit Tests (≥80% coverage)
 
 **Test Structure:**
+
 - DataTable: 25 test suites (pagination, async actions, column visibility, empty state, error display)
 - AdvancedFilterBuilder: 15 test suites (serialization, overflow detection, localStorage fallback)
 - MultiLanguageInputModal: 12 test suites (per-language validation, minimum 1 required)
@@ -305,6 +314,7 @@ type MultiLanguageModalProps = {
 ### Integration Tests
 
 **Scenarios:**
+
 1. DataTable + Filter: User changes filter → DataTable updates → URL syncs
 2. Form + MultiLanguage Modal: User opens modal → enters translations → modal saves → form updates
 3. Action flow: User clicks action button → loading state → callback executes → error/success displayed
@@ -332,6 +342,7 @@ type MultiLanguageModalProps = {
 - Validate TypeScript compatibility and performance
 
 **Deliverables:**
+
 - ui-system package (0.1.0-beta)
 - 1 refactored MMC page
 - Documentation for developers
@@ -346,6 +357,7 @@ type MultiLanguageModalProps = {
 - Validate filter serialization and overflow handling
 
 **Deliverables:**
+
 - Complete ui-system package (0.1.0-rc)
 - 3 refactored MMC pages
 - Integration test suite
@@ -360,6 +372,7 @@ type MultiLanguageModalProps = {
 - Generate Storybook (optional, medium priority)
 
 **Deliverables:**
+
 - Stable ui-system package (0.1.0)
 - 5 refactored MMC pages
 - Developer guide
@@ -375,6 +388,7 @@ type MultiLanguageModalProps = {
 - Plan Backoffice adoption (separate phase)
 
 **Deliverables:**
+
 - 100% MMC pages using shared UI system
 - Backwards compatibility support (old components coexist for 2-3 weeks per batch)
 
@@ -396,6 +410,7 @@ type MultiLanguageModalProps = {
 **Purpose:** Manage filter state, serialization, and URL synchronization.
 
 **Signature:**
+
 ```typescript
 function useFilterBuilder(options?: {
   initialFilters?: AdvancedFilter[]
@@ -404,13 +419,13 @@ function useFilterBuilder(options?: {
 }) {
   const filters = ref<AdvancedFilter[]>(options?.initialFilters || [])
   const isPersistedExternally = computed(() => /* check localStorage usage */)
-  
+
   const serializeFilters = () => { /* base64 encode */ }
   const deserializeFilters = (encoded: string) => { /* base64 decode + validate */ }
   const addFilter = (filter: AdvancedFilter) => { /* ... */ }
   const removeFilter = (fieldId: string) => { /* ... */ }
   const clearFilters = () => { /* ... */ }
-  
+
   return {
     filters,
     isPersistedExternally,
@@ -428,6 +443,7 @@ function useFilterBuilder(options?: {
 **Purpose:** Manage pagination state (server or client mode).
 
 **Signature:**
+
 ```typescript
 function usePagination(options: {
   mode: 'server' | 'client'
@@ -438,15 +454,21 @@ function usePagination(options: {
   const currentPage = ref(options.initialPage || 1)
   const pageSize = ref(options.pageSize || 25)
   const totalCount = ref(options.totalCount)
-  
+
   const pageCount = computed(() => Math.ceil(totalCount.value / pageSize.value))
   const canPrevious = computed(() => currentPage.value > 1)
   const canNext = computed(() => currentPage.value < pageCount.value)
-  
-  const goToPage = (page: number) => { /* validate + update */ }
-  const nextPage = () => { /* ... */ }
-  const previousPage = () => { /* ... */ }
-  
+
+  const goToPage = (page: number) => {
+    /* validate + update */
+  }
+  const nextPage = () => {
+    /* ... */
+  }
+  const previousPage = () => {
+    /* ... */
+  }
+
   return {
     currentPage,
     pageSize,
@@ -456,7 +478,7 @@ function usePagination(options: {
     canNext,
     goToPage,
     nextPage,
-    previousPage
+    previousPage,
   }
 }
 ```
@@ -466,6 +488,7 @@ function usePagination(options: {
 **Purpose:** Manage column visibility state with persistence.
 
 **Signature:**
+
 ```typescript
 function useColumnVisibility<TRow>(options: {
   columns: ColumnDef<TRow>[]
@@ -475,16 +498,16 @@ function useColumnVisibility<TRow>(options: {
   const visibility = ref<Record<string, boolean>>(
     options.initialVisibility || /* default all visible */
   )
-  
+
   const visibleColumns = computed(() =>
     options.columns.filter(col => visibility.value[col.id] !== false)
   )
-  
+
   const toggleColumn = (columnId: string) => { /* ... */ }
   const showColumn = (columnId: string) => { /* ... */ }
   const hideColumn = (columnId: string) => { /* ... */ }
   const reset = () => { /* restore defaults */ }
-  
+
   return {
     visibility,
     visibleColumns,
@@ -501,10 +524,11 @@ function useColumnVisibility<TRow>(options: {
 **Purpose:** Manage multi-language form state and validation.
 
 **Signature:**
+
 ```typescript
 function useMultiLanguageForm(options: {
   languages: LanguageConfig[]
-  requiredLanguages: string[]  // Minimum 1 enforced
+  requiredLanguages: string[] // Minimum 1 enforced
   initialTranslations?: Record<string, string>
   validationRules?: Record<string, ValidationRule[]>
 }) {
@@ -512,23 +536,29 @@ function useMultiLanguageForm(options: {
     options.initialTranslations || {}
   )
   const validationErrors = ref<Record<string, string[]>>({})
-  
+
   const isValid = computed(() => {
     // Check all translations validated
     // Check at least 1 required language has content
   })
-  
-  const updateTranslation = (language: string, value: string) => { /* ... */ }
-  const validateLanguage = (language: string) => { /* run rules */ }
-  const validateAll = () => { /* run all validations */ }
-  
+
+  const updateTranslation = (language: string, value: string) => {
+    /* ... */
+  }
+  const validateLanguage = (language: string) => {
+    /* run rules */
+  }
+  const validateAll = () => {
+    /* run all validations */
+  }
+
   return {
     translations,
     validationErrors,
     isValid,
     updateTranslation,
     validateLanguage,
-    validateAll
+    validateAll,
   }
 }
 ```
@@ -539,15 +569,15 @@ function useMultiLanguageForm(options: {
 
 ### Constitutional Alignment ✅
 
-| Principle | Verification | Status |
-| --- | --- | --- |
-| **Isolation** | No tenant-aware code; apps provide tenant context via props | ✅ |
-| **License Enforcement** | No license checks in UI; apps handle via middleware | ✅ |
-| **Attempt Engine** | No grading logic; read-only attempt state rendering | ✅ |
-| **Database Integrity** | Zero DB imports; no schema modifications | ✅ |
-| **Snapshot Handling** | No snapshot mutations; read-only snapshot data | ✅ |
-| **Version Enforcement** | Version checks in API layer, not UI | ✅ |
-| **Layer Separation** | UI-only; no business logic imports | ✅ |
+| Principle               | Verification                                                | Status |
+| ----------------------- | ----------------------------------------------------------- | ------ |
+| **Isolation**           | No tenant-aware code; apps provide tenant context via props | ✅     |
+| **License Enforcement** | No license checks in UI; apps handle via middleware         | ✅     |
+| **Attempt Engine**      | No grading logic; read-only attempt state rendering         | ✅     |
+| **Database Integrity**  | Zero DB imports; no schema modifications                    | ✅     |
+| **Snapshot Handling**   | No snapshot mutations; read-only snapshot data              | ✅     |
+| **Version Enforcement** | Version checks in API layer, not UI                         | ✅     |
+| **Layer Separation**    | UI-only; no business logic imports                          | ✅     |
 
 ### Architectural Constraints ✅
 
@@ -580,16 +610,16 @@ Plan is ready to be decomposed into atomic tasks covering:
 
 ## Plan Quality Metrics
 
-| Metric | Target | Status |
-| --- | --- | --- |
-| **Completeness** | All 12 sections covered | ✅ |
-| **Decision Embedment** | All 5 locked decisions embedded | ✅ |
-| **Constraint Enforcement** | All 3 locked constraints embedded | ✅ |
-| **Architecture Clarity** | Implementation patterns defined | ✅ |
-| **Type Safety** | Generic typing specified | ✅ |
-| **Constitutional Compliance** | No violations detected | ✅ |
-| **Testing Coverage** | Coverage targets defined (80-90%) | ✅ |
-| **Migration Path** | Phased approach specified | ✅ |
+| Metric                        | Target                            | Status |
+| ----------------------------- | --------------------------------- | ------ |
+| **Completeness**              | All 12 sections covered           | ✅     |
+| **Decision Embedment**        | All 5 locked decisions embedded   | ✅     |
+| **Constraint Enforcement**    | All 3 locked constraints embedded | ✅     |
+| **Architecture Clarity**      | Implementation patterns defined   | ✅     |
+| **Type Safety**               | Generic typing specified          | ✅     |
+| **Constitutional Compliance** | No violations detected            | ✅     |
+| **Testing Coverage**          | Coverage targets defined (80-90%) | ✅     |
+| **Migration Path**            | Phased approach specified         | ✅     |
 
 ---
 
@@ -602,6 +632,6 @@ Plan is ready to be decomposed into atomic tasks covering:
 **Constitutional Compliance:** ✅ PASS  
 **Locked Decisions:** ✅ EMBEDDED  
 **Architecture Coherence:** ✅ VERIFIED  
-**Feasibility:** ✅ CONFIRMED  
+**Feasibility:** ✅ CONFIRMED
 
 The technical plan is comprehensive, architecturally sound, and ready to guide the Tasks step for task decomposition and implementation.

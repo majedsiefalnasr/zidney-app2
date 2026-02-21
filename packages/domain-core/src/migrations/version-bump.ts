@@ -104,7 +104,7 @@ export function getVersionsBetween(
   }
 
   const versions: string[] = []
-  let current = from
+  const current = from
 
   // Generate versions from current to target
   while (

@@ -145,7 +145,7 @@ export async function up(client: PoolClient): Promise<void> {
       -- CONSTRAINTS
       -- ================================================================
       
-      CONSTRAINT valid_email CHECK (email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}$')
+      CONSTRAINT valid_email CHECK (email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Z|a-z]{2,}$')
     );
     
     -- ====================================================================

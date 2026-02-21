@@ -37,7 +37,7 @@
 </template>
 
 <script setup lang="ts">
-import { Button } from '@zidney/shadcn-vue'
+import { Button } from '@shadcn-vue/ui/button'
 
 interface Props {
   title: string
@@ -61,5 +61,7 @@ defineEmits<Emits>()
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 /* Styles handled by Tailwind utilities and shadcn-vue Button */
 </style>

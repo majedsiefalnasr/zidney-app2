@@ -167,11 +167,11 @@ Root tsconfig.base.json must include:
 Path aliases required:
 
 ```
-@domain/_
+@zidney/domain-core/_
 @types/_
-@validation/_
-@ui/_
-@config/\*
+@zidney/validation/_
+@zidney/ui/_
+@zidney/config/\*
 ```
 
 No deep relative imports across packages allowed.

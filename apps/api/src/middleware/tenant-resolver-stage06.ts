@@ -21,8 +21,8 @@
  * 5. If any step fails: return error (400, 404, 503)
  */
 
+import { Logger } from '@zidney/logging'
 import { Context, MiddlewareHandler } from 'hono'
-import { Logger } from '../utils/logger'
 
 export interface TenantContextStage06 {
   id: string

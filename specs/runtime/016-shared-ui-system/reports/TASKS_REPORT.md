@@ -17,21 +17,21 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 ## Task Inventory
 
-| Category | Count | Effort (hrs) | Criticality |
-| --- | --- | --- | --- |
-| Type Definitions | 1 | 8 | HIGH |
-| Utility Functions | 3 | 12 | HIGH |
-| Composable Utilities | 4 | 20 | HIGH |
-| Layout Components | 3 | 16 | MEDIUM |
-| Data Components | 6 | 40 | CRITICAL |
-| Form Components | 3 | 18 | MEDIUM |
-| Utility Components | 5 | 20 | MEDIUM |
-| Build System Setup | 2 | 12 | HIGH |
-| Unit Tests | 3 | 36 | HIGH |
-| Integration Tests | 2 | 24 | MEDIUM |
-| Documentation | 2 | 16 | MEDIUM |
-| Migration Tasks | 3 | 36 | MEDIUM |
-| **TOTAL** | **37** | **288-320** | — |
+| Category             | Count  | Effort (hrs) | Criticality |
+| -------------------- | ------ | ------------ | ----------- |
+| Type Definitions     | 1      | 8            | HIGH        |
+| Utility Functions    | 3      | 12           | HIGH        |
+| Composable Utilities | 4      | 20           | HIGH        |
+| Layout Components    | 3      | 16           | MEDIUM      |
+| Data Components      | 6      | 40           | CRITICAL    |
+| Form Components      | 3      | 18           | MEDIUM      |
+| Utility Components   | 5      | 20           | MEDIUM      |
+| Build System Setup   | 2      | 12           | HIGH        |
+| Unit Tests           | 3      | 36           | HIGH        |
+| Integration Tests    | 2      | 24           | MEDIUM      |
+| Documentation        | 2      | 16           | MEDIUM      |
+| Migration Tasks      | 3      | 36           | MEDIUM      |
+| **TOTAL**            | **37** | **288-320**  | —           |
 
 ---
 
@@ -42,7 +42,7 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 **Task 1: TypeScript Type Definitions**
 
 - **Scope:** Define all TypeScript interfaces for filters, tables, forms, layouts
-- **Deliverable:** src/types/*.ts (filters.ts, table.ts, forms.ts, layout.ts)
+- **Deliverable:** src/types/\*.ts (filters.ts, table.ts, forms.ts, layout.ts)
 - **Transactional:** No – Compile-time definitions
 - **Idempotency:** N/A – Deterministic, fully replayable
 - **Middleware Dependency:** None
@@ -368,7 +368,7 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 **Task 9A: Component Unit Tests**
 
 - **Scope:** Unit tests for all 13 components with ≥80% coverage; test props validation, event emission, loading states, error handling
-- **Deliverable:** src/components/**/*.spec.ts (25+ test suites)
+- **Deliverable:** src/components/\*_/_.spec.ts (25+ test suites)
 - **Transactional:** No – Tests isolated
 - **Idempotency:** Yes – Tests fully replayable
 - **Middleware Dependency:** None (mocked)
@@ -379,7 +379,7 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 **Task 9B: Composable Unit Tests**
 
 - **Scope:** Unit tests for 4 composables with ≥85% coverage; test state management, event emission, error handling
-- **Deliverable:** src/composables/**/*.spec.ts (12+ test suites)
+- **Deliverable:** src/composables/\*_/_.spec.ts (12+ test suites)
 - **Transactional:** No
 - **Idempotency:** Yes
 - **Middleware Dependency:** None (mocked)
@@ -390,7 +390,7 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 **Task 9C: Utility Function Tests**
 
 - **Scope:** Unit tests for all utilities (filter serialization, table state, URL sync) with ≥90% coverage
-- **Deliverable:** src/utils/**/*.spec.ts (8+ test suites)
+- **Deliverable:** src/utils/\*_/_.spec.ts (8+ test suites)
 - **Transactional:** No
 - **Idempotency:** Yes
 - **Middleware Dependency:** None
@@ -525,27 +525,32 @@ Tasks 12A-12C (Migration)
 ## Task Execution Phases
 
 ### Phase 1: Foundation (Week 1)
+
 - Task 1 (Type Definitions)
 - Tasks 2A-2C (Utilities)
 - Tasks 3A-3D (Composables)
 - Effort: 40 hours
 
 ### Phase 2: Components (Weeks 2-3)
+
 - Tasks 4A-7D (All 13 components in parallel)
 - Effort: 72 hours
 
 ### Phase 3: Build & Testing (Week 4)
+
 - Tasks 8A-8B (Build System)
 - Tasks 9A-9C (Unit Tests)
 - Tasks 10A-10B (Integration Tests)
 - Effort: 72 hours
 
 ### Phase 4: Documentation & QA (Week 5)
+
 - Tasks 11A-11B (Documentation)
 - QA sign-off
 - Effort: 16 hours
 
 ### Phase 5: Migration (Weeks 6-12)
+
 - Tasks 12A-12C (Phased MMC refactor)
 - Effort: 36 hours
 
@@ -569,13 +574,13 @@ All 37 tasks have been reviewed for constitutional compliance:
 
 ### Locked Decision Embedment ✅
 
-| Decision | Embedding Locations | Status |
-| --- | --- | --- |
-| **DECISION 1 (Pagination Agnostic)** | Task 3B, Task 5A | ✅ |
-| **DECISION 2 (Row Actions Async)** | Task 5B | ✅ |
-| **DECISION 3 (Filter Serialization)** | Tasks 2A, 3A, 5C | ✅ |
-| **DECISION 4 (Column Accessor)** | Task 5A | ✅ |
-| **DECISION 5 (Multi-Language Validation)** | Tasks 3D, 6C | ✅ |
+| Decision                                   | Embedding Locations | Status |
+| ------------------------------------------ | ------------------- | ------ |
+| **DECISION 1 (Pagination Agnostic)**       | Task 3B, Task 5A    | ✅     |
+| **DECISION 2 (Row Actions Async)**         | Task 5B             | ✅     |
+| **DECISION 3 (Filter Serialization)**      | Tasks 2A, 3A, 5C    | ✅     |
+| **DECISION 4 (Column Accessor)**           | Task 5A             | ✅     |
+| **DECISION 5 (Multi-Language Validation)** | Tasks 3D, 6C        | ✅     |
 
 ### Locked Constraint Enforcement ✅
 
@@ -587,14 +592,14 @@ All 37 tasks have been reviewed for constitutional compliance:
 
 ## Effort Summary
 
-| Phase | Category | Hours | Team Size | Duration |
-| --- | --- | --- | --- | --- |
-| **1** | Foundation | 40 | 2 | 1 week |
-| **2** | Components | 72 | 4 | 2 weeks |
-| **3** | Build & Test | 72 | 3 | 2 weeks |
-| **4** | Documentation | 16 | 1 | 1 week |
-| **5** | Migration | 36 | 2 | 6-12 weeks |
-| — | **TOTAL** | **288-320** | — | **12-16 weeks** |
+| Phase | Category      | Hours       | Team Size | Duration        |
+| ----- | ------------- | ----------- | --------- | --------------- |
+| **1** | Foundation    | 40          | 2         | 1 week          |
+| **2** | Components    | 72          | 4         | 2 weeks         |
+| **3** | Build & Test  | 72          | 3         | 2 weeks         |
+| **4** | Documentation | 16          | 1         | 1 week          |
+| **5** | Migration     | 36          | 2         | 6-12 weeks      |
+| —     | **TOTAL**     | **288-320** | —         | **12-16 weeks** |
 
 ---
 
@@ -603,6 +608,7 @@ All 37 tasks have been reviewed for constitutional compliance:
 ### Analyze Step (Step 5)
 
 Tasks are ready for drift detection and architectural validation via:
+
 - Structural audit of task set
 - Guardian validation (Security, Performance, QA)
 - Pre-implementation gate
@@ -610,6 +616,7 @@ Tasks are ready for drift detection and architectural validation via:
 ### Implement Step (Step 6)
 
 Tasks will be executed in dependency order following:
+
 - Task 1 (Foundation)
 - Tasks 2-3 (Utilities & Composables)
 - Tasks 4-7 (Components)
@@ -627,6 +634,6 @@ Tasks will be executed in dependency order following:
 **Criticality Distribution:** 2 CRITICAL, 11 HIGH, 16 MEDIUM, 8 LOW  
 **All Locked Decisions Embedded:** ✅ 5/5  
 **All Locked Constraints Enforced:** ✅ 3/3  
-**Constitutional Compliance:** ✅ VERIFIED  
+**Constitutional Compliance:** ✅ VERIFIED
 
 Task set is complete, dependency-ordered, and ready to guide the Analyze and Implement steps.

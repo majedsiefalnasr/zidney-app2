@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { pool } from '~/db/pool'
 import type { PoolClient } from 'pg'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { pool } from '~/db/pool'
 
 /**
  * T049: Referential Integrity Integration Test
@@ -38,7 +38,7 @@ describe('Referential Integrity Integration', () => {
     // Create question
     const questionResult = await client.query(
       'INSERT INTO mcq_questions (basket_id, question_text, options_json, correct_option) VALUES ($1, $2, $3, $4) RETURNING id',
-      [basketId, 'Sample Q', '["A", "B", "C"]'::json, 0]
+      [basketId, 'Sample Q', '["A", "B", "C"]', 0]
     )
     const questionId = questionResult.rows[0].id
 
@@ -57,11 +57,18 @@ describe('Referential Integrity Integration', () => {
     const attemptId = attemptResult.rows[0].id
 
     // Verify all relationships exist
-    const examCheck = await client.query('SELECT id FROM mcq_exams WHERE id = $1', [examId])
-    const questionCheck = await client.query('SELECT id FROM mcq_questions WHERE id = $1', [
-      questionId,
-    ])
-    const attemptCheck = await client.query('SELECT id FROM attempts WHERE id = $1', [attemptId])
+    const examCheck = await client.query(
+      'SELECT id FROM mcq_exams WHERE id = $1',
+      [examId]
+    )
+    const questionCheck = await client.query(
+      'SELECT id FROM mcq_questions WHERE id = $1',
+      [questionId]
+    )
+    const attemptCheck = await client.query(
+      'SELECT id FROM attempts WHERE id = $1',
+      [attemptId]
+    )
 
     expect(examCheck.rowCount).toBe(1)
     expect(questionCheck.rowCount).toBe(1)
@@ -83,7 +90,7 @@ describe('Referential Integrity Integration', () => {
 
     const questionResult = await client.query(
       'INSERT INTO mcq_questions (basket_id, question_text, options_json, correct_option) VALUES ($1, $2, $3, $4) RETURNING id',
-      [basketId, 'Delete Q', '["X", "Y"]'::json, 1]
+      [basketId, 'Delete Q', '["X", "Y"]', 1]
     )
     const questionId = questionResult.rows[0].id
 
@@ -96,11 +103,21 @@ describe('Referential Integrity Integration', () => {
 
     await client.query(
       'INSERT INTO attempts (exam_type, exam_id, user_id, configuration_snapshot, question_list_snapshot, grading_config_snapshot) VALUES ($1, $2, $3, $4, $5, $6)',
-      ['MCQ', examId, userId, '{}', JSON.stringify({ questions: [questionId] }), '{}']
+      [
+        'MCQ',
+        examId,
+        userId,
+        '{}',
+        JSON.stringify({ questions: [questionId] }),
+        '{}',
+      ]
     )
 
     // Delete question (soft delete)
-    await client.query('UPDATE mcq_questions SET is_deleted = true WHERE id = $1', [questionId])
+    await client.query(
+      'UPDATE mcq_questions SET is_deleted = true WHERE id = $1',
+      [questionId]
+    )
 
     // Verify question marked as deleted
     const deleteCheck = await client.query(

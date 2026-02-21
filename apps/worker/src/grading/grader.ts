@@ -20,7 +20,12 @@
  * ADRs: ADR-0002 (snapshot model), ADR-0006 (server time)
  */
 
-import { Attempt, AttemptMode, QuestionType, UserAnswer } from '@types/attempt'
+import {
+  Attempt,
+  AttemptMode,
+  QuestionType,
+  UserAnswer,
+} from '@zidney/types/attempt'
 import { logger } from '../services/logger'
 
 /**

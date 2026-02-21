@@ -1,5 +1,7 @@
+import { createLogger } from '@zidney/logging'
 import { JwtPayload, verify } from 'hono/utils/jwt'
-import { logger } from '../../infrastructure/logger'
+
+const logger = createLogger('ws-auth')
 
 export interface WebSocketJWTClaims extends JwtPayload {
   workspace_id: string

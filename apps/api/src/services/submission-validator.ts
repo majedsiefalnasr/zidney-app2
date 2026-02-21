@@ -19,12 +19,12 @@
  * Note: GRADING happens in Phase E worker; this just validates structure
  */
 
+import { Logger } from '@zidney/logging'
 import type {
   QuestionSnapshot,
   QuestionSnapshotContainer,
-  QuestionType,
-} from '../../../packages/types/src/attempt'
-import Logger from '../utils/logger'
+} from '@zidney/types/attempt'
+import { QuestionType } from '@zidney/types/attempt'
 
 /**
  * Submission content for validation

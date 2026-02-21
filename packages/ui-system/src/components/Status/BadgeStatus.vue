@@ -10,7 +10,7 @@
 </template>
 
 <script setup lang="ts">
-import { Badge } from '@zidney/shadcn-vue'
+import { Badge } from '@shadcn-vue/ui/badge'
 import { computed } from 'vue'
 
 type StatusType = 'active' | 'inactive' | 'pending' | 'archived' | 'warning'
@@ -41,5 +41,7 @@ const badgeVariant = computed<
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 /* Styles handled by shadcn-vue Badge component */
 </style>

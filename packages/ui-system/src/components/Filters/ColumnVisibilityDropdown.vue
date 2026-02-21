@@ -51,15 +51,15 @@
 </template>
 
 <script setup lang="ts">
+import { Button } from '@shadcn-vue/ui/button'
 import {
-  Button,
   DropdownMenu,
   DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
-  Input,
-} from '@zidney/shadcn-vue'
+} from '@shadcn-vue/ui/dropdown-menu'
+import { Input } from '@shadcn-vue/ui/input'
 import { ChevronDown } from 'lucide-vue-next'
 import { computed, ref } from 'vue'
 
@@ -126,6 +126,8 @@ const toggleAll = (): void => {
 </script>
 
 <style scoped>
+@reference "tailwindcss";
+
 .column-visibility-dropdown {
   @apply inline-block;
 }

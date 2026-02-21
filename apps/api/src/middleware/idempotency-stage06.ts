@@ -20,8 +20,8 @@
  * - Workspace_id scoped (ADR-0001)
  */
 
+import { Logger } from '@zidney/logging'
 import { Context, MiddlewareHandler } from 'hono'
-import { Logger } from '../utils/logger'
 
 export interface IdempotencyKey {
   key: string

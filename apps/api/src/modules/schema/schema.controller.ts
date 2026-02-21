@@ -18,10 +18,9 @@
 
 import { createLogger } from '@zidney/logging'
 import type { Context } from 'hono'
-import type { RedisClient, WorkerQueue } from './schema.service'
+import type { RedisClient } from './idempotency.service'
+import type { WorkerQueue } from './schema.service'
 import { getSchemaInitStatus, initializeTenantSchema } from './schema.service'
-
-const logger = createLogger('schema-controller')
 
 /**
  * POST /api/workspaces/:workspace_id/schema/initialize
@@ -61,7 +60,7 @@ export async function initializeSchemaHandler(
   const tenant = ctx.get('tenant')
   const workspace_id = tenant?.workspace_id
 
-  const logger_fn = createLogger('POST /schema/initialize')
+  const logger = createLogger('POST /schema/initialize')
   const startTime = Date.now()
 
   try {
@@ -69,7 +68,7 @@ export async function initializeSchemaHandler(
     const body = await ctx.req.json().catch(() => ({}))
     const { idempotency_key } = body
 
-    logger_fn.debug('Schema initialization request received', {
+    logger.debug('Schema initialization request received', {
       workspace_id,
       correlationId,
       idempotency_key: idempotency_key ? '***provided***' : 'not-provided',
@@ -77,7 +76,7 @@ export async function initializeSchemaHandler(
 
     // Validate workspace_id from tenant context
     if (!workspace_id) {
-      logger_fn.error('Missing workspace context', { correlationId })
+      logger.error('Missing workspace context', { correlationId })
       return ctx.json(
         {
           success: false,
@@ -94,7 +93,7 @@ export async function initializeSchemaHandler(
     // Get database pool from tenant context
     const pool = tenant?.pool
     if (!pool) {
-      logger_fn.error('Missing database pool', { workspace_id, correlationId })
+      logger.error('Missing database pool', { workspace_id, correlationId })
       return ctx.json(
         {
           success: false,
@@ -118,7 +117,7 @@ export async function initializeSchemaHandler(
 
     const statusCode = result.status === 'ALREADY_INITIALIZED' ? 409 : 202
 
-    logger_fn.info('Schema initialization endpoint success', {
+    logger.info('Schema initialization endpoint success', {
       workspace_id,
       task_id: result.task_id,
       status: result.status,
@@ -135,7 +134,7 @@ export async function initializeSchemaHandler(
       statusCode
     )
   } catch (error) {
-    logger_fn.error('Schema initialization endpoint error', {
+    logger.error('Schema initialization endpoint error', {
       error: error instanceof Error ? error.message : String(error),
       correlationId,
       duration_ms: Date.now() - startTime,
@@ -185,10 +184,10 @@ export async function getSchemaStatusHandler(
   const workspace_id = tenant?.workspace_id
   const task_id = ctx.req.param('task_id')
 
-  const logger_fn = createLogger('GET /schema/status/:task_id')
+  const logger = createLogger('GET /schema/status/:task_id')
 
   try {
-    logger_fn.debug('Schema status request', {
+    logger.debug('Schema status request', {
       workspace_id,
       task_id,
       correlationId,
@@ -226,7 +225,7 @@ export async function getSchemaStatusHandler(
     // Get status from service
     const status = await getSchemaInitStatus(workspace_id, task_id, redis, pool)
 
-    logger_fn.debug('Schema status retrieved', {
+    logger.debug('Schema status retrieved', {
       workspace_id,
       task_id,
       status: status.status,
@@ -242,7 +241,7 @@ export async function getSchemaStatusHandler(
       200
     )
   } catch (error) {
-    logger_fn.error('Schema status endpoint error', {
+    logger.error('Schema status endpoint error', {
       error: error instanceof Error ? error.message : String(error),
       correlationId,
     })

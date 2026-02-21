@@ -17,8 +17,8 @@ import { db, getTenantPool } from '../../db'
 
 describe('1000-Attempt Load Test', () => {
   let workspaceId: string
-  let users: any[] = []
-  let exams: any[] = []
+  const users: any[] = []
+  const exams: any[] = []
   let pool: any
 
   beforeAll(async () => {

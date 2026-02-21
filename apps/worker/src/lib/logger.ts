@@ -10,7 +10,7 @@
  * - Context injection: All logs automatically include injected fields (no manual params)
  */
 
-import { JobEnvelope } from '@types/job-envelope'
+import { JobEnvelope } from '@zidney/types/job-envelope'
 import pino, { Logger, LoggerOptions } from 'pino'
 
 /**

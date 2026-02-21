@@ -39,7 +39,7 @@ import { registerStage06Routes } from './routes/attempts/index-stage06'
 import { registerStage06PhaseDRoutes } from './routes/attempts/submit-index'
 
 // Utility logger
-import Logger from './utils/logger'
+import { createLogger } from '@zidney/logging'
 
 // ============================================================================
 // APPLICATION SETUP
@@ -86,7 +86,7 @@ app.use('/api/workspaces/*', redactionMiddleware())
 // STAGE 06 ATTEMPT ENGINE ROUTES
 // ============================================================================
 
-const logger = new Logger('app')
+const logger = createLogger('app')
 
 // Register Phase C routes (create, progress, status)
 registerStage06Routes(app, logger)

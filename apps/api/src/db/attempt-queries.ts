@@ -13,13 +13,13 @@
  * ADRs: ADR-0001 (tenant isolation)
  */
 
-import { Pool, PoolClient } from 'pg'
 import {
   Attempt,
   AttemptProgress,
   AttemptStatus,
   SubmissionIdempotencyKey,
-} from '../../types/src/attempt'
+} from '@zidney/types/attempt'
+import { Pool, PoolClient } from 'pg'
 
 /**
  * Query: Find attempt by ID

@@ -1,5 +1,7 @@
-import { logger } from '../../infrastructure/logger'
+import { createLogger } from '@zidney/logging'
 import { redis } from '../../infrastructure/redis'
+
+const logger = createLogger('security')
 
 /**
  * T071: Security Event Logging
@@ -79,8 +81,8 @@ export async function logSecurityEvent(event: SecurityEvent): Promise<void> {
 
   // Store in Redis for real-time monitoring
   const key = `security:events:${event.event_type}`
-  await redis.lpush(key, JSON.stringify(sanitized))
-  await redis.ltrim(key, 0, 999) // Keep last 1000 events
+  await redis.lPush(key, JSON.stringify(sanitized))
+  await redis.lTrim(key, 0, 999) // Keep last 1000 events
   await redis.expire(key, 604800) // 7-day retention in Redis
 
   // Update event counters for alerting
@@ -358,7 +360,7 @@ export async function querySecurityEvents(
 ): Promise<SecurityEvent[]> {
   const key = `security:events:${eventType}`
 
-  const data = await redis.lrange(key, 0, limit - 1)
+  const data = await redis.lRange(key, 0, limit - 1)
 
   return data.map((item: string) => {
     const parsed = JSON.parse(item)

@@ -1,7 +1,9 @@
+import { createLogger } from '@zidney/logging'
 import { Hono } from 'hono'
-import { logger } from '../../infrastructure/logger'
 import { redis } from '../../infrastructure/redis'
 import { validateJWT } from '../auth/jwt-validator'
+
+const logger = createLogger('websocket')
 
 const app = new Hono()
 
@@ -109,7 +111,7 @@ app.get('/ws/attempt/:id', async (c) => {
       message_count: 0,
     }
 
-    await redis.setex(
+    await redis.setEx(
       connectionKey,
       1800, // 30 minutes
       JSON.stringify(connectionMetadata)
@@ -245,7 +247,7 @@ app.get('/ws/attempt/:id', async (c) => {
             const parsed = JSON.parse(metadata)
             parsed.message_count = (parsed.message_count || 0) + 1
             parsed.last_heartbeat = new Date().toISOString()
-            await redis.setex(connectionKey, 1800, JSON.stringify(parsed))
+            await redis.setEx(connectionKey, 1800, JSON.stringify(parsed))
           }
 
           logger.debug(`WebSocket message received`, {

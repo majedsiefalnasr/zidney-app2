@@ -1,6 +1,6 @@
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { pool } from '~/db/pool'
 import type { PoolClient } from 'pg'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { pool } from '~/db/pool'
 
 /**
  * T050: FK Concurrency Test
@@ -69,7 +69,9 @@ describe('FK Concurrency Constraints', () => {
     const categoryId = catResult.rows[0].id
 
     // Race: Delete category while inserting value
-    const deletePromise = client.query('DELETE FROM categories WHERE id = $1', [categoryId])
+    const deletePromise = client.query('DELETE FROM categories WHERE id = $1', [
+      categoryId,
+    ])
 
     const insertPromise = client.query(
       'INSERT INTO category_values (category_id, value) VALUES ($1, $2)',
@@ -87,10 +89,10 @@ describe('FK Concurrency Constraints', () => {
     // Create 10 users
     const userResults = await Promise.all(
       Array.from({ length: 10 }, (_, i) =>
-        client.query('INSERT INTO users (email, name) VALUES ($1, $2) RETURNING id', [
-          `deadlock-user-${i}@test.com`,
-          `Deadlock User ${i}`,
-        ])
+        client.query(
+          'INSERT INTO users (email, name) VALUES ($1, $2) RETURNING id',
+          [`deadlock-user-${i}@test.com`, `Deadlock User ${i}`]
+        )
       )
     )
     const userIds = userResults.map((r) => r.rows[0].id)
@@ -103,7 +105,10 @@ describe('FK Concurrency Constraints', () => {
     const roleId = roleResult.rows[0].id
 
     const assignPromises = userIds.map((uid) =>
-      client.query('INSERT INTO role_assignments (user_id, role_id) VALUES ($1, $2)', [uid, roleId])
+      client.query(
+        'INSERT INTO role_assignments (user_id, role_id) VALUES ($1, $2)',
+        [uid, roleId]
+      )
     )
 
     const results = await Promise.allSettled(assignPromises)
@@ -113,9 +118,10 @@ describe('FK Concurrency Constraints', () => {
     expect(successes).toHaveLength(10)
 
     // Verify assignments
-    const assignCount = await client.query('SELECT COUNT(*) FROM role_assignments WHERE role_id = $1', [
-      roleId,
-    ])
+    const assignCount = await client.query(
+      'SELECT COUNT(*) FROM role_assignments WHERE role_id = $1',
+      [roleId]
+    )
     expect(parseInt(assignCount.rows[0].count, 10)).toBe(10)
   })
 
@@ -123,10 +129,10 @@ describe('FK Concurrency Constraints', () => {
     // Create 5 users
     const userResults = await Promise.all(
       Array.from({ length: 5 }, (_, i) =>
-        client.query('INSERT INTO users (email, name) VALUES ($1, $2) RETURNING id', [
-          `subsc-user-${i}@test.com`,
-          `Subsc User ${i}`,
-        ])
+        client.query(
+          'INSERT INTO users (email, name) VALUES ($1, $2) RETURNING id',
+          [`subsc-user-${i}@test.com`, `Subsc User ${i}`]
+        )
       )
     )
     const userIds = userResults.map((r) => r.rows[0].id)
@@ -134,10 +140,10 @@ describe('FK Concurrency Constraints', () => {
     // Create 25 subscriptions (5 per user) concurrently
     const subscPromises = userIds.flatMap((uid) =>
       Array.from({ length: 5 }, (_, i) =>
-        client.query('INSERT INTO subscriptions (user_id, plan_type) VALUES ($1, $2)', [
-          uid,
-          `PLAN_${i}`,
-        ])
+        client.query(
+          'INSERT INTO subscriptions (user_id, plan_type) VALUES ($1, $2)',
+          [uid, `PLAN_${i}`]
+        )
       )
     )
 
@@ -163,7 +169,7 @@ describe('FK Concurrency Constraints', () => {
     const questionPromises = Array.from({ length: 20 }, (_, i) =>
       client.query(
         'INSERT INTO mcq_questions (basket_id, question_text, options_json, correct_option) VALUES ($1, $2, $3, $4)',
-        [basketId, `Q${i}`, '["A", "B"]'::json, 0]
+        [basketId, `Q${i}`, '["A", "B"]', 0]
       )
     )
 
@@ -173,9 +179,10 @@ describe('FK Concurrency Constraints', () => {
     expect(successes).toHaveLength(20)
 
     // Verify all questions have valid basket_id FK
-    const qCount = await client.query('SELECT COUNT(*) FROM mcq_questions WHERE basket_id = $1', [
-      basketId,
-    ])
+    const qCount = await client.query(
+      'SELECT COUNT(*) FROM mcq_questions WHERE basket_id = $1',
+      [basketId]
+    )
     expect(parseInt(qCount.rows[0].count, 10)).toBe(20)
 
     // Verify no orphaned questions

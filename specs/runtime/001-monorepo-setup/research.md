@@ -20,7 +20,7 @@
 
 **Task**: Research TypeScript path mapping for monorepo
 
-**Decision**: Configure @domain/_, @types/_, @validation/_, @ui/_, @config/\* aliases in tsconfig.base.json
+**Decision**: Configure @zidney/domain-core/_, @types/_, @zidney/validation/_, @zidney/ui/_, @zidney/config/\* aliases in tsconfig.base.json
 
 **Rationale**: Enables clean imports without deep relative paths, enforces package boundaries
 

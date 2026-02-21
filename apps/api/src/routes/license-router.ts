@@ -4,9 +4,11 @@ import {
   LicenseResolver,
   transitionLicenseState,
 } from '@zidney/domain-core/license'
+import { createLogger } from '@zidney/logging'
 import { Context, Hono } from 'hono'
 import { toLicenseError } from '../responses/license-error-handler'
-import { logger } from '../services/logger'
+
+const logger = createLogger('license-router')
 
 /**
  * License Router

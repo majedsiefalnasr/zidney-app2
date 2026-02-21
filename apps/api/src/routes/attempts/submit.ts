@@ -26,17 +26,17 @@
  * - Idempotency triple-layer
  */
 
+import { createLogger } from '@zidney/logging'
 import { Context } from 'hono'
 import { Pool, PoolClient } from 'pg'
-import type { UserContextStage06 } from '../middleware/auth-context-stage06'
+import type { UserContextStage06 } from '../../middleware/auth-context-stage06'
 import {
   storeSubmissionIdempotencyKey,
   validateSubmissionIdempotency,
-} from '../services/idempotency-validator'
-import { enqueueGradingJob } from '../services/job-queue-service'
-import { executeWithLockRetry } from '../services/lock-retry-handler'
-import { validateSubmissionContent } from '../services/submission-validator'
-import Logger from '../utils/logger'
+} from '../../services/idempotency-validator'
+import { enqueueGradingJob } from '../../services/job-queue-service'
+import { executeWithLockRetry } from '../../services/lock-retry-handler'
+import { validateSubmissionContent } from '../../services/submission-validator'
 
 /**
  * POST /api/workspaces/:slug/attempts/:id/submit
@@ -47,7 +47,7 @@ export async function submitAttemptHandler(c: Context) {
   const user = c.get('user') as UserContextStage06
   const tenantDb = c.get('tenantDb') as PoolClient | Pool
   const redis = c.get('redis') || null
-  const logger = new Logger('attempts-submit')
+  const logger = createLogger('attempts-submit')
 
   const startTime = Date.now()
 

@@ -10,7 +10,7 @@
  * Logs full attempt lifecycle: submission → grading → result persistence.
  */
 
-import { GradeAttemptJob, JobEnvelope } from '@types/job-envelope'
+import { GradeAttemptJob, JobEnvelope } from '@zidney/types/job-envelope'
 
 /**
  * Grade attempt job handler.

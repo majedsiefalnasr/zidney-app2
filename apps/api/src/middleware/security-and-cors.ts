@@ -1,5 +1,7 @@
+import { createLogger } from '@zidney/logging'
 import { Hono } from 'hono'
-import { logger } from '../../infrastructure/logger'
+
+const logger = createLogger('security-cors')
 
 /**
  * T063-T066: Security Headers & CORS

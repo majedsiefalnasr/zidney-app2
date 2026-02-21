@@ -1,6 +1,6 @@
 <template>
   <button
-    :disabled="isLoading || action.disabled || globalDisabled"
+    :disabled="computedDisabled"
     :class="[
       'row-action-button',
       `row-action-button--${action.variant || 'primary'}`,
@@ -26,8 +26,9 @@
 </template>
 
 <script setup lang="ts" generic="TRow extends Record<string, any>">
-import { computed, onBeforeUnmount, ref } from 'vue'
-interface RowAction<TRow = any> {
+import { computed, onBeforeUnmount, ref, watch } from 'vue'
+
+export interface RowAction<TRow = any> {
   id: string
   label: string
   icon?: string
@@ -36,16 +37,17 @@ interface RowAction<TRow = any> {
   variant?: 'primary' | 'destructive'
 }
 
-interface Props<TRow> {
+export interface Props<TRow> {
   action: RowAction<TRow>
+  row?: TRow
   isLoading?: boolean
   showError?: boolean
   rowId: string | number
   disabled?: boolean
 }
 
-interface Emits<TRow> {
-  execute: [row: TRow]
+export interface Emits<TRow> {
+  execute: [row?: TRow]
 }
 
 const props = withDefaults(defineProps<Props<TRow>>(), {
@@ -60,13 +62,22 @@ const showErrorState = ref(false)
 const errorTimeoutId = ref<ReturnType<typeof setTimeout> | null>(null)
 const isUnmounting = ref(false)
 
+// Computed: Evaluate action.disabled if it's a function
+const isActionDisabled = computed((): boolean => {
+  if (!props.action.disabled) return false
+  if (typeof props.action.disabled === 'boolean') return props.action.disabled
+  return props.row ? props.action.disabled(props.row) : false
+})
+
 // Computed: combined disabled state (LOCKED DECISION 2: component-managed loading state)
-const globalDisabled = computed(() => props.disabled || props.isLoading)
+const computedDisabled = computed(
+  () => props.disabled || props.isLoading || isActionDisabled.value
+)
 
 // Handlers: Execute action with error state management
 const handleClick = (): void => {
-  if (globalDisabled.value || isUnmounting.value) return
-  emit('execute')
+  if (computedDisabled.value || isUnmounting.value) return
+  emit('execute', props.row)
 }
 
 // Watchers: Show error state for 2 seconds (LOCKED DECISION 2: error indicator for 2 seconds)
@@ -100,11 +111,9 @@ onBeforeUnmount(() => {
 })
 </script>
 
-<script lang="ts">
-import { watch } from 'vue'
-</script>
-
 <style scoped>
+@reference "tailwindcss";
+
 .row-action-button {
   display: inline-flex;
   align-items: center;

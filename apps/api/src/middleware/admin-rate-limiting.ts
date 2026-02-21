@@ -1,6 +1,8 @@
-import { Hono } from 'hono'
-import { logger } from '../../infrastructure/logger'
-import { redis } from '../../infrastructure/redis'
+import { createLogger } from '@zidney/logging'
+import type { Context, Next } from 'hono'
+import { getRedisClient } from '../infrastructure/redis'
+
+const logger = createLogger('admin-rate-limiting')
 
 /**
  * T040: Admin endpoint rate limiting middleware
@@ -28,28 +30,29 @@ const DEFAULT_LIMITS: AdminRateLimitLimits = {
 }
 
 export async function adminRateLimiting(
-  c: Hono,
-  next: () => Promise<void>,
+  c: Context,
+  next: Next,
   limits: AdminRateLimitLimits = DEFAULT_LIMITS
-): Promise<void> {
-  const correlationId = c.state.requestId || 'unknown'
+): Promise<void | Response> {
+  const correlationId = c.get('correlation_id') || 'unknown'
   const clientIp =
     c.req.header('X-Forwarded-For')?.split(',')[0] ||
     c.req.header('X-Real-IP') ||
     'unknown'
-  const userId = c.state.userId || 'anonymous'
-  const workspace = c.state.workspace
+  const userId = c.get('user_id') || 'anonymous'
+  const workspace = c.get('workspace')
 
   try {
+    const redis = getRedisClient()
     const now = Date.now()
     const windowStart = now - limits.windowMs
 
     // Check IP-based limit
     const ipKey = `admin:rate:ip:${clientIp}`
-    const ipCount = await redis.zcount(ipKey, windowStart, now)
+    const ipCount = await redis.zCount(ipKey, windowStart, now)
 
     if (ipCount >= limits.perIp) {
-      logger.warn(`Admin rate limit exceeded: per-IP`, {
+      logger.warn('Admin rate limit exceeded: per-IP', {
         correlation_id: correlationId,
         client_ip: clientIp,
         limit: limits.perIp,
@@ -70,17 +73,17 @@ export async function adminRateLimiting(
             },
           },
         },
-        429
+        { status: 429 }
       )
     }
 
     // Check user-based limit
     if (userId !== 'anonymous') {
       const userKey = `admin:rate:user:${userId}`
-      const userCount = await redis.zcount(userKey, windowStart, now)
+      const userCount = await redis.zCount(userKey, windowStart, now)
 
       if (userCount >= limits.perUser) {
-        logger.warn(`Admin rate limit exceeded: per-user`, {
+        logger.warn('Admin rate limit exceeded: per-user', {
           correlation_id: correlationId,
           user_id: userId,
           client_ip: clientIp,
@@ -102,7 +105,7 @@ export async function adminRateLimiting(
               },
             },
           },
-          429
+          { status: 429 }
         )
       }
     }
@@ -110,10 +113,10 @@ export async function adminRateLimiting(
     // Check workspace-based limit
     if (workspace && workspace.id) {
       const workspaceKey = `admin:rate:workspace:${workspace.id}`
-      const workspaceCount = await redis.zcount(workspaceKey, windowStart, now)
+      const workspaceCount = await redis.zCount(workspaceKey, windowStart, now)
 
       if (workspaceCount >= limits.perWorkspace) {
-        logger.warn(`Admin rate limit exceeded: per-workspace`, {
+        logger.warn('Admin rate limit exceeded: per-workspace', {
           correlation_id: correlationId,
           workspace_id: workspace.id,
           workspace_slug: workspace.slug,
@@ -135,7 +138,7 @@ export async function adminRateLimiting(
               },
             },
           },
-          429
+          { status: 429 }
         )
       }
     }
@@ -143,11 +146,14 @@ export async function adminRateLimiting(
     // Increment counters
     const timestamp = `${now}:${Math.random()}`
 
-    await redis.zadd(ipKey, now, timestamp)
+    await redis.zAdd(ipKey, { score: now, value: timestamp })
     await redis.expire(ipKey, Math.ceil(limits.windowMs / 1000) + 10)
 
     if (userId !== 'anonymous') {
-      await redis.zadd(`admin:rate:user:${userId}`, now, timestamp)
+      await redis.zAdd(`admin:rate:user:${userId}`, {
+        score: now,
+        value: timestamp,
+      })
       await redis.expire(
         `admin:rate:user:${userId}`,
         Math.ceil(limits.windowMs / 1000) + 10
@@ -155,7 +161,10 @@ export async function adminRateLimiting(
     }
 
     if (workspace && workspace.id) {
-      await redis.zadd(`admin:rate:workspace:${workspace.id}`, now, timestamp)
+      await redis.zAdd(`admin:rate:workspace:${workspace.id}`, {
+        score: now,
+        value: timestamp,
+      })
       await redis.expire(
         `admin:rate:workspace:${workspace.id}`,
         Math.ceil(limits.windowMs / 1000) + 10
@@ -163,15 +172,15 @@ export async function adminRateLimiting(
     }
 
     // Add rate limit headers to response
-    c.state.rateLimitHeaders = {
+    c.set('rateLimitHeaders', {
       'X-Rate-Limit-Limit': String(limits.perIp),
       'X-Rate-Limit-Remaining': String(Math.max(0, limits.perIp - ipCount - 1)),
       'X-Rate-Limit-Reset': String(Math.floor((now + limits.windowMs) / 1000)),
-    }
+    })
 
     await next()
   } catch (error) {
-    logger.error(`Admin rate limiting error`, {
+    logger.error('Admin rate limiting error', {
       correlation_id: correlationId,
       user_id: userId,
       client_ip: clientIp,
