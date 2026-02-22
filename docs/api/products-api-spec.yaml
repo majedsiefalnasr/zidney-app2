@@ -35,7 +35,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateProductRequest'
+              $ref: "#/components/schemas/CreateProductRequest"
             example:
               name:
                 en: "Basic Exam Suite"
@@ -44,12 +44,12 @@ paths:
               description: "Foundation product for exam management"
               enabled_modules: ["MCQ", "TRADITIONAL_EXAMS"]
       responses:
-        '201':
+        "201":
           description: Product created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
+                $ref: "#/components/schemas/ApiResponse"
               example:
                 success: true
                 data:
@@ -61,25 +61,25 @@ paths:
                   status: "ACTIVE"
                   current_version: 1
                   created_at: "2026-02-22T10:30:00Z"
-        '400':
+        "400":
           description: Validation error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
               example:
                 success: false
                 data: null
                 error:
                   code: "INVALID_MODULE_ENUM"
                   message: "Module 'UNKNOWN_MODULE' is not valid"
-        '409':
+        "409":
           description: Conflict (duplicate slug)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-      
+                $ref: "#/components/schemas/ErrorResponse"
+
     get:
       tags: [Products]
       summary: List products
@@ -114,12 +114,12 @@ paths:
             default: 0
             minimum: 0
       responses:
-        '200':
+        "200":
           description: Product list
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductListResponse'
+                $ref: "#/components/schemas/ProductListResponse"
 
   /mmc/products/{id}:
     get:
@@ -137,19 +137,19 @@ paths:
             format: uuid
           example: "550e8400-e29b-41d4-a716-446655440000"
       responses:
-        '200':
+        "200":
           description: Product details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '404':
+                $ref: "#/components/schemas/ApiResponse"
+        "404":
           description: Product not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-    
+                $ref: "#/components/schemas/ErrorResponse"
+
     put:
       tags: [Products]
       summary: Update product
@@ -169,20 +169,20 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateProductRequest'
+              $ref: "#/components/schemas/UpdateProductRequest"
       responses:
-        '200':
+        "200":
           description: Product updated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
-        '400':
+                $ref: "#/components/schemas/ApiResponse"
+        "400":
           description: Validation error (slug is immutable)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
   /mmc/products/{id}/status:
     patch:
@@ -211,12 +211,12 @@ paths:
                   type: string
                   enum: [ACTIVE, INACTIVE]
       responses:
-        '200':
+        "200":
           description: Status changed
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ApiResponse'
+                $ref: "#/components/schemas/ApiResponse"
 
   /mmc/products/{id}/audit-log:
     get:
@@ -263,12 +263,12 @@ paths:
             format: date-time
           description: Filter to ISO 8601 datetime
       responses:
-        '200':
+        "200":
           description: Audit trail
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuditLogResponse'
+                $ref: "#/components/schemas/AuditLogResponse"
 
 components:
   schemas:
@@ -292,7 +292,7 @@ components:
               description: Arabic product name (optional, falls back to English)
         slug:
           type: string
-          pattern: '^[a-z0-9-]{1,255}$'
+          pattern: "^[a-z0-9-]{1,255}$"
           description: Globally unique, immutable, lowercase identifier
         description:
           type: string
@@ -333,7 +333,17 @@ components:
 
     ProductResponse:
       type: object
-      required: [id, name, slug, enabled_modules, status, current_version, created_at, updated_at]
+      required:
+        [
+          id,
+          name,
+          slug,
+          enabled_modules,
+          status,
+          current_version,
+          created_at,
+          updated_at,
+        ]
       properties:
         id:
           type: string
@@ -377,8 +387,8 @@ components:
           type: boolean
         data:
           oneOf:
-            - $ref: '#/components/schemas/ProductResponse'
-            - $ref: '#/components/schemas/ProductListResponse'
+            - $ref: "#/components/schemas/ProductResponse"
+            - $ref: "#/components/schemas/ProductListResponse"
             - type: null
 
     ProductListResponse:
@@ -387,7 +397,7 @@ components:
         products:
           type: array
           items:
-            $ref: '#/components/schemas/ProductResponse'
+            $ref: "#/components/schemas/ProductResponse"
         pagination:
           type: object
           required: [limit, offset, total]
@@ -466,7 +476,7 @@ components:
           properties:
             code:
               type: string
-              enum: 
+              enum:
                 - INVALID_MODULE_ENUM
                 - INVALID_NAME_LOCALIZATION
                 - DUPLICATE_SLUG
@@ -483,7 +493,7 @@ components:
             details:
               type: object
               nullable: true
-  
+
   securitySchemes:
     bearer:
       type: http
