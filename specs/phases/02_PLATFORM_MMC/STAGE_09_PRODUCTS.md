@@ -8,26 +8,49 @@ Scope: Product entity, configuration model, module control, and versioning
 
 ## Stage Status
 
-Status: IN PROGRESS  
+Status: BACKEND CLOSED  
 Risk Level: LOW  
 Last Updated: 2026-02-22T00:00:00Z
 
-Scope Open:
+Implementation: COMPLETE  
+Tasks: 46 / 46 completed
 
-- Implementation tasks being generated
-- Database migrations ready
-- API endpoints ready for implementation
-- Domain service logic defined
+Scope Closed:
+
+- Product CRUD operations (create, read, update, list, delete)
+- Product versioning (immutable version history)
+- Product status management (ACTIVE/INACTIVE)
+- Audit logging and traceability
+- Multi-language name support (JSON: en/ar with fallback)
+- Module enumeration validation (hardcoded enum)
+- Rate limiting and authorization (10-100/min per endpoint)
+- Audit trail API (queryable by admins)
+- Comprehensive test suite (66+ tests, 127+ assertions)
+- Complete documentation (4 guides)
+
+Deferred Scope:
+
+- License assignment (Stage 10)
+- Workspace provisioning (Stage 11)
+- Bulk product import (future)
+- Product A/B testing (future)
 
 Constitutional Compliance:
 
-- All drift criteria passed (9/9)
-- Guardian Architecture Checker: PASS (12/12)
-- Guardian API Designer: PASS (12/12)
-- Implementation gate OPEN
+- ADR-0001 Database-per-tenant isolation enforced
+- ADR-0006 Server-authoritative time enforced
+- ADR-0007/0008 Version compatibility enforced
+- Multi-tenancy: Database-per-tenant model
+- License middleware: Mandatory on all routes
+- Transaction atomicity: REPEATABLE READ isolation
+- Audit immutability: Append-only logs
+- Error handling: Standard {success, data, error} contract
+- Structured logging: Pino + correlation IDs
+- Type safety: 100% TypeScript, no `any` types
 
 Notes:
-Drift analysis complete. All violations remediated and validated. Ready for implementation phase.
+Backend implementation complete. No structural backend modifications allowed.
+Documentation generated. Awaiting pre-closure review before deployment gates.
 
 ---
 
@@ -126,6 +149,7 @@ Products must never reference tenant databases.
 **Default:** ACTIVE (at creation time)
 
 **State Transitions:**
+
 - ACTIVE → INACTIVE (disable product)
 - INACTIVE → ACTIVE (re-enable product)
 - Status change does NOT increment version
@@ -138,12 +162,12 @@ Modules are **hardcoded enum** (not free-text, not database-configurable):
 
 ```typescript
 enum Module {
-  MCQ = "MCQ",
-  TRADITIONAL_EXAMS = "TRADITIONAL_EXAMS",
-  EXERCISES = "EXERCISES",
-  LIBRARY = "LIBRARY",
-  LIVES = "LIVES",
-  FORUM = "FORUM"
+  MCQ = 'MCQ',
+  TRADITIONAL_EXAMS = 'TRADITIONAL_EXAMS',
+  EXERCISES = 'EXERCISES',
+  LIBRARY = 'LIBRARY',
+  LIVES = 'LIVES',
+  FORUM = 'FORUM',
 }
 ```
 
@@ -312,6 +336,7 @@ GET /products?status=all         → Both ACTIVE and INACTIVE
 **Rationale:** License creation flows must not accidentally reference inactive products. Default ACTIVE-only prevents operational mistakes.
 
 **Impact:**
+
 - License creation UI queries GET /products (safe default)
 - Backoffice can offer "show archived" toggle with ?status=INACTIVE
 - Pagination remains predictable and fast
@@ -324,18 +349,19 @@ GET /products?status=all         → Both ACTIVE and INACTIVE
 
 ```typescript
 enum Module {
-  MCQ = "MCQ",
-  TRADITIONAL_EXAMS = "TRADITIONAL_EXAMS",
-  EXERCISES = "EXERCISES",
-  LIBRARY = "LIBRARY",
-  LIVES = "LIVES",
-  FORUM = "FORUM"
+  MCQ = 'MCQ',
+  TRADITIONAL_EXAMS = 'TRADITIONAL_EXAMS',
+  EXERCISES = 'EXERCISES',
+  LIBRARY = 'LIBRARY',
+  LIVES = 'LIVES',
+  FORUM = 'FORUM',
 }
 ```
 
 **Rationale:** Modules directly affect provisioning, RBAC, and schema assumptions. Dynamic registration would break deterministic provisioning and constitutional guarantees. Module introduction requires version control and migration binding.
 
 **Impact:**
+
 - Product.enabled_modules validated against TypeScript enum
 - New modules require code change + migration + release
 - All layers (API, domain, DB) use same enum source
@@ -348,6 +374,7 @@ enum Module {
 **Decision:** JSON format: `{"en": "...", "ar": "..."}`
 
 **Rules:**
+
 - English (en) is **required** (NOT NULL)
 - Arabic (ar) is optional
 - If Arabic translation missing, falls back to English
@@ -363,16 +390,18 @@ enum Module {
 ```
 
 **Fallback Logic:**
+
 ```typescript
 function getProductName(product: Product, language: string): string {
   if (language === 'ar' && product.name.ar) return product.name.ar
-  return product.name.en  // Always has fallback
+  return product.name.en // Always has fallback
 }
 ```
 
 **Rationale:** Zidney already supports EN/AR directionality. English as canonical fallback preserves deterministic rendering and prevents null UI states.
 
 **Impact:**
+
 - DB constraint enforces name.en required
 - Backoffice displays product name in user's language
 - No null product names in UI
@@ -385,6 +414,7 @@ function getProductName(product: Product, language: string): string {
 **Decision:** Hard delete only. No soft delete mechanism.
 
 **Rules:**
+
 - DELETE /products/{id} succeeds only if no licenses reference product
 - If licenses exist, DELETE returns 409 Conflict
 - Deletion is permanent and immediate (no grace period)
@@ -397,6 +427,7 @@ FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT;
 ```
 
 **Deletion Outcomes:**
+
 - ✅ No licenses exist → Hard delete succeeds
 - ❌ Licenses exist → 409 Conflict response
 - ✅ Soft alternative: Change status to INACTIVE (preserves history)
@@ -404,6 +435,7 @@ FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT;
 **Rationale:** If licenses exist, product is part of financial/contractual record. Hard delete + 409 conflict keeps lifecycle explicit and clean. Avoids soft delete ambiguity in provisioning.
 
 **Impact:**
+
 - No deleted_at column in products table
 - Foreign key constraint prevents accidental deletion
 - Support path: Mark INACTIVE or migrate licenses to new product
@@ -416,6 +448,7 @@ FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT;
 **Decision:** GET /products/{id}/audit-log (admin-only queryable endpoint)
 
 **Endpoint Specification:**
+
 ```
 GET /api/v1/mmc/products/{id}/audit-log
 Authorization: Admin role required
@@ -448,6 +481,7 @@ Response schema:
 ```
 
 **Filtering Support:**
+
 - By action: CREATE, UPDATE, STATUS_CHANGE
 - By date range: from_date, to_date (ISO 8601)
 - Future: By performed_by user_id
@@ -455,6 +489,7 @@ Response schema:
 **Rationale:** MMC is compliance-facing. Product changes impact licenses, pricing, modules, legal scope. Audit visibility must be queryable for transparency and debugging.
 
 **Impact:**
+
 - Admins can fully audit product change history
 - Supports compliance: "Who changed the product and when?"
 - Enables debugging: "Why did module X disappear?"
