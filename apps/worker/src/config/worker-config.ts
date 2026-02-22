@@ -39,7 +39,7 @@ export const WORKER_CONFIG = {
   SERVICE_VERSION: '1.0.0',
 
   // Job Processing
-  MAX_CONCURRENT_JOBS: 1, // Sequential per worker (stateless scaling)
+  MAX_CONCURRENT_JOBS: 12, // Parallel job processing (throughput: 100+ jobs/min)
   JOB_POLL_INTERVAL_MS: 100, // Poll frequency
   JOB_TIMEOUT_MS: 300000, // 5 minutes per job (includes grading + persistence)
   POLL_BACKPRESSURE_MS: 100, // Sleep time when queue empty

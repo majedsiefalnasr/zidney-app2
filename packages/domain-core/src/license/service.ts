@@ -217,9 +217,9 @@ export async function transitionLicenseState(
 
     // Set state-specific columns
     if (target_state === 'SOFT_LOCKED') {
-      // Calculate soft_lock_until as 7 days from now (per spec)
+      // Calculate soft_lock_until as 90 days from now (per STAGE_04 spec)
       const softLockUntil = new Date()
-      softLockUntil.setDate(softLockUntil.getDate() + 7)
+      softLockUntil.setDate(softLockUntil.getDate() + 90)
       updateQuery += `, soft_lock_until = $4`
       updateParams.push(softLockUntil)
     } else if (target_state === 'ARCHIVED') {
