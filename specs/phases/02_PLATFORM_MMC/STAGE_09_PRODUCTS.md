@@ -8,7 +8,7 @@ Scope: Product entity, configuration model, module control, and versioning
 
 ## Stage Status
 
-Status: DRAFT  
+Status: CLARIFIED  
 Risk Level: LOW  
 Last Updated: 2026-02-22T00:00:00Z
 
@@ -18,9 +18,10 @@ Scope Defined:
 - Product versioning (immutable version history)
 - Product status management (ACTIVE/INACTIVE)
 - Audit logging and traceability
-- Multi-language name support (JSON)
-- Module enumeration validation
+- Multi-language name support (JSON: en/ar with fallback)
+- Module enumeration validation (hardcoded enum)
 - Rate limiting and authorization
+- Audit trail API (queryable by admins)
 
 Deferred Scope:
 
@@ -31,7 +32,8 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted and validated against all ADRs
+- Specification clarified and validated
+- All 5 ambiguities resolved
 - Database-per-tenant isolation enforced
 - License middleware integrity maintained
 - Transaction atomicity enforced
@@ -40,7 +42,7 @@ Constitutional Compliance:
 - Structured logging specified
 
 Notes:
-Specification complete and compliant. Clarification step pending.
+All clarifications locked. Ready for technical planning.
 
 ---
 
@@ -84,65 +86,103 @@ Products must never reference tenant databases.
 ### Core Fields
 
 - id (uuid)
-- name (JSON for multi-language support)
-- slug (unique, immutable)
-- description (nullable)
-- enabled_modules (JSON array)
-- status (ACTIVE | INACTIVE)
-- created_at
-- updated_at
+- name (JSONB: `{"en": "...", "ar": "..."}` — English required, Arabic optional)
+- slug (unique, immutable, lowercase alphanumeric + dash)
+- description (nullable text)
+- enabled_modules (JSONB array: validated against Module enum)
+- status (VARCHAR: ACTIVE | INACTIVE)
+- created_at (TIMESTAMP: server-set, immutable)
+- updated_at (TIMESTAMP: server-set, updated on each modification)
 
 ### Versioning Fields
 
-- current_version (integer)
+- current_version (INTEGER: starts at 1, increments atomically)
 
-Version history must be stored in separate table:
+### Version History Table
 
-product_versions:
+`product_versions` (separate table):
 
-- id
-- product_id
-- version_number
-- change_summary
-- created_at
+- id (uuid)
+- product_id (uuid FK)
+- version_number (INTEGER)
+- change_summary (TEXT: optional description of changes)
+- created_at (TIMESTAMP: when this version was created)
 
-Slug rules:
+**Immutable:** product_versions records never modified or deleted.
 
-- lowercase
-- alphanumeric + dash
-- globally unique
-- immutable after creation
+### Audit Trail Table
+
+`product_audit_logs` (separate table):
+
+- id (uuid)
+- product_id (uuid FK)
+- action (VARCHAR: CREATE | UPDATE | STATUS_CHANGE)
+- previous_version (INTEGER: nullable)
+- new_version (INTEGER: nullable)
+- changed_fields (JSONB: what changed)
+- performed_by (UUID: admin user who made change)
+- timestamp (TIMESTAMP: when change occurred)
+
+**Immutable:** Audit logs are append-only, never modified.
+
+### Slug Rules
+
+- lowercase only
+- alphanumeric characters + dash (no spaces)
+- globally unique (no duplicates across products)
+- immutable after creation (never changed)
+- customer-readable (used in URLs and documentation)
+
+### Status Values
+
+- **ACTIVE:** Product available for new license creation
+- **INACTIVE:** Product archived; cannot create new licenses (existing licenses unaffected)
+
+**Default:** ACTIVE (at creation time)
+
+**State Transitions:**
+- ACTIVE → INACTIVE (disable product)
+- INACTIVE → ACTIVE (re-enable product)
+- Status change does NOT increment version
 
 ---
 
 ## Enabled Modules Contract
 
-Allowed modules (enum-controlled, not free-text):
+Modules are **hardcoded enum** (not free-text, not database-configurable):
 
-- MCQ
-- TRADITIONAL_EXAMS
-- EXERCISES
-- LIBRARY
-- LIVES
-- FORUM
+```typescript
+enum Module {
+  MCQ = "MCQ",
+  TRADITIONAL_EXAMS = "TRADITIONAL_EXAMS",
+  EXERCISES = "EXERCISES",
+  LIBRARY = "LIBRARY",
+  LIVES = "LIVES",
+  FORUM = "FORUM"
+}
+```
 
 Rules:
 
-- At least one module required
-- Modules must be validated against allowed enum
+- At least one module required per product
+- Modules must be validated against TypeScript enum
+- Invalid modules rejected with 400 Bad Request
 - Removing a module only affects future licenses
 - Existing licenses remain unchanged
 
-Disabled module in product:
+Enforcement occurs at:
 
-- Must not be provisioned in new workspaces
-- Must not be accessible in Backoffice
-- Must not be accessible in Frontoffice
+- API validation layer (400 on invalid enum)
+- Domain service layer (pure function validation)
+- Database constraint (CHECK constraintif applicable)
+- Runtime authorization middleware (module availability check)
 
-Module enforcement must occur at:
+New modules require:
 
-- License creation time
-- Runtime authorization middleware
+- Code change (add to enum + type definitions)
+- Database migration (increment schema_version)
+- Release and deployment
+- License provisioning logic review
 
 ---
 
@@ -237,24 +277,203 @@ Audit logs must be immutable.
 
 ## Product Listing (MMC UI Requirements)
 
+**Default Behavior:** GET /products returns ACTIVE products only
+
 Must support:
 
-- Search by name or slug
-- Status filter (ACTIVE / INACTIVE)
-- Pagination
-- Sorting by created_at
-- View licenses count
-- View current_version
+- **Default list:** ACTIVE products only (no filter needed)
+- **Archived products:** ?status=INACTIVE (admin can view with explicit filter)
+- **All products:** ?status=all (see both ACTIVE and INACTIVE)
+- Search by name (supports both en and ar)
+- Search by slug
+- Pagination (limit/offset)
+- Sorting by created_at DESC
+- View license count per product
+- View current version number
 
 Actions per row:
 
-- View
-- Edit
-- Disable
+- View details
+- Edit metadata (name, description, enabled_modules)
+- Change status (ACTIVE ↔ INACTIVE)
 
-Bulk actions allowed for:
+Bulk actions:
 
-- Disable only
+- Change status to INACTIVE (for multiple products)
+
+**Not Available in UI:**
+
+- Delete product (only via API with hard constraint)
+- Modify slug (immutable after creation)
+- Modify version history (read-only audit trail)
+
+---
+
+## Clarifications Locked — Stage 2 Complete
+
+All 5 critical ambiguities have been resolved and locked:
+
+### 1. Product Listing Visibility (✅ Locked)
+
+**Decision:** GET /products returns ACTIVE products only by default.
+
+```
+GET /products                    → ACTIVE products only
+GET /products?status=ACTIVE      → ACTIVE products explicitly
+GET /products?status=INACTIVE    → INACTIVE products only
+GET /products?status=all         → Both ACTIVE and INACTIVE
+```
+
+**Rationale:** License creation flows must not accidentally reference inactive products. Default ACTIVE-only prevents operational mistakes.
+
+**Impact:**
+- License creation UI queries GET /products (safe default)
+- Backoffice can offer "show archived" toggle with ?status=INACTIVE
+- Pagination remains predictable and fast
+
+---
+
+### 2. Module Enumeration Model (✅ Locked)
+
+**Decision:** Modules are a hardcoded enum in code. No runtime registration.
+
+```typescript
+enum Module {
+  MCQ = "MCQ",
+  TRADITIONAL_EXAMS = "TRADITIONAL_EXAMS",
+  EXERCISES = "EXERCISES",
+  LIBRARY = "LIBRARY",
+  LIVES = "LIVES",
+  FORUM = "FORUM"
+}
+```
+
+**Rationale:** Modules directly affect provisioning, RBAC, and schema assumptions. Dynamic registration would break deterministic provisioning and constitutional guarantees. Module introduction requires version control and migration binding.
+
+**Impact:**
+- Product.enabled_modules validated against TypeScript enum
+- New modules require code change + migration + release
+- All layers (API, domain, DB) use same enum source
+- Invalid modules rejected with 400 Bad Request
+
+---
+
+### 3. Product Name Localization (✅ Locked)
+
+**Decision:** JSON format: `{"en": "...", "ar": "..."}`
+
+**Rules:**
+- English (en) is **required** (NOT NULL)
+- Arabic (ar) is optional
+- If Arabic translation missing, falls back to English
+- Only en/ar supported in Stage 9 (extensible for future languages)
+
+```json
+{
+  "name": {
+    "en": "Basic Exam Suite",
+    "ar": "حزمة الامتحان الأساسية"
+  }
+}
+```
+
+**Fallback Logic:**
+```typescript
+function getProductName(product: Product, language: string): string {
+  if (language === 'ar' && product.name.ar) return product.name.ar
+  return product.name.en  // Always has fallback
+}
+```
+
+**Rationale:** Zidney already supports EN/AR directionality. English as canonical fallback preserves deterministic rendering and prevents null UI states.
+
+**Impact:**
+- DB constraint enforces name.en required
+- Backoffice displays product name in user's language
+- No null product names in UI
+- Future language support requires only code + migration
+
+---
+
+### 4. Product Deletion Policy (✅ Locked)
+
+**Decision:** Hard delete only. No soft delete mechanism.
+
+**Rules:**
+- DELETE /products/{id} succeeds only if no licenses reference product
+- If licenses exist, DELETE returns 409 Conflict
+- Deletion is permanent and immediate (no grace period)
+- Foreign key constraint prevents orphaned licenses
+
+```sql
+ALTER TABLE licenses
+ADD CONSTRAINT fk_licenses_product_id
+FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT;
+```
+
+**Deletion Outcomes:**
+- ✅ No licenses exist → Hard delete succeeds
+- ❌ Licenses exist → 409 Conflict response
+- ✅ Soft alternative: Change status to INACTIVE (preserves history)
+
+**Rationale:** If licenses exist, product is part of financial/contractual record. Hard delete + 409 conflict keeps lifecycle explicit and clean. Avoids soft delete ambiguity in provisioning.
+
+**Impact:**
+- No deleted_at column in products table
+- Foreign key constraint prevents accidental deletion
+- Support path: Mark INACTIVE or migrate licenses to new product
+- Audit trail is completely immutable
+
+---
+
+### 5. Audit Log API Exposure (✅ Locked)
+
+**Decision:** GET /products/{id}/audit-log (admin-only queryable endpoint)
+
+**Endpoint Specification:**
+```
+GET /api/mmc/products/{id}/audit-log
+Authorization: Admin role required
+Query params: ?limit=50&offset=0&action=UPDATE&from_date=2026-02-01
+
+Response schema:
+{
+  "data": [
+    {
+      "id": "uuid",
+      "product_id": "uuid",
+      "action": "CREATE|UPDATE|STATUS_CHANGE",
+      "previous_version": null,
+      "new_version": 1,
+      "changed_fields": {...},
+      "performed_by": {
+        "id": "uuid",
+        "email": "admin@mmc.com",
+        "name": "Platform Admin"
+      },
+      "timestamp": "2026-02-22T10:30:00Z"
+    }
+  ],
+  "pagination": {
+    "limit": 50,
+    "offset": 0,
+    "total": 247
+  }
+}
+```
+
+**Filtering Support:**
+- By action: CREATE, UPDATE, STATUS_CHANGE
+- By date range: from_date, to_date (ISO 8601)
+- Future: By performed_by user_id
+
+**Rationale:** MMC is compliance-facing. Product changes impact licenses, pricing, modules, legal scope. Audit visibility must be queryable for transparency and debugging.
+
+**Impact:**
+- Admins can fully audit product change history
+- Supports compliance: "Who changed the product and when?"
+- Enables debugging: "Why did module X disappear?"
+- Audit logs remain immutable and append-only
 
 ---
 
@@ -275,11 +494,16 @@ Stage complete when:
 
 ## Not Allowed
 
-- Editing slug after creation
-- Removing module retroactively for existing licenses
-- Hard deleting product with licenses
-- Automatic license upgrades
-- Direct tenant DB access from product logic
+- ❌ Editing slug after creation (immutable)
+- ❌ Removing module retroactively for existing licenses (version isolation)
+- ❌ Hard deleting product with existing licenses (409 Conflict enforced by FK)
+- ❌ Automatic license upgrades (licenses pin to version at creation)
+- ❌ Direct tenant DB access from product logic (master_db only)
+- ❌ Soft delete mechanism (hard delete + 409 when licenses exist)
+- ❌ Dynamic module registration (hardcoded enum only)
+- ❌ Modifying version history (product_versions immutable)
+- ❌ Non-English product names (en is required)
+- ❌ Free-text module names (enum validation mandatory)
 
 ---
 
