@@ -9,8 +9,8 @@
 
 | Step      | Status | Report                      |
 | --------- | ------ | --------------------------- |
-| Pre-Step  | ⏳     | —                           |
-| Specify   | ⬜     | reports/SPECIFY_REPORT.md   |
+| Pre-Step  | ✅     | —                           |
+| Specify   | ✅     | reports/SPECIFY_REPORT.md   |
 | Clarify   | ⬜     | reports/CLARIFY_REPORT.md   |
 | Plan      | ⬜     | reports/PLAN_REPORT.md      |
 | Tasks     | ⬜     | reports/TASKS_REPORT.md     |
