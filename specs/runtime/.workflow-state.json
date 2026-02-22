@@ -5,9 +5,9 @@
   "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_10_LICENSES.md",
   "branch": "010-licenses-management",
   "base_branch": "develop",
-  "current_step": "specify",
+  "current_step": "clarify",
   "stage_status": "DRAFT",
-  "clarifications_resolved": false,
+  "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
@@ -22,6 +22,11 @@
     },
     {
       "event": "specify_complete",
+      "timestamp": "2026-02-22T00:00:00Z"
+    },
+    {
+      "event": "clarifications_locked",
+      "decisions_locked": 8,
       "timestamp": "2026-02-22T00:00:00Z"
     }
   ]

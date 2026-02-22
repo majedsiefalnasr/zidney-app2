@@ -5,7 +5,7 @@
 **Specification Status:** DRAFT  
 **Report Generated:** 2026-02-22  
 **Report Author:** Specification Analysis Agent  
-**Constitutional Version:** v1.2.0  
+**Constitutional Version:** v1.2.0
 
 ---
 
@@ -128,6 +128,7 @@ License does not contain runtime data, tenant credentials, or academic informati
 - **DELETED:** Terminal state. Tenant database dropped. Snapshot removed. License permanently locked. Cannot be restored or reactivated.
 
 State transition rules:
+
 - Allowed: ACTIVE ↔ SOFT_LOCKED, SOFT_LOCKED → ARCHIVED, ARCHIVED ↔ ACTIVE, ARCHIVED → DELETED
 - Forbidden: ACTIVE → ARCHIVED, ACTIVE → DELETED, SOFT_LOCKED → DELETED (must archive first)
 
@@ -300,6 +301,7 @@ State transition rules:
 **Compliance: REQUIRED BUT DEFERRED**
 
 Middleware chain per primer:
+
 1. Correlation ID middleware
 2. Tenant resolver middleware
 3. License enforcement middleware ← This stage defines License
@@ -307,6 +309,7 @@ Middleware chain per primer:
 5. Route handler
 
 This specification defines what License Middleware does but defers actual middleware implementation. Middleware must:
+
 - Extract license from tenant resolver context
 - Validate license status
 - Block PENDING_PROVISION, SOFT_LOCKED, ARCHIVED, DELETED
@@ -365,7 +368,8 @@ This specification defines what License Middleware does but defers actual middle
 
 **Impact:** Scope creep risk if Stage 04 defines status model differently than this specification.
 
-**Resolution Needed:** 
+**Resolution Needed:**
+
 - Locate or create Stage 04 if it exists in another phase
 - Or confirm Stage 04 is ADR-based definition (likely ADR-0001 or related)
 - Align status enum between documents
@@ -377,6 +381,7 @@ This specification defines what License Middleware does but defers actual middle
 **Ambiguity:** Specification requires "tenants_registry must reflect license state, never redefine it" but synchronization mechanism is not defined.
 
 **Questions:**
+
 - How frequently is tenants_registry synced from license status?
 - What happens if license status changes but tenants_registry not yet updated?
 - Is tenants_registry only read-only copy of license status?
@@ -385,6 +390,7 @@ This specification defines what License Middleware does but defers actual middle
 **Impact:** Status divergence could allow access to ARCHIVED licenses or block access to ACTIVE licenses.
 
 **Resolution Needed:** Define explicit synchronization rules. Example options:
+
 - Option A: tenants_registry is read-only copy, always pulled from licenses table on access
 - Option B: tenants_registry synced immediately on status change (transactional)
 - Option C: tenants_registry cached with TTL, license status is source of truth
@@ -396,11 +402,13 @@ This specification defines what License Middleware does but defers actual middle
 **Ambiguity:** Version Integrity section mentions "License stores 'upgrade_available'" but this field is not included in License Table field list.
 
 **Impact:** Unclear whether upgrade_available is:
+
 - A separate database field on licenses table
 - Computed at query time (checking product_version vs current product version)
 - Stored in a separate upgrades table
 
 **Resolution Needed:** Clarify if upgrade_available is:
+
 - A database field (if so, add to License Table field list)
 - A computed view (document calculation logic)
 - Stored elsewhere (document location)
@@ -412,11 +420,13 @@ This specification defines what License Middleware does but defers actual middle
 **Ambiguity:** STAGE_12_PROVISIONING_TRIGGER.md references "license.status = PROVISION_FAILED" but this status is not listed in License Status Model section (PENDING_PROVISION, ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED).
 
 **Impact:** Specification scope uncertainty:
+
 - Is PROVISION_FAILED a valid license status or only internal state?
 - If ACTIVE only status when provisioning succeeds, how is failure represented?
 - Can user see PROVISION_FAILED in MMC UI or is it hidden?
 
 **Resolution Needed:** Clarify whether PROVISION_FAILED should be:
+
 - Added to License Status Model ENUM
 - Kept as internal state (not user-visible)
 - Mapped to a different status
@@ -426,6 +436,7 @@ This specification defines what License Middleware does but defers actual middle
 ### 5. **Provisional Failure Logging Mechanism** (PRIORITY: MEDIUM)
 
 **Ambiguity:** Specification states "Provisioning failures logged safely" but does not specify:
+
 - Log location (structured logs, worker logs, license table, separate failure table?)
 - Retry visibility (how does MMC know to retry?)
 - Error escalation (how do admins get notified?)
@@ -433,6 +444,7 @@ This specification defines what License Middleware does but defers actual middle
 **Impact:** Provisioning failure handling unclear.
 
 **Resolution Needed:** Define:
+
 - Where failures are persisted (suggestion: failure_reason field in licenses table + structured logs)
 - How MMC surfaces failures to operator
 - How manual retry is triggered
@@ -442,6 +454,7 @@ This specification defines what License Middleware does but defers actual middle
 ### 6. **Definition of "Recoverable" for SOFT_LOCKED vs ARCHIVED** (PRIORITY: LOW)
 
 **Ambiguity:** Specification says SOFT_LOCKED is "recoverable" and ARCHIVED is "recoverable" but doesn't clearly distinguish:
+
 - What data mutations occur during recovery from each state?
 - Is snapshot involved during soft lock recovery?
 - Is snapshot required during archive recovery?
@@ -450,6 +463,7 @@ This specification defines what License Middleware does but defers actual middle
 **Impact:** Operational clarity. Staff might incorrectly restore from ARCHIVED without understanding implications.
 
 **Resolution Needed:** Define recovery process for each state:
+
 - SOFT_LOCKED recovery: Status → ACTIVE, soft_lock_until cleared, no data mutation, no snapshot operation
 - ARCHIVED recovery: Status → ACTIVE, snapshot operations, database state verification
 
@@ -460,6 +474,7 @@ This specification defines what License Middleware does but defers actual middle
 ### 7. **Auto-Transition from SOFT_LOCKED to ARCHIVED on Expiration** (PRIORITY: LOW)
 
 **Ambiguity:** Specification states middleware "must check If status = SOFT_LOCKED AND now > soft_lock_until → Auto-transition to ARCHIVED" but doesn't specify:
+
 - Is this a synchronous check on every request (performance impact)?
 - Is this an async cron job?
 - How is consistency guaranteed (what if multiple requests see expiration simultaneously)?
@@ -467,6 +482,7 @@ This specification defines what License Middleware does but defers actual middle
 **Impact:** Operational model clarity. Could cause race conditions if not carefully implemented.
 
 **Resolution Needed:** Define exact auto-transition mechanism:
+
 - Recommend: Transactional update, first request to detect expiration performs transition atomically
 - Or: Dedicated cron job with explicit locking
 
@@ -475,12 +491,14 @@ This specification defines what License Middleware does but defers actual middle
 ### 8. **Timezone Handling for soft_lock_until and archived_at Timestamps** (PRIORITY: LOW)
 
 **Ambiguity:** Specification uses timestamps but doesn't specify:
+
 - Are all timestamps UTC?
 - How is 90-day grace window calculated (365 days = 1 year, 90 days = 3 months)?
 
 **Impact:** These are straightforward database conventions but worth clarifying.
 
 **Resolution Needed:** Specify
+
 - All timestamps UTC (DEFAULT NOW() in PostgreSQL is UTC)
 - 90-day grace period = now() + INTERVAL '90 days'
 
@@ -494,7 +512,8 @@ This specification defines what License Middleware does but defers actual middle
 
 **Description:** License status PENDING_PROVISION but provisioning worker fails. User sees "created" license but cannot access workspace. Unclear if retry needed.
 
-**Potential Failure Mode:** 
+**Potential Failure Mode:**
+
 - License created with PENDING_PROVISION
 - Provisioning job enqueued
 - Worker crashes before completion
@@ -502,6 +521,7 @@ This specification defines what License Middleware does but defers actual middle
 - User cannot access workspace, no retry button visible
 
 **Mitigation Strategy:** (Implementation, not specification scope)
+
 - Worker timeout: Job must complete or fail within SLA
 - Visible retry UI: Show PROVISION_FAILED status, provide manual retry button
 - Monitoring: Alert on stuck PENDING_PROVISION licenses
@@ -516,12 +536,14 @@ This specification defines what License Middleware does but defers actual middle
 **Description:** License status in master_db conflicts with tenants_registry status. Middleware sees different states, blocks/allows incorrectly.
 
 **Potential Failure Mode:**
+
 - License status = ARCHIVED but tenants_registry still shows ACTIVE
 - Resolver sees ACTIVE in registry, allows login
 - License middleware sees ARCHIVED, denies access (or vice versa)
 - Race condition if both sourced independently
 
 **Mitigation Strategy:**
+
 - Single source of truth: Always pull status from licenses table, never cache in registry
 - Or transactional sync: Update both atomically in single transaction
 - Validation query: Periodic consistency check (tenants_registry WHERE status != licenses.status)
@@ -535,6 +557,7 @@ This specification defines what License Middleware does but defers actual middle
 **Description:** Provisioning worker partially creates database but fails before completing tenants_registry insert. Database exists but license knows nothing about it.
 
 **Potential Failure Mode:**
+
 - Worker creates database workspace_acme_corp
 - Worker runs migrations successfully
 - Worker fails to insert tenants_registry entry
@@ -543,6 +566,7 @@ This specification defines what License Middleware does but defers actual middle
 - Manual cleanup required
 
 **Mitigation Strategy:** (Implementation, not specification scope)
+
 - Explicit cleanup: If worker detects partial database, drop it explicitly
 - Transaction scope: All provisioning operations in same transaction if possible
 - Retry-safe validation: On retry, validate no existing database before proceeding
@@ -556,12 +580,14 @@ This specification defines what License Middleware does but defers actual middle
 **Description:** student_limit is 100, but 120 students get registered because limit check uses stale count.
 
 **Potential Failure Mode:**
-- Limit check: SELECT COUNT(*) FROM students < 100 ✓ (99 students)
+
+- Limit check: SELECT COUNT(\*) FROM students < 100 ✓ (99 students)
 - Student registration proceeds in tenant API
 - But 25 concurrent registrations all see count = 99 before their INSERT
 - Total registered: 124 students (exceeds limit)
 
 **Mitigation Strategy:** (Implementation, not specification scope)
+
 - Transactional check: SELECT ... FOR UPDATE to lock count
 - Or: Post-insert validation with explicit limit enforcement
 - Or: Application-level queue/semaphore
@@ -576,7 +602,8 @@ This specification defines what License Middleware does but defers actual middle
 
 **Description:** Institution needs to upgrade product mid-contract but specification forbids in-place product swap. Must create new license and migrate.
 
-**Impact:** 
+**Impact:**
+
 - High operational friction
 - Requires migration of institutional data
 - Could fragment workspace history
@@ -594,11 +621,13 @@ This specification defines what License Middleware does but defers actual middle
 **Description:** If license status becomes wrong (corrupted), access control fails system-wide. No bypass.
 
 **Potential Failure Mode:**
+
 - License status field corrupted to NULL
 - Middleware cannot determine access, defaults to deny or allow (either bad)
 - All users with that license blocked or all granted access
 
 **Mitigation Strategy:**
+
 - Database constraints: NOT NULL on status field, CHECK constraint for valid ENUM values
 - Input validation: Status updates only through License Service, never direct SQL
 - Audit trail: All status changes logged with actor, timestamp, previous value
@@ -612,7 +641,8 @@ This specification defines what License Middleware does but defers actual middle
 
 **Description:** Institution payment lapse detected, soft lock triggered. But 90 days later auto-archives. Institution might forget, workspace unexpectedly archived.
 
-**Impact:** 
+**Impact:**
+
 - Operational surprise
 - Data preservation, but access blocked
 - Unclear to institution when archive will occur
@@ -632,6 +662,7 @@ This specification defines what License Middleware does but defers actual middle
 **Description:** Specification requires ARCHIVED state before DELETED. What if institution wants immediate deletion?
 
 **Impact:**
+
 - Two-step process increases operational complexity
 - But provides safety net (archive = snapshot preserved before deletion)
 
@@ -648,6 +679,7 @@ This specification defines what License Middleware does but defers actual middle
 **Description:** Middleware version check detects schema_version mismatch (tenant DB schema newer than license.schema_version). Requests blocked with 426.
 
 **Potential Failure Mode:**
+
 - Tenant DB accidentally migrated outside upgrade process
 - schema_version incremented in DB
 - license.schema_version not updated
@@ -655,6 +687,7 @@ This specification defines what License Middleware does but defers actual middle
 - Production down
 
 **Mitigation Strategy:**
+
 - Explicit migrations: DBversioning only through migration system, never manual SQL
 - Transactional updates: License version updated atomically with schema migration
 - Reconciliation process: Periodic check that license_version == actual schema_version
@@ -668,11 +701,13 @@ This specification defines what License Middleware does but defers actual middle
 **Description:** Staff limit is 10, but institution wants to register 15 staff members. Request rejected.
 
 **Impact:**
+
 - Onboarding blocked
 - Institutional friction
 - Either bypass limit (bad) or increase limit (requires MMC action)
 
 **Mitigation Strategy:**
+
 - Accepted constraint. Limits are commercial boundaries.
 - MMC must allow limit updates immediately (specification allows this)
 - Consider grace period for over-limit states (non-specification concern, implementation detail)
@@ -707,20 +742,20 @@ This specification is **ready for Clarify step**, where:
 
 ## Specification Completeness Assessment
 
-| Criterion | Status | Notes |
-|-----------|--------|-------|
-| **License Table Design** | ✅ COMPLETE | All fields specified, immutability rules clear |
-| **License Status Model** | ⚠️ MOSTLY COMPLETE | PROVISION_FAILED status ambiguous, needs clarification |
-| **License Creation Flow** | ✅ COMPLETE | Async provisioning model clear, validation rules clear |
-| **Limits Management** | ✅ COMPLETE | Student and staff limits specified, enforcement delegated to tenant API |
-| **Lifecycle Operations** | ✅ COMPLETE | State transitions defined, forbidden transitions explicit |
-| **Version Integrity** | ✅ MOSTLY COMPLETE | upgrade_available field location ambiguous |
-| **MMC API Endpoints** | ⚠️ PARTIAL | Endpoints listed without full request/response specs (deferred to Plan step) |
-| **Provisioning Integration** | ✅ COMPLETE | Async model, idempotency, failure handling specified |
-| **UI Requirements** | ✅ COMPLETE | Filtering, sorting, actions, display fields specified |
-| **Constitutional Alignment** | ✅ COMPLETE | All ADRs aligned, multi-tenancy enforced, isolation guaranteed |
-| **Dependencies Documented** | ✅ COMPLETE | STAGE_09_PRODUCTS dependency explicit |
-| **Out-of-Scope Clarified** | ✅ COMPLETE | Deferred scope itemized |
+| Criterion                    | Status             | Notes                                                                        |
+| ---------------------------- | ------------------ | ---------------------------------------------------------------------------- |
+| **License Table Design**     | ✅ COMPLETE        | All fields specified, immutability rules clear                               |
+| **License Status Model**     | ⚠️ MOSTLY COMPLETE | PROVISION_FAILED status ambiguous, needs clarification                       |
+| **License Creation Flow**    | ✅ COMPLETE        | Async provisioning model clear, validation rules clear                       |
+| **Limits Management**        | ✅ COMPLETE        | Student and staff limits specified, enforcement delegated to tenant API      |
+| **Lifecycle Operations**     | ✅ COMPLETE        | State transitions defined, forbidden transitions explicit                    |
+| **Version Integrity**        | ✅ MOSTLY COMPLETE | upgrade_available field location ambiguous                                   |
+| **MMC API Endpoints**        | ⚠️ PARTIAL         | Endpoints listed without full request/response specs (deferred to Plan step) |
+| **Provisioning Integration** | ✅ COMPLETE        | Async model, idempotency, failure handling specified                         |
+| **UI Requirements**          | ✅ COMPLETE        | Filtering, sorting, actions, display fields specified                        |
+| **Constitutional Alignment** | ✅ COMPLETE        | All ADRs aligned, multi-tenancy enforced, isolation guaranteed               |
+| **Dependencies Documented**  | ✅ COMPLETE        | STAGE_09_PRODUCTS dependency explicit                                        |
+| **Out-of-Scope Clarified**   | ✅ COMPLETE        | Deferred scope itemized                                                      |
 
 **Overall Specification Grade: A- (Ambiguities minor, core specification solid)**
 
