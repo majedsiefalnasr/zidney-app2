@@ -6,6 +6,54 @@ Scope: License creation, limits management, provisioning trigger, and lifecycle 
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+Risk Level: MEDIUM
+Last Updated: 2026-02-22T00:00:00Z
+
+Scope Defined:
+
+- License table with 18 fields including PROVISION_FAILED state support
+- MMC API endpoints (create, list, details, edit, soft-lock, archive, restore, delete, retry-provisioning)
+- License lifecycle with PROVISION_FAILED status for timeout/failure recovery
+- Limits management framework (student_limit, staff_limit, NULL = unlimited)
+- Provisioning integration with retry policy (5 retries, exponential backoff, 30 min timeout)
+- MMC UI with hybrid error visibility (sanitized errors in UI, full logs in backend)
+- Version integrity (schema_version, product_version immutable snapshots)
+
+Deferred Scope:
+
+- Actual database provisioning (Stage 05)
+- Snapshot/archive implementation (Stage 11)
+- Limits enforcement (Stage 04+)
+- Payment processing integration (future)
+
+Constitutional Compliance:
+
+- All 8 ambiguities resolved and locked
+- Database-per-tenant isolation enforced
+- Multi-tenancy guarantees maintained
+- Version compatibility model verified
+- License as single source of truth established
+- Middleware order compliance confirmed
+
+Ambiguities Locked:
+
+- Status enum extended to include PENDING_PROVISION, PROVISION_FAILED
+- tenants_registry status field removed; master licenses table is authoritative
+- upgrade_available as computed field (product_version comparison)
+- Hybrid error visibility: MMC UI + backend logs
+- Retry policy: 5 retries, 2s base exponential backoff, 30 min total timeout
+- Soft-lock validation: future timestamps only (CHECK constraint)
+- Auto-unlock: lazy evaluation on next request after soft_lock_until passes
+- Timeout responsibility: job queue framework
+
+Notes:
+All clarifications locked and implementation-ready. Constitutional alignment: PASS (ADR-0001, ADR-0005, ADR-0008). Ready for technical planning.
+
+---
+
 ## Objective
 
 Implement License Management inside MMC as the commercial activation layer that binds:
@@ -289,46 +337,3 @@ Zidney loses operational integrity.
 This stage must be stable before:
 
 STAGE 11 – License Lifecycle Operations
-
----
-
-## Stage Status
-
-Status: DRAFT
-Risk Level: MEDIUM
-Last Updated: 2026-02-22T00:00:00Z
-
-Scope Defined:
-
-- License table with 18 fields (product_id, workspace_slug, limits, status ENUM, version snapshots)
-- MMC API endpoints (9 endpoints: create, list, details, edit, soft-lock, archive, restore, delete)
-- License lifecycle states (5 states: PENDING_PROVISION → ACTIVE → SOFT_LOCKED → ARCHIVED → DELETED)
-- Limits management framework (student_limit, staff_limit mutable, NULL = unlimited)
-- Provisioning integration (async worker trigger, version enforcement)
-- MMC UI (license list, filtering, pagination, row actions)
-- Version integrity (schema_version, product_version immutable snapshots)
-
-Deferred Scope:
-
-- Actual database provisioning (Stage 05)
-- Snapshot/archive implementation (Stage 11)
-- Limits enforcement (Stage 04+)
-- Payment processing integration (future)
-
-Constitutional Compliance:
-
-- Specification drafted and validated against Zidney Constitution v1.2.0
-- Database-per-tenant isolation enforced
-- Multi-tenancy guarantees maintained
-- Version compatibility model verified
-- License as single source of truth established
-
-Ambiguities Identified:
-
-- 8 total: 2 HIGH, 3 MEDIUM, 3 LOW
-- HIGH: Stage 04 reference clarification, PROVISION_FAILED handling
-- MEDIUM: upgrade_available field location, failure logging visibility, retry strategy
-- All resolvable in Clarify step
-
-Notes:
-Specification complete and validated. Ready for Clarify step. All 8 ambiguities have clear resolution paths. Constitutional alignment: PASS.
