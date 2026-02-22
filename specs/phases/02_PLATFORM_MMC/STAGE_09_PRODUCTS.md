@@ -8,20 +8,39 @@ Scope: Product entity, configuration model, module control, and versioning
 
 ## Stage Status
 
-Status: PENDING  
-Risk Level: UNKNOWN  
-Initiated: 2026-02-22T00:00:00Z
+Status: DRAFT  
+Risk Level: LOW  
+Last Updated: 2026-02-22T00:00:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Product CRUD operations (create, read, update, list)
+- Product versioning (immutable version history)
+- Product status management (ACTIVE/INACTIVE)
+- Audit logging and traceability
+- Multi-language name support (JSON)
+- Module enumeration validation
+- Rate limiting and authorization
+
+Deferred Scope:
+
+- License assignment (Stage 10)
+- Workspace provisioning (Stage 11)
+- Bulk product import (future)
+- Product A/B testing (future)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted and validated against all ADRs
+- Database-per-tenant isolation enforced
+- License middleware integrity maintained
+- Transaction atomicity enforced
+- Version compatibility model defined
+- Layer separation confirmed
+- Structured logging specified
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete and compliant. Clarification step pending.
 
 ---
 
