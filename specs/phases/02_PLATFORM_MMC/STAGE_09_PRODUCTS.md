@@ -432,7 +432,7 @@ FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT;
 
 **Endpoint Specification:**
 ```
-GET /api/mmc/products/{id}/audit-log
+GET /api/v1/mmc/products/{id}/audit-log
 Authorization: Admin role required
 Query params: ?limit=50&offset=0&action=UPDATE&from_date=2026-02-01
 

@@ -1,0 +1,492 @@
+openapi: 3.0.0
+
+info:
+  title: Zidney Products Management API
+  version: 1.0.0
+  description: Product entity management for MMC (Multi-tenant Management Control)
+  contact:
+    name: API Support
+    email: api-support@zidney.com
+
+servers:
+  - url: https://api.zidney.com/api/v1
+    description: Production
+  - url: https://staging.zidney.com/api/v1
+    description: Staging
+  - url: http://localhost:3000/api/v1
+    description: Local Development
+
+tags:
+  - name: Products
+    description: Product CRUD operations
+  - name: Product Audit
+    description: Audit trail and versioning
+
+paths:
+  /mmc/products:
+    post:
+      tags: [Products]
+      summary: Create product
+      operationId: createProduct
+      security:
+        - bearer: [admin:write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+            example:
+              name:
+                en: "Basic Exam Suite"
+                ar: "حزمة الامتحان الأساسية"
+              slug: "basic-exam-suite"
+              description: "Foundation product for exam management"
+              enabled_modules: ["MCQ", "TRADITIONAL_EXAMS"]
+      responses:
+        '201':
+          description: Product created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+              example:
+                success: true
+                data:
+                  id: "550e8400-e29b-41d4-a716-446655440000"
+                  name:
+                    en: "Basic Exam Suite"
+                    ar: "حزمة الامتحان الأساسية"
+                  slug: "basic-exam-suite"
+                  status: "ACTIVE"
+                  current_version: 1
+                  created_at: "2026-02-22T10:30:00Z"
+        '400':
+          description: Validation error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+              example:
+                success: false
+                data: null
+                error:
+                  code: "INVALID_MODULE_ENUM"
+                  message: "Module 'UNKNOWN_MODULE' is not valid"
+        '409':
+          description: Conflict (duplicate slug)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+      
+    get:
+      tags: [Products]
+      summary: List products
+      description: List products with optional filtering. Returns ACTIVE products by default.
+      operationId: listProducts
+      security:
+        - bearer: [admin:read]
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE, all]
+            default: ACTIVE
+          description: Filter by product status
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search by name (en/ar) or slug
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+            minimum: 1
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+            minimum: 0
+      responses:
+        '200':
+          description: Product list
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+
+  /mmc/products/{id}:
+    get:
+      tags: [Products]
+      summary: Get product by ID
+      operationId: getProductById
+      security:
+        - bearer: [admin:read]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+          example: "550e8400-e29b-41d4-a716-446655440000"
+      responses:
+        '200':
+          description: Product details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+    
+    put:
+      tags: [Products]
+      summary: Update product
+      description: Update product metadata. Creates new version record and increments version.
+      operationId: updateProduct
+      security:
+        - bearer: [admin:write]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductRequest'
+      responses:
+        '200':
+          description: Product updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+        '400':
+          description: Validation error (slug is immutable)
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+
+  /mmc/products/{id}/status:
+    patch:
+      tags: [Products]
+      summary: Change product status
+      description: Change product status (ACTIVE/INACTIVE). Does not increment version.
+      operationId: changeProductStatus
+      security:
+        - bearer: [admin:write]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  type: string
+                  enum: [ACTIVE, INACTIVE]
+      responses:
+        '200':
+          description: Status changed
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ApiResponse'
+
+  /mmc/products/{id}/audit-log:
+    get:
+      tags: [Product Audit]
+      summary: Get product audit trail
+      description: Retrieve immutable audit log for product changes
+      operationId: getProductAuditLog
+      security:
+        - bearer: [admin:read:audit]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            default: 50
+            maximum: 100
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            default: 0
+        - name: action
+          in: query
+          schema:
+            type: string
+            enum: [CREATE, UPDATE, STATUS_CHANGE]
+          description: Filter by action type
+        - name: from_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Filter from ISO 8601 datetime
+        - name: to_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Filter to ISO 8601 datetime
+      responses:
+        '200':
+          description: Audit trail
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuditLogResponse'
+
+components:
+  schemas:
+    CreateProductRequest:
+      type: object
+      required: [name, slug, enabled_modules]
+      properties:
+        name:
+          type: object
+          required: [en]
+          properties:
+            en:
+              type: string
+              minLength: 1
+              maxLength: 255
+              description: English product name (required)
+            ar:
+              type: string
+              minLength: 1
+              maxLength: 255
+              description: Arabic product name (optional, falls back to English)
+        slug:
+          type: string
+          pattern: '^[a-z0-9-]{1,255}$'
+          description: Globally unique, immutable, lowercase identifier
+        description:
+          type: string
+          maxLength: 1000
+          nullable: true
+        enabled_modules:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum: [MCQ, TRADITIONAL_EXAMS, EXERCISES, LIBRARY, LIVES, FORUM]
+          description: Enabled feature modules (at least one required)
+
+    UpdateProductRequest:
+      type: object
+      properties:
+        name:
+          type: object
+          properties:
+            en:
+              type: string
+              minLength: 1
+              maxLength: 255
+            ar:
+              type: string
+              minLength: 1
+              maxLength: 255
+        description:
+          type: string
+          maxLength: 1000
+          nullable: true
+        enabled_modules:
+          type: array
+          minItems: 1
+          items:
+            type: string
+            enum: [MCQ, TRADITIONAL_EXAMS, EXERCISES, LIBRARY, LIVES, FORUM]
+
+    ProductResponse:
+      type: object
+      required: [id, name, slug, enabled_modules, status, current_version, created_at, updated_at]
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: object
+          properties:
+            en:
+              type: string
+            ar:
+              type: string
+              nullable: true
+        slug:
+          type: string
+        description:
+          type: string
+          nullable: true
+        enabled_modules:
+          type: array
+          items:
+            type: string
+            enum: [MCQ, TRADITIONAL_EXAMS, EXERCISES, LIBRARY, LIVES, FORUM]
+        status:
+          type: string
+          enum: [ACTIVE, INACTIVE]
+        current_version:
+          type: integer
+          minimum: 1
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    ApiResponse:
+      type: object
+      required: [success, data]
+      properties:
+        success:
+          type: boolean
+        data:
+          oneOf:
+            - $ref: '#/components/schemas/ProductResponse'
+            - $ref: '#/components/schemas/ProductListResponse'
+            - type: null
+
+    ProductListResponse:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            $ref: '#/components/schemas/ProductResponse'
+        pagination:
+          type: object
+          required: [limit, offset, total]
+          properties:
+            limit:
+              type: integer
+            offset:
+              type: integer
+            total:
+              type: integer
+
+    AuditLogResponse:
+      type: object
+      properties:
+        entries:
+          type: array
+          items:
+            type: object
+            required: [id, product_id, action, timestamp]
+            properties:
+              id:
+                type: string
+                format: uuid
+              product_id:
+                type: string
+                format: uuid
+              action:
+                type: string
+                enum: [CREATE, UPDATE, STATUS_CHANGE]
+              previous_version:
+                type: integer
+                nullable: true
+              new_version:
+                type: integer
+                nullable: true
+              changed_fields:
+                type: object
+                description: JSONB diff of changes
+              performed_by:
+                type: object
+                required: [id, email]
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  email:
+                    type: string
+                  name:
+                    type: string
+              timestamp:
+                type: string
+                format: date-time
+        pagination:
+          type: object
+          required: [limit, offset, total]
+          properties:
+            limit:
+              type: integer
+            offset:
+              type: integer
+            total:
+              type: integer
+
+    ErrorResponse:
+      type: object
+      required: [success, error]
+      properties:
+        success:
+          type: boolean
+          enum: [false]
+        data:
+          type: null
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              enum: 
+                - INVALID_MODULE_ENUM
+                - INVALID_NAME_LOCALIZATION
+                - DUPLICATE_SLUG
+                - SLUG_NOT_MUTABLE
+                - PRODUCT_NOT_FOUND
+                - PRODUCT_HAS_LICENSES
+                - INVALID_STATUS
+                - UNAUTHORIZED
+                - FORBIDDEN
+                - RATE_LIMIT_EXCEEDED
+                - INTERNAL_SERVER_ERROR
+            message:
+              type: string
+            details:
+              type: object
+              nullable: true
+  
+  securitySchemes:
+    bearer:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token with scope (admin:read, admin:write, admin:read:audit)
