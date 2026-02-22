@@ -295,16 +295,40 @@ STAGE 11 – License Lifecycle Operations
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
-Initiated: 2026-02-22T00:00:00Z
+Risk Level: MEDIUM
+Last Updated: 2026-02-22T00:00:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- License table with 18 fields (product_id, workspace_slug, limits, status ENUM, version snapshots)
+- MMC API endpoints (9 endpoints: create, list, details, edit, soft-lock, archive, restore, delete)
+- License lifecycle states (5 states: PENDING_PROVISION → ACTIVE → SOFT_LOCKED → ARCHIVED → DELETED)
+- Limits management framework (student_limit, staff_limit mutable, NULL = unlimited)
+- Provisioning integration (async worker trigger, version enforcement)
+- MMC UI (license list, filtering, pagination, row actions)
+- Version integrity (schema_version, product_version immutable snapshots)
+
+Deferred Scope:
+
+- Actual database provisioning (Stage 05)
+- Snapshot/archive implementation (Stage 11)
+- Limits enforcement (Stage 04+)
+- Payment processing integration (future)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted and validated against Zidney Constitution v1.2.0
+- Database-per-tenant isolation enforced
+- Multi-tenancy guarantees maintained
+- Version compatibility model verified
+- License as single source of truth established
+
+Ambiguities Identified:
+
+- 8 total: 2 HIGH, 3 MEDIUM, 3 LOW
+- HIGH: Stage 04 reference clarification, PROVISION_FAILED handling
+- MEDIUM: upgrade_available field location, failure logging visibility, retry strategy
+- All resolvable in Clarify step
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete and validated. Ready for Clarify step. All 8 ambiguities have clear resolution paths. Constitutional alignment: PASS.
