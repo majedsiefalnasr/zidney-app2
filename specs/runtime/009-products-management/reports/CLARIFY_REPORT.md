@@ -25,14 +25,15 @@ INACTIVE products require explicit ?status=INACTIVE filter.
 ```
 
 **Reasoning (User):**
-> License creation and provisioning flows must not accidentally reference inactive products. 
+
+> License creation and provisioning flows must not accidentally reference inactive products.
 > Default ACTIVE-only prevents operational mistakes and keeps pagination predictable.
 
 **Specification Impact:**
 
 - ✅ GET /products query must include `WHERE status = 'ACTIVE'` as default
 - ✅ GET /products?status=INACTIVE returns archived products only
-- ✅ GET /products?status=* or ?status=all returns both ACTIVE and INACTIVE
+- ✅ GET /products?status=\* or ?status=all returns both ACTIVE and INACTIVE
 - ✅ License creation flows can safely call GET /products without status filter
 - ✅ Backoffice UI can offer "show archived" toggle that appends ?status=INACTIVE
 
@@ -63,6 +64,7 @@ New modules require code release + database migration.
 ```
 
 **Reasoning (User):**
+
 > Modules directly affect provisioning, RBAC, attempt engine availability, and schema assumptions.
 > Dynamic module registration would break deterministic provisioning and constitutional guarantees.
 > Module introduction must remain version-controlled and migration-bound.
@@ -72,12 +74,12 @@ New modules require code release + database migration.
 - ✅ Module list is **TypeScript enum** (not database table):
   ```typescript
   enum Module {
-    MCQ = "MCQ",
-    TRADITIONAL_EXAMS = "TRADITIONAL_EXAMS",
-    EXERCISES = "EXERCISES",
-    LIBRARY = "LIBRARY",
-    LIVES = "LIVES",
-    FORUM = "FORUM"
+    MCQ = 'MCQ',
+    TRADITIONAL_EXAMS = 'TRADITIONAL_EXAMS',
+    EXERCISES = 'EXERCISES',
+    LIBRARY = 'LIBRARY',
+    LIVES = 'LIVES',
+    FORUM = 'FORUM',
   }
   ```
 - ✅ Product.enabled_modules is validated against enum at all layers (API, domain, DB)
@@ -117,6 +119,7 @@ Supported languages initially: English (en) + Arabic (ar).
 ```
 
 **Reasoning (User):**
+
 > Zidney already supports EN/AR directionality.
 > English as canonical fallback preserves deterministic rendering and prevents null UI states.
 > Keeps schema simple while future-proofing.
@@ -140,7 +143,7 @@ Supported languages initially: English (en) + Arabic (ar).
   ```typescript
   function getProductName(product: Product, lang: string): string {
     if (lang === 'ar' && product.name.ar) return product.name.ar
-    return product.name.en  // Fallback to English
+    return product.name.en // Fallback to English
   }
   ```
 - ✅ Future extensibility:
@@ -182,6 +185,7 @@ Product deletion is permanent and immediate (no grace period).
 ```
 
 **Reasoning (User):**
+
 > If licenses exist, product is part of historical financial/contractual record.
 > Soft delete introduces ambiguity in provisioning and compliance.
 > Hard delete + 409 conflict keeps lifecycle explicit and clean.
@@ -199,7 +203,6 @@ Product deletion is permanent and immediate (no grace period).
 - ✅ DELETE /products/{id} behavior:
   - ✅ If no licenses exist → Hard delete (all rows, versions, audit logs)
   - ✅ If licenses exist → 409 Conflict (with message: "Product has active licenses")
-  
 - ✅ Alternatives for problematic products:
   - Change status to INACTIVE (prevents new licenses, preserves history)
   - Migrate licenses to new product (manual operation, coordinated by support)
@@ -235,6 +238,7 @@ Access restricted to MMC admins with AUDIT_READ permission.
 ```
 
 **Reasoning (User):**
+
 > MMC is compliance-facing.
 > Product changes impact licenses, pricing, modules, and legal scope.
 > Audit visibility must be queryable for transparency and debugging.
@@ -243,10 +247,11 @@ Access restricted to MMC admins with AUDIT_READ permission.
 **Specification Impact:**
 
 - ✅ New API endpoint:
+
   ```
   GET /api/mmc/products/{id}/audit-log
   Query params: ?limit=50&offset=0&action=UPDATE&from_date=2026-02-01&to_date=2026-02-22
-  
+
   Response:
   {
     "data": [
@@ -318,13 +323,13 @@ Access restricted to MMC admins with AUDIT_READ permission.
 
 ## Ambiguities Resolution Status
 
-| Ambiguity | Question | Decision | Status |
-|-----------|----------|----------|--------|
-| INACTIVE product visibility | Q1 | ACTIVE-only default | ✅ LOCKED |
-| Module extensibility | Q2 | Hardcoded enum | ✅ LOCKED |
-| Name localization | Q3 | JSON en/ar + fallback | ✅ LOCKED |
-| Deletion policy | Q4 | Hard delete (no soft delete) | ✅ LOCKED |
-| Audit log access | Q5 | Admin queryable endpoint | ✅ LOCKED |
+| Ambiguity                   | Question | Decision                     | Status    |
+| --------------------------- | -------- | ---------------------------- | --------- |
+| INACTIVE product visibility | Q1       | ACTIVE-only default          | ✅ LOCKED |
+| Module extensibility        | Q2       | Hardcoded enum               | ✅ LOCKED |
+| Name localization           | Q3       | JSON en/ar + fallback        | ✅ LOCKED |
+| Deletion policy             | Q4       | Hard delete (no soft delete) | ✅ LOCKED |
+| Audit log access            | Q5       | Admin queryable endpoint     | ✅ LOCKED |
 
 **Total Ambiguities Resolved: 5/5**
 
@@ -353,3 +358,190 @@ All decisions encoded in stage file.
 
 **Proceeding to Step 3 — Plan**
 
+---
+
+## API DESIGN VALIDATION GATE
+
+**Date:** 2026-02-22  
+**Phase:** Post-Plan Validation  
+**Validator:** Zidney API Architecture  
+**Status:** 🔴 BLOCKED – 4 Architectural Issues Found
+
+### Gate Purpose
+
+Before implementation proceeds, the PLAN_REPORT.md API design was validated against 12 acceptance criteria. This gate ensures all architectural requirements are met before code generation.
+
+### Validation Results
+
+**Criteria Passing:** 8/12 ✅  
+**Criteria Needing Work:** 4/12 ❌
+
+**Full Details:** See [VALIDATION_REPORT.md](./VALIDATION_REPORT.md)
+
+---
+
+### BLOCKER #1: Rate Limiting Not Documented ❌
+
+**Severity:** CRITICAL  
+**Category:** Security
+
+**Requirement:**
+
+```
+- 10/min for POST (create products)
+- 20/min for PUT (update products)
+- 100/min for GET (list/read products)
+- Per-user identity (not IP-based)
+```
+
+**Current State:** Not mentioned in PLAN_REPORT.md
+
+**Risk:** DDoS vulnerability, production reliability at risk
+
+**Required Fix:**
+
+- Add Section 7.1 to PLAN_REPORT.md: "Rate Limiting Strategy"
+- Specify Redis sliding-window implementation
+- Define middleware chain integration
+- Add test cases for rate limit enforcement
+- Estimated effort: 30 minutes
+
+**Decision Required:** Approve rate limiting implementation approach?
+
+---
+
+### BLOCKER #2: API Versioning Not in URI Path ⚠️
+
+**Severity:** HIGH  
+**Category:** Architecture
+
+**Requirement:**
+
+```
+API versioning via URL (/api/v1/mmc/products) or header
+```
+
+**Current State:**
+
+```
+Endpoints defined as: /api/mmc/products
+No /v1/ in path, no header versioning documented
+```
+
+**Risk:** Backward compatibility unclear, breaking changes uncontrolled
+
+**Decision Needed:**
+
+- **Option A:** URI versioning: Update all endpoints to `/api/v1/mmc/products`
+- **Option B:** Header versioning: Require `Accept: application/vnd.zidney.v1+json`
+
+**Recommended:** Option A (URI versioning is more discoverable)
+
+**Required Fix:**
+
+- Update Section 3.1 in PLAN_REPORT.md with chosen versioning strategy
+- Update all 6 endpoint definitions with version prefix
+- Document deprecation path for future versions
+- Estimated effort: 15 minutes
+
+**Decision Required:** URI versioning (A) or Header versioning (B)?
+
+---
+
+### BLOCKER #3: OpenAPI 3.0 Specification Not Generated ❌
+
+**Severity:** MEDIUM  
+**Category:** Documentation
+
+**Requirement:**
+
+```
+OpenAPI 3.0 spec generated
+Examples provided for all endpoints
+Spec completeness verified
+```
+
+**Current State:**
+
+- PLAN_REPORT.md has human-readable examples
+- **Missing:** Formal OpenAPI 3.0 YAML/JSON specification file
+
+**Impact:**
+
+- No auto-generated SDK possible
+- IDE/Postman integration blocked
+- No Swagger UI / ReDoc available
+- Contract-first validation missing
+
+**Required Fix:**
+
+- Generate `docs/api/products-management-api-spec.yaml`
+- Include all 6 endpoints with full OpenAPI structure
+- Estimated effort: 45 minutes
+
+**Decision Required:** Approve OpenAPI spec generation?
+
+---
+
+### BLOCKER #4: Metrics Collection Not Defined ❌
+
+**Severity:** MEDIUM  
+**Category:** Observability
+
+**Requirement:**
+
+```
+Metrics collected (latency, error rates)
+Correlation ID in responses (already PASS)
+```
+
+**Current State:**
+
+- PLAN_REPORT.md documents structured logging
+- **Missing:** Metrics aggregation strategy (Prometheus/CloudWatch)
+
+**Required Fix:**
+
+- Add Section 7.2 to PLAN_REPORT.md: "Metrics Collection"
+- Define key metrics with Prometheus
+- Estimated effort: 30 minutes
+
+**Decision Required:** Approve Prometheus-based metrics approach?
+
+---
+
+## Decisions Required
+
+**These questions must be answered before proceeding to implementation:**
+
+1. Rate Limiting: Approve Redis sliding-window implementation?
+2. API Versioning: Choose URI versioning (/v1/) or header versioning?
+3. OpenAPI Spec: Generate formal OpenAPI 3.0 YAML spec?
+4. Metrics Collection: Use Prometheus for aggregation?
+
+---
+
+## Impact if Issues Not Fixed
+
+| Issue             | Impact                                      |
+| ----------------- | ------------------------------------------- |
+| No Rate Limiting  | Production DDoS vulnerability               |
+| No API Versioning | Breaking changes uncontrolled               |
+| No OpenAPI Spec   | Integration barriers, no SDK generation     |
+| No Metrics        | Production blind, no performance visibility |
+
+---
+
+## Remediation Path
+
+1. **Approve Decisions** (above)
+2. **Update PLAN_REPORT.md** with 4 new sections
+3. **Create OpenAPI Spec File**
+4. **Re-validate** against 12 criteria
+5. **Proceed to Implementation** when all PASS
+
+**Estimated Total Effort:** ~2-3 hours
+
+---
+
+**Validator Recommendation:** All 4 issues are fixable and essential. Do not skip to implementation without addressing them.

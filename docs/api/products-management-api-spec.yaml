@@ -1,0 +1,998 @@
+openapi: 3.0.0
+info:
+  title: Zidney Products Management API
+  description: |
+    Products Management API for Zidney Platform.
+    Manages exam products, versions, and audit logs.
+
+    ## Authentication
+    All endpoints require JWT authentication via Authorization header:
+    ```
+    Authorization: Bearer <JWT_TOKEN>
+    ```
+
+    ## Rate Limiting
+    Rate limits are enforced per endpoint:
+    - POST /products: 10 req/min
+    - GET /products: 20 req/min
+    - GET /products/{id}: 30 req/min
+    - PUT /products/{id}: 10 req/min
+    - PATCH /products/{id}/status: 10 req/min
+    - DELETE /products/{id}: 5 req/min
+    - GET /products/{id}/audit-log: 20 req/min
+
+    Responses include rate limit headers:
+    - X-RateLimit-Limit: Request limit
+    - X-RateLimit-Remaining: Requests remaining
+    - X-RateLimit-Reset: Unix timestamp of limit reset
+
+  version: 1.0.0
+  contact:
+    name: Zidney Platform Team
+    email: support@zidney.io
+  license:
+    name: Proprietary
+
+servers:
+  - url: https://api.zidney.io/mmc
+    description: Production
+  - url: http://localhost:3000/mmc
+    description: Development
+
+tags:
+  - name: Products
+    description: Product management operations
+  - name: Audit
+    description: Product audit logging operations
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      description: JWT token required for authentication
+
+  schemas:
+    ProductName:
+      type: object
+      required: [en]
+      properties:
+        en:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Product name in English
+          example: Calculus Assessment
+        ar:
+          type: string
+          minLength: 1
+          maxLength: 255
+          description: Optional product name in Arabic
+          example: تقييم الحساب
+
+    ProductStatus:
+      type: string
+      enum: [ACTIVE, INACTIVE]
+      default: ACTIVE
+      description: Product status
+
+    AuditAction:
+      type: string
+      enum: [CREATE, UPDATE, STATUS_CHANGE]
+      description: Type of audit action performed
+
+    ModuleEnum:
+      type: string
+      enum:
+        - MODULE_ASSESSMENT
+        - MODULE_ATTEMPT
+        - MODULE_CONTENT
+        - MODULE_REPORTING
+        - MODULE_PROCTOR
+        - MODULE_ANALYTICS
+      description: Available feature modules
+
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - slug
+        - enabled_modules
+        - status
+        - current_version
+        - created_at
+        - updated_at
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Unique product identifier
+          example: prod-550e8400-e29b-41d4-a716-446655440000
+        name:
+          $ref: "#/components/schemas/ProductName"
+        slug:
+          type: string
+          pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          minLength: 1
+          maxLength: 255
+          description: URL-friendly product identifier (immutable, lowercase with hyphens)
+          example: calculus-assessment
+        description:
+          type: string
+          maxLength: 2000
+          nullable: true
+          description: Optional product description
+          example: Comprehensive calculus assessment suite
+        enabled_modules:
+          type: array
+          minItems: 1
+          maxItems: 6
+          uniqueItems: true
+          items:
+            $ref: "#/components/schemas/ModuleEnum"
+          description: Enabled feature modules for this product
+          example:
+            - MODULE_ASSESSMENT
+            - MODULE_ATTEMPT
+            - MODULE_REPORTING
+        status:
+          $ref: "#/components/schemas/ProductStatus"
+        current_version:
+          type: integer
+          minimum: 1
+          description: Current version number (incremented on updates)
+          example: 3
+        created_at:
+          type: string
+          format: date-time
+          description: Product creation timestamp (ISO 8601)
+          example: 2024-01-15T10:30:00Z
+        updated_at:
+          type: string
+          format: date-time
+          description: Last update timestamp (ISO 8601)
+          example: 2024-01-15T10:30:00Z
+
+    ProductVersion:
+      type: object
+      required:
+        - id
+        - product_id
+        - version_number
+        - name
+        - slug
+        - description
+        - enabled_modules
+        - created_at
+        - created_by
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Version record identifier
+        product_id:
+          type: string
+          format: uuid
+          description: Product identifier
+        version_number:
+          type: integer
+          minimum: 1
+          description: Version number
+        name:
+          $ref: "#/components/schemas/ProductName"
+        slug:
+          type: string
+          description: Product slug at this version
+        description:
+          type: string
+          nullable: true
+        enabled_modules:
+          type: array
+          items:
+            $ref: "#/components/schemas/ModuleEnum"
+        created_at:
+          type: string
+          format: date-time
+        created_by:
+          type: string
+          format: uuid
+
+    AuditLogEntry:
+      type: object
+      required:
+        - id
+        - product_id
+        - action
+        - timestamp
+        - performed_by
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Audit log entry identifier
+        product_id:
+          type: string
+          format: uuid
+          description: Product identifier
+        action:
+          $ref: "#/components/schemas/AuditAction"
+        timestamp:
+          type: string
+          format: date-time
+          description: Audit action timestamp (ISO 8601)
+        performed_by:
+          type: string
+          format: uuid
+          description: User who performed the action
+        previous_version:
+          type: integer
+          minimum: 1
+          nullable: true
+          description: Previous version (null for CREATE)
+        new_version:
+          type: integer
+          minimum: 1
+          nullable: true
+          description: New version (null for STATUS_CHANGE)
+        changed_fields:
+          type: object
+          nullable: true
+          description: Fields that changed (UPDATE only)
+          additionalProperties:
+            type: object
+            properties:
+              old_value:
+                type: object
+              new_value:
+                type: object
+
+    PaginationMeta:
+      type: object
+      required: [total, limit, offset, has_more]
+      properties:
+        total:
+          type: integer
+          minimum: 0
+          description: Total number of items
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+          description: Items per page
+        offset:
+          type: integer
+          minimum: 0
+          description: Pagination offset
+        has_more:
+          type: boolean
+          description: Whether more items exist
+
+    ProductListResponse:
+      type: object
+      required: [items, total, limit, offset, has_more]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/Product"
+        total:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        offset:
+          type: integer
+          minimum: 0
+        has_more:
+          type: boolean
+
+    AuditLogResponse:
+      type: object
+      required: [items, total, limit, offset]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/AuditLogEntry"
+        total:
+          type: integer
+          minimum: 0
+        limit:
+          type: integer
+          minimum: 1
+          maximum: 100
+        offset:
+          type: integer
+          minimum: 0
+
+    SuccessResponse:
+      type: object
+      required: [success, data, error]
+      properties:
+        success:
+          type: boolean
+          example: true
+        data:
+          type: object
+          nullable: true
+        error:
+          type: object
+          nullable: true
+
+    ErrorResponse:
+      type: object
+      required: [success, data, error]
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: object
+          nullable: true
+          example: null
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: Error code identifier
+              enum:
+                - DUPLICATE_SLUG
+                - INVALID_MODULE_ENUM
+                - INVALID_NAME_LOCALIZATION
+                - INVALID_SLUG_FORMAT
+                - INVALID_STATUS_TRANSITION
+                - INVALID_VERSION_CHANGE
+                - PRODUCT_NOT_FOUND
+                - PRODUCT_HAS_LICENSES
+                - INSUFFICIENT_PERMISSIONS
+                - LICENSE_EXPIRED
+                - SCHEMA_VERSION_MISMATCH
+                - INTERNAL_SERVER_ERROR
+                - RATE_LIMIT_EXCEEDED
+            message:
+              type: string
+              description: Human-readable error message
+
+  responses:
+    BadRequest:
+      description: Bad Request - Invalid input
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            invalid_module:
+              summary: Invalid module enum
+              value:
+                success: false
+                data: null
+                error:
+                  code: INVALID_MODULE_ENUM
+                  message: Invalid module enum value
+
+    Unauthorized:
+      description: Unauthorized - Missing or invalid JWT
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    Forbidden:
+      description: Forbidden - Insufficient permissions
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    NotFound:
+      description: Not Found - Product not found
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            not_found:
+              summary: Product not found
+              value:
+                success: false
+                data: null
+                error:
+                  code: PRODUCT_NOT_FOUND
+                  message: Product with ID not found
+
+    Conflict:
+      description: Conflict - Resource already exists
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            duplicate_slug:
+              summary: Duplicate slug
+              value:
+                success: false
+                data: null
+                error:
+                  code: DUPLICATE_SLUG
+                  message: Product with this slug already exists
+
+    RateLimitExceeded:
+      description: Rate Limit Exceeded
+      headers:
+        X-RateLimit-Limit:
+          schema:
+            type: integer
+          description: Request limit
+        X-RateLimit-Remaining:
+          schema:
+            type: integer
+          description: Remaining requests
+        X-RateLimit-Reset:
+          schema:
+            type: integer
+          description: Unix timestamp when limit resets
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    InternalServerError:
+      description: Internal Server Error
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+security:
+  - BearerAuth: []
+
+paths:
+  /products:
+    post:
+      summary: Create Product
+      description: |
+        Create a new product with initial version 1.
+
+        - Product must have English name (ar optional)
+        - Slug must be unique and lowercase alphanumeric with hyphens
+        - At least one module must be enabled
+        - Initial status is ACTIVE
+        - Creates audit log entry with action CREATE
+
+        **Required Permissions**: admin
+        **Rate Limit**: 10 req/min
+      operationId: createProduct
+      tags: [Products]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [name, slug, enabled_modules]
+              properties:
+                name:
+                  $ref: "#/components/schemas/ProductName"
+                slug:
+                  type: string
+                  pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  minLength: 1
+                  maxLength: 255
+                  example: calculus-exam
+                description:
+                  type: string
+                  maxLength: 2000
+                  nullable: true
+                enabled_modules:
+                  type: array
+                  minItems: 1
+                  maxItems: 6
+                  uniqueItems: true
+                  items:
+                    $ref: "#/components/schemas/ModuleEnum"
+            examples:
+              simple:
+                summary: Simple product creation
+                value:
+                  name:
+                    en: Calculus Assessment
+                  slug: calculus-assessment
+                  enabled_modules:
+                    - MODULE_ASSESSMENT
+                    - MODULE_ATTEMPT
+              full:
+                summary: Product with all fields
+                value:
+                  name:
+                    en: Advanced Calculus
+                    ar: حساب متقدم
+                  slug: advanced-calculus
+                  description: Comprehensive calculus assessment
+                  enabled_modules:
+                    - MODULE_ASSESSMENT
+                    - MODULE_ATTEMPT
+                    - MODULE_REPORTING
+      responses:
+        "201":
+          description: Product created successfully
+          headers:
+            X-Correlation-ID:
+              schema:
+                type: string
+              description: Correlation ID for tracing
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+              description: Request limit
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+              example:
+                id: prod-550e8400-e29b-41d4-a716-446655440000
+                name:
+                  en: Calculus Assessment
+                slug: calculus-assessment
+                description: null
+                enabled_modules:
+                  - MODULE_ASSESSMENT
+                  - MODULE_ATTEMPT
+                status: ACTIVE
+                current_version: 1
+                created_at: 2024-01-15T10:30:00Z
+                updated_at: 2024-01-15T10:30:00Z
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    get:
+      summary: List Products
+      description: |
+        Retrieve paginated list of products with optional filtering and sorting.
+
+        **Filters:**
+        - status: Filter by ACTIVE/INACTIVE (default: ACTIVE only)
+        - search: Search by name or slug (case-insensitive substring match)
+        - module: Filter by enabled module (only products with this module)
+
+        **Pagination:**
+        - limit: Max 100 items per page (default: 10)
+        - offset: Pagination offset (default: 0)
+
+        **Sorting:**
+        - sort_by: created_at (default), updated_at, name
+        - sort_order: asc, desc (default: desc)
+
+        **Required Permissions**: read
+        **Rate Limit**: 20 req/min
+      operationId: listProducts
+      tags: [Products]
+      parameters:
+        - name: status
+          in: query
+          description: Filter by status (ACTIVE, INACTIVE, or both)
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE, all]
+            default: ACTIVE
+        - name: search
+          in: query
+          description: Search by name or slug
+          schema:
+            type: string
+            maxLength: 255
+        - name: module
+          in: query
+          description: Filter by enabled module
+          schema:
+            $ref: "#/components/schemas/ModuleEnum"
+        - name: limit
+          in: query
+          description: Items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: offset
+          in: query
+          description: Pagination offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: sort_by
+          in: query
+          description: Field to sort by
+          schema:
+            type: string
+            enum: [created_at, updated_at, name]
+            default: created_at
+        - name: sort_order
+          in: query
+          description: Sort order
+          schema:
+            type: string
+            enum: [asc, desc]
+            default: desc
+      responses:
+        "200":
+          description: Product list retrieved successfully
+          headers:
+            X-Correlation-ID:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProductListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /products/{productId}:
+    get:
+      summary: Get Product
+      description: |
+        Retrieve a single product by ID with all current details.
+
+        **Required Permissions**: read
+        **Rate Limit**: 30 req/min
+      operationId: getProduct
+      tags: [Products]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: Product ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Product retrieved successfully
+          headers:
+            X-Correlation-ID:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    put:
+      summary: Update Product
+      description: |
+        Update product details and create new version.
+
+        - At least one field must change (no-op updates not versioned)
+        - Increments current_version on change
+        - Creates new ProductVersion record
+        - Creates audit log with UPDATE action
+        - Immutable fields: id, slug, created_at (cannot be changed)
+        - Status remains unchanged (use PATCH for status)
+
+        **Required Permissions**: admin
+        **Rate Limit**: 10 req/min
+      operationId: updateProduct
+      tags: [Products]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: Product ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                name:
+                  $ref: "#/components/schemas/ProductName"
+                description:
+                  type: string
+                  maxLength: 2000
+                  nullable: true
+                enabled_modules:
+                  type: array
+                  minItems: 1
+                  maxItems: 6
+                  uniqueItems: true
+                  items:
+                    $ref: "#/components/schemas/ModuleEnum"
+            examples:
+              partial:
+                summary: Update single field
+                value:
+                  description: Updated description for the product
+              full:
+                summary: Update multiple fields
+                value:
+                  name:
+                    en: Updated Name
+                  description: New description
+                  enabled_modules:
+                    - MODULE_ASSESSMENT
+                    - MODULE_ATTEMPT
+                    - MODULE_REPORTING
+      responses:
+        "200":
+          description: Product updated successfully
+          headers:
+            X-Correlation-ID:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+    delete:
+      summary: Delete Product
+      description: |
+        Delete a product and cascade delete its versions and audit logs.
+
+        - Hard delete (no soft_delete flag)
+        - Cascades to product_versions and product_audit_logs
+        - Cannot delete if product has active licenses
+        - Creates audit log with DELETE action before deletion
+        - Returns 204 No Content on success
+
+        **Required Permissions**: admin
+        **Rate Limit**: 5 req/min
+      operationId: deleteProduct
+      tags: [Products]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: Product ID
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Product deleted successfully
+          headers:
+            X-Correlation-ID:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          description: Product has associated licenses
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /products/{productId}/status:
+    patch:
+      summary: Change Product Status
+      description: |
+        Change product status (ACTIVE ↔ INACTIVE).
+
+        - Does NOT increment version number
+        - Does NOT create new ProductVersion record
+        - Creates audit log with STATUS_CHANGE action
+        - Idempotent: changing to current status is allowed
+        - Preserves all other product fields
+
+        **Required Permissions**: admin
+        **Rate Limit**: 10 req/min
+      operationId: changeProductStatus
+      tags: [Products]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: Product ID
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [status]
+              properties:
+                status:
+                  $ref: "#/components/schemas/ProductStatus"
+            examples:
+              deactivate:
+                summary: Deactivate product
+                value:
+                  status: INACTIVE
+              activate:
+                summary: Reactivate product
+                value:
+                  status: ACTIVE
+      responses:
+        "200":
+          description: Product status changed successfully
+          headers:
+            X-Correlation-ID:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Product"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+        "500":
+          $ref: "#/components/responses/InternalServerError"
+
+  /products/{productId}/audit-log:
+    get:
+      summary: Get Product Audit Log
+      description: |
+        Retrieve paginated audit log for a product.
+
+        **Filters:**
+        - action: CREATE, UPDATE, STATUS_CHANGE (optional)
+        - from_date: Start date (ISO 8601)
+        - to_date: End date (ISO 8601)
+
+        **Pagination:**
+        - limit: Max 100 items (default: 10)
+        - offset: Pagination offset (default: 0)
+
+        **Sorting:** Always DESC by timestamp
+
+        **Required Permissions**: read
+        **Rate Limit**: 20 req/min
+      operationId: getAuditLog
+      tags: [Audit]
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: Product ID
+          schema:
+            type: string
+            format: uuid
+        - name: action
+          in: query
+          description: Filter by audit action
+          schema:
+            $ref: "#/components/schemas/AuditAction"
+        - name: from_date
+          in: query
+          description: Filter entries from this date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: to_date
+          in: query
+          description: Filter entries until this date (ISO 8601)
+          schema:
+            type: string
+            format: date-time
+        - name: limit
+          in: query
+          description: Items per page
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: offset
+          in: query
+          description: Pagination offset
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: Audit log retrieved successfully
+          headers:
+            X-Correlation-ID:
+              schema:
+                type: string
+            X-RateLimit-Limit:
+              schema:
+                type: integer
+            X-RateLimit-Remaining:
+              schema:
+                type: integer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuditLogResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+        "500":
+          $ref: "#/components/responses/InternalServerError"

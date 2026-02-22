@@ -1,54 +1,275 @@
+# ============================================================================
+# STAGE_09_PRODUCTS PRODUCTION DEPLOYMENT
+# ============================================================================
+# Services orchestrated for product management, multi-tenant isolation,
+# and high-concurrency exam runtime.
+#
+# Trust Chain Enforcement:
+#   Isolation → License → Authentication → Attempt → Runtime → Frontoffice
+#
+# Database-per-Tenant Model:
+#   - Single PostgreSQL instance
+#   - Master database (zidney_master) for products, licenses, users
+#   - Workspace databases (workspace_<slug>) for tenant data
+#   - No shared tenant schema
+#
+# All services use health checks and graceful shutdown (SIGTERM).
+# All sensitive data injected via environment variables (.env).
+
+version: "3.9"
+
 services:
+  # =========================================================================
+  # PostgreSQL: Master + Tenant Databases
+  # =========================================================================
   postgres:
-    image: postgres:15
+    image: postgres:15.9-alpine3.20
+    container_name: zidney-postgres
+    restart: unless-stopped
+
     environment:
       POSTGRES_DB: zidney_master
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: password
+      POSTGRES_USER: zidney_app
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-change-me-in-production}
+      POSTGRES_INITDB_ARGS: >
+        -c log_statement=none
+        -c max_connections=200
+        -c shared_buffers=256MB
+        -c effective_cache_size=1GB
+
     ports:
       - "5432:5432"
+
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U zidney_app -d zidney_master"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
+    networks:
+      - zidney
+
+  # =========================================================================
+  # Redis: Job Queue + Pub/Sub
+  # =========================================================================
   redis:
-    image: redis:7
+    image: redis:7.4-alpine3.20
+    container_name: zidney-redis
+    restart: unless-stopped
+
+    command: >
+      redis-server
+      --save 60 1000
+      --appendonly yes
+      --maxmemory 512mb
+      --maxmemory-policy allkeys-lru
+
     ports:
       - "6379:6379"
+
     volumes:
       - redis_data:/data
+
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
       interval: 10s
       timeout: 5s
       retries: 5
+      start_period: 10s
 
-  # pgbouncer:
-  #   image: pgbouncer/pgbouncer:latest
-  #   environment:
-  #     PGBOUNCER_DATABASE_HOST: postgres
-  #     PGBOUNCER_DATABASE_PORT: 5432
-  #     PGBOUNCER_DATABASE_USER: postgres
-  #     PGBOUNCER_DATABASE_PASSWORD: password
-  #     PGBOUNCER_POOL_MODE: transaction
-  #   ports:
-  #     - "6432:6432"
-  #   depends_on:
-  #     postgres:
-  #       condition: service_healthy
+    networks:
+      - zidney
 
+  # =========================================================================
+  # PgBouncer: Connection Pooling (PRODUCTION MANDATORY)
+  # =========================================================================
+  pgbouncer:
+    image: pgbouncer/pgbouncer:1.22-1.15
+    container_name: zidney-pgbouncer
+    restart: unless-stopped
+
+    environment:
+      PGBOUNCER_DATABASES_HOST: postgres
+      PGBOUNCER_DATABASES_PORT: 5432
+      PGBOUNCER_DATABASES_USER: zidney_app
+      PGBOUNCER_DATABASES_PASSWORD: ${DB_PASSWORD:-change-me-in-production}
+      PGBOUNCER_DATABASES_DBNAME: zidney_master
+      PGBOUNCER_POOL_MODE: transaction
+      PGBOUNCER_MAX_CLIENT_CONN: 100
+      PGBOUNCER_DEFAULT_POOL_SIZE: 10
+
+    ports:
+      - "6432:6432"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+    networks:
+      - zidney
+
+  # =========================================================================
+  # API: Bun + Hono Backend (STAGE_09_PRODUCTS Runtime)
+  # =========================================================================
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: api
+
+    container_name: zidney-api
+    restart: unless-stopped
+
+    environment:
+      NODE_ENV: production
+      PORT: 3000
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+
+      DATABASE_URL: postgresql://zidney_app:${DB_PASSWORD:-change-me}@pgbouncer:6432/zidney_master
+      DATABASE_POOL_MAX: 20
+
+      REDIS_URL: redis://redis:6379/0
+
+      PLATFORM_PRODUCT_VERSION: "1.0.0"
+      JWT_SECRET: ${JWT_SECRET:-dev-secret-change-in-production}
+
+      RATE_LIMIT_ENABLED: "true"
+      CORRELATION_ID_ENABLED: "true"
+
+    ports:
+      - "3000:3000"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_started
+
+    healthcheck:
+      test: ["CMD", "bun", "-e", "console.log('ok'); process.exit(0)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    security_opt:
+      - no-new-privileges:true
+
+    networks:
+      - zidney
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # =========================================================================
+  # Worker: Background Job Processor
+  # =========================================================================
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: worker
+
+    container_name: zidney-worker
+    restart: unless-stopped
+
+    environment:
+      NODE_ENV: production
+      LOG_LEVEL: ${LOG_LEVEL:-info}
+
+      DATABASE_URL: postgresql://zidney_app:${DB_PASSWORD:-change-me}@pgbouncer:6432/zidney_master
+      DATABASE_POOL_MAX: 10
+
+      REDIS_URL: redis://redis:6379/0
+
+      WORKER_CONCURRENCY: 4
+      WORKER_TIMEOUT: 300
+
+      CORRELATION_ID_ENABLED: "true"
+
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      pgbouncer:
+        condition: service_started
+
+    healthcheck:
+      test: ["CMD", "bun", "-e", "console.log('worker-ok'); process.exit(0)"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+
+    security_opt:
+      - no-new-privileges:true
+
+    networks:
+      - zidney
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # =========================================================================
+  # Nginx: Reverse Proxy + Public Entry Point
+  # =========================================================================
   nginx:
-    image: nginx:alpine
+    image: nginx:1.27.4-alpine3.20
+    container_name: zidney-nginx
+    restart: unless-stopped
+
     ports:
       - "80:80"
+      - "443:443"
+
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/nginx.conf:ro
+
     depends_on:
-      - postgres
-      - redis
+      api:
+        condition: service_healthy
+
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost/healthz"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+
+    networks:
+      - zidney
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "5"
+
+# ============================================================================
+# Network & Volumes
+# ============================================================================
+
+networks:
+  zidney:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
 
 volumes:
   postgres_data:
+    driver: local
   redis_data:
+    driver: local

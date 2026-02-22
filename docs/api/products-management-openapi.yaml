@@ -1,0 +1,724 @@
+openapi: 3.0.0
+info:
+  title: Products Management API
+  version: 1.0.0
+  description: |
+    Complete API specification for the Products Management system.
+    All endpoints require authentication and operate within a workspace context.
+  contact:
+    name: Zidney Platform Team
+
+servers:
+  - url: https://api.{workspace_slug}.zidney.io/api/v1/mmc
+    description: Production MMC API (workspace-specific)
+    variables:
+      workspace_slug:
+        default: demo
+        description: Workspace slug identifier
+
+security:
+  - BearerToken: []
+
+paths:
+  /products:
+    post:
+      summary: Create a new product
+      operationId: createProduct
+      tags:
+        - Products
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateProductRequest"
+            examples:
+              english_only:
+                summary: English-only product
+                value:
+                  name:
+                    en: MCQ Assessment System
+                  slug: mcq-assessment-system
+                  description: Comprehensive MCQ exam platform
+                  enabled_modules:
+                    - MCQ
+                    - GRADING
+              bilingual:
+                summary: Bilingual product
+                value:
+                  name:
+                    en: Complete Exam Suite
+                    ar: مجموعة الامتحانات الكاملة
+                  slug: complete-exam-suite
+                  enabled_modules:
+                    - MCQ
+                    - SIMULATION
+                    - GRADING
+                    - FEEDBACK
+      responses:
+        "201":
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+              examples:
+                success:
+                  summary: Successful creation
+                  value:
+                    success: true
+                    data:
+                      id: 550e8400-e29b-41d4-a716-446655440000
+                      name:
+                        en: MCQ Assessment System
+                      slug: mcq-assessment-system
+                      description: Comprehensive MCQ exam platform
+                      enabled_modules:
+                        - MCQ
+                        - GRADING
+                      status: ACTIVE
+                      current_version: 1
+                      created_at: "2026-02-22T10:30:00Z"
+                      updated_at: "2026-02-22T10:30:00Z"
+                    error: null
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "423":
+          $ref: "#/components/responses/WorkspaceLocked"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+        "500":
+          $ref: "#/components/responses/InternalError"
+
+    get:
+      summary: List products with filtering and pagination
+      operationId: listProducts
+      tags:
+        - Products
+      parameters:
+        - name: status
+          in: query
+          schema:
+            type: string
+            enum: [ACTIVE, INACTIVE, ALL]
+            default: ACTIVE
+          description: Filter by product status
+        - name: search
+          in: query
+          schema:
+            type: string
+          description: Search by name (en/ar) or slug
+        - name: sort
+          in: query
+          schema:
+            type: string
+            enum: [created_at_asc, created_at_desc]
+            default: created_at_desc
+          description: Sort order
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Number of items per page
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+          description: Number of items to skip
+      responses:
+        "200":
+          description: Product list retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseList"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+
+  /products/{product_id}:
+    get:
+      summary: Get a single product by ID
+      operationId: getProduct
+      tags:
+        - Products
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "200":
+          description: Product retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+
+    put:
+      summary: Update a product (increments version if changes detected)
+      operationId: updateProduct
+      tags:
+        - Products
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/UpdateProductRequest"
+      responses:
+        "200":
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "423":
+          $ref: "#/components/responses/WorkspaceLocked"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+
+    delete:
+      summary: Delete a product (fails if licenses exist)
+      operationId: deleteProduct
+      tags:
+        - Products
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        "204":
+          description: Product deleted successfully
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "423":
+          $ref: "#/components/responses/WorkspaceLocked"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+
+  /products/{product_id}/status:
+    patch:
+      summary: Change product status (ACTIVE <-> INACTIVE)
+      operationId: changeProductStatus
+      tags:
+        - Products
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/StatusChangeRequest"
+      responses:
+        "200":
+          description: Status changed successfully (version not incremented)
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "423":
+          $ref: "#/components/responses/WorkspaceLocked"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+
+  /products/{product_id}/audit-log:
+    get:
+      summary: Get audit log for a product with filtering
+      operationId: getProductAuditLog
+      tags:
+        - Audit
+      parameters:
+        - name: product_id
+          in: path
+          required: true
+          schema:
+            type: string
+            format: uuid
+        - name: action
+          in: query
+          schema:
+            type: string
+            enum: [CREATE, UPDATE, STATUS_CHANGE]
+          description: Filter by action type
+        - name: from_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Filter from date (ISO 8601)
+        - name: to_date
+          in: query
+          schema:
+            type: string
+            format: date-time
+          description: Filter to date (ISO 8601)
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: offset
+          in: query
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        "200":
+          description: Audit log retrieved
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponseAuditLog"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          description: "Forbidden: User lacks AUDIT_READ permission"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "423":
+          $ref: "#/components/responses/WorkspaceLocked"
+        "429":
+          $ref: "#/components/responses/RateLimitExceeded"
+
+components:
+  securitySchemes:
+    BearerToken:
+      type: http
+      scheme: bearer
+      description: JWT bearer token
+
+  schemas:
+    LocalizedString:
+      type: object
+      required:
+        - en
+      properties:
+        en:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: English localization (required)
+        ar:
+          type: string
+          minLength: 1
+          maxLength: 500
+          description: Arabic localization (optional)
+
+    Module:
+      type: string
+      enum:
+        - MCQ
+        - LIBRARY
+        - SIMULATION
+        - GRADING
+        - FEEDBACK
+        - ANALYTICS
+      description: Available product modules
+
+    ProductStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - INACTIVE
+
+    CreateProductRequest:
+      type: object
+      required:
+        - name
+        - slug
+        - enabled_modules
+      properties:
+        name:
+          $ref: "#/components/schemas/LocalizedString"
+        slug:
+          type: string
+          pattern: '^[a-z0-9]([a-z0-9\-]*[a-z0-9])?$'
+          description: URL-safe slug (lowercase, alphanumeric, hyphens only)
+        description:
+          type: string
+          nullable: true
+        enabled_modules:
+          type: array
+          items:
+            $ref: "#/components/schemas/Module"
+          minItems: 1
+          description: At least one module required
+
+    UpdateProductRequest:
+      type: object
+      properties:
+        name:
+          $ref: "#/components/schemas/LocalizedString"
+        description:
+          type: string
+          nullable: true
+        enabled_modules:
+          type: array
+          items:
+            $ref: "#/components/schemas/Module"
+          minItems: 1
+
+    StatusChangeRequest:
+      type: object
+      required:
+        - status
+      properties:
+        status:
+          $ref: "#/components/schemas/ProductStatus"
+
+    Product:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          $ref: "#/components/schemas/LocalizedString"
+        slug:
+          type: string
+        description:
+          type: string
+          nullable: true
+        enabled_modules:
+          type: array
+          items:
+            $ref: "#/components/schemas/Module"
+        status:
+          $ref: "#/components/schemas/ProductStatus"
+        current_version:
+          type: integer
+          minimum: 1
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    AuditLogEntry:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        product_id:
+          type: string
+          format: uuid
+        action:
+          type: string
+          enum: [CREATE, UPDATE, STATUS_CHANGE]
+        previous_version:
+          type: integer
+          nullable: true
+          description: Previous version (null for CREATE/STATUS_CHANGE)
+        new_version:
+          type: integer
+          nullable: true
+          description: New version (null for STATUS_CHANGE)
+        changed_fields:
+          type: object
+          description: 'Map of changed fields: {"field_name": [old_value, new_value]}'
+        performed_by:
+          type: string
+          format: uuid
+          description: User ID who performed the action
+        timestamp:
+          type: string
+          format: date-time
+
+    ApiResponse:
+      type: object
+      required:
+        - success
+        - data
+        - error
+      properties:
+        success:
+          type: boolean
+        data:
+          $ref: "#/components/schemas/Product"
+          nullable: true
+        error:
+          type: object
+          nullable: true
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+            details:
+              type: object
+              nullable: true
+
+    ApiResponseList:
+      type: object
+      required:
+        - success
+        - data
+        - error
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/Product"
+            total:
+              type: integer
+            limit:
+              type: integer
+            offset:
+              type: integer
+            has_more:
+              type: boolean
+        error:
+          type: object
+          nullable: true
+
+    ApiResponseAuditLog:
+      type: object
+      required:
+        - success
+        - data
+        - error
+      properties:
+        success:
+          type: boolean
+        data:
+          type: object
+          properties:
+            items:
+              type: array
+              items:
+                $ref: "#/components/schemas/AuditLogEntry"
+            total:
+              type: integer
+            limit:
+              type: integer
+            offset:
+              type: integer
+            has_more:
+              type: boolean
+        error:
+          type: object
+          nullable: true
+
+    ErrorResponse:
+      type: object
+      required:
+        - success
+        - data
+        - error
+      properties:
+        success:
+          type: boolean
+          example: false
+        data:
+          type: "null"
+        error:
+          type: object
+          required:
+            - code
+            - message
+          properties:
+            code:
+              type: string
+              enum:
+                - DUPLICATE_SLUG
+                - INVALID_MODULE_ENUM
+                - INVALID_NAME_LOCALIZATION
+                - PRODUCT_NOT_FOUND
+                - UNAUTHORIZED
+                - FORBIDDEN
+                - WORKSPACE_LOCKED
+                - WORKSPACE_NOT_FOUND
+                - PRODUCT_HAS_LICENSES
+                - INVALID_SLUG_FORMAT
+                - SLUG_IMMUTABLE
+                - RATE_LIMIT_EXCEEDED
+                - INTERNAL_ERROR
+            message:
+              type: string
+            details:
+              type: object
+              nullable: true
+
+  responses:
+    BadRequest:
+      description: Invalid request (400)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            invalid_slug:
+              summary: Invalid slug format
+              value:
+                success: false
+                data: null
+                error:
+                  code: INVALID_SLUG_FORMAT
+                  message: Slug must contain only lowercase letters, numbers, and hyphens
+                  details:
+                    field: slug
+
+    Unauthorized:
+      description: Missing or invalid authentication (401)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            missing_token:
+              summary: Missing JWT token
+              value:
+                success: false
+                data: null
+                error:
+                  code: UNAUTHORIZED
+                  message: Authorization header is missing or invalid
+
+    Forbidden:
+      description: User lacks required permissions (403)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    Conflict:
+      description: Resource conflict (409)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+          examples:
+            duplicate_slug:
+              summary: Slug already exists
+              value:
+                success: false
+                data: null
+                error:
+                  code: DUPLICATE_SLUG
+                  message: Product with this slug already exists
+
+    WorkspaceLocked:
+      description: Workspace is locked (423)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    RateLimitExceeded:
+      description: Rate limit exceeded (429)
+      headers:
+        x-ratelimit-limit:
+          schema:
+            type: integer
+          description: Request limit per minute
+        x-ratelimit-remaining:
+          schema:
+            type: integer
+          description: Requests remaining in current window
+        x-ratelimit-reset:
+          schema:
+            type: integer
+          description: Unix timestamp when rate limit resets
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    InternalError:
+      description: Internal server error (500)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+    NotFound:
+      description: Resource not found (404)
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+
+tags:
+  - name: Products
+    description: Product CRUD operations
+  - name: Audit
+    description: Audit log queries

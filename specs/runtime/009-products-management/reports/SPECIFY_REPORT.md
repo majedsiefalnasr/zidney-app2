@@ -43,11 +43,11 @@ Products Management implements the commercial product catalog in MMC with:
 
 **New Tables (master_db):**
 
-| Table | Purpose | Columns | Immutable? |
-|-------|---------|---------|-----------|
-| `products` | Core product entities | id, name, slug, description, enabled_modules, status, current_version, created_at, updated_at | slug (immutable) |
-| `product_versions` | Version history | id, product_id, version_number, change_summary, created_at | Yes (append-only) |
-| `product_audit_logs` | Audit trail | id, product_id, action, previous_version, new_version, changed_fields, performed_by, timestamp | Yes (append-only) |
+| Table                | Purpose               | Columns                                                                                        | Immutable?        |
+| -------------------- | --------------------- | ---------------------------------------------------------------------------------------------- | ----------------- |
+| `products`           | Core product entities | id, name, slug, description, enabled_modules, status, current_version, created_at, updated_at  | slug (immutable)  |
+| `product_versions`   | Version history       | id, product_id, version_number, change_summary, created_at                                     | Yes (append-only) |
+| `product_audit_logs` | Audit trail           | id, product_id, action, previous_version, new_version, changed_fields, performed_by, timestamp | Yes (append-only) |
 
 **Modified Tables:**
 
@@ -102,12 +102,12 @@ PATCH  /api/mmc/products/:id/status    Change product status
 
 #### 7. Success Criteria (Pre-Stage 10)
 
-| Category | Criteria |
-|----------|----------|
-| **Functional** | CRUD operations work; slug uniqueness enforced; version history immutable; audit logs present |
-| **Performance** | Product create < 100ms p95; list < 200ms p95 (1000 products) |
-| **Reliability** | 99.95% transaction success; zero orphan records |
-| **Operational** | Structured logging present; rate limiting active; indexes optimized |
+| Category        | Criteria                                                                                      |
+| --------------- | --------------------------------------------------------------------------------------------- |
+| **Functional**  | CRUD operations work; slug uniqueness enforced; version history immutable; audit logs present |
+| **Performance** | Product create < 100ms p95; list < 200ms p95 (1000 products)                                  |
+| **Reliability** | 99.95% transaction success; zero orphan records                                               |
+| **Operational** | Structured logging present; rate limiting active; indexes optimized                           |
 
 ---
 
@@ -115,24 +115,24 @@ PATCH  /api/mmc/products/:id/status    Change product status
 
 ### Completeness Check
 
-| Section | Status | Quality | Notes |
-|---------|--------|---------|-------|
-| Feature Overview | ✅ Complete | High | Clear objective and relation to licensing |
-| Constitutional Compliance | ✅ Complete | High | All ADRs referenced; no violations found |
-| Isolation Analysis | ✅ Complete | High | Master DB only; no tenant access |
-| License & Version Enforcement | ✅ Complete | High | Clear version compatibility model |
-| Data Model | ✅ Complete | High | Schema + indexes + relationships defined |
-| Transaction Boundaries | ✅ Complete | High | Atomicity clearly documented |
-| Authoritative Time Usage | ✅ Complete | High | Server time enforced; no client time accepted |
-| Idempotency Strategy | ✅ Complete | High | Not idempotent by design; retry strategy clear |
-| Observability | ✅ Complete | High | Structured logging spec + metrics |
-| Rate Limiting | ✅ Complete | High | Per-endpoint and per-user limits defined |
-| Layer Separation | ✅ Complete | High | UI/API/Domain/Worker boundaries clear |
-| Failure Modes | ✅ Complete | High | DB failures, data integrity, version mismatches covered |
-| Test Strategy | ✅ Complete | High | Unit, integration, and atomicity tests specified |
-| Non-Goals | ✅ Complete | High | 12 explicit non-goals prevent scope creep |
-| Success Criteria | ✅ Complete | High | Functional, performance, reliability, operational |
-| Assumptions | ✅ Complete | High | Business, technical, operational assumptions stated |
+| Section                       | Status      | Quality | Notes                                                   |
+| ----------------------------- | ----------- | ------- | ------------------------------------------------------- |
+| Feature Overview              | ✅ Complete | High    | Clear objective and relation to licensing               |
+| Constitutional Compliance     | ✅ Complete | High    | All ADRs referenced; no violations found                |
+| Isolation Analysis            | ✅ Complete | High    | Master DB only; no tenant access                        |
+| License & Version Enforcement | ✅ Complete | High    | Clear version compatibility model                       |
+| Data Model                    | ✅ Complete | High    | Schema + indexes + relationships defined                |
+| Transaction Boundaries        | ✅ Complete | High    | Atomicity clearly documented                            |
+| Authoritative Time Usage      | ✅ Complete | High    | Server time enforced; no client time accepted           |
+| Idempotency Strategy          | ✅ Complete | High    | Not idempotent by design; retry strategy clear          |
+| Observability                 | ✅ Complete | High    | Structured logging spec + metrics                       |
+| Rate Limiting                 | ✅ Complete | High    | Per-endpoint and per-user limits defined                |
+| Layer Separation              | ✅ Complete | High    | UI/API/Domain/Worker boundaries clear                   |
+| Failure Modes                 | ✅ Complete | High    | DB failures, data integrity, version mismatches covered |
+| Test Strategy                 | ✅ Complete | High    | Unit, integration, and atomicity tests specified        |
+| Non-Goals                     | ✅ Complete | High    | 12 explicit non-goals prevent scope creep               |
+| Success Criteria              | ✅ Complete | High    | Functional, performance, reliability, operational       |
+| Assumptions                   | ✅ Complete | High    | Business, technical, operational assumptions stated     |
 
 **Overall Quality: EXCELLENT — Ready for planning phase**
 
@@ -142,13 +142,13 @@ PATCH  /api/mmc/products/:id/status    Change product status
 
 ### ADR Alignment Matrix
 
-| ADR | Requirement | Compliance | Evidence |
-|-----|-----------|-----------|----------|
-| **ADR-0001: Database-per-Tenant** | Products in master_db only | ✅ YES | Specification: "Products must never reference tenant databases" |
-| **ADR-0002: Snapshot Attempt Model** | No modification to attempt snapshots | ✅ YES | Specification: "Does not affect attempt engine" |
-| **ADR-0006: Server-Authoritative Time** | Server clock for timestamps | ✅ YES | Specification: "created_at set by server (client time ignored)" |
-| **ADR-0007: Product Version Compatibility** | Version pinning to licenses | ✅ YES | Specification: "Licenses pin to product_version at creation time" |
-| **ADR-0008: Semantic Versioning** | Version increment rules | ✅ YES | Specification: "Each product update increments version atomically" |
+| ADR                                         | Requirement                          | Compliance | Evidence                                                           |
+| ------------------------------------------- | ------------------------------------ | ---------- | ------------------------------------------------------------------ |
+| **ADR-0001: Database-per-Tenant**           | Products in master_db only           | ✅ YES     | Specification: "Products must never reference tenant databases"    |
+| **ADR-0002: Snapshot Attempt Model**        | No modification to attempt snapshots | ✅ YES     | Specification: "Does not affect attempt engine"                    |
+| **ADR-0006: Server-Authoritative Time**     | Server clock for timestamps          | ✅ YES     | Specification: "created_at set by server (client time ignored)"    |
+| **ADR-0007: Product Version Compatibility** | Version pinning to licenses          | ✅ YES     | Specification: "Licenses pin to product_version at creation time"  |
+| **ADR-0008: Semantic Versioning**           | Version increment rules              | ✅ YES     | Specification: "Each product update increments version atomically" |
 
 **Verdict: FULLY COMPLIANT**
 
@@ -180,4 +180,3 @@ No ambiguities that block planning.
 No missing required inputs.
 
 **Proceeding to Step 2 — Clarify**
-
