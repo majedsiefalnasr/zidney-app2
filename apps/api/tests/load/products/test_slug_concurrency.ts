@@ -37,8 +37,8 @@ describe('Load: Products - Slug Concurrency (T069)', () => {
 
   it('should handle 100 concurrent creation attempts', () => {
     const concurrentAttempts = 100
-    let successCount = 1
-    let failureCount = concurrentAttempts - 1
+    const successCount = 1
+    const failureCount = concurrentAttempts - 1
 
     expect(successCount + failureCount).toBe(concurrentAttempts)
     expect(failureCount).toBe(99)
