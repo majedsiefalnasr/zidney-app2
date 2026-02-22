@@ -14,43 +14,46 @@ Last Updated: 2026-02-22T00:00:00Z
 
 Scope Defined:
 
-- License table with 18 fields including PROVISION_FAILED state support
-- MMC API endpoints (create, list, details, edit, soft-lock, archive, restore, delete, retry-provisioning)
-- License lifecycle with PROVISION_FAILED status for timeout/failure recovery
-- Limits management framework (student_limit, staff_limit, NULL = unlimited)
-- Provisioning integration with retry policy (5 retries, exponential backoff, 30 min timeout)
-- MMC UI with hybrid error visibility (sanitized errors in UI, full logs in backend)
-- Version integrity (schema_version, product_version immutable snapshots)
+- License table: 21 fields with 6 status states (PENDING_PROVISION, ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED, PROVISION_FAILED)
+- API Layer: 10 endpoints (create, list, get, edit, soft-lock, unlock, archive, restore, delete, retry-provisioning)
+- Middleware Layer: License access gate with status validation and soft-lock lazy expiration
+- Worker Layer: Provisioning job with idempotency, 5 retries, exponential backoff, 30m timeout
+- Version Integrity: Immutable schema_version and product_version snapshots
+- UI Layer: 7 views (list, detail, create, edit, soft-lock modal, archive modal, restore confirmation)
+- Migration: 3 forward-only migrations for schema creation, provisioning fields, status enum
 
 Deferred Scope:
 
-- Actual database provisioning (Stage 05)
+- Actual database provisioning logic (Stage 05 - DBInitializer)
 - Snapshot/archive implementation (Stage 11)
-- Limits enforcement (Stage 04+)
+- Limits enforcement in runtime (Stage 04+)
 - Payment processing integration (future)
 
 Constitutional Compliance:
 
-- All 8 ambiguities resolved and locked
-- Database-per-tenant isolation enforced
-- Multi-tenancy guarantees maintained
-- Version compatibility model verified
+- Technical plan designed and validated
+- Database-per-tenant architecture preserved
 - License as single source of truth established
-- Middleware order compliance confirmed
+- Multi-tenancy isolation guaranteed
+- Version immutability enforced
+- All ADRs aligned (0001, 0005, 0006, 0007, 0008)
+- Middleware order: Correlation ID → License Check → Tenant Routing
+- Error handling RFC 7807 compliant
+- Structured logging with correlation_id ready
 
-Ambiguities Locked:
+Decision Implementations Locked:
 
-- Status enum extended to include PENDING_PROVISION, PROVISION_FAILED
-- tenants_registry status field removed; master licenses table is authoritative
-- upgrade_available as computed field (product_version comparison)
-- Hybrid error visibility: MMC UI + backend logs
-- Retry policy: 5 retries, 2s base exponential backoff, 30 min total timeout
-- Soft-lock validation: future timestamps only (CHECK constraint)
-- Auto-unlock: lazy evaluation on next request after soft_lock_until passes
-- Timeout responsibility: job queue framework
+- Status enum includes PROVISION_FAILED for timeout recovery
+- tenants_registry: status field removed (master_db authoritative)
+- upgrade_available: computed field in License GET response
+- Provisioning errors: hybrid visibility (sanitized UI + full backend logs)
+- Retry policy: 5 retries, 2s base exponential, 30m timeout implemented
+- Soft-lock validation: CHECK constraint for future timestamps
+- Soft-lock expiration: lazy evaluation on next request (SOFT_LOCKED → ARCHIVED)
+- Timeout responsibility: job queue framework (not STAGE_10)
 
 Notes:
-All clarifications locked and implementation-ready. Constitutional alignment: PASS (ADR-0001, ADR-0005, ADR-0008). Ready for technical planning.
+Technical plan complete and implementation-ready. All layers specified, all endpoints designed, all migrations drafted. Constitutional mandates validated. Ready for Task generation step.
 
 ---
 
