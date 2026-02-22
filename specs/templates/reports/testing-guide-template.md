@@ -10,6 +10,7 @@
 {{STAGE_PLAIN_ENGLISH_SUMMARY}}
 
 In plain terms:
+
 - {{PLAIN_FEATURE_1}}
 - {{PLAIN_FEATURE_2}}
 - {{PLAIN_FEATURE_3}}
@@ -20,14 +21,14 @@ In plain terms:
 
 Make sure you have these ready before running any tests:
 
-| Requirement          | How to check                              |
-|----------------------|-------------------------------------------|
-| Node.js installed    | `node --version` → should be v20+         |
-| Bun installed        | `bun --version` → should be v1+           |
-| Docker running       | `docker ps` → should not error            |
-| `.env` file exists   | Check project root for `.env` or `.env.local` |
-| DB migrations run    | `bun run db:migrate` (run if unsure)      |
-| Branch checked out   | `git branch` → should show `{{STAGE_DIR_NAME}}` |
+| Requirement        | How to check                                    |
+| ------------------ | ----------------------------------------------- |
+| Node.js installed  | `node --version` → should be v20+               |
+| Bun installed      | `bun --version` → should be v1+                 |
+| Docker running     | `docker ps` → should not error                  |
+| `.env` file exists | Check project root for `.env` or `.env.local`   |
+| DB migrations run  | `bun run db:migrate` (run if unsure)            |
+| Branch checked out | `git branch` → should show `{{STAGE_DIR_NAME}}` |
 
 If anything above is missing, ask a teammate or check the project `README.md` before continuing.
 
@@ -129,7 +130,7 @@ Work through these scenarios one by one. Each one has clear steps and what to ex
 
 ---
 
-### Scenario 3 — {{SCENARIO_3_TITLE}} *(Edge Case)*
+### Scenario 3 — {{SCENARIO_3_TITLE}} _(Edge Case)_
 
 **What this tests:** {{SCENARIO_3_WHAT}}
 
@@ -147,13 +148,14 @@ Work through these scenarios one by one. Each one has clear steps and what to ex
 
 These are cases that **should fail** with a clear error. Make sure the system rejects them properly.
 
-| Scenario                        | How to trigger                  | Expected response         |
-|---------------------------------|---------------------------------|---------------------------|
-| {{ERROR_CASE_1_TITLE}}          | {{ERROR_CASE_1_HOW}}            | `{{ERROR_CASE_1_RESPONSE}}` |
-| {{ERROR_CASE_2_TITLE}}          | {{ERROR_CASE_2_HOW}}            | `{{ERROR_CASE_2_RESPONSE}}` |
-| {{ERROR_CASE_3_TITLE}}          | {{ERROR_CASE_3_HOW}}            | `{{ERROR_CASE_3_RESPONSE}}` |
+| Scenario               | How to trigger       | Expected response           |
+| ---------------------- | -------------------- | --------------------------- |
+| {{ERROR_CASE_1_TITLE}} | {{ERROR_CASE_1_HOW}} | `{{ERROR_CASE_1_RESPONSE}}` |
+| {{ERROR_CASE_2_TITLE}} | {{ERROR_CASE_2_HOW}} | `{{ERROR_CASE_2_RESPONSE}}` |
+| {{ERROR_CASE_3_TITLE}} | {{ERROR_CASE_3_HOW}} | `{{ERROR_CASE_3_RESPONSE}}` |
 
 All error responses should follow this format:
+
 ```json
 {
   "success": false,
@@ -193,6 +195,7 @@ bun run dev:worker | jq .
 ```
 
 Look for entries with:
+
 - `"level": "error"` — something went wrong
 - `"workspace_slug"` — confirms tenant context is attached
 - `"correlation_id"` — use this to trace a request end-to-end
@@ -201,14 +204,14 @@ Look for entries with:
 
 ## 🐛 Common Issues & Fixes
 
-| Problem                          | Likely cause                        | Fix                                      |
-|----------------------------------|-------------------------------------|------------------------------------------|
-| `Cannot connect to DB`           | DB not running or wrong credentials | Check `.env` DB_URL and run `docker ps`  |
-| `Migration failed`               | Schema out of sync                  | Run `bun run db:migrate` again           |
-| `401 Unauthorized`               | Missing or expired token            | Re-login and use the new token           |
-| `423 Locked`                     | Workspace license is soft-locked    | Check workspace license status in MMC    |
-| `426 Upgrade Required`           | Schema version mismatch             | Run migrations and restart server        |
-| Tests fail with `port in use`    | Server already running              | Kill existing process: `lsof -ti:3000 \| xargs kill` |
+| Problem                       | Likely cause                        | Fix                                                  |
+| ----------------------------- | ----------------------------------- | ---------------------------------------------------- |
+| `Cannot connect to DB`        | DB not running or wrong credentials | Check `.env` DB_URL and run `docker ps`              |
+| `Migration failed`            | Schema out of sync                  | Run `bun run db:migrate` again                       |
+| `401 Unauthorized`            | Missing or expired token            | Re-login and use the new token                       |
+| `423 Locked`                  | Workspace license is soft-locked    | Check workspace license status in MMC                |
+| `426 Upgrade Required`        | Schema version mismatch             | Run migrations and restart server                    |
+| Tests fail with `port in use` | Server already running              | Kill existing process: `lsof -ti:3000 \| xargs kill` |
 
 ---
 
@@ -223,10 +226,10 @@ bun run db:console --workspace <workspace_slug>
 
 Key tables touched in this stage:
 
-| Table                    | What to check                          |
-|--------------------------|----------------------------------------|
-| {{DB_TABLE_1}}           | {{DB_TABLE_1_CHECK}}                   |
-| {{DB_TABLE_2}}           | {{DB_TABLE_2_CHECK}}                   |
+| Table          | What to check        |
+| -------------- | -------------------- |
+| {{DB_TABLE_1}} | {{DB_TABLE_1_CHECK}} |
+| {{DB_TABLE_2}} | {{DB_TABLE_2_CHECK}} |
 
 ---
 
@@ -253,5 +256,5 @@ If you're stuck or find an unexpected issue:
 
 ---
 
-*Generated by Zidney Orchestrator — Hard Mode v1.2.0*  
-*Stage: {{STAGE_NAME}} | Phase: {{PHASE_NAME}} | Date: {{CLOSURE_DATE}}*
+_Generated by Zidney Orchestrator — Hard Mode v1.2.0_  
+_Stage: {{STAGE_NAME}} | Phase: {{PHASE_NAME}} | Date: {{CLOSURE_DATE}}_
