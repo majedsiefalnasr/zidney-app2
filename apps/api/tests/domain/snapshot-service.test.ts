@@ -11,7 +11,7 @@
 import {
   captureExamSnapshot,
   compareSnapshots,
-} from '@zidney/domain-core/src/attempts/snapshot-service'
+} from '@zidney/domain-core/attempts/snapshot-service'
 import { Pool } from 'pg'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { createLogger } from '../../src/utils/logger'

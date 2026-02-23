@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { createUserWithLimitCheck } from '../../../apps/api/src/utils/transaction-wrapper'
+import { createUserWithLimitCheck } from '@zidney/app/api/utils/transaction-wrapper'
 import { MockDatabaseClient, testFixtures } from './fixtures'
 
 /**

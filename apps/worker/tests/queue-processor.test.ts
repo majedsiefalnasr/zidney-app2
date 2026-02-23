@@ -19,8 +19,8 @@ import {
   getRetryDelay,
   INIT_TENANT_SCHEMA_CONFIG,
   shouldAlertOps,
-} from '@zidney/worker/src/config/task-configs'
-import { TaskQueueProcessor } from '@zidney/worker/src/processor/queue-processor'
+} from '@zidney/app/worker/config/task-configs'
+import { TaskQueueProcessor } from '@zidney/app/worker/processor/queue-processor'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 const logger = createLogger('WorkerQueueProcessorTest')

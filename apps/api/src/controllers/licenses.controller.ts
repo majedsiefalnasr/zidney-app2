@@ -9,15 +9,13 @@
  * Returns RFC 7807 formatted error responses.
  */
 
-import { Context } from 'hono'
-import { Logger } from 'pino'
 import {
   DEFAULT_PAGE_SIZE,
   HTTP_STATUS_CREATED,
   MAX_PAGE_SIZE,
-} from '../../../packages/domain-core/src/licenses/constants'
-import { LicenseError } from '../../../packages/domain-core/src/licenses/errors'
-import { LicenseService } from '../../../packages/domain-core/src/licenses/service'
+} from '@zidney/domain-core/licenses/constants'
+import { LicenseError } from '@zidney/domain-core/licenses/errors'
+import { LicenseService } from '@zidney/domain-core/licenses/service'
 import {
   ArchiveRequest,
   CreateLicenseRequest,
@@ -26,7 +24,9 @@ import {
   RetryProvisioningRequest,
   SoftLockRequest,
   UnlockRequest,
-} from '../../../packages/domain-core/src/licenses/types'
+} from '@zidney/domain-core/licenses/types'
+import { Context } from 'hono'
+import { Logger } from 'pino'
 
 interface LicenseContext extends Context {
   license?: any
@@ -95,8 +95,6 @@ export class LicenseController {
    */
   async list(ctx: LicenseContext) {
     try {
-      const correlationId = ctx.correlation_id || 'unknown'
-
       // Parse query parameters
       const page = parseInt(ctx.req.query('page') || '1')
       const limit = Math.min(
@@ -139,7 +137,7 @@ export class LicenseController {
             licenses: result.items,
             pagination: {
               page: result.page,
-              limit: result.limit || limit,
+              limit: limit,
               total: result.total,
               pages: result.pages,
             },
@@ -528,7 +526,20 @@ export class LicenseController {
         error_message: error.message,
       })
 
-      return ctx.json(error.toResponse(), error.httpStatus)
+      return ctx.json(
+        error.toResponse(),
+        error.httpStatus as
+          | 400
+          | 401
+          | 403
+          | 404
+          | 409
+          | 423
+          | 426
+          | 429
+          | 500
+          | 503
+      )
     }
 
     // Generic error

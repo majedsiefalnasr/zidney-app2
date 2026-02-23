@@ -21,7 +21,7 @@ import { Logger } from 'pino'
 import {
   LicenseStatus,
   ProvisioningJobPayload,
-} from '../../../packages/domain-core/src/licenses/types'
+} from '@zidney/domain-core/licenses/types'
 
 interface ProvisioningJobContext {
   masterDb: Database
