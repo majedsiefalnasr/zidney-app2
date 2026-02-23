@@ -8,8 +8,8 @@
  * Task: T039 (Integration test for concurrent snapshots)
  */
 
-import { initializeAttempt } from '@zidney/domain-core/src/attempts/attempt-init'
-import { getAttemptSnapshot } from '@zidney/domain-core/src/attempts/snapshot-service'
+import { initializeAttempt } from '@zidney/domain-core/attempts/attempt-init'
+import { getAttemptSnapshot } from '@zidney/domain-core/attempts/snapshot-service'
 import { createLogger } from '@zidney/logging'
 import { Pool } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'

@@ -23,7 +23,7 @@ import {
   insertSchemaVersion,
   readMigrationFile,
   verifySchemaIntegrity,
-} from '@zidney/domain-core/src/migrations/migrate'
+} from '@zidney/domain-core/migrations/migrate'
 import { createLogger } from '@zidney/logging'
 import type { Pool, PoolClient } from 'pg'
 

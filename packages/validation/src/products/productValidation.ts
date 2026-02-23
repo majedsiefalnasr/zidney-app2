@@ -9,9 +9,9 @@
  */
 
 import { z } from 'zod'
-import { Module } from '../../../types/src/enums/Module'
-import { ErrorCodes } from '../../../types/src/errors/ErrorCodes'
-import { ProductStatus } from '../../../types/src/products/Product'
+import { Module } from '@zidney/types/enums/Module'
+import { ErrorCodes } from '@zidney/types/errors/ErrorCodes'
+import { ProductStatus } from '@zidney/types/products/Product'
 
 /**
  * Localized name schema

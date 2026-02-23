@@ -18,6 +18,12 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
+      "@zidney/app/*": [
+        "./apps/*/src"
+      ],
+      "@zidney/package/*": [
+        "./packages/*/src"
+      ],
       "@zidney/ui/*": [
         "packages/ui-system/src/*"
       ],

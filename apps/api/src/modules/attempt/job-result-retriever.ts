@@ -1,5 +1,5 @@
 import { createLogger } from '@zidney/logging'
-import { jobQueue } from '../../../worker/src/queue/job-queue'
+import { jobQueue } from '@zidney/app/worker/queue/job-queue'
 
 const logger = createLogger('job-result-retriever')
 

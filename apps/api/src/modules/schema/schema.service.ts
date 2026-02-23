@@ -18,7 +18,7 @@ import type { Pool } from 'pg'
 import {
   calculateSHA256,
   getMigrationFilePath,
-} from '../../../../../packages/domain-core/src/migrations/migrate'
+} from '@zidney/domain-core/migrations/migrate'
 import {
   checkIdempotency,
   generateTaskId,

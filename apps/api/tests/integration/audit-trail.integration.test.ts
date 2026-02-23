@@ -12,7 +12,7 @@ import {
   countAttemptEventsByType,
   getAttemptEventHistory,
   logAttemptEvent,
-} from '@zidney/domain-core/src/audit/attempt-event-logger'
+} from '@zidney/domain-core/audit/attempt-event-logger'
 import { Pool } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { createLogger } from '../../src/utils/logger'

@@ -18,12 +18,12 @@
 import { Database } from 'better-sqlite3'
 import { Context, MiddlewareHandler } from 'hono'
 import { Logger } from 'pino'
-import { ACCESSIBLE_STATUSES } from '../../../packages/domain-core/src/licenses/constants'
+import { ACCESSIBLE_STATUSES } from '@zidney/domain-core/licenses/constants'
 import {
   LicenseError,
   LicenseNotFoundError,
-} from '../../../packages/domain-core/src/licenses/errors'
-import { LicenseStatus } from '../../../packages/domain-core/src/licenses/types'
+} from '@zidney/domain-core/licenses/errors'
+import { LicenseStatus } from '@zidney/domain-core/licenses/types'
 
 interface LicenseMiddlewareContext extends Context {
   license?: any

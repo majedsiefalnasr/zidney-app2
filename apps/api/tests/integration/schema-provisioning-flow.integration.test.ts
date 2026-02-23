@@ -14,8 +14,8 @@
 
 import { createLogger } from '@zidney/logging'
 import { redis } from '@zidney/redis'
-import { TaskQueueProcessor } from '@zidney/worker/src/processor/queue-processor'
-import { executeInitTenantSchema } from 'apps/worker/src/tasks/init-tenant-schema'
+import { TaskQueueProcessor } from '@zidney/app/worker/processor/queue-processor'
+import { executeInitTenantSchema } from '@zidney/app/worker/tasks/init-tenant-schema'
 import { Pool } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 

@@ -27,18 +27,6 @@
       "~/*": [
         "src/*"
       ],
-      "@zidney/domain-core/*": [
-        "../../packages/domain-core/src/*"
-      ],
-      "@types/*": [
-        "../../packages/types/src/*"
-      ],
-      "@zidney/validation/*": [
-        "../../packages/validation/src/*"
-      ],
-      "@zidney/config/*": [
-        "../../packages/config/src/*"
-      ],
       "@shadcn-vue/ui/*": [
         "./src/components/shadcn-vue/*"
       ]

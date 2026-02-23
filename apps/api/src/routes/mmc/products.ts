@@ -28,7 +28,7 @@ import {
   UpdateProductSchema,
 } from '@zidney/validation/products/productValidation'
 import { Router, type Context } from 'hono'
-import * as productService from '../../../../packages/domain-core/src/products/productService'
+import * as productService from '@zidney/domain-core/products/productService'
 import { auditReadMiddleware } from '../../../middleware/auditReadMiddleware'
 import { correlationIdMiddleware } from '../../../middleware/correlationIdMiddleware'
 import { licenseMiddleware } from '../../../middleware/licenseMiddleware'
