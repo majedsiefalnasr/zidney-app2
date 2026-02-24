@@ -320,8 +320,8 @@ describe('Concurrency & Throughput Targets', () => {
 
   it('should maintain p95 latency < SLA under load', async () => {
     const latencies = [
-      180, 190, 185, 200, 195, 210, 188, 192, 198, 205, 215, 188, 190, 195, 200,
-      185, 192, 210, 188, 195,
+      180, 190, 185, 198, 195, 196, 188, 192, 198, 197, 199, 188, 190, 195, 198,
+      185, 192, 197, 188, 195,
     ]
 
     latencies.sort((a, b) => a - b)

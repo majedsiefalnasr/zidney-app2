@@ -15,37 +15,37 @@ describe('StudentStaffCounter', () => {
 
   beforeEach(() => {
     mockDb = new MockDatabaseClient()
-    counter = new StudentStaffCounter(mockDb)
+    counter = new StudentStaffCounter()
   })
 
   // From TEST_INDEX.md: 6 tests for limit enforcer
   it('T036.1: Should count enabled students only', async () => {
     mockDb.mockResult(
-      "SELECT COUNT(*) FROM users WHERE status='ENABLED' AND role='STUDENT'",
+      "FROM users WHERE workspace_id = $1 AND status = 'ENABLED' AND role = 'STUDENT'",
       [{ count: 25 }]
     )
 
-    const count = await counter.countStudents('workspace-uuid')
+    const count = await counter.countStudents(mockDb, 'workspace-uuid')
     expect(count).toBe(25)
   })
 
   it('T036.2: Should not count disabled students (soft-delete)', async () => {
     mockDb.mockResult(
-      "SELECT COUNT(*) FROM users WHERE status='ENABLED' AND role='STUDENT'",
+      "FROM users WHERE workspace_id = $1 AND status = 'ENABLED' AND role = 'STUDENT'",
       [{ count: 24 }]
     )
 
-    const count = await counter.countStudents('workspace-uuid')
+    const count = await counter.countStudents(mockDb, 'workspace-uuid')
     expect(count).toBe(24) // Disabled user not counted
   })
 
   it('T036.3: Should count enabled staff only', async () => {
     mockDb.mockResult(
-      "SELECT COUNT(*) FROM users WHERE status='ENABLED' AND role='STAFF'",
+      "FROM users WHERE workspace_id = $1 AND status = 'ENABLED' AND role = 'STAFF'",
       [{ count: 5 }]
     )
 
-    const count = await counter.countStaff('workspace-uuid')
+    const count = await counter.countStaff(mockDb, 'workspace-uuid')
     expect(count).toBe(5)
   })
 

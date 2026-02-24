@@ -29,11 +29,11 @@ describe('LicenseLicecycle Integration', () => {
   it('T042.1: End-to-end license creation workflow', async () => {
     const product_id = 'product-uuid'
 
-    mockDb.mockResult('SELECT * FROM products WHERE id = $1', [
+    mockDb.mockResult('from products where id = $1', [
       testFixtures.makeProduct({ id: product_id }),
     ])
 
-    mockDb.mockResult('INSERT INTO licenses (...) VALUES (...) RETURNING *', [
+    mockDb.mockResult('insert into licenses', [
       testFixtures.makeLicense({ workspace_slug, product_id }),
     ])
 
@@ -68,7 +68,11 @@ describe('LicenseLicecycle Integration', () => {
 
   it('T042.3: Cannot create duplicate workspace_slug', async () => {
     // UNIQUE constraint violation
-    mockDb.mockResult('INSERT INTO licenses (...)', null, {
+    mockDb.mockResult('from products where id = $1', [
+      testFixtures.makeProduct({ id: 'product-uuid' }),
+    ])
+
+    mockDb.mockResult('insert into licenses', null, {
       code: '23505',
       message: 'unique violation',
     })
@@ -89,7 +93,7 @@ describe('LicenseLicecycle Integration', () => {
   it('T042.4: Retrieving license returns full object', async () => {
     const license = testFixtures.makeLicense()
 
-    mockDb.mockResult('SELECT * FROM licenses WHERE id = $1', [license])
+    mockDb.mockResult('from licenses where id = $1 limit 1', [license])
 
     const result = await getLicenseById(mockDb, license.id)
 

@@ -18,6 +18,7 @@
  */
 
 import { LicenseStatus } from './types'
+export { LicenseStatus } from './types'
 
 /**
  * StateTransition class
@@ -76,6 +77,23 @@ export class StateTransition {
 
       default:
         return false
+    }
+  }
+
+  /**
+   * Return all valid target states for a given current state.
+   */
+  getValidTransitions(from: LicenseStatus): LicenseStatus[] {
+    switch (from) {
+      case LicenseStatus.ACTIVE:
+        return [LicenseStatus.SOFT_LOCKED, LicenseStatus.ARCHIVED]
+      case LicenseStatus.SOFT_LOCKED:
+        return [LicenseStatus.ACTIVE, LicenseStatus.ARCHIVED]
+      case LicenseStatus.ARCHIVED:
+        return [LicenseStatus.ACTIVE, LicenseStatus.DELETED]
+      case LicenseStatus.DELETED:
+      default:
+        return []
     }
   }
 

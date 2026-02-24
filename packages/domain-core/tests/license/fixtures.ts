@@ -109,23 +109,77 @@ export const testFixtures = {
  */
 export class MockDatabaseClient {
   private queries: { sql: string; params: any[] }[] = []
-  private results: Map<string, any[]> = new Map()
+  private mockedResults: Array<{
+    matcher: string | RegExp
+    rows: any[] | null
+    error?: any
+  }> = []
   private transactionActive = false
+
+  private normalizeSql(sql: string): string {
+    return sql.replace(/\s+/g, ' ').trim().toLowerCase()
+  }
+
+  private matches(sql: string, matcher: string | RegExp): boolean {
+    if (matcher instanceof RegExp) {
+      return matcher.test(sql)
+    }
+
+    const normalizedMatcher = this.normalizeSql(matcher)
+    return sql.includes(normalizedMatcher)
+  }
 
   query = vi.fn(async (sql: string, params: any[] = []) => {
     this.queries.push({ sql, params })
+    const normalizedSql = this.normalizeSql(sql)
 
-    // Return default result or mocked result
-    const result = this.results.get(sql)
-    if (result) {
-      return { rows: result, rowCount: result.length }
+    // Transaction control statements
+    if (
+      normalizedSql.startsWith('begin') ||
+      normalizedSql.startsWith('commit') ||
+      normalizedSql.startsWith('rollback')
+    ) {
+      return { rows: [], rowCount: 0 }
+    }
+
+    // Return explicitly mocked results first.
+    const matchIndex = this.mockedResults.findIndex((entry) =>
+      this.matches(normalizedSql, entry.matcher)
+    )
+
+    if (matchIndex >= 0) {
+      const [entry] = this.mockedResults.splice(matchIndex, 1)
+      if (entry.error) {
+        throw entry.error
+      }
+
+      const rows = entry.rows ?? []
+      return { rows, rowCount: rows.length }
+    }
+
+    // Common INSERT behavior used by transaction-wrapper tests.
+    if (
+      normalizedSql.includes('insert into users') &&
+      normalizedSql.includes('returning id')
+    ) {
+      const id = params[0] || uuidv4()
+      return { rows: [{ id }], rowCount: 1 }
+    }
+
+    if (normalizedSql.includes('select count(*) as count')) {
+      return { rows: [{ count: '0' }], rowCount: 1 }
     }
 
     return { rows: [], rowCount: 0 }
   })
 
-  mockResult = (sql: string, rows: any[]) => {
-    this.results.set(sql, rows)
+  mockResult = (
+    sql: string | RegExp,
+    rows: any[] | null,
+    error?: any,
+    _metadata?: unknown
+  ) => {
+    this.mockedResults.push({ matcher: sql, rows, error })
   }
 
   beginTransaction = vi.fn(async () => {
@@ -148,7 +202,7 @@ export class MockDatabaseClient {
 
   reset = () => {
     this.queries = []
-    this.results.clear()
+    this.mockedResults = []
     vi.clearAllMocks()
   }
 }
@@ -160,33 +214,37 @@ export class MockRedisClient {
   private store: Map<string, any> = new Map()
   private ttls: Map<string, number> = new Map()
 
-  get = vi.fn(async (key: string) => {
-    return this.store.get(key)
+  get = vi.fn((key: string) => {
+    return this.store.has(key) ? this.store.get(key) : null
   })
 
-  set = vi.fn(async (key: string, value: any) => {
+  set = vi.fn((key: string, value: any) => {
     this.store.set(key, value)
     return 'OK'
   })
 
-  setex = vi.fn(async (key: string, ttl: number, value: any) => {
+  setex = vi.fn((key: string, ttl: number, value: any) => {
     this.store.set(key, value)
     this.ttls.set(key, ttl)
     return 'OK'
   })
 
-  del = vi.fn(async (key: string) => {
+  del = vi.fn((key: string) => {
     const existed = this.store.has(key)
     this.store.delete(key)
     this.ttls.delete(key)
     return existed ? 1 : 0
   })
 
-  flushall = vi.fn(async () => {
+  flushall = vi.fn(() => {
     this.store.clear()
     this.ttls.clear()
     return 'OK'
   })
+
+  flush = vi.fn(() => this.flushall())
+
+  getTTL = vi.fn((key: string) => this.ttls.get(key) ?? -2)
 
   reset = () => {
     this.store.clear()

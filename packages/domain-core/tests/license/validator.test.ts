@@ -17,18 +17,18 @@ describe('VersionValidator', () => {
 
   // From TEST_INDEX.md: 8 tests for validator
   it('T034.1: Should validate exact schema match', () => {
-    const result = validator.compareVersions('1.0.0', '1.0.0')
-    expect(result).toBe(0) // Equal
+    const result = validator.validateSchemaVersion('1.0.0', '1.0.0')
+    expect(result).toBe(true)
   })
 
   it('T034.2: Should validate forward-compatible schema (tenant >= license)', () => {
-    const result = validator.compareVersions('1.1.0', '1.0.0')
-    expect(result).toBeGreaterThan(0) // Tenant is newer
+    const result = validator.validateSchemaVersion('1.1.0', '1.0.0')
+    expect(result).toBe(true)
   })
 
   it('T034.3: Should reject backward-incompatible schema (tenant < license)', () => {
-    const result = validator.compareVersions('0.9.0', '1.0.0')
-    expect(result).toBeLessThan(0) // Tenant is older
+    const result = validator.validateSchemaVersion('0.9.0', '1.0.0')
+    expect(result).toBe(false)
   })
 
   it('T034.4: Should validate product version match', () => {
@@ -47,15 +47,15 @@ describe('VersionValidator', () => {
   })
 
   it('T034.7: Should handle semver minor version bumps', () => {
-    const result1 = validator.compareVersions('1.10.0', '1.9.0')
-    expect(result1).toBeGreaterThan(0)
+    const result1 = validator.validateSchemaVersion('1.10.0', '1.9.0')
+    expect(result1).toBe(true)
 
-    const result2 = validator.compareVersions('1.9.0', '1.10.0')
-    expect(result2).toBeLessThan(0)
+    const result2 = validator.validateSchemaVersion('1.9.0', '1.10.0')
+    expect(result2).toBe(false)
   })
 
   it('T034.8: Should handle major version differences', () => {
-    const result = validator.compareVersions('2.0.0', '1.9.9')
-    expect(result).toBeGreaterThan(0)
+    const result = validator.validateSchemaVersion('2.0.0', '1.9.9')
+    expect(result).toBe(true)
   })
 })

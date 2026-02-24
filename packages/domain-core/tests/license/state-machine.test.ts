@@ -84,12 +84,12 @@ describe('StateTransition', () => {
     expect(result).toBe(false)
   })
 
-  it('T035.9: ARCHIVED → ACTIVE is invalid (no resurrection)', () => {
+  it('T035.9: ARCHIVED → ACTIVE is valid (manual restore)', () => {
     const result = stateMachine.isValidTransition(
       LicenseStatus.ARCHIVED,
       LicenseStatus.ACTIVE
     )
-    expect(result).toBe(false)
+    expect(result).toBe(true)
   })
 
   it('T035.10: DELETED → anything is invalid', () => {
