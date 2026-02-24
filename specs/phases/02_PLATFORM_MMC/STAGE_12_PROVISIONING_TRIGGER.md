@@ -9,19 +9,32 @@ Scope: Controlled tenant provisioning orchestration (MMC → Provisioning Servic
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
-Initiated: 2026-02-24T00:00:00Z
+Risk Level: LOW
+Last Updated: 2026-02-24T00:00:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Controlled tenant provisioning orchestration (MMC → Provisioning Service)
+- Job queue mediation via Redis with distributed locking
+- Worker validation, DB creation, baseline migrations, seed data, admin account, registry insertion
+- License state transitions (PENDING_PROVISION → ACTIVE / PROVISION_FAILED)
+- Failure recovery & retry logic (3 attempts, exponential backoff)
+- Structured observability with correlation_id tracking
+
+Deferred Scope:
+
+- Backup & recovery strategy (future stage)
+- Tenant deprovisioning / deletion (future stage)
+- Multi-region provisioning (future stage)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — ADR-0001 (isolation), ADR-0006 (time), ADR-0007 (versions), ADR-0008 (semver) all verified
+- Zero unresolved ambiguities
+- Ready for planning phase
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete and validated. 22/22 checklist items PASS. Proceeding to planning.
 
 ---
 
