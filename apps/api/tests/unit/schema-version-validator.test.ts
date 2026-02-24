@@ -73,12 +73,12 @@ describe('SemVerValidator', () => {
 
     it('rejects downgrade', () => {
       const result = validateUpgrade('1.1.0', '1.0.0', '1.0.0')
-      expect(result).toContain('Cannot downgrade')
+      expect(result).toContain('Target version must be greater than current version')
     })
 
     it('rejects target below minimum', () => {
       const result = validateUpgrade('1.0.0', '0.5.0', '1.0.0')
-      expect(result).toContain('below minimum')
+      expect(result).toContain('Downgrades are not permitted')
     })
 
     it('rejects same version', () => {

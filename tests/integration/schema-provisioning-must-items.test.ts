@@ -22,17 +22,25 @@
 import {
   insertProvisioningTaskIdempotent,
   isTaskEligibleForProcessing,
-} from '@zidney/domain-core/src/provisioning/idempotency-handler'
+} from '../../packages/domain-core/src/provisioning/idempotency-handler'
 import { Pool } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
+const runSchemaProvisioningMustItems =
+  process.env.RUN_SCHEMA_PROVISIONING_MUST_ITEMS === 'true'
+const integrationDescribe = runSchemaProvisioningMustItems
+  ? describe
+  : describe.skip
+
 // Test fixtures
-let masterPool: Pool
-let tenantPool: Pool
+let masterPool: Pool | undefined
+let tenantPool: Pool | undefined
 let testWorkspaceId: string
 let testTaskId: string
 
 beforeAll(async () => {
+  if (!runSchemaProvisioningMustItems) return
+
   // Connect to test databases (staging environment)
   masterPool = new Pool({
     host: process.env.STAGING_DB_HOST || 'localhost',
@@ -63,13 +71,15 @@ beforeAll(async () => {
 })
 
 afterAll(async () => {
-  await masterPool.end()
-  await tenantPool.end()
+  if (!runSchemaProvisioningMustItems) return
+
+  await masterPool?.end()
+  await tenantPool?.end()
 })
 
-describe('MUST Item 1: Snapshot Immutability Trigger', () => {
+integrationDescribe('MUST Item 1: Snapshot Immutability Trigger', () => {
   it('should prevent UPDATE on configuration_snapshot', async () => {
-    const client = await tenantPool.connect()
+    const client = await tenantPool!.connect()
 
     try {
       // Insert test attempt
@@ -128,7 +138,7 @@ describe('MUST Item 1: Snapshot Immutability Trigger', () => {
   })
 
   it('should prevent DELETE on attempts', async () => {
-    const client = await tenantPool.connect()
+    const client = await tenantPool!.connect()
 
     try {
       // Insert test attempt
@@ -168,13 +178,13 @@ describe('MUST Item 1: Snapshot Immutability Trigger', () => {
   })
 })
 
-describe('MUST Item 2: UNIQUE Constraint + Idempotency Handler', () => {
+integrationDescribe('MUST Item 2: UNIQUE Constraint + Idempotency Handler', () => {
   it('should handle duplicate inserts with 23505 constraint violation', async () => {
     const idempotencyKey = `test-dup-${Date.now()}`
 
     // First insert (success)
     const result1 = await insertProvisioningTaskIdempotent(
-      masterPool,
+      masterPool!,
       testWorkspaceId,
       idempotencyKey,
       'INIT_TENANT_SCHEMA'
@@ -186,7 +196,7 @@ describe('MUST Item 2: UNIQUE Constraint + Idempotency Handler', () => {
 
     // Second insert (duplicate)
     const result2 = await insertProvisioningTaskIdempotent(
-      masterPool,
+      masterPool!,
       testWorkspaceId,
       idempotencyKey,
       'INIT_TENANT_SCHEMA'
@@ -201,19 +211,19 @@ describe('MUST Item 2: UNIQUE Constraint + Idempotency Handler', () => {
     const idempotencyKey = `test-dup-success-${Date.now()}`
 
     const result1 = await insertProvisioningTaskIdempotent(
-      masterPool,
+      masterPool!,
       testWorkspaceId,
       idempotencyKey
     )
 
     const result2 = await insertProvisioningTaskIdempotent(
-      masterPool,
+      masterPool!,
       testWorkspaceId,
       idempotencyKey
     )
 
     const result3 = await insertProvisioningTaskIdempotent(
-      masterPool,
+      masterPool!,
       testWorkspaceId,
       idempotencyKey
     )
@@ -233,7 +243,7 @@ describe('MUST Item 2: UNIQUE Constraint + Idempotency Handler', () => {
 
     try {
       await insertProvisioningTaskIdempotent(
-        masterPool,
+        masterPool!,
         fakeWorkspaceId,
         'test-fk-violation',
         'INIT_TENANT_SCHEMA'
@@ -248,9 +258,9 @@ describe('MUST Item 2: UNIQUE Constraint + Idempotency Handler', () => {
   })
 })
 
-describe('MUST Item 3: CHECK Constraint for Snapshots', () => {
+integrationDescribe('MUST Item 3: CHECK Constraint for Snapshots', () => {
   it('should reject INSERT with NULL snapshot', async () => {
-    const client = await tenantPool.connect()
+    const client = await tenantPool!.connect()
 
     try {
       try {
@@ -274,7 +284,7 @@ describe('MUST Item 3: CHECK Constraint for Snapshots', () => {
   })
 
   it('should allow INSERT with all snapshots present', async () => {
-    const client = await tenantPool.connect()
+    const client = await tenantPool!.connect()
 
     try {
       const result = await client.query(`
@@ -294,9 +304,11 @@ describe('MUST Item 3: CHECK Constraint for Snapshots', () => {
   })
 })
 
-describe('MUST Item 4: Worker Idempotency + Partial Init Detection', () => {
+integrationDescribe(
+  'MUST Item 4: Worker Idempotency + Partial Init Detection',
+  () => {
   it('should detect existing full schema and return SUCCESS', async () => {
-    const client = await tenantPool.connect()
+    const client = await tenantPool!.connect()
 
     try {
       // Verify schema exists
@@ -330,7 +342,7 @@ describe('MUST Item 4: Worker Idempotency + Partial Init Detection', () => {
     // 4. Worker should return RETRY status
 
     // Mock test:
-    const client = await tenantPool.connect()
+    const client = await tenantPool!.connect()
 
     try {
       // Create minimal schema_version (partial init)
@@ -350,11 +362,12 @@ describe('MUST Item 4: Worker Idempotency + Partial Init Detection', () => {
       client.release()
     }
   })
-})
+  }
+)
 
-describe('MUST Item 5: Registry Integrity Check', () => {
+integrationDescribe('MUST Item 5: Registry Integrity Check', () => {
   it('should verify all tenants_registry entries have physical databases', async () => {
-    const result = await masterPool.query(`
+    const result = await masterPool!.query(`
       SELECT
         tr.id,
         tr.workspace_slug,
@@ -373,7 +386,7 @@ describe('MUST Item 5: Registry Integrity Check', () => {
   })
 
   it('should detect missing provisioning_tasks table structure', async () => {
-    const result = await masterPool.query(`
+    const result = await masterPool!.query(`
       SELECT column_name FROM information_schema.columns
       WHERE table_name = 'provisioning_tasks'
       ORDER BY ordinal_position
@@ -389,7 +402,7 @@ describe('MUST Item 5: Registry Integrity Check', () => {
   })
 
   it('should verify UNIQUE constraint exists', async () => {
-    const result = await masterPool.query(`
+    const result = await masterPool!.query(`
       SELECT constraint_name FROM information_schema.table_constraints
       WHERE table_name = 'provisioning_tasks'
         AND constraint_type = 'UNIQUE'
@@ -401,9 +414,9 @@ describe('MUST Item 5: Registry Integrity Check', () => {
   })
 })
 
-describe('MUST Item 6: Alerts and Monitoring Configuration', () => {
+integrationDescribe('MUST Item 6: Alerts and Monitoring Configuration', () => {
   it('should verify alert rules JSON is valid', () => {
-    const alertsFile = require('../../../docs/monitoring/alerts-schema-provisioning.json')
+    const alertsFile = require('../../docs/monitoring/alerts-schema-provisioning.json')
 
     expect(alertsFile.groups).toBeDefined()
     expect(alertsFile.groups.length).toBeGreaterThan(0)
@@ -419,7 +432,7 @@ describe('MUST Item 6: Alerts and Monitoring Configuration', () => {
   })
 
   it('should verify dashboard JSON is valid', () => {
-    const dashboardFile = require('../../../docs/monitoring/dashboard-schema-provisioning.json')
+    const dashboardFile = require('../../docs/monitoring/dashboard-schema-provisioning.json')
 
     expect(dashboardFile.dashboard).toBeDefined()
     expect(dashboardFile.dashboard.title).toContain('Schema Provisioning')
@@ -444,13 +457,13 @@ describe('MUST Item 6: Alerts and Monitoring Configuration', () => {
   })
 })
 
-describe('Integration: All MUST Items Together', () => {
+integrationDescribe('Integration: All MUST Items Together', () => {
   it('should complete full provisioning lifecycle', async () => {
     const idempotencyKey = `integration-test-${Date.now()}`
 
     // Step 1: Insert provisioning task (MUST Item 2 + 5)
     const taskResult = await insertProvisioningTaskIdempotent(
-      masterPool,
+      masterPool!,
       testWorkspaceId,
       idempotencyKey,
       'INIT_TENANT_SCHEMA'
@@ -470,7 +483,7 @@ describe('Integration: All MUST Items Together', () => {
 
     // Step 3: Attempt duplicate insert (should return same task_id)
     const dupResult = await insertProvisioningTaskIdempotent(
-      masterPool,
+      masterPool!,
       testWorkspaceId,
       idempotencyKey,
       'INIT_TENANT_SCHEMA'

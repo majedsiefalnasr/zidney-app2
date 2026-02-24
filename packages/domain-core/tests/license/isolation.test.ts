@@ -25,10 +25,10 @@ describe('Idempotency & Isolation', () => {
     }
 
     // First request stores result
-    mockRedis.setex(idempotencyKey, 86400, JSON.stringify(cachedResult))
+    await mockRedis.setex(idempotencyKey, 86400, JSON.stringify(cachedResult))
 
     // Second request (same key) retrieves cached result
-    const cached = mockRedis.get(idempotencyKey)
+    const cached = await mockRedis.get(idempotencyKey)
     expect(cached).toBeDefined()
     expect(JSON.parse(cached!)).toEqual(cachedResult)
   })
@@ -38,10 +38,10 @@ describe('Idempotency & Isolation', () => {
     const snapshotLocation = 's3://bucket/license-uuid/2026-02-17T10:30:45Z.sql'
 
     // Check for recent snapshot within 1h
-    mockRedis.setex(deduplicationKey, 3600, snapshotLocation)
+    await mockRedis.setex(deduplicationKey, 3600, snapshotLocation)
 
     // Second archive request within 1h should get cached location
-    const existing = mockRedis.get(deduplicationKey)
+    const existing = await mockRedis.get(deduplicationKey)
     expect(existing).toBe(snapshotLocation)
   })
 
@@ -49,7 +49,7 @@ describe('Idempotency & Isolation', () => {
     const key = 'idempotency:key'
     const ttl = 86400 // 24 hours
 
-    mockRedis.setex(key, ttl, 'result')
+    await mockRedis.setex(key, ttl, 'result')
 
     const storedTTL = mockRedis.getTTL(key)
     expect(storedTTL).toBeLessThanOrEqual(ttl)
@@ -109,18 +109,18 @@ describe('Idempotency & Isolation', () => {
     expect(tenantASlug).not.toBe(tenantBSlug)
   })
 
-  it('T050.2: Resolver caches per-workspace (no cross-tenant leak)', () => {
+  it('T050.2: Resolver caches per-workspace (no cross-tenant leak)', async () => {
     const aKey = `license:acme.edu`
     const bKey = `license:state-u.edu`
 
     const licenseA = testFixtures.makeLicense({ workspace_slug: 'acme.edu' })
     const licenseB = testFixtures.makeLicense({ workspace_slug: 'state-u.edu' })
 
-    mockRedis.set(aKey, JSON.stringify(licenseA))
-    mockRedis.set(bKey, JSON.stringify(licenseB))
+    await mockRedis.set(aKey, JSON.stringify(licenseA))
+    await mockRedis.set(bKey, JSON.stringify(licenseB))
 
-    const retrievedA = JSON.parse(mockRedis.get(aKey)!)
-    const retrievedB = JSON.parse(mockRedis.get(bKey)!)
+    const retrievedA = JSON.parse((await mockRedis.get(aKey))!)
+    const retrievedB = JSON.parse((await mockRedis.get(bKey))!)
 
     expect(retrievedA.workspace_slug).toBe('acme.edu')
     expect(retrievedB.workspace_slug).toBe('state-u.edu')

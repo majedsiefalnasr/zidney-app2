@@ -28,16 +28,18 @@ describe('Concurrency: Limit Enforcement', () => {
     // Request 2: Waits for lock, then recounts, sees count=1, fails with 402
 
     masterDb.mockResult(
-      'SELECT * FROM licenses WHERE workspace_id = $1 FOR UPDATE',
+      'from licenses where workspace_id = $1 for update',
+      [license]
+    )
+    masterDb.mockResult(
+      'from licenses where workspace_id = $1 for update',
       [license]
     )
 
     // First request: count = 0, can add
     tenantDb.mockResult(
-      "SELECT COUNT(*) FROM users WHERE status='ENABLED' AND role='STUDENT'",
-      [{ count: 0 }],
-      undefined,
-      true // SELECT FOR UPDATE
+      "from users where workspace_id = $1 and status = 'enabled' and role = 'student'",
+      [{ count: 0 }]
     )
 
     const result1 = await createUserWithLimitCheck(masterDb, tenantDb, {
@@ -53,10 +55,8 @@ describe('Concurrency: Limit Enforcement', () => {
 
     // Second request: count = 1 (after first insert), cannot add
     tenantDb.mockResult(
-      "SELECT COUNT(*) FROM users WHERE status='ENABLED' AND role='STUDENT'",
-      [{ count: 1 }],
-      undefined,
-      true // SELECT FOR UPDATE
+      "from users where workspace_id = $1 and status = 'enabled' and role = 'student'",
+      [{ count: 1 }]
     )
 
     const result2 = await createUserWithLimitCheck(masterDb, tenantDb, {
@@ -79,7 +79,7 @@ describe('Concurrency: Limit Enforcement', () => {
     })
 
     masterDb.mockResult(
-      'SELECT * FROM licenses WHERE workspace_id = $1 FOR UPDATE',
+      'from licenses where workspace_id = $1 for update',
       [softLockedLicense]
     )
 
@@ -102,7 +102,7 @@ describe('Concurrency: Limit Enforcement', () => {
     })
 
     masterDb.mockResult(
-      'SELECT * FROM licenses WHERE workspace_id = $1 FOR UPDATE',
+      'from licenses where workspace_id = $1 for update',
       [archivedLicense]
     )
 
@@ -124,15 +124,21 @@ describe('Concurrency: Limit Enforcement', () => {
     const license = testFixtures.makeLicense({ student_limit: 2 })
 
     masterDb.mockResult(
-      'SELECT * FROM licenses WHERE workspace_id = $1 FOR UPDATE',
+      'from licenses where workspace_id = $1 for update',
+      [license]
+    )
+    masterDb.mockResult(
+      'from licenses where workspace_id = $1 for update',
       [license]
     )
 
     tenantDb.mockResult(
-      "SELECT COUNT(*) FROM users WHERE status='ENABLED' AND role='STUDENT'",
-      [{ count: 1 }], // Both requests see count=1
-      undefined,
-      true // FOR UPDATE
+      "from users where workspace_id = $1 and status = 'enabled' and role = 'student'",
+      [{ count: 1 }] // Both requests see count=1
+    )
+    tenantDb.mockResult(
+      "from users where workspace_id = $1 and status = 'enabled' and role = 'student'",
+      [{ count: 1 }]
     )
 
     const result1 = await createUserWithLimitCheck(masterDb, tenantDb, {
@@ -163,12 +169,12 @@ describe('Concurrency: Limit Enforcement', () => {
     })
 
     masterDb.mockResult(
-      'SELECT * FROM licenses WHERE workspace_id = $1 FOR UPDATE',
+      'from licenses where workspace_id = $1 for update',
       [unlimitedLicense]
     )
 
     tenantDb.mockResult(
-      "SELECT COUNT(*) FROM users WHERE status='ENABLED' AND role='STUDENT'",
+      "from users where workspace_id = $1 and status = 'enabled' and role = 'student'",
       [{ count: 999 }] // Very high count
     )
 

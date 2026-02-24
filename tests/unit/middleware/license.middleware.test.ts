@@ -5,45 +5,85 @@
  * Task: T067
  *
  * Tests license enforcement middleware logic.
- * Covers status checks, soft-lock expiration, edge cases.
+ * Covers status checks, soft-lock expiration, and not-found handling.
  */
 
-import { LicenseStatus } from '@zidney/domain-core/licenses/types'
-import Database from 'better-sqlite3'
-import { Logger } from 'pino'
+import type { Logger } from '@zidney/logger'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import createLicenseMiddleware from '../../../apps/api/src/middleware/license.middleware'
+import { LicenseStatus } from '../../../packages/domain-core/src/licenses/types'
+
+type LicenseRow = {
+  id: string
+  workspace_slug: string
+  status: LicenseStatus
+  soft_lock_until: string | null
+  deleted_at: string | null
+}
+
+type QueryResult = { rows: any[] }
 
 describe('License Middleware', () => {
-  let db: Database.Database
+  const licensesBySlug = new Map<string, LicenseRow>()
   let middleware: any
   let mockLogger: Logger
+  let mockDb: { query: ReturnType<typeof vi.fn> }
   let mockContext: any
 
+  const setLicense = (overrides: Partial<LicenseRow>) => {
+    const license: LicenseRow = {
+      id: 'license-1',
+      workspace_slug: 'test-workspace',
+      status: LicenseStatus.ACTIVE,
+      soft_lock_until: null,
+      deleted_at: null,
+      ...overrides,
+    }
+    licensesBySlug.set(license.workspace_slug, license)
+  }
+
   beforeEach(() => {
-    db = new Database(':memory:')
+    licensesBySlug.clear()
 
-    // Create licenses table
-    db.exec(`
-      CREATE TABLE licenses (
-        id TEXT PRIMARY KEY,
-        product_id TEXT NOT NULL,
-        workspace_slug TEXT UNIQUE NOT NULL,
-        workspace_name TEXT NOT NULL,
-        status TEXT DEFAULT 'PENDING_PROVISION',
-        soft_lock_until TIMESTAMP,
-        archived_at TIMESTAMP,
-        deleted_at TIMESTAMP,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
+    mockDb = {
+      query: vi.fn(async (sqlText: string, params?: unknown[]): Promise<QueryResult> => {
+        const normalized = sqlText.replace(/\s+/g, ' ').trim().toLowerCase()
 
-      CREATE TABLE tenants_registry (
-        id TEXT PRIMARY KEY,
-        workspace_slug TEXT UNIQUE NOT NULL,
-        database_name TEXT NOT NULL
-      );
-    `)
+        if (normalized.startsWith('select * from licenses')) {
+          const workspaceSlug = String(params?.[0] ?? '')
+          const license = licensesBySlug.get(workspaceSlug)
+          if (!license || license.deleted_at) {
+            return { rows: [] }
+          }
+          return { rows: [license] }
+        }
+
+        if (
+          normalized.startsWith(
+            'update licenses set status = $1, archived_at = now(), updated_at = now()'
+          )
+        ) {
+          const [newStatus, licenseId, expectedStatus] = params || []
+          const target = Array.from(licensesBySlug.values()).find(
+            (row) => row.id === licenseId
+          )
+
+          if (
+            !target ||
+            target.status !== expectedStatus ||
+            !target.soft_lock_until ||
+            new Date(target.soft_lock_until) >= new Date()
+          ) {
+            return { rows: [] }
+          }
+
+          target.status = newStatus as LicenseStatus
+          return { rows: [target] }
+        }
+
+        return { rows: [] }
+      }),
+    }
 
     mockLogger = {
       info: vi.fn(),
@@ -52,7 +92,7 @@ describe('License Middleware', () => {
       debug: vi.fn(),
     } as any
 
-    middleware = createLicenseMiddleware(db, mockLogger)
+    middleware = createLicenseMiddleware(mockDb as any, mockLogger)
 
     mockContext = {
       req: {
@@ -66,6 +106,7 @@ describe('License Middleware', () => {
       correlation_id: 'test-correlation-123',
       workspaceSlug: 'test-workspace',
     }
+    mockContext.status = vi.fn(() => mockContext)
   })
 
   describe('License Status Validation', () => {
@@ -74,132 +115,79 @@ describe('License Middleware', () => {
     })
 
     it('should allow ACTIVE license', async () => {
-      // Insert ACTIVE license
-      const insertStmt = db.prepare(`
-        INSERT INTO licenses (id, product_id, workspace_slug, workspace_name, status)
-        VALUES (?, ?, ?, ?, ?)
-      `)
-      insertStmt.run(
-        'license-1',
-        'product-1',
-        'test-workspace',
-        'Test',
-        LicenseStatus.ACTIVE
-      )
+      setLicense({ status: LicenseStatus.ACTIVE })
+      const next = vi.fn().mockResolvedValue(undefined)
 
-      const nextCalled = vi.fn()
-      await middleware(mockContext, () => Promise.resolve())
+      await middleware(mockContext, next)
 
-      expect(nextCalled).toBeDefined()
+      expect(next).toHaveBeenCalledTimes(1)
       expect(mockContext.license).toBeDefined()
       expect(mockContext.license.status).toBe(LicenseStatus.ACTIVE)
     })
 
     it('should block SOFT_LOCKED license (403)', async () => {
-      const insertStmt = db.prepare(`
-        INSERT INTO licenses (id, product_id, workspace_slug, workspace_name, status, soft_lock_until)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `)
+      setLicense({
+        status: LicenseStatus.SOFT_LOCKED,
+        soft_lock_until: new Date(Date.now() + 86_400_000).toISOString(),
+      })
 
-      const futureDate = new Date(Date.now() + 86400000) // 24h in future
-      insertStmt.run(
-        'license-1',
-        'product-1',
-        'test-workspace',
-        'Test',
-        LicenseStatus.SOFT_LOCKED,
-        futureDate.toISOString()
-      )
+      await middleware(mockContext, vi.fn().mockResolvedValue(undefined))
 
-      await middleware(mockContext, () => Promise.resolve())
-
+      expect(mockContext.status).toHaveBeenCalledWith(403)
       expect(mockContext.json).toHaveBeenCalledWith(
         expect.objectContaining({
           success: false,
           error: expect.objectContaining({
             code: 'LICENSE_SOFT_LOCKED',
           }),
-        }),
-        403
+        })
       )
     })
 
     it('should block PENDING_PROVISION license (503)', async () => {
-      const insertStmt = db.prepare(`
-        INSERT INTO licenses (id, product_id, workspace_slug, workspace_name, status)
-        VALUES (?, ?, ?, ?, ?)
-      `)
-      insertStmt.run(
-        'license-1',
-        'product-1',
-        'test-workspace',
-        'Test',
-        LicenseStatus.PENDING_PROVISION
-      )
+      setLicense({ status: LicenseStatus.PENDING_PROVISION })
 
-      await middleware(mockContext, () => Promise.resolve())
+      await middleware(mockContext, vi.fn().mockResolvedValue(undefined))
 
+      expect(mockContext.status).toHaveBeenCalledWith(503)
       expect(mockContext.json).toHaveBeenCalledWith(
         expect.objectContaining({
           success: false,
           error: expect.objectContaining({
             code: 'LICENSE_PENDING_PROVISION',
           }),
-        }),
-        503
+        })
       )
     })
 
     it('should block ARCHIVED license (403)', async () => {
-      const insertStmt = db.prepare(`
-        INSERT INTO licenses (id, product_id, workspace_slug, workspace_name, status, archived_at)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `)
-      insertStmt.run(
-        'license-1',
-        'product-1',
-        'test-workspace',
-        'Test',
-        LicenseStatus.ARCHIVED,
-        new Date().toISOString()
-      )
+      setLicense({ status: LicenseStatus.ARCHIVED })
 
-      await middleware(mockContext, () => Promise.resolve())
+      await middleware(mockContext, vi.fn().mockResolvedValue(undefined))
 
+      expect(mockContext.status).toHaveBeenCalledWith(403)
       expect(mockContext.json).toHaveBeenCalledWith(
         expect.objectContaining({
           success: false,
           error: expect.objectContaining({
             code: 'LICENSE_ARCHIVED',
           }),
-        }),
-        403
+        })
       )
     })
 
     it('should return 404 for DELETED license', async () => {
-      const insertStmt = db.prepare(`
-        INSERT INTO licenses (id, product_id, workspace_slug, workspace_name, status, deleted_at)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `)
-      insertStmt.run(
-        'license-1',
-        'product-1',
-        'test-workspace',
-        'Test',
-        LicenseStatus.DELETED,
-        new Date().toISOString()
-      )
+      setLicense({ status: LicenseStatus.DELETED })
 
-      await middleware(mockContext, () => Promise.resolve())
+      await middleware(mockContext, vi.fn().mockResolvedValue(undefined))
 
+      expect(mockContext.status).toHaveBeenCalledWith(404)
       expect(mockContext.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: expect.objectContaining({
             code: 'LICENSE_NOT_FOUND',
           }),
-        }),
-        404
+        })
       )
     })
   })
@@ -210,24 +198,13 @@ describe('License Middleware', () => {
     })
 
     it('should auto-transition expired SOFT_LOCKED to ARCHIVED', async () => {
-      const pastDate = new Date(Date.now() - 1000) // 1 second in past
-      const insertStmt = db.prepare(`
-        INSERT INTO licenses (id, product_id, workspace_slug, workspace_name, status, soft_lock_until)
-        VALUES (?, ?, ?, ?, ?, ?)
-      `)
+      setLicense({
+        status: LicenseStatus.SOFT_LOCKED,
+        soft_lock_until: new Date(Date.now() - 1_000).toISOString(),
+      })
 
-      insertStmt.run(
-        'license-1',
-        'product-1',
-        'test-workspace',
-        'Test',
-        LicenseStatus.SOFT_LOCKED,
-        pastDate.toISOString()
-      )
+      await middleware(mockContext, vi.fn().mockResolvedValue(undefined))
 
-      await middleware(mockContext, () => Promise.resolve())
-
-      // Should return 403 (now archived)
       expect(mockContext.json).toHaveBeenCalledWith(
         expect.objectContaining({
           error: expect.objectContaining({
@@ -236,11 +213,9 @@ describe('License Middleware', () => {
         }),
         403
       )
-
-      // Verify database was updated
-      const checkStmt = db.prepare('SELECT status FROM licenses WHERE id = ?')
-      const updated = checkStmt.get('license-1') as any
-      expect(updated.status).toBe(LicenseStatus.ARCHIVED)
+      expect(licensesBySlug.get('test-workspace')?.status).toBe(
+        LicenseStatus.ARCHIVED
+      )
     })
   })
 
@@ -250,11 +225,16 @@ describe('License Middleware', () => {
     })
 
     it('should return 404 if license not found', async () => {
-      await middleware(mockContext, () => Promise.resolve())
+      await middleware(mockContext, vi.fn().mockResolvedValue(undefined))
 
-      // Note: middleware skips if no workspace specified
-      // This test verifies the behavior when workspace is specified but not found
-      // Expected: Either skip or return 404
+      expect(mockContext.status).toHaveBeenCalledWith(404)
+      expect(mockContext.json).toHaveBeenCalledWith(
+        expect.objectContaining({
+          error: expect.objectContaining({
+            code: 'LICENSE_NOT_FOUND',
+          }),
+        })
+      )
     })
   })
 })

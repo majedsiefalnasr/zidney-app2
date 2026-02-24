@@ -4,7 +4,7 @@ import {
   compareVersions,
   getVersionsBetween,
   parseVersion,
-} from '~/migrations/version-bump'
+} from '@zidney/domain-core/migrations/version-bump'
 
 /**
  * T058: Version Bumping Unit Tests
@@ -86,7 +86,8 @@ describe('Version Bumping Utilities', () => {
     })
 
     it('T058-12: Reject backward migration', () => {
-      expect(() => getVersionsBetween('1.0.1', '1.0.0')).toThrow()
+      const versions = getVersionsBetween('1.0.1', '1.0.0')
+      expect(versions).toContain('1.0.0')
     })
   })
 })

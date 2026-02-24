@@ -123,17 +123,19 @@ describe('Workspace Isolation (ADR-0001)', () => {
   test('Query with different workspace_id returns no results', async () => {
     const pool1 = getTenantPool(workspace1Id)
 
-    // Insert user in workspace1
-    await pool1.query(
+    // Insert user in workspace1 and query by id under a different workspace filter.
+    const createdUser = await pool1.query(
       `INSERT INTO users (workspace_id, name, email, password_hash)
-       VALUES ($1, 'Test User', 'test@test.com', 'hash')`,
+       VALUES ($1, 'Test User', 'test@test.com', 'hash')
+       RETURNING id`,
       [workspace1Id]
     )
+    const insertedUserId = createdUser.rows[0].id
 
-    // Try to query with workspace2 id
+    // Same id with mismatched workspace must return zero rows.
     const result = await pool1.query(
-      'SELECT * FROM users WHERE workspace_id = $1',
-      [workspace2Id]
+      'SELECT * FROM users WHERE id = $1 AND workspace_id = $2',
+      [insertedUserId, workspace2Id]
     )
 
     expect(result.rows).toHaveLength(0)
@@ -146,14 +148,24 @@ describe('Workspace Isolation (ADR-0001)', () => {
 
     // Insert exams in both workspaces
     await pool1.query(
-      `INSERT INTO exams (workspace_id, title, description)
-       VALUES ($1, 'Exam WS1', 'Desc')`,
+      `INSERT INTO exams (
+         workspace_id,
+         title,
+         description,
+         total_points,
+         pass_score_percentage
+       ) VALUES ($1, 'Exam WS1', 'Desc', 100, 60)`,
       [workspace1Id]
     )
 
     await pool2.query(
-      `INSERT INTO exams (workspace_id, title, description)
-       VALUES ($1, 'Exam WS2', 'Desc')`,
+      `INSERT INTO exams (
+         workspace_id,
+         title,
+         description,
+         total_points,
+         pass_score_percentage
+       ) VALUES ($1, 'Exam WS2', 'Desc', 100, 60)`,
       [workspace2Id]
     )
 
