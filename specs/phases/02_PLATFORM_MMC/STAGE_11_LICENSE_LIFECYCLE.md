@@ -303,3 +303,22 @@ Data must never be:
 - Archived without recoverability
 
 Lifecycle must be deterministic, centralized, and middleware-enforced.
+
+---
+
+## Stage Status
+
+Status: DRAFT
+Risk Level: UNKNOWN
+Initiated: 2026-02-24T00:00:00Z
+
+Scope Open:
+
+- Specification pending
+
+Constitutional Compliance:
+
+- Pending constitutional audit
+
+Notes:
+Stage initialized. Specification in progress.

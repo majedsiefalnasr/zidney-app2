@@ -1,167 +1,24 @@
 {
-  "stage": "Licenses Management",
+  "stage": "License Lifecycle",
   "phase": "02_PLATFORM_MMC",
-  "stage_dir": "specs/runtime/010-licenses-management",
-  "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_10_LICENSES.md",
-  "branch": "010-licenses-management",
+  "stage_dir": "specs/runtime/011-license-lifecycle",
+  "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_11_LICENSE_LIFECYCLE.md",
+  "branch": "011-license-lifecycle",
   "base_branch": "develop",
-  "current_step": "closure_complete",
-  "stage_status": "PRODUCTION READY",
-  "clarifications_resolved": true,
-  "drift_passed": true,
-  "implementation_allowed": true,
-  "plan_completed": true,
-  "tasks_total": 117,
-  "tasks_completed": 84,
-  "tasks_deferred": 33,
-  "production_readiness_percent": 72,
-  "remediation_fixes_total": 6,
-  "remediation_fixes_completed": 6,
-  "test_scaffolding_files": 4,
-  "test_scaffolding_cases": 87,
-  "test_scaffolding_status": "implementation_complete",
-  "critical_tests_implemented": 14,
-  "closure_date": "2026-02-22T20:15:00Z",
-  "last_updated": "2026-02-22T20:15:00Z",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-02-24T00:00:00Z",
   "history": [
     {
       "event": "branch_created",
-      "branch": "010-licenses-management",
-      "timestamp": "2025-05-22T09:30:00Z"
-    },
-    {
-      "event": "specify_complete",
-      "timestamp": "2025-05-22T09:45:00Z"
-    },
-    {
-      "event": "clarifications_locked",
-      "decisions_locked": 8,
-      "timestamp": "2025-05-22T10:00:00Z"
-    },
-    {
-      "event": "plan_complete",
-      "sections_designed": 16,
-      "timestamp": "2025-05-22T10:30:00Z"
-    },
-    {
-      "event": "tasks_complete",
-      "tasks_total": 117,
-      "timestamp": "2025-05-22T11:00:00Z"
-    },
-    {
-      "event": "drift_analysis_started",
-      "timestamp": "2025-05-22T11:15:00Z"
-    },
-    {
-      "event": "structural_audit_pass",
-      "criteria": "9/9",
-      "timestamp": "2025-05-22T11:20:00Z"
-    },
-    {
-      "event": "performance_audit_blocked",
-      "violations": 6,
-      "timestamp": "2025-05-22T11:30:00Z"
-    },
-    {
-      "event": "qa_audit_blocked",
-      "gaps": 23,
-      "timestamp": "2025-05-22T11:35:00Z"
-    },
-    {
-      "event": "remediation_initiated_option_a",
-      "description": "Full violation remediation",
-      "timestamp": "2025-05-22T11:40:00Z"
-    },
-    {
-      "event": "fix1_grace_period_applied",
-      "description": "7→90 days in service.ts",
-      "file": "packages/domain-core/src/license/service.ts",
-      "line": 219,
-      "timestamp": "2025-05-22T12:00:00Z"
-    },
-    {
-      "event": "fix2_throughput_applied",
-      "description": "MAX_CONCURRENT_JOBS 1→12",
-      "file": "apps/worker/src/config/worker-config.ts",
-      "line": 39,
-      "timestamp": "2025-05-22T12:15:00Z"
-    },
-    {
-      "event": "fix3_concurrency_verified",
-      "description": "SELECT FOR UPDATE confirmed in service.ts",
-      "file": "packages/domain-core/src/license/service.ts",
-      "timestamp": "2025-05-22T12:30:00Z"
-    },
-    {
-      "event": "fix4_provisioning_handler_complete",
-      "description": "ProvisioningHandler class 320 lines with retry/idempotency",
-      "file": "apps/worker/src/handlers/provisioning-handler.ts",
-      "lines": 320,
-      "timestamp": "2025-05-22T13:30:00Z"
-    },
-    {
-      "event": "fix5_test_scaffolding_complete",
-      "description": "4 test files with 87 test scenarios (all .skip() marked)",
-      "files": [
-        "tests/unit/license-rbac.test.ts",
-        "tests/integration/provisioning-failure.test.ts",
-        "tests/integration/license-soft-lock.test.ts",
-        "tests/integration/license-limits-api.test.ts"
-      ],
-      "test_cases": 87,
-      "timestamp": "2025-05-22T14:50:00Z"
-    },
-    {
-      "event": "fix6_test_implementation_complete",
-      "description": "15+ critical tests implemented (RBAC, provisioning, soft-lock, limits)",
-      "test_implementations": {
-        "rbac": 3,
-        "provisioning": 3,
-        "soft_lock": 4,
-        "limits": 4
-      },
-      "total_tests_implemented": 14,
-      "priority": "P1-P2",
-      "timestamp": "2026-02-22T18:45:00Z"
-    },
-    {
-      "event": "drift_analysis_reaudit_complete",
-      "description": "All 4 guardians PASS: Structural (9/9), Security (10/10), Performance (10/10), QA (12/12)",
-      "verdict": "PASS",
-      "implementation_authorized": true,
-      "timestamp": "2026-02-22T19:00:00Z"
-    },
-    {
-      "event": "implementation_phase_complete",
-      "tasks_completed": 67,
-      "tasks_total": 117,
-      "production_readiness_percent": 73,
-      "production_code_lines": 3171,
-      "api_endpoints_live": 10,
-      "database_tables": 3,
-      "migrations": 6,
-      "critical_tests_implemented": 14,
-      "timestamp": "2026-02-22T19:15:00Z"
-    },
-    {
-      "event": "pre_closure_review_approved",
-      "approval": "User explicit approval at Pre-Closure Review Gate",
-      "timestamp": "2026-02-22T19:20:00Z"
-    },
-    {
-      "event": "closure_artifacts_generated",
-      "artifacts": {
-        "closure_report": "reports/CLOSURE_REPORT.md",
-        "testing_guide": "TESTING_GUIDE.md",
-        "pr_summary": "PR_SUMMARY.md"
-      },
-      "timestamp": "2026-02-22T19:25:00Z"
-    },
-    {
-      "event": "stage_production_ready",
-      "status": "PRODUCTION READY",
-      "deployment_readiness": "staging_ready",
-      "timestamp": "2026-02-22T19:30:00Z"
+      "branch": "011-license-lifecycle",
+      "timestamp": "2026-02-24T00:00:00Z"
     }
   ]
 }
