@@ -6,6 +6,12 @@ Scope: Controlled tenant provisioning orchestration (MMC → Provisioning Servic
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Define how MMC triggers tenant provisioning safely and asynchronously.

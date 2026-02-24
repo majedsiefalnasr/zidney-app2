@@ -6,6 +6,12 @@ Database: Tenant DB
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement a lightweight, non-hierarchical tagging system for flexible content classification.

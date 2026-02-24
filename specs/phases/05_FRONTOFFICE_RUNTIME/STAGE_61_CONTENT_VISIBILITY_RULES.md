@@ -6,6 +6,12 @@ Scope: Runtime filtering & access control for student-facing content
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Define strict runtime rules that determine which content a student can see and access in Frontoffice.

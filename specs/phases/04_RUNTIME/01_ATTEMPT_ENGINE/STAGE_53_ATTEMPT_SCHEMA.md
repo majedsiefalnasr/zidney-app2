@@ -8,6 +8,12 @@ Scope: Unified, snapshot-based attempt persistence model
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Define a unified, immutable, snapshot-based attempt schema that supports:

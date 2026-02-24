@@ -6,6 +6,12 @@ Runtime: Backend API + Frontoffice
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement strict subscription-based access control for student users.

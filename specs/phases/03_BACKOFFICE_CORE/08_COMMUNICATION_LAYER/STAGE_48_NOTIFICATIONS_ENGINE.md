@@ -6,6 +6,12 @@ Status: Critical
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## 1. Objective
 
 Implement a tenant-isolated, event-driven Notifications Engine responsible for:

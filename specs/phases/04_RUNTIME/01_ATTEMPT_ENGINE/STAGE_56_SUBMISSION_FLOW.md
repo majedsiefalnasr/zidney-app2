@@ -5,6 +5,12 @@ Runtime: Backend API + Worker (for scheduled auto-submit)
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement a secure, server-authoritative submission flow.

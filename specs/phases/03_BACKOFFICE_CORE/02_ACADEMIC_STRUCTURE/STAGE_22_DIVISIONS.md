@@ -7,6 +7,12 @@ Status: Critical Academic Scope Layer
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement Division as the primary academic isolation layer inside a workspace.

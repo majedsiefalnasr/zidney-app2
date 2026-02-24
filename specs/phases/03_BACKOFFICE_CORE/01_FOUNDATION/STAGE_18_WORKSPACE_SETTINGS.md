@@ -7,6 +7,12 @@ Database: Tenant DB only
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## 1. Objective
 
 Implement a deterministic, auditable, and extensible workspace configuration system.

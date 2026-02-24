@@ -6,6 +6,12 @@ Scope: Student subscription management per workspace
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## 🎯 Objective
 
 Implement the subscription system inside each workspace to:

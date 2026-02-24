@@ -6,6 +6,12 @@ Scope: Workspace-level discount and affiliate code system
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement a workspace-scoped promocode system that:

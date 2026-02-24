@@ -7,6 +7,12 @@ Scope: Workspace-level billing, invoice lifecycle, and subscription activation i
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement a deterministic billing and invoice system that:

@@ -6,6 +6,12 @@ Database: Tenant DB
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement Lesson as the smallest structured academic unit under Subject.

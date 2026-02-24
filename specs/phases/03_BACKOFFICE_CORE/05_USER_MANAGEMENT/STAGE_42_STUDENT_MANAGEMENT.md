@@ -6,6 +6,12 @@ Scope: Frontoffice student lifecycle, academic assignment enforcement, and subsc
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement the Student Management system with:

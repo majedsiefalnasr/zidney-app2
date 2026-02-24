@@ -7,6 +7,12 @@ Status: Organizational-Academic Structure Layer
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement Department as a hierarchical organizational-academic entity within a workspace.

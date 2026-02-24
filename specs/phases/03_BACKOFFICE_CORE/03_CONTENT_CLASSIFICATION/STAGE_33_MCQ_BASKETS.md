@@ -6,6 +6,12 @@ Database: Tenant DB
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement Basket as a structured MCQ grouping tool used for exam composition and automatic question selection.

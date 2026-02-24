@@ -6,6 +6,12 @@ Scope: Transactional enforcement of student and staff limits per license
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement strict, transactional enforcement of:

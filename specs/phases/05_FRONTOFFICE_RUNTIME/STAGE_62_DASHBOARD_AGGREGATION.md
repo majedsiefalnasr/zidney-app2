@@ -6,6 +6,12 @@ Scope: Student dashboard data aggregation, performance constraints, and caching 
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Define the Frontoffice student dashboard aggregation layer.

@@ -7,6 +7,12 @@ Scope: Workspace-level advertisement configuration, targeting, and runtime displ
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement a workspace-isolated Ads Engine that:

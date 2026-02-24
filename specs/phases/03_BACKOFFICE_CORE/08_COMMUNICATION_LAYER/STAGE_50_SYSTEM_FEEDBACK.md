@@ -7,6 +7,12 @@ Scope: Structured collection and management of technical/system-level feedback w
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement a System Feedback module that captures:

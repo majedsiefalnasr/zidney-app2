@@ -5,6 +5,12 @@ Runtime: Backend API + Frontoffice Runtime
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement safe, controlled, and scalable answer autosave during an active attempt.
