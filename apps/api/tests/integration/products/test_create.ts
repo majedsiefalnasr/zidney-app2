@@ -17,10 +17,10 @@
  * - ✅ Correlation ID propagated in response
  */
 
-import { ErrorCodes } from '@zidney/types/errors/ErrorCodes'
 import { Module } from '@zidney/types/enums/Module'
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
+import { ErrorCodes } from '@zidney/types/errors/ErrorCodes'
 import { v4 as uuidv4 } from 'uuid'
+import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 describe('Integration: Products - Create (T052)', () => {
   const mockWorkspaceId = uuidv4()
@@ -311,7 +311,7 @@ describe('Integration: Products - Create (T052)', () => {
           success: false,
           data: null,
           error: {
-            code: "INVALID_SLUG_FORMAT",
+            code: 'INVALID_SLUG_FORMAT',
             message:
               'Slug must be lowercase, alphanumeric, and use hyphens only',
           },
@@ -338,7 +338,7 @@ describe('Integration: Products - Create (T052)', () => {
           enabled_modules: [Module.MCQ],
         }
 
-        expect(payload.slug).toMatch(/^[a-z0-9]([a-z0-9\-]*[a-z0-9])?$/)
+        expect(payload.slug).toMatch(/^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/)
       })
     })
   })

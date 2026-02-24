@@ -167,7 +167,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
     })
 
     it('should return 400 if license is not SOFT_LOCKED', async () => {
-      ;(transitionToActive as any).mockResolvedValue({
+      (transitionToActive as any).mockResolvedValue({
         success: false,
         error_code: 'INVALID_STATE_TRANSITION',
         http_status: 400,
@@ -258,7 +258,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
     })
 
     it('should return 400 if license is not ARCHIVED', async () => {
-      ;(restoreFromArchive as any).mockResolvedValue({
+      (restoreFromArchive as any).mockResolvedValue({
         success: false,
         error_code: 'INVALID_STATE_TRANSITION',
         http_status: 400,
@@ -366,7 +366,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
     })
 
     it('should return 403 for incorrect confirmation phrase', async () => {
-      ;(transitionToDeleted as any).mockResolvedValue({
+      (transitionToDeleted as any).mockResolvedValue({
         success: false,
         error_code: 'INVALID_CONFIRMATION',
         http_status: 403,
@@ -376,7 +376,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
     })
 
     it('should return 400 for expired confirmation', async () => {
-      ;(transitionToDeleted as any).mockResolvedValue({
+      (transitionToDeleted as any).mockResolvedValue({
         success: false,
         error_code: 'CONFIRMATION_EXPIRED',
         http_status: 410,

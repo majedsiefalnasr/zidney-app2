@@ -62,7 +62,7 @@ export async function up(client: PoolClient): Promise<void> {
       updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT NOW(),
       
       -- Constraints on format
-      CONSTRAINT valid_slug_format CHECK (workspace_slug ~ '^[a-z0-9\-]+$'),
+      CONSTRAINT valid_slug_format CHECK (workspace_slug ~ '^[a-z0-9-]+$'),
       CONSTRAINT valid_slug_length CHECK (LENGTH(workspace_slug) >= 3 AND LENGTH(workspace_slug) <= 64)
     )
   `)
