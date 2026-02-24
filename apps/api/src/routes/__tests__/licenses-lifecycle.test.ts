@@ -490,10 +490,10 @@ describe('License Lifecycle Routes (Phase 3)', () => {
     it('should return audit logs in reverse chronological order', async () => {
       const ctx = createMockContext()
       ctx.req.param = vi.fn().mockReturnValue('lic-123')
-      ctx.req.query = vi.fn((key) => {
+      ctx.req.query = vi.fn().mockImplementation((key?: string) => {
         const map = { limit: '50', offset: '0' }
-        return (map as any)[key]
-      })
+        return key ? (map as any)[key] : map
+      }) as typeof ctx.req.query
       ctx.get = vi.fn((key) => {
         const map = {
           correlation_id: 'corr-123',
@@ -525,10 +525,10 @@ describe('License Lifecycle Routes (Phase 3)', () => {
 
     it('should support pagination with limit and offset', async () => {
       const ctx = createMockContext()
-      ctx.req.query = vi.fn((key) => {
+      ctx.req.query = vi.fn().mockImplementation((key?: string) => {
         const map = { limit: '100', offset: '50' }
-        return (map as any)[key]
-      })
+        return key ? (map as any)[key] : map
+      }) as typeof ctx.req.query
 
       // Limit should be capped at 1000
       const limit = Math.min(parseInt(ctx.req.query('limit') || '50', 10), 1000)
@@ -558,10 +558,10 @@ describe('License Lifecycle Routes (Phase 3)', () => {
 
     it('should return 400 if limit > 1000', async () => {
       const ctx = createMockContext()
-      ctx.req.query = vi.fn((key) => {
+      ctx.req.query = vi.fn().mockImplementation((key?: string) => {
         const map = { limit: '5000', offset: '0' }
-        return (map as any)[key]
-      })
+        return key ? (map as any)[key] : map
+      }) as typeof ctx.req.query
 
       // Should cap limit
       const limit = Math.min(parseInt(ctx.req.query('limit') || '50', 10), 1000)

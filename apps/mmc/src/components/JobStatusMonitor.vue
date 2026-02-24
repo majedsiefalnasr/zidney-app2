@@ -34,9 +34,9 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const status = ref<'QUEUED' | 'RUNNING' | 'COMPLETED' | 'FAILED'>(
-  props.initialStatus || 'QUEUED'
-)
+type JobStatus = 'QUEUED' | 'RUNNING' | 'COMPLETED' | 'FAILED'
+
+const status = ref<JobStatus>((props.initialStatus as JobStatus) || 'QUEUED')
 const progress = ref(0)
 const currentStep = ref<string | null>(null)
 const eta = ref<string | null>(null)
