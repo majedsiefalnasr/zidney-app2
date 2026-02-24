@@ -83,7 +83,7 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
       })
 
       const error = getErrorDetails(ProvisioningErrorCode.INVALID_PRODUCT_ID)
-      c.status(error.httpStatus)
+      c.status(error.httpStatus as any)
       return c.json(
         createErrorResponse(
           ProvisioningErrorCode.INVALID_PRODUCT_ID,

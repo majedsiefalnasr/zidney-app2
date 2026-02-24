@@ -36,7 +36,7 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
 
   if (!licenseId) {
     const error = getErrorDetails(ProvisioningErrorCode.LICENSE_NOT_FOUND)
-    c.status(error.httpStatus)
+    c.status(error.httpStatus as any)
     return c.json(
       createErrorResponse(
         ProvisioningErrorCode.LICENSE_NOT_FOUND,
