@@ -1,80 +1,24 @@
 {
-  "stage": "License Lifecycle",
+  "stage": "STAGE_12_PROVISIONING_TRIGGER",
   "phase": "02_PLATFORM_MMC",
-  "stage_dir": "specs/runtime/011-license-lifecycle",
-  "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_11_LICENSE_LIFECYCLE.md",
-  "branch": "011-license-lifecycle",
+  "stage_dir": "specs/runtime/012-provisioning-trigger",
+  "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_12_PROVISIONING_TRIGGER.md",
+  "branch": "012-provisioning-trigger",
   "base_branch": "develop",
-  "current_step": "implement",
-  "stage_status": "IN PROGRESS",
-  "clarifications_resolved": true,
-  "drift_passed": true,
-  "implementation_allowed": true,
-  "plan_completed": true,
-  "tasks_total": 59,
-  "tasks_completed": 24,
-  "last_updated": "2026-02-24T22:53:00Z",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-02-24T00:00:00Z",
   "history": [
     {
       "event": "branch_created",
-      "branch": "011-license-lifecycle",
+      "branch": "012-provisioning-trigger",
       "timestamp": "2026-02-24T00:00:00Z"
-    },
-    {
-      "event": "specify_complete",
-      "timestamp": "2026-02-24T00:00:00Z"
-    },
-    {
-      "event": "plan_complete",
-      "sections_designed": 8,
-      "timestamp": "2026-02-24T00:00:00Z"
-    },
-    {
-      "event": "tasks_complete",
-      "tasks_total": 55,
-      "parallelizable": 18,
-      "timestamp": "2026-02-24T00:00:00Z"
-    },
-    {
-      "event": "guardian_analysis_blocked",
-      "reason": "Critical architectural contradictions detected",
-      "findings": [
-        "Exam engine dual-mode contradiction",
-        "RBAC scope contradiction",
-        "Security guardians critical gaps"
-      ],
-      "timestamp": "2026-02-24T00:15:00Z"
-    },
-    {
-      "event": "remediation_complete",
-      "fixes_applied": 7,
-      "timestamp": "2026-02-24T20:30:00Z"
-    },
-    {
-      "event": "guardian_revalidation_complete",
-      "verdict": "5/5 PASS - Implementation Authorized",
-      "timestamp": "2026-02-24T20:40:00Z"
-    },
-    {
-      "event": "drift_analysis_passed",
-      "criteria_passed": "10/10 Constitutional",
-      "timestamp": "2026-02-24T20:45:00Z"
-    },
-    {
-      "event": "architectural_resolutions_applied",
-      "resolutions": [
-        "Exam Engine: Two-Mode Enforcement",
-        "RBAC: Admin-Only Lock",
-        "Security: Rate-Limit/2FA/S3Auth/Cross-WS",
-        "Performance: Pool/Idempotency/Prepared Statements",
-        "CI/CD: Migration/Logging Guards",
-        "Deployment: Smoke Tests/Worker Pause"
-      ],
-      "updates": [
-        "spec.md: 10 new clarifications (Q6-Q10)",
-        "plan.md: 6 new specification sections"
-      ],
-      "timestamp": "2026-02-24T00:30:00Z"
     }
   ]
 }

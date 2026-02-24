@@ -9,6 +9,19 @@ Scope: Controlled tenant provisioning orchestration (MMC → Provisioning Servic
 ## Stage Status
 
 Status: DRAFT
+Risk Level: UNKNOWN
+Initiated: 2026-02-24T00:00:00Z
+
+Scope Open:
+
+- Specification pending
+
+Constitutional Compliance:
+
+- Pending constitutional audit
+
+Notes:
+Stage initialized. Specification in progress.
 
 ---
 
