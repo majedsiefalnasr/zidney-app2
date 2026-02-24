@@ -36,7 +36,7 @@
  * - Proper HTTP status codes
  */
 
-import { Logger } from '@zidney/logging'
+import { Logger } from '@zidney/logger'
 import { Context } from 'hono'
 
 export interface NormalizedErrorResponse {
@@ -228,7 +228,8 @@ export function createErrorNormalizerStage06(
       })
     }
 
-    return c.json(normalized_error, http_status)
+    c.status(http_status as any)
+    return c.json(normalized_error)
   }
 }
 

@@ -22,16 +22,57 @@ describe('Worker Grading Integration', () => {
   let attemptId: string
   let jobId: string
   let pool: any
+  const runId = Date.now().toString(36)
+  const ddlLockId = 62007001
 
   beforeAll(async () => {
+    await db.master.query('SELECT pg_advisory_lock($1)', [ddlLockId])
+    try {
+      await db.master.query(`
+        CREATE TABLE IF NOT EXISTS workspaces (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          slug TEXT UNIQUE NOT NULL,
+          name TEXT NOT NULL,
+          schema_version INTEGER NOT NULL DEFAULT 1,
+          product_version TEXT NOT NULL DEFAULT '1.0.0',
+          license_status TEXT NOT NULL DEFAULT 'ACTIVE'
+        );
+      `)
+    } finally {
+      await db.master.query('SELECT pg_advisory_unlock($1)', [ddlLockId])
+    }
+
     // Create workspace
     const wsRes = await db.master.query(
       `INSERT INTO workspaces (slug, name, schema_version, product_version, license_status)
-       VALUES ('worker-ws', 'Worker WS', 1, '1.0.0', 'ACTIVE')
-       RETURNING id`
+       VALUES ($1, 'Worker WS', 1, '1.0.0', 'ACTIVE')
+       RETURNING id`,
+      [`worker-ws-${runId}`]
     )
     workspaceId = wsRes.rows[0].id
     pool = getTenantPool(workspaceId)
+
+    await pool.query('SELECT pg_advisory_lock($1)', [ddlLockId])
+    try {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS attempts (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          workspace_id TEXT NULL,
+          user_id TEXT NOT NULL,
+          exam_id TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'SUBMITTED',
+          question_snapshot JSONB NULL,
+          grading_config_snapshot JSONB NULL,
+          result_snapshot TEXT NULL
+        );
+        ALTER TABLE attempts ADD COLUMN IF NOT EXISTS workspace_id TEXT NULL;
+        ALTER TABLE attempts ADD COLUMN IF NOT EXISTS question_snapshot JSONB NULL;
+        ALTER TABLE attempts ADD COLUMN IF NOT EXISTS grading_config_snapshot JSONB NULL;
+        ALTER TABLE attempts ADD COLUMN IF NOT EXISTS result_snapshot TEXT NULL;
+      `)
+    } finally {
+      await pool.query('SELECT pg_advisory_unlock($1)', [ddlLockId])
+    }
 
     // Create attempt
     const attemptRes = await pool.query(
@@ -62,13 +103,6 @@ describe('Worker Grading Integration', () => {
 
   // T054.1: Worker grades attempt end-to-end
   test('Worker grades attempt end-to-end', async () => {
-    const job = {
-      id: jobId,
-      attempt_id: attemptId,
-      workspace_id: workspaceId,
-      type: 'GRADE_ATTEMPT',
-    }
-
     // Simulate worker processing
     const result = {
       attempt_id: attemptId,

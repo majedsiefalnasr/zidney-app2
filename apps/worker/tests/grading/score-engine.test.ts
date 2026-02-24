@@ -46,7 +46,7 @@ describe('Score Engine Determinism', () => {
       correct_answer: 'B',
       explanation: 'Correct',
       order_in_exam: 0,
-    } as QuestionSnapshot
+    } as unknown as QuestionSnapshot
 
     // True/False Question
     trueFalseQuestion = {
@@ -57,7 +57,7 @@ describe('Score Engine Determinism', () => {
       correct_answer: true,
       explanation: 'Correct',
       order_in_exam: 1,
-    } as QuestionSnapshot
+    } as unknown as QuestionSnapshot
 
     // Fill in Blank Question
     fillBlankQuestion = {
@@ -68,7 +68,7 @@ describe('Score Engine Determinism', () => {
       correct_answers: ['Paris', 'PARIS', 'paris'],
       explanation: 'Paris is the capital',
       order_in_exam: 2,
-    } as QuestionSnapshot
+    } as unknown as QuestionSnapshot
 
     // Essay Question
     essayQuestion = {
@@ -79,7 +79,7 @@ describe('Score Engine Determinism', () => {
       default_score: 8,
       explanation: 'Manual grading required',
       order_in_exam: 3,
-    } as QuestionSnapshot
+    } as unknown as QuestionSnapshot
 
     // Matching Question
     matchingQuestion = {
@@ -93,7 +93,7 @@ describe('Score Engine Determinism', () => {
       ],
       explanation: 'Correct matches',
       order_in_exam: 4,
-    } as QuestionSnapshot
+    } as unknown as QuestionSnapshot
 
     // Ordering Question
     orderingQuestion = {
@@ -104,7 +104,7 @@ describe('Score Engine Determinism', () => {
       correct_order: ['A', 'B', 'C', 'D'],
       explanation: 'Correct order',
       order_in_exam: 5,
-    } as QuestionSnapshot
+    } as unknown as QuestionSnapshot
   })
 
   // T044.1: Multiple Choice Determinism
@@ -136,7 +136,7 @@ describe('Score Engine Determinism', () => {
     )
 
     expect(result.points_earned).toBe(0)
-    expect(result.is_correct).toBe(false)
+    expect((result as any).is_correct).toBe(false)
   })
 
   // T044.3: True/False Determinism
@@ -159,7 +159,7 @@ describe('Score Engine Determinism', () => {
     const result = scoreQuestion(trueFalseQuestion, responses, gradingConfig)
 
     expect(result.points_earned).toBe(0)
-    expect(result.is_correct).toBe(false)
+    expect((result as any).is_correct).toBe(false)
   })
 
   // T044.5: Fill Blank Fuzzy Matching Determinism
@@ -192,7 +192,7 @@ describe('Score Engine Determinism', () => {
         gradingConfig
       )
       expect(result.points_earned).toBe(10)
-      expect(result.is_correct).toBe(true)
+      expect((result as any).is_correct).toBe(true)
     })
   })
 
@@ -202,7 +202,7 @@ describe('Score Engine Determinism', () => {
     const result = scoreQuestion(fillBlankQuestion, response, gradingConfig)
 
     expect(result.points_earned).toBe(0)
-    expect(result.is_correct).toBe(false)
+    expect((result as any).is_correct).toBe(false)
   })
 
   // T044.8: Essay Default Scoring
@@ -211,7 +211,7 @@ describe('Score Engine Determinism', () => {
     const result = scoreQuestion(essayQuestion, response, gradingConfig)
 
     expect(result.points_earned).toBe(8)
-    expect(result.is_correct).toBeUndefined() // Manual grading required
+    expect((result as any).is_correct).toBeUndefined() // Manual grading required
   })
 
   // T044.9: Matching Determinism
@@ -306,7 +306,7 @@ describe('Score Engine Determinism', () => {
     )
 
     expect(result.points_earned).toBe(0)
-    expect(result.is_correct).toBe(false)
+    expect((result as any).is_correct).toBe(false)
   })
 
   // T044.15: Pass/Fail Calculation

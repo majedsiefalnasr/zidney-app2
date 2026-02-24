@@ -29,7 +29,7 @@ describe('Grading Snapshots', () => {
       correct_answer: 'B',
       explanation: 'Correct',
       order_in_exam: 0,
-    } as QuestionSnapshot
+    } as unknown as QuestionSnapshot
 
     const response = { selected: 'B' } as UserAnswer
     const score = scoreQuestion(question, response, {
@@ -40,7 +40,7 @@ describe('Grading Snapshots', () => {
     // Snapshot expectation
     expect(score).toMatchSnapshot()
     expect(score.points_earned).toBe(10)
-    expect(score.is_correct).toBe(true)
+    expect((score as any).is_correct).toBe(true)
   })
 
   // T060.2: Fill blank scoring matches snapshot
@@ -53,7 +53,7 @@ describe('Grading Snapshots', () => {
       correct_answers: ['Paris', 'paris', 'PARIS'],
       explanation: 'Paris is the capital',
       order_in_exam: 1,
-    } as QuestionSnapshot
+    } as unknown as QuestionSnapshot
 
     const response = { text: 'Paris' } as UserAnswer
     const score = scoreQuestion(question, response, {
@@ -75,7 +75,7 @@ describe('Grading Snapshots', () => {
       correct_answer: true,
       explanation: 'Correct',
       order_in_exam: 2,
-    } as QuestionSnapshot
+    } as unknown as QuestionSnapshot
 
     const response = { selected: true } as UserAnswer
     const score = scoreQuestion(question, response, {
@@ -84,7 +84,7 @@ describe('Grading Snapshots', () => {
     })
 
     expect(score).toMatchSnapshot()
-    expect(score.is_correct).toBe(true)
+    expect((score as any).is_correct).toBe(true)
   })
 
   // T060.4: Matching scoring matches snapshot
@@ -100,7 +100,7 @@ describe('Grading Snapshots', () => {
       ],
       explanation: 'Correct matches',
       order_in_exam: 3,
-    } as QuestionSnapshot
+    } as unknown as QuestionSnapshot
 
     const response = {
       pairs: [
@@ -128,7 +128,7 @@ describe('Grading Snapshots', () => {
       correct_order: ['A', 'B', 'C', 'D'],
       explanation: 'Correct order',
       order_in_exam: 4,
-    } as QuestionSnapshot
+    } as unknown as QuestionSnapshot
 
     const response = { order: ['A', 'B', 'C', 'D'] } as UserAnswer
     const score = scoreQuestion(question, response, {
@@ -137,7 +137,7 @@ describe('Grading Snapshots', () => {
     })
 
     expect(score).toMatchSnapshot()
-    expect(score.is_correct).toBe(true)
+    expect((score as any).is_correct).toBe(true)
   })
 
   // T060.6: Essay default scoring matches snapshot
@@ -150,7 +150,7 @@ describe('Grading Snapshots', () => {
       default_score: 8,
       explanation: 'Manual grading required',
       order_in_exam: 5,
-    } as QuestionSnapshot
+    } as unknown as QuestionSnapshot
 
     const response = { text: 'Essay content...' } as UserAnswer
     const score = scoreQuestion(question, response, {
@@ -177,7 +177,7 @@ describe('Grading Snapshots', () => {
       correct_answer: 'B',
       explanation: 'Correct is B',
       order_in_exam: 6,
-    } as QuestionSnapshot
+    } as unknown as QuestionSnapshot
 
     const response = { selected: 'A' } as UserAnswer
     const score = scoreQuestion(question, response, {
@@ -187,7 +187,7 @@ describe('Grading Snapshots', () => {
 
     expect(score).toMatchSnapshot()
     expect(score.points_earned).toBe(0)
-    expect(score.is_correct).toBe(false)
+    expect((score as any).is_correct).toBe(false)
   })
 
   // T060.8: Composite score matches snapshot
@@ -204,7 +204,7 @@ describe('Grading Snapshots', () => {
         ],
         explanation: '',
         order_in_exam: 0,
-      } as QuestionSnapshot,
+      } as unknown as QuestionSnapshot,
       {
         id: 'q2',
         type: 'MULTIPLE_CHOICE',
@@ -216,7 +216,7 @@ describe('Grading Snapshots', () => {
         ],
         explanation: '',
         order_in_exam: 1,
-      } as QuestionSnapshot,
+      } as unknown as QuestionSnapshot,
     ]
 
     const answers = new Map([
@@ -251,7 +251,7 @@ describe('Grading Snapshots', () => {
         ],
         explanation: '',
         order_in_exam: 0,
-      } as QuestionSnapshot,
+      } as unknown as QuestionSnapshot,
     ]
 
     const answers = new Map([
@@ -289,7 +289,7 @@ describe('Grading Snapshots', () => {
         ],
         explanation: '',
         order_in_exam: 0,
-      } as QuestionSnapshot,
+      } as unknown as QuestionSnapshot,
     ]
 
     const answers = new Map() // No responses

@@ -72,16 +72,16 @@ export class DistributedLock {
         const result = await this.redis.set(
           lock_key,
           lock_value,
-          'NX',
           'EX',
           ttl_seconds,
-          'GET' // Redis 6.2+: return old value if key existed
+          'NX'
         )
 
-        // If SET returned null/undefined, lock was successfully acquired (key didn't exist before)
-        if (result === null || result === undefined) {
+        if (result === 'OK') {
           // Lock acquired successfully
-          const release_fn = () => this.releaseLock(lock_key, lock_value)
+          const release_fn = async (): Promise<void> => {
+            await this.releaseLock(lock_key, lock_value)
+          }
 
           return {
             acquired: true,
@@ -128,13 +128,15 @@ export class DistributedLock {
       const result = await this.redis.set(
         lock_key,
         lock_value,
-        'NX',
         'EX',
-        ttl_seconds
+        ttl_seconds,
+        'NX'
       )
 
       if (result === 'OK') {
-        const release_fn = () => this.releaseLock(lock_key, lock_value)
+        const release_fn = async (): Promise<void> => {
+          await this.releaseLock(lock_key, lock_value)
+        }
         return {
           acquired: true,
           release_fn,

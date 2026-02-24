@@ -17,7 +17,7 @@
  * - Deterministic validation results
  */
 
-import { createLogger, Logger } from '@zidney/logging'
+import { createLogger, Logger } from '@zidney/logger'
 import { QuestionType, UserAnswer } from '@zidney/types/attempt'
 
 /**
@@ -326,7 +326,7 @@ export function validateEssayResponse(
  */
 export function validateMatchingResponse(
   response: UserAnswer | undefined,
-  questionOptions: string[] | undefined,
+  _questionOptions: string[] | undefined,
   logger: Logger
 ): ResponseValidationResult {
   if (!response) {
@@ -390,7 +390,7 @@ export function validateMatchingResponse(
  */
 export function validateOrderingResponse(
   response: UserAnswer | undefined,
-  questionOptions: string[] | undefined,
+  _questionOptions: string[] | undefined,
   logger: Logger
 ): ResponseValidationResult {
   if (!response) {

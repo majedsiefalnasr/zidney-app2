@@ -1,5 +1,5 @@
-import { createLogger } from '@zidney/logging'
-import { Hono } from 'hono'
+import { createLogger } from '@zidney/logger'
+import type { Context } from 'hono'
 import { v4 as uuidv4 } from 'uuid'
 import { db } from '../../infrastructure/postgres'
 import { redis } from '../../infrastructure/redis'
@@ -35,7 +35,7 @@ export interface DLQRetryResponse {
   }
 }
 
-async function dlqRetry(c: Hono): Promise<Response | void> {
+async function dlqRetry(c: Context): Promise<Response | void> {
   const correlationId = c.state.requestId
   const workspace = c.state.workspace
   const userId = c.state.userId

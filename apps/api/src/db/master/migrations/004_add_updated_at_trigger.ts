@@ -10,13 +10,13 @@
  * Schema version: 4 → 5
  */
 
-import { Database } from 'better-sqlite3'
+import type { PoolClient } from 'pg'
 
 export const name = '004_add_updated_at_trigger'
 export const version = 5
 
-export async function up(db: Database): Promise<void> {
-  db.exec(`
+export async function up(client: PoolClient): Promise<void> {
+  await client.query(`
     -- Create or replace the update_timestamp function (shared across tables)
     CREATE OR REPLACE FUNCTION update_timestamp()
     RETURNS TRIGGER AS $$
@@ -36,8 +36,8 @@ export async function up(db: Database): Promise<void> {
   `)
 }
 
-export async function down(db: Database): Promise<void> {
-  db.exec(`
+export async function down(client: PoolClient): Promise<void> {
+  await client.query(`
     DROP TRIGGER IF EXISTS licenses_updated_at_trigger ON licenses;
     DROP FUNCTION IF EXISTS update_timestamp();
   `)

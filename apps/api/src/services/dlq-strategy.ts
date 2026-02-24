@@ -24,7 +24,7 @@
  * 5. Phase G admin panel enables manual retry/inspection
  */
 
-import { createLogger, Logger } from '@zidney/logging'
+import { createLogger, Logger } from '@zidney/logger'
 import { Pool, PoolClient } from 'pg'
 
 /**

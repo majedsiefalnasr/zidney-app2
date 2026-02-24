@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import type { MigrationConfig } from '../migration-types'
+import type { MigrationConfig } from '../../migration-types'
 
 /**
  * T010: Create Dead Letter Queue Table Migration

@@ -16,6 +16,7 @@ import {
   getPoolStats,
   getTenantClient,
   getTenantDatabase,
+  getTenantPoolSync,
   queryTenantDatabase,
 } from './tenant-pool'
 
@@ -38,6 +39,20 @@ export const db = {
   master: masterPool,
 }
 
+function resolveTenantDatabaseUrl(workspaceId: string): string | null {
+  const template = process.env.TENANT_DATABASE_URL_TEMPLATE
+  if (template) {
+    return template.replace('{workspace_id}', workspaceId)
+  }
+
+  // Test fallback only: use a single DB when dedicated tenant URLs are not configured.
+  if (process.env.NODE_ENV === 'test' && process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL
+  }
+
+  return null
+}
+
 /**
  * Get tenant database pool by workspace ID
  *
@@ -48,21 +63,12 @@ export const db = {
  * @returns Pool instance for tenant database
  */
 export function getTenantPool(workspaceId: string): Pool | null {
-  // This returns null if the pool hasn't been created yet
-  // For full async pool creation, use getTenantDatabase from tenant-pool.ts
-  const tenantDatabaseUrl = process.env.TENANT_DATABASE_URL_TEMPLATE?.replace(
-    '{workspace_id}',
-    workspaceId
-  )
-
+  const tenantDatabaseUrl = resolveTenantDatabaseUrl(workspaceId)
   if (!tenantDatabaseUrl) {
     return null
   }
 
-  // For synchronous access, we need to use a different approach
-  // This is a placeholder that returns null - the actual implementation
-  // should use getTenantDatabase for async pool creation
-  return null
+  return getTenantPoolSync(workspaceId, tenantDatabaseUrl)
 }
 
 // Re-export tenant pool utilities
@@ -72,5 +78,6 @@ export {
   getPoolStats,
   getTenantClient,
   getTenantDatabase,
+  getTenantPoolSync,
   queryTenantDatabase,
 }

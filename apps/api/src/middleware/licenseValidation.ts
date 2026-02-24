@@ -17,7 +17,7 @@
  * - PROVISIONING → 503 Try Again
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import type { Context, MiddlewareHandler, Next } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { Pool } from 'pg'

@@ -1,8 +1,3 @@
-import { createLogger } from '@zidney/logging'
-import { Context, Next } from 'hono'
-
-const baseLogger = createLogger('correlation')
-
 /**
  * Correlation context middleware - binds request-scoped context to child logger.
  *
@@ -18,6 +13,12 @@ const baseLogger = createLogger('correlation')
  * 7. Logs request_received event with method, path, remote_addr
  * 8. Logs request_completed event after response with status, duration
  */
+
+import { createLogger } from '@zidney/logger'
+import { Context, Next } from 'hono'
+
+const baseLogger = createLogger('correlation')
+
 export function correlationMiddleware() {
   return async (c: Context, next: Next): Promise<void> => {
     const requestId = c.get('request_id') as string

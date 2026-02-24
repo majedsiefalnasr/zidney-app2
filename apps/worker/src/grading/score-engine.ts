@@ -19,7 +19,7 @@
  * ADRs: ADR-0002 (snapshot model)
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import {
   QuestionResult,
   QuestionSnapshot,
@@ -28,6 +28,112 @@ import {
 } from '@zidney/types/attempt'
 
 const logger = createLogger('score-engine')
+
+type Pair = { from: string; to: string }
+
+function normalizeQuestionType(type: unknown): string {
+  const normalized = String(type || '').toUpperCase()
+  if (normalized === 'MULTIPLE_CHOICE') return 'MCQ'
+  if (normalized === 'MATCHING') return 'MATCH'
+  return normalized
+}
+
+function resolveSelectedOption(answer: UserAnswer): unknown {
+  const payload = answer as Record<string, unknown>
+  return payload.selected_option ?? payload.selected
+}
+
+function resolveCorrectOption(question: QuestionSnapshot): unknown {
+  const payload = question as Record<string, any>
+  const correctAnswer = payload.correct_answer
+  if (
+    correctAnswer &&
+    typeof correctAnswer === 'object' &&
+    !Array.isArray(correctAnswer)
+  ) {
+    if ('selected_option' in correctAnswer) {
+      return correctAnswer.selected_option
+    }
+    if ('value' in correctAnswer) {
+      return correctAnswer.value
+    }
+  }
+  return correctAnswer
+}
+
+function resolveFillBlankCorrectAnswers(question: QuestionSnapshot): string[] {
+  const payload = question as Record<string, any>
+  const correctAnswer = payload.correct_answer
+  const legacyAnswers = payload.correct_answers
+
+  if (Array.isArray(legacyAnswers)) {
+    return legacyAnswers.map((answer: string) =>
+      answer.toLowerCase().replace(/\s+/g, ' ').trim()
+    )
+  }
+
+  if (Array.isArray(correctAnswer?.answers)) {
+    return correctAnswer.answers.map((answer: string) =>
+      answer.toLowerCase().replace(/\s+/g, ' ').trim()
+    )
+  }
+
+  if (typeof correctAnswer === 'string') {
+    return [correctAnswer.toLowerCase().replace(/\s+/g, ' ').trim()]
+  }
+
+  return [
+    (correctAnswer?.text || '').toLowerCase().replace(/\s+/g, ' ').trim(),
+  ]
+}
+
+function normalizePairs(items: unknown[]): Pair[] {
+  const pairs: Pair[] = []
+
+  for (const item of items) {
+    const payload = item as Record<string, unknown>
+    const from = String(payload.from ?? payload.id ?? '').trim()
+    const to = String(payload.to ?? payload.target ?? '').trim()
+    if (from && to) {
+      pairs.push({ from, to })
+    }
+  }
+
+  return pairs
+}
+
+function resolveUserMatches(userAnswer: UserAnswer): Pair[] {
+  const payload = userAnswer as Record<string, unknown>
+  if (Array.isArray(payload.matches)) {
+    return normalizePairs(payload.matches as unknown[])
+  }
+  if (Array.isArray(payload.pairs)) {
+    return normalizePairs(payload.pairs as unknown[])
+  }
+  return []
+}
+
+function resolveCorrectMatches(question: QuestionSnapshot): Pair[] {
+  const payload = question as Record<string, any>
+  if (Array.isArray(payload.correct_answer?.matches)) {
+    return normalizePairs(payload.correct_answer.matches)
+  }
+  if (Array.isArray(payload.correct_pairs)) {
+    return normalizePairs(payload.correct_pairs)
+  }
+  return []
+}
+
+function resolveCorrectOrder(question: QuestionSnapshot): string[] {
+  const payload = question as Record<string, any>
+  if (Array.isArray(payload.correct_answer?.order)) {
+    return payload.correct_answer.order
+  }
+  if (Array.isArray(payload.correct_order)) {
+    return payload.correct_order
+  }
+  return []
+}
 
 /**
  * Interface: Grading result with detailed breakdown
@@ -119,7 +225,7 @@ export function computeScore(
 export function scoreQuestion(
   question: QuestionSnapshot,
   userAnswer: UserAnswer | undefined,
-  gradingConfig: any
+  _gradingConfig: any
 ): QuestionResult {
   // Not answered
   if (!userAnswer) {
@@ -131,12 +237,17 @@ export function scoreQuestion(
       points_possible: question.points,
       feedback: 'Not answered',
       explanation: 'You did not provide an answer to this question.',
-    }
+      is_correct: false,
+    } as QuestionResult
   }
+
+  const normalizedType = normalizeQuestionType(
+    (question as unknown as Record<string, unknown>).type
+  )
 
   // Dispatch to type-specific scorer
   try {
-    switch (question.type) {
+    switch (normalizedType) {
       case 'MCQ':
       case 'TRUE_FALSE':
         return scoreMCQ(question, userAnswer)
@@ -153,7 +264,7 @@ export function scoreQuestion(
       default:
         logger.warn('Unknown question type', {
           question_id: question.id,
-          type: question.type,
+          type: (question as unknown as Record<string, unknown>).type,
         })
         return {
           question_id: question.id,
@@ -162,13 +273,14 @@ export function scoreQuestion(
           points_earned: 0,
           points_possible: question.points,
           feedback: 'Could not score question',
-          explanation: `Unknown question type: ${question.type}`,
-        }
+          explanation: `Unknown question type: ${(question as unknown as Record<string, unknown>).type}`,
+          is_correct: false,
+        } as QuestionResult
     }
   } catch (error) {
     logger.error('Error scoring question', {
       question_id: question.id,
-      type: question.type,
+      type: (question as unknown as Record<string, unknown>).type,
       error: error instanceof Error ? error.message : String(error),
     })
     return {
@@ -179,7 +291,8 @@ export function scoreQuestion(
       points_possible: question.points,
       feedback: 'Scoring error',
       explanation: 'An error occurred while scoring this question.',
-    }
+      is_correct: false,
+    } as QuestionResult
   }
 }
 
@@ -194,8 +307,8 @@ function scoreMCQ(
   question: QuestionSnapshot,
   userAnswer: UserAnswer
 ): QuestionResult {
-  const selectedOption = userAnswer.selected_option
-  const correctOption = question.correct_answer?.selected_option
+  const selectedOption = resolveSelectedOption(userAnswer)
+  const correctOption = resolveCorrectOption(question)
 
   const isCorrect =
     selectedOption === correctOption &&
@@ -211,8 +324,9 @@ function scoreMCQ(
     feedback: isCorrect ? 'Correct!' : 'Incorrect',
     explanation: isCorrect
       ? 'Your answer matches the correct option.'
-      : `The correct answer is: ${correctOption}`,
-  }
+      : `The correct answer is: ${String(correctOption)}`,
+    is_correct: isCorrect,
+  } as QuestionResult
 }
 
 /**
@@ -287,6 +401,23 @@ function scoreEssay(
   question: QuestionSnapshot,
   userAnswer: UserAnswer
 ): QuestionResult {
+  const legacyDefaultScore = (question as unknown as Record<string, unknown>)
+    .default_score
+  if (
+    typeof legacyDefaultScore === 'number' &&
+    Number.isFinite(legacyDefaultScore)
+  ) {
+    return {
+      question_id: question.id,
+      user_answer: userAnswer,
+      correct_answer: question.correct_answer,
+      points_earned: legacyDefaultScore,
+      points_possible: question.points,
+      feedback: 'Manual grading required',
+      explanation: 'Default essay score applied pending manual review.',
+    }
+  }
+
   const essayText = (userAnswer.text || '').toLowerCase().trim()
   const wordCount = essayText.split(/\s+/).length
   const minWords = question.correct_answer?.min_words || 100
@@ -353,8 +484,8 @@ function scoreMatching(
   question: QuestionSnapshot,
   userAnswer: UserAnswer
 ): QuestionResult {
-  const userMatches = userAnswer.matches || []
-  const correctMatches = question.correct_answer?.matches || []
+  const userMatches = resolveUserMatches(userAnswer)
+  const correctMatches = resolveCorrectMatches(question)
 
   if (correctMatches.length === 0) {
     return {
@@ -365,7 +496,8 @@ function scoreMatching(
       points_possible: question.points,
       feedback: 'No correct answers defined',
       explanation: 'Cannot score: no correct answer configuration.',
-    }
+      is_correct: false,
+    } as QuestionResult
   }
 
   // Count correct matches
@@ -396,7 +528,8 @@ function scoreMatching(
         ? 'All matches correct'
         : 'Some matches incorrect',
     explanation: `You correctly matched ${correctCount}/${correctMatches.length} pairs.`,
-  }
+    is_correct: correctCount === correctMatches.length,
+  } as QuestionResult
 }
 
 /**
@@ -411,7 +544,7 @@ function scoreOrdering(
   userAnswer: UserAnswer
 ): QuestionResult {
   const userOrder = userAnswer.order || []
-  const correctOrder = question.correct_answer?.order || []
+  const correctOrder = resolveCorrectOrder(question)
 
   if (correctOrder.length === 0) {
     return {
@@ -422,7 +555,8 @@ function scoreOrdering(
       points_possible: question.points,
       feedback: 'No correct sequence defined',
       explanation: 'Cannot score: no correct answer configuration.',
-    }
+      is_correct: false,
+    } as QuestionResult
   }
 
   // Check if order is correct
@@ -438,7 +572,8 @@ function scoreOrdering(
     explanation: isCorrect
       ? 'Your sequence matches the correct order.'
       : 'The order is not correct.',
-  }
+    is_correct: isCorrect,
+  } as QuestionResult
 }
 
 /**
@@ -456,16 +591,7 @@ function scoreFillBlank(
     .toLowerCase()
     .replace(/\s+/g, ' ')
     .trim()
-  const correctAnswers = Array.isArray(question.correct_answer?.answers)
-    ? question.correct_answer.answers.map((a: string) =>
-        a.toLowerCase().replace(/\s+/g, ' ').trim()
-      )
-    : [
-        (question.correct_answer?.text || '')
-          .toLowerCase()
-          .replace(/\s+/g, ' ')
-          .trim(),
-      ]
+  const correctAnswers = resolveFillBlankCorrectAnswers(question)
 
   const isCorrect = correctAnswers.some(
     (correct: string) => userAnswer_text === correct
@@ -481,7 +607,8 @@ function scoreFillBlank(
     explanation: isCorrect
       ? 'Your answer matches.'
       : `Expected: ${correctAnswers.join(' or ')}`,
-  }
+    is_correct: isCorrect,
+  } as QuestionResult
 }
 
 /**
@@ -536,7 +663,7 @@ function isPlainReproduction(text: string): boolean {
  * @returns ResultSnapshot
  */
 export function buildResultSnapshot(
-  attemptId: string,
+  _attemptId: string,
   gradingResult: GradingResult
 ): ResultSnapshot {
   return {

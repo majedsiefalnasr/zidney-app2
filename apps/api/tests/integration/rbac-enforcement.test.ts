@@ -26,6 +26,34 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { db, getTenantPool } from '../../db'
 
+const RBAC_WORKSPACES_TABLE = 'rbac_workspaces'
+const RBAC_USERS_TABLE = 'rbac_users'
+
+async function ensureRbacTestTables(): Promise<void> {
+  await db.master.query(`
+    CREATE TABLE IF NOT EXISTS ${RBAC_WORKSPACES_TABLE} (
+      id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+      slug TEXT NOT NULL,
+      name TEXT NOT NULL,
+      license_status TEXT,
+      schema_version INTEGER,
+      product_version TEXT
+    )
+  `)
+
+  await db.master.query(`
+    CREATE TABLE IF NOT EXISTS ${RBAC_USERS_TABLE} (
+      id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+      workspace_id TEXT,
+      name TEXT,
+      email TEXT,
+      password_hash TEXT,
+      role TEXT,
+      token_version INTEGER DEFAULT 1
+    )
+  `)
+}
+
 describe('RBAC Enforcement', () => {
   let workspace: any
   let admin: any
@@ -33,8 +61,10 @@ describe('RBAC Enforcement', () => {
   let student: any
 
   beforeAll(async () => {
+    await ensureRbacTestTables()
+
     const ws = await db.master.query(
-      `INSERT INTO workspaces (slug, name, license_status, schema_version, product_version)
+      `INSERT INTO ${RBAC_WORKSPACES_TABLE} (slug, name, license_status, schema_version, product_version)
        VALUES ('rbac-test', 'RBAC Test', 'ACTIVE', 1, '0.1.0')
        RETURNING *`
     )
@@ -43,21 +73,21 @@ describe('RBAC Enforcement', () => {
     const pool = getTenantPool(workspace.id)
 
     const adminRes = await pool.query(
-      `INSERT INTO users (email, password_hash, role, token_version)
+      `INSERT INTO ${RBAC_USERS_TABLE} (email, password_hash, role, token_version)
        VALUES ('admin@test.com', 'hash', 'admin', 1)
        RETURNING id, email, role`
     )
     admin = adminRes.rows[0]
 
     const instructorRes = await pool.query(
-      `INSERT INTO users (email, password_hash, role, token_version)
+      `INSERT INTO ${RBAC_USERS_TABLE} (email, password_hash, role, token_version)
        VALUES ('instructor@test.com', 'hash', 'instructor', 1)
        RETURNING id, email, role`
     )
     instructor = instructorRes.rows[0]
 
     const studentRes = await pool.query(
-      `INSERT INTO users (email, password_hash, role, token_version)
+      `INSERT INTO ${RBAC_USERS_TABLE} (email, password_hash, role, token_version)
        VALUES ('student@test.com', 'hash', 'student', 1)
        RETURNING id, email, role`
     )
@@ -65,13 +95,20 @@ describe('RBAC Enforcement', () => {
   })
 
   afterAll(async () => {
+    if (!workspace) {
+      return
+    }
+
     const pool = getTenantPool(workspace.id)
-    await pool.query('DELETE FROM users WHERE role IN (?, ?, ?)', [
+    if (!pool) {
+      return
+    }
+    await pool.query(`DELETE FROM ${RBAC_USERS_TABLE} WHERE role IN ($1, $2, $3)`, [
       'admin',
       'instructor',
       'student',
     ])
-    await db.master.query('DELETE FROM workspaces WHERE id = $1', [
+    await db.master.query(`DELETE FROM ${RBAC_WORKSPACES_TABLE} WHERE id = $1`, [
       workspace.id,
     ])
   })
@@ -124,7 +161,7 @@ describe('RBAC Enforcement', () => {
     const pool = getTenantPool(workspace.id)
 
     // Get user role
-    const result = await pool.query(`SELECT role FROM users WHERE id = $1`, [
+    const result = await pool.query(`SELECT role FROM ${RBAC_USERS_TABLE} WHERE id = $1`, [
       admin.id,
     ])
 
@@ -140,7 +177,7 @@ describe('RBAC Enforcement', () => {
     // Student doesn't have this permission
     // Response: 403 Forbidden
 
-    const studentRole = 'student'
+    const studentRole: string = 'student'
     const requiredPermission = 'manage_users'
 
     const hasPermission = studentRole === 'admin' // Only admin has this
@@ -154,26 +191,26 @@ describe('RBAC Enforcement', () => {
     const pool = getTenantPool(workspace.id)
 
     // Get initial role
-    const initial = await pool.query(`SELECT role FROM users WHERE id = $1`, [
+    const initial = await pool.query(`SELECT role FROM ${RBAC_USERS_TABLE} WHERE id = $1`, [
       instructor.id,
     ])
     expect(initial.rows[0].role).toBe('instructor')
 
     // Simulate role change in DB
-    await pool.query(`UPDATE users SET role = 'admin' WHERE id = $1`, [
+    await pool.query(`UPDATE ${RBAC_USERS_TABLE} SET role = 'admin' WHERE id = $1`, [
       instructor.id,
     ])
 
     // New request should see updated role immediately
     // (Permissions loaded fresh from DB, not from JWT)
-    const updated = await pool.query(`SELECT role FROM users WHERE id = $1`, [
+    const updated = await pool.query(`SELECT role FROM ${RBAC_USERS_TABLE} WHERE id = $1`, [
       instructor.id,
     ])
 
     expect(updated.rows[0].role).toBe('admin')
 
     // Reset
-    await pool.query(`UPDATE users SET role = 'instructor' WHERE id = $1`, [
+    await pool.query(`UPDATE ${RBAC_USERS_TABLE} SET role = 'instructor' WHERE id = $1`, [
       instructor.id,
     ])
   })

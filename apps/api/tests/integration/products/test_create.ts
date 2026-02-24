@@ -84,7 +84,7 @@ describe('Integration: Products - Create (T052)', () => {
         },
         slug: `science-exp-${Date.now()}`,
         description: 'Interactive science experiments',
-        enabled_modules: [Module.SIMULATION, Module.GRADING],
+        enabled_modules: [Module.TRADITIONAL_EXAMS, Module.EXERCISES],
       }
 
       const response = {
@@ -115,10 +115,10 @@ describe('Integration: Products - Create (T052)', () => {
       const allModules = [
         Module.MCQ,
         Module.LIBRARY,
-        Module.SIMULATION,
-        Module.GRADING,
-        Module.FEEDBACK,
-        Module.ANALYTICS,
+        Module.TRADITIONAL_EXAMS,
+        Module.EXERCISES,
+        Module.LIVES,
+        Module.FORUM,
       ]
 
       const payload = {
@@ -150,7 +150,7 @@ describe('Integration: Products - Create (T052)', () => {
       expect(response.status).toBe(201)
       expect(response.body.data.enabled_modules).toHaveLength(6)
       expect(response.body.data.enabled_modules).toContain(Module.MCQ)
-      expect(response.body.data.enabled_modules).toContain(Module.GRADING)
+      expect(response.body.data.enabled_modules).toContain(Module.EXERCISES)
     })
 
     it('should create identical product records in product_versions table (version=1)', () => {
@@ -311,7 +311,7 @@ describe('Integration: Products - Create (T052)', () => {
           success: false,
           data: null,
           error: {
-            code: ErrorCodes.INVALID_SLUG_FORMAT,
+            code: "INVALID_SLUG_FORMAT",
             message:
               'Slug must be lowercase, alphanumeric, and use hyphens only',
           },
@@ -418,10 +418,10 @@ describe('Integration: Products - Create (T052)', () => {
       const validModules = [
         Module.MCQ,
         Module.LIBRARY,
-        Module.SIMULATION,
-        Module.GRADING,
-        Module.FEEDBACK,
-        Module.ANALYTICS,
+        Module.TRADITIONAL_EXAMS,
+        Module.EXERCISES,
+        Module.LIVES,
+        Module.FORUM,
       ]
 
       expect(validModules).toHaveLength(6)
@@ -592,9 +592,6 @@ describe('Integration: Products - Create (T052)', () => {
       }
 
       expect(response.status).toBe(403)
-    })
-  })
-
     })
   })
 })

@@ -16,10 +16,10 @@
 import {
   getHashMismatchDetails,
   verifyPayloadHashConsistency,
-} from '@domain-core/job-hash'
+} from '@zidney/domain-core/job-hash'
+import { logger as baseLogger, type Logger } from '@zidney/logger'
 import { JobEnvelope } from '@zidney/types/job-envelope'
-import { dequeueJob, moveToDeadLetter, retryJob } from '../queue'
-import { getJobLogger } from './lib/logger'
+import { dequeueJob, moveToDeadLetter, retryJob } from './queue'
 
 /**
  * Job handler type definition.
@@ -32,6 +32,24 @@ export type JobHandler<T = any> = (
 
 /** Registry of job handlers by job type */
 const jobHandlers: Map<string, JobHandler> = new Map()
+
+function createJobLogger(job: JobEnvelope): Logger {
+  const context: Record<string, unknown> = {
+    job_id: job.job_id,
+    request_id: job.request_id,
+    workspace_id: job.workspace_id,
+    job_name: job.job_name,
+  }
+
+  if (job.user_id) {
+    context.user_id = job.user_id
+  }
+  if (job.attempt_id) {
+    context.attempt_id = job.attempt_id
+  }
+
+  return baseLogger.child(context)
+}
 
 /**
  * Register a job handler for a specific job type.
@@ -94,7 +112,7 @@ export async function processJob(
   }
 
   // Step 3: Create job-scoped child logger with dual IDs
-  const jobLogger = getJobLogger(job)
+  const jobLogger = createJobLogger(job)
 
   jobLogger.info({
     event: 'job_received',

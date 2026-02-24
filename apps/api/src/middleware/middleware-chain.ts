@@ -1,5 +1,3 @@
-import type { Context, Next } from 'hono'
-
 /**
  * T016: Middleware Composition Utility
  *
@@ -25,6 +23,8 @@ import type { Context, Next } from 'hono'
  *
  * No route may bypass tenant + license validation.
  */
+
+import type { Context, Next } from 'hono'
 
 export enum MiddlewareStage {
   CORRELATION_ID = 'correlation-id',

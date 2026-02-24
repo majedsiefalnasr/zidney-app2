@@ -56,10 +56,14 @@ export class RollbackManager {
           actions_taken.push('Database dropped')
         } catch (error) {
           errors.push(`Failed to drop database: ${error}`)
-          this.logger.error('Database drop failed', error, {
-            correlation_id: context.correlation_id,
-            workspace_slug: context.workspace_slug,
-          })
+          this.logger.error(
+            'Database drop failed',
+            error instanceof Error ? error : String(error),
+            {
+              correlation_id: context.correlation_id,
+              workspace_slug: context.workspace_slug,
+            }
+          )
         }
       }
 
@@ -70,10 +74,14 @@ export class RollbackManager {
           actions_taken.push('Registry entry deleted')
         } catch (error) {
           errors.push(`Failed to delete registry entry: ${error}`)
-          this.logger.error('Registry cleanup failed', error, {
-            correlation_id: context.correlation_id,
-            workspace_slug: context.workspace_slug,
-          })
+          this.logger.error(
+            'Registry cleanup failed',
+            error instanceof Error ? error : String(error),
+            {
+              correlation_id: context.correlation_id,
+              workspace_slug: context.workspace_slug,
+            }
+          )
         }
       }
 
@@ -83,9 +91,13 @@ export class RollbackManager {
         actions_taken.push('License marked as FAILED')
       } catch (error) {
         errors.push(`Failed to mark license as FAILED: ${error}`)
-        this.logger.error('License reset failed', error, {
-          correlation_id: context.correlation_id,
-        })
+        this.logger.error(
+          'License reset failed',
+          error instanceof Error ? error : String(error),
+          {
+            correlation_id: context.correlation_id,
+          }
+        )
       }
 
       // Log completion
@@ -104,10 +116,14 @@ export class RollbackManager {
         errors,
       }
     } catch (error) {
-      this.logger.error('Rollback process failed critically', error, {
-        correlation_id: context.correlation_id,
-        workspace_slug: context.workspace_slug,
-      })
+      this.logger.error(
+        'Rollback process failed critically',
+        error instanceof Error ? error : String(error),
+        {
+          correlation_id: context.correlation_id,
+          workspace_slug: context.workspace_slug,
+        }
+      )
 
       return {
         success: false,
@@ -236,10 +252,14 @@ export class RollbackManager {
         details: { license_id },
       })
     } catch (error) {
-      this.logger.error('Force cleanup failed', error, {
-        workspace_slug,
-        details: { license_id },
-      })
+      this.logger.error(
+        'Force cleanup failed',
+        error instanceof Error ? error : String(error),
+        {
+          workspace_slug,
+          details: { license_id },
+        }
+      )
       throw error
     } finally {
       client.release()

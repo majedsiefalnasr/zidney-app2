@@ -12,12 +12,13 @@
  * import { LicenseResolver, LicenseStatus, VersionValidator } from '@zidney/domain-core/license'
  */
 
-// Export types
-export {
+// Export types (using export type for interfaces when isolatedModules is enabled)
+export { LicenseStatus } from './types'
+
+export type {
   ArchiveSnapshot,
   CreateLicenseRequest,
   License,
-  LicenseStatus,
   LicenseTransition,
   LimitConstraint,
   TransitionLicenseRequest,
@@ -33,6 +34,7 @@ export { VersionValidator } from './validator'
 // Export service functions
 export {
   createLicense,
+  deleteLicense,
   getLicenseById,
   getLicenseByWorkspaceId,
   transitionLicenseState,

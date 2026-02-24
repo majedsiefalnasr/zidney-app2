@@ -10,13 +10,13 @@
  * Schema version: 5 → 6
  */
 
-import { Database } from 'better-sqlite3'
+import type { PoolClient } from 'pg'
 
 export const name = '005_create_audit_log_table'
 export const version = 6
 
-export async function up(db: Database): Promise<void> {
-  db.exec(`
+export async function up(client: PoolClient): Promise<void> {
+  await client.query(`
     CREATE TABLE IF NOT EXISTS audit_log (
       id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
       license_id UUID NOT NULL REFERENCES licenses(id) ON DELETE CASCADE,
@@ -43,8 +43,8 @@ export async function up(db: Database): Promise<void> {
   `)
 }
 
-export async function down(db: Database): Promise<void> {
-  db.exec(`
+export async function down(client: PoolClient): Promise<void> {
+  await client.query(`
     DROP TABLE IF EXISTS audit_log CASCADE;
   `)
 }

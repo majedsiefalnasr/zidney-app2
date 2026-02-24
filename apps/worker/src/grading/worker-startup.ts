@@ -20,7 +20,7 @@
  */
 
 import { Pool } from 'pg'
-import { logger } from '../services/logger'
+import { logger } from '@zidney/logger'
 import { startDLQConsumer, stopDLQConsumer } from './dlq-consumer'
 import { startGradeJobsConsumer, stopGradeJobsConsumer } from './job-consumer'
 
@@ -168,7 +168,7 @@ function setupSignalHandlers(): void {
   })
 
   // Handle unhandled promise rejections
-  process.on('unhandledRejection', async (reason, promise) => {
+  process.on('unhandledRejection', async (reason) => {
     logger.error(
       {
         service: 'worker',
@@ -207,7 +207,6 @@ export async function shutdownWorker(exitCode: number = 0): Promise<void> {
   )
 
   const shutdownStartTime = Date.now()
-  const shutdownTimeoutMs = 30000 // 30 seconds
 
   try {
     // 1. Stop accepting new jobs
@@ -298,31 +297,6 @@ export function getHealthStatus() {
     tenant_pools: workerState.tenantPoolMap.size,
     timestamp: new Date().toISOString(),
   }
-}
-
-/**
- * Main Entry Point
- *
- * Called from CLI: `bun run src/index.ts`
- */
-async function main(): Promise<void> {
-  await initializeWorker()
-}
-
-// Start worker if this is the main module
-if (import.meta.main) {
-  main().catch((err) => {
-    logger.error(
-      {
-        service: 'worker',
-        action: 'main_error',
-        error: err.message,
-        error_stack: err.stack,
-      },
-      'Fatal error in main; exiting'
-    )
-    process.exit(1)
-  })
 }
 
 export default { initializeWorker, shutdownWorker, getHealthStatus }

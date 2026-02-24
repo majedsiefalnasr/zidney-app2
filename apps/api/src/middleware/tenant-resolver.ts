@@ -2,6 +2,8 @@
 const logger = {
   info: (msg: string, meta: any) =>
     console.log(JSON.stringify({ level: 'info', message: msg, ...meta })),
+  warn: (msg: string, meta: any) =>
+    console.warn(JSON.stringify({ level: 'warn', message: msg, ...meta })),
 }
 
 import semver from 'semver'
@@ -178,10 +180,7 @@ function enforceProductVersion(license: any) {
  * - Prevents cascade failures from connection exhaustion
  */
 function getOrCreatePool(registry: any) {
-  const pool = TenantPoolManager.getOrCreatePool(registry, {
-    max: 10, // Hardening: explicit limit per workspace
-    idleTimeoutMillis: 30000,
-  })
+  const pool = TenantPoolManager.getOrCreatePool(registry)
 
   // Hardening: Monitor pool usage
   if (pool.totalCount > 8) {

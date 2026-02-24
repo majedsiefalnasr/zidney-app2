@@ -1,4 +1,4 @@
-import { logger } from '../../infrastructure/logger'
+import { logger } from '@zidney/logger'
 import {
   AttemptSnapshot,
   GradingResult,
@@ -6,7 +6,7 @@ import {
   QuestionResult,
   StudentAnswer,
   SubmissionData,
-} from '../types/job-schema'
+} from '../../types/job-schema'
 
 /**
  * T047: Grading executor
@@ -131,7 +131,7 @@ export async function gradeAttempt(
 function gradeQuestion(
   question: Question,
   studentAnswer: StudentAnswer | undefined,
-  gradingRules: any
+  _gradingRules: any
 ): QuestionResult {
   const result: QuestionResult = {
     question_id: question.question_id,

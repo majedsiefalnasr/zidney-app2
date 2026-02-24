@@ -210,23 +210,10 @@ export interface UpdateMMCUserInput {
   role?: MMCUserRole
 }
 
+// Note: Types (interfaces) cannot be used as values in default export with isolatedModules
+// Only enums can be exported as values
 export default {
-  // Entities
-  Product,
-  License,
-  TenantRegistry,
-  MMCUser,
-  PlatformSchemaVersion,
   // Enums
   LicenseStatus,
   MMCUserRole,
-  // Inputs
-  CreateProductInput,
-  UpdateProductInput,
-  CreateLicenseInput,
-  UpdateLicenseInput,
-  CreateTenantRegistryInput,
-  UpdateTenantRegistryInput,
-  CreateMMCUserInput,
-  UpdateMMCUserInput,
 }

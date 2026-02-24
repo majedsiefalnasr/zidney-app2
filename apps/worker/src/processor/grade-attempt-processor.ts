@@ -1,12 +1,11 @@
-import { logger } from '../../infrastructure/logger'
-import { dlqManager } from '../dlq/dlq-manager'
-import { gradeAttempt } from '../grading/grader'
-import { jobQueue, JobQueueEntry } from '../queue/job-queue'
-import { retryHandler } from '../retry/retry-handler'
+import { logger } from '@zidney/logger'
+import { dlqManager } from '../modules/dlq/dlq-manager'
+import { gradeAttempt } from '../modules/grading/grader'
+import { jobQueue, JobQueueEntry, JobResult } from '../queue/job-queue'
+import { retryHandler } from '../modules/retry/retry-handler'
 import {
   GradeAttemptJob,
   isGradeAttemptJob,
-  JobResult,
   validateJob,
 } from '../types/job-schema'
 

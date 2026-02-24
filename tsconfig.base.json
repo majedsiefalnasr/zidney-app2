@@ -33,11 +33,11 @@
       "@zidney/domain-core/*": [
         "packages/domain-core/src/*"
       ],
-      "@zidney/logging": [
-        "packages/logging/src/index.ts"
+      "@zidney/logger": [
+        "packages/logger/src/index.ts"
       ],
-      "@zidney/logging/*": [
-        "packages/logging/src/*"
+      "@zidney/logger/*": [
+        "packages/logger/src/*"
       ],
       "@zidney/types": [
         "packages/types/src/index.ts"

@@ -53,24 +53,18 @@ import {
 } from '@zidney/domain-core/auth'
 import { Context, Next } from 'hono'
 
-/**
- * Express/Hono middleware for JWT validation
- *
- * Usage:
- * ```
- * app.use(validateJwtMiddleware)
- * app.get('/protected', (c) => {
- *   const user = c.get('user')
- *   return c.json({ authenticated: true, user_id: user.user_id })
- * })
- * ```
- *
- * Sets c.req.user (Hono context) with:
- * - payload: Full JWT payload (JwtPayload union type)
- * - isAuthenticated: true
- * - correlationId: From middleware chain
- */
-export async function validateJwtMiddleware(c: Context, next: Next) {
+type JwtScope = 'mmc' | 'backoffice' | 'frontoffice'
+
+function normalizeScope(scope: string | undefined): JwtScope | undefined {
+  if (!scope) return undefined
+  return scope.toLowerCase() as JwtScope
+}
+
+async function runJwtValidation(
+  c: Context,
+  next: Next,
+  requiredScope?: JwtScope
+): Promise<Response | void> {
   try {
     // Extract token from "Bearer <token>" header
     const authHeader = c.req.header('Authorization')
@@ -78,6 +72,22 @@ export async function validateJwtMiddleware(c: Context, next: Next) {
 
     // Verify JWT signature and expiration
     const payload = await verifyAndDecodeToken(token)
+
+    // Validate requested scope when route is scope-specific
+    if (requiredScope) {
+      const tokenScope = normalizeScope(payload.scope)
+      if (tokenScope !== requiredScope) {
+        c.status(401 as any)
+        return c.json({
+          success: false,
+          data: null,
+          error: {
+            code: 'INVALID_TOKEN_SCOPE',
+            message: 'Token scope does not match required route scope',
+          },
+        })
+      }
+    }
 
     // Validate JWT claims
     const resolvedWorkspaceId = c.get('workspaceId')
@@ -102,43 +112,68 @@ export async function validateJwtMiddleware(c: Context, next: Next) {
     // Validate JWT claims including schema version
     await validateJwtClaims(payload, resolvedWorkspaceId, expectedSchemaVersion)
 
+    // Add `email` for legacy route handlers that still read authPayload.email.
+    const authPayload = {
+      ...payload,
+      email: (payload as any).email ?? payload.user_email,
+    }
+
     // Attach to context for downstream middleware
-    c.set('authPayload', payload)
+    c.set('authPayload', authPayload)
     c.set('isAuthenticated', true)
     c.set('userId', payload.user_id)
     c.set('userRole', 'role' in payload ? payload.role : undefined)
 
     // Continue to next middleware
     await next()
+    return
   } catch (error) {
     // Convert auth errors to standard response
     if (error instanceof AuthError) {
-      return c.json(
-        {
-          success: false,
-          data: null,
-          error: {
-            code: error.code,
-            message: error.message,
-          },
-        },
-        error.statusCode
-      )
-    }
-
-    // Unexpected error
-    return c.json(
-      {
+      c.status((error.statusCode || 401) as any)
+      return c.json({
         success: false,
         data: null,
         error: {
-          code: 'INTERNAL_ERROR',
-          message: 'Authentication validation failed',
+          code: error.code,
+          message: error.message,
         },
+      })
+    }
+
+    // Unexpected error
+    c.status(500 as any)
+    return c.json({
+      success: false,
+      data: null,
+      error: {
+        code: 'INTERNAL_ERROR',
+        message: 'Authentication validation failed',
       },
-      500
-    )
+    })
   }
+}
+
+/**
+ * Express/Hono middleware for JWT validation
+ *
+ * Usage:
+ * ```
+ * app.use(validateJwtMiddleware)
+ * app.get('/protected', (c) => {
+ *   const user = c.get('user')
+ *   return c.json({ authenticated: true, user_id: user.user_id })
+ * })
+ * ```
+ *
+ * Sets c.req.user (Hono context) with:
+ * - payload: Full JWT payload (JwtPayload union type)
+ * - isAuthenticated: true
+ * - correlationId: From middleware chain
+ */
+export function validateJwtMiddleware(requiredScope?: JwtScope) {
+  return async (c: Context, next: Next): Promise<Response | void> =>
+    runJwtValidation(c, next, requiredScope)
 }
 
 /**

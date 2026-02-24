@@ -12,7 +12,7 @@ import {
 } from '@zidney/validation'
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { Database } from 'pg'
+import { Pool } from 'pg'
 
 /**
  * Load all migration files from migrations directory
@@ -29,7 +29,7 @@ async function loadMigrationFiles(migrationsDir: string): Promise<string[]> {
  * @throws Error if any migration fails (app refuses to boot)
  */
 export async function runMasterMigrations(
-  masterDb: Database,
+  masterDb: Pool,
   migrationsDir: string = join(__dirname, '../db/master/migrations')
 ): Promise<MigrationResult> {
   const correlationId = crypto.randomUUID()

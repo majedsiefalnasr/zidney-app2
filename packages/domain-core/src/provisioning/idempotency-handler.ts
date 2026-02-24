@@ -21,7 +21,7 @@
  * This layer ensures idempotency is enforced across API + DB.
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { Pool, QueryResultRow } from 'pg'
 
 const logger = createLogger('ProvisioningIdempotencyHandler')

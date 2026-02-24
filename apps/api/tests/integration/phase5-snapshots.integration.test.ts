@@ -13,8 +13,11 @@ import { Pool, PoolClient } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 const getConnectionString = () => {
-  const user = process.env.DB_USER || 'postgres'
-  const password = process.env.DB_PASSWORD || 'postgres'
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL
+  }
+  const user = process.env.DB_USER || 'zidney_app'
+  const password = process.env.DB_PASSWORD || 'change-me-in-production'
   const host = process.env.DB_HOST || 'localhost'
   const port = process.env.DB_PORT || '5432'
   const database = process.env.DB_DATABASE || 'zidney_test_tenant'
@@ -25,13 +28,74 @@ const getConnectionString = () => {
 describe('Phase 5: Snapshot Immutability Tests', () => {
   let pool: Pool
   let client: PoolClient
+  let testSchema: string
 
   beforeAll(async () => {
     pool = new Pool({ connectionString: getConnectionString() })
     client = await pool.connect()
+    testSchema = `phase5_snapshot_${Date.now().toString(36)}`
+    await client.query(`CREATE SCHEMA IF NOT EXISTS ${testSchema}`)
+    await client.query(`SET search_path TO ${testSchema}, public`)
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        email TEXT UNIQUE NOT NULL,
+        name TEXT NULL,
+        first_name TEXT NULL,
+        last_name TEXT NULL,
+        password_hash TEXT NULL,
+        is_active BOOLEAN NOT NULL DEFAULT TRUE
+      );
+      CREATE TABLE IF NOT EXISTS mcq_baskets (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        created_by TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS mcq_exams (
+        id TEXT PRIMARY KEY,
+        basket_id TEXT NULL REFERENCES mcq_baskets(id) ON DELETE SET NULL,
+        name TEXT NOT NULL,
+        duration_minutes INTEGER NOT NULL,
+        question_count INTEGER NOT NULL,
+        passing_score INTEGER NOT NULL DEFAULT 70,
+        created_by TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS mcq_questions (
+        id TEXT PRIMARY KEY,
+        basket_id TEXT NOT NULL REFERENCES mcq_baskets(id) ON DELETE CASCADE,
+        question_text TEXT NOT NULL,
+        correct_option INTEGER NOT NULL,
+        options_json JSONB NOT NULL DEFAULT '{}'::jsonb,
+        difficulty TEXT NOT NULL DEFAULT 'medium',
+        tags_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        created_by TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS attempts (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        exam_type TEXT NOT NULL,
+        exam_id TEXT NOT NULL REFERENCES mcq_exams(id) ON DELETE RESTRICT,
+        user_id TEXT NOT NULL,
+        configuration_snapshot JSONB NULL,
+        question_list_snapshot JSONB NULL,
+        grading_config_snapshot JSONB NULL,
+        status TEXT NOT NULL DEFAULT 'IN_PROGRESS',
+        started_at TIMESTAMPTZ NOT NULL,
+        submission_deadline_at TIMESTAMPTZ NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        created_by TEXT NOT NULL
+      );
+    `)
+    await client.query(
+      'TRUNCATE TABLE attempts, mcq_questions, mcq_exams, mcq_baskets, users CASCADE'
+    )
   })
 
   afterAll(async () => {
+    if (client && testSchema) {
+      await client.query(`DROP SCHEMA IF EXISTS ${testSchema} CASCADE`)
+    }
     if (client) {
       await client.release()
     }

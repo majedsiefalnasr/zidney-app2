@@ -19,7 +19,7 @@
  * - Type-safe validation with strict TypeScript
  */
 
-import { Logger } from '@zidney/logging'
+import { Logger } from '@zidney/logger'
 import { z } from 'zod'
 
 // ============================================================================
@@ -59,7 +59,7 @@ export function validateCreateAttemptRequest(
     const result = createAttemptRequestSchema.parse(body)
     return { valid: true, data: result }
   } catch (error) {
-    const errors = (error as z.ZodError).errors.map((e) => {
+    const errors = (error as z.ZodError).errors.map((e: any) => {
       const path = e.path.join('.')
       return `${path || 'body'}: ${e.message}`
     })
@@ -139,7 +139,7 @@ export function validateUpdateProgressRequest(
 
     return { valid: true, data: result }
   } catch (error) {
-    const errors = (error as z.ZodError).errors.map((e) => {
+    const errors = (error as z.ZodError).errors.map((e: any) => {
       const path = e.path.join('.')
       return `${path || 'body'}: ${e.message}`
     })
@@ -204,7 +204,7 @@ export function validateSubmitAttemptRequest(
     const result = submitAttemptRequestSchema.parse(body)
     return { valid: true, data: result }
   } catch (error) {
-    const errors = (error as z.ZodError).errors.map((e) => {
+    const errors = (error as z.ZodError).errors.map((e: any) => {
       const path = e.path.join('.')
       return `${path || 'body'}: ${e.message}`
     })

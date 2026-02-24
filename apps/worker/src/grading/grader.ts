@@ -26,7 +26,7 @@ import {
   QuestionType,
   UserAnswer,
 } from '@zidney/types/attempt'
-import { logger } from '../services/logger'
+import { logger } from '@zidney/logger'
 
 /**
  * Interface: Grading Result
@@ -396,8 +396,8 @@ function scoreFillBlank(
  * Score Essay question (no autograding; placeholder)
  */
 function scoreEssay(
-  question: any,
-  userAnswer: UserAnswer,
+  _question: any,
+  _userAnswer: UserAnswer,
   result: any,
   gradingConfig: any
 ): any {
@@ -417,7 +417,7 @@ function scoreMatching(
   question: any,
   userAnswer: UserAnswer,
   result: any,
-  gradingConfig: any
+  _gradingConfig: any
 ): any {
   const correctPairs = question.correct_answer || {}
   const userMatches = userAnswer.matches || []
@@ -457,7 +457,7 @@ function scoreOrdering(
   question: any,
   userAnswer: UserAnswer,
   result: any,
-  gradingConfig: any
+  _gradingConfig: any
 ): any {
   const correctOrder = question.correct_answer || []
   const userOrder = userAnswer.order || []

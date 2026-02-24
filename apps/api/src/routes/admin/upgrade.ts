@@ -3,7 +3,7 @@
  * Tasks 15-17: Upgrade request, status polling, rollback
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import {
   validateRollbackRequest,
   validateUpgradeRequest,

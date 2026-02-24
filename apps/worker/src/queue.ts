@@ -11,7 +11,7 @@
  * Per clarification Q5: Payload hash computed at enqueue, verified at dequeue.
  */
 
-import { computeJobPayloadHash } from '@domain-core/job-hash'
+import { computeJobPayloadHash } from '@zidney/domain-core/job-hash'
 import { JobEnvelope } from '@zidney/types/job-envelope'
 import { randomUUID } from 'crypto'
 

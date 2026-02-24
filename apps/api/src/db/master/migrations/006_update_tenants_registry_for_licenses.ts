@@ -10,13 +10,13 @@
  * Schema version: 6 → 7
  */
 
-import { Database } from 'better-sqlite3'
+import type { PoolClient } from 'pg'
 
 export const name = '006_update_tenants_registry_for_licenses'
 export const version = 7
 
-export async function up(db: Database): Promise<void> {
-  db.exec(`
+export async function up(client: PoolClient): Promise<void> {
+  await client.query(`
     -- Add license_id column to tenants_registry
     ALTER TABLE tenants_registry 
     ADD COLUMN IF NOT EXISTS license_id UUID;
@@ -35,8 +35,8 @@ export async function up(db: Database): Promise<void> {
   `)
 }
 
-export async function down(db: Database): Promise<void> {
-  db.exec(`
+export async function down(client: PoolClient): Promise<void> {
+  await client.query(`
     ALTER TABLE tenants_registry 
     DROP CONSTRAINT IF EXISTS uk_license_id,
     DROP CONSTRAINT IF EXISTS fk_tenants_license;

@@ -208,21 +208,30 @@ export function validateProductVersion(productVersion: string): {
  * @returns Grading configuration for this version
  */
 export function getVersionGradingConfig(productVersion: string): any {
+  const gradingByVersion = COMPATIBILITY_RULES.GRADING_BY_VERSION as Record<
+    string,
+    {
+      score_computation: string
+      pass_logic: string
+      version_label: string
+    }
+  >
+
   const versionMatch = productVersion.match(/^(\d+)\.(\d+)\.(\d+)$/)
   if (!versionMatch) {
     // Default to current if unable to parse
-    return COMPATIBILITY_RULES.GRADING_BY_VERSION[PRODUCT_VERSION.CURRENT]
+    return gradingByVersion[PRODUCT_VERSION.CURRENT]
   }
 
   // Look up version-specific grading config
   // For 1.x versions, all use 1.0.0 grading logic
   const majorVersion = parseInt(versionMatch[1], 10)
   if (majorVersion === 1) {
-    return COMPATIBILITY_RULES.GRADING_BY_VERSION['1.0.0']
+    return gradingByVersion['1.0.0']
   }
 
   // Default to current
-  return COMPATIBILITY_RULES.GRADING_BY_VERSION[PRODUCT_VERSION.CURRENT]
+  return gradingByVersion[PRODUCT_VERSION.CURRENT]
 }
 
 /**

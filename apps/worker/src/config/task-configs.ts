@@ -137,10 +137,7 @@ export function determineTaskAction(
   }
 
   // TAMPERING DETECTED: Escalate immediately to DLQ, NO RETRY
-  if (
-    result.tampering_detected ||
-    config.retryPolicy.skipRetryOn?.includes('tampering_detected')
-  ) {
+  if (result.tampering_detected) {
     return 'DLQ'
   }
 

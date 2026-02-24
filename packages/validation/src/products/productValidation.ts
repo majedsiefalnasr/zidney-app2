@@ -240,7 +240,6 @@ export function generateChangeSummary(
 
   const changes = Object.keys(diff)
     .map((field) => {
-      const oldVal = diff[field].old
       const newVal = diff[field].new
 
       if (field === 'enabled_modules' && Array.isArray(newVal)) {

@@ -24,23 +24,64 @@ describe('POST /api/v1/attempts Integration', () => {
   let userId: string
   let examId: string
   let token: string
+  const runId = Date.now().toString(36)
+  const ddlLockId = 62006001
 
   beforeAll(async () => {
     // Create workspace
     const wsRes = await db.master.query(
       `INSERT INTO workspaces (slug, name, schema_version, product_version, license_status)
-       VALUES ('create-attempt-ws', 'Create Attempt WS', 1, '1.0.0', 'ACTIVE')
+       VALUES ($1, 'Create Attempt WS', 1, '1.0.0', 'ACTIVE')
        RETURNING id`
+      ,
+      [`create-attempt-ws-${runId}`]
     )
     workspaceId = wsRes.rows[0].id
     const pool = getTenantPool(workspaceId)
 
+    await pool.query('SELECT pg_advisory_lock($1)', [ddlLockId])
+    try {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS users (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          workspace_id TEXT NOT NULL,
+          name TEXT NOT NULL,
+          email TEXT NOT NULL,
+          password_hash TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS exams (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          workspace_id TEXT NOT NULL,
+          title TEXT NOT NULL,
+          description TEXT NULL,
+          total_points INTEGER NOT NULL,
+          pass_score_percentage INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS enrollments (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          workspace_id TEXT NOT NULL,
+          user_id TEXT NOT NULL,
+          exam_id TEXT NOT NULL,
+          enrolled_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+        );
+        CREATE TABLE IF NOT EXISTS attempts (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          exam_id TEXT NOT NULL,
+          question_snapshot JSONB NULL
+        );
+        ALTER TABLE attempts
+        ADD COLUMN IF NOT EXISTS question_snapshot JSONB NULL;
+      `)
+    } finally {
+      await pool.query('SELECT pg_advisory_unlock($1)', [ddlLockId])
+    }
+
     // Create user
     const userRes = await pool.query(
       `INSERT INTO users (workspace_id, name, email, password_hash)
-       VALUES ($1, 'Test User', 'test@test.com', 'hash')
+       VALUES ($1, 'Test User', $2, 'hash')
        RETURNING id`,
-      [workspaceId]
+      [workspaceId, `test-${runId}@test.com`]
     )
     userId = userRes.rows[0].id
 

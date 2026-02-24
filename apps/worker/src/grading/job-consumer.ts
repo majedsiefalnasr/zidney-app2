@@ -24,7 +24,7 @@
 
 import { Attempt, AttemptStatus } from '@zidney/types/attempt'
 import { Pool } from 'pg'
-import { logger } from '../services/logger'
+import { logger } from '@zidney/logger'
 import { gradeAttempt } from './grader'
 import { finalizeAttempt } from './result-persister'
 import { handleJobFailure } from './retry-strategy'

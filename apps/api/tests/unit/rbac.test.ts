@@ -39,7 +39,12 @@ const roleHierarchy: Record<UserRole, number> = {
   org_admin: 5,
 }
 
-const endpointPermissions: Record<string, Record<string, UserRole[]>> = {
+interface EndpointPermission {
+  method: string
+  allowed_roles: UserRole[]
+}
+
+const endpointPermissions: Record<string, EndpointPermission> = {
   'POST /auth/login': {
     method: 'POST',
     allowed_roles: ['student', 'proctor', 'admin', 'support', 'org_admin'],

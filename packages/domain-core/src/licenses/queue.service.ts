@@ -11,7 +11,7 @@
  * - Database drop (delete - permanent removal)
  */
 
-import { Logger } from 'pino'
+import type { Logger } from '@zidney/logger'
 
 export interface Job {
   id?: string

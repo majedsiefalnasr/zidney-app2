@@ -16,7 +16,7 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import type { Context } from 'hono'
 import type { RedisClient } from './idempotency.service'
 import type { WorkerQueue } from './schema.service'

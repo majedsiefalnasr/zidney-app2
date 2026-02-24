@@ -834,7 +834,7 @@
 
 ### T059: Implement Structured Logging for License Operations
 
-- [ ] T059 Implement structured logging service in `packages/logging/src/license-logger.ts`
+- [ ] T059 Implement structured logging service in `packages/logger/src/license-logger.ts`
   - **Logger methods:**
     - `license_created(license, correlation_id)`
     - `license_edited(license, changed_fields, correlation_id)`
@@ -885,7 +885,7 @@
   - **Examples:**
     - Internal: "Query failed: SELECT \* FROM licenses WHERE id = ?"
     - Public: "Database error occurred"
-  - **File:** Implement in `packages/logging/src/error-sanitizer.ts`
+  - **File:** Implement in `packages/logger/src/error-sanitizer.ts`
 
 ### T063: [P] Implement Audit Log Querying
 

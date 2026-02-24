@@ -14,8 +14,11 @@ import { Pool, PoolClient } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 const getConnectionString = () => {
-  const user = process.env.DB_USER || 'postgres'
-  const password = process.env.DB_PASSWORD || 'postgres'
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL
+  }
+  const user = process.env.DB_USER || 'zidney_app'
+  const password = process.env.DB_PASSWORD || 'change-me-in-production'
   const host = process.env.DB_HOST || 'localhost'
   const port = process.env.DB_PORT || '5432'
   const database = process.env.DB_DATABASE || 'zidney_test_tenant'
@@ -26,13 +29,93 @@ const getConnectionString = () => {
 describe('Phase 6: Referential Integrity Tests', () => {
   let pool: Pool
   let client: PoolClient
+  let testSchema: string
 
   beforeAll(async () => {
     pool = new Pool({ connectionString: getConnectionString() })
     client = await pool.connect()
+    testSchema = `phase6_fk_${Date.now().toString(36)}`
+    await client.query(`CREATE SCHEMA IF NOT EXISTS ${testSchema}`)
+    await client.query(`SET search_path TO ${testSchema}, public`)
+
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY,
+        email TEXT UNIQUE NOT NULL,
+        name TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS subscriptions (
+        id TEXT PRIMARY KEY,
+        user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+        plan_type TEXT NOT NULL,
+        created_by TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS subscription_events (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        subscription_id TEXT NOT NULL REFERENCES subscriptions(id) ON DELETE CASCADE,
+        event_type TEXT NOT NULL,
+        occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        created_by TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS mcq_baskets (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        created_by TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS mcq_exams (
+        id TEXT PRIMARY KEY,
+        basket_id TEXT NULL REFERENCES mcq_baskets(id) ON DELETE SET NULL,
+        name TEXT NOT NULL,
+        duration_minutes INTEGER NOT NULL,
+        question_count INTEGER NOT NULL,
+        passing_score INTEGER NOT NULL DEFAULT 70,
+        created_by TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS mcq_questions (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        basket_id TEXT NOT NULL REFERENCES mcq_baskets(id) ON DELETE CASCADE,
+        question_text TEXT NOT NULL,
+        correct_option INTEGER NOT NULL,
+        created_by TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS attempts (
+        id TEXT PRIMARY KEY,
+        exam_type TEXT NOT NULL,
+        exam_id TEXT NOT NULL REFERENCES mcq_exams(id) ON DELETE RESTRICT,
+        user_id TEXT NOT NULL,
+        started_at TIMESTAMPTZ NOT NULL,
+        created_by TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS attempt_events (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        attempt_id TEXT NOT NULL REFERENCES attempts(id) ON DELETE CASCADE,
+        event_type TEXT NOT NULL,
+        occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        created_by TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS divisions (
+        id TEXT PRIMARY KEY,
+        name TEXT NOT NULL,
+        code TEXT NOT NULL,
+        created_by TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS departments (
+        id TEXT PRIMARY KEY,
+        division_id TEXT NOT NULL REFERENCES divisions(id) ON DELETE RESTRICT,
+        name TEXT NOT NULL,
+        code TEXT NOT NULL,
+        created_by TEXT NOT NULL
+      );
+    `)
+    await client.query(
+      'TRUNCATE TABLE subscription_events, subscriptions, attempt_events, attempts, mcq_questions, mcq_exams, mcq_baskets, departments, divisions, users CASCADE'
+    )
   })
 
   afterAll(async () => {
+    if (client && testSchema) {
+      await client.query(`DROP SCHEMA IF EXISTS ${testSchema} CASCADE`)
+    }
     if (client) {
       await client.release()
     }
@@ -65,7 +148,7 @@ describe('Phase 6: Referential Integrity Tests', () => {
       await client.query(
         `INSERT INTO subscription_events (
           id, subscription_id, event_type, occurred_at, created_by
-        ) VALUES (gen_random_uuid(), $1, $2, NOW(), $3)`,
+        ) VALUES (md5(random()::text || clock_timestamp()::text), $1, $2, NOW(), $3)`,
         [subscriptionId, 'ACTIVATED', userId]
       )
 
@@ -114,7 +197,7 @@ describe('Phase 6: Referential Integrity Tests', () => {
       await client.query(
         `INSERT INTO attempt_events (
           id, attempt_id, event_type, occurred_at, created_by
-        ) VALUES (gen_random_uuid(), $1, $2, NOW(), $3)`,
+        ) VALUES (md5(random()::text || clock_timestamp()::text), $1, $2, NOW(), $3)`,
         [attemptId, 'START', userId]
       )
 
@@ -219,7 +302,7 @@ describe('Phase 6: Referential Integrity Tests', () => {
       await client.query(
         `INSERT INTO mcq_questions (
           id, basket_id, question_text, correct_option, created_by
-        ) VALUES (gen_random_uuid(), $1, $2, $3, $4)`,
+        ) VALUES (md5(random()::text || clock_timestamp()::text), $1, $2, $3, $4)`,
         [basketId, 'Test Q1', 0, userId]
       )
 

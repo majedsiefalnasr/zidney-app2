@@ -19,7 +19,7 @@
  * - All user context thread-local (no global state)
  */
 
-import { Logger } from '@zidney/logging'
+import { Logger } from '@zidney/logger'
 import { Context, MiddlewareHandler } from 'hono'
 
 export interface UserContextStage06 {

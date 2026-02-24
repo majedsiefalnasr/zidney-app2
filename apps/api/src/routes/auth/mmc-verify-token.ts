@@ -126,7 +126,7 @@ router.post(
             valid: true,
             user_id: payload.user_id,
             email: payload.email,
-            expires_at: new Date(payload.exp * 1000).toISOString(),
+            expires_at: new Date((payload.exp ?? 0) * 1000).toISOString(),
           },
           error: null,
         })

@@ -12,6 +12,7 @@
     "./audit": "./src/audit/attempt-event-logger.ts",
     "./logging": "./src/logging/master-db-logger.ts",
     "./migration": "./src/migration/master-migration-runner.ts",
+    "./migration/tenant-migration-runner": "./src/migration/tenant-migration-runner.ts",
     "./migrations": "./src/migrations/migrate.ts",
     "./monitoring": "./src/monitoring/provisioning-metrics.ts",
     "./provisioning": "./src/provisioning/idempotency-handler.ts",

@@ -27,13 +27,37 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { db, getTenantPool } from '../../db'
 
+const TOKEN_WORKSPACES_TABLE = 'token_versioning_workspaces'
+const TOKEN_USERS_TABLE = 'token_versioning_users'
+
 describe('Token Versioning', () => {
   let workspace: any
   let user: any
 
   beforeAll(async () => {
+    await db.master.query(`
+      CREATE TABLE IF NOT EXISTS ${TOKEN_WORKSPACES_TABLE} (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        slug TEXT NOT NULL,
+        name TEXT NOT NULL,
+        license_status TEXT NOT NULL,
+        schema_version INTEGER NOT NULL,
+        product_version TEXT NOT NULL
+      )
+    `)
+    await db.master.query(`
+      CREATE TABLE IF NOT EXISTS ${TOKEN_USERS_TABLE} (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        workspace_id TEXT NOT NULL,
+        email TEXT NOT NULL,
+        password_hash TEXT NOT NULL,
+        role TEXT NOT NULL,
+        token_version INTEGER NOT NULL DEFAULT 1
+      )
+    `)
+
     const ws = await db.master.query(
-      `INSERT INTO workspaces (slug, name, license_status, schema_version, product_version)
+      `INSERT INTO ${TOKEN_WORKSPACES_TABLE} (slug, name, license_status, schema_version, product_version)
        VALUES ('token-ver', 'Token Version Test', 'ACTIVE', 1, '0.1.0')
        RETURNING *`
     )
@@ -41,17 +65,22 @@ describe('Token Versioning', () => {
 
     const pool = getTenantPool(workspace.id)
     const u = await pool.query(
-      `INSERT INTO users (email, password_hash, role, token_version)
-       VALUES ('tokenver@test.com', 'hash', 'admin', 1)
+      `INSERT INTO ${TOKEN_USERS_TABLE} (workspace_id, email, password_hash, role, token_version)
+       VALUES ($1, 'tokenver@test.com', 'hash', 'admin', 1)
        RETURNING id, email, token_version`
+      ,
+      [workspace.id]
     )
     user = u.rows[0]
   })
 
   afterAll(async () => {
+    if (!workspace || !user) {
+      return
+    }
     const pool = getTenantPool(workspace.id)
-    await pool.query('DELETE FROM users WHERE id = $1', [user.id])
-    await db.master.query('DELETE FROM workspaces WHERE id = $1', [
+    await pool.query(`DELETE FROM ${TOKEN_USERS_TABLE} WHERE id = $1`, [user.id])
+    await db.master.query(`DELETE FROM ${TOKEN_WORKSPACES_TABLE} WHERE id = $1`, [
       workspace.id,
     ])
   })
@@ -61,7 +90,7 @@ describe('Token Versioning', () => {
 
     // Get current token version
     const result = await pool.query(
-      `SELECT token_version FROM users WHERE id = $1`,
+      `SELECT token_version FROM ${TOKEN_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
 
@@ -77,13 +106,13 @@ describe('Token Versioning', () => {
 
     // Simulate incremented version in DB
     await pool.query(
-      `UPDATE users SET token_version = token_version + 1 WHERE id = $1`,
+      `UPDATE ${TOKEN_USERS_TABLE} SET token_version = token_version + 1 WHERE id = $1`,
       [user.id]
     )
 
     // Get new version
     const result = await pool.query(
-      `SELECT token_version FROM users WHERE id = $1`,
+      `SELECT token_version FROM ${TOKEN_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
 
@@ -100,20 +129,20 @@ describe('Token Versioning', () => {
 
     // Get current version
     const before = await pool.query(
-      `SELECT token_version FROM users WHERE id = $1`,
+      `SELECT token_version FROM ${TOKEN_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
     const beforeVersion = before.rows[0].token_version
 
     // Simulate logout-all (increment version)
     await pool.query(
-      `UPDATE users SET token_version = token_version + 1 WHERE id = $1`,
+      `UPDATE ${TOKEN_USERS_TABLE} SET token_version = token_version + 1 WHERE id = $1`,
       [user.id]
     )
 
     // Verify version incremented
     const after = await pool.query(
-      `SELECT token_version FROM users WHERE id = $1`,
+      `SELECT token_version FROM ${TOKEN_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
     const afterVersion = after.rows[0].token_version
@@ -128,7 +157,7 @@ describe('Token Versioning', () => {
 
     // Get current version
     const result = await pool.query(
-      `SELECT token_version FROM users WHERE id = $1`,
+      `SELECT token_version FROM ${TOKEN_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
     const currentVersion = result.rows[0].token_version
@@ -144,37 +173,26 @@ describe('Token Versioning', () => {
 
     // Get initial version
     const initial = await pool.query(
-      `SELECT token_version FROM users WHERE id = $1`,
+      `SELECT token_version FROM ${TOKEN_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
     const initialVersion = initial.rows[0].token_version
 
-    // Simulate two concurrent logout-all
-    // Transaction 1
-    const t1 = pool
-      .query('BEGIN')
-      .then(() =>
-        pool.query(
-          `UPDATE users SET token_version = token_version + 1 WHERE id = $1`,
-          [user.id]
-        )
-      )
-
-    // Transaction 2
-    const t2 = pool
-      .query('BEGIN')
-      .then(() =>
-        pool.query(
-          `UPDATE users SET token_version = token_version + 1 WHERE id = $1`,
-          [user.id]
-        )
-      )
+    // Simulate two concurrent logout-all increments
+    const t1 = pool.query(
+      `UPDATE ${TOKEN_USERS_TABLE} SET token_version = token_version + 1 WHERE id = $1`,
+      [user.id]
+    )
+    const t2 = pool.query(
+      `UPDATE ${TOKEN_USERS_TABLE} SET token_version = token_version + 1 WHERE id = $1`,
+      [user.id]
+    )
 
     await Promise.all([t1, t2])
 
     // Both completed, version incremented twice
     const final = await pool.query(
-      `SELECT token_version FROM users WHERE id = $1`,
+      `SELECT token_version FROM ${TOKEN_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
     const finalVersion = final.rows[0].token_version

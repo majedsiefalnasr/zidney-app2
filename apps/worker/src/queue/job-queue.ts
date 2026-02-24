@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
-import { logger } from '../../infrastructure/logger'
-import { redis } from '../../infrastructure/redis'
+import { logger } from '@zidney/logger'
+import { redis } from '../infrastructure/redis'
 
 /**
  * T042: Redis-based job queue implementation
@@ -36,7 +36,6 @@ export interface JobResult {
 export class JobQueue {
   private readonly queuePrefix = 'queue:jobs'
   private readonly resultPrefix = 'job:result'
-  private readonly lockPrefix = 'job:lock'
   private readonly resulTTL = 3600 // 1 hour
 
   /**

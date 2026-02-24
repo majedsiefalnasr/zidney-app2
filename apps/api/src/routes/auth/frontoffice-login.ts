@@ -100,6 +100,14 @@ router.post(
     const startTime = Date.now()
 
     try {
+      if (!workspaceId) {
+        throwAuthError(
+          AuthErrorCodes.WORKSPACE_INVALID,
+          'Workspace not found',
+          404
+        )
+      }
+
       const pool = getTenantPool(workspaceId)
 
       if (!pool) {

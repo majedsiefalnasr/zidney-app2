@@ -10,13 +10,11 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
-import { createLogger } from '@zidney/logging/logger'
+import { createLogger } from '@zidney/logger/logger'
 import { createHash } from 'crypto'
 import { readFileSync } from 'fs'
 import { join } from 'path'
 import type { Pool, QueryResult } from 'pg'
-
-const logger = createLogger('migrations')
 
 /**
  * Migration metadata
@@ -179,7 +177,7 @@ export async function insertSchemaVersion(
   const logger_fn = createLogger('insertSchemaVersion')
 
   try {
-    const result = await pool.query(
+    await pool.query(
       `INSERT INTO schema_version (version, applied_at, checksum) 
        VALUES ($1, NOW(), $2)
        RETURNING version, applied_at, checksum`,

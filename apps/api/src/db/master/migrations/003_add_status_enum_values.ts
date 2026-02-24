@@ -10,22 +10,21 @@
  * Schema version: 3 → 4
  */
 
-import { Database } from 'better-sqlite3'
+import type { PoolClient } from 'pg'
 
 export const name = '003_add_status_enum_values'
 export const version = 4
 
-export async function up(db: Database): Promise<void> {
+export async function up(client: PoolClient): Promise<void> {
   // Note: PostgreSQL ENUM values cannot be removed, only added
   // PROVISION_FAILED is added before ARCHIVED
-  db.exec(`
+  await client.query(`
     -- PostgreSQL: ALTER TYPE status_enum ADD VALUE 'PROVISION_FAILED' BEFORE 'ARCHIVED';
-    -- SQLite: No action needed, enum is not used in SQLite DDL
-    -- This migration is a placeholder for PostgreSQL environments
+    -- No-op placeholder kept for historical compatibility.
   `)
 }
 
-export async function down(db: Database): Promise<void> {
+export async function down(_client: PoolClient): Promise<void> {
   // PostgreSQL limitation: ENUM values cannot be removed
   // Rollback is not possible without recreating the type
   // This is documented and requires manual intervention if ever needed

@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import type { MigrationConfig } from '../migration-types'
+import type { MigrationConfig } from '../../migration-types'
 
 /**
  * T004: Master DB Migration - Schema Version Increment

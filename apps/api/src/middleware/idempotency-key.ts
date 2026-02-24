@@ -4,7 +4,7 @@
  * Applied to: POST /api/admin/workspace/{workspace_id}/upgrade*
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import crypto from 'crypto'
 import type { Context, MiddlewareHandler, Next } from 'hono'
 import { Pool } from 'pg'

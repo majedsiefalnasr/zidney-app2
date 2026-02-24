@@ -26,16 +26,17 @@ services:
     image: postgres:15.9-alpine3.20
     container_name: zidney-postgres
     restart: unless-stopped
+    command: >
+      postgres
+      -c log_statement=none
+      -c max_connections=200
+      -c shared_buffers=256MB
+      -c effective_cache_size=1GB
 
     environment:
       POSTGRES_DB: zidney_master
       POSTGRES_USER: zidney_app
       POSTGRES_PASSWORD: ${DB_PASSWORD:-change-me-in-production}
-      POSTGRES_INITDB_ARGS: >
-        -c log_statement=none
-        -c max_connections=200
-        -c shared_buffers=256MB
-        -c effective_cache_size=1GB
 
     ports:
       - "5432:5432"

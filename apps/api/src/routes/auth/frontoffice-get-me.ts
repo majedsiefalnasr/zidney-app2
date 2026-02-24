@@ -62,6 +62,14 @@ router.get(
     const userId = authPayload.user_id
     const workspaceId = c.get('workspaceId')
 
+    if (!workspaceId) {
+      throwAuthError(
+        AuthErrorCodes.WORKSPACE_INVALID,
+        'Workspace not found',
+        404
+      )
+    }
+
     const pool = getTenantPool(workspaceId)
 
     if (!pool) {

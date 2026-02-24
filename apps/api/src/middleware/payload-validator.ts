@@ -1,8 +1,3 @@
-import { createLogger } from '@zidney/logging'
-import { Hono } from 'hono'
-
-const logger = createLogger('payload-validator')
-
 /**
  * T041: Payload size and format validation middleware
  *
@@ -13,6 +8,11 @@ const logger = createLogger('payload-validator')
  *
  * Returns 400 PAYLOAD_TOO_LARGE on violation
  */
+
+import { createLogger } from '@zidney/logger'
+import { Hono } from 'hono'
+
+const logger = createLogger('payload-validator')
 
 interface PayloadLimits {
   maxBodySizeBytes: number // 1MB default

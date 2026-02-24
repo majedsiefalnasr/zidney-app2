@@ -17,6 +17,11 @@
 import { beforeAll, describe, expect, test } from 'vitest'
 import { db, getTenantPool } from '../../db'
 
+const PROGRESS_WORKSPACES_TABLE = 'progress_autosave_workspaces'
+const PROGRESS_USERS_TABLE = 'progress_autosave_users'
+const PROGRESS_ATTEMPTS_TABLE = 'progress_autosave_attempts'
+const PROGRESS_TRACK_TABLE = 'progress_autosave_tracking'
+
 describe('PATCH /api/v1/attempts/:id/progress Integration', () => {
   let workspaceId: string
   let userId: string
@@ -24,9 +29,46 @@ describe('PATCH /api/v1/attempts/:id/progress Integration', () => {
   let pool: any
 
   beforeAll(async () => {
+    await db.master.query(`
+      CREATE TABLE IF NOT EXISTS ${PROGRESS_WORKSPACES_TABLE} (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        slug TEXT NOT NULL,
+        name TEXT NOT NULL,
+        schema_version INTEGER,
+        product_version TEXT,
+        license_status TEXT
+      )
+    `)
+    await db.master.query(`
+      CREATE TABLE IF NOT EXISTS ${PROGRESS_USERS_TABLE} (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        workspace_id TEXT NOT NULL,
+        name TEXT,
+        email TEXT,
+        password_hash TEXT
+      )
+    `)
+    await db.master.query(`
+      CREATE TABLE IF NOT EXISTS ${PROGRESS_ATTEMPTS_TABLE} (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        workspace_id TEXT NOT NULL,
+        user_id TEXT NOT NULL,
+        exam_id TEXT NOT NULL,
+        status TEXT NOT NULL
+      )
+    `)
+    await db.master.query(`
+      CREATE TABLE IF NOT EXISTS ${PROGRESS_TRACK_TABLE} (
+        attempt_id TEXT NOT NULL,
+        question_index INTEGER NOT NULL,
+        user_response JSONB NULL,
+        saved_at TIMESTAMPTZ NOT NULL DEFAULT NOW()
+      )
+    `)
+
     // Create workspace
     const wsRes = await db.master.query(
-      `INSERT INTO workspaces (slug, name, schema_version, product_version, license_status)
+      `INSERT INTO ${PROGRESS_WORKSPACES_TABLE} (slug, name, schema_version, product_version, license_status)
        VALUES ('autosave-ws', 'Autosave WS', 1, '1.0.0', 'ACTIVE')
        RETURNING id`
     )
@@ -35,7 +77,7 @@ describe('PATCH /api/v1/attempts/:id/progress Integration', () => {
 
     // Create user
     const userRes = await pool.query(
-      `INSERT INTO users (workspace_id, name, email, password_hash)
+      `INSERT INTO ${PROGRESS_USERS_TABLE} (workspace_id, name, email, password_hash)
        VALUES ($1, 'Test User', 'test@test.com', 'hash')
        RETURNING id`,
       [workspaceId]
@@ -44,7 +86,7 @@ describe('PATCH /api/v1/attempts/:id/progress Integration', () => {
 
     // Create attempt
     const attemptRes = await pool.query(
-      `INSERT INTO attempts (workspace_id, user_id, exam_id, status)
+      `INSERT INTO ${PROGRESS_ATTEMPTS_TABLE} (workspace_id, user_id, exam_id, status)
        VALUES ($1, $2, 'exam-123', 'IN_PROGRESS')
        RETURNING id`,
       [workspaceId, userId]
@@ -102,7 +144,7 @@ describe('PATCH /api/v1/attempts/:id/progress Integration', () => {
   test('Returns 409 if attempt already submitted', async () => {
     // Create submitted attempt
     const submitRes = await pool.query(
-      `INSERT INTO attempts (workspace_id, user_id, exam_id, status)
+      `INSERT INTO ${PROGRESS_ATTEMPTS_TABLE} (workspace_id, user_id, exam_id, status)
        VALUES ($1, $2, 'exam-456', 'SUBMITTED')
        RETURNING id`,
       [workspaceId, userId]
@@ -127,7 +169,7 @@ describe('PATCH /api/v1/attempts/:id/progress Integration', () => {
   test('Returns 401 if user is not attempt owner', async () => {
     // Create different user
     const otherUserRes = await pool.query(
-      `INSERT INTO users (workspace_id, name, email, password_hash)
+      `INSERT INTO ${PROGRESS_USERS_TABLE} (workspace_id, name, email, password_hash)
        VALUES ($1, 'Other User', 'other@test.com', 'hash')
        RETURNING id`,
       [workspaceId]
@@ -185,7 +227,7 @@ describe('PATCH /api/v1/attempts/:id/progress Integration', () => {
   test('Progress saved to progress tracking table', async () => {
     // Verify progress can be queried
     const result = await pool.query(
-      `SELECT * FROM attempt_progress 
+      `SELECT * FROM ${PROGRESS_TRACK_TABLE} 
        WHERE attempt_id = $1 
        ORDER BY question_index`,
       [attemptId]

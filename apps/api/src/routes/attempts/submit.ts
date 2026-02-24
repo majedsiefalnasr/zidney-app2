@@ -26,7 +26,7 @@
  * - Idempotency triple-layer
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { Context } from 'hono'
 import { Pool, PoolClient } from 'pg'
 import type { UserContextStage06 } from '../../middleware/auth-context-stage06'
@@ -318,8 +318,6 @@ export async function submitAttemptHandler(c: Context) {
         if (submissionResult.rows.length === 0) {
           throw new Error('Failed to store submission')
         }
-
-        const submittedAt = submissionResult.rows[0].submitted_at
 
         logger.debug('Stored submission in database', {
           correlation_id: correlationId,

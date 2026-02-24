@@ -21,7 +21,7 @@
 - [x] T003 [P] Create product validation schemas in packages/validation/src/products/productValidation.ts
 - [x] T004 [P] Create API response types in packages/types/src/api/ApiResponse.ts
 - [x] T005 Create database migration type definitions in apps/api/src/db/types/Migration.ts
-- [x] T006 Initialize Pino logger for products service in packages/logging/src/products.ts
+- [x] T006 Initialize Pino logger for products service in packages/logger/src/products.ts
 - [x] T007 Create error codes constants in packages/types/src/errors/ErrorCodes.ts
 
 **Checkpoint**: Type system, enums, and validation infrastructure ready for database and service implementation

@@ -31,29 +31,28 @@
  * - GDPR: User data retention policy (90 days)
  */
 
-import pino from 'pino'
 import { AuditEventData } from './types'
 
+// Simple logger interface
+interface SimpleLogger {
+  info: (obj: Record<string, unknown>, msg: string) => void
+  warn: (obj: Record<string, unknown>, msg: string) => void
+  error: (obj: Record<string, unknown>, msg: string) => void
+}
+
 /**
- * Get Pino logger instance for auth audit logs
+ * Get simple logger instance for auth audit logs
  * Configures structured JSON output with correlation ID support
  */
-function getAuditLogger() {
-  return pino({
-    name: 'auth-audit',
-    level: process.env.LOG_LEVEL || 'info',
-    transport:
-      process.env.NODE_ENV === 'development'
-        ? {
-            target: 'pino-pretty',
-            options: {
-              colorize: true,
-              translateTime: 'SYS:standard',
-              ignore: 'pid,hostname',
-            },
-          }
-        : undefined,
-  })
+function getAuditLogger(): SimpleLogger {
+  return {
+    info: (obj, msg) =>
+      console.log(JSON.stringify({ level: 'info', ...obj, msg })),
+    warn: (obj, msg) =>
+      console.warn(JSON.stringify({ level: 'warn', ...obj, msg })),
+    error: (obj, msg) =>
+      console.error(JSON.stringify({ level: 'error', ...obj, msg })),
+  }
 }
 
 /**

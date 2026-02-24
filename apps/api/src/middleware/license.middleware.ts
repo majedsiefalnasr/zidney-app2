@@ -15,9 +15,9 @@
  * - DELETED: Block (404 NOT_FOUND)
  */
 
-import { Database } from 'better-sqlite3'
 import { Context, MiddlewareHandler } from 'hono'
-import { Logger } from 'pino'
+import type { Logger } from '@zidney/logger'
+import type { Pool } from 'pg'
 import { ACCESSIBLE_STATUSES } from '@zidney/domain-core/licenses/constants'
 import {
   LicenseError,
@@ -28,10 +28,11 @@ import { LicenseStatus } from '@zidney/domain-core/licenses/types'
 interface LicenseMiddlewareContext extends Context {
   license?: any
   correlation_id?: string
+  workspaceSlug?: string
 }
 
 export function createLicenseMiddleware(
-  masterDb: Database,
+  masterDb: Pool,
   logger: Logger
 ): MiddlewareHandler {
   return async (ctx: LicenseMiddlewareContext, next) => {
@@ -49,12 +50,14 @@ export function createLicenseMiddleware(
       }
 
       // T039: Query master_db for license
-      const stmt = masterDb.prepare(`
-        SELECT * FROM licenses 
-        WHERE workspace_slug = ? AND deleted_at IS NULL
-      `)
-
-      const license = stmt.get(workspaceSlug) as any
+      const licenseResult = await masterDb.query(
+        `
+        SELECT * FROM licenses
+        WHERE workspace_slug = $1 AND deleted_at IS NULL
+      `,
+        [workspaceSlug]
+      )
+      const license = licenseResult.rows[0] as any
 
       if (!license) {
         throw new LicenseNotFoundError()
@@ -70,18 +73,16 @@ export function createLicenseMiddleware(
         new Date(license.soft_lock_until) < new Date()
       ) {
         // Grace period expired, auto-transition to ARCHIVED
-        const updateStmt = masterDb.prepare(`
-          UPDATE licenses 
-          SET status = ?, archived_at = NOW(), updated_at = NOW()
-          WHERE id = ? AND status = ? AND soft_lock_until < NOW()
+        const updatedResult = await masterDb.query(
+          `
+          UPDATE licenses
+          SET status = $1, archived_at = NOW(), updated_at = NOW()
+          WHERE id = $2 AND status = $3 AND soft_lock_until < NOW()
           RETURNING *
-        `)
-
-        const updated = updateStmt.get(
-          LicenseStatus.ARCHIVED,
-          license.id,
-          LicenseStatus.SOFT_LOCKED
-        ) as any
+        `,
+          [LicenseStatus.ARCHIVED, license.id, LicenseStatus.SOFT_LOCKED]
+        )
+        const updated = updatedResult.rows[0] as any
 
         if (updated) {
           logger.info({
@@ -152,18 +153,16 @@ export function createLicenseMiddleware(
           correlation_id: ctx.correlation_id,
         })
 
-        return ctx.json(
-          {
-            success: false,
-            data: null,
-            error: {
-              code: response.code,
-              message: response.message,
-              status: response.status,
-            },
+        ctx.status(response.status as any)
+        return ctx.json({
+          success: false,
+          data: null,
+          error: {
+            code: response.code,
+            message: response.message,
+            status: response.status,
           },
-          response.status
-        )
+        })
       }
 
       // Attach license to context for downstream handlers
@@ -187,7 +186,8 @@ export function createLicenseMiddleware(
       })
 
       if (error instanceof LicenseError) {
-        return ctx.json(error.toResponse(), error.httpStatus)
+        ctx.status(error.httpStatus as any)
+        return ctx.json(error.toResponse())
       }
 
       // Generic error

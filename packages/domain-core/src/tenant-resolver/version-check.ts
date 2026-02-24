@@ -5,7 +5,7 @@
  */
 
 import { isCompatible } from '@zidney/validation'
-import { Database } from 'pg'
+import { Pool } from 'pg'
 
 export interface TenantResolverContext {
   workspace_id: string
@@ -23,8 +23,8 @@ const CACHE_TTL_MS = 60 * 1000 // 60 seconds
  */
 export async function validateSchemaCompatibility(
   tenantContext: TenantResolverContext,
-  masterDb: Database,
-  tenantDb: Database
+  masterDb: Pool,
+  tenantDb: Pool
 ): Promise<void> {
   try {
     // Get minimum_supported from cache or fetch fresh

@@ -226,7 +226,7 @@ describe('Audit Event Recording', () => {
     it('should prevent cross-workspace access at DB level', () => {
       // Foreign key constraint enforces workspace_id validity
       const event = {
-        workspace_id: 'invalid-workspace-uuid',
+        workspace_id: uuidv4(),
       }
 
       // Should fail on insert (FK constraint)

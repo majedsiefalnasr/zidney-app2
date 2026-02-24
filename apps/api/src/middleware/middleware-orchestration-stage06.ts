@@ -31,7 +31,7 @@
  * - Correlation ID FIRST global (needs to be set for all logs)
  */
 
-import { Logger } from '@zidney/logging'
+import { Logger } from '@zidney/logger'
 import { Hono } from 'hono'
 
 // Middleware imports

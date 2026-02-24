@@ -136,7 +136,6 @@ export class JobQueue implements IJobQueue {
       )
 
       // Re-enqueue with backoff delay
-      const backoff_key = `${this.config.queue_name}:delayed:${job_id}`
       const job_message = JSON.stringify(retried_job.toRedisMessage())
 
       // Use sorted set for delayed jobs (score = future timestamp)

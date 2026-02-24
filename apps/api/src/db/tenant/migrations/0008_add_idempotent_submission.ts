@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import type { MigrationConfig } from '../migration-types'
+import type { MigrationConfig } from '../../migration-types'
 
 /**
  * T005: Tenant DB Migration - Add Idempotent Submission Columns

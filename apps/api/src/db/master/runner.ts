@@ -13,7 +13,7 @@
  * Phase: 1 - Migration Infrastructure
  */
 
-import { Logger } from '@zidney/logging'
+import { Logger } from '@zidney/logger'
 import { Pool, PoolClient } from 'pg'
 import { MigrationLoader } from './loader'
 import { MigrationValidator } from './validator'

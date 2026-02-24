@@ -8,7 +8,6 @@
  * All database queries use parameterized statements to prevent SQL injection.
  */
 
-import { Database } from 'better-sqlite3'
 import { ALLOWED_STATE_TRANSITIONS } from './constants'
 import {
   InvalidStateTransitionError,
@@ -17,8 +16,19 @@ import {
 } from './errors'
 import { License, LicenseStatus } from './types'
 
+interface QueryResult<T = Record<string, unknown>> {
+  rows: T[]
+}
+
+export interface MasterDbClient {
+  query<T = Record<string, unknown>>(
+    text: string,
+    params?: readonly unknown[]
+  ): Promise<QueryResult<T>>
+}
+
 export class LicenseRepository {
-  constructor(private masterDb: Database) {}
+  constructor(private masterDb: MasterDbClient) {}
 
   /**
    * T016: Create a new license
@@ -41,36 +51,40 @@ export class LicenseRepository {
     product_version: number
   }): Promise<License> {
     try {
-      const stmt = this.masterDb.prepare(`
+      const result = await this.masterDb.query(
+        `
         INSERT INTO licenses (
           id, product_id, workspace_slug, workspace_name, student_limit, staff_limit,
           use_zidney_payment, commission_per_user, default_language, uses_divisions,
           status, schema_version, product_version, provisioning_retries,
           created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
+        ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14, NOW(), NOW())
         RETURNING *
-      `)
+      `,
+        [
+          data.id,
+          data.product_id,
+          data.workspace_slug,
+          data.workspace_name,
+          data.student_limit,
+          data.staff_limit,
+          data.use_zidney_payment,
+          data.commission_per_user,
+          data.default_language,
+          data.uses_divisions,
+          LicenseStatus.PENDING_PROVISION,
+          data.schema_version,
+          data.product_version,
+          0,
+        ]
+      )
 
-      const result = stmt.get(
-        data.id,
-        data.product_id,
-        data.workspace_slug,
-        data.workspace_name,
-        data.student_limit,
-        data.staff_limit,
-        data.use_zidney_payment ? 1 : 0,
-        data.commission_per_user,
-        data.default_language,
-        data.uses_divisions ? 1 : 0,
-        LicenseStatus.PENDING_PROVISION,
-        data.schema_version,
-        data.product_version,
-        0
-      ) as any
-
-      return this.mapToLicense(result)
+      return this.mapToLicense(result.rows[0])
     } catch (error: any) {
-      if (error.message?.includes('UNIQUE constraint failed')) {
+      if (
+        error?.code === '23505' ||
+        error?.message?.includes('duplicate key')
+      ) {
         throw LicenseValidationError.slugNotUnique()
       }
       throw error
@@ -81,12 +95,14 @@ export class LicenseRepository {
    * T017: Get license by ID
    */
   async getById(id: string): Promise<License | null> {
-    const stmt = this.masterDb.prepare(`
-      SELECT * FROM licenses WHERE id = ? AND deleted_at IS NULL
-    `)
+    const result = await this.masterDb.query(
+      `
+      SELECT * FROM licenses WHERE id = $1 AND deleted_at IS NULL
+    `,
+      [id]
+    )
 
-    const result = stmt.get(id) as any
-    return result ? this.mapToLicense(result) : null
+    return result.rows[0] ? this.mapToLicense(result.rows[0]) : null
   }
 
   /**
@@ -97,15 +113,17 @@ export class LicenseRepository {
     limit: number,
     offset: number
   ): Promise<License[]> {
-    const stmt = this.masterDb.prepare(`
-      SELECT * FROM licenses 
-      WHERE status = ? AND deleted_at IS NULL
+    const result = await this.masterDb.query(
+      `
+      SELECT * FROM licenses
+      WHERE status = $1 AND deleted_at IS NULL
       ORDER BY created_at DESC
-      LIMIT ? OFFSET ?
-    `)
+      LIMIT $2 OFFSET $3
+    `,
+      [status, limit, offset]
+    )
 
-    const results = stmt.all(status, limit, offset) as any[]
-    return results.map((r) => this.mapToLicense(r))
+    return result.rows.map((row) => this.mapToLicense(row))
   }
 
   /**
@@ -116,15 +134,17 @@ export class LicenseRepository {
     limit: number,
     offset: number
   ): Promise<License[]> {
-    const stmt = this.masterDb.prepare(`
-      SELECT * FROM licenses 
-      WHERE product_id = ? AND deleted_at IS NULL
+    const result = await this.masterDb.query(
+      `
+      SELECT * FROM licenses
+      WHERE product_id = $1 AND deleted_at IS NULL
       ORDER BY created_at DESC
-      LIMIT ? OFFSET ?
-    `)
+      LIMIT $2 OFFSET $3
+    `,
+      [product_id, limit, offset]
+    )
 
-    const results = stmt.all(product_id, limit, offset) as any[]
-    return results.map((r) => this.mapToLicense(r))
+    return result.rows.map((row) => this.mapToLicense(row))
   }
 
   /**
@@ -138,47 +158,50 @@ export class LicenseRepository {
     },
     pagination: { limit: number; offset: number }
   ): Promise<{ items: License[]; total: number }> {
-    let whereConditions = ['deleted_at IS NULL']
-    const params: any[] = []
+    const whereConditions: string[] = ['deleted_at IS NULL']
+    const params: unknown[] = []
 
     if (filters.status) {
-      whereConditions.push('status = ?')
       params.push(filters.status)
+      whereConditions.push(`status = $${params.length}`)
     }
 
     if (filters.product_id) {
-      whereConditions.push('product_id = ?')
       params.push(filters.product_id)
+      whereConditions.push(`product_id = $${params.length}`)
     }
 
     if (filters.search) {
-      whereConditions.push('(workspace_slug ILIKE ? OR workspace_name ILIKE ?)')
       const searchTerm = `%${filters.search}%`
       params.push(searchTerm, searchTerm)
+      whereConditions.push(
+        `(workspace_slug ILIKE $${params.length - 1} OR workspace_name ILIKE $${params.length})`
+      )
     }
 
     const whereClause = whereConditions.join(' AND ')
 
-    // Get total count
-    const countStmt = this.masterDb.prepare(
-      `SELECT COUNT(*) as count FROM licenses WHERE ${whereClause}`
+    const countResult = await this.masterDb.query<{ count: number | string }>(
+      `SELECT COUNT(*)::int as count FROM licenses WHERE ${whereClause}`,
+      params
     )
-    const countResult = countStmt.get(...params) as any
-    const total = countResult.count
+    const total = Number(countResult.rows[0]?.count || 0)
 
-    // Get paginated results
-    params.push(pagination.limit, pagination.offset)
-    const stmt = this.masterDb.prepare(`
-      SELECT * FROM licenses 
+    const paginatedParams = [...params, pagination.limit, pagination.offset]
+    const itemsResult = await this.masterDb.query(
+      `
+      SELECT * FROM licenses
       WHERE ${whereClause}
       ORDER BY created_at DESC
-      LIMIT ? OFFSET ?
-    `)
+      LIMIT $${params.length + 1} OFFSET $${params.length + 2}
+    `,
+      paginatedParams
+    )
 
-    const results = stmt.all(...params) as any[]
-    const items = results.map((r) => this.mapToLicense(r))
-
-    return { items, total }
+    return {
+      items: itemsResult.rows.map((row) => this.mapToLicense(row)),
+      total,
+    }
   }
 
   /**
@@ -190,7 +213,6 @@ export class LicenseRepository {
     id: string,
     data: Partial<Omit<License, 'id' | 'created_at' | 'updated_at'>>
   ): Promise<License> {
-    // Check for immutable field attempts
     if (
       'product_id' in data ||
       'workspace_slug' in data ||
@@ -201,19 +223,16 @@ export class LicenseRepository {
     }
 
     const updates: string[] = []
-    const values: any[] = []
+    const values: unknown[] = []
 
-    // Build dynamic UPDATE statement
     for (const [key, value] of Object.entries(data)) {
       if (key !== 'id') {
-        const mappedValue = typeof value === 'boolean' ? (value ? 1 : 0) : value
-        updates.push(`${key} = ?`)
-        values.push(mappedValue)
+        values.push(value)
+        updates.push(`${key} = $${values.length}`)
       }
     }
 
     if (updates.length === 0) {
-      // No updates, return existing license
       const license = await this.getById(id)
       if (!license) throw new LicenseNotFoundError(id)
       return license
@@ -222,34 +241,38 @@ export class LicenseRepository {
     updates.push('updated_at = NOW()')
     values.push(id)
 
-    const stmt = this.masterDb.prepare(`
-      UPDATE licenses 
+    const result = await this.masterDb.query(
+      `
+      UPDATE licenses
       SET ${updates.join(', ')}
-      WHERE id = ?
+      WHERE id = $${values.length}
       RETURNING *
-    `)
+    `,
+      values
+    )
 
-    const result = stmt.get(...values) as any
-    if (!result) throw new LicenseNotFoundError(id)
+    if (!result.rows[0]) throw new LicenseNotFoundError(id)
 
-    return this.mapToLicense(result)
+    return this.mapToLicense(result.rows[0])
   }
 
   /**
    * T019: Update status
    */
   async updateStatus(id: string, status: LicenseStatus): Promise<License> {
-    const stmt = this.masterDb.prepare(`
-      UPDATE licenses 
-      SET status = ?, updated_at = NOW()
-      WHERE id = ?
+    const result = await this.masterDb.query(
+      `
+      UPDATE licenses
+      SET status = $1, updated_at = NOW()
+      WHERE id = $2
       RETURNING *
-    `)
+    `,
+      [status, id]
+    )
 
-    const result = stmt.get(status, id) as any
-    if (!result) throw new LicenseNotFoundError(id)
+    if (!result.rows[0]) throw new LicenseNotFoundError(id)
 
-    return this.mapToLicense(result)
+    return this.mapToLicense(result.rows[0])
   }
 
   /**
@@ -265,16 +288,17 @@ export class LicenseRepository {
     }
 
     const softLockUntil = new Date(Date.now() + gracePeriodMs)
-
-    const stmt = this.masterDb.prepare(`
-      UPDATE licenses 
-      SET status = ?, soft_lock_until = ?, updated_at = NOW()
-      WHERE id = ?
+    const result = await this.masterDb.query(
+      `
+      UPDATE licenses
+      SET status = $1, soft_lock_until = $2, updated_at = NOW()
+      WHERE id = $3
       RETURNING *
-    `)
+    `,
+      [LicenseStatus.SOFT_LOCKED, softLockUntil, id]
+    )
 
-    const result = stmt.get(LicenseStatus.SOFT_LOCKED, softLockUntil, id) as any
-    return this.mapToLicense(result)
+    return this.mapToLicense(result.rows[0])
   }
 
   /**
@@ -288,15 +312,17 @@ export class LicenseRepository {
       throw InvalidStateTransitionError.unlockFromNonSoftLocked()
     }
 
-    const stmt = this.masterDb.prepare(`
-      UPDATE licenses 
-      SET status = ?, soft_lock_until = NULL, updated_at = NOW()
-      WHERE id = ?
+    const result = await this.masterDb.query(
+      `
+      UPDATE licenses
+      SET status = $1, soft_lock_until = NULL, updated_at = NOW()
+      WHERE id = $2
       RETURNING *
-    `)
+    `,
+      [LicenseStatus.ACTIVE, id]
+    )
 
-    const result = stmt.get(LicenseStatus.ACTIVE, id) as any
-    return this.mapToLicense(result)
+    return this.mapToLicense(result.rows[0])
   }
 
   /**
@@ -310,15 +336,17 @@ export class LicenseRepository {
       throw InvalidStateTransitionError.archiveFromNonSoftLocked()
     }
 
-    const stmt = this.masterDb.prepare(`
-      UPDATE licenses 
-      SET status = ?, archived_at = NOW(), updated_at = NOW()
-      WHERE id = ?
+    const result = await this.masterDb.query(
+      `
+      UPDATE licenses
+      SET status = $1, archived_at = NOW(), updated_at = NOW()
+      WHERE id = $2
       RETURNING *
-    `)
+    `,
+      [LicenseStatus.ARCHIVED, id]
+    )
 
-    const result = stmt.get(LicenseStatus.ARCHIVED, id) as any
-    return this.mapToLicense(result)
+    return this.mapToLicense(result.rows[0])
   }
 
   /**
@@ -332,15 +360,17 @@ export class LicenseRepository {
       throw InvalidStateTransitionError.restoreFromNonArchived()
     }
 
-    const stmt = this.masterDb.prepare(`
-      UPDATE licenses 
-      SET status = ?, archived_at = NULL, updated_at = NOW()
-      WHERE id = ?
+    const result = await this.masterDb.query(
+      `
+      UPDATE licenses
+      SET status = $1, archived_at = NULL, updated_at = NOW()
+      WHERE id = $2
       RETURNING *
-    `)
+    `,
+      [LicenseStatus.ACTIVE, id]
+    )
 
-    const result = stmt.get(LicenseStatus.ACTIVE, id) as any
-    return this.mapToLicense(result)
+    return this.mapToLicense(result.rows[0])
   }
 
   /**
@@ -354,66 +384,75 @@ export class LicenseRepository {
       throw new Error(`License must be ARCHIVED before deletion`)
     }
 
-    const stmt = this.masterDb.prepare(`
-      UPDATE licenses 
-      SET status = ?, deleted_at = NOW(), updated_at = NOW()
-      WHERE id = ?
+    const result = await this.masterDb.query(
+      `
+      UPDATE licenses
+      SET status = $1, deleted_at = NOW(), updated_at = NOW()
+      WHERE id = $2
       RETURNING *
-    `)
+    `,
+      [LicenseStatus.DELETED, id]
+    )
 
-    const result = stmt.get(LicenseStatus.DELETED, id) as any
-    return this.mapToLicense(result)
+    return this.mapToLicense(result.rows[0])
   }
 
   /**
    * T021: Get by workspace slug
    */
   async getByWorkspaceSlug(slug: string): Promise<License | null> {
-    const stmt = this.masterDb.prepare(`
-      SELECT * FROM licenses WHERE workspace_slug = ? AND deleted_at IS NULL
-    `)
+    const result = await this.masterDb.query(
+      `
+      SELECT * FROM licenses WHERE workspace_slug = $1 AND deleted_at IS NULL
+    `,
+      [slug]
+    )
 
-    const result = stmt.get(slug) as any
-    return result ? this.mapToLicense(result) : null
+    return result.rows[0] ? this.mapToLicense(result.rows[0]) : null
   }
 
   /**
    * T021: Count by product
    */
   async countByProduct(product_id: string): Promise<number> {
-    const stmt = this.masterDb.prepare(`
-      SELECT COUNT(*) as count FROM licenses 
-      WHERE product_id = ? AND deleted_at IS NULL
-    `)
+    const result = await this.masterDb.query<{ count: number | string }>(
+      `
+      SELECT COUNT(*)::int as count FROM licenses
+      WHERE product_id = $1 AND deleted_at IS NULL
+    `,
+      [product_id]
+    )
 
-    const result = stmt.get(product_id) as any
-    return result?.count || 0
+    return Number(result.rows[0]?.count || 0)
   }
 
   /**
    * T021: Find expired soft locks (for cron tasks)
    */
   async findExpiredSoftLocks(): Promise<License[]> {
-    const stmt = this.masterDb.prepare(`
-      SELECT * FROM licenses 
-      WHERE status = ? AND soft_lock_until IS NOT NULL AND soft_lock_until < NOW()
+    const result = await this.masterDb.query(
+      `
+      SELECT * FROM licenses
+      WHERE status = $1 AND soft_lock_until IS NOT NULL AND soft_lock_until < NOW()
       AND deleted_at IS NULL
-    `)
+    `,
+      [LicenseStatus.SOFT_LOCKED]
+    )
 
-    const results = stmt.all(LicenseStatus.SOFT_LOCKED) as any[]
-    return results.map((r) => this.mapToLicense(r))
+    return result.rows.map((row) => this.mapToLicense(row))
   }
 
   /**
    * T022: Get platform schema version
    */
   async getPlatformSchemaVersion(): Promise<number> {
-    const stmt = this.masterDb.prepare(`
+    const result = await this.masterDb.query<{ version: number | string | null }>(
+      `
       SELECT MAX(version) as version FROM schema_versions
-    `)
+    `
+    )
 
-    const result = stmt.get() as any
-    const version = result?.version || 0
+    const version = Number(result.rows[0]?.version || 0)
 
     if (version === 0) {
       throw new Error('No migrations executed yet')
@@ -425,16 +464,16 @@ export class LicenseRepository {
   /**
    * T035: Transaction wrapper
    *
-   * Wraps operations in a transaction with rollback on error.
+   * Assumes a transaction-capable query executor (same underlying connection).
    */
   async withTransaction<T>(callback: () => Promise<T>): Promise<T> {
     try {
-      this.masterDb.exec('BEGIN TRANSACTION')
+      await this.masterDb.query('BEGIN')
       const result = await callback()
-      this.masterDb.exec('COMMIT')
+      await this.masterDb.query('COMMIT')
       return result
     } catch (error) {
-      this.masterDb.exec('ROLLBACK')
+      await this.masterDb.query('ROLLBACK')
       throw error
     }
   }

@@ -9,7 +9,7 @@
  * Reference: docs/08_RATE_LIMITING
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import type { Context, Next } from 'hono'
 
 const logger = createLogger('api')

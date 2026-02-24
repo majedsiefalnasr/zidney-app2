@@ -17,7 +17,7 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 
 const logger = createLogger('ProvisioningMetrics')
 
@@ -366,8 +366,12 @@ export class InMemoryMetricsCollector implements MetricsCollector {
 
   getMetricsSnapshot(): Record<string, any> {
     // Calculate percentiles
-    const apiLatencies = this.metrics.api_latencies.sort((a, b) => a - b)
-    const workerDurations = this.metrics.worker_durations.sort((a, b) => a - b)
+    const apiLatencies = this.metrics.api_latencies.sort(
+      (a: number, b: number) => a - b
+    )
+    const workerDurations = this.metrics.worker_durations.sort(
+      (a: number, b: number) => a - b
+    )
 
     return {
       requests_total: this.metrics.requests_total,

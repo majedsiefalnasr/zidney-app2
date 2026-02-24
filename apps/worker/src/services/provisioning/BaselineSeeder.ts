@@ -192,7 +192,7 @@ export class BaselineSeeder {
   /**
    * Seed supported languages
    */
-  private async seedLanguages(client: PoolClient): Promise<number> {
+  private async seedLanguages(_client: PoolClient): Promise<number> {
     // Note: Languages stored as settings/configuration, not in dedicated table
     // This is a placeholder for future language management
     return 0

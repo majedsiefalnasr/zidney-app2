@@ -1,6 +1,6 @@
 import { Pool } from 'pg'
 import { v4 as uuidv4 } from 'uuid'
-import { logger } from '../../services/logger'
+import { logger } from '@zidney/logger'
 
 export interface CreateLicenseOptions {
   product_id: string

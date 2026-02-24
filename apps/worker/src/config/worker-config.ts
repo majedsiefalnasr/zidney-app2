@@ -254,7 +254,7 @@ export const LOG_CONFIG = {
   },
   TRANSPORTS: [
     {
-      target: 'pino/file',
+      target: 'json-file',
       level: 'info',
       options: { destination: '/var/log/zidney/worker.log' },
     },

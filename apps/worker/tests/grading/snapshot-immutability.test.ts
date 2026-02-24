@@ -41,7 +41,7 @@ describe('Snapshot Immutability (ADR-0002)', () => {
         correct_answer: 'B',
         explanation: 'It equals 4',
         order_in_exam: 0,
-      } as QuestionSnapshot,
+      } as unknown as QuestionSnapshot,
       {
         id: 'q2',
         type: 'MULTIPLE_CHOICE',
@@ -55,7 +55,7 @@ describe('Snapshot Immutability (ADR-0002)', () => {
         correct_answer: 'B',
         explanation: 'It equals 7',
         order_in_exam: 1,
-      } as QuestionSnapshot,
+      } as unknown as QuestionSnapshot,
     ]
 
     gradingConfigSnapshot = {

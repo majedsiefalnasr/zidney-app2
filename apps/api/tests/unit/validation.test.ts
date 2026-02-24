@@ -156,7 +156,7 @@ describe('Input Validation', () => {
     })
 
     expect(result.valid).toBe(false)
-    expect(result.errors).toContain(expect.stringContaining('UUID'))
+    expect(result.errors?.join(' ')).toContain('UUID')
   })
 
   // T049.4: Invalid attempt_mode
@@ -167,7 +167,7 @@ describe('Input Validation', () => {
     })
 
     expect(result.valid).toBe(false)
-    expect(result.errors).toContain(expect.stringContaining('INVALID_MODE'))
+    expect(result.errors?.join(' ')).toContain('INVALID_MODE')
   })
 
   // T049.5: Both CHRONO and REVIEW modes valid
@@ -299,9 +299,7 @@ describe('Input Validation', () => {
     })
 
     expect(result.valid).toBe(false)
-    expect(result.errors).toContain(
-      expect.stringContaining('Invalid submission reason')
-    )
+    expect(result.errors?.join(' ')).toContain('Invalid submission reason')
   })
 
   // T049.13: Submission Responses Array
@@ -328,7 +326,7 @@ describe('Input Validation', () => {
     })
 
     expect(result.valid).toBe(false)
-    expect(result.errors).toContain(expect.stringContaining('Response 1'))
+    expect(result.errors?.join(' ')).toContain('Response 1')
   })
 
   // T049.15: Submission Responses Not Array

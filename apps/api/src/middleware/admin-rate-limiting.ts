@@ -1,9 +1,3 @@
-import { createLogger } from '@zidney/logging'
-import type { Context, Next } from 'hono'
-import { getRedisClient } from '../infrastructure/redis'
-
-const logger = createLogger('admin-rate-limiting')
-
 /**
  * T040: Admin endpoint rate limiting middleware
  *
@@ -14,6 +8,12 @@ const logger = createLogger('admin-rate-limiting')
  *
  * Returns 429 on violation
  */
+
+import { createLogger } from '@zidney/logger'
+import type { Context, Next } from 'hono'
+import { getRedisClient } from '../infrastructure/redis'
+
+const logger = createLogger('admin-rate-limiting')
 
 interface AdminRateLimitLimits {
   perIp: number // 10 req/min

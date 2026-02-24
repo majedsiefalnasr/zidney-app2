@@ -21,9 +21,8 @@
  */
 
 import { Attempt, AttemptStatus } from '@zidney/types/attempt'
-import { randomUUID } from 'crypto'
 import { Pool } from 'pg'
-import { logger } from '../services/logger'
+import { logger } from '@zidney/logger'
 import { GradeResult } from './grader'
 
 /**
@@ -63,8 +62,6 @@ export async function finalizeAttempt(
   gradeResult: GradeResult,
   workspaceId: string
 ): Promise<Attempt> {
-  const correlationId = randomUUID()
-
   logger.debug(
     {
       service: 'result-persister',

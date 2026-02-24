@@ -4,14 +4,14 @@
  */
 
 import { MigrationRegistryEntry } from '@zidney/types'
-import { Database } from 'pg'
+import { Pool } from 'pg'
 
 /**
  * Get migration history for workspace
  */
 export async function getMigrationHistory(
   workspace_id: string,
-  masterDb: Database
+  masterDb: Pool
 ): Promise<MigrationRegistryEntry[]> {
   const result = await masterDb.query(
     `SELECT * FROM migration_registry 
@@ -40,7 +40,7 @@ export async function getMigrationHistory(
  */
 export async function getLatestMigration(
   workspace_id: string,
-  masterDb: Database
+  masterDb: Pool
 ): Promise<MigrationRegistryEntry | null> {
   const result = await masterDb.query(
     `SELECT * FROM migration_registry 
@@ -59,7 +59,7 @@ export async function getLatestMigration(
 export async function isMigrationApplied(
   workspace_id: string,
   migrationFile: string,
-  masterDb: Database
+  masterDb: Pool
 ): Promise<boolean> {
   const result = await masterDb.query(
     `SELECT status FROM migration_registry 

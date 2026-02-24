@@ -12,11 +12,11 @@ describe('Unit: Products - Module Enum (T064)', () => {
   it('should have all six modules defined', () => {
     const modules = [
       Module.MCQ,
+      Module.TRADITIONAL_EXAMS,
+      Module.EXERCISES,
       Module.LIBRARY,
-      Module.SIMULATION,
-      Module.GRADING,
-      Module.FEEDBACK,
-      Module.ANALYTICS,
+      Module.LIVES,
+      Module.FORUM,
     ]
 
     expect(modules).toHaveLength(6)
@@ -26,11 +26,11 @@ describe('Unit: Products - Module Enum (T064)', () => {
   it('should validate module values', () => {
     const validModules = [
       'MCQ',
+      'TRADITIONAL_EXAMS',
+      'EXERCISES',
       'LIBRARY',
-      'SIMULATION',
-      'GRADING',
-      'FEEDBACK',
-      'ANALYTICS',
+      'LIVES',
+      'FORUM',
     ]
 
     validModules.forEach((mod) => {
@@ -60,7 +60,7 @@ describe('Unit: Products - Module Enum (T064)', () => {
   })
 
   it('should handle module list operations', () => {
-    const enabledModules = [Module.MCQ, Module.GRADING]
+    const enabledModules = [Module.MCQ, Module.FORUM]
 
     expect(enabledModules).toContain(Module.MCQ)
     expect(enabledModules).not.toContain(Module.LIBRARY)

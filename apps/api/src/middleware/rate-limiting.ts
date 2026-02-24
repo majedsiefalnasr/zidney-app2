@@ -1,9 +1,3 @@
-import { SlidingWindowRateLimiter } from '@zidney/redis-utils/algorithms/sliding-window'
-import { RATE_LIMIT_BY_ENDPOINT } from '@zidney/redis-utils/schemas/rate-limiting'
-import type { Context, Next } from 'hono'
-import { getRedisClient } from '../infrastructure/redis'
-import { MiddlewareStage, recordMiddlewareExecution } from './middleware-chain'
-
 /**
  * T021: Rate Limiting Middleware (NEW)
  *
@@ -28,10 +22,16 @@ import { MiddlewareStage, recordMiddlewareExecution } from './middleware-chain'
  * 4. Endpoint-specific limits
  */
 
+import { SlidingWindowRateLimiter } from '@zidney/redis-utils/algorithms/sliding-window'
+import { RATE_LIMIT_BY_ENDPOINT } from '@zidney/redis-utils/schemas/rate-limiting'
+import type { Context, Next } from 'hono'
+import { getRedisClient } from '../infrastructure/redis'
+import { MiddlewareStage, recordMiddlewareExecution } from './middleware-chain'
+
 export async function rateLimitingMiddleware(
   c: Context,
   next: Next
-): Promise<void> {
+): Promise<Response | void> {
   const correlationId = c.state.correlationId || 'unknown'
   const workspace = c.state.workspace
   const endpoint = `${c.req.method} ${c.req.path}`
@@ -149,18 +149,30 @@ function getEndpointRateLimit(
   _workspaceId: string
 ): RateLimitConfig | null {
   // Map endpoint to rate limit config
-  const config =
-    RATE_LIMIT_BY_ENDPOINT[endpoint as keyof typeof RATE_LIMIT_BY_ENDPOINT]
+  const config = RATE_LIMIT_BY_ENDPOINT[
+    endpoint as keyof typeof RATE_LIMIT_BY_ENDPOINT
+  ] as
+    | {
+        pattern: string
+        limit: number
+        window: number
+        burst?: number
+      }
+    | undefined
 
   if (!config) {
     return null
   }
 
+  const identifierMatch = config.pattern.match(/\{(ip|user|workspace)\}/)
+  const identifier =
+    (identifierMatch?.[1] as RateLimitConfig['identifier']) || 'ip'
+
   return {
-    identifier: config.identifier || 'unknown',
+    identifier,
     limit: config.limit,
     window: config.window,
-    burst: config.burst,
+    ...(typeof config.burst === 'number' ? { burst: config.burst } : {}),
   }
 }
 

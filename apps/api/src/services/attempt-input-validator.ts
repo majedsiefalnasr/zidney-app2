@@ -17,7 +17,7 @@
  * - No business logic leakage (pure validation)
  */
 
-import { Logger } from '@zidney/logging'
+import { Logger } from '@zidney/logger'
 import { Pool, PoolClient } from 'pg'
 
 /**

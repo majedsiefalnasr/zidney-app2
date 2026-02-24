@@ -6,8 +6,8 @@
  */
 
 import { beforeAll, describe, expect, it } from 'vitest'
-import ProvisioningJob from '../../jobs/provisioning/ProvisioningJob'
-import { CheckpointManager } from '../provisioning/CheckpointManager'
+import ProvisioningJob from '../../../src/jobs/provisioning/ProvisioningJob'
+import { CheckpointManager } from '../../../src/services/provisioning/CheckpointManager'
 
 // ============================================================================
 // T025: Unit Tests - Slug Validation, Lock Mechanism, Checkpoints

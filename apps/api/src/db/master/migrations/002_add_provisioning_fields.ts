@@ -12,13 +12,13 @@
  * Schema version: 2 → 3
  */
 
-import { Database } from 'better-sqlite3'
+import type { PoolClient } from 'pg'
 
 export const name = '002_add_provisioning_fields'
 export const version = 3
 
-export async function up(db: Database): Promise<void> {
-  db.exec(`
+export async function up(client: PoolClient): Promise<void> {
+  await client.query(`
     ALTER TABLE licenses 
     ADD COLUMN IF NOT EXISTS provisioning_error TEXT DEFAULT NULL,
     ADD COLUMN IF NOT EXISTS provisioning_retries INTEGER DEFAULT 0 NOT NULL,
@@ -31,8 +31,8 @@ export async function up(db: Database): Promise<void> {
   `)
 }
 
-export async function down(db: Database): Promise<void> {
-  db.exec(`
+export async function down(client: PoolClient): Promise<void> {
+  await client.query(`
     ALTER TABLE licenses 
     DROP COLUMN IF EXISTS provisioning_error,
     DROP COLUMN IF EXISTS provisioning_retries,

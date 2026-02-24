@@ -69,8 +69,7 @@ export interface ApplyMigrationResult {
 export async function applyMigration(
   payload: ApplyMigrationPayload
 ): Promise<ApplyMigrationResult> {
-  const { workspace_id, task_id, target_version, migration_file_checksum } =
-    payload
+  void payload
 
   // Implementation in: apps/worker/src/tasks/apply-migration.ts
   throw new Error(

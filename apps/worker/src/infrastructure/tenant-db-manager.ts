@@ -1,5 +1,5 @@
-import { Client, Pool } from 'pg'
-import { logger } from '../../infrastructure/logger'
+import { Pool, PoolClient } from 'pg'
+import { logger } from '@zidney/logger'
 
 /**
  * T048: Tenant DB connection management for worker
@@ -88,7 +88,7 @@ export class TenantDBManager {
   /**
    * Get a client connection from pool
    */
-  async getClient(workspaceId: string): Promise<Client> {
+  async getClient(workspaceId: string): Promise<PoolClient> {
     const pool = this.pools.get(workspaceId)
 
     if (!pool) {
@@ -182,7 +182,7 @@ export class TenantDBManager {
     for (const [workspaceId, pool] of this.pools.entries()) {
       stats.set(workspaceId, {
         size: pool.totalCount,
-        available: pool.availableCount,
+        available: pool.idleCount,
       })
     }
 

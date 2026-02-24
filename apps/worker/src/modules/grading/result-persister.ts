@@ -1,6 +1,31 @@
-import { logger } from '../../infrastructure/logger'
-import { db } from '../../infrastructure/postgres'
-import { GradingResult } from '../types/job-schema'
+import { logger } from '@zidney/logger'
+import { GradingResult } from '../../types/job-schema'
+
+type DbRow = Record<string, any>
+type QueryResult = { rows: DbRow[] }
+type DbClient = {
+  query: (queryText: string, values?: any[]) => Promise<QueryResult>
+  release: () => void
+}
+type DbAdapter = {
+  query: (queryText: string, values?: any[]) => Promise<QueryResult>
+  connect: () => Promise<DbClient>
+}
+
+let gradingDb: DbAdapter | null = null
+
+export function configureGradingResultPersister(database: DbAdapter): void {
+  gradingDb = database
+}
+
+function getDb(): DbAdapter {
+  if (!gradingDb) {
+    throw new Error(
+      'Grading result persister database is not configured. Call configureGradingResultPersister() first.'
+    )
+  }
+  return gradingDb
+}
 
 /**
  * T049: Grading result persistence
@@ -18,6 +43,7 @@ export async function persistGradingResult(
   gradingResult: GradingResult,
   correlationId: string
 ): Promise<void> {
+  const db = getDb()
   const client = await db.connect()
 
   try {
@@ -149,6 +175,7 @@ export async function verifyResultPersistence(
   attemptId: string
 ): Promise<boolean> {
   try {
+    const db = getDb()
     const result = await db.query(
       `
       SELECT grading_result, status

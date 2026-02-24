@@ -26,7 +26,7 @@ import {
   UnlockRequest,
 } from '@zidney/domain-core/licenses/types'
 import { Context } from 'hono'
-import { Logger } from 'pino'
+import type { Logger } from '@zidney/logger'
 
 interface LicenseContext extends Context {
   license?: any

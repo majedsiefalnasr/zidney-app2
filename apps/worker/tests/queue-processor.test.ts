@@ -12,15 +12,15 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import {
   createDLQMessage,
   determineTaskAction,
   getRetryDelay,
   INIT_TENANT_SCHEMA_CONFIG,
   shouldAlertOps,
-} from '@zidney/app/worker/config/task-configs'
-import { TaskQueueProcessor } from '@zidney/app/worker/processor/queue-processor'
+} from '../src/config/task-configs'
+import { TaskQueueProcessor } from '../src/processor/queue-processor'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 const logger = createLogger('WorkerQueueProcessorTest')
@@ -135,11 +135,6 @@ describe('Worker Queue Processor - Failure Scenarios', () => {
     })
 
     it('❌ Should NEVER retry on lock timeout (suspicious activity)', () => {
-      const result = {
-        status: 'FAILED',
-        error: 'Lock timeout after 5 seconds',
-      }
-
       // If error includes lock timeout, should route to DLQ
       const config = INIT_TENANT_SCHEMA_CONFIG
       const isSkipRetry = config.retryPolicy.skipRetryOn?.includes(
@@ -405,7 +400,7 @@ describe('Worker Queue Processor - Failure Scenarios', () => {
 
       // Verify all tasks processed independently
       expect(results.length).toBe(10)
-      results.forEach((result, i) => {
+      results.forEach((result: (typeof results)[number], i: number) => {
         expect(result.id).toBe(`task-chaos-${i}`)
       })
 

@@ -13,7 +13,7 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import type { Pool } from 'pg'
 import {
   calculateSHA256,

@@ -9,7 +9,7 @@
     "test": "vitest"
   },
   "dependencies": {
-    "@zidney/logging": "workspace:*",
+    "@zidney/logger": "workspace:*",
     "@zidney/types": "workspace:*",
     "zod": "^3.22.0"
   },

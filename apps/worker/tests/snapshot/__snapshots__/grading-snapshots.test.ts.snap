@@ -1,0 +1,210 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`Grading Snapshots > Empty response set matches snapshot 1`] = `
+{
+  "pass_score": 6,
+  "passed": false,
+  "question_results": [
+    {
+      "correct_answer": "B",
+      "explanation": "You did not provide an answer to this question.",
+      "feedback": "Not answered",
+      "is_correct": false,
+      "points_earned": 0,
+      "points_possible": 10,
+      "question_id": "q1",
+      "user_answer": undefined,
+    },
+  ],
+  "score": 0,
+  "summary": "You scored 0%. The passing score is 60%. Please try again.",
+  "total_points": 10,
+}
+`;
+
+exports[`Grading Snapshots > Essay default scoring matches snapshot 1`] = `
+{
+  "correct_answer": undefined,
+  "explanation": "Default essay score applied pending manual review.",
+  "feedback": "Manual grading required",
+  "points_earned": 8,
+  "points_possible": 20,
+  "question_id": "q6",
+  "user_answer": {
+    "text": "Essay content...",
+  },
+}
+`;
+
+exports[`Grading Snapshots > Fill blank scoring matches snapshot 1`] = `
+{
+  "correct_answer": undefined,
+  "explanation": "Your answer matches.",
+  "feedback": "Correct!",
+  "is_correct": true,
+  "points_earned": 10,
+  "points_possible": 10,
+  "question_id": "q2",
+  "user_answer": {
+    "text": "Paris",
+  },
+}
+`;
+
+exports[`Grading Snapshots > MCQ scoring matches snapshot 1`] = `
+{
+  "correct_answer": "B",
+  "explanation": "Your answer matches the correct option.",
+  "feedback": "Correct!",
+  "is_correct": true,
+  "points_earned": 10,
+  "points_possible": 10,
+  "question_id": "q1",
+  "user_answer": {
+    "selected": "B",
+  },
+}
+`;
+
+exports[`Grading Snapshots > Matching scoring matches snapshot 1`] = `
+{
+  "correct_answer": undefined,
+  "explanation": "You correctly matched 2/2 pairs.",
+  "feedback": "All matches correct",
+  "is_correct": true,
+  "points_earned": 10,
+  "points_possible": 10,
+  "question_id": "q4",
+  "user_answer": {
+    "pairs": [
+      {
+        "id": "a1",
+        "target": "b1",
+      },
+      {
+        "id": "a2",
+        "target": "b2",
+      },
+    ],
+  },
+}
+`;
+
+exports[`Grading Snapshots > Ordering scoring matches snapshot 1`] = `
+{
+  "correct_answer": undefined,
+  "explanation": "Your sequence matches the correct order.",
+  "feedback": "Correct order",
+  "is_correct": true,
+  "points_earned": 10,
+  "points_possible": 10,
+  "question_id": "q5",
+  "user_answer": {
+    "order": [
+      "A",
+      "B",
+      "C",
+      "D",
+    ],
+  },
+}
+`;
+
+exports[`Grading Snapshots > Overall score for multi-question exam matches snapshot 1`] = `
+{
+  "pass_score": 12,
+  "passed": true,
+  "question_results": [
+    {
+      "correct_answer": "B",
+      "explanation": "Your answer matches the correct option.",
+      "feedback": "Correct!",
+      "is_correct": true,
+      "points_earned": 10,
+      "points_possible": 10,
+      "question_id": "q1",
+      "user_answer": {
+        "selected": "B",
+      },
+    },
+    {
+      "correct_answer": "A",
+      "explanation": "Your answer matches the correct option.",
+      "feedback": "Correct!",
+      "is_correct": true,
+      "points_earned": 10,
+      "points_possible": 10,
+      "question_id": "q2",
+      "user_answer": {
+        "selected": "A",
+      },
+    },
+  ],
+  "score": 100,
+  "summary": "Excellent! You scored 100% and passed with an outstanding result.",
+  "total_points": 20,
+}
+`;
+
+exports[`Grading Snapshots > Partial credit scenario matches snapshot 1`] = `
+{
+  "pass_score": 6,
+  "passed": false,
+  "question_results": [
+    {
+      "correct_answer": undefined,
+      "explanation": "You correctly matched 1/2 pairs.",
+      "feedback": "Some matches incorrect",
+      "is_correct": false,
+      "points_earned": 5,
+      "points_possible": 10,
+      "question_id": "q1",
+      "user_answer": {
+        "pairs": [
+          {
+            "id": "a",
+            "target": "x",
+          },
+          {
+            "id": "b",
+            "target": "z",
+          },
+        ],
+      },
+    },
+  ],
+  "score": 50,
+  "summary": "You scored 50%. The passing score is 60%. Please try again.",
+  "total_points": 10,
+}
+`;
+
+exports[`Grading Snapshots > True/False scoring matches snapshot 1`] = `
+{
+  "correct_answer": true,
+  "explanation": "Your answer matches the correct option.",
+  "feedback": "Correct!",
+  "is_correct": true,
+  "points_earned": 5,
+  "points_possible": 5,
+  "question_id": "q3",
+  "user_answer": {
+    "selected": true,
+  },
+}
+`;
+
+exports[`Grading Snapshots > Wrong answer scoring matches snapshot 1`] = `
+{
+  "correct_answer": "B",
+  "explanation": "The correct answer is: B",
+  "feedback": "Incorrect",
+  "is_correct": false,
+  "points_earned": 0,
+  "points_possible": 10,
+  "question_id": "q7",
+  "user_answer": {
+    "selected": "A",
+  },
+}
+`;

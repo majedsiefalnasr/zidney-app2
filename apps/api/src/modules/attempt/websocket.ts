@@ -1,7 +1,7 @@
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { Hono } from 'hono'
+import { Jwt } from 'hono/utils/jwt'
 import { redis } from '../../infrastructure/redis'
-import { validateJWT } from '../auth/jwt-validator'
 
 const logger = createLogger('websocket')
 
@@ -46,7 +46,17 @@ app.get('/ws/attempt/:id', async (c) => {
     }
 
     const token = authHeader.substring(7)
-    const claims = validateJWT(token)
+    let claims: any = null
+
+    try {
+      claims = await Jwt.verify(
+        token,
+        process.env.JWT_SECRET || 'dev-secret-change-in-production',
+        'HS256'
+      )
+    } catch {
+      claims = null
+    }
 
     if (!claims) {
       logger.warn(`WebSocket auth failed: invalid JWT`, {
@@ -126,7 +136,7 @@ app.get('/ws/attempt/:id', async (c) => {
     })
 
     // Upgrade to WebSocket
-    return c.upgrade((ws) => {
+    return (c as any).upgrade((ws: any) => {
       let heartbeatInterval: NodeJS.Timeout | null = null
       let heartbeatTimeout: NodeJS.Timeout | null = null
       const messageTimestamps: number[] = []
@@ -162,7 +172,7 @@ app.get('/ws/attempt/:id', async (c) => {
       }
 
       // Message handler
-      ws.onmessage = async (event) => {
+      ws.onmessage = async (event: any) => {
         try {
           // Clear heartbeat timeout on message
           if (heartbeatTimeout) {
@@ -304,7 +314,7 @@ app.get('/ws/attempt/:id', async (c) => {
       }
 
       // Error handler
-      ws.onerror = (error) => {
+      ws.onerror = (error: unknown) => {
         logger.error(`WebSocket connection error`, {
           correlation_id: correlationIDValue,
           workspace_slug: workspace.slug,
