@@ -5,7 +5,7 @@
   "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_12_PROVISIONING_TRIGGER.md",
   "branch": "012-provisioning-trigger",
   "base_branch": "develop",
-  "current_step": "pre_step",
+  "current_step": "specify",
   "stage_status": "DRAFT",
   "clarifications_resolved": false,
   "drift_passed": false,
@@ -18,6 +18,14 @@
     {
       "event": "branch_created",
       "branch": "012-provisioning-trigger",
+      "timestamp": "2026-02-24T00:00:00Z"
+    },
+    {
+      "event": "specify_complete",
+      "spec_lines": 850,
+      "checklist_items": 22,
+      "checklist_pass_rate": "100%",
+      "unresolved_clarifications": 0,
       "timestamp": "2026-02-24T00:00:00Z"
     }
   ]
