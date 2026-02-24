@@ -9,7 +9,7 @@
  * across API → Queue → Worker pipeline.
  */
 
-import { ProvisioningErrorCode } from './errors/provisioning-errors'
+import { ProvisioningErrorCode } from '../errors/provisioning-errors'
 
 /**
  * Job Status enum
@@ -48,6 +48,7 @@ export interface RetryPolicy {
 export interface ProvisioningJob {
   // Core identification
   jobId: string
+  id?: string // Alias for jobId (for compatibility)
   licenseId: string
   correlationId: string
 
@@ -64,6 +65,8 @@ export interface ProvisioningJob {
   // Feature flags
   usesDivisions: boolean
   defaultLanguage: string
+  language?: string // Optional alias for defaultLanguage
+  timezone?: string // Workspace timezone for scheduling
 
   // Versioning (frozen at license creation)
   schemaVersion: string
@@ -80,6 +83,8 @@ export interface ProvisioningJob {
 
   // Tracking
   attemptNumber: number
+  retryCount?: number // Separate retry counter for handlers
+  currentStep?: ProvisioningStep // Current step in provisioning pipeline
   status: ProvisioningJobStatus
   lastError?: {
     code: ProvisioningErrorCode
@@ -102,16 +107,27 @@ export interface ProvisioningJob {
  */
 export enum ProvisioningStep {
   INITIALIZED = 'INITIALIZED',
+  VALIDATE_LICENSE = 'VALIDATE_LICENSE',
   LICENSE_VALIDATED = 'LICENSE_VALIDATED',
+  ACQUIRE_LOCK = 'ACQUIRE_LOCK',
   LOCK_ACQUIRED = 'LOCK_ACQUIRED',
+  CHECK_IDEMPOTENCY = 'CHECK_IDEMPOTENCY',
   IDEMPOTENCY_CHECKED = 'IDEMPOTENCY_CHECKED',
+  CREATE_DATABASE = 'CREATE_DATABASE',
   DATABASE_CREATED = 'DATABASE_CREATED',
+  RUN_MIGRATIONS = 'RUN_MIGRATIONS',
   MIGRATIONS_APPLIED = 'MIGRATIONS_APPLIED',
+  SEED_DATA = 'SEED_DATA',
   SEED_DATA_INSERTED = 'SEED_DATA_INSERTED',
+  CREATE_ADMIN_ACCOUNT = 'CREATE_ADMIN_ACCOUNT',
   ADMIN_ACCOUNT_CREATED = 'ADMIN_ACCOUNT_CREATED',
+  INSERT_REGISTRY = 'INSERT_REGISTRY',
   REGISTRY_INSERTED = 'REGISTRY_INSERTED',
+  ACTIVATE_LICENSE = 'ACTIVATE_LICENSE',
   LICENSE_ACTIVATED = 'LICENSE_ACTIVATED',
+  RELEASE_LOCK = 'RELEASE_LOCK',
   LOCK_RELEASED = 'LOCK_RELEASED',
+  LOG_SUCCESS = 'LOG_SUCCESS',
   COMPLETED = 'COMPLETED',
 }
 

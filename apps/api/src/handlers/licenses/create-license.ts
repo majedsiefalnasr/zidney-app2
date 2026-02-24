@@ -67,7 +67,7 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
           error.message,
           { slug: request.workspace_slug }
         ),
-        { status: error.httpStatus }
+        error.httpStatus as any
       )
     }
 
