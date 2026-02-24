@@ -1,9 +1,10 @@
-import { createLogger } from '@zidney/logging'
-import { JwtPayload, verify } from 'hono/utils/jwt'
+import { createLogger } from '@zidney/logger'
+import { Jwt } from 'hono/utils/jwt'
+import type { JWTPayload } from 'hono/utils/jwt/types'
 
 const logger = createLogger('ws-auth')
 
-export interface WebSocketJWTClaims extends JwtPayload {
+export interface WebSocketJWTClaims extends JWTPayload {
   workspace_id: string
   workspace_slug: string
   user_id: string
@@ -31,7 +32,7 @@ export async function validateWebSocketJWT(
 ): Promise<WebSocketJWTClaims | null> {
   try {
     // Verify JWT signature and expiration
-    const payload = await verify(token, jwtSecret)
+    const payload = (await Jwt.verify(token, jwtSecret, 'HS256')) as JWTPayload
 
     if (!payload) {
       logger.warn(`WebSocket JWT verification failed: invalid signature`)

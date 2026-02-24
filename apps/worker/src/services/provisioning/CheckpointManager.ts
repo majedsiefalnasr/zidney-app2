@@ -207,12 +207,10 @@ export class CheckpointManager {
    * Get all steps in order
    */
   getAllSteps(): ProvisioningStep[] {
-    const steps: ProvisioningStep[] = []
-    for (const [step, ordinal] of this.step_ordinals.entries()) {
-      steps.push({ ordinal, step } as any)
-    }
-    steps.sort((a, b) => a.ordinal - b.ordinal)
-    return steps.map((s) => s.step)
+    const ordered = Array.from(this.step_ordinals.entries())
+      .sort((a, b) => a[1] - b[1])
+      .map(([step]) => step as ProvisioningStep)
+    return ordered
   }
 }
 

@@ -280,7 +280,7 @@ ADD COLUMN product_id UUID NOT NULL REFERENCES products(id);
 Structured logging calls found in:
 
 ```typescript
-// packages/logging/products/productsLogger.ts
+// packages/logger/products/productsLogger.ts
 logger.info('products_list_success', {
   correlation_id: correlationId,
   workspace_id: c.get('workspaceId'),

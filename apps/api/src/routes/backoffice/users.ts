@@ -1,9 +1,22 @@
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { Context, Hono } from 'hono'
 import { toLicenseError } from '../../responses/license-error-handler'
 import { createUserWithLimitCheck } from '../../utils/transaction-wrapper'
 
 const logger = createLogger('backoffice-users')
+
+function parseLimitValue(limit: string | number | null | undefined): number | null {
+  if (limit === 'unlimited' || limit === null || limit === undefined) {
+    return null
+  }
+
+  if (typeof limit === 'number') {
+    return Number.isFinite(limit) ? limit : null
+  }
+
+  const parsed = Number.parseInt(limit, 10)
+  return Number.isNaN(parsed) ? null : parsed
+}
 
 /**
  * Backoffice Users Router
@@ -51,7 +64,7 @@ backofficeUsersRouter.post('/backoffice/users', async (ctx: Context) => {
         },
         'Invalid user creation request'
       )
-      return ctx.json(toLicenseError('INVALID_REQUEST', 400), { status: 400 })
+      return ctx.json(toLicenseError('INVALID_REQUEST'), { status: 400 })
     }
 
     // Validate role
@@ -67,7 +80,7 @@ backofficeUsersRouter.post('/backoffice/users', async (ctx: Context) => {
         },
         'Invalid user role'
       )
-      return ctx.json(toLicenseError('INVALID_ROLE', 400), { status: 400 })
+      return ctx.json(toLicenseError('INVALID_ROLE'), { status: 400 })
     }
 
     // Validate email format (basic)
@@ -83,16 +96,27 @@ backofficeUsersRouter.post('/backoffice/users', async (ctx: Context) => {
         },
         'Invalid email format'
       )
-      return ctx.json(toLicenseError('INVALID_EMAIL', 400), { status: 400 })
+      return ctx.json(toLicenseError('INVALID_EMAIL'), { status: 400 })
+    }
+
+    if (!workspace_id) {
+      logger.error(
+        {
+          correlation_id: correlationId,
+          action: 'user_create_missing_workspace',
+          error_code: 'WORKSPACE_NOT_FOUND',
+        },
+        'Workspace context is missing'
+      )
+      return ctx.json(toLicenseError('WORKSPACE_NOT_FOUND'), { status: 404 })
     }
 
     // Determine limit based on role
     let roleLimit: number | null = null
     if (role === 'STUDENT') {
-      roleLimit =
-        studentLimit === 'unlimited' ? null : parseInt(studentLimit, 10)
+      roleLimit = parseLimitValue(studentLimit)
     } else if (role === 'STAFF') {
-      roleLimit = staffLimit === 'unlimited' ? null : parseInt(staffLimit, 10)
+      roleLimit = parseLimitValue(staffLimit)
     }
     // ADMIN has no limit
 
@@ -126,7 +150,7 @@ backofficeUsersRouter.post('/backoffice/users', async (ctx: Context) => {
           },
           `${role} limit exceeded`
         )
-        return ctx.json(toLicenseError('STUDENT_LIMIT_EXCEEDED', 402), {
+        return ctx.json(toLicenseError('STUDENT_LIMIT_EXCEEDED'), {
           status: 402,
         })
       }
@@ -142,7 +166,7 @@ backofficeUsersRouter.post('/backoffice/users', async (ctx: Context) => {
           },
           'Duplicate email'
         )
-        return ctx.json(toLicenseError('EMAIL_EXISTS', 409), { status: 409 })
+        return ctx.json(toLicenseError('EMAIL_EXISTS'), { status: 409 })
       }
 
       if (transactionResult.error_code === 'SOFT_LOCKED') {
@@ -155,7 +179,7 @@ backofficeUsersRouter.post('/backoffice/users', async (ctx: Context) => {
           },
           'License is soft-locked'
         )
-        return ctx.json(toLicenseError('LICENSE_SOFT_LOCKED', 423), {
+        return ctx.json(toLicenseError('LICENSE_SOFT_LOCKED'), {
           status: 423,
         })
       }
@@ -170,7 +194,7 @@ backofficeUsersRouter.post('/backoffice/users', async (ctx: Context) => {
           },
           'License is archived'
         )
-        return ctx.json(toLicenseError('LICENSE_ARCHIVED', 403), {
+        return ctx.json(toLicenseError('LICENSE_ARCHIVED'), {
           status: 403,
         })
       }
@@ -185,7 +209,7 @@ backofficeUsersRouter.post('/backoffice/users', async (ctx: Context) => {
         },
         `User creation failed: ${transactionResult.error_code}`
       )
-      return ctx.json(toLicenseError('INTERNAL_ERROR', 500), { status: 500 })
+      return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })
     }
 
     // Success: User created
@@ -227,7 +251,7 @@ backofficeUsersRouter.post('/backoffice/users', async (ctx: Context) => {
       'User creation failed'
     )
 
-    return ctx.json(toLicenseError('INTERNAL_ERROR', 500), { status: 500 })
+    return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })
   }
 })
 
@@ -281,7 +305,7 @@ backofficeUsersRouter.get('/backoffice/users', async (ctx: Context) => {
       'Failed to list users'
     )
 
-    return ctx.json(toLicenseError('INTERNAL_ERROR', 500), { status: 500 })
+    return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })
   }
 })
 
@@ -318,7 +342,7 @@ backofficeUsersRouter.get(
           },
           'User not found'
         )
-        return ctx.json(toLicenseError('USER_NOT_FOUND', 404), { status: 404 })
+        return ctx.json(toLicenseError('USER_NOT_FOUND'), { status: 404 })
       }
 
       const user = result.rows[0]
@@ -351,7 +375,7 @@ backofficeUsersRouter.get(
         'Failed to retrieve user'
       )
 
-      return ctx.json(toLicenseError('INTERNAL_ERROR', 500), { status: 500 })
+      return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })
     }
   }
 )
@@ -390,7 +414,7 @@ backofficeUsersRouter.patch(
           },
           'User not found for soft-delete'
         )
-        return ctx.json(toLicenseError('USER_NOT_FOUND', 404), { status: 404 })
+        return ctx.json(toLicenseError('USER_NOT_FOUND'), { status: 404 })
       }
 
       const user = result.rows[0]
@@ -427,7 +451,7 @@ backofficeUsersRouter.patch(
         'Failed to soft-delete user'
       )
 
-      return ctx.json(toLicenseError('INTERNAL_ERROR', 500), { status: 500 })
+      return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })
     }
   }
 )

@@ -1,7 +1,3 @@
-import type { Context, Next } from 'hono'
-import { v4 as uuidv4 } from 'uuid'
-import { MiddlewareStage, recordMiddlewareExecution } from './middleware-chain'
-
 /**
  * T017: Correlation ID Middleware
  *
@@ -20,6 +16,10 @@ import { MiddlewareStage, recordMiddlewareExecution } from './middleware-chain'
  * Execution Order: #1 (FIRST - before tenant resolver)
  * All logs must include correlationId from request context
  */
+
+import type { Context, Next } from 'hono'
+import { v4 as uuidv4 } from 'uuid'
+import { MiddlewareStage, recordMiddlewareExecution } from './middleware-chain'
 
 /**
  * Correlation ID middleware
@@ -114,16 +114,4 @@ export function logWithCorrelation(
       ...(context || {}),
     })
   )
-
-  // Add to response locals for downstream middleware
-  res.locals.correlationId = req.correlationId
-
-  next()
-}
-
-/**
- * Extract correlation ID from request
- */
-export function getCorrelationId(req: Request): string {
-  return req.correlationId || 'unknown'
 }

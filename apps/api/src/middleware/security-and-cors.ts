@@ -1,4 +1,4 @@
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { Hono } from 'hono'
 
 const logger = createLogger('security-cors')

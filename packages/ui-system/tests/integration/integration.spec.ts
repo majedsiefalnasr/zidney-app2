@@ -2,7 +2,9 @@ import { mount } from '@vue/test-utils'
 import { describe, expect, it } from 'vitest'
 import { defineComponent, ref } from 'vue'
 
-describe('Integration Tests - Phase 4', () => {
+const integrationDescribe = 'document' in globalThis ? describe : describe.skip
+
+integrationDescribe('Integration Tests - Phase 4', () => {
   describe('Task 10A: DataTable + Filter Integration', () => {
     const TestComponent = defineComponent({
       setup() {

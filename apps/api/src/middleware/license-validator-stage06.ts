@@ -15,7 +15,7 @@
  * - Forces graceful degradation: 423 (SOFT_LOCKED), 403 (ARCHIVED)
  */
 
-import { Logger } from '@zidney/logging'
+import { Logger } from '@zidney/logger'
 import { Context, MiddlewareHandler } from 'hono'
 
 export interface LicenseContextStage06 {

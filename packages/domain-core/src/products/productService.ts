@@ -16,7 +16,7 @@
  * - Slug is immutable after creation
  */
 
-import { logProductError, logSlowOperation } from '@zidney/logging/products'
+import { logProductError, logSlowOperation } from '@zidney/logger/products'
 import { AppError, ErrorCodes } from '@zidney/types/errors/ErrorCodes'
 import {
   AuditAction,

@@ -21,8 +21,8 @@
  */
 
 import { Pool } from 'pg'
-import { v4 as uuid } from 'uuid'
-import { logger } from '../services/logger'
+import { randomUUID } from 'crypto'
+import { logger } from '@zidney/logger'
 
 /**
  * Interface: DLQ Record
@@ -325,7 +325,7 @@ async function createGradingFailureNotification(
 ): Promise<void> {
   // Check if notifications table exists
   try {
-    const notificationId = uuid()
+    const notificationId = randomUUID()
     const createdAt = new Date()
 
     await masterDb.query(

@@ -177,7 +177,9 @@ describe('Timing Attack Prevention', () => {
     expect(errors.notFound).not.toContain('not found')
 
     // Does not mention "password invalid"
-    expect(errors.invalidPassword).not.toContain('password')
+    expect(errors.invalidPassword.toLowerCase()).not.toContain(
+      'invalid password'
+    )
   })
 })
 

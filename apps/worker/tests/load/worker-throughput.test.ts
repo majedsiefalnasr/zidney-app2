@@ -19,16 +19,55 @@ describe('Worker Throughput', () => {
   let workspaceId: string
   let pool: any
   const jobs: any[] = []
+  const runId = Date.now().toString(36)
+  const ddlLockId = 62007001
 
   beforeAll(async () => {
+    await db.master.query('SELECT pg_advisory_lock($1)', [ddlLockId])
+    try {
+      await db.master.query(`
+        CREATE TABLE IF NOT EXISTS workspaces (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          slug TEXT UNIQUE NOT NULL,
+          name TEXT NOT NULL,
+          schema_version INTEGER NOT NULL DEFAULT 1,
+          product_version TEXT NOT NULL DEFAULT '1.0.0',
+          license_status TEXT NOT NULL DEFAULT 'ACTIVE'
+        );
+      `)
+    } finally {
+      await db.master.query('SELECT pg_advisory_unlock($1)', [ddlLockId])
+    }
+
     // Setup workspace
     const wsRes = await db.master.query(
       `INSERT INTO workspaces (slug, name, schema_version, product_version, license_status)
-       VALUES ('worker-throughput-ws', 'Worker Throughput WS', 1, '1.0.0', 'ACTIVE')
-       RETURNING id`
+       VALUES ($1, 'Worker Throughput WS', 1, '1.0.0', 'ACTIVE')
+       RETURNING id`,
+      [`worker-throughput-ws-${runId}`]
     )
     workspaceId = wsRes.rows[0].id
     pool = getTenantPool(workspaceId)
+
+    await pool.query('SELECT pg_advisory_lock($1)', [ddlLockId])
+    try {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS attempts (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          workspace_id TEXT NULL,
+          user_id TEXT NOT NULL,
+          exam_id TEXT NOT NULL,
+          status TEXT NOT NULL DEFAULT 'SUBMITTED',
+          question_snapshot JSONB NULL,
+          grading_config_snapshot JSONB NULL
+        );
+        ALTER TABLE attempts ADD COLUMN IF NOT EXISTS workspace_id TEXT NULL;
+        ALTER TABLE attempts ADD COLUMN IF NOT EXISTS question_snapshot JSONB NULL;
+        ALTER TABLE attempts ADD COLUMN IF NOT EXISTS grading_config_snapshot JSONB NULL;
+      `)
+    } finally {
+      await pool.query('SELECT pg_advisory_unlock($1)', [ddlLockId])
+    }
 
     // Create 1000 submitted attempts
     for (let i = 0; i < 1000; i++) {
@@ -69,13 +108,11 @@ describe('Worker Throughput', () => {
     // Simulate worker processing
     for (let i = 0; i < jobs.length; i++) {
       const job = jobs[i]
+      void job
 
       // Mock grading
-      const graded = {
-        attempt_id: job.attempt_id,
-        score: Math.floor(Math.random() * 100),
-        status: 'FINALIZED',
-      }
+      const score = Math.floor(Math.random() * 100)
+      void score
 
       completed++
 
@@ -132,12 +169,12 @@ describe('Worker Throughput', () => {
     // Re-grade same attempts
     const attempts = jobs.slice(0, 10) // Sample 10
 
-    const results1 = attempts.map((attempt) => ({
+    const results1 = attempts.map((_attempt) => ({
       score: 75, // Fixed for test
       passed: true,
     }))
 
-    const results2 = attempts.map((attempt) => ({
+    const results2 = attempts.map((_attempt) => ({
       score: 75, // Should be same
       passed: true,
     }))

@@ -21,7 +21,7 @@
  * ADRs: ADR-0002 (snapshot model)
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import {
   FlagsSnapshot,
   GradingConfigSnapshot,

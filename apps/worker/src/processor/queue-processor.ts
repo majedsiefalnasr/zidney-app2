@@ -8,7 +8,7 @@
  * Task: T027 (queue processor integration)
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import type { Pool } from 'pg'
 import {
   createDLQMessage,
@@ -159,7 +159,7 @@ export class TaskQueueProcessor {
       // In production: retrieve pool from resolver
       // For now: create new pool (should be injected from resolver)
       throw new Error(
-        'Pool not found for workspace: ${workspace_id}. Initialize via tenant resolver first.'
+        `Pool not found for workspace: ${workspace_id}. Initialize via tenant resolver first.`
       )
     }
 
@@ -300,17 +300,6 @@ export class TaskQueueProcessor {
       task_type: dlqMessage.taskType,
       workspace_id: dlqMessage.workspaceId,
     })
-
-    // Create new task for requeue
-    const newTask: QueuedTask = {
-      id: dlqMessage.taskId,
-      type: dlqMessage.taskType,
-      payload: dlqMessage.payload,
-      attempt: 1, // Reset to first attempt
-      createdAt: new Date().toISOString(),
-      status: 'PENDING',
-      correlationId: 'manual-dlq-retry',
-    }
 
     // Remove from DLQ
     this.dlqQueue.splice(index, 1)

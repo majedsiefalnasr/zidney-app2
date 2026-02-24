@@ -1,7 +1,7 @@
 /**
- * Worker Logger - Pino singleton with job scope injection.
+ * Worker logger singleton with job scope injection.
  *
- * Follows same pattern as API logger (T001) but specialized for worker job processing.
+ * Uses @zidney/logger package as the single logging implementation.
  * Enables dual ID tracking: request_id (from API) + job_id (per job execution).
  *
  * Structure:
@@ -10,64 +10,19 @@
  * - Context injection: All logs automatically include injected fields (no manual params)
  */
 
+import { createLogger, type Logger } from '@zidney/logger'
 import { JobEnvelope } from '@zidney/types/job-envelope'
-import pino, { Logger, LoggerOptions } from 'pino'
 
 /**
- * Pino logger configuration for worker service.
- */
-const pinoConfig: LoggerOptions = {
-  level: process.env.LOG_LEVEL || 'info',
-  base: {
-    service: process.env.SERVICE_NAME || 'worker',
-    environment: process.env.NODE_ENV || 'development',
-  },
-  timestamp: pino.stdTimeFunctions.isoTime,
-  transport:
-    process.env.NODE_ENV === 'production'
-      ? undefined
-      : {
-          target: 'pino-pretty',
-          options: {
-            colorize: true,
-            translateTime: 'SYS:standard',
-            ignore: 'pid,hostname',
-          },
-        },
-  serializers: {
-    job: (job: any) => ({
-      job_id: job.job_id,
-      job_name: job.job_name,
-      request_id: job.request_id,
-      workspace_id: job.workspace_id,
-      attempt_id: job.attempt_id,
-      retry_count: job.retry_count,
-    }),
-  },
-  redact: {
-    paths: [
-      '*.password',
-      '*.token',
-      '*.jwt',
-      '*.api_key',
-      '*.secret',
-      '*.access_token',
-      '*.refresh_token',
-    ],
-    remove: false,
-  },
-}
-
-/**
- * Global Pino logger singleton.
+ * Global logger singleton.
  * Instantiated once per worker service process.
  */
-const logger: Logger = pino(pinoConfig)
+const logger: Logger = createLogger(process.env.SERVICE_NAME || 'worker')
 
 /**
  * Get the global logger instance (singleton).
  *
- * @returns Pino logger singleton
+ * @returns Logger singleton
  */
 export function getLogger(): Logger {
   return logger
@@ -90,7 +45,7 @@ export function getLogger(): Logger {
  * @returns Child logger with injected context
  */
 export function getJobLogger(job: JobEnvelope): Logger {
-  const context: Record<string, any> = {
+  const context: Record<string, unknown> = {
     job_id: job.job_id,
     request_id: job.request_id,
     workspace_id: job.workspace_id,

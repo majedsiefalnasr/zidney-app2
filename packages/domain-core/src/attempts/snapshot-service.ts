@@ -8,7 +8,7 @@
  * Task: T035 (Snapshot capture service)
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { Pool } from 'pg'
 
 const logger = createLogger('SnapshotService')

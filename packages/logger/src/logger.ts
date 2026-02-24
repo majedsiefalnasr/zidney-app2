@@ -6,7 +6,7 @@
  *
  * Usage:
  * ```typescript
- * import { createLogger } from '@zidney/logging'
+ * import { createLogger } from '@zidney/logger'
  *
  * const logger = createLogger('api')
  * logger.info('Server started', { port: 3000 })
@@ -27,20 +27,24 @@ import { FORBIDDEN_FIELDS, SENSITIVE_PATTERNS } from './types'
  * Log level priority mapping
  */
 const LEVEL_PRIORITY: Record<LogLevel, number> = {
-  debug: 0,
-  info: 1,
-  warn: 2,
-  error: 3,
+  trace: 0,
+  debug: 1,
+  info: 2,
+  warn: 3,
+  error: 4,
+  fatal: 5,
 }
 
 /**
  * Console colors for log levels
  */
 const LEVEL_COLORS: Record<LogLevel, string> = {
+  trace: '\x1b[90m', // gray
   debug: '\x1b[36m', // cyan
   info: '\x1b[32m', // green
   warn: '\x1b[33m', // yellow
   error: '\x1b[31m', // red
+  fatal: '\x1b[35m', // magenta
 }
 
 const RESET_COLOR = '\x1b[0m'
@@ -84,9 +88,14 @@ export class Logger {
    * Parse log level from string
    */
   private parseLogLevel(level: string): LogLevel {
-    const normalized = level.toLowerCase() as LogLevel
+    const normalized = level.toLowerCase()
+
+    if (normalized === 'critical') {
+      return 'fatal'
+    }
+
     if (normalized in LEVEL_PRIORITY) {
-      return normalized
+      return normalized as LogLevel
     }
     return 'info'
   }
@@ -232,8 +241,11 @@ export class Logger {
       `${color}[${timestamp}] [${entry.service}] [${levelUpper}]${RESET_COLOR}${contextStr} [${entry.event}] ${entry.message}`
     )
 
-    // Output additional context on debug
-    if (entry.level === 'debug' && Object.keys(entry.context).length > 0) {
+    // Output additional context on trace/debug
+    if (
+      (entry.level === 'trace' || entry.level === 'debug') &&
+      Object.keys(entry.context).length > 0
+    ) {
       console.log(
         `  ${color}Context:${RESET_COLOR}`,
         JSON.stringify(entry.context, null, 2)
@@ -241,7 +253,7 @@ export class Logger {
     }
 
     // Output error details
-    if (entry.level === 'error' && entry.context.error) {
+    if ((entry.level === 'error' || entry.level === 'fatal') && entry.context.error) {
       console.error(`  ${color}Error:${RESET_COLOR}`, entry.context.error)
     }
   }
@@ -259,8 +271,52 @@ export class Logger {
    * @param message - Log message
    * @param context - Optional context fields
    */
-  debug(message: string, context?: LogContext): void {
-    this.output(this.createEntry('debug', message, context))
+  private normalizeArgs(
+    messageOrContext: string | LogContext,
+    contextOrMessage?: LogContext | string
+  ): { message: string; context?: LogContext } {
+    if (typeof messageOrContext === 'string') {
+      if (typeof contextOrMessage === 'string') {
+        return { message: messageOrContext, context: { note: contextOrMessage } }
+      }
+      return { message: messageOrContext, context: contextOrMessage }
+    }
+
+    return {
+      message:
+        typeof contextOrMessage === 'string' ? contextOrMessage : 'log_event',
+      context: messageOrContext,
+    }
+  }
+
+  private logAt(
+    level: LogLevel,
+    messageOrContext: string | LogContext,
+    contextOrMessage?: LogContext | string
+  ): void {
+    const { message, context } = this.normalizeArgs(
+      messageOrContext,
+      contextOrMessage
+    )
+    this.output(this.createEntry(level, message, context))
+  }
+
+  trace(message: string, context?: LogContext): void
+  trace(context: LogContext, message?: string): void
+  trace(
+    messageOrContext: string | LogContext,
+    contextOrMessage?: LogContext | string
+  ): void {
+    this.logAt('trace', messageOrContext, contextOrMessage)
+  }
+
+  debug(message: string, context?: LogContext): void
+  debug(context: LogContext, message?: string): void
+  debug(
+    messageOrContext: string | LogContext,
+    contextOrMessage?: LogContext | string
+  ): void {
+    this.logAt('debug', messageOrContext, contextOrMessage)
   }
 
   /**
@@ -269,8 +325,13 @@ export class Logger {
    * @param message - Log message
    * @param context - Optional context fields
    */
-  info(message: string, context?: LogContext): void {
-    this.output(this.createEntry('info', message, context))
+  info(message: string, context?: LogContext): void
+  info(context: LogContext, message?: string): void
+  info(
+    messageOrContext: string | LogContext,
+    contextOrMessage?: LogContext | string
+  ): void {
+    this.logAt('info', messageOrContext, contextOrMessage)
   }
 
   /**
@@ -279,8 +340,13 @@ export class Logger {
    * @param message - Log message
    * @param context - Optional context fields
    */
-  warn(message: string, context?: LogContext): void {
-    this.output(this.createEntry('warn', message, context))
+  warn(message: string, context?: LogContext): void
+  warn(context: LogContext, message?: string): void
+  warn(
+    messageOrContext: string | LogContext,
+    contextOrMessage?: LogContext | string
+  ): void {
+    this.logAt('warn', messageOrContext, contextOrMessage)
   }
 
   /**
@@ -289,8 +355,31 @@ export class Logger {
    * @param message - Log message
    * @param context - Optional context fields
    */
-  error(message: string, context?: LogContext): void {
-    this.output(this.createEntry('error', message, context))
+  error(message: string, context?: LogContext): void
+  error(context: LogContext, message?: string): void
+  error(
+    messageOrContext: string | LogContext,
+    contextOrMessage?: LogContext | string
+  ): void {
+    this.logAt('error', messageOrContext, contextOrMessage)
+  }
+
+  fatal(message: string, context?: LogContext): void
+  fatal(context: LogContext, message?: string): void
+  fatal(
+    messageOrContext: string | LogContext,
+    contextOrMessage?: LogContext | string
+  ): void {
+    this.logAt('fatal', messageOrContext, contextOrMessage)
+  }
+
+  critical(message: string, context?: LogContext): void
+  critical(context: LogContext, message?: string): void
+  critical(
+    messageOrContext: string | LogContext,
+    contextOrMessage?: LogContext | string
+  ): void {
+    this.logAt('fatal', messageOrContext, contextOrMessage)
   }
 
   /**
@@ -354,5 +443,17 @@ export function createLogger(
     ...config,
   })
 }
+
+const defaultLogger = createLogger(process.env.SERVICE_NAME || 'app')
+
+export function getLogger(): Logger {
+  return defaultLogger
+}
+
+export function createChildLogger(context: LogContext): Logger {
+  return defaultLogger.child(context)
+}
+
+export const logger = defaultLogger
 
 export default Logger

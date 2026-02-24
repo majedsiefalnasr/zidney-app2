@@ -14,8 +14,11 @@ import { Pool, PoolClient } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 const getConnectionString = () => {
-  const user = process.env.DB_USER || 'postgres'
-  const password = process.env.DB_PASSWORD || 'postgres'
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL
+  }
+  const user = process.env.DB_USER || 'zidney_app'
+  const password = process.env.DB_PASSWORD || 'change-me-in-production'
   const host = process.env.DB_HOST || 'localhost'
   const port = process.env.DB_PORT || '5432'
   const database = process.env.DB_DATABASE || 'zidney_test_tenant'

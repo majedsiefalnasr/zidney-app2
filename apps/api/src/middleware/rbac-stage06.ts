@@ -18,7 +18,7 @@
  * - User can only access their own attempts (except instructors)
  */
 
-import { Logger } from '@zidney/logging'
+import { Logger } from '@zidney/logger'
 import { Context, MiddlewareHandler } from 'hono'
 
 export type AttemptRole = 'student' | 'instructor' | 'admin'

@@ -12,7 +12,7 @@
  * - Provide safe async accessor for tenant databases
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { Pool, PoolClient } from 'pg'
 
 const logger = createLogger('tenant-pool')
@@ -50,6 +50,43 @@ const tenantPools = new Map<string, Pool>()
  */
 const poolCreationLocks = new Map<string, Promise<Pool>>()
 
+function createPoolInstance(workspaceId: string, tenantDatabaseUrl: string): Pool {
+  const pool = new Pool({
+    connectionString: tenantDatabaseUrl,
+    ...DEFAULT_POOL_CONFIG,
+    application_name: `zidney-api-tenant-${workspaceId}`,
+  })
+
+  pool.on('error', (error) => {
+    logger.error('Unexpected error on idle client in tenant pool', {
+      workspace_id: workspaceId,
+      error: error.message,
+    })
+  })
+
+  return pool
+}
+
+/**
+ * Get or lazily create a tenant pool without async connection validation.
+ *
+ * This is primarily used by existing routes/tests that use a synchronous pool
+ * accessor. For the fully validated path, prefer getTenantDatabase().
+ */
+export function getTenantPoolSync(
+  workspaceId: string,
+  tenantDatabaseUrl: string
+): Pool {
+  const existingPool = tenantPools.get(workspaceId)
+  if (existingPool) {
+    return existingPool
+  }
+
+  const pool = createPoolInstance(workspaceId, tenantDatabaseUrl)
+  tenantPools.set(workspaceId, pool)
+  return pool
+}
+
 /**
  * Get or create a connection pool for a tenant's database
  *
@@ -78,6 +115,17 @@ export async function getTenantDatabase(
 
     try {
       const pool = await creationPromise
+      const existingPool = tenantPools.get(workspaceId)
+      if (existingPool) {
+        await pool.end().catch((error) => {
+          logger.error('Error closing duplicate tenant pool', {
+            workspace_id: workspaceId,
+            error: error instanceof Error ? error.message : String(error),
+          })
+        })
+        poolCreationLocks.delete(workspaceId)
+        return existingPool
+      }
       tenantPools.set(workspaceId, pool)
       poolCreationLocks.delete(workspaceId)
       return pool
@@ -108,11 +156,7 @@ async function createTenantPool(
   workspaceId: string,
   tenantDatabaseUrl: string
 ): Promise<Pool> {
-  const pool = new Pool({
-    connectionString: tenantDatabaseUrl,
-    ...DEFAULT_POOL_CONFIG,
-    application_name: `zidney-api-tenant-${workspaceId}`,
-  })
+  const pool = createPoolInstance(workspaceId, tenantDatabaseUrl)
 
   // Test the connection to ensure validity
   const client = await pool.connect()
@@ -126,14 +170,6 @@ async function createTenantPool(
   } finally {
     client.release()
   }
-
-  // Set up error handlers
-  pool.on('error', (error) => {
-    logger.error('Unexpected error on idle client in tenant pool', {
-      workspace_id: workspaceId,
-      error: error.message,
-    })
-  })
 
   return pool
 }

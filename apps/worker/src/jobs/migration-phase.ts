@@ -3,8 +3,8 @@
  * Single atomic transaction for all migrations + version updates
  */
 
-import { runTenantMigrations } from '@zidney/domain-core'
-import { Database } from 'pg'
+import { runTenantMigrations } from '@zidney/domain-core/migration/tenant-migration-runner'
+import { Pool } from 'pg'
 import { acquireWorkspaceLock } from './lock-manager'
 import { SchemaMigrationJob } from './schema-migration-job'
 
@@ -14,17 +14,16 @@ import { SchemaMigrationJob } from './schema-migration-job'
  */
 export async function executeMigrationPhase(
   job: SchemaMigrationJob,
-  masterDb: Database,
-  tenantDb: Database,
+  masterDb: Pool,
+  tenantDb: Pool,
   workspace_slug: string
 ): Promise<{ success: boolean; error?: any }> {
   const { workspace_id, target_schema_version, correlation_id, operator_id } =
     job
-  let lockHandle: any
 
   try {
     // Acquire write lock (times out after 60s)
-    lockHandle = await acquireWorkspaceLock(workspace_id, masterDb, 60000)
+    await acquireWorkspaceLock(workspace_id, masterDb, 60000)
 
     // Run migrations within transaction
     const result = await runTenantMigrations(
@@ -44,6 +43,7 @@ export async function executeMigrationPhase(
             filename: 'placeholder.sql',
             checksum: '',
             targetSchemaVersion: target_schema_version,
+            isBreaking: false,
           },
         ],
         snapshotId: job.snapshot_metadata?.snapshot_id,

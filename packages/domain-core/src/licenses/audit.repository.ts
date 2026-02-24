@@ -8,12 +8,12 @@
  * Provides audit trail for compliance and observability.
  */
 
-import { Database } from 'better-sqlite3'
 import { v4 as uuidv4 } from 'uuid'
+import type { MasterDbClient } from './repository'
 import { AuditLogEntry, LicenseStatus } from './types'
 
 export class AuditRepository {
-  constructor(private masterDb: Database) {}
+  constructor(private masterDb: MasterDbClient) {}
 
   /**
    * T038: Write audit log entry
@@ -29,24 +29,25 @@ export class AuditRepository {
     reason?: string
     correlation_id: string
   }): Promise<AuditLogEntry> {
-    const stmt = this.masterDb.prepare(`
+    const result = await this.masterDb.query(
+      `
       INSERT INTO audit_log (
         id, license_id, action, old_status, new_status, reason, correlation_id, created_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, NOW())
+      ) VALUES ($1, $2, $3, $4, $5, $6, $7, NOW())
       RETURNING *
-    `)
+    `,
+      [
+        uuidv4(),
+        entry.license_id,
+        entry.action,
+        entry.old_status || null,
+        entry.new_status || null,
+        entry.reason || null,
+        entry.correlation_id,
+      ]
+    )
 
-    const result = stmt.get(
-      uuidv4(),
-      entry.license_id,
-      entry.action,
-      entry.old_status || null,
-      entry.new_status || null,
-      entry.reason || null,
-      entry.correlation_id
-    ) as any
-
-    return this.mapToAuditLogEntry(result)
+    return this.mapToAuditLogEntry(result.rows[0])
   }
 
   /**
@@ -57,30 +58,34 @@ export class AuditRepository {
     limit: number = 100,
     offset: number = 0
   ): Promise<AuditLogEntry[]> {
-    const stmt = this.masterDb.prepare(`
+    const result = await this.masterDb.query(
+      `
       SELECT * FROM audit_log 
-      WHERE license_id = ?
+      WHERE license_id = $1
       ORDER BY created_at DESC
-      LIMIT ? OFFSET ?
-    `)
+      LIMIT $2 OFFSET $3
+    `,
+      [license_id, limit, offset]
+    )
 
-    const results = stmt.all(license_id, limit, offset) as any[]
-    return results.map((r) => this.mapToAuditLogEntry(r))
+    return result.rows.map((row) => this.mapToAuditLogEntry(row))
   }
 
   /**
    * T063: Get recent transitions (for dashboard/monitoring)
    */
   async getRecentTransitions(limit: number = 50): Promise<AuditLogEntry[]> {
-    const stmt = this.masterDb.prepare(`
+    const result = await this.masterDb.query(
+      `
       SELECT * FROM audit_log 
       WHERE action IN ('SOFT_LOCK', 'UNLOCK', 'ARCHIVE', 'RESTORE', 'DELETE')
       ORDER BY created_at DESC
-      LIMIT ?
-    `)
+      LIMIT $1
+    `,
+      [limit]
+    )
 
-    const results = stmt.all(limit) as any[]
-    return results.map((r) => this.mapToAuditLogEntry(r))
+    return result.rows.map((row) => this.mapToAuditLogEntry(row))
   }
 
   /**

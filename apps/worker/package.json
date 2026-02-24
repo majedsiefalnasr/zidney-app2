@@ -9,8 +9,11 @@
     "start": "bun run dist/index.js"
   },
   "dependencies": {
-    "redis": "^4.6.0",
+    "@aws-sdk/client-s3": "^3.995.0",
+    "@zidney/domain-core": "workspace:*",
+    "ioredis": "^5.3.0",
     "pg": "^8.18.0",
+    "redis": "^4.6.0",
     "uuid": "^9.0.0"
   },
   "devDependencies": {

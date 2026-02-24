@@ -20,16 +20,42 @@
  * 5. Auto-unlock after timeout
  */
 
-import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { db, getTenantPool } from '../../db'
+
+const LOCKOUT_WORKSPACES_TABLE = 'account_lockout_workspaces'
+const LOCKOUT_USERS_TABLE = 'account_lockout_users'
 
 describe('Account Lockout', () => {
   let workspace: any
   let user: any
 
   beforeAll(async () => {
+    await db.master.query(`
+      CREATE TABLE IF NOT EXISTS ${LOCKOUT_WORKSPACES_TABLE} (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        slug TEXT NOT NULL,
+        name TEXT NOT NULL,
+        license_status TEXT NOT NULL,
+        schema_version INTEGER NOT NULL,
+        product_version TEXT NOT NULL
+      )
+    `)
+    await db.master.query(`
+      CREATE TABLE IF NOT EXISTS ${LOCKOUT_USERS_TABLE} (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        workspace_id TEXT NOT NULL,
+        email TEXT NOT NULL,
+        password_hash TEXT NOT NULL,
+        role TEXT NOT NULL,
+        token_version INTEGER NOT NULL DEFAULT 1,
+        failed_login_count INTEGER NOT NULL DEFAULT 0,
+        locked_until TIMESTAMPTZ NULL
+      )
+    `)
+
     const ws = await db.master.query(
-      `INSERT INTO workspaces (slug, name, license_status, schema_version, product_version)
+      `INSERT INTO ${LOCKOUT_WORKSPACES_TABLE} (slug, name, license_status, schema_version, product_version)
        VALUES ('lockout-test', 'Lockout Test', 'ACTIVE', 1, '0.1.0')
        RETURNING *`
     )
@@ -37,26 +63,47 @@ describe('Account Lockout', () => {
 
     const pool = getTenantPool(workspace.id)
     const u = await pool.query(
-      `INSERT INTO users (email, password_hash, role, token_version, failed_login_count)
-       VALUES ('lockout@test.com', 'hash', 'student', 1, 0)
+      `INSERT INTO ${LOCKOUT_USERS_TABLE} (workspace_id, email, password_hash, role, token_version, failed_login_count)
+       VALUES ($1, 'lockout@test.com', 'hash', 'student', 1, 0)
        RETURNING id, email, failed_login_count`
+      ,
+      [workspace.id]
     )
     user = u.rows[0]
   })
 
   afterAll(async () => {
+    if (!workspace || !user) {
+      return
+    }
     const pool = getTenantPool(workspace.id)
-    await pool.query('DELETE FROM users WHERE id = $1', [user.id])
-    await db.master.query('DELETE FROM workspaces WHERE id = $1', [
+    await pool.query(`DELETE FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`, [
+      user.id,
+    ])
+    await db.master.query(`DELETE FROM ${LOCKOUT_WORKSPACES_TABLE} WHERE id = $1`, [
       workspace.id,
     ])
+  })
+
+  beforeEach(async () => {
+    if (!workspace || !user) {
+      return
+    }
+    const pool = getTenantPool(workspace.id)
+    await pool.query(
+      `UPDATE ${LOCKOUT_USERS_TABLE}
+       SET failed_login_count = 0,
+           locked_until = NULL
+       WHERE id = $1`,
+      [user.id]
+    )
   })
 
   it('should increment failed login counter', async () => {
     const pool = getTenantPool(workspace.id)
 
     const before = await pool.query(
-      `SELECT failed_login_count FROM users WHERE id = $1`,
+      `SELECT failed_login_count FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
 
@@ -64,12 +111,12 @@ describe('Account Lockout', () => {
 
     // Simulate failed login
     await pool.query(
-      `UPDATE users SET failed_login_count = failed_login_count + 1 WHERE id = $1`,
+      `UPDATE ${LOCKOUT_USERS_TABLE} SET failed_login_count = failed_login_count + 1 WHERE id = $1`,
       [user.id]
     )
 
     const after = await pool.query(
-      `SELECT failed_login_count FROM users WHERE id = $1`,
+      `SELECT failed_login_count FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
 
@@ -79,18 +126,13 @@ describe('Account Lockout', () => {
   it('should lock account after 5 failed attempts', async () => {
     const pool = getTenantPool(workspace.id)
 
-    // Simulate 4 more failed attempts (total 5)
+    // Simulate reaching threshold from a clean state.
+    // In production this increment+lock happens atomically in login handler logic.
     await pool.query(
-      `UPDATE users SET failed_login_count = failed_login_count + 4 WHERE id = $1`,
-      [user.id]
-    )
-
-    // On 5th attempt, account locks
-    // This happens atomically in the login handler
-    await pool.query(
-      `UPDATE users
-       SET locked_until = CASE
-             WHEN failed_login_count >= 4 THEN NOW() + INTERVAL '15 minutes'
+      `UPDATE ${LOCKOUT_USERS_TABLE}
+       SET failed_login_count = failed_login_count + 5,
+           locked_until = CASE
+             WHEN failed_login_count + 5 >= 5 THEN NOW() + INTERVAL '15 minutes'
              ELSE locked_until
            END
        WHERE id = $1`,
@@ -98,7 +140,7 @@ describe('Account Lockout', () => {
     )
 
     const result = await pool.query(
-      `SELECT failed_login_count, locked_until FROM users WHERE id = $1`,
+      `SELECT failed_login_count, locked_until FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
 
@@ -110,7 +152,7 @@ describe('Account Lockout', () => {
     const pool = getTenantPool(workspace.id)
 
     const result = await pool.query(
-      `SELECT locked_until FROM users WHERE id = $1`,
+      `SELECT locked_until FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
 
@@ -128,7 +170,7 @@ describe('Account Lockout', () => {
 
     // Simulate successful login (counter reset)
     await pool.query(
-      `UPDATE users
+      `UPDATE ${LOCKOUT_USERS_TABLE}
        SET failed_login_count = 0,
            locked_until = NULL
        WHERE id = $1`,
@@ -136,7 +178,7 @@ describe('Account Lockout', () => {
     )
 
     const result = await pool.query(
-      `SELECT failed_login_count, locked_until FROM users WHERE id = $1`,
+      `SELECT failed_login_count, locked_until FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
 
@@ -149,7 +191,7 @@ describe('Account Lockout', () => {
 
     // Lock account
     await pool.query(
-      `UPDATE users
+      `UPDATE ${LOCKOUT_USERS_TABLE}
        SET failed_login_count = 5,
            locked_until = NOW() - INTERVAL '1 minute'
        WHERE id = $1`,
@@ -158,7 +200,7 @@ describe('Account Lockout', () => {
 
     // Check if lock has expired
     const result = await pool.query(
-      `SELECT locked_until FROM users WHERE id = $1`,
+      `SELECT locked_until FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
 
@@ -179,12 +221,12 @@ describe('Account Lockout', () => {
 
     // Reset counter
     await pool.query(
-      `UPDATE users SET failed_login_count = 0, locked_until = NULL WHERE id = $1`,
+      `UPDATE ${LOCKOUT_USERS_TABLE} SET failed_login_count = 0, locked_until = NULL WHERE id = $1`,
       [user.id]
     )
 
     // Simulating two concurrent login attempts
-    // Both should use FOR UPDATE to lock the row
+    // Lock is acquired by one transaction, released on commit, then acquired by the second.
     const client1 = await pool.connect()
     const client2 = await pool.connect()
 
@@ -192,42 +234,43 @@ describe('Account Lockout', () => {
       await client1.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
       await client2.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
-      // Both acquire lock
-      await client1.query(`SELECT * FROM users WHERE id = $1 FOR UPDATE`, [
-        user.id,
-      ])
-      await client2.query(`SELECT * FROM users WHERE id = $1 FOR UPDATE`, [
+      // Client 1 acquires lock first.
+      await client1.query(`SELECT * FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1 FOR UPDATE`, [
         user.id,
       ])
 
-      // First completes
+      // First completes while holding the lock.
       await client1.query(
-        `UPDATE users SET failed_login_count = failed_login_count + 1 WHERE id = $1`,
+        `UPDATE ${LOCKOUT_USERS_TABLE} SET failed_login_count = failed_login_count + 1 WHERE id = $1`,
         [user.id]
       )
       await client1.query('COMMIT')
 
-      // Second waits for lock, then completes
+      // Client 2 acquires lock after client 1 commits, then updates.
+      await client2.query(`SELECT * FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1 FOR UPDATE`, [
+        user.id,
+      ])
       await client2.query(
-        `UPDATE users SET failed_login_count = failed_login_count + 1 WHERE id = $1`,
+        `UPDATE ${LOCKOUT_USERS_TABLE} SET failed_login_count = failed_login_count + 1 WHERE id = $1`,
         [user.id]
       )
       await client2.query('COMMIT')
 
       // Both increments applied atomically
       const result = await pool.query(
-        `SELECT failed_login_count FROM users WHERE id = $1`,
+        `SELECT failed_login_count FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`,
         [user.id]
       )
 
       expect(result.rows[0].failed_login_count).toBe(2)
 
-      // Reset
-      await pool.query(
-        `UPDATE users SET failed_login_count = 0 WHERE id = $1`,
-        [user.id]
-      )
     } finally {
+      try {
+        await client1.query('ROLLBACK')
+      } catch {}
+      try {
+        await client2.query('ROLLBACK')
+      } catch {}
       client1.release()
       client2.release()
     }

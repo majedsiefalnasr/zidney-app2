@@ -365,7 +365,7 @@ All product management infrastructure successfully implemented and validated. Da
 
 **Logging (1 file)**
 
-- `packages/logging/src/products.ts` - Structured logging
+- `packages/logger/src/products.ts` - Structured logging
 
 **Database (3 files)**
 

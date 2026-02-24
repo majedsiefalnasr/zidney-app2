@@ -295,7 +295,7 @@ export async function verifyAuditLogCompleteness(
   const logs = await queryAttemptAuditLog(client, workspaceId, attemptId)
 
   const events = logs.map((l) => l.event)
-  const expectedSequence = [
+  const expectedSequence: Array<AuditLogEntry['event']> = [
     'attempt_submitted',
     'grading_started',
     'grading_completed',

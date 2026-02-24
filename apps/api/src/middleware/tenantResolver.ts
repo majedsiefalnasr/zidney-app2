@@ -9,7 +9,7 @@
  * Stage: STAGE_05_TENANT_PROVISIONING_SERVICE
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import type { Context, MiddlewareHandler, Next } from 'hono'
 import { Pool } from 'pg'
 

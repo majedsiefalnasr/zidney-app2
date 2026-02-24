@@ -12,7 +12,7 @@
  * ADR-0003: License Enforcement Model
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { ErrorCodes } from '@zidney/types/errors/ErrorCodes'
 import type { Context, Next } from 'hono'
 
@@ -34,7 +34,10 @@ enum LicenseStatus {
  * Validator at mandatory for all workspace-bound routes.
  * Must execute AFTER authentication but BEFORE business logic.
  */
-export async function licenseMiddleware(c: Context, next: Next): Promise<void> {
+export async function licenseMiddleware(
+  c: Context,
+  next: Next
+): Promise<Response | void> {
   // Get workspace from context (set by auth middleware)
   const workspaceId = c.get('workspaceId')
   const workspaceSlug = c.get('workspaceSlug')
@@ -60,7 +63,8 @@ export async function licenseMiddleware(c: Context, next: Next): Promise<void> {
 
   // TODO: Fetch license status from database (Stage 10)
   // For now, assume ACTIVE status
-  const licenseStatus = LicenseStatus.ACTIVE
+  const licenseStatus =
+    (c.get('licenseStatus') as LicenseStatus) || LicenseStatus.ACTIVE
 
   // Validate license status
   if (licenseStatus === LicenseStatus.SOFT_LOCKED) {

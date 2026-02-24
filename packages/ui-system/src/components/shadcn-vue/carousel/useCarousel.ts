@@ -1,17 +1,33 @@
-import type { UnwrapRefCarouselApi as CarouselApi, CarouselEmits, CarouselProps } from "./interface"
+import type {
+  UnwrapRefCarouselApi as CarouselApi,
+  CarouselEmits,
+  CarouselProps,
+} from "./interface"
 import { createInjectionState } from "@vueuse/core"
 import emblaCarouselVue from "embla-carousel-vue"
+import type { Ref } from "vue"
 import { onMounted, ref } from "vue"
 
-const [useProvideCarousel, useInjectCarousel] = createInjectionState(
+interface CarouselState {
+  carouselRef: Ref<HTMLElement | undefined>
+  carouselApi: Ref<CarouselApi>
+  canScrollPrev: Ref<boolean>
+  canScrollNext: Ref<boolean>
+  scrollPrev: () => void
+  scrollNext: () => void
+  orientation: "horizontal" | "vertical"
+}
+
+const [provideCarousel, useInjectCarousel] = createInjectionState(
   ({
     opts,
     orientation,
     plugins,
-  }: CarouselProps, emits: CarouselEmits) => {
+  }: CarouselProps, emits: CarouselEmits): CarouselState => {
+    const resolvedOrientation = orientation ?? "horizontal"
     const [emblaNode, emblaApi] = emblaCarouselVue({
       ...opts,
-      axis: orientation === "horizontal" ? "x" : "y",
+      axis: resolvedOrientation === "horizontal" ? "x" : "y",
     }, plugins)
 
     function scrollPrev() {
@@ -40,11 +56,24 @@ const [useProvideCarousel, useInjectCarousel] = createInjectionState(
       emits("init-api", emblaApi.value)
     })
 
-    return { carouselRef: emblaNode, carouselApi: emblaApi, canScrollPrev, canScrollNext, scrollPrev, scrollNext, orientation }
+    return {
+      carouselRef: emblaNode,
+      carouselApi: emblaApi,
+      canScrollPrev,
+      canScrollNext,
+      scrollPrev,
+      scrollNext,
+      orientation: resolvedOrientation,
+    }
   },
 )
 
-function useCarousel() {
+const useProvideCarousel: (
+  props: CarouselProps,
+  emits: CarouselEmits
+) => CarouselState = provideCarousel
+
+function useCarousel(): CarouselState {
   const carouselState = useInjectCarousel()
 
   if (!carouselState)

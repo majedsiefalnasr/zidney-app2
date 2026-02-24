@@ -26,7 +26,8 @@ class CorrelationIdManager {
     headers: Record<string, string | undefined>
   ): string | null {
     const id =
-      headers[this.HEADER_NAME.toLowerCase()] || headers[this.HEADER_NAME]
+      headers[CorrelationIdManager.HEADER_NAME.toLowerCase()] ||
+      headers[CorrelationIdManager.HEADER_NAME]
 
     if (id && this.isValidUUID(id)) {
       return id
@@ -58,7 +59,7 @@ class CorrelationIdManager {
   ): Record<string, any> {
     return {
       ...headers,
-      [this.HEADER_NAME]: correlationId,
+      [CorrelationIdManager.HEADER_NAME]: correlationId,
     }
   }
 
@@ -126,7 +127,7 @@ describe('Correlation ID Management', () => {
 
   describe('Header Extraction', () => {
     it('should extract X-Request-ID from headers', () => {
-      const testId = '123e4567-e89b-12d3-a456-426614174000'
+      const testId = '123e4567-e89b-42d3-a456-426614174000'
       const headers = { 'x-request-id': testId }
 
       const extracted = manager.extractFromHeaders(headers)
@@ -135,7 +136,7 @@ describe('Correlation ID Management', () => {
     })
 
     it('should handle case-insensitive header name', () => {
-      const testId = '123e4567-e89b-12d3-a456-426614174000'
+      const testId = '123e4567-e89b-42d3-a456-426614174000'
       const headers1 = { 'X-Request-ID': testId }
       const headers2 = { 'x-request-id': testId }
 
@@ -183,7 +184,7 @@ describe('Correlation ID Management', () => {
 
   describe('Get or Create', () => {
     it('should return existing ID if valid', () => {
-      const testId = '123e4567-e89b-12d3-a456-426614174000'
+      const testId = '123e4567-e89b-42d3-a456-426614174000'
       const headers = { 'x-request-id': testId }
 
       const result = manager.getOrCreate(headers)
@@ -209,7 +210,7 @@ describe('Correlation ID Management', () => {
     })
 
     it('should prefer provided ID over generation', () => {
-      const testId = '123e4567-e89b-12d3-a456-426614174000'
+      const testId = '123e4567-e89b-42d3-a456-426614174000'
       const headers = { 'x-request-id': testId }
 
       const result1 = manager.getOrCreate(headers)
@@ -223,7 +224,7 @@ describe('Correlation ID Management', () => {
 
   describe('Header Injection', () => {
     it('should inject correlation ID into response headers', () => {
-      const correlationId = '123e4567-e89b-12d3-a456-426614174000'
+      const correlationId = '123e4567-e89b-42d3-a456-426614174000'
       const headers = {}
 
       const result = manager.injectIntoHeaders(headers, correlationId)
@@ -232,7 +233,7 @@ describe('Correlation ID Management', () => {
     })
 
     it('should preserve existing headers while injecting', () => {
-      const correlationId = '123e4567-e89b-12d3-a456-426614174000'
+      const correlationId = '123e4567-e89b-42d3-a456-426614174000'
       const headers = { 'Content-Type': 'application/json' }
 
       const result = manager.injectIntoHeaders(headers, correlationId)
@@ -242,8 +243,8 @@ describe('Correlation ID Management', () => {
     })
 
     it('should override existing X-Request-ID', () => {
-      const oldId = '123e4567-e89b-12d3-a456-426614174000'
-      const newId = '987e6543-e89b-12d3-a456-426614174999'
+      const oldId = '123e4567-e89b-42d3-a456-426614174000'
+      const newId = '987e6543-e89b-42d3-a456-426614174999'
       const headers = { 'X-Request-ID': oldId }
 
       const result = manager.injectIntoHeaders(headers, newId)
@@ -254,7 +255,7 @@ describe('Correlation ID Management', () => {
 
   describe('Validation', () => {
     it('should validate correlation ID in context', () => {
-      const correlationId = '123e4567-e89b-12d3-a456-426614174000'
+      const correlationId = '123e4567-e89b-42d3-a456-426614174000'
       const context = { correlationId }
 
       const isValid = manager.isValidForContext(correlationId, context)
@@ -263,7 +264,7 @@ describe('Correlation ID Management', () => {
     })
 
     it('should reject mismatched correlation ID', () => {
-      const correlationId = '123e4567-e89b-12d3-a456-426614174000'
+      const correlationId = '123e4567-e89b-42d3-a456-426614174000'
       const context = { correlationId: 'different-id' }
 
       const isValid = manager.isValidForContext(correlationId, context)
@@ -328,7 +329,7 @@ describe('Correlation ID Management', () => {
 
   describe('Edge Cases', () => {
     it('should handle headers with multiple values', () => {
-      const testId = '123e4567-e89b-12d3-a456-426614174000'
+      const testId = '123e4567-e89b-42d3-a456-426614174000'
       const headers = {
         'x-request-id': testId,
         'x-random-header': 'value',
@@ -356,7 +357,7 @@ describe('Correlation ID Management', () => {
     })
 
     it('should be idempotent for same input', () => {
-      const headers = { 'x-request-id': '123e4567-e89b-12d3-a456-426614174000' }
+      const headers = { 'x-request-id': '123e4567-e89b-42d3-a456-426614174000' }
 
       const result1 = manager.getOrCreate(headers)
       const result2 = manager.getOrCreate(headers)

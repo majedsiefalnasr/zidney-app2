@@ -1,4 +1,4 @@
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { jobQueue } from '@zidney/app/worker/queue/job-queue'
 import {
   AttemptSnapshot,

@@ -1,4 +1,4 @@
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { jobQueue } from '@zidney/app/worker/queue/job-queue'
 
 const logger = createLogger('job-result-retriever')
@@ -37,7 +37,7 @@ export async function getJobResult(
       })
 
       // Clean up result from Redis asynchronously
-      jobQueue.clearResults([jobId]).catch((e) => {
+      jobQueue.clearResults([jobId]).catch((e: unknown) => {
         logger.warn(`Failed to clean up job result`, {
           job_id: jobId,
           error: e instanceof Error ? e.message : String(e),
@@ -84,7 +84,7 @@ export async function pollJobResult(
         })
 
         // Clean up result asynchronously
-        jobQueue.clearResults([jobId]).catch((e) => {
+        jobQueue.clearResults([jobId]).catch((e: unknown) => {
           logger.warn(`Failed to clean up job result`, {
             job_id: jobId,
             error: e instanceof Error ? e.message : String(e),

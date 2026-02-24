@@ -38,12 +38,9 @@
  */
 
 import { Context, Next } from 'hono'
-import pino from 'pino'
+import { createLogger } from '@zidney/logger'
 
-const logger = pino({
-  name: 'api-audit',
-  level: process.env.LOG_LEVEL || 'info',
-})
+const logger = createLogger('api-audit')
 
 /**
  * Log all API requests (authenticated routes)

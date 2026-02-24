@@ -14,7 +14,7 @@
 import {
   computeJobPayloadHash,
   verifyPayloadHashConsistency,
-} from '@domain-core/job-hash'
+} from '@zidney/domain-core/job-hash'
 import { JobEnvelope } from '@zidney/types/job-envelope'
 import { v4 as uuidv4 } from 'uuid'
 import { beforeEach, describe, expect, it } from 'vitest'

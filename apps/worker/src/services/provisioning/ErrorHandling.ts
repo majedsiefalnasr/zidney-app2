@@ -264,7 +264,7 @@ export class StructuredLogger {
     error: Error | string,
     context: Partial<LogContext>
   ): void {
-    const error_obj = typeof error === 'string' ? { message: error } : error
+    const error_obj = error instanceof Error ? error : new Error(error)
 
     this.writeLog({
       timestamp: this.formatTimestamp(),
@@ -278,7 +278,7 @@ export class StructuredLogger {
       details: context.details,
       error: {
         code: context.error?.code,
-        message: error_obj.message || String(error_obj),
+        message: error_obj.message,
         stack: error_obj.stack,
       },
     })
@@ -289,7 +289,7 @@ export class StructuredLogger {
     error: Error | string,
     context: Partial<LogContext>
   ): void {
-    const error_obj = typeof error === 'string' ? { message: error } : error
+    const error_obj = error instanceof Error ? error : new Error(error)
 
     this.writeLog({
       timestamp: this.formatTimestamp(),
@@ -301,7 +301,7 @@ export class StructuredLogger {
       event,
       error: {
         code: context.error?.code,
-        message: error_obj.message || String(error_obj),
+        message: error_obj.message,
         stack: error_obj.stack,
       },
     })

@@ -115,18 +115,18 @@ export function evaluateResourcePermission(
 
   // Step 2 (Phase 2+): Division boundary check
   // For now: Allow if permission granted (division checks deferred to Phase 2)
-  if (resourceDivisionId && context.divisionId) {
+  if (resourceDivisionId && context.division_id) {
     // Student can only access resources in their division
     if (
       context.role === 'STUDENT' &&
-      context.divisionId !== resourceDivisionId
+      context.division_id !== resourceDivisionId
     ) {
       return {
         allowed: false,
         reason: 'Student cannot access resources outside their division',
         metadata: {
           role: context.role,
-          userDivision: context.divisionId,
+          userDivision: context.division_id,
           resourceDivision: resourceDivisionId,
         },
       }

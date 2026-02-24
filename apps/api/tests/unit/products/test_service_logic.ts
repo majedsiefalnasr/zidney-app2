@@ -113,7 +113,7 @@ describe('Unit: Products - Service Logic (T062)', () => {
     })
 
     it('should fallback to English if Arabic missing', async () => {
-      const name = { en: 'Product Name' }
+      const name: { en: string; ar?: string } = { en: 'Product Name' }
       const result = name.ar || name.en
       expect(result).toBe('Product Name')
     })

@@ -10,37 +10,153 @@
 
 import { initializeAttempt } from '@zidney/domain-core/attempts/attempt-init'
 import { getAttemptSnapshot } from '@zidney/domain-core/attempts/snapshot-service'
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { Pool } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 const logger = createLogger('ConcurrentSnapshotsTest')
 
+function normalizeSnapshot(snapshot: any) {
+  return {
+    config: {
+      ...snapshot.config,
+      captured_at: undefined,
+    },
+    questions: snapshot.questions,
+    grading: {
+      ...snapshot.grading,
+      captured_at: undefined,
+    },
+  }
+}
+
 describe('Concurrent Snapshot Tests (T039)', () => {
   let pool: Pool
   let examId: string
+  let testSchema: string
 
   beforeAll(async () => {
-    pool = new Pool({
-      host: process.env.DB_HOST || 'localhost',
-      port: parseInt(process.env.DB_PORT || '5432'),
-      database: process.env.DB_NAME || 'zidney_test',
-      user: process.env.DB_USER || 'postgres',
-      password: process.env.DB_PASSWORD || 'postgres',
-    })
+    testSchema = `concurrent_snapshot_${Date.now().toString(36)}`
+    const connectionString = process.env.DATABASE_URL
+    pool = connectionString
+      ? new Pool({
+          connectionString,
+          max: 1,
+          options: `-c search_path=${testSchema},public`,
+        })
+      : new Pool({
+          host: process.env.DB_HOST || 'localhost',
+          port: parseInt(process.env.DB_PORT || '5432'),
+          database: process.env.DB_NAME || 'zidney_test',
+          user: process.env.DB_USER || 'zidney_app',
+          password: process.env.DB_PASSWORD || 'change-me-in-production',
+          max: 1,
+          options: `-c search_path=${testSchema},public`,
+        })
+
+    const schemaClient = await pool.connect()
+    await schemaClient.query(`CREATE SCHEMA IF NOT EXISTS ${testSchema}`)
+    await schemaClient.query(`SET search_path TO ${testSchema}, public`)
+
+    await schemaClient.query(`
+      CREATE TABLE IF NOT EXISTS users (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        email TEXT UNIQUE NOT NULL,
+        name TEXT NULL,
+        first_name TEXT NULL,
+        last_name TEXT NULL,
+        password_hash TEXT NULL,
+        is_active BOOLEAN NOT NULL DEFAULT TRUE
+      );
+      CREATE TABLE IF NOT EXISTS mcq_baskets (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        name TEXT NOT NULL,
+        created_by TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS mcq_exams (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        basket_id TEXT NULL REFERENCES mcq_baskets(id) ON DELETE SET NULL,
+        name TEXT NOT NULL,
+        duration_minutes INTEGER NOT NULL,
+        question_count INTEGER NOT NULL,
+        passing_score INTEGER NOT NULL DEFAULT 70,
+        created_by TEXT NULL
+      );
+      CREATE TABLE IF NOT EXISTS mcq_questions (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        basket_id TEXT NOT NULL REFERENCES mcq_baskets(id) ON DELETE CASCADE,
+        question_text TEXT NOT NULL,
+        correct_option INTEGER NOT NULL DEFAULT 0,
+        options_json JSONB NOT NULL DEFAULT '{}'::jsonb,
+        difficulty TEXT NOT NULL DEFAULT 'medium',
+        tags_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        created_by TEXT NULL
+      );
+      CREATE TABLE IF NOT EXISTS attempts (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        exam_id TEXT NOT NULL REFERENCES mcq_exams(id) ON DELETE RESTRICT,
+        user_id TEXT NOT NULL,
+        configuration_snapshot JSONB NULL,
+        question_list_snapshot JSONB NULL,
+        grading_config_snapshot JSONB NULL,
+        status TEXT NOT NULL DEFAULT 'IN_PROGRESS',
+        started_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        submission_deadline_at TIMESTAMPTZ NULL,
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        created_by TEXT NOT NULL
+      );
+      CREATE TABLE IF NOT EXISTS attempt_events (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        attempt_id TEXT NOT NULL REFERENCES attempts(id) ON DELETE CASCADE,
+        event_type TEXT NOT NULL,
+        event_payload JSONB NOT NULL DEFAULT '{}'::jsonb,
+        occurred_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        created_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        created_by TEXT NOT NULL
+      );
+    `)
+    await schemaClient.query(
+      'TRUNCATE TABLE attempt_events, attempts, mcq_questions, mcq_exams, mcq_baskets, users CASCADE'
+    )
+    schemaClient.release()
+
+    const systemUser = await pool.query(
+      `INSERT INTO users (email, first_name, last_name, password_hash, is_active)
+       VALUES ('system-concurrent@test.com', 'System', 'User', 'hash', true)
+       ON CONFLICT (email) DO UPDATE SET email = EXCLUDED.email
+       RETURNING id`
+    )
+    const systemUserId = systemUser.rows[0].id
+    const basketResult = await pool.query(
+      `INSERT INTO mcq_baskets (name, created_by) VALUES ('Concurrent Basket', $1) RETURNING id`,
+      [systemUserId]
+    )
+    const basketId = basketResult.rows[0].id
 
     // Create test exam
     const examResult = await pool.query(
-      `INSERT INTO mcq_exams (name, duration_minutes, question_count, passing_score)
-       VALUES ('Concurrent Snapshots Exam ' || now(), 120, 20, 75)
+      `INSERT INTO mcq_exams (basket_id, name, duration_minutes, question_count, passing_score, created_by)
+       VALUES ($1, 'Concurrent Snapshots Exam ' || now(), 120, 20, 75, $2)
        RETURNING id`
+      ,
+      [basketId, systemUserId]
     )
     examId = examResult.rows[0].id
+
+    await pool.query(
+      `INSERT INTO mcq_questions (basket_id, question_text, correct_option, options_json, created_by)
+       VALUES ($1, 'Question 1', 0, '{"A":"A","B":"B"}'::jsonb, $2)`,
+      [basketId, systemUserId]
+    )
 
     logger.info('Concurrent snapshots tests setup complete')
   })
 
   afterAll(async () => {
+    if (pool && testSchema) {
+      await pool.query(`DROP SCHEMA IF EXISTS ${testSchema} CASCADE`)
+    }
     if (pool) {
       await pool.end()
     }
@@ -58,13 +174,17 @@ describe('Concurrent Snapshot Tests (T039)', () => {
       batch++
     ) {
       const promises = []
-      for (let i = 0; i < batchSize && userIds.length < concurrentCount; i++) {
+      for (let i = 0; i < batchSize; i++) {
+        const index = batch * batchSize + i
+        if (index >= concurrentCount) {
+          break
+        }
         promises.push(
           pool.query(
             `INSERT INTO users (email, first_name, last_name, password_hash, is_active)
              VALUES ($1, 'ConcurrentUser', $2, 'hash', true)
              RETURNING id`,
-            [`concurrent${userIds.length}@test.com`, userIds.length.toString()]
+            [`concurrent${index}@test.com`, index.toString()]
           )
         )
       }
@@ -96,18 +216,18 @@ describe('Concurrent Snapshot Tests (T039)', () => {
     )
 
     // Verify all have identical snapshots
-    const firstSnapshot = snapshots[0]
+    const firstSnapshot = normalizeSnapshot(snapshots[0])
     const firstSnapshotStr = JSON.stringify(firstSnapshot)
 
     let allIdentical = true
     for (let i = 1; i < snapshots.length; i++) {
-      const snapStr = JSON.stringify(snapshots[i])
+      const snapStr = JSON.stringify(normalizeSnapshot(snapshots[i]))
       if (snapStr !== firstSnapshotStr) {
         allIdentical = false
         logger.warn('Snapshot mismatch detected', {
           index: i,
           first: firstSnapshot.config,
-          current: snapshots[i].config,
+          current: normalizeSnapshot(snapshots[i]).config,
         })
         break
       }
@@ -183,13 +303,23 @@ describe('Concurrent Snapshot Tests (T039)', () => {
     )
 
     // Verify consistency metrics
-    const configSnapshots = snapshots.map((s) => JSON.stringify(s.config))
+    const configSnapshots = snapshots.map((s) =>
+      JSON.stringify({
+        ...s.config,
+        captured_at: undefined,
+      })
+    )
     const uniqueConfigs = new Set(configSnapshots)
 
     const questionSnapshots = snapshots.map((s) => JSON.stringify(s.questions))
     const uniqueQuestions = new Set(questionSnapshots)
 
-    const gradingSnapshots = snapshots.map((s) => JSON.stringify(s.grading))
+    const gradingSnapshots = snapshots.map((s) =>
+      JSON.stringify({
+        ...s.grading,
+        captured_at: undefined,
+      })
+    )
     const uniqueGradings = new Set(gradingSnapshots)
 
     logger.info('Snapshot consistency metrics', {
@@ -238,7 +368,9 @@ describe('Concurrent Snapshot Tests (T039)', () => {
     const snap1 = await getAttemptSnapshot(attempt1.id, pool)
     const snap2 = await getAttemptSnapshot(attempt2.id, pool)
 
-    expect(JSON.stringify(snap1)).toBe(JSON.stringify(snap2))
+    expect(JSON.stringify(normalizeSnapshot(snap1))).toBe(
+      JSON.stringify(normalizeSnapshot(snap2))
+    )
 
     logger.info('✅ Concurrent isolation test passed')
   })
@@ -259,15 +391,19 @@ describe('Concurrent Snapshot Tests (T039)', () => {
       batch++
     ) {
       const promises = []
-      for (let i = 0; i < batchSize && userIds.length < concurrentCount; i++) {
+      for (let i = 0; i < batchSize; i++) {
+        const index = batch * batchSize + i
+        if (index >= concurrentCount) {
+          break
+        }
         promises.push(
           pool.query(
             `INSERT INTO users (email, first_name, last_name, password_hash, is_active)
              VALUES ($1, 'HighConcurrentUser', $2, 'hash', true)
              RETURNING id`,
             [
-              `highconcurrent${userIds.length}@test.com`,
-              userIds.length.toString(),
+              `highconcurrent${index}@test.com`,
+              index.toString(),
             ]
           )
         )

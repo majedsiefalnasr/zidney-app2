@@ -15,7 +15,7 @@
  * ADRs: ADR-0001 (tenant isolation)
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { Pool, PoolClient } from 'pg'
 
 const logger = createLogger('exam-loader')

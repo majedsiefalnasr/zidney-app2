@@ -13,24 +13,61 @@
  * Requirement: Same request → identical response
  */
 
-import { createClient } from 'redis'
-import { beforeAll, describe, expect, test } from 'vitest'
+import { beforeAll, beforeEach, describe, expect, test } from 'vitest'
 import { db, getTenantPool } from '../../db'
 
+class InMemoryRedis {
+  private store = new Map<
+    string,
+    { value: string; expiresAt: number | null }
+  >()
+
+  async get(key: string): Promise<string | null> {
+    const item = this.store.get(key)
+    if (!item) {
+      return null
+    }
+
+    if (item.expiresAt !== null && Date.now() > item.expiresAt) {
+      this.store.delete(key)
+      return null
+    }
+
+    return item.value
+  }
+
+  async set(
+    key: string,
+    value: string,
+    options?: { EX?: number }
+  ): Promise<'OK'> {
+    const expiresAt =
+      options?.EX !== undefined ? Date.now() + options.EX * 1000 : null
+    this.store.set(key, { value, expiresAt })
+    return 'OK'
+  }
+
+  clear(): void {
+    this.store.clear()
+  }
+}
+
 describe('Idempotency (Triple-Layer)', () => {
-  let redis: any
+  let redis: InMemoryRedis
   let workspaceId: string
   let pool: any
 
   beforeAll(async () => {
-    // Setup Redis client
-    redis = createClient()
+    redis = new InMemoryRedis()
 
     // Setup database
+    const workspaceSlug = `idempotent-ws-${Date.now().toString(36)}`
     const wsRes = await db.master.query(
       `INSERT INTO workspaces (slug, name, schema_version, product_version, license_status)
-       VALUES ('idempotent-ws', 'Idempotent WS', 1, '1.0.0', 'ACTIVE')
+       VALUES ($1, 'Idempotent WS', 1, '1.0.0', 'ACTIVE')
        RETURNING id`
+      ,
+      [workspaceSlug]
     )
     workspaceId = wsRes.rows[0].id
     pool = getTenantPool(workspaceId)
@@ -46,6 +83,21 @@ describe('Idempotency (Triple-Layer)', () => {
         created_at TIMESTAMP DEFAULT NOW()
       )
     `)
+
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS idempotency_test_attempts (
+        id UUID PRIMARY KEY,
+        workspace_id UUID NOT NULL,
+        status VARCHAR(50) NOT NULL
+      )
+    `)
+  })
+
+  beforeEach(async () => {
+    redis.clear()
+    await pool.query(
+      'TRUNCATE TABLE submission_idempotency_keys, idempotency_test_attempts'
+    )
   })
 
   // T047.1: Redis Cache Prevents Duplicate Processing
@@ -87,7 +139,7 @@ describe('Idempotency (Triple-Layer)', () => {
   // T047.3: PostgreSQL UNIQUE Constraint Prevents Duplicate Insertion
   test('PostgreSQL UNIQUE constraint prevents duplicate key', async () => {
     const key = 'idempotency:unique-test-1'
-    const attemptId = 'attempt-789'
+    const attemptId = '11111111-1111-1111-1111-111111111789'
     const response = { status: 'ACCEPTED' }
 
     // First insert
@@ -112,7 +164,7 @@ describe('Idempotency (Triple-Layer)', () => {
   // T047.4: UPSERT Handles Idempotency
   test('UPSERT returns same result on duplicate', async () => {
     const key = 'idempotency:upsert-test-1'
-    const attemptId = 'attempt-999'
+    const attemptId = '11111111-1111-1111-1111-111111111999'
     const response1 = { status: 'ACCEPTED', job_id: 'job-1' }
 
     // First upsert
@@ -143,17 +195,20 @@ describe('Idempotency (Triple-Layer)', () => {
       [key]
     )
 
-    expect(JSON.parse(result1.rows[0].response)).toEqual(
-      JSON.parse(result2.rows[0].response)
+    const normalizeResponse = (value: unknown) =>
+      typeof value === 'string' ? JSON.parse(value) : value
+
+    expect(normalizeResponse(result1.rows[0].response)).toEqual(
+      normalizeResponse(result2.rows[0].response)
     )
   })
 
   // T047.5: Status Check Prevents Double Finalization
   test('Attempt status check prevents double finalization', async () => {
-    // Create attempt
+    // Create attempt in test-local table to keep schema assumptions minimal.
     const attemptRes = await pool.query(
-      `INSERT INTO attempts (workspace_id, status)
-       VALUES ($1, 'FINALIZED')
+      `INSERT INTO idempotency_test_attempts (id, workspace_id, status)
+       VALUES ('22222222-2222-2222-2222-222222222222', $1, 'FINALIZED')
        RETURNING id, status`,
       [workspaceId]
     )
@@ -163,7 +218,7 @@ describe('Idempotency (Triple-Layer)', () => {
     // Try to finalize again
     const finalizeAgain = async () => {
       const result = await pool.query(
-        `SELECT status FROM attempts WHERE id = $1 AND workspace_id = $2`,
+        `SELECT status FROM idempotency_test_attempts WHERE id = $1 AND workspace_id = $2`,
         [attempt.id, workspaceId]
       )
 
@@ -178,8 +233,8 @@ describe('Idempotency (Triple-Layer)', () => {
   // T047.6: Same Idempotency Key Different Attempt Fails
   test('Idempotency key bound to attempt prevents cross-attempt reuse', async () => {
     const key = 'idempotency:attempt-binding-test'
-    const attempt1 = 'attempt-aaa'
-    const attempt2 = 'attempt-bbb'
+    const attempt1 = '33333333-3333-3333-3333-333333333333'
+    const attempt2 = '44444444-4444-4444-4444-444444444444'
     const response = { status: 'ACCEPTED' }
 
     // Insert for attempt1
@@ -220,13 +275,13 @@ describe('Idempotency (Triple-Layer)', () => {
   // T047.8: Multiple Concurrent Submissions With Same Key
   test('Concurrent submissions with same key handled correctly', async () => {
     const key = 'idempotency:concurrent-test'
-    const attemptId = 'attempt-concurrent'
+    const attemptId = '55555555-5555-5555-5555-555555555555'
     const responses = [
       { status: 'ACCEPTED', job_id: 'job-c1' },
       { status: 'ACCEPTED', job_id: 'job-c1' }, // Should be same
     ]
 
-    const promises = responses.map((response, index) =>
+    const promises = responses.map((response) =>
       pool.query(
         `INSERT INTO submission_idempotency_keys 
          (workspace_id, idempotency_key, attempt_id, response)

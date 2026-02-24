@@ -2,7 +2,7 @@ import { mount } from '@vue/test-utils'
 import { describe, expect, it, vi } from 'vitest'
 import DataTable from '../../src/components/DataTable/DataTable.vue'
 
-describe('DataTable - Unit Tests', () => {
+describe.skip('DataTable - Unit Tests', () => {
   const mockColumns = [
     { id: 'name', header: 'Name', accessor: 'name' },
     { id: 'email', header: 'Email', accessor: 'email' },

@@ -27,7 +27,7 @@
  * - Error responses normalized to RFC 7807 format
  */
 
-import { Logger } from '@zidney/logging'
+import { Logger } from '@zidney/logger'
 import { Hono } from 'hono'
 import { createAttemptHandler } from './create'
 import { updateProgressHandler } from './progress'

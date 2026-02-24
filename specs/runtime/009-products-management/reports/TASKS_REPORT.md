@@ -1261,7 +1261,7 @@ Implement structured logging for all product operations using Pino JSON logger. 
 **Implementation Notes:**
 
 - Located at apps/api/src/routes/mmc/products.ts (inline logging)
-- Uses createPinoLogger from packages/logging
+- Uses createPinoLogger from packages/logger
 - Log level: info for successes, error for failures, debug for details
 - Enables distributed tracing and root cause analysis
 

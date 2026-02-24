@@ -24,7 +24,7 @@ import {
   readMigrationFile,
   verifySchemaIntegrity,
 } from '@zidney/domain-core/migrations/migrate'
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import type { Pool, PoolClient } from 'pg'
 
 const logger = createLogger('INIT_TENANT_SCHEMA')
@@ -83,7 +83,7 @@ export interface InitTenantSchemaResult {
 export async function executeInitTenantSchema(
   payload: InitTenantSchemaPayload,
   pool: Pool,
-  redisClient?: any
+  _redisClient?: any
 ): Promise<InitTenantSchemaResult> {
   const {
     workspace_id,
@@ -162,8 +162,6 @@ export async function executeInitTenantSchema(
           )
 
           // Return SUCCESS (graceful exit for re-runs)
-          const duration = Date.now() - startTime
-
           return {
             task_id,
             workspace_id,

@@ -6,7 +6,7 @@
 
 import { RetentionPolicy, SnapshotRecord } from '@zidney/types'
 import crypto from 'crypto'
-import { Database } from 'pg'
+import { Pool } from 'pg'
 
 export interface SnapshotCreateParams {
   workspace_id: string
@@ -21,7 +21,7 @@ export interface SnapshotCreateParams {
  * @returns Snapshot record with all metadata
  */
 export async function createSnapshot(
-  masterDb: Database,
+  masterDb: Pool,
   params: SnapshotCreateParams
 ): Promise<SnapshotRecord> {
   const snapshotId = crypto.randomUUID()
@@ -112,7 +112,7 @@ export async function createSnapshot(
  * Get existing snapshot by ID
  */
 export async function getSnapshot(
-  masterDb: Database,
+  masterDb: Pool,
   snapshotId: string,
   workspace_id: string
 ): Promise<SnapshotRecord | null> {
@@ -128,7 +128,7 @@ export async function getSnapshot(
  * List snapshots for workspace
  */
 export async function getSnapshotsByWorkspace(
-  masterDb: Database,
+  masterDb: Pool,
   workspace_id: string
 ): Promise<SnapshotRecord[]> {
   const result = await masterDb.query(

@@ -21,7 +21,7 @@
  */
 
 import { Pool } from 'pg'
-import { logger } from '../services/logger'
+import { logger } from '@zidney/logger'
 
 /**
  * Interface: Retry Configuration

@@ -1,4 +1,4 @@
-import { logger } from '../../infrastructure/logger'
+import { logger } from '@zidney/logger'
 
 /**
  * T053: Job retry logic with exponential backoff

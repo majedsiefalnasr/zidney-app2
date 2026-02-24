@@ -7,7 +7,7 @@
 /**
  * Log levels in order of severity
  */
-export type LogLevel = 'debug' | 'info' | 'warn' | 'error'
+export type LogLevel = 'trace' | 'debug' | 'info' | 'warn' | 'error' | 'fatal'
 
 /**
  * Output format for log entries

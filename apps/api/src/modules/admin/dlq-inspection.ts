@@ -1,5 +1,5 @@
-import { createLogger } from '@zidney/logging'
-import { Hono } from 'hono'
+import { createLogger } from '@zidney/logger'
+import type { Context } from 'hono'
 import { db } from '../../infrastructure/postgres'
 
 const logger = createLogger('dlq-inspection')
@@ -40,7 +40,7 @@ export interface DLQListResponse {
   }
 }
 
-async function dlqInspection(c: Hono): Promise<Response | void> {
+async function dlqInspection(c: Context): Promise<Response | void> {
   const correlationId = c.state.requestId
   const workspace = c.state.workspace
   const userId = c.state.userId

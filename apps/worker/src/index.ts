@@ -16,7 +16,7 @@ import {
   initializeWorker,
   shutdownWorker,
 } from './grading/worker-startup'
-import { logger } from './services/logger'
+import { logger } from '@zidney/logger'
 
 /**
  * Main Worker Entry Point
@@ -42,78 +42,6 @@ async function main(): Promise<void> {
     )
     process.exit(1)
   }
-}
-
-/**
- * Register all job handlers
- */
-async function registerJobHandlers(): Promise<void> {
-  if (!jobQueue) throw new Error('Job queue not initialized')
-
-  logger.debug({}, 'Registering job handlers')
-
-  // Archive Snapshots Queue Handler
-  jobQueue.process('zidney-archive-jobs', 5, async (job: any) => {
-    const payload = job.payload || job.data
-
-    logger.debug(
-      {
-        action: 'archive_job_processing',
-        job_id: job.id,
-        job_type: payload.type,
-      },
-      'Processing archive snapshot job'
-    )
-
-    if (payload.type === 'ARCHIVE_SNAPSHOT') {
-      const { archiveSnapshotJob } = await import('./jobs/archive-snapshot')
-      const result = await archiveSnapshotJob(payload)
-
-      if (!result.success) {
-        throw new Error(result.error || 'Archive snapshot job failed')
-      }
-
-      return result
-    }
-
-    throw new Error(`Unknown job type: ${payload.type}`)
-  })
-
-  logger.info({}, '✓ All job handlers registered')
-}
-
-/**
- * Configure retry policies and DLQs
- */
-async function configureQueuePolicies(): Promise<void> {
-  if (!jobQueue) throw new Error('Job queue not initialized')
-
-  logger.debug({}, 'Configuring queue policies')
-
-  const { QUEUES } = await import('./config/queues')
-
-  for (const queueConfig of QUEUES) {
-    // Set retry policy
-    jobQueue.setRetryPolicy(queueConfig.name, {
-      maxRetries: queueConfig.retryPolicy.maxRetries,
-      backoff: queueConfig.retryPolicy.backoff,
-      timeout: queueConfig.timeout,
-    })
-
-    // Set DLQ
-    jobQueue.setDLQ(queueConfig.name, queueConfig.dlq)
-
-    logger.debug(
-      {
-        queue: queueConfig.name,
-        max_retries: queueConfig.retryPolicy.maxRetries,
-        dlq: queueConfig.dlq,
-      },
-      'Queue policy configured'
-    )
-  }
-
-  logger.info({}, '✓ All queue policies configured')
 }
 
 /**

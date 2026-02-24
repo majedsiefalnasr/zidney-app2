@@ -50,7 +50,7 @@ export async function resolveRbacMiddleware(c: Context, next: Next) {
       return
     }
 
-    const userId = c.get('userId')
+    const userId = c.get('userId') || 'unknown'
     const workspaceSlug = c.get('workspaceSlug')
     const tenantDb = c.get('tenantDb')
 
@@ -103,14 +103,16 @@ export async function resolveRbacMiddleware(c: Context, next: Next) {
       [userRole]
     )
 
-    const permissions = permissionsResult.rows.map((row) => row.permission_code)
+    const permissions = permissionsResult.rows.map(
+      (row: { permission_code: string }) => row.permission_code
+    )
 
     // Build RBAC context
     const rbacContext = buildRbacContext(
       userId,
       userRole,
       permissions,
-      workspaceSlug,
+      workspaceSlug || 'unknown',
       divisionId
     )
 

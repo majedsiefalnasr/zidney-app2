@@ -28,7 +28,7 @@
  * ```
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { Pool, PoolClient } from 'pg'
 
 /**

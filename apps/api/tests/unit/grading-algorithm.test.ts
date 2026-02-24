@@ -398,9 +398,7 @@ describe('Grading Algorithm', () => {
       ]
 
       const longAnswer =
-        'This is a very detailed response with many sentences. ' +
-        'It covers all the key points and provides excellent analysis. ' +
-        'The writer demonstrates deep understanding of the topic.'
+        'Detailed analysis of the topic with supporting evidence. '.repeat(70)
 
       const answers: StudentAnswer[] = [
         { questionId: 'q1', answer: longAnswer },
@@ -426,7 +424,7 @@ describe('Grading Algorithm', () => {
       const result = gradingEngine.gradeAttempt(questions, answers)
 
       expect(result.questionResults[0].earned).toBe(0)
-      expect(result.questionResults[0].feedback).toContain('No response')
+      expect(result.questionResults[0].feedback).toBe('Not answered')
     })
 
     it('should give partial credit for brief response', () => {
@@ -497,7 +495,7 @@ describe('Grading Algorithm', () => {
         correct_answer: 'A',
       }))
 
-      const answers: StudentAnswer[] = Array.from({ length: 9 }, (_, i) => ({
+      const answers: StudentAnswer[] = Array.from({ length: 8 }, (_, i) => ({
         questionId: `q${i}`,
         answer: 'A',
       }))

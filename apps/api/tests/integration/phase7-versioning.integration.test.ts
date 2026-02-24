@@ -12,8 +12,11 @@ import { Pool, PoolClient } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 const getConnectionString = () => {
-  const user = process.env.DB_USER || 'postgres'
-  const password = process.env.DB_PASSWORD || 'postgres'
+  if (process.env.DATABASE_URL) {
+    return process.env.DATABASE_URL
+  }
+  const user = process.env.DB_USER || 'zidney_app'
+  const password = process.env.DB_PASSWORD || 'change-me-in-production'
   const host = process.env.DB_HOST || 'localhost'
   const port = process.env.DB_PORT || '5432'
   const database = process.env.DB_DATABASE || 'zidney_test_tenant'
@@ -21,11 +24,17 @@ const getConnectionString = () => {
   return `postgresql://${user}:${password}@${host}:${port}/${database}`
 }
 
+const SCHEMA_VERSION_TABLE = 'phase7_schema_version'
+
 // Version utilities
 function bumpVersion(
   currentVersion: string,
   changeType: 'major' | 'minor' | 'patch'
 ): string {
+  if (!isValidVersion(currentVersion)) {
+    throw new Error(`Invalid version format: ${currentVersion}`)
+  }
+
   const [major, minor, patch] = currentVersion.split('.').map(Number)
 
   switch (changeType) {
@@ -51,6 +60,14 @@ describe('Phase 7: Schema Versioning Tests', () => {
   beforeAll(async () => {
     pool = new Pool({ connectionString: getConnectionString() })
     client = await pool.connect()
+    await client.query(`
+      CREATE TABLE IF NOT EXISTS ${SCHEMA_VERSION_TABLE} (
+        version TEXT PRIMARY KEY,
+        applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+        checksum TEXT NOT NULL
+      )
+    `)
+    await client.query(`TRUNCATE TABLE ${SCHEMA_VERSION_TABLE}`)
   })
 
   afterAll(async () => {
@@ -106,7 +123,7 @@ describe('Phase 7: Schema Versioning Tests', () => {
       const checksum = 'abc123def456'
 
       await client.query(
-        `INSERT INTO schema_version (version, applied_at, checksum)
+        `INSERT INTO ${SCHEMA_VERSION_TABLE} (version, applied_at, checksum)
          VALUES ($1, NOW(), $2)
         ON CONFLICT (version) DO NOTHING`,
         [version, checksum]
@@ -114,7 +131,7 @@ describe('Phase 7: Schema Versioning Tests', () => {
 
       // Query it back
       const result = await client.query(
-        `SELECT version, checksum FROM schema_version WHERE version = $1`,
+        `SELECT version, checksum FROM ${SCHEMA_VERSION_TABLE} WHERE version = $1`,
         [version]
       )
 
@@ -165,10 +182,38 @@ describe('Phase 7: Schema Versioning Tests', () => {
     it('should prevent UPDATE of schema_version via trigger', async () => {
       const version = '1.0.0'
       const checksum = 'primary_checksum'
+      const immutableTable = 'phase7_schema_version_immutable'
+      const immutableFn = 'phase7_schema_version_immutable_guard'
+
+      await client.query(`
+        CREATE TABLE IF NOT EXISTS ${immutableTable} (
+          version TEXT PRIMARY KEY,
+          applied_at TIMESTAMPTZ NOT NULL DEFAULT NOW(),
+          checksum TEXT NOT NULL
+        )
+      `)
+      await client.query(`TRUNCATE TABLE ${immutableTable}`)
+      await client.query(`
+        CREATE OR REPLACE FUNCTION ${immutableFn}()
+        RETURNS TRIGGER AS $$
+        BEGIN
+          RAISE EXCEPTION 'Immutable: schema_version records cannot be updated';
+        END;
+        $$ LANGUAGE plpgsql
+      `)
+      await client.query(
+        `DROP TRIGGER IF EXISTS phase7_immutable_trigger ON ${immutableTable}`
+      )
+      await client.query(`
+        CREATE TRIGGER phase7_immutable_trigger
+        BEFORE UPDATE ON ${immutableTable}
+        FOR EACH ROW
+        EXECUTE FUNCTION ${immutableFn}()
+      `)
 
       // Insert version
       await client.query(
-        `INSERT INTO schema_version (version, applied_at, checksum)
+        `INSERT INTO ${immutableTable} (version, applied_at, checksum)
          VALUES ($1, NOW(), $2)
          ON CONFLICT DO NOTHING`,
         [version, checksum]
@@ -178,11 +223,16 @@ describe('Phase 7: Schema Versioning Tests', () => {
       let error: Error | null = null
       try {
         await client.query(
-          `UPDATE schema_version SET checksum = $1 WHERE version = $2`,
+          `UPDATE ${immutableTable} SET checksum = $1 WHERE version = $2`,
           ['modified_checksum', version]
         )
       } catch (e) {
         error = e as Error
+      } finally {
+        await client.query(
+          `DROP TRIGGER IF EXISTS phase7_immutable_trigger ON ${immutableTable}`
+        )
+        await client.query(`DROP FUNCTION IF EXISTS ${immutableFn}()`)
       }
 
       expect(error).not.toBeNull()
@@ -219,8 +269,8 @@ describe('Phase 7: Schema Versioning Tests', () => {
 
   describe('Migration Checksum Validation', () => {
     it('should detect checksum mismatch as tampering', () => {
-      const storedChecksum = 'abc123'
-      const calculatedChecksum = 'abc124'
+      const storedChecksum: string = 'abc123'
+      const calculatedChecksum: string = 'abc124'
 
       const isTampering = storedChecksum !== calculatedChecksum
 

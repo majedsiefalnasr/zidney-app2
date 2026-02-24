@@ -1,4 +1,4 @@
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { randomBytes } from 'crypto'
 import { Hono } from 'hono'
 import { redis } from '../../infrastructure/redis'

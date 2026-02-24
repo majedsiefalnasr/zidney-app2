@@ -3,8 +3,8 @@
  * Called before transaction, creates backup metadata
  */
 
-import { createSnapshot } from '@zidney/domain-core'
-import { Database } from 'pg'
+import { createSnapshot } from '@zidney/domain-core/migration/snapshot-manager'
+import type { Pool } from 'pg'
 import { SchemaMigrationJob } from './schema-migration-job'
 
 /**
@@ -13,8 +13,8 @@ import { SchemaMigrationJob } from './schema-migration-job'
  */
 export async function executeSnapshotCreation(
   job: SchemaMigrationJob,
-  masterDb: Database,
-  tenantDb: Database
+  masterDb: Pool,
+  tenantDb: Pool
 ): Promise<string> {
   const { workspace_id, target_schema_version, correlation_id } = job
 

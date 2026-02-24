@@ -40,97 +40,94 @@ import { Context, Next } from 'hono'
  * Execution Order: 4th (after JWT + token version checks, before RBAC)
  * Reason: Fail fast if workspace not licensed
  */
-export async function validateLicenseMiddleware(c: Context, next: Next) {
-  const correlationId = c.get('correlationId') || 'unknown'
+export function validateLicenseMiddleware() {
+  return async (c: Context, next: Next): Promise<Response | void> => {
+    const correlationId = c.get('correlationId') || 'unknown'
 
-  try {
-    // Check if authenticated (skip for public routes)
-    const isAuthenticated = c.get('isAuthenticated')
-    if (!isAuthenticated) {
-      await next()
-      return
-    }
+    try {
+      // Check if authenticated (skip for public routes)
+      const isAuthenticated = c.get('isAuthenticated')
+      if (!isAuthenticated) {
+        await next()
+        return
+      }
 
-    const workspaceSlug = c.get('workspaceSlug')
-    const masterDb = c.get('masterDb')
+      const workspaceSlug = c.get('workspaceSlug') || 'unknown'
+      const masterDb = c.get('masterDb')
 
-    // MMC routes don't need license check (platform-level)
-    const authPayload = c.get('authPayload')
-    if (authPayload && authPayload.scope === 'MMC') {
-      await next()
-      return
-    }
+      // MMC routes don't need license check (platform-level)
+      const authPayload = c.get('authPayload')
+      if (authPayload && authPayload.scope === 'MMC') {
+        await next()
+        return
+      }
 
-    if (!masterDb) {
-      return c.json(
-        {
+      if (!masterDb) {
+        c.status(500 as any)
+        return c.json({
           success: false,
           data: null,
           error: {
             code: 'DB_CONTEXT_MISSING',
             message: 'Database context not found',
           },
-        },
-        500
-      )
-    }
+        })
+      }
 
-    // Fetch workspace license state from master database
-    const licenseResult = await masterDb.query(
-      `SELECT status, product_version FROM licenses 
-       WHERE workspace_slug = $1 
-       ORDER BY created_at DESC 
-       LIMIT 1`,
-      [workspaceSlug]
-    )
-
-    if (licenseResult.rows.length === 0) {
-      // No license found
-      const userId = c.get('userId')
-      await logLicenseBlocked(
-        correlationId,
-        workspaceSlug,
-        'NO_LICENSE',
-        403,
-        userId
+      // Fetch workspace license state from master database
+      const licenseResult = await masterDb.query(
+        `SELECT status, product_version FROM licenses
+         WHERE workspace_slug = $1
+         ORDER BY created_at DESC
+         LIMIT 1`,
+        [workspaceSlug]
       )
 
-      return c.json(
-        {
+      if (licenseResult.rows.length === 0) {
+        // No license found
+        const userId = c.get('userId')
+        await logLicenseBlocked(
+          correlationId,
+          workspaceSlug,
+          'NO_LICENSE',
+          403,
+          userId
+        )
+
+        c.status(403 as any)
+        return c.json({
           success: false,
           data: null,
           error: {
             code: 'LICENSE_NOT_FOUND',
             message: 'Workspace license not found',
           },
-        },
-        403
-      )
-    }
+        })
+      }
 
-    const license = licenseResult.rows[0]
-    const licenseStatus = license.status
+      const license = licenseResult.rows[0]
+      const licenseStatus = license.status
 
-    // Check license state
-    if (licenseStatus === 'ACTIVE') {
-      // License valid - continue
-      await next()
-      return
-    }
+      // Check license state
+      if (licenseStatus === 'ACTIVE') {
+        // License valid - continue
+        await next()
+        return
+      }
 
-    if (licenseStatus === 'SOFT_LOCKED') {
-      // Grace period - workspace can still operate
-      const userId = c.get('userId')
-      await logLicenseBlocked(
-        correlationId,
-        workspaceSlug,
-        licenseStatus,
-        423,
-        userId
-      )
+      if (licenseStatus === 'SOFT_LOCKED') {
+        // Grace period - workspace can still operate
+        const userId = c.get('userId')
+        await logLicenseBlocked(
+          correlationId,
+          workspaceSlug,
+          licenseStatus,
+          423,
+          userId
+        )
 
-      return c.json(
-        {
+        c.status(423 as any)
+        return c.json({
           success: false,
           data: null,
           error: {
@@ -138,13 +135,33 @@ export async function validateLicenseMiddleware(c: Context, next: Next) {
             message:
               'Workspace is temporarily unavailable due to billing issue. Please contact administrator.',
           },
-        },
-        423 // HTTP 423 Locked
-      )
-    }
+        })
+      }
 
-    if (licenseStatus === 'ARCHIVED' || licenseStatus === 'DELETED') {
-      // Workspace no longer available
+      if (licenseStatus === 'ARCHIVED' || licenseStatus === 'DELETED') {
+        // Workspace no longer available
+        const userId = c.get('userId')
+        await logLicenseBlocked(
+          correlationId,
+          workspaceSlug,
+          licenseStatus,
+          403,
+          userId
+        )
+
+        c.status(403 as any)
+        return c.json({
+          success: false,
+          data: null,
+          error: {
+            code: 'WORKSPACE_UNAVAILABLE',
+            message:
+              'Workspace has been archived or deleted and is no longer available.',
+          },
+        })
+      }
+
+      // Unknown status - treat as blocked
       const userId = c.get('userId')
       await logLicenseBlocked(
         correlationId,
@@ -154,53 +171,26 @@ export async function validateLicenseMiddleware(c: Context, next: Next) {
         userId
       )
 
-      return c.json(
-        {
-          success: false,
-          data: null,
-          error: {
-            code: 'WORKSPACE_UNAVAILABLE',
-            message:
-              'Workspace has been archived or deleted and is no longer available.',
-          },
-        },
-        403
-      )
-    }
-
-    // Unknown status - treat as blocked
-    const userId = c.get('userId')
-    await logLicenseBlocked(
-      correlationId,
-      workspaceSlug,
-      licenseStatus,
-      403,
-      userId
-    )
-
-    return c.json(
-      {
+      c.status(403 as any)
+      return c.json({
         success: false,
         data: null,
         error: {
           code: 'INVALID_LICENSE_STATUS',
           message: `License status invalid: ${licenseStatus}`,
         },
-      },
-      403
-    )
-  } catch (error) {
-    console.error('License validation error:', error)
-    return c.json(
-      {
+      })
+    } catch (error) {
+      console.error('License validation error:', error)
+      c.status(500 as any)
+      return c.json({
         success: false,
         data: null,
         error: {
           code: 'INTERNAL_ERROR',
           message: 'License validation failed',
         },
-      },
-      500
-    )
+      })
+    }
   }
 }

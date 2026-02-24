@@ -100,7 +100,7 @@ export function getErrorStatusCode(errorCode: string): number {
  * 5. Return standardized response to client
  */
 export function errorHandlerMiddleware() {
-  return async (c: Context, next: Next): Promise<void> => {
+  return async (c: Context, next: Next): Promise<Response | void> => {
     try {
       await next()
 
@@ -197,18 +197,16 @@ export function errorHandlerMiddleware() {
       }
 
       // Return standardized error response (no stack trace to client)
-      return c.json(
-        {
-          success: false,
-          data: null,
-          error: {
-            code: errorCode,
-            message: errorMessage,
-            request_id: requestId,
-          },
+      c.status(statusCode as any)
+      return c.json({
+        success: false,
+        data: null,
+        error: {
+          code: errorCode,
+          message: errorMessage,
+          request_id: requestId,
         },
-        statusCode
-      )
+      })
     }
   }
 }

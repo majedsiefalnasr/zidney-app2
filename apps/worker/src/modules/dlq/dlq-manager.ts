@@ -1,7 +1,42 @@
-import { v4 as uuidv4 } from 'uuid'
-import { logger } from '../../infrastructure/logger'
-import { db } from '../../infrastructure/postgres'
-import { JobQueueEntry } from '../queue/job-queue'
+import { randomUUID } from 'crypto'
+import { logger } from '@zidney/logger'
+
+export interface JobQueueEntry {
+  job_id: string
+  type: string
+  workspace_id: string
+  workspace_slug: string
+  user_id: string
+  correlation_id: string
+  created_at: string
+  retry_count: number
+  max_retries: number
+  payload: {
+    attempt_id?: string
+    [key: string]: unknown
+  }
+}
+
+type DbRow = Record<string, any>
+type QueryResult = { rows: DbRow[] }
+type DbAdapter = {
+  query: (queryText: string, values?: any[]) => Promise<QueryResult>
+}
+
+let dlqDb: DbAdapter | null = null
+
+export function configureDLQManagerDatabase(database: DbAdapter): void {
+  dlqDb = database
+}
+
+function getDb(): DbAdapter {
+  if (!dlqDb) {
+    throw new Error(
+      'DLQ manager database is not configured. Call configureDLQManagerDatabase() first.'
+    )
+  }
+  return dlqDb
+}
 
 /**
  * T052: Dead-letter queue manager
@@ -22,7 +57,8 @@ export class DLQManager {
     errorMessage: string,
     errorStack: string
   ): Promise<string> {
-    const dlqId = uuidv4()
+    const db = getDb()
+    const dlqId = randomUUID()
 
     try {
       await db.query(
@@ -95,6 +131,7 @@ export class DLQManager {
    *Check DLQ size and send alert if threshold exceeded
    */
   private async checkDLQSize(workspaceId: string): Promise<void> {
+    const db = getDb()
     try {
       const result = await db.query(
         `
@@ -105,7 +142,7 @@ export class DLQManager {
         [workspaceId]
       )
 
-      const dlqSize = result.rows[0].count
+      const dlqSize = Number(result.rows[0]?.count || 0)
 
       if (dlqSize > 10) {
         logger.error(`DLQ alert: high failure rate`, {
@@ -128,6 +165,7 @@ export class DLQManager {
    * Get DLQ entry details
    */
   async getDLQEntry(dlqId: string, workspaceId: string) {
+    const db = getDb()
     try {
       const result = await db.query(
         `
@@ -153,6 +191,7 @@ export class DLQManager {
    * Get DLQ size for workspace
    */
   async getDLQSize(workspaceId: string): Promise<number> {
+    const db = getDb()
     try {
       const result = await db.query(
         `

@@ -36,12 +36,13 @@
  */
 
 import { Context, Next } from 'hono'
-import pino from 'pino'
+import { createLogger } from '@zidney/logger'
 
-const logger = pino({
-  name: 'api-errors',
-  level: process.env.LOG_LEVEL || 'info',
-})
+const logger = createLogger('api-errors')
+
+export function getAuditLogger() {
+  return logger
+}
 
 /**
  * Known error codes for authentication domain
@@ -241,7 +242,7 @@ export async function errorHandlerMiddleware(c: Context, next: Next) {
       )
 
       // Send error response (sanitized)
-      c.status(statusCode)
+      c.status(statusCode as any)
       return c.json({
         success: false,
         data: null,
@@ -269,7 +270,7 @@ export async function errorHandlerMiddleware(c: Context, next: Next) {
       )
 
       // Send sanitized response
-      c.status(statusCode)
+      c.status(statusCode as any)
       return c.json({
         success: false,
         data: null,

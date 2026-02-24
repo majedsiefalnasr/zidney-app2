@@ -10,7 +10,7 @@
  * Task: T030
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { ErrorCodes } from '@zidney/types/errors/ErrorCodes'
 import type { Context, Next } from 'hono'
 
@@ -24,7 +24,7 @@ const logger = createLogger('api')
 export async function auditReadMiddleware(
   c: Context,
   next: Next
-): Promise<void> {
+): Promise<Response | void> {
   // Get user from context (set by auth middleware)
   const userId = c.get('userId')
   const userRoles = c.get('userRoles') || []

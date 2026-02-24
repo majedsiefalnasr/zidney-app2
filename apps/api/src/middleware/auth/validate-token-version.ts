@@ -43,115 +43,108 @@ import { Context, Next } from 'hono'
  *    - user.token_version (from database)
  * 4. If mismatch → 401 Unauthorized (token invalidated)
  */
-export async function validateTokenVersionMiddleware(c: Context, next: Next) {
-  const correlationId = c.get('correlationId') || 'unknown'
+export function validateTokenVersionMiddleware(_scope?: string) {
+  return async (c: Context, next: Next): Promise<Response | void> => {
+    const correlationId = c.get('correlationId') || 'unknown'
 
-  try {
-    // Check if authenticated (skip if not)
-    const isAuthenticated = c.get('isAuthenticated')
-    if (!isAuthenticated) {
-      await next()
-      return
-    }
+    try {
+      // Check if authenticated (skip if not)
+      const isAuthenticated = c.get('isAuthenticated')
+      if (!isAuthenticated) {
+        await next()
+        return
+      }
 
-    const authPayload = c.get('authPayload')
-    if (!authPayload) {
-      return c.json(
-        {
+      const authPayload = c.get('authPayload')
+      if (!authPayload) {
+        c.status(401 as any)
+        return c.json({
           success: false,
           data: null,
           error: {
             code: 'AUTH_CONTEXT_MISSING',
             message: 'Authentication context not found',
           },
-        },
-        401
-      )
-    }
+        })
+      }
 
-    const userId = c.get('userId')
-    const workspaceSlug = c.get('workspaceSlug')
-    const tenantDb = c.get('tenantDb')
+      const userId = c.get('userId') || 'unknown'
+      const workspaceSlug = c.get('workspaceSlug') || 'unknown'
+      const tenantDb = c.get('tenantDb')
 
-    if (!tenantDb) {
-      return c.json(
-        {
+      if (!tenantDb) {
+        c.status(500 as any)
+        return c.json({
           success: false,
           data: null,
           error: {
             code: 'DB_CONTEXT_MISSING',
             message: 'Database context not found',
           },
-        },
-        500
+        })
+      }
+
+      // Fetch current user.token_version from database
+      const result = await tenantDb.query(
+        'SELECT id, token_version, email FROM users WHERE id = $1 AND is_active = true',
+        [userId]
       )
-    }
 
-    // Fetch current user.token_version from database
-    const result = await tenantDb.query(
-      'SELECT id, token_version, email FROM users WHERE id = $1 AND is_active = true',
-      [userId]
-    )
-
-    if (result.rows.length === 0) {
-      // User not found or inactive
-      return c.json(
-        {
+      if (result.rows.length === 0) {
+        // User not found or inactive
+        c.status(401 as any)
+        return c.json({
           success: false,
           data: null,
           error: {
             code: 'USER_NOT_FOUND',
             message: 'User not found or inactive',
           },
-        },
-        401
-      )
-    }
+        })
+      }
 
-    const user = result.rows[0]
-    const currentUserTokenVersion = user.token_version
-    const tokenTokenVersion = authPayload.token_version
+      const user = result.rows[0]
+      const currentUserTokenVersion = user.token_version
+      const tokenTokenVersion = authPayload.token_version
 
-    // Check version match
-    if (tokenTokenVersion !== currentUserTokenVersion) {
-      // Version mismatch - token has been invalidated
-      await logTokenVersionMismatch(
-        correlationId,
-        userId,
-        user.email,
-        workspaceSlug,
-        tokenTokenVersion,
-        currentUserTokenVersion,
-        c.req.header('X-Forwarded-For') || c.req.header('X-Real-IP')
-      )
+      // Check version match
+      if (tokenTokenVersion !== currentUserTokenVersion) {
+        // Version mismatch - token has been invalidated
+        await logTokenVersionMismatch(
+          correlationId,
+          userId,
+          user.email,
+          workspaceSlug,
+          tokenTokenVersion,
+          currentUserTokenVersion,
+          c.req.header('X-Forwarded-For') || c.req.header('X-Real-IP')
+        )
 
-      return c.json(
-        {
+        c.status(401 as any)
+        return c.json({
           success: false,
           data: null,
           error: {
             code: 'TOKEN_VERSION_MISMATCH',
             message: 'Your session has been invalidated. Please login again.',
           },
-        },
-        401
-      )
-    }
+        })
+      }
 
-    // Version match - continue
-    await next()
-  } catch (error) {
-    console.error('Token version validation error:', error)
-    return c.json(
-      {
+      // Version match - continue
+      await next()
+      return
+    } catch (error) {
+      console.error('Token version validation error:', error)
+      c.status(500 as any)
+      return c.json({
         success: false,
         data: null,
         error: {
           code: 'INTERNAL_ERROR',
           message: 'Token version validation failed',
         },
-      },
-      500
-    )
+      })
+    }
   }
 }

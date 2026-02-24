@@ -1,5 +1,5 @@
 import { sql } from 'drizzle-orm'
-import type { MigrationConfig } from '../migration-types'
+import type { MigrationConfig } from '../../migration-types'
 
 /**
  * T011: Create DLQ Resolutions Audit Table Migration

@@ -8,67 +8,153 @@
  * Covers create, edit, state transitions, retry logic.
  */
 
-import Database from 'better-sqlite3'
-import { Logger } from 'pino'
+import type { Logger } from '@zidney/logger'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   InvalidStateTransitionError,
+  LicenseNotFoundError,
   LicenseValidationError,
   ProvisioningError,
-} from '../../../packages/domain-core/src/licenses/errors'
-import { LicenseRepository } from '../../../packages/domain-core/src/licenses/repository'
-import { LicenseService } from '../../../packages/domain-core/src/licenses/service'
+} from '../../../../packages/domain-core/src/licenses/errors'
+import { LicenseService } from '../../../../packages/domain-core/src/licenses/service'
 import {
   CreateLicenseRequest,
+  License,
   LicenseStatus,
-} from '../../../packages/domain-core/src/licenses/types'
+} from '../../../../packages/domain-core/src/licenses/types'
+
+class InMemoryLicenseRepository {
+  private licenses = new Map<string, License>()
+  private platformSchemaVersion = 7
+
+  async withTransaction<T>(callback: () => Promise<T>): Promise<T> {
+    return callback()
+  }
+
+  async getPlatformSchemaVersion(): Promise<number> {
+    return this.platformSchemaVersion
+  }
+
+  async getByWorkspaceSlug(slug: string): Promise<License | null> {
+    for (const license of this.licenses.values()) {
+      if (license.workspace_slug === slug && !license.deleted_at) {
+        return { ...license }
+      }
+    }
+    return null
+  }
+
+  async create(data: {
+    id: string
+    product_id: string
+    workspace_slug: string
+    workspace_name: string
+    student_limit: number | null
+    staff_limit: number | null
+    use_zidney_payment: boolean
+    commission_per_user: number | null
+    default_language: string
+    uses_divisions: boolean
+    schema_version: number
+    product_version: number
+  }): Promise<License> {
+    const existing = await this.getByWorkspaceSlug(data.workspace_slug)
+    if (existing) {
+      throw LicenseValidationError.slugNotUnique()
+    }
+
+    const now = new Date()
+    const license: License = {
+      id: data.id,
+      product_id: data.product_id,
+      workspace_slug: data.workspace_slug,
+      workspace_name: data.workspace_name,
+      student_limit: data.student_limit,
+      staff_limit: data.staff_limit,
+      use_zidney_payment: data.use_zidney_payment,
+      commission_per_user: data.commission_per_user,
+      default_language: data.default_language,
+      uses_divisions: data.uses_divisions,
+      status: LicenseStatus.PENDING_PROVISION,
+      soft_lock_until: null,
+      archived_at: null,
+      deleted_at: null,
+      schema_version: data.schema_version,
+      product_version: data.product_version,
+      provisioning_error: null,
+      provisioning_retries: 0,
+      provisioning_last_attempt_at: null,
+      created_at: now,
+      updated_at: now,
+    }
+
+    this.licenses.set(license.id, license)
+    return { ...license }
+  }
+
+  async getById(id: string): Promise<License | null> {
+    const license = this.licenses.get(id)
+    return license ? { ...license } : null
+  }
+
+  async update(
+    id: string,
+    data: Partial<Omit<License, 'id' | 'created_at' | 'updated_at'>>
+  ): Promise<License> {
+    const existing = this.licenses.get(id)
+    if (!existing) throw new LicenseNotFoundError(id)
+
+    const updated: License = {
+      ...existing,
+      ...data,
+      updated_at: new Date(),
+    }
+
+    this.licenses.set(id, updated)
+    return { ...updated }
+  }
+
+  async softLock(id: string, gracePeriodMs: number): Promise<License> {
+    const existing = this.licenses.get(id)
+    if (!existing) throw new LicenseNotFoundError(id)
+    if (existing.status !== LicenseStatus.ACTIVE) {
+      throw InvalidStateTransitionError.softLockFromNonActive()
+    }
+
+    const updated: License = {
+      ...existing,
+      status: LicenseStatus.SOFT_LOCKED,
+      soft_lock_until: new Date(Date.now() + gracePeriodMs),
+      updated_at: new Date(),
+    }
+
+    this.licenses.set(id, updated)
+    return { ...updated }
+  }
+
+  setLicenseFields(
+    id: string,
+    fields: Partial<Omit<License, 'id' | 'created_at' | 'updated_at'>>
+  ) {
+    const existing = this.licenses.get(id)
+    if (!existing) throw new Error(`License ${id} not found in test repo`)
+
+    this.licenses.set(id, {
+      ...existing,
+      ...fields,
+      updated_at: new Date(),
+    })
+  }
+}
 
 describe('LicenseService', () => {
-  let db: Database.Database
-  let repository: LicenseRepository
+  let repository: InMemoryLicenseRepository
   let service: LicenseService
   let mockQueueService: any
   let mockLogger: Logger
 
   beforeEach(() => {
-    // Initialize test database (in-memory)
-    db = new Database(':memory:')
-
-    // Create tables
-    db.exec(`
-      CREATE TABLE licenses (
-        id TEXT PRIMARY KEY,
-        product_id TEXT NOT NULL,
-        workspace_slug TEXT UNIQUE NOT NULL,
-        workspace_name TEXT NOT NULL,
-        student_limit INTEGER,
-        staff_limit INTEGER,
-        use_zidney_payment BOOLEAN DEFAULT 0,
-        commission_per_user NUMERIC,
-        default_language TEXT DEFAULT 'en',
-        uses_divisions BOOLEAN DEFAULT 0,
-        status TEXT DEFAULT 'PENDING_PROVISION',
-        soft_lock_until TIMESTAMP,
-        archived_at TIMESTAMP,
-        deleted_at TIMESTAMP,
-        schema_version INTEGER NOT NULL,
-        product_version INTEGER NOT NULL,
-        provisioning_error TEXT,
-        provisioning_retries INTEGER DEFAULT 0,
-        provisioning_last_attempt_at TIMESTAMP,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-
-      CREATE TABLE schema_versions (
-        version INTEGER PRIMARY KEY,
-        checksum TEXT
-      );
-
-      INSERT INTO schema_versions (version, checksum) VALUES (7, 'test');
-    `)
-
-    repository = new LicenseRepository(db)
+    repository = new InMemoryLicenseRepository()
 
     mockQueueService = {
       enqueueProvisioningJob: vi.fn().mockResolvedValue(undefined),
@@ -81,11 +167,11 @@ describe('LicenseService', () => {
       debug: vi.fn(),
     } as any
 
-    service = new LicenseService(repository, mockQueueService, mockLogger)
+    service = new LicenseService(repository as any, mockQueueService, mockLogger)
   })
 
   afterEach(() => {
-    db.close()
+    vi.restoreAllMocks()
   })
 
   describe('create()', () => {
@@ -104,13 +190,13 @@ describe('LicenseService', () => {
       expect(license.status).toBe(LicenseStatus.PENDING_PROVISION)
       expect(license.student_limit).toBe(1000)
       expect(license.staff_limit).toBe(50)
-      expect(mockQueueService.enqueueProvisioningJob).toHaveBeenCalled()
+      expect(mockQueueService.enqueueProvisioningJob).toHaveBeenCalledTimes(1)
     })
 
     it('should reject invalid slug format', async () => {
       const input: CreateLicenseRequest = {
         product_id: '550e8400-e29b-41d4-a716-446655440000',
-        workspace_slug: 'INVALID_SLUG', // uppercase, underscore
+        workspace_slug: 'INVALID_SLUG',
         workspace_name: 'Test',
       }
 
@@ -122,7 +208,7 @@ describe('LicenseService', () => {
     it('should reject slug that is too short', async () => {
       const input: CreateLicenseRequest = {
         product_id: '550e8400-e29b-41d4-a716-446655440000',
-        workspace_slug: 'ab', // Only 2 chars
+        workspace_slug: 'ab',
         workspace_name: 'Test',
       }
 
@@ -138,10 +224,8 @@ describe('LicenseService', () => {
         workspace_name: 'ACME',
       }
 
-      // Create first license
       await service.create(input, 'correlation-123')
 
-      // Try to create duplicate
       await expect(service.create(input, 'correlation-456')).rejects.toThrow(
         LicenseValidationError
       )
@@ -152,7 +236,7 @@ describe('LicenseService', () => {
         product_id: '550e8400-e29b-41d4-a716-446655440000',
         workspace_slug: 'test-corp',
         workspace_name: 'Test',
-        student_limit: -10, // Invalid
+        student_limit: -10,
       }
 
       await expect(service.create(input, 'correlation-123')).rejects.toThrow(
@@ -179,7 +263,7 @@ describe('LicenseService', () => {
         product_id: '550e8400-e29b-41d4-a716-446655440000',
         workspace_slug: 'test-lang',
         workspace_name: 'Test',
-        default_language: 'zz', // Invalid
+        default_language: 'zz',
       }
 
       await expect(service.create(input, 'correlation-123')).rejects.toThrow(
@@ -247,10 +331,7 @@ describe('LicenseService', () => {
       )
 
       licenseId = license.id
-
-      // Manually update status to ACTIVE for testing
-      const stmt = db.prepare('UPDATE licenses SET status = ? WHERE id = ?')
-      stmt.run(LicenseStatus.ACTIVE, licenseId)
+      repository.setLicenseFields(licenseId, { status: LicenseStatus.ACTIVE })
     })
 
     it('should transition ACTIVE to SOFT_LOCKED', async () => {
@@ -265,20 +346,10 @@ describe('LicenseService', () => {
     })
 
     it('should reject soft-lock from non-ACTIVE status', async () => {
-      // First soft-lock
-      await service.softLock(
-        licenseId,
-        { grace_period_days: 90 },
-        'correlation-456'
-      )
+      await service.softLock(licenseId, { grace_period_days: 90 }, 'correlation-456')
 
-      // Try to soft-lock again
       await expect(
-        service.softLock(
-          licenseId,
-          { grace_period_days: 90 },
-          'correlation-789'
-        )
+        service.softLock(licenseId, { grace_period_days: 90 }, 'correlation-789')
       ).rejects.toThrow(InvalidStateTransitionError)
     })
   })
@@ -297,18 +368,11 @@ describe('LicenseService', () => {
       )
 
       licenseId = license.id
-
-      // Manually update to PROVISION_FAILED
-      const stmt = db.prepare(`
-        UPDATE licenses 
-        SET status = ?, provisioning_error = ?, provisioning_retries = 0
-        WHERE id = ?
-      `)
-      stmt.run(
-        LicenseStatus.PROVISION_FAILED,
-        'Initial provisioning failed',
-        licenseId
-      )
+      repository.setLicenseFields(licenseId, {
+        status: LicenseStatus.PROVISION_FAILED,
+        provisioning_error: 'Initial provisioning failed',
+        provisioning_retries: 0,
+      })
     })
 
     it('should retry provisioning from PROVISION_FAILED', async () => {
@@ -324,9 +388,7 @@ describe('LicenseService', () => {
     })
 
     it('should reject retry from non-PROVISION_FAILED status', async () => {
-      // Update to ACTIVE
-      const stmt = db.prepare('UPDATE licenses SET status = ? WHERE id = ?')
-      stmt.run(LicenseStatus.ACTIVE, licenseId)
+      repository.setLicenseFields(licenseId, { status: LicenseStatus.ACTIVE })
 
       await expect(
         service.retryProvisioning(licenseId, {}, 'correlation-456')
@@ -334,11 +396,7 @@ describe('LicenseService', () => {
     })
 
     it('should enforce retry limit', async () => {
-      // Simulate 5 retries already
-      let updateStmt = db.prepare(
-        'UPDATE licenses SET provisioning_retries = ? WHERE id = ?'
-      )
-      updateStmt.run(5, licenseId)
+      repository.setLicenseFields(licenseId, { provisioning_retries: 5 })
 
       await expect(
         service.retryProvisioning(licenseId, {}, 'correlation-456')

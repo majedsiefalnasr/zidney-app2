@@ -1,5 +1,5 @@
 /**
- * @zidney/logging - Unified Logger Package
+ * @zidney/logger - Unified Logger Package
  *
  * A single logging package for the entire Zidney platform.
  * Provides consistent API and structured logging across all services.
@@ -7,7 +7,7 @@
  * ## Usage
  *
  * ```typescript
- * import { createLogger } from '@zidney/logging'
+ * import { createLogger } from '@zidney/logger'
  *
  * // Create a logger with service name
  * const logger = createLogger('api')
@@ -64,7 +64,13 @@
  */
 
 // Main exports
-export { createLogger, Logger } from './logger'
+export {
+  createChildLogger,
+  createLogger,
+  getLogger,
+  logger,
+  Logger,
+} from './logger'
 
 // Type exports
 export type {

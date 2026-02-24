@@ -18,7 +18,7 @@
  * - Structured logging with correlation_id
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { Context } from 'hono'
 import { Pool, PoolClient } from 'pg'
 import type { UserContextStage06 } from '../../middleware/auth-context-stage06'

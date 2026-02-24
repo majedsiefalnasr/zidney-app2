@@ -159,7 +159,7 @@ export function detectDestructiveOperations(sqlContent: string): string[] {
 
   const found: string[] = []
 
-  for (const { pattern, description } of destructivePatterns) {
+  for (const { pattern } of destructivePatterns) {
     const matches = sqlContent.match(pattern)
     if (matches) {
       for (const match of matches) {

@@ -39,7 +39,7 @@ import { registerStage06Routes } from './routes/attempts/index-stage06'
 import { registerStage06PhaseDRoutes } from './routes/attempts/submit-index'
 
 // Utility logger
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 
 // ============================================================================
 // APPLICATION SETUP

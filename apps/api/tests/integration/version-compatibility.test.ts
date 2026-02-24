@@ -23,15 +23,28 @@
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 import { db } from '../../db'
 
+const VERSION_WORKSPACES_TABLE = 'version_compat_workspaces'
+
 describe('Version Compatibility', () => {
   let workspaceV1: any
   let workspaceV2: any
   let workspaceIncompatible: any
 
   beforeAll(async () => {
+    await db.master.query(`
+      CREATE TABLE IF NOT EXISTS ${VERSION_WORKSPACES_TABLE} (
+        id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+        slug TEXT NOT NULL,
+        name TEXT NOT NULL,
+        license_status TEXT NOT NULL,
+        schema_version INTEGER NOT NULL,
+        product_version TEXT NOT NULL
+      )
+    `)
+
     // Schema version 1
     const v1 = await db.master.query(
-      `INSERT INTO workspaces (slug, name, license_status, schema_version, product_version)
+      `INSERT INTO ${VERSION_WORKSPACES_TABLE} (slug, name, license_status, schema_version, product_version)
        VALUES ('ver-1', 'Schema v1', 'ACTIVE', 1, '0.1.0')
        RETURNING *`
     )
@@ -39,7 +52,7 @@ describe('Version Compatibility', () => {
 
     // Schema version 1, higher product version
     const v2 = await db.master.query(
-      `INSERT INTO workspaces (slug, name, license_status, schema_version, product_version)
+      `INSERT INTO ${VERSION_WORKSPACES_TABLE} (slug, name, license_status, schema_version, product_version)
        VALUES ('ver-2', 'Schema v1 Higher Product', 'ACTIVE', 1, '0.2.0')
        RETURNING *`
     )
@@ -47,7 +60,7 @@ describe('Version Compatibility', () => {
 
     // Schema version 2 (incompatible)
     const incomp = await db.master.query(
-      `INSERT INTO workspaces (slug, name, license_status, schema_version, product_version)
+      `INSERT INTO ${VERSION_WORKSPACES_TABLE} (slug, name, license_status, schema_version, product_version)
        VALUES ('ver-incomp', 'Schema v2', 'ACTIVE', 2, '0.1.0')
        RETURNING *`
     )
@@ -55,12 +68,15 @@ describe('Version Compatibility', () => {
   })
 
   afterAll(async () => {
-    await db.master.query('DELETE FROM workspaces WHERE slug LIKE ?', ['ver-%'])
+    await db.master.query(
+      `DELETE FROM ${VERSION_WORKSPACES_TABLE} WHERE slug LIKE $1`,
+      ['ver-%']
+    )
   })
 
   it('should allow same schema version', async () => {
     const result = await db.master.query(
-      `SELECT schema_version FROM workspaces WHERE id = $1`,
+      `SELECT schema_version FROM ${VERSION_WORKSPACES_TABLE} WHERE id = $1`,
       [workspaceV1.id]
     )
 
@@ -69,11 +85,11 @@ describe('Version Compatibility', () => {
 
   it('should allow higher product version with same schema', async () => {
     const v1 = await db.master.query(
-      `SELECT product_version FROM workspaces WHERE id = $1`,
+      `SELECT product_version FROM ${VERSION_WORKSPACES_TABLE} WHERE id = $1`,
       [workspaceV1.id]
     )
     const v2 = await db.master.query(
-      `SELECT product_version FROM workspaces WHERE id = $1`,
+      `SELECT product_version FROM ${VERSION_WORKSPACES_TABLE} WHERE id = $1`,
       [workspaceV2.id]
     )
 
@@ -90,7 +106,7 @@ describe('Version Compatibility', () => {
     // Should return 426 Upgrade Required
 
     const workspace = await db.master.query(
-      `SELECT schema_version FROM workspaces WHERE id = $1`,
+      `SELECT schema_version FROM ${VERSION_WORKSPACES_TABLE} WHERE id = $1`,
       [workspaceIncompatible.id]
     )
 
@@ -123,7 +139,7 @@ describe('Version Compatibility', () => {
     // Simulating middleware version check
 
     const workspace = await db.master.query(
-      `SELECT schema_version, product_version FROM workspaces WHERE id = $1`,
+      `SELECT schema_version, product_version FROM ${VERSION_WORKSPACES_TABLE} WHERE id = $1`,
       [workspaceV1.id]
     )
 

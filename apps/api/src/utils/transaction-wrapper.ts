@@ -1,5 +1,5 @@
 import { StudentStaffCounter } from '@zidney/domain-core/license'
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { Pool, PoolClient } from 'pg'
 
 const logger = createLogger('transaction-wrapper')

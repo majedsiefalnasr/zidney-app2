@@ -19,7 +19,7 @@
  * Note: GRADING happens in Phase E worker; this just validates structure
  */
 
-import { Logger } from '@zidney/logging'
+import { Logger } from '@zidney/logger'
 import type {
   QuestionSnapshot,
   QuestionSnapshotContainer,

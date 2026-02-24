@@ -8,8 +8,8 @@
  * Enforces all validation rules, state transitions, and side effects.
  */
 
-import { Logger } from 'pino'
 import { v4 as uuidv4 } from 'uuid'
+import { logger as defaultLogger } from '@zidney/logger'
 import {
   ALLOWED_STATE_TRANSITIONS,
   PROVISIONING_BASE_DELAY_MS,
@@ -41,6 +41,14 @@ import {
   UnlockRequest,
 } from './types'
 
+// Logger interface compatible with pino-like loggers
+interface Logger {
+  info: (obj: Record<string, unknown>, msg?: string) => void
+  warn: (obj: Record<string, unknown>, msg?: string) => void
+  error: (obj: Record<string, unknown>, msg?: string) => void
+  debug: (obj: Record<string, unknown>, msg?: string) => void
+}
+
 export interface QueueService {
   enqueueProvisioningJob(payload: any): Promise<void>
 }
@@ -49,7 +57,7 @@ export class LicenseService {
   constructor(
     private repository: LicenseRepository,
     private queueService: QueueService,
-    private logger: Logger
+    private logger: Logger = defaultLogger
   ) {}
 
   /**

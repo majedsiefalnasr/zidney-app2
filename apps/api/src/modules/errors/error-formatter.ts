@@ -1,6 +1,6 @@
 import type { Context } from 'hono'
-import { getCorrelationId } from '../middleware/correlation-id'
-import { ERROR_CODE_TO_STATUS, ErrorCode } from '../types/error-codes'
+import { getCorrelationId } from '../../middleware/auth/correlation-id'
+import { ERROR_CODE_TO_STATUS, ErrorCode } from '../../types/error-codes'
 
 /**
  * T057: Standardized Error Response Formatter
@@ -91,12 +91,9 @@ export async function handleError(
   )
 
   // Return standardized error response
-  return c.json(formatError(code, message, context?.details), {
-    status: statusCode,
-    headers: {
-      'x-correlation-id': correlationId,
-    },
-  })
+  c.status(statusCode as any)
+  c.header('x-correlation-id', correlationId)
+  return c.json(formatError(code, message, context?.details))
 }
 
 /**

@@ -23,9 +23,9 @@
  * - Structured logging with correlation_id
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { Context } from 'hono'
-import { Pool, PoolClient } from 'pg'
+import { Pool } from 'pg'
 import { v4 as uuidv4 } from 'uuid'
 import type { UserContextStage06 } from '../../middleware/auth-context-stage06'
 import { loadQuestionsForExam } from '../../modules/attempt/exam-loader'
@@ -49,7 +49,7 @@ export async function createAttemptHandler(c: Context) {
   const correlationId = c.get('correlationId') || 'unknown'
   const workspace = c.get('workspace')
   const user = c.get('user') as UserContextStage06
-  const tenantDb = c.get('tenantDb') as PoolClient | Pool
+  const tenantDb = c.get('tenantDb') as Pool
   const logger = createLogger('attempts-create')
 
   const startTime = Date.now()
@@ -170,7 +170,7 @@ export async function createAttemptHandler(c: Context) {
     await client.query('BEGIN')
 
     // Insert attempt
-    const insertAttemptResult = await client.query(
+    await client.query(
       `
       INSERT INTO attempts (
         id, workspace_id, user_id, exam_id, status,

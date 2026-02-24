@@ -1,4 +1,4 @@
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 
 const logger = createLogger('ws-heartbeat')
 

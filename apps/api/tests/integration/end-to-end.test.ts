@@ -22,23 +22,56 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
   let userId: string
   let examId: string
   let pool: any
+  const runId = Date.now().toString(36)
+  const ddlLockId = 62006001
 
   beforeAll(async () => {
     // Setup workspace
     const wsRes = await db.master.query(
       `INSERT INTO workspaces (slug, name, schema_version, product_version, license_status)
-       VALUES ('e2e-ws', 'E2E WS', 1, '1.0.0', 'ACTIVE')
+       VALUES ($1, 'E2E WS', 1, '1.0.0', 'ACTIVE')
        RETURNING id`
+      ,
+      [`e2e-ws-${runId}`]
     )
     workspaceId = wsRes.rows[0].id
     pool = getTenantPool(workspaceId)
 
+    await pool.query('SELECT pg_advisory_lock($1)', [ddlLockId])
+    try {
+      await pool.query(`
+        CREATE TABLE IF NOT EXISTS users (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          workspace_id TEXT NOT NULL,
+          name TEXT NOT NULL,
+          email TEXT NOT NULL,
+          password_hash TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS exams (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          workspace_id TEXT NOT NULL,
+          title TEXT NOT NULL,
+          description TEXT NULL,
+          total_points INTEGER NOT NULL,
+          pass_score_percentage INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS enrollments (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          workspace_id TEXT NOT NULL,
+          user_id TEXT NOT NULL,
+          exam_id TEXT NOT NULL
+        );
+      `)
+    } finally {
+      await pool.query('SELECT pg_advisory_unlock($1)', [ddlLockId])
+    }
+
     // Create user
     const userRes = await pool.query(
       `INSERT INTO users (workspace_id, name, email, password_hash)
-       VALUES ($1, 'E2E User', 'e2e@test.com', 'hash')
+       VALUES ($1, 'E2E User', $2, 'hash')
        RETURNING id`,
-      [workspaceId]
+      [workspaceId, `e2e-${runId}@test.com`]
     )
     userId = userRes.rows[0].id
 
@@ -130,7 +163,7 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
     const jobId = submitResp.body.job_id
 
     // Step 4: Poll result (pending)
-    let resultResp = {
+    let resultResp: any = {
       status: 202,
       body: {
         job_status: 'PENDING',
@@ -217,7 +250,12 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
         `INSERT INTO users (workspace_id, name, email, password_hash)
          VALUES ($1, $2, $3, $4)
          RETURNING id`,
-        [workspaceId, `Concurrent User ${i}`, `concurrent${i}@test.com`, 'hash']
+        [
+          workspaceId,
+          `Concurrent User ${i}`,
+          `concurrent-${runId}-${i}@test.com`,
+          'hash',
+        ]
       )
 
       // Enroll in exam

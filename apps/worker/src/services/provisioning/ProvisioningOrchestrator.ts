@@ -45,7 +45,6 @@ export class ProvisioningOrchestrator {
   private distributed_lock: DistributedLock
   private migration_executor: MigrationExecutor
   private baseline_seeder: BaselineSeeder
-  private checkpoint_manager: CheckpointManager
 
   constructor(
     master_pool: Pool,
@@ -58,7 +57,7 @@ export class ProvisioningOrchestrator {
     this.distributed_lock = distributed_lock
     this.migration_executor = migration_executor
     this.baseline_seeder = baseline_seeder
-    this.checkpoint_manager = checkpoint_manager
+    void checkpoint_manager
   }
 
   /**
@@ -284,7 +283,7 @@ export class ProvisioningOrchestrator {
   private async rollbackProvisioning(
     job: ProvisioningJob,
     steps_completed: number,
-    error: any
+    _error: any
   ): Promise<void> {
     console.log(`[PROV] Rolling back provisioning for ${job.workspace_slug}`)
 

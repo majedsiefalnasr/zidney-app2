@@ -58,8 +58,8 @@ export async function validateSchemaVersionMiddleware(c: Context, next: Next) {
       )
     }
 
-    const userId = c.get('userId')
-    const workspaceSlug = c.get('workspaceSlug')
+    const userId = c.get('userId') || 'unknown'
+    const workspaceSlug = c.get('workspaceSlug') || 'unknown'
     const tenantDb = c.get('tenantDb')
 
     if (!tenantDb) {

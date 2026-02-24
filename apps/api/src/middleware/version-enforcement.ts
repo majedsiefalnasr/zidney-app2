@@ -1,5 +1,5 @@
 import { VersionValidator } from '@zidney/domain-core/license'
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import type { Context, Next } from 'hono'
 import { toLicenseError } from '../responses/license-error-handler'
 

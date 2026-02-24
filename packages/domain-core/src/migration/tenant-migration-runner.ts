@@ -14,7 +14,7 @@ import {
 import crypto from 'crypto'
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { Database } from 'pg'
+import { Pool } from 'pg'
 
 /**
  * Tenant context passed by Worker after resolver validation
@@ -22,8 +22,8 @@ import { Database } from 'pg'
 export interface TenantMigrationContext {
   workspace_id: string
   workspace_slug: string
-  connection_pool: Database
-  masterDb: Database
+  connection_pool: Pool
+  masterDb: Pool
   correlationId: string
 }
 

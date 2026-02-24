@@ -21,7 +21,7 @@
  * - AGENTS.md: Strong validation on every request
  */
 
-import jwt from 'jsonwebtoken'
+import * as jwt from 'jsonwebtoken'
 import {
   AuthError,
   AuthErrorCode,
@@ -104,7 +104,7 @@ export async function signMmcToken(user: {
     exp: Math.floor(Date.now() / 1000) + 15 * 60, // 15 minutes
   }
 
-  return jwt.sign(payload, config.secret, {
+  return jwt.sign(payload as unknown as Record<string, unknown>, config.secret, {
     algorithm: config.algorithm,
     noTimestamp: false, // Let jwt lib manage iat/exp
   })
@@ -156,7 +156,7 @@ export async function signBackofficeToken(
     exp: Math.floor(Date.now() / 1000) + 15 * 60,
   }
 
-  return jwt.sign(payload, config.secret, {
+  return jwt.sign(payload as unknown as Record<string, unknown>, config.secret, {
     algorithm: config.algorithm,
   })
 }
@@ -209,7 +209,7 @@ export async function signFrontofficeToken(
     exp: Math.floor(Date.now() / 1000) + 15 * 60,
   }
 
-  return jwt.sign(payload, config.secret, {
+  return jwt.sign(payload as unknown as Record<string, unknown>, config.secret, {
     algorithm: config.algorithm,
   })
 }
@@ -242,7 +242,7 @@ export async function verifyAndDecodeToken(token: string): Promise<JwtPayload> {
     const config = getJwtConfig()
     const payload = jwt.verify(token, config.secret, {
       algorithms: [config.algorithm],
-    }) as JwtPayload
+    }) as unknown as JwtPayload
 
     return payload
   } catch (error) {

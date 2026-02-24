@@ -4,6 +4,15 @@
     "types": [
       "node"
     ],
+    "typeRoots": [
+      "./node_modules/@types",
+      "../logger/node_modules/@types",
+      "../../node_modules/@types"
+    ],
+    "isolatedModules": false,
+    "noUnusedLocals": false,
+    "noUnusedParameters": false,
+    "noImplicitAny": false,
     "lib": [
       "ES2022"
     ]

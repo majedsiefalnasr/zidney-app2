@@ -664,7 +664,7 @@ Testing (T096-T125)
 
 ## Phase 14: Logging & Observability
 
-- [x] T067 Create structured logging schema in packages/validation/src/schemas/logging-schema.ts
+- [x] T067 Create structured logging schema in packages/validation/src/schemas/logger-schema.ts
   - **Layer:** Shared Package (Logging)
   - **Transactional:** No
   - **Idempotent:** Yes
@@ -672,7 +672,7 @@ Testing (T096-T125)
   - **License Middleware:** Not applicable
   - **Details:** Define log entry schema: timestamp, level (info|warn|error|debug), service, event (descriptive string), workspace_id, workspace_slug, user_id, correlation_id, attempt_id, job_id, additional fields; enforce schema with validation
 
-- [x] T068 Implement structured logger in packages/logging/src/logger.ts (UPDATE)
+- [x] T068 Implement structured logger in packages/logger/src/logger.ts (UPDATE)
   - **Layer:** Shared Package (Logging)
   - **Transactional:** No
   - **Idempotent:** Yes

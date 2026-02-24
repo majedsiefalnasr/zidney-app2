@@ -17,6 +17,45 @@
 import { beforeAll, describe, expect, test } from 'vitest'
 import { db, getTenantPool } from '../../db'
 
+const POLL_WORKSPACES_TABLE = 'poll_workspaces'
+const POLL_USERS_TABLE = 'poll_users'
+const POLL_ATTEMPTS_TABLE = 'poll_attempts'
+
+async function ensurePollingTestTables(): Promise<void> {
+  await db.master.query(`
+    CREATE TABLE IF NOT EXISTS ${POLL_WORKSPACES_TABLE} (
+      id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+      slug TEXT NOT NULL,
+      name TEXT NOT NULL,
+      schema_version INTEGER,
+      product_version TEXT,
+      license_status TEXT
+    )
+  `)
+
+  await db.master.query(`
+    CREATE TABLE IF NOT EXISTS ${POLL_USERS_TABLE} (
+      id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+      workspace_id TEXT,
+      name TEXT,
+      email TEXT,
+      password_hash TEXT,
+      role TEXT,
+      token_version INTEGER DEFAULT 1
+    )
+  `)
+
+  await db.master.query(`
+    CREATE TABLE IF NOT EXISTS ${POLL_ATTEMPTS_TABLE} (
+      id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+      workspace_id TEXT,
+      user_id TEXT,
+      exam_id TEXT,
+      status TEXT
+    )
+  `)
+}
+
 describe('GET /api/v1/attempts/:id/result Integration (Polling)', () => {
   let workspaceId: string
   let userId: string
@@ -24,9 +63,11 @@ describe('GET /api/v1/attempts/:id/result Integration (Polling)', () => {
   let pool: any
 
   beforeAll(async () => {
+    await ensurePollingTestTables()
+
     // Create workspace
     const wsRes = await db.master.query(
-      `INSERT INTO workspaces (slug, name, schema_version, product_version, license_status)
+      `INSERT INTO ${POLL_WORKSPACES_TABLE} (slug, name, schema_version, product_version, license_status)
        VALUES ('poll-ws', 'Poll WS', 1, '1.0.0', 'ACTIVE')
        RETURNING id`
     )
@@ -35,7 +76,7 @@ describe('GET /api/v1/attempts/:id/result Integration (Polling)', () => {
 
     // Create user
     const userRes = await pool.query(
-      `INSERT INTO users (workspace_id, name, email, password_hash)
+      `INSERT INTO ${POLL_USERS_TABLE} (workspace_id, name, email, password_hash)
        VALUES ($1, 'Test User', 'test@test.com', 'hash')
        RETURNING id`,
       [workspaceId]
@@ -44,7 +85,7 @@ describe('GET /api/v1/attempts/:id/result Integration (Polling)', () => {
 
     // Create attempt
     const attemptRes = await pool.query(
-      `INSERT INTO attempts (workspace_id, user_id, exam_id, status)
+      `INSERT INTO ${POLL_ATTEMPTS_TABLE} (workspace_id, user_id, exam_id, status)
        VALUES ($1, $2, 'exam-123', 'SUBMITTED')
        RETURNING id`,
       [workspaceId, userId]

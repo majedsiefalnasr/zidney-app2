@@ -11,7 +11,7 @@
  * Phase: 1 - Migration Infrastructure
  */
 
-import { Logger } from '@zidney/logging'
+import { Logger } from '@zidney/logger'
 import { Pool } from 'pg'
 import { up as initTrackingTable } from './init-tracking-table'
 import { MigrationExecutor } from './runner'

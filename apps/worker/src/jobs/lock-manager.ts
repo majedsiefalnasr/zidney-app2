@@ -3,7 +3,7 @@
  * Serializes concurrent upgrades per workspace
  */
 
-import { Database } from 'pg'
+import { Pool } from 'pg'
 
 export interface LockHandle {
   workspace_id: string
@@ -18,11 +18,9 @@ export interface LockHandle {
  */
 export async function acquireWorkspaceLock(
   workspace_id: string,
-  masterDb: Database,
+  masterDb: Pool,
   timeoutMs: number = 60000
 ): Promise<LockHandle> {
-  const startTime = Date.now()
-
   try {
     // Set statement timeout
     await masterDb.query(`SET statement_timeout = $1`, [timeoutMs])
@@ -75,7 +73,7 @@ export async function acquireWorkspaceLock(
  */
 export async function releaseWorkspaceLock(
   lockHandle: LockHandle,
-  masterDb: Database
+  _masterDb: Pool
 ): Promise<void> {
   console.log(
     JSON.stringify({

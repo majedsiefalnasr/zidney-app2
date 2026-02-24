@@ -110,21 +110,21 @@ export function sendSuccess<T>(
   data: T,
   status: number = 200
 ): Response {
-  return c.json(successResponse(data), status)
+  return c.json(successResponse(data), status as any)
 }
 
 /**
  * Send created response (201)
  */
 export function sendCreated<T>(c: Context, data: T): Response {
-  return c.json(successResponse(data), 201)
+  return c.json(successResponse(data), 201 as any)
 }
 
 /**
  * Send no content response (204)
  */
 export function sendNoContent(c: Context): Response {
-  return c.text('', 204)
+  return c.text('', 204 as any)
 }
 
 /**
@@ -137,7 +137,7 @@ export function sendError(
   status: number = 400,
   details?: Record<string, unknown>
 ): Response {
-  return c.json(errorResponse(code, message, details), status)
+  return c.json(errorResponse(code, message, details), status as any)
 }
 
 /**
@@ -155,7 +155,7 @@ export function sendList<T>(
     success: true,
     data: listResponse(items, total, limit, offset),
   }
-  return c.json(response, status)
+  return c.json(response, status as any)
 }
 
 /**

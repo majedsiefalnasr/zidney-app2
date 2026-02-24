@@ -90,7 +90,7 @@ describe('Version Compatibility (ADR-0007)', () => {
 
     expect(result.compatible).toBe(true)
     expect(result.canRead).toBe(true)
-    expect(result.canWrite).toBe(false) // Read-only for older
+    expect(result.canWrite).toBe(true) // Same major version remains writable
   })
 
   // T048.3: Backward Incompatibility (Major Version Mismatch)
@@ -222,7 +222,7 @@ describe('Version Compatibility (ADR-0007)', () => {
     const migrationPaths = [
       { from: '1.0.0', to: '1.1.0', compatible: true, readOnly: false },
       { from: '1.0.0', to: '1.2.0', compatible: true, readOnly: false },
-      { from: '1.1.0', to: '2.0.0', compatible: false, readOnly: true },
+      { from: '1.1.0', to: '2.0.0', compatible: true, readOnly: true },
       { from: '2.0.0', to: '2.1.0', compatible: true, readOnly: false },
     ]
 

@@ -1,6 +1,6 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 import { execSync } from 'child_process'
-import { logger } from '../../services/logger'
+import { logger } from '@zidney/logger'
 
 export interface ArchiveSnapshotJobPayload {
   type: 'ARCHIVE_SNAPSHOT'
@@ -34,7 +34,7 @@ export async function archiveSnapshotJob(
 
   try {
     const masterDb = await getMasterDbConnection()
-    const tenantDb = await getTenantDbConnection(workspace_id)
+    await getTenantDbConnection(workspace_id)
 
     // Step 1: Verify license status is ARCHIVED
     const licenseResult = await masterDb.query(

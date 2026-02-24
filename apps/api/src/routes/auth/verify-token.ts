@@ -134,7 +134,7 @@ router.post(
             user_id: payload.user_id,
             email: payload.email,
             scope: body.scope,
-            expires_at: new Date(payload.exp * 1000).toISOString(),
+            expires_at: new Date((payload.exp ?? 0) * 1000).toISOString(),
           },
           error: null,
         })
@@ -207,7 +207,7 @@ router.post(
           email: payload.email,
           scope: body.scope,
           workspace_id: workspaceId,
-          expires_at: new Date(payload.exp * 1000).toISOString(),
+          expires_at: new Date((payload.exp ?? 0) * 1000).toISOString(),
         },
         error: null,
       })

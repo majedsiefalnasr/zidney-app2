@@ -10,7 +10,7 @@
  * Reference: docs/01_ENGINEERING_GOVERNANCE/09_ERROR_HANDLING_STANDARD.md
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import {
   AppError,
   ErrorCodes,
@@ -45,7 +45,7 @@ export function handleError(c: Context, error: Error | AppError): Response {
   const workspaceId = c.get('workspaceId')
   const userId = c.get('userId')
 
-  let errorCode = ErrorCodes.INTERNAL_SERVER_ERROR
+  let errorCode: string = ErrorCodes.INTERNAL_SERVER_ERROR
   let statusCode = 500
   let details: Record<string, unknown> | undefined
 
@@ -88,7 +88,7 @@ export function handleError(c: Context, error: Error | AppError): Response {
     },
   }
 
-  return c.json(response, statusCode)
+  return c.json(response, statusCode as any)
 }
 
 /**

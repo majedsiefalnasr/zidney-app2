@@ -387,10 +387,10 @@ describe('Schema Version Management', () => {
       expect(status).toBe(200)
     })
 
-    it('should return 424 for downgrade required', () => {
+    it('should return 400 for downgrade required', () => {
       const status = versionChecker.getHTTPStatusForIncompat('2.0.0')
 
-      expect(status).toBe(424)
+      expect(status).toBe(400)
     })
   })
 

@@ -16,15 +16,15 @@
  * - Dead-letter queue handling (T051)
  */
 
-import { Database } from 'better-sqlite3'
-import { Logger } from 'pino'
+import type { Pool } from 'pg'
+import type { Logger } from '@zidney/logger'
 import {
   LicenseStatus,
   ProvisioningJobPayload,
 } from '@zidney/domain-core/licenses/types'
 
 interface ProvisioningJobContext {
-  masterDb: Database
+  masterDb: Pool
   logger: Logger
   job: {
     data: ProvisioningJobPayload
@@ -62,17 +62,18 @@ export async function handleProvisioningJob(
       })
 
       // Update license status to ACTIVE if not already
-      const updateStmt = masterDb.prepare(`
-        UPDATE licenses 
-        SET status = ?, updated_at = NOW()
-        WHERE id = ? AND status IN (?, ?)
-      `)
-
-      updateStmt.run(
-        LicenseStatus.ACTIVE,
-        payload.license_id,
-        LicenseStatus.PENDING_PROVISION,
-        LicenseStatus.PROVISION_FAILED
+      await masterDb.query(
+        `
+        UPDATE licenses
+        SET status = $1, updated_at = NOW()
+        WHERE id = $2 AND status IN ($3, $4)
+      `,
+        [
+          LicenseStatus.ACTIVE,
+          payload.license_id,
+          LicenseStatus.PENDING_PROVISION,
+          LicenseStatus.PROVISION_FAILED,
+        ]
       )
 
       return
@@ -86,23 +87,20 @@ export async function handleProvisioningJob(
 
     // T047: Create admin account
     const adminEmail = `admin@${payload.workspace_slug}.internal`
-    const adminPassword = await createAdminAccount(
-      payload.workspace_slug,
-      adminEmail,
-      logger
-    )
+    await createAdminAccount(payload.workspace_slug, adminEmail, logger)
 
     // T048: Insert into tenants_registry
     const workspaceId = await insertTenantRegistry(masterDb, payload, logger)
 
     // Update license status to ACTIVE
-    const activateStmt = masterDb.prepare(`
-      UPDATE licenses 
-      SET status = ?, provisioning_error = NULL, updated_at = NOW()
-      WHERE id = ?
-    `)
-
-    activateStmt.run(LicenseStatus.ACTIVE, payload.license_id)
+    await masterDb.query(
+      `
+      UPDATE licenses
+      SET status = $1, provisioning_error = NULL, updated_at = NOW()
+      WHERE id = $2
+    `,
+      [LicenseStatus.ACTIVE, payload.license_id]
+    )
 
     logger.info({
       event: 'provisioning_completed',
@@ -136,17 +134,18 @@ export async function handleProvisioningJob(
     const sanitizedError = sanitizeErrorMessage(error.message)
 
     // Update license with failure status
-    const failStmt = masterDb.prepare(`
-      UPDATE licenses 
-      SET status = ?, provisioning_error = ?, provisioning_retries = ?, provisioning_last_attempt_at = NOW()
-      WHERE id = ?
-    `)
-
-    failStmt.run(
-      LicenseStatus.PROVISION_FAILED,
-      sanitizedError,
-      attemptNumber + 1,
-      payload.license_id
+    await masterDb.query(
+      `
+      UPDATE licenses
+      SET status = $1, provisioning_error = $2, provisioning_retries = $3, provisioning_last_attempt_at = NOW()
+      WHERE id = $4
+    `,
+      [
+        LicenseStatus.PROVISION_FAILED,
+        sanitizedError,
+        attemptNumber + 1,
+        payload.license_id,
+      ]
     )
 
     // T050, T051: Rethrow for automatic retry/DLQ handling
@@ -157,12 +156,12 @@ export async function handleProvisioningJob(
 /**
  * T044: Check if tenant database already exists
  */
-function checkDatabaseExists(workspaceSlug: string): boolean {
+function checkDatabaseExists(_workspaceSlug: string): boolean {
   try {
     // In real implementation, query PostgreSQL pg_database
     // For now, assume no existing databases on first attempt
     return false
-  } catch (error) {
+  } catch {
     return false
   }
 }
@@ -280,7 +279,7 @@ async function createAdminAccount(
  * T048: Insert workspace into tenants_registry
  */
 async function insertTenantRegistry(
-  masterDb: Database,
+  masterDb: Pool,
   payload: ProvisioningJobPayload,
   logger: Logger
 ): Promise<string> {
@@ -293,17 +292,18 @@ async function insertTenantRegistry(
   })
 
   try {
-    const stmt = masterDb.prepare(`
+    await masterDb.query(
+      `
       INSERT INTO tenants_registry (
         license_id, workspace_slug, database_name, workspace_id, created_at
-      ) VALUES (?, ?, ?, ?, NOW())
-    `)
-
-    stmt.run(
-      payload.license_id,
-      payload.workspace_slug,
-      `tenant_${payload.workspace_slug}`,
-      workspaceId
+      ) VALUES ($1, $2, $3, $4, NOW())
+    `,
+      [
+        payload.license_id,
+        payload.workspace_slug,
+        `tenant_${payload.workspace_slug}`,
+        workspaceId,
+      ]
     )
 
     logger.info({

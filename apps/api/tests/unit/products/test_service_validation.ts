@@ -9,25 +9,30 @@
  * - validateSlugUniqueness()
  */
 
-import { Module } from '@zidney/types/enums/Module'
+import { Module, isValidModule } from '@zidney/types/enums/Module'
 import { describe, expect, it } from 'vitest'
 
 describe('Unit: Products - Service Validation (T061)', () => {
+  type LocalizedName = {
+    en?: string
+    ar?: string
+  }
+
   describe('validateProductName()', () => {
     it('should accept valid English name', async () => {
-      const name = { en: 'Valid Product Name' }
+      const name: { en: string } = { en: 'Valid Product Name' }
       const isValid = /^.{1,255}$/.test(name.en)
       expect(isValid).toBe(true)
     })
 
     it('should reject missing English name', async () => {
-      const name = { ar: 'اسم المنتج فقط' }
+      const name: LocalizedName = { ar: 'اسم المنتج فقط' }
       const isValid = name.en !== undefined && name.en.length > 0
       expect(isValid).toBe(false)
     })
 
     it('should accept optional Arabic name', async () => {
-      const name = { en: 'Valid', ar: 'صحيح' }
+      const name: LocalizedName = { en: 'Valid', ar: 'صحيح' }
       const isValid = name.en && (name.ar ? /^.{1,255}$/.test(name.ar) : true)
       expect(isValid).toBe(true)
     })
@@ -54,19 +59,19 @@ describe('Unit: Products - Service Validation (T061)', () => {
   describe('validateModulesEnum()', () => {
     it('should accept valid single module', async () => {
       const modules = [Module.MCQ]
-      const allValid = modules.every((m) => Object.values(Module).includes(m))
+      const allValid = modules.every((m) => isValidModule(m))
       expect(allValid).toBe(true)
     })
 
     it('should accept multiple valid modules', async () => {
       const modules = [Module.MCQ, Module.LIBRARY, Module.EXERCISES]
-      const allValid = modules.every((m) => Object.values(Module).includes(m))
+      const allValid = modules.every((m) => isValidModule(m))
       expect(allValid).toBe(true)
     })
 
     it('should reject invalid module string', async () => {
       const modules = ['INVALID_MODULE']
-      const allValid = modules.every((m) => Object.values(Module).includes(m))
+      const allValid = modules.every((m) => isValidModule(m))
       expect(allValid).toBe(false)
     })
 
@@ -86,7 +91,7 @@ describe('Unit: Products - Service Validation (T061)', () => {
         Module.FORUM,
       ]
       expect(modules).toHaveLength(6)
-      const allValid = modules.every((m) => Object.values(Module).includes(m))
+      const allValid = modules.every((m) => isValidModule(m))
       expect(allValid).toBe(true)
     })
 
@@ -161,8 +166,8 @@ describe('Unit: Products - Service Validation (T061)', () => {
     })
 
     it('should be case-sensitive', async () => {
-      const slug1 = 'MySlug'
-      const slug2 = 'myslug'
+      const slug1: string = 'MySlug'
+      const slug2: string = 'myslug'
       // Mock: Both slugs would be treated as different
       const areDifferent = slug1 !== slug2
       expect(areDifferent).toBe(true)

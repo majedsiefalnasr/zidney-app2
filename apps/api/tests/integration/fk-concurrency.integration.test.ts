@@ -1,6 +1,6 @@
 import type { PoolClient } from 'pg'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { pool } from '~/db/pool'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import { pool } from '../../db'
 
 /**
  * T050: FK Concurrency Test
@@ -9,10 +9,90 @@ import { pool } from '~/db/pool'
 
 describe('FK Concurrency Constraints', () => {
   let client: PoolClient
+  let testSchema: string
+
+  beforeAll(async () => {
+    testSchema = `fk_concurrency_${Date.now().toString(36)}`
+    const setupClient = await pool.connect()
+    try {
+      await setupClient.query(`CREATE SCHEMA IF NOT EXISTS ${testSchema}`)
+      await setupClient.query(`SET search_path TO ${testSchema}, public`)
+      await setupClient.query(`
+        CREATE TABLE IF NOT EXISTS users (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          email TEXT UNIQUE NOT NULL,
+          name TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS mcq_baskets (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          name TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS mcq_questions (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          basket_id TEXT NOT NULL REFERENCES mcq_baskets(id) ON DELETE CASCADE,
+          question_text TEXT NOT NULL,
+          options_json JSONB NOT NULL DEFAULT '[]'::jsonb,
+          correct_option INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS mcq_exams (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          name TEXT NOT NULL,
+          duration_minutes INTEGER NOT NULL,
+          question_count INTEGER NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS attempts (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          exam_type TEXT NOT NULL,
+          exam_id TEXT NOT NULL REFERENCES mcq_exams(id) ON DELETE RESTRICT,
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE RESTRICT,
+          configuration_snapshot JSONB NOT NULL DEFAULT '{}'::jsonb,
+          question_list_snapshot JSONB NOT NULL DEFAULT '{}'::jsonb,
+          grading_config_snapshot JSONB NOT NULL DEFAULT '{}'::jsonb
+        );
+        CREATE TABLE IF NOT EXISTS categories (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          name TEXT NOT NULL,
+          type TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS category_values (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          category_id TEXT NOT NULL REFERENCES categories(id) ON DELETE CASCADE,
+          value TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS roles (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          code TEXT UNIQUE NOT NULL,
+          name TEXT NOT NULL
+        );
+        CREATE TABLE IF NOT EXISTS role_assignments (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          role_id TEXT NOT NULL REFERENCES roles(id) ON DELETE CASCADE
+        );
+        CREATE TABLE IF NOT EXISTS subscriptions (
+          id TEXT PRIMARY KEY DEFAULT md5(random()::text || clock_timestamp()::text),
+          user_id TEXT NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+          plan_type TEXT NOT NULL
+        );
+      `)
+    } finally {
+      setupClient.release()
+    }
+  })
+
+  afterAll(async () => {
+    const teardownClient = await pool.connect()
+    try {
+      await teardownClient.query(`DROP SCHEMA IF EXISTS ${testSchema} CASCADE`)
+    } finally {
+      teardownClient.release()
+    }
+  })
 
   beforeEach(async () => {
     client = await pool.connect()
     await client.query('BEGIN TRANSACTION')
+    await client.query(`SET search_path TO ${testSchema}, public`)
   })
 
   afterEach(async () => {

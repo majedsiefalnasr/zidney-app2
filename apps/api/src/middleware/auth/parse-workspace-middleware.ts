@@ -33,13 +33,10 @@
  */
 
 import { Context, Next } from 'hono'
-import pino from 'pino'
+import { createLogger } from '@zidney/logger'
 import { db } from '../../db'
 
-const logger = pino({
-  name: 'parse-workspace',
-  level: process.env.LOG_LEVEL || 'info',
-})
+const logger = createLogger('parse-workspace')
 
 /**
  * Workspace context

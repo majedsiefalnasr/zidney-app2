@@ -1,4 +1,4 @@
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { redis } from '../../infrastructure/redis'
 
 const logger = createLogger('rate-limiting')

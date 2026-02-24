@@ -17,7 +17,7 @@
  * - DELETE /api/v1/mmc/products/:id (delete)
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { AppError, ErrorCodes } from '@zidney/types/errors/ErrorCodes'
 import { ProductStatus } from '@zidney/types/products/Product'
 import {
@@ -27,21 +27,21 @@ import {
   ProductQueryFiltersSchema,
   UpdateProductSchema,
 } from '@zidney/validation/products/productValidation'
-import { Router, type Context } from 'hono'
+import { Hono, type Context } from 'hono'
 import * as productService from '@zidney/domain-core/products/productService'
-import { auditReadMiddleware } from '../../../middleware/auditReadMiddleware'
-import { correlationIdMiddleware } from '../../../middleware/correlationIdMiddleware'
-import { licenseMiddleware } from '../../../middleware/licenseMiddleware'
-import { asyncHandler, handleError } from '../../../utils/errorHandler'
+import { auditReadMiddleware } from '../../middleware/auditReadMiddleware'
+import { correlationIdMiddleware } from '../../middleware/correlationIdMiddleware'
+import { licenseMiddleware } from '../../middleware/licenseMiddleware'
+import { asyncHandler, handleError } from '../../utils/errorHandler'
 import {
   sendCreated,
   sendList,
   sendNoContent,
   sendSuccess,
-} from '../../../utils/responseWrapper'
+} from '../../utils/responseWrapper'
 
 const logger = createLogger('api')
-const router = new Router()
+const router = new Hono()
 
 // ============================================================================
 // T033: GET /api/v1/mmc/products - List products
@@ -195,7 +195,7 @@ router.get(
       const result = await productService.getProductAuditLog(
         client,
         productId,
-        filters
+        filters as any
       )
 
       // Log successful operation

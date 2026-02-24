@@ -11,8 +11,8 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
-import { createLogger } from '@zidney/logging'
-import { TaskQueueProcessor } from '@zidney/app/worker/processor/queue-processor'
+import { createLogger } from '@zidney/logger'
+import { TaskQueueProcessor } from '../src/processor/queue-processor'
 import { Pool } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
@@ -251,6 +251,7 @@ describe('Schema Provisioning - Load Testing', () => {
     const backoffDelays: number[] = []
 
     for (const task of failedTasks) {
+      void task
       // Simulate task failure → retry with backoff
       const delayMs = 2000 // First retry: 2s
 
@@ -298,6 +299,7 @@ describe('Schema Provisioning - Load Testing', () => {
 
     // Store all messages
     for (const msg of dlqMessages) {
+      void msg
       // In production: Storage to persistent queue (Redis, RabbitMQ, etc.)
       // For test: Just verify in-memory storage works
     }
@@ -306,6 +308,7 @@ describe('Schema Provisioning - Load Testing', () => {
 
     logger.info('DLQ storage test completed', {
       messages_stored: dlqMessages.length,
+      storage_before: storageBefore,
       storage_time_ms: storageTime,
       avg_time_per_message_ms: (storageTime / dlqMessages.length).toFixed(2),
     })

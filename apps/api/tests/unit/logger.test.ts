@@ -11,7 +11,7 @@
  */
 
 import { describe, expect, it, vi } from 'vitest'
-import { createChildLogger, getLogger, logger } from '../../src/lib/logger'
+import { createChildLogger, getLogger, logger } from '@zidney/logger'
 
 describe('Logger Abstraction', () => {
   describe('singleton pattern', () => {
@@ -79,10 +79,7 @@ describe('Logger Abstraction', () => {
   })
 
   describe('log output format', () => {
-    it('should output logs as valid JSON', (done) => {
-      const mockTransport = vi.fn()
-      const testLogger = require('pino')
-
+    it('should output logs as valid JSON', () => {
       // Verify logs can be stringified
       const testLog = {
         timestamp: new Date().toISOString(),
@@ -96,7 +93,6 @@ describe('Logger Abstraction', () => {
         JSON.stringify(testLog)
       }).not.toThrow()
 
-      done()
     })
 
     it('should include required base fields', () => {

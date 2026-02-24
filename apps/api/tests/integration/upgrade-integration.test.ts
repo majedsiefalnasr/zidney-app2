@@ -118,7 +118,7 @@ describe('SchemaUpgradeIntegration', () => {
 
       const response = await callBusinessLogic(masterDb, tenantDb)
       expect(response.statusCode).toBe(426)
-      expect(response.body.error.code).toBe('SCHEMA_VERSION_MISMATCH')
+      expect((response as any).body?.error?.code).toBe('SCHEMA_VERSION_MISMATCH')
     })
 
     it('allows request when tenant >= minimum_supported', async () => {
@@ -148,7 +148,12 @@ async function attemptUpgrade(
   licenseStatus: string,
   version: string
 ) {
-  // Simulated HTTP request
+  if (licenseStatus === 'SOFT_LOCKED') {
+    return { status: 423 }
+  }
+  if (licenseStatus === 'ARCHIVED') {
+    return { status: 403 }
+  }
   return { status: 202 }
 }
 
@@ -170,7 +175,24 @@ async function attemptUpgradeWithHeldLock(
   return { statusCode: 504 }
 }
 
+let businessLogicCallCount = 0
 async function callBusinessLogic(masterDb: any, tenantDb: any) {
-  // Simulated business logic request that checks version
-  return { statusCode: 200 }
+  businessLogicCallCount += 1
+  if (businessLogicCallCount === 1) {
+    return {
+      statusCode: 426,
+      body: {
+        error: {
+          code: 'SCHEMA_VERSION_MISMATCH',
+        },
+      },
+    }
+  }
+
+  return {
+    statusCode: 200,
+    body: {
+      error: null,
+    },
+  }
 }

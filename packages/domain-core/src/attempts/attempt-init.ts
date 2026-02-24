@@ -9,7 +9,7 @@
  * Task: T036 (Attempt initialization service)
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { Pool, PoolClient } from 'pg'
 import { logAttemptEvent } from '../audit/attempt-event-logger'
 import { captureExamSnapshot } from './snapshot-service'

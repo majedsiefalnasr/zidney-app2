@@ -101,9 +101,13 @@ export class OrphanDetectionJob {
       }
     } catch (error) {
       errors.push(`Orphan detection failed: ${error}`)
-      this.logger.error('Orphan detection error', error, {
-        correlation_id: 'orphan-detection-job',
-      })
+      this.logger.error(
+        'Orphan detection error',
+        error instanceof Error ? error : String(error),
+        {
+          correlation_id: 'orphan-detection-job',
+        }
+      )
     }
 
     return {
@@ -128,12 +132,10 @@ export interface DLQJob {
 }
 
 export class DLQHandler {
-  private master_pool: Pool
   private redis: any // Redis client
   private logger: StructuredLogger
 
-  constructor(master_pool: Pool, redis: any, logger?: StructuredLogger) {
-    this.master_pool = master_pool
+  constructor(_master_pool: Pool, redis: any, logger?: StructuredLogger) {
     this.redis = redis
     this.logger =
       logger || new StructuredLogger('dlq-handler', '1.0.0', LogLevel.INFO)
@@ -175,9 +177,13 @@ export class DLQHandler {
         },
       })
     } catch (error) {
-      this.logger.error('Failed to move job to DLQ', error, {
-        correlation_id: context.correlation_id,
-      })
+      this.logger.error(
+        'Failed to move job to DLQ',
+        error instanceof Error ? error : String(error),
+        {
+          correlation_id: context.correlation_id,
+        }
+      )
       throw error
     }
   }
@@ -214,9 +220,13 @@ export class DLQHandler {
           break
       }
     } catch (error) {
-      this.logger.error('Failed to process DLQ job', error, {
-        details: { job_id, action },
-      })
+      this.logger.error(
+        'Failed to process DLQ job',
+        error instanceof Error ? error : String(error),
+        {
+          details: { job_id, action },
+        }
+      )
       throw error
     }
   }
@@ -233,7 +243,11 @@ export class DLQHandler {
       )
       return jobs.map((j: string) => JSON.parse(j))
     } catch (error) {
-      this.logger.error('Failed to retrieve DLQ jobs', error, {})
+      this.logger.error(
+        'Failed to retrieve DLQ jobs',
+        error instanceof Error ? error : String(error),
+        {}
+      )
       return []
     }
   }
@@ -291,7 +305,7 @@ export class MetricsCollector {
     migration_version: string,
     duration_ms: number
   ): void {
-    const key = `migration_${migration_version}_duration`
+    const key = `migration_${workspace_slug}_${migration_version}_duration`
     const collection = this.histograms.get(key) || []
     collection.push(duration_ms)
     this.histograms.set(key, collection)
@@ -301,7 +315,7 @@ export class MetricsCollector {
    * Record attempt count
    */
   recordAttemptCount(workspace_slug: string, attempt_number: number): void {
-    const key = `provisioning_attempts_${attempt_number}`
+    const key = `provisioning_attempts_${workspace_slug}_${attempt_number}`
     this.metrics.set(key, (this.metrics.get(key) || 0) + 1)
   }
 
@@ -309,7 +323,7 @@ export class MetricsCollector {
    * Record job retry
    */
   recordJobRetry(workspace_slug: string, reason: string): void {
-    const key = `provisioning_retries_${reason}`
+    const key = `provisioning_retries_${workspace_slug}_${reason}`
     this.metrics.set(key, (this.metrics.get(key) || 0) + 1)
   }
 

@@ -23,14 +23,15 @@
  * - Idempotent migrations via schema_version tracking
  */
 
-import { createLogger } from '@zidney/logging'
+import { createLogger } from '@zidney/logger'
 import { Redis } from 'ioredis'
 import { Pool } from 'pg'
-import {
-  IJobQueue,
-  JobQueue,
-  ProvisioningJob,
-} from '../jobs/provisioning/ProvisioningJob'
+import ProvisioningJob, { IJobQueue } from '../jobs/provisioning/ProvisioningJob'
+import { BaselineSeeder } from '../services/provisioning/BaselineSeeder'
+import { CheckpointManager } from '../services/provisioning/CheckpointManager'
+import { DistributedLock } from '../services/provisioning/DistributedLock'
+import { JobQueue } from '../services/provisioning/JobQueue'
+import { MigrationExecutor } from '../services/provisioning/MigrationExecutor'
 import { ProvisioningOrchestrator } from '../services/provisioning/ProvisioningOrchestrator'
 
 const logger = createLogger('ProvisioningHandler')
@@ -50,24 +51,26 @@ interface ProvisioningHandlerConfig {
  */
 export class ProvisioningHandler {
   private master_pool: Pool
-  private tenant_pool_factory: (workspace_slug: string) => Pool
   private redis: Redis
   private job_queue: IJobQueue
   private orchestrator: ProvisioningOrchestrator
-  private max_retries: number
   private retry_backoff_base_ms: number
 
   constructor(config: ProvisioningHandlerConfig) {
     this.master_pool = config.master_pool
-    this.tenant_pool_factory = config.tenant_pool_factory
     this.redis = config.redis
     this.job_queue = new JobQueue(config.redis)
-    this.orchestrator = new ProvisioningOrchestrator({
-      master_pool: config.master_pool,
-      tenant_pool_factory: config.tenant_pool_factory,
-      redis: config.redis,
-    })
-    this.max_retries = config.max_retries
+    const distributed_lock = new DistributedLock(config.redis)
+    const migration_executor = new MigrationExecutor()
+    const baseline_seeder = new BaselineSeeder()
+    const checkpoint_manager = new CheckpointManager()
+    this.orchestrator = new ProvisioningOrchestrator(
+      config.master_pool,
+      distributed_lock,
+      migration_executor,
+      baseline_seeder,
+      checkpoint_manager
+    )
     this.retry_backoff_base_ms = config.retry_backoff_base_ms
   }
 
@@ -130,6 +133,7 @@ export class ProvisioningHandler {
           job_id: job.id,
           provisioning_duration_ms: result.duration_ms,
         })
+        await this.recordIdempotency(job)
 
         logger.info(
           {
@@ -191,16 +195,13 @@ export class ProvisioningHandler {
             'Provisioning job exhausted retries, moving to DLQ'
           )
 
-          await this.job_queue.moveToDLQ(job.id, {
-            ...job.toLogContext(),
-            error: result.error,
-          })
+          await this.job_queue.moveToDLQ(job.id, job)
 
           // Update license to PROVISION_FAILED
           await this.updateLicenseStatus(
             job.license_id,
             'PROVISION_FAILED',
-            result.error,
+            result.error ?? null,
             {
               correlation_id: job.correlation_id,
               job_id: job.id,
@@ -298,7 +299,7 @@ export class ProvisioningHandler {
    * - attempt count (retry tracking)
    */
   private async updateLicenseStatus(
-    license_id: string,
+    license_id: number,
     new_status: string,
     error_message: string | null,
     metadata: Record<string, any>
@@ -329,14 +330,16 @@ export class ProvisioningHandler {
         RETURNING *
       `
 
-      const updateParams = [new_status, JSON.stringify(metadata)]
+      const updateParams: Array<number | string> = [
+        new_status,
+        JSON.stringify(metadata),
+      ]
       if (error_message) {
         updateParams.push(error_message)
       }
       updateParams.push(license_id)
 
-      const result = await client.query(updateQuery, updateParams)
-      const updatedLicense = result.rows[0]
+      await client.query(updateQuery, updateParams)
 
       await client.query('COMMIT')
 
@@ -350,17 +353,6 @@ export class ProvisioningHandler {
         'License status updated via provisioning handler'
       )
 
-      // Record idempotency
-      await this.recordIdempotency(
-        new ProvisioningJob(
-          metadata.job_id,
-          parseInt(license_id),
-          '',
-          0,
-          metadata.correlation_id,
-          new Date().toISOString()
-        )
-      )
     } catch (error) {
       await client.query('ROLLBACK').catch(() => {})
       throw error

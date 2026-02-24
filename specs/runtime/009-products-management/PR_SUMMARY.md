@@ -197,7 +197,7 @@ npm run test -- --coverage
 ### Domain Layer
 
 - `packages/domain-core/src/products/productService.ts`
-- `packages/logging/src/products.ts`
+- `packages/logger/src/products.ts`
 
 ### API Layer
 

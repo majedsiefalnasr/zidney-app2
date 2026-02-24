@@ -1314,7 +1314,7 @@ Async provisioning begins in **Stage 10** (License Engine).
 All logs use **Pino** structured logging:
 
 ```typescript
-import { createPinoLogger } from 'packages/logging';
+import { createPinoLogger } from 'packages/logger';
 
 const logger = createPinoLogger('api-products');
 

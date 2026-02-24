@@ -1,5 +1,5 @@
-import { createLogger } from '@zidney/logging'
-import { Hono } from 'hono'
+import { createLogger } from '@zidney/logger'
+import type { Context } from 'hono'
 import { v4 as uuidv4 } from 'uuid'
 import { db } from '../../infrastructure/postgres'
 
@@ -36,7 +36,7 @@ export interface DLQDiscardResponse {
   }
 }
 
-async function dlqDiscard(c: Hono): Promise<Response | void> {
+async function dlqDiscard(c: Context): Promise<Response | void> {
   const correlationId = c.state.requestId
   const workspace = c.state.workspace
   const userId = c.state.userId
