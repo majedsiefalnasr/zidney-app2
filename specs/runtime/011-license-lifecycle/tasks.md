@@ -152,7 +152,7 @@
 **Blocked By**: Phase 2 (all endpoints call License Service)  
 **Blocks**: Phase 4 (middleware needs endpoint list)
 
-- [ ] T016 [SYS] Implement POST /licenses/{licenseId}/soft-lock endpoint — `apps/api/src/routes/licenses.ts`
+- [x] T016 [SYS] Implement POST /licenses/{licenseId}/soft-lock endpoint — `apps/api/src/routes/licenses-lifecycle.ts`
   - Handler signature: `async (ctx: Context) => Promise<Response>`
   - Route: `POST /api/v1/licenses/{licenseId}/soft-lock`
   - Auth required: Admin role
@@ -162,7 +162,7 @@
   - Errors: 400 (invalid input), 403 (not admin), 404 (license not found), 423 (already soft-locked), 500 (DB error)
   - Acceptance: POST with valid data → 200, license.status = SOFT_LOCKED; POST without reason → 400
 
-- [ ] T017 [P] [SYS] Implement POST /licenses/{licenseId}/renew endpoint — `apps/api/src/routes/licenses.ts`
+- [x] T017 [P] [SYS] Implement POST /licenses/{licenseId}/renew endpoint — `apps/api/src/routes/licenses-lifecycle.ts`
   - Handler: `async (ctx: Context) => Promise<Response>`
   - Route: `POST /api/v1/licenses/{licenseId}/renew`
   - Auth required: Admin role
@@ -172,7 +172,7 @@
   - Errors: 400 (not soft-locked), 403 (not admin), 404 (license not found), 500 (DB error)
   - Acceptance: POST on SOFT_LOCKED license → 200, status = ACTIVE
 
-- [ ] T018 [P] [SYS] Implement POST /licenses/{licenseId}/archive endpoint — `apps/api/src/routes/licenses.ts`
+- [x] T018 [P] [SYS] Implement POST /licenses/{licenseId}/archive endpoint — `apps/api/src/routes/licenses-lifecycle.ts`
   - Handler: `async (ctx: Context) => Promise<Response>`
   - Route: `POST /api/v1/licenses/{licenseId}/archive`
   - Auth required: Admin role
@@ -182,7 +182,7 @@
   - Errors: 400 (not soft-locked), 403 (not admin), 404 (license not found), 423 (snapshot in progress), 503 (storage unavailable)
   - Acceptance: POST → 202, job_id returned, job visible in queue
 
-- [ ] T019 [P] [SYS] Implement POST /licenses/{licenseId}/restore endpoint — `apps/api/src/routes/licenses.ts`
+- [x] T019 [P] [SYS] Implement POST /licenses/{licenseId}/restore endpoint — `apps/api/src/routes/licenses-lifecycle.ts`
   - Handler: `async (ctx: Context) => Promise<Response>`
   - Route: `POST /api/v1/licenses/{licenseId}/restore`
   - Auth required: Admin role
@@ -192,7 +192,7 @@
   - Errors: 400 (not archived, snapshot failed), 403 (not admin), 404 (license/snapshot not found), 426 (schema mismatch), 504 (timeout)
   - Acceptance: POST on ARCHIVED license with CREATED snapshot → 202, job_id returned
 
-- [ ] T020 [P] [SYS] Implement POST /licenses/{licenseId}/delete/initiate endpoint — `apps/api/src/routes/licenses.ts`
+- [x] T020 [P] [SYS] Implement POST /licenses/{licenseId}/delete/initiate endpoint — `apps/api/src/routes/licenses-lifecycle.ts`
   - Handler: `async (ctx: Context) => Promise<Response>`
   - Route: `POST /api/v1/licenses/{licenseId}/delete/initiate`
   - Auth required: Admin role + 2FA verification
@@ -202,7 +202,7 @@
   - Errors: 400 (not archived), 401 (not authenticated), 403 (not admin or 2FA failed), 404 (license not found)
   - Acceptance: POST → 200, user receives unique confirmation phrase, DB record created with hash
 
-- [ ] T021 [P] [SYS] Implement POST /licenses/{licenseId}/delete/confirm endpoint — `apps/api/src/routes/licenses.ts`
+- [x] T021 [P] [SYS] Implement POST /licenses/{licenseId}/delete/confirm endpoint — `apps/api/src/routes/licenses-lifecycle.ts`
   - Handler: `async (ctx: Context) => Promise<Response>`
   - Route: `POST /api/v1/licenses/{licenseId}/delete/confirm`
   - Auth required: Admin role + 2FA verification (re-auth check)
@@ -213,7 +213,7 @@
   - Errors: 400 (expired), 403 (phrase mismatch), 401 (not authenticated), 404 (license/confirmation not found)
   - Acceptance: POST with wrong phrase → 403; POST with correct phrase → 202, job_id returned
 
-- [ ] T022 [P] [SYS] Implement GET /licenses/{licenseId} endpoint — `apps/api/src/routes/licenses.ts`
+- [x] T022 [P] [SYS] Implement GET /licenses/{licenseId} endpoint — `apps/api/src/routes/licenses-lifecycle.ts`
   - Handler: `async (ctx: Context) => Promise<Response>`
   - Route: `GET /api/v1/licenses/{licenseId}`
   - Auth required: Optional (admin level)
@@ -223,7 +223,7 @@
   - Errors: 403 (not admin), 404 (license not found), 500 (DB error)
   - Acceptance: GET → 200, license object complete with snapshot info (if archived)
 
-- [ ] T023 [P] [SYS] Implement GET /licenses/{licenseId}/audit-trail endpoint — `apps/api/src/routes/licenses.ts`
+- [x] T023 [P] [SYS] Implement GET /licenses/{licenseId}/audit-trail endpoint — `apps/api/src/routes/licenses-lifecycle.ts`
   - Handler: `async (ctx: Context) => Promise<Response>`
   - Route: `GET /api/v1/licenses/{licenseId}/audit-trail?limit=50&offset=0`
   - Auth required: Admin role
@@ -233,7 +233,7 @@
   - Errors: 403 (not admin), 404 (license not found)
   - Acceptance: GET → 200, audit logs in reverse chronological order, pagination working
 
-- [ ] T024 [SYS] Implement GET /licenses/{licenseId}/job-status/{jobId} endpoint — `apps/api/src/routes/licenses.ts`
+- [x] T024 [SYS] Implement GET /licenses/{licenseId}/job-status/{jobId} endpoint — `apps/api/src/routes/licenses-lifecycle.ts`
   - Handler: `async (ctx: Context) => Promise<Response>`
   - Route: `GET /api/v1/licenses/{licenseId}/job-status/{jobId}`
   - Auth required: Admin role
@@ -253,7 +253,7 @@
 **Blocked By**: Phase 3 (middleware needs endpoint list to exempt lifecycle endpoints)  
 **Blocks**: Phase 5 (workers depend on middleware for context)
 
-- [ ] T025 [SYS] Implement License Enforcement Middleware — `apps/api/src/middleware/license-enforcement.ts`
+- [x] T025 [SYS] Implement License Enforcement Middleware — `apps/api/src/middleware/license-enforcement.ts`
   - Purpose: Intercept requests, check license status, return appropriate HTTP status or proceed to handler
   - Execution point: After tenant resolver, before route handler
   - Status checks:
@@ -266,7 +266,7 @@
   - Performance: < 1ms per request (single index lookup + switch)
   - Acceptance: request to ACTIVE license → reaches handler (200); request to SOFT_LOCKED → returns 423; auto-expiry verified
 
-- [ ] T026 [P] [SYS] Enhance Tenant Resolver with license status caching — `packages/domain-core/src/tenant-resolver/resolver.ts`
+- [x] T026 [P] [SYS] Enhance Tenant Resolver with license status caching — `packages/domain-core/src/tenant-resolver/resolver.ts`
   - Purpose: Quick license status lookup via tenants_registry (denormalized) with fallback to licenses table
   - Flow: Query tenants_registry first (sync_status, license_status) → if stale (OUT_OF_SYNC), query licenses directly
   - Add method: `async validateLicenseStatus(workspace_slug): Promise<LicenseValidationResult>`
@@ -275,7 +275,7 @@
   - Store in context: ctx.set('workspace_context', { license_status, soft_lock_expires_at, is_writable: boolean })
   - Acceptance: Registry query returns status in < 1ms, fallback works if registry corrupted
 
-- [ ] T027 [SYS] Implement soft-lock expiry auto-transition logic — `apps/api/src/middleware/license-enforcement.ts`
+- [x] T027 [SYS] Implement soft-lock expiry auto-transition logic — `apps/api/src/middleware/license-enforcement.ts`
   - Purpose: Atomically transition SOFT_LOCKED → ARCHIVED when soft_lock_until expires (deterministic, no cron needed)
   - Execution: Within licenseEnforcementMiddleware, if status = SOFT_LOCKED and now() > soft_lock_until
   - Atomic transaction: SELECT FOR UPDATE licenses WHERE id = ? → verify status still SOFT_LOCKED → UPDATE status='ARCHIVED', archived_at=now(), soft_lock_until=NULL, updated_at=now() → INSERT audit_log (actor_type='SYSTEM', reason='Soft lock 90-day expiry') → COMMIT
@@ -292,7 +292,7 @@
 **Blocked By**: Phase 4 (middleware needs context for job execution)  
 **Blocks**: Phase 6 (audit logging happens inside job completion)
 
-- [ ] T028 [SYS] Implement snapshot_create worker job — `apps/worker/src/jobs/snapshot_create.ts`
+- [x] T028 [SYS] Implement snapshot_create worker job — `apps/worker/src/jobs/snapshot_create.ts`
   - Job name: `snapshot_create`
   - Queue: `queue:snapshot_create`
   - Payload: { license_id, workspace_slug, tenant_db_connection_string, expected_snapshot_timestamp }
@@ -308,7 +308,7 @@
   - Return: { success: true, snapshot_id, snapshot_location, size_bytes, duration_ms }
   - Acceptance: Job executed → S3 object created, snapshot record in DB, size calculated; retry on transient error; duplicate submission returns existing snapshot
 
-- [ ] T029 [P] [SYS] Implement restore_from_archive worker job — `apps/worker/src/jobs/restore_from_archive.ts`
+- [x] T029 [P] [SYS] Implement restore_from_archive worker job — `apps/worker/src/jobs/restore_from_archive.ts`
   - Job name: `restore_from_archive`
   - Queue: `queue:restore_from_archive`
   - Payload: { license_id, workspace_slug, snapshot_id, snapshot_location, target_schema_version, current_schema_version }
@@ -331,7 +331,7 @@
   - Return: { success: true, license_id, status: 'ACTIVE', restored_at, row_count, duration_ms }
   - Acceptance: Job executed → tenant DB restored from snapshot, license.status=ACTIVE, data integrity verified; idempotent submission succeeds
 
-- [ ] T030 [P] [SYS] Implement delete_license worker job — `apps/worker/src/jobs/delete_license.ts`
+- [x] T030 [P] [SYS] Implement delete_license worker job — `apps/worker/src/jobs/delete_license.ts`
   - Job name: `delete_license`
   - Queue: `queue:delete_license`
   - Payload: { license_id, workspace_slug, snapshot_id, snapshot_location, actor_id, grace_period_until }
@@ -350,7 +350,7 @@
   - Return: { success: true, license_id, status: 'DELETED', deleted_at, duration_ms }
   - Acceptance: Job executed → tenant DB dropped, snapshot deleted from S3, license.status=DELETED; workspace now returns 404; no recovery option
 
-- [ ] T031 [SYS] Implement job status monitoring — `apps/api/src/routes/job-status.ts`
+- [x] T031 [SYS] Implement job status monitoring — `apps/api/src/routes/job-status.ts`
   - Purpose: Allow clients to poll job progress (used by MMC UI)
   - Endpoint: GET /api/v1/licenses/{licenseId}/job-status/{jobId}
   - Query: Get job status from job queue (Redis hash or persistent table)
@@ -359,7 +359,7 @@
   - Errors: 403 (not admin), 404 (job not found), 410 (job gone, completed > 24 hours ago)
   - Acceptance: GET → 200, progress increases over time, ETA decreases
 
-- [ ] T032 [P] [SYS] Implement job polling helper — `packages/domain-core/src/job/polling.ts`
+- [x] T032 [P] [SYS] Implement job polling helper — `packages/domain-core/src/job/polling.ts`
   - Purpose: Utility for frontend to poll job status with exponential backoff
   - Export function: `async pollJobStatus(jobId, maxAttempts=60, initialDelayMs=1000): Promise<JobStatus>`
   - Logic: Poll GET /job-status/{jobId}, if status=RUNNING, wait (delay exponentially growing), retry; if COMPLETED, return; if FAILED, throw error
@@ -367,7 +367,7 @@
   - Cancellation: Support AbortSignal for user cancellation
   - Acceptance: Polling works for complete job lifecycle, exponential backoff verified, timeout reached within ~30min
 
-- [ ] T033 [SYS] Implement job dead-letter queue (DLQ) handler — `apps/worker/src/dlq/license-dlq-handler.ts`
+- [x] T033 [SYS] Implement job dead-letter queue (DLQ) handler — `apps/worker/src/dlq/license-dlq-handler.ts`
   - Purpose: Track failed jobs after max retries exhausted, alert ops
   - DLQ table: jobs_dlq with job_id, job_name, payload, error_message, created_at, resolved (for manual intervention)
   - Alert logic: Send CRITICAL alert to ops via email/Slack when license lifecycle job fails 3 times
@@ -383,7 +383,7 @@
 **Blocked By**: Phase 5 (audit logs created during worker job completion)  
 **Blocks**: Phase 7 (UI displays audit trail)
 
-- [ ] T034 [SYS] Implement immutable audit log handler — `packages/domain-core/src/logging/audit-handler.ts`
+- [x] T034 [SYS] Implement immutable audit log handler — `packages/domain-core/src/logging/audit-handler.ts`
   - Purpose: Centralized handler for all license transition audit logging
   - Function: `async createAuditLog(masterDb, licenseId, previousStatus, newStatus, actorId, actorType, reason, transitionMetadata, correlationId)`
   - Fields: id (UUID), license_id (UUID), previous_status, new_status, actor_id (nullable), actor_type ('ADMIN'|'SYSTEM'), reason (string, ≤512 chars), transition_metadata (JSONB, optional), timestamp (UTC NOW()), correlation_id (UUID), created_at (UTC NOW())
@@ -391,7 +391,7 @@
   - Immutability: Add DB trigger (or application check) to prevent UPDATE/DELETE on license_audit_logs
   - Acceptance: Audit log created after every transition, fields populated correctly, UPDATE/DELETE rejected with permission error
 
-- [ ] T035 [P] [SYS] Implement audit log reader — `packages/domain-core/src/logging/audit-reader.ts`
+- [x] T035 [P] [SYS] Implement audit log reader — `packages/domain-core/src/logging/audit-reader.ts`
   - Purpose: Query and paginate audit logs for a license
   - Function: `async readAuditLogs(masterDb, licenseId, limit=50, offset=0, filterActorType?, filterDateRange?): Promise<AuditLog[]>`
   - Query: SELECT \* FROM license_audit_logs WHERE license_id ORDER BY timestamp DESC LIMIT/OFFSET
@@ -399,7 +399,7 @@
   - Return: Array of audit logs with total_count
   - Acceptance: Pagination works, sorting by timestamp DESC, filters applied
 
-- [ ] T036 [SYS] Implement audit log purge workflow — `packages/domain-core/src/logging/audit-purge.ts`
+- [x] T036 [SYS] Implement audit log purge workflow — `packages/domain-core/src/logging/audit-purge.ts`
   - Purpose: Manual purge of audit logs by elevated MMC role only (LEGAL_COMPLIANCE)
   - Function: `async purgeAuditLogs(masterDb, licenseId, requesterRole, requesterId, reason?, complianceHoldId?)`
   - Authorization: Require role='LEGAL_COMPLIANCE'
@@ -419,7 +419,7 @@
 **Blocked By**: Phase 6 (all UI data comes from backend APIs)  
 **Blocks**: Phase 8 (testing needs UI built)
 
-- [ ] T037 [SYS] Implement License Detail Page component — `apps/mmc/src/components/LicenseDetailPage.vue`
+- [x] T037 [SYS] Implement License Detail Page component — `apps/mmc/src/components/LicenseDetailPage.vue`
   - Route: `/licenses/{licenseId}`
   - Display per state:
     - ACTIVE: Green badge, user/staff count, storage used, "Soft Lock" button
@@ -430,7 +430,7 @@
   - Error handling: 403 → "Not authorized", 404 → "License not found", 500 → "Error loading"
   - Acceptance: Page loads, all states display correctly, buttons appear/disable per state
 
-- [ ] T038 [P] [SYS] Implement Deletion Confirmation Dialog component — `apps/mmc/src/components/LicenseDeletionDialog.vue`
+- [x] T038 [P] [SYS] Implement Deletion Confirmation Dialog component — `apps/mmc/src/components/LicenseDeletionDialog.vue`
   - Trigger: Click "Permanently Delete" button
   - Dialog flow:
     1. Warning text: "Are you sure? This action is irreversible."
@@ -445,7 +445,7 @@
   - Error handling: Phrase mismatch → show error; 2FA failed → retry; confirmation expired → retry initiate
   - Acceptance: Dialog displays phrase, input validates, 2FA required, job status shown, redirect on completion
 
-- [ ] T039 [P] [SYS] Implement Job Status Monitor component — `apps/mmc/src/components/JobStatusMonitor.vue`
+- [x] T039 [P] [SYS] Implement Job Status Monitor component — `apps/mmc/src/components/JobStatusMonitor.vue`
   - Purpose: Display progress of async operations (snapshot, restore, delete)
   - Props: jobId, jobName, initialStatus
   - Display: Progress bar (0-100%), current step, ETA countdown
@@ -458,7 +458,7 @@
   - Actions: Pause (if supported), Cancel (if supported)
   - Acceptance: Progress updates, ETA decreases, completion detected, error shown
 
-- [ ] T040 [SYS] Implement Audit Trail Viewer component — `apps/mmc/src/components/AuditTrailViewer.vue`
+- [x] T040 [SYS] Implement Audit Trail Viewer component — `apps/mmc/src/components/AuditTrailViewer.vue`
   - Route: `/licenses/{licenseId}/audit`
   - Display: Vertical timeline of all license transitions
   - For each entry: Timestamp, actor (user name or "System"), previous status → new status, reason, metadata (expandable)
@@ -479,7 +479,7 @@
 **Blocked By**: Phase 7 (all components ready for testing)  
 **Blocks**: Phase 9 (docs written after tests validate)
 
-- [ ] T041 [SYS] Implement License state machine unit tests — `packages/domain-core/src/license/__tests__/state-machine.test.ts`
+- [x] T041 [SYS] Implement License state machine unit tests — `packages/domain-core/src/license/__tests__/state-machine.test.ts`
   - Tests:
     1. All valid transitions allowed (ACTIVE→SOFT_LOCKED, SOFT_LOCKED→ACTIVE, etc.)
     2. All invalid transitions rejected (ACTIVE→ARCHIVED, SOFT_LOCKED→DELETED, DELETED→\*, etc.)
@@ -489,7 +489,7 @@
   - Coverage: 100% of state machine code
   - Acceptance: All tests pass, state machine logic fully verified
 
-- [ ] T042 [P] [SYS] Implement License Service method unit tests — `packages/domain-core/src/license/__tests__/service.test.ts`
+- [x] T042 [P] [SYS] Implement License Service method unit tests — `packages/domain-core/src/license/__tests__/service.test.ts`
   - Tests per method: transitionToSoftLock, transitionToActive, transitionToArchived, restoreFromArchive, transitionToDeleted
   - For each method:
     1. Valid input → success response with correct state change
@@ -501,13 +501,13 @@
   - Coverage: 100% of License Service methods
   - Acceptance: All tests pass, 100% coverage, mocking verified
 
-- [ ] T043 [P] [SYS] Implement validation helpers unit tests — `packages/domain-core/src/license/__tests__/validation.test.ts`
+- [x] T043 [P] [SYS] Implement validation helpers unit tests — `packages/domain-core/src/license/__tests__/validation.test.ts`
   - Tests: validateStateTransition, validateSoftLockExpiry, validateSchemaCompatibility, validateConcurrentModification
   - For each helper: Valid outputs, invalid outputs, edge cases (expiry at exact boundary, schema mismatch)
   - Coverage: 100% of validation code
   - Acceptance: All tests pass, edge cases covered
 
-- [ ] T044 [SYS] Implement License middleware unit tests — `apps/api/src/middleware/__tests__/license-enforcement.test.ts`
+- [x] T044 [SYS] Implement License middleware unit tests — `apps/api/src/middleware/__tests__/license-enforcement.test.ts`
   - Tests:
     1. ACTIVE license → proceed to handler (await next() called)
     2. SOFT_LOCKED with future expiry → return 423 + Retry-After header
@@ -519,7 +519,7 @@
   - Coverage: 100% of middleware code
   - Acceptance: All tests pass, overhead verified < 1ms
 
-- [ ] T045 [P] [SYS] Implement integration test: Full lifecycle flow — `tests/integration/license-lifecycle.test.ts`
+- [x] T045 [P] [SYS] Implement integration test: Full lifecycle flow — `tests/integration/license-lifecycle.test.ts`
   - Scenarios:
     1. ACTIVE → SOFT_LOCKED → ACTIVE (renewal)
     2. ACTIVE → SOFT_LOCKED → ARCHIVED (manual archive with snapshot) → ACTIVE (restore) → DELETED
@@ -532,7 +532,7 @@
   - Coverage: All major flows
   - Acceptance: All scenarios pass, data integrity maintained, no data loss
 
-- [ ] T046 [P] [SYS] Implement API endpoint integration tests — `tests/integration/api/licenses.test.ts`
+- [x] T046 [P] [SYS] Implement API endpoint integration tests — `tests/integration/api/licenses.test.ts`
   - Tests per endpoint: soft-lock, renew, archive, restore, delete/initiate, delete/confirm, get, audit-trail, job-status
   - For each: Valid request → correct response + status code, invalid request → error with correct code, authorization checks, audit log creation
   - Scenarios:
@@ -544,7 +544,7 @@
   - Coverage: All 9 endpoints
   - Acceptance: All endpoint tests pass, all status codes correct, edge cases handled
 
-- [ ] T047 [P] [SYS] Implement worker job unit tests — `apps/worker/src/jobs/__tests__/snapshot_create.test.ts`, `restore_from_archive.test.ts`, `delete_license.test.ts`
+- [x] T047 [P] [SYS] Implement worker job unit tests — `apps/worker/src/jobs/__tests__/snapshot_create.test.ts`, `restore_from_archive.test.ts`, `delete_license.test.ts`
   - For each job type:
     1. Valid payload → job completes successfully
     2. Transient error (connection timeout) → retry with backoff
@@ -554,7 +554,7 @@
   - Mocking: Mock S3, tenant DB, master DB, Redis queue
   - Acceptance: Snapshot job creates S3 object + DB record; restore overwrites DB + transitions license; delete drops DB + snapshot
 
-- [ ] T048 [P] [SYS] Implement data integrity snapshot tests — `tests/snapshot/data-integrity.test.ts`
+- [x] T048 [P] [SYS] Implement data integrity snapshot tests — `tests/snapshot/data-integrity.test.ts`
   - Scenarios:
     1. Create 1000 student records in workspace, soft-lock, archive (initiate snapshot), restore from archive, verify 1000 records intact
     2. Create 500 in-progress attempts, archive (snapshot blocks until attempts complete or timeout), verify attempts recoverable
@@ -566,7 +566,7 @@
     - Foreign key integrity maintained
   - Acceptance: All data integrity checks pass, no data loss
 
-- [ ] T049 [P] [SYS] Implement load tests — `tests/load/license-middleware-load.test.ts`, `snapshot-performance.test.ts`, `concurrent-restore.test.ts`
+- [x] T049 [P] [SYS] Implement load tests — `tests/load/license-middleware-load.test.ts`, `snapshot-performance.test.ts`, `concurrent-restore.test.ts`
   - Load Test 1: Middleware overhead
     - 1000 concurrent requests to ACTIVE license
     - Measure p50, p95, p99 latency
@@ -579,7 +579,7 @@
     - Verify no data corruption, atomic serialization
   - Acceptance: All load tests pass, latency targets met, no corruption under load
 
-- [ ] T050 [SYS] Document test coverage & create test summary — `tests/README.md`, `tests/COVERAGE_REPORT.md`
+- [x] T050 [SYS] Document test coverage & create test summary — `tests/README.md`, `tests/COVERAGE_REPORT.md`
   - Summary: 100% coverage for state machine, 95%+ coverage overall
   - Test counts: 50+ unit tests, 15+ integration tests, 9 API tests, 3 worker tests, 3 load tests
   - Performance: Middleware < 1ms, snapshot < 10min SLA, restore < 30min SLA
@@ -594,7 +594,7 @@
 **Blocked By**: Phase 8 (docs written after implementation validates)  
 **Blocks**: Phase 10 (docs needed for deployment)
 
-- [ ] T051 [SYS] Update API documentation — `docs/api/licenses.md`
+- [x] T051 [SYS] Update API documentation — `docs/api/licenses.md`
   - Document:
     1. All 9 endpoints (method, path, auth, request/response)
     2. Status codes (200, 202, 400, 403, 404, 423, 426, 500)
@@ -604,7 +604,7 @@
   - Format: OpenAPI 3.0 spec (optional) + markdown
   - Acceptance: All endpoints documented, examples runnable
 
-- [ ] T052 [SYS] Create deployment runbook & incident response guide — `docs/deployment/license-lifecycle-runbook.md`, `docs/operations/incident-response.md`
+- [x] T052 [SYS] Create deployment runbook & incident response guide — `docs/deployment/license-lifecycle-runbook.md`, `docs/operations/incident-response.md`
   - Runbook contents:
     1. Pre-deployment checklist (tests, migrations, staging validation)
     2. 4-phase deployment (migrations → backend → middleware → UI)
@@ -628,7 +628,7 @@
 **Blocked By**: Phase 9 (docs must exist before deploy)  
 **Blocks**: None (final phase)
 
-- [ ] T053a [Setup] Implement migration scale test — `tests/load/license-scale-test.ts` + `tests/integration/migration-scale-test.ts`
+- [x] T053a [Setup] Implement migration scale test — `tests/load/license-scale-test.ts` + `tests/integration/migration-scale-test.ts`
   - Acceptance Criteria:
     1. Create 500k+ license_audit_logs records in test DB
     2. Measure migration A003 application time (target: <30s for 500k records)
@@ -639,7 +639,7 @@
   - Output: Test report with timing data, constraint validation evidence
   - Acceptance: Test passes, performance baseline < 30s, rollback verified
 
-- [ ] T053b [Setup] Implement cross-tenant isolation smoke test — `tests/integration/cross-tenant-isolation-smoke-test.ts`
+- [x] T053b [Setup] Implement cross-tenant isolation smoke test — `tests/integration/cross-tenant-isolation-smoke-test.ts`
   - Acceptance Criteria:
     1. Create 3 test workspaces (A, B, C) with distinct licenses
     2. Verify admin from Workspace A cannot access licenses in B, C (403 ADMIN_WORKSPACE_MISMATCH)
@@ -650,7 +650,7 @@
   - Output: Test result (PASS/FAIL) with evidence of isolation breaches if any
   - Acceptance: All 6 scenarios pass; cross-tenant access denied; isolation verified
 
-- [ ] T053c [Setup] Implement rollback verification script — `scripts/verify-rollback-procedures.sh` + `tests/deployment/rollback-strategy-test.ts`
+- [x] T053c [Setup] Implement rollback verification script — `scripts/verify-rollback-procedures.sh` + `tests/deployment/rollback-strategy-test.ts`
   - Acceptance Criteria:
     1. Test reverse migration for A001 (drop soft_lock_until, archived_at, deleted_at columns)
     2. Test reverse migration for A002 (drop snapshots table)
@@ -662,7 +662,7 @@
   - Output: Rollback verification report with success/failure per migration
   - Acceptance: All 5 reverse migrations tested; restore procedure verified; data integrity confirmed
 
-- [ ] T053d [Setup] Implement pre-deployment validation script — `scripts/validate-license-deploy.sh`
+- [x] T053d [Setup] Implement pre-deployment validation script — `scripts/validate-license-deploy.sh`
   - Acceptance Criteria:
     1. All unit tests passing (domain, service, middleware)
     2. All integration tests passing (API, worker, cross-tenant)
@@ -677,7 +677,7 @@
   - Output: Validation report with 10-point checklist (all PASS required)
   - Acceptance: Script runs, all 10 checks verified, PASS verdict required before Phase 1 deployment
 
-- [ ] T054 [Setup] Implement 3-phase production deployment — `scripts/deploy-license-lifecycle.sh`
+- [x] T054 [Setup] Implement 3-phase production deployment — `scripts/deploy-license-lifecycle.sh`
   - Phase 1: Run migrations A001–A005 in sequence
     - Verify: Schema changes applied, indexes created, backfill complete
     - Gate: If any migration fails, rollback all and abort deploy
@@ -693,7 +693,7 @@
     - Gate: If UI fails to load, rollback to previous version
   - Acceptance: 4-phase deploy completes, all validation gates pass, no errors
 
-- [ ] T055 [SYS] Create post-deployment monitoring dashboard — `terraform/monitoring/license-lifecycle-dashboard.tf`, `docs/monitoring/license-metrics.md`
+- [x] T055 [SYS] Create post-deployment monitoring dashboard — `terraform/monitoring/license-lifecycle-dashboard.tf`, `docs/monitoring/license-metrics.md`
   - Metrics to track:
     1. License status distribution (% ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED)
     2. Middleware latency (p50, p95, p99)
