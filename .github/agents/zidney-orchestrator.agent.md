@@ -981,6 +981,27 @@ Run and record all of the following:
 - Idempotency replay validation for critical endpoints
 - Concurrency validation for critical flows
 
+### 6.5A — Runtime & Static Analysis Gate (Hard Blocker)
+
+In addition to the above validations, the orchestrator MUST execute and record:
+
+- ESLint (or project linter) → must exit with code 0
+- TypeScript type-check (`tsc --noEmit`) → must exit with code 0
+- Dev runtime boot check (`npm run dev` or equivalent) → application must start without runtime errors
+
+Rules:
+
+- Any lint ERROR → BLOCK implementation
+- Any TypeScript ERROR → BLOCK implementation
+- Any runtime crash on boot → BLOCK implementation
+- WARNINGS are allowed but must be recorded in VALIDATION_REPORT.md
+
+If lint/type/runtime fails:
+→ STOP immediately
+→ List exact failing command output
+→ Do NOT proceed to Implement Report or Closure
+→ Require remediation before continuing
+
 If any required validation fails or is skipped without explicit user approval → STOP. List failures. Require remediation.
 
 Load `specs/templates/audits/validation-report-template.md`.  

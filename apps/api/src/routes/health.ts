@@ -83,9 +83,8 @@ export class HealthCheckService {
     if (masterDbHealth.status === 'down' || redisHealth.status === 'down') {
       status = 'unhealthy'
     } else if (
-      masterDbHealth.status === 'down' ||
-      redisHealth.status === 'down' ||
-      queueHealth.status === 'down'
+      queueHealth.status === 'down' ||
+      queueHealth.status === 'degraded'
     ) {
       status = 'degraded'
     } else if (
@@ -247,18 +246,22 @@ export function createHealthCheckRoute(
   // GET /health - Simple liveness probe
   router.get('/health', (ctx) => {
     if (healthCheckService.isAlive()) {
-      return ctx.json({ status: 'alive' }, 200)
+      ctx.status(200)
+      return ctx.json({ status: 'alive' })
     }
-    return ctx.json({ status: 'dead' }, 503)
+    ctx.status(503)
+    return ctx.json({ status: 'dead' })
   })
 
   // GET /health/ready - Readiness probe
   router.get('/health/ready', async (ctx) => {
     const isReady = await healthCheckService.isReady()
     if (isReady) {
-      return ctx.json({ status: 'ready' }, 200)
+      ctx.status(200)
+      return ctx.json({ status: 'ready' })
     }
-    return ctx.json({ status: 'not_ready' }, 503)
+    ctx.status(503)
+    return ctx.json({ status: 'not_ready' })
   })
 
   // GET /health/detailed - Full health check
@@ -272,7 +275,8 @@ export function createHealthCheckRoute(
           ? 200
           : 503
 
-    return ctx.json(health, statusCode)
+    ctx.status(statusCode)
+    return ctx.json(health)
   })
 
   return router

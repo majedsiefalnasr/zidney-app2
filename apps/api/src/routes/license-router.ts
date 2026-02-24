@@ -47,7 +47,8 @@ licenseRouter.post('/mmc/licenses', async (ctx: Context) => {
         },
         'Invalid license creation request'
       )
-      return ctx.json(toLicenseError('INVALID_REQUEST'), { status: 400 })
+      ctx.status(400)
+      return ctx.json(toLicenseError('INVALID_REQUEST'))
     }
 
     // Call domain service (transactional)
@@ -70,14 +71,11 @@ licenseRouter.post('/mmc/licenses', async (ctx: Context) => {
       'License created successfully'
     )
 
-    return ctx.json(
-      {
-        success: true,
-        data: result,
-        error: null,
-      },
-      { status: 201 }
-    )
+    return ctx.json({
+      success: true,
+      data: result,
+      error: null,
+    })
   } catch (error: any) {
     // Handle duplicate workspace_slug
     if (error.code === '23505' || error.message?.includes('unique')) {
@@ -90,9 +88,8 @@ licenseRouter.post('/mmc/licenses', async (ctx: Context) => {
         },
         'Duplicate workspace slug'
       )
-      return ctx.json(toLicenseError('WORKSPACE_ALREADY_EXISTS'), {
-        status: 409,
-      })
+      ctx.status(409)
+      return ctx.json(toLicenseError('WORKSPACE_ALREADY_EXISTS'))
     }
 
     // Log unexpected error
@@ -105,7 +102,8 @@ licenseRouter.post('/mmc/licenses', async (ctx: Context) => {
       'License creation failed'
     )
 
-    return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })
+    ctx.status(500)
+    return ctx.json(toLicenseError('INTERNAL_ERROR'))
   }
 })
 
@@ -139,7 +137,8 @@ licenseRouter.get('/mmc/licenses/:license_id', async (ctx: Context) => {
         },
         'License not found'
       )
-      return ctx.json(toLicenseError('LICENSE_NOT_FOUND'), { status: 404 })
+      ctx.status(404)
+      return ctx.json(toLicenseError('LICENSE_NOT_FOUND'))
     }
 
     const license = result.rows[0]
@@ -153,14 +152,12 @@ licenseRouter.get('/mmc/licenses/:license_id', async (ctx: Context) => {
       'License retrieved'
     )
 
-    return ctx.json(
-      {
-        success: true,
-        data: license,
-        error: null,
-      },
-      { status: 200 }
-    )
+    ctx.status(200)
+    return ctx.json({
+      success: true,
+      data: license,
+      error: null,
+    })
   } catch (error: any) {
     logger.error(
       {
@@ -172,7 +169,8 @@ licenseRouter.get('/mmc/licenses/:license_id', async (ctx: Context) => {
       'License retrieval failed'
     )
 
-    return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })
+    ctx.status(500)
+    return ctx.json(toLicenseError('INTERNAL_ERROR'))
   }
 })
 
@@ -247,14 +245,12 @@ licenseRouter.patch('/mmc/licenses/:license_id/state', async (ctx: Context) => {
       'License state transitioned'
     )
 
-    return ctx.json(
-      {
-        success: true,
-        data: result.license,
-        error: null,
-      },
-      { status: 200 }
-    )
+    ctx.status(200)
+    return ctx.json({
+      success: true,
+      data: result.license,
+      error: null,
+    })
   } catch (error: any) {
     logger.error(
       {
@@ -266,7 +262,8 @@ licenseRouter.patch('/mmc/licenses/:license_id/state', async (ctx: Context) => {
       'License transition failed'
     )
 
-    return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })
+    ctx.status(500)
+    return ctx.json(toLicenseError('INTERNAL_ERROR'))
   }
 })
 
@@ -302,9 +299,8 @@ licenseRouter.get(
           },
           'License not found for workspace'
         )
-        return ctx.json(toLicenseError('LICENSE_NOT_FOUND'), {
-          status: 404,
-        })
+        ctx.status(404)
+        return ctx.json(toLicenseError('LICENSE_NOT_FOUND'))
       }
 
       const license = result.rows[0]
@@ -319,14 +315,12 @@ licenseRouter.get(
         'Workspace license retrieved'
       )
 
-      return ctx.json(
-        {
-          success: true,
-          data: license,
-          error: null,
-        },
-        { status: 200 }
-      )
+      ctx.status(200)
+      return ctx.json({
+        success: true,
+        data: license,
+        error: null,
+      })
     } catch (error: any) {
       logger.error(
         {
@@ -338,7 +332,8 @@ licenseRouter.get(
         'Workspace license retrieval failed'
       )
 
-      return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })
+      ctx.status(500)
+      return ctx.json(toLicenseError('INTERNAL_ERROR'))
     }
   }
 )
@@ -372,7 +367,8 @@ licenseRouter.delete('/mmc/licenses/:license_id', async (ctx: Context) => {
         },
         'Unauthorized license deletion attempt'
       )
-      return ctx.json(toLicenseError('UNAUTHORIZED'), { status: 403 })
+      ctx.status(403)
+      return ctx.json(toLicenseError('UNAUTHORIZED'))
     }
 
     // Extract request body
@@ -409,18 +405,16 @@ licenseRouter.delete('/mmc/licenses/:license_id', async (ctx: Context) => {
       'License deleted successfully'
     )
 
-    return ctx.json(
-      {
-        success: true,
-        data: {
-          license_id,
-          status: 'DELETED',
-          deleted_at: result.deleted_at,
-        },
-        error: null,
+    ctx.status(200)
+    return ctx.json({
+      success: true,
+      data: {
+        license_id,
+        status: 'DELETED',
+        deleted_at: result.deleted_at,
       },
-      { status: 200 }
-    )
+      error: null,
+    })
   } catch (error: any) {
     logger.error(
       {
@@ -432,7 +426,8 @@ licenseRouter.delete('/mmc/licenses/:license_id', async (ctx: Context) => {
       'License deletion error'
     )
 
-    return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })
+    ctx.status(500)
+    return ctx.json(toLicenseError('INTERNAL_ERROR'))
   }
 })
 
