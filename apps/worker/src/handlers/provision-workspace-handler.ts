@@ -32,20 +32,20 @@ import {
 } from '@zidney/types/jobs/provisioning-job'
 import { Redis } from 'ioredis'
 import { Pool } from 'pg'
-import { AdminAccountService } from './admin-account-service'
-import { DatabaseCleanupService } from './database-cleanup-service'
-import { DatabaseService } from './database-service'
-import { DistributedLockService } from './distributed-lock-service'
-import { IdempotencyService } from './idempotency-service'
+import { AdminAccountService } from '../services/admin-account-service'
+import { DatabaseCleanupService } from '../services/database-cleanup-service'
+import { DatabaseService } from '../services/database-service'
+import { DistributedLockService } from '../services/distributed-lock-service'
+import { IdempotencyService } from '../services/idempotency-service'
 import {
   FailureHandlerService,
   LicenseActivationService,
-} from './license-activation-service'
-import { LicenseValidationService } from './license-validation-service'
-import { MigrationRunnerService } from './migration-runner'
-import { RegistryInsertionService } from './registry-insertion-service'
-import { RetryEnqueueService } from './retry-enqueue-service'
-import { SeedDataService } from './seed-service'
+} from '../services/license-activation-service'
+import { LicenseValidationService } from '../services/license-validation-service'
+import { MigrationRunnerService } from '../services/migration-runner'
+import { RegistryInsertionService } from '../services/registry-insertion-service'
+import { RetryEnqueueService } from '../services/retry-enqueue-service'
+import { SeedDataService } from '../services/seed-service'
 
 /**
  * Orchestration result
