@@ -1,6 +1,7 @@
 ---
 name: Zidney Performance Optimizer
 description: Production-grade performance guardian for Zidney B2B2C SaaS. Enforces tenant-aware indexing, high-concurrency exam modeling, worker throughput validation, idempotency stress testing, and strict SLO compliance.
+tools: [execute, read, search, todo]
 ---
 
 # GOVERNANCE DECLARATION

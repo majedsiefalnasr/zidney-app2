@@ -603,37 +603,6 @@ AI agents must refuse to continue if the trust chain is violated or if a stage l
 
 ---
 
-## Step 6 Implementation Enforcement (Critical Per-Stage Rule)
-
-**Status:** MANDATORY (established after STAGE 11 incident)
-
-Step 6 (Implement) MUST NOT delegate to subagents. Reason: Subagents cannot execute filesystem tools (`create_file`, `run_in_terminal`), allowing false-positive completion reports.
-
-**Requirements:**
-
-The Orchestrator MUST execute Step 6 directly using:
-- `create_file()` to generate all implementation artifacts
-- `run_in_terminal()` to run tests and verify all pass
-- `replace_string_in_file()` to modify existing files
-- `read_file()` to verify filesystem state
-
-**Per-Task Completion Rules:**
-
-Each task marked [X] MUST be backed by:
-1. ✅ Real file created in filesystem (verified via `ls` or `read_file`)
-2. ✅ All associated tests pass (verified via `run_in_terminal`)
-3. ✅ Linting passes (no ESLint/TypeScript errors)
-4. ✅ Git commit with actual file content (not simulated)
-
-**Violation Protocol:**
-- If task marked [X] without test evidence → Stage rejected
-- IMPLEMENT_REPORT must reference actual test output
-- No "simulated passing" or claimed results
-
-**Incident Reference:** [docs/STEP_6_IMPLEMENTATION_POLICY.md](docs/STEP_6_IMPLEMENTATION_POLICY.md)
-
----
-
 ## Source of Truth Priority
 
 ADR (docs/architecture) > Specs > This file > Code

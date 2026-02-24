@@ -1,6 +1,19 @@
 ---
 name: Zidney Orchestrator
 description: Execute full SpecKit Hard Mode workflow sequentially with strict Zidney Constitution enforcement.
+tools:
+  [
+    vscode,
+    execute,
+    read,
+    agent,
+    edit,
+    search,
+    web,
+    'context7/*',
+    'figma/*',
+    todo,
+  ]
 ---
 
 # GOVERNANCE DECLARATION
@@ -30,10 +43,10 @@ This agent MUST comply with all binding rules defined in `docs/AGENT_GOVERNANCE.
 
 Two systems write into `specs/runtime/<STAGE_DIR_NAME>/`. They use different filenames and must never overwrite each other.
 
-| Owner | Files | Location |
-|-------|-------|----------|
-| **SpecKit agents** | `spec.md`, `plan.md`, `tasks.md`, `research.md`, `data-model.md`, `quickstart.md`, `contracts/`, `checklists/` | `FEATURE_DIR` root (flat) |
-| **Orchestrator** | `README.md`, `PR_SUMMARY.md`, `*_REPORT.md`, `TESTING_GUIDE.md` | `reports/` `audits/` `guides/` subdirs |
+| Owner              | Files                                                                                                          | Location                               |
+| ------------------ | -------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| **SpecKit agents** | `spec.md`, `plan.md`, `tasks.md`, `research.md`, `data-model.md`, `quickstart.md`, `contracts/`, `checklists/` | `FEATURE_DIR` root (flat)              |
+| **Orchestrator**   | `README.md`, `PR_SUMMARY.md`, `*_REPORT.md`, `TESTING_GUIDE.md`                                                | `reports/` `audits/` `guides/` subdirs |
 
 **How SpecKit resolves file paths:** SpecKit agents call `check-prerequisites.sh` or `setup-plan.sh` to derive `FEATURE_DIR` from the current git branch name. Since the orchestrator creates a branch named `<STAGE_DIR_NAME>`, SpecKit automatically resolves `FEATURE_DIR = specs/runtime/<STAGE_DIR_NAME>/`. SpecKit always writes its files flat into that directory root — it does not use subdirectories.
 
@@ -247,21 +260,21 @@ Create `specs/runtime/<STAGE_DIR_NAME>/README.md`:
 
 ## Workflow Progress
 
-| Step      | Status | SpecKit Output              | Orchestrator Output             |
-|-----------|--------|-----------------------------|---------------------------------|
-| Pre-Step  | ✅     | —                           | —                               |
-| Specify   | ⬜     | spec.md, checklists/        | reports/SPECIFY_REPORT.md       |
-| Clarify   | ⬜     | spec.md (updated in-place)  | reports/CLARIFY_REPORT.md       |
-| Plan      | ⬜     | plan.md, research.md, etc.  | reports/PLAN_REPORT.md          |
-| Tasks     | ⬜     | tasks.md                    | reports/TASKS_REPORT.md         |
-| Analyze   | ⬜     | (read-only — no output)     | audits/ANALYZE_REPORT.md        |
-| Implement | ⬜     | tasks.md (tasks marked [X]) | reports/IMPLEMENT_REPORT.md     |
-| Closure   | ⬜     | —                           | reports/CLOSURE_REPORT.md       |
+| Step      | Status | SpecKit Output              | Orchestrator Output         |
+| --------- | ------ | --------------------------- | --------------------------- |
+| Pre-Step  | ✅     | —                           | —                           |
+| Specify   | ⬜     | spec.md, checklists/        | reports/SPECIFY_REPORT.md   |
+| Clarify   | ⬜     | spec.md (updated in-place)  | reports/CLARIFY_REPORT.md   |
+| Plan      | ⬜     | plan.md, research.md, etc.  | reports/PLAN_REPORT.md      |
+| Tasks     | ⬜     | tasks.md                    | reports/TASKS_REPORT.md     |
+| Analyze   | ⬜     | (read-only — no output)     | audits/ANALYZE_REPORT.md    |
+| Implement | ⬜     | tasks.md (tasks marked [X]) | reports/IMPLEMENT_REPORT.md |
+| Closure   | ⬜     | —                           | reports/CLOSURE_REPORT.md   |
 
 ## Stage Artifacts
 
 | Artifact          | Owner        | Path                               | Generated At |
-|-------------------|--------------|------------------------------------|--------------|
+| ----------------- | ------------ | ---------------------------------- | ------------ |
 | PR Summary        | Orchestrator | PR_SUMMARY.md                      | Step 7       |
 | Testing Guide     | Orchestrator | guides/TESTING_GUIDE.md            | Step 7       |
 | Validation Report | Orchestrator | audits/VALIDATION_REPORT.md        | Step 6       |
@@ -355,6 +368,7 @@ Phase: <PHASE_NAME>
 ```
 
 **What speckit.specify does:**
+
 - Calls `create-new-feature.sh` (branch already exists — this will detect it and use `SPECIFY_FEATURE` env var or current branch)
 - Writes `spec.md` to `specs/runtime/<STAGE_DIR_NAME>/spec.md`
 - Creates `specs/runtime/<STAGE_DIR_NAME>/checklists/requirements.md` (spec quality checklist)
@@ -443,6 +457,7 @@ Stage: <STAGE_NAME>
 ```
 
 **What speckit.clarify does:**
+
 - Calls `check-prerequisites.sh --json --paths-only` to locate `FEATURE_SPEC = specs/runtime/<STAGE_DIR_NAME>/spec.md`
 - Reads `spec.md`, runs ambiguity scan, asks up to 5 targeted questions interactively
 - Appends a `## Clarifications` / `### Session YYYY-MM-DD` section directly into `spec.md` (in-place update)
@@ -532,6 +547,7 @@ Stage: <STAGE_NAME>
 ```
 
 **What speckit.plan does:**
+
 - Calls `setup-plan.sh --json` to copy the plan template to `specs/runtime/<STAGE_DIR_NAME>/plan.md`
 - Reads `spec.md` and `.specify/memory/constitution.md`
 - Phase 0: Generates `specs/runtime/<STAGE_DIR_NAME>/research.md` (resolves all unknowns)
@@ -635,6 +651,7 @@ Stage: <STAGE_NAME>
 ```
 
 **What speckit.tasks does:**
+
 - Calls `check-prerequisites.sh --json` to locate `FEATURE_DIR`
 - Reads `spec.md`, `plan.md`, and optional `data-model.md`, `contracts/`, `research.md`, `quickstart.md`
 - Writes `specs/runtime/<STAGE_DIR_NAME>/tasks.md`
@@ -646,6 +663,7 @@ Stage: <STAGE_NAME>
 ```
 
 Format components:
+
 - `- [ ]` checkbox — marks incomplete; speckit.implement marks done as `- [X]` (uppercase X)
 - `T001` — sequential ID in execution order
 - `[P]` — optional parallel marker (task can run concurrently)
@@ -734,6 +752,7 @@ Stage: <STAGE_NAME>
 ```
 
 **What speckit.analyze does:**
+
 - Calls `check-prerequisites.sh --json --require-tasks --include-tasks` to locate `FEATURE_DIR`
 - Reads `spec.md`, `plan.md`, `tasks.md` from `specs/runtime/<STAGE_DIR_NAME>/` root
 - Reads `.specify/memory/constitution.md` for principle validation
@@ -884,6 +903,7 @@ If any check fails → STOP. Implementation forbidden until resolved.
 **What speckit.implement does first:** It scans all files in `specs/runtime/<STAGE_DIR_NAME>/checklists/` and displays a pass/fail table. If any checklist has incomplete items, it will STOP and ask the user whether to proceed.
 
 The orchestrator MUST verify `checklists/requirements.md` (created by speckit.specify in Step 1) is fully complete before handing off to speckit.implement. If any checklist items are incomplete:
+
 - STOP and present the incomplete items
 - Require the user to either complete them or explicitly approve proceeding
 
@@ -897,6 +917,7 @@ Tasks Total: <TASKS_TOTAL>
 ```
 
 **What speckit.implement does:**
+
 - Calls `check-prerequisites.sh --json --require-tasks --include-tasks` to locate `FEATURE_DIR`
 - Reads `tasks.md`, `plan.md`, and optional `data-model.md`, `contracts/`, `research.md`, `quickstart.md` from `specs/runtime/<STAGE_DIR_NAME>/` root
 - Executes tasks phase-by-phase following TDD approach where applicable

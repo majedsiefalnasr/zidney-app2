@@ -1,5 +1,6 @@
 ---
 description: Create or update the feature specification from a natural language feature description.
+tools: [execute, read, edit, search, agent, todo]
 handoffs: 
   - label: Build Technical Plan
     agent: speckit.plan
