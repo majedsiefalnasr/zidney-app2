@@ -3,7 +3,7 @@
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-02-24  
 **Feature**: [spec.md](../spec.md)  
-**Feature ID**: 011-license-lifecycle  
+**Feature ID**: 011-license-lifecycle
 
 ---
 
@@ -14,7 +14,8 @@
 - [x] Written for non-technical stakeholders
 - [x] All mandatory sections completed
 
-**Notes**: 
+**Notes**:
+
 - Specification uses business-layer terms (License Service, Provisioning Service) without prescribing implementation
 - Focused on institutional data protection and state determinism
 - All sections present: Executive Summary, Objectives, Scope, Constraints, Acceptance Criteria, User Scenarios, Key Entities, Success Criteria, Assumptions, Product Dependencies, Known Risks, Not Allowed
@@ -33,6 +34,7 @@
 - [x] Dependencies and assumptions identified
 
 **Notes**:
+
 - **1 Clarification Present**: "Snapshot Location Finality" (Known Risks #1) - asks whether snapshot paths are deterministic or if location can be overridden. This is architectural, not blocking.
 - Testable requirements provide step-by-step test procedures
 - Measurable success criteria include quantitative targets: 100ms for transitions, 1ms resolver overhead, 10 minutes for snapshot
@@ -51,6 +53,7 @@
 - [x] No implementation details leak into specification
 
 **Notes**:
+
 - Functional requirements (state transitions, soft lock, archival, restore, deletion) each have 1-4 acceptance criteria
 - User scenarios cover: payment lapse → soft lock, automatic expiration, snapshot/restore, permanent deletion, schema compatibility, concurrent transitions
 - Success criteria (12 items) cover all major feature areas: state enforcement, audit, UI, performance, idempotency
@@ -70,6 +73,7 @@
 - [x] No cross-tenant joins allowed
 
 **Notes**:
+
 - Specification enforces trust chain: Isolation → License → Authentication (soft lock blocks auth)
 - Database-per-tenant preserved: snapshots are per-tenant, restore is per-tenant, deletion drops only tenant DB
 - License enforcement in middleware: resolver blocks SOFT_LOCKED/ARCHIVED/DELETED before route handler
@@ -86,6 +90,7 @@
 **Overall Status**: ✅ READY FOR PLANNING
 
 **Validation Summary**:
+
 - All mandatory sections completed ✅
 - Content quality passed ✅
 - Requirements testable and unambiguous ✅
@@ -106,12 +111,12 @@
 
 **Suggested Answers**:
 
-| Option | Answer | Implications |
-|--------|--------|--------------|
-| A | Deterministic paths | Paths calculated as `s3://snapshots/{tenant_id}/{snapshot_timestamp}.tar.gz`; no location variance; restore queries path rather than metadata |
-| B | Configurable location | System allows specifying snapshot bucket/prefix; location stored in snapshot_metadata and must match on restore |
-| C | Dynamic location mapping | Snapshots stored in metadata but actual location determined by storage service; metadata location is reference only |
-| Custom | Define custom approach | Explain how snapshot_location is determined and stored |
+| Option | Answer                   | Implications                                                                                                                                  |
+| ------ | ------------------------ | --------------------------------------------------------------------------------------------------------------------------------------------- |
+| A      | Deterministic paths      | Paths calculated as `s3://snapshots/{tenant_id}/{snapshot_timestamp}.tar.gz`; no location variance; restore queries path rather than metadata |
+| B      | Configurable location    | System allows specifying snapshot bucket/prefix; location stored in snapshot_metadata and must match on restore                               |
+| C      | Dynamic location mapping | Snapshots stored in metadata but actual location determined by storage service; metadata location is reference only                           |
+| Custom | Define custom approach   | Explain how snapshot_location is determined and stored                                                                                        |
 
 **Your choice**: _[To be provided after planning phase - not blocking specification]_
 

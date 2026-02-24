@@ -3,13 +3,14 @@
 **Stage**: STAGE 11 – License Lifecycle Operations  
 **Phase**: 02 – Platform MMC  
 **Interface**: REST API (Hono routes)  
-**Location**: `apps/api/src/routes/`  
+**Location**: `apps/api/src/routes/`
 
 ---
 
 ## Overview
 
 All license lifecycle endpoints require:
+
 1. Authenticated MMC user (session required)
 2. Admin role (for state transitions)
 3. Correlation ID (automatic, set by middleware)
@@ -22,6 +23,7 @@ All license lifecycle endpoints require:
 ### Route Protection
 
 All routes protected by:
+
 ```
 Middleware stack:
 1. Authentication check (session required)
@@ -35,6 +37,7 @@ Middleware stack:
 All responses follow standard:
 
 **Success** (2xx):
+
 ```typescript
 {
   success: true,
@@ -45,6 +48,7 @@ All responses follow standard:
 ```
 
 **Error** (4xx, 5xx):
+
 ```typescript
 {
   success: false,
@@ -69,19 +73,22 @@ All responses follow standard:
 **Authentication**: Required (admin role)
 
 **Request Body**:
+
 ```typescript
 {
-  reason: string  // (required) Business reason for soft lock
+  reason: string // (required) Business reason for soft lock
 }
 ```
 
 **Validation**:
+
 - `licenseId`: Valid UUID
 - `reason`: Non-empty string, max 512 chars
 - License exists and status = ACTIVE
 - User has admin role
 
 **Response** (200 OK):
+
 ```typescript
 {
   success: true,
@@ -102,6 +109,7 @@ All responses follow standard:
 ```
 
 **Error Responses**:
+
 - 400 BadRequest: Invalid input or license not ACTIVE
 - 403 Forbidden: User not admin
 - 404 NotFound: License not found
@@ -119,19 +127,22 @@ All responses follow standard:
 **Authentication**: Required (admin role)
 
 **Request Body**:
+
 ```typescript
 {
-  reason: string  // (required) Business reason for renewal
+  reason: string // (required) Business reason for renewal
 }
 ```
 
 **Validation**:
+
 - `licenseId`: Valid UUID
 - `reason`: Non-empty string, max 512 chars
 - License exists and status = SOFT_LOCKED
 - User has admin role
 
 **Response** (200 OK):
+
 ```typescript
 {
   success: true,
@@ -151,6 +162,7 @@ All responses follow standard:
 ```
 
 **Error Responses**:
+
 - 400 BadRequest: License not SOFT_LOCKED
 - 403 Forbidden: User not admin
 - 404 NotFound: License not found
@@ -168,6 +180,7 @@ All responses follow standard:
 **Authentication**: Required (admin role)
 
 **Request Body**:
+
 ```typescript
 {
   reason?: string  // (optional) Reason for archival
@@ -175,6 +188,7 @@ All responses follow standard:
 ```
 
 **Request Flow**:
+
 1. Validate license exists and status = SOFT_LOCKED
 2. Enqueue `snapshot_create` worker job
 3. Return job_id immediately (async operation)
@@ -183,6 +197,7 @@ All responses follow standard:
    - Client receives status update via MMC UI polling or WebSocket
 
 **Response** (202 Accepted - Async Operation):
+
 ```typescript
 {
   success: true,
@@ -202,6 +217,7 @@ All responses follow standard:
 
 **Response** (200 OK - Complete):
 If snapshot already captured:
+
 ```typescript
 {
   success: true,
@@ -225,6 +241,7 @@ If snapshot already captured:
 ```
 
 **Error Responses**:
+
 - 400 BadRequest: License not SOFT_LOCKED or snapshot failed
 - 403 Forbidden: User not admin
 - 404 NotFound: License not found
@@ -243,6 +260,7 @@ If snapshot already captured:
 **Authentication**: Required (admin role)
 
 **Request Body**:
+
 ```typescript
 {
   reason?: string  // (optional) Reason for restoration
@@ -250,6 +268,7 @@ If snapshot already captured:
 ```
 
 **Request Flow**:
+
 1. Validate license exists and status = ARCHIVED
 2. Validate snapshot exists and status = CREATED
 3. Enqueue `restore_from_archive` worker job
@@ -259,6 +278,7 @@ If snapshot already captured:
    - Client receives completion notification
 
 **Response** (202 Accepted - Async Operation):
+
 ```typescript
 {
   success: true,
@@ -280,6 +300,7 @@ If snapshot already captured:
 ```
 
 **Response** (200 OK - Complete):
+
 ```typescript
 {
   success: true,
@@ -299,6 +320,7 @@ If snapshot already captured:
 ```
 
 **Error Responses**:
+
 - 400 BadRequest: License not ARCHIVED or snapshot failed
 - 403 Forbidden: User not admin
 - 404 NotFound: License not found
@@ -319,16 +341,20 @@ If snapshot already captured:
 **Authentication**: Required (admin role + 2FA verification)
 
 **Request Body**:
+
 ```typescript
-{}  // No body required
+{
+} // No body required
 ```
 
 **Prerequisites**:
+
 - License exists and status = ARCHIVED
 - User re-authenticated with 2FA
 - User has admin role
 
 **Response** (200 OK):
+
 ```typescript
 {
   success: true,
@@ -345,6 +371,7 @@ If snapshot already captured:
 ```
 
 **Error Responses**:
+
 - 401 Unauthorized: 2FA not verified or session missing 2FA flag
 - 403 Forbidden: User not admin
 - 400 BadRequest: License not ARCHIVED
@@ -363,6 +390,7 @@ If snapshot already captured:
 **Authentication**: Required (admin role, fresh 2FA session)
 
 **Request Body**:
+
 ```typescript
 {
   confirmation_phrase: string,  // (required) Must match confirmation_phrase from initiate
@@ -371,6 +399,7 @@ If snapshot already captured:
 ```
 
 **Validation**:
+
 - `confirmation_phrase`: Exact match (case-sensitive) to random phrase from initiate
 - `confirmation_id`: References valid confirmation record
 - Confirmation not expired (< 5 minutes old)
@@ -378,6 +407,7 @@ If snapshot already captured:
 - User authenticated with fresh 2FA (not older than 5 minutes)
 
 **Request Flow**:
+
 1. Verify confirmation phrase matches hash
 2. Verify confirmation not expired
 3. Enqueue `delete_license` worker job
@@ -389,6 +419,7 @@ If snapshot already captured:
    - Tenant registry entry removed
 
 **Response** (202 Accepted - Async Operation):
+
 ```typescript
 {
   success: true,
@@ -407,6 +438,7 @@ If snapshot already captured:
 ```
 
 **Error Responses**:
+
 - 400 BadRequest: Confirmation phrase mismatch or expired
 - 401 Unauthorized: 2FA session expired or missing
 - 403 Forbidden: User not admin or confirmation failed
@@ -426,10 +458,12 @@ If snapshot already captured:
 **Authentication**: Optional (public read, but MMC-specific details require auth)
 
 **Query Parameters**:
+
 - `include_audit_trail`: boolean (optional, default false) - Include last 10 audit entries
 - `include_snapshot`: boolean (optional, default false) - Include snapshot metadata
 
 **Response** (200 OK):
+
 ```typescript
 {
   success: true,
@@ -474,6 +508,7 @@ If snapshot already captured:
 ```
 
 **Error Responses**:
+
 - 404 NotFound: License not found
 
 ---
@@ -487,12 +522,14 @@ If snapshot already captured:
 **Authentication**: Required (admin role)
 
 **Query Parameters**:
+
 - `limit`: number (optional, default 50, max 500)
 - `offset`: number (optional, default 0)
 - `start_date`: ISO-8601 (optional) - Filter by date range
 - `end_date`: ISO-8601 (optional)
 
 **Response** (200 OK):
+
 ```typescript
 {
   success: true,
@@ -524,6 +561,7 @@ If snapshot already captured:
 ```
 
 **Error Responses**:
+
 - 404 NotFound: License not found
 - 400 BadRequest: Invalid query parameters
 
@@ -538,6 +576,7 @@ If snapshot already captured:
 **Authentication**: Optional (public, but may be restricted in MMC)
 
 **Response** (200 OK):
+
 ```typescript
 {
   success: true,
@@ -560,6 +599,7 @@ If snapshot already captured:
 ```
 
 **Response** (200 OK - Completed):
+
 ```typescript
 {
   success: true,
@@ -584,6 +624,7 @@ If snapshot already captured:
 ```
 
 **Error Responses**:
+
 - 404 NotFound: Job not found or expired
 - 410 Gone: Job completed and result purged from cache
 
@@ -591,20 +632,20 @@ If snapshot already captured:
 
 ## HTTP Status Code Reference
 
-| Status | Meaning | When Used |
-|--------|---------|-----------|
-| 200 OK | Synchronous operation completed | Soft lock, renew, state queries |
-| 202 Accepted | Async operation initiated | Archive, restore, delete initiation |
-| 400 Bad Request | Validation error or invalid state transition | Wrong license status |
-| 401 Unauthorized | Missing or invalid authentication | No session |
-| 403 Forbidden | Insufficient permissions or confirmation failed | Non-admin user |
-| 404 Not Found | Resource not found | Invalid license ID |
-| 410 Gone | Resource deleted | DELETED license access |
-| 423 Locked | License SOFT_LOCKED (middleware) | Regular API access during soft lock |
-| 426 Upgrade Required | Schema version incompatible | Restore with old schema |
-| 500 Internal Server Error | Unexpected server error | Database/worker failures |
-| 503 Service Unavailable | Dependent service down | Storage unavailable |
-| 504 Gateway Timeout | Operation exceeded timeout | Restore or snapshot SLA exceeded |
+| Status                    | Meaning                                         | When Used                           |
+| ------------------------- | ----------------------------------------------- | ----------------------------------- |
+| 200 OK                    | Synchronous operation completed                 | Soft lock, renew, state queries     |
+| 202 Accepted              | Async operation initiated                       | Archive, restore, delete initiation |
+| 400 Bad Request           | Validation error or invalid state transition    | Wrong license status                |
+| 401 Unauthorized          | Missing or invalid authentication               | No session                          |
+| 403 Forbidden             | Insufficient permissions or confirmation failed | Non-admin user                      |
+| 404 Not Found             | Resource not found                              | Invalid license ID                  |
+| 410 Gone                  | Resource deleted                                | DELETED license access              |
+| 423 Locked                | License SOFT_LOCKED (middleware)                | Regular API access during soft lock |
+| 426 Upgrade Required      | Schema version incompatible                     | Restore with old schema             |
+| 500 Internal Server Error | Unexpected server error                         | Database/worker failures            |
+| 503 Service Unavailable   | Dependent service down                          | Storage unavailable                 |
+| 504 Gateway Timeout       | Operation exceeded timeout                      | Restore or snapshot SLA exceeded    |
 
 ---
 
@@ -678,6 +719,7 @@ For delete endpoints requiring 2FA:
 - Implementation: Check `user.role == 'admin'` in rate limiting middleware; skip counter for admin users
 
 **Response Headers for Admins**:
+
 ```
 X-RateLimit-Limit: unlimited
 X-RateLimit-Remaining: unlimited
@@ -690,32 +732,33 @@ X-Admin-Bypass: true
 
 Standard error codes returned in `error.code` field for all 4xx/5xx responses:
 
-| Code | HTTP | Meaning | Remediation |
-|------|------|---------|------------|
-| `LICENSE_NOT_FOUND` | 404 | License doesn't exist | Verify license ID; may have been deleted |
-| `LICENSE_WRONG_STATE` | 400 | License in unexpected state (e.g., renew on ACTIVE) | Check current license status; transition not allowed from current state |
-| `LICENSE_ALREADY_ARCHIVED` | 400 | License already archived; archive operation rejected | Try restore operation if desired |
-| `LICENSE_ALREADY_ACTIVE` | 400 | License already active; renew operation rejected | No action needed; license is operational |
-| `LICENSE_NOT_SOFT_LOCKED` | 400 | Operation requires SOFT_LOCKED status | First initiate soft lock |
-| `LICENSE_NOT_ARCHIVED` | 400 | Operation requires ARCHIVED status | First archive the license |
-| `SNAPSHOT_NOT_FOUND` | 404 | Snapshot doesn't exist for archived license | Snapshot may have been deleted; restore not possible |
-| `SNAPSHOT_FAILED` | 400 | Previous snapshot creation failed | Re-initiate archival; new snapshot will be attempted |
-| `SCHEMA_INCOMPATIBLE` | 426 | Snapshot schema version incompatible with current product | Update workspace product version before restore OR contact support for migration assistance |
-| `CONFIRMATION_PHRASE_MISMATCH` | 400 | Phrase doesn't match or is case-sensitive incorrect | Re-read confirmation phrase and enter exactly (spaces/case matter) |
-| `CONFIRMATION_EXPIRED` | 400 | Confirmation phrase valid only 5 minutes; window closed | Re-initiate deletion (POST /delete/initiate) to get new phrase |
-| `2FA_NOT_VERIFIED` | 401 | 2FA verification header missing or timestamp > 5 min old | Re-authenticate with 2FA; include fresh X-2FA-Verified header |
-| `2FA_SESSION_EXPIRED` | 401 | 2FA session no longer valid | Re-authenticate (full login with 2FA) |
-| `IDEMPOTENCY_KEY_MISSING` | 400 | POST request missing Idempotency-Key header | Add `Idempotency-Key: {uuid}` header to request |
-| `IDEMPOTENCY_KEY_DUPLICATE` | 409 | Same Idempotency-Key submitted twice concurrently | Request already in progress; poll job status or wait for completion |
-| `STORAGE_UNAVAILABLE` | 503 | S3 or snapshot service temporarily down | Retry after 30 seconds; if persistent, contact ops team |
-| `RESTORE_SLA_EXCEEDED` | 504 | Restore took longer than size-based SLA | Large restore; operation succeeded but took longer than expected ETA |
-| `UNAUTHORIZED` | 401 | User not authenticated or session invalid | Log in and re-authenticate |
-| `FORBIDDEN` | 403 | User authenticated but lacks required permission (admin role) | User account doesn't have admin privileges; request from admin account |
-| `RATE_LIMIT_EXCEEDED` | 429 | Too many requests in rate limit window | Wait; standard user limits: 1 transition/min, 5 queries/min |
-| `CONFLICT` | 409 | Operation conflicts with another in-flight operation | Concurrent delete/restore detected; operation blocked; retry in 5 seconds |
-| `INTERNAL_ERROR` | 500 | Unexpected server error | Contact support; include X-Correlation-ID from response header |
+| Code                           | HTTP | Meaning                                                       | Remediation                                                                                 |
+| ------------------------------ | ---- | ------------------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| `LICENSE_NOT_FOUND`            | 404  | License doesn't exist                                         | Verify license ID; may have been deleted                                                    |
+| `LICENSE_WRONG_STATE`          | 400  | License in unexpected state (e.g., renew on ACTIVE)           | Check current license status; transition not allowed from current state                     |
+| `LICENSE_ALREADY_ARCHIVED`     | 400  | License already archived; archive operation rejected          | Try restore operation if desired                                                            |
+| `LICENSE_ALREADY_ACTIVE`       | 400  | License already active; renew operation rejected              | No action needed; license is operational                                                    |
+| `LICENSE_NOT_SOFT_LOCKED`      | 400  | Operation requires SOFT_LOCKED status                         | First initiate soft lock                                                                    |
+| `LICENSE_NOT_ARCHIVED`         | 400  | Operation requires ARCHIVED status                            | First archive the license                                                                   |
+| `SNAPSHOT_NOT_FOUND`           | 404  | Snapshot doesn't exist for archived license                   | Snapshot may have been deleted; restore not possible                                        |
+| `SNAPSHOT_FAILED`              | 400  | Previous snapshot creation failed                             | Re-initiate archival; new snapshot will be attempted                                        |
+| `SCHEMA_INCOMPATIBLE`          | 426  | Snapshot schema version incompatible with current product     | Update workspace product version before restore OR contact support for migration assistance |
+| `CONFIRMATION_PHRASE_MISMATCH` | 400  | Phrase doesn't match or is case-sensitive incorrect           | Re-read confirmation phrase and enter exactly (spaces/case matter)                          |
+| `CONFIRMATION_EXPIRED`         | 400  | Confirmation phrase valid only 5 minutes; window closed       | Re-initiate deletion (POST /delete/initiate) to get new phrase                              |
+| `2FA_NOT_VERIFIED`             | 401  | 2FA verification header missing or timestamp > 5 min old      | Re-authenticate with 2FA; include fresh X-2FA-Verified header                               |
+| `2FA_SESSION_EXPIRED`          | 401  | 2FA session no longer valid                                   | Re-authenticate (full login with 2FA)                                                       |
+| `IDEMPOTENCY_KEY_MISSING`      | 400  | POST request missing Idempotency-Key header                   | Add `Idempotency-Key: {uuid}` header to request                                             |
+| `IDEMPOTENCY_KEY_DUPLICATE`    | 409  | Same Idempotency-Key submitted twice concurrently             | Request already in progress; poll job status or wait for completion                         |
+| `STORAGE_UNAVAILABLE`          | 503  | S3 or snapshot service temporarily down                       | Retry after 30 seconds; if persistent, contact ops team                                     |
+| `RESTORE_SLA_EXCEEDED`         | 504  | Restore took longer than size-based SLA                       | Large restore; operation succeeded but took longer than expected ETA                        |
+| `UNAUTHORIZED`                 | 401  | User not authenticated or session invalid                     | Log in and re-authenticate                                                                  |
+| `FORBIDDEN`                    | 403  | User authenticated but lacks required permission (admin role) | User account doesn't have admin privileges; request from admin account                      |
+| `RATE_LIMIT_EXCEEDED`          | 429  | Too many requests in rate limit window                        | Wait; standard user limits: 1 transition/min, 5 queries/min                                 |
+| `CONFLICT`                     | 409  | Operation conflicts with another in-flight operation          | Concurrent delete/restore detected; operation blocked; retry in 5 seconds                   |
+| `INTERNAL_ERROR`               | 500  | Unexpected server error                                       | Contact support; include X-Correlation-ID from response header                              |
 
 **Example Error Response**:
+
 ```json
 {
   "success": false,
@@ -737,7 +780,7 @@ Standard error codes returned in `error.code` field for all 4xx/5xx responses:
 ## Webhooks (Optional Future Extension)
 
 Future endpoints for webhook subscriptions:
+
 - `POST /webhooks/subscribe` - Subscribe to license state change events
 - `POST /webhooks/test` - Send test webhook
 - Response formats: license_transitioned, snapshot_created, restoration_completed, deletion_confirmed
-
