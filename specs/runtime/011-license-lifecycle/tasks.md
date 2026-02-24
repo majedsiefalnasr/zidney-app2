@@ -29,32 +29,32 @@
 **Blocked By**: None  
 **Blocks**: Phase 2 (all service layer code depends on schema)
 
-- [ ] T001 [Setup] Create migration A001 to extend licenses table — `apps/api/src/db/master/migrations/A001_extend_licenses_table.sql`
+- [x] T001 [Setup] Create migration A001 to extend licenses table — `apps/api/src/db/master/migrations/001_A001_extend_licenses_table.sql`
   - Add columns: `soft_lock_until`, `archived_at`, `deleted_at`, `current_snapshot_id` (all nullable)
   - Add constraints: `chk_soft_lock_until_consistency`, `chk_archived_at_consistency`, `chk_deleted_at_consistency`
   - Create index: `idx_licenses_soft_lock_until` (partial, WHERE status = 'SOFT_LOCKED')
   - Create index: `idx_licenses_archived_at` (partial, WHERE status = 'ARCHIVED')
   - Acceptance: Schema applies without errors, 4 columns present, 2 indexes created, constraints enforced
 
-- [ ] T002 [Setup] Create migration A002 to add snapshots table — `apps/api/src/db/master/migrations/A002_create_snapshots_table.sql`
+- [x] T002 [Setup] Create migration A002 to add snapshots table — `apps/api/src/db/master/migrations/002_A002_create_snapshots_table.sql`
   - Create table: `snapshots` with columns: `id` (UUID PK), `license_id` (UUID FK), `snapshot_location` (VARCHAR 512), `snapshot_timestamp` (TIMESTAMP), `version_tag` (VARCHAR 20), `size_bytes` (BIGINT), `status` (ENUM: CREATED|FAILED), `failure_reason` (TEXT NULL), `created_at` (TIMESTAMP), `deleted_at` (TIMESTAMP NULL)
   - Add constraint: `UNIQUE(license_id) WHERE deleted_at IS NULL` (one active snapshot per license)
   - Create indexes: `idx_snapshots_license_id`, `idx_snapshots_status`, `idx_snapshots_created_at`
   - Acceptance: Table created, all columns present, unique constraint enforced, 3 indexes created
 
-- [ ] T003 [Setup] Create migration A003 to add license_audit_logs table — `apps/api/src/db/master/migrations/A003_create_license_audit_logs_table.sql`
+- [x] T003 [Setup] Create migration A003 to add license_audit_logs table — `apps/api/src/db/master/migrations/003_A003_create_license_audit_logs_table.sql`
   - Create table: `license_audit_logs` with columns: `id` (UUID PK), `license_id` (UUID FK), `previous_status` (VARCHAR 20), `new_status` (VARCHAR 20), `actor_id` (UUID FK NULL), `actor_type` (ENUM: ADMIN|SYSTEM), `reason` (VARCHAR 512), `transition_metadata` (JSONB NULL), `timestamp` (TIMESTAMP), `correlation_id` (UUID), `created_at` (TIMESTAMP)
   - Add constraint: `chk_audit_status_valid` (both statuses in valid set), `chk_audit_actor_type_valid`, `chk_audit_natural_transition` (previous != new)
   - Create indexes: `idx_audit_license_id`, `idx_audit_timestamp`, `idx_audit_correlation_id`
   - Acceptance: Table created, immutable (no UPDATE/DELETE triggers), constraints enforced, 3 indexes created
 
-- [ ] T004 [Setup] Create migration A004 to add license_deletion_confirmations table — `apps/api/src/db/master/migrations/A004_create_license_deletion_confirmations_table.sql`
+- [x] T004 [Setup] Create migration A004 to add license_deletion_confirmations table — `apps/api/src/db/master/migrations/004_A004_create_license_deletion_confirmations_table.sql`
   - Create table: `license_deletion_confirmations` with columns: `id` (UUID PK), `license_id` (UUID FK), `confirmation_phrase_hash` (VARCHAR 64), `actor_id` (UUID FK), `confirmed_at` (TIMESTAMP), `grace_period_until` (TIMESTAMP NULL), `deletion_initiated_at` (TIMESTAMP), `created_at` (TIMESTAMP)
   - Add FK constraints: `fk_deletion_license_id` (CASCADE), `fk_deletion_actor_id` (RESTRICT)
   - Create indexes: `idx_deletion_license_id`, `idx_deletion_actor_id`
   - Acceptance: Table created, all columns present, FK constraints enforced, 2 indexes created
 
-- [ ] T005 [Setup] Create migration A005 to extend tenants_registry table — `apps/api/src/db/master/migrations/A005_extend_tenants_registry_table.sql`
+- [x] T005 [Setup] Create migration A005 to extend tenants_registry table — `apps/api/src/db/master/migrations/005_A005_extend_tenants_registry_table.sql`
   - Add columns: `license_status` (VARCHAR 20), `license_id` (UUID FK NULL), `sync_status` (VARCHAR 20 DEFAULT 'IN_SYNC'), `last_synced_at` (TIMESTAMP DEFAULT now())
   - Add FK constraint: `fk_registry_license_id` (CASCADE)
   - Create indexes: `idx_registry_license_status`, `idx_registry_last_synced_at`
@@ -70,7 +70,7 @@
 **Blocked By**: Phase 1 (schema must exist)  
 **Blocks**: Phase 3 (API routes depend on service)
 
-- [ ] T006 [SYS] Implement transitionToSoftLock() method — `packages/domain-core/src/license/service.ts`
+- [x] T006 [SYS] Implement transitionToSoftLock() method — `packages/domain-core/src/license/service.ts`
   - Signature: `async transitionToSoftLock(masterDb, licenseId, reason, actorId)`
   - Validation: License exists, status = ACTIVE (else StateTransitionError)
   - Atomic transaction: SELECT FOR UPDATE → validate → update soft_lock_until = now() + 90d → insert audit log
@@ -78,7 +78,7 @@
   - Error handling: StateTransitionError (400), LicenseNotFoundError (404), DatabaseError (500)
   - Acceptance: Method called on ACTIVE license → status = SOFT_LOCKED, soft_lock_until = now+90d, audit log created
 
-- [ ] T007 [P] [SYS] Implement transitionToActive() method — `packages/domain-core/src/license/service.ts`
+- [x] T007 [P] [SYS] Implement transitionToActive() method — `packages/domain-core/src/license/service.ts`
   - Signature: `async transitionToActive(masterDb, licenseId, reason, actorId)`
   - Validation: License exists, status = SOFT_LOCKED (else StateTransitionError)
   - Atomic transaction: SELECT FOR UPDATE → validate → clear soft_lock_until → insert audit log
@@ -86,7 +86,7 @@
   - Error handling: StateTransitionError (400), LicenseNotFoundError (404)
   - Acceptance: Method called on SOFT_LOCKED license → status = ACTIVE, soft_lock_until = NULL, no reprovisioning
 
-- [ ] T008 [P] [SYS] Implement transitionToArchived() method — `packages/domain-core/src/license/service.ts`
+- [x] T008 [P] [SYS] Implement transitionToArchived() method — `packages/domain-core/src/license/service.ts`
   - Signature: `async transitionToArchived(masterDb, licenseId, snapshotId, reason, actorId)`
   - Validation: License exists, status = SOFT_LOCKED, snapshot exists and status = CREATED
   - Atomic transaction: SELECT FOR UPDATE → validate → set archived_at = now(), soft_lock_until = NULL, current_snapshot_id = snapshotId → insert audit log
@@ -94,7 +94,7 @@
   - Error handling: StateTransitionError (400), SnapshotNotFoundError (404), SnapshotFailedError (400)
   - Acceptance: Method transitions SOFT_LOCKED → ARCHIVED, sets current_snapshot_id, audit log records snapshot_id
 
-- [ ] T009 [P] [SYS] Implement restoreFromArchive() method — `packages/domain-core/src/license/service.ts`
+- [x] T009 [P] [SYS] Implement restoreFromArchive() method — `packages/domain-core/src/license/service.ts`
   - Signature: `async restoreFromArchive(masterDb, licenseId, actorId)`
   - Validation: License exists, status = ARCHIVED, snapshot exists and status = CREATED, version compat check
   - Enqueue worker job: `restore_from_archive` with payload (licenseId, snapshotId, actor_id, correlation_id)
@@ -103,7 +103,7 @@
   - Error handling: StateTransitionError (400), SnapshotFailedError (400), SchemaCompatibilityError (426)
   - Acceptance: Worker job enqueued, CLI output shows job_id, idempotency verified via duplicate submission
 
-- [ ] T010 [P] [SYS] Implement transitionToDeleted() method — `packages/domain-core/src/license/service.ts`
+- [x] T010 [P] [SYS] Implement transitionToDeleted() method — `packages/domain-core/src/license/service.ts`
   - Signature: `async transitionToDeleted(masterDb, licenseId, confirmationPhraseHash, actorId)`
   - Validation: License exists, status = ARCHIVED, confirmation phrase hash matches, grace period expired (if set)
   - Enqueue worker job: `delete_license` with payload (licenseId, snapshotId, actor_id, grace_period_until)
@@ -111,32 +111,32 @@
   - Error handling: StateTransitionError (400), InvalidConfirmationError (403), ConfirmationExpiredError (410)
   - Acceptance: Worker job enqueued with correct payload, confirmation phrase validation verified
 
-- [ ] T011 [P] [SYS] Implement validateStateTransition() helper — `packages/domain-core/src/license/validation.ts`
+- [x] T011 [P] [SYS] Implement validateStateTransition() helper — `packages/domain-core/src/license/validation.ts`
   - Purpose: Enforce valid transitions, reject forbidden transitions
   - Valid transitions: ACTIVE→SOFT_LOCKED, SOFT_LOCKED→ACTIVE, SOFT_LOCKED→ARCHIVED, ARCHIVED→ACTIVE, ARCHIVED→DELETED
   - Forbidden: ACTIVE→ARCHIVED, ACTIVE→DELETED, SOFT_LOCKED→DELETED, any from DELETED
   - Return: { valid: boolean, error?: string }
   - Acceptance: All valid transitions return valid=true, all forbidden return valid=false + descriptive error
 
-- [ ] T012 [P] [SYS] Implement validateSoftLockExpiry() helper — `packages/domain-core/src/license/validation.ts`
+- [x] T012 [P] [SYS] Implement validateSoftLockExpiry() helper — `packages/domain-core/src/license/validation.ts`
   - Purpose: Check if NOW > soft_lock_until for SOFT_LOCKED licenses
   - Input: License object with soft_lock_until
   - Return: { expired: boolean, expires_in_ms: number }
   - Acceptance: For license 90 days in future → expired=false, expires_in_ms ≈ 7776000000
 
-- [ ] T013 [P] [SYS] Implement validateSchemaCompatibility() helper — `packages/domain-core/src/license/validation.ts`
+- [x] T013 [P] [SYS] Implement validateSchemaCompatibility() helper — `packages/domain-core/src/license/validation.ts`
   - Purpose: Verify snapshot version matches current product schema version
   - Input: snapshot.version_tag, current product schema_version
   - Return: { compatible: boolean, error?: string }
   - Acceptance: Exact version match → compatible=true, newer snapshot → compatible=false with error
 
-- [ ] T014 [P] [SYS] Implement validateConcurrentModification() helper — `packages/domain-core/src/license/validation.ts`
+- [x] T014 [P] [SYS] Implement validateConcurrentModification() helper — `packages/domain-core/src/license/validation.ts`
   - Purpose: Detect if license was modified between SELECT and UPDATE (optimistic locking fallback)
   - Input: Expected version/updated_at, current from SELECT FOR UPDATE
   - Return: { safe: boolean, error?: string }
   - Acceptance: Versions match → safe=true, mismatch → safe=false with ConcurrentModificationError
 
-- [ ] T015 [SYS] Create License Service test file — `packages/domain-core/src/license/__tests__/service.test.ts`
+- [x] T015 [SYS] Create License Service test file — `packages/domain-core/src/license/__tests__/service.test.ts`
   - Test all 5 core methods with valid inputs
   - Test invalid state transitions (forbidden paths)
   - Test concurrent access (two simultaneous transitions, one succeeds)

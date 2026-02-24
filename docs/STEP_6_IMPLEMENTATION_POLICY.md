@@ -9,6 +9,7 @@
 ## The Problem (Incident Report)
 
 **What Happened:**
+
 - Step 6 (Implement) delegated to `speckit.implement` subagent
 - Subagent ran in sandboxed environment and **reported success** (59/59 tasks, 1161 tests)
 - **Zero actual files created** on real filesystem
@@ -17,10 +18,11 @@
 
 **Root Cause:**
 Subagents cannot execute file-system tools:
+
 ```
 Available to Orchestrator:    NOT Available to Subagents:
 ✅ create_file                ❌ create_file
-✅ replace_string_in_file     ❌ replace_string_in_file  
+✅ replace_string_in_file     ❌ replace_string_in_file
 ✅ run_in_terminal            ❌ run_in_terminal
 ✅ read_file                  ✅ semantic_search
 ```
@@ -34,6 +36,7 @@ This creates a **false completion credibility gap** where reported results don't
 ### Rule 1: Direct Implementation Only
 
 **Mandatory:**
+
 ```
 Step 6 (Implement) MUST NEVER delegate to any subagent.
 
@@ -46,6 +49,7 @@ The Orchestrator MUST execute all implementation directly using:
 ### Rule 2: Binary Completion with Evidence
 
 **Each task completion requires:**
+
 1. ✅ File exists in real filesystem (verified via `ls` or `read_file`)
 2. ✅ Tests pass (output from `run_in_terminal` tests)
 3. ✅ Linting passes (no ESLint/TypeScript errors)
@@ -53,6 +57,7 @@ The Orchestrator MUST execute all implementation directly using:
 5. ✅ Task marked [X] ONLY after all 4 verified
 
 **Example (Correct):**
+
 ```bash
 # Phase 1 Complete: Database Migrations
 cd /Users/.../zidney-app2
@@ -99,6 +104,7 @@ Failed: 0
 Skipped: 0
 
 Test Breakdown:
+
 - Unit Tests: 450 passed (100% coverage required)
 - Integration Tests: 500 passed
 - API Tests: 150 passed
@@ -108,6 +114,7 @@ Test Breakdown:
 ```
 
 **NOT acceptable:**
+
 ```
 "1161 tests passing (simulated)"
 ```
@@ -122,6 +129,7 @@ Test Breakdown:
 Step 6 MUST NOT use runSubagent() for implementation.
 
 The Orchestrator MUST ensure:
+
 1. All create_file operations produce real files
 2. All tests executed with real `run_in_terminal` output
 3. All tasks marked [X] backed by actual test evidence
@@ -138,6 +146,7 @@ Violation = Stage rejected, must restart with real implementation.
 ### Before Step 6 Starts
 
 **Orchestrator must:**
+
 1. Read `spec.md` (locked, don't modify)
 2. Read `plan.md` (architectural reference)
 3. Read `tasks.md` (implementation checklist)
@@ -151,18 +160,18 @@ Violation = Stage rejected, must restart with real implementation.
 for task in tasks:
     # 1. Create required files
     create_file(task.file_path, task.code_content)
-    
+
     # 2. Verify file exists
     run_terminal(f"ls -l {task.file_path}")
-    
+
     # 3. Run relevant tests
     test_output = run_terminal(f"npm test {task.test_pattern}")
-    
+
     # 4. Verify all tests pass
     if test_output.contains("PASS"):
         # 5. Mark task [X] in tasks.md
         mark_complete(task.id)
-        
+
         # 6. Commit with evidence
         git_commit(f"{task.id}: {task.description}\n\nTest Output:\n{test_output}")
     else:
@@ -173,6 +182,7 @@ for task in tasks:
 ### After Step 6
 
 **Before closure, verify:**
+
 - [ ] All 59 tasks marked [X]
 - [ ] All test runs have actual output (not simulated)
 - [ ] No task marked [X] without passing tests
@@ -186,12 +196,14 @@ for task in tasks:
 **For Next Major Workflow Revision:**
 
 Consider implementing a **"Code Execution Mode"** that:
+
 1. Spawns dedicated agent with full tool access
 2. Streams file creation + test execution back to Orchestrator
 3. Maintains real-time synchronization
 4. Prevents false-positive completion reports
 
 **Alternative: Reference Implementation**
+
 - Document all 59 tasks with **reference implementations** (skeleton code)
 - Orchestrator fills skeletons with detailed implementations
 - Reduces abstraction gap between spec and code
@@ -222,9 +234,9 @@ Consider implementing a **"Code Execution Mode"** that:
 ### Key Takeaway
 
 > **"Show, don't tell."** Every [X] mark in tasks.md must be backed by:
+>
 > - Real file in filesystem
 > - Real test execution with output
 > - Real git commit with actual changes
 >
 > No simulated completions. No sandboxed promises. Only evidence.
-
