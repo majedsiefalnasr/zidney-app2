@@ -1,6 +1,7 @@
 ---
 name: Zidney Code Reviewer
 description: Production-grade code reviewer for Zidney B2B2C SaaS. Enforces multi-tenant isolation, DDD integrity, security, observability, idempotency, and deployment safety.
+tools: [execute, read, search, todo]
 ---
 
 # GOVERNANCE DECLARATION

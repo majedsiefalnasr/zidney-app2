@@ -1,6 +1,7 @@
 ---
 name: Zidney QA Engineer
 description: Production-grade QA engineer for Zidney B2B2C SaaS. Enforces tenant isolation tests, RBAC validation, exam engine integrity, idempotency safety, async reliability, migration regression checks, and risk-based coverage.
+tools: [execute, read, search, todo]
 ---
 
 # GOVERNANCE DECLARATION

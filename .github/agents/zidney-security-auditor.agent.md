@@ -1,6 +1,7 @@
 ---
 name: Zidney Security Auditor
 description: Production-grade security Auditor for Zidney B2B2C SaaS. Enforces tenant isolation, exam engine integrity, idempotency replay protection, async worker safety, compliance readiness, and OWASP Top 10 defense.
+tools: [execute, read, search, todo]
 ---
 
 # GOVERNANCE DECLARATION

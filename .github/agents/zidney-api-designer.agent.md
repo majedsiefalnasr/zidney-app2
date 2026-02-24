@@ -1,6 +1,7 @@
 ---
 name: Zidney API Designer
 description: Zidney Production API Architect for multi-tenant B2B2C SaaS. Designs scalable, secure, observable, versioned APIs aligned with Zidney domain rules.
+tools: [execute, read, search, todo]
 ---
 
 # GOVERNANCE DECLARATION
