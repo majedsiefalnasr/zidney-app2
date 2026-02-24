@@ -835,6 +835,32 @@ See [Worker Jobs Contract](contracts/worker-jobs.md) for full spec.
    - 202 if correct
    - Deletion job enqueued
 
+### Test Case Enumeration: RBAC & Tenant Isolation
+
+**RBAC Negative Test Cases** (8+ required by QA Guardian):
+
+Location: `tests/integration/rbac-enforcement.test.ts`
+
+1. **Non-admin attempts soft-lock**: User without `mmc:license:lifecycle:write` → 403 Unauthorized
+2. **Workspace member (non-admin) attempts soft-lock**: Workspace staff !== MMC Admin → 403 Unauthorized
+3. **Cross-workspace admin attempts soft-lock**: Admin from Workspace A tries Workspace B license → 403 ADMIN_WORKSPACE_MISMATCH
+4. **Anonymous request to soft-lock endpoint**: No auth header → 401 Unauthorized
+5. **Expired JWT attempts soft-lock**: Token past expiry → 401 Token Expired
+6. **2FA-unverified admin attempts deletion**: Admin without valid 2FA (> 5 min old) → 401 2FA_SESSION_EXPIRED
+7. **Admin with revoked license:lifecycle role attempts soft-lock**: After revocation → 403 Permission Denied
+8. **Guest user attempts soft-lock**: Guest role → 403 Unauthorized
+
+**Tenant Isolation Test Cases** (6+ required by QA Guardian):
+
+Location: `tests/integration/tenant-isolation.test.ts`
+
+1. **Cross-workspace license access**: Query Workspace B's license_id from Workspace A context → 404 or empty results
+2. **Cross-workspace snapshot visibility**: List snapshots for Workspace B from Workspace A → No snapshots visible
+3. **Cross-workspace audit log access**: Query audit logs for Workspace B license from Workspace A → 403 Forbidden
+4. **Concurrent soft-lock on same license from different tenants**: Two workspaces attempt soft-lock simultaneously → Only one succeeds, second gets 409 Conflict
+5. **Restore in one tenant does not affect another**: Archive + Restore Workspace A; Workspace B license remains unchanged
+6. **Audit log correlation_id unique per workspace**: Soft-lock transitions in A and B have different correlation_id → Cannot trace cross-tenant
+
 ### Worker Tests
 
 **Location**: `apps/worker/src/jobs/__tests__/`
@@ -1163,6 +1189,52 @@ See [Worker Jobs Contract](contracts/worker-jobs.md) for full spec.
 - **Batch Size**: 10k rows per batch with 1-second pause between batches (prevents table lock escalation)
 - **Index Creation**: Indexes created CONCURRENTLY (PostgreSQL 8.4+) to avoid blocking reads during migration
 - **SLA**: A003 must complete within 15-minute maintenance window
+
+### Reverse Migration Procedures (Critical for Phase 1 Rollback)
+
+**Specification**:
+
+Each migration (A001-A005) must have documented reverse procedure. If Phase 1 deployment fails, these procedures execute in reverse order:
+
+**Reverse A005** (`apps/api/src/db/master/migrations/A005_reverse.sql`):
+
+- DROP TRIGGER license_status_sync_trigger
+- DROP FUNCTION sync_license_status_to_registry()
+- ALTER TABLE tenants_registry DROP COLUMN license_status, DROP COLUMN license_id, DROP COLUMN sync_status, DROP COLUMN last_synced_at
+- DROP INDEX idx_registry_license_status, idx_registry_license_id, idx_registry_last_synced_at
+- **Verification**: SELECT COUNT(\*) FROM tenants_registry COLUMNS - should have original column count
+
+**Reverse A004** (`apps/api/src/db/master/migrations/A004_reverse.sql`):
+
+- DROP TABLE IF EXISTS license_deletion_confirmations CASCADE
+- **Verification**: SELECT \* FROM information_schema.tables WHERE table_name='license_deletion_confirmations' - should be empty
+
+**Reverse A003** (`apps/api/src/db/master/migrations/A003_reverse.sql`):
+
+- DROP TRIGGER audit_immutability_trigger
+- DROP FUNCTION prevent_audit_modification()
+- DROP TABLE IF EXISTS license_audit_logs CASCADE
+- **Verification**: SELECT \* FROM information_schema.tables WHERE table_name='license_audit_logs' - should be empty
+
+**Reverse A002** (`apps/api/src/db/master/migrations/A002_reverse.sql`):
+
+- ALTER TABLE licenses DROP CONSTRAINT IF EXISTS fk_licenses_current_snapshot_id
+- DROP TABLE IF EXISTS snapshots CASCADE
+- **Verification**: SELECT \* FROM information_schema.tables WHERE table_name='snapshots' - should be empty
+
+**Reverse A001** (`apps/api/src/db/master/migrations/A001_reverse.sql`):
+
+- ALTER TABLE licenses DROP CONSTRAINT IF EXISTS chk_soft_lock_until_consistency, chk_archived_at_consistency, chk_deleted_at_consistency
+- ALTER TABLE licenses DROP COLUMN IF EXISTS soft_lock_until, archived_at, deleted_at, current_snapshot_id
+- DROP INDEX IF EXISTS idx_licenses_soft_lock_until, idx_licenses_archived_at
+- **Verification**: SELECT column_name FROM information_schema.columns WHERE table_name='licenses' - should NOT include soft_lock_until, etc.
+
+**Rollback Trigger** (automatic if any migration fails):
+
+- T054 deployment script runs ALL forward migrations (A001-A005) in single transaction
+- If any migration fails or timeout exceeds 15 minutes: PostgreSQL ROLLBACK transaction triggers
+- All reverse scripts executed immediately in reverse order (A005 → A004 → A003 → A002 → A001)
+- **Atomic Guarantee**: Either all migrations succeed OR all revert; no partial state
 
 ---
 
