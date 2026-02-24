@@ -129,6 +129,13 @@ Before ANY commit sub-step, the orchestrator MUST:
    - Implementation files explicitly declared by `PLAN_REPORT.md` and `TASKS_REPORT.md`
 3. For non-implementation steps (Pre through Step 5 and Step 7), do NOT stage implementation source files.
 4. `specs/templates/` files must never be staged in any step commit.
+5. Run code formatter on staged files BEFORE committing:
+   - Determine staged files using: `git diff --name-only --cached`
+   - Run project formatter ONLY on those files (e.g., `npm run format -- <file list>` or `biome format --write <file list>` depending on project setup)
+   - Re-run `git status --porcelain` to confirm no unintended changes were introduced
+   - Re-stage formatted files explicitly
+
+If formatting modifies files outside the active stage scope → STOP and require manual review.
 
 If unrelated or cross-stage changes are detected → STOP. List offending files. Require manual cleanup.
 

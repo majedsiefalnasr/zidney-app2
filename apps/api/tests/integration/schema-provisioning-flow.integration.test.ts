@@ -13,11 +13,9 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { TaskQueueProcessor } from '../../../worker/src/processor/queue-processor'
-import { redis } from '../../../worker/src/infrastructure/redis'
+import * as path from 'path'
 import { Pool } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import * as path from 'path'
 
 const logger = createLogger('SchemaProvisioningFlowTest')
 
@@ -191,7 +189,12 @@ describe('Schema Provisioning Flow - Integration Tests', () => {
     })
 
     // STEP 4: Verify critical tables exist
-    const tablesCheck = ['users', 'attempts', 'attempt_events', 'schema_version']
+    const tablesCheck = [
+      'users',
+      'attempts',
+      'attempt_events',
+      'schema_version',
+    ]
     expect(tablesCheck.length).toBeGreaterThanOrEqual(4)
 
     logger.info('Critical tables verified', {
@@ -207,7 +210,10 @@ describe('Schema Provisioning Flow - Integration Tests', () => {
     const idempotencyKey = `idem-key-${Date.now()}`
 
     // FIRST REQUEST: Initialize provisioning
-    const response1 = await requestSchemaInitialization(workspaceId, idempotencyKey)
+    const response1 = await requestSchemaInitialization(
+      workspaceId,
+      idempotencyKey
+    )
 
     expect(response1.status).toBe(202)
     const result1 = expectQueuedResponse(await response1.json())
@@ -216,7 +222,10 @@ describe('Schema Provisioning Flow - Integration Tests', () => {
     logger.info('First request returned task_id', { task_id: taskId1 })
 
     // SECOND REQUEST: Same idempotency key
-    const response2 = await requestSchemaInitialization(workspaceId, idempotencyKey)
+    const response2 = await requestSchemaInitialization(
+      workspaceId,
+      idempotencyKey
+    )
 
     expect(response2.status).toBe(202)
     const result2 = expectQueuedResponse(await response2.json())

@@ -65,8 +65,7 @@ describe('Account Lockout', () => {
     const u = await pool.query(
       `INSERT INTO ${LOCKOUT_USERS_TABLE} (workspace_id, email, password_hash, role, token_version, failed_login_count)
        VALUES ($1, 'lockout@test.com', 'hash', 'student', 1, 0)
-       RETURNING id, email, failed_login_count`
-      ,
+       RETURNING id, email, failed_login_count`,
       [workspace.id]
     )
     user = u.rows[0]
@@ -80,9 +79,10 @@ describe('Account Lockout', () => {
     await pool.query(`DELETE FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`, [
       user.id,
     ])
-    await db.master.query(`DELETE FROM ${LOCKOUT_WORKSPACES_TABLE} WHERE id = $1`, [
-      workspace.id,
-    ])
+    await db.master.query(
+      `DELETE FROM ${LOCKOUT_WORKSPACES_TABLE} WHERE id = $1`,
+      [workspace.id]
+    )
   })
 
   beforeEach(async () => {
@@ -235,9 +235,10 @@ describe('Account Lockout', () => {
       await client2.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
       // Client 1 acquires lock first.
-      await client1.query(`SELECT * FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1 FOR UPDATE`, [
-        user.id,
-      ])
+      await client1.query(
+        `SELECT * FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1 FOR UPDATE`,
+        [user.id]
+      )
 
       // First completes while holding the lock.
       await client1.query(
@@ -247,9 +248,10 @@ describe('Account Lockout', () => {
       await client1.query('COMMIT')
 
       // Client 2 acquires lock after client 1 commits, then updates.
-      await client2.query(`SELECT * FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1 FOR UPDATE`, [
-        user.id,
-      ])
+      await client2.query(
+        `SELECT * FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1 FOR UPDATE`,
+        [user.id]
+      )
       await client2.query(
         `UPDATE ${LOCKOUT_USERS_TABLE} SET failed_login_count = failed_login_count + 1 WHERE id = $1`,
         [user.id]
@@ -263,14 +265,17 @@ describe('Account Lockout', () => {
       )
 
       expect(result.rows[0].failed_login_count).toBe(2)
-
     } finally {
       try {
         await client1.query('ROLLBACK')
-      } catch {}
+      } catch {
+        // Ignore rollback errors in cleanup
+      }
       try {
         await client2.query('ROLLBACK')
-      } catch {}
+      } catch {
+        // Ignore rollback errors in cleanup
+      }
       client1.release()
       client2.release()
     }

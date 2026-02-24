@@ -155,10 +155,9 @@ export interface PaginatedResponse<T> {
 
 /**
  * API Response for single product
+ * Extends Product with standard response envelope
  */
-export interface ProductResponse extends Product {
-  // Standard Product fields
-}
+export type ProductResponse = Product
 
 /**
  * Audit log query filters

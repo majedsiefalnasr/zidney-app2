@@ -1,7 +1,7 @@
 import { beforeEach, describe, expect, it } from 'vitest'
 
 describe('T105: Idempotency Replay - Same Job ID', () => {
-  let idempotencyCache: Map<string, any> = new Map()
+  const idempotencyCache: Map<string, any> = new Map()
   let executionLog: any[] = []
 
   beforeEach(() => {

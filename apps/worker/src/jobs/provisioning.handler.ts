@@ -380,7 +380,7 @@ function sanitizeErrorMessage(message: string): string {
     },
   ]
 
-  let sanitized = message
+  const sanitized = message
   for (const rule of sanitizationRules) {
     if (rule.pattern.test(sanitized)) {
       return rule.replacement
