@@ -309,16 +309,28 @@ Lifecycle must be deterministic, centralized, and middleware-enforced.
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
-Initiated: 2026-02-24T00:00:00Z
+Risk Level: MEDIUM
+Last Updated: 2026-02-24T00:00:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Four-state lifecycle model (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED)
+- Middleware-enforced soft lock at all auth gates
+- Snapshot creation before archival with schema tagging
+- Deterministic restoration with version compatibility validation
+- Immutable audit logging for all transitions
+- Permanent deletion workflow with explicit admin action
+- TTL enforcement (7→90 days before archival)
+
+Deferred Scope:
+
+- Migration of existing licenses to new state machine (post-production)
+- Snapshot compression optimization (separate performance initiative)
+- Workspace rebuild from snapshot (requires separate feature stage)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — clarification gate pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. 1 non-blocking clarification identified (snapshot location determinism). Ready for Clarify step.
