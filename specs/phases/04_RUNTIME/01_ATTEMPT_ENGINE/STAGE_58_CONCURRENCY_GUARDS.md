@@ -5,6 +5,12 @@ Runtime: Backend + Redis
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Guarantee deterministic behavior under high concurrency.

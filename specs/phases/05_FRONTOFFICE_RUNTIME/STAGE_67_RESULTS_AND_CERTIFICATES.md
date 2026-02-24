@@ -4,6 +4,12 @@ Phase: 05_FRONTOFFICE_RUNTIME
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement secure, immutable result rendering and certificate issuance for Frontoffice.

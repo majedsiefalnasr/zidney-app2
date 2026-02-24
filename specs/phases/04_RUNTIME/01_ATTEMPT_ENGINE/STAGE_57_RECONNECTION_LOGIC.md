@@ -6,6 +6,12 @@ Scope: Network interruption handling and safe resume logic
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Define deterministic and secure reconnection behavior for in-progress attempts.

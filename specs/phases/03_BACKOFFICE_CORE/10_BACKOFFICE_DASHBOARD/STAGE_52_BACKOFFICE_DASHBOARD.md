@@ -7,6 +7,12 @@ Scope: Aggregated institutional insights, operational visibility, and performanc
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Provide workspace administrators with a structured, fast-loading operational overview of:

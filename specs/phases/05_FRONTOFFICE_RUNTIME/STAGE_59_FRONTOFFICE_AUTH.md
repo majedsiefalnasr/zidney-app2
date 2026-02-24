@@ -6,6 +6,12 @@ Runtime: Backend API
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement secure, tenant-isolated authentication for Frontoffice (student users).

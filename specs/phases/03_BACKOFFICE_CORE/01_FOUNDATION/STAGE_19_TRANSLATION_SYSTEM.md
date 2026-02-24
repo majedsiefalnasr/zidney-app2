@@ -7,6 +7,12 @@ Database: Tenant DB only
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement a tenant-scoped entity-level translation system that:

@@ -6,6 +6,12 @@ Database: Tenant DB only
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement a staff-only organizational hierarchy tree.

@@ -7,6 +7,12 @@ Database: Tenant DB only
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement a reusable, deterministic workflow engine that manages lifecycle states for tenant content entities.

@@ -6,6 +6,12 @@ Scope: Affiliate promo codes for license-level sales
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement Affiliate system at MMC level.

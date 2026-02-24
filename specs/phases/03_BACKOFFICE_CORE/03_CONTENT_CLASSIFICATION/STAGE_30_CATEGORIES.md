@@ -6,6 +6,12 @@ Database: Tenant DB
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement Category as a structured academic classification dimension.

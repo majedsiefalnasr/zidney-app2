@@ -7,6 +7,12 @@ Database: Tenant DB only
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement a strict, tenant-isolated Role-Based Access Control (RBAC) system for Backoffice users.

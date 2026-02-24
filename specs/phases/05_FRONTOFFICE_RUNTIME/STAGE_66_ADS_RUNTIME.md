@@ -4,6 +4,12 @@ Phase: 05_FRONTOFFICE_RUNTIME
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement a deterministic, non-blocking advertisement runtime for Frontoffice.

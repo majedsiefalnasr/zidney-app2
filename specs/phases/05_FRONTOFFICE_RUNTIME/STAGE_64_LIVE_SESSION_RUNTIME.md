@@ -6,6 +6,12 @@ Scope: Live session visibility, access control, attendance tracking, and time en
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Define the runtime behavior of the Frontoffice Live Sessions module, including:

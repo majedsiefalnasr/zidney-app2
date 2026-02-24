@@ -6,6 +6,12 @@ Scope: Frontoffice library access, filtering, authorization, and secure file del
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Define the runtime behavior of the Frontoffice Library module, including:

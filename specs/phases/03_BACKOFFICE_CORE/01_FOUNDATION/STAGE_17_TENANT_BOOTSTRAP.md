@@ -7,6 +7,12 @@ Database: Tenant DB only
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## 1. Objective
 
 Establish a deterministic and license-aware runtime foundation for Backoffice.

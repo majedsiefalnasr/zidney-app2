@@ -6,6 +6,12 @@ Scope: Internal team management & strict role-based access control (RBAC)
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement a secure internal MMC member management system with deterministic RBAC.

@@ -6,6 +6,12 @@ Scope: Platform overview & aggregated metrics (master_db only)
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## 1. Objective
 
 Provide platform-level visibility over:

@@ -6,6 +6,12 @@ Scope: Backoffice staff lifecycle, assignment boundaries, and enforcement model
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement the Backoffice Staff Management system with:

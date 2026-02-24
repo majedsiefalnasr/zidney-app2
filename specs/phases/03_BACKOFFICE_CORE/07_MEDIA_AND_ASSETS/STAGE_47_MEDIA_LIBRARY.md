@@ -6,6 +6,12 @@ Status: Critical Infrastructure Component
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## 1. Objective
 
 Provide a centralized, secure, and workspace-isolated media management system that:

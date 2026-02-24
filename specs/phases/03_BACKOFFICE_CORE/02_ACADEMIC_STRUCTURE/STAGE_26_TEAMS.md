@@ -6,6 +6,12 @@ Database: Tenant DB only
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement Teams and Team Types as operational collaboration structures for staff.

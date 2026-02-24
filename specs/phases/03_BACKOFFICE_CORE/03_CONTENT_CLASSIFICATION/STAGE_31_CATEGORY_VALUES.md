@@ -6,6 +6,12 @@ Database: Tenant DB
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement Category Values as structured dimension entries belonging to a Category.

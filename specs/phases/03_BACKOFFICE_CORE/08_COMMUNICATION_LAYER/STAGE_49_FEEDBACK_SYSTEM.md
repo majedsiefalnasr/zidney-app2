@@ -7,6 +7,12 @@ Scope: Structured collection, storage, categorization, and analysis of user feed
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement a structured feedback system that:

@@ -6,6 +6,12 @@ Runtime: Backend + Redis + Worker
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement scheduled exam layer for:

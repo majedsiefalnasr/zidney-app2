@@ -6,6 +6,12 @@ Database: Tenant DB only
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement Groups as an optional academic clustering layer for students and staff.

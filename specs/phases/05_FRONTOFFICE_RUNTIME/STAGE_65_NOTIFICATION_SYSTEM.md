@@ -6,6 +6,12 @@ Scope: Real-time and asynchronous notification delivery, isolation, and enforcem
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Define a secure, tenant-isolated notification system for Zidney that supports:

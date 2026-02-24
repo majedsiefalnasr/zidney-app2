@@ -7,6 +7,12 @@ Scope: Secure, deterministic, and snapshot-based attempt initialization
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Define a deterministic, secure, and idempotent attempt start process that:

@@ -6,6 +6,53 @@ Scope: License state transitions, soft lock enforcement, archival process, resto
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+Risk Level: MEDIUM
+Last Updated: 2026-02-24T00:00:00Z
+
+Tasks Generated:
+
+- Total: 55 atomic, dependency-ordered tasks
+- Parallelizable: 18 tasks (33%) enabling concurrent delivery
+- Critical Path: ~20 milestones across 10 phases
+- Estimated Timeline (1 dev): 5 weeks (202 task-hours)
+- Estimated Timeline (4 devs optimized): 3 weeks (97 task-hours with parallelization)
+- MVP Scope (Week 1): T001–T024 (database + domain + API)
+
+Phase Breakdown:
+
+- Phase 1 (T001–T005): Database schema with 5 migrations
+- Phase 2 (T006–T015): License Service + validation helpers
+- Phase 3 (T016–T024): 9 REST API endpoints
+- Phase 4 (T025–T027): Middleware + auto-expiry enforcement
+- Phase 5 (T028–T033): Worker jobs + async monitoring
+- Phase 6 (T034–T036): Immutable audit logging + purge
+- Phase 7 (T037–T040): MMC UI components
+- Phase 8 (T041–T050): Comprehensive testing (95%+ coverage)
+- Phase 9 (T051–T052): API docs + deployment runbook
+- Phase 10 (T053–T055): 4-phase production deployment
+
+Deferred Scope:
+
+- Migration of existing licenses to new state machine (post-production)
+- Snapshot compression optimization (separate performance initiative)
+- Workspace rebuild from snapshot (requires separate feature stage)
+- Future webhook subscriptions (optional extension)
+
+Constitutional Compliance:
+
+- Tasks align with spec and plan (no drift detected)
+- All tasks reference exact file paths (testable)
+- Acceptance criteria explicit and measurable
+- Drift analysis gate pending (Step 5)
+
+Notes:
+Task breakdown complete. Drift analysis required before implementation authorization.
+
+---
+
 ## Objective
 
 Define and enforce deterministic lifecycle behavior for Licenses.
@@ -303,34 +350,3 @@ Data must never be:
 - Archived without recoverability
 
 Lifecycle must be deterministic, centralized, and middleware-enforced.
-
----
-
-## Stage Status
-
-Status: DRAFT
-Risk Level: MEDIUM
-Last Updated: 2026-02-24T00:00:00Z
-
-Scope Defined:
-
-- Four-state lifecycle model (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED)
-- Middleware-enforced soft lock at all auth gates
-- Snapshot creation before archival with schema tagging
-- Deterministic restoration with version compatibility validation
-- Immutable audit logging for all transitions
-- Permanent deletion workflow with explicit admin action
-- TTL enforcement (7→90 days before archival)
-
-Deferred Scope:
-
-- Migration of existing licenses to new state machine (post-production)
-- Snapshot compression optimization (separate performance initiative)
-- Workspace rebuild from snapshot (requires separate feature stage)
-
-Constitutional Compliance:
-
-- Specification drafted — clarification gate pending
-
-Notes:
-Specification complete. 1 non-blocking clarification identified (snapshot location determinism). Ready for Clarify step.

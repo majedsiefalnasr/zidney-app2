@@ -7,6 +7,12 @@ Status: Critical
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement Subject as the primary academic container within a workspace.
