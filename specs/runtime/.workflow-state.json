@@ -27,6 +27,18 @@
       "checklist_pass_rate": "100%",
       "unresolved_clarifications": 0,
       "timestamp": "2026-02-24T00:00:00Z"
+    },
+    {
+      "event": "clarifications_recorded",
+      "answers": {
+        "q1": "C",
+        "q2": "C",
+        "q3": "D",
+        "q4": "B",
+        "q5": "A"
+      },
+      "clarifications_resolved": true,
+      "timestamp": "2026-02-24T00:05:00Z"
     }
   ]
 }

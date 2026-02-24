@@ -780,3 +780,41 @@ This specification:
 - Aligns with ADR decisions on versioning and multi-tenancy
 
 No exceptions or modifications to Zidney architecture required.
+
+## Clarifications
+
+### Session 2026-02-24
+
+**Q1: Worker network-partition + lock TTL**
+
+Scenario: Worker acquires distributed lock (30s TTL), proceeds with provisioning, then loses connectivity to master_db after 45s (mid-provision).
+
+**A1:** C) Worker attempts reconnect with exponential backoff up to 60s; if still disconnected, roll back, release lock, mark `PROVISION_FAILED`, and re-enqueue for retry. This preserves safety while avoiding indefinite lock extension.
+
+**Q2: Seed data initialization scope**
+
+Should seed data be platform-generic, tenant-specific, or hybrid?
+
+**A2:** C) Hybrid: platform-generic baseline plus tenant-specific optional hooks (e.g., locale or tenant feature flags). Default seeds are platform-generic; hooks allow later tenant customization during provisioning.
+
+**Q3: Admin account initial credential handling**
+
+How should initial admin credentials be handled/delivered?
+
+**A3:** D) Worker creates an admin placeholder and MMC triggers an invite flow where the admin sets their password. Worker does not email or return raw credentials.
+
+**Q4: Database-creation failure rollback semantics**
+
+If DROP/CREATE fails mid-recovery, what is desired behavior?
+
+**A4:** B) Attempt automatic retries for DROP/create with exponential backoff (N attempts) then mark `PROVISION_FAILED`. Operator remediation is allowed after retries fail.
+
+**Q5: Concurrent provisioning requests for same workspace_slug**
+
+How should duplicate/concurrent requests be handled?
+
+**A5:** A) Deduplicate at enqueue time (by `license_id`/slug) — drop duplicates so a single job is processed; processing remains idempotent.
+
+---
+
+All clarifications recorded above have been resolved and incorporated into the specification. No further `[NEEDS CLARIFICATION]` markers remain.
