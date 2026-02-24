@@ -8,18 +8,22 @@ Scope: Controlled tenant provisioning orchestration (MMC → Provisioning Servic
 
 ## Stage Status
 
-Status: DRAFT
+Status: IN PROGRESS
 Risk Level: LOW
-Last Updated: 2026-02-24T00:00:00Z
+Last Updated: 2026-02-24T10:30:00Z
 
-Scope Defined:
+Scope Planned & Authorized:
 
-- Controlled tenant provisioning orchestration (MMC → Provisioning Service)
-- Job queue mediation via Redis with distributed locking
-- Worker validation, DB creation, baseline migrations, seed data, admin account, registry insertion
-- License state transitions (PENDING_PROVISION → ACTIVE / PROVISION_FAILED)
-- Failure recovery & retry logic (3 attempts, exponential backoff)
-- Structured observability with correlation_id tracking
+- Controlled tenant provisioning orchestration (MMC → Provisioning Service) ✅
+- API contract: POST /v1/mmc/licenses + GET /v1/mmc/licenses/{license_id} ✅
+- Job queue mediation via Redis with distributed locking ✅
+- Worker validation, DB creation, baseline migrations, seed data ✅
+- License state transitions (PENDING_PROVISION → ACTIVE / PROVISION_FAILED) ✅
+- Failure recovery & retry logic (3 attempts, exponential backoff) ✅
+- Structured observability with correlation_id tracking ✅
+- Idempotency guarantee (RFC 7231 Idempotency-Key + Worker lock) ✅
+- Rate limiting (100 req/min with 429 response) ✅
+- Comprehensive error handling (15+ error codes, DLQ) ✅
 
 Deferred Scope:
 
@@ -29,12 +33,18 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — ADR-0001 (isolation), ADR-0006 (time), ADR-0007 (versions), ADR-0008 (semver) all verified
-- Zero unresolved ambiguities
-- Ready for planning phase
+- ADR-0001 (Database-per-tenant isolation): ✅ VERIFIED
+- ADR-0005 (Snapshot immutability): ✅ VERIFIED
+- ADR-0006 (Server-authoritative time): ✅ VERIFIED
+- ADR-0007 (Version enforcement): ✅ VERIFIED
+- ADR-0008 (Versioned APIs): ✅ VERIFIED (POST /v1/mmc/licenses)
+- Architecture Checker audit: ✅ PASS (12/12 criteria)
+- API Designer audit (post-remediation): ✅ PASS (12/12 criteria)
+
+Implementation Tasks: 82 atomic tasks (28 parallelizable)
 
 Notes:
-Specification complete and validated. 22/22 checklist items PASS. Proceeding to planning.
+Specification, planning, and drift analysis complete. API contract remediated (10-point fix). Both guardian audits PASS. Implementation authorized. Ready for Step 6 (Implementation).
 
 ---
 
