@@ -29,7 +29,7 @@ export async function mmcTokenValidator(
 
   if (!authHeader) {
     const error = getErrorDetails(ProvisioningErrorCode.UNAUTHORIZED_SERVICE)
-    c.status(error.httpStatus)
+    c.status(error.httpStatus as any)
     return c.json(
       createErrorResponse(
         ProvisioningErrorCode.UNAUTHORIZED_SERVICE,
@@ -42,7 +42,7 @@ export async function mmcTokenValidator(
   const parts = authHeader.split(' ')
   if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
     const error = getErrorDetails(ProvisioningErrorCode.UNAUTHORIZED_SERVICE)
-    c.status(error.httpStatus)
+      c.status(error.httpStatus as any)
     return c.json(
       createErrorResponse(
         ProvisioningErrorCode.UNAUTHORIZED_SERVICE,
@@ -57,7 +57,7 @@ export async function mmcTokenValidator(
   // Constant-time comparison to prevent timing attacks
   if (!constantTimeCompare(token, expectedToken)) {
     const error = getErrorDetails(ProvisioningErrorCode.UNAUTHORIZED_SERVICE)
-    c.status(error.httpStatus)
+    c.status(error.httpStatus as any)
     return c.json(
       createErrorResponse(
         ProvisioningErrorCode.UNAUTHORIZED_SERVICE,

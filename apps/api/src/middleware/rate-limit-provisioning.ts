@@ -95,7 +95,7 @@ export function rateLimitProvisioningMiddleware(
       if (current > config.maxRequests) {
         const error = getErrorDetails(ProvisioningErrorCode.RATE_LIMIT_EXCEEDED)
 
-        c.status(error.httpStatus)
+        c.status(error.httpStatus as any)
         c.header('Retry-After', String(Math.ceil(ttl)))
         c.header('X-RateLimit-Limit', String(config.maxRequests))
         c.header('X-RateLimit-Remaining', '0')
@@ -189,7 +189,7 @@ export function inMemoryRateLimitMiddleware(
 
       const secondsRemaining = Math.ceil((expiresAt - now) / 1000)
 
-      c.status(error.httpStatus)
+      c.status(error.httpStatus as any)
       c.header('Retry-After', String(secondsRemaining))
       c.header('X-RateLimit-Limit', String(config.maxRequests))
       c.header('X-RateLimit-Remaining', '0')
