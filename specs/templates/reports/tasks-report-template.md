@@ -8,47 +8,63 @@
 
 ## Summary
 
-[Summary of task generation.]
+[Brief summary of task generation outcome.]
+
+---
+
+## Inputs Reviewed
+
+- `specs/runtime/<STAGE_DIR_NAME>/spec.md`
+- `specs/runtime/<STAGE_DIR_NAME>/plan.md`
+- `specs/runtime/<STAGE_DIR_NAME>/tasks.md`
 
 ---
 
 ## Task Breakdown
 
-| Category       | Count | Notes |
-| -------------- | ----- | ----- |
-| Infrastructure | ...   | ...   |
-| API            | ...   | ...   |
-| Worker         | ...   | ...   |
-| Frontend       | ...   | ...   |
-| Observability  | ...   | ...   |
-| Testing        | ...   | ...   |
-| **Total**      | ...   |       |
+| Category | Count | Notes |
+| --- | --- | --- |
+| Infrastructure | ... | ... |
+| API | ... | ... |
+| Worker | ... | ... |
+| Frontend | ... | ... |
+| Observability | ... | ... |
+| Testing | ... | ... |
+| **Total** | ... | ... |
 
 ---
 
 ## Transactional Tasks
 
-[List all write-path tasks that require transactions.]
+- [List write-path tasks that require transactions]
+- [...]
 
 ---
 
 ## Idempotency Tasks
 
-[List all tasks that enforce idempotency.]
+- [List tasks that enforce idempotency]
+- [...]
 
 ---
 
 ## Constitutional Compliance
 
-| Check                             | Status  |
-| --------------------------------- | ------- |
-| All writes have transaction tasks | ✅ / ❌ |
-| Idempotency tasks defined         | ✅ / ❌ |
-| No layer boundary violations      | ✅ / ❌ |
-| No unrelated file modifications   | ✅ / ❌ |
-| Migration tasks included          | ✅ / ❌ |
+| Check | Status | Notes |
+| --- | --- | --- |
+| All write paths include transaction tasks | ✅ / ❌ | ... |
+| Idempotency tasks are defined where required | ✅ / ❌ | ... |
+| Layer boundary rules are respected | ✅ / ❌ | ... |
+| No unrelated file modifications planned | ✅ / ❌ | ... |
+| Migration tasks included when required | ✅ / ❌ | ... |
 
 **Overall:** COMPLIANT / BLOCKED
+
+---
+
+## Open Risks
+
+- [List risks, or `None`]
 
 ---
 

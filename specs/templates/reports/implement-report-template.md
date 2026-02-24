@@ -8,60 +8,64 @@
 
 ## Summary
 
-[Summary of implementation output.]
+[Brief summary of implementation outcome.]
+
+---
+
+## Inputs Reviewed
+
+- `specs/runtime/<STAGE_DIR_NAME>/tasks.md`
+- `specs/runtime/<STAGE_DIR_NAME>/plan.md`
+- `specs/runtime/<STAGE_DIR_NAME>/audits/VALIDATION_REPORT.md`
 
 ---
 
 ## Files Modified
 
-| File Path | Change Type      | Notes |
-| --------- | ---------------- | ----- |
-| ...       | Created/Modified | ...   |
+| File Path | Change Type | Notes |
+| --- | --- | --- |
+| ... | Created / Modified | ... |
 
 ---
 
-## Tasks Completed
+## Tasks Completion
 
-| Task ID | Description | Layer | Status  |
-| ------- | ----------- | ----- | ------- |
-| ...     | ...         | ...   | ✅ / ❌ |
+| Task ID | Description | Layer | Status |
+| --- | --- | --- | --- |
+| ... | ... | ... | ✅ / ❌ / DEFERRED |
+
+**Completed:** <TASKS_COMPLETED> / <TASKS_TOTAL>
 
 ---
 
-## Tests Added
+## Tests Added or Updated
 
-| Test File | Type       | Coverage |
-| --------- | ---------- | -------- |
-| ...       | Unit/Integ | ...      |
+| Test File | Type | Scope |
+| --- | --- | --- |
+| ... | Unit / Integration / Snapshot | ... |
 
 ---
 
 ## Constitutional Compliance
 
-| Check                         | Status  |
-| ----------------------------- | ------- |
-| Tenant resolver used only     | ✅ / ❌ |
-| All writes transactional      | ✅ / ❌ |
-| Idempotency enforced          | ✅ / ❌ |
-| Structured logging present    | ✅ / ❌ |
-| No console.log                | ✅ / ❌ |
-| No stack traces to client     | ✅ / ❌ |
-| No business logic in frontend | ✅ / ❌ |
-| Error contract compliant      | ✅ / ❌ |
+| Check | Status | Notes |
+| --- | --- | --- |
+| Tenant resolver context used for tenant DB access | ✅ / ❌ | ... |
+| All write operations are transactional | ✅ / ❌ | ... |
+| Idempotency is enforced where required | ✅ / ❌ | ... |
+| Structured logging is present | ✅ / ❌ | ... |
+| `console.log` is absent | ✅ / ❌ | ... |
+| No stack traces exposed to clients | ✅ / ❌ | ... |
+| UI layer has no business logic | ✅ / ❌ | ... |
+| API error contract is preserved | ✅ / ❌ | ... |
 
 **Overall:** COMPLIANT / BLOCKED
 
 ---
 
-## Post-Implementation Checklist
+## Open Risks
 
-- [ ] All routes wrapped in required middleware
-- [ ] All writes transactional (per plan.md)
-- [ ] Idempotency tests included (per plan.md)
-- [ ] Version checks active (if applicable)
-- [ ] Structured logs present
-- [ ] No console.log
-- [ ] No TODO left
+- [List risks, deferred tasks, or `None`]
 
 ---
 

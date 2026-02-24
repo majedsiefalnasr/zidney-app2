@@ -8,40 +8,53 @@
 
 ## Summary
 
-[Summary of clarification session outcome.]
+[Brief summary of clarification session results.]
+
+---
+
+## Inputs Reviewed
+
+- `specs/runtime/<STAGE_DIR_NAME>/spec.md` (including `## Clarifications`)
 
 ---
 
 ## Clarifications Resolved
 
-| #   | Question | Resolution |
-| --- | -------- | ---------- |
-| 1   | ...      | ...        |
+| # | Question | Resolution | Impact |
+| --- | --- | --- | --- |
+| 1 | ... | ... | ... |
 
 ---
 
 ## Open Items
 
-[Any unresolved items, or state "None".]
+- [List unresolved items, or `None`]
 
 ---
 
-## Impact on Spec
+## Spec Updates Applied
 
-[What changed in the spec as a result of clarifications.]
+- [Describe concrete updates made in `spec.md`]
 
 ---
 
 ## Constitutional Compliance
 
-| Check                          | Status  |
-| ------------------------------ | ------- |
-| All ambiguities resolved       | ✅ / ❌ |
-| Transaction strategy confirmed | ✅ / ❌ |
-| Idempotency strategy confirmed | ✅ / ❌ |
-| Isolation boundaries confirmed | ✅ / ❌ |
+| Check | Status | Notes |
+| --- | --- | --- |
+| All material ambiguities resolved | ✅ / ❌ | ... |
+| Transaction strategy confirmed | ✅ / ❌ | ... |
+| Idempotency strategy confirmed | ✅ / ❌ | ... |
+| Isolation boundaries confirmed | ✅ / ❌ | ... |
+| Version and license constraints confirmed | ✅ / ❌ | ... |
 
 **Overall:** COMPLIANT / BLOCKED
+
+---
+
+## Open Risks
+
+- [List risks, or `None`]
 
 ---
 

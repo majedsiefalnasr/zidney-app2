@@ -8,42 +8,57 @@
 
 ## Summary
 
-[2–4 sentence summary of what was specified.]
+[Brief summary of the specification outcome.]
+
+---
+
+## Inputs Reviewed
+
+- `specs/runtime/<STAGE_DIR_NAME>/spec.md`
+- `specs/runtime/<STAGE_DIR_NAME>/checklists/requirements.md`
 
 ---
 
 ## Key Decisions
 
-| #   | Decision | Rationale |
-| --- | -------- | --------- |
-| 1   | ...      | ...       |
+| # | Decision | Rationale |
+| --- | --- | --- |
+| 1 | ... | ... |
 
 ---
 
-## Functional Requirements
+## Functional Requirements Captured
 
-[List core requirements captured.]
+- [Requirement 1]
+- [Requirement 2]
+- [Requirement 3]
 
 ---
 
 ## Clarifications Required
 
-[List any open [NEEDS CLARIFICATION] markers, or state "None".]
+- [List unresolved `[NEEDS CLARIFICATION]` items, or `None`]
 
 ---
 
 ## Constitutional Compliance
 
-| Check                              | Status  |
-| ---------------------------------- | ------- |
-| No cross-tenant access             | ✅ / ❌ |
-| License middleware declared        | ✅ / ❌ |
-| Snapshot integrity preserved       | ✅ / ❌ |
-| Idempotency strategy defined       | ✅ / ❌ |
-| Transaction boundaries defined     | ✅ / ❌ |
-| Server-authoritative time declared | ✅ / ❌ |
+| Check | Status | Notes |
+| --- | --- | --- |
+| No cross-tenant access introduced | ✅ / ❌ | ... |
+| License middleware requirement captured | ✅ / ❌ | ... |
+| Snapshot integrity requirement captured | ✅ / ❌ | ... |
+| Idempotency strategy defined | ✅ / ❌ | ... |
+| Transaction boundaries identified | ✅ / ❌ | ... |
+| Server-authoritative time enforced | ✅ / ❌ | ... |
 
 **Overall:** COMPLIANT / BLOCKED
+
+---
+
+## Open Risks
+
+- [List risks, or `None`]
 
 ---
 
