@@ -6,6 +6,7 @@ import {
 } from '@zidney/domain-core/license'
 import { createLogger } from '@zidney/logger'
 import { Context, Hono } from 'hono'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 import { toLicenseError } from '../responses/license-error-handler'
 
 const logger = createLogger('licenses-lifecycle')
@@ -120,9 +121,10 @@ licensesLifecycleRouter.post(
           },
           'Soft-lock transition failed'
         )
-        return ctx.json(toLicenseError(result.error_code || 'INTERNAL_ERROR'), {
-          status: statusCode,
-        })
+        return ctx.json(
+          toLicenseError(result.error_code || 'INTERNAL_ERROR'),
+          statusCode as ContentfulStatusCode
+        )
       }
 
       logger.info(
@@ -240,9 +242,10 @@ licensesLifecycleRouter.post(
           },
           'Renew transition failed'
         )
-        return ctx.json(toLicenseError(result.error_code || 'INTERNAL_ERROR'), {
-          status: statusCode,
-        })
+        return ctx.json(
+          toLicenseError(result.error_code || 'INTERNAL_ERROR'),
+          statusCode as ContentfulStatusCode
+        )
       }
 
       logger.info(
@@ -432,9 +435,10 @@ licensesLifecycleRouter.post(
           },
           'Restore job enqueue failed'
         )
-        return ctx.json(toLicenseError(result.error_code || 'INTERNAL_ERROR'), {
-          status: statusCode,
-        })
+        return ctx.json(
+          toLicenseError(result.error_code || 'INTERNAL_ERROR'),
+          statusCode as ContentfulStatusCode
+        )
       }
 
       logger.info(
@@ -442,7 +446,7 @@ licensesLifecycleRouter.post(
           correlation_id: correlationId,
           action: 'restore_job_queued',
           license_id: licenseId,
-          restore_job_id: result.license?.restore_job_id,
+          restore_job_id: result.restore_job_id,
         },
         'Restore job queued successfully'
       )
@@ -451,8 +455,9 @@ licensesLifecycleRouter.post(
         {
           success: true,
           data: {
-            license: result.license,
-            restore_job_id: result.license?.restore_job_id,
+            restore_job_id: result.restore_job_id,
+            restore_timestamp: result.restore_timestamp,
+            eta_seconds: result.eta_seconds,
             estimated_duration_seconds: 300,
             message:
               'Restore job queued - workspace will be restored from snapshot',
@@ -666,9 +671,10 @@ licensesLifecycleRouter.post(
           },
           'Delete confirmation failed'
         )
-        return ctx.json(toLicenseError(result.error_code || 'INTERNAL_ERROR'), {
-          status: statusCode,
-        })
+        return ctx.json(
+          toLicenseError(result.error_code || 'INTERNAL_ERROR'),
+          statusCode as ContentfulStatusCode
+        )
       }
 
       logger.info(
@@ -676,7 +682,7 @@ licensesLifecycleRouter.post(
           correlation_id: correlationId,
           action: 'delete_job_queued',
           license_id: licenseId,
-          delete_job_id: result.license?.delete_job_id,
+          delete_job_id: result.delete_job_id,
         },
         'Delete job queued successfully'
       )
@@ -685,8 +691,8 @@ licensesLifecycleRouter.post(
         {
           success: true,
           data: {
-            license: result.license,
-            delete_job_id: result.license?.delete_job_id,
+            delete_job_id: result.delete_job_id,
+            delete_timestamp: result.delete_timestamp,
             message:
               'Deletion of workspace queued - data will be purged after grace period',
           },
