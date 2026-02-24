@@ -83,12 +83,12 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
       })
 
       const error = getErrorDetails(ProvisioningErrorCode.INVALID_PRODUCT_ID)
+      c.status(error.httpStatus)
       return c.json(
         createErrorResponse(
           ProvisioningErrorCode.INVALID_PRODUCT_ID,
           error.message
-        ),
-        { status: error.httpStatus }
+        )
       )
     }
 
@@ -168,12 +168,12 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
       await deleteLicenseRecord(licenseId)
 
       const error = getErrorDetails(ProvisioningErrorCode.JOB_ENQUEUE_FAILED)
+      c.status(error.httpStatus)
       return c.json(
         createErrorResponse(
           ProvisioningErrorCode.JOB_ENQUEUE_FAILED,
           error.message
-        ),
-        { status: error.httpStatus }
+        )
       )
     }
 
@@ -206,7 +206,8 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
 
     c.header('X-Correlation-ID', correlationId)
 
-    return c.json(response, { status: 200 })
+    c.status(201)
+    return c.json(response)
   } catch (error) {
     logger?.logError(
       'License creation failed',
@@ -214,12 +215,12 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
     )
 
     const generalError = getErrorDetails(ProvisioningErrorCode.PROVISION_FAILED)
+    c.status(generalError.httpStatus)
     return c.json(
       createErrorResponse(
         ProvisioningErrorCode.PROVISION_FAILED,
         generalError.message
-      ),
-      { status: generalError.httpStatus }
+      )
     )
   }
 }

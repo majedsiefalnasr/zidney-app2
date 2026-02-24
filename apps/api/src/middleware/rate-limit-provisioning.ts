@@ -67,7 +67,7 @@ export function rateLimitProvisioningMiddleware(
   redis: Redis,
   config: RateLimitConfig = DEFAULT_RATE_LIMIT_CONFIG
 ) {
-  return async (c: Context, next: Next): Promise<void> => {
+  return async (c: Context, next: Next): Promise<Response | void> => {
     const clientIP = getClientIP(c)
     const key = `${config.keyPrefix}${clientIP}`
 
@@ -113,8 +113,7 @@ export function rateLimitProvisioningMiddleware(
               window_seconds: config.windowSeconds,
               retry_after: Math.ceil(ttl),
             }
-          ),
-          { status: error.httpStatus }
+          )
         )
       }
 
@@ -157,7 +156,7 @@ export function inMemoryRateLimitMiddleware(
     }
   }, config.windowSeconds * 1000)
 
-  return async (c: Context, next: Next): Promise<void> => {
+  return async (c: Context, next: Next): Promise<Response | void> => {
     const clientIP = getClientIP(c)
     const key = `${config.keyPrefix}${clientIP}`
     const now = Date.now()
@@ -203,8 +202,7 @@ export function inMemoryRateLimitMiddleware(
         createErrorResponse(
           ProvisioningErrorCode.RATE_LIMIT_EXCEEDED,
           `Rate limit exceeded: ${config.maxRequests} requests per ${config.windowSeconds} seconds`
-        ),
-        { status: error.httpStatus }
+        )
       )
     }
 

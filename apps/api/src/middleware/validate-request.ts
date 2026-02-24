@@ -15,7 +15,7 @@ import {
 } from '@zidney/types/errors/provisioning-errors'
 import { Context, Next } from 'hono'
 import { z } from 'zod'
-import { createErrorResponse } from './license-response'
+import { createErrorResponse } from '../routes/licenses/license-response'
 
 /**
  * Validator function type
@@ -39,9 +39,9 @@ export interface ValidationOptions {
  * Create validation middleware for Zod schema
  */
 export function validateRequest<T>(
-  schema: z.ZodSchema<T>,
+  schema: z.ZodType<T>,
   options: ValidationOptions = {}
-) {
+): (c: Context, next: Next) => Promise<Response | undefined> {
   return async (c: Context, next: Next) => {
     try {
       // Parse request body
@@ -51,12 +51,12 @@ export function validateRequest<T>(
         try {
           data = await c.req.json()
         } catch (error) {
+          c.status(400)
           return c.json(
             createErrorResponse(
               'INVALID_REQUEST_BODY',
               'Request body is not valid JSON'
-            ),
-            { status: 400 }
+            )
           )
         }
       } else {
@@ -73,23 +73,24 @@ export function validateRequest<T>(
           errors[field] = issue.message
         }
 
+        c.status(400)
         return c.json(
           createErrorResponse(
             'VALIDATION_ERROR',
             'Request validation failed',
             errors
-          ),
-          { status: 400 }
+          )
         )
       }
 
       // Attach validated data to context
       c.set('validatedData', result.data)
+      c.set('validatedBody', result.data)
       await next()
     } catch (error) {
+      c.status(400)
       return c.json(
-        createErrorResponse('VALIDATION_ERROR', 'Request validation failed'),
-        { status: 400 }
+        createErrorResponse('VALIDATION_ERROR', 'Request validation failed')
       )
     }
   }
@@ -101,7 +102,7 @@ export function validateRequest<T>(
 export function createCustomValidator<T>(
   validator: ValidatorFn<T>,
   fieldMapping?: Record<string, ProvisioningErrorCode>
-) {
+): (c: Context, next: Next) => Promise<Response | undefined> {
   return async (c: Context, next: Next) => {
     try {
       const data = await c.req.json()
@@ -114,6 +115,7 @@ export function createCustomValidator<T>(
           ProvisioningErrorCode.INVALID_WORKSPACE_SLUG
         const errorDetails = getErrorDetails(errorCode)
 
+        c.status(errorDetails.httpStatus)
         return c.json(
           createErrorResponse(
             errorCode,
@@ -125,12 +127,12 @@ export function createCustomValidator<T>(
               },
               {} as Record<string, string>
             )
-          ),
-          { status: errorDetails.httpStatus }
+          )
         )
       }
 
       c.set('validatedData', result.data)
+      c.set('validatedBody', result.data)
       await next()
     } catch (error) {
       return c.json(

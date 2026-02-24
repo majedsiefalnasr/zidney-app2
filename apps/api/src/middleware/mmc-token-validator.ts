@@ -21,7 +21,10 @@ import { createErrorResponse } from '../routes/licenses/license-response'
 /**
  * MMC Token Validator Middleware
  */
-export async function mmcTokenValidator(c: Context, next: Next): Promise<void> {
+export async function mmcTokenValidator(
+  c: Context,
+  next: Next
+): Promise<Response | void> {
   const authHeader = c.req.header('authorization')
 
   if (!authHeader) {
@@ -31,8 +34,7 @@ export async function mmcTokenValidator(c: Context, next: Next): Promise<void> {
       createErrorResponse(
         ProvisioningErrorCode.UNAUTHORIZED_SERVICE,
         'Missing Authorization header'
-      ),
-      { status: error.httpStatus }
+      )
     )
   }
 
@@ -45,8 +47,7 @@ export async function mmcTokenValidator(c: Context, next: Next): Promise<void> {
       createErrorResponse(
         ProvisioningErrorCode.UNAUTHORIZED_SERVICE,
         'Invalid Authorization header format; expected: Bearer <token>'
-      ),
-      { status: error.httpStatus }
+      )
     )
   }
 
@@ -61,8 +62,7 @@ export async function mmcTokenValidator(c: Context, next: Next): Promise<void> {
       createErrorResponse(
         ProvisioningErrorCode.UNAUTHORIZED_SERVICE,
         'Invalid or expired service token'
-      ),
-      { status: error.httpStatus }
+      )
     )
   }
 

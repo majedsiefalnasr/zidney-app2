@@ -111,40 +111,34 @@ export function createLicenseRoutes(
   router.get('/health', async (c) => {
     try {
       // Check Redis connectivity
-      const redisConnected = reddit.ping().catch(() => false)
+      const redisConnected = redis.ping().catch(() => false)
 
       // Get queue stats
       const queueStats = await enqueueService.getQueueStats()
 
       const isHealthy = (await redisConnected) === 'PONG'
 
-      return c.json(
-        {
-          status: isHealthy ? 'healthy' : 'degraded',
-          timestamp: new Date().toISOString(),
-          services: {
-            redis: isHealthy ? 'up' : 'down',
-            queue: queueStats,
-          },
+      c.status(isHealthy ? 200 : 503)
+      return c.json({
+        status: isHealthy ? 'healthy' : 'degraded',
+        timestamp: new Date().toISOString(),
+        services: {
+          redis: isHealthy ? 'up' : 'down',
+          queue: queueStats,
         },
-        {
-          status: isHealthy ? 200 : 503,
-        }
-      )
+      })
     } catch (error) {
       logger?.logError(
         'Health check failed',
         error instanceof Error ? error : new Error(String(error))
       )
 
-      return c.json(
-        {
-          status: 'unhealthy',
-          timestamp: new Date().toISOString(),
-          error: error instanceof Error ? error.message : String(error),
-        },
-        { status: 503 }
-      )
+      c.status(503)
+      return c.json({
+        status: 'unhealthy',
+        timestamp: new Date().toISOString(),
+        error: error instanceof Error ? error.message : String(error),
+      })
     }
   })
 

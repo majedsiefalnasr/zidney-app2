@@ -36,12 +36,12 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
 
   if (!licenseId) {
     const error = getErrorDetails(ProvisioningErrorCode.LICENSE_NOT_FOUND)
+    c.status(error.httpStatus)
     return c.json(
       createErrorResponse(
         ProvisioningErrorCode.LICENSE_NOT_FOUND,
         'License ID is required'
-      ),
-      { status: error.httpStatus }
+      )
     )
   }
 
@@ -59,12 +59,12 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
       })
 
       const error = getErrorDetails(ProvisioningErrorCode.LICENSE_NOT_FOUND)
+      c.status(error.httpStatus)
       return c.json(
         createErrorResponse(
           ProvisioningErrorCode.LICENSE_NOT_FOUND,
           `License ${licenseId} not found`
-        ),
-        { status: error.httpStatus }
+        )
       )
     }
 
@@ -100,7 +100,8 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
       c.header('Retry-After', '30')
     }
 
-    return c.json(response, { status: httpStatus })
+    c.status(httpStatus)
+    return c.json(response)
   } catch (error) {
     logger?.logError(
       'License status query failed',
@@ -108,12 +109,12 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
     )
 
     const generalError = getErrorDetails(ProvisioningErrorCode.PROVISION_FAILED)
+    c.status(generalError.httpStatus)
     return c.json(
       createErrorResponse(
         ProvisioningErrorCode.PROVISION_FAILED,
         'Failed to retrieve license status'
-      ),
-      { status: generalError.httpStatus }
+      )
     )
   }
 }
