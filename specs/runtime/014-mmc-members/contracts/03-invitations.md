@@ -31,10 +31,10 @@ Content-Type: application/json
 
 ### Request Validation
 
-| Field | Type | Constraints |
-| --- | --- | --- |
-| email | string | Valid email format; must not exist in mmc_members |
-| role_id | UUID | Must exist in roles table and status='ACTIVE' |
+| Field   | Type   | Constraints                                       |
+| ------- | ------ | ------------------------------------------------- |
+| email   | string | Valid email format; must not exist in mmc_members |
+| role_id | UUID   | Must exist in roles table and status='ACTIVE'     |
 
 ### Response: 201 Created
 
@@ -81,6 +81,7 @@ Zidney Admin Team
 ### Error Responses
 
 #### 400 Bad Request
+
 **Validation Error**
 
 ```json
@@ -95,6 +96,7 @@ Zidney Admin Team
 ```
 
 #### 409 Conflict
+
 **Email already an MMC member or pending invite**
 
 ```json
@@ -159,10 +161,10 @@ Content-Type: application/json
 
 ### Request Validation
 
-| Field | Type | Constraints |
-| --- | --- | --- |
-| password | string | 8+ chars; upper, lower, digit, special |
-| confirmation_password | string | Must match password exactly |
+| Field                 | Type   | Constraints                            |
+| --------------------- | ------ | -------------------------------------- |
+| password              | string | 8+ chars; upper, lower, digit, special |
+| confirmation_password | string | Must match password exactly            |
 
 ### Response: 201 Created
 
@@ -186,12 +188,14 @@ Content-Type: application/json
 ### Login Instructions (in response message or separate endpoint)
 
 User can then login at:
+
 - Endpoint: `POST /mmc/auth/login`
 - Credentials: `username: user_a7f8c2d1`, `password: MyNewPassword123!`
 
 ### Error Responses
 
 #### 400 Bad Request
+
 **Password validation failed**
 
 ```json
@@ -219,6 +223,7 @@ Or password mismatch:
 ```
 
 #### 401 Unauthorized
+
 **Token invalid, expired, or already used**
 
 ```json
@@ -233,6 +238,7 @@ Or password mismatch:
 ```
 
 #### 409 Conflict
+
 **Email already has an account**
 
 ```json
@@ -284,11 +290,11 @@ X-Correlation-ID: {correlation_id}
 
 ### Query Parameters
 
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| status | string | PENDING | Filter by status (PENDING, ACCEPTED, EXPIRED) |
-| limit | integer | 50 | Results per page |
-| offset | integer | 0 | Pagination offset |
+| Parameter | Type    | Default | Description                                   |
+| --------- | ------- | ------- | --------------------------------------------- |
+| status    | string  | PENDING | Filter by status (PENDING, ACCEPTED, EXPIRED) |
+| limit     | integer | 50      | Results per page                              |
+| offset    | integer | 0       | Pagination offset                             |
 
 ### Response: 200 OK
 
@@ -411,6 +417,7 @@ X-Correlation-ID: {correlation_id}
 ```
 
 #### 409 Conflict
+
 **Cannot resend already-accepted invitation**
 
 ```json
@@ -488,4 +495,3 @@ COMMIT
 - Invitation creation: 20 invitations per hour per user
 - Resend: Same rate limit as creation
 - Acceptance: No rate limit (one-time token prevents spam)
-

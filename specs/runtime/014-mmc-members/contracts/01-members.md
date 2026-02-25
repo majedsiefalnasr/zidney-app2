@@ -36,15 +36,15 @@ Content-Type: application/json
 
 ### Request Validation
 
-| Field | Type | Constraints | Example |
-| --- | --- | --- | --- |
-| username | string | 3-50 chars; alphanumeric + underscore; immutable | `john.doe` |
-| email | string | Valid email; unique in mmc_members | `john@example.com` |
-| password | string | 8+ chars; upper, lower, digit, special | `SecurePass123!` |
-| role_id | UUID | Must exist in roles table; status must be ACTIVE | `550e8400...` |
-| team_id | UUID or null | Optional; no FK check | `team-uuid` |
-| group_id | UUID or null | Optional; no FK check | `group-uuid` |
-| department_id | UUID or null | Optional; no FK check | `dept-uuid` |
+| Field         | Type         | Constraints                                      | Example            |
+| ------------- | ------------ | ------------------------------------------------ | ------------------ |
+| username      | string       | 3-50 chars; alphanumeric + underscore; immutable | `john.doe`         |
+| email         | string       | Valid email; unique in mmc_members               | `john@example.com` |
+| password      | string       | 8+ chars; upper, lower, digit, special           | `SecurePass123!`   |
+| role_id       | UUID         | Must exist in roles table; status must be ACTIVE | `550e8400...`      |
+| team_id       | UUID or null | Optional; no FK check                            | `team-uuid`        |
+| group_id      | UUID or null | Optional; no FK check                            | `group-uuid`       |
+| department_id | UUID or null | Optional; no FK check                            | `dept-uuid`        |
 
 ### Response: 201 Created
 
@@ -72,6 +72,7 @@ Content-Type: application/json
 ### Error Responses
 
 #### 400 Bad Request
+
 **Validation Error** — Missing field, invalid format, weak password
 
 ```json
@@ -86,6 +87,7 @@ Content-Type: application/json
 ```
 
 #### 409 Conflict
+
 **Duplicate** — Username or email already exists
 
 ```json
@@ -100,6 +102,7 @@ Content-Type: application/json
 ```
 
 #### 403 Forbidden
+
 **Permission Denied**
 
 ```json
@@ -114,6 +117,7 @@ Content-Type: application/json
 ```
 
 #### 401 Unauthorized
+
 **Invalid Token**
 
 ```json
@@ -128,6 +132,7 @@ Content-Type: application/json
 ```
 
 #### 500 Internal Server Error
+
 **System Failure** — DB connection, bcrypt error, etc.
 
 ```json
@@ -210,6 +215,7 @@ X-Correlation-ID: {correlation_id}
 ### Error Responses
 
 #### 404 Not Found
+
 **Member not found**
 
 ```json
@@ -252,12 +258,12 @@ Content-Type: application/json
 
 ### Request Validation
 
-| Field | Type | Constraints |
-| --- | --- | --- |
-| email | string | Valid email format (if provided); unique if changed |
-| team_id | UUID or null | Optional |
-| group_id | UUID or null | Optional |
-| department_id | UUID or null | Optional |
+| Field         | Type         | Constraints                                         |
+| ------------- | ------------ | --------------------------------------------------- |
+| email         | string       | Valid email format (if provided); unique if changed |
+| team_id       | UUID or null | Optional                                            |
+| group_id      | UUID or null | Optional                                            |
+| department_id | UUID or null | Optional                                            |
 
 **Note:** Role changes handled separately via permission batch update.
 
@@ -295,6 +301,7 @@ Content-Type: application/json
 ```
 
 #### 409 Conflict
+
 **Email already used**
 
 ```json
@@ -369,6 +376,7 @@ X-Correlation-ID: {correlation_id}
 ```
 
 #### 409 Conflict
+
 **Member already disabled**
 
 ```json
@@ -418,11 +426,11 @@ Authorization: Bearer {jwt_token}
 
 ### Query Parameters
 
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| limit | integer | 50 | Max results per page |
-| offset | integer | 0 | Pagination offset |
-| status | string | all | Filter by status (ACTIVE, DISABLED, or both) |
+| Parameter | Type    | Default | Description                                  |
+| --------- | ------- | ------- | -------------------------------------------- |
+| limit     | integer | 50      | Max results per page                         |
+| offset    | integer | 0       | Pagination offset                            |
+| status    | string  | all     | Filter by status (ACTIVE, DISABLED, or both) |
 
 ### Response: 200 OK
 
@@ -447,4 +455,3 @@ Authorization: Bearer {jwt_token}
   "error": null
 }
 ```
-
