@@ -595,3 +595,86 @@ This feature does NOT include:
 - [PROJECT_CONTEXT_PRIMER.md](../../PROJECT_CONTEXT_PRIMER.md) - Architectural context
 - [ADR-0006: Server Time Authoritative](../../architecture/ADR-0006-server-time-authoritative.md)
 - [ADR-0008: Semantic Versioning](../../architecture/ADR-0008-semantic-versioning.md)
+
+---
+
+## Clarifications
+
+### Session 2026-02-25
+
+**Scope**: Edge case design decisions for concurrency, financial precision, and audit completeness.
+
+#### Q1: Per-Client Limit Under Concurrent Purchases
+
+**Q**: When a client reaches their per-client usage limit (e.g., limit=2, already used 2x), and they attempt two simultaneous purchases with the same affiliate code, what should happen?
+
+**Decision: Option C (Reject Second After First Commits)**
+
+**Rationale**: Transactional integrity and safety-first principle. Each transaction acquires row lock, checks limit, and either commits or rejects. The second transaction sees the incremented counter post-commit from the first transaction and rejects with `AFFILIATE_USAGE_LIMIT_PER_CLIENT_EXCEEDED`. This is deterministic, auditable, and safe.
+
+**Spec Update**: Per-client limit validation occurs within the transaction after acquiring `SELECT ... FOR UPDATE` lock. If limit exceeded, transaction rolls back and client receives HTTP 429 (Too Many Requests) or 400 (Bad Request with AFFILIATE_LIMIT_EXCEEDED code).
+
+---
+
+#### Q2: Fractional Cent Handling in Financial Calculations
+
+**Q**: When calculating discount_amount or commission_amount, what rounding behavior is required?
+
+- Example: base_amount=100.00, discount_percentage=33.33 → discount_amount = 33.33?
+
+**Decision: NUMERIC(12,2) with ROUND(amount, 2) deterministic rounding**
+
+**Rationale**: Zidney requires deterministic financial calculations. NUMERIC(12,2) natively supports 2-decimal precision. All calculations use: `ROUND(base_amount * percentage / 100, 2)`. This produces consistent, reproducible results across all systems and is auditable.
+
+**Spec Update**: All discount_amount and commission_amount fields are NUMERIC(12,2). Application layer MUST use database SQL functions for rounding (not floating-point math in code). Calculation audit trail includes the raw multiplied value before rounding and the rounded result.
+
+---
+
+#### Q3: Zero or Negative Base Amounts
+
+**Q**: If license purchase provides base_amount = 0 or negative (data corruption), can an affiliate code still be applied and usage tracked?
+
+**Decision: Reject as Invalid (HTTP 400 Bad Request)**
+
+**Rationale**: Financial integrity. Zero or negative amounts indicate a data error upstream. Affiliate code should not be applied to invalid transactions. Rejects cleanly, audit logs the validation error, and prevents corrupted financial records.
+
+**Spec Update**: License purchase endpoint validates base_amount > 0 before affiliate validation. If violated, returns HTTP 400 with error code `INVALID_LICENSE_AMOUNT`.
+
+---
+
+#### Q4: Affiliate Deletion During Transaction
+
+**Q**: Can an affiliate record be deleted from the database while a license purchase transaction is in-flight and has acquired a lock on the affiliate row?
+
+**Decision: Prevent via ON DELETE RESTRICT Foreign Key Constraint**
+
+**Rationale**: Audit trail and referential integrity. Affiliate records MUST NOT be deleted if affiliate_usages records exist. Soft delete via status field is the only allowed "deletion" path (logical delete, not physical). This prevents race conditions and maintains audit trail completeness.
+
+**Spec Update**: affiliate_usages.affiliate_id has `ON DELETE RESTRICT` constraint. Physical deletion of affiliates is forbidden if usages exist. Deactivation happens via `status = INACTIVE`, not deletion.
+
+---
+
+#### Q5: Admin Action Audit Trail
+
+**Q**: When an admin edits or disables an affiliate, should these actions be logged separately from usage tracking?
+
+**Decision: Yes — Separate Admin Audit Log Table**
+
+**Rationale**: Distinguish user/admin actions from customer usage tracking. Enables compliance reporting (who changed what when) and incident investigation. Audit trail is comprehensive and forensically complete.
+
+**Spec Update**: New table `affiliate_admin_audit` tracks all admin mutations:
+
+- id (uuid)
+- affiliate_id (fk)
+- admin_id (fk, from authenticated session)
+- action (CREATE | UPDATE | DISABLE | DELETE_ATTEMPT_PREVENTED)
+- old_values (jsonb, if UPDATE)
+- new_values (jsonb, if UPDATE)
+- ip_address (inet)
+- created_at (timestamp)
+
+All admin operations (create, update, disable) log to this table transactionally.
+
+---
+
+**All clarifications resolved.** No unresolved [NEEDS CLARIFICATION] markers remain. Specification is locked and ready for planning.

@@ -5,15 +5,15 @@
   "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_13_AFFILIATES.md",
   "branch": "013-affiliates",
   "base_branch": "develop",
-  "current_step": "specify",
+  "current_step": "clarify",
   "stage_status": "DRAFT",
-  "clarifications_resolved": false,
+  "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
   "tasks_total": null,
   "tasks_completed": null,
-  "last_updated": "2026-02-25T00:05:00Z",
+  "last_updated": "2026-02-25T00:10:00Z",
   "history": [
     {
       "event": "branch_created",
@@ -27,6 +27,18 @@
       "checklist_pass_rate": "100%",
       "unresolved_clarifications": 0,
       "timestamp": "2026-02-25T00:05:00Z"
+    },
+    {
+      "event": "clarifications_locked",
+      "clarifications_resolved": 5,
+      "edge_cases_covered": [
+        "concurrency",
+        "financial_precision",
+        "data_integrity",
+        "audit_completeness",
+        "referential_integrity"
+      ],
+      "timestamp": "2026-02-25T00:10:00Z"
     }
   ]
 }
