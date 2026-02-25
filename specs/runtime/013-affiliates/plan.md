@@ -362,6 +362,105 @@ tests/
 
 ---
 
+## Security & Authentication
+
+### Security Section A: MMC Token Validation Middleware
+
+**File**: apps/api/src/middleware/auth/mmc-token-validator.ts (NEW)
+
+Implementation details:
+
+- Function: validateMMCToken(token: string): { admin_id: string, scope: string } | null
+- Logic:
+  1. Verify JWT signature using HS256 + MMC_JWT_SECRET environment variable
+  2. Decode JWT headers + payload
+  3. Validate `iss` claim = "mmc"
+  4. Validate `aud` claim = "api"
+  5. Check `exp` timestamp (reject if expired)
+  6. Extract and return `admin_id` from `sub` claim + `scope`
+  7. Throw AuthenticationError(401, "INVALID_TOKEN") on any failure
+- Middleware chain: Express middleware that calls validateMMCToken() and attaches admin_id to req.user
+- Rejection response: HTTP 401 with error code `UNAUTHORIZED`
+
+Integration:
+
+- Applied to routes: `/api/v1/mmc/affiliates/*`
+- Order: After body parsing, before route handler
+
+---
+
+### Security Section B: SQL Injection Prevention (Test + Validation)
+
+**Guarantees**:
+
+1. All affiliate queries use Drizzle ORM parameterized queries (NO string interpolation)
+2. All promo_code inputs validated via Zod before database query
+3. Database layer: Test with SQL injection payloads
+
+**Test Case**:
+
+- Input: promo_code = "'; DROP TABLE affiliates; --"
+- Expected: Zod validation REJECTS (fails regex /^[A-Z0-9]+$/)
+- HTTP 400 response: INVALID_PROMO_CODE
+- Database: No queries executed, no side effects
+
+**Code Review Checklist**:
+
+- All affiliate queries use Drizzle ORM select()/.query methods
+- No use of raw() SQL without parameterization
+- No string interpolation in WHERE clauses
+- Audit: Two developers sign off on SQL review
+
+---
+
+### Security Section C: Admin Rate Limiting
+
+**Requirement**: Admin affiliate endpoints must be rate-limited to prevent brute force.
+
+**Current Status**: TBD (must verify existing middleware)
+
+**Verification Task**:
+
+- Check: Is rate limiting middleware applied to `/api/v1/mmc/affiliates/*` routes?
+- If YES: Document existing limits, verify >= 5 req/minute for admin
+- If NO: Implement new middleware (e.g., express-rate-limit)
+
+**Implementation** (if not existing):
+
+- Middleware: apps/api/src/middleware/rate-limit/admin.ts
+- Limit: 10 requests per minute per admin_id (or per IP if admin_id unavailable)
+- Response: HTTP 429 Too Many Requests
+- Headers: Retry-After: 60
+
+**Test**:
+
+- Send 11 requests to `/api/v1/mmc/affiliates` within 60 seconds
+- 11th request returns HTTP 429
+
+---
+
+### Security Section D: Logging Policy
+
+**Policy**:
+
+1. **Promo Codes**: Do NOT log full code in audit_trail. Log hash prefix only (first 3 chars + "\*").
+   - Example: Code "SPRING25" logs as "SPR\*"
+   - Rationale: Prevents information leakage if logs are exposed; still useful for forensic tracing
+2. **JWT Tokens**: Do NOT log full token. Log token_id (sub claim) + expiry time only.
+   - Example: Log as `token_id=admin_UUID, expires_at=2026-02-26T00:30Z`
+   - Rationale: Prevents token reuse if logs are compromised
+3. **Error Messages**: Never expose database query structure in error messages.
+   - Client sees: "Promo code not found"
+   - Server logs: "Affiliate not found for promo_code=$1, affiliate_table lookup"
+
+**Implementation**:
+
+- Structured logging: fields are always JSON-parseable
+- Correlation ID: Present in every log entry
+- Log redaction: Applied at logging layer (Pino middleware)
+
+---
+
 ## Next Steps
 
 **Phase 0**: Generate research.md (resolve all NEEDS CLARIFICATION markers)  
