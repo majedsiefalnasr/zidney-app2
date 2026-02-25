@@ -10,7 +10,7 @@ Scope: Affiliate promo codes for license-level sales
 
 Status: DRAFT
 Risk Level: LOW
-Last Updated: 2026-02-25T00:05:00Z
+Last Updated: 2026-02-25T00:10:00Z
 
 Scope Defined:
 
@@ -18,7 +18,7 @@ Scope Defined:
 - Transactional usage tracking with row-level locking
 - Dual-limit enforcement (total + per-client usage)
 - Deterministic financial calculations (NUMERIC types, precise rounding)
-- Comprehensive audit trail (immutable affiliate_usages table)
+- Comprehensive audit trail (immutable affiliate_usages + admin_audit tables)
 - MMC UI with search, filter, and reporting
 - Admin-only access control
 
@@ -30,13 +30,15 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — master_db isolation maintained
-- License middleware integration defined
-- Financial integrity enforced via NUMERIC types and audit trail
-- All 15 specification quality checks passed
+- Clarifications resolved (5/5 edge cases documented)
+- All ambiguities locked — specification frozen
+- Master_db isolation maintained
+- Concurrency strategy defined (row locks, atomic operations)
+- Financial integrity enforced (NUMERIC types, deterministic rounding)
+- Audit completeness ensured (admin_audit table + immutable usage log)
 
 Notes:
-Specification complete. All 15/15 checklist items passed. Zero clarifications needed. Proceeding to Clarify step.
+All clarifications resolved. Specification locked and ready for technical planning.
 
 ---
 
