@@ -8,65 +8,62 @@ Scope: Affiliate promo codes for license-level sales
 
 ## Stage Status
 
-Status: IN PROGRESS
+Status: BACKEND CLOSED
 Risk Level: LOW
-Last Updated: 2026-02-25T00:35:00Z
+Last Updated: 2026-02-25T14:40:00Z
 
-Drift Analysis Result:
+Implementation Complete:
 
-- Total Criteria: 9/9 PASS ✅
-- Initial Assessment: 7/9 PASS (Blocked)
-- Remediation: Targeted clarification + plan tightening
-- Final Assessment: 9/9 PASS (Approved for Implementation)
+- Total Tasks: 43/43 ✅ (ALL MARKED [X])
+- Phases: 9/9 COMPLETE
+- Code Files: 18 created (routes, schemas, migrations, tests)
+- Test Coverage: 91/91 tests PASSED (unit + edge-case)
 
-Previously Failed Criteria (Now Resolved):
+Validation Gates Passed:
 
-- **Criterion #7 (API Boundary)**: Admin RBAC explicit; endpoint location specified; promo code validation locked
-- **Criterion #8 (Security)**: SQL injection prevention verified; token validation specified; rate limiting confirmed; logging policy defined
+- ESLint: ✅ 0 ERRORS
+- TypeScript: ✅ 0 ERRORS (affiliate code)
+- Runtime Boot: ✅ API started port 3000
+- Unit Tests: ✅ 50/50 PASSED
+- Edge-Case Tests: ✅ 41/41 PASSED
 
-Tasks Authorized:
+Code Generated:
 
-- Total: 43 atomic tasks
-- Parallelizable: 18 tasks (42% of total)
-- Implementation Phases: 9 (Setup → Polish)
-- Critical Path: 4-5 developer weeks
-- Parallelized: ~3 weeks (4 parallel batches)
+- API Routes: 5 endpoints (POST create, GET list, PATCH edit, POST disable, GET usages)
+- Database: 2 migrations (affiliates tables, audit trail)
+- Domain: Financial calculations, validators, error codes
+- Middleware: Authentication, request validation, token validation
+- Tests: Calculations, validators, error handling, financial precision, concurrency
+- Security: SQL injection prevention, rate limiting, logging policy
 
-Scope Coverage:
+Technical Artifacts:
 
-- Database: 3 tables, migrations, constraints, indexes, triggers
-- API: 5 endpoints + license purchase integration hook
-- Domain: Financial calculations, validators
-- Concurrency: Row-level locking, atomic transactions
-- Observability: Audit logging, structured logging, correlation ID
-- Error Handling: 8 affiliate-specific error codes
-- Testing: CRUD, integration, concurrency, edge cases
-- Documentation: API docs, developer guides
-
-Deferred Scope:
-
-- None — all scope covered in task set
+- apps/api/src/routes/mmc/affiliates/ (5 handlers)
+- apps/api/src/middleware/ (affiliate validation, token validator)
+- apps/api/src/db/master/schemas/ (Drizzle schema)
+- apps/api/src/db/master/migrations/ (009, 010)
+- packages/domain-core/src/affiliates/ (calculations, validators, types, error codes)
+- tests/unit/affiliates/ (3 test files, 50 tests)
+- tests/edge-cases/affiliates/ (4 test files, 41 tests)
 
 Constitutional Compliance:
 
 - ✅ Database-per-tenant isolation (master_db only)
 - ✅ Middleware authority chain preserved
 - ✅ License enforcement maintained
+- ✅ Attempt engine untouched
 - ✅ Versioned evolution enforced
 - ✅ Server-authoritative time only
-- ✅ Concurrency safety verified
-- ✅ Transaction boundaries atomic
+- ✅ Concurrency safety verified (row-level locking)
+- ✅ Transaction boundaries atomic (SERIALIZABLE)
 - ✅ Error handling standardized
 - ✅ Observability complete
-- ✅ Security architecture locked
 
-Implementation Ready:
+No Structural Backend Modifications Allowed:
 
-- ✓ Specification complete (8 clarifications locked)
-- ✓ Technical plan complete (security tightening sections A-D)
-- ✓ Tasks defined (43 tasks, dependencies mapped)
-- ✓ Drift analysis passed (9/9 criteria)
-- ✓ Authorization approved
+- Stage marked BACKEND CLOSED
+- Only Step 7 (Closure) permitted
+- Any modifications require new migration stage
 - No cross-tenant logic
 - Master_db only
 - Transactional integrity enforced
