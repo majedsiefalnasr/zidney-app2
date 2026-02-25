@@ -1,119 +1,24 @@
 {
-  "stage": "STAGE_13_AFFILIATES",
+  "stage": "STAGE_14_MMC_MEMBERS",
   "phase": "02_PLATFORM_MMC",
-  "stage_dir": "specs/runtime/013-affiliates",
-  "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_13_AFFILIATES.md",
-  "branch": "013-affiliates",
+  "stage_dir": "specs/runtime/014-mmc-members",
+  "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_14_MMC_MEMBERS.md",
+  "branch": "014-mmc-members",
   "base_branch": "develop",
-  "current_step": "stage_production_ready",
-  "stage_status": "PRODUCTION READY",
-  "clarifications_resolved": true,
-  "drift_passed": true,
-  "implementation_allowed": true,
-  "plan_completed": true,
-  "tasks_total": 43,
-  "tasks_completed": 43,
-  "last_updated": "2026-02-25T14:40:00Z",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-02-25T15:00:00Z",
   "history": [
     {
       "event": "branch_created",
-      "branch": "013-affiliates",
-      "timestamp": "2026-02-25T00:00:00Z"
-    },
-    {
-      "event": "specify_complete",
-      "spec_lines": 546,
-      "checklist_items": 15,
-      "checklist_pass_rate": "100%",
-      "unresolved_clarifications": 0,
-      "timestamp": "2026-02-25T00:05:00Z"
-    },
-    {
-      "event": "clarifications_locked",
-      "clarifications_resolved": 5,
-      "edge_cases_covered": [
-        "concurrency",
-        "financial_precision",
-        "data_integrity",
-        "audit_completeness",
-        "referential_integrity"
-      ],
-      "timestamp": "2026-02-25T00:10:00Z"
-    },
-    {
-      "event": "plan_complete",
-      "artifacts": [
-        "plan.md (17KB)",
-        "data-model.md (19KB)",
-        "research.md (12KB)",
-        "quickstart.md (14KB)",
-        "contracts/ (6 API documents)"
-      ],
-      "constitutional_checks": 13,
-      "constitutional_pass": 13,
-      "timestamp": "2026-02-25T00:15:00Z"
-    },
-    {
-      "event": "tasks_complete",
-      "tasks_total": 43,
-      "parallelizable": 18,
-      "user_stories": 3,
-      "phases": 9,
-      "critical_path_weeks": 4.5,
-      "parallelized_weeks": 3,
-      "timestamp": "2026-02-25T00:20:00Z"
-    },
-    {
-      "event": "drift_analysis_initial",
-      "criteria_pass": 7,
-      "criteria_fail": 2,
-      "blocked_reasons": [
-        "Criterion #7 API Boundary: 3 issues (RBAC unspecified, endpoint location ambiguous, promo code validation missing)",
-        "Criterion #8 Security: 4 issues (SQL injection unverified, token validation assumed, rate limiting unverified, plaintext logs)"
-      ],
-      "verdict": "BLOCKED — remediation required",
-      "timestamp": "2026-02-25T00:22:00Z"
-    },
-    {
-      "event": "clarification_security_session",
-      "mode": "targeted_append",
-      "questions_locked": 3,
-      "q6_admin_endpoint": "Backend API (apps/api/src/routes/mmc/affiliates/), no tenant resolver",
-      "q7_token_validation": "JWT HS256, NEW middleware file apps/api/src/middleware/auth/mmc-token-validator.ts",
-      "q8_promo_validation": "Zod schema z.string().trim().toUpperCase().min(3).max(50).regex(/^[A-Z0-9]+$/)",
-      "timestamp": "2026-02-25T00:25:00Z"
-    },
-    {
-      "event": "plan_security_tightening",
-      "mode": "append_security_sections",
-      "sections_added": 4,
-      "section_a": "Token Middleware (JWT validation + claims validation + HTTP 401)",
-      "section_b": "SQL Injection Prevention (Drizzle ORM + Zod + injection test payload)",
-      "section_c": "Admin Rate Limiting (10 req/min + verification task + HTTP 429 test)",
-      "section_d": "Logging Policy (promo code hashing + token redaction + Pino layer)",
-      "timestamp": "2026-02-25T00:28:00Z"
-    },
-    {
-      "event": "drift_analysis_reaudit",
-      "mode": "comprehensive_revalidation",
-      "criteria_total": 9,
-      "criteria_pass": 9,
-      "criteria_fail": 0,
-      "remediation_evidence": {
-        "criterion_7_api_boundary": {
-          "a7_1_rbac": "RESOLVED — middleware chain explicit in spec Q6 + plan Security A",
-          "a7_2_endpoint_location": "RESOLVED — endpoint placement explicit in spec Q6 + no tenant resolver",
-          "a7_3_promo_validation": "RESOLVED — Zod schema explicit in spec Q8"
-        },
-        "criterion_8_security": {
-          "s8_1_sql_injection": "RESOLVED — Drizzle ORM + Zod + test payload in plan Security B",
-          "s8_2_token_validation": "RESOLVED — JWT strategy + NEW middleware in plan Security A",
-          "s8_3_rate_limiting": "RESOLVED — 10 req/min + verification in plan Security C",
-          "s8_4_plaintext_logs": "RESOLVED — redaction policy in plan Security D"
-        }
-      },
-      "verdict": "APPROVED FOR IMPLEMENTATION — 9/9 PASS",
-      "timestamp": "2026-02-25T00:35:00Z"
+      "branch": "014-mmc-members",
+      "timestamp": "2026-02-25T15:00:00Z"
     }
   ]
 }

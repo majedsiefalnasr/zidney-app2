@@ -9,6 +9,19 @@ Scope: Internal team management & strict role-based access control (RBAC)
 ## Stage Status
 
 Status: DRAFT
+Risk Level: UNKNOWN
+Initiated: 2026-02-25T15:00:00Z
+
+Scope Open:
+
+- Specification pending
+
+Constitutional Compliance:
+
+- Pending constitutional audit
+
+Notes:
+Stage initialized. Specification in progress.
 
 ---
 
