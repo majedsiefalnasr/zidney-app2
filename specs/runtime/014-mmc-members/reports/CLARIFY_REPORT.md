@@ -11,18 +11,18 @@
 
 ✅ **Ambiguity Scan:** 10 topics analyzed  
 ✅ **Gaps Identified:** 6 critical clarifications  
-✅ **Status:** All ambiguities RESOLVED  
+✅ **Status:** All ambiguities RESOLVED
 
 ### Clarification Audit Trail
 
-| # | Topic | Severity | Resolution | Status |
-|----|-------|----------|-----------|--------|
-| Q1 | Idempotency cache failure mode | HIGH | Hybrid Redis + request_log (Option C) | ✅ |
-| Q2 | Token invalidation cascade atomicity | HIGH | Single atomic transaction + JOIN | ✅ |
-| Q3 | Permission resolution determinism (deleted role) | MEDIUM | FK ON DELETE RESTRICT protects | ✅ |
-| Q4 | API error contract (JSON schema) | HIGH | Standard Zidney envelope + 5 error codes | ✅ |
-| Q5 | Member invitation duplicate email | MEDIUM | Allow multiple pending, check on accept | ✅ |
-| Q6 | Password hash parameters | HIGH | Bcrypt cost=12, Argon2id memory=65536 | ✅ |
+| #   | Topic                                            | Severity | Resolution                               | Status |
+| --- | ------------------------------------------------ | -------- | ---------------------------------------- | ------ |
+| Q1  | Idempotency cache failure mode                   | HIGH     | Hybrid Redis + request_log (Option C)    | ✅     |
+| Q2  | Token invalidation cascade atomicity             | HIGH     | Single atomic transaction + JOIN         | ✅     |
+| Q3  | Permission resolution determinism (deleted role) | MEDIUM   | FK ON DELETE RESTRICT protects           | ✅     |
+| Q4  | API error contract (JSON schema)                 | HIGH     | Standard Zidney envelope + 5 error codes | ✅     |
+| Q5  | Member invitation duplicate email                | MEDIUM   | Allow multiple pending, check on accept  | ✅     |
+| Q6  | Password hash parameters                         | HIGH     | Bcrypt cost=12, Argon2id memory=65536    | ✅     |
 
 ---
 
@@ -68,19 +68,20 @@ When role permissions change (e.g., can_edit=false→true), are ALL affected mem
 
 ```sql
 BEGIN TRANSACTION;
-  UPDATE mmc_members 
+  UPDATE mmc_members
   SET token_version = token_version + 1
   WHERE role_id = $1
   AND status = 'ACTIVE';
-  
-  UPDATE role_permissions 
+
+  UPDATE role_permissions
   SET can_edit = true
-  WHERE role_id = $1 
+  WHERE role_id = $1
   AND domain = 'ORGANIZATION_SETTINGS';
 COMMIT;
 ```
 
 **Failure modes:**
+
 - Commit: All token_versions incremented + permission updated (all active sessions invalidated)
 - Rollback: Neither change applied; consistency maintained
 - No partial state possible
@@ -101,7 +102,7 @@ If a role is deleted mid-request (while permission check is executing), what det
 
 ```sql
 ALTER TABLE role_permissions ADD CONSTRAINT fk_role_id
-  FOREIGN KEY (role_id) REFERENCES roles(id) 
+  FOREIGN KEY (role_id) REFERENCES roles(id)
   ON DELETE RESTRICT;
 ```
 
@@ -114,7 +115,7 @@ async deleteRole(roleId: UUID) {
     [roleId]
   );
   if (memberCount > 0) throw new Error('409: Role in use'); // Cannot delete
-  
+
   // Explicit check passed, now delete
   await query('DELETE FROM roles WHERE id = $1', [roleId]);
 }
@@ -147,13 +148,13 @@ What is the exact JSON response schema for 401/403/409 errors?
 
 **Error Codes by Scenario:**
 
-| HTTP | Code | Scenario |
-|------|------|----------|
-| 401 | UNAUTHORIZED | Invalid/expired JWT, workspace_id in token, missing Authorization header |
-| 403 | PERMISSION_DENIED | User lacks permission (e.g., can_create=false on POST /mmc/members) |
-| 409 | CONFLICT | Username/email duplicate, role cannot delete (members assigned), member already exists |
-| 410 | GONE | Invitation expired (TOO > 24h) |
-| 422 | UNPROCESSABLE_ENTITY | Invalid email format, weak password, bad role_id FK, malformed request |
+| HTTP | Code                 | Scenario                                                                               |
+| ---- | -------------------- | -------------------------------------------------------------------------------------- |
+| 401  | UNAUTHORIZED         | Invalid/expired JWT, workspace_id in token, missing Authorization header               |
+| 403  | PERMISSION_DENIED    | User lacks permission (e.g., can_create=false on POST /mmc/members)                    |
+| 409  | CONFLICT             | Username/email duplicate, role cannot delete (members assigned), member already exists |
+| 410  | GONE                 | Invitation expired (TOO > 24h)                                                         |
+| 422  | UNPROCESSABLE_ENTITY | Invalid email format, weak password, bad role_id FK, malformed request                 |
 
 **Example Response:**
 
@@ -214,20 +215,20 @@ What are the exact bcrypt/Argon2 parameters to use?
 
 **Locked Parameters (No Override):**
 
-| Algorithm | Parameter | Value | Rationale |
-|-----------|-----------|-------|-----------|
-| Bcrypt | cost factor | 12 | OWASP 2023 recommended for interactive password hashing (2026) |
-| Argon2id | memory | 65536 (64MB) | Sufficient for brute-force resistance; low overhead on platform |
-| Argon2id | parallelism | 1 | Single-threaded to ensure consistency |
-| Argon2id | iterations | 3 | OWASP 2023 minimum for Argon2id |
+| Algorithm | Parameter   | Value        | Rationale                                                       |
+| --------- | ----------- | ------------ | --------------------------------------------------------------- |
+| Bcrypt    | cost factor | 12           | OWASP 2023 recommended for interactive password hashing (2026)  |
+| Argon2id  | memory      | 65536 (64MB) | Sufficient for brute-force resistance; low overhead on platform |
+| Argon2id  | parallelism | 1            | Single-threaded to ensure consistency                           |
+| Argon2id  | iterations  | 3            | OWASP 2023 minimum for Argon2id                                 |
 
 **Implementation:**
 
 ```typescript
-import bcrypt from 'bcryptjs'; // or native bcrypt
+import bcrypt from 'bcryptjs' // or native bcrypt
 
-const hashed = await bcrypt.hash(plaintext, 12);
-const match = await bcrypt.compare(plaintext, hashed); // Timing-safe
+const hashed = await bcrypt.hash(plaintext, 12)
+const match = await bcrypt.compare(plaintext, hashed) // Timing-safe
 ```
 
 **No Override Per Request:** All SSO flows, API setups, and batch operations use these parameters.
@@ -241,7 +242,7 @@ const match = await bcrypt.compare(plaintext, hashed); // Timing-safe
 ✅ **Q3 (Permission Determinism):** Aligns with AGENTS.md (Attempt Engine Integrity) — no runtime policy evaluation  
 ✅ **Q4 (Error Contract):** Aligns with ADR-0011 (Error Handling) — structured responses  
 ✅ **Q5 (Invitation Edge Case):** Aligns with ADR-0003 (Master DB) — no assumption of uniqueness except where enforced  
-✅ **Q6 (Password Hashing):** Aligns with ADR-0005 (Security Model) — no plaintext, deterministic hashing  
+✅ **Q6 (Password Hashing):** Aligns with ADR-0005 (Security Model) — no plaintext, deterministic hashing
 
 ---
 
