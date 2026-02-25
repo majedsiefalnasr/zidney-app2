@@ -8,8 +8,10 @@
  * - Audit log not created if operation rolls back
  */
 
+import * as productService from '@zidney/domain-core/products/productService'
+import { Module } from '@zidney/types/enums/Module'
+import { ProductStatus } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import * as productService from '../../../packages/domain-core/src/products/productService'
 import {
   cleanupTestContext,
   createTestContext,
@@ -40,7 +42,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
       const input = {
         name: { en: 'Atomic Create' },
         slug: 'atomic-create',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       const product = await productService.createProduct(
@@ -108,7 +110,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         {
           name: { en: 'Validation Test' },
           slug: 'validation-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -143,7 +145,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         {
           name: { en: 'No Version Record' },
           slug: 'no-version-rec',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -183,7 +185,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         {
           name: { en: 'Audit Atomicity' },
           slug: 'audit-atomic',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -225,7 +227,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         {
           name: { en: 'Valid State' },
           slug: 'valid-state',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -266,7 +268,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         {
           name: { en: 'Referential Test' },
           slug: 'referential',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -296,7 +298,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         {
           name: { en: 'Sequential' },
           slug: 'sequential',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -314,7 +316,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
       const statusChanged = await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
       expect(statusChanged.current_version).toBe(2)
@@ -355,7 +357,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         {
           name: { en: 'Rapid Ops' },
           slug: 'rapid-ops',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -403,7 +405,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         {
           name: { en: 'Product 1' },
           slug: 'taken-slug',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -415,7 +417,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
           {
             name: { en: 'Product 2' },
             slug: 'taken-slug', // Duplicate
-            enabled_modules: ['MODULE_ATTEMPT'],
+            enabled_modules: [Module.MCQ],
           },
           ctx.userId
         )

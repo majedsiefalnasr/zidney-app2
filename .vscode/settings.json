@@ -36,5 +36,6 @@
     "uuidv",
     "Zidney"
   ],
-  "typescript.tsserver.experimental.enableProjectDiagnostics": true
+  "typescript.tsserver.experimental.enableProjectDiagnostics": true,
+  "eslint.lintTask.enable": true
 }

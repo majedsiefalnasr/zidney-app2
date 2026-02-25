@@ -229,7 +229,7 @@ export class ProvisionWorkspaceHandler {
       const pool = await this.dbService.getTenantPool(dbName)
       const migrationResult = await this.migrationRunner.runBaseline(
         pool,
-        '1.0.0'
+        job.usesDivisions
       )
 
       if (!migrationResult.success) {
@@ -267,10 +267,10 @@ export class ProvisionWorkspaceHandler {
 
       // ========== STEP 7: Create Admin Account ==========
       completedSteps.push(ProvisioningStep.CREATE_ADMIN_ACCOUNT)
-      const adminResult = await this.adminService.createAdminAccount(pool, {
-        email: job.adminEmail,
-        organizationName: job.organizationName,
-      })
+      const adminResult = await this.adminService.createAdminAccount(
+        pool,
+        job.adminEmail
+      )
 
       if (!adminResult.success) {
         throw {
@@ -435,7 +435,7 @@ export class ProvisionWorkspaceHandler {
   /**
    * Determine if an error is retriable
    */
-  private isErrorRetriable(errorCode: string): boolean {
+  private isErrorRetriable(errorCode: ProvisioningErrorCode): boolean {
     const nonRetriableErrors = [
       ProvisioningErrorCode.INVALID_WORKSPACE_SLUG,
       ProvisioningErrorCode.WORKSPACE_SLUG_EXISTS,

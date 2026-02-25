@@ -7,8 +7,9 @@
  * T071: Audit query performance (10000+ entries, <1 second)
  */
 
+import * as productService from '@zidney/domain-core/products/productService'
+import { ProductStatus } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import * as productService from '../../../packages/domain-core/src/products/productService'
 import {
   cleanupTestContext,
   createTestContext,
@@ -434,7 +435,7 @@ describe('T068-T071: Load and Performance Tests', () => {
           .changeProductStatus(
             dbClient,
             products.items[i].id,
-            'INACTIVE',
+            ProductStatus.INACTIVE,
             ctx.userId
           )
           .catch(() => null)
@@ -587,7 +588,7 @@ describe('T068-T071: Load and Performance Tests', () => {
           await productService.changeProductStatus(
             dbClient,
             current.id,
-            i % 2 === 0 ? 'INACTIVE' : 'ACTIVE',
+            i % 2 === 0 ? ProductStatus.INACTIVE : ProductStatus.ACTIVE,
             ctx.userId
           )
         } catch {
@@ -686,12 +687,22 @@ describe('T068-T071: Load and Performance Tests', () => {
         ),
         ...Array.from({ length: 3 }, () =>
           productService
-            .changeProductStatus(dbClient, product.id, 'INACTIVE', ctx.userId)
+            .changeProductStatus(
+              dbClient,
+              product.id,
+              ProductStatus.INACTIVE,
+              ctx.userId
+            )
             .catch(() => null)
         ),
         ...Array.from({ length: 3 }, () =>
           productService
-            .changeProductStatus(dbClient, product.id, 'ACTIVE', ctx.userId)
+            .changeProductStatus(
+              dbClient,
+              product.id,
+              ProductStatus.ACTIVE,
+              ctx.userId
+            )
             .catch(() => null)
         ),
         productService

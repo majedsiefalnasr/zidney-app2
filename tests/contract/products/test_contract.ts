@@ -12,9 +12,10 @@
  * - All error responses match error schema in spec
  */
 
-import { Product } from '@zidney/types/products/Product'
+import * as productService from '@zidney/domain-core/products/productService'
+import { Module } from '@zidney/types/enums/Module'
+import { Product, ProductStatus } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import * as productService from '../../../packages/domain-core/src/products/productService'
 import {
   cleanupTestContext,
   createTestContext,
@@ -48,7 +49,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         slug: 'test-product',
         description: 'A test product',
         enabled_modules: ['MODULE_ATTEMPT', 'MODULE_REPORTING'],
-        status: 'ACTIVE',
+        status: ProductStatus.ACTIVE,
         current_version: 1,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
@@ -73,7 +74,7 @@ describe('T067: OpenAPI Contract Tests', () => {
             id: 'p1',
             name: { en: 'Product 1' },
             slug: 'p1',
-            enabled_modules: ['MODULE_ATTEMPT'],
+            enabled_modules: [Module.MCQ],
             status: 'ACTIVE' as const,
             current_version: 1,
             created_at: new Date().toISOString(),
@@ -128,7 +129,7 @@ describe('T067: OpenAPI Contract Tests', () => {
       const input = {
         name: { en: 'POST Test' },
         slug: 'post-test',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       const product = await productService.createProduct(
@@ -157,7 +158,7 @@ describe('T067: OpenAPI Contract Tests', () => {
           name: { en: 'Full Response' },
           slug: 'full-resp',
           description: 'Full response test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -185,7 +186,7 @@ describe('T067: OpenAPI Contract Tests', () => {
       const input = {
         name: { en: 'List Test' },
         slug: 'list-test',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       await productService.createProduct(dbClient, input, ctx.userId)
@@ -220,7 +221,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         {
           name: { en: 'Fields Test' },
           slug: 'fields-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -245,7 +246,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         {
           name: { en: 'Get By ID' },
           slug: 'get-by-id',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -268,7 +269,7 @@ describe('T067: OpenAPI Contract Tests', () => {
           name: { en: 'Complete' },
           slug: 'complete',
           description: 'Complete product',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -300,7 +301,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         {
           name: { en: 'Original' },
           slug: 'update-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -323,7 +324,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         {
           name: { en: 'Before' },
           slug: 'before',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -360,7 +361,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         {
           name: { en: 'Status Update' },
           slug: 'status-update',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -368,7 +369,7 @@ describe('T067: OpenAPI Contract Tests', () => {
       const updated = await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
@@ -382,7 +383,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         {
           name: { en: 'Preserved' },
           slug: 'preserved',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -390,7 +391,7 @@ describe('T067: OpenAPI Contract Tests', () => {
       const updated = await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
@@ -408,7 +409,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         {
           name: { en: 'Delete Me' },
           slug: 'delete-me',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -428,7 +429,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         {
           name: { en: 'Audit Test' },
           slug: 'audit-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -453,7 +454,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         {
           name: { en: 'Audit Fields' },
           slug: 'audit-fields',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -546,7 +547,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         {
           name: { en: 'Type Check' },
           slug: 'type-check',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -566,7 +567,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         {
           name: { en: 'Consistency' },
           slug: 'consistency',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )

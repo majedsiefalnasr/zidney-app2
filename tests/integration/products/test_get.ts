@@ -7,10 +7,10 @@
  * - All product fields are present
  */
 
+import * as productService from '@zidney/domain-core/products/productService'
 import { ErrorCodes } from '@zidney/types/errors/ErrorCodes'
 import { CreateProductInput } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import * as productService from '../../../packages/domain-core/src/products/productService'
 import {
   cleanupTestContext,
   createTestContext,
@@ -135,7 +135,9 @@ describe('T054: Get Single Product Integration Tests', () => {
 
       expect(new Date(product.created_at)).toBeInstanceOf(Date)
       expect(new Date(product.updated_at)).toBeInstanceOf(Date)
-      expect(product.created_at).toBeLessThanOrEqual(product.updated_at)
+      expect(new Date(product.created_at).getTime()).toBeLessThanOrEqual(
+        new Date(product.updated_at).getTime()
+      )
     })
   })
 

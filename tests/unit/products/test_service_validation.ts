@@ -9,12 +9,12 @@
  * - getProductName()
  */
 
-import { describe, expect, it } from 'vitest'
 import {
   validateModulesEnum,
   validateProductName,
   validateSlug,
-} from '../../../packages/validation/src/products/productValidation'
+} from '@zidney/validation/products/productValidation'
+import { describe, expect, it } from 'vitest'
 
 describe('T061: Product Service Validation Unit Tests', () => {
   describe('validateProductName()', () => {

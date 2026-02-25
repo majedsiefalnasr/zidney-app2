@@ -10,9 +10,9 @@
  * - Proper error responses for invalid input
  */
 
+import * as productService from '@zidney/domain-core/products/productService'
 import { CreateProductInput } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import * as productService from '../../../packages/domain-core/src/products/productService'
 import {
   cleanupTestContext,
   createTestContext,

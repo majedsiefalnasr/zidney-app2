@@ -9,8 +9,9 @@
  * - Version field immutable (not included in PATCH request)
  */
 
+import * as productService from '@zidney/domain-core/products/productService'
+import { ProductStatus } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import * as productService from '../../../packages/domain-core/src/products/productService'
 import {
   cleanupTestContext,
   createTestContext,
@@ -53,7 +54,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       const updated = await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
@@ -74,7 +75,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       const inactive = await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
       expect(inactive.status).toBe('INACTIVE')
@@ -82,7 +83,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       const active = await productService.changeProductStatus(
         dbClient,
         product.id,
-        'ACTIVE',
+        ProductStatus.ACTIVE,
         ctx.userId
       )
       expect(active.status).toBe('ACTIVE')
@@ -102,13 +103,13 @@ describe('T056: Product Status Change Integration Tests', () => {
       const result1 = await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
       const result2 = await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
@@ -134,7 +135,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       const updated = await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
@@ -157,7 +158,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       const v1_inactive = await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
       expect(v1_inactive.current_version).toBe(v1)
@@ -165,7 +166,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       const v1_active = await productService.changeProductStatus(
         dbClient,
         product.id,
-        'ACTIVE',
+        ProductStatus.ACTIVE,
         ctx.userId
       )
       expect(v1_active.current_version).toBe(v1)
@@ -173,7 +174,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       const v1_inactive2 = await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
       expect(v1_inactive2.current_version).toBe(v1)
@@ -199,7 +200,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
@@ -229,7 +230,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
@@ -258,7 +259,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
@@ -289,19 +290,19 @@ describe('T056: Product Status Change Integration Tests', () => {
       await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
       await productService.changeProductStatus(
         dbClient,
         product.id,
-        'ACTIVE',
+        ProductStatus.ACTIVE,
         ctx.userId
       )
       await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
@@ -331,7 +332,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       const updated = await productService.changeProductStatus(
         dbClient,
         original.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
@@ -360,7 +361,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       const statusChanged = await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
@@ -385,7 +386,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
@@ -411,15 +412,15 @@ describe('T056: Product Status Change Integration Tests', () => {
       await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
       const activeList = await productService.listProducts(dbClient, {
-        status: 'ACTIVE',
+        status: ProductStatus.ACTIVE,
       })
       const inactiveList = await productService.listProducts(dbClient, {
-        status: 'INACTIVE',
+        status: ProductStatus.INACTIVE,
       })
 
       expect(activeList.items.find((p) => p.id === product.id)).toBeUndefined()
@@ -457,7 +458,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         await productService.changeProductStatus(
           dbClient,
           'non-existent-id',
-          'INACTIVE',
+          ProductStatus.INACTIVE,
           ctx.userId
         )
         expect.fail('Should have thrown error')

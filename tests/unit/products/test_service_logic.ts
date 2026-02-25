@@ -9,11 +9,11 @@
  * - generateChangeSummary() - change description
  */
 
-import { describe, expect, it } from 'vitest'
 import {
   computeFieldDiff,
   generateChangeSummary,
-} from '../../../packages/validation/src/products/productValidation'
+} from '@zidney/validation/products/productValidation'
+import { describe, expect, it } from 'vitest'
 
 describe('T062: Product Service Logic Unit Tests', () => {
   describe('generateChangeSummary()', () => {

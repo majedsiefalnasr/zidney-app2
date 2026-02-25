@@ -8,10 +8,10 @@
  * Covers status checks, soft-lock expiration, and not-found handling.
  */
 
+import createLicenseMiddleware from '@zidney/app/api/middleware/license.middleware'
+import { LicenseStatus } from '@zidney/domain-core/licenses/types'
 import type { Logger } from '@zidney/logger'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-import createLicenseMiddleware from '../../../apps/api/src/middleware/license.middleware'
-import { LicenseStatus } from '../../../packages/domain-core/src/licenses/types'
 
 type LicenseRow = {
   id: string
@@ -46,43 +46,45 @@ describe('License Middleware', () => {
     licensesBySlug.clear()
 
     mockDb = {
-      query: vi.fn(async (sqlText: string, params?: unknown[]): Promise<QueryResult> => {
-        const normalized = sqlText.replace(/\s+/g, ' ').trim().toLowerCase()
+      query: vi.fn(
+        async (sqlText: string, params?: unknown[]): Promise<QueryResult> => {
+          const normalized = sqlText.replace(/\s+/g, ' ').trim().toLowerCase()
 
-        if (normalized.startsWith('select * from licenses')) {
-          const workspaceSlug = String(params?.[0] ?? '')
-          const license = licensesBySlug.get(workspaceSlug)
-          if (!license || license.deleted_at) {
-            return { rows: [] }
+          if (normalized.startsWith('select * from licenses')) {
+            const workspaceSlug = String(params?.[0] ?? '')
+            const license = licensesBySlug.get(workspaceSlug)
+            if (!license || license.deleted_at) {
+              return { rows: [] }
+            }
+            return { rows: [license] }
           }
-          return { rows: [license] }
-        }
-
-        if (
-          normalized.startsWith(
-            'update licenses set status = $1, archived_at = now(), updated_at = now()'
-          )
-        ) {
-          const [newStatus, licenseId, expectedStatus] = params || []
-          const target = Array.from(licensesBySlug.values()).find(
-            (row) => row.id === licenseId
-          )
 
           if (
-            !target ||
-            target.status !== expectedStatus ||
-            !target.soft_lock_until ||
-            new Date(target.soft_lock_until) >= new Date()
+            normalized.startsWith(
+              'update licenses set status = $1, archived_at = now(), updated_at = now()'
+            )
           ) {
-            return { rows: [] }
+            const [newStatus, licenseId, expectedStatus] = params || []
+            const target = Array.from(licensesBySlug.values()).find(
+              (row) => row.id === licenseId
+            )
+
+            if (
+              !target ||
+              target.status !== expectedStatus ||
+              !target.soft_lock_until ||
+              new Date(target.soft_lock_until) >= new Date()
+            ) {
+              return { rows: [] }
+            }
+
+            target.status = newStatus as LicenseStatus
+            return { rows: [target] }
           }
 
-          target.status = newStatus as LicenseStatus
-          return { rows: [target] }
+          return { rows: [] }
         }
-
-        return { rows: [] }
-      }),
+      ),
     }
 
     mockLogger = {
