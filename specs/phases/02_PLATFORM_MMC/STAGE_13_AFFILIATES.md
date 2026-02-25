@@ -314,3 +314,64 @@ All calculations must be:
 - Reproducible
 
 Financial integrity is mandatory.
+
+---
+
+## Clarifications
+
+### Session 2026-02-25
+
+#### Q1: Admin Endpoint Placement & Tenant Resolver Handling
+
+**Decision: Option A – Backend API Routes (apps/api/src/routes/mmc/affiliates/)**
+
+**Rationale:**
+
+- Reuses existing API authentication infrastructure
+- Consistent with Zidney's layering model and import boundary rules
+- Centralizes all API routing logic in a single service
+
+**Implementation Details:**
+
+- Affiliate CRUD endpoints do NOT use tenant resolver (these are admin/MMC operations, not workspace-bound)
+- Middleware chain: `Authenticate(MMC Token) → RBAC(Admin Role Check) → Route Handler`
+- MMC UI authenticates using MMC-generated JWT token (signed with shared secret)
+- No tenant context required; all operations scoped to master_db only
+- Error responses return HTTP 403 if user lacks ADMIN role
+
+#### Q2: MMC Token Validation Strategy
+
+**Decision: JWT-based Admin Tokens**
+
+**Implementation Details:**
+
+- **Token Generation:** MMC service generates tokens on successful admin login
+- **Format:** JWT (HS256) with industry-standard claims (iss, exp, aud, sub, scope)
+- **Signing Method:** Symmetric (HS256) using shared secret between MMC and API
+- **Shared Secret:** Configured via environment variable `MMC_JWT_SECRET` (rotated every 90 days per security policy)
+- **Expiry:** 24 hours standard for admin sessions
+- **Validation Middleware:** NEW file at `apps/api/src/middleware/auth/mmc-token-validator.ts` (non-tenant-resolver auth chain)
+- **Validation Logic:**
+  - Verify JWT signature using shared secret
+  - Check expiry timestamp
+  - Validate issuer = "mmc"
+  - Check role scope includes "admin"
+  - Reject on any signature failure, expiry, or invalid claim
+- **Error Response:** HTTP 401 (Unauthorized) for token failures
+- **Implementation Task:** Must be explicit task in plan.md (marked as blocking affiliate route deployment)
+
+#### Q3: Promo Code Input Validation in License Purchase
+
+**Decision: Strict Schema Validation with Normalization**
+
+**Implementation Details:**
+
+- **Zod Schema:** `z.string().trim().toUpperCase().min(3).max(50).regex(/^[A-Z0-9]+$/)`
+- **Validation Location:** License purchase handler at `apps/api/src/routes/licenses/purchase.ts` (existing license domain)
+- **Validation Results:**
+  - **Valid:** Alphanumeric, 3–50 characters, uppercase
+  - **Rejected:** Non-alphanumeric chars, < 3 chars, > 50 chars, mixed case
+- **Error Handling:** HTTP 400 with error code `INVALID_PROMO_CODE`
+- **Normalization:** Input automatically trimmed + converted to uppercase before validation
+- **Affiliation Logic:** After validation passes, promo code checked against affiliates table (existing transactional usage flow applies)
+- **User Feedback:** Clear error message: "Promo code must be 3–50 characters, alphanumeric only"
