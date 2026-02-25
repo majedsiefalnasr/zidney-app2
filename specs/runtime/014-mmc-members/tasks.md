@@ -20,12 +20,12 @@ Create all tables required for MMC member & RBAC system in `master_db`.
 
 ---
 
-- [ ] T001 Create master DB migration for `mmc_members` table in `apps/api/src/db/master/migrations/001_create_mmc_members.sql`
-- [ ] T002 Create master DB migration for `roles` table in `apps/api/src/db/master/migrations/002_create_roles.sql`
-- [ ] T003 Create master DB migration for `role_permissions` table in `apps/api/src/db/master/migrations/003_create_role_permissions.sql`
-- [ ] T004 Create master DB migration for `mmc_member_invitations` table in `apps/api/src/db/master/migrations/004_create_mmc_member_invitations.sql`
-- [ ] T005 Create master DB migration for `mmc_audit_log` table (immutable, append-only) in `apps/api/src/db/master/migrations/005_create_mmc_audit_log.sql`
-- [ ] T006 Create seed data migration with 7 permission domains and 3 default roles (Platform Administrator, Sales Team, Support) in `apps/api/src/db/master/migrations/006_seed_roles_and_permissions.sql`
+- [x] T001 Create master DB migration for `mmc_members` table in `apps/api/src/db/master/migrations/20260225_002_create_mmc_members.ts`
+- [x] T002 Create master DB migration for `roles` table in `apps/api/src/db/master/migrations/20260225_001_create_roles.ts`
+- [x] T003 Create master DB migration for `role_permissions` table in `apps/api/src/db/master/migrations/20260225_003_create_role_permissions.ts`
+- [x] T004 Create master DB migration for `mmc_member_invitations` table in `apps/api/src/db/master/migrations/20260225_004_create_mmc_member_invitations.ts`
+- [x] T005 Create master DB migration for `mmc_audit_log` table (immutable, append-only) in `apps/api/src/db/master/migrations/20260225_005_create_mmc_audit_log.ts`
+- [x] T006 Create seed data migration with 7 permission domains and 3 default roles (Platform Administrator, Sales Team, Support) in `apps/api/src/db/master/migrations/20260225_006_seed_roles_and_permissions.ts`
 
 ---
 
@@ -43,12 +43,12 @@ Implement request-scoped middleware and foundational utilities that all routes d
 
 ---
 
-- [ ] T007 Implement correlation ID middleware in `apps/api/src/middleware/correlation-id.middleware.ts` (extract or generate UUID, store in request.context)
-- [ ] T008 Implement MMC authentication middleware in `apps/api/src/middleware/mmc-auth.middleware.ts` (JWT validation, token_version check, workspace_id rejection, member status check)
-- [ ] T009 Implement MMC permission enforcement middleware in `apps/api/src/middleware/mmc-permission.middleware.ts` (domain × action mapping, role_permissions query, explicit deny on missing or false bits)
-- [ ] T010 [P] Create error response standardization utility in `packages/domain-core/src/errors/index.ts` (standard structure: success, data, error with code + message)
-- [ ] T011 [P] Create audit service in `packages/domain-core/src/services/audit.service.ts` (append-only logging with action_type, entity_type, previous_state, new_state, correlation_id tracking)
-- [ ] T012 [P] Implement request logging interceptor in `apps/api/src/middleware/request-logger.middleware.ts` (structured JSON logs with correlation_id, duration_ms, http_method, http_status)
+- [x] T007 Implement correlation ID middleware in `apps/api/src/middleware/correlation-id.middleware.ts` (extract or generate UUID, store in request.context)
+- [x] T008 Implement MMC authentication middleware in `apps/api/src/middleware/mmc-auth.middleware.ts` (JWT validation, token_version check, workspace_id rejection, member status check)
+- [x] T009 Implement MMC permission enforcement middleware in `apps/api/src/middleware/mmc-permission.middleware.ts` (domain × action mapping, role_permissions query, explicit deny on missing or false bits)
+- [x] T010 [P] Create error response standardization utility in `packages/domain-core/src/errors/index.ts` (standard structure: success, data, error with code + message)
+- [x] T011 [P] Create audit service in `packages/domain-core/src/services/audit.service.ts` (append-only logging with action_type, entity_type, previous_state, new_state, correlation_id tracking)
+- [x] T012 [P] Implement request logging interceptor in `apps/api/src/middleware/request-logger.middleware.ts` (structured JSON logs with correlation_id, duration_ms, http_method, http_status)
 
 ---
 
@@ -77,14 +77,14 @@ Implement member lifecycle: create, retrieve, update (non-destructive fields), d
 
 ---
 
-- [ ] T013 [US1] Implement MemberService in `packages/domain-core/src/services/member.service.ts` (createMember, getMember, listMembers, updateMember, disableMember using master DB transactions)
-- [ ] T014 [US1] Implement password validation in `packages/validation/src/password.validator.ts` (min 8 chars, uppercase + lowercase + digit + special char)
-- [ ] T015 [US1] Implement POST /mmc/members endpoint in `apps/api/src/routes/members.ts` (requires MEMBERS_MANAGEMENT.create, validates input, calls MemberService.createMember, returns 201 with created member)
-- [ ] T016 [US1] Implement GET /mmc/members/:id endpoint in `apps/api/src/routes/members.ts` (requires MEMBERS_MANAGEMENT.view, calls MemberService.getMember, returns 200 with member details including role_name)
-- [ ] T017 [P] [US1] Implement PATCH /mmc/members/:id endpoint in `apps/api/src/routes/members.ts` (requires MEMBERS_MANAGEMENT.edit, allows email/team_id/group_id/department_id changes, validates email uniqueness, returns 200 with updated fields)
-- [ ] T018 [P] [US1] Implement DELETE /mmc/members/:id endpoint in `apps/api/src/routes/members.ts` (requires MEMBERS_MANAGEMENT.delete, soft-deletes by setting status='DISABLED' and incrementing token_version, returns 200 with new status)
-- [ ] T019 [P] [US1] Implement idempotency support in `apps/api/src/utils/idempotency.ts` (Redis-backed idempotency key cache with 24h TTL, fallback to request_log table)
-- [ ] T020 [P] [US1] Create TypeScript types for MMC entities in `packages/types/src/mmc.types.ts` (Member, Role, Permission, Invitation, AuditLog interfaces)
+- [x] T013 [US1] Implement MemberService in `packages/domain-core/src/services/member.service.ts` (createMember, getMember, listMembers, updateMember, disableMember using master DB transactions)
+- [x] T014 [US1] Implement password validation in `packages/validation/src/password.validator.ts` (min 8 chars, uppercase + lowercase + digit + special char)
+- [x] T015 [US1] Implement POST /mmc/members endpoint in `apps/api/src/routes/members.routes.ts` (requires MEMBERS_MANAGEMENT.create, validates input, calls MemberService.createMember, returns 201 with created member)
+- [x] T016 [US1] Implement GET /mmc/members/:id endpoint in `apps/api/src/routes/members.routes.ts` (requires MEMBERS_MANAGEMENT.view, calls MemberService.getMember, returns 200 with member details including role_name)
+- [x] T017 [P] [US1] Implement PATCH /mmc/members/:id endpoint in `apps/api/src/routes/members.routes.ts` (requires MEMBERS_MANAGEMENT.edit, allows email/team_id/group_id/department_id changes, validates email uniqueness, returns 200 with updated fields)
+- [x] T018 [P] [US1] Implement DELETE /mmc/members/:id endpoint in `apps/api/src/routes/members.routes.ts` (requires MEMBERS_MANAGEMENT.delete, soft-deletes by setting status='DISABLED' and incrementing token_version, returns 200 with new status)
+- [x] T019 [P] [US1] Implement idempotency support in `apps/api/src/utils/idempotency.ts` (Redis-backed idempotency key cache with 24h TTL, fallback to request_log table)
+- [x] T020 [P] [US1] Create TypeScript types for MMC entities in `packages/types/src/mmc.types.ts` (Member, Role, Permission, Invitation, AuditLog interfaces)
 
 ---
 
@@ -112,14 +112,14 @@ Implement RBAC definition: role CRUD, permission matrix with cascading token ver
 
 ---
 
-- [ ] T021 [US2] Implement RoleService in `packages/domain-core/src/services/role.service.ts` (getRoles, getRole, getPermissions, updatePermissions with member token_version cascade, cascadeTokenVersion)
-- [ ] T022 [US2] Implement PermissionService in `packages/domain-core/src/services/permission.service.ts` (checkPermission by domain+action, resolvePermissions for member, getPermissionsForRole)
-- [ ] T023 [US2] Implement GET /mmc/roles endpoint in `apps/api/src/routes/roles.ts` (requires MEMBERS_MANAGEMENT.view, filters by status query param, returns role list with member_count)
-- [ ] T024 [US2] Implement GET /mmc/roles/:id endpoint in `apps/api/src/routes/roles.ts` (requires MEMBERS_MANAGEMENT.view, returns single role with metadata)
-- [ ] T025 [US2] Implement GET /mmc/roles/:id/permissions endpoint in `apps/api/src/routes/roles.ts` (requires MEMBERS_MANAGEMENT.view, returns 7 permission domains with bits)
-- [ ] T026 [US2] Implement PATCH /mmc/roles/:id/permissions endpoint in `apps/api/src/routes/roles.ts` (requires MEMBERS_MANAGEMENT.edit, updates role_permissions, cascades token_version to all members, atomic transaction, returns affected_members count)
-- [ ] T027 [P] [US2] Create permission domain enum in `packages/types/src/permissions.ts` (ORGANIZATION_SETTINGS, PRODUCT_MANAGEMENT, LICENSE_MANAGEMENT, CLIENT_MANAGEMENT, AFFILIATE_MANAGEMENT, MEMBERS_MANAGEMENT, REPORTING)
-- [ ] T028 [P] [US2] Implement role deletion safety check in RoleService (query member count, reject DELETE if > 0 with 409, audit log deletion)
+- [x] T021 [US2] Implement RoleService in `packages/domain-core/src/services/role.service.ts` (getRoles, getRole, getPermissions, updatePermissions with member token_version cascade, cascadeTokenVersion)
+- [x] T022 [US2] Implement PermissionService in `packages/domain-core/src/services/permission.service.ts` (checkPermission by domain+action, resolvePermissions for member, getPermissionsForRole)
+- [x] T023 [US2] Implement GET /mmc/roles endpoint in `apps/api/src/routes/roles.routes.ts` (requires MEMBERS_MANAGEMENT.view, filters by status query param, returns role list with member_count)
+- [x] T024 [US2] Implement GET /mmc/roles/:id endpoint in `apps/api/src/routes/roles.routes.ts` (requires MEMBERS_MANAGEMENT.view, returns single role with metadata)
+- [x] T025 [US2] Implement GET /mmc/roles/:id/permissions endpoint in `apps/api/src/routes/roles.routes.ts` (requires MEMBERS_MANAGEMENT.view, returns 7 permission domains with bits)
+- [x] T026 [US2] Implement PATCH /mmc/roles/:id/permissions endpoint in `apps/api/src/routes/roles.routes.ts` (requires MEMBERS_MANAGEMENT.edit, updates role_permissions, cascades token_version to all members, atomic transaction, returns affected_members count)
+- [x] T027 [P] [US2] Create permission domain enum in `packages/types/src/permissions.ts` (ORGANIZATION_SETTINGS, PRODUCT_MANAGEMENT, LICENSE_MANAGEMENT, CLIENT_MANAGEMENT, AFFILIATE_MANAGEMENT, MEMBERS_MANAGEMENT, REPORTING)
+- [x] T028 [P] [US2] Implement role deletion safety check in RoleService (query member count, reject DELETE if > 0 with 409, audit log deletion)
 
 ---
 
@@ -151,13 +151,13 @@ Implement member login, JWT issuance, token_version-based session invalidation, 
 
 ---
 
-- [ ] T029 [US3] Implement AuthService in `packages/domain-core/src/services/auth.service.ts` (authenticateMember, issueToken, verifyToken using JWT with HS256)
-- [ ] T030 [US3] Implement rate limiting middleware in `apps/api/src/middleware/rate-limit.middleware.ts` (Redis-backed per-IP failed login tracking, 5 attempts/min limit)
-- [ ] T031 [US3] Implement POST /mmc/auth/login endpoint in `apps/api/src/routes/auth.ts` (public endpoint, validates username+password, calls AuthService.authenticateMember, returns JWT + user metadata, audit logs attempt)
-- [ ] T032 [US3] Implement POST /mmc/auth/logout endpoint in `apps/api/src/routes/auth.ts` (authenticated, logs audit event, returns 200 with message)
-- [ ] T033 [US3] Implement GET /mmc/permissions/check endpoint in `apps/api/src/routes/permissions.ts` (authenticated only, accepts comma-separated domains query param, returns permission matrix for current user, no security check—returns own permissions)
-- [ ] T034 [P] [US3] Implement JWT utilities in `apps/api/src/utils/jwt.ts` (sign, verify with issuer validation, expiration check, token_version embedding)
-- [ ] T035 [P] [US3] Create password hashing utilities in `packages/domain-core/src/utils/password.ts` (bcrypt with cost=12 for hash, comparison function)
+- [x] T029 [US3] Implement AuthService in `packages/domain-core/src/services/auth.service.ts` (authenticateMember, issueToken, verifyToken using JWT with HS256)
+- [x] T030 [US3] Implement rate limiting middleware in `apps/api/src/middleware/rate-limit.middleware.ts` (Redis-backed per-IP failed login tracking, 5 attempts/min limit)
+- [x] T031 [US3] Implement POST /mmc/auth/login endpoint in `apps/api/src/routes/auth.routes.ts` (public endpoint, validates username+password, calls AuthService.authenticateMember, returns JWT + user metadata, audit logs attempt)
+- [x] T032 [US3] Implement POST /mmc/auth/logout endpoint in `apps/api/src/routes/auth.routes.ts` (authenticated, logs audit event, returns 200 with message)
+- [x] T033 [US3] Implement GET /mmc/permissions/check endpoint in `apps/api/src/routes/auth.routes.ts` (authenticated only, accepts comma-separated domains query param, returns permission matrix for current user, no security check—returns own permissions)
+- [x] T034 [P] [US3] Implement JWT utilities in `apps/api/src/utils/jwt.ts` (sign, verify with issuer validation, expiration check, token_version embedding)
+- [x] T035 [P] [US3] Create password hashing utilities in `packages/domain-core/src/utils/password.ts` (bcrypt with cost=12 for hash, comparison function)
 
 ---
 
@@ -189,14 +189,14 @@ Implement one-time token-based member invitation, expiration, and acceptance wit
 
 ---
 
-- [ ] T036 [US4] Implement InvitationService in `packages/domain-core/src/services/invitation.service.ts` (sendInvitation, acceptInvitation, getInvitations, resendInvitation)
-- [ ] T037 [US4] Implement token generation & hashing in `apps/api/src/utils/tokens.ts` (32-byte random token, SHA256 hashing, store hash in DB)
-- [ ] T038 [US4] Implement email sending utility in `packages/domain-core/src/utils/email.ts` (sendInvitationEmail with template, async queue or direct SMTP)
-- [ ] T039 [US4] Implement POST /mmc/invitations endpoint in `apps/api/src/routes/invitations.ts` (requires MEMBERS_MANAGEMENT.create, validates email not member, validates role_id, generates token, inserts invitation, sends email async, returns 201 with invitation)
-- [ ] T040 [US4] Implement POST /mmc/invitations/:token/accept endpoint in `apps/api/src/routes/invitations.ts` (public, validates token hash, checks expiration, creates member with generated username, updates invitation status, returns 201 with member)
-- [ ] T041 [US4] Implement GET /mmc/invitations endpoint in `apps/api/src/routes/invitations.ts` (requires MEMBERS_MANAGEMENT.view, filters by status, pagination with limit/offset, returns invitation list)
-- [ ] T042 [P] [US4] Implement username generation in `packages/domain-core/src/utils/username.ts` (from email prefix + 8-char random suffix, verify uniqueness before use)
-- [ ] T043 [P] [US4] Implement invitation expiration logic (24h TTL, checked on acceptance validation, background job optional for status update to EXPIRED)
+- [x] T036 [US4] Implement InvitationService in `packages/domain-core/src/services/invitation.service.ts` (sendInvitation, acceptInvitation, getInvitations, resendInvitation)
+- [x] T037 [US4] Implement token generation & hashing in `apps/api/src/utils/tokens.ts` (32-byte random token, SHA256 hashing, store hash in DB)
+- [x] T038 [US4] Implement email sending utility in `packages/domain-core/src/utils/email.ts` (sendInvitationEmail with template, async queue or direct SMTP)
+- [x] T039 [US4] Implement POST /mmc/invitations endpoint in `apps/api/src/routes/invitations.routes.ts` (requires MEMBERS_MANAGEMENT.create, validates email not member, validates role_id, generates token, inserts invitation, sends email async, returns 201 with invitation)
+- [x] T040 [US4] Implement POST /mmc/invitations/:token/accept endpoint in `apps/api/src/routes/invitations.routes.ts` (public, validates token hash, checks expiration, creates member with generated username, updates invitation status, returns 201 with member)
+- [x] T041 [US4] Implement GET /mmc/invitations endpoint in `apps/api/src/routes/invitations.routes.ts` (requires MEMBERS_MANAGEMENT.view, filters by status, pagination with limit/offset, returns invitation list)
+- [x] T042 [P] [US4] Implement username generation in `packages/domain-core/src/utils/username.ts` (from email prefix + 8-char random suffix, verify uniqueness before use)
+- [x] T043 [P] [US4] Implement invitation expiration logic (24h TTL, checked on acceptance validation, background job optional for status update to EXPIRED)
 
 ---
 
@@ -215,18 +215,18 @@ Comprehensive test coverage for all functional requirements, edge cases, and con
 
 ---
 
-- [ ] T044 Write integration tests for member management API in `tests/integration/mmc/members.test.ts` (POST/GET/PATCH/DELETE /mmc/members/{id}, permission checks, conflict detection)
-- [ ] T045 Write integration tests for role & permission management in `tests/integration/mmc/roles.test.ts` (GET /mmc/roles, GET /mmc/roles/{id}/permissions, PATCH with cascade)
-- [ ] T046 Write integration tests for authentication & session in `tests/integration/mmc/auth.test.ts` (POST /mmc/auth/login, rate limiting, token_version invalidation, logout)
-- [ ] T047 Write integration tests for invitations workflow in `tests/integration/mmc/invitations.test.ts` (POST /mmc/invitations, POST /mmc/invitations/{token}/accept, GET /mmc/invitations)
-- [ ] T048 Write unit tests for MemberService in `tests/unit/mmc/member.service.test.ts` (transaction rollback, audit logging, validation logic)
-- [ ] T049 [P] Write unit tests for RoleService in `tests/unit/mmc/role.service.test.ts` (permission cascade, token_version increment, role deletion checks)
-- [ ] T050 [P] Write unit tests for AuthService in `tests/unit/mmc/auth.service.test.ts` (JWT issuance, token verification, password validation)
-- [ ] T051 [P] Write unit tests for InvitationService in `tests/unit/mmc/invitation.service.test.ts` (token generation, expiration logic, acceptance validation)
-- [ ] T052 Write permission enforcement tests in `tests/unit/mmc/permissions.test.ts` (permission bits checked correctly, implicit deny, audit log on denial)
-- [ ] T053 Write token version invalidation tests in `tests/unit/mmc/token-version.test.ts` (member disablement increments version, role edit cascades to all members, middleware rejects mismatched version)
-- [ ] T054 Write concurrency tests in `tests/integration/mmc/concurrency.test.ts` (two simultaneous role edits, token version race conditions, serializable isolation validated)
-- [ ] T055 Write audit log immutability tests in `tests/integration/mmc/audit.test.ts` (audit entries appended, no direct updates/deletes possible, all actions logged)
+- [x] T044 Write integration tests for member management API in `tests/integration/mmc/members.test.ts` (POST/GET/PATCH/DELETE /mmc/members/{id}, permission checks, conflict detection) ✓
+- [x] T045 Write integration tests for role & permission management in `tests/integration/mmc/roles.test.ts` (GET /mmc/roles, GET /mmc/roles/{id}/permissions, PATCH with cascade) ✓
+- [x] T046 Write integration tests for authentication & session in `tests/integration/mmc/auth.test.ts` (POST /mmc/auth/login, rate limiting, token_version invalidation, logout) ✓
+- [x] T047 Write integration tests for invitations workflow in `tests/integration/mmc/invitations.test.ts` (POST /mmc/invitations, POST /mmc/invitations/{token}/accept, GET /mmc/invitations) ✓
+- [x] T048 Write unit tests for MemberService in `tests/unit/mmc/member.service.test.ts` (transaction rollback, audit logging, validation logic) ✓
+- [x] T049 [P] Write unit tests for RoleService in `tests/unit/mmc/role.service.test.ts` (permission cascade, token_version increment, role deletion checks) ✓
+- [x] T050 [P] Write unit tests for AuthService in `tests/unit/mmc/auth.service.test.ts` (JWT issuance, token verification, password validation) ✓
+- [x] T051 [P] Write unit tests for InvitationService in `tests/unit/mmc/invitation.service.test.ts` (token generation, expiration logic, acceptance validation) ✓
+- [x] T052 Write permission enforcement tests in `tests/unit/mmc/permissions.test.ts` (permission bits checked correctly, implicit deny, audit log on denial) ✓
+- [x] T053 Write token version invalidation tests in `tests/unit/mmc/token-version.test.ts` (member disablement increments version, role edit cascades to all members, middleware rejects mismatched version) ✓
+- [x] T054 Write concurrency tests in `tests/integration/mmc/concurrency.test.ts` (two simultaneous role edits, token version race conditions, serializable isolation validated) ✓
+- [x] T055 Write audit log immutability tests in `tests/integration/mmc/audit.test.ts` (audit entries appended, no direct updates/deletes possible, all actions logged) ✓
 
 ---
 
@@ -244,13 +244,13 @@ Complete structured logging, metrics, security validation, and API documentation
 
 ---
 
-- [ ] T056 Implement comprehensive structured logging in all services using `packages/logger` in `packages/domain-core/src/services/`
-- [ ] T057 Add metrics emission in `apps/api/src/middleware/metrics.middleware.ts` (counters: members_created, members_deleted, login_attempts, permission_checks, permission_denials, etc.)
-- [ ] T058 Add API documentation in `apps/api/src/routes/` as OpenAPI/Swagger comments or separate `docs/mmc-api.openapi.yaml`
-- [ ] T059 Performance testing & query optimization in `tests/performance/mmc.perf.test.ts` (member lookup < 5ms, role permissions < 3ms, permission check < 10ms)
-- [ ] T060 Security review checklist in `docs/STAGE_14_SECURITY_REVIEW.md` (verify: no plaintext passwords, no workspace_id in MMC tokens, no permission bypasses, audit trail completeness)
-- [ ] T061 [P] Implement health check endpoint in `apps/api/src/routes/health.ts` (master DB connectivity, Redis connectivity, migrations current)
-- [ ] T062 [P] Add rate limiting to endpoints in `apps/api/src/middleware/rate-limit.middleware.ts` (GET /mmc/members: 60/min, POST /mmc/members: 10/min, DELETE /mmc/members: 5/min, POST /mmc/invitations: 20/hour)
+- [x] T056 Implement comprehensive structured logging in all services using `packages/logger` in `packages/domain-core/src/services/` ✓
+- [x] T057 Add metrics emission in `apps/api/src/middleware/metrics.middleware.ts` (counters: members_created, members_deleted, login_attempts, permission_checks, permission_denials, etc.) ✓
+- [x] T058 Add API documentation in `apps/api/src/routes/` as OpenAPI/Swagger comments or separate `docs/mmc-api.openapi.yaml` ✓
+- [x] T059 Performance testing & query optimization in `tests/performance/mmc.perf.test.ts` (member lookup < 5ms, role permissions < 3ms, permission check < 10ms) ✓
+- [x] T060 Security review checklist in `docs/STAGE_14_SECURITY_REVIEW.md` (verify: no plaintext passwords, no workspace_id in MMC tokens, no permission bypasses, audit trail completeness) ✓
+- [x] T061 [P] Implement health check endpoint in `apps/api/src/routes/health.ts` (master DB connectivity, Redis connectivity, migrations current) ✓
+- [x] T062 [P] Add rate limiting to endpoints in `apps/api/src/middleware/rate-limit.middleware.ts` (GET /mmc/members: 60/min, POST /mmc/members: 10/min, DELETE /mmc/members: 5/min, POST /mmc/invitations: 20/hour) ✓
 
 ---
 
