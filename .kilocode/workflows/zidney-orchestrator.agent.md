@@ -119,25 +119,78 @@ Hard STOPs occur only when something genuinely blocks progress or requires human
 
 ## Git Hygiene Enforcement
 
-Before ANY commit sub-step, the orchestrator MUST:
+Referenced throughout as **"Apply Git Hygiene Enforcement."**
 
-1. Run `git status --porcelain` — verify only stage-related files are modified.
-2. Ensure no files outside the active stage scope are staged:
-   - `specs/runtime/<STAGE_DIR_NAME>/`
-   - `specs/runtime/.workflow-state.json`
-   - `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`
-   - Implementation files explicitly declared by `PLAN_REPORT.md` and `TASKS_REPORT.md`
-3. For non-implementation steps (Pre through Step 5 and Step 7), do NOT stage implementation source files.
-4. `specs/templates/` files must never be staged in any step commit.
-5. Run code formatter on staged files BEFORE committing:
-   - Determine staged files using: `git diff --name-only --cached`
-   - Run project formatter ONLY on those files (e.g., `npm run format -- <file list>` or `biome format --write <file list>` depending on project setup)
-   - Re-run `git status --porcelain` to confirm no unintended changes were introduced
-   - Re-stage formatted files explicitly
+Execute this exact sequence before every commit. Order is mandatory — do not reorder steps.
 
-If formatting modifies files outside the active stage scope → STOP and require manual review.
+### 1. Scope check
 
-If unrelated or cross-stage changes are detected → STOP. List offending files. Require manual cleanup.
+```bash
+git status --porcelain
+```
+
+Verify the working tree only contains files within the active stage scope:
+
+- `specs/runtime/<STAGE_DIR_NAME>/`
+- `specs/runtime/.workflow-state.json`
+- `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`
+- Implementation source files declared in `PLAN_REPORT.md` and `TASKS_REPORT.md` (Step 6 only)
+
+Rules:
+
+- Non-implementation steps (Pre through Step 5, Step 7): do NOT include implementation source files
+- `specs/templates/` files must NEVER appear in any commit
+- If unrelated or cross-stage files appear → STOP, list them, require manual cleanup before continuing
+
+### 2. Format changed files (before staging)
+
+```bash
+git diff --name-only HEAD
+```
+
+This lists every file changed in this step (written or modified). Run the project formatter on that exact list — never on the entire repo.
+
+**Formatter detection (check in this order):**
+
+```bash
+# 1. Check package.json for a format or fmt script
+cat package.json | grep -E '"format"|"fmt"'
+# If found: npm run format -- <files>  OR  bun run format <files>
+
+# 2. Check for Biome
+ls biome.json biome.jsonc 2>/dev/null
+# If found: npx biome format --write <files>
+
+# 3. Check for Prettier
+ls .prettierrc* prettier.config.* 2>/dev/null
+# If found: npx prettier --write <files>
+
+# 4. No formatter found → skip, add note to commit message: "no formatter configured"
+```
+
+After formatting, run `git diff --name-only HEAD` again. If formatting touched files **outside** the active stage scope → STOP and require manual review before continuing.
+
+### 3. Stage files
+
+```bash
+git add <explicit file list for this step>
+```
+
+Never use `git add .` or `git add -A`. Always stage by explicit path.
+
+### 4. Verify staged scope
+
+```bash
+git diff --name-only --cached
+```
+
+Confirm the staged file list is exactly what is expected for this step. If unexpected files appear → unstage and investigate before committing.
+
+### 5. Commit
+
+```bash
+git commit -F <(filled commit message from template)
+```
 
 ## Commit Message Templates
 
@@ -349,12 +402,23 @@ Stage initialized. Specification in progress.
 
 ## Pre.8 — Commit Pre-Step
 
-Apply Git Hygiene Enforcement.
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check
+git status --porcelain
+
+# 2. Format changed files (before staging)
+git diff --name-only HEAD
+# → run formatter on those files
+
+# 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-pre-step.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
@@ -439,12 +503,24 @@ Mark Specify row as `✅`.
 
 ## 1.6 — Commit Specify Step
 
-Apply Git Hygiene Enforcement.
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check
+git status --porcelain
+
+# 2. Format changed files (before staging)
+# Changed files this step: spec.md, checklists/requirements.md, SPECIFY_REPORT.md, README.md
+git diff --name-only HEAD
+# → run formatter on those files
+
+# 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-specify.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
@@ -529,12 +605,24 @@ Mark Clarify row as `✅`.
 
 ## 2.6 — Commit Clarify Step
 
-Apply Git Hygiene Enforcement.
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check
+git status --porcelain
+
+# 2. Format changed files (before staging)
+# Changed files this step: spec.md (updated in-place by speckit.clarify), CLARIFY_REPORT.md, README.md
+git diff --name-only HEAD
+# → run formatter on those files
+
+# 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-clarify.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
@@ -633,12 +721,24 @@ Mark Plan row as `✅`.
 
 ## 3.6 — Commit Plan Step
 
-Apply Git Hygiene Enforcement.
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check
+git status --porcelain
+
+# 2. Format changed files (before staging)
+# Changed files this step: plan.md, research.md, data-model.md, quickstart.md (whichever were written), PLAN_REPORT.md, README.md
+git diff --name-only HEAD
+# → run formatter on those files
+
+# 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-plan.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
@@ -734,12 +834,24 @@ Mark Tasks row as `✅`.
 
 ## 4.6 — Commit Tasks Step
 
-Apply Git Hygiene Enforcement.
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check
+git status --porcelain
+
+# 2. Format changed files (before staging)
+# Changed files this step: tasks.md, TASKS_REPORT.md, README.md
+git diff --name-only HEAD
+# → run formatter on those files
+
+# 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-tasks.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
@@ -879,12 +991,24 @@ Mark Analyze row as `✅ Passed` or `❌ Blocked`. Reference path: `audits/ANALY
 
 ## 5.6 — Commit Analyze Step
 
-Apply Git Hygiene Enforcement.
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check
+git status --porcelain
+
+# 2. Format changed files (before staging)
+# Changed files this step: audits/ANALYZE_REPORT.md, README.md
+git diff --name-only HEAD
+# → run formatter on those files
+
+# 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-analyze.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
@@ -1080,15 +1204,25 @@ Mark Implement row as `✅`.
 
 ## 6.11 — Commit Implement Step
 
-Apply Git Hygiene Enforcement.
-
-Stage implementation source files explicitly declared by `PLAN_REPORT.md` and `TASKS_REPORT.md`, then stage workflow artifacts:
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check — includes implementation source files this step
+git status --porcelain
+
+# 2. Format changed files (before staging)
+# Changed files this step: all implementation source files + tasks.md + IMPLEMENT_REPORT.md + VALIDATION_REPORT.md + README.md
+git diff --name-only HEAD
+# → run formatter on ALL of those files — both source code and generated docs
+
+# 3. Stage
 git add <IMPLEMENTATION_FILES_FROM_PLAN_AND_TASKS>
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope — confirm only declared implementation files and stage artifacts are staged
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-implement.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
@@ -1255,12 +1389,24 @@ Output the completed PR summary to the user.
 
 ## 7.7 — Commit Closure Step
 
-Apply Git Hygiene Enforcement.
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check
+git status --porcelain
+
+# 2. Format changed files (before staging)
+# Changed files this step: CLOSURE_REPORT.md, guides/TESTING_GUIDE.md, PR_SUMMARY.md, README.md
+git diff --name-only HEAD
+# → run formatter on those files
+
+# 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-closure.md`.  
