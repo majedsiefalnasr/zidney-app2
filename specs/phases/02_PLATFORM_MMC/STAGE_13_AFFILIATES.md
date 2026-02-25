@@ -10,32 +10,42 @@ Scope: Affiliate promo codes for license-level sales
 
 Status: DRAFT
 Risk Level: LOW
-Last Updated: 2026-02-25T00:15:00Z
+Last Updated: 2026-02-25T00:20:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- Database schema: 3 tables (affiliates, affiliate_usages, affiliate_admin_audit)
-- API endpoints: 5 MMC operations + license purchase integration
-- Concurrency: Pessimistic locking with SELECT FOR UPDATE
-- Financial precision: NUMERIC(12,2) with deterministic ROUND()
-- Audit trail: Immutable affiliate_usages and admin_audit tables
-- Error handling: 8 affiliate-specific error codes
-- Observability: Structured logging with correlation ID
+- Total: 43 atomic tasks
+- Parallelizable: 18 tasks (42% of total)
+- Implementation Phases: 9 (Setup → Polish)
+- Critical Path: 4-5 developer weeks
+- Parallelized: ~3 weeks (4 parallel batches)
+
+Scope Coverage:
+
+- Database: 3 tables, migrations, constraints, indexes, triggers
+- API: 5 endpoints + license purchase integration hook
+- Domain: Financial calculations, validators
+- Concurrency: Row-level locking, atomic transactions
+- Observability: Audit logging, structured logging, correlation ID
+- Error Handling: 8 affiliate-specific error codes
+- Testing: CRUD, integration, concurrency, edge cases
+- Documentation: API docs, developer guides
 
 Deferred Scope:
 
-- None — all planned scope is authorized
+- None — all scope covered in task set
 
 Constitutional Compliance:
 
-- Technical plan compliant with all 13 core principles
-- Concurrency strategy locked and safe
-- Financial integrity mechanism confirmed
-- Audit completeness verified
-- All 5 edge cases addressed in implementation design
+- Task set compliant with all architecture principles
+- No cross-tenant logic
+- Master_db only
+- Transactional integrity enforced
+- Financial determinism guaranteed
+- Drift analysis gate pending
 
 Notes:
-Technical plan complete. All Phase 1 artifacts (plan.md, data-model.md, research.md, quickstart.md, 6 API contracts) locked and ready. Task generation pending.
+Atomic task set generated. All 43 tasks locked and ready. Drift analysis gate pending before implementation.
 
 Implement Affiliate system at MMC level.
 
