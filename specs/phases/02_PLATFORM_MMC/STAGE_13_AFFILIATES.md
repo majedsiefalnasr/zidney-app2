@@ -9,19 +9,34 @@ Scope: Affiliate promo codes for license-level sales
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
-Initiated: 2026-02-25T00:00:00Z
+Risk Level: LOW
+Last Updated: 2026-02-25T00:05:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- B2B affiliate CRUD with immutable promo codes
+- Transactional usage tracking with row-level locking
+- Dual-limit enforcement (total + per-client usage)
+- Deterministic financial calculations (NUMERIC types, precise rounding)
+- Comprehensive audit trail (immutable affiliate_usages table)
+- MMC UI with search, filter, and reporting
+- Admin-only access control
+
+Deferred Scope:
+
+- Tenant-level affiliate logic (handled separately in Backoffice phase)
+- Student subscription discounts (out of scope)
+- Workspace-level promo codes (out of scope)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — master_db isolation maintained
+- License middleware integration defined
+- Financial integrity enforced via NUMERIC types and audit trail
+- All 15 specification quality checks passed
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. All 15/15 checklist items passed. Zero clarifications needed. Proceeding to Clarify step.
 
 ---
 
