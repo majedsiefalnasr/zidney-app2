@@ -10,39 +10,32 @@ Scope: Affiliate promo codes for license-level sales
 
 Status: DRAFT
 Risk Level: LOW
-Last Updated: 2026-02-25T00:10:00Z
+Last Updated: 2026-02-25T00:15:00Z
 
-Scope Defined:
+Scope Planned:
 
-- B2B affiliate CRUD with immutable promo codes
-- Transactional usage tracking with row-level locking
-- Dual-limit enforcement (total + per-client usage)
-- Deterministic financial calculations (NUMERIC types, precise rounding)
-- Comprehensive audit trail (immutable affiliate_usages + admin_audit tables)
-- MMC UI with search, filter, and reporting
-- Admin-only access control
+- Database schema: 3 tables (affiliates, affiliate_usages, affiliate_admin_audit)
+- API endpoints: 5 MMC operations + license purchase integration
+- Concurrency: Pessimistic locking with SELECT FOR UPDATE
+- Financial precision: NUMERIC(12,2) with deterministic ROUND()
+- Audit trail: Immutable affiliate_usages and admin_audit tables
+- Error handling: 8 affiliate-specific error codes
+- Observability: Structured logging with correlation ID
 
 Deferred Scope:
 
-- Tenant-level affiliate logic (handled separately in Backoffice phase)
-- Student subscription discounts (out of scope)
-- Workspace-level promo codes (out of scope)
+- None — all planned scope is authorized
 
 Constitutional Compliance:
 
-- Clarifications resolved (5/5 edge cases documented)
-- All ambiguities locked — specification frozen
-- Master_db isolation maintained
-- Concurrency strategy defined (row locks, atomic operations)
-- Financial integrity enforced (NUMERIC types, deterministic rounding)
-- Audit completeness ensured (admin_audit table + immutable usage log)
+- Technical plan compliant with all 13 core principles
+- Concurrency strategy locked and safe
+- Financial integrity mechanism confirmed
+- Audit completeness verified
+- All 5 edge cases addressed in implementation design
 
 Notes:
-All clarifications resolved. Specification locked and ready for technical planning.
-
----
-
-## Objective
+Technical plan complete. All Phase 1 artifacts (plan.md, data-model.md, research.md, quickstart.md, 6 API contracts) locked and ready. Task generation pending.
 
 Implement Affiliate system at MMC level.
 
