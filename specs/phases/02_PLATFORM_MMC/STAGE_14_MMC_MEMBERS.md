@@ -9,19 +9,30 @@ Scope: Internal team management & strict role-based access control (RBAC)
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
-Initiated: 2026-02-25T15:00:00Z
+Risk Level: LOW
+Last Updated: 2026-02-25T15:15:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Internal MMC member management system
+- Deterministic RBAC with 7 permission domains
+- Master_db isolation (no tenant resolver)
+- Member invitations with 24-hour TTL
+- Atomic cascade operations for token invalidation
+- Immutable audit trail
+
+Deferred Scope:
+
+- Multi-role assignment (Phase 3+)
+- ABAC evaluation (Phase 3+)
+- Dynamic policy evaluation (Phase 3+)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 

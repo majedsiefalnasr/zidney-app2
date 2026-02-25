@@ -5,20 +5,26 @@
   "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_14_MMC_MEMBERS.md",
   "branch": "014-mmc-members",
   "base_branch": "develop",
-  "current_step": "pre_step",
+  "current_step": "specify",
   "stage_status": "DRAFT",
   "clarifications_resolved": false,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
-  "tasks_total": null,
-  "tasks_completed": null,
-  "last_updated": "2026-02-25T15:00:00Z",
+  "last_updated": "2026-02-25T15:15:00Z",
   "history": [
     {
       "event": "branch_created",
       "branch": "014-mmc-members",
       "timestamp": "2026-02-25T15:00:00Z"
+    },
+    {
+      "event": "specify_complete",
+      "spec_lines": 1300,
+      "checklist_items": 12,
+      "checklist_pass_rate": "100%",
+      "unresolved_clarifications": 0,
+      "timestamp": "2026-02-25T15:15:00Z"
     }
   ]
 }
