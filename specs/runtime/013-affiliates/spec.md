@@ -677,4 +677,100 @@ All admin operations (create, update, disable) log to this table transactionally
 
 ---
 
-**All clarifications resolved.** No unresolved [NEEDS CLARIFICATION] markers remain. Specification is locked and ready for planning.
+## **All clarifications resolved.** No unresolved [NEEDS CLARIFICATION] markers remain. Specification is locked and ready for planning.
+
+### Session 2026-02-25 (Part 2 — Security Clarifications)
+
+**Scope**: Architectural clarifications for API boundary, admin authentication, and input validation.
+
+#### Q6: Admin Endpoint Placement & Tenant Resolver Handling
+
+**Q**: Do affiliate CRUD endpoints live in:
+
+- A) `apps/api/src/routes/mmc/affiliates/` (backend API, reuses API auth/middleware)
+- B) `apps/mmc/src/routes/affiliates/` (MMC admin app, separate auth)
+
+And for the chosen option, how is tenant resolver handled?
+
+**Decision: Option A – Backend API Routes (apps/api/src/routes/mmc/affiliates/)**
+
+**Rationale**:
+
+- Reuses existing API authentication infrastructure
+- Consistent with Zidney's layering model (import boundary: apps/api can call packages/\*)
+- Centralizes all API routing logic in a single service
+- Reduces duplication
+
+**Spec Update**:
+
+- Affiliate CRUD endpoints do NOT use tenant resolver (these are admin/MMC operations, not workspace-bound)
+- Middleware chain: `Authenticate(MMC Token) → RBAC(Admin Role Check) → Route Handler`
+- MMC UI authenticates using MMC-generated JWT token (signed with shared secret)
+- No tenant context required; all operations scoped to master_db only
+- Error responses return HTTP 403 if user lacks ADMIN role
+- Routes: `POST /api/v1/mmc/affiliates`, `GET /api/v1/mmc/affiliates`, `PATCH /api/v1/mmc/affiliates/:id`, etc.
+
+---
+
+#### Q7: MMC Token Validation Strategy
+
+**Q**: Token generation, signing, validation mechanism — issuer, format, signing, expiry, rotation, validation middleware location?
+
+**Decision: JWT-based Admin Token Strategy (HS256)**
+
+**Rationale**:
+
+- JWT is industry-standard, well-audited, widely supported
+- HS256 (symmetric) is appropriate for internal MMC↔API communication
+- Shared secret ensures both systems validate the same token
+- 24-hour expiry balances security (limits token lifetime) with UX (avoids frequent re-auth)
+- 90-day secret rotation reduces blast radius of credential leak
+
+**Spec Update**:
+
+- **Token Generation**: MMC service generates tokens on successful admin login
+- **Format**: JWT (HS256) with standard claims: `iss: "mmc"`, `exp: <unix_timestamp>`, `aud: "api"`, `sub: <admin_id>`, `scope: "admin"`
+- **Signing Method**: Symmetric (HS256) using shared secret between MMC and API
+- **Shared Secret**: Configured via environment variable `MMC_JWT_SECRET` (rotated every 90 days per security policy; rotation doesn't invalidate existing tokens, only affects NEW tokens)
+- **Expiry**: 24 hours standard for admin sessions
+- **Validation Middleware**: NEW file at `apps/api/src/middleware/auth/mmc-token-validator.ts` (non-tenant-resolver auth chain)
+- **Validation Logic**:
+  - Parse JWT header and verify signature using shared secret
+  - Check `exp` timestamp (reject if expired)
+  - Validate `iss` claim = "mmc"
+  - Validate `aud` claim = "api"
+  - Check `scope` includes "admin"
+  - Extract `admin_id` from `sub` claim
+  - Reject on any failure: HTTP 401 (Unauthorized)
+- **Implementation Task**: REQUIRED explicit task in plan.md (marked as blocking affiliate route deployment)
+
+---
+
+#### Q8: Promo Code Input Validation in License Purchase
+
+**Q**: Optional `promo_code` parameter in license purchase endpoint — validation schema, location, normalization?
+
+**Decision: Strict Schema Validation with Normalization**
+
+**Rationale**:
+
+- Input validation at API boundary is required by Zidney standards
+- Normalization (trim + uppercase) ensures consistent database queries
+- Regex enforces alphanumeric-only, preventing injection attempts
+- Length constraint (3–50 chars) prevents both trivial codes and storage abuse
+
+**Spec Update**:
+
+- **Zod Schema**: `z.string().trim().toUpperCase().min(3).max(50).regex(/^[A-Z0-9]+$/)`
+- **Validation Location**: License purchase handler at `apps/api/src/routes/licenses/purchase.ts` (existing license endpoint extension)
+- **Validation Results**:
+  - Valid: Alphanumeric, 3–50 characters, uppercase
+  - Rejected: Non-alphanumeric chars, < 3 chars, > 50 chars
+- **Error Handling**: HTTP 400 with error code `INVALID_PROMO_CODE` and user-facing message: "Promo code must be 3–50 characters, alphanumeric only"
+- **Normalization**: Input automatically trimmed + converted to uppercase before database query
+- **Affiliation Logic**: After Zod validation passes, promo code checked against `affiliates` table using transactional usage flow (existing flow applies)
+- **Security Note**: Validates BEFORE database query to prevent malformed input from reaching SQL layer
+
+---
+
+**All clarifications locked.** Specification complete and ready for plan security tightening phase.
