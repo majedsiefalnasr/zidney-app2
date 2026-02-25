@@ -9,6 +9,19 @@ Scope: Affiliate promo codes for license-level sales
 ## Stage Status
 
 Status: DRAFT
+Risk Level: UNKNOWN
+Initiated: 2026-02-25T00:00:00Z
+
+Scope Open:
+
+- Specification pending
+
+Constitutional Compliance:
+
+- Pending constitutional audit
+
+Notes:
+Stage initialized. Specification in progress.
 
 ---
 

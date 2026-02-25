@@ -1,112 +1,24 @@
 {
-  "stage": "STAGE_12_PROVISIONING_TRIGGER",
+  "stage": "STAGE_13_AFFILIATES",
   "phase": "02_PLATFORM_MMC",
-  "stage_dir": "specs/runtime/012-provisioning-trigger",
-  "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_12_PROVISIONING_TRIGGER.md",
-  "branch": "012-provisioning-trigger",
+  "stage_dir": "specs/runtime/013-affiliates",
+  "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_13_AFFILIATES.md",
+  "branch": "013-affiliates",
   "base_branch": "develop",
-  "current_step": "stage_production_ready",
-  "stage_status": "PRODUCTION READY",
-  "implementation_status": "COMPLETE_AND_VALIDATED",
-  "validation_results": {
-    "linting": "PASSED - 0 errors, 1532 warnings (informational only)",
-    "typecheck": "PASSED - tsconfig.json created, functional",
-    "unit_tests": "PASSED - 960/965 tests passing (99.5% pass rate)",
-    "architectural": "PASSED - boundary violations fixed, cross-app imports removed",
-    "task_markers": "PASSED - 82/82 tasks marked complete"
-  },
-  "clarifications_resolved": true,
-  "drift_passed": true,
-  "implementation_allowed": true,
-  "plan_completed": true,
-  "tasks_total": 82,
-  "tasks_completed": 82,
-  "validation_required": false,
-  "closure_status": "COMPLETE",
-  "closure_date": "2026-02-25T12:00:00Z",
-  "last_updated": "2026-02-25T12:00:00Z",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-02-25T00:00:00Z",
   "history": [
     {
       "event": "branch_created",
-      "branch": "012-provisioning-trigger",
-      "timestamp": "2026-02-24T00:00:00Z"
-    },
-    {
-      "event": "specify_complete",
-      "spec_lines": 850,
-      "checklist_items": 22,
-      "checklist_pass_rate": "100%",
-      "unresolved_clarifications": 0,
-      "timestamp": "2026-02-24T00:00:00Z"
-    },
-    {
-      "event": "clarifications_recorded",
-      "answers": {
-        "q1": "C",
-        "q2": "C",
-        "q3": "D",
-        "q4": "B",
-        "q5": "A"
-      },
-      "clarifications_resolved": true,
-      "timestamp": "2026-02-24T00:05:00Z"
-    },
-    {
-      "event": "plan_complete",
-      "artifacts": [
-        "plan.md (60KB)",
-        "data-model.md (28KB)",
-        "contracts/license-creation-api.md",
-        "contracts/provisioning-job-contract.md",
-        "contracts/error-codes.md",
-        "quickstart.md"
-      ],
-      "timestamp": "2026-02-24T09:00:00Z"
-    },
-    {
-      "event": "drift_analysis_passed",
-      "timestamp": "2026-02-24T10:15:00Z"
-    },
-    {
-      "event": "tasks_complete",
-      "tasks_total": 82,
-      "parallelizable": 28,
-      "critical_path": 20,
-      "timestamp": "2026-02-24T10:30:00Z"
-    },
-    {
-      "event": "implementation_complete",
-      "files_created": 35,
-      "files_modified": 8,
-      "test_files": 52,
-      "migrations": 5,
-      "timestamp": "2026-02-24T21:13:42Z"
-    },
-    {
-      "event": "validation_gate_passed",
-      "linting_errors": 0,
-      "type_check_status": "FUNCTIONAL",
-      "test_pass_rate": "99.5%",
-      "architectural_violations": 0,
-      "timestamp": "2026-02-24T22:00:00Z"
-    },
-    {
-      "event": "pre_closure_review_approved",
-      "reviewer": "automated_gate",
-      "tasks_completed": 82,
-      "tasks_total": 82,
-      "all_gates_passing": true,
-      "timestamp": "2026-02-25T11:00:00Z"
-    },
-    {
-      "event": "stage_production_ready",
-      "closure_report_generated": true,
-      "testing_guide_generated": true,
-      "pr_summary_generated": true,
-      "stage_status_updated": true,
-      "workflow_state_finalized": true,
-      "all_artifacts_ready": true,
-      "timestamp": "2026-02-25T12:00:00Z"
+      "branch": "013-affiliates",
+      "timestamp": "2026-02-25T00:00:00Z"
     }
   ]
 }
