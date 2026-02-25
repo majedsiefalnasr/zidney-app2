@@ -10,7 +10,7 @@ Scope: Internal team management & strict role-based access control (RBAC)
 
 Status: DRAFT
 Risk Level: LOW
-Last Updated: 2026-02-25T15:15:00Z
+Last Updated: 2026-02-25T15:30:00Z
 
 Scope Defined:
 
@@ -20,6 +20,9 @@ Scope Defined:
 - Member invitations with 24-hour TTL
 - Atomic cascade operations for token invalidation
 - Immutable audit trail
+- Hybrid idempotency (Redis + request_log)
+- FK constraints prevent concurrent role deletion
+- Bcrypt cost=12, Argon2id memory=65536
 
 Deferred Scope:
 
@@ -29,10 +32,11 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. 6 critical clarifications locked.
+Ready for technical planning phase.
 
 ---
 
