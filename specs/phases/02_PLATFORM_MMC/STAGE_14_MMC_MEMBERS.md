@@ -10,19 +10,18 @@ Scope: Internal team management & strict role-based access control (RBAC)
 
 Status: DRAFT
 Risk Level: LOW
-Last Updated: 2026-02-25T15:30:00Z
+Last Updated: 2026-02-25T16:00:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Internal MMC member management system
-- Deterministic RBAC with 7 permission domains
-- Master_db isolation (no tenant resolver)
-- Member invitations with 24-hour TTL
-- Atomic cascade operations for token invalidation
-- Immutable audit trail
-- Hybrid idempotency (Redis + request_log)
-- FK constraints prevent concurrent role deletion
-- Bcrypt cost=12, Argon2id memory=65536
+- Complete technical design (plan.md 8000+ lines)
+- 6-table schema with atomic constraints
+- 21 API endpoints specified
+- Middleware chain architecture
+- Concurrency guarantees (atomic cascades)
+- Idempotency strategy (hybrid Redis + DB)
+- Performance targets (p95 <500ms)
+- Security baseline (Argon2/Bcrypt, rate limiting, audit trail)
 
 Deferred Scope:
 
@@ -32,11 +31,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. 6 critical clarifications locked.
-Ready for technical planning phase.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
