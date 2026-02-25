@@ -23,12 +23,14 @@ Master Database (PostgreSQL)
 ### Layer Responsibilities
 
 **Frontend Layer:**
+
 - Display login form, member list, role editor
 - NO permission enforcement (UX only)
 - NO business logic
 - NO DB import statements
 
 **API Layer:**
+
 - Route definition
 - Middleware stacking (correlation ID → auth → permission → handler)
 - Request validation (schema, format)
@@ -36,6 +38,7 @@ Master Database (PostgreSQL)
 - Error code mapping
 
 **Domain Services:**
+
 - Member lifecycle (create, edit, disable)
 - Permission evaluation
 - Token version management
@@ -44,6 +47,7 @@ Master Database (PostgreSQL)
 - No framework dependencies
 
 **Data Access Layer:**
+
 - Connection pooling (master_db)
 - Query execution
 - Transaction management
@@ -118,9 +122,9 @@ def mmc_auth_middleware(request):
     if not auth_header or not auth_header.startswith('Bearer '):
         log.warn('mmc_auth', 'Missing or invalid auth header', status=401)
         return 401 {'error': 'Unauthorized'}
-    
+
     token = auth_header[7:]  # Remove 'Bearer '
-    
+
     # 2. Verify JWT
     try:
         payload = jwt.verify(token, secret=JWT_SECRET, issuer='mmc')
@@ -130,47 +134,47 @@ def mmc_auth_middleware(request):
     except jwt.ExpiredSignatureError:
         log.warn('mmc_auth', 'JWT expired', status=401)
         return 401 {'error': 'Unauthorized'}
-    
+
     # 3. Reject cross-context tokens (workspace_id present)
     if payload.get('workspace_id'):
         log.warn('mmc_auth', 'Cross-context token rejected', status=401)
         return 401 {'error': 'Unauthorized'}
-    
+
     # 4. Extract user ID from token
     user_id = payload.get('sub')  # Standard JWT claim
     if not user_id:
         log.warn('mmc_auth', 'Missing sub claim in JWT', status=401)
         return 401 {'error': 'Unauthorized'}
-    
+
     # 5. Fetch member from DB
     db = get_master_pool()
     member = await db.query_one('''
         SELECT id, status, role_id, token_version FROM mmc_members WHERE id = ?
     ''', [user_id])
-    
+
     if not member:
         log.warn('mmc_auth', 'Member not found', user_id=user_id, status=401)
         return 401 {'error': 'Unauthorized'}
-    
+
     # 6. Check status
     if member.status != 'ACTIVE':
         log.warn('mmc_auth', 'Member disabled', user_id=user_id, status=401)
         return 401 {'error': 'Unauthorized'}
-    
+
     # 7. Check token_version (session invalidation)
     if payload.get('token_version') != member.token_version:
-        log.info('mmc_auth', 'Token version mismatch; session invalidated', 
-                 user_id=user_id, jwt_version=payload.get('token_version'), 
+        log.info('mmc_auth', 'Token version mismatch; session invalidated',
+                 user_id=user_id, jwt_version=payload.get('token_version'),
                  db_version=member.token_version, status=401)
         return 401 {'error': 'Unauthorized; please re-login'}
-    
+
     # 8. Store context
     request.context.mmc_user = {
         'user_id': user_id,
         'role_id': member.role_id,
         'token_version': member.token_version
     }
-    
+
     # 9. Log success
     log.debug('mmc_auth', 'Authentication successful', user_id=user_id)
     return next()
@@ -182,44 +186,44 @@ def mmc_auth_middleware(request):
 def permission_middleware(request):
     # Extract permission requirement from route metadata
     route_permission = extract_permission(request.route)  # e.g., ('MEMBERS_MANAGEMENT', 'create')
-    
+
     if not route_permission:
         # No permission required (e.g., GET /mmc/health)
         return next()
-    
+
     domain, action = route_permission
     mmc_user = request.context.mmc_user
-    
+
     # Query permission matrix
     db = get_master_pool()
     perm = await db.query_one('''
         SELECT can_view, can_create, can_edit, can_delete FROM role_permissions
         WHERE role_id = ? AND domain = ?
     ''', [mmc_user.role_id, domain])
-    
+
     # Evaluate permission
     can_perform = False
     if perm:
-        action_map = {'view': perm.can_view, 'create': perm.can_create, 
+        action_map = {'view': perm.can_view, 'create': perm.can_create,
                       'edit': perm.can_edit, 'delete': perm.can_delete}
         can_perform = action_map.get(action, False)
-    
+
     if not can_perform:
-        log.warn('permission_denied', 
-                 domain=domain, action=action, 
-                 user_id=mmc_user.user_id, role_id=mmc_user.role_id, 
+        log.warn('permission_denied',
+                 domain=domain, action=action,
+                 user_id=mmc_user.user_id, role_id=mmc_user.role_id,
                  status=403)
-        
+
         # Optionally: Log to audit table
         await db.execute('''
-            INSERT INTO mmc_audit_log (actor_user_id, action_type, entity_type, 
+            INSERT INTO mmc_audit_log (actor_user_id, action_type, entity_type,
                                        correlation_id, timestamp)
             VALUES (?, ?, ?, ?, NOW())
-        ''', [mmc_user.user_id, 'PERMISSION_CHECK_DENIED', domain, 
+        ''', [mmc_user.user_id, 'PERMISSION_CHECK_DENIED', domain,
               request.context.correlation_id])
-        
+
         return 403 {'error': f'Permission denied: {domain}.{action}'}
-    
+
     # Log success (optional)
     request.context.checked_permission = (domain, action)
     return next()
@@ -250,6 +254,7 @@ def permission_middleware(request):
 ```
 
 **Validation:**
+
 - username: 3-50 alphanumeric + underscore; matches /^[a-zA-Z0-9_]{3,50}$/
 - email: valid format; must not exist in mmc_members or pending invitations
 - password: min 8 chars, uppercase, lowercase, digit, special char (complexity check)
@@ -273,6 +278,7 @@ def permission_middleware(request):
 ```
 
 **Error Responses:**
+
 - 400 (Validation failure): Missing field, invalid format, role not found
 - 409 (Conflict): Username or email already exists
 - 500 (Server error): Database failure, password hash error
@@ -291,6 +297,7 @@ END TRANSACTION
 ```
 
 **Idempotency:**
+
 - Header: `Idempotency-Key: UUID`
 - Redis lookup: `mmc:idempotency:{key}`
 - DB fallback: `request_log` table
@@ -303,6 +310,7 @@ END TRANSACTION
 **Permission Required:** MEMBERS_MANAGEMENT.view
 
 **Request Parameters:**
+
 - id: member UUID in path
 
 **Response (200 OK):**
@@ -330,12 +338,13 @@ END TRANSACTION
 ```
 
 **Error Responses:**
+
 - 404 (Not found): Member ID doesn't exist
 
 **Query:**
 
 ```sql
-SELECT m.*, r.name as role_name, c.username as created_by_username 
+SELECT m.*, r.name as role_name, c.username as created_by_username
 FROM mmc_members m
 LEFT JOIN roles r ON m.role_id = r.id
 LEFT JOIN mmc_members c ON m.created_by = c.id
@@ -360,6 +369,7 @@ WHERE m.id = ?
 ```
 
 **Validation:**
+
 - email: valid format; must not exist elsewhere
 - team_id, group_id, department_id: optional, no FK check (free-form identifiers)
 
@@ -380,6 +390,7 @@ WHERE m.id = ?
 ```
 
 **Error Responses:**
+
 - 404 (Not found): Member not found
 - 409 (Conflict): Email already exists
 
@@ -403,6 +414,7 @@ END TRANSACTION
 **Permission Required:** MEMBERS_MANAGEMENT.delete
 
 **Request Parameters:**
+
 - id: member UUID in path
 
 **Response (204 No Content or 200 OK with status update):**
@@ -422,6 +434,7 @@ END TRANSACTION
 ```
 
 **Error Responses:**
+
 - 404 (Not found): Member not found
 - 409 (Conflict): Member already disabled
 
@@ -504,7 +517,7 @@ SELECT * FROM roles WHERE status='ACTIVE' ORDER BY created_at DESC
         "can_create": true,
         "can_edit": true,
         "can_delete": true
-      },
+      }
       // ... all 7 domains
     ]
   },
@@ -556,6 +569,7 @@ SELECT * FROM role_permissions WHERE role_id = ?
 ```
 
 **Error Responses:**
+
 - 404 (Not found): Role not found
 - 400 (Validation): Invalid domain
 
@@ -609,6 +623,7 @@ END TRANSACTION
 ```
 
 **Error Responses:**
+
 - 400 (Validation): Invalid email format
 - 409 (Conflict): Email already a member or pending invite
 
@@ -627,6 +642,7 @@ END TRANSACTION
 ```
 
 **Async Side Effect:**
+
 - Send email to user with link: `/mmc/invitations/accept?token={plaintext_token}`
 - If email fails: log error but don't fail transaction (invitation still exists; user can resend)
 
@@ -646,6 +662,7 @@ END TRANSACTION
 ```
 
 **Validation:**
+
 - password: min 8 chars, complexity check
 - passwords match
 
@@ -666,6 +683,7 @@ END TRANSACTION
 ```
 
 **Error Responses:**
+
 - 400 (Validation): Password too weak, passwords don't match
 - 401 (Unauthorized): Token invalid, expired, or already used
 - 409 (Conflict): Email already registered
@@ -687,6 +705,7 @@ END TRANSACTION
 ```
 
 **Idempotency:**
+
 - Token can only be used once (status='PENDING' check prevents re-use)
 - If client retries: token_hash mismatch (different SHA256 if typo) or status already ACCEPTED
 
@@ -730,6 +749,7 @@ END TRANSACTION
 ```
 
 **Error Responses:**
+
 - 400 (Validation): Missing username/password
 - 401 (Unauthorized): Invalid credentials, member disabled, rate limit exceeded
 - 429 (Too Many Requests): Rate limit exceeded (5 failed attempts / minute / IP)
@@ -744,14 +764,14 @@ def login(username, password):
     if attempts >= 5:
         log.warn('login_rate_limit_exceeded', ip=client_ip, status=429)
         return 429 'Too many login attempts; try again in 1 hour'
-    
+
     # Fetch member
     db = get_master_pool()
     member = await db.query_one('''
         SELECT id, password_hash, status, role_id, token_version
         FROM mmc_members WHERE username = ?
     ''', [username])
-    
+
     if not member:
         redis.incr(rate_key, ex=60)  # Increment and set 1-min expiry
         log.warn('login_failed', username=username, reason='not_found', status=401)
@@ -760,12 +780,12 @@ def login(username, password):
             VALUES (?, ?, ?, NOW())
         ''', ['LOGIN_ATTEMPT_FAILED', 'MEMBER', correlation_id])
         return 401 'Invalid credentials'
-    
+
     if member.status != 'ACTIVE':
         redis.incr(rate_key, ex=60)
         log.warn('login_failed', username=username, reason='disabled', status=401)
         return 401 'Account disabled'
-    
+
     # Verify password
     if not bcrypt.verify(password, member.password_hash):
         redis.incr(rate_key, ex=60)
@@ -775,7 +795,7 @@ def login(username, password):
             VALUES (?, ?, ?, NOW())
         ''', ['LOGIN_ATTEMPT_FAILED', 'MEMBER', correlation_id])
         return 401 'Invalid credentials'
-    
+
     # Issue JWT
     oauth_token = jwt.sign({
         'sub': member.id,
@@ -784,14 +804,14 @@ def login(username, password):
         'token_version': member.token_version,
         'exp': time.now() + 3600
     }, secret=JWT_SECRET)
-    
+
     # Log success
     log.info('login_success', username=username, member_id=member.id)
     await db.execute('''
         INSERT INTO mmc_audit_log (actor_user_id, action_type, entity_type, correlation_id, timestamp)
         VALUES (?, ?, ?, ?, NOW())
     ''', [member.id, 'LOGIN_ATTEMPT_SUCCESS', 'MEMBER', correlation_id])
-    
+
     return 200 {
         'access_token': oauth_token,
         'token_type': 'Bearer',
@@ -814,6 +834,7 @@ def login(username, password):
 **Permission:** None (authenticated only)
 
 **Query Parameters:**
+
 - domains: comma-separated list of domains to check (e.g., "PRODUCT_MANAGEMENT,CLIENT_MANAGEMENT")
 
 **Response (200 OK):**
@@ -846,7 +867,7 @@ def login(username, password):
 **Query:**
 
 ```sql
-SELECT role_permissions.* 
+SELECT role_permissions.*
 FROM role_permissions
 WHERE role_id = ? AND domain IN (?, ?, ...)
 ```
@@ -908,19 +929,22 @@ services/
 ```typescript
 // MemberService.ts
 export class MemberService {
-  constructor(private db: Pool, private auditService: AuditService) {}
+  constructor(
+    private db: Pool,
+    private auditService: AuditService
+  ) {}
 
   async createMember(data: CreateMemberInput, actor: UUID): Promise<Member> {
-    const hashedPassword = await bcrypt.hash(data.password, 12);
-    
+    const hashedPassword = await bcrypt.hash(data.password, 12)
+
     return this.db.transaction(async (tx) => {
       // Validate
       const existingUsername = await tx.queryOne(
         'SELECT id FROM mmc_members WHERE username = ?',
         [data.username]
-      );
-      if (existingUsername) throw new DuplicateUsernameError();
-      
+      )
+      if (existingUsername) throw new DuplicateUsernameError()
+
       // Create
       const member = await tx.queryOne(
         `INSERT INTO mmc_members 
@@ -928,8 +952,8 @@ export class MemberService {
          VALUES (?, ?, ?, ?, 'ACTIVE', ?, NOW(), NOW())
          RETURNING *`,
         [data.username, data.email, hashedPassword, data.role_id, actor]
-      );
-      
+      )
+
       // Audit
       await this.auditService.logAction(
         actor,
@@ -937,10 +961,10 @@ export class MemberService {
         'MEMBER',
         null,
         { id: member.id, username: member.username }
-      );
-      
-      return member;
-    });
+      )
+
+      return member
+    })
   }
 
   async disableMember(id: UUID, actor: UUID): Promise<Member> {
@@ -949,10 +973,10 @@ export class MemberService {
       const member = await tx.queryOne(
         'SELECT * FROM mmc_members WHERE id = ?',
         [id]
-      );
-      if (!member) throw new NotFoundError();
-      if (member.status === 'DISABLED') throw new AlreadyDisabledError();
-      
+      )
+      if (!member) throw new NotFoundError()
+      if (member.status === 'DISABLED') throw new AlreadyDisabledError()
+
       // Update
       const updated = await tx.queryOne(
         `UPDATE mmc_members 
@@ -960,8 +984,8 @@ export class MemberService {
          WHERE id = ?
          RETURNING *`,
         [id]
-      );
-      
+      )
+
       // Audit
       await this.auditService.logAction(
         actor,
@@ -969,10 +993,10 @@ export class MemberService {
         'MEMBER',
         { status: member.status, token_version: member.token_version },
         { status: updated.status, token_version: updated.token_version }
-      );
-      
-      return updated;
-    });
+      )
+
+      return updated
+    })
   }
 }
 ```
@@ -986,6 +1010,7 @@ export class MemberService {
 All write operations use `SERIALIZABLE` or `REPEATABLE_READ` isolation level.
 
 **Reasoning:**
+
 - `READ_COMMITTED` (PostgreSQL default): allows race conditions in role edits
 - `REPEATABLE_READ`: prevents phantom reads; suitable for MMC
 - `SERIALIZABLE`: strongest; may reduce throughput; use if needed
@@ -1004,6 +1029,7 @@ COMMIT;
 **Scenario:** Admin1 and Admin2 both edit a role's permissions simultaneously.
 
 **Without serialization:**
+
 ```
 Admin1 reads member.token_version = 5
 Admin2 reads member.token_version = 5
@@ -1013,6 +1039,7 @@ Result: token_version = 6 (should be 7; lost update)
 ```
 
 **With SERIALIZABLE isolation:**
+
 ```
 Admin1 starts transaction (acquires lock)
 Admin2 starts transaction (waits for lock)
@@ -1039,32 +1066,37 @@ Result: token_version = 7 (correct)
 ```typescript
 async function updateRolePermissions(roleId, newPermissions) {
   // Validate outside transaction
-  await validateRole(roleId);
-  await validatePermissions(newPermissions);
-  
+  await validateRole(roleId)
+  await validatePermissions(newPermissions)
+
   // Short transaction for write
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       return await db.transaction(async (tx) => {
         // All writes here
-        await tx.execute('UPDATE roles SET ... WHERE id = ?', [roleId]);
-        await tx.execute('UPDATE role_permissions SET ... WHERE role_id = ?', [roleId]);
+        await tx.execute('UPDATE roles SET ... WHERE id = ?', [roleId])
+        await tx.execute('UPDATE role_permissions SET ... WHERE role_id = ?', [
+          roleId,
+        ])
         // Cascade
-        const members = await tx.query('SELECT id FROM mmc_members WHERE role_id = ?', [roleId]);
+        const members = await tx.query(
+          'SELECT id FROM mmc_members WHERE role_id = ?',
+          [roleId]
+        )
         for (const member of members) {
           await tx.execute(
             'UPDATE mmc_members SET token_version = token_version + 1 WHERE id = ?',
             [member.id]
-          );
+          )
         }
-      });
+      })
     } catch (e) {
       if (e.code === 'DEADLOCK' && attempt < 2) {
         // Exponential backoff
-        await sleep(Math.random() * (2 ** attempt) * 100);
-        continue;
+        await sleep(Math.random() * 2 ** attempt * 100)
+        continue
       }
-      throw e;
+      throw e
     }
   }
 }
@@ -1091,15 +1123,15 @@ All errors follow standard structure:
 
 ### Error Codes (Partial)
 
-| Code | HTTP Status | Meaning |
-| --- | --- | --- |
-| UNAUTHORIZED | 401 | Invalid JWT, session invalidated, member disabled |
-| PERMISSION_DENIED | 403 | User lacks permission; audit logged |
-| NOT_FOUND | 404 | Resource doesn't exist |
-| CONFLICT | 409 | Validation conflict (duplicate, already in state) |
-| UNPROCESSABLE_ENTITY | 422 | Validation failure (bad format, constraints) |
-| RATE_LIMITED | 429 | Too many requests |
-| INTERNAL_ERROR | 500 | Server error; correlation_id logged for debugging |
+| Code                 | HTTP Status | Meaning                                           |
+| -------------------- | ----------- | ------------------------------------------------- |
+| UNAUTHORIZED         | 401         | Invalid JWT, session invalidated, member disabled |
+| PERMISSION_DENIED    | 403         | User lacks permission; audit logged               |
+| NOT_FOUND            | 404         | Resource doesn't exist                            |
+| CONFLICT             | 409         | Validation conflict (duplicate, already in state) |
+| UNPROCESSABLE_ENTITY | 422         | Validation failure (bad format, constraints)      |
+| RATE_LIMITED         | 429         | Too many requests                                 |
+| INTERNAL_ERROR       | 500         | Server error; correlation_id logged for debugging |
 
 ---
 
@@ -1163,15 +1195,18 @@ All logs emitted as JSON (Pino logger):
 ### Query Optimization
 
 **Member Lookup by ID:**
+
 - Index: `idx_mmc_members_role_id`, `idx_mmc_members_status`
 - Expected: < 5ms
 
 **Role Permissions Lookup:**
+
 - Index: `idx_role_permissions_role_id`
 - Query: `SELECT * FROM role_permissions WHERE role_id = ? AND domain = ?`
 - Expected: < 3ms
 
 **Permission Check (Middleware):**
+
 - Single query, indexed
 - Expected: < 10ms total
 
@@ -1193,8 +1228,8 @@ const pool = new Pool({
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
-  connectionLimit: 20
-});
+  connectionLimit: 20,
+})
 ```
 
 ### Cache Strategy (Redis)
@@ -1258,13 +1293,12 @@ SMTP_FROM_EMAIL=noreply@example.com
 
 ## Summary
 
-| Component | Technology | Details |
-| --- | --- | --- |
-| Routes | Hono | Lightweight; minimal overhead |
-| Middleware | Custom | Correlation ID → Auth → Permission → Handler |
-| Services | TypeScript | Domain logic; no framework deps |
-| Database | PostgreSQL | SERIALIZABLE isolation; 6 tables |
-| Cache | Redis | Idempotency fast path |
-| Logging | Pino | Structured JSON |
-| Auth | JWT | Bcrypt password hash (cost=12) |
-
+| Component  | Technology | Details                                      |
+| ---------- | ---------- | -------------------------------------------- |
+| Routes     | Hono       | Lightweight; minimal overhead                |
+| Middleware | Custom     | Correlation ID → Auth → Permission → Handler |
+| Services   | TypeScript | Domain logic; no framework deps              |
+| Database   | PostgreSQL | SERIALIZABLE isolation; 6 tables             |
+| Cache      | Redis      | Idempotency fast path                        |
+| Logging    | Pino       | Structured JSON                              |
+| Auth       | JWT        | Bcrypt password hash (cost=12)               |

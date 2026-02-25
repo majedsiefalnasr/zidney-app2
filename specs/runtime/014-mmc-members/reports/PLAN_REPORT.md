@@ -21,29 +21,30 @@
 
 ### Core Design Documents
 
-| Artifact | Type | Size | Purpose |
-|----------|------|------|---------|
-| **plan.md** | Technical Design | 8,000+ lines | Implementation specification (architecture, endpoints, transactions, error handling) |
-| **data-model.md** | Schema | 1,500+ lines | Complete database schema with all constraints, indexes, cascade rules |
-| **research.md** | Architecture Decisions | 2,000+ lines | Justification for all 6 clarified decisions |
-| **quickstart.md** | Developer Guide | 3,000+ lines | Practical examples, code patterns, debugging guide |
+| Artifact          | Type                   | Size         | Purpose                                                                              |
+| ----------------- | ---------------------- | ------------ | ------------------------------------------------------------------------------------ |
+| **plan.md**       | Technical Design       | 8,000+ lines | Implementation specification (architecture, endpoints, transactions, error handling) |
+| **data-model.md** | Schema                 | 1,500+ lines | Complete database schema with all constraints, indexes, cascade rules                |
+| **research.md**   | Architecture Decisions | 2,000+ lines | Justification for all 6 clarified decisions                                          |
+| **quickstart.md** | Developer Guide        | 3,000+ lines | Practical examples, code patterns, debugging guide                                   |
 
 ### API Contracts (contracts/ directory)
 
-| File | Endpoints | Coverage |
-|------|-----------|----------|
-| **01-members.md** | 5 endpoints | Member CRUD, listing, disablement |
-| **02-roles.md** | 6 endpoints | Role management, permission matrix updates, cascade invalidation |
-| **03-invitations.md** | 6 endpoints | Invitation lifecycle, acceptance, resend, state machine |
-| **04-authentication.md** | 4 endpoints | Login, logout, permission checks, session token details |
+| File                     | Endpoints   | Coverage                                                         |
+| ------------------------ | ----------- | ---------------------------------------------------------------- |
+| **01-members.md**        | 5 endpoints | Member CRUD, listing, disablement                                |
+| **02-roles.md**          | 6 endpoints | Role management, permission matrix updates, cascade invalidation |
+| **03-invitations.md**    | 6 endpoints | Invitation lifecycle, acceptance, resend, state machine          |
+| **04-authentication.md** | 4 endpoints | Login, logout, permission checks, session token details          |
 
 **Total API Endpoints Specified:** 21 endpoints with full request/response schemas
 
 ---
 
-## Data Model  – 6 Tables
+## Data Model – 6 Tables
 
 ### Table: mmc_members
+
 ```
 id (UUID) — Primary key
 username (VARCHAR UNIQUE NOT NULL) — Immutable after creation
@@ -66,6 +67,7 @@ Constraints:
 ```
 
 ### Table: roles
+
 ```
 id (UUID) — Primary key
 name (VARCHAR NOT NULL)
@@ -80,6 +82,7 @@ Constraints:
 ```
 
 ### Table: role_permissions
+
 ```
 id (UUID) — Primary key
 role_id (UUID FK → roles.id) ON DELETE CASCADE
@@ -99,6 +102,7 @@ Constraints:
 ```
 
 ### Table: mmc_member_invitations
+
 ```
 id (UUID) — Primary key
 email (VARCHAR NOT NULL)
@@ -119,6 +123,7 @@ Constraints:
 ```
 
 ### Table: mmc_audit_log (Immutable)
+
 ```
 id (UUID) — Primary key
 member_id (UUID) — Who made the change (nullable for system actions)
@@ -136,6 +141,7 @@ Constraints:
 ```
 
 ### Table: request_log (Idempotency Support)
+
 ```
 id (UUID) — Primary key
 request_id (VARCHAR UNIQUE NOT NULL) — Idempotency-Key header
@@ -185,6 +191,7 @@ Constraints:
 ### Core Endpoints (21 Total)
 
 **Members Domain (5):**
+
 - POST /mmc/members (create) — Permission: MEMBERS_MANAGEMENT.can_create
 - GET /mmc/members/:id (read) — Permission: MEMBERS_MANAGEMENT.can_view
 - PATCH /mmc/members/:id (update) — Permission: MEMBERS_MANAGEMENT.can_edit
@@ -192,6 +199,7 @@ Constraints:
 - GET /mmc/members (list) — Permission: MEMBERS_MANAGEMENT.can_view
 
 **Roles Domain (6):**
+
 - GET /mmc/roles (list) — Permission: MEMBERS_MANAGEMENT.can_view
 - GET /mmc/roles/:id (detail) — Permission: MEMBERS_MANAGEMENT.can_view
 - GET /mmc/roles/:id/permissions (matrix) — Permission: MEMBERS_MANAGEMENT.can_view
@@ -200,6 +208,7 @@ Constraints:
 - DELETE /mmc/roles (delete with FK check) — Permission: MEMBERS_MANAGEMENT.can_delete
 
 **Invitations Domain (6):**
+
 - POST /mmc/invitations (create) — Permission: MEMBERS_MANAGEMENT.can_create
 - POST /mmc/invitations/:token/accept (accept) — No auth required (token validation only)
 - GET /mmc/invitations (list) — Permission: MEMBERS_MANAGEMENT.can_view
@@ -208,6 +217,7 @@ Constraints:
 - DELETE /mmc/invitations/:id (cancel pending) — Permission: MEMBERS_MANAGEMENT.can_delete
 
 **Authentication Domain (4):**
+
 - POST /mmc/auth/login (with rate limiting) — No auth required; rate limit enforced
 - POST /mmc/auth/logout (optional) — Auth required
 - GET /mmc/permissions/check (for UI) — Auth required
@@ -223,23 +233,23 @@ Constraints:
 
 ```sql
 BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;
-  
+
   -- Find all members with target role
   target_members = SELECT id FROM mmc_members WHERE role_id = $role_id;
-  
+
   -- Update all members' token_version (invalidates all sessions)
-  UPDATE mmc_members 
+  UPDATE mmc_members
   SET token_version = token_version + 1,
       updated_at = NOW()
   WHERE role_id = $role_id;
-  
+
   -- Update permissions
   UPDATE role_permissions
   SET can_edit = $new_value,
       updated_at = NOW()
   WHERE role_id = $role_id
   AND domain = $domain;
-  
+
   -- Log audit event
   INSERT INTO mmc_audit_log (...)
   VALUES (...);
@@ -252,6 +262,7 @@ COMMIT; -- All or nothing
 ### Session Invalidation Cascade
 
 **When token_version increments:**
+
 1. Next API request from invalidated member → auth middleware queries mmc_members
 2. Compares JWT.token_version with DB token_version
 3. If mismatch → 401 UNAUTHORIZED
@@ -300,15 +311,16 @@ COMMIT; -- All or nothing
 
 ## Performance Targets
 
-| Metric | Target | Justification |
-|--------|--------|---------------|
-| p95 permission check | <50ms | In-memory role_permissions lookup |
-| p95 member creation | <200ms | Hash (100ms) + INSERT (50ms) + audit (50ms) |
+| Metric                  | Target | Justification                                 |
+| ----------------------- | ------ | --------------------------------------------- |
+| p95 permission check    | <50ms  | In-memory role_permissions lookup             |
+| p95 member creation     | <200ms | Hash (100ms) + INSERT (50ms) + audit (50ms)   |
 | p95 role edit (cascade) | <500ms | Multi-UPDATE transaction + token invalidation |
-| Login (bcrypt cost=12) | ~200ms | OWASP standard; acceptable UX |
-| Invitation acceptance | <150ms | Token lookup + password hash + INSERT |
+| Login (bcrypt cost=12)  | ~200ms | OWASP standard; acceptable UX                 |
+| Invitation acceptance   | <150ms | Token lookup + password hash + INSERT         |
 
 **Indexes for Performance:**
+
 - Composite: (role_id, status) on mmc_members — role edit cascade
 - Composite: (email, status) on mmc_member_invitations — duplicate check
 - Composite: (entity_type, entity_id, timestamp) on mmc_audit_log — audit queries
@@ -324,33 +336,38 @@ COMMIT; -- All or nothing
 ✅ **Audit trail** — Immutable append-only log  
 ✅ **Permission enforcement** — API layer ONLY (not frontend)  
 ✅ **Transaction atomicity** — All writes atomic or none  
-✅ **No cross-tenant logic** — Master_db only  
+✅ **No cross-tenant logic** — Master_db only
 
 ---
 
 ## Implementation Phases
 
 ### Phase 1: Schema & Migrations
+
 - Create all 6 tables with constraints
 - Create indexes for performance
 - Verify FK relationships
 
 ### Phase 2: Authentication & Authorization
+
 - MMC JWT validation middleware
 - Permission lookup & enforcement
 - Session invalidation (token_version checking)
 
 ### Phase 3: Core Endpoints (Members & Roles)
+
 - Member CRUD endpoints
 - Role management
 - Permission matrix operations
 
 ### Phase 4: Invitations & Onboarding
+
 - Invitation creation & token generation
 - Acceptance flow with validation
 - Expiration cleanup job
 
 ### Phase 5: Testing & Validation
+
 - Unit tests (service layer)
 - Integration tests (API flows)
 - Concurrency tests (race condition validation)
@@ -361,11 +378,13 @@ COMMIT; -- All or nothing
 ## Next Steps
 
 Technical plan is **COMPLETE**. Ready for:
+
 1. **Task generation** (`speckit.tasks`) — Break into atomic implementation tasks
 2. **Drift analysis** (`speckit.analyze`) — Validate against constitution
 3. **Implementation** (`speckit.implement`) — Coding phase begins
 
 **All planning artifacts:**
+
 - ✅ specs/runtime/014-mmc-members/plan.md
 - ✅ specs/runtime/014-mmc-members/data-model.md
 - ✅ specs/runtime/014-mmc-members/research.md

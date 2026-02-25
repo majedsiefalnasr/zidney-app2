@@ -16,7 +16,7 @@ npm run migrate:master
 
 # Verify tables created
 psql master_db -c "
-  SELECT table_name FROM information_schema.tables 
+  SELECT table_name FROM information_schema.tables
   WHERE table_schema='public' AND table_name LIKE 'mmc_%'
 "
 # Expected output:
@@ -81,7 +81,7 @@ INSERT INTO role_permissions (role_id, domain, can_view, can_create, can_edit, c
 
 -- Insert seed admin member
 INSERT INTO mmc_members (id, username, email, password_hash, role_id, status, created_at, updated_at) VALUES
-('admin-member-uuid', 'admin', 'admin@zidney.example.com', 
+('admin-member-uuid', 'admin', 'admin@zidney.example.com',
  '$2b$12$...bcrypt_hash_of_password...', 'role-admin-uuid', 'ACTIVE', NOW(), NOW());
 ```
 
@@ -104,18 +104,18 @@ const error = ref('')
 async function handleLogin() {
   loading.value = true
   error.value = ''
-  
+
   try {
     const response = await axios.post('/mmc/auth/login', {
       username: username.value,
-      password: password.value
+      password: password.value,
     })
-    
+
     if (response.data.success) {
       // Store token in localStorage or secure cookie
       localStorage.setItem('mmc_token', response.data.data.access_token)
       localStorage.setItem('mmc_user', JSON.stringify(response.data.data.user))
-      
+
       // Redirect to dashboard
       window.location.href = '/mmc/dashboard'
     } else {
@@ -143,8 +143,8 @@ import axios from 'axios'
 const mmc = axios.create({
   baseURL: '/mmc',
   headers: {
-    'Content-Type': 'application/json'
-  }
+    'Content-Type': 'application/json',
+  },
 })
 
 // Interceptor: Add token to all requests
@@ -196,57 +196,60 @@ app.use('*', (c, next) => {
 })
 
 // JWT verification middleware
-app.use('/mmc/*', jwt({
-  secret: process.env.JWT_SECRET,
-  alg: 'HS256',
-  noVerify: false
-}))
+app.use(
+  '/mmc/*',
+  jwt({
+    secret: process.env.JWT_SECRET,
+    alg: 'HS256',
+    noVerify: false,
+  })
+)
 
 // Extended auth middleware: Check token_version + status
 app.use('/mmc/*', async (c, next) => {
   const payload = c.get('jwtPayload')
   const logger = c.get('logger')
-  
+
   // Reject cross-context tokens
   if (payload.workspace_id) {
     logger.warn('cross_context_token_rejected')
     return c.json({ error: 'Unauthorized' }, 401)
   }
-  
+
   // Fetch member from DB
   const db = getMasterPool()
   const member = await db.queryOne(
     'SELECT id, status, role_id, token_version FROM mmc_members WHERE id = ?',
     [payload.sub]
   )
-  
+
   if (!member) {
     logger.warn('member_not_found', { user_id: payload.sub })
     return c.json({ error: 'Unauthorized' }, 401)
   }
-  
+
   if (member.status !== 'ACTIVE') {
     logger.warn('member_disabled', { user_id: payload.sub })
     return c.json({ error: 'Account disabled' }, 401)
   }
-  
+
   // Check token_version (session invalidation)
   if (payload.token_version !== member.token_version) {
     logger.info('session_invalidated', {
       user_id: payload.sub,
       jwt_version: payload.token_version,
-      db_version: member.token_version
+      db_version: member.token_version,
     })
     return c.json({ error: 'Session invalidated; please re-login' }, 401)
   }
-  
+
   // Store context
   c.set('mmc_user', {
     user_id: member.id,
     role_id: member.role_id,
-    token_version: member.token_version
+    token_version: member.token_version,
   })
-  
+
   logger.debug('auth_success', { user_id: payload.sub })
   return next()
 })
@@ -274,63 +277,77 @@ const routePermissions: Map<string, PermissionRequirement> = new Map([
   ['GET /mmc/members/:id', { domain: 'MEMBERS_MANAGEMENT', action: 'view' }],
   ['POST /mmc/members', { domain: 'MEMBERS_MANAGEMENT', action: 'create' }],
   ['PATCH /mmc/members/:id', { domain: 'MEMBERS_MANAGEMENT', action: 'edit' }],
-  ['DELETE /mmc/members/:id', { domain: 'MEMBERS_MANAGEMENT', action: 'delete' }],
+  [
+    'DELETE /mmc/members/:id',
+    { domain: 'MEMBERS_MANAGEMENT', action: 'delete' },
+  ],
   ['GET /mmc/roles', { domain: 'MEMBERS_MANAGEMENT', action: 'view' }],
-  ['PATCH /mmc/roles/:id/permissions', { domain: 'MEMBERS_MANAGEMENT', action: 'edit' }]
+  [
+    'PATCH /mmc/roles/:id/permissions',
+    { domain: 'MEMBERS_MANAGEMENT', action: 'edit' },
+  ],
 ])
 
 async function permissionMiddleware(c: Context, next: Function) {
   const routeKey = `${c.req.method} ${c.req.path}`
   const permission = routePermissions.get(routeKey)
-  
+
   if (!permission) {
     // No permission required (public or optional)
     return next()
   }
-  
+
   const mmc_user = c.get('mmc_user')
   const logger = c.get('logger')
   const db = getMasterPool()
-  
+
   // Query permission matrix
   const perm = await db.queryOne(
     'SELECT can_view, can_create, can_edit, can_delete FROM role_permissions WHERE role_id = ? AND domain = ?',
     [mmc_user.role_id, permission.domain]
   )
-  
+
   // Check permission bit
   const actionMap = {
-    'view': perm?.can_view,
-    'create': perm?.can_create,
-    'edit': perm?.can_edit,
-    'delete': perm?.can_delete
+    view: perm?.can_view,
+    create: perm?.can_create,
+    edit: perm?.can_edit,
+    delete: perm?.can_delete,
   }
-  
+
   const hasPermission = actionMap[permission.action] ?? false
-  
+
   if (!hasPermission) {
     logger.warn('permission_denied', {
       user_id: mmc_user.user_id,
       domain: permission.domain,
-      action: permission.action
+      action: permission.action,
     })
-    
+
     // Log audit entry
     await db.execute(
       'INSERT INTO mmc_audit_log (actor_user_id, action_type, entity_type, correlation_id, timestamp) VALUES (?, ?, ?, ?, NOW())',
-      [mmc_user.user_id, 'PERMISSION_CHECK_DENIED', permission.domain, c.get('correlationId')]
+      [
+        mmc_user.user_id,
+        'PERMISSION_CHECK_DENIED',
+        permission.domain,
+        c.get('correlationId'),
+      ]
     )
-    
-    return c.json({
-      success: false,
-      data: null,
-      error: {
-        code: 'PERMISSION_DENIED',
-        message: `Permission denied: ${permission.domain}.${permission.action}`
-      }
-    }, 403)
+
+    return c.json(
+      {
+        success: false,
+        data: null,
+        error: {
+          code: 'PERMISSION_DENIED',
+          message: `Permission denied: ${permission.domain}.${permission.action}`,
+        },
+      },
+      403
+    )
   }
-  
+
   return next()
 }
 
@@ -350,15 +367,20 @@ import { MemberService } from '@packages/domain-core'
 
 class MemberService {
   constructor(private db: Pool) {}
-  
+
   async createMember(
-    data: { username: string; email: string; password: string; role_id: string },
+    data: {
+      username: string
+      email: string
+      password: string
+      role_id: string
+    },
     actor_user_id: string,
     correlation_id: string
   ) {
     // Hash password
     const hashedPassword = await bcrypt.hash(data.password, 12)
-    
+
     // Transaction
     return this.db.transaction(async (tx) => {
       // Validate
@@ -369,7 +391,7 @@ class MemberService {
       if (existingUsername) {
         throw new Error('DUPLICATE_USERNAME')
       }
-      
+
       const existingEmail = await tx.queryOne(
         'SELECT id FROM mmc_members WHERE email = ?',
         [data.email]
@@ -377,7 +399,7 @@ class MemberService {
       if (existingEmail) {
         throw new Error('DUPLICATE_EMAIL')
       }
-      
+
       const role = await tx.queryOne(
         'SELECT id FROM roles WHERE id = ? AND status = ?',
         [data.role_id, 'ACTIVE']
@@ -385,7 +407,7 @@ class MemberService {
       if (!role) {
         throw new Error('INVALID_ROLE')
       }
-      
+
       // Create member
       const member = await tx.queryOne(
         `INSERT INTO mmc_members 
@@ -394,7 +416,7 @@ class MemberService {
          RETURNING *`,
         [data.username, data.email, hashedPassword, data.role_id, actor_user_id]
       )
-      
+
       // Audit log
       await tx.execute(
         `INSERT INTO mmc_audit_log 
@@ -406,10 +428,10 @@ class MemberService {
           'MEMBER',
           member.id,
           JSON.stringify({ username: member.username, email: member.email }),
-          correlation_id
+          correlation_id,
         ]
       )
-      
+
       return member
     })
   }
@@ -420,7 +442,7 @@ app.post('/mmc/members', permissionMiddleware, async (c) => {
   const data = await c.req.json()
   const mmc_user = c.get('mmc_user')
   const logger = c.get('logger')
-  
+
   try {
     const memberService = new MemberService(getMasterPool())
     const member = await memberService.createMember(
@@ -428,21 +450,27 @@ app.post('/mmc/members', permissionMiddleware, async (c) => {
       mmc_user.user_id,
       c.get('correlationId')
     )
-    
+
     logger.info('member_created', { member_id: member.id })
-    
-    return c.json({
-      success: true,
-      data: member,
-      error: null
-    }, 201)
+
+    return c.json(
+      {
+        success: true,
+        data: member,
+        error: null,
+      },
+      201
+    )
   } catch (err) {
     if (err.message === 'DUPLICATE_USERNAME') {
-      return c.json({
-        success: false,
-        data: null,
-        error: { code: 'CONFLICT', message: 'Username already exists' }
-      }, 409)
+      return c.json(
+        {
+          success: false,
+          data: null,
+          error: { code: 'CONFLICT', message: 'Username already exists' },
+        },
+        409
+      )
     }
     throw err
   }
@@ -459,40 +487,55 @@ app.post('/mmc/members', permissionMiddleware, async (c) => {
 // Backend | Service layer
 class RoleService {
   constructor(private db: Pool) {}
-  
+
   async updateRolePermissions(
     role_id: string,
-    permissions: Array<{ domain: string; can_view: boolean; can_create: boolean; can_edit: boolean; can_delete: boolean }>,
+    permissions: Array<{
+      domain: string
+      can_view: boolean
+      can_create: boolean
+      can_edit: boolean
+      can_delete: boolean
+    }>,
     actor_user_id: string,
     correlation_id: string
   ) {
     return this.db.transaction(async (tx) => {
       // Verify role exists
-      const role = await tx.queryOne('SELECT id FROM roles WHERE id = ?', [role_id])
+      const role = await tx.queryOne('SELECT id FROM roles WHERE id = ?', [
+        role_id,
+      ])
       if (!role) throw new Error('ROLE_NOT_FOUND')
-      
+
       // Update permissions
       for (const perm of permissions) {
         await tx.execute(
           `UPDATE role_permissions 
            SET can_view = ?, can_create = ?, can_edit = ?, can_delete = ?, updated_at = NOW()
            WHERE role_id = ? AND domain = ?`,
-          [perm.can_view, perm.can_create, perm.can_edit, perm.can_delete, role_id, perm.domain]
+          [
+            perm.can_view,
+            perm.can_create,
+            perm.can_edit,
+            perm.can_delete,
+            role_id,
+            perm.domain,
+          ]
         )
       }
-      
+
       // CASCADE: Increment token_version for all members with this role
       const members = await tx.query(
         'SELECT id FROM mmc_members WHERE role_id = ?',
         [role_id]
       )
-      
+
       for (const member of members) {
         await tx.execute(
           'UPDATE mmc_members SET token_version = token_version + 1, updated_at = NOW() WHERE id = ?',
           [member.id]
         )
-        
+
         // Audit log (one per member)
         await tx.execute(
           `INSERT INTO mmc_audit_log 
@@ -506,11 +549,11 @@ class RoleService {
             member.id,
             JSON.stringify({ role_id }),
             JSON.stringify({ role_id, permissions_updated: true }),
-            correlation_id
+            correlation_id,
           ]
         )
       }
-      
+
       return { affected_members: members.length }
     })
   }
@@ -521,7 +564,7 @@ app.patch('/mmc/roles/:id/permissions', permissionMiddleware, async (c) => {
   const role_id = c.req.param('id')
   const { permissions } = await c.req.json()
   const mmc_user = c.get('mmc_user')
-  
+
   const roleService = new RoleService(getMasterPool())
   const result = await roleService.updateRolePermissions(
     role_id,
@@ -529,17 +572,20 @@ app.patch('/mmc/roles/:id/permissions', permissionMiddleware, async (c) => {
     mmc_user.user_id,
     c.get('correlationId')
   )
-  
-  return c.json({
-    success: true,
-    data: {
-      role_id,
-      affected_members: result.affected_members,
-      token_versions_incremented: true,
-      message: `Permissions updated; ${result.affected_members} active sessions will be invalidated`
+
+  return c.json(
+    {
+      success: true,
+      data: {
+        role_id,
+        affected_members: result.affected_members,
+        token_versions_incremented: true,
+        message: `Permissions updated; ${result.affected_members} active sessions will be invalidated`,
+      },
+      error: null,
     },
-    error: null
-  }, 200)
+    200
+  )
 })
 ```
 
@@ -555,28 +601,49 @@ import { ref, computed } from 'vue'
 import mmc from '@/api/mmc'
 
 export function usePermissions() {
-  const permissions = ref<Record<string, { can_view: boolean; can_create: boolean; can_edit: boolean; can_delete: boolean }>>({})
+  const permissions = ref<
+    Record<
+      string,
+      {
+        can_view: boolean
+        can_create: boolean
+        can_edit: boolean
+        can_delete: boolean
+      }
+    >
+  >({})
   const loading = ref(false)
-  
+
   async function fetchPermissions(domains: string[]) {
     loading.value = true
     try {
       const response = await mmc.get('/permissions/check', {
-        params: { domains: domains.join(',') }
+        params: { domains: domains.join(',') },
       })
       permissions.value = response.data.data.permissions
-      sessionStorage.setItem('mmc_permissions', JSON.stringify(permissions.value))
+      sessionStorage.setItem(
+        'mmc_permissions',
+        JSON.stringify(permissions.value)
+      )
     } finally {
       loading.value = false
     }
   }
-  
+
   // Helpers
-  const canViewMembers = computed(() => permissions.value.MEMBERS_MANAGEMENT?.can_view ?? false)
-  const canCreateMembers = computed(() => permissions.value.MEMBERS_MANAGEMENT?.can_create ?? false)
-  const canEditMembers = computed(() => permissions.value.MEMBERS_MANAGEMENT?.can_edit ?? false)
-  const canDeleteMembers = computed(() => permissions.value.MEMBERS_MANAGEMENT?.can_delete ?? false)
-  
+  const canViewMembers = computed(
+    () => permissions.value.MEMBERS_MANAGEMENT?.can_view ?? false
+  )
+  const canCreateMembers = computed(
+    () => permissions.value.MEMBERS_MANAGEMENT?.can_create ?? false
+  )
+  const canEditMembers = computed(
+    () => permissions.value.MEMBERS_MANAGEMENT?.can_edit ?? false
+  )
+  const canDeleteMembers = computed(
+    () => permissions.value.MEMBERS_MANAGEMENT?.can_delete ?? false
+  )
+
   return {
     permissions,
     loading,
@@ -584,7 +651,7 @@ export function usePermissions() {
     canViewMembers,
     canCreateMembers,
     canEditMembers,
-    canDeleteMembers
+    canDeleteMembers,
   }
 }
 
@@ -594,15 +661,15 @@ import { usePermissions } from '@/composables/usePermissions'
 export default {
   setup() {
     const { permissions, canCreateMembers, fetchPermissions } = usePermissions()
-    
+
     // On mount: fetch permissions once
     onMounted(() => {
       fetchPermissions(['MEMBERS_MANAGEMENT', 'PRODUCT_MANAGEMENT'])
     })
-    
+
     return {
       permissions,
-      canCreateMembers
+      canCreateMembers,
     }
   },
   template: `
@@ -616,7 +683,7 @@ export default {
         Create Member
       </button>
     </div>
-  `
+  `,
 }
 ```
 
@@ -640,10 +707,10 @@ class MemberService {
         'SELECT id, status, token_version FROM mmc_members WHERE id = ?',
         [member_id]
       )
-      
+
       if (!member) throw new Error('NOT_FOUND')
       if (member.status === 'DISABLED') throw new Error('ALREADY_DISABLED')
-      
+
       // Disable + increment token_version
       const updated = await tx.queryOne(
         `UPDATE mmc_members 
@@ -652,7 +719,7 @@ class MemberService {
          RETURNING *`,
         [member_id]
       )
-      
+
       // Audit log
       await tx.execute(
         `INSERT INTO mmc_audit_log 
@@ -664,12 +731,18 @@ class MemberService {
           'MEMBER_DISABLED',
           'MEMBER',
           member_id,
-          JSON.stringify({ status: member.status, token_version: member.token_version }),
-          JSON.stringify({ status: 'DISABLED', token_version: updated.token_version }),
-          correlation_id
+          JSON.stringify({
+            status: member.status,
+            token_version: member.token_version,
+          }),
+          JSON.stringify({
+            status: 'DISABLED',
+            token_version: updated.token_version,
+          }),
+          correlation_id,
         ]
       )
-      
+
       return updated
     })
   }
@@ -690,7 +763,7 @@ SELECT id, username, email, status, role_id, token_version FROM mmc_members WHER
 SELECT domain, can_view, can_create, can_edit, can_delete FROM role_permissions WHERE role_id = 'role-uuid';
 
 // Debugging: Check audit log for recent actions
-SELECT action_type, actor_user_id, entity_type, entity_id, timestamp FROM mmc_audit_log 
+SELECT action_type, actor_user_id, entity_type, entity_id, timestamp FROM mmc_audit_log
 ORDER BY timestamp DESC LIMIT 20;
 
 // Debugging: Check if login is rate-limited
@@ -771,7 +844,7 @@ describe('checkPermission', () => {
     )
     expect(result).toBe(true)
   })
-  
+
   it('should deny action if permission bit is false', async () => {
     const result = await checkPermission(
       'role-sales-uuid',
@@ -781,7 +854,7 @@ describe('checkPermission', () => {
     )
     expect(result).toBe(false)
   })
-  
+
   it('should deny action if permission row missing', async () => {
     const result = await checkPermission(
       'role-unknown-uuid',
@@ -802,16 +875,16 @@ import axios from 'axios'
 
 describe('POST /mmc/members', () => {
   let token: string
-  
+
   beforeEach(async () => {
     // Login as admin
     const response = await axios.post('http://localhost:3000/mmc/auth/login', {
       username: 'admin',
-      password: 'admin_password'
+      password: 'admin_password',
     })
     token = response.data.data.access_token
   })
-  
+
   it('should create member with valid credentials', async () => {
     const response = await axios.post(
       'http://localhost:3000/mmc/members',
@@ -819,16 +892,16 @@ describe('POST /mmc/members', () => {
         username: 'newuser',
         email: 'newuser@example.com',
         password: 'Password123!',
-        role_id: 'role-admin-uuid'
+        role_id: 'role-admin-uuid',
       },
       { headers: { Authorization: `Bearer ${token}` } }
     )
-    
+
     expect(response.status).toBe(201)
     expect(response.data.success).toBe(true)
     expect(response.data.data.username).toBe('newuser')
   })
-  
+
   it('should reject duplicate username', async () => {
     await axios.post(
       'http://localhost:3000/mmc/members',
@@ -836,22 +909,22 @@ describe('POST /mmc/members', () => {
         username: 'duplicate',
         email: 'first@example.com',
         password: 'Password123!',
-        role_id: 'role-admin-uuid'
+        role_id: 'role-admin-uuid',
       },
       { headers: { Authorization: `Bearer ${token}` } }
     )
-    
+
     const response = await axios.post(
       'http://localhost:3000/mmc/members',
       {
         username: 'duplicate',
         email: 'second@example.com',
         password: 'Password123!',
-        role_id: 'role-admin-uuid'
+        role_id: 'role-admin-uuid',
       },
       { headers: { Authorization: `Bearer ${token}` } }
     )
-    
+
     expect(response.status).toBe(409)
     expect(response.data.error.code).toBe('CONFLICT')
   })
@@ -866,4 +939,3 @@ describe('POST /mmc/members', () => {
 - [plan.md](./plan.md) — Technical design details
 - [contracts/](./contracts/) — API contract files
 - [research.md](./research.md) — Architecture decisions
-

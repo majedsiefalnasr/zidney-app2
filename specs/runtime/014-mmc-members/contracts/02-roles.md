@@ -25,9 +25,9 @@ X-Correlation-ID: {correlation_id}
 
 ### Query Parameters
 
-| Parameter | Type | Default | Description |
-| --- | --- | --- | --- |
-| status | string | ACTIVE | Filter by status (ACTIVE or INACTIVE) |
+| Parameter | Type   | Default | Description                           |
+| --------- | ------ | ------- | ------------------------------------- |
+| status    | string | ACTIVE  | Filter by status (ACTIVE or INACTIVE) |
 
 ### Response: 200 OK
 
@@ -211,14 +211,15 @@ REPORTING                Access audit logs, compliance reports, analytics
 
 Each domain has 4 boolean bits:
 
-| Bit | Domain | Meaning |
-| --- | --- | --- |
-| can_view | All 7 | User can read/retrieve entities in domain |
-| can_create | All 7 | User can create new entities in domain |
-| can_edit | All 7 | User can modify existing entities in domain |
-| can_delete | All 7 | User can delete/disable entities in domain |
+| Bit        | Domain | Meaning                                     |
+| ---------- | ------ | ------------------------------------------- |
+| can_view   | All 7  | User can read/retrieve entities in domain   |
+| can_create | All 7  | User can create new entities in domain      |
+| can_edit   | All 7  | User can modify existing entities in domain |
+| can_delete | All 7  | User can delete/disable entities in domain  |
 
 **Semantics:** Used for fine-grained access control.
+
 - `view=true, edit=false` → read-only access
 - `create=true, delete=false` → can create but not destroy
 
@@ -278,14 +279,14 @@ Content-Type: application/json
 
 ### Request Validation
 
-| Field | Type | Constraints |
-| --- | --- | --- |
-| permissions | array | 1-7 objects; each with domain + 4 bit fields |
-| domain | string | Must be one of 7 valid domains |
-| can_view | boolean | true or false |
-| can_create | boolean | true or false |
-| can_edit | boolean | true or false |
-| can_delete | boolean | true or false |
+| Field       | Type    | Constraints                                  |
+| ----------- | ------- | -------------------------------------------- |
+| permissions | array   | 1-7 objects; each with domain + 4 bit fields |
+| domain      | string  | Must be one of 7 valid domains               |
+| can_view    | boolean | true or false                                |
+| can_create  | boolean | true or false                                |
+| can_edit    | boolean | true or false                                |
+| can_delete  | boolean | true or false                                |
 
 ### Response: 200 OK
 
@@ -327,6 +328,7 @@ Content-Type: application/json
 ```
 
 #### 400 Bad Request
+
 **Invalid domain**
 
 ```json
@@ -458,6 +460,7 @@ X-Correlation-ID: {correlation_id}
 ```
 
 #### 409 Conflict
+
 **Cannot delete; members assigned to this role**
 
 ```json
@@ -492,6 +495,7 @@ When a user attempts an action, the API middleware:
    - `DELETE /mmc/members/{id}` → `(MEMBERS_MANAGEMENT, delete)`
 
 2. Queries permission matrix:
+
    ```sql
    SELECT (can_view, can_create, can_edit, can_delete) FROM role_permissions
    WHERE role_id = ? AND domain = ?
@@ -503,4 +507,3 @@ When a user attempts an action, the API middleware:
    - If permission NOT found: deny 403 (implicit deny; fail-safe)
 
 4. Logs decision (warn level if denied)
-

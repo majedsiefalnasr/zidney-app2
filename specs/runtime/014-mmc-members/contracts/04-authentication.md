@@ -35,10 +35,10 @@ X-Forwarded-For: 203.0.113.45 (optional; IP detection)
 
 ### Request Validation
 
-| Field | Type | Constraints |
-| --- | --- | --- |
+| Field    | Type   | Constraints                               |
+| -------- | ------ | ----------------------------------------- |
 | username | string | Alphanumeric + underscore; case-sensitive |
-| password | string | Any length; plaintext |
+| password | string | Any length; plaintext                     |
 
 ### Response: 200 OK
 
@@ -63,19 +63,20 @@ X-Forwarded-For: 203.0.113.45 (optional; IP detection)
 
 ### JWT Claims (in issued token)
 
-| Claim | Value | Description |
-| --- | --- | --- |
-| sub | member UUID | Subject (user ID) |
-| issuer | "mmc" | Token issuer (always "mmc" for MMC auth) |
-| role_id | UUID | Member's current role |
-| token_version | integer | Current token_version from DB; used for session invalidation |
-| exp | timestamp | Expiration (unix seconds); typically NOW + 3600 |
+| Claim         | Value       | Description                                                  |
+| ------------- | ----------- | ------------------------------------------------------------ |
+| sub           | member UUID | Subject (user ID)                                            |
+| issuer        | "mmc"       | Token issuer (always "mmc" for MMC auth)                     |
+| role_id       | UUID        | Member's current role                                        |
+| token_version | integer     | Current token_version from DB; used for session invalidation |
+| exp           | timestamp   | Expiration (unix seconds); typically NOW + 3600              |
 
 **Important:** Token NEVER contains `workspace_id`. If token received by tenant endpoint with workspace_id, it's a cross-context rejection.
 
 ### Error Responses
 
 #### 400 Bad Request
+
 **Validation Error**
 
 ```json
@@ -90,6 +91,7 @@ X-Forwarded-For: 203.0.113.45 (optional; IP detection)
 ```
 
 #### 401 Unauthorized
+
 **Invalid Credentials** (generic; doesn't distinguish user vs password failure for security)
 
 ```json
@@ -117,6 +119,7 @@ Account Disabled:
 ```
 
 #### 429 Too Many Requests
+
 **Rate Limit Exceeded**
 
 ```json
@@ -140,14 +143,14 @@ def login(username, password, client_ip, correlation_id):
     if attempts >= 5:
         log.warn('login_rate_limit', ip=client_ip, status=429)
         return 429 'Rate limited'
-    
+
     # 2. Fetch member
     db = get_master_pool()
     member = await db.query_one('''
-        SELECT id, password_hash, status, role_id, token_version 
+        SELECT id, password_hash, status, role_id, token_version
         FROM mmc_members WHERE username = ?
     ''', [username])
-    
+
     # 3. Check exists
     if not member:
         redis.incr(rate_key)
@@ -155,12 +158,12 @@ def login(username, password, client_ip, correlation_id):
         log.warn('login_fail_not_found', username=username, correlation_id=correlation_id)
         await audit_log('LOGIN_ATTEMPT_FAILED', correlation_id=correlation_id)
         return 401 'Invalid username or password'
-    
+
     # 4. Check status
     if member.status != 'ACTIVE':
         log.warn('login_fail_disabled', username=username, correlation_id=correlation_id)
         return 401 'Account disabled'
-    
+
     # 5. Verify password
     if not bcrypt.verify(password, member.password_hash):
         redis.incr(rate_key)
@@ -168,10 +171,10 @@ def login(username, password, client_ip, correlation_id):
         log.warn('login_fail_password', username=username, correlation_id=correlation_id)
         await audit_log('LOGIN_ATTEMPT_FAILED', correlation_id=correlation_id)
         return 401 'Invalid username or password'
-    
+
     # 6. Increment success counter and reset failure counter
     redis.delete(rate_key)  # Clear failed attempts
-    
+
     # 7. Issue JWT
     token = jwt.sign({
         'sub': member.id,
@@ -180,11 +183,11 @@ def login(username, password, client_ip, correlation_id):
         'token_version': member.token_version,
         'exp': time.now() + 3600
     }, secret=JWT_SECRET, algorithm='HS256')
-    
+
     # 8. Log success
     log.info('login_success', username=username, member_id=member.id, correlation_id=correlation_id)
     await audit_log('LOGIN_ATTEMPT_SUCCESS', actor=member.id, correlation_id=correlation_id)
-    
+
     # 9. Return token
     return 200 {
         'access_token': token,
@@ -210,6 +213,7 @@ X-Correlation-ID: correlation-uuid
 ```
 
 Middleware:
+
 1. Extracts JWT from header
 2. Verifies signature
 3. Checks token_version against DB
@@ -271,9 +275,9 @@ X-Correlation-ID: {correlation_id}
 
 ### Query Parameters
 
-| Parameter | Type | Description |
-| --- | --- | --- |
-| domains | string (comma-separated) | Domains to check; e.g., "PRODUCT_MANAGEMENT,CLIENT_MANAGEMENT" |
+| Parameter | Type                     | Description                                                    |
+| --------- | ------------------------ | -------------------------------------------------------------- |
+| domains   | string (comma-separated) | Domains to check; e.g., "PRODUCT_MANAGEMENT,CLIENT_MANAGEMENT" |
 
 ### Response: 200 OK
 
@@ -306,6 +310,7 @@ X-Correlation-ID: {correlation_id}
 ### Use Case
 
 Frontend calls this once after login to cache permission state; uses for:
+
 - Hiding/showing menu items (UX optimization only)
 - Disabling buttons for actions user cannot perform
 - **NOT** for security enforcement (API still enforces permissions)
@@ -320,6 +325,7 @@ WHERE role_id = ? AND domain IN (?, ?, ...)
 ### Error Responses
 
 #### 400 Bad Request
+
 **No domains specified**
 
 ```json
@@ -334,6 +340,7 @@ WHERE role_id = ? AND domain IN (?, ?, ...)
 ```
 
 #### 401 Unauthorized
+
 **Invalid or expired token**
 
 ```json
@@ -441,17 +448,17 @@ Scenario: Admin edits role permissions affecting user A
 def mmc_auth_middleware(request):
     # Extract JWT
     token = extract_jwt(request)
-    
+
     # Verify signature
     payload = jwt.verify(token)
-    
+
     # CRITICAL CHECK: Reject cross-context tokens
     if 'workspace_id' in payload and payload.get('workspace_id'):
-        log.warn('cross_context_token_rejected', 
-                 workspace_id=payload['workspace_id'], 
+        log.warn('cross_context_token_rejected',
+                 workspace_id=payload['workspace_id'],
                  status=401)
         return 401 'Unauthorized'
-    
+
     # Continue (token is MMC scope only)
     return next()
 ```
@@ -486,12 +493,11 @@ Signature: HMACSHA256(base64(header) + "." + base64(payload), JWT_SECRET)
 
 ### Payload Fields Explained
 
-| Field | Purpose | Used For |
-| --- | --- | --- |
-| sub | User identity | Fetch member record for auth checks |
-| issuer | Token source | Distinguish MMC from tenant tokens |
-| role_id | Authorization context | Fetch permission matrix |
-| token_version | Session version | Detect session invalidation |
-| exp | Expiration | Check if token expired |
-| iat | Issuance time | Audit trail (when token issued) |
-
+| Field         | Purpose               | Used For                            |
+| ------------- | --------------------- | ----------------------------------- |
+| sub           | User identity         | Fetch member record for auth checks |
+| issuer        | Token source          | Distinguish MMC from tenant tokens  |
+| role_id       | Authorization context | Fetch permission matrix             |
+| token_version | Session version       | Detect session invalidation         |
+| exp           | Expiration            | Check if token expired              |
+| iat           | Issuance time         | Audit trail (when token issued)     |
