@@ -12,7 +12,7 @@
 ✅ **Total Tasks:** 62 atomic, sequentially-ordered implementation tasks  
 ✅ **Parallelizable:** 28 tasks marked [P] (45% parallelism potential)  
 ✅ **Critical Path:** ~15 tasks on main dependency chain  
-✅ **Estimated Duration:** 5-6 weeks (full-team parallel, 4-5 engineers)  
+✅ **Estimated Duration:** 5-6 weeks (full-team parallel, 4-5 engineers)
 
 ---
 
@@ -22,18 +22,19 @@
 
 Foundation layer: All schema creation before any code.
 
-| Task | Title | Status | 
-|------|-------|--------|
-| T001 | Create mmc_members table | [ ] |
-| T002 | Create roles table | [ ] |
-| T003 | Create role_permissions table | [ ] |
-| T004 | Create mmc_member_invitations table | [ ] |
-| T005 | Create mmc_audit_log table (immutable) | [ ] |
-| T006 | Create request_log table (idempotency support) | [ ] |
+| Task | Title                                          | Status |
+| ---- | ---------------------------------------------- | ------ |
+| T001 | Create mmc_members table                       | [ ]    |
+| T002 | Create roles table                             | [ ]    |
+| T003 | Create role_permissions table                  | [ ]    |
+| T004 | Create mmc_member_invitations table            | [ ]    |
+| T005 | Create mmc_audit_log table (immutable)         | [ ]    |
+| T006 | Create request_log table (idempotency support) | [ ]    |
 
 **Dependencies:** None (can start immediately)  
 **Estimated Duration:** 2-3 hours total  
-**Success Criteria:** 
+**Success Criteria:**
+
 - All migrations run without errors
 - All constraints applied (FK, UNIQUE, CHECK)
 - All indexes created
@@ -45,18 +46,19 @@ Foundation layer: All schema creation before any code.
 
 Authentication and authorization foundation: All endpoints depend on this.
 
-| Task | Title | Parallelizable | 
-|------|-------|---|
-| T007 [P] | Implement MMC JWT validation middleware | Yes |
-| T008 [P] | Implement MMC permission enforcement middleware | Yes |
-| T009 [P] | Implement token_version cascade invalidation on role change | Yes |
-| T010 [P] | Implement idempotency-key request logging (hybrid Redis + DB) | Yes |
-| T011 | Implement rate limiting (5/min login, 10/min creation) | Yes |
-| T012 [P] | Implement structured logging with correlation_id propagation | Yes |
+| Task     | Title                                                         | Parallelizable |
+| -------- | ------------------------------------------------------------- | -------------- |
+| T007 [P] | Implement MMC JWT validation middleware                       | Yes            |
+| T008 [P] | Implement MMC permission enforcement middleware               | Yes            |
+| T009 [P] | Implement token_version cascade invalidation on role change   | Yes            |
+| T010 [P] | Implement idempotency-key request logging (hybrid Redis + DB) | Yes            |
+| T011     | Implement rate limiting (5/min login, 10/min creation)        | Yes            |
+| T012 [P] | Implement structured logging with correlation_id propagation  | Yes            |
 
 **Dependencies:** Phase 1 (schema)  
 **Estimated Duration:** 6-8 hours  
 **Success Criteria:**
+
 - All middleware passes unit tests
 - Auth middleware rejects workspace-scoped tokens
 - Permission matrix correctly lookups from DB
@@ -69,20 +71,21 @@ Authentication and authorization foundation: All endpoints depend on this.
 
 Core member management: Basic create, read, update, disable operations.
 
-| Task | Title | Parallelizable | 
-|------|-------|---|
-| T013 | Create MMC member service (domain logic) | [ ] |
-| T014 [P] | Implement POST /mmc/members (create) endpoint | Yes |
-| T015 [P] | Implement GET /mmc/members/:id (read) endpoint | Yes |
-| T016 [P] | Implement PATCH /mmc/members/:id (update) endpoint | Yes |
-| T017 [P] | Implement DELETE /mmc/members/:id (soft disable) endpoint | Yes |
-| T018 [P] | Implement GET /mmc/members (list with pagination) | Yes |
-| T019 [P] | Unit tests: MMC member service | Yes |
-| T020 [P] | Integration tests: Member endpoints (create → read → update → disable) | Yes |
+| Task     | Title                                                                  | Parallelizable |
+| -------- | ---------------------------------------------------------------------- | -------------- |
+| T013     | Create MMC member service (domain logic)                               | [ ]            |
+| T014 [P] | Implement POST /mmc/members (create) endpoint                          | Yes            |
+| T015 [P] | Implement GET /mmc/members/:id (read) endpoint                         | Yes            |
+| T016 [P] | Implement PATCH /mmc/members/:id (update) endpoint                     | Yes            |
+| T017 [P] | Implement DELETE /mmc/members/:id (soft disable) endpoint              | Yes            |
+| T018 [P] | Implement GET /mmc/members (list with pagination)                      | Yes            |
+| T019 [P] | Unit tests: MMC member service                                         | Yes            |
+| T020 [P] | Integration tests: Member endpoints (create → read → update → disable) | Yes            |
 
 **Dependencies:** Phase 2 (middleware)  
 **Estimated Duration:** 8-10 hours  
 **Success Criteria:**
+
 - Member creation returns 201 with generated ID
 - Username uniqueness enforced (409 on duplicate)
 - Email uniqueness enforced (409 on duplicate)
@@ -97,20 +100,21 @@ Core member management: Basic create, read, update, disable operations.
 
 RBAC core: Role CRUD, permission matrix updates with cascading session invalidation.
 
-| Task | Title | Parallelizable | 
-|------|-------|---|
-| T021 | Create roles service (domain logic) | [ ] |
-| T022 [P] | Implement GET /mmc/roles (list all roles) | Yes |
-| T023 [P] | Implement GET /mmc/roles/:id (role detail) | Yes |
-| T024 [P] | Implement GET /mmc/roles/:id/permissions (permission matrix) | Yes |
-| T025 [P] | Implement PATCH /mmc/roles/:id/permissions (batch update + cascade) | Yes |
-| T026 [P] | Implement POST /mmc/roles (create role) | Yes |
-| T027 [P] | Implement DELETE /mmc/roles (with FK safety check) | Yes |
-| T028 [P] | Unit tests: Role service; Integration tests: Role endpoints + cascade verification | Yes |
+| Task     | Title                                                                              | Parallelizable |
+| -------- | ---------------------------------------------------------------------------------- | -------------- |
+| T021     | Create roles service (domain logic)                                                | [ ]            |
+| T022 [P] | Implement GET /mmc/roles (list all roles)                                          | Yes            |
+| T023 [P] | Implement GET /mmc/roles/:id (role detail)                                         | Yes            |
+| T024 [P] | Implement GET /mmc/roles/:id/permissions (permission matrix)                       | Yes            |
+| T025 [P] | Implement PATCH /mmc/roles/:id/permissions (batch update + cascade)                | Yes            |
+| T026 [P] | Implement POST /mmc/roles (create role)                                            | Yes            |
+| T027 [P] | Implement DELETE /mmc/roles (with FK safety check)                                 | Yes            |
+| T028 [P] | Unit tests: Role service; Integration tests: Role endpoints + cascade verification | Yes            |
 
 **Dependencies:** Phase 3 (member service)  
 **Estimated Duration:** 10-12 hours  
 **Success Criteria:**
+
 - Permission matrix accurately reflects role assignments
 - Role permission edit cascades token_version increment to ALL affected members
 - Within 100ms of cascade, affected sessions become invalid (401 on next request)
@@ -123,19 +127,20 @@ RBAC core: Role CRUD, permission matrix updates with cascading session invalidat
 
 Login, logout, session management, token validation.
 
-| Task | Title | Parallelizable | 
-|------|-------|---|
-| T029 | Create auth service (domain logic) | [ ] |
-| T030 [P] | Implement POST /mmc/auth/login (with bcrypt validation + rate limiting) | Yes |
-| T031 [P] | Implement POST /mmc/auth/logout (optional; clear session flag) | Yes |
-| T032 [P] | Implement GET /mmc/auth/me (current user profile) | Yes |
-| T033 [P] | Implement GET /mmc/permissions/check (permission matrix for frontend) | Yes |
-| T034 [P] | Verify token_version cascade invalidates sessions (within 100ms) | Yes |
-| T035 [P] | Unit tests: Auth service; Integration tests: Login flow + token invalidation | Yes |
+| Task     | Title                                                                        | Parallelizable |
+| -------- | ---------------------------------------------------------------------------- | -------------- |
+| T029     | Create auth service (domain logic)                                           | [ ]            |
+| T030 [P] | Implement POST /mmc/auth/login (with bcrypt validation + rate limiting)      | Yes            |
+| T031 [P] | Implement POST /mmc/auth/logout (optional; clear session flag)               | Yes            |
+| T032 [P] | Implement GET /mmc/auth/me (current user profile)                            | Yes            |
+| T033 [P] | Implement GET /mmc/permissions/check (permission matrix for frontend)        | Yes            |
+| T034 [P] | Verify token_version cascade invalidates sessions (within 100ms)             | Yes            |
+| T035 [P] | Unit tests: Auth service; Integration tests: Login flow + token invalidation | Yes            |
 
 **Dependencies:** Phase 4 (permissions)  
 **Estimated Duration:** 8-10 hours  
 **Success Criteria:**
+
 - Login returns JWT with token_version
 - Invalid credentials return 401 (3 attempts locked for 60s per rate limit)
 - JWT validation rejects workspace_id (403)
@@ -149,20 +154,21 @@ Login, logout, session management, token validation.
 
 Invite workflow: Generate tokens, send emails, accept with password creation.
 
-| Task | Title | Parallelizable |
-|------|-------|---|
-| T036 | Create invitations service (domain logic + email support) | [ ] |
-| T037 [P] | Implement POST /mmc/invitations (create + generate token_once) | Yes |
-| T038 [P] | Implement POST /mmc/invitations/:token/accept (accept + create account) | Yes |
-| T039 [P] | Implement GET /mmc/invitations (list pending) | Yes |
-| T040 [P] | Implement GET /mmc/invitations/:id (detail) | Yes |
-| T041 [P] | Implement POST /mmc/invitations/:id/resend (regenerate token + resend email) | Yes |
-| T042 [P] | Implement DELETE /mmc/invitations/:id (cancel pending + cleanup) | Yes |
-| T043 [P] | Unit tests: Invitations service; Integration tests: Full invitation flow (send → expire → accept) | Yes |
+| Task     | Title                                                                                             | Parallelizable |
+| -------- | ------------------------------------------------------------------------------------------------- | -------------- |
+| T036     | Create invitations service (domain logic + email support)                                         | [ ]            |
+| T037 [P] | Implement POST /mmc/invitations (create + generate token_once)                                    | Yes            |
+| T038 [P] | Implement POST /mmc/invitations/:token/accept (accept + create account)                           | Yes            |
+| T039 [P] | Implement GET /mmc/invitations (list pending)                                                     | Yes            |
+| T040 [P] | Implement GET /mmc/invitations/:id (detail)                                                       | Yes            |
+| T041 [P] | Implement POST /mmc/invitations/:id/resend (regenerate token + resend email)                      | Yes            |
+| T042 [P] | Implement DELETE /mmc/invitations/:id (cancel pending + cleanup)                                  | Yes            |
+| T043 [P] | Unit tests: Invitations service; Integration tests: Full invitation flow (send → expire → accept) | Yes            |
 
 **Dependencies:** Phase 5 (auth)  
 **Estimated Duration:** 10-12 hours  
 **Success Criteria:**
+
 - Invitation token generated and hashed
 - Email sent asynchronously
 - Token expiration enforced (24h TTL, 410 GONE on expired)
@@ -176,24 +182,25 @@ Invite workflow: Generate tokens, send emails, accept with password creation.
 
 Comprehensive testing: Unit, integration, concurrency, edge cases.
 
-| Task | Title | Parallelizable |
-|------|-------|---|
-| T044 [P] | Unit tests: All service layer functions (member, role, auth, invitations) | Yes |
-| T045 [P] | Integration tests: All API flows (CRUD sequences, cascades, permission checks) | Yes |
-| T046 [P] | Concurrency tests: Token cascade under 100+ parallel updates | Yes |
-| T047 [P] | Concurrency tests: Duplicate member creation (idempotency + constraint) | Yes |
-| T048 [P] | Concurrency tests: Role deletion blocked with members assigned | Yes |
-| T049 [P] | Edge case tests: Expired invitations, duplicate emails, FK violations | Yes |
-| T050 [P] | Load tests: Permission check latency (target p95 <50ms) | Yes |
-| T051 [P] | Load tests: Member creation throughput (target p95 <200ms) | Yes |
-| T052 [P] | Snapshot tests: API error responses (all error codes) | Yes |
-| T053 [P] | Audit log tests: All state changes logged with before/after snapshots | Yes |
-| T054 [P] | Idempotency tests: Duplicate requests return cached response | Yes |
-| T055 [P] | Rate limiting tests: Login lockout, creation throttle | Yes |
+| Task     | Title                                                                          | Parallelizable |
+| -------- | ------------------------------------------------------------------------------ | -------------- |
+| T044 [P] | Unit tests: All service layer functions (member, role, auth, invitations)      | Yes            |
+| T045 [P] | Integration tests: All API flows (CRUD sequences, cascades, permission checks) | Yes            |
+| T046 [P] | Concurrency tests: Token cascade under 100+ parallel updates                   | Yes            |
+| T047 [P] | Concurrency tests: Duplicate member creation (idempotency + constraint)        | Yes            |
+| T048 [P] | Concurrency tests: Role deletion blocked with members assigned                 | Yes            |
+| T049 [P] | Edge case tests: Expired invitations, duplicate emails, FK violations          | Yes            |
+| T050 [P] | Load tests: Permission check latency (target p95 <50ms)                        | Yes            |
+| T051 [P] | Load tests: Member creation throughput (target p95 <200ms)                     | Yes            |
+| T052 [P] | Snapshot tests: API error responses (all error codes)                          | Yes            |
+| T053 [P] | Audit log tests: All state changes logged with before/after snapshots          | Yes            |
+| T054 [P] | Idempotency tests: Duplicate requests return cached response                   | Yes            |
+| T055 [P] | Rate limiting tests: Login lockout, creation throttle                          | Yes            |
 
 **Dependencies:** Phase 6 (all features)  
 **Estimated Duration:** 12-15 hours  
 **Success Criteria:**
+
 - All tests pass (unit: 100%, integration: 100%)
 - Concurrency tests show no race conditions
 - Performance targets met (p95 <50ms for checks, <200ms for creation)
@@ -207,19 +214,20 @@ Comprehensive testing: Unit, integration, concurrency, edge cases.
 
 Final touches: Logging improvements, documentation, performance tuning.
 
-| Task | Title | Parallelizable |
-|------|-------|---|
-| T056 [P] | Add structured logging to all endpoints (correlation_id, user_id, action) | Yes |
-| T057 [P] | Add observability: API latency metrics (Prometheus-compatible) | Yes |
-| T058 [P] | Add observability: Database query metrics | Yes |
-| T059 [P] | Performance tuning: Index verification + query plans | Yes |
-| T060 [P] | Documentation: API README + endpoint examples | Yes |
-| T061 [P] | Documentation: Developer guide (authentication, permission checks, error handling) | Yes |
-| T062 [P] | Final validation: All acceptance criteria verified; no regressions | Yes |
+| Task     | Title                                                                              | Parallelizable |
+| -------- | ---------------------------------------------------------------------------------- | -------------- |
+| T056 [P] | Add structured logging to all endpoints (correlation_id, user_id, action)          | Yes            |
+| T057 [P] | Add observability: API latency metrics (Prometheus-compatible)                     | Yes            |
+| T058 [P] | Add observability: Database query metrics                                          | Yes            |
+| T059 [P] | Performance tuning: Index verification + query plans                               | Yes            |
+| T060 [P] | Documentation: API README + endpoint examples                                      | Yes            |
+| T061 [P] | Documentation: Developer guide (authentication, permission checks, error handling) | Yes            |
+| T062 [P] | Final validation: All acceptance criteria verified; no regressions                 | Yes            |
 
 **Dependencies:** Phase 7 (testing)  
 **Estimated Duration:** 6-8 hours  
 **Success Criteria:**
+
 - All logs structured (JSON) with required fields
 - Metrics exposed on /metrics endpoint
 - Database queries optimized per performance targets
@@ -250,6 +258,7 @@ Phase 8 (7 tasks) [Polish] ─────────────→ (7 paralle
 ```
 
 **Critical Path (Sequential):**
+
 1. Phase 1 (schema) – 2-3 hours
 2. Phase 2 (middleware) – 6-8 hours
 3. Phase 3 (member CRUD) – 2-3 hours (core logic only)
@@ -275,6 +284,7 @@ Phase 8 (7 tasks) [Polish] ─────────────→ (7 paralle
 **Total Parallelizable:** 43 of 62 tasks (69% parallelism potential)
 
 **With 4 Engineers:**
+
 - Phase 1: 1 engineer (2-3h)
 - Phase 2: 2 engineers (3-4h)
 - Phases 3-6: 4 engineers (2-3h each phase, total 8-12h)
@@ -288,21 +298,25 @@ Phase 8 (7 tasks) [Polish] ─────────────→ (7 paralle
 Every task must satisfy:
 
 ✅ **Code Quality:**
+
 - ESLint passes
 - TypeScript strict mode passes (no any)
 - No console.log (use structured logger)
 
 ✅ **Testing:**
+
 - Unit tests: ≥80% coverage for services
 - Integration tests: ≥90% coverage for API flows
 - Any concurrency → explicit concurrency test
 
 ✅ **Observability:**
+
 - Structured logs with correlation_id
 - Error codes match error contract
 - Metrics (if applicable)
 
 ✅ **Constitutional Alignment:**
+
 - No tenant resolver calls in MMC code
 - All transactions atomic
 - No plaintext secrets
@@ -315,6 +329,7 @@ Every task must satisfy:
 All 62 tasks are atomic, sequenced, and parallelizable.
 
 **Next Steps:**
+
 1. Drift analysis (speckit.analyze) — validate against constitution
 2. Implementation (speckit.implement) — execute tasks per phase
 3. Validation (test harness) — verify all acceptance criteria
