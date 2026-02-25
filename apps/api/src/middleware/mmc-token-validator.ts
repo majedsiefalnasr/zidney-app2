@@ -42,7 +42,7 @@ export async function mmcTokenValidator(
   const parts = authHeader.split(' ')
   if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
     const error = getErrorDetails(ProvisioningErrorCode.UNAUTHORIZED_SERVICE)
-      c.status(error.httpStatus as any)
+    c.status(error.httpStatus as any)
     return c.json(
       createErrorResponse(
         ProvisioningErrorCode.UNAUTHORIZED_SERVICE,

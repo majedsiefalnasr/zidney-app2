@@ -8,20 +8,20 @@
  * Covers create, edit, state transitions, retry logic.
  */
 
-import type { Logger } from '@zidney/logger'
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   InvalidStateTransitionError,
   LicenseNotFoundError,
   LicenseValidationError,
   ProvisioningError,
-} from '../../../../packages/domain-core/src/licenses/errors'
-import { LicenseService } from '../../../../packages/domain-core/src/licenses/service'
+} from '@zidney/domain-core/licenses/errors'
+import { LicenseService } from '@zidney/domain-core/licenses/service'
 import {
   CreateLicenseRequest,
   License,
   LicenseStatus,
-} from '../../../../packages/domain-core/src/licenses/types'
+} from '@zidney/domain-core/licenses/types'
+import type { Logger } from '@zidney/logger'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 class InMemoryLicenseRepository {
   private licenses = new Map<string, License>()
@@ -167,7 +167,11 @@ describe('LicenseService', () => {
       debug: vi.fn(),
     } as any
 
-    service = new LicenseService(repository as any, mockQueueService, mockLogger)
+    service = new LicenseService(
+      repository as any,
+      mockQueueService,
+      mockLogger
+    )
   })
 
   afterEach(() => {
@@ -346,10 +350,18 @@ describe('LicenseService', () => {
     })
 
     it('should reject soft-lock from non-ACTIVE status', async () => {
-      await service.softLock(licenseId, { grace_period_days: 90 }, 'correlation-456')
+      await service.softLock(
+        licenseId,
+        { grace_period_days: 90 },
+        'correlation-456'
+      )
 
       await expect(
-        service.softLock(licenseId, { grace_period_days: 90 }, 'correlation-789')
+        service.softLock(
+          licenseId,
+          { grace_period_days: 90 },
+          'correlation-789'
+        )
       ).rejects.toThrow(InvalidStateTransitionError)
     })
   })

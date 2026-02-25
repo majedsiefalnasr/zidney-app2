@@ -10,12 +10,13 @@
  * - Results sorted by created_at DESC
  */
 
+import * as productService from '@zidney/domain-core/products/productService'
 import {
   CreateProductInput,
   ProductQueryFilters,
+  ProductStatus,
 } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import * as productService from '../../../packages/domain-core/src/products/productService'
 import {
   cleanupTestContext,
   createTestContext,
@@ -71,7 +72,7 @@ describe('T053: Product Listing Integration Tests', () => {
       await productService.changeProductStatus(
         dbClient,
         inactiveProduct.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
@@ -154,20 +155,20 @@ describe('T053: Product Listing Integration Tests', () => {
       await productService.changeProductStatus(
         dbClient,
         p3.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
       await productService.changeProductStatus(
         dbClient,
         p4.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
     })
 
     it('should filter by status=ACTIVE', async () => {
       const result = await productService.listProducts(dbClient, {
-        status: 'ACTIVE',
+        status: ProductStatus.ACTIVE,
       })
 
       expect(result.items.length).toBe(2)
@@ -176,7 +177,7 @@ describe('T053: Product Listing Integration Tests', () => {
 
     it('should filter by status=INACTIVE', async () => {
       const result = await productService.listProducts(dbClient, {
-        status: 'INACTIVE',
+        status: ProductStatus.INACTIVE,
       })
 
       expect(result.items.length).toBe(2)
@@ -393,12 +394,12 @@ describe('T053: Product Listing Integration Tests', () => {
       await productService.changeProductStatus(
         dbClient,
         p2.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
       const result = await productService.listProducts(dbClient, {
-        status: 'ACTIVE',
+        status: ProductStatus.ACTIVE,
         search: 'Assessment',
         limit: 10,
         offset: 0,

@@ -11,8 +11,8 @@
  * - Change tracking works correctly
  */
 
+import * as productService from '@zidney/domain-core/products/productService'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import * as productService from '../../../packages/domain-core/src/products/productService'
 import {
   cleanupTestContext,
   createTestContext,

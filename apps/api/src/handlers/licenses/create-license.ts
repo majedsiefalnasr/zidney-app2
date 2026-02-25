@@ -168,7 +168,7 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
       await deleteLicenseRecord(licenseId)
 
       const error = getErrorDetails(ProvisioningErrorCode.JOB_ENQUEUE_FAILED)
-      c.status(error.httpStatus)
+      c.status(error.httpStatus as any)
       return c.json(
         createErrorResponse(
           ProvisioningErrorCode.JOB_ENQUEUE_FAILED,
@@ -215,7 +215,7 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
     )
 
     const generalError = getErrorDetails(ProvisioningErrorCode.PROVISION_FAILED)
-    c.status(generalError.httpStatus)
+    c.status(generalError.httpStatus as any)
     return c.json(
       createErrorResponse(
         ProvisioningErrorCode.PROVISION_FAILED,

@@ -9,12 +9,12 @@
  * - Concurrent access patterns
  */
 
-import { describe, expect, it } from 'vitest'
 import {
   validateModulesEnum,
   validateProductName,
   validateSlug,
-} from '../../../packages/validation/src/products/productValidation'
+} from '@zidney/validation/products/productValidation'
+import { describe, expect, it } from 'vitest'
 
 describe('T063: Product Service Edge Cases Unit Tests', () => {
   describe('Null/undefined handling', () => {

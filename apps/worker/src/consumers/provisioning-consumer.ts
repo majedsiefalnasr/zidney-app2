@@ -157,13 +157,13 @@ export class ProvisioningJobConsumer {
       this.config.processingTimeoutMs || 300000
     )
 
-    this.activeJobs.set(job.id, controller)
+    this.activeJobs.set(job.jobId, controller)
 
     try {
       await this.processJob(job, controller.signal)
     } finally {
       clearTimeout(jobTimeout)
-      this.activeJobs.delete(job.id)
+      this.activeJobs.delete(job.jobId)
     }
   }
 

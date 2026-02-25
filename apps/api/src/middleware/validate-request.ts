@@ -14,7 +14,6 @@ import {
   getErrorDetails,
 } from '@zidney/types/errors/provisioning-errors'
 import { Context, Next } from 'hono'
-import { z } from 'zod'
 import { createErrorResponse } from '../routes/licenses/license-response'
 
 /**

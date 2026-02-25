@@ -12,9 +12,11 @@
  * - All errors follow {success, data, error} format
  */
 
+import * as productService from '@zidney/domain-core/products/productService'
+import { Module } from '@zidney/types/enums/Module'
 import { ErrorCodes } from '@zidney/types/errors/ErrorCodes'
+import { ProductStatus } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import * as productService from '../../../packages/domain-core/src/products/productService'
 import {
   cleanupTestContext,
   createTestContext,
@@ -47,7 +49,7 @@ describe('T060: Error Handling Integration Tests', () => {
         {
           name: { en: 'First Product' },
           slug: 'duplicate-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -58,7 +60,7 @@ describe('T060: Error Handling Integration Tests', () => {
           {
             name: { en: 'Second Product' },
             slug: 'duplicate-test',
-            enabled_modules: ['MODULE_ATTEMPT'],
+            enabled_modules: [Module.MCQ],
           },
           ctx.userId
         )
@@ -130,7 +132,7 @@ describe('T060: Error Handling Integration Tests', () => {
           {
             name: { en: '', ar: 'منتج' } as any,
             slug: 'no-en',
-            enabled_modules: ['MODULE_ATTEMPT'],
+            enabled_modules: [Module.MCQ],
           },
           ctx.userId
         )
@@ -147,7 +149,7 @@ describe('T060: Error Handling Integration Tests', () => {
           {
             name: 'Not an object' as any,
             slug: 'bad-name',
-            enabled_modules: ['MODULE_ATTEMPT'],
+            enabled_modules: [Module.MCQ],
           },
           ctx.userId
         )
@@ -187,7 +189,7 @@ describe('T060: Error Handling Integration Tests', () => {
         await productService.changeProductStatus(
           dbClient,
           'non-existent-id',
-          'INACTIVE',
+          ProductStatus.INACTIVE,
           ctx.userId
         )
         expect.fail('Should have thrown PRODUCT_NOT_FOUND')
@@ -226,7 +228,7 @@ describe('T060: Error Handling Integration Tests', () => {
         {
           name: { en: 'Protected' },
           slug: 'protected',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -239,7 +241,7 @@ describe('T060: Error Handling Integration Tests', () => {
           'lic-' + Math.random().toString(36),
           product.id,
           ctx.workspaceId,
-          'ACTIVE',
+          ProductStatus.ACTIVE,
         ]
       )
 
@@ -299,7 +301,7 @@ describe('T060: Error Handling Integration Tests', () => {
           {
             name: { en: '' },
             slug: 'invalid-name',
-            enabled_modules: ['MODULE_ATTEMPT'],
+            enabled_modules: [Module.MCQ],
           },
           ctx.userId
         )
@@ -317,14 +319,14 @@ describe('T060: Error Handling Integration Tests', () => {
         {
           name: { en: 'Status Test' },
           slug: 'status-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
 
       try {
         await productService.changeProductStatus(
-          dbContext,
+          dbClient,
           product.id,
           'INVALID_STATUS' as any,
           ctx.userId
@@ -343,7 +345,7 @@ describe('T060: Error Handling Integration Tests', () => {
         {
           name: { en: 'Update Error' },
           slug: 'update-error',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -441,7 +443,7 @@ describe('T060: Error Handling Integration Tests', () => {
         {
           name: { en: 'P1' },
           slug: 'concurrent-slug',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -451,7 +453,7 @@ describe('T060: Error Handling Integration Tests', () => {
         {
           name: { en: 'P2' },
           slug: 'concurrent-slug',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )

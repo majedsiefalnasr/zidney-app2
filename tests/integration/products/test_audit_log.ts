@@ -10,8 +10,9 @@
  * - Without AUDIT_READ permission returns 403
  */
 
+import * as productService from '@zidney/domain-core/products/productService'
+import { ProductStatus } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import * as productService from '../../../packages/domain-core/src/products/productService'
 import {
   cleanupTestContext,
   createTestContext,
@@ -108,7 +109,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
       await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
@@ -227,7 +228,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
       await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
     })
@@ -529,7 +530,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
       await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 

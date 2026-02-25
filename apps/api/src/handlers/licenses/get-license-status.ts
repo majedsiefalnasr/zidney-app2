@@ -59,7 +59,7 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
       })
 
       const error = getErrorDetails(ProvisioningErrorCode.LICENSE_NOT_FOUND)
-      c.status(error.httpStatus)
+      c.status(error.httpStatus as any)
       return c.json(
         createErrorResponse(
           ProvisioningErrorCode.LICENSE_NOT_FOUND,
@@ -74,29 +74,36 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
     })
 
     // Build response
+    const licenseData = license as any
     const response = createLicenseStatusResponse(
-      license.id,
-      license.workspace_slug,
-      license.organization_name,
-      license.status as LicenseStatus,
-      license.created_at.toISOString(),
-      license.provisioned_at?.toISOString() || null,
-      license.failed_at?.toISOString() || null,
-      license.last_provision_error,
-      license.retry_count
+      licenseData.id,
+      licenseData.workspace_slug,
+      licenseData.organization_name,
+      licenseData.status as LicenseStatus,
+      (licenseData.created_at as Date).toISOString(),
+      licenseData.provisioned_at
+        ? (licenseData.provisioned_at as Date).toISOString()
+        : null,
+      licenseData.failed_at
+        ? (licenseData.failed_at as Date).toISOString()
+        : null,
+      licenseData.last_provision_error,
+      licenseData.retry_count
     )
 
     // Set appropriate HTTP status based on license state
-    const httpStatus = getLicenseHttpStatus(license.status as LicenseStatus)
+    const httpStatus = (getLicenseHttpStatus(
+      licenseData.status as LicenseStatus
+    ) || 200) as any
 
     // Add headers
     c.header('X-Correlation-ID', correlationId)
     c.header('Cache-Control', 'no-cache, no-store, must-revalidate')
 
     // Add retry guidance for polling
-    if (license.status === LicenseStatus.PENDING_PROVISION) {
+    if (licenseData.status === LicenseStatus.PENDING_PROVISION) {
       c.header('Retry-After', '5')
-    } else if (license.status === LicenseStatus.PROVISION_FAILED) {
+    } else if (licenseData.status === LicenseStatus.PROVISION_FAILED) {
       c.header('Retry-After', '30')
     }
 
@@ -109,7 +116,7 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
     )
 
     const generalError = getErrorDetails(ProvisioningErrorCode.PROVISION_FAILED)
-    c.status(generalError.httpStatus)
+    c.status(generalError.httpStatus as any)
     return c.json(
       createErrorResponse(
         ProvisioningErrorCode.PROVISION_FAILED,

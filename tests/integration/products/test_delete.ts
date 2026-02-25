@@ -8,9 +8,10 @@
  * - Cascade delete works (audit logs → versions → product)
  */
 
+import * as productService from '@zidney/domain-core/products/productService'
 import { ErrorCodes } from '@zidney/types/errors/ErrorCodes'
+import { ProductStatus } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import * as productService from '../../../packages/domain-core/src/products/productService'
 import {
   cleanupTestContext,
   createTestContext,
@@ -122,7 +123,7 @@ describe('T057: Product Deletion Integration Tests', () => {
       await productService.changeProductStatus(
         dbClient,
         product.id,
-        'INACTIVE',
+        ProductStatus.INACTIVE,
         ctx.userId
       )
 
@@ -199,7 +200,7 @@ describe('T057: Product Deletion Integration Tests', () => {
           'lic-' + Math.random().toString(36),
           product.id,
           ctx.workspaceId,
-          'ACTIVE',
+          ProductStatus.ACTIVE,
         ]
       )
 
@@ -237,7 +238,7 @@ describe('T057: Product Deletion Integration Tests', () => {
           'lic-' + Math.random().toString(36),
           product.id,
           ctx.workspaceId,
-          'ACTIVE',
+          ProductStatus.ACTIVE,
         ]
       )
 
