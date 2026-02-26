@@ -9,19 +9,44 @@ Scope: Platform overview & aggregated metrics (master_db only)
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
-Initiated: 2026-02-26T00:00:00Z
+Risk Level: LOW
+Last Updated: 2026-02-26T00:00:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- 4 user stories (Commercial Health, Geographic Distribution, Affiliate Performance, Growth Trends)
+- 38 functional requirements covering dashboards, authorization, data accuracy, performance
+- 48 test scenarios across 6 test categories
+- Master_db only (zero tenant database access)
+- 6 dashboard endpoints with <300ms latency guarantee
+- Export to CSV/JSON
+- Role-based access control (platform_owner, member)
+
+Deferred Scope:
+
+- Mutations (license changes, revenue corrections)
+- Tenant database access
+- Real-time streaming
+- ML predictions
+- Mobile app
+- Multi-language i18n
+- PDF export
+- Custom dashboards
+- External analytics integration
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted and validated
+- Database-per-tenant isolation enforced (master_db only)
+- Permission middleware mandatory
+- License status validation
+- Structured logging with correlation_id
+- All isolation tests defined
+- Audit requirements documented
+- GDPR compliance verified
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending to resolve any ambiguities.
 
 ---
 
