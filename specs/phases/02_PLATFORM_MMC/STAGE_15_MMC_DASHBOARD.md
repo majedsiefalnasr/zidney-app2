@@ -12,41 +12,34 @@ Status: DRAFT
 Risk Level: LOW
 Last Updated: 2026-02-26T00:00:00Z
 
-Scope Defined:
+Scope Clarified:
 
-- 4 user stories (Commercial Health, Geographic Distribution, Affiliate Performance, Growth Trends)
-- 38 functional requirements covering dashboards, authorization, data accuracy, performance
-- 48 test scenarios across 6 test categories
-- Master_db only (zero tenant database access)
-- 6 dashboard endpoints with <300ms latency guarantee
-- Export to CSV/JSON
-- Role-based access control (platform_owner, member)
+- Revenue & commission rounding: Aggregate rounding with standard round-half-up at display
+- Concurrent load: 100 concurrent users with tiered caching (5-min TTL for summary/trends)
+- All endpoints maintain hard <300ms latency guarantee
+- Export limits: Max 50,000 rows; 413 on larger requests; always fresh query
+- Role hierarchy: platform_owner sees all workspaces; member sees only own workspace
+- 5 clarification questions resolved and locked into specification
 
 Deferred Scope:
 
-- Mutations (license changes, revenue corrections)
-- Tenant database access
-- Real-time streaming
-- ML predictions
-- Mobile app
-- Multi-language i18n
-- PDF export
-- Custom dashboards
-- External analytics integration
+- Mutations, tenant database access, real-time streaming
+- ML predictions, mobile app, multi-language i18n, PDF export
+- Custom dashboards, external analytics integration
 
 Constitutional Compliance:
 
-- Specification drafted and validated
-- Database-per-tenant isolation enforced (master_db only)
-- Permission middleware mandatory
-- License status validation
-- Structured logging with correlation_id
-- All isolation tests defined
-- Audit requirements documented
-- GDPR compliance verified
+- All 5 clarifications verified against Zidney constraints
+- Database-per-tenant isolation confirmed (role-based query filtering at WHERE clause)
+- Master_db only (zero tenant database access)
+- Permission middleware mandatory (reporting.view required)
+- License status validation enforced
+- Structured logging with correlation_id documented
+- Audit requirements locked
+- GDPR compliance verified (no PII in metrics or logs)
 
 Notes:
-Specification complete. Clarification step pending to resolve any ambiguities.
+All ambiguities resolved. Specification locked and ready for technical planning.
 
 ---
 

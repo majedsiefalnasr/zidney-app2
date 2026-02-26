@@ -5,8 +5,9 @@
   "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_15_MMC_DASHBOARD.md",
   "branch": "015-mmc-dashboard",
   "base_branch": "develop",
-  "current_step": "specify",
+  "current_step": "clarify",
   "stage_status": "DRAFT",
+  "clarifications_resolved": true,
   "clarifications_resolved": false,
   "drift_passed": false,
   "implementation_allowed": false,
@@ -30,6 +31,18 @@
       "quality_gates": 7,
       "edge_cases": 9,
       "clarifications_needed": 0,
+      "timestamp": "2026-02-26T00:00:00Z"
+    },
+    {
+      "event": "clarifications_locked",
+      "ambiguities_resolved": 5,
+      "clarifications": [
+        "revenue_rounding_aggregate_standard_round_half_up",
+        "commission_rounding_sum_precision_round_final",
+        "concurrent_load_100_users_tiered_caching",
+        "export_limit_50000_rows_413_always_fresh",
+        "role_hierarchy_platform_owner_member_workspace_isolated"
+      ],
       "timestamp": "2026-02-26T00:00:00Z"
     }
   ]
