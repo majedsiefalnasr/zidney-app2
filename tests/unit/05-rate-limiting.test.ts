@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { TEST_RATE_LIMITS } from '../../test-constants'
+import { TEST_RATE_LIMITS } from '../test-constants'
 
 describe('Area 5: Rate Limiting Validation (Unit)', () => {
   /**
