@@ -1,85 +1,23 @@
 {
-  "stage": "STAGE_TEST_01_PLATFORM_FOUNDATION",
-  "phase": "01_PLATFORM_FOUNDATION",
-  "stage_dir": "specs/runtime/test-001-platform-foundation",
-  "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_TEST_01_PLATFORM_FOUNDATION.md",
-  "branch": "test-001-platform-foundation",
+  "stage": "MMC Dashboard",
+  "phase": "02_PLATFORM_MMC",
+  "stage_dir": "specs/runtime/015-mmc-dashboard",
+  "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_15_MMC_DASHBOARD.md",
+  "branch": "015-mmc-dashboard",
   "base_branch": "develop",
-  "current_step": "closure",
-  "stage_status": "PRODUCTION_READY",
-  "implementation_status": "COMPLETE_VALIDATION_APPROVED",
-  "validation_gate_status": "APPROVED_ALL_GUARDIANS_PASS",
-  "closure_date": "2026-02-26",
-  "workflow_complete": true,
-  "clarifications_resolved": true,
-  "drift_passed": true,
-  "implementation_allowed": true,
-  "plan_completed": true,
-  "tasks_total": 78,
-  "tasks_completed": 78,
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
   "last_updated": "2026-02-26T00:00:00Z",
   "history": [
     {
       "event": "branch_created",
-      "branch": "test-001-platform-foundation",
-      "timestamp": "2026-02-26T00:00:00Z"
-    },
-    {
-      "event": "specify_complete",
-      "spec_lines": 1147,
-      "validation_areas": 8,
-      "test_scenarios": 23,
-      "clarifications_needed": 0,
-      "timestamp": "2026-02-26T00:00:00Z"
-    },
-    {
-      "event": "clarifications_locked",
-      "ambiguities_resolved": 5,
-      "clarifications": [
-        "test_data_isolation_strategy",
-        "concurrency_mandatory_behavior",
-        "cross_tenant_response_code_403",
-        "license_state_machine_flow",
-        "test_count_clarification_31_tests"
-      ],
-      "timestamp": "2026-02-26T00:00:00Z"
-    },
-    {
-      "event": "plan_complete",
-      "artifacts": [
-        "plan.md (1247 lines)",
-        "research.md (811 lines)",
-        "data-model.md (629 lines)",
-        "contracts/api-responses.md (456 lines)"
-      ],
-      "test_files": 5,
-      "total_tests": 31,
-      "estimated_runtime_minutes": 65,
-      "implementation_weeks": 3,
-      "timestamp": "2026-02-26T00:00:00Z"
-    },
-    {
-      "event": "tasks_complete",
-      "tasks_total": 78,
-      "phases": 11,
-      "test_files_to_create": 10,
-      "critical_path_minutes": 65,
-      "parallel_ci_minutes": 35,
-      "timestamp": "2026-02-26T00:00:00Z"
-    },
-    {
-      "event": "drift_analysis_passed",
-      "criteria_total": 9,
-      "criteria_pass": 9,
-      "criteria_fail": 0,
-      "security_verdict": "PASS",
-      "qa_verdict": "PASS",
-      "performance_verdict": "PASS",
-      "code_review_verdict": "PASS",
-      "risk_level": "LOW",
-      "implementation_authorized": true,
-      "medium_findings": 3,
-      "critical_findings": 0,
+      "branch": "015-mmc-dashboard",
       "timestamp": "2026-02-26T00:00:00Z"
     }
   ]
