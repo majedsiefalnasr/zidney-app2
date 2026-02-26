@@ -5,9 +5,9 @@
  */
 
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { toMatchRFC7807 } from '../../error-matchers'
-import { TEST_CORRELATION_IDS, TEST_WORKSPACES } from '../../test-constants'
-import { MockHttpClient } from '../../test-helpers'
+import { toMatchRFC7807 } from '../error-matchers'
+import { TEST_CORRELATION_IDS, TEST_WORKSPACES } from '../test-constants'
+import { MockHttpClient } from '../test-helpers'
 
 expect.extend({ toMatchRFC7807 })
 

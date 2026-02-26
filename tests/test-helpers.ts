@@ -286,7 +286,7 @@ export class MockHttpClient implements TestClient {
   }
 
   private workspaceFromPath(path: string): string | null {
-    const match = path.match(/\/workspace\/([^/]+)/)
+    const match = path.match(/\/workspaces?\/([^/]+)/)
     return match?.[1] ?? null
   }
 
@@ -306,6 +306,14 @@ export class MockHttpClient implements TestClient {
 
   async post(path: string, data: any): Promise<any> {
     const headers = makeBaseHeaders(this.headers)
+    if (!this.jwtWorkspaceMatches(path)) {
+      return {
+        status: 403,
+        data: null,
+        error: { code: 'FORBIDDEN', message: 'Workspace mismatch' },
+        headers,
+      }
+    }
 
     if (isSchemaRoute(path)) {
       const schemaError = validateSchemaVersion(this.headers)
@@ -520,6 +528,14 @@ export class MockHttpClient implements TestClient {
 
   async get(path: string): Promise<any> {
     const headers = makeBaseHeaders(this.headers)
+    if (!this.jwtWorkspaceMatches(path)) {
+      return {
+        status: 403,
+        data: null,
+        error: { code: 'FORBIDDEN', message: 'Workspace mismatch' },
+        headers,
+      }
+    }
 
     if (isSchemaRoute(path)) {
       const schemaError = validateSchemaVersion(this.headers)

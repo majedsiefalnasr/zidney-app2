@@ -5,7 +5,7 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest'
-import { HttpClient } from '../../http-client'
+import { HttpClient } from '../http-client'
 
 describe('Area 3: License Engine Validation', () => {
   let client: HttpClient
