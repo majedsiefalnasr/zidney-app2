@@ -12,6 +12,12 @@ Depends On:
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement the Frontoffice Live Sessions UI layer.
@@ -372,5 +378,3 @@ Frontoffice live session runtime layer is operational.
 
 Constitutional Compliance Required  
 Zidney Constitution v1.2.0
-
----

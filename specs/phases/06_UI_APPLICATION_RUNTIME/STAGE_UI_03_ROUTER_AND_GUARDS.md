@@ -6,7 +6,13 @@ UI Foundation — Router & Access Guard Architecture
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Define the canonical routing system and guard pipeline shared across:
 
@@ -28,7 +34,7 @@ No business rules are enforced here — only access orchestration.
 
 ---
 
-# 🔒 Constitutional Constraints
+## Constitutional Constraints
 
 Router layer must:
 
@@ -49,9 +55,9 @@ Backend remains the final authority.
 
 ---
 
-# 🧱 Router Architecture
+## Router Architecture
 
-## 1️⃣ Single Router Per App
+### Single Router Per App
 
 Each app must define:
 
@@ -65,7 +71,7 @@ No multiple router instances allowed.
 
 ---
 
-## 2️⃣ Deterministic Route Structure
+### Deterministic Route Structure
 
 Routes must be modular:
 
@@ -92,7 +98,7 @@ No inline route definitions inside components.
 
 ---
 
-# 🏷 Route Meta Contract
+## Route Meta Contract
 
 All protected routes must define meta:
 
@@ -116,7 +122,7 @@ No implicit assumptions.
 
 ---
 
-# 🛡 Guard Execution Pipeline
+## Guard Execution Pipeline
 
 Guards must execute in this exact order:
 
@@ -135,7 +141,7 @@ core/guards/
 
 ---
 
-# 🔐 AuthGuard
+## AuthGuard
 
 Responsibilities:
 
@@ -148,7 +154,7 @@ No permission inference.
 
 ---
 
-# 🏢 WorkspaceGuard (Backoffice Only)
+## WorkspaceGuard (Backoffice Only)
 
 Backoffice requires workspace context.
 
@@ -164,7 +170,7 @@ Workspace resolution must be read-only at router level.
 
 ---
 
-# 👤 RoleGuard (UI-Level Hint Only)
+## RoleGuard (UI-Level Hint Only)
 
 RoleGuard is UI convenience only.
 
@@ -182,7 +188,7 @@ Important:
 
 ---
 
-# 🚨 Navigation Failure Handling
+## Navigation Failure Handling
 
 Router must handle:
 
@@ -194,7 +200,7 @@ No blank pages allowed.
 
 ---
 
-# 🌍 Multi-App Variations
+## Multi-App Variations
 
 MMC:
 
@@ -215,7 +221,7 @@ Router configuration must remain app-specific but follow same blueprint.
 
 ---
 
-# 🔄 Redirect Strategy
+## Redirect Strategy
 
 Login Redirect Logic:
 
@@ -231,7 +237,7 @@ No infinite redirect loops allowed.
 
 ---
 
-# 🧪 Testability Requirements
+## Testability Requirements
 
 Must support:
 
@@ -246,7 +252,7 @@ Router must be instantiable in test environment.
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -261,7 +267,7 @@ Only routing & access orchestration.
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage considered complete when:
 
@@ -277,8 +283,5 @@ Stage considered complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation forbidden
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

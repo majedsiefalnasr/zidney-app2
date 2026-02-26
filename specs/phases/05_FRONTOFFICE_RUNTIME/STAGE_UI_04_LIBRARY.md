@@ -13,6 +13,12 @@ Depends On:
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement the Frontoffice Library UI for students.

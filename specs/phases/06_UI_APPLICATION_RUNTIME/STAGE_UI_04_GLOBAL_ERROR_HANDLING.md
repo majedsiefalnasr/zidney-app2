@@ -6,7 +6,13 @@ UI Foundation — Global Error Boundary & Normalization Layer
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Define the centralized error handling strategy for all Zidney frontend applications:
 
@@ -28,7 +34,7 @@ This stage does NOT implement business-specific error UI.
 
 ---
 
-# 🔒 Constitutional Constraints
+## Constitutional Constraints
 
 Global error handling must:
 
@@ -49,7 +55,7 @@ Frontend only normalizes and displays.
 
 ---
 
-# 🧱 Error Architecture Overview
+## Error Architecture Overview
 
 All errors must flow through a single normalization layer:
 
@@ -65,7 +71,7 @@ No component should manually parse backend error shapes.
 
 ---
 
-# 🧠 AppError Contract
+## AppError Contract
 
 All surfaced errors must conform to:
 
@@ -88,7 +94,7 @@ Rules:
 
 ---
 
-# 🔁 HTTP Error Mapping
+## HTTP Error Mapping
 
 Client layer passes normalized errors to error-normalizer.
 
@@ -110,7 +116,7 @@ Frontend must not reinterpret codes.
 
 ---
 
-# 🌐 Network Failure Handling
+## Network Failure Handling
 
 Network errors (no response):
 
@@ -123,7 +129,7 @@ Offline state detection optional (future enhancement).
 
 ---
 
-# 🛑 Global Error Boundary
+## Global Error Boundary
 
 Each app must wrap root layout with:
 
@@ -144,7 +150,7 @@ Must not display stack traces in production.
 
 ---
 
-# ⚠️ Unhandled Promise Rejection
+## Unhandled Promise Rejection
 
 Global handler must be registered:
 
@@ -161,13 +167,13 @@ Responsibilities:
 
 ---
 
-# 🧭 Error Display Strategy
+## Error Display Strategy
 
 Three display modes allowed:
 
-1️⃣ Inline form error  
-2️⃣ Toast notification  
-3️⃣ Full-page fallback
+1. Inline form error
+2. Toast notification
+3. Full-page fallback
 
 Selection depends on context, not error code.
 
@@ -175,7 +181,7 @@ No business branching inside error handler.
 
 ---
 
-# 🔐 Sensitive Data Redaction
+## Sensitive Data Redaction
 
 Must ensure:
 
@@ -189,7 +195,7 @@ Error logging must pass through redaction utility.
 
 ---
 
-# 🧪 Testability Requirements
+## Testability Requirements
 
 Must support:
 
@@ -204,7 +210,7 @@ No global mutable singleton state.
 
 ---
 
-# 🌍 Multi-App Consistency
+## Multi-App Consistency
 
 All three apps must:
 
@@ -217,7 +223,7 @@ Apps may customize fallback UI styling only.
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -231,7 +237,7 @@ Only infrastructure.
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage considered complete when:
 
@@ -248,8 +254,5 @@ Stage considered complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation forbidden
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

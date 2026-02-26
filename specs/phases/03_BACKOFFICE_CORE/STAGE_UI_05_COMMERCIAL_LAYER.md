@@ -16,6 +16,12 @@ UI Dependencies:
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Purpose
 
 This stage implements the Backoffice Commercial UI layer, enabling institutions to:
@@ -273,3 +279,6 @@ Backoffice Commercial UI must never:
 All financial authority remains in backend services.
 
 ---
+
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

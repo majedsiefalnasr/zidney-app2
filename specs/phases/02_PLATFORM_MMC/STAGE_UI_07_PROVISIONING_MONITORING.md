@@ -17,7 +17,13 @@ Depends On:
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Implement the MMC Provisioning Monitoring interface.
 
@@ -36,7 +42,7 @@ All provisioning state is backend-authoritative.
 
 ---
 
-# 🧱 Functional Scope
+## Functional Scope
 
 The Provisioning Monitoring UI must support:
 
@@ -59,7 +65,7 @@ No direct tenant DB inspection.
 
 ---
 
-# 🧭 Routing
+## Routing
 
 Routes:
 
@@ -84,7 +90,7 @@ core/router/mmc.routes.ts
 
 ---
 
-# 🗂 Module Structure
+## Module Structure
 
 ```
 modules/provisioning/
@@ -104,7 +110,7 @@ No provisioning logic outside this module.
 
 ---
 
-# 📡 API Integration
+## API Integration
 
 All HTTP must go through:
 
@@ -123,7 +129,7 @@ No direct axios/fetch usage in components.
 
 ---
 
-# 🔄 State Management
+## State Management
 
 provisioning.store.ts must manage:
 
@@ -153,7 +159,7 @@ Behavior:
 
 ---
 
-# 📊 Provisioning Table
+## Provisioning Table
 
 Must use shared DataTable.
 
@@ -179,7 +185,7 @@ UI must not:
 
 ---
 
-# 🧾 Provisioning Detail Panel
+## Provisioning Detail Panel
 
 Must display:
 
@@ -199,7 +205,7 @@ No global polling.
 
 ---
 
-# 🔁 Retry Behavior
+## Retry Behavior
 
 If backend exposes retry endpoint:
 
@@ -217,7 +223,7 @@ UI must never attempt duplicate retries without backend confirmation.
 
 ---
 
-# 📈 Queue Health Panel
+## Queue Health Panel
 
 Display:
 
@@ -230,7 +236,7 @@ No local computation of queue metrics unless raw counts provided.
 
 ---
 
-# 🔐 Security Requirements
+## Security Requirements
 
 UI must:
 
@@ -251,7 +257,7 @@ HTTP handling:
 
 ---
 
-# 🧪 Testing Requirements
+## Testing Requirements
 
 Unit tests:
 
@@ -272,7 +278,7 @@ Manual validation:
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -287,7 +293,7 @@ Operational visibility only.
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage complete when:
 
@@ -305,8 +311,5 @@ Stage complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation not started
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

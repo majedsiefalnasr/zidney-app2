@@ -6,7 +6,13 @@ UI Foundation — Environment & Runtime Configuration Layer
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Define the standardized environment configuration strategy for all Zidney frontend applications:
 
@@ -27,7 +33,7 @@ No component may access import.meta.env or process.env directly after this stage
 
 ---
 
-# 🔒 Constitutional Constraints
+## Constitutional Constraints
 
 Environment layer must:
 
@@ -42,9 +48,9 @@ Frontend config is read-only and non-sensitive.
 
 ---
 
-# 🧱 Architectural Design
+## Architectural Design
 
-## 1️⃣ Single Configuration Entry Point
+### Single Configuration Entry Point
 
 All environment access must pass through:
 
@@ -62,7 +68,7 @@ Components and modules must import from env.ts only.
 
 ---
 
-# 🗂 Folder Structure
+## Folder Structure
 
 ```
 core/
@@ -76,7 +82,7 @@ No environment logic allowed inside modules/.
 
 ---
 
-# 🌍 Environment Variable Policy
+## Environment Variable Policy
 
 Only variables prefixed with:
 
@@ -97,7 +103,7 @@ No secret tokens allowed.
 
 ---
 
-# 🔗 API Base Resolution
+## API Base Resolution
 
 env.ts must resolve:
 
@@ -126,7 +132,7 @@ Frontoffice:
 
 ---
 
-# 🏷 Environment Modes
+## Environment Modes
 
 Must support:
 
@@ -146,7 +152,7 @@ No string comparisons scattered across codebase.
 
 ---
 
-# 🚦 Feature Flags
+## Feature Flags
 
 Feature flags must:
 
@@ -166,7 +172,7 @@ No role/permission logic via feature flags.
 
 ---
 
-# 🔐 Security Rules
+## Security Rules
 
 Environment layer must ensure:
 
@@ -180,7 +186,7 @@ Configuration is immutable at runtime.
 
 ---
 
-# 🧪 Testability Requirements
+## Testability Requirements
 
 Must support:
 
@@ -193,7 +199,7 @@ env.ts must not rely on global window during unit tests.
 
 ---
 
-# 🌍 Multi-App Consistency
+## Multi-App Consistency
 
 All three apps must:
 
@@ -209,7 +215,7 @@ App-specific differences handled via:
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -223,7 +229,7 @@ Only environment plumbing.
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage considered complete when:
 
@@ -239,8 +245,5 @@ Stage considered complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation forbidden
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

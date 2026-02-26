@@ -10,6 +10,12 @@ Depends On:
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Establish the structural shell of the Frontoffice application.

@@ -17,6 +17,12 @@ Depends On:
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement the full Frontoffice Attempt Runtime UI.

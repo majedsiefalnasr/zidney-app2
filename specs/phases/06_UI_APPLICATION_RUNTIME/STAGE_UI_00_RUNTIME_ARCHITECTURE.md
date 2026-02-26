@@ -6,7 +6,13 @@ UI Foundation — Cross-Application Runtime Blueprint
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Define the canonical SPA runtime architecture shared across:
 
@@ -26,9 +32,9 @@ No feature implementation occurs in this stage.
 
 ---
 
-# 🧱 Architectural Principles
+## Architectural Principles
 
-## 1️⃣ Single Responsibility Per Layer
+### Single Responsibility Per Layer
 
 Frontend layers must be strictly separated:
 
@@ -42,7 +48,7 @@ No cross-layer leakage allowed.
 
 ---
 
-## 2️⃣ No Business Logic in UI
+### No Business Logic in UI
 
 Frontend must NOT:
 
@@ -56,7 +62,7 @@ All business rules remain server-authoritative.
 
 ---
 
-## 3️⃣ Centralized API Boundary
+### Centralized API Boundary
 
 All HTTP communication must pass through:
 
@@ -73,7 +79,7 @@ Rules:
 
 ---
 
-## 4️⃣ Deterministic Folder Structure (Per App)
+### Deterministic Folder Structure (Per App)
 
 Each frontend app (mmc / backoffice / frontoffice) must follow:
 
@@ -109,15 +115,15 @@ No deviation allowed.
 
 ---
 
-# 🔐 Runtime Security Model
+## Runtime Security Model
 
-## Token Storage Strategy
+### Token Storage Strategy
 
 - Access tokens → memory (preferred)
 - Refresh tokens → httpOnly cookie (backend-controlled)
 - No localStorage token persistence unless explicitly justified
 
-## Token Lifecycle
+### Token Lifecycle
 
 - Attach access token via API client interceptor
 - Auto-refresh on 401 (single-flight refresh strategy)
@@ -125,7 +131,7 @@ No deviation allowed.
 
 ---
 
-# 🧭 Router Architecture
+## Router Architecture
 
 Single router per app:
 
@@ -144,7 +150,7 @@ No inline guard logic inside views.
 
 ---
 
-# 🗂 State Management Strategy
+## State Management Strategy
 
 Pinia required (strict mode).
 
@@ -158,7 +164,7 @@ Rules:
 
 ---
 
-# 🌍 Environment Configuration
+## Environment Configuration
 
 Environment config must be centralized:
 
@@ -177,7 +183,7 @@ No process.env usage inside components.
 
 ---
 
-# ⚠️ Global Error Handling
+## Global Error Handling
 
 Central error normalization layer:
 
@@ -199,7 +205,7 @@ UI must not depend on raw backend structure.
 
 ---
 
-# 🔄 Cross-App Reuse Policy
+## Cross-App Reuse Policy
 
 Shared logic belongs in:
 
@@ -218,7 +224,7 @@ Apps may not duplicate:
 
 ---
 
-# 🧪 Testability Requirements
+## Testability Requirements
 
 This stage must enable:
 
@@ -232,7 +238,7 @@ No tightly coupled global state allowed.
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -247,7 +253,7 @@ Only architecture.
 
 ---
 
-# 🧩 Dependencies
+## Dependencies
 
 Consumes:
 
@@ -261,7 +267,7 @@ But does not modify backend.
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage considered complete when:
 
@@ -277,8 +283,5 @@ Stage considered complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation forbidden
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

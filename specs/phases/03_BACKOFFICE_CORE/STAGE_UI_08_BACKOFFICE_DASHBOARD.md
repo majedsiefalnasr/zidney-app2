@@ -22,6 +22,12 @@ UI Dependencies:
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Purpose
 
 This stage implements the Backoffice Dashboard UI.
@@ -290,3 +296,6 @@ Backoffice Dashboard UI must never:
 All analytics authority remains backend-controlled.
 
 ---
+
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

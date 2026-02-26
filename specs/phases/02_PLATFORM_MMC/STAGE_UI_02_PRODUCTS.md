@@ -13,7 +13,13 @@ Depends On:
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Implement the MMC Products Management user interface on top of the established shell and runtime foundation.
 
@@ -30,7 +36,7 @@ It does NOT redefine backend validation rules.
 
 ---
 
-# 🧱 Functional Scope
+## Functional Scope
 
 The Products UI must support:
 
@@ -46,7 +52,7 @@ No deletion flow unless backend explicitly supports it.
 
 ---
 
-# 🧭 Routing
+## Routing
 
 Routes must follow:
 
@@ -71,7 +77,7 @@ All routes must:
 
 ---
 
-# 🗂 UI Structure
+## UI Structure
 
 Folder structure inside MMC:
 
@@ -92,7 +98,7 @@ No logic outside module folder.
 
 ---
 
-# 📡 API Integration
+## API Integration
 
 All API calls must go through:
 
@@ -112,7 +118,7 @@ No fetch/axios inside components.
 
 ---
 
-# 🔄 State Management
+## State Management
 
 products.store.ts must manage:
 
@@ -142,7 +148,7 @@ Store must:
 
 ---
 
-# 🧾 Product Form Behavior
+## Product Form Behavior
 
 Form must support:
 
@@ -174,7 +180,7 @@ On error:
 
 ---
 
-# 📊 Products Table
+## Products Table
 
 Table must:
 
@@ -193,7 +199,7 @@ Table must not:
 
 ---
 
-# 🟢 Status Handling
+## Status Handling
 
 Status values from backend:
 
@@ -213,7 +219,7 @@ UI must not:
 
 ---
 
-# 🔐 Security Considerations
+## Security Considerations
 
 UI must:
 
@@ -230,7 +236,7 @@ If backend returns:
 
 ---
 
-# 🧪 Test Requirements
+## Test Requirements
 
 Must include:
 
@@ -251,7 +257,7 @@ Manual validation:
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -265,7 +271,7 @@ Only Products Management UI.
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage complete when:
 
@@ -283,8 +289,5 @@ Stage complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation not started
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

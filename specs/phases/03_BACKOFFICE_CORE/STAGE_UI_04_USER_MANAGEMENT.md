@@ -14,6 +14,12 @@ Dependencies:
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Purpose
 
 This stage implements the Backoffice UI for:
@@ -298,3 +304,6 @@ Backoffice UI must never become the source of truth for:
 All authority remains in backend domain core.
 
 ---
+
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

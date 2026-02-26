@@ -6,7 +6,13 @@ UI Foundation — Centralized State Management Architecture
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Define the standardized state management strategy for all Zidney frontend applications:
 
@@ -28,7 +34,7 @@ It defines the runtime contract they must follow.
 
 ---
 
-# 🔒 Constitutional Constraints
+## Constitutional Constraints
 
 State layer must:
 
@@ -44,7 +50,7 @@ Backend remains authoritative for business rules.
 
 ---
 
-# 🧱 State Architecture Overview
+## State Architecture Overview
 
 Pinia is mandatory.
 
@@ -65,9 +71,9 @@ No global mutable singletons allowed.
 
 ---
 
-# 🏗 Store Classification
+## Store Classification
 
-## 1️⃣ Core Stores (Runtime-Level)
+### Core Stores (Runtime-Level)
 
 Located in:
 
@@ -93,7 +99,7 @@ They must NOT contain business data like products or licenses.
 
 ---
 
-## 2️⃣ Feature Stores (Domain-Oriented)
+### Feature Stores (Domain-Oriented)
 
 Located in:
 
@@ -117,7 +123,7 @@ Rules:
 
 ---
 
-# 🔁 API Interaction Pattern
+## API Interaction Pattern
 
 Strict pattern:
 
@@ -136,7 +142,7 @@ Store must:
 
 ---
 
-# 🔄 Cross-Store Communication
+## Cross-Store Communication
 
 Forbidden:
 
@@ -155,7 +161,7 @@ No circular dependencies allowed.
 
 ---
 
-# 💾 State Persistence Policy
+## State Persistence Policy
 
 Default:
 
@@ -184,7 +190,7 @@ Only if formally approved.
 
 ---
 
-# 🌍 Multi-App Considerations
+## Multi-App Considerations
 
 MMC:
 
@@ -205,7 +211,7 @@ Store architecture must remain identical across apps.
 
 ---
 
-# 🧪 Testability Requirements
+## Testability Requirements
 
 Stores must support:
 
@@ -225,7 +231,7 @@ No side effects on import.
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -240,7 +246,7 @@ Only architecture & rules.
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage considered complete when:
 
@@ -256,8 +262,5 @@ Stage considered complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation forbidden
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

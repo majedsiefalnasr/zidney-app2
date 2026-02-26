@@ -6,7 +6,13 @@ UI Foundation — Centralized API Client Architecture
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Define the canonical HTTP communication layer shared across:
 
@@ -28,7 +34,7 @@ No component may call fetch/axios directly after this stage.
 
 ---
 
-# 🔒 Constitutional Constraints
+## Constitutional Constraints
 
 Frontend API layer must:
 
@@ -43,9 +49,9 @@ All HTTP traffic flows through a single client abstraction.
 
 ---
 
-# 🧱 Architectural Design
+## Architectural Design
 
-## Single Entry Point
+### Single Entry Point
 
 All HTTP calls must pass through:
 
@@ -57,7 +63,7 @@ No other file may import `fetch`, `axios`, or similar directly.
 
 ---
 
-## Client Responsibilities
+### Client Responsibilities
 
 The client must:
 
@@ -71,7 +77,7 @@ The client must:
 
 ---
 
-# 📦 Folder Structure
+## Folder Structure
 
 ```
 core/
@@ -92,7 +98,7 @@ But they must import and use `core/api/client.ts`.
 
 ---
 
-# 🔁 Request Lifecycle
+## Request Lifecycle
 
 1. Module calls API function (e.g., products.api.ts)
 2. API function calls client.request<T>()
@@ -109,7 +115,7 @@ No raw Response objects passed upward.
 
 ---
 
-# 🧠 Type-Safe Design
+## Type-Safe Design
 
 Client must support:
 
@@ -129,7 +135,7 @@ Rules:
 
 ---
 
-# 🔄 401 + Refresh Strategy
+## 401 + Refresh Strategy
 
 If backend returns 401:
 
@@ -143,7 +149,7 @@ No more than 1 retry.
 
 ---
 
-# ⚠️ Error Normalization
+## Error Normalization
 
 Backend standard error contract assumed:
 
@@ -170,7 +176,7 @@ UI must consume AppError only.
 
 ---
 
-# 📉 Rate Limiting Handling
+## Rate Limiting Handling
 
 If backend returns 429:
 
@@ -185,7 +191,7 @@ No hidden retries.
 
 ---
 
-# 🔐 Idempotency Support
+## Idempotency Support
 
 For endpoints requiring idempotency:
 
@@ -205,7 +211,7 @@ Rules:
 
 ---
 
-# 🌍 Multi-App Considerations
+## Multi-App Considerations
 
 MMC:
 
@@ -226,7 +232,7 @@ API client must be configurable per app via env.ts.
 
 ---
 
-# 🧪 Testability Requirements
+## Testability Requirements
 
 Must support:
 
@@ -241,7 +247,7 @@ Client must be injectable for testing.
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -256,7 +262,7 @@ Only infrastructure.
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage considered complete when:
 
@@ -272,8 +278,5 @@ Stage considered complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation forbidden
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

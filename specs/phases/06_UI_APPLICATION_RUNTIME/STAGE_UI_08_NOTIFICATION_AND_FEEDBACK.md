@@ -6,7 +6,13 @@ UI Foundation — Global Notifications & User Feedback Layer
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Define a unified notification and feedback architecture across:
 
@@ -31,7 +37,7 @@ It defines how messages are displayed and handled.
 
 ---
 
-# 🔒 Constitutional Constraints
+## Constitutional Constraints
 
 Notification system must:
 
@@ -51,7 +57,7 @@ Backend remains the source of truth.
 
 ---
 
-# 🧱 Feedback Layer Architecture
+## Feedback Layer Architecture
 
 Architecture flow:
 
@@ -69,7 +75,7 @@ core/errors/
 
 ---
 
-# 🏗 Notification Store
+## Notification Store
 
 Location:
 
@@ -105,7 +111,7 @@ Store must:
 
 ---
 
-# 🍞 Toast Notifications
+## Toast Notifications
 
 Use UI system primitives from:
 
@@ -131,40 +137,40 @@ No blocking modals unless explicitly required.
 
 ---
 
-# ❗ Error Handling Strategy
+## Error Handling Strategy
 
 Errors categorized:
 
-1️⃣ Validation Errors (400)
+1. Validation Errors (400)
 
 - Display inline at form field
 - Highlight invalid input
 - Do not show global toast unless systemic
 
-2️⃣ Authorization Errors (401/403)
+2. Authorization Errors (401/403)
 
 - Redirect to login or show permission banner
 - No repeated toasts on every request
 
-3️⃣ Business Rule Errors (409/422)
+3. Business Rule Errors (409/422)
 
 - Show descriptive toast
 - Allow user retry
 
-4️⃣ System Errors (500)
+4. System Errors (500)
 
 - Show generic error toast
 - Optionally display correlation ID
 - Never display stack trace
 
-5️⃣ Network Errors
+5. Network Errors
 
 - Show offline banner
 - Retry mechanism available
 
 ---
 
-# 📝 Form Feedback Rules
+## Form Feedback Rules
 
 Forms must:
 
@@ -181,7 +187,7 @@ Never:
 
 ---
 
-# 🔄 Async Action Feedback
+## Async Action Feedback
 
 All async store actions must:
 
@@ -205,7 +211,7 @@ No silent failures allowed.
 
 ---
 
-# 🌍 Multi-App Considerations
+## Multi-App Considerations
 
 MMC:
 
@@ -224,7 +230,7 @@ Frontoffice:
 
 ---
 
-# 📡 Offline & Reconnect UX
+## Offline & Reconnect UX
 
 If network lost:
 
@@ -236,7 +242,7 @@ No infinite retry loops.
 
 ---
 
-# 🔐 Security & Logging
+## Security & Logging
 
 UI logging rules:
 
@@ -252,7 +258,7 @@ Error reporting (future extension):
 
 ---
 
-# 🧪 Testability Requirements
+## Testability Requirements
 
 Notification system must support:
 
@@ -267,7 +273,7 @@ Must work without backend availability.
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -282,7 +288,7 @@ Only UI notification and feedback behavior.
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage complete when:
 
@@ -299,8 +305,5 @@ Stage complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation forbidden
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

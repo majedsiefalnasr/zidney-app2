@@ -11,6 +11,12 @@ Depends On:
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement secure, student-only authentication flows for the Frontoffice.

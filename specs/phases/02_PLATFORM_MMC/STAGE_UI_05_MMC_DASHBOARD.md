@@ -15,7 +15,13 @@ Depends On:
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Implement the MMC Dashboard user interface.
 
@@ -32,7 +38,7 @@ It aggregates backend-provided metrics and must not perform business calculation
 
 ---
 
-# 🧱 Functional Scope
+## Functional Scope
 
 The MMC Dashboard must include:
 
@@ -64,7 +70,7 @@ No time-series charts unless backend explicitly provides aggregated endpoint.
 
 ---
 
-# 🧭 Routing
+## Routing
 
 Route:
 
@@ -87,7 +93,7 @@ core/router/mmc.routes.ts
 
 ---
 
-# 🗂 Module Structure
+## Module Structure
 
 ```
 modules/dashboard/
@@ -106,7 +112,7 @@ No dashboard logic outside this module.
 
 ---
 
-# 📡 API Integration
+## API Integration
 
 All API calls must go through:
 
@@ -127,7 +133,7 @@ No direct axios/fetch usage.
 
 ---
 
-# 🔄 State Management
+## State Management
 
 dashboard.store.ts must manage:
 
@@ -157,7 +163,7 @@ No business calculations in store.
 
 ---
 
-# 📊 KPI Cards
+## KPI Cards
 
 Each KPI card must:
 
@@ -175,7 +181,7 @@ UI must NOT:
 
 ---
 
-# 🛠 Provisioning Panel
+## Provisioning Panel
 
 Display:
 
@@ -191,7 +197,7 @@ No client-side failure rate computation unless backend provides raw counts.
 
 ---
 
-# 📋 Recent Activity Panel
+## Recent Activity Panel
 
 Display list items:
 
@@ -214,7 +220,7 @@ No infinite scroll unless backend supports pagination.
 
 ---
 
-# ⚠ Alerts Panel
+## Alerts Panel
 
 Alerts may include:
 
@@ -230,7 +236,7 @@ Alerts must:
 
 ---
 
-# 🔗 Quick Links Panel
+## Quick Links Panel
 
 Provide:
 
@@ -244,7 +250,7 @@ No hard page reload.
 
 ---
 
-# 🔐 Security Requirements
+## Security Requirements
 
 UI must:
 
@@ -260,7 +266,7 @@ UI must:
 
 ---
 
-# 🧪 Testing Requirements
+## Testing Requirements
 
 Unit tests:
 
@@ -280,7 +286,7 @@ Manual validation:
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -295,7 +301,7 @@ Dashboard is read-only aggregation only.
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage complete when:
 
@@ -313,8 +319,5 @@ Stage complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation not started
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

@@ -16,6 +16,12 @@ Backend Dependencies:
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Purpose
 
 This stage implements the Backoffice UI for managing the full Academic Structure hierarchy.
@@ -294,3 +300,6 @@ No Exam Management UI stage may begin until Academic Structure UI is stable.
 This stage forms the structural backbone for all exam-related UI.
 
 ---
+
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

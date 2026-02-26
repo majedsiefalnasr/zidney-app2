@@ -6,7 +6,13 @@ UI Foundation — Authentication Runtime Module
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Define the canonical frontend authentication architecture shared across:
 
@@ -28,7 +34,7 @@ It defines the runtime auth engine behind them.
 
 ---
 
-# 🔐 Constitutional Constraints
+## Constitutional Constraints
 
 The frontend authentication layer must:
 
@@ -43,9 +49,9 @@ Authentication is server-authoritative.
 
 ---
 
-# 🧠 Session Model
+## Session Model
 
-## 1️⃣ Token Model
+### Token Model
 
 Frontend assumes backend provides:
 
@@ -60,7 +66,7 @@ Frontend must:
 
 ---
 
-## 2️⃣ Auth State Store (Pinia)
+### Auth State Store (Pinia)
 
 Location:
 
@@ -86,9 +92,9 @@ Rules:
 
 ---
 
-# 🔄 Token Lifecycle Flow
+## Token Lifecycle Flow
 
-## Login Flow (Conceptual)
+### Login Flow (Conceptual)
 
 1. Login form submits credentials
 2. Backend returns:
@@ -101,7 +107,7 @@ Frontend never touches refresh token directly.
 
 ---
 
-## Request Flow
+### Request Flow
 
 1. API client attaches access token in Authorization header
 2. If 401 returned:
@@ -110,7 +116,7 @@ Frontend never touches refresh token directly.
 
 ---
 
-## Refresh Flow (Single-Flight)
+### Refresh Flow (Single-Flight)
 
 Rules:
 
@@ -127,7 +133,7 @@ core/auth/refresh-manager.ts
 
 ---
 
-## Logout Flow
+### Logout Flow
 
 Logout must:
 
@@ -140,7 +146,7 @@ No silent logout.
 
 ---
 
-# 🧭 Guard Integration
+## Guard Integration
 
 Auth module integrates with:
 
@@ -156,7 +162,7 @@ Guard rules:
 
 ---
 
-# 🗂 Folder Structure
+## Folder Structure
 
 ```
 core/
@@ -173,7 +179,7 @@ No auth logic allowed outside core/.
 
 ---
 
-# ⚠️ Security Rules
+## Security Rules
 
 - No console.log of tokens
 - No token exposure in error logs
@@ -186,7 +192,7 @@ Token expiration handled by backend 401 only.
 
 ---
 
-# 🌍 Multi-App Behavior
+## Multi-App Behavior
 
 MMC:
 
@@ -207,7 +213,7 @@ Auth module must be app-agnostic.
 
 ---
 
-# 🧪 Testability Requirements
+## Testability Requirements
 
 Must support:
 
@@ -221,7 +227,7 @@ No global mutable state outside store.
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -234,7 +240,7 @@ This stage does NOT:
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage considered complete when:
 
@@ -251,8 +257,5 @@ Stage considered complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation forbidden
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

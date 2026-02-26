@@ -12,6 +12,12 @@ Depends On:
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement the Frontoffice Ads Runtime UI layer.
@@ -305,5 +311,3 @@ Frontoffice Ads Runtime layer is operational.
 
 Constitutional Compliance Required  
 Zidney Constitution v1.2.0
-
----

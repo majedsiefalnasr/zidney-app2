@@ -6,6 +6,12 @@ Dependency: Phase 06 UI Runtime Architecture
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Purpose
 
 This stage establishes the foundational UI shell for the Backoffice application.
@@ -292,3 +298,6 @@ This stage is:
 Backoffice UI Foundation.
 
 ---
+
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

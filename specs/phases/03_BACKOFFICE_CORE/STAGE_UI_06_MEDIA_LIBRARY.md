@@ -1,15 +1,23 @@
----
 # STAGE_UI_06_MEDIA_LIBRARY
 
 Phase: 03_BACKOFFICE_CORE
 Track: UI (apps/backoffice)
 
 Backend Dependency:
-  - STAGE_47_MEDIA_LIBRARY
+
+- STAGE_47_MEDIA_LIBRARY
 
 UI Dependencies:
-  - STAGE_UI_01_BACKOFFICE_SHELL
-  - STAGE_UI_02_ACADEMIC_STRUCTURE
+
+- STAGE_UI_01_BACKOFFICE_SHELL
+- STAGE_UI_02_ACADEMIC_STRUCTURE
+
+---
+
+## Stage Status
+
+Status: DRAFT
+
 ---
 
 ## Purpose
@@ -301,3 +309,6 @@ Backoffice Media Library UI must never:
 All storage authority remains backend-controlled.
 
 ---
+
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

@@ -13,7 +13,13 @@ Depends On:
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Implement the MMC Affiliates Management user interface.
 
@@ -31,7 +37,7 @@ It does NOT implement payout logic or financial disbursement.
 
 ---
 
-# 🧱 Functional Scope
+## Functional Scope
 
 The Affiliates UI must support:
 
@@ -51,7 +57,7 @@ No payout management in this stage.
 
 ---
 
-# 🧭 Routing
+## Routing
 
 Routes must follow:
 
@@ -77,7 +83,7 @@ core/router/mmc.routes.ts
 
 ---
 
-# 🗂 UI Structure
+## UI Structure
 
 Folder structure inside MMC:
 
@@ -98,7 +104,7 @@ No affiliate logic outside this module.
 
 ---
 
-# 📡 API Integration
+## API Integration
 
 All API calls must go through:
 
@@ -119,7 +125,7 @@ No direct HTTP calls in components.
 
 ---
 
-# 🔄 State Management
+## State Management
 
 affiliates.store.ts must manage:
 
@@ -151,7 +157,7 @@ Store must:
 
 ---
 
-# 🧾 Affiliate Form Behavior
+## Affiliate Form Behavior
 
 Fields (based on backend model):
 
@@ -181,7 +187,7 @@ On error:
 
 ---
 
-# 📊 Affiliates Table
+## Affiliates Table
 
 Table must:
 
@@ -203,7 +209,7 @@ No business logic in table.
 
 ---
 
-# 📈 Metrics Panel
+## Metrics Panel
 
 If backend provides metrics endpoint:
 
@@ -222,7 +228,7 @@ UI must not:
 
 ---
 
-# 🟢 Status Handling
+## Status Handling
 
 Possible statuses:
 
@@ -241,7 +247,7 @@ No optimistic mutation without confirmation.
 
 ---
 
-# 🔐 Security Considerations
+## Security Considerations
 
 UI must:
 
@@ -258,7 +264,7 @@ If backend returns:
 
 ---
 
-# 🧪 Test Requirements
+## Test Requirements
 
 Must include:
 
@@ -280,7 +286,7 @@ Manual validation:
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -294,7 +300,7 @@ Only Affiliates Management UI.
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage complete when:
 
@@ -312,8 +318,5 @@ Stage complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation not started
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

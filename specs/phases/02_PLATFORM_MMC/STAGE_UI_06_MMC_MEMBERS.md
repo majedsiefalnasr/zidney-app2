@@ -15,7 +15,13 @@ Depends On:
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Implement the MMC Members Management user interface.
 
@@ -32,7 +38,7 @@ It consumes backend APIs defined in STAGE_14_MMC_MEMBERS.
 
 ---
 
-# 🧱 Functional Scope
+## Functional Scope
 
 The MMC Members UI must support:
 
@@ -51,7 +57,7 @@ No token management UI.
 
 ---
 
-# 🧭 Routing
+## Routing
 
 Routes:
 
@@ -78,7 +84,7 @@ core/router/mmc.routes.ts
 
 ---
 
-# 🗂 Module Structure
+## Module Structure
 
 ```
 modules/members/
@@ -98,7 +104,7 @@ No member logic outside this module.
 
 ---
 
-# 📡 API Integration
+## API Integration
 
 All API calls must use:
 
@@ -119,7 +125,7 @@ No fetch/axios inside components.
 
 ---
 
-# 🔄 State Management
+## State Management
 
 members.store.ts must manage:
 
@@ -152,7 +158,7 @@ Store rules:
 
 ---
 
-# 🧾 Member Creation Flow
+## Member Creation Flow
 
 MemberForm fields:
 
@@ -186,7 +192,7 @@ On error:
 
 ---
 
-# 📊 Members Table
+## Members Table
 
 Must use shared DataTable.
 
@@ -210,7 +216,7 @@ No client-side permission enforcement.
 
 ---
 
-# 🟢 Role Management
+## Role Management
 
 MemberRoleSelector:
 
@@ -228,7 +234,7 @@ No role hierarchy logic in UI.
 
 ---
 
-# 🧾 Member Audit Timeline
+## Member Audit Timeline
 
 If backend supports audit:
 
@@ -247,7 +253,7 @@ No deletion.
 
 ---
 
-# 🔐 Security Requirements
+## Security Requirements
 
 UI must:
 
@@ -266,7 +272,7 @@ HTTP responses:
 
 ---
 
-# 🧪 Testing Requirements
+## Testing Requirements
 
 Unit tests:
 
@@ -286,7 +292,7 @@ Manual validation:
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -301,7 +307,7 @@ MMC members only.
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage complete when:
 
@@ -318,8 +324,5 @@ Stage complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation not started
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

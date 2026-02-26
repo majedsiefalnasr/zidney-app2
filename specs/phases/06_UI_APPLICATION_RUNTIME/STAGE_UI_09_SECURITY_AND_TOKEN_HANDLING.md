@@ -6,7 +6,13 @@ UI Foundation — Security Boundaries & Token Lifecycle Management
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Define the frontend security architecture across:
 
@@ -30,7 +36,7 @@ It defines how the UI consumes and protects auth state.
 
 ---
 
-# 🔒 Constitutional Constraints
+## Constitutional Constraints
 
 Frontend security layer must:
 
@@ -45,7 +51,7 @@ Backend remains the single source of truth.
 
 ---
 
-# 🔑 Token Model Assumptions
+## Token Model Assumptions
 
 Based on backend architecture:
 
@@ -61,9 +67,9 @@ No JWT decoding for business decisions allowed.
 
 ---
 
-# 💾 Token Storage Policy
+## Token Storage Policy
 
-## Access Token
+### Access Token
 
 Must be stored:
 
@@ -83,7 +89,7 @@ If backend uses HttpOnly cookies:
 
 ---
 
-# 🔄 Token Injection Strategy
+## Token Injection Strategy
 
 All HTTP requests must:
 
@@ -103,7 +109,7 @@ If no token exists:
 
 ---
 
-# ⏳ Token Expiration Handling
+## Token Expiration Handling
 
 If API returns 401:
 
@@ -120,7 +126,7 @@ Never:
 
 ---
 
-# 🔁 Refresh Strategy (If Enabled)
+## Refresh Strategy (If Enabled)
 
 If refresh tokens exist:
 
@@ -139,7 +145,7 @@ Not in component.
 
 ---
 
-# 🚪 Secure Logout
+## Secure Logout
 
 Logout must:
 
@@ -155,7 +161,7 @@ Logout must NOT:
 
 ---
 
-# 🛡 Route Protection
+## Route Protection
 
 Router guards must:
 
@@ -173,7 +179,7 @@ All sensitive decisions must be validated by backend.
 
 ---
 
-# 🔐 Sensitive Data Handling
+## Sensitive Data Handling
 
 UI must never persist:
 
@@ -191,7 +197,7 @@ Sensitive objects must:
 
 ---
 
-# 🧯 XSS Mitigation
+## XSS Mitigation
 
 Rules:
 
@@ -206,7 +212,7 @@ If rich text required:
 
 ---
 
-# 🧱 CSRF Considerations
+## CSRF Considerations
 
 If backend uses cookies:
 
@@ -221,7 +227,7 @@ If backend uses pure JWT header:
 
 ---
 
-# 📡 License & Version Security
+## License & Version Security
 
 UI must not:
 
@@ -238,7 +244,7 @@ UI must not attempt override.
 
 ---
 
-# 🧪 Testability Requirements
+## Testability Requirements
 
 Security layer must support:
 
@@ -253,7 +259,7 @@ Tests must not require real backend.
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -268,7 +274,7 @@ Only frontend security boundaries.
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage complete when:
 
@@ -285,8 +291,5 @@ Stage complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation forbidden
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

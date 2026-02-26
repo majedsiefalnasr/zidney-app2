@@ -6,7 +6,13 @@ UI Foundation — Layout & Shell Integration
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Define the unified layout architecture across all Zidney frontend applications:
 
@@ -28,7 +34,7 @@ It defines how pages live inside a consistent application shell.
 
 ---
 
-# 🔒 Constitutional Constraints
+## Constitutional Constraints
 
 Layout system must:
 
@@ -49,7 +55,7 @@ Authorization & data decisions remain in:
 
 ---
 
-# 🧱 Layout Architecture Overview
+## Layout Architecture Overview
 
 All apps must follow this hierarchy:
 
@@ -71,9 +77,9 @@ No feature view may render its own full-page layout unless explicitly declared a
 
 ---
 
-# 🏗 Layout Components
+## Layout Components
 
-## 1️⃣ AppLayout.vue
+### AppLayout.vue
 
 Responsibilities:
 
@@ -90,7 +96,7 @@ Must NOT:
 
 ---
 
-## 2️⃣ AppSidebar.vue
+### AppSidebar.vue
 
 Responsibilities:
 
@@ -110,7 +116,7 @@ It reads computed permissions from store.
 
 ---
 
-## 3️⃣ AppHeader.vue
+### AppHeader.vue
 
 Responsibilities:
 
@@ -128,21 +134,21 @@ Must not:
 
 ---
 
-# 🌍 Multi-App Differences
+## Multi-App Differences
 
-## MMC
+### MMC
 
 - Platform-level navigation
 - No tenant-scoped data in shell
 - No workspace slug in URL
 
-## Backoffice
+### Backoffice
 
 - Workspace-aware navigation
 - Workspace slug visible in header
 - Layout must react to workspace context change
 
-## Frontoffice
+### Frontoffice
 
 - Minimal shell
 - Sidebar may be optional
@@ -152,7 +158,7 @@ Shell components must be reusable across apps where possible.
 
 ---
 
-# 🎨 UI System Integration
+## UI System Integration
 
 Layout must consume:
 
@@ -178,7 +184,7 @@ All layout styling must follow:
 
 ---
 
-# 📐 Layout Slot Strategy
+## Layout Slot Strategy
 
 AppLayout must expose slots:
 
@@ -194,7 +200,7 @@ Avoid layout prop drilling.
 
 ---
 
-# 📱 Responsive Behavior
+## Responsive Behavior
 
 Breakpoints:
 
@@ -213,7 +219,7 @@ No direct window usage without composable abstraction.
 
 ---
 
-# 🔄 Navigation Architecture
+## Navigation Architecture
 
 Routes must be defined in:
 
@@ -233,7 +239,7 @@ Active state derived from router.
 
 ---
 
-# 🧪 Testability Requirements
+## Testability Requirements
 
 Layout must support:
 
@@ -252,7 +258,7 @@ Layout must not fail if:
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -267,7 +273,7 @@ Only layout architecture & shell integration.
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage considered complete when:
 
@@ -284,8 +290,5 @@ Stage considered complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation forbidden
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

@@ -13,6 +13,12 @@ Depends On:
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement the Frontoffice Results and Certificates UI.
@@ -341,5 +347,3 @@ Frontoffice academic feedback and certification layer is operational.
 
 Constitutional Compliance Required  
 Zidney Constitution v1.2.0
-
----

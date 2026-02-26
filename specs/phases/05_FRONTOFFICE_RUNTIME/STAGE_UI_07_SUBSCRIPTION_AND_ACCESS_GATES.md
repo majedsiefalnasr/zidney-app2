@@ -15,6 +15,12 @@ Depends On:
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement a unified Subscription & Access Gate layer for the Frontoffice UI.
@@ -337,5 +343,3 @@ Frontoffice subscription reflection layer is stable and consistent.
 
 Constitutional Compliance Required  
 Zidney Constitution v1.2.0
-
----

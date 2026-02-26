@@ -16,6 +16,12 @@ UI Dependencies:
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Purpose
 
 This stage implements the Backoffice Communication UI layer, enabling institutions to:
@@ -281,3 +287,6 @@ Backoffice Communication UI must never:
 All communication authority remains backend-controlled.
 
 ---
+
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

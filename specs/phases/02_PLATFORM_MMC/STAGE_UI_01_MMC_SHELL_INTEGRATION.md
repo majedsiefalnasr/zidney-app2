@@ -11,7 +11,13 @@ Depends On:
 
 ---
 
-# 🎯 Purpose
+## Stage Status
+
+Status: DRAFT
+
+---
+
+## Purpose
 
 Integrate the MMC application with the Phase 06 runtime foundation and activate:
 
@@ -26,7 +32,7 @@ It does NOT implement feature pages (Products, Licenses, Affiliates, etc.).
 
 ---
 
-# 🧱 Scope of This Stage
+## Scope of This Stage
 
 This stage MUST:
 
@@ -51,7 +57,7 @@ Only shell-level integration.
 
 ---
 
-# 🏗 MMC-Specific Layout Behavior
+## MMC-Specific Layout Behavior
 
 MMC differs from Backoffice & Frontoffice:
 
@@ -84,7 +90,7 @@ core/navigation/mmc.navigation.ts
 
 ---
 
-# 🔐 Auth Integration
+## Auth Integration
 
 Requirements:
 
@@ -99,7 +105,7 @@ Only basic authenticated shell protection.
 
 ---
 
-# 🧭 Routing Structure
+## Routing Structure
 
 Routes must follow:
 
@@ -124,7 +130,7 @@ core/router/mmc.routes.ts
 
 ---
 
-# 🎨 Sidebar Behavior
+## Sidebar Behavior
 
 Sidebar must:
 
@@ -138,7 +144,7 @@ No business logic inside sidebar.
 
 ---
 
-# 🧪 Validation Checklist
+## Validation Checklist
 
 MMC app must:
 
@@ -154,7 +160,7 @@ MMC app must:
 
 ---
 
-# 🔍 Edge Cases to Validate
+## Edge Cases to Validate
 
 - Direct access to /dashboard without token
 - Access token cleared during session
@@ -166,7 +172,7 @@ Shell must remain stable.
 
 ---
 
-# 🚫 Explicit Non-Goals
+## Explicit Non-Goals
 
 This stage does NOT:
 
@@ -181,7 +187,7 @@ Only shell integration.
 
 ---
 
-# 🏁 Completion Criteria
+## Completion Criteria
 
 Stage complete when:
 
@@ -199,8 +205,5 @@ Stage complete when:
 
 ---
 
-# Status
-
-## Stage Status
-
-DRAFT – Implementation not started
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

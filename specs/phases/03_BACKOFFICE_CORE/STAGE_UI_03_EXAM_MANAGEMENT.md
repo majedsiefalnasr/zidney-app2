@@ -23,6 +23,12 @@ Backend Dependencies:
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Purpose
 
 This stage implements the Backoffice UI for managing:
@@ -350,3 +356,6 @@ No Runtime (Phase 4) attempt flow UI integration may begin until this stage is s
 Exam Management UI forms the bridge between Backoffice configuration and Runtime execution.
 
 ---
+
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

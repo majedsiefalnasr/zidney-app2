@@ -12,6 +12,12 @@ Depends On:
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 ## Objective
 
 Implement the student dashboard as the primary runtime entry point.
