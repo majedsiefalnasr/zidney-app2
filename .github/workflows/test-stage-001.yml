@@ -48,7 +48,7 @@ jobs:
         image: postgres:15-alpine
         env:
           POSTGRES_USER: zidney_test
-          POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+          POSTGRES_PASSWORD: zidney-test-password
           POSTGRES_INITDB_ARGS: "-c max_connections=200"
         options: >-
           --health-cmd pg_isready
@@ -78,7 +78,7 @@ jobs:
           DB_HOST: localhost
           DB_PORT: 5433
           DB_USER: zidney_test
-          DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+          DB_PASSWORD: zidney-test-password
       - name: Reset test Redis
         run: bash scripts/reset-test-redis.sh
         env:
@@ -90,7 +90,7 @@ jobs:
           DB_HOST: localhost
           DB_PORT: 5433
           DB_USER: zidney_test
-          DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+          DB_PASSWORD: zidney-test-password
           REDIS_HOST: localhost
           REDIS_PORT: 6380
       - name: Upload coverage
