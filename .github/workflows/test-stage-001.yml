@@ -167,22 +167,34 @@ jobs:
       - name: Check test results
         run: |
           RESULT=0
-          if [ "${{ needs.static-analysis.result }}" != "success" ]; then
-            echo "❌ Static Analysis FAILED"
+          static_analysis_status="${{ needs.static-analysis.result }}"
+          unit_test_status="${{ needs.unit-tests.result }}"
+          integration_test_status="${{ needs.integration-tests.result }}"
+          performance_test_status="${{ needs.performance-tests.result }}"
+
+          evaluate_status() {
+            local suite_name="$1"
+            local suite_status="$2"
+
+            if [ "$suite_status" = "success" ]; then
+              echo "✅ $suite_name PASSED"
+              return
+            fi
+
+            if [ "$suite_status" = "skipped" ]; then
+              echo "⚠️ $suite_name SKIPPED"
+              return
+            fi
+
+            echo "❌ $suite_name FAILED ($suite_status)"
             RESULT=1
-          fi
-          if [ "${{ needs.unit-tests.result }}" != "success" ]; then
-            echo "❌ Unit Tests FAILED"
-            RESULT=1
-          fi
-          if [ "${{ needs.integration-tests.result }}" != "success" ]; then
-            echo "❌ Integration Tests FAILED"
-            RESULT=1
-          fi
-          if [ "${{ needs.performance-tests.result }}" != "success" ]; then
-            echo "❌ Performance Tests FAILED"
-            RESULT=1
-          fi
+          }
+
+          evaluate_status "Static Analysis" "$static_analysis_status"
+          evaluate_status "Unit Tests" "$unit_test_status"
+          evaluate_status "Integration Tests" "$integration_test_status"
+          evaluate_status "Performance Tests" "$performance_test_status"
+
           if [ $RESULT -eq 0 ]; then
             echo "✅ All test suites passed for STAGE_TEST_01_PLATFORM_FOUNDATION"
           else

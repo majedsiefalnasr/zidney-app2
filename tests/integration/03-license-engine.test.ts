@@ -5,8 +5,8 @@
 
 import { Pool } from 'pg'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createDbManager } from '../../db-manager'
-import { cleanupAllFixtures, seedLicense, seedWorkspace } from '../../fixtures'
+import { createDbManager } from '../db-manager'
+import { cleanupAllFixtures, seedLicense, seedWorkspace } from '../fixtures'
 
 describe('Area 3: License Engine Validation (Integration)', () => {
   let masterDb: Pool

@@ -5,13 +5,13 @@
 
 import { Pool } from 'pg'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createDbManager } from '../../db-manager'
+import { createDbManager } from '../db-manager'
 import {
   cleanupAllFixtures,
   seedAttempt,
   seedExam,
   seedWorkspace,
-} from '../../fixtures'
+} from '../fixtures'
 
 describe('Area 7: Attempt Engine Validation', () => {
   let masterDb: Pool

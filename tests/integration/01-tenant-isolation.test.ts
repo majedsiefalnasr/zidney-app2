@@ -5,14 +5,14 @@
 
 import { Pool } from 'pg'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createAuditHelper } from '../../audit-helpers'
-import { createDbManager } from '../../db-manager'
+import { createAuditHelper } from '../audit-helpers'
+import { createDbManager } from '../db-manager'
 import {
   cleanupAllFixtures,
   seedLicense,
   seedUser,
   seedWorkspace,
-} from '../../fixtures'
+} from '../fixtures'
 
 describe('Area 1: Tenant Isolation (Integration)', () => {
   let masterDb: Pool

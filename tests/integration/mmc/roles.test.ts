@@ -7,7 +7,6 @@
 import { randomUUID } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { MasterDatabase } from '../../../apps/api/src/db'
-import * as AuditService from '../../../packages/domain-core/src/services/audit.service'
 
 interface TestContext {
   db: MasterDatabase
@@ -29,7 +28,6 @@ describe('T045: Role & Permission Management Integration Tests', () => {
       salesRoleId: randomUUID(),
     }
 
-    vi.spyOn(AuditService, 'logAuditEvent').mockResolvedValue(undefined as any)
   })
 
   afterEach(() => {

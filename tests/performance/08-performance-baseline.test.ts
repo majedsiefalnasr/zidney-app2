@@ -4,7 +4,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { PERFORMANCE_THRESHOLDS } from '../../test-constants'
+import { PERFORMANCE_THRESHOLDS } from '../test-constants'
 
 describe('Area 8: Performance Baseline', () => {
   /**
