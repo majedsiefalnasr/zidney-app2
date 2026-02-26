@@ -159,11 +159,11 @@ cat package.json | grep -E '"format"|"fmt"'
 
 # 2. Check for Biome
 ls biome.json biome.jsonc 2>/dev/null
-# If found: npx biome format --write <files>
+# If found: bunx biome format --write <files>
 
 # 3. Check for Prettier
 ls .prettierrc* prettier.config.* 2>/dev/null
-# If found: npx prettier --write <files>
+# If found: bunx prettier --write <files>
 
 # 4. No formatter found → skip, add note to commit message: "no formatter configured"
 ```
