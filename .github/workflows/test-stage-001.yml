@@ -1,0 +1,191 @@
+name: Test Stage 001 - Platform Foundation
+
+on:
+  push:
+    branches:
+      - test-001-platform-foundation
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  static-analysis:
+    name: Static Analysis (Area 4)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install
+      - name: Run static tests
+        run: npm run test:static -- --run
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage-final.json
+
+  unit-tests:
+    name: Unit Tests (Areas 1, 3, 5)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install
+      - name: Run unit tests
+        run: npm run test:unit -- --run
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage-final.json
+
+  integration-tests:
+    name: Integration Tests (Areas 1, 2, 6, 7)
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: zidney_test
+          POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+          POSTGRES_INITDB_ARGS: "-c max_connections=200"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5433:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6380:6379
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install
+      - name: Initialize test database
+        run: bash scripts/init-test-db.sh
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5433
+          DB_USER: zidney_test
+          DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+      - name: Reset test Redis
+        run: bash scripts/reset-test-redis.sh
+        env:
+          REDIS_HOST: localhost
+          REDIS_PORT: 6380
+      - name: Run integration tests
+        run: npm run test:integration -- --run
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5433
+          DB_USER: zidney_test
+          DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+          REDIS_HOST: localhost
+          REDIS_PORT: 6380
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage-final.json
+
+  performance-tests:
+    name: Performance Tests (Area 8)
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: integration-tests
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: zidney_test
+          POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+          POSTGRES_INITDB_ARGS: "-c max_connections=200"
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5433:5432
+
+      redis:
+        image: redis:7-alpine
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6380:6379
+
+    steps:
+      - uses: actions/checkout@v3
+      - uses: oven-sh/setup-bun@v1
+      - run: bun install
+      - name: Initialize test database
+        run: bash scripts/init-test-db.sh
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5433
+          DB_USER: zidney_test
+          DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+      - name: Reset test Redis
+        run: bash scripts/reset-test-redis.sh
+        env:
+          REDIS_HOST: localhost
+          REDIS_PORT: 6380
+      - name: Run performance tests
+        run: npm run test:performance -- --run
+        env:
+          DB_HOST: localhost
+          DB_PORT: 5433
+          DB_USER: zidney_test
+          DB_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+          REDIS_HOST: localhost
+          REDIS_PORT: 6380
+      - name: Upload coverage
+        uses: codecov/codecov-action@v3
+        with:
+          files: ./coverage/coverage-final.json
+
+  test-summary:
+    name: Test Summary
+    runs-on: ubuntu-latest
+    needs: [static-analysis, unit-tests, integration-tests, performance-tests]
+    if: always()
+    steps:
+      - name: Check test results
+        run: |
+          RESULT=0
+          if [ "${{ needs.static-analysis.result }}" != "success" ]; then
+            echo "❌ Static Analysis FAILED"
+            RESULT=1
+          fi
+          if [ "${{ needs.unit-tests.result }}" != "success" ]; then
+            echo "❌ Unit Tests FAILED"
+            RESULT=1
+          fi
+          if [ "${{ needs.integration-tests.result }}" != "success" ]; then
+            echo "❌ Integration Tests FAILED"
+            RESULT=1
+          fi
+          if [ "${{ needs.performance-tests.result }}" != "success" ]; then
+            echo "❌ Performance Tests FAILED"
+            RESULT=1
+          fi
+          if [ $RESULT -eq 0 ]; then
+            echo "✅ All test suites passed for STAGE_TEST_01_PLATFORM_FOUNDATION"
+          else
+            echo "❌ One or more test suites failed"
+            exit 1
+          fi

@@ -51,6 +51,8 @@ services:
       retries: 5
       start_period: 10s
 
+    stop_grace_period: 30s
+
     networks:
       - zidney
 
@@ -108,6 +110,8 @@ services:
 
     depends_on:
       postgres:
+        condition: service_healthy
+
         condition: service_healthy
 
     networks:
@@ -212,6 +216,8 @@ services:
       retries: 3
       start_period: 10s
 
+    stop_grace_period: 300s
+
     security_opt:
       - no-new-privileges:true
 
@@ -228,7 +234,10 @@ services:
   # Nginx: Reverse Proxy + Public Entry Point
   # =========================================================================
   nginx:
-    image: nginx:1.27.4-alpine3.20
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: nginx
     container_name: zidney-nginx
     restart: unless-stopped
 

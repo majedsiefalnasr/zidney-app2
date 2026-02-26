@@ -1,0 +1,50 @@
+version: "3.8"
+
+services:
+  postgres-test:
+    image: postgres:15-alpine
+    container_name: postgres-test-zidney
+    environment:
+      POSTGRES_USER: zidney_test
+      POSTGRES_PASSWORD: ${{ secrets.TEST_DB_PASSWORD }}
+      POSTGRES_INITDB_ARGS: "-c max_connections=200"
+    ports:
+      - "5433:5432"
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zidney_test -d postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    stop_grace_period: 30s
+    networks:
+      - zidney-test
+
+  redis-test:
+    image: redis:7-alpine
+    container_name: redis-test-zidney
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6380:6379"
+    volumes:
+      - redis_test_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    stop_grace_period: 15s
+    networks:
+      - zidney-test
+
+volumes:
+  postgres_test_data:
+  redis_test_data:
+
+networks:
+  zidney-test:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.21.0.0/16
