@@ -121,6 +121,34 @@ The MMC Dashboard MUST NOT:
 
 ---
 
+## Clarifications
+
+### Session 2026-02-26
+
+**Q1: Revenue Calculation Precision & Rounding**  
+**A:** C – Aggregate rounding with standard round-half-up at display level. Database stores full precision; display rounds to 2 decimals only. Applies to all monetary displays (revenue, commission, MRR).
+
+**Q2: Affiliate Commission Rounding Method**  
+**A:** B – Sum all commissions with full precision in database; round final total once at display (2 decimals). Matches revenue rounding pattern. `affiliate_usages.commission_amount` remains source of truth.
+
+**Q3: Concurrent Load Definition & Caching Strategy**  
+**A:** B – "100+ concurrent sessions" = 100 concurrent users (active browser/socket sessions). Tiered caching via Redis: 5-min TTL for summary/trends; revenue breakdown and geographic queries always fresh (indexed). All 6 endpoints maintain hard <300ms guarantee (not 95th percentile).
+
+**Q4: Export File Size Limits & Materialized View Refresh**  
+**A:** B – Maximum 50,000 rows per export file. Requests >50k rows return 413 Payload Too Large. Exports always execute fresh query (not from cache) to ensure financial data integrity. Users must filter via date/country/product for larger datasets.
+
+**Q5: User Role Hierarchy & Data Visibility**  
+**A:** A – Role hierarchy enforced: platform_owner ⊃ member. platform_owner views all workspaces + cross-workspace aggregations. member with `reporting.view` permission views only own workspace metrics (filtered at query level). Multi-tenancy isolation maintained.
+
+**Integration Summary:**
+
+- Rounding rules clarified for all monetary displays (revenue, commission, trends)
+- Caching strategy defined: tiered approach balances performance with freshness
+- Export constraints documented: 50,000 row limit with 413 error code
+- Role-based view filtering: query-level enforcement of workspace isolation
+
+---
+
 ## License & Version Enforcement
 
 ### License Middleware Requirement
@@ -440,9 +468,9 @@ CREATE INDEX idx_affiliate_summary_monthly_affiliate ON affiliate_summary_monthl
 ### Dashboard Endpoint Requirements
 
 - **Fr-001**: System MUST provide `/api/mmc/dashboard/summary` endpoint returning license counts grouped by status (ACTIVE, SOFT_LOCKED, ARCHIVED) from master_db licenses table
-- **Fr-002**: System MUST calculate revenue_this_month and revenue_this_year from revenue_records table, displaying in USD with comma separators
-- **Fr-003**: System MUST provide `/api/mmc/dashboard/revenue-breakdown` endpoint returning revenue by product (top 5), ordered descending by total revenue
-- **Fr-004**: System MUST provide `/api/mmc/dashboard/geographic` endpoint returning revenue and license counts grouped by billing_country, sorted descending by revenue
+- **Fr-002**: System MUST calculate revenue_this_month and revenue_this_year from revenue_records table, displaying in USD with 2 decimal precision (round-half-up) at display level; database stores full precision to avoid cumulative rounding errors
+- **Fr-003**: System MUST provide `/api/mmc/dashboard/revenue-breakdown` endpoint returning revenue by product (top 5), ordered descending by total revenue, with display precision of 2 decimals (aggregate rounding)
+- **Fr-004**: System MUST provide `/api/mmc/dashboard/geographic` endpoint returning revenue and license counts grouped by billing_country, sorted descending by revenue, with revenue displayed in 2 decimal precision
 - **Fr-005**: System MUST provide `/api/mmc/dashboard/affiliates` endpoint returning top affiliates by total_commission_generated, including usage count and status (ACTIVE/INACTIVE)
 - **Fr-006**: System MUST provide `/api/mmc/dashboard/trends` endpoint (optional) returning monthly license and revenue trends for the past 12 months, queryable by date range
 
@@ -522,7 +550,7 @@ CREATE INDEX idx_affiliate_summary_monthly_affiliate ON affiliate_summary_monthl
 - **SC-004**: Affiliate performance metrics (top affiliates by commission, total usages) match precomputed values; query latency <300ms with 100+ affiliates
 - **SC-005**: 100% of unauthorized access attempts (missing reporting.view permission) return 403 Forbidden within 50ms (no data leakage)
 - **SC-006**: Zero queries to tenant databases observed in 100+ dashboard access test runs; 100% of queries isolated to master_db
-- **SC-007**: Dashboard response time remains <300ms under concurrent load (50 simultaneous dashboard viewers); average response time <150ms
+- **SC-007**: Dashboard response time remains <300ms under concurrent load (100 simultaneous dashboard viewers, tiered caching); average response time <150ms with <300ms hard ceiling
 - **SC-008**: All dashboard access logged with correlation_id, user_id, workspace_id, timestamp; audit trail is complete and queryable
 - **SC-009**: No sensitive financial payloads or PII exposed in logs or error messages; compliance checklist passes manual review
 - **SC-010**: CSV export files contain all rows and columns matching on-screen display with no truncation or formatting errors; exports completed within 2 seconds for <10K rows
@@ -656,7 +684,7 @@ CREATE INDEX idx_affiliate_summary_monthly_affiliate ON affiliate_summary_monthl
 2. **Indexed Access Pattern**: All queries explicitly use indexed columns; query planner should never recommend sequential scan
 3. **Aggregation Layer**: Heavy computations delegated to precomputed summary tables (updated by worker job); real-time queries use indexed aggregations only
 4. **Middleware Stack**: License → Permission → Query execution order enforced via middleware composition
-5. **Response Caching**: Consider 5-minute cache on dashboard summary (low-frequency read); longer caches for trend data (precomputed)
+5. **Response Caching**: Tiered strategy to support 100 concurrent users with <300ms hard guarantee: (a) 5-minute TTL for dashboard summary and geographic data (low-write, high-read); (b) 1-minute TTL for affiliate leaderboard (more volatile); (c) 10-minute TTL for trend data (precomputed summary tables); cache key includes workspace_id to prevent cross-tenant leakage
 
 ### Frontend Architecture
 
