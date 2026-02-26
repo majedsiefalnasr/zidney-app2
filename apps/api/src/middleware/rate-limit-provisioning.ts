@@ -73,7 +73,7 @@ export function rateLimitProvisioningMiddleware(
 
     try {
       // Increment counter and set expiration
-      const [current, setExResult] = await Promise.all([
+      const [current] = await Promise.all([
         redis.incr(key),
         redis.expire(key, config.windowSeconds),
       ])

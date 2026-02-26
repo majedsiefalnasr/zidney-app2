@@ -29,15 +29,15 @@
 
 ### Foundation Layer
 
-- [ ] T001 Create test directory structure matching test types in `tests/unit/`, `tests/integration/`, `tests/static/`, `tests/performance/`
-- [ ] T002 Create shared test helpers file: `tests/test-helpers.ts` with:
+- [x] T001 Create test directory structure matching test types in `tests/unit/`, `tests/integration/`, `tests/static/`, `tests/performance/`
+- [x] T002 Create shared test helpers file: `tests/test-helpers.ts` with:
   - `InMemoryPool` class for mocked Database connections (unit tests)
   - `InstrumentedRedisClient` class for mocked Redis (unit tests)
   - `createMockTenantPool()` factory for isolated test DB contexts
   - Transaction wrapper utilities
   - JWT generation helpers
 
-- [ ] T003 Create test fixtures seeding module: `tests/fixtures/index.ts` exporting:
+- [x] T003 Create test fixtures seeding module: `tests/fixtures/index.ts` exporting:
   - `seedWorkspace(db, overrides?)` - creates workspace with unique slug
   - `seedLicense(db, overrides?)` - creates license with configurable status/limits
   - `seedUser(db, overrides?)` - creates user in tenant database
@@ -49,27 +49,27 @@
 
 ### [P] Parallel: Test Configuration
 
-- [ ] T004 [P] Create Vitest configuration: `vitest.config.ts` with:
+- [x] T004 [P] Create Vitest configuration: `vitest.config.ts` with:
   - Test environment setup (node for unit, real DB for integration)
   - Mock configuration (auto-mock dependencies)
   - Coverage thresholds (minimum 80% for test infrastructure)
   - Test reporter configuration (verbose, JSON for CI)
   - Timeout settings: unit 5s, integration 30s, performance 60s
 
-- [ ] T005 [P] Create test HTTP client: `tests/http-client.ts` with:
+- [x] T005 [P] Create test HTTP client: `tests/http-client.ts` with:
   - `createHttpClient()` factory for mock HTTP requests
   - `.setJWT(token)` method for authentication
   - `.get() .post() .patch() .delete()` methods
   - Response verification helpers
   - Error response matching utilities
 
-- [ ] T006 [P] Create structured logging test spy: `tests/logger-spy.ts` with:
+- [x] T006 [P] Create structured logging test spy: `tests/logger-spy.ts` with:
   - Log capture and inspection interface
   - JSON parsing and field validation
   - Required field checklist (timestamp, level, service, workspace_slug, correlation_id, user_id)
   - Sensitive data detection (password, token patterns)
 
-- [ ] T007 [P] Create Docker Compose configuration: `docker-compose.test.yml` with:
+- [x] T007 [P] Create Docker Compose configuration: `docker-compose.test.yml` with:
   - PostgreSQL 15 service on 5433 (master and tenant databases)
   - Redis 7 service on 6380 (distributed locks, rate limiting)
   - Health checks for both services
@@ -77,33 +77,33 @@
 
 ### [P] Parallel: Test Data Utilities
 
-- [ ] T008 [P] Create database connection manager: `tests/db-manager.ts` with:
+- [x] T008 [P] Create database connection manager: `tests/db-manager.ts` with:
   - `.getMasterDb()` - connection to master database
   - `.getTenantDb(workspaceId)` - connection to tenant-specific database
   - `.createTenantDatabase(workspaceSlug)` - provisioning simulation
   - `.teardown()` - cleanup all test databases and connections
   - Transaction management for atomic test operations
 
-- [ ] T009 [P] Create test data cleanup utilities: `tests/cleanup.ts` with:
+- [x] T009 [P] Create test data cleanup utilities: `tests/cleanup.ts` with:
   - `cleanupAllWorkspaces()` - delete all test workspaces and databases
   - `cleanupWorkspace(workspaceId)` - delete specific workspace
   - `cleanupAllLicenses()` - reset license table
   - `cleanupAllAttempts()` - reset attempt data
   - Idempotency: cleanup can be called multiple times safely
 
-- [ ] T010 [P] Create audit log verification helpers: `tests/audit-helpers.ts` with:
+- [x] T010 [P] Create audit log verification helpers: `tests/audit-helpers.ts` with:
   - `queryAuditLog(filters)` - retrieve audit entries matching conditions
   - `verifyAuditEvent(action, workspace_id, expected_status)` - assert audit trail
   - Used by Area 1 tests to verify unauthorized access attempts logged
 
-- [ ] T011 [P] Create RFC 7807 error contract matchers: `tests/error-matchers.ts` with:
+- [x] T011 [P] Create RFC 7807 error contract matchers: `tests/error-matchers.ts` with:
   - `toMatchRFC7807(expectedStatus, expectedCode)` - Vitest custom matcher
   - Validates: type, title, status, detail, instance, error_code fields
   - Used by all error validation tests (Areas 1, 3, 5, 6)
 
 ### [P] Parallel: Test Constants & Types
 
-- [ ] T012 [P] Create test constants file: `tests/test-constants.ts` with:
+- [x] T012 [P] Create test constants file: `tests/test-constants.ts` with:
   - Test workspace slugs: `TEST_WS_A`, `TEST_WS_B`, `TEST_WS_CONCURRENT`
   - Test user IDs and emails
   - License limits for testing: `TEST_STUDENT_LIMIT`, `TEST_STAFF_LIMIT`
@@ -111,7 +111,7 @@
   - Timeout values: `TEST_LOCK_TIMEOUT_MS`, `TEST_PROVISION_TIMEOUT_MS`
   - Performance baseline thresholds: `MIDDLEWARE_OVERHEAD_MAX_MS`, `LOCK_RESOLUTION_MAX_MS`
 
-- [ ] T013 [P] Create test types file: `tests/types.ts` with:
+- [x] T013 [P] Create test types file: `tests/types.ts` with:
   - `TestEnvironment` interface (workspaces, databases, connections)
   - `TestFixture` interface (all seedable entities)
   - `PerformanceMetrics` interface (latency percentiles)
@@ -130,21 +130,21 @@
 
 ### Environment & Dependencies
 
-- [ ] T014 [P] Verify external dependencies available:
+- [x] T014 [P] Verify external dependencies available:
   - PostgreSQL running on localhost:5433
   - Redis running on localhost:6380
   - Bun/Node.js runtime >= 20
   - Vitest >= 1.0 installed
   - Create `scripts/verify-test-env.sh` that exits 0 if all present, 1 otherwise
 
-- [ ] T015 [P] Create test database initialization script: `scripts/init-test-db.sh` with:
+- [x] T015 [P] Create test database initialization script: `scripts/init-test-db.sh` with:
   - Drop existing master_db, recreate with baseline schema
   - Apply all Phase 01 migrations
   - Apply Phase 02 migrations (exam/question tables needed for Area 7)
   - Verify schema_version set correctly
   - Script idempotent (safe to run multiple times)
 
-- [ ] T016 [P] Create Redis test data cleanup script: `scripts/reset-test-redis.sh` with:
+- [x] T016 [P] Create Redis test data cleanup script: `scripts/reset-test-redis.sh` with:
   - Flush all Redis data (safe for test environment only)
   - Recreate rate limit buckets (empty)
   - Verify Redis connection healthy
@@ -153,7 +153,7 @@
 
 ### CI Configuration
 
-- [ ] T017 [P] Create GitHub Actions workflow (or equivalent CI): `.github/workflows/test-stage-001.yml` with:
+- [x] T017 [P] Create GitHub Actions workflow (or equivalent CI): `.github/workflows/test-stage-001.yml` with:
   - **Job 1**: Unit tests (Vitest --run, ~15 min)
   - **Job 2**: Integration tests (Docker + Vitest, ~30 min, parallel to Job 1)
   - **Job 3**: Static analysis (Vitest, ~5 min, parallel to Jobs 1-2)
@@ -175,29 +175,29 @@
 
 ### Unit Tests (Tests 1.1-1.4 with mocks)
 
-- [ ] T018 Create unit test file: `tests/unit/01-tenant-isolation.test.ts` with describe block "Area 1: Tenant Isolation (Unit)"
+- [x] T018 Create unit test file: `tests/unit/01-tenant-isolation.test.ts` with describe block "Area 1: Tenant Isolation (Unit)"
 
-- [ ] T019 [P] [Area 1] Test 1.1 unit implementation:
+- [x] T019 [P] [Area 1] Test 1.1 unit implementation:
   - Cross-tenant data access rejection test
   - Setup: 2 workspaces (ws-a, ws-b), 1 user per workspace
   - Act: Authenticate as User A, attempt GET `/api/workspaces/{ws-b.slug}/students`
   - Assert: Status 403, response body null, RFC 7807 format
   - In `tests/unit/01-tenant-isolation.test.ts`
 
-- [ ] T020 [P] [Area 1] Test 1.2 unit implementation:
+- [x] T020 [P] [Area 1] Test 1.2 unit implementation:
   - Master database boundary enforcement test
   - Codebase scan: Verify no direct master_db imports in tenant-bound routes
   - Pattern: `/apps/api/src/routes/**` should NOT contain `master_db.query()` in tenant context
   - In `tests/unit/01-tenant-isolation.test.ts`
 
-- [ ] T021 [P] [Area 1] Test 1.3 unit implementation:
+- [x] T021 [P] [Area 1] Test 1.3 unit implementation:
   - Resolver middleware enforcement test
   - Create minimal Hono app WITH resolver middleware → first request succeeds
   - Create minimal Hono app WITHOUT resolver middleware → first request fails (500 or 503)
   - Verify error message indicates resolver unavailability
   - In `tests/unit/01-tenant-isolation.test.ts`
 
-- [ ] T022 [P] [Area 1] Test 1.4 unit implementation:
+- [x] T022 [P] [Area 1] Test 1.4 unit implementation:
   - Workspace slug immutability test
   - Authenticate as User A (workspace-a)
   - Attempt POST with malicious `workspace_slug: workspace-b` in request body
@@ -206,16 +206,16 @@
 
 ### Integration Tests (Tests 1.1-1.4 with real database)
 
-- [ ] T023 Create integration test file: `tests/integration/01-tenant-isolation.test.ts` with describe block "Area 1: Tenant Isolation (Integration)"
+- [x] T023 Create integration test file: `tests/integration/01-tenant-isolation.test.ts` with describe block "Area 1: Tenant Isolation (Integration)"
 
-- [ ] T024 [Area 1] Create multi-workspace setup helper:
+- [x] T024 [Area 1] Create multi-workspace setup helper:
   - Function `setupMultiWorkspaceTest(masterDb, tenantPoolMap)` in test file
   - Creates workspace A + B with real databases
   - Provisions both tenant databases
   - Seeds users in both
   - Returns: `{ wsA, wsB, userA, userB, dbA, dbB }`
 
-- [ ] T025 [Area 1] Test 1.1 integration implementation:
+- [x] T025 [Area 1] Test 1.1 integration implementation:
   - Cross-tenant access rejection with real database
   - Setup: Use multi-workspace helper
   - Act: Authenticate as user from workspace A, attempt access to workspace B resource
@@ -223,18 +223,18 @@
   - Verify: No data from workspace B leaked in response
   - In `tests/integration/01-tenant-isolation.test.ts`
 
-- [ ] T026 [Area 1] Test 1.2 integration implementation (same as unit but with real connections):
+- [x] T026 [Area 1] Test 1.2 integration implementation (same as unit but with real connections):
   - Verify resolver chain executes in correct order: correlation → resolver → license → schema → handler
   - In `tests/integration/01-tenant-isolation.test.ts`
 
-- [ ] T027 [Area 1] Test 1.3 integration implementation (same as unit):
+- [x] T027 [Area 1] Test 1.3 integration implementation (same as unit):
   - Service startup validation with real environment
   - In `tests/integration/01-tenant-isolation.test.ts`
 
-- [ ] T028 [Area 1] Test 1.4 integration implementation (same as unit but with real HTTP):
+- [x] T028 [Area 1] Test 1.4 integration implementation (same as unit but with real HTTP):
   - In `tests/integration/01-tenant-isolation.test.ts`
 
-- [ ] T029 [Area 1] Add teardown hook for multi-workspace tests:
+- [x] T029 [Area 1] Add teardown hook for multi-workspace tests:
   - Delete workspace A and B databases after all tests
   - Delete master records
   - Clean up audit log entries
@@ -256,9 +256,9 @@
 
 ### Integration Tests (Tests 2.1-2.3, real database + concurrency)
 
-- [ ] T030 Create provisioning test file: `tests/integration/02-provisioning.test.ts` with describe block "Area 2: Provisioning Validation"
+- [x] T030 Create provisioning test file: `tests/integration/02-provisioning.test.ts` with describe block "Area 2: Provisioning Validation"
 
-- [ ] T031 [Area 2] Test 2.1 implementation:
+- [x] T031 [Area 2] Test 2.1 implementation:
   - Deterministic database creation (idempotency)
   - First provision: triggers database creation
   - Check database list: exactly 1 database created
@@ -267,7 +267,7 @@
   - Assert: schema_version, baseline tables, indexes identical across provisions
   - In `tests/integration/02-provisioning.test.ts`
 
-- [ ] T032 [Area 2] Test 2.2 implementation:
+- [x] T032 [Area 2] Test 2.2 implementation:
   - Distributed lock enforcement under concurrency
   - Create workspace (not yet provisioned)
   - Submit 5 concurrent provision requests (simultaneous or <100ms window)
@@ -277,7 +277,7 @@
   - Verify: Lock timeout/TTL = ~60 seconds
   - In `tests/integration/02-provisioning.test.ts`
 
-- [ ] T033 [Area 2] Test 2.3 implementation:
+- [x] T033 [Area 2] Test 2.3 implementation:
   - Baseline schema integrity after provisioning
   - Provision new workspace
   - Connect to tenant database, verify all required tables present:
@@ -286,7 +286,7 @@
   - Verify schema_version row exists with semantic version (X.Y.Z) and recent timestamp
   - In `tests/integration/02-provisioning.test.ts`
 
-- [ ] T034 [Area 2] Create provisioning test helper:
+- [x] T034 [Area 2] Create provisioning test helper:
   - `provisioning.provision(workspaceId)` - triggers provisioning
   - Used by all three provisioning tests
   - Returns: `{ success: boolean, message: string }`
@@ -308,38 +308,38 @@
 
 ### Unit Tests (Tests 3.1a-e, 3.2, 3.3a-c)
 
-- [ ] T035 Create license engine unit test file: `tests/unit/03-license-engine.test.ts` with describe block "Area 3: License Engine Validation"
+- [x] T035 Create license engine unit test file: `tests/unit/03-license-engine.test.ts` with describe block "Area 3: License Engine Validation"
 
 #### Test 3.1: License State Machine (5 sub-tests)
 
-- [ ] T036 [P] [Area 3] Test 3.1a implementation:
+- [x] T036 [P] [Area 3] Test 3.1a implementation:
   - Valid transition ACTIVE → SOFT_LOCKED
   - Create license in ACTIVE state
   - PATCH to SOFT_LOCKED status
   - Assert: 200 OK, database reflects SOFT_LOCKED, access to workspace returns 423
   - In `tests/unit/03-license-engine.test.ts`
 
-- [ ] T037 [P] [Area 3] Test 3.1b implementation:
+- [x] T037 [P] [Area 3] Test 3.1b implementation:
   - Valid transition SOFT_LOCKED → ARCHIVED
   - Starting from SOFT_LOCKED state (from 3.1a)
   - PATCH to ARCHIVED
   - Assert: 200 OK, database reflects ARCHIVED, access to workspace returns 403
   - In `tests/unit/03-license-engine.test.ts`
 
-- [ ] T038 [P] [Area 3] Test 3.1c implementation:
+- [x] T038 [P] [Area 3] Test 3.1c implementation:
   - Valid transition SOFT_LOCKED → ACTIVE (reactivation)
   - Create license, transition to SOFT_LOCKED, then back to ACTIVE
   - Assert: 200 OK, workspace is accessible again
   - In `tests/unit/03-license-engine.test.ts`
 
-- [ ] T039 [P] [Area 3] Test 3.1d implementation:
+- [x] T039 [P] [Area 3] Test 3.1d implementation:
   - Invalid transition ARCHIVED → ACTIVE (rejected)
   - Create license, transition to ARCHIVED (via SOFT_LOCKED)
   - Attempt to transition ARCHIVED → ACTIVE
   - Assert: 409 Conflict, error_code: INVALID_TRANSITION, detail shows current/requested states
   - In `tests/unit/03-license-engine.test.ts`
 
-- [ ] T040 [P] [Area 3] Test 3.1e implementation:
+- [x] T040 [P] [Area 3] Test 3.1e implementation:
   - Invalid transition DELETED → \* (rejected)
   - Create license in DELETED state (or manually set for test)
   - Attempt any transition from DELETED
@@ -348,7 +348,7 @@
 
 #### Test 3.2: Version Enforcement
 
-- [ ] T041 [Area 3] Test 3.2 implementation:
+- [x] T041 [Area 3] Test 3.2 implementation:
   - Version enforcement (schema compatibility)
   - Create workspace with license pointing to product v2.0.0
   - Provision with schema_version = 2.0.0
@@ -361,7 +361,7 @@
 
 #### Test 3.3: License Limit Enforcement (3 sub-tests)
 
-- [ ] T042 [P] [Area 3] Test 3.3a implementation:
+- [x] T042 [P] [Area 3] Test 3.3a implementation:
   - Student limit enforcement
   - Create license with max_students: 100
   - Create workspace using this license
@@ -372,7 +372,7 @@
   - Verify 101st student NOT created in database
   - In `tests/unit/03-license-engine.test.ts`
 
-- [ ] T043 [P] [Area 3] Test 3.3b implementation:
+- [x] T043 [P] [Area 3] Test 3.3b implementation:
   - Staff limit enforcement
   - Create license with max_staff: 50
   - Create 50 staff members
@@ -381,7 +381,7 @@
   - Verify 51st staff NOT created
   - In `tests/unit/03-license-engine.test.ts`
 
-- [ ] T044 [Area 3] Test 3.3c implementation:
+- [x] T044 [Area 3] Test 3.3c implementation:
   - Limit check is transactional
   - Create license with max_students: 10
   - Attempt bulk operation: create 11 students within transaction
@@ -391,19 +391,19 @@
 
 ### Integration Tests (License enforcement with real database context)
 
-- [ ] T045 Create license engine integration test file: `tests/integration/03-license-engine.test.ts`
+- [x] T045 Create license engine integration test file: `tests/integration/03-license-engine.test.ts`
 
-- [ ] T046 [Area 3] Integration test:
+- [x] T046 [Area 3] Integration test:
   - All 3.1a-e state transitions with real database
   - Verify workspace access permissions change with license state
   - In `tests/integration/03-license-engine.test.ts`
 
-- [ ] T047 [Area 3] Integration test:
+- [x] T047 [Area 3] Integration test:
   - Version enforcement with real tenant database
   - Schema version mismatch detection
   - In `tests/integration/03-license-engine.test.ts`
 
-- [ ] T048 [Area 3] Integration test:
+- [x] T048 [Area 3] Integration test:
   - Limit enforcement with real database writes
   - Transactional correctness
   - In `tests/integration/03-license-engine.test.ts`
@@ -424,9 +424,9 @@
 
 ### Static Analysis Tests (Tests 4.1-4.3, file-based)
 
-- [ ] T049 Create migration discipline test file: `tests/static/04-migration-discipline.test.ts` with describe block "Area 4: Migration Discipline Validation"
+- [x] T049 Create migration discipline test file: `tests/static/04-migration-discipline.test.ts` with describe block "Area 4: Migration Discipline Validation"
 
-- [ ] T050 [Area 4] Test 4.1 implementation:
+- [x] T050 [Area 4] Test 4.1 implementation:
   - Forward-only migration check
   - Scan: `apps/api/src/db/master/migrations/**/*.sql`, `apps/api/src/db/tenant/migrations/**/*.sql`
   - For each migration:
@@ -436,7 +436,7 @@
   - Assert: Zero destructive SQL in UP sections
   - In `tests/static/04-migration-discipline.test.ts`
 
-- [ ] T051 [Area 4] Test 4.2 implementation:
+- [x] T051 [Area 4] Test 4.2 implementation:
   - Migration hash immutability
   - Load hashmap from `.migrations.json` (SHA256 per migration)
   - Calculate current SHA256 for each migration file
@@ -445,7 +445,7 @@
   - If mismatch detected: fail with "Migration {filename} hash changed (immutability violation)"
   - In `tests/static/04-migration-discipline.test.ts`
 
-- [ ] T052 [Area 4] Test 4.3 implementation:
+- [x] T052 [Area 4] Test 4.3 implementation:
   - Duplicate migration ID detection
   - Extract migration ID (number prefix) from each filename
   - Build set of IDs
@@ -453,7 +453,7 @@
   - If duplicates found: fail with list of duplicate IDs and filenames
   - In `tests/static/04-migration-discipline.test.ts`
 
-- [ ] T053 Create migration hash recording script:
+- [x] T053 Create migration hash recording script:
   - `scripts/record-migration-hashes.sh`
   - Generates `.migrations.json` with SHA256 hashes of all migration files
   - Used during deployment to lock migration hashes
@@ -475,11 +475,11 @@
 
 ### Unit Tests (Tests 5.1a-c, 5.2 with mocks)
 
-- [ ] T054 Create rate limiting unit test file: `tests/unit/05-rate-limiting.test.ts` with describe block "Area 5: Rate Limiting Validation"
+- [x] T054 Create rate limiting unit test file: `tests/unit/05-rate-limiting.test.ts` with describe block "Area 5: Rate Limiting Validation"
 
 #### Test 5.1: Threshold Enforcement
 
-- [ ] T055 [P] [Area 5] Test 5.1a implementation:
+- [x] T055 [P] [Area 5] Test 5.1a implementation:
   - Login endpoint rate limit (5/min per IP)
   - Mock HTTP client from IP A
   - Submit 5 login requests (any credentials)
@@ -490,7 +490,7 @@
   - Assert: 200 or 401 (limit reset)
   - In `tests/unit/05-rate-limiting.test.ts`
 
-- [ ] T056 [P] [Area 5] Test 5.1b implementation:
+- [x] T056 [P] [Area 5] Test 5.1b implementation:
   - API endpoint rate limit (per authenticated user)
   - Create 2 users (User1, User2)
   - Authenticate as User1, make 1000 requests within 1 hour
@@ -501,7 +501,7 @@
   - Assert: User2 is NOT rate limited (separate bucket)
   - In `tests/unit/05-rate-limiting.test.ts`
 
-- [ ] T057 [P] [Area 5] Test 5.1c implementation:
+- [x] T057 [P] [Area 5] Test 5.1c implementation:
   - Submission idempotency bypasses rate limiting
   - Create attempt A1, question Q1
   - Submit answer (status: 202 Accepted)
@@ -513,7 +513,7 @@
 
 #### Test 5.2: Rate Limit Headers
 
-- [ ] T058 [Area 5] Test 5.2 implementation:
+- [x] T058 [Area 5] Test 5.2 implementation:
   - Rate limit header verification
   - Make any authenticated API request
   - Assert headers present:
@@ -529,13 +529,13 @@
 
 ### Integration Tests (Rate limiting with real Redis)
 
-- [ ] T059 Create rate limiting integration test file: `tests/integration/05-rate-limiting.test.ts`
+- [x] T059 Create rate limiting integration test file: `tests/integration/05-rate-limiting.test.ts`
 
-- [ ] T060 [Area 5] Integration test:
+- [x] T060 [Area 5] Integration test:
   - Rate limit threshold enforcement with real Redis backend
   - In `tests/integration/05-rate-limiting.test.ts`
 
-- [ ] T061 [Area 5] Integration test:
+- [x] T061 [Area 5] Integration test:
   - Rate limit headers with real rate limit counters
   - In `tests/integration/05-rate-limiting.test.ts`
 
@@ -555,11 +555,11 @@
 
 ### Integration Tests (Tests 6.1-6.2 with real logging)
 
-- [ ] T062 Create observability test file: `tests/integration/06-observability.test.ts` with describe block "Area 6: Observability Validation"
+- [x] T062 Create observability test file: `tests/integration/06-observability.test.ts` with describe block "Area 6: Observability Validation"
 
 #### Test 6.1: Structured Logging Compliance
 
-- [ ] T063 [Area 6] Test 6.1 implementation:
+- [x] T063 [Area 6] Test 6.1 implementation:
   - Structured logging compliance
   - Make authenticated request: GET `/api/workspaces/{ws}/students`
   - Capture all log entries for this request (correlation_id matching)
@@ -581,7 +581,7 @@
 
 #### Test 6.2: RFC 7807 Error Response Contract
 
-- [ ] T064 [Area 6] Test 6.2 implementation:
+- [x] T064 [Area 6] Test 6.2 implementation:
   - Error response contract (RFC 7807)
   - Trigger various errors:
     - 400: Invalid email format
@@ -619,11 +619,11 @@
 
 ### Integration Tests (Tests 7.1-7.3 with real attempt lifecycle)
 
-- [ ] T065 Create attempt engine test file: `tests/integration/07-attempt-engine.test.ts` with describe block "Area 7: Attempt Engine Validation"
+- [x] T065 Create attempt engine test file: `tests/integration/07-attempt-engine.test.ts` with describe block "Area 7: Attempt Engine Validation"
 
 #### Test 7.1: Snapshot Immutability
 
-- [ ] T066 [Area 7] Test 7.1 implementation:
+- [x] T066 [Area 7] Test 7.1 implementation:
   - Snapshot immutability
   - Create exam E1: 5 questions, 100 points, 60% pass threshold, D passing grade
   - Student S1 starts attempt A1 (snapshot created)
@@ -638,7 +638,7 @@
 
 #### Test 7.2: Worker-Only Grading Authority
 
-- [ ] T067 [Area 7] Test 7.2 implementation:
+- [x] T067 [Area 7] Test 7.2 implementation:
   - Worker-only grading authority
   - Codebase scan: `/apps/api/src/routes/**` does NOT contain grading logic
   - Pattern: No calculateScore, gradeSubmission, evaluateAnswer in routes
@@ -650,7 +650,7 @@
 
 #### Test 7.3: Server-Authoritative Time
 
-- [ ] T068 [Area 7] Test 7.3 implementation:
+- [x] T068 [Area 7] Test 7.3 implementation:
   - Server-authoritative time (client time ignored)
   - Create attempt A3 with 60-minute deadline
   - Server time: 2026-02-26 10:00:00 UTC
@@ -680,11 +680,11 @@
 
 ### Performance Tests (Tests 8.1-8.3 with load tools)
 
-- [ ] T069 Create performance test file: `tests/performance/08-performance-baseline.test.ts` with describe block "Area 8: Performance Baseline"
+- [x] T069 Create performance test file: `tests/performance/08-performance-baseline.test.ts` with describe block "Area 8: Performance Baseline"
 
 #### Test 8.1: Middleware Overhead
 
-- [ ] T070 [Area 8] Test 8.1 implementation:
+- [x] T070 [Area 8] Test 8.1 implementation:
   - Middleware overhead < 1ms
   - Create minimal endpoint: GET `/api/test/echo` returns `{ ok: true }`
   - Version 1: WITH all middleware (correlation, resolver, license, schema version)
@@ -698,7 +698,7 @@
 
 #### Test 8.2: License Query Performance
 
-- [ ] T071 [Area 8] Test 8.2 implementation:
+- [x] T071 [Area 8] Test 8.2 implementation:
   - License check query < 5ms
   - Create 10,000 license records in master database
   - Execute query 1000 times: SELECT \* FROM licenses WHERE id = $1 AND status = 'ACTIVE'
@@ -710,7 +710,7 @@
 
 #### Test 8.3: Provisioning Lock Performance
 
-- [ ] T072 [Area 8] Test 8.3 implementation:
+- [x] T072 [Area 8] Test 8.3 implementation:
   - Provisioning lock resolution < 50ms
   - Measure 100 lock cycles: acquire + release
   - Calculate percentiles
@@ -733,18 +733,18 @@
 
 ### Final Validation
 
-- [ ] T073 Create comprehensive test runner script: `scripts/run-all-tests.sh` with:
+- [x] T073 Create comprehensive test runner script: `scripts/run-all-tests.sh` with:
   - Sequential execution: Static → Unit → Integration → Performance
   - Parallel CI mode: All jobs in parallel
   - Summary report at end
   - Exit code 0 if all pass, 1 if any fail
 
-- [ ] T074 Create test coverage report:
+- [x] T074 Create test coverage report:
   - Generate coverage report: `npm run test:coverage`
   - Minimum 80% coverage for test infrastructure
   - Generate HTML report: `coverage/index.html`
 
-- [ ] T075 Create validation report template: `audits/VALIDATION_REPORT.md` with:
+- [x] T075 Create validation report template: `audits/VALIDATION_REPORT.md` with:
   - Section: Test Results (31/31 passed)
   - Section: Architecture Validation (8/8 areas passed)
   - Section: Performance Metrics (all thresholds met)
@@ -753,7 +753,7 @@
 
 ### Documentation
 
-- [ ] T076 Create test execution guide: `docs/TESTING.md` with:
+- [x] T076 Create test execution guide: `docs/TESTING.md` with:
   - Prerequisites (PostgreSQL, Redis, Node.js)
   - Running all tests (sequential and parallel)
   - Running specific test areas (e.g., `npm run test:area-1`)
@@ -761,7 +761,7 @@
   - Debugging failed tests
   - Adding new tests
 
-- [ ] T077 Update README: `specs/runtime/test-001-platform-foundation/README.md` with:
+- [x] T077 Update README: `specs/runtime/test-001-platform-foundation/README.md` with:
   - Quick start commands
   - Test organization overview
   - Expected runtime (~65 min sequential, ~35 min CI)
@@ -769,7 +769,7 @@
 
 ### Cleanup
 
-- [ ] T078 Create post-test cleanup script: `scripts/cleanup-test-env.sh` with:
+- [x] T078 Create post-test cleanup script: `scripts/cleanup-test-env.sh` with:
   - Delete all test databases
   - Clear test data from Redis
   - Clean log files

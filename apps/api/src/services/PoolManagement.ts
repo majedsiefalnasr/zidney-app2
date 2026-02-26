@@ -17,19 +17,19 @@ const logger = createLogger('pool-management')
 // ============================================================================
 
 export class SchemaVersionCheckMiddleware {
-  private master_pool: Pool
+  private _master_pool: Pool
   private min_schema_version: string = '1.0.0'
   private max_schema_version: string = '2.0.0'
-  private schema_cache: Map<string, { version: string; timestamp: number }> =
+  private _schema_cache: Map<string, { version: string; timestamp: number }> =
     new Map()
-  private cache_ttl_ms: number = 60 * 1000 // 1 minute
+  private _cache_ttl_ms: number = 60 * 1000 // 1 minute
 
   constructor(
     master_pool: Pool,
     min_version: string = '1.0.0',
     max_version: string = '2.0.0'
   ) {
-    this.master_pool = master_pool
+    this._master_pool = master_pool
     this.min_schema_version = min_version
     this.max_schema_version = max_version
   }

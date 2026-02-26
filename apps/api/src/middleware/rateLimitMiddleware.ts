@@ -63,7 +63,7 @@ export function rateLimitMiddleware(endpoint: keyof typeof RATE_LIMIT_CONFIG) {
     }
 
     // Rate limit key: {endpoint}:{userId}
-    const rateLimitKey = `rate_limit:${endpoint}:${userId}`
+    const _rateLimitKey = `rate_limit:${endpoint}:${userId}`
     const windowSizeSeconds = 60
     const maxRequests = config.requestsPerMinute
 
@@ -71,7 +71,7 @@ export function rateLimitMiddleware(endpoint: keyof typeof RATE_LIMIT_CONFIG) {
       // Using sliding window algorithm with Redis
       // In production, use pipelined commands for efficiency
       const now = Math.floor(Date.now() / 1000)
-      const windowStart = now - windowSizeSeconds
+      const _windowStart = now - windowSizeSeconds
 
       // Remove old entries outside window
       // (in production, use ZREMRANGEBYSCORE)
@@ -107,10 +107,10 @@ export function rateLimitMiddleware(endpoint: keyof typeof RATE_LIMIT_CONFIG) {
  * Returns true if limit exceeded, false if allowed
  */
 export async function isRateLimited(
-  redis: unknown,
-  endpoint: string,
-  userId: string,
-  limitsPerMinute: number
+  _redis: unknown,
+  _endpoint: string,
+  _userId: string,
+  _limitsPerMinute: number
 ): Promise<boolean> {
   // Placeholder implementation
   // Real implementation would query Redis
@@ -124,9 +124,9 @@ export async function isRateLimited(
  * Get current request count for endpoint
  */
 export async function getRequestCount(
-  redis: unknown,
-  endpoint: string,
-  userId: string
+  _redis: unknown,
+  _endpoint: string,
+  _userId: string
 ): Promise<number> {
   // Placeholder implementation
   // Real implementation would query Redis ZSet
@@ -137,8 +137,8 @@ export async function getRequestCount(
  * Get rate limit info for user
  */
 export async function getRateLimitInfo(
-  redis: unknown,
-  userId: string
+  _redis: unknown,
+  _userId: string
 ): Promise<Record<string, { requests: number; limit: number; resetAt: Date }>> {
   // Placeholder implementation
   // Real implementation would query Redis
@@ -149,8 +149,8 @@ export async function getRateLimitInfo(
  * Reset rate limit for user
  */
 export async function resetRateLimit(
-  redis: unknown,
-  userId: string
+  _redis: unknown,
+  _userId: string
 ): Promise<void> {
   // Placeholder implementation
   // Real implementation would delete Redis keys

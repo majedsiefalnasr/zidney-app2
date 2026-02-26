@@ -49,7 +49,7 @@ export class HealthCheckService {
   private queueName: string
   private dlqName: string
   private startTime: number
-  private lastJobProcessedAt: string | null = null
+  private _lastJobProcessedAt: string | null = null
 
   constructor(
     masterDb: Pool,

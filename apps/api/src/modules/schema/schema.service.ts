@@ -13,12 +13,12 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
-import { createLogger } from '@zidney/logger'
-import type { Pool } from 'pg'
 import {
   calculateSHA256,
   getMigrationFilePath,
 } from '@zidney/domain-core/migrations/migrate'
+import { createLogger } from '@zidney/logger'
+import type { Pool } from 'pg'
 import {
   checkIdempotency,
   generateTaskId,
@@ -154,7 +154,7 @@ export async function initializeTenantSchema(
       pool
     )
 
-    const duration = Date.now() - startTime
+    const _duration = Date.now() - startTime
 
     return {
       task_id: taskId,
@@ -185,7 +185,7 @@ export async function initializeTenantSchema(
 export async function getSchemaInitStatus(
   workspace_id: string,
   task_id: string,
-  redis: RedisClient | null,
+  _redis: RedisClient | null,
   pool: Pool
 ): Promise<any> {
   const logger = createLogger('getSchemaInitStatus')

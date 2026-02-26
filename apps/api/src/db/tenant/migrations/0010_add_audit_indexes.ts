@@ -20,7 +20,7 @@ export const migration: MigrationConfig = {
   version: '1.1.0',
   description: 'Create indexes for efficient audit trail queries',
 
-  up: async (db, schema, context) => {
+  up: async (db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
 
     // T007: Create index for completed attempts (audit queries)
@@ -45,7 +45,7 @@ export const migration: MigrationConfig = {
     console.log(`[${correlationId}] Created audit indexes on attempts table`)
   },
 
-  down: async (db, schema, context) => {
+  down: async (db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
 
     await db.execute(

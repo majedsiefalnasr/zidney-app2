@@ -145,7 +145,7 @@ async function updateSecurityEventCounters(
 async function checkAttackPattern(event: SecurityEvent): Promise<void> {
   // Check for repeated failures from same IP
   const ipKey = `security:counter:${event.event_type}:ip:${event.source_ip}`
-  const keysPattern = `${ipKey}:*`
+  const _keysPattern = `${ipKey}:*`
 
   // TODO: Implement scan-based counting or use sorted set
   // TBD: Alert if pattern matches known attack signature
@@ -375,8 +375,8 @@ export async function querySecurityEvents(
  * Get security event summary for a time period
  */
 export async function getSecurityEventSummary(
-  startDate: Date,
-  endDate: Date
+  _startDate: Date,
+  _endDate: Date
 ): Promise<Record<string, number>> {
   // In production, this would query a security events table
   // For now, calculates from counters

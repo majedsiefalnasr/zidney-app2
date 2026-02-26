@@ -83,7 +83,7 @@ router.post(
   '/',
   validateSchemaVersionMiddleware(),
   validateLicenseMiddleware(),
-  zValidator('json', loginSchema, (result, c) => {
+  zValidator('json', loginSchema, (result, _c) => {
     if (!result.success) {
       throwAuthError(
         AuthErrorCodes.VALIDATION_ERROR,

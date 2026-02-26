@@ -89,7 +89,7 @@ async function dlqInspection(c: Context): Promise<Response | void> {
     })
 
     // Query DLQ entries from tenant database
-    const { rows: entries, rowCount: total } = await db.query(
+    const { rows: entries } = await db.query(
       `
       SELECT
         id,

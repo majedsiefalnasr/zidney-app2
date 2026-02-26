@@ -64,7 +64,7 @@ router.post(
   '/',
   validateJwtMiddleware('mmc'),
   validateTokenVersionMiddleware('mmc'),
-  zValidator('json', verifySchema, (result, c) => {
+  zValidator('json', verifySchema, (result, _c) => {
     // Validation errors are non-fatal for this endpoint
   }),
   async (c) => {

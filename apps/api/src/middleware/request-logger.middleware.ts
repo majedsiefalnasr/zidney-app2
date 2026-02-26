@@ -108,15 +108,15 @@ export function createRequestLoggerMiddleware(logger: Logger) {
  * (fallback for development)
  */
 export class SimpleLogger {
-  info(entry: RequestLogEntry, json: string) {
+  info(_entry: RequestLogEntry, json: string) {
     console.log(json)
   }
 
-  warn(entry: RequestLogEntry, json: string) {
+  warn(_entry: RequestLogEntry, json: string) {
     console.warn(json)
   }
 
-  error(entry: RequestLogEntry, json: string) {
+  error(_entry: RequestLogEntry, json: string) {
     console.error(json)
   }
 }

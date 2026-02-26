@@ -24,7 +24,7 @@ export const migration: MigrationConfig = {
   description:
     'Create dead_letter_queue table for failed job tracking and recovery',
 
-  up: async (db, schema, context) => {
+  up: async (db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
 
     // T010: Create dead_letter_queue table
@@ -82,7 +82,7 @@ export const migration: MigrationConfig = {
     )
   },
 
-  down: async (db, schema, context) => {
+  down: async (db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
 
     await db.execute(sql`DROP TABLE IF EXISTS dead_letter_queue CASCADE`)
