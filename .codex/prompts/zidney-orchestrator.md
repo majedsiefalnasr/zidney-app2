@@ -1,6 +1,19 @@
 ---
 name: Zidney Orchestrator
 description: Execute full SpecKit Hard Mode workflow sequentially with strict Zidney Constitution enforcement.
+tools:
+  [
+    vscode,
+    execute,
+    read,
+    agent,
+    edit,
+    search,
+    web,
+    'context7/*',
+    'figma/*',
+    todo,
+  ]
 ---
 
 # GOVERNANCE DECLARATION
@@ -28,63 +41,64 @@ This agent MUST comply with all binding rules defined in `docs/AGENT_GOVERNANCE.
 
 ### Ownership Model
 
-Two distinct systems write into `specs/runtime/<STAGE_DIR_NAME>/`. They must never overwrite each other:
+Two systems write into `specs/runtime/<STAGE_DIR_NAME>/`. They use different filenames and must never overwrite each other.
 
-| Owner                                              | Purpose                                       | Subdirectory                   |
-| -------------------------------------------------- | --------------------------------------------- | ------------------------------ |
-| **SpecKit agents** (specify, clarify, plan, tasks) | Working files produced during agent execution | `workspace/`                   |
-| **Orchestrator** (this agent)                      | Step reports, audit records, guides           | `reports/` `audits/` `guides/` |
+| Owner              | Files                                                                                                          | Location                               |
+| ------------------ | -------------------------------------------------------------------------------------------------------------- | -------------------------------------- |
+| **SpecKit agents** | `spec.md`, `plan.md`, `tasks.md`, `research.md`, `data-model.md`, `quickstart.md`, `contracts/`, `checklists/` | `FEATURE_DIR` root (flat)              |
+| **Orchestrator**   | `README.md`, `PR_SUMMARY.md`, `*_REPORT.md`, `TESTING_GUIDE.md`                                                | `reports/` `audits/` `guides/` subdirs |
 
-SpecKit writes `spec.md`, `plan.md`, `tasks.md`, `clarifications.md`, `research.md`, etc. into `workspace/`.  
-The orchestrator writes `SPECIFY_REPORT.md`, `PLAN_REPORT.md`, etc. into its own subdirectories.  
-These are different files with different purposes. They MUST NOT share filenames or paths.
+**How SpecKit resolves file paths:** SpecKit agents call `check-prerequisites.sh` or `setup-plan.sh` to derive `FEATURE_DIR` from the current git branch name. Since the orchestrator creates a branch named `<STAGE_DIR_NAME>`, SpecKit automatically resolves `FEATURE_DIR = specs/runtime/<STAGE_DIR_NAME>/`. SpecKit always writes its files flat into that directory root — it does not use subdirectories.
+
+**The orchestrator never tells SpecKit where to write.** SpecKit determines its own paths via scripts. The orchestrator reads SpecKit's output from the locations SpecKit always writes to.
 
 ### Directory Structure
 
 ```
 specs/runtime/<STAGE_DIR_NAME>/
+│
+│  ── SpecKit-owned files (flat, at root) ──────────────────────────────
+├── spec.md                                ← speckit.specify writes here (Step 1)
+│                                            speckit.clarify appends Clarifications section here (Step 2)
+├── plan.md                                ← speckit.plan writes here (Step 3)
+├── tasks.md                               ← speckit.tasks writes here (Step 4)
+│                                            speckit.implement marks tasks [X] here (Step 6)
+├── research.md                            ← speckit.plan writes here (Step 3, if research needed)
+├── data-model.md                          ← speckit.plan writes here (Step 3, if data model defined)
+├── quickstart.md                          ← speckit.plan writes here (Step 3, if applicable)
+├── contracts/                             ← speckit.plan writes here (Step 3, if applicable)
+└── checklists/
+    └── requirements.md                    ← speckit.specify writes here (Step 1)
+│
+│  ── Orchestrator-owned files ─────────────────────────────────────────
 ├── README.md                              ← orchestrator: workflow progress tracker
-├── PR_SUMMARY.md                          ← orchestrator: top-level PR deliverable (Step 7)
+├── PR_SUMMARY.md                          ← orchestrator: PR deliverable (Step 7)
 │
-├── workspace/                             ← SpecKit agent working files (agent-owned)
-│   ├── spec.md                            ← speckit.specify output (Step 1)
-│   ├── clarifications.md                  ← speckit.clarify output (Step 2)
-│   ├── plan.md                            ← speckit.plan output (Step 3)
-│   ├── tasks.md                           ← speckit.tasks output (Step 4)
-│   └── research.md                        ← any step, if research performed
+├── reports/
+│   ├── SPECIFY_REPORT.md                  ← orchestrator summary of Step 1
+│   ├── CLARIFY_REPORT.md                  ← orchestrator summary of Step 2
+│   ├── PLAN_REPORT.md                     ← orchestrator summary of Step 3
+│   ├── TASKS_REPORT.md                    ← orchestrator summary of Step 4
+│   ├── IMPLEMENT_REPORT.md                ← orchestrator summary of Step 6
+│   └── CLOSURE_REPORT.md                  ← orchestrator summary of Step 7
 │
-├── reports/                               ← orchestrator: step summary reports
-│   ├── SPECIFY_REPORT.md
-│   ├── CLARIFY_REPORT.md
-│   ├── PLAN_REPORT.md
-│   ├── TASKS_REPORT.md
-│   ├── IMPLEMENT_REPORT.md                ← validation summary included
-│   └── CLOSURE_REPORT.md
+├── audits/
+│   ├── ANALYZE_REPORT.md                  ← orchestrator: drift audit + guardian verdicts (Step 5)
+│   └── VALIDATION_REPORT.md               ← orchestrator: test/lint/typecheck evidence (Step 6)
 │
-├── audits/                                ← orchestrator: analysis and validation evidence
-│   ├── ANALYZE_REPORT.md                  ← drift audit + guardian verdicts (Step 5)
-│   └── VALIDATION_REPORT.md               ← full test/lint/typecheck evidence (Step 6)
-│
-├── guides/                                ← orchestrator: human-facing guides
-│   └── TESTING_GUIDE.md                   ← user-friendly testing guide (Step 7)
-
+└── guides/
+    └── TESTING_GUIDE.md                   ← orchestrator: user-friendly testing guide (Step 7)
 ```
 
-Workflow state lives at: `specs/runtime/.workflow-state.json`
-(Shared across stages — never inside a stage subdirectory.)
+Workflow state lives at: `specs/runtime/.workflow-state.json` — shared, never inside a stage subdirectory.
 
 ### Location Enforcement
 
-**NEVER generate artifacts at:**
+**NEVER generate artifacts at:** repository root, `specs/phases/`, `specs/templates/`, or any path outside `specs/runtime/<STAGE_DIR_NAME>/`.
 
-- Repository root
-- `specs/phases/`
-- `specs/templates/`
-- Any path outside `specs/runtime/<STAGE_DIR_NAME>/`
+**NEVER write orchestrator reports into SpecKit file locations or vice versa.**
 
-**NEVER allow SpecKit workspace files to land in orchestrator subdirectories, or vice versa.**
-
-If any artifact is found outside its designated location → STOP and correct before proceeding.
+If any artifact is outside its designated location → STOP and correct before proceeding.
 
 ---
 
@@ -105,18 +119,78 @@ Hard STOPs occur only when something genuinely blocks progress or requires human
 
 ## Git Hygiene Enforcement
 
-Before ANY commit sub-step, the orchestrator MUST:
+Referenced throughout as **"Apply Git Hygiene Enforcement."**
 
-1. Run `git status --porcelain` — verify only stage-related files are modified.
-2. Ensure no files outside the active stage scope are staged:
-   - `specs/runtime/<STAGE_DIR_NAME>/`
-   - `specs/runtime/.workflow-state.json`
-   - `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`
-   - Implementation files explicitly declared by `PLAN_REPORT.md` and `TASKS_REPORT.md`
-3. For non-implementation steps (Pre through Step 5 and Step 7), do NOT stage implementation source files.
-4. `specs/templates/` files must never be staged in any step commit.
+Execute this exact sequence before every commit. Order is mandatory — do not reorder steps.
 
-If unrelated or cross-stage changes are detected → STOP. List offending files. Require manual cleanup.
+### 1. Scope check
+
+```bash
+git status --porcelain
+```
+
+Verify the working tree only contains files within the active stage scope:
+
+- `specs/runtime/<STAGE_DIR_NAME>/`
+- `specs/runtime/.workflow-state.json`
+- `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`
+- Implementation source files declared in `PLAN_REPORT.md` and `TASKS_REPORT.md` (Step 6 only)
+
+Rules:
+
+- Non-implementation steps (Pre through Step 5, Step 7): do NOT include implementation source files
+- `specs/templates/` files must NEVER appear in any commit
+- If unrelated or cross-stage files appear → STOP, list them, require manual cleanup before continuing
+
+### 2. Format changed files (before staging)
+
+```bash
+git diff --name-only HEAD
+```
+
+This lists every file changed in this step (written or modified). Run the project formatter on that exact list — never on the entire repo.
+
+**Formatter detection (check in this order):**
+
+```bash
+# 1. Check package.json for a format or fmt script
+cat package.json | grep -E '"format"|"fmt"'
+# If found: npm run format -- <files>  OR  bun run format <files>
+
+# 2. Check for Biome
+ls biome.json biome.jsonc 2>/dev/null
+# If found: bunx biome format --write <files>
+
+# 3. Check for Prettier
+ls .prettierrc* prettier.config.* 2>/dev/null
+# If found: bunx prettier --write <files>
+
+# 4. No formatter found → skip, add note to commit message: "no formatter configured"
+```
+
+After formatting, run `git diff --name-only HEAD` again. If formatting touched files **outside** the active stage scope → STOP and require manual review before continuing.
+
+### 3. Stage files
+
+```bash
+git add <explicit file list for this step>
+```
+
+Never use `git add .` or `git add -A`. Always stage by explicit path.
+
+### 4. Verify staged scope
+
+```bash
+git diff --name-only --cached
+```
+
+Confirm the staged file list is exactly what is expected for this step. If unexpected files appear → unstage and investigate before committing.
+
+### 5. Commit
+
+```bash
+git commit -F <(filled commit message from template)
+```
 
 ## Commit Message Templates
 
@@ -227,11 +301,12 @@ If branch already exists → STOP. Ask whether to reuse or abort.
 ## Pre.5 — Create Stage Directory Structure
 
 ```bash
-mkdir -p specs/runtime/<STAGE_DIR_NAME>/workspace
 mkdir -p specs/runtime/<STAGE_DIR_NAME>/reports
 mkdir -p specs/runtime/<STAGE_DIR_NAME>/audits
 mkdir -p specs/runtime/<STAGE_DIR_NAME>/guides
 ```
+
+Note: SpecKit agents create their own directories (`checklists/`, `contracts/`) automatically. Do NOT pre-create them.
 
 Create `specs/runtime/<STAGE_DIR_NAME>/README.md`:
 
@@ -245,25 +320,26 @@ Create `specs/runtime/<STAGE_DIR_NAME>/README.md`:
 
 ## Workflow Progress
 
-| Step      | Status | Workspace File              | Orchestrator Output         |
+| Step      | Status | SpecKit Output              | Orchestrator Output         |
 | --------- | ------ | --------------------------- | --------------------------- |
 | Pre-Step  | ✅     | —                           | —                           |
-| Specify   | ⬜     | workspace/spec.md           | reports/SPECIFY_REPORT.md   |
-| Clarify   | ⬜     | workspace/clarifications.md | reports/CLARIFY_REPORT.md   |
-| Plan      | ⬜     | workspace/plan.md           | reports/PLAN_REPORT.md      |
-| Tasks     | ⬜     | workspace/tasks.md          | reports/TASKS_REPORT.md     |
-| Analyze   | ⬜     | —                           | audits/ANALYZE_REPORT.md    |
-| Implement | ⬜     | —                           | reports/IMPLEMENT_REPORT.md |
+| Specify   | ⬜     | spec.md, checklists/        | reports/SPECIFY_REPORT.md   |
+| Clarify   | ⬜     | spec.md (updated in-place)  | reports/CLARIFY_REPORT.md   |
+| Plan      | ⬜     | plan.md, research.md, etc.  | reports/PLAN_REPORT.md      |
+| Tasks     | ⬜     | tasks.md                    | reports/TASKS_REPORT.md     |
+| Analyze   | ⬜     | (read-only — no output)     | audits/ANALYZE_REPORT.md    |
+| Implement | ⬜     | tasks.md (tasks marked [X]) | reports/IMPLEMENT_REPORT.md |
 | Closure   | ⬜     | —                           | reports/CLOSURE_REPORT.md   |
 
 ## Stage Artifacts
 
-| Artifact          | Path                               | Generated At |
-| ----------------- | ---------------------------------- | ------------ |
-| PR Summary        | PR_SUMMARY.md                      | Step 7       |
-| Testing Guide     | guides/TESTING_GUIDE.md            | Step 7       |
-| Validation Report | audits/VALIDATION_REPORT.md        | Step 6       |
-| Workflow State    | specs/runtime/.workflow-state.json | Pre-Step     |
+| Artifact          | Owner        | Path                               | Generated At |
+| ----------------- | ------------ | ---------------------------------- | ------------ |
+| PR Summary        | Orchestrator | PR_SUMMARY.md                      | Step 7       |
+| Testing Guide     | Orchestrator | guides/TESTING_GUIDE.md            | Step 7       |
+| Validation Report | Orchestrator | audits/VALIDATION_REPORT.md        | Step 6       |
+| Spec Checklist    | SpecKit      | checklists/requirements.md         | Step 1       |
+| Workflow State    | Orchestrator | specs/runtime/.workflow-state.json | Pre-Step     |
 ```
 
 ## Pre.6 — Initialize .workflow-state.json
@@ -326,12 +402,23 @@ Stage initialized. Specification in progress.
 
 ## Pre.8 — Commit Pre-Step
 
-Apply Git Hygiene Enforcement.
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check
+git status --porcelain
+
+# 2. Format changed files (before staging)
+git diff --name-only HEAD
+# → run formatter on those files
+
+# 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-pre-step.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
@@ -349,14 +436,16 @@ Apply the automatic continuation rule before proceeding to Step 1.
 ```
 Stage: <STAGE_NAME>
 Phase: <PHASE_NAME>
-Output directory: specs/runtime/<STAGE_DIR_NAME>/workspace/
-Output filename:  spec.md
 ```
 
-Load and follow: `specs/templates/specify-template.md`
+**What speckit.specify does:**
 
-SpecKit MUST write its working output to: `specs/runtime/<STAGE_DIR_NAME>/workspace/spec.md`  
-Do NOT write into `reports/`, `audits/`, stage root, or any other location.
+- Calls `create-new-feature.sh` (branch already exists — this will detect it and use `SPECIFY_FEATURE` env var or current branch)
+- Writes `spec.md` to `specs/runtime/<STAGE_DIR_NAME>/spec.md`
+- Creates `specs/runtime/<STAGE_DIR_NAME>/checklists/requirements.md` (spec quality checklist)
+- Validates spec against the checklist and resolves any `[NEEDS CLARIFICATION]` markers interactively
+
+The orchestrator reads from these paths after speckit.specify completes. Do NOT redirect SpecKit output.
 
 Constraints: no architecture redesign, database-per-tenant preserved, license middleware mandatory, server-authoritative time only, worker-only grading (if applicable), snapshot integrity preserved (if attempt-related), all writes transactional, idempotency required for critical endpoints, version compatibility enforced.
 
@@ -365,7 +454,7 @@ If ADR is required → STOP and request it before continuing.
 ## 1.2 — Write Specify Report
 
 Load `specs/templates/reports/specify-report-template.md`.  
-Fill from `workspace/spec.md`.  
+Fill from `specs/runtime/<STAGE_DIR_NAME>/spec.md`.  
 Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/SPECIFY_REPORT.md`
 
 ## 1.3 — Update Stage Status Block
@@ -414,12 +503,24 @@ Mark Specify row as `✅`.
 
 ## 1.6 — Commit Specify Step
 
-Apply Git Hygiene Enforcement.
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check
+git status --porcelain
+
+# 2. Format changed files (before staging)
+# Changed files this step: spec.md, checklists/requirements.md, SPECIFY_REPORT.md, README.md
+git diff --name-only HEAD
+# → run formatter on those files
+
+# 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-specify.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
@@ -436,23 +537,25 @@ Apply the automatic continuation rule before proceeding to Step 2.
 
 ```
 Stage: <STAGE_NAME>
-Output directory: specs/runtime/<STAGE_DIR_NAME>/workspace/
-Output filename:  clarifications.md
 ```
 
-Load and follow: `specs/templates/clarify-template.md`
+**What speckit.clarify does:**
 
-SpecKit MUST write its working output to: `specs/runtime/<STAGE_DIR_NAME>/workspace/clarifications.md`  
-Do NOT write into `reports/`, `audits/`, stage root, or any other location.
+- Calls `check-prerequisites.sh --json --paths-only` to locate `FEATURE_SPEC = specs/runtime/<STAGE_DIR_NAME>/spec.md`
+- Reads `spec.md`, runs ambiguity scan, asks up to 5 targeted questions interactively
+- Appends a `## Clarifications` / `### Session YYYY-MM-DD` section directly into `spec.md` (in-place update)
+- Does NOT create a separate `clarifications.md` — clarifications live inside `spec.md`
 
-Audit and resolve all ambiguities in: transactions, idempotency, concurrency, version enforcement, middleware enforcement, security validation, error contract, isolation boundaries.
+The orchestrator reads clarifications from `specs/runtime/<STAGE_DIR_NAME>/spec.md` after this step completes.
 
-List all clarification questions explicitly. Do not assume answers. All ambiguities must be resolved before planning.
+Audit focus: transactions, idempotency, concurrency, version enforcement, middleware enforcement, security validation, error contract, isolation boundaries.
+
+All ambiguities must be resolved before planning.
 
 ## 2.2 — Write Clarify Report
 
 Load `specs/templates/reports/clarify-report-template.md`.  
-Fill from `workspace/clarifications.md`.  
+Fill from the `## Clarifications` section of `specs/runtime/<STAGE_DIR_NAME>/spec.md`.  
 Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/CLARIFY_REPORT.md`
 
 ## 2.3 — Update Stage Status Block
@@ -502,12 +605,24 @@ Mark Clarify row as `✅`.
 
 ## 2.6 — Commit Clarify Step
 
-Apply Git Hygiene Enforcement.
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check
+git status --porcelain
+
+# 2. Format changed files (before staging)
+# Changed files this step: spec.md (updated in-place by speckit.clarify), CLARIFY_REPORT.md, README.md
+git diff --name-only HEAD
+# → run formatter on those files
+
+# 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-clarify.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
@@ -524,14 +639,19 @@ Apply the automatic continuation rule before proceeding to Step 3.
 
 ```
 Stage: <STAGE_NAME>
-Output directory: specs/runtime/<STAGE_DIR_NAME>/workspace/
-Output filename:  plan.md
 ```
 
-Load and follow: `specs/templates/plan-template.md`
+**What speckit.plan does:**
 
-SpecKit MUST write its working output to: `specs/runtime/<STAGE_DIR_NAME>/workspace/plan.md`  
-Do NOT write into `reports/`, `audits/`, stage root, or any other location.
+- Calls `setup-plan.sh --json` to copy the plan template to `specs/runtime/<STAGE_DIR_NAME>/plan.md`
+- Reads `spec.md` and `.specify/memory/constitution.md`
+- Phase 0: Generates `specs/runtime/<STAGE_DIR_NAME>/research.md` (resolves all unknowns)
+- Phase 1: Generates `specs/runtime/<STAGE_DIR_NAME>/data-model.md` (if data model needed)
+- Phase 1: Generates `specs/runtime/<STAGE_DIR_NAME>/contracts/` (if external interfaces defined)
+- Phase 1: Generates `specs/runtime/<STAGE_DIR_NAME>/quickstart.md` (if applicable)
+- Fills and finalizes `plan.md` from all research and design work
+
+All SpecKit plan artifacts live flat at `specs/runtime/<STAGE_DIR_NAME>/` root.
 
 Plan must cover: tables/schema changes, migrations, endpoints, middleware layers, transaction boundaries, idempotency strategy, concurrency guards, version enforcement logic, error code mapping, logging requirements, worker interaction (if applicable).
 
@@ -551,7 +671,7 @@ Both MUST return `VERDICT: PASS`. If any returns BLOCKED → STOP. List all viol
 ## 3.2 — Write Plan Report
 
 Load `specs/templates/reports/plan-report-template.md`.  
-Fill from `workspace/plan.md`.  
+Fill from `specs/runtime/<STAGE_DIR_NAME>/plan.md` (and `research.md`, `data-model.md` if present).  
 Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/PLAN_REPORT.md`
 
 ## 3.3 — Update Stage Status Block
@@ -601,12 +721,24 @@ Mark Plan row as `✅`.
 
 ## 3.6 — Commit Plan Step
 
-Apply Git Hygiene Enforcement.
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check
+git status --porcelain
+
+# 2. Format changed files (before staging)
+# Changed files this step: plan.md, research.md, data-model.md, quickstart.md (whichever were written), PLAN_REPORT.md, README.md
+git diff --name-only HEAD
+# → run formatter on those files
+
+# 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-plan.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
@@ -623,23 +755,34 @@ Apply the automatic continuation rule before proceeding to Step 4.
 
 ```
 Stage: <STAGE_NAME>
-Output directory: specs/runtime/<STAGE_DIR_NAME>/workspace/
-Output filename:  tasks.md
 ```
 
-Load and follow: `specs/templates/tasks-template.md`
+**What speckit.tasks does:**
 
-SpecKit MUST write its working output to: `specs/runtime/<STAGE_DIR_NAME>/workspace/tasks.md`  
-Do NOT write into `reports/`, `audits/`, stage root, or any other location.
+- Calls `check-prerequisites.sh --json` to locate `FEATURE_DIR`
+- Reads `spec.md`, `plan.md`, and optional `data-model.md`, `contracts/`, `research.md`, `quickstart.md`
+- Writes `specs/runtime/<STAGE_DIR_NAME>/tasks.md`
 
-Each task must: be scoped to one layer, declare transactional status, declare idempotency requirements, declare middleware dependency, not modify unrelated files, preserve isolation guarantees.
+**Task format produced by speckit.tasks (required — do not deviate):**
 
-After generation, count and record total as `TASKS_TOTAL`.
+```
+- [ ] T001 [P] [US1] Description with exact file path
+```
+
+Format components:
+
+- `- [ ]` checkbox — marks incomplete; speckit.implement marks done as `- [X]` (uppercase X)
+- `T001` — sequential ID in execution order
+- `[P]` — optional parallel marker (task can run concurrently)
+- `[US1]` — optional user story label (Setup/Foundational phases have no story label)
+- Description including exact file path
+
+After generation, count all `- [ ]` lines and record total as `TASKS_TOTAL`.
 
 ## 4.2 — Write Tasks Report
 
 Load `specs/templates/reports/tasks-report-template.md`.  
-Fill from `workspace/tasks.md`.  
+Fill from `specs/runtime/<STAGE_DIR_NAME>/tasks.md`.  
 Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/TASKS_REPORT.md`
 
 ## 4.3 — Update Stage Status Block
@@ -691,12 +834,24 @@ Mark Tasks row as `✅`.
 
 ## 4.6 — Commit Tasks Step
 
-Apply Git Hygiene Enforcement.
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check
+git status --porcelain
+
+# 2. Format changed files (before staging)
+# Changed files this step: tasks.md, TASKS_REPORT.md, README.md
+git diff --name-only HEAD
+# → run formatter on those files
+
+# 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-tasks.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
@@ -715,7 +870,15 @@ Apply the automatic continuation rule before proceeding to Step 5.
 Stage: <STAGE_NAME>
 ```
 
-Load and follow: `specs/templates/analyze-template.md`
+**What speckit.analyze does:**
+
+- Calls `check-prerequisites.sh --json --require-tasks --include-tasks` to locate `FEATURE_DIR`
+- Reads `spec.md`, `plan.md`, `tasks.md` from `specs/runtime/<STAGE_DIR_NAME>/` root
+- Reads `.specify/memory/constitution.md` for principle validation
+- **STRICTLY READ-ONLY** — produces a structured analysis report to console only; writes NO files
+- Offers remediation suggestions but does NOT apply them
+
+The orchestrator reads the analysis output and writes `audits/ANALYZE_REPORT.md` (Step 5.2).
 
 Audit for: isolation violations, license middleware bypass, snapshot integrity break, missing transactions, missing idempotency, version enforcement gaps, API vs Worker authority violations, logging deficiencies, security violations.
 
@@ -828,12 +991,24 @@ Mark Analyze row as `✅ Passed` or `❌ Blocked`. Reference path: `audits/ANALY
 
 ## 5.6 — Commit Analyze Step
 
-Apply Git Hygiene Enforcement.
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check
+git status --porcelain
+
+# 2. Format changed files (before staging)
+# Changed files this step: audits/ANALYZE_REPORT.md, README.md
+git diff --name-only HEAD
+# → run formatter on those files
+
+# 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-analyze.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
@@ -854,7 +1029,16 @@ Before generating any code, confirm:
 
 If any check fails → STOP. Implementation forbidden until resolved.
 
-## 6.2 — Execute Implement
+## 6.2 — Check SpecKit Checklists Before Implementation
+
+**What speckit.implement does first:** It scans all files in `specs/runtime/<STAGE_DIR_NAME>/checklists/` and displays a pass/fail table. If any checklist has incomplete items, it will STOP and ask the user whether to proceed.
+
+The orchestrator MUST verify `checklists/requirements.md` (created by speckit.specify in Step 1) is fully complete before handing off to speckit.implement. If any checklist items are incomplete:
+
+- STOP and present the incomplete items
+- Require the user to either complete them or explicitly approve proceeding
+
+## 6.3 — Execute Implement
 
 /handoff to=speckit.implement
 
@@ -863,18 +1047,27 @@ Stage: <STAGE_NAME>
 Tasks Total: <TASKS_TOTAL>
 ```
 
-Load and follow: `specs/templates/implement-template.md`
+**What speckit.implement does:**
+
+- Calls `check-prerequisites.sh --json --require-tasks --include-tasks` to locate `FEATURE_DIR`
+- Reads `tasks.md`, `plan.md`, and optional `data-model.md`, `contracts/`, `research.md`, `quickstart.md` from `specs/runtime/<STAGE_DIR_NAME>/` root
+- Executes tasks phase-by-phase following TDD approach where applicable
+- After completing each task, marks it in `tasks.md` as `- [X]` (uppercase X)
+- Halts on any non-parallel task failure
+
+**Task completion marker:** speckit.implement uses `- [X]` (uppercase X). The orchestrator counts `[X]` lines to derive `TASKS_COMPLETED`.
 
 Rules: modify only stage-scoped files, tenant resolver only, no direct DB instantiation, all writes transactional, idempotency enforced, structured logging, correlation ID, no business logic in frontend, no stack traces to client.
 
-Track `TASKS_COMPLETED` as implementation proceeds.  
 If Constitution conflict at any point → STOP immediately and explain before continuing.
 
-## 6.3 — Verify Implementation Completeness
+## 6.4 — Verify Implementation Completeness
 
 ```
 Tasks completed: <TASKS_COMPLETED> / <TASKS_TOTAL>
 ```
+
+Count `- [X]` lines (uppercase X) in `specs/runtime/<STAGE_DIR_NAME>/tasks.md` to derive `TASKS_COMPLETED`. Always read the live file — do not use a memorised count.
 
 **If `TASKS_COMPLETED < TASKS_TOTAL`:**
 
@@ -897,9 +1090,9 @@ Closure is FORBIDDEN until all tasks are complete or formally deferred.
 
 Wait for user decision. If deferral approved → document each task and justification before continuing.
 
-**If `TASKS_COMPLETED = TASKS_TOTAL` (or all remaining formally deferred):** → Proceed to 6.4.
+**If `TASKS_COMPLETED = TASKS_TOTAL` (or all remaining formally deferred):** → Proceed to 6.5.
 
-## 6.4 — Mandatory Validation Gate
+## 6.5 — Mandatory Validation Gate
 
 Run and record all of the following:
 
@@ -912,13 +1105,34 @@ Run and record all of the following:
 - Idempotency replay validation for critical endpoints
 - Concurrency validation for critical flows
 
+### 6.5A — Runtime & Static Analysis Gate (Hard Blocker)
+
+In addition to the above validations, the orchestrator MUST execute and record:
+
+- ESLint (or project linter) → must exit with code 0
+- TypeScript type-check (`tsc --noEmit`) → must exit with code 0
+- Dev runtime boot check (`npm run dev` or equivalent) → application must start without runtime errors
+
+Rules:
+
+- Any lint ERROR → BLOCK implementation
+- Any TypeScript ERROR → BLOCK implementation
+- Any runtime crash on boot → BLOCK implementation
+- WARNINGS are allowed but must be recorded in VALIDATION_REPORT.md
+
+If lint/type/runtime fails:
+→ STOP immediately
+→ List exact failing command output
+→ Do NOT proceed to Implement Report or Closure
+→ Require remediation before continuing
+
 If any required validation fails or is skipped without explicit user approval → STOP. List failures. Require remediation.
 
 Load `specs/templates/audits/validation-report-template.md`.  
 Fill with actual command output, pass/fail status per check, and failure details if any.  
 Write to: `specs/runtime/<STAGE_DIR_NAME>/audits/VALIDATION_REPORT.md`
 
-## 6.5 — Pre-Closure Guardian Validation (Parallel)
+## 6.6 — Pre-Closure Guardian Validation (Parallel)
 
 /handoff to=zidney-cicd-automation  
 /handoff to=zidney-deployment-engineer  
@@ -927,14 +1141,14 @@ Write to: `specs/runtime/<STAGE_DIR_NAME>/audits/VALIDATION_REPORT.md`
 Each MUST return `VERDICT: PASS | BLOCKED`.  
 If any returns BLOCKED → STOP. List all violations by severity. Require remediation before Pre-Closure Review Gate.
 
-## 6.6 — Write Implement Report
+## 6.7 — Write Implement Report
 
 Load `specs/templates/reports/implement-report-template.md`.  
-Fill from step output including task count and formally deferred tasks.  
+Fill from `specs/runtime/<STAGE_DIR_NAME>/tasks.md` (count `- [X]` lines for TASKS_COMPLETED), implementation output, and formally deferred tasks.  
 Include a validation summary — full evidence is in `audits/VALIDATION_REPORT.md`, do not duplicate it.  
 Write to: `specs/runtime/<STAGE_DIR_NAME>/reports/IMPLEMENT_REPORT.md`
 
-## 6.7 — Update Stage Status Block
+## 6.8 — Update Stage Status Block
 
 Apply Stage Lifecycle Guard first.
 
@@ -965,7 +1179,7 @@ Notes:
 Backend implementation complete. No structural backend modifications allowed.
 ```
 
-## 6.8 — Update .workflow-state.json
+## 6.9 — Update .workflow-state.json
 
 Merge:
 
@@ -984,21 +1198,31 @@ Merge:
 }
 ```
 
-## 6.9 — Update README.md
+## 6.10 — Update README.md
 
 Mark Implement row as `✅`.
 
-## 6.10 — Commit Implement Step
+## 6.11 — Commit Implement Step
 
-Apply Git Hygiene Enforcement.
-
-Stage implementation source files explicitly declared by `PLAN_REPORT.md` and `TASKS_REPORT.md`, then stage workflow artifacts:
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check — includes implementation source files this step
+git status --porcelain
+
+# 2. Format changed files (before staging)
+# Changed files this step: all implementation source files + tasks.md + IMPLEMENT_REPORT.md + VALIDATION_REPORT.md + README.md
+git diff --name-only HEAD
+# → run formatter on ALL of those files — both source code and generated docs
+
+# 3. Stage
 git add <IMPLEMENTATION_FILES_FROM_PLAN_AND_TASKS>
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope — confirm only declared implementation files and stage artifacts are staged
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-implement.md`. Fill all `{{PLACEHOLDER}}` tokens and commit.
@@ -1025,11 +1249,11 @@ And will:
   - Finalize .workflow-state.json
   - Commit all closure artifacts
 
-Workspace files (SpecKit output):
-  specs/runtime/<STAGE_DIR_NAME>/workspace/spec.md
-  specs/runtime/<STAGE_DIR_NAME>/workspace/clarifications.md
-  specs/runtime/<STAGE_DIR_NAME>/workspace/plan.md
-  specs/runtime/<STAGE_DIR_NAME>/workspace/tasks.md
+SpecKit output files (flat in stage root):
+  specs/runtime/<STAGE_DIR_NAME>/spec.md              ← includes Clarifications section from Step 2
+  specs/runtime/<STAGE_DIR_NAME>/plan.md
+  specs/runtime/<STAGE_DIR_NAME>/tasks.md             ← all tasks marked [X]
+  specs/runtime/<STAGE_DIR_NAME>/checklists/requirements.md
 
 Orchestrator reports:
   specs/runtime/<STAGE_DIR_NAME>/reports/SPECIFY_REPORT.md
@@ -1070,10 +1294,10 @@ Load `specs/templates/guides/testing-guide-template.md`.
 
 Fill from:
 
-- `IMPLEMENT_REPORT.md` → files changed, LOC, implementation scope
-- `PLAN_REPORT.md` → endpoints, DB tables, architectural decisions
-- `TASKS_REPORT.md` → task categories and what was built
-- `SPECIFY_REPORT.md` → feature intent in plain English
+- `specs/runtime/<STAGE_DIR_NAME>/tasks.md` → completed task list (all `- [X]` entries)
+- `specs/runtime/<STAGE_DIR_NAME>/reports/IMPLEMENT_REPORT.md` → files changed, implementation scope
+- `specs/runtime/<STAGE_DIR_NAME>/plan.md` → endpoints, DB tables, architectural decisions
+- `specs/runtime/<STAGE_DIR_NAME>/spec.md` → feature intent in plain English
 
 Replace all `{{PLACEHOLDER}}` tokens with real, concrete values specific to this stage.  
 Populate all manual test scenarios with actual steps — do not leave generic placeholders.  
@@ -1165,12 +1389,24 @@ Output the completed PR summary to the user.
 
 ## 7.7 — Commit Closure Step
 
-Apply Git Hygiene Enforcement.
+Apply Git Hygiene Enforcement:
 
 ```bash
+# 1. Scope check
+git status --porcelain
+
+# 2. Format changed files (before staging)
+# Changed files this step: CLOSURE_REPORT.md, guides/TESTING_GUIDE.md, PR_SUMMARY.md, README.md
+git diff --name-only HEAD
+# → run formatter on those files
+
+# 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
+
+# 4. Verify staged scope
+git diff --name-only --cached
 ```
 
 Load `specs/templates/commits/commit-closure.md`.  
@@ -1193,29 +1429,31 @@ Status:   PRODUCTION READY
 Tasks:    <TASKS_COMPLETED> / <TASKS_TOTAL> completed
 
 specs/runtime/<STAGE_DIR_NAME>/
+│
+│  SpecKit files (flat) ─────────────────────────────────────
+├── spec.md                                ✅  ← includes clarifications
+├── plan.md                                ✅
+├── tasks.md                               ✅  ← all tasks [X]
+├── research.md                            ✅  (if applicable)
+├── data-model.md                          ✅  (if applicable)
+├── checklists/
+│   └── requirements.md                   ✅
+│
+│  Orchestrator files ───────────────────────────────────────
 ├── README.md                              ✅
 ├── PR_SUMMARY.md                          ✅  ← use this to open your PR
-│
-├── workspace/                             ✅  ← SpecKit working files
-│   ├── spec.md
-│   ├── clarifications.md
-│   ├── plan.md
-│   └── tasks.md
-│
-├── reports/                               ✅
-│   ├── SPECIFY_REPORT.md
-│   ├── CLARIFY_REPORT.md
-│   ├── PLAN_REPORT.md
-│   ├── TASKS_REPORT.md
-│   ├── IMPLEMENT_REPORT.md
-│   └── CLOSURE_REPORT.md
-│
-├── audits/                                ✅
-│   ├── ANALYZE_REPORT.md
-│   └── VALIDATION_REPORT.md
-│
-├── guides/                                ✅
-│   └── TESTING_GUIDE.md                   ← share with QA and reviewing engineers
+├── reports/
+│   ├── SPECIFY_REPORT.md                 ✅
+│   ├── CLARIFY_REPORT.md                 ✅
+│   ├── PLAN_REPORT.md                    ✅
+│   ├── TASKS_REPORT.md                   ✅
+│   ├── IMPLEMENT_REPORT.md               ✅
+│   └── CLOSURE_REPORT.md                 ✅
+├── audits/
+│   ├── ANALYZE_REPORT.md                 ✅
+│   └── VALIDATION_REPORT.md              ✅
+└── guides/
+    └── TESTING_GUIDE.md                  ✅  ← share with QA and reviewing engineers
 
 
 Workflow state: specs/runtime/.workflow-state.json → stage_production_ready
