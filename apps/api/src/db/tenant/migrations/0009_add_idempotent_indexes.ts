@@ -22,7 +22,7 @@ export const migration: MigrationConfig = {
   description:
     'Create UNIQUE index for idempotency and covering index for cached results',
 
-  up: async (db, schema, context) => {
+  up: async (db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
 
     // T006: Create composite UNIQUE index on (id, idempotent_submission_key)
@@ -47,7 +47,7 @@ export const migration: MigrationConfig = {
     )
   },
 
-  down: async (db, schema, context) => {
+  down: async (db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
 
     await db.execute(

@@ -75,7 +75,7 @@ type RevokeRequest = z.infer<typeof revokeSchemma>
 router.post(
   '/',
   validateJwtMiddleware('mmc'),
-  zValidator('json', revokeSchemma, (result, c) => {
+  zValidator('json', revokeSchemma, (result, _c) => {
     if (!result.success) {
       throwAuthError(AuthErrorCodes.VALIDATION_ERROR, 'Invalid request', 400)
     }

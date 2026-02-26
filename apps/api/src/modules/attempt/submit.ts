@@ -85,7 +85,7 @@ export async function submitAttempt(c: Context) {
 
 export async function getAttemptStatus(c: Context) {
   const attemptId = c.req.param('id')
-  const correlationId = c.state.correlationId
+  const _correlationId = c.state.correlationId
 
   // TODO: Query attempt status from DB
   return c.json(
@@ -99,7 +99,7 @@ export async function getAttemptStatus(c: Context) {
 
 export async function getAttemptResult(c: Context) {
   const attemptId = c.req.param('id')
-  const correlationId = c.state.correlationId
+  const _correlationId = c.state.correlationId
 
   // TODO: Query grading result from DB or Redis cache
   return c.json(

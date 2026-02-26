@@ -22,7 +22,7 @@ export const migration: MigrationConfig = {
   version: '1.1.0',
   description: 'Create dlq_resolutions table for DLQ job resolution tracking',
 
-  up: async (db, schema, context) => {
+  up: async (db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
 
     // T011: Create dlq_resolutions table
@@ -62,7 +62,7 @@ export const migration: MigrationConfig = {
     console.log(`[${correlationId}] Created dlq_resolutions table with indexes`)
   },
 
-  down: async (db, schema, context) => {
+  down: async (db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
 
     await db.execute(sql`DROP TABLE IF EXISTS dlq_resolutions CASCADE`)

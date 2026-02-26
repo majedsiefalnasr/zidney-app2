@@ -71,7 +71,7 @@ type VerifyRequest = z.infer<typeof verifySchema>
  */
 router.post(
   '/',
-  zValidator('json', verifySchema, (result, c) => {
+  zValidator('json', verifySchema, (result, _c) => {
     // Validation errors are non-fatal
   }),
   async (c) => {

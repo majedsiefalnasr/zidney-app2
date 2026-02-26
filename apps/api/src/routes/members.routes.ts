@@ -35,9 +35,9 @@ import {
 } from '../middleware/correlation-id.middleware'
 
 export function createMembersRouter(
-  db: Database,
+  _db: Database,
   memberService: MemberService,
-  auditService: AuditService,
+  _auditService: AuditService,
   logger: Logger
 ): Hono {
   const router = new Hono()

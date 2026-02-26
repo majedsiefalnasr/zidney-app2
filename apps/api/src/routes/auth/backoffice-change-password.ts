@@ -96,7 +96,7 @@ router.post(
   validateJwtMiddleware('backoffice'),
   validateLicenseMiddleware(),
   validateTokenVersionMiddleware('backoffice'),
-  zValidator('json', changePasswordSchema, (result, c) => {
+  zValidator('json', changePasswordSchema, (result, _c) => {
     if (!result.success) {
       throwAuthError(
         AuthErrorCodes.VALIDATION_ERROR,

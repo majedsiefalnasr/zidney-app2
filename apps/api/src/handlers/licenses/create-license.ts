@@ -104,7 +104,7 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
     const licenseId = crypto.randomUUID()
     const createdAt = new Date()
 
-    const license = await insertLicenseRecord({
+    const _license = await insertLicenseRecord({
       id: licenseId,
       workspace_slug: request.workspace_slug,
       organization_name: request.organization_name,
@@ -127,7 +127,7 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
 
     // Step 6: Create provisioning job
     const jobId = crypto.randomUUID()
-    const idempotencyKey = c.get('idempotencyKey') || jobId
+    const _idempotencyKey = c.get('idempotencyKey') || jobId
 
     const job = createProvisioningJob({
       licenseId,

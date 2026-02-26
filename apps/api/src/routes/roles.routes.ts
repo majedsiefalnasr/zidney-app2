@@ -33,7 +33,7 @@ import {
 } from '../middleware/correlation-id.middleware'
 
 export function createRolesRouter(
-  db: Database,
+  _db: Database,
   roleService: RoleService,
   permissionService: PermissionService,
   logger: Logger

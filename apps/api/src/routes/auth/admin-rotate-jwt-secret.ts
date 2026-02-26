@@ -80,7 +80,7 @@ type RotateRequest = z.infer<typeof rotateSchema>
 router.post(
   '/',
   validateJwtMiddleware('mmc'),
-  zValidator('json', rotateSchema, (result, c) => {
+  zValidator('json', rotateSchema, (result, _c) => {
     if (!result.success) {
       throwAuthError(AuthErrorCodes.VALIDATION_ERROR, 'Invalid request', 400)
     }
@@ -139,7 +139,7 @@ router.post(
         const workspace = result.rows[0]
 
         // Count affected users for audit
-        const countResult = await client.query(
+        const _countResult = await client.query(
           `
           SELECT COUNT(*) FROM workspaces
           WHERE id = $1

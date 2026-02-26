@@ -168,7 +168,7 @@ export class RateLimiter {
 export function createLoginRateLimiter(redis?: Redis) {
   const limiter = new RateLimiter(redis)
 
-  return async (ctx: Context, next: Next): Promise<void> => {
+  return async (ctx: Context, next: Next): Promise<void | Response> => {
     const ipAddress =
       ctx.req.header('X-Forwarded-For') ||
       ctx.req.header('CF-Connecting-IP') ||

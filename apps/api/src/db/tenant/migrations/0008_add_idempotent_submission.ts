@@ -23,7 +23,7 @@ export const migration: MigrationConfig = {
   description:
     'Add idempotency columns to attempts table for submission deduplication',
 
-  up: async (db, schema, context) => {
+  up: async (db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
     const workspaceId = context?.workspaceId || 'no-workspace'
 
@@ -54,7 +54,7 @@ export const migration: MigrationConfig = {
     }
   },
 
-  down: async (db, schema, context) => {
+  down: async (db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
 
     // Rollback: Remove idempotency columns

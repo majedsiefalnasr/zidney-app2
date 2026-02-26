@@ -216,7 +216,7 @@ export function calculateRetryAfter(
  */
 export function getRateLimitConfig(endpoint: string): RateLimitConfig | null {
   // Match endpoint pattern
-  for (const [key, config] of Object.entries(RATE_LIMIT_CONFIGS)) {
+  for (const [_key, config] of Object.entries(RATE_LIMIT_CONFIGS)) {
     if (matchEndpointPattern(config.endpoint, endpoint)) {
       return config
     }

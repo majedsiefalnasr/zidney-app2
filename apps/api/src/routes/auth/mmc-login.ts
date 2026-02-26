@@ -76,7 +76,7 @@ type LoginRequest = z.infer<typeof loginSchema>
  */
 router.post(
   '/login',
-  zValidator('json', loginSchema, (result, c) => {
+  zValidator('json', loginSchema, (result, _c) => {
     if (!result.success) {
       throwAuthError(
         AuthErrorCodes.VALIDATION_ERROR,

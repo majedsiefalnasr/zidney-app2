@@ -373,12 +373,12 @@ export function createUpgradeRouter(deps: AppDependencies): Hono {
 
   app.post(
     '/api/admin/workspace/:workspace_id/upgrade',
-    async (c: Context, next: Next) => {
+    async (_c: Context, next: Next) => {
       // Middleware placeholder: license validation
       // In real implementation: licenseMiddleware(c, next)
       return next()
     },
-    async (c: Context, next: Next) => {
+    async (_c: Context, next: Next) => {
       // Middleware placeholder: rate limiting
       // In real implementation: rateLimiter(c, next)
       return next()

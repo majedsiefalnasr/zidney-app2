@@ -37,7 +37,7 @@ export interface ValidationOptions {
 /**
  * Create validation middleware for Zod schema
  */
-export function validateRequest<T>(
+export function validateRequest<_T>(
   schema: any,
   options: ValidationOptions = {}
 ): (c: Context, next: Next) => Promise<Response | undefined> {

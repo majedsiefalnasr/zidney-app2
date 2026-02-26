@@ -1,5 +1,5 @@
-import { createLogger } from '@zidney/logger'
 import { jobQueue } from '@zidney/app/worker/queue/job-queue'
+import { createLogger } from '@zidney/logger'
 
 const logger = createLogger('job-result-retriever')
 
@@ -25,7 +25,7 @@ export interface PollOptions {
  */
 export async function getJobResult(
   jobId: string,
-  timeoutMs = 30000
+  _timeoutMs = 30000
 ): Promise<unknown | null> {
   try {
     const result = await jobQueue.getResult(jobId)
