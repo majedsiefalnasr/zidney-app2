@@ -1,267 +1,387 @@
-# PHASE 3 – IMPLEMENTATION PLAN
+# PHASE 3 – BACKOFFICE IMPLEMENTATION SEQUENCE (EXECUTION GUIDE)
 
 Phase: 03_BACKOFFICE_CORE  
-Objective: Build tenant-level backoffice safely and deterministically
+Goal: Deliver a fully functional, tenant-isolated Backoffice application (Backend + UI + Validation)
+
+This document is an execution sequence, not a theory document.  
+Follow it step-by-step.
 
 ---
 
-Execution Philosophy
+# HOW TO USE THIS DOCUMENT
 
-Phase 3 must follow strict sequencing.
+For each Step below:
 
-Backoffice structure must be stable before introducing heavy engines (exam engine, attempt engine, grading runtime).
+1. Implement Backend stage(s)
+2. Mark backend as `BACKEND_CLOSED`
+3. Implement corresponding UI stage
+4. Mark UI as `UI_READY`
+5. Execute validation checklist
+6. Only then move to next Step
 
-No feature in this phase may violate:
+No skipping. No parallel jumping across structural layers.
 
-- Database-per-tenant isolation
+---
+
+# GLOBAL RULES (NON-NEGOTIABLE)
+
+Throughout Phase 3:
+
+- All data must stay tenant-scoped
+- No master_db access from backoffice runtime
+- License middleware must run on all protected routes
+- RBAC must be enforced server-side
+- No UI-only permission logic
+- All mutations transactional
+- All list endpoints paginated
+- All forms validated (Zod or equivalent)
+- No console errors allowed
+
+If any rule is violated → STOP and fix before continuing.
+
+---
+
+# STEP 1 — BACKOFFICE SHELL (FOUNDATION)
+
+Backend:
+
+- Tenant bootstrap logic
 - License middleware enforcement
-- Schema version enforcement
-- Strict RBAC boundaries
+- Base RBAC structure
+- Module visibility control
 
-If any foundational layer fails validation, implementation must stop and be corrected before proceeding.
+UI:
+
+- STAGE_UI_01_BACKOFFICE_SHELL
+  - Layout
+  - Sidebar
+  - Router setup
+  - Auth guard
+  - Permission guard
+  - Error boundary
+
+Validation Checklist:
+
+- Tenant resolved correctly
+- License states enforced
+- Unauthorized user blocked
+- No cross-tenant access possible
+- No master_db usage
+
+Deliverable:
+Backoffice loads safely with protected routes.
 
 ---
 
-Step 1 – Tenant Bootstrap
+# STEP 2 — WORKSPACE SETTINGS
 
-Implement:
+Backend:
 
-- Workspace base layout (shell only)
-- Tenant resolver validation hook
-- License middleware enforcement
-- Module visibility injection based on product
-- Base RBAC skeleton (roles + permissions structure)
+- Settings CRUD
+- Language config
+- Timezone config
+- Branding tokens
+
+UI:
+
+- Settings pages
+- Controlled forms
+- Theme preview
 
 Validation:
 
-- Tenant resolved correctly on every request
-- License status enforced (ACTIVE / SOFT_LOCKED / ARCHIVED)
-- Disabled modules hidden at API level (not UI only)
-- No master_db access from tenant routes
+- Settings stored only in tenant DB
+- Language fallback works
+- Theme tokens validated
+- No leakage between tenants
 
-Stop if isolation fails.
+Deliverable:
+Tenant can safely configure workspace.
 
 ---
 
-Step 2 – Workspace Settings
+# STEP 3 — TRANSLATION SYSTEM
 
-Implement:
+Backend:
 
-- General settings
-- Language settings
-- Timezone settings
-- Visual identity (logo, favicon, theme tokens)
-- Payment settings placeholder (no gateway logic yet)
+- Translation table
+- Entity linking
+- Fallback logic
+
+UI:
+
+- Translation management screens
+- Language coverage indicator
 
 Validation:
 
-- Settings persisted only in tenant DB
-- Language fallback works correctly
-- Theme configuration stored as controlled tokens
-- No cross-tenant leakage
+- Missing translation falls back safely
+- No entity corruption
+- Performance acceptable
+
+Deliverable:
+Multi-language system operational.
 
 ---
 
-Step 3 – Translation System
+# STEP 4 — STATUS WORKFLOW ENGINE
 
-Implement:
-
-- translations table
-- entity_id + entity_type linking
-- Language coverage tracking
-- Default language fallback
-- Translation management UI
-
-Validation:
-
-- Entity renders fallback if translation missing
-- Coverage percentage accurate
-- Query performance acceptable for large datasets
-- Translation never breaks entity integrity
-
----
-
-Step 4 – Status Workflow Engine
-
-Implement reusable workflow engine:
+Backend:
 
 - Generic state machine
 - Transition validation
-- Role-based transition enforcement
-- Audit logging of state changes
+- Role-based transitions
+- Audit logging
+
+UI:
+
+- Workflow controls in entities
+- Transition buttons permission-aware
 
 Validation:
 
 - Illegal transitions blocked
-- Unauthorized roles cannot transition
-- Workflow reusable across entities
-- Status always consistent in DB
+- Unauthorized role blocked
+- Audit log generated
+
+Deliverable:
+Reusable workflow engine stable.
 
 ---
 
-Step 5 – Academic Structure
+# STEP 5 — ACADEMIC STRUCTURE
 
-Implement in strict order:
+Backend (in order):
 
 1. Divisions
 2. Departments
 3. Groups
-4. Hierarchy (staff tree)
+4. Staff hierarchy
 5. Teams
 6. Semesters
 7. Subjects
 
+UI:
+
+- STAGE_UI_02_ACADEMIC_STRUCTURE
+
 Validation:
 
-- Student belongs to exactly one division
-- Staff may belong to multiple divisions
-- Access restricted by division rules
-- No circular hierarchy allowed
-- Division disable logic respects default division contract
+- No circular hierarchy
+- Division isolation respected
+- Access rules enforced
+- Transaction safety verified
+
+Deliverable:
+Academic hierarchy complete and stable.
 
 ---
 
-Step 6 – Classification Layer
+# STEP 6 — CONTENT CLASSIFICATION
 
-Implement:
+Backend:
 
 - Categories
 - Category values
 - Tags
-- Basket model (for MCQ auto-selection)
+- MCQ basket model
+
+UI:
+
+- Included inside STAGE_UI_03_EXAM_MANAGEMENT
 
 Validation:
 
-- Category values linked correctly
-- Filtering works by division and subject
-- Query performance acceptable
-- No redundant classification joins
+- Filtering accurate
+- Query optimized
+- No redundant joins
+
+Deliverable:
+Content tagging and filtering operational.
 
 ---
 
-Step 7 – User Management
+# STEP 7 — USER MANAGEMENT
 
-Implement:
+Backend:
 
 - Staff management
 - Student management
 - Role assignment
 - Division assignment
-- Limit enforcement (student & staff)
+- Limit enforcement (transaction-safe)
+
+UI:
+
+- STAGE_UI_04_USER_MANAGEMENT
 
 Validation:
 
-- Student limit enforced transactionally
-- Staff limit enforced transactionally
-- Disabled user blocked at middleware
+- Student limit race-condition safe
+- Staff limit race-condition safe
+- Disabled users blocked
 - RBAC enforced at API level
-- No race condition in limit counting
+
+Deliverable:
+User system fully enforced.
 
 ---
 
-Step 8 – Commercial Layer
+# STEP 8 — COMMERCIAL LAYER
 
-Implement:
+Backend:
 
-- Plans (workspace-level)
+- Plans
 - Subscriptions
 - Promocodes
 - Invoices
-- Manual payment recording
+- Manual payment records
+
+UI:
+
+- STAGE_UI_05_COMMERCIAL_LAYER
 
 Validation:
 
-- Subscription expiration restricts content
-- Login allowed but content gated when expired
-- Invoice state transitions consistent
-- No commercial data stored in master_db
+- Expired subscription gates content
+- Invoices transition correctly
+- No commercial data in master_db
+
+Deliverable:
+Workspace monetization layer stable.
 
 ---
 
-Step 9 – Media Library
+# STEP 9 — MEDIA LIBRARY
 
-Implement:
+Backend:
 
 - Media storage abstraction
 - Folder structure
 - Tagging
-- Usage reference tracking
+- Usage tracking
+
+UI:
+
+- STAGE_UI_06_MEDIA_LIBRARY
 
 Validation:
 
 - Cannot delete referenced media
-- Large file uploads handled safely
-- Metadata integrity preserved
-- Storage abstraction ready for future external provider
+- File size limits enforced
+- Storage abstraction future-proof
+
+Deliverable:
+Media system stable and safe.
 
 ---
 
-Step 10 – Communication Layer
+# STEP 10 — COMMUNICATION LAYER
 
-Implement:
+Backend:
 
-- Notifications engine (WebSocket + persistence)
+- Notifications engine
 - Feedback system
-- System feedback (isolated per workspace)
+- System feedback isolation
+
+UI:
+
+- STAGE_UI_07_COMMUNICATION
 
 Validation:
 
 - Real-time delivery stable
-- Delivery failure handled safely
-- Feedback tied to workspace only
-- No cross-tenant broadcast possible
+- No cross-tenant broadcast
+- Error handling safe
+
+Deliverable:
+Communication engine operational.
 
 ---
 
-Step 11 – Ads Module
+# STEP 11 — ADS MODULE
 
-Implement:
+Backend:
 
 - Ad CRUD
-- Placement configuration
-- Division targeting
-- Enable / disable per workspace
+- Targeting rules
+- Placement config
+
+UI:
+
+- Integrated in dashboard and modules
 
 Validation:
 
-- Ad visible only to target users
-- Expired ad never shown
-- Target filtering server-side only
-- No master_db references
+- Targeting enforced server-side
+- Expired ads never shown
+
+Deliverable:
+Ads module isolated and secure.
 
 ---
 
-Step 12 – Backoffice Dashboard
+# STEP 12 — BACKOFFICE DASHBOARD
 
-Implement:
+Backend:
 
-- Student count
-- Staff count
-- Placeholder metrics for exams
+- Aggregated metrics
 - Subscription metrics
+- Student/staff counts
+
+UI:
+
+- STAGE_UI_08_BACKOFFICE_DASHBOARD
 
 Validation:
 
-- All metrics derived from tenant DB
+- Metrics derived from tenant DB only
 - Permission enforced
-- Query performance acceptable
 - No cross-tenant aggregation
 
+Deliverable:
+Dashboard stable and performant.
+
 ---
 
-Phase 3 Completion Criteria
+# STEP 13 — FULL SYSTEM VALIDATION
 
-Move to Phase 4 only if:
+Execute:
 
-- Tenant isolation verified
-- License middleware enforced everywhere
-- RBAC fully enforced
-- Translation stable
-- Academic structure stable
-- Limit enforcement race-condition safe
-- Media storage stable
-- Workflow engine reusable
-- No master_db leakage from tenant runtime
+- STAGE_TEST_01_BACKOFFICE_SYSTEM_VALIDATION
 
-Phase 3 builds structural integrity.  
-Phase 4 builds runtime engines.
+Must Validate:
+
+- API contract compliance
+- RBAC enforcement
+- License enforcement
+- Isolation testing
+- E2E full user flow
+- Load sanity test
+- Logging integrity
+- Error handling
+- Rollback simulation
+
+Phase 3 CANNOT CLOSE unless:
+
+- All E2E tests pass
+- No isolation breach detected
+- No console/runtime errors
+- Backend & UI fully aligned
+- No orphan routes
+
+---
+
+# PHASE 3 COMPLETE WHEN:
+
+- All backend stages marked BACKEND_CLOSED
+- All UI stages marked UI_READY
+- Validation stage passed
+- No security violations
+- No performance red flags
+- No drift between backend and UI
+
+---
+
+Phase 3 builds tenant-level structural integrity.  
+No runtime engines should be built before this phase is fully stable.

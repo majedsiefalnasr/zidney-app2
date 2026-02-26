@@ -1,90 +1,189 @@
-# PHASE 5 – Frontoffice Runtime
+# PHASE 5 – Frontoffice Runtime Overview
 
-## Purpose
+Execution Layer: Frontend (Consumer) + Backend Enforcement  
+Governance Level: Server-Authoritative Runtime Enforcement
 
-This phase defines the student-facing runtime layer of Zidney.
+---
 
-It governs how students authenticate, access content, take exams, receive results, and interact with monetization and communication systems.
+## Phase Objective
 
-This phase executes on top of:
+Phase 5 implements the student-facing execution portal of Zidney.
 
-- Platform Foundation (Phase 1)
-- MMC governance (Phase 2)
-- Backoffice content and structure (Phase 3)
-- Attempt engine runtime (Phase 4)
+This phase does **not** define content.  
+It consumes and enforces:
 
-Frontoffice does not define content.
-It consumes and enforces content.
+- Platform governance (Phase 1)
+- Commercial governance (Phase 2)
+- Academic structure (Phase 3)
+- Deterministic runtime engine (Phase 4)
+
+Frontoffice is an execution client over constitutionally enforced backend rules.
 
 ---
 
 ## Strategic Positioning
 
-Frontoffice is not a marketing portal.
-
 Frontoffice is:
 
-A student learning and examination runtime portal with exams as its core.
+- A student runtime portal
+- A controlled execution interface
+- A monetization enforcement boundary
+- A consumption layer over deterministic runtime guarantees
 
-Its responsibility is controlled execution, not configuration.
+Frontoffice is **not**:
+
+- A configuration system
+- A business logic authority
+- A grading authority
+- A license authority
+- A subscription authority
+
+All authority remains server-side.
 
 ---
 
-## Scope
+## Architectural Model
+
+Frontoffice must follow strict separation:
+
+Frontend responsibilities:
+
+- Render UI state
+- Trigger API calls
+- Display server-enforced results
+- Manage UX transitions
+- Handle token storage securely
+
+Backend responsibilities:
+
+- Enforce subscription gates
+- Enforce division boundaries
+- Enforce license state
+- Enforce scheduled exam timing
+- Execute attempt lifecycle (Phase 4)
+- Validate certificate integrity
+- Filter ads safely
+
+Frontend must never bypass backend enforcement.
+
+---
+
+## Scope of Phase 5
 
 This phase includes:
 
 - Student authentication
-- Subscription enforcement
-- Content visibility filtering
+- Subscription enforcement integration
+- Division-based content visibility
 - Dashboard aggregation
-- Library runtime access
+- Library access
 - Live session runtime
 - Notification runtime
 - Ads runtime
-- Results and certificate runtime
+- Results and certificate delivery
 
-It does not include:
+This phase does NOT include:
 
 - Content creation
-- Academic structure configuration
-- Role configuration
-- License lifecycle
+- Academic configuration
+- License lifecycle management
 - Tenant provisioning
+- Runtime grading logic
+- Commercial calculations
 
 ---
 
-## Runtime Responsibilities
+## Runtime Enforcement Model
+
+All runtime gates must be enforced server-side.
+
+### Subscription Enforcement
+
+If subscription expired:
+
+- Login allowed
+- Dashboard partially visible
+- Profile accessible
+- Certificates downloadable
+- New attempts blocked
+- Paid content hidden
+
+Frontend must reflect restricted state but cannot override it.
+
+---
+
+### Division-Based Visibility
+
+Rules:
+
+- Student sees only content assigned to their division
+- Division filtering executed in database queries
+- No client-side filtering authority
+- Cross-division access impossible
+
+---
+
+### Scheduled Exam Enforcement
+
+Rules:
+
+- Server time is authoritative
+- Attempt start validated against schedule window
+- Late tolerance enforced server-side
+- Auto-submit triggered server-side
+- Client timers are UX-only
+
+---
+
+### Attempt Engine Integration
 
 Frontoffice must:
 
-- Enforce division-based visibility
-- Enforce subscription gates
-- Enforce scheduled exam timing
-- Execute attempts through Phase 4 engine
-- Deliver real-time notifications
-- Render certificates based on stored snapshots
-- Apply ad placement logic safely
+- Trigger attempt start
+- Send autosave events
+- Trigger submission
+- Poll result status
+- Display grading result
 
-All enforcement must happen server-side.
+Frontoffice must NOT:
 
-Frontend may reflect state but must never control it.
+- Compute score
+- Modify grading result
+- Recalculate pass/fail
+- Modify snapshot
 
 ---
 
-## Architectural Principles
+### Certificate Integrity
 
-All access control must be server-enforced.
+Certificates:
 
-Subscription checks must run at middleware level.
+- Generated from stored grading snapshot
+- Must not be recalculated retroactively
+- Must be reproducible
+- Must validate student identity and workspace
 
-Division filtering must be applied in database queries.
+---
 
-Certificate validity must never change retroactively.
+### Ads Runtime
 
-Ads must use simple filter-based targeting.
+Ads must:
 
-Notifications must support real-time WebSocket delivery.
+- Use simple filter-based targeting
+- Never access sensitive student data
+- Never override subscription logic
+- Never block attempt execution
+
+---
+
+### Notifications
+
+Notifications must:
+
+- Support real-time delivery (WebSocket)
+- Fall back to polling if needed
+- Respect workspace isolation
+- Log delivery events
 
 ---
 
@@ -94,44 +193,78 @@ Each student:
 
 - Belongs to exactly one workspace
 - Belongs to exactly one division
-- May optionally belong to department and group
-- Must pass subscription gate for content access
+- May belong to department and group
+- Must pass subscription gate for gated content
 
-No cross-workspace identity allowed.
-
----
-
-## Enforcement Rules
-
-Expired subscription:
-
-- Login allowed
-- Dashboard restricted
-- Profile accessible
-- Certificates downloadable
-- New attempts blocked
-
-Division enforcement:
-
-- Student only sees content assigned to their division
-- Student cannot override division filters
-
-Scheduled exams:
-
-- Server time authority required
-- Late tolerance validated server-side
-- Auto-submit enforced on expiration
+Cross-workspace identity is forbidden.
 
 ---
 
-## Deliverable
+## Security Model
 
-A stable, secure student runtime portal that:
+Frontoffice must enforce:
 
-- Enforces monetization correctly
-- Enforces academic boundaries strictly
-- Integrates cleanly with attempt engine
-- Delivers consistent student experience
-- Maintains institutional trust
+- Token expiration handling
+- Secure storage (httpOnly cookies preferred)
+- Automatic logout on invalid token
+- Role validation via backend
+- No sensitive logic in frontend
 
-Phase 5 completes the execution layer of Zidney.
+All access control remains server-authoritative.
+
+---
+
+## Observability Requirements
+
+Frontend must:
+
+- Propagate request_id
+- Log runtime errors
+- Report token expiry events
+- Report failed attempt submissions
+- Avoid logging sensitive data
+
+Backend logs must always include:
+
+- workspace_slug
+- student_id
+- attempt_id (if applicable)
+- request_id
+
+---
+
+## Phase Dependency Requirement
+
+Phase 5 may only begin after:
+
+- Phase 4 runtime validated
+- Attempt engine deterministic
+- Subscription enforcement stable
+- Division filtering confirmed
+- Authentication system hardened
+
+Frontoffice cannot compensate for backend instability.
+
+---
+
+## Completion Criteria
+
+Phase 5 is complete when:
+
+- Student authentication stable
+- Subscription gates enforced
+- Division boundaries enforced
+- Attempt engine integrated safely
+- Certificate delivery verified
+- Ads runtime controlled
+- Notification system functional
+- No frontend authority bypass possible
+
+At this point:
+
+Zidney execution layer is complete.
+
+---
+
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0

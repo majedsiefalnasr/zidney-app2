@@ -1,22 +1,35 @@
-# PHASE 5 – FRONT OFFICE RUNTIME IMPLEMENTATION
+# PHASE 5 – FRONTOFFICE RUNTIME IMPLEMENTATION
 
-## Scope
+## 🎯 Phase Mission
 
-This phase implements the full student runtime layer:
+Phase 5 delivers the complete Student Runtime layer.
 
-- Authentication (student-only)
-- Subscription gating
-- Content visibility enforcement
-- Runtime modules (MCQ, Traditional, Library, Live, Ads, Notifications)
-- Results & certificate access
-- Runtime isolation enforcement
+This phase turns the platform into a real usable product for students.
 
-This phase must not introduce new domain models.
-It strictly consumes Backoffice + Runtime engine logic.
+It connects:
+
+- Authentication
+- Subscription control
+- Visibility rules
+- Attempt engine
+- Live sessions
+- Notifications
+- Ads
+- Results & Certificates
+
+This phase does **NOT** introduce new domain models.
+It strictly consumes:
+
+- Phase 3 (Backoffice data)
+- Phase 4 (Attempt Engine runtime)
+
+This is a runtime enforcement phase.
 
 ---
 
-## Implementation Order (Strict)
+# 🧱 Execution Order (Strict & Sequential)
+
+Backend stages must be completed in this exact order:
 
 1. STAGE_59_FRONTOFFICE_AUTH
 2. STAGE_60_SUBSCRIPTION_ENFORCEMENT
@@ -28,198 +41,275 @@ It strictly consumes Backoffice + Runtime engine logic.
 8. STAGE_66_ADS_RUNTIME
 9. STAGE_67_RESULTS_AND_CERTIFICATES
 
-Order must not be changed.
+Then execute:
 
-Each stage depends on the previous one.
+10. STAGE_UI_01 → STAGE_UI_10 (Frontoffice UI)
+11. STAGE_TEST_01_FRONTOFFICE_SYSTEM_VALIDATION
 
----
-
-## Execution Strategy
-
-### Stage 59 – Frontoffice Authentication
-
-- Workspace-bound login only
-- Student-only JWT issuance
-- Strict workspace_id validation
-- Token must contain:
-  - workspace_id
-  - user_id
-  - division_id
-  - subscription_status
-  - role = STUDENT
-
-No staff login allowed in this phase.
+Order must not change.
 
 ---
 
-### Stage 60 – Subscription Enforcement
+# 🔐 Stage 59 – Student Authentication
 
-Middleware must enforce:
+Goal: Secure workspace-bound student login.
 
-- Dashboard blocked if expired
-- Attempt start blocked if expired
-- Library access blocked if expired
-- Live session join blocked if expired
+Must implement:
+
+- Workspace-scoped login endpoint
+- JWT issuance (student role only)
+- workspace_id validation
+- division_id binding
+- subscription_status in token
+
+Token must include:
+
+- workspace_id
+- user_id
+- division_id
+- subscription_status
+- role = STUDENT
+
+❌ No staff login in this phase.
+
+Validation:
+
+- Cross-workspace token rejected
+- Expired token rejected
+
+---
+
+# 💳 Stage 60 – Subscription Enforcement
+
+Goal: Enforce subscription rules centrally.
+
+Middleware must block when expired:
+
+- Dashboard access
+- Attempt start
+- Library access
+- Live join
 
 Allowed when expired:
 
-- Profile access
+- Profile
 - Certificate download
-- Payment screen
+- Payment/renewal
 
-Subscription state must be evaluated server-side only.
+Subscription evaluation must be:
 
----
-
-### Stage 61 – Content Visibility Rules
-
-All content must be filtered by:
-
-- Division (mandatory)
-- Department (optional)
-- Group (optional)
-- Scheduled window (for scheduled exams)
-
-No client-side filtering trusted.
-
-All queries must enforce visibility in SQL layer.
+- Server-side only
+- Token-based + DB-verified
 
 ---
 
-### Stage 62 – Dashboard Aggregation
+# 👁 Stage 61 – Content Visibility Enforcement
 
-Dashboard must aggregate:
+Goal: Enforce strict visibility filtering.
 
-- Upcoming scheduled exams
+All queries must filter by:
+
+- workspace_id
+- division_id (mandatory)
+- department_id (optional)
+- group_id (optional)
+- scheduled window (when applicable)
+
+❌ No client-side filtering trusted.
+
+Filtering must occur in SQL layer.
+
+---
+
+# 📊 Stage 62 – Dashboard Aggregation
+
+Goal: Provide a consolidated student dashboard.
+
+Dashboard includes:
+
+- Upcoming exams
 - Upcoming live sessions
-- Earned certificates
-- Performance statistics
-- Notifications summary
+- Certificates
+- Performance summary
+- Notification preview
 
-All queries must be scoped by workspace and student id.
+Constraints:
 
-No heavy analytics in this phase.
-
----
-
-### Stage 63 – Library Runtime
-
-- Filter by visibility rules
-- Respect subscription gating
-- Enforce download authorization
-- Track file access logs
-
-No file access without visibility validation.
+- Strict workspace scope
+- Strict division scope
+- No heavy analytics
 
 ---
 
-### Stage 64 – Live Session Runtime
+# 📚 Stage 63 – Library Runtime
 
-- Validate division visibility
-- Validate subscription
-- Track attendance
-- Store join timestamps
+Goal: Secure content browsing.
 
-No direct session URL exposure without validation.
+Must enforce:
 
----
+- Visibility rules
+- Subscription rules
+- File access authorization
+- File access logging
 
-### Stage 65 – Notification System
-
-- WebSocket-based delivery
-- Scoped by workspace and user
-- Real-time push for:
-  - Scheduled exam reminders
-  - Live session reminders
-  - Result published
-  - System notifications
-
-All WS connections must validate JWT at handshake.
+❌ No file download without visibility validation.
 
 ---
 
-### Stage 66 – Ads Runtime
+# 🎥 Stage 64 – Live Session Runtime
 
-- Ads filtered by:
-  - Division
-  - Department
-  - Group
-  - Placement location
+Goal: Secure live session participation.
 
-Ads must never override visibility rules.
+Must validate:
 
-Ads rendering must not block runtime.
+- Division eligibility
+- Subscription status
+- Scheduled window
 
----
+Must track:
 
-### Stage 67 – Results & Certificates
+- Join timestamps
+- Attendance logs
 
-- Read-only result retrieval
-- Respect exam configuration:
-  - show results
-  - show correct answers
-  - show explanations
-- Certificate retrieval:
-  - Versioned template
-  - Immutable after issuance
-
-No recalculation of old attempts allowed.
+❌ No direct provider URL exposure without backend validation.
 
 ---
 
-## Integration Rules
+# 🔔 Stage 65 – Notification System
 
-Frontoffice must:
+Goal: Real-time student updates.
 
-- Never access master_db directly
-- Never bypass tenant resolver
-- Never bypass subscription middleware
-- Never trust client-provided identifiers
+Implementation:
 
-All DB access must come from resolver context.
+- WebSocket delivery
+- JWT validation at handshake
+- Workspace-scoped channel
 
----
+Events include:
 
-## Failure Handling
-
-Must handle:
-
-- Expired subscription → 402 or custom subscription error
-- Division mismatch → 403
-- Scheduled window violation → 403
-- JWT mismatch → 401
-- Tenant archived → 403
-
-All errors must be structured and logged with workspace_slug.
+- Exam reminder
+- Live reminder
+- Result published
+- System announcement
 
 ---
 
-## Validation Criteria
+# 📢 Stage 66 – Ads Runtime
 
-Phase complete when:
+Goal: Controlled advertisement rendering.
 
-- Student login works
-- Subscription expiration correctly gates access
-- Division filtering prevents cross-division access
-- Scheduled exam timing enforced
+Ads filtered by:
+
+- Division
+- Department
+- Group
+- Placement location
+
+Ads must:
+
+- Never bypass visibility
+- Never block runtime
+- Respect subscription suppression
+
+---
+
+# 🏆 Stage 67 – Results & Certificates
+
+Goal: Safe result and certificate access.
+
+Must:
+
+- Retrieve results read-only
+- Respect exam configuration flags
+- Respect show/hide rules
+- Serve versioned certificates
+
+❌ No recalculation of historical attempts.
+
+---
+
+# 🖥 UI Implementation Layer
+
+After backend stages 59–67:
+
+Implement:
+
+- Frontoffice Shell
+- Student Auth UI
+- Dashboard UI
+- Library UI
+- Attempt UI
+- Results UI
+- Live Sessions UI
+- Ads UI
+- Subscription gating UI
+- Notifications UI
+
+UI must:
+
+- Never duplicate business logic
+- Consume API only
+- Respect backend access states
+
+---
+
+# 🧪 System Validation Stage
+
+Execute STAGE_TEST_01_FRONTOFFICE_SYSTEM_VALIDATION.
+
+Must validate:
+
+- E2E student flow
+- Isolation guarantees
+- Subscription enforcement
+- Attempt integrity
+- Security checks (JWT tampering, injection)
+- Performance targets
+
+Phase cannot be marked PRODUCTION READY without this stage passing.
+
+---
+
+# 🚫 Hard Constraints
+
+Frontoffice must NEVER:
+
+- Access master_db
+- Bypass tenant resolver
+- Trust client-provided IDs
+- Perform business logic client-side
+
+All enforcement lives in backend.
+
+---
+
+# ✅ Phase Completion Criteria
+
+Phase is complete when:
+
+- Student login stable
+- Subscription gating enforced
+- Division filtering correct
+- Scheduled windows respected
 - Live attendance tracked
-- Notifications delivered in real-time
-- Ads appear only in allowed placements
-- Results respect exam configuration flags
-- Certificates downloadable after expiration
-
-No UI polishing required before validation.
+- Notifications delivered
+- Ads controlled
+- Results respect configuration
+- Certificates immutable
+- No isolation leakage
 
 ---
 
-## Exit Condition
+# 🏁 Exit Condition
 
-Frontoffice is considered stable when:
+Phase 5 is considered stable when:
 
-- No cross-division leakage
+- No cross-division access possible
 - No subscription bypass possible
 - No archived workspace accessible
 - No attempt replay possible
 - All runtime modules enforce workspace isolation
 
-Only after this phase passes review can performance optimization begin.
+Only then may optimization and scaling begin.
+
+---

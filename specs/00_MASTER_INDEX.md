@@ -20,6 +20,8 @@ Directory: 01_PLATFORM_FOUNDATION/
 07 — Observability Baseline  
 08 — Rate Limiting & Security
 
+STAGE_TEST_01 — Platform Foundation Validation
+
 ---
 
 ## PHASE 2 — PLATFORM MMC
@@ -34,6 +36,18 @@ Directory: 02_PLATFORM_MMC/
 14 — MMC Members  
 15 — MMC Dashboard  
 16 — Shared UI System
+
+### MMC UI STAGES
+
+UI-02-01 — MMC Shell Integration  
+UI-02-02 — Products UI  
+UI-02-03 — Affiliates UI  
+UI-02-04 — Licenses UI  
+UI-02-05 — MMC Dashboard UI  
+UI-02-06 — MMC Members UI  
+UI-02-07 — Provisioning Monitoring UI
+
+STAGE_TEST_01 — MMC System Validation
 
 ---
 
@@ -107,6 +121,19 @@ Directory: 03_BACKOFFICE_CORE/
 
 52 — Backoffice Dashboard
 
+### BACKOFFICE UI STAGES
+
+UI-03-01 — Backoffice Shell  
+UI-03-02 — Academic Structure UI  
+UI-03-03 — Exam Management UI  
+UI-03-04 — User Management UI  
+UI-03-05 — Commercial Layer UI  
+UI-03-06 — Media Library UI  
+UI-03-07 — Communication UI  
+UI-03-08 — Backoffice Dashboard UI
+
+STAGE_TEST_01 — Backoffice System Validation
+
 ---
 
 ## PHASE 4 — RUNTIME
@@ -119,6 +146,8 @@ Directory: 04_RUNTIME/
 56 — Submission Flow  
 57 — Reconnection Logic  
 58 — Concurrency Guards
+
+STAGE_TEST_01 — Runtime System Validation
 
 ---
 
@@ -135,6 +164,40 @@ Directory: 05_FRONTOFFICE_RUNTIME/
 65 — Notification System  
 66 — Ads Runtime  
 67 — Results & Certificates
+
+### FRONTOFFICE UI STAGES
+
+UI-05-01 — Frontoffice Shell  
+UI-05-02 — Student Auth UI  
+UI-05-03 — Dashboard UI  
+UI-05-04 — Library UI  
+UI-05-05 — Attempt Runtime UI  
+UI-05-06 — Results & Certificates UI  
+UI-05-07 — Subscription & Access Gates UI  
+UI-05-08 — Notifications UI  
+UI-05-09 — Live Sessions UI  
+UI-05-10 — Ads Runtime UI
+
+STAGE_TEST_01 — Frontoffice System Validation
+
+---
+
+## PHASE 6 — UI APPLICATION RUNTIME
+
+Directory: 06_UI_APPLICATION_RUNTIME/
+
+UI-00 — Runtime Architecture  
+UI-01 — Auth Module  
+UI-02 — API Client Layer  
+UI-03 — Router & Guards  
+UI-04 — Global Error Handling  
+UI-05 — Environment Configuration  
+UI-06 — State Management  
+UI-07 — Layout System Integration  
+UI-08 — Notification & Feedback  
+UI-09 — Security & Token Handling
+
+STAGE_TEST_01 — UI Runtime Validation
 
 ---
 

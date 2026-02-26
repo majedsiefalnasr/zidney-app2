@@ -281,10 +281,45 @@ STOP IF FAILS.
 
 ---
 
+## Step 10 – Foundation Validation Stage
+
+Execute:
+
+STAGE_TEST_01_PLATFORM_FOUNDATION
+
+This is a mandatory validation gate for Phase 1.
+
+This step verifies:
+
+- Tenant isolation integrity
+- Provisioning determinism
+- License lifecycle enforcement
+- Migration immutability
+- Attempt engine snapshot guarantees
+- Observability correctness
+- Rate limiting enforcement
+
+All validation scenarios defined in:
+
+STAGE_TEST_01_PLATFORM_FOUNDATION.md
+
+must pass before Phase 1 may be marked VALIDATED.
+
+If any validation fails:
+
+- Phase status remains BACKEND CLOSED
+- Remediation tasks must be created
+- Drift analysis must be re-run
+
+STOP IF FAILS.
+
+---
+
 ## Phase 1 Completion Checklist
 
 You may move to Phase 2 ONLY IF:
 
+- STAGE_TEST_01_PLATFORM_FOUNDATION passed (validation complete)
 - Tenant provisioning works
 - Lifecycle enforcement stable
 - Attempt snapshot model verified

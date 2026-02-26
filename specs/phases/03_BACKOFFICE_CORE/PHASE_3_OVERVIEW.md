@@ -1,126 +1,135 @@
-# PHASE 3 – Backoffice Core
+# PHASE 3 – BACKOFFICE CORE (ARCHITECTURAL OVERVIEW)
 
-Version: 1.0
-Status: Authoritative
-Scope: Tenant-Level Academic and Administrative Control Panel
+Version: 2.0  
+Status: Authoritative  
+Scope: Tenant-Level Academic & Operational Control Panel
 
 ---
 
-## Objective
+# WHAT THIS PHASE BUILDS
 
-Build the Backoffice (Workspace) system that allows each licensed institution to:
+Phase 3 builds the **institutional operating system** of Zidney.
 
-- Configure academic structure
+If Phase 2 is the commercial authority layer,  
+Phase 3 is the tenant execution layer.
+
+This phase enables each licensed workspace to:
+
+- Define academic structure
 - Manage staff and students
-- Create and manage content
-- Configure exam engines
-- Manage subscriptions and billing (tenant-level)
-- Manage media, notifications, ads, and feedback
+- Configure exams
+- Classify content
+- Enforce subscription limits
+- Manage media, notifications, ads
+- Operate institution-level dashboard
 
-Backoffice operates strictly inside tenant databases.
+Phase 3 runs strictly inside tenant databases.
 
-Backoffice must never access master_db directly.
+No master-level mutation is allowed here.
 
 ---
 
-## Architectural Position
+# ARCHITECTURAL POSITION
 
-Backoffice is the institutional control panel.
+Backoffice exists only after:
 
-It operates only after:
-
-- Tenant provisioning is complete
-- License status is ACTIVE
+- License status = ACTIVE
+- Tenant provisioning completed
 - Schema version validated
 - Tenant resolver attached
 
-Every Backoffice request must pass through:
+Every request must pass through:
 
-- Tenant Resolver Middleware
-- License Validation Middleware
-- Schema Version Enforcement
-- RBAC Enforcement
+1. Tenant Resolver Middleware
+2. License Validation Middleware
+3. Schema Version Enforcement
+4. RBAC Enforcement
 
-Backoffice must not:
+Backoffice must never:
 
+- Access master_db directly
 - Mutate license lifecycle
-- Trigger provisioning directly
-- Modify product definitions
+- Trigger provisioning
+- Modify products
 - Access other tenants
+- Execute cross-database joins
+
+Backoffice is tenant-isolated by design.
 
 ---
 
-## Subdomains
+# DATA OWNERSHIP MODEL
 
-Backoffice Core is divided into structured subdomains:
+Phase 3 owns tenant-level entities only:
 
-Foundation
+- divisions
+- departments
+- groups
+- hierarchy trees
+- teams
+- semesters
+- subjects
+- lessons
+- categories
+- tags
+- baskets
+- exams
+- questions
+- users (staff, students)
+- subscriptions (tenant-level)
+- invoices (tenant-level)
+- media
+- notifications
+- feedback
+- ads
+- dashboards
 
-- Tenant bootstrap
-- Workspace settings
-- Translation system
-- Status workflow engine
-- Role and permission system
+Backoffice must never read/write:
 
-Academic Structure
+- products
+- product_versions
+- licenses
+- affiliates (platform-level)
+- mmc_users
+- platform audit logs
 
-- Divisions
-- Departments
-- Groups
-- Hierarchy tree (staff organization)
-- Teams
-- Semesters
-- Subjects
-- Lessons
-
-Content Classification
-
-- Categories
-- Category values
-- Tags
-- MCQ baskets
-
-Exam Engine Core
-
-- MCQ question model
-- Traditional question model
-- MCQ exam configuration
-- Traditional exam configuration
-- Scheduled engine
-- Auto-selection engine
-- Grading core
-
-User Management
-
-- Staff management
-- Student management
-- Limit enforcement
-
-Commercial Layer
-
-- Plans and subscriptions
-- Promocodes
-- Billing and invoices
-
-Assets and Communication
-
-- Media library
-- Notifications engine
-- Feedback system
-- System feedback
-- Ads engine
-
-Dashboard
-
-- Backoffice metrics and insights
-
-Each subdomain has strict boundaries and must not leak into others.
+Master/tenant boundaries are absolute.
 
 ---
 
-## Data Isolation Rules
+# EXECUTION MODEL
 
-Backoffice must operate strictly within its tenant database.
+Phase 3 is executed in structured layers:
+
+1. Shell & Security Layer
+2. Academic Structure
+3. Classification Layer
+4. Exam Engine Core
+5. User Management
+6. Commercial Layer
+7. Media & Communication
+8. Dashboard
+9. System Validation
+
+Each layer requires:
+
+- Backend implementation
+- UI implementation
+- Validation stage
+- Isolation verification
+- Permission verification
+
+No layer is considered stable until UI and validation pass.
+
+---
+
+# TENANT ISOLATION RULES
+
+All queries must:
+
+- Use tenantDb from request context
+- Be scoped to workspace_slug
+- Avoid global identifiers
 
 Forbidden:
 
@@ -128,15 +137,15 @@ Forbidden:
 - Shared student tables
 - Shared attempt tables
 - Cross-database joins
-- Accessing master tables
+- Raw SQL bypassing ORM validation
 
-All operations must use tenantDb from request context.
+Isolation violations invalidate the phase.
 
 ---
 
-## Division Model
+# DIVISION MODEL (CORE RULES)
 
-Division is shared between students and staff.
+Division is shared by staff and students.
 
 Student rules:
 
@@ -147,107 +156,129 @@ Staff rules:
 
 - May belong to multiple divisions
 
-If divisions feature is disabled:
+If divisions are disabled:
 
-- System must enforce a default division
-- All data must map to default division
-- Disabling divisions requires irreversible confirmation
+- Default division enforced
+- All records mapped automatically
+- Irreversible confirmation required
 
----
-
-## Permission Model
-
-Backoffice uses strict RBAC.
-
-Permissions must:
-
-- Be enforced at API layer
-- Never rely on frontend validation
-- Apply globally within tenant
-- Not vary per division in Phase 3
-
-Role resolution must happen per request.
+Division logic must be server-enforced.
 
 ---
 
-## Status Workflow Engine
+# ROLE & PERMISSION MODEL
 
-Entities supporting status flow must follow:
+Backoffice RBAC:
+
+- API-enforced only
+- No frontend-only protection
+- Role resolved per request
+- No division-level permissions (Phase 3 scope)
+
+Permission updates must:
+
+- Take effect immediately
+- Invalidate stale sessions if required
+- Be auditable
+
+---
+
+# WORKFLOW ENGINE PRINCIPLES
+
+Status-enabled entities follow controlled transitions.
+
+Example flow:
 
 Completed → Under Review → Approved → Enabled
 
-Transitions must:
+Rules:
 
-- Be permission-controlled
-- Be validated server-side
-- Be auditable
+- Server-side validation only
+- Transition permission-controlled
+- Audit record created
+- Illegal transitions blocked
 
-Hardcoded flows are allowed in Phase 3.
+Workflow logic must remain deterministic.
 
 ---
 
-## Subscription Enforcement
+# SUBSCRIPTION ENFORCEMENT
 
-Backoffice must enforce:
+Backoffice enforces:
 
 - Student limit
 - Staff limit
 - Plan restrictions
 
-Limit checks must be transactional.
+Limit checks must be:
 
-Subscription expiration must:
-
-- Block frontoffice content access
-- Allow login
-- Allow certificate viewing
-
----
-
-## Observability
-
-All Backoffice actions must:
-
-- Include workspace_slug in logs
-- Include request_id
-- Include user_id
-- Emit structured logs
-
-Sensitive actions must create audit records.
-
----
-
-## Stability Constraints
-
-Backoffice must remain:
-
-- Deterministic
-- Schema-version compatible
 - Transaction-safe
-- Isolation-safe
+- Concurrency-safe
+- Atomic (COUNT + INSERT pattern)
 
-No feature may bypass:
+Subscription expiration:
 
-- Tenant resolver
-- License enforcement
-- Schema enforcement
-- RBAC validation
+- Blocks content access
+- Does not block login
+- Allows certificate viewing
+
+Commercial data in Phase 3 is tenant-scoped only.
 
 ---
 
-## Completion Criteria
+# OBSERVABILITY REQUIREMENTS
 
-Phase 3 is complete when:
+Every Backoffice request must include:
 
-- Academic structure stable
-- Content classification stable
-- Exam configuration stable
-- User management stable
-- Subscription enforcement stable
-- Media and notification systems functional
-- Ads system functional
-- Dashboard operational
-- No cross-tenant leakage exists
+- workspace_slug
+- request_id
+- user_id
+
+Sensitive operations must:
+
+- Emit structured logs
+- Create audit records
+- Record before/after states
+
+Logging must never expose:
+
+- Raw tokens
+- Sensitive secrets
+- Cross-tenant identifiers
+
+---
+
+# STABILITY GUARANTEES
+
+Backoffice must guarantee:
+
+- Deterministic behavior
+- Schema-version compatibility
+- Strict transaction boundaries
+- No isolation leakage
+- No RBAC bypass
+- No master_db dependency
+- No frontend-only enforcement
+
+If any of these are broken, Phase 3 must be halted.
+
+---
+
+# PHASE 3 COMPLETE WHEN
+
+Phase 3 is complete only when:
+
+- All backend stages marked BACKEND_CLOSED
+- All UI stages marked UI_READY
+- STAGE_TEST_01_BACKOFFICE_SYSTEM_VALIDATION passed
+- No cross-tenant leakage detected
+- No permission drift
+- No lifecycle bypass
+- No console/runtime errors
+- No API contract drift
+- Isolation proven via automated tests
+
+Only then may Phase 4 begin.
 
 ---
 

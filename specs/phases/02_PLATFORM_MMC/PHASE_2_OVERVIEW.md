@@ -1,71 +1,67 @@
-# PHASE 2 – Platform MMC
+# PHASE 2 – PLATFORM MMC (ARCHITECTURAL OVERVIEW)
 
-Version: 1.1  
+Version: 2.0  
 Status: Authoritative  
 Scope: Platform Management Console (MMC)
 
 ---
 
-## Objective
+# WHAT THIS PHASE BUILDS
 
-Build the MMC (Master Management Console) as the platform control layer responsible for:
+Phase 2 builds the **commercial and operational control layer of Zidney**.
+
+This is the platform authority layer.
+
+It manages:
 
 - Products
 - Licenses
-- License lifecycle management
+- License lifecycle
 - Workspace provisioning triggers
 - Platform-level affiliates (B2B)
 - Internal platform members (RBAC)
-- Platform-level analytics (master scope only)
+- Master-level analytics
 
-MMC manages the platform.
+It does **NOT** manage:
 
-MMC does not manage academic content, student data, or tenant runtime data.
+- Academic data
+- Students
+- Exams
+- Attempts
+- Certificates
+- Tenant runtime logic
+
+Phase 2 controls the platform.  
+Phase 3 controls the tenants.
 
 ---
 
-## Architectural Position
+# ARCHITECTURAL POSITION
 
-MMC operates exclusively on:
-
-master_db
+MMC operates **exclusively on master_db**.
 
 MMC must never:
 
-- Connect to tenant databases directly
+- Connect directly to tenant databases
 - Modify tenant academic data
-- Access student, attempt, or exam data
+- Access student or attempt data
+- Drop tenant databases
+- Bypass the License Engine
 - Bypass the Provisioning Service
-- Bypass the License Engine middleware
 
-All tenant-related operations must flow through:
+All tenant-impacting operations must flow through:
 
 - License Engine
 - Tenant Provisioning Service
-- Tenant Resolver (runtime only)
+- Tenant Resolver (runtime layer only)
+
+MMC is a command layer — not a runtime layer.
 
 ---
 
-## Functional Domains
+# MASTER DATA OWNED BY MMC
 
-Phase 2 includes the following domains:
-
-- Products Management
-- License Management
-- License Lifecycle Control
-- Provisioning Trigger
-- Affiliates (B2B Promo Codes)
-- MMC Members (Platform RBAC)
-- MMC Dashboard
-- Shared MMC UI System
-
-Each domain is implemented in its own stage specification.
-
----
-
-## Data Scope
-
-MMC controls master-level entities only:
+MMC owns only master-level entities:
 
 - products
 - product_versions
@@ -75,298 +71,285 @@ MMC controls master-level entities only:
 - mmc_users
 - roles
 - permissions
-- audit_logs (platform level)
+- platform_audit_logs
 
-MMC must not read or write:
+MMC must never read/write:
 
-- attempts
 - students
+- attempts
 - exams
 - subscriptions
 - certificates
 - tenant runtime logs
 
-Those belong strictly to tenant databases.
+If master/tenant boundary is violated → architecture is compromised.
 
 ---
 
-## Product Model
+# CORE DOMAINS INSIDE PHASE 2
 
-Product is the commercial configuration layer.
+Phase 2 is divided into structured domains:
 
-Product defines:
+1. Product Management
+2. License Management
+3. License Lifecycle Control
+4. Provisioning Trigger
+5. Affiliates (B2B Promo Codes)
+6. MMC Members & RBAC
+7. MMC Dashboard
+8. Shared UI System
 
-- name
-- description
-- enabled_modules
-- base configuration
-- status
-- version
+Each domain has:
 
-There is no Model abstraction layer.
+- Backend Stage
+- UI Stage
+- Validation Stage
 
-Products evolve independently.
-
-Each product version must be immutable once published.
+No domain is considered complete without all three.
 
 ---
 
-## Product Versioning
+# PRODUCT MODEL
 
-When a product changes:
+Products are the commercial configuration layer.
 
-- A new product_version must be created
-- Existing licenses remain on their current version
-- Upgrade availability must be recorded
-- Workspace must explicitly opt-in to upgrade
+A Product defines:
 
-No automatic breaking upgrades are allowed.
+- Name
+- Description
+- Enabled modules
+- Base configuration
+- Status
+- Version
+
+Key constraints:
+
+- Slug immutable
+- Versions immutable after publish
+- Structural changes require new version
+- Existing licenses stay pinned to version
+- Upgrade must be explicit
+
+No automatic breaking upgrades allowed.
 
 Version compatibility must align with:
 
 - schema_version
-- runtime compatibility enforcement (Phase 1)
+- runtime compatibility (Phase 1 enforcement)
 
 ---
 
-## License Management
+# LICENSE MODEL
 
-MMC must allow:
+License represents a purchased workspace contract.
 
-- Create license
-- Edit license limits
-- Change lifecycle state (via License Engine)
-- Trigger provisioning (async job)
-- Archive workspace
-- Restore workspace
-- Permanently delete workspace (manual confirmation only)
+License defines:
 
-All license operations must:
+- workspace_slug (globally unique)
+- product_id
+- version_id
+- student_limit
+- staff_limit
+- lifecycle state
 
-- Be validated by lifecycle rules
-- Be executed through License Engine
-- Be audited
-- Be idempotent where applicable
+Lifecycle transitions are engine-controlled.
 
-MMC must not mutate tenant registry directly.
-
----
-
-## License Lifecycle Enforcement
-
-Lifecycle state transitions are controlled by the License Engine only.
-
-MMC UI may request transitions, but cannot:
+MMC can request transitions, but cannot:
 
 - Skip lifecycle states
 - Force deletion without archive
-- Bypass soft-lock window
-- Directly drop databases
+- Drop tenant DB
+- Bypass soft-lock windows
 
-All destructive actions must:
+All lifecycle changes must:
 
-- Require explicit confirmation
+- Go through License Engine
+- Be transactional
 - Be audited
-- Respect archive preconditions
+- Be idempotent where applicable
 
 ---
 
-## Provisioning Trigger Model
+# PROVISIONING MODEL
 
 License creation triggers:
 
-- License status = PROVISIONING
-- Asynchronous job dispatch to Provisioning Service
-- State transition to ACTIVE only after success
+1. Status = PROVISIONING
+2. Async job to Provisioning Service
+3. Transition to ACTIVE only on success
 
 MMC must:
 
-- Display provisioning state
-- Block manual lifecycle overrides during provisioning
+- Show provisioning status clearly
+- Block lifecycle overrides during provisioning
 - Log provisioning failures
 
-Provisioning logic is not implemented inside MMC.
+MMC must never create tenant DB directly.
 
 ---
 
-## Affiliates (Platform-Level)
+# AFFILIATES (B2B ONLY)
 
-Affiliates apply only to:
+Affiliates apply only to license purchases.
 
-B2B license purchases.
-
-Affiliate includes:
+Affiliate contains:
 
 - promo_code
 - discount_percentage
 - commission_percentage
 - usage_limit
+- expiration
 - status
 
-Affiliate logic must not interact with tenant-level student purchases.
+Constraints:
 
-Workspace-level promo codes are handled separately in Backoffice.
+- Platform-level only
+- No student-level discount logic
+- No tenant academic interaction
+- Expired affiliate unusable
+- Usage limits enforced transactionally
+
+Backoffice promo codes are separate (Phase 3).
 
 ---
 
-## MMC Members
+# MMC MEMBERS & PERMISSIONS
 
-MMC members are internal platform users:
+MMC members are internal platform operators.
 
-- Platform admins
+Roles include:
+
+- Platform Admin
 - Sales
 - Operations
 - Finance
 
-Stored in master_db only.
+Permission model:
 
-Must support:
+- Strict RBAC
+- API-level enforcement only
+- No frontend-only protection
+- Immediate effect on role change
+- Audit trail required
 
-- Invite member
-- Assign role
-- Assign organizational grouping (team/group/department)
-- Enable/disable member
-
-MMC RBAC applies at full-platform scope.
-
-No partial product access model is supported in Phase 2.
-
----
-
-## Permission Model
-
-MMC uses strict RBAC.
-
-Permission categories include:
+Permission categories:
 
 - Organization Settings
 - Product Management
 - License Management
-- Client Management
 - Affiliate Management
 - Members Management
 - Reporting
 
-Permissions include:
-
-- view
-- create
-- edit
-- delete
-
-Permission checks must be enforced at API level.
-
-No frontend-only enforcement allowed.
-
 ---
 
-## MMC Dashboard Scope
+# MMC DASHBOARD
 
-Dashboard aggregates master-level metrics only:
+Dashboard shows master-level metrics only:
 
 - Total clients
 - Active licenses
 - Soft-locked licenses
 - Archived licenses
 - Revenue summary
-- Revenue by location
-- Affiliate usage statistics
+- Revenue distribution
+- Affiliate usage
 
-Dashboard must:
+Constraints:
 
-- Query master_db only
-- Avoid tenant DB access
-- Use aggregated data only
-- Respect permission visibility
+- master_db only
+- Aggregated queries only
+- No tenant DB access
+- Permission-filtered visibility
+
+MMC dashboard is operational visibility, not tenant analytics.
 
 ---
 
-## Shared MMC UI System
+# SHARED UI SYSTEM PRINCIPLES
 
 MMC must use:
 
 packages/ui-system
 
-Shared components must include:
+Shared components must be:
+
+- Stateless
+- Business-logic free
+- API-agnostic
+- Reusable across apps
+
+Required primitives:
 
 - DataTable
-- Filter system
-- Column visibility controls
+- Filtering system
 - Pagination
+- Column visibility
 - Bulk actions
-- Status toggler
-- Translation modal
 - Confirm dialog
-- Drawer-based form pattern
+- Drawer forms
+- Status toggles
+- Multi-language modal
 
-UI system must:
+No business logic inside shared components.
 
-- Be reusable by Backoffice
-- Avoid business logic
-- Enforce consistent interaction patterns
-
-No business logic in UI components.
+UI must strictly consume backend contracts.
 
 ---
 
-## Audit Requirements
+# AUDIT REQUIREMENTS
 
-All MMC actions must generate audit entries:
+Every critical MMC action must create audit entry:
 
 - Actor (mmc_user_id)
-- Action type
+- Action
 - Target entity
-- Previous state (if applicable)
+- Previous state
 - New state
 - Timestamp
 
 Audit logs must be immutable.
 
-No critical action may occur without audit trail.
+No destructive operation without audit trail.
 
 ---
 
-## Stability Constraints
+# STABILITY GUARANTEES
 
-MMC must:
+MMC must guarantee:
 
-- Never access tenant DB directly
-- Never create tenant DB manually
-- Never mutate lifecycle without engine validation
-- Never allow destructive action without archive
-- Never skip provisioning state
+- No tenant DB access
+- No direct DB provisioning
+- No lifecycle mutation without engine validation
+- No destructive action without archive
+- No bypass of provisioning state
+- No permission drift
+- No un-audited mutation
 
-MMC is the commercial and operational authority of the platform.
+MMC is the commercial authority layer.
 
-If MMC lifecycle logic is unstable, institutional trust is compromised.
+If MMC is unstable, institutional trust collapses.
 
 ---
 
-## Phase Completion Criteria
+# PHASE 2 COMPLETE WHEN
 
-Phase 2 is complete when:
+Phase 2 is considered complete when:
 
-- Product CRUD works with versioning
-- License CRUD works with lifecycle enforcement
-- Async provisioning trigger works
-- Affiliate management works
-- MMC RBAC enforced
-- Dashboard metrics correct
-- Shared UI system implemented and reusable
+- Product CRUD + versioning stable
+- License CRUD + lifecycle enforcement stable
+- Provisioning trigger stable
+- Affiliates stable
+- RBAC fully enforced
+- Dashboard accurate
+- Shared UI system abstracted
 - All actions audited
-- No direct tenant DB access anywhere in MMC
+- No master/tenant boundary violation
+- Backend stages marked BACKEND_CLOSED
+- UI stages marked UI_READY
+- STAGE_TEST_01_MMC_SYSTEM_VALIDATION passed
 
----
-
-## Dependency Gate
-
-Backoffice implementation must not begin until:
-
-- License creation works
-- Provisioning works
-- Lifecycle enforcement works
-- Resolver isolation verified
-- Audit logging operational
+Only then may Phase 3 begin.
 
 ---
 

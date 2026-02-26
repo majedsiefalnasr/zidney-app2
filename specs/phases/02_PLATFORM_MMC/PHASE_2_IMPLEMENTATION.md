@@ -1,50 +1,78 @@
-# PHASE 2 – IMPLEMENTATION PLAN
+# PHASE 2 – MMC IMPLEMENTATION SEQUENCE (EXECUTION GUIDE)
 
-Phase: 02_PLATFORM_MMC
-Objective: Build Platform Control Layer (MMC)
-Status: Authoritative Execution Sequence
+Phase: 02_PLATFORM_MMC  
+Goal: Deliver a fully functional Platform Control Layer (MMC) operating strictly on master_db.
 
----
-
-## Execution Principles
-
-Phase 2 is built strictly on top of Phase 1.
-
-Phase 2 must not:
-
-- Access tenant databases directly
-- Modify tenant schema
-- Bypass License Engine validation
-- Bypass Tenant Provisioning Service
-- Perform lifecycle transitions without engine enforcement
-
-All MMC logic must operate on master_db only.
-
-If master/tenant boundaries are violated, implementation must stop.
+This document is an execution sequence, not a theory plan.  
+Follow it step-by-step.
 
 ---
 
-## Implementation Order (Strict)
+# HOW TO USE THIS DOCUMENT
 
-The following sequence is mandatory.
-No stage may begin before the previous stage passes validation.
+For each Step below:
 
-1. Shared UI System
-2. Products Management
-3. License Management
-4. Lifecycle Controls
-5. Affiliates
-6. MMC Members & RBAC
-7. Dashboard & Reporting
+1. Implement Backend stage(s)
+2. Mark backend as `BACKEND_CLOSED`
+3. Implement corresponding UI stage
+4. Mark UI as `UI_READY`
+5. Execute validation checklist
+6. Only then move to next Step
+
+No skipping layers.  
+No mixing tenant DB access into MMC.  
+No UI-first business logic.
 
 ---
 
-## Step 1 – Shared UI System
+# GLOBAL RULES (NON-NEGOTIABLE)
 
-Implement in packages/ui-system:
+Throughout Phase 2:
+
+- MMC operates on master_db only
+- No direct tenant DB access
+- No schema modification of tenant databases
+- No lifecycle transition without License Engine
+- No provisioning without Provisioning Service
+- No frontend-only validation
+- All mutations transactional
+- All endpoints paginated where applicable
+- All forms validated (Zod or equivalent)
+- No raw engine errors exposed to UI
+- No console/runtime errors allowed
+
+If any of these are violated → STOP and fix before continuing.
+
+---
+
+# PREREQUISITE — UI RUNTIME FOUNDATION (PHASE 06 DEPENDENCY)
+
+Before building any MMC feature UI:
+
+- Auth module must be functional
+- API client layer centralized
+- Router configured with guards
+- Global error handler active
+- Token refresh logic implemented
+- Layout system integrated
+
+If these are not ready → do not build feature screens.
+
+---
+
+# STEP 1 — SHARED UI SYSTEM HARDENING
+
+(UI foundation for all MMC features)
+
+Backend:  
+No backend work here.
+
+UI (packages/ui-system):
+
+Implement reusable primitives:
 
 - AppLayout
-- DataTable (filter, pagination, bulk select, column toggle)
+- DataTable (pagination, filter, bulk select, column toggle)
 - Modal system
 - Drawer-based form layout
 - Confirm dialog
@@ -54,145 +82,252 @@ Implement in packages/ui-system:
 Constraints:
 
 - Stateless components only
-- No API calls inside UI package
-- No business logic inside UI components
+- No API calls inside shared UI package
+- No business logic
 - No direct store access
+- No master_db schema knowledge
 
-Validation Gate:
+Validation:
 
-- Components reusable across MMC and Backoffice
+- Reusable across MMC and Backoffice
 - No duplication across apps
-- No coupling to master_db schema
+- No business rule leakage
 
-Stop if UI logic begins to leak business rules.
+Deliverable:
+Stable UI component library.
 
 ---
 
-## Step 2 – Products Management
+# STEP 2 — PRODUCTS (Backend → UI)
 
-Implement:
+Backend:
 
 - Product CRUD
 - Slug uniqueness enforcement
 - Module selection model
-- Product version creation (immutable versioning)
-- Product activation / deactivation
+- Product versioning (immutable)
+- Activation / deactivation
 
 Constraints:
 
 - Slug immutable after creation
-- Product version must increment on structural change
-- Existing licenses remain on previous version
+- Version increments on structural change
+- Historical versions read-only
+- Inactive product cannot create license
 
-Validation Gate:
+Validation:
 
-- Inactive product cannot create new license
-- Product version stored correctly
-- No destructive edits to historical versions
+- Version stored correctly
+- No destructive edits
+- License creation blocked for inactive products
+
+UI:
+
+- STAGE_UI_02_PRODUCTS
+
+UI Rules:
+
+- Use shared DataTable
+- API via centralized client
+- Slug disabled after creation
+- Version history read-only
+- No direct API logic inside components
+
+UI Validation:
+
+- Cannot create license from inactive product
+- Version badge visible
+- Permission respected
+- Clear error mapping (409/422)
+
+Deliverable:
+Product management stable and version-safe.
 
 ---
 
-## Step 3 – License Management
+# STEP 3 — LICENSES (Backend → UI)
 
-Implement:
+Backend:
 
 - License creation
-- Limit configuration (student_limit, staff_limit)
-- Async provisioning trigger
-- Status visualization
-- Version compatibility display
+- student_limit / staff_limit configuration
+- Provisioning trigger
+- Status state handling
+- Version compatibility checks
 
 Constraints:
 
 - workspace_slug globally unique
-- Product cannot change after license creation
-- License enters PROVISIONING state before ACTIVE
-- No direct DB creation from MMC
+- Product immutable after license creation
+- No direct DB provisioning from MMC
+- Provisioning async only
 
-Validation Gate:
+Validation:
 
-- License triggers provisioning job
 - Duplicate slug blocked
-- Limits stored correctly
-- Provisioning failure handled safely
+- Provisioning job triggered
+- Limits stored transactionally
+- Failure handled safely
+
+UI:
+
+- STAGE_UI_04_LICENSES
+
+UI Rules:
+
+- Status badges mapped to engine states
+- Provisioning visually distinct
+- Limits editable only pre-provision
+- Slug immutable
+
+UI Validation:
+
+- Spinner during provisioning
+- Engine errors mapped cleanly
+- Illegal edits blocked in UI
+
+Deliverable:
+License flow stable and safe.
 
 ---
 
-## Step 4 – Lifecycle Controls
+# STEP 4 — LIFECYCLE CONTROLS
 
-Implement UI and API controls for:
+Backend:
 
 - Soft lock
 - Archive
 - Restore
-- Permanent delete (double confirmation required)
+- Permanent delete (double confirm)
+- Audit logging
 
 Constraints:
 
-- Lifecycle transitions must call License Engine
+- Must call License Engine
 - Illegal transitions blocked
 - Archive required before delete
 - All actions audited
 
-Validation Gate:
+Validation:
 
-- SOFT_LOCKED blocks workspace login
-- ARCHIVED blocks resolver access
-- Restore re-enables access
-- Delete removes tenant safely
+- SOFT_LOCKED blocks login
+- ARCHIVED blocks resolver
+- Restore re-enables
+- Delete removes safely
+
+UI:
+
+- Integrated in STAGE_UI_04_LICENSES
+
+UI Rules:
+
+- Confirm dialog for destructive actions
+- Typed confirmation for delete
+- Buttons state-driven
+- No direct state mutation
+
+UI Validation:
+
+- Illegal transitions never clickable
+- States visually distinct
+- Delete hidden unless allowed
+
+Deliverable:
+Lifecycle strictly engine-driven.
 
 ---
 
-## Step 5 – Affiliates
+# STEP 5 — AFFILIATES (Backend → UI)
 
-Implement:
+Backend:
 
 - Affiliate CRUD
 - Usage limit enforcement
-- Status enforcement
-- Reporting queries
+- Expiration enforcement
+- Commission validation
 
 Constraints:
 
-- Applies only to B2B license purchase
-- No tenant-level student interaction
-- Expired affiliate cannot apply
+- Applies to B2B only
+- No tenant-level student logic
+- Expired affiliate unusable
 
-Validation Gate:
+Validation:
 
-- Usage limit enforced
+- Usage limits enforced
 - Expiration enforced
-- Commission percentage validated
+- Commission validated server-side
+
+UI:
+
+- STAGE_UI_03_AFFILIATES
+
+UI Rules:
+
+- Commission validated client + server
+- Expired flagged visually
+- Usage count visible
+- No student logic inside MMC
+
+UI Validation:
+
+- Expired affiliate not selectable
+- Rate-limit errors clear
+- Promo input validated
+
+Deliverable:
+Affiliate system safe and bounded.
 
 ---
 
-## Step 6 – MMC Members & RBAC
+# STEP 6 — MMC MEMBERS & RBAC
 
-Implement:
+Backend:
 
-- MMC member CRUD
+- Member CRUD
 - Role CRUD
 - Permission matrix
 - Invite flow
-- Activity log integration
+- Audit logging
 
 Constraints:
 
-- Permissions enforced at API layer
+- Permissions enforced server-side
 - No frontend-only protection
-- No partial-product access model in Phase 2
+- Immediate permission effect
+- Secure invite tokens
 
-Validation Gate:
+Validation:
 
-- Unauthorized action returns 403
-- Role update affects permissions immediately
-- Audit log entry created for sensitive actions
+- 403 returned correctly
+- Role updates immediate
+- Audit entry created
+
+UI:
+
+- STAGE_UI_06_MMC_MEMBERS
+
+UI Rules:
+
+- Permission matrix read-only unless super-admin
+- UI relies on backend 403
+- State refresh after role change
+- Secure invite flow
+
+UI Validation:
+
+- 403 handled gracefully
+- Permission drift impossible
+- Activity log visible
+
+Deliverable:
+MMC RBAC fully enforced.
 
 ---
 
-## Step 7 – MMC Dashboard
+# STEP 7 — MMC DASHBOARD
 
-Implement:
+Backend:
 
 - License metrics
 - Revenue summary
@@ -201,49 +336,85 @@ Implement:
 
 Constraints:
 
-- Query master_db only
-- No tenant DB access
-- Indexed queries only
-- Heavy aggregation must be optimized
+- master_db only
+- Indexed queries
+- Optimized aggregations
 
-Validation Gate:
+Validation:
 
 - Permission filtering applied
-- Dashboard loads within acceptable threshold
+- Performance acceptable
 - No blocking queries
 
+UI:
+
+- STAGE_UI_05_MMC_DASHBOARD
+
+UI Rules:
+
+- No heavy browser computation
+- Server-provided aggregates only
+- Widgets permission-driven
+- Graceful loading states
+
+UI Validation:
+
+- Widgets hidden if unauthorized
+- No blocking calls
+- No raw DB assumptions
+
+Deliverable:
+Dashboard performant and secure.
+
 ---
 
-## Audit Requirements
+# STEP 8 — FULL MMC SYSTEM VALIDATION (EXIT GATE)
 
-All sensitive actions must generate audit records:
+Execute:
+STAGE_TEST_01_MMC_SYSTEM_VALIDATION
 
-- Actor (mmc_user_id)
-- Action type
-- Target entity
-- Previous state (if applicable)
-- New state
-- Timestamp
+Must Validate:
 
-Audit logs must be immutable.
+- API contract stability
+- RBAC enforcement
+- Lifecycle enforcement
+- Provisioning flow
+- Affiliate application flow
+- Isolation boundaries
+- Security abuse cases
+- Load & concurrency behavior
+- E2E flows (Playwright)
+- Integration tests against real DB
+- CI fully green
+
+Failure Policy:
+
+- Phase status reverts to BACKEND_CLOSED
+- Root cause documented
+- Fix applied
+- Validation fully re-run
+
+No Phase 3 work begins before this passes.
 
 ---
 
-## Completion Criteria
+# PHASE 2 COMPLETE WHEN:
 
-Phase 2 is complete only if:
-
-- Product → License → Provisioning flow stable
-- Lifecycle transitions enforced via engine
-- Async provisioning verified
+- Product → License → Provisioning stable
+- Lifecycle engine fully enforced
 - Affiliates stable
-- MMC RBAC fully enforced
-- Dashboard stable and optimized
-- Shared UI system abstracted and reused
-- No direct tenant DB access exists anywhere in MMC
+- RBAC enforced
+- Dashboard optimized
+- Shared UI system abstracted
+- No tenant DB access anywhere in MMC
+- UI strictly consumes backend contracts
+- No business logic duplicated in UI
+- All UI stages marked UI_READY
+- All backend stages marked BACKEND_CLOSED
+- STAGE_TEST_01_MMC_SYSTEM_VALIDATION passed
 
-If any boundary between MMC and tenant runtime is violated,
-Phase 2 must be refactored before Phase 3 begins.
+If any master/tenant boundary is violated,
+Phase 2 must be refactored before Phase 3.
 
 ---
 

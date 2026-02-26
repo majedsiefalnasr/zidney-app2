@@ -36,6 +36,33 @@ This phase consumes configuration. It does not define it.
 
 ---
 
+## Execution Model
+
+Phase 4 requires coordinated implementation across:
+
+- Backend API layer (attempt lifecycle endpoints)
+- Worker layer (grading and submission finalization)
+- Database transactional enforcement
+- Runtime validation test suite
+
+This phase is backend-authoritative.
+
+UI may consume runtime endpoints, but runtime correctness must be validated independently of UI rendering.
+
+Implementation must be executed in the following order:
+
+1. Snapshot creation logic
+2. Attempt lifecycle state machine
+3. Submission idempotency enforcement
+4. Worker-based grading pipeline
+5. Concurrency guards
+6. Reconnection validation
+7. Stress and integrity testing
+
+No UI-dependent validation is acceptable for runtime integrity approval.
+
+---
+
 ## Architectural Invariants
 
 The following rules are non-negotiable:
@@ -65,6 +92,26 @@ The engine must guarantee:
 - No double-finalization of attempts
 
 All critical transitions must be transactional.
+
+---
+
+## Worker Separation Enforcement
+
+All grading operations must execute exclusively in the Worker layer.
+
+The API layer must:
+
+- Validate submission state
+- Persist submission record
+- Enqueue grading job
+
+The API layer must NOT:
+
+- Compute scores
+- Apply grading rules
+- Modify grading outputs
+
+Violation of worker separation invalidates runtime determinism.
 
 ---
 
@@ -173,6 +220,36 @@ The runtime must safely support:
 - Stable autosave under burst load
 
 Load safety must be considered before UI optimization.
+
+---
+
+## Phase Dependency Requirement
+
+Phase 4 implementation may only begin after:
+
+- Phase 3 (Backoffice Core) is fully validated
+- Isolation guarantees are verified
+- Role/permission enforcement is confirmed
+- Exam configuration model is production-stable
+
+Runtime cannot compensate for configuration instability.
+
+---
+
+## Validation & Integrity Gate
+
+Before runtime may be considered production-ready, the following must be executed:
+
+- End-to-end attempt flow validation (start → autosave → submit → grade)
+- Idempotent replay test (duplicate submission requests)
+- Snapshot mutation test (config change after attempt start)
+- Concurrency stress test (parallel submissions)
+- Reconnection abuse test (refresh/rejoin attempt under time pressure)
+- Scheduled time authority validation
+- Worker retry and failure simulation
+- Load test under burst autosave traffic
+
+Failure of any validation blocks production promotion.
 
 ---
 

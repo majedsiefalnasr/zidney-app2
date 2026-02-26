@@ -1,165 +1,212 @@
-# PHASE 4 – Implementation Plan
+# PHASE 4 – Runtime Implementation Sequence
 
-## Scope
-
-Phase 4 implements the Runtime Attempt Engine.
-
-This phase turns the exam configuration layer into a safe, scalable, production-ready execution engine.
-
-No UI logic is implemented here.  
-Only backend runtime, grading, safety, and concurrency guarantees.
+Execution Layer: Backend + Worker  
+Governance Level: Constitutional (Isolation + Snapshot + Determinism)
 
 ---
 
-## Recommended Implementation Order
+## Phase Objective
 
-STAGE_53_ATTEMPT_SCHEMA  
-STAGE_54_ATTEMPT_START_FLOW  
-STAGE_55_ANSWER_AUTOSAVE  
-STAGE_56_SUBMISSION_FLOW  
-STAGE_57_RECONNECTION_LOGIC  
-STAGE_58_CONCURRENCY_GUARDS
+Phase 4 transforms configured exams into a deterministic, safe, and scalable Runtime Attempt Engine.
 
-The order is strict and must not be changed.
+This phase does **not** build UI.
 
-Each stage depends on structural guarantees from the previous one.
+This phase guarantees:
 
----
+- Snapshot immutability
+- Deterministic grading
+- Idempotent submission
+- Concurrency safety
+- Reconnection resilience
+- Tenant isolation
+- Worker-only grading enforcement
 
-## Implementation Strategy
-
-### Attempt Schema First (Structural Integrity)
-
-Before any runtime logic:
-
-- Define attempt table
-- Define attempt_answers table
-- Define attempt_events (optional audit trail)
-- Define grading snapshot storage
-- Add performance indexes:
-  - student_id
-  - exam_id
-  - status
-  - scheduled_exam_id
-  - created_at
-
-All runtime safety depends on correct schema design.
-
-No partial schema allowed.
+Only when this phase is stable may Frontoffice runtime UI integrate.
 
 ---
 
-### Attempt Start Flow (Immutable Snapshot)
+# IMPLEMENTATION SEQUENCE (Strict Order)
+
+Execution must follow this exact order:
+
+1. STAGE_53_ATTEMPT_SCHEMA
+2. STAGE_54_ATTEMPT_START_FLOW
+3. STAGE_55_ANSWER_AUTOSAVE
+4. STAGE_56_SUBMISSION_FLOW
+5. STAGE_57_RECONNECTION_LOGIC
+6. STAGE_58_CONCURRENCY_GUARDS
+7. STAGE_TEST_01_RUNTIME_SYSTEM_VALIDATION
+
+Each stage depends on guarantees from the previous one.
+
+No parallel skipping.
+
+---
+
+# Stage 53 – Attempt Schema (Structural Foundation)
+
+Goal: Establish runtime-safe data model.
+
+Required tables:
+
+- attempts
+- attempt_answers
+- attempt_events (audit)
+- grading_jobs (if async worker)
+
+Indexes required:
+
+- student_id
+- exam_id
+- scheduled_exam_id
+- status
+- created_at
+
+Rules:
+
+- Database-per-tenant only
+- No shared runtime tables
+- All timestamps server-authoritative
+- Status enum strictly controlled
+
+Validation:
+
+- Unique active attempt constraint
+- Foreign key integrity
+- No nullable critical runtime fields
+
+Do not proceed until schema integrity verified.
+
+---
+
+# Stage 54 – Attempt Start Flow (Snapshot Lock-In)
+
+Goal: Freeze configuration at runtime start.
 
 On attempt start:
 
-- Validate license state
-- Validate subscription state
-- Validate schedule window (if scheduled)
-- Prevent duplicate active attempt
-- Snapshot:
-  - question list
-  - question order
-  - exam configuration flags
-  - grading configuration
-  - timing rules
-  - pass mark
-  - product_version
-  - schema_version
+Validate:
+
+- License state
+- Subscription state
+- Schedule window
+- Student eligibility
+- No duplicate active attempt
+
+Snapshot must store:
+
+- Question IDs
+- Question order
+- Exam flags
+- Timing rules
+- Grading config
+- Pass mark
+- product_version
+- schema_version
 
 After snapshot:
 
-Configuration must become immutable.
+Configuration must never be re-read.
 
-Runtime must never re-read exam configuration after start.
+Snapshot is immutable.
+
+This is a constitutional rule.
 
 ---
 
-### Answer Autosave (Safe Persistence)
+# Stage 55 – Answer Autosave (Safe Persistence Layer)
 
-Autosave rules:
+Goal: Durable answer storage without grading.
 
-- Debounced writes
+Rules:
+
 - Idempotent upsert
-- Validate question ownership against snapshot
-- Prevent cross-attempt contamination
-- No grading in autosave
-- No exam config reads
+- Validate question belongs to snapshot
+- No grading logic here
+- No config reads
+- No cross-attempt contamination
 
-Autosave must survive:
+Must survive:
 
-- Page refresh
+- Refresh
 - Network jitter
+- Temporary disconnect
 - Reconnection
 
+Autosave must not modify attempt status.
+
 ---
 
-### Submission Flow (Deterministic Grading)
+# Stage 56 – Submission Flow (Deterministic + Atomic)
 
-Submission must be:
+Goal: Idempotent and transactional grading.
 
-- Idempotent
-- Atomic
-- Fully transactional
+Submission flow:
 
-Flow:
-
-1. Validate attempt status = IN_PROGRESS
-2. Lock attempt row
-3. Grade using snapshot only
-4. Store:
+1. Validate attempt IN_PROGRESS
+2. Acquire row-level lock
+3. Persist final answers
+4. Enqueue grading job OR grade via worker
+5. Store:
    - final_score
    - grading_breakdown
    - pass_status
    - submission_timestamp
-5. Change status → SUBMITTED
-6. Release lock
+6. Change status → SUBMITTED
 
-Duplicate submissions must return same result without regrading.
+Constraints:
 
-No double grading allowed.
+- No double grading
+- Duplicate submissions return identical result
+- Entire flow transactional
+- No grading inside API layer
+
+Worker-only grading is mandatory.
 
 ---
 
-### Reconnection Logic (Network Safety)
+# Stage 57 – Reconnection Logic (Runtime Safety)
 
-System must handle:
+System must support:
 
 - Temporary disconnect
 - Browser refresh
-- Scheduled exam expiry
+- Scheduled exam enforcement
+- Timer expiration handling
 
 Rules:
 
-- If still within time → resume
-- If timer expired → auto-submit
-- If schedule window expired → force submit
-- If license soft-locked mid-exam → allow finish
+- Resume if time valid
+- Auto-submit if expired
+- Never reset timer
+- Never reshuffle questions
+- Never modify snapshot
 
-Reconnection must not:
+If license soft-locked mid-exam:
 
-- Reset timer
-- Re-shuffle questions
-- Change grading behavior
+Student may finish attempt.
+
+Reconnection must not bypass deadline rules.
 
 ---
 
-### Concurrency Guards (Hard Safety)
+# Stage 58 – Concurrency Guards (Hard Safety Layer)
 
-Runtime must enforce:
+System must enforce:
 
 - One active attempt per student per scheduled exam
-- No parallel active attempt rows
-- Transactional student limit enforcement
-- Safe row-level locking
+- No parallel active rows
+- Atomic student limit enforcement
+- Row-level locking inside transactions
+- Idempotent submission enforcement
 
 Race conditions must be impossible.
 
-All concurrency enforcement must happen inside DB transaction.
+If concurrency test fails → implementation invalid.
 
 ---
 
-## Observability Requirements
+# Observability & Logging
 
 All runtime events must log:
 
@@ -168,68 +215,89 @@ All runtime events must log:
 - student_id
 - exam_id
 - request_id
-- execution_time
+- execution_time_ms
 
 Critical events:
 
 - attempt_start
 - autosave_write
-- submission
+- submission_received
+- grading_started
+- grading_completed
 - forced_submission
 - grading_error
 
 Logs must be structured.
 
+No console.log.
+
 ---
 
-## Load Testing Requirements
+# Load & Stress Validation
 
-Before Phase 5:
+Before moving to Phase 5:
 
-- 500 concurrent submissions
+Simulate:
+
 - 500 concurrent attempt starts
-- 200 concurrent scheduled exam reconnections
-- Simulated network drops
-- Double submission attempts
-- Expired scheduled exam attempts
+- 500 concurrent submissions
+- 200 reconnections
+- Network drops
+- Duplicate submission replay
+- Expired exam submission attempts
 
 System must:
 
-- Maintain consistent grading
-- Not duplicate attempts
-- Not corrupt answers
-- Not leak cross-tenant data
+- Maintain deterministic grading
+- Prevent duplicate attempts
+- Avoid deadlocks
+- Maintain isolation
+- Keep lock contention < 10ms
+
+Load tool recommended:
+
+- k6 or Artillery
 
 ---
 
-## Hard Constraints
+# Hard Runtime Constraints
 
 Not allowed:
 
-- Live exam config reads after start
-- Regrading on duplicate submit
+- Live exam config reads after snapshot
+- Grading inside API layer
+- Regrading duplicate submission
 - Non-transactional submission
-- Shared attempt tables across tenants
-- Long-running grading without timeout
-- Timer controlled only by client
+- Cross-tenant attempt access
+- Client-side authoritative timers
 
-Runtime must trust server time only.
+Server time is authoritative.
+
+Worker separation is mandatory.
+
+Snapshot immutability is mandatory.
 
 ---
 
-## Completion Criteria
+# Phase Completion Criteria
 
 Phase 4 is complete when:
 
-- Attempt lifecycle fully deterministic
-- Snapshot model verified
-- Concurrency race tests pass
-- Scheduled enforcement reliable
+- Attempt lifecycle deterministic
+- Snapshot immutability verified
+- Concurrency stress tests pass
+- Idempotent submission proven
+- Worker-only grading enforced
 - Reconnection safe
-- Idempotent submission verified
-- Grading consistent across retries
-- Logs structured and traceable
+- Logs structured
+- Isolation validated
+- STAGE_TEST_01_RUNTIME_SYSTEM_VALIDATION passes fully
 
-Only after this phase is stable:
+Only then may:
 
-Phase 5 – Frontoffice Runtime Integration can begin.
+Phase 5 – Frontoffice Runtime Integration begin.
+
+---
+
+Constitutional Compliance Required  
+Zidney Constitution v1.2.0
