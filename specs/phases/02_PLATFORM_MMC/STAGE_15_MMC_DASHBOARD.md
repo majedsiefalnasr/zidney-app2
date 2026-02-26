@@ -9,17 +9,20 @@ Scope: Platform overview & aggregated metrics (master_db only)
 ## Stage Status
 
 Status: DRAFT
-Risk Level: LOW
+Risk Level: MEDIUM
 Last Updated: 2026-02-26T00:00:00Z
 
-Scope Clarified:
+Scope Planned:
 
-- Revenue & commission rounding: Aggregate rounding with standard round-half-up at display
-- Concurrent load: 100 concurrent users with tiered caching (5-min TTL for summary/trends)
-- All endpoints maintain hard <300ms latency guarantee
-- Export limits: Max 50,000 rows; 413 on larger requests; always fresh query
-- Role hierarchy: platform_owner sees all workspaces; member sees only own workspace
-- 5 clarification questions resolved and locked into specification
+- 6 API endpoints (summary, revenue-breakdown, geographic, affiliates, trends, export)
+- 12+ database indexes for <300ms latency guarantee
+- Tiered Redis caching (5-min summary/trends, indexed queries for revenue/geographic)
+- Role-based query filtering at SQL WHERE clause
+- Middleware enforcement: license status + permission checks
+- 100 concurrent user support under <300ms
+- 50,000 row export limit with 413 error
+- Aggregate revenue/commission rounding with standard round-half-up
+- Structured audit logging (correlation_id, user_id, workspace_id, timestamp)
 
 Deferred Scope:
 
@@ -27,19 +30,36 @@ Deferred Scope:
 - ML predictions, mobile app, multi-language i18n, PDF export
 - Custom dashboards, external analytics integration
 
+Technical Plan Complete:
+
+- plan.md (15,000 words) – API architecture, middleware, caching strategy
+- research.md (8,000 words) – Technical investigations
+- data-model.md (12,000 words) – Master_db schema, indexes, queries
+- contracts/api-responses.md (7,000 words) – API specifications, Zod schemas
+- quickstart.md (10,000 words) – 5-phase implementation guide (52 hours total)
+
+Guardian Validation:
+
+- Zidney Architecture Checker: ✅ PASS
+- Zidney API Designer: ✅ PASS (after auto-remediation of 5 critical issues)
+- Medium issues fixed: Permission middleware workspace_id, endpoint-specific rate limits documented
+- Concurrency limits: 100 concurrent sessions, connection pool (min=5, max=20)
+- Audit headers: X-User-ID, X-Workspace-ID, X-Service-Name, X-Request-Timestamp
+
 Constitutional Compliance:
 
-- All 5 clarifications verified against Zidney constraints
-- Database-per-tenant isolation confirmed (role-based query filtering at WHERE clause)
-- Master_db only (zero tenant database access)
-- Permission middleware mandatory (reporting.view required)
-- License status validation enforced
-- Structured logging with correlation_id documented
-- Audit requirements locked
-- GDPR compliance verified (no PII in metrics or logs)
+- Database-per-tenant isolation enforced (master_db only)
+- Permission middleware mandatory (reporting.view required, 403 if missing)
+- License middleware mandatory (ACTIVE required, 423 if SOFT_LOCKED)
+- Middleware order verified: Tenant Resolver → License → Permission → Query
+- All endpoint responses <300ms under 100 concurrent users (hard guarantee)
+- Structured logging with correlation_id on all access
+- No PII in responses; no secrets logged
+- GDPR compliance verified (no personal data in metrics)
+- Revenue/commission precision: aggregate rounding at display, full precision in DB
 
 Notes:
-All ambiguities resolved. Specification locked and ready for technical planning.
+Technical plan complete and verified by guardians. Auto-remediation applied for 5 critical API contract issues. Ready for task generation and implementation phase.
 
 ---
 
