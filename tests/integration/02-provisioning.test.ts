@@ -6,8 +6,8 @@
 
 import { Pool } from 'pg'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { createDbManager } from '../../db-manager'
-import { cleanupAllFixtures, seedWorkspace } from '../../fixtures'
+import { createDbManager } from '../db-manager'
+import { cleanupAllFixtures, seedWorkspace } from '../fixtures'
 
 describe('Area 2: Provisioning Validation', () => {
   let masterDb: Pool

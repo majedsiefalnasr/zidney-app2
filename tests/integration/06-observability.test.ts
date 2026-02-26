@@ -4,8 +4,8 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest'
-import { validateRFC7807Error } from '../../error-matchers'
-import { createLoggerSpy } from '../../logger-spy'
+import { validateRFC7807Error } from '../error-matchers'
+import { createLoggerSpy } from '../logger-spy'
 
 describe('Area 6: Observability Validation', () => {
   let loggerSpy: any

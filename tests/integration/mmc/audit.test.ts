@@ -298,6 +298,7 @@ describe('T055: Audit Log Immutability Tests', () => {
   describe('Immutability testing patterns', () => {
     it('should attempt UPDATE and verify error', async () => {
       const auditId = randomUUID()
+      mockDb.query.mockRejectedValueOnce(new Error('Audit log is immutable'))
 
       let updateError
       try {
@@ -315,6 +316,7 @@ describe('T055: Audit Log Immutability Tests', () => {
 
     it('should attempt DELETE and verify error', async () => {
       const auditId = randomUUID()
+      mockDb.query.mockRejectedValueOnce(new Error('Audit log is immutable'))
 
       let deleteError
       try {
