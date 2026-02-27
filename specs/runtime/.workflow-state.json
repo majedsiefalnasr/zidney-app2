@@ -1,92 +1,24 @@
 {
-  "stage": "MMC Dashboard",
-  "phase": "02_PLATFORM_MMC",
-  "stage_dir": "specs/runtime/015-mmc-dashboard",
-  "stage_file": "specs/phases/02_PLATFORM_MMC/STAGE_15_MMC_DASHBOARD.md",
-  "branch": "015-mmc-dashboard",
+  "stage": "STAGE_INFRA_01_TYPESCRIPT_STABILIZATION",
+  "phase": "01_PLATFORM_FOUNDATION",
+  "stage_dir": "specs/runtime/infra-001-typescript-stabilization",
+  "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_01_TYPESCRIPT_STABILIZATION.md",
+  "branch": "infra-001-typescript-stabilization",
   "base_branch": "develop",
-  "current_step": "stage_production_ready",
-  "stage_status": "PRODUCTION READY",
-  "clarifications_resolved": true,
-  "drift_passed": true,
-  "implementation_allowed": true,
-  "plan_completed": true,
-  "tasks_total": 71,
-  "tasks_completed": 54,
-  "last_updated": "2026-02-27T14:52:00Z",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-02-27T00:00:00Z",
   "history": [
     {
       "event": "branch_created",
-      "branch": "015-mmc-dashboard",
-      "timestamp": "2026-02-26T08:00:00Z"
-    },
-    {
-      "event": "specify_complete",
-      "spec_lines": 1152,
-      "user_stories": 4,
-      "functional_requirements": 38,
-      "test_scenarios": 48,
-      "timestamp": "2026-02-26T09:30:00Z"
-    },
-    {
-      "event": "clarifications_locked",
-      "clarifications_resolved": 5,
-      "timestamp": "2026-02-26T10:15:00Z"
-    },
-    {
-      "event": "plan_complete",
-      "endpoints": 6,
-      "indexes": 14,
-      "guardian_verdicts": "Architecture PASS, API Designer PASS after auto-fix",
-      "timestamp": "2026-02-26T12:30:00Z"
-    },
-    {
-      "event": "tasks_generated",
-      "total_tasks": 71,
-      "critical_additions": 3,
-      "timestamp": "2026-02-27T13:00:00Z"
-    },
-    {
-      "event": "critical_issues_resolved",
-      "rate_limiting": "T007B+T007C+T048B",
-      "schema_version": "T007A",
-      "query_timeout": "T023",
-      "timestamp": "2026-02-27T13:30:00Z"
-    },
-    {
-      "event": "drift_analysis_passed",
-      "criteria_pass": "39/39",
-      "critical_issues": "3/3",
-      "implementation_gate": "OPEN",
-      "timestamp": "2026-02-27T14:45:00Z"
-    },
-    {
-      "event": "implementation_complete_phase_2",
-      "phase_0_tasks": "5/5",
-      "phase_1_tasks": "26/26",
-      "phase_2_tasks": "23/23",
-      "total_tasks_completed": 54,
-      "tests_passing": "833/833",
-      "tests_failing": 0,
-      "timestamp": "2026-02-27T14:48:00Z"
-    },
-    {
-      "event": "pre_closure_review_approved",
-      "performance_sla_met": true,
-      "isolation_verified": true,
-      "rate_limiting_verified": true,
-      "all_tests_passing": true,
-      "timestamp": "2026-02-27T14:50:00Z"
-    },
-    {
-      "event": "stage_production_ready",
-      "closure_report_generated": true,
-      "testing_guide_generated": true,
-      "pr_summary_generated": true,
-      "tasks_completed": 54,
-      "tasks_total": 71,
-      "backend_status": "APPROVED_FOR_PRODUCTION",
-      "timestamp": "2026-02-27T14:52:00Z"
+      "branch": "infra-001-typescript-stabilization",
+      "timestamp": "2026-02-27T00:00:00Z"
     }
   ]
 }
