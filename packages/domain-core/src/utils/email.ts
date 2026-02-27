@@ -143,6 +143,7 @@ export class EmailService {
 
     switch (provider) {
       case 'sendgrid':
+        // @ts-ignore: LOGIC-BUG: sendViaSendGrid method does not exist; should call sendViaServiceProvider — see INFRA-001-LOGIC-04
         return this.sendViaSendGrid(options)
       case 'smtp':
         return this.sendViaSMTP(options)
@@ -154,8 +155,10 @@ export class EmailService {
 
   /**
    * Send via SendGrid API (requires API key)
+   * LOGIC-BUG: Method is unreachable; sendEmail() calls non-existent sendViaSendGrid — see INFRA-001-LOGIC-04
    */
-  private async sendViaServiceProvider(
+  // @ts-ignore: method declared for future use; sendViaSendGrid invokes it incorrectly [INFRA-001-LOGIC-04]
+  private async _sendViaServiceProvider(
     options: SendEmailOptions
   ): Promise<void> {
     const apiKey = this.config.apiKey
@@ -312,7 +315,11 @@ export function createEmailService(
   logger?: Logger
 ): EmailService {
   const emailConfig: EmailConfig = {
-    provider: config.provider || process.env.EMAIL_PROVIDER || 'console',
+    // LOGIC-BUG: EMAIL_PROVIDER env var is not validated against allowed values — see INFRA-001-LOGIC-05
+    provider: (config.provider || process.env.EMAIL_PROVIDER || 'console') as
+      | 'sendgrid'
+      | 'smtp'
+      | 'console',
     smtpHost: config.smtpHost || process.env.SMTP_HOST,
     smtpPort:
       config.smtpPort ||

@@ -103,8 +103,16 @@ export function validateSchemaCompatibility(
     }
   }
 
-  const [snapMajor, snapMinor, _snapPatch] = snapshotParts
-  const [prodMajor, prodMinor, _prodPatch] = productParts
+  const [snapMajor, snapMinor, _snapPatch] = snapshotParts as [
+    number,
+    number,
+    number,
+  ]
+  const [prodMajor, prodMinor, _prodPatch] = productParts as [
+    number,
+    number,
+    number,
+  ]
 
   // MAJOR must match
   if (snapMajor !== prodMajor) {

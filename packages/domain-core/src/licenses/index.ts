@@ -9,7 +9,7 @@
 
 // Types
 export * from './types'
-export {
+export type {
   ArchiveRequest,
   AuditLogEntry,
   CreateLicenseRequest,

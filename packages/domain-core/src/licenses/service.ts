@@ -8,8 +8,8 @@
  * Enforces all validation rules, state transitions, and side effects.
  */
 
-import { v4 as uuidv4 } from 'uuid'
 import { logger as defaultLogger } from '@zidney/logger'
+import { v4 as uuidv4 } from 'uuid'
 import {
   ALLOWED_STATE_TRANSITIONS,
   PROVISIONING_BASE_DELAY_MS,
@@ -487,7 +487,7 @@ export class LicenseService {
    */
   async retryProvisioning(
     id: string,
-    input: RetryProvisioningRequest,
+    _input: RetryProvisioningRequest,
     correlationId: string
   ): Promise<License> {
     return this.repository.withTransaction(async () => {

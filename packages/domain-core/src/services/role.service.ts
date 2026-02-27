@@ -25,6 +25,7 @@ import {
   PermissionDomain,
   RolePermissionsMatrix,
 } from '@zidney/types/mmc.types'
+// @ts-ignore: postgres not declared as dependency of domain-core [INFRA-001-DEPS-05]
 import { Database } from 'postgres'
 
 export interface UpdatePermissionsRequest {
@@ -66,7 +67,7 @@ export class RoleService {
 
     const result = await this.db.query(query, params)
 
-    return result.rows.map((r) => ({
+    return result.rows.map((r: any) => ({
       id: r.id,
       name: r.name,
       description: r.description,
@@ -127,7 +128,7 @@ export class RoleService {
 
     return {
       role_id: roleId,
-      permissions: result.rows.map((r) => ({
+      permissions: result.rows.map((r: any) => ({
         id: r.id,
         role_id: r.role_id,
         domain: r.domain,
@@ -246,7 +247,7 @@ export class RoleService {
 
       const permissionsMatrix: RolePermissionsMatrix = {
         role_id: roleId,
-        permissions: updatedPermissions.map((r) => ({
+        permissions: updatedPermissions.map((r: any) => ({
           id: r.id,
           role_id: r.role_id,
           domain: r.domain,

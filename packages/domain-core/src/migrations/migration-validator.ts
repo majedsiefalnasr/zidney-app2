@@ -37,8 +37,12 @@ export function validateMigration(
   }
 
   // Parse versions
-  const fromParts = fromVersion.split('.').map(Number)
-  const toParts = toVersion.split('.').map(Number)
+  const fromParts = fromVersion.split('.').map(Number) as [
+    number,
+    number,
+    number,
+  ]
+  const toParts = toVersion.split('.').map(Number) as [number, number, number]
 
   // Check version ordering (to > from)
   if (
@@ -144,12 +148,10 @@ export function validateMigrationChecksum(
  */
 export async function validateSchemaVersionTable(
   pool: any,
-  workspaceId: string
+  _workspaceId: string
 ): Promise<{ valid: boolean; error?: string }> {
   try {
-    const result = await pool.query(
-      'SELECT version FROM schema_version LIMIT 1'
-    )
+    await pool.query('SELECT version FROM schema_version LIMIT 1')
     return { valid: true }
   } catch (err: any) {
     if (err.code === '42P01') {

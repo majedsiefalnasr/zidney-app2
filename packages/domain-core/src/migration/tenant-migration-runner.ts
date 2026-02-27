@@ -324,8 +324,14 @@ function isProductVersionCompatible(
   required: string
 ): boolean {
   try {
-    const [currMajor, currMinor, currPatch] = current.split('.').map(Number)
-    const [reqMajor, reqMinor, reqPatch] = required.split('.').map(Number)
+    const [currMajor, currMinor, currPatch] = current
+      .split('.')
+      .map(Number) as [number, number, number]
+    const [reqMajor, reqMinor, reqPatch] = required.split('.').map(Number) as [
+      number,
+      number,
+      number,
+    ]
 
     if (currMajor !== reqMajor) return currMajor > reqMajor
     if (currMinor !== reqMinor) return currMinor > reqMinor

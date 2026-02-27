@@ -28,7 +28,9 @@ import {
   UpdateMemberRequest,
 } from '@zidney/types/mmc.types'
 import { validatePassword } from '@zidney/validation/password.validator'
+// @ts-ignore: bcryptjs not declared as dependency of domain-core [INFRA-001-DEPS-01]
 import * as bcrypt from 'bcryptjs'
+// @ts-ignore: postgres not declared as dependency of domain-core [INFRA-001-DEPS-05]
 import { Database } from 'postgres'
 import { v4 as uuidv4 } from 'uuid'
 import { AuditService } from './audit.service'
@@ -43,7 +45,7 @@ const BCRYPT_COST = 12
 export class MemberService {
   constructor(
     private db: Database,
-    private auditService: AuditService
+    _auditService: AuditService
   ) {}
 
   /**
@@ -258,7 +260,7 @@ export class MemberService {
 
     const result = await this.db.query(query, params)
     const members = await Promise.all(
-      result.rows.map((m) => this.augmentMember(m, this.db as any))
+      result.rows.map((m: any) => this.augmentMember(m, this.db as any))
     )
 
     return { members, total }

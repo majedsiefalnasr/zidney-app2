@@ -9,7 +9,7 @@ interface PurgeAuditLogsOptions {
 }
 
 export async function purgeAuditLogs(
-  db: Pool,
+  _db: Pool,
   license_id: string,
   requester_role: string,
   requester_id: string,

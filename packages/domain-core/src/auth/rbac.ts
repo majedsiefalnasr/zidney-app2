@@ -274,7 +274,7 @@ export function getPermissionDescription(permissionCode: string): string {
   const parts = permissionCode.split(':')
   if (parts.length !== 2) return permissionCode
 
-  const [resource, action] = parts
+  const [resource, action] = parts as [string, string]
   const resources: Record<string, string> = {
     exam: 'Exam',
     report: 'Report',

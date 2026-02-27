@@ -16,17 +16,17 @@ interface AuditLogPayload {
 }
 
 export async function createAuditLog(
-  db: Pool,
+  _db: Pool,
   payload: AuditLogPayload
 ): Promise<{ success: boolean; audit_log_id?: string; error?: string }> {
   const {
     license_id,
     previous_status,
     new_status,
-    actor_id,
+    actor_id: _actor_id,
     actor_type,
-    reason,
-    transition_metadata,
+    reason: _reason,
+    transition_metadata: _transition_metadata,
     correlation_id,
   } = payload
 
@@ -39,7 +39,6 @@ export async function createAuditLog(
     }
 
     const audit_log_id = randomUUID()
-    const now = new Date()
 
     logger.info(
       {

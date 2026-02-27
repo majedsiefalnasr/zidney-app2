@@ -119,6 +119,16 @@ export interface MMCMemberInvitation {
 }
 
 /**
+ * Invitation With Member Data
+ *
+ * Invitation augmented with invited_by_username and role_name after enrichment
+ */
+export interface InvitationWithMemberData extends MMCMemberInvitation {
+  invited_by_username: string
+  role_name: string
+}
+
+/**
  * Audit Log Entry
  *
  * Immutable append-only record of all administrative actions

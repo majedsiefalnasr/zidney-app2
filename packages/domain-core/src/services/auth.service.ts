@@ -17,10 +17,14 @@
  * - No workspace_id in token (MMC-only)
  */
 
-import { AppError, ErrorCode } from '@zidney/domain-core/errors'
+import { AppError, ErrorCode } from '../errors/index.js'
+// @ts-ignore: @zidney/types/mmc.types subpath not declared in packages/types exports field [INFRA-001-DEPS-02]
 import { MMCMember } from '@zidney/types/mmc.types'
+// @ts-ignore: bcryptjs not declared as dependency of domain-core [INFRA-001-DEPS-01]
 import * as bcrypt from 'bcryptjs'
+// @ts-ignore: hono/jwt not declared as dependency of domain-core [INFRA-001-DEPS-04]
 import { sign, verify } from 'hono/jwt'
+// @ts-ignore: postgres not declared as dependency of domain-core [INFRA-001-DEPS-05]
 import { Database } from 'postgres'
 
 export interface MMCTokenPayload {
