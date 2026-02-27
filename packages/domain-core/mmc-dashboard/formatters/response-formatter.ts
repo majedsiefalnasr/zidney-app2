@@ -18,28 +18,63 @@ export interface StandardResponse<T> {
 }
 
 /**
- * Format cents to dollars with 2 decimal places
+ * Helper function: Round half-up to specified decimals
+ * Uses ROUND_HALF_UP (0.5 rounds up) rather than banker's rounding
+ */
+function roundHalfUp(value: number, decimals: number): number {
+  const factor = Math.pow(10, decimals)
+  return Math.round((value + Number.EPSILON) * factor) / factor
+}
+
+/**
+ * Format cents to currency string with 2 decimal places
+ *
+ * Examples:
+ * - 2450050 → "24500.50"
+ * - 100 → "1.00"
+ * - 0 → "0.00"
+ *
+ * Test case verification:
+ * - 100.445 * 100 + 200.556 * 100 + 300.001 * 100 = 60100.2 cents
+ * - formatCurrency(60100.2) = "601.00" ✓
  */
 export function formatCurrency(cents: number): string {
   const dollars = cents / 100
-  return `$${dollars.toFixed(2)}`
+  const rounded = roundHalfUp(dollars, 2)
+  return rounded.toFixed(2)
 }
 
 /**
  * Format cents to number with 2 decimal places
  */
 export function formatCurrencyAsNumber(cents: number): number {
-  return Math.round((cents / 100) * 100) / 100
+  const dollars = cents / 100
+  return roundHalfUp(dollars, 2)
 }
 
 /**
- * Format timestamp as ISO 8601
+ * Format percentage with 2 decimal precision (NOT as string with %)
+ *
+ * @param value - Percentage value (e.g., 9.33)
+ * @returns Formatted percentage as number (e.g., 9.33)
+ *
+ * Examples:
+ * - 9.333333 → 9.33
+ * - 100 → 100.00
  */
-export function formatTimestamp(date: Date | string): string {
-  if (typeof date === 'string') {
-    return new Date(date).toISOString()
-  }
-  return date.toISOString()
+export function formatPercentage(value: number): number {
+  return roundHalfUp(value, 2)
+}
+
+/**
+ * Format timestamp to ISO 8601 UTC
+ *
+ * @param date - Date string or Date object
+ * @returns ISO 8601 formatted timestamp with Z suffix (e.g., "2026-02-26T15:30:00Z")
+ */
+export function formatTimestamp(date: string | Date): string {
+  const d = typeof date === 'string' ? new Date(date) : date
+  return d.toISOString()
 }
 
 /**
@@ -68,48 +103,6 @@ export function createErrorResponse(
       message,
     },
   }
-}
- *
- * Examples:
- * - 2450050 → "24500.50"
- * - 100 → "1.00"
- * - 0 → "0.00"
- *
- * Test case verification:
- * - 100.445 * 100 + 200.556 * 100 + 300.001 * 100 = 60100.2 cents
- * - formatCurrency(60100.2) = "601.00" ✓
- */
-export function formatCurrency(cents: number): string {
-  const decimal = new Decimal(cents).dividedBy(100)
-  return decimal.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toString()
-}
-
-/**
- * Format percentage with 2 decimal precision (NOT as string with %)
- *
- * @param value - Percentage value (e.g., 9.33)
- * @returns Formatted percentage as number (e.g., 9.33)
- *
- * Examples:
- * - 9.333333 → 9.33
- * - 100 → 100.00
- */
-export function formatPercentage(value: number): number {
-  const decimal = new Decimal(value)
-  return parseFloat(
-    decimal.toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toString()
-  )
-}
-
-/**
- * Format timestamp to ISO 8601 UTC
- *
- * @param date - Date string or Date object
- * @returns ISO 8601 formatted timestamp with Z suffix (e.g., "2026-02-26T15:30:00Z")
- */
-export function formatTimestamp(date: string | Date): string {
-  const d = typeof date === 'string' ? new Date(date) : date
-  return d.toISOString()
 }
 
 /**
