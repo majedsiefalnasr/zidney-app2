@@ -359,45 +359,38 @@ declare module '<library-name>' {
 
 ### Design Decision 6: ts-ignore Policy Enforcement (CL-05)
 
-**Required comment format (FR-09, CL-05):**
+**Required comment format (FR-09, amended CL-05):**
 
 ```ts
-// ts-ignore: <reason> [<issue-ref>]
-// @ts-ignore
+// @ts-ignore: <reason> [<issue-ref>]
 ```
 
 Example:
 
 ```ts
-// ts-ignore: library missing type declarations [INFRA-001]
-// @ts-ignore
+// @ts-ignore: library missing type declarations [INFRA-001]
 ```
 
-**Enforcement mechanism:** CI grep check added as a step in the pipeline.
+**Important format change:** CL-05 was revised (post-clarification audit) from a two-line preceding-comment style to a single inline directive. The description is written directly on the same line as `// @ts-ignore`. This format is fully compatible with `@typescript-eslint/ban-ts-comment`'s `descriptionFormat` option, which enforces description text inline — making both the policy and the lint rule internally consistent and mutually enforcing.
 
-**CI grep command:**
+**Enforcement mechanism:** `@typescript-eslint/ban-ts-comment` ESLint rule with `descriptionFormat` enforcement, run as part of `pnpm lint` in CI (see Design Decision 7 for CI gate).
 
-```bash
-# Fail if any @ts-ignore appears WITHOUT the required justification comment on the line above
-grep -n "@ts-ignore\|@ts-expect-error" $(find . -name "*.ts" -o -name "*.vue" | grep -v node_modules | grep -v ".opencode") \
-  | while IFS= read -r line; do
-      file=$(echo "$line" | cut -d: -f1)
-      lineno=$(echo "$line" | cut -d: -f2)
-      prev=$(sed -n "$((lineno-1))p" "$file")
-      if ! echo "$prev" | grep -qE "// ts-ignore: .+ \[.+\]"; then
-        echo "VIOLATION: $file:$lineno — @ts-ignore without required justification comment"
-        exit 1
-      fi
-    done
+**ESLint config addition:**
+
+```json
+{
+  "@typescript-eslint/ban-ts-comment": [
+    "error",
+    {
+      "ts-ignore": { "descriptionFormat": "^: .+ \\[.+\\]$" }
+    }
+  ]
+}
 ```
 
-**Alternative (simpler CI check — recommended for initial implementation):**
+This pattern matches `: reason text [issue-ref]` — the portion after `@ts-ignore` on the same line.
 
-Use a custom ESLint rule from `@typescript-eslint`:
-
-- `@typescript-eslint/ban-ts-comment` with `{ "ts-ignore": { "descriptionFormat": "^: .+ \\[.+\\]$" } }` — this enforces the comment format directly via ESLint.
-
-**Preferred approach:** Use ESLint `@typescript-eslint/ban-ts-comment` with description format enforcement. This runs as part of `pnpm lint` and can be added to CI alongside typecheck. The grep-based check is a fallback for teams not running ESLint.
+**Preferred approach:** Use ESLint `@typescript-eslint/ban-ts-comment` with the above `descriptionFormat`. This runs as part of `pnpm lint` and is executed in CI alongside typecheck (see Design Decision 7 `pnpm lint` step).
 
 **Code review rule:** Any PR containing a bare `// @ts-ignore` without the required justification, or a `// @ts-expect-error` without justification, must be blocked at review. This is a hard gate.
 
@@ -428,15 +421,22 @@ Use a custom ESLint rule from `@typescript-eslint`:
 **CI pipeline integration (GitHub Actions pattern):**
 
 ```yaml
+name: Type Check & Lint
+on:
+  pull_request:
+    branches: ['**']
+  push:
+    branches: ['main', 'develop']
+
 jobs:
   typecheck:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: pnpm/action-setup@v3
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@fe02b74ab94a2950ada7f64132bfb13ba15ae9f1 # v3.0.0
         with:
           version: '9'
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af # v4.1.0
         with:
           node-version: '22'
           cache: 'pnpm'
@@ -446,12 +446,14 @@ jobs:
         run: pnpm typecheck:src
       - name: Type check (tests)
         run: pnpm typecheck:tests
+      - name: Lint
+        run: pnpm lint
 ```
 
 **Gate behavior:**
 
-- Both `typecheck:src` and `typecheck:tests` must exit code 0 → pipeline continues
-- Either exits non-zero → pipeline blocked; PR cannot be merged
+- `typecheck:src`, `typecheck:tests`, and `pnpm lint` must all exit code 0 → pipeline continues
+- Any exits non-zero → pipeline blocked; PR cannot be merged
 
 **Scope:** `pnpm typecheck:src` covers `apps/*/src/**/*` and `packages/*/src/**/*` (all strict rules including `noUnusedLocals/Parameters`). `pnpm typecheck:tests` covers `tests/**/*`, `apps/*/tests/**/*`, and `**/*.test.ts` under relaxed unused-param rules. Together they cover all in-scope files.
 
@@ -484,7 +486,7 @@ jobs:
 1. Stop the current pass
 2. Open a separate issue ticket with the bug description
 3. Stub the type using `unknown` narrowed at the call site as interim type
-4. Document the interim stub in the code comment: `// FIXME: logic bug — see <issue-ref> — interim type until fix is merged`
+4. Document the interim stub in the code comment: `// LOGIC-BUG: <description> — see <issue-ref> — interim type until fix is merged`
 5. Proceed with the type pass
 6. If the bug is in critical path (attempt engine, license enforcement, tenant resolver): stop the entire stabilization stage and escalate before proceeding
 
@@ -559,7 +561,7 @@ If the logic bug discovery is in any of:
 
 Before starting Pass 1, the following must be completed in order:
 
-- [ ] Rename `"type-check"` → `"typecheck"` in root `package.json`
+- [ ] Rename `"type-check"` → `"typecheck:src"`; add `"typecheck:tests": "tsc --noEmit -p tsconfig.test.json"` and `"typecheck": "pnpm typecheck:src && pnpm typecheck:tests"` aggregator scripts to root `package.json`
 - [ ] Add `noImplicitAny: true`, `strictNullChecks: true`, `noUncheckedIndexedAccess: true` to `tsconfig.base.json`
 - [ ] Run `npx tsc --noEmit | grep "error TS" | wc -l` — record new baseline (expected: ≥ 866)
 - [ ] Remove `strict: false`, `noUnusedLocals: false`, `noUnusedParameters: false` from `apps/api/tsconfig.json`

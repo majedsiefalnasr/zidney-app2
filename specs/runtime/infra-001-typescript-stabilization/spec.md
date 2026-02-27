@@ -256,15 +256,15 @@ Any remaining `// @ts-ignore` or `// @ts-expect-error` comment must be accompani
 
 The stage is complete when all of the following are met:
 
-| #     | Criterion                                                                                       | Verification Method                                      |
-| ----- | ----------------------------------------------------------------------------------------------- | -------------------------------------------------------- |
-| SC-01 | The full monorepo type check completes with zero errors                                         | `pnpm typecheck` exits with code `0`                     |
-| SC-02 | Every included package compiles cleanly with no warnings elevated to errors                     | Package-level `tsc --noEmit` passes for each             |
-| SC-03 | CI enforces type correctness — any future regression blocks a merge                             | CI pipeline history shows a blocking typecheck job       |
-| SC-04 | No unsuppressed `@ts-ignore` exists in the codebase                                             | Automated grep in CI; suppressions require documentation |
-| SC-05 | All test files compile clean under strict mode                                                  | `pnpm typecheck` covers test file paths                  |
-| SC-06 | Domain, API, and worker type contracts are structurally aligned — no cross-layer casts required | Manual code review of domain call sites                  |
-| SC-07 | `tsconfig` inheritance is uniform — no sub-package weakens the root contract                    | Automated config audit script or lint rule               |
+| #     | Criterion                                                                                       | Verification Method                                                           |
+| ----- | ----------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------- |
+| SC-01 | The full monorepo type check completes with zero errors                                         | `pnpm typecheck` exits with code `0`                                          |
+| SC-02 | Every included package compiles cleanly with no warnings elevated to errors                     | Package-level `tsc --noEmit` passes for each                                  |
+| SC-03 | CI enforces type correctness — any future regression blocks a merge                             | CI pipeline history shows a blocking typecheck job                            |
+| SC-04 | No unsuppressed `@ts-ignore` exists in the codebase                                             | ESLint `ban-ts-comment` rule in CI (`pnpm lint`); inline description required |
+| SC-05 | All test files compile clean under strict mode                                                  | `pnpm typecheck` covers test file paths                                       |
+| SC-06 | Domain, API, and worker type contracts are structurally aligned — no cross-layer casts required | Manual code review of domain call sites                                       |
+| SC-07 | `tsconfig` inheritance is uniform — no sub-package weakens the root contract                    | Automated config audit script or lint rule                                    |
 
 ---
 
@@ -573,20 +573,20 @@ _Compliant with Zidney Constitution v1.2.0 — Infrastructure hardening stage. N
 
 **Question:** What is the required format for `// @ts-ignore` justification comments?
 
-**Decision:** The justification comment must appear on the line immediately above the `// @ts-ignore` directive, using the format:
+**Decision (amended):** The justification description must appear inline on the same line as the `// @ts-ignore` directive, using the format:
 
 ```ts
-// ts-ignore: <reason> [<issue-ref>]
-// @ts-ignore
+// @ts-ignore: <reason> [<issue-ref>]
 ```
 
 Example:
 
 ```ts
-// ts-ignore: library missing type declarations [INFRA-001]
-// @ts-ignore
+// @ts-ignore: library missing type declarations [INFRA-001]
 ```
 
-Suppressions without this exact preceding comment are forbidden and must fail code review.
+Suppressions without an inline description matching `: <reason> [<issue-ref>]` are forbidden and must fail lint (`pnpm lint`) and code review.
 
-**Rationale:** A machine-parseable, consistent format enables automated lint rules (e.g., a custom ESLint rule or grep-based CI check) to detect and reject undocumented suppressions. The `[<issue-ref>]` field creates a traceable link to the tracking issue, making it possible to audit and remove suppressions once the upstream fix lands. This directly enforces FR-09.
+**Amendment note:** The original decision specified a two-line preceding-comment format (`// ts-ignore: ...` on the line above `// @ts-ignore`). This was revised post-QA audit because `@typescript-eslint/ban-ts-comment`’s `descriptionFormat` option enforces inline description text on the directive line — making the two approaches mutually incompatible. The inline format was selected as it is directly enforceable by the standard ESLint rule without custom scripting, produces simpler diffs, and provides the same audit traceability.
+
+**Rationale:** A machine-parseable, consistent format enables the `@typescript-eslint/ban-ts-comment` ESLint rule to detect and reject undocumented suppressions automatically. The `[<issue-ref>]` field creates a traceable link to the tracking issue, making it possible to audit and remove suppressions once the upstream fix lands. This directly enforces FR-09.
