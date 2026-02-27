@@ -215,29 +215,29 @@ T057–T061 (Phase 5 Deployment, 4h) [FINAL]
 
 ## Dashboard Container Component
 
-- [ ] T054 Create Dashboard.vue container component in `apps/mmc/src/views/Dashboard.vue` (import subcomponents, manage loading/error state, fetch initial data via API client, add dark mode support via shadcn theme)
+- [x] T054 Create Dashboard.vue container component in `apps/mmc/src/views/Dashboard.vue` (import subcomponents, manage loading/error state, fetch initial data via API client, add dark mode support via shadcn theme)
 
 ## Dashboard Subcomponents
 
-- [ ] T055 [P] Create CommercialHealth.vue in `apps/mmc/src/components/Dashboard/CommercialHealth.vue` (display license counts by status, revenue this_month/this_year/last_month, render via shadcn Card + StatCard components, handle null values)
+- [x] T055 [P] Create CommercialHealth.vue in `apps/mmc/src/components/Dashboard/CommercialHealth.vue` (display license counts by status, revenue this_month/this_year/last_month, render via shadcn Card + StatCard components, handle null values)
 
-- [ ] T056 [P] Create RevenueBreakdown.vue in `apps/mmc/src/components/Dashboard/RevenueBreakdown.vue` (display top 5 products table with revenue/growth_percent/license_count, sortable columns, render via shadcn Table + Select for date range, implement date range picker)
+- [x] T056 [P] Create RevenueBreakdown.vue in `apps/mmc/src/components/Dashboard/RevenueBreakdown.vue` (display top 5 products table with revenue/growth_percent/license_count, sortable columns, render via shadcn Table + Select for date range, implement date range picker)
 
-- [ ] T057 [P] Create GeographicDistribution.vue in `apps/mmc/src/components/Dashboard/GeographicDistribution.vue` (display countries list with revenue/license_count, pagination controls, sort dropdown (revenue|license_count), render via shadcn Table + Pagination)
+- [x] T057 [P] Create GeographicDistribution.vue in `apps/mmc/src/components/Dashboard/GeographicDistribution.vue` (display countries list with revenue/license_count, pagination controls, sort dropdown (revenue|license_count), render via shadcn Table + Pagination)
 
-- [ ] T058 [P] Create AffiliateLeaderboard.vue in `apps/mmc/src/components/Dashboard/AffiliateLeaderboard.vue` (display top affiliates ranked by commission, pagination, status filter dropdown, sort controls, render via shadcn Table)
+- [x] T058 [P] Create AffiliateLeaderboard.vue in `apps/mmc/src/components/Dashboard/AffiliateLeaderboard.vue` (display top affiliates ranked by commission, pagination, status filter dropdown, sort controls, render via shadcn Table)
 
-- [ ] T059 [P] Create GrowthTrends.vue in `apps/mmc/src/components/Dashboard/GrowthTrends.vue` (render 12-month trending line chart for revenue/license_count, use shadcn-vue charts component, show growth summary stats below)
+- [x] T059 [P] Create GrowthTrends.vue in `apps/mmc/src/components/Dashboard/GrowthTrends.vue` (render 12-month trending line chart for revenue/license_count, use shadcn-vue charts component, show growth summary stats below)
 
-- [ ] T060 [P] Create DataExport.vue in `apps/mmc/src/components/Dashboard/DataExport.vue` (dropdown to select section: geographic|revenue|affiliate|product, date range picker, export button, handle 413 error gracefully, show download progress)
+- [x] T060 [P] Create DataExport.vue in `apps/mmc/src/components/Dashboard/DataExport.vue` (dropdown to select section: geographic|revenue|affiliate|product, date range picker, export button, handle 413 error gracefully, show download progress)
 
 ## API Client Integration
 
-- [ ] T061 Create dashboard API client in `apps/mmc/src/api/dashboard-client.ts` (implement methods: getSummary(), getRevenueBreakdown(params), getGeographic(params), getAffiliates(params), getTrends(params), exportData(section, params), error handling with proper error codes)
+- [x] T061 Create dashboard API client in `apps/mmc/src/api/dashboard-client.ts` (implement methods: getSummary(), getRevenueBreakdown(params), getGeographic(params), getAffiliates(params), getTrends(params), exportData(section, params), error handling with proper error codes)
 
 ## State Management
 
-- [ ] T062 Create Pinia store for dashboard in `apps/mmc/src/stores/dashboard-store.ts` (state: summary, products, geographic, affiliates, trends, loading, error; actions: fetchSummary(), etc.; getters: formatted results with 2-decimal currency)
+- [x] T062 Create Pinia store for dashboard in `apps/mmc/src/stores/dashboard-store.ts` (state: summary, products, geographic, affiliates, trends, loading, error; actions: fetchSummary(), etc.; getters: formatted results with 2-decimal currency)
 
 ---
 
