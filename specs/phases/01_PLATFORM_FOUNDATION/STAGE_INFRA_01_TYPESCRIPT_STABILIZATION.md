@@ -4,16 +4,18 @@
 
 Status: DRAFT
 Risk Level: LOW
-Last Updated: 2026-02-27T00:03:00Z
+Last Updated: 2026-02-27T00:04:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- TypeScript strict compliance enforcement across apps/api, apps/worker, apps/mmc, packages/\*
-- 866 confirmed TypeScript errors; Day 0 tsconfig hardening + 5-pass migration strategy
-- tsconfig.base.json: 3 missing strict options added; 4 weakening overrides removed
-- Two-step CI gate: pnpm typecheck:src (production) + pnpm typecheck:tests (tests, via tsconfig.test.json)
-- No DB changes, no API changes, no behavioral changes
-- Guardian verdicts: Architecture Checker PASS, API Designer PASS
+- Total: 86 atomic tasks across 7 phases
+- Phase 0 (Day 0 tsconfig hardening): 11 tasks
+- Phase 1 (Pass 1 implicit any): 22 tasks
+- Phase 2 (Pass 2 domain contracts): 7 tasks
+- Phase 3 (Pass 3 null handling): 11 tasks
+- Phase 4 (Pass 4 import cleanup): 12 tasks
+- Phase 5 (Pass 5 test compliance): 18 tasks
+- Phase 6 (CI gate + validation): 5 tasks
 
 Deferred Scope:
 
@@ -23,10 +25,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
