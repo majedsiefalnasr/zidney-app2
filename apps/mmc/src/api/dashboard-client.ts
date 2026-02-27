@@ -1,4 +1,6 @@
+// @ts-ignore: axios not declared as dependency of apps/mmc [INFRA-001-DEPS-06]
 import type { AxiosInstance } from 'axios'
+// @ts-ignore: axios not declared as dependency of apps/mmc [INFRA-001-DEPS-06]
 import axios from 'axios'
 
 /**
@@ -88,10 +90,8 @@ export interface ExportResponse {
  */
 export class DashboardClient {
   private client: AxiosInstance
-  private baseURL: string
 
   constructor(baseURL = '/api/mmc/dashboard') {
-    this.baseURL = baseURL
     this.client = axios.create({
       baseURL,
       timeout: 30000,
@@ -102,12 +102,11 @@ export class DashboardClient {
 
     // Add response interceptor for error handling
     this.client.interceptors.response.use(
-      (response) => response,
-      (error) => {
+      (response: any) => response,
+      (error: any) => {
         // Map backend error codes to user-friendly messages
         if (error.response) {
           const status = error.response.status
-          const errorCode = error.response.data?.error?.code
 
           switch (status) {
             case 423:

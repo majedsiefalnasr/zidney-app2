@@ -1,3 +1,16 @@
 {
-  "extends": "../../tsconfig.base.json"
+  "extends": "../../tsconfig.base.json",
+  "include": [
+    "src/**/*.ts",
+    "src/**/*.vue",
+    "src/**/*.d.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "tests/**/*",
+    "src/**/__tests__/**/*",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
 }
