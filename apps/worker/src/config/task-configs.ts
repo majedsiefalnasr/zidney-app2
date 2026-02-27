@@ -180,7 +180,7 @@ export function getRetryDelay(taskType: string, attemptNumber: number): number {
     return 0
   }
 
-  return config.retryPolicy.backoffDelays[retryIndex]
+  return config.retryPolicy.backoffDelays[retryIndex]!
 }
 
 /**

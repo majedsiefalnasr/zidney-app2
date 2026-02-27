@@ -150,7 +150,7 @@ export class CheckpointManager {
       return null
     }
 
-    return step_order[current_index + 1]
+    return step_order[current_index + 1] ?? null
   }
 
   /**

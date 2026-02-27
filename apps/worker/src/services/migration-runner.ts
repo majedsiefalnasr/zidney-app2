@@ -194,7 +194,7 @@ export class MigrationRunnerService {
     const migrations: MigrationFile[] = []
 
     for (let i = 0; i < files.length; i++) {
-      const filename = files[i]
+      const filename = files[i]!
       const filePath = path.join(this.migrationsDir, filename)
 
       if (!fs.existsSync(filePath)) {

@@ -12,7 +12,7 @@ const logger = createLogger('delete-license-job')
  * On failure: Alert ops, preserve license in ARCHIVED state
  */
 export async function deleteLicenseJob(payload: any, jobId: string) {
-  const { license_id, grace_period_until } = payload
+  const { license_id, grace_period_until: _grace_period_until } = payload
 
   try {
     logger.info(

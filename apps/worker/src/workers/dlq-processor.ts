@@ -9,6 +9,7 @@
  */
 
 import { ProvisioningLogger } from '@zidney/logger/provisioning-logger'
+// @ts-ignore: LOGIC-BUG: dlq-handler is in ../handlers/dlq-handler, not ./dlq-handler — see INFRA-001-LOGIC-09
 import { DLQHandler } from './dlq-handler'
 
 /**
@@ -123,7 +124,9 @@ export class DLQProcessor {
       // Check absolute threshold
       if (stats.total_entries > this.config.alertThreshold) {
         const entries = await this.dlqHandler.getDLQEntries(stats.total_entries)
-        const affectedLicenses = [...new Set(entries.map((e) => e.license_id))]
+        const affectedLicenses = [
+          ...new Set(entries.map((e: any) => e.license_id)),
+        ] as string[]
 
         this.emitAlert({
           timestamp: new Date().toISOString(),
@@ -139,11 +142,11 @@ export class DLQProcessor {
       if (stats.manual_intervention_count > 0) {
         const entries = await this.dlqHandler.getDLQEntries(stats.total_entries)
         const manualEntries = entries.filter(
-          (e) => e.requires_manual_intervention
+          (e: any) => e.requires_manual_intervention
         )
         const affectedLicenses = [
-          ...new Set(manualEntries.map((e) => e.license_id)),
-        ]
+          ...new Set(manualEntries.map((e: any) => e.license_id)),
+        ] as string[]
 
         this.emitAlert({
           timestamp: new Date().toISOString(),

@@ -71,7 +71,7 @@ export async function persistGradingResult(
       throw new Error(`Attempt not found: ${attemptId}`)
     }
 
-    const attempt = attemptResult.rows[0]
+    const attempt = attemptResult.rows[0]!
 
     if (attempt.status === 'COMPLETED') {
       await client.query('ROLLBACK')
@@ -189,7 +189,7 @@ export async function verifyResultPersistence(
       return false
     }
 
-    const attempt = result.rows[0]
+    const attempt = result.rows[0]!
     return attempt.status === 'COMPLETED' && attempt.grading_result !== null
   } catch (error) {
     logger.error(`Result verification error`, {
