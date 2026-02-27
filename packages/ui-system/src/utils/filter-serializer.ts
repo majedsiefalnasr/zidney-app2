@@ -226,7 +226,7 @@ export function areFiltersEqual(
   if (filters1.length !== filters2.length) return false
 
   return filters1.every((f1, index) => {
-    const f2 = filters2[index]
+    const f2 = filters2[index]!
     return (
       f1.fieldId === f2.fieldId &&
       f1.operator === f2.operator &&

@@ -29,7 +29,9 @@ export function useMultiLanguageForm(options: UseMultiLanguageFormOptions) {
       const defaultLang = options.languages.find((l) => l.isDefault)
       return defaultLang
         ? [defaultLang.code]
-        : [options.languages[0]?.code].filter(Boolean)
+        : [options.languages[0]?.code].filter(
+            (c): c is string => typeof c === 'string'
+          )
     }
 
     return provided
@@ -127,7 +129,7 @@ export function useMultiLanguageForm(options: UseMultiLanguageFormOptions) {
       )
       requiredLanguages.value = [
         defaultLang?.code ?? options.languages[0]?.code,
-      ].filter(Boolean)
+      ].filter((c): c is string => typeof c === 'string')
     }
 
     // Check: All required languages have content (LOCKED DECISION 5)
@@ -189,7 +191,7 @@ export function useMultiLanguageForm(options: UseMultiLanguageFormOptions) {
 
   // Method: Validate on submit
   const validateOnSubmit = (): boolean => {
-    const langValid = validateAllLanguages()
+    validateAllLanguages()
     validateGlobal()
 
     return isValid.value
