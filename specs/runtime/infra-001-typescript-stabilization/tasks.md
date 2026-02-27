@@ -92,20 +92,20 @@
 
 ### Group C — apps/api, apps/worker, apps/mmc (depend on domain-core; api hotspot files can run in parallel)
 
-- [ ] T020 [P] Fix implicit any in `apps/api/src/middleware/dashboard-logging.middleware.ts`: add explicit parameter types, typed request/response shapes, and return types (25 errors — was suppressed by `strict: false`)
-- [ ] T021 [P] Fix implicit any in `apps/api/src/middleware/dashboard-cache.middleware.ts`: add explicit parameter types and typed middleware context (was suppressed by `strict: false`)
-- [ ] T022 [P] Fix implicit any in `apps/api/src/routes/members.routes.ts`: add explicit request body types, response types, and route handler parameter types
-- [ ] T023 [P] Fix implicit any in `apps/api/src/routes/invitations.routes.ts`: add explicit request body types, response types, and route handler parameter types
-- [ ] T024 Fix implicit any in remaining `apps/api/src/` files: audit all route handlers and middleware for missing type annotations and add explicit types
-- [ ] T025 Fix implicit any in `apps/worker/src/handlers/provision-workspace-handler.ts`: define typed job payload interface; add explicit parameter types and return types
-- [ ] T026 Fix implicit any in remaining `apps/worker/src/` files: add explicit parameter types and return types to all job handlers and service calls
-- [ ] T027 Fix implicit any in `apps/mmc/src/` Vue components: add typed component props, emits, and composable return types (12 errors baseline)
-- [ ] T028 Fix `tests/test-helpers.ts` vitest `expect` scope issue: add `/// <reference types="vitest/globals" />` or add vitest types to `tsconfig.test.json` — `expect` not in scope currently
-- [ ] T029 Exit gate: run `tsc --noEmit -p apps/api/tsconfig.json` — must exit 0
-- [ ] T030 Exit gate: run `tsc --noEmit -p apps/worker/tsconfig.json` — must exit 0
-- [ ] T031 Exit gate: run `tsc --noEmit -p apps/mmc/tsconfig.json` — must exit 0
-- [ ] T032 Verify implicit any error count reaches zero: run `npx tsc --noEmit 2>&1 | grep "implicit" | wc -l` — must return 0
-- [ ] T033 Run full test suite: `pnpm test` — must pass with zero failures before starting Pass 2
+- [X] T020 [P] Fix implicit any in `apps/api/src/middleware/dashboard-logging.middleware.ts`: add explicit parameter types, typed request/response shapes, and return types (25 errors — was suppressed by `strict: false`)
+- [X] T021 [P] Fix implicit any in `apps/api/src/middleware/dashboard-cache.middleware.ts`: add explicit parameter types and typed middleware context (was suppressed by `strict: false`)
+- [X] T022 [P] Fix implicit any in `apps/api/src/routes/members.routes.ts`: add explicit request body types, response types, and route handler parameter types
+- [X] T023 [P] Fix implicit any in `apps/api/src/routes/invitations.routes.ts`: add explicit request body types, response types, and route handler parameter types
+- [X] T024 Fix implicit any in remaining `apps/api/src/` files: audit all route handlers and middleware for missing type annotations and add explicit types
+- [X] T025 Fix implicit any in `apps/worker/src/handlers/provision-workspace-handler.ts`: define typed job payload interface; add explicit parameter types and return types
+- [X] T026 Fix implicit any in remaining `apps/worker/src/` files: add explicit parameter types and return types to all job handlers and service calls
+- [X] T027 Fix implicit any in `apps/mmc/src/` Vue components: add typed component props, emits, and composable return types (12 errors baseline)
+- [X] T028 Fix `tests/test-helpers.ts` vitest `expect` scope issue: add `/// <reference types="vitest/globals" />` or add vitest types to `tsconfig.test.json` — `expect` not in scope currently
+- [X] T029 Exit gate: run `tsc --noEmit -p apps/api/tsconfig.json` — must exit 0
+- [X] T030 Exit gate: run `tsc --noEmit -p apps/worker/tsconfig.json` — must exit 0
+- [X] T031 Exit gate: run `tsc --noEmit -p apps/mmc/tsconfig.json` — must exit 0
+- [X] T032 Verify implicit any error count reaches zero: run `npx tsc --noEmit 2>&1 | grep "implicit" | wc -l` — must return 0
+- [X] T033 Run full test suite: `pnpm test` — must pass with zero failures before starting Pass 2
 
 ---
 
