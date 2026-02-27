@@ -8,8 +8,7 @@
  * Used by API controllers for request validation.
  */
 
-import type { ZodIssue } from 'zod'
-import { z, ZodError, ZodType } from 'zod'
+import { z } from 'zod'
 
 /**
  * T086: Workspace slug validation schema
@@ -184,14 +183,22 @@ export function createErrorResponse(
  * Validate request with schema and throw formatted error
  */
 export async function validateRequest<T>(
-  schema: ZodType<T>,
+  schema: { parse(data: unknown): T },
   data: unknown
 ): Promise<T> {
   try {
     return schema.parse(data)
   } catch (error: unknown) {
-    if (error instanceof ZodError) {
-      const issues = (error as ZodError).issues.map((issue: ZodIssue) => ({
+    // Duck-type ZodError: has issues array (avoids named import across Zod versions)
+    if (
+      error !== null &&
+      typeof error === 'object' &&
+      Array.isArray((error as Record<string, unknown>).issues)
+    ) {
+      const zodErr = error as {
+        issues: Array<{ path: (string | number)[]; message: string }>
+      }
+      const issues = zodErr.issues.map((issue) => ({
         field: issue.path.join('.'),
         message: issue.message,
       }))
