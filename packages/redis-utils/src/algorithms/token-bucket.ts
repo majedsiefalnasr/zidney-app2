@@ -150,7 +150,7 @@ export class TokenBucketRateLimiter {
       }
 
       const lastRefillAt = parseFloat(state.lastRefillAt)
-      let tokensAvailable = parseFloat(state.tokensAvailable)
+      let tokensAvailable = parseFloat(state.tokensAvailable ?? '0')
 
       const now = Date.now() / 1000
       const timePassed = Math.max(0, now - lastRefillAt)
