@@ -76,7 +76,7 @@ export class SlidingWindowRateLimiter {
       const oldestEntries = await this.redis.zRange(key, 0, 0)
       let resetAt = Math.ceil(now + config.window)
       if (oldestEntries.length > 0) {
-        const oldestScore = await this.redis.zScore(key, oldestEntries[0])
+        const oldestScore = await this.redis.zScore(key, oldestEntries[0]!)
         if (oldestScore !== null) {
           resetAt = Math.ceil(oldestScore + config.window)
         }
