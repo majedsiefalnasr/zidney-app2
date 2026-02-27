@@ -8,7 +8,8 @@
  * Used by API controllers for request validation.
  */
 
-import { z } from 'zod'
+import type { ZodIssue } from 'zod'
+import { z, ZodError, ZodType } from 'zod'
 
 /**
  * T086: Workspace slug validation schema
@@ -21,7 +22,7 @@ const WorkspaceSlugSchema = z
     /^[a-z0-9-]+$/,
     'Slug must contain only lowercase letters, numbers, and dashes'
   )
-  .transform((val) => val.toLowerCase())
+  .transform((val: string) => val.toLowerCase())
 
 /**
  * T087: Limit validation schema
@@ -183,14 +184,14 @@ export function createErrorResponse(
  * Validate request with schema and throw formatted error
  */
 export async function validateRequest<T>(
-  schema: z.ZodSchema<T>,
+  schema: ZodType<T>,
   data: unknown
 ): Promise<T> {
   try {
     return schema.parse(data)
-  } catch (error: any) {
-    if (error instanceof z.ZodError) {
-      const issues = error.issues.map((issue) => ({
+  } catch (error: unknown) {
+    if (error instanceof ZodError) {
+      const issues = (error as ZodError).issues.map((issue: ZodIssue) => ({
         field: issue.path.join('.'),
         message: issue.message,
       }))

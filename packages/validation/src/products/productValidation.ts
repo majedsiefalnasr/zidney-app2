@@ -8,10 +8,10 @@
  * Trust Chain: Product → License → Workspace
  */
 
-import { z } from 'zod'
 import { Module } from '@zidney/types/enums/Module'
 import { ErrorCodes } from '@zidney/types/errors/ErrorCodes'
 import { ProductStatus } from '@zidney/types/products/Product'
+import { z } from 'zod'
 
 /**
  * Localized name schema
@@ -240,7 +240,7 @@ export function generateChangeSummary(
 
   const changes = Object.keys(diff)
     .map((field) => {
-      const newVal = diff[field].new
+      const newVal = diff[field]!.new
 
       if (field === 'enabled_modules' && Array.isArray(newVal)) {
         const modules = (newVal as string[]).join(', ')

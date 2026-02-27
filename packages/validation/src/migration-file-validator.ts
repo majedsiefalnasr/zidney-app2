@@ -44,27 +44,27 @@ export function extractMigrationHeader(sqlContent: string): MigrationHeader {
   if (!versionMatch) {
     throw new Error('Missing required migration header: "-- Migration: X.Y.Z"')
   }
-  const targetVersion = versionMatch[1]
+  const targetVersion = versionMatch[1]!
 
   // Extract product version requirement (optional)
   const productVersionMatch = sqlContent.match(
     /--\s*Required\s+Minimum\s+Product\s+Version:\s*(\d+\.\d+\.\d+)/i
   )
   const targetProductVersion = productVersionMatch
-    ? productVersionMatch[1]
+    ? productVersionMatch[1]!
     : undefined
 
   // Extract breaking flag (optional, defaults to false)
   const breakingMatch = sqlContent.match(/--\s*Breaking:\s*(true|false)/i)
   const isBreaking = breakingMatch
-    ? breakingMatch[1].toLowerCase() === 'true'
+    ? breakingMatch[1]!.toLowerCase() === 'true'
     : false
 
   // Extract description (optional)
   const descriptionMatch = sqlContent.match(
     /--\s*Purpose:\s*(.+?)(?=\n--|\n[A-Z]|$)/
   )
-  const description = descriptionMatch ? descriptionMatch[1].trim() : undefined
+  const description = descriptionMatch ? descriptionMatch[1]!.trim() : undefined
 
   return {
     targetVersion,
@@ -201,15 +201,15 @@ export function detectMigrationGap(fileList: string[]): Error | null {
         `Migration file "${filename}" does not follow naming convention (should start with number, e.g., "001_init.sql")`
       )
     }
-    numbers.push(parseInt(match[1], 10))
+    numbers.push(parseInt(match[1]!, 10))
   }
 
   // Sort and check for gaps
   const sorted = numbers.sort((a, b) => a - b)
 
   for (let i = 0; i < sorted.length - 1; i++) {
-    const current = sorted[i]
-    const next = sorted[i + 1]
+    const current = sorted[i]!
+    const next = sorted[i + 1]!
     if (next - current !== 1) {
       const missing = current + 1
       return new Error(
@@ -221,7 +221,7 @@ export function detectMigrationGap(fileList: string[]): Error | null {
   // Verify sequence starts at 1
   if (sorted[0] !== 1) {
     return new Error(
-      `Migration sequence must start at 001, but found ${sorted[0]}`
+      `Migration sequence must start at 001, but found ${sorted[0] ?? 'undefined'}`
     )
   }
 
