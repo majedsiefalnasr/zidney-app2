@@ -177,7 +177,7 @@ export function getLicenseStatusMessage(status: LicenseStatus): string {
  */
 export function getRetryGuidance(
   status: LicenseStatus,
-  errorCode?: string
+  _errorCode?: string
 ): {
   shouldRetry: boolean
   delaySeconds: number

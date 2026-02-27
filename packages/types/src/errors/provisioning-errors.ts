@@ -115,6 +115,12 @@ export const PROVISIONING_ERROR_REGISTRY: Record<
     httpStatus: 400,
     retryable: false,
   },
+  [ProvisioningErrorCode.INVALID_LICENSE_CONFIG]: {
+    code: ProvisioningErrorCode.INVALID_LICENSE_CONFIG,
+    message: 'License configuration is invalid or missing required fields',
+    httpStatus: 400,
+    retryable: false,
+  },
 
   // Conflict Errors (409 Conflict)
   [ProvisioningErrorCode.WORKSPACE_SLUG_EXISTS]: {
@@ -181,6 +187,15 @@ export const PROVISIONING_ERROR_REGISTRY: Record<
     retryable: true,
   },
 
+  // License Validation Errors (400, 500)
+  [ProvisioningErrorCode.LICENSE_VALIDATION_FAILED]: {
+    code: ProvisioningErrorCode.LICENSE_VALIDATION_FAILED,
+    message:
+      'License validation failed; check license configuration and status',
+    httpStatus: 400,
+    retryable: false,
+  },
+
   // Database Errors (500, 503)
   [ProvisioningErrorCode.DB_CREATE_FAILED]: {
     code: ProvisioningErrorCode.DB_CREATE_FAILED,
@@ -197,6 +212,12 @@ export const PROVISIONING_ERROR_REGISTRY: Record<
   [ProvisioningErrorCode.REGISTRY_INSERT_FAILED]: {
     code: ProvisioningErrorCode.REGISTRY_INSERT_FAILED,
     message: 'Failed to insert registry entry for workspace',
+    httpStatus: 503,
+    retryable: true,
+  },
+  [ProvisioningErrorCode.PROVIDER_REQUEST_FAILED]: {
+    code: ProvisioningErrorCode.PROVIDER_REQUEST_FAILED,
+    message: 'External provider request failed during provisioning',
     httpStatus: 503,
     retryable: true,
   },
