@@ -57,6 +57,7 @@ export class LicenseValidationService {
 
     try {
       // Query license from master database
+      // @ts-ignore: TS2558 - query<T> type arg not accepted here (global tsconfig) [INFRA-001]
       const result = await this.masterDb.query<LicenseRecord>(
         `SELECT id, status, schema_version, product_version, created_at, expires_at
          FROM licenses
