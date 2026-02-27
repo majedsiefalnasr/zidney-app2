@@ -223,9 +223,10 @@ export function createChildContext(
   additional: Partial<CorrelationContextData>
 ): CorrelationContextData {
   const current = correlationStorage.getStore()
+  // LOGIC-BUG: if called outside correlation context, result may lack correlationId — see INFRA-001-LOGIC-01
   return {
-    ...current,
+    ...(current ?? ({} as CorrelationContextData)),
     ...additional,
-    startTime: additional.startTime || Date.now(),
+    startTime: additional.startTime ?? current?.startTime ?? Date.now(),
   }
 }
