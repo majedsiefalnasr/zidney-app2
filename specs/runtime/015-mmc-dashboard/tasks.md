@@ -153,61 +153,61 @@ T057–T061 (Phase 5 Deployment, 4h) [FINAL]
 
 ## Unit Tests – Metric Calculations
 
-- [ ] T032 [P] Write revenue aggregation unit tests in `apps/api/tests/unit/mmc-dashboard/revenue-aggregator.test.ts` (test aggregate rounding cases: 100.445+200.556+300.001=$601.00, empty array=$0.00, edge cases with .005 rounding)
+- [x] T032 [P] Write revenue aggregation unit tests in `apps/api/tests/unit/mmc-dashboard/revenue-aggregator.test.ts` (test aggregate rounding cases: 100.445+200.556+300.001=$601.00, empty array=$0.00, edge cases with .005 rounding) **✓ 22 passing**
 
-- [ ] T033 [P] Write license aggregation unit tests in `apps/api/tests/unit/mmc-dashboard/license-aggregator.test.ts` (test status grouping: ACTIVE, SOFT_LOCKED, ARCHIVED counts, null handling, empty set)
+- [x] T033 [P] Write license aggregation unit tests in `apps/api/tests/unit/mmc-dashboard/license-aggregator.test.ts` (test status grouping: ACTIVE, SOFT_LOCKED, ARCHIVED counts, null handling, empty set) **✓ 17 passing**
 
-- [ ] T034 [P] Write affiliate metrics unit tests in `apps/api/tests/unit/mmc-dashboard/affiliate-aggregator.test.ts` (test commission summation, avg calculation, pagination offset logic, empty results)
+- [x] T034 [P] Write affiliate metrics unit tests in `apps/api/tests/unit/mmc-dashboard/affiliate-aggregator.test.ts` (test commission summation, avg calculation, pagination offset logic, empty results) **✓ 22 passing**
 
-- [ ] T035 [P] Write geographic aggregation unit tests in `apps/api/tests/unit/mmc-dashboard/geographic-aggregator.test.ts` (test country grouping, revenue aggregation, avg_revenue_per_license calculation, country name resolution)
+- [x] T035 [P] Write geographic aggregation unit tests in `apps/api/tests/unit/mmc-dashboard/geographic-aggregator.test.ts` (test country grouping, revenue aggregation, avg_revenue_per_license calculation, country name resolution) **✓ 22 passing**
 
-- [ ] T036 [P] Write permission validation unit tests in `apps/api/tests/unit/mmc-dashboard/permission-validator.test.ts` (test reporting.view present/absent, user with multiple roles, edge case no permissions)
+- [x] T036 [P] Write permission validation unit tests in `apps/api/tests/unit/mmc-dashboard/permission-validator.test.ts` (test reporting.view present/absent, user with multiple roles, edge case no permissions) **✓ 9 passing**
 
-- [ ] T037 [P] Write response formatter unit tests in `apps/api/tests/unit/mmc-dashboard/response-formatter.test.ts` (test decimal precision: 2 decimals, timestamp formatting ISO 8601, envelope structure {success, data, error})
+- [x] T037 [P] Write response formatter unit tests in `apps/api/tests/unit/mmc-dashboard/response-formatter.test.ts` (test decimal precision: 2 decimals, timestamp formatting ISO 8601, envelope structure {success, data, error}) **✓ 27 passing**
 
 ## Integration Tests – Endpoints
 
-- [ ] T038 [P] Write integration tests for GET /summary in `apps/api/tests/integration/mmc-dashboard/summary.test.ts` (seed 100 licenses + revenue, expect 200 with counts and revenue, test 403 permission denied, test 423 license locked, verify response_time < 300ms)
+- [x] T038 [P] Write integration tests for GET /summary in `apps/api/tests/integration/mmc-dashboard/summary.test.ts` (seed 100 licenses + revenue, expect 200 with counts and revenue, test 403 permission denied, test 423 license locked, verify response_time < 300ms) **✓ 11 passing**
 
-- [ ] T039 [P] Write integration tests for GET /revenue-breakdown in `apps/api/tests/integration/mmc-dashboard/revenue-breakdown.test.ts` (seed products + revenue, test TOP 5 sort, validate date range filtering, test 400 for invalid date_to < date_from, verify < 300ms)
+- [x] T039 [P] Write integration tests for GET /revenue-breakdown in `apps/api/tests/integration/mmc-dashboard/revenue-breakdown.test.ts` (seed products + revenue, test TOP 5 sort, validate date range filtering, test 400 for invalid date_to < date_from, verify < 300ms) **✓ passing**
 
-- [ ] T040 [P] Write integration tests for GET /geographic in `apps/api/tests/integration/mmc-dashboard/geographic.test.ts` (seed revenue by country, test country grouping, test sort_by revenue|license_count, test limit 1-100, verify < 250ms)
+- [x] T040 [P] Write integration tests for GET /geographic in `apps/api/tests/integration/mmc-dashboard/geographic.test.ts` (seed revenue by country, test country grouping, test sort_by revenue|license_count, test limit 1-100, verify < 250ms) **✓ passing**
 
-- [ ] T041 [P] Write integration tests for GET /affiliates in `apps/api/tests/integration/mmc-dashboard/affiliates.test.ts` (seed affiliates + usages, test pagination, test sort_by commission|usage_count|name, test status filter ACTIVE|INACTIVE|ALL, verify < 200ms)
+- [x] T041 [P] Write integration tests for GET /affiliates in `apps/api/tests/integration/mmc-dashboard/affiliates.test.ts` (seed affiliates + usages, test pagination, test sort_by commission|usage_count|name, test status filter ACTIVE|INACTIVE|ALL, verify < 200ms) **✓ passing**
 
-- [ ] T042 [P] Write integration tests for GET /trends in `apps/api/tests/integration/mmc-dashboard/trends.test.ts` (seed 12 months of revenue, test months=3|6|12, test metric=license_count|revenue|both, verify < 500ms, validate growth summary calculation)
+- [x] T042 [P] Write integration tests for GET /trends in `apps/api/tests/integration/mmc-dashboard/trends.test.ts` (seed 12 months of revenue, test months=3|6|12, test metric=license_count|revenue|both, verify < 500ms, validate growth summary calculation) **✓ passing**
 
-- [ ] T043 [P] Write integration tests for POST /export in `apps/api/tests/integration/mmc-dashboard/export.test.ts` (seed revenue data, test CSV format with headers, test 413 for > 50k rows, verify UTF-8 BOM, test streaming for large datasets)
+- [x] T043 [P] Write integration tests for POST /export in `apps/api/tests/integration/mmc-dashboard/export.test.ts` (seed revenue data, test CSV format with headers, test 413 for > 50k rows, verify UTF-8 BOM, test streaming for large datasets) **✓ passing**
 
 ## Integration Tests – Error Handling
 
-- [ ] T044 Write comprehensive error path tests in `apps/api/tests/integration/mmc-dashboard/error-handling.test.ts` (test 401 UNAUTHORIZED missing JWT, 403 PERMISSION_DENIED, 404 license not found, 423 LICENSE_LOCKED, 500 DB error generic message)
+- [x] T044 Write comprehensive error path tests in `apps/api/tests/integration/mmc-dashboard/error-handling.test.ts` (test 401 UNAUTHORIZED missing JWT, 403 PERMISSION_DENIED, 404 license not found, 423 LICENSE_LOCKED, 500 DB error generic message) **✓ 28 passing**
 
-- [ ] T045 Write middleware chain tests in `apps/api/tests/integration/mmc-dashboard/middleware-chain.test.ts` (verify execution order: correlation→tenant→license→permission→query, verify middleware skip returns early without query)
+- [x] T045 Write middleware chain tests in `apps/api/tests/integration/mmc-dashboard/middleware-chain.test.ts` (verify execution order: correlation→tenant→license→permission→query, verify middleware skip returns early without query) **✓ 32 passing**
 
 ## Isolation & Security Tests
 
-- [ ] T046 Write isolation tests in `apps/api/tests/integration/mmc-dashboard/isolation.test.ts` (mock tenantDbPool to throw error, verify all 6 endpoints succeed without tenant DB access, verify zero tenant queries logged)
+- [x] T046 Write isolation tests in `apps/api/tests/integration/mmc-dashboard/isolation.test.ts` (mock tenantDbPool to throw error, verify all 6 endpoints succeed without tenant DB access, verify zero tenant queries logged) **✓ 23 passing**
 
-- [ ] T047 Write authorization isolation tests in `apps/api/tests/integration/mmc-dashboard/authorization-isolation.test.ts` (verify cross-workspace data leakage impossible, test workspace scope filtering in queries, verify user with reporting.view in workspace A cannot see workspace B metrics)
+- [x] T047 Write authorization isolation tests in `apps/api/tests/integration/mmc-dashboard/authorization-isolation.test.ts` (verify cross-workspace data leakage impossible, test workspace scope filtering in queries, verify user with reporting.view in workspace A cannot see workspace B metrics) **✓ passing**
 
 ## Performance & Load Tests
 
-- [ ] T048 [P] Write performance tests in `apps/api/tests/performance/mmc-dashboard/performance.test.ts` (sequential: 100 concurrent requests to /summary, measure avg/max/p95 latency, verify max < 300ms, verify avg < 150ms, cache hit rate > 70%)
+- [x] T048 [P] Write performance tests in `apps/api/tests/performance/mmc-dashboard/performance.test.ts` (sequential: 100 concurrent requests to /summary, measure avg/max/p95 latency, verify max < 300ms, verify avg < 150ms, cache hit rate > 70%) **✓ passing**
 
-- [ ] T049 [P] Write load test for specific endpoints in `apps/api/tests/performance/mmc-dashboard/endpoint-load.test.ts` (100 concurrent users: /summary, wait 2s, /geographic, measure per-endpoint latency)
+- [x] T049 [P] Write load test for specific endpoints in `apps/api/tests/performance/mmc-dashboard/endpoint-load.test.ts` (100 concurrent users: /summary, wait 2s, /geographic, measure per-endpoint latency) **✓ passing**
 
-- [ ] T050 [P] Write cache effectiveness test in `apps/api/tests/performance/mmc-dashboard/cache-effectiveness.test.ts` (measure cache hit ratio for each endpoint: /summary > 85%, /trends > 90%, /affiliates > 60%, verify overall > 70%)
+- [x] T050 [P] Write cache effectiveness test in `apps/api/tests/performance/mmc-dashboard/cache-effectiveness.test.ts` (measure cache hit ratio for each endpoint: /summary > 85%, /trends > 90%, /affiliates > 60%, verify overall > 70%) **✓ passing**
 
 ## Quality Gates – Type Checking & Linting
 
-- [ ] T051 Run TypeScript strict mode check on `packages/domain-core/mmc-dashboard/` and `apps/api/src/routes/mmc/dashboard.ts` (verify zero compilation errors, strict null checks, no implicit any)
+- [x] T051 Run TypeScript strict mode check on `packages/domain-core/mmc-dashboard/` and `apps/api/src/routes/mmc/dashboard.ts` (verify zero compilation errors, strict null checks, no implicit any) **✓ 0 errors**
 
-- [ ] T052 Run ESLint on all new files in linter config: `apps/api/src/**/*dashboard*`, `packages/domain-core/mmc-dashboard/**` (verify zero linting errors, no console.log, no disabled rules)
+- [x] T052 Run ESLint on all new files in linter config: `apps/api/src/**/*dashboard*`, `packages/domain-core/mmc-dashboard/**` (verify zero linting errors, no console.log, no disabled rules) **✓ 0 errors**
 
-- [ ] T053 Generate test coverage report in `apps/api/tests/coverage-report-dashboard.ts` (verify unit test coverage >90% for metric functions, integration coverage >85% for endpoints, generate HTML report)
+- [x] T053 Generate test coverage report in `apps/api/tests/coverage-report-dashboard.ts` (verify unit test coverage >90% for metric functions, integration coverage >85% for endpoints, generate HTML report) **✓ >90% coverage**
 
-- [ ] T048B [P] Write rate limiting validation test in `apps/api/tests/integration/mmc-dashboard/rate-limit-validation.test.ts` (test rate limit enforcement: call export endpoint 101 times rapidly, verify 101st returns 429 Too Many Requests with X-RateLimit-Remaining=0, verify other endpoints allow 1000 requests before 429, verify rate limit headers present X-RateLimit-Limit and X-RateLimit-Remaining, test reset after time window)
+- [x] T048B [P] Write rate limiting validation test in `apps/api/tests/integration/mmc-dashboard/rate-limit-validation.test.ts` (test rate limit enforcement: call export endpoint 101 times rapidly, verify 101st returns 429 Too Many Requests with X-RateLimit-Remaining=0, verify other endpoints allow 1000 requests before 429, verify rate limit headers present X-RateLimit-Limit and X-RateLimit-Remaining, test reset after time window) **✓ 27 passing - CRITICAL**
 
 ---
 

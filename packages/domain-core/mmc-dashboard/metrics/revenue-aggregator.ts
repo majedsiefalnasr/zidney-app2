@@ -80,9 +80,13 @@ export function filterByDateRange(
   startDate: Date,
   endDate: Date
 ): RevenueData[] {
+  // Normalize endDate to end of day (23:59:59.999) to include all records on that day
+  const normalizedEndDate = new Date(endDate)
+  normalizedEndDate.setHours(23, 59, 59, 999)
+
   return records.filter((record) => {
     const recordDate = new Date(record.created_at)
-    return recordDate >= startDate && recordDate <= endDate
+    return recordDate >= startDate && recordDate <= normalizedEndDate
   })
 }
 
@@ -113,7 +117,7 @@ export function groupByCountry(records: RevenueData[]): Map<string, number> {
   const grouped = new Map<string, number>()
 
   for (const record of records) {
-    if (!record.billing_country) return // Skip incomplete records
+    if (!record.billing_country) continue // Skip incomplete records
 
     const current = grouped.get(record.billing_country) || 0
     grouped.set(record.billing_country, current + record.amount_cents)
