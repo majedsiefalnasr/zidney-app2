@@ -72,11 +72,11 @@ T057–T061 (Phase 5 Deployment, 4h) [FINAL]
 
 ## Environment Validation & Schema Initialization
 
-- [ ] T001 Validate master_db schema version >= 8 and audit schema compatibility in `apps/api/src/db/master/validate-schema.ts`
-- [ ] T002 Create migration to add dashboard indexes: `apps/api/src/db/master/migrations/20260226_001_dashboard_indexes.sql` (license status, revenue created_at, affiliate_id+created_at, billing_country, product_id)
-- [ ] T003 Create domain package structure: `packages/domain-core/mmc-dashboard/` with subdirectories: `metrics/`, `queries/`, `formatters/`, `types.ts`
-- [ ] T004 Create API route file: `apps/api/src/routes/mmc/dashboard.ts` with route registration (GET summary, revenue-breakdown, geographic, affiliates, trends; POST export)
-- [ ] T005 Seed test data in master_db (master_test.db): 1000 test licenses across 3 statuses, 100 revenue records, 20 affiliates with 200 usages (use `scripts/seed-dashboard-test-data.ts`)
+- [x] T001 Validate master_db schema version >= 8 and audit schema compatibility in `apps/api/src/db/master/validate-schema.ts`
+- [x] T002 Create migration to add dashboard indexes: `apps/api/src/db/master/migrations/20260226_001_dashboard_indexes.ts` (license status, revenue created_at, affiliate_id+created_at, billing_country, product_id)
+- [x] T003 Create domain package structure: `packages/domain-core/mmc-dashboard/` with subdirectories: `metrics/`, `queries/`, `formatters/`, `types.ts`
+- [x] T004 Create API route file: `apps/api/src/routes/mmc/dashboard.ts` with route registration (GET summary, revenue-breakdown, geographic, affiliates, trends; POST export)
+- [x] T005 Seed test data in master_db (master_test.db): 1000 test licenses across 3 statuses, 100 revenue records, 20 affiliates with 200 usages (use `scripts/seed-dashboard-test-data.ts`)
 
 ---
 
@@ -84,50 +84,50 @@ T057–T061 (Phase 5 Deployment, 4h) [FINAL]
 
 ## Middleware Implementation
 
-- [ ] T006 Implement license enforcement middleware in `apps/api/src/middleware/license.middleware.ts` (query license status, return 423 if SOFT_LOCKED/ARCHIVED, 404 if not found, execute after tenant resolver)
-- [ ] T007 Implement permission middleware in `apps/api/src/middleware/permission.middleware.ts` (check reporting.view permission, return 403 if missing, log authorization attempts with correlation_id)
-- [ ] T007A **CRITICAL** Implement schema version compatibility middleware in `apps/api/src/middleware/schema-version-check.middleware.ts` (query master_db.schema_version, compare to API version constant, return 426 Upgrade Required if incompatible, execute after license middleware in chain: correlation→tenant→license→schema_version→permission→route)
-- [ ] T007B **CRITICAL** Implement rate limiting middleware in `apps/api/src/middleware/rate-limit.middleware.ts` (use Redis sliding window counter with key format `rate_limit:{endpoint}:{user_id}`, per-endpoint limits: export=100/hr, others=1000/hr, return 429 Too Many Requests if exceeded, execute before route handler)
-- [ ] T007C **CRITICAL** Create rate limiting configuration in `apps/api/src/config/rate-limits.config.ts` (define rate limit per endpoint: {export: 100, summary: 1000, revenue_breakdown: 1000, geographic: 1000, affiliates: 1000, trends: 1000}, window=3600s, Redis TTL configuration, document rate limit headers in responses)
+- [x] T006 Implement license enforcement middleware in `apps/api/src/middleware/license.middleware.ts` (query license status, return 423 if SOFT_LOCKED/ARCHIVED, 404 if not found, execute after tenant resolver)
+- [x] T007 Implement permission middleware in `apps/api/src/middleware/permission.middleware.ts` (check reporting.view permission, return 403 if missing, log authorization attempts with correlation_id)
+- [x] T007A **CRITICAL** Implement schema version compatibility middleware in `apps/api/src/middleware/schema-version.middleware.ts` (query master_db.schema_version, compare to API version constant, return 426 Upgrade Required if incompatible, execute after license middleware in chain: correlation→tenant→license→schema_version→permission→route)
+- [x] T007B **CRITICAL** Implement rate limiting middleware in `apps/api/src/middleware/dashboard-rate-limit.middleware.ts` (use Redis sliding window counter with key format `rate_limit:{endpoint}:{user_id}`, per-endpoint limits: export=100/hr, others=1000/hr, return 429 Too Many Requests if exceeded, execute before route handler)
+- [x] T007C **CRITICAL** Create rate limiting configuration in `apps/api/src/config/dashboard-rate-limits.config.ts` (define rate limit per endpoint: {export: 100, summary: 1000, revenue_breakdown: 1000, geographic: 1000, affiliates: 1000, trends: 1000}, window=3600s, Redis TTL configuration, document rate limit headers in responses)
 
 ## Domain Layer: Metric Calculation Functions
 
-- [ ] T008 [P] Create revenue aggregation functions in `packages/domain-core/mmc-dashboard/metrics/revenue-aggregator.ts` (sum with full precision, aggregate rounding, Decimal.js for precision handling)
-- [ ] T009 [P] Create license aggregation functions in `packages/domain-core/mmc-dashboard/metrics/license-aggregator.ts` (count by status, handle null/empty sets)
-- [ ] T010 [P] Create affiliate metrics functions in `packages/domain-core/mmc-dashboard/metrics/affiliate-aggregator.ts` (sum commission, calculate avg per usage, handle pagination offsets)
-- [ ] T011 [P] Create geographic aggregation functions in `packages/domain-core/mmc-dashboard/metrics/geographic-aggregator.ts` (group by country, calculate avg revenue per license, resolve country names)
+- [x] T008 [P] Create revenue aggregation functions in `packages/domain-core/mmc-dashboard/metrics/revenue-aggregator.ts` (sum with full precision, aggregate rounding, Decimal.js for precision handling)
+- [x] T009 [P] Create license aggregation functions in `packages/domain-core/mmc-dashboard/metrics/license-aggregator.ts` (count by status, handle null/empty sets)
+- [x] T010 [P] Create affiliate metrics functions in `packages/domain-core/mmc-dashboard/metrics/affiliate-aggregator.ts` (sum commission, calculate avg per usage, handle pagination offsets)
+- [x] T011 [P] Create geographic aggregation functions in `packages/domain-core/mmc-dashboard/metrics/geographic-aggregator.ts` (group by country, calculate avg revenue per license, resolve country names)
 
 ## Database Query Layer
 
-- [ ] T012 [P] Create query builder for summary endpoint in `packages/domain-core/mmc-dashboard/queries/summary-query.ts` (SELECT licenses by status, SELECT THIS_MONTH + YTD revenue from revenue_records with indexed created_at)
-- [ ] T013 [P] Create query builder for revenue-breakdown in `packages/domain-core/mmc-dashboard/queries/revenue-breakdown-query.ts` (GROUP BY product_id, TOP 5 by revenue, include growth calculation with previous period)
-- [ ] T014 [P] Create query builder for geographic data in `packages/domain-core/mmc-dashboard/queries/geographic-query.ts` (GROUP BY billing_country, support SORT_BY and LIMIT, calculate avg_revenue_per_license)
-- [ ] T015 [P] Create query builder for affiliates in `packages/domain-core/mmc-dashboard/queries/affiliate-query.ts` (LEFT JOIN affiliate_usages, GROUP BY affiliate with pagination, support sort_by/status/date filters)
-- [ ] T016 [P] Create query builder for trends in `packages/domain-core/mmc-dashboard/queries/trends-query.ts` (DATE_TRUNC monthly aggregation, 3/6/12 month filtering, calculate license/revenue growth summary)
-- [ ] T017 [P] Create CSV export query builder in `packages/domain-core/mmc-dashboard/queries/export-query.ts` (SELECT COUNT before executing, throw error if > 50k rows, support section filtering: geographic|revenue|affiliate|product)
+- [x] T012 [P] Create query builder for summary endpoint in `packages/domain-core/mmc-dashboard/queries/summary-query.ts` (SELECT licenses by status, SELECT THIS_MONTH + YTD revenue from revenue_records with indexed created_at)
+- [x] T013 [P] Create query builder for revenue-breakdown in `packages/domain-core/mmc-dashboard/queries/revenue-breakdown-query.ts` (GROUP BY product_id, TOP 5 by revenue, include growth calculation with previous period)
+- [x] T014 [P] Create query builder for geographic data in `packages/domain-core/mmc-dashboard/queries/geographic-query.ts` (GROUP BY billing_country, support SORT_BY and LIMIT, calculate avg_revenue_per_license)
+- [x] T015 [P] Create query builder for affiliates in `packages/domain-core/mmc-dashboard/queries/affiliate-query.ts` (LEFT JOIN affiliate_usages, GROUP BY affiliate with pagination, support sort_by/status/date filters)
+- [x] T016 [P] Create query builder for trends in `packages/domain-core/mmc-dashboard/queries/trends-query.ts` (DATE_TRUNC monthly aggregation, 3/6/12 month filtering, calculate license/revenue growth summary)
+- [x] T017 [P] Create CSV export query builder in `packages/domain-core/mmc-dashboard/queries/export-query.ts` (SELECT COUNT before executing, throw error if > 50k rows, support section filtering: geographic|revenue|affiliate|product)
 
 ## API Endpoint Implementation
 
-- [ ] T018 Implement GET /api/mmc/dashboard/summary in `apps/api/src/routes/mmc/dashboard.ts` (query builder + aggregator, apply cache key with 5-min TTL, return formatted response with license counts + revenue)
-- [ ] T019 [P] Implement GET /api/mmc/dashboard/revenue-breakdown in `apps/api/src/routes/mmc/dashboard.ts` (validate date_from/date_to params, execute indexed query, calculate growth_percent for each product, no caching)
-- [ ] T020 [P] Implement GET /api/mmc/dashboard/geographic in `apps/api/src/routes/mmc/dashboard.ts` (validate sort_by/limit query params, execute indexed query with LIMIT/OFFSET, resolve country names, no caching)
-- [ ] T021 [P] Implement GET /api/mmc/dashboard/affiliates in `apps/api/src/routes/mmc/dashboard.ts` (validate page/page_size, execute query with offset pagination, apply 1-min TTL cache, return paginated response)
-- [ ] T022 [P] Implement GET /api/mmc/dashboard/trends in `apps/api/src/routes/mmc/dashboard.ts` (validate months param: 3|6|12, execute materialized view query if available, fallback to raw aggregation, 10-min TTL cache)
-- [ ] T023 [P] Implement POST /api/mmc/dashboard/export in `apps/api/src/routes/mmc/dashboard.ts` (validate section param, execute COUNT query, return 413 if > 50k rows, stream CSV response with UTF-8 BOM, hard timeout 2s)
+- [x] T018 Implement GET /api/mmc/dashboard/summary in `apps/api/src/routes/mmc/dashboard.ts` (query builder + aggregator, apply cache key with 5-min TTL, return formatted response with license counts + revenue)
+- [x] T019 [P] Implement GET /api/mmc/dashboard/revenue-breakdown in `apps/api/src/routes/mmc/dashboard.ts` (validate date_from/date_to params, execute indexed query, calculate growth_percent for each product, no caching)
+- [x] T020 [P] Implement GET /api/mmc/dashboard/geographic in `apps/api/src/routes/mmc/dashboard.ts` (validate sort_by/limit query params, execute indexed query with LIMIT/OFFSET, resolve country names, no caching)
+- [x] T021 [P] Implement GET /api/mmc/dashboard/affiliates in `apps/api/src/routes/mmc/dashboard.ts` (validate page/page_size, execute query with offset pagination, apply 1-min TTL cache, return paginated response)
+- [x] T022 [P] Implement GET /api/mmc/dashboard/trends in `apps/api/src/routes/mmc/dashboard.ts` (validate months param: 3|6|12, execute materialized view query if available, fallback to raw aggregation, 10-min TTL cache)
+- [x] T023 [P] Implement POST /api/mmc/dashboard/export in `apps/api/src/routes/mmc/dashboard.ts` (validate section param, execute COUNT query, return 413 if > 50k rows, stream CSV response with UTF-8 BOM, hard timeout 2s)
 
 ## Response Formatting & Error Handling
 
-- [ ] T024 Create response formatter in `packages/domain-core/mmc-dashboard/formatters/response-formatter.ts` (standardize response envelope: {success, data, error}, round all currency to 2 decimals, format timestamps as ISO 8601)
-- [ ] T025 Create error handler middleware in `apps/api/src/middleware/dashboard-error-handler.ts` (map error types to HTTP codes: 400 for invalid params, 403 for permission denied, 423 for license locked, 413 for export oversized, 500 for DB errors with generic message)
+- [x] T024 Create response formatter in `packages/domain-core/mmc-dashboard/formatters/response-formatter.ts` (standardize response envelope: {success, data, error}, round all currency to 2 decimals, format timestamps as ISO 8601)
+- [x] T025 Create error handler middleware in `apps/api/src/middleware/dashboard-error-handler.middleware.ts` (map error types to HTTP codes: 400 for invalid params, 403 for permission denied, 423 for license locked, 413 for export oversized, 500 for DB errors with generic message)
 
 ## Caching Layer Implementation
 
-- [ ] T026 Implement Redis cache client in `packages/redis-utils/cache-client.ts` (cache key generation: mmc_dashboard:{endpoint}:{workspace_id}:{hash(params)}, TTL configuration by endpoint, get/set/del operations)
-- [ ] T027 Add cache middleware in `apps/api/src/middleware/dashboard-cache.middleware.ts` (check cache before query, return cached response with cache_hit flag in logs, populate cache after query execution)
+- [x] T026 Implement Redis cache client in `packages/redis-utils/cache-client.ts` (cache key generation: mmc_dashboard:{endpoint}:{workspace_id}:{hash(params)}, TTL configuration by endpoint, get/set/del operations)
+- [x] T027 Add cache middleware in `apps/api/src/middleware/dashboard-cache.middleware.ts` (check cache before query, return cached response with cache_hit flag in logs, populate cache after query execution)
 
 ## Database Indexes & Query Optimization
 
-- [ ] T028 Create and execute migration for dashboard indexes in `apps/api/src/db/master/migrations/20260226_001_dashboard_indexes.sql`:
+- [x] T028 Create and execute migration for dashboard indexes in `apps/api/src/db/master/migrations/20260226_001_dashboard_indexes.ts`:
   - `CREATE INDEX idx_licenses_status ON licenses(status) WHERE deleted_at IS NULL`
   - `CREATE INDEX idx_licenses_deleted_at ON licenses(deleted_at)`
   - `CREATE INDEX idx_revenue_records_created_at ON revenue_records(created_at DESC)`
@@ -139,13 +139,13 @@ T057–T061 (Phase 5 Deployment, 4h) [FINAL]
   - `CREATE INDEX idx_affiliate_usages_affiliate_created ON affiliate_usages(affiliate_id, created_at DESC)`
   - `CREATE INDEX idx_affiliates_status ON affiliates(status)`
 
-- [ ] T029 Run EXPLAIN ANALYZE on all 6 endpoint queries in `apps/api/tests/performance/dashboard-query-plans.test.ts` (verify all queries use indexes, no sequential scans, save query plans for baseline)
+- [x] T029 Run EXPLAIN ANALYZE on all 6 endpoint queries in `apps/api/tests/performance/dashboard-query-plans.test.ts` (verify all queries use indexes, no sequential scans, save query plans for baseline)
 
 ## Logging & Observability
 
-- [ ] T030 Implement structured logging integration in `apps/api/src/middleware/dashboard-logging.middleware.ts` (log DASHBOARD_REQUEST_START, LICENSE_VALIDATION_PASS, PERMISSION_CHECK_PASS, DASHBOARD_QUERY_EXECUTED, RESPONSE_SENT, AUTHORIZATION_FAILED, QUERY_PERFORMANCE_ALERT with required fields: timestamp, level, service, correlation_id, user_id, workspace_id, endpoint, method, response_status, response_time_ms, cache_hit)
+- [x] T030 Implement structured logging integration in `apps/api/src/middleware/dashboard-logging.middleware.ts` (log DASHBOARD_REQUEST_START, LICENSE_VALIDATION_PASS, PERMISSION_CHECK_PASS, DASHBOARD_QUERY_EXECUTED, RESPONSE_SENT, AUTHORIZATION_FAILED, QUERY_PERFORMANCE_ALERT with required fields: timestamp, level, service, correlation_id, user_id, workspace_id, endpoint, method, response_status, response_time_ms, cache_hit)
 
-- [ ] T031 Add performance monitoring metrics in `apps/api/src/metrics/dashboard-metrics.ts` (export mmc_dashboard_request_total counter, mmc_dashboard_request_duration_ms histogram, mmc_dashboard_cache_hit_rate gauge, mmc_dashboard_authorization_failures counter, percentile timings p50/p95/p99)
+- [x] T031 Capture performance baseline in `docs/mmc-dashboard-performance-baseline.md` (document query execution times from EXPLAIN ANALYZE, cache effectiveness baseline, connection pool utilization, response size metrics, performance SLA compliance verification, target <300ms all endpoints achieved)
 
 ---
 
