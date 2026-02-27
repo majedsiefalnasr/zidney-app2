@@ -189,7 +189,7 @@ export type CellRenderer<TRow = any> = (props: {
   column: any
 }) => any
 
-export type HeaderRenderer<TRow = any> = (props: {
+export type HeaderRenderer<_TRow = any> = (props: {
   column: any
   table: any
 }) => any
