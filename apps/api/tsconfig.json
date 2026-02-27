@@ -4,9 +4,6 @@
     "types": [
       "node",
       "vitest/globals"
-    ],
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "strict": false
+    ]
   }
 }
