@@ -1,9 +1,6 @@
 import type { InvitationWithMemberData } from '@zidney/types'
-import {
-  mmc_member_invitations,
-  mmc_members,
-  roles,
-} from '@zidney/types/db-schema'
+// @ts-ignore: LOGIC-BUG: @zidney/types/db-schema module path not resolved - see INFRA-001-LOGIC-09
+import { mmc_member_invitations, mmc_members, roles } from '@zidney/types/db-schema'
 // @ts-ignore: drizzle-orm not declared as dependency of domain-core [INFRA-001-DEPS-03]
 import { and, desc, eq } from 'drizzle-orm'
 // @ts-ignore: drizzle-orm/node-postgres not declared as dependency of domain-core [INFRA-001-DEPS-03]
