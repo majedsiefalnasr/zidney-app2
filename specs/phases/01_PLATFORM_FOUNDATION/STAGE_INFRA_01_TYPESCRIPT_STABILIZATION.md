@@ -4,18 +4,16 @@
 
 Status: DRAFT
 Risk Level: LOW
-Last Updated: 2026-02-27T00:02:00Z
+Last Updated: 2026-02-27T00:03:00Z
 
-Scope Defined:
+Scope Planned:
 
 - TypeScript strict compliance enforcement across apps/api, apps/worker, apps/mmc, packages/\*
-- tsconfig.base.json strict contract (9 compiler options), sub-package inheritance standardization
-- tsconfig.test.json override for noUnusedLocals/noUnusedParameters scoped to test paths
-- CI hard-fail gate via pnpm typecheck (exit code 0 required)
-- 5-pass migration strategy (sequential within package, parallel across packages)
-- Vendor @types stub pattern at packages/types/src/vendor/
-- ts-ignore policy: // ts-ignore: <reason> [<issue-ref>] format enforced
-- Logic bug discovery escape hatch (raise separate ticket, stub with safe interim type)
+- 866 confirmed TypeScript errors; Day 0 tsconfig hardening + 5-pass migration strategy
+- tsconfig.base.json: 3 missing strict options added; 4 weakening overrides removed
+- Two-step CI gate: pnpm typecheck:src (production) + pnpm typecheck:tests (tests, via tsconfig.test.json)
+- No DB changes, no API changes, no behavioral changes
+- Guardian verdicts: Architecture Checker PASS, API Designer PASS
 
 Deferred Scope:
 
@@ -25,10 +23,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
