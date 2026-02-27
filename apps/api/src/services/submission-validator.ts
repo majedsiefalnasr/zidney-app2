@@ -196,7 +196,7 @@ function validateSubmissionItem(
     return errors
   }
 
-  const question = questions[item.question_index]
+  const question = questions[item.question_index]!
   const response = item.user_response
 
   // Validate response against question type

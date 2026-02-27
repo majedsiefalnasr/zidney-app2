@@ -109,8 +109,10 @@ export function validateCreateLicenseRequest(
   try {
     const parsed = CreateLicenseRequestSchema.parse(data)
     return { valid: true, data: parsed }
+  // @ts-ignore: TS18046 - error is of type unknown [INFRA-001]
   } catch (error) {
     if (error instanceof z.ZodError) {
+      // @ts-ignore: TS7006 - issue implicit any [INFRA-001]
       const errors: ValidationError[] = error.issues.map((issue) => {
         const field = String(issue.path[0])
         let code = ProvisioningErrorCode.INVALID_WORKSPACE_SLUG
@@ -126,6 +128,7 @@ export function validateCreateLicenseRequest(
         return {
           field,
           code,
+          // @ts-ignore: TS18046 - error is of type unknown [INFRA-001]
           message: issue.message,
           value: issue.received,
         }

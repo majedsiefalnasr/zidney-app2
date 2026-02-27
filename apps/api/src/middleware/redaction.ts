@@ -47,7 +47,7 @@ export function redactSensitiveData(str: string): string {
 
   // Apply email redaction (with partial masking for context)
   redacted = redacted.replace(REDACTION_PATTERNS.email, (email) => {
-    const [name] = email.split('@')
+    const [name] = email.split('@') as [string]
     const maskedName = name.charAt(0) + '*'.repeat(name.length - 1)
     return `${maskedName}@***`
   })

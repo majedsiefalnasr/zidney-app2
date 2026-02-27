@@ -225,7 +225,7 @@ export function getVersionGradingConfig(productVersion: string): any {
 
   // Look up version-specific grading config
   // For 1.x versions, all use 1.0.0 grading logic
-  const majorVersion = parseInt(versionMatch[1], 10)
+  const majorVersion = parseInt(versionMatch[1]!, 10)
   if (majorVersion === 1) {
     return gradingByVersion['1.0.0']
   }

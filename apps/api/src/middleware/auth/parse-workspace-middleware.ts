@@ -32,8 +32,8 @@
  * - Every route must validate workspace context before accessing tenant DB
  */
 
-import { Context, Next } from 'hono'
 import { createLogger } from '@zidney/logger'
+import { Context, Next } from 'hono'
 import { db } from '../../db'
 
 const logger = createLogger('parse-workspace')
@@ -61,14 +61,14 @@ function extractSlugFromSubdomain(host: string): string | null {
   const [hostWithoutPort] = host.split(':')
 
   // Split by dots
-  const parts = hostWithoutPort.split('.')
+  const parts = hostWithoutPort!.split('.')
 
   // If less than 2 parts or only "api", "mmc" → no workspace
   if (parts.length < 2) {
     return null
   }
 
-  const subdomain = parts[0]
+  const subdomain = parts[0]!
 
   // Skip reserved subdomains
   if (['api', 'mmc', 'www', 'admin', 'support', 'docs'].includes(subdomain)) {

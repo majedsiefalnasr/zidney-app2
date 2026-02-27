@@ -48,7 +48,7 @@ export class TenantResolver {
       const parts = host.split('.')
       if (parts.length >= 3) {
         // Return first part as slug (e.g., acme-university.zidney.app → acme-university)
-        return parts[0]
+        return parts[0]!
       }
     }
 
@@ -56,7 +56,7 @@ export class TenantResolver {
     const path = c.req.path
     const path_match = path.match(/^\/workspace\/([a-z0-9-]+)/)
     if (path_match) {
-      return path_match[1]
+      return path_match[1]!
     }
 
     // Try URL parameter

@@ -73,7 +73,7 @@ export function createAuthContextMiddlewareStage06(
         )
       }
 
-      const token = token_match[1]
+      const token = token_match[1]!
 
       // TODO: Implement JWT verification
       // For now, assume token is pre-verified by upstream (e.g., API Gateway)

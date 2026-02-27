@@ -48,7 +48,7 @@ function getClientIP(c: Context): string {
   // Check for proxy headers first
   const forwarded = c.req.header('x-forwarded-for')
   if (forwarded) {
-    return forwarded.split(',')[0].trim()
+    return forwarded.split(',')[0]!.trim()
   }
 
   const xRealIP = c.req.header('x-real-ip')

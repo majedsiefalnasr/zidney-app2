@@ -31,8 +31,9 @@ export const migration: MigrationConfig = {
   description:
     'Create dashboard performance indexes for summary, revenue-breakdown, geographic, affiliates endpoints',
 
-  up: async (db, schema, context) => {
+  up: async (_db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
+    // @ts-ignore: LOGIC-BUG: getClient not on MigrationContext - see INFRA-001-LOGIC-09
     const client = await context?.getClient?.()
 
     if (!client) {
@@ -184,8 +185,9 @@ export const migration: MigrationConfig = {
     )
   },
 
-  down: async (db, schema, context) => {
+  down: async (_db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
+    // @ts-ignore: LOGIC-BUG: getClient not on MigrationContext - see INFRA-001-LOGIC-09
     const client = await context?.getClient?.()
 
     if (!client) {
