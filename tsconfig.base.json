@@ -33,6 +33,12 @@
       "@zidney/domain-core/*": [
         "packages/domain-core/src/*"
       ],
+      "@zidney/domain-core/mmc-dashboard": [
+        "packages/domain-core/mmc-dashboard/index.ts"
+      ],
+      "@zidney/domain-core/mmc-dashboard/*": [
+        "packages/domain-core/mmc-dashboard/*"
+      ],
       "@zidney/logger": [
         "packages/logger/src/index.ts"
       ],
