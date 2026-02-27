@@ -77,7 +77,7 @@ export class LicenseValidationService {
         }
       }
 
-      const license = result.rows[0]
+      const license = result.rows[0]!
 
       // Check if license is in a valid state for provisioning
       if (license.status === 'DELETED' || license.status === 'ARCHIVED') {
@@ -205,10 +205,12 @@ export class LicenseValidationService {
     requiredVersion: string
   ): boolean {
     try {
-      const [licenseMajor, licenseMinor] = licenseVersion.split('.').map(Number)
+      const [licenseMajor, licenseMinor] = licenseVersion
+        .split('.')
+        .map(Number) as [number, number]
       const [requiredMajor, requiredMinor] = requiredVersion
         .split('.')
-        .map(Number)
+        .map(Number) as [number, number]
 
       // Same major version, license minor >= required minor
       if (licenseMajor === requiredMajor) {

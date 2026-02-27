@@ -238,7 +238,7 @@ export async function startJobProcessor(
   // eslint-disable-next-line no-constant-condition
   while (true) {
     try {
-      const currentType = jobTypes[typeIndex % jobTypes.length]
+      const currentType = jobTypes[typeIndex % jobTypes.length]!
 
       // Process one job from current queue
       await processJob(currentType, dequeue_timeout)

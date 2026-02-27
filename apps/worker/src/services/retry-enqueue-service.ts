@@ -92,6 +92,7 @@ export class RetryEnqueueService {
         ...job,
         retryCount,
         status: ProvisioningJobStatus.RETRYING,
+        // @ts-ignore: LOGIC-BUG: lastRetryAt does not exist in ProvisioningJob type — see INFRA-001-LOGIC-09
         lastRetryAt: new Date().toISOString(),
       }
 

@@ -58,7 +58,7 @@ export class MigrationExecutor {
       const match = filename.match(/^(\d+)-(.+)\.sql$/)
       if (!match) continue
 
-      const ordinal = parseInt(match[1], 10)
+      const ordinal = parseInt(match[1]!, 10)
       const version = `${ordinal}`
 
       migrations.push({
@@ -203,7 +203,7 @@ export class MigrationExecutor {
 
         // Update schema_version with latest version
         if (pending.length > 0) {
-          const latest = pending[pending.length - 1]
+          const latest = pending[pending.length - 1]!
           await client.query(
             `
             UPDATE schema_version

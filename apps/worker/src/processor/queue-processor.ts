@@ -294,7 +294,7 @@ export class TaskQueueProcessor {
       return false
     }
 
-    const dlqMessage = this.dlqQueue[index]
+    const dlqMessage = this.dlqQueue[index]!
 
     this.logger.info('Manually retrying DLQ message', {
       task_type: dlqMessage.taskType,

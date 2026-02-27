@@ -1,5 +1,5 @@
-import { randomUUID } from 'crypto'
 import { logger } from '@zidney/logger'
+import { randomUUID } from 'crypto'
 
 export interface JobQueueEntry {
   job_id: string
@@ -201,7 +201,7 @@ export class DLQManager {
         [workspaceId]
       )
 
-      return parseInt(result.rows[0].count || '0')
+      return parseInt(result.rows[0]?.count ?? '0')
     } catch (error) {
       logger.error(`DLQ size query error`, {
         workspace_id: workspaceId,

@@ -20,8 +20,8 @@
  * ADRs: ADR-0001 (tenant isolation)
  */
 
-import { Pool } from 'pg'
 import { logger } from '@zidney/logger'
+import { Pool } from 'pg'
 
 /**
  * Interface: Retry Configuration
@@ -99,7 +99,7 @@ export async function handleJobFailure(
       currentRetryCount - 1,
       retryConfig.backoffMs.length - 1
     )
-    const delayMs = retryConfig.backoffMs[backoffIndex]
+    const delayMs = retryConfig.backoffMs[backoffIndex]!
 
     logger.info(
       {

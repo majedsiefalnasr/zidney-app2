@@ -54,14 +54,14 @@ export class DLQHandler {
   ): Promise<boolean> {
     try {
       const dlqEntry: DLQEntry = {
-        job_id: job.id,
+        job_id: job.id!,
         license_id: job.licenseId,
         workspace_slug: job.workspaceSlug,
         retry_count: job.retryCount || 0,
         max_retries: job.retryPolicy?.maxRetries || 3,
         error_code: errorCode,
         error_message: errorMessage,
-        last_error_step: job.currentStep,
+        last_error_step: job.currentStep as string,
         moved_to_dlq_at: new Date().toISOString(),
         job_payload: job,
         requires_manual_intervention:

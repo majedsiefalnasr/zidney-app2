@@ -20,13 +20,13 @@
  * ADRs: ADR-0002 (snapshot model), ADR-0006 (server time)
  */
 
+import { logger } from '@zidney/logger'
 import {
   Attempt,
   AttemptMode,
   QuestionType,
   UserAnswer,
 } from '@zidney/types/attempt'
-import { logger } from '@zidney/logger'
 
 /**
  * Interface: Grading Result
@@ -144,7 +144,7 @@ export async function gradeAttempt(
     let totalEarned = 0
 
     for (let i = 0; i < questions.length; i++) {
-      const question = questions[i]
+      const question = questions[i]!
       const userAnswer = answerMap.get(question.id)
 
       const result = scoreQuestion(question, userAnswer, gradingConfig)
