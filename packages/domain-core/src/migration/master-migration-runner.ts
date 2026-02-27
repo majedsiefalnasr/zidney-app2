@@ -64,8 +64,8 @@ export async function runMasterMigrations(
           )
         }
 
-        // Calculate checksum
-        const checksum = calculateChecksum(sqlContent)
+        // Calculate checksum (reserved for future integrity verification)
+        void calculateChecksum(sqlContent)
 
         // Execute SQL
         try {
@@ -80,7 +80,7 @@ export async function runMasterMigrations(
 
       // Update platform_settings.current_schema_version
       // Extract latest version from last migration
-      const lastMigrationFile = migrationFiles[migrationFiles.length - 1]
+      const lastMigrationFile = migrationFiles[migrationFiles.length - 1]!
       const lastSqlContent = readFileSync(
         join(migrationsDir, lastMigrationFile),
         'utf-8'

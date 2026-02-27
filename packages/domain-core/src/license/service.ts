@@ -794,8 +794,6 @@ export async function restoreFromArchive(
       }
     }
 
-    const _snapshot = snapshotResult.rows[0]
-
     // TODO: Implement schema compatibility check
     // For now, proceed with restore job
 
@@ -1208,15 +1206,13 @@ export async function deleteLicense(
 
     // Delete license (mark as DELETED + set timestamp)
     const now = new Date()
-    const deleteResult = await client.query(
+    await client.query(
       `UPDATE licenses 
        SET status=$1, deleted_at=$2, updated_at=$2 
        WHERE id=$3 
        RETURNING *`,
       ['DELETED', now, license_id]
     )
-
-    const _deletedLicense = deleteResult.rows[0]
 
     // Commit transaction
     await client.query('COMMIT')

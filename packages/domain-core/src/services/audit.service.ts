@@ -16,6 +16,7 @@
  * - No update/delete capability (enforced at DB level)
  */
 
+// @ts-ignore: postgres not declared as dependency of domain-core [INFRA-001-DEPS-05]
 import { Database } from 'postgres'
 
 export type ActionType =
@@ -292,7 +293,7 @@ export class AuditService {
   async logInvitationAccepted(
     invitationId: string,
     newMemberId: string,
-    email: string,
+    _email: string,
     correlationId: string,
     ipAddress: string | null,
     userAgent: string | null

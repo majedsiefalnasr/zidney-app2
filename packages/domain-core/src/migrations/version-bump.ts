@@ -19,7 +19,7 @@ export function parseVersion(version: string): {
   if (parts.length !== 3 || parts.some((p) => isNaN(p))) {
     throw new Error(`Invalid version format: ${version}. Expected X.Y.Z`)
   }
-  return { major: parts[0], minor: parts[1], patch: parts[2] }
+  return { major: parts[0]!, minor: parts[1]!, patch: parts[2]! }
 }
 
 /**

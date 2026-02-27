@@ -53,8 +53,12 @@ export interface InitTenantSchemaResult {
 export async function initTenantSchema(
   payload: InitTenantSchemaPayload
 ): Promise<InitTenantSchemaResult> {
-  const { workspace_id, task_id, schema_version, schema_file_checksum } =
-    payload
+  const {
+    workspace_id: _workspace_id,
+    task_id: _task_id,
+    schema_version: _schema_version,
+    schema_file_checksum: _schema_file_checksum,
+  } = payload
 
   // Implementation in: apps/worker/src/tasks/init-tenant-schema.ts
   throw new Error(

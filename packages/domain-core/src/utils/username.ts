@@ -1,6 +1,9 @@
+// @ts-ignore: @zidney/types/db-schema subpath not declared in packages/types exports field [INFRA-001-DEPS-02]
 import { mmc_members } from '@zidney/types/db-schema'
 import { randomBytes } from 'crypto'
+// @ts-ignore: drizzle-orm not declared as dependency of domain-core [INFRA-001-DEPS-03]
 import { eq } from 'drizzle-orm'
+// @ts-ignore: drizzle-orm/node-postgres not declared as dependency of domain-core [INFRA-001-DEPS-03]
 import type { Database } from 'drizzle-orm/node-postgres'
 
 /**
@@ -12,7 +15,7 @@ function generateRandomSuffix(length: number = 8): string {
   const bytes = randomBytes(length)
 
   for (let i = 0; i < length; i++) {
-    result += chars[bytes[i] % chars.length]
+    result += chars[bytes[i]! % chars.length]!
   }
 
   return result
@@ -23,7 +26,7 @@ function generateRandomSuffix(length: number = 8): string {
  * Extracts the part before @ and normalizes it
  */
 function generateUsernameFromEmail(email: string): string {
-  const prefix = email.split('@')[0]
+  const prefix = email.split('@')[0]!
 
   // Normalize: lowercase, remove special chars, keep only alphanumeric and dots/underscores
   const normalized = prefix

@@ -8,6 +8,7 @@
  * Password hashing and comparison using bcrypt
  */
 
+// @ts-ignore: bcryptjs not declared as dependency of domain-core [INFRA-001-DEPS-01]
 import * as bcrypt from 'bcryptjs'
 
 const BCRYPT_COST = 12

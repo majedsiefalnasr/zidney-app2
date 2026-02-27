@@ -8,7 +8,7 @@
   "scripts": {
     "typecheck:src": "tsc --noEmit",
     "typecheck:tests": "tsc --noEmit -p tsconfig.test.json",
-    "typecheck": "pnpm typecheck:src && pnpm typecheck:tests",
+    "typecheck": "bun typecheck:src && bun typecheck:tests",
     "lint": "eslint .",
     "test": "vitest run",
     "test:unit": "vitest run --dir tests/unit",

@@ -22,11 +22,11 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Pool, QueryResultRow } from 'pg'
+import { Pool } from 'pg'
 
 const logger = createLogger('ProvisioningIdempotencyHandler')
 
-export interface ProvisioningTaskRecord extends QueryResultRow {
+export interface ProvisioningTaskRecord {
   id: string
   workspace_id: string
   idempotency_key: string

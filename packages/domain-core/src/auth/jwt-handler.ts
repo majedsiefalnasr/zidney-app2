@@ -104,10 +104,14 @@ export async function signMmcToken(user: {
     exp: Math.floor(Date.now() / 1000) + 15 * 60, // 15 minutes
   }
 
-  return jwt.sign(payload as unknown as Record<string, unknown>, config.secret, {
-    algorithm: config.algorithm,
-    noTimestamp: false, // Let jwt lib manage iat/exp
-  })
+  return jwt.sign(
+    payload as unknown as Record<string, unknown>,
+    config.secret,
+    {
+      algorithm: config.algorithm,
+      noTimestamp: false, // Let jwt lib manage iat/exp
+    }
+  )
 }
 
 /**
@@ -156,9 +160,13 @@ export async function signBackofficeToken(
     exp: Math.floor(Date.now() / 1000) + 15 * 60,
   }
 
-  return jwt.sign(payload as unknown as Record<string, unknown>, config.secret, {
-    algorithm: config.algorithm,
-  })
+  return jwt.sign(
+    payload as unknown as Record<string, unknown>,
+    config.secret,
+    {
+      algorithm: config.algorithm,
+    }
+  )
 }
 
 /**
@@ -209,9 +217,13 @@ export async function signFrontofficeToken(
     exp: Math.floor(Date.now() / 1000) + 15 * 60,
   }
 
-  return jwt.sign(payload as unknown as Record<string, unknown>, config.secret, {
-    algorithm: config.algorithm,
-  })
+  return jwt.sign(
+    payload as unknown as Record<string, unknown>,
+    config.secret,
+    {
+      algorithm: config.algorithm,
+    }
+  )
 }
 
 /**
@@ -298,7 +310,7 @@ export function extractTokenFromHeader(authHeader: string | undefined): string {
     )
   }
 
-  return parts[1]
+  return parts[1]!
 }
 
 /**

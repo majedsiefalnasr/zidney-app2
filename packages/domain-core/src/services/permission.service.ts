@@ -18,6 +18,7 @@
  */
 
 import { PermissionDomain, RolePermission } from '@zidney/types/mmc.types'
+// @ts-ignore: postgres not declared as dependency of domain-core [INFRA-001-DEPS-05]
 import { Database } from 'postgres'
 
 /**
@@ -91,7 +92,7 @@ export class PermissionService {
       [roleId]
     )
 
-    return result.rows.map((r) => ({
+    return result.rows.map((r: any) => ({
       id: r.id,
       role_id: r.role_id,
       domain: r.domain,
@@ -126,7 +127,7 @@ export class PermissionService {
       [roleId]
     )
 
-    return result.rows.map((r) => ({
+    return result.rows.map((r: any) => ({
       id: r.id,
       role_id: r.role_id,
       domain: r.domain,
@@ -174,7 +175,7 @@ export class PermissionService {
 
     const result = await this.db.query(query, [roleId, ...domains])
 
-    return result.rows.map((r) => ({
+    return result.rows.map((r: any) => ({
       id: r.id,
       role_id: r.role_id,
       domain: r.domain,

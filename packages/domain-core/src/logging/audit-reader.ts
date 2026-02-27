@@ -25,7 +25,7 @@ interface ReadAuditLogsOptions {
 }
 
 export async function readAuditLogs(
-  db: Pool,
+  _db: Pool,
   license_id: string,
   options: ReadAuditLogsOptions = {}
 ): Promise<{
@@ -34,7 +34,7 @@ export async function readAuditLogs(
   total_count?: number
   error?: string
 }> {
-  const { limit = 50, offset = 0, actor_type, date_from, date_to } = options
+  const { limit = 50, offset = 0, actor_type } = options
 
   try {
     logger.info(
