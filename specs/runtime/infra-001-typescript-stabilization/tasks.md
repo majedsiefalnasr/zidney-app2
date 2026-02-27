@@ -15,7 +15,7 @@
 ## Format
 
 ```
-- [ ] T001 [P] Description with exact file path
+- [X] T001 [P] Description with exact file path
 ```
 
 - `- [ ]` = incomplete checkbox
@@ -47,19 +47,19 @@
 
 > ⚠️ CRITICAL: All Phase 0 tasks must complete before Phase 1 begins. Removing strict overrides makes currently-suppressed errors visible — post-Day-0 baseline will exceed 866.
 
-- [ ] T001 Add `noImplicitAny: true`, `strictNullChecks: true`, and `noUncheckedIndexedAccess: true` to `tsconfig.base.json` compilerOptions (additions only — no existing options removed or reordered)
-- [ ] T002 Remove `strict: false` from `apps/api/tsconfig.json` compilerOptions
-- [ ] T003 Remove `noUnusedLocals: false` and `noUnusedParameters: false` from `apps/api/tsconfig.json` compilerOptions
-- [ ] T004 Remove `noUnusedLocals: false` and `noUnusedParameters: false` from `apps/api/tsconfig.app.json` compilerOptions
-- [ ] T005 Remove `noImplicitAny: false`, `noUnusedLocals: false`, and `noUnusedParameters: false` from `packages/domain-core/tsconfig.json` compilerOptions
-- [ ] T006 Remove `noUnusedLocals: false` and `noUnusedParameters: false` from `packages/ui-system/tsconfig.json` compilerOptions
-- [ ] T007 Create `tsconfig.test.json` at repo root extending `./tsconfig.base.json` with `noUnusedLocals: false`, `noUnusedParameters: false`, `types: ["node", "vitest/globals"]`, and `include` covering `tests/**/*`, `apps/*/tests/**/*`, `**/*.test.ts`, `**/*.spec.ts`
-- [ ] T008 Update root `tsconfig.json` to add `tests/**`, `**/*.test.ts`, `**/*.spec.ts`, `apps/*/tests/**/*` to `exclude` so production typecheck ignores test paths
-- [ ] T009 Create `packages/redis-utils/tsconfig.json` extending `../../tsconfig.base.json` with explicit `include: ["src/**/*"]` and `exclude: ["node_modules", "dist"]`
-- [ ] T010 Create `packages/types/tsconfig.json` extending `../../tsconfig.base.json` with explicit `include: ["src/**/*"]` and `exclude: ["node_modules", "dist"]`
-- [ ] T090 Audit all external references to the old `"type-check"` script name before renaming: run `grep -r '"type-check"\|type-check' . --include="*.yml" --include="*.sh" --include="*.md" --exclude-dir=node_modules` — for each match found in shell scripts, CI workflow files, or documentation, update the reference to the new name (`typecheck:src`, `typecheck:tests`, or `typecheck` as appropriate); complete all updates before executing T011
-- [ ] T011 Rename `"type-check"` script to `"typecheck:src"` in root `package.json`; add `"typecheck:tests": "tsc --noEmit -p tsconfig.test.json"` and `"typecheck": "pnpm typecheck:src && pnpm typecheck:tests"` scripts to root `package.json`
-- [ ] T088 Run `pnpm test` after all Day 0 tsconfig changes (T001–T011) are committed: confirm no test suite regressions before beginning any pass; if any tests fail, investigate and resolve before proceeding to Phase 1
+- [X] T001 Add `noImplicitAny: true`, `strictNullChecks: true`, and `noUncheckedIndexedAccess: true` to `tsconfig.base.json` compilerOptions (additions only — no existing options removed or reordered)
+- [X] T002 Remove `strict: false` from `apps/api/tsconfig.json` compilerOptions
+- [X] T003 Remove `noUnusedLocals: false` and `noUnusedParameters: false` from `apps/api/tsconfig.json` compilerOptions
+- [X] T004 Remove `noUnusedLocals: false` and `noUnusedParameters: false` from `apps/api/tsconfig.app.json` compilerOptions
+- [X] T005 Remove `noImplicitAny: false`, `noUnusedLocals: false`, and `noUnusedParameters: false` from `packages/domain-core/tsconfig.json` compilerOptions
+- [X] T006 Remove `noUnusedLocals: false` and `noUnusedParameters: false` from `packages/ui-system/tsconfig.json` compilerOptions
+- [X] T007 Create `tsconfig.test.json` at repo root extending `./tsconfig.base.json` with `noUnusedLocals: false`, `noUnusedParameters: false`, `types: ["node", "vitest/globals"]`, and `include` covering `tests/**/*`, `apps/*/tests/**/*`, `**/*.test.ts`, `**/*.spec.ts`
+- [X] T008 Update root `tsconfig.json` to add `tests/**`, `**/*.test.ts`, `**/*.spec.ts`, `apps/*/tests/**/*` to `exclude` so production typecheck ignores test paths
+- [X] T009 Create `packages/redis-utils/tsconfig.json` extending `../../tsconfig.base.json` with explicit `include: ["src/**/*"]` and `exclude: ["node_modules", "dist"]`
+- [X] T010 Create `packages/types/tsconfig.json` extending `../../tsconfig.base.json` with explicit `include: ["src/**/*"]` and `exclude: ["node_modules", "dist"]`
+- [X] T090 Audit all external references to the old `"type-check"` script name before renaming: run `grep -r '"type-check"\|type-check' . --include="*.yml" --include="*.sh" --include="*.md" --exclude-dir=node_modules` — for each match found in shell scripts, CI workflow files, or documentation, update the reference to the new name (`typecheck:src`, `typecheck:tests`, or `typecheck` as appropriate); complete all updates before executing T011
+- [X] T011 Rename `"type-check"` script to `"typecheck:src"` in root `package.json`; add `"typecheck:tests": "tsc --noEmit -p tsconfig.test.json"` and `"typecheck": "pnpm typecheck:src && pnpm typecheck:tests"` scripts to root `package.json`
+- [X] T088 Run `pnpm test` after all Day 0 tsconfig changes (T001–T011) are committed: confirm no test suite regressions before beginning any pass; if any tests fail, investigate and resolve before proceeding to Phase 1
 
 **Day 0 Checkpoint:** Run `npx tsc --noEmit 2>&1 | grep "error TS" | wc -l` — record post-Day-0 baseline. This number (expected ≥ 866) is the true starting point for Pass 1.
 
@@ -75,20 +75,20 @@
 
 ### Group A — Foundational Packages (independent, fully parallel)
 
-- [ ] T012 [P] Fix implicit any: add explicit parameter types, return types, and type aliases across `packages/types/src/` (2 errors baseline)
-- [ ] T013 [P] Fix implicit any: add explicit parameter types, return types, and type aliases across `packages/validation/src/` (3 errors baseline)
-- [ ] T014 [P] Fix implicit any: add explicit parameter types and return types across `packages/logger/src/`; ensure logger interface exports typed argument signatures
-- [ ] T015 [P] Fix implicit any: add explicit parameter types and return types across `packages/redis-utils/src/cache-client.ts` and all files in `packages/redis-utils/src/`
-- [ ] T089 [P] Fix implicit any in `packages/ui-system/src/`: add explicit parameter types and return types to all exported components and utilities (est. 3 errors; was masked by `noUnusedLocals: false` override removed in T006)
+- [X] T012 [P] Fix implicit any: add explicit parameter types, return types, and type aliases across `packages/types/src/` (2 errors baseline)
+- [X] T013 [P] Fix implicit any: add explicit parameter types, return types, and type aliases across `packages/validation/src/` (3 errors baseline)
+- [X] T014 [P] Fix implicit any: add explicit parameter types and return types across `packages/logger/src/`; ensure logger interface exports typed argument signatures
+- [X] T015 [P] Fix implicit any: add explicit parameter types and return types across `packages/redis-utils/src/cache-client.ts` and all files in `packages/redis-utils/src/`
+- [X] T089 [P] Fix implicit any in `packages/ui-system/src/`: add explicit parameter types and return types to all exported components and utilities (est. 3 errors; was masked by `noUnusedLocals: false` override removed in T006)
 
 **Group A Checkpoint:** Run `tsc --noEmit -p packages/types/tsconfig.json`, `tsc --noEmit -p packages/validation/tsconfig.json`, `tsc --noEmit -p packages/logger/tsconfig.json`, `tsc --noEmit -p packages/redis-utils/tsconfig.json` — all must exit 0 before T016.
 
 ### Group B — domain-core (depends on Group A, sequential)
 
-- [ ] T016 Fix implicit any in `packages/domain-core/src/services/invitation.service.ts`: add explicit parameter types, return types, and typed service interfaces (primary hotspot — noImplicitAny was suppressed)
-- [ ] T017 Fix implicit any in `packages/domain-core/src/licenses/index.ts`: define typed license data structure interfaces; replace untyped license data with explicit type aliases
-- [ ] T018 Fix implicit any in remaining `packages/domain-core/src/` files: add explicit parameter types and return types to all exported functions
-- [ ] T019 Exit gate: run `tsc --noEmit -p packages/domain-core/tsconfig.json` — must exit 0 before proceeding to Group C
+- [X] T016 Fix implicit any in `packages/domain-core/src/services/invitation.service.ts`: add explicit parameter types, return types, and typed service interfaces (primary hotspot — noImplicitAny was suppressed)
+- [X] T017 Fix implicit any in `packages/domain-core/src/licenses/index.ts`: define typed license data structure interfaces; replace untyped license data with explicit type aliases
+- [X] T018 Fix implicit any in remaining `packages/domain-core/src/` files: add explicit parameter types and return types to all exported functions
+- [X] T019 Exit gate: run `tsc --noEmit -p packages/domain-core/tsconfig.json` — must exit 0 before proceeding to Group C
 
 ### Group C — apps/api, apps/worker, apps/mmc (depend on domain-core; api hotspot files can run in parallel)
 
