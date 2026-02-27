@@ -7,7 +7,7 @@
 **Type:** Infrastructure Hardening (non-feature)
 **Inputs:** spec.md (CL-01–05), plan.md (Day 0 checklist + 5-pass strategy), research.md (codebase state audit)
 **Generated:** 2026-02-27
-**Total Tasks:** 86
+**Total Tasks:** 90
 **Baseline Error Count:** 866 (confirmed — `apps/api` strict: false was suppressing errors; true post-Day-0 baseline will be higher)
 
 ---
@@ -27,15 +27,15 @@
 
 ## Execution Order Summary
 
-| Phase   | Description                          | Tasks     | Parallelism                                                |
-| ------- | ------------------------------------ | --------- | ---------------------------------------------------------- |
-| Phase 0 | Day 0: tsconfig Hardening            | T001–T011 | T002–T005 can run in parallel after T001                   |
-| Phase 1 | Pass 1: Remove Implicit Any          | T012–T033 | T012–T015 parallel; T021–T028 parallel after T020          |
-| Phase 2 | Pass 2: Domain Contract Alignment    | T034–T040 | T035–T036 parallel after T034                              |
-| Phase 3 | Pass 3: Strict Null Handling         | T041–T051 | T041–T043 parallel; T046 parallel                          |
-| Phase 4 | Pass 4: Cross-Package Import Cleanup | T052–T063 | T052–T058 fully parallel                                   |
-| Phase 5 | Pass 5: Test File Strict Compliance  | T064–T081 | T064–T067 parallel; T069–T070 parallel; T074–T076 parallel |
-| Phase 6 | CI Gate + Final Validation           | T082–T086 | T082–T083 parallel                                         |
+| Phase   | Description                          | Tasks                       | Parallelism                                                           |
+| ------- | ------------------------------------ | --------------------------- | --------------------------------------------------------------------- |
+| Phase 0 | Day 0: tsconfig Hardening            | T001–T011, T088, T090       | T002–T005 can run in parallel after T001; T090 must run before T011   |
+| Phase 1 | Pass 1: Remove Implicit Any          | T012–T033, T089             | T012–T015 + T089 parallel; T021–T028 parallel after T020              |
+| Phase 2 | Pass 2: Domain Contract Alignment    | T034–T040                   | T035–T036 parallel after T034                                         |
+| Phase 3 | Pass 3: Strict Null Handling         | T041–T051                   | T041–T043 parallel; T046 parallel                                     |
+| Phase 4 | Pass 4: Cross-Package Import Cleanup | T052–T063                   | T052–T058 fully parallel                                              |
+| Phase 5 | Pass 5: Test File Strict Compliance  | T064–T081                   | T064–T067 parallel; T069–T070 parallel; T074–T076 parallel            |
+| Phase 6 | CI Gate + Final Validation           | T082, T083, T087, T084–T086 | T082–T083 parallel; T087 inserted post-QA audit; T084–T086 sequential |
 
 ---
 
@@ -57,7 +57,9 @@
 - [ ] T008 Update root `tsconfig.json` to add `tests/**`, `**/*.test.ts`, `**/*.spec.ts`, `apps/*/tests/**/*` to `exclude` so production typecheck ignores test paths
 - [ ] T009 Create `packages/redis-utils/tsconfig.json` extending `../../tsconfig.base.json` with explicit `include: ["src/**/*"]` and `exclude: ["node_modules", "dist"]`
 - [ ] T010 Create `packages/types/tsconfig.json` extending `../../tsconfig.base.json` with explicit `include: ["src/**/*"]` and `exclude: ["node_modules", "dist"]`
+- [ ] T090 Audit all external references to the old `"type-check"` script name before renaming: run `grep -r '"type-check"\|type-check' . --include="*.yml" --include="*.sh" --include="*.md" --exclude-dir=node_modules` — for each match found in shell scripts, CI workflow files, or documentation, update the reference to the new name (`typecheck:src`, `typecheck:tests`, or `typecheck` as appropriate); complete all updates before executing T011
 - [ ] T011 Rename `"type-check"` script to `"typecheck:src"` in root `package.json`; add `"typecheck:tests": "tsc --noEmit -p tsconfig.test.json"` and `"typecheck": "pnpm typecheck:src && pnpm typecheck:tests"` scripts to root `package.json`
+- [ ] T088 Run `pnpm test` after all Day 0 tsconfig changes (T001–T011) are committed: confirm no test suite regressions before beginning any pass; if any tests fail, investigate and resolve before proceeding to Phase 1
 
 **Day 0 Checkpoint:** Run `npx tsc --noEmit 2>&1 | grep "error TS" | wc -l` — record post-Day-0 baseline. This number (expected ≥ 866) is the true starting point for Pass 1.
 
@@ -77,6 +79,7 @@
 - [ ] T013 [P] Fix implicit any: add explicit parameter types, return types, and type aliases across `packages/validation/src/` (3 errors baseline)
 - [ ] T014 [P] Fix implicit any: add explicit parameter types and return types across `packages/logger/src/`; ensure logger interface exports typed argument signatures
 - [ ] T015 [P] Fix implicit any: add explicit parameter types and return types across `packages/redis-utils/src/cache-client.ts` and all files in `packages/redis-utils/src/`
+- [ ] T089 [P] Fix implicit any in `packages/ui-system/src/`: add explicit parameter types and return types to all exported components and utilities (est. 3 errors; was masked by `noUnusedLocals: false` override removed in T006)
 
 **Group A Checkpoint:** Run `tsc --noEmit -p packages/types/tsconfig.json`, `tsc --noEmit -p packages/validation/tsconfig.json`, `tsc --noEmit -p packages/logger/tsconfig.json`, `tsc --noEmit -p packages/redis-utils/tsconfig.json` — all must exit 0 before T016.
 
@@ -116,7 +119,7 @@
 - [ ] T035 [P] Align `apps/api` route handler return types to `packages/domain-core` function return types: remove all `as SomeDomainType` casts from API response construction in `apps/api/src/routes/`
 - [ ] T036 [P] Align `apps/worker` job payload types to `packages/domain-core` input contracts: ensure all worker job message interfaces are structurally assignable from domain input types without casting in `apps/worker/src/handlers/`
 - [ ] T037 Consolidate duplicate type declarations: move shared shapes declared inline in `apps/api/src/` or `apps/worker/src/` into `packages/types/src/` and replace with imports
-- [ ] T038 Verify error response types conform to `{ error: { code: string; message: string; details?: unknown; correlationId: string } }` schema across all `apps/api/src/` middleware and route error handlers
+- [ ] T038 Verify error response types conform to the canonical API error schema `{ success: boolean; data: T | null; error: { code: string; message: string } | null }` across all `apps/api/src/` middleware and route error handlers — ensure no handler returns a non-standard shape (e.g., no `correlationId` embedded inside the `error` object; `correlationId` belongs in response headers or a separate envelope field per AGENTS.md). **CL-04 protocol applies:** if audit reveals a handler currently emitting `correlationId` inside the `error` object — not just in the type declaration but in the actual runtime response construction — this is a behavioral deviation; stop, open a separate ticket, stub the non-conforming field as `unknown` in the type shape, and do NOT change the runtime response structure in this stage
 - [ ] T039 Exit gate: run `npx tsc --noEmit 2>&1 | grep "packages/domain-core\|apps/api\|apps/worker" | wc -l` — must return 0
 - [ ] T040 Run full test suite: `pnpm test` — must pass with zero failures before starting Pass 3
 
@@ -195,8 +198,9 @@
 **Purpose:** Lock in type correctness as a mandatory CI gate; confirm the full monorepo is zero-error.  
 **Exit condition:** All gates listed below must pass before the stage can be promoted to BACKEND CLOSED.
 
-- [ ] T082 [P] Create `.github/workflows/typecheck.yml`: add GitHub Actions typecheck job using `pnpm/action-setup@v3` with `version: '9'` and `actions/setup-node@v4` with `node-version: '22'`; include two steps — `pnpm typecheck:src` and `pnpm typecheck:tests` — both must exit 0 for the job to pass
-- [ ] T083 [P] Add `@typescript-eslint/ban-ts-comment` ESLint rule to the root ESLint config with options `{ "ts-ignore": { "descriptionFormat": "^: .+ \\[.+\\]$" } }` to enforce the documented `// ts-ignore: <reason> [<issue-ref>]` format above `@ts-ignore` directives
+- [ ] T082 [P] Create `.github/workflows/typecheck.yml`: workflow must include a top-level `on:` trigger block (`pull_request: branches: ['**']` and `push: branches: ['main', 'develop']`); use SHA-pinned Actions — `actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683` (v4.2.2), `pnpm/action-setup@fe02b74ab94a2950ada7f64132bfb13ba15ae9f1` (v3.0.0), `actions/setup-node@39370e3970a6d050c480ffad4ff0ed4d3fdee5af` (v4.1.0) — mutable tag aliases (`@v4`, `@v3`) are forbidden (supply chain risk); use `pnpm/action-setup@v3` config `version: '9'`; include three steps — `pnpm typecheck:src`, `pnpm typecheck:tests`, and `pnpm lint` — all three must exit 0 for the job to pass (see plan.md Design Decision 7 for the full YAML template including SHA-pinned references)
+- [ ] T083 [P] Add `@typescript-eslint/ban-ts-comment` ESLint rule to the root ESLint config with options `{ "ts-ignore": { "descriptionFormat": "^: .+ \\[.+\\]$" } }` to enforce the **inline** format `// @ts-ignore: <reason> [<issue-ref>]` — the description must appear on the same line as the directive (not on a preceding line); this is the canonical CL-05 format after amendment (see spec.md CL-05 and plan.md Design Decision 6)
+- [ ] T087 Create a CI-executable tsconfig inheritance audit script at `scripts/check-tsconfig-strict.sh`: the script must `grep` all `tsconfig.json` and `tsconfig.app.json` files in `apps/` and `packages/` for any occurrence of `"strict": false`, `"noImplicitAny": false`, `"strictNullChecks": false`, or `"noUncheckedIndexedAccess": false`; the script exits non-zero (and prints the violating file + line) if any such weakening override is found; add a `pnpm check:tsconfig` script entry in root `package.json` that runs this script; this implements SC-07 automated tsconfig conformance audit
 - [ ] T084 Final validation: run `pnpm typecheck` (aggregator — runs `typecheck:src` then `typecheck:tests`) — must exit 0 with zero error lines across the full monorepo
 - [ ] T085 Final validation: run `pnpm test` — full test suite must pass; run `pnpm test:integration` — integration tests must pass; confirm exit code 0 on both
 - [ ] T086 Promote stage: update `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_01_TYPESCRIPT_STABILIZATION.md` status from `IN PROGRESS` → `BACKEND CLOSED`; update `STAGE_TEST_01_PLATFORM_FOUNDATION` to reflect this stage's closure
@@ -207,14 +211,14 @@
 
 | Phase     | Description                          | Tasks  | Parallel Tasks |
 | --------- | ------------------------------------ | ------ | -------------- |
-| Phase 0   | Day 0: tsconfig Hardening            | 11     | 0              |
-| Phase 1   | Pass 1: Remove Implicit Any          | 22     | 9              |
+| Phase 0   | Day 0: tsconfig Hardening            | 13     | 0              |
+| Phase 1   | Pass 1: Remove Implicit Any          | 23     | 9              |
 | Phase 2   | Pass 2: Domain Contract Alignment    | 7      | 2              |
 | Phase 3   | Pass 3: Strict Null Handling         | 11     | 4              |
 | Phase 4   | Pass 4: Cross-Package Import Cleanup | 12     | 7              |
 | Phase 5   | Pass 5: Test File Strict Compliance  | 18     | 7              |
-| Phase 6   | CI Gate + Final Validation           | 5      | 2              |
-| **Total** | —                                    | **86** | **31**         |
+| Phase 6   | CI Gate + Final Validation           | 6      | 2              |
+| **Total** | —                                    | **90** | **31**         |
 
 ---
 
