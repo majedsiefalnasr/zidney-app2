@@ -5,15 +5,15 @@
   "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_01_TYPESCRIPT_STABILIZATION.md",
   "branch": "infra-001-typescript-stabilization",
   "base_branch": "develop",
-  "current_step": "specify",
+  "current_step": "clarify",
   "stage_status": "DRAFT",
-  "clarifications_resolved": false,
+  "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
   "tasks_total": null,
   "tasks_completed": null,
-  "last_updated": "2026-02-27T00:01:00Z",
+  "last_updated": "2026-02-27T00:02:00Z",
   "history": [
     {
       "event": "branch_created",
@@ -23,6 +23,10 @@
     {
       "event": "specify_complete",
       "timestamp": "2026-02-27T00:01:00Z"
+    },
+    {
+      "event": "clarifications_locked",
+      "timestamp": "2026-02-27T00:02:00Z"
     }
   ]
 }
