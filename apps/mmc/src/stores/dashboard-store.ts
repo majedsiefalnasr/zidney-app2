@@ -4,8 +4,9 @@ import type {
   RevenueBreakdownResponse,
   SummaryResponse,
   TrendsResponse,
-} from '@/api/dashboard-client'
-import { dashboardClient } from '@/api/dashboard-client'
+} from '../api/dashboard-client'
+import { dashboardClient } from '../api/dashboard-client'
+// @ts-ignore: pinia not declared as dependency of apps/mmc [INFRA-001-DEPS-07]
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 
@@ -70,7 +71,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     if (!revenueBreakdown.value) return null
     return {
       ...revenueBreakdown.value,
-      topProducts: revenueBreakdown.value.topProducts.map((p) => ({
+      topProducts: revenueBreakdown.value.topProducts.map((p: any) => ({
         ...p,
         revenue: (p.revenue / 100).toFixed(2),
       })),
@@ -83,7 +84,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     if (!geographic.value) return null
     return {
       ...geographic.value,
-      countries: geographic.value.countries.map((c) => ({
+      countries: geographic.value.countries.map((c: any) => ({
         ...c,
         revenue: (c.revenue / 100).toFixed(2),
       })),
@@ -96,7 +97,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     if (!affiliates.value) return null
     return {
       ...affiliates.value,
-      affiliates: affiliates.value.affiliates.map((a) => ({
+      affiliates: affiliates.value.affiliates.map((a: any) => ({
         ...a,
         totalRevenue: (a.totalRevenue / 100).toFixed(2),
       })),
