@@ -269,11 +269,11 @@ T057–T061 (Phase 5 Deployment, 4h) [FINAL]
 
 ## Performance Baseline Documentation
 
-- [ ] T071 Document performance baseline in `docs/mmc-dashboard-performance-baseline.md` (capture query plans for all 6 endpoints via EXPLAIN ANALYZE, baseline latencies (avg/p95/p99), cache hit rates, index usage report)
+- [x] T071 Document performance baseline in `docs/mmc-dashboard-performance-baseline.md` (capture query plans for all 6 endpoints via EXPLAIN ANALYZE, baseline latencies (avg/p95/p99), cache hit rates, index usage report)
 
 ## Security Review
 
-- [ ] T072 Conduct manual security review in `audits/mmc-dashboard-security-review.md` (verify no PII in logs, verify no secrets in response, verify SQL injection not possible via parameterized queries, verify authorization not bypassable, sign off)
+- [x] T072 Conduct manual security review in `audits/mmc-dashboard-security-review.md` (verify no PII in logs, verify no secrets in response, verify SQL injection not possible via parameterized queries, verify authorization not bypassable, sign off)
 
 ---
 
