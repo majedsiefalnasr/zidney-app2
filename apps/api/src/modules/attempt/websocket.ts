@@ -201,7 +201,7 @@ app.get('/ws/attempt/:id', async (c) => {
           // Remove messages older than 60 seconds
           while (
             messageTimestamps.length > 0 &&
-            messageTimestamps[0] < now - 60000
+            messageTimestamps[0]! < now - 60000
           ) {
             messageTimestamps.shift()
           }

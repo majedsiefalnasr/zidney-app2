@@ -175,7 +175,7 @@ export async function updateProgressHandler(c: Context) {
       }
     }
 
-    const question = attempt.question_snapshot.questions[question_index]
+    const question = attempt.question_snapshot.questions[question_index]!
 
     // Validate response format for this question type
     const responseValidation = validateResponseForQuestionType(

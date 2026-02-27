@@ -275,7 +275,7 @@ function extractSlugFromRequest(c: Context): string | null {
     // Extract subdomain (first part before first dot)
     const parts = host.split('.')
     if (parts.length >= 3) {
-      const subdomain = parts[0]
+      const subdomain = parts[0]!
       if (isValidSlug(subdomain)) {
         return subdomain
       }

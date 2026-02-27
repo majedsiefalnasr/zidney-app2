@@ -35,7 +35,7 @@ export async function getAttemptResultHandler(c: Context) {
   const logger = createLogger('attempts-result')
 
   try {
-    const { id: attemptId } = c.req.param()
+    const { id: attemptId = '' } = c.req.param()
 
     // Optional query parameters
     const pollTimeoutSec = parseInt(c.req.query('poll_timeout') || '2', 10)

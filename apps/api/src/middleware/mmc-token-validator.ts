@@ -40,7 +40,7 @@ export async function mmcTokenValidator(
 
   // Parse Bearer token
   const parts = authHeader.split(' ')
-  if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
+  if (parts.length !== 2 || parts[0]!.toLowerCase() !== 'bearer') {
     const error = getErrorDetails(ProvisioningErrorCode.UNAUTHORIZED_SERVICE)
     c.status(error.httpStatus as any)
     return c.json(
@@ -51,7 +51,7 @@ export async function mmcTokenValidator(
     )
   }
 
-  const token = parts[1]
+  const token = parts[1]!
   const expectedToken = process.env.MMC_SERVICE_TOKEN || 'dev-token-not-set'
 
   // Constant-time comparison to prevent timing attacks

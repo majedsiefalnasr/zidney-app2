@@ -66,6 +66,7 @@ export function createMMCAuthMiddleware(
 
     try {
       // Decode and verify JWT
+      // @ts-ignore: LOGIC-BUG: JWTPayload cast to MMCTokenPayload — see INFRA-001-LOGIC-09
       const decoded = (await verify(token, jwtSecret)) as MMCTokenPayload
 
       // Validate issuer

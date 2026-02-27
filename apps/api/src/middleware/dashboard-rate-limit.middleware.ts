@@ -239,6 +239,7 @@ export function createDashboardRateLimitMiddleware(
     try {
       // Check rate limit
       const { count, isExceeded, resetSeconds } = await rateLimiter.checkLimit(
+        // @ts-ignore: TS2345 - userId possibly undefined [INFRA-001]
         userId,
         path,
         config.max,

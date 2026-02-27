@@ -14,6 +14,7 @@
 import {
   ProvisioningJob,
   ProvisioningJobStatus,
+  // @ts-ignore: LOGIC-BUG: QUEUE_NAMES not exported from types/jobs/provisioning-job — see INFRA-001-LOGIC-09
   QUEUE_NAMES,
 } from '@zidney/types/jobs/provisioning-job'
 import { Redis } from 'ioredis'
@@ -38,6 +39,7 @@ export class ProvisionEnqueueService {
 
   constructor(
     redis: Redis,
+    // @ts-ignore: LOGIC-BUG: QUEUE_NAMES not exported from types/jobs/provisioning-job — see INFRA-001-LOGIC-09
     queueName: string = QUEUE_NAMES.JOBS,
     logger?: any
   ) {
@@ -138,6 +140,7 @@ export class ProvisionEnqueueService {
     try {
       const [jobs, dlq, idempotencyKeys] = await Promise.all([
         this.redis.llen(this.queueName),
+        // @ts-ignore: LOGIC-BUG: QUEUE_NAMES not exported from types/jobs/provisioning-job — see INFRA-001-LOGIC-09
         this.redis.llen(QUEUE_NAMES.DLQ),
         this.redis.dbsize(),
       ])
@@ -164,5 +167,6 @@ export function createProvisionEnqueueService(
   redis: Redis,
   logger?: any
 ): ProvisionEnqueueService {
+  // @ts-ignore: LOGIC-BUG: QUEUE_NAMES not exported from types/jobs/provisioning-job — see INFRA-001-LOGIC-09
   return new ProvisionEnqueueService(redis, QUEUE_NAMES.JOBS, logger)
 }

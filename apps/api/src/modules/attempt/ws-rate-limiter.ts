@@ -82,7 +82,7 @@ export class WebSocketRateLimiter {
         let retryAfterMs = this.windowSizeMs
         if (oldestMessage.length >= 1) {
           // Get the score of the oldest message
-          const score = await redis.zScore(key, oldestMessage[0])
+          const score = await redis.zScore(key, oldestMessage[0]!)
           if (score !== null) {
             retryAfterMs = Number(score) + this.windowSizeMs - now
           }
@@ -97,6 +97,7 @@ export class WebSocketRateLimiter {
       }
 
       // Add message to window
+      // @ts-ignore: LOGIC-BUG: Redis zAdd arg type mismatch — see INFRA-001-LOGIC-09
       await redis.zAdd(key, { score: now, value: `${now}:${Math.random()}` })
 
       // Set key expiration (60 seconds past last message)

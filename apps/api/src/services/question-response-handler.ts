@@ -353,7 +353,7 @@ export function validateMatchingResponse(
 
   // Validate each match has from/to
   for (let i = 0; i < response.matches.length; i++) {
-    const match = response.matches[i]
+    const match = response.matches[i]!
 
     if (!match.from || !match.to) {
       logger.warn('Matching validation failed: invalid pair at index', {
