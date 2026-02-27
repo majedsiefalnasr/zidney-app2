@@ -4,18 +4,30 @@
 
 Status: DRAFT
 Risk Level: UNKNOWN
-Initiated: 2026-02-27T00:00:00Z
+Last Updated: 2026-02-27T00:00:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- TypeScript strict compliance enforcement across apps/api, apps/worker, apps/mmc, packages/\*
+- tsconfig.base.json strict contract lock (9 compiler options)
+- Sub-package tsconfig inheritance standardization
+- CI hard-fail gate via pnpm typecheck (exit code 0 required)
+- Test file type compliance (mocks, helpers, fixtures)
+- Domain contract alignment (API ↔ domain ↔ worker)
+- ts-ignore policy enforcement (documented suppressions only)
+
+Deferred Scope:
+
+- apps/frontoffice (deferred to future frontend stabilization stage)
+- apps/backoffice (deferred to future frontend stabilization stage)
+- Generated files, node_modules, temporary scaffolding
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
