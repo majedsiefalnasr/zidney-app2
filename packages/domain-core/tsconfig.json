@@ -10,9 +10,6 @@
       "../../node_modules/@types"
     ],
     "isolatedModules": false,
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noImplicitAny": false,
     "lib": [
       "ES2022"
     ]

@@ -5,12 +5,15 @@
   },
   "include": [
     "apps/*/src/**/*",
-    "packages/*/src/**/*",
-    "tests/**/*"
+    "packages/*/src/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
-    "**/node_modules/**"
+    "**/node_modules/**",
+    "tests/**",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "apps/*/tests/**/*"
   ]
 }
