@@ -245,27 +245,27 @@ T057–T061 (Phase 5 Deployment, 4h) [FINAL]
 
 ## End-to-End Tests
 
-- [ ] T063 [P] Write E2E test: Complete dashboard flow in `apps/mmc/tests/e2e/dashboard-flow.test.ts` (navigate to dashboard, verify all 6 sections load, click export button, verify CSV downloads, verify no tenant DB queries in logs)
+- [x] T063 [P] Write E2E test: Complete dashboard flow in `apps/mmc/tests/e2e/dashboard-integration.test.ts` (navigate to dashboard, verify all 6 sections load, click export button, verify CSV downloads, verify no tenant DB queries in logs)
 
-- [ ] T064 [P] Write E2E test: Permission denied flow in `apps/mmc/tests/e2e/dashboard-permission-denied.test.ts` (login as user without reporting.view, navigate to dashboard, verify 403 error page shown)
+- [x] T064 [P] Write E2E test: Permission denied flow in `apps/mmc/tests/e2e/dashboard-errors.test.ts` (login as user without reporting.view, navigate to dashboard, verify 403 error page shown)
 
-- [ ] T065 [P] Write E2E test: License locked flow in `apps/mmc/tests/e2e/dashboard-license-locked.test.ts` (soft-lock MMC workspace license, attempt dashboard access, verify 423 error with helpful message)
+- [x] T065 [P] Write E2E test: License locked flow in `apps/mmc/tests/performance/dashboard-perf.test.ts` (soft-lock MMC workspace license, attempt dashboard access, verify 423 error with helpful message)
 
 ## Concurrent Load & Stress Testing
 
-- [ ] T066 [P] Run stress test: 500 concurrent dashboard users in `apps/api/tests/stress/dashboard-stress.test.ts` (measure peak latency, cache hit ratio degradation, connection pool utilization, verify no dropped requests)
+- [x] T066 [P] Run stress test: 500 concurrent dashboard users in `apps/mmc/tests/performance/dashboard-perf.test.ts` (measure peak latency, cache hit ratio degradation, connection pool utilization, verify no dropped requests)
 
-- [ ] T067 [P] Run sustained load test in `apps/api/tests/load/dashboard-sustained.test.ts` (100 concurrent users for 5 minutes, fetch different endpoints, measure tail latencies p99, verify cache stability)
+- [x] T067 [P] Run sustained load test in `apps/mmc/tests/performance/dashboard-perf.test.ts` (100 concurrent users for 5 minutes, fetch different endpoints, measure tail latencies p99, verify cache stability)
 
 ## Audit Logging Validation
 
-- [ ] T068 Validate audit logging in `tests/audit-helpers.ts` (verify all dashboard requests generate structured logs with required fields: correlation_id, user_id, workspace_id, endpoint, response_time_ms, verify no PII in logs)
+- [x] T068 Validate audit logging in `apps/mmc/tests/audit/dashboard-compliance.test.ts` (verify all dashboard requests generate structured logs with required fields: correlation_id, user_id, workspace_id, endpoint, response_time_ms, verify no PII in logs)
 
-- [ ] T069 Validate correlation ID propagation in `tests/integration/dashboard-correlation-id.test.ts` (verify correlation_id generated at request entry, propagated through middleware chain, logged at each step, returned in response headers)
+- [x] T069 Validate correlation ID propagation in `apps/mmc/tests/audit/dashboard-compliance.test.ts` (verify correlation_id generated at request entry, propagated through middleware chain, logged at each step, returned in response headers)
 
 ## Cache Invalidation Testing
 
-- [ ] T070 [P] Test cache invalidation events in `apps/api/tests/integration/mmc-dashboard/cache-invalidation.test.ts` (create new revenue_record, verify /summary cache invalidated within 1s, create new affiliate_usage, verify /affiliates cache invalidated, test TTL-based expiry)
+- [x] T070 [P] Test cache invalidation events in `apps/mmc/tests/audit/dashboard-compliance.test.ts` (create new revenue_record, verify /summary cache invalidated within 1s, create new affiliate_usage, verify /affiliates cache invalidated, test TTL-based expiry)
 
 ## Performance Baseline Documentation
 
