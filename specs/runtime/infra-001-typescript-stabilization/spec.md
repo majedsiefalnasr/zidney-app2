@@ -522,3 +522,71 @@ Upon completion:
 ---
 
 _Compliant with Zidney Constitution v1.2.0 — Infrastructure hardening stage. No behavioral changes introduced._
+
+---
+
+## Clarifications
+
+### Session 2026-02-27
+
+#### CL-01: noUnusedLocals/noUnusedParameters in Test Files
+
+**Question:** Should `noUnusedLocals` and `noUnusedParameters` be enforced in test files?
+
+**Decision:** Add a `tsconfig.test.json` extending `tsconfig.base.json` that disables only `noUnusedLocals` and `noUnusedParameters`, scoped to test paths (e.g., `tests/**`, `**/*.test.ts`, `**/*.spec.ts`). All other strict settings remain enforced in test files.
+
+**Rationale:** This is the standard monorepo pattern and avoids the dead-parameter false-positive problem idiomatic to test code (e.g., unused `_ctx` parameters in test helpers, intentionally unused fixture arguments). Disabling these two flags globally or per-file would be too broad; scoping via a dedicated `tsconfig.test.json` preserves maximum strictness everywhere else.
+
+---
+
+#### CL-02: Pass Sequencing Rigidity
+
+**Question:** Are the 5 migration passes (Pass 1–5) strictly sequential, or can teams run them in parallel across different packages?
+
+**Decision:** Passes are **strictly sequential within a package** but **can be parallelized across packages**. Each pass must have its own passing typecheck result before moving to the next pass within the same package.
+
+**Rationale:** This maintains incremental correctness and prevents compounding errors within a single package while allowing teams working on independent packages (e.g., `packages/domain-core` vs. `apps/worker`) to make progress concurrently. CI must gate each pass-commit on a clean typecheck for the affected package scope.
+
+---
+
+#### CL-03: Third-Party @types Placement and Missing Declaration Handling
+
+**Question:** How should type errors caused by missing or incorrect third-party `@types` packages be handled?
+
+**Decision:** Install the correct `@types/*` package first. If no `@types` package exists and the library ships no declarations, create a minimal ambient declaration file at `packages/types/src/vendor/<library-name>.d.ts` with a `declare module` stub. Document the stub with a comment explaining why it exists. `@ts-ignore` is the last resort and requires a justification comment in the format defined by CL-05.
+
+**Rationale:** Placing vendor stubs in `packages/types/src/vendor/` keeps them discoverable, versioned, and reviewable. This avoids scattering ad-hoc declaration files across app layers and ensures they are part of the shared type package included by all consumers. It also creates a clear audit trail for future `@types` package adoption.
+
+---
+
+#### CL-04: Logic Bug Discovery During Type Fixes — Pass Exit Gate Behavior
+
+**Question:** What happens when a type fix during Pass 2 (Domain Contract Alignment) reveals a real logic bug?
+
+**Decision:** Stop the pass, raise a separate issue/ticket, and document the bug in the PR description. Do NOT fix the logic bug within the TypeScript stabilization PR. Stub the type correctly using a safe interim type and track the logic fix separately. If the bug is in a critical path (attempt engine, license enforcement, tenant isolation), escalate immediately before proceeding.
+
+**Rationale:** Mixing behavioral fixes with type stabilization changes scope, increases review surface, and risks introducing regressions in critical subsystems. The TypeScript stabilization stage must remain a zero-behavioral-change operation. Interim type stubs (e.g., `unknown` narrowed at the call site) are acceptable as a holding pattern until the separate logic fix is merged and validated.
+
+---
+
+#### CL-05: @ts-ignore Justification Comment Format
+
+**Question:** What is the required format for `// @ts-ignore` justification comments?
+
+**Decision:** The justification comment must appear on the line immediately above the `// @ts-ignore` directive, using the format:
+
+```ts
+// ts-ignore: <reason> [<issue-ref>]
+// @ts-ignore
+```
+
+Example:
+
+```ts
+// ts-ignore: library missing type declarations [INFRA-001]
+// @ts-ignore
+```
+
+Suppressions without this exact preceding comment are forbidden and must fail code review.
+
+**Rationale:** A machine-parseable, consistent format enables automated lint rules (e.g., a custom ESLint rule or grep-based CI check) to detect and reject undocumented suppressions. The `[<issue-ref>]` field creates a traceable link to the tracking issue, making it possible to audit and remove suppressions once the upstream fix lands. This directly enforces FR-09.

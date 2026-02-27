@@ -3,18 +3,19 @@
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
-Last Updated: 2026-02-27T00:00:00Z
+Risk Level: LOW
+Last Updated: 2026-02-27T00:02:00Z
 
 Scope Defined:
 
 - TypeScript strict compliance enforcement across apps/api, apps/worker, apps/mmc, packages/\*
-- tsconfig.base.json strict contract lock (9 compiler options)
-- Sub-package tsconfig inheritance standardization
+- tsconfig.base.json strict contract (9 compiler options), sub-package inheritance standardization
+- tsconfig.test.json override for noUnusedLocals/noUnusedParameters scoped to test paths
 - CI hard-fail gate via pnpm typecheck (exit code 0 required)
-- Test file type compliance (mocks, helpers, fixtures)
-- Domain contract alignment (API ↔ domain ↔ worker)
-- ts-ignore policy enforcement (documented suppressions only)
+- 5-pass migration strategy (sequential within package, parallel across packages)
+- Vendor @types stub pattern at packages/types/src/vendor/
+- ts-ignore policy: // ts-ignore: <reason> [<issue-ref>] format enforced
+- Logic bug discovery escape hatch (raise separate ticket, stub with safe interim type)
 
 Deferred Scope:
 
@@ -24,10 +25,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
