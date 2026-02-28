@@ -143,6 +143,9 @@ services:
       RATE_LIMIT_ENABLED: "true"
       CORRELATION_ID_ENABLED: "true"
 
+      # Workspace Settings encryption (AES-256-GCM, 64 hex chars = 32 bytes)
+      WORKSPACE_SETTINGS_ENCRYPTION_KEY: ${WORKSPACE_SETTINGS_ENCRYPTION_KEY:-}
+
     ports:
       - "3000:3000"
 

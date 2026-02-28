@@ -45,6 +45,7 @@ import { validateJwtMiddleware } from './middleware/auth/validate-jwt'
 import { licenseEnforcementMiddleware } from './middleware/license-enforcement'
 import { createRateLimitMiddleware } from './middleware/rate-limit.middleware'
 import { backofficeContextRouter } from './routes/backoffice/context'
+import { workspaceSettingsRouter } from './routes/backoffice/settings'
 import { createBackofficeWsRoute } from './routes/backoffice/ws'
 
 // Utility logger
@@ -133,6 +134,9 @@ app.use(
 
 // Context endpoint — available to all authenticated staff (no RBAC guard)
 app.route('/api/v1', backofficeContextRouter)
+
+// Workspace Settings endpoints — requires institution admin RBAC
+app.route('/api/v1/backoffice/workspace', workspaceSettingsRouter)
 
 // WebSocket chain: correlationId (global) → tenantResolver → licenseEnforcement
 //                  → rateLimit(max:10, backoffice-ws) → authentication → WS upgrade
