@@ -1,0 +1,5 @@
+# act variables template – copy to .vars and fill in real values.
+# This file IS committed. The .vars file is gitignored.
+
+REGISTRY=ghcr.io
+IMAGE_NAME=

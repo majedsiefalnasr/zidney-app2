@@ -61,3 +61,7 @@ Thumbs.db
 
 # Vitest
 .vitest/
+
+# act (local GitHub Actions runner)
+.secrets
+.vars

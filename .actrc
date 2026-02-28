@@ -1,0 +1,52 @@
+# act configuration file
+# https://github.com/nektos/act
+#
+# This file is used to configure act for local GitHub Actions execution.
+# Run workflows locally with: act [event] [flags]
+# Examples:
+#   act push                         # simulate a push event
+#   act pull_request                 # simulate a PR event
+#   act -W .github/workflows/typecheck.yml   # run a specific workflow
+#   act -j typecheck                         # run a specific job
+#   act -l                                   # list all workflows
+
+# ─────────────────────────────────────────────────────────────────────────────
+# PLATFORM (Apple Silicon M1/M2/M3 → emulate amd64 for ubuntu-latest compat)
+# ─────────────────────────────────────────────────────────────────────────────
+--container-architecture linux/amd64
+
+# ─────────────────────────────────────────────────────────────────────────────
+# RUNNER IMAGE
+# catthehacker/ubuntu:act-* is a full-featured image compatible with act.
+# Use `ubuntu-latest=catthehacker/ubuntu:act-22.04` (medium, ~3GB, includes
+# most tools). For a full image identical to GitHub's runners, use
+# catthehacker/ubuntu:full-22.04 (~60GB).
+# ─────────────────────────────────────────────────────────────────────────────
+-P ubuntu-latest=catthehacker/ubuntu:act-22.04
+-P ubuntu-22.04=catthehacker/ubuntu:act-22.04
+-P ubuntu-20.04=catthehacker/ubuntu:act-20.04
+
+# ─────────────────────────────────────────────────────────────────────────────
+# SECRETS & VARIABLES
+# These files must never be committed – they are listed in .gitignore.
+# ─────────────────────────────────────────────────────────────────────────────
+--secret-file .secrets
+--var-file .vars
+
+# ─────────────────────────────────────────────────────────────────────────────
+# ARTIFACT SERVER
+# Stores workflow artifacts locally during test runs.
+# ─────────────────────────────────────────────────────────────────────────────
+--artifact-server-path /tmp/act-artifacts
+
+# ─────────────────────────────────────────────────────────────────────────────
+# BEHAVIOR
+# ─────────────────────────────────────────────────────────────────────────────
+# Pull the runner image if not available locally
+--pull=true
+
+# Remove containers after a run (keeps Docker clean)
+--rm
+
+# Reuse containers between steps (set to true to speed up iterative runs)
+--reuse=false
