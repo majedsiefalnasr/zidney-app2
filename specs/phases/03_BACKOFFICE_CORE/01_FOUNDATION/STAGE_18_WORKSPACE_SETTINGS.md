@@ -11,16 +11,15 @@ Database: Tenant DB only
 
 Status: DRAFT
 Risk Level: LOW
-Last Updated: 2026-02-28T19:20:00Z
+Last Updated: 2026-02-28T19:25:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- Migration: ALTER workspace_settings + CREATE workspace_settings_audit
-- 3 API endpoints (GET settings, PUT group, GET audit) under /api/v1/backoffice/
-- AES-256-GCM encryption for payment credentials
-- Optimistic locking with config_version
-- Full-diff immutable audit logging
-- Cursor-based audit pagination
+- Total: 34 atomic tasks
+- Setup/foundation: 7 tasks (migration, schema, types, errors, validation, encryption)
+- User stories: 23 tasks (7 stories with implementation + tests)
+- Integration: 1 task (full API flow test)
+- Polish: 3 tasks (final validation tasks)
 
 Deferred Scope:
 
@@ -30,10 +29,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
