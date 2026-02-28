@@ -11,22 +11,12 @@ Database: Tenant DB only
 
 Status: DRAFT
 Risk Level: MEDIUM
-Last Updated: 2026-02-28T00:20:00Z
+Last Updated: 2026-02-28T00:30:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- Runtime context injection (workspace_id, slug, license_status, enabled_modules, limits, versions)
-- License gate enforcement (ACTIVE required; 423/403/404 + structured error JSON with correlationId)
-- Module visibility contract (server-side enforcement)
-- RBAC skeleton — 4 tenant tables: roles, role_permissions, staff_users, staff_user_roles (single DDL migration)
-- RBAC Permission Guard middleware: createBackofficeRBACGuard(logger, resource, action)
-- AppLayout with dynamic, RBAC-aware Sidebar (packages/ui-system)
-- Workspace-scoped JWT validation with role/permissions claims
-- Limit awareness exposure (student_limit, staff_limit — informational only)
-- WebSocket lifecycle at /ws/backoffice — Redis-based license polling (WS_LICENSE_POLL_INTERVAL_MS, default 30 s)
-- Redis WS connection registry (ws:backoffice:{workspace_id}:{user_id}, TTL = WS_POLL_MS \* 3)
-- All API error responses include correlationId field
-- Update license-enforcement.ts to add correlationId to all non-ACTIVE error responses
+- Total: 29 atomic tasks
+- Phase 0: 2 (Types), Phase 1: 1 (Migration), Phase 2: 3 (Middleware), Phase 3: 2 (Routes), Phase 4: 1 (App Wiring), Phase 5: 15 (Frontend), Phase 6: 5 (Tests)
 
 Deferred Scope:
 
@@ -37,12 +27,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Architecture Checker PASS (Round 3)
-- API Designer PASS (Round 3)
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
