@@ -218,3 +218,88 @@ When loading workspace settings at runtime, the system provides sensible default
 - The token-based color system for branding accepts standard hex color codes or CSS custom property references — exact format to be defined during planning.
 - "Fail safely" for invalid critical config means returning a structured error response rather than a default value — the system should not silently serve wrong timezone/date format data.
 - MMC billing logic is unaffected by workspace-level payment gateway settings (MMC has its own billing path).
+
+---
+
+## Clarifications
+
+### Session 2026-02-28
+
+**CL-001: Concurrency Control — Conflict Behavior**
+
+_Question:_ The spec references `config_version` and states concurrent updates must either succeed or return a conflict error (SC-006, Edge Cases). What is the exact optimistic locking contract?
+
+_Resolution:_ **Optimistic locking with HTTP 409.** The client must send the current `config_version` with every update request. The server compares it against the stored value within the transaction. On mismatch, the server returns HTTP 409 Conflict with the current `config_version` in the response body. The client must re-fetch settings and retry. No auto-merge of non-overlapping changes — each update is atomic across the entire settings row.
+
+_Impact on requirements:_
+
+- FR-005 extended: Update payload must include `config_version`; server rejects if mismatch.
+- SC-006 refined: Conflict returns HTTP 409 with structured error including current `config_version`.
+
+---
+
+**CL-002: Audit Log Granularity**
+
+_Question:_ FR-025 says to log "changed fields." What level of detail should the audit log capture — field names only, or field names with old/new values?
+
+_Resolution:_ **Full diff with field names, previous values, and new values.** Payment credential fields are excluded from the diff (neither old nor new values recorded). For other fields, the audit entry records which fields changed and their before/after values. This enables full auditability and troubleshooting without compromising security.
+
+_Impact on requirements:_
+
+- FR-025 extended: Audit entries must include a structured diff (changed field name, old value, new value) for all non-sensitive fields.
+- FR-026 reinforced: Payment credential field values must not appear in the diff — only a flag like "encrypted_api_key: [REDACTED]" may appear.
+
+---
+
+**CL-003: Payment Credential Partial Update Semantics**
+
+_Question:_ Payment credentials are never returned in API responses. How does a client signal "keep existing credentials" vs. "clear them" vs. "replace them"?
+
+_Resolution:_ **Sentinel value pattern.** When updating payment_settings:
+
+- **Omit** the credential field → keep existing value unchanged
+- **Send `null`** → clear the credential (set to null in DB)
+- **Send a new string value** → encrypt and replace the credential
+
+This avoids exposing existing values while giving the client full control over credential lifecycle.
+
+_Impact on requirements:_
+
+- FR-016 extended: API must support sentinel-based partial update semantics for `encrypted_api_key` and `encrypted_secret_key`.
+- FR-017 extended: New string values are encrypted before persistence; null clears; omission preserves.
+
+---
+
+**CL-004: Error Response Contract for Validation and Conflict**
+
+_Question:_ What HTTP status codes and error format should be used for validation failures versus concurrency conflicts?
+
+_Resolution:_ **HTTP 422 for validation errors, HTTP 409 for concurrency conflicts.** Both use the standard Zidney error response format: `{ success: false, data: null, error: { code: string, message: string } }`.
+
+For validation errors (422):
+
+- `error.code`: `SETTINGS_VALIDATION_FAILED`
+- `error.message`: Human-readable; includes field-level details (which field, what rule was violated)
+
+For concurrency conflicts (409):
+
+- `error.code`: `SETTINGS_VERSION_CONFLICT`
+- `error.message`: Includes the current `config_version` to enable client retry
+
+_Impact on requirements:_
+
+- FR-005 extended: Validation failure returns HTTP 422 with `SETTINGS_VALIDATION_FAILED` code and field-level details.
+- New FR: Config version conflict returns HTTP 409 with `SETTINGS_VERSION_CONFLICT` code and current version.
+
+---
+
+**CL-005: Encryption Key Rotation and Credential Re-encryption**
+
+_Question:_ The spec covers encryption at rest but does not address key rotation. What happens when the encryption key changes?
+
+_Resolution:_ **Key rotation is out of scope for this stage.** The encryption service supports a single active key identified by environment/secrets management. If key rotation is needed in the future, a separate migration stage will handle re-encryption of all stored credentials. For this stage, the system stores a key identifier alongside the encrypted value to support future rotation without data loss.
+
+_Impact on requirements:_
+
+- FR-017 extended: Encrypted credential storage must include a key identifier (e.g., key version or alias) alongside the ciphertext to support future key rotation.
+- Deferred: Key rotation and re-encryption process → future stage.

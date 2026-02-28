@@ -10,31 +10,30 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
-Last Updated: 2026-02-28T19:05:00Z
+Risk Level: LOW
+Last Updated: 2026-02-28T19:10:00Z
 
 Scope Defined:
 
 - Single-row workspace_settings table in tenant DB (JSONB columns)
-- General, language, branding, payment, security settings groups
-- config_version tracking with optimistic concurrency
-- Immutable audit logging for all changes
-- Payment credential encryption (never exposed in API/logs)
-- Language fallback with default_language enforcement
-- Token-based branding (visual only)
+- Optimistic locking with config_version (409 on conflict)
+- Full-diff audit logging (credentials excluded)
+- Payment credential sentinel-based partial updates
+- 422 validation errors / 409 conflict errors
+- Key identifier stored for future rotation support
 
 Deferred Scope:
 
 - Password policy enforcement (future-ready structure only)
+- Encryption key rotation and re-encryption (future stage)
 - Translation management UI (separate stage)
-- Email/certificate template editing (separate stage)
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
