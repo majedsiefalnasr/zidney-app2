@@ -8,22 +8,21 @@ UI Foundation — Cross-Application Runtime Blueprint
 
 ## Stage Status
 
-Status: IN PROGRESS
+Status: BACKEND CLOSED
 Risk Level: LOW
-Last Updated: 2026-02-28T01:30:00Z
+Last Updated: 2026-02-28T02:00:00Z
 
-Drift Analysis: PASSED (9/9 constitutional criteria)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 161 / 161 completed
 
-Scope Authorized:
+Scope Closed:
 
-- 161 atomic tasks across 6 phases
-- Phase 1: 17 tasks (dependencies & config, including vitest.config.ts × 3)
-- Phase 2: 43 tasks (MMC delta migration)
-- Phase 3: 51 tasks (core layer scaffold, all 3 apps)
-- Phase 4: 6 tasks (ESLint import boundaries)
-- Phase 5: 28 tasks (tests — all .test.ts extension)
-- Phase 6: 16 tasks (validation gate)
+- Phase 1 (17 tasks): package.json, tsconfig, vite.config.ts, vitest.config.ts for all 3 apps
+- Phase 2 (43 tasks): MMC delta migration — flat components → module hierarchy
+- Phase 3 (51 tasks): Core layer — env, errors, token-store, API client (lazy getter + refresh queue), guards, router, state, useAuth, main.ts × 3 apps
+- Phase 4 (6 tasks): ESLint import/no-restricted-paths boundaries enforced in all 3 apps
+- Phase 5 (28 tasks): 196 unit tests added (MMC: 64, Backoffice: 70, Frontoffice: 62)
+- Phase 6 (16 tasks): Validation gate — ESLint ✅, tsc ✅, vite build ✅, vitest 196/196 ✅
 
 Deferred Scope:
 
@@ -33,12 +32,15 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- All 9 drift criteria passed — implementation authorized
-- 6/6 guardian verdicts PASS (2 rounds)
-- 7 blocking findings remediated (lazy getter, FR-33, vitest.config, afterEach, credentials test, redirect test, plan tables)
+- ADR alignment verified — no cross-tenant logic, no backend imports in UI layer
+- `getApiClient()` lazy getter pattern enforced (no Pinia activation race)
+- Boot order enforced: env → router → pinia → createApp → use(pinia) → use(router) → mount
+- `NormalizedError` sealed type prevents stack trace leakage
+- `pendingRefresh` queue enforces idempotency for token refresh
 
 Notes:
-Full drift analysis passed after 2 remediation rounds. Implementation gate open.
+Backend implementation complete. 12 bugs found and fixed during TDD. No structural backend modifications allowed.
+Modifications require a new migration stage.
 
 ---
 
