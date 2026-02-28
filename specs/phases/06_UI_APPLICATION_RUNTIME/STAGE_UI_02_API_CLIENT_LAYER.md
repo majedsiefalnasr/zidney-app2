@@ -10,18 +10,33 @@ UI Foundation — Centralized API Client Architecture
 
 Status: DRAFT
 Risk Level: UNKNOWN
-Initiated: 2026-02-28T22:00:00Z
+Last Updated: 2026-02-28T22:05:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Typed API client abstraction (client.ts) shared across MMC, Backoffice, Frontoffice
+- Auth token injection and 401 refresh/retry (single-flight)
+- Error normalization to AppError structure
+- 429 rate-limit surfacing (no auto-retry)
+- Idempotency key header support
+- Per-app base URL configuration
+- Request cancellation via AbortSignal
+- Correlation ID propagation
+- Mock HTTP adapter for testability
+- Lint enforcement against direct fetch/axios imports
+
+Deferred Scope:
+
+- Business endpoint implementations
+- WebSocket/SSE communication
+- Pagination UI logic
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
