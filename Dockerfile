@@ -33,13 +33,29 @@ RUN bun install --production --frozen-lockfile
 RUN bun pm ls --depth=0 | head -10
 
 # ============================================================================
+# STAGE 1b: Full Dependencies (including devDependencies)
+# ============================================================================
+# Purpose: Install ALL deps (including Vite, tsc, etc.) for the build step.
+# API/Worker runtime stages continue using the production-only `dependencies` stage.
+
+FROM oven/bun:1.2.4-alpine AS builder-deps
+
+WORKDIR /app
+
+COPY bun.lock ./
+COPY package.json ./
+
+# Install ALL dependencies (production + dev) needed for builds
+RUN bun install --frozen-lockfile
+
+# ============================================================================
 # STAGE 2: Builder (Monorepo Compilation)
 # ============================================================================
 # Purpose: Compile TypeScript → JavaScript; build app and packages
 # Input: Source code + dependencies from Stage 1
 # Output: /app/dist/*, /app/packages distributed for runtime
 
-FROM dependencies AS builder
+FROM builder-deps AS builder
 
 WORKDIR /app
 
@@ -53,9 +69,14 @@ COPY tsconfig.base.json ./
 # Note: apps/* have their own tsconfig.json
 RUN bun run build
 
+# Build backoffice SPA (Vue 3 + Vite)
+# Vite is a devDependency — requires builder-deps stage (all deps installed)
+RUN cd apps/backoffice && bun run build
+
 # Verify build artifacts exist
 RUN ls -la apps/api/dist 2>/dev/null || echo "API build verification pending"
 RUN ls -la apps/worker/dist 2>/dev/null || echo "Worker build verification pending"
+RUN ls -la apps/backoffice/dist 2>/dev/null || echo "Backoffice SPA build verification pending"
 
 # ============================================================================
 # STAGE 3: API Runtime
@@ -108,7 +129,7 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
 # - Stop accepting new connections
 # - Finish in-flight exam submissions (timeout: 30s)
 # - Exit cleanly
-SIGNAL SIGTERM
+STOPSIGNAL SIGTERM
 
 # Start API server
 CMD ["bun", "dist/api/index.js"]
@@ -160,7 +181,7 @@ HEALTHCHECK --interval=30s --timeout=5s --retries=3 \
   CMD bun -e "console.log('worker-ready'); process.exit(0)" || exit 1
 
 # Graceful shutdown
-SIGNAL SIGTERM
+STOPSIGNAL SIGTERM
 
 # Start worker process
 CMD ["bun", "dist/worker/index.js"]
@@ -178,9 +199,6 @@ FROM nginx:1.27.4-alpine3.20 AS nginx
 
 WORKDIR /etc/nginx
 
-# Copy hardened nginx configuration
-COPY ./docker/nginx.conf ./nginx.conf
-
 # Create non-root user for Nginx
 RUN set -x && \
     addgroup -g 101 --system nginx && \
@@ -188,14 +206,15 @@ RUN set -x && \
     mkdir -p /var/cache/nginx/client_temp && \
     chown -R nginx:nginx /var/cache/nginx /var/log/nginx /etc/nginx
 
-# Drop capabilities (defense in depth)
-# Can bind to privileged ports via docker-compose port mapping
-RUN echo "user nginx;" > /etc/nginx/nginx.conf
-
-# Copy custom Nginx config directory (optional)
-COPY --chown=nginx:nginx docker/nginx.conf /etc/nginx/nginx.conf
+# Copy hardened nginx configuration
+# Note: docker/nginx.conf is a directory — reference the actual file inside it.
+COPY --chown=nginx:nginx docker/nginx.conf/nginx.conf /etc/nginx/nginx.conf
 
 USER nginx
+
+# Copy built Backoffice SPA static assets
+# (built by the builder stage using Vite via builder-deps)
+COPY --from=builder --chown=nginx:nginx /app/apps/backoffice/dist /usr/share/nginx/html/backoffice/
 
 # Expose HTTP only (TLS handled by reverse proxy / CloudFlare)
 EXPOSE 80

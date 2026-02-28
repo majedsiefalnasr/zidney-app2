@@ -1,6 +1,6 @@
-import { configDefaults, defineConfig } from 'vitest/config'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import { configDefaults, defineConfig } from 'vitest/config'
 
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
@@ -9,8 +9,25 @@ export default defineConfig({
   resolve: {
     alias: [
       {
+        find: 'hono',
+        replacement: path.resolve(
+          __dirname,
+          'apps/api/node_modules/hono/dist/index.js'
+        ),
+      },
+      {
+        find: /^hono\/(.+)$/,
+        replacement: path.resolve(
+          __dirname,
+          'apps/api/node_modules/hono/dist/$1.js'
+        ),
+      },
+      {
         find: 'pg',
-        replacement: path.resolve(__dirname, 'apps/api/node_modules/pg/lib/index.js'),
+        replacement: path.resolve(
+          __dirname,
+          'apps/api/node_modules/pg/lib/index.js'
+        ),
       },
       {
         find: 'bcrypt',
@@ -64,7 +81,10 @@ export default defineConfig({
       },
       {
         find: '@zidney/domain-core',
-        replacement: path.resolve(__dirname, 'packages/domain-core/src/index.ts'),
+        replacement: path.resolve(
+          __dirname,
+          'packages/domain-core/src/index.ts'
+        ),
       },
       {
         find: '@zidney/logger',
@@ -76,11 +96,17 @@ export default defineConfig({
       },
       {
         find: '@zidney/validation',
-        replacement: path.resolve(__dirname, 'packages/validation/src/index.ts'),
+        replacement: path.resolve(
+          __dirname,
+          'packages/validation/src/index.ts'
+        ),
       },
       {
         find: '@zidney/redis-utils',
-        replacement: path.resolve(__dirname, 'packages/redis-utils/src/index.ts'),
+        replacement: path.resolve(
+          __dirname,
+          'packages/redis-utils/src/index.ts'
+        ),
       },
       {
         find: '@zidney/config',

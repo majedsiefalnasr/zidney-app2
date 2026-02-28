@@ -1,0 +1,24 @@
+{
+  "name": "@zidney/backoffice",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vue-tsc && vite build",
+    "preview": "vite preview"
+  },
+  "dependencies": {
+    "@zidney/types": "workspace:*",
+    "@zidney/ui-system": "workspace:*",
+    "pinia": "^2.1.0",
+    "vue": "^3.4.0",
+    "vue-router": "^4.0.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^5.0.0",
+    "typescript": "latest",
+    "vite": "^5.0.0",
+    "vue-tsc": "^2.0.0"
+  }
+}

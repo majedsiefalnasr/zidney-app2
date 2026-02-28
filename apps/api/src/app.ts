@@ -38,6 +38,15 @@ import { redactionMiddleware } from './middleware/redaction'
 import { registerStage06Routes } from './routes/attempts/index-stage06'
 import { registerStage06PhaseDRoutes } from './routes/attempts/submit-index'
 
+// ============================================================================
+// STAGE 17: BACKOFFICE ROUTES + MIDDLEWARE
+// ============================================================================
+import { validateJwtMiddleware } from './middleware/auth/validate-jwt'
+import { licenseEnforcementMiddleware } from './middleware/license-enforcement'
+import { createRateLimitMiddleware } from './middleware/rate-limit.middleware'
+import { backofficeContextRouter } from './routes/backoffice/context'
+import { createBackofficeWsRoute } from './routes/backoffice/ws'
+
 // Utility logger
 import { createLogger } from '@zidney/logger'
 
@@ -100,5 +109,48 @@ registerStage06PhaseDRoutes(app, logger)
 
 // Health checks, auth, etc. (no middleware dependency)
 app.get('/health', (c) => c.json({ status: 'ok' }))
+
+// ============================================================================
+// STAGE 17: BACKOFFICE MIDDLEWARE CHAIN + ROUTES
+// ============================================================================
+//
+// REST chain: correlationId (global) → tenantResolver → licenseEnforcement → schemaVersion
+//             → rateLimit(max:60) → authentication
+// Note: correlationIdMiddleware is applied globally at app.use('*') above — not duplicated here.
+//
+app.use(
+  '/api/v1/backoffice/*',
+  tenantResolver,
+  licenseEnforcementMiddleware,
+  schemaVersionMiddleware,
+  createRateLimitMiddleware({
+    windowMs: 60_000,
+    max: 60,
+    keyPrefix: 'backoffice',
+  }),
+  validateJwtMiddleware()
+)
+
+// Context endpoint — available to all authenticated staff (no RBAC guard)
+app.route('/api/v1', backofficeContextRouter)
+
+// WebSocket chain: correlationId (global) → tenantResolver → licenseEnforcement
+//                  → rateLimit(max:10, backoffice-ws) → authentication → WS upgrade
+// H-01: Rate limiting before WS upgrade prevents connection flood
+// Note: correlationIdMiddleware is applied globally at app.use('*') above — not duplicated here.
+app.use(
+  '/ws/backoffice',
+  tenantResolver,
+  licenseEnforcementMiddleware,
+  createRateLimitMiddleware({
+    windowMs: 60_000,
+    max: 10,
+    keyPrefix: 'backoffice-ws',
+  }),
+  validateJwtMiddleware()
+)
+
+// WebSocket endpoint (no RBAC guard)
+app.get('/ws/backoffice', createBackofficeWsRoute())
 
 export default app

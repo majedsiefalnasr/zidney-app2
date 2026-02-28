@@ -509,3 +509,52 @@ export function createPerEndpointRateLimiter(redis?: Redis) {
  */
 
 export default RateLimiter
+/**
+ * Factory: Creates a Hono-compatible rate-limit middleware with configurable
+ * window, max requests, and key prefix.
+ *
+ * Usage:
+ *   app.use('/api/v1/backoffice/*', createRateLimitMiddleware({ windowMs: 60_000, max: 60, keyPrefix: 'backoffice' }))
+ *
+ * @param options.windowMs  - Rate-limit window in milliseconds
+ * @param options.max       - Max requests per window per IP
+ * @param options.keyPrefix - Redis key prefix (for per-route isolation)
+ */
+export function createRateLimitMiddleware(options: {
+  windowMs: number
+  max: number
+  keyPrefix: string
+  redis?: Redis
+}) {
+  const limiter = new RateLimiter(options.redis)
+  const windowSec = Math.ceil(options.windowMs / 1000)
+
+  return async (ctx: Context, next: Next): Promise<void | Response> => {
+    const clientIp =
+      ctx.req.header('X-Forwarded-For')?.split(',')[0]?.trim() ||
+      ctx.req.header('X-Real-IP') ||
+      ctx.req.header('CF-Connecting-IP') ||
+      'unknown'
+
+    const key = `${options.keyPrefix}:${clientIp}`
+    const isLimited = await limiter.isLimited(key, options.max, windowSec)
+
+    if (isLimited) {
+      ctx.header('Retry-After', String(windowSec))
+      // @ts-ignore: ctx.json return type conflicts with MiddlewareHandler void signature [ts(2322)]
+      return ctx.json(
+        {
+          success: false,
+          data: null,
+          error: {
+            code: 'RATE_LIMIT_EXCEEDED',
+            message: 'Too many requests. Please try again later.',
+          },
+        },
+        429
+      )
+    }
+
+    await next()
+  }
+}
