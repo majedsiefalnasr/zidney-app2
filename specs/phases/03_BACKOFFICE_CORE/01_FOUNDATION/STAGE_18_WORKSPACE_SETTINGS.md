@@ -9,7 +9,35 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY
+Risk Level: LOW
+Closure Date: 2026-02-28
+
+Scope Closed:
+
+- Workspace settings CRUD (5 JSONB groups: general, language, branding, payment, security)
+- AES-256-GCM payment credential encryption with v1: key versioning
+- Optimistic locking via config_version (409 on conflict)
+- Immutable audit trail with DB-level trigger and cursor pagination
+- Full middleware chain enforcement (tenant → license → schema → rate → auth)
+- Zod validation for all 5 settings groups
+- 140 tests (124 unit + 16 integration)
+- 34 / 34 tasks completed
+
+Deferred Scope:
+
+- None
+
+Constitutional Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced
+- ADR-0006 Server-authoritative time enforced
+- ADR-0007 Version compatibility enforced
+- ADR-0008 Semantic versioning enforced
+
+Notes:
+Stage is production ready. No structural backend modifications allowed.
+Modifications require a new migration stage.
 
 ---
 
