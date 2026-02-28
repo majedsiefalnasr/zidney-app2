@@ -7,13 +7,17 @@
  * - ApiResponse interface flexible for data types
  */
 
+import { Module } from '@zidney/types/enums/Module'
 import {
   AuditAction,
-  AuditLogEntry,
   Product,
+  ProductAuditLogEntry,
   ProductStatus,
 } from '@zidney/types/products/Product'
 import { describe, expect, it } from 'vitest'
+
+// Alias for backward compat with test that used AuditLogEntry name
+type AuditLogEntry = ProductAuditLogEntry
 
 describe('T065: Product Type Tests', () => {
   describe('Product interface', () => {
@@ -59,14 +63,14 @@ describe('T065: Product Type Tests', () => {
       expect(product1.description).toBe('Some description')
 
       const product2: Partial<Product> = {
-        description: null,
+        description: undefined,
       }
-      expect(product2.description).toBeNull()
+      expect(product2.description).toBeUndefined()
     })
 
     it('should have enabled_modules array', () => {
       const product: Partial<Product> = {
-        enabled_modules: ['MODULE_ATTEMPT', 'MODULE_REPORTING'],
+        enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
       }
       expect(Array.isArray(product.enabled_modules)).toBe(true)
       expect(product.enabled_modules?.length).toBe(2)
@@ -92,7 +96,7 @@ describe('T065: Product Type Tests', () => {
     })
 
     it('should have timestamps', () => {
-      const now = new Date().toISOString()
+      const now = new Date()
       const product: Partial<Product> = {
         created_at: now,
         updated_at: now,
@@ -107,11 +111,11 @@ describe('T065: Product Type Tests', () => {
         name: { en: 'Complete Product', ar: 'منتج كامل' },
         slug: 'complete-product',
         description: 'A complete product',
-        enabled_modules: ['MODULE_ATTEMPT', 'MODULE_REPORTING'],
-        status: 'ACTIVE',
+        enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
+        status: ProductStatus.ACTIVE,
         current_version: 1,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        created_at: new Date(),
+        updated_at: new Date(),
       }
 
       expect(product.id).toBeDefined()
@@ -138,7 +142,11 @@ describe('T065: Product Type Tests', () => {
     })
 
     it('should have action field (CREATE|UPDATE|STATUS_CHANGE)', () => {
-      const actions: AuditAction[] = ['CREATE', 'UPDATE', 'STATUS_CHANGE']
+      const actions: AuditAction[] = [
+        AuditAction.CREATE,
+        AuditAction.UPDATE,
+        AuditAction.STATUS_CHANGE,
+      ]
 
       for (const action of actions) {
         const entry: Partial<AuditLogEntry> = { action }
@@ -147,7 +155,7 @@ describe('T065: Product Type Tests', () => {
     })
 
     it('should have timestamp field', () => {
-      const now = new Date().toISOString()
+      const now = new Date()
       const entry: Partial<AuditLogEntry> = {
         timestamp: now,
       }
@@ -168,9 +176,9 @@ describe('T065: Product Type Tests', () => {
       expect(entry1.previous_version).toBe(1)
 
       const entry2: Partial<AuditLogEntry> = {
-        previous_version: null,
+        previous_version: undefined,
       }
-      expect(entry2.previous_version).toBeNull()
+      expect(entry2.previous_version).toBeUndefined()
     })
 
     it('should have optional new_version', () => {
@@ -180,9 +188,9 @@ describe('T065: Product Type Tests', () => {
       expect(entry1.new_version).toBe(2)
 
       const entry2: Partial<AuditLogEntry> = {
-        new_version: null,
+        new_version: undefined,
       }
-      expect(entry2.new_version).toBeNull()
+      expect(entry2.new_version).toBeUndefined()
     })
 
     it('should have changed_fields object', () => {
@@ -198,8 +206,8 @@ describe('T065: Product Type Tests', () => {
       const entry: AuditLogEntry = {
         id: 'audit-123',
         product_id: 'prod-123',
-        action: 'UPDATE',
-        timestamp: new Date().toISOString(),
+        action: AuditAction.UPDATE,
+        timestamp: new Date(),
         performed_by: 'user-123',
         previous_version: 1,
         new_version: 2,
@@ -221,17 +229,20 @@ describe('T065: Product Type Tests', () => {
 
   describe('Status type', () => {
     it('should accept ACTIVE', () => {
-      const status: ProductStatus = 'ACTIVE'
+      const status: ProductStatus = ProductStatus.ACTIVE
       expect(status).toBe('ACTIVE')
     })
 
     it('should accept INACTIVE', () => {
-      const status: ProductStatus = 'INACTIVE'
+      const status: ProductStatus = ProductStatus.INACTIVE
       expect(status).toBe('INACTIVE')
     })
 
     it('should limit to valid statuses', () => {
-      const validStatuses: ProductStatus[] = ['ACTIVE', 'INACTIVE']
+      const validStatuses: ProductStatus[] = [
+        ProductStatus.ACTIVE,
+        ProductStatus.INACTIVE,
+      ]
 
       for (const status of validStatuses) {
         expect(['ACTIVE', 'INACTIVE']).toContain(status)
@@ -241,22 +252,26 @@ describe('T065: Product Type Tests', () => {
 
   describe('AuditAction type', () => {
     it('should accept CREATE', () => {
-      const action: AuditAction = 'CREATE'
+      const action: AuditAction = AuditAction.CREATE
       expect(action).toBe('CREATE')
     })
 
     it('should accept UPDATE', () => {
-      const action: AuditAction = 'UPDATE'
+      const action: AuditAction = AuditAction.UPDATE
       expect(action).toBe('UPDATE')
     })
 
     it('should accept STATUS_CHANGE', () => {
-      const action: AuditAction = 'STATUS_CHANGE'
+      const action: AuditAction = AuditAction.STATUS_CHANGE
       expect(action).toBe('STATUS_CHANGE')
     })
 
     it('should limit to valid actions', () => {
-      const validActions: AuditAction[] = ['CREATE', 'UPDATE', 'STATUS_CHANGE']
+      const validActions: AuditAction[] = [
+        AuditAction.CREATE,
+        AuditAction.UPDATE,
+        AuditAction.STATUS_CHANGE,
+      ]
 
       for (const action of validActions) {
         expect(['CREATE', 'UPDATE', 'STATUS_CHANGE']).toContain(action)
@@ -271,16 +286,19 @@ describe('T065: Product Type Tests', () => {
           id: 'p1',
           name: { en: 'P1' },
           slug: 'p1',
-          enabled_modules: ['MODULE_ATTEMPT'],
-          status: 'ACTIVE',
+          enabled_modules: [Module.MCQ],
+          status: ProductStatus.ACTIVE,
           current_version: 1,
-          created_at: new Date().toISOString(),
-          updated_at: new Date().toISOString(),
+          created_at: new Date(),
+          updated_at: new Date(),
         },
       ]
 
       expect(products.length).toBe(1)
-      expect(products[0].id).toBe('p1')
+      const firstProduct = products[0]
+      expect(firstProduct).toBeDefined()
+      if (!firstProduct) return
+      expect(firstProduct.id).toBe('p1')
     })
 
     it('should support audit log array', () => {
@@ -288,14 +306,18 @@ describe('T065: Product Type Tests', () => {
         {
           id: 'a1',
           product_id: 'p1',
-          action: 'CREATE',
-          timestamp: new Date().toISOString(),
+          action: AuditAction.CREATE,
+          timestamp: new Date(),
           performed_by: 'user1',
+          changed_fields: {},
         },
       ]
 
       expect(entries.length).toBe(1)
-      expect(entries[0].action).toBe('CREATE')
+      const firstEntry = entries[0]
+      expect(firstEntry).toBeDefined()
+      if (!firstEntry) return
+      expect(firstEntry.action).toBe('CREATE')
     })
   })
 
@@ -312,10 +334,10 @@ describe('T065: Product Type Tests', () => {
 
     it('should allow null description', () => {
       const product: Partial<Product> = {
-        description: null,
+        description: undefined,
       }
 
-      expect(product.description).toBeNull()
+      expect(product.description).toBeUndefined()
     })
 
     it('should allow without ar name', () => {
@@ -330,19 +352,19 @@ describe('T065: Product Type Tests', () => {
 
   describe('Type narrowing', () => {
     it('should narrow status type', () => {
-      const status: ProductStatus = 'ACTIVE'
+      const status: ProductStatus = ProductStatus.ACTIVE
 
-      if (status === 'ACTIVE') {
+      if (status === ProductStatus.ACTIVE) {
         expect(status).toBe('ACTIVE')
       }
     })
 
     it('should narrow action type', () => {
-      const action: AuditAction = 'UPDATE'
+      const action: AuditAction = AuditAction.UPDATE
 
-      if (action === 'UPDATE') {
+      if (action === AuditAction.UPDATE) {
         expect(action).toBe('UPDATE')
-      } else if (action === 'CREATE') {
+      } else if (action === AuditAction.CREATE) {
         expect.fail('Should be UPDATE')
       }
     })
@@ -354,11 +376,11 @@ describe('T065: Product Type Tests', () => {
         id: 'p1',
         name: { en: 'Test' },
         slug: 'test',
-        enabled_modules: ['MODULE_ATTEMPT'],
-        status: 'ACTIVE',
+        enabled_modules: [Module.MCQ],
+        status: ProductStatus.ACTIVE,
         current_version: 1,
-        created_at: '2024-01-01T00:00:00Z',
-        updated_at: '2024-01-01T00:00:00Z',
+        created_at: new Date('2024-01-01T00:00:00Z'),
+        updated_at: new Date('2024-01-01T00:00:00Z'),
       }
 
       const json = JSON.stringify(product)

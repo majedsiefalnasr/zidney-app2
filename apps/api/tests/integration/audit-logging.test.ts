@@ -81,7 +81,7 @@ describe('Audit Logging', () => {
     )
     workspace = ws.rows[0]
 
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
     const u = await pool.query(
       `INSERT INTO ${AUDIT_USERS_TABLE} (workspace_id, email, password_hash, role, token_version)
        VALUES ($1, 'audit@test.com', 'hash', 'admin', 1)
@@ -96,7 +96,7 @@ describe('Audit Logging', () => {
     if (!workspace || !user) {
       return
     }
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
     await pool.query(`DELETE FROM ${AUDIT_USERS_TABLE} WHERE id = $1`, [user.id])
 
     await db.master.query(`DELETE FROM ${AUDIT_WORKSPACES_TABLE} WHERE id = $1`, [

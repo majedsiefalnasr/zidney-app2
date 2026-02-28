@@ -1,3 +1,4 @@
+import type { Pool } from 'pg'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { createUserWithLimitCheck } from '@zidney/app/api/utils/transaction-wrapper'
 import { MockDatabaseClient, testFixtures } from './fixtures'
@@ -42,7 +43,7 @@ describe('Concurrency: Limit Enforcement', () => {
       [{ count: 0 }]
     )
 
-    const result1 = await createUserWithLimitCheck(masterDb, tenantDb, {
+    const result1 = await createUserWithLimitCheck(masterDb as unknown as Pool, tenantDb as unknown as Pool, {
       workspace_id,
       user_id: 'user-1',
       role: 'STUDENT',
@@ -59,7 +60,7 @@ describe('Concurrency: Limit Enforcement', () => {
       [{ count: 1 }]
     )
 
-    const result2 = await createUserWithLimitCheck(masterDb, tenantDb, {
+    const result2 = await createUserWithLimitCheck(masterDb as unknown as Pool, tenantDb as unknown as Pool, {
       workspace_id,
       user_id: 'user-2',
       role: 'STUDENT',
@@ -83,7 +84,7 @@ describe('Concurrency: Limit Enforcement', () => {
       [softLockedLicense]
     )
 
-    const result = await createUserWithLimitCheck(masterDb, tenantDb, {
+    const result = await createUserWithLimitCheck(masterDb as unknown as Pool, tenantDb as unknown as Pool, {
       workspace_id: softLockedLicense.workspace_id,
       user_id: 'user-1',
       role: 'STUDENT',
@@ -106,7 +107,7 @@ describe('Concurrency: Limit Enforcement', () => {
       [archivedLicense]
     )
 
-    const result = await createUserWithLimitCheck(masterDb, tenantDb, {
+    const result = await createUserWithLimitCheck(masterDb as unknown as Pool, tenantDb as unknown as Pool, {
       workspace_id: archivedLicense.workspace_id,
       user_id: 'user-1',
       role: 'STUDENT',
@@ -141,7 +142,7 @@ describe('Concurrency: Limit Enforcement', () => {
       [{ count: 1 }]
     )
 
-    const result1 = await createUserWithLimitCheck(masterDb, tenantDb, {
+    const result1 = await createUserWithLimitCheck(masterDb as unknown as Pool, tenantDb as unknown as Pool, {
       workspace_id: license.workspace_id,
       user_id: 'user-1',
       role: 'STUDENT',
@@ -150,7 +151,7 @@ describe('Concurrency: Limit Enforcement', () => {
       limit: 2,
     })
 
-    const result2 = await createUserWithLimitCheck(masterDb, tenantDb, {
+    const result2 = await createUserWithLimitCheck(masterDb as unknown as Pool, tenantDb as unknown as Pool, {
       workspace_id: license.workspace_id,
       user_id: 'user-2',
       role: 'STUDENT',
@@ -178,7 +179,7 @@ describe('Concurrency: Limit Enforcement', () => {
       [{ count: 999 }] // Very high count
     )
 
-    const result = await createUserWithLimitCheck(masterDb, tenantDb, {
+    const result = await createUserWithLimitCheck(masterDb as unknown as Pool, tenantDb as unknown as Pool, {
       workspace_id: unlimitedLicense.workspace_id,
       user_id: 'user-1',
       role: 'STUDENT',

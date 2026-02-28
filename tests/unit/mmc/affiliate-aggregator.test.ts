@@ -118,12 +118,12 @@ describe('Affiliate Aggregator - Unit Tests', () => {
 
     it('should rank affiliates by commission (DESC)', () => {
       const result = rankAffiliates(metrics)
-      expect(result[0].affiliate_id).toBe('aff_2')
-      expect(result[0].rank).toBe(1)
-      expect(result[1].affiliate_id).toBe('aff_3')
-      expect(result[1].rank).toBe(2)
-      expect(result[2].affiliate_id).toBe('aff_1')
-      expect(result[2].rank).toBe(3)
+      expect(result[0]!.affiliate_id).toBe('aff_2')
+      expect(result[0]!.rank).toBe(1)
+      expect(result[1]!.affiliate_id).toBe('aff_3')
+      expect(result[1]!.rank).toBe(2)
+      expect(result[2]!.affiliate_id).toBe('aff_1')
+      expect(result[2]!.rank).toBe(3)
     })
 
     it('should handle ties (same commission = same rank)', () => {
@@ -151,9 +151,9 @@ describe('Affiliate Aggregator - Unit Tests', () => {
         },
       ]
       const result = rankAffiliates(tied)
-      expect(result[0].rank).toBe(1)
-      expect(result[1].rank).toBe(1) // Same rank for tie
-      expect(result[2].rank).toBe(3)
+      expect(result[0]!.rank).toBe(1)
+      expect(result[1]!.rank).toBe(1) // Same rank for tie
+      expect(result[2]!.rank).toBe(3)
     })
   })
 
@@ -185,13 +185,13 @@ describe('Affiliate Aggregator - Unit Tests', () => {
     it('should filter by ACTIVE status', () => {
       const result = filterByStatus(metrics, 'ACTIVE')
       expect(result).toHaveLength(1)
-      expect(result[0].status).toBe('ACTIVE')
+      expect(result[0]!.status).toBe('ACTIVE')
     })
 
     it('should filter by INACTIVE status', () => {
       const result = filterByStatus(metrics, 'INACTIVE')
       expect(result).toHaveLength(1)
-      expect(result[0].affiliate_id).toBe('aff_2')
+      expect(result[0]!.affiliate_id).toBe('aff_2')
     })
 
     it('should return all for ALL status', () => {
@@ -227,22 +227,22 @@ describe('Affiliate Aggregator - Unit Tests', () => {
 
     it('should sort by commission (DESC default)', () => {
       const result = sortAffiliates(metrics, 'commission', 'DESC')
-      expect(result[0].affiliate_id).toBe('aff_2')
-      expect(result[1].affiliate_id).toBe('aff_3')
-      expect(result[2].affiliate_id).toBe('aff_1')
+      expect(result[0]!.affiliate_id).toBe('aff_2')
+      expect(result[1]!.affiliate_id).toBe('aff_3')
+      expect(result[2]!.affiliate_id).toBe('aff_1')
     })
 
     it('should sort by commission (ASC)', () => {
       const result = sortAffiliates(metrics, 'commission', 'ASC')
-      expect(result[0].affiliate_id).toBe('aff_1')
-      expect(result[1].affiliate_id).toBe('aff_3')
-      expect(result[2].affiliate_id).toBe('aff_2')
+      expect(result[0]!.affiliate_id).toBe('aff_1')
+      expect(result[1]!.affiliate_id).toBe('aff_3')
+      expect(result[2]!.affiliate_id).toBe('aff_2')
     })
 
     it('should sort by usage_count (DESC)', () => {
       const result = sortAffiliates(metrics, 'usage_count', 'DESC')
-      expect(result[0].affiliate_id).toBe('aff_3')
-      expect(result[0].usage_count).toBe(30)
+      expect(result[0]!.affiliate_id).toBe('aff_3')
+      expect(result[0]!.usage_count).toBe(30)
     })
   })
 

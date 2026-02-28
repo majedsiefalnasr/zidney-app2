@@ -37,7 +37,7 @@ DROP TABLE users;
 
     // Extract UP section
     const upMatch = mockMigration.match(/--\s*UP\s*([\s\S]*?)(?:--\s*DOWN|$)/)
-    const upSection = upMatch ? upMatch[1] : ''
+    const upSection = upMatch ? upMatch[1]! : ''
 
     // Check for destructive SQL in UP
     let foundDestructive = false

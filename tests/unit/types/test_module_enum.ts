@@ -111,7 +111,7 @@ describe('T064: Module Enum Unit Tests', () => {
       ]
 
       for (const combo of combinations) {
-        expect(combo.every((m) => VALID_MODULES.includes(m))).toBe(true)
+        expect(combo.every((m) => VALID_MODULES.includes(m!))).toBe(true)
       }
     })
   })

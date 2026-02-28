@@ -9,7 +9,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as PasswordValidation from '../../../packages/validation/src/password.validator'
 
 describe('T048: MemberService Unit Tests', () => {
-  let mockDb: Any // Mocked database connection
+  let mockDb: any // Mocked database connection
 
   beforeEach(() => {
     mockDb = {

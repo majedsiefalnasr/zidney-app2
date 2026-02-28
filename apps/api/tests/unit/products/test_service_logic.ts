@@ -163,8 +163,8 @@ describe('Unit: Products - Service Logic (T062)', () => {
         { timestamp: new Date(now.getTime() - 1000), action: 'CREATE' },
       ]
 
-      expect(new Date(logs[0].timestamp).getTime()).toBeGreaterThan(
-        new Date(logs[1].timestamp).getTime()
+      expect(new Date(logs[0]!.timestamp).getTime()).toBeGreaterThan(
+        new Date(logs[1]!.timestamp).getTime()
       )
     })
   })

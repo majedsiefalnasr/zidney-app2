@@ -1,6 +1,10 @@
 import type { InvitationWithMemberData } from '@zidney/types'
-// @ts-ignore: LOGIC-BUG: @zidney/types/db-schema module path not resolved - see INFRA-001-LOGIC-09
-import { mmc_member_invitations, mmc_members, roles } from '@zidney/types/db-schema'
+// @ts-ignore: LOGIC-BUG: @zidney/types/db-schema module path not resolved - see INFRA-001-LOGIC-09 [INFRA-001]
+import {
+  mmc_member_invitations,
+  mmc_members,
+  roles,
+} from '@zidney/types/db-schema'
 // @ts-ignore: drizzle-orm not declared as dependency of domain-core [INFRA-001-DEPS-03]
 import { and, desc, eq } from 'drizzle-orm'
 // @ts-ignore: drizzle-orm/node-postgres not declared as dependency of domain-core [INFRA-001-DEPS-03]
@@ -106,7 +110,7 @@ export class InvitationService {
       }
 
       // Audit log
-      // @ts-ignore: LOGIC-BUG: logInvitationSent called with object but expects 7 positional args — see INFRA-001-LOGIC-02
+      // @ts-ignore: LOGIC-BUG: logInvitationSent called with object but expects 7 positional args — see INFRA-001-LOGIC-02 [INFRA-001-LOGIC-02]
       await this.auditService.logInvitationSent({
         invitationId: invitation.id,
         email,
@@ -219,7 +223,7 @@ export class InvitationService {
         .where(eq(mmc_member_invitations.id, invitation.id))
 
       // Audit log
-      // @ts-ignore: LOGIC-BUG: logInvitationAccepted called with object but expects 6 positional args — see INFRA-001-LOGIC-02
+      // @ts-ignore: LOGIC-BUG: logInvitationAccepted called with object but expects 6 positional args — see INFRA-001-LOGIC-02 [INFRA-001-LOGIC-02]
       await this.auditService.logInvitationAccepted({
         memberId: member.id,
         invitationId: invitation.id,

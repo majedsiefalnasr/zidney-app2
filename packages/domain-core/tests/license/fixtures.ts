@@ -148,7 +148,7 @@ export class MockDatabaseClient {
     )
 
     if (matchIndex >= 0) {
-      const [entry] = this.mockedResults.splice(matchIndex, 1)
+      const entry = this.mockedResults.splice(matchIndex, 1)[0]!
       if (entry.error) {
         throw entry.error
       }
@@ -299,7 +299,7 @@ export function assertTransactionIsolation(query: string) {
  * Assert SELECT FOR UPDATE (row locking)
  */
 export function assertSelectForUpdate(query: string) {
-  expect(query).toInclude('FOR UPDATE')
+  expect(query).include('FOR UPDATE')
 }
 
 /**

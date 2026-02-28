@@ -109,18 +109,18 @@ describe('Snapshot Immutability (ADR-0002)', () => {
     const answers = new Map([['q1', { selected: 'B' } as UserAnswer]])
 
     const originalQ1 = {
-      id: questionSnapshot[0].id,
-      type: questionSnapshot[0].type,
-      correct_answer: questionSnapshot[0].correct_answer,
-      points: questionSnapshot[0].points,
+      id: questionSnapshot[0]!.id,
+      type: questionSnapshot[0]!.type,
+      correct_answer: questionSnapshot[0]!.correct_answer,
+      points: questionSnapshot[0]!.points,
     }
 
     computeScore(questionSnapshot, answers, gradingConfigSnapshot)
 
-    expect(questionSnapshot[0].id).toBe(originalQ1.id)
-    expect(questionSnapshot[0].type).toBe(originalQ1.type)
-    expect(questionSnapshot[0].correct_answer).toBe(originalQ1.correct_answer)
-    expect(questionSnapshot[0].points).toBe(originalQ1.points)
+    expect(questionSnapshot[0]!.id).toBe(originalQ1.id)
+    expect(questionSnapshot[0]!.type).toBe(originalQ1.type)
+    expect(questionSnapshot[0]!.correct_answer).toBe(originalQ1.correct_answer)
+    expect(questionSnapshot[0]!.points).toBe(originalQ1.points)
   })
 
   // T045.4: Multiple Grading Calls Preserve Snapshot
@@ -203,11 +203,11 @@ describe('Snapshot Immutability (ADR-0002)', () => {
 
   // T045.8: Question Options Array Immutable
   test('Question options array preserved', () => {
-    const original = JSON.stringify(questionSnapshot[0].options)
+    const original = JSON.stringify(questionSnapshot[0]!.options)
 
     const answers = new Map([['q1', { selected: 'B' } as UserAnswer]])
     computeScore(questionSnapshot, answers, gradingConfigSnapshot)
 
-    expect(JSON.stringify(questionSnapshot[0].options)).toBe(original)
+    expect(JSON.stringify(questionSnapshot[0]!.options)).toBe(original)
   })
 })

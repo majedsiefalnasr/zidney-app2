@@ -7,7 +7,7 @@ import { randomUUID } from 'node:crypto'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('T055: Audit Log Immutability Tests', () => {
-  let mockDb: Any
+  let mockDb: any
 
   beforeEach(() => {
     mockDb = {

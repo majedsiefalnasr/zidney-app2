@@ -65,9 +65,9 @@ export function validatePassword(password: string): PasswordValidationResult {
   }
 
   // Check special characters
-  if (!/[!@#$%^&*()_+\-=\[\]{};:'",.<>?/\\|`~]/.test(password)) {
+  if (!/[!@#$%^&*()_+\-=[\]{};:'",./<>?\\|`~]/.test(password)) {
     errors.push(
-      'Password must contain at least one special character (!@#$%^&*()_+-=[]{};\':\",./<>?/\\|`~)'
+      'Password must contain at least one special character (!@#$%^&*()_+-=[]{};\':",./<>?/\\|`~)'
     )
   } else {
     strengthScore += 1

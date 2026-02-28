@@ -288,7 +288,7 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0].earned).toBe(5)
+      expect(result.questionResults[0]!.earned).toBe(5)
     })
 
     it('should calculate weighted scores', () => {
@@ -320,8 +320,8 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0].earned).toBe(10)
-      expect(result.questionResults[0].feedback).toBe('Correct')
+      expect(result.questionResults[0]!.earned).toBe(10)
+      expect(result.questionResults[0]!.feedback).toBe('Correct')
     })
 
     it('should reject incorrect answer', () => {
@@ -333,8 +333,8 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0].earned).toBe(0)
-      expect(result.questionResults[0].feedback).toContain('Incorrect')
+      expect(result.questionResults[0]!.earned).toBe(0)
+      expect(result.questionResults[0]!.feedback).toContain('Incorrect')
     })
   })
 
@@ -348,8 +348,8 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0].earned).toBe(5)
-      expect(result.questionResults[0].feedback).toBe('Correct')
+      expect(result.questionResults[0]!.earned).toBe(5)
+      expect(result.questionResults[0]!.feedback).toBe('Correct')
     })
 
     it('should accept case-insensitive match', () => {
@@ -361,7 +361,7 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0].earned).toBe(5)
+      expect(result.questionResults[0]!.earned).toBe(5)
     })
 
     it('should award partial credit for partial match', () => {
@@ -380,9 +380,9 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0].earned).toBeGreaterThan(0)
-      expect(result.questionResults[0].earned).toBeLessThan(10)
-      expect(result.questionResults[0].feedback).toContain('Partial credit')
+      expect(result.questionResults[0]!.earned).toBeGreaterThan(0)
+      expect(result.questionResults[0]!.earned).toBeLessThan(10)
+      expect(result.questionResults[0]!.feedback).toContain('Partial credit')
     })
   })
 
@@ -406,7 +406,7 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0].earned).toBeGreaterThan(0)
+      expect(result.questionResults[0]!.earned).toBeGreaterThan(0)
     })
 
     it('should give zero credit for empty response', () => {
@@ -423,8 +423,8 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0].earned).toBe(0)
-      expect(result.questionResults[0].feedback).toBe('Not answered')
+      expect(result.questionResults[0]!.earned).toBe(0)
+      expect(result.questionResults[0]!.feedback).toBe('Not answered')
     })
 
     it('should give partial credit for brief response', () => {
@@ -445,7 +445,7 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0].earned).toBe(0)
+      expect(result.questionResults[0]!.earned).toBe(0)
     })
   })
 
@@ -460,7 +460,7 @@ describe('Grading Algorithm', () => {
       const result = gradingEngine.gradeAttempt(questions, answers)
 
       expect(result.score).toBe(0)
-      expect(result.questionResults[0].feedback).toBe('Not answered')
+      expect(result.questionResults[0]!.feedback).toBe('Not answered')
     })
 
     it('should handle empty answer string', () => {
@@ -472,8 +472,8 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0].earned).toBe(0)
-      expect(result.questionResults[0].feedback).toBe('Not answered')
+      expect(result.questionResults[0]!.earned).toBe(0)
+      expect(result.questionResults[0]!.feedback).toBe('Not answered')
     })
   })
 

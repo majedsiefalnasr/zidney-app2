@@ -5,7 +5,7 @@
 
 import { Hono } from 'hono'
 import { db } from '../db'
-// @ts-ignore: LOGIC-BUG: redis service module missing — see INFRA-001-LOGIC-09
+// @ts-ignore: LOGIC-BUG: redis service module missing — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
 import { redis } from '../services/redis'
 
 // @ts-ignore: TS6133 - declared but never read [INFRA-001]
@@ -59,7 +59,7 @@ healthRoutes.get('/health', async (c) => {
     // Test query with 5 second timeout
     // @ts-ignore: TS6133 - declared but never read [INFRA-001]
     const result = await Promise.race([
-      // @ts-ignore: LOGIC-BUG: .query() does not exist on this Pool type — see INFRA-001-LOGIC-09
+      // @ts-ignore: LOGIC-BUG: .query() does not exist on this Pool type — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
       db.query('SELECT 1'),
       new Promise((_, reject) =>
         setTimeout(() => reject(new Error('DB timeout')), 5000)
@@ -165,7 +165,7 @@ healthRoutes.get('/health', async (c) => {
  *
  * test('GET /health returns 503 when migrations out of date', async () => {
  *   // Manually downgrade version in schema_migrations
- // @ts-ignore: LOGIC-BUG: .query() does not exist on this Pool type — see INFRA-001-LOGIC-09
+ // @ts-ignore: LOGIC-BUG: .query() does not exist on this Pool type — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
  *   await db.query('UPDATE master.schema_migrations SET version = ?')
  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
  *   const res = await fetch('http://localhost:3000/health')

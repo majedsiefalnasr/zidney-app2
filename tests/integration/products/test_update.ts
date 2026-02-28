@@ -12,6 +12,7 @@
  */
 
 import * as productService from '@zidney/domain-core/products/productService'
+import { Module } from '@zidney/types/enums/Module'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import {
   cleanupTestContext,
@@ -45,7 +46,7 @@ describe('T055: Product Update Integration Tests', () => {
         {
           name: { en: 'Initial Name' },
           slug: 'update-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -71,7 +72,7 @@ describe('T055: Product Update Integration Tests', () => {
         {
           name: { en: 'Version Track' },
           slug: 'version-track',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -91,8 +92,8 @@ describe('T055: Product Update Integration Tests', () => {
       )
 
       expect(versions.rows.length).toBe(2)
-      expect(versions.rows[0].version_number).toBe(1)
-      expect(versions.rows[1].version_number).toBe(2)
+      expect(versions.rows[0]!.version_number).toBe(1)
+      expect(versions.rows[1]!.version_number).toBe(2)
     })
 
     it('should create audit log with UPDATE action', async () => {
@@ -101,7 +102,7 @@ describe('T055: Product Update Integration Tests', () => {
         {
           name: { en: 'Audit Test' },
           slug: 'audit-upd',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -134,7 +135,7 @@ describe('T055: Product Update Integration Tests', () => {
           name: { en: 'Original' },
           slug: 'changes',
           description: 'Original desc',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -155,7 +156,7 @@ describe('T055: Product Update Integration Tests', () => {
       )
 
       expect(audits.rows.length).toBe(1)
-      const changes = audits.rows[0].changed_fields
+      const changes = audits.rows[0]!.changed_fields
       expect(changes).toBeDefined()
       // Should document the name and description changes
       expect(JSON.stringify(changes)).toContain('name')
@@ -168,7 +169,7 @@ describe('T055: Product Update Integration Tests', () => {
           name: { en: 'Desc Update' },
           slug: 'desc-update',
           description: 'Original',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -192,7 +193,7 @@ describe('T055: Product Update Integration Tests', () => {
         {
           name: { en: 'Module Update' },
           slug: 'mod-update',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -202,16 +203,16 @@ describe('T055: Product Update Integration Tests', () => {
         initial.id,
         {
           enabled_modules: [
-            'MODULE_ATTEMPT',
-            'MODULE_REPORTING',
-            'MODULE_ANALYTICS',
+            Module.MCQ,
+            Module.TRADITIONAL_EXAMS,
+            Module.FORUM,
           ],
         },
         ctx.userId
       )
 
       expect(updated.enabled_modules.sort()).toEqual(
-        ['MODULE_ATTEMPT', 'MODULE_REPORTING', 'MODULE_ANALYTICS'].sort()
+        [Module.MCQ, Module.TRADITIONAL_EXAMS, Module.FORUM].sort()
       )
       expect(updated.current_version).toBe(2)
     })
@@ -222,7 +223,7 @@ describe('T055: Product Update Integration Tests', () => {
         {
           name: { en: 'Test', ar: 'اختبار' },
           slug: 'ar-update',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -248,7 +249,7 @@ describe('T055: Product Update Integration Tests', () => {
           name: { en: 'No Op Test' },
           slug: 'noop',
           description: 'Same',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -275,7 +276,7 @@ describe('T055: Product Update Integration Tests', () => {
         {
           name: { en: 'Version Noop' },
           slug: 'ver-noop',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -292,8 +293,8 @@ describe('T055: Product Update Integration Tests', () => {
         [initial.id]
       )
 
-      expect(parseInt(beforeCount.rows[0].count)).toBe(
-        parseInt(afterCount.rows[0].count)
+      expect(parseInt(beforeCount.rows[0]!.count)).toBe(
+        parseInt(afterCount.rows[0]!.count)
       )
     })
 
@@ -303,7 +304,7 @@ describe('T055: Product Update Integration Tests', () => {
         {
           name: { en: 'Audit Noop' },
           slug: 'audit-noop',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -325,8 +326,8 @@ describe('T055: Product Update Integration Tests', () => {
         [initial.id]
       )
 
-      expect(parseInt(beforeCount.rows[0].count)).toBe(
-        parseInt(afterCount.rows[0].count)
+      expect(parseInt(beforeCount.rows[0]!.count)).toBe(
+        parseInt(afterCount.rows[0]!.count)
       )
     })
   })
@@ -338,7 +339,7 @@ describe('T055: Product Update Integration Tests', () => {
         {
           name: { en: 'Immutable Test' },
           slug: 'immutable',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -373,7 +374,7 @@ describe('T055: Product Update Integration Tests', () => {
         {
           name: { en: 'ID Preserve' },
           slug: 'id-preserve',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -396,7 +397,7 @@ describe('T055: Product Update Integration Tests', () => {
         {
           name: { en: 'Timestamp Preserve' },
           slug: 'ts-preserve',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -419,7 +420,7 @@ describe('T055: Product Update Integration Tests', () => {
         {
           name: { en: 'Updated At Test' },
           slug: 'upd-at',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -448,7 +449,7 @@ describe('T055: Product Update Integration Tests', () => {
         {
           name: { en: 'Sequential' },
           slug: 'sequential',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -484,7 +485,7 @@ describe('T055: Product Update Integration Tests', () => {
         [product.id]
       )
 
-      expect(versions.rows.map((r) => r.version_number)).toEqual([1, 2, 3, 4])
+      expect(versions.rows.map((r: any) => r.version_number)).toEqual([1, 2, 3, 4])
     })
   })
 })

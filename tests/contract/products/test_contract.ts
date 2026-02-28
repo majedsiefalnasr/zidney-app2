@@ -48,11 +48,11 @@ describe('T067: OpenAPI Contract Tests', () => {
         name: { en: 'Test Product', ar: 'منتج اختبار' },
         slug: 'test-product',
         description: 'A test product',
-        enabled_modules: ['MODULE_ATTEMPT', 'MODULE_REPORTING'],
+        enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
         status: ProductStatus.ACTIVE,
         current_version: 1,
-        created_at: new Date().toISOString(),
-        updated_at: new Date().toISOString(),
+        created_at: new Date(),
+        updated_at: new Date(),
       }
 
       // Validate required fields
@@ -77,8 +77,8 @@ describe('T067: OpenAPI Contract Tests', () => {
             enabled_modules: [Module.MCQ],
             status: 'ACTIVE' as const,
             current_version: 1,
-            created_at: new Date().toISOString(),
-            updated_at: new Date().toISOString(),
+            created_at: new Date(),
+            updated_at: new Date(),
           },
         ],
         total: 10,
@@ -117,9 +117,9 @@ describe('T067: OpenAPI Contract Tests', () => {
       }
 
       expect(auditResponse.items).toBeDefined()
-      expect(auditResponse.items[0].id).toBeDefined()
-      expect(auditResponse.items[0].action).toBeDefined()
-      expect(auditResponse.items[0].timestamp).toBeDefined()
+      expect(auditResponse.items[0]!.id).toBeDefined()
+      expect(auditResponse.items[0]!.action).toBeDefined()
+      expect(auditResponse.items[0]!.timestamp).toBeDefined()
       expect(auditResponse.total).toBeDefined()
     })
   })
@@ -229,7 +229,7 @@ describe('T067: OpenAPI Contract Tests', () => {
       const result = await productService.listProducts(dbClient, {})
 
       expect(result.items.length).toBeGreaterThan(0)
-      const item = result.items[0]
+      const item = result.items[0]!
 
       expect(item).toHaveProperty('id')
       expect(item).toHaveProperty('name')
@@ -414,7 +414,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         ctx.userId
       )
 
-      await productService.deleteProduct(dbClient, product.id, ctx.userId)
+      await productService.deleteProduct(dbClient, product.id)
 
       // HTTP 204 would be validated at API layer
       // Domain layer doesn't return anything on successful delete
@@ -466,7 +466,7 @@ describe('T067: OpenAPI Contract Tests', () => {
       )
 
       expect(result.items.length).toBeGreaterThan(0)
-      const entry = result.items[0]
+      const entry = result.items[0]!
 
       expect(entry).toHaveProperty('id')
       expect(entry).toHaveProperty('product_id')

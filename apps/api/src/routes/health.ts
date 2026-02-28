@@ -222,7 +222,7 @@ export class HealthCheckService {
   setJobProcessed(): void {
     // @ts-ignore: TS6133 - declared but never read [INFRA-001]
     const timestamp = Date.now()
-    // @ts-ignore: LOGIC-BUG: should be _lastJobProcessedAt - see INFRA-001-LOGIC-09
+    // @ts-ignore: LOGIC-BUG: should be _lastJobProcessedAt - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
     this.lastJobProcessedAt = new Date(timestamp).toISOString()
     // Store in Redis for distributed health checks
     this.redis

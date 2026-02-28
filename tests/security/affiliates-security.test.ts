@@ -159,7 +159,7 @@ describe('Affiliate Security Tests', () => {
 
       expect(requests.filter((r) => r.httpStatus === 200)).toHaveLength(10)
       expect(requests.filter((r) => r.httpStatus === 429)).toHaveLength(1)
-      expect(requests[10].httpStatus).toBe(429)
+      expect(requests[10]!.httpStatus).toBe(429)
     })
 
     it('should return 429 Too Many Requests on rate limit', () => {

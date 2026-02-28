@@ -82,7 +82,7 @@ describe('Area 8: Performance Baseline', () => {
     const calculatePercentile = (data: number[], percentile: number) => {
       const sorted = [...data].sort((a, b) => a - b)
       const index = Math.ceil(sorted.length * (percentile / 100)) - 1
-      return sorted[Math.max(0, index)]
+      return sorted[Math.max(0, index)]!
     }
 
     const p50 = calculatePercentile(measurements, 50)

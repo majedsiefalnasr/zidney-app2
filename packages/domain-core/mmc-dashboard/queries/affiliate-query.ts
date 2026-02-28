@@ -1,1 +1,71 @@
-/**\n * Affiliate Query Builder\n *\n * Purpose: Get affiliate performance metrics with pagination\n * - Calculate commission totals and averages\n * - Support filtering by status\n * - Support sorting and pagination\n *\n * File: packages/domain-core/mmc-dashboard/queries/affiliate-query.ts\n * Task: T015 [P]\n * Phase: 1 - Backend Implementation (parallel)\n */\n\nimport { Pool } from 'pg'\n\nexport async function getAffiliates(\n  pool: Pool,\n  page: number = 1,\n  pageSize: number = 20,\n  status: 'ACTIVE' | 'INACTIVE' | 'ALL' = 'ACTIVE'\n) {\n  const offset = Math.max(0, (page - 1) * pageSize)\n\n  const statusFilter = status !== 'ALL' ? `AND a.status = $1` : ''\n  const params = []\n  if (status !== 'ALL') params.push(status)\n  params.push(pageSize, offset)\n\n  const query = `\n    SELECT\n      a.id as affiliate_id,\n      a.name as affiliate_name,\n      a.status,\n      SUM(COALESCE(au.amount_cents, 0)) as total_commission_cents,\n      COUNT(DISTINCT au.id) as usage_count\n    FROM affiliates a\n    LEFT JOIN affiliate_usages au ON a.id = au.affiliate_id\n    WHERE a.status IS NOT NULL\n    ${statusFilter}\n    GROUP BY a.id, a.name, a.status\n    ORDER BY total_commission_cents DESC\n    LIMIT $${params.length - 1}\n    OFFSET $${params.length}\n  `\n\n  const result = await pool.query(query, params)\n  return result.rows\n}\n\nexport async function getAffiliateCount(\n  pool: Pool,\n  status: 'ACTIVE' | 'INACTIVE' | 'ALL' = 'ACTIVE'\n) {\n  const statusFilter = status !== 'ALL' ? 'WHERE status = $1' : ''\n  const params = status !== 'ALL' ? [status] : []\n\n  const query = `\n    SELECT COUNT(*) as count\n    FROM affiliates\n    ${statusFilter}\n  `\n\n  const result = await pool.query(query, params)\n  return result.rows[0]?.count || 0\n}\n\nexport default {\n  getAffiliates,\n  getAffiliateCount,\n}\n
+/**
+ * Affiliate Query Builder
+ *
+ * Purpose: Get affiliate performance metrics with pagination
+ * - Calculate commission totals and averages
+ * - Support filtering by status
+ * - Support sorting and pagination
+ *
+ * File: packages/domain-core/mmc-dashboard/queries/affiliate-query.ts
+ * Task: T015 [P]
+ * Phase: 1 - Backend Implementation (parallel)
+ */
+
+import { Pool } from 'pg'
+
+export async function getAffiliates(
+  pool: Pool,
+  page: number = 1,
+  pageSize: number = 20,
+  status: 'ACTIVE' | 'INACTIVE' | 'ALL' = 'ACTIVE'
+) {
+  const offset = Math.max(0, (page - 1) * pageSize)
+
+  const statusFilter = status !== 'ALL' ? `AND a.status = $1` : ''
+  const params = []
+  if (status !== 'ALL') params.push(status)
+  params.push(pageSize, offset)
+
+  const query = `
+    SELECT
+      a.id as affiliate_id,
+      a.name as affiliate_name,
+      a.status,
+      SUM(COALESCE(au.amount_cents, 0)) as total_commission_cents,
+      COUNT(DISTINCT au.id) as usage_count
+    FROM affiliates a
+    LEFT JOIN affiliate_usages au ON a.id = au.affiliate_id
+    WHERE a.status IS NOT NULL
+    ${statusFilter}
+    GROUP BY a.id, a.name, a.status
+    ORDER BY total_commission_cents DESC
+    LIMIT $${params.length - 1}
+    OFFSET $${params.length}
+  `
+
+  const result = await pool.query(query, params)
+  return result.rows
+}
+
+export async function getAffiliateCount(
+  pool: Pool,
+  status: 'ACTIVE' | 'INACTIVE' | 'ALL' = 'ACTIVE'
+) {
+  const statusFilter = status !== 'ALL' ? 'WHERE status = $1' : ''
+  const params = status !== 'ALL' ? [status] : []
+
+  const query = `
+    SELECT COUNT(*) as count
+    FROM affiliates
+    ${statusFilter}
+  `
+
+  const result = await pool.query(query, params)
+  return result.rows[0]?.count || 0
+}
+
+export default {
+  getAffiliates,
+  getAffiliateCount,
+}
+

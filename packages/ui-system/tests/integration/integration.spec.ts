@@ -8,7 +8,7 @@ integrationDescribe('Integration Tests - Phase 4', () => {
   describe('Task 10A: DataTable + Filter Integration', () => {
     const TestComponent = defineComponent({
       setup() {
-        const filters = ref([])
+        const filters = ref<{fieldId: string; value: string}[]>([])
         const rows = ref([
           { id: 1, name: 'John', status: 'active' },
           { id: 2, name: 'Jane', status: 'inactive' },
@@ -92,7 +92,7 @@ integrationDescribe('Integration Tests - Phase 4', () => {
     it('should emit filter-changed event', () => {
       const TestWithEvent = defineComponent({
         setup() {
-          const filters = ref([])
+          const filters = ref<{fieldId: string; value: string}[]>([])
           const isFilterChanged = ref(false)
 
           const onFilterChange = () => {
@@ -371,9 +371,9 @@ integrationDescribe('Integration Tests - Phase 4', () => {
       const inputs = wrapper.findAll('input')
 
       // Type too short for en (needs 3)
-      await inputs[0].setValue('ab')
+      await inputs[0]!.setValue('ab')
 
-      expect(wrapper.vm.errors.en.length).toBeGreaterThan(0)
+      expect(wrapper.vm.errors.en!.length).toBeGreaterThan(0)
     })
 
     it('should validate global constraints (min 1 required language)', () => {
@@ -502,8 +502,8 @@ integrationDescribe('Integration Tests - Phase 4', () => {
       const wrapper = mount(TestConcurrent)
 
       const buttons = wrapper.findAll('button')
-      await buttons[0].trigger('click')
-      await buttons[1].trigger('click')
+      await buttons[0]!.trigger('click')
+      await buttons[1]!.trigger('click')
 
       await new Promise((resolve) => setTimeout(resolve, 50))
 

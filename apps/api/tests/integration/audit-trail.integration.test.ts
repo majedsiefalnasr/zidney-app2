@@ -190,8 +190,8 @@ describe('Audit Trail Integration Tests (T032)', () => {
     const submitEvents = history.filter((e) => e.event_type === 'ANSWER_SUBMIT')
 
     expect(submitEvents.length).toBe(2)
-    expect(submitEvents[0].event_payload.question_id).toBe('q1')
-    expect(submitEvents[1].event_payload.question_id).toBe('q2')
+    expect(submitEvents[0]!.event_payload.question_id).toBe('q1')
+    expect(submitEvents[1]!.event_payload.question_id).toBe('q2')
     logger.info('✅ ANSWER_SUBMIT order test passed')
   })
 
@@ -258,7 +258,7 @@ describe('Audit Trail Integration Tests (T032)', () => {
 
   it('❌ Audit trail events cannot be modified', async () => {
     const history = await getAttemptEventHistory(attemptId, pool)
-    const firstEvent = history[0]
+    const firstEvent = history[0]!
 
     // Try to update event
     try {

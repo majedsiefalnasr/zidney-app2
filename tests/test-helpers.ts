@@ -325,7 +325,7 @@ export class MockHttpClient implements TestClient {
 
     const loginMatch = path.match(/\/workspace\/([^/]+)\/login$/)
     if (loginMatch) {
-      const workspace = loginMatch[1]
+      const workspace = loginMatch[1]!
       const email = String(data?.email ?? '')
       const password = String(data?.password ?? '')
       const ip = this.headers['X-Forwarded-For'] ?? 'local'
@@ -388,7 +388,7 @@ export class MockHttpClient implements TestClient {
 
     const refreshMatch = path.match(/\/workspace\/([^/]+)\/token-refresh$/)
     if (refreshMatch) {
-      const workspace = refreshMatch[1]
+      const workspace = refreshMatch[1]!
       return {
         status: 200,
         data: { token: generateJWT(workspace, randomUUID()) },
@@ -420,7 +420,7 @@ export class MockHttpClient implements TestClient {
       const id = randomUUID()
       this.state.attempts.set(id, {
         id,
-        workspace_id: createAttemptMatch[1],
+        workspace_id: createAttemptMatch[1]!,
         status: 'CREATED',
         result: null,
       })
@@ -435,7 +435,7 @@ export class MockHttpClient implements TestClient {
 
     const submitMatch = path.match(/\/attempt\/([^/]+)\/submit$/)
     if (submitMatch) {
-      const attempt_id = submitMatch[1]
+      const attempt_id = submitMatch[1]!
       const attempt = this.state.attempts.get(attempt_id)
 
       if (!attempt) {
@@ -511,7 +511,7 @@ export class MockHttpClient implements TestClient {
       /\/admin\/workspace\/([^/]+)\/dlq\/([^/]+)\/retry$/
     )
     if (adminRetryMatch) {
-      const dlq_job_id = adminRetryMatch[2]
+      const dlq_job_id = adminRetryMatch[2]!
       this.state.dlqResolutions.push({ dlq_job_id })
       return { status: 202, data: { retried: true }, error: null, headers }
     }
@@ -557,7 +557,7 @@ export class MockHttpClient implements TestClient {
         }
       }
 
-      if (jwt.workspace_id !== verifyMatch[1]) {
+      if (jwt.workspace_id !== verifyMatch[1]!) {
         return {
           status: 403,
           data: null,
@@ -584,7 +584,7 @@ export class MockHttpClient implements TestClient {
 
     const workspaceAttemptsMatch = path.match(/\/workspace\/([^/]+)\/attempts$/)
     if (workspaceAttemptsMatch) {
-      const workspace_id = workspaceAttemptsMatch[1]
+      const workspace_id = workspaceAttemptsMatch[1]!
       const attempts = Array.from(this.state.attempts.values()).filter(
         (attempt) => attempt.workspace_id === workspace_id
       )
@@ -593,9 +593,9 @@ export class MockHttpClient implements TestClient {
 
     const statusMatch = path.match(/\/attempt\/([^/]+)\/status$/)
     if (statusMatch) {
-      let attempt_id = statusMatch[1]
+      let attempt_id = statusMatch[1]!
       try {
-        attempt_id = decodeURIComponent(statusMatch[1])
+        attempt_id = decodeURIComponent(statusMatch[1]!)
       } catch {
         return {
           status: 404,
@@ -633,7 +633,7 @@ export class MockHttpClient implements TestClient {
 
     const resultMatch = path.match(/\/attempt\/([^/]+)\/result$/)
     if (resultMatch) {
-      const attempt = this.state.attempts.get(resultMatch[1])
+      const attempt = this.state.attempts.get(resultMatch[1]!)
       if (!attempt) {
         return {
           status: 404,
@@ -671,7 +671,7 @@ export class MockHttpClient implements TestClient {
     const headers = makeBaseHeaders(this.headers)
     const startMatch = path.match(/\/attempt\/([^/]+)\/start$/)
     if (startMatch) {
-      const attempt = this.state.attempts.get(startMatch[1])
+      const attempt = this.state.attempts.get(startMatch[1]!)
       if (!attempt) {
         return {
           status: 404,
@@ -704,7 +704,7 @@ export class MockHttpClient implements TestClient {
     const headers = makeBaseHeaders(this.headers)
     const attemptMatch = path.match(/\/attempt\/([^/]+)$/)
     if (attemptMatch) {
-      this.state.attempts.delete(attemptMatch[1])
+      this.state.attempts.delete(attemptMatch[1]!)
       return { status: 204, data: null, error: null, headers }
     }
 

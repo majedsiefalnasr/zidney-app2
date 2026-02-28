@@ -72,7 +72,7 @@ describe('Load: Products - List Performance (T070)', () => {
 
     const duration = Date.now() - startTime
 
-    expect(sorted[0].created_at > sorted[999].created_at).toBe(true)
+    expect(sorted[0]!.created_at > sorted[999]!.created_at).toBe(true)
     expect(duration).toBeLessThan(100)
   })
 })

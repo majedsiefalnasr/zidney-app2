@@ -96,7 +96,7 @@ describe('T060: Error Handling Integration Tests', () => {
           {
             name: { en: 'Mixed Modules' },
             slug: 'mixed-mod',
-            enabled_modules: ['MODULE_ATTEMPT', 'FAKE_MODULE'] as any,
+            enabled_modules: [Module.MCQ, 'FAKE_MODULE'] as any,
           },
           ctx.userId
         )
@@ -200,11 +200,7 @@ describe('T060: Error Handling Integration Tests', () => {
 
     it('should return 404 for non-existent product on DELETE', async () => {
       try {
-        await productService.deleteProduct(
-          dbClient,
-          'non-existent-id',
-          ctx.userId
-        )
+        await productService.deleteProduct(dbClient, 'non-existent-id')
         expect.fail('Should have thrown PRODUCT_NOT_FOUND')
       } catch (error: any) {
         expect(error.code).toBe(ErrorCodes.PRODUCT_NOT_FOUND)
@@ -246,7 +242,7 @@ describe('T060: Error Handling Integration Tests', () => {
       )
 
       try {
-        await productService.deleteProduct(dbClient, product.id, ctx.userId)
+        await productService.deleteProduct(dbClient, product.id)
         expect.fail('Should have thrown PRODUCT_HAS_LICENSES')
       } catch (error: any) {
         expect(error.code).toBe(ErrorCodes.PRODUCT_HAS_LICENSES)
@@ -461,14 +457,14 @@ describe('T060: Error Handling Integration Tests', () => {
       const results = await Promise.allSettled([p1Promise, p2Promise])
 
       // One should succeed, one should fail
-      const successful = results.filter((r) => r.status === 'fulfilled')
-      const failed = results.filter((r) => r.status === 'rejected')
+      const successful = results.filter((r: any) => r.status === 'fulfilled')
+      const failed = results.filter((r: any) => r.status === 'rejected')
 
       expect(successful.length).toBe(1)
       expect(failed.length).toBe(1)
 
-      if (failed[0].status === 'rejected') {
-        expect(failed[0].reason.code).toBe(ErrorCodes.DUPLICATE_SLUG)
+      if (failed[0]!.status === 'rejected') {
+        expect(failed[0]!.reason.code).toBe(ErrorCodes.DUPLICATE_SLUG)
       }
     })
   })

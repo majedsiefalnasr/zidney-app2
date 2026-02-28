@@ -9,6 +9,7 @@
  * - generateChangeSummary() - change description
  */
 
+import { Module } from '@zidney/types/enums/Module'
 import {
   computeFieldDiff,
   generateChangeSummary,
@@ -27,10 +28,7 @@ describe('T062: Product Service Logic Unit Tests', () => {
         description: 'Old desc',
       }
 
-      const summary = generateChangeSummary(
-        oldProduct as any,
-        newProduct as any
-      )
+      const summary = generateChangeSummary(computeFieldDiff(oldProduct as any, newProduct as any))
 
       expect(summary).toBeDefined()
       expect(summary.length).toBeGreaterThan(0)
@@ -41,18 +39,15 @@ describe('T062: Product Service Logic Unit Tests', () => {
       const oldProduct = {
         name: { en: 'Old' },
         description: 'Old desc',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
       const newProduct = {
         name: { en: 'New' },
         description: 'New desc',
-        enabled_modules: ['MODULE_ATTEMPT', 'MODULE_REPORTING'],
+        enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
       }
 
-      const summary = generateChangeSummary(
-        oldProduct as any,
-        newProduct as any
-      )
+      const summary = generateChangeSummary(computeFieldDiff(oldProduct as any, newProduct as any))
 
       expect(summary).toBeDefined()
       expect(summary.toLowerCase()).toContain('updated')
@@ -64,7 +59,7 @@ describe('T062: Product Service Logic Unit Tests', () => {
         description: 'Same desc',
       }
 
-      const summary = generateChangeSummary(product as any, product as any)
+      const summary = generateChangeSummary(computeFieldDiff(product as any, product as any))
 
       expect(summary.toLowerCase()).toContain('no change')
     })
@@ -73,18 +68,15 @@ describe('T062: Product Service Logic Unit Tests', () => {
       const oldProduct = {
         name: { en: 'Old' },
         description: 'Old',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
       const newProduct = {
         name: { en: 'New' },
         description: 'New',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
-      const summary = generateChangeSummary(
-        oldProduct as any,
-        newProduct as any
-      )
+      const summary = generateChangeSummary(computeFieldDiff(oldProduct as any, newProduct as any))
 
       expect(summary.length).toBeGreaterThan(0)
     })
@@ -99,10 +91,7 @@ describe('T062: Product Service Logic Unit Tests', () => {
         description: 'New desc',
       }
 
-      const summary = generateChangeSummary(
-        oldProduct as any,
-        newProduct as any
-      )
+      const summary = generateChangeSummary(computeFieldDiff(oldProduct as any, newProduct as any))
 
       expect(summary).toBeDefined()
     })
@@ -110,17 +99,14 @@ describe('T062: Product Service Logic Unit Tests', () => {
     it('should handle module array changes', () => {
       const oldProduct = {
         name: { en: 'Product' },
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
       const newProduct = {
         name: { en: 'Product' },
-        enabled_modules: ['MODULE_ATTEMPT', 'MODULE_REPORTING'],
+        enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
       }
 
-      const summary = generateChangeSummary(
-        oldProduct as any,
-        newProduct as any
-      )
+      const summary = generateChangeSummary(computeFieldDiff(oldProduct as any, newProduct as any))
 
       expect(summary.toLowerCase()).toContain('module')
     })
@@ -143,8 +129,8 @@ describe('T062: Product Service Logic Unit Tests', () => {
 
       const diff = computeFieldDiff(oldProduct as any, newProduct as any)
 
-      expect(diff.description.old).toBe('Old')
-      expect(diff.description.new).toBe('New')
+      expect((diff.description as any).old).toBe('Old')
+      expect((diff.description as any).new).toBe('New')
     })
 
     it('should ignore unchanged fields', () => {
@@ -159,9 +145,9 @@ describe('T062: Product Service Logic Unit Tests', () => {
     })
 
     it('should handle array changes (modules)', () => {
-      const oldProduct = { enabled_modules: ['MODULE_ATTEMPT'] }
+      const oldProduct = { enabled_modules: [Module.MCQ] }
       const newProduct = {
-        enabled_modules: ['MODULE_ATTEMPT', 'MODULE_REPORTING'],
+        enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
       }
 
       const diff = computeFieldDiff(oldProduct as any, newProduct as any)
@@ -175,8 +161,8 @@ describe('T062: Product Service Logic Unit Tests', () => {
 
       const diff = computeFieldDiff(oldProduct as any, newProduct as any)
 
-      expect(diff.description.old).toBeNull()
-      expect(diff.description.new).toBe('New')
+      expect((diff.description as any).old).toBeNull()
+      expect((diff.description as any).new).toBe('New')
     })
 
     it('should handle value to null changes', () => {
@@ -185,8 +171,8 @@ describe('T062: Product Service Logic Unit Tests', () => {
 
       const diff = computeFieldDiff(oldProduct as any, newProduct as any)
 
-      expect(diff.description.old).toBe('Old')
-      expect(diff.description.new).toBeNull()
+      expect((diff.description as any).old).toBe('Old')
+      expect((diff.description as any).new).toBeNull()
     })
 
     it('should handle nested object changes (name)', () => {
@@ -232,34 +218,34 @@ describe('T062: Product Service Logic Unit Tests', () => {
       const diff = computeFieldDiff(oldProduct as any, newProduct as any)
 
       expect(diff.name).toBeDefined()
-      expect(diff.name.old.en).toBe('Product A')
-      expect(diff.name.new.en).toBe('Product B')
+      expect((diff.name as any).old.en).toBe('Product A')
+      expect((diff.name as any).new.en).toBe('Product B')
     })
 
     it('should track when modules are added', () => {
-      const oldProduct = { enabled_modules: ['MODULE_ATTEMPT'] }
+      const oldProduct = { enabled_modules: [Module.MCQ] }
       const newProduct = {
-        enabled_modules: ['MODULE_ATTEMPT', 'MODULE_REPORTING'],
+        enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
       }
 
       const diff = computeFieldDiff(oldProduct as any, newProduct as any)
 
       expect(diff.enabled_modules).toBeDefined()
-      expect(diff.enabled_modules.old).toContain('MODULE_ATTEMPT')
-      expect(diff.enabled_modules.new).toContain('MODULE_REPORTING')
+      expect((diff.enabled_modules as any).old).toContain(Module.MCQ)
+      expect((diff.enabled_modules as any).new).toContain(Module.TRADITIONAL_EXAMS)
     })
 
     it('should track when modules are removed', () => {
       const oldProduct = {
-        enabled_modules: ['MODULE_ATTEMPT', 'MODULE_REPORTING'],
+        enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
       }
-      const newProduct = { enabled_modules: ['MODULE_ATTEMPT'] }
+      const newProduct = { enabled_modules: [Module.MCQ] }
 
       const diff = computeFieldDiff(oldProduct as any, newProduct as any)
 
       expect(diff.enabled_modules).toBeDefined()
-      expect(diff.enabled_modules.old).toContain('MODULE_REPORTING')
-      expect(diff.enabled_modules.new).not.toContain('MODULE_REPORTING')
+      expect((diff.enabled_modules as any).old).toContain(Module.TRADITIONAL_EXAMS)
+      expect((diff.enabled_modules as any).new).not.toContain(Module.TRADITIONAL_EXAMS)
     })
   })
 
@@ -293,10 +279,7 @@ describe('T062: Product Service Logic Unit Tests', () => {
         description: 'D'.repeat(100),
       }
 
-      const summary = generateChangeSummary(
-        oldProduct as any,
-        newProduct as any
-      )
+      const summary = generateChangeSummary(computeFieldDiff(oldProduct as any, newProduct as any))
 
       expect(summary.length).toBeGreaterThan(0)
       expect(summary.length).toBeLessThan(500) // Reasonable summary length
@@ -308,8 +291,8 @@ describe('T062: Product Service Logic Unit Tests', () => {
 
       const diff = computeFieldDiff(oldProduct as any, newProduct as any)
 
-      expect(diff.name.old.en).toBe('Product & Services')
-      expect(diff.name.new.en).toBe('Product (Beta) #2')
+      expect((diff.name as any).old.en).toBe('Product & Services')
+      expect((diff.name as any).new.en).toBe('Product (Beta) #2')
     })
 
     it('should handle Unicode/RTL text in changes', () => {
@@ -327,18 +310,14 @@ describe('T062: Product Service Logic Unit Tests', () => {
       const oldProduct = {
         name: { en: 'Product', ar: 'منتج' },
         description: 'Description',
-        enabled_modules: ['MODULE_ATTEMPT', 'MODULE_REPORTING'],
+        enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
         status: 'ACTIVE',
         current_version: 1,
       }
       const newProduct = {
         name: { en: 'Updated', ar: 'محدث' },
         description: 'New Description',
-        enabled_modules: [
-          'MODULE_ATTEMPT',
-          'MODULE_REPORTING',
-          'MODULE_ANALYTICS',
-        ],
+        enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS, Module.FORUM],
         status: 'ACTIVE',
         current_version: 2,
       }
@@ -353,15 +332,15 @@ describe('T062: Product Service Logic Unit Tests', () => {
     it('should generate summary quickly', () => {
       const product1 = {
         name: { en: 'Test' },
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
       const product2 = {
         name: { en: 'Test Updated' },
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       const start = performance.now()
-      generateChangeSummary(product1 as any, product2 as any)
+      generateChangeSummary(computeFieldDiff(product1 as any, product2 as any))
       const duration = performance.now() - start
 
       expect(duration).toBeLessThan(5) // <5ms

@@ -1,0 +1,37 @@
+name: TypeScript Type Check
+
+on:
+  pull_request:
+    branches: ["**"]
+  push:
+    branches: ["main", "develop", "staging"]
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck:
+    name: TypeScript Type Check
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@4bc047ad259df6fc24a6c9b0f9a0cb08cf17fbe5 # v2.0.1
+        with:
+          bun-version: latest
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Type check source files
+        run: bun run typecheck:src
+
+      - name: Type check test files
+        run: bun run typecheck:tests
+
+      - name: Lint
+        run: bun run lint

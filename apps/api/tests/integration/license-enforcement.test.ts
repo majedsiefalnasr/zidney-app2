@@ -76,7 +76,7 @@ describe('License Enforcement', () => {
     archivedWorkspace = archived.rows[0]
 
     // Create user in active workspace
-    const pool = getTenantPool(activeWorkspace.id)
+    const pool = getTenantPool(activeWorkspace.id)!
     const u = await pool.query(
       `INSERT INTO ${LICENSE_USERS_TABLE} (workspace_id, email, password_hash, role, token_version)
        VALUES ($1, 'license@test.com', 'hash', 'admin', 1)
@@ -91,7 +91,7 @@ describe('License Enforcement', () => {
     if (!activeWorkspace || !user) {
       return
     }
-    const pool = getTenantPool(activeWorkspace.id)
+    const pool = getTenantPool(activeWorkspace.id)!
     await pool.query(`DELETE FROM ${LICENSE_USERS_TABLE} WHERE id = $1`, [user.id])
 
     await db.master.query(`DELETE FROM ${LICENSE_WORKSPACES_TABLE} WHERE slug LIKE $1`, [

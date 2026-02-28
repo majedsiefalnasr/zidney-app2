@@ -323,9 +323,9 @@ describe('Phase 5: Snapshot Immutability Tests', () => {
       const results = await Promise.all(promises)
 
       // Verify all snapshots are identical
-      const firstSnapshot = results[0].rows[0].configuration_snapshot
+      const firstSnapshot = results[0]!.rows[0]!.configuration_snapshot
       for (let i = 1; i < results.length; i++) {
-        expect(results[i].rows[0].configuration_snapshot).toEqual(firstSnapshot)
+        expect(results[i]!.rows[0]!.configuration_snapshot).toEqual(firstSnapshot)
       }
     })
 

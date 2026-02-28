@@ -121,9 +121,9 @@ describe('Version Compatibility', () => {
     const parseVersion = (versionString: string) => {
       const parts = versionString.split('.')
       return {
-        major: parseInt(parts[0]),
-        minor: parseInt(parts[1]),
-        patch: parseInt(parts[2]),
+        major: parseInt(parts[0]!),
+        minor: parseInt(parts[1]!),
+        patch: parseInt(parts[2]!),
       }
     }
 

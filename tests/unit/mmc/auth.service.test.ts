@@ -8,7 +8,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import * as JWT from '../../../apps/api/src/utils/jwt'
 
 describe('T050: AuthService Unit Tests', () => {
-  let mockDb: Any // Mocked database
+  let mockDb: any // Mocked database
 
   beforeEach(() => {
     mockDb = {

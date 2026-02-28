@@ -11,7 +11,8 @@
  */
 
 import * as productService from '@zidney/domain-core/products/productService'
-import { ProductStatus } from '@zidney/types/products/Product'
+import { ProductStatus, AuditAction } from '@zidney/types/products/Product'
+import { Module } from '@zidney/types/enums/Module'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import {
   cleanupTestContext,
@@ -45,7 +46,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         {
           name: { en: 'Audit Test' },
           slug: 'audit-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -68,7 +69,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         {
           name: { en: 'Create Audit' },
           slug: 'create-audit',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -80,7 +81,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
       )
 
       const createEntry = result.items.find(
-        (entry) => entry.action === 'CREATE'
+        (entry) => entry.action === AuditAction.CREATE
       )
       expect(createEntry).toBeDefined()
       expect(createEntry?.product_id).toBe(product.id)
@@ -92,7 +93,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         {
           name: { en: 'All Actions' },
           slug: 'all-actions',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -133,7 +134,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         {
           name: { en: 'Pagination Test' },
           slug: 'pagination',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -151,7 +152,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
     })
 
     it('should respect limit parameter', async () => {
-      const product = (await productService.listProducts(dbClient, {})).items[0]
+      const product = (await productService.listProducts(dbClient, {})).items[0]!
 
       const result = await productService.getProductAuditLog(
         dbClient,
@@ -165,7 +166,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
     })
 
     it('should respect offset parameter', async () => {
-      const product = (await productService.listProducts(dbClient, {})).items[0]
+      const product = (await productService.listProducts(dbClient, {})).items[0]!
 
       const page1 = await productService.getProductAuditLog(
         dbClient,
@@ -185,11 +186,11 @@ describe('T058: Audit Log Query Integration Tests', () => {
         }
       )
 
-      expect(page1.items[0].id).not.toBe(page2.items[0].id)
+      expect(page1.items[0]!.id).not.toBe(page2.items[0]!.id)
     })
 
     it('should include pagination metadata', async () => {
-      const product = (await productService.listProducts(dbClient, {})).items[0]
+      const product = (await productService.listProducts(dbClient, {})).items[0]!
 
       const result = await productService.getProductAuditLog(
         dbClient,
@@ -213,7 +214,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         {
           name: { en: 'Filter Test' },
           slug: 'filter-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -234,53 +235,53 @@ describe('T058: Audit Log Query Integration Tests', () => {
     })
 
     it('should filter by action=CREATE', async () => {
-      const product = (await productService.listProducts(dbClient, {})).items[0]
+      const product = (await productService.listProducts(dbClient, {})).items[0]!
 
       const result = await productService.getProductAuditLog(
         dbClient,
         product.id,
         {
-          action: 'CREATE',
+          action: AuditAction.CREATE,
         }
       )
 
       expect(result.items.length).toBeGreaterThan(0)
-      expect(result.items.every((entry) => entry.action === 'CREATE')).toBe(
+      expect(result.items.every((entry) => entry.action === AuditAction.CREATE)).toBe(
         true
       )
     })
 
     it('should filter by action=UPDATE', async () => {
-      const product = (await productService.listProducts(dbClient, {})).items[0]
+      const product = (await productService.listProducts(dbClient, {})).items[0]!
 
       const result = await productService.getProductAuditLog(
         dbClient,
         product.id,
         {
-          action: 'UPDATE',
+          action: AuditAction.UPDATE,
         }
       )
 
       expect(result.items.length).toBeGreaterThan(0)
-      expect(result.items.every((entry) => entry.action === 'UPDATE')).toBe(
+      expect(result.items.every((entry) => entry.action === AuditAction.UPDATE)).toBe(
         true
       )
     })
 
     it('should filter by action=STATUS_CHANGE', async () => {
-      const product = (await productService.listProducts(dbClient, {})).items[0]
+      const product = (await productService.listProducts(dbClient, {})).items[0]!
 
       const result = await productService.getProductAuditLog(
         dbClient,
         product.id,
         {
-          action: 'STATUS_CHANGE',
+          action: AuditAction.STATUS_CHANGE,
         }
       )
 
       expect(result.items.length).toBeGreaterThan(0)
       expect(
-        result.items.every((entry) => entry.action === 'STATUS_CHANGE')
+        result.items.every((entry) => entry.action === AuditAction.STATUS_CHANGE)
       ).toBe(true)
     })
   })
@@ -292,7 +293,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         {
           name: { en: 'Date Test' },
           slug: 'date-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -304,7 +305,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         dbClient,
         product.id,
         {
-          from_date: from.toISOString(),
+          from_date: from,
         }
       )
 
@@ -317,7 +318,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         {
           name: { en: 'To Date Test' },
           slug: 'to-date-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -329,7 +330,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         dbClient,
         product.id,
         {
-          to_date: to.toISOString(),
+          to_date: to,
         }
       )
 
@@ -342,7 +343,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         {
           name: { en: 'Range Test' },
           slug: 'range-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -357,8 +358,8 @@ describe('T058: Audit Log Query Integration Tests', () => {
         dbClient,
         product.id,
         {
-          from_date: from.toISOString(),
-          to_date: to.toISOString(),
+          from_date: from,
+          to_date: to,
         }
       )
 
@@ -371,7 +372,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         {
           name: { en: 'Future Range' },
           slug: 'future-range',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -383,7 +384,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         dbClient,
         product.id,
         {
-          from_date: from.toISOString(),
+          from_date: from,
         }
       )
 
@@ -398,7 +399,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         {
           name: { en: 'Sort Test' },
           slug: 'sort-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -428,8 +429,8 @@ describe('T058: Audit Log Query Integration Tests', () => {
 
       // Check sorting - should be descending (newest first)
       for (let i = 0; i < result.items.length - 1; i++) {
-        const current = new Date(result.items[i].timestamp).getTime()
-        const next = new Date(result.items[i + 1].timestamp).getTime()
+        const current = new Date(result.items[i]!.timestamp).getTime()
+        const next = new Date(result.items[i + 1]!.timestamp).getTime()
         expect(current).toBeGreaterThanOrEqual(next)
       }
     })
@@ -442,7 +443,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         {
           name: { en: 'Fields Test' },
           slug: 'fields-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -454,7 +455,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
       )
 
       expect(result.items.length).toBeGreaterThan(0)
-      const entry = result.items[0]
+      const entry = result.items[0]!
 
       expect(entry.id).toBeDefined()
       expect(entry.product_id).toBeDefined()
@@ -469,7 +470,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         {
           name: { en: 'User Test' },
           slug: 'user-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -480,7 +481,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         {}
       )
 
-      const entry = result.items[0]
+      const entry = result.items[0]!
       expect(entry.performed_by).toBe(ctx.userId)
     })
 
@@ -490,7 +491,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         {
           name: { en: 'Version Audit' },
           slug: 'version-audit',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -506,12 +507,12 @@ describe('T058: Audit Log Query Integration Tests', () => {
         dbClient,
         product.id,
         {
-          action: 'UPDATE',
+          action: AuditAction.UPDATE,
         }
       )
 
       expect(result.items.length).toBeGreaterThan(0)
-      const updateEntry = result.items[0]
+      const updateEntry = result.items[0]!
       expect(updateEntry.previous_version).toBeDefined()
       expect(updateEntry.new_version).toBeDefined()
     })
@@ -522,7 +523,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         {
           name: { en: 'No Version' },
           slug: 'no-version',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -538,12 +539,12 @@ describe('T058: Audit Log Query Integration Tests', () => {
         dbClient,
         product.id,
         {
-          action: 'STATUS_CHANGE',
+          action: AuditAction.STATUS_CHANGE,
         }
       )
 
       expect(result.items.length).toBeGreaterThan(0)
-      const statusEntry = result.items[0]
+      const statusEntry = result.items[0]!
       // STATUS_CHANGE should not have version info
       expect(
         statusEntry.previous_version === null ||

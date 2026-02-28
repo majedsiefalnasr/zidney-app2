@@ -68,30 +68,30 @@ describe('RBAC Enforcement', () => {
        VALUES ('rbac-test', 'RBAC Test', 'ACTIVE', 1, '0.1.0')
        RETURNING *`
     )
-    workspace = ws.rows[0]
+    workspace = ws.rows[0]!
 
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     const adminRes = await pool.query(
       `INSERT INTO ${RBAC_USERS_TABLE} (email, password_hash, role, token_version)
        VALUES ('admin@test.com', 'hash', 'admin', 1)
        RETURNING id, email, role`
     )
-    admin = adminRes.rows[0]
+    admin = adminRes.rows[0]!
 
     const instructorRes = await pool.query(
       `INSERT INTO ${RBAC_USERS_TABLE} (email, password_hash, role, token_version)
        VALUES ('instructor@test.com', 'hash', 'instructor', 1)
        RETURNING id, email, role`
     )
-    instructor = instructorRes.rows[0]
+    instructor = instructorRes.rows[0]!
 
     const studentRes = await pool.query(
       `INSERT INTO ${RBAC_USERS_TABLE} (email, password_hash, role, token_version)
        VALUES ('student@test.com', 'hash', 'student', 1)
        RETURNING id, email, role`
     )
-    student = studentRes.rows[0]
+    student = studentRes.rows[0]!
   })
 
   afterAll(async () => {
@@ -99,7 +99,7 @@ describe('RBAC Enforcement', () => {
       return
     }
 
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
     if (!pool) {
       return
     }
@@ -158,14 +158,14 @@ describe('RBAC Enforcement', () => {
   })
 
   it('should load permissions from database', async () => {
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     // Get user role
     const result = await pool.query(`SELECT role FROM ${RBAC_USERS_TABLE} WHERE id = $1`, [
       admin.id,
     ])
 
-    expect(result.rows[0].role).toBe('admin')
+    expect(result.rows[0]!.role).toBe('admin')
 
     // In real implementation, permissions loaded from DB based on role
     // Never cached in JWT token
@@ -188,13 +188,13 @@ describe('RBAC Enforcement', () => {
   })
 
   it('should not cache permissions', async () => {
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     // Get initial role
     const initial = await pool.query(`SELECT role FROM ${RBAC_USERS_TABLE} WHERE id = $1`, [
       instructor.id,
     ])
-    expect(initial.rows[0].role).toBe('instructor')
+    expect(initial.rows[0]!.role).toBe('instructor')
 
     // Simulate role change in DB
     await pool.query(`UPDATE ${RBAC_USERS_TABLE} SET role = 'admin' WHERE id = $1`, [
@@ -207,7 +207,7 @@ describe('RBAC Enforcement', () => {
       instructor.id,
     ])
 
-    expect(updated.rows[0].role).toBe('admin')
+    expect(updated.rows[0]!.role).toBe('admin')
 
     // Reset
     await pool.query(`UPDATE ${RBAC_USERS_TABLE} SET role = 'instructor' WHERE id = $1`, [

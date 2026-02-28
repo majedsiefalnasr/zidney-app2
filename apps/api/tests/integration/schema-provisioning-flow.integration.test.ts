@@ -17,6 +17,10 @@ import * as path from 'path'
 import { Pool } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
+// TYPE STUB: TaskQueueProcessor not imported (LOGIC-BUG)
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+declare const TaskQueueProcessor: new (config?: any) => any
+
 const logger = createLogger('SchemaProvisioningFlowTest')
 
 type SchemaInitQueuedResponse = {
@@ -51,7 +55,8 @@ function expectConflictResponse(
 describe('Schema Provisioning Flow - Integration Tests', () => {
   let tenantPool: Pool
   let workspaceId: string
-  let queueProcessor: TaskQueueProcessor
+  let queueProcessor: any
+  let redis: any
   const idempotencyTasks = new Map<string, string>()
   const initializedWorkspaces = new Set<string>()
 

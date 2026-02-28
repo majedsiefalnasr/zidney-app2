@@ -16,6 +16,7 @@ import {
   ProductQueryFilters,
   ProductStatus,
 } from '@zidney/types/products/Product'
+import { Module } from '@zidney/types/enums/Module'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import {
   cleanupTestContext,
@@ -48,13 +49,13 @@ describe('T053: Product Listing Integration Tests', () => {
       const activeInput: CreateProductInput = {
         name: { en: 'Active Product' },
         slug: 'active-1',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       const inactiveInput: CreateProductInput = {
         name: { en: 'Inactive Product' },
         slug: 'inactive-1',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       const activeProduct = await productService.createProduct(
@@ -81,8 +82,8 @@ describe('T053: Product Listing Integration Tests', () => {
       const result = await productService.listProducts(dbClient, filters)
 
       expect(result.items.length).toBe(1)
-      expect(result.items[0].id).toBe(activeProduct.id)
-      expect(result.items[0].status).toBe('ACTIVE')
+      expect(result.items[0]!.id).toBe(activeProduct.id)
+      expect(result.items[0]!.status).toBe('ACTIVE')
     })
 
     it('should count total correctly', async () => {
@@ -91,7 +92,7 @@ describe('T053: Product Listing Integration Tests', () => {
         {
           name: { en: 'Product 1' },
           slug: 'p1',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -100,7 +101,7 @@ describe('T053: Product Listing Integration Tests', () => {
         {
           name: { en: 'Product 2' },
           slug: 'p2',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -120,7 +121,7 @@ describe('T053: Product Listing Integration Tests', () => {
         {
           name: { en: 'A1' },
           slug: 's-a1',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -129,7 +130,7 @@ describe('T053: Product Listing Integration Tests', () => {
         {
           name: { en: 'A2' },
           slug: 's-a2',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -138,7 +139,7 @@ describe('T053: Product Listing Integration Tests', () => {
         {
           name: { en: 'I1' },
           slug: 's-i1',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -147,7 +148,7 @@ describe('T053: Product Listing Integration Tests', () => {
         {
           name: { en: 'I2' },
           slug: 's-i2',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -203,7 +204,7 @@ describe('T053: Product Listing Integration Tests', () => {
           {
             name: { en: `Product ${i}` },
             slug: `product-${i}`,
-            enabled_modules: ['MODULE_ATTEMPT'],
+            enabled_modules: [Module.MCQ],
           },
           ctx.userId
         )
@@ -230,7 +231,7 @@ describe('T053: Product Listing Integration Tests', () => {
 
       expect(page1.items.length).toBe(5)
       expect(page2.items.length).toBe(5)
-      expect(page1.items[0].id).not.toBe(page2.items[0].id)
+      expect(page1.items[0]!.id).not.toBe(page2.items[0]!.id)
     })
 
     it('should enforce maximum limit of 100', async () => {
@@ -269,7 +270,7 @@ describe('T053: Product Listing Integration Tests', () => {
         {
           name: { en: 'Assessment Engine', ar: 'محرك التقييم' },
           slug: 'assessment-engine',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -278,7 +279,7 @@ describe('T053: Product Listing Integration Tests', () => {
         {
           name: { en: 'Content Library', ar: 'مكتبة المحتوى' },
           slug: 'content-library',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -287,7 +288,7 @@ describe('T053: Product Listing Integration Tests', () => {
         {
           name: { en: 'Analytics Dashboard', ar: 'لوحة التحليلات' },
           slug: 'analytics-dashboard',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -299,7 +300,7 @@ describe('T053: Product Listing Integration Tests', () => {
       })
 
       expect(result.items.length).toBe(1)
-      expect(result.items[0].name.en).toContain('Assessment')
+      expect(result.items[0]!.name.en).toContain('Assessment')
     })
 
     it('should search by Arabic name', async () => {
@@ -308,7 +309,7 @@ describe('T053: Product Listing Integration Tests', () => {
       })
 
       expect(result.items.length).toBe(1)
-      expect(result.items[0].name.ar).toContain('محرك')
+      expect(result.items[0]!.name.ar).toContain('محرك')
     })
 
     it('should search by slug', async () => {
@@ -351,7 +352,7 @@ describe('T053: Product Listing Integration Tests', () => {
           {
             name: { en: `Product ${i}` },
             slug: `sort-test-${i}`,
-            enabled_modules: ['MODULE_ATTEMPT'],
+            enabled_modules: [Module.MCQ],
           },
           ctx.userId
         )
@@ -363,9 +364,9 @@ describe('T053: Product Listing Integration Tests', () => {
       const result = await productService.listProducts(dbClient, {})
 
       // Should be in reverse order (newest first)
-      expect(result.items[0].id).toBe(products[2].id)
-      expect(result.items[1].id).toBe(products[1].id)
-      expect(result.items[2].id).toBe(products[0].id)
+      expect(result.items[0]!.id).toBe(products[2]!.id)
+      expect(result.items[1]!.id).toBe(products[1]!.id)
+      expect(result.items[2]!.id).toBe(products[0]!.id)
     })
   })
 
@@ -377,7 +378,7 @@ describe('T053: Product Listing Integration Tests', () => {
         {
           name: { en: 'Active Assessment' },
           slug: 'active-assess',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -386,7 +387,7 @@ describe('T053: Product Listing Integration Tests', () => {
         {
           name: { en: 'Inactive Assessment' },
           slug: 'inactive-assess',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -406,7 +407,7 @@ describe('T053: Product Listing Integration Tests', () => {
       })
 
       expect(result.items.length).toBe(1)
-      expect(result.items[0].id).toBe(p1.id)
+      expect(result.items[0]!.id).toBe(p1.id)
     })
   })
 
@@ -417,7 +418,7 @@ describe('T053: Product Listing Integration Tests', () => {
         {
           name: { en: 'Test' },
           slug: 'test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -425,7 +426,7 @@ describe('T053: Product Listing Integration Tests', () => {
       const result = await productService.listProducts(dbClient, {})
 
       expect(result.items.length).toBeGreaterThan(0)
-      const product = result.items[0]
+      const product = result.items[0]!
       expect(product.id).toBeDefined()
       expect(product.name).toBeDefined()
       expect(product.slug).toBeDefined()
@@ -442,14 +443,14 @@ describe('T053: Product Listing Integration Tests', () => {
         {
           name: { en: 'Test' },
           slug: 'test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
 
       const result = await productService.listProducts(dbClient, {})
 
-      expect(result.items[0]).not.toHaveProperty('audit_log')
+      expect(result.items[0]!).not.toHaveProperty('audit_log')
     })
   })
 })

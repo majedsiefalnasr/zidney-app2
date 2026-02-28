@@ -19,8 +19,8 @@ describe('Load: Products - Concurrent Updates (T068)', () => {
     }))
 
     expect(versions).toHaveLength(concurrentUpdates)
-    expect(versions[0].version_number).toBe(1)
-    expect(versions[concurrentUpdates - 1].version_number).toBe(
+    expect(versions[0]!.version_number).toBe(1)
+    expect(versions[concurrentUpdates - 1]!.version_number).toBe(
       concurrentUpdates
     )
   })
@@ -39,8 +39,8 @@ describe('Load: Products - Concurrent Updates (T068)', () => {
 
     // Verify no gaps in version numbers
     for (let i = 0; i < versions.length - 1; i++) {
-      expect(versions[i + 1].version_number).toBe(
-        versions[i].version_number + 1
+      expect(versions[i + 1]!.version_number).toBe(
+        versions[i]!.version_number + 1
       )
     }
   })

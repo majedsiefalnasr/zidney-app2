@@ -29,10 +29,10 @@ describe('Concurrency & Transaction Safety Tests', () => {
       expect(purchaseResults.filter((p) => p.status === 'FAILED')).toHaveLength(
         2
       )
-      expect(purchaseResults[10].errorCode).toBe(
+      expect(purchaseResults[10]!.errorCode).toBe(
         'AFFILIATE_USAGE_LIMIT_EXCEEDED'
       )
-      expect(purchaseResults[11].errorCode).toBe(
+      expect(purchaseResults[11]!.errorCode).toBe(
         'AFFILIATE_USAGE_LIMIT_EXCEEDED'
       )
     })

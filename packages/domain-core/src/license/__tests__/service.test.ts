@@ -474,7 +474,7 @@ describe('License Validators — T011-T015', () => {
       ]
 
       validPairs.forEach(([current, target]) => {
-        const result = validateStateTransition(current, target)
+        const result = validateStateTransition(current!, target!)
         expect(result.valid).toBe(true)
       })
     })
@@ -489,7 +489,7 @@ describe('License Validators — T011-T015', () => {
       ]
 
       forbiddenPairs.forEach(([current, target]) => {
-        const result = validateStateTransition(current, target)
+        const result = validateStateTransition(current!, target!)
         expect(result.valid).toBe(false)
         expect(result.error).toBeDefined()
       })

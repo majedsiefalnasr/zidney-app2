@@ -99,14 +99,14 @@ describe('Correlation ID Management', () => {
       const parts = id.split('-')
 
       expect(parts.length).toBe(5)
-      expect(parts[0].length).toBe(8)
-      expect(parts[1].length).toBe(4)
-      expect(parts[2].length).toBe(4)
-      expect(parts[3].length).toBe(4)
-      expect(parts[4].length).toBe(12)
+      expect(parts[0]!.length).toBe(8)
+      expect(parts[1]!.length).toBe(4)
+      expect(parts[2]!.length).toBe(4)
+      expect(parts[3]!.length).toBe(4)
+      expect(parts[4]!.length).toBe(12)
 
       // Version 4 in 3rd group (first char)
-      expect(parts[2][0]).toBe('4')
+      expect(parts[2]![0]).toBe('4')
     })
 
     it('should generate 36-character IDs (with dashes)', () => {

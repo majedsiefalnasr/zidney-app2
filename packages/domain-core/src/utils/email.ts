@@ -143,7 +143,7 @@ export class EmailService {
 
     switch (provider) {
       case 'sendgrid':
-        // @ts-ignore: LOGIC-BUG: sendViaSendGrid method does not exist; should call sendViaServiceProvider — see INFRA-001-LOGIC-04
+        // @ts-ignore: LOGIC-BUG: sendViaSendGrid method does not exist; should call sendViaServiceProvider — see INFRA-001-LOGIC-04 [INFRA-001-LOGIC-04]
         return this.sendViaSendGrid(options)
       case 'smtp':
         return this.sendViaSMTP(options)

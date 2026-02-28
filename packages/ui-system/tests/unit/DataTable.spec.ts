@@ -154,7 +154,7 @@ describe.skip('DataTable - Unit Tests', () => {
       const el = wrapper.element as HTMLElement
 
       // Store reference to any custom listeners
-      const listenersBefore = el._eventListeners?.length || 0
+      const listenersBefore = (el as any)._eventListeners?.length || 0
 
       wrapper.unmount()
 

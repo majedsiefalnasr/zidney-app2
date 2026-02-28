@@ -9,6 +9,7 @@
 
 import * as productService from '@zidney/domain-core/products/productService'
 import { ProductStatus } from '@zidney/types/products/Product'
+import { Module } from '@zidney/types/enums/Module'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import {
   cleanupTestContext,
@@ -42,7 +43,7 @@ describe('T068-T071: Load and Performance Tests', () => {
         {
           name: { en: 'Base Product' },
           slug: 'concurrent-update-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -71,7 +72,7 @@ describe('T068-T071: Load and Performance Tests', () => {
         {
           name: { en: 'Version Check' },
           slug: 'version-check',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -88,7 +89,7 @@ describe('T068-T071: Load and Performance Tests', () => {
       )
 
       const results = await Promise.all(updatePromises)
-      const successful = results.filter((r) => !r.error) as any[]
+      const successful = (results as any[]).filter((r) => !r.error) as any[]
 
       if (successful.length > 1) {
         // Get all versions from database
@@ -98,7 +99,7 @@ describe('T068-T071: Load and Performance Tests', () => {
         )
 
         // Verify no duplicate version numbers
-        const versionNumbers = versions.rows.map((r) => r.version_number)
+        const versionNumbers = versions.rows.map((r: any) => r.version_number)
         const uniqueVersions = new Set(versionNumbers)
         expect(uniqueVersions.size).toBe(versionNumbers.length)
       }
@@ -110,7 +111,7 @@ describe('T068-T071: Load and Performance Tests', () => {
         {
           name: { en: 'No Lost Updates' },
           slug: 'no-lost-updates',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -144,7 +145,7 @@ describe('T068-T071: Load and Performance Tests', () => {
         {
           name: { en: 'Audit Preservation' },
           slug: 'audit-preservation',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -170,7 +171,7 @@ describe('T068-T071: Load and Performance Tests', () => {
       )
 
       // Should have CREATE + multiple UPDATEs
-      expect(auditLog.rows[0].count).toBeGreaterThanOrEqual(1)
+      expect(auditLog.rows[0]!.count).toBeGreaterThanOrEqual(1)
     })
 
     it('should handle rapid sequential updates correctly', async () => {
@@ -179,7 +180,7 @@ describe('T068-T071: Load and Performance Tests', () => {
         {
           name: { en: 'Sequential Updates' },
           slug: 'sequential-updates',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -209,7 +210,7 @@ describe('T068-T071: Load and Performance Tests', () => {
             {
               name: { en: `Product ${i}` },
               slug: 'unique-slug-test',
-              enabled_modules: ['MODULE_ATTEMPT'],
+              enabled_modules: [Module.MCQ],
             },
             ctx.userId
           )
@@ -222,11 +223,11 @@ describe('T068-T071: Load and Performance Tests', () => {
       const results = await Promise.all(createPromises)
 
       // Only one should succeed (201)
-      const succeeded = results.filter((r) => !r.error && r.id).length
+      const succeeded = (results as any[]).filter((r) => !r.error && r.id).length
       expect(succeeded).toBe(1)
 
       // Rest should fail with DUPLICATE_SLUG error
-      const failed = results.filter((r) => r.code === 'DUPLICATE_SLUG').length
+      const failed = (results as any[]).filter((r) => r.code === 'DUPLICATE_SLUG').length
       expect(failed).toBeGreaterThan(0)
     })
 
@@ -238,7 +239,7 @@ describe('T068-T071: Load and Performance Tests', () => {
             {
               name: { en: 'Phantom Check' },
               slug: 'phantom-check',
-              enabled_modules: ['MODULE_ATTEMPT'],
+              enabled_modules: [Module.MCQ],
             },
             ctx.userId
           )
@@ -253,7 +254,7 @@ describe('T068-T071: Load and Performance Tests', () => {
         ['phantom-check']
       )
 
-      expect(products.rows[0].count).toBe(1)
+      expect(products.rows[0]!.count).toBe(1)
     })
 
     it('should allow sequential slug creation after initial failure', async () => {
@@ -265,7 +266,7 @@ describe('T068-T071: Load and Performance Tests', () => {
             {
               name: { en: 'Batch1' },
               slug: 'batch-slug',
-              enabled_modules: ['MODULE_ATTEMPT'],
+              enabled_modules: [Module.MCQ],
             },
             ctx.userId
           )
@@ -282,7 +283,7 @@ describe('T068-T071: Load and Performance Tests', () => {
             {
               name: { en: `Batch2-${i}` },
               slug: `batch-slug-${i}`,
-              enabled_modules: ['MODULE_ATTEMPT'],
+              enabled_modules: [Module.MCQ],
             },
             ctx.userId
           )
@@ -302,7 +303,7 @@ describe('T068-T071: Load and Performance Tests', () => {
             {
               name: { en: 'Referential' },
               slug: 'referential-test',
-              enabled_modules: ['MODULE_ATTEMPT'],
+              enabled_modules: [Module.MCQ],
             },
             ctx.userId
           )
@@ -316,13 +317,13 @@ describe('T068-T071: Load and Performance Tests', () => {
         'SELECT COUNT(*) as count FROM product_versions WHERE product_id NOT IN (SELECT id FROM products)'
       )
 
-      expect(versions.rows[0].count).toBe(0)
+      expect(versions.rows[0]!.count).toBe(0)
 
       const audits = await dbClient.query(
         'SELECT COUNT(*) as count FROM product_audit_logs WHERE product_id NOT IN (SELECT id FROM products)'
       )
 
-      expect(audits.rows[0].count).toBe(0)
+      expect(audits.rows[0]!.count).toBe(0)
     })
   })
 
@@ -339,7 +340,7 @@ describe('T068-T071: Load and Performance Tests', () => {
                 {
                   name: { en: `Product ${index}` },
                   slug: `product-${index}`,
-                  enabled_modules: ['MODULE_ATTEMPT'],
+                  enabled_modules: [Module.MCQ],
                 },
                 ctx.userId
               )
@@ -375,7 +376,7 @@ describe('T068-T071: Load and Performance Tests', () => {
             {
               name: { en: `Paginated ${i}` },
               slug: `paginated-${i}`,
-              enabled_modules: ['MODULE_ATTEMPT'],
+              enabled_modules: [Module.MCQ],
             },
             ctx.userId
           )
@@ -417,7 +418,7 @@ describe('T068-T071: Load and Performance Tests', () => {
             {
               name: { en: `Filtered ${i}` },
               slug: `filtered-${i}`,
-              enabled_modules: ['MODULE_ATTEMPT'],
+              enabled_modules: [Module.MCQ],
             },
             ctx.userId
           )
@@ -434,7 +435,7 @@ describe('T068-T071: Load and Performance Tests', () => {
         await productService
           .changeProductStatus(
             dbClient,
-            products.items[i].id,
+            products.items[i]!.id,
             ProductStatus.INACTIVE,
             ctx.userId
           )
@@ -462,7 +463,7 @@ describe('T068-T071: Load and Performance Tests', () => {
         {
           name: { en: 'Audit Performance' },
           slug: 'audit-performance',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -508,7 +509,7 @@ describe('T068-T071: Load and Performance Tests', () => {
         {
           name: { en: 'Audit Pagination' },
           slug: 'audit-pagination',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -569,7 +570,7 @@ describe('T068-T071: Load and Performance Tests', () => {
         {
           name: { en: 'Audit Filter' },
           slug: 'audit-filter',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -620,7 +621,7 @@ describe('T068-T071: Load and Performance Tests', () => {
         {
           name: { en: 'Large Result' },
           slug: 'large-result',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -668,7 +669,7 @@ describe('T068-T071: Load and Performance Tests', () => {
         {
           name: { en: 'Mixed Ops' },
           slug: 'mixed-ops',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )

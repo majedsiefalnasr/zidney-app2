@@ -168,7 +168,7 @@ describe('T064: E2E Authorization & Error Scenarios', () => {
     })
 
     it('should return 429 when rate limited', async () => {
-      const results = []
+      const results: number[] = []
 
       // Rapid fire requests
       for (let i = 0; i < 10; i++) {

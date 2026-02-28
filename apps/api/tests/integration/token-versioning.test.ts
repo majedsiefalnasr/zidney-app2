@@ -61,9 +61,9 @@ describe('Token Versioning', () => {
        VALUES ('token-ver', 'Token Version Test', 'ACTIVE', 1, '0.1.0')
        RETURNING *`
     )
-    workspace = ws.rows[0]
+    workspace = ws.rows[0]!
 
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
     const u = await pool.query(
       `INSERT INTO ${TOKEN_USERS_TABLE} (workspace_id, email, password_hash, role, token_version)
        VALUES ($1, 'tokenver@test.com', 'hash', 'admin', 1)
@@ -71,14 +71,14 @@ describe('Token Versioning', () => {
       ,
       [workspace.id]
     )
-    user = u.rows[0]
+    user = u.rows[0]!
   })
 
   afterAll(async () => {
     if (!workspace || !user) {
       return
     }
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
     await pool.query(`DELETE FROM ${TOKEN_USERS_TABLE} WHERE id = $1`, [user.id])
     await db.master.query(`DELETE FROM ${TOKEN_WORKSPACES_TABLE} WHERE id = $1`, [
       workspace.id,
@@ -86,7 +86,7 @@ describe('Token Versioning', () => {
   })
 
   it('should validate token when versions match', async () => {
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     // Get current token version
     const result = await pool.query(
@@ -94,7 +94,7 @@ describe('Token Versioning', () => {
       [user.id]
     )
 
-    const dbVersion = result.rows[0].token_version
+    const dbVersion = result.rows[0]!.token_version
     const tokenVersion = 1 // Originally issued with version 1
 
     // Versions match = token valid
@@ -102,7 +102,7 @@ describe('Token Versioning', () => {
   })
 
   it('should reject token when versions mismatch', async () => {
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     // Simulate incremented version in DB
     await pool.query(
@@ -116,7 +116,7 @@ describe('Token Versioning', () => {
       [user.id]
     )
 
-    const dbVersion = result.rows[0].token_version
+    const dbVersion = result.rows[0]!.token_version
     const tokenVersion = 1 // Token still has version 1
 
     // Versions mismatch = token revoked
@@ -125,14 +125,14 @@ describe('Token Versioning', () => {
   })
 
   it('should invalidate all tokens on logout-all', async () => {
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     // Get current version
     const before = await pool.query(
       `SELECT token_version FROM ${TOKEN_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
-    const beforeVersion = before.rows[0].token_version
+    const beforeVersion = before.rows[0]!.token_version
 
     // Simulate logout-all (increment version)
     await pool.query(
@@ -145,7 +145,7 @@ describe('Token Versioning', () => {
       `SELECT token_version FROM ${TOKEN_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
-    const afterVersion = after.rows[0].token_version
+    const afterVersion = after.rows[0]!.token_version
 
     expect(afterVersion).toBe(beforeVersion + 1)
 
@@ -153,14 +153,14 @@ describe('Token Versioning', () => {
   })
 
   it('should prevent token reuse after revocation', async () => {
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     // Get current version
     const result = await pool.query(
       `SELECT token_version FROM ${TOKEN_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
-    const currentVersion = result.rows[0].token_version
+    const currentVersion = result.rows[0]!.token_version
 
     // Old token with version (currentVersion - 1) cannot be reused
     const oldTokenVersion = currentVersion - 1
@@ -169,14 +169,14 @@ describe('Token Versioning', () => {
   })
 
   it('should work with concurrent logout-all calls', async () => {
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     // Get initial version
     const initial = await pool.query(
       `SELECT token_version FROM ${TOKEN_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
-    const initialVersion = initial.rows[0].token_version
+    const initialVersion = initial.rows[0]!.token_version
 
     // Simulate two concurrent logout-all increments
     const t1 = pool.query(
@@ -195,7 +195,7 @@ describe('Token Versioning', () => {
       `SELECT token_version FROM ${TOKEN_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
-    const finalVersion = final.rows[0].token_version
+    const finalVersion = final.rows[0]!.token_version
 
     expect(finalVersion).toBeGreaterThan(initialVersion)
   })

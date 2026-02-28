@@ -68,7 +68,7 @@ describe('1000-Attempt Load Test', () => {
     const results = {
       success: 0,
       failed: 0,
-      responses: [],
+      responses: [] as { status: number; body: { id: string } }[],
     }
 
     // Simulate creating 1000 attempts
@@ -155,7 +155,7 @@ describe('1000-Attempt Load Test', () => {
 
   // T058.7: No Timeout Errors
   test('No timeout errors under sustained load', () => {
-    const errors = [
+    const errors: string[] = [
       // No timeout errors expected
     ]
 

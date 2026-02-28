@@ -1,1 +1,186 @@
-/**\n * CSV Export Query Builder\n *\n * Purpose: Build query for CSV data export\n * - Validates row count before execution (max 50,000 rows)\n * - Supports section filtering (geographic, revenue, affiliate, product)\n * - Returns data ready for CSV streaming\n *\n * File: packages/domain-core/mmc-dashboard/queries/export-query.ts\n * Task: T017 [P]\n * Phase: 1 - Backend Implementation (parallel)\n *\n * Constraint:\n * - MAX 50,000 rows (returns 413 Payload Too Large if exceeded)\n * - Hard timeout: 2 seconds (critical per T023)\n * - Response: CSV with UTF-8 BOM\n */\n\nimport { Pool } from 'pg'\n\nconst MAX_EXPORT_ROWS = 50000\n\nexport interface ExportParams {\n  section: 'geographic' | 'revenue' | 'affiliate' | 'product'\n  date_from?: Date\n  date_to?: Date\n}\n\n/**\n * Count rows for export section\n *\n * Returns: Row count, throws if > 50,000\n */\nexport async function countExportRows(\n  pool: Pool,\n  section: string\n): Promise<number> {\n  let countQuery = ''\n\n  switch (section) {\n    case 'geographic':\n      countQuery = `\n        SELECT COUNT(DISTINCT billing_country) as count\n        FROM revenue_records\n      `\n      break\n    case 'revenue':\n      countQuery = `\n        SELECT COUNT(*) as count\n        FROM revenue_records\n      `\n      break\n    case 'affiliate':\n      countQuery = `\n        SELECT COUNT(*) as count\n        FROM affiliates a\n        LEFT JOIN affiliate_usages au ON a.id = au.affiliate_id\n      `\n      break\n    case 'product':\n      countQuery = `\n        SELECT COUNT(*) as count\n        FROM products\n      `\n      break\n    default:\n      throw new Error(`Invalid export section: ${section}`)\n  }\n\n  const result = await pool.query(countQuery)\n  const rowCount = result.rows[0]?.count || 0\n\n  if (rowCount > MAX_EXPORT_ROWS) {\n    throw new Error(\n      `Export exceeds maximum rows: ${rowCount} > ${MAX_EXPORT_ROWS}`\n    )\n  }\n\n  return rowCount\n}\n\n/**\n * Get geographic data for export\n */\nexport async function getGeographicExport(\n  pool: Pool\n) {\n  const query = `\n    SELECT\n      r.billing_country as country_code,\n      SUM(r.amount_cents) as total_revenue,\n      COUNT(DISTINCT r.license_id) as license_count,\n      (SUM(r.amount_cents)::FLOAT / COUNT(DISTINCT r.license_id)) as avg_revenue\n    FROM revenue_records r\n    GROUP BY r.billing_country\n    ORDER BY total_revenue DESC\n  `\n  const result = await pool.query(query)\n  return result.rows\n}\n\n/**\n * Get revenue data for export\n */\nexport async function getRevenueExport(\n  pool: Pool,\n  dateFrom?: Date,\n  dateTo?: Date\n) {\n  const params: any[] = []\n  let dateFilter = ''\n\n  if (dateFrom && dateTo) {\n    dateFilter = 'WHERE r.created_at >= $1 AND r.created_at <= $2'\n    params.push(dateFrom, dateTo)\n  }\n\n  const query = `\n    SELECT\n      p.name->>'en' as product_name,\n      r.amount_cents as amount,\n      r.created_at as transaction_date,\n      r.billing_country as country\n    FROM revenue_records r\n    JOIN products p ON r.product_id = p.id\n    ${dateFilter}\n    ORDER BY r.created_at DESC\n  `\n\n  const result = await pool.query(query, params)\n  return result.rows\n}\n\n/**\n * Get affiliate data for export\n */\nexport async function getAffiliateExport(\n  pool: Pool\n) {\n  const query = `\n    SELECT\n      a.name as affiliate_name,\n      a.status,\n      a.email,\n      COUNT(DISTINCT au.id) as referral_count,\n      SUM(COALESCE(au.amount_cents, 0)) as total_commission\n    FROM affiliates a\n    LEFT JOIN affiliate_usages au ON a.id = au.affiliate_id\n    GROUP BY a.id, a.name, a.status, a.email\n    ORDER BY total_commission DESC\n  `\n\n  const result = await pool.query(query)\n  return result.rows\n}\n\n/**\n * Get product data for export\n */\nexport async function getProductExport(\n  pool: Pool\n) {\n  const query = `\n    SELECT\n      p.name->>'en' as product_name,\n      p.slug,\n      COUNT(DISTINCT r.license_id) as license_count,\n      SUM(COALESCE(r.amount_cents, 0)) as total_revenue\n    FROM products p\n    LEFT JOIN revenue_records r ON p.id = r.product_id\n    GROUP BY p.id, p.name, p.slug\n    ORDER BY total_revenue DESC\n  `\n\n  const result = await pool.query(query)\n  return result.rows\n}\n\nexport default {\n  countExportRows,\n  getGeographicExport,\n  getRevenueExport,\n  getAffiliateExport,\n  getProductExport,\n}\n
+/**
+ * CSV Export Query Builder
+ *
+ * Purpose: Build query for CSV data export
+ * - Validates row count before execution (max 50,000 rows)
+ * - Supports section filtering (geographic, revenue, affiliate, product)
+ * - Returns data ready for CSV streaming
+ *
+ * File: packages/domain-core/mmc-dashboard/queries/export-query.ts
+ * Task: T017 [P]
+ * Phase: 1 - Backend Implementation (parallel)
+ *
+ * Constraint:
+ * - MAX 50,000 rows (returns 413 Payload Too Large if exceeded)
+ * - Hard timeout: 2 seconds (critical per T023)
+ * - Response: CSV with UTF-8 BOM
+ */
+
+import { Pool } from 'pg'
+
+const MAX_EXPORT_ROWS = 50000
+
+export interface ExportParams {
+  section: 'geographic' | 'revenue' | 'affiliate' | 'product'
+  date_from?: Date
+  date_to?: Date
+}
+
+/**
+ * Count rows for export section
+ *
+ * Returns: Row count, throws if > 50,000
+ */
+export async function countExportRows(
+  pool: Pool,
+  section: string
+): Promise<number> {
+  let countQuery = ''
+
+  switch (section) {
+    case 'geographic':
+      countQuery = `
+        SELECT COUNT(DISTINCT billing_country) as count
+        FROM revenue_records
+      `
+      break
+    case 'revenue':
+      countQuery = `
+        SELECT COUNT(*) as count
+        FROM revenue_records
+      `
+      break
+    case 'affiliate':
+      countQuery = `
+        SELECT COUNT(*) as count
+        FROM affiliates a
+        LEFT JOIN affiliate_usages au ON a.id = au.affiliate_id
+      `
+      break
+    case 'product':
+      countQuery = `
+        SELECT COUNT(*) as count
+        FROM products
+      `
+      break
+    default:
+      throw new Error(`Invalid export section: ${section}`)
+  }
+
+  const result = await pool.query(countQuery)
+  const rowCount = result.rows[0]?.count || 0
+
+  if (rowCount > MAX_EXPORT_ROWS) {
+    throw new Error(
+      `Export exceeds maximum rows: ${rowCount} > ${MAX_EXPORT_ROWS}`
+    )
+  }
+
+  return rowCount
+}
+
+/**
+ * Get geographic data for export
+ */
+export async function getGeographicExport(
+  pool: Pool
+) {
+  const query = `
+    SELECT
+      r.billing_country as country_code,
+      SUM(r.amount_cents) as total_revenue,
+      COUNT(DISTINCT r.license_id) as license_count,
+      (SUM(r.amount_cents)::FLOAT / COUNT(DISTINCT r.license_id)) as avg_revenue
+    FROM revenue_records r
+    GROUP BY r.billing_country
+    ORDER BY total_revenue DESC
+  `
+  const result = await pool.query(query)
+  return result.rows
+}
+
+/**
+ * Get revenue data for export
+ */
+export async function getRevenueExport(
+  pool: Pool,
+  dateFrom?: Date,
+  dateTo?: Date
+) {
+  const params: any[] = []
+  let dateFilter = ''
+
+  if (dateFrom && dateTo) {
+    dateFilter = 'WHERE r.created_at >= $1 AND r.created_at <= $2'
+    params.push(dateFrom, dateTo)
+  }
+
+  const query = `
+    SELECT
+      p.name->>'en' as product_name,
+      r.amount_cents as amount,
+      r.created_at as transaction_date,
+      r.billing_country as country
+    FROM revenue_records r
+    JOIN products p ON r.product_id = p.id
+    ${dateFilter}
+    ORDER BY r.created_at DESC
+  `
+
+  const result = await pool.query(query, params)
+  return result.rows
+}
+
+/**
+ * Get affiliate data for export
+ */
+export async function getAffiliateExport(
+  pool: Pool
+) {
+  const query = `
+    SELECT
+      a.name as affiliate_name,
+      a.status,
+      a.email,
+      COUNT(DISTINCT au.id) as referral_count,
+      SUM(COALESCE(au.amount_cents, 0)) as total_commission
+    FROM affiliates a
+    LEFT JOIN affiliate_usages au ON a.id = au.affiliate_id
+    GROUP BY a.id, a.name, a.status, a.email
+    ORDER BY total_commission DESC
+  `
+
+  const result = await pool.query(query)
+  return result.rows
+}
+
+/**
+ * Get product data for export
+ */
+export async function getProductExport(
+  pool: Pool
+) {
+  const query = `
+    SELECT
+      p.name->>'en' as product_name,
+      p.slug,
+      COUNT(DISTINCT r.license_id) as license_count,
+      SUM(COALESCE(r.amount_cents, 0)) as total_revenue
+    FROM products p
+    LEFT JOIN revenue_records r ON p.id = r.product_id
+    GROUP BY p.id, p.name, p.slug
+    ORDER BY total_revenue DESC
+  `
+
+  const result = await pool.query(query)
+  return result.rows
+}
+
+export default {
+  countExportRows,
+  getGeographicExport,
+  getRevenueExport,
+  getAffiliateExport,
+  getProductExport,
+}
+

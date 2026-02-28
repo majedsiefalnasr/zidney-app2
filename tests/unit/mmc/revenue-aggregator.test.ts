@@ -124,7 +124,7 @@ describe('Revenue Aggregator - Unit Tests', () => {
       const endDate = new Date('2026-02-28')
       const result = filterByDateRange(sampleData, startDate, endDate)
       expect(result).toHaveLength(1)
-      expect(result[0].amount_cents).toBe(200)
+      expect(result[0]!.amount_cents).toBe(200)
     })
 
     it('should include boundary dates (inclusive)', () => {
@@ -132,7 +132,7 @@ describe('Revenue Aggregator - Unit Tests', () => {
       const endDate = new Date('2026-02-15')
       const result = filterByDateRange(sampleData, startDate, endDate)
       expect(result).toHaveLength(1)
-      expect(result[0].amount_cents).toBe(200)
+      expect(result[0]!.amount_cents).toBe(200)
     })
 
     it('should return empty array when no records match', () => {
