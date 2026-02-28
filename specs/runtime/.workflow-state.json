@@ -1,81 +1,24 @@
 {
-  "stage": "STAGE_INFRA_01_TYPESCRIPT_STABILIZATION",
-  "phase": "01_PLATFORM_FOUNDATION",
-  "stage_dir": "specs/runtime/infra-001-typescript-stabilization",
-  "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_01_TYPESCRIPT_STABILIZATION.md",
-  "branch": "infra-001-typescript-stabilization",
+  "stage": "STAGE_UI_00_RUNTIME_ARCHITECTURE",
+  "phase": "06_UI_APPLICATION_RUNTIME",
+  "stage_dir": "specs/runtime/ui-00-runtime-architecture",
+  "stage_file": "specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_00_RUNTIME_ARCHITECTURE.md",
+  "branch": "ui-00-runtime-architecture",
   "base_branch": "develop",
-  "current_step": "stage_production_ready",
-  "stage_status": "PRODUCTION READY",
-  "clarifications_resolved": true,
-  "drift_passed": true,
-  "implementation_allowed": true,
-  "plan_completed": true,
-  "tasks_total": 90,
-  "tasks_completed": 90,
-  "last_updated": "2026-02-28T18:00:00Z",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-02-28T00:00:00Z",
   "history": [
     {
       "event": "branch_created",
-      "branch": "infra-001-typescript-stabilization",
-      "timestamp": "2026-02-27T00:00:00Z"
-    },
-    {
-      "event": "specify_complete",
-      "timestamp": "2026-02-27T00:01:00Z"
-    },
-    {
-      "event": "clarifications_locked",
-      "timestamp": "2026-02-27T00:02:00Z"
-    },
-    {
-      "event": "plan_complete",
-      "guardian_verdicts": "Architecture PASS, API Designer PASS",
-      "error_count": 866,
-      "timestamp": "2026-02-27T00:03:00Z"
-    },
-    {
-      "event": "tasks_complete",
-      "tasks_total": 86,
-      "timestamp": "2026-02-27T00:04:00Z"
-    },
-    {
-      "event": "tasks_amended",
-      "tasks_total": 90,
-      "amendment_reason": "4 tasks added post-drift-audit: T087 (SC-07 CI script), T088 (Day 0 test gate), T089 (ui-system implicit any), T090 (script rename audit)",
-      "timestamp": "2026-02-27T01:30:00Z"
-    },
-    {
-      "event": "drift_analysis_passed",
-      "guardians": [
-        "Security: PASS",
-        "Performance: PASS",
-        "QA: PASS (after Round 1 remediation)",
-        "Code Reviewer: PASS (after Round 2 remediation)"
-      ],
-      "drift_criteria": "9/9 PASS",
-      "rounds_required": 2,
-      "timestamp": "2026-02-27T02:00:00Z"
-    },
-    {
-      "event": "stage_backend_closed",
-      "tasks_completed": 90,
-      "tasks_total": 90,
-      "error_count_src": 0,
-      "error_count_tests": 0,
-      "lint_errors": 0,
-      "unit_tests": "416 passed",
-      "timestamp": "2026-02-28T12:00:00Z"
-    },
-    {
-      "event": "pre_closure_review_approved",
-      "timestamp": "2026-02-28T17:00:00Z"
-    },
-    {
-      "event": "stage_production_ready",
-      "tasks_completed": 90,
-      "tasks_total": 90,
-      "timestamp": "2026-02-28T18:00:00Z"
+      "branch": "ui-00-runtime-architecture",
+      "timestamp": "2026-02-28T00:00:00Z"
     }
   ]
 }
