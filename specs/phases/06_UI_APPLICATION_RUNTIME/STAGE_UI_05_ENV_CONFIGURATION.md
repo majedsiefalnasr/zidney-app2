@@ -10,19 +10,16 @@ UI Foundation — Environment & Runtime Configuration Layer
 
 Status: DRAFT
 Risk Level: LOW
-Last Updated: 2026-02-28T21:15:00Z
+Last Updated: 2026-02-28T21:20:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- Centralized environment variable access via core/config/env.ts
-- API base URL resolution per app (MMC, Backoffice, Frontoffice)
-- Environment mode helpers (isDev, isProd, isStaging)
-- Read-only feature flag injection from VITE\_ variables
-- Secure exposure policy (no secrets in browser)
-- Test mockability via factory function pattern
-- Multi-app consistency via shared TypeScript interface
-- Shared types in packages/types (type-only)
-- ESLint no-restricted-syntax enforcement
+- Total: 54 atomic tasks
+- Phase 1 — Shared Types: 2 tasks
+- Phase 2 — MMC: 19 tasks
+- Phase 3 — Backoffice: 12 tasks
+- Phase 4 — Frontoffice: 12 tasks
+- Phase 5 — Cross-App Validation: 9 tasks
 
 Deferred Scope:
 
@@ -35,9 +32,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
+Atomic task set generated. Drift analysis gate pending.
 Technical plan complete. Task breakdown in progress.
 
 ---
