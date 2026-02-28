@@ -56,7 +56,7 @@ No academic content, no examination logic, and no business workflows are introdu
 **Mandatory Compliance Confirmations:**
 
 ✓ **No cross-tenant access** — All DB operations use the tenant-scoped connection pool; workspace_id is validated on every authenticated request  
-✓ **No middleware bypass** — Middleware order: Correlation ID → Tenant Resolver → License Enforcement → Schema Version → Authentication → Route Handler  
+✓ **No middleware bypass** — Middleware order: Correlation ID → Tenant Resolver → License Enforcement → Schema Version → Authentication → RBAC Permission Guard → Route Handler  
 ✓ **No grading outside worker** — This stage contains no grading logic  
 ✓ **No direct DB instantiation** — All queries execute within the tenant resolver context; no global DB singleton  
 ✓ **No snapshot integrity weakening** — Attempt engine not in scope  
@@ -226,14 +226,16 @@ All four tables reside exclusively in the **tenant DB**. No equivalent tables ex
 
 ### FR-02 — License State Enforcement
 
-| ID      | Requirement                                                                                           |
-| ------- | ----------------------------------------------------------------------------------------------------- |
-| FR-02.1 | Access to any Backoffice route requires `license_status = ACTIVE`                                     |
-| FR-02.2 | `SOFT_LOCKED` status must block all routes, API endpoints, and WebSocket connections; return HTTP 423 |
-| FR-02.3 | `ARCHIVED` status must block all routes, API endpoints, and WebSocket connections; return HTTP 403    |
-| FR-02.4 | Unknown or unresolvable workspace slug must return HTTP 404                                           |
-| FR-02.5 | UI must display a neutral "Workspace unavailable" screen for any non-ACTIVE status                    |
-| FR-02.6 | No route exceptions exist in this stage; all routes are subject to license enforcement                |
+| ID      | Requirement                                                                                                                                                                                                                                              |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FR-02.1 | Access to any Backoffice route requires `license_status = ACTIVE`                                                                                                                                                                                        |
+| FR-02.2 | `SOFT_LOCKED` status must block all routes, API endpoints, and WebSocket connections; return HTTP 423                                                                                                                                                    |
+| FR-02.3 | `ARCHIVED` status must block all routes, API endpoints, and WebSocket connections; return HTTP 403                                                                                                                                                       |
+| FR-02.4 | Unknown or unresolvable workspace slug must return HTTP 404                                                                                                                                                                                              |
+| FR-02.5 | UI must display a neutral "Workspace unavailable" screen for any non-ACTIVE status                                                                                                                                                                       |
+| FR-02.6 | No route exceptions exist in this stage; all routes are subject to license enforcement                                                                                                                                                                   |
+| FR-02.7 | All non-ACTIVE license responses (423 / 403 / 404) must include a structured JSON body: `{ success: false, data: null, error: { code: "LICENSE_SOFT_LOCKED" \| "LICENSE_ARCHIVED" \| "WORKSPACE_NOT_FOUND", message: string } }`; no bare HTTP responses |
+| FR-02.8 | The Backoffice SPA must read `error.code` from the response body to determine which "Workspace unavailable" screen variant to render; it must not branch on HTTP status code alone                                                                       |
 
 ---
 
@@ -265,15 +267,16 @@ All four tables reside exclusively in the **tenant DB**. No equivalent tables ex
 
 ### FR-05 — RBAC Skeleton
 
-| ID      | Requirement                                                                                                      |
-| ------- | ---------------------------------------------------------------------------------------------------------------- |
-| FR-05.1 | The following tables must exist in the tenant DB: `roles`, `role_permissions`, `staff_users`, `staff_user_roles` |
-| FR-05.2 | `role_permissions` entries must be module-scoped; permissions map to a module + action pair                      |
-| FR-05.3 | Supported permission actions are: `view`, `create`, `edit`, `delete`                                             |
-| FR-05.4 | RBAC enforcement must occur in the API middleware layer, not in frontend code                                    |
-| FR-05.5 | A request from a staff user lacking the required permission must receive HTTP 403                                |
-| FR-05.6 | Division-scoped or department-scoped permissions are explicitly out of scope for this stage                      |
-| FR-05.7 | The RBAC tables are initialized via tenant DB migration, not at runtime                                          |
+| ID      | Requirement                                                                                                                                                                                                                |
+| ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FR-05.1 | The following tables must exist in the tenant DB: `roles`, `role_permissions`, `staff_users`, `staff_user_roles`                                                                                                           |
+| FR-05.2 | `role_permissions` entries must be module-scoped; permissions map to a module + action pair                                                                                                                                |
+| FR-05.3 | Supported permission actions are: `view`, `create`, `edit`, `delete`                                                                                                                                                       |
+| FR-05.4 | RBAC enforcement must occur in the API middleware layer, not in frontend code                                                                                                                                              |
+| FR-05.5 | A request from a staff user lacking the required permission must receive HTTP 403                                                                                                                                          |
+| FR-05.6 | Division-scoped or department-scoped permissions are explicitly out of scope for this stage                                                                                                                                |
+| FR-05.7 | The RBAC tables are initialized via tenant DB migration, not at runtime                                                                                                                                                    |
+| FR-05.8 | RBAC permission enforcement is implemented as a **separate** Hono middleware function (`RBAC Permission Guard`) registered after Authentication in the chain; it must not be embedded inside the Authentication middleware |
 
 ---
 
@@ -303,14 +306,16 @@ All four tables reside exclusively in the **tenant DB**. No equivalent tables ex
 
 ### FR-08 — WebSocket Integration
 
-| ID      | Requirement                                                                                                  |
-| ------- | ------------------------------------------------------------------------------------------------------------ |
-| FR-08.1 | WebSocket connections from Backoffice must validate `workspace_id` during the handshake                      |
-| FR-08.2 | WebSocket connections must validate `license_status = ACTIVE` during the handshake                           |
-| FR-08.3 | WebSocket connections must validate the authentication token during the handshake                            |
-| FR-08.4 | Every WebSocket connection must carry a `request_id` for distributed tracing                                 |
-| FR-08.5 | If `license_status` becomes non-ACTIVE during an active WebSocket session, the connection must be terminated |
-| FR-08.6 | Only one WebSocket connection per authenticated user session is permitted at any time                        |
+| ID      | Requirement                                                                                                                                                                                    |
+| ------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| FR-08.1 | WebSocket connections from Backoffice must validate `workspace_id` during the handshake                                                                                                        |
+| FR-08.2 | WebSocket connections must validate `license_status = ACTIVE` during the handshake                                                                                                             |
+| FR-08.3 | WebSocket connections must validate the authentication token during the handshake                                                                                                              |
+| FR-08.4 | Every WebSocket connection must carry a `request_id` for distributed tracing                                                                                                                   |
+| FR-08.5 | If `license_status` becomes non-ACTIVE during an active WebSocket session, the connection must be terminated                                                                                   |
+| FR-08.6 | Only one WebSocket connection per authenticated user session is permitted at any time                                                                                                          |
+| FR-08.7 | License state polling for active WebSocket connections must occur at the interval defined by `WS_LICENSE_POLL_INTERVAL_MS` (default: `30000` ms); event-bus push is deferred to a future stage |
+| FR-08.8 | `WS_LICENSE_POLL_INTERVAL_MS` is a configurable environment variable; the valid range is 5000–120000 ms                                                                                        |
 
 ---
 
@@ -442,22 +447,24 @@ Primary key: `(staff_user_id, role_id)`.
 
 ### Migration Notes
 
-- All four tables are created in a single tenant DB migration file
+- All four tables are created in a single STAGE_17-specific tenant DB migration file — this migration is **separate** from the STAGE_05 baseline tenant schema
+- All four `CREATE TABLE` statements execute within a **single DDL transaction**; a failure in any statement rolls back the entire migration
 - Migration is forward-only
-- schema_version is incremented as required by STAGE_02C versioning model
+- `schema_version` is incremented by this STAGE_17 migration, independent of any STAGE_05 version increment
 - No master_db migrations required for this stage
+- Existing tenants provisioned before STAGE_17 must have this migration run by the provisioning worker at next startup
 
 ---
 
 ## Transaction Boundaries
 
-| Operation            | Transactional   | Idempotent | Notes                                                   |
-| -------------------- | --------------- | ---------- | ------------------------------------------------------- |
-| RBAC table creation  | Yes (migration) | Yes        | Worker-executed migration; checksum-validated           |
-| Runtime context read | No              | N/A        | Stateless read from injected middleware context         |
-| Token validation     | No              | N/A        | Stateless claim verification                            |
-| WebSocket handshake  | No              | Yes        | Repeated connection attempts must not create duplicates |
-| Permission check     | No              | N/A        | Read-only lookup; no state mutation                     |
+| Operation            | Transactional   | Idempotent | Notes                                                                                                   |
+| -------------------- | --------------- | ---------- | ------------------------------------------------------------------------------------------------------- |
+| RBAC table creation  | Yes (migration) | Yes        | Worker-executed migration; all 4 tables in one DDL transaction; checksum-validated; rollback-on-failure |
+| Runtime context read | No              | N/A        | Stateless read from injected middleware context                                                         |
+| Token validation     | No              | N/A        | Stateless claim verification                                                                            |
+| WebSocket handshake  | No              | Yes        | Repeated connection attempts must not create duplicates                                                 |
+| Permission check     | No              | N/A        | Read-only lookup; no state mutation                                                                     |
 
 ---
 
@@ -724,6 +731,18 @@ The following are explicitly not implemented in STAGE_17:
 **Given** a staff user whose `token_version` has been incremented (forced invalidation)  
 **When** a request is submitted with the old token  
 **Then** the request is rejected (HTTP 401) and the `token_version` mismatch is recorded in the structured log
+
+---
+
+## Clarifications
+
+### Session 2026-02-28
+
+- Q: Are the four RBAC tables (`roles`, `role_permissions`, `staff_users`, `staff_user_roles`) created as part of the STAGE_05 tenant baseline schema, or as a separate STAGE_17-specific tenant DB migration? → A: Separate STAGE_17 tenant DB migration — distinct from STAGE_05 baseline provisioning. Per "one migration per feature" platform rule, STAGE_05 owns the bare tenant schema and STAGE_17 adds RBAC tables via its own forward-only migration file, incrementing `schema_version` independently.
+- Q: When `license_status` transitions to SOFT_LOCKED or ARCHIVED mid-session (FR-08.5), what is the notification mechanism to the active WebSocket handler — periodic polling or an internal event/push? → A: The WebSocket handler polls the `license_status` from the injected runtime context at a 30-second interval per connection. An event-bus push mechanism is deferred to a future stage. The polling interval is configurable via environment variable (`WS_LICENSE_POLL_INTERVAL_MS`, default `30000`).
+- Q: For non-ACTIVE license responses (HTTP 423 / 403 / 404), does the API return a structured JSON body or a bare HTTP status for both browser SPA and programmatic API consumers? → A: All non-ACTIVE license responses return the standard Zidney error contract `{ success: false, data: null, error: { code: string, message: string } }` with typed error codes: `LICENSE_SOFT_LOCKED` (423), `LICENSE_ARCHIVED` (403), `WORKSPACE_NOT_FOUND` (404). The Backoffice SPA reads the `error.code` field to select the correct "Workspace unavailable" screen variant.
+- Q: Within the single STAGE_17 tenant DB migration file, are all four RBAC table `CREATE TABLE` statements executed inside a single DDL transaction so that a partial failure rolls back completely? → A: Yes — all four `CREATE TABLE` statements must be wrapped in a single DDL transaction (PostgreSQL supports transactional DDL). If any statement fails, the entire transaction rolls back and the provisioning worker retries up to 3 times before routing to the DLQ.
+- Q: Is the RBAC permission check implemented as a distinct middleware function registered separately after Authentication in the Hono chain, or is it embedded inside the Authentication middleware? → A: RBAC is a separate, independently-registered middleware function. The authoritative middleware order is: `Correlation ID → Tenant Resolver → License Enforcement → Schema Version → Authentication → RBAC Permission Guard → Route Handler`. This allows per-route opt-in to specific module+action permission requirements without coupling authorization to identity validation.
 
 ---
 
