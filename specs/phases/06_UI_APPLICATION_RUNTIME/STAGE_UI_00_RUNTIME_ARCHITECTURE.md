@@ -8,9 +8,10 @@ UI Foundation — Cross-Application Runtime Blueprint
 
 ## Stage Status
 
-Status: BACKEND CLOSED
+Status: PRODUCTION READY
 Risk Level: LOW
-Last Updated: 2026-02-28T02:00:00Z
+Closure Date: 2026-02-28
+Last Updated: 2026-02-28T20:00:00Z
 
 Implementation: COMPLETE
 Tasks: 161 / 161 completed
@@ -23,6 +24,7 @@ Scope Closed:
 - Phase 4 (6 tasks): ESLint import/no-restricted-paths boundaries enforced in all 3 apps
 - Phase 5 (28 tasks): 196 unit tests added (MMC: 64, Backoffice: 70, Frontoffice: 62)
 - Phase 6 (16 tasks): Validation gate — ESLint ✅, tsc ✅, vite build ✅, vitest 196/196 ✅
+- Post-implement: ESLint v8 → v9 migration, tsconfig path fixes, tsconfig.test.json scope fix
 
 Deferred Scope:
 
@@ -32,14 +34,17 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- ADR alignment verified — no cross-tenant logic, no backend imports in UI layer
+- ADR-0001 Database-per-tenant isolation enforced (UI stage — no DB access)
+- ADR-0006 Server-authoritative time enforced (no client-side time logic)
+- ADR-0008 Semantic versioning respected (foundational infrastructure)
 - `getApiClient()` lazy getter pattern enforced (no Pinia activation race)
 - Boot order enforced: env → router → pinia → createApp → use(pinia) → use(router) → mount
 - `NormalizedError` sealed type prevents stack trace leakage
 - `pendingRefresh` queue enforces idempotency for token refresh
+- `import/no-restricted-paths` enforces cross-app import boundaries
 
 Notes:
-Backend implementation complete. 12 bugs found and fixed during TDD. No structural backend modifications allowed.
+Stage is production ready. No structural backend modifications allowed.
 Modifications require a new migration stage.
 
 ---
