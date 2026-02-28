@@ -72,8 +72,16 @@
   },
   "include": [
     "tests/**/*",
-    "apps/*/tests/**/*",
+    "apps/api/tests/**/*",
+    "apps/worker/tests/**/*",
     "**/*.test.ts",
     "**/*.spec.ts"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "apps/mmc/tests/**/*",
+    "apps/backoffice/tests/**/*",
+    "apps/frontoffice/tests/**/*"
   ]
 }
