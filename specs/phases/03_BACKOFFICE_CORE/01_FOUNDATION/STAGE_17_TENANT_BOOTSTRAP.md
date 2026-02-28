@@ -11,20 +11,22 @@ Database: Tenant DB only
 
 Status: DRAFT
 Risk Level: MEDIUM
-Last Updated: 2026-02-28T00:10:00Z
+Last Updated: 2026-02-28T00:20:00Z
 
-Scope Defined:
+Scope Planned:
 
 - Runtime context injection (workspace_id, slug, license_status, enabled_modules, limits, versions)
-- License gate enforcement (ACTIVE required; 423/403/404 + structured error JSON)
+- License gate enforcement (ACTIVE required; 423/403/404 + structured error JSON with correlationId)
 - Module visibility contract (server-side enforcement)
-- RBAC skeleton (roles, role_permissions, staff_users, staff_user_roles) — separate STAGE_17 migration
-- RBAC Permission Guard middleware (after Authentication in middleware chain)
+- RBAC skeleton — 4 tenant tables: roles, role_permissions, staff_users, staff_user_roles (single DDL migration)
+- RBAC Permission Guard middleware: createBackofficeRBACGuard(logger, resource, action)
 - AppLayout with dynamic, RBAC-aware Sidebar (packages/ui-system)
 - Workspace-scoped JWT validation with role/permissions claims
 - Limit awareness exposure (student_limit, staff_limit — informational only)
-- WebSocket lifecycle: license polling every 30s (WS_LICENSE_POLL_INTERVAL_MS)
-- Structured observability with workspace context on every log
+- WebSocket lifecycle at /ws/backoffice — Redis-based license polling (WS_LICENSE_POLL_INTERVAL_MS, default 30 s)
+- Redis WS connection registry (ws:backoffice:{workspace_id}:{user_id}, TTL = WS_POLL_MS \* 3)
+- All API error responses include correlationId field
+- Update license-enforcement.ts to add correlationId to all non-ACTIVE error responses
 
 Deferred Scope:
 
@@ -35,10 +37,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Architecture Checker PASS (Round 3)
+- API Designer PASS (Round 3)
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
