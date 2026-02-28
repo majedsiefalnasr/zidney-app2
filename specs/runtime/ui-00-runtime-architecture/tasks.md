@@ -11,15 +11,15 @@
 
 ## Summary
 
-| Phase     | Label                    | Tasks          |
-| --------- | ------------------------ | -------------- |
-| 1         | Dependencies & Config    | T001–T014 (14) |
-| 2         | MMC Delta Migration      | T015–T057 (43) |
-| 3         | Core Layer — All 3 Apps  | T058–T120 (63) |
-| 4         | ESLint Import Boundaries | T121–T126 (6)  |
-| 5         | Tests                    | T127–T154 (28) |
-| 6         | Validation Gate          | T155–T166 (12) |
-| **Total** |                          | **166 tasks**  |
+| Phase     | Label                    | Tasks                                |
+| --------- | ------------------------ | ------------------------------------ |
+| 1         | Dependencies & Config    | T001–T014 + T002a, T006a, T012a (17) |
+| 2         | MMC Delta Migration      | T015–T057 (43)                       |
+| 3         | Core Layer — All 3 Apps  | T058–T108 (51)                       |
+| 4         | ESLint Import Boundaries | T109–T114 (6)                        |
+| 5         | Tests                    | T115–T142 (28)                       |
+| 6         | Validation Gate          | T143–T158 (16)                       |
+| **Total** |                          | **161 tasks**                        |
 
 ---
 
@@ -42,16 +42,19 @@ Within Phase 3:
 
 - [ ] T001 [SCAFFOLD] Update apps/mmc/package.json — add `"pinia": "^2.2.0"` to dependencies and `"@pinia/testing": "^0.1.6"`, `"@vue/test-utils": "^2.4.0"` to devDependencies
 - [ ] T002 [SCAFFOLD] Update apps/mmc/tsconfig.json — add `"baseUrl": "."` and `"paths": { "@/*": ["./src/*"] }` to compilerOptions to align TypeScript resolver with Vite runtime alias
+- [ ] T002a [P] [SCAFFOLD] Create apps/mmc/vitest.config.ts — `defineConfig({ plugins: [vue()], resolve: { alias: [{ find: '@', replacement: resolve(__dirname, 'src') }] }, test: { globals: true, environment: 'jsdom', include: ['tests/**/*.test.ts'] } })`
 - [ ] T003 [P] [SCAFFOLD] Create apps/backoffice/package.json — Vue 3.4, vue-router v4, pinia v2.2, @zidney/ui-system workspace:\*, devDeps: @vitejs/plugin-vue, @pinia/testing, @vue/test-utils, typescript, vite, vitest
 - [ ] T004 [P] [SCAFFOLD] Create apps/backoffice/tsconfig.json — extends ../../tsconfig.base.json, adds `"baseUrl": "."` and `"paths": { "@/*": ["./src/*"] }`, includes src/\*\*
 - [ ] T005 [P] [SCAFFOLD] Create apps/backoffice/tsconfig.app.json — scoped to `src/**/*.ts`, `src/**/*.vue`, `src/**/*.d.ts`
 - [ ] T006 [P] [SCAFFOLD] Create apps/backoffice/vite.config.ts — @vitejs/plugin-vue, `@/` alias to `./src`, `@zidney/ui` alias to `../../packages/ui-system/src`
+- [ ] T006a [P] [SCAFFOLD] Create apps/backoffice/vitest.config.ts — same pattern as MMC (`defineConfig({ plugins: [vue()], resolve: { alias: [{ find: '@', replacement: resolve(__dirname, 'src') }] }, test: { globals: true, environment: 'jsdom', include: ['tests/**/*.test.ts'] } })`)
 - [ ] T007 [P] [SCAFFOLD] Create apps/backoffice/index.html — Vite entry HTML with `<div id="app"></div>` and `<script type="module" src="/src/main.ts">`
 - [ ] T008 [P] [SCAFFOLD] Create apps/backoffice/.env.example — `VITE_API_BASE_URL=` and `VITE_WORKSPACE_SLUG=` placeholders
 - [ ] T009 [P] [SCAFFOLD] Create apps/frontoffice/package.json — Vue 3.4, vue-router v4, pinia v2.2, @zidney/ui-system workspace:\*, devDeps: @vitejs/plugin-vue, @pinia/testing, @vue/test-utils, typescript, vite, vitest
 - [ ] T010 [P] [SCAFFOLD] Create apps/frontoffice/tsconfig.json — extends ../../tsconfig.base.json, adds `"baseUrl": "."` and `"paths": { "@/*": ["./src/*"] }`, includes src/\*\*
 - [ ] T011 [P] [SCAFFOLD] Create apps/frontoffice/tsconfig.app.json — scoped to `src/**/*.ts`, `src/**/*.vue`, `src/**/*.d.ts`
 - [ ] T012 [P] [SCAFFOLD] Create apps/frontoffice/vite.config.ts — @vitejs/plugin-vue, `@/` alias to `./src`, `@zidney/ui` alias to `../../packages/ui-system/src`
+- [ ] T012a [P] [SCAFFOLD] Create apps/frontoffice/vitest.config.ts — identical pattern to backoffice vitest.config.ts
 - [ ] T013 [P] [SCAFFOLD] Create apps/frontoffice/index.html — Vite entry HTML with `<div id="app"></div>` and `<script type="module" src="/src/main.ts">`
 - [ ] T014 [P] [SCAFFOLD] Create apps/frontoffice/.env.example — `VITE_API_BASE_URL=` placeholder
 
@@ -158,9 +161,9 @@ Within Phase 3:
 
 ### 3C — API Client
 
-- [ ] T070 [P] [API-CLIENT] Create apps/mmc/src/core/api/client.ts — factory `createApiClient(config: AppConfig, tokenStore: TokenStore, fetchFn = fetch): ApiClient`; base options `credentials: 'include'`; request interceptors: authInterceptor (Bearer token attach, no logging), contentTypeInterceptor (POST/PUT/PATCH only), idempotencyInterceptor, correlationInterceptor (X-Correlation-ID via crypto.randomUUID()); response interceptors: errorNormalizerInterceptor, refreshInterceptor with single-flight strategy using closure-scoped `refreshPromise: Promise<void> | null` and `requestQueue: QueueEntry[]`; on AUTH_REFRESH_FAILED: reject all queued requests, clear auth store, redirect to login; exports both `createApiClient` factory and default `apiClient: ApiClient` singleton
-- [ ] T071 [P] [API-CLIENT] Create apps/backoffice/src/core/api/client.ts — identical pattern to MMC; factory + singleton export
-- [ ] T072 [P] [API-CLIENT] Create apps/frontoffice/src/core/api/client.ts — identical pattern to MMC; factory + singleton export
+- [ ] T070 [P] [API-CLIENT] Create apps/mmc/src/core/api/client.ts — factory `createApiClient(config: AppConfig, tokenStore: TokenStore, fetchFn = fetch): ApiClient`; base options `credentials: 'include'`; request interceptors: authInterceptor (Bearer token attach, no logging), contentTypeInterceptor (POST/PUT/PATCH only), idempotencyInterceptor, correlationInterceptor (X-Correlation-ID via crypto.randomUUID()); response interceptors: errorNormalizerInterceptor, refreshInterceptor with single-flight strategy using closure-scoped `refreshPromise: Promise<void> | null` and `requestQueue: QueueEntry[]`; on AUTH_REFRESH_FAILED: reject all queued requests, clear auth store, redirect to login via injected router; exports `createApiClient` factory AND lazy `getApiClient(): ApiClient` getter (`useAuthStore()` deferred until first call — Pinia activation race eliminated)
+- [ ] T071 [P] [API-CLIENT] Create apps/backoffice/src/core/api/client.ts — identical pattern to MMC; factory + lazy `getApiClient()` export
+- [ ] T072 [P] [API-CLIENT] Create apps/frontoffice/src/core/api/client.ts — identical pattern to MMC; factory + lazy `getApiClient()` export
 
 ### 3D — Route Guards
 
@@ -209,7 +212,7 @@ Within Phase 3:
 
 ### 3I — App Entry Points (main.ts + App.vue)
 
-- [ ] T103 [P] [SCAFFOLD] Create apps/mmc/src/main.ts — bootstrap order per FR-33: (1) import appConfig from @/core/config/env (validates at import), (2) import createAppPinia from @/core/state, (3) import router from @/core/router, (4) createApp(App), (5) app.use(pinia), (6) app.use(router), (7) app.mount('#app'); Pinia registered before apiClient singleton is accessed
+- [ ] T103 [P] [SCAFFOLD] Create apps/mmc/src/main.ts — bootstrap order per FR-33: (1) import appConfig from @/core/config/env (validates at import), (2) import router from @/core/router (module-level static import), (3) import createAppPinia from @/core/state, (4) createApp(App), (5) app.use(pinia), (6) app.use(router), (7) app.mount('#app'); `getApiClient()` lazy getter ensures Pinia is active before `useAuthStore()` is called
 - [ ] T104 [P] [SCAFFOLD] Create apps/backoffice/src/main.ts — identical bootstrap order to MMC
 - [ ] T105 [P] [SCAFFOLD] Create apps/frontoffice/src/main.ts — identical bootstrap order to MMC
 - [ ] T106 [P] [SCAFFOLD] Create apps/mmc/src/App.vue — `<template><RouterView /></template>` only; no business logic; no inline styles
@@ -241,61 +244,61 @@ Within Phase 3:
 
 ### 5A — Error Normalizer Tests
 
-- [ ] T115 [P] [TEST] Create apps/mmc/tests/unit/core/error-normalizer.spec.ts — standard API error (extracts code/message/httpStatus), network error TypeError → NETWORK_ERROR/0, unknown shape fallback → UNKNOWN_ERROR/-1, pure function (same input same output)
-- [ ] T116 [P] [TEST] Create apps/backoffice/tests/unit/core/error-normalizer.spec.ts — identical test suite
-- [ ] T117 [P] [TEST] Create apps/frontoffice/tests/unit/core/error-normalizer.spec.ts — identical test suite
+- [ ] T115 [P] [TEST] Create apps/mmc/tests/unit/core/error-normalizer.test.ts — standard API error (extracts code/message/httpStatus), network error TypeError → NETWORK_ERROR/0, unknown shape fallback → UNKNOWN_ERROR/-1, pure function (same input same output)
+- [ ] T116 [P] [TEST] Create apps/backoffice/tests/unit/core/error-normalizer.test.ts — identical test suite
+- [ ] T117 [P] [TEST] Create apps/frontoffice/tests/unit/core/error-normalizer.test.ts — identical test suite
 
 ### 5B — API Client Tests
 
-- [ ] T118 [P] [TEST] Create apps/mmc/tests/unit/core/api-client.spec.ts — uses vi.fn() mock fetch and mock tokenStore injected via createApiClient factory; tests: Authorization header attached when token set, header omitted when no token, Idempotency-Key header attached when idempotencyKey provided, X-Correlation-ID present on every request, error normalized on 4xx/5xx, 401 triggers single-flight refresh (only one refresh request for concurrent 401s), original request retried after refresh success, all queued requests rejected with AUTH_REFRESH_FAILED when refresh request fails, auth store cleared on AUTH_REFRESH_FAILED
-- [ ] T119 [P] [TEST] Create apps/backoffice/tests/unit/core/api-client.spec.ts — identical test suite
-- [ ] T120 [P] [TEST] Create apps/frontoffice/tests/unit/core/api-client.spec.ts — identical test suite
+- [ ] T118 [P] [TEST] Create apps/mmc/tests/unit/core/api-client.test.ts — uses vi.fn() mock fetch, mock tokenStore, and mock router injected via createApiClient factory; `afterEach(() => vi.resetAllMocks())` to prevent stateful single-flight closure leakage across tests; tests: Authorization header attached when token set, header omitted when no token, `credentials: 'include'` present on every request (spy on fetchFn init options), Idempotency-Key header attached when idempotencyKey provided, X-Correlation-ID present on every request, error normalized on 4xx/5xx, 401 triggers single-flight refresh (only one refresh request for concurrent 401s), original request retried after refresh success, all queued requests rejected with AUTH_REFRESH_FAILED when refresh request fails, auth store cleared on AUTH_REFRESH_FAILED, router.push('/login') called when refresh fails (AUTH_REFRESH_FAILED redirect)
+- [ ] T119 [P] [TEST] Create apps/backoffice/tests/unit/core/api-client.test.ts — identical test suite (include `credentials: 'include'` assertion, AUTH_REFRESH_FAILED redirect, afterEach reset)
+- [ ] T120 [P] [TEST] Create apps/frontoffice/tests/unit/core/api-client.test.ts — identical test suite (include `credentials: 'include'` assertion, AUTH_REFRESH_FAILED redirect, afterEach reset)
 
 ### 5C — Environment Config Tests
 
-- [ ] T121 [P] [TEST] Create apps/mmc/tests/unit/core/env-config.spec.ts — valid config resolves AppConfig, missing VITE_API_BASE_URL throws descriptive error, buildEnv derives from MODE, debugMode true when VITE_DEBUG_MODE = 'true'; mock `import.meta.env` via vi.stubEnv()
-- [ ] T122 [P] [TEST] Create apps/backoffice/tests/unit/core/env-config.spec.ts — same tests plus VITE_WORKSPACE_SLUG optional check
-- [ ] T123 [P] [TEST] Create apps/frontoffice/tests/unit/core/env-config.spec.ts — same tests as MMC
+- [ ] T121 [P] [TEST] Create apps/mmc/tests/unit/core/env-config.test.ts — valid config resolves AppConfig, missing VITE_API_BASE_URL throws descriptive error, buildEnv derives from MODE, debugMode true when VITE_DEBUG_MODE = 'true'; mock `import.meta.env` via vi.stubEnv()
+- [ ] T122 [P] [TEST] Create apps/backoffice/tests/unit/core/env-config.test.ts — same tests plus VITE_WORKSPACE_SLUG optional check
+- [ ] T123 [P] [TEST] Create apps/frontoffice/tests/unit/core/env-config.test.ts — same tests as MMC
 
 ### 5D — Auth Guard Tests
 
-- [ ] T124 [P] [TEST] Create apps/mmc/tests/unit/core/auth.guard.spec.ts — route without requiresAuth returns true, authenticated user + requiresAuth returns true, unauthenticated user + requiresAuth returns `{ name: 'login' }`; mock authStore via createTestingPinia()
-- [ ] T125 [P] [TEST] Create apps/backoffice/tests/unit/core/auth.guard.spec.ts — identical
-- [ ] T126 [P] [TEST] Create apps/frontoffice/tests/unit/core/auth.guard.spec.ts — identical
+- [ ] T124 [P] [TEST] Create apps/mmc/tests/unit/core/auth.guard.test.ts — route without requiresAuth returns true, authenticated user + requiresAuth returns true, unauthenticated user + requiresAuth returns `{ name: 'login' }`; mock authStore via createTestingPinia()
+- [ ] T125 [P] [TEST] Create apps/backoffice/tests/unit/core/auth.guard.test.ts — identical
+- [ ] T126 [P] [TEST] Create apps/frontoffice/tests/unit/core/auth.guard.test.ts — identical
 
 ### 5E — Role Guard Tests
 
-- [ ] T127 [P] [TEST] Create apps/mmc/tests/unit/core/role.guard.spec.ts — no requiredRole returns true, user role matches returns true, wrong role returns `{ name: 'forbidden' }`, null user returns `{ name: 'forbidden' }`
-- [ ] T128 [P] [TEST] Create apps/backoffice/tests/unit/core/role.guard.spec.ts — identical
-- [ ] T129 [P] [TEST] Create apps/frontoffice/tests/unit/core/role.guard.spec.ts — identical
+- [ ] T127 [P] [TEST] Create apps/mmc/tests/unit/core/role.guard.test.ts — no requiredRole returns true, user role matches returns true, wrong role returns `{ name: 'forbidden' }`, null user returns `{ name: 'forbidden' }`
+- [ ] T128 [P] [TEST] Create apps/backoffice/tests/unit/core/role.guard.test.ts — identical
+- [ ] T129 [P] [TEST] Create apps/frontoffice/tests/unit/core/role.guard.test.ts — identical
 
 ### 5F — Auth Token Store Tests
 
-- [ ] T130 [P] [TEST] Create apps/mmc/tests/unit/core/token-store.spec.ts — uses `setActivePinia(createPinia())` in beforeEach; initial state accessToken/user = null, setAccessToken stores in state only (verify no localStorage.setItem called via vi.spyOn), getAccessToken returns current, clearAccessToken sets both to null, isAuthenticated false/true based on token, never writes to localStorage or sessionStorage
-- [ ] T131 [P] [TEST] Create apps/backoffice/tests/unit/core/token-store.spec.ts — same + test workspaceSlug field is present on AuthUser type
-- [ ] T132 [P] [TEST] Create apps/frontoffice/tests/unit/core/token-store.spec.ts — same as MMC
+- [ ] T130 [P] [TEST] Create apps/mmc/tests/unit/core/token-store.test.ts — uses `setActivePinia(createPinia())` in beforeEach; initial state accessToken/user = null, setAccessToken stores in state only (verify no localStorage.setItem called via vi.spyOn), getAccessToken returns current, clearAccessToken sets both to null, isAuthenticated false/true based on token, never writes to localStorage or sessionStorage
+- [ ] T131 [P] [TEST] Create apps/backoffice/tests/unit/core/token-store.test.ts — same + test workspaceSlug field is present on AuthUser type
+- [ ] T132 [P] [TEST] Create apps/frontoffice/tests/unit/core/token-store.test.ts — same as MMC
 
 ### 5G — useAuth Composable Tests
 
-- [ ] T133 [P] [TEST] Create apps/mmc/tests/unit/core/useAuth.spec.ts — isAuthenticated mirrors tokenStore.isAuthenticated, currentUser mirrors tokenStore.user, logout calls DELETE /auth/logout best-effort (mocked), logout calls clearAccessToken, logout calls router.push('/login'); mock apiClient and router
-- [ ] T134 [P] [TEST] Create apps/backoffice/tests/unit/core/useAuth.spec.ts — identical
-- [ ] T135 [P] [TEST] Create apps/frontoffice/tests/unit/core/useAuth.spec.ts — identical
+- [ ] T133 [P] [TEST] Create apps/mmc/tests/unit/core/useAuth.test.ts — isAuthenticated mirrors tokenStore.isAuthenticated, currentUser mirrors tokenStore.user, logout calls DELETE /auth/logout best-effort (mocked), logout calls clearAccessToken, logout calls router.push('/login'); mock apiClient and router
+- [ ] T134 [P] [TEST] Create apps/backoffice/tests/unit/core/useAuth.test.ts — identical
+- [ ] T135 [P] [TEST] Create apps/frontoffice/tests/unit/core/useAuth.test.ts — identical
 
 ### 5H — Workspace Guard Tests (Backoffice Only)
 
-- [ ] T136 [TEST] Create apps/backoffice/tests/unit/core/workspace.guard.spec.ts — route without requiresWorkspace returns true, route slug matches authStore.user.workspaceSlug returns true, slugs mismatch returns `{ name: 'forbidden' }`, user has no workspaceSlug returns `{ name: 'forbidden' }`
+- [ ] T136 [TEST] Create apps/backoffice/tests/unit/core/workspace.guard.test.ts — route without requiresWorkspace returns true, route slug matches authStore.user.workspaceSlug returns true, slugs mismatch returns `{ name: 'forbidden' }`, user has no workspaceSlug returns `{ name: 'forbidden' }`
 
 ### 5I — Guard Pipeline Integration Tests
 
-- [ ] T137 [P] [TEST] Create apps/mmc/tests/unit/core/guard-pipeline.spec.ts — authGuard executes before roleGuard, stops and redirects to login before checking role when unauthenticated, proceeds through authGuard and evaluates roleGuard when authenticated; use createRouter + createPinia in isolation
-- [ ] T138 [P] [TEST] Create apps/backoffice/tests/unit/core/guard-pipeline.spec.ts — same + workspaceGuard executes last after roleGuard
-- [ ] T139 [P] [TEST] Create apps/frontoffice/tests/unit/core/guard-pipeline.spec.ts — authGuard → roleGuard only (no workspaceGuard)
+- [ ] T137 [P] [TEST] Create apps/mmc/tests/unit/core/guard-pipeline.test.ts — authGuard executes before roleGuard, stops and redirects to login before checking role when unauthenticated, proceeds through authGuard and evaluates roleGuard when authenticated; use createRouter + createPinia in isolation
+- [ ] T138 [P] [TEST] Create apps/backoffice/tests/unit/core/guard-pipeline.test.ts — same + workspaceGuard executes last after roleGuard
+- [ ] T139 [P] [TEST] Create apps/frontoffice/tests/unit/core/guard-pipeline.test.ts — authGuard → roleGuard only (no workspaceGuard)
 
 ### 5J — App Boot Tests
 
-- [ ] T140 [P] [TEST] Create apps/mmc/tests/unit/core/app-boot.spec.ts — app mounts without console errors when env vars valid, Pinia registered before any store access, router registered before navigation; use @vue/test-utils mount with vi.stubEnv() for env mocking
-- [ ] T141 [P] [TEST] Create apps/backoffice/tests/unit/core/app-boot.spec.ts — identical
-- [ ] T142 [P] [TEST] Create apps/frontoffice/tests/unit/core/app-boot.spec.ts — identical
+- [ ] T140 [P] [TEST] Create apps/mmc/tests/unit/core/app-boot.test.ts — app mounts without console errors when env vars valid, Pinia registered before any store access, router registered before navigation; use @vue/test-utils mount with vi.stubEnv() for env mocking
+- [ ] T141 [P] [TEST] Create apps/backoffice/tests/unit/core/app-boot.test.ts — identical
+- [ ] T142 [P] [TEST] Create apps/frontoffice/tests/unit/core/app-boot.test.ts — identical
 
 ---
 
@@ -326,7 +329,7 @@ Within Phase 3:
 ### 6D — Test Suite
 
 - [ ] T152 [P] [TEST] Run `vitest run tests/unit/core/` in apps/mmc/ — all 9 new test files pass; no test isolation failures
-- [ ] T153 [P] [TEST] Run `vitest run tests/unit/core/` in apps/backoffice/ — all 10 new test files pass (includes workspace.guard.spec.ts)
+- [ ] T153 [P] [TEST] Run `vitest run tests/unit/core/` in apps/backoffice/ — all 10 new test files pass (includes workspace.guard.test.ts)
 - [ ] T154 [P] [TEST] Run `vitest run tests/unit/core/` in apps/frontoffice/ — all 9 new test files pass
 
 ### 6E — Completion Audit
@@ -343,7 +346,7 @@ Within Phase 3:
 ### Phase 1 — All parallel after T001+T002
 
 ```
-T001 → T002 → [T003, T004, T005, T006, T007, T008, T009, T010, T011, T012, T013, T014] in parallel
+T001 → T002 → [T002a, T003, T004, T005, T006, T006a, T007, T008, T009, T010, T011, T012, T012a, T013, T014] in parallel
 ```
 
 ### Phase 2 — Sequential sub-groups, parallel within each
@@ -387,13 +390,13 @@ done
 
 ## Notes & Flagged Dependencies
 
-| Dependency                       | Risk                                                                                                                                            |
-| -------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
-| T070–T072 depend on T058–T069    | `client.ts` imports `appConfig` (env.ts) and `useAuthStore` (token-store.ts) — both must exist before client compiles                           |
-| T080–T082 depend on T073–T079    | Router imports guard functions — guards must exist before router compiles                                                                       |
-| T103–T108 depend on T080–T088    | `main.ts` imports router, pinia factory, appConfig — all must exist first                                                                       |
-| T051 depends on T016–T050        | Internal import updates can only happen after files are moved to new paths                                                                      |
-| T052 depends on T051             | Deleting legacy dirs must happen after all imports are fixed                                                                                    |
-| T137–T142 depend on T073–T108    | Integration + boot tests require source files to exist                                                                                          |
-| T112–T114 depend on T109–T111    | ESLint configs require plugin packages installed first                                                                                          |
-| Pinia before apiClient singleton | In `main.ts`, `app.use(pinia)` must occur before any store (including via client.ts singleton) is accessed — ensured by import order in main.ts |
+| Dependency                       | Risk                                                                                                                                                                                                       |
+| -------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| T070–T072 depend on T058–T069    | `client.ts` imports `appConfig` (env.ts) and `useAuthStore` (token-store.ts) — both must exist before client compiles                                                                                      |
+| T080–T082 depend on T073–T079    | Router imports guard functions — guards must exist before router compiles                                                                                                                                  |
+| T103–T108 depend on T080–T088    | `main.ts` imports router, pinia factory, appConfig — all must exist first                                                                                                                                  |
+| T051 depends on T016–T050        | Internal import updates can only happen after files are moved to new paths                                                                                                                                 |
+| T052 depends on T051             | Deleting legacy dirs must happen after all imports are fixed                                                                                                                                               |
+| T137–T142 depend on T073–T108    | Integration + boot tests require source files to exist                                                                                                                                                     |
+| T112–T114 depend on T109–T111    | ESLint configs require plugin packages installed first                                                                                                                                                     |
+| Pinia before getApiClient() call | In `main.ts`, `app.use(pinia)` must occur before `getApiClient()` is first called — enforced by lazy getter in `client.ts` (defers `useAuthStore()` until first API call, never at module evaluation time) |

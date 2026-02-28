@@ -234,17 +234,22 @@ interface ApiClient {
 }
 ```
 
-**Singleton export**: `client.ts` exports BOTH the factory AND a default application-scoped instance:
+**Lazy getter export**: `client.ts` exports BOTH the factory AND a lazy getter — `useAuthStore()` is **never** called at module evaluation time, eliminating the Pinia activation race:
 
 ```typescript
 // Factory (used in tests — inject custom tokenStore + fetch)
 export function createApiClient(config: AppConfig, tokenStore: TokenStore, fetchFn = fetch): ApiClient { ... }
 
-// Default singleton — created once at module load using appConfig
-// All modules/*/api.ts files import this instance
-export const apiClient: ApiClient = createApiClient(appConfig, useAuthStore())
+// Lazy singleton — deferred until first access; safe to import from any file in the boot chain
+let _apiClient: ApiClient | null = null
+export function getApiClient(): ApiClient {
+  if (!_apiClient) {
+    _apiClient = createApiClient(appConfig, useAuthStore())
+  }
+  return _apiClient
+}
 
-// Test isolation: vi.mock('@/core/api/client', () => ({ apiClient: mockClient }))
+// Test isolation: vi.mock('@/core/api/client', () => ({ getApiClient: () => mockClient }))
 ```
 
 **Interceptor implementation strategy**:
@@ -537,14 +542,17 @@ Post-migration, the following empty directories are deleted:
 
 #### New Test Files to CREATE
 
-| Path                                       | Coverage                                                                                     |
-| ------------------------------------------ | -------------------------------------------------------------------------------------------- |
-| `tests/unit/core/error-normalizer.test.ts` | Standard API error, network error, unknown shape                                             |
-| `tests/unit/core/api-client.test.ts`       | Token attach, 401 refresh trigger, error normalization passthrough, AUTH_REFRESH_FAILED path |
-| `tests/unit/core/auth.guard.test.ts`       | Authenticated passes, unauthenticated redirects to login                                     |
-| `tests/unit/core/role.guard.test.ts`       | Correct role passes, wrong role redirects to /403                                            |
-| `tests/unit/core/token-store.test.ts`      | setAccessToken, clearAccessToken, getAccessToken, isAuthenticated reactivity                 |
-| `tests/unit/core/env-config.test.ts`       | Valid config resolves, missing VITE_API_BASE_URL throws                                      |
+| Path                                       | Coverage                                                                                                            |
+| ------------------------------------------ | ------------------------------------------------------------------------------------------------------------------- |
+| `tests/unit/core/error-normalizer.test.ts` | Standard API error, network error, unknown shape                                                                    |
+| `tests/unit/core/api-client.test.ts`       | Token attach, `credentials: 'include'` on every request, 401 refresh trigger, AUTH_REFRESH_FAILED + router redirect |
+| `tests/unit/core/auth.guard.test.ts`       | Authenticated passes, unauthenticated redirects to login                                                            |
+| `tests/unit/core/role.guard.test.ts`       | Correct role passes, wrong role redirects to /403                                                                   |
+| `tests/unit/core/token-store.test.ts`      | setAccessToken, clearAccessToken, getAccessToken, isAuthenticated reactivity                                        |
+| `tests/unit/core/env-config.test.ts`       | Valid config resolves, missing VITE_API_BASE_URL throws                                                             |
+| `tests/unit/core/useAuth.test.ts`          | isAuthenticated reactivity, logout clears store + redirects to /login                                               |
+| `tests/unit/core/guard-pipeline.test.ts`   | Guard execution order, auth stops before role check, login redirect on unauthenticated                              |
+| `tests/unit/core/app-boot.test.ts`         | App mounts without console errors, Pinia registered before store access                                             |
 
 #### Files to DELETE
 
@@ -565,6 +573,7 @@ None — old directories are removed after migration. No files are deleted witho
 | `tsconfig.json` | Extends ../../tsconfig.base.json + `@/` paths |
 | `tsconfig.app.json` | Scoped includes for src/\*\*/_.ts, src/\*_/_.vue |
 | `vite.config.ts` | @vitejs/plugin-vue, @ alias, @zidney/ui alias |
+| `vitest.config.ts` | Vitest config — vue plugin, `@/` alias to `./src`, globals, setupFiles |
 | `index.html` | Vite entry HTML |
 | `.env.example` | VITE_API_BASE_URL= template |
 
@@ -598,12 +607,15 @@ None — old directories are removed after migration. No files are deleted witho
 | Path | Coverage |
 |---|---|
 | `tests/unit/core/error-normalizer.test.ts` | Same 3 failure modes |
-| `tests/unit/core/api-client.test.ts` | Token attach, refresh, AUTH_REFRESH_FAILED |
+| `tests/unit/core/api-client.test.ts` | Token attach, `credentials: 'include'`, refresh, AUTH_REFRESH_FAILED + router redirect |
 | `tests/unit/core/auth.guard.test.ts` | Auth redirect |
 | `tests/unit/core/role.guard.test.ts` | Role redirect |
 | `tests/unit/core/workspace.guard.test.ts` | Matching slug passes, mismatch redirects |
 | `tests/unit/core/token-store.test.ts` | With workspaceSlug field |
 | `tests/unit/core/env-config.test.ts` | Validation |
+| `tests/unit/core/useAuth.test.ts` | isAuthenticated reactivity, logout clears store + redirects |
+| `tests/unit/core/guard-pipeline.test.ts` | Guard order, auth before role, workspace last |
+| `tests/unit/core/app-boot.test.ts` | App mounts without errors, Pinia before store access |
 
 ---
 
@@ -620,6 +632,7 @@ None — old directories are removed after migration. No files are deleted witho
 | `tsconfig.json` | Extends ../../tsconfig.base.json + `@/` paths |
 | `tsconfig.app.json` | Scoped includes |
 | `vite.config.ts` | Plugin-vue, @ alias, @zidney/ui alias |
+| `vitest.config.ts` | Vitest config — vue plugin, `@/` alias to `./src`, globals, setupFiles |
 | `index.html` | Vite entry HTML |
 | `.env.example` | VITE_API_BASE_URL= template |
 
@@ -647,7 +660,20 @@ None — old directories are removed after migration. No files are deleted witho
 - No `AttemptGuard` — deferred to Exam Runtime stage
 - Guard pipeline: `auth.guard → role.guard` only
 
-**Test files**: Same pattern as MMC core tests (no workspace.guard test).
+**Test files**:
+| Path | Coverage |
+|---|---|
+| `tests/unit/core/error-normalizer.test.ts` | Same 3 failure modes |
+| `tests/unit/core/api-client.test.ts` | Token attach, `credentials: 'include'`, refresh, AUTH_REFRESH_FAILED + router redirect |
+| `tests/unit/core/auth.guard.test.ts` | Auth redirect |
+| `tests/unit/core/role.guard.test.ts` | Role redirect |
+| `tests/unit/core/token-store.test.ts` | No workspaceSlug (student context) |
+| `tests/unit/core/env-config.test.ts` | Validation |
+| `tests/unit/core/useAuth.test.ts` | isAuthenticated reactivity, logout clears store + redirects |
+| `tests/unit/core/guard-pipeline.test.ts` | auth → role only (no workspace guard) |
+| `tests/unit/core/app-boot.test.ts` | App mounts without errors |
+
+**Note**: No `workspace.guard.test.ts` — WorkspaceGuard is backoffice-only (per spec §8.3 and §16 clarification).
 
 ---
 
@@ -900,7 +926,7 @@ Before marking this stage IN PROGRESS → BACKEND CLOSED:
 
 - [ ] All three apps have canonical `src/` structure
 - [ ] `core/api/client.ts` exists in all 3 apps — TypeScript strict passes, `credentials: 'include'` in base options
-- [ ] `core/api/client.ts` exports both `createApiClient()` factory AND default `apiClient` singleton
+- [ ] `core/api/client.ts` exports `createApiClient()` factory AND `getApiClient()` lazy getter (never calls `useAuthStore()` at module evaluation time — Pinia activation race eliminated)
 - [ ] `core/router/index.ts` exists in all 3 apps — guard pipeline wired
 - [ ] Pinia initialized in all 3 apps — `package.json` updated
 - [ ] `core/auth/` skeleton present in all 3 apps
@@ -919,25 +945,25 @@ Before marking this stage IN PROGRESS → BACKEND CLOSED:
 - [ ] `@/` alias in all 3 `tsconfig.json` files
 - [ ] **ESLint `import/no-restricted-paths` rules configured per app** — prevents cross-app imports and `import.meta.env` outside `core/config/env.ts`
 - [ ] ESLint passes with zero errors (`eslint src/`) for all 3 apps after import boundary rules are applied
-- [ ] Pinia installed (via `app.use(pinia)`) **before** `apiClient` singleton is imported in all 3 `main.ts` files
+- [ ] `getApiClient()` lazy getter confirmed safe in all 3 apps — `useAuthStore()` deferred until after `app.use(pinia)` in the application flow
 
 ---
 
 ## 10. Key Decisions Log
 
-| Decision                       | Choice                                    | Rationale                                                                               |
-| ------------------------------ | ----------------------------------------- | --------------------------------------------------------------------------------------- |
-| HTTP transport                 | Native `fetch`                            | No axios/ky bundle weight; spec says no axios                                           |
-| API client pattern             | Factory + singleton export                | Factory for DI in tests; singleton (`apiClient`) for module consumption                 |
-| `credentials: 'include'`       | All requests                              | httpOnly refresh cookie must be sent cross-origin for single-flight refresh to function |
-| Content-Type header            | `contentTypeInterceptor` (POST/PUT/PATCH) | Native fetch doesn't auto-set; server middleware requires it                            |
-| Token storage                  | Pinia state only                          | NFR-01: no browser storage                                                              |
-| Pinia "strict mode"            | Convention + ESLint                       | Pinia v2 has no strict API flag                                                         |
-| `@/` alias                     | Add to per-app tsconfig.json              | Vite alias exists; TS compiler needs path map                                           |
-| `workspace.guard.ts`           | Backoffice only                           | Spec §8.1 and §8.3 explicitly exclude MMC + FO                                          |
-| AttemptGuard                   | Deferred                                  | Spec §16 clarification — Exam Runtime stage                                             |
-| `packages/ui-system` additions | None for this stage                       | Layout components exist; core layer is per-app                                          |
-| No automatic retry             | Confirmed                                 | Spec §16 clarification and FR-28 note                                                   |
-| NormalizedError shape          | Sealed at 3 fields                        | FR-26 — fieldErrors deferred                                                            |
-| Pinia plugin: inject router    | Yes                                       | Stores may need router access for logout redirect                                       |
-| ESLint import boundaries       | `import/no-restricted-paths` per app      | Enforces layer separation and prevents apps importing each other                        |
+| Decision                       | Choice                                    | Rationale                                                                                                                                       |
+| ------------------------------ | ----------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------- |
+| HTTP transport                 | Native `fetch`                            | No axios/ky bundle weight; spec says no axios                                                                                                   |
+| API client pattern             | Factory + lazy getter export              | Factory for DI in tests; `getApiClient()` lazy getter defers `useAuthStore()` until app is fully initialized — eliminates Pinia activation race |
+| `credentials: 'include'`       | All requests                              | httpOnly refresh cookie must be sent cross-origin for single-flight refresh to function                                                         |
+| Content-Type header            | `contentTypeInterceptor` (POST/PUT/PATCH) | Native fetch doesn't auto-set; server middleware requires it                                                                                    |
+| Token storage                  | Pinia state only                          | NFR-01: no browser storage                                                                                                                      |
+| Pinia "strict mode"            | Convention + ESLint                       | Pinia v2 has no strict API flag                                                                                                                 |
+| `@/` alias                     | Add to per-app tsconfig.json              | Vite alias exists; TS compiler needs path map                                                                                                   |
+| `workspace.guard.ts`           | Backoffice only                           | Spec §8.1 and §8.3 explicitly exclude MMC + FO                                                                                                  |
+| AttemptGuard                   | Deferred                                  | Spec §16 clarification — Exam Runtime stage                                                                                                     |
+| `packages/ui-system` additions | None for this stage                       | Layout components exist; core layer is per-app                                                                                                  |
+| No automatic retry             | Confirmed                                 | Spec §16 clarification and FR-28 note                                                                                                           |
+| NormalizedError shape          | Sealed at 3 fields                        | FR-26 — fieldErrors deferred                                                                                                                    |
+| Pinia plugin: inject router    | Yes                                       | Stores may need router access for logout redirect                                                                                               |
+| ESLint import boundaries       | `import/no-restricted-paths` per app      | Enforces layer separation and prevents apps importing each other                                                                                |

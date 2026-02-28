@@ -401,15 +401,17 @@ interface AppConfig {
 
 ### 5.8 App Bootstrap
 
-**FR-33** — `main.ts` must initialize in this order:
+**FR-33** — `main.ts` must initialize in this enforceable order, consistent with ES module static import semantics:
 
-1. Validate environment config
-2. Create Pinia instance
-3. Create Vue Router instance
+1. Validate environment config (import-time side effect — `resolveConfig()` throws on missing vars)
+2. Create Vue Router instance (module-level static import executed before imperative code)
+3. Create Pinia instance (`createAppPinia(router)` called imperatively in main.ts body)
 4. Create Vue application (`createApp(App)`)
-5. Register Pinia
-6. Register Router
-7. Mount app
+5. Register Pinia (`app.use(pinia)`)
+6. Register Router (`app.use(router)`)
+7. Mount app (`app.mount('#app')`)
+
+> **Note**: The enforceable constraint is that `app.use(pinia)` executes before any Pinia store is _accessed_. The Pinia activation race is avoided by using `getApiClient()` (lazy getter) in `core/api/client.ts` — `useAuthStore()` is never called at module evaluation time.
 
 **FR-34** — `App.vue` must contain only `<RouterView />` and global layout wrapping. No business logic.
 
