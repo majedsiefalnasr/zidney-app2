@@ -151,12 +151,12 @@ As a platform maintainer, I need all three frontend applications to follow the s
 - **FR-007**: System MUST ensure that only `VITE_`-prefixed variables are accessible in the browser runtime (enforced by Vite's built-in convention).
 - **FR-008**: System MUST NOT log configuration values to the console in production mode.
 - **FR-009**: System MUST NOT expose secrets, database credentials, or private API keys to the browser via the window object, bundle, or any other mechanism.
-- **FR-010**: System MUST surface a clear error during application initialization if a required environment variable (e.g., `VITE_API_BASE_URL`) is missing.
-- **FR-011**: System MUST support mock injection of environment values in unit tests without relying on the global `window` object.
-- **FR-012**: System MUST follow the same env module contract (function names, types, patterns) across MMC, Backoffice, and Frontoffice.
+- **FR-010**: System MUST throw a synchronous exception before `createApp().mount()` if a required environment variable (e.g., `VITE_API_BASE_URL`) is missing. The app must never render in an invalid configuration state.
+- **FR-011**: System MUST support mock injection of environment values in unit tests via a factory function pattern — `createEnvConfig(overrides?)` — that accepts optional overrides. In production, this factory is called once with no overrides and the result is frozen. In tests, callers pass mock values to obtain a testable instance.
+- **FR-012**: System MUST follow the same env module contract (function names, types, patterns) across MMC, Backoffice, and Frontoffice. Consistency is enforced via a shared TypeScript interface (documented contract). Each app implements the interface independently — no shared runtime package.
 - **FR-013**: System MUST handle app-specific configuration differences (e.g., different API base URLs) via separate `.env` files, not via code branching inside the env module.
 - **FR-014**: System MUST provide an app-level configuration module (`core/config/app-config.ts`) that aggregates environment values and feature flags into a single typed configuration object.
-- **FR-015**: System MUST NOT allow runtime modification of any configuration value. Configuration is immutable after initialization.
+- **FR-015**: System MUST NOT allow runtime modification of any configuration value. Configuration is immutable after initialization. The `createEnvConfig()` factory returns a frozen object; subsequent mutation attempts are silently ignored (Object.freeze behavior).
 - **FR-016**: System MUST NOT allow user input to be merged into configuration values.
 - **FR-017**: System MUST NOT use feature flags to gate security, permission, or business logic. Feature flags are limited to UI display behavior and experiments.
 - **FR-018**: System MUST NOT allow environment logic (env access, mode checks) inside application modules — only inside `core/config/`.
@@ -190,7 +190,8 @@ As a platform maintainer, I need all three frontend applications to follow the s
 - All three frontend applications use Vite as their build tool, which enforces the `VITE_` prefix convention for browser-exposed variables.
 - The workspace context for Backoffice is resolved via the route (`/workspace/:slug/backoffice/...`) and backend-issued context — the env module does not compute workspace identifiers.
 - Feature flags in this stage are static (set at build time). Runtime feature flag fetching from a backend service is out of scope.
-- The env module pattern is implemented independently in each app (not as a shared package), since each app has its own Vite build pipeline. The contract (API surface) is shared, not the implementation.
+- The env module pattern is implemented independently in each app (not as a shared package), since each app has its own Vite build pipeline. A shared TypeScript interface defines the contract; each app implements it independently.
+- Configuration must be initialized synchronously before `createApp()` is called. `createEnvConfig()` (or equivalent) must execute at the top of `main.ts` before any Vue instance or service is created. No lazy initialization, no deferred loading.
 - App-specific environment files (`.env`, `.env.development`, `.env.staging`, `.env.production`) follow Vite's standard file loading and precedence conventions.
 
 ---
@@ -204,3 +205,16 @@ As a platform maintainer, I need all three frontend applications to follow the s
 - Business feature toggles controlled by backend (subscription-level features)
 - Runtime feature flag fetching from an API endpoint
 - Secret management infrastructure (vault, sealed secrets)
+- App version injection or API version headers (belongs to API client stage)
+
+---
+
+## Clarifications
+
+### Session 2026-02-28
+
+- Q: How should FR-010 surface errors for missing required env vars — throw before mount, show fallback UI, or log-and-continue? → A: Throw a synchronous exception before `createApp().mount()`. The app must never render in an invalid state.
+- Q: When must configuration be initialized — synchronously before mount, lazily on first access, or asynchronously? → A: Synchronously before app mount. `createEnvConfig()` must be called at the top of `main.ts` before `createApp()`. No lazy or deferred initialization.
+- Q: Should app version (e.g., `VITE_APP_VERSION`) be exposed via the env module for use in API request headers? → A: Out of scope for this stage. Version headers belong to the API client stage.
+- Q: How does FR-011 (test mock injection) coexist with FR-015 (immutability) — dependency injection, module mock, or factory function? → A: Factory function pattern. The env module exports `createEnvConfig(overrides?)` that accepts optional overrides for testing. In production, called once with no overrides and the result is frozen. In tests, callers pass mock values.
+- Q: How is FR-012 (multi-app consistency) enforced — shared package, shared TypeScript interface, or code review only? → A: Shared TypeScript interface in a documented contract location. Each app implements the interface independently (no shared runtime package). Consistency enforced via TypeScript interface conformance and code review.
