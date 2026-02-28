@@ -9,6 +9,19 @@ UI Foundation — Centralized API Client Architecture
 ## Stage Status
 
 Status: DRAFT
+Risk Level: UNKNOWN
+Initiated: 2026-02-28T22:00:00Z
+
+Scope Open:
+
+- Specification pending
+
+Constitutional Compliance:
+
+- Pending constitutional audit
+
+Notes:
+Stage initialized. Specification in progress.
 
 ---
 
