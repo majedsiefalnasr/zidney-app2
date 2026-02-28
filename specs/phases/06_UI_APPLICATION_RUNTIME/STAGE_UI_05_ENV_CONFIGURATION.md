@@ -9,8 +9,8 @@ UI Foundation — Environment & Runtime Configuration Layer
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
-Last Updated: 2026-02-28T21:05:00Z
+Risk Level: LOW
+Last Updated: 2026-02-28T21:10:00Z
 
 Scope Defined:
 
@@ -19,8 +19,8 @@ Scope Defined:
 - Environment mode helpers (isDev, isProd, isStaging)
 - Read-only feature flag injection from VITE\_ variables
 - Secure exposure policy (no secrets in browser)
-- Test mockability without window dependency
-- Multi-app consistency
+- Test mockability via factory function pattern
+- Multi-app consistency via shared TypeScript interface
 
 Deferred Scope:
 
@@ -29,10 +29,14 @@ Deferred Scope:
 - Router guards
 - Workspace resolution logic
 - Business feature toggles
+- App version injection / API version headers
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
+
+Notes:
+All specification ambiguities resolved. Ready for technical planning.
 
 Notes:
 Specification complete. Clarification step pending.
