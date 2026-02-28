@@ -1233,6 +1233,79 @@ Load `specs/templates/commits/commit-implement.md`. Fill all `{{PLACEHOLDER}}` t
 
 **Hard STOP. Do NOT proceed to Step 7 without explicit user approval.**
 
+### Gate A — Run GitHub Workflows
+
+Before presenting the review prompt, run all GitHub Actions workflows locally and record results.
+
+**Step 1 — Detect runner:**
+
+```bash
+act --version 2>/dev/null
+```
+
+- If `act` is available → use it (Step 2a)
+- If not found → fall back to `gh` CLI (Step 2b)
+
+**Step 2a — Run with `act`:**
+
+```bash
+# List all available workflows
+act --list
+
+# Run all workflows against the current branch
+act push --branch <STAGE_DIR_NAME>
+```
+
+Capture exit code and stdout/stderr per workflow job.
+
+**Step 2b — Fall back to `gh` CLI:**
+
+```bash
+# Push branch to trigger remote workflows (if not already pushed)
+git push origin <STAGE_DIR_NAME>
+
+# List workflow runs for this branch and poll until complete
+gh run list --branch <STAGE_DIR_NAME> --limit 20
+gh run watch
+```
+
+Wait for all runs to reach a terminal state (`completed`, `failure`, `cancelled`).
+
+**Step 3 — Build results table:**
+
+Display one row per workflow job:
+
+```
+GitHub Workflows — <STAGE_DIR_NAME>
+Runner: act (local)  |  act (fallback: gh CLI)
+
+| Workflow               | Job              | Status  | Duration |
+|------------------------|------------------|---------|----------|
+| ci.yml                 | lint             | ✅ pass | 0m 42s   |
+| ci.yml                 | test             | ✅ pass | 1m 18s   |
+| ci.yml                 | type-check       | ❌ fail | 0m 31s   |
+| deploy-preview.yml     | build            | ✅ pass | 2m 05s   |
+
+Overall: ⚠️ 1 workflow job failed
+```
+
+**Step 4 — If any jobs failed, display failure details:**
+
+```
+❌ Failures detected:
+
+ci.yml › type-check
+  Exit code: 1
+  Error: src/services/tenant.ts(42,5): error TS2345: Argument of type 'string' is not assignable...
+  [full output]
+```
+
+**Workflow gate behavior:** Failures are WARNING only — they do not automatically block closure. The user sees the full results table and decides in the approval prompt below. If no `.github/workflows/` directory exists → skip this gate and note it in the review prompt.
+
+---
+
+### Gate B — Review Prompt
+
 ```
 ⏸ Pre-Closure Review Gate
 
@@ -1266,6 +1339,8 @@ Audits:
   specs/runtime/<STAGE_DIR_NAME>/audits/ANALYZE_REPORT.md
   specs/runtime/<STAGE_DIR_NAME>/audits/VALIDATION_REPORT.md
 
+GitHub Workflows: <✅ all passed | ⚠️ N failed — see details above | ⏭ skipped (no workflows found)>
+
 Tasks completed: <TASKS_COMPLETED> / <TASKS_TOTAL>
 
 Respond with:
@@ -1273,7 +1348,7 @@ Respond with:
   ❌ "Issues found — [describe what needs fixing]"
 ```
 
-If issues reported → address them, regenerate affected report(s), update stage status and workflow state, then re-present this gate.  
+If issues reported → address them, regenerate affected report(s), update stage status and workflow state, then re-run Gate A before re-presenting Gate B.  
 Do NOT proceed to Step 7 until explicit approval received.
 
 ---
