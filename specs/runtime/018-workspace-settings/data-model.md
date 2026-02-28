@@ -296,7 +296,7 @@ workspace_settings_audit.user_id references users table (no FK to preserve audit
 
 ## Migration Plan
 
-**Migration file**: `apps/api/src/db/tenant/migrations/20260228_001_workspace_settings_jsonb.ts`
+**Migration file**: `apps/api/src/db/tenant/migrations/20260228_002_workspace_settings_jsonb.ts`
 
 ### Steps (within single transaction):
 
