@@ -30,9 +30,9 @@ describe('app-boot (MMC): FR-33 bootstrap order', () => {
   })
 
   it('appConfig is resolved at import time (before pinia/router)', async () => {
-    const { appConfig } = await import('../../../src/core/config/env')
+    const { appConfig } = await import('../../../src/core/config/app-config')
     expect(appConfig).toBeDefined()
-    expect(appConfig.apiBaseUrl).toBe('https://api.example.com')
+    expect(appConfig.env.apiBaseUrl).toBe('https://api.example.com')
   })
 
   it('createAppPinia returns a pinia instance', async () => {

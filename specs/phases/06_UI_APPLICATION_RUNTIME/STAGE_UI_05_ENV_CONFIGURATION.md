@@ -8,7 +8,42 @@ UI Foundation — Environment & Runtime Configuration Layer
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY
+Risk Level: LOW
+Closure Date: 2026-02-28
+
+Scope Closed:
+
+- Centralized env config via createEnvConfig() factory in each app
+- API base URL resolution per app via getApiBase()
+- Mode helpers (isDev, isProd, isStaging) in app-config.ts
+- Feature flags module (read-only, frozen) via createFeatureFlags()
+- ESLint no-restricted-syntax rule for import.meta.env isolation
+- Shared TypeScript interfaces in packages/types/src/env-config.ts
+- Backoffice extension with optional workspaceSlug
+- 105 unit tests across 12 test files
+- 54 / 54 tasks completed
+
+Deferred Scope:
+
+- None
+
+Constitutional Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced (N/A — frontend-only)
+- ADR-0006 Server-authoritative time enforced (N/A — no time ops)
+- ADR-0007 Version compatibility enforced (N/A — no schema changes)
+- ADR-0008 Semantic versioning enforced (N/A — no version bumps)
+- Import boundaries enforced (apps/_ → packages/_ only)
+- Feature flags scoped to UI display only
+- No secrets exposure, no console.log in production path
+
+Notes:
+Stage is production ready. No structural backend modifications allowed.
+Modifications require a new migration stage.
+
+Notes:
+Backend implementation complete. No structural backend modifications allowed.
 
 ---
 
