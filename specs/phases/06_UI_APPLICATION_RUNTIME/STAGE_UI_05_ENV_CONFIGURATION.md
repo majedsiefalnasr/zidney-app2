@@ -10,9 +10,9 @@ UI Foundation — Environment & Runtime Configuration Layer
 
 Status: DRAFT
 Risk Level: LOW
-Last Updated: 2026-02-28T21:10:00Z
+Last Updated: 2026-02-28T21:15:00Z
 
-Scope Defined:
+Scope Planned:
 
 - Centralized environment variable access via core/config/env.ts
 - API base URL resolution per app (MMC, Backoffice, Frontoffice)
@@ -21,6 +21,8 @@ Scope Defined:
 - Secure exposure policy (no secrets in browser)
 - Test mockability via factory function pattern
 - Multi-app consistency via shared TypeScript interface
+- Shared types in packages/types (type-only)
+- ESLint no-restricted-syntax enforcement
 
 Deferred Scope:
 
@@ -33,13 +35,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
-
-Notes:
-Specification complete. Clarification step pending.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
