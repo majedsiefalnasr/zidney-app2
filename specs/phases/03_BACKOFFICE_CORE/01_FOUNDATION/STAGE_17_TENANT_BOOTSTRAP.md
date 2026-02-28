@@ -9,7 +9,43 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY
+Risk Level: MEDIUM
+Closure Date: 2026-02-28
+
+Implementation: COMPLETE
+Tasks: 31 / 31 completed
+
+Scope Closed:
+
+- Backoffice REST + WebSocket bootstrap
+- GET /backoffice/context endpoint
+- License enforcement middleware (enabled_modules + product_version injection)
+- RBAC guard middleware (Redis cache + DB fallback; backoffice\_ table prefix)
+- Module guard middleware
+- Tenant RBAC skeleton migration (backoffice_roles, backoffice_role_permissions, backoffice_staff_users, backoffice_staff_user_roles)
+- Vue 3 SPA scaffold with Pinia context store, Vue Router v4, WS plugin
+- Dockerfile builder-deps stage + nginx WS + SPA location blocks
+- 67 tests across 7 test files (all passing)
+
+Deferred Scope:
+
+- Academic module logic (planned for academic-features stage)
+- Limit enforcement during user creation (requires user management stage)
+- Division/department-scoped RBAC (architectural pattern to be defined in later stage)
+- WebSocket event bus for license transitions (requires event infrastructure)
+
+Constitutional Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced
+- ADR-0006 Server-authoritative time enforced
+- ADR-0007 Version compatibility enforced (product_version injected)
+- ADR-0008 Semantic versioning enforced (migration 20260228*001*\*, schema_version runner)
+- Implementation compliant with Zidney Constitution v1.2.0
+
+Notes:
+Stage is production ready. No structural backend modifications allowed.
+Modifications require a new migration stage.
 
 ---
 

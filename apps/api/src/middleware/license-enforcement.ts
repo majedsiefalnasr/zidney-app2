@@ -22,7 +22,10 @@
  */
 
 import { LicenseStatus } from '@zidney/domain-core/license'
+import { createLogger } from '@zidney/logger'
 import type { Context, Next } from 'hono'
+
+const logger = createLogger('license-engine')
 
 // Would import from actual implementations:
 // import { toLicenseError } from '@/responses/license-error-handler'
@@ -75,7 +78,7 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
         result: 'fail',
       }
 
-      console.log(JSON.stringify(log))
+      logger.warn('License validation failed', log)
 
       // Return error response (would use toLicenseError helper)
       const httpStatus = validationResult.http_status || 403
@@ -86,6 +89,7 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
           error: {
             code: validationResult.error_code,
             message: validationResult.error_message,
+            correlationId: correlation_id,
           },
         },
         { status: httpStatus }
@@ -130,7 +134,7 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
           result: 'success',
           transition_result: result.success ? 'executed' : 'failed',
         }
-        console.log(JSON.stringify(log))
+        logger.warn('License soft-lock auto-transitioned to ARCHIVED', log)
       } catch (transitionError) {
         const log = {
           timestamp: new Date().toISOString(),
@@ -144,7 +148,7 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
               ? transitionError.message
               : String(transitionError),
         }
-        console.log(JSON.stringify(log))
+        logger.error('License soft-lock auto-transition failed', log)
         // Continue to return 403 anyway (license is expired)
       }
 
@@ -156,6 +160,7 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
           error: {
             code: 'LICENSE_SOFT_LOCKED_EXPIRED',
             message: 'Workspace soft-lock grace period has expired',
+            correlationId: correlation_id,
           },
         },
         { status: 403 }
@@ -186,7 +191,7 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
         result: 'fail',
         error_code: 'SCHEMA_VERSION_MISMATCH',
       }
-      console.log(JSON.stringify(log))
+      logger.error('Schema version incompatible', log)
 
       return ctx.json(
         {
@@ -195,6 +200,7 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
           error: {
             code: 'SCHEMA_VERSION_MISMATCH',
             message: 'Workspace requires schema upgrade',
+            correlationId: correlation_id,
           },
         },
         { status: 426 }
@@ -225,7 +231,7 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
           result: 'fail',
           error_code: 'UPGRADE_REQUIRED',
         }
-        console.log(JSON.stringify(log))
+        logger.error('Product version incompatible', log)
 
         return ctx.json(
           {
@@ -234,6 +240,7 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
             error: {
               code: 'UPGRADE_REQUIRED',
               message: 'Workspace license requires product upgrade',
+              correlationId: correlation_id,
             },
           },
           { status: 426 }
@@ -247,22 +254,21 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
     if (license) {
       ctx.set('license_id', license.id)
       ctx.set('license_status', license.status)
-      ctx.set('student_limit', String(license.student_limit || 'unlimited'))
-      ctx.set('staff_limit', String(license.staff_limit || 'unlimited'))
+      ctx.set('student_limit', String(license.student_limit ?? 'unlimited'))
+      ctx.set('staff_limit', String(license.staff_limit ?? 'unlimited'))
+      // BLOCK-2 FIX: Inject enabled_modules and product_version for BackofficeContext
+      ctx.set('enabled_modules', license.enabled_modules ?? [])
+      ctx.set('product_version', license.expected_product_version ?? '1.0.0')
     }
 
     // Log: Middleware check passed
-    const log = {
-      timestamp: new Date().toISOString(),
-      level: 'info',
-      service: 'license-engine',
+    logger.info('License middleware check passed', {
       correlation_id,
       workspace_slug,
       action: 'middleware_check',
-      status: license?.status || 'UNKNOWN',
+      status: license?.status ?? 'UNKNOWN',
       result: 'pass',
-    }
-    console.log(JSON.stringify(log))
+    })
 
     return await next()
   } catch (error) {
@@ -275,7 +281,7 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
       result: 'error',
       error_message: error instanceof Error ? error.message : String(error),
     }
-    console.log(JSON.stringify(log))
+    logger.error('License middleware check failed with unhandled error', log)
 
     return ctx.json(
       {
@@ -284,6 +290,8 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
         error: {
           code: 'LICENSE_CHECK_FAILED',
           message: 'License validation failed',
+          correlationId:
+            ctx.get('correlationId') ?? ctx.get('correlation_id') ?? 'unknown',
         },
       },
       { status: 500 }
