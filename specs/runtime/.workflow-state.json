@@ -1,132 +1,24 @@
 {
-  "stage": "STAGE_UI_00_RUNTIME_ARCHITECTURE",
+  "stage": "ENV Configuration",
   "phase": "06_UI_APPLICATION_RUNTIME",
-  "stage_dir": "specs/runtime/ui-00-runtime-architecture",
-  "stage_file": "specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_00_RUNTIME_ARCHITECTURE.md",
-  "branch": "ui-00-runtime-architecture",
+  "stage_dir": "specs/runtime/ui-05-env-configuration",
+  "stage_file": "specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_05_ENV_CONFIGURATION.md",
+  "branch": "ui-05-env-configuration",
   "base_branch": "develop",
-  "current_step": "stage_production_ready",
-  "stage_status": "PRODUCTION READY",
-  "clarifications_resolved": true,
-  "drift_passed": true,
-  "implementation_allowed": true,
-  "plan_completed": true,
-  "tasks_total": 161,
-  "tasks_completed": 161,
-  "last_updated": "2026-02-28T20:00:00Z",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-02-28T21:00:00Z",
   "history": [
     {
       "event": "branch_created",
-      "branch": "ui-00-runtime-architecture",
-      "timestamp": "2026-02-28T00:00:00Z"
-    },
-    {
-      "event": "specify_complete",
-      "timestamp": "2026-02-28T00:10:00Z"
-    },
-    {
-      "event": "clarifications_locked",
-      "timestamp": "2026-02-28T00:20:00Z"
-    },
-    {
-      "event": "plan_complete",
-      "guardian_verdicts": "Architecture PASS (Round 2), API Designer PASS (Round 2)",
-      "rounds_required": 2,
-      "timestamp": "2026-02-28T00:35:00Z"
-    },
-    {
-      "event": "tasks_complete",
-      "tasks_total": 158,
-      "timestamp": "2026-02-28T00:45:00Z"
-    },
-    {
-      "event": "drift_analysis_passed",
-      "drift_criteria": "9/9 PASS",
-      "consistency_fixes": [
-        "C1: summary table corrected",
-        "C2: .spec.ts -> .test.ts (29 files)"
-      ],
-      "remediations": 7,
-      "guardians": {
-        "security_auditor": "PASS",
-        "performance_optimizer": "PASS",
-        "qa_engineer": "PASS (Round 2)",
-        "code_reviewer": "PASS (Round 2)"
-      },
-      "tasks_total_updated": 161,
-      "timestamp": "2026-02-28T01:30:00Z"
-    },
-    {
-      "event": "implement_complete",
-      "tasks_completed": 161,
-      "tasks_total": 161,
-      "validation_gate": "ALL_PASS",
-      "tests": { "mmc": 64, "backoffice": 70, "frontoffice": 62, "total": 196 },
-      "bugs_fixed": 12,
-      "timestamp": "2026-02-28T02:00:00Z"
-    },
-    {
-      "event": "stage_backend_closed",
-      "tasks_completed": 161,
-      "tasks_total": 161,
-      "timestamp": "2026-02-28T02:00:00Z"
-    },
-    {
-      "event": "pre_closure_review_approved",
-      "timestamp": "2026-02-28T20:00:00Z"
-    },
-    {
-      "event": "stage_production_ready",
-      "timestamp": "2026-02-28T20:00:00Z"
-    }
-  ]
-}
-  "history": [
-    {
-      "event": "branch_created",
-      "branch": "017-tenant-bootstrap",
-      "timestamp": "2026-02-28T00:00:00Z"
-    },
-    {
-      "event": "specify_complete",
-      "timestamp": "2026-02-28T00:05:00Z"
-    },
-    {
-      "event": "clarifications_locked",
-      "timestamp": "2026-02-28T00:10:00Z"
-    },
-    {
-      "event": "plan_complete",
-      "timestamp": "2026-02-28T00:20:00Z"
-    },
-    {
-      "event": "tasks_complete",
-      "tasks_total": 29,
-      "timestamp": "2026-02-28T00:30:00Z"
-    },
-    {
-      "event": "drift_analysis_passed",
-      "guardians": [
-        "speckit.analyze",
-        "zidney-security-auditor",
-        "zidney-performance-optimizer",
-        "zidney-qa-engineer",
-        "zidney-code-reviewer"
-      ],
-      "violations_remediated": 13,
-      "tasks_total_updated": 31,
-      "timestamp": "2026-02-28T01:00:00Z"
-    },
-    {
-      "event": "stage_backend_closed",
-      "tasks_completed": 31,
-      "tasks_total": 31,
-      "guardians_passed": [
-        "zidney-cicd-automation",
-        "zidney-deployment-engineer",
-        "zidney-docker-specialist"
-      ],
-      "timestamp": "2026-02-28T17:30:00Z"
+      "branch": "ui-05-env-configuration",
+      "timestamp": "2026-02-28T21:00:00Z"
     }
   ]
 }
