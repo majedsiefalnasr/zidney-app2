@@ -1,5 +1,5 @@
 // Step 1: Validate environment config at import time — throws early if misconfigured
-import '@/core/config/env'
+import '@/core/config/app-config'
 
 // Step 2: Static import of router (module-level)
 import { router } from '@/core/router'

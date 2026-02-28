@@ -1,7 +1,7 @@
 import type { TokenStore } from '@/core/auth/token-store'
 import { useAuthStore } from '@/core/auth/token-store'
-import type { AppConfig } from '@/core/config/env'
-import { appConfig } from '@/core/config/env'
+import type { AppConfig } from '@/core/config/app-config'
+import { appConfig } from '@/core/config/app-config'
 import { normalizeError } from '@/core/errors/error-normalizer'
 import type { NormalizedError } from '@/core/errors/types'
 
@@ -99,7 +99,7 @@ export function createApiClient(
     reqConfig: RequestConfig
   ): Promise<ApiResponse<T>> {
     const { url, method, params, data, idempotencyKey } = reqConfig
-    const fullUrl = `${config.apiBaseUrl}${url}${serializeParams(params)}`
+    const fullUrl = `${config.env.apiBaseUrl}${url}${serializeParams(params)}`
     const headers = buildHeaders(method, idempotencyKey)
 
     const response = await fetchFn(fullUrl, {

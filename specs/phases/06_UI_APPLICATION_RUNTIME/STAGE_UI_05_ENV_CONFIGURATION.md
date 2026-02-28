@@ -8,29 +8,38 @@ UI Foundation — Environment & Runtime Configuration Layer
 
 ## Stage Status
 
-Status: IN PROGRESS
+Status: BACKEND CLOSED
 Risk Level: LOW
-Last Updated: 2026-02-28T21:25:00Z
+Last Updated: 2026-02-28T21:35:00Z
 
-Drift Analysis: PASSED (all criteria)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 54 / 54 completed
 
-Scope Authorized:
+Scope Closed:
 
-- Centralized env config via core/config/env.ts
-- API base URL resolution per app
-- Mode helpers (isDev, isProd, isStaging)
-- Feature flags module (read-only, frozen)
-- Lint enforcement for import.meta.env
-- Shared TypeScript interfaces in packages/types
-- 54 atomic tasks across 5 phases
+- Centralized env config via createEnvConfig() factory in each app
+- API base URL resolution per app via getApiBase()
+- Mode helpers (isDev, isProd, isStaging) in app-config.ts
+- Feature flags module (read-only, frozen) via createFeatureFlags()
+- ESLint no-restricted-syntax rule for import.meta.env isolation
+- Shared TypeScript interfaces in packages/types/src/env-config.ts
+- Backoffice extension with optional workspaceSlug
+- 105 unit tests across 12 test files
+
+Deferred Scope:
+
+- None
 
 Constitutional Compliance:
 
-- All drift criteria passed — implementation authorized
+- ADR alignment verified
+- Implementation compliant with Zidney Constitution v1.2.0
+- Import boundaries enforced (apps/_ → packages/_ only)
+- Feature flags scoped to UI display only
+- No secrets exposure, no console.log in production path
 
 Notes:
-Full drift analysis passed. Implementation gate open.
+Backend implementation complete. No structural backend modifications allowed.
 
 ---
 
