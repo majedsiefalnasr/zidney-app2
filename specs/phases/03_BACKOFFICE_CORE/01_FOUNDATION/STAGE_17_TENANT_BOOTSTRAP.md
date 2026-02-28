@@ -10,19 +10,20 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
-Last Updated: 2026-02-28T00:05:00Z
+Risk Level: MEDIUM
+Last Updated: 2026-02-28T00:10:00Z
 
 Scope Defined:
 
 - Runtime context injection (workspace_id, slug, license_status, enabled_modules, limits, versions)
-- License gate enforcement (ACTIVE required; 423/403/404 responses)
+- License gate enforcement (ACTIVE required; 423/403/404 + structured error JSON)
 - Module visibility contract (server-side enforcement)
-- RBAC skeleton (roles, role_permissions, staff_users, staff_user_roles)
+- RBAC skeleton (roles, role_permissions, staff_users, staff_user_roles) — separate STAGE_17 migration
+- RBAC Permission Guard middleware (after Authentication in middleware chain)
 - AppLayout with dynamic, RBAC-aware Sidebar (packages/ui-system)
 - Workspace-scoped JWT validation with role/permissions claims
 - Limit awareness exposure (student_limit, staff_limit — informational only)
-- WebSocket lifecycle validation
+- WebSocket lifecycle: license polling every 30s (WS_LICENSE_POLL_INTERVAL_MS)
 - Structured observability with workspace context on every log
 
 Deferred Scope:
@@ -30,13 +31,14 @@ Deferred Scope:
 - Academic module logic
 - Limit enforcement during user creation
 - Division/department-scoped RBAC
+- WebSocket event bus for license transitions
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
