@@ -88,16 +88,42 @@ All Backoffice API routes must traverse this chain in this exact order:
 - 403 — `LICENSE_ARCHIVED`
 - 404 — `WORKSPACE_NOT_FOUND`
 
+**Hono context variable types (BackofficeEnv — shared by all backoffice routes and middleware):**
+
+```typescript
+// apps/api/src/routes/backoffice/types.ts  (new file — imported by context.ts, ws.ts, and all backoffice middleware)
+import type { TenantContext, LicenseStatus, Module } from '@zidney/types'
+
+export type StaffUserContext = { user_id: string; role: string }
+
+export type BackofficeVariables = {
+  correlationId: string
+  tenant: TenantContext
+  staff_user: StaffUserContext
+  license_status: LicenseStatus
+  enabled_modules: Module[]
+  student_limit: number
+  staff_limit: number
+  product_version: string
+  schema_version: number
+}
+
+export type BackofficeEnv = { Variables: BackofficeVariables }
+```
+
+All backoffice Hono instances must be typed: `new Hono<BackofficeEnv>()`. Every `c.get()` call returns a fully typed value — no `unknown` inferences.
+
 **Implementation:**
 
 ```typescript
 // apps/api/src/routes/backoffice/context.ts
 import { createLogger } from '@zidney/logger'
-import { Context, Hono } from 'hono'
+import { Hono } from 'hono'
+import type { BackofficeEnv } from './types'
 
 const logger = createLogger('backoffice-context')
 
-export const backofficeContextRouter = new Hono()
+export const backofficeContextRouter = new Hono<BackofficeEnv>()
 
 backofficeContextRouter.get('/backoffice/context', async (c: Context) => {
   const correlation_id = c.get('correlationId') || 'unknown'
@@ -220,7 +246,45 @@ export function createBackofficeRBACGuard(
       )
     }
 
-    // Query tenant DB for permission
+    // F-02: RBAC Caching Strategy
+    // Cache RBAC results in Redis to avoid a DB query on every protected request.
+    // Cache key: rbac:{workspace_id}:{user_id}:{module}:{action}
+    // TTL: 30 seconds (matches WS poll interval — permissions change infrequently in bootstrap phase)
+    // Cache invalidation: not required for STAGE_17 (no RBAC mutation APIs yet)
+    // The first miss fetches from tenant DB; subsequent requests within the TTL return Redis hit.
+    const rbacCacheKey = `rbac:${tenant.id}:${staff_user.user_id}:${requiredModule}:${requiredAction}`
+    const cached = await tenant.redis?.get(rbacCacheKey) // uses tenant-scoped redis if available, else falls through
+    if (cached !== null && cached !== undefined) {
+      const hasPermission = cached === '1'
+      if (!hasPermission) {
+        // Serve cached denial from Redis — no DB query
+        logger.warn('RBAC permission denied (cached)', {
+          workspace_slug: tenant.slug,
+          workspace_id: tenant.id,
+          correlation_id,
+          route_name: c.req.routePath,
+          user_id: staff_user.user_id,
+          module: requiredModule,
+          action: requiredAction,
+        })
+        return c.json(
+          {
+            success: false,
+            data: null,
+            error: {
+              code: 'RBAC_PERMISSION_DENIED',
+              message: 'Insufficient permissions',
+              correlationId: correlation_id,
+            },
+          },
+          403
+        )
+      }
+      await next()
+      return
+    }
+
+    // Cache miss — Query tenant DB for permission
     const tenantDb = tenant.pool
     const result = await tenantDb.query<{ has_permission: boolean }>(
       `
@@ -237,6 +301,8 @@ export function createBackofficeRBACGuard(
     )
 
     const hasPermission = result.rows[0]?.has_permission ?? false
+    // Store result in Redis cache (TTL = 30 s)
+    await tenant.redis?.set(rbacCacheKey, hasPermission ? '1' : '0', { EX: 30 })
 
     if (!hasPermission) {
       logger.warn('RBAC permission denied', {
@@ -310,12 +376,27 @@ The existing `license-enforcement.ts` uses `toLicenseError()` helper — confirm
 ```typescript
 // apps/api/src/middleware/backoffice-module-guard.ts
 import { Module } from '@zidney/types'
+import { createLogger } from '@zidney/logger'
 import { Context, MiddlewareHandler } from 'hono'
+import type { Logger } from '@zidney/logger'
 
-export function createModuleGuard(requiredModule: Module): MiddlewareHandler {
+// M-02 FIX: logger is required to emit security audit log on denial
+export function createModuleGuard(
+  logger: Logger,
+  requiredModule: Module
+): MiddlewareHandler {
   return async (c: Context, next) => {
     const enabled_modules: string[] = c.get('enabled_modules') ?? []
     if (!enabled_modules.includes(requiredModule)) {
+      // M-02 FIX: emit security audit log on every module guard denial
+      logger.warn('Module guard denied request', {
+        module: requiredModule,
+        workspace_id: c.get('workspace_id') ?? 'unknown',
+        workspace_slug: c.get('workspace_slug') ?? 'unknown',
+        correlation_id: c.get('correlationId') ?? 'unknown',
+        user_id: c.get('staff_user')?.user_id ?? 'unknown',
+        route_name: `${c.req.method} ${c.req.path}`,
+      })
       return c.json(
         {
           success: false,
@@ -364,6 +445,7 @@ export function createModuleGuard(requiredModule: Module): MiddlewareHandler {
 // apps/api/src/routes/backoffice/ws.ts
 import { createLogger } from '@zidney/logger'
 import { upgradeWebSocket } from 'hono/bun'
+import { createRedisClient } from '@zidney/redis-utils'
 
 const logger = createLogger('backoffice-ws')
 
@@ -371,6 +453,11 @@ const WS_POLL_MS = Math.min(
   Math.max(parseInt(process.env.WS_LICENSE_POLL_INTERVAL_MS ?? '30000'), 5000),
   120000
 )
+
+// F-01 FIX: Module-scoped shared Redis client — shared across ALL connections on this process.
+// Never created per-connection; never closed per-connection.
+// Lifetime is process lifetime (same pattern as license middleware Redis client).
+const moduleWsRedis = createRedisClient() // @zidney/redis-utils — module singleton
 
 // Redis-backed connection registry: key = ws:backoffice:{workspace_id}:{user_id}, TTL = WS_POLL_MS * 3
 // Enforces single-connection-per-user across all nodes
@@ -381,17 +468,24 @@ export function createBackofficeWsRoute() {
     const tenant = c.get('tenant')
     const staff_user = c.get('staff_user')
     const correlation_id = c.get('correlationId') || 'unknown'
-    const connKey = `${tenant.id}:${staff_user.user_id}`
-    // WS-02 FIX: Hoist Redis client + key to outer closure so onOpen/onClose/onError all share the same scope
+    // WS-02 FIX: Hoist key to outer closure so onOpen/onClose/onError all share the same scope
+    // F-01 FIX: Use module-scoped moduleWsRedis (no per-connection client)
     const wsKey = `ws:backoffice:${tenant.id}:${staff_user.user_id}`
-    const wsRedis = createRedisClient() // @zidney/redis-utils
+    const wsRedis = moduleWsRedis // alias for clarity within handler scope
     let pollInterval: ReturnType<typeof setInterval>
+    // M-01 FIX: fail-closed on repeated poll failures
+    let consecutivePollFailures = 0
+    const MAX_POLL_FAILURES = parseInt(process.env.WS_MAX_POLL_FAILURES ?? '3')
 
     return {
       async onOpen(_, ws) {
-        // Reject duplicate connections — Redis enforced (node-safe)
-        const existing = await wsRedis.get(wsKey)
-        if (existing) {
+        // H-02 FIX: Atomic SET NX prevents TOCTOU race — replaces two-step GET + SETEX
+        const registered = await wsRedis.set(wsKey, '1', {
+          NX: true,
+          EX: Math.ceil((WS_POLL_MS * 3) / 1000),
+        })
+        if (!registered) {
+          // registered === null means key already exists → duplicate connection
           logger.warn('Duplicate WS connection rejected', {
             workspace_id: tenant.id,
             workspace_slug: tenant.slug,
@@ -402,8 +496,6 @@ export function createBackofficeWsRoute() {
           ws.close(1008, 'DUPLICATE_CONNECTION')
           return
         }
-        // Register connection with TTL (refreshed on each poll cycle)
-        await wsRedis.setex(wsKey, Math.ceil((WS_POLL_MS * 3) / 1000), '1')
         logger.info('Backoffice WS connected', {
           workspace_id: tenant.id,
           workspace_slug: tenant.slug,
@@ -416,8 +508,20 @@ export function createBackofficeWsRoute() {
           try {
             // V-04 FIX: Reuse outer-scope wsRedis client — no new Redis client per tick
             const status = await wsRedis.get(`license:status:${tenant.id}`)
-            // Refresh the connection presence TTL on each successful poll
-            await wsRedis.setex(wsKey, Math.ceil((WS_POLL_MS * 3) / 1000), '1')
+            // CR FIX: Reset failure counter immediately after license is confirmed — BEFORE the
+            // best-effort TTL refresh. If setex throws (transient Redis write hiccup) the
+            // connection stays open because the license was confirmed ACTIVE on this tick.
+            consecutivePollFailures = 0
+            // Best-effort TTL refresh — non-fatal if it fails
+            try {
+              await wsRedis.setex(
+                wsKey,
+                Math.ceil((WS_POLL_MS * 3) / 1000),
+                '1'
+              )
+            } catch {
+              // Intentionally swallowed — TTL expiry is handled by onOpen NX enforcement
+            }
             if (status !== 'ACTIVE') {
               logger.warn('WS license became non-ACTIVE; closing connection', {
                 workspace_id: tenant.id,
@@ -427,23 +531,53 @@ export function createBackofficeWsRoute() {
                 license_status: status ?? 'UNKNOWN',
                 route_name: 'WS /ws/backoffice',
               })
+              clearInterval(pollInterval)
               ws.close(1008, 'WORKSPACE_SUSPENDED')
             }
           } catch (err) {
-            logger.error('WS license poll failed', {
-              workspace_id: tenant.id,
-              workspace_slug: tenant.slug,
-              correlation_id,
-              user_id: staff_user.user_id,
-              route_name: 'WS /ws/backoffice',
-            })
+            consecutivePollFailures++
+            // M-01 FIX: fail-closed on repeated failures — suspend WS after MAX_POLL_FAILURES
+            if (consecutivePollFailures >= MAX_POLL_FAILURES) {
+              logger.error(
+                'WS license poll exceeded max failures; closing fail-closed',
+                {
+                  workspace_id: tenant.id,
+                  workspace_slug: tenant.slug,
+                  correlation_id,
+                  user_id: staff_user.user_id,
+                  route_name: 'WS /ws/backoffice',
+                  consecutive_failures: consecutivePollFailures,
+                }
+              )
+              clearInterval(pollInterval)
+              ws.close(1011, 'POLL_FAILURE')
+            } else {
+              logger.error('WS license poll failed', {
+                workspace_id: tenant.id,
+                workspace_slug: tenant.slug,
+                correlation_id,
+                user_id: staff_user.user_id,
+                route_name: 'WS /ws/backoffice',
+                attempt: consecutivePollFailures,
+              })
+            }
           }
         }, WS_POLL_MS)
       },
 
       onClose() {
         clearInterval(pollInterval)
-        void wsRedis.del(wsKey) // Remove Redis connection registry entry
+        // CR FIX: Log Redis del failure (silent failure leaves presence key alive until TTL expiry)
+        wsRedis.del(wsKey).catch((e: unknown) =>
+          logger.error('WS cleanup Redis del failed on close', {
+            workspace_id: tenant.id,
+            workspace_slug: tenant.slug,
+            correlation_id,
+            user_id: staff_user.user_id,
+            route_name: 'WS /ws/backoffice',
+            error: e instanceof Error ? e.message : String(e),
+          })
+        )
         logger.info('Backoffice WS disconnected', {
           workspace_id: tenant.id,
           workspace_slug: tenant.slug,
@@ -455,13 +589,25 @@ export function createBackofficeWsRoute() {
 
       onError(evt) {
         clearInterval(pollInterval)
-        void wsRedis.del(wsKey) // Remove Redis connection registry entry
+        // CR FIX: Log Redis del failure + log evt.error for production observability
+        wsRedis.del(wsKey).catch((e: unknown) =>
+          logger.error('WS cleanup Redis del failed on error', {
+            workspace_id: tenant.id,
+            workspace_slug: tenant.slug,
+            correlation_id,
+            user_id: staff_user.user_id,
+            route_name: 'WS /ws/backoffice',
+            error: e instanceof Error ? e.message : String(e),
+          })
+        )
         logger.error('Backoffice WS error', {
           workspace_id: tenant.id,
           workspace_slug: tenant.slug,
           correlation_id,
           user_id: staff_user.user_id,
           route_name: 'WS /ws/backoffice',
+          // CR FIX: Include actual error diagnostic — evt.error was previously never read
+          error_message: evt instanceof ErrorEvent ? evt.message : String(evt),
         })
       },
     }
@@ -494,11 +640,17 @@ app.use(
 )
 
 // V-01 FIX: WebSocket endpoint needs its own explicit middleware chain (outside /api/v1/* scope)
+// H-01 FIX: Add rate limiting to WS upgrade path — identical window as API chain
 app.use(
   '/ws/backoffice',
   correlationIdMiddleware,
   createTenantResolverMiddleware(logger, poolManager),
   licenseEnforcementMiddleware,
+  createRateLimitMiddleware({
+    windowMs: 60_000,
+    max: 10, // Lower limit for WS upgrades vs API requests
+    keyPrefix: 'backoffice-ws',
+  }),
   createAuthenticationMiddleware(logger)
 )
 
