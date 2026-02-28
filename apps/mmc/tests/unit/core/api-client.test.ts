@@ -1,34 +1,40 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
-vi.mock('../../../src/core/config/env', () => ({
+vi.mock('../../../src/core/config/app-config', () => ({
   appConfig: {
-    apiBaseUrl: 'https://api.example.com',
-    buildEnv: 'development',
-    debugMode: false,
-  },
-  resolveConfig: vi
-    .fn()
-    .mockReturnValue({
+    env: {
       apiBaseUrl: 'https://api.example.com',
-      buildEnv: 'development',
+      appEnv: 'development',
+      appName: 'mmc',
       debugMode: false,
-    }),
+    },
+    flags: {
+      enableDebugPanel: false,
+    },
+  },
+  getApiBase: vi.fn().mockReturnValue('https://api.example.com'),
 }))
 
 import { createApiClient } from '../../../src/core/api/client'
 import type { TokenStore } from '../../../src/core/auth/token-store'
-import type { AppConfig } from '../../../src/core/config/env'
+import type { AppConfig } from '../../../src/core/config/app-config'
 
 afterEach(() => vi.resetAllMocks())
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
-function makeConfig(overrides?: Partial<AppConfig>): AppConfig {
+function makeConfig(overrides?: Partial<AppConfig['env']>): AppConfig {
   return {
-    apiBaseUrl: 'https://api.example.com',
-    buildEnv: 'development',
-    debugMode: false,
-    ...overrides,
+    env: {
+      apiBaseUrl: 'https://api.example.com',
+      appEnv: 'development',
+      appName: 'mmc',
+      debugMode: false,
+      ...overrides,
+    },
+    flags: {
+      enableDebugPanel: false,
+    },
   }
 }
 

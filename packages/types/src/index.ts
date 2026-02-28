@@ -35,6 +35,7 @@ export {
   type SuccessResponse,
   type UserAnswer,
 } from './attempt'
+export * from './env-config'
 export * from './error-codes'
 export * from './job-envelope'
 export * from './master-db'
