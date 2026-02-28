@@ -269,7 +269,8 @@ export class DashboardClient {
       )
 
       // Handle file download
-      const blob = new Blob([response.data], {
+      // With responseType:'blob', response.data is a Blob at runtime despite the typed generic
+      const blob = new Blob([response.data as unknown as BlobPart], {
         type:
           format === 'xlsx'
             ? 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'

@@ -1,7 +1,14 @@
 {
   "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "noEmit": true
+    "noEmit": true,
+    "paths": {
+      "@/*": [
+        "./apps/mmc/src/*",
+        "./apps/backoffice/src/*",
+        "./apps/frontoffice/src/*"
+      ]
+    }
   },
   "include": [
     "apps/*/src/**/*",
