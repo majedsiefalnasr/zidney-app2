@@ -11,29 +11,29 @@ Database: Tenant DB only
 
 Status: DRAFT
 Risk Level: LOW
-Last Updated: 2026-02-28T19:10:00Z
+Last Updated: 2026-02-28T19:20:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Single-row workspace_settings table in tenant DB (JSONB columns)
-- Optimistic locking with config_version (409 on conflict)
-- Full-diff audit logging (credentials excluded)
-- Payment credential sentinel-based partial updates
-- 422 validation errors / 409 conflict errors
-- Key identifier stored for future rotation support
+- Migration: ALTER workspace_settings + CREATE workspace_settings_audit
+- 3 API endpoints (GET settings, PUT group, GET audit) under /api/v1/backoffice/
+- AES-256-GCM encryption for payment credentials
+- Optimistic locking with config_version
+- Full-diff immutable audit logging
+- Cursor-based audit pagination
 
 Deferred Scope:
 
 - Password policy enforcement (future-ready structure only)
-- Encryption key rotation and re-encryption (future stage)
+- Encryption key rotation (future stage)
 - Translation management UI (separate stage)
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
