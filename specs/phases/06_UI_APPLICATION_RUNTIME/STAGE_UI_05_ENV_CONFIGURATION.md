@@ -10,18 +10,32 @@ UI Foundation — Environment & Runtime Configuration Layer
 
 Status: DRAFT
 Risk Level: UNKNOWN
-Initiated: 2026-02-28T21:00:00Z
+Last Updated: 2026-02-28T21:05:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Centralized environment variable access via core/config/env.ts
+- API base URL resolution per app (MMC, Backoffice, Frontoffice)
+- Environment mode helpers (isDev, isProd, isStaging)
+- Read-only feature flag injection from VITE\_ variables
+- Secure exposure policy (no secrets in browser)
+- Test mockability without window dependency
+- Multi-app consistency
+
+Deferred Scope:
+
+- API client implementation
+- Auth logic
+- Router guards
+- Workspace resolution logic
+- Business feature toggles
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
