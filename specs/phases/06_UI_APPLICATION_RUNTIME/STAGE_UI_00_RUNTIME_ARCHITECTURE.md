@@ -10,33 +10,33 @@ UI Foundation — Cross-Application Runtime Blueprint
 
 Status: DRAFT
 Risk Level: LOW
-Last Updated: 2026-02-28T00:20:00Z
+Last Updated: 2026-02-28T00:35:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Canonical `src/` folder structure scaffolded across MMC, Backoffice, Frontoffice
-- Centralized API client abstraction with single-flight refresh and defined error contract
-- Vue Router with guard pipeline: AuthGuard → RoleGuard → WorkspaceGuard (Backoffice)
-- Pinia strict-mode state management
-- Auth module skeleton with refresh failure path defined
-- Global error normalization (`NormalizedError` sealed at 3 fields)
-- Environment configuration centralization
-- MMC migration delta with explicit per-file mappings
+- Full canonical `src/` scaffold for MMC (delta), Backoffice (fresh), Frontoffice (fresh)
+- API client with `credentials: 'include'`, single-flight refresh, typed queue, factory + singleton
+- Vue Router guard pipeline: `auth → role → workspace` (workspace Backoffice-only)
+- Pinia added to all 3 apps + typed stores
+- Auth module skeleton (`core/auth/`) in all 3 apps
+- Error normalizer sealed at 3 fields
+- Env config with startup validation
+- ESLint import boundary rules as concrete deliverable
+- MMC delta migration: 28 files mapped to canonical targets
+- `@/` alias added to all 3 `tsconfig.json` files
 
 Deferred Scope:
 
 - `AttemptGuard` implementation (deferred to Exam Runtime stage)
-- Authentication UI flow (deferred to Stage UI-01)
-- `fieldErrors` on 422 responses (deferred to form-validation stage)
-- Retry/backoff strategy (opt-in per feature, later stages)
-- Business pages, dashboard views, feature modules (out of scope)
+- Full authentication UI flow (deferred to Stage UI-01)
+- Feature modules and business pages (out of scope)
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 

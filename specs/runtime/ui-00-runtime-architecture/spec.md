@@ -287,8 +287,11 @@ src/
 
 **FR-04** — `core/api/client.ts` must export a configured HTTP client instance.
 
-**FR-05** — The client must support request interceptors for:
+**FR-05** — The client must set `credentials: 'include'` on every fetch request. This is required so the browser sends the backend-issued httpOnly refresh cookie on cross-origin requests (e.g., `app.mmc.zidney.com` → `api.zidney.com`). Without this, the single-flight refresh mechanism is non-functional.
 
+The client must support request interceptors for:
+
+- Setting `Content-Type: application/json` on POST, PUT, PATCH requests
 - Attaching `Authorization: Bearer <token>` from memory
 - Attaching optional `Idempotency-Key` headers
 - Attaching `X-Correlation-ID` headers for traceability
