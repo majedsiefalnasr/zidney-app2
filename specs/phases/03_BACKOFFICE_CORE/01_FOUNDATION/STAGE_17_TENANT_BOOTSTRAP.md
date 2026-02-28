@@ -11,18 +11,32 @@ Database: Tenant DB only
 
 Status: DRAFT
 Risk Level: UNKNOWN
-Initiated: 2026-02-28T00:00:00Z
+Last Updated: 2026-02-28T00:05:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Runtime context injection (workspace_id, slug, license_status, enabled_modules, limits, versions)
+- License gate enforcement (ACTIVE required; 423/403/404 responses)
+- Module visibility contract (server-side enforcement)
+- RBAC skeleton (roles, role_permissions, staff_users, staff_user_roles)
+- AppLayout with dynamic, RBAC-aware Sidebar (packages/ui-system)
+- Workspace-scoped JWT validation with role/permissions claims
+- Limit awareness exposure (student_limit, staff_limit — informational only)
+- WebSocket lifecycle validation
+- Structured observability with workspace context on every log
+
+Deferred Scope:
+
+- Academic module logic
+- Limit enforcement during user creation
+- Division/department-scoped RBAC
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
