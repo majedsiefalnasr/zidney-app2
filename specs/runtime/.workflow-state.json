@@ -5,7 +5,7 @@
   "stage_file": "specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_18_WORKSPACE_SETTINGS.md",
   "branch": "018-workspace-settings",
   "base_branch": "develop",
-  "current_step": "pre_step",
+  "current_step": "specify",
   "stage_status": "DRAFT",
   "clarifications_resolved": false,
   "drift_passed": false,
@@ -13,12 +13,16 @@
   "plan_completed": false,
   "tasks_total": null,
   "tasks_completed": null,
-  "last_updated": "2026-02-28T19:00:00Z",
+  "last_updated": "2026-02-28T19:05:00Z",
   "history": [
     {
       "event": "branch_created",
       "branch": "018-workspace-settings",
       "timestamp": "2026-02-28T19:00:00Z"
+    },
+    {
+      "event": "specify_complete",
+      "timestamp": "2026-02-28T19:05:00Z"
     }
   ]
 }

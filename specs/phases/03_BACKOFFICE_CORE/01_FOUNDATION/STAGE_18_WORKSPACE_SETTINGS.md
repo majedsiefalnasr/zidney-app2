@@ -11,18 +11,30 @@ Database: Tenant DB only
 
 Status: DRAFT
 Risk Level: UNKNOWN
-Initiated: 2026-02-28T19:00:00Z
+Last Updated: 2026-02-28T19:05:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Single-row workspace_settings table in tenant DB (JSONB columns)
+- General, language, branding, payment, security settings groups
+- config_version tracking with optimistic concurrency
+- Immutable audit logging for all changes
+- Payment credential encryption (never exposed in API/logs)
+- Language fallback with default_language enforcement
+- Token-based branding (visual only)
+
+Deferred Scope:
+
+- Password policy enforcement (future-ready structure only)
+- Translation management UI (separate stage)
+- Email/certificate template editing (separate stage)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
