@@ -8,35 +8,29 @@ UI Foundation — Environment & Runtime Configuration Layer
 
 ## Stage Status
 
-Status: DRAFT
+Status: IN PROGRESS
 Risk Level: LOW
-Last Updated: 2026-02-28T21:20:00Z
+Last Updated: 2026-02-28T21:25:00Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all criteria)
+Implementation: AUTHORIZED
 
-- Total: 54 atomic tasks
-- Phase 1 — Shared Types: 2 tasks
-- Phase 2 — MMC: 19 tasks
-- Phase 3 — Backoffice: 12 tasks
-- Phase 4 — Frontoffice: 12 tasks
-- Phase 5 — Cross-App Validation: 9 tasks
+Scope Authorized:
 
-Deferred Scope:
-
-- API client implementation
-- Auth logic
-- Router guards
-- Workspace resolution logic
-- Business feature toggles
-- App version injection / API version headers
+- Centralized env config via core/config/env.ts
+- API base URL resolution per app
+- Mode helpers (isDev, isProd, isStaging)
+- Feature flags module (read-only, frozen)
+- Lint enforcement for import.meta.env
+- Shared TypeScript interfaces in packages/types
+- 54 atomic tasks across 5 phases
 
 Constitutional Compliance:
 
-- Task set compliant — drift analysis required before implementation
+- All drift criteria passed — implementation authorized
 
 Notes:
-Atomic task set generated. Drift analysis gate pending.
-Technical plan complete. Task breakdown in progress.
+Full drift analysis passed. Implementation gate open.
 
 ---
 
