@@ -5,7 +5,7 @@
   "stage_file": "specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_05_ENV_CONFIGURATION.md",
   "branch": "ui-05-env-configuration",
   "base_branch": "develop",
-  "current_step": "pre_step",
+  "current_step": "specify",
   "stage_status": "DRAFT",
   "clarifications_resolved": false,
   "drift_passed": false,
@@ -13,12 +13,16 @@
   "plan_completed": false,
   "tasks_total": null,
   "tasks_completed": null,
-  "last_updated": "2026-02-28T21:00:00Z",
+  "last_updated": "2026-02-28T21:05:00Z",
   "history": [
     {
       "event": "branch_created",
       "branch": "ui-05-env-configuration",
       "timestamp": "2026-02-28T21:00:00Z"
+    },
+    {
+      "event": "specify_complete",
+      "timestamp": "2026-02-28T21:05:00Z"
     }
   ]
 }
