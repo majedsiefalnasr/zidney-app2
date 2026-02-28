@@ -10,20 +10,17 @@ UI Foundation — Cross-Application Runtime Blueprint
 
 Status: DRAFT
 Risk Level: LOW
-Last Updated: 2026-02-28T00:35:00Z
+Last Updated: 2026-02-28T00:45:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- Full canonical `src/` scaffold for MMC (delta), Backoffice (fresh), Frontoffice (fresh)
-- API client with `credentials: 'include'`, single-flight refresh, typed queue, factory + singleton
-- Vue Router guard pipeline: `auth → role → workspace` (workspace Backoffice-only)
-- Pinia added to all 3 apps + typed stores
-- Auth module skeleton (`core/auth/`) in all 3 apps
-- Error normalizer sealed at 3 fields
-- Env config with startup validation
-- ESLint import boundary rules as concrete deliverable
-- MMC delta migration: 28 files mapped to canonical targets
-- `@/` alias added to all 3 `tsconfig.json` files
+- Total: 158 atomic tasks
+- Phase 1: 14 tasks (dependencies & config)
+- Phase 2: 43 tasks (MMC delta migration)
+- Phase 3: 51 tasks (core layer scaffold, all 3 apps)
+- Phase 4: 6 tasks (ESLint import boundaries)
+- Phase 5: 28 tasks (tests)
+- Phase 6: 16 tasks (validation gate)
 
 Deferred Scope:
 
@@ -33,10 +30,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
