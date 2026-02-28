@@ -23,8 +23,8 @@
 
 **Independent test:** `import { ActionEnum, BackofficeContext, StaffUserContext } from '@zidney/types'` resolves without error; TypeScript compile passes.
 
-- [ ] T001 Create new type file `packages/types/src/tenant-rbac.ts` exporting `ActionEnum`, `TenantRBACPermission`, `BackofficeContext`, and `StaffUserContext`
-- [ ] T002 Update `packages/types/src/index.ts` to add `export * from './tenant-rbac'`
+- [x] T001 Create new type file `packages/types/src/tenant-rbac.ts` exporting `ActionEnum`, `TenantRBACPermission`, `BackofficeContext`, and `StaffUserContext`
+- [x] T002 Update `packages/types/src/index.ts` to add `export * from './tenant-rbac'`
 
 > **Checkpoint:** `@zidney/types` now exports all STAGE_17 tenant-RBAC types. Middleware and frontend code can import them.
 
@@ -36,7 +36,7 @@
 
 **Independent test:** After running the migration on a fresh tenant DB, all four tables and all six indexes are present; re-running the migration is a no-op (idempotent via `IF NOT EXISTS`).
 
-- [ ] T003 [US-07] Create tenant DB migration `apps/api/src/db/tenant/migrations/20260228_001_tenant_rbac_skeleton.ts` — single DDL transaction creating `roles`, `role_permissions`, `staff_users`, `staff_user_roles` with all constraints and 6 indexes; `down()` throws (forward-only)
+- [x] T003 [US-07] Create tenant DB migration `apps/api/src/db/tenant/migrations/20260228_001_tenant_rbac_skeleton.ts` — single DDL transaction creating `roles`, `role_permissions`, `staff_users`, `staff_user_roles` with all constraints and 6 indexes; `down()` throws (forward-only)
 
 > **Checkpoint:** Tenant DB migration file is ready and independently testable.
 
@@ -54,9 +54,9 @@
 
 All three tasks are parallel-safe (distinct files, no inter-dependency).
 
-- [ ] T004 [P] [US-01] Update `apps/api/src/middleware/license-enforcement.ts` — add `correlationId: c.get('correlationId') ?? 'unknown'` to all non-ACTIVE error response bodies (SOFT_LOCKED 423, ARCHIVED 403, WORKSPACE_NOT_FOUND 404)
-- [ ] T005 [P] [US-04] Create `apps/api/src/middleware/backoffice-rbac-guard.ts` — `createBackofficeRBACGuard(logger, requiredModule, requiredAction): MiddlewareHandler` factory; F-02: check Redis cache key `rbac:{workspace_id}:{user_id}:{module}:{action}` (TTL 30 s) before DB query; on cache miss queries `role_permissions` via tenant pool; caches result; returns 403 `RBAC_PERMISSION_DENIED` with `correlationId` on denial; calls `next()` on success
-- [ ] T006 [P] [US-01] Create `apps/api/src/middleware/backoffice-module-guard.ts` — `createModuleGuard(logger, requiredModule): MiddlewareHandler` factory (M-02: logger is mandatory parameter); checks `c.get('enabled_modules')`; emits `logger.warn` with workspace/correlation/user fields on every denial; returns 403 `MODULE_NOT_LICENSED` with `correlationId` if module absent; calls `next()` if present
+- [x] T004 [P] [US-01] Update `apps/api/src/middleware/license-enforcement.ts` — add `correlationId: c.get('correlationId') ?? 'unknown'` to all non-ACTIVE error response bodies (SOFT_LOCKED 423, ARCHIVED 403, WORKSPACE_NOT_FOUND 404)
+- [x] T005 [P] [US-04] Create `apps/api/src/middleware/backoffice-rbac-guard.ts` — `createBackofficeRBACGuard(logger, requiredModule, requiredAction): MiddlewareHandler` factory; F-02: check Redis cache key `rbac:{workspace_id}:{user_id}:{module}:{action}` (TTL 30 s) before DB query; on cache miss queries `role_permissions` via tenant pool; caches result; returns 403 `RBAC_PERMISSION_DENIED` with `correlationId` on denial; calls `next()` on success
+- [x] T006 [P] [US-01] Create `apps/api/src/middleware/backoffice-module-guard.ts` — `createModuleGuard(logger, requiredModule): MiddlewareHandler` factory (M-02: logger is mandatory parameter); checks `c.get('enabled_modules')`; emits `logger.warn` with workspace/correlation/user fields on every denial; returns 403 `MODULE_NOT_LICENSED` with `correlationId` if module absent; calls `next()` if present
 
 > **Checkpoint:** All three middleware functions compile and pass unit tests independently.
 
@@ -73,8 +73,8 @@ All three tasks are parallel-safe (distinct files, no inter-dependency).
 
 Both tasks are parallel-safe (distinct files).
 
-- [ ] T007 [P] [US-02] Create `apps/api/src/routes/backoffice/types.ts` — exports `StaffUserContext`, `BackofficeVariables`, and `BackofficeEnv` (Hono `Variables` type map) so all `c.get()` calls are fully typed with no `unknown` inferences. Then create `apps/api/src/routes/backoffice/context.ts` — exports `backofficeContextRouter` typed as `new Hono<BackofficeEnv>()`; handles `GET /backoffice/context`; reads tenant+license context from Hono context; returns `BackofficeContext` response; structured logging with `workspace_slug`, `workspace_id`, `correlation_id`, `route_name`, `user_id`
-- [ ] T008 [P] [US-05][US-06] Create `apps/api/src/routes/backoffice/ws.ts` — exports `createBackofficeWsRoute()`; F-01: declare `moduleWsRedis = createRedisClient()` at module scope (not per-connection); Hono Bun WebSocket upgrade at `/ws/backoffice`; H-02: atomic `SET wsKey '1' NX EX ttl` (replaces non-atomic GET+SETEX — prevents TOCTOU race); Redis-backed connection registry (`ws:backoffice:{workspace_id}:{user_id}`, TTL = `WS_POLL_MS * 3`); license polling every `WS_LICENSE_POLL_INTERVAL_MS` (default 30 000 ms, clamp 5 000–120 000); M-01: fail-closed `ws.close(1011)` after `WS_MAX_POLL_FAILURES` (default 3) consecutive poll failures; closes with 1008 on non-ACTIVE; structured logging on open/close/error/poll-failure
+- [x] T007 [P] [US-02] Create `apps/api/src/routes/backoffice/types.ts` — exports `StaffUserContext`, `BackofficeVariables`, and `BackofficeEnv` (Hono `Variables` type map) so all `c.get()` calls are fully typed with no `unknown` inferences. Then create `apps/api/src/routes/backoffice/context.ts` — exports `backofficeContextRouter` typed as `new Hono<BackofficeEnv>()`; handles `GET /backoffice/context`; reads tenant+license context from Hono context; returns `BackofficeContext` response; structured logging with `workspace_slug`, `workspace_id`, `correlation_id`, `route_name`, `user_id`
+- [x] T008 [P] [US-05][US-06] Create `apps/api/src/routes/backoffice/ws.ts` — exports `createBackofficeWsRoute()`; F-01: declare `moduleWsRedis = createRedisClient()` at module scope (not per-connection); Hono Bun WebSocket upgrade at `/ws/backoffice`; H-02: atomic `SET wsKey '1' NX EX ttl` (replaces non-atomic GET+SETEX — prevents TOCTOU race); Redis-backed connection registry (`ws:backoffice:{workspace_id}:{user_id}`, TTL = `WS_POLL_MS * 3`); license polling every `WS_LICENSE_POLL_INTERVAL_MS` (default 30 000 ms, clamp 5 000–120 000); M-01: fail-closed `ws.close(1011)` after `WS_MAX_POLL_FAILURES` (default 3) consecutive poll failures; closes with 1008 on non-ACTIVE; structured logging on open/close/error/poll-failure
 
 > **Checkpoint:** Context endpoint and WebSocket route are independently functional.
 
@@ -86,7 +86,7 @@ Both tasks are parallel-safe (distinct files).
 
 **Independent test:** `GET /api/v1/backoffice/context` traverses the full chain (correlationId → tenantResolver → licenseEnforcement → schemaVersion → rateLimit → authentication) and responds correctly; `POST /ws/backoffice` handshake traverses the WebSocket chain (correlationId → tenantResolver → licenseEnforcement → authentication).
 
-- [ ] T009 [US-01][US-04] Update `apps/api/src/app.ts` — mount `/api/v1/backoffice/*` middleware chain (correlationId → tenantResolver → licenseEnforcement → schemaVersion → rateLimit(max:60) → authentication); mount separate `/ws/backoffice` chain including H-01 fix: `createRateLimitMiddleware({max:10, keyPrefix:'backoffice-ws'})` before authentication; register `backofficeContextRouter` under `/api/v1`; register `createBackofficeWsRoute()`
+- [x] T009 [US-01][US-04] Update `apps/api/src/app.ts` — mount `/api/v1/backoffice/*` middleware chain (correlationId → tenantResolver → licenseEnforcement → schemaVersion → rateLimit(max:60) → authentication); mount separate `/ws/backoffice` chain including H-01 fix: `createRateLimitMiddleware({max:10, keyPrefix:'backoffice-ws'})` before authentication; register `backofficeContextRouter` under `/api/v1`; register `createBackofficeWsRoute()`
 
 > **Checkpoint:** Full Backoffice API is wired. All middleware and routes are reachable.
 
@@ -100,11 +100,11 @@ Both tasks are parallel-safe (distinct files).
 
 **Independent test:** `bun install` succeeds; `bun run dev` starts the Vite dev server without TypeScript errors.
 
-- [ ] T010 [US-02][US-03] Create `apps/backoffice/package.json` — Vue 3 + Vite + TypeScript project config; versions aligned with `apps/mmc/package.json`; dependencies: `vue`, `vue-router`, `pinia`, `@zidney/types`, `@zidney/ui-system`; dev dependencies: `vite`, `@vitejs/plugin-vue`, `typescript`
-- [ ] T011 [P] [US-02][US-03] Create `apps/backoffice/vite.config.ts` — Vite config with `@vitejs/plugin-vue`; path alias `@/ → src/`; `/api` proxy to API server; `@zidney/*` resolved from `packages/`
-- [ ] T012 [P] [US-02][US-03] Create `apps/backoffice/tsconfig.json` — TypeScript config extending workspace `tsconfig.base.json`; references `tsconfig.app.json`
-- [ ] T013 [P] [US-02][US-03] Create `apps/backoffice/tsconfig.app.json` — app-specific TypeScript config; `include: ["src/**/*"]`; strict mode enabled
-- [ ] T014 [P] [US-02][US-03] Create `apps/backoffice/index.html` — SPA entry HTML; mounts `#app`; imports `src/main.ts`
+- [x] T010 [US-02][US-03] Create `apps/backoffice/package.json` — Vue 3 + Vite + TypeScript project config; versions aligned with `apps/mmc/package.json`; dependencies: `vue`, `vue-router`, `pinia`, `@zidney/types`, `@zidney/ui-system`; dev dependencies: `vite`, `@vitejs/plugin-vue`, `typescript`
+- [x] T011 [P] [US-02][US-03] Create `apps/backoffice/vite.config.ts` — Vite config with `@vitejs/plugin-vue`; path alias `@/ → src/`; `/api` proxy to API server; `@zidney/*` resolved from `packages/`
+- [x] T012 [P] [US-02][US-03] Create `apps/backoffice/tsconfig.json` — TypeScript config extending workspace `tsconfig.base.json`; references `tsconfig.app.json`
+- [x] T013 [P] [US-02][US-03] Create `apps/backoffice/tsconfig.app.json` — app-specific TypeScript config; `include: ["src/**/*"]`; strict mode enabled
+- [x] T014 [P] [US-02][US-03] Create `apps/backoffice/index.html` — SPA entry HTML; mounts `#app`; imports `src/main.ts`
 
 > **Checkpoint:** Project config is complete; scaffolding tasks can proceed.
 
@@ -112,9 +112,9 @@ Both tasks are parallel-safe (distinct files).
 
 **Independent test:** `useBackofficeContext()` composable returns reactive `BackofficeContext` or `null`; `useContextStore()` exposes `loadContext()`, `enabledModules`, `licenseStatus`, `hasModule()`.
 
-- [ ] T015 [P] [US-02] Create `apps/backoffice/src/App.vue` — root component; contains `<RouterView />`; no business logic
-- [ ] T016 [P] [US-02] Create `apps/backoffice/src/composables/useBackofficeContext.ts` — fetches `GET /api/v1/backoffice/context` with `credentials: 'include'`; returns reactive `BackofficeContext | null`; uses `@zidney/types` `BackofficeContext` type
-- [ ] T017 [US-02] Create `apps/backoffice/src/stores/context.ts` — Pinia store `useContextStore`; state: `context`, `loading`, `error`; computed: `isActive`, `enabledModules`, `licenseStatus`, `licenseErrorCode`; actions: `loadContext()` (delegates to composable), `clearContext()`; exports `hasModule(module: Module): boolean`
+- [x] T015 [P] [US-02] Create `apps/backoffice/src/App.vue` — root component; contains `<RouterView />`; no business logic
+- [x] T016 [P] [US-02] Create `apps/backoffice/src/composables/useBackofficeContext.ts` — fetches `GET /api/v1/backoffice/context` with `credentials: 'include'`; returns reactive `BackofficeContext | null`; uses `@zidney/types` `BackofficeContext` type
+- [x] T017 [US-02] Create `apps/backoffice/src/stores/context.ts` — Pinia store `useContextStore`; state: `context`, `loading`, `error`; computed: `isActive`, `enabledModules`, `licenseStatus`, `licenseErrorCode`; actions: `loadContext()` (delegates to composable), `clearContext()`; exports `hasModule(module: Module): boolean`
 
 > **Checkpoint:** Context store is functional; router and layout can consume it.
 
@@ -126,9 +126,9 @@ Both tasks are parallel-safe (distinct files).
 - Router redirects to dashboard when route's `meta.requiredModule` is absent from `enabledModules`.
 - `BackofficeLayout.vue` renders only nav items for modules in `enabledModules`; no hardcoded module names in source.
 
-- [ ] T018 [P] [US-03][US-08] Create `apps/backoffice/src/router/index.ts` — Vue Router v4 with `createWebHistory()`; routes: `dashboard` (`/`), `workspace-unavailable` (`/unavailable`); navigation guard: load context if absent → license gate (`isActive` false → redirect to `/unavailable?code=…`) → module gate (`meta.requiredModule` not in `enabledModules` → redirect dashboard)
-- [ ] T019 [P] [US-03] Create `apps/backoffice/src/layouts/BackofficeLayout.vue` — composes `AppLayout`, `SidebarLayout`, `TopBar` from `@zidney/ui-system`; maps `useContextStore().enabledModules` to `SidebarLayout` items using `MODULE_LABELS` from `@zidney/types`; no hardcoded module names; Tailwind v4 utilities; no hardcoded brand colors
-- [ ] T020 [US-03] Create `apps/backoffice/src/components/Sidebar.vue` — sidebar component filtered by `enabledModules` and RBAC permissions from `useContextStore()`; wraps `SidebarLayout` from `@zidney/ui-system`; collapsible; data-driven nav items only
+- [x] T018 [P] [US-03][US-08] Create `apps/backoffice/src/router/index.ts` — Vue Router v4 with `createWebHistory()`; routes: `dashboard` (`/`), `workspace-unavailable` (`/unavailable`); navigation guard: load context if absent → license gate (`isActive` false → redirect to `/unavailable?code=…`) → module gate (`meta.requiredModule` not in `enabledModules` → redirect dashboard)
+- [x] T019 [P] [US-03] Create `apps/backoffice/src/layouts/BackofficeLayout.vue` — composes `AppLayout`, `SidebarLayout`, `TopBar` from `@zidney/ui-system`; maps `useContextStore().enabledModules` to `SidebarLayout` items using `MODULE_LABELS` from `@zidney/types`; no hardcoded module names; Tailwind v4 utilities; no hardcoded brand colors
+- [x] T020 [US-03] Create `apps/backoffice/src/components/Sidebar.vue` — sidebar component filtered by `enabledModules` and RBAC permissions from `useContextStore()`; wraps `SidebarLayout` from `@zidney/ui-system`; collapsible; data-driven nav items only
 
 > **Checkpoint:** Router and layout are functional; views can be dropped in independently.
 
@@ -136,9 +136,9 @@ Both tasks are parallel-safe (distinct files).
 
 **Independent test:** Each view renders correct heading and message copy for its error code variant without additional API calls.
 
-- [ ] T021 [P] [US-08] Create `apps/backoffice/src/views/WorkspaceLocked.vue` — 423 `LICENSE_SOFT_LOCKED` workspace-suspended screen; uses shadcn-vue components; Tailwind v4; no hardcoded brand colors
-- [ ] T022 [P] [US-08] Create `apps/backoffice/src/views/WorkspaceForbidden.vue` — 403 `LICENSE_ARCHIVED` workspace-archived screen; uses shadcn-vue components; Tailwind v4; no hardcoded brand colors
-- [ ] T023 [P] [US-02] Create `apps/backoffice/src/views/Dashboard.vue` — placeholder landing page rendered on `/`; reads `workspace_slug` from `useContextStore()` for display; no hardcoded workspace identity
+- [x] T021 [P] [US-08] Create `apps/backoffice/src/views/WorkspaceLocked.vue` — 423 `LICENSE_SOFT_LOCKED` workspace-suspended screen; uses shadcn-vue components; Tailwind v4; no hardcoded brand colors
+- [x] T022 [P] [US-08] Create `apps/backoffice/src/views/WorkspaceForbidden.vue` — 403 `LICENSE_ARCHIVED` workspace-archived screen; uses shadcn-vue components; Tailwind v4; no hardcoded brand colors
+- [x] T023 [P] [US-02] Create `apps/backoffice/src/views/Dashboard.vue` — placeholder landing page rendered on `/`; reads `workspace_slug` from `useContextStore()` for display; no hardcoded workspace identity
 
 > **Checkpoint:** All views render their target state independently.
 
@@ -146,7 +146,7 @@ Both tasks are parallel-safe (distinct files).
 
 **Independent test:** `bun run build` produces no TypeScript errors; `main.ts` wires app, pinia, and router correctly.
 
-- [ ] T024 [US-02] Create `apps/backoffice/src/main.ts` — Vue 3 app entry point; calls `createApp(App)`; installs `createPinia()` and `router`; mounts to `#app`; calls `contextStore.loadContext()` before first render via `beforeEach` guard (or router.isReady)
+- [x] T024 [US-02] Create `apps/backoffice/src/main.ts` — Vue 3 app entry point; calls `createApp(App)`; installs `createPinia()` and `router`; mounts to `#app`; calls `contextStore.loadContext()` before first render via `beforeEach` guard (or router.isReady)
 
 > **Checkpoint:** Frontend SPA is fully scaffolded and bootable.
 
@@ -158,13 +158,13 @@ Both tasks are parallel-safe (distinct files).
 
 **Tests explicitly specified in stage summary — all are mandatory for this stage.**
 
-- [ ] T025 [P] [US-01] Create `tests/unit/middleware/backoffice-rbac-guard.test.ts` — unit tests: (a) 403 + `RBAC_PERMISSION_DENIED` when user lacks permission; (b) `next()` on valid role; (c) `correlationId` in all 403 bodies; (d) Redis cache hit returning `'1'` calls `next()` without DB query; (e) cache hit returning `'0'` returns 403 without DB query; (f) cache miss executes DB query and stores result in Redis; (g) stale role (role deleted mid-session, DB returns no rows) returns 403
-- [ ] T026 [P] [US-01] Create `tests/unit/middleware/backoffice-module-guard.test.ts` — unit tests: (a) 403 + `MODULE_NOT_LICENSED` when module absent; (b) `next()` called when module present; (c) `correlationId` in error body; (d) `logger.warn` emitted with correct fields (`module`, `workspace_id`, `workspace_slug`, `correlation_id`, `user_id`, `route_name`) on every denial (M-02 verification)
-- [ ] T027 [P] [US-01] Update `tests/unit/middleware/license-enforcement.test.ts` — add assertions verifying `correlationId` field is present in all non-ACTIVE error responses (SOFT_LOCKED 423, ARCHIVED 403, WORKSPACE_NOT_FOUND 404)
-- [ ] T028 [P] [US-02] Create `tests/integration/api/backoffice/context.test.ts` — integration tests: (a) 200 with all 9 BackofficeContext fields for ACTIVE workspace + valid JWT; (b) 401 when no JWT; (c) 403 `RBAC_PERMISSION_DENIED` when RBAC guard blocks; (d) 403 `MODULE_NOT_LICENSED` when module disabled (discriminated from RBAC deny); (e) 423 `LICENSE_SOFT_LOCKED` for soft-locked workspace; (f) 403 `LICENSE_ARCHIVED` for archived workspace; (g) 404 `WORKSPACE_NOT_FOUND` for nonexistent workspace; (h) 426 `SCHEMA_VERSION_INCOMPATIBLE` response when schema version mismatch; (i) cross-workspace JWT (AC-08): JWT scoped to workspace-A presented to workspace-B → 401; (j) incremented `token_version` JWT (AC-12) → 401
-- [ ] T029 [P] [US-07] Create `tests/unit/db/migrations/tenant-rbac-skeleton.test.ts` — migration tests: all 4 tables created after `up()`; all 6 indexes present; unique constraints enforced on `role_permissions.(role_id, module, action)` and `staff_user_roles.(staff_user_id, role_id)`; migration is idempotent (safe to run twice); `down()` throws
-- [ ] T030 [P] [US-05][US-06][US-07] Create `tests/integration/api/backoffice/ws.test.ts` — WebSocket lifecycle tests: (a) ACTIVE workspace + valid JWT → handshake accepted, structured log emitted; (b) SOFT_LOCKED workspace → refused (close 1008); (c) invalid JWT → refused; (d) duplicate connection (same user) → rejected 1008 `DUPLICATE_CONNECTION` (atomic SET NX verification); (e) license transitions SOFT_LOCKED mid-session → existing connection closed 1008; (f) poll failure accumulation (`MAX_POLL_FAILURES` threshold) → fail-closed 1011 (M-01 verification); (g) WS disconnect → Redis wsKey deleted (`onClose` cleanup)
-- [ ] T031 [P] Create `tests/integration/isolation/backoffice-isolation.test.ts` — tenant isolation tests: (a) no Backoffice handler imports or references `master_db` pool (static analysis or integration assert; AC-05, FR-10.1); (b) RBAC query scoped to tenant DB only — no cross-tenant join possible (FR-10.2); (c) context endpoint returns data from correct tenant DB when multiple tenants exist
+- [x] T025 [P] [US-01] Create `tests/unit/middleware/backoffice-rbac-guard.test.ts` — unit tests: (a) 403 + `RBAC_PERMISSION_DENIED` when user lacks permission; (b) `next()` on valid role; (c) `correlationId` in all 403 bodies; (d) Redis cache hit returning `'1'` calls `next()` without DB query; (e) cache hit returning `'0'` returns 403 without DB query; (f) cache miss executes DB query and stores result in Redis; (g) stale role (role deleted mid-session, DB returns no rows) returns 403
+- [x] T026 [P] [US-01] Create `tests/unit/middleware/backoffice-module-guard.test.ts` — unit tests: (a) 403 + `MODULE_NOT_LICENSED` when module absent; (b) `next()` called when module present; (c) `correlationId` in error body; (d) `logger.warn` emitted with correct fields (`module`, `workspace_id`, `workspace_slug`, `correlation_id`, `user_id`, `route_name`) on every denial (M-02 verification)
+- [x] T027 [P] [US-01] Update `tests/unit/middleware/license-enforcement.test.ts` — add assertions verifying `correlationId` field is present in all non-ACTIVE error responses (SOFT_LOCKED 423, ARCHIVED 403, WORKSPACE_NOT_FOUND 404)
+- [x] T028 [P] [US-02] Create `tests/integration/api/backoffice/context.test.ts` — integration tests: (a) 200 with all 9 BackofficeContext fields for ACTIVE workspace + valid JWT; (b) 401 when no JWT; (c) 403 `RBAC_PERMISSION_DENIED` when RBAC guard blocks; (d) 403 `MODULE_NOT_LICENSED` when module disabled (discriminated from RBAC deny); (e) 423 `LICENSE_SOFT_LOCKED` for soft-locked workspace; (f) 403 `LICENSE_ARCHIVED` for archived workspace; (g) 404 `WORKSPACE_NOT_FOUND` for nonexistent workspace; (h) 426 `SCHEMA_VERSION_INCOMPATIBLE` response when schema version mismatch; (i) cross-workspace JWT (AC-08): JWT scoped to workspace-A presented to workspace-B → 401; (j) incremented `token_version` JWT (AC-12) → 401
+- [x] T029 [P] [US-07] Create `tests/unit/db/migrations/tenant-rbac-skeleton.test.ts` — migration tests: all 4 tables created after `up()`; all 6 indexes present; unique constraints enforced on `role_permissions.(role_id, module, action)` and `staff_user_roles.(staff_user_id, role_id)`; migration is idempotent (safe to run twice); `down()` throws
+- [x] T030 [P] [US-05][US-06][US-07] Create `tests/integration/api/backoffice/ws.test.ts` — WebSocket lifecycle tests: (a) ACTIVE workspace + valid JWT → handshake accepted, structured log emitted; (b) SOFT_LOCKED workspace → refused (close 1008); (c) invalid JWT → refused; (d) duplicate connection (same user) → rejected 1008 `DUPLICATE_CONNECTION` (atomic SET NX verification); (e) license transitions SOFT_LOCKED mid-session → existing connection closed 1008; (f) poll failure accumulation (`MAX_POLL_FAILURES` threshold) → fail-closed 1011 (M-01 verification); (g) WS disconnect → Redis wsKey deleted (`onClose` cleanup)
+- [x] T031 [P] Create `tests/integration/isolation/backoffice-isolation.test.ts` — tenant isolation tests: (a) no Backoffice handler imports or references `master_db` pool (static analysis or integration assert; AC-05, FR-10.1); (b) RBAC query scoped to tenant DB only — no cross-tenant join possible (FR-10.2); (c) context endpoint returns data from correct tenant DB when multiple tenants exist
 
 > **Checkpoint:** All tests pass; lint and type-check pass. Stage STAGE_17 is complete.
 

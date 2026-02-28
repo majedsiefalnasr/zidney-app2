@@ -9,21 +9,24 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: IN PROGRESS
+Status: BACKEND CLOSED
 Risk Level: MEDIUM
-Last Updated: 2026-02-28T01:00:00Z
+Last Updated: 2026-02-28T17:30:00Z
 
-Drift Analysis: PASSED (all 9 criteria)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 31 / 31 completed
 
-Scope Authorized:
+Scope Closed:
 
 - Backoffice REST + WebSocket bootstrap
-- Tenant-resolved context endpoint
-- License enforcement middleware
-- RBAC skeleton (permission guard + module guard)
-- Vue 3 SPA scaffold with Pinia context store
-- Full test coverage: 31 tasks across 7 phases
+- GET /backoffice/context endpoint
+- License enforcement middleware (enabled_modules + product_version injection)
+- RBAC guard middleware (Redis cache + DB fallback; backoffice\_ table prefix)
+- Module guard middleware
+- Tenant RBAC skeleton migration (backoffice_roles, backoffice_role_permissions, backoffice_staff_users, backoffice_staff_user_roles)
+- Vue 3 SPA scaffold with Pinia context store, Vue Router v4, WS plugin
+- Dockerfile builder-deps stage + nginx WS + SPA location blocks
+- 67 tests across 7 test files (all passing)
 
 Deferred Scope:
 
