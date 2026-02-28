@@ -9,34 +9,34 @@ UI Foundation — Cross-Application Runtime Blueprint
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
-Last Updated: 2026-02-28T00:10:00Z
+Risk Level: LOW
+Last Updated: 2026-02-28T00:20:00Z
 
 Scope Defined:
 
 - Canonical `src/` folder structure scaffolded across MMC, Backoffice, Frontoffice
-- Centralized API client abstraction (`core/api/client.ts`)
-- Vue Router initialization with guard pipeline (`core/router/`, `core/guards/`)
-- Pinia strict-mode state management (`core/state/`)
-- Auth module skeleton (`core/auth/`)
-- Global error normalization (`core/errors/error-normalizer.ts`)
-- Environment configuration centralization (`core/config/env.ts`)
-- App bootstrapping order defined (`main.ts`)
-- MMC migration delta defined (non-canonical → canonical)
-- Test stubs for all core layers
+- Centralized API client abstraction with single-flight refresh and defined error contract
+- Vue Router with guard pipeline: AuthGuard → RoleGuard → WorkspaceGuard (Backoffice)
+- Pinia strict-mode state management
+- Auth module skeleton with refresh failure path defined
+- Global error normalization (`NormalizedError` sealed at 3 fields)
+- Environment configuration centralization
+- MMC migration delta with explicit per-file mappings
 
 Deferred Scope:
 
 - `AttemptGuard` implementation (deferred to Exam Runtime stage)
 - Authentication UI flow (deferred to Stage UI-01)
+- `fieldErrors` on 422 responses (deferred to form-validation stage)
+- Retry/backoff strategy (opt-in per feature, later stages)
 - Business pages, dashboard views, feature modules (out of scope)
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

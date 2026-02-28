@@ -298,6 +298,7 @@ src/
 - Normalizing error responses via `error-normalizer.ts`
 - Triggering token refresh on 401 using single-flight strategy
 - Re-queueing failed requests after token refresh
+- If the token refresh request itself fails (e.g., refresh token expired or revoked), all queued requests must be rejected with a normalized `{ code: 'AUTH_REFRESH_FAILED', message: 'Session expired. Please log in again.', httpStatus: 401 }` error, the auth store must be cleared, and the app must redirect to the login route
 
 **FR-07** — No component, store, composable, or module-level `api.ts` is permitted to import `fetch`, `axios`, or `ky` directly. All HTTP calls must use the exported client instance.
 
@@ -363,6 +364,8 @@ interface NormalizedError {
 }
 ```
 
+> **Sealed for this stage**: The `NormalizedError` shape is intentionally minimal. Optional `fieldErrors?: Record<string, string[]>` (for 422 form validation responses) is deferred to the authentication/form-validation implementation stage. Do not extend this interface in this stage.
+
 **FR-27** — `core/errors/error-normalizer.ts` must export:
 
 - `normalizeError(raw: unknown): NormalizedError`
@@ -370,8 +373,10 @@ interface NormalizedError {
 **FR-28** — `normalizeError` must handle:
 
 - Standard API error responses matching `{ success: false, error: { code, message } }`
-- Network errors (no response)
-- Unexpected shapes (fallback to `UNKNOWN_ERROR`)
+- Network errors (no response) — normalized to `{ code: 'NETWORK_ERROR', message: 'Network request failed', httpStatus: 0 }`
+- Unexpected shapes (fallback to `{ code: 'UNKNOWN_ERROR', message: 'An unexpected error occurred', httpStatus: -1 }`)
+
+> **Retry behavior**: No automatic retry logic is implemented at the client scaffolding level. Network errors surface as `NETWORK_ERROR` normalized errors. Retry strategies (e.g., exponential backoff) are opt-in and defined per feature in later implementation stages.
 
 **FR-29** — UI components must only consume `NormalizedError` — never raw API response shapes.
 
@@ -570,14 +575,21 @@ function resolveConfig(): AppConfig
 
 **Current Delta**:
 
-| Current                         | Target                                                      |
-| ------------------------------- | ----------------------------------------------------------- |
-| `src/api/dashboard-client.ts`   | `src/modules/dashboard/api.ts`                              |
-| `src/stores/dashboard-store.ts` | `src/modules/dashboard/store.ts`                            |
-| `src/views/Dashboard.vue`       | `src/modules/dashboard/views/DashboardView.vue`             |
-| `src/views/licenses/`           | `src/modules/licenses/views/`                               |
-| `src/components/`               | Distributed to relevant modules or `src/shared/components/` |
-| `src/lib/`                      | `src/shared/utils/` or `src/core/`                          |
+| Current                                    | Target                                             |
+| ------------------------------------------ | -------------------------------------------------- |
+| `src/api/dashboard-client.ts`              | `src/modules/dashboard/api.ts`                     |
+| `src/stores/dashboard-store.ts`            | `src/modules/dashboard/store.ts`                   |
+| `src/views/Dashboard.vue`                  | `src/modules/dashboard/views/DashboardView.vue`    |
+| `src/views/licenses/LicenseDetailView.vue` | `src/modules/licenses/views/LicenseDetailView.vue` |
+| `src/views/licenses/LicenseList.vue`       | `src/modules/licenses/views/LicenseList.vue`       |
+| `src/views/licenses/LicenseListView.vue`   | `src/modules/licenses/views/LicenseListView.vue`   |
+| `src/components/Dashboard/*.vue` (6 files) | `src/modules/dashboard/components/`                |
+| `src/components/licenses/*.vue` (13 files) | `src/modules/licenses/components/`                 |
+| `src/components/LicenseDeletionDialog.vue` | `src/modules/licenses/components/`                 |
+| `src/components/LicenseDetailPage.vue`     | `src/modules/licenses/components/`                 |
+| `src/components/AuditTrailViewer.vue`      | `src/shared/components/` (cross-cutting concern)   |
+| `src/components/JobStatusMonitor.vue`      | `src/shared/components/` (cross-cutting concern)   |
+| `src/lib/utils.ts`                         | `src/shared/utils/utils.ts`                        |
 
 ### 8.2 Backoffice (apps/backoffice/)
 
@@ -592,7 +604,10 @@ function resolveConfig(): AppConfig
 - Timer is display-only; server time is authoritative
 - Attempt state always fetched from API — never computed locally
 - Not yet scaffolded — full canonical structure created from scratch
-- WorkspaceGuard variant may be needed: StudentAttemptGuard [NEEDS CLARIFICATION: Should Frontoffice implement a distinct `AttemptGuard` that blocks navigation away from an active attempt, or is that a feature-level concern deferred to a later stage?]
+- Guard pipeline: `auth.guard → role.guard` only — no WorkspaceGuard, no AttemptGuard
+- WorkspaceGuard is NOT included for Frontoffice in this stage
+- AttemptGuard (blocking navigation away from an active attempt) is deferred to the Exam Runtime stage
+- Frontoffice routes are workspace-scoped (workspace_slug resolved from route params) but workspace context validation for exam access is handled at the Exam Runtime stage level
 
 ---
 
@@ -728,3 +743,17 @@ This stage explicitly does NOT:
 Compliant with Zidney Constitution v1.2.0 — No violations detected.
 
 This stage is UI scaffolding only. It does not touch the backend, does not modify database schemas, does not bypass middleware, does not weaken tenant isolation, and does not introduce business logic in the UI layer. All enforcement authority remains server-side.
+
+---
+
+## 16. Clarifications
+
+### Session 2026-02-28
+
+- Q: Should Frontoffice implement a distinct `AttemptGuard` that blocks navigation away from an active attempt, or is that deferred to the Exam Runtime stage? → A: Deferred to the Exam Runtime stage. Guard pipeline for all apps in this stage is `auth.guard → role.guard` only. No `AttemptGuard` or `WorkspaceGuard` is created for Frontoffice at this stage.
+- Q: What happens when the single-flight token refresh itself fails (e.g., expired refresh token)? → A: All queued requests are rejected with normalized `AUTH_REFRESH_FAILED` error (`httpStatus: 401`). Auth store is cleared. App redirects to login route. This is enforced in FR-06.
+- Q: Should `NormalizedError` include `fieldErrors` for 422 form validation responses? → A: No — shape is sealed at `{ code, message, httpStatus }` for this stage. `fieldErrors?: Record<string, string[]>` extension is deferred to the authentication/form-validation implementation stage. Noted in FR-26.
+- Q: Should the API client implement automatic retry for network errors at the scaffolding level? → A: No automatic retry. Network errors surface as `NETWORK_ERROR` normalized errors (`httpStatus: 0`). Retry strategies are opt-in per feature, defined in later stages. Noted in FR-28.
+- Q: Does the MMC delta table fully cover all existing `src/components/` files? → A: No — the original table used a generic rule. Section 8.1 delta table has been expanded with explicit per-file and per-subdirectory mappings covering all 23 component files found in `src/components/Dashboard/`, `src/components/licenses/`, and root-level components.
+
+**Spec status**: All critical ambiguities resolved. No outstanding `[NEEDS CLARIFICATION]` markers remain. Spec is complete and ready for `speckit.plan`.
