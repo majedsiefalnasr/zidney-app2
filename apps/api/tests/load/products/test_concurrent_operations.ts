@@ -146,7 +146,7 @@ describe('Load: Products - Concurrent Operations (T068-T071)', () => {
 
       expect(page1).toHaveLength(pageSize)
       expect(page2).toHaveLength(pageSize)
-      expect(page1[0].id).not.toBe(page2[0].id)
+      expect(page1[0]!.id).not.toBe(page2[0]!.id)
     })
 
     it('should search efficiently on large datasets', async () => {

@@ -75,10 +75,10 @@ describe('Geographic Aggregator - Unit Tests', () => {
       ]
       const result = enrichGeographicMetrics(metrics)
       expect(result).toHaveLength(2)
-      expect(result[0].country_name).toBe('United States')
-      expect(result[0].avg_revenue_per_license_cents).toBe(25000)
-      expect(result[1].country_name).toBe('United Kingdom')
-      expect(result[1].avg_revenue_per_license_cents).toBe(20000)
+      expect(result[0]!.country_name).toBe('United States')
+      expect(result[0]!.avg_revenue_per_license_cents).toBe(25000)
+      expect(result[1]!.country_name).toBe('United Kingdom')
+      expect(result[1]!.avg_revenue_per_license_cents).toBe(20000)
     })
 
     it('should handle unknown country codes', () => {
@@ -86,8 +86,8 @@ describe('Geographic Aggregator - Unit Tests', () => {
         { country_code: 'XX', total_revenue_cents: 100000, license_count: 5 },
       ]
       const result = enrichGeographicMetrics(metrics)
-      expect(result[0].country_name).toBe('XX')
-      expect(result[0].avg_revenue_per_license_cents).toBe(20000)
+      expect(result[0]!.country_name).toBe('XX')
+      expect(result[0]!.avg_revenue_per_license_cents).toBe(20000)
     })
   })
 
@@ -118,28 +118,28 @@ describe('Geographic Aggregator - Unit Tests', () => {
 
     it('should sort by revenue (DESC default)', () => {
       const result = sortGeographic(metrics, 'revenue', 'DESC')
-      expect(result[0].country_code).toBe('CA')
-      expect(result[1].country_code).toBe('US')
-      expect(result[2].country_code).toBe('GB')
+      expect(result[0]!.country_code).toBe('CA')
+      expect(result[1]!.country_code).toBe('US')
+      expect(result[2]!.country_code).toBe('GB')
     })
 
     it('should sort by revenue (ASC)', () => {
       const result = sortGeographic(metrics, 'revenue', 'ASC')
-      expect(result[0].country_code).toBe('GB')
-      expect(result[1].country_code).toBe('US')
-      expect(result[2].country_code).toBe('CA')
+      expect(result[0]!.country_code).toBe('GB')
+      expect(result[1]!.country_code).toBe('US')
+      expect(result[2]!.country_code).toBe('CA')
     })
 
     it('should sort by license_count (DESC)', () => {
       const result = sortGeographic(metrics, 'license_count', 'DESC')
-      expect(result[0].country_code).toBe('US')
-      expect(result[0].license_count).toBe(50)
+      expect(result[0]!.country_code).toBe('US')
+      expect(result[0]!.license_count).toBe(50)
     })
 
     it('should sort by avg_revenue_per_license (DESC)', () => {
       const result = sortGeographic(metrics, 'avg_revenue_per_license', 'DESC')
-      expect(result[0].country_code).toBe('CA')
-      expect(result[0].avg_revenue_per_license_cents).toBe(4000)
+      expect(result[0]!.country_code).toBe('CA')
+      expect(result[0]!.avg_revenue_per_license_cents).toBe(4000)
     })
   })
 
@@ -162,19 +162,19 @@ describe('Geographic Aggregator - Unit Tests', () => {
     it('should paginate second page', () => {
       const result = paginate(items, 2, 10)
       expect(result.items).toHaveLength(10)
-      expect(result.items[0].country_code).toBe('C10')
+      expect(result.items[0]!.country_code).toBe('C10')
     })
 
     it('should paginate last page with remaining items', () => {
       const result = paginate(items, 3, 10)
       expect(result.items).toHaveLength(5)
-      expect(result.items[0].country_code).toBe('C20')
+      expect(result.items[0]!.country_code).toBe('C20')
     })
 
     it('should handle invalid page (zero)', () => {
       const result = paginate(items, 0, 10)
       expect(result.items).toHaveLength(10)
-      expect(result.items[0].country_code).toBe('C0')
+      expect(result.items[0]!.country_code).toBe('C0')
     })
 
     it('should handle page beyond total', () => {
@@ -206,7 +206,7 @@ describe('Geographic Aggregator - Unit Tests', () => {
       expect(stats.total_revenue_cents).toBe(180000)
       expect(stats.total_licenses).toBe(90)
       expect(stats.avg_revenue_per_country_cents).toBe(90000)
-      expect(stats.top_country.code).toBe('US')
+      expect(stats.top_country!.code).toBe('US')
     })
 
     it('should handle empty array', () => {
@@ -251,8 +251,8 @@ describe('Geographic Aggregator - Unit Tests', () => {
       ]
       const result = getTopCountries(metrics, 2)
       expect(result).toHaveLength(2)
-      expect(result[0].country_code).toBe('US')
-      expect(result[1].country_code).toBe('GB')
+      expect(result[0]!.country_code).toBe('US')
+      expect(result[1]!.country_code).toBe('GB')
     })
 
     it('should handle default limit of 10', () => {

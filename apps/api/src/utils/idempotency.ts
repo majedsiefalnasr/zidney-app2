@@ -53,7 +53,7 @@ export class IdempotencyManager {
     // Try Redis first (fast path)
     if (this.redis) {
       try {
-        // @ts-ignore: LOGIC-BUG: Redis method no overload match — see INFRA-001-LOGIC-09
+        // @ts-ignore: LOGIC-BUG: Redis method no overload match — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         const cached = await this.redis.get(
           `idempotency:${userId}:${idempotencyKey}`
         )
@@ -113,7 +113,7 @@ export class IdempotencyManager {
     // Store in Redis (async, don't wait)
     if (this.redis) {
       try {
-        // @ts-ignore: LOGIC-BUG: Redis method no overload match — see INFRA-001-LOGIC-09
+        // @ts-ignore: LOGIC-BUG: Redis method no overload match — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         await this.redis.setex(
           `idempotency:${userId}:${idempotencyKey}`,
           this.REDIS_TTL,
@@ -173,7 +173,7 @@ export class IdempotencyManager {
  * Checks request header for Idempotency-Key, returns cached response if found
  */
 export function createIdempotencyMiddleware(manager: IdempotencyManager) {
-  return async (ctx: Context, next: Function) => {
+  return async (ctx: Context, next: () => Promise<void>) => {
     const idempotencyKey = ctx.req.header('Idempotency-Key')
     const userId = ctx.get('context')?.mmcUser?.userId
 
@@ -195,7 +195,7 @@ export function createIdempotencyMiddleware(manager: IdempotencyManager) {
       // Check for cached response
       const cached = await manager.getOrNull(userId, key)
       if (cached) {
-        // @ts-ignore: LOGIC-BUG: cached.statusCode is number not StatusCode - see INFRA-001-LOGIC-09
+        // @ts-ignore: LOGIC-BUG: cached.statusCode is number not StatusCode - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         return ctx.json(cached.response, cached.statusCode)
       }
     }

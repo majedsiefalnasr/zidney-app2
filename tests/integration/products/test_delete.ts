@@ -11,6 +11,7 @@
 import * as productService from '@zidney/domain-core/products/productService'
 import { ErrorCodes } from '@zidney/types/errors/ErrorCodes'
 import { ProductStatus } from '@zidney/types/products/Product'
+import { Module } from '@zidney/types/enums/Module'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import {
   cleanupTestContext,
@@ -44,7 +45,7 @@ describe('T057: Product Deletion Integration Tests', () => {
         {
           name: { en: 'Delete Me' },
           slug: 'delete-me',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -54,7 +55,7 @@ describe('T057: Product Deletion Integration Tests', () => {
       expect(before.id).toBe(product.id)
 
       // Delete it
-      await productService.deleteProduct(dbClient, product.id, ctx.userId)
+      await productService.deleteProduct(dbClient, product.id)
 
       // Verify it's gone
       try {
@@ -71,7 +72,7 @@ describe('T057: Product Deletion Integration Tests', () => {
         {
           name: { en: 'Cascade Test' },
           slug: 'cascade',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -89,17 +90,17 @@ describe('T057: Product Deletion Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_versions WHERE product_id = $1',
         [product.id]
       )
-      expect(parseInt(versions.rows[0].count)).toBe(2)
+      expect(parseInt(versions.rows[0]!.count)).toBe(2)
 
       // Delete product
-      await productService.deleteProduct(dbClient, product.id, ctx.userId)
+      await productService.deleteProduct(dbClient, product.id)
 
       // Verify versions are deleted
       versions = await dbClient.query(
         'SELECT COUNT(*) as count FROM product_versions WHERE product_id = $1',
         [product.id]
       )
-      expect(parseInt(versions.rows[0].count)).toBe(0)
+      expect(parseInt(versions.rows[0]!.count)).toBe(0)
     })
 
     it('should cascade delete product_audit_logs', async () => {
@@ -108,7 +109,7 @@ describe('T057: Product Deletion Integration Tests', () => {
         {
           name: { en: 'Audit Delete' },
           slug: 'audit-del',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -132,17 +133,17 @@ describe('T057: Product Deletion Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_audit_logs WHERE product_id = $1',
         [product.id]
       )
-      expect(parseInt(audits.rows[0].count)).toBeGreaterThan(1)
+      expect(parseInt(audits.rows[0]!.count)).toBeGreaterThan(1)
 
       // Delete product
-      await productService.deleteProduct(dbClient, product.id, ctx.userId)
+      await productService.deleteProduct(dbClient, product.id)
 
       // Verify audit logs are deleted
       audits = await dbClient.query(
         'SELECT COUNT(*) as count FROM product_audit_logs WHERE product_id = $1',
         [product.id]
       )
-      expect(parseInt(audits.rows[0].count)).toBe(0)
+      expect(parseInt(audits.rows[0]!.count)).toBe(0)
     })
 
     it('should be atomic - delete all or nothing', async () => {
@@ -151,13 +152,13 @@ describe('T057: Product Deletion Integration Tests', () => {
         {
           name: { en: 'Atomic Delete' },
           slug: 'atomic-del',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
 
       // Delete product
-      await productService.deleteProduct(dbClient, product.id, ctx.userId)
+      await productService.deleteProduct(dbClient, product.id)
 
       // Verify EVERYTHING is deleted
       const productCount = await dbClient.query(
@@ -173,9 +174,9 @@ describe('T057: Product Deletion Integration Tests', () => {
         [product.id]
       )
 
-      expect(parseInt(productCount.rows[0].count)).toBe(0)
-      expect(parseInt(versionCount.rows[0].count)).toBe(0)
-      expect(parseInt(auditCount.rows[0].count)).toBe(0)
+      expect(parseInt(productCount.rows[0]!.count)).toBe(0)
+      expect(parseInt(versionCount.rows[0]!.count)).toBe(0)
+      expect(parseInt(auditCount.rows[0]!.count)).toBe(0)
     })
   })
 
@@ -186,7 +187,7 @@ describe('T057: Product Deletion Integration Tests', () => {
         {
           name: { en: 'Protected Product' },
           slug: 'protected',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -205,7 +206,7 @@ describe('T057: Product Deletion Integration Tests', () => {
       )
 
       try {
-        await productService.deleteProduct(dbClient, product.id, ctx.userId)
+        await productService.deleteProduct(dbClient, product.id)
         expect.fail('Should have thrown error for product with licenses')
       } catch (error: any) {
         expect(error.code).toBe(ErrorCodes.PRODUCT_HAS_LICENSES)
@@ -225,7 +226,7 @@ describe('T057: Product Deletion Integration Tests', () => {
         {
           name: { en: 'Conflict Test' },
           slug: 'conflict',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -243,7 +244,7 @@ describe('T057: Product Deletion Integration Tests', () => {
       )
 
       try {
-        await productService.deleteProduct(dbClient, product.id, ctx.userId)
+        await productService.deleteProduct(dbClient, product.id)
         expect.fail('Should reject deletion')
       } catch (error: any) {
         expect(error.code).toBe(ErrorCodes.PRODUCT_HAS_LICENSES)
@@ -256,7 +257,7 @@ describe('T057: Product Deletion Integration Tests', () => {
       const fakeId = 'non-existent-' + Math.random().toString(36)
 
       try {
-        await productService.deleteProduct(dbClient, fakeId, ctx.userId)
+        await productService.deleteProduct(dbClient, fakeId)
         expect.fail('Should have thrown error')
       } catch (error: any) {
         expect(error.code).toBe(ErrorCodes.PRODUCT_NOT_FOUND)
@@ -269,17 +270,17 @@ describe('T057: Product Deletion Integration Tests', () => {
         {
           name: { en: 'Idempotent Delete' },
           slug: 'idem-del',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
 
       // First delete succeeds
-      await productService.deleteProduct(dbClient, product.id, ctx.userId)
+      await productService.deleteProduct(dbClient, product.id)
 
       // Second delete should fail
       try {
-        await productService.deleteProduct(dbClient, product.id, ctx.userId)
+        await productService.deleteProduct(dbClient, product.id)
         expect.fail('Second delete should fail')
       } catch (error: any) {
         expect(error.code).toBe(ErrorCodes.PRODUCT_NOT_FOUND)
@@ -294,14 +295,14 @@ describe('T057: Product Deletion Integration Tests', () => {
         {
           name: { en: 'Hard Delete' },
           slug: 'hard-del',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
 
       const productId = product.id
 
-      await productService.deleteProduct(dbClient, productId, ctx.userId)
+      await productService.deleteProduct(dbClient, productId)
 
       try {
         await productService.getProductById(dbClient, productId)
@@ -324,12 +325,12 @@ describe('T057: Product Deletion Integration Tests', () => {
         {
           name: { en: 'No Soft Delete' },
           slug: 'no-soft',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
 
-      await productService.deleteProduct(dbClient, product.id, ctx.userId)
+      await productService.deleteProduct(dbClient, product.id)
 
       // Check schema - should not have deleted_at or is_deleted columns
       const columns = await dbClient.query(
@@ -349,7 +350,7 @@ describe('T057: Product Deletion Integration Tests', () => {
         {
           name: { en: 'Product 1' },
           slug: 'product-1',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -359,13 +360,13 @@ describe('T057: Product Deletion Integration Tests', () => {
         {
           name: { en: 'Product 2' },
           slug: 'product-2',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
 
       // Delete product 1
-      await productService.deleteProduct(dbClient, product1.id, ctx.userId)
+      await productService.deleteProduct(dbClient, product1.id)
 
       // Product 2 should still exist
       const retrieved = await productService.getProductById(
@@ -385,7 +386,7 @@ describe('T057: Product Deletion Integration Tests', () => {
         {
           name: { en: 'Audit Preservation' },
           slug: 'audit-pres',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -395,17 +396,17 @@ describe('T057: Product Deletion Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_audit_logs WHERE product_id = $1',
         [product.id]
       )
-      expect(parseInt(auditBefore.rows[0].count)).toBeGreaterThan(0)
+      expect(parseInt(auditBefore.rows[0]!.count)).toBeGreaterThan(0)
 
       // Delete product (cascade deletes audit logs)
-      await productService.deleteProduct(dbClient, product.id, ctx.userId)
+      await productService.deleteProduct(dbClient, product.id)
 
       // Verify cascade delete worked
       const auditAfter = await dbClient.query(
         'SELECT COUNT(*) as count FROM product_audit_logs WHERE product_id = $1',
         [product.id]
       )
-      expect(parseInt(auditAfter.rows[0].count)).toBe(0)
+      expect(parseInt(auditAfter.rows[0]!.count)).toBe(0)
     })
   })
 })

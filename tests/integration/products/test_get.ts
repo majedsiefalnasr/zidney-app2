@@ -10,6 +10,7 @@
 import * as productService from '@zidney/domain-core/products/productService'
 import { ErrorCodes } from '@zidney/types/errors/ErrorCodes'
 import { CreateProductInput } from '@zidney/types/products/Product'
+import { Module } from '@zidney/types/enums/Module'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import {
   cleanupTestContext,
@@ -42,7 +43,7 @@ describe('T054: Get Single Product Integration Tests', () => {
         name: { en: 'Get Test Product' },
         slug: 'get-test',
         description: 'Test product for get operation',
-        enabled_modules: ['MODULE_ATTEMPT', 'MODULE_REPORTING'],
+        enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
       }
 
       const created = await productService.createProduct(
@@ -69,7 +70,7 @@ describe('T054: Get Single Product Integration Tests', () => {
         {
           name: { en: 'Fields Test' },
           slug: 'fields-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -93,7 +94,7 @@ describe('T054: Get Single Product Integration Tests', () => {
         {
           name: { en: 'Version Test' },
           slug: 'v-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -109,7 +110,7 @@ describe('T054: Get Single Product Integration Tests', () => {
         {
           name: { en: 'Status Get Test' },
           slug: 'status-get-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -126,7 +127,7 @@ describe('T054: Get Single Product Integration Tests', () => {
         {
           name: { en: 'Timestamp Get' },
           slug: 'ts-get',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -183,7 +184,7 @@ describe('T054: Get Single Product Integration Tests', () => {
         name: { en: 'Integrity Test', ar: 'اختبار التكامل' },
         slug: 'integrity-test',
         description: 'Testing data integrity',
-        enabled_modules: ['MODULE_ASSESSMENT', 'MODULE_PROCTOR'],
+        enabled_modules: [Module.EXERCISES, Module.LIBRARY],
       }
 
       const created = await productService.createProduct(
@@ -205,7 +206,7 @@ describe('T054: Get Single Product Integration Tests', () => {
         {
           name: { en: 'Security Test' },
           slug: 'security-test',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -224,7 +225,7 @@ describe('T054: Get Single Product Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: 'Bilingual Product', ar: 'منتج ثنائي اللغة' },
         slug: 'bilingual',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       const created = await productService.createProduct(
@@ -242,7 +243,7 @@ describe('T054: Get Single Product Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: 'English Only' },
         slug: 'en-only',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       const created = await productService.createProduct(
@@ -260,12 +261,12 @@ describe('T054: Get Single Product Integration Tests', () => {
   describe('Module information', () => {
     it('should return all enabled modules', async () => {
       const allModules = [
-        'MODULE_ASSESSMENT',
-        'MODULE_ATTEMPT',
-        'MODULE_CONTENT',
-        'MODULE_REPORTING',
-        'MODULE_PROCTOR',
-        'MODULE_ANALYTICS',
+        Module.EXERCISES,
+        Module.MCQ,
+        Module.LIVES,
+        Module.TRADITIONAL_EXAMS,
+        Module.LIBRARY,
+        Module.FORUM,
       ]
 
       const input: CreateProductInput = {
@@ -288,7 +289,7 @@ describe('T054: Get Single Product Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: 'Single Module' },
         slug: 'single-module',
-        enabled_modules: ['MODULE_ASSESSMENT'],
+        enabled_modules: [Module.EXERCISES],
       }
 
       const created = await productService.createProduct(
@@ -299,7 +300,7 @@ describe('T054: Get Single Product Integration Tests', () => {
       const product = await productService.getProductById(dbClient, created.id)
 
       expect(product.enabled_modules.length).toBe(1)
-      expect(product.enabled_modules[0]).toBe('MODULE_ASSESSMENT')
+      expect(product.enabled_modules[0]).toBe(Module.EXERCISES)
     })
   })
 })

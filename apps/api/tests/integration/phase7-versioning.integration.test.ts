@@ -35,7 +35,7 @@ function bumpVersion(
     throw new Error(`Invalid version format: ${currentVersion}`)
   }
 
-  const [major, minor, patch] = currentVersion.split('.').map(Number)
+  const [major, minor, patch] = currentVersion.split('.').map(Number) as [number, number, number]
 
   switch (changeType) {
     case 'major':

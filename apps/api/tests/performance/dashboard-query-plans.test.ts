@@ -70,8 +70,8 @@ describe('Dashboard Query Plan Verification (T029)', () => {
     const indexScanMatch = explainText.match(/Index Scan|Bitmap Index Scan/g)
 
     return {
-      executionTime: executionMatch ? parseFloat(executionMatch[1]) : 0,
-      planningTime: planningMatch ? parseFloat(planningMatch[1]) : 0,
+      executionTime: executionMatch ? parseFloat(executionMatch[1]!) : 0,
+      planningTime: planningMatch ? parseFloat(planningMatch[1]!) : 0,
       seqScans: seqScanMatch ? seqScanMatch.length : 0,
       indexScans: indexScanMatch ? indexScanMatch.length : 0,
     }

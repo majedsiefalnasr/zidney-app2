@@ -12,7 +12,7 @@
 import {
   validateModulesEnum,
   validateProductName,
-  validateSlug,
+  validateSlugFormat as validateSlug,
 } from '@zidney/validation/products/productValidation'
 import { describe, expect, it } from 'vitest'
 
@@ -309,7 +309,7 @@ describe('T063: Product Service Edge Cases Unit Tests', () => {
 
       const results = await Promise.all(validations)
 
-      expect(results.every((r) => r === true)).toBe(true)
+      expect(results.every((r) => r === null)).toBe(true)
     })
 
     it('should handle rapid sequential validations', () => {
@@ -323,7 +323,7 @@ describe('T063: Product Service Edge Cases Unit Tests', () => {
 
       const results = inputs.map((input) => validateProductName(input))
 
-      expect(results.every((r) => r === true)).toBe(true)
+      expect(results.every((r) => r === null)).toBe(true)
     })
   })
 

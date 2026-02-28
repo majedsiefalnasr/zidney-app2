@@ -1,1 +1,44 @@
-/**\n * Trends Query Builder\n *\n * Purpose: Get monthly revenue and license trends\n * - Supports 3, 6, 12 month periods\n * - Calculates month-over-month growth\n *\n * File: packages/domain-core/mmc-dashboard/queries/trends-query.ts\n * Task: T016 [P]\n * Phase: 1 - Backend Implementation (parallel)\n */\n\nimport { Pool } from 'pg'\n\nexport async function getTrendsData(\n  pool: Pool,\n  months: 3 | 6 | 12 = 12\n) {\n  const startDate = new Date()\n  startDate.setMonth(startDate.getMonth() - months)\n\n  const query = `\n    SELECT\n      DATE_TRUNC('month', r.created_at)::DATE as period,\n      SUM(r.amount_cents) as revenue_cents,\n      COUNT(DISTINCT r.license_id) as license_count\n    FROM revenue_records r\n    WHERE r.created_at >= $1\n    GROUP BY DATE_TRUNC('month', r.created_at)\n    ORDER BY period ASC\n  `\n\n  const result = await pool.query(query, [startDate])\n  return result.rows.map((row: any) => ({\n    period: row.period.toISOString().substring(0, 7),\n    revenue_cents: row.revenue_cents || 0,\n    license_count: row.license_count || 0,\n  }))\n}\n\nexport default {\n  getTrendsData,\n}\n
+/**
+ * Trends Query Builder
+ *
+ * Purpose: Get monthly revenue and license trends
+ * - Supports 3, 6, 12 month periods
+ * - Calculates month-over-month growth
+ *
+ * File: packages/domain-core/mmc-dashboard/queries/trends-query.ts
+ * Task: T016 [P]
+ * Phase: 1 - Backend Implementation (parallel)
+ */
+
+import { Pool } from 'pg'
+
+export async function getTrendsData(
+  pool: Pool,
+  months: 3 | 6 | 12 = 12
+) {
+  const startDate = new Date()
+  startDate.setMonth(startDate.getMonth() - months)
+
+  const query = `
+    SELECT
+      DATE_TRUNC('month', r.created_at)::DATE as period,
+      SUM(r.amount_cents) as revenue_cents,
+      COUNT(DISTINCT r.license_id) as license_count
+    FROM revenue_records r
+    WHERE r.created_at >= $1
+    GROUP BY DATE_TRUNC('month', r.created_at)
+    ORDER BY period ASC
+  `
+
+  const result = await pool.query(query, [startDate])
+  return result.rows.map((row: any) => ({
+    period: row.period.toISOString().substring(0, 7),
+    revenue_cents: row.revenue_cents || 0,
+    license_count: row.license_count || 0,
+  }))
+}
+
+export default {
+  getTrendsData,
+}
+

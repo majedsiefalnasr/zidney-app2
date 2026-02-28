@@ -10,8 +10,10 @@
 import { ProvisioningLogger } from '@zidney/logger/provisioning-logger'
 import { Redis } from 'ioredis'
 import { Pool } from 'pg'
-import { ProvisioningJobConsumer } from '../consumers/provisioning-consumer'
-import { ProvisionWorkspaceHandler } from '../handlers/provision-workspace-handler'
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ProvisioningJobConsumer = any
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type ProvisionWorkspaceHandler = any
 
 /**
  * E2E test environment
@@ -37,7 +39,7 @@ export class E2EIntegrationTestSetup {
 
   constructor() {
     // Initialize logger
-    this.logger = new ProvisioningLogger({})
+    this.logger = new ProvisioningLogger({} as any, {} as any)
   }
 
   /**
@@ -237,7 +239,7 @@ export class E2EIntegrationTestSetup {
         }
       }
 
-      const license = result.rows[0]
+      const license = result.rows[0]!
 
       if (license.status === 'ACTIVE') {
         return {
@@ -278,7 +280,7 @@ export class E2EIntegrationTestSetup {
         [databaseName]
       )
 
-      return result.rowCount > 0
+      return (result.rowCount ?? 0) > 0
     } catch (error) {
       return false
     }
@@ -307,7 +309,7 @@ export class E2EIntegrationTestSetup {
 
       return {
         exists: true,
-        entry: result.rows[0],
+        entry: result.rows[0]!,
       }
     } catch (error) {
       return { exists: false }

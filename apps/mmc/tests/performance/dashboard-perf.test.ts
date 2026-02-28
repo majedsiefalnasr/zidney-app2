@@ -47,7 +47,7 @@ async function makeRequest(
 describe('T065-T067: Performance, Load & Security Tests', () => {
   describe('T065: Endpoint Latency Verification', () => {
     it('should complete GET /summary in <300ms', async () => {
-      const durations = []
+      const durations: number[] = []
 
       for (let i = 0; i < 5; i++) {
         const result = await makeRequest('GET', '/summary', VALID_TOKEN)
@@ -62,7 +62,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
     })
 
     it('should complete GET /revenue-breakdown in <300ms', async () => {
-      const durations = []
+      const durations: number[] = []
 
       for (let i = 0; i < 5; i++) {
         const result = await makeRequest(
@@ -78,7 +78,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
     })
 
     it('should complete GET /geographic in <300ms', async () => {
-      const durations = []
+      const durations: number[] = []
 
       for (let i = 0; i < 5; i++) {
         const result = await makeRequest(
@@ -113,7 +113,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
 
   describe('T066: Load Testing – Concurrent Users', () => {
     it('should handle 10 concurrent requests to /summary', async () => {
-      const requests = []
+      const requests: Promise<any>[] = []
 
       for (let i = 0; i < 10; i++) {
         requests.push(
@@ -132,7 +132,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
     })
 
     it('should handle 20 concurrent mixed endpoint requests', async () => {
-      const requests = []
+      const requests: Promise<any>[] = []
       const endpoints = [
         '/summary',
         '/revenue-breakdown',
@@ -142,7 +142,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
       ]
 
       for (let i = 0; i < 20; i++) {
-        const endpoint = endpoints[i % endpoints.length]
+        const endpoint = endpoints[i % endpoints.length]!
         requests.push(
           makeRequest('GET', endpoint, VALID_TOKEN).catch((e) => ({
             status: 0,
@@ -159,8 +159,8 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
     })
 
     it('should maintain response times under concurrent load', async () => {
-      const requests = []
-      const durations = []
+      const requests: Promise<any>[] = []
+      const durations: number[] = []
 
       for (let i = 0; i < 10; i++) {
         const promise = makeRequest('GET', '/summary', VALID_TOKEN)
@@ -185,7 +185,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
 
   describe('T067: Rate Limiting Validation', () => {
     it('should track rate limit state', async () => {
-      const results = []
+      const results: any[] = []
 
       for (let i = 0; i < 5; i++) {
         const result = await makeRequest('GET', '/summary', VALID_TOKEN)
@@ -193,15 +193,15 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
       }
 
       // Check if rate limit headers present
-      if (results[0].headers['x-ratelimit-limit']) {
+      if (results[0]!.headers['x-ratelimit-limit']) {
         expect(
-          parseInt(results[0].headers['x-ratelimit-limit'])
+          parseInt(results[0]!.headers['x-ratelimit-limit'])
         ).toBeGreaterThan(0)
       }
     })
 
     it('should handle rapid sequential requests gracefully', async () => {
-      const results = []
+      const results: any[] = []
 
       for (let i = 0; i < 10; i++) {
         const result = await makeRequest('GET', '/summary', VALID_TOKEN)
@@ -220,7 +220,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
     })
 
     it('should enforce export endpoint limits', async () => {
-      const results = []
+      const results: any[] = []
 
       for (let i = 0; i < 3; i++) {
         try {
@@ -261,7 +261,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
       for (const [key, endpoint] of endpoints) {
         for (let i = 0; i < 3; i++) {
           const result = await makeRequest('GET', endpoint, VALID_TOKEN)
-          latencyData[key].push(result.duration)
+          latencyData[key]!.push(result.duration)
         }
       }
 
@@ -274,7 +274,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
       for (const [endpoint, durations] of Object.entries(latencyData)) {
         const sorted = durations.sort((a, b) => a - b)
         report.endpoints = {
-          ...report.endpoints,
+          ...(report.endpoints as Record<string, unknown>),
           [endpoint]: {
             min: sorted[0],
             max: sorted[sorted.length - 1],

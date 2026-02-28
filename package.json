@@ -10,6 +10,7 @@
     "typecheck:tests": "tsc --noEmit -p tsconfig.test.json",
     "typecheck": "bun typecheck:src && bun typecheck:tests",
     "lint": "eslint .",
+    "check:tsconfig": "bash scripts/check-tsconfig-strict.sh",
     "test": "vitest run",
     "test:unit": "vitest run --dir tests/unit",
     "test:integration": "vitest run --dir tests/integration --fileParallelism=false",
@@ -24,6 +25,7 @@
     "dev:all": "concurrently \"bun run dev:api\" \"bun run dev:worker\" \"bun run dev:mmc\""
   },
   "devDependencies": {
+    "@types/node": "^25.3.2",
     "@types/pg": "^8.16.0",
     "@typescript-eslint/eslint-plugin": "^8.56.0",
     "@typescript-eslint/parser": "^8.56.0",

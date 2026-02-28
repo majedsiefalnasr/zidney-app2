@@ -437,7 +437,7 @@ describe('Integration: Products - Create (T052)', () => {
         status: i < 10 ? 201 : 429,
       }))
 
-      const lastRequest = requests[requests.length - 1]
+      const lastRequest = requests[requests.length - 1]!
       expect(lastRequest.status).toBe(429)
 
       const response = {

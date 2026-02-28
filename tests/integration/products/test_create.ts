@@ -12,6 +12,7 @@
 
 import * as productService from '@zidney/domain-core/products/productService'
 import { CreateProductInput } from '@zidney/types/products/Product'
+import { Module } from '@zidney/types/enums/Module'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import {
   cleanupTestContext,
@@ -45,7 +46,7 @@ describe('T052: Product Creation Integration Tests', () => {
         name: { en: 'Test Product', ar: 'منتج اختبار' },
         slug: 'test-product-001',
         description: 'A test product for validation',
-        enabled_modules: ['MODULE_ATTEMPT', 'MODULE_REPORTING'],
+        enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
       }
 
       const product = await productService.createProduct(
@@ -67,7 +68,7 @@ describe('T052: Product Creation Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: 'Version Test' },
         slug: 'version-test',
-        enabled_modules: ['MODULE_ASSESSMENT'],
+        enabled_modules: [Module.EXERCISES],
       }
 
       const product = await productService.createProduct(
@@ -82,7 +83,7 @@ describe('T052: Product Creation Integration Tests', () => {
       )
 
       expect(versionResult.rows.length).toBe(1)
-      const version = versionResult.rows[0]
+      const version = versionResult.rows[0]!
       expect(version.version_number).toBe(1)
       expect(version.product_id).toEqual(product.id)
       expect(JSON.parse(version.name)).toEqual(input.name)
@@ -92,7 +93,7 @@ describe('T052: Product Creation Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: 'Audit Test' },
         slug: 'audit-test',
-        enabled_modules: ['MODULE_PROCTOR'],
+        enabled_modules: [Module.LIBRARY],
       }
 
       const product = await productService.createProduct(
@@ -107,7 +108,7 @@ describe('T052: Product Creation Integration Tests', () => {
       )
 
       expect(auditResult.rows.length).toBe(1)
-      const audit = auditResult.rows[0]
+      const audit = auditResult.rows[0]!
       expect(audit.action).toBe('CREATE')
       expect(audit.product_id).toEqual(product.id)
       expect(audit.performed_by).toBe(ctx.userId)
@@ -118,7 +119,7 @@ describe('T052: Product Creation Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: 'Status Test' },
         slug: 'status-test',
-        enabled_modules: ['MODULE_CONTENT'],
+        enabled_modules: [Module.LIVES],
       }
 
       const product = await productService.createProduct(
@@ -134,7 +135,7 @@ describe('T052: Product Creation Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: 'No Description' },
         slug: 'no-desc',
-        enabled_modules: ['MODULE_ANALYTICS'],
+        enabled_modules: [Module.FORUM],
         description: undefined,
       }
 
@@ -151,7 +152,7 @@ describe('T052: Product Creation Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: 'English Only' },
         slug: 'english-only',
-        enabled_modules: ['MODULE_SURVEY'],
+        enabled_modules: [Module.MCQ],
       }
 
       const product = await productService.createProduct(
@@ -166,12 +167,12 @@ describe('T052: Product Creation Integration Tests', () => {
 
     it('should support all 6 module combinations', async () => {
       const allModules = [
-        'MODULE_ASSESSMENT',
-        'MODULE_ATTEMPT',
-        'MODULE_CONTENT',
-        'MODULE_REPORTING',
-        'MODULE_PROCTOR',
-        'MODULE_ANALYTICS',
+        Module.EXERCISES,
+        Module.MCQ,
+        Module.LIVES,
+        Module.TRADITIONAL_EXAMS,
+        Module.LIBRARY,
+        Module.FORUM,
       ]
 
       const input: CreateProductInput = {
@@ -193,7 +194,7 @@ describe('T052: Product Creation Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: 'Timestamp Test' },
         slug: 'timestamp-test',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       const beforeCreate = new Date()
@@ -220,13 +221,13 @@ describe('T052: Product Creation Integration Tests', () => {
       const input1: CreateProductInput = {
         name: { en: 'First Product' },
         slug: 'duplicate-slug',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       const input2: CreateProductInput = {
         name: { en: 'Second Product' },
         slug: 'duplicate-slug', // Same slug
-        enabled_modules: ['MODULE_CONTENT'],
+        enabled_modules: [Module.LIVES],
       }
 
       await productService.createProduct(dbClient, input1, ctx.userId)
@@ -275,7 +276,7 @@ describe('T052: Product Creation Integration Tests', () => {
       const input: Partial<CreateProductInput> = {
         name: { en: '', ar: 'منتج' }, // Empty en
         slug: 'no-en',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       try {
@@ -294,7 +295,7 @@ describe('T052: Product Creation Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: 'Bad Slug' },
         slug: 'UPPERCASE_SLUG', // Invalid format
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       try {
@@ -312,7 +313,7 @@ describe('T052: Product Creation Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: longName },
         slug: 'long-name',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       const product = await productService.createProduct(
@@ -330,7 +331,7 @@ describe('T052: Product Creation Integration Tests', () => {
         name: { en: 'Special Chars' },
         slug: 'special-chars',
         description: specialDesc,
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       const product = await productService.createProduct(
@@ -346,7 +347,7 @@ describe('T052: Product Creation Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: 'Single Char' },
         slug: 'a',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       const product = await productService.createProduct(
@@ -362,7 +363,7 @@ describe('T052: Product Creation Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: 'numeric' },
         slug: '12345',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       const product = await productService.createProduct(
@@ -378,7 +379,7 @@ describe('T052: Product Creation Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: 'Hyphenated' },
         slug: 'test--product--name',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       const product = await productService.createProduct(
@@ -394,7 +395,7 @@ describe('T052: Product Creation Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: 'Change Summary Test' },
         slug: 'change-summary',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
         description: 'Test description',
       }
 
@@ -409,7 +410,7 @@ describe('T052: Product Creation Integration Tests', () => {
         [product.id]
       )
 
-      expect(auditResult.rows[0].change_summary).toBeDefined()
+      expect(auditResult.rows[0]!.change_summary).toBeDefined()
     })
   })
 
@@ -418,7 +419,7 @@ describe('T052: Product Creation Integration Tests', () => {
       const input: CreateProductInput = {
         name: { en: 'Rollback Test' },
         slug: 'rollback-test',
-        enabled_modules: ['MODULE_ATTEMPT'],
+        enabled_modules: [Module.MCQ],
       }
 
       // This would require injecting a failure scenario
@@ -439,9 +440,9 @@ describe('T052: Product Creation Integration Tests', () => {
         [input.slug]
       )
 
-      expect(parseInt(productCount.rows[0].count)).toBe(1)
-      expect(parseInt(versionCount.rows[0].count)).toBe(1)
-      expect(parseInt(auditCount.rows[0].count)).toBe(1)
+      expect(parseInt(productCount.rows[0]!.count)).toBe(1)
+      expect(parseInt(versionCount.rows[0]!.count)).toBe(1)
+      expect(parseInt(auditCount.rows[0]!.count)).toBe(1)
     })
   })
 })

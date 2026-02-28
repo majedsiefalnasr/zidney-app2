@@ -1,3 +1,4 @@
+import type { Pool } from 'pg'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   createLicense,
@@ -37,7 +38,7 @@ describe('LicenseLicecycle Integration', () => {
       testFixtures.makeLicense({ workspace_slug, product_id }),
     ])
 
-    const result = await createLicense(mockDb, {
+    const result = await createLicense(mockDb as unknown as Pool, {
       product_id,
       workspace_id,
       workspace_slug,
@@ -56,7 +57,7 @@ describe('LicenseLicecycle Integration', () => {
       license,
     ])
 
-    const transitionResult = await transitionLicenseState(mockDb, {
+    const transitionResult = await transitionLicenseState(mockDb as unknown as Pool, {
       license_id: license.id,
       target_state: 'SOFT_LOCKED',
       reason: 'payment_failed',
@@ -78,7 +79,7 @@ describe('LicenseLicecycle Integration', () => {
     })
 
     try {
-      await createLicense(mockDb, {
+      await createLicense(mockDb as unknown as Pool, {
         product_id: 'product-uuid',
         workspace_id,
         workspace_slug,
@@ -95,7 +96,7 @@ describe('LicenseLicecycle Integration', () => {
 
     mockDb.mockResult('from licenses where id = $1 limit 1', [license])
 
-    const result = await getLicenseById(mockDb, license.id)
+    const result = await getLicenseById(mockDb as unknown as Pool, license.id)
 
     expect(result).toEqual(license)
     expect(result?.student_limit).toBeDefined()
@@ -119,7 +120,7 @@ describe('LicenseLicecycle Integration', () => {
       expiredLicense,
     ])
 
-    const transitionResult = await transitionLicenseState(mockDb, {
+    const transitionResult = await transitionLicenseState(mockDb as unknown as Pool, {
       license_id: expiredLicense.id,
       target_state: 'ARCHIVED',
       reason: 'soft_lock_expired_auto_transition',

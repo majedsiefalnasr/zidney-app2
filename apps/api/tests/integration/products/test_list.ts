@@ -89,9 +89,9 @@ describe('Integration: Products - List (T053)', () => {
       }
 
       expect(
-        new Date(response.body.data.items[0].created_at).getTime()
+        new Date(response.body.data.items[0]!.created_at).getTime()
       ).toBeGreaterThan(
-        new Date(response.body.data.items[1].created_at).getTime()
+        new Date(response.body.data.items[1]!.created_at).getTime()
       )
     })
   })
@@ -358,7 +358,7 @@ describe('Integration: Products - List (T053)', () => {
         },
       }
 
-      const product = response.body.data.items[0]
+      const product = response.body.data.items[0]!
       expect(product).toHaveProperty('id')
       expect(product).toHaveProperty('name')
       expect(product).toHaveProperty('slug')

@@ -9,7 +9,7 @@
  */
 
 import { ProvisioningLogger } from '@zidney/logger/provisioning-logger'
-// @ts-ignore: LOGIC-BUG: dlq-handler is in ../handlers/dlq-handler, not ./dlq-handler — see INFRA-001-LOGIC-09
+// @ts-ignore: LOGIC-BUG: dlq-handler is in ../handlers/dlq-handler, not ./dlq-handler — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
 import { DLQHandler } from './dlq-handler'
 
 /**

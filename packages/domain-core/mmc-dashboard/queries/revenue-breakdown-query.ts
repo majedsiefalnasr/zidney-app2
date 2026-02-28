@@ -1,2 +1,93 @@
 /**
- * Revenue Breakdown Query Builder\n *\n * Purpose: Build query for top N products by revenue with growth\n * - Supports date range filtering\n * - Calculates growth metrics vs previous period\n * - Sorted by revenue descending\n *\n * File: packages/domain-core/mmc-dashboard/queries/revenue-breakdown-query.ts\n * Task: T013 [P]\n * Phase: 1 - Backend Implementation (parallel)\n */\n\nimport { Pool } from 'pg'\n\nexport interface RevenueBreakdownParams {\n  date_from?: string // ISO 8601 date\n  date_to?: string\n  limit?: number // Default: 5\n}\n\n/**\n * Get revenue by product for specified date range\n */\nexport async function getProductRevenue(\n  pool: Pool,\n  dateFrom?: Date,\n  dateTo?: Date,\n  limit?: number\n) {\n  const fromDate = dateFrom || new Date(new Date().getFullYear(), new Date().getMonth(), 1)\n  const toDate = dateTo || new Date()\n  const limitValue = limit || 5\n\n  const query = `\n    SELECT\n      p.id as product_id,\n      p.name->>'en' as product_name,\n      SUM(r.amount_cents) as total_revenue_cents,\n      COUNT(DISTINCT r.license_id) as license_count\n    FROM products p\n    LEFT JOIN revenue_records r ON p.id = r.product_id\n      AND r.created_at >= $1\n      AND r.created_at <= $2\n    WHERE p.enabled_modules IS NOT NULL\n    GROUP BY p.id, p.name\n    HAVING SUM(r.amount_cents) > 0 OR COUNT(r.*) = 0\n    ORDER BY total_revenue_cents DESC\n    LIMIT $3\n  `\n\n  const result = await pool.query(query, [fromDate, toDate, limitValue])\n  return result.rows\n}\n\n/**\n * Get revenue for previous period (for growth calculation)\n */\nexport async function getProductRevenuePreviousPeriod(\n  pool: Pool,\n  dateFrom: Date,\n  dateTo: Date\n) {\n  // Calculate previous period of same duration\n  const duration = dateTo.getTime() - dateFrom.getTime()\n  const previousTo = new Date(dateFrom.getTime())\n  const previousFrom = new Date(previousTo.getTime() - duration)\n\n  const query = `\n    SELECT\n      r.product_id,\n      SUM(r.amount_cents) as total_revenue_cents\n    FROM revenue_records r\n    WHERE r.created_at >= $1\n      AND r.created_at <= $2\n    GROUP BY r.product_id\n  `\n\n  const result = await pool.query(query, [previousFrom, previousTo])\n  \n  // Convert to map for easy lookup\n  const map = new Map<string, number>()\n  for (const row of result.rows) {\n    map.set(row.product_id, row.total_revenue_cents)\n  }\n  return map\n}\n\nexport default {\n  getProductRevenue,\n  getProductRevenuePreviousPeriod,\n}\n
+ * Revenue Breakdown Query Builder
+ *
+ * Purpose: Build query for top N products by revenue with growth
+ * - Supports date range filtering
+ * - Calculates growth metrics vs previous period
+ * - Sorted by revenue descending
+ *
+ * File: packages/domain-core/mmc-dashboard/queries/revenue-breakdown-query.ts
+ * Task: T013 [P]
+ * Phase: 1 - Backend Implementation (parallel)
+ */
+
+import { Pool } from 'pg'
+
+export interface RevenueBreakdownParams {
+  date_from?: string // ISO 8601 date
+  date_to?: string
+  limit?: number // Default: 5
+}
+
+/**
+ * Get revenue by product for specified date range
+ */
+export async function getProductRevenue(
+  pool: Pool,
+  dateFrom?: Date,
+  dateTo?: Date,
+  limit?: number
+) {
+  const fromDate = dateFrom || new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+  const toDate = dateTo || new Date()
+  const limitValue = limit || 5
+
+  const query = `
+    SELECT
+      p.id as product_id,
+      p.name->>'en' as product_name,
+      SUM(r.amount_cents) as total_revenue_cents,
+      COUNT(DISTINCT r.license_id) as license_count
+    FROM products p
+    LEFT JOIN revenue_records r ON p.id = r.product_id
+      AND r.created_at >= $1
+      AND r.created_at <= $2
+    WHERE p.enabled_modules IS NOT NULL
+    GROUP BY p.id, p.name
+    HAVING SUM(r.amount_cents) > 0 OR COUNT(r.*) = 0
+    ORDER BY total_revenue_cents DESC
+    LIMIT $3
+  `
+
+  const result = await pool.query(query, [fromDate, toDate, limitValue])
+  return result.rows
+}
+
+/**
+ * Get revenue for previous period (for growth calculation)
+ */
+export async function getProductRevenuePreviousPeriod(
+  pool: Pool,
+  dateFrom: Date,
+  dateTo: Date
+) {
+  // Calculate previous period of same duration
+  const duration = dateTo.getTime() - dateFrom.getTime()
+  const previousTo = new Date(dateFrom.getTime())
+  const previousFrom = new Date(previousTo.getTime() - duration)
+
+  const query = `
+    SELECT
+      r.product_id,
+      SUM(r.amount_cents) as total_revenue_cents
+    FROM revenue_records r
+    WHERE r.created_at >= $1
+      AND r.created_at <= $2
+    GROUP BY r.product_id
+  `
+
+  const result = await pool.query(query, [previousFrom, previousTo])
+  
+  // Convert to map for easy lookup
+  const map = new Map<string, number>()
+  for (const row of result.rows) {
+    map.set(row.product_id, row.total_revenue_cents)
+  }
+  return map
+}
+
+export default {
+  getProductRevenue,
+  getProductRevenuePreviousPeriod,
+}
+

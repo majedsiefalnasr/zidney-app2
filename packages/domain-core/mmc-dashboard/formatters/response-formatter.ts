@@ -18,6 +18,12 @@ export interface StandardResponse<T> {
 }
 
 /**
+ * Alias for StandardResponse — satisfies callers expecting ApiResponse<T>.
+ * Defined locally to avoid cross-package imports in this formatter.
+ */
+export type ApiResponse<T> = StandardResponse<T>
+
+/**
  * Helper function: Round half-up to specified decimals
  * Uses ROUND_HALF_UP (0.5 rounds up) rather than banker's rounding
  */
@@ -409,7 +415,9 @@ export function formatExportResponse(data: {
   }
 
   // Extract headers from first row
-  const headers = Object.keys(data.rows[0])
+  // Non-null assertion is safe: length > 0 check above guarantees element exists
+  const firstRow = data.rows[0]!
+  const headers = Object.keys(firstRow)
   const headerRow = headers.join(',')
 
   // Format each row

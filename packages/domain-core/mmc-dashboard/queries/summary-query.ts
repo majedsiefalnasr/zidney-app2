@@ -1,2 +1,155 @@
 /**
- * Summary Endpoint Query Builder\n *\n * Purpose: Build SQL query for dashboard summary (commercial health)\n * - License status aggregation\n * - Current month revenue\n * - Year-to-date revenue\n * - Last month revenue (for growth)\n *\n * File: packages/domain-core/mmc-dashboard/queries/summary-query.ts\n * Task: T012 [P]\n * Phase: 1 - Backend Implementation (parallel)\n *\n * SQL Optimization:\n * - Uses pre-built indexes: idx_licenses_status, idx_revenue_records_created_at\n * - Two queries executed in parallel via Promise.all()\n * - Expected execution time: <50ms each query\n * - Cache TTL: 5 minutes (refresh via cache middleware)\n */\n\nimport { Pool } from 'pg'\n\nexport interface SummaryQueryParams {\n  correlation_id: string\n}\n\n/**\n * Get license counts by status\n */\nexport async function getLicenseCountsByStatus(\n  pool: Pool,\n  correlationId: string\n): Promise<{ status: string; count: number }[]> {\n  const query = `\n    SELECT status, COUNT(*) as count\n    FROM licenses\n    WHERE deleted_at IS NULL\n    GROUP BY status\n    ORDER BY CASE \n      WHEN status = 'ACTIVE' THEN 1\n      WHEN status = 'SOFT_LOCKED' THEN 2\n      WHEN status = 'ARCHIVED' THEN 3\n    END\n  `\n\n  try {\n    const result = await pool.query(query)\n    return result.rows\n  } catch (error) {\n    const msg = error instanceof Error ? error.message : String(error)\n    throw new Error(`License count query failed: ${msg}`)\n  }\n}\n\n/**\n * Get revenue for current month\n */\nexport async function getRevenueCurrentMonth(\n  pool: Pool,\n  correlationId: string\n): Promise<number> {\n  const query = `\n    SELECT SUM(amount_cents) as total\n    FROM revenue_records\n    WHERE created_at >= DATE_TRUNC('month', NOW())\n      AND created_at < DATE_TRUNC('month', NOW()) + INTERVAL '1 month'\n  `\n\n  const result = await pool.query(query)\n  return result.rows[0]?.total || 0\n}\n\n/**\n * Get revenue for current year\n */\nexport async function getRevenueCurrentYear(\n  pool: Pool,\n  correlationId: string\n): Promise<number> {\n  const query = `\n    SELECT SUM(amount_cents) as total\n    FROM revenue_records\n    WHERE created_at >= DATE_TRUNC('year', NOW())\n  `\n\n  const result = await pool.query(query)\n  return result.rows[0]?.total || 0\n}\n\n/**\n * Get revenue for last month\n */\nexport async function getRevenueLastMonth(\n  pool: Pool,\n  correlationId: string\n): Promise<number> {\n  const query = `\n    SELECT SUM(amount_cents) as total\n    FROM revenue_records\n    WHERE created_at >= DATE_TRUNC('month', NOW() - INTERVAL '1 month')\n      AND created_at < DATE_TRUNC('month', NOW())\n  `\n\n  const result = await pool.query(query)\n  return result.rows[0]?.total || 0\n}\n\n/**\n * Get total revenue across all time\n */\nexport async function getRevenueTotal(\n  pool: Pool,\n  correlationId: string\n): Promise<number> {\n  const query = `\n    SELECT SUM(amount_cents) as total\n    FROM revenue_records\n  `\n\n  const result = await pool.query(query)\n  return result.rows[0]?.total || 0\n}\n\n/**\n * Get top 5 products by revenue (for summary card)\n */\nexport async function getTopProducts(\n  pool: Pool,\n  correlationId: string,\n  limit: number = 5\n): Promise<{ product_id: string; total_revenue: number, license_count: number }[]> {\n  const query = `\n    SELECT\n      r.product_id,\n      SUM(r.amount_cents) as total_revenue,\n      COUNT(DISTINCT r.license_id) as license_count\n    FROM revenue_records r\n    GROUP BY r.product_id\n    ORDER BY total_revenue DESC\n    LIMIT $1\n  `\n\n  const result = await pool.query(query, [limit])\n  return result.rows\n}\n\nexport default {\n  getLicenseCountsByStatus,\n  getRevenueCurrentMonth,\n  getRevenueCurrentYear,\n  getRevenueLastMonth,\n  getRevenueTotal,\n  getTopProducts,\n}\n
+ * Summary Endpoint Query Builder
+ *
+ * Purpose: Build SQL query for dashboard summary (commercial health)
+ * - License status aggregation
+ * - Current month revenue
+ * - Year-to-date revenue
+ * - Last month revenue (for growth)
+ *
+ * File: packages/domain-core/mmc-dashboard/queries/summary-query.ts
+ * Task: T012 [P]
+ * Phase: 1 - Backend Implementation (parallel)
+ *
+ * SQL Optimization:
+ * - Uses pre-built indexes: idx_licenses_status, idx_revenue_records_created_at
+ * - Two queries executed in parallel via Promise.all()
+ * - Expected execution time: <50ms each query
+ * - Cache TTL: 5 minutes (refresh via cache middleware)
+ */
+
+import { Pool } from 'pg'
+
+export interface SummaryQueryParams {
+  correlation_id: string
+}
+
+/**
+ * Get license counts by status
+ */
+export async function getLicenseCountsByStatus(
+  pool: Pool,
+  correlationId: string
+): Promise<{ status: string; count: number }[]> {
+  const query = `
+    SELECT status, COUNT(*) as count
+    FROM licenses
+    WHERE deleted_at IS NULL
+    GROUP BY status
+    ORDER BY CASE 
+      WHEN status = 'ACTIVE' THEN 1
+      WHEN status = 'SOFT_LOCKED' THEN 2
+      WHEN status = 'ARCHIVED' THEN 3
+    END
+  `
+
+  try {
+    const result = await pool.query(query)
+    return result.rows
+  } catch (error) {
+    const msg = error instanceof Error ? error.message : String(error)
+    throw new Error(`License count query failed: ${msg}`)
+  }
+}
+
+/**
+ * Get revenue for current month
+ */
+export async function getRevenueCurrentMonth(
+  pool: Pool,
+  correlationId: string
+): Promise<number> {
+  const query = `
+    SELECT SUM(amount_cents) as total
+    FROM revenue_records
+    WHERE created_at >= DATE_TRUNC('month', NOW())
+      AND created_at < DATE_TRUNC('month', NOW()) + INTERVAL '1 month'
+  `
+
+  const result = await pool.query(query)
+  return result.rows[0]?.total || 0
+}
+
+/**
+ * Get revenue for current year
+ */
+export async function getRevenueCurrentYear(
+  pool: Pool,
+  correlationId: string
+): Promise<number> {
+  const query = `
+    SELECT SUM(amount_cents) as total
+    FROM revenue_records
+    WHERE created_at >= DATE_TRUNC('year', NOW())
+  `
+
+  const result = await pool.query(query)
+  return result.rows[0]?.total || 0
+}
+
+/**
+ * Get revenue for last month
+ */
+export async function getRevenueLastMonth(
+  pool: Pool,
+  correlationId: string
+): Promise<number> {
+  const query = `
+    SELECT SUM(amount_cents) as total
+    FROM revenue_records
+    WHERE created_at >= DATE_TRUNC('month', NOW() - INTERVAL '1 month')
+      AND created_at < DATE_TRUNC('month', NOW())
+  `
+
+  const result = await pool.query(query)
+  return result.rows[0]?.total || 0
+}
+
+/**
+ * Get total revenue across all time
+ */
+export async function getRevenueTotal(
+  pool: Pool,
+  correlationId: string
+): Promise<number> {
+  const query = `
+    SELECT SUM(amount_cents) as total
+    FROM revenue_records
+  `
+
+  const result = await pool.query(query)
+  return result.rows[0]?.total || 0
+}
+
+/**
+ * Get top 5 products by revenue (for summary card)
+ */
+export async function getTopProducts(
+  pool: Pool,
+  correlationId: string,
+  limit: number = 5
+): Promise<{ product_id: string; total_revenue: number, license_count: number }[]> {
+  const query = `
+    SELECT
+      r.product_id,
+      SUM(r.amount_cents) as total_revenue,
+      COUNT(DISTINCT r.license_id) as license_count
+    FROM revenue_records r
+    GROUP BY r.product_id
+    ORDER BY total_revenue DESC
+    LIMIT $1
+  `
+
+  const result = await pool.query(query, [limit])
+  return result.rows
+}
+
+export default {
+  getLicenseCountsByStatus,
+  getRevenueCurrentMonth,
+  getRevenueCurrentYear,
+  getRevenueLastMonth,
+  getRevenueTotal,
+  getTopProducts,
+}
+

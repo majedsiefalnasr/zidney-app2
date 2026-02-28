@@ -9,8 +9,8 @@
  */
 
 import * as productService from '@zidney/domain-core/products/productService'
-import { Module } from '@zidney/types/enums/Module'
 import { ProductStatus } from '@zidney/types/products/Product'
+import { Module } from '@zidney/types/enums/Module'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import {
   cleanupTestContext,
@@ -74,7 +74,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
       const input = {
         name: { en: 'Consistency Test' },
         slug: 'consistency',
-        enabled_modules: ['MODULE_ATTEMPT', 'MODULE_REPORTING'],
+        enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
       }
 
       const product = await productService.createProduct(
@@ -93,11 +93,11 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         [product.id]
       )
 
-      expect(versionResult.rows[0].product_id).toBe(product.id)
-      expect(auditResult.rows[0].product_id).toBe(product.id)
+      expect(versionResult.rows[0]!.product_id).toBe(product.id)
+      expect(auditResult.rows[0]!.product_id).toBe(product.id)
 
       // Module arrays should match
-      expect(JSON.parse(versionResult.rows[0].enabled_modules)).toEqual(
+      expect(JSON.parse(versionResult.rows[0]!.enabled_modules)).toEqual(
         input.enabled_modules
       )
     })
@@ -154,7 +154,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_versions WHERE product_id = $1',
         [product.id]
       )
-      const countBefore = parseInt(beforeCount.rows[0].count)
+      const countBefore = parseInt(beforeCount.rows[0]!.count)
 
       // Try invalid update
       try {
@@ -174,7 +174,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_versions WHERE product_id = $1',
         [product.id]
       )
-      const countAfter = parseInt(afterCount.rows[0].count)
+      const countAfter = parseInt(afterCount.rows[0]!.count)
 
       expect(countAfter).toBe(countBefore)
     })
@@ -194,7 +194,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_audit_logs WHERE product_id = $1',
         [product.id]
       )
-      const auditBefore = parseInt(beforeAudit.rows[0].count)
+      const auditBefore = parseInt(beforeAudit.rows[0]!.count)
 
       // Try invalid update
       try {
@@ -214,7 +214,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_audit_logs WHERE product_id = $1',
         [product.id]
       )
-      const auditAfter = parseInt(afterAudit.rows[0].count)
+      const auditAfter = parseInt(afterAudit.rows[0]!.count)
 
       expect(auditAfter).toBe(auditBefore)
     })
@@ -393,7 +393,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         [product.id]
       )
 
-      expect(parseInt(versions.rows[0].count)).toBeGreaterThanOrEqual(2)
+      expect(parseInt(versions.rows[0]!.count)).toBeGreaterThanOrEqual(2)
     })
   })
 
@@ -430,7 +430,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
       const products = await dbClient.query(
         'SELECT COUNT(*) as count FROM products'
       )
-      expect(parseInt(products.rows[0].count)).toBe(1)
+      expect(parseInt(products.rows[0]!.count)).toBe(1)
 
       // Verify consistent state
       const list = await productService.listProducts(dbClient, {})

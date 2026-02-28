@@ -97,7 +97,7 @@ export class WebSocketRateLimiter {
       }
 
       // Add message to window
-      // @ts-ignore: LOGIC-BUG: Redis zAdd arg type mismatch — see INFRA-001-LOGIC-09
+      // @ts-ignore: LOGIC-BUG: Redis zAdd arg type mismatch — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
       await redis.zAdd(key, { score: now, value: `${now}:${Math.random()}` })
 
       // Set key expiration (60 seconds past last message)

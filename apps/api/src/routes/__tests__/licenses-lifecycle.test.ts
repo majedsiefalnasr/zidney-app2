@@ -52,7 +52,7 @@ function createMockContext(overrides = {}) {
     get: vi.fn(),
     set: vi.fn(),
     json: vi.fn((data, opts) => ({ data, opts })),
-    status: vi.fn(function () {
+    status: vi.fn(function (this: any) {
       return this
     }),
   } as unknown as Context

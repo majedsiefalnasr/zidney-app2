@@ -275,7 +275,7 @@ describe('POST /submit Integration (Pessimistic Locking)', () => {
       { status: 409 }, // Locked
     ]
 
-    expect(responses[0].status).toBe(202) // Success
-    expect(responses[1].status).toBe(409) // Conflict
+    expect(responses[0]!.status).toBe(202) // Success
+    expect(responses[1]!.status).toBe(409) // Conflict
   })
 })

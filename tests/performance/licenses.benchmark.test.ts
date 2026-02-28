@@ -257,7 +257,7 @@ describe('T115: Caching Strategy Validation', () => {
 
     // Duplicate query within cache window (should use cache)
     const dupeTimestamp = Date.now() + 1000 // 1 second later
-    const shouldUseCache = dupeTimestamp - queryLog[0].timestamp < cacheWindow
+    const shouldUseCache = dupeTimestamp - queryLog[0]!.timestamp < cacheWindow
 
     expect(shouldUseCache).toBe(true)
   })

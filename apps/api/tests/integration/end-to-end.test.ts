@@ -34,7 +34,7 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
       ,
       [`e2e-ws-${runId}`]
     )
-    workspaceId = wsRes.rows[0].id
+    workspaceId = wsRes.rows[0]!.id
     pool = getTenantPool(workspaceId)
 
     await pool.query('SELECT pg_advisory_lock($1)', [ddlLockId])
@@ -73,7 +73,7 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
        RETURNING id`,
       [workspaceId, `e2e-${runId}@test.com`]
     )
-    userId = userRes.rows[0].id
+    userId = userRes.rows[0]!.id
 
     // Create exam
     const examRes = await pool.query(
@@ -82,7 +82,7 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
        RETURNING id`,
       [workspaceId]
     )
-    examId = examRes.rows[0].id
+    examId = examRes.rows[0]!.id
 
     // Enroll user
     await pool.query(
@@ -236,8 +236,8 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
     }
 
     // All should be independent
-    expect(attempts[0].id).not.toBe(attempts[1].id)
-    expect(attempts[1].id).not.toBe(attempts[2].id)
+    expect(attempts[0]!.id).not.toBe(attempts[1]!.id)
+    expect(attempts[1]!.id).not.toBe(attempts[2]!.id)
   })
 
   // T055.3: Concurrent Attempts By Multiple Users
@@ -262,10 +262,10 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
       await pool.query(
         `INSERT INTO enrollments (workspace_id, user_id, exam_id)
          VALUES ($1, $2, $3)`,
-        [workspaceId, userRes.rows[0].id, examId]
+        [workspaceId, userRes.rows[0]!.id, examId]
       )
 
-      users.push(userRes.rows[0])
+      users.push(userRes.rows[0]!)
     }
 
     // All users create attempts
@@ -401,7 +401,7 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
     )
 
     // Counts can differ but no cross-workspace pollution
-    expect(parseInt(count1.rows[0].count)).toBeGreaterThanOrEqual(0)
-    expect(parseInt(count2.rows[0].count)).toBeGreaterThanOrEqual(0)
+    expect(parseInt(count1.rows[0]!.count)).toBeGreaterThanOrEqual(0)
+    expect(parseInt(count2.rows[0]!.count)).toBeGreaterThanOrEqual(0)
   })
 })

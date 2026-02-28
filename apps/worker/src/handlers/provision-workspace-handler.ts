@@ -162,7 +162,7 @@ export class ProvisionWorkspaceHandler {
 
       // ========== STEP 2: Acquire Distributed Lock ==========
       completedSteps.push(ProvisioningStep.ACQUIRE_LOCK)
-      // @ts-ignore: LOGIC-BUG: LockResult type from acquireLock missing leaseKey property required by lock type — see INFRA-001-LOGIC-08
+      // @ts-ignore: LOGIC-BUG: LockResult type from acquireLock missing leaseKey property required by lock type — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
       lock = await this.lockService.acquireLock(
         `import-provisioning:${job.licenseId}`
       )
@@ -174,7 +174,7 @@ export class ProvisionWorkspaceHandler {
         }
       }
 
-      // @ts-ignore: LOGIC-BUG: logLockOperation called with 2 args but expects 3 — see INFRA-001-LOGIC-08
+      // @ts-ignore: LOGIC-BUG: logLockOperation called with 2 args but expects 3 — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
       this.logger.logLockOperation('Distributed lock acquired', {
         license_id: job.licenseId,
       })
@@ -198,7 +198,7 @@ export class ProvisionWorkspaceHandler {
           licenseId: job.licenseId,
           workspaceSlug: job.workspaceSlug,
           databaseName: idempotencyResult.dbName,
-          // @ts-ignore: LOGIC-BUG: registryId does not exist on IdempotencyCheckResult type — see INFRA-001-LOGIC-08
+          // @ts-ignore: LOGIC-BUG: registryId does not exist on IdempotencyCheckResult type — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
           registryId: idempotencyResult.registryId,
           completedSteps,
           durationMs: Date.now() - startTime,
@@ -212,22 +212,22 @@ export class ProvisionWorkspaceHandler {
       // ========== STEP 4: Create Database ==========
       completedSteps.push(ProvisioningStep.CREATE_DATABASE)
       dbName = `workspace_${job.workspaceSlug}`
-      // @ts-ignore: LOGIC-BUG: createDatabase called with 2 args but expects 1 — see INFRA-001-LOGIC-08
+      // @ts-ignore: LOGIC-BUG: createDatabase called with 2 args but expects 1 — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
       const dbCreateResult = await this.dbService.createDatabase(
         dbName,
-        // @ts-ignore: LOGIC-BUG: createDatabase called with 2 args but expects 1 — see INFRA-001-LOGIC-08
+        // @ts-ignore: LOGIC-BUG: createDatabase called with 2 args but expects 1 — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
         'en_US.UTF-8'
       )
 
       if (!dbCreateResult.success) {
         throw {
           code: ProvisioningErrorCode.PROVIDER_REQUEST_FAILED,
-          // @ts-ignore: LOGIC-BUG: errorMessage does not exist on DatabaseOperation type — see INFRA-001-LOGIC-08
+          // @ts-ignore: LOGIC-BUG: errorMessage does not exist on DatabaseOperation type — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
           message: `Failed to create database: ${dbCreateResult.errorMessage}`,
         }
       }
 
-      // @ts-ignore: LOGIC-BUG: logDatabaseOperation called with 2 args but expects 3-4 — see INFRA-001-LOGIC-08
+      // @ts-ignore: LOGIC-BUG: logDatabaseOperation called with 2 args but expects 3-4 — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
       this.logger.logDatabaseOperation('Database created', {
         database: dbName,
         license_id: job.licenseId,
@@ -236,10 +236,10 @@ export class ProvisionWorkspaceHandler {
       // ========== STEP 5: Run Baseline Migrations ==========
       completedSteps.push(ProvisioningStep.RUN_MIGRATIONS)
       const pool = await this.dbService.getTenantPool(dbName)
-      // @ts-ignore: LOGIC-BUG: runBaseline called with 2 args but expects 3-4 — see INFRA-001-LOGIC-08
+      // @ts-ignore: LOGIC-BUG: runBaseline called with 2 args but expects 3-4 — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
       const migrationResult = await this.migrationRunner.runBaseline(
         pool,
-        // @ts-ignore: LOGIC-BUG: runBaseline called with 2 args but expects 3-4 — see INFRA-001-LOGIC-08
+        // @ts-ignore: LOGIC-BUG: runBaseline called with 2 args but expects 3-4 — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
         job.usesDivisions
       )
 
@@ -257,7 +257,7 @@ export class ProvisionWorkspaceHandler {
 
       // ========== STEP 6: Seed Data ==========
       completedSteps.push(ProvisioningStep.SEED_DATA)
-      // @ts-ignore: LOGIC-BUG: seed called with 2 args but expects 6-7 — see INFRA-001-LOGIC-08
+      // @ts-ignore: LOGIC-BUG: seed called with 2 args but expects 6-7 — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
       const seedResult = await this.seedService.seed(pool, {
         organization_name: job.organizationName,
         student_limit: job.studentLimit,
@@ -299,12 +299,12 @@ export class ProvisionWorkspaceHandler {
 
       // ========== STEP 8: Insert Registry ==========
       completedSteps.push(ProvisioningStep.INSERT_REGISTRY)
-      // @ts-ignore: LOGIC-BUG: insertRegistry called with 1 object arg but expects 4 positional args — see INFRA-001-LOGIC-08
+      // @ts-ignore: LOGIC-BUG: insertRegistry called with 1 object arg but expects 4 positional args — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
       const registryResult = await this.registryService.insertRegistry({
         license_id: job.licenseId,
         workspace_slug: job.workspaceSlug,
         db_name: dbName,
-        // @ts-ignore: LOGIC-BUG: schemaVersion does not exist on MigrationRunResult type — see INFRA-001-LOGIC-08
+        // @ts-ignore: LOGIC-BUG: schemaVersion does not exist on MigrationRunResult type — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
         schema_version: migrationResult.schemaVersion || '1.0.0',
       })
 
@@ -341,15 +341,15 @@ export class ProvisionWorkspaceHandler {
       // ========== STEP 10: Release Lock ==========
       completedSteps.push(ProvisioningStep.RELEASE_LOCK)
       if (lock) {
-        // @ts-ignore: LOGIC-BUG: releaseLock called with 2 args but expects 1 — see INFRA-001-LOGIC-08
+        // @ts-ignore: LOGIC-BUG: releaseLock called with 2 args but expects 1 — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
         await this.lockService.releaseLock(
           `import-provisioning:${job.licenseId}`,
-          // @ts-ignore: LOGIC-BUG: releaseLock called with 2 args but expects 1 — see INFRA-001-LOGIC-08
+          // @ts-ignore: LOGIC-BUG: releaseLock called with 2 args but expects 1 — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
           lock.leaseKey
         )
       }
 
-      // @ts-ignore: LOGIC-BUG: logLockOperation called with 2 args but expects 3 — see INFRA-001-LOGIC-08
+      // @ts-ignore: LOGIC-BUG: logLockOperation called with 2 args but expects 3 — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
       this.logger.logLockOperation('Distributed lock released', {
         license_id: job.licenseId,
       })
@@ -411,10 +411,10 @@ export class ProvisionWorkspaceHandler {
 
       // Release lock if held
       if (lock) {
-        // @ts-ignore: LOGIC-BUG: releaseLock called with 2 args but expects 1 — see INFRA-001-LOGIC-08
+        // @ts-ignore: LOGIC-BUG: releaseLock called with 2 args but expects 1 — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
         await this.lockService.releaseLock(
           `import-provisioning:${job.licenseId}`,
-          // @ts-ignore: LOGIC-BUG: releaseLock called with 2 args but expects 1 — see INFRA-001-LOGIC-08
+          // @ts-ignore: LOGIC-BUG: releaseLock called with 2 args but expects 1 — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
           lock.leaseKey
         )
       }
@@ -425,17 +425,17 @@ export class ProvisionWorkspaceHandler {
       if (isRetriable && (job.retryCount || 0) < 3) {
         // Re-enqueue for retry
         const retryResult = await this.retryEnqueuer.retryJob(job)
-        // @ts-ignore: LOGIC-BUG: logRetry called with 2 args but expects 4 — see INFRA-001-LOGIC-08
+        // @ts-ignore: LOGIC-BUG: logRetry called with 2 args but expects 4 — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
         this.logger.logRetry('Job queued for retry', {
           license_id: job.licenseId,
           retry_count: retryResult.retryCount,
         })
       } else {
         // Move to DLQ
-        // @ts-ignore: LOGIC-BUG: moveToDLQ called with 2 args but expects 4 — see INFRA-001-LOGIC-08
+        // @ts-ignore: LOGIC-BUG: moveToDLQ called with 2 args but expects 4 — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
         await this.retryEnqueuer.moveToDLQ(
           job,
-          // @ts-ignore: LOGIC-BUG: moveToDLQ called with 2 args but expects 4 — see INFRA-001-LOGIC-08
+          // @ts-ignore: LOGIC-BUG: moveToDLQ called with 2 args but expects 4 — see INFRA-001-LOGIC-08 [INFRA-001-LOGIC-08]
           `Provisioning failed: ${errorCode} - ${errorMessage}`
         )
       }

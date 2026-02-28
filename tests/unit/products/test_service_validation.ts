@@ -12,7 +12,7 @@
 import {
   validateModulesEnum,
   validateProductName,
-  validateSlug,
+  validateSlugFormat as validateSlug,
 } from '@zidney/validation/products/productValidation'
 import { describe, expect, it } from 'vitest'
 

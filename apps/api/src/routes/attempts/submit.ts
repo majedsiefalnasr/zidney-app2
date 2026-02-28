@@ -415,7 +415,7 @@ export async function submitAttemptHandler(c: Context) {
       correlation_id: correlationId,
       workspace_id: workspace.id,
       attempt_id: attemptId,
-      // @ts-ignore: LOGIC-BUG: result type unknown - see INFRA-001-LOGIC-09
+      // @ts-ignore: LOGIC-BUG: result type unknown - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
       job_id: result.jobId,
       elapsed_ms: Date.now() - startTime,
     })
@@ -426,11 +426,11 @@ export async function submitAttemptHandler(c: Context) {
         data: {
           id: attemptId,
           status: 'SUBMITTED',
-          // @ts-ignore: LOGIC-BUG: result type unknown - see INFRA-001-LOGIC-09
+          // @ts-ignore: LOGIC-BUG: result type unknown - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           submitted_at: result.submittedAt.toISOString(),
-          // @ts-ignore: LOGIC-BUG: result type unknown - see INFRA-001-LOGIC-09
+          // @ts-ignore: LOGIC-BUG: result type unknown - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           server_time: result.submittedAt.toISOString(),
-          // @ts-ignore: LOGIC-BUG: result type unknown - see INFRA-001-LOGIC-09
+          // @ts-ignore: LOGIC-BUG: result type unknown - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           job_id: result.jobId,
           polling_url: `/api/workspaces/${workspace.slug}/attempts/${attemptId}/result`,
         },

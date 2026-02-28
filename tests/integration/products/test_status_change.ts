@@ -11,6 +11,7 @@
 
 import * as productService from '@zidney/domain-core/products/productService'
 import { ProductStatus } from '@zidney/types/products/Product'
+import { Module } from '@zidney/types/enums/Module'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import {
   cleanupTestContext,
@@ -44,7 +45,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         {
           name: { en: 'Status Test' },
           slug: 'status-trans',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -67,7 +68,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         {
           name: { en: 'Toggle Test' },
           slug: 'toggle',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -95,7 +96,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         {
           name: { en: 'Idempotent' },
           slug: 'idem',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -125,7 +126,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         {
           name: { en: 'Version Immutable' },
           slug: 'version-immut',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -148,7 +149,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         {
           name: { en: 'Multi Status' },
           slug: 'multi-status',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -186,7 +187,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         {
           name: { en: 'No Version Record' },
           slug: 'no-ver-rec',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -195,7 +196,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_versions WHERE product_id = $1',
         [product.id]
       )
-      const beforeNum = parseInt(beforeCount.rows[0].count)
+      const beforeNum = parseInt(beforeCount.rows[0]!.count)
 
       await productService.changeProductStatus(
         dbClient,
@@ -208,7 +209,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         'SELECT COUNT(*) as count FROM product_versions WHERE product_id = $1',
         [product.id]
       )
-      const afterNum = parseInt(afterCount.rows[0].count)
+      const afterNum = parseInt(afterCount.rows[0]!.count)
 
       expect(afterNum).toBe(beforeNum)
       expect(afterNum).toBe(1) // Only the initial version
@@ -222,7 +223,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         {
           name: { en: 'Audit Status' },
           slug: 'audit-status',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -251,7 +252,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         {
           name: { en: 'Status No Version' },
           slug: 'status-no-ver',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -269,7 +270,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       )
 
       expect(audits.rows.length).toBe(1)
-      const audit = audits.rows[0]
+      const audit = audits.rows[0]!
       // STATUS_CHANGE should not have version tracking
       expect(
         audit.previous_version === null || audit.new_version === null
@@ -282,7 +283,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         {
           name: { en: 'Status History' },
           slug: 'status-hist',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -312,7 +313,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       )
 
       expect(audits.rows.length).toBe(3)
-      expect(audits.rows.every((r) => r.action === 'STATUS_CHANGE')).toBe(true)
+      expect(audits.rows.every((r: any) => r.action === 'STATUS_CHANGE')).toBe(true)
     })
   })
 
@@ -324,7 +325,7 @@ describe('T056: Product Status Change Integration Tests', () => {
           name: { en: 'Data Preserve', ar: 'الحفاظ على البيانات' },
           slug: 'data-pres',
           description: 'Important description',
-          enabled_modules: ['MODULE_ATTEMPT', 'MODULE_REPORTING'],
+          enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
         },
         ctx.userId
       )
@@ -351,7 +352,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         {
           name: { en: 'Timestamp Preserve' },
           slug: 'ts-pres',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -378,7 +379,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         {
           name: { en: 'GET Status' },
           slug: 'get-status',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -404,7 +405,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         {
           name: { en: 'List Status' },
           slug: 'list-status',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )
@@ -435,7 +436,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         {
           name: { en: 'Invalid Status' },
           slug: 'inv-status',
-          enabled_modules: ['MODULE_ATTEMPT'],
+          enabled_modules: [Module.MCQ],
         },
         ctx.userId
       )

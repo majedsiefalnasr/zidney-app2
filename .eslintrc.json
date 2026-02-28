@@ -20,6 +20,20 @@
   "rules": {
     "no-console": "warn",
     "@typescript-eslint/no-explicit-any": "warn",
+    "@typescript-eslint/ban-ts-comment": [
+      "error",
+      {
+        "ts-ignore": {
+          "descriptionFormat": "^: .+ \\[.+\\]$"
+        },
+        "ts-nocheck": false,
+        "ts-check": false,
+        "ts-expect-error": {
+          "descriptionFormat": "^: .+ \\[.+\\]$"
+        },
+        "minimumDescriptionLength": 10
+      }
+    ],
     "@typescript-eslint/no-unused-vars": [
       "warn",
       {

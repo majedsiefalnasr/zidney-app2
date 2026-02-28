@@ -126,7 +126,8 @@ export function sign(
 
   if (options.expiresIn != null) {
     const expSeconds = parseExpiresIn(options.expiresIn)
-    const base = typeof tokenPayload.iat === 'number' ? tokenPayload.iat : issuedAt
+    const base =
+      typeof tokenPayload.iat === 'number' ? tokenPayload.iat : issuedAt
     tokenPayload.exp = base + expSeconds
   }
 
@@ -154,16 +155,21 @@ export function verify(
     throw new JsonWebTokenError('jwt malformed')
   }
 
-  const header = parseJsonPart<{ alg?: string }>(parts[0], 'header')
-  const payload = parseJsonPart<Record<string, unknown>>(parts[1], 'payload')
+  // Guaranteed non-undefined: we checked parts.length === 3 above
+  const part0 = parts[0]!
+  const part1 = parts[1]!
+  const part2 = parts[2]!
+
+  const header = parseJsonPart<{ alg?: string }>(part0, 'header')
+  const payload = parseJsonPart<Record<string, unknown>>(part1, 'payload')
   const alg = assertValidAlgorithm(header.alg)
 
   if (options.algorithms && !options.algorithms.includes(alg)) {
     throw new JsonWebTokenError('invalid algorithm')
   }
 
-  const expectedSignature = buildSignature(`${parts[0]}.${parts[1]}`, secret)
-  if (!secureEquals(parts[2], expectedSignature)) {
+  const expectedSignature = buildSignature(`${part0}.${part1}`, secret)
+  if (!secureEquals(part2, expectedSignature)) {
     throw new JsonWebTokenError('invalid signature')
   }
 

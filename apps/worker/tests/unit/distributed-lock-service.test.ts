@@ -7,11 +7,12 @@
 
 import { Redis } from 'ioredis'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import { DistributedLockService } from '../src/services/distributed-lock-service'
+import { DistributedLockService } from '../../src/services/distributed-lock-service'
 
 describe('DistributedLockService', () => {
   let redis: Redis
-  let lockService: DistributedLockService
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let lockService: any
   const testLockKey = 'test:lock:provisioning:test-license'
 
   beforeEach(async () => {

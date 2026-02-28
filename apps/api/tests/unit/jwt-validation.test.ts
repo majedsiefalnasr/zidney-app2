@@ -47,12 +47,12 @@ class JWTValidator {
       }
 
       const header = JSON.parse(
-        Buffer.from(parts[0], 'base64').toString('utf-8')
+        Buffer.from(parts[0]!, 'base64').toString('utf-8')
       )
       const payload = JSON.parse(
-        Buffer.from(parts[1], 'base64').toString('utf-8')
+        Buffer.from(parts[1]!, 'base64').toString('utf-8')
       )
-      const signature = parts[2]
+      const signature = parts[2]!
 
       return {
         header,

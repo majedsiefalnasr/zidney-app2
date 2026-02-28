@@ -187,7 +187,7 @@ describe('Response Formatter - Unit Tests', () => {
       for (const amount of amounts) {
         const formatted = formatCurrency(amount)
         const parts = formatted.split('.')
-        expect(parts[1].length).toBe(2)
+        expect(parts[1]!.length).toBe(2)
       }
     })
   })

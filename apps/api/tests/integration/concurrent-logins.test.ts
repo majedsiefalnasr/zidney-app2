@@ -56,23 +56,23 @@ describe('Concurrent Logins', () => {
        VALUES ('concurrent-test', 'Concurrent Test', 'ACTIVE', 1, '0.1.0')
        RETURNING *`
     )
-    workspace = ws.rows[0]
+    workspace = ws.rows[0]!
 
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
     const u = await pool.query(
       `INSERT INTO ${CONCURRENT_USERS_TABLE} (workspace_id, email, password_hash, role, token_version, failed_login_count)
        VALUES ($1, 'concurrent@test.com', 'hash', 'student', 1, 0)
        RETURNING id, email`,
       [workspace.id]
     )
-    user = u.rows[0]
+    user = u.rows[0]!
   })
 
   afterAll(async () => {
     if (!workspace || !user) {
       return
     }
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
     await pool.query(`DELETE FROM ${CONCURRENT_USERS_TABLE} WHERE id = $1`, [
       user.id,
     ])
@@ -86,7 +86,7 @@ describe('Concurrent Logins', () => {
     if (!workspace || !user) {
       return
     }
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
     await pool.query(
       `UPDATE ${CONCURRENT_USERS_TABLE} SET failed_login_count = 0 WHERE id = $1`,
       [user.id]
@@ -96,7 +96,7 @@ describe('Concurrent Logins', () => {
   it('should use FOR UPDATE to lock user row', async () => {
     // Simulating login handler with FOR UPDATE
 
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
     const client = await pool.connect()
 
     try {
@@ -119,7 +119,7 @@ describe('Concurrent Logins', () => {
   })
 
   it('should block concurrent login attempts on same user', async () => {
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     const client1 = await pool.connect()
     const client2 = await pool.connect()
@@ -161,7 +161,7 @@ describe('Concurrent Logins', () => {
   })
 
   it('should handle SERIALIZABLE isolation correctly', async () => {
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     // Reset counter
     await pool.query(
@@ -179,7 +179,7 @@ describe('Concurrent Logins', () => {
         `SELECT failed_login_count FROM ${CONCURRENT_USERS_TABLE} WHERE id = $1`,
         [user.id]
       )
-      const count1 = r1a.rows[0].failed_login_count
+      const count1 = r1a.rows[0]!.failed_login_count
 
       // Transaction 2
       await client2.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
@@ -187,7 +187,7 @@ describe('Concurrent Logins', () => {
         `SELECT failed_login_count FROM ${CONCURRENT_USERS_TABLE} WHERE id = $1`,
         [user.id]
       )
-      const count2 = r2a.rows[0].failed_login_count
+      const count2 = r2a.rows[0]!.failed_login_count
 
       // Both read same value
       expect(count1).toBe(count2)
@@ -218,7 +218,7 @@ describe('Concurrent Logins', () => {
         [user.id]
       )
 
-      expect(final.rows[0].failed_login_count).toBeGreaterThanOrEqual(1)
+      expect(final.rows[0]!.failed_login_count).toBeGreaterThanOrEqual(1)
     } finally {
       try {
         await client1.query('ROLLBACK')
@@ -236,7 +236,7 @@ describe('Concurrent Logins', () => {
   })
 
   it('should increment failed login count atomically', async () => {
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     // Simulate two concurrent login handlers
     await pool.query(
@@ -284,7 +284,7 @@ describe('Concurrent Logins', () => {
         [user.id]
       )
 
-      expect(result.rows[0].failed_login_count).toBe(2)
+      expect(result.rows[0]!.failed_login_count).toBe(2)
     } finally {
       try {
         await client1.query('ROLLBACK')

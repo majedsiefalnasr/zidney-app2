@@ -46,9 +46,9 @@ class SchemaVersionChecker {
     }
 
     return {
-      major: parseInt(match[1]),
-      minor: parseInt(match[2]),
-      patch: parseInt(match[3]),
+      major: parseInt(match[1]!),
+      minor: parseInt(match[2]!),
+      patch: parseInt(match[3]!),
     }
   }
 
@@ -89,7 +89,7 @@ class SchemaVersionChecker {
 
     // Check explicit mapping first
     if (key in this.compatibilityMatrix) {
-      return this.compatibilityMatrix[key]
+      return this.compatibilityMatrix[key]!
     }
 
     // Parse versions

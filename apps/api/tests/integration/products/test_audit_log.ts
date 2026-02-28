@@ -125,8 +125,8 @@ describe('Integration: Products - Audit Log (T058)', () => {
     }
 
     expect(
-      new Date(response.body.data.items[0].timestamp).getTime()
-    ).toBeGreaterThan(new Date(response.body.data.items[1].timestamp).getTime())
+      new Date(response.body.data.items[0]!.timestamp).getTime()
+    ).toBeGreaterThan(new Date(response.body.data.items[1]!.timestamp).getTime())
   })
 
   it('should return 401 UNAUTHORIZED if not authenticated', async () => {
@@ -194,7 +194,7 @@ describe('Integration: Products - Audit Log (T058)', () => {
       },
     }
 
-    expect(response.body.data.items[0]).toHaveProperty('performed_by')
-    expect(response.body.data.items[0].performed_by).toBeTruthy()
+    expect(response.body.data.items[0]!).toHaveProperty('performed_by')
+    expect(response.body.data.items[0]!.performed_by).toBeTruthy()
   })
 })

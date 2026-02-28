@@ -256,7 +256,8 @@ export function calculatePercentile(
   const sorted = [...amounts].sort((a, b) => a - b)
   const index = Math.ceil((percentile / 100) * sorted.length) - 1
 
-  return sorted[Math.max(0, index)]
+  // sorted is non-empty (checked above); Math.max(0, index) stays in bounds
+  return sorted[Math.max(0, index)] ?? 0
 }
 
 /**

@@ -81,3 +81,8 @@ export {
   getTenantPoolSync,
   queryTenantDatabase,
 }
+
+/**
+ * Master database type for use in tests/other modules
+ */
+export type MasterDatabase = typeof db

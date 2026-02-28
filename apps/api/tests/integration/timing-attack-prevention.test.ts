@@ -140,8 +140,8 @@ describe('Timing Attack Prevention', () => {
 
     // Both checks were performed
     expect(passwordCheckLog).toHaveLength(2)
-    expect(passwordCheckLog[0].checked).toBe(true)
-    expect(passwordCheckLog[1].checked).toBe(true)
+    expect(passwordCheckLog[0]!.checked).toBe(true)
+    expect(passwordCheckLog[1]!.checked).toBe(true)
   })
 
   it('should use bcrypt for constant-time hashing', async () => {

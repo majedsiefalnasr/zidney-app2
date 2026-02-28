@@ -27,7 +27,7 @@ describe('License Middleware', () => {
   const licensesBySlug = new Map<string, LicenseRow>()
   let middleware: any
   let mockLogger: Logger
-  let mockDb: { query: ReturnType<typeof vi.fn> }
+  let mockDb: { query: (...args: any[]) => Promise<any> }
   let mockContext: any
 
   const setLicense = (overrides: Partial<LicenseRow>) => {

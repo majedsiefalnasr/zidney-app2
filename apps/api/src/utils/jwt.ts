@@ -22,7 +22,7 @@ export interface MMCTokenPayload {
  * Sign JWT token
  */
 export async function signToken(payload: any, secret: string): Promise<string> {
-  // @ts-ignore: LOGIC-BUG: Expected 3 arguments in jwt.sign/verify — see INFRA-001-LOGIC-09
+  // @ts-ignore: LOGIC-BUG: Expected 3 arguments in jwt.sign/verify — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
   return sign(payload, secret)
 }
 
@@ -33,7 +33,7 @@ export async function verifyToken(
   token: string,
   secret: string
 ): Promise<Record<string, any>> {
-  // @ts-ignore: LOGIC-BUG: Expected 3 arguments in jwt.sign/verify — see INFRA-001-LOGIC-09
+  // @ts-ignore: LOGIC-BUG: Expected 3 arguments in jwt.sign/verify — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
   return verify(token, secret) as Promise<Record<string, any>>
 }
 

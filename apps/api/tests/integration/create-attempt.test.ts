@@ -36,8 +36,8 @@ describe('POST /api/v1/attempts Integration', () => {
       ,
       [`create-attempt-ws-${runId}`]
     )
-    workspaceId = wsRes.rows[0].id
-    const pool = getTenantPool(workspaceId)
+    workspaceId = wsRes.rows[0]!.id
+    const pool = getTenantPool(workspaceId)!
 
     await pool.query('SELECT pg_advisory_lock($1)', [ddlLockId])
     try {
@@ -83,7 +83,7 @@ describe('POST /api/v1/attempts Integration', () => {
        RETURNING id`,
       [workspaceId, `test-${runId}@test.com`]
     )
-    userId = userRes.rows[0].id
+    userId = userRes.rows[0]!.id
 
     // Create exam
     const examRes = await pool.query(
@@ -92,7 +92,7 @@ describe('POST /api/v1/attempts Integration', () => {
        RETURNING id`,
       [workspaceId]
     )
-    examId = examRes.rows[0].id
+    examId = examRes.rows[0]!.id
 
     // Create enrollment
     await pool.query(
@@ -136,12 +136,12 @@ describe('POST /api/v1/attempts Integration', () => {
     expect(response.body).toHaveProperty('id')
     expect(response.body.status).toBe('IN_PROGRESS')
     expect(response.body.questions).toHaveLength(1)
-    expect(response.body.questions[0].type).toBe('MULTIPLE_CHOICE')
+    expect(response.body.questions[0]!.type).toBe('MULTIPLE_CHOICE')
   })
 
   // T050.2: Returns 400 if user not enrolled
   test('Returns 400 if user not enrolled', async () => {
-    const pool = getTenantPool(workspaceId)
+    const pool = getTenantPool(workspaceId)!
 
     // Create another exam but don't enroll user
     const examRes = await pool.query(
@@ -150,7 +150,7 @@ describe('POST /api/v1/attempts Integration', () => {
        RETURNING id`,
       [workspaceId]
     )
-    const unenrolledExamId = examRes.rows[0].id
+    const unenrolledExamId = examRes.rows[0]!.id
 
     // Mock response
     const response = {
@@ -169,7 +169,7 @@ describe('POST /api/v1/attempts Integration', () => {
 
   // T050.3: Snapshot Created With Questions
   test('Attempt snapshot includes all exam questions', async () => {
-    const pool = getTenantPool(workspaceId)
+    const pool = getTenantPool(workspaceId)!
 
     // Manually verify snapshot structure
     const attemptRes = await pool.query(
@@ -178,7 +178,7 @@ describe('POST /api/v1/attempts Integration', () => {
     )
 
     if (attemptRes.rows.length > 0) {
-      const snapshot = attemptRes.rows[0].question_snapshot
+      const snapshot = attemptRes.rows[0]!.question_snapshot
       expect(snapshot).toBeDefined()
       expect(Array.isArray(snapshot)).toBe(true)
     }

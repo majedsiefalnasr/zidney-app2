@@ -178,9 +178,9 @@ describe('Worker Grading Integration', () => {
       { status: 'COMPLETED', updated_at: '2024-01-01T12:00:15Z' },
     ]
 
-    expect(jobStates[0].status).toBe('PENDING')
-    expect(jobStates[1].status).toBe('PROCESSING')
-    expect(jobStates[2].status).toBe('COMPLETED')
+    expect(jobStates[0]!.status).toBe('PENDING')
+    expect(jobStates[1]!.status).toBe('PROCESSING')
+    expect(jobStates[2]!.status).toBe('COMPLETED')
   })
 
   // T054.5: Result Snapshot Persisted

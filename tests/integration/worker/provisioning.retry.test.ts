@@ -111,7 +111,7 @@ describe('T103: Worker Retry Logic - 6 Backoff Attempts', () => {
     }
 
     expect(mockLogger).toHaveLength(6)
-    expect(mockLogger[0].attempt).toBe(1)
-    expect(mockLogger[5].attempt).toBe(6)
+    expect(mockLogger[0]!.attempt).toBe(1)
+    expect(mockLogger[5]!.attempt).toBe(6)
   })
 })

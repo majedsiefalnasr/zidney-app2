@@ -59,23 +59,23 @@ describe('Account Lockout', () => {
        VALUES ('lockout-test', 'Lockout Test', 'ACTIVE', 1, '0.1.0')
        RETURNING *`
     )
-    workspace = ws.rows[0]
+    workspace = ws.rows[0]!
 
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
     const u = await pool.query(
       `INSERT INTO ${LOCKOUT_USERS_TABLE} (workspace_id, email, password_hash, role, token_version, failed_login_count)
        VALUES ($1, 'lockout@test.com', 'hash', 'student', 1, 0)
        RETURNING id, email, failed_login_count`,
       [workspace.id]
     )
-    user = u.rows[0]
+    user = u.rows[0]!
   })
 
   afterAll(async () => {
     if (!workspace || !user) {
       return
     }
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
     await pool.query(`DELETE FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`, [
       user.id,
     ])
@@ -89,7 +89,7 @@ describe('Account Lockout', () => {
     if (!workspace || !user) {
       return
     }
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
     await pool.query(
       `UPDATE ${LOCKOUT_USERS_TABLE}
        SET failed_login_count = 0,
@@ -100,14 +100,14 @@ describe('Account Lockout', () => {
   })
 
   it('should increment failed login counter', async () => {
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     const before = await pool.query(
       `SELECT failed_login_count FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
 
-    expect(before.rows[0].failed_login_count).toBe(0)
+    expect(before.rows[0]!.failed_login_count).toBe(0)
 
     // Simulate failed login
     await pool.query(
@@ -120,11 +120,11 @@ describe('Account Lockout', () => {
       [user.id]
     )
 
-    expect(after.rows[0].failed_login_count).toBe(1)
+    expect(after.rows[0]!.failed_login_count).toBe(1)
   })
 
   it('should lock account after 5 failed attempts', async () => {
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     // Simulate reaching threshold from a clean state.
     // In production this increment+lock happens atomically in login handler logic.
@@ -144,19 +144,19 @@ describe('Account Lockout', () => {
       [user.id]
     )
 
-    expect(result.rows[0].failed_login_count).toBe(5)
-    expect(result.rows[0].locked_until).not.toBeNull()
+    expect(result.rows[0]!.failed_login_count).toBe(5)
+    expect(result.rows[0]!.locked_until).not.toBeNull()
   })
 
   it('should reject login with 423 while locked', async () => {
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     const result = await pool.query(
       `SELECT locked_until FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`,
       [user.id]
     )
 
-    const lockedUntil = result.rows[0].locked_until
+    const lockedUntil = result.rows[0]!.locked_until
 
     if (lockedUntil && lockedUntil > new Date()) {
       // Account is locked
@@ -166,7 +166,7 @@ describe('Account Lockout', () => {
   })
 
   it('should reset counter on successful login', async () => {
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     // Simulate successful login (counter reset)
     await pool.query(
@@ -182,12 +182,12 @@ describe('Account Lockout', () => {
       [user.id]
     )
 
-    expect(result.rows[0].failed_login_count).toBe(0)
-    expect(result.rows[0].locked_until).toBeNull()
+    expect(result.rows[0]!.failed_login_count).toBe(0)
+    expect(result.rows[0]!.locked_until).toBeNull()
   })
 
   it('should auto-unlock after timeout', async () => {
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     // Lock account
     await pool.query(
@@ -204,7 +204,7 @@ describe('Account Lockout', () => {
       [user.id]
     )
 
-    const lockedUntil = result.rows[0].locked_until
+    const lockedUntil = result.rows[0]!.locked_until
     const isExpired = lockedUntil && lockedUntil < new Date()
 
     expect(isExpired).toBe(true)
@@ -217,7 +217,7 @@ describe('Account Lockout', () => {
   it('should use FOR UPDATE to prevent race conditions', async () => {
     // Simulating concurrent failed logins
 
-    const pool = getTenantPool(workspace.id)
+    const pool = getTenantPool(workspace.id)!
 
     // Reset counter
     await pool.query(
@@ -264,7 +264,7 @@ describe('Account Lockout', () => {
         [user.id]
       )
 
-      expect(result.rows[0].failed_login_count).toBe(2)
+      expect(result.rows[0]!.failed_login_count).toBe(2)
     } finally {
       try {
         await client1.query('ROLLBACK')

@@ -1,1 +1,48 @@
-/**\n * Geographic Revenue Query Builder\n *\n * Purpose: Get revenue grouped by billing country\n * - Calculates avg revenue per license by country\n * - Supports sorting and pagination\n * - Returns country-level aggregates\n *\n * File: packages/domain-core/mmc-dashboard/queries/geographic-query.ts\n * Task: T014 [P]\n * Phase: 1 - Backend Implementation (parallel)\n */\n\nimport { Pool } from 'pg'\n\nexport async function getRevenueByCountry(\n  pool: Pool,\n  sortBy: 'revenue' | 'license_count' = 'revenue',\n  limit?: number,\n  offset?: number\n) {\n  const orderBy =\n    sortBy === 'license_count' ? 'license_count DESC' : 'total_revenue DESC'\n\n  const query = `\n    SELECT\n      COALESCE(r.billing_country, 'UNKNOWN') as country_code,\n      SUM(r.amount_cents) as total_revenue_cents,\n      COUNT(DISTINCT r.license_id) as license_count\n    FROM revenue_records r\n    GROUP BY r.billing_country\n    ORDER BY ${orderBy}\n    ${limit ? 'LIMIT $1' : ''}\n    ${offset ? 'OFFSET $2' : ''}\n  `\n\n  const params = []\n  if (limit) params.push(limit)\n  if (offset) params.push(offset)\n\n  const result = await pool.query(query, params)\n  return result.rows\n}\n\nexport default {\n  getRevenueByCountry,\n}\n
+/**
+ * Geographic Revenue Query Builder
+ *
+ * Purpose: Get revenue grouped by billing country
+ * - Calculates avg revenue per license by country
+ * - Supports sorting and pagination
+ * - Returns country-level aggregates
+ *
+ * File: packages/domain-core/mmc-dashboard/queries/geographic-query.ts
+ * Task: T014 [P]
+ * Phase: 1 - Backend Implementation (parallel)
+ */
+
+import { Pool } from 'pg'
+
+export async function getRevenueByCountry(
+  pool: Pool,
+  sortBy: 'revenue' | 'license_count' = 'revenue',
+  limit?: number,
+  offset?: number
+) {
+  const orderBy =
+    sortBy === 'license_count' ? 'license_count DESC' : 'total_revenue DESC'
+
+  const query = `
+    SELECT
+      COALESCE(r.billing_country, 'UNKNOWN') as country_code,
+      SUM(r.amount_cents) as total_revenue_cents,
+      COUNT(DISTINCT r.license_id) as license_count
+    FROM revenue_records r
+    GROUP BY r.billing_country
+    ORDER BY ${orderBy}
+    ${limit ? 'LIMIT $1' : ''}
+    ${offset ? 'OFFSET $2' : ''}
+  `
+
+  const params = []
+  if (limit) params.push(limit)
+  if (offset) params.push(offset)
+
+  const result = await pool.query(query, params)
+  return result.rows
+}
+
+export default {
+  getRevenueByCountry,
+}
+

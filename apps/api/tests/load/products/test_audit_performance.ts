@@ -93,7 +93,7 @@ describe('Load: Products - Audit Query Performance (T071)', () => {
 
     const duration = Date.now() - startTime
 
-    expect(sorted[0].timestamp > sorted[999].timestamp).toBe(true)
+    expect(sorted[0]!.timestamp > sorted[999]!.timestamp).toBe(true)
     expect(duration).toBeLessThan(200)
   })
 })
