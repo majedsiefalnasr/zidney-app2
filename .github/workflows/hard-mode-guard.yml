@@ -32,10 +32,11 @@ jobs:
           BRANCH="${{ github.head_ref }}"
           echo "Branch: $BRANCH"
 
-          # Branch must match the orchestrator naming pattern: NNN-kebab-stage-name
-          if ! echo "$BRANCH" | grep -qE '^[0-9]{3}[A-Z]?-'; then
-            echo "ERROR: Branch '$BRANCH' does not match the required pattern NNN-kebab-name."
-            echo "       Hard Mode orchestrator branches must start with a zero-padded number prefix (e.g. 005-tenant-provisioning-service)."
+          # Branch must match: NNN-kebab-stage-name OR text-NNN-kebab-stage-name
+          if ! echo "$BRANCH" | grep -qE '^([a-z0-9]+-)?[0-9]{3}[A-Z]?-'; then
+            echo "ERROR: Branch '$BRANCH' does not match the required pattern."
+            echo "       Allowed patterns: NNN-kebab-stage-name or text-NNN-kebab-stage-name"
+            echo "       Examples: 005-tenant-provisioning-service, feature-005-tenant-provisioning-service"
             exit 1
           fi
 
