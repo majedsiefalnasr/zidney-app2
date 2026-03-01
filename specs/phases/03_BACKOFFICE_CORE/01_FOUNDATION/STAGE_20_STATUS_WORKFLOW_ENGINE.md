@@ -11,18 +11,33 @@ Database: Tenant DB only
 
 Status: DRAFT
 Risk Level: UNKNOWN
-Initiated: 2026-03-01T00:00:00.000Z
+Last Updated: 2026-03-01T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Reusable, deterministic workflow state machine (COMPLETED → UNDER_REVIEW → APPROVED → ENABLED)
+- Permission-gated forward and backward transitions
+- Immutable workflow_logs audit table
+- Atomic state transitions (entity update + log insert in single transaction)
+- Generic engine shared across subjects, questions, exams, topics, library files, and templates
+- Server-authoritative timestamps enforced throughout
+- Granular per-transition, per-entity-type permission identifiers
+
+Deferred Scope:
+
+- Per-entity custom workflow states or custom transition graphs
+- Automatic/scheduled workflow transitions
+- Notification or event emission triggered by transitions
+- Bulk batch state transitions
+- UI components for workflow visualization
+- Workflow delegation or multi-approver flows
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 

@@ -1,0 +1,26 @@
+chore(020-status-workflow-engine): complete specify step
+
+Step: Specify (1/7)
+Stage: STAGE_20_STATUS_WORKFLOW_ENGINE
+Phase: 03_BACKOFFICE_CORE/01_FOUNDATION
+Status: DRAFT
+
+What was specified:
+
+- Reusable generic workflow engine with 4-state forward chain
+- 17 functional requirements: transitions, permissions, atomicity, audit log, tenant isolation
+- 6 user stories, 8 success criteria, 7 assumptions, all edge cases resolved
+
+Constraints enforced:
+
+- Database-per-tenant preserved
+- License middleware declared
+- Constitutional compliance confirmed
+
+Artifacts:
+
+- specs/runtime/020-status-workflow-engine/spec.md
+- specs/runtime/020-status-workflow-engine/checklists/requirements.md
+- specs/runtime/020-status-workflow-engine/reports/SPECIFY_REPORT.md
+- specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_20_STATUS_WORKFLOW_ENGINE.md (status: DRAFT)
+- specs/runtime/020-status-workflow-engine/.workflow-state.json
