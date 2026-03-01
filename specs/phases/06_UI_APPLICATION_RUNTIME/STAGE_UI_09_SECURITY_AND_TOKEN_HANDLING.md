@@ -12,36 +12,27 @@ Status: DRAFT
 Risk Level: LOW
 Last Updated: 2026-03-01T00:00:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Token storage policy (in-memory only via Pinia auth store)
-- Authorization header injection via centralised API interceptor
-- Session expiry and 401 response handling (idempotent, authenticated-session-scoped)
-- isHandling401 guard flag for concurrent-401 coalescing
-- Secure logout (full state clear, redirect, optional backend call)
-- Route-level access guards (authentication gate only, no business rules)
-- XSS mitigation (no v-html without sanitization, Vue template escaping)
-- CSRF considerations for JWT-bearer and HttpOnly-cookie transport
-- Sensitive data memory-only policy (zero-tolerance partial token logging)
-- License response handling (423 locked, 426 upgrade, uniform across all apps)
-- All security logic bounded to core/auth/
+- expireSession() action: auth-session-scoped 401 handling with idempotency guard
+- isHandling401 boolean flag in app-level error.interceptor.ts
+- token-redact.ts: pure zero-import token redaction utility
+- 423/426 response via onLicenseError callback (uniform across 3 apps)
+- Auth guard redirect preservation via ?redirect= query param
+- 6 new implementation files + 9 test files + 12 modified files across MMC/Backoffice/Frontoffice
 
 Deferred Scope:
 
-- Refresh token strategy (disabled by default; enabled via core/auth/refresh.ts when needed)
-- HttpOnly cookie storage mode (backend-managed; UI adapts without manual storage)
-- Frontoffice mid-exam 423 interruption (separate stage)
-- 2FA flows
-- OAuth flows
-- Backend authentication implementation
-- RBAC enforcement
+- Refresh token strategy (disabled by default)
+- clearUserSpecificStores() enumeration (deferred to feature stage implementation)
+- 2FA flows, OAuth flows, backend auth implementation, RBAC enforcement
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
