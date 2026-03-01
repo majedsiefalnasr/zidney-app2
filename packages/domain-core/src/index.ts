@@ -42,3 +42,10 @@ export * from './workers/tasks/apply-migration'
 
 // Job hash utility
 export * from './job-hash'
+
+// Translation system (Stage 019)
+export * from './translation/coverage.service'
+export * from './translation/translatable-fields'
+export * from './translation/translation.errors'
+export * from './translation/translation.service'
+export * from './translation/translation.types'

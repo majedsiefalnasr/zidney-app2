@@ -17,10 +17,18 @@
  * ✓ Server-authoritative timestamps
  */
 
+import { computeJobPayloadHash } from '@zidney/domain-core'
 import { createLogger } from '@zidney/logger'
+
+import {
+  countTranslationsForLanguage,
+  deleteTranslationsByLanguage,
+  insertAuditLogBatch,
+} from '../translation/translation.repository'
 
 import { encrypt } from './encryption.service'
 import {
+  LanguageRemovalRequiresAsyncError,
   SettingsNotFoundError,
   SettingsValidationError,
 } from './workspace-settings.errors'
@@ -66,7 +74,15 @@ export interface SettingsRequestContext {
   correlation_id: string
   ip_address: string | null
   user_agent: string | null
+  /**
+   * Optional Redis client (ioredis) — required for async language removal (DRAIN job enqueue).
+   * Provided by backoffice route handler via tenant.redis.
+   */
+  redis?: any
 }
+
+/** Row count threshold for sync vs async language removal (FR-034) */
+const LANGUAGE_REMOVAL_SYNC_THRESHOLD = 10_000
 
 // ---------------------------------------------------------------------------
 // Defaults
@@ -297,6 +313,116 @@ export async function updateSettingsGroup(
 
   const validatedSettings = parseResult.data as Record<string, unknown>
 
+  // ---------------------------------------------------------------------------
+  // T018 (Stage 019): Language removal detection (before transaction)
+  // Detects languages removed from supported_languages.
+  // Sync path (≤10,000): delete translations inside main transaction.
+  // Async path (>10,000): set language_status='removing', enqueue DRAIN job, HTTP 409.
+  // ---------------------------------------------------------------------------
+  let languagesToDeleteSync: string[] = []
+
+  if (group === 'language') {
+    const currentSettingsRow = await repository.getSettings(ctx.db)
+    const currentLangSettings = currentSettingsRow?.language_settings
+    const currentSupported: string[] =
+      currentLangSettings?.supported_languages ?? []
+    const newSupported: string[] =
+      (validatedSettings.supported_languages as string[]) ?? []
+
+    const removedLanguages = currentSupported.filter(
+      (l) => !newSupported.includes(l)
+    )
+
+    if (removedLanguages.length > 0) {
+      const asyncLanguages: string[] = []
+      const syncLanguages: string[] = []
+
+      for (const lang of removedLanguages) {
+        const count = await countTranslationsForLanguage(ctx.db, lang)
+        if (count > LANGUAGE_REMOVAL_SYNC_THRESHOLD) {
+          asyncLanguages.push(lang)
+        } else {
+          syncLanguages.push(lang)
+        }
+      }
+
+      if (asyncLanguages.length > 0) {
+        // Mark languages as 'removing' in language_settings JSONB (non-transactional update)
+        const updatedLangStatus: Record<string, 'active' | 'removing'> = {
+          ...(currentLangSettings?.language_status ?? {}),
+        }
+        for (const lang of asyncLanguages) {
+          updatedLangStatus[lang] = 'removing'
+        }
+
+        await ctx.db.query(
+          `UPDATE workspace_settings
+           SET language_settings = language_settings || jsonb_build_object('language_status', $1::jsonb),
+               updated_at = NOW()
+           WHERE singleton_key = 'SETTINGS'`,
+          [JSON.stringify(updatedLangStatus)]
+        )
+
+        // Enqueue DRAIN job for each async language (best-effort via Redis LPUSH)
+        if (ctx.redis) {
+          for (const lang of asyncLanguages) {
+            const jobPayload = {
+              workspace_slug: ctx.workspace_slug,
+              language_code: lang,
+              batch_size: 500,
+              initiated_by_user_id: ctx.user_id,
+              attempt: 0,
+            }
+            const payloadHash = computeJobPayloadHash(jobPayload)
+            const envelope = {
+              job_id: crypto.randomUUID(),
+              request_id: ctx.correlation_id,
+              workspace_id: ctx.workspace_id,
+              job_name: 'DRAIN_LANGUAGE_TRANSLATIONS',
+              payload: jobPayload,
+              payload_hash: payloadHash,
+              retry_count: 0,
+              max_retries: 3,
+              created_at: new Date().toISOString(),
+            }
+            try {
+              await ctx.redis.lpush(
+                'queue:DRAIN_LANGUAGE_TRANSLATIONS',
+                JSON.stringify(envelope)
+              )
+              logger.info({
+                event: 'drain_language_job_enqueued',
+                workspace_slug: ctx.workspace_slug,
+                workspace_id: ctx.workspace_id,
+                correlation_id: ctx.correlation_id,
+                language_code: lang,
+                job_id: envelope.job_id,
+              })
+            } catch (queueErr) {
+              logger.warn({
+                event: 'drain_language_job_enqueue_failed',
+                workspace_slug: ctx.workspace_slug,
+                workspace_id: ctx.workspace_id,
+                correlation_id: ctx.correlation_id,
+                language_code: lang,
+                error:
+                  queueErr instanceof Error
+                    ? queueErr.message
+                    : String(queueErr),
+              })
+              // Non-fatal: language_status is committed; worker can scan DB for 'removing' languages
+            }
+          }
+        }
+
+        throw new LanguageRemovalRequiresAsyncError(asyncLanguages)
+      }
+
+      // All removals are sync (≤10k each) — schedule for deletion inside transaction
+      languagesToDeleteSync = syncLanguages
+    }
+  }
+
   // Process within transaction
   await ctx.db.query('BEGIN')
 
@@ -333,6 +459,37 @@ export async function updateSettingsGroup(
       dataToStore,
       configVersion
     )
+
+    // T018 (Stage 019): Sync language translation deletion
+    // languagesToDeleteSync is populated only when group === 'language' and all removals are ≤10k
+    if (languagesToDeleteSync.length > 0) {
+      for (const lang of languagesToDeleteSync) {
+        const deletedRows = await deleteTranslationsByLanguage(ctx.db, lang)
+        if (deletedRows.length > 0) {
+          await insertAuditLogBatch(
+            ctx.db,
+            deletedRows.map((row) => ({
+              entity_type: row.entity_type,
+              entity_id: row.entity_id,
+              field_name: row.field_name,
+              language_code: row.language_code,
+              previous_value: row.translated_value,
+            })),
+            ctx.workspace_id,
+            ctx.user_id,
+            ctx.correlation_id
+          )
+          logger.info({
+            event: 'language_translations_deleted_sync',
+            workspace_slug: ctx.workspace_slug,
+            workspace_id: ctx.workspace_id,
+            correlation_id: ctx.correlation_id,
+            language_code: lang,
+            deleted_count: deletedRows.length,
+          })
+        }
+      }
+    }
 
     // Insert audit entry within same transaction
     if (diff.length > 0) {

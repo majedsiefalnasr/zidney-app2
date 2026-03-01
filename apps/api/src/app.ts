@@ -46,6 +46,7 @@ import { licenseEnforcementMiddleware } from './middleware/license-enforcement'
 import { createRateLimitMiddleware } from './middleware/rate-limit.middleware'
 import { backofficeContextRouter } from './routes/backoffice/context'
 import { workspaceSettingsRouter } from './routes/backoffice/settings'
+import { translationRouter } from './routes/backoffice/translations/index'
 import { createBackofficeWsRoute } from './routes/backoffice/ws'
 
 // Utility logger
@@ -137,6 +138,9 @@ app.route('/api/v1', backofficeContextRouter)
 
 // Workspace Settings endpoints — requires institution admin RBAC
 app.route('/api/v1/backoffice/workspace', workspaceSettingsRouter)
+
+// Translation endpoints — Stage 019, staff-level authentication inherited from backoffice group
+app.route('/api/v1/backoffice/workspace', translationRouter)
 
 // WebSocket chain: correlationId (global) → tenantResolver → licenseEnforcement
 //                  → rateLimit(max:10, backoffice-ws) → authentication → WS upgrade

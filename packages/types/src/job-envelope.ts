@@ -185,3 +185,48 @@ export function isGenerateCertificateJob(
 export function isSendEmailJob(job: JobEnvelope): job is SendEmailJob {
   return job.job_name === 'send_email'
 }
+
+// ---------------------------------------------------------------------------
+// Stage 019: DRAIN_LANGUAGE_TRANSLATIONS Job
+// ---------------------------------------------------------------------------
+
+/**
+ * Payload for the async language translation drain job.
+ * Enqueued when supported_languages removal exceeds 10,000 rows.
+ */
+export interface DrainLanguageTranslationsPayload {
+  /** Workspace slug used to resolve tenant pool in worker */
+  workspace_slug: string
+  /** ISO 639-1 / BCP-47 language code being drained */
+  language_code: string
+  /** Number of rows to delete per batch iteration (default: 500) */
+  batch_size: number
+  /** Staff user ID who initiated the language removal */
+  initiated_by_user_id: string
+  /** Retry/continuation attempt count (0-indexed) */
+  attempt?: number
+}
+
+/**
+ * Specific job type: Drain (async-delete) all translations for a language.
+ * Triggered by workspace-settings service when supported_languages is updated
+ * and the removed language has > 10,000 translation rows.
+ *
+ * Job lifecycle:
+ *   PUT /settings/language → service detects >10k rows → enqueues DRAIN job
+ *   → worker iterates batches: DELETE RETURNING + audit INSERT per batch (one tx/batch)
+ *   → worker removes language_status[language_code] → invalidates coverage cache
+ *   → worker updates language_settings (removes from supported_languages)
+ */
+export interface DrainLanguageTranslationsJob extends JobEnvelope<DrainLanguageTranslationsPayload> {
+  job_name: 'DRAIN_LANGUAGE_TRANSLATIONS'
+}
+
+/**
+ * Type guard to check if job is a DrainLanguageTranslationsJob.
+ */
+export function isDrainLanguageTranslationsJob(
+  job: JobEnvelope
+): job is DrainLanguageTranslationsJob {
+  return job.job_name === 'DRAIN_LANGUAGE_TRANSLATIONS'
+}

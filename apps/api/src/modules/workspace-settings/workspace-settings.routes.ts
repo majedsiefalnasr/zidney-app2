@@ -60,6 +60,7 @@ function extractContext(c: any): SettingsRequestContext {
     ip_address:
       c.req.header('x-forwarded-for') || c.req.header('x-real-ip') || null,
     user_agent: c.req.header('user-agent') || null,
+    redis: tenant.redis,
   }
 }
 

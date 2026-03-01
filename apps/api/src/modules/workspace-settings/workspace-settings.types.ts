@@ -51,6 +51,13 @@ export interface GeneralSettings {
 export interface LanguageSettings {
   default_language: string
   supported_languages: string[]
+  /**
+   * Internal-only field tracking per-language removal state.
+   * 'removing' → async DRAIN job is in progress for this language.
+   * This field is set/cleared by workspace-settings service and worker.
+   * It MUST NOT be exposed to client-facing API responses.
+   */
+  language_status?: Record<string, 'active' | 'removing'>
 }
 
 // ---------------------------------------------------------------------------

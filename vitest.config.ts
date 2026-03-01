@@ -48,6 +48,13 @@ export default defineConfig({
         replacement: path.resolve(__dirname, 'tests/shims/jsonwebtoken.ts'),
       },
       {
+        find: 'zod',
+        replacement: path.resolve(
+          __dirname,
+          'node_modules/.bun/zod@3.25.76/node_modules/zod/index.js'
+        ),
+      },
+      {
         find: /^@zidney\/app\/([^/]+)\/(.*)$/,
         replacement: path.resolve(__dirname, 'apps/$1/src/$2'),
       },
