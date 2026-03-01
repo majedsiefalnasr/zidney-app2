@@ -9,34 +9,38 @@ UI Foundation — Centralized API Client Architecture
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
-Last Updated: 2026-02-28T22:05:00Z
+Risk Level: LOW
+Last Updated: 2026-02-28T22:10:00Z
 
 Scope Defined:
 
 - Typed API client abstraction (client.ts) shared across MMC, Backoffice, Frontoffice
-- Auth token injection and 401 refresh/retry (single-flight)
+- Auth token injection and 401 refresh/retry (single-flight, queue during refresh)
 - Error normalization to AppError structure
 - 429 rate-limit surfacing (no auto-retry)
-- Idempotency key header support
+- Idempotency key header support (caller-provided)
 - Per-app base URL configuration
 - Request cancellation via AbortSignal
 - Correlation ID propagation
 - Mock HTTP adapter for testability
-- Lint enforcement against direct fetch/axios imports
+- 30s default request timeout, configurable per-request
+- JSON-only content type (file upload deferred)
+- No internal client logging
 
 Deferred Scope:
 
 - Business endpoint implementations
 - WebSocket/SSE communication
 - Pagination UI logic
+- File upload / multipart support
+- Client-side logging/tracing
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

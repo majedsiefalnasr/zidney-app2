@@ -183,6 +183,10 @@ A developer writing tests for a feature module needs to mock API responses witho
 - What happens when the backend returns a 200 with an unexpected body shape? The client returns the raw data to the caller; type enforcement is the responsibility of the consuming module's DTO validation.
 - What happens when two apps try to use different client instances simultaneously in the same test? Each instance must be independently configurable and isolated.
 - What happens when the network is restored after a failure and a queued request fires late? The client relies on `AbortSignal` for cancellation; otherwise, it processes the response normally.
+- What happens when a request exceeds the 30-second default timeout? The client aborts the request and returns an `AppError` with a timeout-specific error code.
+- What happens when a network error occurs (DNS failure, connection reset)? The client does NOT retry. It returns an `AppError` with `isNetworkError: true` immediately.
+- What happens when 50+ concurrent requests all receive 401 simultaneously? All are queued for retry after the single-flight refresh. No queue depth limit is imposed; browser connection limits (~6 per domain) provide natural throttling.
+- What happens when a caller sends a non-JSON body (e.g., FormData)? The client does not support non-JSON bodies in this stage. Callers must serialize to JSON.
 
 ---
 
@@ -213,12 +217,17 @@ A developer writing tests for a feature module needs to mock API responses witho
 - **FR-021**: System MUST organize the client code in `core/api/` with the following structure: `client.ts`, `types.ts`, `interceptors.ts`, `http-error.ts`.
 - **FR-022**: Feature modules MUST define their API functions in `modules/<feature>/api.ts` and import exclusively from `core/api/client.ts`.
 - **FR-023**: System MUST NOT include any business endpoint implementations — this stage is infrastructure only.
+- **FR-024**: System MUST enforce a default request timeout of 30 seconds. The timeout MUST be overridable per-request via `RequestConfig.timeout`.
+- **FR-025**: System MUST NOT auto-retry on transient network errors (DNS failure, connection reset, socket timeout). Only 401 responses trigger retry (after refresh). All other failures are surfaced as `AppError` immediately.
+- **FR-026**: System MUST support JSON content type (`application/json`) only for request and response bodies. Non-JSON content types (e.g., `multipart/form-data` for file uploads) are out of scope for this stage.
+- **FR-027**: System MUST NOT emit internal logs, metrics, or tracing events. The client is pure infrastructure; error reporting is the consuming module's responsibility via the returned `AppError`.
+- **FR-028**: System MUST NOT impose an explicit limit on the number of concurrent requests queued during a 401 refresh in-flight. All waiting requests are retried after refresh resolves or fails.
 
 ### Key Entities
 
 - **ApiClient**: The singleton HTTP client abstraction responsible for sending typed requests, attaching headers, and routing through interceptors. Configurable per app.
 - **AppError**: The normalized error object consumed by all UI code. Contains `code` (string), `message` (string), `httpStatus` (number), `isNetworkError` (boolean), and optional `retryAfter` (number).
-- **RequestConfig**: The per-request configuration object supporting optional `idempotencyKey`, `correlationId`, `signal` (AbortSignal), and custom headers.
+- **RequestConfig**: The per-request configuration object supporting optional `idempotencyKey`, `correlationId`, `signal` (AbortSignal), `timeout` (number, in milliseconds, default 30000), and custom headers.
 - **HttpAdapter**: The injectable transport interface (real or mocked) responsible for executing the actual HTTP request. Swappable for testing.
 - **Interceptor**: A middleware function in the request/response pipeline that can modify requests (e.g., attach auth header) or handle responses (e.g., trigger refresh on 401).
 
@@ -250,6 +259,10 @@ A developer writing tests for a feature module needs to mock API responses witho
 - `AbortController` / `AbortSignal` are available in all target runtime environments (modern browsers).
 - The backend returns standard HTTP `Retry-After` header (in seconds) on 429 responses when applicable.
 - This stage does not implement WebSocket or Server-Sent Events; HTTP request/response only.
+- This stage supports JSON (`application/json`) content type only. File upload and multipart/form-data support are deferred to a dedicated stage.
+- The API client does not emit internal logs, metrics, or tracing events. Observability is the consuming module's responsibility.
+- The default request timeout is 30 seconds, overridable per-request. This prevents hung requests in UI.
+- No automatic retry on network errors. Only 401 triggers retry (after token refresh). Deterministic failure propagation is preferred.
 
 ---
 
@@ -272,3 +285,15 @@ This specification complies with the following Zidney constitutional constraints
 - **All HTTP traffic through single client abstraction**: Enforced by FR-020 and linting rules.
 - **Database-per-tenant preserved**: The client routes to workspace-scoped APIs for Backoffice and student runtime APIs for Frontoffice; tenant resolution is performed by the backend.
 - **Server-authoritative time only**: The client does not generate, manipulate, or validate timestamps. All time-related logic is server-side.
+
+---
+
+## Clarifications
+
+### Session 2026-03-01
+
+- Q: Should the API client enforce a default request timeout? If so, what value? → A: Yes, 30-second default, configurable per-request via `RequestConfig.timeout`. Prevents hung requests in UI; safety-first for infrastructure.
+- Q: Should the client auto-retry on transient network errors (DNS failure, connection reset, socket timeout)? → A: No auto-retry for network errors. Only 401 triggers retry after refresh. Deterministic failure propagation preferred; avoids masking real failures.
+- Q: Should the client support non-JSON content types (e.g., multipart/form-data for file uploads)? → A: JSON-only (`application/json`) for this stage. File upload and multipart/form-data support deferred to a dedicated stage. Keeps HttpAdapter interface simple.
+- Q: Should the API client emit structured logs for requests, responses, or errors internally? → A: No internal logging, metrics, or tracing. Client is pure infrastructure. Errors propagated as `AppError`; consuming modules handle observability. Avoids logger dependency in shared UI package.
+- Q: Is there a limit on how many concurrent requests can be queued during a 401 refresh in-flight? → A: No explicit limit. All concurrent requests queued and retried after refresh resolves or fails. Browser connection limits (~6 per domain) provide natural throttling.
