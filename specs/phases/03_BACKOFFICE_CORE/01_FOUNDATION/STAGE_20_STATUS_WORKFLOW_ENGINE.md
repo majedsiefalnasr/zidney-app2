@@ -9,18 +9,20 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: DRAFT
+Status: IN PROGRESS
 Risk Level: MEDIUM
-Last Updated: 2026-03-01T00:04:00.000Z
+Last Updated: 2026-03-01T01:00:00.000Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all 9 criteria)
+Implementation: AUTHORIZED
 
-- Total: 40 atomic tasks
-- Phase 1: Setup (T001) — 1 task
-- Phase 2: Foundational engine, migration, API module (T002–T011) — 10 tasks
-- Phase 3–5: US1–3 forward transitions P1 MVP (T012–T022) — 11 tasks
-- Phase 6–8: US4–6 backward transitions + audit + reuse P2/P3 (T023–T033) — 11 tasks
-- Phase 9: Polish, concurrency, rate limit, lint, types (T034–T039) — 6 tasks
+Scope Authorized:
+
+- Workflow state machine: COMPLETED / UNDER_REVIEW / APPROVED / ENABLED
+- `packages/domain-core/src/workflow/` (4 files: states, types, errors, engine)
+- Tenant migration: 20260301_002_workflow_engine.ts (schema 1.2.0 -> 1.3.0)
+- API module: `apps/api/src/modules/workflow/` (validation, context) + `apps/api/src/routes/backoffice/workflow/` (route handler)
+- Tests: 25 test tasks (unit + integration, US1-US6 + concurrent/rate-limit/license)
 
 Deferred Scope:
 
@@ -34,10 +36,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Task set compliant — drift analysis required before implementation
+- All drift criteria passed
+- ADR alignment verified
+- Implementation authorized by orchestrator drift gate
 
 Notes:
-Atomic task set generated. Drift analysis gate pending.
+Full drift analysis passed. Implementation gate open. F-001: route handler files at T010/T011 execution time should follow routes/backoffice/<feature>/ pattern (non-blocking implementation guidance).
 
 ---
 
