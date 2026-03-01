@@ -10,32 +10,30 @@ UI Foundation — Centralized API Client Architecture
 
 Status: DRAFT
 Risk Level: LOW
-Last Updated: 2026-02-28T22:15:00Z
+Last Updated: 2026-02-28T22:20:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- New packages/api-client package (framework-agnostic HTTP client)
-- HttpAdapter injectable transport interface
-- Fixed interceptor pipeline (auth/correlation/content-type/idempotency/timeout)
-- AppError normalization (plain interface)
-- Per-app factory pattern (createApiClient)
-- MockAdapter for testing
-- Incremental migration from existing per-app clients
+- Total: 76 atomic tasks
+- Setup: 12 tasks (package scaffold)
+- P1 Stories: 19 tasks (typed client, auth, refresh, testability)
+- P2 Stories: 18 tasks (errors, 429, idempotency, multi-app)
+- P3 Stories: 10 tasks (cancellation, correlation)
+- Migration: 9 tasks (MMC, Backoffice, Frontoffice)
+- Lint/Polish: 8 tasks
 
 Deferred Scope:
 
 - Business endpoint implementations
 - WebSocket/SSE communication
-- Pagination UI logic
 - File upload / multipart support
-- Client-side logging/tracing
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
