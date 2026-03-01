@@ -37,13 +37,14 @@ The normalized error object consumed by all UI code.
 
 Per-request configuration passed by callers to API client methods.
 
-| Field            | Type                                  | Required | Default             | Description                                                      |
-| ---------------- | ------------------------------------- | -------- | ------------------- | ---------------------------------------------------------------- |
-| `idempotencyKey` | `string \| undefined`                 | ❌       | —                   | Attached as `X-Idempotency-Key` header on mutation requests only |
-| `correlationId`  | `string \| undefined`                 | ❌       | auto-generated UUID | Override for `X-Correlation-ID` header                           |
-| `signal`         | `AbortSignal \| undefined`            | ❌       | —                   | Caller-provided abort signal for request cancellation            |
-| `timeout`        | `number \| undefined`                 | ❌       | `30000`             | Per-request timeout in milliseconds; 0 disables timeout          |
-| `headers`        | `Record<string, string> \| undefined` | ❌       | —                   | Additional custom headers (merged after interceptors)            |
+| Field            | Type                                                       | Required | Default             | Description                                                    |
+| ---------------- | ---------------------------------------------------------- | -------- | ------------------- | -------------------------------------------------------------- |
+| `params`         | `Record<string, string \| number \| boolean> \| undefined` | ❌       | —                   | Query parameters serialized and appended to request URL        |
+| `idempotencyKey` | `string \| undefined`                                      | ❌       | —                   | Attached as `Idempotency-Key` header on mutation requests only |
+| `correlationId`  | `string \| undefined`                                      | ❌       | auto-generated UUID | Override for `X-Correlation-ID` header                         |
+| `signal`         | `AbortSignal \| undefined`                                 | ❌       | —                   | Caller-provided abort signal for request cancellation          |
+| `timeout`        | `number \| undefined`                                      | ❌       | `30000`             | Per-request timeout in milliseconds; 0 disables timeout        |
+| `headers`        | `Record<string, string> \| undefined`                      | ❌       | —                   | Additional custom headers (merged after interceptors)          |
 
 **Validation rules**:
 
@@ -112,9 +113,9 @@ Output of `HttpAdapter.execute()`.
 
 ---
 
-## Entity: ApiResponse\<T\>
+## Entity: ClientResponse\<T\>
 
-Successful response wrapper returned by client methods.
+Successful response wrapper returned by client methods. Named `ClientResponse` to avoid collision with `@zidney/types` `ApiResponse`.
 
 | Field     | Type   | Required | Description                       |
 | --------- | ------ | -------- | --------------------------------- |
@@ -129,13 +130,13 @@ Successful response wrapper returned by client methods.
 
 Public API surface of the client.
 
-| Method      | Signature                                                                          | Description |
-| ----------- | ---------------------------------------------------------------------------------- | ----------- |
-| `get<T>`    | `(url: string, config?: RequestConfig) => Promise<ApiResponse<T>>`                 | HTTP GET    |
-| `post<T>`   | `(url: string, data: unknown, config?: RequestConfig) => Promise<ApiResponse<T>>`  | HTTP POST   |
-| `patch<T>`  | `(url: string, data: unknown, config?: RequestConfig) => Promise<ApiResponse<T>>`  | HTTP PATCH  |
-| `put<T>`    | `(url: string, data: unknown, config?: RequestConfig) => Promise<ApiResponse<T>>`  | HTTP PUT    |
-| `delete<T>` | `(url: string, data?: unknown, config?: RequestConfig) => Promise<ApiResponse<T>>` | HTTP DELETE |
+| Method      | Signature                                                                             | Description |
+| ----------- | ------------------------------------------------------------------------------------- | ----------- |
+| `get<T>`    | `(url: string, config?: RequestConfig) => Promise<ClientResponse<T>>`                 | HTTP GET    |
+| `post<T>`   | `(url: string, data: unknown, config?: RequestConfig) => Promise<ClientResponse<T>>`  | HTTP POST   |
+| `patch<T>`  | `(url: string, data: unknown, config?: RequestConfig) => Promise<ClientResponse<T>>`  | HTTP PATCH  |
+| `put<T>`    | `(url: string, data: unknown, config?: RequestConfig) => Promise<ClientResponse<T>>`  | HTTP PUT    |
+| `delete<T>` | `(url: string, data?: unknown, config?: RequestConfig) => Promise<ClientResponse<T>>` | HTTP DELETE |
 
 **Validation rules**:
 
@@ -168,7 +169,7 @@ Request flow:
   1. Auth Interceptor     → attaches Authorization header
   2. Correlation Interceptor → attaches X-Correlation-ID
   3. Content-Type Interceptor → attaches Content-Type: application/json (mutations)
-  4. Idempotency Interceptor → attaches X-Idempotency-Key (mutations, if provided)
+  4. Idempotency Interceptor → attaches Idempotency-Key (mutations, if provided)
   5. Timeout Interceptor   → creates combined AbortSignal (timeout + caller signal)
   6. HttpAdapter.execute() → sends request
 
@@ -176,7 +177,7 @@ Response flow:
   1. JSON parse → AdapterResponse
   2. 401 Handler → single-flight refresh + retry
   3. Error Normalizer → AppError (for non-ok responses)
-  4. Return ApiResponse<T> or throw AppError
+  4. Return ClientResponse<T> or throw AppError
 ```
 
 ---

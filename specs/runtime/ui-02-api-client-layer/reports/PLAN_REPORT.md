@@ -40,16 +40,16 @@ Technical plan generated for a new `packages/api-client` package providing a fra
 
 ## Key Technical Decisions
 
-| #   | Decision                                                                               | Rationale                                                                           |
-| --- | -------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------- |
-| 1   | New `packages/api-client` package (framework-agnostic)                                 | `packages/ui-system` stays Vue-focused; API client has zero framework dependencies  |
-| 2   | `HttpAdapter` injectable interface                                                     | Enables MockAdapter for deterministic testing without network access                |
-| 3   | Fixed interceptor pipeline (auth → correlation → content-type → idempotency → timeout) | Predictable execution order; no dynamic middleware complexity                       |
-| 4   | `AppError` as plain interface (not class)                                              | Avoids prototype chain issues across monorepo boundaries                            |
-| 5   | Per-app factory pattern via `createApiClient(config)`                                  | Singleton lifecycle in each app's core/api/client.ts                                |
-| 6   | Auto-generated correlation IDs (`crypto.randomUUID()`)                                 | Every request traceable; optional caller override                                   |
-| 7   | `X-Idempotency-Key` header name (matches backend)                                      | Backend reads `x-idempotency-key`; IANA `Idempotency-Key` would be silently ignored |
-| 8   | `credentials: 'include'` default                                                       | Required for httpOnly refresh token cookies on cross-origin requests                |
+| #   | Decision                                                                               | Rationale                                                                          |
+| --- | -------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------- |
+| 1   | New `packages/api-client` package (framework-agnostic)                                 | `packages/ui-system` stays Vue-focused; API client has zero framework dependencies |
+| 2   | `HttpAdapter` injectable interface                                                     | Enables MockAdapter for deterministic testing without network access               |
+| 3   | Fixed interceptor pipeline (auth → correlation → content-type → idempotency → timeout) | Predictable execution order; no dynamic middleware complexity                      |
+| 4   | `AppError` as plain interface (not class)                                              | Avoids prototype chain issues across monorepo boundaries                           |
+| 5   | Per-app factory pattern via `createApiClient(config)`                                  | Singleton lifecycle in each app's core/api/client.ts                               |
+| 6   | Auto-generated correlation IDs (`crypto.randomUUID()`)                                 | Every request traceable; optional caller override                                  |
+| 7   | `Idempotency-Key` header name (IETF standard, matches backend stage06 middleware)      | Backend stage06 reads `Idempotency-Key`; consistent with IETF RFC draft            |
+| 8   | `credentials: 'include'` default                                                       | Required for httpOnly refresh token cookies on cross-origin requests               |
 
 ---
 
@@ -71,7 +71,7 @@ Technical plan generated for a new `packages/api-client` package providing a fra
 
 ## Idempotency Strategy
 
-- Client supports `X-Idempotency-Key` header via `RequestConfig.idempotencyKey`
+- Client supports `Idempotency-Key` header via `RequestConfig.idempotencyKey`
 - Key generation is caller's responsibility (FR-014)
 - Header attached only on mutations (POST/PATCH/PUT/DELETE), ignored on GET
 - Backend enforces idempotency via Redis cache + DB UNIQUE constraints

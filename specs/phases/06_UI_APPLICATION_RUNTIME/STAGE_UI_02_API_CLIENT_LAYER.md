@@ -8,19 +8,21 @@ UI Foundation — Centralized API Client Architecture
 
 ## Stage Status
 
-Status: DRAFT
+Status: IN PROGRESS
 Risk Level: LOW
-Last Updated: 2026-02-28T22:20:00Z
+Last Updated: 2026-02-28T22:30:00Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all criteria)
+Implementation: AUTHORIZED
 
-- Total: 76 atomic tasks
-- Setup: 12 tasks (package scaffold)
-- P1 Stories: 19 tasks (typed client, auth, refresh, testability)
-- P2 Stories: 18 tasks (errors, 429, idempotency, multi-app)
-- P3 Stories: 10 tasks (cancellation, correlation)
-- Migration: 9 tasks (MMC, Backoffice, Frontoffice)
-- Lint/Polish: 8 tasks
+Scope Authorized:
+
+- `packages/api-client` package with HttpAdapter, ClientResponse<T>, AppError interface
+- Fixed interceptor pipeline: auth → correlation → content-type → idempotency → timeout
+- Single-flight 401 refresh, error normalization, idempotency header
+- Per-app wrappers for MMC, Backoffice, Frontoffice
+- Migration of existing per-app client code to shared package
+- Lint enforcement for no direct fetch/axios imports
 
 Deferred Scope:
 
@@ -30,10 +32,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Task set compliant — drift analysis required before implementation
+- All drift criteria passed — implementation authorized
 
 Notes:
-Atomic task set generated. Drift analysis gate pending.
+Full drift analysis passed. All guardian audits (Security, Performance, QA, Code Review) returned PASS. Implementation gate open.
 
 ---
 

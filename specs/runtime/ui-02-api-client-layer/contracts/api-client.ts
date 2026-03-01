@@ -38,7 +38,9 @@ export interface AppError {
  * Per-request configuration. All fields are optional.
  */
 export interface RequestConfig {
-  /** Idempotency key sent as X-Idempotency-Key header. Attached on mutations (POST/PATCH/PUT/DELETE) only. Ignored on GET. */
+  /** Query parameters appended to the URL. Serialized to query string. */
+  readonly params?: Record<string, string | number | boolean>
+  /** Idempotency key sent as Idempotency-Key header. Attached on mutations (POST/PATCH/PUT/DELETE) only. Ignored on GET. */
   readonly idempotencyKey?: string
   /** Override auto-generated correlation ID for X-Correlation-ID header. */
   readonly correlationId?: string
@@ -52,8 +54,9 @@ export interface RequestConfig {
 
 /**
  * Successful API response wrapper.
+ * Named ClientResponse to avoid collision with @zidney/types ApiResponse.
  */
-export interface ApiResponse<T> {
+export interface ClientResponse<T> {
   readonly success: true
   readonly data: T
 }
@@ -124,31 +127,31 @@ export interface ClientConfig {
  */
 export interface ApiClient {
   /** HTTP GET */
-  get<T>(url: string, config?: RequestConfig): Promise<ApiResponse<T>>
+  get<T>(url: string, config?: RequestConfig): Promise<ClientResponse<T>>
   /** HTTP POST */
   post<T>(
     url: string,
     data: unknown,
     config?: RequestConfig
-  ): Promise<ApiResponse<T>>
+  ): Promise<ClientResponse<T>>
   /** HTTP PUT */
   put<T>(
     url: string,
     data: unknown,
     config?: RequestConfig
-  ): Promise<ApiResponse<T>>
+  ): Promise<ClientResponse<T>>
   /** HTTP PATCH */
   patch<T>(
     url: string,
     data: unknown,
     config?: RequestConfig
-  ): Promise<ApiResponse<T>>
+  ): Promise<ClientResponse<T>>
   /** HTTP DELETE */
   delete<T>(
     url: string,
     data?: unknown,
     config?: RequestConfig
-  ): Promise<ApiResponse<T>>
+  ): Promise<ClientResponse<T>>
 }
 
 // ─── Factory ────────────────────────────────────────────────────────────────

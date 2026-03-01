@@ -105,8 +105,8 @@ A developer working on a mutation endpoint (e.g., submission, creation) needs to
 
 **Acceptance Scenarios**:
 
-1. **Given** a developer calls `client.post` with `{ idempotencyKey: "abc-123" }`, **When** the request is sent, **Then** the `X-Idempotency-Key: abc-123` header is present.
-2. **Given** a developer calls `client.post` without an idempotency key, **When** the request is sent, **Then** no `X-Idempotency-Key` header is attached.
+1. **Given** a developer calls `client.post` with `{ idempotencyKey: "abc-123" }`, **When** the request is sent, **Then** the `Idempotency-Key: abc-123` header is present.
+2. **Given** a developer calls `client.post` without an idempotency key, **When** the request is sent, **Then** no `Idempotency-Key` header is attached.
 3. **Given** a developer provides an idempotency key on a GET request, **When** the request is sent, **Then** the key is ignored (not attached).
 
 ---
@@ -195,7 +195,7 @@ A developer writing tests for a feature module needs to mock API responses witho
 ### Functional Requirements
 
 - **FR-001**: System MUST provide a single, typed API client abstraction (`client.ts`) that all frontend apps use for HTTP communication.
-- **FR-002**: System MUST support typed generic methods: `client.get<T>()`, `client.post<T>()`, `client.patch<T>()`, `client.delete<T>()`.
+- **FR-002**: System MUST support typed generic methods: `client.get<T>()`, `client.post<T>()`, `client.put<T>()`, `client.patch<T>()`, `client.delete<T>()`.
 - **FR-003**: System MUST prohibit `any` types in the client's public API; all request and response types must be explicitly parameterized.
 - **FR-004**: System MUST automatically attach the `Authorization` header to requests when an auth token is available.
 - **FR-005**: System MUST omit the `Authorization` header when no auth token is available (public/unauthenticated endpoints).
@@ -206,11 +206,11 @@ A developer writing tests for a feature module needs to mock API responses witho
 - **FR-010**: System MUST normalize all errors (HTTP errors, network failures, timeouts, unexpected responses) into an `AppError` structure with: `code`, `message`, `httpStatus`, `isNetworkError`.
 - **FR-011**: System MUST surface 429 responses as `AppError` with `retryAfter` metadata (when the `Retry-After` header is present).
 - **FR-012**: System MUST NOT auto-retry 429 responses.
-- **FR-013**: System MUST support an optional `idempotencyKey` parameter on mutation requests (`POST`, `PATCH`, `DELETE`) that attaches an `X-Idempotency-Key` header.
+- **FR-013**: System MUST support an optional `idempotencyKey` parameter on mutation requests (`POST`, `PUT`, `PATCH`, `DELETE`) that attaches an `Idempotency-Key` header.
 - **FR-014**: System MUST NOT generate idempotency keys automatically; key generation is the caller's responsibility.
 - **FR-015**: System MUST support per-app base URL configuration (MMC: platform API, Backoffice: workspace-scoped API, Frontoffice: student runtime API) resolved from environment configuration.
 - **FR-016**: System MUST support request cancellation via standard `AbortSignal`.
-- **FR-017**: System MUST support optional `X-Correlation-ID` header attachment on requests.
+- **FR-017**: System MUST auto-generate an `X-Correlation-ID` header (UUID via `crypto.randomUUID()`) on every request, overridable via `RequestConfig.correlationId`.
 - **FR-018**: System MUST NOT expose raw `Response` objects, raw HTTP headers, or transport-layer details to callers.
 - **FR-019**: System MUST support injection of a mock HTTP adapter for testing, allowing full client behavior (interceptors, error normalization, refresh) to be tested without real HTTP calls.
 - **FR-020**: System MUST enforce that no frontend module imports `fetch`, `axios`, or any HTTP library directly — only the centralized client.
@@ -227,7 +227,7 @@ A developer writing tests for a feature module needs to mock API responses witho
 
 - **ApiClient**: The singleton HTTP client abstraction responsible for sending typed requests, attaching headers, and routing through interceptors. Configurable per app.
 - **AppError**: The normalized error object consumed by all UI code. Contains `code` (string), `message` (string), `httpStatus` (number), `isNetworkError` (boolean), and optional `retryAfter` (number).
-- **RequestConfig**: The per-request configuration object supporting optional `idempotencyKey`, `correlationId`, `signal` (AbortSignal), `timeout` (number, in milliseconds, default 30000), and custom headers.
+- **RequestConfig**: The per-request configuration object supporting optional `params` (Record<string, string | number | boolean> for query string serialization), `idempotencyKey`, `correlationId`, `signal` (AbortSignal), `timeout` (number, in milliseconds, default 30000), and custom headers.
 - **HttpAdapter**: The injectable transport interface (real or mocked) responsible for executing the actual HTTP request. Swappable for testing.
 - **Interceptor**: A middleware function in the request/response pipeline that can modify requests (e.g., attach auth header) or handle responses (e.g., trigger refresh on 401).
 

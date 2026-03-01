@@ -79,9 +79,9 @@ packages/api-client/
 ├── src/
 │   ├── index.ts                # Barrel export
 │   ├── client.ts               # createApiClient factory
-│   ├── types.ts                # RequestConfig, ApiResponse, ClientConfig, HttpAdapter
+│   ├── types.ts                # RequestConfig, ClientResponse, ClientConfig, HttpAdapter
 │   ├── interceptors.ts         # Auth interceptor, correlation ID, idempotency, timeout
-│   ├── http-error.ts           # AppError class, error normalization pipeline
+│   ├── http-error.ts           # AppError interface, error normalization pipeline
 │   └── adapters/
 │       ├── fetch-adapter.ts    # Production HttpAdapter (native fetch)
 │       └── mock-adapter.ts     # Test HttpAdapter

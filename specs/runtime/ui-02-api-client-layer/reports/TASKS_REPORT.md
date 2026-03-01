@@ -33,7 +33,7 @@
 | 401 Refresh (P1)         | 3      | Single-flight refresh, retry, queue (T029–T031)         |
 | Error Normalization (P2) | 5      | AppError pipeline (T032–T036)                           |
 | Rate Limiting (P2)       | 4      | 429 surfacing (T037–T040)                               |
-| Idempotency (P2)         | 4      | X-Idempotency-Key header (T041–T044)                    |
+| Idempotency (P2)         | 4      | Idempotency-Key header (T041–T044)                      |
 | Multi-App Config (P2)    | 5      | Per-app wrappers (T045–T049)                            |
 | Cancellation (P3)        | 5      | AbortSignal support (T050–T054)                         |
 | Correlation ID (P3)      | 5      | X-Correlation-ID auto-gen (T055–T059)                   |
@@ -52,7 +52,7 @@
 
 ## Idempotency Tasks
 
-- T041–T044: Implement X-Idempotency-Key header support in interceptor pipeline (client-side header attachment only; enforcement is backend)
+- T041–T044: Implement Idempotency-Key header support in interceptor pipeline (client-side header attachment only; enforcement is backend)
 
 ---
 

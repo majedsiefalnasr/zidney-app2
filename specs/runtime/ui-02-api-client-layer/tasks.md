@@ -37,7 +37,7 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T008 Implement core types in `packages/api-client/src/types.ts`: `AppError`, `RequestConfig`, `ApiResponse<T>`, `AdapterRequest`, `AdapterResponse`, `HttpAdapter` interface, `ClientConfig` — matching contracts/api-client.ts exactly
+- [ ] T008 Implement core types in `packages/api-client/src/types.ts`: `AppError`, `RequestConfig`, `ClientResponse<T>`, `AdapterRequest`, `AdapterResponse`, `HttpAdapter` interface, `ClientConfig` — matching contracts/api-client.ts exactly
 - [ ] T009 Implement `ErrorCodes` constant object in `packages/api-client/src/http-error.ts` with all 7 known codes: `NETWORK_ERROR`, `REQUEST_TIMEOUT`, `REQUEST_CANCELLED`, `RATE_LIMITED`, `AUTH_REFRESH_FAILED`, `INVALID_RESPONSE`, `UNKNOWN_ERROR`
 - [ ] T010 [P] Implement `isAppError` type guard function in `packages/api-client/src/http-error.ts` — checks for `code`, `message`, `httpStatus`, `isNetworkError` fields
 - [ ] T011 [P] Implement `createAppError` internal factory function in `packages/api-client/src/http-error.ts` — constructs frozen `AppError` objects with validated fields
@@ -77,13 +77,13 @@
 ### Tests for User Story 1
 
 - [ ] T018 [P] [US1] Write unit tests in `packages/api-client/tests/adapters/fetch-adapter.test.ts`: verify FetchAdapter calls `globalThis.fetch` with correct URL, method, headers, body, signal; verify response flattening (status, headers, body JSON parse, ok flag); verify network error (fetch TypeError) is thrown as-is
-- [ ] T019 [P] [US1] Write unit tests in `packages/api-client/tests/client.test.ts` — basic request section: `client.get<T>()` sends GET with correct URL (baseUrl + path), `client.post<T>()` sends POST with JSON body, `client.put<T>()` sends PUT, `client.patch<T>()` sends PATCH, `client.delete<T>()` sends DELETE; verify `ApiResponse<T>` shape returned with `{ success: true, data: T }`
+- [ ] T019 [P] [US1] Write unit tests in `packages/api-client/tests/client.test.ts` — basic request section: `client.get<T>()` sends GET with correct URL (baseUrl + path), `client.post<T>()` sends POST with JSON body, `client.put<T>()` sends PUT, `client.patch<T>()` sends PATCH, `client.delete<T>()` sends DELETE; verify `ClientResponse<T>` shape returned with `{ success: true, data: T }`
 
 ### Implementation for User Story 1
 
 - [ ] T020 [US1] Implement `FetchAdapter` in `packages/api-client/src/adapters/fetch-adapter.ts`: wraps `globalThis.fetch`, constructs `Request` from `AdapterRequest`, flattens `Response` to `AdapterResponse` (lowercase header keys, JSON-parse body, catch parse errors → `body: null`), passes `signal` and `credentials`
-- [ ] T021 [US1] Implement `createFetchAdapter(credentials?: RequestCredentials)` factory in `packages/api-client/src/adapters/fetch-adapter.ts` defaulting credentials to `'include'`
-- [ ] T022 [US1] Implement `createApiClient(config: ClientConfig): ApiClient` factory in `packages/api-client/src/client.ts`: instantiate default `FetchAdapter` if no adapter provided, implement `get<T>`, `post<T>`, `put<T>`, `patch<T>`, `delete<T>` methods that build `AdapterRequest` (prepend `baseUrl`, serialize body via `JSON.stringify`), call adapter `.execute()`, return `{ success: true, data: response.body.data }` for ok responses
+- [ ] T021 [US1] Implement `createFetchAdapter()` factory in `packages/api-client/src/adapters/fetch-adapter.ts` — parameterless; `credentials` is applied by `createApiClient` from `ClientConfig.credentials` (default `'include'`) at request time
+- [ ] T022 [US1] Implement `createApiClient(config: ClientConfig): ApiClient` factory in `packages/api-client/src/client.ts`: instantiate default `FetchAdapter` if no adapter provided, implement `get<T>`, `post<T>`, `put<T>`, `patch<T>`, `delete<T>` methods that build `AdapterRequest` (prepend `baseUrl`, serialize body via `JSON.stringify`, serialize `params` to query string and append to URL), call adapter `.execute()`, narrow `response.body` via type guard before accessing `.data`, return `{ success: true, data: response.body.data }` for ok responses. MUST apply `Content-Type: application/json` header on POST, PUT, PATCH methods during request building (required for mutations to succeed).
 - [ ] T023 [US1] Export `createApiClient` and `createFetchAdapter` from `packages/api-client/src/index.ts`
 - [ ] T024 [US1] Run client.test.ts and fetch-adapter.test.ts to verify all pass
 
@@ -173,9 +173,9 @@
 
 ## Phase 9: User Story 6 — Idempotency Key Support (Priority: P2)
 
-**Goal**: Callers pass `idempotencyKey` in `RequestConfig`, client attaches `X-Idempotency-Key` header on mutations only (POST, PUT, PATCH, DELETE). Ignored on GET.
+**Goal**: Callers pass `idempotencyKey` in `RequestConfig`, client attaches `Idempotency-Key` header on mutations only (POST, PUT, PATCH, DELETE). Ignored on GET.
 
-**Independent Test**: Call `client.post("/x", data, { idempotencyKey: "abc" })` → verify `X-Idempotency-Key: abc` header. Call without key → no header. GET with key → no header.
+**Independent Test**: Call `client.post("/x", data, { idempotencyKey: "abc" })` → verify `Idempotency-Key: abc` header. Call without key → no header. GET with key → no header.
 
 ### Tests for User Story 6
 
@@ -183,7 +183,7 @@
 
 ### Implementation for User Story 6
 
-- [ ] T042 [US6] Implement idempotency interceptor in `packages/api-client/src/interceptors.ts`: export `applyIdempotencyKey(headers, method, idempotencyKey?)` — attach `X-Idempotency-Key` only on non-GET methods when key is provided
+- [ ] T042 [US6] Implement idempotency interceptor in `packages/api-client/src/interceptors.ts`: export `applyIdempotencyKey(headers, method, idempotencyKey?)` — attach `Idempotency-Key` only on non-GET methods when key is provided
 - [ ] T043 [US6] Integrate idempotency interceptor into request pipeline in `packages/api-client/src/client.ts`
 - [ ] T044 [US6] Run idempotency test section to verify all pass
 
@@ -246,7 +246,7 @@
 ### Implementation for User Story 9
 
 - [ ] T056 [US9] Implement correlation interceptor in `packages/api-client/src/interceptors.ts`: export `applyCorrelationId(headers, correlationId?)` — set `X-Correlation-ID` to provided value or `crypto.randomUUID()`
-- [ ] T057 [US9] Implement content-type interceptor in `packages/api-client/src/interceptors.ts`: export `applyContentType(headers, method)` — set `Content-Type: application/json` on POST, PUT, PATCH methods
+- [ ] T057 [US9] Extract content-type interceptor from client.ts into `packages/api-client/src/interceptors.ts`: export `applyContentType(headers, method)` — set `Content-Type: application/json` on POST, PUT, PATCH methods. Refactors inline logic from T022 into the shared interceptor module for consistency with other interceptors.
 - [ ] T058 [US9] Integrate correlation and content-type interceptors into request pipeline in `packages/api-client/src/client.ts` — correct pipeline order: auth → correlation → content-type → idempotency → timeout → execute
 - [ ] T059 [US9] Run correlation and content-type tests to verify all pass
 
@@ -260,7 +260,7 @@
 
 ### Migration
 
-- [ ] T060 Replace `apps/mmc/src/core/api/client.ts` with thin wrapper importing from `@zidney/api-client` (created in T046); update all MMC feature module imports of `ApiResponse`, `ApiClient`, `RequestConfig` to import from `@zidney/api-client` or the new wrapper
+- [ ] T060 Replace `apps/mmc/src/core/api/client.ts` with thin wrapper importing from `@zidney/api-client` (created in T046); update all MMC feature module imports of `ClientResponse`, `ApiClient`, `RequestConfig` to import from `@zidney/api-client` or the new wrapper
 - [ ] T061 [P] Delete `apps/mmc/src/core/errors/error-normalizer.ts` and `apps/mmc/src/core/errors/types.ts`; update all MMC imports of `NormalizedError` to use `AppError` from `@zidney/api-client`; update all catch blocks using old `NormalizedError` shape to use `isAppError` guard
 - [ ] T062 Replace `apps/backoffice/src/core/api/client.ts` with thin wrapper importing from `@zidney/api-client` (created in T047); update all Backoffice feature module imports
 - [ ] T063 [P] Delete `apps/backoffice/src/core/errors/error-normalizer.ts` and `apps/backoffice/src/core/errors/types.ts`; update all Backoffice imports of `NormalizedError` to use `AppError` from `@zidney/api-client`
@@ -284,7 +284,7 @@
 - [ ] T069 [P] Verify `tsc --noEmit` passes for `packages/api-client` with zero errors and zero `any` types in public API surface
 - [ ] T070 [P] Verify all unit tests pass: `packages/api-client/tests/**/*.test.ts` — run full suite
 - [ ] T071 Verify interceptor pipeline order matches spec: auth → correlation → content-type → idempotency → timeout → execute → JSON parse → 401 handler → error normalizer → return/throw
-- [ ] T072 [P] Verify `packages/api-client/src/index.ts` barrel exports are complete: `createApiClient`, `createFetchAdapter`, `createMockAdapter`, `isAppError`, `ErrorCodes`, all public types (`AppError`, `RequestConfig`, `ApiResponse`, `ClientConfig`, `HttpAdapter`, `AdapterRequest`, `AdapterResponse`, `ApiClient`, `MockAdapter`)
+- [ ] T072 [P] Verify `packages/api-client/src/index.ts` barrel exports are complete: `createApiClient`, `createFetchAdapter`, `createMockAdapter`, `isAppError`, `ErrorCodes`, all public types (`AppError`, `RequestConfig`, `ClientResponse`, `ClientConfig`, `HttpAdapter`, `AdapterRequest`, `AdapterResponse`, `ApiClient`, `MockAdapter`)
 - [ ] T073 [P] Scan for any remaining TODO, FIXME, or placeholder comments in `packages/api-client/src/**` and `apps/*/src/core/api/**` — remove all (SC-010)
 - [ ] T074 Run quickstart.md validation: create a throwaway test file that imports from `@zidney/api-client`, configures a client with MockAdapter, exercises get/post/error/401-refresh/429/cancel scenarios from quickstart examples — all must work
 - [ ] T075 Run full workspace lint: `eslint apps/ packages/api-client/ --max-warnings=0` — zero errors, zero warnings for the modified files
@@ -379,6 +379,6 @@ T001 → T002 → T003‖T004‖T005 → T006 → T007 → T008 → T009 → T01
 - Each user story is independently testable after its phase completes
 - The package has ZERO runtime dependencies — pure TypeScript
 - All tests use MockAdapter — no network calls in any test
-- Content-type interceptor (T057) is placed in US9 phase since it's a simple header interceptor logically grouped with correlation/idempotency; it has no user story of its own
+- Content-type header applied inline in T022 (Phase 4) to ensure mutations work immediately; extracted to interceptor module in T057 (Phase 12) for architectural consistency with other interceptors
 - Migration phase (T060–T068) must be done AFTER all package features are complete to avoid partial replacements
 - Commit after each phase checkpoint for clean rollback points
