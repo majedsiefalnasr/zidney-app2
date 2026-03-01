@@ -10,18 +10,16 @@ UI Foundation — Authentication Runtime Module
 
 Status: DRAFT
 Risk Level: MEDIUM
-Last Updated: 2026-03-01T00:30:00Z
+Last Updated: 2026-03-01T00:40:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- 18 new files (6 per app × 3 apps)
-- 12 modified files (4 per app × 3 apps: client.ts, main.ts, router/index.ts, auth/index.ts)
-- 3 deleted files (token-store.ts superseded)
-- Bootstrap sequence locked (9-step ordering enforced)
-- Single-flight refresh manager (factory injection pattern)
-- Auth store with lazy refreshManager accessor (avoids creation-order circular dep)
-- API client interceptors wired from Stage 00 stubs
-- 37 unit/integration test cases planned
+- Total: 67 atomic tasks
+- Phase A: 3 tasks (types, foundational)
+- Phase B-E: 12 tasks (token-manager, refresh-manager, auth-service, auth-store)
+- Phase F-H: 21 tasks (auth-guard, API client wiring, main.ts bootstrap)
+- Phase I-J: 18 tasks (unit and integration tests)
+- Phase K-L: 13 tasks (cleanup + verification)
 
 Deferred Scope:
 
@@ -32,12 +30,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Both guardian verdicts: PASS
-- HIGH-01, MEDIUM-01, MEDIUM-03 resolved before plan finalized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
