@@ -6,8 +6,8 @@
  * Stage: STAGE_UI_01_AUTH_MODULE
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { createTokenManager } from '../../../src/core/auth/token-manager'
 import type { ITokenManager } from '../../../src/core/auth/token-manager'
+import { createTokenManager } from '../../../src/core/auth/token-manager'
 
 // ─── Logger mock ─────────────────────────────────────────────────────────────
 vi.mock('@zidney/logger', () => ({
@@ -83,7 +83,10 @@ describe('createTokenManager', () => {
   })
 
   it('setToken does NOT write to document.cookie', () => {
-    const originalDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie')
+    const originalDescriptor = Object.getOwnPropertyDescriptor(
+      Document.prototype,
+      'cookie'
+    )
     const cookieSetter = vi.fn()
     Object.defineProperty(document, 'cookie', {
       set: cookieSetter,

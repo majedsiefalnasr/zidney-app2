@@ -8,23 +8,23 @@
 // Step 0: Validate environment config at import time — throws early if misconfigured
 import '@/core/config/app-config'
 
-import { createApp, ref } from 'vue'
 import { createPinia } from 'pinia'
+import { createApp, ref } from 'vue'
 import App from './App.vue'
 
 // ── Step 2: Import pre-created router (guards NOT yet registered) ──────────
 import { router } from '@/core/router'
 
 // Auth module imports
-import { createTokenManager } from '@/core/auth/token-manager'
-import { createRefreshManager } from '@/core/auth/refresh-manager'
-import type { IRefreshManager } from '@/core/auth/refresh-manager'
-import { createAuthService } from '@/core/auth/auth.service'
-import type { AuthServiceApiClient } from '@/core/auth/auth.service'
-import { createAppApiClient } from '@/core/api/client'
 import type { ApiClient } from '@/core/api/client'
-import { defineAuthStore } from '@/core/state/auth.store'
+import { createAppApiClient } from '@/core/api/client'
+import type { AuthServiceApiClient } from '@/core/auth/auth.service'
+import { createAuthService } from '@/core/auth/auth.service'
+import type { IRefreshManager } from '@/core/auth/refresh-manager'
+import { createRefreshManager } from '@/core/auth/refresh-manager'
+import { createTokenManager } from '@/core/auth/token-manager'
 import { createAuthGuard } from '@/core/router/guards/auth.guard'
+import { defineAuthStore } from '@/core/state/auth.store'
 
 // App-specific route name constants — NOT shared in core/auth/
 const LOGIN_ROUTE = 'fo-login'
@@ -76,10 +76,10 @@ apiClient = createAppApiClient(
 // ── Step 8: Register Auth Guard with sessionInitialized gate (CL-01) ───────
 const sessionInitialized = ref(false)
 
-const authGuard = createAuthGuard(
-  () => authStore.isAuthenticated,
-  { loginRouteName: LOGIN_ROUTE, dashboardRouteName: DASHBOARD_ROUTE }
-)
+const authGuard = createAuthGuard(() => authStore.isAuthenticated, {
+  loginRouteName: LOGIN_ROUTE,
+  dashboardRouteName: DASHBOARD_ROUTE,
+})
 
 router.beforeEach(async (to, from) => {
   if (!sessionInitialized.value) {

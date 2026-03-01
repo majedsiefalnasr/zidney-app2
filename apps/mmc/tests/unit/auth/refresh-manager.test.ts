@@ -5,7 +5,7 @@
  *
  * Stage: STAGE_UI_01_AUTH_MODULE
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createRefreshManager } from '../../../src/core/auth/refresh-manager'
 import { createMockTokenManager } from './setup'
 
@@ -60,7 +60,11 @@ describe('createRefreshManager', () => {
 
     const rm = createRefreshManager(refreshFn, onLogout, tokenManager)
 
-    const results = await Promise.allSettled([rm.refresh(), rm.refresh(), rm.refresh()])
+    const results = await Promise.allSettled([
+      rm.refresh(),
+      rm.refresh(),
+      rm.refresh(),
+    ])
     expect(results.every((r) => r.status === 'fulfilled')).toBe(true)
   })
 

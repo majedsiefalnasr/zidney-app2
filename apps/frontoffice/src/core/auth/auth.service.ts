@@ -10,8 +10,8 @@
  *
  * Stage: STAGE_UI_01_AUTH_MODULE
  */
-import { createLogger } from '@zidney/logger'
 import type { ClientResponse, RequestConfig } from '@zidney/api-client'
+import { createLogger } from '@zidney/logger'
 import type { AuthUser, LoginCredentials, LoginResponse } from './types'
 
 const logger = createLogger('auth:auth-service')
@@ -20,7 +20,11 @@ const logger = createLogger('auth:auth-service')
 // Subset of ApiClient needed by auth service — enables forward-reference proxy in main.ts
 export interface AuthServiceApiClient {
   get<T>(url: string, config?: RequestConfig): Promise<ClientResponse<T>>
-  post<T>(url: string, data: unknown, config?: RequestConfig): Promise<ClientResponse<T>>
+  post<T>(
+    url: string,
+    data: unknown,
+    config?: RequestConfig
+  ): Promise<ClientResponse<T>>
 }
 
 // ─── Interface ───────────────────────────────────────────────────────────────
@@ -60,7 +64,9 @@ export interface IAuthService {
  * Pass a mock AuthServiceApiClient in tests to avoid real HTTP calls.
  * Accepts the minimal subset of ApiClient needed (enabling forward-reference in main.ts).
  */
-export function createAuthService(apiClient: AuthServiceApiClient): IAuthService {
+export function createAuthService(
+  apiClient: AuthServiceApiClient
+): IAuthService {
   return {
     async login(credentials: LoginCredentials): Promise<LoginResponse> {
       const result = await apiClient.post<LoginResponse>(
@@ -68,7 +74,10 @@ export function createAuthService(apiClient: AuthServiceApiClient): IAuthService
         credentials
       )
       // NEVER log accessToken — only log presence
-      logger.info('Login response received', { hasToken: true, hasUser: result.data.user != null })
+      logger.info('Login response received', {
+        hasToken: true,
+        hasUser: result.data.user != null,
+      })
       return result.data
     },
 
@@ -102,4 +111,3 @@ export function createAuthService(apiClient: AuthServiceApiClient): IAuthService
     },
   }
 }
-

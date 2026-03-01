@@ -5,15 +5,15 @@
  *
  * Stage: STAGE_UI_01_AUTH_MODULE
  */
-import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import type { IRefreshManager } from '../../../src/core/auth/refresh-manager'
 import { defineAuthStore } from '../../../src/core/state/auth.store'
 import {
   createMockAuthService,
   createMockTokenManager,
   createTestRouter,
 } from './setup'
-import type { IRefreshManager } from '../../../src/core/auth/refresh-manager'
 
 // ─── Logger mock ─────────────────────────────────────────────────────────────
 vi.mock('@zidney/logger', () => ({
@@ -27,9 +27,11 @@ vi.mock('@zidney/logger', () => ({
 
 // ─── Helper ──────────────────────────────────────────────────────────────────
 
-function buildStore(overrides: {
-  refreshManager?: IRefreshManager | null
-} = {}) {
+function buildStore(
+  overrides: {
+    refreshManager?: IRefreshManager | null
+  } = {}
+) {
   const pinia = createPinia()
   setActivePinia(pinia)
 
@@ -51,7 +53,15 @@ function buildStore(overrides: {
 
   const store = useAuthStore(pinia)
 
-  return { store, authService, tokenManager, router, setRefreshManager: (v: IRefreshManager | null) => { rm = v } }
+  return {
+    store,
+    authService,
+    tokenManager,
+    router,
+    setRefreshManager: (v: IRefreshManager | null) => {
+      rm = v
+    },
+  }
 }
 
 // ─── Tests ───────────────────────────────────────────────────────────────────
@@ -86,8 +96,12 @@ describe('defineAuthStore', () => {
 
     it('token is NOT exposed as a store getter', () => {
       const { store } = buildStore()
-      expect((store as unknown as Record<string, unknown>)['token']).toBeUndefined()
-      expect((store as unknown as Record<string, unknown>)['accessToken']).toBeUndefined()
+      expect(
+        (store as unknown as Record<string, unknown>)['token']
+      ).toBeUndefined()
+      expect(
+        (store as unknown as Record<string, unknown>)['accessToken']
+      ).toBeUndefined()
     })
   })
 
@@ -96,7 +110,12 @@ describe('defineAuthStore', () => {
   describe('setSession()', () => {
     it('sets isAuthenticated to true', () => {
       const { store, tokenManager } = buildStore()
-      store.setSession('tok-123', { id: '1', email: 'a@b.com', name: 'Alice', role: 'admin' })
+      store.setSession('tok-123', {
+        id: '1',
+        email: 'a@b.com',
+        name: 'Alice',
+        role: 'admin',
+      })
       expect(store.isAuthenticated).toBe(true)
     })
 
@@ -109,13 +128,23 @@ describe('defineAuthStore', () => {
 
     it('clears isLoading', () => {
       const { store } = buildStore()
-      store.setSession('tok-123', { id: '1', email: 'a@b.com', name: 'Alice', role: 'admin' })
+      store.setSession('tok-123', {
+        id: '1',
+        email: 'a@b.com',
+        name: 'Alice',
+        role: 'admin',
+      })
       expect(store.isLoading).toBe(false)
     })
 
     it('stores token in tokenManager', () => {
       const { store, tokenManager } = buildStore()
-      store.setSession('tok-abc', { id: '1', email: 'a@b.com', name: 'Alice', role: 'admin' })
+      store.setSession('tok-abc', {
+        id: '1',
+        email: 'a@b.com',
+        name: 'Alice',
+        role: 'admin',
+      })
       expect(tokenManager.setToken).toHaveBeenCalledWith('tok-abc')
     })
   })
@@ -125,8 +154,15 @@ describe('defineAuthStore', () => {
   describe('initSession()', () => {
     it('sets isAuthenticated true and populates user on success', async () => {
       const { store, authService } = buildStore()
-      vi.mocked(authService.refreshToken).mockResolvedValue({ accessToken: 'fresh' })
-      vi.mocked(authService.fetchProfile).mockResolvedValue({ id: '1', email: 'a@b.com', name: 'Alice', role: 'admin' })
+      vi.mocked(authService.refreshToken).mockResolvedValue({
+        accessToken: 'fresh',
+      })
+      vi.mocked(authService.fetchProfile).mockResolvedValue({
+        id: '1',
+        email: 'a@b.com',
+        name: 'Alice',
+        role: 'admin',
+      })
 
       await store.initSession()
 
@@ -142,7 +178,9 @@ describe('defineAuthStore', () => {
 
     it('sets authError.code to AUTH_INIT_FAILED on failure', async () => {
       const { store, authService } = buildStore()
-      vi.mocked(authService.refreshToken).mockRejectedValue(new Error('expired'))
+      vi.mocked(authService.refreshToken).mockRejectedValue(
+        new Error('expired')
+      )
 
       await store.initSession()
 
@@ -151,7 +189,9 @@ describe('defineAuthStore', () => {
 
     it('isAuthenticated remains false on failure', async () => {
       const { store, authService } = buildStore()
-      vi.mocked(authService.refreshToken).mockRejectedValue(new Error('expired'))
+      vi.mocked(authService.refreshToken).mockRejectedValue(
+        new Error('expired')
+      )
 
       await store.initSession()
 
@@ -160,7 +200,9 @@ describe('defineAuthStore', () => {
 
     it('user remains null on failure', async () => {
       const { store, authService } = buildStore()
-      vi.mocked(authService.refreshToken).mockRejectedValue(new Error('expired'))
+      vi.mocked(authService.refreshToken).mockRejectedValue(
+        new Error('expired')
+      )
 
       await store.initSession()
 
@@ -169,7 +211,9 @@ describe('defineAuthStore', () => {
 
     it('isLoading is false after failed initSession()', async () => {
       const { store, authService } = buildStore()
-      vi.mocked(authService.refreshToken).mockRejectedValue(new Error('expired'))
+      vi.mocked(authService.refreshToken).mockRejectedValue(
+        new Error('expired')
+      )
 
       await store.initSession()
 
@@ -178,7 +222,9 @@ describe('defineAuthStore', () => {
 
     it('router.push is NOT called on failure', async () => {
       const { store, authService, router } = buildStore()
-      vi.mocked(authService.refreshToken).mockRejectedValue(new Error('expired'))
+      vi.mocked(authService.refreshToken).mockRejectedValue(
+        new Error('expired')
+      )
       const pushSpy = vi.spyOn(router, 'push')
 
       await store.initSession()
@@ -196,28 +242,48 @@ describe('defineAuthStore', () => {
 
     it('resets isAuthenticated to false', async () => {
       const { store } = buildStore()
-      store.setSession('tok', { id: '1', email: 'a@b.com', name: 'Alice', role: 'admin' })
+      store.setSession('tok', {
+        id: '1',
+        email: 'a@b.com',
+        name: 'Alice',
+        role: 'admin',
+      })
       await store.logout()
       expect(store.isAuthenticated).toBe(false)
     })
 
     it('resets user to null', async () => {
       const { store } = buildStore()
-      store.setSession('tok', { id: '1', email: 'a@b.com', name: 'Alice', role: 'admin' })
+      store.setSession('tok', {
+        id: '1',
+        email: 'a@b.com',
+        name: 'Alice',
+        role: 'admin',
+      })
       await store.logout()
       expect(store.user).toBeNull()
     })
 
     it('clears token in tokenManager', async () => {
       const { store, tokenManager } = buildStore()
-      store.setSession('tok', { id: '1', email: 'a@b.com', name: 'Alice', role: 'admin' })
+      store.setSession('tok', {
+        id: '1',
+        email: 'a@b.com',
+        name: 'Alice',
+        role: 'admin',
+      })
       await store.logout()
       expect(tokenManager.clearToken).toHaveBeenCalledOnce()
     })
 
     it('calls authService.logout() once when authenticated', async () => {
       const { store, authService } = buildStore()
-      store.setSession('tok', { id: '1', email: 'a@b.com', name: 'Alice', role: 'admin' })
+      store.setSession('tok', {
+        id: '1',
+        email: 'a@b.com',
+        name: 'Alice',
+        role: 'admin',
+      })
       await store.logout()
       expect(authService.logout).toHaveBeenCalledOnce()
     })
@@ -225,7 +291,12 @@ describe('defineAuthStore', () => {
     // MEDIUM-02: isLoading false AFTER navigation
     it('isLoading is false after logout() completes (MEDIUM-02)', async () => {
       const { store } = buildStore()
-      store.setSession('tok', { id: '1', email: 'a@b.com', name: 'Alice', role: 'admin' })
+      store.setSession('tok', {
+        id: '1',
+        email: 'a@b.com',
+        name: 'Alice',
+        role: 'admin',
+      })
       await store.logout()
       expect(store.isLoading).toBe(false)
     })
@@ -240,7 +311,12 @@ describe('defineAuthStore', () => {
 
     it('navigates to loginRouteName after logout', async () => {
       const { store, router } = buildStore()
-      store.setSession('tok', { id: '1', email: 'a@b.com', name: 'Alice', role: 'admin' })
+      store.setSession('tok', {
+        id: '1',
+        email: 'a@b.com',
+        name: 'Alice',
+        role: 'admin',
+      })
       const pushSpy = vi.spyOn(router, 'push')
       await store.logout()
       expect(pushSpy).toHaveBeenCalledWith({ name: 'mmc-login' })
@@ -248,16 +324,30 @@ describe('defineAuthStore', () => {
 
     it('still resolves when authService.logout() rejects (FR-30)', async () => {
       const { store, authService } = buildStore()
-      store.setSession('tok', { id: '1', email: 'a@b.com', name: 'Alice', role: 'admin' })
-      vi.mocked(authService.logout).mockRejectedValue(new Error('network error'))
+      store.setSession('tok', {
+        id: '1',
+        email: 'a@b.com',
+        name: 'Alice',
+        role: 'admin',
+      })
+      vi.mocked(authService.logout).mockRejectedValue(
+        new Error('network error')
+      )
 
       await expect(store.logout()).resolves.toBeUndefined()
     })
 
     it('still resets state when authService.logout() rejects', async () => {
       const { store, authService } = buildStore()
-      store.setSession('tok', { id: '1', email: 'a@b.com', name: 'Alice', role: 'admin' })
-      vi.mocked(authService.logout).mockRejectedValue(new Error('network error'))
+      store.setSession('tok', {
+        id: '1',
+        email: 'a@b.com',
+        name: 'Alice',
+        role: 'admin',
+      })
+      vi.mocked(authService.logout).mockRejectedValue(
+        new Error('network error')
+      )
 
       await store.logout()
 

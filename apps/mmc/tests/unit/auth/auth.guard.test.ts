@@ -28,7 +28,10 @@ const OPTIONS: AuthGuardOptions = {
   dashboardRouteName: 'mmc-dashboard',
 }
 
-function makeRoute(meta: Record<string, unknown> = {}, name = 'some-route'): RouteLocationNormalized {
+function makeRoute(
+  meta: Record<string, unknown> = {},
+  name = 'some-route'
+): RouteLocationNormalized {
   return {
     name,
     path: '/' + String(name),
@@ -121,7 +124,9 @@ describe('createAuthGuard', () => {
   })
 
   it('guard never throws', () => {
-    const guardBroken = createAuthGuard(() => { throw new Error('unexpected') }, OPTIONS)
+    const guardBroken = createAuthGuard(() => {
+      throw new Error('unexpected')
+    }, OPTIONS)
     const to = makeRoute({ requiresAuth: true })
 
     // The guard itself should not propagate the error from getIsAuthenticated
@@ -136,7 +141,10 @@ describe('createAuthGuard', () => {
 
   it('requiredRole present + authenticated + requiresAuth → allows through (guard does not check roles)', () => {
     const guard = createAuthGuard(() => true, OPTIONS)
-    const to = makeRoute({ requiresAuth: true, requiredRole: 'admin' }, 'mmc-admin')
+    const to = makeRoute(
+      { requiresAuth: true, requiredRole: 'admin' },
+      'mmc-admin'
+    )
 
     const result = guard(to, FROM, vi.fn())
 

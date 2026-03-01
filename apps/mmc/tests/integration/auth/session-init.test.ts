@@ -6,8 +6,8 @@
  *
  * Stage: STAGE_UI_01_AUTH_MODULE
  */
-import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 import { defineAuthStore } from '../../../src/core/state/auth.store'
 import {
   createMockAuthService,
@@ -58,9 +58,14 @@ describe('session initialization integration', () => {
   describe('Scenario A — authenticated reload (refresh succeeds)', () => {
     it('sets isAuthenticated to true', async () => {
       const { store, authService } = buildStore()
-      vi.mocked(authService.refreshToken).mockResolvedValue({ accessToken: 'bearer-tok' })
+      vi.mocked(authService.refreshToken).mockResolvedValue({
+        accessToken: 'bearer-tok',
+      })
       vi.mocked(authService.fetchProfile).mockResolvedValue({
-        id: '1', email: 'user@test.com', name: 'User', role: 'admin',
+        id: '1',
+        email: 'user@test.com',
+        name: 'User',
+        role: 'admin',
       })
 
       await store.initSession()
@@ -69,9 +74,14 @@ describe('session initialization integration', () => {
 
     it('populates user profile', async () => {
       const { store, authService } = buildStore()
-      vi.mocked(authService.refreshToken).mockResolvedValue({ accessToken: 'bearer-tok' })
+      vi.mocked(authService.refreshToken).mockResolvedValue({
+        accessToken: 'bearer-tok',
+      })
       vi.mocked(authService.fetchProfile).mockResolvedValue({
-        id: '99', email: 'u@t.com', name: 'Jane', role: 'viewer',
+        id: '99',
+        email: 'u@t.com',
+        name: 'Jane',
+        role: 'viewer',
       })
 
       await store.initSession()
@@ -93,9 +103,14 @@ describe('session initialization integration', () => {
 
     it('stores token in tokenManager', async () => {
       const { store, authService, tokenManager } = buildStore()
-      vi.mocked(authService.refreshToken).mockResolvedValue({ accessToken: 'stored-tok' })
+      vi.mocked(authService.refreshToken).mockResolvedValue({
+        accessToken: 'stored-tok',
+      })
       vi.mocked(authService.fetchProfile).mockResolvedValue({
-        id: '1', email: 'e@t.com', name: 'X', role: 'admin',
+        id: '1',
+        email: 'e@t.com',
+        name: 'X',
+        role: 'admin',
       })
 
       await store.initSession()

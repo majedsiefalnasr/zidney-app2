@@ -17,7 +17,10 @@ export default defineConfig({
       },
       {
         find: '@zidney/api-client',
-        replacement: resolve(__dirname, '../../packages/api-client/src/index.ts'),
+        replacement: resolve(
+          __dirname,
+          '../../packages/api-client/src/index.ts'
+        ),
       },
     ],
   },

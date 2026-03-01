@@ -10,12 +10,12 @@
  *
  * Stage: STAGE_UI_01_AUTH_MODULE
  */
+import { createLogger } from '@zidney/logger'
 import type {
   NavigationGuard,
   RouteLocationNormalized,
   RouteLocationRaw,
 } from 'vue-router'
-import { createLogger } from '@zidney/logger'
 
 const logger = createLogger('auth:auth-guard')
 

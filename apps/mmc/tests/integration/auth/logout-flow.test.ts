@@ -7,15 +7,15 @@
  *
  * Stage: STAGE_UI_01_AUTH_MODULE
  */
-import { afterEach, describe, expect, it, vi } from 'vitest'
 import { createPinia, setActivePinia } from 'pinia'
+import { afterEach, describe, expect, it, vi } from 'vitest'
+import type { AuthUser } from '../../../src/core/auth/types'
 import { defineAuthStore } from '../../../src/core/state/auth.store'
 import {
   createMockAuthService,
   createMockTokenManager,
   createTestRouter,
 } from '../../unit/auth/setup'
-import type { AuthUser } from '../../../src/core/auth/types'
 
 // ─── Logger mock ─────────────────────────────────────────────────────────────
 vi.mock('@zidney/logger', () => ({
@@ -29,7 +29,12 @@ vi.mock('@zidney/logger', () => ({
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
-const TEST_USER: AuthUser = { id: '1', email: 'user@test.com', name: 'User', role: 'admin' }
+const TEST_USER: AuthUser = {
+  id: '1',
+  email: 'user@test.com',
+  name: 'User',
+  role: 'admin',
+}
 
 function buildStore() {
   const pinia = createPinia()

@@ -5,8 +5,8 @@
  * Stage: STAGE_UI_01_AUTH_MODULE
  */
 import { createPinia, setActivePinia } from 'pinia'
-import { createMemoryHistory, createRouter } from 'vue-router'
 import { vi } from 'vitest'
+import { createMemoryHistory, createRouter } from 'vue-router'
 import type { IAuthService } from '../../../src/core/auth/auth.service'
 import type { ITokenManager } from '../../../src/core/auth/token-manager'
 import type { AuthUser } from '../../../src/core/auth/types'
@@ -38,8 +38,12 @@ export function createMockTokenManager(): ITokenManager {
   let _token: string | null = null
   return {
     getToken: vi.fn(() => _token),
-    setToken: vi.fn((t: string) => { _token = t }),
-    clearToken: vi.fn(() => { _token = null }),
+    setToken: vi.fn((t: string) => {
+      _token = t
+    }),
+    clearToken: vi.fn(() => {
+      _token = null
+    }),
     hasToken: vi.fn(() => _token !== null),
   }
 }
@@ -51,9 +55,24 @@ export function createTestRouter() {
     history: createMemoryHistory(),
     routes: [
       { path: '/', name: 'home', component: {} },
-      { path: '/login', name: 'mmc-login', meta: { guestOnly: true }, component: {} },
-      { path: '/dashboard', name: 'mmc-dashboard', meta: { requiresAuth: true }, component: {} },
-      { path: '/admin', name: 'mmc-admin', meta: { requiresAuth: true, requiredRole: 'admin' }, component: {} },
+      {
+        path: '/login',
+        name: 'mmc-login',
+        meta: { guestOnly: true },
+        component: {},
+      },
+      {
+        path: '/dashboard',
+        name: 'mmc-dashboard',
+        meta: { requiresAuth: true },
+        component: {},
+      },
+      {
+        path: '/admin',
+        name: 'mmc-admin',
+        meta: { requiresAuth: true, requiredRole: 'admin' },
+        component: {},
+      },
     ],
   })
 }

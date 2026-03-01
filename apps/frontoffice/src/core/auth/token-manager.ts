@@ -9,8 +9,8 @@
  *
  * Stage: STAGE_UI_01_AUTH_MODULE
  */
-import { ref } from 'vue'
 import { createLogger } from '@zidney/logger'
+import { ref } from 'vue'
 
 const logger = createLogger('auth:token-manager')
 

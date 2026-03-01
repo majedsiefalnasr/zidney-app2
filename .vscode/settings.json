@@ -42,7 +42,11 @@
     "npx eslint": true,
     "npx tsc": true,
     "act": true,
-    "gh": true
+    "gh": true,
+    "/^bash \\.specify/scripts/bash/check-prerequisites\\.sh --json --paths-only 2>&1$/": {
+      "approve": true,
+      "matchCommandLine": true
+    }
   },
   "css.lint.unknownAtRules": "ignore",
   "css.customData": [

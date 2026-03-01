@@ -10,20 +10,20 @@
 
 ## Validation Summary
 
-| Check                           | Command                          | Exit Code | Result      |
-| ------------------------------- | -------------------------------- | --------- | ----------- |
-| TypeScript — Root tsconfig      | `tsc --noEmit -p tsconfig.json`  | 0         | ✅ PASS     |
-| TypeScript — MMC                | `tsc --noEmit -p apps/mmc/...`   | 0         | ✅ PASS     |
-| TypeScript — Backoffice         | `tsc --noEmit -p apps/bo/...`    | 0         | ✅ PASS     |
-| TypeScript — Frontoffice        | `tsc --noEmit -p apps/fo/...`    | 0         | ✅ PASS     |
-| ESLint — MMC auth files         | `bunx eslint <files>`            | 0         | ✅ PASS     |
-| ESLint — Backoffice auth files  | `bunx eslint <files>`            | 0         | ✅ PASS     |
-| ESLint — Frontoffice auth files | `bunx eslint <files>`            | 0         | ✅ PASS     |
-| Unit Tests — MMC                | `vitest run` (MMC vitest.config) | 0         | ✅ PASS     |
-| Integration Tests — MMC         | included in vitest run above     | 0         | ✅ PASS     |
-| Token Leak Grep                 | grep accessToken/console.*       | 1 (clean) | ✅ CLEAN    |
-| Storage API Grep                | grep localStorage/sessionStorage | 1 (clean) | ✅ CLEAN    |
-| token-store.ts Deletion         | find -name token-store.ts        | not found | ✅ DELETED  |
+| Check                           | Command                          | Exit Code | Result     |
+| ------------------------------- | -------------------------------- | --------- | ---------- |
+| TypeScript — Root tsconfig      | `tsc --noEmit -p tsconfig.json`  | 0         | ✅ PASS    |
+| TypeScript — MMC                | `tsc --noEmit -p apps/mmc/...`   | 0         | ✅ PASS    |
+| TypeScript — Backoffice         | `tsc --noEmit -p apps/bo/...`    | 0         | ✅ PASS    |
+| TypeScript — Frontoffice        | `tsc --noEmit -p apps/fo/...`    | 0         | ✅ PASS    |
+| ESLint — MMC auth files         | `bunx eslint <files>`            | 0         | ✅ PASS    |
+| ESLint — Backoffice auth files  | `bunx eslint <files>`            | 0         | ✅ PASS    |
+| ESLint — Frontoffice auth files | `bunx eslint <files>`            | 0         | ✅ PASS    |
+| Unit Tests — MMC                | `vitest run` (MMC vitest.config) | 0         | ✅ PASS    |
+| Integration Tests — MMC         | included in vitest run above     | 0         | ✅ PASS    |
+| Token Leak Grep                 | grep accessToken/console.\*      | 1 (clean) | ✅ CLEAN   |
+| Storage API Grep                | grep localStorage/sessionStorage | 1 (clean) | ✅ CLEAN   |
+| token-store.ts Deletion         | find -name token-store.ts        | not found | ✅ DELETED |
 
 ---
 
@@ -109,6 +109,7 @@ bunx vitest run --config apps/mmc/vitest.config.ts
 **Result: 12 test files, 143 tests — ALL PASS.**
 
 Key test coverage:
+
 - `token-manager.test.ts` (11 tests): in-memory storage, no browser storage side effects
 - `refresh-manager.test.ts` (10 tests): single-flight guarantee, `onLogout` called exactly once
 - `auth.store.test.ts` (27 tests): MEDIUM-02 compliance, FR-36 idempotency, token not exposed
@@ -122,14 +123,14 @@ Key test coverage:
 
 ## Security Grep Results
 
-### console.* in auth core files
+### console.\* in auth core files
 
 ```
 grep -rn "console\." apps/*/src/core/auth/
 Exit: 1 (no matches found)
 ```
 
-**✅ CLEAN — No console.* calls in any auth core file.**
+**✅ CLEAN — No console.\* calls in any auth core file.**
 
 ### localStorage / sessionStorage / document.cookie in core/
 
@@ -167,14 +168,14 @@ Verified in `auth.store.ts` for all 3 apps and confirmed by `auth.store.test.ts`
 
 ## Deferred / Skipped Checks
 
-| Check                    | Status   | Reason                                           |
-| ------------------------ | -------- | ------------------------------------------------ |
-| Backoffice unit tests    | DEFERRED | No vitest.config in backoffice app               |
-| Frontoffice unit tests   | DEFERRED | No vitest.config in frontoffice app              |
-| Idempotency replay test  | COVERED  | logout idempotency covered in auth.store.test.ts |
-| Concurrency stress test  | COVERED  | concurrent-refresh.test.ts (5 concurrent calls)  |
-| Migration validation     | N/A      | UI stage — no schema changes                     |
-| Snapshot grading test    | N/A      | Auth module — no grading logic                   |
+| Check                   | Status   | Reason                                           |
+| ----------------------- | -------- | ------------------------------------------------ |
+| Backoffice unit tests   | DEFERRED | No vitest.config in backoffice app               |
+| Frontoffice unit tests  | DEFERRED | No vitest.config in frontoffice app              |
+| Idempotency replay test | COVERED  | logout idempotency covered in auth.store.test.ts |
+| Concurrency stress test | COVERED  | concurrent-refresh.test.ts (5 concurrent calls)  |
+| Migration validation    | N/A      | UI stage — no schema changes                     |
+| Snapshot grading test   | N/A      | Auth module — no grading logic                   |
 
 **Note:** Backoffice and Frontoffice implementations replicate the MMC pattern. The core business logic (token-manager, refresh-manager) is identical and covered by MMC unit tests. Per-app integration would require adding vitest configs to those apps, which is a separate infrastructure task.
 
@@ -188,15 +189,15 @@ None. All checks passed with zero warnings or errors.
 
 ## Constitutional Compliance Confirmation
 
-| Rule                              | Status | Evidence                                  |
-| --------------------------------- | ------ | ----------------------------------------- |
-| No token in logs                  | ✅     | Token leak grep: CLEAN                    |
-| Memory-only token storage         | ✅     | Storage grep: CLEAN; token-manager tests  |
-| No JWT decoding                   | ✅     | No `atob`, `jwt-decode` in implementation |
-| Single-flight refresh             | ✅     | concurrent-refresh.test.ts: 1 call only   |
-| Logout unconditional              | ✅     | auth.store.test.ts: logout-flow tests     |
-| Server-authoritative time         | ✅     | No Date.now() in any auth file            |
-| MEDIUM-02 isLoading after push    | ✅     | auth.store.test.ts verified               |
-| TypeScript strict                 | ✅     | tsc --noEmit: 0 errors                    |
-| No console.*                      | ✅     | console grep: CLEAN                       |
-| Structured logging (@zidney/logger) | ✅   | `createLogger` used in all modules        |
+| Rule                                | Status | Evidence                                  |
+| ----------------------------------- | ------ | ----------------------------------------- |
+| No token in logs                    | ✅     | Token leak grep: CLEAN                    |
+| Memory-only token storage           | ✅     | Storage grep: CLEAN; token-manager tests  |
+| No JWT decoding                     | ✅     | No `atob`, `jwt-decode` in implementation |
+| Single-flight refresh               | ✅     | concurrent-refresh.test.ts: 1 call only   |
+| Logout unconditional                | ✅     | auth.store.test.ts: logout-flow tests     |
+| Server-authoritative time           | ✅     | No Date.now() in any auth file            |
+| MEDIUM-02 isLoading after push      | ✅     | auth.store.test.ts verified               |
+| TypeScript strict                   | ✅     | tsc --noEmit: 0 errors                    |
+| No console.\*                       | ✅     | console grep: CLEAN                       |
+| Structured logging (@zidney/logger) | ✅     | `createLogger` used in all modules        |

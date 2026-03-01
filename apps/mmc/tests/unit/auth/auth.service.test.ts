@@ -6,11 +6,11 @@
  * Stage: STAGE_UI_01_AUTH_MODULE
  */
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { createAuthService } from '../../../src/core/auth/auth.service'
 import type {
   AuthServiceApiClient,
   IAuthService,
 } from '../../../src/core/auth/auth.service'
+import { createAuthService } from '../../../src/core/auth/auth.service'
 import type { AuthUser } from '../../../src/core/auth/types'
 
 // ─── Logger mock ─────────────────────────────────────────────────────────────
@@ -32,10 +32,17 @@ const TEST_USER: AuthUser = {
   role: 'admin',
 }
 
-function makeMockApiClient(overrides: Partial<AuthServiceApiClient> = {}): AuthServiceApiClient {
+function makeMockApiClient(
+  overrides: Partial<AuthServiceApiClient> = {}
+): AuthServiceApiClient {
   return {
     get: vi.fn().mockResolvedValue({ success: true, data: TEST_USER }),
-    post: vi.fn().mockResolvedValue({ success: true, data: { accessToken: 'tok', user: TEST_USER } }),
+    post: vi
+      .fn()
+      .mockResolvedValue({
+        success: true,
+        data: { accessToken: 'tok', user: TEST_USER },
+      }),
     ...overrides,
   }
 }
@@ -67,7 +74,10 @@ describe('createAuthService', () => {
       })
       const service = createAuthService(apiClient)
 
-      const result = await service.login({ email: 'u@test.com', password: 'pw' })
+      const result = await service.login({
+        email: 'u@test.com',
+        password: 'pw',
+      })
       expect(result.accessToken).toBe('access-tok')
       expect(result.user).toEqual(TEST_USER)
     })
@@ -78,7 +88,9 @@ describe('createAuthService', () => {
       })
       const service = createAuthService(apiClient)
 
-      await expect(service.login({ email: 'u@test.com', password: 'pw' })).rejects.toThrow()
+      await expect(
+        service.login({ email: 'u@test.com', password: 'pw' })
+      ).rejects.toThrow()
     })
   })
 
@@ -120,7 +132,12 @@ describe('createAuthService', () => {
   describe('refreshToken()', () => {
     it('calls POST /auth/refresh', async () => {
       const apiClient = makeMockApiClient({
-        post: vi.fn().mockResolvedValue({ success: true, data: { accessToken: 'refreshed' } }),
+        post: vi
+          .fn()
+          .mockResolvedValue({
+            success: true,
+            data: { accessToken: 'refreshed' },
+          }),
       })
       const service = createAuthService(apiClient)
 
@@ -130,7 +147,9 @@ describe('createAuthService', () => {
 
     it('returns { accessToken: string }', async () => {
       const apiClient = makeMockApiClient({
-        post: vi.fn().mockResolvedValue({ success: true, data: { accessToken: 'r-tok' } }),
+        post: vi
+          .fn()
+          .mockResolvedValue({ success: true, data: { accessToken: 'r-tok' } }),
       })
       const service = createAuthService(apiClient)
 

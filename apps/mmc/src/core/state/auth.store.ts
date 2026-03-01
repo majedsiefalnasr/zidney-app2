@@ -13,14 +13,14 @@
  *
  * Stage: STAGE_UI_01_AUTH_MODULE
  */
+import { createLogger } from '@zidney/logger'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
-import { createLogger } from '@zidney/logger'
 import type { Router } from 'vue-router'
 import type { IAuthService } from '../auth/auth.service'
-import type { ITokenManager } from '../auth/token-manager'
 import type { IRefreshManager } from '../auth/refresh-manager'
-import type { AuthUser, AuthError } from '../auth/types'
+import type { ITokenManager } from '../auth/token-manager'
+import type { AuthError, AuthUser } from '../auth/types'
 
 const logger = createLogger('auth:auth-store')
 

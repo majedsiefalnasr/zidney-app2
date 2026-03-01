@@ -1,11 +1,11 @@
+import type { IRefreshManager } from '@/core/auth/refresh-manager'
+import type { ITokenManager } from '@/core/auth/token-manager'
 import { appConfig } from '@/core/config/app-config'
 import type { ApiClient } from '@zidney/api-client'
 import {
   createApiClient as createClient,
   createFetchAdapter,
 } from '@zidney/api-client'
-import type { ITokenManager } from '@/core/auth/token-manager'
-import type { IRefreshManager } from '@/core/auth/refresh-manager'
 import { createLogger } from '@zidney/logger'
 
 const logger = createLogger('auth:api-client')
