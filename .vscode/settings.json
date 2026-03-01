@@ -30,7 +30,19 @@
     "/^bash \\.specify/scripts/bash/check-prerequisites\\.sh --json --require-tasks --include-tasks 2>/dev/null \\|\\| echo \"Script not found or failed\"$/": {
       "approve": true,
       "matchCommandLine": true
-    }
+    },
+    "/^bash \\.specify/scripts/bash/setup-plan\\.sh --json 2>&1$/": {
+      "approve": true,
+      "matchCommandLine": true
+    },
+    "/^bash \\.specify/scripts/bash/check-prerequisites\\.sh --json --require-tasks --include-tasks 2>&1$/": {
+      "approve": true,
+      "matchCommandLine": true
+    },
+    "npx eslint": true,
+    "npx tsc": true,
+    "act": true,
+    "gh": true
   },
   "css.lint.unknownAtRules": "ignore",
   "css.customData": [

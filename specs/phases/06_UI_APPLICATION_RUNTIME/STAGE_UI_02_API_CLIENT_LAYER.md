@@ -8,7 +8,36 @@ UI Foundation — Centralized API Client Architecture
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY
+Risk Level: LOW
+Closure Date: 2026-03-01
+
+Scope Closed:
+
+- `packages/api-client` package with HttpAdapter, ClientResponse<T>, AppError interface
+- Fixed interceptor pipeline: auth → correlation → content-type → idempotency → timeout
+- Single-flight 401 refresh, error normalization to AppError
+- Idempotency-Key header on mutations (POST/PUT/PATCH/DELETE)
+- Auto-generated X-Correlation-ID on every request
+- Per-app wrappers for MMC, Backoffice, Frontoffice
+- Migration of existing per-app client code to shared package
+- ESLint enforcement: no direct fetch/axios imports
+- 90 unit tests across 6 test files
+- 76 / 76 tasks completed
+
+Deferred Scope:
+
+- None
+
+Constitutional Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced
+- ADR-0007 Version compatibility enforced
+- ADR-0008 Semantic versioning enforced
+
+Notes:
+Stage is production ready. No structural backend modifications allowed.
+Modifications require a new migration stage.
 
 ---
 

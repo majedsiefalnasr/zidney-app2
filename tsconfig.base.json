@@ -71,6 +71,12 @@
       ],
       "@zidney/config/*": [
         "packages/config/src/*"
+      ],
+      "@zidney/api-client": [
+        "packages/api-client/src/index.ts"
+      ],
+      "@zidney/api-client/*": [
+        "packages/api-client/src/*"
       ]
     }
   },

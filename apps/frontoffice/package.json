@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@zidney/api-client": "workspace:*",
     "@zidney/ui-system": "workspace:*",
     "pinia": "^2.2.0",
     "vue": "^3.4.0",

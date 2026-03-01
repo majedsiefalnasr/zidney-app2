@@ -150,22 +150,15 @@ git diff --name-only HEAD
 
 This lists every file changed in this step (written or modified). Run the project formatter on that exact list — never on the entire repo.
 
-**Formatter detection (check in this order):**
+Apply Package Manager Enforcement — use `$PKG_MANAGER` (detected at Pre.1) to invoke the formatter. See the "Formatter invocation" rule in that section for the exact command per package manager.
+
+**Formatter config detection (check in this order):**
 
 ```bash
-# 1. Check package.json for a format or fmt script
-cat package.json | grep -E '"format"|"fmt"'
-# If found: npm run format -- <files>  OR  bun run format <files>
-
-# 2. Check for Biome
-ls biome.json biome.jsonc 2>/dev/null
-# If found: bunx biome format --write <files>
-
-# 3. Check for Prettier
-ls .prettierrc* prettier.config.* 2>/dev/null
-# If found: bunx prettier --write <files>
-
-# 4. No formatter found → skip, add note to commit message: "no formatter configured"
+# 1. Check package.json for a format or fmt script → $PKG_MANAGER run format <files>
+# 2. Check for biome.json or biome.jsonc           → biome format --write <files>
+# 3. Check for .prettierrc* or prettier.config.*   → prettier --write <files>
+# 4. None found → skip, note "no formatter configured" in commit message
 ```
 
 After formatting, run `git diff --name-only HEAD` again. If formatting touched files **outside** the active stage scope → STOP and require manual review before continuing.
@@ -210,6 +203,107 @@ specs/templates/commits/
 
 Replace all `{{PLACEHOLDER}}` tokens with actual values before committing.  
 Do NOT write commit messages inline — always load from template.
+
+## Package Manager Enforcement
+
+Referenced throughout as **"Apply Package Manager Enforcement."**
+
+### Detection (run once per session, at Pre.1)
+
+Detect the project package manager by inspecting lockfiles — never assume:
+
+```bash
+# Run from repo root
+if [ -f "bun.lockb" ] || [ -f "bun.lock" ]; then
+  PKG_MANAGER="bun"
+elif [ -f "pnpm-lock.yaml" ]; then
+  PKG_MANAGER="pnpm"
+elif [ -f "yarn.lock" ]; then
+  PKG_MANAGER="yarn"
+elif [ -f "package-lock.json" ]; then
+  PKG_MANAGER="npm"
+else
+  echo "ERROR: No lockfile found. Cannot determine package manager."
+  echo "Ask the user which package manager the project uses before continuing."
+  exit 1
+fi
+
+echo "Detected package manager: $PKG_MANAGER"
+```
+
+Store `PKG_MANAGER` for the entire session. Every subsequent command that invokes a package manager MUST use this value — never hardcode `npm`, `pnpm`, `yarn`, or `bun`.
+
+### Running scripts
+
+Always use the detected package manager to run scripts:
+
+```bash
+$PKG_MANAGER run <script>
+# e.g. bun run dev  |  pnpm run build  |  yarn test  |  npm run lint
+```
+
+### Adding dependencies
+
+**NEVER edit `package.json` directly to add, remove, or update dependencies.**  
+Direct edits produce stale versions from training data. Always use the package manager CLI so the registry resolves the actual latest version:
+
+```bash
+# Runtime dependency
+$PKG_MANAGER add <package-name>
+
+# Dev dependency
+$PKG_MANAGER add -D <package-name>
+
+# Multiple packages at once
+$PKG_MANAGER add <pkg1> <pkg2> <pkg3>
+```
+
+If a specific version is explicitly required by the spec or constitution → pin it:
+
+```bash
+$PKG_MANAGER add <package-name>@<exact-version>
+```
+
+Otherwise always install without a version pin — let the registry resolve latest.
+
+### Updating dependencies
+
+Never bump a version number in `package.json` by hand. Use:
+
+```bash
+# Update a single package to latest
+$PKG_MANAGER add <package-name>@latest
+
+# Bun-specific: update all packages
+bun update
+
+# pnpm-specific: update all packages
+pnpm update --latest
+```
+
+### Formatter invocation
+
+Use the detected package manager when running formatters:
+
+```bash
+# Biome
+$PKG_MANAGER run format          # if format script exists in package.json
+# OR
+bunx biome format --write <files>   # bun
+pnpm dlx @biomejs/biome format --write <files>  # pnpm
+npx @biomejs/biome format --write <files>       # npm/yarn
+
+# Prettier
+$PKG_MANAGER run format          # if format script exists in package.json
+# OR
+bunx prettier --write <files>    # bun
+pnpm dlx prettier --write <files>  # pnpm
+npx prettier --write <files>       # npm/yarn
+```
+
+### Violation rule
+
+If any step attempts to write dependency entries into `package.json` directly (via file edit, string replacement, or template fill) → **STOP**. Remove the direct edit. Run `$PKG_MANAGER add <package>` instead.
 
 ## Terminal Safety
 
@@ -268,6 +362,8 @@ Parse `<STAGE_FILE_NAME>` with pattern: `^STAGE_([0-9]+[A-Z]?)_`
 - Combine: `<PADDED_PREFIX>-<kebab-stage-name>` → e.g. `005-tenant-provisioning-service`
 
 Store as `STAGE_DIR_NAME`.
+
+Apply Package Manager Enforcement — run the lockfile detection block now and store `PKG_MANAGER` for the entire session. Every step from here onwards uses this value. Do NOT re-detect mid-session.
 
 ## Pre.2 — Confirm Base Branch
 
@@ -1059,6 +1155,8 @@ Tasks Total: <TASKS_TOTAL>
 
 Rules: modify only stage-scoped files, tenant resolver only, no direct DB instantiation, all writes transactional, idempotency enforced, structured logging, correlation ID, no business logic in frontend, no stack traces to client.
 
+Apply Package Manager Enforcement — use `$PKG_MANAGER` for all dependency installs and script execution. Never edit `package.json` directly to add or update dependencies — always use `$PKG_MANAGER add <package>` or `$PKG_MANAGER add -D <package>` so the registry resolves the actual latest version.
+
 If Constitution conflict at any point → STOP immediately and explain before continuing.
 
 ## 6.4 — Verify Implementation Completeness
@@ -1111,7 +1209,7 @@ In addition to the above validations, the orchestrator MUST execute and record:
 
 - ESLint (or project linter) → must exit with code 0
 - TypeScript type-check (`tsc --noEmit`) → must exit with code 0
-- Dev runtime boot check (`npm run dev` or equivalent) → application must start without runtime errors
+- Dev runtime boot check (`$PKG_MANAGER run dev` — use the package manager detected at Pre.1) → application must start without runtime errors
 
 Rules:
 
@@ -1233,79 +1331,6 @@ Load `specs/templates/commits/commit-implement.md`. Fill all `{{PLACEHOLDER}}` t
 
 **Hard STOP. Do NOT proceed to Step 7 without explicit user approval.**
 
-### Gate A — Run GitHub Workflows
-
-Before presenting the review prompt, run all GitHub Actions workflows locally and record results.
-
-**Step 1 — Detect runner:**
-
-```bash
-act --version 2>/dev/null
-```
-
-- If `act` is available → use it (Step 2a)
-- If not found → fall back to `gh` CLI (Step 2b)
-
-**Step 2a — Run with `act`:**
-
-```bash
-# List all available workflows
-act --list
-
-# Run all workflows against the current branch
-act push --branch <STAGE_DIR_NAME>
-```
-
-Capture exit code and stdout/stderr per workflow job.
-
-**Step 2b — Fall back to `gh` CLI:**
-
-```bash
-# Push branch to trigger remote workflows (if not already pushed)
-git push origin <STAGE_DIR_NAME>
-
-# List workflow runs for this branch and poll until complete
-gh run list --branch <STAGE_DIR_NAME> --limit 20
-gh run watch
-```
-
-Wait for all runs to reach a terminal state (`completed`, `failure`, `cancelled`).
-
-**Step 3 — Build results table:**
-
-Display one row per workflow job:
-
-```
-GitHub Workflows — <STAGE_DIR_NAME>
-Runner: act (local)  |  act (fallback: gh CLI)
-
-| Workflow               | Job              | Status  | Duration |
-|------------------------|------------------|---------|----------|
-| ci.yml                 | lint             | ✅ pass | 0m 42s   |
-| ci.yml                 | test             | ✅ pass | 1m 18s   |
-| ci.yml                 | type-check       | ❌ fail | 0m 31s   |
-| deploy-preview.yml     | build            | ✅ pass | 2m 05s   |
-
-Overall: ⚠️ 1 workflow job failed
-```
-
-**Step 4 — If any jobs failed, display failure details:**
-
-```
-❌ Failures detected:
-
-ci.yml › type-check
-  Exit code: 1
-  Error: src/services/tenant.ts(42,5): error TS2345: Argument of type 'string' is not assignable...
-  [full output]
-```
-
-**Workflow gate behavior:** Failures are WARNING only — they do not automatically block closure. The user sees the full results table and decides in the approval prompt below. If no `.github/workflows/` directory exists → skip this gate and note it in the review prompt.
-
----
-
-### Gate B — Review Prompt
-
 ```
 ⏸ Pre-Closure Review Gate
 
@@ -1339,8 +1364,6 @@ Audits:
   specs/runtime/<STAGE_DIR_NAME>/audits/ANALYZE_REPORT.md
   specs/runtime/<STAGE_DIR_NAME>/audits/VALIDATION_REPORT.md
 
-GitHub Workflows: <✅ all passed | ⚠️ N failed — see details above | ⏭ skipped (no workflows found)>
-
 Tasks completed: <TASKS_COMPLETED> / <TASKS_TOTAL>
 
 Respond with:
@@ -1348,7 +1371,7 @@ Respond with:
   ❌ "Issues found — [describe what needs fixing]"
 ```
 
-If issues reported → address them, regenerate affected report(s), update stage status and workflow state, then re-run Gate A before re-presenting Gate B.  
+If issues reported → address them, regenerate affected report(s), update stage status and workflow state, then re-present this gate.  
 Do NOT proceed to Step 7 until explicit approval received.
 
 ---

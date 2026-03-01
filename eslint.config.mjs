@@ -120,5 +120,35 @@ export default tseslint.config(
         typescript: { alwaysTryTypes: true },
       },
     },
+  },
+
+  // T066/T067: Ban direct HTTP clients in app code — use @zidney/api-client
+  {
+    files: [
+      'apps/mmc/src/**/*.{ts,vue}',
+      'apps/backoffice/src/**/*.{ts,vue}',
+      'apps/frontoffice/src/**/*.{ts,vue}',
+    ],
+    rules: {
+      'no-restricted-imports': [
+        'error',
+        {
+          paths: [
+            { name: 'axios', message: 'Use @zidney/api-client instead.' },
+            { name: 'got', message: 'Use @zidney/api-client instead.' },
+            { name: 'ky', message: 'Use @zidney/api-client instead.' },
+            { name: 'node-fetch', message: 'Use @zidney/api-client instead.' },
+          ],
+        },
+      ],
+      'no-restricted-globals': [
+        'error',
+        {
+          name: 'fetch',
+          message:
+            'Use @zidney/api-client instead of raw fetch. If you need fetch for auth refresh, import it from core/api/client.',
+        },
+      ],
+    },
   }
 )
