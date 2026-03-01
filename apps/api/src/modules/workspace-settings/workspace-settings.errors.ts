@@ -25,6 +25,7 @@ export const WorkspaceSettingsErrorCode = {
   SETTINGS_NOT_FOUND: 'SETTINGS_NOT_FOUND',
   ENCRYPTION_SERVICE_UNAVAILABLE: 'ENCRYPTION_SERVICE_UNAVAILABLE',
   INVALID_SETTINGS_GROUP: 'INVALID_SETTINGS_GROUP',
+  LANGUAGE_REMOVAL_REQUIRES_ASYNC: 'LANGUAGE_REMOVAL_REQUIRES_ASYNC',
 } as const
 
 export type WorkspaceSettingsErrorCode =
@@ -41,6 +42,7 @@ export const SETTINGS_ERROR_STATUS: Record<WorkspaceSettingsErrorCode, number> =
     [WorkspaceSettingsErrorCode.SETTINGS_NOT_FOUND]: 404,
     [WorkspaceSettingsErrorCode.ENCRYPTION_SERVICE_UNAVAILABLE]: 503,
     [WorkspaceSettingsErrorCode.INVALID_SETTINGS_GROUP]: 400,
+    [WorkspaceSettingsErrorCode.LANGUAGE_REMOVAL_REQUIRES_ASYNC]: 409,
   }
 
 // ---------------------------------------------------------------------------
@@ -138,5 +140,24 @@ export class InvalidSettingsGroupError extends WorkspaceSettingsError {
       `Invalid settings group: '${group}'. Allowed: general, language, branding, payment, security.`
     )
     this.name = 'InvalidSettingsGroupError'
+  }
+}
+
+/**
+ * HTTP 409 — Language removal requires async DRAIN job (>10,000 rows).
+ * The DRAIN job has been enqueued. Client should poll language_status
+ * to determine when removal is complete.
+ */
+export class LanguageRemovalRequiresAsyncError extends WorkspaceSettingsError {
+  public readonly asyncLanguages: string[]
+
+  constructor(asyncLanguages: string[]) {
+    super(
+      WorkspaceSettingsErrorCode.LANGUAGE_REMOVAL_REQUIRES_ASYNC,
+      `Language removal for [${asyncLanguages.join(', ')}] requires async processing due to large row count. A DRAIN job has been enqueued. Poll language_status for completion.`,
+      { async_languages: asyncLanguages }
+    )
+    this.name = 'LanguageRemovalRequiresAsyncError'
+    this.asyncLanguages = asyncLanguages
   }
 }

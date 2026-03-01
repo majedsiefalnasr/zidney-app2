@@ -122,6 +122,21 @@ export const languageSettingsSchema = z
     }
   )
 
+/**
+ * INTERNAL-ONLY schema — includes language_status for service-layer reads.
+ *
+ * language_status is managed exclusively by the workspace-settings service
+ * and the DRAIN worker. It MUST NOT be included in any client-facing API
+ * response schema or request validation.
+ *
+ * Used only when reading settings from DB to populate TranslationOperationContext.
+ */
+export const languageSettingsInternalSchema = languageSettingsSchema.and(
+  z.object({
+    language_status: z.record(z.enum(['active', 'removing'])).optional(),
+  })
+)
+
 // ---------------------------------------------------------------------------
 // Branding Settings Schema
 // ---------------------------------------------------------------------------

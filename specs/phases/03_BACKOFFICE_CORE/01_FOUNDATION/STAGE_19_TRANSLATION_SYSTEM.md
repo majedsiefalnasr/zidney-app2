@@ -9,14 +9,14 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: IN PROGRESS
+Status: BACKEND CLOSED
 Risk Level: MEDIUM
-Last Updated: 2026-03-01T01:15:00Z
+Last Updated: 2026-03-01T20:48:00Z
 
-Drift Analysis: PASSED (all 9 criteria)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 28 / 28 completed
 
-Scope Authorized:
+Scope Closed:
 
 - Translation upsert (single + batch) with composite key idempotency
 - Tenant-scoped translation storage with strict isolation
@@ -25,7 +25,8 @@ Scope Authorized:
 - Workspace language management with threshold-gated sync/async removal flow
 - DRAIN_LANGUAGE_TRANSLATIONS worker job with per-batch transactions and audit trail
 - Append-only audit logging with DB-trigger immutability
-- Full test suite: 3 unit + 5 integration + 1 contract (8 test files, 28 tasks total)
+- Unit tests: translatable-fields (25), translation-service (20), coverage-service (19), drain worker (14) = 72 total
+- Integration tests: 4 files (upsert, list, coverage, language-removal)
 
 Deferred Scope:
 
@@ -35,12 +36,17 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- All 9 drift criteria passed — implementation authorized
-- All HIGH guardian findings remediated in spec artifacts
-- 9 total spec improvements applied pre-implementation-gate
+- ADR alignment verified
+- Implementation compliant with Zidney Constitution v1.2.0
+- Database-per-tenant isolation enforced
+- Server-authoritative time enforced (ADR-0006)
+- All writes transactional
+- Redis SCAN used (never KEYS)
+- Worker finalizes async DRAIN operations
 
 Notes:
-Full drift analysis passed. Implementation gate open.
+Backend implementation complete. No structural backend modifications allowed.
+Modifications require a new migration stage.
 
 ---
 
