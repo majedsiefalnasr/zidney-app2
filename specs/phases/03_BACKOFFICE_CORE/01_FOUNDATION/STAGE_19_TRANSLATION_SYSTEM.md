@@ -11,18 +11,30 @@ Database: Tenant DB only
 
 Status: DRAFT
 Risk Level: UNKNOWN
-Initiated: 2026-03-01T00:00:00Z
+Last Updated: 2026-03-01T00:10:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Tenant-scoped translations table (entity_type, entity_id, field_name, language_code, translated_value)
+- 42 functional requirements across storage, fallback, language management, coverage, audit, performance
+- 6 user stories: translate fields, language-aware retrieval, language management, coverage tracking, bulk management, audit trail
+- Default-language strategy (base entity table only, never duplicated in translations table)
+- API-layer-only fallback logic (no DB triggers)
+- Transactional writes with upsert semantics and batch atomicity
+- Audit logging: append-only, includes correlation_id, stored in tenant DB
+
+Deferred Scope:
+
+- Translation versioning (history of past values) — audit log provides trail
+- Frontoffice direct translation writes — read-only at this stage
+- Automatic default-language migration on default language change
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
