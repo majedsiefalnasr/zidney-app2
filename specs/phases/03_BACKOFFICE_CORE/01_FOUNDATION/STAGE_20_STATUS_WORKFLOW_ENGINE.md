@@ -11,16 +11,16 @@ Database: Tenant DB only
 
 Status: DRAFT
 Risk Level: MEDIUM
-Last Updated: 2026-03-01T00:02:00.000Z
+Last Updated: 2026-03-01T00:03:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Reusable, deterministic workflow state machine (COMPLETED → UNDER_REVIEW → APPROVED → ENABLED)
-- 18 functional requirements covering all transition, permission, atomicity, audit, and tenant isolation concerns
-- SELECT FOR UPDATE row lock for concurrent transition serialization
-- Explicit TenantDb injection contract (no singleton)
-- Rate limiting: 20 transitions/user/entity-type/minute at API layer
-- Full HTTP error contract (400/403/404/409/429)
+- Domain engine package: `packages/domain-core/src/workflow/` (states, types, errors, engine)
+- Tenant migration: `20260301_002_workflow_engine.ts` — `workflow_logs` table, schema_version 1.2.0 → 1.3.0
+- API module: `apps/api/src/modules/workflow/` — route, validation, context builder
+- 5-step SELECT FOR UPDATE atomic transaction pattern
+- WorkflowContext with workspaceSlug/workspaceId for structured log compliance
+- Zidney error envelope with details/correlationId compliance
 
 Deferred Scope:
 
@@ -30,13 +30,14 @@ Deferred Scope:
 - Bulk batch state transitions
 - UI components for workflow visualization
 - Workflow delegation or multi-approver flows
+- Status columns on entity tables (added per-entity in Stage 21+)
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Guardian audit passed (post-fix). Task breakdown in progress.
 
 ---
 
