@@ -11,16 +11,16 @@ Database: Tenant DB only
 
 Status: DRAFT
 Risk Level: MEDIUM
-Last Updated: 2026-03-01T00:03:00.000Z
+Last Updated: 2026-03-01T00:04:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Domain engine package: `packages/domain-core/src/workflow/` (states, types, errors, engine)
-- Tenant migration: `20260301_002_workflow_engine.ts` — `workflow_logs` table, schema_version 1.2.0 → 1.3.0
-- API module: `apps/api/src/modules/workflow/` — route, validation, context builder
-- 5-step SELECT FOR UPDATE atomic transaction pattern
-- WorkflowContext with workspaceSlug/workspaceId for structured log compliance
-- Zidney error envelope with details/correlationId compliance
+- Total: 40 atomic tasks
+- Phase 1: Setup (T001) — 1 task
+- Phase 2: Foundational engine, migration, API module (T002–T011) — 10 tasks
+- Phase 3–5: US1–3 forward transitions P1 MVP (T012–T022) — 11 tasks
+- Phase 6–8: US4–6 backward transitions + audit + reuse P2/P3 (T023–T033) — 11 tasks
+- Phase 9: Polish, concurrency, rate limit, lint, types (T034–T039) — 6 tasks
 
 Deferred Scope:
 
@@ -34,10 +34,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Guardian audit passed (post-fix). Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
