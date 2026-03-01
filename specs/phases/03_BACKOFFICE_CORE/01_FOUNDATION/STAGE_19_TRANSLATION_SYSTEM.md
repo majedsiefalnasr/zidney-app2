@@ -10,31 +10,31 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
-Last Updated: 2026-03-01T00:10:00Z
+Risk Level: MEDIUM
+Last Updated: 2026-03-01T00:20:00Z
 
 Scope Defined:
 
-- Tenant-scoped translations table (entity_type, entity_id, field_name, language_code, translated_value)
-- 42 functional requirements across storage, fallback, language management, coverage, audit, performance
-- 6 user stories: translate fields, language-aware retrieval, language management, coverage tracking, bulk management, audit trail
-- Default-language strategy (base entity table only, never duplicated in translations table)
-- API-layer-only fallback logic (no DB triggers)
-- Transactional writes with upsert semantics and batch atomicity
-- Audit logging: append-only, includes correlation_id, stored in tenant DB
+- Tenant-scoped translations table with unique composite key
+- 42 FRs covering storage, fallback, language management, coverage, audit, performance, access control
+- Hybrid language removal (sync ≤10K rows, async Worker job >10K rows)
+- Application-layer entity deletion cleanup (same transaction, no FK cascade)
+- Error contract: UNSUPPORTED_LANGUAGE / ENTITY_NOT_FOUND / DEFAULT_LANGUAGE_WRITE
+- TRANSLATABLE_FIELDS static constant map in domain-core
+- schema_version MINOR bump required per ADR-0008
 
 Deferred Scope:
 
-- Translation versioning (history of past values) — audit log provides trail
-- Frontoffice direct translation writes — read-only at this stage
+- Translation versioning (history of past values)
+- Frontoffice direct translation writes
 - Automatic default-language migration on default language change
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

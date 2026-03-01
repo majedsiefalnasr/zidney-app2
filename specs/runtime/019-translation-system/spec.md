@@ -235,3 +235,58 @@ Every translation save, update, or delete creates an immutable audit log entry r
 - `translated_value` is always stored as text. Rich-text or structured content serialization is the responsibility of the caller; the translation system treats all values as opaque strings.
 - No translation versioning (history of past translation values) is required at this stage — the audit log provides a change trail but the translations table stores only the current value.
 - Translation system is used by Backoffice content modules (subjects, categories, etc.) at this stage. Frontoffice reads resolved translations served by the API layer.
+
+---
+
+## Clarifications
+
+### Session 2026-03-01
+
+- Q: What is the strategy for cleaning up orphaned translation rows when a base entity (subject, category, question, etc.) is deleted — FK constraint cascade or a background cleanup job? → A: Application-layer explicit delete within the same database transaction as entity deletion (no FK cascade, no background job).
+- Q: What HTTP status codes and structured error codes must be returned for the three primary validation rejections (unsupported language, missing entity, default language write attempt)? → A: 422 Unprocessable Entity + error code `UNSUPPORTED_LANGUAGE` for language not in supported_languages; 404 Not Found + error code `ENTITY_NOT_FOUND` for entity_type+entity_id that does not exist; 422 Unprocessable Entity + error code `DEFAULT_LANGUAGE_WRITE` for language_code equal to the workspace default language.
+- Q: What happens when a language removal cascade exceeds transaction safety limits (e.g., millions of rows) — synchronous in-transaction or hybrid threshold-based? → A: Hybrid row-count threshold: if `COUNT(translations WHERE language_code = X) > 10,000`, reject the synchronous removal and require an async removal flow (language marked `removing`, Worker drains rows, then language is removed); below the threshold, synchronous in-transaction deletion proceeds.
+- Q: What is the idempotency key for translation upsert operations — composite key only, composite key + value, or client-provided idempotency header? → A: The composite key `(entity_type, entity_id, field_name, language_code)` is the idempotency key. Re-submitting the same composite key with any value (same or different) is always safe — it is an upsert, not an error. No client-provided idempotency header is required.
+- Q: What is the mechanism by which the total translatable field count per entity_type is maintained for coverage denominator calculation — hardcoded domain constant, config file, or database registry table? → A: Static constant map (`TRANSLATABLE_FIELDS`) in the domain-core package, keyed by entity_type string (e.g., `{ subject: ['title', 'description'], category: ['name'], ... }`). Coverage denominator is a pure function call — zero runtime DB overhead. Adding a translatable field requires a domain-package code change plus a migration, enforcing governance.
+
+---
+
+### Clarification Implications for Technical Planning
+
+**Q1 — Entity Deletion (Application-layer explicit delete in same transaction)**
+
+- The API route that deletes a base entity (subject, category, etc.) MUST issue a `DELETE FROM translations WHERE entity_type = X AND entity_id = Y` within the same database transaction before or alongside the entity deletion.
+- No database-level FK with `ON DELETE CASCADE` is added to the `translations` table (it cannot point to multiple parent tables).
+- The domain deletion service is responsible for orchestrating this. It is NOT delegated to the Worker.
+- Tests MUST verify that after entity deletion zero translation rows remain for that entity_id, and that the operation is atomic (failure of either delete rolls back both).
+
+**Q2 — Error Contract (422 / 404 with error codes)**
+
+- API route handlers for translation write endpoints MUST return the following structured errors per the platform error contract (`{ success: false, data: null, error: { code, message } }`):
+  - `UNSUPPORTED_LANGUAGE` → HTTP 422
+  - `ENTITY_NOT_FOUND` → HTTP 404
+  - `DEFAULT_LANGUAGE_WRITE` → HTTP 422
+- These error codes MUST be defined as constants in the domain-core or validation package (not inline strings).
+- Tests MUST assert the exact HTTP status code and error code for each rejection scenario.
+
+**Q3 — Transaction Boundaries for Large Language Removal Cascade**
+
+- Language removal endpoint MUST perform a row count check BEFORE entering the deletion transaction: `SELECT COUNT(*) FROM translations WHERE language_code = X`.
+- If count > 10,000: return HTTP 409 Conflict with error code `LANGUAGE_REMOVAL_REQUIRES_ASYNC` and transition the language status to `removing` in `workspace_settings`.
+- Worker picks up `removing` languages and drains rows in batches (configurable batch size, default 1,000) using idempotent `DELETE … LIMIT N` loops, then sets the language to removed.
+- If count ≤ 10,000: execute deletion synchronously within the settings update transaction (FR-016 satisfied).
+- SC-005 must be updated to reflect the threshold: "within the same transaction OR via the async drainage flow for large datasets."
+- Audit log entries for cascade-deleted translations (FR-035) apply to both paths.
+
+**Q4 — Idempotency (Composite key is the idempotency key)**
+
+- FR-030 is clarified: "same request" means same `(entity_type, entity_id, field_name, language_code)` composite key, regardless of `translated_value`.
+- Upsert is always safe to retry — the server returns HTTP 200 (not 201) for both create and update paths to signal idempotency.
+- No client-side idempotency-key header is required or validated.
+- Tests MUST verify that submitting the identical composite key twice in rapid succession does not produce a duplicate row or a unique-constraint error, and that the final `translated_value` reflects the last submitted value.
+
+**Q5 — Coverage Denominator (Static domain constant map)**
+
+- A `TRANSLATABLE_FIELDS` constant record MUST be defined in the domain-core package (e.g., `packages/domain-core/src/translation/translatable-fields.ts`).
+- Coverage denominator = `TRANSLATABLE_FIELDS[entity_type].length`. If `entity_type` is absent from the map, coverage returns 0% with a structured warning log (not an error).
+- Adding a new entity_type or new field to an existing entity_type requires: (a) updating the constant map, (b) a domain-package version bump, (c) no migration required (the translations table is already open-ended for entity_type strings).
+- Tests MUST verify coverage computation against a known constant map entry and verify the warning path for unknown entity types.
