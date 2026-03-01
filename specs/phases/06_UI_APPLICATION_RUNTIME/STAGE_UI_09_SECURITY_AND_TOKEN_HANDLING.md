@@ -10,18 +10,36 @@ UI Foundation — Security Boundaries & Token Lifecycle Management
 
 Status: DRAFT
 Risk Level: UNKNOWN
-Initiated: 2026-03-01T00:00:00.000Z
+Last Updated: 2026-03-01T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Token storage policy (in-memory only via Pinia auth store)
+- Authorization header injection via centralised API interceptor
+- Session expiry and 401 response handling (idempotent 4-step flow)
+- Secure logout (full state clear, redirect, optional backend call)
+- Route-level access guards (authentication gate only, no business rules)
+- XSS mitigation (no v-html without sanitization, Vue template escaping)
+- CSRF considerations for JWT-bearer and HttpOnly-cookie transport
+- Sensitive data memory-only policy (no persistence, redaction in logs)
+- License response handling (423 locked, 426 upgrade — no UI override)
+- All security logic bounded to core/auth/
+
+Deferred Scope:
+
+- Refresh token strategy (disabled by default; enabled via core/auth/refresh.ts when needed)
+- HttpOnly cookie storage mode (backend-managed; UI adapts without manual storage)
+- 2FA flows
+- OAuth flows
+- Backend authentication implementation
+- RBAC enforcement
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
