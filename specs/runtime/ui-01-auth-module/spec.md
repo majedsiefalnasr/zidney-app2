@@ -335,7 +335,7 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 
 ### 5.7 Session Initialization
 
-**FR-32** — At app bootstrap (inside `main.ts` or the root layout component's `onMounted`), `authStore.initSession()` must be called before any route guard runs.
+**FR-32** — At app bootstrap (in `main.ts`, before `app.mount()`), `authStore.initSession()` must be called before any route guard runs. See CL-01 in section 16 for the authoritative call-site decision. The `onMounted` pattern is explicitly excluded due to the timing race it introduces with Vue Router's initial navigation.
 
 **FR-33** — `initSession()` must call `AuthService.refreshToken()` silently:
 

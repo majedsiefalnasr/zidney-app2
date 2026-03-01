@@ -10,20 +10,18 @@ UI Foundation — Authentication Runtime Module
 
 Status: DRAFT
 Risk Level: MEDIUM
-Last Updated: 2026-03-01T00:20:00Z
+Last Updated: 2026-03-01T00:30:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Frontend auth runtime engine (all 3 apps: MMC, Backoffice, Frontoffice)
-- Memory-only access token storage (Pinia reactive memory)
-- Single-flight refresh orchestration via factory-injected refresh manager
-- Coordinated logout with backend invalidation
-- Auth state store (Pinia) with typed state/actions
-- Route protection via auth guard (requiresAuth / guestOnly)
-- Auth service composable (login, logout, initSession, getMe)
-- Token manager and refresh manager interfaces
-- `initSession()` in main.ts, gating guards via sessionInitialized ref
-- API client interceptors wired (Stage 00 skeleton extended)
+- 18 new files (6 per app × 3 apps)
+- 12 modified files (4 per app × 3 apps: client.ts, main.ts, router/index.ts, auth/index.ts)
+- 3 deleted files (token-store.ts superseded)
+- Bootstrap sequence locked (9-step ordering enforced)
+- Single-flight refresh manager (factory injection pattern)
+- Auth store with lazy refreshManager accessor (avoids creation-order circular dep)
+- API client interceptors wired from Stage 00 stubs
+- 37 unit/integration test cases planned
 
 Deferred Scope:
 
@@ -31,14 +29,15 @@ Deferred Scope:
 - RBAC / RoleGuard implementation
 - WorkspaceGuard (Backoffice feature stage)
 - 2FA / MFA UI
-- JWT payload introspection
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Both guardian verdicts: PASS
+- HIGH-01, MEDIUM-01, MEDIUM-03 resolved before plan finalized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
