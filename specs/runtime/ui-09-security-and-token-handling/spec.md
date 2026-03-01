@@ -384,8 +384,8 @@ Components must call auth store actions; they must not replicate auth logic inli
 
 ### 401 Handling
 
-- **FR-SEC-07**: Any 401 response from the API must trigger the standard expiry flow: clear auth store → clear user UI state → redirect to login → show session-expired notification.
-- **FR-SEC-08**: The 401 handling must be idempotent — multiple concurrent 401 responses must not produce multiple redirects or multiple logout executions.
+- **FR-SEC-07**: A 401 response from the API must trigger the standard expiry flow (clear auth store → clear user UI state → redirect to login → show session-expired notification) **only when `auth.store.isAuthenticated === true` at the time the response is received**. A 401 received while the user is not authenticated (e.g., wrong credentials on the login endpoint) must be passed through to the calling code as a normal error without triggering the logout or redirect flow.
+- **FR-SEC-08**: The 401 handling must be idempotent — multiple concurrent 401 responses must not produce multiple redirects or multiple logout executions. A boolean guard flag (`isHandling401`) must be set by the interceptor on the first qualifying 401; all subsequent 401 responses while the flag is `true` are dropped silently without re-entering the logout flow.
 - **FR-SEC-09**: The intended pre-expiry route must optionally be preserved for post-login redirect.
 
 ### Logout
@@ -420,18 +420,18 @@ Components must call auth store actions; they must not replicate auth logic inli
 
 ## Success Criteria
 
-| Criterion                               | Measure                                                                                            |
-| --------------------------------------- | -------------------------------------------------------------------------------------------------- |
-| Token never in persistent storage       | Zero occurrences of token write to localStorage/sessionStorage/IndexedDB found in codebase audit   |
-| Single-point header injection           | Exactly one location in the codebase injects the Authorization header                              |
-| Consistent 401 behaviour                | All 401 responses result in the same standardised flow regardless of which endpoint triggered them |
-| No JWT decoding in UI                   | No JWT decode, base64 decode, or claim extraction from token found in UI codebase                  |
-| XSS surface minimised                   | All `v-html` usages pass sanitization; confirmed by code review and linting                        |
-| Logout is complete                      | Post-logout inspection of Pinia store shows empty auth state                                       |
-| Route guards cover all protected routes | All routes requiring authentication are guarded; confirmed by router configuration audit           |
-| No RBAC logic in UI                     | No permission-condition branches in UI code derived from token claims                              |
-| CI passes                               | Lint and type check pass with zero auth-related violations                                         |
-| No TODO placeholders in security layer  | Security logic in `core/auth/` contains no unresolved TODO comments                                |
+| Criterion                               | Measure                                                                                                                                                                                   |
+| --------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Token never in persistent storage       | Zero occurrences of token write to localStorage/sessionStorage/IndexedDB found in codebase audit                                                                                          |
+| Single-point header injection           | Exactly one location in the codebase injects the Authorization header                                                                                                                     |
+| Consistent 401 behaviour                | All 401 responses received during an authenticated session result in the standardised expiry flow; 401 responses on unauthenticated requests (e.g., login failures) pass through normally |
+| No JWT decoding in UI                   | No JWT decode, base64 decode, or claim extraction from token found in UI codebase                                                                                                         |
+| XSS surface minimised                   | All `v-html` usages pass sanitization; confirmed by code review and linting                                                                                                               |
+| Logout is complete                      | Post-logout inspection of Pinia store shows empty auth state                                                                                                                              |
+| Route guards cover all protected routes | All routes requiring authentication are guarded; confirmed by router configuration audit                                                                                                  |
+| No RBAC logic in UI                     | No permission-condition branches in UI code derived from token claims                                                                                                                     |
+| CI passes                               | Lint and type check pass with zero auth-related violations                                                                                                                                |
+| No TODO placeholders in security layer  | Security logic in `core/auth/` contains no unresolved TODO comments                                                                                                                       |
 
 ---
 
@@ -477,3 +477,19 @@ All security layer behaviour must be testable without a real backend connection.
 | Security — token persistence audit | No token survives page navigation to localStorage/sessionStorage                   |
 
 All tests must pass in CI without network access to a live backend.
+
+---
+
+## Clarifications
+
+### Session 2026-03-01
+
+- **Q: What mechanism enforces idempotency for concurrent 401 responses (FR-SEC-08)?** → **Auto-resolved.** A boolean guard flag `isHandling401` must be set by the interceptor on the first qualifying 401. While the flag is `true`, all subsequent 401 responses are silently dropped — no additional logout executions or redirects. The flag is reset only after the redirect to login completes. This is the standard single-flight guard pattern for Vue/Axios response interceptors. FR-SEC-08 has been updated to encode this mechanism directly. _Rationale: derivable from standard interceptor design and the idempotency requirement already present in the spec._
+
+- **Q: In the default no-refresh scenario, what happens to in-flight requests that receive 401 responses after the first one has already triggered logout?** → **Auto-resolved.** Once `isHandling401` is `true`, the interceptor must immediately reject all subsequent 401 responses as a cancelled/failed promise without re-entering the logout flow. Callers receive a rejected promise; no retry and no second redirect occurs. This is a corollary of FR-SEC-08's idempotency requirement and standard interceptor drop-on-flag behaviour. _Rationale: derivable from FR-SEC-08 and standard Vue/Axios interceptor patterns._
+
+- **Q: Does FR-SEC-03's prohibition on logging tokens "in full or partial form" include truncated representations (e.g., last 4 characters, first 8 characters)?** → **Auto-resolved.** The Constitutional token-opacity rule treats tokens as fully opaque strings with zero-tolerance exposure in logs. No substring, prefix, suffix, or truncated form may appear in any structured log entry. The only safe log representation is complete omission (e.g., `"token": "[REDACTED]"` with no token characters present). _Rationale: Constitutional constraint (tokens are opaque strings); OWASP Logging Cheat Sheet — credential-class values must be entirely excluded from logs, not partially masked._
+
+- **Q: FR-SEC-07 stated "Any 401 response from the API" triggers the session-expiry flow — does this include 401 responses from unauthenticated requests such as a login endpoint rejecting wrong credentials?** → **Auto-resolved with spec amendment.** The word "Any" was overly broad and would cause incorrect behaviour: a user who types the wrong password would be redirected away from the login page before they could correct it. The session-expiry flow must only fire when `auth.store.isAuthenticated === true` at the time the 401 is received. A 401 on any unauthenticated request must pass through to the calling code as a normal error. FR-SEC-07 and the Success Criteria "Consistent 401 behaviour" row have been updated accordingly. _Rationale: OWASP Authentication Cheat Sheet; standard interceptor guard pattern; implied by the spec's own session-expiry framing; Vue security guide._
+
+- **Q: Are 423 (Locked) and 426 (Upgrade Required) response handling behaviours differentiated per application (MMC vs Backoffice vs Frontoffice), or is the same display-and-halt behaviour applied uniformly?** → **Auto-resolved.** The same behaviour applies uniformly across all three applications: display the relevant message, no retry, no override, no cached flag. No per-application differentiation is needed at this stage. Frontoffice-specific concerns (e.g., how a mid-exam 423 interacts with attempt state) are the responsibility of the Frontoffice exam runtime stage, not STAGE*UI_09. \_Rationale: the spec's own License & Version Enforcement table lists uniform behaviour with no per-app differentiation; "Applications affected: MMC, Backoffice, Frontoffice" with identical handling rules.*
