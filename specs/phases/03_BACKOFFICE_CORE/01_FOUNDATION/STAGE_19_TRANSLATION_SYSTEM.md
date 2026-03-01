@@ -11,16 +11,17 @@ Database: Tenant DB only
 
 Status: DRAFT
 Risk Level: MEDIUM
-Last Updated: 2026-03-01T00:40:00Z
+Last Updated: 2026-03-01T00:55:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- Tenant DB migration: translations + translation_audit_logs tables, schema_version 1.1.0→1.2.0
-- domain-core: translation.service.ts, coverage.service.ts, translatable-fields.ts, types, errors
-- API: 4 routes (upsert, resolve, list, coverage) under /api/workspaces/:slug/translations
-- Worker: DRAIN_LANGUAGE_TRANSLATIONS job for async language removal cascade
-- Hybrid language removal: sync ≤10K rows, async Worker >10K rows
-- Guardian validation: Architecture Checker PASS, API Designer PASS
+- Total: 28 atomic tasks
+- Setup: 3 tasks (types, errors, constants)
+- Migration: 3 tasks (schemas + migration + schema_version bump)
+- Domain: 3 tasks (translation.service, coverage.service, barrel)
+- API: 9 tasks (4 route handlers + workspace-settings + router + types/validation)
+- Worker: 2 tasks (job type + DRAIN handler)
+- Tests: 8 tasks (unit + integration + contract)
 
 Deferred Scope:
 
@@ -30,10 +31,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
