@@ -259,7 +259,7 @@ All translation routes inherit this chain. No new middleware types required.
 
 #### GET /api/workspaces/:slug/translations
 
-- Auth: Authenticated workspace user
+- Auth: Staff permission (inherited from backoffice middleware chain; note: if student-facing translation resolution is needed in the future, it must use a separate frontoffice route — not this endpoint)
 - Query: `entity_type` (req), `entity_id` (req), `language_code` (opt), `cursor` (opt), `page_size` (opt, max 50)
 - Mode A (language_code present): `resolveEntityTranslations()` — fields with fallback applied
 - Mode B (language_code absent): `listEntityTranslations()` — paginated raw rows for management panel
@@ -388,6 +388,8 @@ All log entries from translation and coverage service must include:
 - `coverage_unknown_entity_type`: entity_type not in `TRANSLATABLE_FIELDS`
 
 `console.log` is forbidden (AGENTS.md). Use `@zidney/logger` exclusively.
+
+**Prohibited in logs**: `translated_value`, `previous_value`, and `new_value` MUST NOT appear in any structured log entry. These fields are persisted exclusively in the database (`translation_audit_logs`) and must not propagate to the logging layer.
 
 ---
 

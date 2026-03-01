@@ -9,19 +9,23 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: DRAFT
+Status: IN PROGRESS
 Risk Level: MEDIUM
-Last Updated: 2026-03-01T00:55:00Z
+Last Updated: 2026-03-01T01:15:00Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all 9 criteria)
+Implementation: AUTHORIZED
 
-- Total: 28 atomic tasks
-- Setup: 3 tasks (types, errors, constants)
-- Migration: 3 tasks (schemas + migration + schema_version bump)
-- Domain: 3 tasks (translation.service, coverage.service, barrel)
-- API: 9 tasks (4 route handlers + workspace-settings + router + types/validation)
-- Worker: 2 tasks (job type + DRAIN handler)
-- Tests: 8 tasks (unit + integration + contract)
+Scope Authorized:
+
+- Translation upsert (single + batch) with composite key idempotency
+- Tenant-scoped translation storage with strict isolation
+- Deterministic language fallback (FR-007 to FR-015)
+- Coverage calculation and Redis caching per (entity_type, language_code)
+- Workspace language management with threshold-gated sync/async removal flow
+- DRAIN_LANGUAGE_TRANSLATIONS worker job with per-batch transactions and audit trail
+- Append-only audit logging with DB-trigger immutability
+- Full test suite: 3 unit + 5 integration + 1 contract (8 test files, 28 tasks total)
 
 Deferred Scope:
 
@@ -31,10 +35,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Task set compliant — drift analysis required before implementation
+- All 9 drift criteria passed — implementation authorized
+- All HIGH guardian findings remediated in spec artifacts
+- 9 total spec improvements applied pre-implementation-gate
 
 Notes:
-Atomic task set generated. Drift analysis gate pending.
+Full drift analysis passed. Implementation gate open.
 
 ---
 

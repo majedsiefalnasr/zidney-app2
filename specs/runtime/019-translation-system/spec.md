@@ -217,7 +217,7 @@ Every translation save, update, or delete creates an immutable audit log entry r
 - **SC-002**: Translation resolution for all translatable fields of a single entity completes within 50ms under normal load conditions, with fallback to default-language values applying where translations are absent.
 - **SC-003**: Batch translation loading for a list of up to 100 entities of the same type completes in a single database round-trip — zero N+1 query patterns are present in translation reads.
 - **SC-004**: Every translation write produces a verifiable audit log entry — 100% of writes are audited with no silent mutations.
-- **SC-005**: Removing a language from workspace settings safely removes all associated translation rows within the same transaction — zero orphaned translation rows remain after a language removal.
+- **SC-005**: Removing a language from workspace settings safely removes all associated translation rows — within the same transaction (≤10,000 rows) or via the async DRAIN flow for large datasets (>10,000 rows) — zero orphaned translation rows remain after a language removal.
 - **SC-006**: Coverage calculation for any `(entity_type, language_code)` pair is accurate to within 1% of the actual count at time of computation — verified by creating a controlled entity set with known completeness.
 - **SC-007**: Translation system supports a dataset of 5 million rows per tenant without query time regression — all indexed lookups remain within the 50ms target at this scale.
 - **SC-008**: No translation data from one tenant is accessible, visible, or leaked to any other tenant — verified via cross-tenant isolation tests.
