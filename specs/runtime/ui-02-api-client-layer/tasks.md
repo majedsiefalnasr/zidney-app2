@@ -19,13 +19,13 @@
 
 **Purpose**: Create the `packages/api-client` package with build config, exports, and empty structure.
 
-- [ ] T001 Create package manifest at `packages/api-client/package.json` with name `@zidney/api-client`, `type: "module"`, `main: "src/index.ts"`, zero runtime dependencies, devDeps for `typescript` and `vitest`
-- [ ] T002 Create TypeScript configuration at `packages/api-client/tsconfig.json` extending `../../tsconfig.base.json` with strict mode enabled, include `src/**/*.ts`
-- [ ] T003 [P] Create Vitest configuration at `packages/api-client/vitest.config.ts` with src alias resolution
-- [ ] T004 [P] Create barrel export file at `packages/api-client/src/index.ts` with placeholder exports (types, factory, adapters, error utilities) — will be filled as modules are implemented
-- [ ] T005 [P] Create empty source files for planned modules: `packages/api-client/src/types.ts`, `packages/api-client/src/client.ts`, `packages/api-client/src/interceptors.ts`, `packages/api-client/src/http-error.ts`, `packages/api-client/src/adapters/fetch-adapter.ts`, `packages/api-client/src/adapters/mock-adapter.ts`
-- [ ] T006 Add `"@zidney/api-client": "workspace:*"` dependency to `apps/mmc/package.json`, `apps/backoffice/package.json`, and `apps/frontoffice/package.json`
-- [ ] T007 Run workspace install to link the new package and verify TypeScript resolves `@zidney/api-client` imports
+- [X] T001 Create package manifest at `packages/api-client/package.json` with name `@zidney/api-client`, `type: "module"`, `main: "src/index.ts"`, zero runtime dependencies, devDeps for `typescript` and `vitest`
+- [X] T002 Create TypeScript configuration at `packages/api-client/tsconfig.json` extending `../../tsconfig.base.json` with strict mode enabled, include `src/**/*.ts`
+- [X] T003 [P] Create Vitest configuration at `packages/api-client/vitest.config.ts` with src alias resolution
+- [X] T004 [P] Create barrel export file at `packages/api-client/src/index.ts` with placeholder exports (types, factory, adapters, error utilities) — will be filled as modules are implemented
+- [X] T005 [P] Create empty source files for planned modules: `packages/api-client/src/types.ts`, `packages/api-client/src/client.ts`, `packages/api-client/src/interceptors.ts`, `packages/api-client/src/http-error.ts`, `packages/api-client/src/adapters/fetch-adapter.ts`, `packages/api-client/src/adapters/mock-adapter.ts`
+- [X] T006 Add `"@zidney/api-client": "workspace:*"` dependency to `apps/mmc/package.json`, `apps/backoffice/package.json`, and `apps/frontoffice/package.json`
+- [X] T007 Run workspace install to link the new package and verify TypeScript resolves `@zidney/api-client` imports
 
 **Checkpoint**: Package scaffolding complete. All files exist, imports resolve, `tsc --noEmit` passes with empty modules.
 
@@ -37,11 +37,11 @@
 
 **⚠️ CRITICAL**: No user story work can begin until this phase is complete.
 
-- [ ] T008 Implement core types in `packages/api-client/src/types.ts`: `AppError`, `RequestConfig`, `ClientResponse<T>`, `AdapterRequest`, `AdapterResponse`, `HttpAdapter` interface, `ClientConfig` — matching contracts/api-client.ts exactly
-- [ ] T009 Implement `ErrorCodes` constant object in `packages/api-client/src/http-error.ts` with all 7 known codes: `NETWORK_ERROR`, `REQUEST_TIMEOUT`, `REQUEST_CANCELLED`, `RATE_LIMITED`, `AUTH_REFRESH_FAILED`, `INVALID_RESPONSE`, `UNKNOWN_ERROR`
-- [ ] T010 [P] Implement `isAppError` type guard function in `packages/api-client/src/http-error.ts` — checks for `code`, `message`, `httpStatus`, `isNetworkError` fields
-- [ ] T011 [P] Implement `createAppError` internal factory function in `packages/api-client/src/http-error.ts` — constructs frozen `AppError` objects with validated fields
-- [ ] T012 Update barrel exports in `packages/api-client/src/index.ts` to re-export all types, `ErrorCodes`, `isAppError`, and `createAppError`
+- [X] T008 Implement core types in `packages/api-client/src/types.ts`: `AppError`, `RequestConfig`, `ClientResponse<T>`, `AdapterRequest`, `AdapterResponse`, `HttpAdapter` interface, `ClientConfig` — matching contracts/api-client.ts exactly
+- [X] T009 Implement `ErrorCodes` constant object in `packages/api-client/src/http-error.ts` with all 7 known codes: `NETWORK_ERROR`, `REQUEST_TIMEOUT`, `REQUEST_CANCELLED`, `RATE_LIMITED`, `AUTH_REFRESH_FAILED`, `INVALID_RESPONSE`, `UNKNOWN_ERROR`
+- [X] T010 [P] Implement `isAppError` type guard function in `packages/api-client/src/http-error.ts` — checks for `code`, `message`, `httpStatus`, `isNetworkError` fields
+- [X] T011 [P] Implement `createAppError` internal factory function in `packages/api-client/src/http-error.ts` — constructs frozen `AppError` objects with validated fields
+- [X] T012 Update barrel exports in `packages/api-client/src/index.ts` to re-export all types, `ErrorCodes`, `isAppError`, and `createAppError`
 
 **Checkpoint**: Foundation ready — all types compile, `ErrorCodes` is importable, `isAppError` works. User story implementation can now begin.
 
@@ -55,14 +55,14 @@
 
 ### Tests for User Story 10
 
-- [ ] T013 [P] [US10] Write unit tests in `packages/api-client/tests/adapters/mock-adapter.test.ts`: enqueue/dequeue responses, enqueue network errors, request recording (`getRequests`, `getLastRequest`), `assertRequestCount`, `reset`, empty queue throws, partial response defaults
+- [X] T013 [P] [US10] Write unit tests in `packages/api-client/tests/adapters/mock-adapter.test.ts`: enqueue/dequeue responses, enqueue network errors, request recording (`getRequests`, `getLastRequest`), `assertRequestCount`, `reset`, empty queue throws, partial response defaults
 
 ### Implementation for User Story 10
 
-- [ ] T014 [US10] Implement `MockAdapter` class in `packages/api-client/src/adapters/mock-adapter.ts`: FIFO response queue, request log array, `enqueue(Partial<AdapterResponse>)`, `enqueueError(Error)`, `execute(AdapterRequest)`, `getRequests()`, `getLastRequest()`, `reset()`, `assertRequestCount(n)` — default missing fields (`status: 200`, `ok: true`, `headers: {}`, `body: null`)
-- [ ] T015 [US10] Implement `createMockAdapter()` factory function in `packages/api-client/src/adapters/mock-adapter.ts` returning `MockAdapter` instance
-- [ ] T016 [US10] Export `MockAdapter` interface and `createMockAdapter` from `packages/api-client/src/index.ts`
-- [ ] T017 [US10] Run mock-adapter tests to verify all pass
+- [X] T014 [US10] Implement `MockAdapter` class in `packages/api-client/src/adapters/mock-adapter.ts`: FIFO response queue, request log array, `enqueue(Partial<AdapterResponse>)`, `enqueueError(Error)`, `execute(AdapterRequest)`, `getRequests()`, `getLastRequest()`, `reset()`, `assertRequestCount(n)` — default missing fields (`status: 200`, `ok: true`, `headers: {}`, `body: null`)
+- [X] T015 [US10] Implement `createMockAdapter()` factory function in `packages/api-client/src/adapters/mock-adapter.ts` returning `MockAdapter` instance
+- [X] T016 [US10] Export `MockAdapter` interface and `createMockAdapter` from `packages/api-client/src/index.ts`
+- [X] T017 [US10] Run mock-adapter tests to verify all pass
 
 **Checkpoint**: MockAdapter is complete and tested. All subsequent user story tests can use it.
 
@@ -76,16 +76,16 @@
 
 ### Tests for User Story 1
 
-- [ ] T018 [P] [US1] Write unit tests in `packages/api-client/tests/adapters/fetch-adapter.test.ts`: verify FetchAdapter calls `globalThis.fetch` with correct URL, method, headers, body, signal; verify response flattening (status, headers, body JSON parse, ok flag); verify network error (fetch TypeError) is thrown as-is
-- [ ] T019 [P] [US1] Write unit tests in `packages/api-client/tests/client.test.ts` — basic request section: `client.get<T>()` sends GET with correct URL (baseUrl + path), `client.post<T>()` sends POST with JSON body, `client.put<T>()` sends PUT, `client.patch<T>()` sends PATCH, `client.delete<T>()` sends DELETE; verify `ClientResponse<T>` shape returned with `{ success: true, data: T }`
+- [X] T018 [P] [US1] Write unit tests in `packages/api-client/tests/adapters/fetch-adapter.test.ts`: verify FetchAdapter calls `globalThis.fetch` with correct URL, method, headers, body, signal; verify response flattening (status, headers, body JSON parse, ok flag); verify network error (fetch TypeError) is thrown as-is
+- [X] T019 [P] [US1] Write unit tests in `packages/api-client/tests/client.test.ts` — basic request section: `client.get<T>()` sends GET with correct URL (baseUrl + path), `client.post<T>()` sends POST with JSON body, `client.put<T>()` sends PUT, `client.patch<T>()` sends PATCH, `client.delete<T>()` sends DELETE; verify `ClientResponse<T>` shape returned with `{ success: true, data: T }`
 
 ### Implementation for User Story 1
 
-- [ ] T020 [US1] Implement `FetchAdapter` in `packages/api-client/src/adapters/fetch-adapter.ts`: wraps `globalThis.fetch`, constructs `Request` from `AdapterRequest`, flattens `Response` to `AdapterResponse` (lowercase header keys, JSON-parse body, catch parse errors → `body: null`), passes `signal` and `credentials`
-- [ ] T021 [US1] Implement `createFetchAdapter()` factory in `packages/api-client/src/adapters/fetch-adapter.ts` — parameterless; `credentials` is applied by `createApiClient` from `ClientConfig.credentials` (default `'include'`) at request time
-- [ ] T022 [US1] Implement `createApiClient(config: ClientConfig): ApiClient` factory in `packages/api-client/src/client.ts`: instantiate default `FetchAdapter` if no adapter provided, implement `get<T>`, `post<T>`, `put<T>`, `patch<T>`, `delete<T>` methods that build `AdapterRequest` (prepend `baseUrl`, serialize body via `JSON.stringify`, serialize `params` to query string and append to URL), call adapter `.execute()`, narrow `response.body` via type guard before accessing `.data`, return `{ success: true, data: response.body.data }` for ok responses. MUST apply `Content-Type: application/json` header on POST, PUT, PATCH methods during request building (required for mutations to succeed).
-- [ ] T023 [US1] Export `createApiClient` and `createFetchAdapter` from `packages/api-client/src/index.ts`
-- [ ] T024 [US1] Run client.test.ts and fetch-adapter.test.ts to verify all pass
+- [X] T020 [US1] Implement `FetchAdapter` in `packages/api-client/src/adapters/fetch-adapter.ts`: wraps `globalThis.fetch`, constructs `Request` from `AdapterRequest`, flattens `Response` to `AdapterResponse` (lowercase header keys, JSON-parse body, catch parse errors → `body: null`), passes `signal` and `credentials`
+- [X] T021 [US1] Implement `createFetchAdapter()` factory in `packages/api-client/src/adapters/fetch-adapter.ts` — parameterless; `credentials` is applied by `createApiClient` from `ClientConfig.credentials` (default `'include'`) at request time
+- [X] T022 [US1] Implement `createApiClient(config: ClientConfig): ApiClient` factory in `packages/api-client/src/client.ts`: instantiate default `FetchAdapter` if no adapter provided, implement `get<T>`, `post<T>`, `put<T>`, `patch<T>`, `delete<T>` methods that build `AdapterRequest` (prepend `baseUrl`, serialize body via `JSON.stringify`, serialize `params` to query string and append to URL), call adapter `.execute()`, narrow `response.body` via type guard before accessing `.data`, return `{ success: true, data: response.body.data }` for ok responses. MUST apply `Content-Type: application/json` header on POST, PUT, PATCH methods during request building (required for mutations to succeed).
+- [X] T023 [US1] Export `createApiClient` and `createFetchAdapter` from `packages/api-client/src/index.ts`
+- [X] T024 [US1] Run client.test.ts and fetch-adapter.test.ts to verify all pass
 
 **Checkpoint**: Core client works for typed API calls. Developers can `client.get<T>("/path")` and receive typed responses.
 
@@ -99,13 +99,13 @@
 
 ### Tests for User Story 2
 
-- [ ] T025 [P] [US2] Write unit tests in `packages/api-client/tests/interceptors.test.ts` — auth interceptor section: token present → `Authorization: Bearer <token>` header attached; token null → no `Authorization` header; token changes between calls → updated token used
+- [X] T025 [P] [US2] Write unit tests in `packages/api-client/tests/interceptors.test.ts` — auth interceptor section: token present → `Authorization: Bearer <token>` header attached; token null → no `Authorization` header; token changes between calls → updated token used
 
 ### Implementation for User Story 2
 
-- [ ] T026 [US2] Implement auth interceptor logic in `packages/api-client/src/interceptors.ts`: export `applyAuthHeader(headers, getAccessToken)` function that calls `getAccessToken()` and sets `Authorization: Bearer <token>` if non-null
-- [ ] T027 [US2] Integrate auth interceptor into `createApiClient` request pipeline in `packages/api-client/src/client.ts` — call `applyAuthHeader` before adapter.execute()
-- [ ] T028 [US2] Run interceptors.test.ts auth section to verify all pass
+- [X] T026 [US2] Implement auth interceptor logic in `packages/api-client/src/interceptors.ts`: export `applyAuthHeader(headers, getAccessToken)` function that calls `getAccessToken()` and sets `Authorization: Bearer <token>` if non-null
+- [X] T027 [US2] Integrate auth interceptor into `createApiClient` request pipeline in `packages/api-client/src/client.ts` — call `applyAuthHeader` before adapter.execute()
+- [X] T028 [US2] Run interceptors.test.ts auth section to verify all pass
 
 **Checkpoint**: All requests automatically carry auth tokens when available.
 
@@ -119,12 +119,12 @@
 
 ### Tests for User Story 3
 
-- [ ] T029 [P] [US3] Write unit tests in `packages/api-client/tests/client.test.ts` — 401 refresh section: single 401 triggers refresh + retry; retried request uses new token; refresh failure calls `onAuthFailure` and throws `AUTH_REFRESH_FAILED` AppError; double 401 (retry also returns 401) does NOT re-enter refresh loop; concurrent 401s trigger single refresh call; all queued requests retried after refresh; all queued requests rejected if refresh fails
+- [X] T029 [P] [US3] Write unit tests in `packages/api-client/tests/client.test.ts` — 401 refresh section: single 401 triggers refresh + retry; retried request uses new token; refresh failure calls `onAuthFailure` and throws `AUTH_REFRESH_FAILED` AppError; double 401 (retry also returns 401) does NOT re-enter refresh loop; concurrent 401s trigger single refresh call; all queued requests retried after refresh; all queued requests rejected if refresh fails
 
 ### Implementation for User Story 3
 
-- [ ] T030 [US3] Implement 401 single-flight refresh logic in `packages/api-client/src/client.ts`: detect non-ok response with `status === 401`, use shared `refreshPromise` reference for single-flight, call `config.onRefreshToken()`, on success retry original request once with new token, on failure call `config.onAuthFailure()` and throw `AppError` with code `AUTH_REFRESH_FAILED`; queue concurrent requests during refresh and retry/reject all when refresh resolves/fails; prevent re-entry on second 401 after retry
-- [ ] T031 [US3] Run client.test.ts 401 refresh section to verify all pass
+- [X] T030 [US3] Implement 401 single-flight refresh logic in `packages/api-client/src/client.ts`: detect non-ok response with `status === 401`, use shared `refreshPromise` reference for single-flight, call `config.onRefreshToken()`, on success retry original request once with new token, on failure call `config.onAuthFailure()` and throw `AppError` with code `AUTH_REFRESH_FAILED`; queue concurrent requests during refresh and retry/reject all when refresh resolves/fails; prevent re-entry on second 401 after retry
+- [X] T031 [US3] Run client.test.ts 401 refresh section to verify all pass
 
 **Checkpoint**: 401 refresh is transparent. Users never see token expiration during active sessions.
 
@@ -138,14 +138,14 @@
 
 ### Tests for User Story 4
 
-- [ ] T032 [P] [US4] Write unit tests in `packages/api-client/tests/http-error.test.ts`: backend structured error `{ success: false, error: { code, message } }` → AppError with backend code and message; non-JSON response body → `INVALID_RESPONSE` code; network error (adapter throws TypeError) → `NETWORK_ERROR` with `isNetworkError: true` and `httpStatus: 0`; unknown/unexpected error shape → `UNKNOWN_ERROR`; all AppError objects are frozen (immutable)
+- [X] T032 [P] [US4] Write unit tests in `packages/api-client/tests/http-error.test.ts`: backend structured error `{ success: false, error: { code, message } }` → AppError with backend code and message; non-JSON response body → `INVALID_RESPONSE` code; network error (adapter throws TypeError) → `NETWORK_ERROR` with `isNetworkError: true` and `httpStatus: 0`; unknown/unexpected error shape → `UNKNOWN_ERROR`; all AppError objects are frozen (immutable)
 
 ### Implementation for User Story 4
 
-- [ ] T033 [US4] Implement `normalizeResponseError(response: AdapterResponse): AppError` in `packages/api-client/src/http-error.ts`: extract `code` and `message` from backend error body `{ success: false, error: { code, message } }`, fallback to `UNKNOWN_ERROR` if shape doesn't match; set `httpStatus` from response status; set `isNetworkError: false`
-- [ ] T034 [US4] Implement `normalizeNetworkError(error: unknown): AppError` in `packages/api-client/src/http-error.ts`: detect `TypeError` (fetch network failure) → code `NETWORK_ERROR`, `httpStatus: 0`, `isNetworkError: true`; detect `AbortError` naming (handled in US8); fallback → `UNKNOWN_ERROR`
-- [ ] T035 [US4] Integrate error normalization into `createApiClient` response pipeline in `packages/api-client/src/client.ts`: wrap adapter.execute() in try/catch, call `normalizeResponseError` for non-ok adapter responses, call `normalizeNetworkError` for thrown errors, throw resulting `AppError`
-- [ ] T036 [US4] Run http-error.test.ts and client.test.ts error sections to verify all pass
+- [X] T033 [US4] Implement `normalizeResponseError(response: AdapterResponse): AppError` in `packages/api-client/src/http-error.ts`: extract `code` and `message` from backend error body `{ success: false, error: { code, message } }`, fallback to `UNKNOWN_ERROR` if shape doesn't match; set `httpStatus` from response status; set `isNetworkError: false`
+- [X] T034 [US4] Implement `normalizeNetworkError(error: unknown): AppError` in `packages/api-client/src/http-error.ts`: detect `TypeError` (fetch network failure) → code `NETWORK_ERROR`, `httpStatus: 0`, `isNetworkError: true`; detect `AbortError` naming (handled in US8); fallback → `UNKNOWN_ERROR`
+- [X] T035 [US4] Integrate error normalization into `createApiClient` response pipeline in `packages/api-client/src/client.ts`: wrap adapter.execute() in try/catch, call `normalizeResponseError` for non-ok adapter responses, call `normalizeNetworkError` for thrown errors, throw resulting `AppError`
+- [X] T036 [US4] Run http-error.test.ts and client.test.ts error sections to verify all pass
 
 **Checkpoint**: All errors are AppError. No raw errors leak to callers.
 
@@ -159,13 +159,13 @@
 
 ### Tests for User Story 5
 
-- [ ] T037 [P] [US5] Write unit tests in `packages/api-client/tests/http-error.test.ts` — 429 section: 429 with `Retry-After` header → `retryAfter` parsed as number; 429 without header → `retryAfter` undefined; 429 → `code: 'RATE_LIMITED'`, `httpStatus: 429`, `isNetworkError: false`; 429 → no auto-retry (single request only)
+- [X] T037 [P] [US5] Write unit tests in `packages/api-client/tests/http-error.test.ts` — 429 section: 429 with `Retry-After` header → `retryAfter` parsed as number; 429 without header → `retryAfter` undefined; 429 → `code: 'RATE_LIMITED'`, `httpStatus: 429`, `isNetworkError: false`; 429 → no auto-retry (single request only)
 
 ### Implementation for User Story 5
 
-- [ ] T038 [US5] Extend `normalizeResponseError` in `packages/api-client/src/http-error.ts`: when `status === 429`, set `code: ErrorCodes.RATE_LIMITED`, parse `Retry-After` header to number (or `undefined`), set `retryAfter` on AppError
-- [ ] T039 [US5] Ensure 401 handler in `packages/api-client/src/client.ts` does NOT intercept 429 (only 401 triggers refresh) — verify test confirms no retry on 429
-- [ ] T040 [US5] Run 429 test section to verify all pass
+- [X] T038 [US5] Extend `normalizeResponseError` in `packages/api-client/src/http-error.ts`: when `status === 429`, set `code: ErrorCodes.RATE_LIMITED`, parse `Retry-After` header to number (or `undefined`), set `retryAfter` on AppError
+- [X] T039 [US5] Ensure 401 handler in `packages/api-client/src/client.ts` does NOT intercept 429 (only 401 triggers refresh) — verify test confirms no retry on 429
+- [X] T040 [US5] Run 429 test section to verify all pass
 
 **Checkpoint**: Rate limiting is surfaced with retry-after info. UI can display appropriate messages.
 
@@ -179,13 +179,13 @@
 
 ### Tests for User Story 6
 
-- [ ] T041 [P] [US6] Write unit tests in `packages/api-client/tests/interceptors.test.ts` — idempotency section: POST with key → header present; POST without key → no header; GET with key → header NOT attached; PUT/PATCH/DELETE with key → header present
+- [X] T041 [P] [US6] Write unit tests in `packages/api-client/tests/interceptors.test.ts` — idempotency section: POST with key → header present; POST without key → no header; GET with key → header NOT attached; PUT/PATCH/DELETE with key → header present
 
 ### Implementation for User Story 6
 
-- [ ] T042 [US6] Implement idempotency interceptor in `packages/api-client/src/interceptors.ts`: export `applyIdempotencyKey(headers, method, idempotencyKey?)` — attach `Idempotency-Key` only on non-GET methods when key is provided
-- [ ] T043 [US6] Integrate idempotency interceptor into request pipeline in `packages/api-client/src/client.ts`
-- [ ] T044 [US6] Run idempotency test section to verify all pass
+- [X] T042 [US6] Implement idempotency interceptor in `packages/api-client/src/interceptors.ts`: export `applyIdempotencyKey(headers, method, idempotencyKey?)` — attach `Idempotency-Key` only on non-GET methods when key is provided
+- [X] T043 [US6] Integrate idempotency interceptor into request pipeline in `packages/api-client/src/client.ts`
+- [X] T044 [US6] Run idempotency test section to verify all pass
 
 **Checkpoint**: Idempotency keys flow through to backend on mutations.
 
@@ -199,14 +199,14 @@
 
 ### Tests for User Story 7
 
-- [ ] T045 [P] [US7] Write unit tests in `packages/api-client/tests/client.test.ts` — multi-config section: two clients with different baseUrl → requests target correct bases; different `getAccessToken` functions → different auth headers; client instances are isolated (no shared state)
+- [X] T045 [P] [US7] Write unit tests in `packages/api-client/tests/client.test.ts` — multi-config section: two clients with different baseUrl → requests target correct bases; different `getAccessToken` functions → different auth headers; client instances are isolated (no shared state)
 
 ### Implementation for User Story 7
 
-- [ ] T046 [US7] Create MMC wrapper at `apps/mmc/src/core/api/client.ts`: import `createApiClient`, `createFetchAdapter` from `@zidney/api-client`; configure with `appConfig.env.apiBaseUrl`, `useAuthStore().getAccessToken`, refresh via POST to `/auth/refresh`, failure clears auth and navigates to login; export `getApiClient()` lazy singleton
-- [ ] T047 [P] [US7] Create Backoffice wrapper at `apps/backoffice/src/core/api/client.ts`: same pattern as MMC, configured with Backoffice env apiBaseUrl and auth store
-- [ ] T048 [P] [US7] Create Frontoffice wrapper at `apps/frontoffice/src/core/api/client.ts`: same pattern as MMC, configured with Frontoffice env apiBaseUrl and auth store
-- [ ] T049 [US7] Run multi-config tests to verify all pass
+- [X] T046 [US7] Create MMC wrapper at `apps/mmc/src/core/api/client.ts`: import `createApiClient`, `createFetchAdapter` from `@zidney/api-client`; configure with `appConfig.env.apiBaseUrl`, `useAuthStore().getAccessToken`, refresh via POST to `/auth/refresh`, failure clears auth and navigates to login; export `getApiClient()` lazy singleton
+- [X] T047 [P] [US7] Create Backoffice wrapper at `apps/backoffice/src/core/api/client.ts`: same pattern as MMC, configured with Backoffice env apiBaseUrl and auth store
+- [X] T048 [P] [US7] Create Frontoffice wrapper at `apps/frontoffice/src/core/api/client.ts`: same pattern as MMC, configured with Frontoffice env apiBaseUrl and auth store
+- [X] T049 [US7] Run multi-config tests to verify all pass
 
 **Checkpoint**: All three apps have configured client wrappers targeting correct API bases.
 
@@ -220,14 +220,14 @@
 
 ### Tests for User Story 8
 
-- [ ] T050 [P] [US8] Write unit tests in `packages/api-client/tests/client.test.ts` — cancellation section: aborted signal → `AppError` with `code: REQUEST_CANCELLED`, `isNetworkError: false`, `httpStatus: 0`; completed request before abort → normal response returned; timeout exceeded → `AppError` with `code: REQUEST_TIMEOUT`, `isNetworkError: true`, `httpStatus: 0`
+- [X] T050 [P] [US8] Write unit tests in `packages/api-client/tests/client.test.ts` — cancellation section: aborted signal → `AppError` with `code: REQUEST_CANCELLED`, `isNetworkError: false`, `httpStatus: 0`; completed request before abort → normal response returned; timeout exceeded → `AppError` with `code: REQUEST_TIMEOUT`, `isNetworkError: true`, `httpStatus: 0`
 
 ### Implementation for User Story 8
 
-- [ ] T051 [US8] Implement timeout interceptor in `packages/api-client/src/interceptors.ts`: export `createCombinedSignal(timeout, userSignal?)` — combine `AbortSignal.timeout(ms)` with user signal via `AbortSignal.any()`; handle timeout=0 (no timeout signal)
-- [ ] T052 [US8] Extend `normalizeNetworkError` in `packages/api-client/src/http-error.ts`: detect `AbortError` with timeout reason → `REQUEST_TIMEOUT` code, `isNetworkError: true`; detect `AbortError` with user abort → `REQUEST_CANCELLED` code, `isNetworkError: false`
-- [ ] T053 [US8] Integrate timeout interceptor into request pipeline in `packages/api-client/src/client.ts` — apply combined signal before adapter.execute(); use `config.defaultTimeout` (fallback 30000) when per-request timeout not specified
-- [ ] T054 [US8] Run cancellation/timeout tests to verify all pass
+- [X] T051 [US8] Implement timeout interceptor in `packages/api-client/src/interceptors.ts`: export `createCombinedSignal(timeout, userSignal?)` — combine `AbortSignal.timeout(ms)` with user signal via `AbortSignal.any()`; handle timeout=0 (no timeout signal)
+- [X] T052 [US8] Extend `normalizeNetworkError` in `packages/api-client/src/http-error.ts`: detect `AbortError` with timeout reason → `REQUEST_TIMEOUT` code, `isNetworkError: true`; detect `AbortError` with user abort → `REQUEST_CANCELLED` code, `isNetworkError: false`
+- [X] T053 [US8] Integrate timeout interceptor into request pipeline in `packages/api-client/src/client.ts` — apply combined signal before adapter.execute(); use `config.defaultTimeout` (fallback 30000) when per-request timeout not specified
+- [X] T054 [US8] Run cancellation/timeout tests to verify all pass
 
 **Checkpoint**: Requests are cancellable and respect timeouts.
 
@@ -241,14 +241,14 @@
 
 ### Tests for User Story 9
 
-- [ ] T055 [P] [US9] Write unit tests in `packages/api-client/tests/interceptors.test.ts` — correlation section: no correlationId provided → `X-Correlation-ID` header auto-generated as UUID; custom correlationId → that value used; each request gets distinct auto-generated ID
+- [X] T055 [P] [US9] Write unit tests in `packages/api-client/tests/interceptors.test.ts` — correlation section: no correlationId provided → `X-Correlation-ID` header auto-generated as UUID; custom correlationId → that value used; each request gets distinct auto-generated ID
 
 ### Implementation for User Story 9
 
-- [ ] T056 [US9] Implement correlation interceptor in `packages/api-client/src/interceptors.ts`: export `applyCorrelationId(headers, correlationId?)` — set `X-Correlation-ID` to provided value or `crypto.randomUUID()`
-- [ ] T057 [US9] Extract content-type interceptor from client.ts into `packages/api-client/src/interceptors.ts`: export `applyContentType(headers, method)` — set `Content-Type: application/json` on POST, PUT, PATCH methods. Refactors inline logic from T022 into the shared interceptor module for consistency with other interceptors.
-- [ ] T058 [US9] Integrate correlation and content-type interceptors into request pipeline in `packages/api-client/src/client.ts` — correct pipeline order: auth → correlation → content-type → idempotency → timeout → execute
-- [ ] T059 [US9] Run correlation and content-type tests to verify all pass
+- [X] T056 [US9] Implement correlation interceptor in `packages/api-client/src/interceptors.ts`: export `applyCorrelationId(headers, correlationId?)` — set `X-Correlation-ID` to provided value or `crypto.randomUUID()`
+- [X] T057 [US9] Extract content-type interceptor from client.ts into `packages/api-client/src/interceptors.ts`: export `applyContentType(headers, method)` — set `Content-Type: application/json` on POST, PUT, PATCH methods. Refactors inline logic from T022 into the shared interceptor module for consistency with other interceptors.
+- [X] T058 [US9] Integrate correlation and content-type interceptors into request pipeline in `packages/api-client/src/client.ts` — correct pipeline order: auth → correlation → content-type → idempotency → timeout → execute
+- [X] T059 [US9] Run correlation and content-type tests to verify all pass
 
 **Checkpoint**: Full interceptor pipeline is wired in correct order. All headers propagated.
 
@@ -260,18 +260,18 @@
 
 ### Migration
 
-- [ ] T060 Replace `apps/mmc/src/core/api/client.ts` with thin wrapper importing from `@zidney/api-client` (created in T046); update all MMC feature module imports of `ClientResponse`, `ApiClient`, `RequestConfig` to import from `@zidney/api-client` or the new wrapper
-- [ ] T061 [P] Delete `apps/mmc/src/core/errors/error-normalizer.ts` and `apps/mmc/src/core/errors/types.ts`; update all MMC imports of `NormalizedError` to use `AppError` from `@zidney/api-client`; update all catch blocks using old `NormalizedError` shape to use `isAppError` guard
-- [ ] T062 Replace `apps/backoffice/src/core/api/client.ts` with thin wrapper importing from `@zidney/api-client` (created in T047); update all Backoffice feature module imports
-- [ ] T063 [P] Delete `apps/backoffice/src/core/errors/error-normalizer.ts` and `apps/backoffice/src/core/errors/types.ts`; update all Backoffice imports of `NormalizedError` to use `AppError` from `@zidney/api-client`
-- [ ] T064 Replace `apps/frontoffice/src/core/api/client.ts` with thin wrapper importing from `@zidney/api-client` (created in T048); update all Frontoffice feature module imports
-- [ ] T065 [P] Delete `apps/frontoffice/src/core/errors/error-normalizer.ts` and `apps/frontoffice/src/core/errors/types.ts`; update all Frontoffice imports of `NormalizedError` to use `AppError` from `@zidney/api-client`
+- [X] T060 Replace `apps/mmc/src/core/api/client.ts` with thin wrapper importing from `@zidney/api-client` (created in T046); update all MMC feature module imports of `ClientResponse`, `ApiClient`, `RequestConfig` to import from `@zidney/api-client` or the new wrapper
+- [X] T061 [P] Delete `apps/mmc/src/core/errors/error-normalizer.ts` and `apps/mmc/src/core/errors/types.ts`; update all MMC imports of `NormalizedError` to use `AppError` from `@zidney/api-client`; update all catch blocks using old `NormalizedError` shape to use `isAppError` guard
+- [X] T062 Replace `apps/backoffice/src/core/api/client.ts` with thin wrapper importing from `@zidney/api-client` (created in T047); update all Backoffice feature module imports
+- [X] T063 [P] Delete `apps/backoffice/src/core/errors/error-normalizer.ts` and `apps/backoffice/src/core/errors/types.ts`; update all Backoffice imports of `NormalizedError` to use `AppError` from `@zidney/api-client`
+- [X] T064 Replace `apps/frontoffice/src/core/api/client.ts` with thin wrapper importing from `@zidney/api-client` (created in T048); update all Frontoffice feature module imports
+- [X] T065 [P] Delete `apps/frontoffice/src/core/errors/error-normalizer.ts` and `apps/frontoffice/src/core/errors/types.ts`; update all Frontoffice imports of `NormalizedError` to use `AppError` from `@zidney/api-client`
 
 ### Lint Rule Enforcement
 
-- [ ] T066 Add `no-restricted-imports` rule to `eslint.config.mjs` scoped to `apps/*/src/**/*.{ts,vue}`: ban `axios`, `got`, `ky`, `node-fetch` with message "Use @zidney/api-client instead"
-- [ ] T067 Add `no-restricted-globals` rule to `eslint.config.mjs` scoped to `apps/*/src/**/*.{ts,vue}`: ban `fetch` with message "Use @zidney/api-client instead of direct fetch(). Import from core/api/client.ts."
-- [ ] T068 Verify ESLint passes across all three apps with zero violations after migration
+- [X] T066 Add `no-restricted-imports` rule to `eslint.config.mjs` scoped to `apps/*/src/**/*.{ts,vue}`: ban `axios`, `got`, `ky`, `node-fetch` with message "Use @zidney/api-client instead"
+- [X] T067 Add `no-restricted-globals` rule to `eslint.config.mjs` scoped to `apps/*/src/**/*.{ts,vue}`: ban `fetch` with message "Use @zidney/api-client instead of direct fetch(). Import from core/api/client.ts."
+- [X] T068 Verify ESLint passes across all three apps with zero violations after migration
 
 **Checkpoint**: All duplicated code removed. Lint enforces single client abstraction.
 
@@ -281,14 +281,14 @@
 
 **Purpose**: Final validation, cleanup, documentation, and quality gates.
 
-- [ ] T069 [P] Verify `tsc --noEmit` passes for `packages/api-client` with zero errors and zero `any` types in public API surface
-- [ ] T070 [P] Verify all unit tests pass: `packages/api-client/tests/**/*.test.ts` — run full suite
-- [ ] T071 Verify interceptor pipeline order matches spec: auth → correlation → content-type → idempotency → timeout → execute → JSON parse → 401 handler → error normalizer → return/throw
-- [ ] T072 [P] Verify `packages/api-client/src/index.ts` barrel exports are complete: `createApiClient`, `createFetchAdapter`, `createMockAdapter`, `isAppError`, `ErrorCodes`, all public types (`AppError`, `RequestConfig`, `ClientResponse`, `ClientConfig`, `HttpAdapter`, `AdapterRequest`, `AdapterResponse`, `ApiClient`, `MockAdapter`)
-- [ ] T073 [P] Scan for any remaining TODO, FIXME, or placeholder comments in `packages/api-client/src/**` and `apps/*/src/core/api/**` — remove all (SC-010)
-- [ ] T074 Run quickstart.md validation: create a throwaway test file that imports from `@zidney/api-client`, configures a client with MockAdapter, exercises get/post/error/401-refresh/429/cancel scenarios from quickstart examples — all must work
-- [ ] T075 Run full workspace lint: `eslint apps/ packages/api-client/ --max-warnings=0` — zero errors, zero warnings for the modified files
-- [ ] T076 Final review: verify no `fetch`/`axios` direct imports remain in `apps/*/src/**` (excluding `packages/api-client/src/adapters/fetch-adapter.ts`)
+- [X] T069 [P] Verify `tsc --noEmit` passes for `packages/api-client` with zero errors and zero `any` types in public API surface
+- [X] T070 [P] Verify all unit tests pass: `packages/api-client/tests/**/*.test.ts` — run full suite
+- [X] T071 Verify interceptor pipeline order matches spec: auth → correlation → content-type → idempotency → timeout → execute → JSON parse → 401 handler → error normalizer → return/throw
+- [X] T072 [P] Verify `packages/api-client/src/index.ts` barrel exports are complete: `createApiClient`, `createFetchAdapter`, `createMockAdapter`, `isAppError`, `ErrorCodes`, all public types (`AppError`, `RequestConfig`, `ClientResponse`, `ClientConfig`, `HttpAdapter`, `AdapterRequest`, `AdapterResponse`, `ApiClient`, `MockAdapter`)
+- [X] T073 [P] Scan for any remaining TODO, FIXME, or placeholder comments in `packages/api-client/src/**` and `apps/*/src/core/api/**` — remove all (SC-010)
+- [X] T074 Run quickstart.md validation: create a throwaway test file that imports from `@zidney/api-client`, configures a client with MockAdapter, exercises get/post/error/401-refresh/429/cancel scenarios from quickstart examples — all must work
+- [X] T075 Run full workspace lint: `eslint apps/ packages/api-client/ --max-warnings=0` — zero errors, zero warnings for the modified files
+- [X] T076 Final review: verify no `fetch`/`axios` direct imports remain in `apps/*/src/**` (excluding `packages/api-client/src/adapters/fetch-adapter.ts`)
 
 ---
 

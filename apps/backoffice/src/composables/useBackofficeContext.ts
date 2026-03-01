@@ -28,6 +28,7 @@ export function useBackofficeContext() {
     loading.value = true
     error.value = null
     try {
+      // eslint-disable-next-line no-restricted-globals -- pre-auth bootstrap: no token available yet
       const response = await fetch('/api/v1/backoffice/context', {
         // FE-01: HttpOnly SameSite=Strict cookie sent automatically.
         // No Authorization header; no token read from JS-accessible storage.

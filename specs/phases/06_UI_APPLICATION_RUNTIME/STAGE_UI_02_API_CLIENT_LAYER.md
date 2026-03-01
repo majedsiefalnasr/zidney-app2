@@ -8,34 +8,36 @@ UI Foundation — Centralized API Client Architecture
 
 ## Stage Status
 
-Status: IN PROGRESS
+Status: BACKEND CLOSED
 Risk Level: LOW
-Last Updated: 2026-02-28T22:30:00Z
+Last Updated: 2026-02-28T22:45:00Z
 
-Drift Analysis: PASSED (all criteria)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 76 / 76 completed
 
-Scope Authorized:
+Scope Closed:
 
 - `packages/api-client` package with HttpAdapter, ClientResponse<T>, AppError interface
 - Fixed interceptor pipeline: auth → correlation → content-type → idempotency → timeout
-- Single-flight 401 refresh, error normalization, idempotency header
+- Single-flight 401 refresh, error normalization to AppError
+- Idempotency-Key header on mutations (POST/PUT/PATCH/DELETE)
+- Auto-generated X-Correlation-ID on every request
 - Per-app wrappers for MMC, Backoffice, Frontoffice
 - Migration of existing per-app client code to shared package
-- Lint enforcement for no direct fetch/axios imports
+- ESLint enforcement: no direct fetch/axios imports
+- 90 unit tests across 6 test files
 
 Deferred Scope:
 
-- Business endpoint implementations
-- WebSocket/SSE communication
-- File upload / multipart support
+- None
 
 Constitutional Compliance:
 
-- All drift criteria passed — implementation authorized
+- ADR alignment verified
+- Implementation compliant with Zidney Constitution v1.2.0
 
 Notes:
-Full drift analysis passed. All guardian audits (Security, Performance, QA, Code Review) returned PASS. Implementation gate open.
+Backend implementation complete. No structural backend modifications allowed.
 
 ---
 
