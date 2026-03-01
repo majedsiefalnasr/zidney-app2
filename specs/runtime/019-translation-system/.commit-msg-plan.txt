@@ -1,0 +1,25 @@
+chore(019-translation-system): complete plan step
+
+Step: Plan (3/7)
+Stage: TRANSLATION_SYSTEM
+Phase: 03_BACKOFFICE_CORE/01_FOUNDATION
+Status: DRAFT
+
+Guardian validation: Architecture Checker PASS, API Designer PASS
+
+Key architectural decisions:
+- Drizzle onConflictDoUpdate on composite unique key for idempotent upserts
+- DRAIN DELETE with RETURNING clause for FR-032 compliant per-row audit entries
+- Hybrid language removal: sync <=10K rows, async Worker DRAIN job >10K rows
+- TRANSLATABLE_FIELDS pure constant for zero-overhead coverage denominator
+- schema_version 1.1.0 to 1.2.0 MINOR bump per ADR-0008
+
+Artifacts:
+- specs/runtime/019-translation-system/plan.md
+- specs/runtime/019-translation-system/research.md
+- specs/runtime/019-translation-system/data-model.md
+- specs/runtime/019-translation-system/contracts/api-endpoints.md
+- specs/runtime/019-translation-system/contracts/worker-job-schema.md
+- specs/runtime/019-translation-system/reports/PLAN_REPORT.md
+- specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_19_TRANSLATION_SYSTEM.md
+- specs/runtime/.workflow-state.json

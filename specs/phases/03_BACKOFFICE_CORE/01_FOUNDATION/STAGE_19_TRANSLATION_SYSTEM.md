@@ -11,30 +11,29 @@ Database: Tenant DB only
 
 Status: DRAFT
 Risk Level: MEDIUM
-Last Updated: 2026-03-01T00:20:00Z
+Last Updated: 2026-03-01T00:40:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Tenant-scoped translations table with unique composite key
-- 42 FRs covering storage, fallback, language management, coverage, audit, performance, access control
-- Hybrid language removal (sync ≤10K rows, async Worker job >10K rows)
-- Application-layer entity deletion cleanup (same transaction, no FK cascade)
-- Error contract: UNSUPPORTED_LANGUAGE / ENTITY_NOT_FOUND / DEFAULT_LANGUAGE_WRITE
-- TRANSLATABLE_FIELDS static constant map in domain-core
-- schema_version MINOR bump required per ADR-0008
+- Tenant DB migration: translations + translation_audit_logs tables, schema_version 1.1.0→1.2.0
+- domain-core: translation.service.ts, coverage.service.ts, translatable-fields.ts, types, errors
+- API: 4 routes (upsert, resolve, list, coverage) under /api/workspaces/:slug/translations
+- Worker: DRAIN_LANGUAGE_TRANSLATIONS job for async language removal cascade
+- Hybrid language removal: sync ≤10K rows, async Worker >10K rows
+- Guardian validation: Architecture Checker PASS, API Designer PASS
 
 Deferred Scope:
 
 - Translation versioning (history of past values)
 - Frontoffice direct translation writes
-- Automatic default-language migration on default language change
+- Translation management UI
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
