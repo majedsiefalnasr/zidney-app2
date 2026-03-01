@@ -9,19 +9,21 @@ UI Foundation — Authentication Runtime Module
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
-Last Updated: 2026-03-01T00:10:00Z
+Risk Level: MEDIUM
+Last Updated: 2026-03-01T00:20:00Z
 
 Scope Defined:
 
 - Frontend auth runtime engine (all 3 apps: MMC, Backoffice, Frontoffice)
 - Memory-only access token storage (Pinia reactive memory)
-- Single-flight refresh orchestration
+- Single-flight refresh orchestration via factory-injected refresh manager
 - Coordinated logout with backend invalidation
 - Auth state store (Pinia) with typed state/actions
 - Route protection via auth guard (requiresAuth / guestOnly)
 - Auth service composable (login, logout, initSession, getMe)
 - Token manager and refresh manager interfaces
+- `initSession()` in main.ts, gating guards via sessionInitialized ref
+- API client interceptors wired (Stage 00 skeleton extended)
 
 Deferred Scope:
 
@@ -33,10 +35,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

@@ -665,3 +665,74 @@ This stage implements the UI authentication runtime engine in strict conformance
 - Logout is coordinated: backend invalidation followed by unconditional frontend state teardown.
 - Route guards are declarative and query store state only — they never inspect JWT payloads.
 - All multi-tenancy isolation, license enforcement, and attempt engine integrity guarantees are unaffected and remain server-side.
+
+---
+
+## 16. Clarifications
+
+### Session 2026-03-01
+
+#### CL-01 — `initSession()` Call Site
+
+**Question:** FR-32/FR-34 states `initSession()` must complete before any route guard runs. Where should it be called?
+
+**Decision:** In `main.ts` before `app.mount()`, with a `router.beforeEach` guard that awaits a reactive `sessionInitialized` ref.
+
+**Rationale:** This is the only reliable pattern. Calling `initSession()` in `App.vue` `onMounted` introduces a timing race — the Vue Router `beforeEach` hook fires during the initial navigation, which happens before `onMounted` runs. By executing `initSession()` in `main.ts` and gating the guard pipeline on a `sessionInitialized` boolean ref, the auth state is guaranteed to be resolved before any route guard evaluates. This prevents the login-flash anti-pattern described in NFR-05.
+
+**Implementation contract:**
+
+```typescript
+// main.ts — bootstrap pattern
+const authStore = useAuthStore(pinia)
+const sessionInitialized = ref(false)
+
+router.beforeEach(async () => {
+  if (!sessionInitialized.value) {
+    await authStore.initSession()
+    sessionInitialized.value = true
+  }
+  // delegate to auth.guard.ts logic
+})
+
+app.mount('#app')
+```
+
+---
+
+#### CL-02 — Circular Dependency Resolution: Auth Store ↔ API Client ↔ Refresh Manager
+
+**Question:** The circular dependency `authStore.logout()` → API client → `refresh-manager.refresh()` → `authStore.logout()` must be broken. How?
+
+**Decision:** Pass an `onLogout` callback to the refresh-manager at initialization time (factory injection pattern).
+
+**Rationale:** This is the cleanest and most testable resolution. The refresh manager is created via a factory function that receives a `onLogout: () => void` callback at bootstrap. This breaks the module-level circular import by ensuring the refresh manager has zero compile-time dependency on Pinia or the auth store. In tests, `onLogout` is replaced with a Vitest spy, enabling isolated unit testing without instantiating Pinia.
+
+**Implementation contract:**
+
+```typescript
+// refresh-manager.ts — factory pattern
+export function createRefreshManager(
+  httpClient: RefreshHttpClient,
+  onLogout: () => void
+): IRefreshManager { ... }
+
+// main.ts — wired at bootstrap
+const refreshManager = createRefreshManager(apiClient, () => authStore.logout())
+```
+
+---
+
+#### CL-03 — API Client Interceptor Ownership
+
+**Question:** Do the 401-handling and token-injection interceptors (FR-18–FR-21) already exist from STAGE_UI_00, or are they created from scratch in this stage?
+
+**Decision:** STAGE_UI_00 provided the API client skeleton (base URL config, axios/fetch wrapper factory). This stage wires in the actual interceptor implementations: token injection and 401 → refresh → retry logic.
+
+**Rationale:** Stage 00's scope was folder structure and scaffolding. The interceptor hooks were left as stubs or empty extension points. This stage fills them in using `token-manager.getToken()` and `refresh-manager.refresh()`, completing the API client's auth integration contract.
+
+**Implementation scope:**
+
+- Wire request interceptor: inject `Authorization: Bearer <token>` if `tokenManager.hasToken()` is true
+- Wire response interceptor: on 401, call `refreshManager.refresh()`, retry once, handle second 401 as terminal
+- The API client file (`core/api/client.ts`) is **modified** in all three apps — not created from scratch
