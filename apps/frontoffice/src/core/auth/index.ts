@@ -1,32 +1,30 @@
-import { getApiClient } from '@/core/api/client'
-import type { AuthUser } from '@/core/auth/token-store'
-import { useAuthStore } from '@/core/auth/token-store'
-import type { ComputedRef } from 'vue'
-import { computed } from 'vue'
-import { useRouter } from 'vue-router'
+/**
+ * Auth module public API for Frontoffice.
+ * Re-exports from all new auth modules introduced in STAGE_UI_01_AUTH_MODULE.
+ * The old useAuth() composable and token-store.ts are superseded by this stage.
+ *
+ * Stage: STAGE_UI_01_AUTH_MODULE
+ */
 
-export interface UseAuthReturn {
-  isAuthenticated: ComputedRef<boolean>
-  currentUser: ComputedRef<AuthUser | null>
-  logout(): Promise<void>
-}
+// Types (zero runtime imports)
+export type {
+  AuthError,
+  AuthErrorCode,
+  AuthStoreState,
+  AuthUser,
+  LoginCredentials,
+  LoginResponse,
+  UserRole,
+} from './types'
 
-export function useAuth(): UseAuthReturn {
-  const tokenStore = useAuthStore()
-  const router = useRouter()
+// Token Manager
+export { createTokenManager } from './token-manager'
+export type { ITokenManager } from './token-manager'
 
-  const isAuthenticated = computed(() => tokenStore.isAuthenticated)
-  const currentUser = computed(() => tokenStore.user)
+// Refresh Manager
+export { createRefreshManager } from './refresh-manager'
+export type { IRefreshManager, RefreshManagerFactory } from './refresh-manager'
 
-  async function logout(): Promise<void> {
-    try {
-      await getApiClient().delete('/auth/logout')
-    } catch {
-      // Best-effort — discard error
-    }
-    tokenStore.clearAccessToken()
-    await router.push('/login')
-  }
-
-  return { isAuthenticated, currentUser, logout }
-}
+// Auth Service
+export { createAuthService } from './auth.service'
+export type { IAuthService } from './auth.service'

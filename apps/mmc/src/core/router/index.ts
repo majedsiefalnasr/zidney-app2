@@ -1,17 +1,17 @@
-import { useAuthStore } from '@/core/auth/token-store'
-import { authGuard } from '@/core/guards/auth.guard'
-import { roleGuard } from '@/core/guards/role.guard'
+/**
+ * MMC router factory.
+ * Guards are NOT registered here — they are registered in main.ts only (CL-01).
+ * This separation ensures the bootstrap sequence is respected.
+ *
+ * Stage: STAGE_UI_01_AUTH_MODULE
+ */
 import { dashboardRoutes } from '@/modules/dashboard/routes'
 import { licensesRoutes } from '@/modules/licenses/routes'
 import type { Router, RouteRecordRaw } from 'vue-router'
 import { createRouter, createWebHistory } from 'vue-router'
 
-declare module 'vue-router' {
-  interface RouteMeta {
-    requiresAuth?: boolean
-    requiredRole?: string
-  }
-}
+// Apply RouteMeta augmentation for this app
+import '@/core/router/types'
 
 const notFoundRoute: RouteRecordRaw = {
   path: '/:pathMatch(.*)*',
@@ -19,21 +19,25 @@ const notFoundRoute: RouteRecordRaw = {
   component: () => import('@/shared/views/NotFound.vue'),
 }
 
-export const router: Router = createRouter({
-  history: createWebHistory(),
-  routes: [...dashboardRoutes, ...licensesRoutes, notFoundRoute],
-})
+// All application routes (guards registered in main.ts, not here)
+export const routes: RouteRecordRaw[] = [
+  ...dashboardRoutes,
+  ...licensesRoutes,
+  notFoundRoute,
+]
 
-router.beforeEach(async (to, from) => {
-  const authStore = useAuthStore()
+/**
+ * Creates the MMC router instance.
+ * Guards must be registered by the caller (main.ts) after this returns.
+ */
+export function createAppRouter(): Router {
+  return createRouter({
+    history: createWebHistory(),
+    routes,
+  })
+}
 
-  const authResult = await authGuard({ to, from, authStore })
-  if (authResult !== true) return authResult
-
-  const roleResult = await roleGuard({ to, from, authStore })
-  if (roleResult !== true) return roleResult
-
-  return true
-})
+// Legacy export for backward compatibility — same as createAppRouter()
+export const router: Router = createAppRouter()
 
 export default router

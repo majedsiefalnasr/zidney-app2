@@ -1,11 +1,15 @@
+/**
+ * Pinia state module index for Frontoffice.
+ * Router is no longer injected via Pinia plugin — it is passed directly to
+ * defineAuthStore() in main.ts (STAGE_UI_01_AUTH_MODULE).
+ *
+ * Stage: STAGE_UI_01_AUTH_MODULE
+ */
 import { createPinia } from 'pinia'
-import { markRaw } from 'vue'
-import type { Router } from 'vue-router'
 
-export function createAppPinia(router: Router) {
-  const pinia = createPinia()
-  pinia.use(({ store }) => {
-    store['router'] = markRaw(router)
-  })
-  return pinia
+export { createPinia }
+
+// Backward-compatible factory (no longer injects router)
+export function createAppPinia() {
+  return createPinia()
 }
