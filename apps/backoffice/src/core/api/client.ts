@@ -1,10 +1,14 @@
-import { useAuthStore } from '@/core/auth/token-store'
 import { appConfig } from '@/core/config/app-config'
 import type { ApiClient } from '@zidney/api-client'
 import {
   createApiClient as createClient,
   createFetchAdapter,
 } from '@zidney/api-client'
+import type { ITokenManager } from '@/core/auth/token-manager'
+import type { IRefreshManager } from '@/core/auth/refresh-manager'
+import { createLogger } from '@zidney/logger'
+
+const logger = createLogger('auth:api-client')
 
 // ─── Re-exports for convenience ─────────────────────────────────────────────
 export type {
@@ -16,44 +20,37 @@ export type {
 
 export { ErrorCodes, isAppError } from '@zidney/api-client'
 
-// ─── Lazy singleton ────────────────────────────────────────────────────────
-// Defers useAuthStore() until first call — eliminates Pinia activation race.
-
-let _apiClient: ApiClient | null = null
-
-export function getApiClient(): ApiClient {
-  if (!_apiClient) {
-    const auth = useAuthStore()
-    _apiClient = createClient({
-      baseUrl: appConfig.env.apiBaseUrl,
-      getAccessToken: () => auth.getAccessToken(),
-      onRefreshToken: async () => {
-        // eslint-disable-next-line no-restricted-globals
-        const response = await fetch(
-          `${appConfig.env.apiBaseUrl}/auth/refresh`,
-          {
-            method: 'POST',
-            credentials: 'include',
-          }
-        )
-        if (!response.ok) {
-          throw new Error('Token refresh failed')
-        }
-        const data = (await response.json()) as {
-          data: { accessToken: string }
-        }
-        auth.setAccessToken(data.data.accessToken)
-        return data.data.accessToken
-      },
-      onAuthFailure: () => {
-        auth.clearAccessToken()
-        const storeWithRouter = auth as unknown as {
-          router?: { push: (path: string) => void }
-        }
-        storeWithRouter.router?.push('/login')
-      },
-      adapter: createFetchAdapter(),
-    })
-  }
-  return _apiClient
+// ─── Factory ─────────────────────────────────────────────────────────────────
+/**
+ * Creates the application API client with properly wired auth interceptors.
+ * Called once in main.ts after tokenManager and refreshManager are created.
+ *
+ * @param tokenManager - In-memory access token holder
+ * @param refreshManager - Single-flight refresh orchestrator
+ * @param onAuthFailure - Callback invoked when auth fails after retry (calls authStore.logout())
+ */
+export function createAppApiClient(
+  tokenManager: ITokenManager,
+  refreshManager: IRefreshManager,
+  onAuthFailure: () => void
+): ApiClient {
+  return createClient({
+    baseUrl: appConfig.env.apiBaseUrl,
+    credentials: 'include',
+    getAccessToken: () => tokenManager.getToken(),
+    onRefreshToken: async (): Promise<string> => {
+      await refreshManager.refresh()
+      const token = tokenManager.getToken()
+      if (!token) {
+        logger.error('No token available after refresh')
+        throw new Error('No token after refresh')
+      }
+      return token
+    },
+    onAuthFailure: () => {
+      logger.warn('Auth failure callback triggered — initiating logout')
+      onAuthFailure()
+    },
+    adapter: createFetchAdapter(),
+  })
 }

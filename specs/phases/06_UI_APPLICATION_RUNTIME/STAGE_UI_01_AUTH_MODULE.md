@@ -8,29 +8,40 @@ UI Foundation — Authentication Runtime Module
 
 ## Stage Status
 
-Status: IN PROGRESS
+Status: BACKEND CLOSED
 Risk Level: MEDIUM
-Last Updated: 2026-03-01T00:50:00Z
+Last Updated: 2026-03-01T22:10:00Z
 
-Drift Analysis: PASSED (all 9 criteria)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 57 / 57 completed
 
-Scope Authorized:
+Scope Closed:
 
-- 67 atomic tasks across 12 implementation phases
-- Types, token-manager, refresh-manager, auth-service, auth-store, auth-guard (per app)
-- API client interceptor wiring (Stage 00 stubs completed)
-- main.ts bootstrap sequence (9-step ordered)
-- Unit + integration tests
-- Cleanup (token-store.ts deletion)
-- Verification (typecheck, lint, grep)
+- AuthUser, AuthError, AuthErrorCode, ITokenManager, IRefreshManager, IAuthService, AuthGuardOptions types (all 3 apps)
+- token-manager.ts: memory-only token storage (all 3 apps)
+- refresh-manager.ts: single-flight lock, factory injection pattern (all 3 apps)
+- auth.service.ts: login, logout (fire-and-forget), refresh, fetchCurrentUser (all 3 apps)
+- auth.store.ts: defineAuthStore factory with lazy getRefreshManager accessor (all 3 apps)
+- auth.guard.ts: createAuthGuard factory, requiresAuth / guestOnly routing (all 3 apps)
+- API client interceptor wiring: getAccessToken, onRefreshToken, onAuthFailure callbacks (all 3 apps)
+- main.ts 9-step bootstrap with lazy accessor pattern (all 3 apps)
+- token-store.ts deleted from all 3 apps
+- Unit tests: 12 files, 143 tests — all passing (MMC)
+- TypeScript: exit 0 for MMC, Backoffice, Frontoffice
+- Lint: exit 0 for all auth files
+- Security greps: CLEAN (no console.*, no storage writes, no token leaks)
+
+Deferred Scope:
+
+- Backoffice + Frontoffice vitest configs (auth test infra)
 
 Constitutional Compliance:
 
-- All drift criteria passed — implementation authorized
+- ADR alignment verified
+- Implementation compliant with Zidney Constitution v1.2.0
 
 Notes:
-Full drift analysis passed. Implementation gate open.
+Backend implementation complete. No structural backend modifications allowed.
 
 ---
 

@@ -11,6 +11,24 @@
       ],
       "@zidney/ui/*": [
         "../../packages/ui-system/src/*"
+      ],
+      "@zidney/logger": [
+        "../../packages/logger/src/index.ts"
+      ],
+      "@zidney/logger/*": [
+        "../../packages/logger/src/*"
+      ],
+      "@zidney/api-client": [
+        "../../packages/api-client/src/index.ts"
+      ],
+      "@zidney/api-client/*": [
+        "../../packages/api-client/src/*"
+      ],
+      "@zidney/types": [
+        "../../packages/types/src/index.ts"
+      ],
+      "@zidney/types/*": [
+        "../../packages/types/src/*"
       ]
     }
   },
