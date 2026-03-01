@@ -10,18 +10,17 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
-Last Updated: 2026-03-01T00:00:00.000Z
+Risk Level: MEDIUM
+Last Updated: 2026-03-01T00:02:00.000Z
 
 Scope Defined:
 
 - Reusable, deterministic workflow state machine (COMPLETED → UNDER_REVIEW → APPROVED → ENABLED)
-- Permission-gated forward and backward transitions
-- Immutable workflow_logs audit table
-- Atomic state transitions (entity update + log insert in single transaction)
-- Generic engine shared across subjects, questions, exams, topics, library files, and templates
-- Server-authoritative timestamps enforced throughout
-- Granular per-transition, per-entity-type permission identifiers
+- 18 functional requirements covering all transition, permission, atomicity, audit, and tenant isolation concerns
+- SELECT FOR UPDATE row lock for concurrent transition serialization
+- Explicit TenantDb injection contract (no singleton)
+- Rate limiting: 20 transitions/user/entity-type/minute at API layer
+- Full HTTP error contract (400/403/404/409/429)
 
 Deferred Scope:
 
@@ -34,10 +33,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

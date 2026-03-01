@@ -140,28 +140,47 @@ A platform developer registers a new content entity type (e.g., "library file") 
 - **FR-001**: The workflow engine MUST enforce the state sequence: `COMPLETED → UNDER_REVIEW → APPROVED → ENABLED` as the only valid forward path.
 - **FR-002**: The workflow engine MUST assign `COMPLETED` as the default state for any newly created workflow-enabled entity.
 - **FR-003**: The workflow engine MUST reject any transition that skips one or more states, returning a `400 invalid_state_transition` error.
-- **FR-004**: The workflow engine MUST reject any backward transition attempted by a user who lacks the explicit backward-transition permission, returning an authorization error.
+- **FR-004**: The workflow engine MUST reject any backward transition attempted by a user who lacks the explicit backward-transition permission, returning HTTP `403` with error code `workflow_permission_denied`. Forward transitions attempted without the required permission are equally rejected with `403 workflow_permission_denied`.
 - **FR-005**: The workflow engine MUST require a non-empty justification for every backward transition; requests without justification MUST be rejected.
 - **FR-006**: Each workflow-enabled entity record MUST store `status` (enum), `status_updated_at` (server-authoritative timestamp), and `status_updated_by` (actor identifier) directly on the entity table.
 - **FR-007**: The `workflow_logs` table MUST record every state transition with: entity type, entity identifier, previous state, new state, actor identifier, server-authoritative timestamp, and reason (nullable for forward, required for backward).
 - **FR-008**: The `workflow_logs` table MUST be append-only; no UPDATE or DELETE operations are permitted on any log row.
-- **FR-009**: Every state transition MUST execute as a single atomic transaction: (1) validate transition, (2) update entity status, (3) insert log row, (4) commit. Any failure in any step MUST roll back the entire operation.
+- **FR-009**: Every state transition MUST execute as a single atomic transaction in this exact sequence: (1) acquire a row-level exclusive lock on the entity via `SELECT FOR UPDATE`, (2) validate the transition (state legality + permission check), (3) update entity status fields, (4) insert the `workflow_logs` row, (5) commit. Any failure in any step MUST roll back the entire operation. `SELECT FOR UPDATE` is the mandated concurrency mechanism — it serializes concurrent transitions on the same entity without requiring a version column and without generating serialization-failure errors requiring retry logic.
 - **FR-010**: The workflow engine MUST validate the actor's permission for the specific transition before performing any database write.
 - **FR-011**: All status changes for any entity MUST pass through the workflow engine; direct repository-level status updates are forbidden.
 - **FR-012**: The workflow engine MUST be implemented as a shared, generic service; no entity type may contain hardcoded workflow logic.
 - **FR-013**: The workflow engine MUST use server-authoritative time for all `status_updated_at` and `changed_at` values; client-supplied timestamps are rejected.
 - **FR-014**: The workflow engine MUST support granular per-transition, per-entity-type permission identifiers (e.g., `subject.review`, `question.approve`, `exam.enable`).
-- **FR-015**: The workflow engine MUST operate strictly within the tenant database resolved by the tenant resolver; cross-tenant workflow operations are forbidden.
+- **FR-015**: The workflow engine MUST operate strictly within the tenant database resolved by the tenant resolver; cross-tenant workflow operations are forbidden. The tenant `db` connection MUST be passed as an explicit first parameter to `executeTransition(db: TenantDb, context: WorkflowContext)` — not stored as a singleton, not embedded in `WorkflowContext`, and not resolved internally. The API route handler obtains the `db` instance from the tenant resolver middleware and injects it at the call site.
 - **FR-016**: The workflow engine MUST support the following entity types in Phase 3: subjects, MCQ questions, traditional questions, exams, topics, library files, and templates.
 - **FR-017**: Transition invocation MUST be idempotent in the sense that a caller submitting the exact same transition for the same entity when the entity is already in the target state receives a `400 invalid_state_transition` (not a silent success).
+- **FR-018**: Transition API endpoints MUST be rate-limited at the API route layer (not inside the engine) to a maximum of **20 transitions per user per entity-type per minute**. Exceeding this limit returns `429 Too Many Requests`. The engine itself contains no rate-limiting logic; this is enforced by the rate-limiting middleware applied to all workflow transition routes.
 
 ### Key Entities
 
 - **WorkflowState**: An ordered enumeration of content lifecycle states — `COMPLETED`, `UNDER_REVIEW`, `APPROVED`, `ENABLED`. The sequence position determines transition legality.
 - **WorkflowTransition**: A value object representing a directed edge in the state machine — source state, target state, required permission identifier, and whether the transition is forward or backward.
-- **WorkflowContext**: The runtime input to the engine — entity type, entity identifier, target state, actor identifier, and optional reason. Fully resolved before any DB operation.
+- **WorkflowContext**: The runtime input to the engine — entity type, entity identifier, target state, actor identifier, optional reason, and a **pre-resolved `permissions: string[]`** array containing all permission identifiers held by the authenticated actor for the current tenant. The HTTP route handler is responsible for resolving actor permissions from the auth context and including them in `WorkflowContext` before calling the engine. The engine checks whether the required transition permission is present in this array (`required_permission ∈ permissions`) without making any external service call. `WorkflowContext` is a plain value object — it carries no db connection and no injected services.
 - **workflow_logs row**: An immutable audit record inserted for every completed transition. Fields: `id` (UUID), `entity_type`, `entity_id` (UUID), `previous_state`, `new_state`, `changed_by` (UUID), `changed_at` (server timestamp), `reason` (text, nullable).
 - **WorkflowEnabled Entity**: Any content entity (subject, question, exam, topic, library file, template) that carries the `status`, `status_updated_at`, and `status_updated_by` fields and delegates all status mutations to the workflow engine.
+
+---
+
+### Error Contract (HTTP Status Code Mapping)
+
+All workflow API responses conform to the Zidney standard error envelope: `{ success: boolean, data: object | null, error: { code: string, message: string } | null }`.
+
+| Condition                                  | HTTP Status | `error.code`                 |
+| ------------------------------------------ | ----------- | ---------------------------- |
+| State-skipping or same-state re-attempt    | `400`       | `invalid_state_transition`   |
+| Backward transition missing justification  | `400`       | `justification_required`     |
+| Unknown or unregistered entity type        | `400`       | `unknown_entity_type`        |
+| Actor lacks required transition permission | `403`       | `workflow_permission_denied` |
+| Target entity does not exist               | `404`       | `entity_not_found`           |
+| Concurrent transition conflict (race)      | `409`       | `workflow_conflict`          |
+| Rate limit exceeded on transition endpoint | `429`       | `rate_limit_exceeded`        |
+
+Note: `401 Unauthorized` is never returned by the workflow engine — authentication is enforced by upstream middleware before the engine is invoked (A-002). The engine only deals with `403` (authenticated actor lacks permission).
 
 ---
 
@@ -200,3 +219,19 @@ A platform developer registers a new content entity type (e.g., "library file") 
 - Bulk batch state transitions across multiple entities in a single request.
 - UI components for workflow visualization.
 - Workflow delegation or multi-approver flows.
+
+---
+
+## Clarifications
+
+### Session 2026-03-01
+
+- **Q: What locking mechanism serializes simultaneous transitions on the same entity?** → A: `SELECT FOR UPDATE` on the entity row at the start of every transition transaction. Rationale: stability-first platform; row-level exclusive lock requires no schema changes, blocks concurrent writers until commit, then surfaces `400 invalid_state_transition` to the loser — no serialization-failure retries needed. Applied to FR-009.
+
+- **Q: What is the shape of the permission input to the workflow engine?** → A: `WorkflowContext` carries a pre-resolved `permissions: string[]` field populated by the HTTP route handler before the engine is called. The engine checks `required_permission ∈ permissions` internally. Rationale: domain packages must be pure functions with no framework dependencies (AGENTS.md); permission resolution is an API-layer responsibility. Applied to WorkflowContext entity definition.
+
+- **Q: What HTTP status codes map to which workflow error conditions?** → A: `400` invalid transition / missing justification / unknown entity type; `403` permission denied; `404` entity not found; `409` concurrent conflict; `429` rate limit exceeded. The engine never returns `401` — authentication is upstream. Rationale: REST semantics + Zidney standard error envelope. Applied by adding the Error Contract section and updating FR-004.
+
+- **Q: How is the tenant DB connection passed into the workflow engine?** → A: Explicit first parameter — `executeTransition(db: TenantDb, context: WorkflowContext)`. The route handler injects the tenant `db` obtained from the tenant resolver middleware. `WorkflowContext` remains a plain value object with no embedded connection. Rationale: no global DB singleton (AGENTS.md); all DB access must originate from resolver context; explicit injection keeps the engine stateless and unit-testable. Applied to FR-015.
+
+- **Q: Are transition endpoints subject to rate limiting?** → A: Yes — 20 transitions per user per entity-type per minute at the API route layer (not inside the engine). Returns `429 rate_limit_exceeded` when exceeded. Rationale: AGENTS.md mandates rate limiting; transitions are intentional authenticated actions, 20/min is generous for human-driven workflow. Applied as FR-018 and in the Error Contract table.

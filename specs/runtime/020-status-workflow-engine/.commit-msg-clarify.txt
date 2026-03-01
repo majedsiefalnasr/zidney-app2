@@ -1,0 +1,22 @@
+chore(020-status-workflow-engine): complete clarify step
+
+Step: Clarify (2/7)
+Stage: STAGE_20_STATUS_WORKFLOW_ENGINE
+Phase: 03_BACKOFFICE_CORE/01_FOUNDATION
+Status: DRAFT
+
+Ambiguities resolved: 5
+Risk level assessed: MEDIUM
+
+Key clarifications:
+
+- Concurrency: SELECT FOR UPDATE row lock in 5-step atomic transaction (FR-009)
+- Permission injection: WorkflowContext carries permissions[], DB injected as first param (FR-015)
+- Rate limiting: 20 transitions/user/entity-type/minute at API layer (FR-018 added)
+
+Artifacts:
+
+- specs/runtime/020-status-workflow-engine/reports/CLARIFY_REPORT.md
+- specs/runtime/020-status-workflow-engine/spec.md (updated in-place with ## Clarifications)
+- specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_20_STATUS_WORKFLOW_ENGINE.md (status: DRAFT)
+- specs/runtime/020-status-workflow-engine/.workflow-state.json
