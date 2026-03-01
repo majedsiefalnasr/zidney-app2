@@ -31,7 +31,7 @@ This agent MUST comply with all binding rules defined in `docs/AGENT_GOVERNANCE.
 ## Execution Context
 
 **Stage:** $ARGUMENTS (extracted from user request)  
-**Current Step:** `<derive from specs/runtime/.workflow-state.json → current_step, or "pre_step">`  
+**Current Step:** `<derive from specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json → current_step, or "pre_step">`  
 **Current Lifecycle Status:** `<derive from specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME> → ## Stage Status>`  
 **Authority:** Zidney Constitution v1.2.0
 
@@ -90,7 +90,7 @@ specs/runtime/<STAGE_DIR_NAME>/
     └── TESTING_GUIDE.md                   ← orchestrator: user-friendly testing guide (Step 7)
 ```
 
-Workflow state lives at: `specs/runtime/.workflow-state.json` — shared, never inside a stage subdirectory.
+Workflow state lives at: `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json` — stage-local, never at repo root, never duplicated.
 
 ### Location Enforcement
 
@@ -132,7 +132,7 @@ git status --porcelain
 Verify the working tree only contains files within the active stage scope:
 
 - `specs/runtime/<STAGE_DIR_NAME>/`
-- `specs/runtime/.workflow-state.json`
+- `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`
 - `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`
 - Implementation source files declared in `PLAN_REPORT.md` and `TASKS_REPORT.md` (Step 6 only)
 
@@ -152,13 +152,12 @@ This lists every file changed in this step (written or modified). Run the projec
 
 Apply Package Manager Enforcement — use `$PKG_MANAGER` (detected at Pre.1) to invoke the formatter. See the "Formatter invocation" rule in that section for the exact command per package manager.
 
-**Formatter config detection (check in this order):**
+**Formatter execution rule (check in this order):**
 
 ```bash
-# 1. Check package.json for a format or fmt script → $PKG_MANAGER run format <files>
-# 2. Check for biome.json or biome.jsonc           → biome format --write <files>
-# 3. Check for .prettierrc* or prettier.config.*   → prettier --write <files>
-# 4. None found → skip, note "no formatter configured" in commit message
+# 1. If package.json has "format" script → bun run format -- <files> (or bun run format if script ignores file args)
+# 2. Else if package.json has "fmt" script → bun run fmt -- <files> (or bun run fmt if script ignores file args)
+# 3. Else fallback formatter → bunx prettier --write <files>
 ```
 
 After formatting, run `git diff --name-only HEAD` again. If formatting touched files **outside** the active stage scope → STOP and require manual review before continuing.
@@ -208,7 +207,7 @@ Do NOT write commit messages inline — always load from template.
 
 Referenced throughout as **"Apply Package Manager Enforcement."**
 
-### Detection (run once per session, at Pre.1)
+### Runtime selection (run once per session, at Pre.1)
 
 Detect the project package manager by inspecting lockfiles — never assume:
 
@@ -274,11 +273,8 @@ Never bump a version number in `package.json` by hand. Use:
 # Update a single package to latest
 $PKG_MANAGER add <package-name>@latest
 
-# Bun-specific: update all packages
-bun update
-
-# pnpm-specific: update all packages
-pnpm update --latest
+# Update all packages
+$PKG_MANAGER update
 ```
 
 ### Formatter invocation
@@ -365,6 +361,21 @@ Store as `STAGE_DIR_NAME`.
 
 Apply Package Manager Enforcement — run the lockfile detection block now and store `PKG_MANAGER` for the entire session. Every step from here onwards uses this value. Do NOT re-detect mid-session.
 
+After `PKG_MANAGER` is detected, print a status summary:
+
+```
+═════════════════════════════════════════════════════════════
+  ZIDNEY ORCHESTRATOR INITIALIZATION
+═════════════════════════════════════════════════════════════
+
+Stage:         <STAGE_NAME>
+Phase:         <PHASE_NAME>
+Branch:        <STAGE_DIR_NAME>
+Package Mgr:   <PKG_MANAGER>
+
+═════════════════════════════════════════════════════════════
+```
+
 ## Pre.2 — Confirm Base Branch
 
 Default: `develop`. Ask the user to confirm or override:
@@ -429,18 +440,18 @@ Create `specs/runtime/<STAGE_DIR_NAME>/README.md`:
 
 ## Stage Artifacts
 
-| Artifact          | Owner        | Path                               | Generated At |
-| ----------------- | ------------ | ---------------------------------- | ------------ |
-| PR Summary        | Orchestrator | PR_SUMMARY.md                      | Step 7       |
-| Testing Guide     | Orchestrator | guides/TESTING_GUIDE.md            | Step 7       |
-| Validation Report | Orchestrator | audits/VALIDATION_REPORT.md        | Step 6       |
-| Spec Checklist    | SpecKit      | checklists/requirements.md         | Step 1       |
-| Workflow State    | Orchestrator | specs/runtime/.workflow-state.json | Pre-Step     |
+| Artifact          | Owner        | Path                                                | Generated At |
+| ----------------- | ------------ | --------------------------------------------------- | ------------ |
+| PR Summary        | Orchestrator | PR_SUMMARY.md                                       | Step 7       |
+| Testing Guide     | Orchestrator | guides/TESTING_GUIDE.md                             | Step 7       |
+| Validation Report | Orchestrator | audits/VALIDATION_REPORT.md                         | Step 6       |
+| Spec Checklist    | SpecKit      | checklists/requirements.md                          | Step 1       |
+| Workflow State    | Orchestrator | specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json | Pre-Step     |
 ```
 
 ## Pre.6 — Initialize .workflow-state.json
 
-Write to: `specs/runtime/.workflow-state.json`
+Write to: `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`
 
 ```json
 {
@@ -469,7 +480,7 @@ Write to: `specs/runtime/.workflow-state.json`
 }
 ```
 
-`.workflow-state.json` MUST always live at `specs/runtime/.workflow-state.json`. Never at repo root. Never inside a stage subdirectory. Never duplicated. If a conflicting file exists → STOP.
+`.workflow-state.json` MUST always live at `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`. Never at repo root. Never duplicated. If a conflicting file exists → STOP.
 
 ## Pre.7 — Initialize Stage Status Block
 
@@ -510,7 +521,7 @@ git diff --name-only HEAD
 
 # 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
-        specs/runtime/.workflow-state.json \
+        specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
 # 4. Verify staged scope
@@ -612,7 +623,7 @@ git diff --name-only HEAD
 
 # 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
-        specs/runtime/.workflow-state.json \
+        specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
 # 4. Verify staged scope
@@ -714,7 +725,7 @@ git diff --name-only HEAD
 
 # 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
-        specs/runtime/.workflow-state.json \
+        specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
 # 4. Verify staged scope
@@ -830,7 +841,7 @@ git diff --name-only HEAD
 
 # 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
-        specs/runtime/.workflow-state.json \
+        specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
 # 4. Verify staged scope
@@ -943,7 +954,7 @@ git diff --name-only HEAD
 
 # 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
-        specs/runtime/.workflow-state.json \
+        specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
 # 4. Verify staged scope
@@ -1100,7 +1111,7 @@ git diff --name-only HEAD
 
 # 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
-        specs/runtime/.workflow-state.json \
+        specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
 # 4. Verify staged scope
@@ -1119,7 +1130,7 @@ Do NOT proceed to Step 6 if `drift_passed = false`.
 
 Before generating any code, confirm:
 
-- `drift_passed = true` in `specs/runtime/.workflow-state.json`
+- `drift_passed = true` in `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`
 - No unresolved constitutional violations from Step 5
 - No unresolved ambiguities from any prior step
 
@@ -1316,7 +1327,7 @@ git diff --name-only HEAD
 # 3. Stage
 git add <IMPLEMENTATION_FILES_FROM_PLAN_AND_TASKS>
 git add specs/runtime/<STAGE_DIR_NAME>/ \
-        specs/runtime/.workflow-state.json \
+        specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
 # 4. Verify staged scope — confirm only declared implementation files and stage artifacts are staged
@@ -1500,7 +1511,7 @@ git diff --name-only HEAD
 
 # 3. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
-        specs/runtime/.workflow-state.json \
+        specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
 # 4. Verify staged scope
@@ -1554,7 +1565,7 @@ specs/runtime/<STAGE_DIR_NAME>/
     └── TESTING_GUIDE.md                  ✅  ← share with QA and reviewing engineers
 
 
-Workflow state: specs/runtime/.workflow-state.json → stage_production_ready
+Workflow state: specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json → stage_production_ready
 Stage file:     specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME> → PRODUCTION READY
 
 Next actions:
