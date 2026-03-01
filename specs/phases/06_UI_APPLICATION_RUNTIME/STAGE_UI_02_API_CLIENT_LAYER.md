@@ -10,22 +10,17 @@ UI Foundation — Centralized API Client Architecture
 
 Status: DRAFT
 Risk Level: LOW
-Last Updated: 2026-02-28T22:10:00Z
+Last Updated: 2026-02-28T22:15:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Typed API client abstraction (client.ts) shared across MMC, Backoffice, Frontoffice
-- Auth token injection and 401 refresh/retry (single-flight, queue during refresh)
-- Error normalization to AppError structure
-- 429 rate-limit surfacing (no auto-retry)
-- Idempotency key header support (caller-provided)
-- Per-app base URL configuration
-- Request cancellation via AbortSignal
-- Correlation ID propagation
-- Mock HTTP adapter for testability
-- 30s default request timeout, configurable per-request
-- JSON-only content type (file upload deferred)
-- No internal client logging
+- New packages/api-client package (framework-agnostic HTTP client)
+- HttpAdapter injectable transport interface
+- Fixed interceptor pipeline (auth/correlation/content-type/idempotency/timeout)
+- AppError normalization (plain interface)
+- Per-app factory pattern (createApiClient)
+- MockAdapter for testing
+- Incremental migration from existing per-app clients
 
 Deferred Scope:
 
@@ -37,10 +32,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 

@@ -105,8 +105,8 @@ A developer working on a mutation endpoint (e.g., submission, creation) needs to
 
 **Acceptance Scenarios**:
 
-1. **Given** a developer calls `client.post` with `{ idempotencyKey: "abc-123" }`, **When** the request is sent, **Then** the `Idempotency-Key: abc-123` header is present.
-2. **Given** a developer calls `client.post` without an idempotency key, **When** the request is sent, **Then** no `Idempotency-Key` header is attached.
+1. **Given** a developer calls `client.post` with `{ idempotencyKey: "abc-123" }`, **When** the request is sent, **Then** the `X-Idempotency-Key: abc-123` header is present.
+2. **Given** a developer calls `client.post` without an idempotency key, **When** the request is sent, **Then** no `X-Idempotency-Key` header is attached.
 3. **Given** a developer provides an idempotency key on a GET request, **When** the request is sent, **Then** the key is ignored (not attached).
 
 ---
@@ -154,7 +154,7 @@ An operator debugging an issue across frontend and backend needs to trace a requ
 **Acceptance Scenarios**:
 
 1. **Given** a correlation ID is provided in the request config, **When** the request is sent, **Then** the `X-Correlation-ID` header is attached.
-2. **Given** no correlation ID is provided, **When** the request is sent, **Then** no `X-Correlation-ID` header is attached.
+2. **Given** no correlation ID is provided, **When** the request is sent, **Then** a UUID is auto-generated and attached as `X-Correlation-ID`.
 
 ---
 
@@ -206,7 +206,7 @@ A developer writing tests for a feature module needs to mock API responses witho
 - **FR-010**: System MUST normalize all errors (HTTP errors, network failures, timeouts, unexpected responses) into an `AppError` structure with: `code`, `message`, `httpStatus`, `isNetworkError`.
 - **FR-011**: System MUST surface 429 responses as `AppError` with `retryAfter` metadata (when the `Retry-After` header is present).
 - **FR-012**: System MUST NOT auto-retry 429 responses.
-- **FR-013**: System MUST support an optional `idempotencyKey` parameter on mutation requests (`POST`, `PATCH`, `DELETE`) that attaches an `Idempotency-Key` header.
+- **FR-013**: System MUST support an optional `idempotencyKey` parameter on mutation requests (`POST`, `PATCH`, `DELETE`) that attaches an `X-Idempotency-Key` header.
 - **FR-014**: System MUST NOT generate idempotency keys automatically; key generation is the caller's responsibility.
 - **FR-015**: System MUST support per-app base URL configuration (MMC: platform API, Backoffice: workspace-scoped API, Frontoffice: student runtime API) resolved from environment configuration.
 - **FR-016**: System MUST support request cancellation via standard `AbortSignal`.
