@@ -49,3 +49,9 @@ export * from './translation/translatable-fields'
 export * from './translation/translation.errors'
 export * from './translation/translation.service'
 export * from './translation/translation.types'
+
+// Workflow engine (Stage 020)
+export * from './workflow/workflow.engine'
+export * from './workflow/workflow.errors'
+export * from './workflow/workflow.states'
+export * from './workflow/workflow.types'

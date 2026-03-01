@@ -9,12 +9,12 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: IN PROGRESS
+Status: BACKEND CLOSED
 Risk Level: MEDIUM
-Last Updated: 2026-03-01T01:00:00.000Z
+Last Updated: 2026-03-01T01:30:00.000Z
 
-Drift Analysis: PASSED (all 9 criteria)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 39 / 39 completed
 
 Scope Authorized:
 
@@ -34,14 +34,25 @@ Deferred Scope:
 - Workflow delegation or multi-approver flows
 - Status columns on entity tables (added per-entity in Stage 21+)
 
+Scope Closed:
+
+- Workflow state machine: COMPLETED / UNDER_REVIEW / APPROVED / ENABLED
+- packages/domain-core/src/workflow/ (4 files: states, types, errors, engine)
+- Tenant migration: 20260301_002_workflow_engine.ts (schema 1.2.0 -> 1.3.0)
+- API route: apps/api/src/routes/backoffice/workflow/ + apps/api/src/modules/workflow/
+- Tests: 41 unit + 16 integration, all passing
+
+Deferred Scope:
+
+- None
+
 Constitutional Compliance:
 
-- All drift criteria passed
 - ADR alignment verified
-- Implementation authorized by orchestrator drift gate
+- Implementation compliant with Zidney Constitution v1.2.0
 
 Notes:
-Full drift analysis passed. Implementation gate open. F-001: route handler files at T010/T011 execution time should follow routes/backoffice/<feature>/ pattern (non-blocking implementation guidance).
+Backend implementation complete. No structural backend modifications allowed.
 
 ---
 
