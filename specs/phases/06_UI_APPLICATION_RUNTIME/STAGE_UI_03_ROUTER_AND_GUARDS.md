@@ -12,31 +12,26 @@ Status: DRAFT
 Risk Level: MEDIUM
 Last Updated: 2026-03-02T00:00:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Canonical RouteMeta schema (all 3 apps)
-- Guard pipeline: AuthGuard → WorkspaceGuard → RoleGuard → FeatureFlagGuard (stub)
-- core/router/index.ts in MMC, Backoffice, Frontoffice
-- WorkspaceGuard (Backoffice only)
-- RoleGuard (UI-hint only, non-authoritative)
-- 404, Unauthorized, GlobalError fallback views (all 3 apps)
-- Redirect save/restore strategy
-- Backoffice license guard removal (FR-10)
-- Legacy singleton router export removal (CL-05)
-- Backoffice requiredModule field removal (CL-06)
-- Router testability contracts with createMemoryHistory support
+- 15 new files (5 per app: core/router/index.ts, 4 guard files)
+- 14 file modifications (RouteMeta migration, main.ts guard registration)
+- 4 file deletions (old guard files, singleton exports)
+- registerGuards() barrel pattern per app
+- Backoffice STAGE_17 inline license guard removal
+- contextStore.loadContext() relocation to main.ts bootstrap
 
 Deferred Scope:
 
-- FeatureFlagGuard full implementation (stub only — reserved for future stage)
-- Business page implementations (dashboards, product views)
+- FeatureFlagGuard full implementation (stub only)
+- Business page implementations
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. 6 clarifications added. Ready for technical planning.
+Technical plan complete. Architecture Guardian: PASS. Task breakdown in progress.
 
 ---
 
