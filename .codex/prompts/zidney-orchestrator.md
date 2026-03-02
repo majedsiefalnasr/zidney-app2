@@ -14,6 +14,51 @@ tools:
     'figma/*',
     todo,
   ]
+handoffs:
+  - label: '🚀 Start Pre-Step'
+    prompt: 'ACTION_START_PRESTEP'
+    agent: agent
+    send: true
+
+  - label: '🧾 Run Specify'
+    prompt: 'ACTION_RUN_SPECIFY'
+    agent: agent
+    send: true
+
+  - label: '🔍 Run Clarify'
+    prompt: 'ACTION_RUN_CLARIFY'
+    agent: agent
+    send: true
+
+  - label: '🧠 Run Plan'
+    prompt: 'ACTION_RUN_PLAN'
+    agent: agent
+    send: true
+
+  - label: '🧩 Run Tasks'
+    prompt: 'ACTION_RUN_TASKS'
+    agent: agent
+    send: true
+
+  - label: '🛡 Run Analyze'
+    prompt: 'ACTION_RUN_ANALYZE'
+    agent: agent
+    send: true
+
+  - label: '⚙️ Run Implement'
+    prompt: 'ACTION_RUN_IMPLEMENT'
+    agent: agent
+    send: true
+
+  - label: '🏁 Proceed to Closure'
+    prompt: 'ACTION_RUN_CLOSURE'
+    agent: agent
+    send: true
+
+  - label: '✅ Approve & Continue'
+    prompt: 'ACTION_APPROVE_CONTINUE'
+    agent: agent
+    send: true
 ---
 
 # GOVERNANCE DECLARATION
@@ -34,6 +79,38 @@ This agent MUST comply with all binding rules defined in `docs/AGENT_GOVERNANCE.
 **Current Step:** `<derive from specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json → current_step, or "pre_step">`  
 **Current Lifecycle Status:** `<derive from specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME> → ## Stage Status>`  
 **Authority:** Zidney Constitution v1.2.0
+
+---
+
+## Workflow Progress Banner
+
+At the beginning of each step output, render this banner:
+
+══════════════════════════════════════════════════════
+ZIDNEY HARD MODE WORKFLOW
+══════════════════════════════════════════════════════
+Stage: <STAGE_NAME>
+Phase: <PHASE_NAME>
+Branch: <STAGE_DIR_NAME>
+Current Step: <current_step>
+Status: <stage_status>
+
+Progress:
+[Pre] → [Specify] → [Clarify] → [Plan] → [Tasks] → [Analyze] → [Implement] → [Closure]
+
+Highlight current step with ▶ and completed steps with ✓.
+
+Example:
+
+✓ Pre → ✓ Specify → ✓ Clarify → ✓ Plan → ✓ Tasks → ▶ Analyze → Implement → Closure
+
+Rules:
+
+- Always render banner before step execution details.
+- Update progress markers after each committed step.
+- If BLOCKED, display: "STATUS: BLOCKED — Remediation Required" in banner.
+
+This banner must be deterministic and derived from .workflow-state.json.
 
 ---
 
@@ -104,16 +181,115 @@ If any artifact is outside its designated location → STOP and correct before p
 
 ## Automatic Continuation Rule
 
-After completing each sub-step, evaluate before proceeding:
+After completing each sub-step:
 
-- Are there unresolved [NEEDS CLARIFICATION] markers? → STOP and present them
-- Are there constitutional violations? → STOP and list them
-- Are there ambiguities that affect the next step? → STOP and ask
-- Are there missing required inputs? → STOP and request them
+Evaluate:
 
-If none apply → **proceed automatically to the next sub-step or step.**
+- Unresolved [NEEDS CLARIFICATION] markers?
+- Constitutional violations?
+- Guardian BLOCKED verdict?
+- Missing required inputs?
+- Stage lifecycle restriction?
 
-Hard STOPs occur only when something genuinely blocks progress or requires human judgment.
+If ANY exist → STOP and list clearly.
+
+If NONE exist:
+→ Automatically proceed to the next logical step.
+
+Human confirmation is only required for:
+
+- Pre-Closure Review Gate
+- Explicit architectural override
+- Formal task deferral
+
+---
+
+## Action Token Handling (Chat-Friendly Mode)
+
+This agent supports structured action tokens triggered by UI buttons.
+
+Recognized action tokens:
+
+- ACTION_START_PRESTEP
+- ACTION_RUN_SPECIFY
+- ACTION_RUN_CLARIFY
+- ACTION_RUN_PLAN
+- ACTION_RUN_TASKS
+- ACTION_RUN_ANALYZE
+- ACTION_RUN_IMPLEMENT
+- ACTION_RUN_CLOSURE
+- ACTION_APPROVE_CONTINUE
+
+Behavior Rules:
+
+1. If an ACTION*RUN*\* token is received → execute the corresponding step immediately.
+2. If ACTION_APPROVE_CONTINUE is received:
+   - If no blockers exist → automatically proceed to the next logical step.
+   - If blockers exist → list blockers and STOP.
+3. If required inputs are missing → request structured input.
+4. If a step completes without blockers → auto-advance per the Automatic Continuation Rule.
+
+Manual confirmation typing is only required for the explicit Pre-Closure Review Gate.
+
+---
+
+## Smart Next-Step Banner
+
+At the end of every completed step:
+
+1. Evaluate blockers.
+2. If none exist → auto-advance silently.
+3. If user approval is required → display only the relevant action button.
+4. Never display irrelevant buttons.
+
+Examples:
+
+- After intake → show 🚀 Start Pre-Step
+- After Pre-Step → auto-run Specify
+- After Specify (no clarification markers) → auto-run Clarify
+- After Analyze (PASSED) → auto-run Implement
+- Before Closure → require explicit approval
+
+The user should only see ONE logical next action at a time.
+
+---
+
+## Intelligent Retry Logic — Analyze Gate
+
+When Step 5 (Analyze) results in BLOCKED:
+
+1. Clearly categorize violations by severity:
+   - 🚨 Critical
+   - ⚠️ High
+   - ⚡ Medium
+   - ℹ️ Low
+
+2. Automatically generate a structured remediation checklist:
+
+   Remediation Checklist:
+   - [ ] Fix isolation violations
+   - [ ] Add missing transactions
+   - [ ] Add idempotency enforcement
+   - [ ] Fix middleware gaps
+   - [ ] Resolve security findings
+
+3. After remediation is confirmed:
+   - Automatically re-run speckit.analyze.
+   - Re-run guardian audits.
+   - Recompute composite verdict.
+
+4. Retry Limit Logic:
+   - First BLOCK → Normal remediation flow.
+   - Second consecutive BLOCK → Escalation notice (recommend ADR or architectural review).
+   - Third consecutive BLOCK → HARD STOP. Require explicit user override before retrying.
+
+5. Auto-Advance Rule:
+   If all criteria PASS on retry →
+   - Set drift_passed = true
+   - Set implementation_allowed = true
+   - Automatically proceed to Implement step.
+
+No manual confirmation required between retries unless escalation threshold is reached.
 
 ---
 
@@ -322,22 +498,24 @@ Before creating, replacing, or updating any `## Stage Status` block:
 
 # Required Intake
 
-Before executing any step, collect and confirm:
+## Structured Intake Mode (User-Friendly)
 
-- `STAGE_NAME`
-- `PHASE_NAME`
-- `STAGE_FILE_NAME` (actual filename inside `specs/phases/<PHASE_NAME>/`, e.g. `STAGE_05_TENANT_PROVISIONING_SERVICE.md`)
+Please provide the following using this format:
 
-Ask the user:
+Stage:
+Phase:
+Stage File:
 
-```
-Stage:      <STAGE_NAME>
-Phase:      <PHASE_NAME>
-Stage File: <STAGE_FILE_NAME>
-```
+Rules:
 
-Do NOT proceed until all three are explicitly confirmed. Do NOT assume values.  
-Replace all occurrences of `<STAGE_NAME>`, `<PHASE_NAME>`, `<STAGE_FILE_NAME>` throughout this workflow.
+- All three fields are required.
+- If one is missing → clearly indicate which field is missing.
+- Once confirmed → summarize parsed values before proceeding.
+- Do NOT re-ask for values already confirmed.
+
+After confirmation:
+→ Automatically suggest: 🚀 Start Pre-Step
+→ If ACTION_START_PRESTEP is triggered → execute Pre-Step immediately.
 
 ---
 
