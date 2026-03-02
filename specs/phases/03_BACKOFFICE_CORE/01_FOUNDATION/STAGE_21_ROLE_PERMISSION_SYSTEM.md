@@ -9,7 +9,57 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY
+Risk Level: LOW
+Closure Date: 2026-03-02
+Last Updated: 2026-03-02T16:00:00.000Z
+
+Implementation: COMPLETE
+Tasks: 22 / 22 completed
+
+Scope Closed:
+
+- Tenant migration: backoffice_roles, backoffice_role_module_permissions, rbac_audit_logs; schema_version 1.3.0 → 1.4.0
+- Drizzle schemas: backoffice-roles, backoffice-role-module-permissions, rbac-audit-logs, backoffice-staff-users (role_id, division_ids)
+- Domain-core package: rbac.types.ts, rbac.service.ts, rbac.audit.ts, permission-registry.ts (10 modules × 4 actions)
+- Permission guard v2: cache-first (rbac_v2:), SCAN cursor invalidation, starts at step 2 (workspace_id assertion is chain-level)
+- 9 REST endpoints: CRUD roles + permissions + staff role assignment + module list
+- Vue pages: RolesListPage, CreateRolePage, RoleDetailPage + usePermission composable
+- 62 tests passing: 18 unit (rbac.service) + 20 unit (permission-registry) + 18 integration (routes) + 6 integration (version-compat)
+
+Deferred Scope:
+
+- Per-user custom permission overrides (Phase 3+)
+- Division-scoped permission overrides (future phase)
+- Audit log retention/archival policy (future stage)
+- STAGE_17 triplet permission table deprecation (post-STAGE_21 cleanup)
+
+Constitutional Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced
+- ADR-0002 Snapshot immutability enforced (additive-only, forward-only migration)
+- ADR-0006 Server-authoritative time enforced
+- ADR-0007 Version compatibility enforced (1.3.0 → 1.4.0)
+- ADR-0008 Semantic versioning enforced (forward-only down())
+- All writes transactional; audit logs co-transactional
+- SCAN cursor for Redis invalidation; rbac_v2: prefix
+- No raw SQL; Drizzle typed queries throughout
+- Middleware order preserved; no duplicate workspace_id assertion
+
+Phase Artifacts:
+
+- Specification: specs/runtime/021-role-permission-system/spec.md (with Clarifications)
+- Design Plan: specs/runtime/021-role-permission-system/plan.md
+- Task Breakdown: specs/runtime/021-role-permission-system/tasks.md (all 22 [X])
+- Implementation Report: specs/runtime/021-role-permission-system/reports/IMPLEMENT_REPORT.md
+- Validation Evidence: specs/runtime/021-role-permission-system/audits/VALIDATION_REPORT.md
+- Drift Analysis: specs/runtime/021-role-permission-system/audits/ANALYZE_REPORT.md (PASSED)
+- Closure Report: specs/runtime/021-role-permission-system/reports/CLOSURE_REPORT.md
+- Testing Guide: specs/runtime/021-role-permission-system/guides/TESTING_GUIDE.md
+- PR Summary: specs/runtime/021-role-permission-system/PR_SUMMARY.md
+
+Notes:
+Stage is production ready. Ready for PR review and deployment. Testing guide available for QA teams.
 
 ---
 

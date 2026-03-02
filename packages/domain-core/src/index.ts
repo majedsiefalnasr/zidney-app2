@@ -66,3 +66,8 @@ export * from './workflow/workflow.engine'
 export * from './workflow/workflow.errors'
 export * from './workflow/workflow.states'
 export * from './workflow/workflow.types'
+
+// RBAC module (Stage 021) — exported via @zidney/domain-core/rbac subpath only.
+// Root barrel re-export is intentionally omitted to avoid name conflicts with
+// evaluatePermission (./auth/index) and DbClient (./workflow/workflow.types).
+// Import RBAC types/functions using: import { ... } from '@zidney/domain-core/rbac'
