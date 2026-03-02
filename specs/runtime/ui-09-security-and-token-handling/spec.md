@@ -2,9 +2,7 @@
 
 **Phase**: 06_UI_APPLICATION_RUNTIME  
 **Stage**: STAGE_UI_09_SECURITY_AND_TOKEN_HANDLING  
-**Status**: DRAFT  
-**Created**: 2026-03-01  
-**Constitution Version**: 1.2.0
+**Status**: IN PROGRESS
 
 ---
 
@@ -283,14 +281,14 @@ The following data types must never be persisted to any browser storage:
 
 All authentication and security logic must reside in `core/auth/`. No component, page, or layout may contain auth logic directly.
 
-| Responsibility             | Location                                                         |
-| -------------------------- | ---------------------------------------------------------------- |
-| Auth store definition      | `core/auth/auth.store.ts`                                        |
-| Token refresh logic        | `core/auth/refresh.ts`                                           |
-| Logout action              | `core/auth/logout.ts`                                            |
-| 401 response interceptor   | `core/auth/interceptors.ts` (or equivalent in API client config) |
-| Router guard logic         | `core/auth/guards.ts`                                            |
-| Input sanitization helpers | `core/security/sanitize.ts`                                      |
+| Responsibility             | Location                                                                                              |
+| -------------------------- | ----------------------------------------------------------------------------------------------------- |
+| Auth store definition      | `core/state/auth.store.ts`                                                                            |
+| Token refresh logic        | `core/auth/refresh.ts`                                                                                |
+| Logout action              | `core/auth/logout.ts`                                                                                 |
+| 401 response interceptor   | `core/api/interceptors/error.interceptor.ts` (KDD: placed in `core/api/` not `core/auth/` — see plan) |
+| Router guard logic         | `core/router/guards/auth.guard.ts`                                                                    |
+| Input sanitization helpers | `core/security/sanitize.ts`                                                                           |
 
 Components must call auth store actions; they must not replicate auth logic inline.
 

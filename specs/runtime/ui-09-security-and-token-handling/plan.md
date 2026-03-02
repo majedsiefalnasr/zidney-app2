@@ -197,6 +197,8 @@ export const AUTH_INTERCEPTOR_DOCS = {
 
 This file enforces the architectural rule that injection is single-location, serves as a discoverable reference, and satisfies the spec's `core/api/interceptors/` directory structure requirement.
 
+> **F-PLAN-S2 (Scope clarification)**: `auth.interceptor.ts` is **NOT created by STAGE_UI_09**. FR-SEC-04/05/06 (single-location Authorization header injection) is already satisfied by `packages/api-client/src/interceptors.ts:applyAuthHeader()`, which is wired at app startup in `core/api/client.ts`. The documentation shim above is included for architectural clarity only. No implementation task references this file. If a future stage requires explicit per-app documentation of the injection policy, it should create this file at that point.
+
 ---
 
 ## 3. 401 Handler (`error.interceptor.ts`)
@@ -301,7 +303,7 @@ export function createAppApiClient(
   refreshManager: IRefreshManager,
   errorInterceptor: IErrorInterceptor // ← new parameter
 ): ApiClient {
-  return createClient({
+  const rawClient = createClient({
     baseUrl: appConfig.env.apiBaseUrl,
     credentials: 'include',
     getAccessToken: () => tokenManager.getToken(),
@@ -314,10 +316,36 @@ export function createAppApiClient(
         logger.error('Error in auth failure handler', {
           error: err instanceof Error ? err.message : 'unknown',
         })
+        // Fallback hard-redirect if router.push() fails inside expireSession()
+        window.location.href = '/'
       })
     },
     adapter: createFetchAdapter(),
   })
+
+  // C1: 423/426 license response detection (FR-SEC-20/21).
+  // packages/api-client does not expose an onLicenseError hook; the detection
+  // is performed here by wrapping rawClient.execute() at the app layer.
+  // Advantages: no shared-package modification; behaviour isolated to app;
+  // 423/426 are re-thrown after the license callback so callers still receive
+  // an ApiError (they remain in an error state and the UI shows the locked/
+  // upgrade-required overlay served from the license-status store).
+  return {
+    ...rawClient,
+    execute: async (request) => {
+      try {
+        return await rawClient.execute(request)
+      } catch (err) {
+        if (
+          err instanceof ApiError &&
+          (err.status === 423 || err.status === 426)
+        ) {
+          errorInterceptor.handleLicenseError(err.status as 423 | 426)
+        }
+        throw err
+      }
+    },
+  }
 }
 ```
 
@@ -329,11 +357,21 @@ The `IErrorInterceptor` is created in `main.ts` after the auth store is initiali
 // After authStore is created:
 const errorInterceptor = createErrorInterceptor({
   getIsAuthenticated: () => authStore.isAuthenticated,
-  onSessionExpired: () => authStore.expireSession(),
+  // C2/PF-02: clearUserSpecificStores() is called here in the main.ts callback,
+  // NOT inside auth.store.ts:expireSession(). This architectural decision
+  // (a) avoids importing main.ts concerns into the auth store,
+  // (b) keeps expireSession() a pure auth-state teardown,
+  // (c) allows the list of session-bound stores to be enumerated here as
+  //     feature stages add them, without modifying the shared auth store.
+  // T055–T057 MUST test this callback integration, not the expireSession() internals.
+  onSessionExpired: async () => {
+    await authStore.expireSession() // clears auth state only
+    clearUserSpecificStores() // clears all session-bound UI stores
+  },
   onLicenseError: (status) => {
     // Set a license-error flag in a UI state store (details in section 5)
-    if (status === 423) uiStore.setWorkspaceLocked()
-    if (status === 426) uiStore.setUpgradeRequired()
+    if (status === 423) licenseStatusStore.setWorkspaceLocked(true)
+    if (status === 426) licenseStatusStore.setUpgradeRequired(true)
   },
 })
 
@@ -358,11 +396,19 @@ Extend the unauthenticated redirect to preserve the intended route as `?redirect
 // Before (existing):
 return { name: options.loginRouteName }
 
-// After (extended):
-return {
-  name: options.loginRouteName,
-  query: { redirect: to.fullPath },
+// After (extended, PF-03 — Code Reviewer / Performance Optimizer):
+// 1. Guard against redirect loops: if the target is already the login route, pass through.
+//    This is defense-in-depth in case meta.public is accidentally omitted from the login route.
+if (to.name === options.loginRouteName) return true
+
+// 2. Preserve the intended destination for post-login redirect.
+if (options.preserveRedirect !== false) {
+  return {
+    name: options.loginRouteName,
+    query: { redirect: to.fullPath },
+  }
 }
+return { name: options.loginRouteName }
 ```
 
 Extend `AuthGuardOptions`:
@@ -401,9 +447,11 @@ No changes to the `logout()` action. The `expireSession()` action supplements it
 
 **FR-SEC-11 deferral (explicitly documented):** STAGE_UI_09 cannot enumerate session-bound Pinia stores because no feature stores exist yet — they are created in subsequent feature stages. Per FR-SEC-11, logout must clear all user-specific UI state. The implementation strategy is:
 
-1. Each app's `main.ts` wiring registers a `clearUserSpecificStores()` helper
-2. As feature stages add session-bound stores, they are added to this list
-3. Both `logout()` and `expireSession()` call this helper
+1. Each app's `main.ts` wiring defines a `clearUserSpecificStores()` helper and calls it from the `onSessionExpired` callback (after `authStore.expireSession()` resolves) — see Section 3 wiring sketch for the canonical pattern.
+2. As feature stages add session-bound stores, they are added to `clearUserSpecificStores()` in each app's `main.ts`.
+3. `logout()` action must also call `clearUserSpecificStores()` — but since `logout()` is user-initiated and wired at app startup (it can call a registered callback), the wiring pattern is identical: `logout()` in `auth.store.ts` accepts an optional `onClearUserSpecificStores?: () => void` callback registered at startup in `main.ts`. This is an extension to the existing `logout()` signature.
+
+> **Architectural clarification (C2)**: `clearUserSpecificStores()` is NOT called from within `expireSession()` itself. It is the responsibility of the `main.ts` wiring — specifically the `onSessionExpired` callback — to ensure user-specific stores are cleared after the auth state teardown. This prevents the auth store from depending on app-level store topology.
 
 **Known session-bound stores at time of this stage (for initial implementation):**
 
@@ -455,6 +503,11 @@ const SENSITIVE_KEYS = new Set([
   'Authorization',
   'password',
   'credential',
+  // CSRF tokens (FR-SEC-03: all credential-class fields must be redacted)
+  'csrfToken',
+  'csrf_token',
+  'x-csrf-token',
+  'X-CSRF-Token',
 ])
 
 const REDACTED = '[REDACTED]' as const
@@ -462,6 +515,14 @@ const REDACTED = '[REDACTED]' as const
 /**
  * Returns a shallow copy of `logObject` with sensitive fields replaced by "[REDACTED]".
  * Does not recurse into nested objects — callers are responsible for flattening.
+ *
+ * IMPLEMENTATION NOTE (H2 — test helper):
+ * To protect against future regressions where a nested object containing a token is passed
+ * directly to a logger, unit tests must include an `assertNoTokenInLogArgs` helper that
+ * inspects all arguments passed to `packages/logger` during test execution and asserts that
+ * no argument (at any nesting depth) contains a string matching `looksLikeToken()`. This is
+ * tested in T026–T028 (token-redact unit tests). Shallow-copy behaviour is intentional:
+ * nested objects must be pre-flattened by the caller before passing to this function.
  */
 export function redactSensitiveFields<T extends Record<string, unknown>>(
   logObject: T
@@ -504,7 +565,7 @@ No new code files are required. The following is the enforcement baseline:
 | No `eval()` / `Function()` with user data | ESLint `no-eval` + `no-new-func`                                           |
 | Templates through Vue compiler only       | Architecture constraint — no server-side template injection possible       |
 
-**Action**: Verify `vue/no-v-html` is enabled in `eslint.config.mjs`. If not yet enabled, enable it as a `warn` initially (will be upgraded to `error` once all existing `v-html` usages are audited). No new files needed.
+**Action**: Enforce `vue/no-v-html` as `'error'` in `eslint.config.mjs`. Do not use `'warn'` — advisory-only enforcement is insufficient for XSS prevention and violates the constitutional security posture. Task T025 must audit all existing `v-html` usages first and eliminate or sanitize them before enabling the rule as `'error'`. If any unsanitized `v-html` usage is found, it must be resolved in the same PR. No new files needed beyond the ESLint config change.
 
 ---
 
