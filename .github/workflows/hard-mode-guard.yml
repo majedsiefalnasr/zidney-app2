@@ -8,473 +8,295 @@ on:
 
 jobs:
   validate:
-    name: Validate Hard Mode Workflow State
+    name: Hard Mode Workflow State
     runs-on: ubuntu-latest
 
     steps:
       # ── 1. Checkout ────────────────────────────────────────────────────
-      - name: Checkout repository
+      - name: Checkout
         uses: actions/checkout@v4
         with:
           fetch-depth: 0
-
-      - name: Fetch base branch
-        run: |
-          echo "Base ref: ${{ github.base_ref }}"
-          if [ -n "${{ github.base_ref }}" ]; then
-            git fetch origin ${{ github.base_ref }} --depth=1
-          fi
 
       # ── 2. Resolve stage directory from branch name ────────────────────
       - name: Resolve stage directory
         id: stage
         run: |
           BRANCH="${{ github.head_ref }}"
-          echo "Branch: $BRANCH"
 
-          # Branch must match: NNN-kebab-stage-name OR text-NNN-kebab-stage-name
-          if ! echo "$BRANCH" | grep -qE '^([a-z0-9]+-)?[0-9]{3}[A-Z]?-'; then
-            echo "ERROR: Branch '$BRANCH' does not match the required pattern."
-            echo "       Allowed patterns: NNN-kebab-stage-name or text-NNN-kebab-stage-name"
-            echo "       Examples: 005-tenant-provisioning-service, feature-005-tenant-provisioning-service"
+          # Allowed patterns:
+          #   NNN-kebab-name           → 020-status-workflow-engine
+          #   prefix-NNN-kebab-name    → infra-001-typescript-stabilization
+          #                            → ui-02-api-client-layer
+          if ! echo "$BRANCH" | grep -qE '^([a-z]+-)?[0-9]{2,3}[A-Z]?-'; then
+            echo "❌ Branch '$BRANCH' does not match the Hard Mode naming pattern."
+            echo "   Allowed: NNN-name  or  prefix-NNN-name"
+            echo "   Examples: 020-status-workflow-engine, infra-001-typescript-stabilization, ui-02-api-client-layer"
             exit 1
           fi
 
           STAGE_DIR="specs/runtime/${BRANCH}"
           STATE_FILE="${STAGE_DIR}/.workflow-state.json"
 
-          echo "stage_dir=${STAGE_DIR}"   >> "$GITHUB_OUTPUT"
+          echo "stage_dir=${STAGE_DIR}" >> "$GITHUB_OUTPUT"
           echo "state_file=${STATE_FILE}" >> "$GITHUB_OUTPUT"
-          echo "branch=${BRANCH}"         >> "$GITHUB_OUTPUT"
+          echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
 
-          echo "Stage dir : $STAGE_DIR"
-          echo "State file: $STATE_FILE"
+          echo "✅ Branch  : $BRANCH"
+          echo "✅ Stage   : $STAGE_DIR"
+          echo "✅ State   : $STATE_FILE"
 
-      # ── 3. State file exists and is valid JSON ─────────────────────────
-      - name: Validate state file exists
+      # ── 3. Validate state file ─────────────────────────────────────────
+      - name: Validate state file
+        env:
+          STATE_FILE: ${{ steps.stage.outputs.state_file }}
+          BRANCH: ${{ steps.stage.outputs.branch }}
+          STAGE_DIR: ${{ steps.stage.outputs.stage_dir }}
         run: |
-          STATE_FILE="${{ steps.stage.outputs.state_file }}"
-          if [ ! -f "$STATE_FILE" ]; then
-            echo "ERROR: $STATE_FILE not found."
-            echo "       The orchestrator must create this file in Pre.5 before any commit."
-            exit 1
-          fi
-          echo "✅ State file exists: $STATE_FILE"
+          fail() { echo "❌ $1"; exit 1; }
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20"
+          # Exists
+          [ -f "$STATE_FILE" ] || fail "$STATE_FILE not found. Was it committed? (orchestrator creates it in Pre.5)"
 
-      - name: Validate state file is valid JSON
+          # Valid JSON
+          jq empty "$STATE_FILE" 2>/dev/null || fail "$STATE_FILE is not valid JSON"
+          echo "✅ State file exists and is valid JSON"
+
+          # Required fields present and non-empty
+          for field in stage phase stage_dir stage_file branch base_branch current_step stage_status last_updated; do
+            val=$(jq -r ".[\"$field\"] // empty" "$STATE_FILE")
+            [ -n "$val" ] || fail "Missing or empty required field: $field"
+          done
+          echo "✅ Required fields present"
+
+          # branch matches PR branch
+          STATE_BRANCH=$(jq -r '.branch' "$STATE_FILE")
+          [ "$STATE_BRANCH" = "$BRANCH" ] || fail "state.branch '$STATE_BRANCH' does not match PR branch '$BRANCH'"
+          echo "✅ Branch matches"
+
+          # stage_dir matches expected path
+          STATE_DIR=$(jq -r '.stage_dir' "$STATE_FILE")
+          [ "$STATE_DIR" = "$STAGE_DIR" ] || fail "state.stage_dir '$STATE_DIR' must be '$STAGE_DIR'"
+          echo "✅ Stage dir matches"
+
+          # stage_status is a valid value
+          STATUS=$(jq -r '.stage_status' "$STATE_FILE")
+          case "$STATUS" in
+            "DRAFT"|"IN PROGRESS"|"BACKEND CLOSED"|"PRODUCTION READY"|"PRODUCTION HARDENED"|"DEPRECATED")
+              echo "✅ stage_status: $STATUS" ;;
+            *) fail "Invalid stage_status: '$STATUS'" ;;
+          esac
+
+          # current_step is a valid value
+          STEP=$(jq -r '.current_step' "$STATE_FILE")
+          case "$STEP" in
+            "pre_step"|"specify"|"clarify"|"plan"|"tasks"|"analyze"|"implement"|"stage_production_ready")
+              echo "✅ current_step: $STEP" ;;
+            *) fail "Invalid current_step: '$STEP'" ;;
+          esac
+
+          # Boolean fields
+          for field in clarifications_resolved drift_passed implementation_allowed plan_completed; do
+            val=$(jq -r ".[\"$field\"] | type" "$STATE_FILE")
+            [ "$val" = "boolean" ] || fail "Field '$field' must be boolean, got: $val"
+          done
+          echo "✅ Boolean fields valid"
+
+          # History non-empty and starts with branch_created
+          HIST_LEN=$(jq '.history | length' "$STATE_FILE")
+          [ "$HIST_LEN" -gt 0 ] || fail "history must be a non-empty array"
+          FIRST=$(jq -r '.history[0].event' "$STATE_FILE")
+          [ "$FIRST" = "branch_created" ] || fail "history[0].event must be 'branch_created', got '$FIRST'"
+          echo "✅ History valid ($HIST_LEN events)"
+
+      # ── 4. Validate step consistency and history chain ─────────────────
+      - name: Validate step consistency
+        env:
+          STATE_FILE: ${{ steps.stage.outputs.state_file }}
+          STAGE_DIR: ${{ steps.stage.outputs.stage_dir }}
         run: |
-          STATE_FILE="${{ steps.stage.outputs.state_file }}"
-          node -e "
-            const fs = require('fs');
-            try {
-              JSON.parse(fs.readFileSync('$STATE_FILE', 'utf8'));
-              console.log('✅ Valid JSON');
-            } catch (e) {
-              console.error('ERROR: $STATE_FILE is not valid JSON:', e.message);
-              process.exit(1);
-            }
-          "
+          fail() { echo "❌ $1"; exit 1; }
+          has_event() { jq -e --arg e "$1" '.history[] | select(.event == $e)' "$STATE_FILE" > /dev/null 2>&1; }
 
-      # ── 4. Core field validation ───────────────────────────────────────
-      - name: Validate required fields
+          STEP=$(jq -r '.current_step'            "$STATE_FILE")
+          STATUS=$(jq -r '.stage_status'           "$STATE_FILE")
+          CLARIFIED=$(jq -r '.clarifications_resolved' "$STATE_FILE")
+          DRIFT=$(jq -r '.drift_passed'            "$STATE_FILE")
+          IMPL=$(jq -r '.implementation_allowed'   "$STATE_FILE")
+          PLAN=$(jq -r '.plan_completed'           "$STATE_FILE")
+          T_TOTAL=$(jq -r '.tasks_total // "null"' "$STATE_FILE")
+          T_DONE=$(jq -r '.tasks_completed // "null"' "$STATE_FILE")
+
+          echo "Checking: step=$STEP  status=$STATUS"
+
+          case "$STEP" in
+            pre_step)
+              [ "$STATUS"    = "DRAFT" ]   || fail "pre_step requires DRAFT, got '$STATUS'"
+              [ "$CLARIFIED" = "false" ]   || fail "pre_step: clarifications_resolved must be false"
+              [ "$PLAN"      = "false" ]   || fail "pre_step: plan_completed must be false"
+              [ "$DRIFT"     = "false" ]   || fail "pre_step: drift_passed must be false"
+              [ "$IMPL"      = "false" ]   || fail "pre_step: implementation_allowed must be false"
+              ;;
+            specify)
+              [ "$STATUS" = "DRAFT" ]      || fail "specify requires DRAFT, got '$STATUS'"
+              has_event "branch_created"   || fail "specify: missing history event 'branch_created'"
+              ;;
+            clarify)
+              [ "$STATUS"    = "DRAFT" ]   || fail "clarify requires DRAFT, got '$STATUS'"
+              [ "$CLARIFIED" = "true" ]    || fail "clarify: clarifications_resolved must be true"
+              has_event "specify_complete" || fail "clarify: missing history event 'specify_complete'"
+              ;;
+            plan)
+              [ "$STATUS"    = "DRAFT" ]   || fail "plan requires DRAFT, got '$STATUS'"
+              [ "$PLAN"      = "true" ]    || fail "plan: plan_completed must be true"
+              [ "$CLARIFIED" = "true" ]    || fail "plan: clarifications_resolved must be true"
+              has_event "clarifications_locked" || fail "plan: missing history event 'clarifications_locked'"
+              ;;
+            tasks)
+              [ "$STATUS" = "DRAFT" ]      || fail "tasks requires DRAFT, got '$STATUS'"
+              [ "$PLAN"   = "true" ]       || fail "tasks: plan_completed must be true"
+              [ "$T_TOTAL" != "null" ] && [ "$T_TOTAL" -ge 1 ] 2>/dev/null \
+                                           || fail "tasks: tasks_total must be >= 1, got '$T_TOTAL'"
+              [ "$T_DONE" = "0" ]          || fail "tasks: tasks_completed must be 0, got '$T_DONE'"
+              has_event "plan_complete"    || fail "tasks: missing history event 'plan_complete'"
+              ;;
+            analyze)
+              [ "$STATUS" = "IN PROGRESS" ] || fail "analyze requires IN PROGRESS, got '$STATUS'"
+              [ "$DRIFT"  = "$IMPL" ]        || fail "analyze: drift_passed ($DRIFT) and implementation_allowed ($IMPL) must match"
+              has_event "tasks_complete"     || fail "analyze: missing history event 'tasks_complete'"
+              if [ "$DRIFT" = "true" ]; then
+                has_event "drift_analysis_blocked" && fail "drift_passed=true but history contains 'drift_analysis_blocked'"
+              fi
+              ;;
+            implement)
+              [ "$STATUS" = "BACKEND CLOSED" ] || fail "implement requires BACKEND CLOSED, got '$STATUS'"
+              [ "$DRIFT"  = "true" ]           || fail "implement: drift_passed must be true"
+              [ "$IMPL"   = "true" ]           || fail "implement: implementation_allowed must be true"
+              [ "$T_DONE" -le "$T_TOTAL" ] 2>/dev/null \
+                                               || fail "implement: tasks_completed ($T_DONE) cannot exceed tasks_total ($T_TOTAL)"
+              has_event "drift_analysis_passed" || fail "implement: missing history event 'drift_analysis_passed'"
+
+              # Cross-check tasks.md [X] count
+              TASKS_FILE="$STAGE_DIR/tasks.md"
+              if [ -f "$TASKS_FILE" ]; then
+                ACTUAL_DONE=$(grep -c '^- \[X\]' "$TASKS_FILE" || true)
+                ACTUAL_TOTAL=$(grep -cE '^- \[[ X]\]' "$TASKS_FILE" || true)
+                [ "$ACTUAL_DONE"  = "$T_DONE"  ] || fail "tasks_completed ($T_DONE) != [X] count in tasks.md ($ACTUAL_DONE)"
+                [ "$ACTUAL_TOTAL" = "$T_TOTAL" ] || fail "tasks_total ($T_TOTAL) != task count in tasks.md ($ACTUAL_TOTAL)"
+                echo "✅ tasks.md: $ACTUAL_DONE/$ACTUAL_TOTAL completed"
+              fi
+              ;;
+            stage_production_ready)
+              [ "$STATUS"    = "PRODUCTION READY" ] || fail "closure requires PRODUCTION READY, got '$STATUS'"
+              [ "$CLARIFIED" = "true" ]             || fail "closure: clarifications_resolved must be true"
+              [ "$DRIFT"     = "true" ]             || fail "closure: drift_passed must be true"
+              [ "$IMPL"      = "true" ]             || fail "closure: implementation_allowed must be true"
+              [ "$PLAN"      = "true" ]             || fail "closure: plan_completed must be true"
+              [ "$T_TOTAL"   != "null" ] && [ "$T_TOTAL" -ge 1 ] 2>/dev/null \
+                                                    || fail "closure: tasks_total must be >= 1, got '$T_TOTAL'"
+              [ "$T_DONE"    = "$T_TOTAL" ]         || fail "closure: tasks_completed ($T_DONE) must equal tasks_total ($T_TOTAL)"
+              has_event "stage_backend_closed"      || fail "closure: missing history event 'stage_backend_closed'"
+              has_event "pre_closure_review_approved" || fail "closure: missing history event 'pre_closure_review_approved'"
+
+              # Cross-check tasks.md — all must be [X]
+              TASKS_FILE="$STAGE_DIR/tasks.md"
+              if [ -f "$TASKS_FILE" ]; then
+                ACTUAL_DONE=$(grep -c '^- \[X\]' "$TASKS_FILE" || true)
+                ACTUAL_TOTAL=$(grep -cE '^- \[[ X]\]' "$TASKS_FILE" || true)
+                INCOMPLETE=$((ACTUAL_TOTAL - ACTUAL_DONE))
+                [ "$INCOMPLETE" = "0" ] || fail "$INCOMPLETE incomplete task(s) in tasks.md at closure"
+                echo "✅ tasks.md: all $ACTUAL_DONE/$ACTUAL_TOTAL tasks complete"
+              fi
+              ;;
+          esac
+
+          echo "✅ Step consistency valid"
+
+      # ── 5. Validate files on disk match current step ───────────────────
+      - name: Validate directory structure
+        env:
+          STAGE_DIR: ${{ steps.stage.outputs.stage_dir }}
+          STATE_FILE: ${{ steps.stage.outputs.state_file }}
         run: |
-          STATE_FILE="${{ steps.stage.outputs.state_file }}"
-          BRANCH="${{ steps.stage.outputs.branch }}"
-
-          node -e "
-            const fs   = require('fs');
-            const path = require('path');
-            const state = JSON.parse(fs.readFileSync('$STATE_FILE', 'utf8'));
-            const errors = [];
-
-            // ── Required fields must exist and be non-null ──────────────
-            const required = ['stage', 'phase', 'stage_dir', 'stage_file', 'branch',
-                              'base_branch', 'current_step', 'stage_status', 'last_updated'];
-            for (const field of required) {
-              if (state[field] === undefined || state[field] === null || state[field] === '') {
-                errors.push(\`Missing or empty required field: \${field}\`);
-              }
-            }
-
-            // ── branch must match the PR head branch ────────────────────
-            if (state.branch !== '$BRANCH') {
-              errors.push(\`state.branch '\${state.branch}' does not match PR branch '$BRANCH'\`);
-            }
-
-            // ── stage_dir must match expected path ──────────────────────
-            const expectedDir = 'specs/runtime/$BRANCH';
-            if (state.stage_dir !== expectedDir) {
-              errors.push(\`state.stage_dir '\${state.stage_dir}' must be '\${expectedDir}'\`);
-            }
-
-            // ── stage_status allowed values ─────────────────────────────
-            const validStatuses = ['DRAFT', 'IN PROGRESS', 'BACKEND CLOSED',
-                                   'PRODUCTION READY', 'PRODUCTION HARDENED', 'DEPRECATED'];
-            if (!validStatuses.includes(state.stage_status)) {
-              errors.push(\`Invalid stage_status '\${state.stage_status}'. Allowed: \${validStatuses.join(', ')}\`);
-            }
-
-            // ── current_step allowed values ─────────────────────────────
-            const validSteps = ['pre_step', 'specify', 'clarify', 'plan', 'tasks',
-                                'analyze', 'implement', 'stage_production_ready'];
-            if (!validSteps.includes(state.current_step)) {
-              errors.push(\`Invalid current_step '\${state.current_step}'. Allowed: \${validSteps.join(', ')}\`);
-            }
-
-            // ── boolean fields ──────────────────────────────────────────
-            const boolFields = ['clarifications_resolved', 'drift_passed',
-                                'implementation_allowed', 'plan_completed'];
-            for (const field of boolFields) {
-              if (typeof state[field] !== 'boolean') {
-                errors.push(\`Field '\${field}' must be boolean, got: \${typeof state[field]}\`);
-              }
-            }
-
-            // ── history must be a non-empty array ──────────────────────
-            if (!Array.isArray(state.history) || state.history.length === 0) {
-              errors.push('history must be a non-empty array');
-            }
-
-            // ── history must start with branch_created ──────────────────
-            if (Array.isArray(state.history) && state.history.length > 0) {
-              if (state.history[0].event !== 'branch_created') {
-                errors.push(\`history[0].event must be 'branch_created', got '\${state.history[0].event}'\`);
-              }
-            }
-
-            if (errors.length > 0) {
-              console.error('❌ Field validation failed:');
-              errors.forEach(e => console.error('   •', e));
-              process.exit(1);
-            }
-            console.log('✅ All required fields valid');
-          "
-
-      # ── 5. Step-to-state consistency rules ────────────────────────────
-      - name: Validate step-to-state consistency
-        run: |
-          STATE_FILE="${{ steps.stage.outputs.state_file }}"
-
-          node -e "
-            const fs    = require('fs');
-            const state = JSON.parse(fs.readFileSync('$STATE_FILE', 'utf8'));
-            const step  = state.current_step;
-            const errors = [];
-
-            // Rules derived directly from the orchestrator step definitions:
-            //
-            //  pre_step            → DRAFT,  clarifications_resolved=false, plan_completed=false,
-            //                        drift_passed=false, implementation_allowed=false
-            //  specify             → DRAFT
-            //  clarify             → DRAFT,  clarifications_resolved=true
-            //  plan                → DRAFT,  plan_completed=true
-            //  tasks               → DRAFT,  plan_completed=true,  tasks_total >= 1
-            //  analyze (passed)    → IN PROGRESS, drift_passed=true,  implementation_allowed=true
-            //  analyze (blocked)   → IN PROGRESS, drift_passed=false, implementation_allowed=false
-            //  implement           → BACKEND CLOSED, tasks_completed <= tasks_total
-            //  stage_production_ready → PRODUCTION READY, all booleans true, tasks_completed=tasks_total
-
-            const check = (cond, msg) => { if (!cond) errors.push(msg); };
-
-            if (step === 'pre_step') {
-              check(state.stage_status === 'DRAFT', \`pre_step requires stage_status DRAFT, got '\${state.stage_status}'\`);
-              check(state.clarifications_resolved === false, 'pre_step: clarifications_resolved must be false');
-              check(state.plan_completed === false,          'pre_step: plan_completed must be false');
-              check(state.drift_passed === false,            'pre_step: drift_passed must be false');
-              check(state.implementation_allowed === false,  'pre_step: implementation_allowed must be false');
-            }
-
-            if (step === 'specify') {
-              check(state.stage_status === 'DRAFT', \`specify requires stage_status DRAFT, got '\${state.stage_status}'\`);
-            }
-
-            if (step === 'clarify') {
-              check(state.stage_status === 'DRAFT',          \`clarify requires stage_status DRAFT, got '\${state.stage_status}'\`);
-              check(state.clarifications_resolved === true,  'clarify: clarifications_resolved must be true');
-            }
-
-            if (step === 'plan') {
-              check(state.stage_status === 'DRAFT',  \`plan requires stage_status DRAFT, got '\${state.stage_status}'\`);
-              check(state.plan_completed === true,   'plan: plan_completed must be true');
-              check(state.clarifications_resolved === true, 'plan: clarifications_resolved must be true (clarify must precede plan)');
-            }
-
-            if (step === 'tasks') {
-              check(state.stage_status === 'DRAFT',  \`tasks requires stage_status DRAFT, got '\${state.stage_status}'\`);
-              check(state.plan_completed === true,   'tasks: plan_completed must be true');
-              check(typeof state.tasks_total === 'number' && state.tasks_total >= 1,
-                    \`tasks: tasks_total must be a number >= 1, got '\${state.tasks_total}'\`);
-              check(state.tasks_completed === 0,     \`tasks: tasks_completed must be 0 at task generation, got '\${state.tasks_completed}'\`);
-            }
-
-            if (step === 'analyze') {
-              check(state.stage_status === 'IN PROGRESS', \`analyze requires stage_status IN PROGRESS, got '\${state.stage_status}'\`);
-              // drift_passed and implementation_allowed must agree with each other
-              check(state.drift_passed === state.implementation_allowed,
-                    \`analyze: drift_passed (\${state.drift_passed}) and implementation_allowed (\${state.implementation_allowed}) must match\`);
-            }
-
-            if (step === 'implement') {
-              check(state.stage_status === 'BACKEND CLOSED', \`implement requires stage_status BACKEND CLOSED, got '\${state.stage_status}'\`);
-              check(state.drift_passed === true,             'implement: drift_passed must be true — analysis must have passed before implementation');
-              check(state.implementation_allowed === true,   'implement: implementation_allowed must be true');
-              check(typeof state.tasks_completed === 'number', \`implement: tasks_completed must be a number, got '\${state.tasks_completed}'\`);
-              check(typeof state.tasks_total === 'number',     \`implement: tasks_total must be a number, got '\${state.tasks_total}'\`);
-              check(state.tasks_completed <= state.tasks_total,
-                    \`implement: tasks_completed (\${state.tasks_completed}) cannot exceed tasks_total (\${state.tasks_total})\`);
-            }
-
-            if (step === 'stage_production_ready') {
-              check(state.stage_status === 'PRODUCTION READY', \`closure requires stage_status PRODUCTION READY, got '\${state.stage_status}'\`);
-              check(state.clarifications_resolved === true,    'closure: clarifications_resolved must be true');
-              check(state.drift_passed === true,               'closure: drift_passed must be true');
-              check(state.implementation_allowed === true,     'closure: implementation_allowed must be true');
-              check(state.plan_completed === true,             'closure: plan_completed must be true');
-              check(typeof state.tasks_total === 'number' && state.tasks_total >= 1,
-                    \`closure: tasks_total must be a number >= 1, got '\${state.tasks_total}'\`);
-              check(state.tasks_completed === state.tasks_total,
-                    \`closure: tasks_completed (\${state.tasks_completed}) must equal tasks_total (\${state.tasks_total})\`);
-            }
-
-            if (errors.length > 0) {
-              console.error(\`❌ Step-to-state consistency failed for current_step='\${step}':\`);
-              errors.forEach(e => console.error('   •', e));
-              process.exit(1);
-            }
-            console.log(\`✅ Step-to-state consistency valid (current_step='\${step}')\`);
-          "
-
-      # ── 6. History event chain validation ─────────────────────────────
-      - name: Validate history event chain
-        run: |
-          STATE_FILE="${{ steps.stage.outputs.state_file }}"
-
-          node -e "
-            const fs    = require('fs');
-            const state = JSON.parse(fs.readFileSync('$STATE_FILE', 'utf8'));
-            const step  = state.current_step;
-            const events = (state.history || []).map(h => h.event);
-            const errors = [];
-
-            // Every history entry must have event and timestamp
-            (state.history || []).forEach((entry, i) => {
-              if (!entry.event)     errors.push(\`history[\${i}] missing 'event' field\`);
-              if (!entry.timestamp) errors.push(\`history[\${i}] missing 'timestamp' field\`);
-            });
-
-            // Valid event names
-            const validEvents = [
-              'branch_created', 'specify_complete', 'clarifications_locked',
-              'plan_complete', 'tasks_complete', 'drift_analysis_passed',
-              'drift_analysis_blocked', 'stage_backend_closed',
-              'pre_closure_review_approved', 'stage_production_ready'
-            ];
-            events.forEach((e, i) => {
-              if (!validEvents.includes(e)) {
-                errors.push(\`history[\${i}].event '\${e}' is not a recognised event name\`);
-              }
-            });
-
-            // Prerequisite events required by step
-            // Each entry: [current_step, required_event_in_history]
-            const prerequisites = [
-              ['clarify',               'specify_complete'],
-              ['plan',                  'clarifications_locked'],
-              ['tasks',                 'plan_complete'],
-              ['analyze',               'tasks_complete'],
-              ['implement',             'drift_analysis_passed'],
-              ['stage_production_ready','stage_backend_closed'],
-              ['stage_production_ready','pre_closure_review_approved'],
-            ];
-
-            for (const [atStep, requiredEvent] of prerequisites) {
-              if (step === atStep && !events.includes(requiredEvent)) {
-                errors.push(\`current_step='\${atStep}' requires history event '\${requiredEvent}' which is missing\`);
-              }
-            }
-
-            // drift_analysis_blocked must NOT be present if drift_passed=true
-            if (state.drift_passed === true && events.includes('drift_analysis_blocked')) {
-              errors.push('drift_passed=true but history contains drift_analysis_blocked — contradictory state');
-            }
-
-            // tasks_complete entry must carry tasks_total
-            const tasksCompleteEntry = (state.history || []).find(h => h.event === 'tasks_complete');
-            if (tasksCompleteEntry && typeof tasksCompleteEntry.tasks_total !== 'number') {
-              errors.push('history event tasks_complete must include a numeric tasks_total field');
-            }
-
-            // stage_backend_closed entry must carry tasks_completed and tasks_total
-            const backendClosedEntry = (state.history || []).find(h => h.event === 'stage_backend_closed');
-            if (backendClosedEntry) {
-              if (typeof backendClosedEntry.tasks_completed !== 'number') {
-                errors.push('history event stage_backend_closed must include a numeric tasks_completed field');
-              }
-              if (typeof backendClosedEntry.tasks_total !== 'number') {
-                errors.push('history event stage_backend_closed must include a numeric tasks_total field');
-              }
-            }
-
-            if (errors.length > 0) {
-              console.error('❌ History chain validation failed:');
-              errors.forEach(e => console.error('   •', e));
-              process.exit(1);
-            }
-            console.log(\`✅ History event chain valid (\${events.length} events)\`);
-          "
-
-      # ── 7. Stage directory structure on disk ───────────────────────────
-      - name: Validate stage directory structure
-        run: |
-          STAGE_DIR="${{ steps.stage.outputs.stage_dir }}"
-          STEP=$(node -e "const s=require('./${{ steps.stage.outputs.state_file }}'); console.log(s.current_step);")
+          STEP=$(jq -r '.current_step' "$STATE_FILE")
           ERRORS=0
 
-          require_file() {
-            if [ ! -f "$1" ]; then
-              echo "   • MISSING file: $1"
-              ERRORS=$((ERRORS + 1))
-            else
-              echo "   ✅ $1"
-            fi
+          need_file() { [ -f "$1" ] || { echo "   ❌ MISSING: $1"; ERRORS=$((ERRORS+1)); }; }
+          need_dir()  { [ -d "$1" ] || { echo "   ❌ MISSING dir: $1"; ERRORS=$((ERRORS+1)); }; }
+
+          echo "Step: $STEP — checking required files..."
+
+          # Always required after Pre.5
+          need_file "$STAGE_DIR/.workflow-state.json"
+          need_file "$STAGE_DIR/README.md"
+          need_dir  "$STAGE_DIR/reports"
+          need_dir  "$STAGE_DIR/audits"
+          need_dir  "$STAGE_DIR/guides"
+
+          # After specify
+          [[ "$STEP" == "pre_step" ]] || {
+            need_file "$STAGE_DIR/spec.md"
+            need_file "$STAGE_DIR/reports/SPECIFY_REPORT.md"
           }
 
-          require_dir() {
-            if [ ! -d "$1" ]; then
-              echo "   • MISSING directory: $1"
-              ERRORS=$((ERRORS + 1))
-            else
-              echo "   ✅ $1/"
-            fi
+          # After clarify
+          [[ "$STEP" =~ ^(pre_step|specify)$ ]] || {
+            need_file "$STAGE_DIR/reports/CLARIFY_REPORT.md"
           }
 
-          echo "Checking directory structure for step: $STEP"
+          # After plan
+          [[ "$STEP" =~ ^(pre_step|specify|clarify)$ ]] || {
+            need_file "$STAGE_DIR/plan.md"
+            need_file "$STAGE_DIR/reports/PLAN_REPORT.md"
+          }
 
-          # Always required once Pre.5 has run
-          require_file "$STAGE_DIR/.workflow-state.json"
-          require_file "$STAGE_DIR/README.md"
-          require_dir  "$STAGE_DIR/reports"
-          require_dir  "$STAGE_DIR/audits"
-          require_dir  "$STAGE_DIR/guides"
+          # After tasks
+          [[ "$STEP" =~ ^(pre_step|specify|clarify|plan)$ ]] || {
+            need_file "$STAGE_DIR/tasks.md"
+            need_file "$STAGE_DIR/reports/TASKS_REPORT.md"
+          }
 
-          # Required after specify (Step 1)
-          if [[ "$STEP" != "pre_step" ]]; then
-            require_file "$STAGE_DIR/spec.md"
-            require_file "$STAGE_DIR/reports/SPECIFY_REPORT.md"
-          fi
+          # After analyze
+          [[ "$STEP" =~ ^(pre_step|specify|clarify|plan|tasks)$ ]] || {
+            need_file "$STAGE_DIR/audits/ANALYZE_REPORT.md"
+          }
 
-          # Required after clarify (Step 2)
-          if [[ "$STEP" == "plan" || "$STEP" == "tasks" || "$STEP" == "analyze" || "$STEP" == "implement" || "$STEP" == "stage_production_ready" ]]; then
-            require_file "$STAGE_DIR/reports/CLARIFY_REPORT.md"
-          fi
+          # After implement
+          [[ "$STEP" =~ ^(pre_step|specify|clarify|plan|tasks|analyze)$ ]] || {
+            need_file "$STAGE_DIR/reports/IMPLEMENT_REPORT.md"
+            need_file "$STAGE_DIR/audits/VALIDATION_REPORT.md"
+          }
 
-          # Required after plan (Step 3)
-          if [[ "$STEP" == "tasks" || "$STEP" == "analyze" || "$STEP" == "implement" || "$STEP" == "stage_production_ready" ]]; then
-            require_file "$STAGE_DIR/plan.md"
-            require_file "$STAGE_DIR/reports/PLAN_REPORT.md"
-          fi
-
-          # Required after tasks (Step 4)
-          if [[ "$STEP" == "analyze" || "$STEP" == "implement" || "$STEP" == "stage_production_ready" ]]; then
-            require_file "$STAGE_DIR/tasks.md"
-            require_file "$STAGE_DIR/reports/TASKS_REPORT.md"
-          fi
-
-          # Required after analyze (Step 5)
-          if [[ "$STEP" == "implement" || "$STEP" == "stage_production_ready" ]]; then
-            require_file "$STAGE_DIR/audits/ANALYZE_REPORT.md"
-          fi
-
-          # Required after implement (Step 6)
-          if [[ "$STEP" == "stage_production_ready" ]]; then
-            require_file "$STAGE_DIR/reports/IMPLEMENT_REPORT.md"
-            require_file "$STAGE_DIR/audits/VALIDATION_REPORT.md"
-          fi
-
-          # Required at closure (Step 7)
-          if [[ "$STEP" == "stage_production_ready" ]]; then
-            require_file "$STAGE_DIR/reports/CLOSURE_REPORT.md"
-            require_file "$STAGE_DIR/guides/TESTING_GUIDE.md"
-            require_file "$STAGE_DIR/PR_SUMMARY.md"
-          fi
+          # At closure
+          [[ "$STEP" != "stage_production_ready" ]] || {
+            need_file "$STAGE_DIR/reports/CLOSURE_REPORT.md"
+            need_file "$STAGE_DIR/guides/TESTING_GUIDE.md"
+            need_file "$STAGE_DIR/PR_SUMMARY.md"
+          }
 
           if [ "$ERRORS" -gt 0 ]; then
-            echo "❌ $ERRORS missing file(s)/director(ies) for step '$STEP'"
+            echo "❌ $ERRORS missing file(s) for step '$STEP'"
             exit 1
           fi
-          echo "✅ All required files present for step '$STEP'"
+          echo "✅ All required files present"
 
-      # ── 8. tasks.md completion check (implement and closure only) ──────
-      - name: Validate tasks completion
+      # ── 6. Summary ────────────────────────────────────────────────────
+      - name: Summary
+        env:
+          STATE_FILE: ${{ steps.stage.outputs.state_file }}
         run: |
-          STATE_FILE="${{ steps.stage.outputs.state_file }}"
-          STAGE_DIR="${{ steps.stage.outputs.stage_dir }}"
-
-          node -e "
-            const fs    = require('fs');
-            const state = JSON.parse(fs.readFileSync('$STATE_FILE', 'utf8'));
-            const step  = state.current_step;
-
-            if (step !== 'implement' && step !== 'stage_production_ready') {
-              console.log('⏭  Task completion check not applicable at step:', step);
-              process.exit(0);
-            }
-
-            const tasksPath = '$STAGE_DIR/tasks.md';
-            if (!fs.existsSync(tasksPath)) {
-              console.error('ERROR: tasks.md not found at', tasksPath);
-              process.exit(1);
-            }
-
-            const content   = fs.readFileSync(tasksPath, 'utf8');
-            const total     = (content.match(/^- \[[ X]\]/gm) || []).length;
-            const completed = (content.match(/^- \[X\]/gm) || []).length;
-            const incomplete= total - completed;
-
-            console.log(\`tasks.md: \${completed}/\${total} completed (\${incomplete} incomplete)\`);
-
-            // Cross-check with workflow state
-            if (state.tasks_total !== total) {
-              console.error(\`❌ state.tasks_total (\${state.tasks_total}) does not match tasks.md count (\${total})\`);
-              process.exit(1);
-            }
-
-            if (state.tasks_completed !== completed) {
-              console.error(\`❌ state.tasks_completed (\${state.tasks_completed}) does not match [X] count in tasks.md (\${completed})\`);
-              process.exit(1);
-            }
-
-            if (step === 'stage_production_ready' && incomplete > 0) {
-              console.error(\`❌ \${incomplete} incomplete task(s) found in tasks.md at closure — all tasks must be [X] or formally deferred\`);
-              process.exit(1);
-            }
-
-            console.log('✅ Task completion counts consistent');
-          "
-
-      # ── 9. Summary ────────────────────────────────────────────────────
-      - name: Validation summary
-        run: |
-          STATE_FILE="${{ steps.stage.outputs.state_file }}"
-          node -e "
-            const fs    = require('fs');
-            const state = JSON.parse(fs.readFileSync('$STATE_FILE', 'utf8'));
-            console.log('');
-            console.log('Hard Mode Guard — all checks passed');
-            console.log('────────────────────────────────────');
-            console.log('Branch  :', state.branch);
-            console.log('Stage   :', state.stage);
-            console.log('Phase   :', state.phase);
-            console.log('Step    :', state.current_step);
-            console.log('Status  :', state.stage_status);
-            if (typeof state.tasks_total === 'number') {
-              console.log('Tasks   :', state.tasks_completed + '/' + state.tasks_total + ' completed');
-            }
-            console.log('Updated :', state.last_updated);
-            console.log('History :', state.history.length + ' events');
-          "
+          echo ""
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "  Hard Mode Guard — all checks passed  "
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          jq -r '
+            "  Branch  : " + .branch,
+            "  Stage   : " + .stage,
+            "  Phase   : " + .phase,
+            "  Step    : " + .current_step,
+            "  Status  : " + .stage_status,
+            (if .tasks_total then "  Tasks   : " + (.tasks_completed|tostring) + "/" + (.tasks_total|tostring) + " completed" else empty end),
+            "  Updated : " + .last_updated,
+            "  History : " + (.history|length|tostring) + " events"
+          ' "$STATE_FILE"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
