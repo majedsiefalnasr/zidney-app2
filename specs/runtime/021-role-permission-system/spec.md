@@ -585,3 +585,50 @@ The following reasonable defaults were applied without requiring clarification:
 ---
 
 ## Compliant with Zidney Constitution v1.2.0 — No violations detected.
+
+---
+
+## Clarifications
+
+### Session 2026-03-02
+
+**Q1:** How does the permission guard middleware know which `module` key and permission flag to evaluate for a given route? The spec lists 10 module keys and 4 action flags but does not define the binding mechanism between a route and its `(module, action)` pair.
+
+**A1:** Each Backoffice API route MUST declare its `(module, action)` pair via route-level metadata at registration time. A central route permission registry (a plain object/map keyed by `[METHOD, path pattern]`) maps every protected route to exactly one `(module, action)` tuple. The permission guard middleware reads this registry at execution time to determine what to check. Routes not present in the registry are treated as unprotected by default only if explicitly flagged as public (e.g., health check); any route that omits its `(module, action)` registration and is not explicitly marked public MUST be rejected with 403. This makes unregistered routes fail-closed, consistent with the deny-by-default model.
+
+**FR-024** added: Every Backoffice API route MUST be registered in the route permission registry with an explicit `(module, action)` pair before it is considered production-ready. Omission of registration is a deployment gate failure.
+
+---
+
+**Q2:** If a valid JWT issued for Tenant A is presented against Tenant B's resolved workspace context (cross-tenant token replay), does Step 1 (JWT validation) detect and reject this mismatch? The spec does not specify whether the JWT carries a workspace-scoped claim that is validated against the resolved tenant context.
+
+**A2:** JWT tokens issued for Backoffice staff MUST embed a `workspace_id` claim (tenant UUID) at issuance time. During Step 1 (JWT validation), after verifying signature and expiry, the middleware MUST assert that `jwt.workspace_id === resolvedTenant.id`. A mismatch MUST immediately return 403 with the generic `FORBIDDEN` response and MUST be logged at `WARN` level with `correlation_id`, `user_id` (from JWT), and both `jwt.workspace_id` and `resolved_workspace_id` values. No DB access in the tenant's connection pool may occur if this check fails. This closes the cross-tenant token replay attack surface and is a non-negotiable tenant isolation guarantee per the Zidney Constitution.
+
+**FR-007** is updated: Step 1 (Validate JWT) MUST include sub-step: assert `jwt.workspace_id === resolvedTenant.id`; mismatch → 403 immediately, log WARN, abort chain.
+
+---
+
+**Q3:** The spec defines the 403 error body for permission denials but does not specify HTTP status codes or error `code` values for mutation validation failures: (a) creating a role with a duplicate name, (b) assigning a `DISABLED` role to a staff user, (c) deleting a role that has at least one `ACTIVE` assigned user.
+
+**A3:** The following HTTP status codes and error codes are adopted, aligned with the platform error contract (`{ success, data, error: { code, message } }`):
+
+| Scenario                               | HTTP Status                | Error Code              | Message                                                  |
+| -------------------------------------- | -------------------------- | ----------------------- | -------------------------------------------------------- |
+| Create role — duplicate name           | `409 Conflict`             | `ROLE_NAME_CONFLICT`    | "A role with this name already exists"                   |
+| Assign disabled role                   | `422 Unprocessable Entity` | `ROLE_NOT_ASSIGNABLE`   | "Role is not active and cannot be assigned"              |
+| Delete role with active users          | `409 Conflict`             | `ROLE_HAS_ACTIVE_USERS` | "Role cannot be deleted while active users are assigned" |
+| Permission flag on non-existent module | `422 Unprocessable Entity` | `INVALID_MODULE`        | "Unknown permission module"                              |
+
+Error messages MUST NOT expose role IDs, user counts, or internal state in any of these responses.
+
+---
+
+**Q4:** When an API caller creates a role and its initial set of permissions in a single request, the spec's transaction table lists "Create role" and "Update role permissions" as separate rows. It is ambiguous whether both the `roles` insert and all initial `role_permissions` inserts are wrapped in a single database transaction or executed sequentially in separate transactions.
+
+**A4:** A role creation request that includes an initial permissions payload MUST execute both the `roles` INSERT and all `role_permissions` INSERTs within a single database transaction. If any `role_permissions` insert fails (e.g., invalid module key), the entire transaction MUST roll back — including the `roles` row — leaving no partial state. The audit log entry for `CREATE_ROLE` MUST also be written within the same transaction (per FR-014). This applies equally to any API endpoint that combines role creation with initial permission assignment. The transaction table is updated to reflect: "Create role + initial permissions" → single transaction, atomic.
+
+---
+
+**Q5:** The spec states that role deletion must "check for assigned users" before proceeding, but does not specify the concurrency mechanism. Two concurrent admin requests could both observe zero active assigned users and both proceed to delete the same role. The spec's existing concurrency note only addresses permission updates (last-write-wins acceptable), not the delete guard check.
+
+**A5:** The delete-role operation MUST acquire a row-level lock using `SELECT id FROM roles WHERE id = $roleId FOR UPDATE` at the start of the transaction, before evaluating the active-user check. This ensures that two concurrent delete attempts on the same role are serialized: the second request will either see the role already deleted (and return 404) or block until the first transaction commits. Additionally, the active-user count query (`SELECT COUNT(*) FROM staff_users WHERE role_id = $roleId AND status = 'ACTIVE'`) MUST execute within the same transaction after the lock is acquired. PostgreSQL default `READ COMMITTED` isolation is sufficient for all other role mutations (update, disable) since those are idempotent; only the delete guard requires `SELECT FOR UPDATE`.

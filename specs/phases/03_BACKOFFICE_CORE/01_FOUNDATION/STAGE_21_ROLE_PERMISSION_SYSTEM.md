@@ -10,17 +10,18 @@ Database: Tenant DB only
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
+Risk Level: MEDIUM
 Last Updated: 2026-03-02T00:00:00.000Z
 
 Scope Defined:
 
 - Tenant-scoped RBAC for Backoffice staff users
-- roles table, role_permissions table, staff_users.role_id extension
-- Permission guard middleware (10-step evaluation chain)
-- Audit log for destructive operations
-- Cache invalidation on role/permission mutation
-- Extensible permission flag schema (varchar module keys)
+- roles, role_permissions tables; staff_users.role_id extension
+- 10-step permission evaluation chain with deny-by-default
+- Route permission registry (FR-024) binding middleware to (module, action) pairs
+- Cross-tenant JWT workspace_id claim validation (FR-007 updated)
+- Audit log per destructive operation; co-transactional writes
+- Concurrent delete serialization via SELECT FOR UPDATE
 
 Deferred Scope:
 
@@ -32,10 +33,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
