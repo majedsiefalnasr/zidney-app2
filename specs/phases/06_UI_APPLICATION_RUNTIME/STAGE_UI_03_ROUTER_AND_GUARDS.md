@@ -9,6 +9,19 @@ UI Foundation — Router & Access Guard Architecture
 ## Stage Status
 
 Status: DRAFT
+Risk Level: UNKNOWN
+Initiated: 2026-03-02T00:00:00.000Z
+
+Scope Open:
+
+- Specification pending
+
+Constitutional Compliance:
+
+- Pending constitutional audit
+
+Notes:
+Stage initialized. Specification in progress.
 
 ---
 
