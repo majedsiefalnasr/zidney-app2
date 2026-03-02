@@ -1,0 +1,53 @@
+feat(020-status-workflow-engine): complete implement step
+
+Step: Implement (6/7)
+Stage: STAGE_20_STATUS_WORKFLOW_ENGINE
+Phase: 03_BACKOFFICE_CORE/01_FOUNDATION
+Status: BACKEND CLOSED
+
+Tasks completed: 39/40 (39 real tasks; 1 is template placeholder header — not a task)
+Deferred tasks: 0 (none deferred)
+Lines of code: ~2549
+
+Implementation scope:
+
+- Domain engine: packages/domain-core/src/workflow/ (4 files — states, types, errors, engine)
+- Tenant migration: 20260301_002_workflow_engine.ts (workflow_logs + 3 indexes + immutability trigger, schema 1.2.0 -> 1.3.0)
+- API layer: routes/backoffice/workflow/ (route handler + router) + modules/workflow/ (validation + context)
+- Route registration in apps/api/src/app.ts
+- Tests: 41 unit tests + 16 integration tests (all passing)
+- Architecture correction applied: F-001 route files placed in routes/backoffice/workflow/ per established pattern
+
+Validations passed:
+
+- Unit tests: 41/41 PASS
+- Integration tests: 16/16 PASS
+- Lint: 0 errors (ESLint exit code 0 on workflow files)
+- Type check: 0 new TypeScript errors (12 pre-existing @zidney/api-client unrelated)
+- Migration: pattern verified, prevent_audit_modification() reuse confirmed
+
+Files changed:
+- packages/domain-core/src/workflow/workflow.types.ts (created)
+- packages/domain-core/src/workflow/workflow.errors.ts (created)
+- packages/domain-core/src/workflow/workflow.states.ts (created)
+- packages/domain-core/src/workflow/workflow.engine.ts (created)
+- packages/domain-core/src/index.ts (modified — 4 export lines)
+- apps/api/src/db/tenant/migrations/20260301_002_workflow_engine.ts (created)
+- apps/api/src/modules/workflow/workflow.validation.ts (created)
+- apps/api/src/modules/workflow/workflow.context.ts (created)
+- apps/api/src/routes/backoffice/workflow/post-transition.ts (created)
+- apps/api/src/routes/backoffice/workflow/index.ts (created)
+- apps/api/src/app.ts (modified — workflowRouter registered)
+- tests/unit/workflow/workflow.engine.test.ts (created)
+- tests/unit/workflow/workflow.states.test.ts (created)
+- tests/integration/workflow/workflow.transition.test.ts (created)
+- specs/runtime/020-status-workflow-engine/tasks.md (tasks marked [X])
+- specs/runtime/020-status-workflow-engine/reports/IMPLEMENT_REPORT.md (created)
+- specs/runtime/020-status-workflow-engine/audits/VALIDATION_REPORT.md (created)
+
+Artifacts:
+
+- specs/runtime/020-status-workflow-engine/reports/IMPLEMENT_REPORT.md
+- specs/runtime/020-status-workflow-engine/audits/VALIDATION_REPORT.md
+- specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_20_STATUS_WORKFLOW_ENGINE.md (status: BACKEND CLOSED)
+- specs/runtime/020-status-workflow-engine/.workflow-state.json

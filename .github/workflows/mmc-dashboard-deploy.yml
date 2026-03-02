@@ -39,7 +39,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Lint - apps/${{ matrix.app }}
-        run: bun run lint --filter=apps/${{ matrix.app }}
+        run: bunx eslint apps/${{ matrix.app }}
         continue-on-error: false
 
   # ────────────────────────────────────────────────────────────────────────
@@ -62,7 +62,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Type check - apps/${{ matrix.app }}
-        run: bun run typecheck --filter=apps/${{ matrix.app }}
+        run: tsc --noEmit -p apps/${{ matrix.app }}/tsconfig.json
         continue-on-error: false
 
   # ────────────────────────────────────────────────────────────────────────
@@ -109,7 +109,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run unit tests - apps/${{ matrix.app }}
-        run: bun run test:unit --filter=apps/${{ matrix.app }}
+        run: bun run test:unit
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
           REDIS_URL: redis://localhost:6379
@@ -162,7 +162,7 @@ jobs:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
 
       - name: Run integration tests - MMC Dashboard
-        run: bun run test:integration apps/mmc/tests/
+        run: bun run test:integration
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
           REDIS_URL: redis://localhost:6379
@@ -210,7 +210,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run security tests - MMC Dashboard
-        run: bun run test:security apps/mmc/tests/
+        run: bun run test:static
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
           REDIS_URL: redis://localhost:6379
@@ -258,7 +258,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: Run performance tests - MMC Dashboard
-        run: bun run test:performance apps/mmc/tests/
+        run: bun run test:performance
         env:
           DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
           REDIS_URL: redis://localhost:6379

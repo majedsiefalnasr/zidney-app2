@@ -1,0 +1,32 @@
+chore(020-status-workflow-engine): complete plan step
+
+Step: Plan (3/7)
+Stage: STAGE_20_STATUS_WORKFLOW_ENGINE
+Phase: 03_BACKOFFICE_CORE/01_FOUNDATION
+Status: DRAFT
+
+Technical scope:
+
+- Endpoints planned: 1 (POST /workflow/:entityType/:entityId/transition)
+- Schema changes: workflow_logs table + WorkflowState VARCHAR(50) check constraint
+- Migrations required: 1 (20260301_002_workflow_engine.ts, schema 1.2.0->1.3.0)
+- Worker involvement: None
+
+Key decisions:
+
+- Domain engine in packages/domain-core/src/workflow/ with explicit TenantDb injection
+- SELECT FOR UPDATE 5-step atomicity; VARCHAR(50)+CHECK constraint for future-safe state storage
+- WorkflowContext extended with workspaceSlug/workspaceId after guardian logging defect fix
+- Error envelope updated with details+correlationId after API designer V-001 fix
+
+Guardian validation: PASSED (Architecture Checker PASS, API Designer BLOCKED->fixed->PASS)
+
+Artifacts:
+
+- specs/runtime/020-status-workflow-engine/plan.md
+- specs/runtime/020-status-workflow-engine/data-model.md
+- specs/runtime/020-status-workflow-engine/research.md
+- specs/runtime/020-status-workflow-engine/contracts/workflow-transition-api.md
+- specs/runtime/020-status-workflow-engine/reports/PLAN_REPORT.md
+- specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_20_STATUS_WORKFLOW_ENGINE.md (status: DRAFT)
+- specs/runtime/020-status-workflow-engine/.workflow-state.json

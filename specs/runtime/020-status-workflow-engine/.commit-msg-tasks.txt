@@ -1,0 +1,27 @@
+chore(020-status-workflow-engine): complete tasks step
+
+Step: Tasks (4/7)
+Stage: STAGE_20_STATUS_WORKFLOW_ENGINE
+Phase: 03_BACKOFFICE_CORE/01_FOUNDATION
+Status: DRAFT
+
+Tasks generated: 40
+
+Breakdown:
+
+- Infrastructure (domain engine + migration): 7 tasks (T001-T007)
+- API (validation, context, routes, registration): 4 tasks (T008-T011)
+- Testing (unit + integration, US1-US6 + polish): 25 tasks (T012-T036)
+- Observability/quality (logging, typecheck, lint): 3 tasks (T037-T039)
+- Worker: 0 tasks
+- Frontend: 0 tasks
+
+Transactional tasks: 1 (T005 workflow engine SELECT FOR UPDATE)
+Idempotency tasks: 1 (T034 concurrent transition test)
+
+Artifacts:
+
+- specs/runtime/020-status-workflow-engine/tasks.md
+- specs/runtime/020-status-workflow-engine/reports/TASKS_REPORT.md
+- specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_20_STATUS_WORKFLOW_ENGINE.md (status: DRAFT)
+- specs/runtime/020-status-workflow-engine/.workflow-state.json

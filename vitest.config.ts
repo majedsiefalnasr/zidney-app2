@@ -1,5 +1,6 @@
 import path from 'path'
 import { fileURLToPath } from 'url'
+import tsconfigPaths from 'vite-tsconfig-paths'
 import { configDefaults, defineConfig } from 'vitest/config'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -121,6 +122,7 @@ export default defineConfig({
       },
     ],
   },
+  plugins: [tsconfigPaths()],
   test: {
     globals: true,
     environment: 'node',

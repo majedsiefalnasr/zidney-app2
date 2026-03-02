@@ -27,11 +27,8 @@
  */
 
 import { invalidateWorkspaceCoverage } from '@zidney/domain-core'
-import { createLogger } from '@zidney/logger'
 import type { DrainLanguageTranslationsJob } from '@zidney/types/job-envelope'
 import { z } from 'zod'
-
-const logger = createLogger('drain-language-translations')
 
 // ---------------------------------------------------------------------------
 // Payload Zod validation schema (T020: parse at handler entry)
@@ -123,7 +120,7 @@ export async function handleDrainLanguageTranslationsJob(
   )
   if (!payloadParseResult.success) {
     const msg = payloadParseResult.error.errors
-      .map((e) => `${e.path.join('.')}: ${e.message}`)
+      .map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`)
       .join('; ')
 
     jobLogger.error({
@@ -242,7 +239,7 @@ export async function handleDrainLanguageTranslationsJob(
           total_deleted: totalDeleted,
           duration_ms: Date.now() - batchStart,
         })
-      } catch (batchErr) {
+      } catch (batchErr: unknown) {
         await db.query('ROLLBACK')
         throw batchErr
       }
