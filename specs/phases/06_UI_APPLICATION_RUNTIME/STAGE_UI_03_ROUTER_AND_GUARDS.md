@@ -10,18 +10,31 @@ UI Foundation — Router & Access Guard Architecture
 
 Status: DRAFT
 Risk Level: UNKNOWN
-Initiated: 2026-03-02T00:00:00.000Z
+Last Updated: 2026-03-02T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Canonical RouteMeta schema (all 3 apps)
+- Guard pipeline: AuthGuard → WorkspaceGuard → RoleGuard → FeatureFlagGuard (stub)
+- core/router/index.ts in MMC, Backoffice, Frontoffice
+- WorkspaceGuard (Backoffice only)
+- RoleGuard (UI-hint only, non-authoritative)
+- 404, Unauthorized, GlobalError fallback views
+- Redirect save/restore strategy
+- Backoffice license guard removal (FR-10)
+- Router testability contracts
+
+Deferred Scope:
+
+- FeatureFlagGuard full implementation (stub only — reserved for future stage)
+- Business page implementations (dashboards, product views)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. 10 user stories, all ambiguities resolved. Clarification step pending.
 
 ---
 
