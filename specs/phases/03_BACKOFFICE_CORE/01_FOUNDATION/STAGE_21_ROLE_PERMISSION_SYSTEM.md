@@ -13,17 +13,16 @@ Status: DRAFT
 Risk Level: MEDIUM
 Last Updated: 2026-03-02T00:00:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Additive migration 20260302_001_rbac_role_permissions_complete.ts (schema 1.3.0 → 1.4.0)
-- New table: backoffice_role_module_permissions (boolean-flags RBAC model)
-- New table: rbac_audit_logs (immutable RBAC audit trail)
-- Extend: backoffice_roles.status column added
-- Extend: backoffice_staff_users.role_id + division_ids columns added
-- Domain package: packages/domain-core/src/rbac/ (pure business logic)
-- Middleware: apps/api/src/middleware/backoffice-permission-guard.ts
-- API: 9 new endpoints under /api/backoffice/roles
-- Frontend: apps/backoffice/src/composables/usePermission.ts (display-only)
+- Total: 21 atomic tasks
+- Setup (T001–T005): Database migration and schema files
+- Foundational (T006): Route permission registry
+- US1 (T007–T011): Domain package RBAC business logic
+- US2 (T012): Permission guard middleware
+- US3 (T013–T014): 9 API endpoints
+- US4 (T015–T018): Frontend display-only pages
+- US5 (T019–T021): Unit and integration tests
 
 Deferred Scope:
 
@@ -34,10 +33,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Both guardian validators returned PASS. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
