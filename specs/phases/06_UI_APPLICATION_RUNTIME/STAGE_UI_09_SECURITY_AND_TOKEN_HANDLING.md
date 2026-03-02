@@ -8,41 +8,43 @@ UI Foundation — Security Boundaries & Token Lifecycle Management
 
 ## Stage Status
 
-Status: IN PROGRESS
+Status: BACKEND CLOSED
 Risk Level: LOW
-Last Updated: 2026-03-02T00:00:00.000Z
+Last Updated: 2026-03-02T14:10:00Z
 
-Drift Analysis: PASSED (all 9 criteria, all 5 guardians)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 57 / 57 completed
 
-Tasks Generated:
+Scope Closed:
 
-- Total: 59 tasks (T001–T057 + T038–T039 lint/typecheck)
-- Foundation (license-status.store.ts): 3 tasks
-- Token redaction utility: 6 tasks
-- Auth store expireSession() action: 3 tasks
-- Error interceptor with isHandling401 guard: 3 tasks
-- API client factory extension (incl. 423/426 catch wrapper): 3 tasks
-- Auth guard redirect preservation + redirect-loop defense: 3 tasks
-- Main.ts wiring (clearUserSpecificStores via onSessionExpired callback): 3 tasks
-- ESLint vue/no-v-html 'error' enforcement: 1 task
-- Unit tests (12 test files): 12 tasks
-- Security audit tests (token persistence, header injection): 6 tasks
-- Integration 401 race + session-clear wiring tests: 6 tasks
-- License store + route coverage + clearUserSpecificStores wiring tests: 9 tasks
-- Lint + typecheck validation: 2 tasks
+- License status stores (mmc, backoffice, frontoffice)
+- Token redaction utility: redactSensitiveFields + looksLikeToken (3 apps)
+- expireSession() action in auth.store.ts (3 apps)
+- Error interceptor with 401/423/426 handling + isHandling401 idempotency guard (3 apps)
+- API client factory extension with errorInterceptor wiring (3 apps)
+- Auth guard redirect preservation query param (3 apps)
+- main.ts wiring: errorInterceptor + licenseStatusStore + clearUserSpecificStores callback (3 apps)
+- ESLint vue/no-v-html enforced as error; all v-html usages eliminated
+- 31 test files, 273 tests — ALL PASS
 
 Deferred Scope:
 
-- Refresh token strategy (disabled by default)
-- clearUserSpecificStores() full enumeration (deferred to feature stages — wiring in place)
+- Refresh token strategy (disabled by default — deferred to future stage)
+- clearUserSpecificStores() full enumeration (stub in place, populated as feature stages land)
 - 2FA flows, OAuth flows, backend auth, RBAC enforcement
 
 Constitutional Compliance:
 
-- All drift criteria passed — implementation authorized
-- 19 plan/spec/tasks findings resolved during analyze step
-- Token-in-memory, single-header-injection, 401-idempotency, XSS-error enforcement all verified
+- ADR alignment verified — no new ADR required (additive changes only)
+- Token-in-memory enforcement verified via token-persistence-audit tests
+- Single-header injection policy verified via client.test.ts
+- 401 idempotency guaranteed via 401-race integration tests
+- XSS mitigation enforced via vue/no-v-html ESLint rule
+- Implementation compliant with Zidney Constitution v1.2.0
+
+Notes:
+Backend implementation complete. No structural backend modifications allowed.
+To add new security behaviors, create a new stage referencing this one.
 
 Notes:
 Full drift analysis passed. All guardian audits cleared. Implementation gate open.

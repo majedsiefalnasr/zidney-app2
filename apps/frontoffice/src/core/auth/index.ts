@@ -28,3 +28,6 @@ export type { IRefreshManager, RefreshManagerFactory } from './refresh-manager'
 // Auth Service
 export { createAuthService } from './auth.service'
 export type { IAuthService } from './auth.service'
+
+// Token Redaction (FR-SEC-03)
+export { looksLikeToken, redactSensitiveFields } from './token-redact'

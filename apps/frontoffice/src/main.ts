@@ -18,6 +18,7 @@ import { router } from '@/core/router'
 // Auth module imports
 import type { ApiClient } from '@/core/api/client'
 import { createAppApiClient } from '@/core/api/client'
+import { createErrorInterceptor } from '@/core/api/interceptors/error.interceptor'
 import type { AuthServiceApiClient } from '@/core/auth/auth.service'
 import { createAuthService } from '@/core/auth/auth.service'
 import type { IRefreshManager } from '@/core/auth/refresh-manager'
@@ -25,6 +26,7 @@ import { createRefreshManager } from '@/core/auth/refresh-manager'
 import { createTokenManager } from '@/core/auth/token-manager'
 import { createAuthGuard } from '@/core/router/guards/auth.guard'
 import { defineAuthStore } from '@/core/state/auth.store'
+import { useLicenseStatusStore } from '@/core/state/license-status.store'
 
 // App-specific route name constants — NOT shared in core/auth/
 const LOGIN_ROUTE = 'fo-login'
@@ -37,6 +39,7 @@ const pinia = createPinia()
 const tokenManager = createTokenManager()
 
 // ── Step 4: Create Auth Service (forward-reference to apiClient via closure) ────
+// eslint-disable-next-line prefer-const
 let apiClient!: ApiClient
 
 const apiClientProxy: AuthServiceApiClient = {
@@ -57,7 +60,28 @@ const useAuthStore = defineAuthStore(
   () => refreshManagerInstance
 )
 const authStore = useAuthStore(pinia)
+// ── Step 5b: Create License Status Store ───────────────────────
+const licenseStatusStore = useLicenseStatusStore(pinia)
 
+// ── Step 5c: Create Error Interceptor ─────────────────────────
+// C2/PF-02: clearUserSpecificStores() is called here in the main.ts callback,
+// NOT inside auth.store.ts:expireSession().
+function clearUserSpecificStores(): void {
+  // Feature stores registered here as stages land.
+  // Example: dashboardStore.$reset()
+}
+
+const errorInterceptor = createErrorInterceptor({
+  getIsAuthenticated: () => authStore.isAuthenticated,
+  onSessionExpired: async () => {
+    await authStore.expireSession() // clears auth state only
+    clearUserSpecificStores() // clears all session-bound UI stores
+  },
+  onLicenseError: (status) => {
+    if (status === 423) licenseStatusStore.setWorkspaceLocked(true)
+    if (status === 426) licenseStatusStore.setUpgradeRequired(true)
+  },
+})
 // ── Step 6: Create Refresh Manager + wire lazy accessor ───────────────────
 const refreshManager = createRefreshManager(
   () => authService.refreshToken().then((r) => r.accessToken),
@@ -67,11 +91,7 @@ const refreshManager = createRefreshManager(
 refreshManagerInstance = refreshManager
 
 // ── Step 7: Create API Client ───────────────────────────────────────────
-apiClient = createAppApiClient(
-  tokenManager,
-  refreshManager,
-  () => void authStore.logout()
-)
+apiClient = createAppApiClient(tokenManager, refreshManager, errorInterceptor)
 
 // ── Step 8: Register Auth Guard with sessionInitialized gate (CL-01) ───────
 const sessionInitialized = ref(false)

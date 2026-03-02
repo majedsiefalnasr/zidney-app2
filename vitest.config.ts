@@ -55,6 +55,27 @@ export default defineConfig({
         ),
       },
       {
+        find: 'pinia',
+        replacement: path.resolve(
+          __dirname,
+          'apps/mmc/node_modules/pinia/dist/pinia.mjs'
+        ),
+      },
+      {
+        find: 'vue-router',
+        replacement: path.resolve(
+          __dirname,
+          'apps/mmc/node_modules/vue-router/dist/vue-router.mjs'
+        ),
+      },
+      {
+        find: 'vue',
+        replacement: path.resolve(
+          __dirname,
+          'apps/mmc/node_modules/vue/dist/vue.runtime.esm-bundler.js'
+        ),
+      },
+      {
         find: /^@zidney\/app\/([^/]+)\/(.*)$/,
         replacement: path.resolve(__dirname, 'apps/$1/src/$2'),
       },
@@ -85,6 +106,13 @@ export default defineConfig({
       {
         find: /^@zidney\/config\/(.*)$/,
         replacement: path.resolve(__dirname, 'packages/config/src/$1'),
+      },
+      {
+        find: '@zidney/api-client',
+        replacement: path.resolve(
+          __dirname,
+          'packages/api-client/src/index.ts'
+        ),
       },
       {
         find: '@zidney/domain-core',

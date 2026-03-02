@@ -50,9 +50,9 @@ Before executing any task, confirm:
 
 > Prerequisite state stores required before main.ts wiring in US4. No user story dependency — creates the reactive flags consumed by `onLicenseError` callbacks.
 
-- [ ] T001 Create license status store in apps/mmc/src/core/state/license-status.store.ts with `isWorkspaceLocked`, `isUpgradeRequired` reactive refs and `setWorkspaceLocked()`, `setUpgradeRequired()`, `clearLicenseStatus()` actions
-- [ ] T002 [P] Create license status store in apps/backoffice/src/core/state/license-status.store.ts with identical shape as T001
-- [ ] T003 [P] Create license status store in apps/frontoffice/src/core/state/license-status.store.ts with identical shape as T001
+- [X] T001 Create license status store in apps/mmc/src/core/state/license-status.store.ts with `isWorkspaceLocked`, `isUpgradeRequired` reactive refs and `setWorkspaceLocked()`, `setUpgradeRequired()`, `clearLicenseStatus()` actions
+- [X] T002 [P] Create license status store in apps/backoffice/src/core/state/license-status.store.ts with identical shape as T001
+- [X] T003 [P] Create license status store in apps/frontoffice/src/core/state/license-status.store.ts with identical shape as T001
 
 ---
 
@@ -62,12 +62,12 @@ Before executing any task, confirm:
 
 **Independent test criteria**: After this phase, `redactSensitiveFields({ token: 'eyJ...' })` returns `{ token: '[REDACTED]' }` and is importable with no framework bootstrap.
 
-- [ ] T004 [US1] Create token redaction utility in apps/mmc/src/core/auth/token-redact.ts implementing `redactSensitiveFields<T>()` and `looksLikeToken()` pure functions (FR-SEC-03)
-- [ ] T005 [P] [US1] Create token redaction utility in apps/backoffice/src/core/auth/token-redact.ts with identical implementation as T004
-- [ ] T006 [P] [US1] Create token redaction utility in apps/frontoffice/src/core/auth/token-redact.ts with identical implementation as T004
-- [ ] T007 [US1] Add `export { redactSensitiveFields, looksLikeToken } from './token-redact'` to apps/mmc/src/core/auth/index.ts (Group E)
-- [ ] T008 [P] [US1] Add `export { redactSensitiveFields, looksLikeToken } from './token-redact'` to apps/backoffice/src/core/auth/index.ts
-- [ ] T009 [P] [US1] Add `export { redactSensitiveFields, looksLikeToken } from './token-redact'` to apps/frontoffice/src/core/auth/index.ts
+- [X] T004 [US1] Create token redaction utility in apps/mmc/src/core/auth/token-redact.ts implementing `redactSensitiveFields<T>()` and `looksLikeToken()` pure functions (FR-SEC-03)
+- [X] T005 [P] [US1] Create token redaction utility in apps/backoffice/src/core/auth/token-redact.ts with identical implementation as T004
+- [X] T006 [P] [US1] Create token redaction utility in apps/frontoffice/src/core/auth/token-redact.ts with identical implementation as T004
+- [X] T007 [US1] Add `export { redactSensitiveFields, looksLikeToken } from './token-redact'` to apps/mmc/src/core/auth/index.ts (Group E)
+- [X] T008 [P] [US1] Add `export { redactSensitiveFields, looksLikeToken } from './token-redact'` to apps/backoffice/src/core/auth/index.ts
+- [X] T009 [P] [US1] Add `export { redactSensitiveFields, looksLikeToken } from './token-redact'` to apps/frontoffice/src/core/auth/index.ts
 
 ---
 
@@ -79,21 +79,21 @@ Before executing any task, confirm:
 
 ### Group C — Add `expireSession()` to auth store
 
-- [ ] T010 [US2] Add `expireSession()` action to apps/mmc/src/core/state/auth.store.ts: clears token via `tokenManager.clearToken()`, sets `isAuthenticated = false`, sets `user = null`, navigates to `loginRouteName`, and sets `authError.value = { code: 'AUTH_SESSION_EXPIRED', message: 'Session expired. Please sign in again.' }` after navigation; includes `isAuthenticated` idempotency guard
-- [ ] T011 [P] [US2] Add `expireSession()` action to apps/backoffice/src/core/state/auth.store.ts with identical implementation as T010
-- [ ] T012 [P] [US2] Add `expireSession()` action to apps/frontoffice/src/core/state/auth.store.ts with identical implementation as T010
+- [X] T010 [US2] Add `expireSession()` action to apps/mmc/src/core/state/auth.store.ts: clears token via `tokenManager.clearToken()`, sets `isAuthenticated = false`, sets `user = null`, navigates to `loginRouteName`, and sets `authError.value = { code: 'AUTH_SESSION_EXPIRED', message: 'Session expired. Please sign in again.' }` after navigation; includes `isAuthenticated` idempotency guard
+- [X] T011 [P] [US2] Add `expireSession()` action to apps/backoffice/src/core/state/auth.store.ts with identical implementation as T010
+- [X] T012 [P] [US2] Add `expireSession()` action to apps/frontoffice/src/core/state/auth.store.ts with identical implementation as T010
 
 ### Group B — Create error interceptor (depends on Group A: T004/T005/T006)
 
-- [ ] T013 [US2] Create error interceptor in apps/mmc/src/core/api/interceptors/error.interceptor.ts implementing `IErrorInterceptor` interface with `handleAuthFailure()` (isAuthenticated guard + `_isHandling401` flag), `handleLicenseError(423|426)`, and `createErrorInterceptor()` factory using `@zidney/logger`
-- [ ] T014 [P] [US2] Create error interceptor in apps/backoffice/src/core/api/interceptors/error.interceptor.ts with identical interface and factory as T013
-- [ ] T015 [P] [US2] Create error interceptor in apps/frontoffice/src/core/api/interceptors/error.interceptor.ts with identical interface and factory as T013
+- [X] T013 [US2] Create error interceptor in apps/mmc/src/core/api/interceptors/error.interceptor.ts implementing `IErrorInterceptor` interface with `handleAuthFailure()` (isAuthenticated guard + `_isHandling401` flag), `handleLicenseError(423|426)`, and `createErrorInterceptor()` factory using `@zidney/logger`
+- [X] T014 [P] [US2] Create error interceptor in apps/backoffice/src/core/api/interceptors/error.interceptor.ts with identical interface and factory as T013
+- [X] T015 [P] [US2] Create error interceptor in apps/frontoffice/src/core/api/interceptors/error.interceptor.ts with identical interface and factory as T013
 
 ### Group D — Extend API client factory (depends on Group C: T010–T012 and Group B: T013–T015)
 
-- [ ] T016 [US2] Extend `createAppApiClient()` in apps/mmc/src/core/api/client.ts to accept `IErrorInterceptor` as third parameter; wire `onAuthFailure` callback to `errorInterceptor.handleAuthFailure()`; add `onLicenseError?: (status: 423 | 426) => void` callback
-- [ ] T017 [P] [US2] Extend `createAppApiClient()` in apps/backoffice/src/core/api/client.ts with identical signature extension as T016
-- [ ] T018 [P] [US2] Extend `createAppApiClient()` in apps/frontoffice/src/core/api/client.ts with identical signature extension as T016
+- [X] T016 [US2] Extend `createAppApiClient()` in apps/mmc/src/core/api/client.ts to accept `IErrorInterceptor` as third parameter; wire `onAuthFailure` callback to `errorInterceptor.handleAuthFailure()`; add `onLicenseError?: (status: 423 | 426) => void` callback
+- [X] T017 [P] [US2] Extend `createAppApiClient()` in apps/backoffice/src/core/api/client.ts with identical signature extension as T016
+- [X] T018 [P] [US2] Extend `createAppApiClient()` in apps/frontoffice/src/core/api/client.ts with identical signature extension as T016
 
 ---
 
@@ -103,9 +103,9 @@ Before executing any task, confirm:
 
 **Independent test criteria**: After this phase, navigating to `/protected/page` while unauthenticated produces a redirect to `{ name: loginRouteName, query: { redirect: '/protected/page' } }`; setting `preserveRedirect: false` omits the query param.
 
-- [ ] T019 [US3] Extend `createAuthGuard()` in apps/mmc/src/core/router/guards/auth.guard.ts: change unauthenticated redirect from `{ name: options.loginRouteName }` to `{ name: options.loginRouteName, query: { redirect: to.fullPath } }`; add `preserveRedirect?: boolean` field to `AuthGuardOptions` interface (defaults to `true`)
-- [ ] T020 [P] [US3] Extend `createAuthGuard()` in apps/backoffice/src/core/router/guards/auth.guard.ts with identical change as T019
-- [ ] T021 [P] [US3] Extend `createAuthGuard()` in apps/frontoffice/src/core/router/guards/auth.guard.ts with identical change as T019
+- [X] T019 [US3] Extend `createAuthGuard()` in apps/mmc/src/core/router/guards/auth.guard.ts: change unauthenticated redirect from `{ name: options.loginRouteName }` to `{ name: options.loginRouteName, query: { redirect: to.fullPath } }`; add `preserveRedirect?: boolean` field to `AuthGuardOptions` interface (defaults to `true`)
+- [X] T020 [P] [US3] Extend `createAuthGuard()` in apps/backoffice/src/core/router/guards/auth.guard.ts with identical change as T019
+- [X] T021 [P] [US3] Extend `createAuthGuard()` in apps/frontoffice/src/core/router/guards/auth.guard.ts with identical change as T019
 
 ---
 
@@ -115,9 +115,9 @@ Before executing any task, confirm:
 
 **Independent test criteria**: After this phase, `main.ts` wires `createErrorInterceptor` with `onLicenseError` that sets the correct store flag; `isWorkspaceLocked` becomes `true` on a 423; `isUpgradeRequired` becomes `true` on a 426.
 
-- [ ] T022 [US4] Update apps/mmc/src/main.ts: instantiate `createErrorInterceptor` after `authStore` is created wiring `getIsAuthenticated`, `onSessionExpired: () => authStore.expireSession()`, and `onLicenseError` → `licenseStatusStore`; pass `errorInterceptor` to `createAppApiClient`; define `clearUserSpecificStores()` helper stub with `// Feature stores registered here as stages land` comment
-- [ ] T023 [P] [US4] Update apps/backoffice/src/main.ts with identical wiring as T022
-- [ ] T024 [P] [US4] Update apps/frontoffice/src/main.ts with identical wiring as T022
+- [X] T022 [US4] Update apps/mmc/src/main.ts: instantiate `createErrorInterceptor` after `authStore` is created wiring `getIsAuthenticated`, `onSessionExpired: () => authStore.expireSession()`, and `onLicenseError` → `licenseStatusStore`; pass `errorInterceptor` to `createAppApiClient`; define `clearUserSpecificStores()` helper stub with `// Feature stores registered here as stages land` comment
+- [X] T023 [P] [US4] Update apps/backoffice/src/main.ts with identical wiring as T022
+- [X] T024 [P] [US4] Update apps/frontoffice/src/main.ts with identical wiring as T022
 
 ---
 
@@ -127,7 +127,7 @@ Before executing any task, confirm:
 
 **Independent test criteria**: After this phase, ESLint reports an **error** (not `warn`) on any `v-html` directive. All existing `v-html` usages are sanitized or eliminated. Zero lint violations in all three apps.
 
-- [ ] T025 [US5] Enforce `vue/no-v-html` as `'error'` (not `'warn'`) in eslint.config.mjs: (a) audit all existing `v-html` usages in apps/mmc, apps/backoffice, apps/frontoffice; (b) eliminate or sanitize any unsanitized usages; (c) set `'vue/no-v-html': 'error'` in the Vue-files rule block — advisory `'warn'` is constitutionally insufficient per AGENTS.md and plan.md Section 7 (FR-SEC-03, FR-SEC-17)
+- [X] T025 [US5] Enforce `vue/no-v-html` as `'error'` (not `'warn'`) in eslint.config.mjs: (a) audit all existing `v-html` usages in apps/mmc, apps/backoffice, apps/frontoffice; (b) eliminate or sanitize any unsanitized usages; (c) set `'vue/no-v-html': 'error'` in the Vue-files rule block — advisory `'warn'` is constitutionally insufficient per AGENTS.md and plan.md Section 7 (FR-SEC-03, FR-SEC-17)
 
 ---
 
@@ -137,27 +137,27 @@ Before executing any task, confirm:
 
 ### Token Redact Tests (3 files)
 
-- [ ] T026 [P] [US1] Create unit test file tests/unit/mmc/core/auth/token-redact.test.ts covering: `redactSensitiveFields` with `token`, `accessToken`, `access_token`, `refreshToken`, `refresh_token`, `authorization`, `Authorization`, `password`, `credential`, `csrfToken`, `csrf_token`, `x-csrf-token`, `X-CSRF-Token` fields (all 13 SENSITIVE_KEYS); safe-field pass-through; `looksLikeToken` returns true for long base64url string; returns false for short string; returns false for non-string; `assertNoTokenInLogArgs` helper verifies no token-like value exists at any nesting depth in log call arguments
-- [ ] T027 [P] [US1] Create unit test file tests/unit/backoffice/core/auth/token-redact.test.ts with identical test cases as T026
-- [ ] T028 [P] [US1] Create unit test file tests/unit/frontoffice/core/auth/token-redact.test.ts with identical test cases as T026
+- [X] T026 [P] [US1] Create unit test file tests/unit/mmc/core/auth/token-redact.test.ts covering: `redactSensitiveFields` with `token`, `accessToken`, `access_token`, `refreshToken`, `refresh_token`, `authorization`, `Authorization`, `password`, `credential`, `csrfToken`, `csrf_token`, `x-csrf-token`, `X-CSRF-Token` fields (all 13 SENSITIVE_KEYS); safe-field pass-through; `looksLikeToken` returns true for long base64url string; returns false for short string; returns false for non-string; `assertNoTokenInLogArgs` helper verifies no token-like value exists at any nesting depth in log call arguments
+- [X] T027 [P] [US1] Create unit test file tests/unit/backoffice/core/auth/token-redact.test.ts with identical test cases as T026
+- [X] T028 [P] [US1] Create unit test file tests/unit/frontoffice/core/auth/token-redact.test.ts with identical test cases as T026
 
 ### Error Interceptor Tests (3 files)
 
-- [ ] T029 [P] [US2] Create unit test file tests/unit/mmc/core/api/interceptors/error.interceptor.test.ts covering: `handleAuthFailure()` calls `onSessionExpired` when `isAuthenticated=true`; does NOT call `onSessionExpired` when `isAuthenticated=false`; `isHandling401` guard fires `onSessionExpired` exactly once on concurrent calls; `isHandling401` resets to false after `onSessionExpired` resolves so a subsequent call can re-trigger; `handleLicenseError(423)` calls `onLicenseError` with `423`; `handleLicenseError(426)` calls `onLicenseError` with `426`
-- [ ] T030 [P] [US2] Create unit test file tests/unit/backoffice/core/api/interceptors/error.interceptor.test.ts with identical test cases as T029
-- [ ] T031 [P] [US2] Create unit test file tests/unit/frontoffice/core/api/interceptors/error.interceptor.test.ts with identical test cases as T029
+- [X] T029 [P] [US2] Create unit test file tests/unit/mmc/core/api/interceptors/error.interceptor.test.ts covering: `handleAuthFailure()` calls `onSessionExpired` when `isAuthenticated=true`; does NOT call `onSessionExpired` when `isAuthenticated=false`; `isHandling401` guard fires `onSessionExpired` exactly once on concurrent calls; `isHandling401` resets to false after `onSessionExpired` resolves so a subsequent call can re-trigger; `handleLicenseError(423)` calls `onLicenseError` with `423`; `handleLicenseError(426)` calls `onLicenseError` with `426`
+- [X] T030 [P] [US2] Create unit test file tests/unit/backoffice/core/api/interceptors/error.interceptor.test.ts with identical test cases as T029
+- [X] T031 [P] [US2] Create unit test file tests/unit/frontoffice/core/api/interceptors/error.interceptor.test.ts with identical test cases as T029
 
 ### Auth Guard Redirect Tests (3 files)
 
-- [ ] T032 [P] [US3] Create unit test file tests/unit/mmc/core/router/guards/auth.guard.redirect.test.ts covering: unauthenticated access to protected route → redirect includes `query.redirect === to.fullPath`; `preserveRedirect: false` option → redirect has no query param; authenticated access to protected route → navigation passes through without redirect; accessing the login route directly while unauthenticated → passes through without redirect loop (PF-03: `to.name === loginRouteName` early-exit guard); `preserveRedirect` option omitted (default) → behaves identically to `preserveRedirect: true`
-- [ ] T033 [P] [US3] Create unit test file tests/unit/backoffice/core/router/guards/auth.guard.redirect.test.ts with identical test cases as T032
-- [ ] T034 [P] [US3] Create unit test file tests/unit/frontoffice/core/router/guards/auth.guard.redirect.test.ts with identical test cases as T032
+- [X] T032 [P] [US3] Create unit test file tests/unit/mmc/core/router/guards/auth.guard.redirect.test.ts covering: unauthenticated access to protected route → redirect includes `query.redirect === to.fullPath`; `preserveRedirect: false` option → redirect has no query param; authenticated access to protected route → navigation passes through without redirect; accessing the login route directly while unauthenticated → passes through without redirect loop (PF-03: `to.name === loginRouteName` early-exit guard); `preserveRedirect` option omitted (default) → behaves identically to `preserveRedirect: true`
+- [X] T033 [P] [US3] Create unit test file tests/unit/backoffice/core/router/guards/auth.guard.redirect.test.ts with identical test cases as T032
+- [X] T034 [P] [US3] Create unit test file tests/unit/frontoffice/core/router/guards/auth.guard.redirect.test.ts with identical test cases as T032
 
 ### Auth Store `expireSession` Test Extensions (3 existing files modified)
 
-- [ ] T035 [P] [US2] Extend tests/unit/mmc/core/state/auth.store.test.ts with `expireSession()` test cases: authenticated → clears token, sets `authError.code === 'AUTH_SESSION_EXPIRED'`, navigates to login; not authenticated → no-op, no navigation, no authError; called twice concurrently → executes once (idempotency via `isAuthenticated` guard)
-- [ ] T036 [P] [US2] Extend tests/unit/backoffice/core/state/auth.store.test.ts with identical `expireSession()` test cases as T035
-- [ ] T037 [P] [US2] Extend tests/unit/frontoffice/core/state/auth.store.test.ts with identical `expireSession()` test cases as T035
+- [X] T035 [P] [US2] Extend tests/unit/mmc/core/state/auth.store.test.ts with `expireSession()` test cases: authenticated → clears token, sets `authError.code === 'AUTH_SESSION_EXPIRED'`, navigates to login; not authenticated → no-op, no navigation, no authError; called twice concurrently → executes once (idempotency via `isAuthenticated` guard)
+- [X] T036 [P] [US2] Extend tests/unit/backoffice/core/state/auth.store.test.ts with identical `expireSession()` test cases as T035
+- [X] T037 [P] [US2] Extend tests/unit/frontoffice/core/state/auth.store.test.ts with identical `expireSession()` test cases as T035
 
 ---
 
@@ -167,21 +167,21 @@ Before executing any task, confirm:
 
 ### Token Persistence Audit Tests (3 files) — QA-C1
 
-- [ ] T040 [P] Create unit test file tests/unit/mmc/core/auth/token-persistence-audit.test.ts: spy on `localStorage.setItem` and `sessionStorage.setItem`; call `authStore.setSession({ token })`, `authStore.expireSession()`, and `authStore.logout()`; assert `setItem` is NEVER called with a value matching `looksLikeToken()` across all three operations (FR-SEC-01/02 zero-persistence guarantee)
-- [ ] T041 [P] Create unit test file tests/unit/backoffice/core/auth/token-persistence-audit.test.ts with identical test cases as T040
-- [ ] T042 [P] Create unit test file tests/unit/frontoffice/core/auth/token-persistence-audit.test.ts with identical test cases as T040
+- [X] T040 [P] Create unit test file tests/unit/mmc/core/auth/token-persistence-audit.test.ts: spy on `localStorage.setItem` and `sessionStorage.setItem`; call `authStore.setSession({ token })`, `authStore.expireSession()`, and `authStore.logout()`; assert `setItem` is NEVER called with a value matching `looksLikeToken()` across all three operations (FR-SEC-01/02 zero-persistence guarantee)
+- [X] T041 [P] Create unit test file tests/unit/backoffice/core/auth/token-persistence-audit.test.ts with identical test cases as T040
+- [X] T042 [P] Create unit test file tests/unit/frontoffice/core/auth/token-persistence-audit.test.ts with identical test cases as T040
 
 ### Auth Header Injection Tests (3 files) — QA-C2
 
-- [ ] T043 [P] Create unit test file tests/unit/mmc/core/api/client.test.ts (or extend existing): assert that when `getAccessToken()` returns a token string, outbound requests carry `Authorization: Bearer <token>` header; assert that when `getAccessToken()` returns `null`, no `Authorization` header is present (FR-SEC-04/05/06 single-point injection)
-- [ ] T044 [P] Create unit test file tests/unit/backoffice/core/api/client.test.ts with identical test cases as T043
-- [ ] T045 [P] Create unit test file tests/unit/frontoffice/core/api/client.test.ts with identical test cases as T043
+- [X] T043 [P] Create unit test file tests/unit/mmc/core/api/client.test.ts (or extend existing): assert that when `getAccessToken()` returns a token string, outbound requests carry `Authorization: Bearer <token>` header; assert that when `getAccessToken()` returns `null`, no `Authorization` header is present (FR-SEC-04/05/06 single-point injection)
+- [X] T044 [P] Create unit test file tests/unit/backoffice/core/api/client.test.ts with identical test cases as T043
+- [X] T045 [P] Create unit test file tests/unit/frontoffice/core/api/client.test.ts with identical test cases as T043
 
 ### Integration 401 Race Tests (3 files) — QA-C3
 
-- [ ] T046 [P] Create integration test file tests/integration/mmc/auth/401-race.test.ts: fire 3 concurrent 401 responses during an authenticated session; assert `authStore.expireSession()` and `onSessionExpired` callback each fires exactly once; assert `isHandling401` resets afterward; separately assert that a 401 originating from the login endpoint (unauthenticated context) does NOT trigger expiry flow (FR-SEC-07/08 idempotency)
-- [ ] T047 [P] Create integration test file tests/integration/backoffice/auth/401-race.test.ts with identical test cases as T046
-- [ ] T048 [P] Create integration test file tests/integration/frontoffice/auth/401-race.test.ts with identical test cases as T046
+- [X] T046 [P] Create integration test file tests/integration/mmc/auth/401-race.test.ts: fire 3 concurrent 401 responses during an authenticated session; assert `authStore.expireSession()` and `onSessionExpired` callback each fires exactly once; assert `isHandling401` resets afterward; separately assert that a 401 originating from the login endpoint (unauthenticated context) does NOT trigger expiry flow (FR-SEC-07/08 idempotency)
+- [X] T047 [P] Create integration test file tests/integration/backoffice/auth/401-race.test.ts with identical test cases as T046
+- [X] T048 [P] Create integration test file tests/integration/frontoffice/auth/401-race.test.ts with identical test cases as T046
 
 ---
 
@@ -191,23 +191,23 @@ Before executing any task, confirm:
 
 ### License-Status Store Unit Tests (3 files) — QA-H1
 
-- [ ] T049 [P] Create unit test file tests/unit/mmc/core/state/license-status.store.test.ts: test `setWorkspaceLocked(true)` sets `isWorkspaceLocked === true`; `setUpgradeRequired(true)` sets `isUpgradeRequired === true`; `clearLicenseStatus()` resets both to false; assert that `error.interceptor.ts` wires `onLicenseError(423)` to `setWorkspaceLocked` and `onLicenseError(426)` to `setUpgradeRequired`
-- [ ] T050 [P] Create unit test file tests/unit/backoffice/core/state/license-status.store.test.ts with identical test cases as T049
-- [ ] T051 [P] Create unit test file tests/unit/frontoffice/core/state/license-status.store.test.ts with identical test cases as T049
+- [X] T049 [P] Create unit test file tests/unit/mmc/core/state/license-status.store.test.ts: test `setWorkspaceLocked(true)` sets `isWorkspaceLocked === true`; `setUpgradeRequired(true)` sets `isUpgradeRequired === true`; `clearLicenseStatus()` resets both to false; assert that `error.interceptor.ts` wires `onLicenseError(423)` to `setWorkspaceLocked` and `onLicenseError(426)` to `setUpgradeRequired`
+- [X] T050 [P] Create unit test file tests/unit/backoffice/core/state/license-status.store.test.ts with identical test cases as T049
+- [X] T051 [P] Create unit test file tests/unit/frontoffice/core/state/license-status.store.test.ts with identical test cases as T049
 
 ### Route Guard Coverage Audit (3 tests per app) — QA-H2
 
-- [ ] T052 [P] Create unit test file tests/unit/mmc/core/router/guards/route-coverage-audit.test.ts: iterate all routes defined in the MMC router; assert every route that lacks `meta.public === true` has `auth.guard.ts` applied as a navigation guard; assert the set of guarded routes matches the expected list (fail if new unguarded non-public routes appear)
-- [ ] T053 [P] Create unit test file tests/unit/backoffice/core/router/guards/route-coverage-audit.test.ts with identical pattern as T052 applied to Backoffice router
-- [ ] T054 [P] Create unit test file tests/unit/frontoffice/core/router/guards/route-coverage-audit.test.ts with identical pattern as T052 applied to Frontoffice router
+- [X] T052 [P] Create unit test file tests/unit/mmc/core/router/guards/route-coverage-audit.test.ts: iterate all routes defined in the MMC router; assert every route that lacks `meta.public === true` has `auth.guard.ts` applied as a navigation guard; assert the set of guarded routes matches the expected list (fail if new unguarded non-public routes appear)
+- [X] T053 [P] Create unit test file tests/unit/backoffice/core/router/guards/route-coverage-audit.test.ts with identical pattern as T052 applied to Backoffice router
+- [X] T054 [P] Create unit test file tests/unit/frontoffice/core/router/guards/route-coverage-audit.test.ts with identical pattern as T052 applied to Frontoffice router
 
 ### clearUserSpecificStores() Call Contract Tests (3 files) — QA-H3
 
 > **Note (C2/PF-02 architectural decision)**: `clearUserSpecificStores()` is called from the `main.ts` `onSessionExpired` callback AFTER `authStore.expireSession()` resolves. It is NOT called from inside `expireSession()` itself. Tests T055–T057 verify the callback integration at the `main.ts` wiring level.
 
-- [ ] T055 [P] Create integration test file tests/integration/mmc/auth/session-clear-wiring.test.ts: spy on `clearUserSpecificStores`; simulate a 401 response through the full `errorInterceptor.handleAuthFailure()` → `onSessionExpired` callback chain; assert `clearUserSpecificStores()` is called exactly once after `expireSession()` resolves; assert it is NOT called when 401 arrives on unauthenticated context (guard blocks before `onSessionExpired`)
-- [ ] T056 [P] Create integration test file tests/integration/backoffice/auth/session-clear-wiring.test.ts with identical wiring integration test cases as T055
-- [ ] T057 [P] Create integration test file tests/integration/frontoffice/auth/session-clear-wiring.test.ts with identical wiring integration test cases as T055
+- [X] T055 [P] Create integration test file tests/integration/mmc/auth/session-clear-wiring.test.ts: spy on `clearUserSpecificStores`; simulate a 401 response through the full `errorInterceptor.handleAuthFailure()` → `onSessionExpired` callback chain; assert `clearUserSpecificStores()` is called exactly once after `expireSession()` resolves; assert it is NOT called when 401 arrives on unauthenticated context (guard blocks before `onSessionExpired`)
+- [X] T056 [P] Create integration test file tests/integration/backoffice/auth/session-clear-wiring.test.ts with identical wiring integration test cases as T055
+- [X] T057 [P] Create integration test file tests/integration/frontoffice/auth/session-clear-wiring.test.ts with identical wiring integration test cases as T055
 
 ---
 
@@ -215,8 +215,8 @@ Before executing any task, confirm:
 
 > Run after all implementation and test tasks complete. Validates constitutional enforcement rules at toolchain level.
 
-- [ ] T038 Run ESLint across all three apps (`eslint apps/mmc/src apps/backoffice/src apps/frontoffice/src`) and resolve any violations introduced by this stage (zero auth-related ESLint violations required for merge)
-- [ ] T039 Run TypeScript type check across all three apps (`tsc -p apps/mmc/tsconfig.app.json --noEmit && tsc -p apps/backoffice/tsconfig.app.json --noEmit && tsc -p apps/frontoffice/tsconfig.app.json --noEmit`) and resolve all type errors before merge
+- [X] T038 Run ESLint across all three apps (`eslint apps/mmc/src apps/backoffice/src apps/frontoffice/src`) and resolve any violations introduced by this stage (zero auth-related ESLint violations required for merge)
+- [X] T039 Run TypeScript type check across all three apps (`tsc -p apps/mmc/tsconfig.app.json --noEmit && tsc -p apps/backoffice/tsconfig.app.json --noEmit && tsc -p apps/frontoffice/tsconfig.app.json --noEmit`) and resolve all type errors before merge
 
 ---
 

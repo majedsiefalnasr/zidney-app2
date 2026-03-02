@@ -1,5 +1,6 @@
 import eslint from '@eslint/js'
 import importX from 'eslint-plugin-import-x'
+import eslintPluginVue from 'eslint-plugin-vue'
 import globals from 'globals'
 import tseslint from 'typescript-eslint'
 
@@ -149,6 +150,39 @@ export default tseslint.config(
             'Use @zidney/api-client instead of raw fetch. If you need fetch for auth refresh, import it from core/api/client.',
         },
       ],
+    },
+  },
+
+  // T025 (STAGE_UI_09): XSS Mitigation — Enforce vue/no-v-html as 'error' (FR-SEC-17)
+  // Advisory 'warn' is constitutionally insufficient per AGENTS.md security posture.
+  // Audit confirmed zero existing v-html usages in apps/mmc, apps/backoffice, apps/frontoffice.
+  // vue-eslint-parser is provided by eslint-plugin-vue flat/base config.
+  // TypeScript parser is explicitly set for <script lang="ts"> blocks.
+  ...eslintPluginVue.configs['flat/base'].map((config) => ({
+    ...config,
+    files: [
+      'apps/mmc/src/**/*.vue',
+      'apps/backoffice/src/**/*.vue',
+      'apps/frontoffice/src/**/*.vue',
+    ],
+  })),
+  {
+    files: [
+      'apps/mmc/src/**/*.vue',
+      'apps/backoffice/src/**/*.vue',
+      'apps/frontoffice/src/**/*.vue',
+    ],
+    languageOptions: {
+      parserOptions: {
+        // Use @typescript-eslint/parser to process <script lang="ts"> blocks
+        parser: tseslint.parser,
+        ecmaVersion: 'latest',
+        sourceType: 'module',
+        extraFileExtensions: ['.vue'],
+      },
+    },
+    rules: {
+      'vue/no-v-html': 'error',
     },
   }
 )

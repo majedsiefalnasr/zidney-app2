@@ -186,6 +186,49 @@ export function defineAuthStore(
       authError.value = null
     }
 
+    /**
+     * FR-SEC-07/FR-SEC-08: Session expiry triggered by a 401 on an authenticated session.
+     * Called from error.interceptor.ts → onSessionExpired callback in main.ts.
+     *
+     * INVARIANTS:
+     * - Idempotency guard: no-op if already unauthenticated (isAuthenticated === false)
+     * - Does NOT call authService.logout() — the server already invalidated the session
+     * - Sets authError AFTER navigation so it is not cleared by navigation-triggered reactions
+     * - Does NOT call clearUserSpecificStores() — that is the responsibility of the
+     *   onSessionExpired callback in main.ts (C2/PF-02 architectural decision)
+     *
+     * Stage: STAGE_UI_09_SECURITY_AND_TOKEN_HANDLING
+     */
+    async function expireSession(): Promise<void> {
+      // Idempotency: skip if already handling expiry (not authenticated)
+      if (!isAuthenticated.value) {
+        logger.debug(
+          'expireSession() called when already unauthenticated — no-op'
+        )
+        return
+      }
+
+      // Step 1: Clear token from memory immediately
+      tokenManager.clearToken()
+
+      // Step 2: Reset auth state (isAuthenticated, user, authError)
+      isAuthenticated.value = false
+      user.value = null
+      authError.value = null
+
+      // Step 3: Navigate to login
+      await router.push({ name: loginRouteName })
+
+      // Step 4: Set session-expired error AFTER navigation so it is not cleared
+      // by any navigation-triggered store reaction.
+      authError.value = {
+        code: 'AUTH_SESSION_EXPIRED',
+        message: 'Session expired. Please sign in again.',
+      }
+
+      logger.info('Session expired — user redirected to login')
+    }
+
     return {
       // State (reactive refs — readonly to components)
       isAuthenticated,
@@ -198,6 +241,7 @@ export function defineAuthStore(
       refresh,
       logout,
       clearAuthError,
+      expireSession,
     }
   })
 }

@@ -191,7 +191,7 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const lastUpdated = ref(new Date())
-let refreshInterval: NodeJS.Timeout | null = null
+let refreshInterval: ReturnType<typeof setInterval> | null = null
 
 onMounted(() => {
   if (props.autoRefresh) {
