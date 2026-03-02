@@ -18,8 +18,8 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 
 ## Phase 0: Setup — Branch & Dependency Audit
 
-- [ ] T001 Verify branch `ui-03-router-and-guards` is checked out and confirm `vue-router` version is ≥ 4.0.0 in all three apps (`apps/mmc/package.json`, `apps/backoffice/package.json`, `apps/frontoffice/package.json`)
-- [ ] T002 Run `grep -r "guestOnly\|requiredRole\|requiredModule\|name: '" apps/mmc/src apps/backoffice/src apps/frontoffice/src` and save output for use during route migration tasks (T031–T038)
+- [X] T001 Verify branch `ui-03-router-and-guards` is checked out and confirm `vue-router` version is ≥ 4.0.0 in all three apps (`apps/mmc/package.json`, `apps/backoffice/package.json`, `apps/frontoffice/package.json`)
+- [X] T002 Run `grep -r "guestOnly\|requiredRole\|requiredModule\|name: '" apps/mmc/src apps/backoffice/src apps/frontoffice/src` and save output for use during route migration tasks (T031–T038)
 
 ---
 
@@ -29,9 +29,9 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 >
 > **Independent Test Criteria**: `bun run tsc --noEmit` passes with zero errors in all three apps after this phase.
 
-- [ ] T003 [P] [US8] Rewrite `apps/mmc/src/core/router/types.ts` — replace `guestOnly` with `public`, replace `requiredRole: string` with `roles?: string[]`, add `requiresWorkspace?: boolean`, rename alias `AuthRouteMeta` → `AppRouteMeta`, add canonical JSDoc comments per spec §4
-- [ ] T004 [P] [US8] Rewrite `apps/backoffice/src/core/router/types.ts` — replace `guestOnly` with `public`, replace `requiredRole: string` with `roles?: string[]`, keep `requiresWorkspace?: boolean`, remove `requiredModule` field entirely, rename alias to `AppRouteMeta`
-- [ ] T005 [P] [US8] Rewrite `apps/frontoffice/src/core/router/types.ts` — replace `guestOnly` with `public`, replace `requiredRole: string` with `roles?: string[]`, add `requiresWorkspace?: boolean`, rename alias `AuthRouteMeta` → `AppRouteMeta`
+- [X] T003 [P] [US8] Rewrite `apps/mmc/src/core/router/types.ts` — replace `guestOnly` with `public`, replace `requiredRole: string` with `roles?: string[]`, add `requiresWorkspace?: boolean`, rename alias `AuthRouteMeta` → `AppRouteMeta`, add canonical JSDoc comments per spec §4
+- [X] T004 [P] [US8] Rewrite `apps/backoffice/src/core/router/types.ts` — replace `guestOnly` with `public`, replace `requiredRole: string` with `roles?: string[]`, keep `requiresWorkspace?: boolean`, remove `requiredModule` field entirely, rename alias to `AppRouteMeta`
+- [X] T005 [P] [US8] Rewrite `apps/frontoffice/src/core/router/types.ts` — replace `guestOnly` with `public`, replace `requiredRole: string` with `roles?: string[]`, add `requiresWorkspace?: boolean`, rename alias `AuthRouteMeta` → `AppRouteMeta`
 
 ---
 
@@ -41,9 +41,9 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 >
 > **Independent Test Criteria**: `createAuthGuard()` unit tests pass for all 10 required scenarios (T046–T048) with no DOM required.
 
-- [ ] T006 [P] [US1] Create `apps/mmc/src/core/guards/auth.guard.ts` — implement `createAuthGuard(getIsAuthenticated, options: AuthGuardOptions): NavigationGuard`; handle `requiresAuth + !auth → login+?redirect`, `public + auth → dashboard`, open-redirect validation via `isSafeRedirect()`, short-circuit if `to.name === loginRouteName`, wrap in `try/catch` with `@zidney/logger` on error
-- [ ] T007 [P] [US1] Create `apps/backoffice/src/core/guards/auth.guard.ts` — identical implementation to T006 with Backoffice-specific loginRouteName `'bo-login'` and dashboardRouteName `'bo-dashboard'` documented in JSDoc
-- [ ] T008 [P] [US1] Create `apps/frontoffice/src/core/guards/auth.guard.ts` — identical implementation to T006 with Frontoffice-specific loginRouteName `'fo-login'` and dashboardRouteName `'fo-home'` documented in JSDoc
+- [X] T006 [P] [US1] Create `apps/mmc/src/core/guards/auth.guard.ts` — implement `createAuthGuard(getIsAuthenticated, options: AuthGuardOptions): NavigationGuard`; handle `requiresAuth + !auth → login+?redirect`, `public + auth → dashboard`, open-redirect validation via `isSafeRedirect()`, short-circuit if `to.name === loginRouteName`, wrap in `try/catch` with `@zidney/logger` on error
+- [X] T007 [P] [US1] Create `apps/backoffice/src/core/guards/auth.guard.ts` — identical implementation to T006 with Backoffice-specific loginRouteName `'bo-login'` and dashboardRouteName `'bo-dashboard'` documented in JSDoc
+- [X] T008 [P] [US1] Create `apps/frontoffice/src/core/guards/auth.guard.ts` — identical implementation to T006 with Frontoffice-specific loginRouteName `'fo-login'` and dashboardRouteName `'fo-home'` documented in JSDoc
 
 ---
 
@@ -53,7 +53,7 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 >
 > **Independent Test Criteria**: `createWorkspaceGuard()` unit test passes all 5 required scenarios (T049) without any API calls.
 
-- [ ] T009 [US3] Create `apps/backoffice/src/core/guards/workspace.guard.ts` — implement `createWorkspaceGuard(isWorkspaceResolved: () => boolean, options?: WorkspaceGuardOptions): NavigationGuard`; only activates when `to.meta.requiresWorkspace === true`; redirects to `'bo-workspace-selector'` if `!isWorkspaceResolved()`; short-circuit if `to.name === 'bo-workspace-selector'`; MUST NOT call any API or read license status; wrap in `try/catch` with structured logging
+- [X] T009 [US3] Create `apps/backoffice/src/core/guards/workspace.guard.ts` — implement `createWorkspaceGuard(isWorkspaceResolved: () => boolean, options?: WorkspaceGuardOptions): NavigationGuard`; only activates when `to.meta.requiresWorkspace === true`; redirects to `'bo-workspace-selector'` if `!isWorkspaceResolved()`; short-circuit if `to.name === 'bo-workspace-selector'`; MUST NOT call any API or read license status; wrap in `try/catch` with structured logging
 
 ---
 
@@ -63,12 +63,12 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 >
 > **Independent Test Criteria**: `createRoleGuard()` and `createFeatureFlagGuard()` unit tests pass all required scenarios (T050–T057) for all three apps.
 
-- [ ] T010 [P] [US4] Create `apps/mmc/src/core/guards/role.guard.ts` — implement `createRoleGuard(getUser: () => { role: string } | null, options: RoleGuardOptions): NavigationGuard`; skip if `to.meta.roles` is undefined/empty; redirect to `'mmc-unauthorized'` on role mismatch or null user; short-circuit if `to.name === unauthorizedRouteName`; wrap in `try/catch`
-- [ ] T011 [P] [US4] Create `apps/backoffice/src/core/guards/role.guard.ts` — identical implementation with `'bo-unauthorized'` as default unauthorizedRouteName in JSDoc
-- [ ] T012 [P] [US4] Create `apps/frontoffice/src/core/guards/role.guard.ts` — identical implementation with `'fo-unauthorized'` as default unauthorizedRouteName in JSDoc
-- [ ] T013 [P] [US4] Create `apps/mmc/src/core/guards/feature-flag.guard.ts` — implement `createFeatureFlagGuard(): NavigationGuard` stub that always returns `true`; include required comment `// TODO(STAGE_UI_XX): Implement feature flag evaluation when feature flag service is ready.`
-- [ ] T014 [P] [US4] Create `apps/backoffice/src/core/guards/feature-flag.guard.ts` — identical stub to T013
-- [ ] T015 [P] [US4] Create `apps/frontoffice/src/core/guards/feature-flag.guard.ts` — identical stub to T013
+- [X] T010 [P] [US4] Create `apps/mmc/src/core/guards/role.guard.ts` — implement `createRoleGuard(getUser: () => { role: string } | null, options: RoleGuardOptions): NavigationGuard`; skip if `to.meta.roles` is undefined/empty; redirect to `'mmc-unauthorized'` on role mismatch or null user; short-circuit if `to.name === unauthorizedRouteName`; wrap in `try/catch`
+- [X] T011 [P] [US4] Create `apps/backoffice/src/core/guards/role.guard.ts` — identical implementation with `'bo-unauthorized'` as default unauthorizedRouteName in JSDoc
+- [X] T012 [P] [US4] Create `apps/frontoffice/src/core/guards/role.guard.ts` — identical implementation with `'fo-unauthorized'` as default unauthorizedRouteName in JSDoc
+- [X] T013 [P] [US4] Create `apps/mmc/src/core/guards/feature-flag.guard.ts` — implement `createFeatureFlagGuard(): NavigationGuard` stub that always returns `true`; include required comment `// TODO(STAGE_UI_XX): Implement feature flag evaluation when feature flag service is ready.`
+- [X] T014 [P] [US4] Create `apps/backoffice/src/core/guards/feature-flag.guard.ts` — identical stub to T013
+- [X] T015 [P] [US4] Create `apps/frontoffice/src/core/guards/feature-flag.guard.ts` — identical stub to T013
 
 ---
 
@@ -78,9 +78,9 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 >
 > **Independent Test Criteria**: `registerGuards()` can be called in a test with a `createMemoryHistory()` router without errors.
 
-- [ ] T016 [P] Create `apps/mmc/src/core/guards/index.ts` — export `RegisterGuardsOptions` interface and `registerGuards(router, options)` function; pipeline order: sessionInitialized gate → AuthGuard → RoleGuard → FeatureFlagGuard; register `router.onError` handler redirecting to `errorRouteName` (MMC: `'mmc-error'`); add `errorRouteName` to `RegisterGuardsOptions`
-- [ ] T017 [P] Create `apps/backoffice/src/core/guards/index.ts` — export `RegisterGuardsOptions` interface and `registerGuards(router, options)` function; pipeline order: sessionInitialized gate → AuthGuard → WorkspaceGuard → RoleGuard → FeatureFlagGuard; include `isWorkspaceResolved: () => boolean` in options; register `router.onError` handler redirecting to `'bo-error'`
-- [ ] T018 [P] Create `apps/frontoffice/src/core/guards/index.ts` — export `RegisterGuardsOptions` interface and `registerGuards(router, options)` function; pipeline: sessionInitialized gate → AuthGuard → RoleGuard → FeatureFlagGuard; register `router.onError` handler redirecting to `'fo-error'`
+- [X] T016 [P] Create `apps/mmc/src/core/guards/index.ts` — export `RegisterGuardsOptions` interface and `registerGuards(router, options)` function; pipeline order: sessionInitialized gate → AuthGuard → RoleGuard → FeatureFlagGuard; register `router.onError` handler redirecting to `errorRouteName` (MMC: `'mmc-error'`); add `errorRouteName` to `RegisterGuardsOptions`
+- [X] T017 [P] Create `apps/backoffice/src/core/guards/index.ts` — export `RegisterGuardsOptions` interface and `registerGuards(router, options)` function; pipeline order: sessionInitialized gate → AuthGuard → WorkspaceGuard → RoleGuard → FeatureFlagGuard; include `isWorkspaceResolved: () => boolean` in options; register `router.onError` handler redirecting to `'bo-error'`
+- [X] T018 [P] Create `apps/frontoffice/src/core/guards/index.ts` — export `RegisterGuardsOptions` interface and `registerGuards(router, options)` function; pipeline: sessionInitialized gate → AuthGuard → RoleGuard → FeatureFlagGuard; register `router.onError` handler redirecting to `'fo-error'`
 
 ---
 
@@ -90,9 +90,9 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 >
 > **Independent Test Criteria**: `createAppRouter(createMemoryHistory())` returns a Router instance; catch-all route resolves to NotFoundView; unauthorized and error routes exist.
 
-- [ ] T019 [P] [US7] Update `apps/mmc/src/core/router/index.ts` — remove `export const router = createAppRouter()` singleton export and any `export default router`; add `history?: RouterHistory` parameter to factory; add route for `mmc-unauthorized` (`/unauthorized`, NotFoundView, `meta: { public: true }`); add route for `mmc-error` (`/error`, GlobalErrorView, `meta: { public: true }`); update catch-all route name to `'mmc-not-found'` and component to `NotFoundView.vue`; update import path for NotFoundView; ensure NO guards are registered inside this file
-- [ ] T020 [P] [US7] Update `apps/backoffice/src/core/router/index.ts` — remove singleton exports; add `history?: RouterHistory` param; add route `bo-unauthorized` (`/unauthorized`, UnauthorizedView, `meta: { public: true }`); add route `bo-error` (`/error`, GlobalErrorView, `meta: { public: true }`); add route `bo-workspace-selector` (`/select-workspace`, placeholder component or deferred import, `meta: { requiresAuth: true }`); add route `bo-workspace-unavailable` (`/unavailable`, `meta: { requiresAuth: true }`); update catch-all to `'bo-not-found'` + `NotFoundView.vue`; add dashboard route `'bo-dashboard'` (`/`, `meta: { requiresAuth: true, requiresWorkspace: true }`) if not covered by module route
-- [ ] T021 [P] [US7] Update `apps/frontoffice/src/core/router/index.ts` — remove singleton export (`export const router`) and default export (`export default router`); add `history?: RouterHistory` param; add route `fo-unauthorized` (`/unauthorized`, UnauthorizedView, `meta: { public: true }`); add route `fo-error` (`/error`, GlobalErrorView, `meta: { public: true }`); update catch-all to `'fo-not-found'` + `NotFoundView.vue`; ensure NO guards are registered inside this file
+- [X] T019 [P] [US7] Update `apps/mmc/src/core/router/index.ts` — remove `export const router = createAppRouter()` singleton export and any `export default router`; add `history?: RouterHistory` parameter to factory; add route for `mmc-unauthorized` (`/unauthorized`, NotFoundView, `meta: { public: true }`); add route for `mmc-error` (`/error`, GlobalErrorView, `meta: { public: true }`); update catch-all route name to `'mmc-not-found'` and component to `NotFoundView.vue`; update import path for NotFoundView; ensure NO guards are registered inside this file
+- [X] T020 [P] [US7] Update `apps/backoffice/src/core/router/index.ts` — remove singleton exports; add `history?: RouterHistory` param; add route `bo-unauthorized` (`/unauthorized`, UnauthorizedView, `meta: { public: true }`); add route `bo-error` (`/error`, GlobalErrorView, `meta: { public: true }`); add route `bo-workspace-selector` (`/select-workspace`, placeholder component or deferred import, `meta: { requiresAuth: true }`); add route `bo-workspace-unavailable` (`/unavailable`, `meta: { requiresAuth: true }`); update catch-all to `'bo-not-found'` + `NotFoundView.vue`; add dashboard route `'bo-dashboard'` (`/`, `meta: { requiresAuth: true, requiresWorkspace: true }`) if not covered by module route
+- [X] T021 [P] [US7] Update `apps/frontoffice/src/core/router/index.ts` — remove singleton export (`export const router`) and default export (`export default router`); add `history?: RouterHistory` param; add route `fo-unauthorized` (`/unauthorized`, UnauthorizedView, `meta: { public: true }`); add route `fo-error` (`/error`, GlobalErrorView, `meta: { public: true }`); update catch-all to `'fo-not-found'` + `NotFoundView.vue`; ensure NO guards are registered inside this file
 
 ---
 
@@ -102,15 +102,15 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 >
 > **Independent Test Criteria**: Navigating to `/undefined-path` renders NotFoundView; navigating to `/unauthorized` renders UnauthorizedView; navigating to `/error` renders GlobalErrorView — all without authentication.
 
-- [ ] T022 [P] [US5] Rename `apps/mmc/src/shared/views/NotFound.vue` → `apps/mmc/src/shared/views/NotFoundView.vue` and update all import references within the MMC app
-- [ ] T023 [P] [US5] Rename `apps/backoffice/src/shared/views/NotFound.vue` → `apps/backoffice/src/shared/views/NotFoundView.vue` and update all import references within the Backoffice app
-- [ ] T024 [P] [US5] Rename `apps/frontoffice/src/shared/views/NotFound.vue` → `apps/frontoffice/src/shared/views/NotFoundView.vue` and update all import references within the Frontoffice app
-- [ ] T025 [P] [US6] Create `apps/mmc/src/shared/views/UnauthorizedView.vue` — display "You don't have permission to access this page"; include `<RouterLink :to="{ name: 'mmc-dashboard' }">` back to dashboard; no `requiresAuth` meta needed (component is public)
-- [ ] T026 [P] [US6] Create `apps/backoffice/src/shared/views/UnauthorizedView.vue` — display unauthorized message; include link to `'bo-dashboard'`
-- [ ] T027 [P] [US6] Create `apps/frontoffice/src/shared/views/UnauthorizedView.vue` — display unauthorized message; include link to `'fo-home'`
-- [ ] T028 [P] Create `apps/mmc/src/shared/views/GlobalErrorView.vue` — display generic error message "Something went wrong"; include "Return to Dashboard" link to `'mmc-dashboard'`; do NOT expose error details; component-level `<script setup>` only (CL-01)
-- [ ] T029 [P] Create `apps/backoffice/src/shared/views/GlobalErrorView.vue` — same pattern as T028, link to `'bo-dashboard'`
-- [ ] T030 [P] Create `apps/frontoffice/src/shared/views/GlobalErrorView.vue` — same pattern as T028, link to `'fo-home'`
+- [X] T022 [P] [US5] Rename `apps/mmc/src/shared/views/NotFound.vue` → `apps/mmc/src/shared/views/NotFoundView.vue` and update all import references within the MMC app
+- [X] T023 [P] [US5] Rename `apps/backoffice/src/shared/views/NotFound.vue` → `apps/backoffice/src/shared/views/NotFoundView.vue` and update all import references within the Backoffice app
+- [X] T024 [P] [US5] Rename `apps/frontoffice/src/shared/views/NotFound.vue` → `apps/frontoffice/src/shared/views/NotFoundView.vue` and update all import references within the Frontoffice app
+- [X] T025 [P] [US6] Create `apps/mmc/src/shared/views/UnauthorizedView.vue` — display "You don't have permission to access this page"; include `<RouterLink :to="{ name: 'mmc-dashboard' }">` back to dashboard; no `requiresAuth` meta needed (component is public)
+- [X] T026 [P] [US6] Create `apps/backoffice/src/shared/views/UnauthorizedView.vue` — display unauthorized message; include link to `'bo-dashboard'`
+- [X] T027 [P] [US6] Create `apps/frontoffice/src/shared/views/UnauthorizedView.vue` — display unauthorized message; include link to `'fo-home'`
+- [X] T028 [P] Create `apps/mmc/src/shared/views/GlobalErrorView.vue` — display generic error message "Something went wrong"; include "Return to Dashboard" link to `'mmc-dashboard'`; do NOT expose error details; component-level `<script setup>` only (CL-01)
+- [X] T029 [P] Create `apps/backoffice/src/shared/views/GlobalErrorView.vue` — same pattern as T028, link to `'bo-dashboard'`
+- [X] T030 [P] Create `apps/frontoffice/src/shared/views/GlobalErrorView.vue` — same pattern as T028, link to `'fo-home'`
 
 ---
 
@@ -120,11 +120,11 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 >
 > **Independent Test Criteria**: `grep -r "guestOnly\|requiredRole\|requiredModule" apps/` returns zero results.
 
-- [ ] T031 [P] [US8] Update `apps/mmc/src/modules/dashboard/routes.ts` — rename route name `'dashboard'` → `'mmc-dashboard'`; verify `meta: { requiresAuth: true }` is present
-- [ ] T032 [P] [US8] Update `apps/mmc/src/modules/licenses/routes.ts` — rename all route names to `'mmc-*'` prefix; replace any `guestOnly: true` with `public: true`; replace any `requiredRole: '<value>'` with `roles: ['<value>']`
-- [ ] T033 [US8] Audit all Backoffice module route files (`apps/backoffice/src/modules/**/routes.ts`) — replace `guestOnly: true` with `public: true`; replace `requiredRole: '<value>'` with `roles: ['<value>']`; remove `requiredModule` field from every route meta; rename any non-prefixed route names to `'bo-*'` prefix
-- [ ] T034 [US8] Audit all Frontoffice module route files (`apps/frontoffice/src/modules/**/routes.ts`) — replace `guestOnly: true` with `public: true`; replace `requiredRole: '<value>'` with `roles: ['<value>']`; rename any non-prefixed route names to `'fo-*'` prefix
-- [ ] T035 Audit remaining component and store files that call `router.push({ name: '<old-name>' })` — specifically check `apps/mmc/src`, `apps/backoffice/src`, `apps/frontoffice/src` for hardcoded route names `'dashboard'`, `'not-found'`, `'login'` and update all callers to use the canonical `mmc-*`/`bo-*`/`fo-*` prefixed names
+- [X] T031 [P] [US8] Update `apps/mmc/src/modules/dashboard/routes.ts` — rename route name `'dashboard'` → `'mmc-dashboard'`; verify `meta: { requiresAuth: true }` is present
+- [X] T032 [P] [US8] Update `apps/mmc/src/modules/licenses/routes.ts` — rename all route names to `'mmc-*'` prefix; replace any `guestOnly: true` with `public: true`; replace any `requiredRole: '<value>'` with `roles: ['<value>']`
+- [X] T033 [US8] Audit all Backoffice module route files (`apps/backoffice/src/modules/**/routes.ts`) — replace `guestOnly: true` with `public: true`; replace `requiredRole: '<value>'` with `roles: ['<value>']`; remove `requiredModule` field from every route meta; rename any non-prefixed route names to `'bo-*'` prefix
+- [X] T034 [US8] Audit all Frontoffice module route files (`apps/frontoffice/src/modules/**/routes.ts`) — replace `guestOnly: true` with `public: true`; replace `requiredRole: '<value>'` with `roles: ['<value>']`; rename any non-prefixed route names to `'fo-*'` prefix
+- [X] T035 Audit remaining component and store files that call `router.push({ name: '<old-name>' })` — specifically check `apps/mmc/src`, `apps/backoffice/src`, `apps/frontoffice/src` for hardcoded route names `'dashboard'`, `'not-found'`, `'login'` and update all callers to use the canonical `mmc-*`/`bo-*`/`fo-*` prefixed names
 
 ---
 
@@ -134,10 +134,10 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 >
 > **Independent Test Criteria**: Application mounts without importing from `src/router/index.ts`; `isActive` check is absent from all guard code; `contextStore.loadContext()` is called in `main.ts`.
 
-- [ ] T036 Extract routes from `apps/backoffice/src/router/index.ts` — document the `'dashboard'` route (component: `Dashboard.vue`) and `'workspace-unavailable'` route (component: `WorkspaceLocked.vue`) so they can be verified as covered by the updated `core/router/index.ts` in T020
-- [ ] T037 Remove the entire `router.beforeEach` guard block from `apps/backoffice/src/router/index.ts` — delete the `contextLoaded` sentinel variable, the dynamic `import('../stores/context')` call inside the guard, and the `isActive` license status check (FR-10.2); this file will be deleted in T039 but the inline guard must be explicitly noted as removed
-- [ ] T038 Verify `apps/backoffice/src/core/router/index.ts` (updated in T020) includes `'bo-dashboard'`, `'bo-workspace-unavailable'`, and `'bo-workspace-selector'` routes, confirming all STAGE_17 routes are migrated
-- [ ] T039 Delete `apps/backoffice/src/router/index.ts` — entire STAGE_17 legacy file is now superseded (FR-10.1); confirm no remaining imports reference this file before deletion
+- [X] T036 Extract routes from `apps/backoffice/src/router/index.ts` — document the `'dashboard'` route (component: `Dashboard.vue`) and `'workspace-unavailable'` route (component: `WorkspaceLocked.vue`) so they can be verified as covered by the updated `core/router/index.ts` in T020
+- [X] T037 Remove the entire `router.beforeEach` guard block from `apps/backoffice/src/router/index.ts` — delete the `contextLoaded` sentinel variable, the dynamic `import('../stores/context')` call inside the guard, and the `isActive` license status check (FR-10.2); this file will be deleted in T039 but the inline guard must be explicitly noted as removed
+- [X] T038 Verify `apps/backoffice/src/core/router/index.ts` (updated in T020) includes `'bo-dashboard'`, `'bo-workspace-unavailable'`, and `'bo-workspace-selector'` routes, confirming all STAGE_17 routes are migrated
+- [X] T039 Delete `apps/backoffice/src/router/index.ts` — entire STAGE_17 legacy file is now superseded (FR-10.1); confirm no remaining imports reference this file before deletion
 
 ---
 
@@ -147,12 +147,12 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 >
 > **Independent Test Criteria**: TypeScript compilation shows no "missing export" errors; `grep -r "export const router\|export default router" apps/*/src/core/router/index.ts` returns zero results.
 
-- [ ] T040 [P] Delete `apps/mmc/src/core/router/guards/auth.guard.ts` — superseded by `apps/mmc/src/core/guards/auth.guard.ts` created in T006; confirm no remaining imports reference the old path before deletion
-- [ ] T041 [P] Delete `apps/backoffice/src/core/router/guards/auth.guard.ts` — superseded by T007; confirm no remaining imports reference the old path
-- [ ] T042 [P] Delete `apps/frontoffice/src/core/router/guards/auth.guard.ts` — superseded by T008; confirm no remaining imports reference the old path
-- [ ] T043 [P] Update `apps/mmc/src/main.ts` — replace `import { router } from '@/core/router'` with `import { createAppRouter } from '@/core/router'` and `const router = createAppRouter()`; import `registerGuards` from `@/core/guards`; replace all manual `router.beforeEach(...)` calls with `registerGuards(router, { isAuthenticated: () => authStore.isAuthenticated, getUser: () => authStore.user, loginRouteName: 'mmc-login', dashboardRouteName: 'mmc-dashboard', unauthorizedRouteName: 'mmc-unauthorized', errorRouteName: 'mmc-error', initSession: () => authStore.initSession() })`
-- [ ] T044 Update `apps/backoffice/src/main.ts` — replace singleton `import { router }` with `createAppRouter()` call; import `useContextStore` and add `try/catch`-wrapped `await contextStore.loadContext()` AFTER Pinia setup and BEFORE `registerGuards()` call; call `registerGuards(router, { isAuthenticated: ..., isWorkspaceResolved: () => contextStore.context !== null, getUser: ..., loginRouteName: 'bo-login', dashboardRouteName: 'bo-dashboard', unauthorizedRouteName: 'bo-unauthorized', errorRouteName: 'bo-error', initSession: () => authStore.initSession() })`
-- [ ] T045 [P] Update `apps/frontoffice/src/main.ts` — replace `import { router }` and any `import router from` with `createAppRouter()` call; replace manual `router.beforeEach(...)` with `registerGuards(router, { isAuthenticated: () => authStore.isAuthenticated, getUser: () => authStore.user, loginRouteName: 'fo-login', dashboardRouteName: 'fo-home', unauthorizedRouteName: 'fo-unauthorized', errorRouteName: 'fo-error', initSession: () => authStore.initSession() })`
+- [X] T040 [P] Delete `apps/mmc/src/core/router/guards/auth.guard.ts` — superseded by `apps/mmc/src/core/guards/auth.guard.ts` created in T006; confirm no remaining imports reference the old path before deletion
+- [X] T041 [P] Delete `apps/backoffice/src/core/router/guards/auth.guard.ts` — superseded by T007; confirm no remaining imports reference the old path
+- [X] T042 [P] Delete `apps/frontoffice/src/core/router/guards/auth.guard.ts` — superseded by T008; confirm no remaining imports reference the old path
+- [X] T043 [P] Update `apps/mmc/src/main.ts` — replace `import { router } from '@/core/router'` with `import { createAppRouter } from '@/core/router'` and `const router = createAppRouter()`; import `registerGuards` from `@/core/guards`; replace all manual `router.beforeEach(...)` calls with `registerGuards(router, { isAuthenticated: () => authStore.isAuthenticated, getUser: () => authStore.user, loginRouteName: 'mmc-login', dashboardRouteName: 'mmc-dashboard', unauthorizedRouteName: 'mmc-unauthorized', errorRouteName: 'mmc-error', initSession: () => authStore.initSession() })`
+- [X] T044 Update `apps/backoffice/src/main.ts` — replace singleton `import { router }` with `createAppRouter()` call; import `useContextStore` and add `try/catch`-wrapped `await contextStore.loadContext()` AFTER Pinia setup and BEFORE `registerGuards()` call; call `registerGuards(router, { isAuthenticated: ..., isWorkspaceResolved: () => contextStore.context !== null, getUser: ..., loginRouteName: 'bo-login', dashboardRouteName: 'bo-dashboard', unauthorizedRouteName: 'bo-unauthorized', errorRouteName: 'bo-error', initSession: () => authStore.initSession() })`
+- [X] T045 [P] Update `apps/frontoffice/src/main.ts` — replace `import { router }` and any `import router from` with `createAppRouter()` call; replace manual `router.beforeEach(...)` with `registerGuards(router, { isAuthenticated: () => authStore.isAuthenticated, getUser: () => authStore.user, loginRouteName: 'fo-login', dashboardRouteName: 'fo-home', unauthorizedRouteName: 'fo-unauthorized', errorRouteName: 'fo-error', initSession: () => authStore.initSession() })`
 
 ---
 
@@ -164,25 +164,25 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 
 ### AuthGuard Tests (US1 + US2)
 
-- [ ] T046 [P] [US10] Create `apps/mmc/src/core/guards/__tests__/auth.guard.spec.ts` — cover all 10 required scenarios: `requiresAuth+!auth→login+?redirect`, `requiresAuth+auth→true`, `public+!auth→true`, `public+auth→dashboard`, `to.name===loginRouteName+!auth→true (loop prevention)`, `no meta+auth→true`, `no meta+!auth→true`, `redirect param with external URL→login without param`, `redirect param with relative path→login+?redirect`, `getIsAuthenticated() throws→log error+return true`
-- [ ] T047 [P] [US10] Create `apps/backoffice/src/core/guards/__tests__/auth.guard.spec.ts` — same 10 scenarios with Backoffice route names (`bo-login`, `bo-dashboard`)
-- [ ] T048 [P] [US10] Create `apps/frontoffice/src/core/guards/__tests__/auth.guard.spec.ts` — same 10 scenarios with Frontoffice route names (`fo-login`, `fo-home`)
+- [X] T046 [P] [US10] Create `apps/mmc/src/core/guards/__tests__/auth.guard.spec.ts` — cover all 10 required scenarios: `requiresAuth+!auth→login+?redirect`, `requiresAuth+auth→true`, `public+!auth→true`, `public+auth→dashboard`, `to.name===loginRouteName+!auth→true (loop prevention)`, `no meta+auth→true`, `no meta+!auth→true`, `redirect param with external URL→login without param`, `redirect param with relative path→login+?redirect`, `getIsAuthenticated() throws→log error+return true`
+- [X] T047 [P] [US10] Create `apps/backoffice/src/core/guards/__tests__/auth.guard.spec.ts` — same 10 scenarios with Backoffice route names (`bo-login`, `bo-dashboard`)
+- [X] T048 [P] [US10] Create `apps/frontoffice/src/core/guards/__tests__/auth.guard.spec.ts` — same 10 scenarios with Frontoffice route names (`fo-login`, `fo-home`)
 
 ### WorkspaceGuard Tests (US3, Backoffice Only)
 
-- [ ] T049 [US10] Create `apps/backoffice/src/core/guards/__tests__/workspace.guard.spec.ts` — cover all 5 required scenarios: `requiresWorkspace+resolved→true`, `requiresWorkspace+!resolved→bo-workspace-selector`, `requiresWorkspace undefined→true`, `to.name==='bo-workspace-selector'→true (loop prevention)`, `isWorkspaceResolved() throws→log error+return true`
+- [X] T049 [US10] Create `apps/backoffice/src/core/guards/__tests__/workspace.guard.spec.ts` — cover all 5 required scenarios: `requiresWorkspace+resolved→true`, `requiresWorkspace+!resolved→bo-workspace-selector`, `requiresWorkspace undefined→true`, `to.name==='bo-workspace-selector'→true (loop prevention)`, `isWorkspaceResolved() throws→log error+return true`
 
 ### RoleGuard Tests (US4)
 
-- [ ] T050 [P] [US10] Create `apps/mmc/src/core/guards/__tests__/role.guard.spec.ts` — cover all 6 required scenarios: `roles:['admin']+user.role:'admin'→true`, `roles:['admin']+user.role:'viewer'→mmc-unauthorized`, `roles undefined→true`, `roles:['admin']+user:null→mmc-unauthorized`, `to.name===unauthorizedRouteName→true (loop prevention)`, `getUser() throws→log error+return true`
-- [ ] T051 [P] [US10] Create `apps/backoffice/src/core/guards/__tests__/role.guard.spec.ts` — same 6 scenarios with `bo-unauthorized`
-- [ ] T052 [P] [US10] Create `apps/frontoffice/src/core/guards/__tests__/role.guard.spec.ts` — same 6 scenarios with `fo-unauthorized`
+- [X] T050 [P] [US10] Create `apps/mmc/src/core/guards/__tests__/role.guard.spec.ts` — cover all 6 required scenarios: `roles:['admin']+user.role:'admin'→true`, `roles:['admin']+user.role:'viewer'→mmc-unauthorized`, `roles undefined→true`, `roles:['admin']+user:null→mmc-unauthorized`, `to.name===unauthorizedRouteName→true (loop prevention)`, `getUser() throws→log error+return true`
+- [X] T051 [P] [US10] Create `apps/backoffice/src/core/guards/__tests__/role.guard.spec.ts` — same 6 scenarios with `bo-unauthorized`
+- [X] T052 [P] [US10] Create `apps/frontoffice/src/core/guards/__tests__/role.guard.spec.ts` — same 6 scenarios with `fo-unauthorized`
 
 ### FeatureFlagGuard Tests
 
-- [ ] T053 [P] [US10] Create `apps/mmc/src/core/guards/__tests__/feature-flag.guard.spec.ts` — single scenario: any route returns `true`; verify guard never redirects
-- [ ] T054 [P] [US10] Create `apps/backoffice/src/core/guards/__tests__/feature-flag.guard.spec.ts` — same scenario
-- [ ] T055 [P] [US10] Create `apps/frontoffice/src/core/guards/__tests__/feature-flag.guard.spec.ts` — same scenario
+- [X] T053 [P] [US10] Create `apps/mmc/src/core/guards/__tests__/feature-flag.guard.spec.ts` — single scenario: any route returns `true`; verify guard never redirects
+- [X] T054 [P] [US10] Create `apps/backoffice/src/core/guards/__tests__/feature-flag.guard.spec.ts` — same scenario
+- [X] T055 [P] [US10] Create `apps/frontoffice/src/core/guards/__tests__/feature-flag.guard.spec.ts` — same scenario
 
 ---
 
@@ -192,9 +192,9 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 >
 > **Independent Test Criteria**: All router integration tests pass with `createMemoryHistory()` and `createTestingPinia()`; no real browser or DOM required.
 
-- [ ] T056 [P] [US10] Create `apps/mmc/tests/integration/core/router/router.test.ts` — cover: `createAppRouter(createMemoryHistory())` returns Router instance; navigation to undefined path resolves `NotFoundView`; navigation to `/unauthorized` renders `UnauthorizedView` without auth; navigation to `/error` renders `GlobalErrorView` without auth; `registerGuards()` adds `beforeEach` hook; redirect flow: navigate to protected route while `isAuthenticated=false` → redirect to `mmc-login` with `?redirect=/protected-path`
-- [ ] T057 [P] [US10] Create `apps/backoffice/tests/integration/core/router/router.test.ts` — same structure plus: navigation to workspace-bound route while `isWorkspaceResolved=false → bo-workspace-selector`; WorkspaceGuard not triggered on non-`requiresWorkspace` routes
-- [ ] T058 [P] [US10] Create `apps/frontoffice/tests/integration/core/router/router.test.ts` — same structure as MMC with Frontoffice route names
+- [X] T056 [P] [US10] Create `apps/mmc/tests/integration/core/router/router.test.ts` — cover: `createAppRouter(createMemoryHistory())` returns Router instance; navigation to undefined path resolves `NotFoundView`; navigation to `/unauthorized` renders `UnauthorizedView` without auth; navigation to `/error` renders `GlobalErrorView` without auth; `registerGuards()` adds `beforeEach` hook; redirect flow: navigate to protected route while `isAuthenticated=false` → redirect to `mmc-login` with `?redirect=/protected-path`
+- [X] T057 [P] [US10] Create `apps/backoffice/tests/integration/core/router/router.test.ts` — same structure plus: navigation to workspace-bound route while `isWorkspaceResolved=false → bo-workspace-selector`; WorkspaceGuard not triggered on non-`requiresWorkspace` routes
+- [X] T058 [P] [US10] Create `apps/frontoffice/tests/integration/core/router/router.test.ts` — same structure as MMC with Frontoffice route names
 
 ---
 
@@ -202,11 +202,11 @@ Each phase is an independently committable increment. Run `bun run tsc --noEmit`
 
 > All phases complete. Run full validation suite.
 
-- [ ] T059 Run `bun run tsc --noEmit` in workspace root — zero TypeScript errors expected; all RouteMeta augmentations valid under strict mode; all router factories return typed Router instances
-- [ ] T060 Run `bun run lint` in workspace root — zero ESLint errors expected; no `console.log`, no `any` in guard files, no import boundary violations
-- [ ] T061 Run `grep -r "guestOnly\|requiredRole\|requiredModule" apps/mmc/src apps/backoffice/src apps/frontoffice/src` — must return zero results confirming complete migration of legacy meta fields (AC8.2, AC8.3)
-- [ ] T062 Run `grep -r "export const router\|export default router" apps/mmc/src/core/router apps/backoffice/src/core/router apps/frontoffice/src/core/router` — must return zero results confirming singleton removal (CL-05)
-- [ ] T063 Run `grep -r "isActive" apps/backoffice/src/core/guards apps/backoffice/src/core/router` — must return zero results confirming license status check is absent from all guard and router code (FR-10.2)
+- [X] T059 Run `bun run tsc --noEmit` in workspace root — zero TypeScript errors expected; all RouteMeta augmentations valid under strict mode; all router factories return typed Router instances
+- [X] T060 Run `bun run lint` in workspace root — zero ESLint errors expected; no `console.log`, no `any` in guard files, no import boundary violations
+- [X] T061 Run `grep -r "guestOnly\|requiredRole\|requiredModule" apps/mmc/src apps/backoffice/src apps/frontoffice/src` — must return zero results confirming complete migration of legacy meta fields (AC8.2, AC8.3)
+- [X] T062 Run `grep -r "export const router\|export default router" apps/mmc/src/core/router apps/backoffice/src/core/router apps/frontoffice/src/core/router` — must return zero results confirming singleton removal (CL-05)
+- [X] T063 Run `grep -r "isActive" apps/backoffice/src/core/guards apps/backoffice/src/core/router` — must return zero results confirming license status check is absent from all guard and router code (FR-10.2)
 
 ---
 

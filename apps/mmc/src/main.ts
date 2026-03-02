@@ -4,27 +4,28 @@
  *
  * Bootstrap order is critical — dependencies must be wired in the correct sequence:
  *   Step 1: Pinia
- *   Step 2: Router (imported — guards registered below, NOT in router/index.ts)
+ *   Step 2: Router factory — createAppRouter() (guards registered below, NOT in router/index.ts)
  *   Step 3: Token Manager
  *   Step 4: Auth Service (via forward-reference proxy to apiClient)
  *   Step 5: Auth Store (defineAuthStore factory + instantiate)
  *   Step 6: Refresh Manager + wire lazy accessor
  *   Step 7: API Client (wires tokenManager + refreshManager)
- *   Step 8: Auth Guard + sessionInitialized gate (CL-01)
+ *   Step 8: registerGuards() — guard pipeline with sessionInitialized gate (CL-01)
  *   Step 9: Mount
  *
- * Stage: STAGE_UI_01_AUTH_MODULE
+ * Stage: STAGE_UI_03_ROUTER_AND_GUARDS
  */
 
 // Step 0: Validate environment config at import time — throws early if misconfigured
 import '@/core/config/app-config'
 
 import { createPinia } from 'pinia'
-import { createApp, ref } from 'vue'
+import { createApp } from 'vue'
 import App from './App.vue'
 
-// ── Step 2: Import pre-created router (guards NOT yet registered) ─────────────
-import { router } from '@/core/router'
+// ── Step 2: Router factory (guards NOT registered here — registered via registerGuards)
+import { registerGuards } from '@/core/guards'
+import { createAppRouter } from '@/core/router'
 
 // Auth module imports
 import type { ApiClient } from '@/core/api/client'
@@ -35,7 +36,6 @@ import { createAuthService } from '@/core/auth/auth.service'
 import type { IRefreshManager } from '@/core/auth/refresh-manager'
 import { createRefreshManager } from '@/core/auth/refresh-manager'
 import { createTokenManager } from '@/core/auth/token-manager'
-import { createAuthGuard } from '@/core/router/guards/auth.guard'
 import { defineAuthStore } from '@/core/state/auth.store'
 import { useLicenseStatusStore } from '@/core/state/license-status.store'
 
@@ -45,6 +45,9 @@ const DASHBOARD_ROUTE = 'mmc-dashboard'
 
 // ── Step 1: Create Pinia ───────────────────────────────────────────────────────
 const pinia = createPinia()
+
+// ── Step 2: Create Router ──────────────────────────────────────────────────────
+const router = createAppRouter()
 
 // ── Step 3: Create Token Manager ───────────────────────────────────────────────
 const tokenManager = createTokenManager()
@@ -111,22 +114,17 @@ refreshManagerInstance = refreshManager // wire lazy accessor
 // ── Step 7: Create API Client ───────────────────────────────────────────────────
 apiClient = createAppApiClient(tokenManager, refreshManager, errorInterceptor)
 
-// ── Step 8: Register Auth Guard with sessionInitialized gate (CL-01) ──────────
-// The sessionInitialized gate ensures initSession() is called exactly once —
-// on the first navigation — before any guard evaluation.
-const sessionInitialized = ref(false)
-
-const authGuard = createAuthGuard(() => authStore.isAuthenticated, {
+// ── Step 8: Register guard pipeline (CL-01) ────────────────────────────────────
+// registerGuards handles sessionInitialized gate, AuthGuard, RoleGuard, FeatureFlagGuard
+// pipeline and router.onError → mmc-error (OBS-02).
+registerGuards(router, {
+  isAuthenticated: () => authStore.isAuthenticated,
+  getUserRole: () => authStore.user?.role,
   loginRouteName: LOGIN_ROUTE,
   dashboardRouteName: DASHBOARD_ROUTE,
-})
-
-router.beforeEach(async (to, from) => {
-  if (!sessionInitialized.value) {
-    await authStore.initSession()
-    sessionInitialized.value = true
-  }
-  return authGuard(to, from, () => {})
+  unauthorizedRouteName: 'mmc-unauthorized',
+  errorRouteName: 'mmc-error',
+  initSession: () => authStore.initSession(),
 })
 
 // ── Step 9: Mount ──────────────────────────────────────────────────────────────
