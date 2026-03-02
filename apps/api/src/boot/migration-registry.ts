@@ -1,4 +1,5 @@
 import { sql } from 'drizzle-orm'
+import { up as applyRbacRolePermissionsComplete } from '../db/tenant/migrations/20260302_001_rbac_role_permissions_complete'
 
 /**
  * T009: Tenant DB Migration Registration - Boot Sequence
@@ -21,6 +22,20 @@ const TENANT_MIGRATIONS_1_1_0 = [
   '0009_add_idempotent_indexes',
   '0010_add_audit_indexes',
 ]
+
+/**
+ * STAGE_21: Tenant migrations required for 1.4.0 schema (RBAC Role Permissions Complete)
+ * Applied for tenants currently at schema_version 1.3.0.
+ *
+ * Migration: 20260302_001_rbac_role_permissions_complete
+ * - ALTER backoffice_roles (add status)
+ * - CREATE backoffice_role_module_permissions
+ * - ALTER backoffice_staff_users (add role_id, division_ids)
+ * - CREATE rbac_audit_logs
+ * - UPDATE schema_version 1.3.0 → 1.4.0
+ */
+const TENANT_MIGRATIONS_1_4_0_NAME =
+  '20260302_001_rbac_role_permissions_complete'
 
 /**
  * Apply tenant DB migrations during app boot
@@ -75,6 +90,60 @@ export async function registerAndApplyTenantMigrations(
     } catch (error) {
       console.error(
         `[${correlationId}][${workspaceSlug}] Migration failed:`,
+        error
+      )
+      failedTenants.push(workspaceSlug)
+    }
+  }
+
+  // ─── STAGE_21: Apply 1.3.0 → 1.4.0 migrations ───────────────────────────
+  // For any tenant currently at schema_version 1.3.0, apply the RBAC
+  // Role Permissions Complete migration to bring them to 1.4.0.
+  for (const [workspaceSlug, db] of tenantConnections.entries()) {
+    try {
+      // Query schema_version from the canonical schema_version table
+      const versionResult = await db.execute(
+        sql`SELECT version FROM schema_version LIMIT 1`
+      )
+
+      const currentVersion = (versionResult?.[0]?.version as string) || '0.0.0'
+
+      // Only apply if at exactly 1.3.0 (idempotent: skip if already >= 1.4.0 via any path)
+      if (currentVersion >= '1.4.0') {
+        continue
+      }
+
+      // Check idempotency: skip if already recorded
+      const alreadyApplied = await db.execute(
+        sql`SELECT 1 FROM migration_history WHERE name = ${TENANT_MIGRATIONS_1_4_0_NAME} LIMIT 1`
+      )
+      if (alreadyApplied?.[0]) {
+        continue
+      }
+
+      // Get a raw PoolClient to run the migration's transactional DDL
+      // db.$client is the underlying pg.Pool in Drizzle's postgres-js / node-postgres driver
+      const pool = (db as any).$client
+      const client = await pool.connect()
+      try {
+        await applyRbacRolePermissionsComplete(client)
+      } finally {
+        client.release()
+      }
+
+      // Record the migration name for idempotency
+      await db.execute(
+        sql`INSERT INTO migration_history (name, version, applied_at, correlation_id)
+            VALUES (${TENANT_MIGRATIONS_1_4_0_NAME}, '1.4.0', NOW(), ${correlationId})
+            ON CONFLICT (name) DO NOTHING`
+      )
+
+      console.log(
+        `[${correlationId}][${workspaceSlug}] Applied migration: ${TENANT_MIGRATIONS_1_4_0_NAME} (schema 1.3.0 → 1.4.0)`
+      )
+    } catch (error) {
+      console.error(
+        `[${correlationId}][${workspaceSlug}] STAGE_21 migration 1.4.0 failed:`,
         error
       )
       failedTenants.push(workspaceSlug)

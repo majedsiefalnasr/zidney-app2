@@ -5,15 +5,15 @@
   "stage_file": "specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_21_ROLE_PERMISSION_SYSTEM.md",
   "branch": "021-role-permission-system",
   "base_branch": "develop",
-  "current_step": "analyze",
-  "stage_status": "IN PROGRESS",
+  "current_step": "implement",
+  "stage_status": "BACKEND CLOSED",
   "clarifications_resolved": true,
   "drift_passed": true,
   "implementation_allowed": true,
   "plan_completed": true,
   "tasks_total": 22,
-  "tasks_completed": 0,
-  "last_updated": "2026-03-02T02:00:00.000Z",
+  "tasks_completed": 22,
+  "last_updated": "2026-03-02T15:00:00.000Z",
   "history": [
     {
       "event": "branch_created",
@@ -63,6 +63,12 @@
     {
       "event": "drift_analysis_passed",
       "timestamp": "2026-03-02T02:00:00.000Z"
+    },
+    {
+      "event": "stage_backend_closed",
+      "tasks_completed": 22,
+      "tasks_total": 22,
+      "timestamp": "2026-03-02T15:00:00.000Z"
     }
   ]
 }

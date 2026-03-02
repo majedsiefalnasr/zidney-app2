@@ -9,23 +9,22 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: IN PROGRESS
+Status: BACKEND CLOSED
 Risk Level: MEDIUM
-Last Updated: 2026-03-02T02:00:00.000Z
+Last Updated: 2026-03-02T15:00:00.000Z
 
-Drift Analysis: PASSED (all 9 criteria)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 22 / 22 completed
 
-Tasks Authorized:
+Scope Closed:
 
-- Total: 22 atomic tasks
-- Setup (T001–T005): Database migration and schema files
-- Foundational (T006): Route permission registry (re-export shim over T010)
-- US1 (T007–T011): Domain package RBAC business logic
-- US2 (T012): Permission guard middleware (starts at step 2, trusts chain)
-- US3 (T013–T014): 9 API endpoints (single roles.ts file)
-- US4 (T015–T018): Frontend display-only pages
-- US5 (T019–T022): Unit, integration, and version compatibility tests
+- Tenant migration: backoffice_roles, backoffice_role_module_permissions, rbac_audit_logs; schema_version 1.3.0 → 1.4.0
+- Drizzle schemas: backoffice-roles, backoffice-role-module-permissions, rbac-audit-logs, backoffice-staff-users (role_id, division_ids)
+- Domain-core package: rbac.types.ts, rbac.service.ts, rbac.audit.ts, permission-registry.ts (10 modules × 4 actions)
+- Permission guard v2: cache-first (rbac_v2:), SCAN cursor invalidation, starts at step 2 (workspace_id assertion is chain-level)
+- 9 REST endpoints: CRUD roles + permissions + staff role assignment + module list
+- Vue pages: RolesListPage, CreateRolePage, RoleDetailPage + usePermission composable
+- 62 tests passing: 18 unit (rbac.service) + 20 unit (permission-registry) + 18 integration (routes) + 6 integration (version-compat)
 
 Deferred Scope:
 
@@ -33,18 +32,19 @@ Deferred Scope:
 - Division-scoped permission overrides (future phase)
 - Audit log retention/archival policy (future stage)
 - STAGE_17 triplet permission table deprecation (post-STAGE_21 cleanup)
-- Rate limit concrete values (to be declared in implementation config)
 
 Constitutional Compliance:
 
-- All 9 constitutional criteria passed — full guardian audit completed
-- Security: tenant isolation, deny-by-default, audit immutability verified
-- Performance: all guard hot-path indices present; Redis SCAN pattern required
-- QA: 22 tasks covering all SC-001–SC-010; cross-tenant replay test added
-- Code Review: domain logic separation; Drizzle typed queries; single registry
+- ADR alignment verified
+- Implementation compliant with Zidney Constitution v1.2.0
+- All writes transactional; audit logs co-transactional
+- SCAN cursor for Redis invalidation; rbac_v2: prefix
+- No raw SQL; Drizzle typed queries throughout
+- Middleware order preserved; no duplicate workspace_id assertion
 
 Notes:
-Full drift analysis passed. Composite guardian audit passed. Implementation gate open.
+Backend implementation complete. No structural backend modifications allowed.
+Modifications require a new migration stage.
 
 ---
 

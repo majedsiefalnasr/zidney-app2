@@ -45,6 +45,7 @@ import { validateJwtMiddleware } from './middleware/auth/validate-jwt'
 import { licenseEnforcementMiddleware } from './middleware/license-enforcement'
 import { createRateLimitMiddleware } from './middleware/rate-limit.middleware'
 import { backofficeContextRouter } from './routes/backoffice/context'
+import { rolesRouter } from './routes/backoffice/roles'
 import { workspaceSettingsRouter } from './routes/backoffice/settings'
 import { translationRouter } from './routes/backoffice/translations/index'
 import { workflowRouter } from './routes/backoffice/workflow/index'
@@ -145,6 +146,9 @@ app.route('/api/v1/backoffice/workspace', translationRouter)
 
 // Workflow engine endpoints — Stage 020, staff-level authentication inherited from backoffice group
 app.route('/api/v1/backoffice/workspace', workflowRouter)
+
+// Role & Permission endpoints — Stage 021, permission guard applied per route
+app.route('/api/v1/backoffice/workspace', rolesRouter)
 
 // WebSocket chain: correlationId (global) → tenantResolver → licenseEnforcement
 //                  → rateLimit(max:10, backoffice-ws) → authentication → WS upgrade
