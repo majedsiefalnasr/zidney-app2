@@ -12,14 +12,11 @@ Status: DRAFT
 Risk Level: MEDIUM
 Last Updated: 2026-03-02T00:00:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- 15 new files (5 per app: core/router/index.ts, 4 guard files)
-- 14 file modifications (RouteMeta migration, main.ts guard registration)
-- 4 file deletions (old guard files, singleton exports)
-- registerGuards() barrel pattern per app
-- Backoffice STAGE_17 inline license guard removal
-- contextStore.loadContext() relocation to main.ts bootstrap
+- Total: 63 atomic tasks
+- 45 parallel-eligible, 18 sequential
+- 14 phases covering guards, routers, views, migrations, tests, validation
 
 Deferred Scope:
 
@@ -28,10 +25,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Architecture Guardian: PASS. Task breakdown in progress.
+Atomic task set generated. 63 tasks across 14 phases. Drift analysis gate pending.
 
 ---
 
