@@ -5,7 +5,7 @@
   "stage_file": "specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_21_ROLE_PERMISSION_SYSTEM.md",
   "branch": "021-role-permission-system",
   "base_branch": "develop",
-  "current_step": "pre_step",
+  "current_step": "specify",
   "stage_status": "DRAFT",
   "clarifications_resolved": false,
   "drift_passed": false,
@@ -18,6 +18,10 @@
     {
       "event": "branch_created",
       "branch": "021-role-permission-system",
+      "timestamp": "2026-03-02T00:00:00.000Z"
+    },
+    {
+      "event": "specify_complete",
       "timestamp": "2026-03-02T00:00:00.000Z"
     }
   ]

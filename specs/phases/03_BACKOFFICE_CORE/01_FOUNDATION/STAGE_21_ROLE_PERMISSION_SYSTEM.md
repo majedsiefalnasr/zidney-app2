@@ -11,18 +11,31 @@ Database: Tenant DB only
 
 Status: DRAFT
 Risk Level: UNKNOWN
-Initiated: 2026-03-02T00:00:00.000Z
+Last Updated: 2026-03-02T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Tenant-scoped RBAC for Backoffice staff users
+- roles table, role_permissions table, staff_users.role_id extension
+- Permission guard middleware (10-step evaluation chain)
+- Audit log for destructive operations
+- Cache invalidation on role/permission mutation
+- Extensible permission flag schema (varchar module keys)
+
+Deferred Scope:
+
+- Per-user custom permission overrides (explicitly Phase 3+)
+- Division-scoped permission overrides (future phase)
+- Temporary role elevation (future phase)
+- Field-level permissions (future phase)
+- Audit log retention/archival policy (future stage)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
