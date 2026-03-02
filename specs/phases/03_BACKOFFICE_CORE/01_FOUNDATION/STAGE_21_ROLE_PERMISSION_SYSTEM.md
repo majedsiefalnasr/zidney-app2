@@ -13,30 +13,31 @@ Status: DRAFT
 Risk Level: MEDIUM
 Last Updated: 2026-03-02T00:00:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Tenant-scoped RBAC for Backoffice staff users
-- roles, role_permissions tables; staff_users.role_id extension
-- 10-step permission evaluation chain with deny-by-default
-- Route permission registry (FR-024) binding middleware to (module, action) pairs
-- Cross-tenant JWT workspace_id claim validation (FR-007 updated)
-- Audit log per destructive operation; co-transactional writes
-- Concurrent delete serialization via SELECT FOR UPDATE
+- Additive migration 20260302_001_rbac_role_permissions_complete.ts (schema 1.3.0 → 1.4.0)
+- New table: backoffice_role_module_permissions (boolean-flags RBAC model)
+- New table: rbac_audit_logs (immutable RBAC audit trail)
+- Extend: backoffice_roles.status column added
+- Extend: backoffice_staff_users.role_id + division_ids columns added
+- Domain package: packages/domain-core/src/rbac/ (pure business logic)
+- Middleware: apps/api/src/middleware/backoffice-permission-guard.ts
+- API: 9 new endpoints under /api/backoffice/roles
+- Frontend: apps/backoffice/src/composables/usePermission.ts (display-only)
 
 Deferred Scope:
 
-- Per-user custom permission overrides (explicitly Phase 3+)
+- Per-user custom permission overrides (Phase 3+)
 - Division-scoped permission overrides (future phase)
-- Temporary role elevation (future phase)
-- Field-level permissions (future phase)
 - Audit log retention/archival policy (future stage)
+- STAGE_17 triplet permission table deprecation (post-STAGE_21 cleanup)
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Both guardian validators returned PASS. Task breakdown in progress.
 
 ---
 
