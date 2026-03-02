@@ -20,7 +20,7 @@ interface Props {
 const props = defineProps<Props>()
 
 const now = ref(new Date())
-let interval: NodeJS.Timeout | null = null
+let interval: ReturnType<typeof setInterval> | null = null
 
 onMounted(() => {
   interval = setInterval(() => {

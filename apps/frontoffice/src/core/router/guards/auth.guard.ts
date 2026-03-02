@@ -30,7 +30,12 @@ export interface AuthGuardOptions {
    * Name of the default authenticated landing route.
    * MMC: 'mmc-dashboard' | Backoffice: 'bo-dashboard' | Frontoffice: 'fo-home'
    */
-  dashboardRouteName: string
+  dashboardRouteName: string /**
+   * When true (default), preserves the intended route as ?redirect query param
+   * on unauthenticated access so the login page can redirect back after auth.
+   * Set to false to omit the query param entirely (FR-SEC-09, FR-SEC-16).
+   */
+  preserveRedirect?: boolean
 }
 
 // ─── Factory ─────────────────────────────────────────────────────────────────
@@ -53,6 +58,18 @@ export function createAuthGuard(
         logger.debug('Auth guard: unauthenticated access to protected route', {
           route: to.name?.toString() ?? to.path,
         })
+
+        // PF-03: Defense-in-depth redirect-loop guard.
+        // If the target IS already the login route, pass through without redirect.
+        if (to.name === options.loginRouteName) return true
+
+        // FR-SEC-09/FR-SEC-16: Preserve intended destination for post-login redirect
+        if (options.preserveRedirect !== false) {
+          return {
+            name: options.loginRouteName,
+            query: { redirect: to.fullPath },
+          }
+        }
         return { name: options.loginRouteName }
       }
       return true
