@@ -823,3 +823,45 @@ Stage is considered complete when ALL of the following are true:
 - Zidney Constitution v1.2.0
 - `docs/PROJECT_CONTEXT_PRIMER.md`
 - `docs/architecture/` (ADR files for authoritative decisions)
+
+---
+
+## Clarifications
+
+### Session 2026-03-02
+
+**CL-01: GlobalErrorView Is In Scope (Scope Gap)**
+
+- **Context**: FR-08.3 requires a `GlobalErrorView` component wired to `router.onError()` to prevent blank screens on component import failure. However, the "In Scope" section lists only `NotFoundView.vue` and `UnauthorizedView.vue` — `GlobalErrorView.vue` is absent from the In Scope list and from the Completion Criteria checklist.
+- **Resolution**: `GlobalErrorView.vue` is explicitly added to scope for all three apps (`shared/views/GlobalErrorView.vue`). It must be registered as a reachable route (`/error` or equivalent with `meta: { public: true }`) so `router.onError()` can call `router.replace({ name: '<app>-error' })`. The Completion Criteria checklist must include: `GlobalErrorView.vue` present in all 3 apps and `router.onError()` registered. The In Scope section is updated accordingly.
+- **Impact**: FR-08.3, FR-08.4, In Scope, Completion Criteria, Multi-App Variation Matrix.
+
+**CL-02: Guard try/catch Requirement Is Mandatory**
+
+- **Context**: The Error Handling Contract table states "Guard itself throws unexpectedly → `try/catch` in guard → Log error, return `true` to prevent crash". However, FR-03 through FR-07 contain no explicit instruction to wrap guard logic in try/catch. The existing MMC `auth.guard.ts` (from STAGE_UI_01) does not include try/catch. This creates an ambiguity: is try/catch required or merely recommended?
+- **Resolution**: try/catch is **mandatory** for all guard factory implementations. Each guard's returned `NavigationGuard` function must wrap its logic in a try/catch block. On catch: log at `error` level using `@zidney/logger` with `correlation_id` and `route` context, then return `true` to prevent pipeline crash (never `false` or a broken redirect). This is the authoritative enforcement of FR-03.3 ("must never throw"). FR-03.3 is updated to make this explicit.
+- **Impact**: FR-03.3, FR-04, FR-05, FR-06, FR-07 implementations; guard unit test scenarios must include a "guard callback throws" test case for AuthGuard, WorkspaceGuard, and RoleGuard.
+
+**CL-03: Canonical Route Names for 404 and Unauthorized Routes**
+
+- **Context**: The Multi-App Variation Matrix specifies `<app>-login`, `<app>-dashboard`, and `<app>-unauthorized` route names but does not specify the route name for the 404 catch-all route. Existing MMC and Frontoffice code (from STAGE_UI_01) uses `name: 'not-found'` (no app prefix), which violates Assumption A3 (`<app-prefix>-<route-name>` convention). This creates inconsistency and risks the RoleGuard short-circuit pattern (which checks `to.name === unauthorizedRouteName`) failing silently if names diverge.
+- **Resolution**: Canonical 404 route names per app are: `mmc-not-found` (MMC), `bo-not-found` (Backoffice), `fo-not-found` (Frontoffice). The existing `name: 'not-found'` route definitions in MMC and Frontoffice must be renamed as part of this migration. The error-route name for GlobalErrorView (CL-01) follows the same pattern: `mmc-error`, `bo-error`, `fo-error`. The Multi-App Variation Matrix is updated to include these rows.
+- **Impact**: FR-08.1, FR-08.2, FR-08.3; Route module definitions for all 3 apps; loop-prevention short-circuit checks in guards must use injected `notFoundRouteName` and `errorRouteName` options if the guard needs to reference them (currently only RoleGuard and WorkspaceGuard short-circuit on specific names — no change needed there, but error/404 route name injection is now canonically defined).
+
+**CL-04: Test Environment Router History Mode**
+
+- **Context**: `createAppRouter()` uses `createWebHistory()`, which requires browser DOM APIs (`window.history`, `location`). AC10.5 requires the router to be instantiable in the `jsdom` test environment without DOM errors. These goals are in tension. The spec does not specify how to reconcile `createWebHistory()` with jsdom, nor whether a separate test factory or history override is needed.
+- **Resolution**: Guard unit tests do **not** need a full router instance — they call the `NavigationGuard` function directly with mock `to`/`from` route objects (standard Vue Router testing pattern). Guard factory functions (FR-03.4) return a plain function; tests invoke that function with mocked args and assert the return value. For router integration tests (e.g., "404 fallback resolves to NotFoundView"), `createMemoryHistory()` must be used instead of `createWebHistory()`. Each app's `createAppRouter()` must accept an optional `history` parameter (defaulting to `createWebHistory()`) so tests can inject `createMemoryHistory()`. This pattern satisfies AC10.1 and AC10.5 without altering production behavior.
+- **Impact**: FR-01.1, AC10.1, AC10.5, NFR-03, Testability Contract; `createAppRouter` signatures updated to `createAppRouter(history?: RouterHistory): Router`.
+
+**CL-05: Legacy Singleton Router Export Must Be Removed**
+
+- **Context**: Both MMC and Frontoffice currently export a build-time singleton `export const router: Router = createAppRouter()` alongside the factory, with the comment "Legacy export for backward compatibility — same as createAppRouter()". FR-01.3 states only one router instance is allowed per app. Two exports (factory + eagerly-created singleton) create a second instance at module-load time. FR-01.2 requires guards to be registered by the caller (`main.ts`), which assumes `main.ts` creates the single instance via `createAppRouter()`.
+- **Resolution**: The singleton `export const router = createAppRouter()` must be **removed** from all three apps as part of this stage. All current callers must be updated to call `createAppRouter()` in `main.ts` and hold the instance there. The default export (`export default router`) must also be removed; all imports of the router must use the named `createAppRouter` export. This is a breaking change scoped to this migration stage and is acceptable given no business pages reference the router directly yet.
+- **Impact**: FR-01.1, FR-01.3; `main.ts` in MMC and Frontoffice must be updated; Backoffice (new file) starts clean without singleton; Completion Criteria updated.
+
+**CL-06: `requiredModule` Meta Field Must Be Removed in Backoffice Migration**
+
+- **Context**: The existing STAGE_17 Backoffice router defines `meta: { requiredModule: Module.MCQ }` for license-module gating. FR-10.2 removes the module gate guard, but no spec section explicitly states whether the `requiredModule` field itself should be purged from `RouteMeta` or left as a dormant no-op annotation after migration.
+- **Resolution**: `requiredModule` is NOT part of the canonical `RouteMeta` schema defined in FR-02.1 and must be removed from Backoffice's `RouteMeta` augmentation. Any route definitions using `requiredModule` must have the field stripped. No guard reads `requiredModule` in the canonical pipeline. Leaving it as a phantom field would create confusion and violate FR-02.4's intent (no ambiguous meta states). Removal aligns with FR-10.2's goal of eliminating all license-logic remnants from the router layer.
+- **Impact**: FR-10.2, FR-02.1, FR-02.2; Backoffice `core/router/types.ts` and all route definitions that set `requiredModule`.

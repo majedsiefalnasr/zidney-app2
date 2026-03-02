@@ -9,7 +9,7 @@ UI Foundation — Router & Access Guard Architecture
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
+Risk Level: MEDIUM
 Last Updated: 2026-03-02T00:00:00.000Z
 
 Scope Defined:
@@ -19,10 +19,12 @@ Scope Defined:
 - core/router/index.ts in MMC, Backoffice, Frontoffice
 - WorkspaceGuard (Backoffice only)
 - RoleGuard (UI-hint only, non-authoritative)
-- 404, Unauthorized, GlobalError fallback views
+- 404, Unauthorized, GlobalError fallback views (all 3 apps)
 - Redirect save/restore strategy
 - Backoffice license guard removal (FR-10)
-- Router testability contracts
+- Legacy singleton router export removal (CL-05)
+- Backoffice requiredModule field removal (CL-06)
+- Router testability contracts with createMemoryHistory support
 
 Deferred Scope:
 
@@ -31,10 +33,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. 10 user stories, all ambiguities resolved. Clarification step pending.
+All specification ambiguities resolved. 6 clarifications added. Ready for technical planning.
 
 ---
 
