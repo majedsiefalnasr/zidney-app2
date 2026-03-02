@@ -12,27 +12,31 @@ Status: DRAFT
 Risk Level: LOW
 Last Updated: 2026-03-01T00:00:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- expireSession() action: auth-session-scoped 401 handling with idempotency guard
-- isHandling401 boolean flag in app-level error.interceptor.ts
-- token-redact.ts: pure zero-import token redaction utility
-- 423/426 response via onLicenseError callback (uniform across 3 apps)
-- Auth guard redirect preservation via ?redirect= query param
-- 6 new implementation files + 9 test files + 12 modified files across MMC/Backoffice/Frontoffice
+- Total: 39 atomic tasks
+- Foundation (license-status.store.ts): 3 tasks
+- Token redaction utility: 3 tasks
+- Auth store expireSession() action: 3 tasks
+- Error interceptor with isHandling401 guard: 3 tasks
+- API client factory extension: 3 tasks
+- Auth guard redirect preservation: 3 tasks
+- Main.ts wiring: 3 tasks
+- Unit tests (12 test files): 12 tasks
+- Lint + typecheck validation: 2 tasks
 
 Deferred Scope:
 
 - Refresh token strategy (disabled by default)
-- clearUserSpecificStores() enumeration (deferred to feature stage implementation)
-- 2FA flows, OAuth flows, backend auth implementation, RBAC enforcement
+- clearUserSpecificStores() full enumeration (deferred to feature stages)
+- 2FA flows, OAuth flows, backend auth, RBAC enforcement
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
