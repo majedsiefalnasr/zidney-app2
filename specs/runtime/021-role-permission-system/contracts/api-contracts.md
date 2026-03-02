@@ -557,19 +557,19 @@ Authorization: Bearer <token>
 
 ## Common Error Codes Reference
 
-| Code                    | HTTP Status | Description                                                        |
-| ----------------------- | ----------- | ------------------------------------------------------------------ |
-| `FORBIDDEN`             | 403         | Permission denied (all guard failures, no internal detail exposed) |
-| `UNAUTHORIZED`          | 401         | Missing or invalid JWT, or workspace_id mismatch                   |
-| `ROLE_NOT_FOUND`        | 404         | Role UUID not found in this tenant                                 |
-| `USER_NOT_FOUND`        | 404         | Staff user UUID not found in this tenant                           |
-| `ROLE_NAME_CONFLICT`    | 409         | Duplicate role name in this tenant                                 |
-| `ROLE_HAS_ACTIVE_USERS` | 409         | Delete blocked: active users assigned to role                      |
-| `ROLE_NOT_ASSIGNABLE`   | 422         | Role is DISABLED and cannot be assigned                            |
-| `INVALID_MODULE`        | 422         | Unrecognized module key in permissions array                       |
-| `VALIDATION_ERROR`      | 422         | Request body failed schema validation                              |
-| `TENANT_NOT_FOUND`      | 404         | Workspace slug not found                                           |
-| `LICENSE_BLOCKED`       | 423         | Workspace license is SOFT_LOCKED                                   |
-| `VERSION_MISMATCH`      | 426         | Schema or product version incompatible                             |
-| `INTERNAL_ERROR`        | 500         | Unexpected server error (generic, no internal state exposed)       |
-| `SERVICE_UNAVAILABLE`   | 503         | DB unavailable during permission check                             |
+| Code                    | HTTP Status | Description                                                                                                                                        |
+| ----------------------- | ----------- | -------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `FORBIDDEN`             | 403         | Permission denied (all guard failures, no internal detail exposed); includes cross-tenant token replay (workspace_id claim mismatch — see spec A2) |
+| `UNAUTHORIZED`          | 401         | Missing, expired, or invalid JWT (signature failure or missing claim)                                                                              |
+| `ROLE_NOT_FOUND`        | 404         | Role UUID not found in this tenant                                                                                                                 |
+| `USER_NOT_FOUND`        | 404         | Staff user UUID not found in this tenant                                                                                                           |
+| `ROLE_NAME_CONFLICT`    | 409         | Duplicate role name in this tenant                                                                                                                 |
+| `ROLE_HAS_ACTIVE_USERS` | 409         | Delete blocked: active users assigned to role                                                                                                      |
+| `ROLE_NOT_ASSIGNABLE`   | 422         | Role is DISABLED and cannot be assigned                                                                                                            |
+| `INVALID_MODULE`        | 422         | Unrecognized module key in permissions array                                                                                                       |
+| `VALIDATION_ERROR`      | 422         | Request body failed schema validation                                                                                                              |
+| `TENANT_NOT_FOUND`      | 404         | Workspace slug not found                                                                                                                           |
+| `LICENSE_BLOCKED`       | 423         | Workspace license is SOFT_LOCKED                                                                                                                   |
+| `VERSION_MISMATCH`      | 426         | Schema or product version incompatible                                                                                                             |
+| `INTERNAL_ERROR`        | 500         | Unexpected server error (generic, no internal state exposed)                                                                                       |
+| `SERVICE_UNAVAILABLE`   | 503         | DB unavailable during permission check                                                                                                             |

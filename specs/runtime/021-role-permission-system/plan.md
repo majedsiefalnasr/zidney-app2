@@ -277,16 +277,13 @@ apps/api/src/
 │   ├── backoffice-permission-guard-v2.ts                     ← New permission guard factory
 │   └── route-permission-registry.ts                          ← Route → (module,action) map
 └── routes/backoffice/
-    ├── roles.ts                                              ← CRUD + permission routes
-    ├── staff-role.ts                                         ← Staff role assignment route
-    └── permission-modules.ts                                 ← Module list route
+    └── roles.ts                                              ← All 9 role management endpoints (CRUD, permissions, staff assignment, module list)
 
 packages/domain-core/src/rbac/
-├── types.ts                 ← RbacRole, RolePermission, RbacAuditEntry types
-├── role.service.ts          ← createRole, updateRole, deleteRole, listRoles, getRole
-├── permission.service.ts    ← replacePermissions, getPermissionsForRole
-├── permission-guard.ts      ← evaluatePermission() pure function
-└── audit.service.ts         ← writeRbacAuditLog() — called within DB transaction
+├── rbac.types.ts            ← RbacRole, RolePermission, RbacAuditEntry types (T007)
+├── rbac.service.ts          ← createRole, updateRole, deleteRole, listRoles, getRole, evaluatePermission, replacePermissions (T008)
+├── rbac.audit.ts            ← writeRbacAuditLog() — called within DB transaction (T009)
+└── permission-registry.ts   ← ROUTE_PERMISSION_REGISTRY, lookupPermission (T010 — single source of truth)
 
 tests/
 ├── unit/rbac/
@@ -366,7 +363,7 @@ specs/runtime/021-role-permission-system/
 ├── data-model.md        ← Phase 1 complete
 ├── contracts/
 │   └── api-contracts.md ← Phase 1 complete
-└── tasks.md             ← Phase 2 output (not yet created)
+└── tasks.md             ← Phase 2 complete (22 tasks including T022 version compatibility)
 ```
 
 ### Source Code Layout

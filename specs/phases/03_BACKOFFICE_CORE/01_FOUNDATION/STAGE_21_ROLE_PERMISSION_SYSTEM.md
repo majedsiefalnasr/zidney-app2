@@ -9,20 +9,23 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: DRAFT
+Status: IN PROGRESS
 Risk Level: MEDIUM
-Last Updated: 2026-03-02T00:00:00.000Z
+Last Updated: 2026-03-02T02:00:00.000Z
 
-Tasks Generated:
+Drift Analysis: PASSED (all 9 criteria)
+Implementation: AUTHORIZED
 
-- Total: 21 atomic tasks
+Tasks Authorized:
+
+- Total: 22 atomic tasks
 - Setup (T001–T005): Database migration and schema files
-- Foundational (T006): Route permission registry
+- Foundational (T006): Route permission registry (re-export shim over T010)
 - US1 (T007–T011): Domain package RBAC business logic
-- US2 (T012): Permission guard middleware
-- US3 (T013–T014): 9 API endpoints
+- US2 (T012): Permission guard middleware (starts at step 2, trusts chain)
+- US3 (T013–T014): 9 API endpoints (single roles.ts file)
 - US4 (T015–T018): Frontend display-only pages
-- US5 (T019–T021): Unit and integration tests
+- US5 (T019–T022): Unit, integration, and version compatibility tests
 
 Deferred Scope:
 
@@ -30,13 +33,18 @@ Deferred Scope:
 - Division-scoped permission overrides (future phase)
 - Audit log retention/archival policy (future stage)
 - STAGE_17 triplet permission table deprecation (post-STAGE_21 cleanup)
+- Rate limit concrete values (to be declared in implementation config)
 
 Constitutional Compliance:
 
-- Task set compliant — drift analysis required before implementation
+- All 9 constitutional criteria passed — full guardian audit completed
+- Security: tenant isolation, deny-by-default, audit immutability verified
+- Performance: all guard hot-path indices present; Redis SCAN pattern required
+- QA: 22 tasks covering all SC-001–SC-010; cross-tenant replay test added
+- Code Review: domain logic separation; Drizzle typed queries; single registry
 
 Notes:
-Atomic task set generated. Drift analysis gate pending.
+Full drift analysis passed. Composite guardian audit passed. Implementation gate open.
 
 ---
 

@@ -4,7 +4,7 @@
 **Stage**: `STAGE_21_ROLE_PERMISSION_SYSTEM`  
 **Phase**: `03_BACKOFFICE_CORE / 01_FOUNDATION`  
 **Created**: 2026-03-02  
-**Status**: Draft  
+**Status**: IN PROGRESS  
 **Stage File**: `specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_21_ROLE_PERMISSION_SYSTEM.md`
 
 ---
@@ -64,10 +64,11 @@ No exceptions requiring ADR were detected for this stage.
 - **Tenant resolution:** Via existing tenant resolver middleware, before any DB operation.
 - **Connection pool:** Obtained from tenant-scoped in-memory connection pool map.
 - **Resolver middleware:** Mandatory; no route handler may access DB before tenant and license validation.
-- **New tables introduced:**
-  - `roles` (tenant DB)
-  - `role_permissions` (tenant DB)
-  - `staff_users.role_id` column added (extension to existing tenant table)
+- **Tables created or modified (implementation names):**
+  - `backoffice_roles` extended (existing STAGE_17 table): `status` column added
+  - `backoffice_role_module_permissions` created (new boolean-flags permissions table)
+  - `rbac_audit_logs` created (new immutable audit table, following STAGE-19 pattern)
+  - `backoffice_staff_users` extended: `role_id` and `division_ids` columns added
 
 **Confirmed:** No shared tenant data. No cross-tenant joins. No global RBAC singleton.
 
@@ -183,13 +184,13 @@ A Backoffice super-administrator can list all roles defined for the workspace, a
 - **FR-004**: The combination of `(role_id, module)` MUST be unique — no duplicate permission rows per role per module.
 - **FR-005**: Staff users MUST have a single `role_id` foreign key referencing the `roles` table.
 - **FR-006**: Every Backoffice API route MUST execute permission evaluation in middleware before any business logic runs.
-- **FR-007**: Permission evaluation MUST follow the order: validate JWT → resolve tenant → validate license → load staff user → check user status → load role → check role status → load role permissions → check module+action permission.
+- **FR-007**: Permission evaluation MUST follow the order: resolve tenant → validate license → validate JWT (assert jwt.workspace_id === resolvedTenant.id; mismatch → 403 WARN) → load staff user → check user status → load role → check role status → load role permissions → check module+action permission.
 - **FR-008**: If `role.status != ACTIVE`, the system MUST return 403 Forbidden with a generic message.
-- **FR-009**: If `user.status != ACTIVE`, the system MUST return 403 Forbidden with a generic message.
+- **FR-009**: If `user.status != ACTIVE`, the system MUST return 403 Forbidden with a generic message. (**NOTE**: `backoffice_staff_users` stores this as `is_active BOOLEAN`; the permission guard maps `is_active = false` as equivalent to status `DISABLED`. `is_active = true` is treated as `ACTIVE`.)
 - **FR-010**: If the required permission flag is absent or `false` for the requested module and action, the system MUST return 403 Forbidden with a generic message.
 - **FR-011**: Error responses MUST NOT expose internal permission structure, role names, or permission flag values.
 - **FR-012**: Permission lookup results MAY be cached for the duration of a single request (per-request cache); any longer-lived cache MUST be invalidated immediately on role update, permission update, or role status change.
-- **FR-013**: The system MUST write an audit log entry for every destructive action (create, update, delete) containing: `user_id`, `role_id`, `module`, `action`, `timestamp`, and `request_id`.
+- **FR-013**: The system MUST write an audit log entry for every destructive action (create, update, delete, **assign**) containing: `user_id`, `role_id`, `module`, `action`, `timestamp`, and `request_id`. Permitted audit action values: `CREATE_ROLE`, `UPDATE_ROLE`, `DISABLE_ROLE`, `DELETE_ROLE`, `UPDATE_PERMISSIONS`, `ASSIGN_ROLE`.
 - **FR-014**: Audit log writes MUST be performed within the same transaction as the mutation they record.
 - **FR-015**: Audit log records MUST be immutable — no update or delete operations on audit records.
 - **FR-016**: Roles with status `DISABLED` MUST NOT be assignable to new or existing staff users.
@@ -213,44 +214,51 @@ A Backoffice super-administrator can list all roles defined for the workspace, a
 
 ## Data Model Changes
 
-### New Tables
+> **Implementation note:** The logical names `roles`, `role_permissions`, and `staff_users` used in diagrams above correspond to the implementation table names `backoffice_roles`, `backoffice_role_module_permissions`, and `backoffice_staff_users`. `backoffice_roles` and `backoffice_staff_users` are existing STAGE-17 tables being extended; `backoffice_role_module_permissions` and `rbac_audit_logs` are new tables.
 
-#### `roles` (tenant DB)
+### Tables Created or Modified
 
-| Column       | Type                      | Constraints                            |
-| ------------ | ------------------------- | -------------------------------------- |
-| `id`         | UUID                      | Primary Key, default gen_random_uuid() |
-| `name`       | varchar(100)              | NOT NULL, UNIQUE per tenant            |
-| `status`     | enum('ACTIVE','DISABLED') | NOT NULL, default 'ACTIVE'             |
-| `created_at` | timestamptz               | NOT NULL, default now()                |
-| `updated_at` | timestamptz               | NOT NULL, default now()                |
+#### Extended: `backoffice_roles` (tenant DB, existing since STAGE-17)
+
+| Column         | Type         | Constraints                                                  |
+| -------------- | ------------ | ------------------------------------------------------------ |
+| `id`           | UUID         | Primary Key, default gen_random_uuid() — existing            |
+| `workspace_id` | UUID         | NOT NULL — existing (denormalized for query convenience)     |
+| `name`         | varchar(128) | NOT NULL, UNIQUE per tenant — existing                       |
+| `description`  | text         | NULLABLE — existing                                          |
+| `status`       | varchar(10)  | NOT NULL, default 'ACTIVE' — **ADDED by STAGE-21 migration** |
+| `created_at`   | timestamptz  | NOT NULL, default now() — existing                           |
+| `updated_at`   | timestamptz  | NOT NULL, default now() — existing                           |
 
 Indexes: `UNIQUE (name)` (tenant-scoped by database isolation).
 
-#### `role_permissions` (tenant DB)
+#### New: `backoffice_role_module_permissions` (tenant DB)
 
-| Column       | Type         | Constraints                               |
-| ------------ | ------------ | ----------------------------------------- |
-| `id`         | UUID         | Primary Key, default gen_random_uuid()    |
-| `role_id`    | UUID         | NOT NULL, FK → roles.id ON DELETE CASCADE |
-| `module`     | varchar(100) | NOT NULL                                  |
-| `can_view`   | boolean      | NOT NULL, default false                   |
-| `can_create` | boolean      | NOT NULL, default false                   |
-| `can_edit`   | boolean      | NOT NULL, default false                   |
-| `can_delete` | boolean      | NOT NULL, default false                   |
-| `created_at` | timestamptz  | NOT NULL, default now()                   |
-| `updated_at` | timestamptz  | NOT NULL, default now()                   |
+| Column       | Type         | Constraints                                          |
+| ------------ | ------------ | ---------------------------------------------------- |
+| `id`         | UUID         | Primary Key, default gen_random_uuid()               |
+| `role_id`    | UUID         | NOT NULL, FK → backoffice_roles.id ON DELETE CASCADE |
+| `module`     | varchar(100) | NOT NULL                                             |
+| `can_view`   | boolean      | NOT NULL, default false                              |
+| `can_create` | boolean      | NOT NULL, default false                              |
+| `can_edit`   | boolean      | NOT NULL, default false                              |
+| `can_delete` | boolean      | NOT NULL, default false                              |
+| `created_at` | timestamptz  | NOT NULL, default now()                              |
+| `updated_at` | timestamptz  | NOT NULL, default now()                              |
 
 Indexes: `UNIQUE (role_id, module)`.
 
-#### Modified: `staff_users` (tenant DB)
+> **Note:** The pre-existing STAGE-17 table `backoffice_role_permissions` (triplet model: role_id, module, action) is NOT modified and coexists. STAGE-21 uses the new boolean-flags model only. A future stage may deprecate the triplet table.
 
-| Column         | Change                                                       |
-| -------------- | ------------------------------------------------------------ |
-| `role_id`      | ADD COLUMN: UUID, NULLABLE, FK → roles.id ON DELETE SET NULL |
-| `division_ids` | ADD COLUMN (if not present): UUID[], default '{}'            |
+#### Extended: `backoffice_staff_users` (tenant DB, existing since STAGE-17)
+
+| Column         | Change                                                                  |
+| -------------- | ----------------------------------------------------------------------- |
+| `role_id`      | ADD COLUMN: UUID, NULLABLE, FK → backoffice_roles.id ON DELETE SET NULL |
+| `division_ids` | ADD COLUMN (if not present): UUID[], default '{}'                       |
 
 > `role_id` is nullable to support migration without data loss. Nullable role is treated as no-access (FR-018 applies).
+> `backoffice_staff_users.is_active` is an existing BOOLEAN column. The permission guard maps `is_active = true → ACTIVE` and `is_active = false → DISABLED` (see FR-009).
 
 ### Migration Impact
 
@@ -297,14 +305,14 @@ Indexes: `UNIQUE (role_id, module)`.
 Request arrives at Backoffice API
          │
          ▼
-[1] Validate JWT (signature, expiry, workspace scope)
+[1] Resolve Tenant (from subdomain/path slug)
          │
          ▼
-[2] Resolve Tenant (from subdomain/path slug)
-         │
-         ▼
-[3] Validate License (status, schema_version, product_version)
+[2] Validate License (status, schema_version, product_version)
          │  SOFT_LOCKED → 423 | ARCHIVED → 403 | NOT FOUND → 404
+         ▼
+[3] Validate JWT (signature, expiry, workspace scope)
+         │  Assert jwt.workspace_id === resolvedTenant.id → 403 FORBIDDEN + WARN log on mismatch
          ▼
 [4] Load StaffUser from tenant DB (by sub claim in JWT)
          │  Not found → 403
@@ -353,7 +361,7 @@ Internal permission details, role names, and flag values MUST NOT appear in the 
 | Cross-request persistent cache (Redis or similar) | Allowed but requires immediate invalidation | Role mutation must publish invalidation event   |
 | Client-side permission cache                      | Never allowed                               | —                                               |
 
-**Invalidation must be synchronous with mutation** — permission change must be observable on the very next request. Long stale cache is a platform integrity violation.
+**Cache invalidation is best-effort synchronous** — permission change must be observable on the very next request under normal conditions. If Redis DEL fails, the mutation still commits and the next cache miss triggers a fresh DB read; maximum stale window equals the cache TTL (0–30s). Persistent stale cache that results in incorrect permission elevation is a platform integrity violation.
 
 ---
 
@@ -380,19 +388,19 @@ Module keys are stored as `varchar` in `role_permissions.module`. New modules ar
 
 ## Audit Requirements
 
-Every destructive action (create, update, delete on roles and permissions) MUST produce a structured audit log entry.
+Every destructive action (create, update, delete, assign on roles and permissions) MUST produce a structured audit log entry.
 
 ### Required Audit Fields
 
-| Field            | Source                                                                            |
-| ---------------- | --------------------------------------------------------------------------------- |
-| `user_id`        | Authenticated staff user making the request                                       |
-| `role_id`        | Role being created/modified/deleted                                               |
-| `module`         | Module affected (for permission changes)                                          |
-| `action`         | `CREATE_ROLE`, `UPDATE_ROLE`, `DISABLE_ROLE`, `DELETE_ROLE`, `UPDATE_PERMISSIONS` |
-| `timestamp`      | Server time (authoritative)                                                       |
-| `request_id`     | Correlation ID from request context                                               |
-| `workspace_slug` | Tenant identifier                                                                 |
+| Field            | Source                                                                                           |
+| ---------------- | ------------------------------------------------------------------------------------------------ |
+| `user_id`        | Authenticated staff user making the request                                                      |
+| `role_id`        | Role being created/modified/deleted                                                              |
+| `module`         | Module affected (for permission changes)                                                         |
+| `action`         | `CREATE_ROLE`, `UPDATE_ROLE`, `DISABLE_ROLE`, `DELETE_ROLE`, `UPDATE_PERMISSIONS`, `ASSIGN_ROLE` |
+| `timestamp`      | Server time (authoritative)                                                                      |
+| `request_id`     | Correlation ID from request context                                                              |
+| `workspace_slug` | Tenant identifier                                                                                |
 
 ### Audit Immutability
 
@@ -604,7 +612,7 @@ The following reasonable defaults were applied without requiring clarification:
 
 **A2:** JWT tokens issued for Backoffice staff MUST embed a `workspace_id` claim (tenant UUID) at issuance time. During Step 1 (JWT validation), after verifying signature and expiry, the middleware MUST assert that `jwt.workspace_id === resolvedTenant.id`. A mismatch MUST immediately return 403 with the generic `FORBIDDEN` response and MUST be logged at `WARN` level with `correlation_id`, `user_id` (from JWT), and both `jwt.workspace_id` and `resolved_workspace_id` values. No DB access in the tenant's connection pool may occur if this check fails. This closes the cross-tenant token replay attack surface and is a non-negotiable tenant isolation guarantee per the Zidney Constitution.
 
-**FR-007** is updated: Step 1 (Validate JWT) MUST include sub-step: assert `jwt.workspace_id === resolvedTenant.id`; mismatch → 403 immediately, log WARN, abort chain.
+**FR-007** is updated: Step 3 (Validate JWT) MUST include sub-step: assert `jwt.workspace_id === resolvedTenant.id`; mismatch → 403 immediately, log WARN, abort chain. (**Ordering correction applied in H3 remediation**: JWT validation is Step 3 — after tenant resolution (Step 1) and license check (Step 2) — per Zidney trust chain: Isolation → License → Authentication.)
 
 ---
 
