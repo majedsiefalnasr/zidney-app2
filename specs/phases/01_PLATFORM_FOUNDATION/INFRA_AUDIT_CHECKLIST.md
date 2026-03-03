@@ -9,26 +9,27 @@ Purpose: Non-destructive audit before governance enforcement
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
 Last Updated: 2026-03-04T00:00:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Read-only infrastructure audit: Vitest inventory, test distribution, ESLint audit, CI audit, Bun compatibility, README coverage, tech debt snapshot, enforcement readiness score
-- Repeatable non-destructive audit script: scripts/infra-audit.ts
-- Written deliverables: Gap Report, Risk Classification, Safe Rollout Plan
+- Phase 0: Research & setup (verify Bun, .gitignore guard)
+- Phase 1: Create scripts/infra-audit.ts (non-destructive Bun CLI)
+- Phase 2: Manual audit supplements (ESLint severity, CI posture, README, tech debt)
+- Phase 3: Written deliverables (Gap Report, Risk Classification, Safe Rollout Plan)
 
 Deferred Scope:
 
-- Any Vitest consolidation, ESLint rule changes, Prettier changes, Husky hooks, CI workflow modifications — deferred to STAGE_INFRA_GOVERNANCE
+- Any Vitest consolidation, ESLint rule changes, Husky hooks, CI workflow modifications — deferred to STAGE_INFRA_GOVERNANCE
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved (8 clarifications, CL1–CL8). Risk level LOW. Ready for technical planning.
+Architecture Checker verdict: PASS. API Designer: N/A (no endpoints). Risk level LOW. Ready for task breakdown.
 
 ---
 
