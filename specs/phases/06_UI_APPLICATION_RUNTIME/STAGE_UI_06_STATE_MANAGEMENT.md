@@ -9,36 +9,34 @@ UI Foundation — Centralized State Management Architecture
 ## Stage Status
 
 Status: DRAFT
-Risk Level: LOW
-Last Updated: 2026-03-03T00:00:00.000Z
+Risk Level: MEDIUM
+Last Updated: 2026-03-03T00:02:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Pinia 2.x Composition API store architecture for MMC, Backoffice, Frontoffice (37 FRs)
-- Domain-oriented store boundaries (core/state vs modules/<feature>)
-- API interaction chain: Component -> Store -> API Module -> client (no direct HTTP in components)
-- Cross-store communication rules (read via storeToRefs, no direct mutation)
-- Loading state: isLoading: boolean (primary) + pending: Record<string, boolean> (multi-action)
-- Error state: error: AppError | null with auto-reset and explicit clearError() action
-- State persistence via pinia-plugin-persistedstate with explicit paths whitelist
-- Security: JWT never in localStorage/sessionStorage (memory or secure HTTP-only cookie)
-- Testability: setActivePinia isolation, $reset() required on ALL stores
-- Notification store: queue-based, independently dismissible
-- CSR-only (no SSR scope)
+- 27 implementation tasks across 5 phases (Infrastructure, MMC, Backoffice, Frontoffice, Validation)
+- 21 new files, 13 modified files across 3 apps
+- Pinia initialization in main.ts for all 3 apps with pinia-plugin-persistedstate
+- 13 core runtime stores (auth, app, ui, notification, workspace)
+- Design Contracts: concurrent call guard, error contract, persistence whitelist
+- ESLint no-restricted-imports rule for .vue files
+- Full unit test coverage per store + integration tests for bootstrap
 
 Deferred Scope:
 
 - Feature-specific store implementations (products, licenses, attempt engine, dashboard)
-- Router guard integration (ui-03-router-and-guards)
-- Deep token refresh logic (ui-02-api-client-layer)
+- workspace.store.ts full implementation (stub only - pending workspace API module)
+- AppNotification migration to packages/types
 - SSR support
 
 Constitutional Compliance:
 
-- Clarifications resolved - planning authorized
+- Technical plan compliant - task generation authorized
+- Architecture Checker: VERDICT PASS
+- API Designer: VERDICT PASS (after 2 HIGH + 3 MEDIUM remediations)
 
 Notes:
-All specification ambiguities resolved. 6/6 clarifications encoded. Ready for technical planning.
+Technical plan complete. Both guardians passed. Task breakdown in progress.
 
 ---
 
