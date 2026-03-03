@@ -12,6 +12,7 @@
     "@zidney/api-client": "workspace:*",
     "@zidney/ui-system": "workspace:*",
     "pinia": "^2.2.0",
+    "pinia-plugin-persistedstate": "^4.2.0",
     "vue": "^3.4.0",
     "vue-router": "^4.0.0"
   },

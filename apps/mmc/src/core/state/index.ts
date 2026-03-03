@@ -1,15 +1,12 @@
 /**
  * Pinia state module index for MMC.
- * Router is no longer injected via Pinia plugin — it is passed directly to
- * defineAuthStore() in main.ts (STAGE_UI_01_AUTH_MODULE).
+ * Re-exports all core stores for the MMC application.
  *
- * Stage: STAGE_UI_01_AUTH_MODULE
+ * Stage: STAGE_UI_06_STATE_MANAGEMENT
  */
-import { createPinia } from 'pinia'
-
-export { createPinia }
-
-// Backward-compatible factory (no longer injects router)
-export function createAppPinia() {
-  return createPinia()
-}
+export { defineAuthStore } from './auth.store'
+export { useMmcAppStore } from './app.store'
+export { useMmcUiStore } from './ui.store'
+export { useMmcNotificationStore } from './notification.store'
+export { useLicenseStatusStore } from './license-status.store'
+export type { AppNotification } from './notification.store'

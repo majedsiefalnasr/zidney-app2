@@ -24,7 +24,7 @@ import type { AuthError, AuthUser } from '../auth/types'
 
 const logger = createLogger('auth:auth-store')
 
-const AUTH_STORE_ID = 'auth' as const
+const AUTH_STORE_ID = 'frontoffice-auth' as const
 
 // ─── Factory ──────────────────────────────────────────────────────────────────
 /**
