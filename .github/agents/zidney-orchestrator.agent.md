@@ -14,51 +14,6 @@ tools:
     'figma/*',
     todo,
   ]
-handoffs:
-  - label: '🚀 Start Pre-Step'
-    prompt: 'ACTION_START_PRESTEP'
-    agent: agent
-    send: true
-
-  - label: '🧾 Run Specify'
-    prompt: 'ACTION_RUN_SPECIFY'
-    agent: agent
-    send: true
-
-  - label: '🔍 Run Clarify'
-    prompt: 'ACTION_RUN_CLARIFY'
-    agent: agent
-    send: true
-
-  - label: '🧠 Run Plan'
-    prompt: 'ACTION_RUN_PLAN'
-    agent: agent
-    send: true
-
-  - label: '🧩 Run Tasks'
-    prompt: 'ACTION_RUN_TASKS'
-    agent: agent
-    send: true
-
-  - label: '🛡 Run Analyze'
-    prompt: 'ACTION_RUN_ANALYZE'
-    agent: agent
-    send: true
-
-  - label: '⚙️ Run Implement'
-    prompt: 'ACTION_RUN_IMPLEMENT'
-    agent: agent
-    send: true
-
-  - label: '🏁 Proceed to Closure'
-    prompt: 'ACTION_RUN_CLOSURE'
-    agent: agent
-    send: true
-
-  - label: '✅ Approve & Continue'
-    prompt: 'ACTION_APPROVE_CONTINUE'
-    agent: agent
-    send: true
 ---
 
 # GOVERNANCE DECLARATION
@@ -94,15 +49,16 @@ Phase: <PHASE_NAME>
 Branch: <STAGE_DIR_NAME>
 Current Step: <current_step>
 Status: <stage_status>
+Package Mgr: <PKG_MANAGER>
 
 Progress:
-[Pre] → [Specify] → [Clarify] → [Plan] → [Tasks] → [Analyze] → [Implement] → [Closure]
+1/8: [Pre]/[Specify]/[Clarify]/[Plan]/[Tasks]/[Analyze]/[Implement]/[Closure]
 
 Highlight current step with ▶ and completed steps with ✓.
 
 Example:
 
-✓ Pre → ✓ Specify → ✓ Clarify → ✓ Plan → ✓ Tasks → ▶ Analyze → Implement → Closure
+3/8: Clarify
 
 Rules:
 
@@ -201,35 +157,6 @@ Human confirmation is only required for:
 - Pre-Closure Review Gate
 - Explicit architectural override
 - Formal task deferral
-
----
-
-## Action Token Handling (Chat-Friendly Mode)
-
-This agent supports structured action tokens triggered by UI buttons.
-
-Recognized action tokens:
-
-- ACTION_START_PRESTEP
-- ACTION_RUN_SPECIFY
-- ACTION_RUN_CLARIFY
-- ACTION_RUN_PLAN
-- ACTION_RUN_TASKS
-- ACTION_RUN_ANALYZE
-- ACTION_RUN_IMPLEMENT
-- ACTION_RUN_CLOSURE
-- ACTION_APPROVE_CONTINUE
-
-Behavior Rules:
-
-1. If an ACTION*RUN*\* token is received → execute the corresponding step immediately.
-2. If ACTION_APPROVE_CONTINUE is received:
-   - If no blockers exist → automatically proceed to the next logical step.
-   - If blockers exist → list blockers and STOP.
-3. If required inputs are missing → request structured input.
-4. If a step completes without blockers → auto-advance per the Automatic Continuation Rule.
-
-Manual confirmation typing is only required for the explicit Pre-Closure Review Gate.
 
 ---
 
@@ -398,9 +325,18 @@ elif [ -f "yarn.lock" ]; then
 elif [ -f "package-lock.json" ]; then
   PKG_MANAGER="npm"
 else
-  echo "ERROR: No lockfile found. Cannot determine package manager."
-  echo "Ask the user which package manager the project uses before continuing."
-  exit 1
+  echo "No lockfile found — presenting package manager selection to user."
+
+  # Present selection widget:
+  # widget choice
+  # prompt: "No lockfile detected. Which package manager does this project use?"
+  # options:
+  #   - label: "bun"   value: "bun"
+  #   - label: "pnpm"  value: "pnpm"
+  #   - label: "yarn"  value: "yarn"
+  #   - label: "npm"   value: "npm"
+  #
+  # Store the selected value as PKG_MANAGER and continue.
 fi
 
 echo "Detected package manager: $PKG_MANAGER"
@@ -500,21 +436,36 @@ Before creating, replacing, or updating any `## Stage Status` block:
 
 ## Structured Intake Mode (User-Friendly)
 
-Please provide the following using this format:
+Present the following input widget to the user:
 
-Stage:
-Phase:
-Stage File:
+```widget ask_user
+fields:
+  - label: "Stage Name"
+    placeholder: "e.g. Tenant Provisioning Service"
+    required: true
+  - label: "Phase Name"
+    placeholder: "e.g. PHASE_02_BACKEND"
+    required: true
+  - label: "Stage File"
+    placeholder: "e.g. STAGE_05_TENANT_PROVISIONING_SERVICE.md"
+    required: true
+```
 
 Rules:
 
 - All three fields are required.
-- If one is missing → clearly indicate which field is missing.
-- Once confirmed → summarize parsed values before proceeding.
+- If any field is missing → highlight the missing field and ask the user to complete it before proceeding.
+- Once all fields are filled → summarize parsed values in a confirmation block before proceeding.
 - Do NOT re-ask for values already confirmed.
 
-After confirmation:
-→ Automatically suggest: 🚀 Start Pre-Step
+After the user submits the form, display a confirmation summary and present a single action button:
+
+```widget action_button
+label: "🚀 Start Pre-Step"
+action: ACTION_START_PRESTEP
+style: primary
+```
+
 → If ACTION_START_PRESTEP is triggered → execute Pre-Step immediately.
 
 ---
@@ -539,30 +490,25 @@ Store as `STAGE_DIR_NAME`.
 
 Apply Package Manager Enforcement — run the lockfile detection block now and store `PKG_MANAGER` for the entire session. Every step from here onwards uses this value. Do NOT re-detect mid-session.
 
-After `PKG_MANAGER` is detected, print a status summary:
-
-```
-═════════════════════════════════════════════════════════════
-  ZIDNEY ORCHESTRATOR INITIALIZATION
-═════════════════════════════════════════════════════════════
-
-Stage:         <STAGE_NAME>
-Phase:         <PHASE_NAME>
-Branch:        <STAGE_DIR_NAME>
-Package Mgr:   <PKG_MANAGER>
-
-═════════════════════════════════════════════════════════════
-```
-
 ## Pre.2 — Confirm Base Branch
 
-Default: `develop`. Ask the user to confirm or override:
+Present a selection widget with a default of `develop`:
 
-```
-Base branch for checkout [develop]:
+```widget choice
+prompt: "Select base branch to checkout from:"
+options:
+  - label: "develop"
+    value: "develop"
+    default: true
+  - label: "main"
+    value: "main"
+  - label: "Other — type below"
+    value: "custom"
 ```
 
-Store as `BASE_BRANCH`.
+If "Other" is selected → show a text input field for the user to type the branch name.
+
+Store the confirmed value as `BASE_BRANCH`.
 
 ## Pre.3 — Validate Clean Working Tree
 
@@ -570,7 +516,22 @@ Store as `BASE_BRANCH`.
 git status --porcelain
 ```
 
-If output is not empty → STOP. List modified files. Require cleanup or explicit user approval.
+If output is not empty → STOP. Display the list of modified files clearly, then present:
+
+```widget choice
+prompt: "Working tree is not clean. How would you like to proceed?"
+options:
+  - label: "🧹 I've cleaned it — retry"
+    value: "retry"
+  - label: "✅ Approve dirty files and continue"
+    value: "approve"
+  - label: "🛑 Abort"
+    value: "abort"
+```
+
+- `retry` → re-run `git status --porcelain` and re-evaluate
+- `approve` → continue with explicit dirty-tree approval recorded in .workflow-state.json
+- `abort` → halt the entire workflow
 
 ## Pre.4 — Create Git Branch
 
@@ -581,7 +542,19 @@ git pull origin <BASE_BRANCH>
 git checkout -b <STAGE_DIR_NAME>
 ```
 
-If branch already exists → STOP. Ask whether to reuse or abort.
+If branch already exists → STOP. Display the branch name and present:
+
+```widget choice
+prompt: "Branch '<STAGE_DIR_NAME>' already exists. What would you like to do?"
+options:
+  - label: "♻️ Reuse existing branch"
+    value: "reuse"
+  - label: "🛑 Abort"
+    value: "abort"
+```
+
+- `reuse` → run `git checkout <STAGE_DIR_NAME>` and continue from Pre.5
+- `abort` → halt the entire workflow
 
 ## Pre.5 — Create Stage Directory Structure
 
@@ -1318,10 +1291,19 @@ If any check fails → STOP. Implementation forbidden until resolved.
 
 **What speckit.implement does first:** It scans all files in `specs/runtime/<STAGE_DIR_NAME>/checklists/` and displays a pass/fail table. If any checklist has incomplete items, it will STOP and ask the user whether to proceed.
 
-The orchestrator MUST verify `checklists/requirements.md` (created by speckit.specify in Step 1) is fully complete before handing off to speckit.implement. If any checklist items are incomplete:
+The orchestrator MUST verify `checklists/requirements.md` (created by speckit.specify in Step 1) is fully complete before handing off to speckit.implement. If any checklist items are incomplete → STOP, display the incomplete items clearly, then present:
 
-- STOP and present the incomplete items
-- Require the user to either complete them or explicitly approve proceeding
+```widget choice
+prompt: "Some checklist items in checklists/requirements.md are incomplete. How would you like to proceed?"
+options:
+  - label: "✅ I've completed the checklists — re-check"
+    value: "recheck"
+  - label: "⚠️ Proceed anyway (risk accepted)"
+    value: "proceed"
+```
+
+- `recheck` → re-read `checklists/requirements.md` and re-evaluate completeness
+- `proceed` → continue with incomplete checklists, record explicit user override in .workflow-state.json
 
 ## 6.3 — Execute Implement
 
@@ -1360,6 +1342,8 @@ Count `- [X]` lines (uppercase X) in `specs/runtime/<STAGE_DIR_NAME>/tasks.md` t
 
 → STOP. Do NOT write report or proceed to closure.
 
+Display the following summary, then present a choice widget:
+
 ```
 ⚠️ Implementation Incomplete
 
@@ -1368,14 +1352,20 @@ Completed: <TASKS_COMPLETED> / <TASKS_TOTAL> tasks
 Remaining tasks:
 - [Each incomplete task: layer | description]
 
-Options:
-  A) Continue implementation now
-  B) Formally defer remaining tasks with written justification per task
-
 Closure is FORBIDDEN until all tasks are complete or formally deferred.
 ```
 
-Wait for user decision. If deferral approved → document each task and justification before continuing.
+```widget choice
+prompt: "How would you like to proceed?"
+options:
+  - label: "▶️ Continue implementation now"
+    value: "continue"
+  - label: "📋 Formally defer remaining tasks"
+    value: "defer"
+```
+
+- `continue` → resume speckit.implement from the next incomplete task
+- `defer` → for each remaining task, show a text input field asking the user to provide a written justification; record all deferrals before continuing
 
 **If `TASKS_COMPLETED = TASKS_TOTAL` (or all remaining formally deferred):** → Proceed to 6.5.
 
@@ -1554,14 +1544,33 @@ Audits:
   specs/runtime/<STAGE_DIR_NAME>/audits/VALIDATION_REPORT.md
 
 Tasks completed: <TASKS_COMPLETED> / <TASKS_TOTAL>
-
-Respond with:
-  ✅ "Approved — proceed to closure"
-  ❌ "Issues found — [describe what needs fixing]"
 ```
 
-If issues reported → address them, regenerate affected report(s), update stage status and workflow state, then re-present this gate.  
-Do NOT proceed to Step 7 until explicit approval received.
+Present the following action buttons:
+
+```widget choice
+prompt: "Please review all reports above. How would you like to proceed?"
+options:
+  - label: "✅ Approve — proceed to closure"
+    value: "approve"
+    style: primary
+  - label: "❌ Issues found — send back for fixes"
+    value: "reject"
+    style: danger
+```
+
+If `reject` → show a text input field:
+
+```widget text_input
+label: "Describe what needs fixing:"
+placeholder: "e.g. PLAN_REPORT.md missing endpoint contracts, tasks.md has 2 unchecked items"
+required: true
+```
+
+Then address the reported issues, regenerate affected report(s), update stage status and workflow state, re-run Gate A, and re-present Gate B.
+
+If `approve` → proceed immediately to Step 7.
+Do NOT proceed to Step 7 until explicit approval is received.
 
 ---
 
