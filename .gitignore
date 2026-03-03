@@ -65,3 +65,4 @@ Thumbs.db
 # act (local GitHub Actions runner)
 .secrets
 .vars
+.gitnexus

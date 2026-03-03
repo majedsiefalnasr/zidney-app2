@@ -48,7 +48,7 @@ Stage: <STAGE_NAME>
 Phase: <PHASE_NAME>
 Branch: <STAGE_DIR_NAME>
 Current Step: <current_step>
-Status: <stage_status>
+Status: <displayed_status>
 Package Mgr: <PKG_MANAGER>
 
 Progress:
@@ -66,7 +66,22 @@ Rules:
 - Update progress markers after each committed step.
 - If BLOCKED, display: "STATUS: BLOCKED — Remediation Required" in banner.
 
-This banner must be deterministic and derived from .workflow-state.json.
+Displayed status must be deterministic and derived from `.workflow-state.json` using:
+
+- If `stage_status != DRAFT`:
+  - Use `stage_status` directly.
+- If `stage_status == DRAFT`:
+  - `pre_step` -> `DRAFT — Initializing`
+  - `specify` -> `DRAFT — Specifying`
+  - `clarify` -> `DRAFT — Clarifying`
+  - `plan` -> `DRAFT — Planning`
+  - `tasks` -> `DRAFT — Tasking`
+  - `analyze` -> `IN PROGRESS — Analyzing`
+  - `implement` -> `IN PROGRESS — Implementing`
+  - `stage_production_ready` -> `PRODUCTION READY`
+  - Any unknown step -> `DRAFT`
+
+`displayed_status` is presentation-only. Do not mutate lifecycle `stage_status` solely for banner output.
 
 ---
 
@@ -643,6 +658,7 @@ Open `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`. Add or replace `## Stage Sta
 ## Stage Status
 
 Status: DRAFT
+Step: pre_step
 Risk Level: UNKNOWN
 Initiated: <ISO_TIMESTAMP>
 
@@ -723,6 +739,7 @@ Apply Stage Lifecycle Guard first.
 ## Stage Status
 
 Status: DRAFT
+Step: specify
 Risk Level: UNKNOWN
 Last Updated: <ISO_TIMESTAMP>
 
@@ -824,6 +841,7 @@ Apply Stage Lifecycle Guard first.
 ## Stage Status
 
 Status: DRAFT
+Step: clarify
 Risk Level: <LOW / MEDIUM / HIGH>
 Last Updated: <ISO_TIMESTAMP>
 
@@ -940,6 +958,7 @@ Apply Stage Lifecycle Guard first.
 ## Stage Status
 
 Status: DRAFT
+Step: plan
 Risk Level: <LOW / MEDIUM / HIGH>
 Last Updated: <ISO_TIMESTAMP>
 
@@ -1051,6 +1070,7 @@ Apply Stage Lifecycle Guard first.
 ## Stage Status
 
 Status: DRAFT
+Step: tasks
 Risk Level: <LOW / MEDIUM / HIGH>
 Last Updated: <ISO_TIMESTAMP>
 
