@@ -5,15 +5,15 @@
   "stage_file": "specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_06_STATE_MANAGEMENT.md",
   "branch": "ui-06-state-management",
   "base_branch": "develop",
-  "current_step": "specify",
+  "current_step": "clarify",
   "stage_status": "DRAFT",
-  "clarifications_resolved": false,
+  "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
   "tasks_total": null,
   "tasks_completed": null,
-  "last_updated": "2026-03-03T00:00:00.000Z",
+  "last_updated": "2026-03-03T00:01:00.000Z",
   "history": [
     {
       "event": "branch_created",
@@ -22,6 +22,10 @@
     },
     {
       "event": "specify_complete",
+      "timestamp": "2026-03-03T00:00:00.000Z"
+    },
+    {
+      "event": "clarifications_locked",
       "timestamp": "2026-03-03T00:00:00.000Z"
     }
   ]

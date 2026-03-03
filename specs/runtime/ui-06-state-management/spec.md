@@ -103,7 +103,7 @@ A developer fetches workspace data in Backoffice. The API call fails with a 503.
 - What happens when a store is used before Pinia is initialized? All stores must be consumed after `createPinia()` is registered in `main.ts`. Stores must not instantiate themselves at module load time via side effects.
 - What happens when two concurrent actions in the same store both attempt to set `isLoading`? Each action must manage its own local `isLoading` flag or use scoped pending state; a single global `isLoading` flag per store is insufficient for concurrent multi-action stores.
 
-  [NEEDS CLARIFICATION: Should stores with multiple concurrent async operations use a single boolean `isLoading` flag, or a per-action pending map (e.g., `pending: Record<string, boolean>`)? The answer determines the standard loading state shape across all stores.]
+  **RESOLVED (2026-03-03)**: Stores with a single primary async concern use `isLoading: boolean`. Stores that must independently track multiple concurrent async operations MUST additionally expose a `pending: Record<string, boolean>` map keyed by action name. See FR-016 and `## Clarifications → Session 2026-03-03`.
 
 - What happens when `pinia-plugin-persistedstate` is not yet initialized before the first store access? Plugin must be registered before `app.mount()` in `main.ts`.
 - What happens when JWT is stored and the app updates? JWT must never be in `localStorage`. Any inadvertent prior `localStorage` reads for JWT-like keys must be treated as a security violation.
@@ -140,9 +140,9 @@ A developer fetches workspace data in Backoffice. The API call fails with a 503.
 
 **Loading and Error State**
 
-- **FR-016**: Every store that performs async operations MUST expose an `isLoading` reactive boolean that is `true` during the async operation and `false` otherwise.
+- **FR-016**: Every store that performs async operations MUST expose an `isLoading: boolean` reactive property as its primary loading signal (`true` during the async operation, `false` otherwise). Stores that must independently track multiple concurrent async operations MUST additionally expose a `pending: Record<string, boolean>` map keyed by action name. The specific loading state shape for each store MUST be declared in that store's design documentation.
 - **FR-017**: Every store that performs async operations MUST expose an `error` reactive property typed as `AppError | null`, defaulting to `null`.
-- **FR-018**: Before each new async action begins, `error` MUST be reset to `null`.
+- **FR-018**: Before each new async action begins, `error` MUST be automatically reset to `null`. Every store that exposes `error` state MUST also expose a `clearError()` action for explicit error clearing by components.
 - **FR-019**: On action failure, `isLoading` MUST be set to `false` and `error` MUST be set to the caught `AppError`.
 
 **State Persistence**
@@ -163,7 +163,7 @@ A developer fetches workspace data in Backoffice. The API call fails with a 503.
 
 - **FR-028**: Every store MUST be unit-testable in isolation using `setActivePinia(createPinia())` without requiring a browser environment, DOM, or Vue component.
 - **FR-029**: API module dependencies MUST be injectable/mockable so store actions can be tested against simulated success, error, and network failure scenarios.
-- **FR-030**: Store state MUST be fully resettable between test cases using `store.$reset()` or by re-instantiating via `setActivePinia`.
+- **FR-030**: All stores (both core and feature) MUST implement `$reset()` to restore the store to its initial state. `$reset()` is mandatory — not optional — for every store. Store state MUST be fully resettable between test cases using `store.$reset()` or by re-instantiating via `setActivePinia`.
 - **FR-031**: Stores MUST export no module-level side effects. Initialization must happen only when the store composable is first called.
 
 **Naming and Organization**
@@ -185,7 +185,7 @@ A developer fetches workspace data in Backoffice. The API call fails with a 503.
 - **Auth Store** (`auth.store.ts`): Manages the authenticated user session — current user identity, token lifecycle (in-memory), authentication status, and logout action.
 - **App Store** (`app.store.ts`): Manages global application layout state — sidebar collapsed, active view mode, any app-wide toggles.
 - **UI Store** (`ui.store.ts`): Manages transient UI state — modals open/closed, drawers, overlay visibility.
-- **Notification Store** (`notification.store.ts`): Manages toast and alert notifications — push, dismiss, and clear actions.
+- **Notification Store** (`notification.store.ts`): Manages toast and alert notifications — push, dismiss, and clear actions. The notification store MUST maintain a queue of notifications (not only the most recent) so multiple concurrent notifications can be displayed and dismissed independently.
 - **Workspace Store** (`workspace.store.ts`, Backoffice only): Manages the resolved workspace context (slug, name, tier) for the active session. Read by feature stores; not mutated by them.
 - **AppError**: The structured error type imported from the shared packages. Used as the typed `error` state across all stores.
 
@@ -210,6 +210,7 @@ A developer fetches workspace data in Backoffice. The API call fails with a 503.
 
 ## Assumptions
 
+- Pinia 2.x (the stable release line for Vue 3) is the target version for this stage. No Pinia 3 or alpha builds are assumed.
 - The `api-client` package (`packages/api-client`) exports typed API module functions (e.g., `authApi.login(...)`) that stores will call. Stores do not compose raw HTTP calls.
 - `AppError` is exported from `packages/types` or `packages/domain-core` and is the agreed error contract for all API failure cases.
 - `pinia-plugin-persistedstate` is an approved dependency and is already listed in the monorepo's dependency policy.
@@ -234,3 +235,17 @@ This stage does NOT define:
 - The router guard integration (that belongs to `ui-03-router-and-guards`)
 - Deep token refresh logic (belongs to `ui-02-api-client-layer`)
 - The env configuration pattern (belongs to `ui-05-env-configuration`)
+- Server-Side Rendering (SSR) support. Zidney frontend apps (MMC, Backoffice, Frontoffice) are Client-Side Rendered (CSR) only. SSR store hydration patterns are out of scope for this stage.
+
+---
+
+## Clarifications
+
+### Session 2026-03-03
+
+- Q: Should stores with multiple concurrent async operations use a single boolean `isLoading` flag, or a per-action `pending: Record<string, boolean>` map? → A: Stores with a single primary async concern use `isLoading: boolean`. Any store that must independently track multiple concurrent async operations MUST additionally expose a `pending: Record<string, boolean>` map keyed by action name. The specific shape must be declared in the store's design doc. FR-016 updated accordingly.
+- Q: Which exact Pinia version should be targeted? → A: Pinia 2.x (stable for Vue 3). Resolved autonomously; added to Assumptions.
+- Q: Should the notification store support multiple notifications or only the most recent? → A: A queue of notifications — multiple concurrent notifications must be maintainable and dismissible independently. Resolved autonomously; Notification Store entity updated.
+- Q: Should `$reset()` be required on feature stores but optional on core stores? → A: `$reset()` is required on ALL stores — both core and feature. Resolved autonomously; FR-030 updated.
+- Q: Should stores support Server-Side Rendering (SSR)? → A: Out of scope for this stage. Zidney apps are CSR only. Resolved autonomously; added to Out of Scope.
+- Q: Should stores expose a `clearError()` action, or rely solely on auto-clear at next action start? → A: Both — `error` is automatically reset to `null` at the start of every async action, AND every store exposing `error` state MUST provide a `clearError()` action for explicit clearing by components. Resolved autonomously; FR-018 updated.

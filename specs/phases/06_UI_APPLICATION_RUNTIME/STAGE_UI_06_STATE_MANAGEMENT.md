@@ -9,33 +9,36 @@ UI Foundation — Centralized State Management Architecture
 ## Stage Status
 
 Status: DRAFT
-Risk Level: UNKNOWN
+Risk Level: LOW
 Last Updated: 2026-03-03T00:00:00.000Z
 
 Scope Defined:
 
-- Pinia-based store architecture for MMC, Backoffice, Frontoffice
+- Pinia 2.x Composition API store architecture for MMC, Backoffice, Frontoffice (37 FRs)
 - Domain-oriented store boundaries (core/state vs modules/<feature>)
-- API interaction chain enforcement (Component → Store → API Module → client)
+- API interaction chain: Component -> Store -> API Module -> client (no direct HTTP in components)
 - Cross-store communication rules (read via storeToRefs, no direct mutation)
-- Loading and error state conventions (isLoading, error: AppError | null)
-- State persistence policy (pinia-plugin-persistedstate, explicit paths whitelist)
-- Security constraints (JWT never in localStorage/sessionStorage)
-- Testability and isolation rules
-- Per-app scope boundaries
+- Loading state: isLoading: boolean (primary) + pending: Record<string, boolean> (multi-action)
+- Error state: error: AppError | null with auto-reset and explicit clearError() action
+- State persistence via pinia-plugin-persistedstate with explicit paths whitelist
+- Security: JWT never in localStorage/sessionStorage (memory or secure HTTP-only cookie)
+- Testability: setActivePinia isolation, $reset() required on ALL stores
+- Notification store: queue-based, independently dismissible
+- CSR-only (no SSR scope)
 
 Deferred Scope:
 
 - Feature-specific store implementations (products, licenses, attempt engine, dashboard)
 - Router guard integration (ui-03-router-and-guards)
 - Deep token refresh logic (ui-02-api-client-layer)
+- SSR support
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved - planning authorized
 
 Notes:
-Specification complete. 1 clarification pending (concurrent async loading state shape). Clarification step pending.
+All specification ambiguities resolved. 6/6 clarifications encoded. Ready for technical planning.
 
 ---
 
