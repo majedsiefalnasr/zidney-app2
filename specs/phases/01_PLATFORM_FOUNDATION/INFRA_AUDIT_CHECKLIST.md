@@ -9,16 +9,18 @@ Purpose: Non-destructive audit before governance enforcement
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
 Last Updated: 2026-03-04T00:00:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- Phase 0: Research & setup (verify Bun, .gitignore guard)
-- Phase 1: Create scripts/infra-audit.ts (non-destructive Bun CLI)
-- Phase 2: Manual audit supplements (ESLint severity, CI posture, README, tech debt)
-- Phase 3: Written deliverables (Gap Report, Risk Classification, Safe Rollout Plan)
+- Total: 53 atomic tasks
+- Phase 0 (Research & Setup): 7 tasks
+- Phase 1 (Audit Script, US9): 12 tasks
+- Phase 2 (Manual Supplements, US1–US8): 30 tasks
+- Phase 3 (Written Deliverables, US10): 4 tasks
+- Parallelizable: 33 tasks
 
 Deferred Scope:
 
@@ -26,10 +28,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Architecture Checker verdict: PASS. API Designer: N/A (no endpoints). Risk level LOW. Ready for task breakdown.
+53 atomic tasks generated. All tasks are read-only or additive. T053 is the final governance gate.
 
 ---
 
