@@ -10,17 +10,16 @@ UI Foundation — Centralized State Management Architecture
 
 Status: DRAFT
 Risk Level: MEDIUM
-Last Updated: 2026-03-03T00:02:00.000Z
+Last Updated: 2026-03-03T00:03:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- 27 implementation tasks across 5 phases (Infrastructure, MMC, Backoffice, Frontoffice, Validation)
-- 21 new files, 13 modified files across 3 apps
-- Pinia initialization in main.ts for all 3 apps with pinia-plugin-persistedstate
-- 13 core runtime stores (auth, app, ui, notification, workspace)
-- Design Contracts: concurrent call guard, error contract, persistence whitelist
-- ESLint no-restricted-imports rule for .vue files
-- Full unit test coverage per store + integration tests for bootstrap
+- Total: 38 atomic tasks across 8 groups
+- Group A (Infrastructure): T001-T005 — 5 tasks
+- Group B (MMC): T006-T011 — 6 tasks
+- Group C (Backoffice): T012-T018 — 7 tasks
+- Group D (Frontoffice): T019-T024 — 6 tasks
+- Groups E1-E4 (Tests): T025-T038 — 14 tasks
 
 Deferred Scope:
 
@@ -31,12 +30,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant - task generation authorized
-- Architecture Checker: VERDICT PASS
-- API Designer: VERDICT PASS (after 2 HIGH + 3 MEDIUM remediations)
+- Task set compliant - drift analysis required before implementation
 
 Notes:
-Technical plan complete. Both guardians passed. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
