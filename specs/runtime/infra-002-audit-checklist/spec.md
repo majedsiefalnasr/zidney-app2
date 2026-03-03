@@ -317,3 +317,49 @@ As a platform engineer, I want the audit stage to conclude with three versioned 
 | **Bun**                            | The JavaScript runtime and package manager used by Zidney (`bun install`, `bun test`, `bun run`).                                                                             |
 | **Flat ESLint Config**             | The `eslint.config.*` format introduced in ESLint v9, as distinct from the legacy `.eslintrc.*` format.                                                                       |
 | **Playwright**                     | The E2E testing framework; presence of its config file is audited per app in the E2E section.                                                                                 |
+
+---
+
+## Clarifications
+
+### Session 2026-03-04
+
+**CL1 — Coverage Baseline Scope (Test Suite Inclusion vs. DB Isolation)**
+Q: FR-US2-4 requires running `bun test --coverage` to record the coverage baseline. However, NFR-I1 prohibits invoking any tenant database connection during this audit stage. If `bun test --coverage` executes integration or API tests that attempt DB connections, a conflict arises between recording a complete coverage baseline and the tenant isolation constraint. Should the coverage run be limited to unit tests only, or should all tests be attempted with DB-touching failures documented as-is?
+A: Run the full test suite via `bun test --coverage` in a local test environment where DB connections are expected to fail gracefully. Any integration test failures caused by a missing or unavailable DB must be recorded as "DB-GATED" entries in `infra-audit-report.json`. The coverage baseline captures whatever succeeds; no filtering by test type is applied at the script level. This aligns with the R1 mitigation: "Record partial coverage with error log; document broken tests as debt items; do not block audit on test failure."
+Rationale: Filtering tests by type before running would alter the measurement and underreport real coverage gaps. The audit goal is to record the current state, including failures caused by environment constraints.
+
+**CL2 — Audit Script Re-run Behavior (Idempotency of `infra-audit-report.json`)**
+Q: FR-US9-4 states the script must not modify any tracked file and must write `infra-audit-report.json` to the repo root. The spec does not specify what happens when `infra-audit-report.json` already exists from a previous run. Should the script overwrite silently, emit a warning and overwrite, or append a timestamped variant?
+A: The script must overwrite `infra-audit-report.json` silently on every run without prompting. The file is ephemeral (gitignored per R7 mitigation) and NFR-O3 requires reproducibility across runs, making silent overwrite the correct default. Versioning or appending would violate the "single source of truth" intent of the audit report. The `timestamp` field inside the JSON (required by AC-US9-3) serves as the run-identity record.
+Rationale: A read-only audit stage that produces a non-idempotent output artifact would undermine the repeatability guarantee in NFR-O3. Silent overwrite is the standard pattern for generated report files.
+
+**CL3 — Secrets Exclusion Pattern Scope (NFR-S1)**
+Q: NFR-S1 prohibits the audit script from reading `.env` content or credential files, but does not enumerate which filename patterns qualify as secret files. The spec mentions `.env` explicitly but does not clarify whether `.env.*`, `*.pem`, `*.key`, `*.secret`, or `docker-compose.override.yml` are also excluded.
+A: The audit script must skip — without opening or reading — any file matching the following patterns during all filesystem scans: `.env`, `.env.*`, `*.pem`, `*.key`, `*.secret`, `*.p12`, `*.pfx`, and `docker-compose.override.yml`. If the script encounters one of these files during directory traversal, it must log the filename as "SKIPPED (secret pattern)" in the console output and exclude it from all audit results. No other credential patterns need be enumerated for this stage.
+Rationale: Enumerating an explicit exclusion list prevents accidental credential exposure through pattern-matching ambiguity and satisfies NFR-S1's intent without requiring a runtime secret-detection library.
+
+**CL4 — Audit Script Error Handling on Parse Failure**
+Q: The spec defines what the audit script must collect but does not specify behaviour when a discovered file cannot be parsed (e.g., a malformed Vitest config, a YAML syntax error in a CI workflow file, or a `package.json` with invalid JSON). Should the script abort the entire run on the first parse error, or log the failure and continue?
+A: The script must catch parse errors per file, log the file path and error message to the console as a structured warning, and continue processing all remaining files. The failed file must appear in `infra-audit-report.json` with a `"status": "PARSE_ERROR"` field alongside its path. The overall script exit code must remain 0 (success) as long as the filesystem scan completes, ensuring the Gap Report is always produced even in partially degraded conditions.
+Rationale: Aborting on first failure would prevent the audit from producing a complete picture in repositories with known configuration debt — precisely the state this audit is designed to document.
+
+**CL5 — Flaky Test Detection Method (FR-US7-4)**
+Q: FR-US7-4 requires the audit to "scan test output for known flaky test markers" but does not define what constitutes a "known flaky test marker." There are at least three possible approaches: scanning source files for comment or API markers, reading previous CI run logs, or parsing Vitest retry configuration. Which method is in scope?
+A: The script must perform a static scan of test source files only (no external CI log access, no network requests per NFR-S2). The scan must detect the following patterns: `.retry(`, `// flaky`, `// FLAKY`, `// unstable`, `// UNSTABLE`, and the Vitest config key `retry:` with a value ≥ 1. The resulting flaky-test count is labelled `"detectionMethod": "STATIC_SCAN_ONLY"` in `infra-audit-report.json` and must be described as best-effort in the Gap Report.
+Rationale: CI log inspection would require network access or credentials (violating NFR-S2 and NFR-S1). Static source scanning is deterministic, reproducible, and fully contained within the local filesystem.
+
+**CL6 — README Section Completeness Threshold (FR-US6-2)**
+Q: FR-US6-2 requires verifying the presence of seven named sections in each README. The spec does not define what "presence" means — specifically whether a markdown heading alone satisfies the check, or whether the section must also contain non-empty body content.
+A: A section is considered PRESENT only if (a) a markdown heading matching the section name (case-insensitive, `#` through `###` depth) exists AND (b) at least one non-blank, non-heading line of body text follows before the next heading. A heading with no body content must be classified as `PRESENT_EMPTY`, which is treated identically to MISSING for the purpose of MEDIUM debt classification per FR-US6-3. The `PRESENT_EMPTY` status must appear as a distinct column value in the README audit table so it can be distinguished from a completely absent section.
+Rationale: An empty heading gives false confidence that documentation exists. Distinguishing `PRESENT_EMPTY` from `PRESENT` enables more precise remediation prioritisation in the Safe Rollout Plan.
+
+**CL7 — Enforcement Readiness Score Verdict Thresholds (FR-US8-2)**
+Q: FR-US8-2 defines three possible overall verdicts (READY FOR ENFORCEMENT, PARTIAL — FIX REQUIRED, NOT READY) but does not specify at what count of NEEDS WORK areas each verdict applies. Without a defined threshold, two auditors could assign different verdicts from the same score table.
+A: The verdict must be determined by the following rule applied to the six governance areas: 0 areas NEEDS WORK → `READY FOR ENFORCEMENT`; 1–3 areas NEEDS WORK → `PARTIAL — FIX REQUIRED`; 4–6 areas NEEDS WORK → `NOT READY`. This threshold rule must be documented verbatim in the Gap Report immediately above the readiness score table so it is visible for review. The threshold itself is not a governance enforcement gate — it is an auditor convention, and the STAGE_INFRA_GOVERNANCE implementer may override it with explicit justification.
+Rationale: Without a numeric threshold, the verdict becomes subjective and non-reproducible across audit runs or reviewers, undermining the auditability goal of NFR-O3.
+
+**CL8 — Cross-Referencing Requirement Definition (AC-US10-4)**
+Q: AC-US10-4 requires that all three output documents (Gap Report, Risk Classification, Safe Rollout Plan) "cross-reference" each other, but does not define what cross-referencing means in practice. Does a plain text mention of the other document names satisfy this, or must relative markdown links be used?
+A: Cross-referencing is satisfied only by a dedicated "Related Documents" section (or equivalent heading) in each output document that lists the other two documents as relative markdown links using their filenames. Example: `[RISK_CLASSIFICATION.md](./RISK_CLASSIFICATION.md)`. A plain text mention without a link does not satisfy this requirement. The "Related Documents" section must appear at the top of each document (before the first audit content section) so reviewers can navigate between documents without scrolling.
+Rationale: Markdown links are machine-verifiable and enable tooling to validate document graph completeness in CI, whereas plain text mentions provide no navigability or automated verifiability.

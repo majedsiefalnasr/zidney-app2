@@ -9,26 +9,26 @@ Purpose: Non-destructive audit before governance enforcement
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
+Step: clarify
+Risk Level: LOW
 Last Updated: 2026-03-04T00:00:00.000Z
 
 Scope Defined:
 
-- Read-only infrastructure audit of Vitest configs, test distribution, ESLint, CI, Bun compatibility, README coverage, technical debt, and enforcement readiness
-- Repeatable audit script: scripts/infra-audit.ts
+- Read-only infrastructure audit: Vitest inventory, test distribution, ESLint audit, CI audit, Bun compatibility, README coverage, tech debt snapshot, enforcement readiness score
+- Repeatable non-destructive audit script: scripts/infra-audit.ts
 - Written deliverables: Gap Report, Risk Classification, Safe Rollout Plan
 
 Deferred Scope:
 
-- Any Vitest consolidation, ESLint rule changes, Prettier changes, Husky hooks, CI workflow modifications — all deferred to STAGE_INFRA_GOVERNANCE
+- Any Vitest consolidation, ESLint rule changes, Prettier changes, Husky hooks, CI workflow modifications — deferred to STAGE_INFRA_GOVERNANCE
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. 10 user stories defined (US1–US10). Zero clarification markers. Clarification step pending.
+All specification ambiguities resolved (8 clarifications, CL1–CL8). Risk level LOW. Ready for technical planning.
 
 ---
 
