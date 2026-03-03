@@ -9,6 +9,7 @@
 import '@/core/config/app-config'
 
 import { createPinia } from 'pinia'
+import { createPersistedState } from 'pinia-plugin-persistedstate'
 import { createApp } from 'vue'
 import App from './App.vue'
 
@@ -36,6 +37,7 @@ const DASHBOARD_ROUTE = 'bo-dashboard'
 
 // ── Step 1: Create Pinia ───────────────────────────────────────────
 const pinia = createPinia()
+pinia.use(createPersistedState()) // FR-021, FR-034: register before any store instantiation
 
 // ── Step 2: Create Router ───────────────────────────────────────────
 const router = createAppRouter()

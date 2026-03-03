@@ -15,6 +15,17 @@ export default defineConfig({
         find: '@zidney/logger',
         replacement: resolve(__dirname, '../../packages/logger/src/index.ts'),
       },
+      {
+        find: '@zidney/types',
+        replacement: resolve(__dirname, '../../packages/types/src/index.ts'),
+      },
+      {
+        find: '@zidney/api-client',
+        replacement: resolve(
+          __dirname,
+          '../../packages/api-client/src/index.ts'
+        ),
+      },
     ],
   },
   test: {

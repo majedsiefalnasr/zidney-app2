@@ -184,5 +184,39 @@ export default tseslint.config(
     rules: {
       'vue/no-v-html': 'error',
     },
+  },
+
+  // T005 (STAGE_UI_06): API client import firewall — covers .vue AND .ts (composables, helpers)
+  // Store files are excluded; they are the only layer allowed to call the API client (FR-008, SC-002)
+  // core/api and core/auth are excluded — they are the infrastructure wrappers below the store layer
+  {
+    files: ['apps/**/*.{vue,ts}'],
+    ignores: [
+      'apps/*/src/core/state/**',
+      'apps/*/src/modules/**/*.store.ts',
+      'apps/*/src/core/api/**',
+      'apps/*/src/core/auth/**',
+    ],
+    rules: {
+      'no-restricted-imports': ['error', {
+        patterns: [
+          {
+            group: ['@zidney/api-client', '@zidney/api-client/*'],
+            message:
+              'Direct API client imports are forbidden. ' +
+              'Call a store action instead. (STAGE_UI_06 — FR-008)',
+          },
+        ],
+      }],
+    },
+  },
+
+  // T005 (STAGE_UI_06): Prevent v-html in all app templates — broader catch for XSS
+  // via notification/workspace name rendering (FR-027)
+  {
+    files: ['apps/**/*.vue'],
+    rules: {
+      'vue/no-v-html': 'error',
+    },
   }
 )

@@ -1,15 +1,14 @@
 /**
  * Pinia state module index for Backoffice.
- * Router is no longer injected via Pinia plugin — it is passed directly to
- * defineAuthStore() in main.ts (STAGE_UI_01_AUTH_MODULE).
+ * Re-exports all core stores for the Backoffice application.
  *
- * Stage: STAGE_UI_01_AUTH_MODULE
+ * Stage: STAGE_UI_06_STATE_MANAGEMENT
  */
-import { createPinia } from 'pinia'
-
-export { createPinia }
-
-// Backward-compatible factory (no longer injects router)
-export function createAppPinia() {
-  return createPinia()
-}
+export { defineAuthStore } from './auth.store'
+export { useBackofficeAppStore } from './app.store'
+export { useBackofficeUiStore } from './ui.store'
+export { useBackofficeNotificationStore } from './notification.store'
+export { useBackofficeWorkspaceStore } from './workspace.store'
+export { useLicenseStatusStore } from './license-status.store'
+export type { AppNotification } from './notification.store'
+export type { WorkspaceContext } from './workspace.store'
