@@ -2,18 +2,21 @@
  * Backoffice Application Bootstrap
  * Implements the 9-step auth module wiring sequence (CL-01).
  *
- * Stage: STAGE_UI_01_AUTH_MODULE
+ * Stage: STAGE_UI_03_ROUTER_AND_GUARDS
  */
 
 // Step 0: Validate environment config at import time — throws early if misconfigured
 import '@/core/config/app-config'
 
 import { createPinia } from 'pinia'
-import { createApp, ref } from 'vue'
+import { createApp } from 'vue'
 import App from './App.vue'
 
-// ── Step 2: Import pre-created router (guards NOT yet registered) ──────────
-import { router } from '@/core/router'
+// ── Step 2: Router factory (guards NOT registered here — registered via registerGuards)
+// Use relative imports to avoid root tsconfig @/* path alias resolving to MMC first
+import { useContextStore } from '@/stores/context'
+import { registerGuards } from './core/guards'
+import { createAppRouter } from './core/router'
 
 // Auth module imports
 import type { ApiClient } from '@/core/api/client'
@@ -24,7 +27,6 @@ import { createAuthService } from '@/core/auth/auth.service'
 import type { IRefreshManager } from '@/core/auth/refresh-manager'
 import { createRefreshManager } from '@/core/auth/refresh-manager'
 import { createTokenManager } from '@/core/auth/token-manager'
-import { createAuthGuard } from '@/core/router/guards/auth.guard'
 import { defineAuthStore } from '@/core/state/auth.store'
 import { useLicenseStatusStore } from '@/core/state/license-status.store'
 
@@ -34,6 +36,12 @@ const DASHBOARD_ROUTE = 'bo-dashboard'
 
 // ── Step 1: Create Pinia ───────────────────────────────────────────
 const pinia = createPinia()
+
+// ── Step 2: Create Router ───────────────────────────────────────────
+const router = createAppRouter()
+
+// ── Step 2b: Create Context Store (Pinia must exist first) ──────────
+const contextStore = useContextStore(pinia)
 
 // ── Step 3: Create Token Manager ─────────────────────────────────────────
 const tokenManager = createTokenManager()
@@ -93,20 +101,19 @@ refreshManagerInstance = refreshManager
 // ── Step 7: Create API Client ───────────────────────────────────────────
 apiClient = createAppApiClient(tokenManager, refreshManager, errorInterceptor)
 
-// ── Step 8: Register Auth Guard with sessionInitialized gate (CL-01) ───────
-const sessionInitialized = ref(false)
-
-const authGuard = createAuthGuard(() => authStore.isAuthenticated, {
+// ── Step 8: Register guard pipeline (CL-01) ────────────────────────────
+// registerGuards handles sessionInitialized gate, AuthGuard, WorkspaceGuard,
+// RoleGuard, FeatureFlagGuard pipeline and router.onError → bo-error (OBS-02).
+registerGuards(router, {
+  isAuthenticated: () => authStore.isAuthenticated,
+  getUserRole: () => authStore.user?.role,
   loginRouteName: LOGIN_ROUTE,
   dashboardRouteName: DASHBOARD_ROUTE,
-})
-
-router.beforeEach(async (to, from) => {
-  if (!sessionInitialized.value) {
-    await authStore.initSession()
-    sessionInitialized.value = true
-  }
-  return authGuard(to, from, () => {})
+  unauthorizedRouteName: 'bo-unauthorized',
+  errorRouteName: 'bo-error',
+  initSession: () => authStore.initSession(),
+  isWorkspaceResolved: () => contextStore.context !== null,
+  workspaceSelectorRouteName: 'bo-workspace-selector',
 })
 
 // ── Step 9: Mount ───────────────────────────────────────────────────────────

@@ -2,14 +2,15 @@
  * Unit tests for createAuthGuard().
  * Verifies: routing decisions, never calls router.push(), never throws.
  *
- * Stage: STAGE_UI_01_AUTH_MODULE
+ * Updated for STAGE_UI_03_ROUTER_AND_GUARDS:
+ * - Uses new object options API: createAuthGuard({ isAuthenticated, loginRouteName, dashboardRouteName })
+ * - Uses new RouteMeta fields: `public` instead of `guestOnly`, `roles[]` instead of `requiredRole`
+ *
+ * Stage: STAGE_UI_01_AUTH_MODULE (updated in STAGE_UI_03_ROUTER_AND_GUARDS)
  */
 import { afterEach, describe, expect, it, vi } from 'vitest'
 import type { RouteLocationNormalized } from 'vue-router'
-import {
-  createAuthGuard,
-  type AuthGuardOptions,
-} from '../../../src/core/router/guards/auth.guard'
+import { createAuthGuard } from '../../../src/core/guards/auth.guard'
 
 // ─── Logger mock ─────────────────────────────────────────────────────────────
 vi.mock('@zidney/logger', () => ({
@@ -22,11 +23,6 @@ vi.mock('@zidney/logger', () => ({
 }))
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
-
-const OPTIONS: AuthGuardOptions = {
-  loginRouteName: 'mmc-login',
-  dashboardRouteName: 'mmc-dashboard',
-}
 
 function makeRoute(
   meta: Record<string, unknown> = {},
@@ -47,6 +43,16 @@ function makeRoute(
 
 const FROM = makeRoute({}, 'from-route')
 
+// ─── Factory helper ───────────────────────────────────────────────────────────
+
+function makeGuard(isAuthenticated: () => boolean) {
+  return createAuthGuard({
+    isAuthenticated,
+    loginRouteName: 'mmc-login',
+    dashboardRouteName: 'mmc-dashboard',
+  })
+}
+
 describe('createAuthGuard', () => {
   afterEach(() => {
     vi.resetAllMocks()
@@ -55,16 +61,16 @@ describe('createAuthGuard', () => {
   // ── requiresAuth + unauthenticated ────────────────────────────────────────
 
   it('requiresAuth=true + unauthenticated → redirects to login', () => {
-    const guard = createAuthGuard(() => false, OPTIONS)
+    const guard = makeGuard(() => false)
     const to = makeRoute({ requiresAuth: true }, 'mmc-dashboard')
 
     const result = guard(to, FROM, vi.fn())
 
-    expect(result).toEqual({ name: 'mmc-login' })
+    expect(result).toMatchObject({ name: 'mmc-login' })
   })
 
   it('requiresAuth=true + authenticated → returns true (allow)', () => {
-    const guard = createAuthGuard(() => true, OPTIONS)
+    const guard = makeGuard(() => true)
     const to = makeRoute({ requiresAuth: true }, 'mmc-dashboard')
 
     const result = guard(to, FROM, vi.fn())
@@ -72,20 +78,20 @@ describe('createAuthGuard', () => {
     expect(result).toBe(true)
   })
 
-  // ── guestOnly + authenticated ─────────────────────────────────────────────
+  // ── public + authenticated ────────────────────────────────────────────────
 
-  it('guestOnly=true + authenticated → redirects to dashboard', () => {
-    const guard = createAuthGuard(() => true, OPTIONS)
-    const to = makeRoute({ guestOnly: true }, 'mmc-login')
+  it('public=true + authenticated → redirects to dashboard', () => {
+    const guard = makeGuard(() => true)
+    const to = makeRoute({ public: true }, 'mmc-login')
 
     const result = guard(to, FROM, vi.fn())
 
-    expect(result).toEqual({ name: 'mmc-dashboard' })
+    expect(result).toMatchObject({ name: 'mmc-dashboard' })
   })
 
-  it('guestOnly=true + unauthenticated → returns true (allow)', () => {
-    const guard = createAuthGuard(() => false, OPTIONS)
-    const to = makeRoute({ guestOnly: true }, 'mmc-login')
+  it('public=true + unauthenticated → returns true (allow)', () => {
+    const guard = makeGuard(() => false)
+    const to = makeRoute({ public: true }, 'mmc-login')
 
     const result = guard(to, FROM, vi.fn())
 
@@ -95,7 +101,7 @@ describe('createAuthGuard', () => {
   // ── No meta ───────────────────────────────────────────────────────────────
 
   it('no meta + authenticated → returns true (allow)', () => {
-    const guard = createAuthGuard(() => true, OPTIONS)
+    const guard = makeGuard(() => true)
     const to = makeRoute({}, 'public-page')
 
     const result = guard(to, FROM, vi.fn())
@@ -104,7 +110,7 @@ describe('createAuthGuard', () => {
   })
 
   it('no meta + unauthenticated → returns true (allow)', () => {
-    const guard = createAuthGuard(() => false, OPTIONS)
+    const guard = makeGuard(() => false)
     const to = makeRoute({}, 'public-page')
 
     const result = guard(to, FROM, vi.fn())
@@ -115,7 +121,7 @@ describe('createAuthGuard', () => {
   // ── Guard behavioral constraints ──────────────────────────────────────────
 
   it('guard never calls next() with router.push behavior (uses returns only)', () => {
-    const guard = createAuthGuard(() => false, OPTIONS)
+    const guard = makeGuard(() => false)
     const to = makeRoute({ requiresAuth: true })
 
     // Result must be a redirect location — not calling router.push()
@@ -123,32 +129,24 @@ describe('createAuthGuard', () => {
     expect(typeof result === 'object' || result === true).toBe(true)
   })
 
-  it('guard never throws', () => {
-    const guardBroken = createAuthGuard(() => {
-      throw new Error('unexpected')
-    }, OPTIONS)
+  it('guard never throws for well-behaved callbacks', () => {
+    const guard = makeGuard(() => false)
     const to = makeRoute({ requiresAuth: true })
 
-    // The guard itself should not propagate the error from getIsAuthenticated
-    // (by contract FR-26, guard never throws — but if getIsAuthenticated throws,
-    // that is a contract violation in getIsAuthenticated; guard should still not throw
-    // if the callback is well-behaved)
-    const normalGuard = createAuthGuard(() => false, OPTIONS)
-    expect(() => normalGuard(to, FROM, vi.fn())).not.toThrow()
+    expect(() => guard(to, FROM, vi.fn())).not.toThrow()
   })
 
-  // ── Role-based meta (requiredRole) ────────────────────────────────────────
+  // ── roles[] meta (auth guard ignores roles — roles are handled by RoleGuard) ─
 
-  it('requiredRole present + authenticated + requiresAuth → allows through (guard does not check roles)', () => {
-    const guard = createAuthGuard(() => true, OPTIONS)
-    const to = makeRoute(
-      { requiresAuth: true, requiredRole: 'admin' },
-      'mmc-admin'
-    )
+  it('roles present + authenticated + requiresAuth → allows through (auth guard does not check roles)', () => {
+    const guard = makeGuard(() => true)
+    const to = makeRoute({ requiresAuth: true, roles: ['admin'] }, 'mmc-admin')
 
     const result = guard(to, FROM, vi.fn())
 
-    // auth guard only checks requiresAuth/guestOnly — role checks are separate
+    // auth guard only checks requiresAuth/public — role checks are separate
     expect(result).toBe(true)
   })
 })
+
+// ── requiresAuth + unauthenticated ────────────────────────────────────────

@@ -1,24 +1,44 @@
 /**
  * Vue Router RouteMeta augmentation for Frontoffice.
- * Adds auth-specific fields to the global RouteMeta type.
+ * Defines canonical meta fields for the guard pipeline.
  *
- * Stage: STAGE_UI_01_AUTH_MODULE
+ * Stage: STAGE_UI_03_ROUTER_AND_GUARDS
  */
+import type { RouteMeta as VueRouteMeta } from 'vue-router'
 
-// Extend Vue Router's RouteMeta interface with auth fields
+// Extend Vue Router's RouteMeta interface with canonical fields
 declare module 'vue-router' {
   interface RouteMeta {
-    /** When true: unauthenticated users are redirected to the login route */
+    /** Route requires authentication. Default: false */
     requiresAuth?: boolean
-    /** When true: authenticated users are redirected to the dashboard route */
-    guestOnly?: boolean
-    /** Required role string — for use by role guard (not auth guard) */
-    requiredRole?: string
+    /** Accessible without authentication. MUST be explicit. */
+    public?: boolean
+    /** UI-level role hints (non-authoritative). Backend is the final authority. */
+    roles?: string[]
+    /** Backoffice only: requires workspace context to be resolved. */
+    requiresWorkspace?: boolean
   }
 }
 
-// Convenience type alias for use in guards and route definitions
-export interface AuthRouteMeta {
+/**
+ * Canonical RouteMeta interface extending Vue Router's RouteMeta.
+ * Use this type in route definitions and guard implementations.
+ *
+ * Replaces legacy: guestOnly, requiredRole, requiredModule
+ */
+export interface RouteMeta extends VueRouteMeta {
+  /** Route requires authentication. Default: false */
   requiresAuth?: boolean
-  guestOnly?: boolean
+  /** Accessible without authentication. MUST be explicit. */
+  public?: boolean
+  /** UI-level role hints (non-authoritative). Backend is the final authority. */
+  roles?: string[]
+  /** Backoffice only: requires workspace context to be resolved. */
+  requiresWorkspace?: boolean
 }
+
+/**
+ * Convenience alias for canonical RouteMeta.
+ * Replaces the legacy AuthRouteMeta alias.
+ */
+export type AppRouteMeta = RouteMeta

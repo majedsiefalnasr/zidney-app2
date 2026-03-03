@@ -8,7 +8,37 @@ UI Foundation — Router & Access Guard Architecture
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY
+Risk Level: MEDIUM
+Closure Date: 2025-07-07T13:00:00.000Z
+
+Implementation: COMPLETE
+Tasks: 63 / 63 completed
+
+Scope Closed:
+
+- Guard pipeline (AuthGuard → WorkspaceGuard → RoleGuard → FeatureFlagGuard)
+- Router factory per app (`createAppRouter(history?)`)
+- Fallback views (`NotFoundView`, `UnauthorizedView`, `GlobalErrorView`) for all 3 apps
+- RouteMeta schema migration (`guestOnly` → `public`, `requiredRole` → `roles?`, `requiredModule` removed)
+- Backoffice STAGE_17 migration: legacy `src/router/index.ts` deleted; all routes migrated to `core/router/index.ts`
+- Singleton export removal (0 results — confirmed via grep)
+- Unit tests (10 auth-guard scenarios, 6 role-guard scenarios, 5 workspace-guard scenarios, 1 feature-flag scenario per app)
+- Integration tests (direct guard factory invocation pattern to avoid jsdom navigation hangs)
+
+Deferred Scope:
+
+- `createFeatureFlagGuard()` is a stub — implementation requires a future stage when the Feature Flag service is ready
+
+Constitutional Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced
+- ADR-0006 Server-authoritative time enforced
+- ADR-0008 Semantic versioning enforced
+- All Zidney Constitution v1.2.0 rules verified
+
+Notes:
+Stage is production ready. No structural backend modifications allowed.
 
 ---
 

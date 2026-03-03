@@ -30,6 +30,7 @@ export default defineConfig({
     include: [
       `${appRoot}/tests/unit/**/*.test.ts`,
       `${appRoot}/tests/integration/**/*.test.ts`,
+      `${appRoot}/src/**/__tests__/**/*.spec.ts`,
     ],
     env: {
       VITE_API_BASE_URL: 'http://test.local',
