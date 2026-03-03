@@ -9,20 +9,26 @@ Purpose: Non-destructive audit before governance enforcement
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-04T00:00:00.000Z
+Last Updated: 2026-03-04T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Read-only infrastructure audit of Vitest configs, test distribution, ESLint, CI, Bun compatibility, README coverage, technical debt, and enforcement readiness
+- Repeatable audit script: scripts/infra-audit.ts
+- Written deliverables: Gap Report, Risk Classification, Safe Rollout Plan
+
+Deferred Scope:
+
+- Any Vitest consolidation, ESLint rule changes, Prettier changes, Husky hooks, CI workflow modifications — all deferred to STAGE_INFRA_GOVERNANCE
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. 10 user stories defined (US1–US10). Zero clarification markers. Clarification step pending.
 
 ---
 
