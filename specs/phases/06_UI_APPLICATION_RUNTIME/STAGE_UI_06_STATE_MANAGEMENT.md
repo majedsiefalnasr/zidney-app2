@@ -10,18 +10,32 @@ UI Foundation — Centralized State Management Architecture
 
 Status: DRAFT
 Risk Level: UNKNOWN
-Initiated: 2026-03-03T00:00:00.000Z
+Last Updated: 2026-03-03T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Pinia-based store architecture for MMC, Backoffice, Frontoffice
+- Domain-oriented store boundaries (core/state vs modules/<feature>)
+- API interaction chain enforcement (Component → Store → API Module → client)
+- Cross-store communication rules (read via storeToRefs, no direct mutation)
+- Loading and error state conventions (isLoading, error: AppError | null)
+- State persistence policy (pinia-plugin-persistedstate, explicit paths whitelist)
+- Security constraints (JWT never in localStorage/sessionStorage)
+- Testability and isolation rules
+- Per-app scope boundaries
+
+Deferred Scope:
+
+- Feature-specific store implementations (products, licenses, attempt engine, dashboard)
+- Router guard integration (ui-03-router-and-guards)
+- Deep token refresh logic (ui-02-api-client-layer)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. 1 clarification pending (concurrent async loading state shape). Clarification step pending.
 
 ---
 
