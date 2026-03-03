@@ -206,13 +206,13 @@ async function fetchWorkspaceList(): Promise<void> {
 
 ## R-010: ESLint Rule for Preventing Direct API Client Imports in .vue Files
 
-**Decision**: Use `no-restricted-imports` rule in ESLint config, applied to `*.vue` file glob.
+**Decision**: Use `no-restricted-imports` rule in ESLint config, applied to `apps/**/*.vue` file glob.
 
 **Config entry** (in `eslint.config.mjs`):
 
 ```js
 {
-  files: ['**/*.vue'],
+  files: ['apps/**/*.vue'],
   rules: {
     'no-restricted-imports': ['error', {
       patterns: [{

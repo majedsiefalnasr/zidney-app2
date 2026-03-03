@@ -64,6 +64,7 @@ interface MmcAuthState {
 
 interface MmcAuthActions {
   initSession(): Promise<void>
+  /** @internal — MUST be called only from initSession() or refresh() auth flows. Never call from components or composables directly. (SA-006) */
   setSession(accessToken: string, profile: AuthUser): void
   refresh(): Promise<boolean>
   logout(): Promise<void>
@@ -84,15 +85,13 @@ interface MmcAppState {
   sidebarCollapsed: boolean // Sidebar collapsed preference (PERSISTED)
   theme: 'light' | 'dark' | 'system' // Active UI theme (PERSISTED)
   locale: string // Active locale code, e.g. 'en', 'ar' (PERSISTED)
-  isLoading: boolean // Global app-level loading indicator
-  error: AppError | null // Last global app error; null when none
+  // NOTE: No isLoading or error — this store has only synchronous actions (CR-M2)
 }
 
 interface MmcAppActions {
   setSidebarCollapsed(value: boolean): void
   setTheme(theme: MmcAppState['theme']): void
   setLocale(locale: string): void
-  clearError(): void
   $reset(): void
 }
 
@@ -170,6 +169,7 @@ interface BackofficeAuthState {
 
 interface BackofficeAuthActions {
   initSession(): Promise<void>
+  /** @internal — MUST be called only from initSession() or refresh() auth flows. Never call from components or composables directly. (SA-006) */
   setSession(accessToken: string, profile: AuthUser): void
   refresh(): Promise<boolean>
   logout(): Promise<void>
@@ -190,15 +190,13 @@ interface BackofficeAppState {
   sidebarCollapsed: boolean // PERSISTED
   theme: 'light' | 'dark' | 'system' // PERSISTED
   locale: string // PERSISTED
-  isLoading: boolean
-  error: AppError | null
+  // NOTE: No isLoading or error — this store has only synchronous actions (CR-M2)
 }
 
 interface BackofficeAppActions {
   setSidebarCollapsed(value: boolean): void
   setTheme(theme: BackofficeAppState['theme']): void
   setLocale(locale: string): void
-  clearError(): void
   $reset(): void
 }
 
@@ -266,9 +264,10 @@ interface WorkspaceContext {
 
 interface BackofficeWorkspaceState {
   workspace: WorkspaceContext | null // null until workspace is resolved
-  isLoading: boolean // Primary loading signal
-  // pending map: workspace store may need to independently track
-  // concurrent async operations (e.g. loadSummary + loadMembers)
+  // isLoading is a derived ComputedRef — computed(() => Object.values(pending.value).some(Boolean))
+  // It is NOT a manually-managed ref. Components read it as a boolean via storeToRefs().
+  isLoading: ComputedRef<boolean> // import type { ComputedRef } from 'vue'
+  // pending map: workspace store independently tracks concurrent async operations
   pending: Record<string, boolean>
   error: AppError | null
 }
@@ -301,6 +300,7 @@ interface FrontofficeAuthState {
 
 interface FrontofficeAuthActions {
   initSession(): Promise<void>
+  /** @internal — MUST be called only from initSession() or refresh() auth flows. Never call from components or composables directly. (SA-006) */
   setSession(accessToken: string, profile: AuthUser): void
   refresh(): Promise<boolean>
   logout(): Promise<void>
@@ -321,15 +321,13 @@ interface FrontofficeAppState {
   sidebarCollapsed: boolean // PERSISTED
   theme: 'light' | 'dark' | 'system' // PERSISTED
   locale: string // PERSISTED
-  isLoading: boolean
-  error: AppError | null
+  // NOTE: No isLoading or error — this store has only synchronous actions (CR-M2)
 }
 
 interface FrontofficeAppActions {
   setSidebarCollapsed(value: boolean): void
   setTheme(theme: FrontofficeAppState['theme']): void
   setLocale(locale: string): void
-  clearError(): void
   $reset(): void
 }
 
@@ -389,7 +387,7 @@ interface FrontofficeNotificationActions {
 | Store                    | `isLoading` | `pending` map |
 | ------------------------ | :---------: | :-----------: |
 | auth.store (all apps)    |      ✓      |       ✗       |
-| app.store (all apps)     |      ✓      |       ✗       |
+| app.store (all apps)     |      ✗      |       ✗       |
 | ui.store (all apps)      |      ✗      |       ✗       |
 | notification.store (all) |      ✗      |       ✗       |
 | workspace.store (BO)     |      ✓      |       ✓       |

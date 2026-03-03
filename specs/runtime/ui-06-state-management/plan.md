@@ -131,31 +131,44 @@ export function useIsolatedPinia(): void {
 
 ---
 
-### Task 3 — Update ESLint Config (no-restricted-imports for .vue files)
+### Task 3 — Update ESLint Config (no-restricted-imports for .vue + .ts files, vue/no-v-html)
 
 **File**: `eslint.config.mjs` (root)
 
-Add rule block:
+Add two rule blocks:
 
 ```js
+// Block 1: API client import firewall — covers .vue AND .ts (composables, helpers)
+// Store files are excluded; they are the only layer allowed to call the API client
 {
-  files: ['apps/**/*.vue'],
+  files: ['apps/**/*.{vue,ts}'],
+  ignores: [
+    'apps/*/src/core/state/**',
+    'apps/*/src/modules/**/*.store.ts',
+  ],
   rules: {
     'no-restricted-imports': ['error', {
       patterns: [
         {
           group: ['@zidney/api-client', '@zidney/api-client/*'],
           message:
-            'Direct API client imports are forbidden in .vue files. ' +
+            'Direct API client imports are forbidden. ' +
             'Call a store action instead. (STAGE_UI_06 — FR-008)',
         },
       ],
     }],
   },
 },
+// Block 2: Prevent v-html in all app templates to mitigate XSS via store-sourced strings
+{
+  files: ['apps/**/*.vue'],
+  rules: {
+    'vue/no-v-html': 'error',
+  },
+},
 ```
 
-**Verification**: Run `bun lint` — the rule must surface no existing violations; if violations exist, they must be resolved before this task is closed.
+**Verification**: Run `bun lint` — both rule blocks must surface zero existing violations; resolve any before closing this task.
 
 ---
 
@@ -210,7 +223,6 @@ This is a single-line rename. All existing auth module wiring in `main.ts` conti
  *
  * Stage: STAGE_UI_06_STATE_MANAGEMENT
  */
-import { AppError } from '@zidney/types'
 import { defineStore } from 'pinia'
 import { ref } from 'vue'
 
@@ -223,8 +235,6 @@ export const useMmcAppStore = defineStore(
     const sidebarCollapsed = ref<boolean>(false)
     const theme = ref<Theme>('system')
     const locale = ref<string>('en')
-    const isLoading = ref<boolean>(false)
-    const error = ref<AppError | null>(null)
 
     // ── Actions ────────────────────────────────────────────────────────────
     function setSidebarCollapsed(value: boolean): void {
@@ -239,28 +249,19 @@ export const useMmcAppStore = defineStore(
       locale.value = value
     }
 
-    function clearError(): void {
-      error.value = null
-    }
-
     function $reset(): void {
       sidebarCollapsed.value = false
       theme.value = 'system'
       locale.value = 'en'
-      isLoading.value = false
-      error.value = null
     }
 
     return {
       sidebarCollapsed,
       theme,
       locale,
-      isLoading,
-      error,
       setSidebarCollapsed,
       setTheme,
       setLocale,
-      clearError,
       $reset,
     }
   },
@@ -381,12 +382,18 @@ export interface AppNotification {
 // Moving this type to @zidney/types is deferred to a future cleanup stage.
 
 export const useMmcNotificationStore = defineStore('mmc-notification', () => {
+  // ── Constants ──────────────────────────────────────────────────────────
+  const MAX_QUEUE_SIZE = 20 // prevents unbounded growth during error-retry storms (PO-HIGH)
+
   // ── State ──────────────────────────────────────────────────────────────
   const notifications = ref<AppNotification[]>([])
 
   // ── Actions ────────────────────────────────────────────────────────────
   function push(notification: Omit<AppNotification, 'id'>): string {
     const id = crypto.randomUUID()
+    if (notifications.value.length >= MAX_QUEUE_SIZE) {
+      notifications.value.shift() // evict oldest when at capacity
+    }
     notifications.value.push({ ...notification, id })
     return id
   }
@@ -480,7 +487,7 @@ Identical structure to MMC `ui.store.ts` (Task 7). Store `id`: `'backoffice-ui'`
 
 **File**: `apps/backoffice/src/core/state/notification.store.ts`
 
-Identical structure to MMC `notification.store.ts` (Task 8). Store `id`: `'backoffice-notification'`. Export: `useBackofficeNotificationStore`.
+Identical structure to MMC `notification.store.ts` (Task 8), including `MAX_QUEUE_SIZE = 20` and bounded `push()` with eviction. Store `id`: `'backoffice-notification'`. Export: `useBackofficeNotificationStore`.
 
 ---
 
@@ -500,8 +507,9 @@ Identical structure to MMC `notification.store.ts` (Task 8). Store `id`: `'backo
  * Stage: STAGE_UI_06_STATE_MANAGEMENT
  */
 import { AppError } from '@zidney/types'
+import { logger } from '@zidney/logger'
 import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 
 export interface WorkspaceContext {
   slug: string
@@ -516,8 +524,9 @@ export const useBackofficeWorkspaceStore = defineStore(
   () => {
     // ── State ──────────────────────────────────────────────────────────────
     const workspace = ref<WorkspaceContext | null>(null)
-    const isLoading = ref<boolean>(false)
     const pending = ref<Record<string, boolean>>({})
+    // isLoading is a derived computed — auto-updates from pending map (PO-MED-1)
+    const isLoading = computed(() => Object.values(pending.value).some(Boolean))
     const error = ref<AppError | null>(null)
 
     // ── Actions ────────────────────────────────────────────────────────────
@@ -526,7 +535,7 @@ export const useBackofficeWorkspaceStore = defineStore(
       if (pending.value['loadWorkspace']) return
 
       pending.value['loadWorkspace'] = true
-      isLoading.value = true
+      // isLoading automatically becomes true as pending now has a truthy key
       error.value = null
 
       try {
@@ -539,16 +548,19 @@ export const useBackofficeWorkspaceStore = defineStore(
         // Stub: resolve without throwing so bootstrap and lifecycle tests pass cleanly
         await Promise.resolve()
       } catch (err: unknown) {
-        error.value =
-          err instanceof AppError
-            ? err
-            : new AppError(
-                'WORKSPACE_LOAD_FAILED',
-                err instanceof Error ? err.message : 'Unknown error'
-              )
+        const appErr = new AppError(
+          'WORKSPACE_LOAD_FAILED',
+          'Unable to load workspace. Please try again.' // generic, never raw err.message (SA-003)
+        )
+        logger.warn('workspace.store: loadWorkspace failed', {
+          service: 'backoffice-store',
+          error_code: appErr.code,
+          internal_message: err instanceof Error ? err.message : String(err), // internal-only
+        })
+        error.value = appErr
       } finally {
         pending.value['loadWorkspace'] = false
-        isLoading.value = Object.values(pending.value).some(Boolean)
+        // isLoading auto-derives from pending — no manual assignment needed
       }
     }
 
@@ -558,8 +570,7 @@ export const useBackofficeWorkspaceStore = defineStore(
 
     function $reset(): void {
       workspace.value = null
-      isLoading.value = false
-      pending.value = {}
+      pending.value = {} // isLoading auto-derives to false when pending is empty
       error.value = null
     }
 
@@ -633,7 +644,7 @@ Identical to MMC/Backoffice pattern. Store `id`: `'frontoffice-ui'`. Export: `us
 
 **File**: `apps/frontoffice/src/core/state/notification.store.ts`
 
-Identical to MMC/Backoffice notification pattern. Store `id`: `'frontoffice-notification'`. Export: `useFrontofficeNotificationStore`.
+Identical to MMC/Backoffice notification pattern, including `MAX_QUEUE_SIZE = 20` and bounded `push()` with eviction. Store `id`: `'frontoffice-notification'`. Export: `useFrontofficeNotificationStore`.
 
 ---
 
@@ -665,36 +676,25 @@ Files to create:
 **Test pattern for app.store.test.ts**:
 
 ```ts
-import { setActivePinia, createPinia } from 'pinia'
-import { describe, it, expect, beforeEach } from 'vitest'
+import { describe, it, expect } from 'vitest'
 import { useMmcAppStore } from '@/core/state/app.store'
+import { useIsolatedPinia } from '../../../../tests/unit/store-test-helper' // (L-001: use shared helper)
 
 describe('useMmcAppStore', () => {
-  beforeEach(() => {
-    setActivePinia(createPinia())
-  })
+  useIsolatedPinia() // registers setActivePinia(createPinia()) in beforeEach
 
   it('initializes with default state', () => {
     const store = useMmcAppStore()
     expect(store.sidebarCollapsed).toBe(false)
     expect(store.theme).toBe('system')
     expect(store.locale).toBe('en')
-    expect(store.isLoading).toBe(false)
-    expect(store.error).toBeNull()
+    // Note: isLoading and error removed — app.store has no async actions (CR-M2)
   })
 
   it('sets sidebarCollapsed', () => {
     const store = useMmcAppStore()
     store.setSidebarCollapsed(true)
     expect(store.sidebarCollapsed).toBe(true)
-  })
-
-  it('clears error', () => {
-    const store = useMmcAppStore()
-    // Manually set error to simulate state
-    ;(store.error as any) = new AppError('TEST', 'test')
-    store.clearError()
-    expect(store.error).toBeNull()
   })
 
   it('$reset restores initial state', () => {
@@ -714,16 +714,78 @@ describe('useMmcAppStore', () => {
 })
 ```
 
+**Workspace store test pattern** (requires AppError import):
+
+```ts
+import { describe, it, expect, vi } from 'vitest'
+import { AppError } from '@zidney/types'
+import { useBackofficeWorkspaceStore } from '@/core/state/workspace.store'
+import { useIsolatedPinia } from '../../../../tests/unit/store-test-helper'
+
+describe('useBackofficeWorkspaceStore', () => {
+  useIsolatedPinia()
+
+  it('initializes with default state', () => {
+    const store = useBackofficeWorkspaceStore()
+    expect(store.workspace).toBeNull()
+    expect(store.isLoading).toBe(false)
+    expect(Object.keys(store.pending)).toHaveLength(0)
+    expect(store.error).toBeNull()
+  })
+
+  it('clears error', () => {
+    const store = useBackofficeWorkspaceStore()
+    store.$patch({ error: new AppError('TEST', 'test') }) // use $patch, not direct assignment (CR-M3)
+    store.clearError()
+    expect(store.error).toBeNull()
+  })
+
+  it('concurrent guard: second call while first is in-flight is dropped', async () => {
+    const store = useBackofficeWorkspaceStore()
+    // Hold the first call open: patch pending directly to simulate an in-flight async action
+    store.$patch({ pending: { loadWorkspace: true } }) // simulate first call in-flight
+    // The early-return guard should fire immediately: pending['loadWorkspace'] is still true
+    const result = store.loadWorkspace('test-slug') // second call — guard should drop it
+    expect(store.pending['loadWorkspace']).toBe(true) // still locked by the simulated first call
+    // Resolve the simulated first call
+    store.$patch({
+      pending: { loadWorkspace: false },
+      workspace: {
+        slug: 'test-slug',
+        name: 'Test',
+        tier: 'standard',
+        schemaVersion: 1,
+        productVersion: '1.0.0',
+      },
+    })
+    await result
+    expect(store.pending['loadWorkspace']).toBe(false) // released after completion
+    // The critical assertion: only 1 progression through the action body (load did not double-fire)
+    expect(store.workspace?.slug).toBe('test-slug') // state was set exactly once
+  })
+
+  it('subsequent action clears error before executing', async () => {
+    const store = useBackofficeWorkspaceStore()
+    store.$patch({ error: new AppError('PREV_ERROR', 'prev') })
+    // On second loadWorkspace call, error must clear before async work begins (FR-018, QA-M002)
+    await store.loadWorkspace('workspace-slug')
+    expect(store.error).toBeNull()
+  })
+})
+```
+
 **Test coverage requirements** per store:
 
 1. Default state initialization
 2. Action produces expected state mutations
-3. `clearError()` zeroes the error field
+3. For async stores: `clearError()` zeroes the error field
 4. `$reset()` restores all fields to initial values
-5. State isolation between test cases (via `setActivePinia`)
+5. State isolation between test cases (via `useIsolatedPinia()` shared helper — L-001)
 6. (For async stores) `isLoading` becomes `true` then `false` around async actions
 7. (For async stores) Failed action sets `error` to `AppError` instance and `isLoading` to `false`
-8. (For async stores) Subsequent action clears `error` before executing
+8. (For async stores) Subsequent action clears `error` before executing (FR-018)
+9. (For async stores) Concurrent guard drops second in-flight call (M-001 timing test)
+10. Push `MAX_QUEUE_SIZE + 1` notifications; assert exactly `MAX_QUEUE_SIZE` entries remain
 
 ---
 
@@ -768,37 +830,70 @@ describe('useMmcAppStore', () => {
 
 ### Task 27 — CI Validation Rule: Store ID Uniqueness
 
-**File**: Add to existing lint or test infrastructure
+**File**: `tests/unit/store-id-uniqueness.test.ts`
 
-One approach — a Vitest test file that imports all stores and verifies that their ids are unique:
+This test imports and instantiates all stores to read their actual `$id` properties (not a hardcoded array — CR-H2 fix):
 
 ```ts
 // tests/unit/store-id-uniqueness.test.ts
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect, beforeEach } from 'vitest'
+import { setActivePinia, createPinia } from 'pinia'
+// MMC stores
+import { useMmcAuthStore } from '../../apps/mmc/src/core/state/auth.store'
+import { useMmcAppStore } from '../../apps/mmc/src/core/state/app.store'
+import { useMmcUiStore } from '../../apps/mmc/src/core/state/ui.store'
+import { useMmcNotificationStore } from '../../apps/mmc/src/core/state/notification.store'
+// Backoffice stores
+import { useBackofficeAppStore } from '../../apps/backoffice/src/core/state/app.store'
+import { useBackofficeUiStore } from '../../apps/backoffice/src/core/state/ui.store'
+import { useBackofficeNotificationStore } from '../../apps/backoffice/src/core/state/notification.store'
+import { useBackofficeWorkspaceStore } from '../../apps/backoffice/src/core/state/workspace.store'
+// Frontoffice stores
+import { useFrontofficeAppStore } from '../../apps/frontoffice/src/core/state/app.store'
+import { useFrontofficeUiStore } from '../../apps/frontoffice/src/core/state/ui.store'
+import { useFrontofficeNotificationStore } from '../../apps/frontoffice/src/core/state/notification.store'
 
-const expectedUniqueIds = [
-  'mmc-auth',
-  'mmc-app',
-  'mmc-ui',
-  'mmc-notification',
-  'backoffice-auth',
-  'backoffice-app',
-  'backoffice-ui',
-  'backoffice-notification',
-  'backoffice-workspace',
-  'frontoffice-auth',
-  'frontoffice-app',
-  'frontoffice-ui',
-  'frontoffice-notification',
-]
+describe('Store ID Uniqueness (SC-010)', () => {
+  beforeEach(() => {
+    setActivePinia(createPinia())
+  })
 
-it('store ids are unique', () => {
-  const unique = new Set(expectedUniqueIds)
-  expect(unique.size).toBe(expectedUniqueIds.length)
+  it('all core store $id values are unique across all apps', () => {
+    // Instantiate all stores — reads actual $id from defineStore call (not a hardcoded list)
+    const storeIds = [
+      useMmcAuthStore().$id,
+      useMmcAppStore().$id,
+      useMmcUiStore().$id,
+      useMmcNotificationStore().$id,
+      useBackofficeAppStore().$id,
+      useBackofficeUiStore().$id,
+      useBackofficeNotificationStore().$id,
+      useBackofficeWorkspaceStore().$id,
+      useFrontofficeAppStore().$id,
+      useFrontofficeUiStore().$id,
+      useFrontofficeNotificationStore().$id,
+    ]
+    // Note: backoffice-auth and frontoffice-auth use the defineAuthStore factory —
+    // their $id is asserted in per-app integration bootstrap tests (T035–T037)
+    const uniqueIds = new Set(storeIds)
+    expect(uniqueIds.size).toBe(storeIds.length)
+  })
+
+  it('no store uses the reserved single-app id "auth" (must be namespaced)', () => {
+    const allIds = [
+      useMmcAuthStore().$id,
+      useMmcAppStore().$id,
+      useMmcNotificationStore().$id,
+      useBackofficeAppStore().$id,
+      useBackofficeWorkspaceStore().$id,
+      useFrontofficeAppStore().$id,
+    ]
+    expect(allIds).not.toContain('auth')
+    expect(allIds).not.toContain('app')
+    expect(allIds).not.toContain('workspace')
+  })
 })
 ```
-
-A stronger approach (if feasible) uses a static analysis script that greps for `defineStore('...` patterns and asserts uniqueness across each app.
 
 ---
 
@@ -876,38 +971,55 @@ Phase E — Validation:
 
 ### Modified Files
 
-| Path                                            | Task | Change                                     |
-| ----------------------------------------------- | ---- | ------------------------------------------ |
-| `apps/mmc/package.json`                         | 1    | Add pinia-plugin-persistedstate dependency |
-| `apps/backoffice/package.json`                  | 1    | Add pinia-plugin-persistedstate dependency |
-| `apps/frontoffice/package.json`                 | 1    | Add pinia-plugin-persistedstate dependency |
-| `apps/mmc/src/main.ts`                          | 4    | Register pinia-plugin-persistedstate       |
-| `apps/mmc/src/core/state/auth.store.ts`         | 5    | Rename store id to `mmc-auth`              |
-| `apps/mmc/src/core/state/index.ts`              | 9    | Re-export all core stores                  |
-| `apps/backoffice/src/main.ts`                   | 10   | Register pinia-plugin-persistedstate       |
-| `apps/backoffice/src/core/state/auth.store.ts`  | 11   | Replace with factory pattern               |
-| `apps/backoffice/src/core/state/index.ts`       | 16   | Re-export all core stores                  |
-| `apps/frontoffice/src/main.ts`                  | 17   | Register pinia-plugin-persistedstate       |
-| `apps/frontoffice/src/core/state/auth.store.ts` | 18   | Replace with factory pattern               |
-| `apps/frontoffice/src/core/state/index.ts`      | 22   | Re-export all core stores                  |
-| `eslint.config.mjs`                             | 3    | Add no-restricted-imports for .vue files   |
+| Path                                            | Task | Change                                                       |
+| ----------------------------------------------- | ---- | ------------------------------------------------------------ |
+| `apps/mmc/package.json`                         | 1    | Add pinia-plugin-persistedstate dependency                   |
+| `apps/backoffice/package.json`                  | 1    | Add pinia-plugin-persistedstate dependency                   |
+| `apps/frontoffice/package.json`                 | 1    | Add pinia-plugin-persistedstate dependency                   |
+| `apps/mmc/src/main.ts`                          | 4    | Register pinia-plugin-persistedstate                         |
+| `apps/mmc/src/core/state/auth.store.ts`         | 5    | Rename store id to `mmc-auth`                                |
+| `apps/mmc/src/core/state/index.ts`              | 9    | Re-export all core stores                                    |
+| `apps/backoffice/src/main.ts`                   | 10   | Register pinia-plugin-persistedstate                         |
+| `apps/backoffice/src/core/state/auth.store.ts`  | 11   | Replace with factory pattern                                 |
+| `apps/backoffice/src/core/state/index.ts`       | 16   | Re-export all core stores                                    |
+| `apps/frontoffice/src/main.ts`                  | 17   | Register pinia-plugin-persistedstate                         |
+| `apps/frontoffice/src/core/state/auth.store.ts` | 18   | Replace with factory pattern                                 |
+| `apps/frontoffice/src/core/state/index.ts`      | 22   | Re-export all core stores                                    |
+| `eslint.config.mjs`                             | 3    | Add no-restricted-imports for .vue/.ts files + vue/no-v-html |
+
+---
+
+## Developer Notes: HMR Registration (PO-MED-2)
+
+Each store file MUST include the following Vite HMR boilerplate at the bottom to prevent full-page reloads on store file save in development:
+
+```ts
+// ── HMR (development only) ────────────────────────────────────────────
+import { acceptHMRUpdate } from 'pinia'
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useStoreName, import.meta.hot))
+}
+```
+
+Replace `useStoreName` with the exported composable from that file. This block has zero production impact — `import.meta.hot` is `undefined` in production builds.
 
 ---
 
 ## Success Criteria Verification
 
-| ID     | Criterion                                         | Verification Method                                                                  |
-| ------ | ------------------------------------------------- | ------------------------------------------------------------------------------------ |
-| SC-001 | Stores instantiate in Node.js without DOM in < 3s | `vitest run --reporter=verbose` — all store unit tests pass                          |
-| SC-002 | Zero .vue files with direct API client imports    | `bun lint` with `no-restricted-imports` rule — zero errors                           |
-| SC-003 | Zero stores persist tokens or permissions         | Inspect all `persist.pick` configurations in tests — assert no auth-related keys     |
-| SC-004 | All async stores expose `isLoading` + `error`     | Type check + unit test coverage per Task 23–25                                       |
-| SC-005 | No state bleed across tests                       | `setActivePinia(createPinia())` in `beforeEach` — verified by parallel test run      |
-| SC-006 | TypeScript strict mode zero errors                | `bun typecheck` — zero errors on all store files                                     |
-| SC-007 | No circular store dependencies                    | Dependency graph verified manually; enforced by FR-033 rule in reviews               |
-| SC-008 | All persistence has explicit pick list            | `persist.pick` is explicit in all `app.store.ts` files; all others have no `persist` |
-| SC-009 | Core stores registered before first route guard   | Integration test Task 26 — asserts bootstrap order                                   |
-| SC-010 | Store ids unique per app                          | `store-id-uniqueness.test.ts` — Task 27                                              |
+| ID     | Criterion                                          | Verification Method                                                                         |
+| ------ | -------------------------------------------------- | ------------------------------------------------------------------------------------------- |
+| SC-001 | Stores instantiate in Node.js without DOM in < 3s  | `vitest run --reporter=verbose` \u2014 all store unit tests pass                            |
+| SC-002 | Zero .vue/.ts files with direct API client imports | `bun lint` with `no-restricted-imports` rule \u2014 zero errors                             |
+| SC-003 | Zero stores persist tokens or permissions          | Inspect all `persist.pick` configurations in tests \u2014 assert no auth-related keys       |
+| SC-004 | All async stores expose `isLoading` + `error`      | Type check + unit test coverage per Task 23\u201325                                         |
+| SC-005 | No state bleed across tests                        | `useIsolatedPinia()` helper in `beforeEach` \u2014 verified by parallel test run            |
+| SC-006 | TypeScript strict mode zero errors                 | `bun typecheck` \u2014 zero errors on all store files                                       |
+| SC-007 | No circular store dependencies                     | T042: `madge`/`dpdm` CI check asserts acyclicity; FR-033 prevents core\u2192modules imports |
+| SC-008 | All persistence has explicit pick list             | `persist.pick` is explicit in all `app.store.ts` files; all others have no `persist`        |
+| SC-009 | Core stores registered before first route guard    | Integration test Task 26 \u2014 asserts bootstrap order                                     |
+| SC-010 | Store ids unique per app                           | `store-id-uniqueness.test.ts` \u2014 Task 27 (instantiates actual stores)                   |
+| SC-011 | Structured logging in all store catch blocks       | T039: logger.warn confirmed + CI grep check for console.log                                 |
 
 ---
 

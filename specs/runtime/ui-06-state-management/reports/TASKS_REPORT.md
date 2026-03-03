@@ -3,13 +3,13 @@
 **Step:** 4 — Tasks
 **Timestamp:** 2026-03-03T00:03:00.000Z
 **Status:** COMPLETE
-**Tasks Total:** 38
+**Tasks Total:** 42
 
 ---
 
 ## Summary
 
-38 dependency-ordered atomic tasks generated across 8 groups. The task set follows the plan's
+42 dependency-ordered atomic tasks generated across 8 groups. The task set follows the plan's
 5-phase structure (Infrastructure, MMC, Backoffice, Frontoffice, Validation) and identifies 8
 parallel execution batches to minimize implementation wall time. All tasks reference exact file
 paths and are traceable back to spec functional requirements.
@@ -27,8 +27,8 @@ paths and are traceable back to spec functional requirements.
 | E1 — MMC Unit Tests         | T025–T027 | 3      | T006–T011           |
 | E2 — Backoffice Unit Tests  | T028–T031 | 4      | T012–T018           |
 | E3 — Frontoffice Unit Tests | T032–T034 | 3      | T019–T024           |
-| E4 — Integration & CI Tests | T035–T038 | 4      | All Phase A–D       |
-| **TOTAL**                   |           | **38** |                     |
+| E4 — Integration & CI Tests | T035–T042 | 8      | All Phase A–D       |
+| **TOTAL**                   |           | **42** |                     |
 
 ---
 
@@ -75,19 +75,20 @@ paths and are traceable back to spec functional requirements.
 | FR-026 (JWT not in localStorage)      | Auth store tasks (T007, T013, T020); verified in T025, T028, T032 |
 | FR-028 (isolated unit tests)          | T025–T034                                                         |
 | FR-032 (store ID uniqueness)          | T038                                                              |
+| Structured logging in catch blocks    | T039                                                              |
 | SC-006 (TypeScript strict mode)       | T036 (type-check gate)                                            |
 
 ---
 
 ## Constitutional Compliance
 
-| Check                                    | Status | Notes                                                |
-| ---------------------------------------- | ------ | ---------------------------------------------------- |
-| All spec functional requirements covered | ✅     | 37 FRs mapped to tasks                               |
-| Database-per-tenant isolation preserved  | ✅ N/A | UI stage                                             |
-| Testing tasks included                   | ✅     | T025–T038 cover all stores (unit + integration + CI) |
-| Dependency order correct                 | ✅     | Infrastructure → App init → Stores → Tests           |
-| No tasks modify staged/closed stages     | ✅     | All file paths within this stage's scope             |
+| Check                                    | Status | Notes                                                                               |
+| ---------------------------------------- | ------ | ----------------------------------------------------------------------------------- |
+| All spec functional requirements covered | ✅     | 37 FRs mapped to tasks                                                              |
+| Database-per-tenant isolation preserved  | ✅ N/A | UI stage                                                                            |
+| Testing tasks included                   | ✅     | T025–T042 cover all stores (unit + integration + CI + logging + auth + cycle check) |
+| Dependency order correct                 | ✅     | Infrastructure → App init → Stores → Tests                                          |
+| No tasks modify staged/closed stages     | ✅     | All file paths within this stage's scope                                            |
 
 **Overall:** COMPLIANT — Ready for drift analysis gate.
 

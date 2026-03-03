@@ -2,7 +2,7 @@
 
 **Feature Branch**: `ui-06-state-management`
 **Created**: 2026-03-03
-**Status**: Draft
+**Status**: Ready for Implementation
 **Phase**: 06_UI_APPLICATION_RUNTIME
 **Stage File**: `specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_06_STATE_MANAGEMENT.md`
 **Input**: User description: "Define a standardized Pinia-based state management architecture for all Zidney frontend applications: MMC, Backoffice, and Frontoffice"
@@ -23,7 +23,7 @@ A frontend developer needs to add a globally available store (auth, app layout, 
 
 1. **Given** a developer creates a new core store in `src/core/state/`, **When** they follow the naming convention `[name].store.ts` and register it in `main.ts`, **Then** the store is accessible via `use[Name]Store()` in any component without additional configuration.
 2. **Given** a core store is imported during tests, **When** `setActivePinia(createPinia())` is called in `beforeEach`, **Then** store state is isolated per test with no bleed-through between cases.
-3. **Given** a core store action throws an `AppError`, **When** the error is caught inside the action, **Then** the store updates its `error` reactive property and does not swallow the error silently.
+3. **Given** an **async** core store action throws an `AppError`, **When** the error is caught inside the action, **Then** the store updates its `error` reactive property and does not swallow the error silently. _(Applies only to stores with async actions: `auth.store`, `workspace.store`. Synchronous stores such as `app.store`, `ui.store`, and `notification.store` have no `error` state — see FR-016.)_
 4. **Given** a component mounts and the auth store is already initialized, **When** the component reads `authStore.isAuthenticated`, **Then** it receives the current reactive value without triggering any side effects.
 
 ---
@@ -156,8 +156,8 @@ A developer fetches workspace data in Backoffice. The API call fails with a 503.
 
 **Security**
 
-- **FR-026**: JWT and authentication tokens MUST NOT be stored in `localStorage` or `sessionStorage`. Tokens MUST reside in memory (store state) or a secure HTTP-only cookie managed by the server.
-- **FR-027**: Store state MUST NOT expose raw token strings as publicly readable properties wherever possible; token access MUST be encapsulated behind actions.
+- **FR-026**: JWT and authentication tokens MUST NOT be stored in `localStorage`, `sessionStorage`, or as reactive Pinia state fields. Tokens MUST reside exclusively in the injected `ITokenManager` implementation (a non-reactive, module-scoped structure not accessible via `storeToRefs()`) or in a secure HTTP-only cookie managed entirely by the server. No store may expose a token field in its returned reactive object.
+- **FR-027**: Store state MUST NOT expose raw token strings as publicly readable properties. Token access MUST be encapsulated behind actions. The `ITokenManager` implementation is the sole owner of token lifecycle; no store, component, or composable may read a token directly from store state.
 
 **Testability**
 
