@@ -155,7 +155,7 @@ Every skipped test in the codebase either has a documented reason or has been re
 - **FR-011**: A `playwright.config.ts` file MUST be created at `apps/mmc/playwright.config.ts`.
 - **FR-012**: A `playwright.config.ts` file MUST be created at `apps/backoffice/playwright.config.ts`.
 - **FR-013**: A `playwright.config.ts` file MUST be created at `apps/frontoffice/playwright.config.ts`.
-- **FR-014**: An initial smoke test MUST be created at `tests/e2e/app-load.spec.ts` that verifies each UI app loads in a browser context.
+- **FR-014**: A reference/documentation file MUST be created at `tests/e2e/app-load.spec.ts` that documents the per-app smoke test pattern for contributors. This file is NOT a runnable Playwright test (no root-level `playwright.config.ts` exists); it exists as a code-comment guide. Runnable smoke tests are created per-app (FR-011–FR-013 + per-app `tests/e2e/smoke.spec.ts`).
 - **FR-015**: Each Playwright config MUST define the base URL, test directory, and browser target(s).
 
 **T004 — ESLint and Prettier Alignment**

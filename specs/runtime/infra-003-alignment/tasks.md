@@ -43,13 +43,13 @@ Phase 1 (US1 — Vitest)
 **US1 Goal**: Establish a single projects-based Vitest root config that orchestrates all apps and packages.
 **Independent Test**: Run `bun run test` from repo root; confirm tests from all apps/packages execute in one invocation.
 
-- [ ] T001 Rewrite root config to projects-based orchestrator — vitest.config.ts
+- [ ] T001 Rewrite root config to projects-based orchestrator (preserve full resolve.alias block; run `bun run test` after rewrite and confirm existing test count unchanged before proceeding to T002-T014) — vitest.config.ts
 - [ ] T002 [P] Strip apps/mmc/vitest.config.ts to minimal override (env + plugins + alias + setupFiles; remove coverage) — apps/mmc/vitest.config.ts
 - [ ] T003 [P] Strip apps/backoffice/vitest.config.ts to minimal override (env + plugins + alias + setupFiles; remove coverage) — apps/backoffice/vitest.config.ts
 - [ ] T004 [P] Strip apps/frontoffice/vitest.config.ts to minimal override (env + plugins + alias + setupFiles; remove coverage) — apps/frontoffice/vitest.config.ts
 - [ ] T005 [P] Strip packages/api-client/vitest.config.ts to minimal override (env + globals; remove custom include glob) — packages/api-client/vitest.config.ts
-- [ ] T006 [P] Create new minimal Vitest config for apps/api (node env, globals, setupFiles, api include glob) — apps/api/vitest.config.ts
-- [ ] T007 [P] Create new minimal Vitest config for apps/worker (node env, globals, setupFiles, worker include glob) — apps/worker/vitest.config.ts
+- [ ] T006 [P] Create new minimal Vitest config for apps/api (node env, globals, setupFiles; include glob: `['./src/**/*.test.ts','./tests/unit/**/*.test.ts','./tests/integration/**/*.test.ts']`) — apps/api/vitest.config.ts
+- [ ] T007 [P] Create new minimal Vitest config for apps/worker (node env, globals, setupFiles; include glob: `['./src/**/*.test.ts','./tests/unit/**/*.test.ts']`; exclude load-testing tests) — apps/worker/vitest.config.ts
 - [ ] T008 [P] Create new minimal Vitest config for packages/domain-core (node env, globals, unit include glob) — packages/domain-core/vitest.config.ts
 - [ ] T009 [P] Create new minimal Vitest config for packages/logger (node env, globals, unit include glob) — packages/logger/vitest.config.ts
 - [ ] T010 [P] Create new minimal Vitest config for packages/config (node env, globals, unit include glob) — packages/config/vitest.config.ts
@@ -76,8 +76,8 @@ Phase 1 (US1 — Vitest)
 - [ ] T023 [P] Create missing unit directory placeholder — packages/redis-utils/tests/unit/.gitkeep
 - [ ] T024 [P] Create missing unit directory placeholder — packages/types/tests/unit/.gitkeep
 - [ ] T025 [P] Create missing unit directory placeholder — packages/validation/tests/unit/.gitkeep
-- [ ] T026 Investigate packages/api-client/tests/adapters/ — determine if adapter tests are pure unit tests; relocate to tests/unit/adapters/ if confirmed — packages/api-client/tests/
-- [ ] T027 Move packages/domain-core/tests/license/ into tests/unit/license/ to conform to standard directory structure — packages/domain-core/tests/
+- [ ] T026 Investigate packages/api-client/tests/adapters/ — determine if adapter tests are pure unit tests; relocate to tests/unit/adapters/ if confirmed; update all relative import paths in relocated test files — packages/api-client/tests/
+- [ ] T027 Move packages/domain-core/tests/license/ into tests/unit/license/ to conform to standard directory structure; update all relative import paths in moved test files — packages/domain-core/tests/
 
 ---
 
@@ -93,7 +93,7 @@ Phase 1 (US1 — Vitest)
 - [ ] T032 [P] Create MMC smoke test (page.goto('/'), expect no error title, expect body visible) — apps/mmc/tests/e2e/smoke.spec.ts
 - [ ] T033 [P] Create Backoffice smoke test (page.goto('/'), expect login or root route renders) — apps/backoffice/tests/e2e/smoke.spec.ts
 - [ ] T034 [P] Create Frontoffice smoke test (page.goto('/'), expect root route renders) — apps/frontoffice/tests/e2e/smoke.spec.ts
-- [ ] T035 Create root-level E2E marker test documenting per-app smoke test pattern — tests/e2e/app-load.spec.ts
+- [ ] T035 Create root-level E2E documentation/pattern file (NOT a runnable test — no root playwright.config.ts exists; this is a reference document showing the per-app smoke test pattern for contributors) — tests/e2e/app-load.spec.ts
 - [ ] T036 Create placeholder to track root e2e directory in version control — tests/e2e/.gitkeep
 - [ ] T037 Add tests/e2e/\*\* exclusion to root Vitest config exclude patterns so Playwright specs are not picked up by Vitest — vitest.config.ts
 - [ ] T038 Add test:e2e:mmc, test:e2e:backoffice, test:e2e:frontoffice, and test:e2e scripts to root — package.json
@@ -135,7 +135,7 @@ Phase 1 (US1 — Vitest)
 - [ ] T050 [P] Review tests/integration/licenses.e2e.test.ts — re-enable or annotate — tests/integration/licenses.e2e.test.ts
 - [ ] T051 [P] Review tests/integration/provisioning-failure.test.ts — re-enable or annotate — tests/integration/provisioning-failure.test.ts
 - [ ] T052 [P] Review tests/integration/license-soft-lock.test.ts — re-enable or annotate — tests/integration/license-soft-lock.test.ts
-- [ ] T053 Review packages/ui-system/tests/unit/DataTable.spec.ts (also excluded in vitest config) — re-enable or annotate AND remove the exclude entry from vitest.config.ts — packages/ui-system/tests/unit/DataTable.spec.ts + vitest.config.ts
+- [ ] T053 Review packages/ui-system/tests/unit/DataTable.spec.ts (also excluded in vitest config) — re-enable or annotate AND remove the exclude entry from vitest.config.ts (NOTE: T053 must run AFTER T037 due to shared vitest.config.ts modification) — packages/ui-system/tests/unit/DataTable.spec.ts + vitest.config.ts
 - [ ] T054 [P] Review packages/ui-system/tests/unit/composables.spec.ts — re-enable or annotate — packages/ui-system/tests/unit/composables.spec.ts
 - [ ] T055 [P] Review packages/ui-system/tests/unit/utilities.spec.ts — re-enable or annotate — packages/ui-system/tests/unit/utilities.spec.ts
 - [ ] T056 [P] Review apps/api/tests/integration/tenant-resolver.test.ts — re-enable or annotate — apps/api/tests/integration/tenant-resolver.test.ts
@@ -169,7 +169,7 @@ Phase 1 (US1 — Vitest)
 **US1/US2/US3 Goal**: Create GitHub Actions CI workflow with 5 sequential stages (lint → typecheck → unit → integration → e2e). No coverage thresholds.
 **Independent Test**: Push branch and confirm all 5 CI jobs appear in GitHub Actions; lint and typecheck jobs reach green.
 
-- [ ] T071 Create .github/workflows/ci.yml with 5 jobs: lint, typecheck, unit-tests (needs lint+typecheck), integration-tests (needs unit; postgres+redis services), e2e-tests (needs integration; dev servers + wait-on) — .github/workflows/ci.yml
+- [ ] T071 Create .github/workflows/ci.yml with 5 jobs: lint (add `--reporter=verbose`), typecheck, unit-tests (--reporter=verbose; needs lint+typecheck; add grep assertion: `! grep -r '\.skip' tests/ packages/ apps/ --include='*.test.ts' | grep -v 'SKIP REASON\|QUARANTINE'`), integration-tests (needs unit; postgres+redis services), e2e-tests (needs integration; dev servers + wait-on) — .github/workflows/ci.yml
 - [ ] T072 Add dev:backoffice and dev:frontoffice scripts to root package.json for CI e2e server start step — package.json
 
 ---
@@ -191,7 +191,8 @@ Phase 1 (US1 — Vitest)
 
 ### Cross-Phase Parallel Opportunities
 
-- Phases 5 and 6 can start as soon as Phase 1 completes (both only read/modify test files, not config files touched in phases 2–4).
+- Phases 5 (flaky) can start as soon as Phase 1 completes (only modifies test files).
+- Phase 6 (skip review): T048–T052, T054–T057 can start after Phase 1 completes. **EXCEPTION: T053 must run AFTER T037 (Phase 3) because it also modifies `vitest.config.ts` — running concurrently would create a merge conflict that could lose the Playwright e2e exclusion.**
 - Phase 7 is fully independent; README creation can begin immediately after Phase 1 and run alongside Phases 2–6.
 - Phase 8 must be last (references scripts from Phases 1, 3, and 4).
 
