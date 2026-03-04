@@ -167,6 +167,19 @@ Emit structured section headers to stdout:
 
 The following audit areas cannot be fully automated by the script and require manual inspection during implementation. Each must be incorporated into the written reports.
 
+> **Plan-to-Tasks Sub-group Mapping (M3 remediation):** During task decomposition, Phase 2 expanded to 8 sub-groups. The 4 additional sub-groups not named as separate plan sub-phases are: Vitest Config Detail (tasks T020–T025, maps to US1), Test Distribution Verification (T026, maps to US2), Skipped/Flaky Test Verification (T047, maps to US7), and Enforcement Readiness Score Synthesis (T048–T049, maps to US8). These are covered by FR-US1, FR-US2, FR-US7, and FR-US8 respectively.
+
+| tasks.md Sub-group                  | Plan Section                                     | US Labels |
+| ----------------------------------- | ------------------------------------------------ | --------- |
+| §2.1 Vitest Config Detail           | Derived from script output (FR-US1)              | US1       |
+| §2.2 Test Distribution Verification | Derived from script output (FR-US2)              | US2       |
+| §2.3 ESLint Rule Severity           | §2.1 ESLint Rule Severity Scan                   | US3       |
+| §2.4 CI Pipeline Audit              | §2.2 CI Pipeline Enforcement Posture             | US4       |
+| §2.5 README Completeness            | §2.3 README Section Completeness                 | US6       |
+| §2.6 Command Execution              | §2.4 Technical Debt Snapshot — Command Execution | US5, US7  |
+| §2.7 Skipped/Flaky Verification     | Derived from script output (FR-US7-4)            | US7       |
+| §2.8 Readiness Score                | Synthesis of §2.1–§2.7 (FR-US8)                  | US8       |
+
 #### 2.1 ESLint Rule Severity Scan (FR-US3-2)
 
 **Why manual:** Flat config files (`eslint.config.mjs`, `eslint.config.js`) are ES modules. Statically parsing rule severity without executing them is not reliable.

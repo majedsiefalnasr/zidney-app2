@@ -39,9 +39,9 @@
 - [ ] T012 [US9] Add Playwright config detector to `scripts/infra-audit.ts` — locate `playwright.config.ts`, `playwright.config.js`; record `e2ePresent: true/false` per app; populate `playwrightConfigs` array (section 1.5)
 - [ ] T013 [US9] Add README presence and section-completeness scanner to `scripts/infra-audit.ts` — for every `apps/*` and `packages/*` directory: check for `README.md` (case-insensitive); if present, scan for 7 required section headings; classify each as `PRESENT`, `PRESENT_EMPTY`, or `MISSING`; classify missing READMEs as `README_MISSING` (section 1.6)
 - [ ] T014 [US9] Add skipped/flaky test scanner to `scripts/infra-audit.ts` — scan all test source files for `.skip(`, `.todo(`, `xit(`, `xdescribe(`, `.retry(`, `// flaky`, `// FLAKY`, `// unstable`, `// UNSTABLE`, and `retry:` config key ≥ 1; record counts per app with `"detectionMethod": "STATIC_SCAN_ONLY"` (section 1.7)
-- [ ] T015 [US9] Add JSON output writer and structured console output to `scripts/infra-audit.ts` — write `infra-audit-report.json` with all 10 required top-level keys (`timestamp`, `gitSha`, `vitestConfigs`, `eslintConfigs`, `playwrightConfigs`, `totalTestFiles`, `readmeAudit`, `skippedTests`, `flakyTests`, `consolidationRisk`, `prettierConflictRisk`); emit `[INFRA AUDIT]` phase headers to stdout; emit `WARN: PARSE_ERROR` on file parse failure; emit `SKIP: SKIPPED (secret pattern)` for skipped files (sections 1.8–1.9)
+- [ ] T015 [US9] Add JSON output writer and structured console output to `scripts/infra-audit.ts` — write `infra-audit-report.json` with all 11 required top-level keys (`timestamp`, `gitSha`, `vitestConfigs`, `eslintConfigs`, `playwrightConfigs`, `totalTestFiles`, `readmeAudit`, `skippedTests`, `flakyTests`, `consolidationRisk`, `prettierConflictRisk`); emit `[INFRA AUDIT]` phase headers to stdout; emit `WARN: PARSE_ERROR` on file parse failure; emit `SKIP: SKIPPED (secret pattern)` for skipped files (sections 1.8–1.9)
 - [ ] T016 [US9] Run `bun run scripts/infra-audit.ts` — verify exit code 0 and confirm `infra-audit-report.json` is written at repo root
-- [ ] T017 [US9] Validate `infra-audit-report.json` — confirm all 10 required top-level keys are present and non-null; confirm `timestamp` is ISO 8601; confirm `gitSha` matches recorded SHA from T003
+- [ ] T017 [US9] Validate `infra-audit-report.json` — confirm all 11 required top-level keys are present and non-null; confirm `timestamp` is ISO 8601; confirm `gitSha` matches recorded SHA from T003
 - [ ] T018 [P] [US9] Lint `scripts/infra-audit.ts` via `bun run lint` — verify 0 new ESLint errors introduced by the script
 - [ ] T019 [P] [US9] Type-check via `bun run tsc --noEmit` — verify 0 new TypeScript errors introduced by `scripts/infra-audit.ts`
 
@@ -94,11 +94,11 @@
 > These tasks are **strictly sequential** per NFR-P2. Do not run in parallel.
 
 - [ ] T041 [US5] Run `bun install` — record exit code and any Bun compatibility warnings; note any Node.js-only tooling warnings
-- [ ] T042 [US5] Run `bun run build` — record exit code and any build errors or warnings
-- [ ] T043 [US5] Assign Bun compatibility verdict (FULLY COMPATIBLE / PARTIALLY COMPATIBLE / INCOMPATIBLE) based on T041–T042 results
+- [ ] T042 [US7] Run `bun run tsc --noEmit` — record total TypeScript error count with git SHA and ISO 8601 timestamp
+- [ ] T043 [US7] Run `bun run lint` — record total ESLint error count and warning count with git SHA and ISO 8601 timestamp
 - [ ] T044 [US2] [US7] Run `bun test --coverage` in local test environment — record exit code; record raw Lines%, Functions%, Statements%, Branches% coverage baseline; document any DB-gated test failures as `"DB-GATED"` entries; do not filter by test type
-- [ ] T045 [US7] Run `bun run tsc --noEmit` — record total TypeScript error count with git SHA and ISO 8601 timestamp
-- [ ] T046 [US7] Run `bun run lint` — record total ESLint error count and warning count with git SHA and ISO 8601 timestamp
+- [ ] T045 [US5] Run `bun run build` — record exit code and any build errors or warnings
+- [ ] T046 [US5] Assign Bun compatibility verdict (FULLY COMPATIBLE / PARTIALLY COMPATIBLE / INCOMPATIBLE) based on T041–T045 results (all four commands: install, tsc, lint, test, build)
 
 #### 2.7 — Skipped/Flaky Test Count Verification [US7]
 

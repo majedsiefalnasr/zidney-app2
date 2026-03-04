@@ -257,7 +257,7 @@ As a platform engineer, I want the audit stage to conclude with three versioned 
 
 - AC-US9-1: `scripts/infra-audit.ts` exists and lints without errors.
 - AC-US9-2: Running `bun run scripts/infra-audit.ts` produces `infra-audit-report.json` without error.
-- AC-US9-3: The JSON output contains keys: `vitestConfigs`, `eslintConfigs`, `playwrightConfigs`, `totalTestFiles`, `readmeAudit`, `timestamp`.
+- AC-US9-3: The JSON output contains all 11 required top-level keys: `timestamp`, `gitSha`, `vitestConfigs`, `eslintConfigs`, `playwrightConfigs`, `totalTestFiles`, `readmeAudit`, `skippedTests`, `flakyTests`, `consolidationRisk`, `prettierConflictRisk`.
 - AC-US9-4: The script makes no modifications to any tracked file.
 
 ### AC-US10: Written Deliverables
