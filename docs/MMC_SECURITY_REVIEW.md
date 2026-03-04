@@ -395,7 +395,7 @@ MMC implements authentication, authorization, and role-based access control (RBA
 
 - [ ] **CO-05:** Documentation of security controls (this checklist)
   - **Evidence:** This document and architectural decision records (ADRs)
-  - **ADRs:** `docs/architecture/ADR-0003-RBAC-Model.md`, `ADR-0006-Server-Authority.md`
+  - **ADRs:** `docs/architecture/adr/adr-0003-RBAC-Model.md`, `ADR-0006-Server-Authority.md`
   - **Status:** ✅ PASS
 
 - [ ] **CO-06:** Security incident response plan exists

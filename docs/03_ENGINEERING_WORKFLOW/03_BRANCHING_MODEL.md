@@ -92,7 +92,7 @@ v1.2.3
 
 Tag must match semantic versioning policy defined in:
 
-docs/architecture/ADR-0008-semantic-versioning-policy.md
+docs/architecture/adr/adr-0008-semantic-versioning-policy.md
 
 ---
 

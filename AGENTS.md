@@ -2,11 +2,34 @@
 
 ---
 
+## AI ENTRYPOINT (Load First)
+
+AI agents must start reasoning by loading:
+
+1. docs/ai/AI_BOOTSTRAP.md
+2. docs/ai/AI_CONTEXT_INDEX.md
+3. PROJECT_CONTEXT_PRIMER.md
+4. docs/ai/AI_ENGINEERING_RULES.md
+5. docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json
+6. docs/architecture/ADR/
+
+AI_BOOTSTRAP.md defines the architecture‑first reasoning model and must always be loaded before any other AI context files.
+
+---
+
 ## Mandatory Context Initialization
 
 Before performing architectural analysis, implementation, planning, or modification of any feature, AI agents MUST read:
 
 `PROJECT_CONTEXT_PRIMER.md`
+
+AI agents MUST also load the AI governance context:
+
+`docs/ai/AI_CONTEXT_INDEX.md`
+
+This file links the AI architecture contract, engineering rules, ADR references, and governance pipeline.
+
+AI tools must treat `AI_CONTEXT_INDEX.md` as the entry point for all AI-specific guidance before generating code or proposing architectural changes.
 
 This file defines:
 
@@ -261,6 +284,24 @@ No merge without tests.
 
 ## AI Behavioral Enforcement (Strict Contract)
 
+### AI Context Loading Requirement
+
+Before any reasoning, planning, code generation, or architectural analysis, AI must load the following files in this order:
+
+1. `docs/ai/AI_BOOTSTRAP.md`
+2. `docs/ai/AI_CONTEXT_INDEX.md`
+3. `PROJECT_CONTEXT_PRIMER.md`
+4. `docs/ai/AI_ENGINEERING_RULES.md`
+5. `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json`
+
+`AI_BOOTSTRAP.md` establishes the AI reasoning model and governance pipeline and must always be loaded before any other AI context documents.
+
+These files together define the behavioral contract, architecture boundaries, and governance pipeline for AI-driven development inside Zidney.
+
+If any conflict exists between these files, resolution order is:
+
+ADR > Specs > AI_CONTEXT_INDEX > AI_ENGINEERING_RULES > AGENTS.md > Implementation
+
 This section defines mandatory behavioral constraints for all AI agents (Copilot, MCP-enabled agents, Claude, GLM, etc.) operating inside Zidney.
 
 Violation of these rules is considered architectural failure.
@@ -269,7 +310,7 @@ Violation of these rules is considered architectural failure.
 
 AI must treat:
 
-- `docs/architecture/ADR-*` as binding architectural decisions.
+- `docs/architecture/adr/adr-*` as binding architectural decisions.
 - `specs/phases/` as the feature behavior authority.
 - `docs/01_ENGINEERING_GOVERNANCE/` as enforcement authority.
 
@@ -401,22 +442,98 @@ White-label customization is visual only.
 
 ---
 
-### MCP Usage Restrictions
+### MCP Usage Restrictions & Auto-Trigger Rules
 
-AI may use MCP for:
+AI must evaluate available MCPs before responding to any technical task.
+AI must prefer MCP-sourced context over training knowledge for all code, documentation, and architecture tasks.
 
-- Schema inspection.
-- Query validation.
-- Debugging.
+---
 
-AI must not:
+#### Context7 MCP — Auto-Trigger (no explicit prompt required)
 
-- Execute destructive SQL.
-- Modify production databases.
-- Bypass migration system.
+AI must automatically invoke Context7 MCP when:
+
+- Looking up documentation for any third-party library or framework (Hono, Bun, Vue 3, shadcn-vue, Drizzle ORM, Tailwind CSS, Vite, etc.).
+- Generating code that imports or uses a third-party package.
+- Answering setup, installation, or configuration questions for external tools.
+- Resolving API references, method signatures, or option interfaces for any non-Zidney dependency.
+
+Context7 must not be used for Zidney internal packages. Use GitNexus MCP for internal codebase context.
+
+---
+
+#### GitNexus MCP — Auto-Trigger (no explicit prompt required)
+
+AI must automatically invoke GitNexus MCP when:
+
+- Understanding how a Zidney feature, module, or service works.
+- Assessing the blast radius of a proposed change.
+- Tracing the cause of a bug or unexpected behavior.
+- Performing or planning a refactor, rename, extraction, or split.
+
+AI must always read `gitnexus://repo/{name}/context` first to verify index freshness before any GitNexus query.
+
+If the index is stale, AI must prompt the user to run `npx gitnexus analyze` before proceeding.
+
+---
+
+#### Postgres/DB MCP — Auto-Trigger (no explicit prompt required)
+
+AI must automatically invoke Postgres/DB MCP when:
+
+- Inspecting the current schema before writing a migration.
+- Validating a query for correctness or performance.
+- Debugging a database-level error or unexpected query result.
+
+AI must not use Postgres/DB MCP to:
+
+- Execute destructive SQL (DROP, TRUNCATE, DELETE without WHERE, etc.).
+- Modify schema outside of migration files.
 - Apply ad-hoc schema patches.
+- Modify production databases.
 
-MCP is read-first, controlled-write only in development.
+Postgres/DB MCP is read-first. Controlled writes are allowed in development only, via migration system.
+
+---
+
+#### Filesystem MCP — Auto-Trigger (no explicit prompt required)
+
+AI must automatically invoke Filesystem MCP when:
+
+- Reading ADR files before making any architectural decision.
+- Reading spec files before generating or modifying any feature.
+- Verifying that a migration file, spec, or config file exists before referencing it.
+- Confirming directory structure before generating new files.
+
+AI must not use Filesystem MCP to:
+
+- Write or overwrite manually curated spec files.
+- Modify files in CLOSED or HARDENED stages.
+- Bypass the SpecKit directory structure.
+
+---
+
+#### GitHub MCP — Auto-Trigger (no explicit prompt required)
+
+AI must automatically invoke GitHub MCP when:
+
+- Checking the status of an open PR before suggesting changes.
+- Referencing a commit, diff, or change history for context.
+- Verifying whether an issue or bug has already been reported or resolved.
+- Checking branch state before proposing or generating code.
+
+AI must not use GitHub MCP to:
+
+- Merge PRs or push commits without explicit user instruction.
+- Close or modify issues autonomously.
+
+---
+
+#### General MCP Enforcement Rule
+
+AI must not rely solely on training knowledge when an MCP can provide current, project-specific, or authoritative context.
+
+MCP usage is not optional — it is a mandatory step in the reasoning pipeline for all technical tasks.
 
 ---
 
@@ -612,7 +729,7 @@ This contract is authoritative.
 <!-- gitnexus:start -->
 # GitNexus MCP
 
-This project is indexed by GitNexus as **zidney-app2** (6877 symbols, 13629 relationships, 300 execution flows).
+This project is indexed by GitNexus as **zidney-app2** (7071 symbols, 13978 relationships, 300 execution flows).
 
 ## Always Start Here
 

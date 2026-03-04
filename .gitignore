@@ -66,6 +66,3 @@ Thumbs.db
 .secrets
 .vars
 .gitnexus
-
-# Infra audit ephemeral output
-infra-audit-report.json

@@ -1,5 +1,12 @@
 #!/usr/bin/env sh
 . "$(dirname -- "$0")/_/husky.sh"
 
+# AI Architecture Guard
+bun scripts/ai-guard.ts
+
+# Infrastructure Audit
+bun scripts/infra-audit.ts --quick
+
+# Standard quality gates
 bun run lint
 bun run type-check

@@ -474,8 +474,8 @@ redis-cli MONITOR
 
 ## Related ADRs
 
-- [ADR-0001: Database-per-Tenant](../architecture/ADR-0001-database-per-tenant.md)
-- [ADR-0006: Runtime Authoritative Time](../architecture/ADR-0006-runtime-authoritative-time.md)
+- [ADR-0001: Database-per-Tenant](../architecture/adr/adr-0001-database-per-tenant.md)
+- [ADR-0006: Runtime Authoritative Time](../architecture/adr/adr-0006-runtime-authoritative-time.md)
 
 ## References
 

@@ -37,7 +37,7 @@ Major Release (X.0.0)
 - Snapshot mandatory before upgrade
 
 All releases must follow semantic versioning policy defined in:
-docs/architecture/ADR-0008-formalize-semantic-versioning-policy.md
+docs/architecture/adr/adr-0008-formalize-semantic-versioning-policy.md
 
 ---
 
