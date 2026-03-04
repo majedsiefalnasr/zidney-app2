@@ -100,7 +100,8 @@ function detectFileModule(file: string): string | null {
   return null
 }
 
-function validateDependencyRules(
+function validateRules(
+  ruleType: string,
   fileModule: string,
   imports: string[],
   rules?: Record<string, string[]>
@@ -116,7 +117,53 @@ function validateDependencyRules(
     if (!module) continue
 
     if (forbidden.includes(module)) {
-      violations.push(`Forbidden dependency: ${fileModule} → ${module}`)
+      violations.push(
+        `${ruleType} violation: ${fileModule} → ${module} is forbidden`
+      )
+    }
+  }
+
+  return violations
+}
+
+function validateCrossAppImports(
+  fileModule: string,
+  filePath: string,
+  imports: string[]
+): string[] {
+  const violations: string[] = []
+
+  // Only enforce for app modules
+  const isAppFile = filePath.startsWith('apps/')
+  if (!isAppFile) return violations
+
+  for (const imp of imports) {
+    const module = detectModule(imp)
+    if (!module) continue
+
+    // If an app imports another app directly → violation
+    if (imp.startsWith('apps/') && module !== fileModule) {
+      violations.push(
+        `Cross-app violation: apps/${fileModule} → apps/${module} is forbidden`
+      )
+    }
+  }
+
+  return violations
+}
+
+function validateRelativeLeaks(filePath: string, imports: string[]): string[] {
+  const violations: string[] = []
+
+  for (const imp of imports) {
+    // Detect relative paths that climb directories
+    if (!imp.startsWith('.')) continue
+
+    // If the relative path explicitly references apps or packages, block it
+    if (imp.includes('apps/') || imp.includes('packages/')) {
+      violations.push(
+        `Relative architecture leak: "${imp}" should use module import instead of relative path`
+      )
     }
   }
 
@@ -142,13 +189,34 @@ function runGuard() {
 
     const imports = extractImports(file)
 
-    const dependencyViolations = validateDependencyRules(
+    const crossAppViolations = validateCrossAppImports(
+      fileModule,
+      file,
+      imports
+    )
+
+    const relativeLeakViolations = validateRelativeLeaks(file, imports)
+
+    const dependencyViolations = validateRules(
+      'Dependency',
       fileModule,
       imports,
       contract.dependencyRules?.forbidden
     )
 
-    violations.push(...dependencyViolations.map((v) => `${file}: ${v}`))
+    const layerViolations = validateRules(
+      'Layer',
+      fileModule,
+      imports,
+      contract.layerRules?.forbidden
+    )
+
+    violations.push(
+      ...dependencyViolations.map((v) => `${file}: ${v}`),
+      ...layerViolations.map((v) => `${file}: ${v}`),
+      ...crossAppViolations.map((v) => `${file}: ${v}`),
+      ...relativeLeakViolations.map((v) => `${file}: ${v}`)
+    )
   }
 
   if (violations.length > 0) {
