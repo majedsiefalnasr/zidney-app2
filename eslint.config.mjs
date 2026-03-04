@@ -1,4 +1,5 @@
 import eslint from '@eslint/js'
+import eslintConfigPrettier from 'eslint-config-prettier'
 import importX from 'eslint-plugin-import-x'
 import eslintPluginVue from 'eslint-plugin-vue'
 import globals from 'globals'
@@ -198,16 +199,19 @@ export default tseslint.config(
       'apps/*/src/core/auth/**',
     ],
     rules: {
-      'no-restricted-imports': ['error', {
-        patterns: [
-          {
-            group: ['@zidney/api-client', '@zidney/api-client/*'],
-            message:
-              'Direct API client imports are forbidden. ' +
-              'Call a store action instead. (STAGE_UI_06 — FR-008)',
-          },
-        ],
-      }],
+      'no-restricted-imports': [
+        'error',
+        {
+          patterns: [
+            {
+              group: ['@zidney/api-client', '@zidney/api-client/*'],
+              message:
+                'Direct API client imports are forbidden. ' +
+                'Call a store action instead. (STAGE_UI_06 — FR-008)',
+            },
+          ],
+        },
+      ],
     },
   },
 
@@ -218,5 +222,10 @@ export default tseslint.config(
     rules: {
       'vue/no-v-html': 'error',
     },
-  }
+  },
+
+  // eslint-config-prettier: Disable all ESLint rules that conflict with Prettier.
+  // This MUST be the last entry in the config array.
+  // Stage: STAGE_INFRA_03_ALIGNMENT — T042
+  eslintConfigPrettier
 )

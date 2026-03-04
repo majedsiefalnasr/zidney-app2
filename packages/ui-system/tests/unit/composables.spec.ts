@@ -1,12 +1,12 @@
 // @ts-nocheck
-// NOTE: Tests are intentionally skipped (describe.skip) - pending composable API alignment
+// SKIP REASON: Composable APIs (useColumnVisibility, useFilterBuilder, useMultiLanguageForm, usePagination) not yet finalized in @zidney/ui-system. Re-enable once public composable interfaces are stable.
 import { describe, expect, it, vi } from 'vitest'
 import { useColumnVisibility } from '../../src/composables/useColumnVisibility'
 import { useFilterBuilder } from '../../src/composables/useFilterBuilder'
 import { useMultiLanguageForm } from '../../src/composables/useMultiLanguageForm'
 import { usePagination } from '../../src/composables/usePagination'
 
-describe.skip('Composables - Unit Tests (Phase 4B)', () => {
+describe.skip('[QUARANTINED] Composables - Unit Tests (Phase 4B)', () => {
   describe('useFilterBuilder', () => {
     it('should initialize with empty filters', () => {
       const { filters } = useFilterBuilder([])

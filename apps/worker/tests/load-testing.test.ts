@@ -9,16 +9,24 @@
  *
  * Test Coverage: T061 (Load testing for concurrent initialization)
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
+ *
+ * QUARANTINE: Wall-clock timing assertions and real infrastructure dependencies
+ * (TaskQueueProcessor, pg.Pool) make this test non-deterministic in unit test context.
+ * This file belongs in apps/worker/tests/load/ (a canonical copy exists there).
+ * Run with: vitest run --dir apps/worker/tests/load
+ * Tracking ref: INFRA-003-FLAKY-002
  */
 
 import { createLogger } from '@zidney/logger'
-import { TaskQueueProcessor } from '../src/processor/queue-processor'
 import { Pool } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
+import { TaskQueueProcessor } from '../src/processor/queue-processor'
 
 const logger = createLogger('SchemaProvisioningLoadTest')
 
-describe('Schema Provisioning - Load Testing', () => {
+// QUARANTINE: Load test with wall-clock timing assertions. Moved to tests/load/.
+// Tracking ref: INFRA-003-FLAKY-002
+describe.skip('[QUARANTINED] Schema Provisioning - Load Testing', () => {
   let queueProcessor: TaskQueueProcessor
   let startTime: number
 

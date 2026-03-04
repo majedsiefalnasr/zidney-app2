@@ -1,14 +1,27 @@
-import path from 'path'
-import { defineConfig } from 'vitest/config'
+import { resolve } from 'path'
+import { fileURLToPath } from 'url'
+import { defineProject } from 'vitest/config'
 
-export default defineConfig({
+const __dirname = resolve(fileURLToPath(import.meta.url), '..')
+
+/**
+ * packages/api-client — Minimal Vitest Project Override
+ *
+ * Node environment, globals, and alias only.
+ * Test discovery handled by root orchestrator.
+ *
+ * Stage: STAGE_INFRA_03_ALIGNMENT — T005
+ */
+export default defineProject({
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'),
+      '@': resolve(__dirname, 'src'),
     },
   },
   test: {
+    name: 'api-client',
     globals: true,
-    include: ['tests/**/*.test.ts'],
+    environment: 'node',
+    include: ['./tests/**/*.test.ts'],
   },
 })
