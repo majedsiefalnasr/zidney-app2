@@ -9,20 +9,32 @@ Status: DESIGN SPECIFICATION
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-04T00:00:00.000Z
+Last Updated: 2026-03-04T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Vitest configuration consolidation
+- Test directory structure normalization (unit/integration/e2e)
+- Playwright installation and smoke tests for MMC, Backoffice, Frontoffice
+- ESLint + Prettier alignment
+- Flaky and skipped test stabilization
+- README coverage for all apps and packages
+- CI pipeline preparation
+
+Deferred Scope:
+
+- Coverage threshold enforcement (STAGE_INFRA_GOVERNANCE)
+- Husky hooks (STAGE_INFRA_GOVERNANCE)
+- No business logic, tenant DB, or migration changes
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
