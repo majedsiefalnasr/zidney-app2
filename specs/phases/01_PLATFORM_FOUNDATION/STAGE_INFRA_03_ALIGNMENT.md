@@ -9,17 +9,20 @@ Status: DESIGN SPECIFICATION
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
-Risk Level: LOW
+Step: plan
+Risk Level: MEDIUM
 Last Updated: 2026-03-04T00:00:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Vitest consolidation: single root config with per-app minimal overrides retained
-- Playwright: separate E2E pipeline (`test:e2e`), not mixed with Vitest
-- Flaky tests: `it.skip()` + QUARANTINE comment pattern
-- README: free-form with required section checklist
-- ESLint/Prettier: global root config alignment
+- T001: Vitest consolidation (single root projects config)
+- T002: Test directory normalization
+- T003: Playwright installation and smoke tests
+- T004: ESLint + Prettier alignment
+- T005: Flaky test stabilization
+- T006: Skipped test review
+- T007: README creation (11 apps/packages)
+- T008: CI pipeline preparation
 
 Deferred Scope:
 
@@ -29,10 +32,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Guardian validations passed. Task breakdown in progress.
 
 ---
 
