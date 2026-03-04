@@ -1,6 +1,125 @@
 # @zidney/ui-system
 
-A Vue 3 + TypeScript shared UI component library for Zidney built on **shadcn-vue** and **Tailwind CSS v4**.
+## Purpose
+
+Shared Vue 3 + TypeScript UI component library for the Zidney platform. Built on **shadcn-vue** and **Tailwind CSS v4**. Provides all reusable UI components, composables, and utilities used by MMC, Backoffice, and Frontoffice SPAs.
+
+---
+
+## Responsibilities
+
+- Provide production-ready components that extend **shadcn-vue** base components
+- Enforce consistent design token usage (no hardcoded brand colors)
+- Export composables for common patterns (pagination, filtering, column visibility, form handling)
+- Export utility functions for table operations, filter serialization, and URL sync
+- Support white-label visual customization via CSS design tokens only
+
+---
+
+## Dependencies
+
+| Package          | Role                                |
+| ---------------- | ----------------------------------- |
+| `vue`            | Vue 3 runtime (peer dependency)     |
+| `shadcn-vue`     | Base component system               |
+| `tailwindcss` v4 | Utility-first CSS (peer dependency) |
+| `@zidney/types`  | Shared TypeScript types             |
+
+---
+
+## How to Run Tests
+
+```bash
+# Unit tests (from repo root)
+bun run vitest run --project ui-system
+
+# From this directory
+bun run test
+bun run test:unit
+
+# Type check
+bun run typecheck
+```
+
+> Some test suites are intentionally skipped — see `SKIP REASON` comments in `tests/unit/` for details.
+
+---
+
+## Environment Variables
+
+None — this is a UI library; all configuration is done via component props and design tokens.
+
+---
+
+## Known Boundaries
+
+- **shadcn-vue components first** — never introduce a custom component if a shadcn-vue equivalent exists
+- **No hardcoded brand colors** — all colors must use CSS design tokens (`var(--color-brand-*)`)
+- **No global CSS** — all styles must be scoped or use `@apply` with Tailwind utilities
+- **White-label is visual only** — logos, brand tokens, favicon only; no behavioral customization
+- **Import rule**: may import from `packages/types`; must not import from `apps/*` or backend packages
+
+---
+
+## Public API
+
+### Components (17 production-ready)
+
+```typescript
+import {
+  DataTable,
+  DataTableColumn,
+  DataTableFilter,
+  Button,
+  Input,
+  Select,
+  Checkbox,
+  Badge,
+  Dialog,
+  Sheet,
+  Drawer,
+  Card,
+  CardHeader,
+  CardContent,
+  CardFooter,
+  Tabs,
+  TabsList,
+  TabsTrigger,
+  TabsContent,
+  Toast,
+  ToastProvider,
+} from '@zidney/ui-system'
+```
+
+### Composables
+
+```typescript
+import {
+  useColumnVisibility,
+  useFilterBuilder,
+  useMultiLanguageForm,
+  usePagination,
+} from '@zidney/ui-system/composables'
+```
+
+### Utilities
+
+```typescript
+import {
+  serializeFilters,
+  deserializeFilters,
+  detectFilterOverflow,
+  sortRows,
+  paginateRows,
+  calculateTotalPages,
+  extractRowKey,
+  encodeURL,
+  decodeURL,
+  syncToURL,
+} from '@zidney/ui-system/utils'
+```
+
+---
 
 ## ⚠️ MANDATORY REQUIREMENTS
 

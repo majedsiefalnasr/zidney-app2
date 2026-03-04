@@ -1,33 +1,84 @@
-/\*\*
+# @zidney/types
 
-- Master Database Types - Public API
--
-- File: packages/types/README.md
-- Task: T039
-- Phase: 6 - Polish and Deployment Readiness
--
-- Export reference and usage guide for @zidney/types
-  \*/
+## Purpose
 
-# @zidney/types - Master Database Types
-
-TypeScript type definitions for Zidney master database layer.
-
-**Version**: 1.0.0  
-**Published**: @zidney/types  
-**Stability**: Stable
+Shared TypeScript type definitions and enums for the entire Zidney platform. Serves as the single source of truth for all domain entity shapes, status enums, and role definitions used across `apps/*` and `packages/*`.
 
 ---
 
-## Installation
+## Responsibilities
+
+- Export TypeScript interfaces for all master-DB entities: `Product`, `License`, `TenantRegistry`, `MMCUser`, `PlatformSchemaVersion`
+- Export status enums: `LicenseStatus`, `MMCUserRole`, `AttemptStatus`, `WorkspaceStatus`
+- Export request/response wrapper types used by the API layer
+- Provide type utilities shared across domain packages
+
+---
+
+## Dependencies
+
+No runtime dependencies — pure TypeScript type definitions only.
+
+---
+
+## How to Run Tests
 
 ```bash
-npm install @zidney/types
+# Type-check only (types package has no runtime test logic)
+bun run vitest run --project types
+
+# From repo root typecheck
+bun run typecheck
 ```
 
 ---
 
-## Entity Types
+## Environment Variables
+
+None.
+
+---
+
+## Known Boundaries
+
+- **No runtime code** — this package emits type declarations only; no `.js` output
+- **No business logic** — types describe data shapes, not behavior
+- May be imported by all `apps/*` and `packages/*` without restriction
+- Must not import from any other `packages/*` or `apps/*`
+
+---
+
+## Public API
+
+```typescript
+import type {
+  // Entity types
+  Product,
+  License,
+  TenantRegistry,
+  MMCUser,
+  PlatformSchemaVersion,
+
+  // Enums
+  LicenseStatus, // PENDING_PROVISION | ACTIVE | SOFT_LOCKED | ARCHIVED | PROVISION_FAILED
+  MMCUserRole, // mmc_admin | mmc_support
+  AttemptStatus, // IN_PROGRESS | SUBMITTED | GRADED | ABANDONED
+  WorkspaceStatus, // ACTIVE | SOFT_LOCKED | ARCHIVED
+
+  // API wrapper types
+  ApiSuccess, // { success: true, data: T }
+  ApiError, // { success: false, error: { code: string, message: string } }
+  ApiResponse, // ApiSuccess<T> | ApiError
+
+  // Utility types
+  Paginated, // { items: T[], total: number, page: number, pageSize: number }
+  WithTimestamps, // { created_at: Date, updated_at: Date }
+} from '@zidney/types'
+```
+
+---
+
+## Entity Reference
 
 All entity types are exported from `@zidney/types`:
 

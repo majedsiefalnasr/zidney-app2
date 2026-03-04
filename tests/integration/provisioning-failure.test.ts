@@ -88,6 +88,7 @@ describe('Provisioning Job — Failure Scenarios', () => {
   })
 
   describe('Migration Failure', () => {
+    // SKIP REASON: Integration test requires real Worker process and PostgreSQL with tenant schema. Will be enabled in CI integration-tests job once infrastructure is confirmed.
     it.skip('should rollback database if migration fails', async () => {
       // Setup:
       // - Create provisioning job
@@ -104,6 +105,7 @@ describe('Provisioning Job — Failure Scenarios', () => {
       // - License still PENDING_PROVISION
     })
 
+    // SKIP REASON: Integration test requires real Worker process and PostgreSQL with tenant schema. Will be enabled in CI integration-tests job once infrastructure is confirmed.
     it.skip('should preserve checkpoint across retries', async () => {
       // Setup:
       // - Provision workspace:test
@@ -124,6 +126,7 @@ describe('Provisioning Job — Failure Scenarios', () => {
   })
 
   describe('Seeding Failure', () => {
+    // SKIP REASON: Integration test requires real Worker process and PostgreSQL with tenant schema. Will be enabled in CI integration-tests job once infrastructure is confirmed.
     it.skip('should mark PROVISION_FAILED if seeding fails', async () => {
       // Setup:
       // - Provision workspace:test
@@ -140,6 +143,7 @@ describe('Provisioning Job — Failure Scenarios', () => {
   })
 
   describe('Timeout Handling', () => {
+    // SKIP REASON: Integration test requires real Worker process and PostgreSQL with tenant schema. Will be enabled in CI integration-tests job once infrastructure is confirmed.
     it.skip('should detect job timeout and move to DLQ after 30min', async () => {
       // Setup:
       // - Enqueue provisioning job
@@ -159,6 +163,7 @@ describe('Provisioning Job — Failure Scenarios', () => {
       // - No zombie jobs left running
     })
 
+    // SKIP REASON: Integration test requires real Worker process and PostgreSQL with tenant schema. Will be enabled in CI integration-tests job once infrastructure is confirmed.
     it.skip('should NOT mark job as complete if commit timeout occurs', async () => {
       // Setup:
       // - Provision completes successfully
@@ -181,6 +186,7 @@ describe('Provisioning Job — Failure Scenarios', () => {
   })
 
   describe('Idempotency & Replay Safety', () => {
+    // SKIP REASON: Integration test requires real Worker process and PostgreSQL with tenant schema. Will be enabled in CI integration-tests job once infrastructure is confirmed.
     it.skip('should be idempotent when same job_id replayed', async () => {
       // Setup:
       // - Provision workspace:test (succeeds)
@@ -195,6 +201,7 @@ describe('Provisioning Job — Failure Scenarios', () => {
       // - Idempotency cache key in Redis: provisioning:idempotency:{job_id}
     })
 
+    // SKIP REASON: Integration test requires real Worker process and PostgreSQL with tenant schema. Will be enabled in CI integration-tests job once infrastructure is confirmed.
     it.skip('should NOT be idempotent for different job_ids', async () => {
       // Setup:
       // - Provision workspace:test with job_id=A (succeeds)
@@ -215,6 +222,7 @@ describe('Provisioning Job — Failure Scenarios', () => {
   })
 
   describe('DLQ (Dead-Letter Queue) Management', () => {
+    // SKIP REASON: Integration test requires real Worker process and PostgreSQL with tenant schema. Will be enabled in CI integration-tests job once infrastructure is confirmed.
     it.skip('should move job to DLQ after max retries (5)', async () => {
       // Setup:
       // - Enqueue job
@@ -232,6 +240,7 @@ describe('Provisioning Job — Failure Scenarios', () => {
       // - Job retrievable via peekDLQ()
     })
 
+    // SKIP REASON: Integration test requires real Worker process and PostgreSQL with tenant schema. Will be enabled in CI integration-tests job once infrastructure is confirmed.
     it.skip('should NOT remove job from DLQ automatically', async () => {
       // Setup:
       // - Job in DLQ with failed status
@@ -244,6 +253,7 @@ describe('Provisioning Job — Failure Scenarios', () => {
       // - Prevents automatic re-processing of permanently failed jobs
     })
 
+    // SKIP REASON: Integration test requires real Worker process and PostgreSQL with tenant schema. Will be enabled in CI integration-tests job once infrastructure is confirmed.
     it.skip('should allow manual retry of DLQ job by operators', async () => {
       // Setup:
       // - Job in DLQ after failed provisioning
@@ -259,6 +269,7 @@ describe('Provisioning Job — Failure Scenarios', () => {
   })
 
   describe('Concurrency Safety', () => {
+    // SKIP REASON: Integration test requires real Worker process and PostgreSQL with tenant schema. Will be enabled in CI integration-tests job once infrastructure is confirmed.
     it.skip('should prevent concurrent provisioning of same workspace', async () => {
       // Setup:
       // - Enqueue 2 jobs for workspace:test (with different job_ids)
@@ -281,6 +292,7 @@ describe('Provisioning Job — Failure Scenarios', () => {
   })
 
   describe('Logging & Observability', () => {
+    // SKIP REASON: Integration test requires real Worker process and PostgreSQL with tenant schema. Will be enabled in CI integration-tests job once infrastructure is confirmed.
     it.skip('should log all job lifecycle events with correlation_id', async () => {
       // Expected log entries:
       // 1. "Provisioning job dequeued" (DEBUG)
@@ -304,6 +316,7 @@ describe('Provisioning Job — Failure Scenarios', () => {
       // - Error logs include stack trace (but NOT returned to client)
     })
 
+    // SKIP REASON: Integration test requires real Worker process and PostgreSQL with tenant schema. Will be enabled in CI integration-tests job once infrastructure is confirmed.
     it.skip('should emit metric: provisioning_duration_ms', async () => {
       // Expected metrics:
       // - (p50, p95, p99) provisioning latency
@@ -319,6 +332,7 @@ describe('Provisioning Job — Failure Scenarios', () => {
 })
 
 describe('Provisioning Failure — Edge Cases', () => {
+  // SKIP REASON: Integration test requires real Worker process and PostgreSQL with tenant schema. Will be enabled in CI integration-tests job once infrastructure is confirmed.
   it.skip('should handle license not found (race condition)', async () => {
     // Setup:
     // - Create license (license_id = X)
@@ -334,6 +348,7 @@ describe('Provisioning Failure — Edge Cases', () => {
     // - Job moved to DLQ
   })
 
+  // SKIP REASON: Integration test requires real Worker process and PostgreSQL with tenant schema. Will be enabled in CI integration-tests job once infrastructure is confirmed.
   it.skip('should handle invalid state transition during update', async () => {
     // Setup:
     // - Provision job for license in PENDING_PROVISION

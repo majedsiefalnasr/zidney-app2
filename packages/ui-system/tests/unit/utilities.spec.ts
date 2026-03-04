@@ -1,5 +1,5 @@
 // @ts-nocheck
-// NOTE: Tests are intentionally skipped (describe.skip) - pending utility function API alignment
+// SKIP REASON: Utility function APIs (filter-serializer, table-helpers, url-sync) not yet finalized in @zidney/ui-system. Re-enable once public utility interfaces are stable.
 import { describe, expect, it } from 'vitest'
 import {
   deserializeFilters,

@@ -120,6 +120,7 @@ describe('T026: Integration Tests - Happy Path', () => {
   // - Proper test database setup
   // - Connection pool configuration
 
+  // SKIP REASON: Integration test requires full worker infrastructure (Redis job queue + PostgreSQL with tenant schema). Enable in CI integration-tests job. See STAGE_02B_TENANT_BASELINE_SCHEMA.
   it.skip('should provision workspace end-to-end', async () => {
     // Test flow:
     // 1. Create job
@@ -134,6 +135,7 @@ describe('T026: Integration Tests - Happy Path', () => {
     // Placeholder for integration test
   })
 
+  // SKIP REASON: Integration test requires full worker infrastructure (Redis job queue + PostgreSQL with tenant schema). Enable in CI integration-tests job. See STAGE_02B_TENANT_BASELINE_SCHEMA.
   it.skip('should handle provisioning failure and rollback', async () => {
     // Test flow:
     // 1. Create job
@@ -152,6 +154,7 @@ describe('T026: Integration Tests - Happy Path', () => {
 // ============================================================================
 
 describe('T027: Concurrency & Crash Recovery Tests', () => {
+  // SKIP REASON: Integration test requires full worker infrastructure (Redis job queue + PostgreSQL with tenant schema). Enable in CI integration-tests job. See STAGE_02B_TENANT_BASELINE_SCHEMA.
   it.skip('should handle concurrent provisioning with lock collision', async () => {
     // Test flow:
     // 1. Enqueue 2 jobs for same workspace
@@ -165,6 +168,7 @@ describe('T027: Concurrency & Crash Recovery Tests', () => {
     // - Graceful error recovery
   })
 
+  // SKIP REASON: Integration test requires full worker infrastructure (Redis job queue + PostgreSQL with tenant schema). Enable in CI integration-tests job. See STAGE_02B_TENANT_BASELINE_SCHEMA.
   it.skip('should recover from worker crash at each step', async () => {
     // Test flow:
     // 1. For each step 1-9:
@@ -177,6 +181,7 @@ describe('T027: Concurrency & Crash Recovery Tests', () => {
     // This test verifies idempotency and crash safety of checkpoints
   })
 
+  // SKIP REASON: Integration test requires full worker infrastructure (Redis job queue + PostgreSQL with tenant schema). Enable in CI integration-tests job. See STAGE_02B_TENANT_BASELINE_SCHEMA.
   it.skip('should clean up after lock TTL expiration', async () => {
     // Test flow:
     // 1. Acquire lock
