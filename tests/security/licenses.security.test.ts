@@ -5,7 +5,7 @@ import { describe, expect, it } from 'vitest'
  * T098-T102: Ready for implementation with load testing framework (k6, Artillery)
  */
 
-describe('T098: SQL Injection Penetration Tests (10+ attack vectors)', () => {
+describe.skip('[QUARANTINED] T098: SQL Injection Penetration Tests (10+ attack vectors)', () => {
   // SKIP REASON: Security test stub pending API implementation. Requires running API server with license RBAC routes. Deferred per STAGE_INFRA_03_ALIGNMENT scope.
   it.skip('should prevent SQL injection in workspace_slug parameter', () => {
     // Attack: POST /licenses with workspace_slug = "'; DROP TABLE licenses; --"
@@ -90,7 +90,7 @@ describe('T098: SQL Injection Penetration Tests (10+ attack vectors)', () => {
   })
 })
 
-describe('T099: Authorization Boundary Testing (72+ scenarios)', () => {
+describe.skip('[QUARANTINED] T099: Authorization Boundary Testing (72+ scenarios)', () => {
   // SKIP REASON: Security test stub pending API implementation. Requires running API server with license RBAC routes. Deferred per STAGE_INFRA_03_ALIGNMENT scope.
   it.skip('should reject student role accessing /v1/mmc/licenses', () => {
     // Student cannot access MMC endpoints (401 Unauthorized)
@@ -174,7 +174,7 @@ describe('T099: Authorization Boundary Testing (72+ scenarios)', () => {
   })
 })
 
-describe('T100: Cross-Tenant Data Leakage Stress Test', () => {
+describe.skip('[QUARANTINED] T100: Cross-Tenant Data Leakage Stress Test', () => {
   // SKIP REASON: Security test stub pending API implementation. Requires running API server with license RBAC routes. Deferred per STAGE_INFRA_03_ALIGNMENT scope.
   it.skip('should not leak workspace data across tenants under concurrent load', () => {
     // 100 concurrent users from different tenants
@@ -222,7 +222,7 @@ describe('T100: Cross-Tenant Data Leakage Stress Test', () => {
   })
 })
 
-describe('T101: Rate Limiting Under Load (1000 req/s)', () => {
+describe.skip('[QUARANTINED] T101: Rate Limiting Under Load (1000 req/s)', () => {
   // SKIP REASON: Security test stub pending API implementation. Requires running API server with license RBAC routes. Deferred per STAGE_INFRA_03_ALIGNMENT scope.
   it.skip('should maintain rate limits under sustained load', () => {
     // Simulate 1000 req/sec from 100 users
@@ -270,7 +270,7 @@ describe('T101: Rate Limiting Under Load (1000 req/s)', () => {
   })
 })
 
-describe('T102: Password & Credential Sanitization (Error Responses)', () => {
+describe.skip('[QUARANTINED] T102: Password & Credential Sanitization (Error Responses)', () => {
   // SKIP REASON: Security test stub pending API implementation. Requires running API server with license RBAC routes. Deferred per STAGE_INFRA_03_ALIGNMENT scope.
   it.skip('should never log passwords in application logs', () => {
     // Admin account generation: password never stored

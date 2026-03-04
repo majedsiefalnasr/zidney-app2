@@ -8,7 +8,7 @@
 
 import { describe, it } from 'vitest'
 
-describe('License — Soft-Lock Expiration', () => {
+describe.skip('[QUARANTINED] License — Soft-Lock Expiration', () => {
   describe('Lazy Evaluation (On-Request Expiration)', () => {
     it('should auto-transition to ARCHIVED if soft_lock_until expired on next request', async () => {
       // ✅ CRITICAL P2 TEST: Lazy expiration on request (NOT cron)

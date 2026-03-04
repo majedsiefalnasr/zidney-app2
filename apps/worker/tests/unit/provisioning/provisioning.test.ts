@@ -121,7 +121,7 @@ describe('T026: Integration Tests - Happy Path', () => {
   // - Connection pool configuration
 
   // SKIP REASON: Integration test requires full worker infrastructure (Redis job queue + PostgreSQL with tenant schema). Enable in CI integration-tests job. See STAGE_02B_TENANT_BASELINE_SCHEMA.
-  it.skip('should provision workspace end-to-end', async () => {
+  it.skip('[QUARANTINED] should provision workspace end-to-end', async () => {
     // Test flow:
     // 1. Create job
     // 2. Enqueue to Redis
@@ -136,7 +136,7 @@ describe('T026: Integration Tests - Happy Path', () => {
   })
 
   // SKIP REASON: Integration test requires full worker infrastructure (Redis job queue + PostgreSQL with tenant schema). Enable in CI integration-tests job. See STAGE_02B_TENANT_BASELINE_SCHEMA.
-  it.skip('should handle provisioning failure and rollback', async () => {
+  it.skip('[QUARANTINED] should handle provisioning failure and rollback', async () => {
     // Test flow:
     // 1. Create job
     // 2. Simulate failure at step 5 (seeding)
@@ -155,7 +155,7 @@ describe('T026: Integration Tests - Happy Path', () => {
 
 describe('T027: Concurrency & Crash Recovery Tests', () => {
   // SKIP REASON: Integration test requires full worker infrastructure (Redis job queue + PostgreSQL with tenant schema). Enable in CI integration-tests job. See STAGE_02B_TENANT_BASELINE_SCHEMA.
-  it.skip('should handle concurrent provisioning with lock collision', async () => {
+  it.skip('[QUARANTINED] should handle concurrent provisioning with lock collision', async () => {
     // Test flow:
     // 1. Enqueue 2 jobs for same workspace
     // 2. Spawn 2 worker threads
@@ -169,7 +169,7 @@ describe('T027: Concurrency & Crash Recovery Tests', () => {
   })
 
   // SKIP REASON: Integration test requires full worker infrastructure (Redis job queue + PostgreSQL with tenant schema). Enable in CI integration-tests job. See STAGE_02B_TENANT_BASELINE_SCHEMA.
-  it.skip('should recover from worker crash at each step', async () => {
+  it.skip('[QUARANTINED] should recover from worker crash at each step', async () => {
     // Test flow:
     // 1. For each step 1-9:
     //    a. Start provisioning
@@ -182,7 +182,7 @@ describe('T027: Concurrency & Crash Recovery Tests', () => {
   })
 
   // SKIP REASON: Integration test requires full worker infrastructure (Redis job queue + PostgreSQL with tenant schema). Enable in CI integration-tests job. See STAGE_02B_TENANT_BASELINE_SCHEMA.
-  it.skip('should clean up after lock TTL expiration', async () => {
+  it.skip('[QUARANTINED] should clean up after lock TTL expiration', async () => {
     // Test flow:
     // 1. Acquire lock
     // 2. Simulate TTL expiration (60 seconds)

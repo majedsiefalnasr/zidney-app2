@@ -284,7 +284,7 @@ describe('ApiClient', () => {
     // causing r1/r2 data to be swapped. Needs deterministic request-identity tracking in
     // the mock adapter to guarantee pairing.
     // Tracking ref: INFRA-003-FLAKY-001
-    it.skip('should trigger single refresh for concurrent 401s', async () => {
+    it.skip('[QUARANTINED] should trigger single refresh for concurrent 401s', async () => {
       // Two concurrent requests both get 401
       adapter.enqueue({
         status: 401,

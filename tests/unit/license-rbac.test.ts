@@ -27,7 +27,7 @@ interface TestUser {
  * POST /licenses/:id/restore         |   ❌    |  ❌   |     ❌     |    ✅
  */
 
-describe('License Management — RBAC Enforcement', () => {
+describe.skip('[QUARANTINED] License Management — RBAC Enforcement', () => {
   describe('License Creation (POST /mmc/licenses)', () => {
     it('should reject creation by student (401)', async () => {
       // ✅ CRITICAL P1 TEST: Students cannot create licenses

@@ -26,7 +26,7 @@ const logger = createLogger('SchemaProvisioningLoadTest')
 
 // QUARANTINE: Load test with wall-clock timing assertions. Moved to tests/load/.
 // Tracking ref: INFRA-003-FLAKY-002
-describe.skip('Schema Provisioning - Load Testing', () => {
+describe.skip('[QUARANTINED] Schema Provisioning - Load Testing', () => {
   let queueProcessor: TaskQueueProcessor
   let startTime: number
 

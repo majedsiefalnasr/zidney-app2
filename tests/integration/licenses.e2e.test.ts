@@ -8,7 +8,7 @@ import { describe, expect, it } from 'vitest'
  * Structure provided for future implementation
  */
 
-describe('T056: Snapshot Job Enqueueing (DEFERRED - Stage 12)', () => {
+describe.skip('[QUARANTINED] T056: Snapshot Job Enqueueing (DEFERRED - Stage 12)', () => {
   // SKIP REASON: Integration test requires running PostgreSQL, Redis, and Worker services. Will be enabled in CI integration-tests job once infrastructure is confirmed.
   it.skip('should enqueue license snapshot job when archiving', () => {
     // DEFERRED: Snapshotting strategy to be defined in Stage 12
@@ -42,7 +42,7 @@ describe('T056: Snapshot Job Enqueueing (DEFERRED - Stage 12)', () => {
   })
 })
 
-describe('T057: Restore Job Enqueueing (DEFERRED - Stage 12)', () => {
+describe.skip('[QUARANTINED] T057: Restore Job Enqueueing (DEFERRED - Stage 12)', () => {
   // SKIP REASON: Integration test requires running PostgreSQL, Redis, and Worker services. Will be enabled in CI integration-tests job once infrastructure is confirmed.
   it.skip('should enqueue restore job when restoring from archive', () => {
     // DEFERRED: Restore implementation to be designed in Stage 12
@@ -75,7 +75,7 @@ describe('T057: Restore Job Enqueueing (DEFERRED - Stage 12)', () => {
   })
 })
 
-describe('T058: Database Drop Job Enqueueing (DEFERRED - Stage 12)', () => {
+describe.skip('[QUARANTINED] T058: Database Drop Job Enqueueing (DEFERRED - Stage 12)', () => {
   // SKIP REASON: Integration test requires running PostgreSQL, Redis, and Worker services. Will be enabled in CI integration-tests job once infrastructure is confirmed.
   it.skip('should enqueue database drop job when deleting license', () => {
     // DEFERRED: Safe deletion process for Stage 12
@@ -114,7 +114,7 @@ describe('T058: Database Drop Job Enqueueing (DEFERRED - Stage 12)', () => {
  * T092-T097: Ready for implementation after unit tests pass
  */
 
-describe('T092: E2E - License Creation & Provisioning Workflow', () => {
+describe.skip('[QUARANTINED] T092: E2E - License Creation & Provisioning Workflow', () => {
   // SKIP REASON: Integration test requires running PostgreSQL, Redis, and Worker services. Will be enabled in CI integration-tests job once infrastructure is confirmed.
   it.skip('should create license and trigger provisioning job automatically', () => {
     // Given: MMC admin authenticated
@@ -148,7 +148,7 @@ describe('T092: E2E - License Creation & Provisioning Workflow', () => {
   })
 })
 
-describe('T093: E2E - License Lifecycle State Transitions', () => {
+describe.skip('[QUARANTINED] T093: E2E - License Lifecycle State Transitions', () => {
   // SKIP REASON: Integration test requires running PostgreSQL, Redis, and Worker services. Will be enabled in CI integration-tests job once infrastructure is confirmed.
   it.skip('should follow valid state machine transitions only', () => {
     // Allowed: PENDING → ACTIVE → SOFT_LOCKED → ARCHIVED → (deleted)
@@ -177,7 +177,7 @@ describe('T093: E2E - License Lifecycle State Transitions', () => {
   })
 })
 
-describe('T094: E2E - Provisioning Retry with Exponential Backoff', () => {
+describe.skip('[QUARANTINED] T094: E2E - Provisioning Retry with Exponential Backoff', () => {
   // SKIP REASON: Integration test requires running PostgreSQL, Redis, and Worker services. Will be enabled in CI integration-tests job once infrastructure is confirmed.
   it.skip('should retry 6 times with 2s → 64s backoff', () => {
     // Attempt 1: 2s delay
@@ -207,7 +207,7 @@ describe('T094: E2E - Provisioning Retry with Exponential Backoff', () => {
   })
 })
 
-describe('T095: E2E - Concurrent Duplicate Prevention', () => {
+describe.skip('[QUARANTINED] T095: E2E - Concurrent Duplicate Prevention', () => {
   // SKIP REASON: Integration test requires running PostgreSQL, Redis, and Worker services. Will be enabled in CI integration-tests job once infrastructure is confirmed.
   it.skip('should prevent duplicate licenses with same workspace slug', () => {
     // Concurrent requests with same slug:
@@ -235,7 +235,7 @@ describe('T095: E2E - Concurrent Duplicate Prevention', () => {
   })
 })
 
-describe('T096: E2E - Soft-Lock Lazy Expiration', () => {
+describe.skip('[QUARANTINED] T096: E2E - Soft-Lock Lazy Expiration', () => {
   // SKIP REASON: Integration test requires running PostgreSQL, Redis, and Worker services. Will be enabled in CI integration-tests job once infrastructure is confirmed.
   it.skip('should NOT auto-transition on scheduled job', () => {
     // Soft-lock DOES NOT use cron job (no continuous processing)
@@ -266,7 +266,7 @@ describe('T096: E2E - Soft-Lock Lazy Expiration', () => {
   })
 })
 
-describe('T097: E2E - Audit Trail Completeness', () => {
+describe.skip('[QUARANTINED] T097: E2E - Audit Trail Completeness', () => {
   // SKIP REASON: Integration test requires running PostgreSQL, Redis, and Worker services. Will be enabled in CI integration-tests job once infrastructure is confirmed.
   it.skip('should log all CREATE, UPDATE, DELETE operations', () => {
     // Audit table records:

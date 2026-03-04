@@ -14,7 +14,7 @@ import {
 } from '../../src/utils/table-helpers'
 import { decodeURL, encodeURL, syncToURL } from '../../src/utils/url-sync'
 
-describe.skip('Utility Functions - Unit Tests (Phase 4C)', () => {
+describe.skip('[QUARANTINED] Utility Functions - Unit Tests (Phase 4C)', () => {
   describe('Filter Serialization (Task 2A / 9C)', () => {
     it('should serialize empty filters', () => {
       const result = serializeFilters([])

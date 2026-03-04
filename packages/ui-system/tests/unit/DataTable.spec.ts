@@ -3,7 +3,7 @@ import { describe, expect, it, vi } from 'vitest'
 import DataTable from '../../src/components/DataTable/DataTable.vue'
 
 // SKIP REASON: DataTable imports not yet aligned with @zidney/ui-system public API exports. Re-enable once DataTable.vue component interface is stabilized (STAGE_03_BACKOFFICE).
-describe.skip('DataTable - Unit Tests', () => {
+describe.skip('[QUARANTINED] DataTable - Unit Tests', () => {
   const mockColumns = [
     { id: 'name', header: 'Name', accessor: 'name' },
     { id: 'email', header: 'Email', accessor: 'email' },
