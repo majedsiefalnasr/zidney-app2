@@ -393,7 +393,7 @@ All tasks MUST maintain:
 
 - `specs/runtime/016-shared-ui-system/plan.md` — Architecture decisions
 - `specs/runtime/016-shared-ui-system/tasks.md` — Full task definitions
-- `docs/architecture/ADR-0001.md` through `ADR-0008.md` — Constitutional rules
+- `docs/architecture/adr/adr-0001.md` through `ADR-0008.md` — Constitutional rules
 - `packages/ui-system/src/types/index.ts` — Type definitions (foundation)
 
 ---

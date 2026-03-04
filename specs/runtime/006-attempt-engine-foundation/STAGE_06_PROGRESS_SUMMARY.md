@@ -205,7 +205,7 @@ Documentation (TBD):
 
 - **Full Report**: IMPLEMENT_REPORT.md
 - **Tasks Checklist**: tasks.md (22/72 marked complete)
-- **Architecture**: docs/architecture/ADR-\*.md
+- **Architecture**: docs/architecture/adr/adr-\*.md
 - **Specifications**: spec.md, plan.md
 
 ---

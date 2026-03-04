@@ -219,7 +219,7 @@ State transition rules:
 
 ### Referenced but File Not Found
 
-- **Stage 04 Licensing Foundation:** Specification claims "Status ENUM must be identical to Stage 04 definition" but STAGE_04_LICENSING_FOUNDATION.md does not exist in specs/phases/02_PLATFORM_MMC/. Assumed to be architecture/ADR definition or foundational stage from earlier phase.
+- **Stage 04 Licensing Foundation:** Specification claims "Status ENUM must be identical to Stage 04 definition" but STAGE_04_LICENSING_FOUNDATION.md does not exist in specs/phases/02_PLATFORM_MMC/. Assumed to be architecture/adr definition or foundational stage from earlier phase.
 
 ---
 

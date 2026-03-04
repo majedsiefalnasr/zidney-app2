@@ -623,7 +623,7 @@ None — approved for production ✅
 
 - `specs/runtime/012-provisioning-trigger/spec.md` — Feature specification
 - `specs/runtime/012-provisioning-trigger/plan.md` — Technical design
-- `docs/architecture/ADR-*.md` — Architectural decisions
+- `docs/architecture/adr/adr-*.md` — Architectural decisions
 
 ---
 

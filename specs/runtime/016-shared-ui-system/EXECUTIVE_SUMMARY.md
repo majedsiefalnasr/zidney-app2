@@ -221,9 +221,9 @@ For detailed work, reference these files in `specs/runtime/016-shared-ui-system/
 
 For architectural context:
 
-- **docs/architecture/ADR-0001.md** — Database-per-tenant rule
-- **docs/architecture/ADR-0003.md** — White-label visual constraint
-- **docs/architecture/ADR-0008.md** — Versioning model
+- **docs/architecture/adr/adr-0001.md** — Database-per-tenant rule
+- **docs/architecture/adr/adr-0003.md** — White-label visual constraint
+- **docs/architecture/adr/adr-0008.md** — Versioning model
 
 ---
 

@@ -15,7 +15,7 @@
 ## Inputs Reviewed
 
 - `specs/runtime/019-translation-system/spec.md` (including `## Clarifications / Session 2026-03-01`)
-- `docs/architecture/ADR-0008-formalize-semantic-versioning-policy.md` (schema_version bump policy)
+- `docs/architecture/adr/adr-0008-formalize-semantic-versioning-policy.md` (schema_version bump policy)
 
 ---
 

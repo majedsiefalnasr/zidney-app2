@@ -141,7 +141,7 @@ Reference: [clarify.md](./clarify.md)
 | Scope                      | Files                                        | Modification Forbidden       |
 | -------------------------- | -------------------------------------------- | ---------------------------- |
 | **Program Metadata**       | `PROJECT_CONTEXT_PRIMER.md`                  | ❌ NO (read-only)            |
-| **Architecture Rules**     | `docs/architecture/ADR-*`                    | ❌ NO (read-only)            |
+| **Architecture Rules**     | `docs/architecture/adr/adr-*`                | ❌ NO (read-only)            |
 | **Engineering Governance** | `docs/01_ENGINEERING_GOVERNANCE/`            | ❌ NO (read-only)            |
 | **Other Stages**           | `apps/api/src/routes/{other_auth_domains}/`  | ❌ NO                        |
 | **Worker Layer**           | `apps/worker/`                               | ❌ NO (not in Phase 1 scope) |

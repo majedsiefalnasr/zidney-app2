@@ -434,7 +434,7 @@ All services use structured logging with required fields:
    - Special rules (e.g., students can only access their own attempts)
    - Permission granularity (create, read, update, delete)
 
-5. **architecture/ADR-0009-rate-limiting.md** (900+ lines)
+5. **architecture/adr/adr-0009-rate-limiting.md** (900+ lines)
    - Architecture decision record
    - Problem statement
    - Proposed solution with consequences

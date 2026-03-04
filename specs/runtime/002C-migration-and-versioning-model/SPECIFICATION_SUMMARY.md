@@ -229,7 +229,7 @@ The tasks stage will:
 | Data Model       | data-model.md                                                                   | Schema definitions       |
 | Quick Reference  | quickstart.md                                                                   | Developer on-ramp        |
 | STAGE Stage File | ../../phases/01_PLATFORM_FOUNDATION/STAGE_02C_MIGRATION_AND_VERSIONING_MODEL.md | Original requirements    |
-| Governing ADR    | ../../../docs/architecture/ADR-0008-formalize-semantic-versioning-policy.md     | Version policy authority |
+| Governing ADR    | ../../../docs/architecture/adr/adr-0008-formalize-semantic-versioning-policy.md | Version policy authority |
 | Constitution     | ../../../AGENTS.md                                                              | Platform rules           |
 | Specify Template | ../../templates/specify-template.md                                             | Specification format     |
 

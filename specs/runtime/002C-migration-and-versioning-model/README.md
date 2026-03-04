@@ -205,7 +205,7 @@ This stage provides the "what"; planning will provide the "how".
 
 | Item                            | Location                                                                        |
 | ------------------------------- | ------------------------------------------------------------------------------- |
-| Governing Architecture Decision | docs/architecture/ADR-0008-formalize-semantic-versioning-policy.md              |
+| Governing Architecture Decision | docs/architecture/adr/adr-0008-formalize-semantic-versioning-policy.md          |
 | Platform Constitution           | AGENTS.md (section: Migration Discipline)                                       |
 | Master Stage File               | ../../phases/01_PLATFORM_FOUNDATION/STAGE_02C_MIGRATION_AND_VERSIONING_MODEL.md |
 | Specification Template          | ../../templates/specify-template.md                                             |

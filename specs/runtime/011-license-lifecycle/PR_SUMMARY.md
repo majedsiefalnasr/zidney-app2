@@ -447,7 +447,7 @@ For questions about this implementation:
 
 - Review `STAGE_11_COMPLETION_SUMMARY.md` for detailed task breakdown
 - Check individual task specifications in `tasks.md`
-- Refer to `docs/architecture/ADR-*.md` for architectural decisions
+- Refer to `docs/architecture/adr/adr-*.md` for architectural decisions
 - See deployment runbook in `docs/deployment/license-lifecycle-runbook.md`
 
 ---

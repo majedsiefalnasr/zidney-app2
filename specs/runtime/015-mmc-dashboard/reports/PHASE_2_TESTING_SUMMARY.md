@@ -312,8 +312,8 @@ Duration:    2.22s
 
 ✅ **All changes align with:**
 
-- [ADR-0006](../../../docs/architecture/ADR-0006.md): Response envelope standardization
-- [ADR-0008](../../../docs/architecture/ADR-0008.md): Semantic versioning
+- [ADR-0006](../../../docs/architecture/adr/adr-0006.md): Response envelope standardization
+- [ADR-0008](../../../docs/architecture/adr/adr-0008.md): Semantic versioning
 - Zidney Trust Chain: Isolation → License → Auth → Attempt → Runtime → Frontoffice
 - Multi-tenancy model: Database-per-tenant isolation verified
 - Constitutional Monetary Format: All amounts in integer cents

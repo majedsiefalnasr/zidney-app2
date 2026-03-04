@@ -795,7 +795,7 @@
    - Special permission rules
    - How to add new roles
 
-5. ✅ **architecture/ADR-0009-rate-limiting.md** (900+ lines)
+5. ✅ **architecture/adr/adr-0009-rate-limiting.md** (900+ lines)
    - Decision record
    - Context + consequences
    - Alternatives considered

@@ -392,9 +392,9 @@ packages/ui-system/
 
 For detailed context, reference:
 
-- `docs/architecture/ADR-0001.md` — Database-per-tenant
-- `docs/architecture/ADR-0003.md` — White-label visual only
-- `docs/architecture/ADR-0008.md` — Semantic versioning
+- `docs/architecture/adr/adr-0001.md` — Database-per-tenant
+- `docs/architecture/adr/adr-0003.md` — White-label visual only
+- `docs/architecture/adr/adr-0008.md` — Semantic versioning
 - `specs/runtime/016-shared-ui-system/plan.md` — Full architecture
 - `specs/runtime/016-shared-ui-system/tasks.md` — Complete task definitions
 

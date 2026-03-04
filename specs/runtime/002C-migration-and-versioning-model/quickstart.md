@@ -383,7 +383,7 @@ ORDER BY expires_at ASC;
 
 - **Data Model:** `specs/runtime/002C-migration-and-versioning-model/data-model.md`
 - **Full Spec:** `specs/runtime/002C-migration-and-versioning-model/spec.md`
-- **Governing ADR:** `docs/architecture/ADR-0008-formalize-semantic-versioning-policy.md`
+- **Governing ADR:** `docs/architecture/adr/adr-0008-formalize-semantic-versioning-policy.md`
 - **Constitution:** `AGENTS.md` (section: Migration Discipline)
 
 ---
