@@ -9,19 +9,17 @@ Status: DESIGN SPECIFICATION
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
+Step: clarify
+Risk Level: LOW
 Last Updated: 2026-03-04T00:00:00.000Z
 
 Scope Defined:
 
-- Vitest configuration consolidation
-- Test directory structure normalization (unit/integration/e2e)
-- Playwright installation and smoke tests for MMC, Backoffice, Frontoffice
-- ESLint + Prettier alignment
-- Flaky and skipped test stabilization
-- README coverage for all apps and packages
-- CI pipeline preparation
+- Vitest consolidation: single root config with per-app minimal overrides retained
+- Playwright: separate E2E pipeline (`test:e2e`), not mixed with Vitest
+- Flaky tests: `it.skip()` + QUARANTINE comment pattern
+- README: free-form with required section checklist
+- ESLint/Prettier: global root config alignment
 
 Deferred Scope:
 
@@ -31,10 +29,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

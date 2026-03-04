@@ -5,9 +5,9 @@
   "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_03_ALIGNMENT.md",
   "branch": "infra-003-alignment",
   "base_branch": "develop",
-  "current_step": "specify",
+  "current_step": "clarify",
   "stage_status": "DRAFT",
-  "clarifications_resolved": false,
+  "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
@@ -22,6 +22,10 @@
     },
     {
       "event": "specify_complete",
+      "timestamp": "2026-03-04T00:00:00.000Z"
+    },
+    {
+      "event": "clarifications_locked",
       "timestamp": "2026-03-04T00:00:00.000Z"
     }
   ]

@@ -320,3 +320,24 @@ All 8 validation checks from the stage file must pass:
 - Coverage threshold enforcement is deliberately excluded — it belongs to STAGE_INFRA_GOVERNANCE.
 - This stage does not introduce any new ADRs — it implements existing governance decisions.
 - No changes to the Zidney trust chain: Isolation → License → Authentication → Attempt → Runtime → Frontoffice.
+
+---
+
+## Clarifications
+
+### Session 2026-03-04
+
+**Q1: Should per-app `vitest.config.ts` files be deleted entirely after root projects consolidation, or kept as minimal overrides?**
+A: Keep per-app `vitest.config.ts` files as minimal overrides. Each must retain only the `environment` (`node` or `jsdom`) and `setupFiles` declarations. All coverage settings must be removed from per-app configs and centralized in the root config only. Deleting per-app configs entirely would lose per-environment isolation (e.g., `jsdom` for UI apps vs. `node` for packages), which is required by FR-003 and FR-004. This aligns with the stage design statement: "Per-project configuration may remain minimal."
+
+**Q2: Should Playwright smoke tests be excluded from the regular `bun run test` command, or are they part of the default test run?**
+A: Playwright smoke tests are excluded from `bun run test`. They run only via a dedicated `bun run test:e2e` command (or equivalent per-app script). The regular `bun run test` invocation targets Vitest only (unit + integration). This separation is required because E2E tests depend on a running dev server (as stated in the Edge Cases section), and conflating them with the Vitest runner would break CI sequential staging (FR-035). The root `vitest.config.ts` projects glob (`./apps/*`, `./packages/*`) must exclude Playwright config and spec files.
+
+**Q3: What is the mechanism for quarantining flaky tests so that CI reports them visibly but does not fail the build?**
+A: Quarantined tests use `it.skip(...)` (or `test.skip(...)`) co-located with a `// QUARANTINE: <reason> <tracking-ref>` comment on the line immediately above the test definition. No separate test file pattern or dedicated quarantine directory is introduced. CI must run with a verbose reporter (e.g., `--reporter=verbose`) so skipped tests appear explicitly in CI output logs — they must never be silently suppressed (FR-028). A quarantined test that is skipped without the required comment is treated as an unjustified skip (FR-029 CI warning). There is no CI flag to bulk-suppress quarantined tests; each must be individually marked.
+
+**Q4: Should README files follow an existing internal template, or are they free-form documents structured around the required sections?**
+A: READMEs are free-form documents structured around the required sections defined in FR-032 and FR-033 (Purpose, Responsibilities, Dependencies, How to Run Tests, Environment Variables, Known Boundaries; plus Public API for packages). No existing internal template file exists in the repository. Authors must treat the section list as a mandatory checklist, but section content and prose style are at the author's discretion. The only hard constraint is FR-034: plain language written for an onboarding developer, not an expert. CI validation of README coverage (SC-004) checks for file existence and required section headings, not content quality.
+
+**Q5: Should `eslint-config-prettier` be applied globally in the root `eslint.config.mjs`, or scoped to specific apps that use Prettier-sensitive rules?**
+A: Apply globally in the root `eslint.config.mjs` only. The flat config at the repo root is the single authoritative ESLint configuration for the entire monorepo (as defined in the Key Entities section). Per-app ESLint configs are not part of this stage's scope. Applying `eslint-config-prettier` globally ensures consistent Prettier/ESLint boundary enforcement across all apps and packages (FR-017, FR-018) and prevents any app from accidentally reactivating formatting rules that Prettier owns. If a specific rule disabled by `eslint-config-prettier` is required for correctness (not formatting), it must be explicitly re-enabled in the root config with a documented comment (as noted in the Edge Cases section).
