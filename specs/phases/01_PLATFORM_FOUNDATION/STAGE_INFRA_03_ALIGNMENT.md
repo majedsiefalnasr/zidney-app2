@@ -9,20 +9,21 @@ Status: DESIGN SPECIFICATION
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: MEDIUM
 Last Updated: 2026-03-04T00:00:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- T001: Vitest consolidation (single root projects config)
-- T002: Test directory normalization
-- T003: Playwright installation and smoke tests
-- T004: ESLint + Prettier alignment
-- T005: Flaky test stabilization
-- T006: Skipped test review
-- T007: README creation (11 apps/packages)
-- T008: CI pipeline preparation
+- Total: 72 atomic tasks
+- Phase 1 (T001-T015): Vitest consolidation — 15 tasks
+- Phase 2 (T016-T027): Test directory normalization — 12 tasks
+- Phase 3 (T028-T038): Playwright installation — 11 tasks
+- Phase 4 (T039-T043): ESLint + Prettier alignment — 5 tasks
+- Phase 5 (T044-T047): Flaky test stabilization — 4 tasks
+- Phase 6 (T048-T057): Skipped test review — 10 tasks
+- Phase 7 (T058-T070): README creation — 13 tasks
+- Phase 8 (T071-T072): CI pipeline — 2 tasks
 
 Deferred Scope:
 
@@ -32,10 +33,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Guardian validations passed. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
