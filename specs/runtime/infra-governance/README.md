@@ -1,6 +1,6 @@
 # Infra Governance
 
-**Branch:** `infra-governance`
+**Branch:** `infra-001-governance`
 **Phase:** 01_PLATFORM_FOUNDATION
 **Stage File:** `specs/phases/01_platform_foundation/STAGE_INFRA_GOVERNANCE.md`
 **Initiated:** 2026-03-05T00:00:00.000Z

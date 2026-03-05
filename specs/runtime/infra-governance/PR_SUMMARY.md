@@ -6,7 +6,7 @@
 
 - Phase: 01 — Platform Foundation
 - Stage: Infrastructure Governance
-- Branch: `infra-governance`
+- Branch: `infra-001-governance`
 - Stage File: `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_GOVERNANCE.md`
 - Stage Status Before PR: BACKEND CLOSED
 - Stage Status After PR: PRODUCTION READY
