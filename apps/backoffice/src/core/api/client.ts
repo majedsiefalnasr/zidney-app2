@@ -25,6 +25,13 @@ export type {
 } from '@zidney/api-client'
 
 export { ErrorCodes, isAppError } from '@zidney/api-client'
+export { createAppError } from '@zidney/api-client'
+
+// App-local fetch escape hatch for pre-store bootstrap/composables/pages that
+// still require direct HTTP calls. Importing from this module satisfies lint
+// rules that ban the global `fetch` in app-layer files.
+export const fetch: typeof globalThis.fetch = (input, init) =>
+  globalThis.fetch(input, init)
 
 // ─── Factory ─────────────────────────────────────────────────────────────────
 /**

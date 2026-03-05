@@ -70,8 +70,8 @@ export const useFrontofficeUiStore = defineStore('frontoffice-ui', () => {
 
 // ── HMR (development only) ────────────────────────────────────────────────────
 import { acceptHMRUpdate } from 'pinia'
-if (import.meta.hot) {
-  import.meta.hot.accept(
-    acceptHMRUpdate(useFrontofficeUiStore, import.meta.hot)
+if ((import.meta as any).hot) {
+  ;(import.meta as any).hot.accept(
+    acceptHMRUpdate(useFrontofficeUiStore, (import.meta as any).hot)
   )
 }

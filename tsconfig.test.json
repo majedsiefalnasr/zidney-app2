@@ -4,8 +4,14 @@
     "baseUrl": "./",
     "noUnusedLocals": false,
     "noUnusedParameters": false,
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["node", "vitest/globals"],
     "paths": {
+      "@/*": [
+        "./apps/backoffice/src/*",
+        "./apps/frontoffice/src/*",
+        "./apps/mmc/src/*"
+      ],
       "@zidney/app/*": ["./apps/*/src"],
       "@zidney/app/api/*": ["./apps/api/src/*"],
       "@zidney/app/worker/*": ["./apps/worker/src/*"],

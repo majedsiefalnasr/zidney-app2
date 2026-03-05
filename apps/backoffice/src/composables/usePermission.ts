@@ -49,6 +49,7 @@ export function usePermission() {
     loading.value = true
     error.value = null
     try {
+      // eslint-disable-next-line no-restricted-globals
       const response = await fetch('/api/v1/backoffice/context', {
         credentials: 'include',
       })

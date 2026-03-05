@@ -189,10 +189,10 @@ describe('quickstart validation', () => {
 
     await client.get('/anything')
     const req = mock.getLastRequest()!
-    const correlationId = req.headers['X-Correlation-ID']
+    const correlationId = req.headers['X-Correlation-ID'] as string | undefined
     expect(correlationId).toBeDefined()
     expect(typeof correlationId).toBe('string')
-    expect(correlationId.length).toBeGreaterThan(0)
+    expect(correlationId!.length).toBeGreaterThan(0)
   })
 
   it('allows custom correlation ID', async () => {

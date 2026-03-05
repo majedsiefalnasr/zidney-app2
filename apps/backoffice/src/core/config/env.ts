@@ -43,11 +43,17 @@ export function parseBooleanFlag(value: string | undefined): boolean {
  */
 export function createEnvConfig(overrides?: Partial<EnvConfig>): EnvConfig {
   const raw = {
-    apiBaseUrl: import.meta.env['VITE_API_BASE_URL'] as string | undefined,
-    appEnv: import.meta.env['VITE_APP_ENV'] as string | undefined,
-    appName: import.meta.env['VITE_APP_NAME'] as string | undefined,
-    debugMode: import.meta.env['VITE_DEBUG_MODE'] as string | undefined,
-    workspaceSlug: import.meta.env['VITE_WORKSPACE_SLUG'] as string | undefined,
+    apiBaseUrl: (import.meta.env as any)['VITE_API_BASE_URL'] as
+      | string
+      | undefined,
+    appEnv: (import.meta.env as any)['VITE_APP_ENV'] as string | undefined,
+    appName: (import.meta.env as any)['VITE_APP_NAME'] as string | undefined,
+    debugMode: (import.meta.env as any)['VITE_DEBUG_MODE'] as
+      | string
+      | undefined,
+    workspaceSlug: (import.meta.env as any)['VITE_WORKSPACE_SLUG'] as
+      | string
+      | undefined,
   }
 
   const merged: EnvConfig = {

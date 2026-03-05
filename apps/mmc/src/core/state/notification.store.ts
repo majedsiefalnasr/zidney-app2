@@ -61,8 +61,8 @@ export const useMmcNotificationStore = defineStore('mmc-notification', () => {
 
 // ── HMR (development only) ────────────────────────────────────────────────────
 import { acceptHMRUpdate } from 'pinia'
-if (import.meta.hot) {
-  import.meta.hot.accept(
-    acceptHMRUpdate(useMmcNotificationStore, import.meta.hot)
+if ((import.meta as any).hot) {
+  ;(import.meta as any).hot.accept(
+    acceptHMRUpdate(useMmcNotificationStore, (import.meta as any).hot)
   )
 }

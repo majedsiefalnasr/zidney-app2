@@ -47,7 +47,7 @@ export * from './job-hash'
 export * from './translation/coverage.service'
 export * from './translation/translatable-fields'
 export * from './translation/translation.service'
-export * from './translation/translation.types'
+export type * from './translation/translation.types'
 // Translation errors — named imports to avoid conflicts with workflow errors
 export {
   TRANSLATION_ERROR_CODES,
@@ -65,7 +65,7 @@ export {
 export * from './workflow/workflow.engine'
 export * from './workflow/workflow.errors'
 export * from './workflow/workflow.states'
-export * from './workflow/workflow.types'
+export type * from './workflow/workflow.types'
 
 // RBAC module (Stage 021) — exported via @zidney/domain-core/rbac subpath only.
 // Root barrel re-export is intentionally omitted to avoid name conflicts with

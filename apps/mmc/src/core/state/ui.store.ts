@@ -70,6 +70,8 @@ export const useMmcUiStore = defineStore('mmc-ui', () => {
 
 // ── HMR (development only) ────────────────────────────────────────────────────
 import { acceptHMRUpdate } from 'pinia'
-if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useMmcUiStore, import.meta.hot))
+if ((import.meta as any).hot) {
+  ;(import.meta as any).hot.accept(
+    acceptHMRUpdate(useMmcUiStore, (import.meta as any).hot)
+  )
 }

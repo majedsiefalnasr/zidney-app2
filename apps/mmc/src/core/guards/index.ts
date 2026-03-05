@@ -25,8 +25,8 @@ export {
   isSafeRedirect,
   type AuthGuardOptions,
 } from './auth.guard'
-export { createRoleGuard, type RoleGuardOptions } from './role.guard'
 export { createFeatureFlagGuard } from './feature-flag.guard'
+export { createRoleGuard, type RoleGuardOptions } from './role.guard'
 
 // ─── Options Interface ────────────────────────────────────────────────────────
 
