@@ -140,7 +140,7 @@ Reference: [clarify.md](./clarify.md)
 
 | Scope                      | Files                                        | Modification Forbidden       |
 | -------------------------- | -------------------------------------------- | ---------------------------- |
-| **Program Metadata**       | `PROJECT_CONTEXT_PRIMER.md`                  | ❌ NO (read-only)            |
+| **Program Metadata**       | `docs/PROJECT_CONTEXT_PRIMER.md`             | ❌ NO (read-only)            |
 | **Architecture Rules**     | `docs/architecture/adr/adr-*`                | ❌ NO (read-only)            |
 | **Engineering Governance** | `docs/01_ENGINEERING_GOVERNANCE/`            | ❌ NO (read-only)            |
 | **Other Stages**           | `apps/api/src/routes/{other_auth_domains}/`  | ❌ NO                        |

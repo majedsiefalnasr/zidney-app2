@@ -7,7 +7,7 @@
     "bootstrap": ["docs/ai/AI_BOOTSTRAP.md"],
     "context": [
       "docs/ai/AI_CONTEXT_INDEX.md",
-      "PROJECT_CONTEXT_PRIMER.md",
+      "docs/PROJECT_CONTEXT_PRIMER.md",
       "docs/ai/AI_ENGINEERING_RULES.md",
       "docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json"
     ]

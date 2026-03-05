@@ -8,7 +8,7 @@ AI agents must start reasoning by loading:
 
 1. docs/ai/AI_BOOTSTRAP.md
 2. docs/ai/AI_CONTEXT_INDEX.md
-3. PROJECT_CONTEXT_PRIMER.md
+3. docs/PROJECT_CONTEXT_PRIMER.md
 4. docs/ai/AI_ENGINEERING_RULES.md
 5. docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json
 6. docs/architecture/ADR/
@@ -21,7 +21,7 @@ AI_BOOTSTRAP.md defines the architecture‑first reasoning model and must always
 
 Before performing architectural analysis, implementation, planning, or modification of any feature, AI agents MUST read:
 
-`PROJECT_CONTEXT_PRIMER.md`
+`docs/PROJECT_CONTEXT_PRIMER.md`
 
 AI agents MUST also load the AI governance context:
 
@@ -290,7 +290,7 @@ Before any reasoning, planning, code generation, or architectural analysis, AI m
 
 1. `docs/ai/AI_BOOTSTRAP.md`
 2. `docs/ai/AI_CONTEXT_INDEX.md`
-3. `PROJECT_CONTEXT_PRIMER.md`
+3. `docs/PROJECT_CONTEXT_PRIMER.md`
 4. `docs/ai/AI_ENGINEERING_RULES.md`
 5. `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json`
 
@@ -606,7 +606,7 @@ Stage lifecycle governance is mandatory.
 
 AI must:
 
-- Load `PROJECT_CONTEXT_PRIMER.md` before architectural reasoning.
+- Load `docs/PROJECT_CONTEXT_PRIMER.md` before architectural reasoning.
 - Validate changes against the Trust Chain model.
 - Validate changes against multi-tenancy isolation.
 - Validate changes against version enforcement rules.

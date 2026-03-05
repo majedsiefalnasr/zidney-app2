@@ -592,7 +592,7 @@ This feature does NOT include:
 ## References
 
 - [STAGE_13_AFFILIATES.md](../../phases/02_PLATFORM_MMC/STAGE_13_AFFILIATES.md) - Stage requirements document
-- [PROJECT_CONTEXT_PRIMER.md](../../PROJECT_CONTEXT_PRIMER.md) - Architectural context
+- [PROJECT_CONTEXT_PRIMER.md](../../../docs/PROJECT_CONTEXT_PRIMER.md) - Architectural context
 - [ADR-0006: Server Time Authoritative](../../architecture/adr/adr-0006-server-time-authoritative.md)
 - [ADR-0008: Semantic Versioning](../../architecture/adr/adr-0008-semantic-versioning.md)
 

@@ -13,7 +13,7 @@ This ensures that AI reasoning starts from **architecture → governance → imp
 AI agents must load the following resources **in this exact order**:
 
 1. docs/ai/AI_CONTEXT_INDEX.md
-2. PROJECT_CONTEXT_PRIMER.md
+2. docs/PROJECT_CONTEXT_PRIMER.md
 3. docs/ai/AI_ENGINEERING_RULES.md
 4. docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json
 5. docs/architecture/ADR/

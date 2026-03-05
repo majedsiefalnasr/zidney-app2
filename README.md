@@ -44,7 +44,7 @@ Before generating or modifying code, AI agents must load the following files in 
 
 1. `docs/ai/AI_BOOTSTRAP.md`
 2. `docs/ai/AI_CONTEXT_INDEX.md`
-3. `PROJECT_CONTEXT_PRIMER.md`
+3. `docs/PROJECT_CONTEXT_PRIMER.md`
 4. `docs/ai/AI_ENGINEERING_RULES.md`
 5. `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json`
 6. `docs/architecture/ADR/`

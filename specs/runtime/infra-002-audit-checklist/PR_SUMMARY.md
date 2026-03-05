@@ -245,7 +245,7 @@ Confirm compliance with Zidney Constitution v1.2.0:
 
 **References:**
 
-- [Framework Context](PROJECT_CONTEXT_PRIMER.md)
+- [Framework Context](docs/PROJECT_CONTEXT_PRIMER.md)
 - [Workflow Instructions](docs/00_SPEC_KIT_HARD_MODE_WORKFLOW.md.md)
 - [Agent Governance](docs/AGENT_GOVERNANCE.md)
 - [Architecture Decisions (ADRs)](docs/architecture/)
