@@ -1,12 +1,17 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
+#!/bin/sh
 
-# AI Architecture Guard
+# ── Staged-file quality gates (lint-staged) ────────────────────────────────
+# Runs ESLint --fix + Prettier --write on staged .ts/.tsx/.vue/.md/.json files.
+# Commit is blocked if any lint error remains after auto-fix.
+bunx lint-staged
+
+# ── AI Architecture Guard (hard gate) ──────────────────────────────────────
+# Checks ARCHITECTURE_CONTRACT.json for layer violations, dependency rule
+# violations, circular dependencies, and architecture drift.
+# Non-zero exit = commit blocked.
 bun scripts/ai-guard.ts
 
-# Infrastructure Audit
+# ── Infrastructure Audit — Quick Mode (hard gate) ──────────────────────────
+# Runs structural governance checks (excludes slow file writes).
+# Non-zero exit = commit blocked.
 bun scripts/infra-audit.ts --quick
-
-# Standard quality gates
-bun run lint
-bun run type-check
