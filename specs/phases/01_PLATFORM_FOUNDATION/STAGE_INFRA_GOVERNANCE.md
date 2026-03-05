@@ -9,34 +9,34 @@ Scope: Monorepo-wide (apps + packages + CI)
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-05T00:03:00.000Z
+Last Updated: 2026-03-05T00:04:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- T001: Coverage thresholds + @vitest/coverage-v8 (vitest.config.ts, package.json)
-- T002: Husky + lint-staged devDeps + prepare script (package.json)
-- T003: lint-staged.config.mjs (new file)
-- T004: .husky/pre-commit rewrite (Husky v9 format)
-- T005: .husky/pre-push (new file)
-- T006: --quick flag for scripts/infra-audit.ts
-- T007: .github/workflows/ci.yml updates (E2E split, coverage, build jobs)
+- Total: 22 atomic tasks
+- Phase 1 (T001-T004): package.json dependency additions
+- Phase 2 (T005-T006): vitest.config.ts + lint-staged.config.mjs [parallel]
+- Phase 3 (T007-T008): bun install + husky init
+- Phase 4 (T009-T010): .husky/pre-commit rewrite + pre-push create [parallel]
+- Phase 5 (T011-T014): scripts/infra-audit.ts --quick flag
+- Phase 6 (T015-T020): .github/workflows/ci.yml E2E split + coverage + build jobs
+- Phase 7 (T021-T022): verification + branch protection
 
 Deferred Scope:
 
 - Multi-browser Playwright expansion
 - Mass migration of legacy test paths
 - ESLint no-console escalation to error
-- API unit-test coverage threshold gate (follow-on stage required)
+- API unit-test coverage threshold gate (follow-on stage)
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. 7 work items defined. Guardian validation: PASS.
-Task breakdown in progress.
+Atomic task set generated (22 tasks). Drift analysis gate pending.
 
 ---
 
