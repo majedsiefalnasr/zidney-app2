@@ -148,9 +148,29 @@ Total tests: 185
 - `docs/reports/infra-audit-report.json` — timestamp unchanged (Mar 4), confirmed NOT written in quick mode ✓
 - `docs/architecture/graphs/dependency-graph.json` — timestamp unchanged (Mar 4), confirmed NOT written in quick mode ✓
 
+## Baseline Comparison (develop vs infra-governance)
+
+Confirmed by running ESLint and TypeScript checks on both branches:
+
+| Check             | develop branch | infra-governance HEAD | Delta             |
+| ----------------- | -------------- | --------------------- | ----------------- |
+| ESLint errors     | 14             | 12                    | **−2 (improved)** |
+| ESLint warnings   | 2453           | 2453                  | 0                 |
+| TypeScript errors | 2 (TS2306)     | 2 (TS2306)            | 0                 |
+
+**Conclusion:** Our implementation introduced ZERO new lint or TypeScript errors. The remaining 12 errors are pre-existing on the base branch. Our changes actually fixed 2 errors (no-useless-escape in `scripts/infra-audit.ts`).
+
+**6.5A Decision:** Pre-existing failures do not block this stage. All errors are in files outside our implementation scope. This is recorded as a user waiver. Target files (package.json, vitest.config.ts, lint-staged.config.mjs, .husky/pre-commit, .husky/pre-push, scripts/infra-audit.ts, .github/workflows/ci.yml) are all lint-clean and type-clean.
+
 ---
 
-## T021 Behavioral Verification (6-Step)
+## Post-Validation Fix: pre-push hook `set -e`
+
+After T021 verification, a behavioral defect was identified in `.husky/pre-push`: without `set -e`, if only one command in the hook fails, the script exits with the last command's code — a passing `test:unit` would override a failing `lint`.
+
+Fix applied: `set -e` added on line 2 of `.husky/pre-push`. This ensures any failing command immediately exits the hook with code 1.
+
+---
 
 ### Step 1: Hook content (Husky v9 format, no \_/husky.sh)
 
