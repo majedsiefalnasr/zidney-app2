@@ -9,35 +9,34 @@ UI Foundation — Layout & Shell Integration
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
-Risk Level: LOW
+Step: plan
+Risk Level: MEDIUM
 Last Updated: 2026-03-05T00:00:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Unified layout shell architecture for MMC, Backoffice, Frontoffice
-- AppLayout.vue, AppSidebar.vue, AppHeader.vue standardization
-- Layout slot strategy (5 named slots)
-- Navigation config externalization in core/navigation/
-- Responsive behavior via ui.store with useBreakpoint composable
-- @zidney/ui-system integration
-- Standalone layout bypass via route meta (standaloneLayout / hideSidebar)
-- White-label visual-token-only constraints
+- AppLayout.vue, AppSidebar.vue, AppHeader.vue per-app implementation
+- ui.store extension (sidebarCollapsed, isMobile, toggleSidebar, setMobile)
+- auth.store extension (resolvedPermissions: Record<string, boolean>)
+- useBreakpoint composable per app
+- NavigationConfig type definitions and core/navigation/ setup
+- RouteMeta augmentation for standaloneLayout and hideSidebar
+- BackofficeLayout.vue deprecation and removal
+- MMC addition of @zidney/ui-system dependency
+- Unit, snapshot, and responsive tests per app
 
 Deferred Scope:
 
 - Feature page implementations
-- Dashboard widgets, affiliate UI
-- Role/permission logic
 - Notification system (placeholder only)
 - Global search (placeholder only)
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
