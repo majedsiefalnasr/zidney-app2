@@ -150,7 +150,7 @@ Note: Pin to same major as `vitest` (`^1.0.0`).
 
 The `prepare` lifecycle script runs automatically on `bun install`, ensuring all contributors get hooks installed without additional steps.
 
-**After T002:** Run `bun install` then `bun run prepare` (or `bunx husky`) to initialize `.husky/_/` and make hooks executable.
+**After T004 and T005 (hook rewrites):** Run `bun install` then `bun run prepare` (or `bunx husky`) to install Husky v9 and make hook files executable. ⚠️ Do NOT run `bun install` before completing T004 and T005. Running `bun install` installs Husky v9 (via `prepare: husky`) which removes `_/husky.sh`. The existing `.husky/pre-commit` still sources `_/husky.sh` (v8 format); rewriting it in v9 format (T004) must be completed first to avoid a broken-hook window.
 
 ---
 
@@ -274,12 +274,16 @@ bun run test:unit
 3. The script exits non-zero if any violations are found, or exits 0 if clean.
 4. `process.exit(1)` on violations (same as `--ci` mode).
 
-**Change at top of file (after existing `CI_MODE` line):**
+**Change at top of file — line 32, immediately after `const ROOT = process.cwd()` at line 31:**
 
 ```ts
-const CI_MODE = process.argv.includes('--ci')
-const QUICK_MODE = process.argv.includes('--quick')
+const ROOT = process.cwd()
+const QUICK_MODE = process.argv.includes('--quick') // ← add here (line 32)
+// ... rest of file unchanged ...
+// CI_MODE stays at line 876+ — it is only used at line ~1288 and is safely declared before its use
 ```
+
+> ⚠️ **PLACEMENT WARNING**: `QUICK_MODE` MUST be declared at line 32 (after `ROOT`), NOT after `CI_MODE` at line 876. The `mkdirSync` blocks that `QUICK_MODE` guards are at lines 39–56. JavaScript `const` is not hoisted — declaring at line 877 and using at line 39 throws `ReferenceError: Cannot access 'QUICK_MODE' before initialization` at runtime.
 
 **Pattern for all report-writing blocks:** Wrap each `writeFileSync` / directory-creation call with `if (!QUICK_MODE) { ... }`.
 
