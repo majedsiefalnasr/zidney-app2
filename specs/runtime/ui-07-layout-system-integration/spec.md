@@ -581,3 +581,87 @@ This stage explicitly does NOT cover:
 ---
 
 Compliant with Zidney Constitution v1.2.0 — No violations detected.
+
+---
+
+## Clarifications
+
+### Session 2026-03-05
+
+#### CL-001 — `ui.store` Action Interface Contract
+
+**Question:** What exact actions does `ui.store` expose that layout components must use for all sidebar and viewport-state mutation?
+
+**Resolution:** `ui.store` exposes exactly two actions:
+
+- `toggleSidebar()` — flips the boolean value of `sidebarCollapsed`. Called by `AppSidebar` when the collapse control is activated.
+- `setMobile(val: boolean)` — sets `isMobile`. Called exclusively by the breakpoint composable (e.g., `useBreakpoint`) when the viewport crosses the mobile breakpoint threshold.
+
+No layout component mutates `sidebarCollapsed` or `isMobile` through any other path. Direct property assignment is forbidden (FR-009). All test mocks for `ui.store` must expose both of these actions.
+
+**Impact on plan:** `AppSidebar` collapse control emits are wired to `uiStore.toggleSidebar()`. The breakpoint composable calls `uiStore.setMobile(val)`. Unit tests mock both named actions. No other mutation surface needs to be planned.
+
+---
+
+#### CL-002 — `auth.store.resolvedPermissions` Type Shape
+
+**Question:** What is the exact TypeScript type of `auth.store.resolvedPermissions`, and how does `AppSidebar` evaluate whether a NavigationItem's `permission` key is satisfied?
+
+**Resolution:** `resolvedPermissions` is typed as `Record<string, boolean>`. `NavigationItem.permission` is a `string` key that is looked up in this record. The filter predicate applied in `AppSidebar` is:
+
+```ts
+items.filter(
+  (item) => !item.permission || resolvedPermissions[item.permission] === true
+)
+```
+
+A missing key evaluates as `false` — the item is hidden. This type is consistent with Pinia store state serialization (no `Map` usage). `auth.store` (defined in `ui-01-auth-module`) must export `resolvedPermissions: Record<string, boolean>`.
+
+**Impact on plan:** `AppSidebar` filter logic uses `resolvedPermissions[key] === true`. Test fixtures for permission filtering use `Record<string, boolean>` shape. The `auth.store` interface contract in `ui-01-auth-module` must be confirmed to match this type before integration tests are written.
+
+---
+
+#### CL-003 — NavigationConfig Type Alias Correction
+
+**Question:** `NavigationConfig` is defined as `type NavigationConfig = NavigationGroup[]`, but `AppSidebar.vue` props list the type as `NavigationConfig[]`. Which is the canonical correct form?
+
+**Resolution:** The `AppSidebar.vue` prop is corrected to:
+
+```ts
+navigationConfig: NavigationConfig // i.e., NavigationGroup[]
+```
+
+`NavigationConfig[]` in the original props definition was a spec typo — it would incorrectly type the prop as `NavigationGroup[][]` (an array of arrays). The canonical definition `type NavigationConfig = NavigationGroup[]` is correct and final. All three `core/navigation/index.ts` files export a single `NavigationConfig` value (i.e., `NavigationGroup[]`), not a nested array.
+
+**Impact on plan:** The `AppSidebar.vue` prop signature must use `navigationConfig: NavigationConfig`, not `navigationConfig: NavigationConfig[]`. NFR-011 (TypeScript strict mode) will catch this at compile time if the wrong form is used. Test fixtures pass a `NavigationGroup[]` directly as the prop value.
+
+---
+
+#### CL-004 — Frontoffice Sidebar Optionality Mechanism
+
+**Question:** In Frontoffice, what is the exact mechanism that drives hiding the optional sidebar on certain routes — route meta, a `ui.store` property, or the `hideSidebar` prop on `AppLayout`?
+
+**Resolution:** Frontoffice `App.vue` reads `route.meta.hideSidebar === true` and passes it as the `hideSidebar` prop to `AppLayout`:
+
+```vue
+<AppLayout :hideSidebar="route.meta.hideSidebar === true" />
+```
+
+This keeps `AppLayout` declarative (props-driven) and consistent with the `standaloneLayout` detection pattern — both sidebar visibility and layout bypass are controlled at the `App.vue` routing level, not inside `AppLayout` itself. `ui.store` is not used for sidebar visibility — `ui.store` controls only collapse state (`sidebarCollapsed`). Frontoffice routes that should hide the sidebar declare `meta: { hideSidebar: true }` in their route definition.
+
+**Impact on plan:** The distinction between `hideSidebar` (prop, hides sidebar component) and `sidebarCollapsed` (store state, collapses sidebar to icon-only) must be clearly represented in implementation and tests. `App.vue` in Frontoffice requires a route meta check for `hideSidebar`. The `AppLayout.vue` prop table and template structure reflect this: `hideSidebar` suppresses `<AppSidebar />` rendering entirely.
+
+---
+
+#### CL-005 — Cross-Breakpoint Sidebar State Persistence
+
+**Question:** When a user resizes from mobile (sidebar hidden/overlay) to desktop, does `sidebarCollapsed` reset to `false` (expanded) or retain its collapsed value?
+
+**Resolution:** Breakpoint transition behavior is defined as follows:
+
+- **Mobile → Desktop** (`isMobile` transitions `true → false`): `sidebarCollapsed` is reset to `false` (sidebar expanded). Mobile overlay-hidden state is not semantically equivalent to desktop collapsed state. The breakpoint composable calls `uiStore.setMobile(false)` AND resets `sidebarCollapsed` to `false` atomically.
+- **Desktop → Mobile** (`isMobile` transitions `false → true`): `sidebarCollapsed` is set to `true`. The sidebar defaults to hidden/overlay mode on mobile.
+
+The breakpoint composable (e.g., `useBreakpoint`) owns this reset logic via a `watch` on the computed mobile breakpoint. Layout components do not implement this logic directly — they react to store state only.
+
+**Impact on plan:** The `useBreakpoint` composable implementation plan must include a `watch` that calls both `setMobile` and resets `sidebarCollapsed` on breakpoint crossings. NFR-005 (testability via composable mocks) applies: the composable must be testable with simulated breakpoint transitions that verify both state fields are updated correctly. Two snapshot states are needed in tests: mobile entry (collapsed true) and desktop re-entry (collapsed false).

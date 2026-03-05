@@ -9,8 +9,8 @@ UI Foundation — Layout & Shell Integration
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
+Step: clarify
+Risk Level: LOW
 Last Updated: 2026-03-05T00:00:00Z
 
 Scope Defined:
@@ -19,25 +19,25 @@ Scope Defined:
 - AppLayout.vue, AppSidebar.vue, AppHeader.vue standardization
 - Layout slot strategy (5 named slots)
 - Navigation config externalization in core/navigation/
-- Responsive behavior via ui.store
+- Responsive behavior via ui.store with useBreakpoint composable
 - @zidney/ui-system integration
+- Standalone layout bypass via route meta (standaloneLayout / hideSidebar)
 - White-label visual-token-only constraints
 
 Deferred Scope:
 
 - Feature page implementations
-- Dashboard widgets
-- Affiliate UI
+- Dashboard widgets, affiliate UI
 - Role/permission logic
 - Notification system (placeholder only)
 - Global search (placeholder only)
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
