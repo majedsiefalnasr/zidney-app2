@@ -9,20 +9,35 @@ UI Foundation — Layout & Shell Integration
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-05T00:00:00Z
+Last Updated: 2026-03-05T00:00:00Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Unified layout shell architecture for MMC, Backoffice, Frontoffice
+- AppLayout.vue, AppSidebar.vue, AppHeader.vue standardization
+- Layout slot strategy (5 named slots)
+- Navigation config externalization in core/navigation/
+- Responsive behavior via ui.store
+- @zidney/ui-system integration
+- White-label visual-token-only constraints
+
+Deferred Scope:
+
+- Feature page implementations
+- Dashboard widgets
+- Affiliate UI
+- Role/permission logic
+- Notification system (placeholder only)
+- Global search (placeholder only)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
