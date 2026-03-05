@@ -9,9 +9,9 @@ Scope: Monorepo-wide (apps + packages + CI)
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-05T00:00:00.000Z
+Step: clarify
+Risk Level: LOW
+Last Updated: 2026-03-05T00:02:00.000Z
 
 Scope Defined:
 
@@ -19,23 +19,23 @@ Scope Defined:
 - Per-App E2E Isolation (per-app Playwright config, no cross-app dependency)
 - Vitest Monorepo Configuration (root workspace file, coverage thresholds)
 - ESLint + Prettier integration (root-only, conflict-free, Bun compatible)
-- Commit Hooks: Husky pre-commit + pre-push gates
-- CI Enforcement Matrix: 8-step GitHub Actions sequence
+- Commit Hooks: Husky pre-commit + pre-push gates (ai-guard and infra-audit are hard gates)
+- CI Enforcement Matrix: 8-step GitHub Actions sequence (coverage = unit-only threshold)
 - README Governance Standard: 7 mandatory sections per app/package
-- Hard Mode Enforcement: rules locked for all future stages
+- Hard Mode Enforcement: rules locked for all future stages (emergency bypass protocol documented)
 
 Deferred Scope:
 
 - Multi-browser Playwright expansion (deferred to a future stage)
 - Mass migration of legacy test paths (gradual migration approach)
+- ESLint no-console escalation to error (deferred to a future enforcement stage)
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. 12 functional requirements defined across 8 governance areas.
-Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

@@ -250,7 +250,7 @@ The primary actors for this stage are:
 
 1. The root `vitest.config.ts` must act as the global orchestrator using a `workspace` reference.
 2. The root `vitest.workspace.ts` must define all test projects across apps and packages.
-3. No app or package may introduce a standalone `vitest.config.ts` that operates independently of the root workspace.
+3. No app or package may introduce a standalone `vitest.config.ts` that operates **independently** of the root workspace (i.e., is not registered as a project entry in `vitest.workspace.ts`). Existing per-app `vitest.config.ts` files (e.g., `apps/api/vitest.config.ts`) are **retained** as project-entry configuration files that are explicitly referenced from `vitest.workspace.ts`; they are not considered standalone because they are orchestrated through the root workspace. No existing per-app config file is deleted during initial stage application.
 4. Each project entry in `vitest.workspace.ts` must declare its environment (`node` or `jsdom`), plugins, setup files, and resolve aliases as required.
 5. Coverage configuration must be defined at the root level only — no per-project coverage config is allowed.
 6. Global coverage thresholds must be set to: Lines ≥ 85%, Functions ≥ 85%, Statements ≥ 85%, Branches ≥ 80%.
@@ -264,7 +264,7 @@ The primary actors for this stage are:
 2. No per-app ESLint configuration override is allowed unless explicitly required by a specific app's framework and justified in that app's `AGENTS.md`.
 3. The configuration must include: `@typescript-eslint`, `eslint-plugin-vue`, `eslint-plugin-import-x`.
 4. The configuration must include `eslint-config-prettier` as the final flat config entry to suppress any formatting-related ESLint rules that conflict with Prettier.
-5. `no-console` must be set to at minimum `warn` in production source files.
+5. `no-console` must be set to `warn` in all environments (local and CI) for this stage. Escalation to `error` in CI is deferred — see FR-12.6 for the future target state, which requires a separate enforcement stage.
 6. `@typescript-eslint/no-explicit-any` must be set to at minimum `warn`.
 7. Existing rules must not be escalated from `warn` to `error` without an explicit review and documented rationale.
 8. ESLint errors must block commit (via Husky pre-commit) and block CI (via lint job).
@@ -287,8 +287,8 @@ The primary actors for this stage are:
 2. The pre-commit hook must run lint-staged, which must run:
    - `eslint --fix` on staged `.ts`, `.tsx`, `.vue` files
    - `prettier --write` on staged `.ts`, `.tsx`, `.vue`, `.md`, `.json` files
-3. The pre-commit hook must run the AI architecture guard (`scripts/ai-guard.ts`) to check for architecture drift.
-4. The pre-commit hook must run the infrastructure audit script (`scripts/infra-audit.ts --quick`).
+3. The pre-commit hook must run the AI architecture guard (`scripts/ai-guard.ts`) to check for architecture drift. A non-zero exit code from this script is a **hard gate** — the commit must be blocked. The script must be idempotent (safe to re-run on retry without side effects).
+4. The pre-commit hook must run the infrastructure audit script (`scripts/infra-audit.ts --quick`). A non-zero exit code from this script is a **hard gate** — the commit must be blocked. The script must be idempotent.
 5. Commit must be blocked if any lint error remains after auto-fix.
 6. Commit must not be blocked by Prettier reformatting alone (reformatting is applied automatically).
 
@@ -308,17 +308,17 @@ The primary actors for this stage are:
 
 The GitHub Actions CI pipeline must enforce the following sequence:
 
-| Step | Job Name            | Depends On        | Failure Blocks Merge |
-| ---- | ------------------- | ----------------- | -------------------- |
-| 1    | Lint                | —                 | Yes                  |
-| 2    | Type Check          | —                 | Yes                  |
-| 3    | Unit Tests          | Lint, Type Check  | Yes                  |
-| 4    | Integration Tests   | Unit Tests        | Yes                  |
-| 5    | E2E: MMC            | Integration Tests | Yes                  |
-| 5    | E2E: Backoffice     | Integration Tests | Yes                  |
-| 5    | E2E: Frontoffice    | Integration Tests | Yes                  |
-| 6    | Coverage Validation | Unit Tests        | Yes                  |
-| 7    | Build Verification  | All prior jobs    | Yes                  |
+| Step | Job Name            | Depends On        | Failure Blocks Merge                                                                                   |
+| ---- | ------------------- | ----------------- | ------------------------------------------------------------------------------------------------------ |
+| 1    | Lint                | —                 | Yes                                                                                                    |
+| 2    | Type Check          | —                 | Yes                                                                                                    |
+| 3    | Unit Tests          | Lint, Type Check  | Yes                                                                                                    |
+| 4    | Integration Tests   | Unit Tests        | Yes                                                                                                    |
+| 5    | E2E: MMC            | Integration Tests | Yes                                                                                                    |
+| 5    | E2E: Backoffice     | Integration Tests | Yes                                                                                                    |
+| 5    | E2E: Frontoffice    | Integration Tests | Yes                                                                                                    |
+| 6    | Coverage Validation | Unit Tests        | Yes (unit-test coverage only; integration coverage is collected but not threshold-gated in this stage) |
+| 7    | Build Verification  | All prior jobs    | Yes                                                                                                    |
 
 Rules:
 
@@ -355,8 +355,8 @@ The following rules are mandatory for all future stages:
 2. No new package may be merged without a `README.md` and unit tests.
 3. No stage may be marked `PRODUCTION_READY` without passing E2E tests for any UI it touches.
 4. No merge is allowed with test coverage below the defined thresholds.
-5. No CI bypass (`--no-verify`, `force-push to main`, skipping jobs) is allowed.
-6. No `console.log` in production source files (enforced by `no-console: error` in CI strict mode; `warn` in local).
+5. No CI bypass (`--no-verify`, `force-push to main`, skipping jobs) is allowed **except** as a documented emergency exception. Emergency exception protocol: (1) developer must open a GitHub Issue within 24 hours of the bypass, (2) the bypassed commit message must contain the tag `[emergency-bypass]` with a reason, and (3) the bypassed quality gates must pass in the immediately following commit. Direct pushes to `main` without CI remain absolutely forbidden with no exceptions.
+6. No `console.log` in production source files. For this stage, `no-console` is enforced at `warn` severity in all environments (local and CI). Escalation to `error` in CI is the future target state and is deferred to a dedicated enforcement stage. The phrase "CI strict mode" in earlier drafts refers to that future state, not this stage.
 
 ---
 
@@ -431,3 +431,19 @@ The following assumptions are made and have been documented as reasonable defaul
 - Accessibility testing (deferred to a future stage)
 - Visual regression testing (deferred to a future stage)
 - Dependency security scanning (deferred to a dedicated security stage)
+
+---
+
+## Clarifications
+
+### Session 2026-03-05
+
+- Q: Are `scripts/ai-guard.ts` and `scripts/infra-audit.ts --quick` hard gates (non-zero exit blocks commit) or advisory (warnings only) in the pre-commit hook? → A: Hard gates — a non-zero exit from either script must block the commit, identical to the lint-error gate defined in FR-08.5. Both scripts must be idempotent.
+
+- Q: FR-06.5 sets `no-console: warn` while FR-12.6 references `no-console: error` in "CI strict mode" — which is authoritative for this stage and how is the switch made? → A: `warn` everywhere for this stage. The phrase "CI strict mode" in FR-12.6 describes a future enforcement target, not a mechanism implemented in this stage. Escalation to `error` requires a dedicated enforcement stage. FR-06.5 is authoritative.
+
+- Q: FR-05.3 forbids standalone per-app `vitest.config.ts` files, but `apps/api/vitest.config.ts` and similar already exist — must they be deleted (destructive) or retained? → A: Retained as project-entry configuration files explicitly referenced from `vitest.workspace.ts`. A config is only "standalone" if it is NOT registered in the root workspace. No existing per-app Vitest config file is deleted during initial stage application.
+
+- Q: Does the Coverage Validation CI job (Step 6 in FR-10 matrix, depends on Unit Tests) enforce thresholds against unit-test coverage only, or does it aggregate unit + integration coverage? → A: Unit-test coverage only is threshold-enforced in this stage. Integration test coverage data may be collected as informational output but is not gate-enforced. The CI matrix dependency on "Unit Tests" (not Integration Tests) is intentional and authoritative.
+
+- Q: FR-12.5 forbids all `--no-verify` bypass with no exceptions — is there any sanctioned emergency escape hatch, or is it absolutely forbidden? → A: Emergency exceptions are permitted under a strict incident protocol: the developer must open a GitHub Issue within 24 hours, the bypassed commit message must include the tag `[emergency-bypass]` with stated reason, and the bypassed quality gates must pass in the immediately following commit. Direct force-pushes to `main` remain absolutely forbidden with no exceptions.
