@@ -8,30 +8,42 @@ UI Foundation — Layout & Shell Integration
 
 ## Stage Status
 
-Status: DRAFT
-Step: tasks
+Status: IN PROGRESS
+Step: analyze
 Risk Level: MEDIUM
 Last Updated: 2026-03-05T00:00:00Z
 
-Tasks Generated:
+Drift Analysis: PASSED (9/9 criteria)
+Implementation: AUTHORIZED
 
-- Total: 51 atomic tasks (T001–T051)
+Tasks Finalized:
+
+- Total: 57 atomic tasks (T001–T056 + T052–T055 remediated additions)
 - 7 dependency/store foundation tasks
 - 6 types/configuration tasks
 - 3 composable tasks
 - 9 layout component tasks (3 per app)
 - 8 app integration tasks
-- 18 test tasks
+- 21 test tasks (18 original + T052–T054 auth.store permissions + T055 SidebarLayout fix)
+- 1 CI lint/typecheck task (T056)
 
 Deferred Scope:
 
 - Feature page implementations
 - Notification system (placeholder only)
 - Global search (placeholder only)
+- NFR-001 render benchmark test (accepted as design invariant)
+- ESLint layout import restriction rule (governance follow-up stage)
 
 Constitutional Compliance:
 
-- Task set compliant — drift analysis required before implementation
+- All 9 drift criteria passed — implementation authorized
+- ADR alignment verified — no architectural modifications
+- Zidney Constitution v1.2.0 compliant
+
+Notes:
+Analyze gate passed on second pass after targeted remediation. Eight remediations applied.
+Four medium, three low residual findings documented in audits/ANALYZE_REPORT.md — none block implementation.
 
 Notes:
 Atomic task set generated. Drift analysis gate pending.

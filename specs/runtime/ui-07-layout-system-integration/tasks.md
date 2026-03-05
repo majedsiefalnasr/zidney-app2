@@ -62,13 +62,13 @@ This stage is **Frontend only**. All tasks are frontend implementation tasks.
 
 ### Tasks
 
-- [ ] T001 Add `"@zidney/ui-system": "workspace:*"` to dependencies in `apps/mmc/package.json`
+- [ ] T001 Add `"@zidney/ui-system": "workspace:*"` to dependencies in `apps/mmc/package.json`; also extend `apps/mmc/vite.config.ts` resolve aliases to map `@zidney/ui-system` to `../../packages/ui-system/src/index.ts` so that both dev and build resolve to source (prevents dual module identity with the existing `@zidney/ui` alias, which would cause identical components to be bundled twice and silently break Vue component instance comparisons)
 - [ ] T002 [P] Extend `apps/mmc/src/core/state/ui.store.ts` — add `sidebarCollapsed: ref<boolean>(false)`, `isMobile: ref<boolean>(false)`, `toggleSidebar()`, `setMobile(val)` with atomic `sidebarCollapsed` reset, and include them in `return` and `$reset()`
 - [ ] T003 [P] Extend `apps/backoffice/src/core/state/ui.store.ts` — add `sidebarCollapsed: ref<boolean>(false)`, `isMobile: ref<boolean>(false)`, `toggleSidebar()`, `setMobile(val)` with atomic `sidebarCollapsed` reset, and include them in `return` and `$reset()`
 - [ ] T004 [P] Extend `apps/frontoffice/src/core/state/ui.store.ts` — add `sidebarCollapsed: ref<boolean>(false)`, `isMobile: ref<boolean>(false)`, `toggleSidebar()`, `setMobile(val)` with atomic `sidebarCollapsed` reset, and include them in `return` and `$reset()`
-- [ ] T005 [P] Extend `apps/mmc/src/core/state/auth.store.ts` — add `resolvedPermissions: ref<Record<string, boolean>>({})`, `buildResolvedPermissions(profile)` pure helper, populate in `setSession()` and `initSession()`, clear in `resetState()`
-- [ ] T006 [P] Extend `apps/backoffice/src/core/state/auth.store.ts` — add `resolvedPermissions: ref<Record<string, boolean>>({})`, `buildResolvedPermissions(profile)` pure helper, populate in `setSession()` and `initSession()`, clear in `resetState()`
-- [ ] T007 [P] Extend `apps/frontoffice/src/core/state/auth.store.ts` — add `resolvedPermissions: ref<Record<string, boolean>>({})`, `buildResolvedPermissions(profile)` pure helper, populate in `setSession()` and `initSession()`, clear in `resetState()`
+- [ ] T005 [P] Extend `apps/mmc/src/core/state/auth.store.ts` — add `resolvedPermissions: ref<Record<string, boolean>>({})`, `buildResolvedPermissions(profile)` pure helper (handles array-of-strings, passthrough Record, and null/undefined guard), populate in `setSession()` and `initSession()`, clear in `resetState()` AND in `expireSession()` (stale permissions must not persist between the expiry event and the reload/redirect)
+- [ ] T006 [P] Extend `apps/backoffice/src/core/state/auth.store.ts` — add `resolvedPermissions: ref<Record<string, boolean>>({})`, `buildResolvedPermissions(profile)` pure helper (handles array-of-strings, passthrough Record, and null/undefined guard), populate in `setSession()` and `initSession()`, clear in `resetState()` AND in `expireSession()` (stale permissions must not persist between the expiry event and the reload/redirect)
+- [ ] T007 [P] Extend `apps/frontoffice/src/core/state/auth.store.ts` — add `resolvedPermissions: ref<Record<string, boolean>>({})`, `buildResolvedPermissions(profile)` pure helper (handles array-of-strings, passthrough Record, and null/undefined guard), populate in `setSession()` and `initSession()`, clear in `resetState()` AND in `expireSession()` (stale permissions must not persist between the expiry event and the reload/redirect)
 
 ---
 
@@ -117,9 +117,9 @@ This stage is **Frontend only**. All tasks are frontend implementation tasks.
 
 ### Tasks
 
-- [ ] T017 [P] [US1] Create `apps/mmc/src/components/layout/AppHeader.vue` — renders `TopBar` from `@zidney/ui-system`, user avatar with initials from `useMmcAuthStore().user`, logout `DropdownMenuItem` calling `authStore.logout()`, exposes named slots `left` and `right`, `showWorkspace=false`
-- [ ] T018 [P] [US4] Create `apps/backoffice/src/components/layout/AppHeader.vue` — renders `TopBar` from `@zidney/ui-system`, user avatar with initials from `useBackofficeAuthStore().user`, workspace name from `useBackofficeWorkspaceStore().workspace?.name` when `showWorkspace=true`, logout dropdown, exposes named slots `left` and `right`
-- [ ] T019 [P] [US1] Create `apps/frontoffice/src/components/layout/AppHeader.vue` — renders `TopBar` from `@zidney/ui-system`, user avatar with initials from `useFrontofficeAuthStore().user`, logout dropdown, exposes named slots `left` and `right`, `showWorkspace=false`
+- [ ] T017 [P] [US1] Create `apps/mmc/src/components/layout/AppHeader.vue` — renders `TopBar` from `@zidney/ui-system`, user avatar with initials from `useMmcAuthStore().user`, logout `DropdownMenuItem` calling `handleLogout()` which wraps `await authStore.logout()` in try/catch (errors are handled inside the auth store; the component must not propagate uncaught promise rejections to the global error handler), exposes named slots `left` and `right`, `showWorkspace=false`
+- [ ] T018 [P] [US4] Create `apps/backoffice/src/components/layout/AppHeader.vue` — renders `TopBar` from `@zidney/ui-system`, user avatar with initials from `useBackofficeAuthStore().user`, workspace name from `useBackofficeWorkspaceStore().workspace?.name` when `showWorkspace=true`, logout dropdown with `handleLogout()` wrapping `await authStore.logout()` in try/catch (errors handled in auth store; no uncaught promise rejections in component), exposes named slots `left` and `right`
+- [ ] T019 [P] [US1] Create `apps/frontoffice/src/components/layout/AppHeader.vue` — renders `TopBar` from `@zidney/ui-system`, user avatar with initials from `useFrontofficeAuthStore().user`, logout dropdown with `handleLogout()` wrapping `await authStore.logout()` in try/catch (errors handled in auth store; no uncaught promise rejections in component), exposes named slots `left` and `right`, `showWorkspace=false`
 
 ---
 
@@ -133,9 +133,9 @@ This stage is **Frontend only**. All tasks are frontend implementation tasks.
 
 ### Tasks
 
-- [ ] T020 [P] [US3] Create `apps/mmc/src/components/layout/AppSidebar.vue` — accepts `navigationConfig: NavigationConfig` prop, filters items using `useMmcAuthStore().resolvedPermissions`, highlights active item using `useRoute().name`, renders `SidebarLayout` from `@zidney/ui-system`, drives `sidebarCollapsed`/`isMobile` from `useMmcUiStore()`, calls `toggleSidebar()` on collapse control click, exposes `footer` slot
-- [ ] T021 [P] [US3] Create `apps/backoffice/src/components/layout/AppSidebar.vue` — accepts `navigationConfig: NavigationConfig` prop, filters items using `useBackofficeAuthStore().resolvedPermissions`, highlights active item using `useRoute().name`, renders `SidebarLayout` from `@zidney/ui-system`, drives `sidebarCollapsed`/`isMobile` from `useBackofficeUiStore()`, calls `toggleSidebar()` on collapse control click, exposes `footer` slot
-- [ ] T022 [P] [US3] Create `apps/frontoffice/src/components/layout/AppSidebar.vue` — accepts `navigationConfig: NavigationConfig` prop, filters items using `useFrontofficeAuthStore().resolvedPermissions`, highlights active item using `useRoute().name`, renders `SidebarLayout` from `@zidney/ui-system`, drives `sidebarCollapsed`/`isMobile` from `useFrontofficeUiStore()`, calls `toggleSidebar()` on collapse control click, exposes `footer` slot
+- [ ] T020 [P] [US3] [requires T055] Create `apps/mmc/src/components/layout/AppSidebar.vue` — **T055 must be complete first** (SidebarLayout.vue watch-synced prop required); accepts `navigationConfig: NavigationConfig` prop, filters items using `useMmcAuthStore().resolvedPermissions`, highlights active item using `useRoute().name`, renders `SidebarLayout` from `@zidney/ui-system`, passes `collapsed` prop from `sidebarCollapsed`, drives `isMobile` from `useMmcUiStore()`, calls `toggleSidebar()` on collapse control click, renders group label as a non-interactive visual separator row above each group when `NavigationGroup.label` is non-empty (FR-030), exposes `footer` slot
+- [ ] T021 [P] [US3] [requires T055] Create `apps/backoffice/src/components/layout/AppSidebar.vue` — **T055 must be complete first** (SidebarLayout.vue watch-synced prop required); accepts `navigationConfig: NavigationConfig` prop, filters items using `useBackofficeAuthStore().resolvedPermissions`, highlights active item using `useRoute().name`, renders `SidebarLayout` from `@zidney/ui-system`, passes `collapsed` prop from `sidebarCollapsed`, drives `isMobile` from `useBackofficeUiStore()`, calls `toggleSidebar()` on collapse control click, renders group label as a non-interactive visual separator row above each group when `NavigationGroup.label` is non-empty (FR-030), exposes `footer` slot
+- [ ] T022 [P] [US3] [requires T055] Create `apps/frontoffice/src/components/layout/AppSidebar.vue` — **T055 must be complete first** (SidebarLayout.vue watch-synced prop required); accepts `navigationConfig: NavigationConfig` prop, filters items using `useFrontofficeAuthStore().resolvedPermissions`, highlights active item using `useRoute().name`, renders `SidebarLayout` from `@zidney/ui-system`, passes `collapsed` prop from `sidebarCollapsed`, drives `isMobile` from `useFrontofficeUiStore()`, calls `toggleSidebar()` on collapse control click, renders group label as a non-interactive visual separator row above each group when `NavigationGroup.label` is non-empty (FR-030), exposes `footer` slot
 
 ---
 
@@ -165,14 +165,14 @@ This stage is **Frontend only**. All tasks are frontend implementation tasks.
 
 ### Tasks
 
-- [ ] T026 [P] [US1] Update `apps/mmc/src/App.vue` — replace `<RouterView />` with conditional pattern: `<AppLayout v-else><router-view /></AppLayout>` for non-standalone routes and `<router-view />` for `route.meta.standaloneLayout === true`; import `useRoute` and `AppLayout`
-- [ ] T027 [P] [US1] Update `apps/backoffice/src/App.vue` — replace existing template with conditional pattern: `<AppLayout v-else><router-view /></AppLayout>` for non-standalone routes and `<router-view />` for `route.meta.standaloneLayout === true`; import `useRoute` and `AppLayout`
-- [ ] T028 [P] [US5] Update `apps/frontoffice/src/App.vue` — replace existing template with conditional pattern: `<AppLayout v-else :hideSidebar="route.meta.hideSidebar === true"><router-view /></AppLayout>` for non-standalone routes and `<router-view />` for `route.meta.standaloneLayout === true`; import `useRoute` and `AppLayout`
+- [ ] T026 [P] [US1] Update `apps/mmc/src/App.vue` — replace `<RouterView />` with conditional pattern: `<AppLayout v-else />` (self-closing — AppLayout contains `<router-view />` internally in its content area; do NOT pass `<router-view>` as slot content) for non-standalone routes, and bare `<router-view />` for `route.meta.standaloneLayout === true`; import `useRoute` and `AppLayout`
+- [ ] T027 [P] [US1] Update `apps/backoffice/src/App.vue` — replace existing template with conditional pattern: `<AppLayout v-else />` (self-closing — AppLayout contains `<router-view />` internally in its content area; do NOT pass `<router-view>` as slot content) for non-standalone routes, and bare `<router-view />` for `route.meta.standaloneLayout === true`; import `useRoute` and `AppLayout`
+- [ ] T028 [P] [US5] Update `apps/frontoffice/src/App.vue` — replace existing template with conditional pattern: `<AppLayout v-else :hideSidebar="route.meta.hideSidebar === true" />` (self-closing — AppLayout contains `<router-view />` internally; do NOT pass `<router-view>` as slot content) for non-standalone routes, and bare `<router-view />` for `route.meta.standaloneLayout === true`; import `useRoute` and `AppLayout`
 - [ ] T029 [P] [US5] Declare `meta: { standaloneLayout: true }` on all auth routes (login, forgot-password, reset-password) and error/404 routes in `apps/mmc/src/core/router/index.ts`
 - [ ] T030 [P] [US5] Declare `meta: { standaloneLayout: true }` on all auth routes (login, forgot-password, reset-password) and error/404 routes in `apps/backoffice/src/core/router/index.ts`
 - [ ] T031 [P] [US5] Declare `meta: { standaloneLayout: true }` on all auth routes, error/404 routes, and attempt runtime routes in `apps/frontoffice/src/core/router/index.ts`; declare `meta: { hideSidebar: true }` on routes requiring sidebar suppression
-- [ ] T032 [US1] Delete `apps/backoffice/src/layouts/BackofficeLayout.vue` (superseded by new AppLayout pattern; confirmed Backoffice App.vue and routes no longer reference it after T027 and T030)
-- [ ] T033 [US1] Audit and update any Backoffice view or route files still importing from `apps/backoffice/src/layouts/BackofficeLayout.vue` — replace all usages with the new shell-via-App.vue pattern (router-view inside AppLayout handles wrapping automatically)
+- [ ] T032 [US1] Audit all Backoffice view and route files for imports of `apps/backoffice/src/layouts/BackofficeLayout.vue` — update or remove all usages, replacing any component-level layout wrapping with the new shell-via-App.vue pattern (AppLayout in App.vue handles wrapping automatically via its internal `<router-view />`)
+- [ ] T033 [US1] Delete `apps/backoffice/src/layouts/BackofficeLayout.vue` only after T032 audit confirms zero remaining import references — confirm TypeScript compilation passes before deletion
 
 ---
 
@@ -191,6 +191,9 @@ This stage is **Frontend only**. All tasks are frontend implementation tasks.
 - [ ] T034 [P] Create `tests/unit/mmc/core/state/ui.store.layout.test.ts` — verify `toggleSidebar` flips `sidebarCollapsed`, `setMobile(true)` atomically sets `isMobile=true` and `sidebarCollapsed=true`, `setMobile(false)` resets both, `setMobile` no-op when value unchanged, `$reset()` clears both to `false`
 - [ ] T035 [P] Create `tests/unit/backoffice/core/state/ui.store.layout.test.ts` — verify `toggleSidebar` flips `sidebarCollapsed`, `setMobile(true)` atomically sets `isMobile=true` and `sidebarCollapsed=true`, `setMobile(false)` resets both, `setMobile` no-op when value unchanged, `$reset()` clears both to `false`
 - [ ] T036 [P] Create `tests/unit/frontoffice/core/state/ui.store.layout.test.ts` — verify `toggleSidebar` flips `sidebarCollapsed`, `setMobile(true)` atomically sets `isMobile=true` and `sidebarCollapsed=true`, `setMobile(false)` resets both, `setMobile` no-op when value unchanged, `$reset()` clears both to `false`
+- [ ] T052 [P] Create `tests/unit/mmc/core/state/auth.store.permissions.test.ts` — verify `resolvedPermissions` defaults to `{}`, `buildResolvedPermissions` with array-of-strings input maps each string to `true`, with `Record<string, boolean>` input passes through unchanged, with null/undefined `profile.permissions` returns `{}` without throwing, `resetState()` clears `resolvedPermissions` to `{}`, `expireSession()` clears `resolvedPermissions` to `{}`
+- [ ] T053 [P] Create `tests/unit/backoffice/core/state/auth.store.permissions.test.ts` — same assertions as T052
+- [ ] T054 [P] Create `tests/unit/frontoffice/core/state/auth.store.permissions.test.ts` — same assertions as T052
 
 ---
 
@@ -238,9 +241,11 @@ This stage is **Frontend only**. All tasks are frontend implementation tasks.
 
 **What to assert**: Full shell composition (AppLayout + real AppSidebar + real AppHeader) mounts without error; sidebar toggle flows: toggle control click → `toggleSidebar()` store action → layout re-renders with correct CSS class; `standaloneLayout: true` on a route causes App.vue to bypass AppLayout entirely (AppSidebar and AppHeader absent from DOM).
 
-- [ ] T049 [P] [US1] Create `tests/integration/mmc/app-layout.integration.test.ts` — mount AppLayout with real AppSidebar and AppHeader using `createTestingPinia`, verify full shell renders without error, sidebar toggle propagates from click through store to re-render, `hideSidebar` prop removes AppSidebar from DOM
-- [ ] T050 [P] [US1] Create `tests/integration/backoffice/app-layout.integration.test.ts` — mount AppLayout with real AppSidebar and AppHeader using `createTestingPinia`, verify full shell renders with workspace name in header, sidebar toggle propagates from click through store to re-render
+- [ ] T049 [P] [US1] Create `tests/integration/mmc/app-layout.integration.test.ts` — mount AppLayout with real AppSidebar and AppHeader using `createTestingPinia`, verify full shell renders without error, sidebar toggle propagates from click through store to re-render, `hideSidebar` prop removes AppSidebar from DOM; ALSO mount App.vue with a mocked router where a route declares `meta: { standaloneLayout: true }` and assert AppLayout is absent from the DOM (bare `<router-view>` renders directly — `standaloneLayout` bypasses shell rendering and NOT router guard execution)
+- [ ] T050 [P] [US1] Create `tests/integration/backoffice/app-layout.integration.test.ts` — mount AppLayout with real AppSidebar and AppHeader using `createTestingPinia`, verify full shell renders with workspace name in header, sidebar toggle propagates from click through store to re-render; ALSO mount App.vue with a mocked router where a route declares `meta: { standaloneLayout: true }` and assert AppLayout is absent from the DOM (bare `<router-view>` renders directly — `standaloneLayout` bypasses shell rendering and NOT router guard execution)
 - [ ] T051 [P] [US5] Create `tests/integration/frontoffice/app-layout.integration.test.ts` — mount AppLayout with real AppSidebar and AppHeader using `createTestingPinia`, verify `standaloneLayout: true` route causes App.vue to mount `<router-view>` directly (AppSidebar and AppHeader absent from DOM), `hideSidebar: true` suppresses AppSidebar while AppHeader remains
+- [ ] T055 Fix `packages/ui-system/src/components/Layout/SidebarLayout.vue` — replace one-time `ref(props.defaultCollapsed)` initialization with a watch-synced reactive pattern: rename prop from `defaultCollapsed` to `collapsed` (or keep `defaultCollapsed` and add `watch(() => props.defaultCollapsed, val => { isCollapsed.value = val })`) so that Pinia-driven state changes (e.g. `setMobile(true)` → `sidebarCollapsed=true` → AppSidebar binding update) immediately reflect in the sidebar DOM without requiring a user click to re-sync; verify fix with T037–T039 composable resize tests
+- [ ] T056 Run `bun run lint` and `bun run type-check` across `apps/mmc`, `apps/backoffice`, `apps/frontoffice`, and `packages/ui-system` — all must exit with zero errors; collect full output and record pass/fail per app in `audits/VALIDATION_REPORT.md`; ESLint errors BLOCK merge; TypeScript errors BLOCK merge; warnings are allowed but must be documented
 
 ---
 
@@ -287,8 +292,8 @@ T008 → T029 [P] (mmc standalone routes)
 T009 → T030 [P] (bo standalone routes)
 T010 → T031 [P] (fo standalone routes)
 
-T027, T030 → T032 (delete BackofficeLayout.vue)
-T032 → T033 (audit BackofficeLayout import refs)
+T027, T030 → T032 (audit BackofficeLayout import refs)
+T032 → T033 (delete BackofficeLayout.vue — only after T032 audit confirms zero imports)
 
 Phase 6 tests depend on their respective implementation tasks.
 ```
@@ -297,23 +302,25 @@ Phase 6 tests depend on their respective implementation tasks.
 
 ## Parallel Execution Summary
 
-| Parallel Group            | Tasks     | Can Start After              |
-| ------------------------- | --------- | ---------------------------- |
-| Store extensions (ui)     | T002–T004 | T001 complete                |
-| Store extensions (auth)   | T005–T007 | T001 complete                |
-| RouteMeta + NavConfig     | T008–T013 | Any time (Phase 1+2 overlap) |
-| useBreakpoint composables | T014–T016 | T002, T003, T004             |
-| AppHeader components      | T017–T019 | T005–T007, T011–T013         |
-| AppSidebar components     | T020–T022 | T002–T007, T011–T013         |
-| AppLayout components      | T023–T025 | T014–T022                    |
-| App.vue updates           | T026–T028 | T023–T025                    |
-| Standalone route updates  | T029–T031 | T008–T010                    |
-| Store unit tests          | T034–T036 | T002–T007                    |
-| Composable unit tests     | T037–T039 | T014–T016                    |
-| AppHeader unit tests      | T040–T042 | T017–T019                    |
-| AppSidebar unit tests     | T043–T045 | T020–T022                    |
-| AppLayout unit tests      | T046–T048 | T023–T025                    |
-| Integration tests         | T049–T051 | T026–T031                    |
+| Parallel Group              | Tasks     | Can Start After              |
+| --------------------------- | --------- | ---------------------------- |
+| Store extensions (ui)       | T002–T004 | T001 complete                |
+| Store extensions (auth)     | T005–T007 | T001 complete                |
+| RouteMeta + NavConfig       | T008–T013 | Any time (Phase 1+2 overlap) |
+| useBreakpoint composables   | T014–T016 | T002, T003, T004             |
+| AppHeader components        | T017–T019 | T005–T007, T011–T013         |
+| AppSidebar components       | T020–T022 | T002–T007, T011–T013         |
+| AppLayout components        | T023–T025 | T014–T022                    |
+| App.vue updates             | T026–T028 | T023–T025                    |
+| Standalone route updates    | T029–T031 | T008–T010                    |
+| Store unit tests (ui.store) | T034–T036 | T002–T007                    |
+| Auth store permission tests | T052–T054 | T005–T007                    |
+| Composable unit tests       | T037–T039 | T014–T016                    |
+| AppHeader unit tests        | T040–T042 | T017–T019                    |
+| AppSidebar unit tests       | T043–T045 | T020–T022                    |
+| AppLayout unit tests        | T046–T048 | T023–T025                    |
+| Integration tests           | T049–T051 | T026–T031                    |
+| SidebarLayout fix           | T055      | Before T020–T022             |
 
 ---
 
@@ -339,9 +346,9 @@ Then replicate to MMC (T001, T002, T005, T008, T011, T014, T017, T020, T023, T02
 
 ### Dependency Conflict Notes
 
-1. **T001 must be first**: MMC has no `@zidney/ui-system` depedency. Without it, T002, T014, T017, T020, T023 cannot import from `@zidney/ui-system`. All MMC implementation tasks are blocked until T001 is complete and `pnpm install` is re-run.
+1. **T001 must be first**: MMC has no `@zidney/ui-system` dependency. Without it, T002, T014, T017, T020, T023 cannot import from `@zidney/ui-system`. All MMC implementation tasks are blocked until T001 is complete and `bun install` is re-run.
 
-2. **T032/T033 ordering**: `BackofficeLayout.vue` may not be deleted (T032) until T027 (Backoffice App.vue updated) and T030 (standalone routes declared) are both complete. Deleting it before the new layout is wired will break Backoffice entirely.
+2. **T032/T033 ordering**: `BackofficeLayout.vue` may not be deleted (T033) until T027 (Backoffice App.vue updated), T030 (standalone routes declared), and T032 (audit confirms zero remaining import references) are all complete. Deleting it before the audit confirms zero imports will break Backoffice entirely.
 
 3. **RouteMeta before router updates**: T029–T031 (standalone route declarations) require T008–T010 to be complete; TypeScript will reject `meta: { standaloneLayout: true }` until the `RouteMeta` augmentation is in place.
 
@@ -366,4 +373,7 @@ Then replicate to MMC (T001, T002, T005, T008, T011, T014, T017, T020, T023, T02
 | 6d    | AppSidebar Unit Tests           | T043–T045  | 3      |
 | 6e    | AppLayout Unit Tests            | T046–T048  | 3      |
 | 6f    | Integration Tests               | T049–T051  | 3      |
-| **—** | **Total**                       | T001–T051  | **51** |
+| 6a+   | Auth Store Permission Tests     | T052–T054  | 3      |
+| 6f+   | SidebarLayout Controlled Prop   | T055       | 1      |
+| CI    | Lint + Type-Check Validation    | T056       | 1      |
+| **—** | **Total**                       | T001–T056  | **57** |

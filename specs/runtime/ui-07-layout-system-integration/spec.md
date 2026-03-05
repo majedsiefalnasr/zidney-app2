@@ -358,9 +358,9 @@ apps/backoffice  → apps/mmc                      ✗ FORBIDDEN
 
 **Props**:
 
-| Prop               | Type                 | Required | Description                           |
-| ------------------ | -------------------- | -------- | ------------------------------------- |
-| `navigationConfig` | `NavigationConfig[]` | Yes      | Array of navigation group definitions |
+| Prop               | Type               | Required | Description                                                                |
+| ------------------ | ------------------ | -------- | -------------------------------------------------------------------------- |
+| `navigationConfig` | `NavigationConfig` | Yes      | Navigation group definitions (`NavigationGroup[]`) — see CL-003 correction |
 
 **NavigationConfig Shape**:
 
