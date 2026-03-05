@@ -9,21 +9,19 @@ UI Foundation — Layout & Shell Integration
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: MEDIUM
 Last Updated: 2026-03-05T00:00:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- AppLayout.vue, AppSidebar.vue, AppHeader.vue per-app implementation
-- ui.store extension (sidebarCollapsed, isMobile, toggleSidebar, setMobile)
-- auth.store extension (resolvedPermissions: Record<string, boolean>)
-- useBreakpoint composable per app
-- NavigationConfig type definitions and core/navigation/ setup
-- RouteMeta augmentation for standaloneLayout and hideSidebar
-- BackofficeLayout.vue deprecation and removal
-- MMC addition of @zidney/ui-system dependency
-- Unit, snapshot, and responsive tests per app
+- Total: 51 atomic tasks (T001–T051)
+- 7 dependency/store foundation tasks
+- 6 types/configuration tasks
+- 3 composable tasks
+- 9 layout component tasks (3 per app)
+- 8 app integration tasks
+- 18 test tasks
 
 Deferred Scope:
 
@@ -33,10 +31,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
