@@ -10,32 +10,20 @@
     ".specify/scripts/bash/": true,
     ".specify/scripts/powershell/": true,
     "mkdir": true,
-    "/^bash \\.specify/scripts/bash/check-prerequisites\\.sh --json --require-tasks --include-tasks 2>/dev/null \\| head -100$/": {
+    "/^bash \\.specify\\/scripts\\/bash\\/check-prerequisites\\.sh(\\s+.*)?$/": {
       "approve": true,
       "matchCommandLine": true
     },
     "bun": true,
-    "/^bash \\.specify/scripts/bash/check-prerequisites\\.sh --json$/": {
+    "/^bash \\.specify\\/scripts\\/bash\\/setup-plan\\.sh(\\s+.*)?$/": {
       "approve": true,
       "matchCommandLine": true
     },
-    "/^bash \\.specify/scripts/bash/check-prerequisites\\.sh --json 2>/dev/null \\|\\| echo \"SCRIPT_NOT_FOUND\"$/": {
+    "/^\\.specify\\/scripts\\/bash\\/check-prerequisites\\.sh(\\s+.*)?$/": {
       "approve": true,
       "matchCommandLine": true
     },
-    "/^bash \\.specify/scripts/bash/check-prerequisites\\.sh --json --require-tasks --include-tasks 2>/dev/null \\|\\| echo \"SCRIPT_NOT_FOUND\"$/": {
-      "approve": true,
-      "matchCommandLine": true
-    },
-    "/^bash \\.specify/scripts/bash/check-prerequisites\\.sh --json --require-tasks --include-tasks 2>/dev/null \\|\\| echo \"Script not found or failed\"$/": {
-      "approve": true,
-      "matchCommandLine": true
-    },
-    "/^bash \\.specify/scripts/bash/setup-plan\\.sh --json 2>&1$/": {
-      "approve": true,
-      "matchCommandLine": true
-    },
-    "/^bash \\.specify/scripts/bash/check-prerequisites\\.sh --json --require-tasks --include-tasks 2>&1$/": {
+    "/^\\.specify\\/scripts\\/bash\\/setup-plan\\.sh(\\s+.*)?$/": {
       "approve": true,
       "matchCommandLine": true
     },
@@ -43,22 +31,9 @@
     "npx tsc": true,
     "act": true,
     "gh": true,
-    "/^bash \\.specify/scripts/bash/check-prerequisites\\.sh --json --paths-only 2>&1$/": {
-      "approve": true,
-      "matchCommandLine": true
-    },
-    "/^bash \\.specify/scripts/bash/check-prerequisites\\.sh --json --paths-only 2>/dev/null \\|\\| echo \"SCRIPT_NOT_FOUND\"$/": {
-      "approve": true,
-      "matchCommandLine": true
-    },
-    "/^bash \\.specify/scripts/bash/check-prerequisites\\.sh --json 2>/dev/null \\|\\| echo \"Script not found or failed\"$/": {
-      "approve": true,
-      "matchCommandLine": true
-    },
-    "/^bash \\.specify/scripts/bash/check-prerequisites\\.sh --json --require-tasks --include-tasks 2>&1 \\|\\| echo \"Script not found or failed\"$/": {
-      "approve": true,
-      "matchCommandLine": true
-    }
+    "git stash": true,
+    "git checkout": true,
+    "bunx": true,
   },
   "css.lint.unknownAtRules": "ignore",
   "css.customData": [
