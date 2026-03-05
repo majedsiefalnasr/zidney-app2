@@ -20,8 +20,23 @@ export default defineConfig({
     workspace: './vitest.workspace.ts',
     // Centralized coverage — no per-project coverage config
     coverage: {
+      provider: 'v8',
       reporter: ['text', 'json', 'html'],
-      exclude: ['node_modules/', 'dist/', 'build/', 'tests/e2e/**'],
+      exclude: [
+        'node_modules/',
+        'dist/',
+        'build/',
+        'tests/e2e/**',
+        '**/*.d.ts',
+        '**/vitest.config.ts',
+        '**/playwright.config.ts',
+      ],
+      thresholds: {
+        lines: 85,
+        functions: 85,
+        statements: 85,
+        branches: 80,
+      },
     },
   },
 })

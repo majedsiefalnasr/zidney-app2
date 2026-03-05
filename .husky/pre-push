@@ -1,0 +1,14 @@
+#!/bin/sh
+
+# ── Pre-Push Quality Gate ───────────────────────────────────────────────────
+# All three checks must pass before a push is allowed.
+# Target: complete in under 3 minutes on a standard developer machine.
+
+# 1. Full ESLint (entire repo)
+bun run lint
+
+# 2. TypeScript type check (source + tests)
+bun run typecheck
+
+# 3. Unit tests (all unit-test projects)
+bun run test:unit

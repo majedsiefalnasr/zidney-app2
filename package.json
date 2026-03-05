@@ -31,7 +31,8 @@
     "dev:mmc": "bun --cwd apps/mmc dev",
     "dev:backoffice": "bun --cwd apps/backoffice dev",
     "dev:frontoffice": "bun --cwd apps/frontoffice dev",
-    "dev:all": "concurrently \"bun run dev:api\" \"bun run dev:worker\" \"bun run dev:mmc\" \"bun run dev:backoffice\" \"bun run dev:frontoffice\""
+    "dev:all": "concurrently \"bun run dev:api\" \"bun run dev:worker\" \"bun run dev:mmc\" \"bun run dev:backoffice\" \"bun run dev:frontoffice\"",
+    "prepare": "husky"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
@@ -53,7 +54,10 @@
     "typescript": "latest",
     "typescript-eslint": "^8.0.0",
     "vite-tsconfig-paths": "4.3.2",
-    "vitest": "^1.0.0"
+    "vitest": "^1.0.0",
+    "@vitest/coverage-v8": "^1.0.0",
+    "husky": "^9.0.0",
+    "lint-staged": "^15.0.0"
   },
   "packageManager": "pnpm@10.12.2+sha512.a32540185b964ee30bb4e979e405adc6af59226b438ee4cc19f9e8773667a66d302f5bfee60a39d3cac69e35e4b96e708a71dd002b7e9359c4112a1722ac323f"
 }

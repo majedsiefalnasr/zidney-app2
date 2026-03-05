@@ -10,14 +10,13 @@ on:
   pull_request:
     branches:
       - main
+      - develop
 
 env:
   BUN_VERSION: latest
 
 jobs:
-  # ──────────────────────────────────────────────────────────────────────────
-  # Job 1: Lint
-  # ──────────────────────────────────────────────────────────────────────────
+  # ── Job 1. Lint ────────────────────────────────────────────────────────
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -40,9 +39,7 @@ jobs:
       - name: Check Prettier formatting
         run: bun run format:check
 
-  # ──────────────────────────────────────────────────────────────────────────
-  # Job 2: Type Check
-  # ──────────────────────────────────────────────────────────────────────────
+  # ── Job 2. Type Check ──────────────────────────────────────────────────
   typecheck:
     name: Type Check
     runs-on: ubuntu-latest
@@ -65,9 +62,7 @@ jobs:
       - name: Type check tests
         run: bun run typecheck:tests
 
-  # ──────────────────────────────────────────────────────────────────────────
-  # Job 3: Unit Tests
-  # ──────────────────────────────────────────────────────────────────────────
+  # ── Job 3. Unit Tests ──────────────────────────────────────────────────
   unit-tests:
     name: Unit Tests
     runs-on: ubuntu-latest
@@ -104,9 +99,7 @@ jobs:
       - name: Run unit tests (all projects)
         run: bun run test:unit --reporter=verbose
 
-  # ──────────────────────────────────────────────────────────────────────────
-  # Job 4: Integration Tests
-  # ──────────────────────────────────────────────────────────────────────────
+  # ── Job 4. Integration Tests ───────────────────────────────────────────
   integration-tests:
     name: Integration Tests
     runs-on: ubuntu-latest
@@ -167,11 +160,9 @@ jobs:
       - name: Run integration tests
         run: bun run test:integration --reporter=verbose
 
-  # ──────────────────────────────────────────────────────────────────────────
-  # Job 5: E2E Tests
-  # ──────────────────────────────────────────────────────────────────────────
-  e2e-tests:
-    name: E2E Tests
+  # ── Job 5a. E2E — MMC ─────────────────────────────────────────────────
+  e2e-mmc:
+    name: "E2E: MMC"
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs:
@@ -191,40 +182,162 @@ jobs:
       - name: Install Playwright browsers
         run: bunx playwright install --with-deps chromium
 
-      - name: Start MMC dev server (port 5173)
+      - name: Start MMC dev server
         run: bun run dev:mmc &
         env:
           VITE_API_BASE_URL: http://localhost:3000
 
-      - name: Start Backoffice dev server (port 5174)
-        run: bun run dev:backoffice &
-        env:
-          VITE_API_BASE_URL: http://localhost:3000
-
-      - name: Start Frontoffice dev server (port 5175)
-        run: bun run dev:frontoffice &
-        env:
-          VITE_API_BASE_URL: http://localhost:3000
-
-      - name: Wait for dev servers to be ready
-        run: bunx wait-on http://localhost:5173 http://localhost:5174 http://localhost:5175 --timeout 60000
+      - name: Wait for MMC dev server
+        run: bunx wait-on http://localhost:5173 --timeout 60000
 
       - name: Run MMC E2E tests
         run: bun run test:e2e:mmc
 
+      - name: Upload MMC Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-mmc
+          path: apps/mmc/playwright-report/
+          retention-days: 7
+
+  # ── Job 5b. E2E — Backoffice ───────────────────────────────────────────
+  e2e-backoffice:
+    name: "E2E: Backoffice"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs:
+      - integration-tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
+      - name: Start Backoffice dev server
+        run: bun run dev:backoffice &
+        env:
+          VITE_API_BASE_URL: http://localhost:3000
+
+      - name: Wait for Backoffice dev server
+        run: bunx wait-on http://localhost:5174 --timeout 60000
+
       - name: Run Backoffice E2E tests
         run: bun run test:e2e:backoffice
+
+      - name: Upload Backoffice Playwright report
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-report-backoffice
+          path: apps/backoffice/playwright-report/
+          retention-days: 7
+
+  # ── Job 5c. E2E — Frontoffice ──────────────────────────────────────────
+  e2e-frontoffice:
+    name: "E2E: Frontoffice"
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs:
+      - integration-tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Install Playwright browsers
+        run: bunx playwright install --with-deps chromium
+
+      - name: Start Frontoffice dev server
+        run: bun run dev:frontoffice &
+        env:
+          VITE_API_BASE_URL: http://localhost:3000
+
+      - name: Wait for Frontoffice dev server
+        run: bunx wait-on http://localhost:5175 --timeout 60000
 
       - name: Run Frontoffice E2E tests
         run: bun run test:e2e:frontoffice
 
-      - name: Upload Playwright report
+      - name: Upload Frontoffice Playwright report
         if: failure()
         uses: actions/upload-artifact@v4
         with:
-          name: playwright-report
-          path: |
-            apps/mmc/playwright-report/
-            apps/backoffice/playwright-report/
-            apps/frontoffice/playwright-report/
+          name: playwright-report-frontoffice
+          path: apps/frontoffice/playwright-report/
           retention-days: 7
+
+  # ── Job 6. Coverage Validation ─────────────────────────────────────────
+  coverage-validation:
+    name: Coverage Validation
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs:
+      - unit-tests
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Run unit tests with coverage (enforces thresholds)
+        run: bun run test:unit --coverage
+
+      - name: Upload coverage report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-report
+          path: coverage/
+          retention-days: 14
+
+  # ── Job 7. Build Verification ──────────────────────────────────────────
+  build-verification:
+    name: Build Verification
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    needs:
+      - lint
+      - typecheck
+      - unit-tests
+      - integration-tests
+      - e2e-mmc
+      - e2e-backoffice
+      - e2e-frontoffice
+      - coverage-validation
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: ${{ env.BUN_VERSION }}
+
+      - name: Install dependencies
+        run: bun install --frozen-lockfile
+
+      - name: Build all workspaces
+        run: bun run build
