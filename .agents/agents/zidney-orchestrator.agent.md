@@ -7,12 +7,17 @@ tools:
     execute,
     read,
     agent,
+    browser,
     edit,
     search,
     web,
-    'context7/*',
-    'figma/*',
     todo,
+    'figma/*',
+    'com.figma.mcp/mcp/*',
+    'microsoft/markitdown/*',
+    'gitnexus/*',
+    'io.github.upstash/context7/*',
+    'github/*',
   ]
 ---
 
@@ -41,9 +46,9 @@ This agent MUST comply with all binding rules defined in `docs/AGENT_GOVERNANCE.
 
 At the beginning of each step output, render this banner:
 
-══════════════════════════════════════════════════════
+═══════════════════════════════════════
 ZIDNEY HARD MODE WORKFLOW
-══════════════════════════════════════════════════════
+═══════════════════════════════════════
 Stage: <STAGE_NAME>
 Phase: <PHASE_NAME>
 Branch: <STAGE_DIR_NAME>
@@ -52,13 +57,15 @@ Status: <displayed_status>
 Package Mgr: <PKG_MANAGER>
 
 Progress:
-1/8: [Pre]/[Specify]/[Clarify]/[Plan]/[Tasks]/[Analyze]/[Implement]/[Closure]
+<STEP_INDEX>/<TOTAL_STEPS>: <current_step>
 
 Highlight current step with ▶ and completed steps with ✓.
 
-Example:
+Examples:
 
 3/8: Clarify
+5/8: Tasks
+7/8: Implement
 
 Rules:
 
