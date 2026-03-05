@@ -1,0 +1,24 @@
+{
+  "stage": "Infra Governance",
+  "phase": "01_PLATFORM_FOUNDATION",
+  "stage_dir": "specs/runtime/infra-governance",
+  "stage_file": "specs/phases/01_platform_foundation/STAGE_INFRA_GOVERNANCE.md",
+  "branch": "infra-governance",
+  "base_branch": "develop",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-03-05T00:00:00.000Z",
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "infra-governance",
+      "timestamp": "2026-03-05T00:00:00.000Z"
+    }
+  ]
+}
