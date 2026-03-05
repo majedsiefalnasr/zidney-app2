@@ -17,6 +17,10 @@ declare module 'vue-router' {
     roles?: string[]
     /** Backoffice only: requires workspace context to be resolved. */
     requiresWorkspace?: boolean
+    /** Layout bypass: route renders directly without AppLayout shell */
+    standaloneLayout?: boolean
+    /** Frontoffice only: hides AppSidebar for this route (AppLayout still renders) */
+    hideSidebar?: boolean
   }
 }
 
@@ -35,6 +39,10 @@ export interface RouteMeta extends VueRouteMeta {
   roles?: string[]
   /** Backoffice only: requires workspace context to be resolved. */
   requiresWorkspace?: boolean
+  /** Layout bypass: route renders directly without AppLayout shell */
+  standaloneLayout?: boolean
+  /** Frontoffice only: hides AppSidebar for this route (AppLayout still renders) */
+  hideSidebar?: boolean
 }
 
 /**

@@ -8,24 +8,28 @@ UI Foundation — Layout & Shell Integration
 
 ## Stage Status
 
-Status: IN PROGRESS
-Step: analyze
+Status: BACKEND CLOSED
+Step: implement
 Risk Level: MEDIUM
-Last Updated: 2026-03-05T00:00:00Z
+Last Updated: 2026-03-06T00:00:00Z
 
-Drift Analysis: PASSED (9/9 criteria)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 56 / 56 completed
 
-Tasks Finalized:
+Scope Closed:
 
-- Total: 57 atomic tasks (T001–T056 + T052–T055 remediated additions)
-- 7 dependency/store foundation tasks
-- 6 types/configuration tasks
-- 3 composable tasks
-- 9 layout component tasks (3 per app)
-- 8 app integration tasks
-- 21 test tasks (18 original + T052–T054 auth.store permissions + T055 SidebarLayout fix)
-- 1 CI lint/typecheck task (T056)
+- UI store (sidebarCollapsed, isMobile, toggleSidebar, setMobile, $reset) — 3 apps
+- Auth store (resolvedPermissions, buildResolvedPermissions) — 3 apps
+- Router types update (standaloneLayout?, hideSidebar?) — 3 apps
+- Router index update (standaloneLayout on auth/error routes) — 3 apps
+- useBreakpoint composable — 3 apps
+- Navigation index (typed route records) — 3 apps
+- AppHeader, AppSidebar, AppLayout components — 3 apps
+- SidebarLayout in @zidney/ui-system (reactive collapsed prop)
+- App.vue conditional layout — 3 apps
+- BackofficeLayout.vue deleted (replaced by AppLayout)
+- 4 backoffice view files updated (BackofficeLayout wrapper removed)
+- 21 unit/composable/integration tests — 162 assertions all pass
 
 Deferred Scope:
 
@@ -37,7 +41,13 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- All 9 drift criteria passed — implementation authorized
+- ADR alignment verified — no cross-tenant logic
+- All 9 drift criteria passed
+- Implementation compliant with Zidney Constitution v1.2.0
+
+Notes:
+Backend implementation complete. No structural backend modifications allowed.
+
 - ADR alignment verified — no architectural modifications
 - Zidney Constitution v1.2.0 compliant
 

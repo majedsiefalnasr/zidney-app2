@@ -1,162 +1,158 @@
 <template>
-  <BackofficeLayout>
-    <div class="p-8">
-      <div class="flex items-center justify-between mb-6">
-        <div>
-          <h1 class="text-2xl font-semibold text-gray-900">Roles</h1>
-          <p class="text-sm text-gray-500 mt-1">
-            Manage staff roles and their permissions.
-          </p>
-        </div>
-        <a
-          v-if="canCreate"
-          href="/roles/create"
-          class="inline-flex items-center px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
-        >
-          Create Role
-        </a>
-      </div>
-
-      <!-- Loading -->
-      <div v-if="loading" class="py-12 text-center text-sm text-gray-500">
-        Loading roles…
-      </div>
-
-      <!-- 403 Access Denied -->
-      <div
-        v-else-if="forbidden"
-        class="rounded-md border border-destructive/50 bg-destructive/10 p-6 text-center"
-      >
-        <p class="text-sm font-medium text-destructive">Access Denied</p>
-        <p class="text-sm text-muted-foreground mt-1">
-          You do not have permission to view roles.
+  <div class="p-8">
+    <div class="flex items-center justify-between mb-6">
+      <div>
+        <h1 class="text-2xl font-semibold text-gray-900">Roles</h1>
+        <p class="text-sm text-gray-500 mt-1">
+          Manage staff roles and their permissions.
         </p>
       </div>
-
-      <!-- Error -->
-      <div
-        v-else-if="error"
-        class="rounded-md border border-destructive/50 bg-destructive/10 p-6 text-center"
+      <a
+        v-if="canCreate"
+        href="/roles/create"
+        class="inline-flex items-center px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 transition-colors"
       >
-        <p class="text-sm font-medium text-destructive">{{ error.message }}</p>
+        Create Role
+      </a>
+    </div>
+
+    <!-- Loading -->
+    <div v-if="loading" class="py-12 text-center text-sm text-gray-500">
+      Loading roles…
+    </div>
+
+    <!-- 403 Access Denied -->
+    <div
+      v-else-if="forbidden"
+      class="rounded-md border border-destructive/50 bg-destructive/10 p-6 text-center"
+    >
+      <p class="text-sm font-medium text-destructive">Access Denied</p>
+      <p class="text-sm text-muted-foreground mt-1">
+        You do not have permission to view roles.
+      </p>
+    </div>
+
+    <!-- Error -->
+    <div
+      v-else-if="error"
+      class="rounded-md border border-destructive/50 bg-destructive/10 p-6 text-center"
+    >
+      <p class="text-sm font-medium text-destructive">{{ error.message }}</p>
+    </div>
+
+    <!-- Roles table -->
+    <div v-else class="rounded-md border border-border overflow-hidden">
+      <!-- Empty state -->
+      <div
+        v-if="roles.length === 0"
+        class="py-12 text-center text-sm text-muted-foreground"
+      >
+        No roles found. Create one to get started.
       </div>
 
-      <!-- Roles table -->
-      <div v-else class="rounded-md border border-border overflow-hidden">
-        <!-- Empty state -->
-        <div
-          v-if="roles.length === 0"
-          class="py-12 text-center text-sm text-muted-foreground"
-        >
-          No roles found. Create one to get started.
-        </div>
-
-        <!-- Table -->
-        <table v-else class="w-full text-sm">
-          <thead class="bg-muted text-muted-foreground">
-            <tr>
-              <th class="px-4 py-3 text-left font-medium">Name</th>
-              <th class="px-4 py-3 text-left font-medium">Status</th>
-              <th class="px-4 py-3 text-left font-medium">Created</th>
-              <th class="px-4 py-3 text-right font-medium">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="role in roles"
-              :key="role.id"
-              class="border-t border-border hover:bg-muted/30 transition-colors"
-            >
-              <td class="px-4 py-3 font-medium text-foreground">
-                <a :href="`/roles/${role.id}`" class="hover:underline">{{
-                  role.name
-                }}</a>
-              </td>
-              <td class="px-4 py-3">
-                <!-- shadcn-vue Switch for inline status toggle -->
-                <div class="flex items-center gap-2">
-                  <button
-                    v-if="canEdit"
-                    :disabled="togglingId === role.id"
-                    :aria-checked="role.status === 'ACTIVE'"
-                    :aria-label="`Toggle ${role.name} status`"
-                    role="switch"
-                    class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
-                    :class="
-                      role.status === 'ACTIVE' ? 'bg-primary' : 'bg-input'
-                    "
-                    @click="toggleStatus(role)"
-                  >
-                    <span
-                      class="inline-block h-4 w-4 rounded-full bg-background shadow-sm transform transition-transform"
-                      :class="
-                        role.status === 'ACTIVE'
-                          ? 'translate-x-4'
-                          : 'translate-x-0.5'
-                      "
-                    />
-                  </button>
+      <!-- Table -->
+      <table v-else class="w-full text-sm">
+        <thead class="bg-muted text-muted-foreground">
+          <tr>
+            <th class="px-4 py-3 text-left font-medium">Name</th>
+            <th class="px-4 py-3 text-left font-medium">Status</th>
+            <th class="px-4 py-3 text-left font-medium">Created</th>
+            <th class="px-4 py-3 text-right font-medium">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr
+            v-for="role in roles"
+            :key="role.id"
+            class="border-t border-border hover:bg-muted/30 transition-colors"
+          >
+            <td class="px-4 py-3 font-medium text-foreground">
+              <a :href="`/roles/${role.id}`" class="hover:underline">{{
+                role.name
+              }}</a>
+            </td>
+            <td class="px-4 py-3">
+              <!-- shadcn-vue Switch for inline status toggle -->
+              <div class="flex items-center gap-2">
+                <button
+                  v-if="canEdit"
+                  :disabled="togglingId === role.id"
+                  :aria-checked="role.status === 'ACTIVE'"
+                  :aria-label="`Toggle ${role.name} status`"
+                  role="switch"
+                  class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:opacity-50"
+                  :class="role.status === 'ACTIVE' ? 'bg-primary' : 'bg-input'"
+                  @click="toggleStatus(role)"
+                >
                   <span
-                    class="text-xs font-medium"
+                    class="inline-block h-4 w-4 rounded-full bg-background shadow-sm transform transition-transform"
                     :class="
                       role.status === 'ACTIVE'
-                        ? 'text-emerald-600'
-                        : 'text-muted-foreground'
+                        ? 'translate-x-4'
+                        : 'translate-x-0.5'
                     "
-                  >
-                    {{ role.status === 'ACTIVE' ? 'Active' : 'Disabled' }}
-                  </span>
-                </div>
-              </td>
-              <td class="px-4 py-3 text-muted-foreground">
-                {{ formatDate(role.created_at) }}
-              </td>
-              <td class="px-4 py-3 text-right">
-                <a
-                  :href="`/roles/${role.id}`"
-                  class="text-primary hover:underline text-xs mr-3"
-                >
-                  Edit
-                </a>
-                <button
-                  v-if="canDelete"
-                  class="text-destructive hover:underline text-xs disabled:opacity-50"
-                  :disabled="deletingId === role.id"
-                  @click="deleteRole(role.id)"
-                >
-                  Delete
+                  />
                 </button>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+                <span
+                  class="text-xs font-medium"
+                  :class="
+                    role.status === 'ACTIVE'
+                      ? 'text-emerald-600'
+                      : 'text-muted-foreground'
+                  "
+                >
+                  {{ role.status === 'ACTIVE' ? 'Active' : 'Disabled' }}
+                </span>
+              </div>
+            </td>
+            <td class="px-4 py-3 text-muted-foreground">
+              {{ formatDate(role.created_at) }}
+            </td>
+            <td class="px-4 py-3 text-right">
+              <a
+                :href="`/roles/${role.id}`"
+                class="text-primary hover:underline text-xs mr-3"
+              >
+                Edit
+              </a>
+              <button
+                v-if="canDelete"
+                class="text-destructive hover:underline text-xs disabled:opacity-50"
+                :disabled="deletingId === role.id"
+                @click="deleteRole(role.id)"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
 
-      <!-- Pagination -->
-      <div
-        v-if="roles.length > 0"
-        class="flex items-center justify-between mt-4 text-sm text-muted-foreground"
-      >
-        <span>Page {{ page }} of {{ totalPages }}</span>
-        <div class="flex gap-2">
-          <button
-            :disabled="page <= 1"
-            class="px-3 py-1 rounded border hover:bg-muted disabled:opacity-40"
-            @click="prev"
-          >
-            Previous
-          </button>
-          <button
-            :disabled="page >= totalPages"
-            class="px-3 py-1 rounded border hover:bg-muted disabled:opacity-40"
-            @click="next"
-          >
-            Next
-          </button>
-        </div>
+    <!-- Pagination -->
+    <div
+      v-if="roles.length > 0"
+      class="flex items-center justify-between mt-4 text-sm text-muted-foreground"
+    >
+      <span>Page {{ page }} of {{ totalPages }}</span>
+      <div class="flex gap-2">
+        <button
+          :disabled="page <= 1"
+          class="px-3 py-1 rounded border hover:bg-muted disabled:opacity-40"
+          @click="prev"
+        >
+          Previous
+        </button>
+        <button
+          :disabled="page >= totalPages"
+          class="px-3 py-1 rounded border hover:bg-muted disabled:opacity-40"
+          @click="next"
+        >
+          Next
+        </button>
       </div>
     </div>
-  </BackofficeLayout>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -178,9 +174,9 @@
  * ✓ 403 access-denied state handled
  */
 
+import { fetch } from '@/core/api/client'
 import { computed, onMounted, ref } from 'vue'
 import { usePermission } from '../../composables/usePermission'
-import BackofficeLayout from '../../layouts/BackofficeLayout.vue'
 
 type Role = {
   id: string

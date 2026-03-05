@@ -19,6 +19,25 @@ export default defineProject({
     alias: [
       { find: '@', replacement: resolve(__dirname, 'src') },
       {
+        find: '@zidney/ui-system',
+        replacement: resolve(
+          __dirname,
+          '../../packages/ui-system/src/index.ts'
+        ),
+      },
+      {
+        find: '@zidney/ui',
+        replacement: resolve(__dirname, '../../packages/ui-system/src'),
+      },
+      {
+        // Required: ui-system internal components use @shadcn-vue/ui/* imports
+        find: '@shadcn-vue/ui',
+        replacement: resolve(
+          __dirname,
+          '../../packages/ui-system/src/components/shadcn-vue'
+        ),
+      },
+      {
         find: '@zidney/logger',
         replacement: resolve(__dirname, '../../packages/logger/src/index.ts'),
       },

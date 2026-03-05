@@ -50,6 +50,7 @@ export function defineAuthStore(
     const user = ref<AuthUser | null>(null)
     const isLoading = ref<boolean>(false)
     const authError = ref<AuthError | null>(null)
+    const resolvedPermissions = ref<Record<string, boolean>>({})
 
     // ── Helpers ────────────────────────────────────────────────────────────
 
@@ -62,7 +63,19 @@ export function defineAuthStore(
       isAuthenticated.value = false
       user.value = null
       authError.value = null
+      resolvedPermissions.value = {} // clear stale permissions on logout/expire
       // isLoading is managed per-action — NOT reset here (MEDIUM-02)
+    }
+
+    function buildResolvedPermissions(
+      profile: AuthUser
+    ): Record<string, boolean> {
+      const perms = (profile as any).permissions
+      if (!perms) return {}
+      if (Array.isArray(perms)) {
+        return Object.fromEntries(perms.map((p: string) => [p, true]))
+      }
+      return perms as Record<string, boolean>
     }
 
     function setError(code: AuthError['code'], message: string): void {
@@ -86,6 +99,7 @@ export function defineAuthStore(
         const profile = await authService.fetchProfile()
         user.value = profile
         isAuthenticated.value = true
+        resolvedPermissions.value = buildResolvedPermissions(profile)
         logger.info('Session initialized', { userId: profile.id })
       } catch (err: unknown) {
         logger.info(
@@ -111,6 +125,7 @@ export function defineAuthStore(
       isAuthenticated.value = true
       isLoading.value = false
       authError.value = null
+      resolvedPermissions.value = buildResolvedPermissions(profile)
       logger.info('Session established', { userId: profile.id })
     }
 
@@ -211,10 +226,11 @@ export function defineAuthStore(
       // Step 1: Clear token from memory immediately
       tokenManager.clearToken()
 
-      // Step 2: Reset auth state (isAuthenticated, user, authError)
+      // Step 2: Reset auth state (isAuthenticated, user, authError, resolvedPermissions)
       isAuthenticated.value = false
       user.value = null
       authError.value = null
+      resolvedPermissions.value = {} // stale permissions must not persist past expiry
 
       // Step 3: Navigate to login
       await router.push({ name: loginRouteName })
@@ -235,6 +251,7 @@ export function defineAuthStore(
       user,
       isLoading,
       authError,
+      resolvedPermissions,
       // Actions
       initSession,
       setSession,
@@ -245,3 +262,22 @@ export function defineAuthStore(
     }
   })
 }
+
+/**
+ * Component accessor composable for the MMC auth store.
+ * Requires the store to be registered by main.ts (via defineAuthStore) before use.
+ * In tests, createTestingPinia overrides this automatically.
+ */
+export const useMmcAuthStore = defineStore(AUTH_STORE_ID, () => ({
+  isAuthenticated: ref(false),
+  user: ref<AuthUser | null>(null),
+  isLoading: ref(false),
+  authError: ref<AuthError | null>(null),
+  resolvedPermissions: ref<Record<string, boolean>>({}),
+  initSession: async (): Promise<void> => {},
+  setSession: (_accessToken: string, _profile: AuthUser): void => {},
+  refresh: async (): Promise<boolean> => false,
+  logout: async (): Promise<void> => {},
+  clearAuthError: (): void => {},
+  expireSession: async (): Promise<void> => {},
+}))

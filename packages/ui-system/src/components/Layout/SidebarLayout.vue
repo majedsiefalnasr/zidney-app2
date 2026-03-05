@@ -60,9 +60,9 @@
 </template>
 
 <script setup lang="ts">
-import { Badge } from '@shadcn-vue/ui/badge'
-import { Button } from '@shadcn-vue/ui/button'
-import { ref } from 'vue'
+import { ref, watch } from 'vue'
+import { Badge } from '../shadcn-vue/badge'
+import { Button } from '../shadcn-vue/button'
 
 interface NavItem {
   id: string
@@ -78,13 +78,17 @@ interface NavItem {
 interface SidebarLayoutProps {
   items: NavItem[]
   collapsible?: boolean
+  /** @deprecated Use `collapsed` for reactive binding. `defaultCollapsed` sets initial value only. */
   defaultCollapsed?: boolean
+  /** Reactive collapsed state — driven by Pinia ui.store.sidebarCollapsed */
+  collapsed?: boolean
   activeItem?: string
 }
 
 const props = withDefaults(defineProps<SidebarLayoutProps>(), {
   collapsible: true,
   defaultCollapsed: false,
+  collapsed: undefined,
 })
 
 const emit = defineEmits<{
@@ -92,7 +96,20 @@ const emit = defineEmits<{
   'collapse-toggled': [isCollapsed: boolean]
 }>()
 
-const isCollapsed = ref(props.defaultCollapsed)
+// Initialize from `collapsed` if provided, otherwise fall back to `defaultCollapsed`
+const isCollapsed = ref(
+  props.collapsed !== undefined ? props.collapsed : props.defaultCollapsed
+)
+
+// T055: Watch-synced collapsed prop — keeps isCollapsed in sync with external Pinia state
+watch(
+  () => props.collapsed,
+  (val) => {
+    if (val !== undefined) {
+      isCollapsed.value = val
+    }
+  }
+)
 
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value

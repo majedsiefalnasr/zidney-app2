@@ -4,9 +4,9 @@
  *
  * Stage: STAGE_UI_06_STATE_MANAGEMENT
  */
-export { defineAuthStore } from './auth.store'
 export { useFrontofficeAppStore } from './app.store'
-export { useFrontofficeUiStore } from './ui.store'
-export { useFrontofficeNotificationStore } from './notification.store'
+export { defineAuthStore, useFrontofficeAuthStore } from './auth.store'
 export { useLicenseStatusStore } from './license-status.store'
+export { useFrontofficeNotificationStore } from './notification.store'
 export type { AppNotification } from './notification.store'
+export { useFrontofficeUiStore } from './ui.store'

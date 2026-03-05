@@ -1,163 +1,156 @@
 <template>
-  <BackofficeLayout>
-    <div class="p-8">
-      <!-- Header -->
-      <div class="flex items-center gap-4 mb-6">
-        <a
-          href="/roles"
-          class="text-sm text-muted-foreground hover:text-foreground"
-          >← Roles</a
-        >
-        <h1 class="text-2xl font-semibold text-gray-900">
-          {{ role ? role.name : 'Role Detail' }}
-        </h1>
-        <span
-          v-if="role"
-          class="px-2 py-0.5 rounded text-xs font-medium"
-          :class="
-            role.status === 'ACTIVE'
-              ? 'bg-emerald-100 text-emerald-700'
-              : 'bg-gray-100 text-gray-600'
-          "
-        >
-          {{ role.status === 'ACTIVE' ? 'Active' : 'Disabled' }}
-        </span>
-      </div>
-
-      <!-- Loading -->
-      <div
-        v-if="loading"
-        class="py-12 text-center text-sm text-muted-foreground"
+  <div class="p-8">
+    <!-- Header -->
+    <div class="flex items-center gap-4 mb-6">
+      <a
+        href="/roles"
+        class="text-sm text-muted-foreground hover:text-foreground"
+        >← Roles</a
       >
-        Loading…
-      </div>
-
-      <!-- 403 -->
-      <div
-        v-else-if="forbidden"
-        class="rounded-md border border-destructive/50 bg-destructive/10 p-6 text-center"
+      <h1 class="text-2xl font-semibold text-gray-900">
+        {{ role ? role.name : 'Role Detail' }}
+      </h1>
+      <span
+        v-if="role"
+        class="px-2 py-0.5 rounded text-xs font-medium"
+        :class="
+          role.status === 'ACTIVE'
+            ? 'bg-emerald-100 text-emerald-700'
+            : 'bg-gray-100 text-gray-600'
+        "
       >
-        <p class="text-sm font-medium text-destructive">Access Denied</p>
-        <p class="text-sm text-muted-foreground mt-1">
-          You do not have permission to view this role.
-        </p>
-      </div>
+        {{ role.status === 'ACTIVE' ? 'Active' : 'Disabled' }}
+      </span>
+    </div>
 
-      <!-- 404 -->
-      <div
-        v-else-if="notFound"
-        class="rounded-md border border-muted p-6 text-center"
+    <!-- Loading -->
+    <div v-if="loading" class="py-12 text-center text-sm text-muted-foreground">
+      Loading…
+    </div>
+
+    <!-- 403 -->
+    <div
+      v-else-if="forbidden"
+      class="rounded-md border border-destructive/50 bg-destructive/10 p-6 text-center"
+    >
+      <p class="text-sm font-medium text-destructive">Access Denied</p>
+      <p class="text-sm text-muted-foreground mt-1">
+        You do not have permission to view this role.
+      </p>
+    </div>
+
+    <!-- 404 -->
+    <div
+      v-else-if="notFound"
+      class="rounded-md border border-muted p-6 text-center"
+    >
+      <p class="text-sm font-medium text-foreground">Role not found</p>
+      <a href="/roles" class="text-sm text-primary hover:underline mt-2 block"
+        >Return to roles list</a
       >
-        <p class="text-sm font-medium text-foreground">Role not found</p>
-        <a href="/roles" class="text-sm text-primary hover:underline mt-2 block"
-          >Return to roles list</a
-        >
-      </div>
+    </div>
 
-      <!-- Error -->
-      <div
-        v-else-if="error"
-        class="rounded-md border border-destructive/50 bg-destructive/10 p-6 text-center"
-      >
-        <p class="text-sm font-medium text-destructive">{{ error.message }}</p>
-      </div>
+    <!-- Error -->
+    <div
+      v-else-if="error"
+      class="rounded-md border border-destructive/50 bg-destructive/10 p-6 text-center"
+    >
+      <p class="text-sm font-medium text-destructive">{{ error.message }}</p>
+    </div>
 
-      <!-- Content -->
-      <div v-else-if="role">
-        <!-- Role metadata -->
-        <div class="rounded-md border border-border p-6 mb-6">
-          <dl class="grid grid-cols-2 gap-4 text-sm">
-            <div>
-              <dt class="font-medium text-muted-foreground">Name</dt>
-              <dd class="mt-1 text-foreground">{{ role.name }}</dd>
-            </div>
-            <div>
-              <dt class="font-medium text-muted-foreground">Status</dt>
-              <dd class="mt-1 text-foreground">{{ role.status }}</dd>
-            </div>
-            <div v-if="role.description" class="col-span-2">
-              <dt class="font-medium text-muted-foreground">Description</dt>
-              <dd class="mt-1 text-foreground">{{ role.description }}</dd>
-            </div>
-          </dl>
-        </div>
-
-        <!-- Permission Matrix -->
-        <div class="rounded-md border border-border overflow-hidden mb-6">
-          <div class="px-4 py-3 bg-muted">
-            <h2 class="text-sm font-semibold text-foreground">
-              Permission Matrix
-            </h2>
+    <!-- Content -->
+    <div v-else-if="role">
+      <!-- Role metadata -->
+      <div class="rounded-md border border-border p-6 mb-6">
+        <dl class="grid grid-cols-2 gap-4 text-sm">
+          <div>
+            <dt class="font-medium text-muted-foreground">Name</dt>
+            <dd class="mt-1 text-foreground">{{ role.name }}</dd>
           </div>
-          <div class="overflow-x-auto">
-            <table class="w-full text-sm">
-              <thead class="bg-muted/50 text-muted-foreground">
-                <tr>
-                  <th class="px-4 py-2 text-left font-medium w-48">Module</th>
-                  <th class="px-4 py-2 text-center font-medium">View</th>
-                  <th class="px-4 py-2 text-center font-medium">Create</th>
-                  <th class="px-4 py-2 text-center font-medium">Edit</th>
-                  <th class="px-4 py-2 text-center font-medium">Delete</th>
-                </tr>
-              </thead>
-              <tbody>
-                <tr
-                  v-for="mod in moduleList"
-                  :key="mod.key"
-                  class="border-t border-border hover:bg-muted/20"
+          <div>
+            <dt class="font-medium text-muted-foreground">Status</dt>
+            <dd class="mt-1 text-foreground">{{ role.status }}</dd>
+          </div>
+          <div v-if="role.description" class="col-span-2">
+            <dt class="font-medium text-muted-foreground">Description</dt>
+            <dd class="mt-1 text-foreground">{{ role.description }}</dd>
+          </div>
+        </dl>
+      </div>
+
+      <!-- Permission Matrix -->
+      <div class="rounded-md border border-border overflow-hidden mb-6">
+        <div class="px-4 py-3 bg-muted">
+          <h2 class="text-sm font-semibold text-foreground">
+            Permission Matrix
+          </h2>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-muted/50 text-muted-foreground">
+              <tr>
+                <th class="px-4 py-2 text-left font-medium w-48">Module</th>
+                <th class="px-4 py-2 text-center font-medium">View</th>
+                <th class="px-4 py-2 text-center font-medium">Create</th>
+                <th class="px-4 py-2 text-center font-medium">Edit</th>
+                <th class="px-4 py-2 text-center font-medium">Delete</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="mod in moduleList"
+                :key="mod.key"
+                class="border-t border-border hover:bg-muted/20"
+              >
+                <td class="px-4 py-3 font-medium text-foreground">
+                  {{ mod.display_name }}
+                </td>
+                <td
+                  v-for="action in [
+                    'can_view',
+                    'can_create',
+                    'can_edit',
+                    'can_delete',
+                  ] as const"
+                  :key="action"
+                  class="px-4 py-3 text-center"
                 >
-                  <td class="px-4 py-3 font-medium text-foreground">
-                    {{ mod.display_name }}
-                  </td>
-                  <td
-                    v-for="action in [
-                      'can_view',
-                      'can_create',
-                      'can_edit',
-                      'can_delete',
-                    ] as const"
-                    :key="action"
-                    class="px-4 py-3 text-center"
-                  >
-                    <input
-                      type="checkbox"
-                      :checked="getPermission(mod.key, action)"
-                      :disabled="!canEdit"
-                      class="h-4 w-4 rounded border-input text-primary focus:ring-ring disabled:opacity-50"
-                      @change="
-                        setPermission(
-                          mod.key,
-                          action,
-                          ($event.target as HTMLInputElement).checked
-                        )
-                      "
-                    />
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+                  <input
+                    type="checkbox"
+                    :checked="getPermission(mod.key, action)"
+                    :disabled="!canEdit"
+                    class="h-4 w-4 rounded border-input text-primary focus:ring-ring disabled:opacity-50"
+                    @change="
+                      setPermission(
+                        mod.key,
+                        action,
+                        ($event.target as HTMLInputElement).checked
+                      )
+                    "
+                  />
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
+      </div>
 
-        <!-- Save permissions button -->
-        <div v-if="canEdit" class="flex items-center gap-3">
-          <button
-            :disabled="saving"
-            class="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
-            @click="savePermissions"
-          >
-            {{ saving ? 'Saving…' : 'Save Permissions' }}
-          </button>
-          <span v-if="saveSuccess" class="text-sm text-emerald-600"
-            >Saved!</span
-          >
-          <span v-if="saveError" class="text-sm text-destructive">{{
-            saveError
-          }}</span>
-        </div>
+      <!-- Save permissions button -->
+      <div v-if="canEdit" class="flex items-center gap-3">
+        <button
+          :disabled="saving"
+          class="px-4 py-2 rounded-md bg-primary text-primary-foreground text-sm font-medium hover:bg-primary/90 disabled:opacity-50 transition-colors"
+          @click="savePermissions"
+        >
+          {{ saving ? 'Saving…' : 'Save Permissions' }}
+        </button>
+        <span v-if="saveSuccess" class="text-sm text-emerald-600">Saved!</span>
+        <span v-if="saveError" class="text-sm text-destructive">{{
+          saveError
+        }}</span>
       </div>
     </div>
-  </BackofficeLayout>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -184,10 +177,10 @@
  * ✓ All server errors normalized to safe messages
  */
 
+import { fetch } from '@/core/api/client'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
 import { usePermission } from '../../composables/usePermission'
-import BackofficeLayout from '../../layouts/BackofficeLayout.vue'
 
 type Role = {
   id: string

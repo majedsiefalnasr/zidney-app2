@@ -30,3 +30,23 @@ export { default as MultiLanguageInputModal } from './Forms/MultiLanguageInputMo
 
 // Dialog Components
 export { default as ConfirmDialog } from './Dialogs/ConfirmDialog.vue'
+
+// shadcn-vue: Avatar
+export { default as Avatar } from './shadcn-vue/avatar/Avatar.vue'
+export { default as AvatarFallback } from './shadcn-vue/avatar/AvatarFallback.vue'
+export { default as AvatarImage } from './shadcn-vue/avatar/AvatarImage.vue'
+
+// shadcn-vue: DropdownMenu
+export { default as DropdownMenu } from './shadcn-vue/dropdown-menu/DropdownMenu.vue'
+export { default as DropdownMenuContent } from './shadcn-vue/dropdown-menu/DropdownMenuContent.vue'
+export { default as DropdownMenuGroup } from './shadcn-vue/dropdown-menu/DropdownMenuGroup.vue'
+export { default as DropdownMenuItem } from './shadcn-vue/dropdown-menu/DropdownMenuItem.vue'
+export { default as DropdownMenuLabel } from './shadcn-vue/dropdown-menu/DropdownMenuLabel.vue'
+export { default as DropdownMenuSeparator } from './shadcn-vue/dropdown-menu/DropdownMenuSeparator.vue'
+export { default as DropdownMenuTrigger } from './shadcn-vue/dropdown-menu/DropdownMenuTrigger.vue'
+
+// shadcn-vue: Button
+export { default as Button } from './shadcn-vue/button/Button.vue'
+
+// shadcn-vue: Badge
+export { default as Badge } from './shadcn-vue/badge/Badge.vue'

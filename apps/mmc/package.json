@@ -10,6 +10,7 @@
   },
   "dependencies": {
     "@zidney/api-client": "workspace:*",
+    "@zidney/ui-system": "workspace:*",
     "axios": "^1.7.0",
     "lucide-vue-next": "^0.400.0",
     "pinia": "^2.2.0",
