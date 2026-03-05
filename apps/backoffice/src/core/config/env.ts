@@ -69,8 +69,12 @@ export function createEnvConfig(overrides?: Partial<EnvConfig>): EnvConfig {
  * Read raw feature flag values from import.meta.env.
  * Only env.ts is allowed to touch import.meta.env (design decision D3).
  */
-export function readRawFeatureFlags(): { enableDebugPanel: string | undefined } {
+export function readRawFeatureFlags(): {
+  enableDebugPanel: string | undefined
+} {
   return {
-    enableDebugPanel: import.meta.env['VITE_ENABLE_DEBUG_PANEL'] as string | undefined,
+    enableDebugPanel: import.meta.env['VITE_ENABLE_DEBUG_PANEL'] as
+      | string
+      | undefined,
   }
 }

@@ -20,9 +20,9 @@
 
 ## Clarifications Resolved
 
-| # | Question | Resolution | Impact |
-| --- | --- | --- | --- |
-| 1 | ... | ... | ... |
+| #   | Question | Resolution | Impact |
+| --- | -------- | ---------- | ------ |
+| 1   | ...      | ...        | ...    |
 
 ---
 
@@ -40,13 +40,13 @@
 
 ## Constitutional Compliance
 
-| Check | Status | Notes |
-| --- | --- | --- |
-| All material ambiguities resolved | ✅ / ❌ | ... |
-| Transaction strategy confirmed | ✅ / ❌ | ... |
-| Idempotency strategy confirmed | ✅ / ❌ | ... |
-| Isolation boundaries confirmed | ✅ / ❌ | ... |
-| Version and license constraints confirmed | ✅ / ❌ | ... |
+| Check                                     | Status  | Notes |
+| ----------------------------------------- | ------- | ----- |
+| All material ambiguities resolved         | ✅ / ❌ | ...   |
+| Transaction strategy confirmed            | ✅ / ❌ | ...   |
+| Idempotency strategy confirmed            | ✅ / ❌ | ...   |
+| Isolation boundaries confirmed            | ✅ / ❌ | ...   |
+| Version and license constraints confirmed | ✅ / ❌ | ...   |
 
 **Overall:** COMPLIANT / BLOCKED
 

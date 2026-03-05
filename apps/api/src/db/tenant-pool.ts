@@ -50,7 +50,10 @@ const tenantPools = new Map<string, Pool>()
  */
 const poolCreationLocks = new Map<string, Promise<Pool>>()
 
-function createPoolInstance(workspaceId: string, tenantDatabaseUrl: string): Pool {
+function createPoolInstance(
+  workspaceId: string,
+  tenantDatabaseUrl: string
+): Pool {
   const pool = new Pool({
     connectionString: tenantDatabaseUrl,
     ...DEFAULT_POOL_CONFIG,

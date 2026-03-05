@@ -1,4 +1,4 @@
-# Design of *[Change Name]*
+# Design of _[Change Name]_
 
 ## Context
 

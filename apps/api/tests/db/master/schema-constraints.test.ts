@@ -133,15 +133,21 @@ const ensureLegacyMasterSchema = async (pool: Pool) => {
     )
   `)
 
-  await pool.query(`CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug)`)
+  await pool.query(
+    `CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug)`
+  )
   await pool.query(
     `CREATE INDEX IF NOT EXISTS idx_licenses_workspace_slug ON licenses(workspace_slug)`
   )
-  await pool.query(`CREATE INDEX IF NOT EXISTS idx_licenses_status ON licenses(status)`)
+  await pool.query(
+    `CREATE INDEX IF NOT EXISTS idx_licenses_status ON licenses(status)`
+  )
   await pool.query(
     `CREATE INDEX IF NOT EXISTS idx_tenants_registry_workspace_slug ON tenants_registry(workspace_slug)`
   )
-  await pool.query(`CREATE INDEX IF NOT EXISTS idx_mmc_users_email ON mmc_users(email)`)
+  await pool.query(
+    `CREATE INDEX IF NOT EXISTS idx_mmc_users_email ON mmc_users(email)`
+  )
 
   await pool.query(`
     INSERT INTO products (id, name, slug, description, version, enabled_modules)

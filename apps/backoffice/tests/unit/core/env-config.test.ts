@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { createEnvConfig, normalizeAppEnv, parseBooleanFlag } from '../../../src/core/config/env'
+import {
+  createEnvConfig,
+  normalizeAppEnv,
+  parseBooleanFlag,
+} from '../../../src/core/config/env'
 
 describe('createEnvConfig (Backoffice)', () => {
   const validOverrides = {
@@ -38,7 +42,10 @@ describe('createEnvConfig (Backoffice)', () => {
   })
 
   it('supports workspaceSlug override', () => {
-    const config = createEnvConfig({ ...validOverrides, workspaceSlug: 'my-org' })
+    const config = createEnvConfig({
+      ...validOverrides,
+      workspaceSlug: 'my-org',
+    })
     expect(config.workspaceSlug).toBe('my-org')
   })
 

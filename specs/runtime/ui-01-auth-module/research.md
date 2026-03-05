@@ -72,14 +72,12 @@ const mockAuthService: IAuthService = {
   login: vi.fn(),
   logout: vi.fn().mockResolvedValue(undefined),
   refreshToken: vi.fn().mockResolvedValue({ accessToken: 'test-token' }),
-  fetchProfile: vi
-    .fn()
-    .mockResolvedValue({
-      id: '1',
-      email: 'a@b.com',
-      name: 'A',
-      role: UserRole.ADMIN,
-    }),
+  fetchProfile: vi.fn().mockResolvedValue({
+    id: '1',
+    email: 'a@b.com',
+    name: 'A',
+    role: UserRole.ADMIN,
+  }),
 }
 const store = useAuthStore()
 // inject mock by calling store actions that delegate to injected service

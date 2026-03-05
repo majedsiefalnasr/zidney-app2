@@ -4,7 +4,12 @@
  * T088 Extended: Soft-Lock Auto-Expiration UI
  */
 
-import { Card, CardContent, CardHeader, CardTitle } from '@zidney/ui/components/shadcn-vue/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@zidney/ui/components/shadcn-vue/card'
 import { computed, onMounted, ref } from 'vue'
 
 interface Props {

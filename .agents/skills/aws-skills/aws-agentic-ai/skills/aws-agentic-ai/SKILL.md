@@ -50,6 +50,7 @@ AWS Bedrock AgentCore provides a complete platform for deploying and scaling AI 
 ## When to Use This Skill
 
 Use this skill when you need to:
+
 - Deploy REST APIs as MCP tools for AI agents (Gateway)
 - Execute agents in serverless runtime (Runtime)
 - Add conversation memory to agents (Memory)
@@ -60,15 +61,15 @@ Use this skill when you need to:
 
 ## Available Services
 
-| Service | Use For | Documentation |
-|---------|---------|---------------|
-| **Gateway** | Converting REST APIs to MCP tools | [`services/gateway/README.md`](services/gateway/README.md) |
-| **Runtime** | Deploying and scaling agents | [`services/runtime/README.md`](services/runtime/README.md) |
-| **Memory** | Managing conversation state | [`services/memory/README.md`](services/memory/README.md) |
-| **Identity** | Credential and access management | [`services/identity/README.md`](services/identity/README.md) |
+| Service              | Use For                            | Documentation                                                                |
+| -------------------- | ---------------------------------- | ---------------------------------------------------------------------------- |
+| **Gateway**          | Converting REST APIs to MCP tools  | [`services/gateway/README.md`](services/gateway/README.md)                   |
+| **Runtime**          | Deploying and scaling agents       | [`services/runtime/README.md`](services/runtime/README.md)                   |
+| **Memory**           | Managing conversation state        | [`services/memory/README.md`](services/memory/README.md)                     |
+| **Identity**         | Credential and access management   | [`services/identity/README.md`](services/identity/README.md)                 |
 | **Code Interpreter** | Secure code execution in sandboxes | [`services/code-interpreter/README.md`](services/code-interpreter/README.md) |
-| **Browser** | Web automation and scraping | [`services/browser/README.md`](services/browser/README.md) |
-| **Observability** | Tracing and monitoring | [`services/observability/README.md`](services/observability/README.md) |
+| **Browser**          | Web automation and scraping        | [`services/browser/README.md`](services/browser/README.md)                   |
+| **Observability**    | Tracing and monitoring             | [`services/observability/README.md`](services/observability/README.md)       |
 
 ## Common Workflows
 
@@ -77,8 +78,9 @@ Use this skill when you need to:
 **MANDATORY - READ DETAILED DOCUMENTATION**: See [`services/gateway/README.md`](services/gateway/README.md) for complete Gateway setup guide including deployment strategies, troubleshooting, and IAM configuration.
 
 **Quick Workflow**:
+
 1. Upload OpenAPI schema to S3
-2. *(API Key auth only)* Create credential provider and store API key
+2. _(API Key auth only)_ Create credential provider and store API key
 3. Create gateway target linking schema (and credentials if using API key)
 4. Verify target status and test connectivity
 
@@ -89,6 +91,7 @@ Use this skill when you need to:
 **MANDATORY - READ DETAILED DOCUMENTATION**: See [`cross-service/credential-management.md`](cross-service/credential-management.md) for unified credential management patterns across all services.
 
 **Quick Workflow**:
+
 1. Use Identity service credential providers for all API keys
 2. Link providers to gateway targets via ARN references
 3. Rotate credentials quarterly through credential provider updates
@@ -99,6 +102,7 @@ Use this skill when you need to:
 **MANDATORY - READ DETAILED DOCUMENTATION**: See [`services/observability/README.md`](services/observability/README.md) for comprehensive monitoring setup.
 
 **Quick Workflow**:
+
 1. Enable observability for agents
 2. Configure CloudWatch dashboards for metrics
 3. Set up alarms for error rates and latency
@@ -109,12 +113,15 @@ Use this skill when you need to:
 For detailed documentation on each AgentCore service, see the following resources:
 
 ### Gateway Service
+
 - **Overview**: [`services/gateway/README.md`](services/gateway/README.md)
 - **Deployment Strategies**: [`services/gateway/deployment-strategies.md`](services/gateway/deployment-strategies.md)
 - **Troubleshooting**: [`services/gateway/troubleshooting-guide.md`](services/gateway/troubleshooting-guide.md)
 
 ### Runtime, Memory, Identity, Code Interpreter, Browser, Observability
+
 Each service has comprehensive documentation in its respective directory:
+
 - [`services/runtime/README.md`](services/runtime/README.md)
 - [`services/memory/README.md`](services/memory/README.md)
 - [`services/identity/README.md`](services/identity/README.md)
@@ -133,4 +140,3 @@ For patterns and best practices that span multiple AgentCore services:
 - **AWS Documentation**: [Amazon Bedrock AgentCore](https://docs.aws.amazon.com/bedrock-agentcore/latest/devguide/what-is-bedrock-agentcore.html)
 - **API Reference**: [Bedrock AgentCore Control Plane API](https://docs.aws.amazon.com/bedrock-agentcore-control/latest/APIReference/)
 - **AWS CLI Reference**: [bedrock-agentcore-control commands](https://awscli.amazonaws.com/v2/documentation/api/latest/reference/bedrock-agentcore-control/index.html)
-

@@ -33,7 +33,8 @@ const getTenantTestConnectionString = () => {
   const password = process.env.DB_PASSWORD || 'change-me-in-production'
   const host = process.env.DB_HOST || 'localhost'
   const port = process.env.DB_PORT || '5432'
-  const database = process.env.DB_DATABASE || process.env.DB_NAME || 'zidney_master'
+  const database =
+    process.env.DB_DATABASE || process.env.DB_NAME || 'zidney_master'
 
   return `postgresql://${user}:${password}@${host}:${port}/${database}`
 }
@@ -76,7 +77,9 @@ describe('Immutability Trigger Tests (T031)', () => {
       $$ LANGUAGE plpgsql
     `)
 
-    await pool.query(`DROP TRIGGER IF EXISTS ${UPDATE_TRIGGER} ON ${EVENTS_TABLE}`)
+    await pool.query(
+      `DROP TRIGGER IF EXISTS ${UPDATE_TRIGGER} ON ${EVENTS_TABLE}`
+    )
     await pool.query(`
       CREATE TRIGGER ${UPDATE_TRIGGER}
       BEFORE UPDATE ON ${EVENTS_TABLE}
@@ -90,7 +93,9 @@ describe('Immutability Trigger Tests (T031)', () => {
   afterAll(async () => {
     if (pool) {
       try {
-        await pool.query(`DROP TRIGGER IF EXISTS ${UPDATE_TRIGGER} ON ${EVENTS_TABLE}`)
+        await pool.query(
+          `DROP TRIGGER IF EXISTS ${UPDATE_TRIGGER} ON ${EVENTS_TABLE}`
+        )
         await pool.query(`DROP FUNCTION IF EXISTS ${IMMUTABLE_FN}()`)
         await pool.query(`DROP TABLE IF EXISTS ${EVENTS_TABLE}`)
         await pool.query(`DROP TABLE IF EXISTS ${ATTEMPTS_TABLE}`)
@@ -101,7 +106,9 @@ describe('Immutability Trigger Tests (T031)', () => {
   })
 
   beforeEach(async () => {
-    await pool.query(`TRUNCATE TABLE ${EVENTS_TABLE}, ${ATTEMPTS_TABLE} CASCADE`)
+    await pool.query(
+      `TRUNCATE TABLE ${EVENTS_TABLE}, ${ATTEMPTS_TABLE} CASCADE`
+    )
     const result = await pool.query(
       `INSERT INTO ${ATTEMPTS_TABLE} DEFAULT VALUES RETURNING id`
     )

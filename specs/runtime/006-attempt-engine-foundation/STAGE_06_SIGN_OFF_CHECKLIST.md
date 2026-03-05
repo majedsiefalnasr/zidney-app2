@@ -396,7 +396,7 @@
 
 ### Architecture Review
 
-**Architect:** ****************\_**************** Date: ****\_\_****
+**Architect:** **\*\***\*\*\*\***\*\***\_**\*\***\*\*\*\***\*\*** Date: \***\*\_\_\*\***
 
 Requirements:
 
@@ -410,7 +410,7 @@ Requirements:
 
 ### Engineering Lead (Backend)
 
-**Lead Engineer:** ****************\_**************** Date: ****\_\_****
+**Lead Engineer:** **\*\***\*\*\*\***\*\***\_**\*\***\*\*\*\***\*\*** Date: \***\*\_\_\*\***
 
 Requirements:
 
@@ -424,7 +424,7 @@ Requirements:
 
 ### QA Lead
 
-**QA Lead:** ****************\_**************** Date: ****\_\_****
+**QA Lead:** **\*\***\*\*\*\***\*\***\_**\*\***\*\*\*\***\*\*** Date: \***\*\_\_\*\***
 
 Requirements:
 
@@ -438,7 +438,7 @@ Requirements:
 
 ### Operations Lead
 
-**Ops Lead:** ****************\_**************** Date: ****\_\_****
+**Ops Lead:** **\*\***\*\*\*\***\*\***\_**\*\***\*\*\*\***\*\*** Date: \***\*\_\_\*\***
 
 Requirements:
 
@@ -452,7 +452,7 @@ Requirements:
 
 ### Compliance Officer
 
-**Compliance:** ****************\_**************** Date: ****\_\_****
+**Compliance:** **\*\***\*\*\*\***\*\***\_**\*\***\*\*\*\***\*\*** Date: \***\*\_\_\*\***
 
 Requirements:
 
@@ -515,8 +515,8 @@ To be completed after 7 days of production operation:
 - [ ] Performance baseline holding
 - [ ] User feedback positive
 
-**Post-Deployment Date:** ******\_\_\_\_******  
-**Sign-Off:** **************\_\_**************
+**Post-Deployment Date:** **\*\***\_\_\_\_**\*\***  
+**Sign-Off:** **\*\***\*\***\*\***\_\_**\*\***\*\***\*\***
 
 ---
 

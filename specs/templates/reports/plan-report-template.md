@@ -24,31 +24,31 @@
 
 ## Architecture Layers Touched
 
-| Layer | Planned Changes |
-| --- | --- |
-| API | ... |
-| Worker | ... |
-| Frontend | ... |
-| DB Master | ... |
-| DB Tenant | ... |
+| Layer     | Planned Changes |
+| --------- | --------------- |
+| API       | ...             |
+| Worker    | ...             |
+| Frontend  | ...             |
+| DB Master | ...             |
+| DB Tenant | ...             |
 
 ---
 
 ## Key Technical Decisions
 
-| # | Decision | Rationale |
-| --- | --- | --- |
-| 1 | ... | ... |
+| #   | Decision | Rationale |
+| --- | -------- | --------- |
+| 1   | ...      | ...       |
 
 ---
 
 ## Migration Impact
 
-| Item | Value | Notes |
-| --- | --- | --- |
-| Migration required | Yes / No | ... |
-| `schema_version` bump | Yes / No | ... |
-| Backward compatible | Yes / No | ... |
+| Item                  | Value    | Notes |
+| --------------------- | -------- | ----- |
+| Migration required    | Yes / No | ...   |
+| `schema_version` bump | Yes / No | ...   |
+| Backward compatible   | Yes / No | ...   |
 
 ---
 
@@ -68,14 +68,14 @@
 
 ## Constitutional Compliance
 
-| Check | Status | Notes |
-| --- | --- | --- |
-| No cross-tenant logic introduced | ✅ / ❌ | ... |
-| All writes are transactional by design | ✅ / ❌ | ... |
-| Server-authoritative time enforced | ✅ / ❌ | ... |
-| License middleware enforced | ✅ / ❌ | ... |
-| Version compatibility enforced | ✅ / ❌ | ... |
-| No architecture redesign without ADR | ✅ / ❌ | ... |
+| Check                                  | Status  | Notes |
+| -------------------------------------- | ------- | ----- |
+| No cross-tenant logic introduced       | ✅ / ❌ | ...   |
+| All writes are transactional by design | ✅ / ❌ | ...   |
+| Server-authoritative time enforced     | ✅ / ❌ | ...   |
+| License middleware enforced            | ✅ / ❌ | ...   |
+| Version compatibility enforced         | ✅ / ❌ | ...   |
+| No architecture redesign without ADR   | ✅ / ❌ | ...   |
 
 **Overall:** COMPLIANT / BLOCKED
 

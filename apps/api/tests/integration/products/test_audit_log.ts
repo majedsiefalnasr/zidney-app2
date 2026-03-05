@@ -126,7 +126,9 @@ describe('Integration: Products - Audit Log (T058)', () => {
 
     expect(
       new Date(response.body.data.items[0]!.timestamp).getTime()
-    ).toBeGreaterThan(new Date(response.body.data.items[1]!.timestamp).getTime())
+    ).toBeGreaterThan(
+      new Date(response.body.data.items[1]!.timestamp).getTime()
+    )
   })
 
   it('should return 401 UNAUTHORIZED if not authenticated', async () => {

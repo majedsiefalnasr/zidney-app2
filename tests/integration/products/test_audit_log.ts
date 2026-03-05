@@ -152,7 +152,8 @@ describe('T058: Audit Log Query Integration Tests', () => {
     })
 
     it('should respect limit parameter', async () => {
-      const product = (await productService.listProducts(dbClient, {})).items[0]!
+      const product = (await productService.listProducts(dbClient, {}))
+        .items[0]!
 
       const result = await productService.getProductAuditLog(
         dbClient,
@@ -166,7 +167,8 @@ describe('T058: Audit Log Query Integration Tests', () => {
     })
 
     it('should respect offset parameter', async () => {
-      const product = (await productService.listProducts(dbClient, {})).items[0]!
+      const product = (await productService.listProducts(dbClient, {}))
+        .items[0]!
 
       const page1 = await productService.getProductAuditLog(
         dbClient,
@@ -190,7 +192,8 @@ describe('T058: Audit Log Query Integration Tests', () => {
     })
 
     it('should include pagination metadata', async () => {
-      const product = (await productService.listProducts(dbClient, {})).items[0]!
+      const product = (await productService.listProducts(dbClient, {}))
+        .items[0]!
 
       const result = await productService.getProductAuditLog(
         dbClient,
@@ -235,7 +238,8 @@ describe('T058: Audit Log Query Integration Tests', () => {
     })
 
     it('should filter by action=CREATE', async () => {
-      const product = (await productService.listProducts(dbClient, {})).items[0]!
+      const product = (await productService.listProducts(dbClient, {}))
+        .items[0]!
 
       const result = await productService.getProductAuditLog(
         dbClient,
@@ -246,13 +250,14 @@ describe('T058: Audit Log Query Integration Tests', () => {
       )
 
       expect(result.items.length).toBeGreaterThan(0)
-      expect(result.items.every((entry) => entry.action === AuditAction.CREATE)).toBe(
-        true
-      )
+      expect(
+        result.items.every((entry) => entry.action === AuditAction.CREATE)
+      ).toBe(true)
     })
 
     it('should filter by action=UPDATE', async () => {
-      const product = (await productService.listProducts(dbClient, {})).items[0]!
+      const product = (await productService.listProducts(dbClient, {}))
+        .items[0]!
 
       const result = await productService.getProductAuditLog(
         dbClient,
@@ -263,13 +268,14 @@ describe('T058: Audit Log Query Integration Tests', () => {
       )
 
       expect(result.items.length).toBeGreaterThan(0)
-      expect(result.items.every((entry) => entry.action === AuditAction.UPDATE)).toBe(
-        true
-      )
+      expect(
+        result.items.every((entry) => entry.action === AuditAction.UPDATE)
+      ).toBe(true)
     })
 
     it('should filter by action=STATUS_CHANGE', async () => {
-      const product = (await productService.listProducts(dbClient, {})).items[0]!
+      const product = (await productService.listProducts(dbClient, {}))
+        .items[0]!
 
       const result = await productService.getProductAuditLog(
         dbClient,
@@ -281,7 +287,9 @@ describe('T058: Audit Log Query Integration Tests', () => {
 
       expect(result.items.length).toBeGreaterThan(0)
       expect(
-        result.items.every((entry) => entry.action === AuditAction.STATUS_CHANGE)
+        result.items.every(
+          (entry) => entry.action === AuditAction.STATUS_CHANGE
+        )
       ).toBe(true)
     })
   })

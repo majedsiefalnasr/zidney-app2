@@ -339,6 +339,6 @@ export function legacyErrorHandlerMiddleware(err: any, req: any, res: any) {
   )
 
   // Send response
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+
   res.status(statusCode).json(createErrorResponse(errorCode, message))
 }

@@ -11,11 +11,13 @@ Amazon Bedrock AgentCore Memory is a fully managed service that gives AI agents 
 AgentCore Memory offers two types of memory that work together:
 
 ### Short-Term Memory
+
 Captures turn-by-turn interactions within a single session, allowing agents to maintain immediate context without requiring users to repeat information.
 
 **Example**: When a user asks "What's the weather like in Seattle?" and follows up with "What about tomorrow?", the agent relies on recent conversation history to understand that "tomorrow" refers to Seattle weather.
 
 ### Long-Term Memory
+
 Automatically extracts and stores key insights from conversations across multiple sessions, including user preferences, important facts, and session summaries for persistent knowledge retention.
 
 **Example**: If a customer mentions they prefer window seats during flight booking, the agent stores this preference and proactively offers window seats in future interactions.
@@ -23,34 +25,39 @@ Automatically extracts and stores key insights from conversations across multipl
 ## Core Capabilities
 
 ### Memory Resource Management
+
 - **Logical Containers**: Encapsulate both raw events and processed long-term memories
 - **Retention Policies**: Define how long data is retained
 - **Security Configuration**: Control access and encryption
 - **Data Transformation**: Transform raw interactions into meaningful insights
 
 ### Short-Term Memory Features
+
 - **Event Storage**: Store conversations, system events, and state changes as immutable events
 - **Session Organization**: Organize by actor and session
 - **Context Preservation**: Maintain immediate context within sessions
 - **Structured Storage**: Support structured storage of interaction data
 
 ### Long-Term Memory Features
+
 - **Insight Extraction**: Automatically extract insights, preferences, and knowledge
 - **Asynchronous Processing**: Extract memories asynchronously using memory strategies
 - **Cross-Session Persistence**: Retain information across multiple sessions
 - **Semantic Search**: Search memories by meaning and context
 
 ### Memory Strategies
+
 Define the intelligence layer that transforms raw events into meaningful memories:
 
-| Strategy | Description |
-|----------|-------------|
-| **Semantic** | Extract meaningful facts and information |
-| **Summary** | Generate conversation summaries |
-| **User Preference** | Extract and store user preferences |
-| **Custom** | Define custom extraction logic |
+| Strategy            | Description                              |
+| ------------------- | ---------------------------------------- |
+| **Semantic**        | Extract meaningful facts and information |
+| **Summary**         | Generate conversation summaries          |
+| **User Preference** | Extract and store user preferences       |
+| **Custom**          | Define custom extraction logic           |
 
 ### Advanced Features
+
 - **Branching**: Create alternative conversation paths from specific points
 - **Checkpointing**: Save and mark specific states for later reference
 - **Memory Consolidation**: Merge related memories without duplicates
@@ -59,28 +66,36 @@ Define the intelligence layer that transforms raw events into meaningful memorie
 ## Use Cases
 
 ### Conversational Agents
+
 Enable chatbots to:
+
 - Remember previous issues and preferences
 - Provide relevant assistance based on history
 - Create personalized customer experiences
 - Maintain context across session breaks
 
 ### Task-Oriented Agents
+
 Support workflows like:
+
 - Track multi-step business process status
 - Maintain workflow progress across sessions
 - Remember task context for resumption
 - Store intermediate results
 
 ### Multi-Agent Systems
+
 Allow agent teams to:
+
 - Share memory for synchronized operations
 - Coordinate inventory levels and logistics
 - Maintain shared context
 - Optimize collaborative workflows
 
 ### Autonomous Agents
+
 Enable agents to:
+
 - Plan routes based on past experiences
 - Learn from previous interactions
 - Improve decision-making over time
@@ -205,24 +220,28 @@ aws bedrock-agentcore-control create-memory \
 ## Best Practices
 
 ### Memory Architecture
+
 - Design memory architecture intentionally
 - Choose appropriate strategies for use case
 - Implement proper retention policies
 - Consider memory costs and storage
 
 ### Performance
+
 - Use appropriate time-to-live settings
 - Extract only relevant information
 - Implement rhythm of memory operations
 - Monitor memory search latency
 
 ### Security
+
 - Implement proper access controls
 - Encrypt sensitive memories
 - Audit memory access
 - Follow data privacy regulations (GDPR, HIPAA)
 
 ### Operations
+
 - Monitor memory usage and costs
 - Set up alerts for memory failures
 - Implement backup strategies
@@ -230,12 +249,12 @@ aws bedrock-agentcore-control create-memory \
 
 ## Troubleshooting
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| Memory not found | Incorrect memory ID | Verify memory ID with list command |
-| Search returns empty | No matching memories | Check query and memory content |
-| Slow memory retrieval | Large memory size | Implement pagination and filters |
-| Strategy extraction fails | Invalid configuration | Check strategy configuration |
+| Issue                     | Cause                 | Solution                           |
+| ------------------------- | --------------------- | ---------------------------------- |
+| Memory not found          | Incorrect memory ID   | Verify memory ID with list command |
+| Search returns empty      | No matching memories  | Check query and memory content     |
+| Slow memory retrieval     | Large memory size     | Implement pagination and filters   |
+| Strategy extraction fails | Invalid configuration | Check strategy configuration       |
 
 ## Related Services
 

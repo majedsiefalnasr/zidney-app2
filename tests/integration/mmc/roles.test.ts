@@ -27,7 +27,6 @@ describe('T045: Role & Permission Management Integration Tests', () => {
       defaultRoleId: randomUUID(),
       salesRoleId: randomUUID(),
     }
-
   })
 
   afterEach(() => {

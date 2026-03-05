@@ -4,85 +4,36 @@
     "baseUrl": "./",
     "noUnusedLocals": false,
     "noUnusedParameters": false,
-    "types": [
-      "node",
-      "vitest/globals"
-    ],
+    "types": ["node", "vitest/globals"],
     "paths": {
-      "@zidney/app/*": [
-        "./apps/*/src"
-      ],
-      "@zidney/app/api/*": [
-        "./apps/api/src/*"
-      ],
-      "@zidney/app/worker/*": [
-        "./apps/worker/src/*"
-      ],
-      "@zidney/package/*": [
-        "./packages/*/src"
-      ],
-      "@zidney/ui/*": [
-        "packages/ui-system/src/*"
-      ],
-      "@zidney/domain-core": [
-        "packages/domain-core/src/index.ts"
-      ],
-      "@zidney/domain-core/*": [
-        "packages/domain-core/src/*"
-      ],
+      "@zidney/app/*": ["./apps/*/src"],
+      "@zidney/app/api/*": ["./apps/api/src/*"],
+      "@zidney/app/worker/*": ["./apps/worker/src/*"],
+      "@zidney/package/*": ["./packages/*/src"],
+      "@zidney/ui/*": ["packages/ui-system/src/*"],
+      "@zidney/domain-core": ["packages/domain-core/src/index.ts"],
+      "@zidney/domain-core/*": ["packages/domain-core/src/*"],
       "@zidney/domain-core/mmc-dashboard": [
         "packages/domain-core/mmc-dashboard/index.ts"
       ],
       "@zidney/domain-core/mmc-dashboard/*": [
         "packages/domain-core/mmc-dashboard/*"
       ],
-      "@zidney/logger": [
-        "packages/logger/src/index.ts"
-      ],
-      "@zidney/logger/*": [
-        "packages/logger/src/*"
-      ],
-      "@zidney/types": [
-        "packages/types/src/index.ts"
-      ],
-      "@zidney/types/*": [
-        "packages/types/src/*"
-      ],
-      "@zidney/validation": [
-        "packages/validation/src/index.ts"
-      ],
-      "@zidney/validation/*": [
-        "packages/validation/src/*"
-      ],
-      "@zidney/redis-utils": [
-        "packages/redis-utils/src/index.ts"
-      ],
-      "@zidney/redis-utils/*": [
-        "packages/redis-utils/src/*"
-      ],
-      "@zidney/config": [
-        "packages/config/src/index.ts"
-      ],
-      "@zidney/config/*": [
-        "packages/config/src/*"
-      ],
-      "jsonwebtoken": [
-        "./tests/shims/jsonwebtoken"
-      ]
+      "@zidney/logger": ["packages/logger/src/index.ts"],
+      "@zidney/logger/*": ["packages/logger/src/*"],
+      "@zidney/types": ["packages/types/src/index.ts"],
+      "@zidney/types/*": ["packages/types/src/*"],
+      "@zidney/validation": ["packages/validation/src/index.ts"],
+      "@zidney/validation/*": ["packages/validation/src/*"],
+      "@zidney/redis-utils": ["packages/redis-utils/src/index.ts"],
+      "@zidney/redis-utils/*": ["packages/redis-utils/src/*"],
+      "@zidney/config": ["packages/config/src/index.ts"],
+      "@zidney/config/*": ["packages/config/src/*"],
+      "@zidney/api-client": ["packages/api-client/src/index.ts"],
+      "@zidney/api-client/*": ["packages/api-client/src/*"],
+      "jsonwebtoken": ["./tests/shims/jsonwebtoken"]
     }
   },
-  "include": [
-    "tests/**/*",
-    "apps/api/tests/**/*",
-    "apps/worker/tests/**/*",
-    "**/*.test.ts",
-    "**/*.spec.ts"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "apps/mmc/tests/**/*",
-    "apps/backoffice/tests/**/*",
-    "apps/frontoffice/tests/**/*"
-  ]
+  "include": ["tests/**/*", "packages/*/tests/**/*"],
+  "exclude": ["node_modules", "dist", "apps/*/tests/**/*"]
 }

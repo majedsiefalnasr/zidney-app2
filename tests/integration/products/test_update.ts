@@ -202,11 +202,7 @@ describe('T055: Product Update Integration Tests', () => {
         dbClient,
         initial.id,
         {
-          enabled_modules: [
-            Module.MCQ,
-            Module.TRADITIONAL_EXAMS,
-            Module.FORUM,
-          ],
+          enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS, Module.FORUM],
         },
         ctx.userId
       )
@@ -485,7 +481,9 @@ describe('T055: Product Update Integration Tests', () => {
         [product.id]
       )
 
-      expect(versions.rows.map((r: any) => r.version_number)).toEqual([1, 2, 3, 4])
+      expect(versions.rows.map((r: any) => r.version_number)).toEqual([
+        1, 2, 3, 4,
+      ])
     })
   })
 })

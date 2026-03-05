@@ -126,7 +126,7 @@ export async function logAttemptEvent(
     // Release connection if we got it from pool
     if (!client && conn) {
       try {
-        (conn as any).release?.()
+        ;(conn as any).release?.()
       } catch (_) {
         // Ignore release errors
       }

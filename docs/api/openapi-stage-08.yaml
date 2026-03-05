@@ -95,7 +95,7 @@ paths:
   /auth/password-reset:
     post:
       summary: Reset user password
-      description: Rate limited: 1 per user per minute, 2 per IP per minute
+      description: Rate limited 1 per user per minute, 2 per IP per minute
       tags:
         - Authentication
       requestBody:

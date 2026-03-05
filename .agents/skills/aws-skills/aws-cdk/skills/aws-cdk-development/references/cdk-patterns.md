@@ -19,33 +19,37 @@ This reference provides detailed patterns, anti-patterns, and best practices for
 Let CDK and CloudFormation generate unique resource names automatically:
 
 **Benefits**:
+
 - Enables multiple deployments in the same region/account
 - Supports parallel environments (dev, staging, prod)
 - Prevents naming conflicts
 - Allows stack cloning and testing
 
 **Example**:
+
 ```typescript
 // ✅ GOOD - Automatic naming
 const bucket = new s3.Bucket(this, 'DataBucket', {
   // No bucketName specified
   encryption: s3.BucketEncryption.S3_MANAGED,
-});
+})
 ```
 
 ### When Explicit Naming is Required
 
 Some scenarios require explicit names:
+
 - Resources referenced by external systems
 - Resources that must maintain consistent names across deployments
 - Cross-stack references requiring stable names
 
 **Pattern**: Use logical prefixes and environment suffixes
+
 ```typescript
 // Only when absolutely necessary
 const bucket = new s3.Bucket(this, 'DataBucket', {
   bucketName: `${props.projectName}-data-${props.environment}`,
-});
+})
 ```
 
 ## Construct Patterns
@@ -55,12 +59,12 @@ const bucket = new s3.Bucket(this, 'DataBucket', {
 Prefer high-level patterns that encapsulate best practices:
 
 ```typescript
-import * as patterns from 'aws-cdk-lib/aws-apigateway';
+import * as patterns from 'aws-cdk-lib/aws-apigateway'
 
 new patterns.LambdaRestApi(this, 'MyApi', {
   handler: myFunction,
   // Includes CloudWatch Logs, IAM roles, and API Gateway configuration
-});
+})
 ```
 
 ### Custom Constructs
@@ -69,29 +73,29 @@ Create reusable constructs for repeated patterns:
 
 ```typescript
 export class ApiWithDatabase extends Construct {
-  public readonly api: apigateway.RestApi;
-  public readonly table: dynamodb.Table;
+  public readonly api: apigateway.RestApi
+  public readonly table: dynamodb.Table
 
   constructor(scope: Construct, id: string, props: ApiWithDatabaseProps) {
-    super(scope, id);
+    super(scope, id)
 
     this.table = new dynamodb.Table(this, 'Table', {
       partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
       billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-    });
+    })
 
     const handler = new NodejsFunction(this, 'Handler', {
       entry: props.handlerEntry,
       environment: {
         TABLE_NAME: this.table.tableName,
       },
-    });
+    })
 
-    this.table.grantReadWriteData(handler);
+    this.table.grantReadWriteData(handler)
 
     this.api = new apigateway.LambdaRestApi(this, 'Api', {
       handler,
-    });
+    })
   }
 }
 ```
@@ -104,16 +108,22 @@ Use grant methods instead of broad policies:
 
 ```typescript
 // ✅ GOOD - Specific grants
-const table = new dynamodb.Table(this, 'Table', { /* ... */ });
-const lambda = new lambda.Function(this, 'Function', { /* ... */ });
+const table = new dynamodb.Table(this, 'Table', {
+  /* ... */
+})
+const lambda = new lambda.Function(this, 'Function', {
+  /* ... */
+})
 
-table.grantReadWriteData(lambda);
+table.grantReadWriteData(lambda)
 
 // ❌ BAD - Overly broad permissions
-lambda.addToRolePolicy(new iam.PolicyStatement({
-  actions: ['dynamodb:*'],
-  resources: ['*'],
-}));
+lambda.addToRolePolicy(
+  new iam.PolicyStatement({
+    actions: ['dynamodb:*'],
+    resources: ['*'],
+  })
+)
 ```
 
 ### Secrets Management
@@ -121,7 +131,7 @@ lambda.addToRolePolicy(new iam.PolicyStatement({
 Use Secrets Manager for sensitive data:
 
 ```typescript
-import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager';
+import * as secretsmanager from 'aws-cdk-lib/aws-secretsmanager'
 
 const secret = new secretsmanager.Secret(this, 'DbPassword', {
   generateSecretString: {
@@ -129,10 +139,10 @@ const secret = new secretsmanager.Secret(this, 'DbPassword', {
     generateStringKey: 'password',
     excludePunctuation: true,
   },
-});
+})
 
 // Grant read access to Lambda
-secret.grantRead(myFunction);
+secret.grantRead(myFunction)
 ```
 
 ### VPC Configuration
@@ -160,7 +170,7 @@ const vpc = new ec2.Vpc(this, 'Vpc', {
       cidrMask: 24,
     },
   ],
-});
+})
 ```
 
 ## Lambda Integration
@@ -168,7 +178,7 @@ const vpc = new ec2.Vpc(this, 'Vpc', {
 ### NodejsFunction (TypeScript/JavaScript)
 
 ```typescript
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 
 const fn = new NodejsFunction(this, 'Function', {
   entry: 'src/handlers/process.ts',
@@ -184,13 +194,13 @@ const fn = new NodejsFunction(this, 'Function', {
     sourceMap: true,
     externalModules: ['@aws-sdk/*'], // Use AWS SDK from Lambda runtime
   },
-});
+})
 ```
 
 ### PythonFunction
 
 ```typescript
-import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
+import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha'
 
 const fn = new PythonFunction(this, 'Function', {
   entry: 'src/handlers',
@@ -199,7 +209,7 @@ const fn = new PythonFunction(this, 'Function', {
   runtime: lambda.Runtime.PYTHON_3_12,
   timeout: Duration.seconds(30),
   memorySize: 512,
-});
+})
 ```
 
 ### Lambda Layers
@@ -211,12 +221,12 @@ const layer = new lambda.LayerVersion(this, 'CommonLayer', {
   code: lambda.Code.fromAsset('layers/common'),
   compatibleRuntimes: [lambda.Runtime.NODEJS_20_X],
   description: 'Common utilities',
-});
+})
 
 new NodejsFunction(this, 'Function', {
   entry: 'src/handler.ts',
   layers: [layer],
-});
+})
 ```
 
 ## Testing Patterns
@@ -224,25 +234,25 @@ new NodejsFunction(this, 'Function', {
 ### Snapshot Testing
 
 ```typescript
-import { Template } from 'aws-cdk-lib/assertions';
+import { Template } from 'aws-cdk-lib/assertions'
 
 test('Stack creates expected resources', () => {
-  const app = new cdk.App();
-  const stack = new MyStack(app, 'TestStack');
+  const app = new cdk.App()
+  const stack = new MyStack(app, 'TestStack')
 
-  const template = Template.fromStack(stack);
-  expect(template.toJSON()).toMatchSnapshot();
-});
+  const template = Template.fromStack(stack)
+  expect(template.toJSON()).toMatchSnapshot()
+})
 ```
 
 ### Fine-Grained Assertions
 
 ```typescript
 test('Lambda has correct environment', () => {
-  const app = new cdk.App();
-  const stack = new MyStack(app, 'TestStack');
+  const app = new cdk.App()
+  const stack = new MyStack(app, 'TestStack')
 
-  const template = Template.fromStack(stack);
+  const template = Template.fromStack(stack)
 
   template.hasResourceProperties('AWS::Lambda::Function', {
     Runtime: 'nodejs20.x',
@@ -252,20 +262,20 @@ test('Lambda has correct environment', () => {
         TABLE_NAME: { Ref: Match.anyValue() },
       },
     },
-  });
-});
+  })
+})
 ```
 
 ### Resource Count Validation
 
 ```typescript
 test('Stack has correct number of functions', () => {
-  const app = new cdk.App();
-  const stack = new MyStack(app, 'TestStack');
+  const app = new cdk.App()
+  const stack = new MyStack(app, 'TestStack')
 
-  const template = Template.fromStack(stack);
-  template.resourceCountIs('AWS::Lambda::Function', 3);
-});
+  const template = Template.fromStack(stack)
+  template.resourceCountIs('AWS::Lambda::Function', 3)
+})
 ```
 
 ## Cost Optimization
@@ -277,14 +287,14 @@ test('Stack has correct number of functions', () => {
 const devFunction = new NodejsFunction(this, 'DevFunction', {
   memorySize: 256, // Lower for dev
   timeout: Duration.seconds(30),
-});
+})
 
 // Production
 const prodFunction = new NodejsFunction(this, 'ProdFunction', {
   memorySize: 1024, // Higher for prod performance
   timeout: Duration.seconds(10),
   reservedConcurrentExecutions: 10, // Prevent runaway costs
-});
+})
 ```
 
 ### DynamoDB Billing Modes
@@ -293,15 +303,17 @@ const prodFunction = new NodejsFunction(this, 'ProdFunction', {
 // Development/Low Traffic
 const devTable = new dynamodb.Table(this, 'DevTable', {
   billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-});
+})
 
 // Production/Predictable Load
 const prodTable = new dynamodb.Table(this, 'ProdTable', {
   billingMode: dynamodb.BillingMode.PROVISIONED,
   readCapacity: 5,
   writeCapacity: 5,
-  autoScaling: { /* ... */ },
-});
+  autoScaling: {
+    /* ... */
+  },
+})
 ```
 
 ### S3 Lifecycle Policies
@@ -327,7 +339,7 @@ const bucket = new s3.Bucket(this, 'DataBucket', {
       noncurrentVersionExpiration: Duration.days(30),
     },
   ],
-});
+})
 ```
 
 ## Anti-Patterns
@@ -341,13 +353,13 @@ new lambda.Function(this, 'Function', {
   code: lambda.Code.fromAsset('lambda'),
   handler: 'index.handler',
   runtime: lambda.Runtime.NODEJS_20_X,
-});
+})
 
 // GOOD
 new NodejsFunction(this, 'Function', {
   entry: 'src/handler.ts',
   // Let CDK generate the name
-});
+})
 ```
 
 ### ❌ Overly Broad IAM Permissions
@@ -370,13 +382,13 @@ table.grantReadWriteData(function);
 new lambda.Function(this, 'Function', {
   code: lambda.Code.fromAsset('lambda.zip'), // Pre-bundled manually
   // ...
-});
+})
 
 // GOOD - Let CDK handle it
 new NodejsFunction(this, 'Function', {
   entry: 'src/handler.ts',
   // CDK handles bundling automatically
-});
+})
 ```
 
 ### ❌ Missing Environment Variables
@@ -386,7 +398,7 @@ new NodejsFunction(this, 'Function', {
 new NodejsFunction(this, 'Function', {
   entry: 'src/handler.ts',
   // Table name hardcoded in Lambda code
-});
+})
 
 // GOOD
 new NodejsFunction(this, 'Function', {
@@ -394,27 +406,27 @@ new NodejsFunction(this, 'Function', {
   environment: {
     TABLE_NAME: table.tableName,
   },
-});
+})
 ```
 
 ### ❌ Ignoring Stack Outputs
 
 ```typescript
 // BAD - No way to reference resources
-new MyStack(app, 'Stack', {});
+new MyStack(app, 'Stack', {})
 
 // GOOD - Export important values
 class MyStack extends Stack {
   constructor(scope: Construct, id: string) {
-    super(scope, id);
+    super(scope, id)
 
-    const api = new apigateway.RestApi(this, 'Api', {});
+    const api = new apigateway.RestApi(this, 'Api', {})
 
     new CfnOutput(this, 'ApiUrl', {
       value: api.url,
       description: 'API Gateway URL',
       exportName: 'MyApiUrl',
-    });
+    })
   }
 }
 ```

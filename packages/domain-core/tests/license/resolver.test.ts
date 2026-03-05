@@ -42,9 +42,7 @@ describe('LicenseResolver', () => {
     const workspace_slug = 'acme.edu'
     const license = testFixtures.makeLicense({ workspace_slug })
 
-    mockDb.mockResult('from licenses where workspace_slug = $1', [
-      license,
-    ])
+    mockDb.mockResult('from licenses where workspace_slug = $1', [license])
 
     // First query (miss)
     const result1 = await resolver.getLicenseBySlug(workspace_slug)
@@ -61,9 +59,7 @@ describe('LicenseResolver', () => {
     const workspace_slug = 'acme.edu'
     const license = testFixtures.makeLicense({ workspace_slug })
 
-    mockDb.mockResult('from licenses where workspace_slug = $1', [
-      license,
-    ])
+    mockDb.mockResult('from licenses where workspace_slug = $1', [license])
     mockRedis.flush() // Clear cache
 
     const result = await resolver.getLicenseBySlug(workspace_slug)

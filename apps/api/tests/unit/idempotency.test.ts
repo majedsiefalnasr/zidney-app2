@@ -17,10 +17,7 @@ import { beforeAll, beforeEach, describe, expect, test } from 'vitest'
 import { db, getTenantPool } from '../../db'
 
 class InMemoryRedis {
-  private store = new Map<
-    string,
-    { value: string; expiresAt: number | null }
-  >()
+  private store = new Map<string, { value: string; expiresAt: number | null }>()
 
   async get(key: string): Promise<string | null> {
     const item = this.store.get(key)
@@ -65,8 +62,7 @@ describe('Idempotency (Triple-Layer)', () => {
     const wsRes = await db.master.query(
       `INSERT INTO workspaces (slug, name, schema_version, product_version, license_status)
        VALUES ($1, 'Idempotent WS', 1, '1.0.0', 'ACTIVE')
-       RETURNING id`
-      ,
+       RETURNING id`,
       [workspaceSlug]
     )
     workspaceId = wsRes.rows[0].id

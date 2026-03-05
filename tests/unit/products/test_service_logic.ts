@@ -28,7 +28,9 @@ describe('T062: Product Service Logic Unit Tests', () => {
         description: 'Old desc',
       }
 
-      const summary = generateChangeSummary(computeFieldDiff(oldProduct as any, newProduct as any))
+      const summary = generateChangeSummary(
+        computeFieldDiff(oldProduct as any, newProduct as any)
+      )
 
       expect(summary).toBeDefined()
       expect(summary.length).toBeGreaterThan(0)
@@ -47,7 +49,9 @@ describe('T062: Product Service Logic Unit Tests', () => {
         enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
       }
 
-      const summary = generateChangeSummary(computeFieldDiff(oldProduct as any, newProduct as any))
+      const summary = generateChangeSummary(
+        computeFieldDiff(oldProduct as any, newProduct as any)
+      )
 
       expect(summary).toBeDefined()
       expect(summary.toLowerCase()).toContain('updated')
@@ -59,7 +63,9 @@ describe('T062: Product Service Logic Unit Tests', () => {
         description: 'Same desc',
       }
 
-      const summary = generateChangeSummary(computeFieldDiff(product as any, product as any))
+      const summary = generateChangeSummary(
+        computeFieldDiff(product as any, product as any)
+      )
 
       expect(summary.toLowerCase()).toContain('no change')
     })
@@ -76,7 +82,9 @@ describe('T062: Product Service Logic Unit Tests', () => {
         enabled_modules: [Module.MCQ],
       }
 
-      const summary = generateChangeSummary(computeFieldDiff(oldProduct as any, newProduct as any))
+      const summary = generateChangeSummary(
+        computeFieldDiff(oldProduct as any, newProduct as any)
+      )
 
       expect(summary.length).toBeGreaterThan(0)
     })
@@ -91,7 +99,9 @@ describe('T062: Product Service Logic Unit Tests', () => {
         description: 'New desc',
       }
 
-      const summary = generateChangeSummary(computeFieldDiff(oldProduct as any, newProduct as any))
+      const summary = generateChangeSummary(
+        computeFieldDiff(oldProduct as any, newProduct as any)
+      )
 
       expect(summary).toBeDefined()
     })
@@ -106,7 +116,9 @@ describe('T062: Product Service Logic Unit Tests', () => {
         enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
       }
 
-      const summary = generateChangeSummary(computeFieldDiff(oldProduct as any, newProduct as any))
+      const summary = generateChangeSummary(
+        computeFieldDiff(oldProduct as any, newProduct as any)
+      )
 
       expect(summary.toLowerCase()).toContain('module')
     })
@@ -232,7 +244,9 @@ describe('T062: Product Service Logic Unit Tests', () => {
 
       expect(diff.enabled_modules).toBeDefined()
       expect((diff.enabled_modules as any).old).toContain(Module.MCQ)
-      expect((diff.enabled_modules as any).new).toContain(Module.TRADITIONAL_EXAMS)
+      expect((diff.enabled_modules as any).new).toContain(
+        Module.TRADITIONAL_EXAMS
+      )
     })
 
     it('should track when modules are removed', () => {
@@ -244,8 +258,12 @@ describe('T062: Product Service Logic Unit Tests', () => {
       const diff = computeFieldDiff(oldProduct as any, newProduct as any)
 
       expect(diff.enabled_modules).toBeDefined()
-      expect((diff.enabled_modules as any).old).toContain(Module.TRADITIONAL_EXAMS)
-      expect((diff.enabled_modules as any).new).not.toContain(Module.TRADITIONAL_EXAMS)
+      expect((diff.enabled_modules as any).old).toContain(
+        Module.TRADITIONAL_EXAMS
+      )
+      expect((diff.enabled_modules as any).new).not.toContain(
+        Module.TRADITIONAL_EXAMS
+      )
     })
   })
 
@@ -279,7 +297,9 @@ describe('T062: Product Service Logic Unit Tests', () => {
         description: 'D'.repeat(100),
       }
 
-      const summary = generateChangeSummary(computeFieldDiff(oldProduct as any, newProduct as any))
+      const summary = generateChangeSummary(
+        computeFieldDiff(oldProduct as any, newProduct as any)
+      )
 
       expect(summary.length).toBeGreaterThan(0)
       expect(summary.length).toBeLessThan(500) // Reasonable summary length

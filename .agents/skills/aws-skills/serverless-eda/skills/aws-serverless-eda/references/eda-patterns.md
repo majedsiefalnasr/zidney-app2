@@ -16,6 +16,7 @@ Comprehensive patterns for building event-driven systems on AWS with serverless 
 ### Event Types
 
 **Domain Events**: Represent business facts
+
 ```json
 {
   "source": "orders",
@@ -23,13 +24,14 @@ Comprehensive patterns for building event-driven systems on AWS with serverless 
   "detail": {
     "orderId": "12345",
     "customerId": "customer-1",
-    "amount": 100.00,
+    "amount": 100.0,
     "timestamp": "2025-01-15T10:30:00Z"
   }
 }
 ```
 
 **System Events**: Technical occurrences
+
 ```json
 {
   "source": "aws.s3",
@@ -48,24 +50,24 @@ Define clear contracts between producers and consumers:
 ```typescript
 // schemas/order-events.ts
 export interface OrderPlacedEvent {
-  orderId: string;
-  customerId: string;
+  orderId: string
+  customerId: string
   items: Array<{
-    productId: string;
-    quantity: number;
-    price: number;
-  }>;
-  totalAmount: number;
-  timestamp: string;
+    productId: string
+    quantity: number
+    price: number
+  }>
+  totalAmount: number
+  timestamp: string
 }
 
 // Register schema with EventBridge
-const registry = new events.EventBusSchemaRegistry(this, 'SchemaRegistry');
+const registry = new events.EventBusSchemaRegistry(this, 'SchemaRegistry')
 
 const schema = new events.Schema(this, 'OrderPlacedSchema', {
   schemaName: 'OrderPlaced',
   definition: events.SchemaDefinition.fromInline(/* JSON Schema */),
-});
+})
 ```
 
 ## Event Routing Patterns
@@ -85,7 +87,7 @@ new events.Rule(this, 'HighValueOrders', {
     },
   },
   targets: [new targets.LambdaFunction(highValueOrderFunction)],
-});
+})
 
 new events.Rule(this, 'StandardOrders', {
   eventPattern: {
@@ -96,7 +98,7 @@ new events.Rule(this, 'StandardOrders', {
     },
   },
   targets: [new targets.LambdaFunction(standardOrderFunction)],
-});
+})
 ```
 
 ### Pattern 2: Event Filtering
@@ -116,7 +118,7 @@ new events.Rule(this, 'FilteredRule', {
     },
   },
   targets: [new targets.LambdaFunction(reorderFunction)],
-});
+})
 ```
 
 ### Pattern 3: Event Replay and Archive
@@ -130,7 +132,7 @@ const archive = new events.Archive(this, 'EventArchive', {
     account: [this.account],
   },
   retention: Duration.days(365),
-});
+})
 
 // Replay events when needed
 // Use AWS Console or CLI to replay from archive
@@ -142,15 +144,17 @@ Route events to other AWS accounts:
 
 ```typescript
 // Event bus in Account A
-const eventBus = new events.EventBus(this, 'SharedBus');
+const eventBus = new events.EventBus(this, 'SharedBus')
 
 // Grant permission to Account B
-eventBus.addToResourcePolicy(new iam.PolicyStatement({
-  effect: iam.Effect.ALLOW,
-  principals: [new iam.AccountPrincipal('ACCOUNT-B-ID')],
-  actions: ['events:PutEvents'],
-  resources: [eventBus.eventBusArn],
-}));
+eventBus.addToResourcePolicy(
+  new iam.PolicyStatement({
+    effect: iam.Effect.ALLOW,
+    principals: [new iam.AccountPrincipal('ACCOUNT-B-ID')],
+    actions: ['events:PutEvents'],
+    resources: [eventBus.eventBusArn],
+  })
+)
 
 // Rule forwards to Account B event bus
 new events.Rule(this, 'ForwardToAccountB', {
@@ -158,14 +162,16 @@ new events.Rule(this, 'ForwardToAccountB', {
   eventPattern: {
     source: ['shared-service'],
   },
-  targets: [new targets.EventBus(
-    events.EventBus.fromEventBusArn(
-      this,
-      'AccountBBus',
-      'arn:aws:events:us-east-1:ACCOUNT-B-ID:event-bus/default'
-    )
-  )],
-});
+  targets: [
+    new targets.EventBus(
+      events.EventBus.fromEventBusArn(
+        this,
+        'AccountBBus',
+        'arn:aws:events:us-east-1:ACCOUNT-B-ID:event-bus/default'
+      )
+    ),
+  ],
+})
 ```
 
 ## Event Processing Patterns
@@ -180,15 +186,17 @@ new events.Rule(this, 'TransformRule', {
   eventPattern: {
     source: ['orders'],
   },
-  targets: [new targets.LambdaFunction(processFunction, {
-    event: events.RuleTargetInput.fromObject({
-      orderId: events.EventField.fromPath('$.detail.orderId'),
-      customerEmail: events.EventField.fromPath('$.detail.customer.email'),
-      amount: events.EventField.fromPath('$.detail.totalAmount'),
-      // Transformed structure
+  targets: [
+    new targets.LambdaFunction(processFunction, {
+      event: events.RuleTargetInput.fromObject({
+        orderId: events.EventField.fromPath('$.detail.orderId'),
+        customerEmail: events.EventField.fromPath('$.detail.customer.email'),
+        amount: events.EventField.fromPath('$.detail.totalAmount'),
+        // Transformed structure
+      }),
     }),
-  })],
-});
+  ],
+})
 ```
 
 ### Pattern 2: Event Aggregation
@@ -198,7 +206,7 @@ Aggregate multiple events:
 ```typescript
 // DynamoDB stores partial results
 export const handler = async (event: any) => {
-  const { transactionId, step, data } = event;
+  const { transactionId, step, data } = event
 
   // Store step result
   await dynamodb.updateItem({
@@ -207,25 +215,27 @@ export const handler = async (event: any) => {
     UpdateExpression: 'SET #step = :data',
     ExpressionAttributeNames: { '#step': step },
     ExpressionAttributeValues: { ':data': data },
-  });
+  })
 
   // Check if all steps complete
   const item = await dynamodb.getItem({
     TableName: process.env.TABLE_NAME,
     Key: { transactionId },
-  });
+  })
 
   if (allStepsComplete(item)) {
     // Trigger final processing
     await eventBridge.putEvents({
-      Entries: [{
-        Source: 'aggregator',
-        DetailType: 'AllStepsComplete',
-        Detail: JSON.stringify(item),
-      }],
-    });
+      Entries: [
+        {
+          Source: 'aggregator',
+          DetailType: 'AllStepsComplete',
+          Detail: JSON.stringify(item),
+        },
+      ],
+    })
   }
-};
+}
 ```
 
 ### Pattern 3: Event Enrichment
@@ -234,28 +244,30 @@ Enrich events with additional data:
 
 ```typescript
 export const enrichEvent = async (event: any) => {
-  const { customerId } = event.detail;
+  const { customerId } = event.detail
 
   // Fetch additional customer data
   const customer = await dynamodb.getItem({
     TableName: process.env.CUSTOMER_TABLE,
     Key: { customerId },
-  });
+  })
 
   // Publish enriched event
   await eventBridge.putEvents({
-    Entries: [{
-      Source: 'orders',
-      DetailType: 'OrderEnriched',
-      Detail: JSON.stringify({
-        ...event.detail,
-        customerName: customer.Item?.name,
-        customerTier: customer.Item?.tier,
-        customerEmail: customer.Item?.email,
-      }),
-    }],
-  });
-};
+    Entries: [
+      {
+        Source: 'orders',
+        DetailType: 'OrderEnriched',
+        Detail: JSON.stringify({
+          ...event.detail,
+          customerName: customer.Item?.name,
+          customerTier: customer.Item?.tier,
+          customerEmail: customer.Item?.email,
+        }),
+      },
+    ],
+  })
+}
 ```
 
 ### Pattern 4: Event Fork and Join
@@ -264,28 +276,34 @@ Process event multiple ways then aggregate:
 
 ```typescript
 // Step Functions parallel + aggregation
-const parallel = new stepfunctions.Parallel(this, 'ForkProcessing');
+const parallel = new stepfunctions.Parallel(this, 'ForkProcessing')
 
-parallel.branch(new tasks.LambdaInvoke(this, 'ValidateInventory', {
-  lambdaFunction: inventoryFunction,
-  resultPath: '$.inventory',
-}));
+parallel.branch(
+  new tasks.LambdaInvoke(this, 'ValidateInventory', {
+    lambdaFunction: inventoryFunction,
+    resultPath: '$.inventory',
+  })
+)
 
-parallel.branch(new tasks.LambdaInvoke(this, 'CheckCredit', {
-  lambdaFunction: creditFunction,
-  resultPath: '$.credit',
-}));
+parallel.branch(
+  new tasks.LambdaInvoke(this, 'CheckCredit', {
+    lambdaFunction: creditFunction,
+    resultPath: '$.credit',
+  })
+)
 
-parallel.branch(new tasks.LambdaInvoke(this, 'CalculateShipping', {
-  lambdaFunction: shippingFunction,
-  resultPath: '$.shipping',
-}));
+parallel.branch(
+  new tasks.LambdaInvoke(this, 'CalculateShipping', {
+    lambdaFunction: shippingFunction,
+    resultPath: '$.shipping',
+  })
+)
 
 const definition = parallel.next(
   new tasks.LambdaInvoke(this, 'AggregateResults', {
     lambdaFunction: aggregateFunction,
   })
-);
+)
 ```
 
 ## Event Sourcing Patterns
@@ -300,11 +318,11 @@ const eventStore = new dynamodb.Table(this, 'EventStore', {
   sortKey: { name: 'version', type: dynamodb.AttributeType.NUMBER },
   stream: dynamodb.StreamViewType.NEW_IMAGE,
   pointInTimeRecovery: true, // Important for audit
-});
+})
 
 // Append events
 export const appendEvent = async (aggregateId: string, event: any) => {
-  const version = await getNextVersion(aggregateId);
+  const version = await getNextVersion(aggregateId)
 
   await dynamodb.putItem({
     TableName: process.env.EVENT_STORE,
@@ -317,8 +335,8 @@ export const appendEvent = async (aggregateId: string, event: any) => {
       userId: event.userId,
     },
     ConditionExpression: 'attribute_not_exists(version)', // Optimistic locking
-  });
-};
+  })
+}
 
 // Rebuild state from events
 export const rebuildState = async (aggregateId: string) => {
@@ -327,15 +345,15 @@ export const rebuildState = async (aggregateId: string) => {
     KeyConditionExpression: 'aggregateId = :id',
     ExpressionAttributeValues: { ':id': aggregateId },
     ScanIndexForward: true, // Chronological order
-  });
+  })
 
-  let state = initialState();
+  let state = initialState()
   for (const event of events.Items) {
-    state = applyEvent(state, event);
+    state = applyEvent(state, event)
   }
 
-  return state;
-};
+  return state
+}
 ```
 
 ### Pattern: Materialized Views
@@ -344,32 +362,32 @@ Create read-optimized projections:
 
 ```typescript
 // Event store stream triggers projection
-eventStore.grantStreamRead(projectionFunction);
+eventStore.grantStreamRead(projectionFunction)
 
 new lambda.EventSourceMapping(this, 'Projection', {
   target: projectionFunction,
   eventSourceArn: eventStore.tableStreamArn,
   startingPosition: lambda.StartingPosition.LATEST,
-});
+})
 
 // Projection function updates read model
 export const updateProjection = async (event: DynamoDBStreamEvent) => {
   for (const record of event.Records) {
-    if (record.eventName !== 'INSERT') continue;
+    if (record.eventName !== 'INSERT') continue
 
-    const eventData = record.dynamodb?.NewImage;
-    const aggregateId = eventData?.aggregateId.S;
+    const eventData = record.dynamodb?.NewImage
+    const aggregateId = eventData?.aggregateId.S
 
     // Rebuild current state
-    const currentState = await rebuildState(aggregateId);
+    const currentState = await rebuildState(aggregateId)
 
     // Update read model
     await readModelTable.putItem({
       TableName: process.env.READ_MODEL_TABLE,
       Item: currentState,
-    });
+    })
   }
-};
+}
 ```
 
 ### Pattern: Snapshots
@@ -379,8 +397,8 @@ Optimize event replay with snapshots:
 ```typescript
 export const createSnapshot = async (aggregateId: string) => {
   // Rebuild state from all events
-  const state = await rebuildState(aggregateId);
-  const version = await getLatestVersion(aggregateId);
+  const state = await rebuildState(aggregateId)
+  const version = await getLatestVersion(aggregateId)
 
   // Store snapshot
   await snapshotTable.putItem({
@@ -391,26 +409,26 @@ export const createSnapshot = async (aggregateId: string) => {
       state: JSON.stringify(state),
       createdAt: Date.now(),
     },
-  });
-};
+  })
+}
 
 // Rebuild from snapshot + newer events
 export const rebuildFromSnapshot = async (aggregateId: string) => {
   // Get latest snapshot
-  const snapshot = await getLatestSnapshot(aggregateId);
+  const snapshot = await getLatestSnapshot(aggregateId)
 
-  let state = JSON.parse(snapshot.state);
-  const snapshotVersion = snapshot.version;
+  let state = JSON.parse(snapshot.state)
+  const snapshotVersion = snapshot.version
 
   // Apply only events after snapshot
-  const events = await getEventsSinceVersion(aggregateId, snapshotVersion);
+  const events = await getEventsSinceVersion(aggregateId, snapshotVersion)
 
   for (const event of events) {
-    state = applyEvent(state, event);
+    state = applyEvent(state, event)
   }
 
-  return state;
-};
+  return state
+}
 ```
 
 ## Saga Patterns
@@ -422,16 +440,18 @@ Services coordinate through events:
 ```typescript
 // Order Service publishes event
 export const placeOrder = async (order: Order) => {
-  await saveOrder(order);
+  await saveOrder(order)
 
   await eventBridge.putEvents({
-    Entries: [{
-      Source: 'orders',
-      DetailType: 'OrderPlaced',
-      Detail: JSON.stringify({ orderId: order.id }),
-    }],
-  });
-};
+    Entries: [
+      {
+        Source: 'orders',
+        DetailType: 'OrderPlaced',
+        Detail: JSON.stringify({ orderId: order.id }),
+      },
+    ],
+  })
+}
 
 // Inventory Service reacts to event
 new events.Rule(this, 'ReserveInventory', {
@@ -440,32 +460,36 @@ new events.Rule(this, 'ReserveInventory', {
     detailType: ['OrderPlaced'],
   },
   targets: [new targets.LambdaFunction(reserveInventoryFunction)],
-});
+})
 
 // Inventory Service publishes result
 export const reserveInventory = async (event: any) => {
-  const { orderId } = event.detail;
+  const { orderId } = event.detail
 
   try {
-    await reserve(orderId);
+    await reserve(orderId)
 
     await eventBridge.putEvents({
-      Entries: [{
-        Source: 'inventory',
-        DetailType: 'InventoryReserved',
-        Detail: JSON.stringify({ orderId }),
-      }],
-    });
+      Entries: [
+        {
+          Source: 'inventory',
+          DetailType: 'InventoryReserved',
+          Detail: JSON.stringify({ orderId }),
+        },
+      ],
+    })
   } catch (error) {
     await eventBridge.putEvents({
-      Entries: [{
-        Source: 'inventory',
-        DetailType: 'InventoryReservationFailed',
-        Detail: JSON.stringify({ orderId, error: error.message }),
-      }],
-    });
+      Entries: [
+        {
+          Source: 'inventory',
+          DetailType: 'InventoryReservationFailed',
+          Detail: JSON.stringify({ orderId, error: error.message }),
+        },
+      ],
+    })
   }
-};
+}
 
 // Payment Service reacts to inventory event
 new events.Rule(this, 'ProcessPayment', {
@@ -474,7 +498,7 @@ new events.Rule(this, 'ProcessPayment', {
     detailType: ['InventoryReserved'],
   },
   targets: [new targets.LambdaFunction(processPaymentFunction)],
-});
+})
 ```
 
 ### Pattern: Orchestration-Based Saga
@@ -487,43 +511,48 @@ const definition = new tasks.LambdaInvoke(this, 'ReserveInventory', {
   lambdaFunction: reserveInventoryFunction,
   resultPath: '$.inventory',
 })
-  .next(new tasks.LambdaInvoke(this, 'ProcessPayment', {
-    lambdaFunction: processPaymentFunction,
-    resultPath: '$.payment',
-  }))
-  .next(new tasks.LambdaInvoke(this, 'ShipOrder', {
-    lambdaFunction: shipOrderFunction,
-    resultPath: '$.shipment',
-  }))
+  .next(
+    new tasks.LambdaInvoke(this, 'ProcessPayment', {
+      lambdaFunction: processPaymentFunction,
+      resultPath: '$.payment',
+    })
+  )
+  .next(
+    new tasks.LambdaInvoke(this, 'ShipOrder', {
+      lambdaFunction: shipOrderFunction,
+      resultPath: '$.shipment',
+    })
+  )
   .addCatch(
     // Compensation flow
     new tasks.LambdaInvoke(this, 'RefundPayment', {
       lambdaFunction: refundFunction,
-    })
-      .next(new tasks.LambdaInvoke(this, 'ReleaseInventory', {
+    }).next(
+      new tasks.LambdaInvoke(this, 'ReleaseInventory', {
         lambdaFunction: releaseFunction,
-      })),
+      })
+    ),
     {
       errors: ['States.TaskFailed'],
       resultPath: '$.error',
     }
-  );
+  )
 
 new stepfunctions.StateMachine(this, 'OrderSaga', {
   definition,
   tracingEnabled: true,
-});
+})
 ```
 
 **Comparison**:
 
-| Aspect | Choreography | Orchestration |
-|--------|--------------|---------------|
-| Coordination | Decentralized | Centralized |
-| Coupling | Loose | Tighter |
-| Visibility | Distributed logs | Single execution history |
-| Debugging | Harder (trace across services) | Easier (single workflow) |
-| Best for | Simple flows | Complex flows |
+| Aspect       | Choreography                   | Orchestration            |
+| ------------ | ------------------------------ | ------------------------ |
+| Coordination | Decentralized                  | Centralized              |
+| Coupling     | Loose                          | Tighter                  |
+| Visibility   | Distributed logs               | Single execution history |
+| Debugging    | Harder (trace across services) | Easier (single workflow) |
+| Best for     | Simple flows                   | Complex flows            |
 
 ## Best Practices
 
@@ -534,25 +563,25 @@ new stepfunctions.StateMachine(this, 'OrderSaga', {
 ```typescript
 // Use idempotency keys
 export const handler = async (event: any) => {
-  const idempotencyKey = event.requestId || event.messageId;
+  const idempotencyKey = event.requestId || event.messageId
 
   // Check if already processed
   try {
     const existing = await dynamodb.getItem({
       TableName: process.env.IDEMPOTENCY_TABLE,
       Key: { idempotencyKey },
-    });
+    })
 
     if (existing.Item) {
-      console.log('Already processed:', idempotencyKey);
-      return existing.Item.result; // Return cached result
+      console.log('Already processed:', idempotencyKey)
+      return existing.Item.result // Return cached result
     }
   } catch (error) {
     // First time processing
   }
 
   // Process event
-  const result = await processEvent(event);
+  const result = await processEvent(event)
 
   // Store result
   await dynamodb.putItem({
@@ -564,10 +593,10 @@ export const handler = async (event: any) => {
     },
     // Optional: Set TTL for cleanup
     ExpirationTime: Math.floor(Date.now() / 1000) + 86400, // 24 hours
-  });
+  })
 
-  return result;
-};
+  return result
+}
 ```
 
 ### Event Versioning
@@ -577,31 +606,31 @@ export const handler = async (event: any) => {
 ```typescript
 // Version events
 interface OrderPlacedEventV1 {
-  version: '1.0';
-  orderId: string;
-  amount: number;
+  version: '1.0'
+  orderId: string
+  amount: number
 }
 
 interface OrderPlacedEventV2 {
-  version: '2.0';
-  orderId: string;
-  amount: number;
-  currency: string; // New field
+  version: '2.0'
+  orderId: string
+  amount: number
+  currency: string // New field
 }
 
 // Handler supports multiple versions
 export const handler = async (event: any) => {
-  const eventVersion = event.detail.version || '1.0';
+  const eventVersion = event.detail.version || '1.0'
 
   switch (eventVersion) {
     case '1.0':
-      return processV1(event.detail as OrderPlacedEventV1);
+      return processV1(event.detail as OrderPlacedEventV1)
     case '2.0':
-      return processV2(event.detail as OrderPlacedEventV2);
+      return processV2(event.detail as OrderPlacedEventV2)
     default:
-      throw new Error(`Unsupported event version: ${eventVersion}`);
+      throw new Error(`Unsupported event version: ${eventVersion}`)
   }
-};
+}
 
 const processV1 = async (event: OrderPlacedEventV1) => {
   // Upgrade to V2 internally
@@ -609,9 +638,9 @@ const processV1 = async (event: OrderPlacedEventV1) => {
     ...event,
     version: '2.0',
     currency: 'USD', // Default value
-  };
-  return processV2(v2Event);
-};
+  }
+  return processV2(v2Event)
+}
 ```
 
 ### Eventual Consistency
@@ -622,32 +651,34 @@ const processV1 = async (event: OrderPlacedEventV1) => {
 // Service A writes to its database
 export const createOrder = async (order: Order) => {
   // Write to Order database
-  await orderTable.putItem({ Item: order });
+  await orderTable.putItem({ Item: order })
 
   // Publish event
   await eventBridge.putEvents({
-    Entries: [{
-      Source: 'orders',
-      DetailType: 'OrderCreated',
-      Detail: JSON.stringify({ orderId: order.id }),
-    }],
-  });
-};
+    Entries: [
+      {
+        Source: 'orders',
+        DetailType: 'OrderCreated',
+        Detail: JSON.stringify({ orderId: order.id }),
+      },
+    ],
+  })
+}
 
 // Service B eventually updates its database
 export const onOrderCreated = async (event: any) => {
-  const { orderId } = event.detail;
+  const { orderId } = event.detail
 
   // Fetch additional data
-  const orderDetails = await getOrderDetails(orderId);
+  const orderDetails = await getOrderDetails(orderId)
 
   // Update inventory database (eventual consistency)
   await inventoryTable.updateItem({
     Key: { productId: orderDetails.productId },
     UpdateExpression: 'SET reserved = reserved + :qty',
     ExpressionAttributeValues: { ':qty': orderDetails.quantity },
-  });
-};
+  })
+}
 ```
 
 ### Error Handling in EDA
@@ -658,11 +689,13 @@ export const onOrderCreated = async (event: any) => {
 // Dead Letter Queue for failed events
 const dlq = new sqs.Queue(this, 'EventDLQ', {
   retentionPeriod: Duration.days(14),
-});
+})
 
 // EventBridge rule with DLQ
 new events.Rule(this, 'ProcessRule', {
-  eventPattern: { /* ... */ },
+  eventPattern: {
+    /* ... */
+  },
   targets: [
     new targets.LambdaFunction(processFunction, {
       deadLetterQueue: dlq,
@@ -670,21 +703,21 @@ new events.Rule(this, 'ProcessRule', {
       retryAttempts: 2,
     }),
   ],
-});
+})
 
 // Monitor DLQ
 new cloudwatch.Alarm(this, 'DLQAlarm', {
   metric: dlq.metricApproximateNumberOfMessagesVisible(),
   threshold: 1,
   evaluationPeriods: 1,
-});
+})
 
 // DLQ processor for manual review
 new lambda.EventSourceMapping(this, 'DLQProcessor', {
   target: dlqProcessorFunction,
   eventSourceArn: dlq.queueArn,
   enabled: false, // Enable manually when reviewing
-});
+})
 ```
 
 ### Message Ordering
@@ -698,7 +731,7 @@ const fifoQueue = new sqs.Queue(this, 'OrderedQueue', {
   contentBasedDeduplication: true,
   deduplicationScope: sqs.DeduplicationScope.MESSAGE_GROUP,
   fifoThroughputLimit: sqs.FifoThroughputLimit.PER_MESSAGE_GROUP_ID,
-});
+})
 
 // Publish with message group ID
 await sqs.sendMessage({
@@ -706,19 +739,19 @@ await sqs.sendMessage({
   MessageBody: JSON.stringify(event),
   MessageGroupId: customerId, // All messages for same customer in order
   MessageDeduplicationId: eventId, // Prevent duplicates
-});
+})
 
 // Kinesis for ordered streams
 const stream = new kinesis.Stream(this, 'Stream', {
   shardCount: 1, // Single shard = strict ordering
-});
+})
 
 // Partition key ensures same partition
 await kinesis.putRecord({
   StreamName: process.env.STREAM_NAME,
   Data: Buffer.from(JSON.stringify(event)),
   PartitionKey: customerId, // Same key = same shard
-});
+})
 ```
 
 ### Deduplication
@@ -730,11 +763,11 @@ await kinesis.putRecord({
 const queue = new sqs.Queue(this, 'Queue', {
   fifo: true,
   contentBasedDeduplication: true, // Hash of message body
-});
+})
 
 // Manual deduplication with DynamoDB
 export const handler = async (event: any) => {
-  const eventId = event.id || event.messageId;
+  const eventId = event.id || event.messageId
 
   try {
     // Conditional write (fails if exists)
@@ -746,18 +779,18 @@ export const handler = async (event: any) => {
         ttl: Math.floor(Date.now() / 1000) + 86400, // 24h TTL
       },
       ConditionExpression: 'attribute_not_exists(eventId)',
-    });
+    })
 
     // Event is unique, process it
-    await processEvent(event);
+    await processEvent(event)
   } catch (error) {
     if (error.code === 'ConditionalCheckFailedException') {
-      console.log('Duplicate event ignored:', eventId);
-      return; // Already processed
+      console.log('Duplicate event ignored:', eventId)
+      return // Already processed
     }
-    throw error; // Other error
+    throw error // Other error
   }
-};
+}
 ```
 
 ### Backpressure Handling
@@ -768,13 +801,13 @@ export const handler = async (event: any) => {
 // Control Lambda concurrency
 const consumerFunction = new lambda.Function(this, 'Consumer', {
   reservedConcurrentExecutions: 10, // Max 10 concurrent
-});
+})
 
 // SQS visibility timeout + retry logic
 const queue = new sqs.Queue(this, 'Queue', {
   visibilityTimeout: Duration.seconds(300), // 5 minutes
   receiveMessageWaitTime: Duration.seconds(20), // Long polling
-});
+})
 
 new lambda.EventSourceMapping(this, 'Consumer', {
   target: consumerFunction,
@@ -782,27 +815,27 @@ new lambda.EventSourceMapping(this, 'Consumer', {
   batchSize: 10,
   maxConcurrency: 5, // Process 5 batches concurrently
   reportBatchItemFailures: true,
-});
+})
 
 // Circuit breaker pattern
-let consecutiveFailures = 0;
-const FAILURE_THRESHOLD = 5;
+let consecutiveFailures = 0
+const FAILURE_THRESHOLD = 5
 
 export const handler = async (event: any) => {
   // Check circuit breaker
   if (consecutiveFailures >= FAILURE_THRESHOLD) {
-    console.error('Circuit breaker open, skipping processing');
-    throw new Error('Circuit breaker open');
+    console.error('Circuit breaker open, skipping processing')
+    throw new Error('Circuit breaker open')
   }
 
   try {
-    await processEvent(event);
-    consecutiveFailures = 0; // Reset on success
+    await processEvent(event)
+    consecutiveFailures = 0 // Reset on success
   } catch (error) {
-    consecutiveFailures++;
-    throw error;
+    consecutiveFailures++
+    throw error
   }
-};
+}
 ```
 
 ## Advanced Patterns
@@ -819,7 +852,7 @@ const archive = new events.Archive(this, 'Archive', {
     account: [this.account],
   },
   retention: Duration.days(365),
-});
+})
 
 // Replay programmatically
 export const replayEvents = async (startTime: Date, endTime: Date) => {
@@ -832,8 +865,8 @@ export const replayEvents = async (startTime: Date, endTime: Date) => {
     Destination: {
       Arn: eventBus.eventBusArn,
     },
-  });
-};
+  })
+}
 ```
 
 ### Pattern: Event Time vs Processing Time
@@ -843,32 +876,35 @@ Handle late-arriving events:
 ```typescript
 // Include event timestamp
 interface Event {
-  eventId: string;
-  eventTime: string; // When event occurred
-  processingTime?: string; // When event processed
-  data: any;
+  eventId: string
+  eventTime: string // When event occurred
+  processingTime?: string // When event processed
+  data: any
 }
 
 // Windowed aggregation
 export const aggregateWindow = async (events: Event[]) => {
   // Group by event time window (not processing time)
-  const windows = new Map<string, Event[]>();
+  const windows = new Map<string, Event[]>()
 
   for (const event of events) {
-    const window = getWindowForTime(new Date(event.eventTime), Duration.minutes(5));
-    const key = window.toISOString();
+    const window = getWindowForTime(
+      new Date(event.eventTime),
+      Duration.minutes(5)
+    )
+    const key = window.toISOString()
 
     if (!windows.has(key)) {
-      windows.set(key, []);
+      windows.set(key, [])
     }
-    windows.get(key)!.push(event);
+    windows.get(key)!.push(event)
   }
 
   // Process each window
   for (const [window, eventsInWindow] of windows) {
-    await processWindow(window, eventsInWindow);
+    await processWindow(window, eventsInWindow)
   }
-};
+}
 ```
 
 ### Pattern: Transactional Outbox
@@ -901,30 +937,32 @@ export const createOrderWithEvent = async (order: Order) => {
         },
       },
     ],
-  });
-};
+  })
+}
 
 // Separate Lambda processes outbox
 new lambda.EventSourceMapping(this, 'OutboxProcessor', {
   target: outboxFunction,
   eventSourceArn: outboxTable.tableStreamArn,
   startingPosition: lambda.StartingPosition.LATEST,
-});
+})
 
 export const processOutbox = async (event: DynamoDBStreamEvent) => {
   for (const record of event.Records) {
-    if (record.eventName !== 'INSERT') continue;
+    if (record.eventName !== 'INSERT') continue
 
-    const outboxEvent = unmarshall(record.dynamodb?.NewImage);
+    const outboxEvent = unmarshall(record.dynamodb?.NewImage)
 
     // Publish to EventBridge
     await eventBridge.putEvents({
-      Entries: [{
-        Source: 'orders',
-        DetailType: outboxEvent.eventType,
-        Detail: JSON.stringify(outboxEvent.eventData),
-      }],
-    });
+      Entries: [
+        {
+          Source: 'orders',
+          DetailType: outboxEvent.eventType,
+          Detail: JSON.stringify(outboxEvent.eventData),
+        },
+      ],
+    })
 
     // Mark as processed
     await dynamodb.updateItem({
@@ -933,9 +971,9 @@ export const processOutbox = async (event: DynamoDBStreamEvent) => {
       UpdateExpression: 'SET #status = :status',
       ExpressionAttributeNames: { '#status': 'status' },
       ExpressionAttributeValues: { ':status': 'PUBLISHED' },
-    });
+    })
   }
-};
+}
 ```
 
 ## Testing Event-Driven Systems
@@ -948,22 +986,22 @@ export const publishTestEvents = async () => {
   const testEvents = [
     { source: 'orders', detailType: 'OrderPlaced', detail: { orderId: '1' } },
     { source: 'orders', detailType: 'OrderPlaced', detail: { orderId: '2' } },
-  ];
+  ]
 
   for (const event of testEvents) {
-    await eventBridge.putEvents({ Entries: [event] });
+    await eventBridge.putEvents({ Entries: [event] })
   }
-};
+}
 
 // Monitor processing
 export const verifyProcessing = async () => {
   // Check downstream databases
-  const order1 = await orderTable.getItem({ Key: { orderId: '1' } });
-  const order2 = await orderTable.getItem({ Key: { orderId: '2' } });
+  const order1 = await orderTable.getItem({ Key: { orderId: '1' } })
+  const order2 = await orderTable.getItem({ Key: { orderId: '2' } })
 
-  expect(order1.Item).toBeDefined();
-  expect(order2.Item).toBeDefined();
-};
+  expect(order1.Item).toBeDefined()
+  expect(order2.Item).toBeDefined()
+}
 ```
 
 ### Pattern: Event Mocking
@@ -972,11 +1010,11 @@ export const verifyProcessing = async () => {
 // Mock EventBridge in tests
 const mockEventBridge = {
   putEvents: jest.fn().mockResolvedValue({}),
-};
+}
 
 // Test event publishing
 test('publishes event on order creation', async () => {
-  await createOrder(mockEventBridge, order);
+  await createOrder(mockEventBridge, order)
 
   expect(mockEventBridge.putEvents).toHaveBeenCalledWith({
     Entries: [
@@ -985,8 +1023,8 @@ test('publishes event on order creation', async () => {
         DetailType: 'OrderPlaced',
       }),
     ],
-  });
-});
+  })
+})
 ```
 
 ## Summary

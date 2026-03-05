@@ -445,13 +445,13 @@ pg_restore -d zidney_master < backup-master-pre-deploy.sql.gz
 
 ## Sign-Off
 
-**Deployment Lead**: ********\_******** Date: **\_\_\_**
+**Deployment Lead**: **\*\*\*\***\_**\*\*\*\*** Date: **\_\_\_**
 
-**Principal Engineer**: ********\_******** Date: **\_\_\_**
+**Principal Engineer**: **\*\*\*\***\_**\*\*\*\*** Date: **\_\_\_**
 
-**SRE/DevOps**: ********\_******** Date: **\_\_\_**
+**SRE/DevOps**: **\*\*\*\***\_**\*\*\*\*** Date: **\_\_\_**
 
-**Release Manager**: ********\_******** Date: **\_\_\_**
+**Release Manager**: **\*\*\*\***\_**\*\*\*\*** Date: **\_\_\_**
 
 ---
 

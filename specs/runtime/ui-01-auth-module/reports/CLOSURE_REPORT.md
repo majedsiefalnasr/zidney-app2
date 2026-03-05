@@ -14,16 +14,16 @@ STAGE_UI_01_AUTH_MODULE has completed the full Hard Mode workflow across all 7 s
 
 ## Workflow Summary
 
-| Step      | Status       | Primary Artifact                            |
-| --------- | ------------ | ------------------------------------------- |
-| Pre-Step  | ✅ Complete  | `README.md`                                 |
-| Specify   | ✅ Complete  | `reports/SPECIFY_REPORT.md`                 |
-| Clarify   | ✅ Complete  | `reports/CLARIFY_REPORT.md`                 |
-| Plan      | ✅ Complete  | `reports/PLAN_REPORT.md`                    |
-| Tasks     | ✅ Complete  | `reports/TASKS_REPORT.md`                   |
-| Analyze   | ✅ Complete  | `audits/ANALYZE_REPORT.md` — APPROVED       |
-| Implement | ✅ Complete  | `reports/IMPLEMENT_REPORT.md` — 57/57 tasks |
-| Closure   | ✅ Complete  | `reports/CLOSURE_REPORT.md` (this file)     |
+| Step      | Status      | Primary Artifact                            |
+| --------- | ----------- | ------------------------------------------- |
+| Pre-Step  | ✅ Complete | `README.md`                                 |
+| Specify   | ✅ Complete | `reports/SPECIFY_REPORT.md`                 |
+| Clarify   | ✅ Complete | `reports/CLARIFY_REPORT.md`                 |
+| Plan      | ✅ Complete | `reports/PLAN_REPORT.md`                    |
+| Tasks     | ✅ Complete | `reports/TASKS_REPORT.md`                   |
+| Analyze   | ✅ Complete | `audits/ANALYZE_REPORT.md` — APPROVED       |
+| Implement | ✅ Complete | `reports/IMPLEMENT_REPORT.md` — 57/57 tasks |
+| Closure   | ✅ Complete | `reports/CLOSURE_REPORT.md` (this file)     |
 
 ---
 
@@ -44,27 +44,27 @@ STAGE_UI_01_AUTH_MODULE has completed the full Hard Mode workflow across all 7 s
 
 ## Deferred Scope
 
-| Item                                           | Justification                                                             |
-| ---------------------------------------------- | ------------------------------------------------------------------------- |
+| Item                                           | Justification                                                                                        |
+| ---------------------------------------------- | ---------------------------------------------------------------------------------------------------- |
 | Backoffice + Frontoffice vitest configurations | No existing vitest.config in those apps; adding it is a separate infra task outside this stage scope |
 
 ---
 
 ## Constitutional Compliance (Final)
 
-| Rule / ADR                              | Status | Notes                                                             |
-| --------------------------------------- | ------ | ----------------------------------------------------------------- |
-| ADR-0001 Database-per-tenant isolation  | ✅     | UI stage — no DB access; isolation unaffected                     |
-| ADR-0002 Snapshot immutability          | ✅ N/A | Attempt engine not touched                                        |
-| ADR-0006 Server-authoritative time      | ✅     | No `Date.now()` in any auth file; 401 is sole expiry signal       |
-| ADR-0007 Version compatibility          | ✅ N/A | License middleware enforcement remains server-side                |
-| ADR-0008 Semantic versioning            | ✅     | No breaking API surface changes introduced                        |
-| No middleware bypass                    | ✅     | License and auth middleware untouched                             |
-| Memory-only token storage               | ✅     | Verified by storage grep (clean) and token-manager tests          |
-| Idempotency enforced                    | ✅     | `logout()` idempotency guard; `inFlight` single-flight lock       |
-| Structured logging                      | ✅     | `createLogger` from `@zidney/logger` in every module; no console  |
-| No JWT decoding                         | ✅     | No `atob`, `jwt-decode` anywhere; state from server responses only |
-| MEDIUM-02 `isLoading` sequencing        | ✅     | Set to `false` after `router.push()` resolves, not in resetState  |
+| Rule / ADR                             | Status | Notes                                                              |
+| -------------------------------------- | ------ | ------------------------------------------------------------------ |
+| ADR-0001 Database-per-tenant isolation | ✅     | UI stage — no DB access; isolation unaffected                      |
+| ADR-0002 Snapshot immutability         | ✅ N/A | Attempt engine not touched                                         |
+| ADR-0006 Server-authoritative time     | ✅     | No `Date.now()` in any auth file; 401 is sole expiry signal        |
+| ADR-0007 Version compatibility         | ✅ N/A | License middleware enforcement remains server-side                 |
+| ADR-0008 Semantic versioning           | ✅     | No breaking API surface changes introduced                         |
+| No middleware bypass                   | ✅     | License and auth middleware untouched                              |
+| Memory-only token storage              | ✅     | Verified by storage grep (clean) and token-manager tests           |
+| Idempotency enforced                   | ✅     | `logout()` idempotency guard; `inFlight` single-flight lock        |
+| Structured logging                     | ✅     | `createLogger` from `@zidney/logger` in every module; no console   |
+| No JWT decoding                        | ✅     | No `atob`, `jwt-decode` anywhere; state from server responses only |
+| MEDIUM-02 `isLoading` sequencing       | ✅     | Set to `false` after `router.push()` resolves, not in resetState   |
 
 **Final Verdict:** COMPLIANT
 
@@ -80,14 +80,14 @@ STAGE_UI_01_AUTH_MODULE has completed the full Hard Mode workflow across all 7 s
 
 ## Commit History (this stage)
 
-| Hash      | Step      | Message                                                          |
-| --------- | --------- | ---------------------------------------------------------------- |
-| `eee0e77` | Pre-Step  | chore(ui-01-auth-module): initialize stage branch and directory  |
-| `e46d09c` | Specify   | chore(ui-01-auth-module): complete specify step                  |
-| `7666bd2` | Clarify   | chore(ui-01-auth-module): complete clarify step                  |
-| `ea5c7b5` | Plan      | chore(ui-01-auth-module): complete plan step                     |
-| `4af7f3d` | Tasks     | chore(ui-01-auth-module): complete tasks step                    |
-| `0d978f8` | Analyze   | chore(ui-01-auth-module): complete analyze step                  |
+| Hash      | Step      | Message                                                           |
+| --------- | --------- | ----------------------------------------------------------------- |
+| `eee0e77` | Pre-Step  | chore(ui-01-auth-module): initialize stage branch and directory   |
+| `e46d09c` | Specify   | chore(ui-01-auth-module): complete specify step                   |
+| `7666bd2` | Clarify   | chore(ui-01-auth-module): complete clarify step                   |
+| `ea5c7b5` | Plan      | chore(ui-01-auth-module): complete plan step                      |
+| `4af7f3d` | Tasks     | chore(ui-01-auth-module): complete tasks step                     |
+| `0d978f8` | Analyze   | chore(ui-01-auth-module): complete analyze step                   |
 | `ca1bb24` | Implement | feat(ui-01-auth-module): implement auth module across MMC, BO, FO |
 
 ---

@@ -23,9 +23,9 @@
 
 ## Violations Detected
 
-| # | Violation Type | Description | Severity | Owner | Remediation |
-| --- | --- | --- | --- | --- | --- |
-| 1 | ... | ... | LOW / MEDIUM / HIGH / CRITICAL | ... | ... |
+| #   | Violation Type | Description | Severity                       | Owner | Remediation |
+| --- | -------------- | ----------- | ------------------------------ | ----- | ----------- |
+| 1   | ...            | ...         | LOW / MEDIUM / HIGH / CRITICAL | ...   | ...         |
 
 Use `None` when no violations are present.
 
@@ -33,28 +33,28 @@ Use `None` when no violations are present.
 
 ## Audit Checklist
 
-| Domain | Check | Status | Notes |
-| --- | --- | --- | --- |
-| Isolation | No cross-tenant joins | ✅ / ❌ | ... |
-| Isolation | Tenant resolver required for tenant DB access | ✅ / ❌ | ... |
-| License | License middleware enforced before tenant DB access | ✅ / ❌ | ... |
-| Transactions | All write paths transactional | ✅ / ❌ | ... |
-| Idempotency | Replay protection defined for critical flows | ✅ / ❌ | ... |
-| Snapshot Integrity | Snapshot remains immutable after start (if applicable) | ✅ / ❌ / N/A | ... |
-| Versioning | Schema/product compatibility checks enforced | ✅ / ❌ | ... |
-| Observability | Structured logs include `correlation_id` and `workspace_slug` | ✅ / ❌ | ... |
-| Security | No tenant override from request body | ✅ / ❌ | ... |
+| Domain             | Check                                                         | Status        | Notes |
+| ------------------ | ------------------------------------------------------------- | ------------- | ----- |
+| Isolation          | No cross-tenant joins                                         | ✅ / ❌       | ...   |
+| Isolation          | Tenant resolver required for tenant DB access                 | ✅ / ❌       | ...   |
+| License            | License middleware enforced before tenant DB access           | ✅ / ❌       | ...   |
+| Transactions       | All write paths transactional                                 | ✅ / ❌       | ...   |
+| Idempotency        | Replay protection defined for critical flows                  | ✅ / ❌       | ...   |
+| Snapshot Integrity | Snapshot remains immutable after start (if applicable)        | ✅ / ❌ / N/A | ...   |
+| Versioning         | Schema/product compatibility checks enforced                  | ✅ / ❌       | ...   |
+| Observability      | Structured logs include `correlation_id` and `workspace_slug` | ✅ / ❌       | ...   |
+| Security           | No tenant override from request body                          | ✅ / ❌       | ...   |
 
 ---
 
 ## Guardian Verdicts
 
-| Guardian | Verdict | Key Findings |
-| --- | --- | --- |
-| zidney-security-auditor | PASS / BLOCKED | ... |
-| zidney-performance-optimizer | PASS / BLOCKED | ... |
-| zidney-qa-engineer | PASS / BLOCKED | ... |
-| zidney-code-reviewer | PASS / BLOCKED | ... |
+| Guardian                     | Verdict        | Key Findings |
+| ---------------------------- | -------------- | ------------ |
+| zidney-security-auditor      | PASS / BLOCKED | ...          |
+| zidney-performance-optimizer | PASS / BLOCKED | ...          |
+| zidney-qa-engineer           | PASS / BLOCKED | ...          |
+| zidney-code-reviewer         | PASS / BLOCKED | ...          |
 
 ---
 

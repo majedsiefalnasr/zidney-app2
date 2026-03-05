@@ -15,8 +15,7 @@ function buildFallbackMasterPool(): Pool {
       process.env.DB_DATABASE ||
       process.env.DB_NAME ||
       'zidney_master',
-    user:
-      process.env.MASTER_DB_USER || process.env.DB_USER || 'zidney_app',
+    user: process.env.MASTER_DB_USER || process.env.DB_USER || 'zidney_app',
     password:
       process.env.MASTER_DB_PASSWORD ||
       process.env.DB_PASSWORD ||

@@ -210,9 +210,9 @@ STAGE_09_PRODUCTS has completed comprehensive CI/CD audit and security review. *
 
 ### Operational Sign-Off
 
-- [ ] **Release Manager:** ********\_\_\_******** (TBD)
-- [ ] **Operations Lead:** ********\_\_\_******** (TBD)
-- [ ] **Executive Sponsor:** ********\_\_\_******** (TBD)
+- [ ] **Release Manager:** **\*\*\*\***\_\_\_**\*\*\*\*** (TBD)
+- [ ] **Operations Lead:** **\*\*\*\***\_\_\_**\*\*\*\*** (TBD)
+- [ ] **Executive Sponsor:** **\*\*\*\***\_\_\_**\*\*\*\*** (TBD)
 
 ---
 

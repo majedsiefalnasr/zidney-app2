@@ -28,7 +28,8 @@ export async function getProductRevenue(
   dateTo?: Date,
   limit?: number
 ) {
-  const fromDate = dateFrom || new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+  const fromDate =
+    dateFrom || new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   const toDate = dateTo || new Date()
   const limitValue = limit || 5
 
@@ -77,7 +78,7 @@ export async function getProductRevenuePreviousPeriod(
   `
 
   const result = await pool.query(query, [previousFrom, previousTo])
-  
+
   // Convert to map for easy lookup
   const map = new Map<string, number>()
   for (const row of result.rows) {
@@ -90,4 +91,3 @@ export default {
   getProductRevenue,
   getProductRevenuePreviousPeriod,
 }
-

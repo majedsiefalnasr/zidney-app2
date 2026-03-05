@@ -19,24 +19,11 @@
     "forceConsistentCasingInFileNames": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "src/*"
-      ],
-      "~/*": [
-        "src/*"
-      ],
-      "@shadcn-vue/ui/*": [
-        "./src/components/shadcn-vue/*"
-      ]
+      "@/*": ["src/*"],
+      "~/*": ["src/*"],
+      "@shadcn-vue/ui/*": ["./src/components/shadcn-vue/*"]
     }
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.vue"
-  ],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "tests"
-  ]
+  "include": ["src/**/*.ts", "src/**/*.vue"],
+  "exclude": ["node_modules", "dist", "tests"]
 }

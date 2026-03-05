@@ -1,7 +1,7 @@
 # STAGE_09_PRODUCTS Deployment Checklist
 
-**Deployment Date:** ******\_\_\_\_******  
-**Release Manager:** ******\_\_\_\_******  
+**Deployment Date:** **\*\***\_\_\_\_**\*\***  
+**Release Manager:** **\*\***\_\_\_\_**\*\***  
 **Status:** ☐ NOT STARTED | ☐ IN PROGRESS | ☐ COMPLETE
 
 ---
@@ -453,10 +453,10 @@ kubectl patch service zidney-api-service -n production \
 
 **Escalation Contacts:**
 
-- Platform Lead: ******\_\_\_\_******
-- Security Team: ******\_\_\_\_******
-- Database Team: ******\_\_\_\_******
-- Operations Team: ******\_\_\_\_******
+- Platform Lead: **\*\***\_\_\_\_**\*\***
+- Security Team: **\*\***\_\_\_\_**\*\***
+- Database Team: **\*\***\_\_\_\_**\*\***
+- Operations Team: **\*\***\_\_\_\_**\*\***
 
 ---
 
@@ -476,7 +476,7 @@ kubectl patch service zidney-api-service -n production \
 
 **Deployment Status:** ☐ SUCCESSFUL | ☐ ROLLED BACK | ☐ IN PROGRESS
 
-**Release Manager Signature:** **********\_\_**********  
+**Release Manager Signature:** \***\*\*\*\*\***\_\_\***\*\*\*\*\***  
 **Date & Time Completed:** **_/_**/\_**\_ **:\_\_ UTC
 
 ---

@@ -38,7 +38,7 @@ The folder `.specrate/changes/` contains the changes that describe proposed modi
 Changes are about "how" the system should evolve to meet new requirements or fix issues.
 
 Each change is stored in its own subfolder named after its unique change id (`.specrate/changes/{change-id}/`).
-Change ids are kebab-case, verb-led, unique identifiers, e.g., `add-multi-factor-auth`, `improve-payment-latency`, or `add-project-dashboard`. Prefer verb prefixes like `add-`, `remove-`, `update-`, `improve-`, *etc.*, to indicate the action being proposed.
+Change ids are kebab-case, verb-led, unique identifiers, e.g., `add-multi-factor-auth`, `improve-payment-latency`, or `add-project-dashboard`. Prefer verb prefixes like `add-`, `remove-`, `update-`, `improve-`, _etc._, to indicate the action being proposed.
 The corresponding change names are of the same wording but in Title Case, e.g., `Add Multi-Factor Auth`, `Improve Payment Latency`, or `Add Project Dashboard`.
 
 - `.specrate/changes/{change-id}/state`: (required)

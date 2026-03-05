@@ -8,7 +8,7 @@ integrationDescribe('Integration Tests - Phase 4', () => {
   describe('Task 10A: DataTable + Filter Integration', () => {
     const TestComponent = defineComponent({
       setup() {
-        const filters = ref<{fieldId: string; value: string}[]>([])
+        const filters = ref<{ fieldId: string; value: string }[]>([])
         const rows = ref([
           { id: 1, name: 'John', status: 'active' },
           { id: 2, name: 'Jane', status: 'inactive' },
@@ -92,7 +92,7 @@ integrationDescribe('Integration Tests - Phase 4', () => {
     it('should emit filter-changed event', () => {
       const TestWithEvent = defineComponent({
         setup() {
-          const filters = ref<{fieldId: string; value: string}[]>([])
+          const filters = ref<{ fieldId: string; value: string }[]>([])
           const isFilterChanged = ref(false)
 
           const onFilterChange = () => {
@@ -151,7 +151,7 @@ integrationDescribe('Integration Tests - Phase 4', () => {
 
           const addManyFilters = () => {
             for (let i = 0; i < 50; i++) {
-              (filters.value as any).push({
+              ;(filters.value as any).push({
                 fieldId: `field_${i}`,
                 value: `${'x'.repeat(100)}`,
               })

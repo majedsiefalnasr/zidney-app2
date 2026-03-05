@@ -5,7 +5,9 @@ import { createUserWithLimitCheck } from '../../utils/transaction-wrapper'
 
 const logger = createLogger('backoffice-users')
 
-function parseLimitValue(limit: string | number | null | undefined): number | null {
+function parseLimitValue(
+  limit: string | number | null | undefined
+): number | null {
   if (limit === 'unlimited' || limit === null || limit === undefined) {
     return null
   }

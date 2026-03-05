@@ -116,7 +116,7 @@ export async function initializeAttempt(
     } finally {
       if (!options.client && conn) {
         try {
-          (conn as any).release?.()
+          ;(conn as any).release?.()
         } catch (_) {
           // Ignore release errors
         }

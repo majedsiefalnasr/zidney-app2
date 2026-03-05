@@ -15,8 +15,8 @@
 
 **Purpose**: Create compile-time-only shared TypeScript interfaces that all three apps implement. Zero runtime footprint.
 
-- [X] T001 Create shared env config interfaces (`ZidneyEnvConfig`, `ZidneyFeatureFlags`, `ZidneyAppConfig`) in `packages/types/src/env-config.ts`
-- [X] T002 Re-export env config types from `packages/types/src/index.ts`
+- [x] T001 Create shared env config interfaces (`ZidneyEnvConfig`, `ZidneyFeatureFlags`, `ZidneyAppConfig`) in `packages/types/src/env-config.ts`
+- [x] T002 Re-export env config types from `packages/types/src/index.ts`
 
 **Checkpoint**: Shared types compile. No runtime code added.
 
@@ -30,45 +30,45 @@
 
 ### US1 — Centralized Environment Access (P1)
 
-- [X] T003 [US1] Refactor `apps/mmc/src/core/config/env.ts` — replace `resolveConfig()` with `createEnvConfig(overrides?)` factory function that reads `import.meta.env`, accepts optional `Partial<EnvConfig>` overrides for testability, validates required vars, returns `Object.freeze()`-ed `EnvConfig` implementing `ZidneyEnvConfig`
-- [X] T004 [US1] In `createEnvConfig()` inside `apps/mmc/src/core/config/env.ts`, read `VITE_APP_ENV` instead of Vite `MODE` for application environment. Add `normalizeAppEnv()` that maps `'staging'`→`'staging'`, `'production'`→`'production'`, `'development'`→`'development'`, and returns `'development'` as fallback — **GUARDIAN FIX**: unrecognized values must cause all mode helpers to return `false` (see T008 for the fix in `normalizeAppEnv`)
-- [X] T005 [US1] Add `ImportMetaEnv` interface augmentation to `apps/mmc/src/vite-env.d.ts` declaring `VITE_API_BASE_URL`, `VITE_APP_ENV`, `VITE_APP_NAME`, `VITE_DEBUG_MODE`, `VITE_ENABLE_DEBUG_PANEL`
-- [X] T006 [US1] Rewrite `apps/mmc/tests/unit/core/env-config.test.ts` — replace `vi.stubEnv()`/`vi.resetModules()` pattern with factory-based tests: valid config, missing `VITE_API_BASE_URL` throws, `appEnv` normalization, overrides applied, returned object is frozen, mutation has no effect
+- [x] T003 [US1] Refactor `apps/mmc/src/core/config/env.ts` — replace `resolveConfig()` with `createEnvConfig(overrides?)` factory function that reads `import.meta.env`, accepts optional `Partial<EnvConfig>` overrides for testability, validates required vars, returns `Object.freeze()`-ed `EnvConfig` implementing `ZidneyEnvConfig`
+- [x] T004 [US1] In `createEnvConfig()` inside `apps/mmc/src/core/config/env.ts`, read `VITE_APP_ENV` instead of Vite `MODE` for application environment. Add `normalizeAppEnv()` that maps `'staging'`→`'staging'`, `'production'`→`'production'`, `'development'`→`'development'`, and returns `'development'` as fallback — **GUARDIAN FIX**: unrecognized values must cause all mode helpers to return `false` (see T008 for the fix in `normalizeAppEnv`)
+- [x] T005 [US1] Add `ImportMetaEnv` interface augmentation to `apps/mmc/src/vite-env.d.ts` declaring `VITE_API_BASE_URL`, `VITE_APP_ENV`, `VITE_APP_NAME`, `VITE_DEBUG_MODE`, `VITE_ENABLE_DEBUG_PANEL`
+- [x] T006 [US1] Rewrite `apps/mmc/tests/unit/core/env-config.test.ts` — replace `vi.stubEnv()`/`vi.resetModules()` pattern with factory-based tests: valid config, missing `VITE_API_BASE_URL` throws, `appEnv` normalization, overrides applied, returned object is frozen, mutation has no effect
 
 ### US2 — API Base URL Resolution (P1)
 
-- [X] T007 [US2] Create `apps/mmc/src/core/config/app-config.ts` — import `createEnvConfig()` and `createFeatureFlags()`, compose frozen `appConfig: AppConfig` aggregate, export `getApiBase()` returning `envConfig.apiBaseUrl`, export `appConfig` and standalone `featureFlags` — **GUARDIAN FIX**: must export standalone `featureFlags` per contract
-- [X] T008 [US2] Update `apps/mmc/src/main.ts` — change `import '@/core/config/env'` to `import '@/core/config/app-config'`
-- [X] T009 [US2] Update `apps/mmc/src/core/api/client.ts` — change `import { appConfig } from '@/core/config/env'` to `import { appConfig, getApiBase } from '@/core/config/app-config'`, update `AppConfig` type import path
-- [X] T010 [P] [US2] Create `apps/mmc/tests/unit/core/app-config.test.ts` — test `getApiBase()` returns `apiBaseUrl`, test `appConfig` is frozen, test `appConfig.env` is frozen, test `appConfig.flags` is frozen
+- [x] T007 [US2] Create `apps/mmc/src/core/config/app-config.ts` — import `createEnvConfig()` and `createFeatureFlags()`, compose frozen `appConfig: AppConfig` aggregate, export `getApiBase()` returning `envConfig.apiBaseUrl`, export `appConfig` and standalone `featureFlags` — **GUARDIAN FIX**: must export standalone `featureFlags` per contract
+- [x] T008 [US2] Update `apps/mmc/src/main.ts` — change `import '@/core/config/env'` to `import '@/core/config/app-config'`
+- [x] T009 [US2] Update `apps/mmc/src/core/api/client.ts` — change `import { appConfig } from '@/core/config/env'` to `import { appConfig, getApiBase } from '@/core/config/app-config'`, update `AppConfig` type import path
+- [x] T010 [P] [US2] Create `apps/mmc/tests/unit/core/app-config.test.ts` — test `getApiBase()` returns `apiBaseUrl`, test `appConfig` is frozen, test `appConfig.env` is frozen, test `appConfig.flags` is frozen
 
 ### US3 — Environment Mode Helpers (P2)
 
-- [X] T011 [US3] Add mode helpers `isDev()`, `isProd()`, `isStaging()` as standalone exported functions in `apps/mmc/src/core/config/app-config.ts` — pure functions of frozen `envConfig`
-- [X] T012 [US3] **GUARDIAN FIX**: Update `normalizeAppEnv()` in `apps/mmc/src/core/config/env.ts` to NOT default unrecognized values to `'development'` — instead, store the raw normalized value and let mode helpers return `false` for all when `appEnv` is not one of the three known values. Change `appEnv` type to `string` internally and keep the union type for known values only in the validation path
-- [X] T013 [P] [US3] Add mode helper tests to `apps/mmc/tests/unit/core/app-config.test.ts` — `isDev()` true in development, `isProd()` true in production, `isStaging()` true in staging, all return `false` for unrecognized mode value (e.g., `'custom'`)
+- [x] T011 [US3] Add mode helpers `isDev()`, `isProd()`, `isStaging()` as standalone exported functions in `apps/mmc/src/core/config/app-config.ts` — pure functions of frozen `envConfig`
+- [x] T012 [US3] **GUARDIAN FIX**: Update `normalizeAppEnv()` in `apps/mmc/src/core/config/env.ts` to NOT default unrecognized values to `'development'` — instead, store the raw normalized value and let mode helpers return `false` for all when `appEnv` is not one of the three known values. Change `appEnv` type to `string` internally and keep the union type for known values only in the validation path
+- [x] T013 [P] [US3] Add mode helper tests to `apps/mmc/tests/unit/core/app-config.test.ts` — `isDev()` true in development, `isProd()` true in production, `isStaging()` true in staging, all return `false` for unrecognized mode value (e.g., `'custom'`)
 
 ### US4 — Feature Flag Injection (P2)
 
-- [X] T014 [US4] Create `apps/mmc/src/core/config/feature-flags.ts` — export `createFeatureFlags(env: EnvConfig)` factory that receives parsed env config, reads `VITE_ENABLE_DEBUG_PANEL` from `import.meta.env` only within `env.ts` — **GUARDIAN FIX**: `feature-flags.ts` must NOT read `import.meta.env` directly; all env reads go through `env.ts` per design decision D3. Instead, `createFeatureFlags` must accept overrides or the raw flag values passed from `env.ts`
-- [X] T015 [US4] **GUARDIAN FIX**: Update `createFeatureFlags()` in `apps/mmc/src/core/config/feature-flags.ts` to accept and use its parameter/overrides object for testability — signature: `createFeatureFlags(overrides?: Partial<FeatureFlags>): FeatureFlags`
-- [X] T016 [P] [US4] Create `apps/mmc/tests/unit/core/feature-flags.test.ts` — test `parseBooleanFlag`: `"true"`→`true`, `"1"`→`true`, `"yes"`→`true`, `"false"`→`false`, `undefined`→`false`; test returned flags are frozen; test mutation has no effect; test overrides are applied
+- [x] T014 [US4] Create `apps/mmc/src/core/config/feature-flags.ts` — export `createFeatureFlags(env: EnvConfig)` factory that receives parsed env config, reads `VITE_ENABLE_DEBUG_PANEL` from `import.meta.env` only within `env.ts` — **GUARDIAN FIX**: `feature-flags.ts` must NOT read `import.meta.env` directly; all env reads go through `env.ts` per design decision D3. Instead, `createFeatureFlags` must accept overrides or the raw flag values passed from `env.ts`
+- [x] T015 [US4] **GUARDIAN FIX**: Update `createFeatureFlags()` in `apps/mmc/src/core/config/feature-flags.ts` to accept and use its parameter/overrides object for testability — signature: `createFeatureFlags(overrides?: Partial<FeatureFlags>): FeatureFlags`
+- [x] T016 [P] [US4] Create `apps/mmc/tests/unit/core/feature-flags.test.ts` — test `parseBooleanFlag`: `"true"`→`true`, `"1"`→`true`, `"yes"`→`true`, `"false"`→`false`, `undefined`→`false`; test returned flags are frozen; test mutation has no effect; test overrides are applied
 
 ### US5 — Secure Exposure Policy (P1)
 
-- [X] T017 [US5] Add `no-restricted-syntax` ESLint rule to `apps/mmc/eslint.config.js` targeting `MemberExpression` for `import.meta.env` — applied to all `**/*.ts` and `**/*.vue` files, ignoring `src/core/config/env.ts`
-- [X] T018 [P] [US5] Verify no `import.meta.env` usage exists outside `apps/mmc/src/core/config/env.ts` by running ESLint on the MMC app
+- [x] T017 [US5] Add `no-restricted-syntax` ESLint rule to `apps/mmc/eslint.config.js` targeting `MemberExpression` for `import.meta.env` — applied to all `**/*.ts` and `**/*.vue` files, ignoring `src/core/config/env.ts`
+- [x] T018 [P] [US5] Verify no `import.meta.env` usage exists outside `apps/mmc/src/core/config/env.ts` by running ESLint on the MMC app
 
 ### US6 — Test Environment Support (P2)
 
-- [X] T019 [US6] Verify factory pattern enables isolated testing in `apps/mmc/tests/unit/core/env-config.test.ts` — add test that provides mock overrides to `createEnvConfig()` without `vi.stubEnv()` and confirms mocked values returned
-- [X] T020 [P] [US6] Add test in `apps/mmc/tests/unit/core/app-config.test.ts` that simulates staging mode via factory override and verifies `isStaging()` returns `true`
+- [x] T019 [US6] Verify factory pattern enables isolated testing in `apps/mmc/tests/unit/core/env-config.test.ts` — add test that provides mock overrides to `createEnvConfig()` without `vi.stubEnv()` and confirms mocked values returned
+- [x] T020 [P] [US6] Add test in `apps/mmc/tests/unit/core/app-config.test.ts` that simulates staging mode via factory override and verifies `isStaging()` returns `true`
 
 ### US7 — Multi-App Consistency (P3) — deferred to Phase 5
 
 ### Environment Files
 
-- [X] T021 [P] Create/update `apps/mmc/.env.example` — document all `VITE_` variables: `VITE_API_BASE_URL`, `VITE_APP_ENV`, `VITE_APP_NAME`, `VITE_DEBUG_MODE`, `VITE_ENABLE_DEBUG_PANEL` — **GUARDIAN FIX**: include comment documenting `MODE → VITE_APP_ENV` migration (old `MODE` usage replaced by `VITE_APP_ENV`)
+- [x] T021 [P] Create/update `apps/mmc/.env.example` — document all `VITE_` variables: `VITE_API_BASE_URL`, `VITE_APP_ENV`, `VITE_APP_NAME`, `VITE_DEBUG_MODE`, `VITE_ENABLE_DEBUG_PANEL` — **GUARDIAN FIX**: include comment documenting `MODE → VITE_APP_ENV` migration (old `MODE` usage replaced by `VITE_APP_ENV`)
 
 **Checkpoint**: MMC env configuration is fully functional. All 7 user stories covered (US7 validated in Phase 5). Factory pattern works. Lint rule active. Tests pass.
 
@@ -80,30 +80,30 @@
 
 ### US1 — Centralized Environment Access (P1)
 
-- [X] T022 [US1] Refactor `apps/backoffice/src/core/config/env.ts` — replace `resolveConfig()` with `createEnvConfig(overrides?)` factory. Extend `ZidneyEnvConfig` with `BackofficeEnvConfig` adding optional `workspaceSlug`. Read `VITE_WORKSPACE_SLUG` additionally. Use `VITE_APP_ENV` instead of `MODE`. **GUARDIAN FIX**: `normalizeAppEnv()` must handle unrecognized values (not default to `'development'`). Return `Object.freeze()`-ed config.
-- [X] T023 [P] [US1] Add `ImportMetaEnv` interface augmentation to `apps/backoffice/src/vite-env.d.ts` declaring `VITE_API_BASE_URL`, `VITE_APP_ENV`, `VITE_APP_NAME`, `VITE_DEBUG_MODE`, `VITE_ENABLE_DEBUG_PANEL`, `VITE_WORKSPACE_SLUG`
-- [X] T024 [P] [US1] Rewrite `apps/backoffice/tests/unit/core/env-config.test.ts` — factory pattern tests including `workspaceSlug` override, unrecognized `appEnv` handling, frozen output
+- [x] T022 [US1] Refactor `apps/backoffice/src/core/config/env.ts` — replace `resolveConfig()` with `createEnvConfig(overrides?)` factory. Extend `ZidneyEnvConfig` with `BackofficeEnvConfig` adding optional `workspaceSlug`. Read `VITE_WORKSPACE_SLUG` additionally. Use `VITE_APP_ENV` instead of `MODE`. **GUARDIAN FIX**: `normalizeAppEnv()` must handle unrecognized values (not default to `'development'`). Return `Object.freeze()`-ed config.
+- [x] T023 [P] [US1] Add `ImportMetaEnv` interface augmentation to `apps/backoffice/src/vite-env.d.ts` declaring `VITE_API_BASE_URL`, `VITE_APP_ENV`, `VITE_APP_NAME`, `VITE_DEBUG_MODE`, `VITE_ENABLE_DEBUG_PANEL`, `VITE_WORKSPACE_SLUG`
+- [x] T024 [P] [US1] Rewrite `apps/backoffice/tests/unit/core/env-config.test.ts` — factory pattern tests including `workspaceSlug` override, unrecognized `appEnv` handling, frozen output
 
 ### US2 — API Base URL Resolution (P1)
 
-- [X] T025 [US2] Create `apps/backoffice/src/core/config/app-config.ts` — compose frozen `appConfig`, export `getApiBase()`, `isDev()`, `isProd()`, `isStaging()`, standalone `featureFlags` — **GUARDIAN FIX**: must export standalone `featureFlags`
-- [X] T026 [US2] Update `apps/backoffice/src/main.ts` — change `import '@/core/config/env'` to `import '@/core/config/app-config'`
-- [X] T027 [US2] Update `apps/backoffice/src/core/api/client.ts` — change imports from `@/core/config/env` to `@/core/config/app-config`
-- [X] T028 [P] [US2] Create `apps/backoffice/tests/unit/core/app-config.test.ts` — test `getApiBase()`, frozen `appConfig`, mode helpers, unrecognized mode returns `false` for all
+- [x] T025 [US2] Create `apps/backoffice/src/core/config/app-config.ts` — compose frozen `appConfig`, export `getApiBase()`, `isDev()`, `isProd()`, `isStaging()`, standalone `featureFlags` — **GUARDIAN FIX**: must export standalone `featureFlags`
+- [x] T026 [US2] Update `apps/backoffice/src/main.ts` — change `import '@/core/config/env'` to `import '@/core/config/app-config'`
+- [x] T027 [US2] Update `apps/backoffice/src/core/api/client.ts` — change imports from `@/core/config/env` to `@/core/config/app-config`
+- [x] T028 [P] [US2] Create `apps/backoffice/tests/unit/core/app-config.test.ts` — test `getApiBase()`, frozen `appConfig`, mode helpers, unrecognized mode returns `false` for all
 
 ### US4 — Feature Flag Injection (P2)
 
-- [X] T029 [US4] Create `apps/backoffice/src/core/config/feature-flags.ts` — `createFeatureFlags(overrides?)` factory. **GUARDIAN FIX**: must NOT read `import.meta.env` directly; accept overrides parameter for testability
-- [X] T030 [P] [US4] Create `apps/backoffice/tests/unit/core/feature-flags.test.ts` — boolean normalization, frozen output, overrides applied
+- [x] T029 [US4] Create `apps/backoffice/src/core/config/feature-flags.ts` — `createFeatureFlags(overrides?)` factory. **GUARDIAN FIX**: must NOT read `import.meta.env` directly; accept overrides parameter for testability
+- [x] T030 [P] [US4] Create `apps/backoffice/tests/unit/core/feature-flags.test.ts` — boolean normalization, frozen output, overrides applied
 
 ### US5 — Secure Exposure Policy (P1)
 
-- [X] T031 [US5] Add `no-restricted-syntax` ESLint rule to `apps/backoffice/eslint.config.js` targeting `import.meta.env` MemberExpression — ignoring `src/core/config/env.ts`
-- [X] T032 [P] [US5] Verify no `import.meta.env` usage outside `apps/backoffice/src/core/config/env.ts`
+- [x] T031 [US5] Add `no-restricted-syntax` ESLint rule to `apps/backoffice/eslint.config.js` targeting `import.meta.env` MemberExpression — ignoring `src/core/config/env.ts`
+- [x] T032 [P] [US5] Verify no `import.meta.env` usage outside `apps/backoffice/src/core/config/env.ts`
 
 ### Environment Files
 
-- [X] T033 [P] Update `apps/backoffice/.env.example` — document all `VITE_` variables including `VITE_WORKSPACE_SLUG`. **GUARDIAN FIX**: include `MODE → VITE_APP_ENV` migration comment
+- [x] T033 [P] Update `apps/backoffice/.env.example` — document all `VITE_` variables including `VITE_WORKSPACE_SLUG`. **GUARDIAN FIX**: include `MODE → VITE_APP_ENV` migration comment
 
 **Checkpoint**: Backoffice env configuration is fully functional. Extension pattern with `workspaceSlug` validated.
 
@@ -115,30 +115,30 @@
 
 ### US1 — Centralized Environment Access (P1)
 
-- [X] T034 [US1] Refactor `apps/frontoffice/src/core/config/env.ts` — replace `resolveConfig()` with `createEnvConfig(overrides?)` factory. Use `VITE_APP_ENV` instead of `MODE`. **GUARDIAN FIX**: `normalizeAppEnv()` handles unrecognized values. Return `Object.freeze()`-ed config.
-- [X] T035 [P] [US1] Add `ImportMetaEnv` interface augmentation to `apps/frontoffice/src/vite-env.d.ts` declaring `VITE_API_BASE_URL`, `VITE_APP_ENV`, `VITE_APP_NAME`, `VITE_DEBUG_MODE`, `VITE_ENABLE_DEBUG_PANEL`
-- [X] T036 [P] [US1] Rewrite `apps/frontoffice/tests/unit/core/env-config.test.ts` — factory pattern tests, unrecognized `appEnv` handling, frozen output
+- [x] T034 [US1] Refactor `apps/frontoffice/src/core/config/env.ts` — replace `resolveConfig()` with `createEnvConfig(overrides?)` factory. Use `VITE_APP_ENV` instead of `MODE`. **GUARDIAN FIX**: `normalizeAppEnv()` handles unrecognized values. Return `Object.freeze()`-ed config.
+- [x] T035 [P] [US1] Add `ImportMetaEnv` interface augmentation to `apps/frontoffice/src/vite-env.d.ts` declaring `VITE_API_BASE_URL`, `VITE_APP_ENV`, `VITE_APP_NAME`, `VITE_DEBUG_MODE`, `VITE_ENABLE_DEBUG_PANEL`
+- [x] T036 [P] [US1] Rewrite `apps/frontoffice/tests/unit/core/env-config.test.ts` — factory pattern tests, unrecognized `appEnv` handling, frozen output
 
 ### US2 — API Base URL Resolution (P1)
 
-- [X] T037 [US2] Create `apps/frontoffice/src/core/config/app-config.ts` — compose frozen `appConfig`, export `getApiBase()`, `isDev()`, `isProd()`, `isStaging()`, standalone `featureFlags` — **GUARDIAN FIX**: must export standalone `featureFlags`
-- [X] T038 [US2] Update `apps/frontoffice/src/main.ts` — change `import '@/core/config/env'` to `import '@/core/config/app-config'`
-- [X] T039 [US2] Update `apps/frontoffice/src/core/api/client.ts` — change imports from `@/core/config/env` to `@/core/config/app-config`
-- [X] T040 [P] [US2] Create `apps/frontoffice/tests/unit/core/app-config.test.ts` — test `getApiBase()`, frozen `appConfig`, mode helpers, unrecognized mode returns `false` for all
+- [x] T037 [US2] Create `apps/frontoffice/src/core/config/app-config.ts` — compose frozen `appConfig`, export `getApiBase()`, `isDev()`, `isProd()`, `isStaging()`, standalone `featureFlags` — **GUARDIAN FIX**: must export standalone `featureFlags`
+- [x] T038 [US2] Update `apps/frontoffice/src/main.ts` — change `import '@/core/config/env'` to `import '@/core/config/app-config'`
+- [x] T039 [US2] Update `apps/frontoffice/src/core/api/client.ts` — change imports from `@/core/config/env` to `@/core/config/app-config`
+- [x] T040 [P] [US2] Create `apps/frontoffice/tests/unit/core/app-config.test.ts` — test `getApiBase()`, frozen `appConfig`, mode helpers, unrecognized mode returns `false` for all
 
 ### US4 — Feature Flag Injection (P2)
 
-- [X] T041 [US4] Create `apps/frontoffice/src/core/config/feature-flags.ts` — `createFeatureFlags(overrides?)` factory. **GUARDIAN FIX**: must NOT read `import.meta.env` directly; accept overrides parameter
-- [X] T042 [P] [US4] Create `apps/frontoffice/tests/unit/core/feature-flags.test.ts` — boolean normalization, frozen output, overrides applied
+- [x] T041 [US4] Create `apps/frontoffice/src/core/config/feature-flags.ts` — `createFeatureFlags(overrides?)` factory. **GUARDIAN FIX**: must NOT read `import.meta.env` directly; accept overrides parameter
+- [x] T042 [P] [US4] Create `apps/frontoffice/tests/unit/core/feature-flags.test.ts` — boolean normalization, frozen output, overrides applied
 
 ### US5 — Secure Exposure Policy (P1)
 
-- [X] T043 [US5] Add `no-restricted-syntax` ESLint rule to `apps/frontoffice/eslint.config.js` targeting `import.meta.env` MemberExpression — ignoring `src/core/config/env.ts`
-- [X] T044 [P] [US5] Verify no `import.meta.env` usage outside `apps/frontoffice/src/core/config/env.ts`
+- [x] T043 [US5] Add `no-restricted-syntax` ESLint rule to `apps/frontoffice/eslint.config.js` targeting `import.meta.env` MemberExpression — ignoring `src/core/config/env.ts`
+- [x] T044 [P] [US5] Verify no `import.meta.env` usage outside `apps/frontoffice/src/core/config/env.ts`
 
 ### Environment Files
 
-- [X] T045 [P] Update `apps/frontoffice/.env.example` — document all `VITE_` variables. **GUARDIAN FIX**: include `MODE → VITE_APP_ENV` migration comment
+- [x] T045 [P] Update `apps/frontoffice/.env.example` — document all `VITE_` variables. **GUARDIAN FIX**: include `MODE → VITE_APP_ENV` migration comment
 
 **Checkpoint**: Frontoffice env configuration is fully functional. Same API surface as MMC.
 
@@ -150,18 +150,18 @@
 
 ### US7 — Multi-App Consistency (P3)
 
-- [X] T046 [US7] Verify all three apps export the same public API surface from `app-config.ts`: `appConfig`, `featureFlags`, `isDev()`, `isProd()`, `isStaging()`, `getApiBase()` — compare function signatures and return types
-- [X] T047 [US7] Run TypeScript compiler across all three apps — verify all `EnvConfig` types satisfy `ZidneyEnvConfig` interface from `packages/types`
-- [X] T048 [US7] Run ESLint across all three apps — confirm zero violations of `no-restricted-syntax` rule for `import.meta.env` outside `env.ts`
-- [X] T049 [US7] Run all unit tests across all three apps — confirm env-config, feature-flags, and app-config test suites pass
+- [x] T046 [US7] Verify all three apps export the same public API surface from `app-config.ts`: `appConfig`, `featureFlags`, `isDev()`, `isProd()`, `isStaging()`, `getApiBase()` — compare function signatures and return types
+- [x] T047 [US7] Run TypeScript compiler across all three apps — verify all `EnvConfig` types satisfy `ZidneyEnvConfig` interface from `packages/types`
+- [x] T048 [US7] Run ESLint across all three apps — confirm zero violations of `no-restricted-syntax` rule for `import.meta.env` outside `env.ts`
+- [x] T049 [US7] Run all unit tests across all three apps — confirm env-config, feature-flags, and app-config test suites pass
 
 ### Cross-Cutting Concerns
 
-- [X] T050 [P] Scan all three apps for any remaining `import { appConfig } from '@/core/config/env'` references — migrate to `@/core/config/app-config`
-- [X] T051 [P] Scan all three apps for any remaining `appConfig.buildEnv` references — migrate to `appConfig.env.appEnv`
-- [X] T052 [P] Scan all three apps for any remaining `appConfig.apiBaseUrl` direct references — migrate to `appConfig.env.apiBaseUrl` or `getApiBase()`
-- [X] T053 [P] Scan all three apps for any remaining `appConfig.debugMode` references — migrate to `appConfig.env.debugMode`
-- [X] T054 Run `quickstart.md` validation — follow the developer usage guide end-to-end in one app and confirm imports, mode helpers, feature flags, and lint behavior work as documented
+- [x] T050 [P] Scan all three apps for any remaining `import { appConfig } from '@/core/config/env'` references — migrate to `@/core/config/app-config`
+- [x] T051 [P] Scan all three apps for any remaining `appConfig.buildEnv` references — migrate to `appConfig.env.appEnv`
+- [x] T052 [P] Scan all three apps for any remaining `appConfig.apiBaseUrl` direct references — migrate to `appConfig.env.apiBaseUrl` or `getApiBase()`
+- [x] T053 [P] Scan all three apps for any remaining `appConfig.debugMode` references — migrate to `appConfig.env.debugMode`
+- [x] T054 Run `quickstart.md` validation — follow the developer usage guide end-to-end in one app and confirm imports, mode helpers, feature flags, and lint behavior work as documented
 
 **Checkpoint**: All three apps are consistent. All tests pass. Lint clean. Migration complete.
 

@@ -27,7 +27,6 @@ describe('T046: Authentication & Session Management Integration Tests', () => {
       adminPassword: 'AdminPass123!',
       disabledUserId: randomUUID(),
     }
-
   })
 
   afterEach(() => {

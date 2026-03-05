@@ -164,7 +164,11 @@ class InMemoryPool {
       return { rows: [], rowCount: 1 }
     }
 
-    if (normalized.startsWith('select * from dlq_resolutions where dlq_job_id = $1')) {
+    if (
+      normalized.startsWith(
+        'select * from dlq_resolutions where dlq_job_id = $1'
+      )
+    ) {
       const dlq_job_id = String(params[0])
       const rows = this.state.dlqResolutions.filter(
         (row) => row.dlq_job_id === dlq_job_id
@@ -172,7 +176,11 @@ class InMemoryPool {
       return { rows, rowCount: rows.length }
     }
 
-    if (normalized.includes('select count(*) as count from attempts where workspace_id = $1')) {
+    if (
+      normalized.includes(
+        'select count(*) as count from attempts where workspace_id = $1'
+      )
+    ) {
       const workspace_id = String(params[0])
       const count = Array.from(this.state.attempts.values()).filter(
         (attempt) => attempt.workspace_id === workspace_id
@@ -238,7 +246,9 @@ function validateSchemaVersion(headers: Record<string, string>) {
   }
 }
 
-function makeBaseHeaders(clientHeaders: Record<string, string>): Record<string, string> {
+function makeBaseHeaders(
+  clientHeaders: Record<string, string>
+): Record<string, string> {
   return {
     'X-Correlation-ID': clientHeaders['X-Correlation-ID'] ?? randomUUID(),
   }
@@ -339,7 +349,10 @@ export class MockHttpClient implements TestClient {
           return {
             status: 429,
             data: null,
-            error: { code: 'RATE_LIMIT_EXCEEDED', message: 'Too many requests' },
+            error: {
+              code: 'RATE_LIMIT_EXCEEDED',
+              message: 'Too many requests',
+            },
             headers: { ...headers, 'Retry-After': '60' },
           }
         }
@@ -660,7 +673,10 @@ export class MockHttpClient implements TestClient {
       return { status: 200, data: { items: [] }, error: null, headers }
     }
 
-    if (path.includes('/rate-limit-audit') || path.includes('/rate-limit-export')) {
+    if (
+      path.includes('/rate-limit-audit') ||
+      path.includes('/rate-limit-export')
+    ) {
       return { status: 200, data: { ok: true }, error: null, headers }
     }
 
@@ -694,7 +710,12 @@ export class MockHttpClient implements TestClient {
       }
 
       attempt.status = 'IN_PROGRESS'
-      return { status: 200, data: { status: 'IN_PROGRESS' }, error: null, headers }
+      return {
+        status: 200,
+        data: { status: 'IN_PROGRESS' },
+        error: null,
+        headers,
+      }
     }
 
     return { status: 200, data: {}, error: null, headers }

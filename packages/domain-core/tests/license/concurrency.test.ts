@@ -28,14 +28,12 @@ describe('Concurrency: Limit Enforcement', () => {
     // Request 1: Lock acquired, count=0, INSERT succeeds
     // Request 2: Waits for lock, then recounts, sees count=1, fails with 402
 
-    masterDb.mockResult(
-      'from licenses where workspace_id = $1 for update',
-      [license]
-    )
-    masterDb.mockResult(
-      'from licenses where workspace_id = $1 for update',
-      [license]
-    )
+    masterDb.mockResult('from licenses where workspace_id = $1 for update', [
+      license,
+    ])
+    masterDb.mockResult('from licenses where workspace_id = $1 for update', [
+      license,
+    ])
 
     // First request: count = 0, can add
     tenantDb.mockResult(
@@ -43,14 +41,18 @@ describe('Concurrency: Limit Enforcement', () => {
       [{ count: 0 }]
     )
 
-    const result1 = await createUserWithLimitCheck(masterDb as unknown as Pool, tenantDb as unknown as Pool, {
-      workspace_id,
-      user_id: 'user-1',
-      role: 'STUDENT',
-      name: 'User 1',
-      email: 'user1@example.com',
-      limit: 1,
-    })
+    const result1 = await createUserWithLimitCheck(
+      masterDb as unknown as Pool,
+      tenantDb as unknown as Pool,
+      {
+        workspace_id,
+        user_id: 'user-1',
+        role: 'STUDENT',
+        name: 'User 1',
+        email: 'user1@example.com',
+        limit: 1,
+      }
+    )
 
     expect(result1.success).toBe(true)
 
@@ -60,14 +62,18 @@ describe('Concurrency: Limit Enforcement', () => {
       [{ count: 1 }]
     )
 
-    const result2 = await createUserWithLimitCheck(masterDb as unknown as Pool, tenantDb as unknown as Pool, {
-      workspace_id,
-      user_id: 'user-2',
-      role: 'STUDENT',
-      name: 'User 2',
-      email: 'user2@example.com',
-      limit: 1,
-    })
+    const result2 = await createUserWithLimitCheck(
+      masterDb as unknown as Pool,
+      tenantDb as unknown as Pool,
+      {
+        workspace_id,
+        user_id: 'user-2',
+        role: 'STUDENT',
+        name: 'User 2',
+        email: 'user2@example.com',
+        limit: 1,
+      }
+    )
 
     expect(result2.success).toBe(false)
     expect(result2.error_code).toBe('LIMIT_EXCEEDED')
@@ -79,18 +85,21 @@ describe('Concurrency: Limit Enforcement', () => {
       status: 'SOFT_LOCKED',
     })
 
-    masterDb.mockResult(
-      'from licenses where workspace_id = $1 for update',
-      [softLockedLicense]
-    )
+    masterDb.mockResult('from licenses where workspace_id = $1 for update', [
+      softLockedLicense,
+    ])
 
-    const result = await createUserWithLimitCheck(masterDb as unknown as Pool, tenantDb as unknown as Pool, {
-      workspace_id: softLockedLicense.workspace_id,
-      user_id: 'user-1',
-      role: 'STUDENT',
-      name: 'User 1',
-      email: 'user1@example.com',
-    })
+    const result = await createUserWithLimitCheck(
+      masterDb as unknown as Pool,
+      tenantDb as unknown as Pool,
+      {
+        workspace_id: softLockedLicense.workspace_id,
+        user_id: 'user-1',
+        role: 'STUDENT',
+        name: 'User 1',
+        email: 'user1@example.com',
+      }
+    )
 
     expect(result.success).toBe(false)
     expect(result.error_code).toBe('LICENSE_SOFT_LOCKED')
@@ -102,18 +111,21 @@ describe('Concurrency: Limit Enforcement', () => {
       status: 'ARCHIVED',
     })
 
-    masterDb.mockResult(
-      'from licenses where workspace_id = $1 for update',
-      [archivedLicense]
-    )
+    masterDb.mockResult('from licenses where workspace_id = $1 for update', [
+      archivedLicense,
+    ])
 
-    const result = await createUserWithLimitCheck(masterDb as unknown as Pool, tenantDb as unknown as Pool, {
-      workspace_id: archivedLicense.workspace_id,
-      user_id: 'user-1',
-      role: 'STUDENT',
-      name: 'User 1',
-      email: 'user1@example.com',
-    })
+    const result = await createUserWithLimitCheck(
+      masterDb as unknown as Pool,
+      tenantDb as unknown as Pool,
+      {
+        workspace_id: archivedLicense.workspace_id,
+        user_id: 'user-1',
+        role: 'STUDENT',
+        name: 'User 1',
+        email: 'user1@example.com',
+      }
+    )
 
     expect(result.success).toBe(false)
     expect(result.error_code).toBe('LICENSE_ARCHIVED')
@@ -124,14 +136,12 @@ describe('Concurrency: Limit Enforcement', () => {
     // Both requests see same count due to FOR UPDATE lock
     const license = testFixtures.makeLicense({ student_limit: 2 })
 
-    masterDb.mockResult(
-      'from licenses where workspace_id = $1 for update',
-      [license]
-    )
-    masterDb.mockResult(
-      'from licenses where workspace_id = $1 for update',
-      [license]
-    )
+    masterDb.mockResult('from licenses where workspace_id = $1 for update', [
+      license,
+    ])
+    masterDb.mockResult('from licenses where workspace_id = $1 for update', [
+      license,
+    ])
 
     tenantDb.mockResult(
       "from users where workspace_id = $1 and status = 'enabled' and role = 'student'",
@@ -142,23 +152,31 @@ describe('Concurrency: Limit Enforcement', () => {
       [{ count: 1 }]
     )
 
-    const result1 = await createUserWithLimitCheck(masterDb as unknown as Pool, tenantDb as unknown as Pool, {
-      workspace_id: license.workspace_id,
-      user_id: 'user-1',
-      role: 'STUDENT',
-      name: 'User 1',
-      email: 'user1@example.com',
-      limit: 2,
-    })
+    const result1 = await createUserWithLimitCheck(
+      masterDb as unknown as Pool,
+      tenantDb as unknown as Pool,
+      {
+        workspace_id: license.workspace_id,
+        user_id: 'user-1',
+        role: 'STUDENT',
+        name: 'User 1',
+        email: 'user1@example.com',
+        limit: 2,
+      }
+    )
 
-    const result2 = await createUserWithLimitCheck(masterDb as unknown as Pool, tenantDb as unknown as Pool, {
-      workspace_id: license.workspace_id,
-      user_id: 'user-2',
-      role: 'STUDENT',
-      name: 'User 2',
-      email: 'user2@example.com',
-      limit: 2,
-    })
+    const result2 = await createUserWithLimitCheck(
+      masterDb as unknown as Pool,
+      tenantDb as unknown as Pool,
+      {
+        workspace_id: license.workspace_id,
+        user_id: 'user-2',
+        role: 'STUDENT',
+        name: 'User 2',
+        email: 'user2@example.com',
+        limit: 2,
+      }
+    )
 
     expect(result1.success).toBe(true)
     expect(result2.success).toBe(true) // Both within limit
@@ -169,24 +187,27 @@ describe('Concurrency: Limit Enforcement', () => {
       student_limit: null,
     })
 
-    masterDb.mockResult(
-      'from licenses where workspace_id = $1 for update',
-      [unlimitedLicense]
-    )
+    masterDb.mockResult('from licenses where workspace_id = $1 for update', [
+      unlimitedLicense,
+    ])
 
     tenantDb.mockResult(
       "from users where workspace_id = $1 and status = 'enabled' and role = 'student'",
       [{ count: 999 }] // Very high count
     )
 
-    const result = await createUserWithLimitCheck(masterDb as unknown as Pool, tenantDb as unknown as Pool, {
-      workspace_id: unlimitedLicense.workspace_id,
-      user_id: 'user-1',
-      role: 'STUDENT',
-      name: 'User 1',
-      email: 'user1@example.com',
-      limit: null,
-    })
+    const result = await createUserWithLimitCheck(
+      masterDb as unknown as Pool,
+      tenantDb as unknown as Pool,
+      {
+        workspace_id: unlimitedLicense.workspace_id,
+        user_id: 'user-1',
+        role: 'STUDENT',
+        name: 'User 1',
+        email: 'user1@example.com',
+        limit: null,
+      }
+    )
 
     expect(result.success).toBe(true)
   })

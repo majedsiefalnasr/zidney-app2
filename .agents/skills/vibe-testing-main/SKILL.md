@@ -91,11 +91,13 @@ A single sentence in the persona's own words. Use a blockquote.
 Sarah's first payment attempt is declined. She re-enters a different card.
 
 **Primitives:**
+
 - `payments-spec.md`: retry policy, idempotency keys
 - `inventory-spec.md`: stock hold duration during retry
 - `orders-spec.md`: order state transitions on payment failure
 
 **Questions:**
+
 - Q3.1: The payment spec says "retry 3 times." The inventory spec
   holds stock for 5 minutes. What if retries take longer than 5 minutes?
 - Q3.2: Does the order stay in "pending_payment" during retries, or
@@ -114,11 +116,11 @@ Sarah's first payment attempt is declined. She re-enters a different card.
 A table showing which spec docs were exercised at which steps.
 
 ```markdown
-| Spec Doc | Steps Hit | Coverage |
-|----------|-----------|----------|
-| `payments-spec.md` | 3,4 | Retry covered; hold-vs-retry timing gap |
-| `inventory-spec.md` | 2,3 | Stock hold covered; expiry-during-retry unclear |
-| `shipping-spec.md` | — | Not exercised |
+| Spec Doc            | Steps Hit | Coverage                                        |
+| ------------------- | --------- | ----------------------------------------------- |
+| `payments-spec.md`  | 3,4       | Retry covered; hold-vs-retry timing gap         |
+| `inventory-spec.md` | 2,3       | Stock hold covered; expiry-during-retry unclear |
+| `shipping-spec.md`  | —         | Not exercised                                   |
 ```
 
 Specs that no scenario touches are untested blind spots.
@@ -131,11 +133,11 @@ Collect all Q-numbers for easy reference. The simulator answers every one.
 
 Classify each finding by severity:
 
-| Severity | Definition | Example |
-|----------|-----------|---------|
+| Severity     | Definition                                    | Example                                                                  |
+| ------------ | --------------------------------------------- | ------------------------------------------------------------------------ |
 | **BLOCKING** | Spec cannot answer; implementation impossible | Payment retry duration can exceed inventory hold — no resolution defined |
-| **DEGRADED** | Spec is silent but a workaround exists | No spec for partial refunds on split shipments; can process manually |
-| **COSMETIC** | Missing convenience, not a correctness issue | No order timeline view for customer support |
+| **DEGRADED** | Spec is silent but a workaround exists        | No spec for partial refunds on split shipments; can process manually     |
+| **COSMETIC** | Missing convenience, not a correctness issue  | No order timeline view for customer support                              |
 
 ## Running a Vibe Test
 
@@ -198,14 +200,14 @@ After spec updates, re-run all vibe tests to verify:
 
 Choose scenarios that vary across dimensions:
 
-| Dimension | Variation A | Variation B | Variation C |
-|-----------|------------|------------|------------|
-| **User type** | First-time buyer | Returning customer | Admin/merchant |
-| **Device** | Mobile browser | Desktop | API client |
-| **Scale** | Single user | Normal traffic | Black Friday spike |
-| **Payment** | Happy path | Failure + retry | Partial refund |
-| **Governance** | None (consumer) | Moderate (business) | Strict (compliance) |
-| **Network** | Fast WiFi | Slow 3G | Intermittent |
+| Dimension      | Variation A      | Variation B         | Variation C         |
+| -------------- | ---------------- | ------------------- | ------------------- |
+| **User type**  | First-time buyer | Returning customer  | Admin/merchant      |
+| **Device**     | Mobile browser   | Desktop             | API client          |
+| **Scale**      | Single user      | Normal traffic      | Black Friday spike  |
+| **Payment**    | Happy path       | Failure + retry     | Partial refund      |
+| **Governance** | None (consumer)  | Moderate (business) | Strict (compliance) |
+| **Network**    | Fast WiFi        | Slow 3G             | Intermittent        |
 
 Each test case should differ on at least 3 dimensions. 4 test cases covering 4 quadrants give good coverage.
 
@@ -232,34 +234,37 @@ After writing all test cases, check the coverage union. Every spec doc should ap
 ## Gap Summary
 
 ### BLOCKING
-| ID | Gap | Affected Tests | Recommended Fix |
-|----|-----|---------------|-----------------|
-| G-B1 | Payment retry window can exceed inventory hold | VT-1, VT-2 | Align timing in payments-spec.md and inventory-spec.md |
+
+| ID   | Gap                                            | Affected Tests | Recommended Fix                                        |
+| ---- | ---------------------------------------------- | -------------- | ------------------------------------------------------ |
+| G-B1 | Payment retry window can exceed inventory hold | VT-1, VT-2     | Align timing in payments-spec.md and inventory-spec.md |
 
 ### DEGRADED
-| ID | Gap | Affected Tests | Workaround |
-|----|-----|---------------|-----------|
-| G-D1 | No spec for partial refunds on split shipments | VT-3 | Process refunds per-shipment manually |
+
+| ID   | Gap                                            | Affected Tests | Workaround                            |
+| ---- | ---------------------------------------------- | -------------- | ------------------------------------- |
+| G-D1 | No spec for partial refunds on split shipments | VT-3           | Process refunds per-shipment manually |
 
 ### COSMETIC
-| ID | Gap | Affected Tests |
-|----|-----|---------------|
-| G-C1 | No order timeline view for support agents | VT-4 |
+
+| ID   | Gap                                       | Affected Tests |
+| ---- | ----------------------------------------- | -------------- |
+| G-C1 | No order timeline view for support agents | VT-4           |
 ```
 
 Gap IDs use prefix: `G-B` (blocking), `G-D` (degraded), `G-C` (cosmetic).
 
 ## Common Mistakes
 
-| Mistake | Fix |
-|---------|-----|
-| Abstract personas ("a user") | Give them names, roles, and constraints |
-| Scenario only tests happy path | Add failure steps: "What if the payment is declined?" |
+| Mistake                                   | Fix                                                       |
+| ----------------------------------------- | --------------------------------------------------------- |
+| Abstract personas ("a user")              | Give them names, roles, and constraints                   |
+| Scenario only tests happy path            | Add failure steps: "What if the payment is declined?"     |
 | Questions test opinions ("Is this good?") | Questions must be spec-answerable: "Which doc defines X?" |
-| All tests use same user type | Vary across buyer, merchant, admin, support |
-| Ignoring coverage matrix | Every spec doc must appear in at least one test |
-| Writing tests after implementation | Vibe tests validate specs BEFORE implementation |
-| Too many steps per scenario | 5-8 steps. Focused scenarios find more gaps |
+| All tests use same user type              | Vary across buyer, merchant, admin, support               |
+| Ignoring coverage matrix                  | Every spec doc must appear in at least one test           |
+| Writing tests after implementation        | Vibe tests validate specs BEFORE implementation           |
+| Too many steps per scenario               | 5-8 steps. Focused scenarios find more gaps               |
 
 ## Additional Resources
 

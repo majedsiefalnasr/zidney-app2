@@ -11,6 +11,7 @@
 ### Core Service Methods (T006-T010)
 
 Each method must:
+
 - Accept tenant resolver context + license ID + required parameters
 - Return transaction result with audit entry
 - Throw structured errors (ISO-8601 timestamps, error codes)
@@ -38,6 +39,7 @@ async transitionToSoftLock(
 ### Validation Helpers (T011-T015)
 
 Each helper validates critical invariants:
+
 - **validateStateTransition**: Checks if new_status is valid from current_status
 - **validateSoftLockExpiry**: Ensures soft_lock_until > now() and respects schema
 - **validateSchemaCompatibility**: Confirms schema_version in license matches master
@@ -96,6 +98,7 @@ npm test -- --testPathPattern=license.service.integration.test.ts
    - **Target:** 100% test scenarios pass
 
 4. **Lint + Type Check**
+
    ```bash
    npx eslint packages/domain-core/src/license/
    npx tsc --noEmit
@@ -112,24 +115,25 @@ npm test -- --testPathPattern=license.service.integration.test.ts
 
 ## Key Constraints by Task
 
-| Task | Method | Constraints | Accept Criteria |
-|------|--------|-----------|-----------------|
-| T006 | transitionToSoftLock | Must set soft_lock_until, log reason, Q6 dual-mode | Tests pass: normal + expiry + concurrent |
-| T007 | transitionToActive | Must clear soft_lock_until, validate Q6 window | Tests pass: recovery scenario |
-| T008 | transitionToArchived | Must snapshot before archive (Q3), no restore during archive | Tests pass: archive + timeout validation |
-| T009 | restoreFromArchive | Must reverse archive state, must NOT restore if deleted | Tests pass: recovery + deletion guard |
-| T010 | transitionToDeleted | Grace period enforcement (deleted_at + 30 days) | Tests pass: grace period + double-confirm |
-| T011 | validateStateTransition | State machine: ACTIVE ↔ SOFT_LOCKED, ACTIVE → ARCHIVED, etc. | Unit tests: all valid + invalid paths |
-| T012 | validateSoftLockExpiry | Check soft_lock_until > NOW(), prevent past expiry | Unit tests: edge cases, boundary times |
-| T013 | validateSchemaCompatibility | Confirm license.schema_version ≤ master schema version | Unit tests: version matrix |
-| T014 | validateConcurrentModification | Detect stale reads, raise OptimisticLockError | Integration: race condition simulation |
-| T015 | validateAdminAuthority | RBAC only: actor.role = 'MMC_ADMIN' or raise 403 | Integration: unauthorized + authorized paths |
+| Task | Method                         | Constraints                                                  | Accept Criteria                              |
+| ---- | ------------------------------ | ------------------------------------------------------------ | -------------------------------------------- |
+| T006 | transitionToSoftLock           | Must set soft_lock_until, log reason, Q6 dual-mode           | Tests pass: normal + expiry + concurrent     |
+| T007 | transitionToActive             | Must clear soft_lock_until, validate Q6 window               | Tests pass: recovery scenario                |
+| T008 | transitionToArchived           | Must snapshot before archive (Q3), no restore during archive | Tests pass: archive + timeout validation     |
+| T009 | restoreFromArchive             | Must reverse archive state, must NOT restore if deleted      | Tests pass: recovery + deletion guard        |
+| T010 | transitionToDeleted            | Grace period enforcement (deleted_at + 30 days)              | Tests pass: grace period + double-confirm    |
+| T011 | validateStateTransition        | State machine: ACTIVE ↔ SOFT_LOCKED, ACTIVE → ARCHIVED, etc. | Unit tests: all valid + invalid paths        |
+| T012 | validateSoftLockExpiry         | Check soft_lock_until > NOW(), prevent past expiry           | Unit tests: edge cases, boundary times       |
+| T013 | validateSchemaCompatibility    | Confirm license.schema_version ≤ master schema version       | Unit tests: version matrix                   |
+| T014 | validateConcurrentModification | Detect stale reads, raise OptimisticLockError                | Integration: race condition simulation       |
+| T015 | validateAdminAuthority         | RBAC only: actor.role = 'MMC_ADMIN' or raise 403             | Integration: unauthorized + authorized paths |
 
 ---
 
 ## Error Codes (Immutable by Spec)
 
 **T006-T010 Errors:**
+
 - `LIC_STATE_INVALID: "Cannot transition from {current} to {target}"` (422)
 - `LIC_SOFT_LOCK_EXPIRED: "Soft lock window closed"` (410)
 - `LIC_SCHEMA_VERSION_MISMATCH: "Cannot transition: schema version incompatible"` (409)
@@ -155,12 +159,12 @@ logger.info({
   actor_id: params.actor_id,
   actor_type: params.actor_type,
   new_status: 'SOFT_LOCKED',
-  soft_lock_until: new Date(Date.now() + 24*60*60*1000).toISOString(),
+  soft_lock_until: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
   correlation_id: params.correlation_id,
   transition_metadata: params.metadata,
   execution_time_ms: Date.now() - startTime,
   timestamp: new Date().toISOString(),
-});
+})
 ```
 
 ---
@@ -176,7 +180,7 @@ ls -la packages/domain-core/src/license/service*.test.ts
 # 2. Unit tests pass
 npm test -- packages/domain-core/src/license/service.unit.test.ts --coverage
 
-# 3. Integration tests pass  
+# 3. Integration tests pass
 npm test -- packages/domain-core/src/license/service.integration.test.ts
 
 # 4. Combined coverage
@@ -229,6 +233,7 @@ git diff --cached packages/domain-core/src/license/
 ## Next: Phase 3 (T016-T024)
 
 After Phase 2 passes testing:
+
 - Create `apps/api/src/routes/licenses.ts`
 - Implement 9 REST endpoints
 - Each endpoint calls service methods from Phase 2

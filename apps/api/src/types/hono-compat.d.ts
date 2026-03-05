@@ -36,32 +36,16 @@ declare module 'hono' {
     get: (key: string) => any
     set: (key: string, value: any) => any
     status: (code: number) => any
-    json: (
-      object: any,
-      status?: any,
-      headers?: Record<string, string>
-    ) => any
-    text: (
-      text: string,
-      status?: any,
-      headers?: Record<string, string>
-    ) => any
+    json: (object: any, status?: any, headers?: Record<string, string>) => any
+    text: (text: string, status?: any, headers?: Record<string, string>) => any
   }
 
   interface Hono {
     state: Record<string, any>
     req: any
-    json: (
-      object: any,
-      status?: any,
-      headers?: Record<string, string>
-    ) => any
+    json: (object: any, status?: any, headers?: Record<string, string>) => any
     header: (name: string, value?: string) => any
-    text: (
-      text: string,
-      status?: any,
-      headers?: Record<string, string>
-    ) => any
+    text: (text: string, status?: any, headers?: Record<string, string>) => any
     status: (code: number) => any
   }
 }

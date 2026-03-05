@@ -1,4 +1,4 @@
-# Proposal of *[Change Name]*
+# Proposal of _[Change Name]_
 
 ## Motivation
 

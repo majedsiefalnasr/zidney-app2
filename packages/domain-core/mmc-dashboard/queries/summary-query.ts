@@ -128,7 +128,9 @@ export async function getTopProducts(
   pool: Pool,
   correlationId: string,
   limit: number = 5
-): Promise<{ product_id: string; total_revenue: number, license_count: number }[]> {
+): Promise<
+  { product_id: string; total_revenue: number; license_count: number }[]
+> {
   const query = `
     SELECT
       r.product_id,
@@ -152,4 +154,3 @@ export default {
   getRevenueTotal,
   getTopProducts,
 }
-

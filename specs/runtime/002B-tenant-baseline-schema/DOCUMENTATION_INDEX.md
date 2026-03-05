@@ -269,7 +269,7 @@
 - [ ] Risk assessment acceptable
 - [ ] **Ready for production deployment**: YES / NO
 
-**Sign-Off**: ********\_******** **Date**: **\_\_\_**
+**Sign-Off**: **\*\*\*\***\_**\*\*\*\*** **Date**: **\_\_\_**
 
 ### For Dev Lead
 

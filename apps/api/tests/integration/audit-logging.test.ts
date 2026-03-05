@@ -85,8 +85,7 @@ describe('Audit Logging', () => {
     const u = await pool.query(
       `INSERT INTO ${AUDIT_USERS_TABLE} (workspace_id, email, password_hash, role, token_version)
        VALUES ($1, 'audit@test.com', 'hash', 'admin', 1)
-       RETURNING id, email`
-      ,
+       RETURNING id, email`,
       [workspace.id]
     )
     user = u.rows[0]
@@ -97,14 +96,18 @@ describe('Audit Logging', () => {
       return
     }
     const pool = getTenantPool(workspace.id)!
-    await pool.query(`DELETE FROM ${AUDIT_USERS_TABLE} WHERE id = $1`, [user.id])
+    await pool.query(`DELETE FROM ${AUDIT_USERS_TABLE} WHERE id = $1`, [
+      user.id,
+    ])
 
-    await db.master.query(`DELETE FROM ${AUDIT_WORKSPACES_TABLE} WHERE id = $1`, [
-      workspace.id,
-    ])
-    await db.master.query(`DELETE FROM ${AUDIT_LOGS_TABLE} WHERE workspace_id = $1`, [
-      workspace.id,
-    ])
+    await db.master.query(
+      `DELETE FROM ${AUDIT_WORKSPACES_TABLE} WHERE id = $1`,
+      [workspace.id]
+    )
+    await db.master.query(
+      `DELETE FROM ${AUDIT_LOGS_TABLE} WHERE workspace_id = $1`,
+      [workspace.id]
+    )
   })
 
   it('should create audit log entry', async () => {

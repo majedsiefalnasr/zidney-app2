@@ -3,40 +3,18 @@
   "compilerOptions": {
     "baseUrl": ".",
     "paths": {
-      "@/*": [
-        "./src/*"
-      ],
-      "@zidney/ui": [
-        "../../packages/ui-system/src/index.ts"
-      ],
-      "@zidney/ui/*": [
-        "../../packages/ui-system/src/*"
-      ],
-      "@zidney/logger": [
-        "../../packages/logger/src/index.ts"
-      ],
-      "@zidney/logger/*": [
-        "../../packages/logger/src/*"
-      ],
-      "@zidney/api-client": [
-        "../../packages/api-client/src/index.ts"
-      ],
-      "@zidney/api-client/*": [
-        "../../packages/api-client/src/*"
-      ],
-      "@zidney/types": [
-        "../../packages/types/src/index.ts"
-      ],
-      "@zidney/types/*": [
-        "../../packages/types/src/*"
-      ]
+      "@/*": ["./src/*"],
+      "@zidney/ui": ["../../packages/ui-system/src/index.ts"],
+      "@zidney/ui/*": ["../../packages/ui-system/src/*"],
+      "@zidney/logger": ["../../packages/logger/src/index.ts"],
+      "@zidney/logger/*": ["../../packages/logger/src/*"],
+      "@zidney/api-client": ["../../packages/api-client/src/index.ts"],
+      "@zidney/api-client/*": ["../../packages/api-client/src/*"],
+      "@zidney/types": ["../../packages/types/src/index.ts"],
+      "@zidney/types/*": ["../../packages/types/src/*"]
     }
   },
-  "include": [
-    "src/**/*.ts",
-    "src/**/*.vue",
-    "src/**/*.d.ts"
-  ],
+  "include": ["src/**/*.ts", "src/**/*.vue", "src/**/*.d.ts"],
   "exclude": [
     "node_modules",
     "dist",

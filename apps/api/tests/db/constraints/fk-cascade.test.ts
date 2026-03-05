@@ -1,5 +1,13 @@
 import type { PoolClient } from 'pg'
-import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
+import {
+  afterAll,
+  afterEach,
+  beforeAll,
+  beforeEach,
+  describe,
+  expect,
+  it,
+} from 'vitest'
 import { db } from '../../../src/db'
 
 const pool = db.master
@@ -128,7 +136,9 @@ describe('FK Cascade Delete Constraints', () => {
     )
     const subscriptionId = subResult.rows[0].id
 
-    await client.query('DELETE FROM subscriptions WHERE id = $1', [subscriptionId])
+    await client.query('DELETE FROM subscriptions WHERE id = $1', [
+      subscriptionId,
+    ])
 
     const countResult = await client.query(
       'SELECT COUNT(*) FROM subscriptions WHERE id = $1',

@@ -111,10 +111,10 @@ components:
           description: Unique product identifier
           example: prod-550e8400-e29b-41d4-a716-446655440000
         name:
-          $ref: "#/components/schemas/ProductName"
+          $ref: '#/components/schemas/ProductName'
         slug:
           type: string
-          pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+          pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
           minLength: 1
           maxLength: 255
           description: URL-friendly product identifier (immutable, lowercase with hyphens)
@@ -131,14 +131,14 @@ components:
           maxItems: 6
           uniqueItems: true
           items:
-            $ref: "#/components/schemas/ModuleEnum"
+            $ref: '#/components/schemas/ModuleEnum'
           description: Enabled feature modules for this product
           example:
             - MODULE_ASSESSMENT
             - MODULE_ATTEMPT
             - MODULE_REPORTING
         status:
-          $ref: "#/components/schemas/ProductStatus"
+          $ref: '#/components/schemas/ProductStatus'
         current_version:
           type: integer
           minimum: 1
@@ -181,7 +181,7 @@ components:
           minimum: 1
           description: Version number
         name:
-          $ref: "#/components/schemas/ProductName"
+          $ref: '#/components/schemas/ProductName'
         slug:
           type: string
           description: Product slug at this version
@@ -191,7 +191,7 @@ components:
         enabled_modules:
           type: array
           items:
-            $ref: "#/components/schemas/ModuleEnum"
+            $ref: '#/components/schemas/ModuleEnum'
         created_at:
           type: string
           format: date-time
@@ -217,7 +217,7 @@ components:
           format: uuid
           description: Product identifier
         action:
-          $ref: "#/components/schemas/AuditAction"
+          $ref: '#/components/schemas/AuditAction'
         timestamp:
           type: string
           format: date-time
@@ -276,7 +276,7 @@ components:
         items:
           type: array
           items:
-            $ref: "#/components/schemas/Product"
+            $ref: '#/components/schemas/Product'
         total:
           type: integer
           minimum: 0
@@ -297,7 +297,7 @@ components:
         items:
           type: array
           items:
-            $ref: "#/components/schemas/AuditLogEntry"
+            $ref: '#/components/schemas/AuditLogEntry'
         total:
           type: integer
           minimum: 0
@@ -365,7 +365,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
           examples:
             invalid_module:
               summary: Invalid module enum
@@ -381,21 +381,21 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
 
     Forbidden:
       description: Forbidden - Insufficient permissions
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
 
     NotFound:
       description: Not Found - Product not found
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
           examples:
             not_found:
               summary: Product not found
@@ -411,7 +411,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
           examples:
             duplicate_slug:
               summary: Duplicate slug
@@ -440,14 +440,14 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
 
     InternalServerError:
       description: Internal Server Error
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
 
 security:
   - BearerAuth: []
@@ -478,10 +478,10 @@ paths:
               required: [name, slug, enabled_modules]
               properties:
                 name:
-                  $ref: "#/components/schemas/ProductName"
+                  $ref: '#/components/schemas/ProductName'
                 slug:
                   type: string
-                  pattern: "^[a-z0-9]+(?:-[a-z0-9]+)*$"
+                  pattern: '^[a-z0-9]+(?:-[a-z0-9]+)*$'
                   minLength: 1
                   maxLength: 255
                   example: calculus-exam
@@ -495,7 +495,7 @@ paths:
                   maxItems: 6
                   uniqueItems: true
                   items:
-                    $ref: "#/components/schemas/ModuleEnum"
+                    $ref: '#/components/schemas/ModuleEnum'
             examples:
               simple:
                 summary: Simple product creation
@@ -519,7 +519,7 @@ paths:
                     - MODULE_ATTEMPT
                     - MODULE_REPORTING
       responses:
-        "201":
+        '201':
           description: Product created successfully
           headers:
             X-Correlation-ID:
@@ -536,7 +536,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Product"
+                $ref: '#/components/schemas/Product'
               example:
                 id: prod-550e8400-e29b-41d4-a716-446655440000
                 name:
@@ -550,16 +550,16 @@ paths:
                 current_version: 1
                 created_at: 2024-01-15T10:30:00Z
                 updated_at: 2024-01-15T10:30:00Z
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "409":
-          $ref: "#/components/responses/Conflict"
-        "429":
-          $ref: "#/components/responses/RateLimitExceeded"
-        "500":
-          $ref: "#/components/responses/InternalServerError"
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '409':
+          $ref: '#/components/responses/Conflict'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
     get:
       summary: List Products
@@ -601,7 +601,7 @@ paths:
           in: query
           description: Filter by enabled module
           schema:
-            $ref: "#/components/schemas/ModuleEnum"
+            $ref: '#/components/schemas/ModuleEnum'
         - name: limit
           in: query
           description: Items per page
@@ -632,7 +632,7 @@ paths:
             enum: [asc, desc]
             default: desc
       responses:
-        "200":
+        '200':
           description: Product list retrieved successfully
           headers:
             X-Correlation-ID:
@@ -647,15 +647,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProductListResponse"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "429":
-          $ref: "#/components/responses/RateLimitExceeded"
-        "500":
-          $ref: "#/components/responses/InternalServerError"
+                $ref: '#/components/schemas/ProductListResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /products/{productId}:
     get:
@@ -676,7 +676,7 @@ paths:
             type: string
             format: uuid
       responses:
-        "200":
+        '200':
           description: Product retrieved successfully
           headers:
             X-Correlation-ID:
@@ -691,15 +691,15 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Product"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "429":
-          $ref: "#/components/responses/RateLimitExceeded"
-        "500":
-          $ref: "#/components/responses/InternalServerError"
+                $ref: '#/components/schemas/Product'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
     put:
       summary: Update Product
@@ -733,7 +733,7 @@ paths:
               type: object
               properties:
                 name:
-                  $ref: "#/components/schemas/ProductName"
+                  $ref: '#/components/schemas/ProductName'
                 description:
                   type: string
                   maxLength: 2000
@@ -744,7 +744,7 @@ paths:
                   maxItems: 6
                   uniqueItems: true
                   items:
-                    $ref: "#/components/schemas/ModuleEnum"
+                    $ref: '#/components/schemas/ModuleEnum'
             examples:
               partial:
                 summary: Update single field
@@ -761,7 +761,7 @@ paths:
                     - MODULE_ATTEMPT
                     - MODULE_REPORTING
       responses:
-        "200":
+        '200':
           description: Product updated successfully
           headers:
             X-Correlation-ID:
@@ -776,17 +776,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Product"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "429":
-          $ref: "#/components/responses/RateLimitExceeded"
-        "500":
-          $ref: "#/components/responses/InternalServerError"
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
     delete:
       summary: Delete Product
@@ -812,7 +812,7 @@ paths:
             type: string
             format: uuid
       responses:
-        "204":
+        '204':
           description: Product deleted successfully
           headers:
             X-Correlation-ID:
@@ -824,20 +824,20 @@ paths:
             X-RateLimit-Remaining:
               schema:
                 type: integer
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
           description: Product has associated licenses
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "429":
-          $ref: "#/components/responses/RateLimitExceeded"
-        "500":
-          $ref: "#/components/responses/InternalServerError"
+                $ref: '#/components/schemas/ErrorResponse'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /products/{productId}/status:
     patch:
@@ -872,7 +872,7 @@ paths:
               required: [status]
               properties:
                 status:
-                  $ref: "#/components/schemas/ProductStatus"
+                  $ref: '#/components/schemas/ProductStatus'
             examples:
               deactivate:
                 summary: Deactivate product
@@ -883,7 +883,7 @@ paths:
                 value:
                   status: ACTIVE
       responses:
-        "200":
+        '200':
           description: Product status changed successfully
           headers:
             X-Correlation-ID:
@@ -898,17 +898,17 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Product"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "429":
-          $ref: "#/components/responses/RateLimitExceeded"
-        "500":
-          $ref: "#/components/responses/InternalServerError"
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'
 
   /products/{productId}/audit-log:
     get:
@@ -943,7 +943,7 @@ paths:
           in: query
           description: Filter by audit action
           schema:
-            $ref: "#/components/schemas/AuditAction"
+            $ref: '#/components/schemas/AuditAction'
         - name: from_date
           in: query
           description: Filter entries from this date (ISO 8601)
@@ -972,7 +972,7 @@ paths:
             minimum: 0
             default: 0
       responses:
-        "200":
+        '200':
           description: Audit log retrieved successfully
           headers:
             X-Correlation-ID:
@@ -987,12 +987,12 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AuditLogResponse"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "429":
-          $ref: "#/components/responses/RateLimitExceeded"
-        "500":
-          $ref: "#/components/responses/InternalServerError"
+                $ref: '#/components/schemas/AuditLogResponse'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimitExceeded'
+        '500':
+          $ref: '#/components/responses/InternalServerError'

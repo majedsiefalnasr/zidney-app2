@@ -14,16 +14,16 @@
 
 ## Workflow Summary
 
-| Step | Status | Primary Artifact |
-| --- | --- | --- |
-| Pre-Step | ✅ Complete | `README.md` |
-| Specify | ✅ Complete | `reports/SPECIFY_REPORT.md` |
-| Clarify | ✅ Complete | `reports/CLARIFY_REPORT.md` |
-| Plan | ✅ Complete | `reports/PLAN_REPORT.md` |
-| Tasks | ✅ Complete | `reports/TASKS_REPORT.md` |
-| Analyze | ✅ Complete | `audits/ANALYZE_REPORT.md` |
+| Step      | Status      | Primary Artifact              |
+| --------- | ----------- | ----------------------------- |
+| Pre-Step  | ✅ Complete | `README.md`                   |
+| Specify   | ✅ Complete | `reports/SPECIFY_REPORT.md`   |
+| Clarify   | ✅ Complete | `reports/CLARIFY_REPORT.md`   |
+| Plan      | ✅ Complete | `reports/PLAN_REPORT.md`      |
+| Tasks     | ✅ Complete | `reports/TASKS_REPORT.md`     |
+| Analyze   | ✅ Complete | `audits/ANALYZE_REPORT.md`    |
 | Implement | ✅ Complete | `reports/IMPLEMENT_REPORT.md` |
-| Closure | ✅ Complete | `reports/CLOSURE_REPORT.md` |
+| Closure   | ✅ Complete | `reports/CLOSURE_REPORT.md`   |
 
 ---
 
@@ -43,17 +43,17 @@
 
 ## Constitutional Compliance (Final)
 
-| Rule / ADR | Status | Notes |
-| --- | --- | --- |
-| ADR-0001 Database-per-tenant isolation | ✅ / ❌ | ... |
-| ADR-0002 Snapshot immutability (if applicable) | ✅ / ❌ | ... |
-| ADR-0006 Server-authoritative time | ✅ / ❌ | ... |
-| ADR-0007 Version compatibility enforcement | ✅ / ❌ | ... |
-| ADR-0008 Semantic versioning alignment | ✅ / ❌ | ... |
-| No middleware bypass | ✅ / ❌ | ... |
-| All writes transactional | ✅ / ❌ | ... |
-| Idempotency enforced where required | ✅ / ❌ | ... |
-| Structured logging present | ✅ / ❌ | ... |
+| Rule / ADR                                     | Status  | Notes |
+| ---------------------------------------------- | ------- | ----- |
+| ADR-0001 Database-per-tenant isolation         | ✅ / ❌ | ...   |
+| ADR-0002 Snapshot immutability (if applicable) | ✅ / ❌ | ...   |
+| ADR-0006 Server-authoritative time             | ✅ / ❌ | ...   |
+| ADR-0007 Version compatibility enforcement     | ✅ / ❌ | ...   |
+| ADR-0008 Semantic versioning alignment         | ✅ / ❌ | ...   |
+| No middleware bypass                           | ✅ / ❌ | ...   |
+| All writes transactional                       | ✅ / ❌ | ...   |
+| Idempotency enforced where required            | ✅ / ❌ | ...   |
+| Structured logging present                     | ✅ / ❌ | ...   |
 
 **Final Verdict:** COMPLIANT / BLOCKED
 

@@ -27,13 +27,13 @@ Key outcomes:
 
 ## Prerequisites
 
-| Requirement | Validation Command / Check |
-| --- | --- |
-| Node.js installed | `node --version` (v20+) |
-| Bun installed | `bun --version` (v1+) |
-| Docker running | `docker ps` |
-| Environment file present | Verify `.env` or `.env.local` exists |
-| Migrations applied | `bun run db:migrate` |
+| Requirement                | Validation Command / Check                 |
+| -------------------------- | ------------------------------------------ |
+| Node.js installed          | `node --version` (v20+)                    |
+| Bun installed              | `bun --version` (v1+)                      |
+| Docker running             | `docker ps`                                |
+| Environment file present   | Verify `.env` or `.env.local` exists       |
+| Migrations applied         | `bun run db:migrate`                       |
 | Correct branch checked out | `git branch` includes `{{STAGE_DIR_NAME}}` |
 
 ---
@@ -128,8 +128,8 @@ Expected:
 
 ## Negative Cases
 
-| Scenario | Trigger | Expected Response |
-| --- | --- | --- |
+| Scenario               | Trigger              | Expected Response           |
+| ---------------------- | -------------------- | --------------------------- |
 | {{ERROR_CASE_1_TITLE}} | {{ERROR_CASE_1_HOW}} | `{{ERROR_CASE_1_RESPONSE}}` |
 | {{ERROR_CASE_2_TITLE}} | {{ERROR_CASE_2_HOW}} | `{{ERROR_CASE_2_RESPONSE}}` |
 | {{ERROR_CASE_3_TITLE}} | {{ERROR_CASE_3_HOW}} | `{{ERROR_CASE_3_RESPONSE}}` |
@@ -185,8 +185,8 @@ Confirm the presence of:
 bun run db:console --workspace <workspace_slug>
 ```
 
-| Table | Verification |
-| --- | --- |
+| Table          | Verification         |
+| -------------- | -------------------- |
 | {{DB_TABLE_1}} | {{DB_TABLE_1_CHECK}} |
 | {{DB_TABLE_2}} | {{DB_TABLE_2_CHECK}} |
 

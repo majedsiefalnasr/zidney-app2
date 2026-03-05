@@ -11,6 +11,7 @@ This reference guide covers different deployment strategies for AWS Bedrock Agen
 **Concept**: Create ONE credential provider and share across all gateway targets
 
 **Setup**:
+
 ```bash
 # Create shared provider with API key (run once)
 aws bedrock-agentcore-control create-api-key-credential-provider \
@@ -20,6 +21,7 @@ aws bedrock-agentcore-control create-api-key-credential-provider \
 ```
 
 **Environment Configuration**:
+
 ```bash
 # .env.gateway-a
 GATEWAY_IDENTIFIER=gateway-a-abc123xyz
@@ -31,17 +33,20 @@ CREDENTIAL_PROVIDER_NAME=SharedAPICredentialProvider  # Same for all
 ```
 
 **Benefits**:
+
 - ✅ Simplified key management - single key to rotate
 - ✅ Reduced operational overhead
 - ✅ Consistent authentication across all gateways
 - ✅ Easier compliance and auditing
 
 **Use Cases**:
+
 - Same API, multiple gateway deployments
 - Development/Testing/Production gateways
 - Regional deployments (us-west-2, eu-west-1)
 
 **Trade-offs**:
+
 - Less isolation between gateways (all or nothing key rotation)
 
 ### Strategy 2: Isolated Provider (Per-Gateway)
@@ -49,6 +54,7 @@ CREDENTIAL_PROVIDER_NAME=SharedAPICredentialProvider  # Same for all
 **Concept**: Create UNIQUE credential provider for each gateway
 
 **Setup**:
+
 ```bash
 # Create provider for Gateway A
 aws bedrock-agentcore-control create-api-key-credential-provider \
@@ -64,6 +70,7 @@ aws bedrock-agentcore-control create-api-key-credential-provider \
 ```
 
 **Environment Configuration**:
+
 ```bash
 # .env.gateway-a
 GATEWAY_IDENTIFIER=gateway-a-abc123xyz
@@ -75,18 +82,21 @@ CREDENTIAL_PROVIDER_NAME=GatewayBAPICredentialProvider  # Unique
 ```
 
 **Benefits**:
+
 - ✅ Complete isolation between gateways
 - ✅ Independent key rotation per environment
 - ✅ Different API keys for different use cases
 - ✅ Better security boundaries
 
 **Use Cases**:
+
 - Production vs Development with different API keys
 - Different APIs for different gateways
 - Compliance requiring environment separation
 - Testing new API versions in isolation
 
 **Trade-offs**:
+
 - More complex key management
 - Multiple keys to rotate and maintain
 
@@ -95,6 +105,7 @@ CREDENTIAL_PROVIDER_NAME=GatewayBAPICredentialProvider  # Unique
 **Concept**: Hybrid approach with shared provider for non-prod, isolated for production
 
 **Setup**:
+
 ```bash
 # Shared provider for dev/test
 aws bedrock-agentcore-control create-api-key-credential-provider \
@@ -110,6 +121,7 @@ aws bedrock-agentcore-control create-api-key-credential-provider \
 ```
 
 **Environment Configuration**:
+
 ```bash
 # .env.development
 GATEWAY_IDENTIFIER=dev-gateway-abc123xyz
@@ -125,12 +137,14 @@ CREDENTIAL_PROVIDER_NAME=ProdAPICredentialProvider
 ```
 
 **Benefits**:
+
 - ✅ Balance of simplicity and security
 - ✅ Production isolation with dev/test convenience
 - ✅ Easier testing in non-prod environments
 - ✅ Production key remains protected
 
 **Use Cases**:
+
 - Most common enterprise pattern
 - Clear separation between environments
 - Controlled production access
@@ -142,6 +156,7 @@ When deploying across multiple AWS accounts:
 ### Setup
 
 1. **Credential Provider per Account**:
+
    ```bash
    # Account 1 (Dev)
    aws bedrock-agentcore-control create-api-key-credential-provider \
@@ -157,6 +172,7 @@ When deploying across multiple AWS accounts:
    ```
 
 2. **Centralized Configuration**:
+
    ```bash
    # .env.dev
    ACCOUNT_ID=123456789012
@@ -170,6 +186,7 @@ When deploying across multiple AWS accounts:
    ```
 
 3. **Cross-Account Deployment Script**:
+
    ```bash
    #!/bin/bash
    ENV_FILE=$1
@@ -191,6 +208,7 @@ When deploying across multiple AWS accounts:
 ### Shared Provider Strategy
 
 **Manual Rotation**:
+
 ```bash
 # 1. Update key in provider
 aws bedrock-agentcore-control update-api-key-credential-provider \
@@ -202,6 +220,7 @@ aws bedrock-agentcore-control update-api-key-credential-provider \
 ```
 
 **Automated Rotation**:
+
 - Use AWS Secrets Manager rotation (if supported by credential provider)
 - Triggered by CloudWatch Events schedule
 - Lambda function handles key generation/update
@@ -209,6 +228,7 @@ aws bedrock-agentcore-control update-api-key-credential-provider \
 ### Isolated Provider Strategy
 
 **Per-Gateway Rotation**:
+
 ```bash
 # Rotate dev environment only
 aws bedrock-agentcore-control update-api-key-credential-provider \
@@ -276,7 +296,7 @@ new cloudwatch.Alarm(this, 'HighErrorRate', {
   comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
   alarmDescription: 'Error rate exceeds 10%',
   actionsEnabled: true,
-});
+})
 ```
 
 ## Cost Optimization
@@ -308,6 +328,7 @@ new cloudwatch.Alarm(this, 'HighErrorRate', {
 ### Optimization Strategies
 
 **Schema Optimization**:
+
 ```yaml
 # Embed common IDs to reduce API calls by 50%
 info:
@@ -319,24 +340,28 @@ info:
 ```
 
 **Credential Provider Sharing**:
+
 - Single provider for all gateways = 1 secret = $0.40/month
 - Separate providers = N secrets = $0.40N/month
 
 ## Security Best Practices
 
 ### Credential Management
+
 - Never commit API keys to source control
 - Use AWS Secrets Manager via credential providers
 - Rotate keys regularly (quarterly minimum)
 - Use different keys for different environments
 
 ### IAM Permissions
+
 - Custom Resource Lambda has scoped permissions
 - Only allows access to Gateway service roles
 - Follows principle of least privilege
 - Audit policy versions regularly
 
 ### Network Security
+
 - Ensure Gateway is in VPC if required
 - Use AWS PrivateLink for on-premises integrations
 - Enable encryption in transit (TLS 1.2+)
@@ -386,6 +411,7 @@ done
 ### Migrating from Manual to CDK Management
 
 1. **Discovery Phase**:
+
    ```bash
    # Document existing targets
    aws bedrock-agentcore-control list-gateway-targets \

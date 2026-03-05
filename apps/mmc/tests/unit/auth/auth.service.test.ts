@@ -37,12 +37,10 @@ function makeMockApiClient(
 ): AuthServiceApiClient {
   return {
     get: vi.fn().mockResolvedValue({ success: true, data: TEST_USER }),
-    post: vi
-      .fn()
-      .mockResolvedValue({
-        success: true,
-        data: { accessToken: 'tok', user: TEST_USER },
-      }),
+    post: vi.fn().mockResolvedValue({
+      success: true,
+      data: { accessToken: 'tok', user: TEST_USER },
+    }),
     ...overrides,
   }
 }
@@ -132,12 +130,10 @@ describe('createAuthService', () => {
   describe('refreshToken()', () => {
     it('calls POST /auth/refresh', async () => {
       const apiClient = makeMockApiClient({
-        post: vi
-          .fn()
-          .mockResolvedValue({
-            success: true,
-            data: { accessToken: 'refreshed' },
-          }),
+        post: vi.fn().mockResolvedValue({
+          success: true,
+          data: { accessToken: 'refreshed' },
+        }),
       })
       const service = createAuthService(apiClient)
 

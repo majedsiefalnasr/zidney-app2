@@ -84,11 +84,11 @@ vibe-testing/
 
 Vibe tests produce a structured gap report:
 
-| Severity | Meaning |
-|----------|---------|
+| Severity     | Meaning                                                           |
+| ------------ | ----------------------------------------------------------------- |
 | **BLOCKING** | Spec cannot answer. Implementation impossible without resolution. |
-| **DEGRADED** | Workaround exists but it's fragile. |
-| **COSMETIC** | Missing convenience. Not a correctness issue. |
+| **DEGRADED** | Workaround exists but it's fragile.                               |
+| **COSMETIC** | Missing convenience. Not a correctness issue.                     |
 
 ## Example
 

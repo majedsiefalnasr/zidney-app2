@@ -91,7 +91,9 @@ describe('Schema Version Mismatch Handling', () => {
     expect(updated.rows[0].version).toBe('1.1.0')
 
     // Verify final state
-    const final = await client.query(`SELECT version FROM ${schemaVersionTable}`)
+    const final = await client.query(
+      `SELECT version FROM ${schemaVersionTable}`
+    )
     expect(final.rows[0].version).toBe('1.1.0')
   })
 

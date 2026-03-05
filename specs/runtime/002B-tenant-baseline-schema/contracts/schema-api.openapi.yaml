@@ -243,7 +243,7 @@ paths:
                 data: null
                 error:
                   code: \"RATE_LIMIT_EXCEEDED\"
-                  message: \"Rate limit: 5 requests per minute per workspace\"
+                  message: \"Rate limit 5 requests per minute per workspace\"
         
         '503':
           description: Service unavailable (migration in progress or DB down)

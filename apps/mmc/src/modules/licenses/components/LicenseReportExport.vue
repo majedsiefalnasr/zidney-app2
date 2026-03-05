@@ -4,7 +4,12 @@
  */
 
 import { Button } from '@zidney/ui/components/shadcn-vue/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@zidney/ui/components/shadcn-vue/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@zidney/ui/components/shadcn-vue/card'
 import { ref } from 'vue'
 
 const generating = ref(false)

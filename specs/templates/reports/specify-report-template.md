@@ -21,9 +21,9 @@
 
 ## Key Decisions
 
-| # | Decision | Rationale |
-| --- | --- | --- |
-| 1 | ... | ... |
+| #   | Decision | Rationale |
+| --- | -------- | --------- |
+| 1   | ...      | ...       |
 
 ---
 
@@ -43,14 +43,14 @@
 
 ## Constitutional Compliance
 
-| Check | Status | Notes |
-| --- | --- | --- |
-| No cross-tenant access introduced | ✅ / ❌ | ... |
-| License middleware requirement captured | ✅ / ❌ | ... |
-| Snapshot integrity requirement captured | ✅ / ❌ | ... |
-| Idempotency strategy defined | ✅ / ❌ | ... |
-| Transaction boundaries identified | ✅ / ❌ | ... |
-| Server-authoritative time enforced | ✅ / ❌ | ... |
+| Check                                   | Status  | Notes |
+| --------------------------------------- | ------- | ----- |
+| No cross-tenant access introduced       | ✅ / ❌ | ...   |
+| License middleware requirement captured | ✅ / ❌ | ...   |
+| Snapshot integrity requirement captured | ✅ / ❌ | ...   |
+| Idempotency strategy defined            | ✅ / ❌ | ...   |
+| Transaction boundaries identified       | ✅ / ❌ | ...   |
+| Server-authoritative time enforced      | ✅ / ❌ | ...   |
 
 **Overall:** COMPLIANT / BLOCKED
 

@@ -9,60 +9,28 @@
         "./apps/backoffice/src/*",
         "./apps/frontoffice/src/*"
       ],
-      "@zidney/app/*": [
-        "./apps/*/src"
-      ],
-      "@zidney/package/*": [
-        "./packages/*/src"
-      ],
-      "@zidney/ui": [
-        "packages/ui-system/src/index.ts"
-      ],
-      "@zidney/ui/*": [
-        "packages/ui-system/src/*"
-      ],
-      "@zidney/domain-core": [
-        "packages/domain-core/src/index.ts"
-      ],
-      "@zidney/domain-core/*": [
-        "packages/domain-core/src/*"
-      ],
+      "@zidney/app/*": ["./apps/*/src"],
+      "@zidney/package/*": ["./packages/*/src"],
+      "@zidney/ui": ["packages/ui-system/src/index.ts"],
+      "@zidney/ui/*": ["packages/ui-system/src/*"],
+      "@zidney/domain-core": ["packages/domain-core/src/index.ts"],
+      "@zidney/domain-core/*": ["packages/domain-core/src/*"],
       "@zidney/domain-core/mmc-dashboard": [
         "packages/domain-core/mmc-dashboard/index.ts"
       ],
       "@zidney/domain-core/mmc-dashboard/*": [
         "packages/domain-core/mmc-dashboard/*"
       ],
-      "@zidney/logger": [
-        "packages/logger/src/index.ts"
-      ],
-      "@zidney/logger/*": [
-        "packages/logger/src/*"
-      ],
-      "@zidney/types": [
-        "packages/types/src/index.ts"
-      ],
-      "@zidney/types/*": [
-        "packages/types/src/*"
-      ],
-      "@zidney/validation": [
-        "packages/validation/src/index.ts"
-      ],
-      "@zidney/validation/*": [
-        "packages/validation/src/*"
-      ],
-      "@zidney/redis-utils": [
-        "packages/redis-utils/src/index.ts"
-      ],
-      "@zidney/redis-utils/*": [
-        "packages/redis-utils/src/*"
-      ],
-      "@zidney/config": [
-        "packages/config/src/index.ts"
-      ],
-      "@zidney/config/*": [
-        "packages/config/src/*"
-      ]
+      "@zidney/logger": ["packages/logger/src/index.ts"],
+      "@zidney/logger/*": ["packages/logger/src/*"],
+      "@zidney/types": ["packages/types/src/index.ts"],
+      "@zidney/types/*": ["packages/types/src/*"],
+      "@zidney/validation": ["packages/validation/src/index.ts"],
+      "@zidney/validation/*": ["packages/validation/src/*"],
+      "@zidney/redis-utils": ["packages/redis-utils/src/index.ts"],
+      "@zidney/redis-utils/*": ["packages/redis-utils/src/*"],
+      "@zidney/config": ["packages/config/src/index.ts"],
+      "@zidney/config/*": ["packages/config/src/*"]
     }
   },
   "include": [

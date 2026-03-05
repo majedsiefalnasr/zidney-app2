@@ -27,7 +27,8 @@ const getConnectionString = () => {
   const password = process.env.DB_PASSWORD || 'change-me-in-production'
   const host = process.env.DB_HOST || 'localhost'
   const port = process.env.DB_PORT || '5432'
-  const database = process.env.DB_NAME || process.env.DB_DATABASE || 'zidney_master'
+  const database =
+    process.env.DB_NAME || process.env.DB_DATABASE || 'zidney_master'
 
   return `postgresql://${user}:${password}@${host}:${port}/${database}`
 }

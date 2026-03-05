@@ -110,7 +110,7 @@ export function validateCreateLicenseRequest(
   try {
     const parsed = CreateLicenseRequestSchema.parse(data)
     return { valid: true, data: parsed }
-  // @ts-ignore: TS18046 - error is of type unknown [INFRA-001]
+    // @ts-ignore: TS18046 - error is of type unknown [INFRA-001]
   } catch (error) {
     if (error instanceof z.ZodError) {
       // @ts-ignore: TS7006 - issue implicit any [INFRA-001]

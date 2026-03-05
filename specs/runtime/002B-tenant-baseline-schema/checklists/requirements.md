@@ -29,6 +29,7 @@
 - [x] Dependencies and assumptions identified
 
 **Details**:
+
 - 20 FR items are each independently testable
 - 12 SC items have quantifiable metrics (< 5 seconds, 100%, < 100ms)
 - 5 user stories with P1–P2 priorities
@@ -46,6 +47,7 @@
 - [x] No implementation details leak into specification
 
 **Primary Flows Covered**:
+
 1. Tenant provisioning (schema initialization)
 2. Audit trail immutability (append-only enforcement)
 3. Attempt snapshot immutability (configuration frozen)
@@ -53,6 +55,7 @@
 5. Schema versioning (product compatibility)
 
 **Acceptance Covered**:
+
 - P1–P2 user stories have 3–5 acceptance scenarios each (total 15 scenarios)
 - Edge cases cross-referenced in test requirements
 - Failure modes mapped to recovery procedures

@@ -87,8 +87,7 @@ declare module 'pg' {
     on: (event: string, handler: (...args: any[]) => void) => void
     totalCount: number
     idleCount: number
-    waitingCount: number
+    waitingCount: number;
     [key: string]: any
   }
-
 }

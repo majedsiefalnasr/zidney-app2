@@ -18,6 +18,7 @@ Comprehensive patterns for building serverless applications on AWS based on Well
 **Use case**: Independent, scalable services with separate databases
 
 **Architecture**:
+
 ```
 API Gateway → Lambda Functions → DynamoDB/RDS
               ↓ (events)
@@ -25,27 +26,28 @@ API Gateway → Lambda Functions → DynamoDB/RDS
 ```
 
 **CDK Implementation**:
+
 ```typescript
 // User Service
 const userTable = new dynamodb.Table(this, 'Users', {
   partitionKey: { name: 'userId', type: dynamodb.AttributeType.STRING },
   billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-});
+})
 
 const userFunction = new NodejsFunction(this, 'UserHandler', {
   entry: 'src/services/users/handler.ts',
   environment: {
     TABLE_NAME: userTable.tableName,
   },
-});
+})
 
-userTable.grantReadWriteData(userFunction);
+userTable.grantReadWriteData(userFunction)
 
 // Order Service (separate database)
 const orderTable = new dynamodb.Table(this, 'Orders', {
   partitionKey: { name: 'orderId', type: dynamodb.AttributeType.STRING },
   billingMode: dynamodb.BillingMode.PAY_PER_REQUEST,
-});
+})
 
 const orderFunction = new NodejsFunction(this, 'OrderHandler', {
   entry: 'src/services/orders/handler.ts',
@@ -53,13 +55,14 @@ const orderFunction = new NodejsFunction(this, 'OrderHandler', {
     TABLE_NAME: orderTable.tableName,
     EVENT_BUS: eventBus.eventBusName,
   },
-});
+})
 
-orderTable.grantReadWriteData(orderFunction);
-eventBus.grantPutEventsTo(orderFunction);
+orderTable.grantReadWriteData(orderFunction)
+eventBus.grantPutEventsTo(orderFunction)
 ```
 
 **Benefits**:
+
 - Independent deployment and scaling
 - Database per service (data isolation)
 - Technology diversity
@@ -70,6 +73,7 @@ eventBus.grantPutEventsTo(orderFunction);
 **Use case**: REST or GraphQL API with serverless compute
 
 **REST API with API Gateway**:
+
 ```typescript
 const api = new apigateway.RestApi(this, 'Api', {
   restApiName: 'serverless-api',
@@ -84,20 +88,21 @@ const api = new apigateway.RestApi(this, 'Api', {
     allowOrigins: apigateway.Cors.ALL_ORIGINS,
     allowMethods: apigateway.Cors.ALL_METHODS,
   },
-});
+})
 
 // Resource-based routing
-const items = api.root.addResource('items');
-items.addMethod('GET', new apigateway.LambdaIntegration(listFunction));
-items.addMethod('POST', new apigateway.LambdaIntegration(createFunction));
+const items = api.root.addResource('items')
+items.addMethod('GET', new apigateway.LambdaIntegration(listFunction))
+items.addMethod('POST', new apigateway.LambdaIntegration(createFunction))
 
-const item = items.addResource('{id}');
-item.addMethod('GET', new apigateway.LambdaIntegration(getFunction));
-item.addMethod('PUT', new apigateway.LambdaIntegration(updateFunction));
-item.addMethod('DELETE', new apigateway.LambdaIntegration(deleteFunction));
+const item = items.addResource('{id}')
+item.addMethod('GET', new apigateway.LambdaIntegration(getFunction))
+item.addMethod('PUT', new apigateway.LambdaIntegration(updateFunction))
+item.addMethod('DELETE', new apigateway.LambdaIntegration(deleteFunction))
 ```
 
 **GraphQL API with AppSync**:
+
 ```typescript
 const api = new appsync.GraphqlApi(this, 'Api', {
   name: 'serverless-graphql-api',
@@ -108,15 +113,15 @@ const api = new appsync.GraphqlApi(this, 'Api', {
     },
   },
   xrayEnabled: true,
-});
+})
 
 // Lambda resolver
-const dataSource = api.addLambdaDataSource('lambda-ds', resolverFunction);
+const dataSource = api.addLambdaDataSource('lambda-ds', resolverFunction)
 
 dataSource.createResolver('QueryGetItem', {
   typeName: 'Query',
   fieldName: 'getItem',
-});
+})
 ```
 
 ### Pattern: Serverless Data Lake
@@ -124,6 +129,7 @@ dataSource.createResolver('QueryGetItem', {
 **Use case**: Ingest, process, and analyze large-scale data
 
 **Architecture**:
+
 ```
 S3 (raw data) → Lambda (transform) → S3 (processed)
                   ↓ (catalog)
@@ -131,39 +137,40 @@ S3 (raw data) → Lambda (transform) → S3 (processed)
 ```
 
 **Implementation**:
+
 ```typescript
-const rawBucket = new s3.Bucket(this, 'RawData');
-const processedBucket = new s3.Bucket(this, 'ProcessedData');
+const rawBucket = new s3.Bucket(this, 'RawData')
+const processedBucket = new s3.Bucket(this, 'ProcessedData')
 
 // Trigger Lambda on file upload
 rawBucket.addEventNotification(
   s3.EventType.OBJECT_CREATED,
   new s3n.LambdaDestination(transformFunction),
   { prefix: 'incoming/' }
-);
+)
 
 // Transform function
 export const transform = async (event: S3Event) => {
   for (const record of event.Records) {
-    const key = record.s3.object.key;
+    const key = record.s3.object.key
 
     // Get raw data
     const raw = await s3.getObject({
       Bucket: record.s3.bucket.name,
       Key: key,
-    });
+    })
 
     // Transform data
-    const transformed = await transformData(raw.Body);
+    const transformed = await transformData(raw.Body)
 
     // Write to processed bucket
     await s3.putObject({
       Bucket: process.env.PROCESSED_BUCKET,
       Key: `processed/${key}`,
       Body: JSON.stringify(transformed),
-    });
+    })
   }
-};
+}
 ```
 
 ## API Patterns
@@ -178,13 +185,13 @@ const authorizer = new apigateway.TokenAuthorizer(this, 'Authorizer', {
   handler: authorizerFunction,
   identitySource: 'method.request.header.Authorization',
   resultsCacheTtl: Duration.minutes(5),
-});
+})
 
 // Apply to API methods
-const resource = api.root.addResource('protected');
+const resource = api.root.addResource('protected')
 resource.addMethod('GET', new apigateway.LambdaIntegration(protectedFunction), {
   authorizer,
-});
+})
 ```
 
 ### Pattern: Request Validation
@@ -202,7 +209,7 @@ const requestModel = api.addModel('RequestModel', {
       email: { type: apigateway.JsonSchemaType.STRING, format: 'email' },
     },
   },
-});
+})
 
 resource.addMethod('POST', integration, {
   requestValidator: new apigateway.RequestValidator(this, 'Validator', {
@@ -213,7 +220,7 @@ resource.addMethod('POST', integration, {
   requestModels: {
     'application/json': requestModel,
   },
-});
+})
 ```
 
 ### Pattern: Response Caching
@@ -228,17 +235,19 @@ const api = new apigateway.RestApi(this, 'Api', {
     cacheClusterEnabled: true,
     cacheClusterSize: '0.5', // GB
   },
-});
+})
 
 // Enable caching per method
 resource.addMethod('GET', integration, {
-  methodResponses: [{
-    statusCode: '200',
-    responseParameters: {
-      'method.response.header.Cache-Control': true,
+  methodResponses: [
+    {
+      statusCode: '200',
+      responseParameters: {
+        'method.response.header.Cache-Control': true,
+      },
     },
-  }],
-});
+  ],
+})
 ```
 
 ## Data Processing Patterns
@@ -248,28 +257,28 @@ resource.addMethod('GET', integration, {
 **Use case**: Process files uploaded to S3
 
 ```typescript
-const bucket = new s3.Bucket(this, 'DataBucket');
+const bucket = new s3.Bucket(this, 'DataBucket')
 
 // Process images
 bucket.addEventNotification(
   s3.EventType.OBJECT_CREATED,
   new s3n.LambdaDestination(imageProcessingFunction),
   { suffix: '.jpg' }
-);
+)
 
 // Process CSV files
 bucket.addEventNotification(
   s3.EventType.OBJECT_CREATED,
   new s3n.LambdaDestination(csvProcessingFunction),
   { suffix: '.csv' }
-);
+)
 
 // Large file processing with Step Functions
 bucket.addEventNotification(
   s3.EventType.OBJECT_CREATED,
   new s3n.SfnDestination(processingStateMachine),
   { prefix: 'large-files/' }
-);
+)
 ```
 
 ### Pattern: DynamoDB Streams Processing
@@ -280,7 +289,7 @@ bucket.addEventNotification(
 const table = new dynamodb.Table(this, 'Table', {
   partitionKey: { name: 'id', type: dynamodb.AttributeType.STRING },
   stream: dynamodb.StreamViewType.NEW_AND_OLD_IMAGES,
-});
+})
 
 // Process stream changes
 new lambda.EventSourceMapping(this, 'StreamConsumer', {
@@ -291,26 +300,26 @@ new lambda.EventSourceMapping(this, 'StreamConsumer', {
   maxBatchingWindow: Duration.seconds(5),
   bisectBatchOnError: true,
   retryAttempts: 3,
-});
+})
 
 // Example: Sync to search index
 export const processStream = async (event: DynamoDBStreamEvent) => {
   for (const record of event.Records) {
     if (record.eventName === 'INSERT' || record.eventName === 'MODIFY') {
-      const newImage = record.dynamodb?.NewImage;
+      const newImage = record.dynamodb?.NewImage
       await elasticSearch.index({
         index: 'items',
         id: newImage?.id.S,
         body: unmarshall(newImage),
-      });
+      })
     } else if (record.eventName === 'REMOVE') {
       await elasticSearch.delete({
         index: 'items',
         id: record.dynamodb?.Keys?.id.S,
-      });
+      })
     }
   }
-};
+}
 ```
 
 ### Pattern: Kinesis Stream Processing
@@ -321,7 +330,7 @@ export const processStream = async (event: DynamoDBStreamEvent) => {
 const stream = new kinesis.Stream(this, 'EventStream', {
   shardCount: 2,
   streamMode: kinesis.StreamMode.PROVISIONED,
-});
+})
 
 // Fan-out with multiple consumers
 const consumer1 = new lambda.EventSourceMapping(this, 'Analytics', {
@@ -330,7 +339,7 @@ const consumer1 = new lambda.EventSourceMapping(this, 'Analytics', {
   startingPosition: lambda.StartingPosition.LATEST,
   batchSize: 100,
   parallelizationFactor: 10, // Process 10 batches per shard in parallel
-});
+})
 
 const consumer2 = new lambda.EventSourceMapping(this, 'Alerting', {
   target: alertingFunction,
@@ -341,7 +350,7 @@ const consumer2 = new lambda.EventSourceMapping(this, 'Alerting', {
       eventName: lambda.FilterRule.isEqual('CRITICAL_EVENT'),
     }),
   ],
-});
+})
 ```
 
 ## Integration Patterns
@@ -351,7 +360,7 @@ const consumer2 = new lambda.EventSourceMapping(this, 'Alerting', {
 **Use case**: Decouple services with events
 
 ```typescript
-const eventBus = new events.EventBus(this, 'AppBus');
+const eventBus = new events.EventBus(this, 'AppBus')
 
 // Service A publishes events
 const serviceA = new NodejsFunction(this, 'ServiceA', {
@@ -359,9 +368,9 @@ const serviceA = new NodejsFunction(this, 'ServiceA', {
   environment: {
     EVENT_BUS: eventBus.eventBusName,
   },
-});
+})
 
-eventBus.grantPutEventsTo(serviceA);
+eventBus.grantPutEventsTo(serviceA)
 
 // Service B subscribes to events
 new events.Rule(this, 'ServiceBRule', {
@@ -371,7 +380,7 @@ new events.Rule(this, 'ServiceBRule', {
     detailType: ['EntityCreated'],
   },
   targets: [new targets.LambdaFunction(serviceBFunction)],
-});
+})
 
 // Service C subscribes to same events
 new events.Rule(this, 'ServiceCRule', {
@@ -381,7 +390,7 @@ new events.Rule(this, 'ServiceCRule', {
     detailType: ['EntityCreated'],
   },
   targets: [new targets.LambdaFunction(serviceCFunction)],
-});
+})
 ```
 
 ### Pattern: API Gateway + SQS Integration
@@ -389,9 +398,9 @@ new events.Rule(this, 'ServiceCRule', {
 **Use case**: Async API requests without Lambda
 
 ```typescript
-const queue = new sqs.Queue(this, 'RequestQueue');
+const queue = new sqs.Queue(this, 'RequestQueue')
 
-const api = new apigateway.RestApi(this, 'Api');
+const api = new apigateway.RestApi(this, 'Api')
 
 // Direct SQS integration (no Lambda)
 const sqsIntegration = new apigateway.AwsIntegration({
@@ -401,20 +410,23 @@ const sqsIntegration = new apigateway.AwsIntegration({
   options: {
     credentialsRole: sqsRole,
     requestParameters: {
-      'integration.request.header.Content-Type': "'application/x-www-form-urlencoded'",
+      'integration.request.header.Content-Type':
+        "'application/x-www-form-urlencoded'",
     },
     requestTemplates: {
       'application/json': 'Action=SendMessage&MessageBody=$input.body',
     },
-    integrationResponses: [{
-      statusCode: '200',
-    }],
+    integrationResponses: [
+      {
+        statusCode: '200',
+      },
+    ],
   },
-});
+})
 
 api.root.addMethod('POST', sqsIntegration, {
   methodResponses: [{ statusCode: '200' }],
-});
+})
 ```
 
 ### Pattern: EventBridge + Step Functions
@@ -448,18 +460,22 @@ const definition = new tasks.LambdaInvoke(this, 'Step1', {
   lambdaFunction: step1Function,
   outputPath: '$.Payload',
 })
-  .next(new tasks.LambdaInvoke(this, 'Step2', {
-    lambdaFunction: step2Function,
-    outputPath: '$.Payload',
-  }))
-  .next(new tasks.LambdaInvoke(this, 'Step3', {
-    lambdaFunction: step3Function,
-    outputPath: '$.Payload',
-  }));
+  .next(
+    new tasks.LambdaInvoke(this, 'Step2', {
+      lambdaFunction: step2Function,
+      outputPath: '$.Payload',
+    })
+  )
+  .next(
+    new tasks.LambdaInvoke(this, 'Step3', {
+      lambdaFunction: step3Function,
+      outputPath: '$.Payload',
+    })
+  )
 
 new stepfunctions.StateMachine(this, 'Sequential', {
   definition,
-});
+})
 ```
 
 ### Pattern: Parallel Execution
@@ -467,25 +483,33 @@ new stepfunctions.StateMachine(this, 'Sequential', {
 **Use case**: Execute independent tasks concurrently
 
 ```typescript
-const parallel = new stepfunctions.Parallel(this, 'ParallelProcessing');
+const parallel = new stepfunctions.Parallel(this, 'ParallelProcessing')
 
-parallel.branch(new tasks.LambdaInvoke(this, 'ProcessA', {
-  lambdaFunction: functionA,
-}));
+parallel.branch(
+  new tasks.LambdaInvoke(this, 'ProcessA', {
+    lambdaFunction: functionA,
+  })
+)
 
-parallel.branch(new tasks.LambdaInvoke(this, 'ProcessB', {
-  lambdaFunction: functionB,
-}));
+parallel.branch(
+  new tasks.LambdaInvoke(this, 'ProcessB', {
+    lambdaFunction: functionB,
+  })
+)
 
-parallel.branch(new tasks.LambdaInvoke(this, 'ProcessC', {
-  lambdaFunction: functionC,
-}));
+parallel.branch(
+  new tasks.LambdaInvoke(this, 'ProcessC', {
+    lambdaFunction: functionC,
+  })
+)
 
-const definition = parallel.next(new tasks.LambdaInvoke(this, 'Aggregate', {
-  lambdaFunction: aggregateFunction,
-}));
+const definition = parallel.next(
+  new tasks.LambdaInvoke(this, 'Aggregate', {
+    lambdaFunction: aggregateFunction,
+  })
+)
 
-new stepfunctions.StateMachine(this, 'Parallel', { definition });
+new stepfunctions.StateMachine(this, 'Parallel', { definition })
 ```
 
 ### Pattern: Map State (Dynamic Parallelism)
@@ -496,15 +520,19 @@ new stepfunctions.StateMachine(this, 'Parallel', { definition });
 const mapState = new stepfunctions.Map(this, 'ProcessItems', {
   maxConcurrency: 10,
   itemsPath: '$.items',
-});
+})
 
-mapState.iterator(new tasks.LambdaInvoke(this, 'ProcessItem', {
-  lambdaFunction: processItemFunction,
-}));
+mapState.iterator(
+  new tasks.LambdaInvoke(this, 'ProcessItem', {
+    lambdaFunction: processItemFunction,
+  })
+)
 
-const definition = mapState.next(new tasks.LambdaInvoke(this, 'Finalize', {
-  lambdaFunction: finalizeFunction,
-}));
+const definition = mapState.next(
+  new tasks.LambdaInvoke(this, 'Finalize', {
+    lambdaFunction: finalizeFunction,
+  })
+)
 ```
 
 ### Pattern: Choice State (Conditional Logic)
@@ -512,19 +540,19 @@ const definition = mapState.next(new tasks.LambdaInvoke(this, 'Finalize', {
 **Use case**: Branching logic based on input
 
 ```typescript
-const choice = new stepfunctions.Choice(this, 'OrderType');
+const choice = new stepfunctions.Choice(this, 'OrderType')
 
 choice.when(
   stepfunctions.Condition.stringEquals('$.orderType', 'STANDARD'),
   standardProcessing
-);
+)
 
 choice.when(
   stepfunctions.Condition.stringEquals('$.orderType', 'EXPRESS'),
   expressProcessing
-);
+)
 
-choice.otherwise(defaultProcessing);
+choice.otherwise(defaultProcessing)
 ```
 
 ### Pattern: Wait State
@@ -535,12 +563,12 @@ choice.otherwise(defaultProcessing);
 // Fixed delay
 const wait = new stepfunctions.Wait(this, 'Wait30Seconds', {
   time: stepfunctions.WaitTime.duration(Duration.seconds(30)),
-});
+})
 
 // Wait until timestamp
 const waitUntil = new stepfunctions.Wait(this, 'WaitUntil', {
   time: stepfunctions.WaitTime.timestampPath('$.expiryTime'),
-});
+})
 
 // Wait for callback (.waitForTaskToken)
 const waitForCallback = new tasks.LambdaInvoke(this, 'WaitForApproval', {
@@ -550,7 +578,7 @@ const waitForCallback = new tasks.LambdaInvoke(this, 'WaitForApproval', {
     token: stepfunctions.JsonPath.taskToken,
     data: stepfunctions.JsonPath.entirePayload,
   }),
-});
+})
 ```
 
 ## Anti-Patterns
@@ -563,23 +591,34 @@ const waitForCallback = new tasks.LambdaInvoke(this, 'WaitForApproval', {
 // BAD
 export const handler = async (event: any) => {
   switch (event.operation) {
-    case 'createUser': return createUser(event);
-    case 'getUser': return getUser(event);
-    case 'updateUser': return updateUser(event);
-    case 'deleteUser': return deleteUser(event);
-    case 'createOrder': return createOrder(event);
+    case 'createUser':
+      return createUser(event)
+    case 'getUser':
+      return getUser(event)
+    case 'updateUser':
+      return updateUser(event)
+    case 'deleteUser':
+      return deleteUser(event)
+    case 'createOrder':
+      return createOrder(event)
     // ... 20 more operations
   }
-};
+}
 ```
 
 **Solution**: Separate Lambda functions per operation
 
 ```typescript
 // GOOD - Separate functions
-export const createUser = async (event: any) => { /* ... */ };
-export const getUser = async (event: any) => { /* ... */ };
-export const updateUser = async (event: any) => { /* ... */ };
+export const createUser = async (event: any) => {
+  /* ... */
+}
+export const getUser = async (event: any) => {
+  /* ... */
+}
+export const updateUser = async (event: any) => {
+  /* ... */
+}
 ```
 
 ### ❌ Recursive Lambda Pattern
@@ -589,16 +628,18 @@ export const updateUser = async (event: any) => { /* ... */ };
 ```typescript
 // BAD
 export const handler = async (event: any) => {
-  await processItem(event);
+  await processItem(event)
 
   if (hasMoreItems()) {
     await lambda.invoke({
       FunctionName: process.env.AWS_LAMBDA_FUNCTION_NAME,
       InvocationType: 'Event',
-      Payload: JSON.stringify({ /* next batch */ }),
-    });
+      Payload: JSON.stringify({
+        /* next batch */
+      }),
+    })
   }
-};
+}
 ```
 
 **Solution**: Use SQS or Step Functions
@@ -607,10 +648,10 @@ export const handler = async (event: any) => {
 // GOOD - Use SQS for iteration
 export const handler = async (event: SQSEvent) => {
   for (const record of event.Records) {
-    await processItem(record);
+    await processItem(record)
   }
   // SQS handles iteration automatically
-};
+}
 ```
 
 ### ❌ Lambda Chaining
@@ -620,14 +661,14 @@ export const handler = async (event: SQSEvent) => {
 ```typescript
 // BAD
 export const handler1 = async (event: any) => {
-  const result = await processStep1(event);
+  const result = await processStep1(event)
 
   // Directly invoking next Lambda
   await lambda.invoke({
     FunctionName: 'handler2',
     Payload: JSON.stringify(result),
-  });
-};
+  })
+}
 ```
 
 **Solution**: Use EventBridge, SQS, or Step Functions
@@ -635,16 +676,18 @@ export const handler1 = async (event: any) => {
 ```typescript
 // GOOD - Publish to EventBridge
 export const handler1 = async (event: any) => {
-  const result = await processStep1(event);
+  const result = await processStep1(event)
 
   await eventBridge.putEvents({
-    Entries: [{
-      Source: 'service.step1',
-      DetailType: 'Step1Completed',
-      Detail: JSON.stringify(result),
-    }],
-  });
-};
+    Entries: [
+      {
+        Source: 'service.step1',
+        DetailType: 'Step1Completed',
+        Detail: JSON.stringify(result),
+      },
+    ],
+  })
+}
 ```
 
 ### ❌ Synchronous Waiting in Lambda
@@ -654,15 +697,15 @@ export const handler1 = async (event: any) => {
 ```typescript
 // BAD - Blocking on slow operation
 export const handler = async (event: any) => {
-  await startBatchJob(); // Returns immediately
+  await startBatchJob() // Returns immediately
 
   // Wait for job to complete (wastes Lambda time)
   while (true) {
-    const status = await checkJobStatus();
-    if (status === 'COMPLETE') break;
-    await sleep(1000);
+    const status = await checkJobStatus()
+    if (status === 'COMPLETE') break
+    await sleep(1000)
   }
-};
+}
 ```
 
 **Solution**: Use Step Functions with callback pattern
@@ -675,7 +718,7 @@ const waitForJob = new tasks.LambdaInvoke(this, 'StartJob', {
   payload: stepfunctions.TaskInput.fromObject({
     token: stepfunctions.JsonPath.taskToken,
   }),
-});
+})
 ```
 
 ### ❌ Large Deployment Packages
@@ -683,6 +726,7 @@ const waitForJob = new tasks.LambdaInvoke(this, 'StartJob', {
 **Problem**: Large Lambda packages increase cold start time
 
 **Solution**:
+
 - Use layers for shared dependencies
 - Externalize AWS SDK
 - Minimize bundle size
@@ -695,7 +739,7 @@ new NodejsFunction(this, 'Function', {
     externalModules: ['@aws-sdk/*'], // Provided by runtime
     nodeModules: ['only-needed-deps'], // Selective bundling
   },
-});
+})
 ```
 
 ## Performance Optimization
@@ -703,6 +747,7 @@ new NodejsFunction(this, 'Function', {
 ### Cold Start Optimization
 
 **Techniques**:
+
 1. Minimize package size
 2. Use provisioned concurrency for critical paths
 3. Lazy load dependencies
@@ -714,15 +759,17 @@ new NodejsFunction(this, 'Function', {
 const apiFunction = new NodejsFunction(this, 'ApiFunction', {
   entry: 'src/api.ts',
   memorySize: 1769, // 1 vCPU for faster initialization
-});
+})
 
-const alias = apiFunction.currentVersion.addAlias('live');
-alias.addAutoScaling({
-  minCapacity: 2,
-  maxCapacity: 10,
-}).scaleOnUtilization({
-  utilizationTarget: 0.7,
-});
+const alias = apiFunction.currentVersion.addAlias('live')
+alias
+  .addAutoScaling({
+    minCapacity: 2,
+    maxCapacity: 10,
+  })
+  .scaleOnUtilization({
+    utilizationTarget: 0.7,
+  })
 ```
 
 ### Right-Sizing Memory
@@ -734,19 +781,19 @@ alias.addAutoScaling({
 new NodejsFunction(this, 'ComputeFunction', {
   memorySize: 1769, // 1 vCPU
   timeout: Duration.seconds(30),
-});
+})
 
 // I/O-bound workload
 new NodejsFunction(this, 'IOFunction', {
   memorySize: 512, // Less CPU needed
   timeout: Duration.seconds(60),
-});
+})
 
 // Simple operations
 new NodejsFunction(this, 'SimpleFunction', {
   memorySize: 256,
   timeout: Duration.seconds(10),
-});
+})
 ```
 
 ### Concurrent Execution Control
@@ -755,12 +802,12 @@ new NodejsFunction(this, 'SimpleFunction', {
 // Protect downstream services
 new NodejsFunction(this, 'Function', {
   reservedConcurrentExecutions: 10, // Max 10 concurrent
-});
+})
 
 // Unreserved concurrency (shared pool)
 new NodejsFunction(this, 'Function', {
   // Uses unreserved account concurrency
-});
+})
 ```
 
 ## Testing Strategies
@@ -773,24 +820,24 @@ Test business logic separate from AWS services:
 // handler.ts
 export const processOrder = async (order: Order): Promise<Result> => {
   // Business logic (easily testable)
-  const validated = validateOrder(order);
-  const priced = calculatePrice(validated);
-  return transformResult(priced);
-};
+  const validated = validateOrder(order)
+  const priced = calculatePrice(validated)
+  return transformResult(priced)
+}
 
 export const handler = async (event: any): Promise<any> => {
-  const order = parseEvent(event);
-  const result = await processOrder(order);
-  await saveToDatabase(result);
-  return formatResponse(result);
-};
+  const order = parseEvent(event)
+  const result = await processOrder(order)
+  await saveToDatabase(result)
+  return formatResponse(result)
+}
 
 // handler.test.ts
 test('processOrder calculates price correctly', () => {
-  const order = { items: [{ price: 10, quantity: 2 }] };
-  const result = processOrder(order);
-  expect(result.total).toBe(20);
-});
+  const order = { items: [{ price: 10, quantity: 2 }] }
+  const result = processOrder(order)
+  expect(result.total).toBe(20)
+})
 ```
 
 ### Integration Testing
@@ -799,19 +846,21 @@ Test with actual AWS services:
 
 ```typescript
 // integration.test.ts
-import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
+import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda'
 
 test('Lambda processes order correctly', async () => {
-  const lambda = new LambdaClient({});
+  const lambda = new LambdaClient({})
 
-  const response = await lambda.send(new InvokeCommand({
-    FunctionName: process.env.FUNCTION_NAME,
-    Payload: JSON.stringify({ orderId: '123' }),
-  }));
+  const response = await lambda.send(
+    new InvokeCommand({
+      FunctionName: process.env.FUNCTION_NAME,
+      Payload: JSON.stringify({ orderId: '123' }),
+    })
+  )
 
-  const result = JSON.parse(Buffer.from(response.Payload!).toString());
-  expect(result.statusCode).toBe(200);
-});
+  const result = JSON.parse(Buffer.from(response.Payload!).toString())
+  expect(result.statusCode).toBe(200)
+})
 ```
 
 ### Local Testing with SAM

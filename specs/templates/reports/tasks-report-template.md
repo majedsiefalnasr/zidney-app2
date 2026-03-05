@@ -22,15 +22,15 @@
 
 ## Task Breakdown
 
-| Category | Count | Notes |
-| --- | --- | --- |
-| Infrastructure | ... | ... |
-| API | ... | ... |
-| Worker | ... | ... |
-| Frontend | ... | ... |
-| Observability | ... | ... |
-| Testing | ... | ... |
-| **Total** | ... | ... |
+| Category       | Count | Notes |
+| -------------- | ----- | ----- |
+| Infrastructure | ...   | ...   |
+| API            | ...   | ...   |
+| Worker         | ...   | ...   |
+| Frontend       | ...   | ...   |
+| Observability  | ...   | ...   |
+| Testing        | ...   | ...   |
+| **Total**      | ...   | ...   |
 
 ---
 
@@ -50,13 +50,13 @@
 
 ## Constitutional Compliance
 
-| Check | Status | Notes |
-| --- | --- | --- |
-| All write paths include transaction tasks | ✅ / ❌ | ... |
-| Idempotency tasks are defined where required | ✅ / ❌ | ... |
-| Layer boundary rules are respected | ✅ / ❌ | ... |
-| No unrelated file modifications planned | ✅ / ❌ | ... |
-| Migration tasks included when required | ✅ / ❌ | ... |
+| Check                                        | Status  | Notes |
+| -------------------------------------------- | ------- | ----- |
+| All write paths include transaction tasks    | ✅ / ❌ | ...   |
+| Idempotency tasks are defined where required | ✅ / ❌ | ...   |
+| Layer boundary rules are respected           | ✅ / ❌ | ...   |
+| No unrelated file modifications planned      | ✅ / ❌ | ...   |
+| Migration tasks included when required       | ✅ / ❌ | ...   |
 
 **Overall:** COMPLIANT / BLOCKED
 

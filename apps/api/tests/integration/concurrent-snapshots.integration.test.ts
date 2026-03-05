@@ -138,8 +138,7 @@ describe('Concurrent Snapshot Tests (T039)', () => {
     const examResult = await pool.query(
       `INSERT INTO mcq_exams (basket_id, name, duration_minutes, question_count, passing_score, created_by)
        VALUES ($1, 'Concurrent Snapshots Exam ' || now(), 120, 20, 75, $2)
-       RETURNING id`
-      ,
+       RETURNING id`,
       [basketId, systemUserId]
     )
     examId = examResult.rows[0].id
@@ -401,10 +400,7 @@ describe('Concurrent Snapshot Tests (T039)', () => {
             `INSERT INTO users (email, first_name, last_name, password_hash, is_active)
              VALUES ($1, 'HighConcurrentUser', $2, 'hash', true)
              RETURNING id`,
-            [
-              `highconcurrent${index}@test.com`,
-              index.toString(),
-            ]
+            [`highconcurrent${index}@test.com`, index.toString()]
           )
         )
       }

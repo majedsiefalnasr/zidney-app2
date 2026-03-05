@@ -11,8 +11,8 @@
 
 [A table of specs with ID, summary, and sanity columns filled out for each spec]
 
-| ID | Summary | Sanity |
-| -- | ------- | ------ |
+| ID  | Summary | Sanity |
+| --- | ------- | ------ |
 
 [Summary is a concise summary extracted from the spec.md file]
 [Sanity is a combination of "MISSING spec.md" or any other issues found; or "OK" if no issues]
@@ -23,8 +23,8 @@
 
 [A table of changes with ID, state, summary, affected specs, and sanity columns filled out for each change]
 
-| ID | State | Summary | Affected Specs | Sanity |
-| -- | ----- | ------- | -------------- | ------ |
+| ID  | State | Summary | Affected Specs | Sanity |
+| --- | ----- | ------- | -------------- | ------ |
 
 [State is one of "PROPOSED", "PLANNED", "IMPLEMENTED", "ARCHIVED", "MISSING", "INVALID" from STATE file]
 [Summary is a concise summary extracted from the proposal.md file]

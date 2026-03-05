@@ -470,6 +470,6 @@ After deployment succeeds, ensure:
 
 **Keep this page near you during deployment!**
 
-Print Date: ******\_******  
-Deployment Date: ******\_******  
+Print Date: **\*\***\_**\*\***  
+Deployment Date: **\*\***\_**\*\***  
 Status: ✓ DEPLOYMENT SUCCESSFUL / ✗ ROLLBACK EXECUTED

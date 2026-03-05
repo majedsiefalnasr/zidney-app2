@@ -465,10 +465,10 @@ curl https://production-api/mmc/permissions/check \
 
 ## Sign-Off
 
-**QA Engineer:** ********\_********  
-**Date:** ********\_********
+**QA Engineer:** **\*\*\*\***\_**\*\*\*\***  
+**Date:** **\*\*\*\***\_**\*\*\*\***
 
-**Code Reviewer:** ********\_********  
-**Date:** ********\_********
+**Code Reviewer:** **\*\*\*\***\_**\*\*\*\***  
+**Date:** **\*\*\*\***\_**\*\*\*\***
 
 All manual and automated tests passed: ✅

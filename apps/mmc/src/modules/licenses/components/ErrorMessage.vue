@@ -3,7 +3,11 @@
  * T084: Error Message Display Component
  */
 
-import { Alert, AlertDescription, AlertTitle } from '@zidney/ui/components/shadcn-vue/alert'
+import {
+  Alert,
+  AlertDescription,
+  AlertTitle,
+} from '@zidney/ui/components/shadcn-vue/alert'
 
 interface Props {
   error: {

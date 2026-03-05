@@ -4,19 +4,20 @@ The Runtime service provides a secure, serverless hosting environment for deploy
 
 ## Key Features
 
-| Feature | Description |
-|---------|-------------|
-| **Framework Agnostic** | Works with LangGraph, Strands, CrewAI, or custom agents |
-| **Model Flexibility** | Supports any LLM (Bedrock, Claude, Gemini, OpenAI) |
-| **Protocol Support** | MCP (Model Context Protocol) and A2A (Agent to Agent) |
-| **Session Isolation** | Dedicated microVM per session with isolated CPU, memory, filesystem |
-| **Extended Execution** | Up to 8 hours for long-running workloads |
-| **100MB Payloads** | Handle multimodal content (text, images, audio, video) |
-| **Bidirectional Streaming** | HTTP API and WebSocket for real-time interactions |
+| Feature                     | Description                                                         |
+| --------------------------- | ------------------------------------------------------------------- |
+| **Framework Agnostic**      | Works with LangGraph, Strands, CrewAI, or custom agents             |
+| **Model Flexibility**       | Supports any LLM (Bedrock, Claude, Gemini, OpenAI)                  |
+| **Protocol Support**        | MCP (Model Context Protocol) and A2A (Agent to Agent)               |
+| **Session Isolation**       | Dedicated microVM per session with isolated CPU, memory, filesystem |
+| **Extended Execution**      | Up to 8 hours for long-running workloads                            |
+| **100MB Payloads**          | Handle multimodal content (text, images, audio, video)              |
+| **Bidirectional Streaming** | HTTP API and WebSocket for real-time interactions                   |
 
 ## Quick Start
 
 ### Prerequisites
+
 - AWS CLI configured with appropriate permissions
 - Docker installed for container builds
 - Python 3.9+ for SDK usage
@@ -24,11 +25,13 @@ The Runtime service provides a secure, serverless hosting environment for deploy
 ### Deploy an Agent
 
 **Step 1: Install AgentCore SDK**
+
 ```bash
 pip install bedrock-agentcore
 ```
 
 **Step 2: Create agent code**
+
 ```python
 from bedrock_agentcore.runtime import BedrockAgentCoreApp
 
@@ -42,6 +45,7 @@ async def handle_request(request, context):
 ```
 
 **Step 3: Create AgentCore Runtime**
+
 ```bash
 aws bedrock-agentcore-control create-agent-runtime \
   --agent-runtime-name my-agent \
@@ -52,6 +56,7 @@ aws bedrock-agentcore-control create-agent-runtime \
 ```
 
 **Step 4: Invoke agent**
+
 ```bash
 aws bedrock-agentcore-runtime invoke-agent-runtime \
   --agent-runtime-endpoint-arn arn:aws:bedrock-agentcore:us-west-2:<ACCOUNT_ID>:runtime/my-agent/endpoint/DEFAULT \
@@ -62,19 +67,25 @@ aws bedrock-agentcore-runtime invoke-agent-runtime \
 ## Core Components
 
 ### AgentCore Runtime
+
 Containerized application hosting your AI agent or tool code. Each runtime:
+
 - Has a unique identity
 - Is versioned for controlled deployment and updates
 - Can use popular frameworks or custom implementations
 
 ### Versions
+
 Immutable snapshots of configuration:
+
 - Version 1 (V1) created automatically with new runtime
 - Each update creates a new version
 - Enables rollback capabilities
 
 ### Endpoints
+
 Addressable access points to runtime versions:
+
 - **DEFAULT**: Automatically created, points to latest version
 - Custom endpoints for different environments (dev, test, prod)
 - Unique ARN for invocation
@@ -82,7 +93,9 @@ Addressable access points to runtime versions:
 Endpoint states: `CREATING` → `READY` (or `CREATE_FAILED`) → `UPDATING` → `READY`
 
 ### Sessions
+
 Individual interaction contexts with complete isolation:
+
 - Dedicated microVM per session
 - Preserves context across interactions
 - Persists up to 8 hours
@@ -94,12 +107,13 @@ Session states: `Active` → `Idle` → `Terminated`
 
 ### Inbound (Who Can Access Your Agent)
 
-| Method | Description |
-|--------|-------------|
-| **IAM (SigV4)** | AWS credentials for identity verification |
-| **OAuth 2.0** | External identity providers (Cognito, Okta, Entra ID) |
+| Method          | Description                                           |
+| --------------- | ----------------------------------------------------- |
+| **IAM (SigV4)** | AWS credentials for identity verification             |
+| **OAuth 2.0**   | External identity providers (Cognito, Okta, Entra ID) |
 
 **OAuth Flow**:
+
 1. User authenticates with identity provider
 2. Client receives bearer token
 3. Token passed in authorization header
@@ -108,24 +122,27 @@ Session states: `Active` → `Idle` → `Terminated`
 
 ### Outbound (Accessing External Services)
 
-| Method | Use Case |
-|--------|----------|
-| **OAuth** | Services supporting OAuth flows |
-| **API Keys** | Key-based authentication |
+| Method       | Use Case                        |
+| ------------ | ------------------------------- |
+| **OAuth**    | Services supporting OAuth flows |
+| **API Keys** | Key-based authentication        |
 
 **Modes**:
+
 - **User-delegated**: Acting on behalf of end user
 - **Autonomous**: Acting with service-level credentials
 
 ## Common Operations
 
 ### List Agent Runtimes
+
 ```bash
 aws bedrock-agentcore-control list-agent-runtimes \
   --region us-west-2
 ```
 
 ### Get Runtime Details
+
 ```bash
 aws bedrock-agentcore-control get-agent-runtime \
   --agent-runtime-id <RUNTIME_ID> \
@@ -133,6 +150,7 @@ aws bedrock-agentcore-control get-agent-runtime \
 ```
 
 ### Update Runtime
+
 ```bash
 aws bedrock-agentcore-control update-agent-runtime \
   --agent-runtime-id <RUNTIME_ID> \
@@ -141,6 +159,7 @@ aws bedrock-agentcore-control update-agent-runtime \
 ```
 
 ### Delete Runtime
+
 ```bash
 aws bedrock-agentcore-control delete-agent-runtime \
   --agent-runtime-id <RUNTIME_ID> \
@@ -184,21 +203,21 @@ async def handle_request(request, context):
 
 ## Supported Frameworks
 
-| Framework | Description |
-|-----------|-------------|
+| Framework     | Description                 |
+| ------------- | --------------------------- |
 | **LangGraph** | Graph-based agent workflows |
-| **Strands** | AWS-native agent framework |
-| **CrewAI** | Multi-agent collaboration |
-| **Custom** | Any Python-based agent |
+| **Strands**   | AWS-native agent framework  |
+| **CrewAI**    | Multi-agent collaboration   |
+| **Custom**    | Any Python-based agent      |
 
 ## Troubleshooting
 
-| Error | Cause | Solution |
-|-------|-------|----------|
-| 504 Gateway Timeout | Container issues, ARM64 compatibility | Ensure container exposes port 8080, use ARM64 image |
-| 403 AccessDeniedException | Missing permissions | Verify IAM role and policies |
-| exec format error | Wrong architecture | Build ARM64 containers with buildx |
-| Session terminated after 15min | Idle timeout | Implement ping handler with HEALTHY_BUSY status |
+| Error                          | Cause                                 | Solution                                            |
+| ------------------------------ | ------------------------------------- | --------------------------------------------------- |
+| 504 Gateway Timeout            | Container issues, ARM64 compatibility | Ensure container exposes port 8080, use ARM64 image |
+| 403 AccessDeniedException      | Missing permissions                   | Verify IAM role and policies                        |
+| exec format error              | Wrong architecture                    | Build ARM64 containers with buildx                  |
+| Session terminated after 15min | Idle timeout                          | Implement ping handler with HEALTHY_BUSY status     |
 
 ## Related Services
 

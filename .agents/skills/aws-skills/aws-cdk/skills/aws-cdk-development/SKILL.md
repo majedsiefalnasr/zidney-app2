@@ -47,7 +47,9 @@ This skill provides comprehensive guidance for developing AWS infrastructure usi
 This skill includes the CDK MCP server automatically configured with the plugin:
 
 ### AWS CDK MCP Server
+
 **When to use**: For CDK-specific guidance and utilities
+
 - Get CDK construct recommendations
 - Retrieve CDK best practices
 - Access CDK pattern suggestions
@@ -59,6 +61,7 @@ This skill includes the CDK MCP server automatically configured with the plugin:
 ## When to Use This Skill
 
 Use this skill when:
+
 - Creating new CDK stacks or constructs
 - Refactoring existing CDK infrastructure
 - Implementing Lambda functions within CDK
@@ -73,6 +76,7 @@ Use this skill when:
 **CRITICAL**: Do NOT explicitly specify resource names when they are optional in CDK constructs.
 
 **Why**: CDK-generated names enable:
+
 - **Reusable patterns**: Deploy the same construct/pattern multiple times without conflicts
 - **Parallel deployments**: Multiple stacks can deploy simultaneously in the same region
 - **Cleaner shared logic**: Patterns and shared code can be initialized multiple times without name collision
@@ -83,15 +87,15 @@ Use this skill when:
 ```typescript
 // ❌ BAD - Explicit naming prevents reusability and parallel deployments
 new lambda.Function(this, 'MyFunction', {
-  functionName: 'my-lambda',  // Avoid this
+  functionName: 'my-lambda', // Avoid this
   // ...
-});
+})
 
 // ✅ GOOD - Let CDK generate unique names
 new lambda.Function(this, 'MyFunction', {
   // No functionName specified - CDK generates: StackName-MyFunctionXXXXXX
   // ...
-});
+})
 ```
 
 **Security Note**: For different environments (dev, staging, prod), follow AWS Security Pillar best practices by using separate AWS accounts rather than relying on resource naming within a single account. Account-level isolation provides stronger security boundaries.
@@ -101,29 +105,32 @@ new lambda.Function(this, 'MyFunction', {
 Use the appropriate Lambda construct based on runtime:
 
 **TypeScript/JavaScript**: Use `@aws-cdk/aws-lambda-nodejs`
+
 ```typescript
-import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs';
+import { NodejsFunction } from 'aws-cdk-lib/aws-lambda-nodejs'
 
 new NodejsFunction(this, 'MyFunction', {
   entry: 'lambda/handler.ts',
   handler: 'handler',
   // Automatically handles bundling, dependencies, and transpilation
-});
+})
 ```
 
 **Python**: Use `@aws-cdk/aws-lambda-python`
+
 ```typescript
-import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha';
+import { PythonFunction } from '@aws-cdk/aws-lambda-python-alpha'
 
 new PythonFunction(this, 'MyFunction', {
   entry: 'lambda',
   index: 'handler.py',
   handler: 'handler',
   // Automatically handles dependencies and packaging
-});
+})
 ```
 
 **Benefits**:
+
 - Automatic bundling and dependency management
 - Transpilation handled automatically
 - No manual packaging required
@@ -138,17 +145,19 @@ Use a **multi-layer validation strategy** for comprehensive CDK quality checks:
 **For TypeScript/JavaScript projects**:
 
 Install [cdk-nag](https://github.com/cdklabs/cdk-nag) for synthesis-time validation:
+
 ```bash
 npm install --save-dev cdk-nag
 ```
 
 Add to your CDK app:
-```typescript
-import { Aspects } from 'aws-cdk-lib';
-import { AwsSolutionsChecks } from 'cdk-nag';
 
-const app = new App();
-Aspects.of(app).add(new AwsSolutionsChecks());
+```typescript
+import { Aspects } from 'aws-cdk-lib'
+import { AwsSolutionsChecks } from 'cdk-nag'
+
+const app = new App()
+Aspects.of(app).add(new AwsSolutionsChecks())
 ```
 
 **Optional - VS Code users**: Install [CDK NAG Validator extension](https://marketplace.visualstudio.com/items?itemName=alphacrack.cdk-nag-validator) for faster feedback on file save.
@@ -158,31 +167,36 @@ Aspects.of(app).add(new AwsSolutionsChecks());
 #### Layer 2: Synthesis-Time Validation (Required)
 
 1. **Synthesis with cdk-nag**: Validate stack with comprehensive rules
+
    ```bash
    cdk synth  # cdk-nag runs automatically via Aspects
    ```
 
 2. **Suppress legitimate exceptions** with documented reasons:
+
    ```typescript
-   import { NagSuppressions } from 'cdk-nag';
+   import { NagSuppressions } from 'cdk-nag'
 
    // Document WHY the exception is needed
    NagSuppressions.addResourceSuppressions(resource, [
      {
        id: 'AwsSolutions-L1',
-       reason: 'Lambda@Edge requires specific runtime for CloudFront compatibility'
-     }
-   ]);
+       reason:
+         'Lambda@Edge requires specific runtime for CloudFront compatibility',
+     },
+   ])
    ```
 
 #### Layer 3: Pre-Commit Safety Net
 
 1. **Build**: Ensure compilation succeeds
+
    ```bash
    npm run build  # or language-specific build command
    ```
 
 2. **Tests**: Run unit and integration tests
+
    ```bash
    npm test  # or pytest, mvn test, etc.
    ```
@@ -193,6 +207,7 @@ Aspects.of(app).add(new AwsSolutionsChecks());
    ```
 
 The validation script now focuses on:
+
 - Language detection
 - Template size and resource count analysis
 - Synthesis success verification
@@ -235,6 +250,7 @@ The validation script now focuses on:
 ### When to Use AWS Documentation MCP
 
 **Always verify before implementing**:
+
 - New AWS service features or configurations
 - Service availability in target regions
 - API parameter specifications
@@ -242,6 +258,7 @@ The validation script now focuses on:
 - Security best practices for AWS services
 
 **Example scenarios**:
+
 - "Check if Lambda supports Python 3.13 runtime"
 - "Verify DynamoDB is available in eu-south-2"
 - "What are the current Lambda timeout limits?"
@@ -250,6 +267,7 @@ The validation script now focuses on:
 ### When to Use CDK MCP Server
 
 **Leverage for CDK-specific guidance**:
+
 - CDK construct selection and usage
 - CDK API parameter options
 - CDK best practice patterns
@@ -257,6 +275,7 @@ The validation script now focuses on:
 - CDK-specific optimizations
 
 **Example scenarios**:
+
 - "What's the recommended CDK construct for API Gateway REST API?"
 - "How to configure NodejsFunction bundling options?"
 - "Best practices for CDK stack organization"
@@ -277,6 +296,7 @@ For detailed CDK patterns, anti-patterns, and architectural guidance, refer to t
 **File**: `references/cdk-patterns.md`
 
 This reference includes:
+
 - Common CDK patterns and their use cases
 - Anti-patterns to avoid
 - Security best practices

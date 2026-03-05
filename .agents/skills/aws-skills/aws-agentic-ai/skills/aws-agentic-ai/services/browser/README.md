@@ -9,18 +9,21 @@ Amazon Bedrock AgentCore Browser provides a fast, secure, cloud-based browser ru
 ## Core Capabilities
 
 ### Cloud-Based Runtime
+
 - **Fast Execution**: High-performance browser instances with minimal latency
 - **Auto Scaling**: Automatic scaling based on demand without configuration
 - **Zero Infrastructure**: No servers or containers to manage
 - **Multi-Region**: Deploy browser instances across AWS regions globally
 
 ### Security and Compliance
+
 - **Enterprise Security**: Industry-standard security controls and encryption
 - **Isolated Sessions**: Each browsing session runs in complete isolation
 - **Data Protection**: Secure data handling and privacy controls
 - **Compliance Ready**: Meets enterprise compliance requirements (SOC, HIPAA, GDPR)
 
 ### Web Interaction Capabilities
+
 - **Full Automation**: Complete browser automation capabilities
 - **JavaScript Support**: Execute JavaScript in browser context
 - **Form Interaction**: Fill forms, click buttons, navigate pages
@@ -29,6 +32,7 @@ Amazon Bedrock AgentCore Browser provides a fast, secure, cloud-based browser ru
 - **Screenshot Capture**: Take screenshots of pages and elements
 
 ### Observability
+
 - **Execution Logging**: Comprehensive logs of browser actions
 - **Performance Metrics**: Track page load times and operation latency
 - **Error Tracking**: Detailed error capture and debugging information
@@ -37,35 +41,45 @@ Amazon Bedrock AgentCore Browser provides a fast, secure, cloud-based browser ru
 ## Use Cases
 
 ### Web Scraping and Data Extraction
+
 Enable agents to:
+
 - Extract data from websites at scale
 - Scrape content from dynamic pages
 - Collect structured data from multiple sources
 - Monitor website changes over time
 
 ### Automated Testing and QA
+
 Support scenarios like:
+
 - Automated UI testing of web applications
 - Regression testing for web features
 - Cross-browser compatibility testing
 - Performance testing and monitoring
 
 ### Form Filling and Workflow Automation
+
 Allow agents to:
+
 - Automate form submissions
 - Complete multi-step workflows
 - Handle authentication and logins
 - Process batch operations on web interfaces
 
 ### Real-Time Monitoring
+
 Enable agents to:
+
 - Monitor website availability and uptime
 - Track content changes and updates
 - Verify website functionality
 - Gather competitive intelligence
 
 ### Content Verification
+
 Support tasks like:
+
 - Validate web content accuracy
 - Check link integrity
 - Verify page rendering
@@ -144,6 +158,7 @@ aws bedrock-agentcore-control update-browser-config \
 ## Browser Actions
 
 ### Navigation
+
 ```javascript
 // Navigate to URL
 {
@@ -163,6 +178,7 @@ aws bedrock-agentcore-control update-browser-config \
 ```
 
 ### Element Interaction
+
 ```javascript
 // Click element
 {
@@ -186,6 +202,7 @@ aws bedrock-agentcore-control update-browser-config \
 ```
 
 ### Content Extraction
+
 ```javascript
 // Extract text
 {
@@ -208,6 +225,7 @@ aws bedrock-agentcore-control update-browser-config \
 ```
 
 ### Screenshots
+
 ```javascript
 // Full page screenshot
 {
@@ -225,6 +243,7 @@ aws bedrock-agentcore-control update-browser-config \
 ## Best Practices
 
 ### Performance Optimization
+
 - Use headless mode for non-visual operations
 - Disable unnecessary resources (images, stylesheets)
 - Set appropriate timeouts for page loads
@@ -232,6 +251,7 @@ aws bedrock-agentcore-control update-browser-config \
 - Implement exponential backoff for retries
 
 ### Reliability
+
 - Handle network failures gracefully
 - Implement proper error handling
 - Use explicit waits for dynamic content
@@ -239,6 +259,7 @@ aws bedrock-agentcore-control update-browser-config \
 - Set reasonable timeout values
 
 ### Security
+
 - Validate all URLs before navigation
 - Sanitize extracted data
 - Use secure credential storage
@@ -246,6 +267,7 @@ aws bedrock-agentcore-control update-browser-config \
 - Monitor for suspicious patterns
 
 ### Cost Optimization
+
 - Close browser sessions when done
 - Use session pooling for frequent operations
 - Set appropriate resource limits
@@ -255,6 +277,7 @@ aws bedrock-agentcore-control update-browser-config \
 ## Integration Patterns
 
 ### With Memory Service
+
 ```
 Browser ←→ Memory Service
 - Store extracted data in memory
@@ -263,6 +286,7 @@ Browser ←→ Memory Service
 ```
 
 ### With Identity Service
+
 ```
 Browser ←→ Identity Service
 - Authenticate browser sessions
@@ -271,6 +295,7 @@ Browser ←→ Identity Service
 ```
 
 ### With Code Interpreter
+
 ```
 Browser ←→ Code Interpreter
 - Process scraped data with code
@@ -283,28 +308,34 @@ Browser ←→ Code Interpreter
 ### Common Issues
 
 **Page Load Timeout**
+
 - Symptom: Page takes too long to load
 - Solution: Increase timeout or optimize target page
 
 **Element Not Found**
+
 - Symptom: Cannot locate page element
 - Solution: Use explicit waits or verify selector
 
 **JavaScript Errors**
+
 - Symptom: Page JavaScript fails
 - Solution: Check console logs, handle errors
 
 **Session Terminated**
+
 - Symptom: Browser session unexpectedly ends
 - Solution: Check resource limits and session timeout
 
 **Authentication Required**
+
 - Symptom: Cannot access protected pages
 - Solution: Configure credentials via Identity service
 
 ## Monitoring
 
 ### Key Metrics
+
 - **Session Count**: Number of active browser sessions
 - **Success Rate**: Percentage of successful operations
 - **Page Load Time**: Average time to load pages
@@ -312,6 +343,7 @@ Browser ←→ Code Interpreter
 - **Resource Usage**: CPU and memory utilization
 
 ### CloudWatch Integration
+
 ```bash
 # Query browser metrics
 aws cloudwatch get-metric-statistics \
@@ -325,6 +357,7 @@ aws cloudwatch get-metric-statistics \
 ```
 
 ### Logging
+
 ```bash
 # View browser execution logs
 aws logs tail /aws/bedrock-agentcore/browser/<AGENT_ID> \
@@ -335,6 +368,7 @@ aws logs tail /aws/bedrock-agentcore/browser/<AGENT_ID> \
 ## Performance Considerations
 
 ### Optimization Techniques
+
 1. **Disable Unnecessary Resources**: Turn off images/stylesheets when not needed
 2. **Use Headless Mode**: Faster execution without rendering overhead
 3. **Implement Caching**: Cache static resources and repeated queries
@@ -342,6 +376,7 @@ aws logs tail /aws/bedrock-agentcore/browser/<AGENT_ID> \
 5. **Smart Waiting**: Use explicit waits instead of fixed delays
 
 ### Scaling Patterns
+
 - **Horizontal Scaling**: Launch multiple browser instances
 - **Session Pooling**: Reuse browser sessions for efficiency
 - **Request Queuing**: Queue browser operations during high load
@@ -357,6 +392,7 @@ aws logs tail /aws/bedrock-agentcore/browser/<AGENT_ID> \
 ---
 
 **Related Services**:
+
 - [Runtime Service](../runtime/README.md) - Agent execution
 - [Code Interpreter](../code-interpreter/README.md) - Data processing
 - [Memory Service](../memory/README.md) - State management

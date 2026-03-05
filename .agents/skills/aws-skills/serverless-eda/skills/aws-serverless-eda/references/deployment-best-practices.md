@@ -16,11 +16,13 @@ Deployment best practices for serverless applications including CI/CD, testing, 
 ### Four Stages of Release
 
 **1. Source Phase**:
+
 - Developers commit code changes
 - Code review (peer review)
 - Version control (Git)
 
 **2. Build Phase**:
+
 - Compile code
 - Run unit tests
 - Style checking and linting
@@ -28,6 +30,7 @@ Deployment best practices for serverless applications including CI/CD, testing, 
 - Build container images
 
 **3. Test Phase**:
+
 - Integration tests with other systems
 - Load testing
 - UI testing
@@ -35,6 +38,7 @@ Deployment best practices for serverless applications including CI/CD, testing, 
 - Acceptance testing
 
 **4. Production Phase**:
+
 - Deploy to production environment
 - Monitor for errors
 - Validate deployment success
@@ -43,16 +47,19 @@ Deployment best practices for serverless applications including CI/CD, testing, 
 ### CI/CD Maturity Levels
 
 **Continuous Integration (CI)**:
+
 - Automated build on code commit
 - Automated unit testing
 - Manual deployment to test/production
 
 **Continuous Delivery (CD)**:
+
 - Automated deployment to test environments
 - Manual approval for production
 - Automated testing in non-prod
 
 **Continuous Deployment**:
+
 - Fully automated pipeline
 - Automated deployment to production
 - No manual intervention after code commit
@@ -84,6 +91,7 @@ Resources:
 ```
 
 **Benefits**:
+
 - Simple, serverless-focused syntax
 - Built-in best practices
 - SAM CLI for local testing
@@ -97,18 +105,20 @@ new NodejsFunction(this, 'OrderFunction', {
   environment: {
     TABLE_NAME: ordersTable.tableName,
   },
-});
+})
 
-ordersTable.grantReadWriteData(orderFunction);
+ordersTable.grantReadWriteData(orderFunction)
 ```
 
 **Benefits**:
+
 - Type-safe, programmatic
 - Reusable constructs
 - Rich AWS service support
 - Better for complex infrastructure
 
 **When to use**:
+
 - **SAM**: Serverless-only applications, simpler projects
 - **CDK**: Complex infrastructure, multiple services, reusable patterns
 
@@ -118,19 +128,19 @@ ordersTable.grantReadWriteData(orderFunction);
 
 ```typescript
 // CDK App
-const app = new cdk.App();
+const app = new cdk.App()
 
 new ServerlessStack(app, 'DevStack', {
   env: { account: '111111111111', region: 'us-east-1' },
   environment: 'dev',
   logLevel: 'DEBUG',
-});
+})
 
 new ServerlessStack(app, 'ProdStack', {
   env: { account: '222222222222', region: 'us-east-1' },
   environment: 'prod',
   logLevel: 'INFO',
-});
+})
 ```
 
 **SAM with parameters**:
@@ -162,15 +172,15 @@ Resources:
 **Comprehensive pipeline**:
 
 ```typescript
-import * as codepipeline from 'aws-cdk-lib/aws-codepipeline';
-import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions';
+import * as codepipeline from 'aws-cdk-lib/aws-codepipeline'
+import * as codepipeline_actions from 'aws-cdk-lib/aws-codepipeline-actions'
 
-const sourceOutput = new codepipeline.Artifact();
-const buildOutput = new codepipeline.Artifact();
+const sourceOutput = new codepipeline.Artifact()
+const buildOutput = new codepipeline.Artifact()
 
 const pipeline = new codepipeline.Pipeline(this, 'Pipeline', {
   pipelineName: 'serverless-pipeline',
-});
+})
 
 // Source stage
 pipeline.addStage({
@@ -185,7 +195,7 @@ pipeline.addStage({
       connectionArn: githubConnection.connectionArn,
     }),
   ],
-});
+})
 
 // Build stage
 pipeline.addStage({
@@ -198,7 +208,7 @@ pipeline.addStage({
       outputs: [buildOutput],
     }),
   ],
-});
+})
 
 // Test stage
 pipeline.addStage({
@@ -217,7 +227,7 @@ pipeline.addStage({
       runOrder: 2,
     }),
   ],
-});
+})
 
 // Production stage (with manual approval)
 pipeline.addStage({
@@ -234,7 +244,7 @@ pipeline.addStage({
       runOrder: 2,
     }),
   ],
-});
+})
 ```
 
 ### GitHub Actions
@@ -304,20 +314,20 @@ jobs:
 // handler.ts
 export const processOrder = (order: Order): ProcessedOrder => {
   // Pure business logic (easily testable)
-  validateOrder(order);
-  calculateTotal(order);
-  return transformOrder(order);
-};
+  validateOrder(order)
+  calculateTotal(order)
+  return transformOrder(order)
+}
 
 export const handler = async (event: any) => {
-  const order = parseEvent(event);
-  const processed = processOrder(order); // Testable function
-  await saveToDatabase(processed);
-  return formatResponse(processed);
-};
+  const order = parseEvent(event)
+  const processed = processOrder(order) // Testable function
+  await saveToDatabase(processed)
+  return formatResponse(processed)
+}
 
 // handler.test.ts
-import { processOrder } from './handler';
+import { processOrder } from './handler'
 
 describe('processOrder', () => {
   it('calculates total correctly', () => {
@@ -326,18 +336,18 @@ describe('processOrder', () => {
         { price: 10, quantity: 2 },
         { price: 5, quantity: 3 },
       ],
-    };
+    }
 
-    const result = processOrder(order);
+    const result = processOrder(order)
 
-    expect(result.total).toBe(35);
-  });
+    expect(result.total).toBe(35)
+  })
 
   it('throws on invalid order', () => {
-    const invalid = { items: [] };
-    expect(() => processOrder(invalid)).toThrow();
-  });
-});
+    const invalid = { items: [] }
+    expect(() => processOrder(invalid)).toThrow()
+  })
+})
 ```
 
 ### Integration Testing
@@ -346,37 +356,41 @@ describe('processOrder', () => {
 
 ```typescript
 // integration.test.ts
-import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda';
-import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb';
+import { LambdaClient, InvokeCommand } from '@aws-sdk/client-lambda'
+import { DynamoDBClient, GetItemCommand } from '@aws-sdk/client-dynamodb'
 
 describe('Order Processing Integration', () => {
-  const lambda = new LambdaClient({});
-  const dynamodb = new DynamoDBClient({});
+  const lambda = new LambdaClient({})
+  const dynamodb = new DynamoDBClient({})
 
   it('processes order end-to-end', async () => {
     // Invoke Lambda
-    const response = await lambda.send(new InvokeCommand({
-      FunctionName: process.env.FUNCTION_NAME,
-      Payload: JSON.stringify({
-        orderId: 'test-123',
-        items: [{ productId: 'prod-1', quantity: 2 }],
-      }),
-    }));
+    const response = await lambda.send(
+      new InvokeCommand({
+        FunctionName: process.env.FUNCTION_NAME,
+        Payload: JSON.stringify({
+          orderId: 'test-123',
+          items: [{ productId: 'prod-1', quantity: 2 }],
+        }),
+      })
+    )
 
-    const result = JSON.parse(Buffer.from(response.Payload!).toString());
+    const result = JSON.parse(Buffer.from(response.Payload!).toString())
 
-    expect(result.statusCode).toBe(200);
+    expect(result.statusCode).toBe(200)
 
     // Verify database write
-    const dbResult = await dynamodb.send(new GetItemCommand({
-      TableName: process.env.TABLE_NAME,
-      Key: { orderId: { S: 'test-123' } },
-    }));
+    const dbResult = await dynamodb.send(
+      new GetItemCommand({
+        TableName: process.env.TABLE_NAME,
+        Key: { orderId: { S: 'test-123' } },
+      })
+    )
 
-    expect(dbResult.Item).toBeDefined();
-    expect(dbResult.Item?.status.S).toBe('PROCESSED');
-  });
-});
+    expect(dbResult.Item).toBeDefined()
+    expect(dbResult.Item?.status.S).toBe('PROCESSED')
+  })
+})
 ```
 
 ### Local Testing with SAM
@@ -448,6 +462,7 @@ Resources:
 ```
 
 **Use for**:
+
 - Development environments
 - Non-critical applications
 - Quick hotfixes (with caution)
@@ -470,6 +485,7 @@ Resources:
 ```
 
 **Deployment types**:
+
 - **Linear10PercentEvery1Minute**: 10% traffic shift every minute
 - **Linear10PercentEvery2Minutes**: Slower, more conservative
 - **Linear10PercentEvery3Minutes**: Even slower
@@ -517,20 +533,21 @@ Resources:
 **CDK with CodeDeploy**:
 
 ```typescript
-import * as codedeploy from 'aws-cdk-lib/aws-codedeploy';
+import * as codedeploy from 'aws-cdk-lib/aws-codedeploy'
 
-const alias = fn.currentVersion.addAlias('live');
+const alias = fn.currentVersion.addAlias('live')
 
 new codedeploy.LambdaDeploymentGroup(this, 'DeploymentGroup', {
   alias,
-  deploymentConfig: codedeploy.LambdaDeploymentConfig.CANARY_10PERCENT_10MINUTES,
+  deploymentConfig:
+    codedeploy.LambdaDeploymentConfig.CANARY_10PERCENT_10MINUTES,
   alarms: [errorAlarm, latencyAlarm],
   autoRollback: {
     failedDeployment: true,
     stoppedDeployment: true,
     deploymentInAlarm: true,
   },
-});
+})
 ```
 
 ### Deployment Hooks
@@ -636,6 +653,7 @@ DeploymentPreference:
 ```
 
 **Rollback scenarios**:
+
 - CloudWatch alarm triggers during deployment
 - Pre-traffic hook fails
 - Post-traffic hook fails
@@ -655,7 +673,7 @@ const errorAlarm = new cloudwatch.Alarm(this, 'ErrorAlarm', {
   threshold: 5,
   evaluationPeriods: 2,
   treatMissingData: cloudwatch.TreatMissingData.NOT_BREACHING,
-});
+})
 
 // Duration alarm (regression)
 const durationAlarm = new cloudwatch.Alarm(this, 'DurationAlarm', {
@@ -666,7 +684,7 @@ const durationAlarm = new cloudwatch.Alarm(this, 'DurationAlarm', {
   threshold: previousAvgDuration * 1.2, // 20% increase
   evaluationPeriods: 2,
   comparisonOperator: cloudwatch.ComparisonOperator.GREATER_THAN_THRESHOLD,
-});
+})
 
 // Throttle alarm
 const throttleAlarm = new cloudwatch.Alarm(this, 'ThrottleAlarm', {
@@ -676,7 +694,7 @@ const throttleAlarm = new cloudwatch.Alarm(this, 'ThrottleAlarm', {
   }),
   threshold: 1,
   evaluationPeriods: 1,
-});
+})
 ```
 
 ### Version Management
@@ -684,10 +702,10 @@ const throttleAlarm = new cloudwatch.Alarm(this, 'ThrottleAlarm', {
 **Use Lambda versions and aliases**:
 
 ```typescript
-const version = fn.currentVersion;
+const version = fn.currentVersion
 
-const prodAlias = version.addAlias('prod');
-const devAlias = version.addAlias('dev');
+const prodAlias = version.addAlias('prod')
+const devAlias = version.addAlias('dev')
 
 // Gradual rollout with weighted aliases
 new lambda.Alias(this, 'LiveAlias', {
@@ -697,7 +715,7 @@ new lambda.Alias(this, 'LiveAlias', {
     { version: oldVersion, weight: 0.9 }, // 90% old
     // 10% automatically goes to main version (new)
   ],
-});
+})
 ```
 
 ## Best Practices Checklist
@@ -752,43 +770,41 @@ new lambda.Alias(this, 'LiveAlias', {
 new ServerlessStack(app, 'PrimaryStack', {
   env: { region: 'us-east-1' },
   isPrimary: true,
-});
+})
 
 // Secondary region (standby)
 new ServerlessStack(app, 'SecondaryStack', {
   env: { region: 'us-west-2' },
   isPrimary: false,
-});
+})
 
 // Route 53 health check and failover
 const healthCheck = new route53.CfnHealthCheck(this, 'HealthCheck', {
   type: 'HTTPS',
   resourcePath: '/health',
   fullyQualifiedDomainName: 'api.example.com',
-});
+})
 ```
 
 **Active-Active**:
 
 ```typescript
 // Deploy to multiple regions
-const regions = ['us-east-1', 'us-west-2', 'eu-west-1'];
+const regions = ['us-east-1', 'us-west-2', 'eu-west-1']
 
 for (const region of regions) {
   new ServerlessStack(app, `Stack-${region}`, {
     env: { region },
-  });
+  })
 }
 
 // Route 53 geolocation routing
 new route53.ARecord(this, 'GeoRecord', {
   zone: hostedZone,
   recordName: 'api',
-  target: route53.RecordTarget.fromAlias(
-    new targets.ApiGatewayDomain(domain)
-  ),
+  target: route53.RecordTarget.fromAlias(new targets.ApiGatewayDomain(domain)),
   geoLocation: route53.GeoLocation.country('US'),
-});
+})
 ```
 
 ### Feature Flags with AppConfig
@@ -796,24 +812,24 @@ new route53.ARecord(this, 'GeoRecord', {
 **Safe feature rollout**:
 
 ```typescript
-import { AppConfigData } from '@aws-sdk/client-appconfigdata';
+import { AppConfigData } from '@aws-sdk/client-appconfigdata'
 
-const appconfig = new AppConfigData({});
+const appconfig = new AppConfigData({})
 
 export const handler = async (event: any) => {
   // Fetch feature flags
   const config = await appconfig.getLatestConfiguration({
     ConfigurationToken: token,
-  });
+  })
 
-  const features = JSON.parse(config.Configuration.toString());
+  const features = JSON.parse(config.Configuration.toString())
 
   if (features.newFeatureEnabled) {
-    return newFeatureHandler(event);
+    return newFeatureHandler(event)
   }
 
-  return legacyHandler(event);
-};
+  return legacyHandler(event)
+}
 ```
 
 ## Summary

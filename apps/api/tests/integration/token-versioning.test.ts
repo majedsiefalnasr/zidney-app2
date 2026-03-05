@@ -67,8 +67,7 @@ describe('Token Versioning', () => {
     const u = await pool.query(
       `INSERT INTO ${TOKEN_USERS_TABLE} (workspace_id, email, password_hash, role, token_version)
        VALUES ($1, 'tokenver@test.com', 'hash', 'admin', 1)
-       RETURNING id, email, token_version`
-      ,
+       RETURNING id, email, token_version`,
       [workspace.id]
     )
     user = u.rows[0]!
@@ -79,10 +78,13 @@ describe('Token Versioning', () => {
       return
     }
     const pool = getTenantPool(workspace.id)!
-    await pool.query(`DELETE FROM ${TOKEN_USERS_TABLE} WHERE id = $1`, [user.id])
-    await db.master.query(`DELETE FROM ${TOKEN_WORKSPACES_TABLE} WHERE id = $1`, [
-      workspace.id,
+    await pool.query(`DELETE FROM ${TOKEN_USERS_TABLE} WHERE id = $1`, [
+      user.id,
     ])
+    await db.master.query(
+      `DELETE FROM ${TOKEN_WORKSPACES_TABLE} WHERE id = $1`,
+      [workspace.id]
+    )
   })
 
   it('should validate token when versions match', async () => {

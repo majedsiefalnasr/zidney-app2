@@ -9,4 +9,3 @@ export function validateSchemaVersionMiddleware() {
     await next()
   }
 }
-

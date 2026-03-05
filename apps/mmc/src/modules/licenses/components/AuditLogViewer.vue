@@ -4,7 +4,12 @@
  */
 
 import { Badge } from '@zidney/ui/components/shadcn-vue/badge'
-import { Card, CardContent, CardHeader, CardTitle } from '@zidney/ui/components/shadcn-vue/card'
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+} from '@zidney/ui/components/shadcn-vue/card'
 import { onMounted, ref } from 'vue'
 
 interface AuditEntry {

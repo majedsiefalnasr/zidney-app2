@@ -1,4 +1,4 @@
-# Tasks of *[Change Name]*
+# Tasks of _[Change Name]_
 
 ## [Task category]
 

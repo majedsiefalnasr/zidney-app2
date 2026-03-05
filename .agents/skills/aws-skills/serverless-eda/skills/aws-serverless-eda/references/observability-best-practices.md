@@ -14,21 +14,27 @@ Comprehensive observability patterns for serverless applications based on AWS be
 ## Three Pillars of Observability
 
 ### Metrics
+
 **Numeric data measured at intervals (time series)**
+
 - Request rate, error rate, duration
 - CPU%, memory%, disk%
 - Custom business metrics
 - Service Level Indicators (SLIs)
 
 ### Logs
+
 **Timestamped records of discrete events**
+
 - Application events and errors
 - State transformations
 - Debugging information
 - Audit trails
 
 ### Traces
+
 **Single user's journey across services**
+
 - Request flow through distributed system
 - Service dependencies
 - Latency breakdown
@@ -39,6 +45,7 @@ Comprehensive observability patterns for serverless applications based on AWS be
 ### CloudWatch Metrics for Lambda
 
 **Out-of-the-box metrics** (automatically available):
+
 ```
 - Invocations
 - Errors
@@ -49,10 +56,11 @@ Comprehensive observability patterns for serverless applications based on AWS be
 ```
 
 **CDK Configuration**:
+
 ```typescript
 const fn = new NodejsFunction(this, 'Function', {
   entry: 'src/handler.ts',
-});
+})
 
 // Create alarms on metrics
 new cloudwatch.Alarm(this, 'ErrorAlarm', {
@@ -62,7 +70,7 @@ new cloudwatch.Alarm(this, 'ErrorAlarm', {
   }),
   threshold: 10,
   evaluationPeriods: 1,
-});
+})
 
 new cloudwatch.Alarm(this, 'DurationAlarm', {
   metric: fn.metricDuration({
@@ -71,7 +79,7 @@ new cloudwatch.Alarm(this, 'DurationAlarm', {
   }),
   threshold: 1000, // 1 second
   evaluationPeriods: 2,
-});
+})
 ```
 
 ### Custom Metrics
@@ -80,80 +88,92 @@ new cloudwatch.Alarm(this, 'DurationAlarm', {
 
 ```typescript
 export const handler = async (event: any) => {
-  const startTime = Date.now();
+  const startTime = Date.now()
 
   try {
-    const result = await processOrder(event);
+    const result = await processOrder(event)
 
     // Emit custom metrics
-    console.log(JSON.stringify({
-      _aws: {
-        Timestamp: Date.now(),
-        CloudWatchMetrics: [{
-          Namespace: 'MyApp/Orders',
-          Dimensions: [['ServiceName', 'Operation']],
-          Metrics: [
-            { Name: 'ProcessingTime', Unit: 'Milliseconds' },
-            { Name: 'OrderValue', Unit: 'None' },
+    console.log(
+      JSON.stringify({
+        _aws: {
+          Timestamp: Date.now(),
+          CloudWatchMetrics: [
+            {
+              Namespace: 'MyApp/Orders',
+              Dimensions: [['ServiceName', 'Operation']],
+              Metrics: [
+                { Name: 'ProcessingTime', Unit: 'Milliseconds' },
+                { Name: 'OrderValue', Unit: 'None' },
+              ],
+            },
           ],
-        }],
-      },
-      ServiceName: 'OrderService',
-      Operation: 'ProcessOrder',
-      ProcessingTime: Date.now() - startTime,
-      OrderValue: result.amount,
-    }));
+        },
+        ServiceName: 'OrderService',
+        Operation: 'ProcessOrder',
+        ProcessingTime: Date.now() - startTime,
+        OrderValue: result.amount,
+      })
+    )
 
-    return result;
+    return result
   } catch (error) {
     // Emit error metric
-    console.log(JSON.stringify({
-      _aws: {
-        CloudWatchMetrics: [{
-          Namespace: 'MyApp/Orders',
-          Dimensions: [['ServiceName']],
-          Metrics: [{ Name: 'Errors', Unit: 'Count' }],
-        }],
-      },
-      ServiceName: 'OrderService',
-      Errors: 1,
-    }));
+    console.log(
+      JSON.stringify({
+        _aws: {
+          CloudWatchMetrics: [
+            {
+              Namespace: 'MyApp/Orders',
+              Dimensions: [['ServiceName']],
+              Metrics: [{ Name: 'Errors', Unit: 'Count' }],
+            },
+          ],
+        },
+        ServiceName: 'OrderService',
+        Errors: 1,
+      })
+    )
 
-    throw error;
+    throw error
   }
-};
+}
 ```
 
 **Using Lambda Powertools**:
 
 ```typescript
-import { Metrics, MetricUnits } from '@aws-lambda-powertools/metrics';
+import { Metrics, MetricUnits } from '@aws-lambda-powertools/metrics'
 
 const metrics = new Metrics({
   namespace: 'MyApp',
   serviceName: 'OrderService',
-});
+})
 
 export const handler = async (event: any) => {
-  metrics.addMetric('Invocation', MetricUnits.Count, 1);
+  metrics.addMetric('Invocation', MetricUnits.Count, 1)
 
-  const startTime = Date.now();
+  const startTime = Date.now()
 
   try {
-    const result = await processOrder(event);
+    const result = await processOrder(event)
 
-    metrics.addMetric('Success', MetricUnits.Count, 1);
-    metrics.addMetric('ProcessingTime', MetricUnits.Milliseconds, Date.now() - startTime);
-    metrics.addMetric('OrderValue', MetricUnits.None, result.amount);
+    metrics.addMetric('Success', MetricUnits.Count, 1)
+    metrics.addMetric(
+      'ProcessingTime',
+      MetricUnits.Milliseconds,
+      Date.now() - startTime
+    )
+    metrics.addMetric('OrderValue', MetricUnits.None, result.amount)
 
-    return result;
+    return result
   } catch (error) {
-    metrics.addMetric('Error', MetricUnits.Count, 1);
-    throw error;
+    metrics.addMetric('Error', MetricUnits.Count, 1)
+    throw error
   } finally {
-    metrics.publishStoredMetrics();
+    metrics.publishStoredMetrics()
   }
-};
+}
 ```
 
 ## Logging
@@ -165,89 +185,96 @@ export const handler = async (event: any) => {
 ```typescript
 // ✅ GOOD - Structured JSON logging
 export const handler = async (event: any) => {
-  console.log(JSON.stringify({
-    level: 'INFO',
-    message: 'Processing order',
-    orderId: event.orderId,
-    customerId: event.customerId,
-    timestamp: new Date().toISOString(),
-    requestId: context.requestId,
-  }));
+  console.log(
+    JSON.stringify({
+      level: 'INFO',
+      message: 'Processing order',
+      orderId: event.orderId,
+      customerId: event.customerId,
+      timestamp: new Date().toISOString(),
+      requestId: context.requestId,
+    })
+  )
 
   try {
-    const result = await processOrder(event);
+    const result = await processOrder(event)
 
-    console.log(JSON.stringify({
-      level: 'INFO',
-      message: 'Order processed successfully',
-      orderId: event.orderId,
-      duration: Date.now() - startTime,
-      timestamp: new Date().toISOString(),
-    }));
+    console.log(
+      JSON.stringify({
+        level: 'INFO',
+        message: 'Order processed successfully',
+        orderId: event.orderId,
+        duration: Date.now() - startTime,
+        timestamp: new Date().toISOString(),
+      })
+    )
 
-    return result;
+    return result
   } catch (error) {
-    console.error(JSON.stringify({
-      level: 'ERROR',
-      message: 'Order processing failed',
-      orderId: event.orderId,
-      error: {
-        name: error.name,
-        message: error.message,
-        stack: error.stack,
-      },
-      timestamp: new Date().toISOString(),
-    }));
+    console.error(
+      JSON.stringify({
+        level: 'ERROR',
+        message: 'Order processing failed',
+        orderId: event.orderId,
+        error: {
+          name: error.name,
+          message: error.message,
+          stack: error.stack,
+        },
+        timestamp: new Date().toISOString(),
+      })
+    )
 
-    throw error;
+    throw error
   }
-};
+}
 
 // ❌ BAD - Unstructured logging
-console.log('Processing order ' + orderId + ' for customer ' + customerId);
+console.log('Processing order ' + orderId + ' for customer ' + customerId)
 ```
 
 **Using Lambda Powertools Logger**:
 
 ```typescript
-import { Logger } from '@aws-lambda-powertools/logger';
+import { Logger } from '@aws-lambda-powertools/logger'
 
 const logger = new Logger({
   serviceName: 'OrderService',
   logLevel: 'INFO',
-});
+})
 
 export const handler = async (event: any, context: Context) => {
-  logger.addContext(context);
+  logger.addContext(context)
 
   logger.info('Processing order', {
     orderId: event.orderId,
     customerId: event.customerId,
-  });
+  })
 
   try {
-    const result = await processOrder(event);
+    const result = await processOrder(event)
 
     logger.info('Order processed', {
       orderId: event.orderId,
       amount: result.amount,
-    });
+    })
 
-    return result;
+    return result
   } catch (error) {
     logger.error('Order processing failed', {
       orderId: event.orderId,
       error,
-    });
+    })
 
-    throw error;
+    throw error
   }
-};
+}
 ```
 
 ### Log Levels
 
 **Use appropriate log levels**:
+
 - **ERROR**: Errors requiring immediate attention
 - **WARN**: Warnings or recoverable errors
 - **INFO**: Important business events
@@ -257,12 +284,12 @@ export const handler = async (event: any, context: Context) => {
 const logger = new Logger({
   serviceName: 'OrderService',
   logLevel: process.env.LOG_LEVEL || 'INFO',
-});
+})
 
-logger.debug('Detailed processing info', { data });
-logger.info('Business event occurred', { event });
-logger.warn('Recoverable error', { error });
-logger.error('Critical failure', { error });
+logger.debug('Detailed processing info', { data })
+logger.info('Business event occurred', { event })
+logger.warn('Recoverable error', { error })
+logger.error('Critical failure', { error })
 ```
 
 ### Log Insights Queries
@@ -305,89 +332,90 @@ fields @timestamp, @message, orderId
 const fn = new NodejsFunction(this, 'Function', {
   entry: 'src/handler.ts',
   tracing: lambda.Tracing.ACTIVE, // Enable X-Ray
-});
+})
 
 // API Gateway tracing
 const api = new apigateway.RestApi(this, 'Api', {
   deployOptions: {
     tracingEnabled: true,
   },
-});
+})
 
 // Step Functions tracing
 new stepfunctions.StateMachine(this, 'StateMachine', {
   definition,
   tracingEnabled: true,
-});
+})
 ```
 
 **Instrument application code**:
 
 ```typescript
-import { captureAWSv3Client } from 'aws-xray-sdk-core';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { captureAWSv3Client } from 'aws-xray-sdk-core'
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
 
 // Wrap AWS SDK clients
-const client = captureAWSv3Client(new DynamoDBClient({}));
+const client = captureAWSv3Client(new DynamoDBClient({}))
 
 // Custom segments
-import AWSXRay from 'aws-xray-sdk-core';
+import AWSXRay from 'aws-xray-sdk-core'
 
 export const handler = async (event: any) => {
-  const segment = AWSXRay.getSegment();
+  const segment = AWSXRay.getSegment()
 
   // Custom subsegment
-  const subsegment = segment.addNewSubsegment('ProcessOrder');
+  const subsegment = segment.addNewSubsegment('ProcessOrder')
 
   try {
     // Add annotations (indexed for filtering)
-    subsegment.addAnnotation('orderId', event.orderId);
-    subsegment.addAnnotation('customerId', event.customerId);
+    subsegment.addAnnotation('orderId', event.orderId)
+    subsegment.addAnnotation('customerId', event.customerId)
 
     // Add metadata (not indexed, detailed info)
-    subsegment.addMetadata('orderDetails', event);
+    subsegment.addMetadata('orderDetails', event)
 
-    const result = await processOrder(event);
+    const result = await processOrder(event)
 
-    subsegment.addAnnotation('status', 'success');
-    subsegment.close();
+    subsegment.addAnnotation('status', 'success')
+    subsegment.close()
 
-    return result;
+    return result
   } catch (error) {
-    subsegment.addError(error);
-    subsegment.close();
-    throw error;
+    subsegment.addError(error)
+    subsegment.close()
+    throw error
   }
-};
+}
 ```
 
 **Using Lambda Powertools Tracer**:
 
 ```typescript
-import { Tracer } from '@aws-lambda-powertools/tracer';
+import { Tracer } from '@aws-lambda-powertools/tracer'
 
-const tracer = new Tracer({ serviceName: 'OrderService' });
+const tracer = new Tracer({ serviceName: 'OrderService' })
 
 export const handler = async (event: any) => {
-  const segment = tracer.getSegment();
+  const segment = tracer.getSegment()
 
   // Automatically captures and traces
   const result = await tracer.captureAWSv3Client(dynamodb).getItem({
     TableName: process.env.TABLE_NAME,
     Key: { orderId: event.orderId },
-  });
+  })
 
   // Custom annotation
-  tracer.putAnnotation('orderId', event.orderId);
-  tracer.putMetadata('orderDetails', event);
+  tracer.putAnnotation('orderId', event.orderId)
+  tracer.putMetadata('orderDetails', event)
 
-  return result;
-};
+  return result
+}
 ```
 
 ### Service Map
 
 **Visualize service dependencies** with X-Ray:
+
 - Shows service-to-service communication
 - Identifies latency bottlenecks
 - Highlights error rates between services
@@ -409,21 +437,24 @@ export const handler = async (event: any) => {
 
 ```typescript
 export const handler = async (event: any, context: Context) => {
-  const traceId = process.env._X_AMZN_TRACE_ID;
+  const traceId = process.env._X_AMZN_TRACE_ID
 
-  console.log(JSON.stringify({
-    level: 'INFO',
-    message: 'Processing order',
-    traceId,
-    requestId: context.requestId,
-    orderId: event.orderId,
-  }));
-};
+  console.log(
+    JSON.stringify({
+      level: 'INFO',
+      message: 'Processing order',
+      traceId,
+      requestId: context.requestId,
+      orderId: event.orderId,
+    })
+  )
+}
 ```
 
 ### CloudWatch ServiceLens
 
 **Unified view of traces and metrics**:
+
 - Automatically correlates X-Ray traces with CloudWatch metrics
 - Shows service map with metrics overlay
 - Identifies performance and availability issues
@@ -434,45 +465,49 @@ export const handler = async (event: any, context: Context) => {
 **All three pillars in one**:
 
 ```typescript
-import { Logger } from '@aws-lambda-powertools/logger';
-import { Tracer } from '@aws-lambda-powertools/tracer';
-import { Metrics, MetricUnits } from '@aws-lambda-powertools/metrics';
+import { Logger } from '@aws-lambda-powertools/logger'
+import { Tracer } from '@aws-lambda-powertools/tracer'
+import { Metrics, MetricUnits } from '@aws-lambda-powertools/metrics'
 
-const logger = new Logger({ serviceName: 'OrderService' });
-const tracer = new Tracer({ serviceName: 'OrderService' });
-const metrics = new Metrics({ namespace: 'MyApp', serviceName: 'OrderService' });
+const logger = new Logger({ serviceName: 'OrderService' })
+const tracer = new Tracer({ serviceName: 'OrderService' })
+const metrics = new Metrics({ namespace: 'MyApp', serviceName: 'OrderService' })
 
 export const handler = async (event: any, context: Context) => {
   // Automatically adds trace context to logs
-  logger.addContext(context);
+  logger.addContext(context)
 
-  logger.info('Processing order', { orderId: event.orderId });
+  logger.info('Processing order', { orderId: event.orderId })
 
   // Add trace annotations
-  tracer.putAnnotation('orderId', event.orderId);
+  tracer.putAnnotation('orderId', event.orderId)
 
   // Add metrics
-  metrics.addMetric('Invocation', MetricUnits.Count, 1);
+  metrics.addMetric('Invocation', MetricUnits.Count, 1)
 
-  const startTime = Date.now();
+  const startTime = Date.now()
 
   try {
-    const result = await processOrder(event);
+    const result = await processOrder(event)
 
-    metrics.addMetric('Success', MetricUnits.Count, 1);
-    metrics.addMetric('Duration', MetricUnits.Milliseconds, Date.now() - startTime);
+    metrics.addMetric('Success', MetricUnits.Count, 1)
+    metrics.addMetric(
+      'Duration',
+      MetricUnits.Milliseconds,
+      Date.now() - startTime
+    )
 
-    logger.info('Order processed', { orderId: event.orderId });
+    logger.info('Order processed', { orderId: event.orderId })
 
-    return result;
+    return result
   } catch (error) {
-    metrics.addMetric('Error', MetricUnits.Count, 1);
-    logger.error('Processing failed', { orderId: event.orderId, error });
-    throw error;
+    metrics.addMetric('Error', MetricUnits.Count, 1)
+    logger.error('Processing failed', { orderId: event.orderId, error })
+    throw error
   } finally {
-    metrics.publishStoredMetrics();
+    metrics.publishStoredMetrics()
   }
-};
+}
 ```
 
 ## Alerting
@@ -480,11 +515,13 @@ export const handler = async (event: any, context: Context) => {
 ### Effective Alerting Strategy
 
 **Alert on what matters**:
+
 - **Critical**: Customer-impacting issues (errors, high latency)
 - **Warning**: Approaching thresholds (80% capacity)
 - **Info**: Trends and anomalies (cost spikes)
 
 **Alarm fatigue prevention**:
+
 - Tune thresholds based on actual patterns
 - Use composite alarms to reduce noise
 - Set appropriate evaluation periods
@@ -507,7 +544,7 @@ new cloudwatch.Alarm(this, 'ErrorRateAlarm', {
   threshold: 1, // 1% error rate
   evaluationPeriods: 2,
   alarmDescription: 'Error rate exceeded 1%',
-});
+})
 
 // Latency alarm (p99)
 new cloudwatch.Alarm(this, 'LatencyAlarm', {
@@ -518,7 +555,7 @@ new cloudwatch.Alarm(this, 'LatencyAlarm', {
   threshold: 1000, // 1 second
   evaluationPeriods: 2,
   alarmDescription: 'p99 latency exceeded 1 second',
-});
+})
 
 // Concurrent executions approaching limit
 new cloudwatch.Alarm(this, 'ConcurrencyAlarm', {
@@ -528,7 +565,7 @@ new cloudwatch.Alarm(this, 'ConcurrencyAlarm', {
   threshold: 800, // 80% of 1000 default limit
   evaluationPeriods: 1,
   alarmDescription: 'Approaching concurrency limit',
-});
+})
 ```
 
 ### Composite Alarms
@@ -540,19 +577,19 @@ const errorAlarm = new cloudwatch.Alarm(this, 'Errors', {
   metric: fn.metricErrors(),
   threshold: 10,
   evaluationPeriods: 1,
-});
+})
 
 const throttleAlarm = new cloudwatch.Alarm(this, 'Throttles', {
   metric: fn.metricThrottles(),
   threshold: 5,
   evaluationPeriods: 1,
-});
+})
 
 const latencyAlarm = new cloudwatch.Alarm(this, 'Latency', {
   metric: fn.metricDuration({ statistic: 'p99' }),
   threshold: 2000,
   evaluationPeriods: 2,
-});
+})
 
 // Composite alarm (any of the above)
 new cloudwatch.CompositeAlarm(this, 'ServiceHealthAlarm', {
@@ -563,7 +600,7 @@ new cloudwatch.CompositeAlarm(this, 'ServiceHealthAlarm', {
     latencyAlarm
   ),
   alarmDescription: 'Overall service health degraded',
-});
+})
 ```
 
 ## Dashboard Best Practices
@@ -601,7 +638,7 @@ new cloudwatch.CompositeAlarm(this, 'ServiceHealthAlarm', {
 ```typescript
 const dashboard = new cloudwatch.Dashboard(this, 'ServiceDashboard', {
   dashboardName: 'order-service',
-});
+})
 
 dashboard.addWidgets(
   // Row 1: Overview
@@ -629,7 +666,7 @@ dashboard.addWidgets(
       fn.metricDuration({ statistic: 'p99', label: 'p99' }),
     ],
   })
-);
+)
 
 // Row 2: Errors
 dashboard.addWidgets(
@@ -643,7 +680,7 @@ dashboard.addWidgets(
       'limit 20',
     ],
   })
-);
+)
 ```
 
 ## Monitoring Serverless Architectures
@@ -660,21 +697,21 @@ API Gateway → Lambda → DynamoDB → EventBridge → Lambda
 
 **Key metrics per service**:
 
-| Service | Key Metrics |
-|---------|-------------|
-| API Gateway | Count, 4XXError, 5XXError, Latency, CacheHitCount |
-| Lambda | Invocations, Errors, Duration, Throttles, ConcurrentExecutions |
-| DynamoDB | ConsumedReadCapacity, ConsumedWriteCapacity, UserErrors, SystemErrors |
-| SQS | NumberOfMessagesSent, NumberOfMessagesReceived, ApproximateAgeOfOldestMessage |
-| EventBridge | Invocations, FailedInvocations, TriggeredRules |
-| Step Functions | ExecutionsStarted, ExecutionsFailed, ExecutionTime |
+| Service        | Key Metrics                                                                   |
+| -------------- | ----------------------------------------------------------------------------- |
+| API Gateway    | Count, 4XXError, 5XXError, Latency, CacheHitCount                             |
+| Lambda         | Invocations, Errors, Duration, Throttles, ConcurrentExecutions                |
+| DynamoDB       | ConsumedReadCapacity, ConsumedWriteCapacity, UserErrors, SystemErrors         |
+| SQS            | NumberOfMessagesSent, NumberOfMessagesReceived, ApproximateAgeOfOldestMessage |
+| EventBridge    | Invocations, FailedInvocations, TriggeredRules                                |
+| Step Functions | ExecutionsStarted, ExecutionsFailed, ExecutionTime                            |
 
 ### Synthetic Monitoring
 
 **Use CloudWatch Synthetics for API monitoring**:
 
 ```typescript
-import { Canary, Test, Code, Schedule } from '@aws-cdk/aws-synthetics-alpha';
+import { Canary, Test, Code, Schedule } from '@aws-cdk/aws-synthetics-alpha'
 
 new Canary(this, 'ApiCanary', {
   canaryName: 'api-health-check',
@@ -699,7 +736,7 @@ new Canary(this, 'ApiCanary', {
     handler: 'index.handler',
   }),
   runtime: synthetics.Runtime.SYNTHETICS_NODEJS_PUPPETEER_6_2,
-});
+})
 ```
 
 ## OpenTelemetry Integration
@@ -714,7 +751,7 @@ const adotLayer = lambda.LayerVersion.fromLayerVersionArn(
   this,
   'AdotLayer',
   `arn:aws:lambda:${this.region}:901920570463:layer:aws-otel-nodejs-amd64-ver-1-18-1:4`
-);
+)
 
 new NodejsFunction(this, 'Function', {
   entry: 'src/handler.ts',
@@ -724,10 +761,11 @@ new NodejsFunction(this, 'Function', {
     AWS_LAMBDA_EXEC_WRAPPER: '/opt/otel-handler',
     OPENTELEMETRY_COLLECTOR_CONFIG_FILE: '/var/task/collector.yaml',
   },
-});
+})
 ```
 
 **Benefits of ADOT**:
+
 - Vendor-neutral (works with Datadog, New Relic, Honeycomb, etc.)
 - Automatic instrumentation
 - Consistent format across services
@@ -736,6 +774,7 @@ new NodejsFunction(this, 'Function', {
 ## Best Practices Summary
 
 ### Metrics
+
 - ✅ Use CloudWatch Embedded Metric Format (EMF)
 - ✅ Track business metrics, not just technical metrics
 - ✅ Set alarms on error rate, latency, and throughput
@@ -743,6 +782,7 @@ new NodejsFunction(this, 'Function', {
 - ✅ Create dashboards for key services
 
 ### Logging
+
 - ✅ Use structured JSON logging
 - ✅ Include correlation IDs (request ID, trace ID)
 - ✅ Use appropriate log levels
@@ -750,6 +790,7 @@ new NodejsFunction(this, 'Function', {
 - ✅ Use CloudWatch Logs Insights for analysis
 
 ### Tracing
+
 - ✅ Enable X-Ray tracing on all services
 - ✅ Instrument AWS SDK calls
 - ✅ Add custom annotations for business context
@@ -757,6 +798,7 @@ new NodejsFunction(this, 'Function', {
 - ✅ Correlate traces with logs and metrics
 
 ### Alerting
+
 - ✅ Alert on customer-impacting issues
 - ✅ Tune thresholds to reduce false positives
 - ✅ Use composite alarms to reduce noise
@@ -764,6 +806,7 @@ new NodejsFunction(this, 'Function', {
 - ✅ Escalate critical alarms appropriately
 
 ### Tools
+
 - ✅ Use Lambda Powertools for unified observability
 - ✅ Use CloudWatch ServiceLens for service view
 - ✅ Use Synthetics for proactive monitoring

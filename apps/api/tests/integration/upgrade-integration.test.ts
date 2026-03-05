@@ -118,7 +118,9 @@ describe('SchemaUpgradeIntegration', () => {
 
       const response = await callBusinessLogic(masterDb, tenantDb)
       expect(response.statusCode).toBe(426)
-      expect((response as any).body?.error?.code).toBe('SCHEMA_VERSION_MISMATCH')
+      expect((response as any).body?.error?.code).toBe(
+        'SCHEMA_VERSION_MISMATCH'
+      )
     })
 
     it('allows request when tenant >= minimum_supported', async () => {

@@ -4,9 +4,9 @@ on:
   push:
     branches:
       - main
-      - "infra-*"
-      - "feature/*"
-      - "fix/*"
+      - 'infra-*'
+      - 'feature/*'
+      - 'fix/*'
   pull_request:
     branches:
       - main
@@ -162,7 +162,7 @@ jobs:
 
   # ── Job 5a. E2E — MMC ─────────────────────────────────────────────────
   e2e-mmc:
-    name: "E2E: MMC"
+    name: 'E2E: MMC'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs:
@@ -203,7 +203,7 @@ jobs:
 
   # ── Job 5b. E2E — Backoffice ───────────────────────────────────────────
   e2e-backoffice:
-    name: "E2E: Backoffice"
+    name: 'E2E: Backoffice'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs:
@@ -244,7 +244,7 @@ jobs:
 
   # ── Job 5c. E2E — Frontoffice ──────────────────────────────────────────
   e2e-frontoffice:
-    name: "E2E: Frontoffice"
+    name: 'E2E: Frontoffice'
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs:

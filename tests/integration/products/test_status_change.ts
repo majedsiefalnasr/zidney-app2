@@ -313,7 +313,9 @@ describe('T056: Product Status Change Integration Tests', () => {
       )
 
       expect(audits.rows.length).toBe(3)
-      expect(audits.rows.every((r: any) => r.action === 'STATUS_CHANGE')).toBe(true)
+      expect(audits.rows.every((r: any) => r.action === 'STATUS_CHANGE')).toBe(
+        true
+      )
     })
   })
 

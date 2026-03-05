@@ -30,8 +30,7 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
     const wsRes = await db.master.query(
       `INSERT INTO workspaces (slug, name, schema_version, product_version, license_status)
        VALUES ($1, 'E2E WS', 1, '1.0.0', 'ACTIVE')
-       RETURNING id`
-      ,
+       RETURNING id`,
       [`e2e-ws-${runId}`]
     )
     workspaceId = wsRes.rows[0]!.id

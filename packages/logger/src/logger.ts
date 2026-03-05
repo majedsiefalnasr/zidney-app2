@@ -253,7 +253,10 @@ export class Logger {
     }
 
     // Output error details
-    if ((entry.level === 'error' || entry.level === 'fatal') && entry.context.error) {
+    if (
+      (entry.level === 'error' || entry.level === 'fatal') &&
+      entry.context.error
+    ) {
       console.error(`  ${color}Error:${RESET_COLOR}`, entry.context.error)
     }
   }
@@ -277,7 +280,10 @@ export class Logger {
   ): { message: string; context?: LogContext } {
     if (typeof messageOrContext === 'string') {
       if (typeof contextOrMessage === 'string') {
-        return { message: messageOrContext, context: { note: contextOrMessage } }
+        return {
+          message: messageOrContext,
+          context: { note: contextOrMessage },
+        }
       }
       return { message: messageOrContext, context: contextOrMessage }
     }

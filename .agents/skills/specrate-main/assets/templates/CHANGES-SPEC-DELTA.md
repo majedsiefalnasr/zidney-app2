@@ -1,6 +1,6 @@
-# Spec Delta of *[Change Name]*
+# Spec Delta of _[Change Name]_
 
-## Apply to Spec *[Spec Name]*
+## Apply to Spec _[Spec Name]_
 
 ### Requirement: [New requirement name] (ADDED)
 

@@ -57,11 +57,14 @@ describe('LicenseLicecycle Integration', () => {
       license,
     ])
 
-    const transitionResult = await transitionLicenseState(mockDb as unknown as Pool, {
-      license_id: license.id,
-      target_state: 'SOFT_LOCKED',
-      reason: 'payment_failed',
-    })
+    const transitionResult = await transitionLicenseState(
+      mockDb as unknown as Pool,
+      {
+        license_id: license.id,
+        target_state: 'SOFT_LOCKED',
+        reason: 'payment_failed',
+      }
+    )
 
     expect(transitionResult.success).toBe(true)
     expect(transitionResult.previous_state).toBe('ACTIVE')
@@ -120,11 +123,14 @@ describe('LicenseLicecycle Integration', () => {
       expiredLicense,
     ])
 
-    const transitionResult = await transitionLicenseState(mockDb as unknown as Pool, {
-      license_id: expiredLicense.id,
-      target_state: 'ARCHIVED',
-      reason: 'soft_lock_expired_auto_transition',
-    })
+    const transitionResult = await transitionLicenseState(
+      mockDb as unknown as Pool,
+      {
+        license_id: expiredLicense.id,
+        target_state: 'ARCHIVED',
+        reason: 'soft_lock_expired_auto_transition',
+      }
+    )
 
     expect(transitionResult.success).toBe(true)
   })

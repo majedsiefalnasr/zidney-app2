@@ -1,4 +1,4 @@
-# Spec of *[Spec Name]*
+# Spec of _[Spec Name]_
 
 ## Overview
 

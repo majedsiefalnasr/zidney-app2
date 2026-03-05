@@ -27,7 +27,6 @@ describe('T047: Invitations Workflow Integration Tests', () => {
       roleId: randomUUID(),
       pendingInvitationToken: 'valid-32-byte-token-as-plaintext',
     }
-
   })
 
   afterEach(() => {

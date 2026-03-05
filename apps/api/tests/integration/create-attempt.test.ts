@@ -32,8 +32,7 @@ describe('POST /api/v1/attempts Integration', () => {
     const wsRes = await db.master.query(
       `INSERT INTO workspaces (slug, name, schema_version, product_version, license_status)
        VALUES ($1, 'Create Attempt WS', 1, '1.0.0', 'ACTIVE')
-       RETURNING id`
-      ,
+       RETURNING id`,
       [`create-attempt-ws-${runId}`]
     )
     workspaceId = wsRes.rows[0]!.id

@@ -22,17 +22,17 @@
 
 ## Files Modified
 
-| File Path | Change Type | Notes |
-| --- | --- | --- |
-| ... | Created / Modified | ... |
+| File Path | Change Type        | Notes |
+| --------- | ------------------ | ----- |
+| ...       | Created / Modified | ...   |
 
 ---
 
 ## Tasks Completion
 
-| Task ID | Description | Layer | Status |
-| --- | --- | --- | --- |
-| ... | ... | ... | ✅ / ❌ / DEFERRED |
+| Task ID | Description | Layer | Status             |
+| ------- | ----------- | ----- | ------------------ |
+| ...     | ...         | ...   | ✅ / ❌ / DEFERRED |
 
 **Completed:** <TASKS_COMPLETED> / <TASKS_TOTAL>
 
@@ -40,24 +40,24 @@
 
 ## Tests Added or Updated
 
-| Test File | Type | Scope |
-| --- | --- | --- |
-| ... | Unit / Integration / Snapshot | ... |
+| Test File | Type                          | Scope |
+| --------- | ----------------------------- | ----- |
+| ...       | Unit / Integration / Snapshot | ...   |
 
 ---
 
 ## Constitutional Compliance
 
-| Check | Status | Notes |
-| --- | --- | --- |
-| Tenant resolver context used for tenant DB access | ✅ / ❌ | ... |
-| All write operations are transactional | ✅ / ❌ | ... |
-| Idempotency is enforced where required | ✅ / ❌ | ... |
-| Structured logging is present | ✅ / ❌ | ... |
-| `console.log` is absent | ✅ / ❌ | ... |
-| No stack traces exposed to clients | ✅ / ❌ | ... |
-| UI layer has no business logic | ✅ / ❌ | ... |
-| API error contract is preserved | ✅ / ❌ | ... |
+| Check                                             | Status  | Notes |
+| ------------------------------------------------- | ------- | ----- |
+| Tenant resolver context used for tenant DB access | ✅ / ❌ | ...   |
+| All write operations are transactional            | ✅ / ❌ | ...   |
+| Idempotency is enforced where required            | ✅ / ❌ | ...   |
+| Structured logging is present                     | ✅ / ❌ | ...   |
+| `console.log` is absent                           | ✅ / ❌ | ...   |
+| No stack traces exposed to clients                | ✅ / ❌ | ...   |
+| UI layer has no business logic                    | ✅ / ❌ | ...   |
+| API error contract is preserved                   | ✅ / ❌ | ...   |
 
 **Overall:** COMPLIANT / BLOCKED
 

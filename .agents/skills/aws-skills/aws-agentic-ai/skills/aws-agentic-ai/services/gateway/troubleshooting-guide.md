@@ -7,7 +7,9 @@
 **Error Message**: `"Gateway target creation failed"`
 
 **Diagnosis Steps**:
+
 1. Verify gateway exists
+
    ```bash
    aws bedrock-agentcore-control get-gateway \
      --gateway-identifier <GATEWAY_ID> \
@@ -15,6 +17,7 @@
    ```
 
 2. Check credential provider exists (if using API key auth)
+
    ```bash
    aws bedrock-agentcore-control get-api-key-credential-provider \
      --name <PROVIDER_NAME> \
@@ -29,6 +32,7 @@
    ```
 
 **Common Causes**:
+
 - Gateway ID incorrect or gateway doesn't exist
 - Credential provider name misspelled (for API key auth)
 - OpenAPI schema syntax error
@@ -41,6 +45,7 @@
 ### Error: "User is not authorized to perform: bedrock-agentcore:GetResourceApiKey"
 
 **Full Error**:
+
 ```
 User: arn:aws:sts::<ACCOUNT_ID>:assumed-role/GatewayServiceRole is not
 authorized to perform: bedrock-agentcore:GetResourceApiKey on resource: *
@@ -49,6 +54,7 @@ authorized to perform: bedrock-agentcore:GetResourceApiKey on resource: *
 **Root Cause**: Gateway service role missing credential provider access permissions
 
 **Diagnosis**:
+
 ```bash
 # Get gateway role ARN
 GATEWAY_ROLE=$(aws bedrock-agentcore-control get-gateway \
@@ -68,6 +74,7 @@ aws iam list-attached-role-policies \
 ```
 
 **Solution**: Add required permissions to gateway role:
+
 ```bash
 cat > /tmp/gateway-policy.json <<EOF
 {
@@ -115,6 +122,7 @@ aws iam create-policy-version \
 ### Error: "AccessDeniedException: Secrets Manager"
 
 **Full Error**:
+
 ```
 AccessDeniedException: User: arn:aws:sts::<ACCOUNT_ID>:assumed-role/GatewayServiceRole
 is not authorized to perform: secretsmanager:GetSecretValue on resource: ...
@@ -131,6 +139,7 @@ is not authorized to perform: secretsmanager:GetSecretValue on resource: ...
 ### Error: "Credential provider not found"
 
 **Diagnosis**:
+
 ```bash
 # Check if provider exists
 aws bedrock-agentcore-control get-api-key-credential-provider \
@@ -143,6 +152,7 @@ aws bedrock-agentcore-control list-api-key-credential-providers \
 ```
 
 **Solution**:
+
 ```bash
 # Create provider if missing
 aws bedrock-agentcore-control create-api-key-credential-provider \
@@ -158,6 +168,7 @@ aws bedrock-agentcore-control create-api-key-credential-provider \
 **Symptom**: API calls return 403 or authentication errors
 
 **Diagnosis**:
+
 ```bash
 # Check API key format in secret
 SECRET=$(aws secretsmanager get-secret-value \
@@ -170,6 +181,7 @@ echo $SECRET | jq '.'
 ```
 
 **Solution**:
+
 ```bash
 # Use the correct update command (not secretsmanager put-secret-value)
 aws bedrock-agentcore-control update-api-key-credential-provider \
@@ -187,6 +199,7 @@ aws bedrock-agentcore-control update-api-key-credential-provider \
 ### Error: "Invalid OpenAPI schema"
 
 **Diagnosis**:
+
 ```bash
 # Validate OpenAPI schema locally
 npm install -g @apidevtools/swagger-cli
@@ -198,12 +211,14 @@ grep -n "oneOf\|anyOf\|allOf" schemas/my-api-openapi.yaml
 ```
 
 **Common Issues**:
+
 1. **oneOf/anyOf/allOf**: Not supported, use simple types
 2. **Missing operationId**: All operations must have operationId
 3. **Invalid $ref references**: Must point to valid components
 4. **YAML syntax errors**: Use online YAML validator
 
 **Solution**: Use OpenAPI 3.0 simple types only:
+
 ```yaml
 # ❌ Bad - unsupported
 schema:
@@ -223,6 +238,7 @@ schema:
 **Root Cause**: OpenAPI schema too large for Gateway
 
 **Solutions**:
+
 1. Remove unused endpoints from schema
 2. Simplify descriptions (keep essential info only)
 3. Remove redundant component definitions
@@ -239,6 +255,7 @@ schema:
 **Root Cause**: Gateway or upstream API rate limits
 
 **Diagnosis**:
+
 ```bash
 # Check gateway target status
 aws bedrock-agentcore-control get-gateway-target \
@@ -248,6 +265,7 @@ aws bedrock-agentcore-control get-gateway-target \
 ```
 
 **Solutions**:
+
 1. **Check Gateway limits**: Verify gateway quota in AWS Console
 2. **Upstream API limits**: Check your API provider dashboard for limits
 3. **Optimize calls**: Use embedded IDs in schema to reduce API queries
@@ -261,6 +279,7 @@ aws bedrock-agentcore-control get-gateway-target \
 **Root Cause**: API endpoint or host header configuration mismatch
 
 **Diagnosis**:
+
 ```bash
 # Check schema for correct server URL
 grep -A5 "servers:" schemas/my-api-openapi.yaml
@@ -280,6 +299,7 @@ grep -A10 "securitySchemes:" schemas/my-api-openapi.yaml
 **Root Cause**: Upstream API not responding within timeout limit
 
 **Solutions**:
+
 1. Verify upstream API is accessible
 2. Check network connectivity from Gateway
 3. Increase timeout in target configuration (if supported)
@@ -292,6 +312,7 @@ grep -A10 "securitySchemes:" schemas/my-api-openapi.yaml
 ### Target Status: "FAILED"
 
 **Diagnosis**:
+
 ```bash
 # Get target details including status reason
 aws bedrock-agentcore-control get-gateway-target \
@@ -302,6 +323,7 @@ aws bedrock-agentcore-control get-gateway-target \
 ```
 
 **Common Status Reasons**:
+
 - `SCHEMA_VALIDATION_FAILED`: OpenAPI schema has errors
 - `CREDENTIAL_PROVIDER_NOT_FOUND`: API key provider doesn't exist
 - `PERMISSION_DENIED`: IAM permissions missing
@@ -313,6 +335,7 @@ aws bedrock-agentcore-control get-gateway-target \
 **Root Cause**: Target creation stuck
 
 **Solutions**:
+
 1. Check if all dependencies exist (gateway, credential provider)
 2. Delete and recreate target
 3. Check AWS service health dashboard
@@ -356,16 +379,16 @@ aws bedrock-agentcore-control get-gateway-target \
 
 ## Common Error Summary Table
 
-| Error | Likely Cause | Solution |
-|-------|-------------|----------|
-| "not authorized to perform: bedrock-agentcore:GetResourceApiKey" | Missing IAM permissions | Add permissions to gateway role |
-| "Credential provider not found" | Provider doesn't exist or name typo | Create provider with `create-api-key-credential-provider` |
-| "Invalid API key" | Key format wrong or key invalid | Use `update-api-key-credential-provider` to update |
-| "Invalid OpenAPI schema" | Unsupported constructs (oneOf/anyOf/allOf) | Remove unsupported constructs, use simple types |
-| "Invalid API host header" | Host header doesn't match endpoint | Update OpenAPI schema with correct host |
-| "Rate limit exceeded" | Too many API calls | Check limits, implement caching |
-| "Connection timeout" | Upstream API not responding | Verify API accessibility |
-| "Target status FAILED" | Schema or credential issues | Check statusReason in get-gateway-target |
+| Error                                                            | Likely Cause                               | Solution                                                  |
+| ---------------------------------------------------------------- | ------------------------------------------ | --------------------------------------------------------- |
+| "not authorized to perform: bedrock-agentcore:GetResourceApiKey" | Missing IAM permissions                    | Add permissions to gateway role                           |
+| "Credential provider not found"                                  | Provider doesn't exist or name typo        | Create provider with `create-api-key-credential-provider` |
+| "Invalid API key"                                                | Key format wrong or key invalid            | Use `update-api-key-credential-provider` to update        |
+| "Invalid OpenAPI schema"                                         | Unsupported constructs (oneOf/anyOf/allOf) | Remove unsupported constructs, use simple types           |
+| "Invalid API host header"                                        | Host header doesn't match endpoint         | Update OpenAPI schema with correct host                   |
+| "Rate limit exceeded"                                            | Too many API calls                         | Check limits, implement caching                           |
+| "Connection timeout"                                             | Upstream API not responding                | Verify API accessibility                                  |
+| "Target status FAILED"                                           | Schema or credential issues                | Check statusReason in get-gateway-target                  |
 
 ---
 
@@ -378,6 +401,7 @@ If issues persist after troubleshooting:
 3. **Community**: AWS Developer Forums
 
 **Information to gather for AWS Support**:
+
 - Gateway ID and target ID
 - Error messages and timestamps
 - OpenAPI schema (sanitized)

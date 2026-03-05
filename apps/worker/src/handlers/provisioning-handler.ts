@@ -26,7 +26,9 @@
 import { createLogger } from '@zidney/logger'
 import { Redis } from 'ioredis'
 import { Pool } from 'pg'
-import ProvisioningJob, { IJobQueue } from '../jobs/provisioning/ProvisioningJob'
+import ProvisioningJob, {
+  IJobQueue,
+} from '../jobs/provisioning/ProvisioningJob'
 import { BaselineSeeder } from '../services/provisioning/BaselineSeeder'
 import { CheckpointManager } from '../services/provisioning/CheckpointManager'
 import { DistributedLock } from '../services/provisioning/DistributedLock'
@@ -352,7 +354,6 @@ export class ProvisioningHandler {
         },
         'License status updated via provisioning handler'
       )
-
     } catch (error) {
       await client.query('ROLLBACK').catch(() => {})
       throw error

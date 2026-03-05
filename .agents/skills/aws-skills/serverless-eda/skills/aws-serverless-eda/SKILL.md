@@ -53,7 +53,9 @@ This skill provides comprehensive guidance for building serverless applications 
 This skill can leverage serverless-specific MCP servers for enhanced development workflows:
 
 ### AWS Serverless MCP Server
+
 **Purpose**: Complete serverless application lifecycle with SAM CLI
+
 - Initialize new serverless applications
 - Deploy serverless applications
 - Test Lambda functions locally
@@ -61,14 +63,18 @@ This skill can leverage serverless-specific MCP servers for enhanced development
 - Manage serverless application lifecycle
 
 ### AWS Lambda Tool MCP Server
+
 **Purpose**: Execute Lambda functions as tools
+
 - Invoke Lambda functions directly
 - Test Lambda integrations
 - Execute workflows requiring private resource access
 - Run Lambda-based automation
 
 ### AWS Step Functions MCP Server
+
 **Purpose**: Execute complex workflows and orchestration
+
 - Create and manage state machines
 - Execute workflow orchestrations
 - Handle distributed transactions
@@ -76,7 +82,9 @@ This skill can leverage serverless-specific MCP servers for enhanced development
 - Coordinate microservices
 
 ### Amazon SNS/SQS MCP Server
+
 **Purpose**: Event-driven messaging and queue management
+
 - Publish messages to SNS topics
 - Send/receive messages from SQS queues
 - Manage event-driven communication
@@ -86,6 +94,7 @@ This skill can leverage serverless-specific MCP servers for enhanced development
 ## When to Use This Skill
 
 Use this skill when:
+
 - Building serverless applications with Lambda
 - Designing event-driven architectures
 - Implementing microservices patterns
@@ -105,20 +114,21 @@ Use this skill when:
 // ✅ GOOD - Single purpose, focused function
 export const processOrder = async (event: OrderEvent) => {
   // Only handles order processing
-  const order = await validateOrder(event);
-  await saveOrder(order);
-  await publishOrderCreatedEvent(order);
-  return { statusCode: 200, body: JSON.stringify({ orderId: order.id }) };
-};
+  const order = await validateOrder(event)
+  await saveOrder(order)
+  await publishOrderCreatedEvent(order)
+  return { statusCode: 200, body: JSON.stringify({ orderId: order.id }) }
+}
 
 // ❌ BAD - Function does too much
 export const handleEverything = async (event: any) => {
   // Handles orders, inventory, payments, shipping...
   // Too many responsibilities
-};
+}
 ```
 
 **Keep functions environmentally efficient and cost-aware**:
+
 - Minimize cold start times
 - Optimize memory allocation
 - Use provisioned concurrency only when needed
@@ -129,6 +139,7 @@ export const handleEverything = async (event: any) => {
 **Design for concurrency, not volume**
 
 Lambda scales horizontally - design considerations should focus on:
+
 - Concurrent execution limits
 - Downstream service throttling
 - Shared resource contention
@@ -138,18 +149,18 @@ Lambda scales horizontally - design considerations should focus on:
 // Consider concurrent Lambda executions accessing DynamoDB
 const table = new dynamodb.Table(this, 'Table', {
   billingMode: dynamodb.BillingMode.PAY_PER_REQUEST, // Auto-scales with load
-});
+})
 
 // Or with provisioned capacity + auto-scaling
 const table = new dynamodb.Table(this, 'Table', {
   billingMode: dynamodb.BillingMode.PROVISIONED,
   readCapacity: 5,
   writeCapacity: 5,
-});
+})
 
 // Enable auto-scaling for concurrent load
-table.autoScaleReadCapacity({ minCapacity: 5, maxCapacity: 100 });
-table.autoScaleWriteCapacity({ minCapacity: 5, maxCapacity: 100 });
+table.autoScaleReadCapacity({ minCapacity: 5, maxCapacity: 100 })
+table.autoScaleWriteCapacity({ minCapacity: 5, maxCapacity: 100 })
 ```
 
 ### 3. Share Nothing
@@ -159,8 +170,8 @@ table.autoScaleWriteCapacity({ minCapacity: 5, maxCapacity: 100 });
 ```typescript
 // ❌ BAD - Relying on local file system
 export const handler = async (event: any) => {
-  fs.writeFileSync('/tmp/data.json', JSON.stringify(data)); // Lost after execution
-};
+  fs.writeFileSync('/tmp/data.json', JSON.stringify(data)) // Lost after execution
+}
 
 // ✅ GOOD - Use persistent storage
 export const handler = async (event: any) => {
@@ -168,11 +179,12 @@ export const handler = async (event: any) => {
     Bucket: process.env.BUCKET_NAME,
     Key: 'data.json',
     Body: JSON.stringify(data),
-  });
-};
+  })
+}
 ```
 
 **State management**:
+
 - Use DynamoDB for persistent state
 - Use Step Functions for workflow state
 - Use ElastiCache for session state
@@ -183,11 +195,13 @@ export const handler = async (event: any) => {
 **Applications must be hardware-agnostic**
 
 Infrastructure can change without notice:
+
 - Lambda functions can run on different hardware
 - Container instances can be replaced
 - No assumption about underlying infrastructure
 
 **Design for portability**:
+
 - Use environment variables for configuration
 - Avoid hardware-specific optimizations
 - Test across different environments
@@ -199,24 +213,24 @@ Infrastructure can change without notice:
 ```typescript
 // ❌ BAD - Lambda function chaining
 export const handler1 = async (event: any) => {
-  const result = await processStep1(event);
+  const result = await processStep1(event)
   await lambda.invoke({
     FunctionName: 'handler2',
     Payload: JSON.stringify(result),
-  });
-};
+  })
+}
 
 // ✅ GOOD - Step Functions orchestration
 const stateMachine = new stepfunctions.StateMachine(this, 'OrderWorkflow', {
-  definition: stepfunctions.Chain
-    .start(validateOrder)
+  definition: stepfunctions.Chain.start(validateOrder)
     .next(processPayment)
     .next(shipOrder)
     .next(sendConfirmation),
-});
+})
 ```
 
 **Benefits of Step Functions**:
+
 - Visual workflow representation
 - Built-in error handling and retries
 - Execution history and debugging
@@ -229,13 +243,13 @@ const stateMachine = new stepfunctions.StateMachine(this, 'OrderWorkflow', {
 
 ```typescript
 // Pattern: Event-driven processing
-const bucket = new s3.Bucket(this, 'DataBucket');
+const bucket = new s3.Bucket(this, 'DataBucket')
 
 bucket.addEventNotification(
   s3.EventType.OBJECT_CREATED,
   new s3n.LambdaDestination(processFunction),
   { prefix: 'uploads/' }
-);
+)
 
 // Pattern: EventBridge integration
 const rule = new events.Rule(this, 'OrderRule', {
@@ -243,12 +257,13 @@ const rule = new events.Rule(this, 'OrderRule', {
     source: ['orders'],
     detailType: ['OrderPlaced'],
   },
-});
+})
 
-rule.addTarget(new targets.LambdaFunction(processOrderFunction));
+rule.addTarget(new targets.LambdaFunction(processOrderFunction))
 ```
 
 **Benefits**:
+
 - Loose coupling between services
 - Asynchronous processing
 - Better fault tolerance
@@ -262,43 +277,44 @@ rule.addTarget(new targets.LambdaFunction(processOrderFunction));
 // ✅ GOOD - Idempotent operation
 export const handler = async (event: SQSEvent) => {
   for (const record of event.Records) {
-    const orderId = JSON.parse(record.body).orderId;
+    const orderId = JSON.parse(record.body).orderId
 
     // Check if already processed (idempotency)
     const existing = await dynamodb.getItem({
       TableName: process.env.TABLE_NAME,
       Key: { orderId },
-    });
+    })
 
     if (existing.Item) {
-      console.log('Order already processed:', orderId);
-      continue; // Skip duplicate
+      console.log('Order already processed:', orderId)
+      continue // Skip duplicate
     }
 
     // Process order
-    await processOrder(orderId);
+    await processOrder(orderId)
 
     // Mark as processed
     await dynamodb.putItem({
       TableName: process.env.TABLE_NAME,
       Item: { orderId, processedAt: Date.now() },
-    });
+    })
   }
-};
+}
 ```
 
 **Implement retry logic with exponential backoff**:
+
 ```typescript
 async function withRetry<T>(fn: () => Promise<T>, maxRetries = 3): Promise<T> {
   for (let i = 0; i < maxRetries; i++) {
     try {
-      return await fn();
+      return await fn()
     } catch (error) {
-      if (i === maxRetries - 1) throw error;
-      await new Promise(resolve => setTimeout(resolve, Math.pow(2, i) * 1000));
+      if (i === maxRetries - 1) throw error
+      await new Promise((resolve) => setTimeout(resolve, Math.pow(2, i) * 1000))
     }
   }
-  throw new Error('Max retries exceeded');
+  throw new Error('Max retries exceeded')
 }
 ```
 
@@ -312,7 +328,7 @@ Use EventBridge for event routing and filtering:
 // Create custom event bus
 const eventBus = new events.EventBus(this, 'AppEventBus', {
   eventBusName: 'application-events',
-});
+})
 
 // Define event schema
 const schema = new events.Schema(this, 'OrderSchema', {
@@ -334,7 +350,7 @@ const schema = new events.Schema(this, 'OrderSchema', {
       },
     },
   }),
-});
+})
 
 // Create rules for different consumers
 new events.Rule(this, 'ProcessOrderRule', {
@@ -344,7 +360,7 @@ new events.Rule(this, 'ProcessOrderRule', {
     detailType: ['OrderPlaced'],
   },
   targets: [new targets.LambdaFunction(processOrderFunction)],
-});
+})
 
 new events.Rule(this, 'NotifyCustomerRule', {
   eventBus,
@@ -353,7 +369,7 @@ new events.Rule(this, 'NotifyCustomerRule', {
     detailType: ['OrderPlaced'],
   },
   targets: [new targets.LambdaFunction(notifyCustomerFunction)],
-});
+})
 ```
 
 ### Pattern 2: Queue-Based Processing (SQS)
@@ -369,14 +385,14 @@ const queue = new sqs.Queue(this, 'ProcessingQueue', {
     queue: dlq,
     maxReceiveCount: 3,
   },
-});
+})
 
 // FIFO queue for ordered processing
 const fifoQueue = new sqs.Queue(this, 'OrderedQueue', {
   fifo: true,
   contentBasedDeduplication: true,
   deduplicationScope: sqs.DeduplicationScope.MESSAGE_GROUP,
-});
+})
 
 // Lambda consumer
 new lambda.EventSourceMapping(this, 'QueueConsumer', {
@@ -384,7 +400,7 @@ new lambda.EventSourceMapping(this, 'QueueConsumer', {
   eventSourceArn: queue.queueArn,
   batchSize: 10,
   maxBatchingWindow: Duration.seconds(5),
-});
+})
 ```
 
 ### Pattern 3: Pub/Sub (SNS + SQS Fan-Out)
@@ -395,22 +411,22 @@ Implement fan-out pattern for multiple consumers:
 // Create SNS topic
 const topic = new sns.Topic(this, 'OrderTopic', {
   displayName: 'Order Events',
-});
+})
 
 // Multiple SQS queues subscribe to topic
-const inventoryQueue = new sqs.Queue(this, 'InventoryQueue');
-const shippingQueue = new sqs.Queue(this, 'ShippingQueue');
-const analyticsQueue = new sqs.Queue(this, 'AnalyticsQueue');
+const inventoryQueue = new sqs.Queue(this, 'InventoryQueue')
+const shippingQueue = new sqs.Queue(this, 'ShippingQueue')
+const analyticsQueue = new sqs.Queue(this, 'AnalyticsQueue')
 
-topic.addSubscription(new subscriptions.SqsSubscription(inventoryQueue));
-topic.addSubscription(new subscriptions.SqsSubscription(shippingQueue));
-topic.addSubscription(new subscriptions.SqsSubscription(analyticsQueue));
+topic.addSubscription(new subscriptions.SqsSubscription(inventoryQueue))
+topic.addSubscription(new subscriptions.SqsSubscription(shippingQueue))
+topic.addSubscription(new subscriptions.SqsSubscription(analyticsQueue))
 
 // Each queue has its own Lambda consumer
 new lambda.EventSourceMapping(this, 'InventoryConsumer', {
   target: inventoryFunction,
   eventSourceArn: inventoryQueue.queueArn,
-});
+})
 ```
 
 ### Pattern 4: Saga Pattern with Step Functions
@@ -421,26 +437,26 @@ Implement distributed transactions:
 const reserveFlight = new tasks.LambdaInvoke(this, 'ReserveFlight', {
   lambdaFunction: reserveFlightFunction,
   outputPath: '$.Payload',
-});
+})
 
 const reserveHotel = new tasks.LambdaInvoke(this, 'ReserveHotel', {
   lambdaFunction: reserveHotelFunction,
   outputPath: '$.Payload',
-});
+})
 
 const processPayment = new tasks.LambdaInvoke(this, 'ProcessPayment', {
   lambdaFunction: processPaymentFunction,
   outputPath: '$.Payload',
-});
+})
 
 // Compensating transactions
 const cancelFlight = new tasks.LambdaInvoke(this, 'CancelFlight', {
   lambdaFunction: cancelFlightFunction,
-});
+})
 
 const cancelHotel = new tasks.LambdaInvoke(this, 'CancelHotel', {
   lambdaFunction: cancelHotelFunction,
-});
+})
 
 // Define saga with compensation
 const definition = reserveFlight
@@ -448,12 +464,12 @@ const definition = reserveFlight
   .next(processPayment)
   .addCatch(cancelHotel.next(cancelFlight), {
     resultPath: '$.error',
-  });
+  })
 
 new stepfunctions.StateMachine(this, 'BookingStateMachine', {
   definition,
   timeout: Duration.minutes(5),
-});
+})
 ```
 
 ### Pattern 5: Event Sourcing
@@ -466,11 +482,11 @@ const eventStore = new dynamodb.Table(this, 'EventStore', {
   partitionKey: { name: 'aggregateId', type: dynamodb.AttributeType.STRING },
   sortKey: { name: 'version', type: dynamodb.AttributeType.NUMBER },
   stream: dynamodb.StreamViewType.NEW_IMAGE,
-});
+})
 
 // Lambda function stores events
 export const handleCommand = async (event: any) => {
-  const { aggregateId, eventType, eventData } = event;
+  const { aggregateId, eventType, eventData } = event
 
   // Get current version
   const items = await dynamodb.query({
@@ -479,9 +495,9 @@ export const handleCommand = async (event: any) => {
     ExpressionAttributeValues: { ':id': aggregateId },
     ScanIndexForward: false,
     Limit: 1,
-  });
+  })
 
-  const nextVersion = items.Items?.[0]?.version + 1 || 1;
+  const nextVersion = items.Items?.[0]?.version + 1 || 1
 
   // Append new event
   await dynamodb.putItem({
@@ -493,11 +509,11 @@ export const handleCommand = async (event: any) => {
       eventData,
       timestamp: Date.now(),
     },
-  });
-};
+  })
+}
 
 // Projections read from event stream
-eventStore.grantStreamRead(projectionFunction);
+eventStore.grantStreamRead(projectionFunction)
 ```
 
 ## Serverless Architecture Patterns
@@ -514,17 +530,17 @@ const api = new apigateway.RestApi(this, 'Api', {
     throttlingBurstLimit: 2000,
     tracingEnabled: true,
   },
-});
+})
 
 // User service
-const users = api.root.addResource('users');
-users.addMethod('GET', new apigateway.LambdaIntegration(getUsersFunction));
-users.addMethod('POST', new apigateway.LambdaIntegration(createUserFunction));
+const users = api.root.addResource('users')
+users.addMethod('GET', new apigateway.LambdaIntegration(getUsersFunction))
+users.addMethod('POST', new apigateway.LambdaIntegration(createUserFunction))
 
 // Order service
-const orders = api.root.addResource('orders');
-orders.addMethod('GET', new apigateway.LambdaIntegration(getOrdersFunction));
-orders.addMethod('POST', new apigateway.LambdaIntegration(createOrderFunction));
+const orders = api.root.addResource('orders')
+orders.addMethod('GET', new apigateway.LambdaIntegration(getOrdersFunction))
+orders.addMethod('POST', new apigateway.LambdaIntegration(createOrderFunction))
 ```
 
 ### Pattern 2: Stream Processing
@@ -535,7 +551,7 @@ Real-time data processing with Kinesis:
 const stream = new kinesis.Stream(this, 'DataStream', {
   shardCount: 2,
   retentionPeriod: Duration.days(7),
-});
+})
 
 // Lambda processes stream records
 new lambda.EventSourceMapping(this, 'StreamProcessor', {
@@ -548,7 +564,7 @@ new lambda.EventSourceMapping(this, 'StreamProcessor', {
   retryAttempts: 3,
   bisectBatchOnError: true,
   onFailure: new lambdaDestinations.SqsDestination(dlq),
-});
+})
 ```
 
 ### Pattern 3: Async Task Processing
@@ -564,20 +580,20 @@ const taskQueue = new sqs.Queue(this, 'TaskQueue', {
     queue: dlq,
     maxReceiveCount: 3,
   },
-});
+})
 
 // Lambda worker processes tasks
 const worker = new lambda.Function(this, 'TaskWorker', {
   // ... configuration
   reservedConcurrentExecutions: 10, // Control concurrency
-});
+})
 
 new lambda.EventSourceMapping(this, 'TaskConsumer', {
   target: worker,
   eventSourceArn: taskQueue.queueArn,
   batchSize: 10,
   reportBatchItemFailures: true, // Partial batch failure handling
-});
+})
 ```
 
 ### Pattern 4: Scheduled Jobs
@@ -589,13 +605,13 @@ Periodic processing with EventBridge:
 new events.Rule(this, 'DailyCleanup', {
   schedule: events.Schedule.cron({ hour: '2', minute: '0' }),
   targets: [new targets.LambdaFunction(cleanupFunction)],
-});
+})
 
 // Process every 5 minutes
 new events.Rule(this, 'FrequentProcessing', {
   schedule: events.Schedule.rate(Duration.minutes(5)),
   targets: [new targets.LambdaFunction(processFunction)],
-});
+})
 ```
 
 ### Pattern 5: Webhook Processing
@@ -606,31 +622,34 @@ Handle external webhooks:
 // API Gateway endpoint for webhooks
 const webhookApi = new apigateway.RestApi(this, 'WebhookApi', {
   restApiName: 'webhooks',
-});
+})
 
-const webhook = webhookApi.root.addResource('webhook');
-webhook.addMethod('POST', new apigateway.LambdaIntegration(webhookFunction, {
-  proxy: true,
-  timeout: Duration.seconds(29), // API Gateway max
-}));
+const webhook = webhookApi.root.addResource('webhook')
+webhook.addMethod(
+  'POST',
+  new apigateway.LambdaIntegration(webhookFunction, {
+    proxy: true,
+    timeout: Duration.seconds(29), // API Gateway max
+  })
+)
 
 // Lambda handler validates and queues webhook
 export const handler = async (event: APIGatewayProxyEvent) => {
   // Validate webhook signature
-  const isValid = validateSignature(event.headers, event.body);
+  const isValid = validateSignature(event.headers, event.body)
   if (!isValid) {
-    return { statusCode: 401, body: 'Invalid signature' };
+    return { statusCode: 401, body: 'Invalid signature' }
   }
 
   // Queue for async processing
   await sqs.sendMessage({
     QueueUrl: process.env.QUEUE_URL,
     MessageBody: event.body,
-  });
+  })
 
   // Return immediately
-  return { statusCode: 202, body: 'Accepted' };
-};
+  return { statusCode: 202, body: 'Accepted' }
+}
 ```
 
 ## Best Practices
@@ -641,20 +660,20 @@ export const handler = async (event: APIGatewayProxyEvent) => {
 
 ```typescript
 export const handler = async (event: SQSEvent) => {
-  const failures: SQSBatchItemFailure[] = [];
+  const failures: SQSBatchItemFailure[] = []
 
   for (const record of event.Records) {
     try {
-      await processRecord(record);
+      await processRecord(record)
     } catch (error) {
-      console.error('Failed to process record:', record.messageId, error);
-      failures.push({ itemIdentifier: record.messageId });
+      console.error('Failed to process record:', record.messageId, error)
+      failures.push({ itemIdentifier: record.messageId })
     }
   }
 
   // Return partial batch failures for retry
-  return { batchItemFailures: failures };
-};
+  return { batchItemFailures: failures }
+}
 ```
 
 ### Dead Letter Queues
@@ -664,14 +683,14 @@ export const handler = async (event: SQSEvent) => {
 ```typescript
 const dlq = new sqs.Queue(this, 'DLQ', {
   retentionPeriod: Duration.days(14),
-});
+})
 
 const queue = new sqs.Queue(this, 'Queue', {
   deadLetterQueue: {
     queue: dlq,
     maxReceiveCount: 3,
   },
-});
+})
 
 // Monitor DLQ depth
 new cloudwatch.Alarm(this, 'DLQAlarm', {
@@ -679,7 +698,7 @@ new cloudwatch.Alarm(this, 'DLQAlarm', {
   threshold: 1,
   evaluationPeriods: 1,
   alarmDescription: 'Messages in DLQ require attention',
-});
+})
 ```
 
 ### Observability
@@ -695,7 +714,7 @@ new NodejsFunction(this, 'Function', {
     POWERTOOLS_METRICS_NAMESPACE: 'MyApp',
     LOG_LEVEL: 'INFO',
   },
-});
+})
 ```
 
 ## Using MCP Servers Effectively
@@ -703,6 +722,7 @@ new NodejsFunction(this, 'Function', {
 ### AWS Serverless MCP Usage
 
 **Lifecycle management**:
+
 - Initialize new serverless projects
 - Generate SAM templates
 - Deploy applications
@@ -711,6 +731,7 @@ new NodejsFunction(this, 'Function', {
 ### Lambda Tool MCP Usage
 
 **Function execution**:
+
 - Test Lambda functions directly
 - Execute automation workflows
 - Access private resources
@@ -719,6 +740,7 @@ new NodejsFunction(this, 'Function', {
 ### Step Functions MCP Usage
 
 **Workflow orchestration**:
+
 - Create state machines for complex workflows
 - Execute distributed transactions
 - Implement saga patterns
@@ -727,6 +749,7 @@ new NodejsFunction(this, 'Function', {
 ### SNS/SQS MCP Usage
 
 **Messaging operations**:
+
 - Test pub/sub patterns
 - Send test messages to queues
 - Validate event routing
@@ -773,6 +796,7 @@ This skill includes comprehensive reference documentation based on AWS best prac
   - Rollback and safety mechanisms
 
 **External Resources**:
+
 - **AWS Well-Architected Serverless Lens**: https://docs.aws.amazon.com/wellarchitected/latest/serverless-applications-lens/
 - **ServerlessLand.com**: Pre-built serverless patterns
 - **AWS Serverless Workshops**: https://serverlessland.com/learn?type=Workshops

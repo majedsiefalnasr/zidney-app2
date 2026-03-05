@@ -38,7 +38,7 @@ paths:
       operationId: getHealth
       tags: [Health]
       responses:
-        "200":
+        '200':
           description: Service is healthy
           content:
             application/json:
@@ -57,12 +57,12 @@ paths:
                     description: Server timestamp (NOW())
                   version:
                     type: string
-                    example: "1.0.0"
+                    example: '1.0.0'
               example:
                 status: healthy
                 uptime: 123456
-                timestamp: "2026-02-18T14:30:00Z"
-                version: "1.0.0"
+                timestamp: '2026-02-18T14:30:00Z'
+                version: '1.0.0'
 
   /workspaces/{workspace_slug}/attempts:
     post:
@@ -76,7 +76,7 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/WorkspaceSlugPath"
+        - $ref: '#/components/parameters/WorkspaceSlugPath'
         - name: X-Correlation-ID
           in: header
           required: false
@@ -89,12 +89,12 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/CreateAttemptRequest"
+              $ref: '#/components/schemas/CreateAttemptRequest'
             example:
-              exam_id: "550e8400-e29b-41d4-a716-446655440000"
-              attempt_mode: "CHRONO"
+              exam_id: '550e8400-e29b-41d4-a716-446655440000'
+              attempt_mode: 'CHRONO'
       responses:
-        "201":
+        '201':
           description: Attempt created successfully
           headers:
             X-Correlation-ID:
@@ -104,23 +104,23 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AttemptResponse"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "403":
-          $ref: "#/components/responses/Forbidden"
-        "423":
+                $ref: '#/components/schemas/AttemptResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '423':
           description: |
             Workspace soft-locked (license status SOFT_LOCKED).
             Attempts can be created but not submitted.
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "426":
-          $ref: "#/components/responses/UpgradeRequired"
+                $ref: '#/components/schemas/ErrorResponse'
+        '426':
+          $ref: '#/components/responses/UpgradeRequired'
 
   /workspaces/{workspace_slug}/attempts/{attempt_id}:
     get:
@@ -131,17 +131,17 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/WorkspaceSlugPath"
-        - $ref: "#/components/parameters/AttemptIdPath"
+        - $ref: '#/components/parameters/WorkspaceSlugPath'
+        - $ref: '#/components/parameters/AttemptIdPath'
       responses:
-        "200":
+        '200':
           description: Attempt details
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/AttemptResponse"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/AttemptResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   /workspaces/{workspace_slug}/attempts/{attempt_id}/progress:
     patch:
@@ -154,8 +154,8 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/WorkspaceSlugPath"
-        - $ref: "#/components/parameters/AttemptIdPath"
+        - $ref: '#/components/parameters/WorkspaceSlugPath'
+        - $ref: '#/components/parameters/AttemptIdPath'
         - name: X-Idempotency-Key
           in: header
           required: false
@@ -168,22 +168,22 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/UpdateProgressRequest"
+              $ref: '#/components/schemas/UpdateProgressRequest'
       responses:
-        "200":
+        '200':
           description: Progress saved (idempotent, safe to retry)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProgressResponse"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
+                $ref: '#/components/schemas/ProgressResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
           description: Attempt already submitted or finalized
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
 
   /workspaces/{workspace_slug}/attempts/{attempt_id}/submit:
     post:
@@ -198,8 +198,8 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/WorkspaceSlugPath"
-        - $ref: "#/components/parameters/AttemptIdPath"
+        - $ref: '#/components/parameters/WorkspaceSlugPath'
+        - $ref: '#/components/parameters/AttemptIdPath'
         - name: X-Idempotency-Key
           in: header
           required: false
@@ -212,9 +212,9 @@ paths:
         content:
           application/json:
             schema:
-              $ref: "#/components/schemas/SubmitAttemptRequest"
+              $ref: '#/components/schemas/SubmitAttemptRequest'
       responses:
-        "202":
+        '202':
           description: |
             Submit accepted (job enqueued for async grading).
             Poll /result endpoint for grading completion.
@@ -227,14 +227,14 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/SubmitResponse"
-        "400":
-          $ref: "#/components/responses/BadRequest"
-        "401":
-          $ref: "#/components/responses/Unauthorized"
-        "404":
-          $ref: "#/components/responses/NotFound"
-        "409":
+                $ref: '#/components/schemas/SubmitResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
           description: |
             Submission locked (concurrent submit attempt).
             Retry with exponential backoff (100ms → 200ms → 400ms).
@@ -248,13 +248,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
-        "423":
+                $ref: '#/components/schemas/ErrorResponse'
+        '423':
           description: License soft-locked (create allowed, submit blocked)
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ErrorResponse"
+                $ref: '#/components/schemas/ErrorResponse'
 
   /workspaces/{workspace_slug}/attempts/{attempt_id}/result:
     get:
@@ -268,16 +268,16 @@ paths:
       security:
         - BearerAuth: []
       parameters:
-        - $ref: "#/components/parameters/WorkspaceSlugPath"
-        - $ref: "#/components/parameters/AttemptIdPath"
+        - $ref: '#/components/parameters/WorkspaceSlugPath'
+        - $ref: '#/components/parameters/AttemptIdPath'
       responses:
-        "200":
+        '200':
           description: Grading completed
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ResultResponse"
-        "202":
+                $ref: '#/components/schemas/ResultResponse'
+        '202':
           description: Still processing (poll again)
           headers:
             Retry-After:
@@ -288,9 +288,9 @@ paths:
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProcessingResponse"
-        "404":
-          $ref: "#/components/responses/NotFound"
+                $ref: '#/components/schemas/ProcessingResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
 components:
   parameters:
@@ -304,7 +304,7 @@ components:
       schema:
         type: string
         pattern: '^[a-z0-9][a-z0-9\-]*[a-z0-9]$'
-        example: "tenant-acme-corp"
+        example: 'tenant-acme-corp'
 
     AttemptIdPath:
       name: attempt_id
@@ -314,7 +314,7 @@ components:
       schema:
         type: string
         format: uuid
-        example: "550e8400-e29b-41d4-a716-446655440000"
+        example: '550e8400-e29b-41d4-a716-446655440000'
 
   schemas:
     CreateAttemptRequest:
@@ -537,7 +537,7 @@ components:
           type: boolean
           enum: [false]
         data:
-          type: "null"
+          type: 'null'
         error:
           type: object
           required:
@@ -562,7 +562,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
           example:
             success: false
             data: null
@@ -575,21 +575,21 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
 
     Forbidden:
       description: User lacks permission (403)
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
 
     NotFound:
       description: Resource not found (404)
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
 
     UpgradeRequired:
       description: |
@@ -598,7 +598,7 @@ components:
       content:
         application/json:
           schema:
-            $ref: "#/components/schemas/ErrorResponse"
+            $ref: '#/components/schemas/ErrorResponse'
 
   securitySchemes:
     BearerAuth:

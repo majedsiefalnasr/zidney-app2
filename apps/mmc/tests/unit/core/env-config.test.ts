@@ -1,5 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { createEnvConfig, normalizeAppEnv, parseBooleanFlag } from '../../../src/core/config/env'
+import {
+  createEnvConfig,
+  normalizeAppEnv,
+  parseBooleanFlag,
+} from '../../../src/core/config/env'
 
 describe('createEnvConfig', () => {
   const validOverrides = {

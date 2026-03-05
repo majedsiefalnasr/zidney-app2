@@ -9,6 +9,7 @@ Amazon Bedrock AgentCore Observability helps developers trace, debug, and monito
 ## Core Capabilities
 
 ### Distributed Tracing
+
 - **End-to-End Tracing**: Complete request tracing across all AgentCore services
 - **Workflow Visualization**: Detailed step-by-step workflow execution views
 - **Service Dependencies**: Automatic mapping of service interactions
@@ -16,6 +17,7 @@ Amazon Bedrock AgentCore Observability helps developers trace, debug, and monito
 - **Error Attribution**: Pinpoint exact failure points in complex workflows
 
 ### Metrics and Monitoring
+
 - **Real-Time Metrics**: Live operational metrics for all agent activities
 - **Token Tracking**: Monitor token consumption and costs
 - **Latency Measurements**: Track P50, P95, P99 response times
@@ -24,6 +26,7 @@ Amazon Bedrock AgentCore Observability helps developers trace, debug, and monito
 - **Throughput**: Measure requests per second and operation counts
 
 ### Logging
+
 - **Centralized Aggregation**: All service logs in one place
 - **Structured Logging**: Consistent log format with correlation IDs
 - **Search and Filter**: Query logs by service, operation, or time
@@ -31,6 +34,7 @@ Amazon Bedrock AgentCore Observability helps developers trace, debug, and monito
 - **Log Retention**: Configurable retention policies
 
 ### Dashboards and Alerting
+
 - **Unified Dashboards**: Pre-built operational dashboards
 - **Custom Metrics**: Define and visualize custom metrics
 - **CloudWatch Integration**: Native AWS CloudWatch support
@@ -38,6 +42,7 @@ Amazon Bedrock AgentCore Observability helps developers trace, debug, and monito
 - **Multi-Service Views**: Consolidated view across all services
 
 ### OpenTelemetry Support
+
 - **Industry Standard**: Compatible with OpenTelemetry specification
 - **Tool Integration**: Works with existing observability tools
 - **Custom Instrumentation**: Add custom traces and metrics
@@ -46,35 +51,45 @@ Amazon Bedrock AgentCore Observability helps developers trace, debug, and monito
 ## Use Cases
 
 ### Production Debugging
+
 Enable teams to:
+
 - Debug agent execution issues in real-time
 - Identify root causes of failures quickly
 - Trace request flows across services
 - Analyze error patterns and trends
 
 ### Performance Monitoring
+
 Support scenarios like:
+
 - Monitor agent response times
 - Track token usage and costs
 - Identify slow operations
 - Optimize agent workflows
 
 ### Behavior Analysis
+
 Allow teams to:
+
 - Analyze agent behavior patterns
 - Understand user interaction flows
 - Identify usage trends
 - Detect anomalies
 
 ### Quality Assurance
+
 Enable teams to:
+
 - Ensure SLA compliance
 - Monitor service reliability
 - Track quality metrics
 - Validate performance standards
 
 ### Capacity Planning
+
 Support activities like:
+
 - Forecast resource needs
 - Identify scaling requirements
 - Optimize resource allocation
@@ -204,21 +219,25 @@ aws xray get-service-graph \
 ### Common Metrics
 
 **Gateway Metrics**:
+
 - `TargetInvocations`: Number of target invocations
 - `TargetErrors`: Number of target errors
 - `TargetLatency`: Target response latency
 
 **Runtime Metrics**:
+
 - `AgentExecutions`: Number of agent executions
 - `ExecutionDuration`: Agent execution duration
 - `ExecutionErrors`: Number of execution failures
 
 **Memory Metrics**:
+
 - `MemoryReads`: Number of memory read operations
 - `MemoryWrites`: Number of memory write operations
 - `MemorySize`: Total memory storage size
 
 **Token Metrics**:
+
 - `TokensConsumed`: Total tokens used
 - `TokenCost`: Estimated cost in dollars
 
@@ -298,7 +317,7 @@ aws cloudwatch put-dashboard \
       "type": "metric",
       "properties": {
         "metrics": [
-          ["AWS/BedrockAgentCore", "TargetInvocations", {"stat": "Sum"}]
+          ["AWS/BedrockAgentCore", "TargetInvocations", { "stat": "Sum" }]
         ],
         "period": 300,
         "stat": "Sum",
@@ -310,7 +329,7 @@ aws cloudwatch put-dashboard \
       "type": "metric",
       "properties": {
         "metrics": [
-          ["AWS/BedrockAgentCore", "TargetErrors", {"stat": "Sum"}]
+          ["AWS/BedrockAgentCore", "TargetErrors", { "stat": "Sum" }]
         ],
         "period": 300,
         "stat": "Sum",
@@ -345,6 +364,7 @@ aws cloudwatch put-metric-alarm \
 ### Alarm Templates
 
 **High Error Rate**:
+
 ```bash
 # Alert on >5% error rate
 aws cloudwatch put-metric-alarm \
@@ -355,6 +375,7 @@ aws cloudwatch put-metric-alarm \
 ```
 
 **High Latency**:
+
 ```bash
 # Alert on P95 latency >2s
 aws cloudwatch put-metric-alarm \
@@ -366,6 +387,7 @@ aws cloudwatch put-metric-alarm \
 ```
 
 **High Token Usage**:
+
 ```bash
 # Alert on excessive token usage
 aws cloudwatch put-metric-alarm \
@@ -379,6 +401,7 @@ aws cloudwatch put-metric-alarm \
 ## Best Practices
 
 ### Instrumentation
+
 - Enable observability for all production agents
 - Use appropriate sampling rates (1.0 for dev, 0.1 for prod)
 - Add custom metrics for business-critical operations
@@ -386,6 +409,7 @@ aws cloudwatch put-metric-alarm \
 - Use structured logging formats
 
 ### Performance
+
 - Use appropriate metric aggregation periods
 - Implement metric sampling for high-volume operations
 - Set reasonable log retention periods
@@ -393,6 +417,7 @@ aws cloudwatch put-metric-alarm \
 - Archive old traces and logs
 
 ### Cost Optimization
+
 - Adjust sampling rates based on traffic
 - Use metric filters to create custom metrics
 - Set appropriate log retention (7-30 days)
@@ -400,6 +425,7 @@ aws cloudwatch put-metric-alarm \
 - Use CloudWatch Insights for complex queries
 
 ### Alerting
+
 - Define clear SLOs and SLIs
 - Set meaningful alert thresholds
 - Avoid alert fatigue with proper tuning
@@ -407,6 +433,7 @@ aws cloudwatch put-metric-alarm \
 - Implement escalation policies
 
 ### Security
+
 - Encrypt logs and metrics at rest
 - Use IAM for access control
 - Implement least privilege access
@@ -447,6 +474,7 @@ OpenTelemetry Collector
 ### No Traces Appearing
 
 **Diagnosis**:
+
 ```bash
 # Check if tracing is enabled
 aws bedrock-agentcore-control get-observability-config \
@@ -463,6 +491,7 @@ aws bedrock-agentcore-control get-observability-config \
 ### Missing Logs
 
 **Diagnosis**:
+
 ```bash
 # Check log group exists
 aws logs describe-log-groups \
@@ -481,21 +510,25 @@ aws logs describe-log-groups \
 ### Key Performance Indicators
 
 **Availability**:
+
 - Service uptime percentage
 - Error rate by service
 - Failed request percentage
 
 **Performance**:
+
 - P50, P95, P99 latency
 - Request throughput
 - Operation duration
 
 **Efficiency**:
+
 - Token consumption rate
 - Cost per operation
 - Resource utilization
 
 **Quality**:
+
 - Agent success rate
 - User satisfaction metrics
 - Workflow completion rate
@@ -511,6 +544,7 @@ aws logs describe-log-groups \
 ---
 
 **Related Services**:
+
 - [Gateway Service](../gateway/README.md) - Gateway monitoring
 - [Runtime Service](../runtime/README.md) - Runtime tracing
 - [Memory Service](../memory/README.md) - Memory metrics

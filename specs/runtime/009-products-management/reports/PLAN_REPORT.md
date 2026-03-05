@@ -15,6 +15,7 @@
 - **Related ADRs:** ADR-0001 (Database Per Tenant), ADR-0002 (Snapshot Attempt Model), ADR-0006 (Server Authoritative Time)
 
 **Scope Validation:**
+
 - ✅ No cross-tenant data access (all operations in master_db)
 - ✅ No middleware bypass (license + auth required on all routes)
 - ✅ No direct DB instantiation (connection pool via tenant resolver context)
@@ -63,21 +64,21 @@ Tenant databases are fully isolated per ADR-0001.
 ```sql
 CREATE TABLE IF NOT EXISTS products (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  
+
   -- Core fields
   name JSONB NOT NULL,  -- {"en": "...", "ar": "..."}
   slug VARCHAR(255) UNIQUE NOT NULL,  -- lowercase, alphanumeric + dash
   description TEXT,
   enabled_modules JSONB NOT NULL DEFAULT '[]'::jsonb,  -- Array of Module enum values
   status VARCHAR(50) NOT NULL DEFAULT 'ACTIVE',  -- ACTIVE | INACTIVE
-  
+
   -- Versioning
   current_version INTEGER NOT NULL DEFAULT 1,
-  
+
   -- Timestamps (server-authoritative per ADR-0006)
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  
+
   -- Constraints
   CONSTRAINT valid_status CHECK (status IN ('ACTIVE', 'INACTIVE')),
   CONSTRAINT name_en_required CHECK (name->>'en' IS NOT NULL),
@@ -96,6 +97,7 @@ CREATE INDEX idx_products_updated_at ON products(updated_at);
 ```
 
 **Immutability Guarantees:**
+
 - `id`: Immutable (primary key)
 - `slug`: Immutable after creation (enforce in API layer via UPDATE check)
 - `created_at`: Immutable (set once at insertion)
@@ -110,21 +112,21 @@ CREATE INDEX idx_products_updated_at ON products(updated_at);
 ```sql
 CREATE TABLE IF NOT EXISTS product_versions (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  
+
   product_id UUID NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
   version_number INTEGER NOT NULL,
-  
+
   -- Snapshot of configuration at this version
   name JSONB NOT NULL,
   enabled_modules JSONB NOT NULL,
   description TEXT,
-  
+
   -- Why this version exists
   change_summary TEXT,
-  
+
   -- Immutable timestamp
   created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  
+
   -- Unique: one version per product per version_number
   CONSTRAINT unique_product_version UNIQUE (product_id, version_number)
 );
@@ -135,6 +137,7 @@ CREATE INDEX idx_product_versions_version_number ON product_versions(version_num
 ```
 
 **Immutability Guarantees:**
+
 - Never modified after insert
 - Never deleted (RESTRICT on foreign key from products)
 - Snapshots specific configuration at each version
@@ -147,23 +150,23 @@ CREATE INDEX idx_product_versions_version_number ON product_versions(version_num
 ```sql
 CREATE TABLE IF NOT EXISTS product_audit_logs (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-  
+
   product_id UUID NOT NULL REFERENCES products(id) ON DELETE RESTRICT,
-  
+
   -- Action type
   action VARCHAR(50) NOT NULL,  -- CREATE | UPDATE | STATUS_CHANGE
-  
+
   -- Version tracking
   previous_version INTEGER,  -- NULL for CREATE
   new_version INTEGER,  -- NULL for STATUS_CHANGE
-  
+
   -- What changed (JSON diff)
   changed_fields JSONB NOT NULL,  -- {"field_name": {"old": ..., "new": ...}}
-  
+
   -- Who and when
   performed_by UUID NOT NULL,  -- Reference to admin/user who made change
   timestamp TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  
+
   -- Constraints
   CONSTRAINT valid_action CHECK (action IN ('CREATE', 'UPDATE', 'STATUS_CHANGE')),
   CONSTRAINT version_fields_create CHECK (
@@ -181,6 +184,7 @@ CREATE INDEX idx_audit_logs_performed_by ON product_audit_logs(performed_by);
 ```
 
 **Immutability Guarantees:**
+
 - Append-only (INSERT only, never UPDATE/DELETE)
 - Unique constraint on product_id prevents deletion
 - Timestamp immutable (set at insertion)
@@ -200,6 +204,7 @@ FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT;
 ```
 
 **Behavior:**
+
 - DELETE /products/{id} fails with 409 Conflict if any license exists
 - Protects product deletion when commercial contracts reference it
 - Enforced at DB level (no soft delete allowed)
@@ -215,16 +220,16 @@ All validation enforced at multiple layers:
 3. **Domain Layer:** Pure function validation
 4. **Audit Trail:** Immutable proof of validation
 
-| Field | Constraint | Error Code | Layer |
-|-------|------------|-----------|-------|
-| `name.en` | NOT NULL | 400 | API + DB |
-| `name.en` | NOT EMPTY | 400 | API + DB |
-| `enabled_modules` | NOT EMPTY | 400 | API + Domain |
-| `enabled_modules` | Valid enum | 400 | API + Domain |
-| `slug` | UNIQUE | 409 | DB + API |
-| `slug` | Valid format | 400 | API + Domain |
-| `status` | IN ('ACTIVE', 'INACTIVE') | 400 | DB + API |
-| `slug` | IMMUTABLE | 400 | API (after create) |
+| Field             | Constraint                | Error Code | Layer              |
+| ----------------- | ------------------------- | ---------- | ------------------ |
+| `name.en`         | NOT NULL                  | 400        | API + DB           |
+| `name.en`         | NOT EMPTY                 | 400        | API + DB           |
+| `enabled_modules` | NOT EMPTY                 | 400        | API + Domain       |
+| `enabled_modules` | Valid enum                | 400        | API + Domain       |
+| `slug`            | UNIQUE                    | 409        | DB + API           |
+| `slug`            | Valid format              | 400        | API + Domain       |
+| `status`          | IN ('ACTIVE', 'INACTIVE') | 400        | DB + API           |
+| `slug`            | IMMUTABLE                 | 400        | API (after create) |
 
 ---
 
@@ -235,22 +240,22 @@ All validation enforced at multiple layers:
 ```typescript
 /**
  * Migration: Initial Products Schema
- * 
+ *
  * Adds products table with versioning and audit trail support.
  * All operations are master_db (cross-tenant platform control).
- * 
+ *
  * Atomicity: Single transaction
  * Idempotency: CREATE TABLE IF NOT EXISTS
  * Reversibility: Snapshot restore only (no rollback)
  */
 
-import { sql } from 'drizzle-orm';
-import type { Migration } from '../types';
+import { sql } from 'drizzle-orm'
+import type { Migration } from '../types'
 
 export const migration: Migration = {
   id: '001_initial_products_schema',
   name: 'Create products, product_versions, and product_audit_logs tables',
-  
+
   // Forward migration
   up: async (db) => {
     // Execute all DDL statements
@@ -273,15 +278,15 @@ export const migration: Migration = {
           slug ~ '^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$'
         )
       );
-    `);
-    
+    `)
+
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
       CREATE INDEX IF NOT EXISTS idx_products_status ON products(status);
       CREATE INDEX IF NOT EXISTS idx_products_created_at ON products(created_at);
       CREATE INDEX IF NOT EXISTS idx_products_updated_at ON products(updated_at);
-    `);
-    
+    `)
+
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS product_versions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -294,13 +299,13 @@ export const migration: Migration = {
         created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT unique_product_version UNIQUE (product_id, version_number)
       );
-    `);
-    
+    `)
+
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_product_versions_product_id ON product_versions(product_id);
       CREATE INDEX IF NOT EXISTS idx_product_versions_version_number ON product_versions(version_number);
-    `);
-    
+    `)
+
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS product_audit_logs (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -313,22 +318,22 @@ export const migration: Migration = {
         timestamp TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT valid_action CHECK (action IN ('CREATE', 'UPDATE', 'STATUS_CHANGE'))
       );
-    `);
-    
+    `)
+
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_audit_logs_product_id ON product_audit_logs(product_id);
       CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON product_audit_logs(action);
       CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON product_audit_logs(timestamp DESC);
       CREATE INDEX IF NOT EXISTS idx_audit_logs_performed_by ON product_audit_logs(performed_by);
-    `);
+    `)
   },
-  
+
   // No rollback: snapshot restore only per Zidney Constitution
   down: async (db) => {
     // Migration rollback is prohibited. Rollback via snapshot restoration only.
-    throw new Error('Rollback not supported. Use snapshot restore.');
-  }
-};
+    throw new Error('Rollback not supported. Use snapshot restore.')
+  },
+}
 ```
 
 ---
@@ -345,7 +350,7 @@ await db.execute(sql`
       last_migration_id = '001_initial_products_schema',
       last_migration_timestamp = CURRENT_TIMESTAMP
   WHERE workspace_id = 'master'  -- master_db is identified as 'master'
-`);
+`)
 ```
 
 ---
@@ -411,7 +416,7 @@ All DDL executed within single transaction:
 await db.transaction(async (tx) => {
   // All DDL here
   // Either all succeed or entire transaction rolls back
-});
+})
 ```
 
 **Benefit:** Master DB schema is always in consistent state
@@ -439,68 +444,74 @@ Before production deployment:
 All routes in `apps/api/src/routes/mmc/products.ts`
 
 ```typescript
-import { Hono } from 'hono';
-import type { Context } from 'hono';
-import { z } from 'zod';
+import { Hono } from 'hono'
+import type { Context } from 'hono'
+import { z } from 'zod'
 
-const app = new Hono();
+const app = new Hono()
 
 // POST /api/v1/mmc/products – Create product
-app.post('/api/v1/mmc/products', 
-  authMiddleware,           // Authenticate request
-  licenseMiddleware,        // Validate license (MMC admin)
+app.post(
+  '/api/v1/mmc/products',
+  authMiddleware, // Authenticate request
+  licenseMiddleware, // Validate license (MMC admin)
   async (c: Context) => {
     // Route handler
   }
-);
+)
 
 // GET /api/v1/mmc/products – List products (with filters)
-app.get('/api/v1/mmc/products',
+app.get(
+  '/api/v1/mmc/products',
   authMiddleware,
   licenseMiddleware,
   async (c: Context) => {
     // Route handler
   }
-);
+)
 
 // GET /api/v1/mmc/products/:id – Get single product
-app.get('/api/v1/mmc/products/:id',
+app.get(
+  '/api/v1/mmc/products/:id',
   authMiddleware,
   licenseMiddleware,
   async (c: Context) => {
     // Route handler
   }
-);
+)
 
 // PUT /api/v1/mmc/products/:id – Update product
-app.put('/api/v1/mmc/products/:id',
+app.put(
+  '/api/v1/mmc/products/:id',
   authMiddleware,
   licenseMiddleware,
   async (c: Context) => {
     // Route handler
   }
-);
+)
 
 // PATCH /api/v1/mmc/products/:id/status – Change product status
-app.patch('/api/v1/mmc/products/:id/status',
+app.patch(
+  '/api/v1/mmc/products/:id/status',
   authMiddleware,
   licenseMiddleware,
   async (c: Context) => {
     // Route handler
   }
-);
+)
 
 // GET /api/v1/mmc/products/:id/audit-log – Get audit trail
-app.get('/api/v1/mmc/products/:id/audit-log',
+app.get(
+  '/api/v1/mmc/products/:id/audit-log',
   authMiddleware,
-  auditReadMiddleware,     // AUDIT_READ permission required
+  auditReadMiddleware, // AUDIT_READ permission required
   licenseMiddleware,
   async (c: Context) => {
     // Route handler
   }
-);
+)
 
-export default app;
+export default app
 ```
 
 ---
@@ -524,13 +535,13 @@ All routes execute middleware in order:
 
 ```typescript
 export async function licenseMiddleware(c: Context, next: () => Promise<void>) {
-  const workspaceId = c.get('workspaceId');  // From JWT
-  const userId = c.get('userId');
-  const correlationId = c.get('correlationId');
-  
+  const workspaceId = c.get('workspaceId') // From JWT
+  const userId = c.get('userId')
+  const correlationId = c.get('correlationId')
+
   // Query master DB: GET license status for workspace
-  const license = await getLicenseForWorkspace(workspaceId);
-  
+  const license = await getLicenseForWorkspace(workspaceId)
+
   if (!license) {
     logStructured({
       level: 'warn',
@@ -539,47 +550,56 @@ export async function licenseMiddleware(c: Context, next: () => Promise<void>) {
       workspaceId,
       userId,
       correlationId,
-      reason: 'LICENSE_NOT_FOUND'
-    });
-    return c.json({ 
-      success: false, 
-      error: { code: 'LICENSE_NOT_FOUND', message: 'Invalid workspace' } 
-    }, 404);
+      reason: 'LICENSE_NOT_FOUND',
+    })
+    return c.json(
+      {
+        success: false,
+        error: { code: 'LICENSE_NOT_FOUND', message: 'Invalid workspace' },
+      },
+      404
+    )
   }
-  
+
   if (license.status === 'SOFT_LOCKED') {
     logStructured({
       level: 'warn',
       service: 'api',
       action: 'license_soft_locked',
       workspaceId,
-      correlationId
-    });
-    return c.json({
-      success: false,
-      error: { code: 'WORKSPACE_LOCKED', message: 'Workspace is locked' }
-    }, 423);  // Locked
+      correlationId,
+    })
+    return c.json(
+      {
+        success: false,
+        error: { code: 'WORKSPACE_LOCKED', message: 'Workspace is locked' },
+      },
+      423
+    ) // Locked
   }
-  
+
   if (license.status === 'ARCHIVED') {
     logStructured({
       level: 'warn',
       service: 'api',
       action: 'license_archived',
       workspaceId,
-      correlationId
-    });
-    return c.json({
-      success: false,
-      error: { code: 'WORKSPACE_ARCHIVED', message: 'Workspace is archived' }
-    }, 403);
+      correlationId,
+    })
+    return c.json(
+      {
+        success: false,
+        error: { code: 'WORKSPACE_ARCHIVED', message: 'Workspace is archived' },
+      },
+      403
+    )
   }
-  
+
   // Store license context for route handler
-  c.set('license', license);
-  c.set('workspaceId', workspaceId);
-  
-  await next();
+  c.set('license', license)
+  c.set('workspaceId', workspaceId)
+
+  await next()
 }
 ```
 
@@ -593,34 +613,40 @@ export async function licenseMiddleware(c: Context, next: () => Promise<void>) {
 const createProductSchema = z.object({
   name: z.object({
     en: z.string().min(1).max(255),
-    ar: z.string().min(1).max(255).optional()
+    ar: z.string().min(1).max(255).optional(),
   }),
-  slug: z.string()
+  slug: z
+    .string()
     .min(1)
     .max(255)
     .regex(/^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/),
   description: z.string().max(1000).optional(),
-  enabled_modules: z.array(z.enum([
-    'MCQ',
-    'TRADITIONAL_EXAMS',
-    'EXERCISES',
-    'LIBRARY',
-    'LIVES',
-    'FORUM'
-  ])).min(1).max(10)
-});
+  enabled_modules: z
+    .array(
+      z.enum([
+        'MCQ',
+        'TRADITIONAL_EXAMS',
+        'EXERCISES',
+        'LIBRARY',
+        'LIVES',
+        'FORUM',
+      ])
+    )
+    .min(1)
+    .max(10),
+})
 
-type CreateProductRequest = z.infer<typeof createProductSchema>;
+type CreateProductRequest = z.infer<typeof createProductSchema>
 
 // POST /api/v1/mmc/products request body format:
 interface CreateProductBody {
   name: {
-    en: string;
-    ar?: string;
-  };
-  slug: string;
-  description?: string;
-  enabled_modules: Module[];
+    en: string
+    ar?: string
+  }
+  slug: string
+  description?: string
+  enabled_modules: Module[]
 }
 ```
 
@@ -681,12 +707,12 @@ interface ApiResponse<T> {
 
 ```typescript
 interface ListProductsResponse {
-  data: ProductResponse[];
+  data: ProductResponse[]
   pagination: {
-    limit: number;
-    offset: number;
-    total: number;
-  };
+    limit: number
+    offset: number
+    total: number
+  }
 }
 ```
 
@@ -696,30 +722,33 @@ interface ListProductsResponse {
 
 ```typescript
 interface AuditLogEntry {
-  id: string;
-  product_id: string;
-  action: 'CREATE' | 'UPDATE' | 'STATUS_CHANGE';
-  previous_version: number | null;
-  new_version: number | null;
-  changed_fields: Record<string, {
-    old: unknown;
-    new: unknown;
-  }>;
+  id: string
+  product_id: string
+  action: 'CREATE' | 'UPDATE' | 'STATUS_CHANGE'
+  previous_version: number | null
+  new_version: number | null
+  changed_fields: Record<
+    string,
+    {
+      old: unknown
+      new: unknown
+    }
+  >
   performed_by: {
-    id: string;
-    email: string;
-    name: string;
-  };
-  timestamp: string;  // ISO 8601
+    id: string
+    email: string
+    name: string
+  }
+  timestamp: string // ISO 8601
 }
 
 interface ListAuditLogsResponse {
-  data: AuditLogEntry[];
+  data: AuditLogEntry[]
   pagination: {
-    limit: number;
-    offset: number;
-    total: number;
-  };
+    limit: number
+    offset: number
+    total: number
+  }
 }
 ```
 
@@ -746,19 +775,19 @@ All errors follow standard format:
 
 ### Error Codes & HTTP Status Mapping
 
-| Error Code | HTTP Status | Description | Recovery |
-|-----------|------------|-------------|----------|
-| INVALID_MODULE_ENUM | 400 | Module not recognized | Validate module against enum |
-| DUPLICATE_SLUG | 409 | Slug already exists | Choose unique slug |
-| PRODUCT_NOT_FOUND | 404 | Product doesn't exist | Verify product ID |
-| PRODUCT_HAS_LICENSES | 409 | Cannot delete (licenses reference) | Mark INACTIVE or migrate licenses |
-| INVALID_NAME_LOCALIZATION | 400 | name.en missing or invalid | Provide valid English name |
-| SLUG_NOT_MUTABLE | 400 | Cannot change slug after creation | Slug is immutable |
-| UNAUTHORIZED | 401 | User authentication failed | Provide valid JWT |
-| FORBIDDEN | 403 | User lacks permission | Verify user role |
-| WORKSPACE_LOCKED | 423 | License is soft-locked | Wait for unlock or contact support |
-| VERSION_MISMATCH | 426 | Schema version incompatible | Upgrade workspace schema |
-| INTERNAL_SERVER_ERROR | 500 | Unexpected error | Retry or contact support |
+| Error Code                | HTTP Status | Description                        | Recovery                           |
+| ------------------------- | ----------- | ---------------------------------- | ---------------------------------- |
+| INVALID_MODULE_ENUM       | 400         | Module not recognized              | Validate module against enum       |
+| DUPLICATE_SLUG            | 409         | Slug already exists                | Choose unique slug                 |
+| PRODUCT_NOT_FOUND         | 404         | Product doesn't exist              | Verify product ID                  |
+| PRODUCT_HAS_LICENSES      | 409         | Cannot delete (licenses reference) | Mark INACTIVE or migrate licenses  |
+| INVALID_NAME_LOCALIZATION | 400         | name.en missing or invalid         | Provide valid English name         |
+| SLUG_NOT_MUTABLE          | 400         | Cannot change slug after creation  | Slug is immutable                  |
+| UNAUTHORIZED              | 401         | User authentication failed         | Provide valid JWT                  |
+| FORBIDDEN                 | 403         | User lacks permission              | Verify user role                   |
+| WORKSPACE_LOCKED          | 423         | License is soft-locked             | Wait for unlock or contact support |
+| VERSION_MISMATCH          | 426         | Schema version incompatible        | Upgrade workspace schema           |
+| INTERNAL_SERVER_ERROR     | 500         | Unexpected error                   | Retry or contact support           |
 
 ---
 
@@ -818,30 +847,30 @@ All business logic in `packages/domain-core/src/products/productService.ts`
 // Domain module: packages/domain-core/src/products/
 
 export interface CreateProductInput {
-  name: { en: string; ar?: string };
-  slug: string;
-  description?: string;
-  enabled_modules: Module[];
-  performed_by: UUID;
+  name: { en: string; ar?: string }
+  slug: string
+  description?: string
+  enabled_modules: Module[]
+  performed_by: UUID
 }
 
 export interface UpdateProductInput {
-  id: UUID;
-  name?: { en: string; ar?: string };
-  description?: string;
-  enabled_modules?: Module[];
-  performed_by: UUID;
+  id: UUID
+  name?: { en: string; ar?: string }
+  description?: string
+  enabled_modules?: Module[]
+  performed_by: UUID
 }
 
 export interface StatusChangeInput {
-  id: UUID;
-  status: 'ACTIVE' | 'INACTIVE';
-  performed_by: UUID;
+  id: UUID
+  status: 'ACTIVE' | 'INACTIVE'
+  performed_by: UUID
 }
 
 /**
  * Create product with version 1 and audit log
- * 
+ *
  * Atomicity: Single transaction
  * - Insert product (version 1)
  * - Insert version record
@@ -852,10 +881,10 @@ export async function createProduct(
   db: Database
 ): Promise<Product> {
   // Validation layer
-  validateProductName(input.name);
-  validateSlugUniqueness(input.slug, db);
-  validateModulesEnum(input.enabled_modules);
-  
+  validateProductName(input.name)
+  validateSlugUniqueness(input.slug, db)
+  validateModulesEnum(input.enabled_modules)
+
   // Create with transaction
   const product = await db.transaction(async (tx) => {
     // Insert product record
@@ -865,12 +894,12 @@ export async function createProduct(
       slug: input.slug.toLowerCase(),
       description: input.description || null,
       enabled_modules: JSON.stringify(input.enabled_modules),
-      status: 'ACTIVE',  // Default
+      status: 'ACTIVE', // Default
       current_version: 1,
       created_at: new Date(),
-      updated_at: new Date()
-    });
-    
+      updated_at: new Date(),
+    })
+
     // Insert version 1
     await tx.insert(productVersions).values({
       id: generateUUID(),
@@ -880,9 +909,9 @@ export async function createProduct(
       enabled_modules: JSON.stringify(input.enabled_modules),
       description: input.description || null,
       change_summary: 'Initial version',
-      created_at: new Date()
-    });
-    
+      created_at: new Date(),
+    })
+
     // Insert audit log
     await tx.insert(productAuditLogs).values({
       id: generateUUID(),
@@ -893,21 +922,21 @@ export async function createProduct(
       changed_fields: JSON.stringify({
         name: { old: null, new: input.name },
         slug: { old: null, new: input.slug },
-        enabled_modules: { old: null, new: input.enabled_modules }
+        enabled_modules: { old: null, new: input.enabled_modules },
       }),
       performed_by: input.performed_by,
-      timestamp: new Date()
-    });
-    
-    return newProduct;
-  });
-  
-  return product;
+      timestamp: new Date(),
+    })
+
+    return newProduct
+  })
+
+  return product
 }
 
 /**
  * Update product: Creates new version, increments current_version
- * 
+ *
  * Atomicity: Single transaction
  * - Update product record
  * - Insert new version record
@@ -918,50 +947,65 @@ export async function updateProduct(
   db: Database
 ): Promise<Product> {
   // Fetch existing product
-  const existing = await getProductById(input.id, db);
-  if (!existing) throw new Error('PRODUCT_NOT_FOUND');
-  
+  const existing = await getProductById(input.id, db)
+  if (!existing) throw new Error('PRODUCT_NOT_FOUND')
+
   // Validation
-  if (input.name) validateProductName(input.name);
-  if (input.enabled_modules) validateModulesEnum(input.enabled_modules);
-  
+  if (input.name) validateProductName(input.name)
+  if (input.enabled_modules) validateModulesEnum(input.enabled_modules)
+
   // Check if actual changes (prevent unnecessary version bump)
-  const hasChanges = 
-    (input.name && JSON.stringify(input.name) !== JSON.stringify(existing.name)) ||
-    (input.description !== undefined && input.description !== existing.description) ||
-    (input.enabled_modules && JSON.stringify(input.enabled_modules) !== JSON.stringify(existing.enabled_modules));
-  
+  const hasChanges =
+    (input.name &&
+      JSON.stringify(input.name) !== JSON.stringify(existing.name)) ||
+    (input.description !== undefined &&
+      input.description !== existing.description) ||
+    (input.enabled_modules &&
+      JSON.stringify(input.enabled_modules) !==
+        JSON.stringify(existing.enabled_modules))
+
   if (!hasChanges) {
-    return existing;  // No version bump
+    return existing // No version bump
   }
-  
+
   // Update with transaction
   const updated = await db.transaction(async (tx) => {
-    const newVersion = existing.current_version + 1;
-    
+    const newVersion = existing.current_version + 1
+
     // Update product record
-    await tx.update(products)
+    await tx
+      .update(products)
       .set({
         name: input.name || existing.name,
-        description: input.description !== undefined ? input.description : existing.description,
-        enabled_modules: input.enabled_modules ? JSON.stringify(input.enabled_modules) : existing.enabled_modules,
+        description:
+          input.description !== undefined
+            ? input.description
+            : existing.description,
+        enabled_modules: input.enabled_modules
+          ? JSON.stringify(input.enabled_modules)
+          : existing.enabled_modules,
         current_version: newVersion,
-        updated_at: new Date()
+        updated_at: new Date(),
       })
-      .where(eq(products.id, input.id));
-    
+      .where(eq(products.id, input.id))
+
     // Insert new version record
     await tx.insert(productVersions).values({
       id: generateUUID(),
       product_id: input.id,
       version_number: newVersion,
       name: input.name || existing.name,
-      enabled_modules: input.enabled_modules ? JSON.stringify(input.enabled_modules) : existing.enabled_modules,
-      description: input.description !== undefined ? input.description : existing.description,
+      enabled_modules: input.enabled_modules
+        ? JSON.stringify(input.enabled_modules)
+        : existing.enabled_modules,
+      description:
+        input.description !== undefined
+          ? input.description
+          : existing.description,
       change_summary: generateChangeSummary(existing, input),
-      created_at: new Date()
-    });
-    
+      created_at: new Date(),
+    })
+
     // Insert audit log
     await tx.insert(productAuditLogs).values({
       id: generateUUID(),
@@ -971,20 +1015,20 @@ export async function updateProduct(
       new_version: newVersion,
       changed_fields: JSON.stringify(computeFieldDiff(existing, input)),
       performed_by: input.performed_by,
-      timestamp: new Date()
-    });
-    
-    return { ...existing, ...input, current_version: newVersion };
-  });
-  
-  return updated;
+      timestamp: new Date(),
+    })
+
+    return { ...existing, ...input, current_version: newVersion }
+  })
+
+  return updated
 }
 
 /**
  * Change product status (ACTIVE ↔ INACTIVE)
- * 
+ *
  * Does NOT increment version
- * 
+ *
  * Atomicity: Single transaction
  * - Update status
  * - Insert audit log (action: STATUS_CHANGE)
@@ -993,22 +1037,23 @@ export async function changeProductStatus(
   input: StatusChangeInput,
   db: Database
 ): Promise<Product> {
-  const existing = await getProductById(input.id, db);
-  if (!existing) throw new Error('PRODUCT_NOT_FOUND');
-  
+  const existing = await getProductById(input.id, db)
+  if (!existing) throw new Error('PRODUCT_NOT_FOUND')
+
   if (existing.status === input.status) {
-    return existing;  // No change
+    return existing // No change
   }
-  
+
   const updated = await db.transaction(async (tx) => {
     // Update status only
-    await tx.update(products)
+    await tx
+      .update(products)
       .set({
         status: input.status,
-        updated_at: new Date()
+        updated_at: new Date(),
       })
-      .where(eq(products.id, input.id));
-    
+      .where(eq(products.id, input.id))
+
     // Insert audit log (NO VERSION CHANGE)
     await tx.insert(productAuditLogs).values({
       id: generateUUID(),
@@ -1017,16 +1062,16 @@ export async function changeProductStatus(
       previous_version: null,
       new_version: null,
       changed_fields: JSON.stringify({
-        status: { old: existing.status, new: input.status }
+        status: { old: existing.status, new: input.status },
       }),
       performed_by: input.performed_by,
-      timestamp: new Date()
-    });
-    
-    return { ...existing, status: input.status };
-  });
-  
-  return updated;
+      timestamp: new Date(),
+    })
+
+    return { ...existing, status: input.status }
+  })
+
+  return updated
 }
 
 /**
@@ -1036,8 +1081,8 @@ export async function getProductById(
   id: UUID,
   db: Database
 ): Promise<Product | null> {
-  const result = await db.select().from(products).where(eq(products.id, id));
-  return result.length > 0 ? result[0] : null;
+  const result = await db.select().from(products).where(eq(products.id, id))
+  return result.length > 0 ? result[0] : null
 }
 
 /**
@@ -1047,90 +1092,92 @@ export async function getProductBySlug(
   slug: string,
   db: Database
 ): Promise<Product | null> {
-  const result = await db.select().from(products).where(eq(products.slug, slug));
-  return result.length > 0 ? result[0] : null;
+  const result = await db.select().from(products).where(eq(products.slug, slug))
+  return result.length > 0 ? result[0] : null
 }
 
 /**
  * List products with filters
- * 
+ *
  * Default: ACTIVE products only
  * Query params: ?status=ACTIVE|INACTIVE|all&limit=50&offset=0
  */
 export async function listProducts(
   query: {
-    status?: 'ACTIVE' | 'INACTIVE' | 'all';
-    limit?: number;
-    offset?: number;
-    search?: string;  // Search by name or slug
+    status?: 'ACTIVE' | 'INACTIVE' | 'all'
+    limit?: number
+    offset?: number
+    search?: string // Search by name or slug
   },
   db: Database
 ): Promise<{ data: Product[]; total: number }> {
-  let q = db.select().from(products);
-  
+  let q = db.select().from(products)
+
   // Default: ACTIVE only
   if (query.status === 'all') {
     // Return both ACTIVE and INACTIVE
   } else if (query.status === 'INACTIVE') {
-    q = q.where(eq(products.status, 'INACTIVE'));
+    q = q.where(eq(products.status, 'INACTIVE'))
   } else {
     // Default: ACTIVE
-    q = q.where(eq(products.status, 'ACTIVE'));
+    q = q.where(eq(products.status, 'ACTIVE'))
   }
-  
+
   // Search filter (optional)
   if (query.search) {
-    const searchPattern = `%${query.search.toLowerCase()}%`;
+    const searchPattern = `%${query.search.toLowerCase()}%`
     q = q.where(
       or(
         sql`LOWER(products.name->>'en') LIKE ${searchPattern}`,
         sql`LOWER(products.name->>'ar') LIKE ${searchPattern}`,
         sql`LOWER(products.slug) LIKE ${searchPattern}`
       )
-    );
+    )
   }
-  
+
   // Pagination
-  const limit = Math.min(query.limit || 50, 100);  // Max 100
-  const offset = query.offset || 0;
-  
-  const total = await db.select({ count: countDistinct(products.id) }).from(products);
-  const data = await q.orderBy(desc(products.created_at)).limit(limit).offset(offset);
-  
-  return { data, total: total[0].count };
+  const limit = Math.min(query.limit || 50, 100) // Max 100
+  const offset = query.offset || 0
+
+  const total = await db
+    .select({ count: countDistinct(products.id) })
+    .from(products)
+  const data = await q
+    .orderBy(desc(products.created_at))
+    .limit(limit)
+    .offset(offset)
+
+  return { data, total: total[0].count }
 }
 
 /**
  * Delete product (hard delete)
- * 
+ *
  * Enforced by foreign key constraint: FK_licenses_product_id with ON DELETE RESTRICT
- * 
+ *
  * Returns: 409 if licenses exist
  */
-export async function deleteProduct(
-  id: UUID,
-  db: Database
-): Promise<void> {
-  const product = await getProductById(id, db);
-  if (!product) throw new Error('PRODUCT_NOT_FOUND');
-  
+export async function deleteProduct(id: UUID, db: Database): Promise<void> {
+  const product = await getProductById(id, db)
+  if (!product) throw new Error('PRODUCT_NOT_FOUND')
+
   // Check if any licenses reference this product
-  const licenseCount = await countLicensesByProductId(id, db);
+  const licenseCount = await countLicensesByProductId(id, db)
   if (licenseCount > 0) {
-    throw new Error('PRODUCT_HAS_LICENSES');
+    throw new Error('PRODUCT_HAS_LICENSES')
   }
-  
+
   // Hard delete (no soft delete)
   await db.transaction(async (tx) => {
     // Delete audit logs first (cascade)
-    await tx.delete(productAuditLogs).where(eq(productAuditLogs.product_id, id));
-    
+    await tx.delete(productAuditLogs).where(eq(productAuditLogs.product_id, id))
+
     // Delete versions
-    await tx.delete(productVersions).where(eq(productVersions.product_id, id));
-    
+    await tx.delete(productVersions).where(eq(productVersions.product_id, id))
+
     // Delete product
-    await tx.delete(products).where(eq(products.id, id));
-  });
+    await tx.delete(products).where(eq(products.id, id))
+  })
 }
 
 /**
@@ -1139,35 +1186,44 @@ export async function deleteProduct(
 export async function getProductAuditLog(
   productId: UUID,
   query: {
-    limit?: number;
-    offset?: number;
-    action?: string;
-    from_date?: string;  // ISO 8601
-    to_date?: string;    // ISO 8601
+    limit?: number
+    offset?: number
+    action?: string
+    from_date?: string // ISO 8601
+    to_date?: string // ISO 8601
   },
   db: Database
 ): Promise<{ data: AuditLogEntry[]; total: number }> {
-  let q = db.select().from(productAuditLogs).where(eq(productAuditLogs.product_id, productId));
-  
+  let q = db
+    .select()
+    .from(productAuditLogs)
+    .where(eq(productAuditLogs.product_id, productId))
+
   if (query.action) {
-    q = q.where(eq(productAuditLogs.action, query.action));
+    q = q.where(eq(productAuditLogs.action, query.action))
   }
-  
+
   if (query.from_date) {
-    q = q.where(gte(productAuditLogs.timestamp, new Date(query.from_date)));
+    q = q.where(gte(productAuditLogs.timestamp, new Date(query.from_date)))
   }
-  
+
   if (query.to_date) {
-    q = q.where(lte(productAuditLogs.timestamp, new Date(query.to_date)));
+    q = q.where(lte(productAuditLogs.timestamp, new Date(query.to_date)))
   }
-  
-  const limit = Math.min(query.limit || 50, 100);
-  const offset = query.offset || 0;
-  
-  const total = await db.select({ count: countDistinct(productAuditLogs.id) }).from(productAuditLogs).where(eq(productAuditLogs.product_id, productId));
-  const data = await q.orderBy(desc(productAuditLogs.timestamp)).limit(limit).offset(offset);
-  
-  return { data, total: total[0].count };
+
+  const limit = Math.min(query.limit || 50, 100)
+  const offset = query.offset || 0
+
+  const total = await db
+    .select({ count: countDistinct(productAuditLogs.id) })
+    .from(productAuditLogs)
+    .where(eq(productAuditLogs.product_id, productId))
+  const data = await q
+    .orderBy(desc(productAuditLogs.timestamp))
+    .limit(limit)
+    .offset(offset)
+
+  return { data, total: total[0].count }
 }
 ```
 
@@ -1180,53 +1236,72 @@ export async function getProductAuditLog(
 
 export function validateProductName(name: { en: string; ar?: string }): void {
   if (!name.en || typeof name.en !== 'string' || name.en.trim() === '') {
-    throw new Error('INVALID_NAME_LOCALIZATION: English name is required');
+    throw new Error('INVALID_NAME_LOCALIZATION: English name is required')
   }
-  
+
   if (name.en.length < 1 || name.en.length > 255) {
-    throw new Error('INVALID_NAME_LOCALIZATION: English name must be 1-255 characters');
+    throw new Error(
+      'INVALID_NAME_LOCALIZATION: English name must be 1-255 characters'
+    )
   }
-  
+
   if (name.ar && (name.ar.length < 1 || name.ar.length > 255)) {
-    throw new Error('INVALID_NAME_LOCALIZATION: Arabic name must be 1-255 characters if provided');
+    throw new Error(
+      'INVALID_NAME_LOCALIZATION: Arabic name must be 1-255 characters if provided'
+    )
   }
 }
 
 export function validateModulesEnum(modules: string[]): void {
-  const validModules = ['MCQ', 'TRADITIONAL_EXAMS', 'EXERCISES', 'LIBRARY', 'LIVES', 'FORUM'];
-  
+  const validModules = [
+    'MCQ',
+    'TRADITIONAL_EXAMS',
+    'EXERCISES',
+    'LIBRARY',
+    'LIVES',
+    'FORUM',
+  ]
+
   if (!Array.isArray(modules) || modules.length === 0) {
-    throw new Error('INVALID_MODULE_ENUM: At least one module required');
+    throw new Error('INVALID_MODULE_ENUM: At least one module required')
   }
-  
+
   for (const module of modules) {
     if (!validModules.includes(module)) {
-      throw new Error(`INVALID_MODULE_ENUM: Unknown module '${module}'`);
+      throw new Error(`INVALID_MODULE_ENUM: Unknown module '${module}'`)
     }
   }
 }
 
 export function validateSlug(slug: string): void {
-  const slugRegex = /^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/;
-  
+  const slugRegex = /^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/
+
   if (!slug || typeof slug !== 'string') {
-    throw new Error('INVALID_SLUG: Slug must be a non-empty string');
+    throw new Error('INVALID_SLUG: Slug must be a non-empty string')
   }
-  
+
   if (!slugRegex.test(slug)) {
-    throw new Error('INVALID_SLUG: Slug must be lowercase alphanumeric with dashes (no spaces, uppercase)');
+    throw new Error(
+      'INVALID_SLUG: Slug must be lowercase alphanumeric with dashes (no spaces, uppercase)'
+    )
   }
-  
+
   if (slug.length > 255) {
-    throw new Error('INVALID_SLUG: Slug must be under 255 characters');
+    throw new Error('INVALID_SLUG: Slug must be under 255 characters')
   }
 }
 
-export async function validateSlugUniqueness(slug: string, db: Database): Promise<void> {
-  const existing = await db.select().from(products).where(eq(products.slug, slug));
-  
+export async function validateSlugUniqueness(
+  slug: string,
+  db: Database
+): Promise<void> {
+  const existing = await db
+    .select()
+    .from(products)
+    .where(eq(products.slug, slug))
+
   if (existing.length > 0) {
-    throw new Error('DUPLICATE_SLUG');
+    throw new Error('DUPLICATE_SLUG')
   }
 }
 
@@ -1235,9 +1310,9 @@ export function getProductName(
   language: string = 'en'
 ): string {
   if (language === 'ar' && product.name.ar) {
-    return product.name.ar;
+    return product.name.ar
   }
-  return product.name.en;  // Fallback to English
+  return product.name.en // Fallback to English
 }
 ```
 
@@ -1254,42 +1329,45 @@ export enum Module {
   EXERCISES = 'EXERCISES',
   LIBRARY = 'LIBRARY',
   LIVES = 'LIVES',
-  FORUM = 'FORUM'
+  FORUM = 'FORUM',
 }
 
 export function isValidModule(value: unknown): value is Module {
-  return Object.values(Module).includes(value as Module);
+  return Object.values(Module).includes(value as Module)
 }
 
-export function getModuleLabel(module: Module, language: 'en' | 'ar' = 'en'): string {
+export function getModuleLabel(
+  module: Module,
+  language: 'en' | 'ar' = 'en'
+): string {
   const labels: Record<Module, Record<'en' | 'ar', string>> = {
     [Module.MCQ]: {
       en: 'Multiple Choice Questions',
-      ar: 'أسئلة الاختيار من متعدد'
+      ar: 'أسئلة الاختيار من متعدد',
     },
     [Module.TRADITIONAL_EXAMS]: {
       en: 'Traditional Exams',
-      ar: 'الاختبارات التقليدية'
+      ar: 'الاختبارات التقليدية',
     },
     [Module.EXERCISES]: {
       en: 'Exercises',
-      ar: 'التمارين'
+      ar: 'التمارين',
     },
     [Module.LIBRARY]: {
       en: 'Content Library',
-      ar: 'مكتبة المحتوى'
+      ar: 'مكتبة المحتوى',
     },
     [Module.LIVES]: {
       en: 'Live Sessions',
-      ar: 'الجلسات المباشرة'
+      ar: 'الجلسات المباشرة',
     },
     [Module.FORUM]: {
       en: 'Forum',
-      ar: 'المنتدى'
-    }
-  };
-  
-  return labels[module][language];
+      ar: 'المنتدى',
+    },
+  }
+
+  return labels[module][language]
 }
 ```
 
@@ -1314,9 +1392,9 @@ Async provisioning begins in **Stage 10** (License Engine).
 All logs use **Pino** structured logging:
 
 ```typescript
-import { createPinoLogger } from 'packages/logger';
+import { createPinoLogger } from 'packages/logger'
 
-const logger = createPinoLogger('api-products');
+const logger = createPinoLogger('api-products')
 
 // Example log entry
 logger.info({
@@ -1327,8 +1405,8 @@ logger.info({
   workspaceId: 'workspace-uuid',
   userId: 'admin-uuid',
   enabled_modules: ['MCQ', 'EXERCISES'],
-  timestamp: '2026-02-22T10:30:00Z'
-});
+  timestamp: '2026-02-22T10:30:00Z',
+})
 ```
 
 ---
@@ -1340,10 +1418,10 @@ Every request carries `correlationId` (request_id):
 ```typescript
 // Middleware: Generate correlation ID
 export function correlationIdMiddleware(c: Context, next: () => Promise<void>) {
-  const correlationId = c.req.header('x-correlation-id') || generateUUID();
-  c.set('correlationId', correlationId);
-  c.res.headers.set('x-correlation-id', correlationId);
-  await next();
+  const correlationId = c.req.header('x-correlation-id') || generateUUID()
+  c.set('correlationId', correlationId)
+  c.res.headers.set('x-correlation-id', correlationId)
+  await next()
 }
 
 // All logs include correlationId:
@@ -1351,7 +1429,7 @@ logger.info({
   correlationId: c.get('correlationId'),
   action: 'product_updated',
   // ... more fields
-});
+})
 ```
 
 ---
@@ -1362,21 +1440,21 @@ Every log entry must include:
 
 ```typescript
 interface LogEntry {
-  timestamp: string;            // ISO 8601
-  level: 'error' | 'warn' | 'info' | 'debug';
-  service: string;              // 'api' | 'worker' | 'auth'
-  correlationId: string;        // Request ID
-  workspaceId?: string;         // Tenant identifier (if applicable)
-  workspaceSlug?: string;       // Human-readable tenant
-  userId?: string;              // User making request
-  action: string;               // What happened (e.g., 'product_created')
-  productId?: string;           // (If applicable to this action)
+  timestamp: string // ISO 8601
+  level: 'error' | 'warn' | 'info' | 'debug'
+  service: string // 'api' | 'worker' | 'auth'
+  correlationId: string // Request ID
+  workspaceId?: string // Tenant identifier (if applicable)
+  workspaceSlug?: string // Human-readable tenant
+  userId?: string // User making request
+  action: string // What happened (e.g., 'product_created')
+  productId?: string // (If applicable to this action)
   error?: {
-    code: string;
-    message: string;
-    stack?: string;
-  };
-  durationMs?: number;          // How long operation took
+    code: string
+    message: string
+    stack?: string
+  }
+  durationMs?: number // How long operation took
 }
 ```
 
@@ -1394,12 +1472,12 @@ logger.info({
   correlationId,
   workspaceId,
   userId,
-  slug: payload.slug
-});
+  slug: payload.slug,
+})
 
 try {
-  const product = await createProduct(payload, db);
-  
+  const product = await createProduct(payload, db)
+
   logger.info({
     level: 'info',
     service: 'api',
@@ -1407,10 +1485,10 @@ try {
     correlationId,
     productId: product.id,
     slug: product.slug,
-    status: 'success'
-  });
-  
-  return c.json({ success: true, data: product }, 201);
+    status: 'success',
+  })
+
+  return c.json({ success: true, data: product }, 201)
 } catch (error) {
   logger.error({
     level: 'error',
@@ -1420,11 +1498,11 @@ try {
     slug: payload.slug,
     error: {
       code: error.code,
-      message: error.message
-    }
-  });
-  
-  return handleError(c, error);
+      message: error.message,
+    },
+  })
+
+  return handleError(c, error)
 }
 ```
 
@@ -1437,18 +1515,21 @@ logger.info({
   action: 'product_update_start',
   correlationId,
   productId: id,
-  changes: Object.keys(payload)
-});
+  changes: Object.keys(payload),
+})
 
-const updated = await updateProduct({ ...payload, id, performed_by: userId }, db);
+const updated = await updateProduct(
+  { ...payload, id, performed_by: userId },
+  db
+)
 
 logger.info({
   action: 'product_updated',
   correlationId,
   productId: updated.id,
   oldVersion: updated.current_version - 1,
-  newVersion: updated.current_version
-});
+  newVersion: updated.current_version,
+})
 ```
 
 ---
@@ -1461,8 +1542,8 @@ logger.info({
   correlationId,
   productId: id,
   oldStatus: existing.status,
-  newStatus: newStatus
-});
+  newStatus: newStatus,
+})
 ```
 
 ---
@@ -1473,12 +1554,15 @@ logger.info({
 logger.info({
   action: 'audit_log_queried',
   correlationId,
-  userId,  // Must be admin
+  userId, // Must be admin
   productId: id,
   limit: query.limit,
   offset: query.offset,
-  filters: { action: query.action, date_range: [query.from_date, query.to_date] }
-});
+  filters: {
+    action: query.action,
+    date_range: [query.from_date, query.to_date],
+  },
+})
 ```
 
 ---
@@ -1491,55 +1575,52 @@ logger.info({
 
 **Endpoints & Limits** (per authenticated user):
 
-| Endpoint | Method | Limit | Window | Rationale |
-|----------|--------|-------|--------|-----------|
-| `/api/v1/mmc/products` | POST | 10/min | 60s | Product creation must be deliberate |
-| `/api/v1/mmc/products/:id` | PUT | 20/min | 60s | Updates more frequent than creates |
-| `/api/v1/mmc/products` | GET | 100/min | 60s | List/search operations |
-| `/api/v1/mmc/products/:id` | GET | 100/min | 60s | Single read operations |
-| `/api/v1/mmc/products/:id/status` | PATCH | 20/min | 60s | Status changes (like updates) |
-| `/api/v1/mmc/products/:id/audit-log` | GET | 50/min | 60s | Audit queries (compliance reads) |
+| Endpoint                             | Method | Limit   | Window | Rationale                           |
+| ------------------------------------ | ------ | ------- | ------ | ----------------------------------- |
+| `/api/v1/mmc/products`               | POST   | 10/min  | 60s    | Product creation must be deliberate |
+| `/api/v1/mmc/products/:id`           | PUT    | 20/min  | 60s    | Updates more frequent than creates  |
+| `/api/v1/mmc/products`               | GET    | 100/min | 60s    | List/search operations              |
+| `/api/v1/mmc/products/:id`           | GET    | 100/min | 60s    | Single read operations              |
+| `/api/v1/mmc/products/:id/status`    | PATCH  | 20/min  | 60s    | Status changes (like updates)       |
+| `/api/v1/mmc/products/:id/audit-log` | GET    | 50/min  | 60s    | Audit queries (compliance reads)    |
 
 **Rate Limit Middleware**:
 
 ```typescript
 // apps/api/src/middleware/rateLimit.ts
 
-import { Redis } from 'redis';
-import { Context } from 'hono';
+import { Redis } from 'redis'
+import { Context } from 'hono'
 
-const redis = new Redis(process.env.REDIS_URL);
+const redis = new Redis(process.env.REDIS_URL)
 
 interface RateLimitConfig {
-  key: string;  // Redis key prefix
-  limit: number;  // Max requests
-  window: number;  // Time window in seconds
+  key: string // Redis key prefix
+  limit: number // Max requests
+  window: number // Time window in seconds
 }
 
-export async function rateLimitMiddleware(
-  config: RateLimitConfig,
-  c: Context
-) {
-  const userId = c.get('user')?.id;
+export async function rateLimitMiddleware(config: RateLimitConfig, c: Context) {
+  const userId = c.get('user')?.id
   if (!userId) {
-    return c.json({ error: 'Unauthorized' }, 401);
+    return c.json({ error: 'Unauthorized' }, 401)
   }
-  
-  const key = `${config.key}:${userId}`;
-  const current = await redis.incr(key);
-  
+
+  const key = `${config.key}:${userId}`
+  const current = await redis.incr(key)
+
   if (current === 1) {
-    await redis.expire(key, config.window);
+    await redis.expire(key, config.window)
   }
-  
-  const remaining = Math.max(0, config.limit - current);
-  const resetAt = await redis.ttl(key);
-  
+
+  const remaining = Math.max(0, config.limit - current)
+  const resetAt = await redis.ttl(key)
+
   // Set rate limit headers
-  c.header('X-RateLimit-Limit', config.limit.toString());
-  c.header('X-RateLimit-Remaining', remaining.toString());
-  c.header('X-RateLimit-Reset', (Date.now() + resetAt * 1000).toString());
-  
+  c.header('X-RateLimit-Limit', config.limit.toString())
+  c.header('X-RateLimit-Remaining', remaining.toString())
+  c.header('X-RateLimit-Reset', (Date.now() + resetAt * 1000).toString())
+
   if (current > config.limit) {
     return c.json(
       {
@@ -1547,14 +1628,14 @@ export async function rateLimitMiddleware(
         data: null,
         error: {
           code: 'RATE_LIMIT_EXCEEDED',
-          message: `Rate limit exceeded. Max ${config.limit} requests per ${config.window}s`
-        }
+          message: `Rate limit exceeded. Max ${config.limit} requests per ${config.window}s`,
+        },
       },
       429
-    );
+    )
   }
-  
-  return null;  // Pass through
+
+  return null // Pass through
 }
 ```
 
@@ -1562,20 +1643,23 @@ export async function rateLimitMiddleware(
 
 ```typescript
 // Apply rate limiting to all product routes
-router.post('/products', 
+router.post(
+  '/products',
   rateLimitMiddleware({ key: 'products:create', limit: 10, window: 60 }),
   createProductHandler
-);
+)
 
-router.get('/products', 
+router.get(
+  '/products',
   rateLimitMiddleware({ key: 'products:list', limit: 100, window: 60 }),
   listProductsHandler
-);
+)
 
-router.put('/products/:id', 
+router.put(
+  '/products/:id',
   rateLimitMiddleware({ key: 'products:update', limit: 20, window: 60 }),
   updateProductHandler
-);
+)
 ```
 
 **Metrics Emitted**:
@@ -1638,20 +1722,20 @@ const productCreateTotal = new Counter({
 
 router.post('/products', async (c) => {
   const start = Date.now();
-  
+
   try {
     const product = await createProduct(...);
     const duration = Date.now() - start;
-    
+
     productCreateLatency.observe(duration);
     productCreateTotal.inc({ status: 'success' });
-    
+
     logger.info({
       action: 'product_created',
       duration_ms: duration,
       product_id: product.id
     });
-    
+
     return c.json({ data: product }, 201);
   } catch (error) {
     productCreateTotal.inc({ error_code: error.code, status: 'error' });
@@ -1666,14 +1750,14 @@ router.post('/products', async (c) => {
 const productUpdateLatency = new Histogram({
   name: 'product_update_latency_ms',
   help: 'Product update latency',
-  buckets: [10, 25, 50, 100, 250, 500, 1000]
-});
+  buckets: [10, 25, 50, 100, 250, 500, 1000],
+})
 
 const productUpdateTotal = new Counter({
   name: 'product_update_total',
   help: 'Total product updates',
-  labelNames: ['field_changed', 'status']
-});
+  labelNames: ['field_changed', 'status'],
+})
 
 // Middleware to track which fields were changed
 ```
@@ -1684,15 +1768,15 @@ const productUpdateTotal = new Counter({
 const productErrorsTotal = new Counter({
   name: 'product_errors_total',
   help: 'Total product operation errors',
-  labelNames: ['error_code', 'operation', 'http_status']
-});
+  labelNames: ['error_code', 'operation', 'http_status'],
+})
 
 // In error handler:
 productErrorsTotal.inc({
   error_code: error.code,
   operation: 'create|update|list|delete',
-  http_status: error.statusCode
-});
+  http_status: error.statusCode,
+})
 ```
 
 ### Request Rate Metrics
@@ -1701,15 +1785,15 @@ productErrorsTotal.inc({
 const productRequestsTotal = new Counter({
   name: 'product_requests_total',
   help: 'Total product requests',
-  labelNames: ['method', 'path', 'status']
-});
+  labelNames: ['method', 'path', 'status'],
+})
 
 const productRequestDurationSeconds = new Histogram({
   name: 'product_request_duration_seconds',
   help: 'Product request duration in seconds',
   labelNames: ['method', 'path'],
-  buckets: [0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5]
-});
+  buckets: [0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],
+})
 ```
 
 **Prometheus Scrape Config**:
@@ -1745,11 +1829,11 @@ groups:
       - alert: ProductErrorRateHigh
         expr: rate(product_errors_total[5m]) > 0.1
         for: 5m
-        
+
       - alert: ProductLatencyHigh
         expr: histogram_quantile(0.95, product_create_latency_ms) > 500
         for: 5m
-        
+
       - alert: RateLimitExceededHigh
         expr: rate(product_requests_total{status="429"}[5m]) > 0.5
         for: 5m
@@ -1864,7 +1948,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-      
+
     get:
       tags: [Products]
       summary: List products (ACTIVE by default)
@@ -1929,7 +2013,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ErrorResponse'
-    
+
     put:
       tags: [Products]
       summary: Update product
@@ -2066,7 +2150,7 @@ components:
           items:
             type: string
             enum: [MCQ, TRADITIONAL_EXAMS, EXERCISES, LIBRARY, LIVES, FORUM]
-    
+
     ProductResponse:
       type: object
       properties:
@@ -2100,7 +2184,7 @@ components:
         updated_at:
           type: string
           format: date-time
-    
+
     ProductListResponse:
       type: object
       properties:
@@ -2117,7 +2201,7 @@ components:
               type: integer
             total:
               type: integer
-    
+
     AuditLogResponse:
       type: object
       properties:
@@ -2161,7 +2245,7 @@ components:
               type: integer
             total:
               type: integer
-    
+
     ErrorResponse:
       type: object
       properties:
@@ -2179,7 +2263,7 @@ components:
               type: string
             details:
               type: object
-  
+
   securitySchemes:
     bearer:
       type: http
@@ -2193,21 +2277,21 @@ components:
 
 ## 7.1 Complete Error Code Reference
 
-| Code | HTTP | Handler | Recovery |
-|------|------|---------|----------|
-| INVALID_MODULE_ENUM | 400 | Validation layer | Validate module against enum |
-| INVALID_NAME_LOCALIZATION | 400 | Validation layer | Provide valid name with English required |
-| DUPLICATE_SLUG | 409 | Validation layer | Choose unique slug |
-| SLUG_NOT_MUTABLE | 400 | Update handler | Slug cannot be changed after creation |
-| PRODUCT_NOT_FOUND | 404 | Query layer | Verify product ID |
-| PRODUCT_HAS_LICENSES | 409 | Delete handler | Mark INACTIVE or migrate/delete licenses first |
-| UNAUTHORIZED | 401 | Auth middleware | Provide valid JWT |
-| FORBIDDEN | 403 | Auth middleware | User lacks required role |
-| WORKSPACE_LOCKED | 423 | License middleware | License is soft-locked |
-| WORKSPACE_ARCHIVED | 403 | License middleware | License is archived |
-| LICENSE_NOT_FOUND | 404 | License middleware | Invalid workspace |
-| VERSION_MISMATCH | 426 | License middleware | Schema/product version incompatible |
-| INTERNAL_SERVER_ERROR | 500 | Error handler | Retry or contact support |
+| Code                      | HTTP | Handler            | Recovery                                       |
+| ------------------------- | ---- | ------------------ | ---------------------------------------------- |
+| INVALID_MODULE_ENUM       | 400  | Validation layer   | Validate module against enum                   |
+| INVALID_NAME_LOCALIZATION | 400  | Validation layer   | Provide valid name with English required       |
+| DUPLICATE_SLUG            | 409  | Validation layer   | Choose unique slug                             |
+| SLUG_NOT_MUTABLE          | 400  | Update handler     | Slug cannot be changed after creation          |
+| PRODUCT_NOT_FOUND         | 404  | Query layer        | Verify product ID                              |
+| PRODUCT_HAS_LICENSES      | 409  | Delete handler     | Mark INACTIVE or migrate/delete licenses first |
+| UNAUTHORIZED              | 401  | Auth middleware    | Provide valid JWT                              |
+| FORBIDDEN                 | 403  | Auth middleware    | User lacks required role                       |
+| WORKSPACE_LOCKED          | 423  | License middleware | License is soft-locked                         |
+| WORKSPACE_ARCHIVED        | 403  | License middleware | License is archived                            |
+| LICENSE_NOT_FOUND         | 404  | License middleware | Invalid workspace                              |
+| VERSION_MISMATCH          | 426  | License middleware | Schema/product version incompatible            |
+| INTERNAL_SERVER_ERROR     | 500  | Error handler      | Retry or contact support                       |
 
 ---
 
@@ -2215,20 +2299,26 @@ components:
 
 ```typescript
 export function handleError(c: Context, error: Error): Response {
-  const correlationId = c.get('correlationId');
-  
+  const correlationId = c.get('correlationId')
+
   // Map error to code + status
   const errorMap: Record<string, { code: string; status: number }> = {
-    'INVALID_MODULE_ENUM': { code: 'INVALID_MODULE_ENUM', status: 400 },
-    'INVALID_NAME_LOCALIZATION': { code: 'INVALID_NAME_LOCALIZATION', status: 400 },
-    'DUPLICATE_SLUG': { code: 'DUPLICATE_SLUG', status: 409 },
-    'SLUG_NOT_MUTABLE': { code: 'SLUG_NOT_MUTABLE', status: 400 },
-    'PRODUCT_NOT_FOUND': { code: 'PRODUCT_NOT_FOUND', status: 404 },
-    'PRODUCT_HAS_LICENSES': { code: 'PRODUCT_HAS_LICENSES', status: 409 },
-  };
-  
-  const mapping = errorMap[error.message] || { code: 'INTERNAL_SERVER_ERROR', status: 500 };
-  
+    INVALID_MODULE_ENUM: { code: 'INVALID_MODULE_ENUM', status: 400 },
+    INVALID_NAME_LOCALIZATION: {
+      code: 'INVALID_NAME_LOCALIZATION',
+      status: 400,
+    },
+    DUPLICATE_SLUG: { code: 'DUPLICATE_SLUG', status: 409 },
+    SLUG_NOT_MUTABLE: { code: 'SLUG_NOT_MUTABLE', status: 400 },
+    PRODUCT_NOT_FOUND: { code: 'PRODUCT_NOT_FOUND', status: 404 },
+    PRODUCT_HAS_LICENSES: { code: 'PRODUCT_HAS_LICENSES', status: 409 },
+  }
+
+  const mapping = errorMap[error.message] || {
+    code: 'INTERNAL_SERVER_ERROR',
+    status: 500,
+  }
+
   logger.error({
     level: 'error',
     service: 'api',
@@ -2237,35 +2327,39 @@ export function handleError(c: Context, error: Error): Response {
     error: {
       code: mapping.code,
       message: error.message,
-      stack: error.stack
-    }
-  });
-  
-  return c.json({
-    success: false,
-    data: null,
-    error: {
-      code: mapping.code,
-      message: getErrorMessage(mapping.code)
-    }
-  }, mapping.status);
+      stack: error.stack,
+    },
+  })
+
+  return c.json(
+    {
+      success: false,
+      data: null,
+      error: {
+        code: mapping.code,
+        message: getErrorMessage(mapping.code),
+      },
+    },
+    mapping.status
+  )
 }
 
 function getErrorMessage(code: string): string {
   const messages: Record<string, string> = {
-    'INVALID_MODULE_ENUM': 'Invalid module. Allowed: MCQ, TRADITIONAL_EXAMS, EXERCISES, LIBRARY, LIVES, FORUM',
-    'INVALID_NAME_LOCALIZATION': 'Product name must include English translation',
-    'DUPLICATE_SLUG': 'Product slug already exists',
-    'SLUG_NOT_MUTABLE': 'Slug cannot be changed after creation',
-    'PRODUCT_NOT_FOUND': 'Product not found',
-    'PRODUCT_HAS_LICENSES': 'Cannot delete product with active licenses',
-    'UNAUTHORIZED': 'Authentication required',
-    'FORBIDDEN': 'Access denied',
-    'WORKSPACE_LOCKED': 'Workspace is locked',
-    'INTERNAL_SERVER_ERROR': 'Internal server error. Please try again.'
-  };
-  
-  return messages[code] || 'Unknown error';
+    INVALID_MODULE_ENUM:
+      'Invalid module. Allowed: MCQ, TRADITIONAL_EXAMS, EXERCISES, LIBRARY, LIVES, FORUM',
+    INVALID_NAME_LOCALIZATION: 'Product name must include English translation',
+    DUPLICATE_SLUG: 'Product slug already exists',
+    SLUG_NOT_MUTABLE: 'Slug cannot be changed after creation',
+    PRODUCT_NOT_FOUND: 'Product not found',
+    PRODUCT_HAS_LICENSES: 'Cannot delete product with active licenses',
+    UNAUTHORIZED: 'Authentication required',
+    FORBIDDEN: 'Access denied',
+    WORKSPACE_LOCKED: 'Workspace is locked',
+    INTERNAL_SERVER_ERROR: 'Internal server error. Please try again.',
+  }
+
+  return messages[code] || 'Unknown error'
 }
 ```
 
@@ -2351,12 +2445,15 @@ If licenses exist → ROLLBACK (foreign key prevents delete)
 All transactions use **REPEATABLE READ** isolation level:
 
 ```typescript
-await db.transaction(async (tx) => {
-  // REPEATABLE READ ensures:
-  // - No dirty reads
-  // - No non-repeatable reads
-  // - Phantom reads possible (acceptable for product CRUD)
-}, { isolationLevel: 'REPEATABLE READ' });
+await db.transaction(
+  async (tx) => {
+    // REPEATABLE READ ensures:
+    // - No dirty reads
+    // - No non-repeatable reads
+    // - Phantom reads possible (acceptable for product CRUD)
+  },
+  { isolationLevel: 'REPEATABLE READ' }
+)
 ```
 
 ---
@@ -2374,7 +2471,7 @@ const query = `
   WHERE status = 'ACTIVE'
   ORDER BY created_at DESC
   LIMIT $1 OFFSET $2
-`;
+`
 
 // With explicit filter:
 const query = `
@@ -2382,7 +2479,7 @@ const query = `
   WHERE status = $1
   ORDER BY created_at DESC
   LIMIT $2 OFFSET $3
-`;
+`
 ```
 
 ---
@@ -2396,7 +2493,7 @@ const query = `
   SELECT * FROM products 
   WHERE LOWER(slug) = LOWER($1)
   LIMIT 1
-`;
+`
 ```
 
 ---
@@ -2423,7 +2520,7 @@ const query = `
     AND ($4::timestamp IS NULL OR timestamp <= $4)
   ORDER BY timestamp DESC
   LIMIT $5 OFFSET $6
-`;
+`
 ```
 
 ---
@@ -2437,7 +2534,7 @@ const query = `
   SELECT COUNT(*) as license_count
   FROM licenses
   WHERE product_id = $1
-`;
+`
 ```
 
 ---
@@ -2460,7 +2557,7 @@ const query = `
   WHERE p.status = $1
   ORDER BY p.created_at DESC
   LIMIT $2 OFFSET $3
-`;
+`
 ```
 
 ---
@@ -2478,7 +2575,7 @@ const query = `
     OR LOWER(slug) LIKE LOWER($1)
   ORDER BY created_at DESC
   LIMIT $2 OFFSET $3
-`;
+`
 ```
 
 ---
@@ -2496,48 +2593,48 @@ describe('Product Validation', () => {
   describe('validateProductName', () => {
     it('should accept valid English name', () => {
       expect(() => {
-        validateProductName({ en: 'Basic Exam Suite' });
-      }).not.toThrow();
-    });
-    
+        validateProductName({ en: 'Basic Exam Suite' })
+      }).not.toThrow()
+    })
+
     it('should reject missing English name', () => {
       expect(() => {
-        validateProductName({ en: '' });
-      }).toThrow('INVALID_NAME_LOCALIZATION');
-    });
-    
+        validateProductName({ en: '' })
+      }).toThrow('INVALID_NAME_LOCALIZATION')
+    })
+
     it('should accept optional Arabic name', () => {
       expect(() => {
-        validateProductName({ en: 'Test', ar: 'اختبار' });
-      }).not.toThrow();
-    });
-    
+        validateProductName({ en: 'Test', ar: 'اختبار' })
+      }).not.toThrow()
+    })
+
     it('should accept missing Arabic name', () => {
       expect(() => {
-        validateProductName({ en: 'Test' });
-      }).not.toThrow();
-    });
-  });
-  
+        validateProductName({ en: 'Test' })
+      }).not.toThrow()
+    })
+  })
+
   describe('validateModulesEnum', () => {
     it('should accept valid modules', () => {
       expect(() => {
-        validateModulesEnum(['MCQ', 'EXERCISES']);
-      }).not.toThrow();
-    });
-    
+        validateModulesEnum(['MCQ', 'EXERCISES'])
+      }).not.toThrow()
+    })
+
     it('should reject invalid module', () => {
       expect(() => {
-        validateModulesEnum(['INVALID_MODULE']);
-      }).toThrow('INVALID_MODULE_ENUM');
-    });
-    
+        validateModulesEnum(['INVALID_MODULE'])
+      }).toThrow('INVALID_MODULE_ENUM')
+    })
+
     it('should reject empty modules array', () => {
       expect(() => {
-        validateModulesEnum([]);
-      }).toThrow('INVALID_MODULE_ENUM');
-    });
-    
+        validateModulesEnum([])
+      }).toThrow('INVALID_MODULE_ENUM')
+    })
+
     it('should accept all known modules', () => {
       const allModules = [
         'MCQ',
@@ -2545,46 +2642,46 @@ describe('Product Validation', () => {
         'EXERCISES',
         'LIBRARY',
         'LIVES',
-        'FORUM'
-      ];
+        'FORUM',
+      ]
       expect(() => {
-        validateModulesEnum(allModules);
-      }).not.toThrow();
-    });
-  });
-  
+        validateModulesEnum(allModules)
+      }).not.toThrow()
+    })
+  })
+
   describe('validateSlug', () => {
     it('should accept valid lowercase slug', () => {
       expect(() => {
-        validateSlug('basic-exam-suite');
-      }).not.toThrow();
-    });
-    
+        validateSlug('basic-exam-suite')
+      }).not.toThrow()
+    })
+
     it('should reject uppercase', () => {
       expect(() => {
-        validateSlug('Basic-Exam');
-      }).toThrow('INVALID_SLUG');
-    });
-    
+        validateSlug('Basic-Exam')
+      }).toThrow('INVALID_SLUG')
+    })
+
     it('should reject spaces', () => {
       expect(() => {
-        validateSlug('basic exam');
-      }).toThrow('INVALID_SLUG');
-    });
-    
+        validateSlug('basic exam')
+      }).toThrow('INVALID_SLUG')
+    })
+
     it('should accept single character slug', () => {
       expect(() => {
-        validateSlug('a');
-      }).not.toThrow();
-    });
-    
+        validateSlug('a')
+      }).not.toThrow()
+    })
+
     it('should reject empty slug', () => {
       expect(() => {
-        validateSlug('');
-      }).toThrow('INVALID_SLUG');
-    });
-  });
-});
+        validateSlug('')
+      }).toThrow('INVALID_SLUG')
+    })
+  })
+})
 ```
 
 ---
@@ -2595,12 +2692,12 @@ Location: `tests/integration/products/api.test.ts`
 
 ```typescript
 describe('Products API', () => {
-  let testDb: Database;
-  
+  let testDb: Database
+
   beforeAll(async () => {
-    testDb = await setupTestDatabase();
-  });
-  
+    testDb = await setupTestDatabase()
+  })
+
   describe('POST /api/v1/mmc/products', () => {
     it('should create product with valid payload', async () => {
       const response = await request(app)
@@ -2609,16 +2706,16 @@ describe('Products API', () => {
         .send({
           name: { en: 'Test Product', ar: 'منتج اختبار' },
           slug: 'test-product',
-          enabled_modules: ['MCQ', 'EXERCISES']
-        });
-      
-      expect(response.status).toBe(201);
-      expect(response.body.success).toBe(true);
-      expect(response.body.data.id).toBeDefined();
-      expect(response.body.data.current_version).toBe(1);
-      expect(response.body.data.status).toBe('ACTIVE');
-    });
-    
+          enabled_modules: ['MCQ', 'EXERCISES'],
+        })
+
+      expect(response.status).toBe(201)
+      expect(response.body.success).toBe(true)
+      expect(response.body.data.id).toBeDefined()
+      expect(response.body.data.current_version).toBe(1)
+      expect(response.body.data.status).toBe('ACTIVE')
+    })
+
     it('should reject duplicate slug', async () => {
       // Create first product
       await request(app)
@@ -2627,9 +2724,9 @@ describe('Products API', () => {
         .send({
           name: { en: 'Product 1', ar: 'المنتج 1' },
           slug: 'duplicate-slug',
-          enabled_modules: ['MCQ']
-        });
-      
+          enabled_modules: ['MCQ'],
+        })
+
       // Try to create second with same slug
       const response = await request(app)
         .post('/api/v1/mmc/products')
@@ -2637,13 +2734,13 @@ describe('Products API', () => {
         .send({
           name: { en: 'Product 2', ar: 'المنتج 2' },
           slug: 'duplicate-slug',
-          enabled_modules: ['EXERCISES']
-        });
-      
-      expect(response.status).toBe(409);
-      expect(response.body.error.code).toBe('DUPLICATE_SLUG');
-    });
-    
+          enabled_modules: ['EXERCISES'],
+        })
+
+      expect(response.status).toBe(409)
+      expect(response.body.error.code).toBe('DUPLICATE_SLUG')
+    })
+
     it('should reject invalid module', async () => {
       const response = await request(app)
         .post('/api/v1/mmc/products')
@@ -2651,28 +2748,28 @@ describe('Products API', () => {
         .send({
           name: { en: 'Test Product' },
           slug: 'test-product',
-          enabled_modules: ['INVALID_MODULE']
-        });
-      
-      expect(response.status).toBe(400);
-      expect(response.body.error.code).toBe('INVALID_MODULE_ENUM');
-    });
-    
+          enabled_modules: ['INVALID_MODULE'],
+        })
+
+      expect(response.status).toBe(400)
+      expect(response.body.error.code).toBe('INVALID_MODULE_ENUM')
+    })
+
     it('should reject missing English name', async () => {
       const response = await request(app)
         .post('/api/v1/mmc/products')
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          name: { ar: 'منتج' },  // Missing 'en'
+          name: { ar: 'منتج' }, // Missing 'en'
           slug: 'test-product',
-          enabled_modules: ['MCQ']
-        });
-      
-      expect(response.status).toBe(400);
-      expect(response.body.error.code).toBe('INVALID_NAME_LOCALIZATION');
-    });
-  });
-  
+          enabled_modules: ['MCQ'],
+        })
+
+      expect(response.status).toBe(400)
+      expect(response.body.error.code).toBe('INVALID_NAME_LOCALIZATION')
+    })
+  })
+
   describe('GET /api/v1/mmc/products', () => {
     it('should return ACTIVE products by default', async () => {
       // Create ACTIVE product
@@ -2680,100 +2777,102 @@ describe('Products API', () => {
         name: { en: 'Active Product' },
         slug: 'active-1',
         enabled_modules: ['MCQ'],
-        status: 'ACTIVE'
-      });
-      
+        status: 'ACTIVE',
+      })
+
       // Create INACTIVE product
       await testDb.insert(products).values({
         name: { en: 'Inactive Product' },
         slug: 'inactive-1',
         enabled_modules: ['EXERCISES'],
-        status: 'INACTIVE'
-      });
-      
+        status: 'INACTIVE',
+      })
+
       const response = await request(app)
         .get('/api/v1/mmc/products')
-        .set('Authorization', `Bearer ${adminToken}`);
-      
-      expect(response.status).toBe(200);
-      expect(response.body.data.length).toBe(1);
-      expect(response.body.data[0].status).toBe('ACTIVE');
-    });
-    
+        .set('Authorization', `Bearer ${adminToken}`)
+
+      expect(response.status).toBe(200)
+      expect(response.body.data.length).toBe(1)
+      expect(response.body.data[0].status).toBe('ACTIVE')
+    })
+
     it('should return INACTIVE products with explicit filter', async () => {
       const response = await request(app)
         .get('/api/v1/mmc/products?status=INACTIVE')
-        .set('Authorization', `Bearer ${adminToken}`);
-      
-      expect(response.status).toBe(200);
-      expect(response.body.data.every((p: any) => p.status === 'INACTIVE')).toBe(true);
-    });
-    
+        .set('Authorization', `Bearer ${adminToken}`)
+
+      expect(response.status).toBe(200)
+      expect(
+        response.body.data.every((p: any) => p.status === 'INACTIVE')
+      ).toBe(true)
+    })
+
     it('should return all products with status=all', async () => {
       const response = await request(app)
         .get('/api/v1/mmc/products?status=all')
-        .set('Authorization', `Bearer ${adminToken}`);
-      
-      expect(response.status).toBe(200);
+        .set('Authorization', `Bearer ${adminToken}`)
+
+      expect(response.status).toBe(200)
       // Should include both ACTIVE and INACTIVE
-      const statuses = new Set(response.body.data.map((p: any) => p.status));
-      expect(statuses.size).toBeGreaterThan(1);
-    });
-    
+      const statuses = new Set(response.body.data.map((p: any) => p.status))
+      expect(statuses.size).toBeGreaterThan(1)
+    })
+
     it('should support pagination', async () => {
       const response = await request(app)
         .get('/api/v1/mmc/products?limit=10&offset=0')
-        .set('Authorization', `Bearer ${adminToken}`);
-      
-      expect(response.status).toBe(200);
-      expect(response.body.pagination).toBeDefined();
-      expect(response.body.pagination.limit).toBe(10);
-      expect(response.body.pagination.offset).toBe(0);
-      expect(response.body.pagination.total).toBeGreaterThanOrEqual(0);
-    });
-  });
-  
+        .set('Authorization', `Bearer ${adminToken}`)
+
+      expect(response.status).toBe(200)
+      expect(response.body.pagination).toBeDefined()
+      expect(response.body.pagination.limit).toBe(10)
+      expect(response.body.pagination.offset).toBe(0)
+      expect(response.body.pagination.total).toBeGreaterThanOrEqual(0)
+    })
+  })
+
   describe('PUT /api/v1/mmc/products/:id', () => {
     it('should update product and increment version', async () => {
       const product = await testDb.insert(products).values({
         name: { en: 'Original Name' },
         slug: 'test-update',
         enabled_modules: ['MCQ'],
-        current_version: 1
-      });
-      
+        current_version: 1,
+      })
+
       const response = await request(app)
         .put(`/api/v1/mmc/products/${product.id}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
           name: { en: 'Updated Name', ar: 'الاسم المحدث' },
-          enabled_modules: ['MCQ', 'EXERCISES']
-        });
-      
-      expect(response.status).toBe(200);
-      expect(response.body.data.current_version).toBe(2);
-      expect(response.body.data.name.en).toBe('Updated Name');
-    });
-    
+          enabled_modules: ['MCQ', 'EXERCISES'],
+        })
+
+      expect(response.status).toBe(200)
+      expect(response.body.data.current_version).toBe(2)
+      expect(response.body.data.name.en).toBe('Updated Name')
+    })
+
     it('should prevent slug modification', async () => {
       const product = await testDb.insert(products).values({
         name: { en: 'Test' },
         slug: 'immutable-slug',
-        enabled_modules: ['MCQ']
-      });
-      
+        enabled_modules: ['MCQ'],
+      })
+
       const response = await request(app)
         .put(`/api/v1/mmc/products/${product.id}`)
         .set('Authorization', `Bearer ${adminToken}`)
         .send({
-          slug: 'new-slug'  // Attempt to change
-        });
-      
-      expect(response.status).toBe(400);
-      expect(response.body.error.code).toBe('SLUG_NOT_MUTABLE');
-    });
-  });
-  
+          slug: 'new-slug', // Attempt to change
+        })
+
+      expect(response.status).toBe(400)
+      expect(response.body.error.code).toBe('SLUG_NOT_MUTABLE')
+    })
+  })
+
   describe('PATCH /api/v1/mmc/products/:id/status', () => {
     it('should change status without incrementing version', async () => {
       const product = await testDb.insert(products).values({
@@ -2781,104 +2880,110 @@ describe('Products API', () => {
         slug: 'status-test',
         enabled_modules: ['MCQ'],
         status: 'ACTIVE',
-        current_version: 1
-      });
-      
+        current_version: 1,
+      })
+
       const response = await request(app)
         .patch(`/api/v1/mmc/products/${product.id}/status`)
         .set('Authorization', `Bearer ${adminToken}`)
-        .send({ status: 'INACTIVE' });
-      
-      expect(response.status).toBe(200);
-      expect(response.body.data.status).toBe('INACTIVE');
-      expect(response.body.data.current_version).toBe(1);  // NO increment
-    });
-  });
-  
+        .send({ status: 'INACTIVE' })
+
+      expect(response.status).toBe(200)
+      expect(response.body.data.status).toBe('INACTIVE')
+      expect(response.body.data.current_version).toBe(1) // NO increment
+    })
+  })
+
   describe('DELETE /api/v1/mmc/products/:id', () => {
     it('should delete product with no licenses', async () => {
       const product = await testDb.insert(products).values({
         name: { en: 'Test' },
         slug: 'delete-test',
-        enabled_modules: ['MCQ']
-      });
-      
+        enabled_modules: ['MCQ'],
+      })
+
       const response = await request(app)
         .delete(`/api/v1/mmc/products/${product.id}`)
-        .set('Authorization', `Bearer ${adminToken}`);
-      
-      expect(response.status).toBe(204);
-    });
-    
+        .set('Authorization', `Bearer ${adminToken}`)
+
+      expect(response.status).toBe(204)
+    })
+
     it('should reject delete if licenses reference product', async () => {
       const product = await testDb.insert(products).values({
         name: { en: 'Protected' },
         slug: 'protected-product',
-        enabled_modules: ['MCQ']
-      });
-      
+        enabled_modules: ['MCQ'],
+      })
+
       // Create license referencing product
       await testDb.insert(licenses).values({
         product_id: product.id,
-        workspace_id: 'workspace-123'
-      });
-      
+        workspace_id: 'workspace-123',
+      })
+
       const response = await request(app)
         .delete(`/api/v1/mmc/products/${product.id}`)
-        .set('Authorization', `Bearer ${adminToken}`);
-      
-      expect(response.status).toBe(409);
-      expect(response.body.error.code).toBe('PRODUCT_HAS_LICENSES');
-    });
-  });
-  
+        .set('Authorization', `Bearer ${adminToken}`)
+
+      expect(response.status).toBe(409)
+      expect(response.body.error.code).toBe('PRODUCT_HAS_LICENSES')
+    })
+  })
+
   describe('GET /api/v1/mmc/products/:id/audit-log', () => {
     it('should return audit log for product', async () => {
       const product = await testDb.insert(products).values({
         name: { en: 'Test' },
         slug: 'audit-test',
-        enabled_modules: ['MCQ']
-      });
-      
+        enabled_modules: ['MCQ'],
+      })
+
       const response = await request(app)
         .get(`/api/v1/mmc/products/${product.id}/audit-log`)
-        .set('Authorization', `Bearer ${adminToken}`);
-      
-      expect(response.status).toBe(200);
-      expect(Array.isArray(response.body.data)).toBe(true);
-      expect(response.body.data.length).toBeGreaterThanOrEqual(1);
-      expect(response.body.data[0].action).toBe('CREATE');
-    });
-    
+        .set('Authorization', `Bearer ${adminToken}`)
+
+      expect(response.status).toBe(200)
+      expect(Array.isArray(response.body.data)).toBe(true)
+      expect(response.body.data.length).toBeGreaterThanOrEqual(1)
+      expect(response.body.data[0].action).toBe('CREATE')
+    })
+
     it('should filter audit log by action', async () => {
       const product = await testDb.insert(products).values({
         name: { en: 'Test' },
         slug: 'audit-filter-test',
-        enabled_modules: ['MCQ']
-      });
-      
+        enabled_modules: ['MCQ'],
+      })
+
       // Create and update to generate different actions
-      await updateProduct(product.id, { name: { en: 'Updated' } });
-      await changeProductStatus(product.id, 'INACTIVE');
-      
+      await updateProduct(product.id, { name: { en: 'Updated' } })
+      await changeProductStatus(product.id, 'INACTIVE')
+
       const response = await request(app)
-        .get(`/api/v1/mmc/products/${product.id}/audit-log?action=STATUS_CHANGE`)
-        .set('Authorization', `Bearer ${adminToken}`);
-      
-      expect(response.status).toBe(200);
-      expect(response.body.data.every((entry: any) => entry.action === 'STATUS_CHANGE')).toBe(true);
-    });
-    
+        .get(
+          `/api/v1/mmc/products/${product.id}/audit-log?action=STATUS_CHANGE`
+        )
+        .set('Authorization', `Bearer ${adminToken}`)
+
+      expect(response.status).toBe(200)
+      expect(
+        response.body.data.every(
+          (entry: any) => entry.action === 'STATUS_CHANGE'
+        )
+      ).toBe(true)
+    })
+
     it('should support pagination on audit log', async () => {
       const response = await request(app)
         .get(`/api/v1/mmc/products/any-id/audit-log?limit=10&offset=0`)
-        .set('Authorization', `Bearer ${adminToken}`);
-      
-      expect(response.body.pagination).toBeDefined();
-      expect(response.body.pagination.limit).toBe(10);
-    });
-  });
-});
+        .set('Authorization', `Bearer ${adminToken}`)
+
+      expect(response.body.pagination).toBeDefined()
+      expect(response.body.pagination.limit).toBe(10)
+    })
+  })
+})
 ```
 
 ---
@@ -2892,46 +2997,55 @@ describe('Transaction Atomicity', () => {
   it('should rollback entire creation on any failure', async () => {
     // Simulate: version insert succeeds but audit log insert fails
     // Entire transaction should rollback
-    
-    const beforeCount = await countProducts(testDb);
-    
+
+    const beforeCount = await countProducts(testDb)
+
     try {
-      await createProduct({
-        name: { en: 'Test' },
-        slug: 'atom-test',
-        enabled_modules: ['INVALID_MODULE'],  // Will fail validation
-        performed_by: 'admin-uuid'
-      }, testDb);
+      await createProduct(
+        {
+          name: { en: 'Test' },
+          slug: 'atom-test',
+          enabled_modules: ['INVALID_MODULE'], // Will fail validation
+          performed_by: 'admin-uuid',
+        },
+        testDb
+      )
     } catch (error) {
       // Expected to fail
     }
-    
-    const afterCount = await countProducts(testDb);
-    expect(beforeCount).toBe(afterCount);  // No orphaned products
-  });
-  
+
+    const afterCount = await countProducts(testDb)
+    expect(beforeCount).toBe(afterCount) // No orphaned products
+  })
+
   it('should ensure version and audit log stay in sync', async () => {
-    const product = await createProduct({
-      name: { en: 'Test' },
-      slug: 'sync-test',
-      enabled_modules: ['MCQ'],
-      performed_by: 'admin-uuid'
-    }, testDb);
-    
+    const product = await createProduct(
+      {
+        name: { en: 'Test' },
+        slug: 'sync-test',
+        enabled_modules: ['MCQ'],
+        performed_by: 'admin-uuid',
+      },
+      testDb
+    )
+
     // Update product
-    await updateProduct({
-      id: product.id,
-      name: { en: 'Updated' },
-      performed_by: 'admin-uuid'
-    }, testDb);
-    
+    await updateProduct(
+      {
+        id: product.id,
+        name: { en: 'Updated' },
+        performed_by: 'admin-uuid',
+      },
+      testDb
+    )
+
     // Verify: product version = audit log entry count
-    const current = await getProductById(product.id, testDb);
-    const auditCount = await countAuditLogsForProduct(product.id, testDb);
-    
-    expect(current.current_version).toBe(auditCount);  // Always in sync
-  });
-});
+    const current = await getProductById(product.id, testDb)
+    const auditCount = await countAuditLogsForProduct(product.id, testDb)
+
+    expect(current.current_version).toBe(auditCount) // Always in sync
+  })
+})
 ```
 
 ---
@@ -2945,35 +3059,38 @@ describe('Tenant Isolation (Products Master DB Only)', () => {
   it('should never access tenant database', async () => {
     // Product operations should ONLY touch master_db
     // Spy on db connection calls
-    
-    const spy = jest.spyOn(database, 'query');
-    
-    await createProduct({
-      name: { en: 'Test' },
-      slug: 'isolation-test',
-      enabled_modules: ['MCQ'],
-      performed_by: 'admin-uuid'
-    }, masterDb);
-    
+
+    const spy = jest.spyOn(database, 'query')
+
+    await createProduct(
+      {
+        name: { en: 'Test' },
+        slug: 'isolation-test',
+        enabled_modules: ['MCQ'],
+        performed_by: 'admin-uuid',
+      },
+      masterDb
+    )
+
     // Verify all queries went to master_db only
-    spy.mock.calls.forEach(call => {
-      expect(call[0]).toContain('master_db');
-    });
-    
-    spy.mockRestore();
-  });
-  
+    spy.mock.calls.forEach((call) => {
+      expect(call[0]).toContain('master_db')
+    })
+
+    spy.mockRestore()
+  })
+
   it('should not reference tenant authentication context', () => {
     // Product service should not require tenant context
     // It's a platform-level service
-    
-    const serviceInstance = new ProductService();
-    
+
+    const serviceInstance = new ProductService()
+
     // Should exist and be callable without tenant context
-    expect(serviceInstance.createProduct).toBeDefined();
-    expect(serviceInstance.listProducts).toBeDefined();
-  });
-});
+    expect(serviceInstance.createProduct).toBeDefined()
+    expect(serviceInstance.listProducts).toBeDefined()
+  })
+})
 ```
 
 ---
@@ -2988,35 +3105,35 @@ describe('Product Versioning', () => {
     const product = await createProduct(...);
     expect(product.current_version).toBe(1);
   });
-  
+
   it('should increment version only on structural change', async () => {
     let product = await createProduct(...);
     expect(product.current_version).toBe(1);
-    
+
     // Status change (no version bump)
     product = await changeProductStatus(product.id, 'INACTIVE');
     expect(product.current_version).toBe(1);
-    
+
     // Structural change (version bump)
     product = await updateProduct(product.id, { name: { en: 'Updated' } });
     expect(product.current_version).toBe(2);
   });
-  
+
   it('should never decrease version', async () => {
     // Impossible scenario but ensure guardrail exists
     const product = await createProduct(...);
-    
+
     // Try to manually set version down (should fail)
     expect(() => {
       // Version is immutable, can only increment
     }).not.toThrow();
   });
-  
+
   it('should create version record for each version number', async () => {
     const product = await createProduct(...);
     await updateProduct(product.id, { name: { en: 'V2' } });
     await updateProduct(product.id, { enabled_modules: ['MCQ', 'EXERCISES'] });
-    
+
     const versions = await getProductVersions(product.id);
     expect(versions.length).toBe(3);
     expect(versions[0].version_number).toBe(1);
@@ -3036,26 +3153,26 @@ Location: `tests/unit/products/immutability.test.ts`
 describe('Immutability Guarantees', () => {
   it('should not allow slug modification after creation', async () => {
     const product = await createProduct({ slug: 'original-slug', ... });
-    
+
     expect(() => {
       product.slug = 'new-slug';
     }).toThrow('SLUG_NOT_MUTABLE');
   });
-  
+
   it('should not allow version history modification', async () => {
     const product = await createProduct(...);
     const version = await getProductVersion(product.id, 1);
-    
+
     // Try to update version record
     expect(() => {
       database.query('UPDATE product_versions SET name = ... WHERE id = ?', version.id);
     }).toThrow();  // DB constraint prevents
   });
-  
+
   it('should not allow audit log modification', async () => {
     const product = await createProduct(...);
     const audit = await getProductAuditLog(product.id, 0, 10);
-    
+
     // Try to update audit log
     expect(() => {
       database.query('DELETE FROM product_audit_logs WHERE id = ?', audit[0].id);
@@ -3074,27 +3191,27 @@ Location: `tests/unit/products/synchronous.test.ts`
 describe('Synchronous-Only Operations (Stage 9)', () => {
   it('should not enqueue any background jobs', async () => {
     const queueSpy = jest.spyOn(queue, 'enqueue');
-    
+
     // All Stage 9 operations should complete synchronously
     await createProduct(...);
     await updateProduct(...);
     await changeProductStatus(...);
-    
+
     // No background jobs should be enqueued
     expect(queueSpy).not.toHaveBeenCalled();
-    
+
     queueSpy.mockRestore();
   });
-  
+
   it('should return response immediately (no awaiting workers)', async () => {
     const start = Date.now();
-    
+
     const response = await request(app)
       .post('/api/v1/mmc/products')
       .send(...);
-    
+
     const duration = Date.now() - start;
-    
+
     expect(duration).toBeLessThan(500);  // Should complete in < 500ms
     expect(response.body.data).toBeDefined();  // Data returned, not pending
   });

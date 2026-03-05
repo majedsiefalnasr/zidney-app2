@@ -235,7 +235,7 @@ export async function startJobProcessor(
   let typeIndex = 0
 
   // Infinite loop: round-robin through job queues
-  // eslint-disable-next-line no-constant-condition
+
   while (true) {
     try {
       const currentType = jobTypes[typeIndex % jobTypes.length]!

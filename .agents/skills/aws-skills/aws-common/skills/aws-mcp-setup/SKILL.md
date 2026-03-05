@@ -9,10 +9,10 @@ description: Configure AWS Documentation MCP server to query up-to-date AWS know
 
 This guide helps you configure AWS MCP tools for AI agents. Two options are available:
 
-| Option | Requirements | Capabilities |
-|--------|--------------|--------------|
-| **Full AWS MCP Server** | Python 3.10+, uvx, AWS credentials | Execute AWS API calls + documentation search |
-| **AWS Documentation MCP** | None | Documentation search only |
+| Option                    | Requirements                       | Capabilities                                 |
+| ------------------------- | ---------------------------------- | -------------------------------------------- |
+| **Full AWS MCP Server**   | Python 3.10+, uvx, AWS credentials | Execute AWS API calls + documentation search |
+| **AWS Documentation MCP** | None                               | Documentation search only                    |
 
 ## Step 1: Check Existing Configuration
 
@@ -21,6 +21,7 @@ Before configuring, check if AWS MCP tools are already available using either me
 ### Method A: Check Available Tools (Recommended)
 
 Look for these tool name patterns in your agent's available tools:
+
 - `mcp__aws-mcp__*` or `mcp__aws__*` → Full AWS MCP Server configured
 - `mcp__*awsdocs*__aws___*` → AWS Documentation MCP configured
 
@@ -30,12 +31,12 @@ Look for these tool name patterns in your agent's available tools:
 
 Agent tools use hierarchical configuration (precedence: local → project → user → enterprise):
 
-| Scope | File Location | Use Case |
-|-------|---------------|----------|
-| Local | `.claude.json` (in project) | Personal/experimental |
-| Project | `.mcp.json` (project root) | Team-shared |
-| User | `~/.claude.json` | Cross-project personal |
-| Enterprise | System managed directories | Organization-wide |
+| Scope      | File Location               | Use Case               |
+| ---------- | --------------------------- | ---------------------- |
+| Local      | `.claude.json` (in project) | Personal/experimental  |
+| Project    | `.mcp.json` (project root)  | Team-shared            |
+| User       | `~/.claude.json`            | Cross-project personal |
+| Enterprise | System managed directories  | Organization-wide      |
 
 Check these files for `mcpServers` containing `aws-mcp`, `aws`, or `awsdocs` keys:
 
@@ -71,26 +72,31 @@ aws sts get-caller-identity || echo "AWS credentials not configured"
 **Use when**: uvx available AND AWS credentials valid
 
 **Prerequisites**:
+
 - Python 3.10+ with `uv` package manager
 - AWS credentials configured (via profile, environment variables, or IAM role)
 
 **Required IAM Permissions**:
+
 ```json
 {
   "Version": "2012-10-17",
-  "Statement": [{
-    "Effect": "Allow",
-    "Action": [
-      "aws-mcp:InvokeMCP",
-      "aws-mcp:CallReadOnlyTool",
-      "aws-mcp:CallReadWriteTool"
-    ],
-    "Resource": "*"
-  }]
+  "Statement": [
+    {
+      "Effect": "Allow",
+      "Action": [
+        "aws-mcp:InvokeMCP",
+        "aws-mcp:CallReadOnlyTool",
+        "aws-mcp:CallReadWriteTool"
+      ],
+      "Resource": "*"
+    }
+  ]
 }
 ```
 
 **Configuration** (add to your MCP settings):
+
 ```json
 {
   "mcpServers": {
@@ -99,7 +105,8 @@ aws sts get-caller-identity || echo "AWS credentials not configured"
       "args": [
         "mcp-proxy-for-aws@latest",
         "https://aws-mcp.us-east-1.api.aws/mcp",
-        "--metadata", "AWS_REGION=us-west-2"
+        "--metadata",
+        "AWS_REGION=us-west-2"
       ]
     }
   }
@@ -109,6 +116,7 @@ aws sts get-caller-identity || echo "AWS credentials not configured"
 **Credential Configuration Options**:
 
 1. **AWS Profile** (recommended for development):
+
    ```json
    "args": [
      "mcp-proxy-for-aws@latest",
@@ -119,6 +127,7 @@ aws sts get-caller-identity || echo "AWS credentials not configured"
    ```
 
 2. **Environment Variables**:
+
    ```json
    "env": {
      "AWS_ACCESS_KEY_ID": "...",
@@ -130,6 +139,7 @@ aws sts get-caller-identity || echo "AWS credentials not configured"
 3. **IAM Role** (for EC2/ECS/Lambda): No additional config needed - uses instance credentials
 
 **Additional Options**:
+
 - `--region <region>`: Override AWS region
 - `--read-only`: Restrict to read-only tools
 - `--log-level <level>`: Set logging level (debug, info, warning, error)
@@ -139,11 +149,13 @@ aws sts get-caller-identity || echo "AWS credentials not configured"
 ### Option B: AWS Documentation MCP Server (No Auth)
 
 **Use when**:
+
 - No Python/uvx environment
 - No AWS credentials
 - Only need documentation search (no API execution)
 
 **Configuration**:
+
 ```json
 {
   "mcpServers": {
@@ -160,16 +172,18 @@ aws sts get-caller-identity || echo "AWS credentials not configured"
 After configuration, verify tools are available:
 
 **For Full AWS MCP**:
+
 - Look for tools: `mcp__aws-mcp__aws___search_documentation`, `mcp__aws-mcp__aws___call_aws`
 
 **For Documentation MCP**:
+
 - Look for tools: `mcp__awsdocs__aws___search_documentation`, `mcp__awsdocs__aws___read_documentation`
 
 ## Troubleshooting
 
-| Issue | Cause | Solution |
-|-------|-------|----------|
-| `uvx: command not found` | uv not installed | Install with `pip install uv` or use Option B |
-| `AccessDenied` error | Missing IAM permissions | Add aws-mcp:* permissions to IAM policy |
-| `InvalidSignatureException` | Credential issue | Check `aws sts get-caller-identity` |
-| Tools not appearing | MCP not started | Restart your agent after config change |
+| Issue                       | Cause                   | Solution                                      |
+| --------------------------- | ----------------------- | --------------------------------------------- |
+| `uvx: command not found`    | uv not installed        | Install with `pip install uv` or use Option B |
+| `AccessDenied` error        | Missing IAM permissions | Add aws-mcp:\* permissions to IAM policy      |
+| `InvalidSignatureException` | Credential issue        | Check `aws sts get-caller-identity`           |
+| Tools not appearing         | MCP not started         | Restart your agent after config change        |

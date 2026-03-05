@@ -92,7 +92,6 @@ describe('Logger Abstraction', () => {
       expect(() => {
         JSON.stringify(testLog)
       }).not.toThrow()
-
     })
 
     it('should include required base fields', () => {

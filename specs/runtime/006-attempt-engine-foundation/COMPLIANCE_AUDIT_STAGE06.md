@@ -312,6 +312,7 @@ grep -r "schema_version\|product_version" apps/api/src/ apps/worker/src/ | wc -l
    ```
 
 3. **At Grading (Worker)**
+
    ```typescript
    // Worker verifies schema compatibility
    async function shouldGrade(attempt, workspace) {

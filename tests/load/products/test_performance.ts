@@ -223,11 +223,15 @@ describe('T068-T071: Load and Performance Tests', () => {
       const results = await Promise.all(createPromises)
 
       // Only one should succeed (201)
-      const succeeded = (results as any[]).filter((r) => !r.error && r.id).length
+      const succeeded = (results as any[]).filter(
+        (r) => !r.error && r.id
+      ).length
       expect(succeeded).toBe(1)
 
       // Rest should fail with DUPLICATE_SLUG error
-      const failed = (results as any[]).filter((r) => r.code === 'DUPLICATE_SLUG').length
+      const failed = (results as any[]).filter(
+        (r) => r.code === 'DUPLICATE_SLUG'
+      ).length
       expect(failed).toBeGreaterThan(0)
     })
 

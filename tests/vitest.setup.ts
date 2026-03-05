@@ -8,8 +8,7 @@ const dbUser = process.env.DB_USER ?? DEFAULT_DB_USER
 const dbPassword = process.env.DB_PASSWORD ?? DEFAULT_DB_PASSWORD
 const dbHost = process.env.DB_HOST ?? DEFAULT_DB_HOST
 const dbPort = process.env.DB_PORT ?? DEFAULT_DB_PORT
-const dbName =
-  process.env.DB_NAME ?? process.env.DB_DATABASE ?? DEFAULT_DB_NAME
+const dbName = process.env.DB_NAME ?? process.env.DB_DATABASE ?? DEFAULT_DB_NAME
 
 process.env.DB_USER = dbUser
 process.env.DB_PASSWORD = dbPassword

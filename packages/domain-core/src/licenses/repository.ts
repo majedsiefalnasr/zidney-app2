@@ -446,7 +446,9 @@ export class LicenseRepository {
    * T022: Get platform schema version
    */
   async getPlatformSchemaVersion(): Promise<number> {
-    const result = await this.masterDb.query<{ version: number | string | null }>(
+    const result = await this.masterDb.query<{
+      version: number | string | null
+    }>(
       `
       SELECT MAX(version) as version FROM schema_versions
     `

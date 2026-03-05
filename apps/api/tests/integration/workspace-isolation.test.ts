@@ -73,8 +73,7 @@ describe('Workspace Isolation', () => {
     const u1 = await pool1.query(
       `INSERT INTO ${WS_ISO_USERS_TABLE} (workspace_id, email, password_hash, role, token_version)
        VALUES ($1, 'user1@test.com', 'hash1', 'admin', 1)
-       RETURNING id, email`
-      ,
+       RETURNING id, email`,
       [workspace1.id]
     )
     user1 = u1.rows[0]!
@@ -84,8 +83,7 @@ describe('Workspace Isolation', () => {
     const u2 = await pool2.query(
       `INSERT INTO ${WS_ISO_USERS_TABLE} (workspace_id, email, password_hash, role, token_version)
        VALUES ($1, 'user2@test.com', 'hash2', 'admin', 1)
-       RETURNING id, email`
-      ,
+       RETURNING id, email`,
       [workspace2.id]
     )
     user2 = u2.rows[0]!
@@ -96,24 +94,31 @@ describe('Workspace Isolation', () => {
     const pool1 = getTenantPool(workspace1.id)!
     const pool2 = getTenantPool(workspace2.id)!
 
-    await pool1.query(`DELETE FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`, [user1.id])
-    await pool2.query(`DELETE FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`, [user2.id])
+    await pool1.query(`DELETE FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`, [
+      user1.id,
+    ])
+    await pool2.query(`DELETE FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`, [
+      user2.id,
+    ])
 
-    await db.master.query(`DELETE FROM ${WS_ISO_WORKSPACES_TABLE} WHERE id = $1`, [
-      workspace1.id,
-    ])
-    await db.master.query(`DELETE FROM ${WS_ISO_WORKSPACES_TABLE} WHERE id = $1`, [
-      workspace2.id,
-    ])
+    await db.master.query(
+      `DELETE FROM ${WS_ISO_WORKSPACES_TABLE} WHERE id = $1`,
+      [workspace1.id]
+    )
+    await db.master.query(
+      `DELETE FROM ${WS_ISO_WORKSPACES_TABLE} WHERE id = $1`,
+      [workspace2.id]
+    )
   })
 
   it('should reject token from different workspace', async () => {
     // User 1 token should not work in workspace 2
     const pool1 = getTenantPool(workspace1.id)!
 
-    const result = await pool1.query(`SELECT * FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`, [
-      user1.id,
-    ])
+    const result = await pool1.query(
+      `SELECT * FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`,
+      [user1.id]
+    )
 
     expect(result.rows).toHaveLength(1)
     expect(result.rows[0]!.email).toBe('user1@test.com')

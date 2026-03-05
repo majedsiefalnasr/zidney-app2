@@ -75,7 +75,11 @@ export class DbManager {
       return { success: true, dbName }
     } catch (error: any) {
       // Handle concurrent create attempts idempotently.
-      if (error.code === '42P04' || error.code === '23505' || error.code === '55006') {
+      if (
+        error.code === '42P04' ||
+        error.code === '23505' ||
+        error.code === '55006'
+      ) {
         return { success: true, dbName }
       }
       const exists = await masterDb.query(

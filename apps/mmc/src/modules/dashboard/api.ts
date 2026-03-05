@@ -1,8 +1,8 @@
 // @ts-ignore: axios not declared as dependency of apps/mmc [INFRA-001-DEPS-06]
-// eslint-disable-next-line no-restricted-imports
+
 import type { AxiosInstance } from 'axios'
 // @ts-ignore: axios not declared as dependency of apps/mmc [INFRA-001-DEPS-06]
-// eslint-disable-next-line no-restricted-imports
+
 import axios from 'axios'
 
 /**

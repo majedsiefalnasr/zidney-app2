@@ -82,9 +82,7 @@ function resolveFillBlankCorrectAnswers(question: QuestionSnapshot): string[] {
     return [correctAnswer.toLowerCase().replace(/\s+/g, ' ').trim()]
   }
 
-  return [
-    (correctAnswer?.text || '').toLowerCase().replace(/\s+/g, ' ').trim(),
-  ]
+  return [(correctAnswer?.text || '').toLowerCase().replace(/\s+/g, ' ').trim()]
 }
 
 function normalizePairs(items: unknown[]): Pair[] {

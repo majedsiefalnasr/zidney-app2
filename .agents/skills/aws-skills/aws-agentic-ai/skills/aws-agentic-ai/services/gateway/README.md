@@ -5,6 +5,7 @@ The Gateway service converts REST APIs into MCP tools that AI agents can use. It
 ## Quick Start
 
 ### Prerequisites
+
 - AWS CLI configured with appropriate permissions
 - An existing Gateway (created via AWS Console or CLI)
 - OpenAPI schema for your target API
@@ -12,11 +13,13 @@ The Gateway service converts REST APIs into MCP tools that AI agents can use. It
 ### Deploy a Gateway Target
 
 **Step 1: Upload OpenAPI schema to S3**
+
 ```bash
 aws s3 cp my-api-openapi.yaml s3://<BUCKET_NAME>/schemas/
 ```
 
 **Step 2: Create credential provider (API Key auth only)**
+
 ```bash
 aws bedrock-agentcore-control create-api-key-credential-provider \
   --name MyAPICredentialProvider \
@@ -25,6 +28,7 @@ aws bedrock-agentcore-control create-api-key-credential-provider \
 ```
 
 **Step 3: Create gateway target**
+
 ```bash
 aws bedrock-agentcore-control create-gateway-target \
   --gateway-identifier <GATEWAY_ID> \
@@ -35,6 +39,7 @@ aws bedrock-agentcore-control create-gateway-target \
 ```
 
 **Step 4: Verify deployment**
+
 ```bash
 aws bedrock-agentcore-control get-gateway-target \
   --gateway-identifier <GATEWAY_ID> \
@@ -46,31 +51,33 @@ aws bedrock-agentcore-control get-gateway-target \
 
 ### Outbound (Accessing External APIs)
 
-| Target Type | IAM | OAuth 2LO | OAuth 3LO | API Key |
-|-------------|-----|-----------|-----------|---------|
-| Lambda function | Yes | No | No | No |
-| API Gateway | Yes | No | No | Yes |
-| OpenAPI schema | No | Yes | Yes | Yes |
-| Smithy schema | Yes | Yes | Yes | No |
-| MCP server | No | Yes | No | No |
+| Target Type     | IAM | OAuth 2LO | OAuth 3LO | API Key |
+| --------------- | --- | --------- | --------- | ------- |
+| Lambda function | Yes | No        | No        | No      |
+| API Gateway     | Yes | No        | No        | Yes     |
+| OpenAPI schema  | No  | Yes       | Yes       | Yes     |
+| Smithy schema   | Yes | Yes       | Yes       | No      |
+| MCP server      | No  | Yes       | No        | No      |
 
 ### Inbound (Who Can Invoke Tools)
+
 - **IAM**: AWS IAM credentials
 - **JWT**: Tokens from identity providers (Cognito, Entra ID)
 - **No Auth**: Open access (use with caution)
 
 ## Documentation
 
-| Document | Description |
-|----------|-------------|
-| [Deployment Strategies](deployment-strategies.md) | Credential provider patterns, multi-environment setup, key rotation |
-| [Troubleshooting Guide](troubleshooting-guide.md) | Common errors, diagnosis steps, solutions |
-| [Deploy Template Script](deploy-template.sh) | Automated deployment script |
-| [Validate Deployment Script](validate-deployment.sh) | Post-deployment verification |
+| Document                                             | Description                                                         |
+| ---------------------------------------------------- | ------------------------------------------------------------------- |
+| [Deployment Strategies](deployment-strategies.md)    | Credential provider patterns, multi-environment setup, key rotation |
+| [Troubleshooting Guide](troubleshooting-guide.md)    | Common errors, diagnosis steps, solutions                           |
+| [Deploy Template Script](deploy-template.sh)         | Automated deployment script                                         |
+| [Validate Deployment Script](validate-deployment.sh) | Post-deployment verification                                        |
 
 ## Common Operations
 
 ### List Gateway Targets
+
 ```bash
 aws bedrock-agentcore-control list-gateway-targets \
   --gateway-identifier <GATEWAY_ID> \
@@ -78,6 +85,7 @@ aws bedrock-agentcore-control list-gateway-targets \
 ```
 
 ### Update Credential Provider
+
 ```bash
 aws bedrock-agentcore-control update-api-key-credential-provider \
   --name MyAPICredentialProvider \
@@ -86,6 +94,7 @@ aws bedrock-agentcore-control update-api-key-credential-provider \
 ```
 
 ### Delete Gateway Target
+
 ```bash
 aws bedrock-agentcore-control delete-gateway-target \
   --gateway-identifier <GATEWAY_ID> \

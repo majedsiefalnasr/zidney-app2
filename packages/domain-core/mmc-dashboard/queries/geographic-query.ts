@@ -45,4 +45,3 @@ export async function getRevenueByCountry(
 export default {
   getRevenueByCountry,
 }
-

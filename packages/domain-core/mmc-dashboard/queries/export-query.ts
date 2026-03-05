@@ -82,9 +82,7 @@ export async function countExportRows(
 /**
  * Get geographic data for export
  */
-export async function getGeographicExport(
-  pool: Pool
-) {
+export async function getGeographicExport(pool: Pool) {
   const query = `
     SELECT
       r.billing_country as country_code,
@@ -134,9 +132,7 @@ export async function getRevenueExport(
 /**
  * Get affiliate data for export
  */
-export async function getAffiliateExport(
-  pool: Pool
-) {
+export async function getAffiliateExport(pool: Pool) {
   const query = `
     SELECT
       a.name as affiliate_name,
@@ -157,9 +153,7 @@ export async function getAffiliateExport(
 /**
  * Get product data for export
  */
-export async function getProductExport(
-  pool: Pool
-) {
+export async function getProductExport(pool: Pool) {
   const query = `
     SELECT
       p.name->>'en' as product_name,
@@ -183,4 +177,3 @@ export default {
   getAffiliateExport,
   getProductExport,
 }
-
