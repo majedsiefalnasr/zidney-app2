@@ -5,7 +5,7 @@
   "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_04_BIOME.md",
   "branch": "spec/infra-004-biome",
   "base_branch": "develop",
-  "current_step": "pre_step",
+  "current_step": "specify",
   "stage_status": "DRAFT",
   "clarifications_resolved": false,
   "drift_passed": false,
@@ -18,6 +18,10 @@
     {
       "event": "branch_created",
       "branch": "spec/infra-004-biome",
+      "timestamp": "2026-03-06T00:00:00.000Z"
+    },
+    {
+      "event": "specify_complete",
       "timestamp": "2026-03-06T00:00:00.000Z"
     }
   ]

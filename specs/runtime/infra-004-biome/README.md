@@ -10,7 +10,7 @@
 | Step      | Status | SpecKit Output              | Orchestrator Output         |
 | --------- | ------ | --------------------------- | --------------------------- |
 | Pre-Step  | ✅     | —                           | —                           |
-| Specify   | ⬜     | spec.md, checklists/        | reports/SPECIFY_REPORT.md   |
+| Specify   | ✅     | spec.md, checklists/        | reports/SPECIFY_REPORT.md   |
 | Clarify   | ⬜     | spec.md (updated in-place)  | reports/CLARIFY_REPORT.md   |
 | Plan      | ⬜     | plan.md, research.md, etc.  | reports/PLAN_REPORT.md      |
 | Tasks     | ⬜     | tasks.md                    | reports/TASKS_REPORT.md     |
