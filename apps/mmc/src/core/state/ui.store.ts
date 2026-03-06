@@ -13,6 +13,8 @@ export const useMmcUiStore = defineStore('mmc-ui', () => {
   const modals = ref<Record<string, boolean>>({})
   const drawers = ref<Record<string, boolean>>({})
   const overlayVisible = ref<boolean>(false)
+  const sidebarCollapsed = ref<boolean>(false)
+  const isMobile = ref<boolean>(false)
 
   // ── Actions ────────────────────────────────────────────────────────────
   function openModal(id: string): void {
@@ -45,16 +47,31 @@ export const useMmcUiStore = defineStore('mmc-ui', () => {
     overlayVisible.value = false
   }
 
+  function toggleSidebar(): void {
+    sidebarCollapsed.value = !sidebarCollapsed.value
+  }
+
+  function setMobile(val: boolean): void {
+    if (isMobile.value === val) return // no-op if unchanged
+    isMobile.value = val
+    // CL-005: atomic reset of sidebarCollapsed on breakpoint transition
+    sidebarCollapsed.value = val // true on mobile, false on desktop
+  }
+
   function $reset(): void {
     modals.value = {}
     drawers.value = {}
     overlayVisible.value = false
+    sidebarCollapsed.value = false
+    isMobile.value = false
   }
 
   return {
     modals,
     drawers,
     overlayVisible,
+    sidebarCollapsed,
+    isMobile,
     openModal,
     closeModal,
     toggleModal,
@@ -64,6 +81,8 @@ export const useMmcUiStore = defineStore('mmc-ui', () => {
     showOverlay,
     hideOverlay,
     closeAll,
+    toggleSidebar,
+    setMobile,
     $reset,
   }
 })

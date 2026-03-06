@@ -1,13 +1,11 @@
 <template>
-  <BackofficeLayout>
-    <div class="p-8">
-      <h1 class="text-2xl font-semibold text-gray-900 mb-1">Dashboard</h1>
-      <p class="text-gray-500">
-        Welcome to <strong>{{ workspaceSlug }}</strong
-        >. Select a module from the sidebar to get started.
-      </p>
-    </div>
-  </BackofficeLayout>
+  <div class="p-8">
+    <h1 class="text-2xl font-semibold text-gray-900 mb-1">Dashboard</h1>
+    <p class="text-gray-500">
+      Welcome to <strong>{{ workspaceSlug }}</strong
+      >. Select a module from the sidebar to get started.
+    </p>
+  </div>
 </template>
 
 <script setup lang="ts">
@@ -27,7 +25,6 @@
  */
 
 import { computed } from 'vue'
-import BackofficeLayout from '../layouts/BackofficeLayout.vue'
 import { useContextStore } from '../stores/context'
 
 const contextStore = useContextStore()

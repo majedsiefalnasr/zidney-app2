@@ -18,7 +18,7 @@ const loginRoute: RouteRecordRaw = {
   path: '/login',
   name: 'bo-login',
   component: () => import('@/shared/views/NotFoundView.vue'), // TODO(STAGE_UI_01): replace with real LoginPage when auth module is ready
-  meta: { public: true },
+  meta: { public: true, standaloneLayout: true },
 }
 
 const dashboardRoute: RouteRecordRaw = {
@@ -46,21 +46,21 @@ const unauthorizedRoute: RouteRecordRaw = {
   path: '/unauthorized',
   name: 'bo-unauthorized',
   component: () => import('@/shared/views/UnauthorizedView.vue'),
-  meta: { public: true },
+  meta: { public: true, standaloneLayout: true },
 }
 
 const errorRoute: RouteRecordRaw = {
   path: '/error',
   name: 'bo-error',
   component: () => import('@/shared/views/GlobalErrorView.vue'),
-  meta: { public: true },
+  meta: { public: true, standaloneLayout: true },
 }
 
 const notFoundRoute: RouteRecordRaw = {
   path: '/:pathMatch(.*)*',
   name: 'bo-not-found',
   component: () => import('@/shared/views/NotFoundView.vue'),
-  meta: { public: true },
+  meta: { public: true, standaloneLayout: true },
 }
 
 // All application routes (guards registered in main.ts, not here)

@@ -1,3 +1,11 @@
 <template>
-  <RouterView />
+  <RouterView v-if="route.meta.standaloneLayout === true" />
+  <AppLayout v-else />
 </template>
+
+<script setup lang="ts">
+import AppLayout from '@/components/layout/AppLayout.vue'
+import { useRoute } from 'vue-router'
+
+const route = useRoute()
+</script>

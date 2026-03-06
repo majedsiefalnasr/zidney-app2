@@ -11,6 +11,13 @@ export default defineConfig({
         find: '@zidney/ui',
         replacement: resolve(__dirname, '../../packages/ui-system/src'),
       },
+      {
+        find: '@zidney/ui-system',
+        replacement: resolve(
+          __dirname,
+          '../../packages/ui-system/src/index.ts'
+        ),
+      },
     ],
   },
 })

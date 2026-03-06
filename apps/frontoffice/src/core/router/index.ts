@@ -18,7 +18,7 @@ const loginRoute: RouteRecordRaw = {
   path: '/login',
   name: 'fo-login',
   component: () => import('@/shared/views/NotFoundView.vue'), // TODO(STAGE_UI_01): replace with real LoginPage when auth module is ready
-  meta: { public: true },
+  meta: { public: true, standaloneLayout: true },
 }
 
 const homeRoute: RouteRecordRaw = {
@@ -32,21 +32,21 @@ const unauthorizedRoute: RouteRecordRaw = {
   path: '/unauthorized',
   name: 'fo-unauthorized',
   component: () => import('@/shared/views/UnauthorizedView.vue'),
-  meta: { public: true },
+  meta: { public: true, standaloneLayout: true },
 }
 
 const errorRoute: RouteRecordRaw = {
   path: '/error',
   name: 'fo-error',
   component: () => import('@/shared/views/GlobalErrorView.vue'),
-  meta: { public: true },
+  meta: { public: true, standaloneLayout: true },
 }
 
 const notFoundRoute: RouteRecordRaw = {
   path: '/:pathMatch(.*)*',
   name: 'fo-not-found',
   component: () => import('@/shared/views/NotFoundView.vue'),
-  meta: { public: true },
+  meta: { public: true, standaloneLayout: true },
 }
 
 // All application routes (guards registered in main.ts, not here)
