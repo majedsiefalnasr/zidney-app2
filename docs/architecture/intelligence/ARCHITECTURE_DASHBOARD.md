@@ -1,7 +1,7 @@
 # Zidney Architecture Dashboard
 
-**Generated:** 2026-03-05T13:06:51.039Z
-**Git SHA:** 7f1a81f4109a53cb4853d42682653dd50eb0e1a5
+**Generated:** 2026-03-05T21:59:03.579Z
+**Git SHA:** 71f05a51949e03516d5154484add836c4dea373b
 
 ## Architecture Score
 
@@ -22,30 +22,30 @@
 
 ## Test Distribution
 
-Total Tests: 185
+Total Tests: 206
 
-- Unit: 67
-- Integration: 100
+- Unit: 85
+- Integration: 103
 - E2E (spec): 18
 
 ## Dependency Graph
 
-Nodes: 49
+Nodes: 56
 
-Edges: 509
+Edges: 577
 
 ## Top Architectural Hotspots
 
-- packages/logger (185)
+- packages/logger (186)
 - packages/types (101)
 - packages/domain-core (77)
-- packages/api-client (17)
+- packages/api-client (18)
+- ./apps/mmc/srcvue/test-utils (17)
+- ./apps/mmc/srcpinia/testing (15)
+- ./apps/mmc/src/core/state/ui.store (12)
 - packages/validation (10)
 - ./apps/mmc/src/core/auth/refresh-manager (9)
 - ./apps/mmc/srcvitejs/plugin-vue (8)
-- ./apps/mmc/srchono/zod-validator (7)
-- ./apps/mmc/src/core/state/app.store (6)
-- ./apps/mmc/src/core/state/notification.store (6)
 
 ---
 

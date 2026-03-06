@@ -1,6 +1,5 @@
 {
-  "version": "1.0",
-  "generatedAt": "2026-03-05T21:59:03.583Z",
+  "generatedAt": "2026-03-05T21:59:03.580Z",
   "gitSha": "71f05a51949e03516d5154484add836c4dea373b",
   "architectureScore": 100,
   "modules": [
@@ -61,101 +60,6 @@
     "apps/worker",
     "./apps/mmc/srcaws-sdk/client-s3"
   ],
-  "layers": {
-    "packages": [
-      "packages/types",
-      "packages/logger",
-      "packages/config",
-      "packages/redis-utils",
-      "packages/ui-system",
-      "packages/api-client",
-      "packages/domain-core",
-      "packages/app",
-      "packages/validation",
-      "packages/ui"
-    ],
-    "apps": [
-      "apps/mmc",
-      "apps/frontoffice",
-      "apps/backoffice",
-      "apps/api",
-      "apps/worker"
-    ]
-  },
-  "rules": {
-    "dependencyRules": {
-      "forbidPackagesImportingApps": true,
-      "forbidAppsImportingOtherApps": true
-    },
-    "layerRules": {
-      "forbidUiImportingDomain": {
-        "source": "packages/ui-system",
-        "target": "packages/domain-core"
-      },
-      "forbidApiClientImportingWorker": {
-        "source": "packages/api-client",
-        "target": "apps/worker"
-      }
-    }
-  },
-  "moduleRisk": {
-    "packages/types": "MEDIUM",
-    "packages/logger": "HIGH",
-    "packages/config": "LOW",
-    "packages/redis-utils": "LOW",
-    "packages/ui-system": "LOW",
-    "./apps/mmc/srcvue/test-utils": "LOW",
-    "./apps/mmc/srctailwindcss/vite": "LOW",
-    "./apps/mmc/srcvitejs/plugin-vue": "LOW",
-    "./apps/mmc/srcvueuse/core": "LOW",
-    "./apps/mmc/srcunovis/vue": "LOW",
-    "./apps/mmc/srctanstack/vue-table": "LOW",
-    "packages/api-client": "LOW",
-    "packages/domain-core": "MEDIUM",
-    "packages/app": "LOW",
-    "packages/validation": "LOW",
-    "apps/mmc": "LOW",
-    "./apps/mmc/src/composables/useBreakpoint": "LOW",
-    "./apps/mmc/src/core/state/ui.store": "LOW",
-    "./apps/mmc/srcpinia/testing": "LOW",
-    "./apps/mmc/src/core/auth/token-redact": "LOW",
-    "./apps/mmc/src/core/state/app.store": "LOW",
-    "./apps/mmc/src/core/auth/types": "LOW",
-    "./apps/mmc/src/core/state/auth.store": "LOW",
-    "./apps/mmc/src/core/state/notification.store": "LOW",
-    "./apps/mmc/src/components/layout/AppSidebar.vue": "LOW",
-    "./apps/mmc/src/core/navigation/index": "LOW",
-    "./apps/mmc/src/components/layout/AppLayout.vue": "LOW",
-    "./apps/mmc/src/components/layout/AppHeader.vue": "LOW",
-    "./apps/mmc/src/App.vue": "LOW",
-    "./apps/mmc/srcplaywright/test": "LOW",
-    "./apps/mmc/srctypescript-eslint/parser": "LOW",
-    "./apps/mmc/src/core/api/interceptors/error.interceptor": "LOW",
-    "./apps/mmc/src/core/auth/refresh-manager": "LOW",
-    "./apps/mmc/src/core/auth/token-manager": "LOW",
-    "./apps/mmc/src/core/config/app-config": "LOW",
-    "./apps/mmc/src/modules/dashboard/routes": "LOW",
-    "./apps/mmc/src/modules/licenses/routes": "LOW",
-    "./apps/mmc/src/core/guards": "LOW",
-    "./apps/mmc/src/core/router": "LOW",
-    "./apps/mmc/src/core/api/client": "LOW",
-    "./apps/mmc/src/core/auth/auth.service": "LOW",
-    "./apps/mmc/src/core/state/license-status.store": "LOW",
-    "./apps/mmc/src/modules/dashboard/store": "LOW",
-    "packages/ui": "LOW",
-    "./apps/mmc/src/modules/dashboard/api": "LOW",
-    "apps/frontoffice": "LOW",
-    "apps/backoffice": "LOW",
-    "./apps/mmc/src/composables/usePermission": "LOW",
-    "./apps/mmc/src/core/state/workspace.store": "LOW",
-    "./apps/mmc/src/stores/context": "LOW",
-    "apps/api": "LOW",
-    "./apps/mmc/src/responses/license-error-handler": "LOW",
-    "./apps/mmc/src/logging": "LOW",
-    "./apps/mmc/srchono/zod-validator": "LOW",
-    "apps/worker": "LOW",
-    "./apps/mmc/srcaws-sdk/client-s3": "LOW"
-  },
   "edges": [
     {
       "from": "packages/redis-utils",
@@ -2465,5 +2369,122 @@
       "from": "apps/worker",
       "to": "packages/types"
     }
-  ]
+  ],
+  "hotspots": [
+    {
+      "module": "packages/logger",
+      "score": 186
+    },
+    {
+      "module": "packages/types",
+      "score": 101
+    },
+    {
+      "module": "packages/domain-core",
+      "score": 77
+    },
+    {
+      "module": "packages/api-client",
+      "score": 18
+    },
+    {
+      "module": "./apps/mmc/srcvue/test-utils",
+      "score": 17
+    },
+    {
+      "module": "./apps/mmc/srcpinia/testing",
+      "score": 15
+    },
+    {
+      "module": "./apps/mmc/src/core/state/ui.store",
+      "score": 12
+    },
+    {
+      "module": "packages/validation",
+      "score": 10
+    },
+    {
+      "module": "./apps/mmc/src/core/auth/refresh-manager",
+      "score": 9
+    },
+    {
+      "module": "./apps/mmc/srcvitejs/plugin-vue",
+      "score": 8
+    }
+  ],
+  "moduleRisk": {
+    "packages/types": "MEDIUM",
+    "packages/logger": "HIGH",
+    "packages/config": "LOW",
+    "packages/redis-utils": "LOW",
+    "packages/ui-system": "LOW",
+    "./apps/mmc/srcvue/test-utils": "LOW",
+    "./apps/mmc/srctailwindcss/vite": "LOW",
+    "./apps/mmc/srcvitejs/plugin-vue": "LOW",
+    "./apps/mmc/srcvueuse/core": "LOW",
+    "./apps/mmc/srcunovis/vue": "LOW",
+    "./apps/mmc/srctanstack/vue-table": "LOW",
+    "packages/api-client": "LOW",
+    "packages/domain-core": "MEDIUM",
+    "packages/app": "LOW",
+    "packages/validation": "LOW",
+    "apps/mmc": "LOW",
+    "./apps/mmc/src/composables/useBreakpoint": "LOW",
+    "./apps/mmc/src/core/state/ui.store": "LOW",
+    "./apps/mmc/srcpinia/testing": "LOW",
+    "./apps/mmc/src/core/auth/token-redact": "LOW",
+    "./apps/mmc/src/core/state/app.store": "LOW",
+    "./apps/mmc/src/core/auth/types": "LOW",
+    "./apps/mmc/src/core/state/auth.store": "LOW",
+    "./apps/mmc/src/core/state/notification.store": "LOW",
+    "./apps/mmc/src/components/layout/AppSidebar.vue": "LOW",
+    "./apps/mmc/src/core/navigation/index": "LOW",
+    "./apps/mmc/src/components/layout/AppLayout.vue": "LOW",
+    "./apps/mmc/src/components/layout/AppHeader.vue": "LOW",
+    "./apps/mmc/src/App.vue": "LOW",
+    "./apps/mmc/srcplaywright/test": "LOW",
+    "./apps/mmc/srctypescript-eslint/parser": "LOW",
+    "./apps/mmc/src/core/api/interceptors/error.interceptor": "LOW",
+    "./apps/mmc/src/core/auth/refresh-manager": "LOW",
+    "./apps/mmc/src/core/auth/token-manager": "LOW",
+    "./apps/mmc/src/core/config/app-config": "LOW",
+    "./apps/mmc/src/modules/dashboard/routes": "LOW",
+    "./apps/mmc/src/modules/licenses/routes": "LOW",
+    "./apps/mmc/src/core/guards": "LOW",
+    "./apps/mmc/src/core/router": "LOW",
+    "./apps/mmc/src/core/api/client": "LOW",
+    "./apps/mmc/src/core/auth/auth.service": "LOW",
+    "./apps/mmc/src/core/state/license-status.store": "LOW",
+    "./apps/mmc/src/modules/dashboard/store": "LOW",
+    "packages/ui": "LOW",
+    "./apps/mmc/src/modules/dashboard/api": "LOW",
+    "apps/frontoffice": "LOW",
+    "apps/backoffice": "LOW",
+    "./apps/mmc/src/composables/usePermission": "LOW",
+    "./apps/mmc/src/core/state/workspace.store": "LOW",
+    "./apps/mmc/src/stores/context": "LOW",
+    "apps/api": "LOW",
+    "./apps/mmc/src/responses/license-error-handler": "LOW",
+    "./apps/mmc/src/logging": "LOW",
+    "./apps/mmc/srchono/zod-validator": "LOW",
+    "apps/worker": "LOW",
+    "./apps/mmc/srcaws-sdk/client-s3": "LOW"
+  },
+  "architectureDrift": [],
+  "rules": {
+    "dependencyRules": {
+      "forbidPackagesImportingApps": true,
+      "forbidAppsImportingOtherApps": true
+    },
+    "layerRules": {
+      "forbidUiImportingDomain": {
+        "source": "packages/ui-system",
+        "target": "packages/domain-core"
+      },
+      "forbidApiClientImportingWorker": {
+        "source": "packages/api-client",
+        "target": "apps/worker"
+      }
+    }
+  }
 }

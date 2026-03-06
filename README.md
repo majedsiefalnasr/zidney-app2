@@ -1,98 +1,515 @@
 # Zidney
 
-A production-grade B2B2C white-label educational SaaS platform.
+A production‑grade **B2B2C white‑label educational SaaS platform** designed for multi‑tenant exam systems, learning platforms, and institutional deployments.
 
-## Monorepo Setup
+This repository is a **governed monorepo** built for **AI‑assisted development, strict architectural boundaries, and scalable runtime services**.
 
-This repository uses Bun workspaces for managing multiple applications and packages.
+---
+
+## 30‑Second Developer Onboarding
+
+If you just cloned the repository, follow these steps to get the platform running quickly.
+
+1. Install dependencies
+
+```
+bun install
+```
+
+2. Start required infrastructure
+
+```
+docker-compose up -d
+```
+
+3. Run the backend API
+
+```
+cd apps/api
+bun run dev
+```
+
+4. Start a frontend application (example: MMC)
+
+```
+cd apps/mmc
+bun run dev
+```
+
+5. Verify architecture integrity
+
+```
+bun scripts/infra-audit.ts
+```
+
+If the audit passes, your environment is correctly configured.
+
+---
+
+## Quick Start (Developers)
 
 ### Prerequisites
 
-- Bun stable 1.x
-- Docker and docker-compose
+- Bun (stable 1.x)
+- Docker
+- Docker Compose
+- Node compatible environment
+
+Verify installations:
+
+```
+bun --version
+docker --version
+```
+
+---
 
 ### Installation
 
-1. Clone the repository
-2. Install dependencies: `bun install`
-3. Start infrastructure: `docker-compose up -d`
-4. Verify services are running
+Clone the repository:
 
-### Development
+```
+git clone <repo-url>
+cd zidney
+```
 
-- API: `cd apps/api && bun run dev`
-- Worker: `cd apps/worker && bun run dev`
-- Frontend apps: `cd apps/<app> && bun run dev`
+Install dependencies:
 
-### Scripts
+```
+bun install
+```
 
-- `bun run lint`: Run ESLint
-- `bun run type-check`: Run TypeScript type checking
-- `bun run test`: Run tests with Vitest
+Start infrastructure services:
 
-## Architecture
+```
+docker-compose up -d
+```
 
-- **Apps**: api, worker, mmc, backoffice, frontoffice
-- **Packages**: domain-core, types, validation, ui-system, redis-utils, config
+This will start required services such as:
 
-Import boundaries are strictly enforced: apps import from packages only.
+- PostgreSQL
+- Redis
+- supporting infrastructure
 
-## AI Development Context
+---
 
-This repository is optimized for **AI-assisted development**.  
-Before generating or modifying code, AI agents must load the following files in order:
+## Running the Platform
 
-1. `docs/ai/AI_BOOTSTRAP.md`
-2. `docs/ai/AI_CONTEXT_INDEX.md`
-3. `docs/PROJECT_CONTEXT_PRIMER.md`
-4. `docs/ai/AI_ENGINEERING_RULES.md`
-5. `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json`
-6. `docs/architecture/ADR/`
+### Backend API
 
-These documents define the architecture rules, governance pipeline, and reasoning model required for safe AI-driven development.
+```
+cd apps/api
+bun run dev
+```
 
-AI tools should never generate code without first understanding these files.
+### Worker
+
+```
+cd apps/worker
+bun run dev
+```
+
+### Frontend Applications
+
+MMC (Master Management Console)
+
+```
+cd apps/mmc
+bun run dev
+```
+
+Backoffice
+
+```
+cd apps/backoffice
+bun run dev
+```
+
+Frontoffice
+
+```
+cd apps/frontoffice
+bun run dev
+```
+
+---
+
+## Repository Structure
+
+Zidney follows a **layered monorepo architecture**.
+
+apps/
+
+Runtime applications:
+
+- api → backend HTTP runtime
+- worker → background jobs
+- mmc → master management console
+- backoffice → tenant administration
+- frontoffice → student experience
+
+packages/
+
+Shared platform modules:
+
+- domain-core → domain models & business logic
+- types → shared TypeScript types
+- validation → schema validation
+- ui-system → shared UI component system
+- redis-utils → redis utilities
+- config → configuration management
+
+Architecture boundaries are enforced automatically.
+
+Applications may only import from **packages**.
+
+---
+
+## Architecture Overview
+
+The Zidney platform follows a **layered architecture** enforced by automated governance tools.
+
+```mermaid
+flowchart TD
+
+subgraph UI Layer
+  MMC[apps/mmc]
+  BACKOFFICE[apps/backoffice]
+  FRONTOFFICE[apps/frontoffice]
+  UI_SYSTEM[packages/ui-system]
+end
+
+subgraph Runtime Layer
+  API[apps/api]
+  WORKER[apps/worker]
+end
+
+subgraph Infrastructure Layer
+  CONFIG[packages/config]
+  LOGGER[packages/logger]
+  REDIS[packages/redis-utils]
+  API_CLIENT[packages/api-client]
+end
+
+subgraph Domain Layer
+  DOMAIN[packages/domain-core]
+  TYPES[packages/types]
+  VALIDATION[packages/validation]
+end
+
+MMC --> UI_SYSTEM
+BACKOFFICE --> UI_SYSTEM
+FRONTOFFICE --> UI_SYSTEM
+
+MMC --> API_CLIENT
+BACKOFFICE --> API_CLIENT
+FRONTOFFICE --> API_CLIENT
+
+API --> DOMAIN
+WORKER --> DOMAIN
+
+DOMAIN --> TYPES
+DOMAIN --> VALIDATION
+
+API --> CONFIG
+API --> LOGGER
+API --> REDIS
+
+WORKER --> CONFIG
+WORKER --> LOGGER
+WORKER --> REDIS
+```
+
+This diagram illustrates the **allowed dependency direction** between layers. Lower layers must never depend on higher layers.
+
+---
+
+---
+
+## Architecture Rules (TL;DR)
+
+These are the most important rules every developer must follow when working in the Zidney monorepo.
+
+### 1. Respect the Layered Architecture
+
+Zidney uses four architectural layers:
+
+- **domain** → core business logic
+- **infrastructure** → technical services (config, logging, redis, api clients)
+- **runtime** → backend applications (API, workers)
+- **ui** → frontend applications and shared UI system
+
+Lower layers must **never depend on higher layers**.
+
+Example (invalid):
+
+```
+packages/domain-core → packages/ui-system ❌
+```
+
+Example (valid):
+
+```
+apps/api → packages/domain-core ✔
+```
+
+---
+
+### 2. Applications Cannot Import Other Applications
+
+Applications must **only depend on packages**.
+
+Invalid:
+
+```
+apps/api → apps/worker ❌
+apps/mmc → apps/backoffice ❌
+```
+
+Valid:
+
+```
+apps/api → packages/domain-core ✔
+apps/mmc → packages/ui-system ✔
+```
+
+---
+
+### 3. All Modules Must Be Registered in the Architecture Map
+
+Every module must exist in:
+
+```
+docs/architecture/intelligence/ARCHITECTURE_MAP.json
+```
+
+When creating a new module:
+
+```
+bun run arch:add-module packages/<module-name>
+```
+
+---
+
+### 4. Architecture Is Enforced Automatically
+
+Violations are detected by:
+
+- `ai-guard.ts` (pre‑commit)
+- `infra-audit.ts` (local + CI)
+- CI governance workflows
+
+If architecture rules are broken, commits or CI checks will fail.
+
+---
+
+### 5. Always Run the Architecture Audit Before Pushing
+
+```
+bun scripts/infra-audit.ts
+```
+
+This ensures your changes respect the platform architecture.
+
+---
+
+## Development Commands
+
+Run linting:
+
+```
+bun run lint
+```
+
+Run TypeScript checks:
+
+```
+bun run type-check
+```
+
+Run tests:
+
+```
+bun run test
+```
+
+Run architecture audit:
+
+```
+bun scripts/infra-audit.ts
+```
+
+Regenerate architecture map:
+
+```
+bun run arch:generate
+```
+
+---
+
+## Common Development Workflows
+
+### Creating a Feature
+
+1. Create a feature branch
+
+```
+git checkout -b feature/<feature-name>
+```
+
+2. Implement the feature following architecture rules
+
+3. Run validation locally before committing
+
+```
+bun run lint
+bun run type-check
+bun run test
+bun scripts/infra-audit.ts
+```
+
+4. Commit changes
+
+```
+git commit -m "feat: <description>"
+```
+
+5. Push branch
+
+```
+git push origin feature/<feature-name>
+```
+
+---
+
+### Adding a New Module
+
+1. Create the module directory
+
+Example:
+
+```
+packages/my-new-module
+```
+
+2. Register the module in the architecture map
+
+```
+bun run arch:add-module packages/my-new-module
+```
+
+3. Verify architecture integrity
+
+```
+bun scripts/infra-audit.ts
+```
+
+---
+
+### Before Opening a Pull Request
+
+Always run the full validation pipeline locally:
+
+```
+bun run lint
+bun run type-check
+bun run test
+bun scripts/infra-audit.ts --ci
+```
+
+This ensures CI will pass and prevents architecture violations.
+
+---
+
+---
 
 ## Architecture Governance
 
-Zidney uses a **multi-layer architecture governance system** to protect the integrity of the platform.
+Zidney uses a **multi-layer architecture governance pipeline** to protect system integrity.
 
-Architecture validation occurs at multiple stages:
+Architecture validation occurs at several stages:
 
-1. **AI Bootstrap Context** – ensures AI agents understand the architecture.
-2. **Pre‑commit Guard (`ai-guard.ts`)** – blocks commits that violate architecture rules.
-3. **Infrastructure Audit (`infra-audit.ts`)** – analyzes repository structure and dependencies.
-4. **Architecture Diff (`architecture-diff.ts`)** – detects architectural drift in pull requests.
-5. **CI Governance Pipeline** – validates the repository in GitHub Actions.
+1. **AI Bootstrap Context**
+2. **Pre‑commit Guard (`ai-guard.ts`)**
+3. **Infrastructure Audit (`infra-audit.ts`)**
+4. **Architecture Drift Detection (`architecture-diff.ts`)**
+5. **CI Governance Pipeline**
 
-These checks enforce rules such as:
+These mechanisms enforce:
 
-- No cross‑app imports (`apps/* → apps/*`)
-- Domain isolation (`domain-core` cannot depend on application code)
-- Layered architecture boundaries
-- No architecture leaks through relative imports
+- strict module boundaries
+- layered architecture
+- domain isolation
+- dependency governance
+
+Architecture rules are defined in:
+
+`docs/architecture/intelligence/ARCHITECTURE_MAP.json`
+
+---
+
+## AI‑Assisted Development
+
+Zidney is optimized for **AI‑assisted engineering workflows**.
+
+AI agents must load the following files before modifying code:
+
+1. docs/ai/AI_BOOTSTRAP.md
+2. docs/ai/AI_CONTEXT_INDEX.md
+3. docs/PROJECT_CONTEXT_PRIMER.md
+4. docs/ai/AI_ENGINEERING_RULES.md
+5. docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json
+6. docs/architecture/ADR/
+
+These documents define:
+
+- architecture contracts
+- development rules
+- platform reasoning context
+
+AI tools should **never generate code without loading this context first**.
+
+---
 
 ## GitNexus Knowledge Graph (Optional)
 
-The repository can be indexed using **GitNexus** to provide AI agents with a semantic understanding of the codebase.
+The repository can be indexed using **GitNexus** to build a semantic knowledge graph of the codebase.
 
 Example usage:
 
 ```
+
 gitnexus analyze .
+
 gitnexus query tenant
+
 gitnexus context tenantResolver
+
 gitnexus impact createTenant
+
 ```
 
 GitNexus enables:
 
 - repository knowledge graph
-- execution flow discovery
 - dependency impact analysis
+- execution flow discovery
+- better AI reasoning
 
-This significantly improves AI reasoning when modifying large areas of the system.
+---
 
-## Environment
+## Environment Setup
 
-Copy `.env.example` to `.env` and configure as needed.
+Create a local environment configuration:
+
+```
+cp .env.example .env
+```
+
+Then configure environment variables according to your deployment environment.
+
+---
+
+## Maintainers
+
+Architecture governance and platform design follow the **Zidney Governance Charter** and ADR system.

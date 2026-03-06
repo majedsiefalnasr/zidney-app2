@@ -58,17 +58,39 @@ graph TD
   packages_validation --> packages_types
   packages_validation --> packages_logger
   packages_validation --> packages_types
+  apps_mmc --> ._apps_mmc_src_composables_useBreakpoint
+  apps_mmc --> ._apps_mmc_src_core_state_ui.store
+  apps_mmc --> ._apps_mmc_srcpinia_testing
+  apps_mmc --> ._apps_mmc_srcvue_test_utils
   apps_mmc --> ._apps_mmc_src_core_auth_token_redact
   apps_mmc --> ._apps_mmc_src_core_state_app.store
+  apps_mmc --> ._apps_mmc_src_core_state_ui.store
+  apps_mmc --> ._apps_mmc_src_core_auth_types
+  apps_mmc --> ._apps_mmc_src_core_state_auth.store
   apps_mmc --> ._apps_mmc_src_core_state_notification.store
   apps_mmc --> ._apps_mmc_src_core_state_notification.store
   apps_mmc --> ._apps_mmc_src_core_state_ui.store
+  apps_mmc --> ._apps_mmc_src_components_layout_AppSidebar.vue
+  apps_mmc --> ._apps_mmc_src_core_navigation_index
+  apps_mmc --> ._apps_mmc_srcpinia_testing
+  apps_mmc --> ._apps_mmc_srcvue_test_utils
+  apps_mmc --> ._apps_mmc_src_components_layout_AppLayout.vue
+  apps_mmc --> ._apps_mmc_srcpinia_testing
+  apps_mmc --> ._apps_mmc_srcvue_test_utils
+  apps_mmc --> ._apps_mmc_src_components_layout_AppHeader.vue
+  apps_mmc --> ._apps_mmc_srcpinia_testing
+  apps_mmc --> ._apps_mmc_srcvue_test_utils
   apps_mmc --> ._apps_mmc_src_core_state_app.store
+  apps_mmc --> ._apps_mmc_src_App.vue
+  apps_mmc --> ._apps_mmc_src_components_layout_AppLayout.vue
+  apps_mmc --> ._apps_mmc_srcpinia_testing
+  apps_mmc --> ._apps_mmc_srcvue_test_utils
   apps_mmc --> ._apps_mmc_srcplaywright_test
   apps_mmc --> ._apps_mmc_srcplaywright_test
   apps_mmc --> ._apps_mmc_srctypescript_eslint_parser
   apps_mmc --> ._apps_mmc_srcvitejs_plugin_vue
   apps_mmc --> ._apps_mmc_srcvitejs_plugin_vue
+  apps_mmc --> ._apps_mmc_src_core_state_ui.store
   apps_mmc --> packages_types
   apps_mmc --> packages_types
   apps_mmc --> packages_types
@@ -89,6 +111,7 @@ graph TD
   apps_mmc --> packages_api_client
   apps_mmc --> packages_logger
   apps_mmc --> packages_logger
+  apps_mmc --> packages_logger
   apps_mmc --> ._apps_mmc_src_modules_dashboard_routes
   apps_mmc --> ._apps_mmc_src_modules_licenses_routes
   apps_mmc --> ._apps_mmc_src_core_guards
@@ -106,19 +129,41 @@ graph TD
   apps_mmc --> ._apps_mmc_src_modules_dashboard_store
   apps_mmc --> packages_ui
   apps_mmc --> ._apps_mmc_src_modules_dashboard_api
+  apps_frontoffice --> ._apps_mmc_src_composables_useBreakpoint
+  apps_frontoffice --> ._apps_mmc_src_core_state_ui.store
+  apps_frontoffice --> ._apps_mmc_srcpinia_testing
+  apps_frontoffice --> ._apps_mmc_srcvue_test_utils
   apps_frontoffice --> ._apps_mmc_src_core_auth_token_redact
   apps_frontoffice --> ._apps_mmc_src_core_state_app.store
+  apps_frontoffice --> ._apps_mmc_src_core_state_ui.store
+  apps_frontoffice --> ._apps_mmc_src_core_auth_types
+  apps_frontoffice --> ._apps_mmc_src_core_state_auth.store
   apps_frontoffice --> ._apps_mmc_src_core_state_notification.store
   apps_frontoffice --> ._apps_mmc_src_core_state_notification.store
   apps_frontoffice --> ._apps_mmc_src_core_auth_types
   apps_frontoffice --> ._apps_mmc_src_core_state_auth.store
   apps_frontoffice --> ._apps_mmc_src_core_state_ui.store
+  apps_frontoffice --> ._apps_mmc_src_components_layout_AppSidebar.vue
+  apps_frontoffice --> ._apps_mmc_src_core_navigation_index
+  apps_frontoffice --> ._apps_mmc_srcpinia_testing
+  apps_frontoffice --> ._apps_mmc_srcvue_test_utils
+  apps_frontoffice --> ._apps_mmc_src_components_layout_AppLayout.vue
+  apps_frontoffice --> ._apps_mmc_srcpinia_testing
+  apps_frontoffice --> ._apps_mmc_srcvue_test_utils
+  apps_frontoffice --> ._apps_mmc_src_components_layout_AppHeader.vue
+  apps_frontoffice --> ._apps_mmc_srcpinia_testing
+  apps_frontoffice --> ._apps_mmc_srcvue_test_utils
   apps_frontoffice --> ._apps_mmc_src_core_state_app.store
+  apps_frontoffice --> ._apps_mmc_src_App.vue
+  apps_frontoffice --> ._apps_mmc_src_components_layout_AppLayout.vue
+  apps_frontoffice --> ._apps_mmc_srcpinia_testing
+  apps_frontoffice --> ._apps_mmc_srcvue_test_utils
   apps_frontoffice --> ._apps_mmc_srcplaywright_test
   apps_frontoffice --> ._apps_mmc_srcplaywright_test
   apps_frontoffice --> ._apps_mmc_srctypescript_eslint_parser
   apps_frontoffice --> ._apps_mmc_srcvitejs_plugin_vue
   apps_frontoffice --> ._apps_mmc_srcvitejs_plugin_vue
+  apps_frontoffice --> ._apps_mmc_src_core_state_ui.store
   apps_frontoffice --> packages_types
   apps_frontoffice --> packages_types
   apps_frontoffice --> packages_types
@@ -153,7 +198,14 @@ graph TD
   apps_frontoffice --> ._apps_mmc_src_core_state_auth.store
   apps_frontoffice --> ._apps_mmc_src_core_state_license_status.store
   apps_backoffice --> ._apps_mmc_src_composables_usePermission
+  apps_backoffice --> ._apps_mmc_src_composables_useBreakpoint
+  apps_backoffice --> ._apps_mmc_src_core_state_ui.store
+  apps_backoffice --> ._apps_mmc_srcpinia_testing
+  apps_backoffice --> ._apps_mmc_srcvue_test_utils
   apps_backoffice --> ._apps_mmc_src_core_state_app.store
+  apps_backoffice --> ._apps_mmc_src_core_state_ui.store
+  apps_backoffice --> ._apps_mmc_src_core_auth_types
+  apps_backoffice --> ._apps_mmc_src_core_state_auth.store
   apps_backoffice --> ._apps_mmc_src_core_state_workspace.store
   apps_backoffice --> packages_api_client
   apps_backoffice --> ._apps_mmc_src_core_state_notification.store
@@ -161,14 +213,29 @@ graph TD
   apps_backoffice --> ._apps_mmc_src_core_auth_types
   apps_backoffice --> ._apps_mmc_src_core_state_auth.store
   apps_backoffice --> ._apps_mmc_src_core_state_ui.store
+  apps_backoffice --> ._apps_mmc_src_components_layout_AppSidebar.vue
+  apps_backoffice --> ._apps_mmc_src_core_navigation_index
+  apps_backoffice --> ._apps_mmc_srcpinia_testing
+  apps_backoffice --> ._apps_mmc_srcvue_test_utils
+  apps_backoffice --> ._apps_mmc_src_components_layout_AppLayout.vue
+  apps_backoffice --> ._apps_mmc_srcpinia_testing
+  apps_backoffice --> ._apps_mmc_srcvue_test_utils
+  apps_backoffice --> ._apps_mmc_src_components_layout_AppHeader.vue
+  apps_backoffice --> ._apps_mmc_srcpinia_testing
+  apps_backoffice --> ._apps_mmc_srcvue_test_utils
   apps_backoffice --> ._apps_mmc_src_core_state_app.store
   apps_backoffice --> ._apps_mmc_src_core_state_workspace.store
+  apps_backoffice --> ._apps_mmc_src_App.vue
+  apps_backoffice --> ._apps_mmc_src_components_layout_AppLayout.vue
+  apps_backoffice --> ._apps_mmc_srcpinia_testing
+  apps_backoffice --> ._apps_mmc_srcvue_test_utils
   apps_backoffice --> ._apps_mmc_srcplaywright_test
   apps_backoffice --> ._apps_mmc_srcplaywright_test
   apps_backoffice --> ._apps_mmc_srctypescript_eslint_parser
   apps_backoffice --> ._apps_mmc_srcvitejs_plugin_vue
   apps_backoffice --> ._apps_mmc_srcvitejs_plugin_vue
   apps_backoffice --> packages_types
+  apps_backoffice --> ._apps_mmc_src_core_state_ui.store
   apps_backoffice --> packages_types
   apps_backoffice --> packages_types
   apps_backoffice --> packages_types
@@ -187,6 +254,7 @@ graph TD
   apps_backoffice --> packages_api_client
   apps_backoffice --> packages_api_client
   apps_backoffice --> packages_logger
+  apps_backoffice --> packages_api_client
   apps_backoffice --> packages_api_client
   apps_backoffice --> packages_api_client
   apps_backoffice --> packages_logger

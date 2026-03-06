@@ -1,0 +1,80 @@
+[
+  {
+    "module": "packages/types",
+    "layer": "domain",
+    "allowedDependencies": [],
+    "forbiddenDependencies": ["apps/*"]
+  },
+  {
+    "module": "packages/logger",
+    "layer": "infrastructure",
+    "allowedDependencies": [],
+    "forbiddenDependencies": []
+  },
+  {
+    "module": "packages/config",
+    "layer": "infrastructure",
+    "allowedDependencies": [],
+    "forbiddenDependencies": []
+  },
+  {
+    "module": "packages/redis-utils",
+    "layer": "infrastructure",
+    "allowedDependencies": [],
+    "forbiddenDependencies": []
+  },
+  {
+    "module": "packages/ui-system",
+    "layer": "ui",
+    "allowedDependencies": [],
+    "forbiddenDependencies": ["apps/*"]
+  },
+  {
+    "module": "packages/api-client",
+    "layer": "infrastructure",
+    "allowedDependencies": [],
+    "forbiddenDependencies": ["apps/*"]
+  },
+  {
+    "module": "packages/domain-core",
+    "layer": "domain",
+    "allowedDependencies": [],
+    "forbiddenDependencies": ["apps/*", "packages/ui-system"]
+  },
+  {
+    "module": "packages/validation",
+    "layer": "domain",
+    "allowedDependencies": [],
+    "forbiddenDependencies": ["apps/*"]
+  },
+  {
+    "module": "apps/mmc",
+    "layer": "ui",
+    "allowedDependencies": [],
+    "forbiddenDependencies": ["apps/*"]
+  },
+  {
+    "module": "apps/frontoffice",
+    "layer": "ui",
+    "allowedDependencies": [],
+    "forbiddenDependencies": ["apps/*"]
+  },
+  {
+    "module": "apps/backoffice",
+    "layer": "ui",
+    "allowedDependencies": [],
+    "forbiddenDependencies": ["apps/*"]
+  },
+  {
+    "module": "apps/api",
+    "layer": "runtime",
+    "allowedDependencies": [],
+    "forbiddenDependencies": ["apps/*", "packages/ui-system"]
+  },
+  {
+    "module": "apps/worker",
+    "layer": "runtime",
+    "allowedDependencies": [],
+    "forbiddenDependencies": ["apps/*", "packages/ui-system"]
+  }
+]

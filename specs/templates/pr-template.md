@@ -6,6 +6,7 @@
 - Phase: <PHASE_NUMBER>
 - Stage: <STAGE_NAME>
 - Branch: `<STAGE_DIR_NAME>`
+- Stage Directory: `specs/runtime/<STAGE_DIR_NAME>/`
 - Stage File: `specs/phases/<STAGE_FILE_NAME>`
 - Stage Status Before PR: IN PROGRESS
 - Stage Status After PR: PRODUCTION READY
@@ -16,6 +17,7 @@
 
 - [x] Feature
 - [ ] Architectural Change
+- [ ] Infrastructure / Governance
 - [ ] Security Hardening
 - [ ] Refactor (No Behavior Change)
 - [ ] Documentation
@@ -36,6 +38,9 @@
 ---
 
 ## 4. Workflow Completion Evidence
+
+Stage Directory:
+specs/runtime/<STAGE_DIR_NAME>/
 
 | Step      | Status      | Report Link                                                |
 | --------- | ----------- | ---------------------------------------------------------- |
@@ -61,6 +66,7 @@ Confirm compliance with Zidney Constitution v1.2.0:
 - [ ] No cross-tenant access introduced
 - [ ] No middleware bypass created
 - [ ] No shared mutable global state introduced
+- [ ] ARCHITECTURE_MAP.json rules preserved
 
 ---
 
@@ -104,9 +110,9 @@ Confirm compliance with Zidney Constitution v1.2.0:
 
 Test Command:
 
-\`\`\`
-npm run test -- --coverage
-\`\`\`
+```bash
+bun test
+```
 
 ---
 
@@ -126,6 +132,26 @@ npm run test -- --coverage
 - [ ] No cross-phase leakage
 - [ ] No unauthorized stage modification
 - [ ] ANALYZE_REPORT.md confirms APPROVED
+- [ ] ai-guard.ts executed
+
+---
+
+## 11A. Architecture Guard
+
+- [ ] `ai-guard.ts` passed
+- [ ] `infra-audit.ts` passed
+- [ ] No architecture drift detected
+- [ ] Architecture diagrams regenerated
+
+Architecture diagrams:
+docs/architecture/ARCHITECTURE_DIAGRAMS.md
+
+Commands:
+
+```bash
+bun scripts/infra-audit.ts
+bun scripts/ai-guard.ts
+```
 
 ---
 
@@ -170,5 +196,34 @@ Reviewer Sign-off:
 - [ ] Architecture Approved
 - [ ] Security Approved
 - [ ] Ready to Merge
+
+---
+
+## PR Checklist Enforcement (CI)
+
+This repository enforces **Hard Mode governance** automatically in CI.
+
+Before merging, ensure that:
+
+- All required checkboxes in this PR template are completed
+- `bun scripts/infra-audit.ts` passes
+- `bun scripts/ai-guard.ts` passes
+- No architecture drift is detected
+
+CI pipelines may block the merge if:
+
+- Required checklist items remain unchecked
+- Architecture violations are detected
+- Stage workflow reports are missing
+
+Local verification:
+
+```bash
+bun scripts/infra-audit.ts
+bun scripts/ai-guard.ts
+bun test
+```
+
+This ensures that Zidney's architecture, governance, and testing guarantees remain intact before merging.
 
 ---

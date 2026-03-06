@@ -1,6 +1,6 @@
 # Zidney Architecture Risk Heatmap
 
-Generated: 2026-03-05T13:06:51.042Z
+Generated: 2026-03-05T21:59:03.582Z
 
 ## Module Risk Classification
 
@@ -22,10 +22,19 @@ Generated: 2026-03-05T13:06:51.042Z
 | packages/app                                           | LOW    |
 | packages/validation                                    | LOW    |
 | apps/mmc                                               | LOW    |
+| ./apps/mmc/src/composables/useBreakpoint               | LOW    |
+| ./apps/mmc/src/core/state/ui.store                     | LOW    |
+| ./apps/mmc/srcpinia/testing                            | LOW    |
 | ./apps/mmc/src/core/auth/token-redact                  | LOW    |
 | ./apps/mmc/src/core/state/app.store                    | LOW    |
+| ./apps/mmc/src/core/auth/types                         | LOW    |
+| ./apps/mmc/src/core/state/auth.store                   | LOW    |
 | ./apps/mmc/src/core/state/notification.store           | LOW    |
-| ./apps/mmc/src/core/state/ui.store                     | LOW    |
+| ./apps/mmc/src/components/layout/AppSidebar.vue        | LOW    |
+| ./apps/mmc/src/core/navigation/index                   | LOW    |
+| ./apps/mmc/src/components/layout/AppLayout.vue         | LOW    |
+| ./apps/mmc/src/components/layout/AppHeader.vue         | LOW    |
+| ./apps/mmc/src/App.vue                                 | LOW    |
 | ./apps/mmc/srcplaywright/test                          | LOW    |
 | ./apps/mmc/srctypescript-eslint/parser                 | LOW    |
 | ./apps/mmc/src/core/api/interceptors/error.interceptor | LOW    |
@@ -38,13 +47,11 @@ Generated: 2026-03-05T13:06:51.042Z
 | ./apps/mmc/src/core/router                             | LOW    |
 | ./apps/mmc/src/core/api/client                         | LOW    |
 | ./apps/mmc/src/core/auth/auth.service                  | LOW    |
-| ./apps/mmc/src/core/state/auth.store                   | LOW    |
 | ./apps/mmc/src/core/state/license-status.store         | LOW    |
 | ./apps/mmc/src/modules/dashboard/store                 | LOW    |
 | packages/ui                                            | LOW    |
 | ./apps/mmc/src/modules/dashboard/api                   | LOW    |
 | apps/frontoffice                                       | LOW    |
-| ./apps/mmc/src/core/auth/types                         | LOW    |
 | apps/backoffice                                        | LOW    |
 | ./apps/mmc/src/composables/usePermission               | LOW    |
 | ./apps/mmc/src/core/state/workspace.store              | LOW    |

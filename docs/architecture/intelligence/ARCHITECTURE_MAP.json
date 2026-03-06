@@ -1,0 +1,99 @@
+{
+  "system": "Zidney",
+  "architecture_model": "layered-monorepo",
+  "version": "1.0",
+  "layers": ["domain", "infrastructure", "runtime", "ui"],
+  "modules": {
+    "packages/types": {
+      "layer": "domain",
+      "description": "Shared TypeScript types used across the entire platform",
+      "criticality": "core",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": ["apps/*"]
+    },
+    "packages/logger": {
+      "layer": "infrastructure",
+      "description": "Structured logging utilities",
+      "criticality": "infrastructure",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": []
+    },
+    "packages/config": {
+      "layer": "infrastructure",
+      "description": "Centralized configuration management",
+      "criticality": "infrastructure",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": []
+    },
+    "packages/redis-utils": {
+      "layer": "infrastructure",
+      "description": "Redis connection and caching utilities",
+      "criticality": "infrastructure",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": []
+    },
+    "packages/ui-system": {
+      "layer": "ui",
+      "description": "Shared UI component system used by all frontend applications",
+      "criticality": "ui",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": ["apps/*"]
+    },
+    "packages/api-client": {
+      "layer": "infrastructure",
+      "description": "HTTP client used by UI applications",
+      "criticality": "infrastructure",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": ["apps/*"]
+    },
+    "packages/domain-core": {
+      "layer": "domain",
+      "description": "Core domain models and business rules",
+      "criticality": "core",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": ["apps/*", "packages/ui-system"]
+    },
+    "packages/validation": {
+      "layer": "domain",
+      "description": "Schema validation and input validation utilities",
+      "criticality": "core",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": ["apps/*"]
+    },
+    "apps/mmc": {
+      "layer": "ui",
+      "description": "Master management console application",
+      "criticality": "ui",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": ["apps/*"]
+    },
+    "apps/frontoffice": {
+      "layer": "ui",
+      "description": "Student-facing frontoffice application",
+      "criticality": "ui",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": ["apps/*"]
+    },
+    "apps/backoffice": {
+      "layer": "ui",
+      "description": "Tenant backoffice administration application",
+      "criticality": "ui",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": ["apps/*"]
+    },
+    "apps/api": {
+      "layer": "runtime",
+      "description": "Main backend API runtime",
+      "criticality": "runtime",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": ["apps/*", "packages/ui-system"]
+    },
+    "apps/worker": {
+      "layer": "runtime",
+      "description": "Background job processing runtime",
+      "criticality": "runtime",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": ["apps/*", "packages/ui-system"]
+    }
+  }
+}
