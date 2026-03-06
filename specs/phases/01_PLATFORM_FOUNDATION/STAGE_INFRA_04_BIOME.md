@@ -18,31 +18,34 @@ This stage ensures consistent code style, eliminates toolchain fragmentation, an
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
 Last Updated: 2026-03-06T00:00:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Replace ESLint + Prettier with Biome as unified lint/format engine
-- Single root biome.json with noConsole exception for packages/logger
-- CI gates in ci.yml only (blocking, before AI-Guard)
-- lint-staged updated to use bun biome check --apply-unsafe
-- Line width 100 (intentional change from Prettier 80)
-- Import organization enabled globally
+- 3-Pass migration: Install Biome → Resolve violations → Remove legacy toolchain
+- Single root biome.json with logger/scripts/test overrides
+- noConsole enforcement across all apps and packages (groups A and B separated)
+- CI gates in ci.yml only (lint + format check)
+- lint-staged updated to bun biome check --apply-unsafe
+- 8 ESLint packages and 1 Prettier package removed
+- 6 config files deleted
 
 Deferred Scope:
 
-- Per-package biome.json overrides — explicitly excluded (logger exception documented)
-- Vue template syntax analysis — not supported by Biome
+- Per-package biome.json overrides — explicitly excluded
+- Vue template syntax — not supported by Biome
 - Custom Biome rule authoring — future enhancement
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Zidney Architecture Checker: PASS
+- Zidney API Designer: PASS
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
