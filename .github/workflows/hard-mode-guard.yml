@@ -24,27 +24,30 @@ jobs:
       - name: Resolve stage directory
         id: stage
         run: |
-          BRANCH="${{ github.head_ref }}"
+          BRANCH="${{ github.head_ref || github.ref_name }}"
+
+          STRIPPED_BRANCH="${BRANCH#spec/}"
 
           # Allowed patterns:
           #   NNN-kebab-name           → 020-status-workflow-engine
           #   prefix-NNN-kebab-name    → infra-001-typescript-stabilization
           #                            → ui-02-api-client-layer
-          if ! echo "$BRANCH" | grep -qE '^([a-z]+-)?[0-9]{2,3}[A-Z]?-'; then
+          if ! echo "$STRIPPED_BRANCH" | grep -qE '^([a-z]+-)?[0-9]{2,3}[A-Z]?-'; then
             echo "❌ Branch '$BRANCH' does not match the Hard Mode naming pattern."
             echo "   Allowed: NNN-name  or  prefix-NNN-name"
             echo "   Examples: 020-status-workflow-engine, infra-001-typescript-stabilization, ui-02-api-client-layer"
             exit 1
           fi
 
-          STAGE_DIR="specs/runtime/${BRANCH}"
+          STAGE_DIR="specs/runtime/${STRIPPED_BRANCH}"
           STATE_FILE="${STAGE_DIR}/.workflow-state.json"
 
           echo "stage_dir=${STAGE_DIR}" >> "$GITHUB_OUTPUT"
           echo "state_file=${STATE_FILE}" >> "$GITHUB_OUTPUT"
-          echo "branch=${BRANCH}" >> "$GITHUB_OUTPUT"
+          echo "branch=${STRIPPED_BRANCH}" >> "$GITHUB_OUTPUT"
 
           echo "✅ Branch  : $BRANCH"
+          echo "✅ Stage branch : $STRIPPED_BRANCH"
           echo "✅ Stage   : $STAGE_DIR"
           echo "✅ State   : $STATE_FILE"
 
