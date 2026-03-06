@@ -1,5 +1,4 @@
 #!/usr/bin/env node
- 
 
 /**
  * Zidney Hard Mode Validation Script
@@ -33,7 +32,7 @@ let state
 try {
   const raw = fs.readFileSync(statePath, 'utf-8')
   state = JSON.parse(raw)
-} catch (err) {
+} catch (_err) {
   fail('Invalid JSON format in specs/runtime/.workflow-state.json')
 }
 
@@ -94,7 +93,7 @@ try {
       )
     }
   }
-} catch (err) {
+} catch (_err) {
   fail('Unable to perform migration validation via git diff.')
 }
 

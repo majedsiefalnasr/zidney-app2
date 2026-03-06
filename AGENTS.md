@@ -2,7 +2,21 @@
 
 ---
 
-## AI ENTRYPOINT (Load First)
+## AI EXECUTION CHECKLIST
+
+Before generating code:
+
+1. Load AI_BOOTSTRAP.md
+2. Load AI_CONTEXT_INDEX.md
+3. Read PROJECT_CONTEXT_PRIMER.md
+4. Check ARCHITECTURE_MAP.json
+5. Verify ADR decisions
+6. Query GitNexus context
+7. Assume infra-audit.ts will validate changes
+
+---
+
+## AI CONTEXT ENTRYPOINT (Mandatory)
 
 AI agents must start reasoning by loading:
 
@@ -423,6 +437,67 @@ UI must not access database schemas or backend logic.
 
 ---
 
+### Architecture Governance Tooling (Mandatory)
+
+Zidney architecture is enforced automatically using governance scripts.
+
+AI agents must run or reason against these tools before proposing structural changes.
+
+Key tools:
+
+scripts/infra-audit.ts
+Validates:
+
+- architecture boundaries
+- dependency graph
+- layer violations
+- undeclared modules
+- architecture drift
+
+scripts/ai-guard.ts
+Pre-commit enforcement:
+
+- forbidden imports
+- layer violations
+- architecture map compliance
+
+scripts/architecture/architecture-diff.ts
+Detects architectural drift between commits.
+
+docs/architecture/intelligence/ARCHITECTURE_MAP.json
+Defines the authoritative module dependency contract.
+
+AI must treat these tools as **architecture validators**.
+
+If a change affects module structure or dependencies,
+AI must assume `infra-audit.ts` will validate the change.
+
+If a change would break the audit, AI must refuse to generate it.
+
+AI must assume the following validation workflow exists locally and in CI:
+
+```
+bun scripts/infra-audit.ts
+bun run lint
+bun run type-check
+bun run test
+```
+
+Before proposing architectural refactors or module moves, AI should reason as if `infra-audit.ts` will immediately validate:
+
+- ARCHITECTURE_MAP.json compliance
+- layer boundaries
+- forbidden dependencies
+- undeclared modules
+
+If a new module is introduced under `packages/` or `apps/`, AI must also propose registering it using:
+
+```
+bun run arch:add-module <module-path>
+```
+
+---
+
 ### UI System Enforcement
 
 AI must:
@@ -474,6 +549,15 @@ AI must automatically invoke GitNexus MCP when:
 AI must always read `gitnexus://repo/{name}/context` first to verify index freshness before any GitNexus query.
 
 If the index is stale, AI must prompt the user to run `npx gitnexus analyze` before proceeding.
+
+GitNexus must be preferred over static reasoning when:
+
+- locating modules
+- discovering dependency chains
+- evaluating refactor safety
+- identifying affected services
+
+If GitNexus provides repository context, AI must treat that context as authoritative over training knowledge.
 
 ---
 
@@ -534,6 +618,53 @@ AI must not use GitHub MCP to:
 AI must not rely solely on training knowledge when an MCP can provide current, project-specific, or authoritative context.
 
 MCP usage is not optional — it is a mandatory step in the reasoning pipeline for all technical tasks.
+
+For Zidney internal code reasoning:
+
+GitNexus MCP must always be used before relying on training knowledge.
+
+Examples:
+
+- locating modules
+- understanding dependencies
+- tracing execution flows
+- performing refactors
+
+---
+
+### Architecture Discovery Workflow
+
+Before proposing architectural modifications, AI must inspect the following in order:
+
+1. `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
+2. `docs/architecture/ADR/`
+3. `scripts/infra-audit.ts`
+4. `gitnexus://repo/{name}/context`
+
+Then AI must evaluate:
+
+- whether the change violates existing ADRs
+- whether the change breaks ARCHITECTURE_MAP.json contracts
+- whether the change introduces a new module requiring registration
+
+If any uncertainty exists, AI must stop and request clarification.
+
+---
+
+### Module Registration Rule
+
+All new modules must be registered in:
+
+docs/architecture/intelligence/ARCHITECTURE_MAP.json
+
+If AI proposes a new module under:
+
+packages/_
+apps/_
+
+AI must also propose registering the module using:
+
+bun run arch:add-module <module-path>
 
 ---
 
@@ -720,6 +851,105 @@ AI agents must refuse to continue if the trust chain is violated or if a stage l
 
 ---
 
+---
+
+## Auto‑Generated AI Architecture Intelligence Layer
+
+Zidney maintains an **AI‑readable architecture intelligence layer** to make automated reasoning about the codebase deterministic.
+
+This layer is generated from the repository structure and governance tools and must be treated as **machine‑readable architecture context**.
+
+Location:
+
+```
+docs/ai/context/
+```
+
+Generated artifacts:
+
+```
+docs/ai/context/
+├── ai-layer-model.json
+├── ai-module-map.json
+├── ai-dependency-graph.json
+├── ai-runtime-map.json
+├── ai-runtime-dependents.json
+├── ai-architecture-brain.json
+├── ai-architecture-diff.json
+├── ai-context-mini.json
+└── ai-architecture-summary.md
+```
+
+Purpose of each artifact:
+
+ai-layer-model.json
+Defines Zidney’s architectural layers and allowed dependency directions.
+
+ai-module-map.json
+Maps every module under `packages/` and `apps/` to its architecture layer.
+
+ai-dependency-graph.json
+Machine-readable graph of module dependencies used by:
+
+- `infra-audit.ts`
+- `ai-guard.ts`
+- CI architecture validation
+
+ai-runtime-map.json
+Defines runtime services and how they interact:
+
+- API
+- Worker
+- MMC
+- Backoffice
+- Frontoffice
+
+ai-architecture-summary.md
+Human-readable architecture overview automatically derived from the repository.
+
+ai-runtime-dependents.json
+Reverse dependency graph showing which services or modules depend on a given module. Used for blast‑radius analysis and refactor safety.
+
+ai-architecture-brain.json
+Machine‑readable architecture intelligence produced by `infra-audit.ts`. Contains dependency graph, architecture score, hotspots, and rule sets. This file is consumed by:
+
+- `scripts/ai-guard.ts`
+- GitNexus MCP
+- AI agents performing architectural reasoning
+
+ai-architecture-diff.json
+Generated architecture diff between the current audit and the previous snapshot. Used for detecting architectural drift in CI and PR validation.
+
+ai-context-mini.json
+A lightweight architecture context designed for MCP tools and AI agents that need fast bootstrap context without loading the full graph.
+
+AI agents must prefer this intelligence layer when performing:
+
+- architecture analysis
+- refactor planning
+- dependency tracing
+- blast radius analysis
+
+If these files exist, they are **authoritative for architecture discovery** and should be consulted before reasoning about module relationships.
+
+These files are generated automatically by the architecture governance system and must not be manually edited.
+
+If these files become outdated, regenerate the architecture intelligence layer:
+
+```
+bun scripts/infra-audit.ts
+```
+
+To automatically register newly detected modules in `ARCHITECTURE_MAP.json`, run the self‑healing audit:
+
+```
+bun scripts/infra-audit.ts --fix-map
+```
+
+This updates the architecture map when new modules appear under `packages/` or `apps/`.
+
+---
+
 ## Source of Truth Priority
 
 ADR (docs/architecture) > Specs > This file > Code
@@ -731,6 +961,15 @@ This contract is authoritative.
 # GitNexus MCP
 
 This project is indexed by GitNexus as **zidney-app2** (7071 symbols, 13978 relationships, 300 execution flows).
+
+AI must use GitNexus for:
+
+- understanding existing modules
+- impact analysis before refactors
+- dependency tracing
+- architectural discovery
+
+GitNexus is the authoritative internal code context.
 
 ## Always Start Here
 

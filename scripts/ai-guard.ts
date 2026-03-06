@@ -2,8 +2,9 @@
  * Zidney AI Guard
  *
  * Purpose:
- * Enforce architecture rules defined in
- * docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json
+ * Enforce architecture rules defined in:
+ *  - docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json
+ *  - docs/architecture/intelligence/ARCHITECTURE_MAP.json
  *
  * This script is intended to run:
  *  - before AI-generated commits
@@ -28,12 +29,58 @@ type ArchitectureContract = {
   }
 }
 
+type ArchitectureMap = {
+  modules?: Record<
+    string,
+    {
+      layer?: string
+      allowed_dependencies?: string[]
+      forbidden_dependencies?: string[]
+    }
+  >
+}
+
+type ArchitectureBrain = {
+  rules?: {
+    dependencyRules?: {
+      forbidden?: Record<string, string[]>
+    }
+    layerRules?: {
+      forbidden?: Record<string, string[]>
+    }
+  }
+  modules?: string[]
+  edges?: { from: string; to: string }[]
+}
+
 const CONTRACT_PATH =
   'docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json'
+
+const ARCH_MAP_PATH = 'docs/architecture/intelligence/ARCHITECTURE_MAP.json'
+
+const AI_BRAIN_PATH = 'docs/ai/context/ai-architecture-brain.json'
 
 function loadContract(): ArchitectureContract {
   const raw = readFileSync(CONTRACT_PATH, 'utf-8')
   return JSON.parse(raw)
+}
+
+function loadArchitectureMap(): ArchitectureMap {
+  try {
+    const raw = readFileSync(ARCH_MAP_PATH, 'utf-8')
+    return JSON.parse(raw)
+  } catch {
+    return {}
+  }
+}
+
+function loadArchitectureBrain(): ArchitectureBrain | null {
+  try {
+    const raw = readFileSync(AI_BRAIN_PATH, 'utf-8')
+    return JSON.parse(raw)
+  } catch {
+    return null
+  }
 }
 
 function getChangedFiles(): string[] {
@@ -98,6 +145,57 @@ function detectFileModule(file: string): string | null {
   }
 
   return null
+}
+
+function resolveModulePath(module: string): string | null {
+  if (!module) return null
+
+  if (module.startsWith('@zidney/')) {
+    return `packages/${module.replace('@zidney/', '')}`
+  }
+
+  if (module.startsWith('apps/') || module.startsWith('packages/')) {
+    return module.split('/').slice(0, 2).join('/')
+  }
+
+  return null
+}
+
+function validateArchitectureMap(
+  filePath: string,
+  fileModule: string,
+  imports: string[],
+  archMap: ArchitectureMap
+): string[] {
+  const violations: string[] = []
+
+  const modulePath = resolveModulePath(filePath)
+  if (!modulePath) return violations
+
+  const moduleDef = archMap.modules?.[modulePath]
+  if (!moduleDef) return violations
+
+  const allowed = moduleDef.allowed_dependencies || []
+  const forbidden = moduleDef.forbidden_dependencies || []
+
+  for (const imp of imports) {
+    const target = resolveModulePath(imp)
+    if (!target) continue
+
+    if (forbidden.includes(target)) {
+      violations.push(
+        `ARCH_MAP forbidden dependency: ${modulePath} → ${target}`
+      )
+    }
+
+    if (allowed.length > 0 && !allowed.includes(target)) {
+      violations.push(
+        `ARCH_MAP dependency not allowed: ${modulePath} → ${target}`
+      )
+    }
+  }
+
+  return violations
 }
 
 function validateRules(
@@ -170,8 +268,31 @@ function validateRelativeLeaks(filePath: string, imports: string[]): string[] {
   return violations
 }
 
+function getModuleDepsFromBrain(
+  modulePath: string,
+  brain: ArchitectureBrain
+): string[] {
+  if (!brain?.edges) return []
+
+  return brain.edges.filter((e) => e.from === modulePath).map((e) => e.to)
+}
+
 function runGuard() {
-  const contract = loadContract()
+  const brain = loadArchitectureBrain()
+  if (brain) {
+    console.log(
+      'AI Guard: using ai-architecture-brain.json for rule validation.'
+    )
+  }
+
+  const contract = brain?.rules
+    ? {
+        dependencyRules: brain.rules.dependencyRules,
+        layerRules: brain.rules.layerRules,
+      }
+    : loadContract()
+
+  const archMap = loadArchitectureMap()
 
   const changedFiles = getChangedFiles()
 
@@ -187,7 +308,27 @@ function runGuard() {
 
     if (!fileModule) continue
 
-    const imports = extractImports(file)
+    let imports = extractImports(file)
+
+    // Prefer architecture brain graph if available
+    if (brain) {
+      const modulePath = resolveModulePath(file)
+
+      if (modulePath) {
+        const brainDeps = getModuleDepsFromBrain(modulePath, brain)
+
+        if (brainDeps.length > 0) {
+          imports = brainDeps
+        }
+      }
+    }
+
+    const archMapViolations = validateArchitectureMap(
+      file,
+      fileModule,
+      imports,
+      archMap
+    )
 
     const crossAppViolations = validateCrossAppImports(
       fileModule,
@@ -215,7 +356,8 @@ function runGuard() {
       ...dependencyViolations.map((v) => `${file}: ${v}`),
       ...layerViolations.map((v) => `${file}: ${v}`),
       ...crossAppViolations.map((v) => `${file}: ${v}`),
-      ...relativeLeakViolations.map((v) => `${file}: ${v}`)
+      ...relativeLeakViolations.map((v) => `${file}: ${v}`),
+      ...archMapViolations.map((v) => `${file}: ${v}`)
     )
   }
 

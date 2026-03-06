@@ -64,7 +64,7 @@ interface Product {
   slug: string
 }
 
-interface Affiliate {
+interface _Affiliate {
   id: string
   name: string
   email: string

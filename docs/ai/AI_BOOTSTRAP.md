@@ -13,10 +13,13 @@ This ensures that AI reasoning starts from **architecture → governance → imp
 AI agents must load the following resources **in this exact order**:
 
 1. docs/ai/AI_CONTEXT_INDEX.md
-2. docs/PROJECT_CONTEXT_PRIMER.md
-3. docs/ai/AI_ENGINEERING_RULES.md
-4. docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json
-5. docs/architecture/ADR/
+2. docs/architecture/ZIDNEY_ARCHITECTURE_SYSTEM.md
+3. docs/PROJECT_CONTEXT_PRIMER.md
+4. docs/ai/AI_ENGINEERING_RULES.md
+5. docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json
+6. docs/architecture/module-boundaries.json
+7. docs/architecture/ADR/
+8. docs/ai/context/
 
 This establishes the following reasoning hierarchy:
 
@@ -31,6 +34,24 @@ System Context
 Codebase
 
 AI must **not generate code before these resources are loaded**.
+
+---
+
+# Architecture Knowledge Sources
+
+AI must treat the following files as the **authoritative architecture knowledge base**:
+
+```
+docs/architecture/ZIDNEY_ARCHITECTURE_SYSTEM.md
+docs/architecture/module-boundaries.json
+docs/architecture/ADR/
+docs/architecture/visualization/
+docs/ai/context/
+```
+
+These artifacts are generated and maintained by the infrastructure governance system and must always take precedence over assumptions derived from raw source code.
+
+When architecture metadata and code appear to conflict, AI must assume that the **architecture documents are correct** and investigate the code for potential violations.
 
 ---
 
@@ -257,10 +278,11 @@ If GitNexus MCP is available, AI should use it to obtain repository context.
 
 Recommended sequence:
 
-1. Load `gitnexus://repo/context`
-2. Retrieve dependency graph
-3. Validate proposed imports against architecture contract
-4. Continue reasoning
+1. Load docs/ai/AI_BOOTSTRAP.md
+2. Load docs/architecture/ZIDNEY_ARCHITECTURE_SYSTEM.md
+3. Query GitNexus for dependency graph
+4. Validate proposed imports against module-boundaries.json
+5. Continue reasoning
 
 This provides AI with **deep repository awareness**.
 

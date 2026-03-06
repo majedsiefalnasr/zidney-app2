@@ -224,6 +224,24 @@ export default tseslint.config(
     },
   },
 
+  // CLI scripts are allowed to use console for output
+  {
+    files: ['scripts/**/*.{ts,js}'],
+    rules: {
+      'no-console': 'off',
+      '@typescript-eslint/no-explicit-any': 'warn',
+      'no-empty': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        {
+          argsIgnorePattern: '^_',
+          varsIgnorePattern: '^_',
+          caughtErrorsIgnorePattern: '^_',
+        },
+      ],
+    },
+  },
+
   // eslint-config-prettier: Disable all ESLint rules that conflict with Prettier.
   // This MUST be the last entry in the config array.
   // Stage: STAGE_INFRA_03_ALIGNMENT — T042
