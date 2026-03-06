@@ -81,13 +81,13 @@
 
 ---
 
-- [ ] T007 [P] Replace `console.*` with `import { logger } from '@zidney/logger'` calls in apps/api/src/index.ts, apps/api/src/boot/migration-registry.ts, apps/api/src/infrastructure/redis.ts
-- [ ] T008 [P] Replace `console.*` with `@zidney/logger` calls in apps/api/src/middleware/auth/resolve-rbac.ts, apps/api/src/middleware/auth/validate-jwt.ts, apps/api/src/middleware/auth/validate-license-middleware.ts, apps/api/src/middleware/auth/validate-license.ts, apps/api/src/middleware/auth/validate-token-version.ts
-- [ ] T009 [P] Replace `console.*` with `@zidney/logger` calls in apps/api/src/middleware/backoffice-module-guard.ts, apps/api/src/middleware/backoffice-permission-guard-v2.ts, apps/api/src/middleware/backoffice-rbac-guard.ts, apps/api/src/middleware/correlation-id.ts, apps/api/src/middleware/error-handler.ts, apps/api/src/middleware/middleware-chain.ts, apps/api/src/middleware/rate-limit-provisioning.ts, apps/api/src/middleware/rate-limiting.ts, apps/api/src/middleware/request-logger.middleware.ts, apps/api/src/middleware/tenant-resolver.ts
-- [ ] T010 [P] Replace `console.*` with `@zidney/logger` calls in apps/api/src/handlers/licenses/create-license.ts, apps/api/src/modules/attempt/submit.ts, apps/api/src/modules/errors/error-formatter.ts, apps/api/src/modules/schema/migration-enqueue.ts, apps/api/src/modules/workspace-settings/workspace-settings.service.ts
-- [ ] T011 [P] Replace `console.*` with `@zidney/logger` calls in apps/api/src/routes/auth/backoffice-login.ts, apps/api/src/routes/auth/logout-all.ts, apps/api/src/routes/backoffice/context.ts, apps/api/src/routes/backoffice/roles.ts, apps/api/src/routes/backoffice/workflow/post-transition.ts, apps/api/src/routes/backoffice/ws.ts, apps/api/src/routes/health.ts
-- [ ] T012 [P] Replace `console.*` with `@zidney/logger` calls in apps/api/src/routes/mmc/affiliates/create.ts, apps/api/src/routes/mmc/affiliates/disable.ts, apps/api/src/routes/mmc/affiliates/edit.ts, apps/api/src/routes/mmc/affiliates/list.ts, apps/api/src/routes/mmc/affiliates/usages.ts
-- [ ] T013 [P] Replace `console.*` with `@zidney/logger` calls in apps/api/src/services/audit.service.ts, apps/api/src/utils/idempotency.ts
+- [x] T007 [P] Replace `console.*` with `import { logger } from '@zidney/logger'` calls in apps/api/src/index.ts, apps/api/src/boot/migration-registry.ts, apps/api/src/infrastructure/redis.ts
+- [x] T008 [P] Replace `console.*` with `@zidney/logger` calls in apps/api/src/middleware/auth/resolve-rbac.ts, apps/api/src/middleware/auth/validate-jwt.ts, apps/api/src/middleware/auth/validate-license-middleware.ts, apps/api/src/middleware/auth/validate-license.ts, apps/api/src/middleware/auth/validate-token-version.ts
+- [x] T009 [P] Replace `console.*` with `@zidney/logger` calls in apps/api/src/middleware/backoffice-module-guard.ts, apps/api/src/middleware/backoffice-permission-guard-v2.ts, apps/api/src/middleware/backoffice-rbac-guard.ts, apps/api/src/middleware/correlation-id.ts, apps/api/src/middleware/error-handler.ts, apps/api/src/middleware/middleware-chain.ts, apps/api/src/middleware/rate-limit-provisioning.ts, apps/api/src/middleware/rate-limiting.ts, apps/api/src/middleware/request-logger.middleware.ts, apps/api/src/middleware/tenant-resolver.ts
+- [x] T010 [P] Replace `console.*` with `@zidney/logger` calls in apps/api/src/handlers/licenses/create-license.ts, apps/api/src/modules/attempt/submit.ts, apps/api/src/modules/errors/error-formatter.ts, apps/api/src/modules/schema/migration-enqueue.ts, apps/api/src/modules/workspace-settings/workspace-settings.service.ts
+- [x] T011 [P] Replace `console.*` with `@zidney/logger` calls in apps/api/src/routes/auth/backoffice-login.ts, apps/api/src/routes/auth/logout-all.ts, apps/api/src/routes/backoffice/context.ts, apps/api/src/routes/backoffice/roles.ts, apps/api/src/routes/backoffice/workflow/post-transition.ts, apps/api/src/routes/backoffice/ws.ts, apps/api/src/routes/health.ts
+- [x] T012 [P] Replace `console.*` with `@zidney/logger` calls in apps/api/src/routes/mmc/affiliates/create.ts, apps/api/src/routes/mmc/affiliates/disable.ts, apps/api/src/routes/mmc/affiliates/edit.ts, apps/api/src/routes/mmc/affiliates/list.ts, apps/api/src/routes/mmc/affiliates/usages.ts
+- [x] T013 [P] Replace `console.*` with `@zidney/logger` calls in apps/api/src/services/audit.service.ts, apps/api/src/utils/idempotency.ts
 
 ---
 
@@ -101,7 +101,7 @@
 
 ---
 
-- [ ] T014 Read apps/worker/src/observability/structured-logger.ts — if it wraps `console.*` internally as a logger bridge (similar to `packages/logger/src/logger.ts`), add `"apps/worker/src/observability/structured-logger.ts"` to the `noConsole: "off"` override include list in `biome.json`; if it is not a bridge, replace its `console.*` calls with `@zidney/logger`
+- [x] T014 Read apps/worker/src/observability/structured-logger.ts — if it wraps `console.*` internally as a logger bridge (similar to `packages/logger/src/logger.ts`), add `"apps/worker/src/observability/structured-logger.ts"` to the `noConsole: "off"` override include list in `biome.json`; if it is not a bridge, replace its `console.*` calls with `@zidney/logger`
 
 ---
 
@@ -115,10 +115,10 @@
 
 ---
 
-- [ ] T015 [P] Replace `console.*` with `@zidney/logger` calls in apps/worker/src/config/queues.ts, apps/worker/src/config/worker-config.ts
-- [ ] T016 [P] Replace `console.*` with `@zidney/logger` calls in apps/worker/src/jobs/drain-language-translations.ts, apps/worker/src/jobs/grade-attempt.ts, apps/worker/src/jobs/lock-manager.ts, apps/worker/src/jobs/migration-phase.ts, apps/worker/src/jobs/retry-strategy.ts, apps/worker/src/jobs/snapshot-phase.ts
-- [ ] T017 [P] Replace `console.*` with `@zidney/logger` calls in apps/worker/src/modules/queue/job-queue.ts, apps/worker/src/processor.ts, apps/worker/src/queue.ts
-- [ ] T018 [P] Replace `console.*` with `@zidney/logger` calls in apps/worker/src/services/provisioning/BaselineSeeder.ts, apps/worker/src/services/provisioning/CheckpointManager.ts, apps/worker/src/services/provisioning/DistributedLock.ts, apps/worker/src/services/provisioning/ErrorHandling.ts, apps/worker/src/services/provisioning/JobQueue.ts, apps/worker/src/services/provisioning/MigrationExecutor.ts, apps/worker/src/services/provisioning/ProvisioningOrchestrator.ts
+- [x] T015 [P] Replace `console.*` with `@zidney/logger` calls in apps/worker/src/config/queues.ts, apps/worker/src/config/worker-config.ts
+- [x] T016 [P] Replace `console.*` with `@zidney/logger` calls in apps/worker/src/jobs/drain-language-translations.ts, apps/worker/src/jobs/grade-attempt.ts, apps/worker/src/jobs/lock-manager.ts, apps/worker/src/jobs/migration-phase.ts, apps/worker/src/jobs/retry-strategy.ts, apps/worker/src/jobs/snapshot-phase.ts
+- [x] T017 [P] Replace `console.*` with `@zidney/logger` calls in apps/worker/src/modules/queue/job-queue.ts, apps/worker/src/processor.ts, apps/worker/src/queue.ts
+- [x] T018 [P] Replace `console.*` with `@zidney/logger` calls in apps/worker/src/services/provisioning/BaselineSeeder.ts, apps/worker/src/services/provisioning/CheckpointManager.ts, apps/worker/src/services/provisioning/DistributedLock.ts, apps/worker/src/services/provisioning/ErrorHandling.ts, apps/worker/src/services/provisioning/JobQueue.ts, apps/worker/src/services/provisioning/MigrationExecutor.ts, apps/worker/src/services/provisioning/ProvisioningOrchestrator.ts
 
 ---
 
@@ -132,8 +132,8 @@
 
 ---
 
-- [ ] T019 [P] Add `// biome-ignore lint/suspicious/noConsole: migration runner output` inline suppression comments to all `console.*` calls in apps/api/src/db/master/migrations/0005_schema_version_increment.ts, apps/api/src/db/master/migrations/0006_create_dead_letter_queue.ts, apps/api/src/db/master/migrations/0007_create_dlq_resolutions.ts, apps/api/src/db/master/migrations/20260225_006_seed_roles_and_permissions.ts, apps/api/src/db/master/migrations/20260226_001_dashboard_indexes.ts, apps/api/src/db/master/migrations/runner.ts
-- [ ] T020 [P] Add `// biome-ignore lint/suspicious/noConsole: migration runner output` inline suppression comments to all `console.*` calls in apps/api/src/db/tenant/migrations/0008_add_idempotent_submission.ts, apps/api/src/db/tenant/migrations/0009_add_idempotent_indexes.ts, apps/api/src/db/tenant/migrations/0010_add_audit_indexes.ts
+- [x] T019 [P] Add `// biome-ignore lint/suspicious/noConsole: migration runner output` inline suppression comments to all `console.*` calls in apps/api/src/db/master/migrations/0005_schema_version_increment.ts, apps/api/src/db/master/migrations/0006_create_dead_letter_queue.ts, apps/api/src/db/master/migrations/0007_create_dlq_resolutions.ts, apps/api/src/db/master/migrations/20260225_006_seed_roles_and_permissions.ts, apps/api/src/db/master/migrations/20260226_001_dashboard_indexes.ts, apps/api/src/db/master/migrations/runner.ts
+- [x] T020 [P] Add `// biome-ignore lint/suspicious/noConsole: migration runner output` inline suppression comments to all `console.*` calls in apps/api/src/db/tenant/migrations/0008_add_idempotent_submission.ts, apps/api/src/db/tenant/migrations/0009_add_idempotent_indexes.ts, apps/api/src/db/tenant/migrations/0010_add_audit_indexes.ts
 
 ---
 
@@ -147,8 +147,8 @@
 
 ---
 
-- [ ] T021 Replace `console.*` with `@zidney/logger` calls in packages/domain-core/src/auth/password.ts, packages/domain-core/src/auth/audit.ts, packages/domain-core/src/utils/email.ts, packages/domain-core/src/services/audit.service.ts, packages/domain-core/src/tenant-resolver/version-check.ts; additionally, read packages/domain-core/src/logging/master-db-logger.ts — if it is a DB logger bridge wrapping `console.*` intentionally, add it to the `noConsole: "off"` override in `biome.json`; otherwise migrate its calls (**NOTE**: T021 is sequential — if biome.json is modified, T022 must start after T021 completes)
-- [ ] T022 [P] Add `// biome-ignore lint/suspicious/noConsole: migration runner output` inline suppression comments to all `console.*` calls in packages/domain-core/src/migration/master-migration-runner.ts, packages/domain-core/src/migration/snapshot-manager.ts, packages/domain-core/src/migration/tenant-migration-runner.ts
+- [x] T021 Replace `console.*` with `@zidney/logger` calls in packages/domain-core/src/auth/password.ts, packages/domain-core/src/auth/audit.ts, packages/domain-core/src/utils/email.ts, packages/domain-core/src/services/audit.service.ts, packages/domain-core/src/tenant-resolver/version-check.ts; additionally, read packages/domain-core/src/logging/master-db-logger.ts — if it is a DB logger bridge wrapping `console.*` intentionally, add it to the `noConsole: "off"` override in `biome.json`; otherwise migrate its calls (**NOTE**: T021 is sequential — if biome.json is modified, T022 must start after T021 completes)
+- [x] T022 [P] Add `// biome-ignore lint/suspicious/noConsole: migration runner output` inline suppression comments to all `console.*` calls in packages/domain-core/src/migration/master-migration-runner.ts, packages/domain-core/src/migration/snapshot-manager.ts, packages/domain-core/src/migration/tenant-migration-runner.ts
 
 ---
 
@@ -162,7 +162,7 @@
 
 ---
 
-- [ ] T023 [P] Replace `console.*` with `@zidney/logger` calls in packages/redis-utils/src/algorithms/token-bucket.ts (3x console.error), packages/redis-utils/src/algorithms/sliding-window.ts (3x console.error)
+- [x] T023 [P] Replace `console.*` with `@zidney/logger` calls in packages/redis-utils/src/algorithms/token-bucket.ts (3x console.error), packages/redis-utils/src/algorithms/sliding-window.ts (3x console.error)
 
 ---
 
@@ -176,7 +176,7 @@
 
 ---
 
-- [ ] T024 Run `bun biome check tests/ apps/*/tests/` and confirm zero `noConsole` violations are reported across all apps and packages; if violations appear, extend the `noConsole: "off"` override include patterns in `biome.json` to cover the missing paths (e.g., `apps/backoffice/tests/**`, `apps/frontoffice/tests/**`, `apps/worker/tests/**`)
+- [x] T024 Run `bun biome check tests/ apps/*/tests/` and confirm zero `noConsole` violations are reported across all apps and packages; if violations appear, extend the `noConsole: "off"` override include patterns in `biome.json` to cover the missing paths (e.g., `apps/backoffice/tests/**`, `apps/frontoffice/tests/**`, `apps/worker/tests/**`)
 
 ---
 
@@ -190,7 +190,7 @@
 
 ---
 
-- [ ] T042 [P] Run `bun biome check apps/backoffice/src/ apps/frontoffice/src/` and confirm zero `noConsole` violations; if any violations are reported, apply the same Group D strategy (biome-ignore suppression for error boundaries, remove debug calls) in the respective file
+- [x] T042 [P] Run `bun biome check apps/backoffice/src/ apps/frontoffice/src/` and confirm zero `noConsole` violations; if any violations are reported, apply the same Group D strategy (biome-ignore suppression for error boundaries, remove debug calls) in the respective file
 
 ---
 
@@ -204,8 +204,8 @@
 
 ---
 
-- [ ] T025 [P] In apps/mmc/src/shared/components/AuditTrailViewer.vue: add `// biome-ignore lint/suspicious/noConsole: frontend error boundary` on each of the 2x `console.error` calls; in apps/mmc/src/modules/dashboard/views/DashboardView.vue: add same suppression on each of the 3x `console.error` calls
-- [ ] T026 [P] In apps/mmc/src/modules/licenses/views/LicenseList.vue: remove the 1x debug `console.log` call entirely; in apps/mmc/src/modules/dashboard/api.ts: add `// biome-ignore lint/suspicious/noConsole: frontend error boundary` on each of the 6x `console.error` calls; in apps/mmc/src/modules/dashboard/store.ts: add same suppression on each of the 6x `console.error` calls
+- [x] T025 [P] In apps/mmc/src/shared/components/AuditTrailViewer.vue: add `// biome-ignore lint/suspicious/noConsole: frontend error boundary` on each of the 2x `console.error` calls; in apps/mmc/src/modules/dashboard/views/DashboardView.vue: add same suppression on each of the 3x `console.error` calls
+- [x] T026 [P] In apps/mmc/src/modules/licenses/views/LicenseList.vue: remove the 1x debug `console.log` call entirely; in apps/mmc/src/modules/dashboard/api.ts: add `// biome-ignore lint/suspicious/noConsole: frontend error boundary` on each of the 6x `console.error` calls; in apps/mmc/src/modules/dashboard/store.ts: add same suppression on each of the 6x `console.error` calls
 
 ---
 
@@ -219,8 +219,8 @@
 
 ---
 
-- [ ] T027 Run `bun biome check .` — must exit with code 0; if violations remain, fix before proceeding to Pass 3
-- [ ] T028 Run `bun biome format --check .` — must exit with code 0; if formatting issues remain, run `bun biome format --write .` to resolve, then re-run check
+- [x] T027 Run `bun biome check .` — must exit with code 0; if violations remain, fix before proceeding to Pass 3
+- [x] T028 Run `bun biome format --check .` — must exit with code 0; if formatting issues remain, run `bun biome format --write .` to resolve, then re-run check
 
 ---
 
@@ -234,8 +234,8 @@
 
 ---
 
-- [ ] T029 Remove the following 8 ESLint entries from `devDependencies` in root `package.json`: `@eslint/js`, `eslint`, `eslint-config-prettier`, `eslint-import-resolver-typescript`, `eslint-plugin-import-x`, `eslint-plugin-vue`, `globals`, `typescript-eslint`
-- [ ] T030 Remove `prettier` from `devDependencies` in root `package.json`
+- [x] T029 Remove the following 8 ESLint entries from `devDependencies` in root `package.json`: `@eslint/js`, `eslint`, `eslint-config-prettier`, `eslint-import-resolver-typescript`, `eslint-plugin-import-x`, `eslint-plugin-vue`, `globals`, `typescript-eslint`
+- [x] T030 Remove `prettier` from `devDependencies` in root `package.json`
 
 ---
 
@@ -249,9 +249,9 @@
 
 ---
 
-- [ ] T031 [P] Delete `eslint.config.mjs` at the repo root
-- [ ] T032 [P] Delete `apps/backoffice/eslint.config.js`, `apps/frontoffice/eslint.config.js`, `apps/mmc/eslint.config.js`; do NOT delete `packages/ui-system/.eslintrc-ui-guard.md` — that file is Markdown documentation, not an ESLint config
-- [ ] T033 [P] Delete `prettier.config.mjs` and `.prettierrc` at the repo root
+- [x] T031 [P] Delete `eslint.config.mjs` at the repo root
+- [x] T032 [P] Delete `apps/backoffice/eslint.config.js`, `apps/frontoffice/eslint.config.js`, `apps/mmc/eslint.config.js`; do NOT delete `packages/ui-system/.eslintrc-ui-guard.md` — that file is Markdown documentation, not an ESLint config
+- [x] T033 [P] Delete `prettier.config.mjs` and `.prettierrc` at the repo root
 
 ---
 
@@ -265,11 +265,11 @@
 
 ---
 
-- [ ] T034 Replace the entire contents of `lint-staged.config.mjs` with: `/** @type {import('lint-staged').Config} */\nexport default {\n  '*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --apply'],\n}` — removes `eslint --fix` and `prettier --write`; drops `.md` files; adds `json`/`js`/`jsx`/`mjs` extensions. **NOTE**: `--apply` (safe fixes only) is used in pre-commit to prevent silent staged-code mutation; `--apply-unsafe` is available via direct invocation: `bun biome check --apply-unsafe .` (`lint:fix` script uses `--apply` for safe fixes only).
-- [ ] T035 Update `.github/workflows/ci.yml` lint job: change the display `name:` to `'Biome — Lint & Format'`; replace the `Run ESLint` step (`bun run lint -- --debug`) with `- name: Run Biome lint check\n  run: bun biome check .`; replace the `Check Prettier formatting` step (`bun run format:check`) with `- name: Run Biome format check\n  run: bun biome format --check .`; keep the YAML key `lint:` unchanged to preserve all downstream `needs: [lint]` references
-- [ ] T036 Update the `scripts` section of root `package.json`: replace `"lint": "eslint ."` with `"lint": "bun biome check ."`; replace `"format": "prettier --write ."` with `"format": "bun biome format --write ."`; replace `"format:check": "prettier --check ."` with `"format:check": "bun biome format --check ."`; verify no remaining `eslint` or `prettier` invocations remain in the scripts section
-- [ ] T037 [P] Create `.vscode/extensions.json` with content: `{\n  "recommendations": ["biomejs.biome"]\n}`
-- [ ] T038 [P] Update `.vscode/settings.json` — append the following keys without overwriting any existing entries: `"[typescript]": { "editor.defaultFormatter": "biomejs.biome" }`, `"[typescriptreact]": { "editor.defaultFormatter": "biomejs.biome" }`, `"[javascript]": { "editor.defaultFormatter": "biomejs.biome" }`, `"[vue]": { "editor.defaultFormatter": "biomejs.biome" }`, `"[json]": { "editor.defaultFormatter": "biomejs.biome" }`, `"editor.formatOnSave": true`
+- [x] T034 Replace the entire contents of `lint-staged.config.mjs` with: `/** @type {import('lint-staged').Config} */\nexport default {\n  '*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --apply'],\n}` — removes `eslint --fix` and `prettier --write`; drops `.md` files; adds `json`/`js`/`jsx`/`mjs` extensions. **NOTE**: `--apply` (safe fixes only) is used in pre-commit to prevent silent staged-code mutation; `--apply-unsafe` is available via direct invocation: `bun biome check --apply-unsafe .` (`lint:fix` script uses `--apply` for safe fixes only).
+- [x] T035 Update `.github/workflows/ci.yml` lint job: change the display `name:` to `'Biome — Lint & Format'`; replace the `Run ESLint` step (`bun run lint -- --debug`) with `- name: Run Biome lint check\n  run: bun biome check .`; replace the `Check Prettier formatting` step (`bun run format:check`) with `- name: Run Biome format check\n  run: bun biome format --check .`; keep the YAML key `lint:` unchanged to preserve all downstream `needs: [lint]` references
+- [x] T036 Update the `scripts` section of root `package.json`: replace `"lint": "eslint ."` with `"lint": "bun biome check ."`; replace `"format": "prettier --write ."` with `"format": "bun biome format --write ."`; replace `"format:check": "prettier --check ."` with `"format:check": "bun biome format --check ."`; verify no remaining `eslint` or `prettier` invocations remain in the scripts section
+- [x] T037 [P] Create `.vscode/extensions.json` with content: `{\n  "recommendations": ["biomejs.biome"]\n}`
+- [x] T038 [P] Update `.vscode/settings.json` — append the following keys without overwriting any existing entries: `"[typescript]": { "editor.defaultFormatter": "biomejs.biome" }`, `"[typescriptreact]": { "editor.defaultFormatter": "biomejs.biome" }`, `"[javascript]": { "editor.defaultFormatter": "biomejs.biome" }`, `"[vue]": { "editor.defaultFormatter": "biomejs.biome" }`, `"[json]": { "editor.defaultFormatter": "biomejs.biome" }`, `"editor.formatOnSave": true`
 
 ---
 
@@ -283,7 +283,7 @@
 
 ---
 
-- [ ] T039 Run `bun install` from the repo root to regenerate `bun.lock` after all `package.json` devDependency removals
+- [x] T039 Run `bun install` from the repo root to regenerate `bun.lock` after all `package.json` devDependency removals
 
 ---
 
@@ -297,10 +297,10 @@
 
 ---
 
-- [ ] T040 Run `bun biome check .` — must exit with code 0 (final gate; any failure indicates a violation missed in Pass 2)
-- [ ] T041 Run `bun biome format --check .` — must exit with code 0 (final gate; any failure indicates uncommitted formatting changes)
-- [ ] T044 Run `bun run typecheck` (or `bunx tsc --noEmit`) — must exit with code 0; confirms that the toolchain migration introduced no TypeScript regressions
-- [ ] T045 Run `bun run test:unit` (or matching unit test script) — must exit with code 0; confirms no unit test regressions were introduced by the console.\* migrations or config file removals
+- [x] T040 Run `bun biome check .` — must exit with code 0 (final gate; any failure indicates a violation missed in Pass 2)
+- [x] T041 Run `bun biome format --check .` — must exit with code 0 (final gate; any failure indicates uncommitted formatting changes)
+- [x] T044 Run `bun run typecheck` (or `bunx tsc --noEmit`) — must exit with code 0; confirms that the toolchain migration introduced no TypeScript regressions
+- [x] T045 Run `bun run test:unit` (or matching unit test script) — must exit with code 0; confirms no unit test regressions were introduced by the console.\* migrations or config file removals
 
 ---
 
@@ -314,7 +314,7 @@
 
 ---
 
-- [ ] T043 Update root `README.md` (or `docs/` developer setup guide if it exists) to document the new toolchain: add a "Linting & Formatting" section with commands `bun run lint` (check), `bun run format` (auto-fix), `bun run format:check` (CI check), and recommend the `biomejs.biome` VSCode extension (already configured in `.vscode/extensions.json`)
+- [x] T043 Update root `README.md` (or `docs/` developer setup guide if it exists) to document the new toolchain: add a "Linting & Formatting" section with commands `bun run lint` (check), `bun run format` (auto-fix), `bun run format:check` (CI check), and recommend the `biomejs.biome` VSCode extension (already configured in `.vscode/extensions.json`)
 
 ---
 
