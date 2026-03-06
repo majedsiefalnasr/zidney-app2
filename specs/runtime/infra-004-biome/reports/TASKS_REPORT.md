@@ -10,7 +10,7 @@
 
 ## Summary
 
-41 atomic tasks generated across 16 phases. 29 tasks are parallelizable. Full coverage of 3-pass migration strategy.
+45 atomic tasks generated across 17 phases. 30 tasks are parallelizable. Full coverage of 3-pass migration strategy.
 
 **Drift analysis gate required before implementation.**
 
@@ -20,11 +20,11 @@
 
 | Metric               | Value |
 | -------------------- | ----- |
-| Total tasks          | 41    |
-| Parallelizable tasks | 29    |
-| Sequential tasks     | 12    |
+| Total tasks          | 45    |
+| Parallelizable tasks | 30    |
+| Sequential tasks     | 15    |
 | Passes               | 3     |
-| Phases               | 16    |
+| Phases               | 17    |
 
 ---
 
@@ -75,6 +75,10 @@
 | T039          | Create/update `.vscode/extensions.json` with Biome extension recommendation                                                                                                                                      |
 | T040          | Run `bun install` to regenerate lockfile with removed packages                                                                                                                                                   |
 | T041          | Final verification: `bun biome check .` (exit 0) + `bun biome format --check .` (exit 0)                                                                                                                         |
+| T042          | Phase 9B: Verify `apps/backoffice/src` and `apps/frontoffice/src` with `bun biome check` — expected zero violations                                                                                              |
+| T043          | Phase 17: Update root `README.md` with Biome workflow commands and VSCode extension recommendation                                                                                                               |
+| T044          | Phase 16: `bun run typecheck` — must exit 0                                                                                                                                                                      |
+| T045          | Phase 16: `bun run test:unit` — must exit 0                                                                                                                                                                      |
 
 ---
 
@@ -112,9 +116,9 @@ T040, T039 → T041 (final verification)
 
 ## Artifacts Produced
 
-| File                                   | Owner   | Status                |
-| -------------------------------------- | ------- | --------------------- |
-| specs/runtime/infra-004-biome/tasks.md | SpecKit | ✅ Created (41 tasks) |
+| File                                   | Owner   | Status                                                |
+| -------------------------------------- | ------- | ----------------------------------------------------- |
+| specs/runtime/infra-004-biome/tasks.md | SpecKit | ✅ Created (45 tasks, after Analyze gate remediation) |
 
 ---
 

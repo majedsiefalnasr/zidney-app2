@@ -143,11 +143,11 @@
 
 **Exit criterion:** `grep -rn "console\." packages/domain-core/src/` returns only biome-ignore annotated lines.
 
-**Dependency:** Requires Phase 2 completion. T021 and T022 may run in parallel with each other and with Phases 3-6.
+**Dependency:** Requires Phase 2 completion. T021 runs sequentially (it may modify `biome.json` based on bridge evaluation; T022 may run in parallel with Phases 3-6 after T021 settles the biome.json override question).
 
 ---
 
-- [ ] T021 [P] Replace `console.*` with `@zidney/logger` calls in packages/domain-core/src/auth/password.ts, packages/domain-core/src/auth/audit.ts, packages/domain-core/src/utils/email.ts, packages/domain-core/src/services/audit.service.ts, packages/domain-core/src/tenant-resolver/version-check.ts; additionally, read packages/domain-core/src/logging/master-db-logger.ts — if it is a DB logger bridge wrapping `console.*` intentionally, add it to the `noConsole: "off"` override in `biome.json`; otherwise migrate its calls
+- [ ] T021 Replace `console.*` with `@zidney/logger` calls in packages/domain-core/src/auth/password.ts, packages/domain-core/src/auth/audit.ts, packages/domain-core/src/utils/email.ts, packages/domain-core/src/services/audit.service.ts, packages/domain-core/src/tenant-resolver/version-check.ts; additionally, read packages/domain-core/src/logging/master-db-logger.ts — if it is a DB logger bridge wrapping `console.*` intentionally, add it to the `noConsole: "off"` override in `biome.json`; otherwise migrate its calls (**NOTE**: T021 is sequential — if biome.json is modified, T022 must start after T021 completes)
 - [ ] T022 [P] Add `// biome-ignore lint/suspicious/noConsole: migration runner output` inline suppression comments to all `console.*` calls in packages/domain-core/src/migration/master-migration-runner.ts, packages/domain-core/src/migration/snapshot-manager.ts, packages/domain-core/src/migration/tenant-migration-runner.ts
 
 ---
@@ -176,7 +176,21 @@
 
 ---
 
-- [ ] T024 Run `bun biome check tests/ apps/mmc/tests/ apps/api/tests/` and confirm zero `noConsole` violations are reported; if violations appear, extend the `noConsole: "off"` override include patterns in `biome.json` to cover the missing paths (e.g., `apps/mmc/tests/**`, `apps/api/tests/**`)
+- [ ] T024 Run `bun biome check tests/ apps/*/tests/` and confirm zero `noConsole` violations are reported across all apps and packages; if violations appear, extend the `noConsole: "off"` override include patterns in `biome.json` to cover the missing paths (e.g., `apps/backoffice/tests/**`, `apps/frontoffice/tests/**`, `apps/worker/tests/**`)
+
+---
+
+## Phase 9B — PASS 2: Group E Verification — apps/backoffice and apps/frontoffice
+
+**Goal:** Confirm that apps/backoffice and apps/frontoffice contain no `console.*` violations. Both apps are in-scope per spec.md Scope table. Pre-scan confirmed these apps reference `console` only in JSDoc comments (not executable code), so this phase is a verification gate only — no source modification expected.
+
+**Exit criterion:** `bun biome check apps/backoffice/src/ apps/frontoffice/src/` reports zero `noConsole` violations.
+
+**Dependency:** Requires T002 (biome.json) to be complete. Can run in parallel with Phase 9.
+
+---
+
+- [ ] T042 [P] Run `bun biome check apps/backoffice/src/ apps/frontoffice/src/` and confirm zero `noConsole` violations; if any violations are reported, apply the same Group D strategy (biome-ignore suppression for error boundaries, remove debug calls) in the respective file
 
 ---
 
@@ -245,13 +259,13 @@
 
 **Goal:** Replace all ESLint/Prettier invocations in lint-staged, CI, and package.json scripts with Biome. Create the VS Code extension recommendation.
 
-**Exit criterion:** `bun run lint` invokes `bun biome check .`; `bun run format:check` invokes `bun biome format --check .`; CI `lint` job runs two Biome steps; lint-staged hook invokes `bun biome check --apply-unsafe`; `.vscode/extensions.json` exists recommending `biomejs.biome`.
+**Exit criterion:** `bun run lint` invokes `bun biome check .`; `bun run format:check` invokes `bun biome format --check .`; CI `lint` job runs two Biome steps; lint-staged hook invokes `bun biome check --apply`; `.vscode/extensions.json` exists recommending `biomejs.biome`.
 
 **Dependency:** Requires Phase 12-13 completion. T037 and T038 may run in parallel with T034-T036.
 
 ---
 
-- [ ] T034 Replace the entire contents of `lint-staged.config.mjs` with: `/** @type {import('lint-staged').Config} */\nexport default {\n  '*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --apply-unsafe'],\n}` — removes `eslint --fix` and `prettier --write`; drops `.md` files; adds `json`/`js`/`jsx`/`mjs` extensions
+- [ ] T034 Replace the entire contents of `lint-staged.config.mjs` with: `/** @type {import('lint-staged').Config} */\nexport default {\n  '*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --apply'],\n}` — removes `eslint --fix` and `prettier --write`; drops `.md` files; adds `json`/`js`/`jsx`/`mjs` extensions. **NOTE**: `--apply` (safe fixes only) is used in pre-commit to prevent silent staged-code mutation; `--apply-unsafe` is available via direct invocation: `bun biome check --apply-unsafe .` (`lint:fix` script uses `--apply` for safe fixes only).
 - [ ] T035 Update `.github/workflows/ci.yml` lint job: change the display `name:` to `'Biome — Lint & Format'`; replace the `Run ESLint` step (`bun run lint -- --debug`) with `- name: Run Biome lint check\n  run: bun biome check .`; replace the `Check Prettier formatting` step (`bun run format:check`) with `- name: Run Biome format check\n  run: bun biome format --check .`; keep the YAML key `lint:` unchanged to preserve all downstream `needs: [lint]` references
 - [ ] T036 Update the `scripts` section of root `package.json`: replace `"lint": "eslint ."` with `"lint": "bun biome check ."`; replace `"format": "prettier --write ."` with `"format": "bun biome format --write ."`; replace `"format:check": "prettier --check ."` with `"format:check": "bun biome format --check ."`; verify no remaining `eslint` or `prettier` invocations remain in the scripts section
 - [ ] T037 [P] Create `.vscode/extensions.json` with content: `{\n  "recommendations": ["biomejs.biome"]\n}`
@@ -277,7 +291,7 @@
 
 **Goal:** Confirm the migration is fully complete and both Biome gates pass cleanly end-to-end.
 
-**Exit criterion:** `bun biome check .` exits 0 and `bun biome format --check .` exits 0; additionally `bun run lint` and `bun run format:check` both succeed.
+**Exit criterion:** `bun biome check .` exits 0 and `bun biome format --check .` exits 0; additionally `bun run lint` and `bun run format:check` both succeed; `bun run typecheck` exits 0 (T044); `bun run test:unit` exits 0 (T045).
 
 **Dependency:** Requires Phase 15 completion.
 
@@ -285,6 +299,22 @@
 
 - [ ] T040 Run `bun biome check .` — must exit with code 0 (final gate; any failure indicates a violation missed in Pass 2)
 - [ ] T041 Run `bun biome format --check .` — must exit with code 0 (final gate; any failure indicates uncommitted formatting changes)
+- [ ] T044 Run `bun run typecheck` (or `bunx tsc --noEmit`) — must exit with code 0; confirms that the toolchain migration introduced no TypeScript regressions
+- [ ] T045 Run `bun run test:unit` (or matching unit test script) — must exit with code 0; confirms no unit test regressions were introduced by the console.\* migrations or config file removals
+
+---
+
+## Phase 17 — Documentation Update
+
+**Goal:** Update developer-facing documentation to reflect the new `bun biome` workflow. Required by SC-08 and FR-08/FR-10 acceptance criteria.
+
+**Exit criterion:** Root README.md or `docs/` developer guide references `bun biome check .`, `bun biome format --write .`, and the VSCode extension recommendation.
+
+**Dependency:** Requires Phase 16 (all verification gates pass).
+
+---
+
+- [ ] T043 Update root `README.md` (or `docs/` developer setup guide if it exists) to document the new toolchain: add a "Linting & Formatting" section with commands `bun run lint` (check), `bun run format` (auto-fix), `bun run format:check` (CI check), and recommend the `biomejs.biome` VSCode extension (already configured in `.vscode/extensions.json`)
 
 ---
 
@@ -312,7 +342,7 @@ T001 (install @biomejs/biome)
                            │    └─ T018 [P]  worker provisioning (7 files)
                            ├─ T019 [P]  Group B: master migrations + runner (6 files)
                            ├─ T020 [P]  Group B: tenant migrations (3 files)
-                           ├─ T021 [P]  domain-core source (5 files + bridge eval)
+                           ├─ T021      domain-core source (5 files + bridge eval, SEQUENTIAL)
                            ├─ T022 [P]  domain-core migration runners (3 files)
                            ├─ T023 [P]  redis-utils algorithms (2 files)
                            ├─ T024      test file override verification
@@ -339,55 +369,58 @@ T001 (install @biomejs/biome)
 
 ## Parallel Execution Opportunities
 
-| Batch                  | Tasks      | Files targeted                 | Can run simultaneously with |
-| ---------------------- | ---------- | ------------------------------ | --------------------------- |
-| Auto-fix               | T005, T006 | All source files (sequential)  | —                           |
-| Group A — API source   | T007-T013  | apps/api/src/ subgroups        | Each other                  |
-| Worker bridge eval     | T014       | apps/worker/src/observability/ | T007-T013                   |
-| Worker source          | T015-T018  | apps/worker/src/ subgroups     | Each other + T007-T013      |
-| Group B migrations     | T019-T020  | apps/api/src/db/ subgroups     | T007-T018                   |
-| domain-core            | T021-T022  | packages/domain-core/src/      | T007-T020                   |
-| redis-utils            | T023       | packages/redis-utils/src/      | T007-T022                   |
-| Group D Vue            | T025-T026  | apps/mmc/src/ subgroups        | T007-T023                   |
-| Pass 3 config deletion | T031-T033  | distinct config files          | Each other                  |
-| Pass 3 tooling         | T037-T038  | .vscode/ files                 | T034-T036                   |
+| Batch                  | Tasks      | Files targeted                 | Can run simultaneously with                           |
+| ---------------------- | ---------- | ------------------------------ | ----------------------------------------------------- |
+| Auto-fix               | T005, T006 | All source files (sequential)  | —                                                     |
+| Group A — API source   | T007-T013  | apps/api/src/ subgroups        | Each other                                            |
+| Worker bridge eval     | T014       | apps/worker/src/observability/ | T007-T013                                             |
+| Worker source          | T015-T018  | apps/worker/src/ subgroups     | Each other + T007-T013                                |
+| Group B migrations     | T019-T020  | apps/api/src/db/ subgroups     | T007-T018                                             |
+| domain-core            | T021, T022 | packages/domain-core/src/      | T007-T020 (T021 sequential; T022 parallel after T021) |
+| redis-utils            | T023       | packages/redis-utils/src/      | T007-T022                                             |
+| Group D Vue            | T025-T026  | apps/mmc/src/ subgroups        | T007-T023                                             |
+| Pass 3 config deletion | T031-T033  | distinct config files          | Each other                                            |
+| Pass 3 tooling         | T037-T038  | .vscode/ files                 | T034-T036                                             |
 
 ---
 
 ## Commit Sequence (Recommended)
 
-| Commit | After tasks | Message                                                                               |
-| ------ | ----------- | ------------------------------------------------------------------------------------- |
-| 1      | T001-T004   | `feat(toolchain): install Biome and add root biome.json`                              |
-| 2      | T005        | `chore(toolchain): apply Biome formatting pass (lineWidth 100, single quotes)`        |
-| 3      | T006        | `chore(toolchain): auto-fix unused imports and useConst via Biome`                    |
-| 4      | T007-T013   | `chore(toolchain): replace console.* with @zidney/logger in apps/api/src`             |
-| 5      | T014-T023   | `chore(toolchain): migrate console.* in worker, packages; suppress migration runners` |
-| 6      | T024-T026   | `chore(toolchain): suppress console.* in Vue frontend error boundaries`               |
-| 7      | T027-T028   | `chore(toolchain): Pass 2 complete — biome check and format exit 0`                   |
-| 8      | T029-T038   | `chore(toolchain): remove ESLint + Prettier, update CI, lint-staged, scripts`         |
-| 9      | T039-T041   | `chore(toolchain): regenerate lockfile, final Biome gate verification`                |
+| Commit | After tasks          | Message                                                                                                |
+| ------ | -------------------- | ------------------------------------------------------------------------------------------------------ |
+| 1      | T001-T004            | `feat(toolchain): install Biome and add root biome.json`                                               |
+| 2      | T005                 | `chore(toolchain): apply Biome formatting pass (lineWidth 100, single quotes)`                         |
+| 3      | T006                 | `chore(toolchain): auto-fix unused imports and useConst via Biome`                                     |
+| 4      | T007-T013            | `chore(toolchain): replace console.* with @zidney/logger in apps/api/src`                              |
+| 5      | T014-T023            | `chore(toolchain): migrate console.* in worker, packages; suppress migration runners`                  |
+| 6      | T024-T026, T042      | `chore(toolchain): suppress console.* in Vue frontend error boundaries; verify backoffice/frontoffice` |
+| 7      | T027-T028            | `chore(toolchain): Pass 2 complete — biome check and format exit 0`                                    |
+| 8      | T029-T038            | `chore(toolchain): remove ESLint + Prettier, update CI, lint-staged, scripts`                          |
+| 9      | T039-T041, T044-T045 | `chore(toolchain): regenerate lockfile, final Biome gate + typecheck + test verification`              |
+| 10     | T043                 | `docs(toolchain): update README with Biome workflow and VSCode extension recommendation`               |
 
 ---
 
 ## Task Count Summary
 
-| Phase     | Description                           | Tasks  | Parallelizable |
-| --------- | ------------------------------------- | ------ | -------------- |
-| Phase 1   | PASS 1: Install & Configure           | 4      | 1 (T002)       |
-| Phase 2   | PASS 2: Auto-Fix                      | 2      | 0              |
-| Phase 3   | PASS 2: Group A — apps/api/src        | 7      | 7 (T007-T013)  |
-| Phase 4   | PASS 2: Worker Logger Bridge Eval     | 1      | 0              |
-| Phase 5   | PASS 2: apps/worker/src               | 4      | 4 (T015-T018)  |
-| Phase 6   | PASS 2: Group B — Migration Runners   | 2      | 2 (T019-T020)  |
-| Phase 7   | PASS 2: packages/domain-core          | 2      | 2 (T021-T022)  |
-| Phase 8   | PASS 2: packages/redis-utils          | 1      | 1 (T023)       |
-| Phase 9   | PASS 2: Group C Test Files (verify)   | 1      | 0              |
-| Phase 10  | PASS 2: Group D — apps/mmc Vue        | 2      | 2 (T025-T026)  |
-| Phase 11  | PASS 2: Exit Gate                     | 2      | 0              |
-| Phase 12  | PASS 3: Remove ESLint & Prettier Pkgs | 2      | 0              |
-| Phase 13  | PASS 3: Delete Config Files           | 3      | 3 (T031-T033)  |
-| Phase 14  | PASS 3: Update Tooling & CI           | 5      | 2 (T037-T038)  |
-| Phase 15  | PASS 3: Regenerate Lockfile           | 1      | 0              |
-| Phase 16  | PASS 3: Final Verification            | 2      | 0              |
-| **Total** |                                       | **41** | **29**         |
+| Phase     | Description                              | Tasks  | Parallelizable |
+| --------- | ---------------------------------------- | ------ | -------------- |
+| Phase 1   | PASS 1: Install & Configure              | 4      | 1 (T002)       |
+| Phase 2   | PASS 2: Auto-Fix                         | 2      | 0              |
+| Phase 3   | PASS 2: Group A — apps/api/src           | 7      | 7 (T007-T013)  |
+| Phase 4   | PASS 2: Worker Logger Bridge Eval        | 1      | 0              |
+| Phase 5   | PASS 2: apps/worker/src                  | 4      | 4 (T015-T018)  |
+| Phase 6   | PASS 2: Group B — Migration Runners      | 2      | 2 (T019-T020)  |
+| Phase 7   | PASS 2: packages/domain-core             | 2      | 1 (T022)       |
+| Phase 8   | PASS 2: packages/redis-utils             | 1      | 1 (T023)       |
+| Phase 9   | PASS 2: Group C Test Files (verify)      | 1      | 0              |
+| Phase 9B  | PASS 2: Group E — backoffice/frontoffice | 1      | 1 (T042)       |
+| Phase 10  | PASS 2: Group D — apps/mmc Vue           | 2      | 2 (T025-T026)  |
+| Phase 11  | PASS 2: Exit Gate                        | 2      | 0              |
+| Phase 12  | PASS 3: Remove ESLint & Prettier Pkgs    | 2      | 0              |
+| Phase 13  | PASS 3: Delete Config Files              | 3      | 3 (T031-T033)  |
+| Phase 14  | PASS 3: Update Tooling & CI              | 5      | 2 (T037-T038)  |
+| Phase 15  | PASS 3: Regenerate Lockfile              | 1      | 0              |
+| Phase 16  | PASS 3: Final Verification               | 4      | 0              |
+| Phase 17  | Documentation Update                     | 1      | 0              |
+| **Total** |                                          | **45** | **29**         |

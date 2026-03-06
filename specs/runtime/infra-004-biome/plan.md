@@ -434,7 +434,7 @@ Replace the entire file content with:
 ```js
 /** @type {import('lint-staged').Config} */
 export default {
-  '*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --apply-unsafe'],
+  '*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --apply'],
 }
 ```
 
@@ -467,7 +467,7 @@ Update the `scripts` section in root `package.json`:
 "format:check": "bun biome format --check .",
 ```
 
-**Note:** `lint:fix` is a new script for applying safe auto-fixes locally. `--apply` (safe fixes only) is the local shortcut; `--apply-unsafe` is reserved for pre-commit hooks where all lint+format violations must be resolved.
+**Note:** `lint:fix` is a new script for applying safe auto-fixes locally. `--apply` (safe fixes only) is used in both `lint:fix` and the lint-staged pre-commit hook to prevent silent staged-code mutation. `--apply-unsafe` is reserved for explicit developer invocation: run `bun biome check --apply-unsafe .` directly when you want to apply all suggested fixes including potentially semantics-altering transformations.
 
 ### Step 3.6 — Update `.github/workflows/ci.yml`
 
@@ -673,7 +673,7 @@ feat(infra): replace ESLint + Prettier with Biome (infra-004-biome)
 
 - Removes 8 ESLint packages and 1 Prettier package from devDependencies
 - Deletes eslint.config.mjs, 3 per-app eslint configs, prettier.config.mjs, .prettierrc
-- Updates lint-staged to use bun biome check --apply-unsafe
+- Updates lint-staged to use bun biome check --apply
 - Updates CI lint job to use biome check + biome format --check
 - Adds .vscode/extensions.json with Biome extension recommendation
 - Adds biome.json at repository root as single source of truth
@@ -713,7 +713,7 @@ Mapped from the spec exit conditions:
 - [ ] CI `lint` job runs `bun biome check .` and `bun biome format --check .`
 - [ ] CI `lint` job runs before `unit-tests` job (preserved via existing `needs:` graph)
 - [ ] `.vscode/extensions.json` contains `biomejs.biome` recommendation
-- [ ] `lint-staged.config.mjs` uses `bun biome check --apply-unsafe`
+- [ ] `lint-staged.config.mjs` uses `bun biome check --apply`
 - [ ] `bun run test:unit` passes with no regressions
 - [ ] `bun run typecheck` passes with no regressions
 - [ ] Single `biome.json` exists at repository root with no sub-directory overrides

@@ -439,7 +439,7 @@ All existing Vitest unit and integration tests must pass after reformatting. Bio
 
 ## Assumptions
 
-1. **Biome version**: The `@biomejs/biome` package will be pinned to a specific version (e.g., `1.7.x`) rather than a floating range, consistent with the project's stability-first approach.
+1. **Biome version**: The `@biomejs/biome` package is installed without a version pin (`bun add -D @biomejs/biome`), as resolved in CL-03 during clarification. The registry resolves the latest stable version at install time. The resolved version is recorded in `biome.json`'s `$schema` URL (e.g., `"https://biomejs.dev/schemas/X.Y.Z/schema.json"`). CI uses `bun install --frozen-lockfile` to ensure deterministic builds. ADR-0008 governs platform SemVer (product_version, schema_version) — it does not mandate pinning of tooling devDependencies.
 2. **`noConsole` violations**: Existing `console.log` calls are assumed to exist in source files (not test files). All must be replaced with the structured logger from `packages/logger`. Test files may use `console` sparingly via a Biome override if necessary.
 3. **Vue file support**: Biome's Vue embedded script analysis covers `<script>` and `<script setup>` blocks. Template blocks and CSS blocks are not processed by Biome and remain outside scope.
 4. **No per-package config**: No application or package in the monorepo has a legitimate need for a Biome configuration that differs from the root. Any discovered exception requires an ADR-level justification before it can be introduced.
@@ -450,10 +450,10 @@ All existing Vitest unit and integration tests must pass after reformatting. Bio
 
 ## ADR References
 
-| ADR      | Relevance                                                                       |
-| -------- | ------------------------------------------------------------------------------- |
-| ADR-0001 | Monorepo structure — Biome operates from the root consistent with this decision |
-| ADR-0008 | Versioning strategy — Biome dependency will be pinned per semantic versioning   |
+| ADR      | Relevance                                                                                                                                                |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| ADR-0001 | Monorepo structure — Biome operates from the root consistent with this decision                                                                          |
+| ADR-0008 | Versioning strategy — governs platform SemVer (product_version, schema_version); does not mandate npm devDependency pinning (see Assumption 1 and CL-03) |
 
 No new ADR is required for this stage. The toolchain replacement does not alter any architectural boundary or governance contract.
 
@@ -500,6 +500,10 @@ This stage is complete when all of the following are true:
 
 - Q: Should Biome be installed with a pinned version or as latest-stable, and how should the version be recorded? → A: Install `@biomejs/biome` **without** a version pin (`bun add -D @biomejs/biome`). The resolved version is recorded in the `$schema` URL inside `biome.json` (e.g., `"https://biomejs.dev/schemas/X.Y.Z/schema.json"`). No hardcoded version string in `package.json` — the registry resolves latest stable at install time.
 
-- Q: How should `lint-staged` be updated as part of this migration? → A: Update `lint-staged.config.mjs` to use `bun biome check --apply-unsafe` for `.ts`, `.js`, `.tsx`, `.jsx`, and `.json` files. Remove all ESLint and Prettier lint-staged entries entirely.
+- Q: How should `lint-staged` be updated as part of this migration? → A: Update `lint-staged.config.mjs` to use `bun biome check --apply` (safe fixes only) for `.ts`, `.js`, `.tsx`, `.jsx`, `.mjs`, `.vue`, and `.json` files. Remove all ESLint and Prettier lint-staged entries entirely. **NOTE (corrected at Analyze Gate):** `--apply` prevents silent staged-code mutation in pre-commit; `--apply-unsafe` is reserved for explicit developer invocation (`bun biome check --apply-unsafe .`) and must NOT be the default pre-commit hook behavior.
 
 - Q: The stage specification sets line width to 100, but current Prettier configuration uses 80. How should this discrepancy be handled? → A: Line width 100 is intentional per the stage specification. A full reformatting pass (`bun biome format --write .`) is executed as part of the migration. This will produce a large diff on the initial commit, which is expected and acceptable. The change must be documented explicitly in the PR description.
+
+### Session 2026-03-06 (Analyze Gate Remediation)
+
+- Q: FR-09 acceptance criterion states "AI-Guard is not triggered before Biome passes" and implies AI-Guard runs as a dedicated CI job after the Biome lint gate. However, the codebase shows AI-Guard runs only via `lint-staged` pre-commit hooks and the `architecture-governance.yml` workflow — there is no `ai-guard` step inside `ci.yml`. How should the ordering contract be enforced? → A: **Clarification — enforcement model is pre-commit + architecture governance, not inline `ci.yml` step.** The CI pipeline sequence `Biome → AI-Guard → Vitest` is enforced as follows: (1) Biome runs in `ci.yml` as the `lint` job; (2) AI-Guard enforcement runs via `lint-staged` pre-commit hooks (blocking developer pushes) and via `architecture-governance.yml` (which has `needs: [lint]` dependency on the Biome lint job, satisfying the ordering constraint); (3) Vitest runs in the `test` job which also `needs: [lint]`. The ordering contract is therefore met through the existing workflow dependency graph. No new `ai-guard` step should be added to `ci.yml` — doing so would duplicate enforcement and conflict with the existing architecture governance workflow design. FR-09 acceptance criterion "AI-Guard is not triggered before Biome passes" is satisfied because `architecture-governance.yml` already declares `needs: [lint]`.
