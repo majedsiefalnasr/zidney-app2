@@ -74,9 +74,12 @@ jobs:
           done
           echo "✅ Required fields present"
 
-          # branch matches PR branch
+          # branch matches PR branch (support spec/ prefix in state file)
           STATE_BRANCH=$(jq -r '.branch' "$STATE_FILE")
-          [ "$STATE_BRANCH" = "$BRANCH" ] || fail "state.branch '$STATE_BRANCH' does not match PR branch '$BRANCH'"
+          STATE_BRANCH_STRIPPED="${STATE_BRANCH#spec/}"
+
+          [ "$STATE_BRANCH_STRIPPED" = "$BRANCH" ] || fail "state.branch '$STATE_BRANCH' does not match PR branch '$BRANCH'"
+
           echo "✅ Branch matches"
 
           # stage_dir matches expected path
