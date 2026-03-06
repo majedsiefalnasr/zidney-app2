@@ -222,7 +222,7 @@ describe('invalidateWorkspaceCoverage', () => {
 
     await invalidateWorkspaceCoverage(redis, 'ws-001')
 
-    const scanCall = (redis.scan as ReturnType<typeof vi.fn>).mock.calls[0]
+    const scanCall = (redis.scan as ReturnType<typeof vi.fn>).mock.calls[0]!
     expect(scanCall[0]).toBe('0') // starts at cursor 0
     expect(scanCall[1]).toBe('MATCH')
     expect(scanCall[2]).toBe('coverage:ws-001:*')

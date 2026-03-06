@@ -34,6 +34,7 @@ function makeTokenManager(token: string | null = null): ITokenManager {
     clearToken: vi.fn(() => {
       _token = null
     }),
+    hasToken: vi.fn(() => _token !== null),
   }
 }
 

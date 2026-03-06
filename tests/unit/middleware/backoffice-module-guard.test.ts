@@ -85,7 +85,7 @@ describe('createModuleGuard', () => {
     const next = vi.fn()
 
     const guard = createModuleGuard(logger as any, MODULE_MCQ)
-    await guard(ctx as any, next, undefined as any)
+    await guard(ctx as any, next)
 
     expect(next).not.toHaveBeenCalled()
     expect(jsonFn).toHaveBeenCalledWith(
@@ -103,7 +103,7 @@ describe('createModuleGuard', () => {
     const next = vi.fn()
 
     const guard = createModuleGuard(logger as any, MODULE_MCQ)
-    await guard(ctx as any, next, undefined as any)
+    await guard(ctx as any, next)
 
     expect(next).toHaveBeenCalledOnce()
   })
@@ -116,7 +116,7 @@ describe('createModuleGuard', () => {
     const next = vi.fn()
 
     const guard = createModuleGuard(logger as any, MODULE_MCQ)
-    await guard(ctx as any, next, undefined as any)
+    await guard(ctx as any, next)
 
     expect(jsonFn).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -139,7 +139,7 @@ describe('createModuleGuard', () => {
     const next = vi.fn()
 
     const guard = createModuleGuard(logger as any, MODULE_MCQ)
-    await guard(ctx as any, next, undefined as any)
+    await guard(ctx as any, next)
 
     expect(logger.warn).toHaveBeenCalledOnce()
     expect(logger.warn).toHaveBeenCalledWith(
@@ -160,7 +160,7 @@ describe('createModuleGuard', () => {
     const next = vi.fn()
 
     const guard = createModuleGuard(logger as any, MODULE_MCQ)
-    await guard(ctx as any, next, undefined as any)
+    await guard(ctx as any, next)
 
     expect(logger.warn).not.toHaveBeenCalled()
   })

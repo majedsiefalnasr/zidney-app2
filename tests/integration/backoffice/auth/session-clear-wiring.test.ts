@@ -31,7 +31,12 @@ function makePinia() {
 }
 
 function makeTokenManager(): ITokenManager {
-  return { getToken: vi.fn(() => null), setToken: vi.fn(), clearToken: vi.fn() }
+  return {
+    getToken: vi.fn(() => null),
+    setToken: vi.fn(),
+    clearToken: vi.fn(),
+    hasToken: vi.fn(() => false),
+  }
 }
 
 function makeRouter(): Router {
