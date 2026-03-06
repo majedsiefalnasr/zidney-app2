@@ -1,10 +1,12 @@
 name: Hard Mode Guard
 
 on:
+  push:
+    branches:
+      - "spec/*"
   pull_request:
     branches:
-      - main
-      - develop
+      - "spec/*"
 
 jobs:
   validate:

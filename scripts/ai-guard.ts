@@ -20,6 +20,16 @@
 import { execSync } from 'child_process'
 import { readFileSync } from 'fs'
 
+function getCurrentBranch(): string {
+  try {
+    return execSync('git rev-parse --abbrev-ref HEAD', {
+      encoding: 'utf-8',
+    }).trim()
+  } catch {
+    return ''
+  }
+}
+
 type ArchitectureContract = {
   dependencyRules?: {
     forbidden?: Record<string, string[]>
@@ -277,7 +287,58 @@ function getModuleDepsFromBrain(
   return brain.edges.filter((e) => e.from === modulePath).map((e) => e.to)
 }
 
+function validateBranchNaming(changedFiles: string[]): void {
+  const branch = getCurrentBranch()
+
+  // Only enforce spec/* branches when working on spec-driven stages
+  const isSpecWork = changedFiles.some((f) => f.startsWith('specs/'))
+
+  if (!isSpecWork) {
+    return
+  }
+
+  if (!branch) return
+
+  // Zidney Hard Mode requires spec branches for stage work
+  if (!branch.startsWith('spec/')) {
+    console.error(
+      '\nAI Guard: Invalid branch for architecture-controlled changes.'
+    )
+    console.error(`Current branch: ${branch}`)
+    console.error('Required pattern: spec/<stage-name>')
+    console.error('Example: spec/005-tenant-provisioning-service\n')
+
+    process.exit(1)
+  }
+
+  // Attempt to detect stage file being modified
+  const stageFile = changedFiles.find((f) => /STAGE_[A-Z0-9_]+/.test(f))
+
+  if (stageFile) {
+    const match = stageFile.match(/STAGE_[A-Z0-9_]+/)
+
+    if (match) {
+      const expectedStage = match[0]
+      const branchStage = branch.replace('spec/', '').toUpperCase()
+
+      if (!branchStage.includes(expectedStage)) {
+        console.error('\nAI Guard: Stage branch mismatch.')
+        console.error(`Stage file modified: ${expectedStage}`)
+        console.error(`Current branch: ${branch}`)
+        console.error(`Expected branch to include: spec/${expectedStage}`)
+        console.error('Example: spec/STAGE_21_ROLE_PERMISSION_SYSTEM\n')
+
+        process.exit(1)
+      }
+    }
+  }
+}
+
 function runGuard() {
+  const changedFiles = getChangedFiles()
+
+  validateBranchNaming(changedFiles)
+
   const brain = loadArchitectureBrain()
   if (brain) {
     console.log(
@@ -293,8 +354,6 @@ function runGuard() {
     : loadContract()
 
   const archMap = loadArchitectureMap()
-
-  const changedFiles = getChangedFiles()
 
   if (changedFiles.length === 0) {
     console.log('AI Guard: no changed files detected.')

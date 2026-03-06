@@ -1086,9 +1086,9 @@ Parse `<STAGE_FILE_NAME>` with pattern: `^STAGE_([0-9]+[A-Z]?)_`
 - If pattern does not match → STOP and request corrected filename.
 - Zero-pad numeric part to 3 digits, preserve trailing letter: `05` → `005` | `06A` → `006A`
 - Convert `<STAGE_NAME>` to kebab-case (lowercase, underscores/spaces → hyphens).
-- Combine: `<PADDED_PREFIX>-<kebab-stage-name>` → e.g. `005-tenant-provisioning-service`
+- Combine: `<PADDED_PREFIX>-<kebab-stage-name>` → e.g. `005-tenant-provisioning-service`, then prefix the git branch with `spec/` resulting in `spec/<STAGE_DIR_NAME>` (example: `spec/005-tenant-provisioning-service`).
 
-Store as `STAGE_DIR_NAME`.
+Store the directory name as `STAGE_DIR_NAME` (without prefix). The git branch name MUST be `spec/<STAGE_DIR_NAME>`.
 
 Apply Package Manager Enforcement — run the lockfile detection block now and store `PKG_MANAGER` for the entire session. Every step from here onwards uses this value. Do NOT re-detect mid-session.
 
@@ -1141,13 +1141,13 @@ options:
 git fetch --all --prune
 git checkout <BASE_BRANCH>
 git pull origin <BASE_BRANCH>
-git checkout -b <STAGE_DIR_NAME>
+git checkout -b spec/<STAGE_DIR_NAME>
 ```
 
 If branch already exists → STOP. Display the branch name and present:
 
 ```widget choice
-prompt: "Branch '<STAGE_DIR_NAME>' already exists. What would you like to do?"
+prompt: "Branch 'spec/<STAGE_DIR_NAME>' already exists. What would you like to do?"
 options:
   - label: "♻️ Reuse existing branch"
     value: "reuse"
@@ -1155,7 +1155,7 @@ options:
     value: "abort"
 ```
 
-- `reuse` → run `git checkout <STAGE_DIR_NAME>` and continue from Pre.5
+- `reuse` → run `git checkout spec/<STAGE_DIR_NAME>` and continue from Pre.5
 - `abort` → halt the entire workflow
 
 ## Pre.5 — Create Stage Directory Structure
@@ -1173,7 +1173,7 @@ Create `specs/runtime/<STAGE_DIR_NAME>/README.md`:
 ```markdown
 # <STAGE_NAME>
 
-**Branch:** `<STAGE_DIR_NAME>`
+**Branch:** `spec/<STAGE_DIR_NAME>`
 **Phase:** <PHASE_NAME>
 **Stage File:** `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`
 **Initiated:** <ISO_TIMESTAMP>
@@ -1212,7 +1212,7 @@ Write to: `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`
   "phase": "<PHASE_NAME>",
   "stage_dir": "specs/runtime/<STAGE_DIR_NAME>",
   "stage_file": "specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>",
-  "branch": "<STAGE_DIR_NAME>",
+  "branch": "spec/<STAGE_DIR_NAME>",
   "base_branch": "<BASE_BRANCH>",
   "current_step": "pre_step",
   "stage_status": "DRAFT",
@@ -1226,7 +1226,7 @@ Write to: `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`
   "history": [
     {
       "event": "branch_created",
-      "branch": "<STAGE_DIR_NAME>",
+      "branch": "spec/<STAGE_DIR_NAME>",
       "timestamp": "<ISO_TIMESTAMP>"
     }
   ]
@@ -2248,7 +2248,7 @@ Modifications require a new migration stage.
   "phase": "<PHASE_NAME>",
   "stage_dir": "specs/runtime/<STAGE_DIR_NAME>",
   "stage_file": "specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>",
-  "branch": "<STAGE_DIR_NAME>",
+  "branch": "spec/<STAGE_DIR_NAME>",
   "base_branch": "<BASE_BRANCH>",
   "current_step": "stage_production_ready",
   "stage_status": "PRODUCTION READY",
@@ -2327,7 +2327,7 @@ git commit -F <(filled commit message)
 
 Stage:    <STAGE_NAME>
 Phase:    <PHASE_NAME>
-Branch:   <STAGE_DIR_NAME>
+Branch:   spec/<STAGE_DIR_NAME>
 Status:   PRODUCTION READY
 Tasks:    <TASKS_COMPLETED> / <TASKS_TOTAL> completed
 
@@ -2363,7 +2363,7 @@ Workflow state: specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json → stage_pr
 Stage file:     specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME> → PRODUCTION READY
 
 Next actions:
-  1. git push origin <STAGE_DIR_NAME>
+  1. git push origin spec/<STAGE_DIR_NAME>
   2. Open PR using specs/runtime/<STAGE_DIR_NAME>/PR_SUMMARY.md
   3. Share guides/TESTING_GUIDE.md with QA or reviewing engineer
 ```
