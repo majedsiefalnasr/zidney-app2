@@ -15,6 +15,26 @@ This stage ensures consistent code style, eliminates toolchain fragmentation, an
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+Step: pre_step
+Risk Level: UNKNOWN
+Initiated: 2026-03-06T00:00:00.000Z
+
+Scope Open:
+
+- Specification pending
+
+Constitutional Compliance:
+
+- Pending constitutional audit
+
+Notes:
+Stage initialized. Specification in progress.
+
+---
+
 # Objectives
 
 1. Replace ESLint + Prettier with Biome.
