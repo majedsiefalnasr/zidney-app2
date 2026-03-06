@@ -1,8 +1,4 @@
-// @ts-expect-error: axios not declared as dependency of apps/mmc [INFRA-001-DEPS-06]
-
 import type { AxiosInstance } from 'axios'
-// @ts-expect-error: axios not declared as dependency of apps/mmc [INFRA-001-DEPS-06]
-
 import axios from 'axios'
 
 /**

@@ -1,4 +1,3 @@
-// @ts-expect-error: pinia not declared as dependency of apps/mmc [INFRA-001-DEPS-07]
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type {

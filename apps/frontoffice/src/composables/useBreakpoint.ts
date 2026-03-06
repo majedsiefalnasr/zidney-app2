@@ -7,7 +7,7 @@
  */
 
 import { onMounted, onUnmounted } from 'vue'
-import { useFrontofficeUiStore } from '@/core/state/ui.store'
+import { useFrontofficeUiStore } from '../core/state/ui.store'
 
 const MOBILE_BREAKPOINT = 768
 
