@@ -4,23 +4,15 @@
     "noEmit": true,
     "baseUrl": "./",
     "paths": {
-      "@/*": [
-        "./apps/mmc/src/*",
-        "./apps/backoffice/src/*",
-        "./apps/frontoffice/src/*"
-      ],
+      "@/*": ["./apps/mmc/src/*", "./apps/backoffice/src/*", "./apps/frontoffice/src/*"],
       "@zidney/app/*": ["./apps/*/src"],
       "@zidney/package/*": ["./packages/*/src"],
       "@zidney/ui": ["packages/ui-system/src/index.ts"],
       "@zidney/ui/*": ["packages/ui-system/src/*"],
       "@zidney/domain-core": ["packages/domain-core/src/index.ts"],
       "@zidney/domain-core/*": ["packages/domain-core/src/*"],
-      "@zidney/domain-core/mmc-dashboard": [
-        "packages/domain-core/mmc-dashboard/index.ts"
-      ],
-      "@zidney/domain-core/mmc-dashboard/*": [
-        "packages/domain-core/mmc-dashboard/*"
-      ],
+      "@zidney/domain-core/mmc-dashboard": ["packages/domain-core/mmc-dashboard/index.ts"],
+      "@zidney/domain-core/mmc-dashboard/*": ["packages/domain-core/mmc-dashboard/*"],
       "@zidney/logger": ["packages/logger/src/index.ts"],
       "@zidney/logger/*": ["packages/logger/src/*"],
       "@zidney/types": ["packages/types/src/index.ts"],

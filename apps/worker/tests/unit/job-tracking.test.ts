@@ -11,11 +11,8 @@
  * - Job dequeue and processing
  */
 
-import {
-  computeJobPayloadHash,
-  verifyPayloadHashConsistency,
-} from '@zidney/domain-core/job-hash'
-import { JobEnvelope } from '@zidney/types/job-envelope'
+import { computeJobPayloadHash, verifyPayloadHashConsistency } from '@zidney/domain-core/job-hash'
+import type { JobEnvelope } from '@zidney/types/job-envelope'
 import { v4 as uuidv4 } from 'uuid'
 import { beforeEach, describe, expect, it } from 'vitest'
 
@@ -40,9 +37,7 @@ describe('Job Lifecycle Tracking', () => {
 
     it('should use UUID-v4 format', () => {
       const jobId = uuidv4()
-      expect(jobId).toMatch(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-      )
+      expect(jobId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
     })
 
     it('should be different from request_id', () => {
@@ -229,8 +224,7 @@ describe('Job Lifecycle Tracking', () => {
 
     it('should handle hash mismatch gracefully', () => {
       const payload = { attempt_id: '123' }
-      const wrongHash =
-        'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
+      const wrongHash = 'aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa'
 
       const match = verifyPayloadHashConsistency(payload, wrongHash)
       expect(match).toBe(false)

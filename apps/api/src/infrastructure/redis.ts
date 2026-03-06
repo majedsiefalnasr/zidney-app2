@@ -1,3 +1,4 @@
+import { logger } from '@zidney/logger'
 import { createClient } from 'redis'
 
 /**
@@ -25,15 +26,11 @@ let redisClient: RedisClientType | null = null
  * Initialize Redis connection pool
  * Called once during app boot
  */
-export async function initializeRedisPool(
-  context?: any
-): Promise<RedisClientType> {
+export async function initializeRedisPool(context?: any): Promise<RedisClientType> {
   const correlationId = context?.correlationId || 'system'
 
   if (redisClient) {
-    console.log(
-      `[${correlationId}] Redis client already initialized, reusing connection`
-    )
+    logger.info(`[${correlationId}] Redis client already initialized, reusing connection`)
     return redisClient
   }
 
@@ -45,9 +42,7 @@ export async function initializeRedisPool(
         port: parseInt(process.env.REDIS_PORT || '6379'),
         reconnectStrategy: (retries: number) => {
           if (retries > 10) {
-            console.error(
-              `[${correlationId}] Redis connection retries exhausted`
-            )
+            logger.error(`[${correlationId}] Redis connection retries exhausted`)
             return new Error('Redis connection retries exhausted')
           }
           // Exponential backoff: 100ms, 200ms, 400ms, etc.
@@ -70,28 +65,27 @@ export async function initializeRedisPool(
 
     // Health check
     const result = await redisClient.ping()
-    console.log(`[${correlationId}] Redis health check: ${result}`)
+    logger.info(`[${correlationId}] Redis health check: ${result}`)
 
     // Set up error handlers
     redisClient.on('error', (err: Error) => {
-      console.error(`[${correlationId}] Redis client error:`, err.message)
+      logger.error(`[${correlationId}] Redis client error:`, {
+        error: err.message,
+      })
     })
 
     redisClient.on('reconnecting', () => {
-      console.warn(`[${correlationId}] Redis client reconnecting...`)
+      logger.warn(`[${correlationId}] Redis client reconnecting...`)
     })
 
-    console.log(
-      `[${correlationId}] Redis connection pool initialized successfully`
-    )
+    logger.info(`[${correlationId}] Redis connection pool initialized successfully`)
 
     return redisClient
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    console.error(
-      `[${correlationId}] Failed to initialize Redis pool:`,
-      message
-    )
+    logger.error(`[${correlationId}] Failed to initialize Redis pool:`, {
+      error: message,
+    })
     throw error
   }
 }
@@ -101,9 +95,7 @@ export async function initializeRedisPool(
  */
 export function getRedisClient(): RedisClientType {
   if (!redisClient) {
-    throw new Error(
-      'Redis client not initialized. Call initializeRedisPool() first.'
-    )
+    throw new Error('Redis client not initialized. Call initializeRedisPool() first.')
   }
   return redisClient
 }
@@ -121,11 +113,13 @@ export async function closeRedisPool(context?: any): Promise<void> {
 
   try {
     await redisClient.quit()
-    console.log(`[${correlationId}] Redis connection pool closed`)
+    logger.info(`[${correlationId}] Redis connection pool closed`)
     redisClient = null
   } catch (error) {
     const message = error instanceof Error ? error.message : String(error)
-    console.error(`[${correlationId}] Error closing Redis pool:`, message)
+    logger.error(`[${correlationId}] Error closing Redis pool:`, {
+      error: message,
+    })
   }
 }
 

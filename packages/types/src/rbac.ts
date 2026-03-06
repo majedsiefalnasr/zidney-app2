@@ -159,10 +159,7 @@ export const RolePermissions: Record<MMCUserRole, MasterDBPermission[]> = {
  * hasPermission(MMCUserRole.OPERATOR, MasterDBPermission.CREATE_LICENSE) // true
  * hasPermission(MMCUserRole.READ_ONLY, MasterDBPermission.CREATE_LICENSE) // false
  */
-export function hasPermission(
-  role: MMCUserRole,
-  permission: MasterDBPermission
-): boolean {
+export function hasPermission(role: MMCUserRole, permission: MasterDBPermission): boolean {
   return RolePermissions[role].includes(permission)
 }
 
@@ -175,10 +172,7 @@ export function hasPermission(
  *   MasterDBPermission.DELETE_LICENSE
  * ]) // true (operator has CREATE but not DELETE)
  */
-export function hasAnyPermission(
-  role: MMCUserRole,
-  permissions: MasterDBPermission[]
-): boolean {
+export function hasAnyPermission(role: MMCUserRole, permissions: MasterDBPermission[]): boolean {
   return permissions.some((p) => hasPermission(role, p))
 }
 
@@ -191,10 +185,7 @@ export function hasAnyPermission(
  *   MasterDBPermission.DELETE_LICENSE
  * ]) // true (admin has all)
  */
-export function hasAllPermissions(
-  role: MMCUserRole,
-  permissions: MasterDBPermission[]
-): boolean {
+export function hasAllPermissions(role: MMCUserRole, permissions: MasterDBPermission[]): boolean {
   return permissions.every((p) => hasPermission(role, p))
 }
 

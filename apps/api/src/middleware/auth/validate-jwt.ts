@@ -51,7 +51,8 @@ import {
   validateJwtClaims,
   verifyAndDecodeToken,
 } from '@zidney/domain-core/auth'
-import { Context, Next } from 'hono'
+import { logger } from '@zidney/logger'
+import type { Context, Next } from 'hono'
 
 type JwtScope = 'mmc' | 'backoffice' | 'frontoffice'
 
@@ -105,7 +106,7 @@ async function runJwtValidation(
       } catch (err) {
         // If we can't fetch schema version, continue without it
         // (better to allow request than block on query error)
-        console.warn('Failed to fetch schema version:', err)
+        logger.warn('Failed to fetch schema version:', { error: err })
       }
     }
 

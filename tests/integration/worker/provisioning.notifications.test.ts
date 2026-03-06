@@ -90,7 +90,7 @@ describe('T106: Async Notification Chain - Events', () => {
         event: 'provisioning:retry',
         jobId,
         attempt,
-        backoffMs: Math.pow(2, attempt - 1) * 1000,
+        backoffMs: 2 ** (attempt - 1) * 1000,
         timestamp: new Date().toISOString(),
       })
     }
@@ -137,9 +137,7 @@ describe('T106: Async Notification Chain - Events', () => {
     events.forEach((evt) => eventBus.push(evt))
 
     // All events should have correlation ID
-    const allHaveCorrelationId = eventBus.every(
-      (evt) => evt.correlationId === correlationId
-    )
+    const allHaveCorrelationId = eventBus.every((evt) => evt.correlationId === correlationId)
     expect(allHaveCorrelationId).toBe(true)
   })
 

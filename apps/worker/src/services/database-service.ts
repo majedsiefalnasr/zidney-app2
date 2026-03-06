@@ -12,7 +12,7 @@
  */
 
 import { ProvisioningErrorCode } from '@zidney/types/errors/provisioning-errors'
-import { Pool, QueryResult } from 'pg'
+import { Pool, type QueryResult } from 'pg'
 
 /**
  * Database Service Result
@@ -77,15 +77,11 @@ export class DatabaseService {
 
       await this.adminPool.query(createSQL)
 
-      this.logger?.logStep(
-        'database-created',
-        'Tenant database created successfully',
-        {
-          db_name: dbName,
-          workspace_slug: workspaceSlug,
-          encoding: 'UTF-8',
-        }
-      )
+      this.logger?.logStep('database-created', 'Tenant database created successfully', {
+        db_name: dbName,
+        workspace_slug: workspaceSlug,
+        encoding: 'UTF-8',
+      })
 
       const durationMs = Date.now() - startTime
 
@@ -147,11 +143,7 @@ export class DatabaseService {
   /**
    * Run query on tenant database
    */
-  async queryTenantDb(
-    dbName: string,
-    sql: string,
-    params?: unknown[]
-  ): Promise<QueryResult> {
+  async queryTenantDb(dbName: string, sql: string, params?: unknown[]): Promise<QueryResult> {
     const pool = await this.getTenantPool(dbName)
     return pool.query(sql, params)
   }
@@ -159,10 +151,7 @@ export class DatabaseService {
   /**
    * Run migrations on tenant database
    */
-  async runMigration(
-    dbName: string,
-    migrationSQL: string
-  ): Promise<DatabaseOperation> {
+  async runMigration(dbName: string, migrationSQL: string): Promise<DatabaseOperation> {
     const startTime = Date.now()
 
     try {
@@ -181,11 +170,7 @@ export class DatabaseService {
         client.release()
       }
 
-      this.logger?.logDatabaseOperation(
-        'MIGRATE',
-        dbName,
-        Date.now() - startTime
-      )
+      this.logger?.logDatabaseOperation('MIGRATE', dbName, Date.now() - startTime)
 
       return {
         success: true,
@@ -215,10 +200,7 @@ export class DatabaseService {
   /**
    * Seed tenant database with baseline data
    */
-  async seedDatabase(
-    dbName: string,
-    seedSQL: string
-  ): Promise<DatabaseOperation> {
+  async seedDatabase(dbName: string, seedSQL: string): Promise<DatabaseOperation> {
     const startTime = Date.now()
 
     try {
@@ -304,10 +286,9 @@ export class DatabaseService {
    */
   private async databaseExists(dbName: string): Promise<boolean> {
     try {
-      const result = await this.adminPool.query(
-        `SELECT 1 FROM pg_database WHERE datname = $1`,
-        [dbName]
-      )
+      const result = await this.adminPool.query(`SELECT 1 FROM pg_database WHERE datname = $1`, [
+        dbName,
+      ])
       return result.rows.length > 0
     } catch (error) {
       return false
@@ -360,9 +341,6 @@ export class DatabaseService {
 /**
  * Factory to create database service
  */
-export function createDatabaseService(
-  adminPool: Pool,
-  logger?: any
-): DatabaseService {
+export function createDatabaseService(adminPool: Pool, logger?: any): DatabaseService {
   return new DatabaseService(adminPool, logger)
 }

@@ -13,11 +13,12 @@
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  * Task: T043
  */
-import AppSidebar from '@/components/layout/AppSidebar.vue'
-import type { NavigationConfig } from '@/core/navigation/index'
+
 import { createTestingPinia } from '@pinia/testing'
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import AppSidebar from '@/components/layout/AppSidebar.vue'
+import type { NavigationConfig } from '@/core/navigation/index'
 
 vi.mock('vue-router', () => ({
   useRoute: vi.fn(() => ({ name: 'mmc-dashboard' })),
@@ -49,9 +50,7 @@ const testNav: NavigationConfig = [
   },
 ]
 
-function createWrapper(
-  opts: { resolvedPermissions?: Record<string, boolean> } = {}
-) {
+function createWrapper(opts: { resolvedPermissions?: Record<string, boolean> } = {}) {
   const pinia = createTestingPinia({
     createSpy: vi.fn,
     initialState: {
@@ -67,8 +66,7 @@ function createWrapper(
         SidebarLayout: sidebarLayoutStub,
         RouterLink: {
           props: ['to'],
-          template:
-            '<a class="stub-router-link" :class="$attrs.class"><slot /></a>',
+          template: '<a class="stub-router-link" :class="$attrs.class"><slot /></a>',
           inheritAttrs: false,
         },
         Teleport: { template: '<div><slot /></div>' },
@@ -101,9 +99,7 @@ describe('AppSidebar — MMC', () => {
   })
 
   it('hides items with missing permission key', () => {
-    expect(createWrapper({ resolvedPermissions: {} }).text()).not.toContain(
-      'Workspaces'
-    )
+    expect(createWrapper({ resolvedPermissions: {} }).text()).not.toContain('Workspaces')
   })
 
   it('active route item has app-sidebar__nav-item--active class', () => {

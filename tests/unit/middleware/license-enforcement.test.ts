@@ -47,9 +47,7 @@ function makeCtx(
     versionValidator: versionValidator ?? null,
     tenant_schema_version: '1.0.0',
     runtime_version: '1.0.0',
-    transitionLicenseState: vi
-      .fn()
-      .mockResolvedValue({ success: transitionResult }),
+    transitionLicenseState: vi.fn().mockResolvedValue({ success: transitionResult }),
     master_db: {},
   }
 
@@ -118,8 +116,7 @@ describe('licenseEnforcementMiddleware — correlationId in all non-ACTIVE error
     expect(next).not.toHaveBeenCalled()
     const [body, statusOrOpts] = jsonFn.mock.calls[0]
     expect(body.error.correlationId).toBe(CORRELATION_ID)
-    const status =
-      typeof statusOrOpts === 'number' ? statusOrOpts : statusOrOpts?.status
+    const status = typeof statusOrOpts === 'number' ? statusOrOpts : statusOrOpts?.status
     expect(status).toBe(423)
   })
 
@@ -196,9 +193,7 @@ describe('licenseEnforcementMiddleware — correlationId in all non-ACTIVE error
       expected_product_version: '1.0.0',
     }
     const resolver = {
-      validateLicenseStatus: vi
-        .fn()
-        .mockResolvedValue({ valid: true, status: 'ACTIVE' }),
+      validateLicenseStatus: vi.fn().mockResolvedValue({ valid: true, status: 'ACTIVE' }),
       getLicenseBySlug: vi.fn().mockResolvedValue(license),
       validateVersions: vi.fn().mockResolvedValue(false), // schema mismatch
     }
@@ -217,9 +212,7 @@ describe('licenseEnforcementMiddleware — correlationId in all non-ACTIVE error
 
   it('(f) 500 LICENSE_CHECK_FAILED on unexpected error contains correlationId', async () => {
     const resolver = {
-      validateLicenseStatus: vi
-        .fn()
-        .mockRejectedValue(new Error('DB connection failed')),
+      validateLicenseStatus: vi.fn().mockRejectedValue(new Error('DB connection failed')),
       getLicenseBySlug: vi.fn(),
       validateVersions: vi.fn(),
     }
@@ -232,8 +225,7 @@ describe('licenseEnforcementMiddleware — correlationId in all non-ACTIVE error
     const [body, statusOrOpts] = jsonFn.mock.calls[0]
     expect(body.success).toBe(false)
     expect(body.error.correlationId).toBeDefined()
-    const status =
-      typeof statusOrOpts === 'number' ? statusOrOpts : statusOrOpts?.status
+    const status = typeof statusOrOpts === 'number' ? statusOrOpts : statusOrOpts?.status
     expect(status).toBe(500)
   })
 
@@ -263,9 +255,7 @@ describe('licenseEnforcementMiddleware — correlationId in all non-ACTIVE error
       expected_product_version: '1.0.0',
     }
     const resolver = {
-      validateLicenseStatus: vi
-        .fn()
-        .mockResolvedValue({ valid: true, status: 'ACTIVE' }),
+      validateLicenseStatus: vi.fn().mockResolvedValue({ valid: true, status: 'ACTIVE' }),
       getLicenseBySlug: vi.fn().mockResolvedValue(license),
       validateVersions: vi.fn().mockResolvedValue(true),
     }

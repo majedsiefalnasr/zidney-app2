@@ -10,7 +10,7 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
-import { Pool, PoolClient } from 'pg'
+import { Pool, type PoolClient } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 const getConnectionString = () => {
@@ -214,8 +214,8 @@ describe('Phases 8-11: End-to-End Integration Tests', () => {
   describe('Phase 11: Comprehensive Testing', () => {
     it('should support cross-tenant isolation validation', async () => {
       // Setup: Create 2 workspaces with different tenants
-      const workspaceA = 'ws-aaa'
-      const workspaceB = 'ws-bbb'
+      const _workspaceA = 'ws-aaa'
+      const _workspaceB = 'ws-bbb'
 
       // Attempt cross-tenant access should fail
       const isolation = {
@@ -235,9 +235,7 @@ describe('Phases 8-11: End-to-End Integration Tests', () => {
         errors: [],
       }))
 
-      const allSuccessful = concurrentWorkspaces.every(
-        (ws) => ws.status === 'INITIALIZED'
-      )
+      const allSuccessful = concurrentWorkspaces.every((ws) => ws.status === 'INITIALIZED')
 
       expect(allSuccessful).toBe(true)
     })
@@ -250,9 +248,7 @@ describe('Phases 8-11: End-to-End Integration Tests', () => {
         order: i,
       }))
 
-      const allSubmitted = submissionStates.every(
-        (s) => s.status === 'SUBMITTED'
-      )
+      const allSubmitted = submissionStates.every((s) => s.status === 'SUBMITTED')
       const orderPreserved = submissionStates.every((s, i) => s.order === i)
 
       expect(allSubmitted).toBe(true)
@@ -362,7 +358,7 @@ describe('Phases 8-11: End-to-End Integration Tests', () => {
 
   describe('Idempotency Validation', () => {
     it('should return same response for duplicate requests with idempotency_key', async () => {
-      const idempotencyKey = 'idem-123'
+      const _idempotencyKey = 'idem-123'
 
       const firstRequest = {
         task_id: 'task-aaa',
@@ -380,7 +376,7 @@ describe('Phases 8-11: End-to-End Integration Tests', () => {
     })
 
     it('should cache idempotency result in Redis for 24hrs', async () => {
-      const cacheKey = 'schema-init:workspace-123:idem-456'
+      const _cacheKey = 'schema-init:workspace-123:idem-456'
       const cacheTTL = 86400 // 24 hours in seconds
 
       expect(cacheTTL).toBe(86400)

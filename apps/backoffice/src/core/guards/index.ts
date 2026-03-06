@@ -55,10 +55,7 @@ export interface RegisterGuardsOptions {
  * @param router - The Vue Router instance
  * @param options - Guard configuration options
  */
-export function registerGuards(
-  router: Router,
-  options: RegisterGuardsOptions
-): void {
+export function registerGuards(router: Router, options: RegisterGuardsOptions): void {
   let sessionInitialized = false
 
   const authGuard = createAuthGuard({
@@ -95,20 +92,14 @@ export function registerGuards(
     const authResult = await Promise.resolve(authGuard(to, from, () => {}))
     if (authResult !== true && authResult !== undefined) return authResult
 
-    const workspaceResult = await Promise.resolve(
-      workspaceGuard(to, from, () => {})
-    )
-    if (workspaceResult !== true && workspaceResult !== undefined)
-      return workspaceResult
+    const workspaceResult = await Promise.resolve(workspaceGuard(to, from, () => {}))
+    if (workspaceResult !== true && workspaceResult !== undefined) return workspaceResult
 
     const roleResult = await Promise.resolve(roleGuard(to, from, () => {}))
     if (roleResult !== true && roleResult !== undefined) return roleResult
 
-    const featureResult = await Promise.resolve(
-      featureFlagGuard(to, from, () => {})
-    )
-    if (featureResult !== true && featureResult !== undefined)
-      return featureResult
+    const featureResult = await Promise.resolve(featureFlagGuard(to, from, () => {}))
+    if (featureResult !== true && featureResult !== undefined) return featureResult
 
     return true
   })

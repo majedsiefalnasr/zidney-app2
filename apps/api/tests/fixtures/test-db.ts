@@ -13,8 +13,7 @@ export async function getTestDb(): Promise<Pool> {
   if (!testPool) {
     testPool = new Pool({
       connectionString:
-        process.env.DATABASE_URL ||
-        'postgresql://postgres:postgres@localhost:5432/zidney_test',
+        process.env.DATABASE_URL || 'postgresql://postgres:postgres@localhost:5432/zidney_test',
     })
   }
   return testPool

@@ -18,10 +18,9 @@
  * - Dependencies: mmc_members table must exist
  */
 
-import { PoolClient } from 'pg'
+import type { PoolClient } from 'pg'
 
-export const description =
-  'Create mmc_audit_log table for immutable audit trail'
+export const description = 'Create mmc_audit_log table for immutable audit trail'
 
 /**
  * Execute schema migration

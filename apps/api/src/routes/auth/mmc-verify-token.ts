@@ -41,10 +41,10 @@ import { db } from '../../db'
 import { validateJwtMiddleware } from '../../middleware/auth/validate-jwt'
 import { validateTokenVersionMiddleware } from '../../middleware/auth/validate-token-version'
 
-// @ts-ignore: TS6133 - declared but never read [INFRA-001]
+// @ts-expect-error: TS6133 - declared but never read [INFRA-001]
 const router = new Hono()
 
-// @ts-ignore: TS6133 - declared but never read [INFRA-001]
+// @ts-expect-error: TS6133 - declared but never read [INFRA-001]
 const verifySchema = z.object({
   token: z.string().optional(),
 })
@@ -70,15 +70,15 @@ router.post(
     // Validation errors are non-fatal for this endpoint
   }),
   async (c) => {
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const body = c.req.valid('json')
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const authPayload = c.get('authPayload')
 
     // If token provided in body, verify it separately
     if (body.token && body.token !== '') {
       try {
-        // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+        // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
         const payload = auth.jwt.verifyToken(body.token, 'mmc')
 
         // Check token_version
@@ -93,7 +93,7 @@ router.post(
           })
         }
 
-        // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+        // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
         const userResult = await db.master.query(
           `
           SELECT id, email, token_version FROM mmc_users WHERE id = $1
@@ -112,7 +112,7 @@ router.post(
           })
         }
 
-        // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+        // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
         const user = userResult.rows[0]
 
         if (user.token_version !== payload.token_version) {
@@ -137,7 +137,7 @@ router.post(
           },
           error: null,
         })
-      } catch (err) {
+      } catch (_err) {
         return c.json({
           success: true,
           data: {

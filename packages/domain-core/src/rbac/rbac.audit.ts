@@ -52,10 +52,7 @@ export interface DbClient {
  *         Callers must catch this before the DB write — the invalid action
  *         represents a programming error, not a runtime failure.
  */
-export async function writeRbacAuditLog(
-  db: DbClient,
-  entry: RbacAuditEntry
-): Promise<void> {
+export async function writeRbacAuditLog(db: DbClient, entry: RbacAuditEntry): Promise<void> {
   // Validate action against allowlist — throw on invalid action
   if (!(RBAC_AUDIT_ACTIONS as ReadonlyArray<string>).includes(entry.action)) {
     throw new Error(

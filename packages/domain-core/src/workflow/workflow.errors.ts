@@ -36,8 +36,7 @@ export const WORKFLOW_ERROR_CODES = {
 } as const
 
 /** Union of all valid workflow error code strings */
-export type WorkflowErrorCode =
-  (typeof WORKFLOW_ERROR_CODES)[keyof typeof WORKFLOW_ERROR_CODES]
+export type WorkflowErrorCode = (typeof WORKFLOW_ERROR_CODES)[keyof typeof WORKFLOW_ERROR_CODES]
 
 /** HTTP status code mapping per error code */
 export const WORKFLOW_ERROR_HTTP_STATUS: Record<WorkflowErrorCode, number> = {
@@ -103,10 +102,7 @@ export class WorkflowError extends Error {
 // -------------------------------------------------------------------------
 
 /** Attempted transition is not a valid state machine edge (400) */
-export function invalidStateTransition(
-  from: string,
-  to: string
-): WorkflowError {
+export function invalidStateTransition(from: string, to: string): WorkflowError {
   return new WorkflowError(
     'invalid_state_transition',
     `Transition from '${from}' to '${to}' is not allowed.`
@@ -130,10 +126,7 @@ export function unknownEntityType(entityType: string): WorkflowError {
 }
 
 /** Actor lacks the required permission for this transition (403) */
-export function workflowPermissionDenied(
-  permission: string,
-  actorId: string
-): WorkflowError {
+export function workflowPermissionDenied(permission: string, actorId: string): WorkflowError {
   return new WorkflowError(
     'workflow_permission_denied',
     `Actor '${actorId}' does not have the required permission '${permission}'.`
@@ -141,10 +134,7 @@ export function workflowPermissionDenied(
 }
 
 /** Entity row not found in tenant database (404) */
-export function entityNotFound(
-  entityType: string,
-  entityId: string
-): WorkflowError {
+export function entityNotFound(entityType: string, entityId: string): WorkflowError {
   return new WorkflowError(
     'entity_not_found',
     `Entity of type '${entityType}' with id '${entityId}' was not found.`

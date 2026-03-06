@@ -1,13 +1,11 @@
 import { createLogger } from '@zidney/logger'
-import { Context, Hono } from 'hono'
+import { type Context, Hono } from 'hono'
 import { toLicenseError } from '../../responses/license-error-handler'
 import { createUserWithLimitCheck } from '../../utils/transaction-wrapper'
 
 const logger = createLogger('backoffice-users')
 
-function parseLimitValue(
-  limit: string | number | null | undefined
-): number | null {
+function parseLimitValue(limit: string | number | null | undefined): number | null {
   if (limit === 'unlimited' || limit === null || limit === undefined) {
     return null
   }
@@ -123,19 +121,15 @@ backofficeUsersRouter.post('/backoffice/users', async (ctx: Context) => {
     // ADMIN has no limit
 
     // Call transaction wrapper with limit enforcement
-    const transactionResult = await createUserWithLimitCheck(
-      masterDb,
-      tenantDb,
-      {
-        workspace_id,
-        user_id: user_id || crypto.randomUUID(),
-        role: role as 'STUDENT' | 'STAFF',
-        name,
-        email,
-        limit: roleLimit,
-        license_id: licenseId,
-      }
-    )
+    const transactionResult = await createUserWithLimitCheck(masterDb, tenantDb, {
+      workspace_id,
+      user_id: user_id || crypto.randomUUID(),
+      role: role as 'STUDENT' | 'STAFF',
+      name,
+      email,
+      limit: roleLimit,
+      license_id: licenseId,
+    })
 
     // Handle transaction result
     if (!transactionResult.success) {
@@ -320,67 +314,64 @@ backofficeUsersRouter.get('/backoffice/users', async (ctx: Context) => {
  * Transactions: NO (read-only)
  * Response: User object
  */
-backofficeUsersRouter.get(
-  '/backoffice/users/:user_id',
-  async (ctx: Context) => {
-    const correlationId = ctx.get('correlation_id')
-    const tenantDb = ctx.get('tenant_db')
-    const user_id = ctx.req.param('user_id')
+backofficeUsersRouter.get('/backoffice/users/:user_id', async (ctx: Context) => {
+  const correlationId = ctx.get('correlation_id')
+  const tenantDb = ctx.get('tenant_db')
+  const user_id = ctx.req.param('user_id')
 
-    try {
-      // Query user by ID
-      const result = await tenantDb.query(
-        'SELECT id, name, email, role, status, created_at FROM users WHERE id=$1 LIMIT 1',
-        [user_id]
-      )
+  try {
+    // Query user by ID
+    const result = await tenantDb.query(
+      'SELECT id, name, email, role, status, created_at FROM users WHERE id=$1 LIMIT 1',
+      [user_id]
+    )
 
-      if (!result.rows.length) {
-        logger.warn(
-          {
-            correlation_id: correlationId,
-            action: 'user_not_found',
-            user_id,
-            error_code: 'USER_NOT_FOUND',
-          },
-          'User not found'
-        )
-        return ctx.json(toLicenseError('USER_NOT_FOUND'), { status: 404 })
-      }
-
-      const user = result.rows[0]
-
-      logger.debug(
+    if (!result.rows.length) {
+      logger.warn(
         {
           correlation_id: correlationId,
-          action: 'user_retrieved',
+          action: 'user_not_found',
           user_id,
+          error_code: 'USER_NOT_FOUND',
         },
-        'User retrieved'
+        'User not found'
       )
-
-      return ctx.json(
-        {
-          success: true,
-          data: user,
-          error: null,
-        },
-        { status: 200 }
-      )
-    } catch (error: any) {
-      logger.error(
-        {
-          correlation_id: correlationId,
-          action: 'user_get_error',
-          user_id,
-          error_message: error.message,
-        },
-        'Failed to retrieve user'
-      )
-
-      return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })
+      return ctx.json(toLicenseError('USER_NOT_FOUND'), { status: 404 })
     }
+
+    const user = result.rows[0]
+
+    logger.debug(
+      {
+        correlation_id: correlationId,
+        action: 'user_retrieved',
+        user_id,
+      },
+      'User retrieved'
+    )
+
+    return ctx.json(
+      {
+        success: true,
+        data: user,
+        error: null,
+      },
+      { status: 200 }
+    )
+  } catch (error: any) {
+    logger.error(
+      {
+        correlation_id: correlationId,
+        action: 'user_get_error',
+        user_id,
+        error_message: error.message,
+      },
+      'Failed to retrieve user'
+    )
+
+    return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })
   }
-)
+})
 
 /**
  * PATCH /api/backoffice/users/:user_id/soft-delete
@@ -392,70 +383,67 @@ backofficeUsersRouter.get(
  * Idempotency: NO (idempotent by design; second call is no-op)
  * Response: Updated user object or 404
  */
-backofficeUsersRouter.patch(
-  '/backoffice/users/:user_id/soft-delete',
-  async (ctx: Context) => {
-    const correlationId = ctx.get('correlation_id')
-    const tenantDb = ctx.get('tenant_db')
-    const user_id = ctx.req.param('user_id')
+backofficeUsersRouter.patch('/backoffice/users/:user_id/soft-delete', async (ctx: Context) => {
+  const correlationId = ctx.get('correlation_id')
+  const tenantDb = ctx.get('tenant_db')
+  const user_id = ctx.req.param('user_id')
 
-    try {
-      // Update user status to DISABLED (soft-delete)
-      const result = await tenantDb.query(
-        'UPDATE users SET status=$1, updated_at=NOW() WHERE id=$2 RETURNING id, name, email, role, status',
-        ['DISABLED', user_id]
-      )
+  try {
+    // Update user status to DISABLED (soft-delete)
+    const result = await tenantDb.query(
+      'UPDATE users SET status=$1, updated_at=NOW() WHERE id=$2 RETURNING id, name, email, role, status',
+      ['DISABLED', user_id]
+    )
 
-      if (!result.rows.length) {
-        logger.warn(
-          {
-            correlation_id: correlationId,
-            action: 'user_soft_delete_not_found',
-            user_id,
-            error_code: 'USER_NOT_FOUND',
-          },
-          'User not found for soft-delete'
-        )
-        return ctx.json(toLicenseError('USER_NOT_FOUND'), { status: 404 })
-      }
-
-      const user = result.rows[0]
-
-      logger.info(
+    if (!result.rows.length) {
+      logger.warn(
         {
           correlation_id: correlationId,
-          action: 'user_soft_deleted',
+          action: 'user_soft_delete_not_found',
           user_id,
-          role: user.role,
+          error_code: 'USER_NOT_FOUND',
         },
-        'User soft-deleted (no longer counted toward limits)'
+        'User not found for soft-delete'
       )
-
-      return ctx.json(
-        {
-          success: true,
-          data: {
-            ...user,
-            message: 'User disabled and no longer counted toward limits',
-          },
-          error: null,
-        },
-        { status: 200 }
-      )
-    } catch (error: any) {
-      logger.error(
-        {
-          correlation_id: correlationId,
-          action: 'user_soft_delete_error',
-          user_id,
-          error_message: error.message,
-        },
-        'Failed to soft-delete user'
-      )
-
-      return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })
+      return ctx.json(toLicenseError('USER_NOT_FOUND'), { status: 404 })
     }
+
+    const user = result.rows[0]
+
+    logger.info(
+      {
+        correlation_id: correlationId,
+        action: 'user_soft_deleted',
+        user_id,
+        role: user.role,
+      },
+      'User soft-deleted (no longer counted toward limits)'
+    )
+
+    return ctx.json(
+      {
+        success: true,
+        data: {
+          ...user,
+          message: 'User disabled and no longer counted toward limits',
+        },
+        error: null,
+      },
+      { status: 200 }
+    )
+  } catch (error: any) {
+    logger.error(
+      {
+        correlation_id: correlationId,
+        action: 'user_soft_delete_error',
+        user_id,
+        error_message: error.message,
+      },
+      'Failed to soft-delete user'
+    )
+
+    return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })
   }
-)
+})
 
 export default backofficeUsersRouter

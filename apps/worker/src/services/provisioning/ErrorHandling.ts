@@ -180,13 +180,7 @@ export class StructuredLogger {
   }
 
   private shouldLog(level: LogLevel): boolean {
-    const levels = [
-      LogLevel.DEBUG,
-      LogLevel.INFO,
-      LogLevel.WARN,
-      LogLevel.ERROR,
-      LogLevel.FATAL,
-    ]
+    const levels = [LogLevel.DEBUG, LogLevel.INFO, LogLevel.WARN, LogLevel.ERROR, LogLevel.FATAL]
     const min_idx = levels.indexOf(this.min_level)
     const level_idx = levels.indexOf(level)
     return level_idx >= min_idx
@@ -259,11 +253,7 @@ export class StructuredLogger {
     })
   }
 
-  error(
-    event: string,
-    error: Error | string,
-    context: Partial<LogContext>
-  ): void {
+  error(event: string, error: Error | string, context: Partial<LogContext>): void {
     const error_obj = error instanceof Error ? error : new Error(error)
 
     this.writeLog({
@@ -284,11 +274,7 @@ export class StructuredLogger {
     })
   }
 
-  fatal(
-    event: string,
-    error: Error | string,
-    context: Partial<LogContext>
-  ): void {
+  fatal(event: string, error: Error | string, context: Partial<LogContext>): void {
     const error_obj = error instanceof Error ? error : new Error(error)
 
     this.writeLog({

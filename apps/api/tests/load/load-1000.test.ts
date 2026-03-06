@@ -73,8 +73,8 @@ describe('1000-Attempt Load Test', () => {
 
     // Simulate creating 1000 attempts
     for (let i = 0; i < 1000; i++) {
-      const user = users[i % users.length]
-      const exam = exams[i % exams.length]
+      const _user = users[i % users.length]
+      const _exam = exams[i % exams.length]
 
       // Mock creation
       const response = {
@@ -138,7 +138,7 @@ describe('1000-Attempt Load Test', () => {
       [workspaceId]
     )
 
-    const count = parseInt(result.rows[0].count)
+    const count = parseInt(result.rows[0].count, 10)
     expect(Number.isFinite(count)).toBe(true)
     expect(count).toBeGreaterThanOrEqual(0)
   })
@@ -184,8 +184,7 @@ describe('1000-Attempt Load Test', () => {
       { timestamp: '90s', mb: 103 },
     ]
 
-    const avgMemory =
-      memoryReadings.reduce((sum, r) => sum + r.mb, 0) / memoryReadings.length
+    const avgMemory = memoryReadings.reduce((sum, r) => sum + r.mb, 0) / memoryReadings.length
 
     expect(avgMemory).toBeLessThan(200) // No runaway memory
   })

@@ -35,15 +35,14 @@ export type WorkspaceSettingsErrorCode =
 // HTTP Status Code Mapping
 // ---------------------------------------------------------------------------
 
-export const SETTINGS_ERROR_STATUS: Record<WorkspaceSettingsErrorCode, number> =
-  {
-    [WorkspaceSettingsErrorCode.SETTINGS_VALIDATION_FAILED]: 422,
-    [WorkspaceSettingsErrorCode.SETTINGS_VERSION_CONFLICT]: 409,
-    [WorkspaceSettingsErrorCode.SETTINGS_NOT_FOUND]: 404,
-    [WorkspaceSettingsErrorCode.ENCRYPTION_SERVICE_UNAVAILABLE]: 503,
-    [WorkspaceSettingsErrorCode.INVALID_SETTINGS_GROUP]: 400,
-    [WorkspaceSettingsErrorCode.LANGUAGE_REMOVAL_REQUIRES_ASYNC]: 409,
-  }
+export const SETTINGS_ERROR_STATUS: Record<WorkspaceSettingsErrorCode, number> = {
+  [WorkspaceSettingsErrorCode.SETTINGS_VALIDATION_FAILED]: 422,
+  [WorkspaceSettingsErrorCode.SETTINGS_VERSION_CONFLICT]: 409,
+  [WorkspaceSettingsErrorCode.SETTINGS_NOT_FOUND]: 404,
+  [WorkspaceSettingsErrorCode.ENCRYPTION_SERVICE_UNAVAILABLE]: 503,
+  [WorkspaceSettingsErrorCode.INVALID_SETTINGS_GROUP]: 400,
+  [WorkspaceSettingsErrorCode.LANGUAGE_REMOVAL_REQUIRES_ASYNC]: 409,
+}
 
 // ---------------------------------------------------------------------------
 // Base Error
@@ -87,11 +86,7 @@ export class WorkspaceSettingsError extends Error {
 /** HTTP 422 — Validation failure with field-level details */
 export class SettingsValidationError extends WorkspaceSettingsError {
   constructor(message: string, details?: Record<string, unknown>) {
-    super(
-      WorkspaceSettingsErrorCode.SETTINGS_VALIDATION_FAILED,
-      message,
-      details
-    )
+    super(WorkspaceSettingsErrorCode.SETTINGS_VALIDATION_FAILED, message, details)
     this.name = 'SettingsValidationError'
   }
 }
@@ -124,9 +119,7 @@ export class SettingsNotFoundError extends WorkspaceSettingsError {
 
 /** HTTP 503 — Encryption key missing or crypto module failure */
 export class EncryptionServiceUnavailableError extends WorkspaceSettingsError {
-  constructor(
-    message = 'Unable to process payment credentials. Please try again later.'
-  ) {
+  constructor(message = 'Unable to process payment credentials. Please try again later.') {
     super(WorkspaceSettingsErrorCode.ENCRYPTION_SERVICE_UNAVAILABLE, message)
     this.name = 'EncryptionServiceUnavailableError'
   }

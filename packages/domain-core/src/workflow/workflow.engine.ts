@@ -40,11 +40,7 @@ import {
   workflowConflict,
   workflowPermissionDenied,
 } from './workflow.errors'
-import {
-  WORKFLOW_ENTITY_TYPES,
-  WORKFLOW_TRANSITIONS,
-  WorkflowState,
-} from './workflow.states'
+import { WORKFLOW_ENTITY_TYPES, WORKFLOW_TRANSITIONS, type WorkflowState } from './workflow.states'
 import type {
   DbClient,
   WorkflowContext,
@@ -126,9 +122,7 @@ export async function executeTransition(
   // STEP 2: Acquire PoolClient for transaction lifecycle control
   // ------------------------------------------------------------------
   if (!db.connect) {
-    throw new Error(
-      'DbClient must implement connect() for transaction support.'
-    )
+    throw new Error('DbClient must implement connect() for transaction support.')
   }
   const client = await db.connect()
 
@@ -265,9 +259,7 @@ export async function executeTransition(
 
     const logRow = insertResult.rows[0]
     if (!logRow) {
-      throw new Error(
-        'workflow_logs INSERT returned no row — unexpected failure.'
-      )
+      throw new Error('workflow_logs INSERT returned no row — unexpected failure.')
     }
 
     // ----------------------------------------------------------------
@@ -316,19 +308,12 @@ export async function executeTransition(
         entity_type: context.entityType,
         entity_id: context.entityId,
         actor_id: context.actorId,
-        error:
-          rollbackErr instanceof Error
-            ? rollbackErr.message
-            : String(rollbackErr),
+        error: rollbackErr instanceof Error ? rollbackErr.message : String(rollbackErr),
       })
     }
 
     // Check for PostgreSQL serialization/deadlock errors → workflow_conflict
-    if (
-      err instanceof Error &&
-      'code' in err &&
-      (err as NodeJS.ErrnoException).code === '40001'
-    ) {
+    if (err instanceof Error && 'code' in err && (err as NodeJS.ErrnoException).code === '40001') {
       throw workflowConflict(context.entityId)
     }
 

@@ -58,9 +58,7 @@ export async function insertAuditLog(
   ])
 
   if (!result.rows || result.rows.length === 0) {
-    throw new Error(
-      `Failed to insert audit log for attempt ${entry.attempt_id}`
-    )
+    throw new Error(`Failed to insert audit log for attempt ${entry.attempt_id}`)
   }
 
   return result.rows[0].id
@@ -235,8 +233,7 @@ export async function queryAttemptAuditLog(
     attempt_id: row.attempt_id,
     user_id: row.user_id,
     event: row.event,
-    details:
-      typeof row.details === 'string' ? JSON.parse(row.details) : row.details,
+    details: typeof row.details === 'string' ? JSON.parse(row.details) : row.details,
     correlation_id: row.correlation_id,
     created_at: row.created_at,
   }))
@@ -272,8 +269,7 @@ export async function queryAuditLogByCorrelationId(
     attempt_id: row.attempt_id,
     user_id: row.user_id,
     event: row.event,
-    details:
-      typeof row.details === 'string' ? JSON.parse(row.details) : row.details,
+    details: typeof row.details === 'string' ? JSON.parse(row.details) : row.details,
     correlation_id: row.correlation_id,
     created_at: row.created_at,
   }))

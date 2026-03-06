@@ -70,9 +70,7 @@ const isActionDisabled = computed((): boolean => {
 })
 
 // Computed: combined disabled state (LOCKED DECISION 2: component-managed loading state)
-const computedDisabled = computed(
-  () => props.disabled || props.isLoading || isActionDisabled.value
-)
+const computedDisabled = computed(() => props.disabled || props.isLoading || isActionDisabled.value)
 
 // Handlers: Execute action with error state management
 const handleClick = (): void => {

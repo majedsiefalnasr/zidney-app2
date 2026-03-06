@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { StudentStaffCounter } from '../../src/license/limit-enforcer'
+import { StudentStaffCounter } from '../../../src/license/limit-enforcer'
 import { MockDatabaseClient } from './fixtures'
 
 /**

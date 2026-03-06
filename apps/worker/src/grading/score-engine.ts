@@ -20,7 +20,7 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import {
+import type {
   QuestionResult,
   QuestionSnapshot,
   ResultSnapshot,
@@ -46,11 +46,7 @@ function resolveSelectedOption(answer: UserAnswer): unknown {
 function resolveCorrectOption(question: QuestionSnapshot): unknown {
   const payload = question as Record<string, any>
   const correctAnswer = payload.correct_answer
-  if (
-    correctAnswer &&
-    typeof correctAnswer === 'object' &&
-    !Array.isArray(correctAnswer)
-  ) {
+  if (correctAnswer && typeof correctAnswer === 'object' && !Array.isArray(correctAnswer)) {
     if ('selected_option' in correctAnswer) {
       return correctAnswer.selected_option
     }
@@ -67,9 +63,7 @@ function resolveFillBlankCorrectAnswers(question: QuestionSnapshot): string[] {
   const legacyAnswers = payload.correct_answers
 
   if (Array.isArray(legacyAnswers)) {
-    return legacyAnswers.map((answer: string) =>
-      answer.toLowerCase().replace(/\s+/g, ' ').trim()
-    )
+    return legacyAnswers.map((answer: string) => answer.toLowerCase().replace(/\s+/g, ' ').trim())
   }
 
   if (Array.isArray(correctAnswer?.answers)) {
@@ -181,8 +175,7 @@ export function computeScore(
 
   // Calculate percentagescores
   const totalPoints = gradingConfig.total_points
-  const scorePercentage =
-    totalPoints > 0 ? (totalEarned / totalPoints) * 100 : 0
+  const scorePercentage = totalPoints > 0 ? (totalEarned / totalPoints) * 100 : 0
   const passScorePercentage = gradingConfig.pass_score_percentage || 60
   const passScore = (passScorePercentage / 100) * totalPoints
 
@@ -301,17 +294,12 @@ export function scoreQuestion(
  *
  * @private
  */
-function scoreMCQ(
-  question: QuestionSnapshot,
-  userAnswer: UserAnswer
-): QuestionResult {
+function scoreMCQ(question: QuestionSnapshot, userAnswer: UserAnswer): QuestionResult {
   const selectedOption = resolveSelectedOption(userAnswer)
   const correctOption = resolveCorrectOption(question)
 
   const isCorrect =
-    selectedOption === correctOption &&
-    selectedOption !== undefined &&
-    correctOption !== undefined
+    selectedOption === correctOption && selectedOption !== undefined && correctOption !== undefined
 
   return {
     question_id: question.id,
@@ -335,19 +323,14 @@ function scoreMCQ(
  *
  * @private
  */
-function scoreShortAnswer(
-  question: QuestionSnapshot,
-  userAnswer: UserAnswer
-): QuestionResult {
+function scoreShortAnswer(question: QuestionSnapshot, userAnswer: UserAnswer): QuestionResult {
   const userText = (userAnswer.text || '').toLowerCase().trim()
   const correctAnswers = Array.isArray(question.correct_answer?.answers)
     ? question.correct_answer.answers.map((a: string) => a.toLowerCase().trim())
     : [(question.correct_answer?.text || '').toLowerCase().trim()]
 
   // Check for exact match
-  const isExactMatch = correctAnswers.some(
-    (correct: string) => userText === correct
-  )
+  const isExactMatch = correctAnswers.some((correct: string) => userText === correct)
 
   if (isExactMatch) {
     return {
@@ -369,9 +352,7 @@ function scoreShortAnswer(
 
   let pointsEarned = 0
   if (matchedKeywords.length > 0 && keywords.length > 0) {
-    pointsEarned = Math.floor(
-      (matchedKeywords.length / keywords.length) * question.points
-    )
+    pointsEarned = Math.floor((matchedKeywords.length / keywords.length) * question.points)
   }
 
   return {
@@ -395,16 +376,9 @@ function scoreShortAnswer(
  *
  * @private
  */
-function scoreEssay(
-  question: QuestionSnapshot,
-  userAnswer: UserAnswer
-): QuestionResult {
-  const legacyDefaultScore = (question as unknown as Record<string, unknown>)
-    .default_score
-  if (
-    typeof legacyDefaultScore === 'number' &&
-    Number.isFinite(legacyDefaultScore)
-  ) {
+function scoreEssay(question: QuestionSnapshot, userAnswer: UserAnswer): QuestionResult {
+  const legacyDefaultScore = (question as unknown as Record<string, unknown>).default_score
+  if (typeof legacyDefaultScore === 'number' && Number.isFinite(legacyDefaultScore)) {
     return {
       question_id: question.id,
       user_answer: userAnswer,
@@ -432,8 +406,7 @@ function scoreEssay(
     {
       criterion: 'keywords',
       check:
-        keywords.length > 0 &&
-        keywords.some((k: string) => essayText.includes(k.toLowerCase())),
+        keywords.length > 0 && keywords.some((k: string) => essayText.includes(k.toLowerCase())),
       weight: 0.4,
     },
     {
@@ -478,10 +451,7 @@ function scoreEssay(
  *
  * @private
  */
-function scoreMatching(
-  question: QuestionSnapshot,
-  userAnswer: UserAnswer
-): QuestionResult {
+function scoreMatching(question: QuestionSnapshot, userAnswer: UserAnswer): QuestionResult {
   const userMatches = resolveUserMatches(userAnswer)
   const correctMatches = resolveCorrectMatches(question)
 
@@ -502,8 +472,7 @@ function scoreMatching(
   let correctCount = 0
   for (const userMatch of userMatches) {
     const isCorrect = correctMatches.some(
-      (correct: any) =>
-        correct.from === userMatch.from && correct.to === userMatch.to
+      (correct: any) => correct.from === userMatch.from && correct.to === userMatch.to
     )
     if (isCorrect) {
       correctCount++
@@ -522,9 +491,7 @@ function scoreMatching(
     points_earned: pointsEarned,
     points_possible: question.points,
     feedback:
-      correctCount === correctMatches.length
-        ? 'All matches correct'
-        : 'Some matches incorrect',
+      correctCount === correctMatches.length ? 'All matches correct' : 'Some matches incorrect',
     explanation: `You correctly matched ${correctCount}/${correctMatches.length} pairs.`,
     is_correct: correctCount === correctMatches.length,
   } as QuestionResult
@@ -537,10 +504,7 @@ function scoreMatching(
  *
  * @private
  */
-function scoreOrdering(
-  question: QuestionSnapshot,
-  userAnswer: UserAnswer
-): QuestionResult {
+function scoreOrdering(question: QuestionSnapshot, userAnswer: UserAnswer): QuestionResult {
   const userOrder = userAnswer.order || []
   const correctOrder = resolveCorrectOrder(question)
 
@@ -581,19 +545,11 @@ function scoreOrdering(
  *
  * @private
  */
-function scoreFillBlank(
-  question: QuestionSnapshot,
-  userAnswer: UserAnswer
-): QuestionResult {
-  const userAnswer_text = (userAnswer.text || '')
-    .toLowerCase()
-    .replace(/\s+/g, ' ')
-    .trim()
+function scoreFillBlank(question: QuestionSnapshot, userAnswer: UserAnswer): QuestionResult {
+  const userAnswer_text = (userAnswer.text || '').toLowerCase().replace(/\s+/g, ' ').trim()
   const correctAnswers = resolveFillBlankCorrectAnswers(question)
 
-  const isCorrect = correctAnswers.some(
-    (correct: string) => userAnswer_text === correct
-  )
+  const isCorrect = correctAnswers.some((correct: string) => userAnswer_text === correct)
 
   return {
     question_id: question.id,
@@ -602,9 +558,7 @@ function scoreFillBlank(
     points_earned: isCorrect ? question.points : 0,
     points_possible: question.points,
     feedback: isCorrect ? 'Correct!' : 'Incorrect',
-    explanation: isCorrect
-      ? 'Your answer matches.'
-      : `Expected: ${correctAnswers.join(' or ')}`,
+    explanation: isCorrect ? 'Your answer matches.' : `Expected: ${correctAnswers.join(' or ')}`,
     is_correct: isCorrect,
   } as QuestionResult
 }

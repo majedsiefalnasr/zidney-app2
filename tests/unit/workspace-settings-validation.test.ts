@@ -115,13 +115,7 @@ describe('generalSettingsSchema', () => {
 
   // date_format
   it('accepts all valid date_format values', () => {
-    const formats = [
-      'YYYY-MM-DD',
-      'DD/MM/YYYY',
-      'MM/DD/YYYY',
-      'DD-MM-YYYY',
-      'DD.MM.YYYY',
-    ]
+    const formats = ['YYYY-MM-DD', 'DD/MM/YYYY', 'MM/DD/YYYY', 'DD-MM-YYYY', 'DD.MM.YYYY']
     for (const fmt of formats) {
       const result = generalSettingsSchema.safeParse({
         ...validGeneral,
@@ -275,27 +269,15 @@ describe('brandingSettingsSchema', () => {
 
   // T027 — Hex colors
   it('accepts valid hex colors (#1E40AF, #9333EA, #1E40AF80)', () => {
-    expect(
-      brandingSettingsSchema.safeParse({ primary_color: '#1E40AF' }).success
-    ).toBe(true)
-    expect(
-      brandingSettingsSchema.safeParse({ primary_color: '#9333EA' }).success
-    ).toBe(true)
-    expect(
-      brandingSettingsSchema.safeParse({ primary_color: '#1E40AF80' }).success
-    ).toBe(true)
+    expect(brandingSettingsSchema.safeParse({ primary_color: '#1E40AF' }).success).toBe(true)
+    expect(brandingSettingsSchema.safeParse({ primary_color: '#9333EA' }).success).toBe(true)
+    expect(brandingSettingsSchema.safeParse({ primary_color: '#1E40AF80' }).success).toBe(true)
   })
 
   it('rejects invalid color values', () => {
-    expect(
-      brandingSettingsSchema.safeParse({ primary_color: '#GGG' }).success
-    ).toBe(false)
-    expect(
-      brandingSettingsSchema.safeParse({ primary_color: 'rgb(1,2,3)' }).success
-    ).toBe(false)
-    expect(
-      brandingSettingsSchema.safeParse({ primary_color: 'blue' }).success
-    ).toBe(false)
+    expect(brandingSettingsSchema.safeParse({ primary_color: '#GGG' }).success).toBe(false)
+    expect(brandingSettingsSchema.safeParse({ primary_color: 'rgb(1,2,3)' }).success).toBe(false)
+    expect(brandingSettingsSchema.safeParse({ primary_color: 'blue' }).success).toBe(false)
   })
 
   // URLs

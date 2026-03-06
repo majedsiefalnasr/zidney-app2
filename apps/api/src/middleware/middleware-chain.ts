@@ -24,6 +24,7 @@
  * No route may bypass tenant + license validation.
  */
 
+import { logger } from '@zidney/logger'
 import type { Context, Next } from 'hono'
 
 export enum MiddlewareStage {
@@ -76,9 +77,7 @@ export class MiddlewareChain {
 
     for (const stage of required) {
       if (!this.executed.has(stage)) {
-        console.error(
-          `[Middleware Chain] Missing required middleware: ${stage}`
-        )
+        logger.error(`[Middleware Chain] Missing required middleware: ${stage}`)
         return false
       }
     }
@@ -88,9 +87,7 @@ export class MiddlewareChain {
     for (const stage of required) {
       const index = this.order.indexOf(stage)
       if (index <= lastIndex) {
-        console.error(
-          `[Middleware Chain] Middleware ${stage} executed out of order`
-        )
+        logger.error(`[Middleware Chain] Middleware ${stage} executed out of order`)
         return false
       }
       lastIndex = index
@@ -104,9 +101,7 @@ export class MiddlewareChain {
    */
   requireComplete(): void {
     if (!this.verifyExecutionOrder()) {
-      throw new Error(
-        'Middleware chain incomplete or out of order. Request cannot proceed.'
-      )
+      throw new Error('Middleware chain incomplete or out of order. Request cannot proceed.')
     }
   }
 

@@ -53,5 +53,5 @@ export function getApiBase(): string {
 
 // ─── Re-exports ─────────────────────────────────────────────────────────────
 
-export { type EnvConfig } from './env'
-export { type FeatureFlags } from './feature-flags'
+export type { EnvConfig } from './env'
+export type { FeatureFlags } from './feature-flags'

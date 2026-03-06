@@ -16,7 +16,7 @@ import { db, getTenantPool } from '../../db'
 
 describe('Pessimistic Lock Behavior', () => {
   let workspaceId: string
-  let attemptId: string
+  let _attemptId: string
   let pool: any
 
   beforeAll(async () => {
@@ -36,7 +36,7 @@ describe('Pessimistic Lock Behavior', () => {
        RETURNING id`,
       [workspaceId]
     )
-    attemptId = attemptRes.rows[0].id
+    _attemptId = attemptRes.rows[0].id
   })
 
   // T057.1: Lock timeout immediate with NOWAIT
@@ -129,8 +129,7 @@ describe('Pessimistic Lock Behavior', () => {
       { succeeded: false },
     ]
 
-    const contentionRate =
-      lockAttempts.filter((a) => !a.succeeded).length / lockAttempts.length
+    const contentionRate = lockAttempts.filter((a) => !a.succeeded).length / lockAttempts.length
 
     expect(contentionRate).toBeGreaterThan(0.5) // High contention
   })

@@ -1,4 +1,5 @@
-import { createClient } from 'redis'
+import { logger } from '@zidney/logger'
+import type { createClient } from 'redis'
 
 /**
  * T015: Token Bucket Rate Limiter Algorithm
@@ -60,9 +61,7 @@ export class TokenBucketRateLimiter {
       // Get current state
       const state = await this.redis.hGetAll(bucketKey)
 
-      const lastRefillAt = state?.lastRefillAt
-        ? parseFloat(state.lastRefillAt)
-        : now
+      const lastRefillAt = state?.lastRefillAt ? parseFloat(state.lastRefillAt) : now
       let tokensAvailable = state?.tokensAvailable
         ? parseFloat(state.tokensAvailable)
         : config.capacity
@@ -92,9 +91,7 @@ export class TokenBucketRateLimiter {
       await this.redis.expire(bucketKey, window)
 
       // Calculate refill time
-      const refillAt = Math.ceil(
-        now + (tokensNeeded - tokensAvailable) / config.refillRate
-      )
+      const refillAt = Math.ceil(now + (tokensNeeded - tokensAvailable) / config.refillRate)
 
       // Calculate retry-after
       const retryAfter = allowed
@@ -108,10 +105,7 @@ export class TokenBucketRateLimiter {
         retryAfter,
       }
     } catch (error) {
-      console.error(
-        `[Token Bucket] Error checking limit for key ${key}:`,
-        error
-      )
+      logger.error('token_bucket_check_failed', { key, error: String(error) })
       // On Redis error, fail open (allow request)
       return {
         allowed: true,
@@ -127,20 +121,14 @@ export class TokenBucketRateLimiter {
     try {
       await this.redis.del(`bucket:${key}`)
     } catch (error) {
-      console.error(
-        `[Token Bucket] Error resetting bucket for key ${key}:`,
-        error
-      )
+      logger.error('token_bucket_reset_failed', { key, error: String(error) })
     }
   }
 
   /**
    * Get current tokens available (for monitoring)
    */
-  async getCurrentTokens(
-    key: string,
-    config: TokenBucketConfig
-  ): Promise<number> {
+  async getCurrentTokens(key: string, config: TokenBucketConfig): Promise<number> {
     try {
       const bucketKey = `bucket:${key}`
       const state = await this.redis.hGetAll(bucketKey)
@@ -160,10 +148,7 @@ export class TokenBucketRateLimiter {
 
       return Math.floor(tokensAvailable)
     } catch (error) {
-      console.error(
-        `[Token Bucket] Error getting tokens for key ${key}:`,
-        error
-      )
+      logger.error('token_bucket_get_failed', { key, error: String(error) })
       return config.capacity
     }
   }
@@ -172,8 +157,6 @@ export class TokenBucketRateLimiter {
 /**
  * Helper function to create token bucket limiter
  */
-export function createTokenBucketLimiter(
-  redis: RedisClient
-): TokenBucketRateLimiter {
+export function createTokenBucketLimiter(redis: RedisClient): TokenBucketRateLimiter {
   return new TokenBucketRateLimiter(redis)
 }

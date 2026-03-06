@@ -20,8 +20,8 @@
  * - Workspace_id scoped (ADR-0001)
  */
 
-import { Logger } from '@zidney/logger'
-import { Context, MiddlewareHandler } from 'hono'
+import type { Logger } from '@zidney/logger'
+import type { Context, MiddlewareHandler } from 'hono'
 
 export interface IdempotencyKey {
   key: string
@@ -49,10 +49,7 @@ export interface IdempotencyKey {
  * - PostgreSQL unavailable: Log warning, proceed without cache (risky but continues)
  * - Invalid idempotency key format: Continue without caching
  */
-export function createIdempotencyMiddlewareStage06(
-  logger: Logger,
-  redis?: any
-): MiddlewareHandler {
+export function createIdempotencyMiddlewareStage06(logger: Logger, redis?: any): MiddlewareHandler {
   return async (c: Context, next) => {
     const correlation_id = c.get('correlationId') || 'unknown'
     const tenant = c.get('tenant')
@@ -68,8 +65,7 @@ export function createIdempotencyMiddlewareStage06(
     }
 
     // Extract idempotency key from headers
-    const idempotency_key =
-      c.req.header('idempotency-key') || c.req.header('Idempotency-Key')
+    const idempotency_key = c.req.header('idempotency-key') || c.req.header('Idempotency-Key')
 
     if (!idempotency_key) {
       // No idempotency key provided — proceed without caching
@@ -103,10 +99,7 @@ export function createIdempotencyMiddlewareStage06(
           logger.warn('Idempotency middleware: Redis lookup failed, fallback', {
             correlation_id,
             workspace_id,
-            error:
-              redis_error instanceof Error
-                ? redis_error.message
-                : String(redis_error),
+            error: redis_error instanceof Error ? redis_error.message : String(redis_error),
           })
           // Continue to PostgreSQL fallback
         }
@@ -140,22 +133,17 @@ export function createIdempotencyMiddlewareStage06(
               correlation_id,
               workspace_id,
               idempotency_key,
-              age_ms:
-                new Date().getTime() - new Date(record.created_at).getTime(),
+              age_ms: Date.now() - new Date(record.created_at).getTime(),
             })
 
             return c.json(record.response_body, record.response_status)
           }
         } catch (db_error) {
-          logger.warn(
-            'Idempotency middleware: Database lookup failed, proceeding',
-            {
-              correlation_id,
-              workspace_id,
-              error:
-                db_error instanceof Error ? db_error.message : String(db_error),
-            }
-          )
+          logger.warn('Idempotency middleware: Database lookup failed, proceeding', {
+            correlation_id,
+            workspace_id,
+            error: db_error instanceof Error ? db_error.message : String(db_error),
+          })
           // Continue without cache (risky but proceeds)
         }
       }
@@ -236,10 +224,7 @@ export async function cacheIdempotentResponse(
       logger.warn('Failed to cache in Redis', {
         correlation_id,
         workspace_id,
-        error:
-          redis_error instanceof Error
-            ? redis_error.message
-            : String(redis_error),
+        error: redis_error instanceof Error ? redis_error.message : String(redis_error),
       })
       // Continue — fallback to PostgreSQL
     }

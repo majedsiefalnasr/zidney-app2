@@ -13,13 +13,10 @@ export type FeatureFlags = ZidneyFeatureFlags
  * GUARDIAN FIX: Does NOT read `import.meta.env` directly.
  * Accepts and uses `overrides` parameter for testability.
  */
-export function createFeatureFlags(
-  overrides?: Partial<FeatureFlags>
-): FeatureFlags {
+export function createFeatureFlags(overrides?: Partial<FeatureFlags>): FeatureFlags {
   const raw = readRawFeatureFlags()
 
   return Object.freeze({
-    enableDebugPanel:
-      overrides?.enableDebugPanel ?? parseBooleanFlag(raw.enableDebugPanel),
+    enableDebugPanel: overrides?.enableDebugPanel ?? parseBooleanFlag(raw.enableDebugPanel),
   })
 }

@@ -1,9 +1,9 @@
-// @ts-ignore: @zidney/types/db-schema subpath not declared in packages/types exports field [INFRA-001-DEPS-02]
+// @ts-expect-error: @zidney/types/db-schema subpath not declared in packages/types exports field [INFRA-001-DEPS-02]
 import { mmc_members } from '@zidney/types/db-schema'
 import { randomBytes } from 'crypto'
-// @ts-ignore: drizzle-orm not declared as dependency of domain-core [INFRA-001-DEPS-03]
+// @ts-expect-error: drizzle-orm not declared as dependency of domain-core [INFRA-001-DEPS-03]
 import { eq } from 'drizzle-orm'
-// @ts-ignore: drizzle-orm/node-postgres not declared as dependency of domain-core [INFRA-001-DEPS-03]
+// @ts-expect-error: drizzle-orm/node-postgres not declared as dependency of domain-core [INFRA-001-DEPS-03]
 import type { Database } from 'drizzle-orm/node-postgres'
 
 /**
@@ -98,10 +98,7 @@ export function isValidUsername(username: string): boolean {
 /**
  * Validate username uniqueness in database
  */
-export async function isUsernameUnique(
-  username: string,
-  db: Database
-): Promise<boolean> {
+export async function isUsernameUnique(username: string, db: Database): Promise<boolean> {
   const existing = await db.query.mmc_members.findFirst({
     where: eq(mmc_members.username, username),
   })

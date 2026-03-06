@@ -337,11 +337,8 @@ integrationDescribe('Integration Tests - Phase 4', () => {
           const errors = ref<Record<string, string[]>>({})
 
           const validateLanguage = (lang: string) => {
-            const val = values.value[
-              lang as keyof typeof values.value
-            ] as string
-            const rules =
-              validationRules.value[lang as keyof typeof validationRules.value]
+            const val = values.value[lang as keyof typeof values.value] as string
+            const rules = validationRules.value[lang as keyof typeof validationRules.value]
 
             errors.value[lang] = []
 
@@ -371,9 +368,9 @@ integrationDescribe('Integration Tests - Phase 4', () => {
       const inputs = wrapper.findAll('input')
 
       // Type too short for en (needs 3)
-      await inputs[0]!.setValue('ab')
+      await inputs[0]?.setValue('ab')
 
-      expect(wrapper.vm.errors.en!.length).toBeGreaterThan(0)
+      expect(wrapper.vm.errors.en?.length).toBeGreaterThan(0)
     })
 
     it('should validate global constraints (min 1 required language)', () => {
@@ -383,9 +380,7 @@ integrationDescribe('Integration Tests - Phase 4', () => {
           const requiredLanguages = ref(['en']) // Must have at least 1
 
           const isGloballyValid = () => {
-            return requiredLanguages.value.some((lang) =>
-              filledLanguages.value.includes(lang)
-            )
+            return requiredLanguages.value.some((lang) => filledLanguages.value.includes(lang))
           }
 
           return { filledLanguages, requiredLanguages, isGloballyValid }
@@ -502,8 +497,8 @@ integrationDescribe('Integration Tests - Phase 4', () => {
       const wrapper = mount(TestConcurrent)
 
       const buttons = wrapper.findAll('button')
-      await buttons[0]!.trigger('click')
-      await buttons[1]!.trigger('click')
+      await buttons[0]?.trigger('click')
+      await buttons[1]?.trigger('click')
 
       await new Promise((resolve) => setTimeout(resolve, 50))
 
@@ -512,7 +507,7 @@ integrationDescribe('Integration Tests - Phase 4', () => {
     })
 
     it('should cleanup async operations on unmount', async () => {
-      let timeoutCleared = false
+      let _timeoutCleared = false
 
       const TestCleanup = defineComponent({
         setup() {
@@ -527,7 +522,7 @@ integrationDescribe('Integration Tests - Phase 4', () => {
             // Cleanup on unmount
             return () => {
               clearTimeout(timeoutId)
-              timeoutCleared = true
+              _timeoutCleared = true
             }
           }
 

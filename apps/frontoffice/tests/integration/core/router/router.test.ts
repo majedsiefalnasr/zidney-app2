@@ -85,14 +85,14 @@ describe('createAppRouter (Frontoffice)', () => {
     const router = createAppRouter(createMemoryHistory())
     const resolved = router.resolve('/unauthorized')
     expect(resolved.name).toBe('fo-unauthorized')
-    expect(resolved.meta['public']).toBe(true)
+    expect(resolved.meta.public).toBe(true)
   })
 
   it('/error route resolves to fo-error', () => {
     const router = createAppRouter(createMemoryHistory())
     const resolved = router.resolve('/error')
     expect(resolved.name).toBe('fo-error')
-    expect(resolved.meta['public']).toBe(true)
+    expect(resolved.meta.public).toBe(true)
   })
 })
 

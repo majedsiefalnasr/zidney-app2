@@ -4,9 +4,10 @@
  *
  * Stage: STAGE_UI_06_STATE_MANAGEMENT
  */
+
+import { describe, expect, it } from 'vitest'
 import type { AppNotification } from '@/core/state/notification.store'
 import { useFrontofficeNotificationStore } from '@/core/state/notification.store'
-import { describe, expect, it } from 'vitest'
 import { useIsolatedPinia } from '../store-test-helper'
 
 const makeNotification = (

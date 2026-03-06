@@ -72,9 +72,7 @@ function makeMockRedis(setNxResult: 0 | 1 = 1) {
   }
 }
 
-function makeMockLicenseResolver(
-  status: 'ACTIVE' | 'SOFT_LOCKED' | 'ARCHIVED'
-) {
+function makeMockLicenseResolver(status: 'ACTIVE' | 'SOFT_LOCKED' | 'ARCHIVED') {
   return {
     validateLicenseStatus: vi.fn().mockResolvedValue({
       valid: status === 'ACTIVE',
@@ -107,12 +105,7 @@ describe('WebSocket backoffice — lifecycle tests', () => {
     it('structured log would include workspace_slug, user_id, correlation_id', () => {
       // This is a compile-time contract: ws.ts uses createLogger() with these fields
       // Verify the required log fields exist in the implementation (static check)
-      const REQUIRED_LOG_FIELDS = [
-        'workspace_slug',
-        'user_id',
-        'correlation_id',
-        'workspace_id',
-      ]
+      const REQUIRED_LOG_FIELDS = ['workspace_slug', 'user_id', 'correlation_id', 'workspace_id']
       for (const field of REQUIRED_LOG_FIELDS) {
         // Assert knowledge of field (implementation would emit these)
         expect(typeof field).toBe('string')
@@ -283,15 +276,11 @@ describe('WebSocket backoffice — lifecycle tests', () => {
 
     it('cleanup is best-effort: error in del does not crash server', async () => {
       const redis = makeMockRedis()
-      redis.del = vi
-        .fn()
-        .mockRejectedValue(new Error('Redis error during cleanup'))
+      redis.del = vi.fn().mockRejectedValue(new Error('Redis error during cleanup'))
       const wsKey = 'ws:backoffice:ws-err:s-err'
 
       // Should not throw — handler catches and logs the error
-      await expect(
-        redis.del(wsKey).catch(() => undefined)
-      ).resolves.toBeUndefined()
+      await expect(redis.del(wsKey).catch(() => undefined)).resolves.toBeUndefined()
     })
   })
 })

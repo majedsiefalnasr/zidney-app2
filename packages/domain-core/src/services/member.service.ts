@@ -22,18 +22,14 @@
  */
 
 import { AppError, ErrorCode } from '@zidney/domain-core/errors'
-import {
-  CreateMemberRequest,
-  MMCMember,
-  UpdateMemberRequest,
-} from '@zidney/types/mmc.types'
+import type { CreateMemberRequest, MMCMember, UpdateMemberRequest } from '@zidney/types/mmc.types'
 import { validatePassword } from '@zidney/validation/password.validator'
-// @ts-ignore: bcryptjs not declared as dependency of domain-core [INFRA-001-DEPS-01]
+// @ts-expect-error: bcryptjs not declared as dependency of domain-core [INFRA-001-DEPS-01]
 import * as bcrypt from 'bcryptjs'
-// @ts-ignore: postgres not declared as dependency of domain-core [INFRA-001-DEPS-05]
-import { Database } from 'postgres'
+// @ts-expect-error: postgres not declared as dependency of domain-core [INFRA-001-DEPS-05]
+import type { Database } from 'postgres'
 import { v4 as uuidv4 } from 'uuid'
-import { AuditService } from './audit.service'
+import type { AuditService } from './audit.service'
 
 const BCRYPT_COST = 12
 
@@ -68,28 +64,16 @@ export class MemberService {
   ): Promise<MMCMember> {
     // Validate inputs
     if (!request.username || request.username.length < 3) {
-      throw new AppError(
-        ErrorCode.VALIDATION_ERROR,
-        'Username must be at least 3 characters',
-        400
-      )
+      throw new AppError(ErrorCode.VALIDATION_ERROR, 'Username must be at least 3 characters', 400)
     }
 
     if (!request.email || !this.isValidEmail(request.email)) {
-      throw new AppError(
-        ErrorCode.VALIDATION_ERROR,
-        'Invalid email format',
-        400
-      )
+      throw new AppError(ErrorCode.VALIDATION_ERROR, 'Invalid email format', 400)
     }
 
     const passwordValidation = validatePassword(request.password)
     if (!passwordValidation.valid) {
-      throw new AppError(
-        ErrorCode.INVALID_PASSWORD,
-        passwordValidation.errors.join('; '),
-        400
-      )
+      throw new AppError(ErrorCode.INVALID_PASSWORD, passwordValidation.errors.join('; '), 400)
     }
 
     const client = await this.db.connect()
@@ -102,11 +86,7 @@ export class MemberService {
         [request.username]
       )
       if (usernameResult.rowCount > 0) {
-        throw new AppError(
-          ErrorCode.DUPLICATE_USERNAME,
-          'Username already in use',
-          409
-        )
+        throw new AppError(ErrorCode.DUPLICATE_USERNAME, 'Username already in use', 409)
       }
 
       // Check email uniqueness
@@ -115,27 +95,18 @@ export class MemberService {
         [request.email]
       )
       if (emailResult.rowCount > 0) {
-        throw new AppError(
-          ErrorCode.DUPLICATE_EMAIL,
-          'Email already in use',
-          409
-        )
+        throw new AppError(ErrorCode.DUPLICATE_EMAIL, 'Email already in use', 409)
       }
 
       // Check role exists and is ACTIVE
-      const roleResult = await client.query(
-        `SELECT id, status FROM roles WHERE id = $1`,
-        [request.role_id]
-      )
+      const roleResult = await client.query(`SELECT id, status FROM roles WHERE id = $1`, [
+        request.role_id,
+      ])
       if (roleResult.rowCount === 0) {
         throw new AppError(ErrorCode.INVALID_ROLE, 'Role not found', 404)
       }
       if (roleResult.rows[0].status !== 'ACTIVE') {
-        throw new AppError(
-          ErrorCode.INVALID_ROLE,
-          'Cannot assign inactive role',
-          400
-        )
+        throw new AppError(ErrorCode.INVALID_ROLE, 'Cannot assign inactive role', 400)
       }
 
       // Hash password
@@ -214,10 +185,7 @@ export class MemberService {
    * Returns augmented member data (role_name, creator info).
    */
   async getMember(memberId: string): Promise<MMCMember | null> {
-    const result = await this.db.query(
-      `SELECT * FROM mmc_members WHERE id = $1`,
-      [memberId]
-    )
+    const result = await this.db.query(`SELECT * FROM mmc_members WHERE id = $1`, [memberId])
 
     if (result.rowCount === 0) {
       return null
@@ -296,11 +264,7 @@ export class MemberService {
           [request.email, memberId]
         )
         if (emailResult.rowCount > 0) {
-          throw new AppError(
-            ErrorCode.DUPLICATE_EMAIL,
-            'Email already in use',
-            409
-          )
+          throw new AppError(ErrorCode.DUPLICATE_EMAIL, 'Email already in use', 409)
         }
       }
 
@@ -462,10 +426,9 @@ export class MemberService {
    * Used by authentication service
    */
   async verifyPassword(memberId: string, password: string): Promise<boolean> {
-    const result = await this.db.query(
-      `SELECT password_hash FROM mmc_members WHERE id = $1`,
-      [memberId]
-    )
+    const result = await this.db.query(`SELECT password_hash FROM mmc_members WHERE id = $1`, [
+      memberId,
+    ])
 
     if (result.rowCount === 0) {
       return false
@@ -484,8 +447,7 @@ export class MemberService {
       `SELECT name FROM roles WHERE id = $1`,
       [member.role_id]
     )
-    const roleName =
-      roleResult.rowCount > 0 ? roleResult.rows[0].name : undefined
+    const roleName = roleResult.rowCount > 0 ? roleResult.rows[0].name : undefined
 
     // Get creator username
     let createdByUsername: string | undefined
@@ -494,8 +456,7 @@ export class MemberService {
         `SELECT username FROM mmc_members WHERE id = $1`,
         [member.created_by]
       )
-      createdByUsername =
-        creatorResult.rowCount > 0 ? creatorResult.rows[0].username : undefined
+      createdByUsername = creatorResult.rowCount > 0 ? creatorResult.rows[0].username : undefined
     }
 
     return {
@@ -529,9 +490,6 @@ export class MemberService {
 /**
  * Create member service instance
  */
-export function createMemberService(
-  db: Database,
-  auditService: AuditService
-): MemberService {
+export function createMemberService(db: Database, auditService: AuditService): MemberService {
   return new MemberService(db, auditService)
 }

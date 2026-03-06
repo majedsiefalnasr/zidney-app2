@@ -17,25 +17,28 @@ import { looksLikeToken } from '../../../../../apps/frontoffice/src/core/auth/to
 import type { AuthUser } from '../../../../../apps/frontoffice/src/core/auth/types'
 import { defineAuthStore } from '../../../../../apps/frontoffice/src/core/state/auth.store'
 
-const FAKE_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEifQ.fakeSignature'
+const FAKE_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEifQ.fakeSignature'
 
 const LOGIN_ROUTE = 'fo-login'
 
 function makeAuthService(user: AuthUser | null = null): IAuthService {
+  const defaultUser = {
+    id: 'u1',
+    email: 'test@test.com',
+    name: 'Test User',
+    role: 'user',
+  }
   return {
     login: vi.fn().mockResolvedValue({
       token: FAKE_TOKEN,
-      user: user ?? { id: 'u1', email: 'test@test.com' },
+      user: user ?? defaultUser,
     }),
     logout: vi.fn().mockResolvedValue(undefined),
     refreshToken: vi.fn().mockResolvedValue({
       token: FAKE_TOKEN,
-      user: user ?? { id: 'u1', email: 'test@test.com' },
+      user: user ?? defaultUser,
     }),
-    fetchProfile: vi
-      .fn()
-      .mockResolvedValue(user ?? { id: 'u1', email: 'test@test.com' }),
+    fetchProfile: vi.fn().mockResolvedValue(user ?? defaultUser),
   } as unknown as IAuthService
 }
 
@@ -49,6 +52,7 @@ function makeTokenManager(): ITokenManager {
     clearToken: vi.fn(() => {
       _token = null
     }),
+    hasToken: vi.fn(() => _token !== null),
   }
 }
 
@@ -64,9 +68,7 @@ function makeRefreshManager(): IRefreshManager {
   return { refresh: vi.fn() } as unknown as IRefreshManager
 }
 
-function tokenWasWrittenToStorage(
-  storageFn: ReturnType<typeof vi.spyOn>
-): boolean {
+function tokenWasWrittenToStorage(storageFn: ReturnType<typeof vi.spyOn>): boolean {
   const calls = storageFn.mock.calls as Array<[string, string]>
   return calls.some(([, value]) => {
     if (typeof value !== 'string') return false
@@ -86,8 +88,8 @@ describe('token persistence audit (frontoffice) — no token reaches Web Storage
     setActivePinia(pinia)
     tokenManager = makeTokenManager()
     router = makeRouter()
-    localStorageSpy = vi.spyOn(Storage.prototype, 'setItem')
-    sessionStorageSpy = vi.spyOn(Storage.prototype, 'setItem')
+    localStorageSpy = vi.spyOn(Storage.prototype, 'setItem') as any
+    sessionStorageSpy = vi.spyOn(Storage.prototype, 'setItem') as any
   })
 
   afterEach(() => {
@@ -95,25 +97,21 @@ describe('token persistence audit (frontoffice) — no token reaches Web Storage
   })
 
   function makeStore() {
-    const useStore = defineAuthStore(
-      makeAuthService(),
-      tokenManager,
-      router,
-      LOGIN_ROUTE,
-      () => makeRefreshManager()
+    const useStore = defineAuthStore(makeAuthService(), tokenManager, router, LOGIN_ROUTE, () =>
+      makeRefreshManager()
     )
     return useStore(pinia)
   }
 
   it('does not write any token value to localStorage during login', async () => {
     const store = makeStore()
-    store.setSession(FAKE_TOKEN, { id: 'u1', email: 'test@test.com' })
+    store.setSession(FAKE_TOKEN, { id: 'u1', email: 'test@test.com', name: 'User', role: 'user' })
     expect(tokenWasWrittenToStorage(localStorageSpy)).toBe(false)
   })
 
   it('does not write any token value to sessionStorage during login', async () => {
     const store = makeStore()
-    store.setSession(FAKE_TOKEN, { id: 'u1', email: 'test@test.com' })
+    store.setSession(FAKE_TOKEN, { id: 'u1', email: 'test@test.com', name: 'User', role: 'user' })
     expect(tokenWasWrittenToStorage(sessionStorageSpy)).toBe(false)
   })
 

@@ -54,8 +54,7 @@ describe.skip('[QUARANTINED] Composables - Unit Tests (Phase 4B)', () => {
     })
 
     it('should deserialize filters correctly', () => {
-      const { filters, addFilter, serializeFilters, deserializeFilters } =
-        useFilterBuilder([])
+      const { filters, addFilter, serializeFilters, deserializeFilters } = useFilterBuilder([])
 
       addFilter({
         fieldId: 'status',
@@ -71,8 +70,7 @@ describe.skip('[QUARANTINED] Composables - Unit Tests (Phase 4B)', () => {
     })
 
     it('should detect overflow (> 2000 chars)', () => {
-      const { filters, addFilter, serializeFilters, isOverflowed } =
-        useFilterBuilder([])
+      const { filters, addFilter, serializeFilters, isOverflowed } = useFilterBuilder([])
 
       // Add enough filters to exceed 2000 chars
       for (let i = 0; i < 50; i++) {
@@ -88,9 +86,7 @@ describe.skip('[QUARANTINED] Composables - Unit Tests (Phase 4B)', () => {
     })
 
     it('should toggle storage fallback mode', () => {
-      const { isPersistedExternally, toggleStorageFallback } = useFilterBuilder(
-        []
-      )
+      const { isPersistedExternally, toggleStorageFallback } = useFilterBuilder([])
 
       const initialMode = isPersistedExternally.value
       toggleStorageFallback()
@@ -134,8 +130,7 @@ describe.skip('[QUARANTINED] Composables - Unit Tests (Phase 4B)', () => {
     })
 
     it('should navigate to previous page', () => {
-      const { currentPage, nextPage, previousPage, totalCount } =
-        usePagination()
+      const { currentPage, nextPage, previousPage, totalCount } = usePagination()
       totalCount.value = 50
 
       nextPage()
@@ -170,14 +165,8 @@ describe.skip('[QUARANTINED] Composables - Unit Tests (Phase 4B)', () => {
     })
 
     it('should detect first/last page', () => {
-      const {
-        currentPage,
-        isFirstPage,
-        isLastPage,
-        totalCount,
-        pageSize,
-        nextPage,
-      } = usePagination()
+      const { currentPage, isFirstPage, isLastPage, totalCount, pageSize, nextPage } =
+        usePagination()
       totalCount.value = 30
       pageSize.value = 10
 
@@ -233,8 +222,7 @@ describe.skip('[QUARANTINED] Composables - Unit Tests (Phase 4B)', () => {
 
     it('should show all columns', () => {
       const columns = ['name', 'email', 'status']
-      const { visibleColumns, toggleColumn, showAll } =
-        useColumnVisibility(columns)
+      const { visibleColumns, toggleColumn, showAll } = useColumnVisibility(columns)
 
       toggleColumn('email')
       toggleColumn('status')
@@ -301,22 +289,27 @@ describe.skip('[QUARANTINED] Composables - Unit Tests (Phase 4B)', () => {
     })
 
     it('should require default language', () => {
-      const { isDefaultLanguageRequired, currentLanguage } =
-        useMultiLanguageForm(['en', 'es'], 'en')
+      const { isDefaultLanguageRequired, currentLanguage } = useMultiLanguageForm(
+        ['en', 'es'],
+        'en'
+      )
 
       expect(isDefaultLanguageRequired.value).toBe(true)
     })
 
     it('should validate per-language rules', () => {
-      const { getLanguageValidationErrors, setLanguageValue } =
-        useMultiLanguageForm(['en', 'es'], 'en', {
+      const { getLanguageValidationErrors, setLanguageValue } = useMultiLanguageForm(
+        ['en', 'es'],
+        'en',
+        {
           validationRules: {
             en: [
               { type: 'required', message: 'Required' },
               { type: 'minLength', value: 3, message: 'Min 3 chars' },
             ],
           },
-        })
+        }
+      )
 
       setLanguageValue('en', 'ab') // Too short
       const errors = getLanguageValidationErrors('en')
@@ -325,10 +318,13 @@ describe.skip('[QUARANTINED] Composables - Unit Tests (Phase 4B)', () => {
     })
 
     it('should validate global constraints', () => {
-      const { isValid, setLanguageValue, requiredLanguages } =
-        useMultiLanguageForm(['en', 'es'], 'en', {
+      const { isValid, setLanguageValue, requiredLanguages } = useMultiLanguageForm(
+        ['en', 'es'],
+        'en',
+        {
           requiredLanguages: ['en', 'es'],
-        })
+        }
+      )
 
       setLanguageValue('en', 'Hello')
       expect(isValid.value).toBe(false)
@@ -338,20 +334,14 @@ describe.skip('[QUARANTINED] Composables - Unit Tests (Phase 4B)', () => {
     })
 
     it('should get form values by language', () => {
-      const { setLanguageValue, getLanguageValue } = useMultiLanguageForm(
-        ['en', 'es'],
-        'en'
-      )
+      const { setLanguageValue, getLanguageValue } = useMultiLanguageForm(['en', 'es'], 'en')
 
       setLanguageValue('en', 'Hello')
       expect(getLanguageValue('en')).toBe('Hello')
     })
 
     it('should get all form values', () => {
-      const { setLanguageValue, getAllValues } = useMultiLanguageForm(
-        ['en', 'es'],
-        'en'
-      )
+      const { setLanguageValue, getAllValues } = useMultiLanguageForm(['en', 'es'], 'en')
 
       setLanguageValue('en', 'Hello')
       setLanguageValue('es', 'Hola')
@@ -379,20 +369,14 @@ describe.skip('[QUARANTINED] Composables - Unit Tests (Phase 4B)', () => {
     })
 
     it('should switch language', () => {
-      const { currentLanguage, switchLanguage } = useMultiLanguageForm(
-        ['en', 'es'],
-        'en'
-      )
+      const { currentLanguage, switchLanguage } = useMultiLanguageForm(['en', 'es'], 'en')
 
       switchLanguage('es')
       expect(currentLanguage.value).toBe('es')
     })
 
     it('should search languages', () => {
-      const { searchLanguages } = useMultiLanguageForm(
-        ['english', 'spanish', 'french'],
-        'english'
-      )
+      const { searchLanguages } = useMultiLanguageForm(['english', 'spanish', 'french'], 'english')
 
       const results = searchLanguages('span')
       expect(results).toContain('spanish')

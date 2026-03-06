@@ -45,9 +45,7 @@ export class HttpClient {
     expectedCode: string
   ): Promise<boolean> {
     if (response.status !== expectedStatus) {
-      console.error(
-        `Status mismatch: expected ${expectedStatus}, got ${response.status}`
-      )
+      console.error(`Status mismatch: expected ${expectedStatus}, got ${response.status}`)
       return false
     }
 
@@ -67,9 +65,7 @@ export class HttpClient {
     }
 
     if (error.code !== expectedCode) {
-      console.error(
-        `Error code mismatch: expected ${expectedCode}, got ${error.code}`
-      )
+      console.error(`Error code mismatch: expected ${expectedCode}, got ${error.code}`)
       return false
     }
 
@@ -84,9 +80,7 @@ export class HttpClient {
     expectedStatus: number = 200
   ): Promise<boolean> {
     if (response.status !== expectedStatus) {
-      console.error(
-        `Status mismatch: expected ${expectedStatus}, got ${response.status}`
-      )
+      console.error(`Status mismatch: expected ${expectedStatus}, got ${response.status}`)
       return false
     }
 

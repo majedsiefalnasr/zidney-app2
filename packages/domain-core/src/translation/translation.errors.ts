@@ -35,10 +35,7 @@ export type TranslationErrorCode =
   (typeof TRANSLATION_ERROR_CODES)[keyof typeof TRANSLATION_ERROR_CODES]
 
 /** HTTP status code mapping per error code */
-export const TRANSLATION_ERROR_HTTP_STATUS: Record<
-  TranslationErrorCode,
-  number
-> = {
+export const TRANSLATION_ERROR_HTTP_STATUS: Record<TranslationErrorCode, number> = {
   UNSUPPORTED_LANGUAGE: 422,
   DEFAULT_LANGUAGE_WRITE: 422,
   ENTITY_NOT_FOUND: 404,
@@ -115,10 +112,7 @@ export function defaultLanguageWrite(languageCode: string): TranslationError {
 }
 
 /** Entity not found in tenant DB (404) */
-export function entityNotFound(
-  entityType: string,
-  entityId: string
-): TranslationError {
+export function entityNotFound(entityType: string, entityId: string): TranslationError {
   return new TranslationError(
     'ENTITY_NOT_FOUND',
     `Entity of type '${entityType}' with id '${entityId}' was not found.`
@@ -126,10 +120,7 @@ export function entityNotFound(
 }
 
 /** Field name not valid for entity type (422) */
-export function invalidFieldName(
-  fieldName: string,
-  entityType: string
-): TranslationError {
+export function invalidFieldName(fieldName: string, entityType: string): TranslationError {
   return new TranslationError(
     'INVALID_FIELD_NAME',
     `Field '${fieldName}' is not a translatable field for entity type '${entityType}'.`
@@ -146,16 +137,11 @@ export function unknownEntityType(entityType: string): TranslationError {
 
 /** Batch item failed Zod validation (422) */
 export function batchValidationFailed(detail: string): TranslationError {
-  return new TranslationError(
-    'BATCH_VALIDATION_FAILED',
-    `Batch validation failed: ${detail}`
-  )
+  return new TranslationError('BATCH_VALIDATION_FAILED', `Batch validation failed: ${detail}`)
 }
 
 /** Row count exceeds 10,000 sync threshold — async drain required (409) */
-export function languageRemovalRequiresAsync(
-  languageCode: string
-): TranslationError {
+export function languageRemovalRequiresAsync(languageCode: string): TranslationError {
   return new TranslationError(
     'LANGUAGE_REMOVAL_REQUIRES_ASYNC',
     `Language '${languageCode}' has more than 10,000 translation rows and must be removed asynchronously. A drain job has been enqueued.`

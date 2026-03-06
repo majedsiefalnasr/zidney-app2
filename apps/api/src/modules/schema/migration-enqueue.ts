@@ -1,3 +1,4 @@
+import { logger } from '@zidney/logger'
 import { createHash } from 'crypto'
 import { readFileSync } from 'fs'
 
@@ -67,15 +68,13 @@ export async function enqueueMigration(options: {
   if (redisClient) {
     try {
       await redisClient.lpush(taskQueue, JSON.stringify(migrationTask))
-      console.log(
-        `[MIGRATION] Task enqueued: ${taskId} (${fromVersion} → ${toVersion})`
-      )
+      logger.info(`[MIGRATION] Task enqueued: ${taskId} (${fromVersion} → ${toVersion})`)
     } catch (err: any) {
-      console.error(`[MIGRATION] Failed to enqueue: ${err.message}`)
+      logger.error(`[MIGRATION] Failed to enqueue: ${err.message}`)
       throw new Error(`Failed to enqueue migration: ${err.message}`)
     }
   } else {
-    console.warn(
+    logger.warn(
       `[MIGRATION] No Redis client provided. Task would be: ${JSON.stringify(migrationTask)}`
     )
   }

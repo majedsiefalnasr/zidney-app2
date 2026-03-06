@@ -20,11 +20,7 @@ interface SchemaVersion {
   patch: number
 }
 
-type SchemaCompatibility =
-  | 'compatible'
-  | 'incompatible'
-  | 'requires_upgrade'
-  | 'requires_downgrade'
+type SchemaCompatibility = 'compatible' | 'incompatible' | 'requires_upgrade' | 'requires_downgrade'
 
 class SchemaVersionChecker {
   private currentVersion: SchemaVersion = { major: 1, minor: 1, patch: 0 }
@@ -46,9 +42,9 @@ class SchemaVersionChecker {
     }
 
     return {
-      major: parseInt(match[1]!),
-      minor: parseInt(match[2]!),
-      patch: parseInt(match[3]!),
+      major: parseInt(match[1]!, 10),
+      minor: parseInt(match[2]!, 10),
+      patch: parseInt(match[3]!, 10),
     }
   }
 
@@ -81,11 +77,8 @@ class SchemaVersionChecker {
     return this.compareVersions(v1, v2) < 0
   }
 
-  checkCompatibility(
-    tenantVersion: string,
-    appVersion: string
-  ): SchemaCompatibility {
-    const key = tenantVersion + '-' + appVersion
+  checkCompatibility(tenantVersion: string, appVersion: string): SchemaCompatibility {
+    const key = `${tenantVersion}-${appVersion}`
 
     // Check explicit mapping first
     if (key in this.compatibilityMatrix) {
@@ -122,20 +115,15 @@ class SchemaVersionChecker {
 
   requiresUpgrade(tenantVersion: string): boolean {
     const appVersionString = this.versionToString(this.currentVersion)
-    const compatibility = this.checkCompatibility(
-      tenantVersion,
-      appVersionString
-    )
+    const compatibility = this.checkCompatibility(tenantVersion, appVersionString)
 
     return compatibility === 'requires_upgrade'
   }
 
   canProceedWithRequest(tenantVersion: string): boolean {
     return (
-      this.checkCompatibility(
-        tenantVersion,
-        this.versionToString(this.currentVersion)
-      ) === 'compatible'
+      this.checkCompatibility(tenantVersion, this.versionToString(this.currentVersion)) ===
+      'compatible'
     )
   }
 

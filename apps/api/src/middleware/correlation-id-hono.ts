@@ -21,7 +21,7 @@
  * ```
  */
 
-import { Context, MiddlewareHandler } from 'hono'
+import type { Context, MiddlewareHandler } from 'hono'
 import { v4 as uuidv4 } from 'uuid'
 
 /**
@@ -33,10 +33,7 @@ import { v4 as uuidv4 } from 'uuid'
  * 4. Attaches to response headers: X-Correlation-ID, X-Request-ID
  * 5. Proceeds to next middleware
  */
-export const correlationIdMiddlewareHono: MiddlewareHandler = async (
-  c: Context,
-  next
-) => {
+export const correlationIdMiddlewareHono: MiddlewareHandler = async (c: Context, next) => {
   // Check for existing correlation ID in request headers
   const existingId =
     c.req.header('x-correlation-id') ||

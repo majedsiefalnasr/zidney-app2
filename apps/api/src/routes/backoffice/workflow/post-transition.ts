@@ -49,8 +49,7 @@ export async function handlePostTransition(c: HonoContext): Promise<Response> {
     const rawBody = await c.req.json()
     const parseResult = TransitionRequestSchema.safeParse(rawBody)
     if (!parseResult.success) {
-      const correlationId =
-        c.get('correlationId') ?? c.req.header('x-correlation-id') ?? 'unknown'
+      const correlationId = c.get('correlationId') ?? c.req.header('x-correlation-id') ?? 'unknown'
       return c.json(
         {
           success: false,
@@ -72,8 +71,7 @@ export async function handlePostTransition(c: HonoContext): Promise<Response> {
     }
     body = parseResult.data
   } catch {
-    const correlationId =
-      c.get('correlationId') ?? c.req.header('x-correlation-id') ?? 'unknown'
+    const correlationId = c.get('correlationId') ?? c.req.header('x-correlation-id') ?? 'unknown'
     return c.json(
       {
         success: false,

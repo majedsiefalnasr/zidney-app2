@@ -18,9 +18,9 @@
  */
 
 import { AppError, ErrorCode } from '@zidney/domain-core/errors'
-import { Logger } from '@zidney/logger'
-import { Context, Next } from 'hono'
-import { Database } from 'postgres'
+import type { Logger } from '@zidney/logger'
+import type { Context, Next } from 'hono'
+import type { Database } from 'postgres'
 import { getRequestContext } from './correlation-id.middleware'
 
 export type PermissionDomain =
@@ -42,49 +42,34 @@ export interface RoutePermission {
 /**
  * Map routes to required permission domain and action
  */
-function getRoutePermission(
-  method: string,
-  path: string
-): RoutePermission | null {
+function getRoutePermission(method: string, path: string): RoutePermission | null {
   // Member routes
   if (path.startsWith('/mmc/members')) {
-    if (method === 'GET')
-      return { domain: 'MEMBERS_MANAGEMENT', action: 'view' }
-    if (method === 'POST')
-      return { domain: 'MEMBERS_MANAGEMENT', action: 'create' }
-    if (method === 'PATCH')
-      return { domain: 'MEMBERS_MANAGEMENT', action: 'edit' }
-    if (method === 'DELETE')
-      return { domain: 'MEMBERS_MANAGEMENT', action: 'delete' }
+    if (method === 'GET') return { domain: 'MEMBERS_MANAGEMENT', action: 'view' }
+    if (method === 'POST') return { domain: 'MEMBERS_MANAGEMENT', action: 'create' }
+    if (method === 'PATCH') return { domain: 'MEMBERS_MANAGEMENT', action: 'edit' }
+    if (method === 'DELETE') return { domain: 'MEMBERS_MANAGEMENT', action: 'delete' }
   }
 
   // Role routes
   if (path.startsWith('/mmc/roles')) {
-    if (method === 'GET')
-      return { domain: 'MEMBERS_MANAGEMENT', action: 'view' }
-    if (method === 'POST')
-      return { domain: 'MEMBERS_MANAGEMENT', action: 'create' }
-    if (method === 'PATCH')
-      return { domain: 'MEMBERS_MANAGEMENT', action: 'edit' }
-    if (method === 'DELETE')
-      return { domain: 'MEMBERS_MANAGEMENT', action: 'delete' }
+    if (method === 'GET') return { domain: 'MEMBERS_MANAGEMENT', action: 'view' }
+    if (method === 'POST') return { domain: 'MEMBERS_MANAGEMENT', action: 'create' }
+    if (method === 'PATCH') return { domain: 'MEMBERS_MANAGEMENT', action: 'edit' }
+    if (method === 'DELETE') return { domain: 'MEMBERS_MANAGEMENT', action: 'delete' }
   }
 
   // Permission routes
   if (path.startsWith('/mmc/permissions')) {
-    if (method === 'GET')
-      return { domain: 'MEMBERS_MANAGEMENT', action: 'view' }
-    if (method === 'PATCH')
-      return { domain: 'MEMBERS_MANAGEMENT', action: 'edit' }
+    if (method === 'GET') return { domain: 'MEMBERS_MANAGEMENT', action: 'view' }
+    if (method === 'PATCH') return { domain: 'MEMBERS_MANAGEMENT', action: 'edit' }
   }
 
   // Invitation routes
   if (path.startsWith('/mmc/invitations')) {
-    if (method === 'GET')
-      return { domain: 'MEMBERS_MANAGEMENT', action: 'view' }
+    if (method === 'GET') return { domain: 'MEMBERS_MANAGEMENT', action: 'view' }
     if (method === 'POST' && path.includes('/accept')) return null // Public endpoint
-    if (method === 'POST')
-      return { domain: 'MEMBERS_MANAGEMENT', action: 'create' }
+    if (method === 'POST') return { domain: 'MEMBERS_MANAGEMENT', action: 'create' }
   }
 
   // Auth routes (login/logout are public, but logout requires auth)
@@ -120,11 +105,7 @@ export function createMMCPermissionMiddleware(db: Database, logger: Logger) {
 
     // Ensure user is authenticated
     if (!context.mmcUser) {
-      throw new AppError(
-        ErrorCode.AUTHENTICATION_FAILED,
-        'Authentication required',
-        401
-      )
+      throw new AppError(ErrorCode.AUTHENTICATION_FAILED, 'Authentication required', 401)
     }
 
     const roleId = context.mmcUser.roleId
@@ -181,21 +162,13 @@ export function createMMCPermissionMiddleware(db: Database, logger: Logger) {
           ]
         )
 
-        throw new AppError(
-          ErrorCode.PERMISSION_DENIED,
-          'Permission denied',
-          403
-        )
+        throw new AppError(ErrorCode.PERMISSION_DENIED, 'Permission denied', 403)
       }
 
       const permission = result.rows[0]
 
       // Check the specific action bit
-      const permissionKey = `can_${action}` as
-        | 'can_view'
-        | 'can_create'
-        | 'can_edit'
-        | 'can_delete'
+      const permissionKey = `can_${action}` as 'can_view' | 'can_create' | 'can_edit' | 'can_delete'
       const allowed = permission[permissionKey] === true
 
       if (!allowed) {
@@ -231,11 +204,7 @@ export function createMMCPermissionMiddleware(db: Database, logger: Logger) {
           ]
         )
 
-        throw new AppError(
-          ErrorCode.PERMISSION_DENIED,
-          'Permission denied',
-          403
-        )
+        throw new AppError(ErrorCode.PERMISSION_DENIED, 'Permission denied', 403)
       }
 
       // Permission granted
@@ -274,11 +243,7 @@ export function createMMCPermissionMiddleware(db: Database, logger: Logger) {
         'Permission check error'
       )
 
-      throw new AppError(
-        ErrorCode.INTERNAL_ERROR,
-        'Failed to check permissions',
-        500
-      )
+      throw new AppError(ErrorCode.INTERNAL_ERROR, 'Failed to check permissions', 500)
     }
   }
 }

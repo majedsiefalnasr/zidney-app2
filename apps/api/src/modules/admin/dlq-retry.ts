@@ -35,7 +35,7 @@ export interface DLQRetryResponse {
   }
 }
 
-async function dlqRetry(c: Context): Promise<Response | void> {
+async function dlqRetry(c: Context): Promise<Response | undefined> {
   const correlationId = c.state.requestId
   const workspace = c.state.workspace
   const userId = c.state.userId
@@ -44,8 +44,7 @@ async function dlqRetry(c: Context): Promise<Response | void> {
 
   try {
     // RBAC check: require org_admin or super_admin
-    const hasAdminRole =
-      userRoles.includes('org_admin') || userRoles.includes('super_admin')
+    const hasAdminRole = userRoles.includes('org_admin') || userRoles.includes('super_admin')
 
     if (!hasAdminRole) {
       logger.warn(`DLQ retry rejected: insufficient permissions`, {
@@ -134,10 +133,7 @@ async function dlqRetry(c: Context): Promise<Response | void> {
       }
 
       // Push to Redis job queue
-      await redis.lPush(
-        `queue:jobs:${workspace.id}`,
-        JSON.stringify(jobPayload)
-      )
+      await redis.lPush(`queue:jobs:${workspace.id}`, JSON.stringify(jobPayload))
 
       // Record resolution
       const resolutionId = uuidv4()

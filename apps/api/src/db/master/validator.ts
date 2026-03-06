@@ -11,7 +11,7 @@
  * Phase: 1 - Migration Infrastructure
  */
 
-import { PoolClient } from 'pg'
+import type { PoolClient } from 'pg'
 
 export interface Migration {
   version: string
@@ -51,16 +51,12 @@ export class MigrationValidator {
 
     // Validate up function
     if (typeof migration.up !== 'function') {
-      throw new Error(
-        `Migration.up must be a function, got: ${typeof migration.up}`
-      )
+      throw new Error(`Migration.up must be a function, got: ${typeof migration.up}`)
     }
 
     // Validate up function signature (accepts PoolClient)
     if (migration.up.length < 1) {
-      throw new Error(
-        'Migration.up() must accept at least 1 parameter (PoolClient)'
-      )
+      throw new Error('Migration.up() must accept at least 1 parameter (PoolClient)')
     }
   }
 }

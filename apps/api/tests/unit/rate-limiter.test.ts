@@ -35,11 +35,7 @@ const mockRedis = {
 class SlidingWindowLimiter {
   constructor(private redis: any) {}
 
-  async checkLimit(
-    key: string,
-    limit: number,
-    windowSeconds: number
-  ): Promise<boolean> {
+  async checkLimit(key: string, limit: number, windowSeconds: number): Promise<boolean> {
     const now = Math.floor(Date.now() / 1000)
     const windowStart = now - windowSeconds
 
@@ -60,11 +56,7 @@ class SlidingWindowLimiter {
     return true
   }
 
-  async getRemaining(
-    key: string,
-    limit: number,
-    windowSeconds: number
-  ): Promise<number> {
+  async getRemaining(key: string, limit: number, windowSeconds: number): Promise<number> {
     const now = Math.floor(Date.now() / 1000)
     const windowStart = now - windowSeconds
 
@@ -84,7 +76,7 @@ class SlidingWindowLimiter {
       return 0
     }
 
-    const oldestTimestamp = parseInt(entries[1])
+    const oldestTimestamp = parseInt(entries[1], 10)
     const retryAfter = Math.max(0, oldestTimestamp + windowSeconds - now)
 
     return retryAfter
@@ -101,7 +93,7 @@ class TokenBucketLimiter {
     tokensNeeded: number = 1
   ): Promise<boolean> {
     const now = Date.now()
-    const lastRefillKey = `${key}:last_refill`
+    const _lastRefillKey = `${key}:last_refill`
 
     // Get current tokens and last refill
     const data = await this.redis.get(key)
@@ -210,11 +202,7 @@ describe('Rate Limiting Algorithms', () => {
     it('should calculate remaining requests correctly', async () => {
       mockRedis.zcard.mockResolvedValue(2)
 
-      const remaining = await limiter.getRemaining(
-        'rate:auth:ip:127.0.0.1',
-        5,
-        60
-      )
+      const remaining = await limiter.getRemaining('rate:auth:ip:127.0.0.1', 5, 60)
 
       expect(remaining).toBe(3)
     })
@@ -222,11 +210,7 @@ describe('Rate Limiting Algorithms', () => {
     it('should return 0 remaining when at limit', async () => {
       mockRedis.zcard.mockResolvedValue(5)
 
-      const remaining = await limiter.getRemaining(
-        'rate:auth:ip:127.0.0.1',
-        5,
-        60
-      )
+      const remaining = await limiter.getRemaining('rate:auth:ip:127.0.0.1', 5, 60)
 
       expect(remaining).toBe(0)
     })
@@ -236,10 +220,7 @@ describe('Rate Limiting Algorithms', () => {
       const oldestTimestamp = now - 30 // 30 seconds into window
       mockRedis.zrange.mockResolvedValue(['entry', oldestTimestamp.toString()])
 
-      const retryAfter = await limiter.getRetryAfter(
-        'rate:auth:ip:127.0.0.1',
-        60
-      )
+      const retryAfter = await limiter.getRetryAfter('rate:auth:ip:127.0.0.1', 60)
 
       expect(retryAfter).toBeGreaterThan(0)
       expect(retryAfter).toBeLessThanOrEqual(60)
@@ -250,10 +231,7 @@ describe('Rate Limiting Algorithms', () => {
 
       await limiter.checkLimit('rate:auth:ip:127.0.0.1', 5, 60)
 
-      expect(mockRedis.expire).toHaveBeenCalledWith(
-        'rate:auth:ip:127.0.0.1',
-        61
-      )
+      expect(mockRedis.expire).toHaveBeenCalledWith('rate:auth:ip:127.0.0.1', 61)
     })
   })
 
@@ -276,9 +254,7 @@ describe('Rate Limiting Algorithms', () => {
     })
 
     it('should reject request when no tokens available', async () => {
-      mockRedis.get.mockResolvedValue(
-        JSON.stringify({ tokens: 0, lastRefill: Date.now() })
-      )
+      mockRedis.get.mockResolvedValue(JSON.stringify({ tokens: 0, lastRefill: Date.now() }))
 
       const result = await limiter.checkLimit('rate:ws:user:1', 100, 10, 1)
 
@@ -293,14 +269,12 @@ describe('Rate Limiting Algorithms', () => {
       vi.useFakeTimers()
       vi.setSystemTime(initialTime)
 
-      mockRedis.get.mockResolvedValue(
-        JSON.stringify({ tokens: 0, lastRefill: initialTime })
-      )
+      mockRedis.get.mockResolvedValue(JSON.stringify({ tokens: 0, lastRefill: initialTime }))
 
       vi.setSystemTime(laterTime)
 
-      const data = await new Promise((resolve) => {
-        mockRedis.set.mockImplementation((key, value) => {
+      const _data = await new Promise((resolve) => {
+        mockRedis.set.mockImplementation((_key, value) => {
           resolve(JSON.parse(value))
         })
 
@@ -326,11 +300,7 @@ describe('Rate Limiting Algorithms', () => {
         })
       )
 
-      const remaining = await limiter.getRemainingTokens(
-        'rate:ws:user:1',
-        100,
-        10
-      )
+      const remaining = await limiter.getRemainingTokens('rate:ws:user:1', 100, 10)
 
       // Should be capped at 100, not 95 + 100
       expect(remaining).toBeLessThanOrEqual(100)
@@ -344,11 +314,7 @@ describe('Rate Limiting Algorithms', () => {
         })
       )
 
-      const remaining = await limiter.getRemainingTokens(
-        'rate:ws:user:1',
-        100,
-        10
-      )
+      const remaining = await limiter.getRemainingTokens('rate:ws:user:1', 100, 10)
 
       expect(remaining).toBe(75)
     })
@@ -389,9 +355,9 @@ describe('Rate Limiting Algorithms', () => {
 
       mockRedis.zcard.mockRejectedValue(new Error('Redis connection failed'))
 
-      await expect(
-        limiter.checkLimit('rate:auth:ip:127.0.0.1', 5, 60)
-      ).rejects.toThrow('Redis connection failed')
+      await expect(limiter.checkLimit('rate:auth:ip:127.0.0.1', 5, 60)).rejects.toThrow(
+        'Redis connection failed'
+      )
     })
   })
 
@@ -401,11 +367,7 @@ describe('Rate Limiting Algorithms', () => {
 
       mockRedis.zcard.mockResolvedValue(2)
 
-      const remaining = await limiter.getRemaining(
-        'rate:auth:ip:127.0.0.1',
-        5,
-        60
-      )
+      const remaining = await limiter.getRemaining('rate:auth:ip:127.0.0.1', 5, 60)
 
       expect(remaining).toBe(3)
     })
@@ -416,10 +378,7 @@ describe('Rate Limiting Algorithms', () => {
       const now = Math.floor(Date.now() / 1000)
       mockRedis.zrange.mockResolvedValue(['entry', (now - 30).toString()])
 
-      const retryAfter = await limiter.getRetryAfter(
-        'rate:auth:ip:127.0.0.1',
-        60
-      )
+      const retryAfter = await limiter.getRetryAfter('rate:auth:ip:127.0.0.1', 60)
 
       expect(retryAfter).toBeGreaterThan(0)
       expect(Number.isInteger(retryAfter)).toBe(true)

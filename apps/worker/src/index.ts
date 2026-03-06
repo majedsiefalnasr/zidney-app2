@@ -10,13 +10,9 @@
  * STAGE_06_ATTEMPT_ENGINE_FOUNDATION - Phase E (Worker Grading Pipeline)
  */
 
-import { WORKER_CONFIG, initializeConfig } from './config/worker-config'
-import {
-  getHealthStatus,
-  initializeWorker,
-  shutdownWorker,
-} from './grading/worker-startup'
 import { logger } from '@zidney/logger'
+import { initializeConfig, WORKER_CONFIG } from './config/worker-config'
+import { getHealthStatus, initializeWorker, shutdownWorker } from './grading/worker-startup'
 
 /**
  * Main Worker Entry Point
@@ -66,10 +62,7 @@ export async function healthCheck(): Promise<{
  * Graceful Shutdown Handler
  */
 async function gracefulShutdown(): Promise<void> {
-  logger.info(
-    { action: 'worker_shutdown' },
-    'Worker service shutting down gracefully'
-  )
+  logger.info({ action: 'worker_shutdown' }, 'Worker service shutting down gracefully')
 
   const shutdownTimeout = setTimeout(() => {
     logger.warn({}, 'Shutdown timeout reached; force exiting')
@@ -80,10 +73,7 @@ async function gracefulShutdown(): Promise<void> {
     await shutdownWorker(0)
     clearTimeout(shutdownTimeout)
   } catch (error: any) {
-    logger.error(
-      { error_message: error.message },
-      'Error during graceful shutdown'
-    )
+    logger.error({ error_message: error.message }, 'Error during graceful shutdown')
     process.exit(1)
   }
 }

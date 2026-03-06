@@ -17,7 +17,7 @@
 import type { Module as ModuleType } from './enums/Module'
 
 // Re-export Module enum and labels so consumers can import from @zidney/types
-export { ALL_MODULES, Module, MODULE_LABELS } from './enums/Module'
+export { ALL_MODULES, MODULE_LABELS, Module } from './enums/Module'
 
 /**
  * Actions that can be performed on a module.

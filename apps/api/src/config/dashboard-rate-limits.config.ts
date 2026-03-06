@@ -103,8 +103,7 @@ export const DASHBOARD_RATE_LIMITS: RateLimitRule[] = [
     path: '/api/mmc/dashboard/export',
     max: 100,
     window_seconds: 3600,
-    description:
-      'CSV data export (CRITICAL: 100 req/hr, 2s timeout, 50k row limit)',
+    description: 'CSV data export (CRITICAL: 100 req/hr, 2s timeout, 50k row limit)',
   },
 ]
 
@@ -144,22 +143,15 @@ export function generateRateLimitKey(
   userId: string,
   windowSeconds: number
 ): string {
-  const windowStart =
-    Math.floor(Date.now() / 1000 / windowSeconds) * windowSeconds
+  const windowStart = Math.floor(Date.now() / 1000 / windowSeconds) * windowSeconds
   return `rate_limit:${endpoint}:${userId}:${windowStart}`
 }
 
 /**
  * Get rate limit config by endpoint
  */
-export function getRateLimitConfig(
-  method: string,
-  path: string
-): RateLimitRule | null {
-  return (
-    DASHBOARD_RATE_LIMITS.find((r) => r.method === method && r.path === path) ||
-    null
-  )
+export function getRateLimitConfig(method: string, path: string): RateLimitRule | null {
+  return DASHBOARD_RATE_LIMITS.find((r) => r.method === method && r.path === path) || null
 }
 
 /**
@@ -209,10 +201,7 @@ export function buildRateLimitHeaders(
   }
 
   if (isExceeded) {
-    headers['Retry-After'] = Math.max(
-      1,
-      resetUnixSeconds - Math.floor(Date.now() / 1000)
-    )
+    headers['Retry-After'] = Math.max(1, resetUnixSeconds - Math.floor(Date.now() / 1000))
   }
 
   return headers

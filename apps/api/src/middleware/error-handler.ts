@@ -23,7 +23,8 @@
  * Stack traces logged internally only, never sent to client.
  */
 
-import { Context, Next } from 'hono'
+import { logger as zidneyLogger } from '@zidney/logger'
+import type { Context, Next } from 'hono'
 import { ErrorCodes } from '../config/errors'
 
 export interface StandardErrorResponse {
@@ -125,24 +126,15 @@ export function errorHandlerMiddleware() {
         const errorName = error.name
 
         // Map common error types
-        if (
-          errorName === 'ValidationError' ||
-          errorName === 'JoiValidationError'
-        ) {
+        if (errorName === 'ValidationError' || errorName === 'JoiValidationError') {
           errorCode = ErrorCodes.VALIDATION_ERROR
           statusCode = 400
           errorMessage = error.message || 'Request validation failed'
-        } else if (
-          errorName === 'UnauthorizedError' ||
-          errorName === 'AuthenticationError'
-        ) {
+        } else if (errorName === 'UnauthorizedError' || errorName === 'AuthenticationError') {
           errorCode = ErrorCodes.AUTHENTICATION_FAILED
           statusCode = 401
           errorMessage = 'Authentication failed'
-        } else if (
-          errorName === 'ForbiddenError' ||
-          errorName === 'PermissionError'
-        ) {
+        } else if (errorName === 'ForbiddenError' || errorName === 'PermissionError') {
           errorCode = ErrorCodes.PERMISSION_DENIED
           statusCode = 403
           errorMessage = 'You do not have permission to perform this action'
@@ -175,7 +167,7 @@ export function errorHandlerMiddleware() {
             status_code: statusCode,
           })
         } else {
-          console.error('Request error', {
+          zidneyLogger.error('Request error', {
             event: 'request_error',
             error_code: errorCode,
             status_code: statusCode,
@@ -185,7 +177,7 @@ export function errorHandlerMiddleware() {
       } else {
         // Non-Error object thrown
         const errorStr = String(error)
-        console.error('Unknown error thrown', { error: errorStr })
+        zidneyLogger.error('Unknown error thrown', { error: errorStr })
 
         if (logger) {
           logger.error({
@@ -298,10 +290,7 @@ export class RateLimitError extends Error {
 /**
  * Create standard error response
  */
-export function createErrorResponse(
-  errorCode: string,
-  message: string
-): StandardErrorResponse {
+export function createErrorResponse(errorCode: string, message: string): StandardErrorResponse {
   return {
     success: false,
     data: null,
@@ -325,18 +314,14 @@ export function legacyErrorHandlerMiddleware(err: any, req: any, res: any) {
   const statusCode = err.statusCode || getErrorStatusCode(errorCode)
 
   // Log error
-  console.log(
-    JSON.stringify({
-      level: 'ERROR',
-      service: 'api-error-handler',
-      event: 'request_error',
-      correlation_id,
-      error_code: errorCode,
-      error_message: message,
-      status_code: statusCode,
-      timestamp: new Date().toISOString(),
-    })
-  )
+  zidneyLogger.error('request_error', {
+    service: 'api-error-handler',
+    event: 'request_error',
+    correlation_id,
+    error_code: errorCode,
+    error_message: message,
+    status_code: statusCode,
+  })
 
   // Send response
 

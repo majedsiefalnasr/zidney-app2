@@ -3,15 +3,10 @@
  * CRITICAL: Tests 7.2 (worker-only grading) and 7.3 (server-authoritative time) MUST PASS
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createDbManager } from '../db-manager'
-import {
-  cleanupAllFixtures,
-  seedAttempt,
-  seedExam,
-  seedWorkspace,
-} from '../fixtures'
+import { cleanupAllFixtures, seedAttempt, seedExam, seedWorkspace } from '../fixtures'
 
 describe('Area 7: Attempt Engine Validation', () => {
   let masterDb: Pool
@@ -66,15 +61,9 @@ describe('Area 7: Attempt Engine Validation', () => {
     // Attempt's snapshot should remain unchanged
     const attemptSnapshot = attempt.snapshot
 
-    expect(attemptSnapshot.exam_config.questions).not.toBe(
-      modifiedExam.questions
-    )
-    expect(attemptSnapshot.exam_config.pass_threshold).not.toBe(
-      modifiedExam.pass_threshold
-    )
-    expect(attemptSnapshot.exam_config.passing_grade).not.toBe(
-      modifiedExam.passing_grade
-    )
+    expect(attemptSnapshot.exam_config.questions).not.toBe(modifiedExam.questions)
+    expect(attemptSnapshot.exam_config.pass_threshold).not.toBe(modifiedExam.pass_threshold)
+    expect(attemptSnapshot.exam_config.passing_grade).not.toBe(modifiedExam.passing_grade)
   })
 
   /**
@@ -124,9 +113,7 @@ describe('Area 7: Attempt Engine Validation', () => {
       attempt_id: attempt.id,
       question_id: 'q1',
       answer: 'answer',
-      client_timestamp: new Date(
-        serverTime.getTime() + 55 * 60 * 1000
-      ).toISOString(), // Fake early time
+      client_timestamp: new Date(serverTime.getTime() + 55 * 60 * 1000).toISOString(), // Fake early time
     }
 
     // Server should IGNORE client_timestamp and use server time

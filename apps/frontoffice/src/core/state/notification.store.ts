@@ -21,49 +21,47 @@ export interface AppNotification {
 // All three apps (MMC, Backoffice, Frontoffice) MUST keep this interface shape identical.
 // Moving this type to @zidney/types is deferred to a future cleanup stage.
 
-export const useFrontofficeNotificationStore = defineStore(
-  'frontoffice-notification',
-  () => {
-    // ── Constants ──────────────────────────────────────────────────────────
-    const MAX_QUEUE_SIZE = 20 // prevents unbounded growth during error-retry storms (PO-HIGH)
+export const useFrontofficeNotificationStore = defineStore('frontoffice-notification', () => {
+  // ── Constants ──────────────────────────────────────────────────────────
+  const MAX_QUEUE_SIZE = 20 // prevents unbounded growth during error-retry storms (PO-HIGH)
 
-    // ── State ──────────────────────────────────────────────────────────────
-    const notifications = ref<AppNotification[]>([])
+  // ── State ──────────────────────────────────────────────────────────────
+  const notifications = ref<AppNotification[]>([])
 
-    // ── Actions ────────────────────────────────────────────────────────────
-    function push(notification: Omit<AppNotification, 'id'>): string {
-      const id = crypto.randomUUID()
-      if (notifications.value.length >= MAX_QUEUE_SIZE) {
-        notifications.value.shift() // evict oldest when at capacity
-      }
-      notifications.value.push({ ...notification, id })
-      return id
+  // ── Actions ────────────────────────────────────────────────────────────
+  function push(notification: Omit<AppNotification, 'id'>): string {
+    const id = crypto.randomUUID()
+    if (notifications.value.length >= MAX_QUEUE_SIZE) {
+      notifications.value.shift() // evict oldest when at capacity
     }
-
-    function dismiss(id: string): void {
-      notifications.value = notifications.value.filter((n) => n.id !== id)
-    }
-
-    function clearAll(): void {
-      notifications.value = []
-    }
-
-    function $reset(): void {
-      notifications.value = []
-    }
-
-    return {
-      notifications,
-      push,
-      dismiss,
-      clearAll,
-      $reset,
-    }
+    notifications.value.push({ ...notification, id })
+    return id
   }
-)
+
+  function dismiss(id: string): void {
+    notifications.value = notifications.value.filter((n) => n.id !== id)
+  }
+
+  function clearAll(): void {
+    notifications.value = []
+  }
+
+  function $reset(): void {
+    notifications.value = []
+  }
+
+  return {
+    notifications,
+    push,
+    dismiss,
+    clearAll,
+    $reset,
+  }
+})
 
 // ── HMR (development only) ────────────────────────────────────────────────────
 import { acceptHMRUpdate } from 'pinia'
+
 if ((import.meta as any).hot) {
   ;(import.meta as any).hot.accept(
     acceptHMRUpdate(useFrontofficeNotificationStore, (import.meta as any).hot)

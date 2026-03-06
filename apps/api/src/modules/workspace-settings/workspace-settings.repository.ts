@@ -50,9 +50,7 @@ interface DbClient {
  * Returns raw row or null if no settings row exists.
  * No transaction needed — read-only.
  */
-export async function getSettings(
-  db: DbClient
-): Promise<WorkspaceSettings | null> {
+export async function getSettings(db: DbClient): Promise<WorkspaceSettings | null> {
   const result = await db.query<WorkspaceSettings>(
     `SELECT id, singleton_key, config_version,
             general_settings, language_settings, branding_settings,
@@ -162,9 +160,7 @@ export async function insertAuditEntry(
   }
 ): Promise<void> {
   // Guardian audit: truncate user_agent to 500 chars
-  const truncatedUserAgent = entry.user_agent
-    ? entry.user_agent.substring(0, 500)
-    : null
+  const truncatedUserAgent = entry.user_agent ? entry.user_agent.substring(0, 500) : null
 
   await db.query(
     `INSERT INTO workspace_settings_audit (
@@ -204,9 +200,7 @@ export async function getAuditEntries(
   let cursorData: AuditCursor | null = null
   if (filters.cursor) {
     try {
-      const decoded = JSON.parse(
-        Buffer.from(filters.cursor, 'base64').toString('utf8')
-      )
+      const decoded = JSON.parse(Buffer.from(filters.cursor, 'base64').toString('utf8'))
       // Guardian audit: validate decoded cursor with Zod
       const parsed = auditCursorSchema.safeParse(decoded)
       if (!parsed.success) {
@@ -230,9 +224,7 @@ export async function getAuditEntries(
   }
 
   if (cursorData) {
-    conditions.push(
-      `(created_at, id) < ($${paramIndex}::timestamptz, $${paramIndex + 1}::uuid)`
-    )
+    conditions.push(`(created_at, id) < ($${paramIndex}::timestamptz, $${paramIndex + 1}::uuid)`)
     params.push(cursorData.created_at, cursorData.id)
     paramIndex += 2
   }
@@ -279,7 +271,5 @@ export async function getCurrentVersion(db: DbClient): Promise<number | null> {
   const result = await db.query<{ config_version: number }>(
     `SELECT config_version FROM workspace_settings WHERE singleton_key = 'SETTINGS'`
   )
-  return result.rows.length > 0 && result.rows[0]
-    ? result.rows[0].config_version
-    : null
+  return result.rows.length > 0 && result.rows[0] ? result.rows[0].config_version : null
 }

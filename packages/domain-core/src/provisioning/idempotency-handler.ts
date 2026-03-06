@@ -22,7 +22,7 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 const logger = createLogger('ProvisioningIdempotencyHandler')
 
@@ -99,19 +99,12 @@ export async function insertProvisioningTaskIdempotent(
     }
   } catch (error) {
     // Check for UNIQUE constraint violation (error code 23505)
-    if (
-      error instanceof Error &&
-      error.message &&
-      error.message.includes('23505')
-    ) {
-      logger.warn(
-        'UNIQUE constraint violation - duplicate provisioning request',
-        {
-          workspace_id,
-          idempotency_key,
-          error_code: '23505',
-        }
-      )
+    if (error instanceof Error && error.message && error.message.includes('23505')) {
+      logger.warn('UNIQUE constraint violation - duplicate provisioning request', {
+        workspace_id,
+        idempotency_key,
+        error_code: '23505',
+      })
 
       // Query existing task
       try {
@@ -135,9 +128,7 @@ export async function insertProvisioningTaskIdempotent(
             }
           )
 
-          throw new Error(
-            'Database inconsistency: UNIQUE violation but task not found'
-          )
+          throw new Error('Database inconsistency: UNIQUE violation but task not found')
         }
 
         const existingTask = existingTaskResult.rows[0]
@@ -161,10 +152,7 @@ export async function insertProvisioningTaskIdempotent(
         logger.error('Failed to query existing task after UNIQUE violation', {
           workspace_id,
           idempotency_key,
-          error:
-            queryError instanceof Error
-              ? queryError.message
-              : String(queryError),
+          error: queryError instanceof Error ? queryError.message : String(queryError),
         })
 
         throw queryError
@@ -172,11 +160,7 @@ export async function insertProvisioningTaskIdempotent(
     }
 
     // Check for FK constraint violation (workspace doesn't exist or is_deleted)
-    if (
-      error instanceof Error &&
-      error.message &&
-      error.message.includes('23503')
-    ) {
+    if (error instanceof Error && error.message && error.message.includes('23503')) {
       logger.warn('FK constraint violation - workspace not found or deleted', {
         workspace_id,
         idempotency_key,
@@ -210,9 +194,7 @@ export async function insertProvisioningTaskIdempotent(
  * @param task Provisioning task record
  * @returns true if task should be processed
  */
-export function isTaskEligibleForProcessing(
-  task: ProvisioningTaskRecord
-): boolean {
+export function isTaskEligibleForProcessing(task: ProvisioningTaskRecord): boolean {
   if (task.status === 'PENDING') {
     return true // Ready to process
   }

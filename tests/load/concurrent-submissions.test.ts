@@ -10,7 +10,7 @@ import {
   createTestContext,
   generateJWT,
   insertTestAttempt,
-  TestContext,
+  type TestContext,
 } from '../test-helpers'
 
 describe('T089: Concurrent Submissions', () => {

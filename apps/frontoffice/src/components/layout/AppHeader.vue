@@ -34,19 +34,10 @@
  *
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  */
-import { useFrontofficeAuthStore } from '@/core/state/auth.store'
-import {
-  Avatar,
-  AvatarFallback,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  TopBar,
-} from '@zidney/ui-system'
+
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
+import { useFrontofficeAuthStore } from '@/core/state/auth.store'
 
 interface AppHeaderProps {
   showWorkspace?: boolean

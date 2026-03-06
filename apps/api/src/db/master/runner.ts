@@ -13,8 +13,8 @@
  * Phase: 1 - Migration Infrastructure
  */
 
-import { Logger } from '@zidney/logger'
-import { Pool, PoolClient } from 'pg'
+import type { Logger } from '@zidney/logger'
+import type { Pool, PoolClient } from 'pg'
 import { MigrationLoader } from './loader'
 import { MigrationValidator } from './validator'
 
@@ -121,10 +121,7 @@ export class MigrationExecutor {
   /**
    * Execute single migration in transaction
    */
-  private async executeMigration(
-    migration: Migration,
-    correlationId: string
-  ): Promise<void> {
+  private async executeMigration(migration: Migration, correlationId: string): Promise<void> {
     const client = await this.pool.connect()
     const startTime = Date.now()
 
@@ -132,15 +129,12 @@ export class MigrationExecutor {
       // Validate migration before execution
       await this.validator.validate(migration)
 
-      this.logger.info(
-        `Executing migration ${migration.version}: ${migration.description}`,
-        {
-          correlation_id: correlationId,
-          migration_version: migration.version,
-          phase: 'execution',
-          status: 'started',
-        }
-      )
+      this.logger.info(`Executing migration ${migration.version}: ${migration.description}`, {
+        correlation_id: correlationId,
+        migration_version: migration.version,
+        phase: 'execution',
+        status: 'started',
+      })
 
       // Begin transaction
       await client.query('BEGIN')
@@ -174,28 +168,22 @@ export class MigrationExecutor {
           phase: 'rollback',
           error: {
             code: 'ROLLBACK_ERROR',
-            message:
-              rollbackError instanceof Error
-                ? rollbackError.message
-                : 'Unknown error',
+            message: rollbackError instanceof Error ? rollbackError.message : 'Unknown error',
           },
         })
       }
 
-      this.logger.error(
-        `Migration ${migration.version} failed and rolled back`,
-        {
-          correlation_id: correlationId,
-          migration_version: migration.version,
-          phase: 'execution',
-          status: 'failed',
-          error: {
-            code: 'MIGRATION_FAILURE',
-            message: error instanceof Error ? error.message : 'Unknown error',
-          },
-          duration_ms: Date.now() - startTime,
-        }
-      )
+      this.logger.error(`Migration ${migration.version} failed and rolled back`, {
+        correlation_id: correlationId,
+        migration_version: migration.version,
+        phase: 'execution',
+        status: 'failed',
+        error: {
+          code: 'MIGRATION_FAILURE',
+          message: error instanceof Error ? error.message : 'Unknown error',
+        },
+        duration_ms: Date.now() - startTime,
+      })
 
       throw error
     } finally {
@@ -214,10 +202,7 @@ export class MigrationExecutor {
       return result.rows.map((row) => row.version)
     } catch (error) {
       // If table doesn't exist yet, return empty list
-      if (
-        error instanceof Error &&
-        error.message.includes('_schema_migrations')
-      ) {
+      if (error instanceof Error && error.message.includes('_schema_migrations')) {
         return []
       }
       throw error

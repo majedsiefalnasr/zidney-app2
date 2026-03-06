@@ -17,8 +17,8 @@
  * - Deterministic validation results
  */
 
-import { createLogger, Logger } from '@zidney/logger'
-import { QuestionType, UserAnswer } from '@zidney/types/attempt'
+import { createLogger, type Logger } from '@zidney/logger'
+import { QuestionType, type UserAnswer } from '@zidney/types/attempt'
 
 /**
  * Response validation result

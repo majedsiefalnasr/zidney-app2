@@ -140,9 +140,7 @@ describe('Affiliate Security Tests', () => {
       ]
 
       expect(protectedRoutes).toHaveLength(5)
-      expect(
-        protectedRoutes.every((r) => r.includes('/v1/mmc/affiliates'))
-      ).toBe(true)
+      expect(protectedRoutes.every((r) => r.includes('/v1/mmc/affiliates'))).toBe(true)
     })
   })
 

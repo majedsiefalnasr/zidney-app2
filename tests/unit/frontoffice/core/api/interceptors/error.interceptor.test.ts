@@ -14,8 +14,8 @@ describe('createErrorInterceptor (frontoffice)', () => {
   let onLicenseError: ReturnType<typeof vi.fn>
 
   beforeEach(() => {
-    getIsAuthenticated = vi.fn()
-    onSessionExpired = vi.fn().mockResolvedValue(undefined)
+    getIsAuthenticated = vi.fn().mockReturnValue(false) as unknown as () => boolean
+    onSessionExpired = vi.fn().mockResolvedValue(undefined) as unknown as () => Promise<void>
     onLicenseError = vi.fn()
   })
 

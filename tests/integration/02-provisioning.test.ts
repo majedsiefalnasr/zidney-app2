@@ -4,7 +4,7 @@
  * Critical: Test 2.2 (concurrency with distributed lock) must PASS
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createDbManager } from '../db-manager'
 import { cleanupAllFixtures, seedWorkspace } from '../fixtures'
@@ -78,9 +78,7 @@ describe('Area 2: Provisioning Validation', () => {
 
     // Verify only one database was created
     const createdDbs = new Set(
-      results
-        .filter((r) => r.status === 'fulfilled')
-        .map((r: any) => r.value.dbName)
+      results.filter((r) => r.status === 'fulfilled').map((r: any) => r.value.dbName)
     )
 
     expect(createdDbs.size).toBe(1)
@@ -97,19 +95,10 @@ describe('Area 2: Provisioning Validation', () => {
     await dbManager.createTenantDatabase(testWs.slug)
 
     // Verify baseline tables exist
-    const expectedTables = [
-      'users',
-      'students',
-      'attempts',
-      'questions',
-      'schema_version',
-    ]
+    const expectedTables = ['users', 'students', 'attempts', 'questions', 'schema_version']
 
     // For mock/test purposes, we'll just verify the workspace is created
-    const result = await masterDb.query(
-      'SELECT id FROM workspaces WHERE id = $1',
-      [testWs.id]
-    )
+    const result = await masterDb.query('SELECT id FROM workspaces WHERE id = $1', [testWs.id])
 
     expect(result.rows).toHaveLength(1)
   })

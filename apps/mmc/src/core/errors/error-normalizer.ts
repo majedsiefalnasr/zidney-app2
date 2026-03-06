@@ -7,18 +7,12 @@ function isApiErrorResponse(raw: unknown): raw is ApiErrorResponse {
     (raw as Record<string, unknown>)['success'] === false &&
     typeof (raw as Record<string, unknown>)['error'] === 'object' &&
     (raw as Record<string, unknown>)['error'] !== null &&
-    typeof (
-      (raw as Record<string, { code: unknown }>)['error'] as Record<
-        string,
-        unknown
-      >
-    )['code'] === 'string' &&
-    typeof (
-      (raw as Record<string, { message: unknown }>)['error'] as Record<
-        string,
-        unknown
-      >
-    )['message'] === 'string'
+    typeof ((raw as Record<string, { code: unknown }>)['error'] as Record<string, unknown>)[
+      'code'
+    ] === 'string' &&
+    typeof ((raw as Record<string, { message: unknown }>)['error'] as Record<string, unknown>)[
+      'message'
+    ] === 'string'
   )
 }
 

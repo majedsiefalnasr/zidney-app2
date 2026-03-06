@@ -137,35 +137,26 @@ export const REDIS_RATE_LIMIT_SCHEMAS = {
 export const RATE_LIMIT_BY_ENDPOINT = {
   'POST /auth/login': REDIS_RATE_LIMIT_SCHEMAS.AUTH_LOGIN_BY_IP,
   'POST /auth/logout': null, // No rate limit (cleanup operation)
-  'POST /auth/password-reset':
-    REDIS_RATE_LIMIT_SCHEMAS.AUTH_PASSWORD_RESET_BY_IP,
+  'POST /auth/password-reset': REDIS_RATE_LIMIT_SCHEMAS.AUTH_PASSWORD_RESET_BY_IP,
   'POST /attempt/{id}/start': REDIS_RATE_LIMIT_SCHEMAS.ATTEMPT_START_BY_USER,
   'POST /attempt/{id}/submit': REDIS_RATE_LIMIT_SCHEMAS.ATTEMPT_SUBMIT_BY_ID,
   'GET /attempt/{id}/status': null, // No rate limit (read operation)
   'GET /ws/attempt/{id}': REDIS_RATE_LIMIT_SCHEMAS.WS_CONNECTION,
-  'GET /admin/workspace/{id}/dlq':
-    REDIS_RATE_LIMIT_SCHEMAS.ADMIN_OPERATIONS_BY_IP,
-  'POST /admin/workspace/{id}/dlq/{dlqId}/retry':
-    REDIS_RATE_LIMIT_SCHEMAS.ADMIN_OPERATIONS_BY_USER,
+  'GET /admin/workspace/{id}/dlq': REDIS_RATE_LIMIT_SCHEMAS.ADMIN_OPERATIONS_BY_IP,
+  'POST /admin/workspace/{id}/dlq/{dlqId}/retry': REDIS_RATE_LIMIT_SCHEMAS.ADMIN_OPERATIONS_BY_USER,
 }
 
 /**
  * Get rate limit config for an endpoint
  */
 export function getRateLimitConfig(endpoint: string) {
-  return (
-    RATE_LIMIT_BY_ENDPOINT[endpoint as keyof typeof RATE_LIMIT_BY_ENDPOINT] ||
-    null
-  )
+  return RATE_LIMIT_BY_ENDPOINT[endpoint as keyof typeof RATE_LIMIT_BY_ENDPOINT] || null
 }
 
 /**
  * Format Redis key with tenant isolation
  */
-export function formatRedisKey(
-  pattern: string,
-  params: Record<string, string>
-): string {
+export function formatRedisKey(pattern: string, params: Record<string, string>): string {
   let key = pattern
   for (const [param, value] of Object.entries(params)) {
     key = key.replace(`{${param}}`, value)

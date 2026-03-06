@@ -34,7 +34,7 @@
  */
 
 import { logger } from '@zidney/logger'
-import { Context, Next } from 'hono'
+import type { Context, Next } from 'hono'
 
 /**
  * Error response envelope
@@ -72,12 +72,10 @@ const ERROR_MESSAGE_MAP: Record<string, string> = {
   REQUEST_TIMEOUT: 'The request took too long to process.',
   PAYLOAD_TOO_LARGE: 'The request payload is too large to process.',
   LICENSE_LOCKED: 'The workspace license is not in an active state.',
-  SCHEMA_INCOMPATIBLE:
-    'The database schema version is incompatible with this API version.',
+  SCHEMA_INCOMPATIBLE: 'The database schema version is incompatible with this API version.',
   RATE_LIMIT_EXCEEDED: 'You have exceeded the rate limit for this endpoint.',
   INTERNAL_ERROR: 'An internal server error occurred. Please try again later.',
-  SERVICE_UNAVAILABLE:
-    'The service is temporarily unavailable. Please try again later.',
+  SERVICE_UNAVAILABLE: 'The service is temporarily unavailable. Please try again later.',
 }
 
 /**
@@ -104,8 +102,7 @@ export class DashboardError extends Error {
  */
 function formatErrorResponse(status: number, message?: string): ErrorResponse {
   const errorCode = ERROR_CODE_MAP[status] || 'INTERNAL_ERROR'
-  const errorMessage =
-    message || ERROR_MESSAGE_MAP[errorCode] || 'An unexpected error occurred.'
+  const errorMessage = message || ERROR_MESSAGE_MAP[errorCode] || 'An unexpected error occurred.'
 
   return {
     success: false,
@@ -148,11 +145,11 @@ function logError(
   }
 
   if (originalError) {
-    // @ts-ignore: LOGIC-BUG: stack_trace not in logData type - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
-    logData['stack_trace'] = originalError.stack
+    // @ts-expect-error: LOGIC-BUG: stack_trace not in logData type - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+    logData.stack_trace = originalError.stack
   }
 
-  // @ts-ignore: LOGIC-BUG: Logger.log() does not exist — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+  // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
   logger.log(logData)
 }
 
@@ -167,10 +164,7 @@ function logError(
  * app.use(dashboardErrorHandler)
  * ```
  */
-export async function dashboardErrorHandler(
-  c: Context,
-  next: Next
-): Promise<void> {
+export async function dashboardErrorHandler(c: Context, next: Next): Promise<void> {
   try {
     await next()
 
@@ -179,7 +173,7 @@ export async function dashboardErrorHandler(
     if (status >= 400) {
       // If middleware already set headers, don't override
       const contentType = c.res.headers.get('content-type')
-      if (contentType && contentType.includes('application/json')) {
+      if (contentType?.includes('application/json')) {
         // Response already formatted, don't modify
         return
       }
@@ -189,17 +183,14 @@ export async function dashboardErrorHandler(
       const message = ERROR_MESSAGE_MAP[errorCode]
 
       // Log the error
-      // @ts-ignore: LOGIC-BUG: logError args possibly undefined - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+      // @ts-expect-error: LOGIC-BUG: logError args possibly undefined - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
       logError(status, errorCode, message, c, undefined)
 
       // Send formatted error response
-      // @ts-ignore: LOGIC-BUG: Hono c.status() expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+      // @ts-expect-error: LOGIC-BUG: Hono c.status() expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
       c.status(status)
       c.header('Content-Type', 'application/json')
-      c.header(
-        'x-correlation-id',
-        c.req.header('x-correlation-id') || 'unknown'
-      )
+      c.header('x-correlation-id', c.req.header('x-correlation-id') || 'unknown')
       await c.json(formatErrorResponse(status, message))
     }
   } catch (error) {
@@ -218,7 +209,7 @@ export async function dashboardErrorHandler(
       message = dashError.message
 
       // Log with context from DashboardError
-      // @ts-ignore: LOGIC-BUG: logError args possibly undefined - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+      // @ts-expect-error: LOGIC-BUG: logError args possibly undefined - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
       logError(status, errorCode, message, c, err)
     } else {
       // Log unexpected error with full stack trace
@@ -226,10 +217,9 @@ export async function dashboardErrorHandler(
     }
 
     // Never expose database errors or stack traces to client
-    const clientMessage =
-      status === 500 ? ERROR_MESSAGE_MAP['INTERNAL_ERROR'] : message
+    const clientMessage = status === 500 ? ERROR_MESSAGE_MAP.INTERNAL_ERROR : message
 
-    // @ts-ignore: LOGIC-BUG: Hono c.status() expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+    // @ts-expect-error: LOGIC-BUG: Hono c.status() expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
     c.status(status)
     c.header('Content-Type', 'application/json')
     c.header('x-correlation-id', c.req.header('x-correlation-id') || 'unknown')
@@ -276,10 +266,7 @@ export function throwDashboardError(
  * )
  * ```
  */
-export function createErrorResponse(
-  code: string,
-  message: string
-): ErrorResponse {
+export function createErrorResponse(code: string, message: string): ErrorResponse {
   return {
     success: false,
     data: null,

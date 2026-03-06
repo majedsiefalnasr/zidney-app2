@@ -1,5 +1,5 @@
 import { logger } from '@zidney/logger'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 import { v4 as uuidv4 } from 'uuid'
 
 export interface CreateLicenseOptions {
@@ -166,10 +166,9 @@ export async function transitionLicenseState(
     await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
     // Lock the license row
-    const lockResult = await client.query(
-      'SELECT * FROM licenses WHERE id = $1 FOR UPDATE',
-      [options.license_id]
-    )
+    const lockResult = await client.query('SELECT * FROM licenses WHERE id = $1 FOR UPDATE', [
+      options.license_id,
+    ])
 
     if (!lockResult.rows.length) {
       await client.query('ROLLBACK')
@@ -302,10 +301,9 @@ export async function transitionToSoftLock(
     await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
     // Lock and verify license exists
-    const licenseResult = await client.query(
-      'SELECT * FROM licenses WHERE id = $1 FOR UPDATE',
-      [license_id]
-    )
+    const licenseResult = await client.query('SELECT * FROM licenses WHERE id = $1 FOR UPDATE', [
+      license_id,
+    ])
 
     if (!licenseResult.rows.length) {
       await client.query('ROLLBACK')
@@ -437,10 +435,9 @@ export async function transitionToActive(
     await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
     // Lock and verify license exists
-    const licenseResult = await client.query(
-      'SELECT * FROM licenses WHERE id = $1 FOR UPDATE',
-      [license_id]
-    )
+    const licenseResult = await client.query('SELECT * FROM licenses WHERE id = $1 FOR UPDATE', [
+      license_id,
+    ])
 
     if (!licenseResult.rows.length) {
       await client.query('ROLLBACK')
@@ -490,16 +487,7 @@ export async function transitionToActive(
       `INSERT INTO license_audit_logs 
        (license_id, previous_status, new_status, actor_id, reason, timestamp, correlation_id, created_at)
        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)`,
-      [
-        license_id,
-        current_state,
-        'ACTIVE',
-        actor_id,
-        reason,
-        now,
-        uuidv4(),
-        now,
-      ]
+      [license_id, current_state, 'ACTIVE', actor_id, reason, now, uuidv4(), now]
     )
 
     await client.query('COMMIT')
@@ -561,19 +549,16 @@ export async function transitionToArchived(
   snapshot_id: string,
   reason: string,
   actor_id: string
-): Promise<
-  TransitionResult & { archive_timestamp?: Date; snapshot_id?: string }
-> {
+): Promise<TransitionResult & { archive_timestamp?: Date; snapshot_id?: string }> {
   const client = await masterDb.connect()
 
   try {
     await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
     // Lock and verify license exists
-    const licenseResult = await client.query(
-      'SELECT * FROM licenses WHERE id = $1 FOR UPDATE',
-      [license_id]
-    )
+    const licenseResult = await client.query('SELECT * FROM licenses WHERE id = $1 FOR UPDATE', [
+      license_id,
+    ])
 
     if (!licenseResult.rows.length) {
       await client.query('ROLLBACK')
@@ -737,10 +722,9 @@ export async function restoreFromArchive(
     await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
     // Verify license exists and is ARCHIVED
-    const licenseResult = await client.query(
-      'SELECT * FROM licenses WHERE id = $1 FOR UPDATE',
-      [license_id]
-    )
+    const licenseResult = await client.query('SELECT * FROM licenses WHERE id = $1 FOR UPDATE', [
+      license_id,
+    ])
 
     if (!licenseResult.rows.length) {
       await client.query('ROLLBACK')
@@ -780,10 +764,9 @@ export async function restoreFromArchive(
       }
     }
 
-    const snapshotResult = await client.query(
-      'SELECT * FROM snapshots WHERE id = $1 FOR UPDATE',
-      [license.current_snapshot_id]
-    )
+    const snapshotResult = await client.query('SELECT * FROM snapshots WHERE id = $1 FOR UPDATE', [
+      license.current_snapshot_id,
+    ])
 
     if (!snapshotResult.rows.length) {
       await client.query('ROLLBACK')
@@ -897,10 +880,9 @@ export async function transitionToDeleted(
     await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
     // Verify license exists and is ARCHIVED
-    const licenseResult = await client.query(
-      'SELECT * FROM licenses WHERE id = $1 FOR UPDATE',
-      [license_id]
-    )
+    const licenseResult = await client.query('SELECT * FROM licenses WHERE id = $1 FOR UPDATE', [
+      license_id,
+    ])
 
     if (!licenseResult.rows.length) {
       await client.query('ROLLBACK')
@@ -948,8 +930,7 @@ export async function transitionToDeleted(
 
     if (
       !confirmationResult.rows.length ||
-      confirmationResult.rows[0].confirmation_phrase_hash !==
-        confirmation_phrase_hash
+      confirmationResult.rows[0].confirmation_phrase_hash !== confirmation_phrase_hash
     ) {
       await client.query('ROLLBACK')
       logger.warn(
@@ -970,13 +951,9 @@ export async function transitionToDeleted(
     const now = new Date()
 
     // Check if grace period has expired
-    if (
-      confirmation.grace_period_until &&
-      now < confirmation.grace_period_until
-    ) {
+    if (confirmation.grace_period_until && now < confirmation.grace_period_until) {
       await client.query('ROLLBACK')
-      const remaining_ms =
-        confirmation.grace_period_until.getTime() - now.getTime()
+      const remaining_ms = confirmation.grace_period_until.getTime() - now.getTime()
       logger.warn(
         {
           action: 'grace_period_active',
@@ -1065,14 +1042,8 @@ export async function transitionToDeleted(
  * @param license_id License UUID
  * @returns License object or null if not found
  */
-export async function getLicenseById(
-  masterDb: Pool,
-  license_id: string
-): Promise<License | null> {
-  const result = await masterDb.query(
-    'SELECT * FROM licenses WHERE id = $1 LIMIT 1',
-    [license_id]
-  )
+export async function getLicenseById(masterDb: Pool, license_id: string): Promise<License | null> {
+  const result = await masterDb.query('SELECT * FROM licenses WHERE id = $1 LIMIT 1', [license_id])
 
   return result.rows.length ? result.rows[0] : null
 }
@@ -1089,10 +1060,9 @@ export async function getLicenseByWorkspaceId(
   masterDb: Pool,
   workspace_id: string
 ): Promise<License | null> {
-  const result = await masterDb.query(
-    'SELECT * FROM licenses WHERE workspace_id = $1 LIMIT 1',
-    [workspace_id]
-  )
+  const result = await masterDb.query('SELECT * FROM licenses WHERE workspace_id = $1 LIMIT 1', [
+    workspace_id,
+  ])
 
   return result.rows.length ? result.rows[0] : null
 }
@@ -1148,10 +1118,9 @@ export async function deleteLicense(
     await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
     // Pre-check 2: Verify license is ARCHIVED
-    const licenseResult = await client.query(
-      'SELECT * FROM licenses WHERE id = $1 FOR UPDATE',
-      [license_id]
-    )
+    const licenseResult = await client.query('SELECT * FROM licenses WHERE id = $1 FOR UPDATE', [
+      license_id,
+    ])
 
     if (!licenseResult.rows.length) {
       await client.query('ROLLBACK')

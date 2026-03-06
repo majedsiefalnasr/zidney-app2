@@ -11,20 +11,20 @@
 import { describe, expect, it } from 'vitest'
 
 import {
-  TRANSLATABLE_FIELDS,
   getTranslatableFields,
   isTranslatableEntityType,
+  TRANSLATABLE_FIELDS,
 } from '../../../packages/domain-core/src/translation/translatable-fields'
 
 import {
-  TRANSLATION_ERROR_CODES,
-  TRANSLATION_ERROR_HTTP_STATUS,
-  TranslationError,
   batchValidationFailed,
   defaultLanguageWrite,
   entityNotFound,
   invalidFieldName,
   languageRemovalRequiresAsync,
+  TRANSLATION_ERROR_CODES,
+  TRANSLATION_ERROR_HTTP_STATUS,
+  TranslationError,
   unknownEntityType,
   unsupportedLanguage,
 } from '../../../packages/domain-core/src/translation/translation.errors'
@@ -109,22 +109,12 @@ describe('getTranslatableFields', () => {
 
 describe('TRANSLATION_ERROR_CODES', () => {
   it('defines all required error codes', () => {
-    expect(TRANSLATION_ERROR_CODES.UNSUPPORTED_LANGUAGE).toBe(
-      'UNSUPPORTED_LANGUAGE'
-    )
-    expect(TRANSLATION_ERROR_CODES.DEFAULT_LANGUAGE_WRITE).toBe(
-      'DEFAULT_LANGUAGE_WRITE'
-    )
+    expect(TRANSLATION_ERROR_CODES.UNSUPPORTED_LANGUAGE).toBe('UNSUPPORTED_LANGUAGE')
+    expect(TRANSLATION_ERROR_CODES.DEFAULT_LANGUAGE_WRITE).toBe('DEFAULT_LANGUAGE_WRITE')
     expect(TRANSLATION_ERROR_CODES.ENTITY_NOT_FOUND).toBe('ENTITY_NOT_FOUND')
-    expect(TRANSLATION_ERROR_CODES.INVALID_FIELD_NAME).toBe(
-      'INVALID_FIELD_NAME'
-    )
-    expect(TRANSLATION_ERROR_CODES.UNKNOWN_ENTITY_TYPE).toBe(
-      'UNKNOWN_ENTITY_TYPE'
-    )
-    expect(TRANSLATION_ERROR_CODES.BATCH_VALIDATION_FAILED).toBe(
-      'BATCH_VALIDATION_FAILED'
-    )
+    expect(TRANSLATION_ERROR_CODES.INVALID_FIELD_NAME).toBe('INVALID_FIELD_NAME')
+    expect(TRANSLATION_ERROR_CODES.UNKNOWN_ENTITY_TYPE).toBe('UNKNOWN_ENTITY_TYPE')
+    expect(TRANSLATION_ERROR_CODES.BATCH_VALIDATION_FAILED).toBe('BATCH_VALIDATION_FAILED')
     expect(TRANSLATION_ERROR_CODES.LANGUAGE_REMOVAL_REQUIRES_ASYNC).toBe(
       'LANGUAGE_REMOVAL_REQUIRES_ASYNC'
     )
@@ -143,9 +133,7 @@ describe('TRANSLATION_ERROR_HTTP_STATUS', () => {
     expect(TRANSLATION_ERROR_HTTP_STATUS.INVALID_FIELD_NAME).toBe(422)
     expect(TRANSLATION_ERROR_HTTP_STATUS.UNKNOWN_ENTITY_TYPE).toBe(422)
     expect(TRANSLATION_ERROR_HTTP_STATUS.BATCH_VALIDATION_FAILED).toBe(422)
-    expect(TRANSLATION_ERROR_HTTP_STATUS.LANGUAGE_REMOVAL_REQUIRES_ASYNC).toBe(
-      409
-    )
+    expect(TRANSLATION_ERROR_HTTP_STATUS.LANGUAGE_REMOVAL_REQUIRES_ASYNC).toBe(409)
   })
 })
 
@@ -170,10 +158,7 @@ describe('TranslationError', () => {
   })
 
   it('stores correct code and message', () => {
-    const err = new TranslationError(
-      'UNSUPPORTED_LANGUAGE',
-      "Language 'es' not supported"
-    )
+    const err = new TranslationError('UNSUPPORTED_LANGUAGE', "Language 'es' not supported")
     expect(err.code).toBe('UNSUPPORTED_LANGUAGE')
     expect(err.message).toBe("Language 'es' not supported")
   })

@@ -19,7 +19,7 @@
  * - Dependencies: roles and role_permissions tables must exist
  */
 
-import { PoolClient } from 'pg'
+import type { PoolClient } from 'pg'
 
 export const description = 'Seed default roles and permissions for MMC'
 
@@ -63,21 +63,15 @@ export async function up(client: PoolClient): Promise<void> {
 
   const platformAdminId =
     platformAdminResult.rows[0]?.id ||
-    (
-      await client.query(
-        `SELECT id FROM roles WHERE name = 'Platform Administrator'`
-      )
-    ).rows[0].id
+    (await client.query(`SELECT id FROM roles WHERE name = 'Platform Administrator'`)).rows[0].id
 
   const salesTeamId =
     salesTeamResult.rows[0]?.id ||
-    (await client.query(`SELECT id FROM roles WHERE name = 'Sales Team'`))
-      .rows[0].id
+    (await client.query(`SELECT id FROM roles WHERE name = 'Sales Team'`)).rows[0].id
 
   const supportId =
     supportResult.rows[0]?.id ||
-    (await client.query(`SELECT id FROM roles WHERE name = 'Support'`)).rows[0]
-      .id
+    (await client.query(`SELECT id FROM roles WHERE name = 'Support'`)).rows[0].id
 
   // Define permission matrix for each role
   // Platform Administrator: Full access (can_view, can_create, can_edit, can_delete = TRUE for all)

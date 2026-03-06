@@ -19,7 +19,7 @@
  * - Dependencies: _schema_migrations table must exist
  */
 
-import { PoolClient } from 'pg'
+import type { PoolClient } from 'pg'
 
 export const description =
   'Create master database schema (products, licenses, tenants_registry, mmc_users, platform_schema_version)'

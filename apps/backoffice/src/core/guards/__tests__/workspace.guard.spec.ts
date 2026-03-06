@@ -5,13 +5,11 @@
  *
  * Stage: STAGE_UI_03_ROUTER_AND_GUARDS
  */
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
 import type { RouteLocationNormalized } from 'vue-router'
 import { createWorkspaceGuard } from '../workspace.guard'
 
-function makeRoute(
-  overrides: Partial<RouteLocationNormalized> = {}
-): RouteLocationNormalized {
+function makeRoute(overrides: Partial<RouteLocationNormalized> = {}): RouteLocationNormalized {
   return {
     path: '/test',
     fullPath: '/test',

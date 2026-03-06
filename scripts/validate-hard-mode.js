@@ -5,14 +5,11 @@
  * Enforces workflow-state integrity before allowing CI merge.
  */
 
-const fs = require('fs')
-const path = require('path')
-const { execSync } = require('child_process')
+const fs = require('node:fs')
+const path = require('node:path')
+const { execSync } = require('node:child_process')
 
-const statePath = path.resolve(
-  __dirname,
-  '../specs/runtime/.workflow-state.json'
-)
+const statePath = path.resolve(__dirname, '../specs/runtime/.workflow-state.json')
 
 function fail(message) {
   console.error(`\n❌ HARD MODE VALIDATION FAILED:\n${message}\n`)
@@ -71,8 +68,7 @@ if (state.implementation_allowed !== true) {
 
 // Migration enforcement (prevent unplanned schema changes)
 try {
-  const baseRef =
-    process.env.GITHUB_BASE_REF || process.env.BASE_REF || 'develop'
+  const baseRef = process.env.GITHUB_BASE_REF || process.env.BASE_REF || 'develop'
 
   const diff = execSync(`git diff --name-only origin/${baseRef}...HEAD`, {
     encoding: 'utf-8',
@@ -80,10 +76,7 @@ try {
   const changedFiles = diff.split('\n').filter(Boolean)
 
   const migrationFiles = changedFiles.filter(
-    (file) =>
-      file.includes('migration') ||
-      file.includes('migrations') ||
-      file.endsWith('.sql')
+    (file) => file.includes('migration') || file.includes('migrations') || file.endsWith('.sql')
   )
 
   if (migrationFiles.length > 0) {

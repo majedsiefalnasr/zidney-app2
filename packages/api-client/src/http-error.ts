@@ -21,10 +21,10 @@ export function isAppError(error: unknown): error is AppError {
   return (
     typeof error === 'object' &&
     error !== null &&
-    typeof (error as Record<string, unknown>)['code'] === 'string' &&
-    typeof (error as Record<string, unknown>)['message'] === 'string' &&
-    typeof (error as Record<string, unknown>)['httpStatus'] === 'number' &&
-    typeof (error as Record<string, unknown>)['isNetworkError'] === 'boolean'
+    typeof (error as Record<string, unknown>).code === 'string' &&
+    typeof (error as Record<string, unknown>).message === 'string' &&
+    typeof (error as Record<string, unknown>).httpStatus === 'number' &&
+    typeof (error as Record<string, unknown>).isNetworkError === 'boolean'
   )
 }
 
@@ -45,9 +45,7 @@ export function createAppError(fields: {
     message: fields.message,
     httpStatus: fields.httpStatus,
     isNetworkError: fields.isNetworkError,
-    ...(fields.retryAfter !== undefined
-      ? { retryAfter: fields.retryAfter }
-      : {}),
+    ...(fields.retryAfter !== undefined ? { retryAfter: fields.retryAfter } : {}),
   })
 }
 
@@ -60,12 +58,9 @@ export function normalizeResponseError(response: AdapterResponse): AppError {
   // 429 Rate Limited
   if (response.status === 429) {
     const retryAfterRaw = response.headers['retry-after']
-    const retryAfter =
-      retryAfterRaw !== undefined ? Number(retryAfterRaw) : undefined
+    const retryAfter = retryAfterRaw !== undefined ? Number(retryAfterRaw) : undefined
     const validRetryAfter =
-      retryAfter !== undefined && !Number.isNaN(retryAfter)
-        ? retryAfter
-        : undefined
+      retryAfter !== undefined && !Number.isNaN(retryAfter) ? retryAfter : undefined
 
     return createAppError({
       code: ErrorCodes.RATE_LIMITED,
@@ -81,17 +76,12 @@ export function normalizeResponseError(response: AdapterResponse): AppError {
   if (
     typeof body === 'object' &&
     body !== null &&
-    (body as Record<string, unknown>)['success'] === false &&
-    typeof (body as Record<string, unknown>)['error'] === 'object' &&
-    (body as Record<string, unknown>)['error'] !== null
+    (body as Record<string, unknown>).success === false &&
+    typeof (body as Record<string, unknown>).error === 'object' &&
+    (body as Record<string, unknown>).error !== null
   ) {
-    const errorObj = (
-      body as Record<string, { code: unknown; message: unknown }>
-    )['error']
-    if (
-      typeof errorObj?.code === 'string' &&
-      typeof errorObj?.message === 'string'
-    ) {
+    const errorObj = (body as Record<string, { code: unknown; message: unknown }>).error
+    if (typeof errorObj?.code === 'string' && typeof errorObj?.message === 'string') {
       return createAppError({
         code: errorObj.code as string,
         message: errorObj.message as string,
@@ -115,8 +105,8 @@ export function normalizeResponseError(response: AdapterResponse): AppError {
   return createAppError({
     code: ErrorCodes.UNKNOWN_ERROR,
     message:
-      typeof (body as Record<string, unknown>)['message'] === 'string'
-        ? ((body as Record<string, unknown>)['message'] as string)
+      typeof (body as Record<string, unknown>).message === 'string'
+        ? ((body as Record<string, unknown>).message as string)
         : `Request failed with status ${response.status}`,
     httpStatus: response.status,
     isNetworkError: false,
@@ -179,8 +169,7 @@ export function normalizeNetworkError(error: unknown): AppError {
   // Unknown error
   return createAppError({
     code: ErrorCodes.UNKNOWN_ERROR,
-    message:
-      error instanceof Error ? error.message : 'An unknown error occurred',
+    message: error instanceof Error ? error.message : 'An unknown error occurred',
     httpStatus: 0,
     isNetworkError: false,
   })

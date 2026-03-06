@@ -17,7 +17,7 @@
  * No personally identifiable information (PII) is logged.
  */
 
-import pino, { Logger } from 'pino'
+import pino, { type Logger } from 'pino'
 
 /**
  * Log Level Type
@@ -64,9 +64,7 @@ export interface ProvisioningLogEntry {
 /**
  * Create provisioning logger instance
  */
-export function createProvisioningLogger(
-  service: 'api' | 'worker' = 'worker'
-): Logger {
+export function createProvisioningLogger(service: 'api' | 'worker' = 'worker'): Logger {
   const transport = pino.transport({
     target: 'pino/file',
     options: {
@@ -101,9 +99,7 @@ let provisioningLogger: Logger | null = null
 /**
  * Get or create logger
  */
-export function getProvisioningLogger(
-  service: 'api' | 'worker' = 'worker'
-): Logger {
+export function getProvisioningLogger(service: 'api' | 'worker' = 'worker'): Logger {
   if (!provisioningLogger) {
     provisioningLogger = createProvisioningLogger(service)
   }
@@ -135,11 +131,7 @@ export class ProvisioningLogger {
   /**
    * Log provisioning step
    */
-  logStep(
-    step: string,
-    event: string,
-    metadata?: Record<string, unknown>
-  ): void {
+  logStep(step: string, event: string, metadata?: Record<string, unknown>): void {
     this.logger.info({
       ...this.context,
       step,
@@ -151,11 +143,7 @@ export class ProvisioningLogger {
   /**
    * Log provisioning success
    */
-  logSuccess(
-    event: string,
-    durationMs: number,
-    metadata?: Record<string, unknown>
-  ): void {
+  logSuccess(event: string, durationMs: number, metadata?: Record<string, unknown>): void {
     this.logger.info({
       ...this.context,
       event,
@@ -167,11 +155,7 @@ export class ProvisioningLogger {
   /**
    * Log provisioning error
    */
-  logError(
-    event: string,
-    error: Error,
-    metadata?: Record<string, unknown>
-  ): void {
+  logError(event: string, error: Error, metadata?: Record<string, unknown>): void {
     this.logger.error({
       ...this.context,
       event,
@@ -258,12 +242,7 @@ export class ProvisioningLogger {
   /**
    * Log retry attempt
    */
-  logRetry(
-    attempt: number,
-    maxAttempts: number,
-    reason: string,
-    nextRetryMs: number
-  ): void {
+  logRetry(attempt: number, maxAttempts: number, reason: string, nextRetryMs: number): void {
     this.logger.warn({
       ...this.context,
       event: 'retry_attempt',
@@ -277,11 +256,7 @@ export class ProvisioningLogger {
   /**
    * Log DLQ move
    */
-  logDLQMove(
-    reason: string,
-    attempts: number,
-    metadata?: Record<string, unknown>
-  ): void {
+  logDLQMove(reason: string, attempts: number, metadata?: Record<string, unknown>): void {
     this.logger.error({
       ...this.context,
       event: 'dlq_move',

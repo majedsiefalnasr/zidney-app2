@@ -23,7 +23,7 @@
  * - Dependencies: tenants_registry table must exist
  */
 
-import { PoolClient } from 'pg'
+import type { PoolClient } from 'pg'
 
 export const description =
   'Create provisioning_tasks table for idempotent schema initialization tracking'

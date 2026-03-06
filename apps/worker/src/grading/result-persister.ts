@@ -20,10 +20,10 @@
  * ADRs: ADR-0001 (tenant isolation), ADR-0002 (snapshot immutability)
  */
 
-import { Attempt, AttemptStatus } from '@zidney/types/attempt'
-import { Pool } from 'pg'
 import { logger } from '@zidney/logger'
-import { GradeResult } from './grader'
+import { type Attempt, AttemptStatus } from '@zidney/types/attempt'
+import type { Pool } from 'pg'
+import type { GradeResult } from './grader'
 
 /**
  * Error: Attempt already finalized
@@ -231,10 +231,7 @@ export async function finalizeAttempt(
           action: 'rollback_error',
           attempt_id: attempt.id,
           workspace_id: workspaceId,
-          error:
-            rollbackErr instanceof Error
-              ? rollbackErr.message
-              : String(rollbackErr),
+          error: rollbackErr instanceof Error ? rollbackErr.message : String(rollbackErr),
         },
         'Error rolling back transaction'
       )

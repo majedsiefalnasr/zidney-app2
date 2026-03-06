@@ -44,13 +44,7 @@ function buildStore() {
   const tokenManager = createMockTokenManager()
   const router = createTestRouter()
 
-  const useAuthStore = defineAuthStore(
-    authService,
-    tokenManager,
-    router,
-    'mmc-login',
-    () => null
-  )
+  const useAuthStore = defineAuthStore(authService, tokenManager, router, 'mmc-login', () => null)
 
   const store = useAuthStore(pinia)
   const pushSpy = vi.spyOn(router, 'push')

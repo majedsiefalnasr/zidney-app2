@@ -22,11 +22,5 @@
     "windsurf",
     "antigravity"
   ],
-  "tags": [
-    "testing",
-    "specifications",
-    "architecture",
-    "validation",
-    "planning"
-  ]
+  "tags": ["testing", "specifications", "architecture", "validation", "planning"]
 }

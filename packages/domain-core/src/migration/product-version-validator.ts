@@ -3,7 +3,7 @@
  * Validates migration product version requirements
  */
 
-import { MigrationFile } from '@zidney/types'
+import type { MigrationFile } from '@zidney/types'
 import { isCompatible } from '@zidney/validation'
 
 /**
@@ -36,11 +36,7 @@ export function validateProductVersionCompatibility(
  * Extract product version requirement from migration file header
  * Format: "-- Required Minimum Product Version: X.Y.Z"
  */
-export function extractProductVersionRequirement(
-  sqlContent: string
-): string | undefined {
-  const match = sqlContent.match(
-    /--\s*Required\s+Minimum\s+Product\s+Version:\s*(\d+\.\d+\.\d+)/i
-  )
+export function extractProductVersionRequirement(sqlContent: string): string | undefined {
+  const match = sqlContent.match(/--\s*Required\s+Minimum\s+Product\s+Version:\s*(\d+\.\d+\.\d+)/i)
   return match ? match[1] : undefined
 }

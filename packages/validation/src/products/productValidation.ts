@@ -18,10 +18,7 @@ import { z } from 'zod'
  * Requires English, Arabic optional
  */
 export const LocalizedNameSchema = z.object({
-  en: z
-    .string()
-    .min(1, 'English name is required')
-    .max(255, 'English name too long'),
+  en: z.string().min(1, 'English name is required').max(255, 'English name too long'),
   ar: z.string().max(255, 'Arabic name too long').optional(),
 })
 
@@ -66,10 +63,7 @@ export type ModulesArray = z.infer<typeof ModulesArraySchema>
 /**
  * Product status schema
  */
-export const ProductStatusSchema = z.enum([
-  ProductStatus.ACTIVE,
-  ProductStatus.INACTIVE,
-])
+export const ProductStatusSchema = z.enum([ProductStatus.ACTIVE, ProductStatus.INACTIVE])
 
 /**
  * Create product request schema
@@ -183,10 +177,7 @@ export function validateSlugImmutable(
  * Get product name with fallback
  * Fallback from ar to en if ar not available
  */
-export function getProductName(
-  name: LocalizedName,
-  lang: 'en' | 'ar' = 'en'
-): string {
+export function getProductName(name: LocalizedName, lang: 'en' | 'ar' = 'en'): string {
   if (lang === 'ar') {
     return name.ar || name.en
   }
@@ -201,19 +192,14 @@ export function computeFieldDiff(
   oldData: unknown,
   newData: unknown
 ): Record<string, { old: unknown; new: unknown }> {
-  if (
-    !oldData ||
-    !newData ||
-    typeof oldData !== 'object' ||
-    typeof newData !== 'object'
-  ) {
+  if (!oldData || !newData || typeof oldData !== 'object' || typeof newData !== 'object') {
     return {}
   }
 
   const diff: Record<string, { old: unknown; new: unknown }> = {}
 
   for (const key in newData) {
-    if (Object.prototype.hasOwnProperty.call(newData, key)) {
+    if (Object.hasOwn(newData, key)) {
       const newVal = (newData as Record<string, unknown>)[key]
       const oldVal = (oldData as Record<string, unknown>)[key]
 
@@ -240,7 +226,7 @@ export function generateChangeSummary(
 
   const changes = Object.keys(diff)
     .map((field) => {
-      const newVal = diff[field]!.new
+      const newVal = diff[field]?.new
 
       if (field === 'enabled_modules' && Array.isArray(newVal)) {
         const modules = (newVal as string[]).join(', ')
@@ -248,8 +234,7 @@ export function generateChangeSummary(
       }
 
       if (field === 'name' && typeof newVal === 'object') {
-        const name =
-          (newVal as Record<string, string>).en || JSON.stringify(newVal)
+        const name = (newVal as Record<string, string>).en || JSON.stringify(newVal)
         return `Name updated: ${name}`
       }
 

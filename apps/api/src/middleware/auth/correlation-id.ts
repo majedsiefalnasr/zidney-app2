@@ -31,7 +31,7 @@
  * ```
  */
 
-import { Context, Next } from 'hono'
+import type { Context, Next } from 'hono'
 import { v4 as uuidv4 } from 'uuid'
 
 /**

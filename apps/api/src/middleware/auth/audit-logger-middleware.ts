@@ -37,8 +37,8 @@
  * - Async logging (doesn't block response)
  */
 
-import { Context, Next } from 'hono'
 import { createLogger } from '@zidney/logger'
+import type { Context, Next } from 'hono'
 
 const logger = createLogger('api-audit')
 

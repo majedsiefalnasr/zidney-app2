@@ -59,26 +59,15 @@ export function calculateLicenseHealthScore(counts: LicenseCounts): number {
 export function getLicenseSummary(counts: LicenseCounts) {
   return {
     total_licenses: counts.total,
-    active_percent:
-      counts.total > 0
-        ? ((counts.active / counts.total) * 100).toFixed(1)
-        : '0',
+    active_percent: counts.total > 0 ? ((counts.active / counts.total) * 100).toFixed(1) : '0',
     soft_locked_percent:
-      counts.total > 0
-        ? ((counts.soft_locked / counts.total) * 100).toFixed(1)
-        : '0',
-    archived_percent:
-      counts.total > 0
-        ? ((counts.archived / counts.total) * 100).toFixed(1)
-        : '0',
+      counts.total > 0 ? ((counts.soft_locked / counts.total) * 100).toFixed(1) : '0',
+    archived_percent: counts.total > 0 ? ((counts.archived / counts.total) * 100).toFixed(1) : '0',
     health_score: calculateLicenseHealthScore(counts),
   }
 }
 
-export function compareLicenseCounts(
-  current: LicenseCounts,
-  previous: LicenseCounts
-) {
+export function compareLicenseCounts(current: LicenseCounts, previous: LicenseCounts) {
   return {
     total_change: current.total - previous.total,
     active_change: current.active - previous.active,

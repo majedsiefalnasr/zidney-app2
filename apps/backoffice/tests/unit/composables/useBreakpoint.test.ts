@@ -10,12 +10,13 @@
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  * Task: T038
  */
-import { useBreakpoint } from '@/composables/useBreakpoint'
-import { useBackofficeUiStore } from '@/core/state/ui.store'
+
 import { createTestingPinia } from '@pinia/testing'
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent } from 'vue'
+import { useBreakpoint } from '@/composables/useBreakpoint'
+import { useBackofficeUiStore } from '@/core/state/ui.store'
 
 const TestComponent = defineComponent({
   setup() {

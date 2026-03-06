@@ -1,6 +1,6 @@
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
-import { execSync } from 'child_process'
 import { logger } from '@zidney/logger'
+import { execSync } from 'child_process'
 
 export interface ArchiveSnapshotJobPayload {
   type: 'ARCHIVE_SNAPSHOT'
@@ -37,10 +37,9 @@ export async function archiveSnapshotJob(
     await getTenantDbConnection(workspace_id)
 
     // Step 1: Verify license status is ARCHIVED
-    const licenseResult = await masterDb.query(
-      'SELECT * FROM licenses WHERE id = $1 LIMIT 1',
-      [license_id]
-    )
+    const licenseResult = await masterDb.query('SELECT * FROM licenses WHERE id = $1 LIMIT 1', [
+      license_id,
+    ])
 
     if (!licenseResult.rows.length) {
       logger.error(
@@ -65,9 +64,7 @@ export async function archiveSnapshotJob(
         },
         'Archive snapshot job: license not in ARCHIVED state (will retry)'
       )
-      throw new Error(
-        `License not in ARCHIVED state; current status: ${license.status}`
-      )
+      throw new Error(`License not in ARCHIVED state; current status: ${license.status}`)
     }
 
     // Step 2: Check idempotency - recent snapshot within 1 hour?
@@ -99,10 +96,7 @@ export async function archiveSnapshotJob(
     }
 
     // Step 3: Execute pg_dump
-    logger.debug(
-      { action: 'archive_snapshot_dump_start', license_id },
-      'Starting pg_dump'
-    )
+    logger.debug({ action: 'archive_snapshot_dump_start', license_id }, 'Starting pg_dump')
 
     const tenantDbName = `tenant-${workspace_id}`
     const dumpTimestamp = snapshot_timestamp.replace(/[:.]/g, '-')
@@ -130,13 +124,9 @@ export async function archiveSnapshotJob(
       region: process.env.AWS_REGION || 'us-east-1',
     })
     const s3Key = `archive-snapshots/${license_id}/${dumpTimestamp}.sql`
-    const s3Bucket =
-      process.env.ARCHIVE_SNAPSHOTS_BUCKET || 'zidney-archive-snapshots'
+    const s3Bucket = process.env.ARCHIVE_SNAPSHOTS_BUCKET || 'zidney-archive-snapshots'
 
-    logger.debug(
-      { action: 'archive_snapshot_upload_start', s3_key: s3Key },
-      'Starting S3 upload'
-    )
+    logger.debug({ action: 'archive_snapshot_upload_start', s3_key: s3Key }, 'Starting S3 upload')
 
     try {
       const uploadCommand = new PutObjectCommand({
@@ -196,10 +186,10 @@ export async function archiveSnapshotJob(
       const snapshot_id = snapshotResult.rows[0].id
 
       // Update license with snapshot_id
-      await client.query(
-        'UPDATE licenses SET snapshot_id = $1, updated_at = NOW() WHERE id = $2',
-        [snapshot_id, license_id]
-      )
+      await client.query('UPDATE licenses SET snapshot_id = $1, updated_at = NOW() WHERE id = $2', [
+        snapshot_id,
+        license_id,
+      ])
 
       await client.query('COMMIT')
 

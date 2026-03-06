@@ -7,6 +7,7 @@
 
 import { describe, expect, it } from 'vitest'
 import {
+  type AffiliateMetrics,
   calculateAverageCommission,
   calculatePaginationOffset,
   calculateTotalCommission,
@@ -14,7 +15,6 @@ import {
   getAffiliateStatistics,
   rankAffiliates,
   sortAffiliates,
-  type AffiliateMetrics,
 } from '../../../packages/domain-core/mmc-dashboard/metrics/affiliate-aggregator'
 
 describe('Affiliate Aggregator - Unit Tests', () => {

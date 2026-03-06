@@ -15,7 +15,7 @@
  * Idempotent: Uses CREATE TABLE IF NOT EXISTS
  */
 
-import { PoolClient } from 'pg'
+import type { PoolClient } from 'pg'
 
 export const description = 'Initialize _schema_migrations tracking table'
 

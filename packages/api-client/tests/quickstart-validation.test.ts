@@ -3,12 +3,7 @@
  * Verifies all quickstart.md scenarios work as documented.
  */
 import { describe, expect, it } from 'vitest'
-import {
-  createApiClient,
-  createMockAdapter,
-  ErrorCodes,
-  isAppError,
-} from '../src/index'
+import { createApiClient, createMockAdapter, ErrorCodes, isAppError } from '../src/index'
 
 describe('quickstart validation', () => {
   function makeClient() {
@@ -41,7 +36,7 @@ describe('quickstart validation', () => {
     expect(result.data).toHaveLength(1)
 
     const req = mock.getLastRequest()!
-    expect(req.headers['Authorization']).toBe('Bearer test-token')
+    expect(req.headers.Authorization).toBe('Bearer test-token')
     expect(req.headers['X-Correlation-ID']).toBeDefined()
   })
 
@@ -144,9 +139,7 @@ describe('quickstart validation', () => {
   it('supports cancellation via AbortController', async () => {
     const { mock, client } = makeClient()
 
-    mock.enqueueError(
-      new DOMException('The operation was aborted.', 'AbortError')
-    )
+    mock.enqueueError(new DOMException('The operation was aborted.', 'AbortError'))
 
     const controller = new AbortController()
     controller.abort()
@@ -192,7 +185,7 @@ describe('quickstart validation', () => {
     const correlationId = req.headers['X-Correlation-ID'] as string | undefined
     expect(correlationId).toBeDefined()
     expect(typeof correlationId).toBe('string')
-    expect(correlationId!.length).toBeGreaterThan(0)
+    expect(correlationId?.length).toBeGreaterThan(0)
   })
 
   it('allows custom correlation ID', async () => {

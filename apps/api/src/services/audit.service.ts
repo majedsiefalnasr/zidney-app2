@@ -1,3 +1,4 @@
+import { logger } from '@zidney/logger'
 import { v4 as uuidv4 } from 'uuid'
 
 /**
@@ -19,11 +20,7 @@ import { v4 as uuidv4 } from 'uuid'
 export interface AuditEventRecord {
   id: string
   workspace_id: string
-  action_type:
-    | 'LICENSE_CHANGE'
-    | 'TENANT_PROVISION'
-    | 'SCHEMA_UPGRADE'
-    | 'ROLE_CHANGE'
+  action_type: 'LICENSE_CHANGE' | 'TENANT_PROVISION' | 'SCHEMA_UPGRADE' | 'ROLE_CHANGE'
   actor_id?: string
   previous_state?: Record<string, any>
   new_state?: Record<string, any>
@@ -67,7 +64,7 @@ export async function recordLicenseChange(
     })
   } catch (error) {
     // Log error but don't block calling operation (audit is secondary)
-    console.error('Audit service: LICENSE_CHANGE event recording failed', {
+    logger.error('Audit service: LICENSE_CHANGE event recording failed', {
       error: error instanceof Error ? error.message : String(error),
       workspace_id,
     })
@@ -109,7 +106,7 @@ export async function recordTenantProvisioned(
       })
     })
   } catch (error) {
-    console.error('Audit service: TENANT_PROVISION event recording failed', {
+    logger.error('Audit service: TENANT_PROVISION event recording failed', {
       error: error instanceof Error ? error.message : String(error),
       workspace_id,
     })
@@ -152,7 +149,7 @@ export async function recordSchemaUpgrade(
       })
     })
   } catch (error) {
-    console.error('Audit service: SCHEMA_UPGRADE event recording failed', {
+    logger.error('Audit service: SCHEMA_UPGRADE event recording failed', {
       error: error instanceof Error ? error.message : String(error),
       workspace_id,
     })
@@ -190,16 +187,14 @@ export async function recordRoleChange(
         workspace_id,
         actor_id,
         action_type: 'ROLE_CHANGE',
-        previous_state: previousRole
-          ? { user_id: userId, role: previousRole }
-          : null,
+        previous_state: previousRole ? { user_id: userId, role: previousRole } : null,
         new_state: { user_id: userId, role: newRole },
         metadata: metadata || null,
         created_at: new Date(),
       })
     })
   } catch (error) {
-    console.error('Audit service: ROLE_CHANGE event recording failed', {
+    logger.error('Audit service: ROLE_CHANGE event recording failed', {
       error: error instanceof Error ? error.message : String(error),
       workspace_id,
     })

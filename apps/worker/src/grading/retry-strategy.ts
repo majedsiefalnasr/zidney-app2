@@ -21,7 +21,7 @@
  */
 
 import { logger } from '@zidney/logger'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 /**
  * Interface: Retry Configuration
@@ -95,10 +95,7 @@ export async function handleJobFailure(
 
   // Check if should retry
   if (currentRetryCount <= maxRetries) {
-    const backoffIndex = Math.min(
-      currentRetryCount - 1,
-      retryConfig.backoffMs.length - 1
-    )
+    const backoffIndex = Math.min(currentRetryCount - 1, retryConfig.backoffMs.length - 1)
     const delayMs = retryConfig.backoffMs[backoffIndex]!
 
     logger.info(
@@ -283,10 +280,7 @@ async function moveJobToDLQ(
           service: 'retry-strategy',
           action: 'dlq_rollback_error',
           job_id: job.id,
-          error:
-            rollbackErr instanceof Error
-              ? rollbackErr.message
-              : String(rollbackErr),
+          error: rollbackErr instanceof Error ? rollbackErr.message : String(rollbackErr),
         },
         'Error rolling back DLQ transaction'
       )
@@ -314,7 +308,7 @@ async function moveJobToDLQ(
  * Utility: Generate UUID (simplified; use proper UUID library in production)
  */
 function generateUUID(): string {
-  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
     const r = (Math.random() * 16) | 0
     const v = c === 'x' ? r : (r & 0x3) | 0x8
     return v.toString(16)
@@ -334,6 +328,6 @@ export function calculateBackoffDelay(
   baseMs: number = 1000,
   maxMs: number = 30000
 ): number {
-  const exponentialDelay = baseMs * Math.pow(2, retryCount)
+  const exponentialDelay = baseMs * 2 ** retryCount
   return Math.min(exponentialDelay, maxMs)
 }

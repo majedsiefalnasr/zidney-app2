@@ -10,7 +10,8 @@
  * Logs full attempt lifecycle: submission → grading → result persistence.
  */
 
-import { GradeAttemptJob } from '@zidney/types/job-envelope'
+import { logger } from '@zidney/logger'
+import type { GradeAttemptJob } from '@zidney/types/job-envelope'
 
 /**
  * Grade attempt job handler.
@@ -127,5 +128,5 @@ export async function handleGradeAttemptJob(
 export async function registerGradeAttemptHandler(): Promise<void> {
   // TODO: Import registerJobHandler from processor
   // registerJobHandler('finalize_attempt', formatGradeAttemptJob);
-  console.log('Grade attempt handler registered (TODO: implement registration)')
+  logger.info('grade_attempt_handler_stub_registered')
 }

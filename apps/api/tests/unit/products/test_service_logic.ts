@@ -81,10 +81,10 @@ describe('Unit: Products - Service Logic (T062)', () => {
 
   describe('changeProductStatus() version immutability', () => {
     it('should preserve current_version on status change', async () => {
-      const statusBefore = 'ACTIVE'
+      const _statusBefore = 'ACTIVE'
       const versionBefore = 5
 
-      const statusAfter = 'INACTIVE'
+      const _statusAfter = 'INACTIVE'
       const versionAfter = 5 // Same
 
       expect(versionAfter).toBe(versionBefore)
@@ -128,7 +128,7 @@ describe('Unit: Products - Service Logic (T062)', () => {
 
   describe('generateChangeSummary()', () => {
     it('should create descriptive change summary from diff', async () => {
-      const diff = {
+      const _diff = {
         name: { old: { en: 'Old' }, new: { en: 'New' } },
         enabled_modules: {
           old: [Module.MCQ],
@@ -163,8 +163,8 @@ describe('Unit: Products - Service Logic (T062)', () => {
         { timestamp: new Date(now.getTime() - 1000), action: 'CREATE' },
       ]
 
-      expect(new Date(logs[0]!.timestamp).getTime()).toBeGreaterThan(
-        new Date(logs[1]!.timestamp).getTime()
+      expect(new Date(logs[0]?.timestamp).getTime()).toBeGreaterThan(
+        new Date(logs[1]?.timestamp).getTime()
       )
     })
   })

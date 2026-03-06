@@ -16,11 +16,7 @@
  * Stage: STAGE_UI_03_ROUTER_AND_GUARDS
  */
 import { createLogger } from '@zidney/logger'
-import type {
-  NavigationGuard,
-  RouteLocationNormalized,
-  RouteLocationRaw,
-} from 'vue-router'
+import type { NavigationGuard, RouteLocationNormalized, RouteLocationRaw } from 'vue-router'
 
 const logger = createLogger('backoffice:workspace-guard')
 
@@ -51,7 +47,7 @@ export function createWorkspaceGuard(options: {
   return (to: RouteLocationNormalized): RouteLocationRaw | boolean => {
     try {
       // Only activates for workspace-bound routes
-      if (to.meta['requiresWorkspace'] !== true) return true
+      if (to.meta.requiresWorkspace !== true) return true
 
       // Loop prevention: if already navigating to selector, allow
       if (to.name === options.workspaceSelectorRouteName) return true
@@ -59,12 +55,9 @@ export function createWorkspaceGuard(options: {
       const resolved = options.isWorkspaceResolved()
 
       if (!resolved) {
-        logger.debug(
-          'Workspace guard: workspace not resolved, redirecting to selector',
-          {
-            route: to.name?.toString() ?? to.path,
-          }
-        )
+        logger.debug('Workspace guard: workspace not resolved, redirecting to selector', {
+          route: to.name?.toString() ?? to.path,
+        })
         return { name: options.workspaceSelectorRouteName }
       }
 
@@ -74,4 +67,20 @@ export function createWorkspaceGuard(options: {
       return true
     }
   }
+}
+
+// ─── Context-Based Direct API ─────────────────────────────────────────────────
+
+export interface WorkspaceGuardContext {
+  to: RouteLocationNormalized
+  from: RouteLocationNormalized
+  authStore: { user: { workspaceSlug?: string } | null }
+}
+
+export function workspaceGuard(ctx: WorkspaceGuardContext): boolean | RouteLocationRaw {
+  if (ctx.to.meta.requiresWorkspace !== true) return true
+  const slug = ctx.to.params.slug as string | undefined
+  const userSlug = ctx.authStore.user?.workspaceSlug
+  if (!userSlug || userSlug !== slug) return { name: 'forbidden' }
+  return true
 }

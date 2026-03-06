@@ -60,11 +60,7 @@ describe('createRefreshManager', () => {
 
     const rm = createRefreshManager(refreshFn, onLogout, tokenManager)
 
-    const results = await Promise.allSettled([
-      rm.refresh(),
-      rm.refresh(),
-      rm.refresh(),
-    ])
+    const results = await Promise.allSettled([rm.refresh(), rm.refresh(), rm.refresh()])
     expect(results.every((r) => r.status === 'fulfilled')).toBe(true)
   })
 

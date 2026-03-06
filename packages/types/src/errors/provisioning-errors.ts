@@ -86,10 +86,7 @@ export interface ProvisioningError {
 /**
  * Error Registry Mapping Error Code → HTTP Status + Metadata
  */
-export const PROVISIONING_ERROR_REGISTRY: Record<
-  ProvisioningErrorCode,
-  ProvisioningError
-> = {
+export const PROVISIONING_ERROR_REGISTRY: Record<ProvisioningErrorCode, ProvisioningError> = {
   // Validation Errors (400 Bad Request)
   [ProvisioningErrorCode.INVALID_WORKSPACE_SLUG]: {
     code: ProvisioningErrorCode.INVALID_WORKSPACE_SLUG,
@@ -175,8 +172,7 @@ export const PROVISIONING_ERROR_REGISTRY: Record<
   // Lock/Concurrency (503)
   [ProvisioningErrorCode.LOCK_TIMEOUT]: {
     code: ProvisioningErrorCode.LOCK_TIMEOUT,
-    message:
-      'Provisioning lock acquisition timed out; another operation may be in progress',
+    message: 'Provisioning lock acquisition timed out; another operation may be in progress',
     httpStatus: 503,
     retryable: true,
   },
@@ -190,8 +186,7 @@ export const PROVISIONING_ERROR_REGISTRY: Record<
   // License Validation Errors (400, 500)
   [ProvisioningErrorCode.LICENSE_VALIDATION_FAILED]: {
     code: ProvisioningErrorCode.LICENSE_VALIDATION_FAILED,
-    message:
-      'License validation failed; check license configuration and status',
+    message: 'License validation failed; check license configuration and status',
     httpStatus: 400,
     retryable: false,
   },
@@ -231,8 +226,7 @@ export const PROVISIONING_ERROR_REGISTRY: Record<
   },
   [ProvisioningErrorCode.MIGRATION_ROLLBACK_FAILED]: {
     code: ProvisioningErrorCode.MIGRATION_ROLLBACK_FAILED,
-    message:
-      'Migration failed and rollback also failed; manual intervention required',
+    message: 'Migration failed and rollback also failed; manual intervention required',
     httpStatus: 500,
     retryable: false,
   },
@@ -266,8 +260,7 @@ export const PROVISIONING_ERROR_REGISTRY: Record<
   },
   [ProvisioningErrorCode.RETRY_EXHAUSTED]: {
     code: ProvisioningErrorCode.RETRY_EXHAUSTED,
-    message:
-      'Provisioning failed after max retries; operator intervention required',
+    message: 'Provisioning failed after max retries; operator intervention required',
     httpStatus: 503,
     retryable: false,
   },
@@ -316,9 +309,7 @@ export const PROVISIONING_ERROR_REGISTRY: Record<
 /**
  * Helper: Get error details by code
  */
-export function getErrorDetails(
-  code: ProvisioningErrorCode
-): ProvisioningError {
+export function getErrorDetails(code: ProvisioningErrorCode): ProvisioningError {
   return (
     PROVISIONING_ERROR_REGISTRY[code] || {
       code: ProvisioningErrorCode.PROVISION_FAILED,

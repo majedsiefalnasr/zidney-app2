@@ -11,7 +11,7 @@
  * Phase: 1 - Backend Implementation (parallel)
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 export async function getAffiliates(
   pool: Pool,

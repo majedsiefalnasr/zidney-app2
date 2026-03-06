@@ -15,7 +15,7 @@ import {
   validatePerClientUsageLimit,
 } from '@zidney/domain-core/affiliates/validators'
 import { sql } from 'drizzle-orm'
-import { Logger } from 'pino'
+import type { Logger } from 'pino'
 import { v4 as uuidv4 } from 'uuid'
 
 interface AffiliateDiscount {
@@ -100,8 +100,7 @@ export class AffiliateService {
         )
         throw {
           code: AffiliateErrorCode.AFFILIATE_CODE_NOT_FOUND,
-          message:
-            AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_CODE_NOT_FOUND],
+          message: AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_CODE_NOT_FOUND],
           httpStatus: 400,
         } as AffiliateValidationError
       }
@@ -123,21 +122,14 @@ export class AffiliateService {
         )
         throw {
           code: AffiliateErrorCode.AFFILIATE_CODE_INACTIVE,
-          message:
-            AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_CODE_INACTIVE],
+          message: AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_CODE_INACTIVE],
           httpStatus: 400,
         } as AffiliateValidationError
       }
 
       // 3. VALIDATE TEMPORAL RANGE
       const now = new Date()
-      if (
-        !validateCurrentTimeInRange(
-          affiliate.start_date,
-          affiliate.end_date,
-          now
-        )
-      ) {
+      if (!validateCurrentTimeInRange(affiliate.start_date, affiliate.end_date, now)) {
         this.logger.warn(
           {
             correlationId,
@@ -152,19 +144,13 @@ export class AffiliateService {
         )
         throw {
           code: AffiliateErrorCode.AFFILIATE_CODE_EXPIRED,
-          message:
-            AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_CODE_EXPIRED],
+          message: AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_CODE_EXPIRED],
           httpStatus: 400,
         } as AffiliateValidationError
       }
 
       // 4. VALIDATE GLOBAL USAGE LIMIT
-      if (
-        !validateGlobalUsageLimit(
-          affiliate.usage_count,
-          affiliate.usage_limit_total
-        )
-      ) {
+      if (!validateGlobalUsageLimit(affiliate.usage_count, affiliate.usage_limit_total)) {
         this.logger.warn(
           {
             correlationId,
@@ -178,26 +164,14 @@ export class AffiliateService {
         )
         throw {
           code: AffiliateErrorCode.AFFILIATE_USAGE_LIMIT_EXCEEDED,
-          message:
-            AffiliateErrorMessages[
-              AffiliateErrorCode.AFFILIATE_USAGE_LIMIT_EXCEEDED
-            ],
+          message: AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_USAGE_LIMIT_EXCEEDED],
           httpStatus: 400,
         } as AffiliateValidationError
       }
 
       // 5. VALIDATE PER-CLIENT USAGE LIMIT
-      const perClientCount = await this.countPerClientUsage(
-        tx,
-        affiliateId,
-        clientId
-      )
-      if (
-        !validatePerClientUsageLimit(
-          perClientCount,
-          affiliate.usage_limit_per_client
-        )
-      ) {
+      const perClientCount = await this.countPerClientUsage(tx, affiliateId, clientId)
+      if (!validatePerClientUsageLimit(perClientCount, affiliate.usage_limit_per_client)) {
         this.logger.warn(
           {
             correlationId,
@@ -206,17 +180,14 @@ export class AffiliateService {
             clientId,
             perClientCount,
             usageLimitPerClient: affiliate.usage_limit_per_client,
-            errorCode:
-              AffiliateErrorCode.AFFILIATE_USAGE_LIMIT_PER_CLIENT_EXCEEDED,
+            errorCode: AffiliateErrorCode.AFFILIATE_USAGE_LIMIT_PER_CLIENT_EXCEEDED,
           },
           'Affiliate code per-client usage limit exceeded'
         )
         throw {
           code: AffiliateErrorCode.AFFILIATE_USAGE_LIMIT_PER_CLIENT_EXCEEDED,
           message:
-            AffiliateErrorMessages[
-              AffiliateErrorCode.AFFILIATE_USAGE_LIMIT_PER_CLIENT_EXCEEDED
-            ],
+            AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_USAGE_LIMIT_PER_CLIENT_EXCEEDED],
           httpStatus: 400,
         } as AffiliateValidationError
       }

@@ -12,10 +12,11 @@
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  * Task: T047
  */
-import AppLayout from '@/components/layout/AppLayout.vue'
+
 import { createTestingPinia } from '@pinia/testing'
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import AppLayout from '@/components/layout/AppLayout.vue'
 
 // Stub vue-router composables used by child components
 vi.mock('vue-router', () => ({
@@ -34,12 +35,7 @@ const childStubs = {
   },
 }
 
-function createWrapper(
-  opts: {
-    isMobile?: boolean
-    sidebarCollapsed?: boolean
-  } = {}
-) {
+function createWrapper(opts: { isMobile?: boolean; sidebarCollapsed?: boolean } = {}) {
   const pinia = createTestingPinia({
     createSpy: vi.fn,
     initialState: {
@@ -75,23 +71,17 @@ describe('AppLayout — Backoffice', () => {
 
   it('adds .app-layout--mobile class when isMobile=true', () => {
     const wrapper = createWrapper({ isMobile: true })
-    expect(wrapper.find('.app-layout').classes()).toContain(
-      'app-layout--mobile'
-    )
+    expect(wrapper.find('.app-layout').classes()).toContain('app-layout--mobile')
   })
 
   it('does not add .app-layout--mobile class when isMobile=false', () => {
     const wrapper = createWrapper({ isMobile: false })
-    expect(wrapper.find('.app-layout').classes()).not.toContain(
-      'app-layout--mobile'
-    )
+    expect(wrapper.find('.app-layout').classes()).not.toContain('app-layout--mobile')
   })
 
   it('adds .app-layout--collapsed class when sidebarCollapsed=true', () => {
     const wrapper = createWrapper({ sidebarCollapsed: true })
-    expect(wrapper.find('.app-layout').classes()).toContain(
-      'app-layout--collapsed'
-    )
+    expect(wrapper.find('.app-layout').classes()).toContain('app-layout--collapsed')
   })
 
   it('mobile backdrop renders when isMobile=true and sidebarCollapsed=false', () => {
@@ -122,8 +112,7 @@ describe('AppLayout — Backoffice', () => {
     const stubs = {
       ...childStubs,
       AppHeader: {
-        template:
-          '<div class="stub-app-header"><slot name="left" /><slot name="right" /></div>',
+        template: '<div class="stub-app-header"><slot name="left" /><slot name="right" /></div>',
       },
     }
     const wrapper = mount(AppLayout, {

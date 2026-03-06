@@ -16,12 +16,9 @@
  * - Dead-letter queue handling (T051)
  */
 
-import type { Pool } from 'pg'
+import { LicenseStatus, type ProvisioningJobPayload } from '@zidney/domain-core/licenses/types'
 import type { Logger } from '@zidney/logger'
-import {
-  LicenseStatus,
-  ProvisioningJobPayload,
-} from '@zidney/domain-core/licenses/types'
+import type { Pool } from 'pg'
 
 interface ProvisioningJobContext {
   masterDb: Pool
@@ -35,9 +32,7 @@ interface ProvisioningJobContext {
 /**
  * Main provisioning job handler
  */
-export async function handleProvisioningJob(
-  ctx: ProvisioningJobContext
-): Promise<void> {
+export async function handleProvisioningJob(ctx: ProvisioningJobContext): Promise<void> {
   const { masterDb, logger, job } = ctx
   const payload = job.data
   const attemptNumber = job.attemptsMade || 0
@@ -140,12 +135,7 @@ export async function handleProvisioningJob(
       SET status = $1, provisioning_error = $2, provisioning_retries = $3, provisioning_last_attempt_at = NOW()
       WHERE id = $4
     `,
-      [
-        LicenseStatus.PROVISION_FAILED,
-        sanitizedError,
-        attemptNumber + 1,
-        payload.license_id,
-      ]
+      [LicenseStatus.PROVISION_FAILED, sanitizedError, attemptNumber + 1, payload.license_id]
     )
 
     // T050, T051: Rethrow for automatic retry/DLQ handling
@@ -169,10 +159,7 @@ function checkDatabaseExists(_workspaceSlug: string): boolean {
 /**
  * T045: Run baseline schema migrations for tenant database
  */
-async function runTenantMigrations(
-  workspaceSlug: string,
-  logger: Logger
-): Promise<void> {
+async function runTenantMigrations(workspaceSlug: string, logger: Logger): Promise<void> {
   logger.info({
     event: 'tenant_migrations_starting',
     workspace_slug: workspaceSlug,
@@ -203,10 +190,7 @@ async function runTenantMigrations(
 /**
  * T046: Seed baseline data into tenant database
  */
-async function seedTenantData(
-  payload: ProvisioningJobPayload,
-  logger: Logger
-): Promise<void> {
+async function seedTenantData(payload: ProvisioningJobPayload, logger: Logger): Promise<void> {
   logger.info({
     event: 'tenant_seeding_starting',
     workspace_slug: payload.workspace_slug,
@@ -298,12 +282,7 @@ async function insertTenantRegistry(
         license_id, workspace_slug, database_name, workspace_id, created_at
       ) VALUES ($1, $2, $3, $4, NOW())
     `,
-      [
-        payload.license_id,
-        payload.workspace_slug,
-        `tenant_${payload.workspace_slug}`,
-        workspaceId,
-      ]
+      [payload.license_id, payload.workspace_slug, `tenant_${payload.workspace_slug}`, workspaceId]
     )
 
     logger.info({
@@ -326,10 +305,7 @@ async function insertTenantRegistry(
 /**
  * T049: Cleanup on provisioning failure
  */
-async function cleanupFailedProvisioning(
-  workspaceSlug: string,
-  logger: Logger
-): Promise<void> {
+async function cleanupFailedProvisioning(workspaceSlug: string, logger: Logger): Promise<void> {
   logger.info({
     event: 'provisioning_cleanup_starting',
     workspace_slug: workspaceSlug,
@@ -395,8 +371,7 @@ function sanitizeErrorMessage(message: string): string {
  * Helper: Generate secure temporary password
  */
 function generateSecurePassword(): string {
-  const chars =
-    'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%'
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%'
   let password = ''
   for (let i = 0; i < 16; i++) {
     password += chars.charAt(Math.floor(Math.random() * chars.length))

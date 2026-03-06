@@ -3,8 +3,8 @@
  * Query migration history and status
  */
 
-import { MigrationRegistryEntry } from '@zidney/types'
-import { Pool } from 'pg'
+import type { MigrationRegistryEntry } from '@zidney/types'
+import type { Pool } from 'pg'
 
 /**
  * Get migration history for workspace

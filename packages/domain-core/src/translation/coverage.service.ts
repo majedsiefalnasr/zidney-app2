@@ -21,10 +21,7 @@
 
 import { createLogger } from '@zidney/logger'
 
-import {
-  TRANSLATABLE_FIELDS,
-  isTranslatableEntityType,
-} from './translatable-fields'
+import { isTranslatableEntityType, TRANSLATABLE_FIELDS } from './translatable-fields'
 import type { TranslationCoverage } from './translation.types'
 
 const logger = createLogger('coverage-service')
@@ -46,12 +43,7 @@ interface DbClient {
 
 export interface RedisClient {
   get(key: string): Promise<string | null>
-  set(
-    key: string,
-    value: string,
-    expiryMode: 'EX',
-    time: number
-  ): Promise<string | null>
+  set(key: string, value: string, expiryMode: 'EX', time: number): Promise<string | null>
   del(key: string | string[]): Promise<number>
   scan(
     cursor: string,
@@ -66,11 +58,7 @@ export interface RedisClient {
 // Cache key helpers
 // ---------------------------------------------------------------------------
 
-function coverageCacheKey(
-  workspaceId: string,
-  entityType: string,
-  languageCode: string
-): string {
+function coverageCacheKey(workspaceId: string, entityType: string, languageCode: string): string {
   return `coverage:${workspaceId}:${entityType}:${languageCode}`
 }
 
@@ -138,8 +126,7 @@ export async function getCoverage(
   }
 
   // --- DB computation ---
-  const fieldsForType =
-    TRANSLATABLE_FIELDS[entityType as keyof typeof TRANSLATABLE_FIELDS]
+  const fieldsForType = TRANSLATABLE_FIELDS[entityType as keyof typeof TRANSLATABLE_FIELDS]
   const fieldCount = fieldsForType.length
 
   // COUNT distinct entity IDs present in translations (denominator entity base)
@@ -167,20 +154,13 @@ export async function getCoverage(
     total_entities: totalEntities,
     translated_count: translatedCount,
     coverage_percent:
-      maxPossible > 0
-        ? Math.round((translatedCount / maxPossible) * 10000) / 100
-        : 0,
+      maxPossible > 0 ? Math.round((translatedCount / maxPossible) * 10000) / 100 : 0,
   }
 
   // --- Cache write ---
   if (redis) {
     try {
-      await redis.set(
-        cacheKey,
-        JSON.stringify(coverage),
-        'EX',
-        COVERAGE_CACHE_TTL_SECONDS
-      )
+      await redis.set(cacheKey, JSON.stringify(coverage), 'EX', COVERAGE_CACHE_TTL_SECONDS)
     } catch (err) {
       logger.warn({
         event: 'coverage_cache_write_error',

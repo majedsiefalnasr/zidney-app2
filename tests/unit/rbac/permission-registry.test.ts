@@ -18,9 +18,9 @@
 import { describe, expect, it } from 'vitest'
 
 import {
+  lookupPermission,
   PUBLIC_ROUTES,
   ROUTE_PERMISSION_REGISTRY,
-  lookupPermission,
 } from '../../../packages/domain-core/src/rbac/permission-registry'
 import { PermissionModule } from '../../../packages/domain-core/src/rbac/rbac.types'
 
@@ -30,10 +30,7 @@ import { PermissionModule } from '../../../packages/domain-core/src/rbac/rbac.ty
 
 describe('lookupPermission() — registered routes', () => {
   it('resolves POST /api/v1/backoffice/workspace/roles → SETTINGS can_create', () => {
-    const result = lookupPermission(
-      'POST',
-      '/api/v1/backoffice/workspace/roles'
-    )
+    const result = lookupPermission('POST', '/api/v1/backoffice/workspace/roles')
     expect(result).not.toBeNull()
     expect(result?.module).toBe(PermissionModule.SETTINGS)
     expect(result?.action).toBe('can_create')
@@ -47,70 +44,49 @@ describe('lookupPermission() — registered routes', () => {
   })
 
   it('resolves GET /api/v1/backoffice/workspace/roles/:id → SETTINGS can_view', () => {
-    const result = lookupPermission(
-      'GET',
-      '/api/v1/backoffice/workspace/roles/:id'
-    )
+    const result = lookupPermission('GET', '/api/v1/backoffice/workspace/roles/:id')
     expect(result).not.toBeNull()
     expect(result?.module).toBe(PermissionModule.SETTINGS)
     expect(result?.action).toBe('can_view')
   })
 
   it('resolves PATCH /api/v1/backoffice/workspace/roles/:id → SETTINGS can_edit', () => {
-    const result = lookupPermission(
-      'PATCH',
-      '/api/v1/backoffice/workspace/roles/:id'
-    )
+    const result = lookupPermission('PATCH', '/api/v1/backoffice/workspace/roles/:id')
     expect(result).not.toBeNull()
     expect(result?.module).toBe(PermissionModule.SETTINGS)
     expect(result?.action).toBe('can_edit')
   })
 
   it('resolves PUT /api/v1/backoffice/workspace/roles/:id/permissions → SETTINGS can_edit', () => {
-    const result = lookupPermission(
-      'PUT',
-      '/api/v1/backoffice/workspace/roles/:id/permissions'
-    )
+    const result = lookupPermission('PUT', '/api/v1/backoffice/workspace/roles/:id/permissions')
     expect(result).not.toBeNull()
     expect(result?.module).toBe(PermissionModule.SETTINGS)
     expect(result?.action).toBe('can_edit')
   })
 
   it('resolves DELETE /api/v1/backoffice/workspace/roles/:id → SETTINGS can_delete', () => {
-    const result = lookupPermission(
-      'DELETE',
-      '/api/v1/backoffice/workspace/roles/:id'
-    )
+    const result = lookupPermission('DELETE', '/api/v1/backoffice/workspace/roles/:id')
     expect(result).not.toBeNull()
     expect(result?.module).toBe(PermissionModule.SETTINGS)
     expect(result?.action).toBe('can_delete')
   })
 
   it('resolves GET /api/v1/backoffice/workspace/roles/:id/users → SETTINGS can_view', () => {
-    const result = lookupPermission(
-      'GET',
-      '/api/v1/backoffice/workspace/roles/:id/users'
-    )
+    const result = lookupPermission('GET', '/api/v1/backoffice/workspace/roles/:id/users')
     expect(result).not.toBeNull()
     expect(result?.module).toBe(PermissionModule.SETTINGS)
     expect(result?.action).toBe('can_view')
   })
 
   it('resolves PATCH /api/v1/backoffice/workspace/staff/:userId/role → USERS can_edit', () => {
-    const result = lookupPermission(
-      'PATCH',
-      '/api/v1/backoffice/workspace/staff/:userId/role'
-    )
+    const result = lookupPermission('PATCH', '/api/v1/backoffice/workspace/staff/:userId/role')
     expect(result).not.toBeNull()
     expect(result?.module).toBe(PermissionModule.USERS)
     expect(result?.action).toBe('can_edit')
   })
 
   it('resolves GET /api/v1/backoffice/workspace/role-permission-modules → SETTINGS can_view', () => {
-    const result = lookupPermission(
-      'GET',
-      '/api/v1/backoffice/workspace/role-permission-modules'
-    )
+    const result = lookupPermission('GET', '/api/v1/backoffice/workspace/role-permission-modules')
     expect(result).not.toBeNull()
     expect(result?.module).toBe(PermissionModule.SETTINGS)
     expect(result?.action).toBe('can_view')
@@ -123,15 +99,11 @@ describe('lookupPermission() — registered routes', () => {
 
 describe('lookupPermission() — fail-closed for unregistered routes', () => {
   it('returns null for a completely unknown path', () => {
-    expect(
-      lookupPermission('GET', '/api/v1/backoffice/workspace/unknown')
-    ).toBeNull()
+    expect(lookupPermission('GET', '/api/v1/backoffice/workspace/unknown')).toBeNull()
   })
 
   it('returns null for a known path with wrong method', () => {
-    expect(
-      lookupPermission('PUT', '/api/v1/backoffice/workspace/roles')
-    ).toBeNull()
+    expect(lookupPermission('PUT', '/api/v1/backoffice/workspace/roles')).toBeNull()
   })
 
   it('returns null for an empty path', () => {
@@ -179,12 +151,7 @@ describe('ROUTE_PERMISSION_REGISTRY completeness', () => {
   })
 
   it('all actions are valid permission action names', () => {
-    const validActions = new Set([
-      'can_view',
-      'can_create',
-      'can_edit',
-      'can_delete',
-    ])
+    const validActions = new Set(['can_view', 'can_create', 'can_edit', 'can_delete'])
     for (const entry of Object.values(ROUTE_PERMISSION_REGISTRY)) {
       expect(validActions.has(entry.action)).toBe(true)
     }

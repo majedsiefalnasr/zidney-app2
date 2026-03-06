@@ -17,15 +17,15 @@
  * - No workspace_id in token (MMC-only)
  */
 
-import { AppError, ErrorCode } from '../errors/index.js'
-// @ts-ignore: @zidney/types/mmc.types subpath not declared in packages/types exports field [INFRA-001-DEPS-02]
-import { MMCMember } from '@zidney/types/mmc.types'
-// @ts-ignore: bcryptjs not declared as dependency of domain-core [INFRA-001-DEPS-01]
+// @ts-expect-error: @zidney/types/mmc.types subpath not declared in packages/types exports field [INFRA-001-DEPS-02]
+import type { MMCMember } from '@zidney/types/mmc.types'
+// @ts-expect-error: bcryptjs not declared as dependency of domain-core [INFRA-001-DEPS-01]
 import * as bcrypt from 'bcryptjs'
-// @ts-ignore: hono/jwt not declared as dependency of domain-core [INFRA-001-DEPS-04]
+// @ts-expect-error: hono/jwt not declared as dependency of domain-core [INFRA-001-DEPS-04]
 import { sign, verify } from 'hono/jwt'
-// @ts-ignore: postgres not declared as dependency of domain-core [INFRA-001-DEPS-05]
-import { Database } from 'postgres'
+// @ts-expect-error: postgres not declared as dependency of domain-core [INFRA-001-DEPS-05]
+import type { Database } from 'postgres'
+import { AppError, ErrorCode } from '../errors/index.js'
 
 export interface MMCTokenPayload {
   sub: string // user ID
@@ -56,10 +56,7 @@ export class AuthService {
    *
    * Returns member if successful, throws error otherwise
    */
-  async authenticateMember(
-    username: string,
-    password: string
-  ): Promise<MMCMember> {
+  async authenticateMember(username: string, password: string): Promise<MMCMember> {
     // Query member by username
     const result = await this.db.query(
       `SELECT m.*, r.status as role_status FROM mmc_members m
@@ -69,43 +66,29 @@ export class AuthService {
     )
 
     if (result.rowCount === 0) {
-      throw new AppError(
-        ErrorCode.AUTHENTICATION_FAILED,
-        'Invalid username or password',
-        401,
-        { reason: 'User not found' }
-      )
+      throw new AppError(ErrorCode.AUTHENTICATION_FAILED, 'Invalid username or password', 401, {
+        reason: 'User not found',
+      })
     }
 
     const member = result.rows[0]
 
     // Verify member status
     if (member.status !== 'ACTIVE') {
-      throw new AppError(
-        ErrorCode.MEMBER_DISABLED,
-        'Member account is disabled',
-        401
-      )
+      throw new AppError(ErrorCode.MEMBER_DISABLED, 'Member account is disabled', 401)
     }
 
     // Verify role status
     if (member.role_status !== 'ACTIVE') {
-      throw new AppError(
-        ErrorCode.AUTHENTICATION_FAILED,
-        'Member role is inactive',
-        401
-      )
+      throw new AppError(ErrorCode.AUTHENTICATION_FAILED, 'Member role is inactive', 401)
     }
 
     // Verify password
     const passwordMatch = await bcrypt.compare(password, member.password_hash)
     if (!passwordMatch) {
-      throw new AppError(
-        ErrorCode.AUTHENTICATION_FAILED,
-        'Invalid username or password',
-        401,
-        { reason: 'Password mismatch' }
-      )
+      throw new AppError(ErrorCode.AUTHENTICATION_FAILED, 'Invalid username or password', 401, {
+        reason: 'Password mismatch',
+      })
     }
 
     // Remove password hash before returning
@@ -171,12 +154,9 @@ export class AuthService {
 
       return payload
     } catch (error) {
-      throw new AppError(
-        ErrorCode.AUTHENTICATION_FAILED,
-        'Invalid or expired token',
-        401,
-        { reason: error instanceof Error ? error.message : String(error) }
-      )
+      throw new AppError(ErrorCode.AUTHENTICATION_FAILED, 'Invalid or expired token', 401, {
+        reason: error instanceof Error ? error.message : String(error),
+      })
     }
   }
 
@@ -184,10 +164,7 @@ export class AuthService {
    * Private: Augment member with role name (for response)
    */
   private async augmentMember(member: any): Promise<MMCMember> {
-    const roleResult = await this.db.query(
-      `SELECT name FROM roles WHERE id = $1`,
-      [member.role_id]
-    )
+    const roleResult = await this.db.query(`SELECT name FROM roles WHERE id = $1`, [member.role_id])
 
     return {
       id: member.id,
@@ -209,9 +186,6 @@ export class AuthService {
 /**
  * Create auth service instance
  */
-export function createAuthService(
-  db: Database,
-  jwtSecret: string
-): AuthService {
+export function createAuthService(db: Database, jwtSecret: string): AuthService {
   return new AuthService(db, jwtSecret)
 }

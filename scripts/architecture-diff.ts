@@ -10,8 +10,8 @@
  * Used in CI to prevent architecture drift.
  */
 
-import { execSync } from 'child_process'
-import { readFileSync } from 'fs'
+import { execSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 
 type ArchitectureContract = {
   dependencyRules?: {
@@ -22,8 +22,7 @@ type ArchitectureContract = {
   }
 }
 
-const CONTRACT_PATH =
-  'docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json'
+const CONTRACT_PATH = 'docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json'
 
 function loadContract(): ArchitectureContract {
   const raw = readFileSync(CONTRACT_PATH, 'utf-8')
@@ -44,9 +43,7 @@ function getChangedFiles(): string[] {
       .split('\n')
       .map((f) => f.trim())
       .filter(Boolean)
-      .filter(
-        (f) => f.endsWith('.ts') || f.endsWith('.tsx') || f.endsWith('.vue')
-      )
+      .filter((f) => f.endsWith('.ts') || f.endsWith('.tsx') || f.endsWith('.vue'))
   } catch {
     return []
   }

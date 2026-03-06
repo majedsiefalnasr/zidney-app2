@@ -14,22 +14,17 @@
  * All endpoints require MMC authentication + permission check
  */
 
-import {
-  AppError,
-  ErrorCode,
-  errorResponse,
-  successResponse,
-} from '@zidney/domain-core/errors'
-import { PermissionService } from '@zidney/domain-core/services/permission.service'
-import { RoleService } from '@zidney/domain-core/services/role.service'
-import { Logger } from '@zidney/logger'
-import { UpdateRolePermissionRequest } from '@zidney/types/mmc.types'
+import { AppError, ErrorCode, errorResponse, successResponse } from '@zidney/domain-core/errors'
+import type { PermissionService } from '@zidney/domain-core/services/permission.service'
+import type { RoleService } from '@zidney/domain-core/services/role.service'
+import type { Logger } from '@zidney/logger'
+import type { UpdateRolePermissionRequest } from '@zidney/types/mmc.types'
 import { isValidPermissionDomain } from '@zidney/types/permissions'
-import { Context, Hono } from 'hono'
-import { Database } from 'postgres'
+import { type Context, Hono } from 'hono'
+import type { Database } from 'postgres'
 import {
   getRequestContext,
-  // @ts-ignore: LOGIC-BUG: requireMMCAuth is not exported from correlation-id.middleware — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+  // @ts-expect-error: LOGIC-BUG: requireMMCAuth is not exported from correlation-id.middleware — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
   requireMMCAuth,
 } from '../middleware/correlation-id.middleware'
 
@@ -53,10 +48,7 @@ export function createRolesRouter(
       const context = getRequestContext(ctx)
       requireMMCAuth(ctx)
 
-      const status = ctx.req.query('status') as
-        | 'ACTIVE'
-        | 'INACTIVE'
-        | undefined
+      const status = ctx.req.query('status') as 'ACTIVE' | 'INACTIVE' | undefined
       const correlationId = context.correlationId
 
       // Validate status if provided
@@ -65,10 +57,10 @@ export function createRolesRouter(
           errorResponse(
             ErrorCode.VALIDATION_ERROR,
             'Invalid status; must be ACTIVE or INACTIVE',
-            // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+            // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
             400
           ),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           400
         )
       }
@@ -100,7 +92,7 @@ export function createRolesRouter(
 
       return ctx.json(
         errorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to list roles'),
-        // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+        // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         500
       )
     }
@@ -127,10 +119,10 @@ export function createRolesRouter(
           errorResponse(
             ErrorCode.INVALID_REQUEST,
             'Invalid role ID format',
-            // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+            // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
             400
           ),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           400
         )
       }
@@ -139,7 +131,7 @@ export function createRolesRouter(
       if (!role) {
         return ctx.json(
           errorResponse(ErrorCode.NOT_FOUND, 'Role not found'),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           404
         )
       }
@@ -164,7 +156,7 @@ export function createRolesRouter(
 
       return ctx.json(
         errorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to retrieve role'),
-        // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+        // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         500
       )
     }
@@ -191,10 +183,10 @@ export function createRolesRouter(
           errorResponse(
             ErrorCode.INVALID_REQUEST,
             'Invalid role ID format',
-            // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+            // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
             400
           ),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           400
         )
       }
@@ -203,7 +195,7 @@ export function createRolesRouter(
       if (permissions === null) {
         return ctx.json(
           errorResponse(ErrorCode.NOT_FOUND, 'Role not found'),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           404
         )
       }
@@ -233,11 +225,8 @@ export function createRolesRouter(
       )
 
       return ctx.json(
-        errorResponse(
-          ErrorCode.INTERNAL_ERROR,
-          'Failed to retrieve permissions'
-        ),
-        // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+        errorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to retrieve permissions'),
+        // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         500
       )
     }
@@ -258,7 +247,7 @@ export function createRolesRouter(
       requireMMCAuth(ctx)
 
       const roleId = ctx.req.param('id')
-      const userId = context.mmcUser!.userId
+      const userId = context.mmcUser?.userId
       const correlationId = context.correlationId
       const ipAddress = ctx.req.header('X-Forwarded-For') || 'unknown'
       const userAgent = ctx.req.header('User-Agent') || 'unknown'
@@ -269,18 +258,16 @@ export function createRolesRouter(
           errorResponse(
             ErrorCode.INVALID_REQUEST,
             'Invalid role ID format',
-            // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+            // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
             400
           ),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           400
         )
       }
 
       // Parse request
-      const body = await ctx.req.json<
-        UpdateRolePermissionRequest | UpdateRolePermissionRequest[]
-      >()
+      const body = await ctx.req.json<UpdateRolePermissionRequest | UpdateRolePermissionRequest[]>()
 
       // Validate permissions
       const updates = Array.isArray(body) ? body : [body]
@@ -291,10 +278,10 @@ export function createRolesRouter(
             errorResponse(
               ErrorCode.VALIDATION_ERROR,
               'Missing required field: domain',
-              // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+              // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
               400
             ),
-            // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+            // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
             400
           )
         }
@@ -304,10 +291,10 @@ export function createRolesRouter(
             errorResponse(
               ErrorCode.VALIDATION_ERROR,
               `Invalid permission domain: ${update.domain}`,
-              // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+              // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
               400
             ),
-            // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+            // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
             400
           )
         }
@@ -351,7 +338,7 @@ export function createRolesRouter(
         )
         return ctx.json(
           errorResponse(error.code, error.message, error.details),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           error.statusCode
         )
       }
@@ -366,7 +353,7 @@ export function createRolesRouter(
 
       return ctx.json(
         errorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to update permissions'),
-        // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+        // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         500
       )
     }
@@ -379,7 +366,6 @@ export function createRolesRouter(
  * Validate UUID format
  */
 function isValidUUID(uuid: string): boolean {
-  const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   return uuidRegex.test(uuid)
 }

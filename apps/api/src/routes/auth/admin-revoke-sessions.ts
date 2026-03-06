@@ -96,11 +96,7 @@ router.post(
         '[Admin Auth] Non-admin tried to revoke sessions'
       )
 
-      throwAuthError(
-        AuthErrorCodes.PERMISSION_DENIED,
-        'Only admins can revoke sessions',
-        403
-      )
+      throwAuthError(AuthErrorCodes.PERMISSION_DENIED, 'Only admins can revoke sessions', 403)
     }
 
     try {
@@ -108,11 +104,7 @@ router.post(
       const pool = getTenantPool(request.workspace_id)
 
       if (!pool) {
-        throwAuthError(
-          AuthErrorCodes.WORKSPACE_INVALID,
-          'Workspace not found',
-          404
-        )
+        throwAuthError(AuthErrorCodes.WORKSPACE_INVALID, 'Workspace not found', 404)
       }
 
       const client = await pool.connect()

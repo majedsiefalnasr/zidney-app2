@@ -9,7 +9,7 @@ import {
   createTestClient,
   createTestContext,
   generateJWT,
-  TestContext,
+  type TestContext,
 } from '../test-helpers'
 
 describe('T097-T101: Auth Endpoints', () => {
@@ -68,22 +68,16 @@ describe('T097-T101: Auth Endpoints', () => {
 
   // T099: POST /password-reset
   it('should initiate password reset', async () => {
-    const res = await client.post(
-      `/workspace/${ctx.workspaceId}/password-reset`,
-      {
-        email: 'test@example.com',
-      }
-    )
+    const res = await client.post(`/workspace/${ctx.workspaceId}/password-reset`, {
+      email: 'test@example.com',
+    })
     expect(res.status).toBe(202)
   })
 
   it('should return 404 for nonexistent email', async () => {
-    const res = await client.post(
-      `/workspace/${ctx.workspaceId}/password-reset`,
-      {
-        email: 'nonexistent@example.com',
-      }
-    )
+    const res = await client.post(`/workspace/${ctx.workspaceId}/password-reset`, {
+      email: 'nonexistent@example.com',
+    })
     expect(res.status).toBe(200) // 202 for privacy
   })
 
@@ -92,10 +86,7 @@ describe('T097-T101: Auth Endpoints', () => {
     const jwt = generateJWT(ctx.workspaceId, ctx.userId)
     client.setJWT(jwt)
 
-    const res = await client.post(
-      `/workspace/${ctx.workspaceId}/token-refresh`,
-      {}
-    )
+    const res = await client.post(`/workspace/${ctx.workspaceId}/token-refresh`, {})
     expect(res.status).toBe(200)
     expect(res.data.token).toBeDefined()
   })

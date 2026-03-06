@@ -8,7 +8,7 @@
  * Trust Chain: Product → License → Workspace
  */
 
-import { Module } from '../enums/Module'
+import type { Module } from '../enums/Module'
 
 /**
  * Localized name object

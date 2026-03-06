@@ -38,27 +38,18 @@ import type { MiddlewareHandler } from 'hono'
  * @param logger          - Module-scoped logger (M-02: mandatory — emits security audit log on denial)
  * @param requiredModule  - Module that must be enabled for the request to proceed
  */
-export function createModuleGuard(
-  logger: Logger,
-  requiredModule: Module
-): MiddlewareHandler {
+export function createModuleGuard(logger: Logger, requiredModule: Module): MiddlewareHandler {
   return async (c, next) => {
-    const enabled_modules: string[] =
-      (c.get('enabled_modules') as string[]) ?? []
+    const enabled_modules: string[] = (c.get('enabled_modules') as string[]) ?? []
 
     if (!enabled_modules.includes(requiredModule)) {
       // M-02: Emit security audit log on every module guard denial
       logger.warn('Module guard denied request', {
         module: requiredModule,
-        workspace_id:
-          (c.get('workspace_id') as string | undefined) ?? 'unknown',
-        workspace_slug:
-          (c.get('workspace_slug') as string | undefined) ?? 'unknown',
-        correlation_id:
-          (c.get('correlationId') as string | undefined) ?? 'unknown',
-        user_id:
-          (c.get('staff_user') as { user_id?: string } | undefined)?.user_id ??
-          'unknown',
+        workspace_id: (c.get('workspace_id') as string | undefined) ?? 'unknown',
+        workspace_slug: (c.get('workspace_slug') as string | undefined) ?? 'unknown',
+        correlation_id: (c.get('correlationId') as string | undefined) ?? 'unknown',
+        user_id: (c.get('staff_user') as { user_id?: string } | undefined)?.user_id ?? 'unknown',
         route_name: `${c.req.method} ${c.req.path}`,
       })
 
@@ -69,8 +60,7 @@ export function createModuleGuard(
           error: {
             code: 'MODULE_NOT_LICENSED',
             message: `Module ${requiredModule} is not available for this workspace`,
-            correlationId:
-              (c.get('correlationId') as string | undefined) ?? 'unknown',
+            correlationId: (c.get('correlationId') as string | undefined) ?? 'unknown',
           },
         },
         403

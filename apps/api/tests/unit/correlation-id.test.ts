@@ -12,7 +12,7 @@
  * - Response header injection
  */
 
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 class CorrelationIdManager {
@@ -22,9 +22,7 @@ class CorrelationIdManager {
     return randomUUID()
   }
 
-  extractFromHeaders(
-    headers: Record<string, string | undefined>
-  ): string | null {
+  extractFromHeaders(headers: Record<string, string | undefined>): string | null {
     const id =
       headers[CorrelationIdManager.HEADER_NAME.toLowerCase()] ||
       headers[CorrelationIdManager.HEADER_NAME]
@@ -37,8 +35,7 @@ class CorrelationIdManager {
   }
 
   isValidUUID(id: string): boolean {
-    const uuidRegex =
-      /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+    const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
 
     return uuidRegex.test(id)
   }
@@ -53,10 +50,7 @@ class CorrelationIdManager {
     return this.generateId()
   }
 
-  injectIntoHeaders(
-    headers: Record<string, any>,
-    correlationId: string
-  ): Record<string, any> {
+  injectIntoHeaders(headers: Record<string, any>, correlationId: string): Record<string, any> {
     return {
       ...headers,
       [CorrelationIdManager.HEADER_NAME]: correlationId,
@@ -64,9 +58,7 @@ class CorrelationIdManager {
   }
 
   isValidForContext(correlationId: string, context: any): boolean {
-    return (
-      this.isValidUUID(correlationId) && context.correlationId === correlationId
-    )
+    return this.isValidUUID(correlationId) && context.correlationId === correlationId
   }
 }
 
@@ -99,14 +91,14 @@ describe('Correlation ID Management', () => {
       const parts = id.split('-')
 
       expect(parts.length).toBe(5)
-      expect(parts[0]!.length).toBe(8)
-      expect(parts[1]!.length).toBe(4)
-      expect(parts[2]!.length).toBe(4)
-      expect(parts[3]!.length).toBe(4)
-      expect(parts[4]!.length).toBe(12)
+      expect(parts[0]?.length).toBe(8)
+      expect(parts[1]?.length).toBe(4)
+      expect(parts[2]?.length).toBe(4)
+      expect(parts[3]?.length).toBe(4)
+      expect(parts[4]?.length).toBe(12)
 
       // Version 4 in 3rd group (first char)
-      expect(parts[2]![0]).toBe('4')
+      expect(parts[2]?.[0]).toBe('4')
     })
 
     it('should generate 36-character IDs (with dashes)', () => {

@@ -9,7 +9,7 @@
  * - validateSlugUniqueness()
  */
 
-import { Module, isValidModule } from '@zidney/types/enums/Module'
+import { isValidModule, Module } from '@zidney/types/enums/Module'
 import { describe, expect, it } from 'vitest'
 
 describe('Unit: Products - Service Validation (T061)', () => {
@@ -106,8 +106,7 @@ describe('Unit: Products - Service Validation (T061)', () => {
   describe('validateSlug()', () => {
     it('should accept valid slug format', async () => {
       const slug = 'valid-slug-123'
-      const isValid =
-        /^[a-z0-9-]+$/.test(slug) && slug.length > 0 && slug.length <= 100
+      const isValid = /^[a-z0-9-]+$/.test(slug) && slug.length > 0 && slug.length <= 100
       expect(isValid).toBe(true)
     })
 
@@ -150,7 +149,7 @@ describe('Unit: Products - Service Validation (T061)', () => {
 
   describe('validateSlugUniqueness()', () => {
     it('should accept unique slug', async () => {
-      const slug = 'unique-slug-' + Date.now()
+      const _slug = `unique-slug-${Date.now()}`
       // Mock DB query: SELECT COUNT(*) FROM products WHERE slug = slug
       const isDuplicate = false
       const isUnique = !isDuplicate
@@ -158,7 +157,7 @@ describe('Unit: Products - Service Validation (T061)', () => {
     })
 
     it('should detect duplicate slug', async () => {
-      const slug = 'existing-slug'
+      const _slug = 'existing-slug'
       // Mock DB query: SELECT COUNT(*) FROM products WHERE slug = slug
       const isDuplicate = true
       const isUnique = !isDuplicate

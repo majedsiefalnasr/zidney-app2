@@ -110,10 +110,7 @@ export interface DebouncedValidationConfig {
 // Validator class for reusability
 export interface Validator {
   validate: (value: any, rules: ValidationRule[]) => ValidationResult
-  validateAsync: (
-    value: any,
-    rules: ValidationRule[]
-  ) => Promise<ValidationResult>
+  validateAsync: (value: any, rules: ValidationRule[]) => Promise<ValidationResult>
 }
 
 // Validation context
@@ -129,8 +126,6 @@ export function isRequiredRule(rule: ValidationRule): rule is RequiredRule {
   return rule.type === 'required'
 }
 
-export function isAsyncValidationRule(
-  rule: ValidationRule
-): rule is AsyncValidationRule {
+export function isAsyncValidationRule(rule: ValidationRule): rule is AsyncValidationRule {
   return 'validateAsync' in rule
 }

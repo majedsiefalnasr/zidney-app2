@@ -10,7 +10,7 @@ import {
   createTestContext,
   generateJWT,
   insertTestAttempt,
-  TestContext,
+  type TestContext,
 } from '../test-helpers'
 
 describe('T102-T109: Attempt Endpoints', () => {
@@ -53,10 +53,9 @@ describe('T102-T109: Attempt Endpoints', () => {
 
   it('should return 409 if already started', async () => {
     const attemptId = await insertTestAttempt(ctx.tenantDb, ctx.workspaceId)
-    await ctx.tenantDb.query(
-      `UPDATE attempts SET status = 'IN_PROGRESS' WHERE id = $1`,
-      [attemptId]
-    )
+    await ctx.tenantDb.query(`UPDATE attempts SET status = 'IN_PROGRESS' WHERE id = $1`, [
+      attemptId,
+    ])
 
     const res = await client.put(`/attempt/${attemptId}/start`, {})
     expect(res.status).toBe(409)

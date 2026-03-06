@@ -1,9 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import {
-  createEnvConfig,
-  normalizeAppEnv,
-  parseBooleanFlag,
-} from '../../../src/core/config/env'
+import { createEnvConfig, normalizeAppEnv, parseBooleanFlag } from '../../../src/core/config/env'
 
 describe('createEnvConfig (Backoffice)', () => {
   const validOverrides = {
@@ -23,9 +19,9 @@ describe('createEnvConfig (Backoffice)', () => {
   })
 
   it('throws when VITE_API_BASE_URL is missing', () => {
-    expect(() =>
-      createEnvConfig({ ...validOverrides, apiBaseUrl: '' })
-    ).toThrow('VITE_API_BASE_URL')
+    expect(() => createEnvConfig({ ...validOverrides, apiBaseUrl: '' })).toThrow(
+      'VITE_API_BASE_URL'
+    )
   })
 
   it('normalizes appEnv to known values', () => {
@@ -78,7 +74,7 @@ describe('createEnvConfig (Backoffice)', () => {
   it('mutation throws on frozen config', () => {
     const config = createEnvConfig(validOverrides)
     expect(() => {
-      ;(config as Record<string, unknown>)['apiBaseUrl'] = 'http://hacked.local'
+      ;(config as Record<string, unknown>).apiBaseUrl = 'http://hacked.local'
     }).toThrow()
     expect(config.apiBaseUrl).toBe('https://api.example.com')
   })

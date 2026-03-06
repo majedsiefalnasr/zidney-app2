@@ -59,8 +59,7 @@ export const useMmcAppStore = defineStore(
 
 // ── HMR (development only) ────────────────────────────────────────────────────
 import { acceptHMRUpdate } from 'pinia'
+
 if ((import.meta as any).hot) {
-  ;(import.meta as any).hot.accept(
-    acceptHMRUpdate(useMmcAppStore, (import.meta as any).hot)
-  )
+  ;(import.meta as any).hot.accept(acceptHMRUpdate(useMmcAppStore, (import.meta as any).hot))
 }

@@ -83,11 +83,7 @@ function createTestApp(
       query: vi.fn(async (sql: string, params?: unknown[]) => {
         if (dbError) throw new Error('DB error')
 
-        if (
-          sql.includes('BEGIN') ||
-          sql.includes('COMMIT') ||
-          sql.includes('ROLLBACK')
-        ) {
+        if (sql.includes('BEGIN') || sql.includes('COMMIT') || sql.includes('ROLLBACK')) {
           return { rows: [], rowCount: 0 }
         }
 
@@ -155,14 +151,11 @@ function createTestApp(
 describe('PUT /api/v1/backoffice/workspace/settings/language — sync language removal (≤10k rows)', () => {
   it('returns 200 when removed language has fewer than 10k translations', async () => {
     const app = createTestApp({ translationCount: 100 })
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/language',
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(REMOVE_ARABIC_BODY),
-      }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/language', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(REMOVE_ARABIC_BODY),
+    })
 
     expect(res.status).toBe(200)
     const body = await res.json()
@@ -172,14 +165,11 @@ describe('PUT /api/v1/backoffice/workspace/settings/language — sync language r
 
   it('returns 200 when removed language has exactly 10k translations (boundary)', async () => {
     const app = createTestApp({ translationCount: SYNC_THRESHOLD })
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/language',
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(REMOVE_ARABIC_BODY),
-      }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/language', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(REMOVE_ARABIC_BODY),
+    })
 
     expect(res.status).toBe(200)
   })
@@ -205,14 +195,11 @@ describe('PUT /api/v1/backoffice/workspace/settings/language — sync language r
 
   it('returns 200 when no translations exist for removed language', async () => {
     const app = createTestApp({ translationCount: 0 })
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/language',
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(REMOVE_ARABIC_BODY),
-      }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/language', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(REMOVE_ARABIC_BODY),
+    })
 
     expect(res.status).toBe(200)
   })
@@ -225,14 +212,11 @@ describe('PUT /api/v1/backoffice/workspace/settings/language — sync language r
 describe('PUT /api/v1/backoffice/workspace/settings/language — async language removal (>10k rows)', () => {
   it('returns 409 LANGUAGE_REMOVAL_REQUIRES_ASYNC when count exceeds threshold', async () => {
     const app = createTestApp({ translationCount: SYNC_THRESHOLD + 1 })
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/language',
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(REMOVE_ARABIC_BODY),
-      }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/language', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(REMOVE_ARABIC_BODY),
+    })
 
     expect(res.status).toBe(409)
     const body = await res.json()
@@ -262,14 +246,11 @@ describe('PUT /api/v1/backoffice/workspace/settings/language — async language 
 
   it('409 response error lists the removed language code', async () => {
     const app = createTestApp({ translationCount: SYNC_THRESHOLD + 1 })
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/language',
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(REMOVE_ARABIC_BODY),
-      }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/language', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(REMOVE_ARABIC_BODY),
+    })
 
     const body = await res.json()
     expect(body.error?.message).toContain('ar')
@@ -283,17 +264,14 @@ describe('PUT /api/v1/backoffice/workspace/settings/language — async language 
 describe('PUT /api/v1/backoffice/workspace/settings/language — no language removed', () => {
   it('returns 200 without counting translations when no languages removed', async () => {
     const app = createTestApp({ translationCount: 0 })
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/language',
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          default_language: 'en',
-          supported_languages: ['en', 'ar', 'fr'], // Same as current
-        }),
-      }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/language', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        default_language: 'en',
+        supported_languages: ['en', 'ar', 'fr'], // Same as current
+      }),
+    })
 
     expect(res.status).toBe(200)
   })

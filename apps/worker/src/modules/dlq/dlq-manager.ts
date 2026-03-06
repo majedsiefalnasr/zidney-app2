@@ -52,11 +52,7 @@ export class DLQManager {
   /**
    * Move job to dead-letter queue
    */
-  async moveToDLQ(
-    job: JobQueueEntry,
-    errorMessage: string,
-    errorStack: string
-  ): Promise<string> {
+  async moveToDLQ(job: JobQueueEntry, errorMessage: string, errorStack: string): Promise<string> {
     const db = getDb()
     const dlqId = randomUUID()
 

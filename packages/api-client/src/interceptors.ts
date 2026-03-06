@@ -9,7 +9,7 @@ export function applyAuthHeader(
 ): void {
   const token = getAccessToken()
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`
+    headers.Authorization = `Bearer ${token}`
   }
 }
 
@@ -18,10 +18,7 @@ export function applyAuthHeader(
 /**
  * Attach X-Correlation-ID header. Auto-generates UUID if not provided.
  */
-export function applyCorrelationId(
-  headers: Record<string, string>,
-  correlationId?: string
-): void {
+export function applyCorrelationId(headers: Record<string, string>, correlationId?: string): void {
   headers['X-Correlation-ID'] = correlationId ?? crypto.randomUUID()
 }
 
@@ -30,10 +27,7 @@ export function applyCorrelationId(
 /**
  * Attach Content-Type: application/json on POST, PUT, PATCH mutations.
  */
-export function applyContentType(
-  headers: Record<string, string>,
-  method: string
-): void {
+export function applyContentType(headers: Record<string, string>, method: string): void {
   if (['POST', 'PUT', 'PATCH'].includes(method)) {
     headers['Content-Type'] = 'application/json'
   }

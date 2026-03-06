@@ -26,7 +26,7 @@ describe('Load: Products - Concurrent Operations (T068-T071)', () => {
     })
 
     it('should increment version consistently across concurrent updates', async () => {
-      const productId = uuidv4()
+      const _productId = uuidv4()
       let currentVersion = 1
 
       // Simulate 10 sequential increments
@@ -38,7 +38,7 @@ describe('Load: Products - Concurrent Operations (T068-T071)', () => {
     })
 
     it('should create version record for each concurrent update', async () => {
-      const productId = uuidv4()
+      const _productId = uuidv4()
       const versionNumbers = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 
       const uniqueVersions = new Set(versionNumbers)
@@ -46,7 +46,7 @@ describe('Load: Products - Concurrent Operations (T068-T071)', () => {
     })
 
     it('should prevent lost updates with proper locking', async () => {
-      const productId = uuidv4()
+      const _productId = uuidv4()
 
       // Mock: Transaction ensures isolation
       const transactionIsolated = true
@@ -54,7 +54,7 @@ describe('Load: Products - Concurrent Operations (T068-T071)', () => {
     })
 
     it('should preserve audit log for all concurrent updates', async () => {
-      const productId = uuidv4()
+      const _productId = uuidv4()
       const auditCount = 10
 
       // Mock: Each update creates audit entry
@@ -68,7 +68,7 @@ describe('Load: Products - Concurrent Operations (T068-T071)', () => {
 
   describe('T069: Slug Uniqueness Under Concurrency', () => {
     it('should handle 10+ concurrent product creations with same slug', async () => {
-      const slug = 'concurrent-slug-' + Date.now()
+      const _slug = `concurrent-slug-${Date.now()}`
       const attemptCount = 15
 
       const results = {
@@ -81,7 +81,7 @@ describe('Load: Products - Concurrent Operations (T068-T071)', () => {
     })
 
     it('should return 409 for only duplicate attempts, not first', async () => {
-      const slug = 'unique-' + Date.now()
+      const _slug = `unique-${Date.now()}`
 
       // First creation succeeds
       const firstResult = {
@@ -102,7 +102,7 @@ describe('Load: Products - Concurrent Operations (T068-T071)', () => {
     })
 
     it('should ensure no phantom reads', async () => {
-      const slug = 'phantom-test-' + Date.now()
+      const _slug = `phantom-test-${Date.now()}`
 
       // Simulate concurrent reads
       const reads = [
@@ -135,7 +135,7 @@ describe('Load: Products - Concurrent Operations (T068-T071)', () => {
 
     it('should apply pagination correctly at scale', async () => {
       const pageSize = 50
-      const totalCount = 1000
+      const _totalCount = 1000
 
       const page1 = Array(pageSize)
         .fill(null)
@@ -146,14 +146,14 @@ describe('Load: Products - Concurrent Operations (T068-T071)', () => {
 
       expect(page1).toHaveLength(pageSize)
       expect(page2).toHaveLength(pageSize)
-      expect(page1[0]!.id).not.toBe(page2[0]!.id)
+      expect(page1[0]?.id).not.toBe(page2[0]?.id)
     })
 
     it('should search efficiently on large datasets', async () => {
       const startTime = Date.now()
 
       // Mock: Search through 1000 products
-      const results = Array(10)
+      const _results = Array(10)
         .fill(null)
         .map(() => ({ id: uuidv4() }))
 
@@ -190,8 +190,7 @@ describe('Load: Products - Concurrent Operations (T068-T071)', () => {
         .fill(null)
         .map((_, i) => ({
           id: uuidv4(),
-          action:
-            i % 3 === 0 ? 'UPDATE' : i % 3 === 1 ? 'CREATE' : 'STATUS_CHANGE',
+          action: i % 3 === 0 ? 'UPDATE' : i % 3 === 1 ? 'CREATE' : 'STATUS_CHANGE',
           timestamp: Date.now(),
         }))
 
@@ -205,7 +204,7 @@ describe('Load: Products - Concurrent Operations (T068-T071)', () => {
 
     it('should apply pagination on audit logs at scale', async () => {
       const pageSize = 100
-      const totalAudits = 10000
+      const _totalAudits = 10000
 
       const page1 = Array(pageSize)
         .fill(null)
@@ -228,16 +227,12 @@ describe('Load: Products - Concurrent Operations (T068-T071)', () => {
         .fill(null)
         .map(() => ({
           id: uuidv4(),
-          timestamp: new Date(
-            from.getTime() + Math.random() * (to.getTime() - from.getTime())
-          ),
+          timestamp: new Date(from.getTime() + Math.random() * (to.getTime() - from.getTime())),
         }))
 
       // Filter by date range
       const startTime = Date.now()
-      const inRange = audits.filter(
-        (a) => a.timestamp >= from && a.timestamp <= to
-      )
+      const inRange = audits.filter((a) => a.timestamp >= from && a.timestamp <= to)
       const duration = Date.now() - startTime
 
       expect(inRange.length).toBeGreaterThan(0)

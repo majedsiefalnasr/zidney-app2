@@ -22,7 +22,7 @@
  * ✓ Throws EncryptionServiceUnavailableError if key missing
  */
 
-import { createCipheriv, createDecipheriv, randomBytes } from 'crypto'
+import { createCipheriv, createDecipheriv, randomBytes } from 'node:crypto'
 
 import { EncryptionServiceUnavailableError } from './workspace-settings.errors'
 
@@ -74,10 +74,7 @@ export function encrypt(plaintext: string): string {
     authTagLength: AUTH_TAG_LENGTH,
   })
 
-  const encrypted = Buffer.concat([
-    cipher.update(plaintext, 'utf8'),
-    cipher.final(),
-  ])
+  const encrypted = Buffer.concat([cipher.update(plaintext, 'utf8'), cipher.final()])
 
   const authTag = cipher.getAuthTag()
 
@@ -125,10 +122,7 @@ export function decrypt(encryptedValue: string): string {
   })
   decipher.setAuthTag(authTag)
 
-  const decrypted = Buffer.concat([
-    decipher.update(ciphertext),
-    decipher.final(),
-  ])
+  const decrypted = Buffer.concat([decipher.update(ciphertext), decipher.final()])
 
   return decrypted.toString('utf8')
 }

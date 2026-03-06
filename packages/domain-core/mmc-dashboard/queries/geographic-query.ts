@@ -11,7 +11,7 @@
  * Phase: 1 - Backend Implementation (parallel)
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 export async function getRevenueByCountry(
   pool: Pool,
@@ -19,8 +19,7 @@ export async function getRevenueByCountry(
   limit?: number,
   offset?: number
 ) {
-  const orderBy =
-    sortBy === 'license_count' ? 'license_count DESC' : 'total_revenue DESC'
+  const orderBy = sortBy === 'license_count' ? 'license_count DESC' : 'total_revenue DESC'
 
   const query = `
     SELECT

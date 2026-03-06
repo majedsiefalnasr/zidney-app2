@@ -24,8 +24,8 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Context } from 'hono'
-import { Pool } from 'pg'
+import type { Context } from 'hono'
+import type { Pool } from 'pg'
 import { v4 as uuidv4 } from 'uuid'
 import type { UserContextStage06 } from '../../middleware/auth-context-stage06'
 import { loadQuestionsForExam } from '../../modules/attempt/exam-loader'
@@ -132,8 +132,7 @@ export async function createAttemptHandler(c: Context) {
 
     throw {
       code: 'USER_NOT_ELIGIBLE',
-      message:
-        eligibilityValidation.errors?.[0] || 'User not eligible for this exam',
+      message: eligibilityValidation.errors?.[0] || 'User not eligible for this exam',
       status: 400,
     }
   }

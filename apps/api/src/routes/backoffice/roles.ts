@@ -34,22 +34,21 @@
  * ✓ Redis cache invalidated after mutations via SCAN cursor (rbac_v2: prefix)
  */
 
-import { createLogger } from '@zidney/logger'
-import { Hono } from 'hono'
-
 import {
-  PermissionModule,
-  RbacError,
-  RoleStatus,
   assignRoleToStaffUser,
   createRole,
   deleteRole,
   getRoleById,
   getRoleUsers,
   listRoles,
+  PermissionModule,
+  RbacError,
+  RoleStatus,
   updateRole,
   updateRolePermissions,
 } from '@zidney/domain-core/rbac'
+import { createLogger } from '@zidney/logger'
+import { Hono } from 'hono'
 
 import {
   createPermissionGuard,
@@ -86,10 +85,7 @@ function getRequestContext(c: any) {
     id: string
     slug: string
     pool: {
-      query: <T>(
-        sql: string,
-        params?: unknown[]
-      ) => Promise<{ rows: T[]; rowCount: number | null }>
+      query: <T>(sql: string, params?: unknown[]) => Promise<{ rows: T[]; rowCount: number | null }>
     }
     redis?: import('ioredis').Redis
   }
@@ -99,11 +95,7 @@ function getRequestContext(c: any) {
   return { correlationId, tenant, userId }
 }
 
-function auditCtx(
-  correlationId: string,
-  userId: string | null,
-  workspaceSlug: string
-) {
+function auditCtx(correlationId: string, userId: string | null, workspaceSlug: string) {
   return {
     user_id: userId,
     request_id: correlationId,
@@ -111,12 +103,7 @@ function auditCtx(
   }
 }
 
-function errorResponse(
-  c: any,
-  status: number,
-  code: string,
-  correlationId: string
-) {
+function errorResponse(c: any, status: number, code: string, correlationId: string) {
   return c.json(
     {
       success: false as const,
@@ -133,10 +120,8 @@ function errorResponse(
 
 function errorMessageForCode(code: string): string {
   const messages: Record<string, string> = {
-    ROLE_NAME_CONFLICT:
-      'A role with this name already exists in this workspace',
-    ROLE_HAS_ACTIVE_USERS:
-      'This role has active users assigned and cannot be deleted',
+    ROLE_NAME_CONFLICT: 'A role with this name already exists in this workspace',
+    ROLE_HAS_ACTIVE_USERS: 'This role has active users assigned and cannot be deleted',
     ROLE_NOT_ASSIGNABLE: 'The specified role is not assignable',
     INVALID_MODULE: 'One or more module keys are invalid',
     ROLE_NOT_FOUND: 'The requested role was not found',
@@ -193,11 +178,7 @@ rolesRouter.post(
       )
     }
 
-    if (
-      !body.name ||
-      typeof body.name !== 'string' ||
-      body.name.trim().length === 0
-    ) {
+    if (!body.name || typeof body.name !== 'string' || body.name.trim().length === 0) {
       return c.json(
         {
           success: false,
@@ -242,11 +223,7 @@ rolesRouter.post(
       if (err instanceof RbacError) {
         return errorResponse(
           c,
-          err.code === 'ROLE_NAME_CONFLICT'
-            ? 409
-            : err.code === 'INVALID_MODULE'
-              ? 422
-              : 400,
+          err.code === 'ROLE_NAME_CONFLICT' ? 409 : err.code === 'INVALID_MODULE' ? 422 : 400,
           err.code,
           correlationId
         )
@@ -406,11 +383,7 @@ rolesRouter.patch(
     } catch (err) {
       if (err instanceof RbacError) {
         const status =
-          err.code === 'ROLE_NOT_FOUND'
-            ? 404
-            : err.code === 'ROLE_NAME_CONFLICT'
-              ? 409
-              : 400
+          err.code === 'ROLE_NOT_FOUND' ? 404 : err.code === 'ROLE_NAME_CONFLICT' ? 409 : 400
         return errorResponse(c, status, err.code, correlationId)
       }
       logger.error('updateRole failed', {
@@ -510,11 +483,7 @@ rolesRouter.put(
     } catch (err) {
       if (err instanceof RbacError) {
         const status =
-          err.code === 'ROLE_NOT_FOUND'
-            ? 404
-            : err.code === 'INVALID_MODULE'
-              ? 422
-              : 400
+          err.code === 'ROLE_NOT_FOUND' ? 404 : err.code === 'INVALID_MODULE' ? 422 : 400
         return errorResponse(c, status, err.code, correlationId)
       }
       logger.error('updateRolePermissions failed', {
@@ -540,11 +509,7 @@ rolesRouter.delete(
     const roleId = c.req.param('id')
 
     try {
-      await deleteRole(
-        tenant.pool,
-        roleId,
-        auditCtx(correlationId, userId, tenant.slug)
-      )
+      await deleteRole(tenant.pool, roleId, auditCtx(correlationId, userId, tenant.slug))
 
       // Flush RBAC cache after deletion
       if (tenant.redis) {
@@ -563,11 +528,7 @@ rolesRouter.delete(
     } catch (err) {
       if (err instanceof RbacError) {
         const status =
-          err.code === 'ROLE_NOT_FOUND'
-            ? 404
-            : err.code === 'ROLE_HAS_ACTIVE_USERS'
-              ? 409
-              : 400
+          err.code === 'ROLE_NOT_FOUND' ? 404 : err.code === 'ROLE_HAS_ACTIVE_USERS' ? 409 : 400
         return errorResponse(c, status, err.code, correlationId)
       }
       logger.error('deleteRole failed', {
@@ -699,12 +660,7 @@ rolesRouter.patch(
           ROLE_NOT_FOUND: 404,
           ROLE_NOT_ASSIGNABLE: 422,
         }
-        return errorResponse(
-          c,
-          status[err.code] ?? 400,
-          err.code,
-          correlationId
-        )
+        return errorResponse(c, status[err.code] ?? 400, err.code, correlationId)
       }
       logger.error('assignRoleToStaffUser failed', {
         workspace_slug: tenant.slug,

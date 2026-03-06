@@ -1,21 +1,9 @@
-import {
-  existsSync,
-  readdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from 'fs'
-import { join } from 'path'
+import { existsSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 const ROOT = process.cwd()
 
-const ARCH_PATH = join(
-  ROOT,
-  'docs',
-  'architecture',
-  'intelligence',
-  'ARCHITECTURE_MAP.json'
-)
+const ARCH_PATH = join(ROOT, 'docs', 'architecture', 'intelligence', 'ARCHITECTURE_MAP.json')
 
 function scanModules() {
   const modules: string[] = []
@@ -84,11 +72,7 @@ function scanDependencies(moduleRoot: string) {
 function inferLayer(module: string) {
   if (module.startsWith('packages/ui')) return 'ui'
   if (module.startsWith('apps/')) return 'ui'
-  if (
-    module.includes('config') ||
-    module.includes('redis') ||
-    module.includes('logger')
-  )
+  if (module.includes('config') || module.includes('redis') || module.includes('logger'))
     return 'infrastructure'
   return 'domain'
 }
@@ -116,8 +100,7 @@ function generateMap() {
     newModules[m] = {
       layer: prev?.layer ?? inferLayer(m),
       description: prev?.description ?? '',
-      criticality:
-        prev?.criticality ?? (m.startsWith('apps/') ? 'runtime' : 'core'),
+      criticality: prev?.criticality ?? (m.startsWith('apps/') ? 'runtime' : 'core'),
       allowed_dependencies: deps,
       forbidden_dependencies: prev?.forbidden_dependencies ?? [],
     }

@@ -9,7 +9,7 @@
  */
 
 import { Hono } from 'hono'
-import { LicenseController } from '../../controllers/licenses.controller'
+import type { LicenseController } from '../../controllers/licenses.controller'
 
 export function createLicenseRoutes(controller: LicenseController): Hono {
   const router = new Hono()
@@ -27,9 +27,7 @@ export function createLicenseRoutes(controller: LicenseController): Hono {
   router.patch('/licenses/:id', (ctx) => controller.edit(ctx as any))
 
   // POST /v1/mmc/licenses/:id/soft-lock - Soft lock license
-  router.post('/licenses/:id/soft-lock', (ctx) =>
-    controller.softLock(ctx as any)
-  )
+  router.post('/licenses/:id/soft-lock', (ctx) => controller.softLock(ctx as any))
 
   // POST /v1/mmc/licenses/:id/unlock - Unlock (restore from soft lock)
   router.post('/licenses/:id/unlock', (ctx) => controller.unlock(ctx as any))
@@ -44,9 +42,7 @@ export function createLicenseRoutes(controller: LicenseController): Hono {
   router.delete('/licenses/:id', (ctx) => controller.delete(ctx as any))
 
   // POST /v1/mmc/licenses/:id/retry-provisioning - Retry provisioning
-  router.post('/licenses/:id/retry-provisioning', (ctx) =>
-    controller.retryProvisioning(ctx as any)
-  )
+  router.post('/licenses/:id/retry-provisioning', (ctx) => controller.retryProvisioning(ctx as any))
 
   return router
 }

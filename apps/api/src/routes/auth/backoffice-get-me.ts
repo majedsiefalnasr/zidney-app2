@@ -32,10 +32,7 @@
 
 import { Hono } from 'hono'
 import { getTenantPool } from '../../db'
-import {
-  AuthErrorCodes,
-  throwAuthError,
-} from '../../middleware/auth/error-handler-middleware'
+import { AuthErrorCodes, throwAuthError } from '../../middleware/auth/error-handler-middleware'
 import { validateJwtMiddleware } from '../../middleware/auth/validate-jwt'
 import { validateLicenseMiddleware } from '../../middleware/auth/validate-license-middleware'
 import { validateTokenVersionMiddleware } from '../../middleware/auth/validate-token-version'
@@ -69,22 +66,14 @@ router.get(
     const workspaceId = c.get('workspaceId')
 
     if (!workspaceId) {
-      throwAuthError(
-        AuthErrorCodes.WORKSPACE_INVALID,
-        'Workspace not found',
-        404
-      )
+      throwAuthError(AuthErrorCodes.WORKSPACE_INVALID, 'Workspace not found', 404)
     }
 
     // Get tenant pool
     const pool = getTenantPool(workspaceId)
 
     if (!pool) {
-      throwAuthError(
-        AuthErrorCodes.WORKSPACE_INVALID,
-        'Workspace not found',
-        404
-      )
+      throwAuthError(AuthErrorCodes.WORKSPACE_INVALID, 'Workspace not found', 404)
     }
 
     const result = await pool.query(

@@ -47,10 +47,7 @@ import type {
   WorkspaceSettingsResponse,
 } from './workspace-settings.types'
 import { PAYMENT_REDACTED_FIELDS } from './workspace-settings.types'
-import {
-  SETTINGS_SCHEMA_MAP,
-  auditQuerySchema,
-} from './workspace-settings.validation'
+import { auditQuerySchema, SETTINGS_SCHEMA_MAP } from './workspace-settings.validation'
 
 const logger = createLogger('workspace-settings')
 
@@ -121,10 +118,7 @@ export function computeSettingsDiff(
   const diff: AuditDiffEntry[] = []
 
   // Get all unique keys from both objects
-  const allKeys = new Set([
-    ...Object.keys(oldValues),
-    ...Object.keys(newValues),
-  ])
+  const allKeys = new Set([...Object.keys(oldValues), ...Object.keys(newValues)])
 
   for (const key of allKeys) {
     const oldVal = oldValues[key]
@@ -139,10 +133,8 @@ export function computeSettingsDiff(
     if (redactedSet.has(key)) {
       diff.push({
         field: key,
-        old_value:
-          oldVal !== undefined && oldVal !== null ? '[REDACTED]' : null,
-        new_value:
-          newVal !== undefined && newVal !== null ? '[REDACTED]' : null,
+        old_value: oldVal !== undefined && oldVal !== null ? '[REDACTED]' : null,
+        new_value: newVal !== undefined && newVal !== null ? '[REDACTED]' : null,
       })
     } else {
       diff.push({
@@ -209,8 +201,7 @@ export async function getWorkspaceSettings(
   const generalSettings: GeneralSettings = {
     ...row.general_settings,
     session_timeout_minutes:
-      row.general_settings.session_timeout_minutes ??
-      GENERAL_DEFAULTS.session_timeout_minutes,
+      row.general_settings.session_timeout_minutes ?? GENERAL_DEFAULTS.session_timeout_minutes,
   }
 
   // Validate critical fields
@@ -226,25 +217,19 @@ export async function getWorkspaceSettings(
 
   const securitySettings: SecuritySettings = {
     ...row.security_settings,
-    analytics_opt_in:
-      row.security_settings.analytics_opt_in ??
-      SECURITY_DEFAULTS.analytics_opt_in,
+    analytics_opt_in: row.security_settings.analytics_opt_in ?? SECURITY_DEFAULTS.analytics_opt_in,
     max_login_attempts:
-      row.security_settings.max_login_attempts ??
-      SECURITY_DEFAULTS.max_login_attempts,
+      row.security_settings.max_login_attempts ?? SECURITY_DEFAULTS.max_login_attempts,
     lockout_duration_minutes:
-      row.security_settings.lockout_duration_minutes ??
-      SECURITY_DEFAULTS.lockout_duration_minutes,
+      row.security_settings.lockout_duration_minutes ?? SECURITY_DEFAULTS.lockout_duration_minutes,
   }
 
   // Strip payment credentials — replace with boolean sentinels
   const paymentResponse: PaymentSettingsResponse = {
-    use_custom_payment_gateway:
-      row.payment_settings.use_custom_payment_gateway ?? false,
+    use_custom_payment_gateway: row.payment_settings.use_custom_payment_gateway ?? false,
     gateway_provider: row.payment_settings.gateway_provider ?? null,
     has_api_key: !!(
-      row.payment_settings.encrypted_api_key &&
-      row.payment_settings.encrypted_api_key.length > 0
+      row.payment_settings.encrypted_api_key && row.payment_settings.encrypted_api_key.length > 0
     ),
     has_secret_key: !!(
       row.payment_settings.encrypted_secret_key &&
@@ -260,9 +245,7 @@ export async function getWorkspaceSettings(
     payment_settings: paymentResponse,
     security_settings: securitySettings,
     updated_at:
-      row.updated_at instanceof Date
-        ? row.updated_at.toISOString()
-        : String(row.updated_at),
+      row.updated_at instanceof Date ? row.updated_at.toISOString() : String(row.updated_at),
   }
 }
 
@@ -302,12 +285,10 @@ export async function updateSettingsGroup(
       )
       .join('; ')
     throw new SettingsValidationError(`Validation failed: ${fieldErrors}`, {
-      issues: issues.map(
-        (i: { path: (string | number)[]; message: string }) => ({
-          path: i.path,
-          message: i.message,
-        })
-      ),
+      issues: issues.map((i: { path: (string | number)[]; message: string }) => ({
+        path: i.path,
+        message: i.message,
+      })),
     })
   }
 
@@ -324,14 +305,10 @@ export async function updateSettingsGroup(
   if (group === 'language') {
     const currentSettingsRow = await repository.getSettings(ctx.db)
     const currentLangSettings = currentSettingsRow?.language_settings
-    const currentSupported: string[] =
-      currentLangSettings?.supported_languages ?? []
-    const newSupported: string[] =
-      (validatedSettings.supported_languages as string[]) ?? []
+    const currentSupported: string[] = currentLangSettings?.supported_languages ?? []
+    const newSupported: string[] = (validatedSettings.supported_languages as string[]) ?? []
 
-    const removedLanguages = currentSupported.filter(
-      (l) => !newSupported.includes(l)
-    )
+    const removedLanguages = currentSupported.filter((l) => !newSupported.includes(l))
 
     if (removedLanguages.length > 0) {
       const asyncLanguages: string[] = []
@@ -386,10 +363,7 @@ export async function updateSettingsGroup(
               created_at: new Date().toISOString(),
             }
             try {
-              await ctx.redis.lpush(
-                'queue:DRAIN_LANGUAGE_TRANSLATIONS',
-                JSON.stringify(envelope)
-              )
+              await ctx.redis.lpush('queue:DRAIN_LANGUAGE_TRANSLATIONS', JSON.stringify(envelope))
               logger.info({
                 event: 'drain_language_job_enqueued',
                 workspace_slug: ctx.workspace_slug,
@@ -405,10 +379,7 @@ export async function updateSettingsGroup(
                 workspace_id: ctx.workspace_id,
                 correlation_id: ctx.correlation_id,
                 language_code: lang,
-                error:
-                  queueErr instanceof Error
-                    ? queueErr.message
-                    : String(queueErr),
+                error: queueErr instanceof Error ? queueErr.message : String(queueErr),
               })
               // Non-fatal: language_status is committed; worker can scan DB for 'removing' languages
             }
@@ -443,14 +414,8 @@ export async function updateSettingsGroup(
     }
 
     // Compute diff with credential redaction
-    const redactedFields =
-      group === 'payment' ? Array.from(PAYMENT_REDACTED_FIELDS) : []
-    const diff = computeSettingsDiff(
-      group,
-      currentGroupSettings || {},
-      dataToStore,
-      redactedFields
-    )
+    const redactedFields = group === 'payment' ? Array.from(PAYMENT_REDACTED_FIELDS) : []
+    const diff = computeSettingsDiff(group, currentGroupSettings || {}, dataToStore, redactedFields)
 
     // Upsert with optimistic locking
     const { config_version: newVersion } = await repository.upsertSettings(
@@ -541,8 +506,7 @@ function processPaymentSettings(
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {
     use_custom_payment_gateway: input.use_custom_payment_gateway,
-    gateway_provider:
-      input.gateway_provider ?? current.gateway_provider ?? null,
+    gateway_provider: input.gateway_provider ?? current.gateway_provider ?? null,
   }
 
   // api_key sentinel processing
@@ -592,12 +556,10 @@ export async function getSettingsAudit(
 
   if (!parseResult.success) {
     throw new SettingsValidationError('Invalid audit query parameters', {
-      issues: parseResult.error.issues.map(
-        (i: { path: (string | number)[]; message: string }) => ({
-          path: i.path,
-          message: i.message,
-        })
-      ),
+      issues: parseResult.error.issues.map((i: { path: (string | number)[]; message: string }) => ({
+        path: i.path,
+        message: i.message,
+      })),
     })
   }
 

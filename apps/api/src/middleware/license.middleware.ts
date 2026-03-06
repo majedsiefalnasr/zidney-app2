@@ -15,15 +15,12 @@
  * - DELETED: Block (404 NOT_FOUND)
  */
 
-import { Context, MiddlewareHandler } from 'hono'
-import type { Logger } from '@zidney/logger'
-import type { Pool } from 'pg'
 import { ACCESSIBLE_STATUSES } from '@zidney/domain-core/licenses/constants'
-import {
-  LicenseError,
-  LicenseNotFoundError,
-} from '@zidney/domain-core/licenses/errors'
+import { LicenseError, LicenseNotFoundError } from '@zidney/domain-core/licenses/errors'
 import { LicenseStatus } from '@zidney/domain-core/licenses/types'
+import type { Logger } from '@zidney/logger'
+import type { Context, MiddlewareHandler } from 'hono'
+import type { Pool } from 'pg'
 
 interface LicenseMiddlewareContext extends Context {
   license?: any
@@ -31,18 +28,13 @@ interface LicenseMiddlewareContext extends Context {
   workspaceSlug?: string
 }
 
-export function createLicenseMiddleware(
-  masterDb: Pool,
-  logger: Logger
-): MiddlewareHandler {
+export function createLicenseMiddleware(masterDb: Pool, logger: Logger): MiddlewareHandler {
   return async (ctx: LicenseMiddlewareContext, next) => {
     try {
       // Get workspace slug from request context
       // This should be set by tenant resolver middleware
       const workspaceSlug =
-        ctx.req.header('x-workspace-slug') ||
-        ctx.req.query('workspace_slug') ||
-        ctx.workspaceSlug
+        ctx.req.header('x-workspace-slug') || ctx.req.query('workspace_slug') || ctx.workspaceSlug
 
       if (!workspaceSlug) {
         // If no workspace specified, allow (e.g., for public endpoints)

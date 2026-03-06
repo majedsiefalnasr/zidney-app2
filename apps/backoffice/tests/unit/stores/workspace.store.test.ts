@@ -4,9 +4,10 @@
  *
  * Stage: STAGE_UI_06_STATE_MANAGEMENT
  */
-import { useBackofficeWorkspaceStore } from '@/core/state/workspace.store'
+
 import { createAppError } from '@zidney/api-client'
 import { describe, expect, it } from 'vitest'
+import { useBackofficeWorkspaceStore } from '@/core/state/workspace.store'
 import { useIsolatedPinia } from '../store-test-helper'
 
 describe('useBackofficeWorkspaceStore', () => {
@@ -76,7 +77,7 @@ describe('useBackofficeWorkspaceStore', () => {
     await store.loadWorkspace('test-slug')
     expect(store.isLoading).toBe(false)
     expect(store.error).toBeNull()
-    expect(store.pending['loadWorkspace']).toBe(false)
+    expect(store.pending.loadWorkspace).toBe(false)
   })
 
   it('concurrent guard: second call while first is in-flight is dropped (FR-016, M-03)', async () => {
@@ -86,7 +87,7 @@ describe('useBackofficeWorkspaceStore', () => {
     // Second call should hit the guard and return immediately
     const result = store.loadWorkspace('test-slug')
     // pending still locked from simulated first call
-    expect(store.pending['loadWorkspace']).toBe(true)
+    expect(store.pending.loadWorkspace).toBe(true)
     // Release the simulated first call
     store.$patch({
       pending: { loadWorkspace: false },
@@ -99,7 +100,7 @@ describe('useBackofficeWorkspaceStore', () => {
       },
     })
     await result
-    expect(store.pending['loadWorkspace']).toBe(false)
+    expect(store.pending.loadWorkspace).toBe(false)
     expect(store.workspace?.slug).toBe('test-slug')
   })
 

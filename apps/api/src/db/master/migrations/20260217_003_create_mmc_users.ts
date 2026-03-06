@@ -38,10 +38,9 @@
  * - STAGE_03: Workspace isolation enforced (MMC tokens rejected for tenant APIs)
  */
 
-import { PoolClient } from 'pg'
+import type { PoolClient } from 'pg'
 
-export const description =
-  'Create MMC users table for platform-level authentication'
+export const description = 'Create MMC users table for platform-level authentication'
 
 /**
  * Execute schema migration

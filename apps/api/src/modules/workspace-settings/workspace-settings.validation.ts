@@ -39,10 +39,7 @@ const hexColorRegex = /^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/
 
 const hexColorSchema = z
   .string()
-  .regex(
-    hexColorRegex,
-    'Must be a valid hex color (e.g., #1E40AF or #1E40AF80)'
-  )
+  .regex(hexColorRegex, 'Must be a valid hex color (e.g., #1E40AF or #1E40AF80)')
 
 const urlSchema = z.string().url('Must be a valid URL')
 
@@ -68,13 +65,7 @@ export const dateFormatSchema = z.enum(DATE_FORMATS)
 // Settings Group Enum
 // ---------------------------------------------------------------------------
 
-export const SETTINGS_GROUPS = [
-  'general',
-  'language',
-  'branding',
-  'payment',
-  'security',
-] as const
+export const SETTINGS_GROUPS = ['general', 'language', 'branding', 'payment', 'security'] as const
 
 export const settingsGroupSchema = z.enum(SETTINGS_GROUPS)
 
@@ -161,16 +152,10 @@ export const certificateTemplateBrandingSchema = z
 export const seoMetadataSchema = z
   .object({
     title: z
-      .union([
-        z.string().max(60, 'SEO title must not exceed 60 characters'),
-        z.null(),
-      ])
+      .union([z.string().max(60, 'SEO title must not exceed 60 characters'), z.null()])
       .optional(),
     description: z
-      .union([
-        z.string().max(160, 'SEO description must not exceed 160 characters'),
-        z.null(),
-      ])
+      .union([z.string().max(160, 'SEO description must not exceed 160 characters'), z.null()])
       .optional(),
     og_image_url: optionalUrl,
   })
@@ -255,9 +240,7 @@ export const updateSettingsRequestSchema = z.object({
 
 /** Guardian audit: validate decoded audit cursor with Zod */
 export const auditCursorSchema = z.object({
-  created_at: z
-    .string()
-    .datetime({ message: 'Cursor created_at must be a valid ISO datetime' }),
+  created_at: z.string().datetime({ message: 'Cursor created_at must be a valid ISO datetime' }),
   id: z.string().uuid('Cursor id must be a valid UUID'),
 })
 
@@ -304,7 +287,5 @@ export type LanguageSettingsInput = z.infer<typeof languageSettingsSchema>
 export type BrandingSettingsInput = z.infer<typeof brandingSettingsSchema>
 export type PaymentSettingsInput = z.infer<typeof paymentSettingsSchema>
 export type SecuritySettingsInput = z.infer<typeof securitySettingsSchema>
-export type UpdateSettingsRequestInput = z.infer<
-  typeof updateSettingsRequestSchema
->
+export type UpdateSettingsRequestInput = z.infer<typeof updateSettingsRequestSchema>
 export type AuditQueryInput = z.infer<typeof auditQuerySchema>

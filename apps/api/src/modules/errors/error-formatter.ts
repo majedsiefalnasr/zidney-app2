@@ -1,3 +1,4 @@
+import { logger } from '@zidney/logger'
 import type { Context } from 'hono'
 import { getCorrelationId } from '../../middleware/auth/correlation-id'
 import { ERROR_CODE_TO_STATUS, ErrorCode } from '../../types/error-codes'
@@ -75,20 +76,15 @@ export async function handleError(
   }
 
   // Log error with correlation ID (never expose stack trace to client)
-  console.error(
-    JSON.stringify({
-      timestamp: new Date().toISOString(),
-      level: 'error',
-      service: 'api',
-      event: 'error_handler_invoked',
-      correlation_id: correlationId,
-      error_code: code,
-      error_message: message,
-      status_code: statusCode,
-      // Stack trace logged internally only, never sent to client
-      stack: error instanceof Error ? error.stack : undefined,
-    })
-  )
+  logger.error('error_handler_invoked', {
+    service: 'api',
+    event: 'error_handler_invoked',
+    correlation_id: correlationId,
+    error_code: code,
+    error_message: message,
+    status_code: statusCode,
+    stack: error instanceof Error ? error.stack : undefined,
+  })
 
   // Return standardized error response
   c.status(statusCode as any)
@@ -113,10 +109,7 @@ export class ApiError extends Error {
 /**
  * Middleware to catch unhandled errors
  */
-export async function errorHandlerMiddleware(
-  c: Context,
-  next: () => Promise<void>
-) {
+export async function errorHandlerMiddleware(c: Context, next: () => Promise<void>) {
   try {
     await next()
   } catch (error) {

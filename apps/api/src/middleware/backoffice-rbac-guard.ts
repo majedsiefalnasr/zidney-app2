@@ -38,11 +38,7 @@ interface TenantCtx {
   }
   redis?: {
     get: (key: string) => Promise<string | null>
-    set: (
-      key: string,
-      value: string,
-      options?: { EX?: number }
-    ) => Promise<unknown>
+    set: (key: string, value: string, options?: { EX?: number }) => Promise<unknown>
   }
 }
 
@@ -75,8 +71,7 @@ export function createBackofficeRBACGuard(
   requiredAction: ActionEnum
 ): MiddlewareHandler {
   return async (c, next) => {
-    const correlation_id: string =
-      (c.get('correlationId') as string) || 'unknown'
+    const correlation_id: string = (c.get('correlationId') as string) || 'unknown'
     const staff_user = c.get('staff_user') as StaffCtx | undefined
     const tenant = c.get('tenant') as TenantCtx | undefined
 
@@ -96,8 +91,7 @@ export function createBackofficeRBACGuard(
     }
 
     // Check enabled_modules first — fast pre-check before DB/Redis query
-    const enabled_modules: string[] =
-      (c.get('enabled_modules') as string[]) ?? []
+    const enabled_modules: string[] = (c.get('enabled_modules') as string[]) ?? []
     if (!enabled_modules.includes(requiredModule)) {
       logger.warn('Module not licensed (RBAC guard pre-check)', {
         workspace_slug: tenant.slug,

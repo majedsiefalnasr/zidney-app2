@@ -23,13 +23,8 @@ interface Props {
 
 const props = defineProps<Props>()
 
-const badgeVariant = computed<
-  'default' | 'secondary' | 'destructive' | 'outline'
->(() => {
-  const variantMap: Record<
-    StatusType,
-    'default' | 'secondary' | 'destructive' | 'outline'
-  > = {
+const badgeVariant = computed<'default' | 'secondary' | 'destructive' | 'outline'>(() => {
+  const variantMap: Record<StatusType, 'default' | 'secondary' | 'destructive' | 'outline'> = {
     active: 'default',
     inactive: 'secondary',
     pending: 'secondary',

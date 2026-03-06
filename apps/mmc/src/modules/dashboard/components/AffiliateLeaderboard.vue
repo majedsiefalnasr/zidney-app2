@@ -122,6 +122,8 @@
 </template>
 
 <script setup lang="ts">
+import { TrendingDown, TrendingUp, Users } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
 import {
   Button,
   Input,
@@ -131,8 +133,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui'
-import { TrendingDown, TrendingUp, Users } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
 
 interface AffiliateData {
   affiliateId: string
@@ -173,8 +173,7 @@ const filteredData = computed(() => {
     const query = searchQuery.value.toLowerCase()
     result = result.filter(
       (item) =>
-        item.affiliateName.toLowerCase().includes(query) ||
-        item.email.toLowerCase().includes(query)
+        item.affiliateName.toLowerCase().includes(query) || item.email.toLowerCase().includes(query)
     )
   }
 

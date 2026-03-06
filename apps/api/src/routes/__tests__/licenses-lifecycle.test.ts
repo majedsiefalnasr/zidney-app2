@@ -1,4 +1,4 @@
-import { Context } from 'hono'
+import type { Context } from 'hono'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 /**
@@ -42,7 +42,7 @@ import {
 } from '@zidney/domain-core/license'
 
 // Helper to create mock context
-function createMockContext(overrides = {}) {
+function createMockContext(_overrides = {}) {
   return {
     req: {
       param: vi.fn(),
@@ -670,8 +670,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
       const validUuid = '550e8400-e29b-41d4-a716-446655440000'
       const invalidUuid = 'not-a-uuid'
 
-      const uuidRegex =
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+      const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
       expect(uuidRegex.test(validUuid)).toBe(true)
       expect(uuidRegex.test(invalidUuid)).toBe(false)
     })

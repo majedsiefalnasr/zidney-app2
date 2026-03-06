@@ -29,8 +29,8 @@
  * - Compared against performance targets
  */
 
-import fs from 'fs'
-import path from 'path'
+import fs from 'node:fs'
+import path from 'node:path'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { getTestDb } from '../fixtures/test-db'
 
@@ -80,20 +80,14 @@ describe('Dashboard Query Plan Verification (T029)', () => {
   /**
    * Helper: Run EXPLAIN ANALYZE on a query
    */
-  async function analyzeQuery(
-    endpoint: string,
-    query: string
-  ): Promise<QueryPlan> {
+  async function analyzeQuery(endpoint: string, query: string): Promise<QueryPlan> {
     const explainQuery = `EXPLAIN ANALYZE ${query}`
 
     try {
       const result = await db.query(explainQuery)
-      const planText = result.rows
-        .map((row: any) => Object.values(row).join(' '))
-        .join('\n')
+      const planText = result.rows.map((row: any) => Object.values(row).join(' ')).join('\n')
 
-      const { executionTime, planningTime, seqScans, indexScans } =
-        parseExplainOutput(planText)
+      const { executionTime, planningTime, seqScans, indexScans } = parseExplainOutput(planText)
 
       // Get actual row count by running the original query
       const dataResult = await db.query(query)
@@ -292,12 +286,7 @@ describe('Dashboard Query Plan Verification (T029)', () => {
     const baselineDoc = generateBaselineDocumentation(queryPlans)
 
     // Save to docs folder
-    const docsPath = path.join(
-      __dirname,
-      '../../../..',
-      'docs',
-      'mmc-dashboard-query-plans.md'
-    )
+    const docsPath = path.join(__dirname, '../../../..', 'docs', 'mmc-dashboard-query-plans.md')
 
     // Create docs directory if it doesn't exist
     const docsDir = path.dirname(docsPath)
@@ -310,14 +299,11 @@ describe('Dashboard Query Plan Verification (T029)', () => {
     console.log(`\n✓ Query plan baseline documentation saved to: ${docsPath}`)
     console.log(`\n📊 Query Plan Summary:`)
     console.log(`   Total Queries: ${queryPlans.length}`)
-    console.log(
-      `   Passed: ${queryPlans.filter((p) => p.status === 'PASS').length}`
-    )
+    console.log(`   Passed: ${queryPlans.filter((p) => p.status === 'PASS').length}`)
     console.log(`   Failed: ${failedPlans.length}`)
     console.log(
       `   Average Execution Time: ${(
-        queryPlans.reduce((sum, p) => sum + p.executionTime, 0) /
-        queryPlans.length
+        queryPlans.reduce((sum, p) => sum + p.executionTime, 0) / queryPlans.length
       ).toFixed(2)}ms`
     )
   })
@@ -371,12 +357,8 @@ No sequential scans detected.
   }
 
   doc += `\n## Performance SLA Compliance\n\n`
-  doc += `✓ All endpoints <300ms: ${
-    plans.every((p) => p.executionTime < 300) ? 'YES' : 'NO'
-  }\n`
-  doc += `✓ No sequential scans: ${
-    plans.every((p) => p.seqScans === 0) ? 'YES' : 'NO'
-  }\n`
+  doc += `✓ All endpoints <300ms: ${plans.every((p) => p.executionTime < 300) ? 'YES' : 'NO'}\n`
+  doc += `✓ No sequential scans: ${plans.every((p) => p.seqScans === 0) ? 'YES' : 'NO'}\n`
   doc += `✓ Average <150ms: ${avgExecTime < 150 ? 'YES' : 'NO'}\n`
 
   doc += `\n## Index Strategy\n\n`

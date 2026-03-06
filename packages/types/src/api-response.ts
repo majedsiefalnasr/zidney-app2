@@ -13,7 +13,7 @@
  * All API endpoints must return this structure
  */
 
-import { MasterDBErrorCode } from './error-codes'
+import type { MasterDBErrorCode } from './error-codes'
 
 /**
  * Standard error object in response
@@ -106,10 +106,7 @@ export function createSuccessResponse<T>(data: T): APISuccessResponse<T> {
  *   'Product with ID 123 not found'
  * );
  */
-export function createErrorResponse(
-  code: MasterDBErrorCode,
-  message: string
-): APIErrorResponse {
+export function createErrorResponse(code: MasterDBErrorCode, message: string): APIErrorResponse {
   return {
     success: false,
     data: null,
@@ -125,14 +122,8 @@ export function createErrorResponse(
  *   console.log(response.data); // TypeScript knows this is T, not null
  * }
  */
-export function isSuccessResponse<T>(
-  response: APIResponse<T>
-): response is APISuccessResponse<T> {
-  return (
-    response.success === true &&
-    response.data !== null &&
-    response.error === null
-  )
+export function isSuccessResponse<T>(response: APIResponse<T>): response is APISuccessResponse<T> {
+  return response.success === true && response.data !== null && response.error === null
 }
 
 /**
@@ -143,14 +134,8 @@ export function isSuccessResponse<T>(
  *   console.log(response.error.code); // TypeScript knows this is APIError
  * }
  */
-export function isErrorResponse(
-  response: APIResponse
-): response is APIErrorResponse {
-  return (
-    response.success === false &&
-    response.data === null &&
-    response.error !== null
-  )
+export function isErrorResponse(response: APIResponse): response is APIErrorResponse {
+  return response.success === false && response.data === null && response.error !== null
 }
 
 export default {

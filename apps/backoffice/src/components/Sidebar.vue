@@ -28,7 +28,6 @@
 
 import type { Module } from '@zidney/types'
 import { MODULE_LABELS } from '@zidney/types'
-import { SidebarLayout } from '@zidney/ui-system'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useContextStore } from '../stores/context'
@@ -41,7 +40,7 @@ const contextStore = useContextStore()
 const route = useRoute()
 
 // Build nav items from enabledModules — no hardcoded list
-const filteredNavItems = computed(() =>
+const _filteredNavItems = computed(() =>
   contextStore.enabledModules.map((mod: Module) => ({
     id: mod,
     label: MODULE_LABELS[mod]?.en ?? mod,
@@ -49,7 +48,5 @@ const filteredNavItems = computed(() =>
   }))
 )
 
-const activeItem = computed(
-  () => (route.meta.requiredModule as string | undefined) ?? ''
-)
+const _activeItem = computed(() => (route.meta.requiredModule as string | undefined) ?? '')
 </script>

@@ -4,21 +4,13 @@ function isApiErrorResponse(raw: unknown): raw is ApiErrorResponse {
   return (
     typeof raw === 'object' &&
     raw !== null &&
-    (raw as Record<string, unknown>)['success'] === false &&
-    typeof (raw as Record<string, unknown>)['error'] === 'object' &&
-    (raw as Record<string, unknown>)['error'] !== null &&
-    typeof (
-      (raw as Record<string, { code: unknown }>)['error'] as Record<
-        string,
-        unknown
-      >
-    )['code'] === 'string' &&
-    typeof (
-      (raw as Record<string, { message: unknown }>)['error'] as Record<
-        string,
-        unknown
-      >
-    )['message'] === 'string'
+    (raw as Record<string, unknown>).success === false &&
+    typeof (raw as Record<string, unknown>).error === 'object' &&
+    (raw as Record<string, unknown>).error !== null &&
+    typeof ((raw as Record<string, { code: unknown }>).error as Record<string, unknown>).code ===
+      'string' &&
+    typeof ((raw as Record<string, { message: unknown }>).error as Record<string, unknown>)
+      .message === 'string'
   )
 }
 
@@ -36,8 +28,8 @@ export function normalizeError(raw: unknown): NormalizedError {
   if (
     typeof raw === 'object' &&
     raw !== null &&
-    typeof (raw as Record<string, unknown>)['code'] === 'string' &&
-    typeof (raw as Record<string, unknown>)['httpStatus'] === 'number'
+    typeof (raw as Record<string, unknown>).code === 'string' &&
+    typeof (raw as Record<string, unknown>).httpStatus === 'number'
   ) {
     return raw as NormalizedError
   }
@@ -46,12 +38,12 @@ export function normalizeError(raw: unknown): NormalizedError {
   if (
     typeof raw === 'object' &&
     raw !== null &&
-    isApiErrorResponse((raw as Record<string, unknown>)['body'])
+    isApiErrorResponse((raw as Record<string, unknown>).body)
   ) {
-    const body = (raw as Record<string, unknown>)['body'] as ApiErrorResponse
+    const body = (raw as Record<string, unknown>).body as ApiErrorResponse
     const status =
-      typeof (raw as Record<string, unknown>)['httpStatus'] === 'number'
-        ? ((raw as Record<string, unknown>)['httpStatus'] as number)
+      typeof (raw as Record<string, unknown>).httpStatus === 'number'
+        ? ((raw as Record<string, unknown>).httpStatus as number)
         : 0
     return {
       code: body.error.code,

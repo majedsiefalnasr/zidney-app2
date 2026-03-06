@@ -7,7 +7,7 @@
  * - Concurrent access, audit logging, state integrity
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   restoreFromArchive,
@@ -73,12 +73,7 @@ describe('License Service — T006-T010: Transition Methods', () => {
         .mockResolvedValueOnce(undefined) // COMMIT
 
       // Act
-      const result = await transitionToSoftLock(
-        mockDb,
-        licenseId,
-        reason,
-        actorId
-      )
+      const result = await transitionToSoftLock(mockDb, licenseId, reason, actorId)
 
       // Assert
       expect(result.success).toBe(true)
@@ -86,9 +81,7 @@ describe('License Service — T006-T010: Transition Methods', () => {
       expect(result.previous_state).toBe('ACTIVE')
 
       // Verify transaction calls
-      expect(mockClient.query).toHaveBeenCalledWith(
-        'BEGIN ISOLATION LEVEL SERIALIZABLE'
-      )
+      expect(mockClient.query).toHaveBeenCalledWith('BEGIN ISOLATION LEVEL SERIALIZABLE')
       expect(mockDb.connect).toHaveBeenCalled()
     })
 
@@ -110,12 +103,7 @@ describe('License Service — T006-T010: Transition Methods', () => {
         .mockResolvedValueOnce(undefined) // ROLLBACK
 
       // Act
-      const result = await transitionToSoftLock(
-        mockDb,
-        licenseId,
-        'reason',
-        'actor-1'
-      )
+      const result = await transitionToSoftLock(mockDb, licenseId, 'reason', 'actor-1')
 
       // Assert
       expect(result.success).toBe(false)
@@ -138,12 +126,7 @@ describe('License Service — T006-T010: Transition Methods', () => {
         .mockResolvedValueOnce(undefined) // ROLLBACK
 
       // Act
-      const result = await transitionToSoftLock(
-        mockDb,
-        licenseId,
-        'reason',
-        'actor-1'
-      )
+      const result = await transitionToSoftLock(mockDb, licenseId, 'reason', 'actor-1')
 
       // Assert
       expect(result.success).toBe(false)
@@ -166,9 +149,7 @@ describe('License Service — T006-T010: Transition Methods', () => {
       mockClient.query
         .mockResolvedValueOnce(undefined) // BEGIN
         .mockResolvedValueOnce({
-          rows: [
-            { id: licenseId, status: 'SOFT_LOCKED', workspace_slug: 'test' },
-          ],
+          rows: [{ id: licenseId, status: 'SOFT_LOCKED', workspace_slug: 'test' }],
         }) // SELECT
         .mockResolvedValueOnce({
           rows: [{ id: licenseId, status: 'ACTIVE', soft_lock_until: null }],
@@ -177,12 +158,7 @@ describe('License Service — T006-T010: Transition Methods', () => {
         .mockResolvedValueOnce(undefined) // COMMIT
 
       // Act
-      const result = await transitionToActive(
-        mockDb,
-        licenseId,
-        'payment_received',
-        'actor-1'
-      )
+      const result = await transitionToActive(mockDb, licenseId, 'payment_received', 'actor-1')
 
       // Assert
       expect(result.success).toBe(true)
@@ -207,12 +183,7 @@ describe('License Service — T006-T010: Transition Methods', () => {
         .mockResolvedValueOnce(undefined) // ROLLBACK
 
       // Act
-      const result = await transitionToActive(
-        mockDb,
-        licenseId,
-        'reason',
-        'actor-1'
-      )
+      const result = await transitionToActive(mockDb, licenseId, 'reason', 'actor-1')
 
       // Assert
       expect(result.success).toBe(false)
@@ -295,13 +266,7 @@ describe('License Service — T006-T010: Transition Methods', () => {
         .mockResolvedValueOnce(undefined) // ROLLBACK
 
       // Act
-      const result = await transitionToArchived(
-        mockDb,
-        licenseId,
-        snapshotId,
-        'reason',
-        'actor-1'
-      )
+      const result = await transitionToArchived(mockDb, licenseId, snapshotId, 'reason', 'actor-1')
 
       // Assert
       expect(result.success).toBe(false)
@@ -408,12 +373,7 @@ describe('License Service — T006-T010: Transition Methods', () => {
         .mockResolvedValueOnce(undefined) // COMMIT
 
       // Act
-      const result = await transitionToDeleted(
-        mockDb,
-        licenseId,
-        confirmationHash,
-        'actor-1'
-      )
+      const result = await transitionToDeleted(mockDb, licenseId, confirmationHash, 'actor-1')
 
       // Assert
       expect(result.success).toBe(true)
@@ -448,12 +408,7 @@ describe('License Service — T006-T010: Transition Methods', () => {
         .mockResolvedValueOnce(undefined) // ROLLBACK
 
       // Act
-      const result = await transitionToDeleted(
-        mockDb,
-        licenseId,
-        'wrong-hash',
-        'actor-1'
-      )
+      const result = await transitionToDeleted(mockDb, licenseId, 'wrong-hash', 'actor-1')
 
       // Assert
       expect(result.success).toBe(false)
@@ -638,9 +593,7 @@ describe('Integration Tests — Concurrent Access & Audit Logging', () => {
 
     // Verify INSERT called for audit log
     const insertCalls = mockClient.query.mock.calls.filter(
-      (call) =>
-        typeof call[0] === 'string' &&
-        call[0].includes('INSERT INTO license_audit_logs')
+      (call) => typeof call[0] === 'string' && call[0].includes('INSERT INTO license_audit_logs')
     )
     expect(insertCalls.length).toBeGreaterThan(0)
   })

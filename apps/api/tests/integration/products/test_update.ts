@@ -85,7 +85,7 @@ describe('Integration: Products - Update (T055)', () => {
 
     it('should create new version record in product_versions table', async () => {
       // Mock: In actual implementation would query DB
-      const response = {
+      const _response = {
         status: 200,
         body: {
           success: true,
@@ -104,7 +104,7 @@ describe('Integration: Products - Update (T055)', () => {
 
     it('should create audit log entry with action=UPDATE', async () => {
       // Mock: In actual implementation would query DB
-      const response = {
+      const _response = {
         status: 200,
         body: {
           success: true,
@@ -166,7 +166,7 @@ describe('Integration: Products - Update (T055)', () => {
 
     it('should not create new version record if no changes', async () => {
       // Mock: Verify DB
-      const response = {
+      const _response = {
         status: 200,
         body: {
           success: true,
@@ -185,7 +185,7 @@ describe('Integration: Products - Update (T055)', () => {
 
     it('should not create audit log if no changes', async () => {
       // Mock: Verify DB
-      const response = {
+      const _response = {
         status: 200,
         body: {
           success: true,
@@ -223,7 +223,7 @@ describe('Integration: Products - Update (T055)', () => {
 
     it('should ignore slug field in update request', async () => {
       // Even if slug is included in request body, it should be ignored
-      const updatePayload = {
+      const _updatePayload = {
         name: { en: 'Updated Name' },
         slug: 'wrong-slug', // This should be ignored
       }
@@ -352,9 +352,7 @@ describe('Integration: Products - Update (T055)', () => {
       }
 
       expect(response.status).toBe(400)
-      expect(response.body.error.code).toBe(
-        ErrorCodes.INVALID_NAME_LOCALIZATION
-      )
+      expect(response.body.error.code).toBe(ErrorCodes.INVALID_NAME_LOCALIZATION)
     })
 
     it('should return 423 when workspace is soft-locked', async () => {
@@ -386,9 +384,7 @@ describe('Integration: Products - Update (T055)', () => {
       }
 
       expect(response.status).toBe(200)
-      expect(parseInt(response.headers['x-ratelimit-remaining'])).toBeLessThan(
-        20
-      )
+      expect(parseInt(response.headers['x-ratelimit-remaining'], 10)).toBeLessThan(20)
     })
   })
 

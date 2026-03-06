@@ -42,9 +42,7 @@ describe('Area 1: Tenant Isolation (Unit)', () => {
     client.setCorrelationId(TEST_CORRELATION_IDS.REQUEST_1)
 
     // Act: Attempt to access workspace-b resource while authenticated as workspace-a user
-    const response = await client.get(
-      `/api/workspaces/${TEST_WORKSPACES.WS_B}/students`
-    )
+    const response = await client.get(`/api/workspaces/${TEST_WORKSPACES.WS_B}/students`)
 
     // Assert: 403 Forbidden, RFC 7807 format, no data leaked
     expect(response.status).toBe(403)
@@ -115,10 +113,7 @@ describe('Area 1: Tenant Isolation (Unit)', () => {
       data: 'some data',
     }
 
-    const response = await client.post(
-      '/api/workspaces/some-resource',
-      maliciousPayload
-    )
+    const response = await client.post('/api/workspaces/some-resource', maliciousPayload)
 
     // Assert: Request uses authenticated workspace (A), not body override (B)
     // If body override worked, this would be a security breach
@@ -138,9 +133,7 @@ describe('Area 1: Tenant Isolation (Unit)', () => {
     ).toString('base64')
 
     client.setJWT(tokenA)
-    const response = await client.get(
-      `/api/workspaces/${TEST_WORKSPACES.WS_B}/students`
-    )
+    const response = await client.get(`/api/workspaces/${TEST_WORKSPACES.WS_B}/students`)
 
     // Verify response contains no workspace-b data
     expect(response.status).toBe(403)

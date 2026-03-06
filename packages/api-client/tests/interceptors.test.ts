@@ -15,14 +15,14 @@ describe('Interceptors', () => {
       const headers: Record<string, string> = {}
       applyAuthHeader(headers, () => 'test-token')
 
-      expect(headers['Authorization']).toBe('Bearer test-token')
+      expect(headers.Authorization).toBe('Bearer test-token')
     })
 
     it('should not add Authorization header when token is null', () => {
       const headers: Record<string, string> = {}
       applyAuthHeader(headers, () => null)
 
-      expect(headers['Authorization']).toBeUndefined()
+      expect(headers.Authorization).toBeUndefined()
     })
 
     it('should use updated token between calls', () => {
@@ -31,12 +31,12 @@ describe('Interceptors', () => {
 
       const headers1: Record<string, string> = {}
       applyAuthHeader(headers1, getToken)
-      expect(headers1['Authorization']).toBe('Bearer first-token')
+      expect(headers1.Authorization).toBe('Bearer first-token')
 
       token = 'second-token'
       const headers2: Record<string, string> = {}
       applyAuthHeader(headers2, getToken)
-      expect(headers2['Authorization']).toBe('Bearer second-token')
+      expect(headers2.Authorization).toBe('Bearer second-token')
     })
   })
 
@@ -113,9 +113,7 @@ describe('Interceptors', () => {
       applyCorrelationId(headers1)
       applyCorrelationId(headers2)
 
-      expect(headers1['X-Correlation-ID']).not.toBe(
-        headers2['X-Correlation-ID']
-      )
+      expect(headers1['X-Correlation-ID']).not.toBe(headers2['X-Correlation-ID'])
     })
   })
 

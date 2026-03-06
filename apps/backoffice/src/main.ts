@@ -11,14 +11,6 @@ import '@/core/config/app-config'
 import { createPinia } from 'pinia'
 import { createPersistedState } from 'pinia-plugin-persistedstate'
 import { createApp } from 'vue'
-import App from './App.vue'
-
-// ── Step 2: Router factory (guards NOT registered here — registered via registerGuards)
-// Use relative imports to avoid root tsconfig @/* path alias resolving to MMC first
-import { useContextStore } from '@/stores/context'
-import { registerGuards } from './core/guards'
-import { createAppRouter } from './core/router'
-
 // Auth module imports
 import type { ApiClient } from '@/core/api/client'
 import { createAppApiClient } from '@/core/api/client'
@@ -30,6 +22,12 @@ import { createRefreshManager } from '@/core/auth/refresh-manager'
 import { createTokenManager } from '@/core/auth/token-manager'
 import { defineAuthStore } from '@/core/state/auth.store'
 import { useLicenseStatusStore } from '@/core/state/license-status.store'
+// ── Step 2: Router factory (guards NOT registered here — registered via registerGuards)
+// Use relative imports to avoid root tsconfig @/* path alias resolving to MMC first
+import { useContextStore } from '@/stores/context'
+import App from './App.vue'
+import { registerGuards } from './core/guards'
+import { createAppRouter } from './core/router'
 
 // App-specific route name constants — NOT shared in core/auth/
 const LOGIN_ROUTE = 'bo-login'

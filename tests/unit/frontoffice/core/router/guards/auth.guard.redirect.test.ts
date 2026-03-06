@@ -9,9 +9,7 @@ import { describe, expect, it } from 'vitest'
 import type { RouteLocationNormalized } from 'vue-router'
 import { createAuthGuard } from '../../../../../../apps/frontoffice/src/core/router/guards/auth.guard'
 
-function makeRoute(
-  overrides: Partial<RouteLocationNormalized> = {}
-): RouteLocationNormalized {
+function makeRoute(overrides: Partial<RouteLocationNormalized> = {}): RouteLocationNormalized {
   return {
     path: '/exam',
     name: 'fo-home',

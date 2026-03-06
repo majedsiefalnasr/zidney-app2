@@ -18,9 +18,7 @@ export interface TableState {
 /**
  * Serialize table state to URLSearchParams
  */
-export function serializeQueryState(
-  state: Partial<TableState>
-): URLSearchParams {
+export function serializeQueryState(state: Partial<TableState>): URLSearchParams {
   const params = new URLSearchParams()
 
   if (state.filters && state.filters.length > 0) {
@@ -152,9 +150,7 @@ export function parseQueryString(queryString: string): Record<string, string> {
   if (!queryString) return {}
 
   // Remove leading '?'
-  const cleanQuery = queryString.startsWith('?')
-    ? queryString.slice(1)
-    : queryString
+  const cleanQuery = queryString.startsWith('?') ? queryString.slice(1) : queryString
 
   const params = new URLSearchParams(cleanQuery)
   const result: Record<string, string> = {}
@@ -179,10 +175,7 @@ export function getCurrentUrlState(): Partial<TableState> {
 /**
  * Push table state to browser URL (without reload)
  */
-export function pushTableStateToUrl(
-  state: Partial<TableState>,
-  title?: string
-): void {
+export function pushTableStateToUrl(state: Partial<TableState>, title?: string): void {
   if (typeof window === 'undefined') return
 
   const queryString = buildQueryString(state)
@@ -194,10 +187,7 @@ export function pushTableStateToUrl(
 /**
  * Replace table state in browser URL (replaces history entry)
  */
-export function replaceTableStateInUrl(
-  state: Partial<TableState>,
-  title?: string
-): void {
+export function replaceTableStateInUrl(state: Partial<TableState>, title?: string): void {
   if (typeof window === 'undefined') return
 
   const queryString = buildQueryString(state)
@@ -248,9 +238,7 @@ export function hasTableStateChanges(state: Partial<TableState>): boolean {
 /**
  * Get state changes as readable summary
  */
-export function getTableStateChangeSummary(
-  state: Partial<TableState>
-): string[] {
+export function getTableStateChangeSummary(state: Partial<TableState>): string[] {
   const changes: string[] = []
 
   if (state.filters && state.filters.length > 0) {
@@ -275,10 +263,7 @@ export function getTableStateChangeSummary(
 /**
  * Save table state to localStorage
  */
-export function saveTableStateToStorage(
-  key: string,
-  state: Partial<TableState>
-): void {
+export function saveTableStateToStorage(key: string, state: Partial<TableState>): void {
   try {
     localStorage.setItem(key, JSON.stringify(state))
   } catch {
@@ -289,9 +274,7 @@ export function saveTableStateToStorage(
 /**
  * Load table state from localStorage
  */
-export function loadTableStateFromStorage(
-  key: string
-): Partial<TableState> | null {
+export function loadTableStateFromStorage(key: string): Partial<TableState> | null {
   try {
     const item = localStorage.getItem(key)
     if (!item) return null

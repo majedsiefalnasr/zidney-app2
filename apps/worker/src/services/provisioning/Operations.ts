@@ -9,7 +9,7 @@
  * Task: T024 – Prometheus metrics emission
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 import { LogLevel, StructuredLogger } from './ErrorHandling'
 
 // ============================================================================
@@ -22,8 +22,7 @@ export class OrphanDetectionJob {
 
   constructor(master_pool: Pool, logger?: StructuredLogger) {
     this.master_pool = master_pool
-    this.logger =
-      logger || new StructuredLogger('orphan-detection', '1.0.0', LogLevel.INFO)
+    this.logger = logger || new StructuredLogger('orphan-detection', '1.0.0', LogLevel.INFO)
   }
 
   /**
@@ -101,13 +100,9 @@ export class OrphanDetectionJob {
       }
     } catch (error) {
       errors.push(`Orphan detection failed: ${error}`)
-      this.logger.error(
-        'Orphan detection error',
-        error instanceof Error ? error : String(error),
-        {
-          correlation_id: 'orphan-detection-job',
-        }
-      )
+      this.logger.error('Orphan detection error', error instanceof Error ? error : String(error), {
+        correlation_id: 'orphan-detection-job',
+      })
     }
 
     return {
@@ -137,8 +132,7 @@ export class DLQHandler {
 
   constructor(_master_pool: Pool, redis: any, logger?: StructuredLogger) {
     this.redis = redis
-    this.logger =
-      logger || new StructuredLogger('dlq-handler', '1.0.0', LogLevel.INFO)
+    this.logger = logger || new StructuredLogger('dlq-handler', '1.0.0', LogLevel.INFO)
   }
 
   /**
@@ -191,10 +185,7 @@ export class DLQHandler {
   /**
    * Process DLQ job (manual decision: retry, delete, or ignore)
    */
-  async processDLQJob(
-    job_id: string,
-    action: 'retry' | 'delete' | 'mark_resolved'
-  ): Promise<void> {
+  async processDLQJob(job_id: string, action: 'retry' | 'delete' | 'mark_resolved'): Promise<void> {
     try {
       switch (action) {
         case 'retry':
@@ -211,12 +202,9 @@ export class DLQHandler {
           await this.redis.lrem('provisioning_jobs:dlq', 0, job_id)
           break
         case 'mark_resolved':
-          this.logger.info(
-            'DLQ job: marked resolved (manual intervention completed)',
-            {
-              details: { job_id },
-            }
-          )
+          this.logger.info('DLQ job: marked resolved (manual intervention completed)', {
+            details: { job_id },
+          })
           break
       }
     } catch (error) {
@@ -236,11 +224,7 @@ export class DLQHandler {
    */
   async getDLQJobs(limit: number = 100): Promise<DLQJob[]> {
     try {
-      const jobs = await this.redis.lrange(
-        'provisioning_jobs:dlq',
-        0,
-        limit - 1
-      )
+      const jobs = await this.redis.lrange('provisioning_jobs:dlq', 0, limit - 1)
       return jobs.map((j: string) => JSON.parse(j))
     } catch (error) {
       this.logger.error(
@@ -263,9 +247,7 @@ export class MetricsCollector {
   private logger: StructuredLogger
 
   constructor(logger?: StructuredLogger) {
-    this.logger =
-      logger ||
-      new StructuredLogger('metrics-collector', '1.0.0', LogLevel.DEBUG)
+    this.logger = logger || new StructuredLogger('metrics-collector', '1.0.0', LogLevel.DEBUG)
   }
 
   /**

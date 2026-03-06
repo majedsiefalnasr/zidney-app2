@@ -126,8 +126,7 @@ export function sign(
 
   if (options.expiresIn != null) {
     const expSeconds = parseExpiresIn(options.expiresIn)
-    const base =
-      typeof tokenPayload.iat === 'number' ? tokenPayload.iat : issuedAt
+    const base = typeof tokenPayload.iat === 'number' ? tokenPayload.iat : issuedAt
     tokenPayload.exp = base + expSeconds
   }
 

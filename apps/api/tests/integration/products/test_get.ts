@@ -89,8 +89,6 @@ describe('Integration: Products - Get Single (T054)', () => {
     }
 
     expect(response.status).toBe(200)
-    expect(parseInt(response.headers['x-ratelimit-remaining'])).toBeLessThan(
-      100
-    )
+    expect(parseInt(response.headers['x-ratelimit-remaining'], 10)).toBeLessThan(100)
   })
 })

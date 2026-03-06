@@ -18,6 +18,7 @@
  */
 
 import { LicenseStatus } from './types'
+
 export { LicenseStatus } from './types'
 
 /**

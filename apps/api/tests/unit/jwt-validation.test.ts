@@ -32,8 +32,6 @@ interface JWTPayload {
 }
 
 class JWTValidator {
-  private secret: string
-
   constructor(secret: string = 'test-secret-key') {
     this.secret = secret
   }
@@ -46,12 +44,8 @@ class JWTValidator {
         return null
       }
 
-      const header = JSON.parse(
-        Buffer.from(parts[0]!, 'base64').toString('utf-8')
-      )
-      const payload = JSON.parse(
-        Buffer.from(parts[1]!, 'base64').toString('utf-8')
-      )
+      const header = JSON.parse(Buffer.from(parts[0]!, 'base64').toString('utf-8'))
+      const payload = JSON.parse(Buffer.from(parts[1]!, 'base64').toString('utf-8'))
       const signature = parts[2]!
 
       return {
@@ -59,7 +53,7 @@ class JWTValidator {
         payload,
         signature,
       }
-    } catch (error) {
+    } catch (_error) {
       return null
     }
   }
@@ -97,8 +91,7 @@ class JWTValidator {
     const requiredClaims = ['sub', 'user_id', 'workspace_id', 'roles']
 
     return requiredClaims.every(
-      (claim) =>
-        claim in claims && claims[claim as keyof JWTClaims] !== undefined
+      (claim) => claim in claims && claims[claim as keyof JWTClaims] !== undefined
     )
   }
 
@@ -492,10 +485,7 @@ describe('JWT Validation', () => {
 
       const resolvedWorkspaceId = 'ws-1' // From domain/path
 
-      const match = validator.validateWorkspaceId(
-        claimsFromToken,
-        resolvedWorkspaceId
-      )
+      const match = validator.validateWorkspaceId(claimsFromToken, resolvedWorkspaceId)
 
       expect(match).toBe(true)
     })

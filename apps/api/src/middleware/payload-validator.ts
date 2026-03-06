@@ -10,7 +10,7 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Hono } from 'hono'
+import type { Hono } from 'hono'
 
 const logger = createLogger('payload-validator')
 
@@ -38,7 +38,7 @@ export async function payloadValidator(
     // Get content length
     const contentLengthHeader = c.req.header('content-length')
     if (contentLengthHeader) {
-      const contentLength = parseInt(contentLengthHeader)
+      const contentLength = parseInt(contentLengthHeader, 10)
 
       // Check general body size limit
       if (contentLength > limits.maxBodySizeBytes) {
@@ -62,10 +62,7 @@ export async function payloadValidator(
       }
 
       // Check file upload size
-      if (
-        contentType.includes('multipart/form-data') &&
-        contentLength > limits.maxFileSizeBytes
-      ) {
+      if (contentType.includes('multipart/form-data') && contentLength > limits.maxFileSizeBytes) {
         logger.warn(`Payload validation failed: file too large`, {
           correlation_id: correlationId,
           content_length: contentLength,

@@ -141,9 +141,7 @@ export async function getRecentViolations(
 /**
  * Get aggregated violation patterns for a limit type
  */
-export async function getViolationPatterns(
-  limitType: string
-): Promise<Map<string, any>> {
+export async function getViolationPatterns(limitType: string): Promise<Map<string, any>> {
   const key = `ratelimit:patterns:${limitType}`
 
   const data = await redis.hGetAll(key)
@@ -187,11 +185,7 @@ export async function isIdentifierBlocked(
   thresholdViolations: number = 5,
   windowMinutes: number = 10
 ): Promise<boolean> {
-  const recentViolations = await getRecentViolations(
-    limitType,
-    identifier,
-    thresholdViolations
-  )
+  const recentViolations = await getRecentViolations(limitType, identifier, thresholdViolations)
 
   if (recentViolations.length < thresholdViolations) {
     return false
@@ -212,10 +206,7 @@ export async function isIdentifierBlocked(
 /**
  * Clear violation history for an identifier (admin action)
  */
-export async function clearViolationHistory(
-  limitType: string,
-  identifier: string
-): Promise<void> {
+export async function clearViolationHistory(limitType: string, identifier: string): Promise<void> {
   const keyViolation = `ratelimit:violations:${limitType}:${identifier}`
   const keyPattern = `ratelimit:patterns:${limitType}`
 

@@ -3,7 +3,8 @@
  * Serializes concurrent upgrades per workspace
  */
 
-import { Pool } from 'pg'
+import { logger } from '@zidney/logger'
+import type { Pool } from 'pg'
 
 export interface LockHandle {
   workspace_id: string
@@ -37,17 +38,12 @@ export async function acquireWorkspaceLock(
 
     const acquiredAt = new Date()
 
-    console.log(
-      JSON.stringify({
-        level: 'DEBUG',
-        service: 'lock-manager',
-        event: 'lock_acquired',
-        workspace_id,
-        acquired_at: acquiredAt.toISOString(),
-        timeout_ms: timeoutMs,
-        timestamp: new Date().toISOString(),
-      })
-    )
+    logger.debug('lock_acquired', {
+      service: 'lock-manager',
+      workspace_id,
+      acquired_at: acquiredAt.toISOString(),
+      timeout_ms: timeoutMs,
+    })
 
     return {
       workspace_id,
@@ -71,19 +67,11 @@ export async function acquireWorkspaceLock(
  * Release workspace lock (automatic on transaction end)
  * Explicit call not needed - PostgreSQL releases on COMMIT/ROLLBACK
  */
-export async function releaseWorkspaceLock(
-  lockHandle: LockHandle,
-  _masterDb: Pool
-): Promise<void> {
-  console.log(
-    JSON.stringify({
-      level: 'DEBUG',
-      service: 'lock-manager',
-      event: 'lock_released',
-      workspace_id: lockHandle.workspace_id,
-      held_for_ms: Date.now() - lockHandle.acquiredAt.getTime(),
-      timestamp: new Date().toISOString(),
-    })
-  )
+export async function releaseWorkspaceLock(lockHandle: LockHandle, _masterDb: Pool): Promise<void> {
+  logger.debug('lock_released', {
+    service: 'lock-manager',
+    workspace_id: lockHandle.workspace_id,
+    held_for_ms: Date.now() - lockHandle.acquiredAt.getTime(),
+  })
   // No action needed - lock released automatically on transaction end
 }

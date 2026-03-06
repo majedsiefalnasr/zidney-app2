@@ -88,10 +88,7 @@ function validateSubmissionRequest(payload: any): {
   const errors: string[] = []
 
   // reason validation
-  if (
-    payload.reason &&
-    !['COMPLETED', 'TIME_EXPIRED', 'ABANDONED'].includes(payload.reason)
-  ) {
+  if (payload.reason && !['COMPLETED', 'TIME_EXPIRED', 'ABANDONED'].includes(payload.reason)) {
     errors.push('Invalid submission reason')
   }
 
@@ -118,8 +115,7 @@ function validateSubmissionRequest(payload: any): {
 }
 
 function isValidUUID(uuid: string): boolean {
-  const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
   return uuidRegex.test(uuid)
 }
 
@@ -282,9 +278,7 @@ describe('Input Validation', () => {
     reasons.forEach((reason) => {
       const result = validateSubmissionRequest({
         reason,
-        all_responses: [
-          { question_index: 0, user_response: { selected: 'A' } },
-        ],
+        all_responses: [{ question_index: 0, user_response: { selected: 'A' } }],
       })
 
       expect(result.valid).toBe(true)

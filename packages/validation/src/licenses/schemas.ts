@@ -17,10 +17,7 @@ const WorkspaceSlugSchema = z
   .string()
   .min(3, 'Slug must be at least 3 characters')
   .max(64, 'Slug must be at most 64 characters')
-  .regex(
-    /^[a-z0-9-]+$/,
-    'Slug must contain only lowercase letters, numbers, and dashes'
-  )
+  .regex(/^[a-z0-9-]+$/, 'Slug must contain only lowercase letters, numbers, and dashes')
   .transform((val: string) => val.toLowerCase())
 
 /**
@@ -43,24 +40,16 @@ const LanguageCodeSchema = z
 export const CreateLicenseRequestSchema = z.object({
   product_id: z.string().uuid('Invalid product ID'),
   workspace_slug: WorkspaceSlugSchema,
-  workspace_name: z
-    .string()
-    .min(1, 'Workspace name required')
-    .max(255, 'Workspace name too long'),
+  workspace_name: z.string().min(1, 'Workspace name required').max(255, 'Workspace name too long'),
   student_limit: LimitSchema,
   staff_limit: LimitSchema,
   use_zidney_payment: z.boolean().default(false).optional(),
-  commission_per_user: z
-    .number()
-    .min(0, 'Commission must be non-negative')
-    .optional(),
+  commission_per_user: z.number().min(0, 'Commission must be non-negative').optional(),
   default_language: LanguageCodeSchema.optional(),
   uses_divisions: z.boolean().default(false).optional(),
 })
 
-export type CreateLicenseRequestType = z.infer<
-  typeof CreateLicenseRequestSchema
->
+export type CreateLicenseRequestType = z.infer<typeof CreateLicenseRequestSchema>
 
 /**
  * T089: Edit License Request Schema
@@ -68,10 +57,7 @@ export type CreateLicenseRequestType = z.infer<
 export const EditLicenseRequestSchema = z.object({
   student_limit: LimitSchema,
   staff_limit: LimitSchema,
-  commission_per_user: z
-    .number()
-    .min(0, 'Commission must be non-negative')
-    .optional(),
+  commission_per_user: z.number().min(0, 'Commission must be non-negative').optional(),
   use_zidney_payment: z.boolean().optional(),
   default_language: LanguageCodeSchema.optional(),
   uses_divisions: z.boolean().optional(),
@@ -138,9 +124,7 @@ export const RetryProvisioningRequestSchema = z.object({
   reason: z.string().optional(),
 })
 
-export type RetryProvisioningRequestType = z.infer<
-  typeof RetryProvisioningRequestSchema
->
+export type RetryProvisioningRequestType = z.infer<typeof RetryProvisioningRequestSchema>
 
 /**
  * T090: RFC 7807 Error Response Formatter

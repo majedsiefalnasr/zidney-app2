@@ -6,7 +6,7 @@
  * All responses follow RFC 7807 Problem Details format for errors.
  */
 
-import { LicenseStatus } from '@zidney/types/licenses/license-state'
+import type { LicenseStatus } from '@zidney/types/licenses/license-state'
 
 /**
  * License Creation Response (200 OK)
@@ -145,10 +145,7 @@ export function createLicenseStatusResponse(
     const createdAtMs = new Date(createdAt).getTime()
     const elapsedMs = Date.now() - createdAtMs
     const totalEstimateMs = 120000 // 120 seconds
-    estimatedRemaining = Math.max(
-      0,
-      Math.round((totalEstimateMs - elapsedMs) / 1000)
-    )
+    estimatedRemaining = Math.max(0, Math.round((totalEstimateMs - elapsedMs) / 1000))
   }
 
   return {
@@ -208,10 +205,7 @@ export function createRateLimitHeaders(
 /**
  * Create idempotency headers
  */
-export function createIdempotencyHeaders(
-  isReplay: boolean,
-  storedAt?: Date
-): IdempotencyHeaders {
+export function createIdempotencyHeaders(isReplay: boolean, storedAt?: Date): IdempotencyHeaders {
   const headers: IdempotencyHeaders = {
     'Idempotent-Replay': isReplay ? 'true' : 'false',
   }

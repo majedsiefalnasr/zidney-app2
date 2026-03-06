@@ -29,10 +29,7 @@ export class WebSocketRateLimiter {
    * Check if message is allowed under rate limit
    * Returns { allowed, messagesIn60s, messagesIn1s, retryAfterMs }
    */
-  async checkRateLimit(
-    userId: string,
-    attemptId: string
-  ): Promise<RateLimitStatus> {
+  async checkRateLimit(userId: string, attemptId: string): Promise<RateLimitStatus> {
     const now = Date.now()
     const windowStart = now - this.windowSizeMs
     const burstWindowStart = now - this.burstWindowMs
@@ -97,7 +94,7 @@ export class WebSocketRateLimiter {
       }
 
       // Add message to window
-      // @ts-ignore: LOGIC-BUG: Redis zAdd arg type mismatch — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+      // @ts-expect-error: LOGIC-BUG: Redis zAdd arg type mismatch — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
       await redis.zAdd(key, { score: now, value: `${now}:${Math.random()}` })
 
       // Set key expiration (60 seconds past last message)
@@ -160,9 +157,7 @@ export class WebSocketRateLimiter {
       const messagesIn1s = await redis.zCount(key, burstWindowStart, now)
 
       return {
-        allowed:
-          messagesIn60s < this.maxMessagesPerWindow &&
-          messagesIn1s < this.maxBurstRate,
+        allowed: messagesIn60s < this.maxMessagesPerWindow && messagesIn1s < this.maxBurstRate,
         messagesIn60s,
         messagesIn1s,
       }

@@ -17,13 +17,7 @@ export type FilterOperator =
   | 'is_empty'
   | 'is_not_empty'
 
-export type FilterFieldType =
-  | 'text'
-  | 'select'
-  | 'date'
-  | 'boolean'
-  | 'number'
-  | 'multiselect'
+export type FilterFieldType = 'text' | 'select' | 'date' | 'boolean' | 'number' | 'multiselect'
 
 export interface FilterField {
   id: string
@@ -126,13 +120,7 @@ export type StatusVariant =
   | 'error'
   | 'success'
 
-export type ButtonVariant =
-  | 'primary'
-  | 'secondary'
-  | 'destructive'
-  | 'outline'
-  | 'ghost'
-  | 'link'
+export type ButtonVariant = 'primary' | 'secondary' | 'destructive' | 'outline' | 'ghost' | 'link'
 
 export type ButtonSize = 'sm' | 'md' | 'lg' | 'xl'
 
@@ -183,16 +171,9 @@ export interface AsyncOperation<T = any> {
 // Utility Types
 export type Accessor<TRow = any> = string | ((row: TRow) => any)
 
-export type CellRenderer<TRow = any> = (props: {
-  value: any
-  row: TRow
-  column: any
-}) => any
+export type CellRenderer<TRow = any> = (props: { value: any; row: TRow; column: any }) => any
 
-export type HeaderRenderer<_TRow = any> = (props: {
-  column: any
-  table: any
-}) => any
+export type HeaderRenderer<_TRow = any> = (props: { column: any; table: any }) => any
 
 // Discriminated Unions for Type Safety
 export type DataTableViewMode = 'table' | 'grid' | 'list'

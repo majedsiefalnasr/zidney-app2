@@ -44,9 +44,7 @@ const REDACTED = '[REDACTED]' as const
  * tested in T026–T028 (token-redact unit tests). Shallow-copy behaviour is intentional:
  * nested objects must be pre-flattened by the caller before passing to this function.
  */
-export function redactSensitiveFields<T extends Record<string, unknown>>(
-  logObject: T
-): T {
+export function redactSensitiveFields<T extends Record<string, unknown>>(logObject: T): T {
   const result = { ...logObject }
   for (const key of Object.keys(result)) {
     if (SENSITIVE_KEYS.has(key)) {

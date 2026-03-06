@@ -99,9 +99,7 @@ export async function validateWebSocketJWT(
  * Extract JWT token from request headers
  * Expects: Authorization: Bearer <token>
  */
-export function extractBearerToken(
-  authHeader: string | undefined
-): string | null {
+export function extractBearerToken(authHeader: string | undefined): string | null {
   if (!authHeader) {
     return null
   }
@@ -113,9 +111,6 @@ export function extractBearerToken(
 /**
  * Check if user has required role for WebSocket operations
  */
-export function hasRequiredRole(
-  claims: WebSocketJWTClaims,
-  requiredRoles: string[]
-): boolean {
+export function hasRequiredRole(claims: WebSocketJWTClaims, requiredRoles: string[]): boolean {
   return requiredRoles.some((role) => claims.roles.includes(role))
 }

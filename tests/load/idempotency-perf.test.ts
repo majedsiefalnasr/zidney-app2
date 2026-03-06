@@ -10,7 +10,7 @@ import {
   createTestContext,
   generateJWT,
   insertTestAttempt,
-  TestContext,
+  type TestContext,
 } from '../test-helpers'
 
 describe('T091: Idempotency Performance', () => {

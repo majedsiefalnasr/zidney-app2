@@ -1,4 +1,13 @@
 // ─── Types ──────────────────────────────────────────────────────────────────
+
+// ─── Adapters ───────────────────────────────────────────────────────────────
+export { createFetchAdapter } from './adapters/fetch-adapter'
+export type { MockAdapter } from './adapters/mock-adapter'
+export { createMockAdapter } from './adapters/mock-adapter'
+// ─── Client Factory ─────────────────────────────────────────────────────────
+export { createApiClient } from './client'
+// ─── Error Utilities ────────────────────────────────────────────────────────
+export { createAppError, ErrorCodes, isAppError } from './http-error'
 export type {
   AdapterRequest,
   AdapterResponse,
@@ -9,14 +18,3 @@ export type {
   HttpAdapter,
   RequestConfig,
 } from './types'
-
-// ─── Error Utilities ────────────────────────────────────────────────────────
-export { createAppError, ErrorCodes, isAppError } from './http-error'
-
-// ─── Client Factory ─────────────────────────────────────────────────────────
-export { createApiClient } from './client'
-
-// ─── Adapters ───────────────────────────────────────────────────────────────
-export { createFetchAdapter } from './adapters/fetch-adapter'
-export { createMockAdapter } from './adapters/mock-adapter'
-export type { MockAdapter } from './adapters/mock-adapter'

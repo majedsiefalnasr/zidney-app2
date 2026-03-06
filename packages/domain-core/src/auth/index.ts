@@ -9,39 +9,6 @@
  * Provides unified interface for auth layer to middleware and routes.
  */
 
-// Types
-export * from './types'
-
-// Password hashing
-export {
-  generateDummyHash,
-  hashPassword,
-  validatePasswordComplexity,
-  verifyPassword,
-} from './password'
-
-// JWT operations
-export {
-  extractTokenFromHeader,
-  signBackofficeToken,
-  signFrontofficeToken,
-  signMmcToken,
-  validateJwtClaims,
-  verifyAndDecodeToken,
-} from './jwt-handler'
-
-// RBAC
-export {
-  buildRbacContext,
-  evaluatePermission,
-  evaluatePermissions,
-  evaluateResourcePermission,
-  getDefaultPermissionsForRole,
-  getPermissionDescription,
-  getRoleDescription,
-  isValidPermissionCode,
-} from './rbac'
-
 // Audit logging
 export {
   logAccountLocked,
@@ -55,3 +22,33 @@ export {
   logTokenVersionMismatch,
   logWorkspaceMismatch,
 } from './audit'
+// JWT operations
+export {
+  extractTokenFromHeader,
+  signBackofficeToken,
+  signFrontofficeToken,
+  signMmcToken,
+  validateJwtClaims,
+  verifyAndDecodeToken,
+} from './jwt-handler'
+// Password hashing
+export {
+  generateDummyHash,
+  hashPassword,
+  validatePasswordComplexity,
+  verifyPassword,
+} from './password'
+
+// RBAC
+export {
+  buildRbacContext,
+  evaluatePermission,
+  evaluatePermissions,
+  evaluateResourcePermission,
+  getDefaultPermissionsForRole,
+  getPermissionDescription,
+  getRoleDescription,
+  isValidPermissionCode,
+} from './rbac'
+// Types
+export * from './types'

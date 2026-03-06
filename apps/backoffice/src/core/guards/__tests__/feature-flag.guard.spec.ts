@@ -6,9 +6,7 @@ import { describe, expect, it } from 'vitest'
 import type { RouteLocationNormalized } from 'vue-router'
 import { createFeatureFlagGuard } from '../feature-flag.guard'
 
-function makeRoute(
-  overrides: Partial<RouteLocationNormalized> = {}
-): RouteLocationNormalized {
+function makeRoute(overrides: Partial<RouteLocationNormalized> = {}): RouteLocationNormalized {
   return {
     path: '/test',
     fullPath: '/test',
@@ -26,16 +24,12 @@ function makeRoute(
 describe('createFeatureFlagGuard (Backoffice)', () => {
   it('always returns true for any route', () => {
     const guard = createFeatureFlagGuard()
-    expect(
-      guard(makeRoute({ meta: { requiresAuth: true } }), makeRoute(), () => {})
-    ).toBe(true)
+    expect(guard(makeRoute({ meta: { requiresAuth: true } }), makeRoute(), () => {})).toBe(true)
   })
 
   it('always returns true for public routes', () => {
     const guard = createFeatureFlagGuard()
-    expect(
-      guard(makeRoute({ meta: { public: true } }), makeRoute(), () => {})
-    ).toBe(true)
+    expect(guard(makeRoute({ meta: { public: true } }), makeRoute(), () => {})).toBe(true)
   })
 
   it('never redirects — always passes navigation', () => {

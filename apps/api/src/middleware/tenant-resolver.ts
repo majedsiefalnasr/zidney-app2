@@ -1,11 +1,4 @@
-// Assume logger
-const logger = {
-  info: (msg: string, meta: any) =>
-    console.log(JSON.stringify({ level: 'info', message: msg, ...meta })),
-  warn: (msg: string, meta: any) =>
-    console.warn(JSON.stringify({ level: 'warn', message: msg, ...meta })),
-}
-
+import { logger } from '@zidney/logger'
 import semver from 'semver'
 import { config } from '../config/index'
 import { TenantPoolManager } from '../db/tenant/pool-manager'
@@ -163,9 +156,7 @@ export function enforceLicenseStatus(license: any) {
 }
 
 function enforceProductVersion(license: any) {
-  if (
-    !semver.satisfies(config.platformProductVersion, license.product_version)
-  ) {
+  if (!semver.satisfies(config.platformProductVersion, license.product_version)) {
     throw new Error('VERSION_MISMATCH')
   }
 }
@@ -188,8 +179,7 @@ function getOrCreatePool(registry: any) {
       workspace_id: registry.id,
       totalCount: pool.totalCount,
       maxLimit: 10,
-      message:
-        'Approaching connection limit - consider reviewing query patterns',
+      message: 'Approaching connection limit - consider reviewing query patterns',
     })
   }
 

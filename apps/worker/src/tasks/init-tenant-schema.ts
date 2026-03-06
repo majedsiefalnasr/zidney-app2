@@ -85,13 +85,7 @@ export async function executeInitTenantSchema(
   pool: Pool,
   _redisClient?: any
 ): Promise<InitTenantSchemaResult> {
-  const {
-    workspace_id,
-    task_id,
-    idempotency_key,
-    schema_version,
-    schema_file_checksum,
-  } = payload
+  const { workspace_id, task_id, idempotency_key, schema_version, schema_file_checksum } = payload
 
   const logger = createLogger(`INIT_TENANT_SCHEMA[${task_id}]`)
   const startTime = Date.now()
@@ -140,26 +134,20 @@ export async function executeInitTenantSchema(
         // Schema version record exists - VERIFY baseline tables exist
         const existingVersion = existingVersionResult.rows[0]
 
-        logger.debug(
-          'Schema version record found - verifying baseline tables',
-          {
-            existing_version: existingVersion.version,
-          }
-        )
+        logger.debug('Schema version record found - verifying baseline tables', {
+          existing_version: existingVersion.version,
+        })
 
         // CRITICAL EDGE CASE: If schema_version exists but tables missing,
         // the previous worker crashed mid-transaction. Retry to recover.
         try {
           await verifySchemaIntegrity(client as any)
 
-          logger.info(
-            'IDEMPOTENT: Schema fully initialized (all baseline tables verified)',
-            {
-              existing_version: existingVersion.version,
-              existing_applied_at: existingVersion.applied_at,
-              requested_version: schema_version,
-            }
-          )
+          logger.info('IDEMPOTENT: Schema fully initialized (all baseline tables verified)', {
+            existing_version: existingVersion.version,
+            existing_applied_at: existingVersion.applied_at,
+            requested_version: schema_version,
+          })
 
           // Return SUCCESS (graceful exit for re-runs)
           return {
@@ -178,9 +166,7 @@ export async function executeInitTenantSchema(
               existing_version: existingVersion.version,
               requested_version: schema_version,
               error:
-                integrityError instanceof Error
-                  ? integrityError.message
-                  : String(integrityError),
+                integrityError instanceof Error ? integrityError.message : String(integrityError),
             }
           )
 
@@ -217,14 +203,8 @@ export async function executeInitTenantSchema(
       // READ MIGRATION FILES
       // ======================================================================
 
-      const schemaFilePath = getMigrationFilePath(
-        schema_version,
-        'baseline-schema.sql'
-      )
-      const triggersFilePath = getMigrationFilePath(
-        schema_version,
-        'triggers.sql'
-      )
+      const schemaFilePath = getMigrationFilePath(schema_version, 'baseline-schema.sql')
+      const triggersFilePath = getMigrationFilePath(schema_version, 'triggers.sql')
 
       const schemaSQL = readMigrationFile(schemaFilePath)
       const triggersSQL = readMigrationFile(triggersFilePath)
@@ -290,11 +270,7 @@ export async function executeInitTenantSchema(
       // INSERT SCHEMA_VERSION RECORD (marks initialization complete)
       // ======================================================================
 
-      await insertSchemaVersion(
-        client as any,
-        schema_version,
-        calculatedChecksum
-      )
+      await insertSchemaVersion(client as any, schema_version, calculatedChecksum)
       logger.info('Schema version record inserted', {
         version: schema_version,
         checksum: calculatedChecksum.substring(0, 8) + '...',
@@ -337,10 +313,7 @@ export async function executeInitTenantSchema(
         logger.debug('Transaction rolled back')
       } catch (rollbackError) {
         logger.error('Rollback failed', {
-          error:
-            rollbackError instanceof Error
-              ? rollbackError.message
-              : String(rollbackError),
+          error: rollbackError instanceof Error ? rollbackError.message : String(rollbackError),
         })
       }
 
@@ -374,10 +347,7 @@ export async function executeInitTenantSchema(
         logger.debug('Client released to pool')
       } catch (releaseError) {
         logger.error('Failed to release client', {
-          error:
-            releaseError instanceof Error
-              ? releaseError.message
-              : String(releaseError),
+          error: releaseError instanceof Error ? releaseError.message : String(releaseError),
         })
       }
     }
@@ -403,11 +373,7 @@ export async function handleInitTenantSchema(
   const payload = taskData as InitTenantSchemaPayload
 
   // Execute with full transaction context
-  const result = await executeInitTenantSchema(
-    payload,
-    dependencies.pool,
-    dependencies.redis
-  )
+  const result = await executeInitTenantSchema(payload, dependencies.pool, dependencies.redis)
 
   // Handle result routing
   if (result.status === 'SUCCESS') {
@@ -416,13 +382,10 @@ export async function handleInitTenantSchema(
       version: result.version,
     })
   } else if (result.status === 'DLQ_ESCALATED') {
-    logger.critical(
-      'SECURITY: Schema initialization escalated to DLQ (tampering detected)',
-      {
-        workspace_id: result.workspace_id,
-        tampering_detected: result.tampering_detected,
-      }
-    )
+    logger.critical('SECURITY: Schema initialization escalated to DLQ (tampering detected)', {
+      workspace_id: result.workspace_id,
+      tampering_detected: result.tampering_detected,
+    })
     // Queue should: Send to DLQ, Alert admin, DO NOT RETRY
   } else if (result.status === 'RETRY') {
     logger.warn('Schema initialization will retry', {

@@ -16,8 +16,8 @@
  * - Returns 429 Too Many Requests with Retry-After header
  */
 
-import { Context, Next } from 'hono'
-import { Redis } from 'ioredis'
+import type { Context, Next } from 'hono'
+import type { Redis } from 'ioredis'
 
 const LOGIN_ATTEMPTS_LIMIT = 5
 const LOGIN_ATTEMPTS_WINDOW = 60 // 1 minute in seconds
@@ -78,8 +78,7 @@ export const RATE_LIMIT_CONFIG: Record<
  * Rate Limiter
  */
 export class RateLimiter {
-  private inMemoryStore: Map<string, { attempts: number; resetAt: number }> =
-    new Map()
+  private inMemoryStore: Map<string, { attempts: number; resetAt: number }> = new Map()
 
   constructor(private redis?: Redis) {}
 
@@ -101,7 +100,7 @@ export class RateLimiter {
           await this.redis.expire(`rate_limit:${key}`, window)
         }
         return attempts > limit
-      } catch (err) {
+      } catch (_err) {
         // Fall back to in-memory
       }
     }
@@ -137,7 +136,7 @@ export class RateLimiter {
     if (this.redis) {
       try {
         await this.redis.del(`rate_limit:${key}`)
-      } catch (err) {
+      } catch (_err) {
         // Ignore
       }
     }
@@ -152,7 +151,7 @@ export class RateLimiter {
       try {
         const attempts = await this.redis.get(`rate_limit:${key}`)
         return parseInt(attempts || '0', 10)
-      } catch (err) {
+      } catch (_err) {
         // Fall back to in-memory
       }
     }
@@ -168,16 +167,14 @@ export class RateLimiter {
 export function createLoginRateLimiter(redis?: Redis) {
   const limiter = new RateLimiter(redis)
 
-  return async (ctx: Context, next: Next): Promise<void | Response> => {
+  return async (ctx: Context, next: Next): Promise<undefined | Response> => {
     const ipAddress =
-      ctx.req.header('X-Forwarded-For') ||
-      ctx.req.header('CF-Connecting-IP') ||
-      'unknown'
+      ctx.req.header('X-Forwarded-For') || ctx.req.header('CF-Connecting-IP') || 'unknown'
     const key = `login_attempt:${ipAddress}`
 
     const isLimited = await limiter.isLimited(key)
     if (isLimited) {
-      // @ts-ignore: LOGIC-BUG: ctx.json() return not void in rate limit handler — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+      // @ts-expect-error: LOGIC-BUG: ctx.json() return not void in rate limit handler — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
       return ctx.json(
         {
           success: false,
@@ -240,24 +237,19 @@ export function createPerEndpointRateLimiter(redis?: Redis) {
 
     // Extract client IP from forwarded headers (behind proxy)
     const clientIp =
-      // @ts-ignore: LOGIC-BUG: possibly undefined header value — see INFRA-001 [INFRA-001]
-      ctx.req.header('x-forwarded-for')?.split(',')[0]!.trim() ||
+      // @ts-expect-error: LOGIC-BUG: possibly undefined header value — see INFRA-001 [INFRA-001]
+      ctx.req.header('x-forwarded-for')?.split(',')[0]?.trim() ||
       ctx.req.header('x-real-ip') ||
       ctx.req.header('CF-Connecting-IP') ||
       'unknown'
 
     const key = `${endpoint}:${clientIp}`
-    const isLimited = await limiter.isLimited(
-      key,
-      config.max,
-      Math.ceil(config.windowMs / 1000)
-    )
+    const isLimited = await limiter.isLimited(key, config.max, Math.ceil(config.windowMs / 1000))
 
     // Get current attempt count for headers
     const attempts = await limiter.getAttempts(key)
     const remaining = Math.max(0, config.max - attempts)
-    const resetTime =
-      Math.ceil(Date.now() / 1000) + Math.ceil(config.windowMs / 1000)
+    const resetTime = Math.ceil(Date.now() / 1000) + Math.ceil(config.windowMs / 1000)
 
     // Add standard rate limit headers
     ctx.header('X-RateLimit-Limit', String(config.max))
@@ -268,7 +260,7 @@ export function createPerEndpointRateLimiter(redis?: Redis) {
       const retryAfter = Math.ceil(config.windowMs / 1000)
       ctx.header('Retry-After', String(retryAfter))
 
-      // @ts-ignore: LOGIC-BUG: ctx.json() return not void in rate limit handler — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+      // @ts-expect-error: LOGIC-BUG: ctx.json() return not void in rate limit handler — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
       return ctx.json(
         {
           success: false,
@@ -529,7 +521,7 @@ export function createRateLimitMiddleware(options: {
   const limiter = new RateLimiter(options.redis)
   const windowSec = Math.ceil(options.windowMs / 1000)
 
-  return async (ctx: Context, next: Next): Promise<void | Response> => {
+  return async (ctx: Context, next: Next): Promise<undefined | Response> => {
     const clientIp =
       ctx.req.header('X-Forwarded-For')?.split(',')[0]?.trim() ||
       ctx.req.header('X-Real-IP') ||
@@ -541,7 +533,7 @@ export function createRateLimitMiddleware(options: {
 
     if (isLimited) {
       ctx.header('Retry-After', String(windowSec))
-      // @ts-ignore: ctx.json return type conflicts with MiddlewareHandler void signature [ts(2322)]
+      // @ts-expect-error: ctx.json return type conflicts with MiddlewareHandler void signature [ts(2322)]
       return ctx.json(
         {
           success: false,

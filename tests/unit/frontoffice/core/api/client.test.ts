@@ -80,11 +80,7 @@ describe('createAppApiClient (frontoffice)', () => {
   })
 
   it('returns an ApiClient instance (truthy object)', () => {
-    const client = createAppApiClient(
-      tokenManager,
-      refreshManager,
-      errorInterceptor
-    )
+    const client = createAppApiClient(tokenManager, refreshManager, errorInterceptor)
     expect(client).toBeTruthy()
   })
 

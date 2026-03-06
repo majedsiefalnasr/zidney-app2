@@ -39,14 +39,10 @@
  * ✓ Cache prefix `rbac_v2:` (not `rbac:`)
  */
 
+import type { PermissionAction, PermissionModule } from '@zidney/domain-core/rbac'
 import type { Logger } from '@zidney/logger'
 import type { MiddlewareHandler } from 'hono'
 import type { Redis } from 'ioredis'
-
-import {
-  PermissionModule,
-  type PermissionAction,
-} from '@zidney/domain-core/rbac'
 
 // ---------------------------------------------------------------------------
 // Types
@@ -154,8 +150,7 @@ export function createPermissionGuard(
   action: PermissionAction
 ): MiddlewareHandler {
   return async (c, next) => {
-    const correlationId: string =
-      (c.get('correlationId') as string) || 'unknown'
+    const correlationId: string = (c.get('correlationId') as string) || 'unknown'
     const tenant = c.get('tenant') as TenantContext | undefined
 
     if (!tenant) {
@@ -242,7 +237,7 @@ export function createPermissionGuard(
     }
 
     // -- Step 6: Check role.status === 'ACTIVE' --
-    if (roleResult.rows[0]!.status !== 'ACTIVE') {
+    if (roleResult.rows[0]?.status !== 'ACTIVE') {
       logger.warn('Permission denied: role disabled', {
         workspace_slug: tenant.slug,
         workspace_id: tenant.id,
@@ -295,7 +290,7 @@ export function createPermissionGuard(
         if (permResult.rows.length === 0) {
           hasPermission = false
         } else {
-          hasPermission = permResult.rows[0]![action] === true
+          hasPermission = permResult.rows[0]?.[action] === true
         }
 
         // Store in request cache
@@ -304,12 +299,7 @@ export function createPermissionGuard(
         // Store in Redis (TTL 30s)
         if (tenant.redis) {
           try {
-            await tenant.redis.set(
-              redisCacheKey,
-              hasPermission ? '1' : '0',
-              'EX',
-              30
-            )
+            await tenant.redis.set(redisCacheKey, hasPermission ? '1' : '0', 'EX', 30)
           } catch (err) {
             // Redis write failure is non-blocking — log and continue
             logger.warn('Redis cache write failed', {

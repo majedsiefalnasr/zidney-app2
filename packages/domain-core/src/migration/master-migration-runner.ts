@@ -4,15 +4,11 @@
  * Platform bootstrap (executed once at app boot)
  */
 
-import { MigrationResult } from '@zidney/types'
-import {
-  calculateChecksum,
-  detectMigrationGap,
-  validateMigrationFile,
-} from '@zidney/validation'
+import type { MigrationResult } from '@zidney/types'
+import { calculateChecksum, detectMigrationGap, validateMigrationFile } from '@zidney/validation'
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 /**
  * Load all migration files from migrations directory
@@ -72,23 +68,15 @@ export async function runMasterMigrations(
           await client.query(sqlContent)
           migrationsApplied++
         } catch (err: any) {
-          throw new Error(
-            `Syntax error in migration ${filename}: ${err.message}`
-          )
+          throw new Error(`Syntax error in migration ${filename}: ${err.message}`)
         }
       }
 
       // Update platform_settings.current_schema_version
       // Extract latest version from last migration
       const lastMigrationFile = migrationFiles[migrationFiles.length - 1]!
-      const lastSqlContent = readFileSync(
-        join(migrationsDir, lastMigrationFile),
-        'utf-8'
-      )
-      const lastValidation = validateMigrationFile(
-        lastMigrationFile,
-        lastSqlContent
-      )
+      const lastSqlContent = readFileSync(join(migrationsDir, lastMigrationFile), 'utf-8')
+      const lastValidation = validateMigrationFile(lastMigrationFile, lastSqlContent)
 
       if (!lastValidation.header?.targetVersion) {
         throw new Error('Unable to determine latest schema version')

@@ -28,17 +28,17 @@ import {
   LicenseValidationError,
   ProvisioningError,
 } from './errors'
-import { LicenseRepository } from './repository'
+import type { LicenseRepository } from './repository'
 import {
-  ArchiveRequest,
-  CreateLicenseRequest,
-  EditLicenseRequest,
-  License,
+  type ArchiveRequest,
+  type CreateLicenseRequest,
+  type EditLicenseRequest,
+  type License,
   LicenseStatus,
-  RestoreRequest,
-  RetryProvisioningRequest,
-  SoftLockRequest,
-  UnlockRequest,
+  type RestoreRequest,
+  type RetryProvisioningRequest,
+  type SoftLockRequest,
+  type UnlockRequest,
 } from './types'
 
 // Logger interface compatible with pino-like loggers
@@ -66,10 +66,7 @@ export class LicenseService {
    * Validates all input, snapshotts versions, creates license,
    * and enqueues provisioning job.
    */
-  async create(
-    input: CreateLicenseRequest,
-    correlationId: string
-  ): Promise<License> {
+  async create(input: CreateLicenseRequest, correlationId: string): Promise<License> {
     return this.repository.withTransaction(async () => {
       // Step 1: Validate all inputs
       this.validateWorkspaceSlug(input.workspace_slug)
@@ -77,10 +74,7 @@ export class LicenseService {
       await this.validateProductActive(input.product_id)
       this.validateLimits(input.student_limit, input.staff_limit)
       this.validateLanguageCode(input.default_language || 'en')
-      if (
-        input.commission_per_user !== undefined &&
-        input.commission_per_user !== null
-      ) {
+      if (input.commission_per_user !== undefined && input.commission_per_user !== null) {
         this.validateCommission(input.commission_per_user)
       }
 
@@ -158,15 +152,8 @@ export class LicenseService {
     }
   }
 
-  validateLimits(
-    studentLimit?: number | null,
-    staffLimit?: number | null
-  ): void {
-    if (
-      studentLimit !== undefined &&
-      studentLimit !== null &&
-      studentLimit < 0
-    ) {
+  validateLimits(studentLimit?: number | null, staffLimit?: number | null): void {
+    if (studentLimit !== undefined && studentLimit !== null && studentLimit < 0) {
       throw LicenseValidationError.invalidLimit()
     }
 
@@ -196,9 +183,7 @@ export class LicenseService {
   }
 
   async validateSlugUnique(slug: string): Promise<void> {
-    const existing = await this.repository.getByWorkspaceSlug(
-      slug.toLowerCase()
-    )
+    const existing = await this.repository.getByWorkspaceSlug(slug.toLowerCase())
     if (existing) {
       throw LicenseValidationError.slugNotUnique()
     }
@@ -252,11 +237,7 @@ export class LicenseService {
    * Allows editing of mutable fields only.
    * Rejects attempts to change immutable fields.
    */
-  async edit(
-    id: string,
-    input: EditLicenseRequest,
-    correlationId: string
-  ): Promise<License> {
+  async edit(id: string, input: EditLicenseRequest, correlationId: string): Promise<License> {
     return this.repository.withTransaction(async () => {
       const license = await this.getById(id)
 
@@ -282,10 +263,7 @@ export class LicenseService {
       if (input.default_language) {
         this.validateLanguageCode(input.default_language)
       }
-      if (
-        input.commission_per_user !== undefined &&
-        input.commission_per_user !== null
-      ) {
+      if (input.commission_per_user !== undefined && input.commission_per_user !== null) {
         this.validateCommission(input.commission_per_user)
       }
 
@@ -306,11 +284,7 @@ export class LicenseService {
   /**
    * T027: Status transition methods
    */
-  async softLock(
-    id: string,
-    input: SoftLockRequest,
-    correlationId: string
-  ): Promise<License> {
+  async softLock(id: string, input: SoftLockRequest, correlationId: string): Promise<License> {
     return this.repository.withTransaction(async () => {
       const license = await this.getById(id)
 
@@ -321,10 +295,7 @@ export class LicenseService {
       }
 
       const gracePeriodDays = input.grace_period_days || SOFT_LOCK_DEFAULT_DAYS
-      if (
-        gracePeriodDays < SOFT_LOCK_MIN_DAYS ||
-        gracePeriodDays > SOFT_LOCK_MAX_DAYS
-      ) {
+      if (gracePeriodDays < SOFT_LOCK_MIN_DAYS || gracePeriodDays > SOFT_LOCK_MAX_DAYS) {
         throw new Error(
           `Grace period must be between ${SOFT_LOCK_MIN_DAYS} and ${SOFT_LOCK_MAX_DAYS} days`
         )
@@ -355,11 +326,7 @@ export class LicenseService {
     })
   }
 
-  async unlock(
-    id: string,
-    input: UnlockRequest,
-    correlationId: string
-  ): Promise<License> {
+  async unlock(id: string, input: UnlockRequest, correlationId: string): Promise<License> {
     return this.repository.withTransaction(async () => {
       const license = await this.getById(id)
 
@@ -388,11 +355,7 @@ export class LicenseService {
     })
   }
 
-  async archive(
-    id: string,
-    input: ArchiveRequest,
-    correlationId: string
-  ): Promise<License> {
+  async archive(id: string, input: ArchiveRequest, correlationId: string): Promise<License> {
     return this.repository.withTransaction(async () => {
       const license = await this.getById(id)
 
@@ -421,11 +384,7 @@ export class LicenseService {
     })
   }
 
-  async restore(
-    id: string,
-    input: RestoreRequest,
-    correlationId: string
-  ): Promise<License> {
+  async restore(id: string, input: RestoreRequest, correlationId: string): Promise<License> {
     return this.repository.withTransaction(async () => {
       const license = await this.getById(id)
 
@@ -506,10 +465,8 @@ export class LicenseService {
       // Check backoff (exponential: 2s, 4s, 8s, 16s, 32s)
       if (license.provisioning_last_attempt_at) {
         const retryNumber = license.provisioning_retries
-        const requiredDelayMs =
-          PROVISIONING_BASE_DELAY_MS * Math.pow(2, retryNumber)
-        const timeSinceLastAttempt =
-          Date.now() - license.provisioning_last_attempt_at.getTime()
+        const requiredDelayMs = PROVISIONING_BASE_DELAY_MS * 2 ** retryNumber
+        const timeSinceLastAttempt = Date.now() - license.provisioning_last_attempt_at.getTime()
 
         if (timeSinceLastAttempt < requiredDelayMs - 500) {
           // 500ms tolerance window

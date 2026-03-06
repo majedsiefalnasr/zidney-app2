@@ -12,10 +12,10 @@ import { createLogger } from '@zidney/logger'
 import type { Pool } from 'pg'
 import {
   createDLQMessage,
+  type DLQMessage,
   determineTaskAction,
   getRetryDelay,
   shouldAlertOps,
-  type DLQMessage,
 } from '../config/task-configs'
 import {
   executeInitTenantSchema,
@@ -147,9 +147,7 @@ export class TaskQueueProcessor {
   /**
    * Process INIT_TENANT_SCHEMA task
    */
-  private async processInitTenantSchema(
-    task: QueuedTask
-  ): Promise<InitTenantSchemaResult> {
+  private async processInitTenantSchema(task: QueuedTask): Promise<InitTenantSchemaResult> {
     const payload = task.payload as InitTenantSchemaPayload
     const { workspace_id } = payload
 
@@ -176,11 +174,7 @@ export class TaskQueueProcessor {
   /**
    * Route task to DLQ (Dead Letter Queue)
    */
-  private async routeToDLQ(
-    task: QueuedTask,
-    result: any,
-    logger: any
-  ): Promise<QueuedTask> {
+  private async routeToDLQ(task: QueuedTask, result: any, logger: any): Promise<QueuedTask> {
     const dlqMessage = createDLQMessage(
       task.type,
       task.id,
@@ -212,11 +206,7 @@ export class TaskQueueProcessor {
   /**
    * Schedule task for retry with exponential backoff
    */
-  private async scheduleRetry(
-    task: QueuedTask,
-    result: any,
-    logger: any
-  ): Promise<QueuedTask> {
+  private async scheduleRetry(task: QueuedTask, result: any, logger: any): Promise<QueuedTask> {
     const backoffMs = getRetryDelay(task.type, task.attempt)
     const nextAttempt = task.attempt + 1
     const nextRetryAt = new Date(Date.now() + backoffMs).toISOString()

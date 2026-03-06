@@ -22,9 +22,9 @@
  * 8. Handle failures with retry strategy (T040)
  */
 
-import { Attempt, AttemptStatus } from '@zidney/types/attempt'
-import { Pool } from 'pg'
 import { logger } from '@zidney/logger'
+import { type Attempt, AttemptStatus } from '@zidney/types/attempt'
+import type { Pool } from 'pg'
 import { gradeAttempt } from './grader'
 import { finalizeAttempt } from './result-persister'
 import { handleJobFailure } from './retry-strategy'
@@ -118,16 +118,10 @@ export async function startGradeJobsConsumer(
         // 3. Load attempt (workspace-scoped)
         const tenantDb = tenantPoolMap.get(job.workspace_id)
         if (!tenantDb) {
-          throw new Error(
-            `Tenant database not found for workspace ${job.workspace_id}`
-          )
+          throw new Error(`Tenant database not found for workspace ${job.workspace_id}`)
         }
 
-        const attempt = await loadAttempt(
-          tenantDb,
-          job.workspace_id,
-          job.attempt_id
-        )
+        const attempt = await loadAttempt(tenantDb, job.workspace_id, job.attempt_id)
 
         if (!attempt) {
           throw new Error(`Attempt not found: ${job.attempt_id}`)
@@ -170,9 +164,7 @@ export async function startGradeJobsConsumer(
 
         // 5. Verify attempt is in SUBMITTED state
         if (attempt.status !== AttemptStatus.SUBMITTED) {
-          throw new Error(
-            `Attempt must be SUBMITTED for grading, got: ${attempt.status}`
-          )
+          throw new Error(`Attempt must be SUBMITTED for grading, got: ${attempt.status}`)
         }
 
         // 6. Execute grading (T038)
@@ -203,12 +195,7 @@ export async function startGradeJobsConsumer(
         )
 
         // 7. Persist result (T039, atomic)
-        const finalized = await finalizeAttempt(
-          tenantDb,
-          attempt,
-          gradeResult,
-          job.workspace_id
-        )
+        const finalized = await finalizeAttempt(tenantDb, attempt, gradeResult, job.workspace_id)
 
         logger.info(
           {
@@ -395,10 +382,7 @@ async function dequeueJob(masterDb: Pool): Promise<GradingJob | null> {
  * @param jobId - Job UUID
  * @returns Job or null
  */
-async function getJobById(
-  masterDb: Pool,
-  jobId: string
-): Promise<GradingJob | null> {
+async function getJobById(masterDb: Pool, jobId: string): Promise<GradingJob | null> {
   const result = await masterDb.query(
     `
     SELECT 

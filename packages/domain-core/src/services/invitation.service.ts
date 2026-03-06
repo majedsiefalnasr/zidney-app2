@@ -1,16 +1,12 @@
 import type { InvitationWithMemberData } from '@zidney/types'
-// @ts-ignore: LOGIC-BUG: @zidney/types/db-schema module path not resolved - see INFRA-001-LOGIC-09 [INFRA-001]
-import {
-  mmc_member_invitations,
-  mmc_members,
-  roles,
-} from '@zidney/types/db-schema'
-// @ts-ignore: drizzle-orm not declared as dependency of domain-core [INFRA-001-DEPS-03]
+// @ts-expect-error: LOGIC-BUG: @zidney/types/db-schema module path not resolved - see INFRA-001-LOGIC-09 [INFRA-001]
+import { mmc_member_invitations, mmc_members, roles } from '@zidney/types/db-schema'
+// @ts-expect-error: drizzle-orm not declared as dependency of domain-core [INFRA-001-DEPS-03]
 import { and, desc, eq } from 'drizzle-orm'
-// @ts-ignore: drizzle-orm/node-postgres not declared as dependency of domain-core [INFRA-001-DEPS-03]
-import { type Database } from 'drizzle-orm/node-postgres'
+// @ts-expect-error: drizzle-orm/node-postgres not declared as dependency of domain-core [INFRA-001-DEPS-03]
+import type { Database } from 'drizzle-orm/node-postgres'
 import { AppError, ErrorCode } from '../errors/index.js'
-import { AuditService } from './audit.service.js'
+import type { AuditService } from './audit.service.js'
 
 export interface InvitationServiceConstructor {
   db: Database
@@ -45,21 +41,16 @@ export class InvitationService {
     })
 
     if (existingMember) {
-      throw new AppError(
-        ErrorCode.CONFLICT,
-        `Email already registered as MMC member`,
-        409
-      )
+      throw new AppError(ErrorCode.CONFLICT, `Email already registered as MMC member`, 409)
     }
 
     // Validate no pending invitation for same email
-    const existingInvitation =
-      await this.db.query.mmc_member_invitations.findFirst({
-        where: and(
-          eq(mmc_member_invitations.email, email),
-          eq(mmc_member_invitations.status, 'PENDING')
-        ),
-      })
+    const existingInvitation = await this.db.query.mmc_member_invitations.findFirst({
+      where: and(
+        eq(mmc_member_invitations.email, email),
+        eq(mmc_member_invitations.status, 'PENDING')
+      ),
+    })
 
     if (existingInvitation) {
       throw new AppError(
@@ -102,15 +93,11 @@ export class InvitationService {
         .returning()
 
       if (!invitation.id) {
-        throw new AppError(
-          ErrorCode.INTERNAL_ERROR,
-          `Failed to create invitation`,
-          500
-        )
+        throw new AppError(ErrorCode.INTERNAL_ERROR, `Failed to create invitation`, 500)
       }
 
       // Audit log
-      // @ts-ignore: LOGIC-BUG: logInvitationSent called with object but expects 7 positional args — see INFRA-001-LOGIC-02 [INFRA-001-LOGIC-02]
+      // @ts-expect-error: LOGIC-BUG: logInvitationSent called with object but expects 7 positional args — see INFRA-001-LOGIC-02 [INFRA-001-LOGIC-02]
       await this.auditService.logInvitationSent({
         invitationId: invitation.id,
         email,
@@ -144,11 +131,7 @@ export class InvitationService {
     })
 
     if (!invitation) {
-      throw new AppError(
-        ErrorCode.VALIDATION_ERROR,
-        `Invalid or expired invitation token`,
-        401
-      )
+      throw new AppError(ErrorCode.VALIDATION_ERROR, `Invalid or expired invitation token`, 401)
     }
 
     // Validate invitation not already accepted
@@ -163,11 +146,7 @@ export class InvitationService {
     // Validate not expired (server time authoritative)
     const now = new Date()
     if (now > invitation.expires_at) {
-      throw new AppError(
-        ErrorCode.VALIDATION_ERROR,
-        `Invitation token has expired`,
-        401
-      )
+      throw new AppError(ErrorCode.VALIDATION_ERROR, `Invitation token has expired`, 401)
     }
 
     // Validate username uniqueness
@@ -204,11 +183,7 @@ export class InvitationService {
         .returning()
 
       if (!member.id) {
-        throw new AppError(
-          ErrorCode.INTERNAL_ERROR,
-          `Failed to create member`,
-          500
-        )
+        throw new AppError(ErrorCode.INTERNAL_ERROR, `Failed to create member`, 500)
       }
 
       // Update invitation
@@ -223,7 +198,7 @@ export class InvitationService {
         .where(eq(mmc_member_invitations.id, invitation.id))
 
       // Audit log
-      // @ts-ignore: LOGIC-BUG: logInvitationAccepted called with object but expects 6 positional args — see INFRA-001-LOGIC-02 [INFRA-001-LOGIC-02]
+      // @ts-expect-error: LOGIC-BUG: logInvitationAccepted called with object but expects 6 positional args — see INFRA-001-LOGIC-02 [INFRA-001-LOGIC-02]
       await this.auditService.logInvitationAccepted({
         memberId: member.id,
         invitationId: invitation.id,
@@ -317,11 +292,7 @@ export class InvitationService {
     }
 
     if (invitation.status !== 'PENDING') {
-      throw new AppError(
-        ErrorCode.VALIDATION_ERROR,
-        `Can only resend pending invitations`,
-        400
-      )
+      throw new AppError(ErrorCode.VALIDATION_ERROR, `Can only resend pending invitations`, 400)
     }
 
     // Check expiration
@@ -336,11 +307,7 @@ export class InvitationService {
         })
         .where(eq(mmc_member_invitations.id, invitationId))
 
-      throw new AppError(
-        ErrorCode.VALIDATION_ERROR,
-        `Invitation has expired`,
-        401
-      )
+      throw new AppError(ErrorCode.VALIDATION_ERROR, `Invitation has expired`, 401)
     }
 
     // Get role name
@@ -366,12 +333,7 @@ export class InvitationService {
         status: 'EXPIRED',
         updated_at: now,
       })
-      .where(
-        and(
-          eq(mmc_member_invitations.status, 'PENDING'),
-          (col: any) => col.expires_at < now
-        )
-      )
+      .where(and(eq(mmc_member_invitations.status, 'PENDING'), (col: any) => col.expires_at < now))
 
     return result.rowCount || 0
   }

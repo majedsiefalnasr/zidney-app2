@@ -6,8 +6,9 @@
  * Purpose: Soft delete affiliate by changing status to INACTIVE
  */
 
-import { Affiliate } from '@zidney/domain-core/affiliates/types'
-import { Context } from 'hono'
+import type { Affiliate } from '@zidney/domain-core/affiliates/types'
+import { logger } from '@zidney/logger'
+import type { Context } from 'hono'
 import { pool } from '../../../../db'
 
 export async function disableAffiliateHandler(c: Context) {
@@ -66,7 +67,7 @@ export async function disableAffiliateHandler(c: Context) {
 
     // TODO: Insert into affiliate_admin_audit with ACTION='DISABLE'
 
-    console.log('[AFFILIATE] Disabled:', {
+    logger.info('[AFFILIATE] Disabled:', {
       affiliate_id: affiliateId,
       promo_code: current.promo_code,
       correlation_id: c.get('correlation_id'),
@@ -79,7 +80,7 @@ export async function disableAffiliateHandler(c: Context) {
       error: null,
     })
   } catch (error: any) {
-    console.error('[AFFILIATE] Disable error:', error)
+    logger.error('[AFFILIATE] Disable error:', { error })
 
     c.status(500)
     return c.json({

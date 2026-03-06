@@ -17,10 +17,9 @@
  * - Dependencies: roles table must exist
  */
 
-import { PoolClient } from 'pg'
+import type { PoolClient } from 'pg'
 
-export const description =
-  'Create role_permissions table with permission matrix (role × domain)'
+export const description = 'Create role_permissions table with permission matrix (role × domain)'
 
 /**
  * Execute schema migration

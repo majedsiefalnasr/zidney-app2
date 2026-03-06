@@ -4,8 +4,9 @@
  * Blocks incompatible requests with 426 Upgrade Required
  */
 
+import { logger } from '@zidney/logger'
 import { isCompatible } from '@zidney/validation'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 export interface TenantResolverContext {
   workspace_id: string
@@ -76,33 +77,21 @@ export async function validateSchemaCompatibility(
       throw err
     }
 
-    console.log(
-      JSON.stringify({
-        level: 'DEBUG',
-        service: 'schema-compatibility-checker',
-        event: 'schema_version_check_passed',
-        workspace_id: tenantContext.workspace_id,
-        tenant_version: tenantVersion,
-        minimum_version: minimumSupported,
-        compatible: true,
-        timestamp: new Date().toISOString(),
-      })
-    )
+    logger.debug('schema_version_check_passed', {
+      workspace_id: tenantContext.workspace_id,
+      tenant_version: tenantVersion,
+      minimum_version: minimumSupported,
+      compatible: true,
+    })
   } catch (err: any) {
     if (err.statusCode === 426) {
       throw err
     }
 
-    console.log(
-      JSON.stringify({
-        level: 'ERROR',
-        service: 'schema-compatibility-checker',
-        event: 'schema_version_check_failed',
-        workspace_id: tenantContext.workspace_id,
-        error_message: err.message,
-        timestamp: new Date().toISOString(),
-      })
-    )
+    logger.error('schema_version_check_failed', {
+      workspace_id: tenantContext.workspace_id,
+      error_message: err.message,
+    })
 
     // Re-throw as compatibility error
     const err426 = new Error(err.message)
@@ -117,13 +106,7 @@ export async function validateSchemaCompatibility(
 export function invalidatePlatformSettingsCache(): void {
   platformSettingsCache.delete('minimum_supported_schema_version')
 
-  console.log(
-    JSON.stringify({
-      level: 'DEBUG',
-      service: 'schema-compatibility-checker',
-      event: 'cache_invalidated',
-      key: 'minimum_supported_schema_version',
-      timestamp: new Date().toISOString(),
-    })
-  )
+  logger.debug('cache_invalidated', {
+    key: 'minimum_supported_schema_version',
+  })
 }

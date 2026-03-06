@@ -49,7 +49,8 @@ import {
   signBackofficeToken,
   verifyPassword,
 } from '@zidney/domain-core/auth'
-import { Context } from 'hono'
+import { logger } from '@zidney/logger'
+import type { Context } from 'hono'
 
 /**
  * POST /auth/backoffice/login
@@ -171,13 +172,7 @@ export async function backofficeLoginHandler(c: Context) {
 
       // === STEP 5: Check if user found (after time-safe verification) ===
       if (!user || !user.is_active) {
-        await logLoginFailure(
-          correlationId,
-          email,
-          workspaceSlug,
-          'user_not_found_or_inactive',
-          0
-        )
+        await logLoginFailure(correlationId, email, workspaceSlug, 'user_not_found_or_inactive', 0)
         await client.query('COMMIT')
         return c.json(
           {
@@ -236,13 +231,7 @@ export async function backofficeLoginHandler(c: Context) {
             [newFailCount, lockUntil, user.id]
           )
 
-          await logAccountLocked(
-            correlationId,
-            user.id,
-            user.email,
-            workspaceSlug,
-            300
-          )
+          await logAccountLocked(correlationId, user.id, user.email, workspaceSlug, 300)
         } else {
           // Just increment counter
           await client.query(
@@ -350,7 +339,7 @@ export async function backofficeLoginHandler(c: Context) {
       client.release()
     }
   } catch (error) {
-    console.error('Backoffice login error:', error)
+    logger.error('Backoffice login error:', { error })
     return c.json(
       {
         success: false,

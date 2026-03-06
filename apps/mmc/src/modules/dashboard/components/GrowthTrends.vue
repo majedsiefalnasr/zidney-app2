@@ -163,6 +163,8 @@
 </template>
 
 <script setup lang="ts">
+import { TrendingDown, TrendingUp } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
 import {
   Button,
   Select,
@@ -171,8 +173,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui'
-import { TrendingDown, TrendingUp } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
 
 interface TrendDataPoint {
   month: string
@@ -212,10 +212,8 @@ const formatCurrency = (value: number): string => {
 // Computed
 const displayedMonths = computed(() => {
   const months = props.data.months || []
-  if (selectedPeriod.value === '3mo')
-    return months.slice(-3).map((m) => m.month)
-  if (selectedPeriod.value === '6mo')
-    return months.slice(-6).map((m) => m.month)
+  if (selectedPeriod.value === '3mo') return months.slice(-3).map((m) => m.month)
+  if (selectedPeriod.value === '6mo') return months.slice(-6).map((m) => m.month)
   return months.map((m) => m.month)
 })
 
@@ -260,31 +258,24 @@ const licensePoints = computed(() => {
 
 const avgRevenue = computed(() => {
   if (!filteredData.value.length) return 0
-  const sum = filteredData.value.reduce(
-    (acc: number, point: TrendDataPoint) => {
-      return acc + (parseInt(point.revenue) || 0)
-    },
-    0
-  )
+  const sum = filteredData.value.reduce((acc: number, point: TrendDataPoint) => {
+    return acc + (parseInt(point.revenue) || 0)
+  }, 0)
   return sum / filteredData.value.length
 })
 
 const avgLicenses = computed(() => {
   if (!filteredData.value.length) return 0
-  const sum = filteredData.value.reduce(
-    (acc: number, point: TrendDataPoint) => {
-      return acc + (parseInt(point.licenses) || 0)
-    },
-    0
-  )
+  const sum = filteredData.value.reduce((acc: number, point: TrendDataPoint) => {
+    return acc + (parseInt(point.licenses) || 0)
+  }, 0)
   return sum / filteredData.value.length
 })
 
 const revenueTrend = computed(() => {
   if (!filteredData.value.length) return 0
   const first = parseInt(filteredData.value[0]?.revenue) || 0
-  const last =
-    parseInt(filteredData.value[filteredData.value.length - 1]?.revenue) || 0
+  const last = parseInt(filteredData.value[filteredData.value.length - 1]?.revenue) || 0
   if (first === 0) return 0
   return ((last - first) / first) * 100
 })

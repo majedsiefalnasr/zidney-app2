@@ -7,6 +7,6 @@
 export { useMmcAppStore } from './app.store'
 export { defineAuthStore, useMmcAuthStore } from './auth.store'
 export { useLicenseStatusStore } from './license-status.store'
-export { useMmcNotificationStore } from './notification.store'
 export type { AppNotification } from './notification.store'
+export { useMmcNotificationStore } from './notification.store'
 export { useMmcUiStore } from './ui.store'

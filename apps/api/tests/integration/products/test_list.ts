@@ -40,9 +40,7 @@ describe('Integration: Products - List (T053)', () => {
 
       expect(response.status).toBe(200)
       expect(response.body.data.items).toHaveLength(2)
-      expect(response.body.data.items.every((p) => p.status === 'ACTIVE')).toBe(
-        true
-      )
+      expect(response.body.data.items.every((p) => p.status === 'ACTIVE')).toBe(true)
     })
 
     it('should return pagination metadata', async () => {
@@ -88,10 +86,8 @@ describe('Integration: Products - List (T053)', () => {
         },
       }
 
-      expect(
-        new Date(response.body.data.items[0]!.created_at).getTime()
-      ).toBeGreaterThan(
-        new Date(response.body.data.items[1]!.created_at).getTime()
+      expect(new Date(response.body.data.items[0]?.created_at).getTime()).toBeGreaterThan(
+        new Date(response.body.data.items[1]?.created_at).getTime()
       )
     })
   })
@@ -119,9 +115,7 @@ describe('Integration: Products - List (T053)', () => {
       }
 
       expect(response.status).toBe(200)
-      expect(
-        response.body.data.items.every((p) => p.status === 'INACTIVE')
-      ).toBe(true)
+      expect(response.body.data.items.every((p) => p.status === 'INACTIVE')).toBe(true)
     })
 
     it('should return both ACTIVE and INACTIVE with ?status=all', async () => {
@@ -239,9 +233,7 @@ describe('Integration: Products - List (T053)', () => {
 
       expect(response.status).toBe(200)
       expect(response.body.data.items.length).toBeGreaterThan(0)
-      expect(
-        response.body.data.items.every((p) => p.name.en.includes('Math'))
-      ).toBe(true)
+      expect(response.body.data.items.every((p) => p.name.en.includes('Math'))).toBe(true)
     })
 
     it('should search by Arabic name', async () => {
@@ -263,9 +255,7 @@ describe('Integration: Products - List (T053)', () => {
       }
 
       expect(response.status).toBe(200)
-      expect(
-        response.body.data.items.every((p) => p.name.ar?.includes('رياضيات'))
-      ).toBe(true)
+      expect(response.body.data.items.every((p) => p.name.ar?.includes('رياضيات'))).toBe(true)
     })
 
     it('should search by slug', async () => {
@@ -287,9 +277,7 @@ describe('Integration: Products - List (T053)', () => {
       }
 
       expect(response.status).toBe(200)
-      expect(
-        response.body.data.items.every((p) => p.slug.includes('math'))
-      ).toBe(true)
+      expect(response.body.data.items.every((p) => p.slug.includes('math'))).toBe(true)
     })
 
     it('should return empty array when no matches found', async () => {
@@ -324,9 +312,7 @@ describe('Integration: Products - List (T053)', () => {
       }
 
       expect(response.status).toBe(200)
-      expect(parseInt(response.headers['x-ratelimit-remaining'])).toBeLessThan(
-        100
-      )
+      expect(parseInt(response.headers['x-ratelimit-remaining'], 10)).toBeLessThan(100)
     })
   })
 

@@ -52,6 +52,7 @@ function makeTokenManager(token: string | null = null): ITokenManager {
     getToken: vi.fn(() => token),
     setToken: vi.fn(),
     clearToken: vi.fn(),
+    hasToken: vi.fn(() => token !== null),
   }
 }
 
@@ -84,11 +85,7 @@ describe('createAppApiClient (mmc)', () => {
   // ── Returns ApiClient ──────────────────────────────────────────────────────
 
   it('returns an ApiClient instance (truthy object)', () => {
-    const client = createAppApiClient(
-      tokenManager,
-      refreshManager,
-      errorInterceptor
-    )
+    const client = createAppApiClient(tokenManager, refreshManager, errorInterceptor)
     expect(client).toBeTruthy()
   })
 

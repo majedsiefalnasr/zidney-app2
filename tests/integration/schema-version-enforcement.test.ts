@@ -9,7 +9,7 @@ import {
   createTestClient,
   createTestContext,
   generateJWT,
-  TestContext,
+  type TestContext,
 } from '../test-helpers'
 
 describe('T086: Schema Version Enforcement', () => {

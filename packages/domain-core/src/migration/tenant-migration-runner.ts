@@ -5,16 +5,12 @@
  * Per-workspace schema upgrades (executed by Worker)
  */
 
-import { MigrationResult, UpgradeJob } from '@zidney/types'
-import {
-  calculateChecksum,
-  detectMigrationGap,
-  validateMigrationFile,
-} from '@zidney/validation'
+import type { MigrationResult, UpgradeJob } from '@zidney/types'
+import { calculateChecksum, detectMigrationGap, validateMigrationFile } from '@zidney/validation'
 import crypto from 'crypto'
 import { readFileSync } from 'fs'
 import { join } from 'path'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 /**
  * Tenant context passed by Worker after resolver validation
@@ -43,21 +39,13 @@ export async function runTenantMigrations(
   const startTime = Date.now()
   let migrationsApplied = 0
 
-  const {
-    workspace_id,
-    workspace_slug,
-    correlationId,
-    connection_pool,
-    masterDb,
-  } = tenantContext
+  const { workspace_id, workspace_slug, correlationId, connection_pool, masterDb } = tenantContext
 
   try {
     // Load migration files
     const fs = require('fs').promises
     const files = await fs.readdir(migrationsDir)
-    const migrationFiles = files
-      .filter((f: string) => f.endsWith('.sql'))
-      .sort()
+    const migrationFiles = files.filter((f: string) => f.endsWith('.sql')).sort()
 
     // Validate sequence
     const gapError = detectMigrationGap(migrationFiles)
@@ -148,10 +136,7 @@ export async function runTenantMigrations(
           )
 
           // If already SUCCESS: Skip SQL execution (idempotent)
-          if (
-            registryCheck.rows.length > 0 &&
-            registryCheck.rows[0].status === 'SUCCESS'
-          ) {
+          if (registryCheck.rows.length > 0 && registryCheck.rows[0].status === 'SUCCESS') {
             console.log(
               JSON.stringify({
                 level: 'DEBUG',
@@ -168,16 +153,10 @@ export async function runTenantMigrations(
 
           // Validate product version compatibility
           if (validation.header?.targetProductVersion) {
-            const requiredProductVersion =
-              validation.header.targetProductVersion
+            const requiredProductVersion = validation.header.targetProductVersion
             const currentProductVersion = license.product_version
 
-            if (
-              !isProductVersionCompatible(
-                currentProductVersion,
-                requiredProductVersion
-              )
-            ) {
+            if (!isProductVersionCompatible(currentProductVersion, requiredProductVersion)) {
               throw new Error(
                 `Migration ${filename} requires product version ${requiredProductVersion}, current: ${currentProductVersion}`
               )
@@ -188,9 +167,7 @@ export async function runTenantMigrations(
           try {
             await tenantClient.query(sqlContent)
           } catch (err: any) {
-            throw new Error(
-              `Syntax error in migration ${filename}: ${err.message}`
-            )
+            throw new Error(`Syntax error in migration ${filename}: ${err.message}`)
           }
 
           // Record in migration_registry
@@ -205,8 +182,7 @@ export async function runTenantMigrations(
                 crypto.randomUUID(),
                 workspace_id,
                 filename,
-                validation.header?.targetVersion ||
-                  upgradeJob.targetSchemaVersion,
+                validation.header?.targetVersion || upgradeJob.targetSchemaVersion,
                 checksum,
                 new Date(),
                 Date.now() - startTime,
@@ -216,9 +192,7 @@ export async function runTenantMigrations(
               ]
             )
           } catch (err: any) {
-            throw new Error(
-              `Failed to record migration in registry: ${err.message}`
-            )
+            throw new Error(`Failed to record migration in registry: ${err.message}`)
           }
 
           migrationsApplied++
@@ -319,14 +293,13 @@ export async function runTenantMigrations(
 /**
  * Helper: Check product version compatibility (X.Y.Z format)
  */
-function isProductVersionCompatible(
-  current: string,
-  required: string
-): boolean {
+function isProductVersionCompatible(current: string, required: string): boolean {
   try {
-    const [currMajor, currMinor, currPatch] = current
-      .split('.')
-      .map(Number) as [number, number, number]
+    const [currMajor, currMinor, currPatch] = current.split('.').map(Number) as [
+      number,
+      number,
+      number,
+    ]
     const [reqMajor, reqMinor, reqPatch] = required.split('.').map(Number) as [
       number,
       number,

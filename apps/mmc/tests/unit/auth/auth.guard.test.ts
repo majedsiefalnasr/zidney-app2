@@ -30,13 +30,13 @@ function makeRoute(
 ): RouteLocationNormalized {
   return {
     name,
-    path: '/' + String(name),
+    path: `/${String(name)}`,
     meta,
     params: {},
     query: {},
     hash: '',
     matched: [],
-    fullPath: '/' + String(name),
+    fullPath: `/${String(name)}`,
     redirectedFrom: undefined,
   } as unknown as RouteLocationNormalized
 }

@@ -10,10 +10,10 @@
  */
 
 import {
-  CreateLicenseInput,
-  CreateMMCUserInput,
-  CreateProductInput,
-  CreateTenantRegistryInput,
+  type CreateLicenseInput,
+  type CreateMMCUserInput,
+  type CreateProductInput,
+  type CreateTenantRegistryInput,
   LicenseStatus,
   MasterDBErrorCode,
   MMCUserRole,
@@ -66,10 +66,7 @@ export function validateCreateProductInput(input: unknown): CreateProductInput {
 
   // Validate slug
   if (typeof data.slug !== 'string' || data.slug.trim().length === 0) {
-    throw new ValidationError(
-      MasterDBErrorCode.MISSING_REQUIRED_FIELD,
-      'Product slug is required'
-    )
+    throw new ValidationError(MasterDBErrorCode.MISSING_REQUIRED_FIELD, 'Product slug is required')
   }
 
   if (!/^[a-z0-9-]+$/.test(data.slug)) {
@@ -112,8 +109,7 @@ export function validateCreateProductInput(input: unknown): CreateProductInput {
   return {
     name: data.name as string,
     slug: data.slug as string,
-    description:
-      typeof data.description === 'string' ? data.description : undefined,
+    description: typeof data.description === 'string' ? data.description : undefined,
     version: typeof data.version === 'string' ? data.version : undefined,
     enabled_modules:
       data.enabled_modules && typeof data.enabled_modules === 'object'
@@ -146,10 +142,7 @@ export function validateCreateLicenseInput(input: unknown): CreateLicenseInput {
   const data = input as Record<string, unknown>
 
   // Validate product_id
-  if (
-    typeof data.product_id !== 'string' ||
-    data.product_id.trim().length === 0
-  ) {
+  if (typeof data.product_id !== 'string' || data.product_id.trim().length === 0) {
     throw new ValidationError(
       MasterDBErrorCode.MISSING_REQUIRED_FIELD,
       'product_id is required and must be a UUID string'
@@ -157,10 +150,7 @@ export function validateCreateLicenseInput(input: unknown): CreateLicenseInput {
   }
 
   // Validate workspace_slug
-  if (
-    typeof data.workspace_slug !== 'string' ||
-    data.workspace_slug.trim().length === 0
-  ) {
+  if (typeof data.workspace_slug !== 'string' || data.workspace_slug.trim().length === 0) {
     throw new ValidationError(
       MasterDBErrorCode.INVALID_WORKSPACE_SLUG_FORMAT,
       'workspace_slug is required'
@@ -187,10 +177,7 @@ export function validateCreateLicenseInput(input: unknown): CreateLicenseInput {
 
   // Validate limits
   if (data.student_limit !== undefined && data.student_limit !== null) {
-    if (
-      !Number.isInteger(data.student_limit) ||
-      (data.student_limit as number) <= 0
-    ) {
+    if (!Number.isInteger(data.student_limit) || (data.student_limit as number) <= 0) {
       throw new ValidationError(
         MasterDBErrorCode.INVALID_REQUEST_BODY,
         'student_limit must be positive integer or null'
@@ -199,10 +186,7 @@ export function validateCreateLicenseInput(input: unknown): CreateLicenseInput {
   }
 
   if (data.staff_limit !== undefined && data.staff_limit !== null) {
-    if (
-      !Number.isInteger(data.staff_limit) ||
-      (data.staff_limit as number) <= 0
-    ) {
+    if (!Number.isInteger(data.staff_limit) || (data.staff_limit as number) <= 0) {
       throw new ValidationError(
         MasterDBErrorCode.INVALID_REQUEST_BODY,
         'staff_limit must be positive integer or null'
@@ -235,9 +219,7 @@ export function validateCreateLicenseInput(input: unknown): CreateLicenseInput {
  * - db_user: non-empty
  * - password: non-empty
  */
-export function validateCreateTenantRegistryInput(
-  input: unknown
-): CreateTenantRegistryInput {
+export function validateCreateTenantRegistryInput(input: unknown): CreateTenantRegistryInput {
   if (typeof input !== 'object' || input === null) {
     throw new ValidationError(
       MasterDBErrorCode.INVALID_REQUEST_BODY,
@@ -248,21 +230,12 @@ export function validateCreateTenantRegistryInput(
   const data = input as Record<string, unknown>
 
   // Validate license_id
-  if (
-    typeof data.license_id !== 'string' ||
-    data.license_id.trim().length === 0
-  ) {
-    throw new ValidationError(
-      MasterDBErrorCode.MISSING_REQUIRED_FIELD,
-      'license_id is required'
-    )
+  if (typeof data.license_id !== 'string' || data.license_id.trim().length === 0) {
+    throw new ValidationError(MasterDBErrorCode.MISSING_REQUIRED_FIELD, 'license_id is required')
   }
 
   // Validate workspace_slug
-  if (
-    typeof data.workspace_slug !== 'string' ||
-    data.workspace_slug.trim().length === 0
-  ) {
+  if (typeof data.workspace_slug !== 'string' || data.workspace_slug.trim().length === 0) {
     throw new ValidationError(
       MasterDBErrorCode.INVALID_WORKSPACE_SLUG_FORMAT,
       'workspace_slug is required'
@@ -278,10 +251,7 @@ export function validateCreateTenantRegistryInput(
 
   // Validate db_host
   if (typeof data.db_host !== 'string' || data.db_host.trim().length === 0) {
-    throw new ValidationError(
-      MasterDBErrorCode.INVALID_DATABASE_HOST,
-      'db_host is required'
-    )
+    throw new ValidationError(MasterDBErrorCode.INVALID_DATABASE_HOST, 'db_host is required')
   }
 
   // Validate db_port
@@ -297,18 +267,12 @@ export function validateCreateTenantRegistryInput(
 
   // Validate db_name
   if (typeof data.db_name !== 'string' || data.db_name.trim().length === 0) {
-    throw new ValidationError(
-      MasterDBErrorCode.MISSING_REQUIRED_FIELD,
-      'db_name is required'
-    )
+    throw new ValidationError(MasterDBErrorCode.MISSING_REQUIRED_FIELD, 'db_name is required')
   }
 
   // Validate db_user
   if (typeof data.db_user !== 'string' || data.db_user.trim().length === 0) {
-    throw new ValidationError(
-      MasterDBErrorCode.MISSING_REQUIRED_FIELD,
-      'db_user is required'
-    )
+    throw new ValidationError(MasterDBErrorCode.MISSING_REQUIRED_FIELD, 'db_user is required')
   }
 
   // Validate password
@@ -357,26 +321,17 @@ export function validateCreateMMCUserInput(input: unknown): CreateMMCUserInput {
 
   // Validate email
   if (typeof data.email !== 'string' || data.email.trim().length === 0) {
-    throw new ValidationError(
-      MasterDBErrorCode.INVALID_EMAIL_FORMAT,
-      'email is required'
-    )
+    throw new ValidationError(MasterDBErrorCode.INVALID_EMAIL_FORMAT, 'email is required')
   }
 
   // Basic email format check
   if (!data.email.includes('@')) {
-    throw new ValidationError(
-      MasterDBErrorCode.INVALID_EMAIL_FORMAT,
-      'Invalid email format'
-    )
+    throw new ValidationError(MasterDBErrorCode.INVALID_EMAIL_FORMAT, 'Invalid email format')
   }
 
   // Validate password
   if (typeof data.password !== 'string' || data.password.length === 0) {
-    throw new ValidationError(
-      MasterDBErrorCode.MISSING_REQUIRED_FIELD,
-      'password is required'
-    )
+    throw new ValidationError(MasterDBErrorCode.MISSING_REQUIRED_FIELD, 'password is required')
   }
 
   if (data.password.length < 8) {
@@ -387,10 +342,7 @@ export function validateCreateMMCUserInput(input: unknown): CreateMMCUserInput {
   }
 
   // Validate role if provided
-  if (
-    data.role !== undefined &&
-    !Object.values(MMCUserRole).includes(data.role as MMCUserRole)
-  ) {
+  if (data.role !== undefined && !Object.values(MMCUserRole).includes(data.role as MMCUserRole)) {
     throw new ValidationError(
       MasterDBErrorCode.INVALID_REQUEST_BODY,
       `role must be one of: ${Object.values(MMCUserRole).join(', ')}`

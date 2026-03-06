@@ -135,14 +135,10 @@ export function createDashboardRouter() {
 
       // Execute parallel queries for licenses and revenue
       // Using Promise.all for maximum performance
-      const [
-        licenseCountsResult,
-        thisMonthResult,
-        thisYearResult,
-        lastMonthResult,
-      ] = await Promise.all([
-        // License counts by status
-        masterDb.query(`
+      const [licenseCountsResult, thisMonthResult, thisYearResult, lastMonthResult] =
+        await Promise.all([
+          // License counts by status
+          masterDb.query(`
             SELECT status, COUNT(*) as count
             FROM licenses
             WHERE deleted_at IS NULL
@@ -153,27 +149,27 @@ export function createDashboardRouter() {
               WHEN status = 'ARCHIVED' THEN 3
             END
           `),
-        // Current month revenue
-        masterDb.query(`
+          // Current month revenue
+          masterDb.query(`
             SELECT SUM(amount_cents) as total
             FROM revenue_records
             WHERE created_at >= DATE_TRUNC('month', NOW())
               AND created_at < DATE_TRUNC('month', NOW()) + INTERVAL '1 month'
           `),
-        // Current year revenue
-        masterDb.query(`
+          // Current year revenue
+          masterDb.query(`
             SELECT SUM(amount_cents) as total
             FROM revenue_records
             WHERE created_at >= DATE_TRUNC('year', NOW())
           `),
-        // Last month revenue
-        masterDb.query(`
+          // Last month revenue
+          masterDb.query(`
             SELECT SUM(amount_cents) as total
             FROM revenue_records
             WHERE created_at >= DATE_TRUNC('month', NOW() - INTERVAL '1 month')
               AND created_at < DATE_TRUNC('month', NOW())
           `),
-      ])
+        ])
 
       // Log successful query execution
       logger.debug('DASHBOARD_QUERY_EXECUTED', {
@@ -374,7 +370,7 @@ export function createDashboardRouter() {
       let dateTo = dateToStr ? new Date(dateToStr) : undefined
 
       // Validate date format
-      if (dateFromStr && isNaN(dateFrom!.getTime())) {
+      if (dateFromStr && Number.isNaN(dateFrom?.getTime())) {
         return c.json(
           {
             success: false,
@@ -388,7 +384,7 @@ export function createDashboardRouter() {
         )
       }
 
-      if (dateToStr && isNaN(dateTo!.getTime())) {
+      if (dateToStr && Number.isNaN(dateTo?.getTime())) {
         return c.json(
           {
             success: false,
@@ -448,7 +444,7 @@ export function createDashboardRouter() {
 
         // Calculate previous period
         (async () => {
-          const duration = dateTo!.getTime() - dateFrom!.getTime()
+          const duration = dateTo?.getTime() - dateFrom?.getTime()
           const previousTo = dateFrom
           const previousFrom = new Date(previousTo.getTime() - duration)
 
@@ -654,15 +650,11 @@ export function createDashboardRouter() {
 
       // Parse and validate query parameters
       const sortByParam = c.req.query('sort_by') || 'revenue'
-      const limitParam = parseInt(c.req.query('limit') || '20')
-      const offsetParam = parseInt(c.req.query('offset') || '0')
+      const limitParam = parseInt(c.req.query('limit') || '20', 10)
+      const offsetParam = parseInt(c.req.query('offset') || '0', 10)
 
       // Validate sort_by
-      const validSortBy = [
-        'revenue',
-        'license_count',
-        'avg_revenue_per_license',
-      ]
+      const validSortBy = ['revenue', 'license_count', 'avg_revenue_per_license']
       if (!validSortBy.includes(sortByParam)) {
         return c.json(
           {
@@ -670,8 +662,7 @@ export function createDashboardRouter() {
             data: null,
             error: {
               code: 'INVALID_SORT_BY',
-              message:
-                'sort_by must be one of: revenue, license_count, avg_revenue_per_license',
+              message: 'sort_by must be one of: revenue, license_count, avg_revenue_per_license',
             },
           },
           { status: 400 }
@@ -941,8 +932,8 @@ export function createDashboardRouter() {
       }
 
       // Parse and validate pagination parameters
-      const pageParam = parseInt(c.req.query('page') || '1')
-      const pageSizeParam = parseInt(c.req.query('page_size') || '20')
+      const pageParam = parseInt(c.req.query('page') || '1', 10)
+      const pageSizeParam = parseInt(c.req.query('page_size') || '20', 10)
       const statusParam = (c.req.query('status') || 'ACTIVE') as string
       const sortByParam = (c.req.query('sort_by') || 'commission') as string
 
@@ -1018,8 +1009,7 @@ export function createDashboardRouter() {
       }
 
       // Build status filter
-      const statusFilter =
-        statusParam === 'ALL' ? '' : `AND a.status = '${statusParam}'`
+      const statusFilter = statusParam === 'ALL' ? '' : `AND a.status = '${statusParam}'`
 
       // Execute query for affiliates data
       const [dataResult, countResult] = await Promise.all([
@@ -1232,7 +1222,7 @@ export function createDashboardRouter() {
       }
 
       // Parse and validate query parameters
-      const monthsParam = parseInt(c.req.query('months') || '12')
+      const monthsParam = parseInt(c.req.query('months') || '12', 10)
       const metricParam = (c.req.query('metric') || 'both') as string
 
       // Validate months
@@ -1343,22 +1333,11 @@ export function createDashboardRouter() {
       const licenseSeries = periods.map((p) => p.license_count)
 
       // Calculate summary statistics
-      const totalRevenue = periods.reduce(
-        (sum: number, p: any) => sum + p.revenue_cents,
-        0
-      )
-      const totalLicenses = periods.reduce(
-        (sum: number, p: any) => sum + p.license_count,
-        0
-      )
+      const totalRevenue = periods.reduce((sum: number, p: any) => sum + p.revenue_cents, 0)
+      const totalLicenses = periods.reduce((sum: number, p: any) => sum + p.license_count, 0)
       const avgGrowthPercent =
         periods.length > 1
-          ? periods
-              .slice(1)
-              .reduce(
-                (sum: number, p: any) => sum + p.revenue_growth_percent,
-                0
-              ) /
+          ? periods.slice(1).reduce((sum: number, p: any) => sum + p.revenue_growth_percent, 0) /
             (periods.length - 1)
           : 0
 
@@ -1529,7 +1508,7 @@ export function createDashboardRouter() {
         if (rawBody) {
           body = JSON.parse(rawBody)
         }
-      } catch (e) {
+      } catch (_e) {
         return c.json(
           {
             success: false,
@@ -1556,8 +1535,7 @@ export function createDashboardRouter() {
             data: null,
             error: {
               code: 'INVALID_SECTION',
-              message:
-                'section must be one of: geographic, revenue, affiliate, product',
+              message: 'section must be one of: geographic, revenue, affiliate, product',
             },
           },
           { status: 400 }
@@ -1570,7 +1548,7 @@ export function createDashboardRouter() {
 
       if (dateFromStr) {
         dateFrom = new Date(dateFromStr)
-        if (isNaN(dateFrom.getTime())) {
+        if (Number.isNaN(dateFrom.getTime())) {
           return c.json(
             {
               success: false,
@@ -1587,7 +1565,7 @@ export function createDashboardRouter() {
 
       if (dateToStr) {
         dateTo = new Date(dateToStr)
-        if (isNaN(dateTo.getTime())) {
+        if (Number.isNaN(dateTo.getTime())) {
           return c.json(
             {
               success: false,
@@ -1605,10 +1583,7 @@ export function createDashboardRouter() {
       // Create 2-second timeout for export query
       const exportTimeoutMs = 2000
       const timeoutPromise = new Promise((_, reject) =>
-        setTimeout(
-          () => reject(new Error('Export query timeout exceeded')),
-          exportTimeoutMs
-        )
+        setTimeout(() => reject(new Error('Export query timeout exceeded')), exportTimeoutMs)
       )
 
       // Execute COUNT query with timeout to check row limit
@@ -1627,10 +1602,7 @@ export function createDashboardRouter() {
         }
       })()
 
-      const countResult = await Promise.race([
-        masterDb.query(countQuery),
-        timeoutPromise,
-      ])
+      const countResult = await Promise.race([masterDb.query(countQuery), timeoutPromise])
 
       const rowCount = (countResult as any).rows[0]?.count || 0
 
@@ -1727,10 +1699,7 @@ export function createDashboardRouter() {
       }
 
       // Execute export query with timeout
-      const dataResult = await Promise.race([
-        masterDb.query(exportQuery, params),
-        timeoutPromise,
-      ])
+      const dataResult = await Promise.race([masterDb.query(exportQuery, params), timeoutPromise])
 
       const rows = (dataResult as any).rows || []
 
@@ -1760,24 +1729,21 @@ export function createDashboardRouter() {
           break
 
         case 'revenue':
-          csvContent +=
-            'Product Name,Amount (cents),Transaction Date,Country,Transaction Type\n'
+          csvContent += 'Product Name,Amount (cents),Transaction Date,Country,Transaction Type\n'
           for (const row of rows) {
             csvContent += `"${row.product_name}",${row.amount},"${row.transaction_date}","${row.country}","${row.transaction_type}"\n`
           }
           break
 
         case 'affiliate':
-          csvContent +=
-            'Affiliate Name,Status,Email,Referral Count,Total Commission\n'
+          csvContent += 'Affiliate Name,Status,Email,Referral Count,Total Commission\n'
           for (const row of rows) {
             csvContent += `"${row.affiliate_name}","${row.status}","${row.email}",${row.referral_count},${row.total_commission}\n`
           }
           break
 
         case 'product':
-          csvContent +=
-            'Product Name,Slug,License Count,Total Revenue (cents)\n'
+          csvContent += 'Product Name,Slug,License Count,Total Revenue (cents)\n'
           for (const row of rows) {
             csvContent += `"${row.product_name}","${row.slug}",${row.license_count},${row.total_revenue}\n`
           }

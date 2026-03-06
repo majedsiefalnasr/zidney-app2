@@ -1,4 +1,4 @@
-import type { Logger } from '@zidney/logger'
+import { type Logger, logger } from '@zidney/logger'
 
 export interface EmailConfig {
   smtpHost?: string
@@ -143,7 +143,7 @@ export class EmailService {
 
     switch (provider) {
       case 'sendgrid':
-        // @ts-ignore: LOGIC-BUG: sendViaSendGrid method does not exist; should call sendViaServiceProvider — see INFRA-001-LOGIC-04 [INFRA-001-LOGIC-04]
+        // @ts-expect-error: LOGIC-BUG: sendViaSendGrid method does not exist; should call sendViaServiceProvider — see INFRA-001-LOGIC-04 [INFRA-001-LOGIC-04]
         return this.sendViaSendGrid(options)
       case 'smtp':
         return this.sendViaSMTP(options)
@@ -157,10 +157,8 @@ export class EmailService {
    * Send via SendGrid API (requires API key)
    * LOGIC-BUG: Method is unreachable; sendEmail() calls non-existent sendViaSendGrid — see INFRA-001-LOGIC-04
    */
-  // @ts-ignore: method declared for future use; sendViaSendGrid invokes it incorrectly [INFRA-001-LOGIC-04]
-  private async _sendViaServiceProvider(
-    options: SendEmailOptions
-  ): Promise<void> {
+  // @ts-expect-error: method declared for future use; sendViaSendGrid invokes it incorrectly [INFRA-001-LOGIC-04]
+  private async _sendViaServiceProvider(options: SendEmailOptions): Promise<void> {
     const apiKey = this.config.apiKey
     if (!apiKey) {
       throw new Error('SendGrid API key not configured')
@@ -222,10 +220,10 @@ export class EmailService {
         htmlLength: options.html.length,
       })
     } else {
-      console.log('📧 Email:', {
+      logger.info('email_dev_console', {
         to: options.to,
         subject: options.subject,
-        html: options.html,
+        html_length: options.html.length,
       })
     }
   }
@@ -322,12 +320,10 @@ export function createEmailService(
       | 'console',
     smtpHost: config.smtpHost || process.env.SMTP_HOST,
     smtpPort:
-      config.smtpPort ||
-      (process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : undefined),
+      config.smtpPort || (process.env.SMTP_PORT ? parseInt(process.env.SMTP_PORT, 10) : undefined),
     smtpUser: config.smtpUser || process.env.SMTP_USER,
     smtpPassword: config.smtpPassword || process.env.SMTP_PASSWORD,
-    senderEmail:
-      config.senderEmail || process.env.SENDER_EMAIL || 'noreply@example.com',
+    senderEmail: config.senderEmail || process.env.SENDER_EMAIL || 'noreply@example.com',
     senderName: config.senderName || process.env.SENDER_NAME || 'Platform',
     apiKey: config.apiKey || process.env.SENDGRID_API_KEY,
   }

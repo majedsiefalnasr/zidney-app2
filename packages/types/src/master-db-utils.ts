@@ -91,10 +91,7 @@ export function compareVersions(v1: string, v2: string): -1 | 0 | 1 {
  * isVersionCompatible("1.0.0", "1.5.0") // false (1.0.0 < 1.5.0)
  * isVersionCompatible("1.0.0", "1.0.0") // true (equal is compatible)
  */
-export function isVersionCompatible(
-  requestedVersion: string,
-  minimumVersion: string
-): boolean {
+export function isVersionCompatible(requestedVersion: string, minimumVersion: string): boolean {
   const comparison = compareVersions(requestedVersion, minimumVersion)
   return comparison >= 0 // equal or greater
 }

@@ -242,26 +242,16 @@ export class MetricsEmitter {
    * Get percentile statistics for debugging
    */
   getStats() {
-    const sortedDurations = [...this.state.sampledDurations].sort(
-      (a, b) => a - b
-    )
-    const sortedLockWaits = [...this.state.sampledLockWaits].sort(
-      (a, b) => a - b
-    )
+    const sortedDurations = [...this.state.sampledDurations].sort((a, b) => a - b)
+    const sortedLockWaits = [...this.state.sampledLockWaits].sort((a, b) => a - b)
 
     return {
-      duration_p50:
-        sortedDurations[Math.floor(sortedDurations.length * 0.5)] || 0,
-      duration_p95:
-        sortedDurations[Math.floor(sortedDurations.length * 0.95)] || 0,
-      duration_p99:
-        sortedDurations[Math.floor(sortedDurations.length * 0.99)] || 0,
-      lock_wait_p50:
-        sortedLockWaits[Math.floor(sortedLockWaits.length * 0.5)] || 0,
-      lock_wait_p95:
-        sortedLockWaits[Math.floor(sortedLockWaits.length * 0.95)] || 0,
-      lock_wait_p99:
-        sortedLockWaits[Math.floor(sortedLockWaits.length * 0.99)] || 0,
+      duration_p50: sortedDurations[Math.floor(sortedDurations.length * 0.5)] || 0,
+      duration_p95: sortedDurations[Math.floor(sortedDurations.length * 0.95)] || 0,
+      duration_p99: sortedDurations[Math.floor(sortedDurations.length * 0.99)] || 0,
+      lock_wait_p50: sortedLockWaits[Math.floor(sortedLockWaits.length * 0.5)] || 0,
+      lock_wait_p95: sortedLockWaits[Math.floor(sortedLockWaits.length * 0.95)] || 0,
+      lock_wait_p99: sortedLockWaits[Math.floor(sortedLockWaits.length * 0.99)] || 0,
     }
   }
 }

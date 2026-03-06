@@ -90,24 +90,14 @@ export class MasterDBLogger {
    *   message: 'Starting master database migrations'
    * });
    */
-  info(
-    data: Omit<
-      StructuredLogEntry,
-      'timestamp' | 'level' | 'service' | 'correlation_id'
-    >
-  ): void {
+  info(data: Omit<StructuredLogEntry, 'timestamp' | 'level' | 'service' | 'correlation_id'>): void {
     this.log('INFO', data)
   }
 
   /**
    * Log at WARN level
    */
-  warn(
-    data: Omit<
-      StructuredLogEntry,
-      'timestamp' | 'level' | 'service' | 'correlation_id'
-    >
-  ): void {
+  warn(data: Omit<StructuredLogEntry, 'timestamp' | 'level' | 'service' | 'correlation_id'>): void {
     this.log('WARN', data)
   }
 
@@ -115,10 +105,7 @@ export class MasterDBLogger {
    * Log at ERROR level
    */
   error(
-    data: Omit<
-      StructuredLogEntry,
-      'timestamp' | 'level' | 'service' | 'correlation_id'
-    >
+    data: Omit<StructuredLogEntry, 'timestamp' | 'level' | 'service' | 'correlation_id'>
   ): void {
     this.log('ERROR', data)
   }
@@ -127,10 +114,7 @@ export class MasterDBLogger {
    * Log at DEBUG level
    */
   debug(
-    data: Omit<
-      StructuredLogEntry,
-      'timestamp' | 'level' | 'service' | 'correlation_id'
-    >
+    data: Omit<StructuredLogEntry, 'timestamp' | 'level' | 'service' | 'correlation_id'>
   ): void {
     this.log('DEBUG', data)
   }
@@ -145,10 +129,7 @@ export class MasterDBLogger {
    */
   private log(
     level: LogLevel,
-    data: Omit<
-      StructuredLogEntry,
-      'timestamp' | 'level' | 'service' | 'correlation_id'
-    >
+    data: Omit<StructuredLogEntry, 'timestamp' | 'level' | 'service' | 'correlation_id'>
   ): void {
     const entry: StructuredLogEntry = {
       timestamp: new Date().toISOString(),
@@ -176,13 +157,7 @@ export class MasterDBLogger {
    * @throws Error if sensitive data detected
    */
   private validateNoSensitiveData(entry: StructuredLogEntry): void {
-    const sensitivePatterns = [
-      /password/i,
-      /token/i,
-      /secret/i,
-      /api_key/i,
-      /credentials/i,
-    ]
+    const sensitivePatterns = [/password/i, /token/i, /secret/i, /api_key/i, /credentials/i]
 
     // Check all keys and values
     const entryStr = JSON.stringify(entry).toLowerCase()

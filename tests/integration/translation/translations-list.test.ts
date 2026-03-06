@@ -46,12 +46,7 @@ const DEFAULT_SETTINGS_ROW = {
 // App factory
 // ---------------------------------------------------------------------------
 
-function createTestApp(
-  options: {
-    rows?: any[]
-    dbError?: boolean
-  } = {}
-) {
+function createTestApp(options: { rows?: any[]; dbError?: boolean } = {}) {
   const app = new Hono<BackofficeEnv>()
   const { rows = [], dbError = false } = options
 
@@ -64,10 +59,7 @@ function createTestApp(
           return { rows: [DEFAULT_SETTINGS_ROW], rowCount: 1 }
         }
 
-        if (
-          sql.includes('FROM translations') ||
-          sql.includes('FROM "translations"')
-        ) {
+        if (sql.includes('FROM translations') || sql.includes('FROM "translations"')) {
           return { rows, rowCount: rows.length }
         }
 
@@ -130,9 +122,7 @@ describe('GET /api/v1/backoffice/workspace/translations', () => {
   })
 
   it('returns null next_cursor on last page', async () => {
-    const rows = Array.from({ length: 5 }, (_, i) =>
-      makeTranslationRow(`tr-00${i + 1}`)
-    )
+    const rows = Array.from({ length: 5 }, (_, i) => makeTranslationRow(`tr-00${i + 1}`))
     const app = createTestApp({ rows })
     const res = await app.request(
       '/api/v1/backoffice/workspace/translations?entity_type=question&entity_id=q-001',
@@ -166,10 +156,9 @@ describe('GET /api/v1/backoffice/workspace/translations', () => {
 
   it('returns 422 when entity_type is missing', async () => {
     const app = createTestApp()
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/translations?entity_id=q-001',
-      { method: 'GET' }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/translations?entity_id=q-001', {
+      method: 'GET',
+    })
     expect(res.status).toBe(422)
     const body = await res.json()
     expect(body.success).toBe(false)

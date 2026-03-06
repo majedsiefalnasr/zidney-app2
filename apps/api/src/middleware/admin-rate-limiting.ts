@@ -33,12 +33,10 @@ export async function adminRateLimiting(
   c: Context,
   next: Next,
   limits: AdminRateLimitLimits = DEFAULT_LIMITS
-): Promise<void | Response> {
+): Promise<undefined | Response> {
   const correlationId = c.get('correlation_id') || 'unknown'
   const clientIp =
-    c.req.header('X-Forwarded-For')?.split(',')[0] ||
-    c.req.header('X-Real-IP') ||
-    'unknown'
+    c.req.header('X-Forwarded-For')?.split(',')[0] || c.req.header('X-Real-IP') || 'unknown'
   const userId = c.get('user_id') || 'anonymous'
   const workspace = c.get('workspace')
 
@@ -111,7 +109,7 @@ export async function adminRateLimiting(
     }
 
     // Check workspace-based limit
-    if (workspace && workspace.id) {
+    if (workspace?.id) {
       const workspaceKey = `admin:rate:workspace:${workspace.id}`
       const workspaceCount = await redis.zCount(workspaceKey, windowStart, now)
 
@@ -154,13 +152,10 @@ export async function adminRateLimiting(
         score: now,
         value: timestamp,
       })
-      await redis.expire(
-        `admin:rate:user:${userId}`,
-        Math.ceil(limits.windowMs / 1000) + 10
-      )
+      await redis.expire(`admin:rate:user:${userId}`, Math.ceil(limits.windowMs / 1000) + 10)
     }
 
-    if (workspace && workspace.id) {
+    if (workspace?.id) {
       await redis.zAdd(`admin:rate:workspace:${workspace.id}`, {
         score: now,
         value: timestamp,

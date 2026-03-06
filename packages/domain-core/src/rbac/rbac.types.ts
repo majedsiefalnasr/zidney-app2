@@ -70,11 +70,7 @@ export enum PermissionModule {
  * Per-row permission action flags.
  * Map to the four boolean columns on backoffice_role_module_permissions.
  */
-export type PermissionAction =
-  | 'can_view'
-  | 'can_create'
-  | 'can_edit'
-  | 'can_delete'
+export type PermissionAction = 'can_view' | 'can_create' | 'can_edit' | 'can_delete'
 
 // ---------------------------------------------------------------------------
 // Interfaces

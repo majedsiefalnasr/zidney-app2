@@ -34,10 +34,9 @@
  * - AGENTS.md: No direct DB instantiation, uses migration system
  */
 
-import { PoolClient } from 'pg'
+import type { PoolClient } from 'pg'
 
-export const description =
-  'Add authentication fields to users table for STAGE_03'
+export const description = 'Add authentication fields to users table for STAGE_03'
 
 /**
  * Execute schema migration

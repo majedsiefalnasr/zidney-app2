@@ -9,11 +9,7 @@ import { createPinia, setActivePinia } from 'pinia'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { IRefreshManager } from '../../../src/core/auth/refresh-manager'
 import { defineAuthStore } from '../../../src/core/state/auth.store'
-import {
-  createMockAuthService,
-  createMockTokenManager,
-  createTestRouter,
-} from './setup'
+import { createMockAuthService, createMockTokenManager, createTestRouter } from './setup'
 
 // ─── Logger mock ─────────────────────────────────────────────────────────────
 vi.mock('@zidney/logger', () => ({
@@ -27,11 +23,7 @@ vi.mock('@zidney/logger', () => ({
 
 // ─── Helper ──────────────────────────────────────────────────────────────────
 
-function buildStore(
-  overrides: {
-    refreshManager?: IRefreshManager | null
-  } = {}
-) {
+function buildStore(overrides: { refreshManager?: IRefreshManager | null } = {}) {
   const pinia = createPinia()
   setActivePinia(pinia)
 
@@ -96,12 +88,8 @@ describe('defineAuthStore', () => {
 
     it('token is NOT exposed as a store getter', () => {
       const { store } = buildStore()
-      expect(
-        (store as unknown as Record<string, unknown>)['token']
-      ).toBeUndefined()
-      expect(
-        (store as unknown as Record<string, unknown>)['accessToken']
-      ).toBeUndefined()
+      expect((store as unknown as Record<string, unknown>).token).toBeUndefined()
+      expect((store as unknown as Record<string, unknown>).accessToken).toBeUndefined()
     })
   })
 
@@ -178,9 +166,7 @@ describe('defineAuthStore', () => {
 
     it('sets authError.code to AUTH_INIT_FAILED on failure', async () => {
       const { store, authService } = buildStore()
-      vi.mocked(authService.refreshToken).mockRejectedValue(
-        new Error('expired')
-      )
+      vi.mocked(authService.refreshToken).mockRejectedValue(new Error('expired'))
 
       await store.initSession()
 
@@ -189,9 +175,7 @@ describe('defineAuthStore', () => {
 
     it('isAuthenticated remains false on failure', async () => {
       const { store, authService } = buildStore()
-      vi.mocked(authService.refreshToken).mockRejectedValue(
-        new Error('expired')
-      )
+      vi.mocked(authService.refreshToken).mockRejectedValue(new Error('expired'))
 
       await store.initSession()
 
@@ -200,9 +184,7 @@ describe('defineAuthStore', () => {
 
     it('user remains null on failure', async () => {
       const { store, authService } = buildStore()
-      vi.mocked(authService.refreshToken).mockRejectedValue(
-        new Error('expired')
-      )
+      vi.mocked(authService.refreshToken).mockRejectedValue(new Error('expired'))
 
       await store.initSession()
 
@@ -211,9 +193,7 @@ describe('defineAuthStore', () => {
 
     it('isLoading is false after failed initSession()', async () => {
       const { store, authService } = buildStore()
-      vi.mocked(authService.refreshToken).mockRejectedValue(
-        new Error('expired')
-      )
+      vi.mocked(authService.refreshToken).mockRejectedValue(new Error('expired'))
 
       await store.initSession()
 
@@ -222,9 +202,7 @@ describe('defineAuthStore', () => {
 
     it('router.push is NOT called on failure', async () => {
       const { store, authService, router } = buildStore()
-      vi.mocked(authService.refreshToken).mockRejectedValue(
-        new Error('expired')
-      )
+      vi.mocked(authService.refreshToken).mockRejectedValue(new Error('expired'))
       const pushSpy = vi.spyOn(router, 'push')
 
       await store.initSession()
@@ -330,9 +308,7 @@ describe('defineAuthStore', () => {
         name: 'Alice',
         role: 'admin',
       })
-      vi.mocked(authService.logout).mockRejectedValue(
-        new Error('network error')
-      )
+      vi.mocked(authService.logout).mockRejectedValue(new Error('network error'))
 
       await expect(store.logout()).resolves.toBeUndefined()
     })
@@ -345,9 +321,7 @@ describe('defineAuthStore', () => {
         name: 'Alice',
         role: 'admin',
       })
-      vi.mocked(authService.logout).mockRejectedValue(
-        new Error('network error')
-      )
+      vi.mocked(authService.logout).mockRejectedValue(new Error('network error'))
 
       await store.logout()
 

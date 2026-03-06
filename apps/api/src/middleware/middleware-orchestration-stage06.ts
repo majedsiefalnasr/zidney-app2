@@ -31,8 +31,8 @@
  * - Correlation ID FIRST global (needs to be set for all logs)
  */
 
-import { Logger } from '@zidney/logger'
-import { Hono } from 'hono'
+import type { Logger } from '@zidney/logger'
+import type { Hono } from 'hono'
 
 // Middleware imports
 import { createAuthContextMiddlewareStage06 } from './auth-context-stage06'
@@ -74,10 +74,7 @@ export function registerMiddlewareStackStage06(
   // =========================================================================
 
   // 2. Tenant Resolver — MUST be second (extract workspace, load DB pool)
-  app.use(
-    '/api/workspaces/*',
-    createTenantResolverStage06(logger, dependencies.tenantPoolManager)
-  )
+  app.use('/api/workspaces/*', createTenantResolverStage06(logger, dependencies.tenantPoolManager))
 
   // 3. License Validator — MUST be third (verify ACTIVE/SOFT_LOCKED/ARCHIVED)
   // Applied BEFORE any business logic to prevent DB access if not licensed
@@ -85,10 +82,7 @@ export function registerMiddlewareStackStage06(
 
   // 4. Idempotency Middleware — After license, before RBAC
   // Deduplicates mutable requests (POST, PUT, PATCH, DELETE)
-  app.use(
-    '/api/workspaces/*',
-    createIdempotencyMiddlewareStage06(logger, dependencies.redis)
-  )
+  app.use('/api/workspaces/*', createIdempotencyMiddlewareStage06(logger, dependencies.redis))
 
   // 5. Auth Context — Validate JWT and extract user
   app.use('/api/workspaces/*', createAuthContextMiddlewareStage06(logger))

@@ -39,9 +39,7 @@ export class TestCleanup {
    */
   async cleanupWorkspace(workspaceId: string): Promise<void> {
     try {
-      await this.db.query('DELETE FROM licenses WHERE workspace_id = $1', [
-        workspaceId,
-      ])
+      await this.db.query('DELETE FROM licenses WHERE workspace_id = $1', [workspaceId])
     } catch (error) {
       // Ignore
     }
@@ -53,9 +51,7 @@ export class TestCleanup {
     }
 
     try {
-      await this.db.query('DELETE FROM audit_logs WHERE workspace_id = $1', [
-        workspaceId,
-      ])
+      await this.db.query('DELETE FROM audit_logs WHERE workspace_id = $1', [workspaceId])
     } catch (error) {
       // Ignore
     }

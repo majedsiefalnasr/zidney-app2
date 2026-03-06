@@ -92,14 +92,14 @@ describe('createAppRouter (Backoffice)', () => {
     const router = createAppRouter(createMemoryHistory())
     const resolved = router.resolve('/unauthorized')
     expect(resolved.name).toBe('bo-unauthorized')
-    expect(resolved.meta['public']).toBe(true)
+    expect(resolved.meta.public).toBe(true)
   })
 
   it('/error route resolves to bo-error', () => {
     const router = createAppRouter(createMemoryHistory())
     const resolved = router.resolve('/error')
     expect(resolved.name).toBe('bo-error')
-    expect(resolved.meta['public']).toBe(true)
+    expect(resolved.meta.public).toBe(true)
   })
 
   it('/select-workspace route resolves to bo-workspace-selector', () => {

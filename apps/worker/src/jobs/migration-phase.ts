@@ -4,9 +4,10 @@
  */
 
 import { runTenantMigrations } from '@zidney/domain-core/migration/tenant-migration-runner'
-import { Pool } from 'pg'
+import { logger } from '@zidney/logger'
+import type { Pool } from 'pg'
 import { acquireWorkspaceLock } from './lock-manager'
-import { SchemaMigrationJob } from './schema-migration-job'
+import type { SchemaMigrationJob } from './schema-migration-job'
 
 /**
  * Execute migration phase within single transaction
@@ -18,8 +19,7 @@ export async function executeMigrationPhase(
   tenantDb: Pool,
   workspace_slug: string
 ): Promise<{ success: boolean; error?: any }> {
-  const { workspace_id, target_schema_version, correlation_id, operator_id } =
-    job
+  const { workspace_id, target_schema_version, correlation_id, operator_id } = job
 
   try {
     // Acquire write lock (times out after 60s)
@@ -53,34 +53,24 @@ export async function executeMigrationPhase(
       }
     )
 
-    console.log(
-      JSON.stringify({
-        level: 'INFO',
-        service: 'worker-upgrade',
-        event: 'migration_phase_completed',
-        correlation_id,
-        workspace_id,
-        target_version: target_schema_version,
-        migrations_applied: result.migrationsApplied,
-        execution_time_ms: result.executionTimeMs,
-        timestamp: new Date().toISOString(),
-      })
-    )
+    logger.info('migration_phase_completed', {
+      service: 'worker-upgrade',
+      correlation_id,
+      workspace_id,
+      target_version: target_schema_version,
+      migrations_applied: result.migrationsApplied,
+      execution_time_ms: result.executionTimeMs,
+    })
 
     return { success: true }
   } catch (err: any) {
-    console.log(
-      JSON.stringify({
-        level: 'ERROR',
-        service: 'worker-upgrade',
-        event: 'migration_phase_failed',
-        correlation_id,
-        workspace_id,
-        error_code: err.errorCode || 'MIGRATION_EXECUTION_FAILED',
-        error_message: err.message,
-        timestamp: new Date().toISOString(),
-      })
-    )
+    logger.error('migration_phase_failed', {
+      service: 'worker-upgrade',
+      correlation_id,
+      workspace_id,
+      error_code: err.errorCode || 'MIGRATION_EXECUTION_FAILED',
+      error_message: err.message,
+    })
 
     return { success: false, error: err }
   }

@@ -16,15 +16,9 @@ describe('Affiliate Error Codes', () => {
     expect(AffiliateErrorCode.AFFILIATE_CODE_INACTIVE).toBeDefined()
     expect(AffiliateErrorCode.AFFILIATE_CODE_EXPIRED).toBeDefined()
     expect(AffiliateErrorCode.AFFILIATE_USAGE_LIMIT_EXCEEDED).toBeDefined()
-    expect(
-      AffiliateErrorCode.AFFILIATE_USAGE_LIMIT_PER_CLIENT_EXCEEDED
-    ).toBeDefined()
-    expect(
-      AffiliateErrorCode.AFFILIATE_INVALID_DISCOUNT_PERCENTAGE
-    ).toBeDefined()
-    expect(
-      AffiliateErrorCode.AFFILIATE_FORBIDDEN_DUPLICATE_PROMO_CODE
-    ).toBeDefined()
+    expect(AffiliateErrorCode.AFFILIATE_USAGE_LIMIT_PER_CLIENT_EXCEEDED).toBeDefined()
+    expect(AffiliateErrorCode.AFFILIATE_INVALID_DISCOUNT_PERCENTAGE).toBeDefined()
+    expect(AffiliateErrorCode.AFFILIATE_FORBIDDEN_DUPLICATE_PROMO_CODE).toBeDefined()
   })
 
   it('should have error messages for all codes', () => {
@@ -35,11 +29,9 @@ describe('Affiliate Error Codes', () => {
   })
 
   it('should have human-readable messages', () => {
-    expect(
-      AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_CODE_NOT_FOUND]
-    ).toContain('not found')
-    expect(
-      AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_CODE_EXPIRED]
-    ).toContain('expired')
+    expect(AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_CODE_NOT_FOUND]).toContain(
+      'not found'
+    )
+    expect(AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_CODE_EXPIRED]).toContain('expired')
   })
 })

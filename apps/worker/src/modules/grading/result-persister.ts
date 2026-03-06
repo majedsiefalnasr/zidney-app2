@@ -1,5 +1,5 @@
 import { logger } from '@zidney/logger'
-import { GradingResult } from '../../types/job-schema'
+import type { GradingResult } from '../../types/job-schema'
 
 type DbRow = Record<string, any>
 type QueryResult = { rows: DbRow[] }
@@ -147,10 +147,7 @@ export async function persistGradingResult(
     } catch (rollbackError) {
       logger.error(`Rollback error`, {
         attempt_id: attemptId,
-        error:
-          rollbackError instanceof Error
-            ? rollbackError.message
-            : String(rollbackError),
+        error: rollbackError instanceof Error ? rollbackError.message : String(rollbackError),
       })
     }
 

@@ -33,9 +33,9 @@
  * - mmc_dashboard:trends:uuid-workspace-1:abc123def456
  */
 
+import { createHash } from 'node:crypto'
 import { logger } from '@zidney/logger'
-import { createHash } from 'crypto'
-import Redis from 'ioredis'
+import type Redis from 'ioredis'
 
 /**
  * Cache TTL configuration per endpoint (in seconds)
@@ -72,10 +72,7 @@ function generateCacheKey(
       .map((key) => `${key}=${String(queryParams[key])}`)
       .join('&')
 
-    paramHash = createHash('md5')
-      .update(sortedParams)
-      .digest('hex')
-      .substring(0, 12)
+    paramHash = createHash('md5').update(sortedParams).digest('hex').substring(0, 12)
   } else {
     // No params, use fixed hash
     paramHash = 'no-params'
@@ -137,7 +134,7 @@ export class DashboardCacheClient {
 
     try {
       const key = generateCacheKey(endpoint, workspaceId, queryParams)
-      const value = await this.redis!.get(key)
+      const value = await this.redis?.get(key)
 
       if (value) {
         // Log cache hit for observability
@@ -194,7 +191,7 @@ export class DashboardCacheClient {
         return false
       }
 
-      await this.redis!.setex(key, ttl, value)
+      await this.redis?.setex(key, ttl, value)
 
       logger.log({
         timestamp: new Date().toISOString(),
@@ -239,7 +236,7 @@ export class DashboardCacheClient {
 
     try {
       const key = generateCacheKey(endpoint, workspaceId, queryParams)
-      const result = await this.redis!.del(key)
+      const result = await this.redis?.del(key)
 
       logger.log({
         timestamp: new Date().toISOString(),
@@ -284,9 +281,9 @@ export class DashboardCacheClient {
 
     try {
       const key = generateCacheKey(endpoint, workspaceId, queryParams)
-      const result = await this.redis!.exists(key)
+      const result = await this.redis?.exists(key)
       return result > 0
-    } catch (error) {
+    } catch (_error) {
       return false
     }
   }
@@ -305,13 +302,13 @@ export class DashboardCacheClient {
 
     try {
       const pattern = `mmc_dashboard:${endpoint}:*`
-      const keys = await this.redis!.keys(pattern)
+      const keys = await this.redis?.keys(pattern)
 
       if (keys.length === 0) {
         return 0
       }
 
-      const deleted = await this.redis!.del(...keys)
+      const deleted = await this.redis?.del(...keys)
 
       logger.log({
         timestamp: new Date().toISOString(),
@@ -349,13 +346,13 @@ export class DashboardCacheClient {
 
     try {
       const pattern = `mmc_dashboard:*:${workspaceId}:*`
-      const keys = await this.redis!.keys(pattern)
+      const keys = await this.redis?.keys(pattern)
 
       if (keys.length === 0) {
         return 0
       }
 
-      const deleted = await this.redis!.del(...keys)
+      const deleted = await this.redis?.del(...keys)
 
       logger.log({
         timestamp: new Date().toISOString(),
@@ -401,9 +398,7 @@ let globalCacheClient: DashboardCacheClient | null = null
  * @param redisClient - ioredis client (optional; if provided, initializes client)
  * @returns Global cache client instance
  */
-export function getDashboardCacheClient(
-  redisClient?: Redis
-): DashboardCacheClient {
+export function getDashboardCacheClient(redisClient?: Redis): DashboardCacheClient {
   if (!globalCacheClient) {
     globalCacheClient = new DashboardCacheClient(redisClient)
   } else if (redisClient && !globalCacheClient.isAvailable) {

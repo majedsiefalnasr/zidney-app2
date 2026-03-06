@@ -10,8 +10,8 @@
  * - Redaction patterns applied at serializer level
  */
 
-import { describe, expect, it, vi } from 'vitest'
 import { createChildLogger, getLogger, logger } from '@zidney/logger'
+import { describe, expect, it } from 'vitest'
 
 describe('Logger Abstraction', () => {
   describe('singleton pattern', () => {
@@ -96,7 +96,7 @@ describe('Logger Abstraction', () => {
 
     it('should include required base fields', () => {
       // Base fields that should be on every log
-      const requiredFields = ['timestamp', 'level', 'service', 'environment']
+      const _requiredFields = ['timestamp', 'level', 'service', 'environment']
 
       // Verify logger configured with these fields
       expect(getLogger()).toBeDefined()
@@ -131,14 +131,14 @@ describe('Logger Abstraction', () => {
       const child = createChildLogger(context)
 
       // All logs from this child should include context
-      const logOutput: any[] = []
+      const _logOutput: any[] = []
 
       // Mock logger calls (in real test, capture output)
       expect(typeof child.info).toBe('function')
     })
 
     it('should not interfere with parent logger context', () => {
-      const parent = getLogger()
+      const _parent = getLogger()
       const child1 = createChildLogger({ request_id: 'req-1' })
       const child2 = createChildLogger({ request_id: 'req-2' })
 

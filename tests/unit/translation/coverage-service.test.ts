@@ -79,14 +79,7 @@ describe('getCoverage', () => {
     })
     const db = createMockDb()
 
-    const result = await getCoverage(
-      db as any,
-      'ws-001',
-      'question',
-      'ar',
-      'en',
-      redis
-    )
+    const result = await getCoverage(db as any, 'ws-001', 'question', 'ar', 'en', redis)
 
     expect(result).toEqual(cachedData)
     expect(db.query).not.toHaveBeenCalled()
@@ -104,14 +97,7 @@ describe('getCoverage', () => {
       },
     })
 
-    const result = await getCoverage(
-      db as any,
-      'ws-001',
-      'question',
-      'ar',
-      'en',
-      redis
-    )
+    const result = await getCoverage(db as any, 'ws-001', 'question', 'ar', 'en', redis)
 
     expect(result).not.toBeNull()
     expect(result?.entity_type).toBe('question')
@@ -148,14 +134,7 @@ describe('getCoverage', () => {
     })
 
     // Should not throw; falls back to DB
-    const result = await getCoverage(
-      db as any,
-      'ws-001',
-      'question',
-      'ar',
-      'en',
-      redis
-    )
+    const result = await getCoverage(db as any, 'ws-001', 'question', 'ar', 'en', redis)
 
     expect(result).not.toBeNull()
     expect(result?.entity_type).toBe('question')
@@ -227,9 +206,7 @@ describe('invalidateCoverage', () => {
     })
 
     // Should resolve without throwing
-    await expect(
-      invalidateCoverage(redis, 'ws-001', 'question', 'ar')
-    ).resolves.not.toThrow()
+    await expect(invalidateCoverage(redis, 'ws-001', 'question', 'ar')).resolves.not.toThrow()
   })
 })
 
@@ -245,7 +222,7 @@ describe('invalidateWorkspaceCoverage', () => {
 
     await invalidateWorkspaceCoverage(redis, 'ws-001')
 
-    const scanCall = (redis.scan as ReturnType<typeof vi.fn>).mock.calls[0]
+    const scanCall = (redis.scan as ReturnType<typeof vi.fn>).mock.calls[0]!
     expect(scanCall[0]).toBe('0') // starts at cursor 0
     expect(scanCall[1]).toBe('MATCH')
     expect(scanCall[2]).toBe('coverage:ws-001:*')
@@ -287,8 +264,6 @@ describe('invalidateWorkspaceCoverage', () => {
       scan: vi.fn().mockRejectedValue(new Error('SCAN failed')),
     })
 
-    await expect(
-      invalidateWorkspaceCoverage(redis, 'ws-001')
-    ).resolves.not.toThrow()
+    await expect(invalidateWorkspaceCoverage(redis, 'ws-001')).resolves.not.toThrow()
   })
 })

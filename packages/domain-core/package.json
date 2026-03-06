@@ -25,6 +25,7 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@zidney/logger": "workspace:*",
     "bcrypt": "^6.0.0",
     "pg": "^8.18.0",
     "uuid": "^13.0.0",

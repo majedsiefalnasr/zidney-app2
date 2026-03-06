@@ -21,8 +21,7 @@ import type { MigrationConfig } from '../../migration-types'
 export const migration: MigrationConfig = {
   name: '0006_create_dead_letter_queue',
   version: '1.1.0',
-  description:
-    'Create dead_letter_queue table for failed job tracking and recovery',
+  description: 'Create dead_letter_queue table for failed job tracking and recovery',
 
   up: async (db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
@@ -77,9 +76,8 @@ export const migration: MigrationConfig = {
           )`
     )
 
-    console.log(
-      `[${correlationId}] Created dead_letter_queue table with indexes`
-    )
+    // biome-ignore lint/suspicious/noConsole: migration runner output
+    console.log(`[${correlationId}] Created dead_letter_queue table with indexes`)
   },
 
   down: async (db, _schema, context) => {
@@ -87,6 +85,7 @@ export const migration: MigrationConfig = {
 
     await db.execute(sql`DROP TABLE IF EXISTS dead_letter_queue CASCADE`)
 
+    // biome-ignore lint/suspicious/noConsole: migration runner output
     console.log(`[${correlationId}] Dropped dead_letter_queue table`)
   },
 }

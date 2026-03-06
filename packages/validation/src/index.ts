@@ -5,12 +5,43 @@
  * Pure functions, no side effects.
  */
 
-// Upgrade request validation
+// Attempt schemas
 export {
-  validateRollbackRequest,
-  validateUpgradeRequest,
-} from './upgrade-request-validator'
+  type CreateAttemptRequest,
+  createAttemptRequestSchema,
+  type QuestionResponse,
+  questionResponseSchema,
+  type SubmissionBusinessValidation,
+  SubmissionReason,
+  type SubmitAttemptRequest,
+  submitAttemptRequestSchema,
+  type UpdateProgressRequest,
+  updateProgressRequestSchema,
+  validateCreateAttemptRequest,
+  validateSubmissionBusiness,
+  validateSubmitAttemptRequest,
+  validateUpdateProgressRequest,
+} from './attempt-schemas'
+// Master database input validation
+export {
+  ValidationError,
+  validateCreateLicenseInput,
+  validateCreateMMCUserInput,
+  validateCreateProductInput,
+  validateCreateTenantRegistryInput,
+} from './master-db-schema'
 
+// Migration file validation
+export {
+  calculateChecksum,
+  detectDestructiveOperations,
+  detectMigrationGap,
+  extractMigrationHeader,
+  type MigrationHeader,
+  type MigrationValidationResult,
+  validateChecksum,
+  validateMigrationFile,
+} from './migration-file-validator'
 // Schema version validation (SemVer)
 export {
   compareVersions,
@@ -22,45 +53,10 @@ export {
   semVerToString,
   validateUpgrade,
 } from './schema-version-validator'
-
-// Migration file validation
-export {
-  calculateChecksum,
-  detectDestructiveOperations,
-  detectMigrationGap,
-  extractMigrationHeader,
-  validateChecksum,
-  validateMigrationFile,
-  type MigrationHeader,
-  type MigrationValidationResult,
-} from './migration-file-validator'
-
-// Master database input validation
-export {
-  validateCreateLicenseInput,
-  validateCreateMMCUserInput,
-  validateCreateProductInput,
-  validateCreateTenantRegistryInput,
-  ValidationError,
-} from './master-db-schema'
-
-// Attempt schemas
-export {
-  createAttemptRequestSchema,
-  questionResponseSchema,
-  SubmissionReason,
-  submitAttemptRequestSchema,
-  updateProgressRequestSchema,
-  validateCreateAttemptRequest,
-  validateSubmissionBusiness,
-  validateSubmitAttemptRequest,
-  validateUpdateProgressRequest,
-  type CreateAttemptRequest,
-  type QuestionResponse,
-  type SubmissionBusinessValidation,
-  type SubmitAttemptRequest,
-  type UpdateProgressRequest,
-} from './attempt-schemas'
-
 // Logging schema
 export * from './schemas/logging-schema'
+// Upgrade request validation
+export {
+  validateRollbackRequest,
+  validateUpgradeRequest,
+} from './upgrade-request-validator'

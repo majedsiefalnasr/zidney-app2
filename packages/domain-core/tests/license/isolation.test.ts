@@ -103,7 +103,7 @@ describe('Idempotency & Isolation', () => {
     const tenantBSlug = 'state-u.edu'
 
     // Query must always include workspace_slug in WHERE clause
-    const query = `SELECT * FROM licenses WHERE workspace_slug = $1`
+    const _query = `SELECT * FROM licenses WHERE workspace_slug = $1`
 
     // If slug is 'acme.edu', tenantB cannot be queried
     expect(tenantASlug).not.toBe(tenantBSlug)

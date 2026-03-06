@@ -133,7 +133,5 @@ export async function up(client: PoolClient): Promise<void> {
  * Rollback must be performed via database snapshot restore.
  */
 export async function down(_client: PoolClient): Promise<void> {
-  throw new Error(
-    'Workflow engine migration is not reversible. Restore from snapshot.'
-  )
+  throw new Error('Workflow engine migration is not reversible. Restore from snapshot.')
 }

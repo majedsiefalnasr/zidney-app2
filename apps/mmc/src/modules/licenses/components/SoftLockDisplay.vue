@@ -41,9 +41,7 @@ const timeRemaining = computed(() => {
   if (remaining <= 0) return 'Expired'
 
   const days = Math.floor(remaining / (1000 * 60 * 60 * 24))
-  const hours = Math.floor(
-    (remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60)
-  )
+  const hours = Math.floor((remaining % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60))
   const minutes = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60))
 
   return `${days}d ${hours}h ${minutes}m`

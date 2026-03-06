@@ -12,10 +12,11 @@
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  * Task: T048
  */
-import AppLayout from '@/components/layout/AppLayout.vue'
+
 import { createTestingPinia } from '@pinia/testing'
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import AppLayout from '@/components/layout/AppLayout.vue'
 
 vi.mock('vue-router', () => ({
   useRoute: vi.fn(() => ({ name: 'fo-home' })),
@@ -30,11 +31,7 @@ const childStubs = {
 }
 
 function createWrapper(
-  opts: {
-    hideSidebar?: boolean
-    isMobile?: boolean
-    sidebarCollapsed?: boolean
-  } = {}
+  opts: { hideSidebar?: boolean; isMobile?: boolean; sidebarCollapsed?: boolean } = {}
 ) {
   const pinia = createTestingPinia({
     createSpy: vi.fn,
@@ -62,36 +59,28 @@ describe('AppLayout — Frontoffice', () => {
   })
 
   it('AppSidebar present when hideSidebar=false (default)', () => {
-    expect(
-      createWrapper({ hideSidebar: false }).find('.stub-app-sidebar').exists()
-    ).toBe(true)
+    expect(createWrapper({ hideSidebar: false }).find('.stub-app-sidebar').exists()).toBe(true)
   })
 
   it('AppSidebar absent when hideSidebar=true', () => {
-    expect(
-      createWrapper({ hideSidebar: true }).find('.stub-app-sidebar').exists()
-    ).toBe(false)
+    expect(createWrapper({ hideSidebar: true }).find('.stub-app-sidebar').exists()).toBe(false)
   })
 
   it('AppHeader always present regardless of hideSidebar', () => {
-    expect(
-      createWrapper({ hideSidebar: true }).find('.stub-app-header').exists()
-    ).toBe(true)
-    expect(
-      createWrapper({ hideSidebar: false }).find('.stub-app-header').exists()
-    ).toBe(true)
+    expect(createWrapper({ hideSidebar: true }).find('.stub-app-header').exists()).toBe(true)
+    expect(createWrapper({ hideSidebar: false }).find('.stub-app-header').exists()).toBe(true)
   })
 
   it('adds .app-layout--mobile class when isMobile=true', () => {
-    expect(
-      createWrapper({ isMobile: true }).find('.app-layout').classes()
-    ).toContain('app-layout--mobile')
+    expect(createWrapper({ isMobile: true }).find('.app-layout').classes()).toContain(
+      'app-layout--mobile'
+    )
   })
 
   it('adds .app-layout--collapsed class when sidebarCollapsed=true', () => {
-    expect(
-      createWrapper({ sidebarCollapsed: true }).find('.app-layout').classes()
-    ).toContain('app-layout--collapsed')
+    expect(createWrapper({ sidebarCollapsed: true }).find('.app-layout').classes()).toContain(
+      'app-layout--collapsed'
+    )
   })
 
   it('mobile backdrop renders when !hideSidebar && isMobile && !sidebarCollapsed', () => {

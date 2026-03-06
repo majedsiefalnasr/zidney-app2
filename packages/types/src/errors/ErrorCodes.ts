@@ -65,12 +65,10 @@ export const ErrorCodeToStatusMap: Record<string, number> = {
 export const ErrorCodeToMessageMap: Record<string, string> = {
   [ErrorCodes.INVALID_MODULE_ENUM]:
     'Invalid module. Allowed: MCQ, TRADITIONAL_EXAMS, EXERCISES, LIBRARY, LIVES, FORUM',
-  [ErrorCodes.INVALID_NAME_LOCALIZATION]:
-    'Product name must include English translation',
+  [ErrorCodes.INVALID_NAME_LOCALIZATION]: 'Product name must include English translation',
   [ErrorCodes.SLUG_NOT_MUTABLE]: 'Slug cannot be changed after creation',
   [ErrorCodes.DUPLICATE_SLUG]: 'Product slug already exists',
-  [ErrorCodes.PRODUCT_HAS_LICENSES]:
-    'Cannot delete product with active licenses',
+  [ErrorCodes.PRODUCT_HAS_LICENSES]: 'Cannot delete product with active licenses',
   [ErrorCodes.PRODUCT_NOT_FOUND]: 'Product not found',
   [ErrorCodes.LICENSE_NOT_FOUND]: 'License not found',
   [ErrorCodes.UNAUTHORIZED]: 'Authentication required',
@@ -78,8 +76,7 @@ export const ErrorCodeToMessageMap: Record<string, string> = {
   [ErrorCodes.WORKSPACE_LOCKED]: 'Workspace is locked',
   [ErrorCodes.WORKSPACE_ARCHIVED]: 'Workspace is archived',
   [ErrorCodes.VERSION_MISMATCH]: 'Schema or product version incompatible',
-  [ErrorCodes.INTERNAL_SERVER_ERROR]:
-    'Internal server error. Please try again.',
+  [ErrorCodes.INTERNAL_SERVER_ERROR]: 'Internal server error. Please try again.',
 }
 
 /**

@@ -20,7 +20,7 @@
  * 3. No timing difference for user found vs not found
  */
 
-import * as crypto from 'crypto'
+import * as crypto from 'node:crypto'
 import { describe, expect, it } from 'vitest'
 
 describe('Timing Attack Prevention', () => {
@@ -73,7 +73,7 @@ describe('Timing Attack Prevention', () => {
       'exists@test.com': 'real_bcrypt_hash_here',
     }
 
-    const loginHandler = async (email: string, password: string) => {
+    const _loginHandler = async (email: string, password: string) => {
       const startTime = performance.now()
 
       // Always perform hash verification
@@ -118,12 +118,11 @@ describe('Timing Attack Prevention', () => {
   })
 
   it('should always perform password check', () => {
-    const passwordCheckLog: Array<{ user_found: boolean; checked: boolean }> =
-      []
+    const passwordCheckLog: Array<{ user_found: boolean; checked: boolean }> = []
 
-    const login = (userExists: boolean, password: string) => {
+    const login = (userExists: boolean, _password: string) => {
       // Always compute hash (either real or dummy)
-      const hash = userExists ? 'real_hash' : getDummyHash()
+      const _hash = userExists ? 'real_hash' : getDummyHash()
 
       // Always verify password
       passwordCheckLog.push({
@@ -140,8 +139,8 @@ describe('Timing Attack Prevention', () => {
 
     // Both checks were performed
     expect(passwordCheckLog).toHaveLength(2)
-    expect(passwordCheckLog[0]!.checked).toBe(true)
-    expect(passwordCheckLog[1]!.checked).toBe(true)
+    expect(passwordCheckLog[0]?.checked).toBe(true)
+    expect(passwordCheckLog[1]?.checked).toBe(true)
   })
 
   it('should use bcrypt for constant-time hashing', async () => {
@@ -149,8 +148,7 @@ describe('Timing Attack Prevention', () => {
     // Inherent constant-time verification
 
     // Simulating bcrypt properties
-    const bcryptHash =
-      '$2b$12$R9h7cIPz0gi.URNNGHZ1de4sWBVChcOs2MtkiwPeak286PKZbB1Zm'
+    const bcryptHash = '$2b$12$R9h7cIPz0gi.URNNGHZ1de4sWBVChcOs2MtkiwPeak286PKZbB1Zm'
 
     const properties = {
       algorithm: '$2b$', // bcrypt identifier
@@ -177,19 +175,14 @@ describe('Timing Attack Prevention', () => {
     expect(errors.notFound).not.toContain('not found')
 
     // Does not mention "password invalid"
-    expect(errors.invalidPassword.toLowerCase()).not.toContain(
-      'invalid password'
-    )
+    expect(errors.invalidPassword.toLowerCase()).not.toContain('invalid password')
   })
 })
 
 /**
  * Simulate bcrypt verify (simplified)
  */
-async function simulateBcryptVerify(
-  password: string,
-  hash: string
-): Promise<boolean> {
+async function simulateBcryptVerify(_password: string, hash: string): Promise<boolean> {
   // In reality, bcrypt.compare() does constant-time comparison
   // This is a simplified simulation
   await new Promise((resolve) => setTimeout(resolve, 5))

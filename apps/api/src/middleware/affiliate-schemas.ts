@@ -22,7 +22,7 @@ export const createAffiliateSchema = z.object({
   discount_percentage: z.string().refine((val: unknown) => {
     try {
       const num = parseFloat(String(val))
-      return !isNaN(num) && num >= 0 && num <= 100
+      return !Number.isNaN(num) && num >= 0 && num <= 100
     } catch {
       return false
     }
@@ -30,7 +30,7 @@ export const createAffiliateSchema = z.object({
   commission_percentage: z.string().refine((val: unknown) => {
     try {
       const num = parseFloat(String(val))
-      return !isNaN(num) && num >= 0 && num <= 100
+      return !Number.isNaN(num) && num >= 0 && num <= 100
     } catch {
       return false
     }
@@ -52,7 +52,7 @@ export const updateAffiliateSchema = z.object({
     .refine((val: unknown) => {
       try {
         const num = parseFloat(String(val))
-        return !isNaN(num) && num >= 0 && num <= 100
+        return !Number.isNaN(num) && num >= 0 && num <= 100
       } catch {
         return false
       }
@@ -63,7 +63,7 @@ export const updateAffiliateSchema = z.object({
     .refine((val: unknown) => {
       try {
         const num = parseFloat(String(val))
-        return !isNaN(num) && num >= 0 && num <= 100
+        return !Number.isNaN(num) && num >= 0 && num <= 100
       } catch {
         return false
       }

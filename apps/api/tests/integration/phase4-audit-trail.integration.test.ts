@@ -8,7 +8,7 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
-import { Pool, PoolClient } from 'pg'
+import { Pool, type PoolClient } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 const getConnectionString = () => {
@@ -19,8 +19,7 @@ const getConnectionString = () => {
   const password = process.env.DB_PASSWORD || 'change-me-in-production'
   const host = process.env.DB_HOST || 'localhost'
   const port = process.env.DB_PORT || '5432'
-  const database =
-    process.env.DB_DATABASE || process.env.DB_NAME || 'zidney_master'
+  const database = process.env.DB_DATABASE || process.env.DB_NAME || 'zidney_master'
 
   return `postgresql://${user}:${password}@${host}:${port}/${database}`
 }
@@ -82,16 +81,15 @@ describe('Phase 4: Audit Trail Immutability', () => {
           EXECUTE FUNCTION phase4_attempt_events_immutable_guard();
       `)
 
-      await client.query(
-        'TRUNCATE TABLE attempt_events, attempts, mcq_exams, users CASCADE'
-      )
+      await client.query('TRUNCATE TABLE attempt_events, attempts, mcq_exams, users CASCADE')
 
       // Insert test data
       const userId = '11111111-1111-1111-1111-111111111111'
-      await client.query(
-        `INSERT INTO users (id, email, name) VALUES ($1, $2, $3)`,
-        [userId, 'test@example.com', 'Test User']
-      )
+      await client.query(`INSERT INTO users (id, email, name) VALUES ($1, $2, $3)`, [
+        userId,
+        'test@example.com',
+        'Test User',
+      ])
 
       // Create test exam and attempt
       const examId = '22222222-2222-2222-2222-222222222222'
@@ -163,10 +161,9 @@ describe('Phase 4: Audit Trail Immutability', () => {
       // Now try to UPDATE it
       let error: Error | null = null
       try {
-        await client.query(
-          `UPDATE attempt_events SET event_type = 'RESUME' WHERE id = $1`,
-          [eventId]
-        )
+        await client.query(`UPDATE attempt_events SET event_type = 'RESUME' WHERE id = $1`, [
+          eventId,
+        ])
       } catch (e) {
         error = e as Error
       }
@@ -269,10 +266,9 @@ describe('Phase 4: Audit Trail Immutability', () => {
       // Verify immutability
       let error: Error | null = null
       try {
-        await client.query(
-          `UPDATE attempt_events SET event_type = 'START' WHERE id = $1`,
-          [eventId]
-        )
+        await client.query(`UPDATE attempt_events SET event_type = 'START' WHERE id = $1`, [
+          eventId,
+        ])
       } catch (e) {
         error = e as Error
       }

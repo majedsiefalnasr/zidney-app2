@@ -23,8 +23,8 @@ describe('Workspace Isolation (ADR-0001)', () => {
   let workspace1Id: string
   let workspace2Id: string
   let user1: any
-  let user2: any
-  let exam1: any
+  let _user2: any
+  let _exam1: any
 
   beforeAll(async () => {
     // Create test workspaces
@@ -33,14 +33,14 @@ describe('Workspace Isolation (ADR-0001)', () => {
        VALUES ('iso-ws1', 'Isolation WS1', 1, '1.0.0', 'ACTIVE')
        RETURNING id`
     )
-    workspace1Id = ws1.rows[0]!.id
+    workspace1Id = ws1.rows[0]?.id
 
     const ws2 = await db.master.query(
       `INSERT INTO workspaces (slug, name, schema_version, product_version, license_status)
        VALUES ('iso-ws2', 'Isolation WS2', 1, '1.0.0', 'ACTIVE')
        RETURNING id`
     )
-    workspace2Id = ws2.rows[0]!.id
+    workspace2Id = ws2.rows[0]?.id
 
     // Create users in each workspace
     const userPool1 = getTenantPool(workspace1Id)!
@@ -60,7 +60,7 @@ describe('Workspace Isolation (ADR-0001)', () => {
        RETURNING id`,
       [workspace2Id]
     )
-    user2 = u2.rows[0]!
+    _user2 = u2.rows[0]!
   })
 
   // T046.1: Query Always Includes workspace_id Filter
@@ -69,9 +69,7 @@ describe('Workspace Isolation (ADR-0001)', () => {
     const spy = vi.spyOn(pool, 'query')
 
     // Execute a query
-    await pool.query('SELECT * FROM users WHERE workspace_id = $1', [
-      workspace1Id,
-    ])
+    await pool.query('SELECT * FROM users WHERE workspace_id = $1', [workspace1Id])
 
     // Verify query parameters include workspace_id
     expect(spy).toHaveBeenCalledWith(
@@ -91,14 +89,14 @@ describe('Workspace Isolation (ADR-0001)', () => {
        RETURNING id`,
       [workspace1Id, user1.id, 'exam1']
     )
-    const attemptId = attemptRes.rows[0]!.id
+    const attemptId = attemptRes.rows[0]?.id
 
     // Try to load from workspace2 (should fail)
     const pool2 = getTenantPool(workspace2Id)!
-    const result = await pool2.query(
-      'SELECT * FROM attempts WHERE id = $1 AND workspace_id = $2',
-      [attemptId, workspace2Id]
-    )
+    const result = await pool2.query('SELECT * FROM attempts WHERE id = $1 AND workspace_id = $2', [
+      attemptId,
+      workspace2Id,
+    ])
 
     expect(result.rows).toHaveLength(0) // Not found
   })
@@ -130,13 +128,13 @@ describe('Workspace Isolation (ADR-0001)', () => {
        RETURNING id`,
       [workspace1Id]
     )
-    const insertedUserId = createdUser.rows[0]!.id
+    const insertedUserId = createdUser.rows[0]?.id
 
     // Same id with mismatched workspace must return zero rows.
-    const result = await pool1.query(
-      'SELECT * FROM users WHERE id = $1 AND workspace_id = $2',
-      [insertedUserId, workspace2Id]
-    )
+    const result = await pool1.query('SELECT * FROM users WHERE id = $1 AND workspace_id = $2', [
+      insertedUserId,
+      workspace2Id,
+    ])
 
     expect(result.rows).toHaveLength(0)
   })
@@ -181,8 +179,8 @@ describe('Workspace Isolation (ADR-0001)', () => {
       [workspace2Id]
     )
 
-    expect(parseInt(result1.rows[0]!.count)).toBeGreaterThanOrEqual(1)
-    expect(parseInt(result2.rows[0]!.count)).toBeGreaterThanOrEqual(1)
+    expect(parseInt(result1.rows[0]?.count, 10)).toBeGreaterThanOrEqual(1)
+    expect(parseInt(result2.rows[0]?.count, 10)).toBeGreaterThanOrEqual(1)
   })
 
   // T046.7: Workspace Slug Acts As Primary Tenant Identifier

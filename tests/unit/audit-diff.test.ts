@@ -194,9 +194,7 @@ describe('computeSettingsDiff', () => {
       new_value: '[REDACTED]',
     })
     // gateway toggle unchanged — should not appear
-    expect(
-      diff.find((d) => d.field === 'use_custom_payment_gateway')
-    ).toBeUndefined()
+    expect(diff.find((d) => d.field === 'use_custom_payment_gateway')).toBeUndefined()
   })
 
   it('handles new fields appearing (undefined → value)', () => {

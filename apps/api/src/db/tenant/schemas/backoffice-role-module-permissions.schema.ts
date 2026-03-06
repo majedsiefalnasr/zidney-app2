@@ -16,15 +16,7 @@
  * ✓ ON DELETE CASCADE: removing a role removes all its permission rows
  */
 
-import {
-  boolean,
-  index,
-  pgTable,
-  timestamp,
-  uniqueIndex,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core'
+import { boolean, index, pgTable, timestamp, uniqueIndex, uuid, varchar } from 'drizzle-orm/pg-core'
 
 import { backofficeRoles } from './backoffice-roles.schema'
 
@@ -58,29 +50,21 @@ export const backofficeRoleModulePermissions = pgTable(
     can_edit: boolean('can_edit').notNull().default(false),
     /** Whether this role can delete resources in the module. */
     can_delete: boolean('can_delete').notNull().default(false),
-    created_at: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updated_at: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     /** Prevents duplicate permission rows per role per module. */
-    unique_role_module: uniqueIndex(
-      'backoffice_role_module_permissions_unique'
-    ).on(table.role_id, table.module),
-    /** Permission evaluation hot path — lookup all permissions for a role. */
-    idx_role_id: index('idx_brmp_role_id').on(table.role_id),
-    /** Per-module permission lookup for guard evaluation. */
-    idx_role_module: index('idx_brmp_role_module').on(
+    unique_role_module: uniqueIndex('backoffice_role_module_permissions_unique').on(
       table.role_id,
       table.module
     ),
+    /** Permission evaluation hot path — lookup all permissions for a role. */
+    idx_role_id: index('idx_brmp_role_id').on(table.role_id),
+    /** Per-module permission lookup for guard evaluation. */
+    idx_role_module: index('idx_brmp_role_module').on(table.role_id, table.module),
   })
 )
 
-export type BackofficeRoleModulePermission =
-  typeof backofficeRoleModulePermissions.$inferSelect
-export type NewBackofficeRoleModulePermission =
-  typeof backofficeRoleModulePermissions.$inferInsert
+export type BackofficeRoleModulePermission = typeof backofficeRoleModulePermissions.$inferSelect
+export type NewBackofficeRoleModulePermission = typeof backofficeRoleModulePermissions.$inferInsert

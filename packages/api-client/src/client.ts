@@ -24,9 +24,7 @@ import type {
 
 // ─── Helper: Serialize params to query string ───────────────────────────────
 
-function serializeParams(
-  params?: Record<string, string | number | boolean>
-): string {
+function serializeParams(params?: Record<string, string | number | boolean>): string {
   if (!params) return ''
   const entries = Object.entries(params)
   if (entries.length === 0) return ''
@@ -40,13 +38,11 @@ function serializeParams(
 
 // ─── Helper: Check if body has { success, data } shape ──────────────────────
 
-function hasSuccessData(
-  body: unknown
-): body is { success: true; data: unknown } {
+function hasSuccessData(body: unknown): body is { success: true; data: unknown } {
   return (
     typeof body === 'object' &&
     body !== null &&
-    (body as Record<string, unknown>)['success'] === true &&
+    (body as Record<string, unknown>).success === true &&
     'data' in (body as Record<string, unknown>)
   )
 }
@@ -102,8 +98,7 @@ export function createApiClient(config: ClientConfig): ApiClient {
     const body = data !== undefined ? JSON.stringify(data) : undefined
 
     // 5. Timeout interceptor — combine signals
-    const timeout =
-      reqConfig?.timeout !== undefined ? reqConfig.timeout : defaultTimeout
+    const timeout = reqConfig?.timeout !== undefined ? reqConfig.timeout : defaultTimeout
     const signal = createCombinedSignal(timeout, reqConfig?.signal)
 
     const adapterRequest: AdapterRequest = {
@@ -199,49 +194,23 @@ export function createApiClient(config: ClientConfig): ApiClient {
 
   return {
     get<T>(url: string, reqConfig?: RequestConfig): Promise<ClientResponse<T>> {
-      return executeRequest('GET', url, undefined, reqConfig) as Promise<
-        ClientResponse<T>
-      >
+      return executeRequest('GET', url, undefined, reqConfig) as Promise<ClientResponse<T>>
     },
 
-    post<T>(
-      url: string,
-      data: unknown,
-      reqConfig?: RequestConfig
-    ): Promise<ClientResponse<T>> {
-      return executeRequest('POST', url, data, reqConfig) as Promise<
-        ClientResponse<T>
-      >
+    post<T>(url: string, data: unknown, reqConfig?: RequestConfig): Promise<ClientResponse<T>> {
+      return executeRequest('POST', url, data, reqConfig) as Promise<ClientResponse<T>>
     },
 
-    put<T>(
-      url: string,
-      data: unknown,
-      reqConfig?: RequestConfig
-    ): Promise<ClientResponse<T>> {
-      return executeRequest('PUT', url, data, reqConfig) as Promise<
-        ClientResponse<T>
-      >
+    put<T>(url: string, data: unknown, reqConfig?: RequestConfig): Promise<ClientResponse<T>> {
+      return executeRequest('PUT', url, data, reqConfig) as Promise<ClientResponse<T>>
     },
 
-    patch<T>(
-      url: string,
-      data: unknown,
-      reqConfig?: RequestConfig
-    ): Promise<ClientResponse<T>> {
-      return executeRequest('PATCH', url, data, reqConfig) as Promise<
-        ClientResponse<T>
-      >
+    patch<T>(url: string, data: unknown, reqConfig?: RequestConfig): Promise<ClientResponse<T>> {
+      return executeRequest('PATCH', url, data, reqConfig) as Promise<ClientResponse<T>>
     },
 
-    delete<T>(
-      url: string,
-      data?: unknown,
-      reqConfig?: RequestConfig
-    ): Promise<ClientResponse<T>> {
-      return executeRequest('DELETE', url, data, reqConfig) as Promise<
-        ClientResponse<T>
-      >
+    delete<T>(url: string, data?: unknown, reqConfig?: RequestConfig): Promise<ClientResponse<T>> {
+      return executeRequest('DELETE', url, data, reqConfig) as Promise<ClientResponse<T>>
     },
   }
 }

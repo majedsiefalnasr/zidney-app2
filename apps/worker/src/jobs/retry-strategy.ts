@@ -3,7 +3,8 @@
  * Exponential backoff and dead-letter queue
  */
 
-import { SchemaMigrationJob } from './schema-migration-job'
+import { logger } from '@zidney/logger'
+import type { SchemaMigrationJob } from './schema-migration-job'
 
 export interface RetryPolicy {
   maxAttempts: number
@@ -26,8 +27,7 @@ export function calculateNextRetryDelay(
   attempt: number,
   policy: RetryPolicy = DEFAULT_RETRY_POLICY
 ): number {
-  const delay =
-    policy.baseDelayMs * Math.pow(policy.backoffMultiplier, attempt - 1)
+  const delay = policy.baseDelayMs * policy.backoffMultiplier ** (attempt - 1)
   return Math.min(delay, policy.maxDelayMs)
 }
 
@@ -56,36 +56,20 @@ export async function sendToDLQ(
       `INSERT INTO dead_letter_queue (
         job_type, workspace_id, original_job, error_message, entered_at
       ) VALUES ($1, $2, $3, $4, $5)`,
-      [
-        job.job_type,
-        job.workspace_id,
-        JSON.stringify(job),
-        error.message,
-        new Date(),
-      ]
+      [job.job_type, job.workspace_id, JSON.stringify(job), error.message, new Date()]
     )
 
-    console.log(
-      JSON.stringify({
-        level: 'ERROR',
-        service: 'dlq',
-        event: 'job_sent_to_dlq',
-        job_type: job.job_type,
-        workspace_id: job.workspace_id,
-        error_message: error.message,
-        timestamp: new Date().toISOString(),
-      })
-    )
+    logger.error('job_sent_to_dlq', {
+      service: 'dlq',
+      job_type: job.job_type,
+      workspace_id: job.workspace_id,
+      error_message: error.message,
+    })
   } catch (err: any) {
-    console.log(
-      JSON.stringify({
-        level: 'ERROR',
-        service: 'dlq',
-        event: 'dlq_write_failed',
-        error_message: err.message,
-        timestamp: new Date().toISOString(),
-      })
-    )
+    logger.error('dlq_write_failed', {
+      service: 'dlq',
+      error_message: err.message,
+    })
   }
 }
 

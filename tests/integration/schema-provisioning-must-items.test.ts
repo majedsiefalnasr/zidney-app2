@@ -26,11 +26,8 @@ import {
 import { Pool } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
-const runSchemaProvisioningMustItems =
-  process.env.RUN_SCHEMA_PROVISIONING_MUST_ITEMS === 'true'
-const integrationDescribe = runSchemaProvisioningMustItems
-  ? describe
-  : describe.skip
+const runSchemaProvisioningMustItems = process.env.RUN_SCHEMA_PROVISIONING_MUST_ITEMS === 'true'
+const integrationDescribe = runSchemaProvisioningMustItems ? describe : describe.skip
 
 // Test fixtures
 let masterPool: Pool | undefined
@@ -119,9 +116,7 @@ integrationDescribe('MUST Item 1: Snapshot Immutability Trigger', () => {
         throw new Error('UPDATE on snapshot should have been blocked')
       } catch (error) {
         // Expected: Trigger blocks UPDATE
-        expect(
-          error instanceof Error && error.message.includes('Immutable')
-        ).toBe(true)
+        expect(error instanceof Error && error.message.includes('Immutable')).toBe(true)
       }
 
       // Verify snapshot unchanged
@@ -161,16 +156,13 @@ integrationDescribe('MUST Item 1: Snapshot Immutability Trigger', () => {
 
         throw new Error('DELETE on attempts should have been blocked')
       } catch (error) {
-        expect(
-          error instanceof Error && error.message.includes('Immutable')
-        ).toBe(true)
+        expect(error instanceof Error && error.message.includes('Immutable')).toBe(true)
       }
 
       // Verify record still exists
-      const verifyResult = await client.query(
-        `SELECT COUNT(*) FROM attempts WHERE id = $1`,
-        [attemptId]
-      )
+      const verifyResult = await client.query(`SELECT COUNT(*) FROM attempts WHERE id = $1`, [
+        attemptId,
+      ])
       expect(verifyResult.rows[0].count).toBe(1)
     } finally {
       client.release()
@@ -178,88 +170,83 @@ integrationDescribe('MUST Item 1: Snapshot Immutability Trigger', () => {
   })
 })
 
-integrationDescribe(
-  'MUST Item 2: UNIQUE Constraint + Idempotency Handler',
-  () => {
-    it('should handle duplicate inserts with 23505 constraint violation', async () => {
-      const idempotencyKey = `test-dup-${Date.now()}`
+integrationDescribe('MUST Item 2: UNIQUE Constraint + Idempotency Handler', () => {
+  it('should handle duplicate inserts with 23505 constraint violation', async () => {
+    const idempotencyKey = `test-dup-${Date.now()}`
 
-      // First insert (success)
-      const result1 = await insertProvisioningTaskIdempotent(
+    // First insert (success)
+    const result1 = await insertProvisioningTaskIdempotent(
+      masterPool!,
+      testWorkspaceId,
+      idempotencyKey,
+      'INIT_TENANT_SCHEMA'
+    )
+
+    expect(result1.is_duplicate).toBe(false)
+    expect(result1.task_id).toBeTruthy()
+    testTaskId = result1.task_id
+
+    // Second insert (duplicate)
+    const result2 = await insertProvisioningTaskIdempotent(
+      masterPool!,
+      testWorkspaceId,
+      idempotencyKey,
+      'INIT_TENANT_SCHEMA'
+    )
+
+    expect(result2.is_duplicate).toBe(true)
+    expect(result2.task_id).toBe(result1.task_id) // Same ID
+    expect(result2.status).toBe('PENDING')
+  })
+
+  it('should return success on duplicate requests', async () => {
+    const idempotencyKey = `test-dup-success-${Date.now()}`
+
+    const result1 = await insertProvisioningTaskIdempotent(
+      masterPool!,
+      testWorkspaceId,
+      idempotencyKey
+    )
+
+    const result2 = await insertProvisioningTaskIdempotent(
+      masterPool!,
+      testWorkspaceId,
+      idempotencyKey
+    )
+
+    const result3 = await insertProvisioningTaskIdempotent(
+      masterPool!,
+      testWorkspaceId,
+      idempotencyKey
+    )
+
+    // All three should return same task_id
+    expect(result1.task_id).toBe(result2.task_id)
+    expect(result2.task_id).toBe(result3.task_id)
+
+    // First is new, others are dupes
+    expect(result1.is_duplicate).toBe(false)
+    expect(result2.is_duplicate).toBe(true)
+    expect(result3.is_duplicate).toBe(true)
+  })
+
+  it('should reject FK constraint violation (workspace not found)', async () => {
+    const fakeWorkspaceId = 'ffffffff-ffff-ffff-ffff-ffffffffffff'
+
+    try {
+      await insertProvisioningTaskIdempotent(
         masterPool!,
-        testWorkspaceId,
-        idempotencyKey,
+        fakeWorkspaceId,
+        'test-fk-violation',
         'INIT_TENANT_SCHEMA'
       )
 
-      expect(result1.is_duplicate).toBe(false)
-      expect(result1.task_id).toBeTruthy()
-      testTaskId = result1.task_id
-
-      // Second insert (duplicate)
-      const result2 = await insertProvisioningTaskIdempotent(
-        masterPool!,
-        testWorkspaceId,
-        idempotencyKey,
-        'INIT_TENANT_SCHEMA'
-      )
-
-      expect(result2.is_duplicate).toBe(true)
-      expect(result2.task_id).toBe(result1.task_id) // Same ID
-      expect(result2.status).toBe('PENDING')
-    })
-
-    it('should return success on duplicate requests', async () => {
-      const idempotencyKey = `test-dup-success-${Date.now()}`
-
-      const result1 = await insertProvisioningTaskIdempotent(
-        masterPool!,
-        testWorkspaceId,
-        idempotencyKey
-      )
-
-      const result2 = await insertProvisioningTaskIdempotent(
-        masterPool!,
-        testWorkspaceId,
-        idempotencyKey
-      )
-
-      const result3 = await insertProvisioningTaskIdempotent(
-        masterPool!,
-        testWorkspaceId,
-        idempotencyKey
-      )
-
-      // All three should return same task_id
-      expect(result1.task_id).toBe(result2.task_id)
-      expect(result2.task_id).toBe(result3.task_id)
-
-      // First is new, others are dupes
-      expect(result1.is_duplicate).toBe(false)
-      expect(result2.is_duplicate).toBe(true)
-      expect(result3.is_duplicate).toBe(true)
-    })
-
-    it('should reject FK constraint violation (workspace not found)', async () => {
-      const fakeWorkspaceId = 'ffffffff-ffff-ffff-ffff-ffffffffffff'
-
-      try {
-        await insertProvisioningTaskIdempotent(
-          masterPool!,
-          fakeWorkspaceId,
-          'test-fk-violation',
-          'INIT_TENANT_SCHEMA'
-        )
-
-        throw new Error('Should have failed on FK constraint')
-      } catch (error) {
-        expect(
-          error instanceof Error && error.message.includes('not found')
-        ).toBe(true)
-      }
-    })
-  }
-)
+      throw new Error('Should have failed on FK constraint')
+    } catch (error) {
+      expect(error instanceof Error && error.message.includes('not found')).toBe(true)
+    }
+  })
+})
 
 integrationDescribe('MUST Item 3: CHECK Constraint for Snapshots', () => {
   it('should reject INSERT with NULL snapshot', async () => {
@@ -307,66 +294,61 @@ integrationDescribe('MUST Item 3: CHECK Constraint for Snapshots', () => {
   })
 })
 
-integrationDescribe(
-  'MUST Item 4: Worker Idempotency + Partial Init Detection',
-  () => {
-    it('should detect existing full schema and return SUCCESS', async () => {
-      const client = await tenantPool!.connect()
+integrationDescribe('MUST Item 4: Worker Idempotency + Partial Init Detection', () => {
+  it('should detect existing full schema and return SUCCESS', async () => {
+    const client = await tenantPool!.connect()
 
-      try {
-        // Verify schema exists
-        const schemaCheckResult = await client.query(
-          `SELECT COUNT(*) FROM information_schema.tables 
+    try {
+      // Verify schema exists
+      const schemaCheckResult = await client.query(
+        `SELECT COUNT(*) FROM information_schema.tables 
          WHERE table_schema = 'public'`
-        )
+      )
 
-        expect(Number(schemaCheckResult.rows[0].count)).toBeGreaterThan(10) // Baseline has 38+ tables
+      expect(Number(schemaCheckResult.rows[0].count)).toBeGreaterThan(10) // Baseline has 38+ tables
 
-        // If rerun occurs, worker should:
-        // 1. Check schema_version exists ✓
-        // 2. Verify baseline tables exist ✓
-        // 3. Return SUCCESS immediately ✓
+      // If rerun occurs, worker should:
+      // 1. Check schema_version exists ✓
+      // 2. Verify baseline tables exist ✓
+      // 3. Return SUCCESS immediately ✓
 
-        const versionCheck = await client.query(
-          `SELECT COUNT(*) FROM schema_version`
-        )
-        expect(Number(versionCheck.rows[0].count)).toBeGreaterThanOrEqual(1)
-      } finally {
-        client.release()
-      }
-    })
+      const versionCheck = await client.query(`SELECT COUNT(*) FROM schema_version`)
+      expect(Number(versionCheck.rows[0].count)).toBeGreaterThanOrEqual(1)
+    } finally {
+      client.release()
+    }
+  })
 
-    it('should detect partial initialization (schema_version without tables)', async () => {
-      // This is tested in Gate 4 (load test) which might introduce partial inits
-      // For unit test, we would:
-      // 1. Create schema_version record
-      // 2. Delete critical tables
-      // 3. Call verifySchemaIntegrity() → should fail
-      // 4. Worker should return RETRY status
+  it('should detect partial initialization (schema_version without tables)', async () => {
+    // This is tested in Gate 4 (load test) which might introduce partial inits
+    // For unit test, we would:
+    // 1. Create schema_version record
+    // 2. Delete critical tables
+    // 3. Call verifySchemaIntegrity() → should fail
+    // 4. Worker should return RETRY status
 
-      // Mock test:
-      const client = await tenantPool!.connect()
+    // Mock test:
+    const client = await tenantPool!.connect()
 
-      try {
-        // Create minimal schema_version (partial init)
-        await client.query(
-          `
+    try {
+      // Create minimal schema_version (partial init)
+      await client.query(
+        `
         INSERT INTO schema_version (version, checksum)
         VALUES ('1.0.0', 'abc123def456')
         `
-        )
+      )
 
-        // In production, verify baseline tables would be present
-        // Here we're just confirming schema_version is insertable
-        const result = await client.query(`SELECT COUNT(*) FROM schema_version`)
-        expect(Number(result.rows[0].count)).toBeGreaterThan(0)
-      } finally {
-        await client.query(`DELETE FROM schema_version`)
-        client.release()
-      }
-    })
-  }
-)
+      // In production, verify baseline tables would be present
+      // Here we're just confirming schema_version is insertable
+      const result = await client.query(`SELECT COUNT(*) FROM schema_version`)
+      expect(Number(result.rows[0].count)).toBeGreaterThan(0)
+    } finally {
+      await client.query(`DELETE FROM schema_version`)
+      client.release()
+    }
+  })
+})
 
 integrationDescribe('MUST Item 5: Registry Integrity Check', () => {
   it('should verify all tenants_registry entries have physical databases', async () => {

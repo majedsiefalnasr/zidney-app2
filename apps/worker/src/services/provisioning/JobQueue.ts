@@ -18,11 +18,12 @@
  * Backoff strategy: min(2^attempt * 5s, 60s)
  */
 
-import { Redis } from 'ioredis'
+import { logger } from '@zidney/logger'
+import type { Redis } from 'ioredis'
 import ProvisioningJob, {
   DEFAULT_JOB_QUEUE_CONFIG,
-  IJobQueue,
-  JobQueueConfig,
+  type IJobQueue,
+  type JobQueueConfig,
 } from '../../jobs/provisioning/ProvisioningJob'
 
 /**
@@ -46,7 +47,7 @@ export class JobQueue implements IJobQueue {
       const message = JSON.stringify(job.toRedisMessage())
       await this.redis.rpush(this.config.queue_name, message)
     } catch (error) {
-      console.error(`JobQueue.enqueue error: ${error}`)
+      logger.error('job_queue_enqueue_failed', { error: String(error) })
       throw error
     }
   }
@@ -62,10 +63,7 @@ export class JobQueue implements IJobQueue {
     timeout_seconds: number = this.config.dequeue_timeout_seconds
   ): Promise<ProvisioningJob | null> {
     try {
-      const result = await this.redis.blpop(
-        this.config.queue_name,
-        timeout_seconds
-      )
+      const result = await this.redis.blpop(this.config.queue_name, timeout_seconds)
 
       if (!result || result.length < 2) {
         return null
@@ -84,7 +82,7 @@ export class JobQueue implements IJobQueue {
 
       return job
     } catch (error) {
-      console.error(`JobQueue.dequeue error: ${error}`)
+      logger.error('job_queue_dequeue_failed', { error: String(error) })
       throw error
     }
   }
@@ -100,7 +98,7 @@ export class JobQueue implements IJobQueue {
       const processing_key = `${this.config.processing_set_name}:${job_id}`
       await this.redis.del(processing_key)
     } catch (error) {
-      console.error(`JobQueue.ack error: ${error}`)
+      logger.error('job_queue_ack_failed', { error: String(error) })
       throw error
     }
   }
@@ -128,10 +126,8 @@ export class JobQueue implements IJobQueue {
 
       // Calculate backoff: min(2^attempt * 5s, 60s)
       const backoff_seconds = Math.min(
-        Math.pow(
-          this.config.retry_backoff_multiplier,
-          retried_job.attempt - 1
-        ) * this.config.retry_backoff_base_seconds,
+        this.config.retry_backoff_multiplier ** (retried_job.attempt - 1) *
+          this.config.retry_backoff_base_seconds,
         this.config.max_retry_backoff_seconds
       )
 
@@ -140,13 +136,9 @@ export class JobQueue implements IJobQueue {
 
       // Use sorted set for delayed jobs (score = future timestamp)
       const future_timestamp = Date.now() + backoff_seconds * 1000
-      await this.redis.zadd(
-        `${this.config.queue_name}:delayed`,
-        future_timestamp,
-        job_message
-      )
+      await this.redis.zadd(`${this.config.queue_name}:delayed`, future_timestamp, job_message)
     } catch (error) {
-      console.error(`JobQueue.nack error: ${error}`)
+      logger.error('job_queue_nack_failed', { error: String(error) })
       throw error
     }
   }
@@ -175,7 +167,7 @@ export class JobQueue implements IJobQueue {
       // Set expiry (keep DLQ jobs for 7 days)
       await this.redis.expire(this.config.dlq_name, 7 * 24 * 60 * 60)
     } catch (error) {
-      console.error(`JobQueue.moveToDLQ error: ${error}`)
+      logger.error('job_queue_move_to_dlq_failed', { error: String(error) })
       throw error
     }
   }
@@ -189,17 +181,11 @@ export class JobQueue implements IJobQueue {
    */
   async peek(limit: number = 10): Promise<ProvisioningJob[]> {
     try {
-      const messages = await this.redis.lrange(
-        this.config.queue_name,
-        0,
-        limit - 1
-      )
+      const messages = await this.redis.lrange(this.config.queue_name, 0, limit - 1)
 
-      return messages.map((msg) =>
-        ProvisioningJob.fromRedisMessage(JSON.parse(msg))
-      )
+      return messages.map((msg) => ProvisioningJob.fromRedisMessage(JSON.parse(msg)))
     } catch (error) {
-      console.error(`JobQueue.peek error: ${error}`)
+      logger.error('job_queue_peek_failed', { error: String(error) })
       return []
     }
   }
@@ -212,18 +198,14 @@ export class JobQueue implements IJobQueue {
    */
   async peekDLQ(limit: number = 10): Promise<ProvisioningJob[]> {
     try {
-      const messages = await this.redis.lrange(
-        this.config.dlq_name,
-        0,
-        limit - 1
-      )
+      const messages = await this.redis.lrange(this.config.dlq_name, 0, limit - 1)
 
       return messages.map((msg) => {
         const dlq_entry = JSON.parse(msg)
         return ProvisioningJob.fromRedisMessage(dlq_entry.job)
       })
     } catch (error) {
-      console.error(`JobQueue.peekDLQ error: ${error}`)
+      logger.error('job_queue_peek_dlq_failed', { error: String(error) })
       return []
     }
   }
@@ -240,9 +222,7 @@ export class JobQueue implements IJobQueue {
   }> {
     try {
       const pending_count = await this.redis.llen(this.config.queue_name)
-      const processing_keys = await this.redis.keys(
-        `${this.config.processing_set_name}:*`
-      )
+      const processing_keys = await this.redis.keys(`${this.config.processing_set_name}:*`)
       const dlq_count = await this.redis.llen(this.config.dlq_name)
 
       return {
@@ -251,7 +231,7 @@ export class JobQueue implements IJobQueue {
         dlq_count,
       }
     } catch (error) {
-      console.error(`JobQueue.getStats error: ${error}`)
+      logger.error('job_queue_get_stats_failed', { error: String(error) })
       return {
         pending_count: 0,
         processing_count: 0,
@@ -284,15 +264,11 @@ export class JobQueue implements IJobQueue {
       }
 
       // Remove from delayed set
-      await this.redis.zremrangebyscore(
-        `${this.config.queue_name}:delayed`,
-        0,
-        now
-      )
+      await this.redis.zremrangebyscore(`${this.config.queue_name}:delayed`, 0, now)
 
       return delayed_jobs.length
     } catch (error) {
-      console.error(`JobQueue.processDelayedJobs error: ${error}`)
+      logger.error('job_queue_process_delayed_failed', { error: String(error) })
       return 0
     }
   }

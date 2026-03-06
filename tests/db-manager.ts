@@ -40,10 +40,7 @@ export class DbManager {
     }
 
     const dbName = `tenant_${workspaceId.replace(/-/g, '_')}`
-    const connectionString = this.masterConnectionString.replace(
-      '/master_db',
-      `/${dbName}`
-    )
+    const connectionString = this.masterConnectionString.replace('/master_db', `/${dbName}`)
 
     const pool = new Pool({
       connectionString,
@@ -54,18 +51,14 @@ export class DbManager {
       this.tenantDbs.set(workspaceId, pool)
       return pool
     } catch (error) {
-      throw new Error(
-        `Failed to connect to tenant database ${dbName}: ${error}`
-      )
+      throw new Error(`Failed to connect to tenant database ${dbName}: ${error}`)
     }
   }
 
   /**
    * Provision a new tenant database
    */
-  async createTenantDatabase(
-    workspaceSlug: string
-  ): Promise<{ success: boolean; dbName: string }> {
+  async createTenantDatabase(workspaceSlug: string): Promise<{ success: boolean; dbName: string }> {
     const masterDb = await this.getMasterDb()
     const dbName = `tenant_${workspaceSlug.replace(/-/g, '_')}`
 
@@ -75,17 +68,10 @@ export class DbManager {
       return { success: true, dbName }
     } catch (error: any) {
       // Handle concurrent create attempts idempotently.
-      if (
-        error.code === '42P04' ||
-        error.code === '23505' ||
-        error.code === '55006'
-      ) {
+      if (error.code === '42P04' || error.code === '23505' || error.code === '55006') {
         return { success: true, dbName }
       }
-      const exists = await masterDb.query(
-        `SELECT 1 FROM pg_database WHERE datname = $1`,
-        [dbName]
-      )
+      const exists = await masterDb.query(`SELECT 1 FROM pg_database WHERE datname = $1`, [dbName])
       if (exists.rowCount && exists.rowCount > 0) {
         return { success: true, dbName }
       }

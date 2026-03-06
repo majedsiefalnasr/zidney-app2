@@ -34,7 +34,7 @@
  *
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  */
-import { useMmcAuthStore } from '@/core/state/auth.store'
+
 import {
   Avatar,
   AvatarFallback,
@@ -47,6 +47,7 @@ import {
 } from '@zidney/ui-system'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
+import { useMmcAuthStore } from '@/core/state/auth.store'
 
 interface AppHeaderProps {
   showWorkspace?: boolean

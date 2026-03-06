@@ -170,14 +170,7 @@
 <script setup lang="ts">
 import { Button } from '@shadcn-vue/ui/button'
 import { Checkbox } from '@shadcn-vue/ui/checkbox'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@shadcn-vue/ui/table'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@shadcn-vue/ui/table'
 import { ChevronDown, ChevronUp, Loader } from 'lucide-vue-next'
 import { computed, ref, watch } from 'vue'
 
@@ -234,9 +227,7 @@ const emit = defineEmits<{
 
 // REACTIVE STATE
 
-const sortState = ref<{ column: string; direction: 'asc' | 'desc' } | null>(
-  null
-)
+const sortState = ref<{ column: string; direction: 'asc' | 'desc' } | null>(null)
 const selectedRows = ref<Set<string>>(new Set())
 const actionLoading = ref<Map<string, Set<string>>>(new Map())
 const currentPageInternal = ref(props.currentPage)
@@ -259,14 +250,10 @@ const allRowsSelected = computed(
 )
 
 const someRowsSelected = computed(
-  () =>
-    displayedRows.value.some((row) => isRowSelected(getRowKey(row))) &&
-    !allRowsSelected.value
+  () => displayedRows.value.some((row) => isRowSelected(getRowKey(row))) && !allRowsSelected.value
 )
 
-const visibleColumns = computed(() =>
-  props.columns.filter((col) => col.id !== 'actions')
-)
+const visibleColumns = computed(() => props.columns.filter((col) => col.id !== 'actions'))
 
 const totalPages = computed(() => Math.ceil(props.rows.length / pageSize.value))
 
@@ -277,8 +264,7 @@ const getRowKey = (row: any): string => {
   return String(row[key] || '')
 }
 
-const isRowSelected = (rowKey: string): boolean =>
-  selectedRows.value.has(rowKey)
+const isRowSelected = (rowKey: string): boolean => selectedRows.value.has(rowKey)
 
 const getCellValue = (row: any, column: Column): any => {
   if (column.accessor) {
@@ -318,9 +304,7 @@ const handleSelectRow = (row: any, checked: boolean) => {
 // Methods: Sorting
 const handleSort = (columnId: string): void => {
   const newDirection =
-    sortState.value?.column === columnId && sortState.value?.direction === 'asc'
-      ? 'desc'
-      : 'asc'
+    sortState.value?.column === columnId && sortState.value?.direction === 'asc' ? 'desc' : 'asc'
 
   sortState.value = { column: columnId, direction: newDirection }
   emit('sort', columnId, newDirection)

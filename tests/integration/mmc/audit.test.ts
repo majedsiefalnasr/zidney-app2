@@ -302,10 +302,10 @@ describe('T055: Audit Log Immutability Tests', () => {
 
       let updateError
       try {
-        await mockDb.query(
-          'UPDATE mmc_audit_log SET action_type = ? WHERE id = ?',
-          ['MODIFIED', auditId]
-        )
+        await mockDb.query('UPDATE mmc_audit_log SET action_type = ? WHERE id = ?', [
+          'MODIFIED',
+          auditId,
+        ])
       } catch (e) {
         updateError = e
       }

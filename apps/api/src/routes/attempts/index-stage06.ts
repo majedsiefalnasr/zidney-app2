@@ -27,8 +27,8 @@
  * - Error responses normalized to RFC 7807 format
  */
 
-import { Logger } from '@zidney/logger'
-import { Hono } from 'hono'
+import type { Logger } from '@zidney/logger'
+import type { Hono } from 'hono'
 import { createAttemptHandler } from './create'
 import { updateProgressHandler } from './progress'
 import { getAttemptStatusHandler } from './status'
@@ -75,20 +75,13 @@ export function registerStage06Routes(app: Hono, logger: Logger): void {
    * Idempotency: UPSERT ON CONFLICT (attempt_id, question_id)
    * Response: 200 OK
    */
-  app.patch(
-    '/api/workspaces/:slug/attempts/:id/progress',
-    updateProgressHandler
-  )
+  app.patch('/api/workspaces/:slug/attempts/:id/progress', updateProgressHandler)
 
-  logger.info(
-    'Registered route: PATCH /api/workspaces/:slug/attempts/:id/progress',
-    {
-      handler: 'updateProgressHandler',
-      middleware:
-        'tenantResolver → licenseValidator → idempotency → authContext → rbac',
-      idempotency: 'UPSERT method',
-    }
-  )
+  logger.info('Registered route: PATCH /api/workspaces/:slug/attempts/:id/progress', {
+    handler: 'updateProgressHandler',
+    middleware: 'tenantResolver → licenseValidator → idempotency → authContext → rbac',
+    idempotency: 'UPSERT method',
+  })
 
   // =========================================================================
   // STATUS & METADATA ENDPOINTS

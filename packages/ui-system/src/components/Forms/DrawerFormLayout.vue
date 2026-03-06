@@ -39,6 +39,7 @@
 </template>
 
 <script setup lang="ts">
+import { Button } from '@shadcn-vue/ui/button'
 import {
   Drawer,
   DrawerContent,
@@ -46,8 +47,6 @@ import {
   DrawerHeader,
   DrawerTitle,
 } from '@shadcn-vue/ui/drawer'
-
-import { Button } from '@shadcn-vue/ui/button'
 
 interface Props {
   isOpen: boolean

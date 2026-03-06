@@ -8,7 +8,7 @@ import {
   createTestClient,
   createTestContext,
   generateJWT,
-  TestContext,
+  type TestContext,
 } from '../test-helpers'
 
 describe('T094: SQL Injection Prevention', () => {

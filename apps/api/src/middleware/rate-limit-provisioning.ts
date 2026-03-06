@@ -15,12 +15,10 @@
  * - Retry-After: Seconds to wait before retry (on 429)
  */
 
-import {
-  ProvisioningErrorCode,
-  getErrorDetails,
-} from '@zidney/types/errors/provisioning-errors'
-import { Context, Next } from 'hono'
-import { Redis } from 'ioredis'
+import { logger } from '@zidney/logger'
+import { getErrorDetails, ProvisioningErrorCode } from '@zidney/types/errors/provisioning-errors'
+import type { Context, Next } from 'hono'
+import type { Redis } from 'ioredis'
 import { createErrorResponse } from '../routes/licenses/license-response'
 
 /**
@@ -85,9 +83,7 @@ export function rateLimitProvisioningMiddleware(
       // Set rate limit response headers
       c.set('rateLimitHeaders', {
         'X-RateLimit-Limit': String(config.maxRequests),
-        'X-RateLimit-Remaining': String(
-          Math.max(0, config.maxRequests - current)
-        ),
+        'X-RateLimit-Remaining': String(Math.max(0, config.maxRequests - current)),
         'X-RateLimit-Reset': String(Math.floor(resetTime.getTime() / 1000)),
       })
 
@@ -99,10 +95,7 @@ export function rateLimitProvisioningMiddleware(
         c.header('Retry-After', String(Math.ceil(ttl)))
         c.header('X-RateLimit-Limit', String(config.maxRequests))
         c.header('X-RateLimit-Remaining', '0')
-        c.header(
-          'X-RateLimit-Reset',
-          String(Math.floor(resetTime.getTime() / 1000))
-        )
+        c.header('X-RateLimit-Reset', String(Math.floor(resetTime.getTime() / 1000)))
 
         return c.json(
           createErrorResponse(
@@ -129,7 +122,7 @@ export function rateLimitProvisioningMiddleware(
       await next()
     } catch (error) {
       // On Redis error, log but don't block request
-      console.error('Rate limit check failed:', error)
+      logger.error('Rate limit check failed:', { error })
       c.set('rateLimitFailed', true)
       await next()
     }
@@ -140,9 +133,7 @@ export function rateLimitProvisioningMiddleware(
  * In-memory rate limiter (for development/testing)
  * Note: Not suitable for distributed deployments
  */
-export function inMemoryRateLimitMiddleware(
-  config: RateLimitConfig = DEFAULT_RATE_LIMIT_CONFIG
-) {
+export function inMemoryRateLimitMiddleware(config: RateLimitConfig = DEFAULT_RATE_LIMIT_CONFIG) {
   // Map to store: { key: [count, expiresAt] }
   const store = new Map<string, [number, number]>()
 
@@ -193,10 +184,7 @@ export function inMemoryRateLimitMiddleware(
       c.header('Retry-After', String(secondsRemaining))
       c.header('X-RateLimit-Limit', String(config.maxRequests))
       c.header('X-RateLimit-Remaining', '0')
-      c.header(
-        'X-RateLimit-Reset',
-        String(Math.floor(resetTime.getTime() / 1000))
-      )
+      c.header('X-RateLimit-Reset', String(Math.floor(resetTime.getTime() / 1000)))
 
       return c.json(
         createErrorResponse(
@@ -213,8 +201,6 @@ export function inMemoryRateLimitMiddleware(
 /**
  * Get rate limit info from context
  */
-export function getRateLimitInfo(
-  c: Context
-): Record<string, unknown> | undefined {
+export function getRateLimitInfo(c: Context): Record<string, unknown> | undefined {
   return c.get('rateLimitInfo')
 }

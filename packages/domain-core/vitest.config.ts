@@ -1,5 +1,5 @@
-import { resolve } from 'path'
-import { fileURLToPath } from 'url'
+import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineProject } from 'vitest/config'
 
 const __dirname = resolve(fileURLToPath(import.meta.url), '..')
@@ -12,6 +12,10 @@ const __dirname = resolve(fileURLToPath(import.meta.url), '..')
 export default defineProject({
   resolve: {
     alias: [
+      {
+        find: /^@zidney\/app\/([^/]+)\/(.*)$/,
+        replacement: resolve(__dirname, '../../apps/$1/src/$2'),
+      },
       {
         find: '@zidney/types',
         replacement: resolve(__dirname, '../types/src/index.ts'),

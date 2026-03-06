@@ -36,6 +36,7 @@ function makeTokenManager(): ITokenManager {
     getToken: vi.fn(() => null),
     setToken: vi.fn(),
     clearToken: vi.fn(),
+    hasToken: vi.fn(() => false),
   }
 }
 
@@ -75,12 +76,8 @@ describe('session clear wiring (mmc) — clearUserSpecificStores fired after exp
 
   function buildWiredSetup() {
     // Mirror main.ts bootstrap wiring for onSessionExpired
-    const useAuthStore = defineAuthStore(
-      makeAuthService(),
-      tokenManager,
-      router,
-      LOGIN_ROUTE,
-      () => makeRefreshManager()
+    const useAuthStore = defineAuthStore(makeAuthService(), tokenManager, router, LOGIN_ROUTE, () =>
+      makeRefreshManager()
     )
     const authStore = useAuthStore(pinia)
 

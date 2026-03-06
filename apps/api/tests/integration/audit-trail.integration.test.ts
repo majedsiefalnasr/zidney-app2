@@ -13,9 +13,9 @@ import {
   getAttemptEventHistory,
   logAttemptEvent,
 } from '@zidney/domain-core/audit/attempt-event-logger'
+import { createLogger } from '@zidney/logger'
 import { Pool } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
-import { createLogger } from '@zidney/logger'
 
 const logger = createLogger('AuditTrailIntegrationTest')
 
@@ -37,7 +37,7 @@ describe('Audit Trail Integration Tests (T032)', () => {
         })
       : new Pool({
           host: process.env.DB_HOST || 'localhost',
-          port: parseInt(process.env.DB_PORT || '5432'),
+          port: parseInt(process.env.DB_PORT || '5432', 10),
           database: process.env.DB_NAME || 'zidney_test',
           user: process.env.DB_USER || 'zidney_app',
           password: process.env.DB_PASSWORD || 'change-me-in-production',
@@ -99,9 +99,7 @@ describe('Audit Trail Integration Tests (T032)', () => {
         FOR EACH ROW
         EXECUTE FUNCTION audit_trail_events_immutable_guard();
     `)
-    await schemaClient.query(
-      'TRUNCATE TABLE attempt_events, attempts, mcq_exams, users CASCADE'
-    )
+    await schemaClient.query('TRUNCATE TABLE attempt_events, attempts, mcq_exams, users CASCADE')
     schemaClient.release()
 
     // Create exam
@@ -190,8 +188,8 @@ describe('Audit Trail Integration Tests (T032)', () => {
     const submitEvents = history.filter((e) => e.event_type === 'ANSWER_SUBMIT')
 
     expect(submitEvents.length).toBe(2)
-    expect(submitEvents[0]!.event_payload.question_id).toBe('q1')
-    expect(submitEvents[1]!.event_payload.question_id).toBe('q2')
+    expect(submitEvents[0]?.event_payload.question_id).toBe('q1')
+    expect(submitEvents[1]?.event_payload.question_id).toBe('q2')
     logger.info('✅ ANSWER_SUBMIT order test passed')
   })
 
@@ -247,11 +245,11 @@ describe('Audit Trail Integration Tests (T032)', () => {
   it('✅ Event counts by type are accurate', async () => {
     const counts = await countAttemptEventsByType(attemptId, pool)
 
-    expect(counts['START']).toBeGreaterThan(0)
-    expect(counts['ANSWER_SUBMIT']).toBeGreaterThan(0)
-    expect(counts['SUBMIT_REQUEST']).toBeGreaterThan(0)
-    expect(counts['FINALIZED']).toBeGreaterThan(0)
-    expect(counts['GRADED']).toBeGreaterThan(0)
+    expect(counts.START).toBeGreaterThan(0)
+    expect(counts.ANSWER_SUBMIT).toBeGreaterThan(0)
+    expect(counts.SUBMIT_REQUEST).toBeGreaterThan(0)
+    expect(counts.FINALIZED).toBeGreaterThan(0)
+    expect(counts.GRADED).toBeGreaterThan(0)
 
     logger.info('✅ Event count test passed', { counts })
   })
@@ -293,9 +291,7 @@ describe('Audit Trail Integration Tests (T032)', () => {
     await Promise.all(promises)
 
     const history = await getAttemptEventHistory(attemptId, pool)
-    const concurrentEvents = history.filter(
-      (e) => e.event_type === 'ANSWER_SUBMIT'
-    )
+    const concurrentEvents = history.filter((e) => e.event_type === 'ANSWER_SUBMIT')
 
     expect(concurrentEvents.length).toBeGreaterThanOrEqual(10)
     logger.info('✅ Concurrent logging test passed')

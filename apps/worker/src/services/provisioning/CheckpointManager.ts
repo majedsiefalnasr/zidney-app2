@@ -9,7 +9,8 @@
  * Stage: STAGE_05_TENANT_PROVISIONING_SERVICE
  */
 
-import { PoolClient } from 'pg'
+import { logger } from '@zidney/logger'
+import type { PoolClient } from 'pg'
 
 export enum ProvisioningStep {
   DB_CREATED = 'DB_CREATED',
@@ -65,15 +66,10 @@ export class CheckpointManager {
         INSERT INTO provisioning_checkpoints (step, step_ordinal, payload, correlation_id, completed_at)
         VALUES ($1, $2, $3, $4, NOW())
         `,
-        [
-          step,
-          ordinal,
-          payload ? JSON.stringify(payload) : null,
-          correlation_id,
-        ]
+        [step, ordinal, payload ? JSON.stringify(payload) : null, correlation_id]
       )
     } catch (error) {
-      console.error(`Failed to write checkpoint ${step}:`, error)
+      logger.error('checkpoint_write_failed', { step, error: String(error) })
       throw error
     }
   }
@@ -112,7 +108,7 @@ export class CheckpointManager {
         correlation_id: row.correlation_id,
       }
     } catch (error) {
-      console.error(`Failed to read latest checkpoint:`, error)
+      logger.error('checkpoint_read_failed', { correlation_id, error: String(error) })
       throw error
     }
   }
@@ -121,10 +117,7 @@ export class CheckpointManager {
    * Get next step to resume from
    * Returns the step after the latest completed checkpoint
    */
-  async getNextStep(
-    client: PoolClient,
-    correlation_id: string
-  ): Promise<string | null> {
+  async getNextStep(client: PoolClient, correlation_id: string): Promise<string | null> {
     const latest = await this.readLatestCheckpoint(client, correlation_id)
 
     if (!latest) {
@@ -156,10 +149,7 @@ export class CheckpointManager {
   /**
    * Get all checkpoints for a provisioning job (debugging)
    */
-  async getCheckpoints(
-    client: PoolClient,
-    correlation_id: string
-  ): Promise<Checkpoint[]> {
+  async getCheckpoints(client: PoolClient, correlation_id: string): Promise<Checkpoint[]> {
     try {
       const result = await client.query(
         `
@@ -180,7 +170,7 @@ export class CheckpointManager {
         correlation_id: row.correlation_id,
       }))
     } catch (error) {
-      console.error(`Failed to get checkpoints:`, error)
+      logger.error('checkpoint_list_failed', { correlation_id, error: String(error) })
       return []
     }
   }
@@ -188,10 +178,7 @@ export class CheckpointManager {
   /**
    * Check if provisioning already completed (idempotency check)
    */
-  async isProvisioningComplete(
-    client: PoolClient,
-    correlation_id: string
-  ): Promise<boolean> {
+  async isProvisioningComplete(client: PoolClient, correlation_id: string): Promise<boolean> {
     const latest = await this.readLatestCheckpoint(client, correlation_id)
     return latest !== null && latest.step_ordinal === 9 // Final step
   }

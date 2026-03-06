@@ -211,24 +211,17 @@ onUnmounted(() => {
 // Computed Properties
 const studentUsagePercent = computed(() => {
   if (!props.license) return 0
-  return Math.round(
-    (props.license.current_students / props.license.student_limit) * 100
-  )
+  return Math.round((props.license.current_students / props.license.student_limit) * 100)
 })
 
 const staffUsagePercent = computed(() => {
   if (!props.license) return 0
-  return Math.round(
-    (props.license.current_staff / props.license.staff_limit) * 100
-  )
+  return Math.round((props.license.current_staff / props.license.staff_limit) * 100)
 })
 
 const studentAvailable = computed(() => {
   if (!props.license) return 0
-  return Math.max(
-    0,
-    props.license.student_limit - props.license.current_students
-  )
+  return Math.max(0, props.license.student_limit - props.license.current_students)
 })
 
 const staffAvailable = computed(() => {
@@ -240,9 +233,7 @@ const staffAvailable = computed(() => {
 const studentWarning = computed(() => studentUsagePercent.value >= 80)
 const staffWarning = computed(() => staffUsagePercent.value >= 80)
 const isNearLimit = computed(() => studentWarning.value || staffWarning.value)
-const isAtLimit = computed(
-  () => studentUsagePercent.value >= 100 || staffUsagePercent.value >= 100
-)
+const isAtLimit = computed(() => studentUsagePercent.value >= 100 || staffUsagePercent.value >= 100)
 
 const studentWarningLabel = computed(() => {
   if (studentUsagePercent.value >= 100) return 'FULL'
@@ -257,29 +248,25 @@ const staffWarningLabel = computed(() => {
 // CSS Classes
 const studentQuotaClass = computed(() => ({
   'text-red-600': studentUsagePercent.value >= 100,
-  'text-amber-600':
-    studentUsagePercent.value >= 80 && studentUsagePercent.value < 100,
+  'text-amber-600': studentUsagePercent.value >= 80 && studentUsagePercent.value < 100,
   'text-green-600': studentUsagePercent.value < 80,
 }))
 
 const staffQuotaClass = computed(() => ({
   'text-red-600': staffUsagePercent.value >= 100,
-  'text-amber-600':
-    staffUsagePercent.value >= 80 && staffUsagePercent.value < 100,
+  'text-amber-600': staffUsagePercent.value >= 80 && staffUsagePercent.value < 100,
   'text-green-600': staffUsagePercent.value < 80,
 }))
 
 const studentProgressClass = computed(() => ({
   'bg-red-500': studentUsagePercent.value >= 100,
-  'bg-amber-500':
-    studentUsagePercent.value >= 80 && studentUsagePercent.value < 100,
+  'bg-amber-500': studentUsagePercent.value >= 80 && studentUsagePercent.value < 100,
   'bg-green-500': studentUsagePercent.value < 80,
 }))
 
 const staffProgressClass = computed(() => ({
   'bg-red-500': staffUsagePercent.value >= 100,
-  'bg-amber-500':
-    staffUsagePercent.value >= 80 && staffUsagePercent.value < 100,
+  'bg-amber-500': staffUsagePercent.value >= 80 && staffUsagePercent.value < 100,
   'bg-green-500': staffUsagePercent.value < 80,
 }))
 

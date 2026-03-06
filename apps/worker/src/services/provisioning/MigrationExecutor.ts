@@ -9,10 +9,11 @@
  * Stage: STAGE_05_TENANT_PROVISIONING_SERVICE
  */
 
+import { logger } from '@zidney/logger'
 import { createHash } from 'crypto'
 import * as fs from 'fs'
 import * as path from 'path'
-import { Pool, PoolClient } from 'pg'
+import type { Pool, PoolClient } from 'pg'
 
 export interface MigrationFile {
   version: string
@@ -118,20 +119,18 @@ export class MigrationExecutor {
   /**
    * Execute single migration in transaction
    */
-  async executeMigration(
-    client: PoolClient,
-    migration: MigrationFile
-  ): Promise<number> {
+  async executeMigration(client: PoolClient, migration: MigrationFile): Promise<number> {
     const start_time = Date.now()
 
     try {
       await client.query(migration.content)
       return Date.now() - start_time
     } catch (error) {
-      console.error(`Migration ${migration.version} failed:`, error)
-      throw new Error(
-        `Migration ${migration.version} execution failed: ${error}`
-      )
+      logger.error('migration_execution_failed', {
+        version: migration.version,
+        error: String(error),
+      })
+      throw new Error(`Migration ${migration.version} execution failed: ${error}`)
     }
   }
 
@@ -150,15 +149,10 @@ export class MigrationExecutor {
         VALUES ($1, $2, $3, $4, NOW())
         ON CONFLICT (version) DO NOTHING
         `,
-        [
-          migration.version,
-          `Migration ${migration.version}`,
-          migration.checksum,
-          duration_ms,
-        ]
+        [migration.version, `Migration ${migration.version}`, migration.checksum, duration_ms]
       )
     } catch (error) {
-      console.error(`Failed to record migration ${migration.version}:`, error)
+      logger.error('migration_record_failed', { version: migration.version, error: String(error) })
       throw error
     }
   }
@@ -218,7 +212,7 @@ export class MigrationExecutor {
         return { executed, skipped: applied.length, failed: false }
       } catch (error) {
         await client.query('ROLLBACK')
-        console.error('Migration transaction failed, rolled back:', error)
+        logger.error('migration_transaction_failed', { error: String(error) })
         return { executed, skipped: applied.length, failed: true }
       }
     } finally {
@@ -239,9 +233,7 @@ export class MigrationExecutor {
     let prev_ordinal = -1
     for (const m of migrations) {
       if (m.ordinal !== prev_ordinal + 1) {
-        errors.push(
-          `Migration ordinal gap: expected ${prev_ordinal + 1}, got ${m.ordinal}`
-        )
+        errors.push(`Migration ordinal gap: expected ${prev_ordinal + 1}, got ${m.ordinal}`)
       }
       prev_ordinal = m.ordinal
     }

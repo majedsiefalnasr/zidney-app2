@@ -91,14 +91,9 @@ describe('License Enforcement', () => {
       return
     }
     const pool = getTenantPool(activeWorkspace.id)!
-    await pool.query(`DELETE FROM ${LICENSE_USERS_TABLE} WHERE id = $1`, [
-      user.id,
-    ])
+    await pool.query(`DELETE FROM ${LICENSE_USERS_TABLE} WHERE id = $1`, [user.id])
 
-    await db.master.query(
-      `DELETE FROM ${LICENSE_WORKSPACES_TABLE} WHERE slug LIKE $1`,
-      ['lic-%']
-    )
+    await db.master.query(`DELETE FROM ${LICENSE_WORKSPACES_TABLE} WHERE slug LIKE $1`, ['lic-%'])
   })
 
   it('should allow access to ACTIVE workspace', async () => {

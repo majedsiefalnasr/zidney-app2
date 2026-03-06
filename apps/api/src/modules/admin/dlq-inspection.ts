@@ -40,7 +40,7 @@ export interface DLQListResponse {
   }
 }
 
-async function dlqInspection(c: Context): Promise<Response | void> {
+async function dlqInspection(c: Context): Promise<Response | undefined> {
   const correlationId = c.state.requestId
   const workspace = c.state.workspace
   const userId = c.state.userId
@@ -48,8 +48,7 @@ async function dlqInspection(c: Context): Promise<Response | void> {
 
   try {
     // RBAC check: require org_admin or super_admin
-    const hasAdminRole =
-      userRoles.includes('org_admin') || userRoles.includes('super_admin')
+    const hasAdminRole = userRoles.includes('org_admin') || userRoles.includes('super_admin')
 
     if (!hasAdminRole) {
       logger.warn(`DLQ inspection rejected: insufficient permissions`, {
@@ -74,8 +73,8 @@ async function dlqInspection(c: Context): Promise<Response | void> {
     }
 
     // Parse pagination parameters
-    const page = parseInt(c.req.query('page') || '1')
-    const limit = Math.min(parseInt(c.req.query('limit') || '100'), 100)
+    const page = parseInt(c.req.query('page') || '1', 10)
+    const limit = Math.min(parseInt(c.req.query('limit') || '100', 10), 100)
 
     const offset = (page - 1) * limit
 
@@ -117,7 +116,7 @@ async function dlqInspection(c: Context): Promise<Response | void> {
       [workspace.id]
     )
 
-    const count = parseInt(totalCount.rows[0].count)
+    const count = parseInt(totalCount.rows[0].count, 10)
     const pages = Math.ceil(count / limit)
 
     logger.info(`DLQ inspection completed`, {

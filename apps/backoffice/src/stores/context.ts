@@ -14,8 +14,7 @@
  * ✓ hasModule() is pure function — no side effects
  */
 
-import type { BackofficeContext } from '@zidney/types'
-import { type Module } from '@zidney/types'
+import type { BackofficeContext, Module } from '@zidney/types'
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import { useBackofficeContext } from '../composables/useBackofficeContext'
@@ -54,11 +53,7 @@ export const useContextStore = defineStore('backoffice-context', () => {
    * Safe to call multiple times — subsequent calls re-fetch the context.
    */
   async function loadContext(): Promise<void> {
-    const {
-      fetchContext,
-      context: fetchedContext,
-      error: fetchError,
-    } = useBackofficeContext()
+    const { fetchContext, context: fetchedContext, error: fetchError } = useBackofficeContext()
     loading.value = true
     error.value = null
     try {

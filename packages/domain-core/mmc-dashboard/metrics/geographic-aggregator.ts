@@ -74,10 +74,7 @@ export function getCountryName(countryCode: string): string {
  *
  * Handles: Zero license count (returns 0)
  */
-export function calculateAvgRevenuePerLicense(
-  totalCents: number,
-  licenseCount: number
-): number {
+export function calculateAvgRevenuePerLicense(totalCents: number, licenseCount: number): number {
   if (licenseCount === 0) return 0
   return Math.floor(totalCents / licenseCount)
 }
@@ -85,9 +82,7 @@ export function calculateAvgRevenuePerLicense(
 /**
  * Enrich geographic metrics with country names and calculations
  */
-export function enrichGeographicMetrics(
-  metrics: GeographicMetrics[]
-): GeographicResult[] {
+export function enrichGeographicMetrics(metrics: GeographicMetrics[]): GeographicResult[] {
   return metrics.map((m) => ({
     ...m,
     country_name: getCountryName(m.country_code),
@@ -163,10 +158,7 @@ export function getGeographicStatistics(metrics: GeographicResult[]) {
     }
   }
 
-  const totalRevenue = metrics.reduce(
-    (sum, m) => sum + m.total_revenue_cents,
-    0
-  )
+  const totalRevenue = metrics.reduce((sum, m) => sum + m.total_revenue_cents, 0)
   const totalLicenses = metrics.reduce((sum, m) => sum + m.license_count, 0)
   const avgPerCountry = Math.floor(totalRevenue / metrics.length)
   const topCountry = metrics.reduce((prev, current) =>

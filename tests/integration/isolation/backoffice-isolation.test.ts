@@ -39,29 +39,25 @@ describe('Backoffice tenant isolation', () => {
       'apps/api/src/middleware/backoffice-module-guard.ts',
     ]
 
-    it.each(BACKOFFICE_SOURCE_FILES)(
-      '%s does not import master_db',
-      (filePath) => {
-        const source = readSourceFile(filePath)
+    it.each(BACKOFFICE_SOURCE_FILES)('%s does not import master_db', (filePath) => {
+      const source = readSourceFile(filePath)
 
-        // Must not reference master_db pool directly
-        expect(source).not.toMatch(/master_db/)
-        expect(source).not.toMatch(/masterDb/)
-        expect(source).not.toMatch(/master-db/)
-      }
-    )
+      // Must not reference master_db pool directly
+      expect(source).not.toMatch(/master_db/)
+      expect(source).not.toMatch(/masterDb/)
+      expect(source).not.toMatch(/master-db/)
+    })
 
-    it.each(BACKOFFICE_SOURCE_FILES)(
-      '%s does not reference the master pool singleton',
-      (filePath) => {
-        const source = readSourceFile(filePath)
+    it.each(
+      BACKOFFICE_SOURCE_FILES
+    )('%s does not reference the master pool singleton', (filePath) => {
+      const source = readSourceFile(filePath)
 
-        // Must not reference constants like MASTER_POOL or similar singletons
-        expect(source).not.toMatch(/MASTER_POOL/)
-        expect(source).not.toMatch(/masterPool/)
-        expect(source).not.toMatch(/getMasterDb\(\)/)
-      }
-    )
+      // Must not reference constants like MASTER_POOL or similar singletons
+      expect(source).not.toMatch(/MASTER_POOL/)
+      expect(source).not.toMatch(/masterPool/)
+      expect(source).not.toMatch(/getMasterDb\(\)/)
+    })
   })
 
   /**
@@ -71,9 +67,7 @@ describe('Backoffice tenant isolation', () => {
    */
   describe('(b) FR-10.2 — RBAC queries are scoped to tenant DB, no cross-tenant joins', () => {
     it('RBAC guard SQL does not contain workspace_id filter on a cross-tenant table', () => {
-      const source = readSourceFile(
-        'apps/api/src/middleware/backoffice-rbac-guard.ts'
-      )
+      const source = readSourceFile('apps/api/src/middleware/backoffice-rbac-guard.ts')
 
       // RBAC guard should not join against a global workspace table
       expect(source).not.toMatch(/FROM workspaces/i)
@@ -83,9 +77,7 @@ describe('Backoffice tenant isolation', () => {
     })
 
     it('RBAC guard queries target tenant-scoped tables only (roles, role_permissions, staff_user_roles)', () => {
-      const source = readSourceFile(
-        'apps/api/src/middleware/backoffice-rbac-guard.ts'
-      )
+      const source = readSourceFile('apps/api/src/middleware/backoffice-rbac-guard.ts')
 
       // Must query tenant-local tables
       const queryPresent =
@@ -97,9 +89,7 @@ describe('Backoffice tenant isolation', () => {
     })
 
     it('RBAC guard extracts pool from tenant context, not a global reference', () => {
-      const source = readSourceFile(
-        'apps/api/src/middleware/backoffice-rbac-guard.ts'
-      )
+      const source = readSourceFile('apps/api/src/middleware/backoffice-rbac-guard.ts')
 
       // Should get pool from ctx.get('tenant') or similar context-bound access
       expect(source).toMatch(/tenant.*pool|pool.*tenant|ctx\.get\(/i)
@@ -158,9 +148,7 @@ describe('Backoffice tenant isolation', () => {
       // Both contexts are independent — querying one doesn't pollute the other
       expect(ctxTenantA.get('workspace_id')).toBe('ws-A')
       expect(ctxTenantB.get('workspace_id')).toBe('ws-B')
-      expect(ctxTenantA.get('workspace_id')).not.toBe(
-        ctxTenantB.get('workspace_id')
-      )
+      expect(ctxTenantA.get('workspace_id')).not.toBe(ctxTenantB.get('workspace_id'))
     })
   })
 })

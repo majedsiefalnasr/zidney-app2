@@ -23,7 +23,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 describe('Integration: Products - Create (T052)', () => {
-  const mockWorkspaceId = uuidv4()
+  const _mockWorkspaceId = uuidv4()
   const mockUserId = uuidv4()
   let correlationId: string
 
@@ -198,7 +198,7 @@ describe('Integration: Products - Create (T052)', () => {
 
   describe('Invalid Input - Name Validation', () => {
     it('should reject product without English name', () => {
-      const payload = {
+      const _payload = {
         name: { ar: 'منتج بدون الإنجليزية' },
         slug: `invalid-${Date.now()}`,
         description: 'Missing English',
@@ -218,13 +218,11 @@ describe('Integration: Products - Create (T052)', () => {
       }
 
       expect(response.status).toBe(400)
-      expect(response.body.error.code).toBe(
-        ErrorCodes.INVALID_NAME_LOCALIZATION
-      )
+      expect(response.body.error.code).toBe(ErrorCodes.INVALID_NAME_LOCALIZATION)
     })
 
     it('should reject product with empty English name', () => {
-      const payload = {
+      const _payload = {
         name: { en: '' },
         slug: `empty-name-${Date.now()}`,
         description: 'Empty English name',
@@ -248,7 +246,7 @@ describe('Integration: Products - Create (T052)', () => {
 
     it('should reject product with very long name (>500 chars)', () => {
       const longName = 'A'.repeat(501)
-      const payload = {
+      const _payload = {
         name: { en: longName },
         slug: `long-name-${Date.now()}`,
         description: 'Very long name',
@@ -274,7 +272,7 @@ describe('Integration: Products - Create (T052)', () => {
   describe('Invalid Input - Slug Validation', () => {
     it('should reject duplicate slug with 409 DUPLICATE_SLUG', () => {
       const existingSlug = 'existing-product'
-      const payload = {
+      const _payload = {
         name: { en: 'Different Product' },
         slug: existingSlug,
         description: 'Trying to duplicate slug',
@@ -298,7 +296,7 @@ describe('Integration: Products - Create (T052)', () => {
     })
 
     it('should reject invalid slug format', () => {
-      const payload = {
+      const _payload = {
         name: { en: 'Invalid Slug Product' },
         slug: 'Invalid Slug With Spaces!!!',
         description: 'Invalid characters in slug',
@@ -312,8 +310,7 @@ describe('Integration: Products - Create (T052)', () => {
           data: null,
           error: {
             code: 'INVALID_SLUG_FORMAT',
-            message:
-              'Slug must be lowercase, alphanumeric, and use hyphens only',
+            message: 'Slug must be lowercase, alphanumeric, and use hyphens only',
           },
         },
       }
@@ -322,13 +319,7 @@ describe('Integration: Products - Create (T052)', () => {
     })
 
     it('should accept valid slug formats', () => {
-      const validSlugs = [
-        'product-one',
-        'prod-2',
-        'p',
-        'product-with-many-hyphens',
-        'product123',
-      ]
+      const validSlugs = ['product-one', 'prod-2', 'p', 'product-with-many-hyphens', 'product123']
 
       validSlugs.forEach((slug) => {
         const payload = {
@@ -345,7 +336,7 @@ describe('Integration: Products - Create (T052)', () => {
 
   describe('Invalid Input - Modules Validation', () => {
     it('should reject invalid module enum', () => {
-      const payload = {
+      const _payload = {
         name: { en: 'Invalid Module Product' },
         slug: `invalid-mod-${Date.now()}`,
         description: 'Invalid module',
@@ -369,7 +360,7 @@ describe('Integration: Products - Create (T052)', () => {
     })
 
     it('should reject empty modules list', () => {
-      const payload = {
+      const _payload = {
         name: { en: 'No Modules Product' },
         slug: `no-mod-${Date.now()}`,
         description: 'No modules enabled',
@@ -392,7 +383,7 @@ describe('Integration: Products - Create (T052)', () => {
     })
 
     it('should reject duplicate module in list', () => {
-      const payload = {
+      const _payload = {
         name: { en: 'Duplicate Module Product' },
         slug: `dup-mod-${Date.now()}`,
         description: 'Duplicate module',
@@ -447,8 +438,7 @@ describe('Integration: Products - Create (T052)', () => {
           data: null,
           error: {
             code: 'RATE_LIMIT_EXCEEDED',
-            message:
-              'Too many requests. Limit: 10 requests per minute for POST /products',
+            message: 'Too many requests. Limit: 10 requests per minute for POST /products',
           },
         },
       }
@@ -468,7 +458,7 @@ describe('Integration: Products - Create (T052)', () => {
 
       expect(response.headers['x-ratelimit-limit']).toBe('10')
       expect(response.headers['x-ratelimit-remaining']).toBe('0')
-      expect(parseInt(response.headers['x-ratelimit-reset'])).toBeGreaterThan(
+      expect(parseInt(response.headers['x-ratelimit-reset'], 10)).toBeGreaterThan(
         Math.floor(Date.now() / 1000)
       )
     })
@@ -476,7 +466,7 @@ describe('Integration: Products - Create (T052)', () => {
 
   describe('Error Response Format', () => {
     it('should include correlation ID in all responses', () => {
-      const payload = {
+      const _payload = {
         name: { en: 'Test Product' },
         slug: `test-${Date.now()}`,
         description: 'Test',
@@ -551,8 +541,7 @@ describe('Integration: Products - Create (T052)', () => {
           data: null,
           error: {
             code: ErrorCodes.FORBIDDEN,
-            message:
-              'Insufficient permissions. Admin role required for product management',
+            message: 'Insufficient permissions. Admin role required for product management',
           },
         },
       }

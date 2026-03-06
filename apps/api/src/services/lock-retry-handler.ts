@@ -29,7 +29,7 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Pool, PoolClient } from 'pg'
+import type { Pool, PoolClient } from 'pg'
 
 /**
  * Options for lock retry execution
@@ -76,7 +76,7 @@ export async function executeWithLockRetry<T>(
     try {
       // Calculate backoff: 100ms, 200ms, 400ms
       if (attempt > 0) {
-        const backoffMs = initialBackoffMs * Math.pow(2, attempt - 1)
+        const backoffMs = initialBackoffMs * 2 ** (attempt - 1)
         logger.debug('Lock acquisition failed, backing off', {
           correlation_id: correlationId,
           workspace_id: workspaceId,

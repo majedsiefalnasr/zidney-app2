@@ -61,9 +61,7 @@ export async function initTenantSchema(
   } = payload
 
   // Implementation in: apps/worker/src/tasks/init-tenant-schema.ts
-  throw new Error(
-    'Not implemented - see apps/worker/src/tasks/init-tenant-schema.ts'
-  )
+  throw new Error('Not implemented - see apps/worker/src/tasks/init-tenant-schema.ts')
 }
 
 export default {

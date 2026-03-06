@@ -1,3 +1,4 @@
+import { logger } from '@zidney/logger'
 import type { RedisClientType } from 'redis'
 
 /**
@@ -95,13 +96,15 @@ export class JobQueue {
       await this.redis.expire(`job:${jobId}:meta`, 86400) // 24 hours
       await this.redis.expire(`job:${jobId}:payload`, 86400)
 
-      console.log(
-        `[${job.correlation_id}] Job enqueued: ${jobId} for attempt ${job.attempt_id}`
-      )
+      logger.info('job_enqueued', {
+        correlation_id: job.correlation_id,
+        job_id: jobId,
+        attempt_id: job.attempt_id,
+      })
 
       return jobId
     } catch (error) {
-      console.error(`Failed to enqueue job ${jobId}:`, error)
+      logger.error('job_enqueue_failed', { job_id: jobId, error: String(error) })
       throw error
     }
   }
@@ -130,7 +133,7 @@ export class JobQueue {
     }
 
     // Timeout - return null but let worker continue
-    console.warn(`Job ${jobId} did not complete within ${timeoutMs}ms`)
+    logger.warn('job_completion_timeout', { job_id: jobId, timeout_ms: timeoutMs })
     return null
   }
 
@@ -140,10 +143,7 @@ export class JobQueue {
   async dequeueJob(): Promise<GradeAttemptJob | null> {
     try {
       // RPOPLPUSH: move from queue to processing
-      const jobId = await this.redis.rPopLPush(
-        this.queueKey,
-        this.processingKey
-      )
+      const jobId = await this.redis.rPopLPush(this.queueKey, this.processingKey)
 
       if (!jobId) {
         return null // No jobs in queue
@@ -172,7 +172,7 @@ export class JobQueue {
 
       return job
     } catch (error) {
-      console.error('Failed to dequeue job:', error)
+      logger.error('job_dequeue_failed', { error: String(error) })
       return null
     }
   }
@@ -180,10 +180,7 @@ export class JobQueue {
   /**
    * Store job result
    */
-  async storeResult(
-    jobId: string,
-    result: GradeAttemptJob['result']
-  ): Promise<void> {
+  async storeResult(jobId: string, result: GradeAttemptJob['result']): Promise<void> {
     try {
       const resultKey = `${this.resultsKey}:${jobId}`
       await this.redis.setEx(
@@ -192,7 +189,7 @@ export class JobQueue {
         JSON.stringify(result)
       )
     } catch (error) {
-      console.error(`Failed to store result for job ${jobId}:`, error)
+      logger.error('job_result_store_failed', { job_id: jobId, error: String(error) })
     }
   }
 
@@ -204,7 +201,7 @@ export class JobQueue {
       // Remove from processing queue
       await this.redis.lRem(this.processingKey, 0, jobId)
     } catch (error) {
-      console.error(`Failed to clear job status ${jobId}:`, error)
+      logger.error('job_status_clear_failed', { job_id: jobId, error: String(error) })
     }
   }
 }

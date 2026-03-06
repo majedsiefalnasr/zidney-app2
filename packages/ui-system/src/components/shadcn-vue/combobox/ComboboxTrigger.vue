@@ -1,13 +1,11 @@
 <script setup lang="ts">
-import type { ComboboxTriggerProps } from 'reka-ui'
-import type { HTMLAttributes } from 'vue'
 import { reactiveOmit } from '@vueuse/core'
+import type { ComboboxTriggerProps } from 'reka-ui'
 import { ComboboxTrigger, useForwardProps } from 'reka-ui'
+import type { HTMLAttributes } from 'vue'
 import { cn } from '@/lib/utils'
 
-const props = defineProps<
-  ComboboxTriggerProps & { class?: HTMLAttributes['class'] }
->()
+const props = defineProps<ComboboxTriggerProps & { class?: HTMLAttributes['class'] }>()
 
 const delegatedProps = reactiveOmit(props, 'class')
 

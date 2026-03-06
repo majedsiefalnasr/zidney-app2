@@ -14,11 +14,7 @@
 import * as productService from '@zidney/domain-core/products/productService'
 import { Module } from '@zidney/types/enums/Module'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import {
-  cleanupTestContext,
-  createTestContext,
-  TestContext,
-} from '../../test-helpers'
+import { cleanupTestContext, createTestContext, type TestContext } from '../../test-helpers'
 
 describe('T055: Product Update Integration Tests', () => {
   let ctx: TestContext
@@ -289,9 +285,7 @@ describe('T055: Product Update Integration Tests', () => {
         [initial.id]
       )
 
-      expect(parseInt(beforeCount.rows[0]!.count)).toBe(
-        parseInt(afterCount.rows[0]!.count)
-      )
+      expect(parseInt(beforeCount.rows[0]!.count)).toBe(parseInt(afterCount.rows[0]!.count))
     })
 
     it('should not create audit log for no-op update', async () => {
@@ -322,9 +316,7 @@ describe('T055: Product Update Integration Tests', () => {
         [initial.id]
       )
 
-      expect(parseInt(beforeCount.rows[0]!.count)).toBe(
-        parseInt(afterCount.rows[0]!.count)
-      )
+      expect(parseInt(beforeCount.rows[0]!.count)).toBe(parseInt(afterCount.rows[0]!.count))
     })
   })
 
@@ -345,18 +337,10 @@ describe('T055: Product Update Integration Tests', () => {
         const input: any = {
           slug: 'new-slug',
         }
-        await productService.updateProduct(
-          dbClient,
-          initial.id,
-          input,
-          ctx.userId
-        )
+        await productService.updateProduct(dbClient, initial.id, input, ctx.userId)
 
         // If it allows the update, the slug should still not change
-        const retrieved = await productService.getProductById(
-          dbClient,
-          initial.id
-        )
+        const retrieved = await productService.getProductById(dbClient, initial.id)
         expect(retrieved.slug).toBe('immutable')
       } catch (error: any) {
         // Expected - slug should be immutable
@@ -481,9 +465,7 @@ describe('T055: Product Update Integration Tests', () => {
         [product.id]
       )
 
-      expect(versions.rows.map((r: any) => r.version_number)).toEqual([
-        1, 2, 3, 4,
-      ])
+      expect(versions.rows.map((r: any) => r.version_number)).toEqual([1, 2, 3, 4])
     })
   })
 })

@@ -20,10 +20,10 @@
  */
 
 import { AppError, ErrorCode } from '@zidney/domain-core/errors'
-import { Logger } from '@zidney/logger'
-import { Context, Next } from 'hono'
+import type { Logger } from '@zidney/logger'
+import type { Context, Next } from 'hono'
 import { verify } from 'hono/jwt'
-import { Database } from 'postgres'
+import type { Database } from 'postgres'
 import { getRequestContext } from './correlation-id.middleware'
 
 export interface MMCTokenPayload {
@@ -42,11 +42,7 @@ export interface MMCTokenPayload {
  * Validates JWT and enforces token version matching.
  * Throws 401 if token invalid or version mismatch.
  */
-export function createMMCAuthMiddleware(
-  db: Database,
-  jwtSecret: string,
-  logger: Logger
-) {
+export function createMMCAuthMiddleware(db: Database, jwtSecret: string, logger: Logger) {
   return async (ctx: Context, next: Next): Promise<void> => {
     const context = getRequestContext(ctx)
     const correlationId = context.correlationId
@@ -66,7 +62,7 @@ export function createMMCAuthMiddleware(
 
     try {
       // Decode and verify JWT
-      // @ts-ignore: LOGIC-BUG: JWTPayload cast to MMCTokenPayload — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+      // @ts-expect-error: LOGIC-BUG: JWTPayload cast to MMCTokenPayload — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
       const decoded = (await verify(token, jwtSecret)) as MMCTokenPayload
 
       // Validate issuer
@@ -104,24 +100,18 @@ export function createMMCAuthMiddleware(
       )
 
       if (memberResult.rowCount === 0) {
-        throw new AppError(
-          ErrorCode.AUTHENTICATION_FAILED,
-          'Member not found',
-          401,
-          { reason: 'User ID not found in database' }
-        )
+        throw new AppError(ErrorCode.AUTHENTICATION_FAILED, 'Member not found', 401, {
+          reason: 'User ID not found in database',
+        })
       }
 
       const member = memberResult.rows[0]
 
       // Validate member status (ACTIVE only)
       if (member.status !== 'ACTIVE') {
-        throw new AppError(
-          ErrorCode.MEMBER_DISABLED,
-          'Member account is disabled',
-          401,
-          { reason: `Status: ${member.status}` }
-        )
+        throw new AppError(ErrorCode.MEMBER_DISABLED, 'Member account is disabled', 401, {
+          reason: `Status: ${member.status}`,
+        })
       }
 
       // Validate token version (prevents session hijacking on role change)
@@ -177,12 +167,9 @@ export function createMMCAuthMiddleware(
         'JWT verification failed'
       )
 
-      throw new AppError(
-        ErrorCode.AUTHENTICATION_FAILED,
-        'Invalid or malformed token',
-        401,
-        { reason: jwtError }
-      )
+      throw new AppError(ErrorCode.AUTHENTICATION_FAILED, 'Invalid or malformed token', 401, {
+        reason: jwtError,
+      })
     }
   }
 }
@@ -193,10 +180,6 @@ export function createMMCAuthMiddleware(
 export function requireMMCAuth(ctx: Context): void {
   const context = getRequestContext(ctx)
   if (!context.mmcUser) {
-    throw new AppError(
-      ErrorCode.AUTHENTICATION_FAILED,
-      'MMC authentication required',
-      401
-    )
+    throw new AppError(ErrorCode.AUTHENTICATION_FAILED, 'MMC authentication required', 401)
   }
 }

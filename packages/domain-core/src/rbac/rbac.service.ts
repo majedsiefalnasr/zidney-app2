@@ -29,12 +29,12 @@
 
 import { createLogger } from '@zidney/logger'
 
-import { writeRbacAuditLog, type DbClient } from './rbac.audit'
+import { type DbClient, writeRbacAuditLog } from './rbac.audit'
 import {
-  PermissionModule,
-  RoleStatus,
   type PermissionAction,
   type PermissionFlags,
+  PermissionModule,
+  RoleStatus,
   type RoleWithPermissions,
 } from './rbac.types'
 
@@ -48,10 +48,7 @@ const VALID_MODULES = new Set(Object.values(PermissionModule) as string[])
 
 export function assertValidModule(module: string): void {
   if (!VALID_MODULES.has(module)) {
-    throw new RbacError(
-      'INVALID_MODULE',
-      `Unknown permission module: '${module}'`
-    )
+    throw new RbacError('INVALID_MODULE', `Unknown permission module: '${module}'`)
   }
 }
 
@@ -154,10 +151,7 @@ export async function createRole(
       roleRow = result.rows[0]!
     } catch (err: any) {
       if (err?.code === '23505') {
-        throw new RbacError(
-          'ROLE_NAME_CONFLICT',
-          'A role with this name already exists'
-        )
+        throw new RbacError('ROLE_NAME_CONFLICT', 'A role with this name already exists')
       }
       throw err
     }
@@ -267,10 +261,7 @@ export interface ListRolesResult {
 /**
  * Paginated role list — filterable by status.
  */
-export async function listRoles(
-  db: DbClient,
-  input: ListRolesInput
-): Promise<ListRolesResult> {
+export async function listRoles(db: DbClient, input: ListRolesInput): Promise<ListRolesResult> {
   const page = Math.max(1, input.page ?? 1)
   const pageSize = Math.min(100, Math.max(1, input.pageSize ?? 20))
   const offset = (page - 1) * pageSize
@@ -393,17 +384,13 @@ export async function updateRole(
       updated = result.rows[0]!
     } catch (err: any) {
       if (err?.code === '23505') {
-        throw new RbacError(
-          'ROLE_NAME_CONFLICT',
-          'A role with this name already exists'
-        )
+        throw new RbacError('ROLE_NAME_CONFLICT', 'A role with this name already exists')
       }
       throw err
     }
 
     // Determine audit action: disable specifically is tracked as DISABLE_ROLE
-    const auditAction =
-      input.status === RoleStatus.DISABLED ? 'DISABLE_ROLE' : 'UPDATE_ROLE'
+    const auditAction = input.status === RoleStatus.DISABLED ? 'DISABLE_ROLE' : 'UPDATE_ROLE'
 
     await writeRbacAuditLog(db, {
       user_id: auditCtx.user_id,
@@ -461,10 +448,7 @@ export async function deleteRole(
     )
     const activeCount = parseInt(countResult.rows[0]?.cnt ?? '0', 10)
     if (activeCount > 0) {
-      throw new RbacError(
-        'ROLE_HAS_ACTIVE_USERS',
-        'Cannot delete role with active assigned users'
-      )
+      throw new RbacError('ROLE_HAS_ACTIVE_USERS', 'Cannot delete role with active assigned users')
     }
 
     await db.query(`DELETE FROM backoffice_roles WHERE id = $1`, [roleId])
@@ -555,10 +539,7 @@ export async function updateRolePermissions(
     }
 
     // Full-replace: delete existing, insert new
-    await db.query(
-      `DELETE FROM backoffice_role_module_permissions WHERE role_id = $1`,
-      [roleId]
-    )
+    await db.query(`DELETE FROM backoffice_role_module_permissions WHERE role_id = $1`, [roleId])
 
     const result: Record<string, PermissionFlags> = {}
     for (const [module, flags] of Object.entries(permissions)) {
@@ -574,14 +555,7 @@ export async function updateRolePermissions(
           (role_id, module, can_view, can_create, can_edit, can_delete, created_at, updated_at)
         VALUES ($1, $2, $3, $4, $5, $6, NOW(), NOW())
         `,
-        [
-          roleId,
-          module,
-          row.can_view,
-          row.can_create,
-          row.can_edit,
-          row.can_delete,
-        ]
+        [roleId, module, row.can_view, row.can_create, row.can_edit, row.can_delete]
       )
       result[module] = row
     }
@@ -695,9 +669,7 @@ interface EvaluatePermissionInput {
  * Returns false (deny) — never throws — on any denial condition.
  * Throws only on unexpected DB errors.
  */
-export async function evaluatePermission(
-  input: EvaluatePermissionInput
-): Promise<boolean> {
+export async function evaluatePermission(input: EvaluatePermissionInput): Promise<boolean> {
   const { db, user_id, module, action } = input
 
   try {

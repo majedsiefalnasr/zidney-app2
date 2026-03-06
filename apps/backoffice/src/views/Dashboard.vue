@@ -29,7 +29,5 @@ import { useContextStore } from '../stores/context'
 
 const contextStore = useContextStore()
 
-const workspaceSlug = computed(
-  () => contextStore.context?.workspace_slug ?? 'your workspace'
-)
+const _workspaceSlug = computed(() => contextStore.context?.workspace_slug ?? 'your workspace')
 </script>

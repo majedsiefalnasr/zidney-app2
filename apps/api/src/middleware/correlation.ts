@@ -15,7 +15,7 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Context, Next } from 'hono'
+import type { Context, Next } from 'hono'
 
 const baseLogger = createLogger('correlation')
 
@@ -57,10 +57,7 @@ export function correlationMiddleware() {
     childLogger.info('request_received', {
       method: c.req.method,
       path: c.req.path,
-      remote_addr:
-        c.req.header('x-forwarded-for') ||
-        c.req.header('x-real-ip') ||
-        'unknown',
+      remote_addr: c.req.header('x-forwarded-for') || c.req.header('x-real-ip') || 'unknown',
       user_agent: c.req.header('user-agent'),
       query_string: c.req.url.split('?')[1] || undefined,
     })

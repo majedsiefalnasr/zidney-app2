@@ -8,7 +8,7 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
-import { Pool, PoolClient } from 'pg'
+import { Pool, type PoolClient } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 const getConnectionString = () => {
@@ -27,19 +27,12 @@ const getConnectionString = () => {
 const SCHEMA_VERSION_TABLE = 'phase7_schema_version'
 
 // Version utilities
-function bumpVersion(
-  currentVersion: string,
-  changeType: 'major' | 'minor' | 'patch'
-): string {
+function bumpVersion(currentVersion: string, changeType: 'major' | 'minor' | 'patch'): string {
   if (!isValidVersion(currentVersion)) {
     throw new Error(`Invalid version format: ${currentVersion}`)
   }
 
-  const [major, minor, patch] = currentVersion.split('.').map(Number) as [
-    number,
-    number,
-    number,
-  ]
+  const [major, minor, patch] = currentVersion.split('.').map(Number) as [number, number, number]
 
   switch (changeType) {
     case 'major':
@@ -205,9 +198,7 @@ describe('Phase 7: Schema Versioning Tests', () => {
         END;
         $$ LANGUAGE plpgsql
       `)
-      await client.query(
-        `DROP TRIGGER IF EXISTS phase7_immutable_trigger ON ${immutableTable}`
-      )
+      await client.query(`DROP TRIGGER IF EXISTS phase7_immutable_trigger ON ${immutableTable}`)
       await client.query(`
         CREATE TRIGGER phase7_immutable_trigger
         BEFORE UPDATE ON ${immutableTable}
@@ -226,16 +217,14 @@ describe('Phase 7: Schema Versioning Tests', () => {
       // Attempt UPDATE
       let error: Error | null = null
       try {
-        await client.query(
-          `UPDATE ${immutableTable} SET checksum = $1 WHERE version = $2`,
-          ['modified_checksum', version]
-        )
+        await client.query(`UPDATE ${immutableTable} SET checksum = $1 WHERE version = $2`, [
+          'modified_checksum',
+          version,
+        ])
       } catch (e) {
         error = e as Error
       } finally {
-        await client.query(
-          `DROP TRIGGER IF EXISTS phase7_immutable_trigger ON ${immutableTable}`
-        )
+        await client.query(`DROP TRIGGER IF EXISTS phase7_immutable_trigger ON ${immutableTable}`)
         await client.query(`DROP FUNCTION IF EXISTS ${immutableFn}()`)
       }
 
@@ -257,8 +246,7 @@ describe('Phase 7: Schema Versioning Tests', () => {
 
     it('should identify semantic versioning change types', () => {
       // Patch: 1.0.0 → 1.0.1
-      const isPatch =
-        '1.0.1' === '1.0.0'.replace(/\.\d+$/, `.${parseInt('0') + 1}`)
+      const isPatch = '1.0.1' === '1.0.0'.replace(/\.\d+$/, `.${parseInt('0', 10) + 1}`)
       expect(isPatch).toBe(true)
 
       // Minor: 1.0.0 → 1.1.0

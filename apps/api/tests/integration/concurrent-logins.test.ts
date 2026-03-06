@@ -73,13 +73,10 @@ describe('Concurrent Logins', () => {
       return
     }
     const pool = getTenantPool(workspace.id)!
-    await pool.query(`DELETE FROM ${CONCURRENT_USERS_TABLE} WHERE id = $1`, [
-      user.id,
+    await pool.query(`DELETE FROM ${CONCURRENT_USERS_TABLE} WHERE id = $1`, [user.id])
+    await db.master.query(`DELETE FROM ${CONCURRENT_WORKSPACES_TABLE} WHERE id = $1`, [
+      workspace.id,
     ])
-    await db.master.query(
-      `DELETE FROM ${CONCURRENT_WORKSPACES_TABLE} WHERE id = $1`,
-      [workspace.id]
-    )
   })
 
   beforeEach(async () => {
@@ -87,10 +84,9 @@ describe('Concurrent Logins', () => {
       return
     }
     const pool = getTenantPool(workspace.id)!
-    await pool.query(
-      `UPDATE ${CONCURRENT_USERS_TABLE} SET failed_login_count = 0 WHERE id = $1`,
-      [user.id]
-    )
+    await pool.query(`UPDATE ${CONCURRENT_USERS_TABLE} SET failed_login_count = 0 WHERE id = $1`, [
+      user.id,
+    ])
   })
 
   it('should use FOR UPDATE to lock user row', async () => {
@@ -127,10 +123,9 @@ describe('Concurrent Logins', () => {
     try {
       // Client 1 starts transaction and locks row
       await client1.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
-      await client1.query(
-        `SELECT * FROM ${CONCURRENT_USERS_TABLE} WHERE id = $1 FOR UPDATE`,
-        [user.id]
-      )
+      await client1.query(`SELECT * FROM ${CONCURRENT_USERS_TABLE} WHERE id = $1 FOR UPDATE`, [
+        user.id,
+      ])
 
       // Client 2 tries to lock same row (will wait)
       await client2.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
@@ -164,10 +159,9 @@ describe('Concurrent Logins', () => {
     const pool = getTenantPool(workspace.id)!
 
     // Reset counter
-    await pool.query(
-      `UPDATE ${CONCURRENT_USERS_TABLE} SET failed_login_count = 0 WHERE id = $1`,
-      [user.id]
-    )
+    await pool.query(`UPDATE ${CONCURRENT_USERS_TABLE} SET failed_login_count = 0 WHERE id = $1`, [
+      user.id,
+    ])
 
     const client1 = await pool.connect()
     const client2 = await pool.connect()
@@ -179,7 +173,7 @@ describe('Concurrent Logins', () => {
         `SELECT failed_login_count FROM ${CONCURRENT_USERS_TABLE} WHERE id = $1`,
         [user.id]
       )
-      const count1 = r1a.rows[0]!.failed_login_count
+      const count1 = r1a.rows[0]?.failed_login_count
 
       // Transaction 2
       await client2.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
@@ -187,7 +181,7 @@ describe('Concurrent Logins', () => {
         `SELECT failed_login_count FROM ${CONCURRENT_USERS_TABLE} WHERE id = $1`,
         [user.id]
       )
-      const count2 = r2a.rows[0]!.failed_login_count
+      const count2 = r2a.rows[0]?.failed_login_count
 
       // Both read same value
       expect(count1).toBe(count2)
@@ -207,7 +201,7 @@ describe('Concurrent Logins', () => {
           [count2 + 1, user.id]
         )
         await client2.query('COMMIT')
-      } catch (e) {
+      } catch (_e) {
         // SERIALIZABLE isolation may reject this (expected)
         await client2.query('ROLLBACK')
       }
@@ -218,7 +212,7 @@ describe('Concurrent Logins', () => {
         [user.id]
       )
 
-      expect(final.rows[0]!.failed_login_count).toBeGreaterThanOrEqual(1)
+      expect(final.rows[0]?.failed_login_count).toBeGreaterThanOrEqual(1)
     } finally {
       try {
         await client1.query('ROLLBACK')
@@ -239,10 +233,9 @@ describe('Concurrent Logins', () => {
     const pool = getTenantPool(workspace.id)!
 
     // Simulate two concurrent login handlers
-    await pool.query(
-      `UPDATE ${CONCURRENT_USERS_TABLE} SET failed_login_count = 0 WHERE id = $1`,
-      [user.id]
-    )
+    await pool.query(`UPDATE ${CONCURRENT_USERS_TABLE} SET failed_login_count = 0 WHERE id = $1`, [
+      user.id,
+    ])
 
     const client1 = await pool.connect()
     const client2 = await pool.connect()
@@ -252,10 +245,9 @@ describe('Concurrent Logins', () => {
       await client2.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
       // Both lock row
-      await client1.query(
-        `SELECT * FROM ${CONCURRENT_USERS_TABLE} WHERE id = $1 FOR UPDATE`,
-        [user.id]
-      )
+      await client1.query(`SELECT * FROM ${CONCURRENT_USERS_TABLE} WHERE id = $1 FOR UPDATE`, [
+        user.id,
+      ])
 
       // Client 2 must wait...
       // After client 1 commits, client 2 can proceed
@@ -268,10 +260,9 @@ describe('Concurrent Logins', () => {
       await client1.query('COMMIT')
 
       // Now client 2 can lock and update
-      await client2.query(
-        `SELECT * FROM ${CONCURRENT_USERS_TABLE} WHERE id = $1 FOR UPDATE`,
-        [user.id]
-      )
+      await client2.query(`SELECT * FROM ${CONCURRENT_USERS_TABLE} WHERE id = $1 FOR UPDATE`, [
+        user.id,
+      ])
       await client2.query(
         `UPDATE ${CONCURRENT_USERS_TABLE} SET failed_login_count = failed_login_count + 1 WHERE id = $1`,
         [user.id]
@@ -284,7 +275,7 @@ describe('Concurrent Logins', () => {
         [user.id]
       )
 
-      expect(result.rows[0]!.failed_login_count).toBe(2)
+      expect(result.rows[0]?.failed_login_count).toBe(2)
     } finally {
       try {
         await client1.query('ROLLBACK')

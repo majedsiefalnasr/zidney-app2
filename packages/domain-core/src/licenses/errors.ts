@@ -7,11 +7,7 @@
  * Extends base error classes with license-specific context.
  */
 
-import {
-  ErrorCode,
-  ErrorCodeToHttpStatus,
-  ErrorCodeToMessage,
-} from './constants'
+import { ErrorCode, ErrorCodeToHttpStatus, ErrorCodeToMessage } from './constants'
 
 /**
  * Base class for all license-related errors
@@ -71,10 +67,7 @@ export class LicenseValidationError extends LicenseError {
   }
 
   static slugNotUnique(): LicenseValidationError {
-    return new LicenseValidationError(
-      ErrorCode.SLUG_NOT_UNIQUE,
-      'Workspace slug already exists'
-    )
+    return new LicenseValidationError(ErrorCode.SLUG_NOT_UNIQUE, 'Workspace slug already exists')
   }
 
   static invalidProductId(): LicenseValidationError {
@@ -92,10 +85,7 @@ export class LicenseValidationError extends LicenseError {
   }
 
   static invalidLanguage(): LicenseValidationError {
-    return new LicenseValidationError(
-      ErrorCode.INVALID_LANGUAGE,
-      'Invalid language code'
-    )
+    return new LicenseValidationError(ErrorCode.INVALID_LANGUAGE, 'Invalid language code')
   }
 
   static invalidCommission(): LicenseValidationError {
@@ -162,10 +152,7 @@ export class InvalidStateTransitionError extends LicenseError {
   }
 
   static retryFromNonProvisionFailed(): InvalidStateTransitionError {
-    return new InvalidStateTransitionError(
-      'non-PROVISION_FAILED',
-      'PENDING_PROVISION'
-    )
+    return new InvalidStateTransitionError('non-PROVISION_FAILED', 'PENDING_PROVISION')
   }
 }
 
@@ -175,10 +162,7 @@ export class InvalidStateTransitionError extends LicenseError {
  * Thrown when provisioning operations fail
  */
 export class ProvisioningError extends LicenseError {
-  constructor(
-    message: string,
-    code: ErrorCode = ErrorCode.PROVISIONING_FAILED
-  ) {
+  constructor(message: string, code: ErrorCode = ErrorCode.PROVISIONING_FAILED) {
     const httpStatus = ErrorCodeToHttpStatus[code] || 503
     super(code, httpStatus, message)
     this.name = 'ProvisioningError'
@@ -250,17 +234,11 @@ export class AuthenticationError extends LicenseError {
   }
 
   static missing(): AuthenticationError {
-    return new AuthenticationError(
-      ErrorCode.AUTH_MISSING,
-      'Missing authentication credentials'
-    )
+    return new AuthenticationError(ErrorCode.AUTH_MISSING, 'Missing authentication credentials')
   }
 
   static invalid(): AuthenticationError {
-    return new AuthenticationError(
-      ErrorCode.AUTH_INVALID,
-      'Invalid authentication credentials'
-    )
+    return new AuthenticationError(ErrorCode.AUTH_INVALID, 'Invalid authentication credentials')
   }
 }
 

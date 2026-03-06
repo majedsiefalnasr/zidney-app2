@@ -1,5 +1,5 @@
 import { createLogger } from '@zidney/logger'
-import { Hono } from 'hono'
+import type { Hono } from 'hono'
 
 const logger = createLogger('security-cors')
 
@@ -34,16 +34,13 @@ const DEFAULT_HEADERS: SecurityHeadersConfig = {
   xssProtection: '1; mode=block',
   strictTransportSecurity: 'max-age=31536000; includeSubDomains; preload',
   referrerPolicy: 'strict-origin-when-cross-origin',
-  permissionsPolicy:
-    'geolocation=(), microphone=(), camera=(), payment=(), usb=()',
+  permissionsPolicy: 'geolocation=(), microphone=(), camera=(), payment=(), usb=()',
 }
 
 /**
  * Security headers middleware
  */
-export function securityHeaders(
-  config: SecurityHeadersConfig = DEFAULT_HEADERS
-) {
+export function securityHeaders(config: SecurityHeadersConfig = DEFAULT_HEADERS) {
   return async (c: Hono, next: () => Promise<void>) => {
     try {
       // Proceed with request
@@ -115,12 +112,7 @@ export const CORS_DEV_CONFIG: CORSConfig = {
     'http://127.0.0.1:3000',
   ],
   allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-CSRF-Token',
-    'X-Request-ID',
-  ],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Request-ID'],
   exposedHeaders: [
     'X-Rate-Limit-Limit',
     'X-Rate-Limit-Remaining',
@@ -137,12 +129,7 @@ export const CORS_PROD_CONFIG: CORSConfig = {
     process.env.APP_DOMAIN_ALT || 'https://exam.example.com',
   ],
   allowedMethods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-  allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-CSRF-Token',
-    'X-Request-ID',
-  ],
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token', 'X-Request-ID'],
   exposedHeaders: [
     'X-Rate-Limit-Limit',
     'X-Rate-Limit-Remaining',
@@ -156,10 +143,7 @@ export const CORS_PROD_CONFIG: CORSConfig = {
 /**
  * Validate origin against allowed list
  */
-export function isOriginAllowed(
-  origin: string | undefined,
-  allowedOrigins: string[]
-): boolean {
+export function isOriginAllowed(origin: string | undefined, allowedOrigins: string[]): boolean {
   if (!origin) {
     return false
   }
@@ -172,7 +156,7 @@ export function isOriginAllowed(
   // Wildcard support for subdomains in dev
   for (const allowed of allowedOrigins) {
     if (allowed.includes('*')) {
-      const regex = new RegExp('^' + allowed.replace(/\*/g, '[a-z0-9-]+') + '$')
+      const regex = new RegExp(`^${allowed.replace(/\*/g, '[a-z0-9-]+')}$`)
       if (regex.test(origin)) {
         return true
       }
@@ -206,22 +190,10 @@ export function corsMiddleware(corsConfig: CORSConfig = CORS_DEV_CONFIG) {
 
       // Set CORS headers
       c.header('Access-Control-Allow-Origin', origin!)
-      c.header(
-        'Access-Control-Allow-Methods',
-        corsConfig.allowedMethods.join(', ')
-      )
-      c.header(
-        'Access-Control-Allow-Headers',
-        corsConfig.allowedHeaders.join(', ')
-      )
-      c.header(
-        'Access-Control-Expose-Headers',
-        corsConfig.exposedHeaders.join(', ')
-      )
-      c.header(
-        'Access-Control-Allow-Credentials',
-        String(corsConfig.allowCredentials)
-      )
+      c.header('Access-Control-Allow-Methods', corsConfig.allowedMethods.join(', '))
+      c.header('Access-Control-Allow-Headers', corsConfig.allowedHeaders.join(', '))
+      c.header('Access-Control-Expose-Headers', corsConfig.exposedHeaders.join(', '))
+      c.header('Access-Control-Allow-Credentials', String(corsConfig.allowCredentials))
       c.header('Access-Control-Max-Age', String(corsConfig.maxAge))
 
       // Handle preflight

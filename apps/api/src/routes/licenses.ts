@@ -15,7 +15,7 @@
  */
 
 import { Hono } from 'hono'
-import { Redis } from 'ioredis'
+import type { Redis } from 'ioredis'
 import { createLicenseHandler } from '../handlers/licenses/create-license'
 import { getLicenseStatusHandler } from '../handlers/licenses/get-license-status'
 import { mmcTokenValidator } from '../middleware/mmc-token-validator'
@@ -23,11 +23,8 @@ import {
   DEFAULT_RATE_LIMIT_CONFIG,
   rateLimitProvisioningMiddleware,
 } from '../middleware/rate-limit-provisioning'
-import {
-  requireContentType,
-  validateRequest,
-} from '../middleware/validate-request'
-import { ProvisionEnqueueService } from '../services/provision-enqueue-service'
+import { requireContentType, validateRequest } from '../middleware/validate-request'
+import type { ProvisionEnqueueService } from '../services/provision-enqueue-service'
 import { CreateLicenseRequestSchema } from './licenses/validate-license-request'
 
 /**

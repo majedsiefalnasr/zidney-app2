@@ -102,7 +102,7 @@ describe('JWT Operations', () => {
 
     // Tamper with signature
     const parts = token.split('.')
-    const tamperedToken = parts[0] + '.' + parts[1] + '.invalidsignature'
+    const tamperedToken = `${parts[0]}.${parts[1]}.invalidsignature`
 
     expect(() => {
       verifyToken(tamperedToken, SECRET_MMC)
@@ -178,7 +178,7 @@ describe('JWT Operations', () => {
   })
 
   it('should reject unsupported algorithm', () => {
-    const payload = {
+    const _payload = {
       user_id: 'user-unsup',
       email: 'unsup@example.com',
     }

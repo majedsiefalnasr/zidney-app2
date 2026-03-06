@@ -8,10 +8,11 @@
  *
  * Stage: STAGE_UI_06_STATE_MANAGEMENT
  */
-import { useMmcAppStore } from '@/core/state/app.store'
+
 import { createPinia, setActivePinia } from 'pinia'
 import { createPersistedState } from 'pinia-plugin-persistedstate'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { useMmcAppStore } from '@/core/state/app.store'
 
 describe('MMC Pinia Bootstrap (SC-009, FR-034)', () => {
   beforeEach(() => {

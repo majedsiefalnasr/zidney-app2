@@ -8,14 +8,12 @@
  *
  * Stage: STAGE_UI_06_STATE_MANAGEMENT
  */
-import { readFileSync, readdirSync } from 'fs'
+import { readdirSync, readFileSync } from 'fs'
 import { join, resolve } from 'path'
 import { describe, expect, it } from 'vitest'
 
 const WORKSPACE_ROOT = resolve(
-  import.meta.url
-    .replace('file://', '')
-    .replace('/tests/unit/no-console-in-stores.test.ts', '')
+  import.meta.url.replace('file://', '').replace('/tests/unit/no-console-in-stores.test.ts', '')
 )
 
 const STATE_DIRS = [
@@ -57,10 +55,9 @@ describe('No console.log in store files (SC-006, SC-011, AGENTS.md logging rule)
       }
     }
 
-    expect(
-      violations,
-      `console.log found in store files:\n${violations.join('\n')}`
-    ).toHaveLength(0)
+    expect(violations, `console.log found in store files:\n${violations.join('\n')}`).toHaveLength(
+      0
+    )
   })
 
   it('zero console.warn occurrences in store files (must use logger.warn instead)', () => {
@@ -83,10 +80,9 @@ describe('No console.log in store files (SC-006, SC-011, AGENTS.md logging rule)
       }
     }
 
-    expect(
-      violations,
-      `console.warn found in store files:\n${violations.join('\n')}`
-    ).toHaveLength(0)
+    expect(violations, `console.warn found in store files:\n${violations.join('\n')}`).toHaveLength(
+      0
+    )
   })
 
   it('zero console.error occurrences in store files (must use logger.error instead)', () => {
@@ -123,9 +119,7 @@ describe('No console.log in store files (SC-006, SC-011, AGENTS.md logging rule)
     const content = readFileSync(workspaceStorePath, 'utf-8')
 
     // Verify structured logging is present
-    expect(content).toContain(
-      "logger.warn('workspace.store: loadWorkspace failed'"
-    )
+    expect(content).toContain("logger.warn('workspace.store: loadWorkspace failed'")
     expect(content).toContain('service: ')
     expect(content).toContain('error_code: ')
     expect(content).toContain('internal_message: ')

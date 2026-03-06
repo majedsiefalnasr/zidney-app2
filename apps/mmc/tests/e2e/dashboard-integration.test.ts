@@ -24,12 +24,7 @@ interface ApiResponse<T> {
   correlationId: string
 }
 
-async function makeRequest(
-  method: string,
-  endpoint: string,
-  token: string,
-  body?: unknown
-) {
+async function makeRequest(method: string, endpoint: string, token: string, body?: unknown) {
   const url = `${API_BASE}${endpoint}`
 
   const response = await fetch(url, {
@@ -55,9 +50,7 @@ async function makeRequest(
   return {
     status: response.status,
     data,
-    headers: Object.fromEntries(
-      Array.from(response.headers).map(([key, value]) => [key, value])
-    ),
+    headers: Object.fromEntries(Array.from(response.headers).map(([key, value]) => [key, value])),
   }
 }
 
@@ -83,11 +76,7 @@ describe('T063: E2E Dashboard Integration Tests', () => {
     })
 
     it('should load geographic data with pagination', async () => {
-      const result = await makeRequest(
-        'GET',
-        '/geographic?page=1&limit=10',
-        testToken
-      )
+      const result = await makeRequest('GET', '/geographic?page=1&limit=10', testToken)
 
       expect(result.status).toBe(200)
       expect(result.data.success).toBe(true)
@@ -125,13 +114,7 @@ describe('T063: E2E Dashboard Integration Tests', () => {
     })
 
     it('should complete individual requests in <300ms', async () => {
-      const endpoints = [
-        '/summary',
-        '/revenue-breakdown',
-        '/geographic',
-        '/affiliates',
-        '/trends',
-      ]
+      const endpoints = ['/summary', '/revenue-breakdown', '/geographic', '/affiliates', '/trends']
 
       for (const endpoint of endpoints) {
         const start = Date.now()
@@ -145,22 +128,14 @@ describe('T063: E2E Dashboard Integration Tests', () => {
 
   describe('Data Filtering and Sorting', () => {
     it('should filter revenue data by minimum revenue', async () => {
-      const result = await makeRequest(
-        'GET',
-        '/revenue-breakdown?minRevenue=1000',
-        testToken
-      )
+      const result = await makeRequest('GET', '/revenue-breakdown?minRevenue=1000', testToken)
 
       expect(result.status).toBe(200)
       expect(Array.isArray(result.data.data)).toBe(true)
     })
 
     it('should sort data in requested order', async () => {
-      const result = await makeRequest(
-        'GET',
-        '/revenue-breakdown?sort_by=revenue_desc',
-        testToken
-      )
+      const result = await makeRequest('GET', '/revenue-breakdown?sort_by=revenue_desc', testToken)
 
       expect(result.status).toBe(200)
       expect(Array.isArray(result.data.data)).toBe(true)
@@ -208,22 +183,14 @@ describe('T063: E2E Dashboard Integration Tests', () => {
     })
 
     it('should return 403 for insufficient permissions', async () => {
-      const result = await makeRequest(
-        'GET',
-        '/summary',
-        'Bearer invalid-permission-token'
-      )
+      const result = await makeRequest('GET', '/summary', 'Bearer invalid-permission-token')
 
       // Either 401 or 403 depending on token validity
       expect([401, 403]).toContain(result.status)
     })
 
     it('should return 400 for invalid query parameters', async () => {
-      const result = await makeRequest(
-        'GET',
-        '/summary?page=invalid&limit=-5',
-        testToken
-      )
+      const result = await makeRequest('GET', '/summary?page=invalid&limit=-5', testToken)
 
       expect([200, 400]).toContain(result.status)
     })

@@ -14,13 +14,7 @@
  * ```
  */
 
-import type {
-  LogContext,
-  LogEntry,
-  LoggerConfig,
-  LogLevel,
-  OutputFormat,
-} from './types'
+import type { LogContext, LogEntry, LoggerConfig, LogLevel, OutputFormat } from './types'
 import { FORBIDDEN_FIELDS, SENSITIVE_PATTERNS } from './types'
 
 /**
@@ -74,11 +68,8 @@ export class Logger {
       this.boundContext = {}
     } else {
       this.service = config.service
-      this.level =
-        config.level || this.parseLogLevel(process.env.LOG_LEVEL || 'info')
-      this.format =
-        config.format ||
-        this.parseOutputFormat(process.env.LOG_FORMAT || 'console')
+      this.level = config.level || this.parseLogLevel(process.env.LOG_LEVEL || 'info')
+      this.format = config.format || this.parseOutputFormat(process.env.LOG_FORMAT || 'console')
       this.sanitizeSensitive = config.sanitizeSensitive !== false
       this.boundContext = config.boundContext || {}
     }
@@ -135,20 +126,14 @@ export class Logger {
       }
 
       // Check if field name matches sensitive patterns
-      const isSensitive = SENSITIVE_PATTERNS.some((pattern) =>
-        pattern.test(key)
-      )
+      const isSensitive = SENSITIVE_PATTERNS.some((pattern) => pattern.test(key))
       if (isSensitive) {
         sanitized[key] = '[REDACTED]'
         continue
       }
 
       // Recursively sanitize nested objects
-      if (
-        typeof value === 'object' &&
-        value !== null &&
-        !Array.isArray(value)
-      ) {
+      if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
         sanitized[key] = this.sanitize(value as LogContext)
       } else {
         sanitized[key] = value
@@ -161,11 +146,7 @@ export class Logger {
   /**
    * Create a log entry
    */
-  private createEntry(
-    level: LogLevel,
-    message: string,
-    context?: LogContext
-  ): LogEntry {
+  private createEntry(level: LogLevel, message: string, context?: LogContext): LogEntry {
     const mergedContext = {
       ...this.boundContext,
       ...context,
@@ -234,8 +215,7 @@ export class Logger {
       contextParts.push(`uid=${entry.context.user_id}`)
     }
 
-    const contextStr =
-      contextParts.length > 0 ? ` [${contextParts.join(' ')}]` : ''
+    const contextStr = contextParts.length > 0 ? ` [${contextParts.join(' ')}]` : ''
 
     console.log(
       `${color}[${timestamp}] [${entry.service}] [${levelUpper}]${RESET_COLOR}${contextStr} [${entry.event}] ${entry.message}`
@@ -246,17 +226,11 @@ export class Logger {
       (entry.level === 'trace' || entry.level === 'debug') &&
       Object.keys(entry.context).length > 0
     ) {
-      console.log(
-        `  ${color}Context:${RESET_COLOR}`,
-        JSON.stringify(entry.context, null, 2)
-      )
+      console.log(`  ${color}Context:${RESET_COLOR}`, JSON.stringify(entry.context, null, 2))
     }
 
     // Output error details
-    if (
-      (entry.level === 'error' || entry.level === 'fatal') &&
-      entry.context.error
-    ) {
+    if ((entry.level === 'error' || entry.level === 'fatal') && entry.context.error) {
       console.error(`  ${color}Error:${RESET_COLOR}`, entry.context.error)
     }
   }
@@ -289,8 +263,7 @@ export class Logger {
     }
 
     return {
-      message:
-        typeof contextOrMessage === 'string' ? contextOrMessage : 'log_event',
+      message: typeof contextOrMessage === 'string' ? contextOrMessage : 'log_event',
       context: messageOrContext,
     }
   }
@@ -300,28 +273,19 @@ export class Logger {
     messageOrContext: string | LogContext,
     contextOrMessage?: LogContext | string
   ): void {
-    const { message, context } = this.normalizeArgs(
-      messageOrContext,
-      contextOrMessage
-    )
+    const { message, context } = this.normalizeArgs(messageOrContext, contextOrMessage)
     this.output(this.createEntry(level, message, context))
   }
 
   trace(message: string, context?: LogContext): void
   trace(context: LogContext, message?: string): void
-  trace(
-    messageOrContext: string | LogContext,
-    contextOrMessage?: LogContext | string
-  ): void {
+  trace(messageOrContext: string | LogContext, contextOrMessage?: LogContext | string): void {
     this.logAt('trace', messageOrContext, contextOrMessage)
   }
 
   debug(message: string, context?: LogContext): void
   debug(context: LogContext, message?: string): void
-  debug(
-    messageOrContext: string | LogContext,
-    contextOrMessage?: LogContext | string
-  ): void {
+  debug(messageOrContext: string | LogContext, contextOrMessage?: LogContext | string): void {
     this.logAt('debug', messageOrContext, contextOrMessage)
   }
 
@@ -333,10 +297,7 @@ export class Logger {
    */
   info(message: string, context?: LogContext): void
   info(context: LogContext, message?: string): void
-  info(
-    messageOrContext: string | LogContext,
-    contextOrMessage?: LogContext | string
-  ): void {
+  info(messageOrContext: string | LogContext, contextOrMessage?: LogContext | string): void {
     this.logAt('info', messageOrContext, contextOrMessage)
   }
 
@@ -348,10 +309,7 @@ export class Logger {
    */
   warn(message: string, context?: LogContext): void
   warn(context: LogContext, message?: string): void
-  warn(
-    messageOrContext: string | LogContext,
-    contextOrMessage?: LogContext | string
-  ): void {
+  warn(messageOrContext: string | LogContext, contextOrMessage?: LogContext | string): void {
     this.logAt('warn', messageOrContext, contextOrMessage)
   }
 
@@ -363,28 +321,19 @@ export class Logger {
    */
   error(message: string, context?: LogContext): void
   error(context: LogContext, message?: string): void
-  error(
-    messageOrContext: string | LogContext,
-    contextOrMessage?: LogContext | string
-  ): void {
+  error(messageOrContext: string | LogContext, contextOrMessage?: LogContext | string): void {
     this.logAt('error', messageOrContext, contextOrMessage)
   }
 
   fatal(message: string, context?: LogContext): void
   fatal(context: LogContext, message?: string): void
-  fatal(
-    messageOrContext: string | LogContext,
-    contextOrMessage?: LogContext | string
-  ): void {
+  fatal(messageOrContext: string | LogContext, contextOrMessage?: LogContext | string): void {
     this.logAt('fatal', messageOrContext, contextOrMessage)
   }
 
   critical(message: string, context?: LogContext): void
   critical(context: LogContext, message?: string): void
-  critical(
-    messageOrContext: string | LogContext,
-    contextOrMessage?: LogContext | string
-  ): void {
+  critical(messageOrContext: string | LogContext, contextOrMessage?: LogContext | string): void {
     this.logAt('fatal', messageOrContext, contextOrMessage)
   }
 
@@ -440,10 +389,7 @@ export class Logger {
  * @param config - Optional configuration
  * @returns Logger instance
  */
-export function createLogger(
-  service: string,
-  config?: Partial<LoggerConfig>
-): Logger {
+export function createLogger(service: string, config?: Partial<LoggerConfig>): Logger {
   return new Logger({
     service,
     ...config,

@@ -31,16 +31,12 @@ export async function processMigrationDLQ(
 
   // CRITICAL: Check for tampering flag
   if (task.tampering_detected || task.error_code === 'CHECKSUM_MISMATCH') {
-    logger?.log(
-      'critical',
-      'TAMPERING DETECTED - ESCALATING TO SECURITY TEAM',
-      {
-        task_id: task.task_id,
-        workspace_id: task.workspace_id,
-        from_version: task.from_version,
-        to_version: task.to_version,
-      }
-    )
+    logger?.log('critical', 'TAMPERING DETECTED - ESCALATING TO SECURITY TEAM', {
+      task_id: task.task_id,
+      workspace_id: task.workspace_id,
+      from_version: task.from_version,
+      to_version: task.to_version,
+    })
 
     // Alert security team
     if (alertService) {
@@ -126,9 +122,7 @@ export function classifyMigrationFailure(error: string): {
 /**
  * Export audit trail for failed migration
  */
-export function generateMigrationFailureReport(
-  task: FailedMigrationTask
-): string {
+export function generateMigrationFailureReport(task: FailedMigrationTask): string {
   return `
 === MIGRATION FAILURE REPORT ===
 Task ID: ${task.task_id}

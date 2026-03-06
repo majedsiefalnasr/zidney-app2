@@ -11,11 +11,12 @@
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  * Task: T051
  */
-import App from '@/App.vue'
-import AppLayout from '@/components/layout/AppLayout.vue'
+
 import { createTestingPinia } from '@pinia/testing'
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import App from '@/App.vue'
+import AppLayout from '@/components/layout/AppLayout.vue'
 
 const mockRoute = { meta: { standaloneLayout: false } }
 

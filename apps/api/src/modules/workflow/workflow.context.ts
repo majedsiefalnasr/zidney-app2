@@ -18,12 +18,12 @@
  * ✓ No business logic
  */
 
-import { randomUUID } from 'crypto'
+import { randomUUID } from 'node:crypto'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type HonoContext = any
 
-import { WorkflowState } from '@zidney/domain-core'
+import type { WorkflowState } from '@zidney/domain-core'
 
 import type { TransitionRequestBody } from './workflow.validation'
 

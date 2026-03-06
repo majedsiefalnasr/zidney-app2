@@ -20,11 +20,7 @@ const logger = createLogger('auth:auth-service')
 // Subset of ApiClient needed by auth service — enables forward-reference proxy in main.ts
 export interface AuthServiceApiClient {
   get<T>(url: string, config?: RequestConfig): Promise<ClientResponse<T>>
-  post<T>(
-    url: string,
-    data: unknown,
-    config?: RequestConfig
-  ): Promise<ClientResponse<T>>
+  post<T>(url: string, data: unknown, config?: RequestConfig): Promise<ClientResponse<T>>
 }
 
 // ─── Interface ───────────────────────────────────────────────────────────────
@@ -64,15 +60,10 @@ export interface IAuthService {
  * Pass a mock AuthServiceApiClient in tests to avoid real HTTP calls.
  * Accepts the minimal subset of ApiClient needed (enabling forward-reference in main.ts).
  */
-export function createAuthService(
-  apiClient: AuthServiceApiClient
-): IAuthService {
+export function createAuthService(apiClient: AuthServiceApiClient): IAuthService {
   return {
     async login(credentials: LoginCredentials): Promise<LoginResponse> {
-      const result = await apiClient.post<LoginResponse>(
-        '/auth/login',
-        credentials
-      )
+      const result = await apiClient.post<LoginResponse>('/auth/login', credentials)
       // NEVER log accessToken — only log presence
       logger.info('Login response received', {
         hasToken: true,
@@ -87,21 +78,15 @@ export function createAuthService(
         logger.info('Backend logout completed')
       } catch (err: unknown) {
         // FR-30: logout always resolves — backend error is non-fatal
-        logger.warn(
-          'Backend logout failed — proceeding with local state teardown',
-          {
-            error: err instanceof Error ? err.message : 'unknown',
-          }
-        )
+        logger.warn('Backend logout failed — proceeding with local state teardown', {
+          error: err instanceof Error ? err.message : 'unknown',
+        })
         // Intentionally swallowed — do not rethrow
       }
     },
 
     async refreshToken(): Promise<{ accessToken: string }> {
-      const result = await apiClient.post<{ accessToken: string }>(
-        '/auth/refresh',
-        {}
-      )
+      const result = await apiClient.post<{ accessToken: string }>('/auth/refresh', {})
       return result.data
     },
 

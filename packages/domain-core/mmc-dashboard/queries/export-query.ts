@@ -16,7 +16,7 @@
  * - Response: CSV with UTF-8 BOM
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 const MAX_EXPORT_ROWS = 50000
 
@@ -31,10 +31,7 @@ export interface ExportParams {
  *
  * Returns: Row count, throws if > 50,000
  */
-export async function countExportRows(
-  pool: Pool,
-  section: string
-): Promise<number> {
+export async function countExportRows(pool: Pool, section: string): Promise<number> {
   let countQuery = ''
 
   switch (section) {
@@ -71,9 +68,7 @@ export async function countExportRows(
   const rowCount = result.rows[0]?.count || 0
 
   if (rowCount > MAX_EXPORT_ROWS) {
-    throw new Error(
-      `Export exceeds maximum rows: ${rowCount} > ${MAX_EXPORT_ROWS}`
-    )
+    throw new Error(`Export exceeds maximum rows: ${rowCount} > ${MAX_EXPORT_ROWS}`)
   }
 
   return rowCount
@@ -100,11 +95,7 @@ export async function getGeographicExport(pool: Pool) {
 /**
  * Get revenue data for export
  */
-export async function getRevenueExport(
-  pool: Pool,
-  dateFrom?: Date,
-  dateTo?: Date
-) {
+export async function getRevenueExport(pool: Pool, dateFrom?: Date, dateTo?: Date) {
   const params: any[] = []
   let dateFilter = ''
 

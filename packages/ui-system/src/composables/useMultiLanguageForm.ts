@@ -29,9 +29,7 @@ export function useMultiLanguageForm(options: UseMultiLanguageFormOptions) {
       const defaultLang = options.languages.find((l) => l.isDefault)
       return defaultLang
         ? [defaultLang.code]
-        : [options.languages[0]?.code].filter(
-            (c): c is string => typeof c === 'string'
-          )
+        : [options.languages[0]?.code].filter((c): c is string => typeof c === 'string')
     }
 
     return provided
@@ -65,16 +63,11 @@ export function useMultiLanguageForm(options: UseMultiLanguageFormOptions) {
   // Computed: Translation coverage percentage
   const translationCoverage = computed(() => {
     if (options.languages.length === 0) return 0
-    return Math.round(
-      (filledLanguages.value.size / options.languages.length) * 100
-    )
+    return Math.round((filledLanguages.value.size / options.languages.length) * 100)
   })
 
   // Method: Validate single language
-  const validateLanguage = (
-    code: string,
-    value?: string
-  ): ValidationError[] => {
+  const validateLanguage = (code: string, value?: string): ValidationError[] => {
     const errors: ValidationError[] = []
     const actualValue = value ?? formValues.value[code] ?? ''
     const rules = options.validationRules?.[code] ?? []
@@ -124,12 +117,11 @@ export function useMultiLanguageForm(options: UseMultiLanguageFormOptions) {
 
     // Check: Minimum 1 required language (LOCKED DECISION 5)
     if (requiredLanguages.value.length === 0) {
-      console.warn(
-        'No required languages specified. Defaulting to minimum 1 required language.'
+      // biome-ignore lint/suspicious/noConsole: intentional developer warning in composable
+      console.warn('No required languages specified. Defaulting to minimum 1 required language.')
+      requiredLanguages.value = [defaultLang?.code ?? options.languages[0]?.code].filter(
+        (c): c is string => typeof c === 'string'
       )
-      requiredLanguages.value = [
-        defaultLang?.code ?? options.languages[0]?.code,
-      ].filter((c): c is string => typeof c === 'string')
     }
 
     // Check: All required languages have content (LOCKED DECISION 5)
@@ -150,9 +142,7 @@ export function useMultiLanguageForm(options: UseMultiLanguageFormOptions) {
 
   // Computed: Is form valid? (all languages pass validation + global constraints)
   const isValid = computed(() => {
-    const languageErrorsExist = Object.values(languageErrors.value).some(
-      (errs) => errs.length > 0
-    )
+    const languageErrorsExist = Object.values(languageErrors.value).some((errs) => errs.length > 0)
     const globalErrorsExist = globalErrors.value.length > 0
 
     return !languageErrorsExist && !globalErrorsExist

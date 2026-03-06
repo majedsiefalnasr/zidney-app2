@@ -15,14 +15,7 @@
  * ✓ Tenant DB only — no master DB references
  */
 
-import {
-  index,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core'
+import { index, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 
 // ---------------------------------------------------------------------------
 // translation_audit_logs
@@ -73,9 +66,7 @@ export const translationAuditLogs = pgTable(
     /**
      * Server-authoritative creation timestamp. Immutable after insert.
      */
-    created_at: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     /**

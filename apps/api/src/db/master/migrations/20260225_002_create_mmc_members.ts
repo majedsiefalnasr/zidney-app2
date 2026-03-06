@@ -17,10 +17,9 @@
  * - Dependencies: roles table must exist
  */
 
-import { PoolClient } from 'pg'
+import type { PoolClient } from 'pg'
 
-export const description =
-  'Create mmc_members table with role assignments and token versioning'
+export const description = 'Create mmc_members table with role assignments and token versioning'
 
 /**
  * Execute schema migration

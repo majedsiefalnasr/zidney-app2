@@ -5,8 +5,9 @@
  *
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  */
-import { useFrontofficeUiStore } from '@/core/state/ui.store'
+
 import { onMounted, onUnmounted } from 'vue'
+import { useFrontofficeUiStore } from '../core/state/ui.store'
 
 const MOBILE_BREAKPOINT = 768
 

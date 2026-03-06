@@ -22,7 +22,7 @@
  * ✓ Public routes are explicitly listed — not derived from absence in registry
  */
 
-import { PermissionAction, PermissionModule } from './rbac.types'
+import { type PermissionAction, PermissionModule } from './rbac.types'
 
 // ---------------------------------------------------------------------------
 // Route permission entry shape
@@ -133,10 +133,7 @@ export const PUBLIC_ROUTES = new Set<string>([
  * @returns RoutePermissionEntry if route is protected and registered;
  *          null if route is public or unregistered (fail-closed).
  */
-export function lookupPermission(
-  method: string,
-  path: string
-): RoutePermissionEntry | null {
+export function lookupPermission(method: string, path: string): RoutePermissionEntry | null {
   const key = `${method.toUpperCase()} ${path}`
 
   if (PUBLIC_ROUTES.has(key)) return null

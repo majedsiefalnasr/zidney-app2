@@ -1,4 +1,4 @@
-import { createHash, randomBytes } from 'crypto'
+import { createHash, randomBytes } from 'node:crypto'
 
 /**
  * Generate a random token suitable for one-time use invitations
@@ -24,7 +24,7 @@ export function hashToken(token: string): string {
 export function verifyTokenHash(token: string, tokenHash: string): boolean {
   const computed = hashToken(token)
   // Use timingSafeEqual for constant-time comparison
-  const { timingSafeEqual } = require('crypto')
+  const { timingSafeEqual } = require('node:crypto')
 
   try {
     return timingSafeEqual(Buffer.from(computed), Buffer.from(tokenHash))

@@ -16,7 +16,7 @@
  */
 
 import { ProvisioningErrorCode } from '@zidney/types/errors/provisioning-errors'
-import { Redis } from 'ioredis'
+import type { Redis } from 'ioredis'
 import { LOCK_CONFIG, QUEUE_KEYS } from '../config/queue-config'
 
 /**
@@ -49,11 +49,7 @@ export class DistributedLockService {
   private config: typeof LOCK_CONFIG
   private logger?: any
 
-  constructor(
-    redis: Redis,
-    config: typeof LOCK_CONFIG = LOCK_CONFIG,
-    logger?: any
-  ) {
+  constructor(redis: Redis, config: typeof LOCK_CONFIG = LOCK_CONFIG, logger?: any) {
     this.redis = redis
     this.config = config
     this.logger = logger
@@ -76,13 +72,7 @@ export class DistributedLockService {
     for (let attempt = 0; attempt < maxRetries; attempt++) {
       try {
         // Try to set lock (SETNX = SET if Not eXists)
-        const acquired = await this.redis.set(
-          lockKey,
-          leaseKey,
-          'EX',
-          this.config.TTL,
-          'NX'
-        )
+        const acquired = await this.redis.set(lockKey, leaseKey, 'EX', this.config.TTL, 'NX')
 
         if (acquired === 'OK') {
           const now = new Date()
@@ -265,8 +255,7 @@ export class DistributedLockService {
    */
   private calculateBackoff(attemptNumber: number): number {
     const exponential = Math.min(
-      this.config.INITIAL_BACKOFF_MS *
-        Math.pow(this.config.BACKOFF_MULTIPLIER, attemptNumber),
+      this.config.INITIAL_BACKOFF_MS * this.config.BACKOFF_MULTIPLIER ** attemptNumber,
       this.config.MAX_BACKOFF_MS
     )
     return exponential
@@ -297,9 +286,6 @@ export class DistributedLockService {
 /**
  * Factory to create distributed lock service
  */
-export function createDistributedLockService(
-  redis: Redis,
-  logger?: any
-): DistributedLockService {
+export function createDistributedLockService(redis: Redis, logger?: any): DistributedLockService {
   return new DistributedLockService(redis, LOCK_CONFIG, logger)
 }

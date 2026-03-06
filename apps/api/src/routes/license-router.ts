@@ -1,10 +1,6 @@
-import {
-  createLicense,
-  deleteLicense,
-  transitionLicenseState,
-} from '@zidney/domain-core/license'
+import { createLicense, deleteLicense, transitionLicenseState } from '@zidney/domain-core/license'
 import { createLogger } from '@zidney/logger'
-import { Context, Hono } from 'hono'
+import { type Context, Hono } from 'hono'
 import { toLicenseError } from '../responses/license-error-handler'
 
 const logger = createLogger('license-router')
@@ -122,10 +118,9 @@ licenseRouter.get('/mmc/licenses/:license_id', async (ctx: Context) => {
 
   try {
     // Query license
-    const result = await masterDb.query(
-      'SELECT * FROM licenses WHERE id = $1 LIMIT 1',
-      [license_id]
-    )
+    const result = await masterDb.query('SELECT * FROM licenses WHERE id = $1 LIMIT 1', [
+      license_id,
+    ])
 
     if (!result.rows.length) {
       logger.warn(
@@ -275,68 +270,64 @@ licenseRouter.patch('/mmc/licenses/:license_id/state', async (ctx: Context) => {
  * Transactions: NO (read-only)
  * Response: License object with full details
  */
-licenseRouter.get(
-  '/admin/workspace/:workspace_id/license',
-  async (ctx: Context) => {
-    const correlationId = ctx.get('correlation_id')
-    const masterDb = ctx.get('master_db')
-    const workspace_id = ctx.req.param('workspace_id')
+licenseRouter.get('/admin/workspace/:workspace_id/license', async (ctx: Context) => {
+  const correlationId = ctx.get('correlation_id')
+  const masterDb = ctx.get('master_db')
+  const workspace_id = ctx.req.param('workspace_id')
 
-    try {
-      // Query license by workspace_id
-      const result = await masterDb.query(
-        'SELECT * FROM licenses WHERE workspace_id = $1 LIMIT 1',
-        [workspace_id]
-      )
+  try {
+    // Query license by workspace_id
+    const result = await masterDb.query('SELECT * FROM licenses WHERE workspace_id = $1 LIMIT 1', [
+      workspace_id,
+    ])
 
-      if (!result.rows.length) {
-        logger.warn(
-          {
-            correlation_id: correlationId,
-            action: 'workspace_license_not_found',
-            workspace_id,
-            error_code: 'LICENSE_NOT_FOUND',
-          },
-          'License not found for workspace'
-        )
-        ctx.status(404)
-        return ctx.json(toLicenseError('LICENSE_NOT_FOUND'))
-      }
-
-      const license = result.rows[0]
-
-      logger.debug(
+    if (!result.rows.length) {
+      logger.warn(
         {
           correlation_id: correlationId,
-          action: 'workspace_license_retrieved',
+          action: 'workspace_license_not_found',
           workspace_id,
-          license_id: license.id,
+          error_code: 'LICENSE_NOT_FOUND',
         },
-        'Workspace license retrieved'
+        'License not found for workspace'
       )
-
-      ctx.status(200)
-      return ctx.json({
-        success: true,
-        data: license,
-        error: null,
-      })
-    } catch (error: any) {
-      logger.error(
-        {
-          correlation_id: correlationId,
-          action: 'workspace_license_retrieve_error',
-          workspace_id,
-          error_message: error.message,
-        },
-        'Workspace license retrieval failed'
-      )
-
-      ctx.status(500)
-      return ctx.json(toLicenseError('INTERNAL_ERROR'))
+      ctx.status(404)
+      return ctx.json(toLicenseError('LICENSE_NOT_FOUND'))
     }
+
+    const license = result.rows[0]
+
+    logger.debug(
+      {
+        correlation_id: correlationId,
+        action: 'workspace_license_retrieved',
+        workspace_id,
+        license_id: license.id,
+      },
+      'Workspace license retrieved'
+    )
+
+    ctx.status(200)
+    return ctx.json({
+      success: true,
+      data: license,
+      error: null,
+    })
+  } catch (error: any) {
+    logger.error(
+      {
+        correlation_id: correlationId,
+        action: 'workspace_license_retrieve_error',
+        workspace_id,
+        error_message: error.message,
+      },
+      'Workspace license retrieval failed'
+    )
+
+    ctx.status(500)
+    return ctx.json(toLicenseError('INTERNAL_ERROR'))
   }
-)
+})
 
 /**
  * DELETE /api/mmc/licenses/:license_id

@@ -7,11 +7,12 @@
  *
  * Stage: STAGE_UI_06_STATE_MANAGEMENT
  */
-import { useBackofficeAppStore } from '@/core/state/app.store'
-import { useBackofficeWorkspaceStore } from '@/core/state/workspace.store'
+
 import { createPinia, setActivePinia } from 'pinia'
 import { createPersistedState } from 'pinia-plugin-persistedstate'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { useBackofficeAppStore } from '@/core/state/app.store'
+import { useBackofficeWorkspaceStore } from '@/core/state/workspace.store'
 
 describe('Backoffice Pinia Bootstrap (SC-009, FR-034)', () => {
   beforeEach(() => {

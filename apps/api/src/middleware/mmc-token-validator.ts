@@ -11,20 +11,14 @@
  * Failure: Returns 401 Unauthorized
  */
 
-import {
-  ProvisioningErrorCode,
-  getErrorDetails,
-} from '@zidney/types/errors/provisioning-errors'
-import { Context, Next } from 'hono'
+import { getErrorDetails, ProvisioningErrorCode } from '@zidney/types/errors/provisioning-errors'
+import type { Context, Next } from 'hono'
 import { createErrorResponse } from '../routes/licenses/license-response'
 
 /**
  * MMC Token Validator Middleware
  */
-export async function mmcTokenValidator(
-  c: Context,
-  next: Next
-): Promise<Response | void> {
+export async function mmcTokenValidator(c: Context, next: Next): Promise<Response | undefined> {
   const authHeader = c.req.header('authorization')
 
   if (!authHeader) {
@@ -40,7 +34,7 @@ export async function mmcTokenValidator(
 
   // Parse Bearer token
   const parts = authHeader.split(' ')
-  if (parts.length !== 2 || parts[0]!.toLowerCase() !== 'bearer') {
+  if (parts.length !== 2 || parts[0]?.toLowerCase() !== 'bearer') {
     const error = getErrorDetails(ProvisioningErrorCode.UNAUTHORIZED_SERVICE)
     c.status(error.httpStatus as any)
     return c.json(

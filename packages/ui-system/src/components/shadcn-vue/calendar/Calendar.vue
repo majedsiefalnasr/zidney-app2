@@ -1,17 +1,14 @@
 <script lang="ts" setup>
-import type { CalendarRootEmits, CalendarRootProps, DateValue } from 'reka-ui'
-import type { HTMLAttributes, Ref } from 'vue'
-import type { LayoutTypes } from '.'
 import { getLocalTimeZone, today } from '@internationalized/date'
 import { createReusableTemplate, reactiveOmit, useVModel } from '@vueuse/core'
+import type { CalendarRootEmits, CalendarRootProps, DateValue } from 'reka-ui'
 import { CalendarRoot, useDateFormatter, useForwardPropsEmits } from 'reka-ui'
 import { createYear, createYearRange, toDate } from 'reka-ui/date'
+import type { HTMLAttributes, Ref } from 'vue'
 import { computed, toRaw } from 'vue'
 import { cn } from '@/lib/utils'
-import {
-  NativeSelect,
-  NativeSelectOption,
-} from '@/registry/new-york-v4/ui/native-select'
+import { NativeSelect, NativeSelectOption } from '@/registry/new-york-v4/ui/native-select'
+import type { LayoutTypes } from '.'
 import {
   CalendarCell,
   CalendarCellTrigger,
@@ -56,19 +53,17 @@ const yearRange = computed(() => {
     createYearRange({
       start:
         props?.minValue ??
-        (
-          toRaw(props.placeholder) ??
-          props.defaultPlaceholder ??
-          today(getLocalTimeZone())
-        ).cycle('year', -100),
+        (toRaw(props.placeholder) ?? props.defaultPlaceholder ?? today(getLocalTimeZone())).cycle(
+          'year',
+          -100
+        ),
 
       end:
         props?.maxValue ??
-        (
-          toRaw(props.placeholder) ??
-          props.defaultPlaceholder ??
-          today(getLocalTimeZone())
-        ).cycle('year', 10),
+        (toRaw(props.placeholder) ?? props.defaultPlaceholder ?? today(getLocalTimeZone())).cycle(
+          'year',
+          10
+        ),
     })
   )
 })

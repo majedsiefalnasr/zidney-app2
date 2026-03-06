@@ -23,8 +23,8 @@
  * Layer 3 (Status): Check attempt status (SUBMITTED/FINALIZED = no-op)
  */
 
-import { Logger } from '@zidney/logger'
-import { Pool, PoolClient } from 'pg'
+import type { Logger } from '@zidney/logger'
+import type { Pool, PoolClient } from 'pg'
 
 /**
  * Idempotency check result
@@ -86,8 +86,7 @@ export async function validateSubmissionIdempotency(
       } catch (parseErr) {
         logger.warn('Failed to parse Redis cache entry', {
           correlation_id: correlationId,
-          error:
-            parseErr instanceof Error ? parseErr.message : String(parseErr),
+          error: parseErr instanceof Error ? parseErr.message : String(parseErr),
         })
         // Fall through to Layer 2
       }
@@ -134,8 +133,7 @@ export async function validateSubmissionIdempotency(
       } catch (redisErr) {
         logger.warn('Failed to update Redis cache', {
           correlation_id: correlationId,
-          error:
-            redisErr instanceof Error ? redisErr.message : String(redisErr),
+          error: redisErr instanceof Error ? redisErr.message : String(redisErr),
         })
         // Proceed without cache update; DB layer still works
       }
@@ -279,8 +277,7 @@ export async function storeSubmissionIdempotencyKey(
       } catch (redisErr) {
         logger.warn('Failed to update Redis cache', {
           correlation_id: correlationId,
-          error:
-            redisErr instanceof Error ? redisErr.message : String(redisErr),
+          error: redisErr instanceof Error ? redisErr.message : String(redisErr),
         })
         // Proceed without cache; DB layer still works
       }

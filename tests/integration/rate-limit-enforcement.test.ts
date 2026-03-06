@@ -9,7 +9,7 @@ import {
   createTestClient,
   createTestContext,
   sleep,
-  TestContext,
+  type TestContext,
 } from '../test-helpers'
 
 describe('T084: Rate Limit Enforcement', () => {

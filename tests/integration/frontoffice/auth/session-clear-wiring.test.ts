@@ -31,7 +31,12 @@ function makePinia() {
 }
 
 function makeTokenManager(): ITokenManager {
-  return { getToken: vi.fn(() => null), setToken: vi.fn(), clearToken: vi.fn() }
+  return {
+    getToken: vi.fn(() => null),
+    setToken: vi.fn(),
+    clearToken: vi.fn(),
+    hasToken: vi.fn(() => false),
+  }
 }
 
 function makeRouter(): Router {
@@ -69,12 +74,8 @@ describe('session clear wiring (frontoffice)', () => {
   })
 
   function buildWiredSetup() {
-    const useAuthStore = defineAuthStore(
-      makeAuthService(),
-      tokenManager,
-      router,
-      LOGIN_ROUTE,
-      () => makeRefreshManager()
+    const useAuthStore = defineAuthStore(makeAuthService(), tokenManager, router, LOGIN_ROUTE, () =>
+      makeRefreshManager()
     )
     const authStore = useAuthStore(pinia)
     const getIsAuthenticated = () => authStore.isAuthenticated

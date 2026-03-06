@@ -20,10 +20,10 @@
  */
 
 import {
-  TranslationError,
-  invalidateCoverage,
-  upsertTranslations,
   type EntityValidator,
+  invalidateCoverage,
+  TranslationError,
+  upsertTranslations,
 } from '@zidney/domain-core'
 import { createLogger } from '@zidney/logger'
 
@@ -104,12 +104,7 @@ export async function handlePostUpsert(c: any): Promise<Response> {
         entity_type: string
         language_code: string
       }>) {
-        await invalidateCoverage(
-          redis,
-          ctx.workspace_id,
-          pair.entity_type,
-          pair.language_code
-        )
+        await invalidateCoverage(redis, ctx.workspace_id, pair.entity_type, pair.language_code)
       }
     }
 

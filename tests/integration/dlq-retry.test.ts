@@ -11,7 +11,7 @@ import {
   generateJWT,
   insertTestAttempt,
   sleep,
-  TestContext,
+  type TestContext,
 } from '../test-helpers'
 
 describe('T087: DLQ Lifecycle', () => {
@@ -33,10 +33,7 @@ describe('T087: DLQ Lifecycle', () => {
 
     // Insert failed job attempts
     for (let i = 0; i < 3; i++) {
-      await ctx.redis.lPush(
-        `queue:grading:failed:${attemptId}`,
-        JSON.stringify({ attempt: i })
-      )
+      await ctx.redis.lPush(`queue:grading:failed:${attemptId}`, JSON.stringify({ attempt: i }))
     }
 
     const dlqKey = `dlq:${attemptId}`
@@ -58,37 +55,29 @@ describe('T087: DLQ Lifecycle', () => {
     await ctx.redis.lPush(`dlq:${attemptId}`, dlqJobId)
 
     // Retry the job
-    const res = await client.post(
-      `/admin/workspace/${ctx.workspaceId}/dlq/${dlqJobId}/retry`,
-      {}
-    )
+    const res = await client.post(`/admin/workspace/${ctx.workspaceId}/dlq/${dlqJobId}/retry`, {})
     expect(res.status).toBe(202)
   })
 
   it('should create dlq_resolutions record on successful retry', async () => {
     const dlqJobId = 'dlq-job-' + Math.random().toString(36).substring(7)
 
-    const res = await client.post(
-      `/admin/workspace/${ctx.workspaceId}/dlq/${dlqJobId}/retry`,
-      {}
-    )
+    const res = await client.post(`/admin/workspace/${ctx.workspaceId}/dlq/${dlqJobId}/retry`, {})
 
     await sleep(50)
 
-    const record = await ctx.tenantDb.query(
-      `SELECT * FROM dlq_resolutions WHERE dlq_job_id = $1`,
-      [dlqJobId]
-    )
+    const record = await ctx.tenantDb.query(`SELECT * FROM dlq_resolutions WHERE dlq_job_id = $1`, [
+      dlqJobId,
+    ])
     expect(record.rows.length).toBeGreaterThanOrEqual(0)
   })
 
   it('should discard DLQ job with reason', async () => {
     const dlqJobId = 'dlq-job-' + Math.random().toString(36).substring(7)
 
-    const res = await client.post(
-      `/admin/workspace/${ctx.workspaceId}/dlq/${dlqJobId}/discard`,
-      { reason: 'Invalid exam data' }
-    )
+    const res = await client.post(`/admin/workspace/${ctx.workspaceId}/dlq/${dlqJobId}/discard`, {
+      reason: 'Invalid exam data',
+    })
     expect(res.status).toBe(200)
   })
 

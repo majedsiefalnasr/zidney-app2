@@ -16,7 +16,7 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Pool, PoolClient } from 'pg'
+import type { Pool, PoolClient } from 'pg'
 
 const logger = createLogger('exam-loader')
 

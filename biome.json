@@ -1,0 +1,85 @@
+{
+  "$schema": "https://biomejs.dev/schemas/2.4.6/schema.json",
+  "vcs": { "enabled": true, "clientKind": "git", "useIgnoreFile": true },
+  "files": {
+    "includes": [
+      "**",
+      "!node_modules",
+      "!dist",
+      "!**/*.d.ts",
+      "!.specify",
+      "!coverage",
+      "!**/*.css",
+      "!docs/**/*.html"
+    ]
+  },
+  "formatter": {
+    "enabled": true,
+    "indentStyle": "space",
+    "indentWidth": 2,
+    "lineWidth": 100
+  },
+  "javascript": {
+    "formatter": {
+      "quoteStyle": "single",
+      "semicolons": "asNeeded",
+      "trailingCommas": "es5"
+    }
+  },
+  "linter": {
+    "enabled": true,
+    "rules": {
+      "recommended": true,
+      "correctness": {
+        "noUnusedImports": "error",
+        "noUnreachable": "warn",
+        "noPrecisionLoss": "warn",
+        "noVueDuplicateKeys": "warn"
+      },
+      "suspicious": {
+        "noDebugger": "error",
+        "noConsole": "error",
+        "useIterableCallbackReturn": "warn",
+        "noImplicitAnyLet": "warn",
+        "noExportsInTest": "warn",
+        "noAssignInExpressions": "warn"
+      },
+      "style": {
+        "useConst": "error"
+      }
+    }
+  },
+  "assist": {
+    "enabled": true,
+    "actions": {
+      "source": {
+        "organizeImports": "on"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "packages/logger/**/*.ts",
+        "apps/worker/src/observability/structured-logger.ts",
+        "apps/worker/src/services/provisioning/ErrorHandling.ts",
+        "packages/domain-core/src/logging/master-db-logger.ts",
+        "packages/domain-core/src/migration/master-migration-runner.ts",
+        "packages/domain-core/src/migration/tenant-migration-runner.ts",
+        "packages/domain-core/src/migration/snapshot-manager.ts",
+        "apps/api/src/db/master/migrations/**",
+        "apps/api/src/db/tenant/migrations/**",
+        "scripts/**"
+      ],
+      "linter": { "rules": { "suspicious": { "noConsole": "off" } } }
+    },
+    {
+      "includes": ["tests/**", "**/*.test.ts", "**/*.spec.ts"],
+      "linter": { "rules": { "suspicious": { "noConsole": "off" } } }
+    },
+    {
+      "includes": ["**/*.vue"],
+      "linter": { "rules": { "correctness": { "noUnusedImports": "warn" } } }
+    }
+  ]
+}

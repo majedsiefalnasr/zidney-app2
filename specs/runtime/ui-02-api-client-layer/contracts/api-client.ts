@@ -129,29 +129,13 @@ export interface ApiClient {
   /** HTTP GET */
   get<T>(url: string, config?: RequestConfig): Promise<ClientResponse<T>>
   /** HTTP POST */
-  post<T>(
-    url: string,
-    data: unknown,
-    config?: RequestConfig
-  ): Promise<ClientResponse<T>>
+  post<T>(url: string, data: unknown, config?: RequestConfig): Promise<ClientResponse<T>>
   /** HTTP PUT */
-  put<T>(
-    url: string,
-    data: unknown,
-    config?: RequestConfig
-  ): Promise<ClientResponse<T>>
+  put<T>(url: string, data: unknown, config?: RequestConfig): Promise<ClientResponse<T>>
   /** HTTP PATCH */
-  patch<T>(
-    url: string,
-    data: unknown,
-    config?: RequestConfig
-  ): Promise<ClientResponse<T>>
+  patch<T>(url: string, data: unknown, config?: RequestConfig): Promise<ClientResponse<T>>
   /** HTTP DELETE */
-  delete<T>(
-    url: string,
-    data?: unknown,
-    config?: RequestConfig
-  ): Promise<ClientResponse<T>>
+  delete<T>(url: string, data?: unknown, config?: RequestConfig): Promise<ClientResponse<T>>
 }
 
 // ─── Factory ────────────────────────────────────────────────────────────────

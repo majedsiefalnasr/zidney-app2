@@ -9,12 +9,7 @@
 import { randomUUID } from 'node:crypto'
 import type { Pool } from 'pg'
 
-type AttemptStatus =
-  | 'PENDING'
-  | 'CREATED'
-  | 'IN_PROGRESS'
-  | 'COMPLETED'
-  | 'EXPIRED'
+type AttemptStatus = 'PENDING' | 'CREATED' | 'IN_PROGRESS' | 'COMPLETED' | 'EXPIRED'
 
 type AttemptRecord = {
   id: string
@@ -132,8 +127,7 @@ class InMemoryPool {
       const attempt = this.state.attempts.get(String(params[1]))
       if (attempt) {
         attempt.status = 'COMPLETED'
-        attempt.result =
-          typeof result === 'string' ? JSON.parse(result) : (result ?? null)
+        attempt.result = typeof result === 'string' ? JSON.parse(result) : (result ?? null)
       }
       return { rows: attempt ? [attempt] : [], rowCount: attempt ? 1 : 0 }
     }
@@ -164,23 +158,13 @@ class InMemoryPool {
       return { rows: [], rowCount: 1 }
     }
 
-    if (
-      normalized.startsWith(
-        'select * from dlq_resolutions where dlq_job_id = $1'
-      )
-    ) {
+    if (normalized.startsWith('select * from dlq_resolutions where dlq_job_id = $1')) {
       const dlq_job_id = String(params[0])
-      const rows = this.state.dlqResolutions.filter(
-        (row) => row.dlq_job_id === dlq_job_id
-      )
+      const rows = this.state.dlqResolutions.filter((row) => row.dlq_job_id === dlq_job_id)
       return { rows, rowCount: rows.length }
     }
 
-    if (
-      normalized.includes(
-        'select count(*) as count from attempts where workspace_id = $1'
-      )
-    ) {
+    if (normalized.includes('select count(*) as count from attempts where workspace_id = $1')) {
       const workspace_id = String(params[0])
       const count = Array.from(this.state.attempts.values()).filter(
         (attempt) => attempt.workspace_id === workspace_id
@@ -224,10 +208,7 @@ function parseSchemaVersion(headers: Record<string, string>): string | null {
 }
 
 function isSchemaRoute(path: string): boolean {
-  return (
-    path.includes('/attempt/') ||
-    (path.includes('/workspace/') && path.endsWith('/attempt'))
-  )
+  return path.includes('/attempt/') || (path.includes('/workspace/') && path.endsWith('/attempt'))
 }
 
 function validateSchemaVersion(headers: Record<string, string>) {
@@ -246,9 +227,7 @@ function validateSchemaVersion(headers: Record<string, string>) {
   }
 }
 
-function makeBaseHeaders(
-  clientHeaders: Record<string, string>
-): Record<string, string> {
+function makeBaseHeaders(clientHeaders: Record<string, string>): Record<string, string> {
   return {
     'X-Correlation-ID': clientHeaders['X-Correlation-ID'] ?? randomUUID(),
   }
@@ -520,18 +499,14 @@ export class MockHttpClient implements TestClient {
       }
     }
 
-    const adminRetryMatch = path.match(
-      /\/admin\/workspace\/([^/]+)\/dlq\/([^/]+)\/retry$/
-    )
+    const adminRetryMatch = path.match(/\/admin\/workspace\/([^/]+)\/dlq\/([^/]+)\/retry$/)
     if (adminRetryMatch) {
       const dlq_job_id = adminRetryMatch[2]!
       this.state.dlqResolutions.push({ dlq_job_id })
       return { status: 202, data: { retried: true }, error: null, headers }
     }
 
-    const adminDiscardMatch = path.match(
-      /\/admin\/workspace\/([^/]+)\/dlq\/([^/]+)\/discard$/
-    )
+    const adminDiscardMatch = path.match(/\/admin\/workspace\/([^/]+)\/dlq\/([^/]+)\/discard$/)
     if (adminDiscardMatch) {
       return { status: 200, data: { discarded: true }, error: null, headers }
     }
@@ -673,10 +648,7 @@ export class MockHttpClient implements TestClient {
       return { status: 200, data: { items: [] }, error: null, headers }
     }
 
-    if (
-      path.includes('/rate-limit-audit') ||
-      path.includes('/rate-limit-export')
-    ) {
+    if (path.includes('/rate-limit-audit') || path.includes('/rate-limit-export')) {
       return { status: 200, data: { ok: true }, error: null, headers }
     }
 
@@ -824,10 +796,7 @@ export const expectErrorResponse = (
   expect(response.data).toBeNull()
 }
 
-export const expectSuccessResponse = (
-  response: any,
-  expectedStatus: number = 200
-) => {
+export const expectSuccessResponse = (response: any, expectedStatus: number = 200) => {
   expect(response.status).toBe(expectedStatus)
   expect(response.success).toBe(true)
   expect(response.error).toBeNull()

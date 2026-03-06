@@ -11,7 +11,7 @@
  */
 
 import { createLogger, type Logger } from '@zidney/logger'
-import { JobEnvelope } from '@zidney/types/job-envelope'
+import type { JobEnvelope } from '@zidney/types/job-envelope'
 
 /**
  * Global logger singleton.

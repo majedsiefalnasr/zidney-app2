@@ -89,15 +89,11 @@ const filteredColumns = computed(() => {
 })
 
 const allVisible = computed(() => {
-  return filteredColumns.value.every((col) =>
-    props.visibleColumns.includes(col)
-  )
+  return filteredColumns.value.every((col) => props.visibleColumns.includes(col))
 })
 
 const someVisible = computed(() => {
-  const selected = filteredColumns.value.filter((col) =>
-    props.visibleColumns.includes(col)
-  )
+  const selected = filteredColumns.value.filter((col) => props.visibleColumns.includes(col))
   return selected.length > 0 && selected.length < filteredColumns.value.length
 })
 

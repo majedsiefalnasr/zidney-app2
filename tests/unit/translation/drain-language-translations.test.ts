@@ -50,17 +50,9 @@ function makeValidJob(
 }
 
 function createMockDb(
-  options: {
-    deletedRows?: any[]
-    throwOnDelete?: boolean
-    throwOnUpdate?: boolean
-  } = {}
+  options: { deletedRows?: any[]; throwOnDelete?: boolean; throwOnUpdate?: boolean } = {}
 ) {
-  const {
-    deletedRows = [],
-    throwOnDelete = false,
-    throwOnUpdate = false,
-  } = options
+  const { deletedRows = [], throwOnDelete = false, throwOnUpdate = false } = options
   const queries: Array<{ sql: string; params?: unknown[] }> = []
   let deleteCallCount = 0
 
@@ -209,11 +201,7 @@ describe('handleDrainLanguageTranslationsJob — happy path', () => {
     ]
 
     const db = createMockDb({ deletedRows })
-    await handleDrainLanguageTranslationsJob(
-      makeValidJob(),
-      makeJobLogger() as any,
-      db as any
-    )
+    await handleDrainLanguageTranslationsJob(makeValidJob(), makeJobLogger() as any, db as any)
 
     const auditInsert = db._queries.find((q) =>
       q.sql.includes('INSERT INTO translation_audit_logs')
@@ -271,11 +259,7 @@ describe('handleDrainLanguageTranslationsJob — happy path', () => {
       _queries: [] as any[],
       query: vi.fn(async (sql: string, params?: unknown[]) => {
         db._queries.push({ sql, params })
-        if (
-          sql.includes('BEGIN') ||
-          sql.includes('COMMIT') ||
-          sql.includes('ROLLBACK')
-        ) {
+        if (sql.includes('BEGIN') || sql.includes('COMMIT') || sql.includes('ROLLBACK')) {
           return { rows: [], rowCount: 0 }
         }
         if (sql.includes('DELETE FROM') && sql.includes('translations')) {
@@ -321,11 +305,7 @@ describe('handleDrainLanguageTranslationsJob — error handling', () => {
 
   it('issues ROLLBACK on batch DELETE failure', async () => {
     const db = createMockDb({ throwOnDelete: true })
-    await handleDrainLanguageTranslationsJob(
-      makeValidJob(),
-      makeJobLogger() as any,
-      db as any
-    )
+    await handleDrainLanguageTranslationsJob(makeValidJob(), makeJobLogger() as any, db as any)
 
     const rollbackCalled = db._queries.some((q) => q.sql.includes('ROLLBACK'))
     expect(rollbackCalled).toBe(true)

@@ -46,14 +46,8 @@ export const EMAIL_PATTERN =
 export const CreateLicenseRequestSchema = z.object({
   workspace_slug: z
     .string()
-    .min(
-      MIN_SLUG_LENGTH,
-      `Workspace slug must be at least ${MIN_SLUG_LENGTH} characters`
-    )
-    .max(
-      MAX_SLUG_LENGTH,
-      `Workspace slug must be at most ${MAX_SLUG_LENGTH} characters`
-    )
+    .min(MIN_SLUG_LENGTH, `Workspace slug must be at least ${MIN_SLUG_LENGTH} characters`)
+    .max(MAX_SLUG_LENGTH, `Workspace slug must be at most ${MAX_SLUG_LENGTH} characters`)
     .regex(
       WORKSPACE_SLUG_PATTERN,
       'Workspace slug must contain only lowercase letters, digits, and hyphens; no leading or trailing hyphens'
@@ -103,16 +97,14 @@ export type CreateLicenseRequest = z.infer<typeof CreateLicenseRequestSchema>
  */
 export function validateCreateLicenseRequest(
   data: unknown
-):
-  | { valid: true; data: CreateLicenseRequest }
-  | { valid: false; errors: ValidationError[] } {
+): { valid: true; data: CreateLicenseRequest } | { valid: false; errors: ValidationError[] } {
   try {
     const parsed = CreateLicenseRequestSchema.parse(data)
     return { valid: true, data: parsed }
-    // @ts-ignore: TS18046 - error is of type unknown [INFRA-001]
+    // @ts-expect-error: TS18046 - error is of type unknown [INFRA-001]
   } catch (error) {
     if (error instanceof z.ZodError) {
-      // @ts-ignore: TS7006 - issue implicit any [INFRA-001]
+      // @ts-expect-error: TS7006 - issue implicit any [INFRA-001]
       const errors: ValidationError[] = error.issues.map((issue) => {
         const field = String(issue.path[0])
         let code = ProvisioningErrorCode.INVALID_WORKSPACE_SLUG
@@ -128,7 +120,7 @@ export function validateCreateLicenseRequest(
         return {
           field,
           code,
-          // @ts-ignore: TS18046 - error is of type unknown [INFRA-001]
+          // @ts-expect-error: TS18046 - error is of type unknown [INFRA-001]
           message: issue.message,
           value: issue.received,
         }
@@ -174,12 +166,7 @@ export function isValidEmail(email: string): boolean {
  * Validate limit (student/staff)
  */
 export function isValidLimit(limit: unknown): limit is number {
-  return (
-    typeof limit === 'number' &&
-    Number.isInteger(limit) &&
-    limit >= 1 &&
-    limit <= 999999
-  )
+  return typeof limit === 'number' && Number.isInteger(limit) && limit >= 1 && limit <= 999999
 }
 
 /**

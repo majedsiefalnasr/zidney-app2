@@ -72,9 +72,7 @@ export async function applyMigration(
   void payload
 
   // Implementation in: apps/worker/src/tasks/apply-migration.ts
-  throw new Error(
-    'Not implemented - see apps/worker/src/tasks/apply-migration.ts'
-  )
+  throw new Error('Not implemented - see apps/worker/src/tasks/apply-migration.ts')
 }
 
 export default {

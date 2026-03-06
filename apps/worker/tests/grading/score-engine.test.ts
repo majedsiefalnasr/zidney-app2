@@ -113,11 +113,7 @@ describe('Score Engine Determinism', () => {
     const results: number[] = []
 
     for (let i = 0; i < 100; i++) {
-      const result = scoreQuestion(
-        multipleChoiceQuestion,
-        responses,
-        gradingConfig
-      )
+      const result = scoreQuestion(multipleChoiceQuestion, responses, gradingConfig)
       results.push(result.points_earned)
     }
 
@@ -129,11 +125,7 @@ describe('Score Engine Determinism', () => {
   // T044.2: Multiple Choice - Wrong Answer
   test('MULTIPLE_CHOICE returns 0 for wrong answer', () => {
     const responses = { selected: 'A' } as UserAnswer
-    const result = scoreQuestion(
-      multipleChoiceQuestion,
-      responses,
-      gradingConfig
-    )
+    const result = scoreQuestion(multipleChoiceQuestion, responses, gradingConfig)
 
     expect(result.points_earned).toBe(0)
     expect((result as any).is_correct).toBe(false)
@@ -178,19 +170,10 @@ describe('Score Engine Determinism', () => {
 
   // T044.6: Fill Blank Case Insensitivity
   test('FILL_BLANK case-insensitive matching', () => {
-    const variants = [
-      { text: 'Paris' },
-      { text: 'paris' },
-      { text: 'PARIS' },
-      { text: 'pAriS' },
-    ]
+    const variants = [{ text: 'Paris' }, { text: 'paris' }, { text: 'PARIS' }, { text: 'pAriS' }]
 
     variants.forEach((response) => {
-      const result = scoreQuestion(
-        fillBlankQuestion,
-        response as UserAnswer,
-        gradingConfig
-      )
+      const result = scoreQuestion(fillBlankQuestion, response as UserAnswer, gradingConfig)
       expect(result.points_earned).toBe(10)
       expect((result as any).is_correct).toBe(true)
     })
@@ -271,11 +254,7 @@ describe('Score Engine Determinism', () => {
 
   // T044.13: Overall Score Computation
   test('computeScore aggregates question scores deterministically', () => {
-    const questions = [
-      multipleChoiceQuestion,
-      trueFalseQuestion,
-      fillBlankQuestion,
-    ]
+    const questions = [multipleChoiceQuestion, trueFalseQuestion, fillBlankQuestion]
 
     const answers = new Map([
       ['q1', { selected: 'B' } as UserAnswer],
@@ -299,11 +278,7 @@ describe('Score Engine Determinism', () => {
 
   // T044.14: Unknown Answer Type Handling
   test('scoreQuestion handles undefined response gracefully', () => {
-    const result = scoreQuestion(
-      multipleChoiceQuestion,
-      undefined,
-      gradingConfig
-    )
+    const result = scoreQuestion(multipleChoiceQuestion, undefined, gradingConfig)
 
     expect(result.points_earned).toBe(0)
     expect((result as any).is_correct).toBe(false)

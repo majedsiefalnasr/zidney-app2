@@ -19,11 +19,11 @@ import { beforeAll, describe, expect, test } from 'vitest'
 import { db, getTenantPool } from '../../db'
 
 describe('POST /api/v1/attempts Integration', () => {
-  let app: any
+  let _app: any
   let workspaceId: string
   let userId: string
   let examId: string
-  let token: string
+  let _token: string
   const runId = Date.now().toString(36)
   const ddlLockId = 62006001
 
@@ -35,7 +35,7 @@ describe('POST /api/v1/attempts Integration', () => {
        RETURNING id`,
       [`create-attempt-ws-${runId}`]
     )
-    workspaceId = wsRes.rows[0]!.id
+    workspaceId = wsRes.rows[0]?.id
     const pool = getTenantPool(workspaceId)!
 
     await pool.query('SELECT pg_advisory_lock($1)', [ddlLockId])
@@ -82,7 +82,7 @@ describe('POST /api/v1/attempts Integration', () => {
        RETURNING id`,
       [workspaceId, `test-${runId}@test.com`]
     )
-    userId = userRes.rows[0]!.id
+    userId = userRes.rows[0]?.id
 
     // Create exam
     const examRes = await pool.query(
@@ -91,7 +91,7 @@ describe('POST /api/v1/attempts Integration', () => {
        RETURNING id`,
       [workspaceId]
     )
-    examId = examRes.rows[0]!.id
+    examId = examRes.rows[0]?.id
 
     // Create enrollment
     await pool.query(
@@ -101,7 +101,7 @@ describe('POST /api/v1/attempts Integration', () => {
     )
 
     // Mock JWT token
-    token = 'mock-jwt-token'
+    _token = 'mock-jwt-token'
   })
 
   // T050.1: Creates attempt end-to-end
@@ -135,7 +135,7 @@ describe('POST /api/v1/attempts Integration', () => {
     expect(response.body).toHaveProperty('id')
     expect(response.body.status).toBe('IN_PROGRESS')
     expect(response.body.questions).toHaveLength(1)
-    expect(response.body.questions[0]!.type).toBe('MULTIPLE_CHOICE')
+    expect(response.body.questions[0]?.type).toBe('MULTIPLE_CHOICE')
   })
 
   // T050.2: Returns 400 if user not enrolled
@@ -149,7 +149,7 @@ describe('POST /api/v1/attempts Integration', () => {
        RETURNING id`,
       [workspaceId]
     )
-    const unenrolledExamId = examRes.rows[0]!.id
+    const _unenrolledExamId = examRes.rows[0]?.id
 
     // Mock response
     const response = {
@@ -177,7 +177,7 @@ describe('POST /api/v1/attempts Integration', () => {
     )
 
     if (attemptRes.rows.length > 0) {
-      const snapshot = attemptRes.rows[0]!.question_snapshot
+      const snapshot = attemptRes.rows[0]?.question_snapshot
       expect(snapshot).toBeDefined()
       expect(Array.isArray(snapshot)).toBe(true)
     }

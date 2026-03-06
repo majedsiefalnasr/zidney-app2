@@ -45,7 +45,7 @@ export class RetryHandler {
 
     // Exponential backoff: delay = baseDelay * multiplier^retryCount
     const delay = Math.min(
-      this.config.baseDelayMs * Math.pow(this.config.multiplier, retryCount),
+      this.config.baseDelayMs * this.config.multiplier ** retryCount,
       this.config.maxDelayMs
     )
 
@@ -74,7 +74,7 @@ export class RetryHandler {
     attemptsRemaining: number
   } {
     const delayMs = Math.min(
-      this.config.baseDelayMs * Math.pow(this.config.multiplier, retryCount),
+      this.config.baseDelayMs * this.config.multiplier ** retryCount,
       this.config.maxDelayMs
     )
 
@@ -88,12 +88,7 @@ export class RetryHandler {
   /**
    * Log retry attempt
    */
-  logRetryAttempt(
-    jobId: string,
-    retryCount: number,
-    error: Error,
-    delayMs: number
-  ): void {
+  logRetryAttempt(jobId: string, retryCount: number, error: Error, delayMs: number): void {
     const info = this.getRetryInfo(retryCount)
 
     if (info.shouldRetry) {
@@ -122,7 +117,7 @@ export class RetryHandler {
 
     for (let i = startRetryCount; i < this.config.maxRetries; i++) {
       const delay = Math.min(
-        this.config.baseDelayMs * Math.pow(this.config.multiplier, i),
+        this.config.baseDelayMs * this.config.multiplier ** i,
         this.config.maxDelayMs
       )
       delays.push(delay)

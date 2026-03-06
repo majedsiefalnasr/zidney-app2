@@ -94,34 +94,23 @@ describe('Workspace Isolation', () => {
     const pool1 = getTenantPool(workspace1.id)!
     const pool2 = getTenantPool(workspace2.id)!
 
-    await pool1.query(`DELETE FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`, [
-      user1.id,
-    ])
-    await pool2.query(`DELETE FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`, [
-      user2.id,
-    ])
+    await pool1.query(`DELETE FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`, [user1.id])
+    await pool2.query(`DELETE FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`, [user2.id])
 
-    await db.master.query(
-      `DELETE FROM ${WS_ISO_WORKSPACES_TABLE} WHERE id = $1`,
-      [workspace1.id]
-    )
-    await db.master.query(
-      `DELETE FROM ${WS_ISO_WORKSPACES_TABLE} WHERE id = $1`,
-      [workspace2.id]
-    )
+    await db.master.query(`DELETE FROM ${WS_ISO_WORKSPACES_TABLE} WHERE id = $1`, [workspace1.id])
+    await db.master.query(`DELETE FROM ${WS_ISO_WORKSPACES_TABLE} WHERE id = $1`, [workspace2.id])
   })
 
   it('should reject token from different workspace', async () => {
     // User 1 token should not work in workspace 2
     const pool1 = getTenantPool(workspace1.id)!
 
-    const result = await pool1.query(
-      `SELECT * FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`,
-      [user1.id]
-    )
+    const result = await pool1.query(`SELECT * FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`, [
+      user1.id,
+    ])
 
     expect(result.rows).toHaveLength(1)
-    expect(result.rows[0]!.email).toBe('user1@test.com')
+    expect(result.rows[0]?.email).toBe('user1@test.com')
   })
 
   it('should isolate user lookups by workspace', async () => {
@@ -134,7 +123,7 @@ describe('Workspace Isolation', () => {
       [workspace1.id]
     )
     expect(r1.rows).toHaveLength(1)
-    expect(r1.rows[0]!.id).toBe(user1.id)
+    expect(r1.rows[0]?.id).toBe(user1.id)
 
     // Query same email from workspace 2 (should not find user1)
     const r2 = await pool2.query(
@@ -149,17 +138,15 @@ describe('Workspace Isolation', () => {
     const pool2 = getTenantPool(workspace2.id)!
 
     // Get token versions
-    const r1 = await pool1.query(
-      `SELECT token_version FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`,
-      [user1.id]
-    )
-    const r2 = await pool2.query(
-      `SELECT token_version FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`,
-      [user2.id]
-    )
+    const r1 = await pool1.query(`SELECT token_version FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`, [
+      user1.id,
+    ])
+    const r2 = await pool2.query(`SELECT token_version FROM ${WS_ISO_USERS_TABLE} WHERE id = $1`, [
+      user2.id,
+    ])
 
-    expect(r1.rows[0]!.token_version).toBe(1)
-    expect(r2.rows[0]!.token_version).toBe(1)
+    expect(r1.rows[0]?.token_version).toBe(1)
+    expect(r2.rows[0]?.token_version).toBe(1)
 
     // Increment token in workspace 1
     await pool1.query(
@@ -177,8 +164,8 @@ describe('Workspace Isolation', () => {
       [user2.id]
     )
 
-    expect(check1.rows[0]!.token_version).toBe(2)
-    expect(check2.rows[0]!.token_version).toBe(1)
+    expect(check1.rows[0]?.token_version).toBe(2)
+    expect(check2.rows[0]?.token_version).toBe(1)
   })
 
   it('should reject cross-workspace token claims', () => {

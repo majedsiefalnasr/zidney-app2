@@ -1,4 +1,4 @@
-import { Context, Next } from 'hono'
+import type { Context, Next } from 'hono'
 
 /**
  * Redaction patterns for sensitive data detection.
@@ -7,8 +7,7 @@ import { Context, Next } from 'hono'
 const REDACTION_PATTERNS = {
   jwt: /Bearer\s+[A-Za-z0-9\-._~+/]+=*/gi,
   password: /"password"\s*:\s*"[^"]*"/gi,
-  token:
-    /"(authorization|token|api_key|secret|access_token|refresh_token)"\s*:\s*"[^"]*"/gi,
+  token: /"(authorization|token|api_key|secret|access_token|refresh_token)"\s*:\s*"[^"]*"/gi,
   email: /([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/g,
   ssn: /\d{3}-\d{2}-\d{4}/g,
   credit_card: /\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}/g,
@@ -34,15 +33,12 @@ export function redactSensitiveData(str: string): string {
   redacted = redacted.replace(REDACTION_PATTERNS.jwt, '[REDACTED_JWT]')
 
   // Apply password redaction
-  redacted = redacted.replace(
-    REDACTION_PATTERNS.password,
-    '"password":"[REDACTED]"'
-  )
+  redacted = redacted.replace(REDACTION_PATTERNS.password, '"password":"[REDACTED]"')
 
   // Apply token redaction
   redacted = redacted.replace(
     REDACTION_PATTERNS.token,
-    (match) => match.split('"')[1] + '":"[REDACTED]"'
+    (match) => `${match.split('"')[1]}":"[REDACTED]"`
   )
 
   // Apply email redaction (with partial masking for context)
@@ -56,16 +52,10 @@ export function redactSensitiveData(str: string): string {
   redacted = redacted.replace(REDACTION_PATTERNS.ssn, '***-**-****')
 
   // Apply credit card redaction
-  redacted = redacted.replace(
-    REDACTION_PATTERNS.credit_card,
-    '****-****-****-****'
-  )
+  redacted = redacted.replace(REDACTION_PATTERNS.credit_card, '****-****-****-****')
 
   // Apply phone redaction
-  redacted = redacted.replace(
-    REDACTION_PATTERNS.phone,
-    (match) => '***-***-' + match.slice(-4)
-  )
+  redacted = redacted.replace(REDACTION_PATTERNS.phone, (match) => `***-***-${match.slice(-4)}`)
 
   return redacted
 }

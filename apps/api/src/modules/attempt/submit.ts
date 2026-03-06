@@ -1,3 +1,4 @@
+import { logger } from '@zidney/logger'
 import type { Context } from 'hono'
 import { ErrorCode } from '../../types/error-codes'
 import { ApiError, formatError, formatSuccess } from '../errors/error-formatter'
@@ -14,20 +15,19 @@ import { ApiError, formatError, formatSuccess } from '../errors/error-formatter'
  */
 
 export async function submitAttempt(c: Context) {
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const correlationId = c.state.correlationId
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const attemptId = c.req.param('id')
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const workspace = c.state.workspace
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const userId = c.state.user?.id
 
   if (!attemptId || !workspace || !userId) {
-    return c.json(
-      formatError(ErrorCode.BAD_REQUEST, 'Missing required parameters'),
-      { status: 400 }
-    )
+    return c.json(formatError(ErrorCode.BAD_REQUEST, 'Missing required parameters'), {
+      status: 400,
+    })
   }
 
   try {
@@ -56,9 +56,7 @@ export async function submitAttempt(c: Context) {
     //    f. Store result in DB and Redis cache
     //    g. Return grading result
 
-    console.log(
-      `[${correlationId}] Attempt submission: ${attemptId} by user ${userId}`
-    )
+    logger.info(`[${correlationId}] Attempt submission: ${attemptId} by user ${userId}`)
 
     // Placeholder response
     return c.json(
@@ -76,7 +74,7 @@ export async function submitAttempt(c: Context) {
       })
     }
 
-    console.error(`[${correlationId}] Submission error:`, error)
+    logger.error(`[${correlationId}] Submission error:`, { error })
     return c.json(formatError(ErrorCode.INTERNAL_ERROR, 'Submission failed'), {
       status: 500,
     })
@@ -88,9 +86,9 @@ export async function submitAttempt(c: Context) {
  */
 
 export async function getAttemptStatus(c: Context) {
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const attemptId = c.req.param('id')
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const _correlationId = c.state.correlationId
 
   // TODO: Query attempt status from DB
@@ -104,9 +102,9 @@ export async function getAttemptStatus(c: Context) {
 }
 
 export async function getAttemptResult(c: Context) {
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const attemptId = c.req.param('id')
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const _correlationId = c.state.correlationId
 
   // TODO: Query grading result from DB or Redis cache

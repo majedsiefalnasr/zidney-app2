@@ -9,7 +9,7 @@ import {
   createTestClient,
   createTestContext,
   generateJWT,
-  TestContext,
+  type TestContext,
 } from '../test-helpers'
 
 describe('T093: JWT Workspace Isolation', () => {
@@ -55,8 +55,7 @@ describe('T093: JWT Workspace Isolation', () => {
   })
 
   it('should validate attempt ownership per workspace', async () => {
-    const attemptInOtherWs =
-      'attempt-' + Math.random().toString(36).substring(7)
+    const attemptInOtherWs = 'attempt-' + Math.random().toString(36).substring(7)
     // This attempt doesn't exist in current workspace
     const jwt = generateJWT(ctx.workspaceId, ctx.userId)
     client.setJWT(jwt)
@@ -66,8 +65,7 @@ describe('T093: JWT Workspace Isolation', () => {
   })
 
   it('should validate user_id from JWT claims', async () => {
-    const differentUser =
-      'user-other-' + Math.random().toString(36).substring(7)
+    const differentUser = 'user-other-' + Math.random().toString(36).substring(7)
     const jwt = generateJWT(ctx.workspaceId, differentUser)
     client.setJWT(jwt)
 

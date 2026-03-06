@@ -18,8 +18,8 @@
  * ✓ No tenant database queries (master_db only)
  */
 
-import { Logger } from '@zidney/logger'
-import { Pool, PoolClient } from 'pg'
+import type { Logger } from '@zidney/logger'
+import type { Pool, PoolClient } from 'pg'
 
 export interface SchemaValidationResult {
   isCompatible: boolean
@@ -53,11 +53,7 @@ export class SchemaValidator {
 
   // Required indexes by table for performance guarantee (<300ms)
   private readonly REQUIRED_INDEXES: Record<string, string[]> = {
-    licenses: [
-      'idx_licenses_status',
-      'idx_licenses_deleted_at',
-      'idx_licenses_workspace_slug',
-    ],
+    licenses: ['idx_licenses_status', 'idx_licenses_deleted_at', 'idx_licenses_workspace_slug'],
     products: ['idx_products_id', 'idx_products_slug'],
     revenue_records: [
       'idx_revenue_records_created_at',
@@ -124,9 +120,7 @@ export class SchemaValidator {
           // Table exists; check indexes
           const requiredIndexes = this.REQUIRED_INDEXES[tableName] || []
           const existingIndexes = await this.getTableIndexes(client, tableName)
-          const missingIndexes = requiredIndexes.filter(
-            (idx) => !existingIndexes.includes(idx)
-          )
+          const missingIndexes = requiredIndexes.filter((idx) => !existingIndexes.includes(idx))
 
           result.tables.push({
             name: tableName,
@@ -162,8 +156,7 @@ export class SchemaValidator {
 
       return result
     } catch (error) {
-      const errorMsg =
-        error instanceof Error ? error.message : 'Unknown validation error'
+      const errorMsg = error instanceof Error ? error.message : 'Unknown validation error'
 
       this.logger.error('Schema validation failed', {
         correlation_id: correlationId,
@@ -220,11 +213,10 @@ export class SchemaValidator {
       }
 
       const version = result.rows[0].version
-      const isCompatible =
-        this.compareVersions(version, this.MIN_SCHEMA_VERSION) >= 0
+      const isCompatible = this.compareVersions(version, this.MIN_SCHEMA_VERSION) >= 0
 
       return { version, isCompatible }
-    } catch (error) {
+    } catch (_error) {
       // If schema_versions doesn't exist, return 1.0.0 (pre-bootstrap state)
       return { version: '1.0.0', isCompatible: false }
     }
@@ -233,10 +225,7 @@ export class SchemaValidator {
   /**
    * Check if table exists in master_db
    */
-  private async tableExists(
-    client: PoolClient,
-    tableName: string
-  ): Promise<boolean> {
+  private async tableExists(client: PoolClient, tableName: string): Promise<boolean> {
     const result = await client.query(
       `SELECT EXISTS(
         SELECT FROM information_schema.tables 
@@ -251,14 +240,10 @@ export class SchemaValidator {
   /**
    * Get all indexes for a table
    */
-  private async getTableIndexes(
-    client: PoolClient,
-    tableName: string
-  ): Promise<string[]> {
-    const result = await client.query(
-      `SELECT indexname FROM pg_indexes WHERE tablename = $1`,
-      [tableName]
-    )
+  private async getTableIndexes(client: PoolClient, tableName: string): Promise<string[]> {
+    const result = await client.query(`SELECT indexname FROM pg_indexes WHERE tablename = $1`, [
+      tableName,
+    ])
 
     return result.rows.map((row) => row.indexname)
   }
@@ -291,9 +276,7 @@ export class SchemaValidator {
    *
    * Useful for manual remediation
    */
-  async generateRemediationSQL(
-    validationResult: SchemaValidationResult
-  ): Promise<string> {
+  async generateRemediationSQL(validationResult: SchemaValidationResult): Promise<string> {
     let sql = '-- Schema Remediation SQL\n\n'
 
     // Add instructions for missing tables

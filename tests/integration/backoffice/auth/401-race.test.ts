@@ -19,16 +19,16 @@ vi.mock('@zidney/logger', () => ({
 
 describe('401 storm guard (backoffice) — FR-SEC-08', () => {
   let onSessionExpiredCount: number
-  let onSessionExpired: ReturnType<typeof vi.fn>
-  let getIsAuthenticated: ReturnType<typeof vi.fn>
+  let onSessionExpired: (() => Promise<void>) & ReturnType<typeof vi.fn>
+  let getIsAuthenticated: (() => boolean) & ReturnType<typeof vi.fn>
 
   beforeEach(() => {
     onSessionExpiredCount = 0
     onSessionExpired = vi.fn(async () => {
       onSessionExpiredCount++
       await new Promise<void>((resolve) => setTimeout(resolve, 10))
-    })
-    getIsAuthenticated = vi.fn(() => true)
+    }) as any
+    getIsAuthenticated = vi.fn(() => true) as any
   })
 
   it('fires onSessionExpired exactly once when 3 concurrent 401 responses arrive', async () => {
@@ -56,9 +56,7 @@ describe('401 storm guard (backoffice) — FR-SEC-08', () => {
       onLicenseError: vi.fn(),
     })
 
-    const calls = Array.from({ length: 5 }, () =>
-      interceptor.handleAuthFailure()
-    )
+    const calls = Array.from({ length: 5 }, () => interceptor.handleAuthFailure())
     await Promise.all(calls)
 
     expect(onSessionExpiredCount).toBe(1)

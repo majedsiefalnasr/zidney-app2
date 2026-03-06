@@ -129,7 +129,6 @@
 </template>
 
 <script setup lang="ts">
-import { Button, Card, CardContent, Checkbox, Label } from '@/components/ui'
 import {
   AlertCircle,
   Award,
@@ -143,6 +142,7 @@ import {
   TrendingUp,
 } from 'lucide-vue-next'
 import { ref } from 'vue'
+import { Button, Card, CardContent, Checkbox, Label } from '@/components/ui'
 
 interface ExportOption {
   id: string
@@ -285,10 +285,7 @@ const handleExport = async () => {
   } catch (error) {
     statusMessage.value = {
       type: 'error',
-      text:
-        error instanceof Error
-          ? error.message
-          : 'Export failed. Please try again.',
+      text: error instanceof Error ? error.message : 'Export failed. Please try again.',
     }
   } finally {
     isExporting.value = false

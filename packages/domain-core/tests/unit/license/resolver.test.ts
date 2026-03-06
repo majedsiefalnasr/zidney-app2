@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { LicenseResolver } from '../../src/license/resolver'
+import { LicenseResolver } from '../../../src/license/resolver'
 import { MockDatabaseClient, MockRedisClient, testFixtures } from './fixtures'
 
 /**

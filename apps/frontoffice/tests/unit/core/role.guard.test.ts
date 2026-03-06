@@ -6,10 +6,7 @@ import { roleGuard } from '../../../src/core/guards/role.guard'
 
 afterEach(() => vi.resetAllMocks())
 
-function makeRoute(
-  requiredRole?: string,
-  extraMeta: Record<string, unknown> = {}
-) {
+function makeRoute(requiredRole?: string, extraMeta: Record<string, unknown> = {}) {
   return {
     meta: { ...(requiredRole ? { requiredRole } : {}), ...extraMeta },
     name: 'test',

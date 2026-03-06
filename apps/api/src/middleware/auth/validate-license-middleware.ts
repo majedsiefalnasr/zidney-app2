@@ -32,7 +32,8 @@
  */
 
 import { logLicenseBlocked } from '@zidney/domain-core/auth'
-import { Context, Next } from 'hono'
+import { logger } from '@zidney/logger'
+import type { Context, Next } from 'hono'
 
 /**
  * Validate workspace license state
@@ -86,13 +87,7 @@ export function validateLicenseMiddleware() {
       if (licenseResult.rows.length === 0) {
         // No license found
         const userId = c.get('userId')
-        await logLicenseBlocked(
-          correlationId,
-          workspaceSlug,
-          'NO_LICENSE',
-          403,
-          userId
-        )
+        await logLicenseBlocked(correlationId, workspaceSlug, 'NO_LICENSE', 403, userId)
 
         c.status(403 as any)
         return c.json({
@@ -118,13 +113,7 @@ export function validateLicenseMiddleware() {
       if (licenseStatus === 'SOFT_LOCKED') {
         // Grace period - workspace can still operate
         const userId = c.get('userId')
-        await logLicenseBlocked(
-          correlationId,
-          workspaceSlug,
-          licenseStatus,
-          423,
-          userId
-        )
+        await logLicenseBlocked(correlationId, workspaceSlug, licenseStatus, 423, userId)
 
         c.status(423 as any)
         return c.json({
@@ -141,13 +130,7 @@ export function validateLicenseMiddleware() {
       if (licenseStatus === 'ARCHIVED' || licenseStatus === 'DELETED') {
         // Workspace no longer available
         const userId = c.get('userId')
-        await logLicenseBlocked(
-          correlationId,
-          workspaceSlug,
-          licenseStatus,
-          403,
-          userId
-        )
+        await logLicenseBlocked(correlationId, workspaceSlug, licenseStatus, 403, userId)
 
         c.status(403 as any)
         return c.json({
@@ -155,21 +138,14 @@ export function validateLicenseMiddleware() {
           data: null,
           error: {
             code: 'WORKSPACE_UNAVAILABLE',
-            message:
-              'Workspace has been archived or deleted and is no longer available.',
+            message: 'Workspace has been archived or deleted and is no longer available.',
           },
         })
       }
 
       // Unknown status - treat as blocked
       const userId = c.get('userId')
-      await logLicenseBlocked(
-        correlationId,
-        workspaceSlug,
-        licenseStatus,
-        403,
-        userId
-      )
+      await logLicenseBlocked(correlationId, workspaceSlug, licenseStatus, 403, userId)
 
       c.status(403 as any)
       return c.json({
@@ -181,7 +157,7 @@ export function validateLicenseMiddleware() {
         },
       })
     } catch (error) {
-      console.error('License validation error:', error)
+      logger.error('License validation error:', { error })
       c.status(500 as any)
       return c.json({
         success: false,

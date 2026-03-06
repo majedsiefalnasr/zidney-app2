@@ -13,11 +13,7 @@ export interface UsePaginationOptions {
 }
 
 export function usePagination(options: UsePaginationOptions) {
-  const {
-    totalCount,
-    pageSize: initialPageSize = 25,
-    initialPage = 1,
-  } = options
+  const { totalCount, pageSize: initialPageSize = 25, initialPage = 1 } = options
 
   // State
   const currentPage = ref(initialPage)
@@ -77,10 +73,7 @@ export function usePagination(options: UsePaginationOptions) {
   }
 
   // Method: Validate page (useful for URL restoration)
-  const validatePageFromUrl = (
-    page: number | undefined,
-    size: number | undefined
-  ): void => {
+  const validatePageFromUrl = (page: number | undefined, size: number | undefined): void => {
     if (size && size > 0) {
       pageSize.value = size
     }

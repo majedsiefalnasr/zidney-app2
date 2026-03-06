@@ -9,12 +9,8 @@
  */
 
 import { ALLOWED_STATE_TRANSITIONS } from './constants'
-import {
-  InvalidStateTransitionError,
-  LicenseNotFoundError,
-  LicenseValidationError,
-} from './errors'
-import { License, LicenseStatus } from './types'
+import { InvalidStateTransitionError, LicenseNotFoundError, LicenseValidationError } from './errors'
+import { type License, LicenseStatus } from './types'
 
 interface QueryResult<T = Record<string, unknown>> {
   rows: T[]
@@ -81,10 +77,7 @@ export class LicenseRepository {
 
       return this.mapToLicense(result.rows[0])
     } catch (error: any) {
-      if (
-        error?.code === '23505' ||
-        error?.message?.includes('duplicate key')
-      ) {
+      if (error?.code === '23505' || error?.message?.includes('duplicate key')) {
         throw LicenseValidationError.slugNotUnique()
       }
       throw error
@@ -108,11 +101,7 @@ export class LicenseRepository {
   /**
    * T018: List methods - List by status with pagination
    */
-  async listByStatus(
-    status: LicenseStatus,
-    limit: number,
-    offset: number
-  ): Promise<License[]> {
+  async listByStatus(status: LicenseStatus, limit: number, offset: number): Promise<License[]> {
     const result = await this.masterDb.query(
       `
       SELECT * FROM licenses
@@ -129,11 +118,7 @@ export class LicenseRepository {
   /**
    * T018: List by product
    */
-  async listByProduct(
-    product_id: string,
-    limit: number,
-    offset: number
-  ): Promise<License[]> {
+  async listByProduct(product_id: string, limit: number, offset: number): Promise<License[]> {
     const result = await this.masterDb.query(
       `
       SELECT * FROM licenses
@@ -496,9 +481,7 @@ export class LicenseRepository {
       default_language: row.default_language,
       uses_divisions: Boolean(row.uses_divisions),
       status: row.status as LicenseStatus,
-      soft_lock_until: row.soft_lock_until
-        ? new Date(row.soft_lock_until)
-        : null,
+      soft_lock_until: row.soft_lock_until ? new Date(row.soft_lock_until) : null,
       archived_at: row.archived_at ? new Date(row.archived_at) : null,
       deleted_at: row.deleted_at ? new Date(row.deleted_at) : null,
       schema_version: row.schema_version,

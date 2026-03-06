@@ -87,24 +87,8 @@ export interface ClientConfig {
  */
 export interface ApiClient {
   get<T>(url: string, config?: RequestConfig): Promise<ClientResponse<T>>
-  post<T>(
-    url: string,
-    data: unknown,
-    config?: RequestConfig
-  ): Promise<ClientResponse<T>>
-  put<T>(
-    url: string,
-    data: unknown,
-    config?: RequestConfig
-  ): Promise<ClientResponse<T>>
-  patch<T>(
-    url: string,
-    data: unknown,
-    config?: RequestConfig
-  ): Promise<ClientResponse<T>>
-  delete<T>(
-    url: string,
-    data?: unknown,
-    config?: RequestConfig
-  ): Promise<ClientResponse<T>>
+  post<T>(url: string, data: unknown, config?: RequestConfig): Promise<ClientResponse<T>>
+  put<T>(url: string, data: unknown, config?: RequestConfig): Promise<ClientResponse<T>>
+  patch<T>(url: string, data: unknown, config?: RequestConfig): Promise<ClientResponse<T>>
+  delete<T>(url: string, data?: unknown, config?: RequestConfig): Promise<ClientResponse<T>>
 }

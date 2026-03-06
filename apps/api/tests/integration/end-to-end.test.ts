@@ -33,7 +33,7 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
        RETURNING id`,
       [`e2e-ws-${runId}`]
     )
-    workspaceId = wsRes.rows[0]!.id
+    workspaceId = wsRes.rows[0]?.id
     pool = getTenantPool(workspaceId)
 
     await pool.query('SELECT pg_advisory_lock($1)', [ddlLockId])
@@ -72,7 +72,7 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
        RETURNING id`,
       [workspaceId, `e2e-${runId}@test.com`]
     )
-    userId = userRes.rows[0]!.id
+    userId = userRes.rows[0]?.id
 
     // Create exam
     const examRes = await pool.query(
@@ -81,7 +81,7 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
        RETURNING id`,
       [workspaceId]
     )
-    examId = examRes.rows[0]!.id
+    examId = examRes.rows[0]?.id
 
     // Enroll user
     await pool.query(
@@ -235,8 +235,8 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
     }
 
     // All should be independent
-    expect(attempts[0]!.id).not.toBe(attempts[1]!.id)
-    expect(attempts[1]!.id).not.toBe(attempts[2]!.id)
+    expect(attempts[0]?.id).not.toBe(attempts[1]?.id)
+    expect(attempts[1]?.id).not.toBe(attempts[2]?.id)
   })
 
   // T055.3: Concurrent Attempts By Multiple Users
@@ -249,19 +249,14 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
         `INSERT INTO users (workspace_id, name, email, password_hash)
          VALUES ($1, $2, $3, $4)
          RETURNING id`,
-        [
-          workspaceId,
-          `Concurrent User ${i}`,
-          `concurrent-${runId}-${i}@test.com`,
-          'hash',
-        ]
+        [workspaceId, `Concurrent User ${i}`, `concurrent-${runId}-${i}@test.com`, 'hash']
       )
 
       // Enroll in exam
       await pool.query(
         `INSERT INTO enrollments (workspace_id, user_id, exam_id)
          VALUES ($1, $2, $3)`,
-        [workspaceId, userRes.rows[0]!.id, examId]
+        [workspaceId, userRes.rows[0]?.id, examId]
       )
 
       users.push(userRes.rows[0]!)
@@ -297,7 +292,7 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
   // T055.5: Grading Result Matches Snapshot
   test('Graded result immutably matches snapshot', async () => {
     // Create attempt
-    const attemptId = 'attempt-snapshot-test'
+    const _attemptId = 'attempt-snapshot-test'
 
     // After grading, verify result matches what was snapshotted
     const result = {
@@ -388,19 +383,17 @@ describe('End-to-End: Create → Progress → Submit → Grade → Result', () =
   // T055.10: Clean State Between Tests
   test('Each workflow is independent with no state leakage', async () => {
     // Verify workspace isolation
-    const count1 = await pool.query(
-      'SELECT COUNT(*) FROM attempts WHERE workspace_id = $1',
-      [workspaceId]
-    )
+    const count1 = await pool.query('SELECT COUNT(*) FROM attempts WHERE workspace_id = $1', [
+      workspaceId,
+    ])
 
     // Create and clean another test
-    const count2 = await pool.query(
-      'SELECT COUNT(*) FROM attempts WHERE workspace_id = $1',
-      [workspaceId]
-    )
+    const count2 = await pool.query('SELECT COUNT(*) FROM attempts WHERE workspace_id = $1', [
+      workspaceId,
+    ])
 
     // Counts can differ but no cross-workspace pollution
-    expect(parseInt(count1.rows[0]!.count)).toBeGreaterThanOrEqual(0)
-    expect(parseInt(count2.rows[0]!.count)).toBeGreaterThanOrEqual(0)
+    expect(parseInt(count1.rows[0]?.count, 10)).toBeGreaterThanOrEqual(0)
+    expect(parseInt(count2.rows[0]?.count, 10)).toBeGreaterThanOrEqual(0)
   })
 })

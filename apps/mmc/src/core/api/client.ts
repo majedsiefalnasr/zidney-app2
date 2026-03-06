@@ -1,18 +1,10 @@
+import type { AdapterRequest, AdapterResponse, ApiClient, HttpAdapter } from '@zidney/api-client'
+import { createApiClient as createClient, createFetchAdapter } from '@zidney/api-client'
+import { createLogger } from '@zidney/logger'
 import type { IErrorInterceptor } from '@/core/api/interceptors/error.interceptor'
 import type { IRefreshManager } from '@/core/auth/refresh-manager'
 import type { ITokenManager } from '@/core/auth/token-manager'
 import { appConfig } from '@/core/config/app-config'
-import type {
-  AdapterRequest,
-  AdapterResponse,
-  ApiClient,
-  HttpAdapter,
-} from '@zidney/api-client'
-import {
-  createApiClient as createClient,
-  createFetchAdapter,
-} from '@zidney/api-client'
-import { createLogger } from '@zidney/logger'
 
 const logger = createLogger('auth:api-client')
 

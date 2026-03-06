@@ -12,10 +12,11 @@
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  * Task: T046
  */
-import AppLayout from '@/components/layout/AppLayout.vue'
+
 import { createTestingPinia } from '@pinia/testing'
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import AppLayout from '@/components/layout/AppLayout.vue'
 
 vi.mock('vue-router', () => ({
   useRoute: vi.fn(() => ({ name: 'mmc-dashboard' })),
@@ -29,9 +30,7 @@ const childStubs = {
   RouterView: { template: '<div class="stub-router-view" />' },
 }
 
-function createWrapper(
-  opts: { isMobile?: boolean; sidebarCollapsed?: boolean } = {}
-) {
+function createWrapper(opts: { isMobile?: boolean; sidebarCollapsed?: boolean } = {}) {
   const pinia = createTestingPinia({
     createSpy: vi.fn,
     initialState: {
@@ -65,15 +64,15 @@ describe('AppLayout — MMC', () => {
   })
 
   it('adds .app-layout--mobile class when isMobile=true', () => {
-    expect(
-      createWrapper({ isMobile: true }).find('.app-layout').classes()
-    ).toContain('app-layout--mobile')
+    expect(createWrapper({ isMobile: true }).find('.app-layout').classes()).toContain(
+      'app-layout--mobile'
+    )
   })
 
   it('adds .app-layout--collapsed class when sidebarCollapsed=true', () => {
-    expect(
-      createWrapper({ sidebarCollapsed: true }).find('.app-layout').classes()
-    ).toContain('app-layout--collapsed')
+    expect(createWrapper({ sidebarCollapsed: true }).find('.app-layout').classes()).toContain(
+      'app-layout--collapsed'
+    )
   })
 
   it('mobile backdrop renders when isMobile=true and sidebarCollapsed=false', () => {
@@ -93,9 +92,7 @@ describe('AppLayout — MMC', () => {
   })
 
   it('mobile backdrop absent when isMobile=false', () => {
-    expect(
-      createWrapper({ isMobile: false }).find('.app-layout__backdrop').exists()
-    ).toBe(false)
+    expect(createWrapper({ isMobile: false }).find('.app-layout__backdrop').exists()).toBe(false)
   })
 
   it('clicking backdrop calls useMmcUiStore().toggleSidebar()', async () => {

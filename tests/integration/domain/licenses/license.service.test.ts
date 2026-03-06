@@ -16,8 +16,8 @@ import {
 } from '@zidney/domain-core/licenses/errors'
 import { LicenseService } from '@zidney/domain-core/licenses/service'
 import {
-  CreateLicenseRequest,
-  License,
+  type CreateLicenseRequest,
+  type License,
   LicenseStatus,
 } from '@zidney/domain-core/licenses/types'
 import type { Logger } from '@zidney/logger'
@@ -132,10 +132,7 @@ class InMemoryLicenseRepository {
     return { ...updated }
   }
 
-  setLicenseFields(
-    id: string,
-    fields: Partial<Omit<License, 'id' | 'created_at' | 'updated_at'>>
-  ) {
+  setLicenseFields(id: string, fields: Partial<Omit<License, 'id' | 'created_at' | 'updated_at'>>) {
     const existing = this.licenses.get(id)
     if (!existing) throw new Error(`License ${id} not found in test repo`)
 
@@ -167,11 +164,7 @@ describe('LicenseService', () => {
       debug: vi.fn(),
     } as any
 
-    service = new LicenseService(
-      repository as any,
-      mockQueueService,
-      mockLogger
-    )
+    service = new LicenseService(repository as any, mockQueueService, mockLogger)
   })
 
   afterEach(() => {
@@ -204,9 +197,7 @@ describe('LicenseService', () => {
         workspace_name: 'Test',
       }
 
-      await expect(service.create(input, 'correlation-123')).rejects.toThrow(
-        LicenseValidationError
-      )
+      await expect(service.create(input, 'correlation-123')).rejects.toThrow(LicenseValidationError)
     })
 
     it('should reject slug that is too short', async () => {
@@ -216,9 +207,7 @@ describe('LicenseService', () => {
         workspace_name: 'Test',
       }
 
-      await expect(service.create(input, 'correlation-123')).rejects.toThrow(
-        LicenseValidationError
-      )
+      await expect(service.create(input, 'correlation-123')).rejects.toThrow(LicenseValidationError)
     })
 
     it('should enforce slug uniqueness', async () => {
@@ -230,9 +219,7 @@ describe('LicenseService', () => {
 
       await service.create(input, 'correlation-123')
 
-      await expect(service.create(input, 'correlation-456')).rejects.toThrow(
-        LicenseValidationError
-      )
+      await expect(service.create(input, 'correlation-456')).rejects.toThrow(LicenseValidationError)
     })
 
     it('should reject negative student limit', async () => {
@@ -243,9 +230,7 @@ describe('LicenseService', () => {
         student_limit: -10,
       }
 
-      await expect(service.create(input, 'correlation-123')).rejects.toThrow(
-        LicenseValidationError
-      )
+      await expect(service.create(input, 'correlation-123')).rejects.toThrow(LicenseValidationError)
     })
 
     it('should accept null limits as unlimited', async () => {
@@ -270,9 +255,7 @@ describe('LicenseService', () => {
         default_language: 'zz',
       }
 
-      await expect(service.create(input, 'correlation-123')).rejects.toThrow(
-        LicenseValidationError
-      )
+      await expect(service.create(input, 'correlation-123')).rejects.toThrow(LicenseValidationError)
     })
   })
 
@@ -350,18 +333,10 @@ describe('LicenseService', () => {
     })
 
     it('should reject soft-lock from non-ACTIVE status', async () => {
-      await service.softLock(
-        licenseId,
-        { grace_period_days: 90 },
-        'correlation-456'
-      )
+      await service.softLock(licenseId, { grace_period_days: 90 }, 'correlation-456')
 
       await expect(
-        service.softLock(
-          licenseId,
-          { grace_period_days: 90 },
-          'correlation-789'
-        )
+        service.softLock(licenseId, { grace_period_days: 90 }, 'correlation-789')
       ).rejects.toThrow(InvalidStateTransitionError)
     })
   })
@@ -388,11 +363,7 @@ describe('LicenseService', () => {
     })
 
     it('should retry provisioning from PROVISION_FAILED', async () => {
-      const updated = await service.retryProvisioning(
-        licenseId,
-        {},
-        'correlation-456'
-      )
+      const updated = await service.retryProvisioning(licenseId, {}, 'correlation-456')
 
       expect(updated.status).toBe(LicenseStatus.PENDING_PROVISION)
       expect(updated.provisioning_retries).toBe(1)
@@ -402,17 +373,17 @@ describe('LicenseService', () => {
     it('should reject retry from non-PROVISION_FAILED status', async () => {
       repository.setLicenseFields(licenseId, { status: LicenseStatus.ACTIVE })
 
-      await expect(
-        service.retryProvisioning(licenseId, {}, 'correlation-456')
-      ).rejects.toThrow(InvalidStateTransitionError)
+      await expect(service.retryProvisioning(licenseId, {}, 'correlation-456')).rejects.toThrow(
+        InvalidStateTransitionError
+      )
     })
 
     it('should enforce retry limit', async () => {
       repository.setLicenseFields(licenseId, { provisioning_retries: 5 })
 
-      await expect(
-        service.retryProvisioning(licenseId, {}, 'correlation-456')
-      ).rejects.toThrow(ProvisioningError)
+      await expect(service.retryProvisioning(licenseId, {}, 'correlation-456')).rejects.toThrow(
+        ProvisioningError
+      )
     })
   })
 })

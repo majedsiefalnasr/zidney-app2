@@ -4,9 +4,9 @@
  * Called before transaction, idempotent via checksum-based key
  */
 
-import { RetentionPolicy, SnapshotRecord } from '@zidney/types'
+import { RetentionPolicy, type SnapshotRecord } from '@zidney/types'
 import crypto from 'crypto'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 export interface SnapshotCreateParams {
   workspace_id: string
@@ -26,8 +26,7 @@ export async function createSnapshot(
 ): Promise<SnapshotRecord> {
   const snapshotId = crypto.randomUUID()
   const snapshotLocation = `s3://zidney-backups/workspace-${params.workspace_id}/snapshot-${snapshotId}.sql.gz`
-  const retentionPolicy =
-    params.retentionPolicy || RetentionPolicy.AUTO_DELETE_30D
+  const retentionPolicy = params.retentionPolicy || RetentionPolicy.AUTO_DELETE_30D
 
   // In production, call storage system to create backup
   // For now, simulate with metadata-only record
@@ -67,9 +66,7 @@ export async function createSnapshot(
         location: snapshotLocation,
         size_bytes: snapshotSizeBytes,
         retention_policy: retentionPolicy,
-        expires_at: new Date(
-          Date.now() + 30 * 24 * 60 * 60 * 1000
-        ).toISOString(),
+        expires_at: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString(),
         timestamp: new Date().toISOString(),
       })
     )

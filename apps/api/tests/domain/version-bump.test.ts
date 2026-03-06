@@ -1,10 +1,10 @@
-import { describe, expect, it } from 'vitest'
 import {
   bumpVersion,
   compareVersions,
   getVersionsBetween,
   parseVersion,
 } from '@zidney/domain-core/migrations/version-bump'
+import { describe, expect, it } from 'vitest'
 
 /**
  * T058: Version Bumping Unit Tests

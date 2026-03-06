@@ -46,7 +46,7 @@ describe('Concurrent Snapshot Tests (T039)', () => {
         })
       : new Pool({
           host: process.env.DB_HOST || 'localhost',
-          port: parseInt(process.env.DB_PORT || '5432'),
+          port: parseInt(process.env.DB_PORT || '5432', 10),
           database: process.env.DB_NAME || 'zidney_test',
           user: process.env.DB_USER || 'zidney_app',
           password: process.env.DB_PASSWORD || 'change-me-in-production',
@@ -167,11 +167,7 @@ describe('Concurrent Snapshot Tests (T039)', () => {
 
     // Create users
     const batchSize = 10
-    for (
-      let batch = 0;
-      batch < Math.ceil(concurrentCount / batchSize);
-      batch++
-    ) {
+    for (let batch = 0; batch < Math.ceil(concurrentCount / batchSize); batch++) {
       const promises = []
       for (let i = 0; i < batchSize; i++) {
         const index = batch * batchSize + i
@@ -200,9 +196,7 @@ describe('Concurrent Snapshot Tests (T039)', () => {
 
     // Create 50 attempts concurrently
     const attempts = await Promise.all(
-      userIds.map((userId) =>
-        initializeAttempt({ examId, userId }, pool, userId)
-      )
+      userIds.map((userId) => initializeAttempt({ examId, userId }, pool, userId))
     )
 
     logger.info('Created concurrent attempts', {
@@ -210,9 +204,7 @@ describe('Concurrent Snapshot Tests (T039)', () => {
     })
 
     // Get snapshots for all attempts
-    const snapshots = await Promise.all(
-      attempts.map((a) => getAttemptSnapshot(a.id, pool))
-    )
+    const snapshots = await Promise.all(attempts.map((a) => getAttemptSnapshot(a.id, pool)))
 
     // Verify all have identical snapshots
     const firstSnapshot = normalizeSnapshot(snapshots[0])
@@ -253,9 +245,7 @@ describe('Concurrent Snapshot Tests (T039)', () => {
 
     // Create attempts concurrently from same exam
     const attempts = await Promise.all(
-      userIds.map((userId) =>
-        initializeAttempt({ examId, userId }, pool, userId)
-      )
+      userIds.map((userId) => initializeAttempt({ examId, userId }, pool, userId))
     )
 
     // Verify all attempts were created
@@ -290,16 +280,12 @@ describe('Concurrent Snapshot Tests (T039)', () => {
     // Create all attempts concurrently
     const createStartTime = Date.now()
     const attempts = await Promise.all(
-      userIds.map((userId) =>
-        initializeAttempt({ examId, userId }, pool, userId)
-      )
+      userIds.map((userId) => initializeAttempt({ examId, userId }, pool, userId))
     )
     const createDuration = Date.now() - createStartTime
 
     // Get all snapshots
-    const snapshots = await Promise.all(
-      attempts.map((a) => getAttemptSnapshot(a.id, pool))
-    )
+    const snapshots = await Promise.all(attempts.map((a) => getAttemptSnapshot(a.id, pool)))
 
     // Verify consistency metrics
     const configSnapshots = snapshots.map((s) =>
@@ -367,9 +353,7 @@ describe('Concurrent Snapshot Tests (T039)', () => {
     const snap1 = await getAttemptSnapshot(attempt1.id, pool)
     const snap2 = await getAttemptSnapshot(attempt2.id, pool)
 
-    expect(JSON.stringify(normalizeSnapshot(snap1))).toBe(
-      JSON.stringify(normalizeSnapshot(snap2))
-    )
+    expect(JSON.stringify(normalizeSnapshot(snap1))).toBe(JSON.stringify(normalizeSnapshot(snap2)))
 
     logger.info('✅ Concurrent isolation test passed')
   })
@@ -384,11 +368,7 @@ describe('Concurrent Snapshot Tests (T039)', () => {
 
     // Create all users in batches
     const batchSize = 20
-    for (
-      let batch = 0;
-      batch < Math.ceil(concurrentCount / batchSize);
-      batch++
-    ) {
+    for (let batch = 0; batch < Math.ceil(concurrentCount / batchSize); batch++) {
       const promises = []
       for (let i = 0; i < batchSize; i++) {
         const index = batch * batchSize + i
@@ -434,15 +414,10 @@ describe('Concurrent Snapshot Tests (T039)', () => {
       total_requested: concurrentCount,
       successful: successfulAttempts.length,
       duration_ms: duration,
-      throughput_attempts_per_sec: (
-        successfulAttempts.length /
-        (duration / 1000)
-      ).toFixed(2),
+      throughput_attempts_per_sec: (successfulAttempts.length / (duration / 1000)).toFixed(2),
     })
 
-    expect(successfulAttempts.length).toBeGreaterThanOrEqual(
-      concurrentCount * 0.95
-    )
+    expect(successfulAttempts.length).toBeGreaterThanOrEqual(concurrentCount * 0.95)
     logger.info('✅ High concurrency test passed')
   })
 })

@@ -1,4 +1,5 @@
 #!/usr/bin/env bun
+import { resolve } from 'node:path'
 /**
  * scripts/check-store-cycles.ts
  *
@@ -16,7 +17,6 @@
  * Refs: SC-007, QA-H003, FR-033
  */
 import madge from 'madge'
-import { resolve } from 'path'
 
 // ─── Configuration ─────────────────────────────────────────────────────────────
 
@@ -56,9 +56,7 @@ async function checkCycles(): Promise<void> {
       })
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : String(err)
-      console.error(
-        `[check-store-cycles] ERROR: Failed to analyze ${app} — ${msg}`
-      )
+      console.error(`[check-store-cycles] ERROR: Failed to analyze ${app} — ${msg}`)
       process.exit(2)
     }
 
@@ -82,15 +80,11 @@ async function checkCycles(): Promise<void> {
     console.error(
       `\n[check-store-cycles] FAIL: ${totalCycles} cycle(s) detected across all store directories.`
     )
-    console.error(
-      '[check-store-cycles] Fix circular imports before merging. See SC-007, FR-033.'
-    )
+    console.error('[check-store-cycles] Fix circular imports before merging. See SC-007, FR-033.')
     process.exit(1)
   }
 
-  console.log(
-    '\n[check-store-cycles] PASS: Zero circular dependencies in all store directories.'
-  )
+  console.log('\n[check-store-cycles] PASS: Zero circular dependencies in all store directories.')
   process.exit(0)
 }
 

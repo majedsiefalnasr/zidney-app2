@@ -8,10 +8,7 @@ import type { Accessor, FilterFieldType, SortDirection } from '../types'
 /**
  * Calculate total pages from total count and page size
  */
-export function calculateTotalPages(
-  totalCount: number,
-  pageSize: number
-): number {
+export function calculateTotalPages(totalCount: number, pageSize: number): number {
   if (pageSize <= 0) return 0
   return Math.ceil(totalCount / pageSize)
 }
@@ -226,11 +223,7 @@ export function coerceValue(value: any, fieldType: FilterFieldType): any {
 /**
  * Compare two values based on field type
  */
-export function compareValues(
-  valueA: any,
-  valueB: any,
-  fieldType: FilterFieldType
-): number {
+export function compareValues(valueA: any, valueB: any, fieldType: FilterFieldType): number {
   const a = coerceValue(valueA, fieldType)
   const b = coerceValue(valueB, fieldType)
 
@@ -284,10 +277,7 @@ export function toggleRowSelection(
   return newSelected
 }
 
-export function isRowSelected(
-  selected: Set<string | number>,
-  rowKey: string | number
-): boolean {
+export function isRowSelected(selected: Set<string | number>, rowKey: string | number): boolean {
   return selected.has(rowKey)
 }
 

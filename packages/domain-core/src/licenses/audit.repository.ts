@@ -10,7 +10,7 @@
 
 import { v4 as uuidv4 } from 'uuid'
 import type { MasterDbClient } from './repository'
-import { AuditLogEntry, LicenseStatus } from './types'
+import type { AuditLogEntry, LicenseStatus } from './types'
 
 export class AuditRepository {
   constructor(private masterDb: MasterDbClient) {}

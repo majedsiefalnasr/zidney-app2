@@ -89,8 +89,7 @@ export const useBackofficeUiStore = defineStore('backoffice-ui', () => {
 
 // ── HMR (development only) ────────────────────────────────────────────────────
 import { acceptHMRUpdate } from 'pinia'
+
 if ((import.meta as any).hot) {
-  ;(import.meta as any).hot.accept(
-    acceptHMRUpdate(useBackofficeUiStore, (import.meta as any).hot)
-  )
+  ;(import.meta as any).hot.accept(acceptHMRUpdate(useBackofficeUiStore, (import.meta as any).hot))
 }

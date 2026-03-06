@@ -18,24 +18,14 @@
 // ---------------------------------------------------------------------------
 
 /** Valid settings group identifiers */
-export type SettingsGroup =
-  | 'general'
-  | 'language'
-  | 'branding'
-  | 'payment'
-  | 'security'
+export type SettingsGroup = 'general' | 'language' | 'branding' | 'payment' | 'security'
 
 // ---------------------------------------------------------------------------
 // General Settings
 // ---------------------------------------------------------------------------
 
 /** Accepted date format patterns */
-export type DateFormat =
-  | 'YYYY-MM-DD'
-  | 'DD/MM/YYYY'
-  | 'MM/DD/YYYY'
-  | 'DD-MM-YYYY'
-  | 'DD.MM.YYYY'
+export type DateFormat = 'YYYY-MM-DD' | 'DD/MM/YYYY' | 'MM/DD/YYYY' | 'DD-MM-YYYY' | 'DD.MM.YYYY'
 
 export interface GeneralSettings {
   app_name: string

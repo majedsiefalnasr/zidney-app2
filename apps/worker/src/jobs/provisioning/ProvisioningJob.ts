@@ -114,13 +114,8 @@ export class ProvisioningJob {
     if (!message.workspace_slug || typeof message.workspace_slug !== 'string') {
       throw new Error('Invalid message: missing or non-string workspace_slug')
     }
-    if (
-      !Number.isInteger(message.organization_id) ||
-      message.organization_id < 0
-    ) {
-      throw new Error(
-        'Invalid message: organization_id must be non-negative integer'
-      )
+    if (!Number.isInteger(message.organization_id) || message.organization_id < 0) {
+      throw new Error('Invalid message: organization_id must be non-negative integer')
     }
     if (!message.correlation_id || typeof message.correlation_id !== 'string') {
       throw new Error('Invalid message: missing or non-string correlation_id')

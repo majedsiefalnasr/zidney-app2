@@ -36,12 +36,7 @@ export interface IdempotencyRecord {
  */
 export interface RedisClient {
   get(key: string): Promise<string | null>
-  set(
-    key: string,
-    value: string,
-    optionName: string,
-    optionValue: number
-  ): Promise<void>
+  set(key: string, value: string, optionName: string, optionValue: number): Promise<void>
   del(key: string): Promise<void>
 }
 
@@ -52,10 +47,7 @@ const IDEMPOTENCY_KEY_PREFIX = 'tenant'
  * Generate Redis cache key for idempotency tracking
  * Format: tenant:{workspace_id}:idempotency:{idempotency_key}
  */
-export function generateIdempotencyKey(
-  workspace_id: string,
-  idempotency_key: string
-): string {
+export function generateIdempotencyKey(workspace_id: string, idempotency_key: string): string {
   return `${IDEMPOTENCY_KEY_PREFIX}:${workspace_id}:idempotency:${idempotency_key}`
 }
 
@@ -168,12 +160,7 @@ export async function storeIdempotencyRecord(
     // Store in Redis cache (24h TTL)
     if (redis) {
       const cacheKey = generateIdempotencyKey(workspace_id, idempotency_key)
-      await redis.set(
-        cacheKey,
-        JSON.stringify(record),
-        'EX',
-        IDEMPOTENCY_CACHE_TTL
-      )
+      await redis.set(cacheKey, JSON.stringify(record), 'EX', IDEMPOTENCY_CACHE_TTL)
       logger.debug('Idempotency record stored in Redis', {
         workspace_id,
         task_id,
@@ -232,12 +219,7 @@ export async function markIdempotencyComplete(
       }
 
       // Update with remaining TTL
-      await redis.set(
-        cacheKey,
-        JSON.stringify(record),
-        'EX',
-        IDEMPOTENCY_CACHE_TTL
-      )
+      await redis.set(cacheKey, JSON.stringify(record), 'EX', IDEMPOTENCY_CACHE_TTL)
 
       logger.debug('Idempotency record completed', {
         workspace_id,

@@ -68,10 +68,7 @@ describe('Version Compatibility', () => {
   })
 
   afterAll(async () => {
-    await db.master.query(
-      `DELETE FROM ${VERSION_WORKSPACES_TABLE} WHERE slug LIKE $1`,
-      ['ver-%']
-    )
+    await db.master.query(`DELETE FROM ${VERSION_WORKSPACES_TABLE} WHERE slug LIKE $1`, ['ver-%'])
   })
 
   it('should allow same schema version', async () => {
@@ -121,9 +118,9 @@ describe('Version Compatibility', () => {
     const parseVersion = (versionString: string) => {
       const parts = versionString.split('.')
       return {
-        major: parseInt(parts[0]!),
-        minor: parseInt(parts[1]!),
-        patch: parseInt(parts[2]!),
+        major: parseInt(parts[0]!, 10),
+        minor: parseInt(parts[1]!, 10),
+        patch: parseInt(parts[2]!, 10),
       }
     }
 
@@ -152,8 +149,8 @@ describe('Version Compatibility', () => {
     expect(schemaCompatible).toBe(true)
 
     // Check product version compatibility (semantic versioning)
-    const apiProductVersion = '0.1.0'
-    const wsProductVersion = ws.product_version
+    const _apiProductVersion = '0.1.0'
+    const _wsProductVersion = ws.product_version
 
     expect(schemaCompatible).toBe(true)
   })

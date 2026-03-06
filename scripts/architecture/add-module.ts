@@ -1,15 +1,9 @@
-import { existsSync, readFileSync, writeFileSync } from 'fs'
-import { join } from 'path'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { join } from 'node:path'
 
 const ROOT = process.cwd()
 
-const mapPath = join(
-  ROOT,
-  'docs',
-  'architecture',
-  'intelligence',
-  'ARCHITECTURE_MAP.json'
-)
+const mapPath = join(ROOT, 'docs', 'architecture', 'intelligence', 'ARCHITECTURE_MAP.json')
 
 const moduleName = process.argv[2]
 

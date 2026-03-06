@@ -10,7 +10,7 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
-import { Pool, PoolClient } from 'pg'
+import { Pool, type PoolClient } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 const getConnectionString = () => {
@@ -160,9 +160,7 @@ describe('Phase 6: Referential Integrity Tests', () => {
       expect(parseInt(result.rows[0].count, 10)).toBe(1)
 
       // Delete subscription
-      await client.query(`DELETE FROM subscriptions WHERE id = $1`, [
-        subscriptionId,
-      ])
+      await client.query(`DELETE FROM subscriptions WHERE id = $1`, [subscriptionId])
 
       // Verify event was cascaded deleted
       result = await client.query(

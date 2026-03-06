@@ -1,3 +1,5 @@
+import { defineStore } from 'pinia'
+import { computed, ref } from 'vue'
 import type {
   AffiliatesResponse,
   GeographicResponse,
@@ -6,9 +8,6 @@ import type {
   TrendsResponse,
 } from './api'
 import { dashboardClient } from './api'
-// @ts-ignore: pinia not declared as dependency of apps/mmc [INFRA-001-DEPS-07]
-import { defineStore } from 'pinia'
-import { computed, ref } from 'vue'
 
 /**
  * Dashboard Store (Pinia)
@@ -116,8 +115,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
     try {
       summary.value = await dashboardClient.getSummary()
     } catch (error) {
-      errors.value.summary =
-        error instanceof Error ? error.message : 'Unknown error'
+      errors.value.summary = error instanceof Error ? error.message : 'Unknown error'
+      // biome-ignore lint/suspicious/noConsole: frontend error boundary
       console.error('Summary fetch error:', error)
     } finally {
       loading.value.summary = false
@@ -135,8 +134,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
     try {
       revenueBreakdown.value = await dashboardClient.getRevenueBreakdown()
     } catch (error) {
-      errors.value.revenueBreakdown =
-        error instanceof Error ? error.message : 'Unknown error'
+      errors.value.revenueBreakdown = error instanceof Error ? error.message : 'Unknown error'
+      // biome-ignore lint/suspicious/noConsole: frontend error boundary
       console.error('Revenue breakdown fetch error:', error)
     } finally {
       loading.value.revenueBreakdown = false
@@ -157,8 +156,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
         pagination.value.geographic.limit
       )
     } catch (error) {
-      errors.value.geographic =
-        error instanceof Error ? error.message : 'Unknown error'
+      errors.value.geographic = error instanceof Error ? error.message : 'Unknown error'
+      // biome-ignore lint/suspicious/noConsole: frontend error boundary
       console.error('Geographic fetch error:', error)
     } finally {
       loading.value.geographic = false
@@ -176,8 +175,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
       pagination.value.affiliates.page = page
       affiliates.value = await dashboardClient.getAffiliates()
     } catch (error) {
-      errors.value.affiliates =
-        error instanceof Error ? error.message : 'Unknown error'
+      errors.value.affiliates = error instanceof Error ? error.message : 'Unknown error'
+      // biome-ignore lint/suspicious/noConsole: frontend error boundary
       console.error('Affiliates fetch error:', error)
     } finally {
       loading.value.affiliates = false
@@ -195,8 +194,8 @@ export const useDashboardStore = defineStore('dashboard', () => {
     try {
       trends.value = await dashboardClient.getTrends(months)
     } catch (error) {
-      errors.value.trends =
-        error instanceof Error ? error.message : 'Unknown error'
+      errors.value.trends = error instanceof Error ? error.message : 'Unknown error'
+      // biome-ignore lint/suspicious/noConsole: frontend error boundary
       console.error('Trends fetch error:', error)
     } finally {
       loading.value.trends = false
@@ -208,6 +207,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     try {
       await dashboardClient.exportData(section as any, options)
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: frontend error boundary
       console.error('Export error:', error)
       throw error
     }

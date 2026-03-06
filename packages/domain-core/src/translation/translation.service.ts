@@ -24,10 +24,7 @@
 
 import { createLogger } from '@zidney/logger'
 
-import {
-  TRANSLATABLE_FIELDS,
-  isTranslatableEntityType,
-} from './translatable-fields'
+import { isTranslatableEntityType, TRANSLATABLE_FIELDS } from './translatable-fields'
 import { TRANSLATION_ERROR_CODES, TranslationError } from './translation.errors'
 import type {
   ResolvedEntityTranslations,
@@ -146,9 +143,7 @@ export async function upsertTranslations(
 
   // 6. Entity existence validation (one check per distinct entity_type+entity_id pair)
   const uniqueEntities = [
-    ...new Map(
-      items.map((i) => [`${i.entity_type}:${i.entity_id}`, i])
-    ).values(),
+    ...new Map(items.map((i) => [`${i.entity_type}:${i.entity_id}`, i])).values(),
   ]
 
   for (const item of uniqueEntities) {
@@ -178,8 +173,7 @@ export async function upsertTranslations(
         [item.entity_type, item.entity_id, item.field_name, item.language_code]
       )
       const previousValue = prevResult.rows[0]?.translated_value ?? null
-      const action: 'created' | 'updated' =
-        previousValue !== null ? 'updated' : 'created'
+      const action: 'created' | 'updated' = previousValue !== null ? 'updated' : 'created'
 
       // Upsert via composite unique constraint (Q4: HTTP 200 for both create/update)
       const upsertResult = await db.query<Translation>(
@@ -274,8 +268,7 @@ export async function resolveEntityTranslations(
   languageCode: string,
   baseEntityFields: Record<string, string>
 ): Promise<ResolvedEntityTranslations> {
-  const translatableFields =
-    TRANSLATABLE_FIELDS[entityType as keyof typeof TRANSLATABLE_FIELDS]
+  const translatableFields = TRANSLATABLE_FIELDS[entityType as keyof typeof TRANSLATABLE_FIELDS]
 
   // FR-007: Default language short-circuit — return base fields without DB call
   if (languageCode === ctx.default_language) {
@@ -457,8 +450,7 @@ export async function listEntityTranslations(
 
   const hasMore = result.rows.length > pageSize
   const items = hasMore ? result.rows.slice(0, pageSize) : result.rows
-  const next_cursor =
-    hasMore && items.length > 0 ? (items[items.length - 1]?.id ?? null) : null
+  const next_cursor = hasMore && items.length > 0 ? (items[items.length - 1]?.id ?? null) : null
 
   return { items, next_cursor, page_size: pageSize }
 }

@@ -122,12 +122,9 @@ export const ErrorCodeToMessage: Record<ErrorCode, string> = {
   [ErrorCode.LICENSE_ARCHIVED]: 'License is archived. Access denied',
   [ErrorCode.LICENSE_NOT_FOUND]: 'License not found',
   [ErrorCode.WORKSPACE_NOT_FOUND]: 'Workspace not found',
-  [ErrorCode.SCHEMA_VERSION_MISMATCH]:
-    'Schema version mismatch. Upgrade required',
-  [ErrorCode.PRODUCT_VERSION_MISMATCH]:
-    'Product version mismatch. Upgrade required',
-  [ErrorCode.PROVISIONING_QUEUE_UNAVAILABLE]:
-    'Provisioning service unavailable',
+  [ErrorCode.SCHEMA_VERSION_MISMATCH]: 'Schema version mismatch. Upgrade required',
+  [ErrorCode.PRODUCT_VERSION_MISMATCH]: 'Product version mismatch. Upgrade required',
+  [ErrorCode.PROVISIONING_QUEUE_UNAVAILABLE]: 'Provisioning service unavailable',
   [ErrorCode.PROVISIONING_FAILED]: 'Provisioning failed',
   [ErrorCode.LICENSE_PENDING_PROVISION]: 'License provisioning in progress',
   [ErrorCode.DATABASE_ERROR]: 'Database error',
@@ -163,18 +160,14 @@ export const WORKSPACE_SLUG_MAX_LENGTH = 64
  *
  * Define which status transitions are allowed
  */
-export const ALLOWED_STATE_TRANSITIONS: Record<LicenseStatus, LicenseStatus[]> =
-  {
-    [LicenseStatus.PENDING_PROVISION]: [
-      LicenseStatus.ACTIVE,
-      LicenseStatus.PROVISION_FAILED,
-    ],
-    [LicenseStatus.ACTIVE]: [LicenseStatus.SOFT_LOCKED, LicenseStatus.DELETED],
-    [LicenseStatus.SOFT_LOCKED]: [LicenseStatus.ACTIVE, LicenseStatus.ARCHIVED],
-    [LicenseStatus.PROVISION_FAILED]: [LicenseStatus.PENDING_PROVISION],
-    [LicenseStatus.ARCHIVED]: [LicenseStatus.ACTIVE, LicenseStatus.DELETED],
-    [LicenseStatus.DELETED]: [],
-  }
+export const ALLOWED_STATE_TRANSITIONS: Record<LicenseStatus, LicenseStatus[]> = {
+  [LicenseStatus.PENDING_PROVISION]: [LicenseStatus.ACTIVE, LicenseStatus.PROVISION_FAILED],
+  [LicenseStatus.ACTIVE]: [LicenseStatus.SOFT_LOCKED, LicenseStatus.DELETED],
+  [LicenseStatus.SOFT_LOCKED]: [LicenseStatus.ACTIVE, LicenseStatus.ARCHIVED],
+  [LicenseStatus.PROVISION_FAILED]: [LicenseStatus.PENDING_PROVISION],
+  [LicenseStatus.ARCHIVED]: [LicenseStatus.ACTIVE, LicenseStatus.DELETED],
+  [LicenseStatus.DELETED]: [],
+}
 
 /**
  * License Status with Accessible Workspace
@@ -226,8 +219,4 @@ export const HTTP_STATUS_NO_CONTENT = 204
 /**
  * Correlation ID Header Names
  */
-export const CORRELATION_ID_HEADERS = [
-  'x-correlation-id',
-  'x-request-id',
-  'correlation-id',
-]
+export const CORRELATION_ID_HEADERS = ['x-correlation-id', 'x-request-id', 'correlation-id']

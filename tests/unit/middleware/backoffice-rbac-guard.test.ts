@@ -104,12 +104,8 @@ describe('createBackofficeRBACGuard', () => {
     const { ctx, jsonFn } = makeContext({ tenant, enabledModules: ['MCQ'] })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
-    await guard(ctx as any, next, undefined as any)
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
+    await guard(ctx as any, next)
 
     expect(next).not.toHaveBeenCalled()
     expect(jsonFn).toHaveBeenCalledWith(
@@ -126,12 +122,8 @@ describe('createBackofficeRBACGuard', () => {
     const { ctx } = makeContext({ tenant, enabledModules: ['MCQ'] })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
-    await guard(ctx as any, next, undefined as any)
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
+    await guard(ctx as any, next)
 
     expect(next).toHaveBeenCalled()
   })
@@ -145,12 +137,8 @@ describe('createBackofficeRBACGuard', () => {
     })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
-    await guard(ctx as any, next, undefined as any)
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
+    await guard(ctx as any, next)
 
     expect(jsonFn).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -165,12 +153,8 @@ describe('createBackofficeRBACGuard', () => {
     const { ctx } = makeContext({ tenant, enabledModules: ['MCQ'] })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
-    await guard(ctx as any, next, undefined as any)
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
+    await guard(ctx as any, next)
 
     expect(next).toHaveBeenCalled()
     // DB should not be queried on cache hit
@@ -182,12 +166,8 @@ describe('createBackofficeRBACGuard', () => {
     const { ctx, jsonFn } = makeContext({ tenant, enabledModules: ['MCQ'] })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
-    await guard(ctx as any, next, undefined as any)
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
+    await guard(ctx as any, next)
 
     expect(next).not.toHaveBeenCalled()
     expect(tenant._mocks.dbQuery).not.toHaveBeenCalled()
@@ -204,12 +184,8 @@ describe('createBackofficeRBACGuard', () => {
     const { ctx } = makeContext({ tenant, enabledModules: ['MCQ'] })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
-    await guard(ctx as any, next, undefined as any)
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
+    await guard(ctx as any, next)
 
     expect(tenant._mocks.dbQuery).toHaveBeenCalledOnce()
     expect(tenant._mocks.redisSet).toHaveBeenCalledWith(
@@ -227,12 +203,8 @@ describe('createBackofficeRBACGuard', () => {
     const { ctx, jsonFn } = makeContext({ tenant, enabledModules: ['MCQ'] })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
-    await guard(ctx as any, next, undefined as any)
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
+    await guard(ctx as any, next)
 
     expect(next).not.toHaveBeenCalled()
     expect(jsonFn).toHaveBeenCalledWith(
@@ -248,12 +220,8 @@ describe('createBackofficeRBACGuard', () => {
     const { ctx, jsonFn } = makeContext({ tenant, enabledModules: [] })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
-    await guard(ctx as any, next, undefined as any)
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
+    await guard(ctx as any, next)
 
     expect(next).not.toHaveBeenCalled()
     expect(jsonFn).toHaveBeenCalledWith(

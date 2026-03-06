@@ -26,6 +26,7 @@
 </template>
 
 <script setup lang="ts">
+import { Button } from '@shadcn-vue/ui/button'
 import {
   Dialog,
   DialogContent,
@@ -33,8 +34,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@shadcn-vue/ui/dialog'
-
-import { Button } from '@shadcn-vue/ui/button'
 
 interface Props {
   isOpen: boolean

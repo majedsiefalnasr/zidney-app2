@@ -11,7 +11,7 @@
  * Phase: 1 - Backend Implementation (parallel)
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 export interface RevenueBreakdownParams {
   date_from?: string // ISO 8601 date
@@ -28,8 +28,7 @@ export async function getProductRevenue(
   dateTo?: Date,
   limit?: number
 ) {
-  const fromDate =
-    dateFrom || new Date(new Date().getFullYear(), new Date().getMonth(), 1)
+  const fromDate = dateFrom || new Date(new Date().getFullYear(), new Date().getMonth(), 1)
   const toDate = dateTo || new Date()
   const limitValue = limit || 5
 
@@ -57,11 +56,7 @@ export async function getProductRevenue(
 /**
  * Get revenue for previous period (for growth calculation)
  */
-export async function getProductRevenuePreviousPeriod(
-  pool: Pool,
-  dateFrom: Date,
-  dateTo: Date
-) {
+export async function getProductRevenuePreviousPeriod(pool: Pool, dateFrom: Date, dateTo: Date) {
   // Calculate previous period of same duration
   const duration = dateTo.getTime() - dateFrom.getTime()
   const previousTo = new Date(dateFrom.getTime())

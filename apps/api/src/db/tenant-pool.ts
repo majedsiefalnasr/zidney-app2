@@ -13,7 +13,7 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Pool, PoolClient } from 'pg'
+import { Pool, type PoolClient } from 'pg'
 
 const logger = createLogger('tenant-pool')
 
@@ -50,10 +50,7 @@ const tenantPools = new Map<string, Pool>()
  */
 const poolCreationLocks = new Map<string, Promise<Pool>>()
 
-function createPoolInstance(
-  workspaceId: string,
-  tenantDatabaseUrl: string
-): Pool {
+function createPoolInstance(workspaceId: string, tenantDatabaseUrl: string): Pool {
   const pool = new Pool({
     connectionString: tenantDatabaseUrl,
     ...DEFAULT_POOL_CONFIG,
@@ -76,10 +73,7 @@ function createPoolInstance(
  * This is primarily used by existing routes/tests that use a synchronous pool
  * accessor. For the fully validated path, prefer getTenantDatabase().
  */
-export function getTenantPoolSync(
-  workspaceId: string,
-  tenantDatabaseUrl: string
-): Pool {
+export function getTenantPoolSync(workspaceId: string, tenantDatabaseUrl: string): Pool {
   const existingPool = tenantPools.get(workspaceId)
   if (existingPool) {
     return existingPool
@@ -155,10 +149,7 @@ export async function getTenantDatabase(
  * @param tenantDatabaseUrl - PostgreSQL connection string
  * @returns Promise resolving to new Pool instance
  */
-async function createTenantPool(
-  workspaceId: string,
-  tenantDatabaseUrl: string
-): Promise<Pool> {
+async function createTenantPool(workspaceId: string, tenantDatabaseUrl: string): Promise<Pool> {
   const pool = createPoolInstance(workspaceId, tenantDatabaseUrl)
 
   // Test the connection to ensure validity

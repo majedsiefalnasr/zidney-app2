@@ -7,9 +7,10 @@
  * Returns health status and dependency states.
  */
 
+import { logger } from '@zidney/logger'
 import { Hono } from 'hono'
-import { Redis } from 'ioredis'
-import { Pool } from 'pg'
+import type { Redis } from 'ioredis'
+import type { Pool } from 'pg'
 
 /**
  * Health check result
@@ -49,15 +50,10 @@ export class HealthCheckService {
   private queueName: string
   private dlqName: string
   private startTime: number
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   private _lastJobProcessedAt: string | null = null
 
-  constructor(
-    masterDb: Pool,
-    redis: Redis,
-    queueName: string,
-    dlqName: string
-  ) {
+  constructor(masterDb: Pool, redis: Redis, queueName: string, dlqName: string) {
     this.masterDb = masterDb
     this.redis = redis
     this.queueName = queueName
@@ -69,9 +65,9 @@ export class HealthCheckService {
    * Check overall health
    */
   async check(): Promise<HealthCheckResult> {
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const timestamp = new Date().toISOString()
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const uptime = (Date.now() - this.startTime) / 1000
 
     const [masterDbHealth, redisHealth, queueHealth] = await Promise.all([
@@ -85,15 +81,9 @@ export class HealthCheckService {
 
     if (masterDbHealth.status === 'down' || redisHealth.status === 'down') {
       status = 'unhealthy'
-    } else if (
-      queueHealth.status === 'down' ||
-      queueHealth.status === 'degraded'
-    ) {
+    } else if (queueHealth.status === 'down' || queueHealth.status === 'degraded') {
       status = 'degraded'
-    } else if (
-      (masterDbHealth.latency_ms || 0) > 1000 ||
-      (redisHealth.latency_ms || 0) > 500
-    ) {
+    } else if ((masterDbHealth.latency_ms || 0) > 1000 || (redisHealth.latency_ms || 0) > 500) {
       status = 'degraded'
     }
 
@@ -112,14 +102,12 @@ export class HealthCheckService {
   /**
    * Check master database connectivity
    */
-  private async checkMasterDb(): Promise<
-    HealthCheckResult['dependencies']['master_db']
-  > {
+  private async checkMasterDb(): Promise<HealthCheckResult['dependencies']['master_db']> {
     try {
-      // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+      // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const startTime = Date.now()
       await this.masterDb.query('SELECT 1')
-      // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+      // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const latency = Date.now() - startTime
 
       return {
@@ -137,16 +125,14 @@ export class HealthCheckService {
   /**
    * Check Redis connectivity
    */
-  private async checkRedis(): Promise<
-    HealthCheckResult['dependencies']['redis']
-  > {
+  private async checkRedis(): Promise<HealthCheckResult['dependencies']['redis']> {
     try {
-      // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+      // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const startTime = Date.now()
       await this.redis.ping()
-      // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+      // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const latency = Date.now() - startTime
-      // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+      // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const isConnected = this.redis.status === 'ready'
 
       return {
@@ -166,31 +152,25 @@ export class HealthCheckService {
   /**
    * Check worker queue health
    */
-  private async checkWorkerQueue(): Promise<
-    HealthCheckResult['dependencies']['worker_queue']
-  > {
+  private async checkWorkerQueue(): Promise<HealthCheckResult['dependencies']['worker_queue']> {
     try {
       // Get queue depth
-      // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+      // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const queueDepth = await this.redis.llen(this.queueName)
-      // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+      // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const dlqDepth = await this.redis.llen(this.dlqName)
 
       // Check if worker is consuming (check for recent job processed timestamp)
       // This would be set by the worker consumer
-      // @ts-ignore: TS6133 - declared but never read [INFRA-001]
-      const lastProcessed = await this.redis.get(
-        `${this.queueName}:last_processed_at`
-      )
+      // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
+      const lastProcessed = await this.redis.get(`${this.queueName}:last_processed_at`)
 
-      // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+      // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const now = Date.now()
-      // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+      // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const lastProcessedTime = lastProcessed ? parseInt(lastProcessed) : null
-      // @ts-ignore: TS6133 - declared but never read [INFRA-001]
-      const timeSinceLastJob = lastProcessedTime
-        ? now - lastProcessedTime
-        : null
+      // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
+      const timeSinceLastJob = lastProcessedTime ? now - lastProcessedTime : null
 
       // If no job processed in last 5 minutes, consider degraded (if queue has items)
       let status: 'up' | 'down' | 'degraded' = 'up'
@@ -220,27 +200,24 @@ export class HealthCheckService {
    * Record job processed (called by worker)
    */
   setJobProcessed(): void {
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const timestamp = Date.now()
-    // @ts-ignore: LOGIC-BUG: should be _lastJobProcessedAt - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+    // @ts-expect-error: LOGIC-BUG: should be _lastJobProcessedAt - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
     this.lastJobProcessedAt = new Date(timestamp).toISOString()
     // Store in Redis for distributed health checks
-    this.redis
-      .set(`${this.queueName}:last_processed_at`, String(timestamp))
-      .catch((error) => {
-        console.error('Failed to update job processed timestamp:', error)
-      })
+    this.redis.set(`${this.queueName}:last_processed_at`, String(timestamp)).catch((error) => {
+      logger.error('Failed to update job processed timestamp:', { error })
+    })
   }
 
   /**
    * Get readiness status (all dependencies up)
    */
   async isReady(): Promise<boolean> {
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const health = await this.check()
     return (
-      health.dependencies.master_db.status === 'up' &&
-      health.dependencies.redis.status === 'up'
+      health.dependencies.master_db.status === 'up' && health.dependencies.redis.status === 'up'
     )
   }
 
@@ -255,10 +232,8 @@ export class HealthCheckService {
 /**
  * Create health check route handler
  */
-export function createHealthCheckRoute(
-  healthCheckService: HealthCheckService
-): Hono {
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+export function createHealthCheckRoute(healthCheckService: HealthCheckService): Hono {
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const router = new Hono()
 
   // GET /health - Simple liveness probe
@@ -273,7 +248,7 @@ export function createHealthCheckRoute(
 
   // GET /health/ready - Readiness probe
   router.get('/health/ready', async (ctx) => {
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const isReady = await healthCheckService.isReady()
     if (isReady) {
       ctx.status(200)
@@ -285,16 +260,11 @@ export function createHealthCheckRoute(
 
   // GET /health/detailed - Full health check
   router.get('/health/detailed', async (ctx) => {
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const health = await healthCheckService.check()
 
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
-    const statusCode =
-      health.status === 'healthy'
-        ? 200
-        : health.status === 'degraded'
-          ? 200
-          : 503
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
+    const statusCode = health.status === 'healthy' ? 200 : health.status === 'degraded' ? 200 : 503
 
     ctx.status(statusCode)
     return ctx.json(health)

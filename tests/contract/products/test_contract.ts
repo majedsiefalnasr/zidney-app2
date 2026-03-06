@@ -14,13 +14,9 @@
 
 import * as productService from '@zidney/domain-core/products/productService'
 import { Module } from '@zidney/types/enums/Module'
-import { Product, ProductStatus } from '@zidney/types/products/Product'
+import { type Product, ProductStatus } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import {
-  cleanupTestContext,
-  createTestContext,
-  TestContext,
-} from '../../test-helpers'
+import { cleanupTestContext, createTestContext, type TestContext } from '../../test-helpers'
 
 describe('T067: OpenAPI Contract Tests', () => {
   let ctx: TestContext
@@ -132,11 +128,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         enabled_modules: [Module.MCQ],
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       // Validate success response format
       expect(product).toBeDefined()
@@ -251,10 +243,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         ctx.userId
       )
 
-      const retrieved = await productService.getProductById(
-        dbClient,
-        created.id
-      )
+      const retrieved = await productService.getProductById(dbClient, created.id)
 
       // Should be a single product, not wrapped in pagination
       expect(retrieved).toBeDefined()
@@ -434,11 +423,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         ctx.userId
       )
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {}
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {})
 
       expect(result).toBeDefined()
       expect(result.items).toBeDefined()
@@ -459,11 +444,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         ctx.userId
       )
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {}
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {})
 
       expect(result.items.length).toBeGreaterThan(0)
       const entry = result.items[0]!
@@ -572,10 +553,7 @@ describe('T067: OpenAPI Contract Tests', () => {
         ctx.userId
       )
 
-      const retrieved = await productService.getProductById(
-        dbClient,
-        created.id
-      )
+      const retrieved = await productService.getProductById(dbClient, created.id)
 
       // Both should have same fields
       const createdKeys = Object.keys(created).sort()

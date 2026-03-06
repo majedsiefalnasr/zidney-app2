@@ -109,10 +109,7 @@ export class AuditHelper {
   /**
    * Get recent audit entries
    */
-  async getRecentEntries(
-    workspaceId: string,
-    limit: number = 10
-  ): Promise<AuditLogEntry[]> {
+  async getRecentEntries(workspaceId: string, limit: number = 10): Promise<AuditLogEntry[]> {
     try {
       const result = await this.db.query(
         'SELECT * FROM audit_logs WHERE workspace_id = $1 ORDER BY created_at DESC LIMIT $2',

@@ -16,9 +16,10 @@
  * - Automatic cleanup via cron or background job
  */
 
-import { Context } from 'hono'
-import { Redis } from 'ioredis'
-import { Database } from 'postgres'
+import { logger } from '@zidney/logger'
+import type { Context } from 'hono'
+import type { Redis } from 'ioredis'
+import type { Database } from 'postgres'
 import { v4 as uuidv4 } from 'uuid'
 
 export interface IdempotencyResponse {
@@ -46,17 +47,12 @@ export class IdempotencyManager {
    *
    * Returns cached response if found, otherwise null
    */
-  async getOrNull(
-    userId: string,
-    idempotencyKey: string
-  ): Promise<IdempotencyResponse | null> {
+  async getOrNull(userId: string, idempotencyKey: string): Promise<IdempotencyResponse | null> {
     // Try Redis first (fast path)
     if (this.redis) {
       try {
-        // @ts-ignore: LOGIC-BUG: Redis method no overload match — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
-        const cached = await this.redis.get(
-          `idempotency:${userId}:${idempotencyKey}`
-        )
+        // @ts-expect-error: LOGIC-BUG: Redis method no overload match — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+        const cached = await this.redis.get(`idempotency:${userId}:${idempotencyKey}`)
         if (cached) {
           const parsed = JSON.parse(cached)
           return {
@@ -113,7 +109,7 @@ export class IdempotencyManager {
     // Store in Redis (async, don't wait)
     if (this.redis) {
       try {
-        // @ts-ignore: LOGIC-BUG: Redis method no overload match — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+        // @ts-expect-error: LOGIC-BUG: Redis method no overload match — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         await this.redis.setex(
           `idempotency:${userId}:${idempotencyKey}`,
           this.REDIS_TTL,
@@ -121,7 +117,7 @@ export class IdempotencyManager {
         )
       } catch (err) {
         // Log Redis error but don't fail
-        console.error('[IDEMPOTENCY_REDIS_ERROR]', err)
+        logger.error('[IDEMPOTENCY_REDIS_ERROR]', { error: err })
       }
     }
 
@@ -149,7 +145,7 @@ export class IdempotencyManager {
       )
     } catch (err) {
       // Log DB error but don't fail
-      console.error('[IDEMPOTENCY_DB_ERROR]', err)
+      logger.error('[IDEMPOTENCY_DB_ERROR]', { error: err })
     }
   }
 
@@ -162,7 +158,7 @@ export class IdempotencyManager {
         `DELETE FROM request_log WHERE created_at < NOW() - INTERVAL '${this.DB_TTL_DAYS} days'`
       )
     } catch (err) {
-      console.error('[IDEMPOTENCY_CLEANUP_ERROR]', err)
+      logger.error('[IDEMPOTENCY_CLEANUP_ERROR]', { error: err })
     }
   }
 }
@@ -179,9 +175,7 @@ export function createIdempotencyMiddleware(manager: IdempotencyManager) {
 
     // Check if this is a request method that requires idempotency
     const method = ctx.req.method
-    const requiresIdempotency = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(
-      method
-    )
+    const requiresIdempotency = ['POST', 'PUT', 'PATCH', 'DELETE'].includes(method)
 
     if (!requiresIdempotency) {
       await next()
@@ -195,7 +189,7 @@ export function createIdempotencyMiddleware(manager: IdempotencyManager) {
       // Check for cached response
       const cached = await manager.getOrNull(userId, key)
       if (cached) {
-        // @ts-ignore: LOGIC-BUG: cached.statusCode is number not StatusCode - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+        // @ts-expect-error: LOGIC-BUG: cached.statusCode is number not StatusCode - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         return ctx.json(cached.response, cached.statusCode)
       }
     }
@@ -208,9 +202,6 @@ export function createIdempotencyMiddleware(manager: IdempotencyManager) {
 /**
  * Create idempotency manager
  */
-export function createIdempotencyManager(
-  db: Database,
-  redis?: Redis
-): IdempotencyManager {
+export function createIdempotencyManager(db: Database, redis?: Redis): IdempotencyManager {
   return new IdempotencyManager(db, redis)
 }

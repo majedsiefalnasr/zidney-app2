@@ -15,15 +15,7 @@
  * ✓ Tenant DB only — no master DB references
  */
 
-import {
-  index,
-  pgTable,
-  text,
-  timestamp,
-  unique,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core'
+import { index, pgTable, text, timestamp, unique, uuid, varchar } from 'drizzle-orm/pg-core'
 
 // ---------------------------------------------------------------------------
 // translations
@@ -46,16 +38,12 @@ export const translations = pgTable(
      * Server-authoritative creation timestamp.
      * Set once on insert — never overwritten on subsequent upserts.
      */
-    created_at: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
     /**
      * Server-authoritative last-update timestamp.
      * Set to NOW() on every upsert (including idempotent re-upserts).
      */
-    updated_at: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     /**
@@ -72,18 +60,12 @@ export const translations = pgTable(
      * Index 1: Batch entity load (FR-037) and entity cleanup (Q1).
      * Covers queries like: WHERE entity_type = X AND entity_id IN (...)
      */
-    entityIndex: index('idx_translations_entity').on(
-      table.entity_type,
-      table.entity_id
-    ),
+    entityIndex: index('idx_translations_entity').on(table.entity_type, table.entity_id),
     /**
      * Index 2: Coverage aggregation (FR-022).
      * Enables index-only COUNT(*) scans for coverage calculation.
      */
-    coverageIndex: index('idx_translations_coverage').on(
-      table.entity_type,
-      table.language_code
-    ),
+    coverageIndex: index('idx_translations_coverage').on(table.entity_type, table.language_code),
     /**
      * Index 3: Language drain and row-count threshold check.
      * Used by DRAIN_LANGUAGE_TRANSLATIONS job and sync removal path.

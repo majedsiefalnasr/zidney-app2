@@ -12,8 +12,8 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
+import * as path from 'node:path'
 import { createLogger } from '@zidney/logger'
-import * as path from 'path'
 import { Pool } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
@@ -34,18 +34,14 @@ type SchemaInitConflictResponse = {
 
 type SchemaInitResponse = SchemaInitQueuedResponse | SchemaInitConflictResponse
 
-function expectQueuedResponse(
-  body: SchemaInitResponse
-): SchemaInitQueuedResponse {
+function expectQueuedResponse(body: SchemaInitResponse): SchemaInitQueuedResponse {
   if (!('task_id' in body)) {
     throw new Error('Expected queued schema-init response with task_id')
   }
   return body
 }
 
-function expectConflictResponse(
-  body: SchemaInitResponse
-): SchemaInitConflictResponse {
+function expectConflictResponse(body: SchemaInitResponse): SchemaInitConflictResponse {
   if (!('error' in body)) {
     throw new Error('Expected conflict schema-init response with error payload')
   }
@@ -104,7 +100,7 @@ describe('Schema Provisioning Flow - Integration Tests', () => {
     logger.info('Setting up schema provisioning integration tests')
 
     // Create test workspace
-    workspaceId = 'test-workspace-' + Date.now()
+    workspaceId = `test-workspace-${Date.now()}`
 
     // Initialize tenant pool (in production: from resolver)
     const connectionString = process.env.DATABASE_URL
@@ -112,7 +108,7 @@ describe('Schema Provisioning Flow - Integration Tests', () => {
       ? new Pool({ connectionString, max: 10 })
       : new Pool({
           host: process.env.DB_HOST || 'localhost',
-          port: parseInt(process.env.DB_PORT || '5432'),
+          port: parseInt(process.env.DB_PORT || '5432', 10),
           database: workspaceId,
           user: process.env.DB_USER || 'zidney_app',
           password: process.env.DB_PASSWORD || 'change-me-in-production',
@@ -153,10 +149,7 @@ describe('Schema Provisioning Flow - Integration Tests', () => {
     // Test: Full flow from API request to schema locked
 
     // STEP 1: Call API endpoint
-    const response = await requestSchemaInitialization(
-      workspaceId,
-      `key-${Date.now()}`
-    )
+    const response = await requestSchemaInitialization(workspaceId, `key-${Date.now()}`)
 
     // Verify 202 Accepted
     expect(response.status).toBe(202)
@@ -194,12 +187,7 @@ describe('Schema Provisioning Flow - Integration Tests', () => {
     })
 
     // STEP 4: Verify critical tables exist
-    const tablesCheck = [
-      'users',
-      'attempts',
-      'attempt_events',
-      'schema_version',
-    ]
+    const tablesCheck = ['users', 'attempts', 'attempt_events', 'schema_version']
     expect(tablesCheck.length).toBeGreaterThanOrEqual(4)
 
     logger.info('Critical tables verified', {
@@ -215,10 +203,7 @@ describe('Schema Provisioning Flow - Integration Tests', () => {
     const idempotencyKey = `idem-key-${Date.now()}`
 
     // FIRST REQUEST: Initialize provisioning
-    const response1 = await requestSchemaInitialization(
-      workspaceId,
-      idempotencyKey
-    )
+    const response1 = await requestSchemaInitialization(workspaceId, idempotencyKey)
 
     expect(response1.status).toBe(202)
     const result1 = expectQueuedResponse(await response1.json())
@@ -227,10 +212,7 @@ describe('Schema Provisioning Flow - Integration Tests', () => {
     logger.info('First request returned task_id', { task_id: taskId1 })
 
     // SECOND REQUEST: Same idempotency key
-    const response2 = await requestSchemaInitialization(
-      workspaceId,
-      idempotencyKey
-    )
+    const response2 = await requestSchemaInitialization(workspaceId, idempotencyKey)
 
     expect(response2.status).toBe(202)
     const result2 = expectQueuedResponse(await response2.json())
@@ -317,16 +299,10 @@ describe('Schema Provisioning Flow - Integration Tests', () => {
   it('✅ Should handle concurrent provisioning requests', async () => {
     // Test: 10 concurrent requests on different workspaces
 
-    const workspaceIds = Array.from(
-      { length: 5 },
-      (_, i) => `concurrent-ws-${Date.now()}-${i}`
-    )
+    const workspaceIds = Array.from({ length: 5 }, (_, i) => `concurrent-ws-${Date.now()}-${i}`)
 
     const promises = workspaceIds.map(async (wsId) => {
-      const response = await requestSchemaInitialization(
-        wsId,
-        `concurrent-${wsId}`
-      )
+      const response = await requestSchemaInitialization(wsId, `concurrent-${wsId}`)
 
       expect(response.status).toBe(202)
       const result = expectQueuedResponse(await response.json())
@@ -359,7 +335,7 @@ describe('Schema Provisioning Flow - Integration Tests', () => {
 
     // Create task with short timeout
     const task = {
-      id: 'task-timeout-' + Date.now(),
+      id: `task-timeout-${Date.now()}`,
       type: 'INIT_TENANT_SCHEMA',
       payload: {
         workspace_id: workspaceId,
@@ -396,12 +372,8 @@ describe('Schema Provisioning Flow - Integration Tests', () => {
     // In production: This would trigger the checksum validation in executeInitTenantSchema
 
     // Verify the tamper detection logic exists in config
-    const config = require(
-      path.join(process.cwd(), 'apps/worker/src/config/task-configs.ts')
-    )
-    expect(config.INIT_TENANT_SCHEMA_CONFIG.retryPolicy.skipRetryOn).toContain(
-      'tampering_detected'
-    )
+    const config = require(path.join(process.cwd(), 'apps/worker/src/config/task-configs.ts'))
+    expect(config.INIT_TENANT_SCHEMA_CONFIG.retryPolicy.skipRetryOn).toContain('tampering_detected')
 
     logger.info('Tampering detection configured', {
       skip_retry_on: config.INIT_TENANT_SCHEMA_CONFIG.retryPolicy.skipRetryOn,
@@ -419,7 +391,7 @@ describe('Schema Provisioning Flow - Integration Tests', () => {
 
     // Simulate DLQ message
     const dlqMessage = {
-      taskId: 'task-dlq-' + Date.now(),
+      taskId: `task-dlq-${Date.now()}`,
       taskType: 'INIT_TENANT_SCHEMA',
       workspaceId: workspaceId,
       payload: {
@@ -436,7 +408,7 @@ describe('Schema Provisioning Flow - Integration Tests', () => {
     }
 
     // Get initial DLQ size
-    const dlqBefore = queueProcessor.getDLQ()
+    const _dlqBefore = queueProcessor.getDLQ()
 
     // Manually retry (would reset attempt counter in production)
     const success = await queueProcessor.retryFromDLQ(dlqMessage.taskId)

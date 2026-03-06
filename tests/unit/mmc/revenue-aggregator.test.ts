@@ -11,8 +11,8 @@ import {
   filterByDateRange,
   groupByCountry,
   groupByProduct,
-  sumRevenue,
   type RevenueData,
+  sumRevenue,
 } from '../../../packages/domain-core/mmc-dashboard/metrics/revenue-aggregator'
 
 describe('Revenue Aggregator - Unit Tests', () => {

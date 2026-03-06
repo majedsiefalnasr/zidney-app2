@@ -76,8 +76,7 @@ describe('Area 3: License Engine Validation', () => {
         DELETED: [],
       }
 
-      const isValid =
-        validTransitions[license.status]?.includes(requestedTransition) ?? false
+      const isValid = validTransitions[license.status]?.includes(requestedTransition) ?? false
 
       expect(isValid).toBe(false)
 
@@ -100,8 +99,7 @@ describe('Area 3: License Engine Validation', () => {
         DELETED: [],
       }
 
-      const isValid =
-        validTransitions[license.status]?.includes(requestedTransition) ?? false
+      const isValid = validTransitions[license.status]?.includes(requestedTransition) ?? false
 
       expect(isValid).toBe(false)
     })
@@ -118,8 +116,7 @@ describe('Area 3: License Engine Validation', () => {
       const tenantSchema = { schema_version: '1.9.0' }
 
       // In actual implementation, this would trigger upgrade check
-      const isCompatible =
-        tenantSchema.schema_version === license.schema_version
+      const isCompatible = tenantSchema.schema_version === license.schema_version
 
       expect(isCompatible).toBe(false)
     })
@@ -135,8 +132,7 @@ describe('Area 3: License Engine Validation', () => {
       const currentStudents = 100
       const attemptingToAdd = 1
 
-      const wouldExceedLimit =
-        currentStudents + attemptingToAdd > license.max_students
+      const wouldExceedLimit = currentStudents + attemptingToAdd > license.max_students
 
       expect(wouldExceedLimit).toBe(true)
     })
@@ -149,8 +145,7 @@ describe('Area 3: License Engine Validation', () => {
       const currentStaff = 50
       const attemptingToAdd = 1
 
-      const wouldExceedLimit =
-        currentStaff + attemptingToAdd > license.max_staff
+      const wouldExceedLimit = currentStaff + attemptingToAdd > license.max_staff
 
       expect(wouldExceedLimit).toBe(true)
     })

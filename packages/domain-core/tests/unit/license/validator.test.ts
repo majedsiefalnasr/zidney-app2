@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it } from 'vitest'
-import { VersionValidator } from '../../src/license/validator'
+import { VersionValidator } from '../../../src/license/validator'
 
 /**
  * Test: Version Validator (T034)

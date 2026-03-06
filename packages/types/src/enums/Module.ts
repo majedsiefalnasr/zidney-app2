@@ -65,32 +65,24 @@ export const MODULE_LABELS: Record<Module, Record<'en' | 'ar', string>> = {
  * Validate if a value is a valid module
  */
 export function isValidModule(value: unknown): value is Module {
-  return (
-    typeof value === 'string' && Object.values(Module).includes(value as Module)
-  )
+  return typeof value === 'string' && Object.values(Module).includes(value as Module)
 }
 
 /**
  * Get module label by key and language
  */
-export function getModuleLabel(
-  module: Module,
-  lang: 'en' | 'ar' = 'en'
-): string {
+export function getModuleLabel(module: Module, lang: 'en' | 'ar' = 'en'): string {
   return MODULE_LABELS[module][lang]
 }
 
 /**
  * Get module label with fallback to English if Arabic not available
  */
-export function getModuleLabelWithFallback(
-  module: Module,
-  lang: 'en' | 'ar' = 'en'
-): string {
+export function getModuleLabelWithFallback(module: Module, lang: 'en' | 'ar' = 'en'): string {
   if (lang === 'ar') {
-    return MODULE_LABELS[module]['ar'] || MODULE_LABELS[module]['en']
+    return MODULE_LABELS[module].ar || MODULE_LABELS[module].en
   }
-  return MODULE_LABELS[module]['en']
+  return MODULE_LABELS[module].en
 }
 
 /**

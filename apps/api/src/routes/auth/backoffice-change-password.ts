@@ -100,8 +100,7 @@ router.post(
     if (!result.success) {
       throwAuthError(
         AuthErrorCodes.VALIDATION_ERROR,
-        result.error.flatten().fieldErrors.new_password?.[0] ||
-          'Invalid request',
+        result.error.flatten().fieldErrors.new_password?.[0] || 'Invalid request',
         400
       )
     }
@@ -115,21 +114,13 @@ router.post(
 
     try {
       if (!workspaceId) {
-        throwAuthError(
-          AuthErrorCodes.WORKSPACE_INVALID,
-          'Workspace not found',
-          404
-        )
+        throwAuthError(AuthErrorCodes.WORKSPACE_INVALID, 'Workspace not found', 404)
       }
 
       const pool = getTenantPool(workspaceId)
 
       if (!pool) {
-        throwAuthError(
-          AuthErrorCodes.WORKSPACE_INVALID,
-          'Workspace not found',
-          404
-        )
+        throwAuthError(AuthErrorCodes.WORKSPACE_INVALID, 'Workspace not found', 404)
       }
 
       const client = await pool.connect()
@@ -172,11 +163,7 @@ router.post(
 
           await client.query('ROLLBACK')
 
-          throwAuthError(
-            AuthErrorCodes.INVALID_CREDENTIALS,
-            'Current password is incorrect',
-            401
-          )
+          throwAuthError(AuthErrorCodes.INVALID_CREDENTIALS, 'Current password is incorrect', 401)
         }
 
         // Hash new password

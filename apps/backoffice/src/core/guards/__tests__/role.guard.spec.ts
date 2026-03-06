@@ -2,13 +2,11 @@
  * RoleGuard unit tests for Backoffice.
  * Stage: STAGE_UI_03_ROUTER_AND_GUARDS
  */
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
 import type { RouteLocationNormalized } from 'vue-router'
 import { createRoleGuard } from '../role.guard'
 
-function makeRoute(
-  overrides: Partial<RouteLocationNormalized> = {}
-): RouteLocationNormalized {
+function makeRoute(overrides: Partial<RouteLocationNormalized> = {}): RouteLocationNormalized {
   return {
     path: '/test',
     fullPath: '/test',
@@ -38,9 +36,7 @@ describe('createRoleGuard (Backoffice)', () => {
       getUserRole,
       unauthorizedRouteName: UNAUTHORIZED_ROUTE,
     })
-    expect(
-      guard(makeRoute({ meta: { roles: ['admin'] } }), makeRoute(), () => {})
-    ).toBe(true)
+    expect(guard(makeRoute({ meta: { roles: ['admin'] } }), makeRoute(), () => {})).toBe(true)
   })
 
   it('SC2: roles:["admin"] + user.role:"viewer" → redirects to bo-unauthorized', () => {
@@ -49,9 +45,9 @@ describe('createRoleGuard (Backoffice)', () => {
       getUserRole,
       unauthorizedRouteName: UNAUTHORIZED_ROUTE,
     })
-    expect(
-      guard(makeRoute({ meta: { roles: ['admin'] } }), makeRoute(), () => {})
-    ).toEqual({ name: UNAUTHORIZED_ROUTE })
+    expect(guard(makeRoute({ meta: { roles: ['admin'] } }), makeRoute(), () => {})).toEqual({
+      name: UNAUTHORIZED_ROUTE,
+    })
   })
 
   it('SC3: roles undefined → returns true (guard skips)', () => {
@@ -69,9 +65,9 @@ describe('createRoleGuard (Backoffice)', () => {
       getUserRole,
       unauthorizedRouteName: UNAUTHORIZED_ROUTE,
     })
-    expect(
-      guard(makeRoute({ meta: { roles: ['admin'] } }), makeRoute(), () => {})
-    ).toEqual({ name: UNAUTHORIZED_ROUTE })
+    expect(guard(makeRoute({ meta: { roles: ['admin'] } }), makeRoute(), () => {})).toEqual({
+      name: UNAUTHORIZED_ROUTE,
+    })
   })
 
   it('SC5: already on unauthorized route → returns true (loop prevention)', () => {
@@ -97,8 +93,6 @@ describe('createRoleGuard (Backoffice)', () => {
       getUserRole,
       unauthorizedRouteName: UNAUTHORIZED_ROUTE,
     })
-    expect(
-      guard(makeRoute({ meta: { roles: ['admin'] } }), makeRoute(), () => {})
-    ).toBe(true)
+    expect(guard(makeRoute({ meta: { roles: ['admin'] } }), makeRoute(), () => {})).toBe(true)
   })
 })
