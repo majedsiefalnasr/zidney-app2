@@ -26,6 +26,7 @@
  * - PCI DSS 3.2.1: Passwords must be hashed and salted
  */
 
+import { logger } from '@zidney/logger'
 import bcrypt from 'bcrypt'
 
 /**
@@ -124,10 +125,7 @@ export async function verifyPassword(
     return isValid
   } catch (error) {
     // Hash is malformed or corrupted
-    console.error(
-      'Password verification failed (possibly corrupted hash):',
-      error
-    )
+    logger.error('password_verification_failed', { error: String(error) })
     return false
   }
 }
@@ -200,8 +198,7 @@ export function validatePasswordComplexity(password: string): {
   if (password.length < 8) suggestions.push('Use at least 8 characters')
   if (password.length >= 8) score++
 
-  if (password.length < 12)
-    suggestions.push('Longer passwords are more secure (12+ chars)')
+  if (password.length < 12) suggestions.push('Longer passwords are more secure (12+ chars)')
   if (password.length >= 12) score++
 
   // Character diversity

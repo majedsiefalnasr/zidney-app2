@@ -9,7 +9,7 @@ import {
   createTestContext,
   generateJWT,
   insertTestAttempt,
-  TestContext,
+  type TestContext,
 } from '../test-helpers'
 
 describe('T096: Attempt Expiration', () => {
@@ -30,10 +30,7 @@ describe('T096: Attempt Expiration', () => {
     const attemptId = await insertTestAttempt(ctx.tenantDb, ctx.workspaceId)
 
     // Mark attempt as expired
-    await ctx.tenantDb.query(
-      `UPDATE attempts SET status = 'EXPIRED' WHERE id = $1`,
-      [attemptId]
-    )
+    await ctx.tenantDb.query(`UPDATE attempts SET status = 'EXPIRED' WHERE id = $1`, [attemptId])
 
     const res = await client.post(`/attempt/${attemptId}/submit`, {
       idempotency_key: 'expired-test-1',
@@ -45,10 +42,7 @@ describe('T096: Attempt Expiration', () => {
 
   it('should return 410 Gone for expired attempt', async () => {
     const attemptId = await insertTestAttempt(ctx.tenantDb, ctx.workspaceId)
-    await ctx.tenantDb.query(
-      `UPDATE attempts SET status = 'EXPIRED' WHERE id = $1`,
-      [attemptId]
-    )
+    await ctx.tenantDb.query(`UPDATE attempts SET status = 'EXPIRED' WHERE id = $1`, [attemptId])
 
     const res = await client.get(`/attempt/${attemptId}/status`)
     expect(res.status).toBe(410)
@@ -56,10 +50,7 @@ describe('T096: Attempt Expiration', () => {
 
   it('should prevent resubmission after completion', async () => {
     const attemptId = await insertTestAttempt(ctx.tenantDb, ctx.workspaceId)
-    await ctx.tenantDb.query(
-      `UPDATE attempts SET status = 'COMPLETED' WHERE id = $1`,
-      [attemptId]
-    )
+    await ctx.tenantDb.query(`UPDATE attempts SET status = 'COMPLETED' WHERE id = $1`, [attemptId])
 
     const res = await client.post(`/attempt/${attemptId}/submit`, {
       idempotency_key: 'completed-test',
@@ -71,10 +62,7 @@ describe('T096: Attempt Expiration', () => {
 
   it('should handle concurrent expiration checks', async () => {
     const attemptId = await insertTestAttempt(ctx.tenantDb, ctx.workspaceId)
-    await ctx.tenantDb.query(
-      `UPDATE attempts SET status = 'EXPIRED' WHERE id = $1`,
-      [attemptId]
-    )
+    await ctx.tenantDb.query(`UPDATE attempts SET status = 'EXPIRED' WHERE id = $1`, [attemptId])
 
     const promises = Array(10)
       .fill(null)

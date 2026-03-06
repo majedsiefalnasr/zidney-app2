@@ -1,5 +1,5 @@
 import { createLogger } from '@zidney/logger'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 const logger = createLogger('audit-reader')
 

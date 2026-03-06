@@ -5,13 +5,11 @@
  *
  * Stage: STAGE_UI_03_ROUTER_AND_GUARDS
  */
-import { beforeEach, describe, expect, it, vi, type Mock } from 'vitest'
+import { beforeEach, describe, expect, it, type Mock, vi } from 'vitest'
 import type { RouteLocationNormalized } from 'vue-router'
 import { createAuthGuard } from '../auth.guard'
 
-function makeRoute(
-  overrides: Partial<RouteLocationNormalized> = {}
-): RouteLocationNormalized {
+function makeRoute(overrides: Partial<RouteLocationNormalized> = {}): RouteLocationNormalized {
   return {
     path: '/test',
     fullPath: '/test',
@@ -62,9 +60,7 @@ describe('createAuthGuard (Frontoffice)', () => {
       loginRouteName: LOGIN_ROUTE,
       dashboardRouteName: DASHBOARD_ROUTE,
     })
-    expect(
-      guard(makeRoute({ meta: { requiresAuth: true } }), makeRoute(), () => {})
-    ).toBe(true)
+    expect(guard(makeRoute({ meta: { requiresAuth: true } }), makeRoute(), () => {})).toBe(true)
   })
 
   it('SC3: public + !auth → returns true', () => {
@@ -74,9 +70,7 @@ describe('createAuthGuard (Frontoffice)', () => {
       loginRouteName: LOGIN_ROUTE,
       dashboardRouteName: DASHBOARD_ROUTE,
     })
-    expect(
-      guard(makeRoute({ meta: { public: true } }), makeRoute(), () => {})
-    ).toBe(true)
+    expect(guard(makeRoute({ meta: { public: true } }), makeRoute(), () => {})).toBe(true)
   })
 
   it('SC4: public + auth → redirects to dashboard', () => {
@@ -86,9 +80,9 @@ describe('createAuthGuard (Frontoffice)', () => {
       loginRouteName: LOGIN_ROUTE,
       dashboardRouteName: DASHBOARD_ROUTE,
     })
-    expect(
-      guard(makeRoute({ meta: { public: true } }), makeRoute(), () => {})
-    ).toEqual({ name: DASHBOARD_ROUTE })
+    expect(guard(makeRoute({ meta: { public: true } }), makeRoute(), () => {})).toEqual({
+      name: DASHBOARD_ROUTE,
+    })
   })
 
   it('SC5: already on login route + !auth → returns true (loop prevention)', () => {
@@ -98,9 +92,7 @@ describe('createAuthGuard (Frontoffice)', () => {
       loginRouteName: LOGIN_ROUTE,
       dashboardRouteName: DASHBOARD_ROUTE,
     })
-    expect(guard(makeRoute({ name: LOGIN_ROUTE }), makeRoute(), () => {})).toBe(
-      true
-    )
+    expect(guard(makeRoute({ name: LOGIN_ROUTE }), makeRoute(), () => {})).toBe(true)
   })
 
   it('SC6: no meta + auth → returns true', () => {
@@ -164,9 +156,7 @@ describe('createAuthGuard (Frontoffice)', () => {
       loginRouteName: LOGIN_ROUTE,
       dashboardRouteName: DASHBOARD_ROUTE,
     })
-    expect(
-      guard(makeRoute({ meta: { requiresAuth: true } }), makeRoute(), () => {})
-    ).toBe(true)
+    expect(guard(makeRoute({ meta: { requiresAuth: true } }), makeRoute(), () => {})).toBe(true)
   })
 
   it('US9: after logout, protected route → login redirect', () => {

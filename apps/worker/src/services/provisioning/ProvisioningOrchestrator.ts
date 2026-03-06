@@ -20,12 +20,13 @@
  * 9. Release lock and complete
  */
 
-import { Pool } from 'pg'
-import ProvisioningJob from '../../jobs/provisioning/ProvisioningJob'
-import { BaselineSeeder } from './BaselineSeeder'
-import { CheckpointManager } from './CheckpointManager'
-import { DistributedLock } from './DistributedLock'
-import { MigrationExecutor } from './MigrationExecutor'
+import { logger } from '@zidney/logger'
+import type { Pool } from 'pg'
+import type ProvisioningJob from '../../jobs/provisioning/ProvisioningJob'
+import type { BaselineSeeder } from './BaselineSeeder'
+import type { CheckpointManager } from './CheckpointManager'
+import type { DistributedLock } from './DistributedLock'
+import type { MigrationExecutor } from './MigrationExecutor'
 
 export interface ProvisioningResult {
   success: boolean
@@ -70,22 +71,22 @@ export class ProvisioningOrchestrator {
 
     try {
       // Step 1: Validate job, license, slug
-      console.log(`[PROV] Step 1: Validating job ${job.id}`)
+      logger.info('provisioning_step', { step: 1, description: `Validating job ${job.id}` })
       this.validateJob(job)
       steps_completed = 1
 
       // Step 2: Acquire distributed lock
-      console.log(`[PROV] Step 2: Acquiring lock for ${job.workspace_slug}`)
-      const lock_result = await this.distributed_lock.acquireLock(
-        job.workspace_slug
-      )
+      logger.info('provisioning_step', {
+        step: 2,
+        description: `Acquiring lock for ${job.workspace_slug}`,
+      })
+      const lock_result = await this.distributed_lock.acquireLock(job.workspace_slug)
       if (!lock_result.acquired) {
         return {
           success: false,
           job_id: job.id,
           workspace_slug: job.workspace_slug,
-          error:
-            'PROV_006: Failed to acquire provisioning lock (another provisioning in progress)',
+          error: 'PROV_006: Failed to acquire provisioning lock (another provisioning in progress)',
           steps_completed,
           duration_ms: Date.now() - start_time,
         }
@@ -94,51 +95,49 @@ export class ProvisioningOrchestrator {
       steps_completed = 2
 
       // Step 3: Create tenant database
-      console.log(
-        `[PROV] Step 3: Creating database workspace_${job.workspace_slug}`
-      )
+      logger.info('provisioning_step', {
+        step: 3,
+        description: `Creating database workspace_${job.workspace_slug}`,
+      })
       await this.createTenantDatabase(job.workspace_slug)
       steps_completed = 3
 
       // Step 4: Execute baseline migrations
-      console.log(`[PROV] Step 4: Executing migrations`)
+      logger.info('provisioning_step', { step: 4, description: 'Executing migrations' })
       const migrations = await this.migration_executor.loadMigrations()
-      const migration_result =
-        await this.migration_executor.executeMigrationsInTransaction(
-          this.master_pool, // Will be tenant pool in actual impl
-          migrations
-        )
+      const migration_result = await this.migration_executor.executeMigrationsInTransaction(
+        this.master_pool, // Will be tenant pool in actual impl
+        migrations
+      )
       if (migration_result.failed) {
         throw new Error('PROV_003: Migration execution failed')
       }
       steps_completed = 4
 
       // Step 5: Seed baseline data
-      console.log(`[PROV] Step 5: Seeding baseline data`)
-      const seed_result = await this.baseline_seeder.seedAllData(
-        this.master_pool
-      )
-      console.log(`[PROV] Seeded ${seed_result.total_seeded} baseline records`)
+      logger.info('provisioning_step', { step: 5, description: 'Seeding baseline data' })
+      const seed_result = await this.baseline_seeder.seedAllData(this.master_pool)
+      logger.info('provisioning_seeded', { total_seeded: seed_result.total_seeded })
       steps_completed = 5
 
       // Step 6: Create registry entry
-      console.log(`[PROV] Step 6: Creating registry entry`)
+      logger.info('provisioning_step', { step: 6, description: 'Creating registry entry' })
       await this.createRegistryEntry(job)
       steps_completed = 6
 
       // Step 7: Transition license to ACTIVE
-      console.log(`[PROV] Step 7: Transitioning license to ACTIVE`)
+      logger.info('provisioning_step', { step: 7, description: 'Transitioning license to ACTIVE' })
       await this.transitionLicenseToActive(job)
       steps_completed = 7
 
       // Step 8: Register connection pool
-      console.log(`[PROV] Step 8: Registering connection pool`)
+      logger.info('provisioning_step', { step: 8, description: 'Registering connection pool' })
       // Note: In actual impl, would create Pool and register in ConnectionPoolManager
       // For now, this is a placeholder
       steps_completed = 8
 
       // Step 9: Release lock and complete
-      console.log(`[PROV] Step 9: Completing provisioning`)
+      logger.info('provisioning_step', { step: 9, description: 'Completing provisioning' })
       if (lock_released) {
         await lock_released()
       }
@@ -153,16 +152,13 @@ export class ProvisioningOrchestrator {
         duration_ms: Date.now() - start_time,
       }
     } catch (error) {
-      console.error(
-        `[PROV] Provisioning failed at step ${steps_completed + 1}:`,
-        error
-      )
+      logger.error('provisioning_failed', { step: steps_completed + 1, error: String(error) })
 
       // Rollback operations
       try {
         await this.rollbackProvisioning(job, steps_completed, error)
       } catch (rollback_error) {
-        console.error(`[PROV] Rollback failed:`, rollback_error)
+        logger.error('provisioning_rollback_failed', { error: String(rollback_error) })
       }
 
       // Release lock if held
@@ -170,7 +166,7 @@ export class ProvisioningOrchestrator {
         try {
           await lock_released()
         } catch (e) {
-          console.error(`[PROV] Failed to release lock:`, e)
+          logger.error('provisioning_lock_release_failed', { error: String(e) })
         }
       }
 
@@ -211,7 +207,7 @@ export class ProvisioningOrchestrator {
       const db_name = `workspace_${workspace_slug}`
       // In production, use psql or admin connection to create database
       // For now, simplified implementation
-      console.log(`[PROV] Creating database: ${db_name}`)
+      logger.info('provisioning_creating_database', { db_name })
       // await client.query(`CREATE DATABASE ${db_name}`)
     } catch (error) {
       throw new Error(`PROV_002: Database creation failed: ${error}`)
@@ -285,18 +281,24 @@ export class ProvisioningOrchestrator {
     steps_completed: number,
     _error: any
   ): Promise<void> {
-    console.log(`[PROV] Rolling back provisioning for ${job.workspace_slug}`)
+    logger.info('provisioning_rollback_started', { workspace_slug: job.workspace_slug })
 
     if (steps_completed >= 3) {
       // Drop database if created
       const client = await this.master_pool.connect()
       try {
         const db_name = `workspace_${job.workspace_slug}`
-        console.log(`[PROV] Dropping database: ${db_name}`)
+        logger.info('provisioning_rollback_drop_db', {
+          workspace_slug: job.workspace_slug,
+          db_name,
+        })
         // In production, would use admin connection to drop database
         // await client.query(`DROP DATABASE IF EXISTS ${db_name}`)
       } catch (e) {
-        console.error(`[PROV] Failed to drop database:`, e)
+        logger.error('provisioning_rollback_drop_db_failed', {
+          workspace_slug: job.workspace_slug,
+          error: String(e),
+        })
       } finally {
         client.release()
       }
@@ -306,12 +308,13 @@ export class ProvisioningOrchestrator {
       // Delete registry entry
       const client = await this.master_pool.connect()
       try {
-        await client.query(
-          `DELETE FROM tenants_registry WHERE license_id = $1`,
-          [job.license_id]
-        )
+        await client.query(`DELETE FROM tenants_registry WHERE license_id = $1`, [job.license_id])
       } catch (e) {
-        console.error(`[PROV] Failed to delete registry entry:`, e)
+        logger.error('provisioning_rollback_registry_delete_failed', {
+          workspace_slug: job.workspace_slug,
+          license_id: job.license_id,
+          error: String(e),
+        })
       } finally {
         client.release()
       }
@@ -329,7 +332,10 @@ export class ProvisioningOrchestrator {
         [job.license_id]
       )
     } catch (e) {
-      console.error(`[PROV] Failed to mark license as FAILED:`, e)
+      logger.error('provisioning_rollback_license_update_failed', {
+        license_id: job.license_id,
+        error: String(e),
+      })
     } finally {
       client.release()
     }

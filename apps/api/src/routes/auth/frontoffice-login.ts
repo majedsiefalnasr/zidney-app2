@@ -85,11 +85,7 @@ router.post(
   validateLicenseMiddleware(),
   zValidator('json', loginSchema, (result, _c) => {
     if (!result.success) {
-      throwAuthError(
-        AuthErrorCodes.VALIDATION_ERROR,
-        'Invalid login request',
-        400
-      )
+      throwAuthError(AuthErrorCodes.VALIDATION_ERROR, 'Invalid login request', 400)
     }
   }),
   async (c) => {
@@ -101,21 +97,13 @@ router.post(
 
     try {
       if (!workspaceId) {
-        throwAuthError(
-          AuthErrorCodes.WORKSPACE_INVALID,
-          'Workspace not found',
-          404
-        )
+        throwAuthError(AuthErrorCodes.WORKSPACE_INVALID, 'Workspace not found', 404)
       }
 
       const pool = getTenantPool(workspaceId)
 
       if (!pool) {
-        throwAuthError(
-          AuthErrorCodes.WORKSPACE_INVALID,
-          'Workspace not found',
-          404
-        )
+        throwAuthError(AuthErrorCodes.WORKSPACE_INVALID, 'Workspace not found', 404)
       }
 
       const client = await pool.connect()
@@ -136,10 +124,7 @@ router.post(
 
         if (userResult.rows.length === 0) {
           // Dummy hash for timing safety
-          await auth.password.verifyPassword(
-            request.password,
-            auth.password.getDummyHash()
-          )
+          await auth.password.verifyPassword(request.password, auth.password.getDummyHash())
 
           logger.warn(
             {
@@ -152,11 +137,7 @@ router.post(
             '[Frontoffice Auth] Login attempt for non-existent student'
           )
 
-          throwAuthError(
-            AuthErrorCodes.INVALID_CREDENTIALS,
-            'Invalid email or password',
-            401
-          )
+          throwAuthError(AuthErrorCodes.INVALID_CREDENTIALS, 'Invalid email or password', 401)
         }
 
         const user = userResult.rows[0]
@@ -228,11 +209,7 @@ router.post(
             )
           }
 
-          throwAuthError(
-            AuthErrorCodes.INVALID_CREDENTIALS,
-            'Invalid email or password',
-            401
-          )
+          throwAuthError(AuthErrorCodes.INVALID_CREDENTIALS, 'Invalid email or password', 401)
         }
 
         // Success - reset counters

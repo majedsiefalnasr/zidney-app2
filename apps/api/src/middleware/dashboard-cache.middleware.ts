@@ -36,7 +36,7 @@
  */
 
 import { logger } from '@zidney/logger'
-import { Context, Next } from 'hono'
+import type { Context, Next } from 'hono'
 
 /**
  * Extract endpoint name from request path
@@ -64,13 +64,10 @@ function extractEndpointName(path: string): string {
  * app.use('/api/mmc/dashboard/*', dashboardCacheMiddleware)
  * ```
  */
-export async function dashboardCacheMiddleware(
-  c: Context,
-  next: Next
-): Promise<void> {
+export async function dashboardCacheMiddleware(c: Context, next: Next): Promise<void> {
   const cacheClient = getDashboardCacheClient()
   const endpoint = extractEndpointName(c.req.path)
-  // @ts-ignore: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
+  // @ts-expect-error: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
   const workspaceId = c.req.get('x-workspace-id')
   const ttl = cacheClient.getTTL(endpoint)
 
@@ -86,13 +83,13 @@ export async function dashboardCacheMiddleware(
     await next()
 
     // Log cache bypass
-    // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+    // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
     logger.log({
       timestamp: new Date().toISOString(),
       level: 'debug',
       service: 'dashboard-cache',
       correlation_id: c.req.header('x-correlation-id') || 'unknown',
-      // @ts-ignore: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
+      // @ts-expect-error: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
       user_id: c.req.get('x-user-id') || 'unknown',
       workspace_id: workspaceId || 'unknown',
       event: 'cache_bypass',
@@ -115,11 +112,7 @@ export async function dashboardCacheMiddleware(
 
   try {
     // BEFORE: Check cache
-    const cachedResponse = await cacheClient.get(
-      endpoint,
-      workspaceId,
-      queryParams
-    )
+    const cachedResponse = await cacheClient.get(endpoint, workspaceId, queryParams)
 
     if (cachedResponse) {
       // Cache hit: return cached response
@@ -129,13 +122,13 @@ export async function dashboardCacheMiddleware(
       c.header('Content-Type', 'application/json')
 
       // Log cache hit
-      // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+      // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
       logger.log({
         timestamp: new Date().toISOString(),
         level: 'debug',
         service: 'dashboard-cache',
         correlation_id: c.req.header('x-correlation-id') || 'unknown',
-        // @ts-ignore: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
+        // @ts-expect-error: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
         user_id: c.req.get('x-user-id') || 'unknown',
         workspace_id: workspaceId,
         event: 'cache_hit',
@@ -158,7 +151,7 @@ export async function dashboardCacheMiddleware(
     }
   } catch (error) {
     // Cache error: continue without caching
-    // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+    // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
     logger.log({
       timestamp: new Date().toISOString(),
       level: 'warn',
@@ -186,7 +179,7 @@ export async function dashboardCacheMiddleware(
       responseStatus = initResponse.status || 200
     }
 
-    // @ts-ignore: TS2589+TS2345 excessive deep type in response - see INFRA-001 [INFRA-001]
+    // @ts-expect-error: TS2589+TS2345 excessive deep type in response - see INFRA-001 [INFRA-001]
     return originalJson.call(this, data, initResponse)
   }
 
@@ -194,12 +187,7 @@ export async function dashboardCacheMiddleware(
   await next()
 
   // AFTER: Cache successful responses (2xx)
-  if (
-    responseStatus >= 200 &&
-    responseStatus < 300 &&
-    responseData &&
-    cacheStatus === 'MISS'
-  ) {
+  if (responseStatus >= 200 && responseStatus < 300 && responseData && cacheStatus === 'MISS') {
     try {
       const cacheKey = `${endpoint}:${workspaceId}:${JSON.stringify(queryParams)}`
       const cached = await cacheClient.set(
@@ -212,13 +200,13 @@ export async function dashboardCacheMiddleware(
       if (cached) {
         c.header('Cache-Control', `max-age=${ttl}, public`)
 
-        // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+        // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
         logger.log({
           timestamp: new Date().toISOString(),
           level: 'debug',
           service: 'dashboard-cache',
           correlation_id: c.req.header('x-correlation-id') || 'unknown',
-          // @ts-ignore: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
+          // @ts-expect-error: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
           user_id: c.req.get('x-user-id') || 'unknown',
           workspace_id: workspaceId,
           event: 'cache_stored',
@@ -229,7 +217,7 @@ export async function dashboardCacheMiddleware(
         })
       }
     } catch (error) {
-      // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+      // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
       logger.log({
         timestamp: new Date().toISOString(),
         level: 'warn',
@@ -244,7 +232,7 @@ export async function dashboardCacheMiddleware(
     // Don't cache errors
     c.header('Cache-Control', 'no-cache, no-store, must-revalidate')
 
-    // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+    // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
     logger.log({
       timestamp: new Date().toISOString(),
       level: 'debug',
@@ -266,9 +254,7 @@ function getDashboardCacheClient() {
   // This function is re-exported from redis-utils package
   // Implementation handles singleton pattern
   try {
-    const {
-      getDashboardCacheClient: getClient,
-    } = require('@zidney/redis-utils')
+    const { getDashboardCacheClient: getClient } = require('@zidney/redis-utils')
     return getClient()
   } catch {
     // If import fails, return a no-op client
@@ -293,13 +279,10 @@ function getDashboardCacheClient() {
  * app.use(dashboardCacheMiddlewareAsync)
  * ```
  */
-export async function dashboardCacheMiddlewareAsync(
-  c: Context,
-  next: Next
-): Promise<void> {
+export async function dashboardCacheMiddlewareAsync(c: Context, next: Next): Promise<void> {
   const cacheClient = getDashboardCacheClient()
   const endpoint = extractEndpointName(c.req.path)
-  // @ts-ignore: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
+  // @ts-expect-error: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
   const workspaceId = c.req.get('x-workspace-id')
   const ttl = cacheClient.getTTL(endpoint)
 
@@ -321,7 +304,7 @@ export async function dashboardCacheMiddlewareAsync(
       c.status(200)
       await c.json(JSON.parse(cached))
 
-      // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+      // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
       logger.log({
         timestamp: new Date().toISOString(),
         level: 'debug',
@@ -334,7 +317,7 @@ export async function dashboardCacheMiddlewareAsync(
     }
   } catch (error) {
     // Continue on cache error
-    // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+    // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
     logger.log({
       timestamp: new Date().toISOString(),
       level: 'warn',
@@ -355,15 +338,10 @@ export async function dashboardCacheMiddlewareAsync(
     try {
       // Note: In async middleware, the response body may have already been sent
       // This approach works if response is buffered before being sent to client
-      await cacheClient.set(
-        endpoint,
-        workspaceId,
-        c.res.text?.() || '',
-        queryParams
-      )
+      await cacheClient.set(endpoint, workspaceId, c.res.text?.() || '', queryParams)
 
       c.header('Cache-Control', `max-age=${ttl}, public`)
-    } catch (error) {
+    } catch (_error) {
       // Silent fail on cache error
     }
   }

@@ -199,17 +199,12 @@ app.get('/ws/attempt/:id', async (c) => {
           messageTimestamps.push(now)
 
           // Remove messages older than 60 seconds
-          while (
-            messageTimestamps.length > 0 &&
-            messageTimestamps[0]! < now - 60000
-          ) {
+          while (messageTimestamps.length > 0 && messageTimestamps[0]! < now - 60000) {
             messageTimestamps.shift()
           }
 
           // Check burst limit (10 messages in last 1 second)
-          const recentMessages = messageTimestamps.filter(
-            (ts) => ts > now - 1000
-          )
+          const recentMessages = messageTimestamps.filter((ts) => ts > now - 1000)
           if (recentMessages.length > 10) {
             logger.warn(`WebSocket rate limit: too many messages (burst)`, {
               correlation_id: correlationIDValue,
@@ -308,8 +303,7 @@ app.get('/ws/attempt/:id', async (c) => {
           workspace_id: workspace.id,
           user_id: userId,
           attempt_id: attemptId,
-          session_duration_ms:
-            Date.now() - Date.parse(connectionMetadata.connected_at),
+          session_duration_ms: Date.now() - Date.parse(connectionMetadata.connected_at),
         })
       }
 

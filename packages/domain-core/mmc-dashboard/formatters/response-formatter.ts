@@ -28,7 +28,7 @@ export type ApiResponse<T> = StandardResponse<T>
  * Uses ROUND_HALF_UP (0.5 rounds up) rather than banker's rounding
  */
 function roundHalfUp(value: number, decimals: number): number {
-  const factor = Math.pow(10, decimals)
+  const factor = 10 ** decimals
   return Math.round((value + Number.EPSILON) * factor) / factor
 }
 
@@ -97,10 +97,7 @@ export function createSuccessResponse<T>(data: T): StandardResponse<T> {
 /**
  * Create standard error response
  */
-export function createErrorResponse(
-  code: string,
-  message: string
-): StandardResponse<null> {
+export function createErrorResponse(code: string, message: string): StandardResponse<null> {
   return {
     success: false,
     data: null,
@@ -213,9 +210,7 @@ export function formatRevenueBreakdownResponse(data: {
         product_id: p.product_id,
         product_name: p.product_name,
         revenue_this_period: formatCurrency(p.revenue_this_period_cents),
-        revenue_previous_period: formatCurrency(
-          p.revenue_previous_period_cents
-        ),
+        revenue_previous_period: formatCurrency(p.revenue_previous_period_cents),
         growth_percent: formatPercentage(p.growth_percent),
         license_count: p.license_count,
       })),
@@ -265,9 +260,7 @@ export function formatGeographicResponse(data: {
         country_name: c.country_name,
         revenue: formatCurrency(c.revenue_cents),
         license_count: c.license_count,
-        avg_revenue_per_license: formatCurrency(
-          c.avg_revenue_per_license_cents
-        ),
+        avg_revenue_per_license: formatCurrency(c.avg_revenue_per_license_cents),
       })),
       total_revenue: formatCurrency(data.total_revenue_cents),
       total_license_count: data.total_license_count,
@@ -328,9 +321,7 @@ export function formatAffiliatesResponse(data: {
         status: a.status,
         total_commission: formatCurrency(a.total_commission_cents),
         usage_count: a.usage_count,
-        avg_commission_per_usage: formatCurrency(
-          a.avg_commission_per_usage_cents
-        ),
+        avg_commission_per_usage: formatCurrency(a.avg_commission_per_usage_cents),
       })),
       pagination: data.pagination,
       total_commission: formatCurrency(data.total_commission_cents),
@@ -384,12 +375,8 @@ export function formatTrendsResponse(data: {
         growth_percent: formatPercentage(m.growth_percent),
       })),
       growth_summary: {
-        license_growth_percent: formatPercentage(
-          data.growth_summary.license_growth_percent
-        ),
-        revenue_growth_percent: formatPercentage(
-          data.growth_summary.revenue_growth_percent
-        ),
+        license_growth_percent: formatPercentage(data.growth_summary.license_growth_percent),
+        revenue_growth_percent: formatPercentage(data.growth_summary.revenue_growth_percent),
         period_months: data.growth_summary.period_months,
       },
     },
@@ -411,7 +398,7 @@ export function formatExportResponse(data: {
   const bom = '\uFEFF'
 
   if (data.rows.length === 0) {
-    return bom + 'No data\n'
+    return `${bom}No data\n`
   }
 
   // Extract headers from first row
@@ -438,7 +425,7 @@ export function formatExportResponse(data: {
       .join(',')
   )
 
-  return bom + headerRow + '\n' + dataRows.join('\n')
+  return `${bom + headerRow}\n${dataRows.join('\n')}`
 }
 
 /**
@@ -448,10 +435,7 @@ export function formatExportResponse(data: {
  * @param message - Human-readable error message
  * @returns Error response envelope
  */
-export function formatErrorResponse(
-  code: string,
-  message: string
-): ApiResponse<null> {
+export function formatErrorResponse(code: string, message: string): ApiResponse<null> {
   return {
     success: false,
     data: null,

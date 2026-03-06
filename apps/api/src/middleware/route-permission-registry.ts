@@ -22,8 +22,8 @@
  */
 
 export {
+  lookupPermission,
   PUBLIC_ROUTES,
   ROUTE_PERMISSION_REGISTRY,
-  lookupPermission,
   type RoutePermissionEntry,
 } from '@zidney/domain-core/rbac'

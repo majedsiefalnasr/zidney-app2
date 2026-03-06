@@ -21,10 +21,7 @@ const logger = createLogger('api')
  *
  * Only allows users with AUDIT_READ role to access audit logs.
  */
-export async function auditReadMiddleware(
-  c: Context,
-  next: Next
-): Promise<Response | void> {
+export async function auditReadMiddleware(c: Context, next: Next): Promise<Response | undefined> {
   // Get user from context (set by auth middleware)
   const userId = c.get('userId')
   const userRoles = c.get('userRoles') || []
@@ -50,8 +47,7 @@ export async function auditReadMiddleware(
 
   // Check for AUDIT_READ role
   const hasAuditReadPermission =
-    Array.isArray(userRoles) &&
-    (userRoles.includes('AUDIT_READ') || userRoles.includes('ADMIN'))
+    Array.isArray(userRoles) && (userRoles.includes('AUDIT_READ') || userRoles.includes('ADMIN'))
 
   if (!hasAuditReadPermission) {
     logger.warn('audit_read_permission_denied', {

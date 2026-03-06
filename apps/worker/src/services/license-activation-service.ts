@@ -9,7 +9,7 @@
  * This is the final success marker for provisioning.
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 /**
  * License Activation Result
@@ -113,11 +113,7 @@ export class FailureHandlerService {
   /**
    * Mark license as provisioning failed
    */
-  async markFailed(
-    licenseId: string,
-    errorCode: string,
-    errorMessage: string
-  ): Promise<boolean> {
+  async markFailed(licenseId: string, errorCode: string, errorMessage: string): Promise<boolean> {
     try {
       const failed_at = new Date().toISOString()
 
@@ -129,11 +125,7 @@ export class FailureHandlerService {
              retry_count = retry_count + 1
          WHERE id = $3
          RETURNING id, status, retry_count`,
-        [
-          failed_at,
-          `${errorCode}: ${errorMessage}`.substring(0, 1024),
-          licenseId,
-        ]
+        [failed_at, `${errorCode}: ${errorMessage}`.substring(0, 1024), licenseId]
       )
 
       if (result.rowCount === 0) {
@@ -143,16 +135,12 @@ export class FailureHandlerService {
         return false
       }
 
-      this.logger?.logStep(
-        'license-failed',
-        'License marked as provisioning failed',
-        {
-          license_id: licenseId,
-          error_code: errorCode,
-          status: 'PROVISION_FAILED',
-          retry_count: result.rows[0].retry_count,
-        }
-      )
+      this.logger?.logStep('license-failed', 'License marked as provisioning failed', {
+        license_id: licenseId,
+        error_code: errorCode,
+        status: 'PROVISION_FAILED',
+        retry_count: result.rows[0].retry_count,
+      })
 
       return true
     } catch (error) {
@@ -168,9 +156,6 @@ export class FailureHandlerService {
 /**
  * Factory to create failure handler
  */
-export function createFailureHandlerService(
-  masterDb: Pool,
-  logger?: any
-): FailureHandlerService {
+export function createFailureHandlerService(masterDb: Pool, logger?: any): FailureHandlerService {
   return new FailureHandlerService(masterDb, logger)
 }

@@ -107,11 +107,7 @@ describe('T061: Product Service Validation Unit Tests', () => {
     })
 
     it('should accept multiple valid modules', () => {
-      const result = validateModulesEnum([
-        'MODULE_ATTEMPT',
-        'MODULE_REPORTING',
-        'MODULE_ANALYTICS',
-      ])
+      const result = validateModulesEnum(['MODULE_ATTEMPT', 'MODULE_REPORTING', 'MODULE_ANALYTICS'])
       expect(result).toBe(true)
     })
 

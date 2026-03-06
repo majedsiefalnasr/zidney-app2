@@ -8,10 +8,11 @@
  *
  * Stage: STAGE_UI_03_ROUTER_AND_GUARDS
  */
+
+import type { RouteRecordRaw, Router, RouterHistory } from 'vue-router'
+import { createRouter, createWebHistory } from 'vue-router'
 import { dashboardRoutes } from '@/modules/dashboard/routes'
 import { licensesRoutes } from '@/modules/licenses/routes'
-import type { Router, RouteRecordRaw, RouterHistory } from 'vue-router'
-import { createRouter, createWebHistory } from 'vue-router'
 
 // Apply RouteMeta augmentation for this app
 import '@/core/router/types'

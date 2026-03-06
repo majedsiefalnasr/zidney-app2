@@ -15,16 +15,7 @@
  * ✓ Tenant DB only — no master DB references
  */
 
-import {
-  index,
-  integer,
-  jsonb,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core'
+import { index, integer, jsonb, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 
 import type {
   BrandingSettings,
@@ -42,9 +33,7 @@ export const workspaceSettings = pgTable(
   'workspace_settings',
   {
     id: uuid('id').primaryKey().defaultRandom(),
-    singleton_key: varchar('singleton_key', { length: 10 })
-      .notNull()
-      .default('SETTINGS'),
+    singleton_key: varchar('singleton_key', { length: 10 }).notNull().default('SETTINGS'),
     config_version: integer('config_version').notNull().default(1),
 
     // Existing flat columns (preserved — forward-only)
@@ -53,38 +42,17 @@ export const workspaceSettings = pgTable(
     staff_limit: integer('staff_limit').notNull().default(50),
 
     // JSONB settings columns
-    general_settings: jsonb('general_settings')
-      .notNull()
-      .default({})
-      .$type<GeneralSettings>(),
-    language_settings: jsonb('language_settings')
-      .notNull()
-      .default({})
-      .$type<LanguageSettings>(),
-    branding_settings: jsonb('branding_settings')
-      .notNull()
-      .default({})
-      .$type<BrandingSettings>(),
-    payment_settings: jsonb('payment_settings')
-      .notNull()
-      .default({})
-      .$type<PaymentSettings>(),
-    security_settings: jsonb('security_settings')
-      .notNull()
-      .default({})
-      .$type<SecuritySettings>(),
+    general_settings: jsonb('general_settings').notNull().default({}).$type<GeneralSettings>(),
+    language_settings: jsonb('language_settings').notNull().default({}).$type<LanguageSettings>(),
+    branding_settings: jsonb('branding_settings').notNull().default({}).$type<BrandingSettings>(),
+    payment_settings: jsonb('payment_settings').notNull().default({}).$type<PaymentSettings>(),
+    security_settings: jsonb('security_settings').notNull().default({}).$type<SecuritySettings>(),
 
-    created_at: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updated_at: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
-    singletonIndex: index('idx_workspace_settings_singleton').on(
-      table.singleton_key
-    ),
+    singletonIndex: index('idx_workspace_settings_singleton').on(table.singleton_key),
   })
 )
 
@@ -104,9 +72,7 @@ export const workspaceSettingsAudit = pgTable(
     request_id: varchar('request_id', { length: 50 }).notNull(),
     ip_address: text('ip_address'), // INET stored as text for Drizzle compatibility
     user_agent: text('user_agent'),
-    created_at: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     // Guardian audit: composite index for cursor-based pagination
@@ -115,11 +81,7 @@ export const workspaceSettingsAudit = pgTable(
       table.created_at,
       table.id
     ),
-    settingsGroupIndex: index('idx_wsa_settings_group').on(
-      table.settings_group
-    ),
-    configVersionIndex: index('idx_wsa_config_version').on(
-      table.config_version
-    ),
+    settingsGroupIndex: index('idx_wsa_settings_group').on(table.settings_group),
+    configVersionIndex: index('idx_wsa_config_version').on(table.config_version),
   })
 )

@@ -7,8 +7,8 @@ import {
   CardHeader,
   CardTitle,
 } from '@zidney/ui/components/shadcn-vue/card'
-import { type License } from '@/types/license'
 import { computed, onMounted, ref } from 'vue'
+import type { License } from '@/types/license'
 
 /**
  * T076: License Detail View - Full license information display

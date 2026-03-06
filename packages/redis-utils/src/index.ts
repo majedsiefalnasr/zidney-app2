@@ -27,15 +27,15 @@ export function createRedisClient(): Redis {
 // Algorithms
 export {
   createSlidingWindowLimiter,
-  SlidingWindowRateLimiter,
   type RateLimitResult,
   type RateLimitWindow,
+  SlidingWindowRateLimiter,
 } from './algorithms/sliding-window'
 
 export {
   createTokenBucketLimiter,
-  TokenBucketRateLimiter,
   type TokenBucketConfig,
+  TokenBucketRateLimiter,
   type TokenBucketResult,
 } from './algorithms/token-bucket'
 

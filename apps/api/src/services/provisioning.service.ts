@@ -74,13 +74,7 @@ export async function createTenantWorkspace(
       ...(tenant_config.metadata && { metadata: tenant_config.metadata }),
     }
 
-    await recordTenantProvisioned(
-      trx,
-      workspace_id,
-      actor_id,
-      config_snapshot,
-      auditMetadata
-    )
+    await recordTenantProvisioned(trx, workspace_id, actor_id, config_snapshot, auditMetadata)
   })
 
   return {
@@ -122,13 +116,7 @@ export async function getTenantBySlug(
   slug: string
 ): Promise<(Partial<TenantConfig> & { workspace_id: string }) | null> {
   const result = await db
-    .select(
-      'id as workspace_id',
-      'name',
-      'slug',
-      'product_version',
-      'schema_version'
-    )
+    .select('id as workspace_id', 'name', 'slug', 'product_version', 'schema_version')
     .from('workspaces')
     .where('slug', '=', slug)
     .first()
@@ -144,11 +132,7 @@ export async function getTenantBySlug(
  * @returns true if slug is taken, false if available
  */
 export async function isSlugTaken(db: any, slug: string): Promise<boolean> {
-  const result = await db
-    .select('id')
-    .from('workspaces')
-    .where('slug', '=', slug)
-    .first()
+  const result = await db.select('id').from('workspaces').where('slug', '=', slug).first()
 
   return !!result
 }

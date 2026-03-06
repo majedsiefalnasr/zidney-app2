@@ -28,10 +28,7 @@ export function parseVersion(version: string): {
  * @param changeType - Type of change: 'major', 'minor', or 'patch'
  * @returns New version string
  */
-export function bumpVersion(
-  currentVersion: string,
-  changeType: ChangeType
-): string {
+export function bumpVersion(currentVersion: string, changeType: ChangeType): string {
   const parsed = parseVersion(currentVersion)
 
   switch (changeType) {
@@ -88,10 +85,7 @@ export function isValidVersion(version: string): boolean {
  * Get all intermediate versions between two versions
  * Useful for validating migration path
  */
-export function getVersionsBetween(
-  fromVersion: string,
-  toVersion: string
-): string[] {
+export function getVersionsBetween(fromVersion: string, toVersion: string): string[] {
   const from = parseVersion(fromVersion)
   const to = parseVersion(toVersion)
 
@@ -110,18 +104,12 @@ export function getVersionsBetween(
   while (
     current.major < to.major ||
     (current.major === to.major && current.minor < to.minor) ||
-    (current.major === to.major &&
-      current.minor === to.minor &&
-      current.patch < to.patch)
+    (current.major === to.major && current.minor === to.minor && current.patch < to.patch)
   ) {
     versions.push(`${current.major}.${current.minor}.${current.patch}`)
 
     // Increment patch first
-    if (
-      current.patch < to.patch &&
-      current.major === to.major &&
-      current.minor === to.minor
-    ) {
+    if (current.patch < to.patch && current.major === to.major && current.minor === to.minor) {
       current.patch++
     } else if (current.minor < to.minor && current.major === to.major) {
       // Increment minor if we haven't reached target minor

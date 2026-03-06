@@ -25,8 +25,7 @@
 
 import type { PoolClient } from 'pg'
 
-export const description =
-  'Create RBAC skeleton tables for STAGE_17 Tenant Bootstrap'
+export const description = 'Create RBAC skeleton tables for STAGE_17 Tenant Bootstrap'
 
 /**
  * Forward migration — creates all 4 RBAC tables in a single DDL transaction.

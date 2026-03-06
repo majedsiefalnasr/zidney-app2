@@ -17,11 +17,7 @@
  * Stage: STAGE_UI_03_ROUTER_AND_GUARDS
  */
 import { createLogger } from '@zidney/logger'
-import type {
-  NavigationGuard,
-  RouteLocationNormalized,
-  RouteLocationRaw,
-} from 'vue-router'
+import type { NavigationGuard, RouteLocationNormalized, RouteLocationRaw } from 'vue-router'
 
 const logger = createLogger('backoffice:role-guard')
 
@@ -48,7 +44,7 @@ export function createRoleGuard(options: {
 }): NavigationGuard {
   return (to: RouteLocationNormalized): RouteLocationRaw | boolean => {
     try {
-      const roles = to.meta['roles'] as string[] | undefined
+      const roles = to.meta.roles as string[] | undefined
 
       // Skip if no roles required for this route
       if (!roles || roles.length === 0) return true
@@ -59,14 +55,11 @@ export function createRoleGuard(options: {
       const userRole = options.getUserRole()
 
       if (!userRole || !roles.includes(userRole)) {
-        logger.debug(
-          'Role guard: role mismatch or null user, redirecting to unauthorized',
-          {
-            route: to.name?.toString() ?? to.path,
-            requiredRoles: roles,
-            userRole: userRole ?? 'null',
-          }
-        )
+        logger.debug('Role guard: role mismatch or null user, redirecting to unauthorized', {
+          route: to.name?.toString() ?? to.path,
+          requiredRoles: roles,
+          userRole: userRole ?? 'null',
+        })
         return { name: options.unauthorizedRouteName }
       }
 
@@ -76,4 +69,20 @@ export function createRoleGuard(options: {
       return true
     }
   }
+}
+
+// ─── Context-Based Direct API ─────────────────────────────────────────────────
+
+export interface GuardContext {
+  to: RouteLocationNormalized
+  from: RouteLocationNormalized
+  authStore: { user: { role?: string } | null }
+}
+
+export function roleGuard(ctx: GuardContext): boolean | RouteLocationRaw {
+  const requiredRole = ctx.to.meta.requiredRole as string | undefined
+  if (!requiredRole) return true
+  const userRole = ctx.authStore.user?.role
+  if (!userRole || userRole !== requiredRole) return { name: 'forbidden' }
+  return true
 }

@@ -13,11 +13,12 @@
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  * Task: T044
  */
-import AppSidebar from '@/components/layout/AppSidebar.vue'
-import type { NavigationConfig } from '@/core/navigation/index'
+
 import { createTestingPinia } from '@pinia/testing'
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import AppSidebar from '@/components/layout/AppSidebar.vue'
+import type { NavigationConfig } from '@/core/navigation/index'
 
 // Mock vue-router's useRoute so we control the active route
 vi.mock('vue-router', () => ({
@@ -73,8 +74,7 @@ function createWrapper(
         SidebarLayout: sidebarLayoutStub,
         RouterLink: {
           props: ['to'],
-          template:
-            '<a class="stub-router-link" :class="$attrs.class"><slot /></a>',
+          template: '<a class="stub-router-link" :class="$attrs.class"><slot /></a>',
           inheritAttrs: false,
         },
         Teleport: { template: '<div><slot /></div>' },
@@ -116,9 +116,7 @@ describe('AppSidebar — Backoffice', () => {
   it('active route item has app-sidebar__nav-item--active class', () => {
     const wrapper = createWrapper()
     const activeLinks = wrapper.findAll('.stub-router-link')
-    const dashboardLink = activeLinks.find((el) =>
-      el.text().includes('Dashboard')
-    )
+    const dashboardLink = activeLinks.find((el) => el.text().includes('Dashboard'))
     expect(dashboardLink?.classes()).toContain('app-sidebar__nav-item--active')
   })
 
@@ -126,9 +124,7 @@ describe('AppSidebar — Backoffice', () => {
     const wrapper = createWrapper({
       resolvedPermissions: { 'exam.list': true },
     })
-    const examsLink = wrapper
-      .findAll('.stub-router-link')
-      .find((el) => el.text().includes('Exams'))
+    const examsLink = wrapper.findAll('.stub-router-link').find((el) => el.text().includes('Exams'))
     expect(examsLink?.classes()).not.toContain('app-sidebar__nav-item--active')
   })
 

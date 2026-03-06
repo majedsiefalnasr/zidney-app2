@@ -9,11 +9,8 @@
  *   app.post('/licenses', validateRequest(CreateLicenseRequestSchema), createLicenseHandler)
  */
 
-import {
-  ProvisioningErrorCode,
-  getErrorDetails,
-} from '@zidney/types/errors/provisioning-errors'
-import { Context, Next } from 'hono'
+import { getErrorDetails, ProvisioningErrorCode } from '@zidney/types/errors/provisioning-errors'
+import type { Context, Next } from 'hono'
 import { createErrorResponse } from '../routes/licenses/license-response'
 
 /**
@@ -49,13 +46,10 @@ export function validateRequest<_T>(
       if (options.parseJson !== false) {
         try {
           data = await c.req.json()
-        } catch (error) {
+        } catch (_error) {
           c.status(400)
           return c.json(
-            createErrorResponse(
-              'INVALID_REQUEST_BODY',
-              'Request body is not valid JSON'
-            )
+            createErrorResponse('INVALID_REQUEST_BODY', 'Request body is not valid JSON')
           )
         }
       } else {
@@ -74,24 +68,16 @@ export function validateRequest<_T>(
         }
 
         c.status(400)
-        return c.json(
-          createErrorResponse(
-            'VALIDATION_ERROR',
-            'Request validation failed',
-            errors
-          )
-        )
+        return c.json(createErrorResponse('VALIDATION_ERROR', 'Request validation failed', errors))
       }
 
       // Attach validated data to context
       c.set('validatedData', result.data)
       c.set('validatedBody', result.data)
       await next()
-    } catch (error) {
+    } catch (_error) {
       c.status(400)
-      return c.json(
-        createErrorResponse('VALIDATION_ERROR', 'Request validation failed')
-      )
+      return c.json(createErrorResponse('VALIDATION_ERROR', 'Request validation failed'))
     }
   }
 }
@@ -134,11 +120,10 @@ export function createCustomValidator<T>(
       c.set('validatedData', result.data)
       c.set('validatedBody', result.data)
       await next()
-    } catch (error) {
-      return c.json(
-        createErrorResponse('VALIDATION_ERROR', 'Request validation failed'),
-        { status: 400 }
-      )
+    } catch (_error) {
+      return c.json(createErrorResponse('VALIDATION_ERROR', 'Request validation failed'), {
+        status: 400,
+      })
     }
   }
 }
@@ -207,10 +192,7 @@ export function requireContentType(contentType: string) {
     const header = c.req.header('content-type')
     if (!header || !header.includes(contentType)) {
       return c.json(
-        createErrorResponse(
-          'INVALID_CONTENT_TYPE',
-          `Content-Type must be ${contentType}`
-        ),
+        createErrorResponse('INVALID_CONTENT_TYPE', `Content-Type must be ${contentType}`),
         { status: 400 }
       )
     }

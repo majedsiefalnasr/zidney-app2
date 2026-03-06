@@ -16,11 +16,7 @@
  * Stage: STAGE_UI_03_ROUTER_AND_GUARDS
  */
 import { createLogger } from '@zidney/logger'
-import type {
-  NavigationGuard,
-  RouteLocationNormalized,
-  RouteLocationRaw,
-} from 'vue-router'
+import type { NavigationGuard, RouteLocationNormalized, RouteLocationRaw } from 'vue-router'
 
 const logger = createLogger('backoffice:auth-guard')
 
@@ -85,14 +81,11 @@ export function createAuthGuard(options: {
       if (to.name === options.loginRouteName && !authenticated) return true
 
       // requiresAuth: unauthenticated users → redirect to login with optional ?redirect
-      if (to.meta['requiresAuth'] === true) {
+      if (to.meta.requiresAuth === true) {
         if (!authenticated) {
-          logger.debug(
-            'Auth guard: unauthenticated access to protected route',
-            {
-              route: to.name?.toString() ?? to.path,
-            }
-          )
+          logger.debug('Auth guard: unauthenticated access to protected route', {
+            route: to.name?.toString() ?? to.path,
+          })
 
           const redirect = to.fullPath
           if (safeRedirect(redirect)) {
@@ -107,14 +100,11 @@ export function createAuthGuard(options: {
       }
 
       // public: authenticated users → redirect to dashboard
-      if (to.meta['public'] === true) {
+      if (to.meta.public === true) {
         if (authenticated) {
-          logger.debug(
-            'Auth guard: authenticated user accessing public route',
-            {
-              route: to.name?.toString() ?? to.path,
-            }
-          )
+          logger.debug('Auth guard: authenticated user accessing public route', {
+            route: to.name?.toString() ?? to.path,
+          })
           return { name: options.dashboardRouteName }
         }
         return true
@@ -127,4 +117,18 @@ export function createAuthGuard(options: {
       return true
     }
   }
+}
+
+// ─── Context-Based Direct API ─────────────────────────────────────────────────
+
+export interface GuardContext {
+  to: RouteLocationNormalized
+  from: RouteLocationNormalized
+  authStore: { isAuthenticated: boolean }
+}
+
+export function authGuard(ctx: GuardContext): boolean | RouteLocationRaw {
+  if (ctx.to.meta.requiresAuth !== true) return true
+  if (ctx.authStore.isAuthenticated) return true
+  return { name: 'login' }
 }

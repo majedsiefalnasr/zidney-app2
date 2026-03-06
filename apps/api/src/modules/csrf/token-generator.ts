@@ -1,6 +1,6 @@
+import { randomBytes } from 'node:crypto'
 import { createLogger } from '@zidney/logger'
-import { randomBytes } from 'crypto'
-import { Hono } from 'hono'
+import type { Hono } from 'hono'
 import { redis } from '../../infrastructure/redis'
 
 const logger = createLogger('csrf')
@@ -31,11 +31,7 @@ export function generateCSRFToken(): string {
 /**
  * Store CSRF token in Redis for validation
  */
-async function storeCSRFToken(
-  token: string,
-  userId: string,
-  workspaceId: string
-): Promise<void> {
+async function storeCSRFToken(token: string, userId: string, workspaceId: string): Promise<void> {
   const key = `csrf:token:${token}`
   const value = JSON.stringify({
     user_id: userId,
@@ -49,10 +45,7 @@ async function storeCSRFToken(
 /**
  * Retrieve and validate CSRF token
  */
-async function validateCSRFToken(
-  token: string,
-  userId: string
-): Promise<boolean> {
+async function validateCSRFToken(token: string, userId: string): Promise<boolean> {
   const key = `csrf:token:${token}`
   const value = await redis.get(key)
 
@@ -71,11 +64,7 @@ async function validateCSRFToken(
 /**
  * Set CSRF token cookie and include in response body
  */
-export async function setCSRFToken(
-  c: Hono,
-  userId: string,
-  workspaceId: string
-): Promise<string> {
+export async function setCSRFToken(c: Hono, userId: string, workspaceId: string): Promise<string> {
   const token = generateCSRFToken()
 
   await storeCSRFToken(token, userId, workspaceId)
@@ -92,10 +81,7 @@ export async function setCSRFToken(
 /**
  * T066: CSRF validation middleware
  */
-export async function csrfValidator(
-  c: Hono,
-  next: () => Promise<void>
-): Promise<void> {
+export async function csrfValidator(c: Hono, next: () => Promise<void>): Promise<void> {
   const correlationId = c.state.requestId || 'unknown'
   const userId = c.state.userId
   const method = c.req.method

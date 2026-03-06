@@ -12,9 +12,10 @@
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  * Task: T052
  */
+
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import type { AuthUser } from '@/core/auth/types'
 import { defineAuthStore } from '@/core/state/auth.store'
-import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { useIsolatedPinia } from '../store-test-helper'
 
 function createStubAuthService() {

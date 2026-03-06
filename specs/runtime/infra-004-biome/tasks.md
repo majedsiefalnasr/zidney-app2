@@ -49,10 +49,10 @@
 
 ---
 
-- [ ] T001 Install `@biomejs/biome` as a devDependency by running `bun add -D @biomejs/biome` from the repo root; note the resolved version and verify the `$schema` URL in the next task matches `https://biomejs.dev/schemas/<resolved-version>/schema.json`
-- [ ] T002 [P] Create `biome.json` at the repo root with the exact configuration defined in plan.md Step 1.2: `$schema` (2.4.6 or resolved version), `vcs.useIgnoreFile: true`, `formatter` (space/2/100), `javascript.formatter` (single/es5/asNeeded), `linter.rules` (recommended + noUnusedImports + noDuplicateImports + noDebugger + noConsole:error + useConst), `organizeImports.enabled: true`, and three `overrides` for `packages/logger/**/*.ts`, `scripts/**`, and `tests/**` / `**/*.test.ts` / `**/*.spec.ts` setting `noConsole: "off"`; also add `node_modules`, `dist`, `**/*.d.ts`, `.specify/**`, `coverage/**` to `files.ignore`
-- [ ] T003 Add `"lint:fix": "bun biome check --apply ."` to the `scripts` section of root `package.json` (new key — does not replace existing lint/format scripts at this stage)
-- [ ] T004 Verify Biome runs without configuration error: execute `bun biome check . 2>&1 | tail -20` and confirm output shows lint violations (not a config/parse failure)
+- [x] T001 Install `@biomejs/biome` as a devDependency
+- [x] T002 [P] Create `biome.json` at the repo root: `$schema` (2.4.6 or resolved version), `vcs.useIgnoreFile: true`, `formatter` (space/2/100), `javascript.formatter` (single/es5/asNeeded), `linter.rules` (recommended + noUnusedImports + noDuplicateImports + noDebugger + noConsole:error + useConst), `organizeImports.enabled: true`, and three `overrides` for `packages/logger/**/*.ts`, `scripts/**`, and `tests/**` / `**/*.test.ts` / `**/*.spec.ts` setting `noConsole: "off"`; also add `node_modules`, `dist`, `**/*.d.ts`, `.specify/**`, `coverage/**` to `files.ignore`
+- [x] T003 Add `"lint:fix": "bun biome check --apply ."` to the `scripts` section of root `package.json`
+- [x] T004 Verify Biome runs without configuration error
 
 ---
 
@@ -66,8 +66,8 @@
 
 ---
 
-- [ ] T005 Run `bun biome format --write .` from the repo root to apply the full formatting pass (indent normalisation, line width 100, single quotes, no semicolons, es5 trailing commas, import sorting); commit the result as `chore(toolchain): apply Biome formatter`
-- [ ] T006 Run `bun biome check --apply-unsafe .` from the repo root to auto-fix `noUnusedImports`, `noDuplicateImports`, and `useConst` violations; inspect the diff before committing; `noConsole` violations will remain after this step
+- [x] T005 Run `bun biome format --write .` from the repo root (indent normalisation, line width 100, single quotes, no semicolons, es5 trailing commas, import sorting); commit the result as `chore(toolchain): apply Biome formatter`
+- [x] T006 Run `bun biome check --apply-unsafe .` from the repo root to auto-fix violations
 
 ---
 

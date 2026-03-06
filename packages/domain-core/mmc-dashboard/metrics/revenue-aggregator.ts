@@ -61,10 +61,7 @@ export function sumRevenue(amounts: number[]): number {
  * Total: 60100 cents ($601.00), Items: 3
  * → 20033 cents per item ($200.33)
  */
-export function calculateAverageRevenue(
-  totalCents: number,
-  itemCount: number
-): number {
+export function calculateAverageRevenue(totalCents: number, itemCount: number): number {
   if (itemCount === 0 || totalCents === 0) return 0
   return Math.floor(totalCents / itemCount)
 }
@@ -140,10 +137,7 @@ export function groupByCountry(records: RevenueData[]): Map<string, number> {
  * Current: 80000 cents ($800), Previous: 100000 cents ($1000) → -20%
  * Current: 50000 cents ($500), Previous: 0 cents → 0% (from zero baseline)
  */
-export function calculateGrowthPercent(
-  current: number,
-  previous: number
-): number {
+export function calculateGrowthPercent(current: number, previous: number): number {
   if (previous <= 0) return 0 // Can't calculate growth from zero
   const growth = ((current - previous) / previous) * 100
   return Math.round(growth * 100) / 100 // 2 decimal places
@@ -154,10 +148,7 @@ export function calculateGrowthPercent(
  *
  * Returns: Difference in cents (can be negative for decline)
  */
-export function calculateGrowthAbsolute(
-  current: number,
-  previous: number
-): number {
+export function calculateGrowthAbsolute(current: number, previous: number): number {
   return current - previous
 }
 
@@ -246,10 +237,7 @@ export function aggregateByMonth(
  * Sorts amounts and returns value at specified percentile
  * Useful for identifying top revenue contributors
  */
-export function calculatePercentile(
-  amounts: number[],
-  percentile: number
-): number {
+export function calculatePercentile(amounts: number[], percentile: number): number {
   if (amounts.length === 0) return 0
   if (percentile < 0 || percentile > 100) return 0
 
@@ -268,11 +256,8 @@ export function calculatePercentile(
  *
  * NOT called in domain functions - all calculations preserve full precision
  */
-export function roundCentsToDisplay(
-  cents: number,
-  decimals: number = 2
-): number {
-  const multiplier = Math.pow(10, decimals)
+export function roundCentsToDisplay(cents: number, decimals: number = 2): number {
+  const multiplier = 10 ** decimals
   const dollars = cents / 100
   // Round-half-up
   return Math.round((dollars + Number.EPSILON) * multiplier) / multiplier

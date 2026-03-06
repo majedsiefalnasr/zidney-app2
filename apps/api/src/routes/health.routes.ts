@@ -5,10 +5,10 @@
 
 import { Hono } from 'hono'
 import { db } from '../db'
-// @ts-ignore: LOGIC-BUG: redis service module missing — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+// @ts-expect-error: LOGIC-BUG: redis service module missing — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
 import { redis } from '../services/redis'
 
-// @ts-ignore: TS6133 - declared but never read [INFRA-001]
+// @ts-expect-error: TS6133 - declared but never read [INFRA-001]
 export const healthRoutes = new Hono()
 
 interface HealthResponse {
@@ -43,9 +43,9 @@ interface HealthResponse {
  * }
  */
 healthRoutes.get('/health', async (c) => {
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const timestamp = new Date().toISOString()
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const response: HealthResponse = {
     status: 'healthy',
     master_db: 'disconnected',
@@ -57,16 +57,14 @@ healthRoutes.get('/health', async (c) => {
   // Check master database connectivity
   try {
     // Test query with 5 second timeout
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
-    const result = await Promise.race([
-      // @ts-ignore: LOGIC-BUG: .query() does not exist on this Pool type — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
+    const _result = await Promise.race([
+      // @ts-expect-error: LOGIC-BUG: .query() does not exist on this Pool type — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
       db.query('SELECT 1'),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('DB timeout')), 5000)
-      ),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('DB timeout')), 5000)),
     ])
     response.master_db = 'connected'
-  } catch (error) {
+  } catch (_error) {
     response.status = 'unhealthy'
     response.master_db = 'disconnected'
   }
@@ -74,15 +72,13 @@ healthRoutes.get('/health', async (c) => {
   // Check Redis connectivity
   try {
     // Test PING with 5 second timeout
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
-    const result = await Promise.race([
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
+    const _result = await Promise.race([
       redis.ping(),
-      new Promise((_, reject) =>
-        setTimeout(() => reject(new Error('Redis timeout')), 5000)
-      ),
+      new Promise((_, reject) => setTimeout(() => reject(new Error('Redis timeout')), 5000)),
     ])
     response.redis = 'connected'
-  } catch (error) {
+  } catch (_error) {
     response.status = 'unhealthy'
     response.redis = 'disconnected'
   }
@@ -90,36 +86,33 @@ healthRoutes.get('/health', async (c) => {
   // Check migrations current
   try {
     // Query schema_version from migrations table
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const migrationQuery = `
       SELECT version FROM master.schema_migrations 
       ORDER BY version DESC 
       LIMIT 1
     `
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const result = await db.query(migrationQuery)
 
     // EXPECTED_MIGRATION_VERSION must match latest migration
     // Update this constant when new migrations are added
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const EXPECTED_MIGRATION_VERSION = '20260225010000' // Latest master migration
 
-    if (
-      result.rows.length > 0 &&
-      result.rows[0].version === EXPECTED_MIGRATION_VERSION
-    ) {
+    if (result.rows.length > 0 && result.rows[0].version === EXPECTED_MIGRATION_VERSION) {
       response.migrations_current = true
     } else {
       response.status = 'unhealthy'
       response.migrations_current = false
     }
-  } catch (error) {
+  } catch (_error) {
     response.status = 'unhealthy'
     response.migrations_current = false
   }
 
   // Return 200 if healthy, 503 if unhealthy
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const statusCode = response.status === 'healthy' ? 200 : 503
   return c.json(response, statusCode)
 })
@@ -128,10 +121,10 @@ healthRoutes.get('/health', async (c) => {
  * Health Check Test Suite (to be implemented)
  *
  * test('GET /health returns 200 when all systems operational', async () => {
- // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+ // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
  *   const res = await fetch('http://localhost:3000/health')
  *   expect(res.status).toBe(200)
- // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+ // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
  *   const body = await res.json()
  *   expect(body.status).toBe('healthy')
  *   expect(body.master_db).toBe('connected')
@@ -142,10 +135,10 @@ healthRoutes.get('/health', async (c) => {
  * test('GET /health returns 503 when database disconnected', async () => {
  *   // Simulate DB disconnect
  *   db.pool.destroy()
- // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+ // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
  *   const res = await fetch('http://localhost:3000/health')
  *   expect(res.status).toBe(503)
- // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+ // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
  *   const body = await res.json()
  *   expect(body.status).toBe('unhealthy')
  *   expect(body.master_db).toBe('disconnected')
@@ -154,10 +147,10 @@ healthRoutes.get('/health', async (c) => {
  * test('GET /health returns 503 when Redis disconnected', async () => {
  *   // Simulate Redis disconnect
  *   redis.disconnect()
- // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+ // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
  *   const res = await fetch('http://localhost:3000/health')
  *   expect(res.status).toBe(503)
- // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+ // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
  *   const body = await res.json()
  *   expect(body.status).toBe('unhealthy')
  *   expect(body.redis).toBe('disconnected')
@@ -165,33 +158,33 @@ healthRoutes.get('/health', async (c) => {
  *
  * test('GET /health returns 503 when migrations out of date', async () => {
  *   // Manually downgrade version in schema_migrations
- // @ts-ignore: LOGIC-BUG: .query() does not exist on this Pool type — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+ // @ts-expect-error: LOGIC-BUG: .query() does not exist on this Pool type — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
  *   await db.query('UPDATE master.schema_migrations SET version = ?')
- // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+ // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
  *   const res = await fetch('http://localhost:3000/health')
  *   expect(res.status).toBe(503)
- // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+ // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
  *   const body = await res.json()
  *   expect(body.migrations_current).toBe(false)
  * })
  *
  * test('GET /health uses 5 second timeout for database check', async () => {
- // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+ // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
  *   const startTime = Date.now()
  *   // Simulate slow DB (hangs)
  *   db.query = jest.fn(() => new Promise(() => {})) // Never resolves
- // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+ // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
  *   const res = await fetch('http://localhost:3000/health')
- // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+ // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
  *   const elapsed = Date.now() - startTime
  *   expect(elapsed).toBeLessThan(6000) // Should timeout around 5s
  *   expect(res.status).toBe(503)
  * })
  *
  * test('GET /health response includes timestamp', async () => {
- // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+ // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
  *   const res = await fetch('http://localhost:3000/health')
- // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+ // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
  *   const body = await res.json()
  *   expect(body.timestamp).toBeDefined()
  *   // Verify timestamp is valid ISO 8601
@@ -200,7 +193,7 @@ healthRoutes.get('/health', async (c) => {
  *
  * test('GET /health is publicly accessible (no auth required)', async () => {
  *   // No authorization header
- // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+ // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
  *   const res = await fetch('http://localhost:3000/health')
  *   expect(res.status).not.toBe(401) // Should NOT return 401 Unauthorized
  *   expect(res.status).not.toBe(403) // Should NOT return 403 Forbidden

@@ -14,7 +14,7 @@ import { v4 as uuidv4 } from 'uuid'
 import { beforeEach, describe, expect, it } from 'vitest'
 
 describe('Audit Event Recording', () => {
-  let db: any
+  let _db: any
   let testWorkspace: any
   let testActor: any
 
@@ -176,9 +176,7 @@ describe('Audit Event Recording', () => {
 
     it('should include auto-generated event ID', () => {
       const event = { id: uuidv4() }
-      expect(event.id).toMatch(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-      )
+      expect(event.id).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
     })
 
     it('should set server-authoritative timestamp', () => {

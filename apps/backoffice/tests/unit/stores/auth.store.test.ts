@@ -12,10 +12,11 @@
  * Stage: STAGE_UI_06_STATE_MANAGEMENT
  * Refs: QA-H001, FR-026, FR-027, SC-003
  */
-import type { AuthUser } from '@/core/auth/types'
-import { defineAuthStore } from '@/core/state/auth.store'
+
 import { storeToRefs } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
+import type { AuthUser } from '@/core/auth/types'
+import { defineAuthStore } from '@/core/state/auth.store'
 import { useIsolatedPinia } from '../store-test-helper'
 
 // ─── Stubs ─────────────────────────────────────────────────────────────────────
@@ -68,13 +69,7 @@ describe('Backoffice: defineAuthStore (backoffice-auth)', () => {
     const tokenManager = createStubTokenManager()
     const router = createStubRouter()
 
-    useAuthStore = defineAuthStore(
-      authService,
-      tokenManager,
-      router,
-      'bo-login',
-      () => null
-    )
+    useAuthStore = defineAuthStore(authService, tokenManager, router, 'bo-login', () => null)
   })
 
   it('default state: isAuthenticated false, user null, isLoading false, authError null (FR-026)', () => {
@@ -147,8 +142,8 @@ describe('Backoffice: defineAuthStore (backoffice-auth)', () => {
     expect(store.authError).not.toBeNull()
     expect(store.authError).toHaveProperty('code', 'AUTH_INIT_FAILED')
     expect(store.authError).toHaveProperty('message', 'Something went wrong')
-    expect(typeof store.authError!.code).toBe('string')
-    expect(typeof store.authError!.message).toBe('string')
+    expect(typeof store.authError?.code).toBe('string')
+    expect(typeof store.authError?.message).toBe('string')
   })
 
   it('clearAuthError() zeroes authError (FR-04)', () => {

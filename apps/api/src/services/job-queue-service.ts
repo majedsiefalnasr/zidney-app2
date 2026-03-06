@@ -24,8 +24,8 @@
  * 4. Client polls GET /result → Reads from grading_jobs table
  */
 
-import { Logger } from '@zidney/logger'
-import { Pool, PoolClient } from 'pg'
+import type { Logger } from '@zidney/logger'
+import type { Pool, PoolClient } from 'pg'
 
 /**
  * Job payload structure
@@ -122,8 +122,7 @@ export async function enqueueGradingJob(
         logger.warn('Failed to push job to queue (will retry via DB scan)', {
           correlation_id: correlationId,
           job_id: jobId,
-          error:
-            queueErr instanceof Error ? queueErr.message : String(queueErr),
+          error: queueErr instanceof Error ? queueErr.message : String(queueErr),
         })
         // Proceed without queue; worker can still pick up job from DB via "PENDING" status scan
       }

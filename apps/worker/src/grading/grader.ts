@@ -21,12 +21,7 @@
  */
 
 import { logger } from '@zidney/logger'
-import {
-  Attempt,
-  AttemptMode,
-  QuestionType,
-  UserAnswer,
-} from '@zidney/types/attempt'
+import { type Attempt, AttemptMode, QuestionType, type UserAnswer } from '@zidney/types/attempt'
 
 /**
  * Interface: Grading Result
@@ -61,10 +56,7 @@ export interface GradeResult {
  * @returns GradeResult with score, pass/fail, and per-question breakdown
  * @throws Error if snapshots invalid or expired
  */
-export async function gradeAttempt(
-  attempt: Attempt,
-  workspaceId: string
-): Promise<GradeResult> {
+export async function gradeAttempt(attempt: Attempt, workspaceId: string): Promise<GradeResult> {
   const startTime = Date.now()
 
   logger.debug(
@@ -110,11 +102,7 @@ export async function gradeAttempt(
     const timeLimitMs = (attempt.time_limit_snapshot || 0) * 1000 // Convert seconds to ms
 
     // For CHRONO or RUSH modes, verify time didn't exceed limit (with 1 minute grace)
-    if (
-      attempt.mode !== AttemptMode.RELAX &&
-      timeLimitMs > 0 &&
-      elapsedMs > timeLimitMs + 60000
-    ) {
+    if (attempt.mode !== AttemptMode.RELAX && timeLimitMs > 0 && elapsedMs > timeLimitMs + 60000) {
       logger.warn(
         {
           service: 'grader',
@@ -154,8 +142,7 @@ export async function gradeAttempt(
 
     // 5. Calculate normalized score
     const totalPoints = gradingConfig.total_points
-    const normalizedScore =
-      totalPoints > 0 ? (totalEarned / totalPoints) * 100 : 0
+    const normalizedScore = totalPoints > 0 ? (totalEarned / totalPoints) * 100 : 0
     const passScorePercentage = gradingConfig.pass_score_percentage || 60
     const passed = normalizedScore >= passScorePercentage
 
@@ -278,12 +265,7 @@ function scoreQuestion(
 /**
  * Score MCQ question
  */
-function scoreMCQ(
-  question: any,
-  userAnswer: UserAnswer,
-  result: any,
-  gradingConfig: any
-): any {
+function scoreMCQ(question: any, userAnswer: UserAnswer, result: any, gradingConfig: any): any {
   const selectedOption = userAnswer.selected_option
   const correctOption = question.correct_answer
 
@@ -395,12 +377,7 @@ function scoreFillBlank(
 /**
  * Score Essay question (no autograding; placeholder)
  */
-function scoreEssay(
-  _question: any,
-  _userAnswer: UserAnswer,
-  result: any,
-  gradingConfig: any
-): any {
+function scoreEssay(_question: any, _userAnswer: UserAnswer, result: any, gradingConfig: any): any {
   // Essays require manual grading
   // Award default score or zero based on config
   result.points_earned = gradingConfig.default_essay_score || 0
@@ -438,9 +415,7 @@ function scoreMatching(
     result.points_earned = result.points_possible
     result.feedback = 'All pairs matched correctly!'
   } else if (percentCorrect > 50) {
-    result.points_earned = Math.floor(
-      result.points_possible * (percentCorrect / 100)
-    )
+    result.points_earned = Math.floor(result.points_possible * (percentCorrect / 100))
     result.feedback = `Partially correct (${Math.floor(percentCorrect)}%)`
   } else {
     result.points_earned = 0
@@ -476,11 +451,7 @@ function scoreOrdering(
 /**
  * Build human-readable summary text
  */
-function buildSummary(
-  score: number,
-  passScore: number,
-  passed: boolean
-): string {
+function buildSummary(score: number, passScore: number, passed: boolean): string {
   if (passed) {
     if (score >= 90) {
       return 'Excellent! You passed with a high score.'

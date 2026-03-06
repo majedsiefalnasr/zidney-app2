@@ -19,8 +19,8 @@
  * ADRs: ADR-0001 (tenant isolation), ADR-0002 (snapshot immutability)
  */
 
-import { Pool } from 'pg'
 import { logger } from '@zidney/logger'
+import { Pool } from 'pg'
 import { startDLQConsumer, stopDLQConsumer } from './dlq-consumer'
 import { startGradeJobsConsumer, stopGradeJobsConsumer } from './job-consumer'
 
@@ -199,9 +199,7 @@ export async function shutdownWorker(exitCode: number = 0): Promise<void> {
       service: 'worker',
       action: 'worker_shutdown_started',
       exit_code: exitCode,
-      uptime_ms: workerState.startTime
-        ? Date.now() - workerState.startTime.getTime()
-        : 0,
+      uptime_ms: workerState.startTime ? Date.now() - workerState.startTime.getTime() : 0,
     },
     'Worker shutdown sequence started'
   )
@@ -258,9 +256,7 @@ export async function shutdownWorker(exitCode: number = 0): Promise<void> {
         action: 'worker_shutdown_complete',
         exit_code: exitCode,
         shutdown_time_ms: Date.now() - shutdownStartTime,
-        total_uptime_ms: workerState.startTime
-          ? Date.now() - workerState.startTime.getTime()
-          : 0,
+        total_uptime_ms: workerState.startTime ? Date.now() - workerState.startTime.getTime() : 0,
       },
       'Worker shutdown complete; exiting gracefully'
     )
@@ -286,9 +282,7 @@ export async function shutdownWorker(exitCode: number = 0): Promise<void> {
  * Returns worker health status (for monitoring/liveness probes)
  */
 export function getHealthStatus() {
-  const uptime = workerState.startTime
-    ? Date.now() - workerState.startTime.getTime()
-    : 0
+  const uptime = workerState.startTime ? Date.now() - workerState.startTime.getTime() : 0
 
   return {
     status: workerState.isRunning ? 'healthy' : 'shutdown',

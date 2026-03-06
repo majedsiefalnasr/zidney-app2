@@ -17,8 +17,8 @@
  * - No sensitive data in logs (passwords, tokens, emails)
  */
 
-import { Logger } from '@zidney/logger'
-import { Context, Next } from 'hono'
+import type { Logger } from '@zidney/logger'
+import type { Context, Next } from 'hono'
 
 export interface RequestLogEntry {
   timestamp: string
@@ -49,9 +49,7 @@ export function createRequestLoggerMiddleware(logger: Logger) {
     const path = ctx.req.path
     const userAgent = ctx.req.header('User-Agent')
     const ipAddress =
-      ctx.req.header('X-Forwarded-For') ||
-      ctx.req.header('CF-Connecting-IP') ||
-      'unknown'
+      ctx.req.header('X-Forwarded-For') || ctx.req.header('CF-Connecting-IP') || 'unknown'
 
     // Extract user ID if available from context
     const userId = ctx.get('context')?.mmcUser?.userId
@@ -109,14 +107,17 @@ export function createRequestLoggerMiddleware(logger: Logger) {
  */
 export class SimpleLogger {
   info(_entry: RequestLogEntry, json: string) {
+    // biome-ignore lint/suspicious/noConsole: SimpleLogger bridge — intentional console wrapper
     console.log(json)
   }
 
   warn(_entry: RequestLogEntry, json: string) {
+    // biome-ignore lint/suspicious/noConsole: SimpleLogger bridge — intentional console wrapper
     console.warn(json)
   }
 
   error(_entry: RequestLogEntry, json: string) {
+    // biome-ignore lint/suspicious/noConsole: SimpleLogger bridge — intentional console wrapper
     console.error(json)
   }
 }

@@ -1,10 +1,10 @@
-import { createLogger } from '@zidney/logger'
 import { jobQueue } from '@zidney/app/worker/queue/job-queue'
 import {
-  AttemptSnapshot,
-  SubmissionData,
+  type AttemptSnapshot,
   createGradeAttemptJob,
+  type SubmissionData,
 } from '@zidney/app/worker/types/job-schema'
+import { createLogger } from '@zidney/logger'
 
 const logger = createLogger('job-enqueuer')
 

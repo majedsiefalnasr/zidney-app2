@@ -60,23 +60,13 @@ export class LoggerSpy {
     valid: boolean
     missing: Array<{ index: number; fields: string[] }>
   } {
-    const required = [
-      'timestamp',
-      'level',
-      'service',
-      'correlation_id',
-      'message',
-    ]
+    const required = ['timestamp', 'level', 'service', 'correlation_id', 'message']
     const missing: Array<{ index: number; fields: string[] }> = []
 
     this.logs.forEach((log, index) => {
       const missingFields: string[] = []
       for (const field of required) {
-        if (
-          !(field in log) ||
-          log[field] === undefined ||
-          log[field] === null
-        ) {
+        if (!(field in log) || log[field] === undefined || log[field] === null) {
           missingFields.push(field)
         }
       }
@@ -106,8 +96,7 @@ export class LoggerSpy {
       { pattern: /bearer\s+[a-z0-9]+/i, name: 'bearer_token' },
     ]
 
-    const violations: Array<{ index: number; field: string; pattern: string }> =
-      []
+    const violations: Array<{ index: number; field: string; pattern: string }> = []
 
     this.logs.forEach((log, index) => {
       Object.entries(log).forEach(([field, value]) => {

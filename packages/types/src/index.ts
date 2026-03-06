@@ -7,17 +7,16 @@
 export * from './api-response'
 // Explicitly re-export from attempt to avoid ErrorResponse conflict with api-response
 export {
-  AttemptMode,
-  AttemptStatus,
-  AttemptType,
-  QuestionType,
   type ApiResponse,
   type Attempt,
-  // Rename attempt's ErrorResponse to avoid conflict
-  type ErrorResponse as AttemptErrorResponse,
+  AttemptMode,
   type AttemptProgress,
+  AttemptStatus,
+  AttemptType,
   type CreateAttemptRequest,
   type CreateAttemptResponse,
+  // Rename attempt's ErrorResponse to avoid conflict
+  type ErrorResponse as AttemptErrorResponse,
   type FlagsSnapshot,
   type GradingConfigSnapshot,
   type GradingJob,
@@ -26,6 +25,7 @@ export {
   type QuestionResult,
   type QuestionSnapshot,
   type QuestionSnapshotContainer,
+  QuestionType,
   type ResultResponse,
   type ResultSnapshot,
   type StatusResponse,

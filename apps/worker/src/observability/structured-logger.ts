@@ -214,9 +214,7 @@ let globalLogger: StructuredLoggerPipeline | null = null
 /**
  * Get global logger instance
  */
-export function getGlobalLogger(
-  serviceName: string = 'provisioning'
-): StructuredLoggerPipeline {
+export function getGlobalLogger(serviceName: string = 'provisioning'): StructuredLoggerPipeline {
   if (!globalLogger) {
     globalLogger = createStructuredLoggerPipeline(serviceName, {
       level: process.env.LOG_LEVEL || 'info',

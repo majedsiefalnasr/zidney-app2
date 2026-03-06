@@ -12,8 +12,7 @@ async function runPipeline(
 ) {
   const { authGuard } = await import('../../../src/core/guards/auth.guard')
   const { roleGuard } = await import('../../../src/core/guards/role.guard')
-  const { workspaceGuard } =
-    await import('../../../src/core/guards/workspace.guard')
+  const { workspaceGuard } = await import('../../../src/core/guards/workspace.guard')
 
   const to = {
     meta: toMeta,

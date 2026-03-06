@@ -10,6 +10,7 @@
 import { ProvisioningLogger } from '@zidney/logger/provisioning-logger'
 import { Redis } from 'ioredis'
 import { Pool } from 'pg'
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 type ProvisioningJobConsumer = any
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -110,9 +111,7 @@ export class E2EIntegrationTestSetup {
       if (!this.masterDb) return
 
       // Delete test licensesand registry entries
-      await this.masterDb.query(
-        `DELETE FROM tenant_registry WHERE license_id LIKE 'test-%'`
-      )
+      await this.masterDb.query(`DELETE FROM tenant_registry WHERE license_id LIKE 'test-%'`)
       await this.masterDb.query(`DELETE FROM licenses WHERE id LIKE 'test-%'`)
 
       // Drop test workspace databases
@@ -163,10 +162,7 @@ export class E2EIntegrationTestSetup {
         this.redis = null
       }
 
-      this.logger?.logStep(
-        'e2e-cleanup-complete',
-        'Test environment cleaned up'
-      )
+      this.logger?.logStep('e2e-cleanup-complete', 'Test environment cleaned up')
     } catch (error) {
       console.error('Cleanup error:', error)
     }

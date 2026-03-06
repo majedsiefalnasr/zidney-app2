@@ -40,48 +40,41 @@ const workflowRateLimiter = createRateLimiter()
 const WORKFLOW_RATE_LIMIT_MAX = 20
 const WORKFLOW_RATE_LIMIT_WINDOW_SEC = 60
 
-workflowRouter.use(
-  '/workflow/:entityType/:entityId/transition',
-  async (c, next) => {
-    const staffUser = c.get('staff_user')
-    const entityType = c.req.param('entityType')
-    const actorId = staffUser?.user_id ?? 'anonymous'
-    const correlationId =
-      c.get('correlationId') ?? c.req.header('x-correlation-id') ?? 'unknown'
+workflowRouter.use('/workflow/:entityType/:entityId/transition', async (c, next) => {
+  const staffUser = c.get('staff_user')
+  const entityType = c.req.param('entityType')
+  const actorId = staffUser?.user_id ?? 'anonymous'
+  const correlationId = c.get('correlationId') ?? c.req.header('x-correlation-id') ?? 'unknown'
 
-    const key = `workflow-transition:${actorId}:${entityType}`
-    const isLimited = await workflowRateLimiter.isLimited(
-      key,
-      WORKFLOW_RATE_LIMIT_MAX,
-      WORKFLOW_RATE_LIMIT_WINDOW_SEC
-    )
+  const key = `workflow-transition:${actorId}:${entityType}`
+  const isLimited = await workflowRateLimiter.isLimited(
+    key,
+    WORKFLOW_RATE_LIMIT_MAX,
+    WORKFLOW_RATE_LIMIT_WINDOW_SEC
+  )
 
-    if (isLimited) {
-      c.header('Retry-After', String(WORKFLOW_RATE_LIMIT_WINDOW_SEC))
-      return c.json(
-        {
-          success: false,
-          data: null,
-          error: {
-            code: 'rate_limit_exceeded',
-            message: `Rate limit exceeded. Maximum ${WORKFLOW_RATE_LIMIT_MAX} workflow transitions per ${WORKFLOW_RATE_LIMIT_WINDOW_SEC}s per actor per entity type.`,
-            details: null,
-            correlationId,
-          },
+  if (isLimited) {
+    c.header('Retry-After', String(WORKFLOW_RATE_LIMIT_WINDOW_SEC))
+    return c.json(
+      {
+        success: false,
+        data: null,
+        error: {
+          code: 'rate_limit_exceeded',
+          message: `Rate limit exceeded. Maximum ${WORKFLOW_RATE_LIMIT_MAX} workflow transitions per ${WORKFLOW_RATE_LIMIT_WINDOW_SEC}s per actor per entity type.`,
+          details: null,
+          correlationId,
         },
-        429
-      )
-    }
-
-    await next()
+      },
+      429
+    )
   }
-)
+
+  await next()
+})
 
 /**
  * POST /workflow/:entityType/:entityId/transition
  * Perform a state transition on any workflow-enabled entity.
  */
-workflowRouter.post(
-  '/workflow/:entityType/:entityId/transition',
-  handlePostTransition
-)
+workflowRouter.post('/workflow/:entityType/:entityId/transition', handlePostTransition)

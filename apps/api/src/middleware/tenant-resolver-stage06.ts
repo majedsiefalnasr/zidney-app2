@@ -21,8 +21,8 @@
  * 5. If any step fails: return error (400, 404, 503)
  */
 
-import { Logger } from '@zidney/logger'
-import { Context, MiddlewareHandler } from 'hono'
+import type { Logger } from '@zidney/logger'
+import type { Context, MiddlewareHandler } from 'hono'
 
 export interface TenantContextStage06 {
   id: string
@@ -50,10 +50,7 @@ export interface TenantContextStage06 {
  * - poolManager: Tenant pool manager (getTenantDatabase, etc.)
  * - masterDb: Master DB connection (for tenant registry query)  [attached by setup]
  */
-export function createTenantResolverStage06(
-  logger: Logger,
-  poolManager?: any
-): MiddlewareHandler {
+export function createTenantResolverStage06(logger: Logger, poolManager?: any): MiddlewareHandler {
   return async (c: Context, next) => {
     const correlation_id = c.get('correlationId') || 'unknown'
 
@@ -144,8 +141,7 @@ export function createTenantResolverStage06(
         logger.error('Tenant resolver: Master DB query failed', {
           correlation_id,
           slug,
-          error:
-            db_error instanceof Error ? db_error.message : String(db_error),
+          error: db_error instanceof Error ? db_error.message : String(db_error),
         })
         return c.json(
           {
@@ -193,10 +189,7 @@ export function createTenantResolverStage06(
         logger.error('Tenant resolver: Pool manager error', {
           correlation_id,
           slug,
-          error:
-            pool_error instanceof Error
-              ? pool_error.message
-              : String(pool_error),
+          error: pool_error instanceof Error ? pool_error.message : String(pool_error),
         })
         return c.json(
           {

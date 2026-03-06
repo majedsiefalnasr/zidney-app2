@@ -59,9 +59,7 @@ describe('Integration: Products - Error Handling (T060)', () => {
       }
 
       expect(response.status).toBe(400)
-      expect(response.body.error.code).toBe(
-        ErrorCodes.INVALID_NAME_LOCALIZATION
-      )
+      expect(response.body.error.code).toBe(ErrorCodes.INVALID_NAME_LOCALIZATION)
     })
 
     it('PRODUCT_NOT_FOUND → 404 Not Found', async () => {
@@ -278,9 +276,7 @@ describe('Integration: Products - Error Handling (T060)', () => {
       }
 
       const responseString = JSON.stringify(errorResponse)
-      expect(responseString).not.toMatch(
-        /password|token|secret|key|credential/i
-      )
+      expect(responseString).not.toMatch(/password|token|secret|key|credential/i)
     })
 
     it('each error code has exactly one HTTP status', async () => {
@@ -314,8 +310,7 @@ describe('Integration: Products - Error Handling (T060)', () => {
         [ErrorCodes.DUPLICATE_SLUG]: 'Product slug already exists',
         [ErrorCodes.INVALID_MODULE_ENUM]:
           'Invalid module. Allowed: MCQ, TRADITIONAL_EXAMS, EXERCISES, LIBRARY, LIVES, FORUM',
-        [ErrorCodes.INVALID_NAME_LOCALIZATION]:
-          'Product name must include English translation',
+        [ErrorCodes.INVALID_NAME_LOCALIZATION]: 'Product name must include English translation',
       }
 
       Object.values(errorMessages).forEach((msg) => {

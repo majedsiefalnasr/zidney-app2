@@ -51,19 +51,15 @@ export class QueueService {
    */
   async enqueueProvisioningJob(payload: any): Promise<void> {
     try {
-      const job = await this.provisioningQueue.add(
-        'provisioning:license',
-        payload,
-        {
-          attempts: 6, // 1 initial + 5 retries
-          backoff: {
-            type: 'exponential',
-            delay: 2000, // 2s base, exponential multiplier
-          },
-          timeout: 1800000, // 30 minutes
-          removeOnComplete: false, // Keep history
-        }
-      )
+      const job = await this.provisioningQueue.add('provisioning:license', payload, {
+        attempts: 6, // 1 initial + 5 retries
+        backoff: {
+          type: 'exponential',
+          delay: 2000, // 2s base, exponential multiplier
+        },
+        timeout: 1800000, // 30 minutes
+        removeOnComplete: false, // Keep history
+      })
 
       this.logger.info({
         event: 'provisioning_job_enqueued',
@@ -86,10 +82,7 @@ export class QueueService {
    * Creates async job to snapshot tenant database for archival.
    * Full implementation deferred to Stage 12.
    */
-  async enqueueSnapshotJob(
-    license_id: string,
-    workspace_slug: string
-  ): Promise<void> {
+  async enqueueSnapshotJob(license_id: string, workspace_slug: string): Promise<void> {
     try {
       const job = await this.snapshotQueue.add('snapshot:license', {
         license_id,
@@ -118,10 +111,7 @@ export class QueueService {
    * Creates async job to restore tenant database from snapshot.
    * Full implementation deferred to Stage 12.
    */
-  async enqueueRestoreJob(
-    license_id: string,
-    workspace_slug: string
-  ): Promise<void> {
+  async enqueueRestoreJob(license_id: string, workspace_slug: string): Promise<void> {
     try {
       const job = await this.restoreQueue.add('restore:license', {
         license_id,
@@ -149,10 +139,7 @@ export class QueueService {
    * Creates async job to permanently drop tenant database.
    * Full implementation deferred to Stage 12.
    */
-  async enqueueDatabaseDropJob(
-    license_id: string,
-    workspace_slug: string
-  ): Promise<void> {
+  async enqueueDatabaseDropJob(license_id: string, workspace_slug: string): Promise<void> {
     try {
       const job = await this.dropQueue.add('database-drop:license', {
         license_id,

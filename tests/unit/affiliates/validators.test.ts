@@ -5,7 +5,7 @@
  */
 
 import { describe, expect, it } from 'vitest'
-import { Affiliate } from '../../../packages/domain-core/src/affiliates/types'
+import type { Affiliate } from '../../../packages/domain-core/src/affiliates/types'
 import {
   checkAffiliateActive,
   checkGlobalUsageLimit,

@@ -15,7 +15,8 @@
  * Safety: Full lock recoverability after TTL expiry
  */
 
-import { Redis } from 'ioredis'
+import { logger } from '@zidney/logger'
+import type { Redis } from 'ioredis'
 
 /**
  * DistributedLock: Manages distributed locks for provisioning operations
@@ -58,8 +59,7 @@ export class DistributedLock {
     key: string,
     ttl_seconds: number = this.lock_ttl_seconds
   ): Promise<
-    | { acquired: false }
-    | { acquired: true; release_fn: () => Promise<void>; lock_value: string }
+    { acquired: false } | { acquired: true; release_fn: () => Promise<void>; lock_value: string }
   > {
     const lock_key = this.getLockKey(key)
     const lock_value = this.generateLockValue()
@@ -69,13 +69,7 @@ export class DistributedLock {
     while (attempts < this.max_retry_attempts) {
       try {
         // Try to set lock atomically (NX = only if not exists, EX = expiry seconds)
-        const result = await this.redis.set(
-          lock_key,
-          lock_value,
-          'EX',
-          ttl_seconds,
-          'NX'
-        )
+        const result = await this.redis.set(lock_key, lock_value, 'EX', ttl_seconds, 'NX')
 
         if (result === 'OK') {
           // Lock acquired successfully
@@ -102,7 +96,7 @@ export class DistributedLock {
         await this.sleep(backoff_ms + jitter)
         backoff_ms = Math.min(backoff_ms * 2, this.max_backoff_ms)
       } catch (error) {
-        console.error(`DistributedLock.acquireLock error: ${error}`)
+        logger.error('distributed_lock_acquire_failed', { key, error: String(error) })
         throw error
       }
     }
@@ -118,20 +112,13 @@ export class DistributedLock {
     key: string,
     ttl_seconds: number = this.lock_ttl_seconds
   ): Promise<
-    | { acquired: false }
-    | { acquired: true; release_fn: () => Promise<void>; lock_value: string }
+    { acquired: false } | { acquired: true; release_fn: () => Promise<void>; lock_value: string }
   > {
     const lock_key = this.getLockKey(key)
     const lock_value = this.generateLockValue()
 
     try {
-      const result = await this.redis.set(
-        lock_key,
-        lock_value,
-        'EX',
-        ttl_seconds,
-        'NX'
-      )
+      const result = await this.redis.set(lock_key, lock_value, 'EX', ttl_seconds, 'NX')
 
       if (result === 'OK') {
         const release_fn = async (): Promise<void> => {
@@ -146,7 +133,7 @@ export class DistributedLock {
 
       return { acquired: false }
     } catch (error) {
-      console.error(`DistributedLock.tryAcquireLock error: ${error}`)
+      logger.error('distributed_lock_try_acquire_failed', { key, error: String(error) })
       throw error
     }
   }
@@ -158,10 +145,7 @@ export class DistributedLock {
    * @param lock_key - Full lock key
    * @param lock_value - Lock value to verify ownership
    */
-  private async releaseLock(
-    lock_key: string,
-    lock_value: string
-  ): Promise<boolean> {
+  private async releaseLock(lock_key: string, lock_value: string): Promise<boolean> {
     try {
       // Use Lua script for atomic check-and-delete
       // Ensures only lock holder can release
@@ -180,7 +164,7 @@ export class DistributedLock {
 
       return (released as number) === 1
     } catch (error) {
-      console.error(`DistributedLock.releaseLock error: ${error}`)
+      logger.error('distributed_lock_release_failed', { lock_key, error: String(error) })
       throw error
     }
   }
@@ -193,10 +177,7 @@ export class DistributedLock {
    * @param ttl_seconds - New TTL in seconds
    * @returns true if lock renewed, false if lock not held by this process
    */
-  async renewLock(
-    key: string,
-    ttl_seconds: number = this.lock_ttl_seconds
-  ): Promise<boolean> {
+  async renewLock(key: string, ttl_seconds: number = this.lock_ttl_seconds): Promise<boolean> {
     const lock_key = this.getLockKey(key)
 
     try {
@@ -212,7 +193,7 @@ export class DistributedLock {
       const result = await this.redis.expire(lock_key, ttl_seconds)
       return result === 1 // 1 = TTL set, 0 = key doesn't exist
     } catch (error) {
-      console.error(`DistributedLock.renewLock error: ${error}`)
+      logger.error('distributed_lock_renew_failed', { key, error: String(error) })
       throw error
     }
   }
@@ -228,7 +209,7 @@ export class DistributedLock {
       const deleted = await this.redis.del(lock_key)
       return deleted === 1
     } catch (error) {
-      console.error(`DistributedLock.forceReleaseLock error: ${error}`)
+      logger.error('distributed_lock_force_release_failed', { key, error: String(error) })
       throw error
     }
   }
@@ -257,7 +238,7 @@ export class DistributedLock {
         ttl_seconds: ttl > 0 ? ttl : 0,
       }
     } catch (error) {
-      console.error(`DistributedLock.getLockStatus error: ${error}`)
+      logger.error('distributed_lock_status_failed', { key, error: String(error) })
       throw error
     }
   }

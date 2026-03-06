@@ -39,11 +39,7 @@ const notFoundRoute: RouteRecordRaw = {
   name: 'not-found',
   component: () => Promise.resolve({}),
 }
-const mmcRoutes: RouteRecordRaw[] = [
-  ...dashboardRoutes,
-  ...licensesRoutes,
-  notFoundRoute,
-]
+const mmcRoutes: RouteRecordRaw[] = [...dashboardRoutes, ...licensesRoutes, notFoundRoute]
 
 describe('route coverage audit (mmc)', () => {
   it('all module-registered routes should have requiresAuth: true or be in the known-public allowlist', () => {
@@ -57,9 +53,7 @@ describe('route coverage audit (mmc)', () => {
     })
 
     if (unprotectedUnknownRoutes.length > 0) {
-      const names = unprotectedUnknownRoutes
-        .map((r) => `${String(r.name)} (${r.path})`)
-        .join(', ')
+      const names = unprotectedUnknownRoutes.map((r) => `${String(r.name)} (${r.path})`).join(', ')
       throw new Error(
         `Route coverage audit FAILED: The following routes lack requiresAuth: true and ` +
           `are not in the known-public allowlist: [${names}]. ` +
@@ -72,9 +66,7 @@ describe('route coverage audit (mmc)', () => {
 
   it('all routes with requiresAuth: true are actually present in the routes array', () => {
     const allRoutes = flattenRoutes(mmcRoutes)
-    const protectedRoutes = allRoutes.filter(
-      (r) => r.meta?.['requiresAuth'] === true
-    )
+    const protectedRoutes = allRoutes.filter((r) => r.meta?.['requiresAuth'] === true)
     // At minimum, the dashboard and licenses routes should be guarded
     const protectedNames = protectedRoutes.map((r) => r.name)
     expect(protectedNames).toContain('dashboard')

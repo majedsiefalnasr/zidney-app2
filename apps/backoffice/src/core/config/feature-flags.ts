@@ -14,13 +14,10 @@ export type FeatureFlags = ZidneyFeatureFlags
  * All env reads go through `env.ts` via `readRawFeatureFlags()`.
  * Accepts and uses `overrides` parameter for testability.
  */
-export function createFeatureFlags(
-  overrides?: Partial<FeatureFlags>
-): FeatureFlags {
+export function createFeatureFlags(overrides?: Partial<FeatureFlags>): FeatureFlags {
   const raw = readRawFeatureFlags()
 
   return Object.freeze({
-    enableDebugPanel:
-      overrides?.enableDebugPanel ?? parseBooleanFlag(raw.enableDebugPanel),
+    enableDebugPanel: overrides?.enableDebugPanel ?? parseBooleanFlag(raw.enableDebugPanel),
   })
 }

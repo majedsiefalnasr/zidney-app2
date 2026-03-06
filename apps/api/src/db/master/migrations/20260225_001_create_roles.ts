@@ -16,7 +16,7 @@
  * - Execution Order: FIRST (no dependencies)
  */
 
-import { PoolClient } from 'pg'
+import type { PoolClient } from 'pg'
 
 export const description = 'Create roles table for MMC role definitions'
 

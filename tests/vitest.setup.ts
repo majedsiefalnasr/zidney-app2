@@ -28,8 +28,7 @@ process.env.TEST_DATABASE_URL =
   `postgresql://${process.env.TEST_DB_USER}:${process.env.TEST_DB_PASSWORD}@${process.env.TEST_DB_HOST}:${process.env.TEST_DB_PORT}/${process.env.TEST_DB_NAME}`
 
 process.env.DATABASE_URL =
-  process.env.DATABASE_URL ??
-  `postgresql://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`
+  process.env.DATABASE_URL ?? `postgresql://${dbUser}:${dbPassword}@${dbHost}:${dbPort}/${dbName}`
 
 if (!('localStorage' in globalThis)) {
   const store = new Map<string, string>()

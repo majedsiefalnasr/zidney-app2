@@ -3,7 +3,7 @@
  * Real database testing of license state machine and enforcement
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createDbManager } from '../db-manager'
 import { cleanupAllFixtures, seedLicense, seedWorkspace } from '../fixtures'

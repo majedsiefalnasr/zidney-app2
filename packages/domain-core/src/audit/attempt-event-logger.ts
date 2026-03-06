@@ -9,7 +9,7 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Pool, PoolClient } from 'pg'
+import type { Pool, PoolClient } from 'pg'
 
 const logger = createLogger('AttemptEventLogger')
 
@@ -61,17 +61,8 @@ const VALID_EVENTS: AttemptEventType[] = [
  * Sets occurred_at = NOW() (server-authoritative)
  * Retries on lock timeout with exponential backoff
  */
-export async function logAttemptEvent(
-  options: LogAttemptEventOptions,
-  pool: Pool
-): Promise<void> {
-  const {
-    attemptId,
-    eventType,
-    payload = {},
-    client,
-    currentUserId = 'system',
-  } = options
+export async function logAttemptEvent(options: LogAttemptEventOptions, pool: Pool): Promise<void> {
+  const { attemptId, eventType, payload = {}, client, currentUserId = 'system' } = options
 
   // Validate event_type
   if (!VALID_EVENTS.includes(eventType)) {
@@ -106,7 +97,7 @@ export async function logAttemptEvent(
       } catch (error: any) {
         // Lock timeout - retry
         if (error.code === 'LOCK_TIMEOUT' && attempt < 2) {
-          const backoffMs = Math.pow(2, attempt) * 1000 // 1s, 2s, 4s
+          const backoffMs = 2 ** attempt * 1000 // 1s, 2s, 4s
           logger.warn('Lock timeout, retrying', {
             attempt: attempt + 1,
             backoff_ms: backoffMs,

@@ -8,15 +8,11 @@
  */
 
 import * as productService from '@zidney/domain-core/products/productService'
-import { ErrorCodes } from '@zidney/types/errors/ErrorCodes'
-import { CreateProductInput } from '@zidney/types/products/Product'
 import { Module } from '@zidney/types/enums/Module'
+import { ErrorCodes } from '@zidney/types/errors/ErrorCodes'
+import type { CreateProductInput } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import {
-  cleanupTestContext,
-  createTestContext,
-  TestContext,
-} from '../../test-helpers'
+import { cleanupTestContext, createTestContext, type TestContext } from '../../test-helpers'
 
 describe('T054: Get Single Product Integration Tests', () => {
   let ctx: TestContext
@@ -46,15 +42,8 @@ describe('T054: Get Single Product Integration Tests', () => {
         enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
       }
 
-      const created = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
-      const retrieved = await productService.getProductById(
-        dbClient,
-        created.id
-      )
+      const created = await productService.createProduct(dbClient, input, ctx.userId)
+      const retrieved = await productService.getProductById(dbClient, created.id)
 
       expect(retrieved).toBeDefined()
       expect(retrieved.id).toBe(created.id)
@@ -187,15 +176,8 @@ describe('T054: Get Single Product Integration Tests', () => {
         enabled_modules: [Module.EXERCISES, Module.LIBRARY],
       }
 
-      const created = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
-      const retrieved = await productService.getProductById(
-        dbClient,
-        created.id
-      )
+      const created = await productService.createProduct(dbClient, input, ctx.userId)
+      const retrieved = await productService.getProductById(dbClient, created.id)
 
       expect(JSON.stringify(created)).toBe(JSON.stringify(retrieved))
     })
@@ -228,11 +210,7 @@ describe('T054: Get Single Product Integration Tests', () => {
         enabled_modules: [Module.MCQ],
       }
 
-      const created = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const created = await productService.createProduct(dbClient, input, ctx.userId)
       const product = await productService.getProductById(dbClient, created.id)
 
       expect(product.name.en).toBe('Bilingual Product')
@@ -246,11 +224,7 @@ describe('T054: Get Single Product Integration Tests', () => {
         enabled_modules: [Module.MCQ],
       }
 
-      const created = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const created = await productService.createProduct(dbClient, input, ctx.userId)
       const product = await productService.getProductById(dbClient, created.id)
 
       expect(product.name.en).toBe('English Only')
@@ -275,11 +249,7 @@ describe('T054: Get Single Product Integration Tests', () => {
         enabled_modules: allModules as any[],
       }
 
-      const created = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const created = await productService.createProduct(dbClient, input, ctx.userId)
       const product = await productService.getProductById(dbClient, created.id)
 
       expect(product.enabled_modules.sort()).toEqual(allModules.sort())
@@ -292,11 +262,7 @@ describe('T054: Get Single Product Integration Tests', () => {
         enabled_modules: [Module.EXERCISES],
       }
 
-      const created = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const created = await productService.createProduct(dbClient, input, ctx.userId)
       const product = await productService.getProductById(dbClient, created.id)
 
       expect(product.enabled_modules.length).toBe(1)

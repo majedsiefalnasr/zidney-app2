@@ -83,10 +83,7 @@ describe('createTokenManager', () => {
   })
 
   it('setToken does NOT write to document.cookie', () => {
-    const originalDescriptor = Object.getOwnPropertyDescriptor(
-      Document.prototype,
-      'cookie'
-    )
+    const originalDescriptor = Object.getOwnPropertyDescriptor(Document.prototype, 'cookie')
     const cookieSetter = vi.fn()
     Object.defineProperty(document, 'cookie', {
       set: cookieSetter,

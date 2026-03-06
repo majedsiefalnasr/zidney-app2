@@ -8,7 +8,7 @@
  * Password hashing and comparison using bcrypt
  */
 
-// @ts-ignore: bcryptjs not declared as dependency of domain-core [INFRA-001-DEPS-01]
+// @ts-expect-error: bcryptjs not declared as dependency of domain-core [INFRA-001-DEPS-01]
 import * as bcrypt from 'bcryptjs'
 
 const BCRYPT_COST = 12
@@ -23,10 +23,7 @@ export async function hashPassword(password: string): Promise<string> {
 /**
  * Compare password with hash
  */
-export async function comparePassword(
-  password: string,
-  hash: string
-): Promise<boolean> {
+export async function comparePassword(password: string, hash: string): Promise<boolean> {
   return bcrypt.compare(password, hash)
 }
 

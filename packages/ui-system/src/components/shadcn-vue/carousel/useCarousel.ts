@@ -1,12 +1,8 @@
-import type {
-  UnwrapRefCarouselApi as CarouselApi,
-  CarouselEmits,
-  CarouselProps,
-} from './interface'
 import { createInjectionState } from '@vueuse/core'
 import emblaCarouselVue from 'embla-carousel-vue'
 import type { Ref } from 'vue'
 import { onMounted, ref } from 'vue'
+import type { UnwrapRefCarouselApi as CarouselApi, CarouselEmits, CarouselProps } from './interface'
 
 interface CarouselState {
   carouselRef: Ref<HTMLElement | undefined>
@@ -19,10 +15,7 @@ interface CarouselState {
 }
 
 const [provideCarousel, useInjectCarousel] = createInjectionState(
-  (
-    { opts, orientation, plugins }: CarouselProps,
-    emits: CarouselEmits
-  ): CarouselState => {
+  ({ opts, orientation, plugins }: CarouselProps, emits: CarouselEmits): CarouselState => {
     const resolvedOrientation = orientation ?? 'horizontal'
     const [emblaNode, emblaApi] = emblaCarouselVue(
       {
@@ -69,16 +62,13 @@ const [provideCarousel, useInjectCarousel] = createInjectionState(
   }
 )
 
-const useProvideCarousel: (
-  props: CarouselProps,
-  emits: CarouselEmits
-) => CarouselState = provideCarousel
+const useProvideCarousel: (props: CarouselProps, emits: CarouselEmits) => CarouselState =
+  provideCarousel
 
 function useCarousel(): CarouselState {
   const carouselState = useInjectCarousel()
 
-  if (!carouselState)
-    throw new Error('useCarousel must be used within a <Carousel />')
+  if (!carouselState) throw new Error('useCarousel must be used within a <Carousel />')
 
   return carouselState
 }

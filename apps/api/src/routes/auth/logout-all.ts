@@ -42,7 +42,8 @@
  */
 
 import { logTokenInvalidation } from '@zidney/domain-core/auth'
-import { Context } from 'hono'
+import { logger } from '@zidney/logger'
+import type { Context } from 'hono'
 
 /**
  * POST /auth/logout-all
@@ -202,7 +203,7 @@ export async function logoutAllHandler(c: Context) {
       try {
         await client.query('ROLLBACK')
       } catch (rollbackErr) {
-        console.error('Rollback error:', rollbackErr)
+        logger.error('Rollback error:', { error: rollbackErr })
       }
 
       // Serialization error - retry logic could go here in future
@@ -213,8 +214,7 @@ export async function logoutAllHandler(c: Context) {
             data: null,
             error: {
               code: 'TRANSACTION_CONFLICT',
-              message:
-                'Transaction conflict with concurrent request. Please retry.',
+              message: 'Transaction conflict with concurrent request. Please retry.',
             },
           },
           409
@@ -226,7 +226,7 @@ export async function logoutAllHandler(c: Context) {
       client.release()
     }
   } catch (error) {
-    console.error('Logout all error:', error)
+    logger.error('Logout all error:', { error })
     return c.json(
       {
         success: false,

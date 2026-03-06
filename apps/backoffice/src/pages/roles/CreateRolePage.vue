@@ -178,9 +178,9 @@
  * ✓ Safe error messages — no internal structure exposed
  */
 
-import { fetch } from '@/core/api/client'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { fetch } from '@/core/api/client'
 import { usePermission } from '../../composables/usePermission'
 
 type PermissionFlags = {
@@ -212,11 +212,7 @@ const submitting = ref(false)
 const nameError = ref<string | null>(null)
 const moduleError = ref<string | null>(null)
 
-function setPermission(
-  module: string,
-  flag: keyof PermissionFlags,
-  value: boolean
-): void {
+function _setPermission(module: string, flag: keyof PermissionFlags, value: boolean): void {
   if (!form.value.permissions[module]) {
     form.value.permissions[module] = {
       can_view: false,
@@ -231,12 +227,9 @@ function setPermission(
 async function loadModules(): Promise<void> {
   loadingModules.value = true
   try {
-    const response = await fetch(
-      '/api/v1/backoffice/workspace/role-permission-modules',
-      {
-        credentials: 'include',
-      }
-    )
+    const response = await fetch('/api/v1/backoffice/workspace/role-permission-modules', {
+      credentials: 'include',
+    })
     if (response.status === 403) {
       forbidden.value = true
       return
@@ -264,7 +257,7 @@ async function loadModules(): Promise<void> {
   }
 }
 
-async function submit(): Promise<void> {
+async function _submit(): Promise<void> {
   nameError.value = null
   moduleError.value = null
 

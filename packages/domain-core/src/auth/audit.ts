@@ -31,7 +31,8 @@
  * - GDPR: User data retention policy (90 days)
  */
 
-import { AuditEventData } from './types'
+import { logger } from '@zidney/logger'
+import type { AuditEventData } from './types'
 
 // Simple logger interface
 interface SimpleLogger {
@@ -46,12 +47,9 @@ interface SimpleLogger {
  */
 function getAuditLogger(): SimpleLogger {
   return {
-    info: (obj, msg) =>
-      console.log(JSON.stringify({ level: 'info', ...obj, msg })),
-    warn: (obj, msg) =>
-      console.warn(JSON.stringify({ level: 'warn', ...obj, msg })),
-    error: (obj, msg) =>
-      console.error(JSON.stringify({ level: 'error', ...obj, msg })),
+    info: (obj, msg) => logger.info(msg, obj),
+    warn: (obj, msg) => logger.warn(msg, obj),
+    error: (obj, msg) => logger.error(msg, obj),
   }
 }
 
@@ -142,11 +140,7 @@ export async function logAuthEvent(event: AuditEventData): Promise<void> {
 
   // Choose log level based on result
   const logLevel =
-    event.result === 'SUCCESS'
-      ? 'info'
-      : event.result === 'BLOCKED'
-        ? 'warn'
-        : 'warn'
+    event.result === 'SUCCESS' ? 'info' : event.result === 'BLOCKED' ? 'warn' : 'warn'
 
   // Log with appropriate level
   if (logLevel === 'info') {

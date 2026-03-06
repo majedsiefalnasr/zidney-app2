@@ -45,18 +45,14 @@ export type ApiResponse<T = unknown> = SuccessResponse<T> | ErrorResponse
 /**
  * Type guard to check if response is success
  */
-export function isSuccessResponse<T>(
-  response: ApiResponse<T>
-): response is SuccessResponse<T> {
+export function isSuccessResponse<T>(response: ApiResponse<T>): response is SuccessResponse<T> {
   return response.success === true && 'data' in response
 }
 
 /**
  * Type guard to check if response is error
  */
-export function isErrorResponse(
-  response: ApiResponse
-): response is ErrorResponse {
+export function isErrorResponse(response: ApiResponse): response is ErrorResponse {
   return response.success === false && 'error' in response
 }
 

@@ -64,9 +64,7 @@ export async function applyMigration(
     await client.query('LOCK schema_version IN EXCLUSIVE MODE')
 
     // Step 2: Read current version
-    const versionResult = await client.query(
-      'SELECT version FROM schema_version LIMIT 1'
-    )
+    const versionResult = await client.query('SELECT version FROM schema_version LIMIT 1')
     const currentVersion = versionResult.rows[0]?.version || '1.0.0'
 
     logger?.log('debug', 'Current schema version', { current: currentVersion })
@@ -83,26 +81,18 @@ export async function applyMigration(
     try {
       migrationSQL = readFileSync(migration_file_path, 'utf-8')
     } catch (err: any) {
-      throw new Error(
-        `Failed to read migration file: ${migration_file_path} - ${err.message}`
-      )
+      throw new Error(`Failed to read migration file: ${migration_file_path} - ${err.message}`)
     }
 
     // Step 5: CRITICAL - Verify checksum (tampering detection)
-    const calculatedChecksum = createHash('sha256')
-      .update(migrationSQL)
-      .digest('hex')
+    const calculatedChecksum = createHash('sha256').update(migrationSQL).digest('hex')
     if (calculatedChecksum !== migration_file_checksum) {
-      logger?.log(
-        'critical',
-        'MIGRATION CHECKSUM MISMATCH - POSSIBLE TAMPERING',
-        {
-          workspace_id,
-          task_id,
-          expected: migration_file_checksum,
-          calculated: calculatedChecksum,
-        }
-      )
+      logger?.log('critical', 'MIGRATION CHECKSUM MISMATCH - POSSIBLE TAMPERING', {
+        workspace_id,
+        task_id,
+        expected: migration_file_checksum,
+        calculated: calculatedChecksum,
+      })
 
       // ABORT IMMEDIATELY - DO NOT RETRY on checksum failure
       await client.query('ROLLBACK')
@@ -223,10 +213,6 @@ export function getMigrationRetryPolicy(): RetryPolicy {
   return {
     maxRetries: 3,
     backoffMs: [2000, 4000, 8000], // 2s, 4s, 8s
-    noRetryOn: [
-      'TAMPERING_DETECTED',
-      'CHECKSUM_MISMATCH',
-      'LOCK_TIMEOUT_AFTER_RETRIES',
-    ],
+    noRetryOn: ['TAMPERING_DETECTED', 'CHECKSUM_MISMATCH', 'LOCK_TIMEOUT_AFTER_RETRIES'],
   }
 }

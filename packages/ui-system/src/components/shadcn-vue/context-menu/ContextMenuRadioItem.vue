@@ -1,21 +1,12 @@
 <script setup lang="ts">
-import type {
-  ContextMenuRadioItemEmits,
-  ContextMenuRadioItemProps,
-} from 'reka-ui'
-import type { HTMLAttributes } from 'vue'
 import { reactiveOmit } from '@vueuse/core'
 import { Circle } from 'lucide-vue-next'
-import {
-  ContextMenuItemIndicator,
-  ContextMenuRadioItem,
-  useForwardPropsEmits,
-} from 'reka-ui'
+import type { ContextMenuRadioItemEmits, ContextMenuRadioItemProps } from 'reka-ui'
+import { ContextMenuItemIndicator, ContextMenuRadioItem, useForwardPropsEmits } from 'reka-ui'
+import type { HTMLAttributes } from 'vue'
 import { cn } from '@/lib/utils'
 
-const props = defineProps<
-  ContextMenuRadioItemProps & { class?: HTMLAttributes['class'] }
->()
+const props = defineProps<ContextMenuRadioItemProps & { class?: HTMLAttributes['class'] }>()
 const emits = defineEmits<ContextMenuRadioItemEmits>()
 
 const delegatedProps = reactiveOmit(props, 'class')

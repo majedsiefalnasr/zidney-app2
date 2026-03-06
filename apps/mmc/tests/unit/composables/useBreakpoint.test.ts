@@ -10,12 +10,13 @@
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  * Task: T037
  */
-import { useBreakpoint } from '@/composables/useBreakpoint'
-import { useMmcUiStore } from '@/core/state/ui.store'
+
 import { createTestingPinia } from '@pinia/testing'
 import { mount } from '@vue/test-utils'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { defineComponent } from 'vue'
+import { useBreakpoint } from '@/composables/useBreakpoint'
+import { useMmcUiStore } from '@/core/state/ui.store'
 
 // Wrapper component to test lifecycle hooks
 const TestComponent = defineComponent({
@@ -92,9 +93,6 @@ describe('useBreakpoint (mmc)', () => {
     const removeEventListenerSpy = vi.spyOn(window, 'removeEventListener')
     const wrapper = mount(TestComponent, { global: { plugins: [pinia] } })
     wrapper.unmount()
-    expect(removeEventListenerSpy).toHaveBeenCalledWith(
-      'resize',
-      expect.any(Function)
-    )
+    expect(removeEventListenerSpy).toHaveBeenCalledWith('resize', expect.any(Function))
   })
 })

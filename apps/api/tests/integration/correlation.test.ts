@@ -19,15 +19,12 @@ describe('Request ID & Correlation Lifecycle', () => {
     it('should generate request ID on each request', () => {
       // In real test, make HTTP request and check for request id
       const requestId = uuidv4()
-      expect(requestId).toMatch(
-        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-      )
+      expect(requestId).toMatch(/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i)
     })
 
     it('should use UUID-v4 format (RFC 4122)', () => {
       const requestId = uuidv4()
-      const uuidPattern =
-        /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+      const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
       expect(requestId).toMatch(uuidPattern)
     })
 
@@ -233,13 +230,7 @@ describe('Request ID & Correlation Lifecycle', () => {
 
     it('should not reorder middleware', () => {
       // Middleware order must be immutable
-      const order = [
-        'request-id',
-        'tenant-resolver',
-        'license',
-        'correlation',
-        'redaction',
-      ]
+      const order = ['request-id', 'tenant-resolver', 'license', 'correlation', 'redaction']
       expect(order[0]).toBe('request-id')
       expect(order[1]).toBe('tenant-resolver')
     })

@@ -33,7 +33,7 @@ describe('Snapshot Immutability Integration Tests (T038)', () => {
         })
       : new Pool({
           host: process.env.DB_HOST || 'localhost',
-          port: parseInt(process.env.DB_PORT || '5432'),
+          port: parseInt(process.env.DB_PORT || '5432', 10),
           database: process.env.DB_NAME || 'zidney_test',
           user: process.env.DB_USER || 'zidney_app',
           password: process.env.DB_PASSWORD || 'change-me-in-production',
@@ -153,10 +153,9 @@ describe('Snapshot Immutability Integration Tests (T038)', () => {
     expect(originalSnapshot.config.question_count).toBe(3)
 
     // Modify exam (change question count, passing score)
-    await pool.query(
-      `UPDATE mcq_exams SET question_count = 5, passing_score = 80 WHERE id = $1`,
-      [examId]
-    )
+    await pool.query(`UPDATE mcq_exams SET question_count = 5, passing_score = 80 WHERE id = $1`, [
+      examId,
+    ])
 
     // Retrieve attempt snapshot again
     const unchangedSnapshot = await getAttemptSnapshot(attempt.id, pool)
@@ -164,9 +163,7 @@ describe('Snapshot Immutability Integration Tests (T038)', () => {
     // Snapshot should remain unchanged
     expect(unchangedSnapshot.config.question_count).toBe(3)
     expect(unchangedSnapshot.config.passing_score).toBe(70)
-    expect(JSON.stringify(unchangedSnapshot)).toBe(
-      JSON.stringify(originalSnapshot)
-    )
+    expect(JSON.stringify(unchangedSnapshot)).toBe(JSON.stringify(originalSnapshot))
 
     logger.info('✅ Exam modification test passed - snapshot unchanged')
   })
@@ -181,11 +178,7 @@ describe('Snapshot Immutability Integration Tests (T038)', () => {
     const testExamId = examResult.rows[0].id
 
     // Create attempt
-    const attempt = await initializeAttempt(
-      { examId: testExamId, userId },
-      pool,
-      userId
-    )
+    const attempt = await initializeAttempt({ examId: testExamId, userId }, pool, userId)
 
     const originalSnapshot = await getAttemptSnapshot(attempt.id, pool)
     const originalGrading = JSON.stringify(originalSnapshot.grading)
@@ -218,11 +211,7 @@ describe('Snapshot Immutability Integration Tests (T038)', () => {
     const testExamId = examResult.rows[0].id
 
     // Create attempt
-    const attempt = await initializeAttempt(
-      { examId: testExamId, userId },
-      pool,
-      userId
-    )
+    const attempt = await initializeAttempt({ examId: testExamId, userId }, pool, userId)
 
     // Retrieve at different times
     const snap1 = await getAttemptSnapshot(attempt.id, pool)
@@ -249,11 +238,7 @@ describe('Snapshot Immutability Integration Tests (T038)', () => {
     const testExamId = examResult.rows[0].id
 
     // Create attempt (captures question order)
-    const attempt1 = await initializeAttempt(
-      { examId: testExamId, userId },
-      pool,
-      userId
-    )
+    const attempt1 = await initializeAttempt({ examId: testExamId, userId }, pool, userId)
 
     // Small delay
     await new Promise((r) => setTimeout(r, 100))
@@ -266,19 +251,13 @@ describe('Snapshot Immutability Integration Tests (T038)', () => {
     )
     const userId2 = userId2Result.rows[0].id
 
-    const attempt2 = await initializeAttempt(
-      { examId: testExamId, userId: userId2 },
-      pool,
-      userId2
-    )
+    const attempt2 = await initializeAttempt({ examId: testExamId, userId: userId2 }, pool, userId2)
 
     const snap1 = await getAttemptSnapshot(attempt1.id, pool)
     const snap2 = await getAttemptSnapshot(attempt2.id, pool)
 
     // Both attempts should have identical question order (from same exam at time of creation)
-    expect(JSON.stringify(snap1.questions)).toBe(
-      JSON.stringify(snap2.questions)
-    )
+    expect(JSON.stringify(snap1.questions)).toBe(JSON.stringify(snap2.questions))
 
     logger.info('✅ Question order freezing test passed')
   })
@@ -293,11 +272,7 @@ describe('Snapshot Immutability Integration Tests (T038)', () => {
     const testExamId = examResult.rows[0].id
 
     // Create attempt
-    const attempt = await initializeAttempt(
-      { examId: testExamId, userId },
-      pool,
-      userId
-    )
+    const attempt = await initializeAttempt({ examId: testExamId, userId }, pool, userId)
 
     // Try to update configuration_snapshot
     try {

@@ -16,8 +16,9 @@
  * - No update/delete capability (enforced at DB level)
  */
 
-// @ts-ignore: postgres not declared as dependency of domain-core [INFRA-001-DEPS-05]
-import { Database } from 'postgres'
+import { logger } from '@zidney/logger'
+// @ts-expect-error: postgres not declared as dependency of domain-core [INFRA-001-DEPS-05]
+import type { Database } from 'postgres'
 
 export type ActionType =
   | 'MEMBER_CREATED'
@@ -42,12 +43,7 @@ export type ActionType =
   | 'PERMISSION_CHECK_ALLOWED'
   | 'SESSION_INVALIDATED'
 
-export type EntityType =
-  | 'MEMBER'
-  | 'ROLE'
-  | 'PERMISSION'
-  | 'INVITATION'
-  | 'SESSION'
+export type EntityType = 'MEMBER' | 'ROLE' | 'PERMISSION' | 'INVITATION' | 'SESSION'
 
 export interface AuditLogEntry {
   id?: string
@@ -108,7 +104,7 @@ export class AuditService {
       )
     } catch (error) {
       // Never throw from audit service; log to stderr and continue
-      console.error('[AUDIT_LOG_ERROR]', {
+      logger.error('audit_log_error', {
         action: entry.action_type,
         entity: entry.entity_type,
         error: error instanceof Error ? error.message : String(error),

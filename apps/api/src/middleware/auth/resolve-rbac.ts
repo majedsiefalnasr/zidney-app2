@@ -28,7 +28,8 @@
  */
 
 import { buildRbacContext, logPermissionDenied } from '@zidney/domain-core/auth'
-import { Context, Next } from 'hono'
+import { logger } from '@zidney/logger'
+import type { Context, Next } from 'hono'
 
 /**
  * Resolve user's role and permissions from database
@@ -121,7 +122,7 @@ export async function resolveRbacMiddleware(c: Context, next: Next) {
 
     await next()
   } catch (error) {
-    console.error('RBAC resolution error:', error)
+    logger.error('RBAC resolution error:', { error })
     return c.json(
       {
         success: false,
@@ -283,9 +284,7 @@ export function requireAllPermissions(permissions: string[]) {
     const hasAll = permissions.every((p) => rbacContext.permissions.includes(p))
 
     if (!hasAll) {
-      const missing = permissions.filter(
-        (p) => !rbacContext.permissions.includes(p)
-      )
+      const missing = permissions.filter((p) => !rbacContext.permissions.includes(p))
       return c.json(
         {
           success: false,

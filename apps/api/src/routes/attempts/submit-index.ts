@@ -26,8 +26,8 @@
  * - Error responses normalized to RFC 7807 format
  */
 
-import { Logger } from '@zidney/logger'
-import { Hono } from 'hono'
+import type { Logger } from '@zidney/logger'
+import type { Hono } from 'hono'
 import { getAttemptResultHandler } from './result'
 import { submitAttemptHandler } from './submit'
 
@@ -56,17 +56,12 @@ export function registerStage06PhaseDRoutes(app: Hono, logger: Logger): void {
    */
   app.post('/api/workspaces/:slug/attempts/:id/submit', submitAttemptHandler)
 
-  logger.info(
-    'Registered route: POST /api/workspaces/:slug/attempts/:id/submit',
-    {
-      handler: 'submitAttemptHandler',
-      middleware:
-        'tenantResolver → licenseValidator → idempotency → authContext → rbac',
-      response_code: 202,
-      description:
-        'Submit attempt for async grading (pessimistic lock, triple-layer idempotency)',
-    }
-  )
+  logger.info('Registered route: POST /api/workspaces/:slug/attempts/:id/submit', {
+    handler: 'submitAttemptHandler',
+    middleware: 'tenantResolver → licenseValidator → idempotency → authContext → rbac',
+    response_code: 202,
+    description: 'Submit attempt for async grading (pessimistic lock, triple-layer idempotency)',
+  })
 
   // =========================================================================
   // RESULT POLLING ENDPOINT (T031)
@@ -83,24 +78,18 @@ export function registerStage06PhaseDRoutes(app: Hono, logger: Logger): void {
    */
   app.get('/api/workspaces/:slug/attempts/:id/result', getAttemptResultHandler)
 
-  logger.info(
-    'Registered route: GET /api/workspaces/:slug/attempts/:id/result',
-    {
-      handler: 'getAttemptResultHandler',
-      middleware: 'tenantResolver → licenseValidator → authContext → rbac',
-      response_code: '202 (polling) or 200 (result)',
-      description: 'Poll for async grading result',
-    }
-  )
+  logger.info('Registered route: GET /api/workspaces/:slug/attempts/:id/result', {
+    handler: 'getAttemptResultHandler',
+    middleware: 'tenantResolver → licenseValidator → authContext → rbac',
+    response_code: '202 (polling) or 200 (result)',
+    description: 'Poll for async grading result',
+  })
 
-  logger.info(
-    'Stage 06 Phase D (submit + result) routes registered successfully',
-    {
-      total_endpoints: 2,
-      submit: 1,
-      result: 1,
-    }
-  )
+  logger.info('Stage 06 Phase D (submit + result) routes registered successfully', {
+    total_endpoints: 2,
+    submit: 1,
+    result: 1,
+  })
 }
 
 /**

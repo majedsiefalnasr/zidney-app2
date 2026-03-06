@@ -1,13 +1,5 @@
 import type { PoolClient } from 'pg'
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { pool } from '../../db'
 
 /**
@@ -144,18 +136,11 @@ describe('Referential Integrity Integration', () => {
     const attemptId = attemptResult.rows[0].id
 
     // Verify all relationships exist
-    const examCheck = await client.query(
-      'SELECT id FROM mcq_exams WHERE id = $1',
-      [examId]
-    )
-    const questionCheck = await client.query(
-      'SELECT id FROM mcq_questions WHERE id = $1',
-      [questionId]
-    )
-    const attemptCheck = await client.query(
-      'SELECT id FROM attempts WHERE id = $1',
-      [attemptId]
-    )
+    const examCheck = await client.query('SELECT id FROM mcq_exams WHERE id = $1', [examId])
+    const questionCheck = await client.query('SELECT id FROM mcq_questions WHERE id = $1', [
+      questionId,
+    ])
+    const attemptCheck = await client.query('SELECT id FROM attempts WHERE id = $1', [attemptId])
 
     expect(examCheck.rowCount).toBe(1)
     expect(questionCheck.rowCount).toBe(1)
@@ -190,27 +175,16 @@ describe('Referential Integrity Integration', () => {
 
     await client.query(
       'INSERT INTO attempts (exam_type, exam_id, user_id, configuration_snapshot, question_list_snapshot, grading_config_snapshot) VALUES ($1, $2, $3, $4, $5, $6)',
-      [
-        'MCQ',
-        examId,
-        userId,
-        '{}',
-        JSON.stringify({ questions: [questionId] }),
-        '{}',
-      ]
+      ['MCQ', examId, userId, '{}', JSON.stringify({ questions: [questionId] }), '{}']
     )
 
     // Delete question (soft delete)
-    await client.query(
-      'UPDATE mcq_questions SET is_deleted = true WHERE id = $1',
-      [questionId]
-    )
+    await client.query('UPDATE mcq_questions SET is_deleted = true WHERE id = $1', [questionId])
 
     // Verify question marked as deleted
-    const deleteCheck = await client.query(
-      'SELECT is_deleted FROM mcq_questions WHERE id = $1',
-      [questionId]
-    )
+    const deleteCheck = await client.query('SELECT is_deleted FROM mcq_questions WHERE id = $1', [
+      questionId,
+    ])
     expect(deleteCheck.rows[0].is_deleted).toBe(true)
 
     // Attempt still has reference (acceptable)
@@ -235,10 +209,9 @@ describe('Referential Integrity Integration', () => {
     const examId = examResult.rows[0].id
 
     // Application should check is_deleted before allowing new attempts
-    const archiveCheck = await client.query(
-      'SELECT is_deleted FROM mcq_exams WHERE id = $1',
-      [examId]
-    )
+    const archiveCheck = await client.query('SELECT is_deleted FROM mcq_exams WHERE id = $1', [
+      examId,
+    ])
     expect(archiveCheck.rows[0].is_deleted).toBe(true)
 
     // Attempts on archived exam acceptable at DB level (enforced at app level)
@@ -247,10 +220,9 @@ describe('Referential Integrity Integration', () => {
       ['MCQ', examId, userId, '{}', '{}', '{}']
     )
 
-    const attemptCount = await client.query(
-      'SELECT COUNT(*) FROM attempts WHERE exam_id = $1',
-      [examId]
-    )
+    const attemptCount = await client.query('SELECT COUNT(*) FROM attempts WHERE exam_id = $1', [
+      examId,
+    ])
     expect(parseInt(attemptCount.rows[0].count, 10)).toBe(1)
   })
 
@@ -308,10 +280,10 @@ describe('Referential Integrity Integration', () => {
     expect(childCheck.rows[0].parent_category_id).toEqual(parentId)
 
     // Create values under child
-    await client.query(
-      'INSERT INTO category_values (category_id, value) VALUES ($1, $2)',
-      [childId, 'value1']
-    )
+    await client.query('INSERT INTO category_values (category_id, value) VALUES ($1, $2)', [
+      childId,
+      'value1',
+    ])
 
     const valueCheck = await client.query(
       'SELECT category_id FROM category_values WHERE category_id = $1',

@@ -5,6 +5,8 @@
  * Queue names, concurrency, retry policies, and DLQ settings.
  */
 
+import { logger } from '@zidney/logger'
+
 export interface QueueConfig {
   name: string
   concurrency: number
@@ -68,17 +70,17 @@ export function getAllDLQs(): string[] {
  */
 export function validateQueueConfig(config: QueueConfig): boolean {
   if (!config.name || !config.name.length) {
-    console.error('Queue name is required')
+    logger.error('queue_config_invalid', { reason: 'Queue name is required' })
     return false
   }
 
   if (config.concurrency < 1 || config.concurrency > 100) {
-    console.error('Concurrency must be between 1 and 100')
+    logger.error('queue_config_invalid', { reason: 'Concurrency must be between 1 and 100' })
     return false
   }
 
   if (config.retryPolicy.maxRetries < 0 || config.retryPolicy.maxRetries > 10) {
-    console.error('Max retries must be between 0 and 10')
+    logger.error('queue_config_invalid', { reason: 'Max retries must be between 0 and 10' })
     return false
   }
 
@@ -86,12 +88,16 @@ export function validateQueueConfig(config: QueueConfig): boolean {
     config.retryPolicy.backoff.length !== config.retryPolicy.maxRetries &&
     config.retryPolicy.maxRetries > 0
   ) {
-    console.error('Backoff array length must match maxRetries count')
+    logger.error('queue_config_invalid', {
+      reason: 'Backoff array length must match maxRetries count',
+    })
     return false
   }
 
   if (config.timeout < 1000 || config.timeout > 3600000) {
-    console.error('Timeout must be between 1s and 1h (1000-3600000ms)')
+    logger.error('queue_config_invalid', {
+      reason: 'Timeout must be between 1s and 1h (1000-3600000ms)',
+    })
     return false
   }
 
@@ -104,17 +110,19 @@ export function validateQueueConfig(config: QueueConfig): boolean {
  * Called during worker startup
  */
 export async function initializeQueues(): Promise<void> {
-  console.log(`Initializing ${QUEUES.length} job queues...`)
+  logger.info('queues_initializing', { count: QUEUES.length })
 
   for (const config of QUEUES) {
     if (!validateQueueConfig(config)) {
       throw new Error(`Invalid queue configuration for ${config.name}`)
     }
 
-    console.log(
-      `✓ Queue initialized: ${config.name} (concurrency=${config.concurrency}, timeout=${config.timeout}ms)`
-    )
+    logger.info('queue_initialized', {
+      name: config.name,
+      concurrency: config.concurrency,
+      timeout_ms: config.timeout,
+    })
   }
 
-  console.log('All queues initialized successfully')
+  logger.info('queues_initialized')
 }

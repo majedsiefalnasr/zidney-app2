@@ -184,10 +184,8 @@ const confirmationInput = ref('')
 
 const isConfirmationValid = computed(() => {
   if (props.targetStatus === 'SOFT_LOCKED') return true
-  if (props.targetStatus === 'ARCHIVED')
-    return confirmationInput.value === 'ARCHIVE'
-  if (props.targetStatus === 'DELETED')
-    return confirmationInput.value === 'DELETE FOREVER'
+  if (props.targetStatus === 'ARCHIVED') return confirmationInput.value === 'ARCHIVE'
+  if (props.targetStatus === 'DELETED') return confirmationInput.value === 'DELETE FOREVER'
   return false
 })
 

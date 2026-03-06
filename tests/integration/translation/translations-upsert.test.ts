@@ -45,11 +45,7 @@ function createTestApp(
       query: vi.fn(async (sql: string, params?: unknown[]) => {
         if (dbError) throw new Error('DB error')
 
-        if (
-          sql.includes('BEGIN') ||
-          sql.includes('COMMIT') ||
-          sql.includes('ROLLBACK')
-        ) {
+        if (sql.includes('BEGIN') || sql.includes('COMMIT') || sql.includes('ROLLBACK')) {
           return { rows: [], rowCount: 0 }
         }
 
@@ -70,14 +66,8 @@ function createTestApp(
         }
 
         // Entity existence check
-        if (
-          sql.includes('FROM') &&
-          sql.includes('WHERE') &&
-          !sql.includes('translations')
-        ) {
-          return entityExists
-            ? { rows: [{ id: 'q-001' }], rowCount: 1 }
-            : { rows: [], rowCount: 0 }
+        if (sql.includes('FROM') && sql.includes('WHERE') && !sql.includes('translations')) {
+          return entityExists ? { rows: [{ id: 'q-001' }], rowCount: 1 } : { rows: [], rowCount: 0 }
         }
 
         // Translation upsert (ON CONFLICT)
@@ -135,9 +125,7 @@ describe('POST /api/v1/backoffice/workspace/translations', () => {
       body: JSON.stringify({
         entity_type: 'question',
         entity_id: 'q-001',
-        translations: [
-          { field_name: 'text', language_code: 'ar', translated_value: 'سؤال' },
-        ],
+        translations: [{ field_name: 'text', language_code: 'ar', translated_value: 'سؤال' }],
       }),
     })
 
@@ -250,9 +238,7 @@ describe('POST /api/v1/backoffice/workspace/translations', () => {
       body: JSON.stringify({
         entity_type: 'question',
         entity_id: 'q-001',
-        translations: [
-          { field_name: 'text', language_code: 'ar', translated_value: 'سؤال' },
-        ],
+        translations: [{ field_name: 'text', language_code: 'ar', translated_value: 'سؤال' }],
       }),
     })
 
@@ -270,9 +256,7 @@ describe('POST /api/v1/backoffice/workspace/translations', () => {
       body: JSON.stringify({
         entity_type: 'question',
         entity_id: 'q-nonexistent',
-        translations: [
-          { field_name: 'text', language_code: 'ar', translated_value: 'سؤال' },
-        ],
+        translations: [{ field_name: 'text', language_code: 'ar', translated_value: 'سؤال' }],
       }),
     })
 
@@ -290,9 +274,7 @@ describe('POST /api/v1/backoffice/workspace/translations', () => {
       body: JSON.stringify({
         entity_type: 'unknown_type',
         entity_id: 'x-001',
-        translations: [
-          { field_name: 'text', language_code: 'ar', translated_value: 'test' },
-        ],
+        translations: [{ field_name: 'text', language_code: 'ar', translated_value: 'test' }],
       }),
     })
 
@@ -310,9 +292,7 @@ describe('POST /api/v1/backoffice/workspace/translations', () => {
       body: JSON.stringify({
         entity_type: 'question',
         entity_id: 'q-001',
-        translations: [
-          { field_name: 'text', language_code: 'ar', translated_value: 'سؤال' },
-        ],
+        translations: [{ field_name: 'text', language_code: 'ar', translated_value: 'سؤال' }],
       }),
     })
 

@@ -66,9 +66,7 @@ export type TranslatableFieldName<T extends TranslatableEntityType> =
  * @returns Readonly array of field names, or [] for unknown types
  */
 export function getTranslatableFields(entityType: string): readonly string[] {
-  return (
-    (TRANSLATABLE_FIELDS as Record<string, readonly string[]>)[entityType] ?? []
-  )
+  return (TRANSLATABLE_FIELDS as Record<string, readonly string[]>)[entityType] ?? []
 }
 
 /**
@@ -77,8 +75,6 @@ export function getTranslatableFields(entityType: string): readonly string[] {
  *
  * @param entityType - Any string to check
  */
-export function isTranslatableEntityType(
-  entityType: string
-): entityType is TranslatableEntityType {
+export function isTranslatableEntityType(entityType: string): entityType is TranslatableEntityType {
   return entityType in TRANSLATABLE_FIELDS
 }

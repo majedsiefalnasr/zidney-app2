@@ -29,8 +29,7 @@ import { z } from 'zod'
 export const TransitionRequestSchema = z.object({
   target_state: z.enum(['COMPLETED', 'UNDER_REVIEW', 'APPROVED', 'ENABLED'], {
     errorMap: () => ({
-      message:
-        "target_state must be one of 'COMPLETED', 'UNDER_REVIEW', 'APPROVED', 'ENABLED'",
+      message: "target_state must be one of 'COMPLETED', 'UNDER_REVIEW', 'APPROVED', 'ENABLED'",
     }),
   }),
   reason: z.string().optional(),

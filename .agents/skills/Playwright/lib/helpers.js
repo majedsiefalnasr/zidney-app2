@@ -23,17 +23,10 @@ function getExtraHeadersFromEnv() {
   if (headersJson) {
     try {
       const parsed = JSON.parse(headersJson)
-      if (
-        typeof parsed === 'object' &&
-        parsed !== null &&
-        !Array.isArray(parsed)
-      ) {
+      if (typeof parsed === 'object' && parsed !== null && !Array.isArray(parsed)) {
         return parsed
       }
-      console.warn('PW_EXTRA_HEADERS must be a JSON object, ignoring...')
-    } catch (e) {
-      console.warn('Failed to parse PW_EXTRA_HEADERS as JSON:', e.message)
-    }
+    } catch (_e) {}
   }
 
   return null
@@ -47,7 +40,7 @@ function getExtraHeadersFromEnv() {
 async function launchBrowser(browserType = 'chromium', options = {}) {
   const defaultOptions = {
     headless: process.env.HEADLESS !== 'false',
-    slowMo: process.env.SLOW_MO ? parseInt(process.env.SLOW_MO) : 0,
+    slowMo: process.env.SLOW_MO ? parseInt(process.env.SLOW_MO, 10) : 0,
     args: ['--no-sandbox', '--disable-setuid-sandbox'],
   }
 
@@ -100,9 +93,7 @@ async function waitForPageReady(page, options = {}) {
     await page.waitForLoadState(waitOptions.waitUntil, {
       timeout: waitOptions.timeout,
     })
-  } catch (e) {
-    console.warn('Page load timeout, continuing...')
-  }
+  } catch (_e) {}
 
   // Additional wait for dynamic content if selector provided
   if (options.waitForSelector) {
@@ -135,12 +126,9 @@ async function safeClick(page, selector, options = {}) {
       return true
     } catch (e) {
       if (i === maxRetries - 1) {
-        console.error(
-          `Failed to click ${selector} after ${maxRetries} attempts`
-        )
         throw e
       }
-      console.log(`Retry ${i + 1}/${maxRetries} for clicking ${selector}`)
+
       await page.waitForTimeout(retryDelay)
     }
   }
@@ -198,7 +186,6 @@ async function takeScreenshot(page, name, options = {}) {
     ...options,
   })
 
-  console.log(`Screenshot saved: ${filename}`)
   return filename
 }
 
@@ -225,13 +212,10 @@ async function authenticate(page, credentials, selectors = {}) {
   // Wait for navigation or success indicator
   await Promise.race([
     page.waitForNavigation({ waitUntil: 'networkidle' }),
-    page.waitForSelector(
-      selectors.successIndicator || '.dashboard, .user-menu, .logout',
-      { timeout: 10000 }
-    ),
-  ]).catch(() => {
-    console.log('Login might have completed without navigation')
-  })
+    page.waitForSelector(selectors.successIndicator || '.dashboard, .user-menu, .logout', {
+      timeout: 10000,
+    }),
+  ]).catch(() => {})
 }
 
 /**
@@ -315,10 +299,10 @@ async function handleCookieBanner(page, timeout = 3000) {
       })
       if (element) {
         await element.click()
-        console.log('Cookie banner dismissed')
+
         return true
       }
-    } catch (e) {
+    } catch (_e) {
       // Continue to next selector
     }
   }
@@ -340,8 +324,8 @@ async function retryWithBackoff(fn, maxRetries = 3, initialDelay = 1000) {
       return await fn()
     } catch (error) {
       lastError = error
-      const delay = initialDelay * Math.pow(2, i)
-      console.log(`Attempt ${i + 1} failed, retrying in ${delay}ms...`)
+      const delay = initialDelay * 2 ** i
+
       await new Promise((resolve) => setTimeout(resolve, delay))
     }
   }
@@ -387,21 +371,17 @@ async function createContext(browser, options = {}) {
  * @returns {Promise<Array>} Array of detected server URLs
  */
 async function detectDevServers(customPorts = []) {
-  const http = require('http')
+  const http = require('node:http')
 
   // Common dev server ports
-  const commonPorts = [
-    3000, 3001, 3002, 5173, 8080, 8000, 4200, 5000, 9000, 1234,
-  ]
+  const commonPorts = [3000, 3001, 3002, 5173, 8080, 8000, 4200, 5000, 9000, 1234]
   const allPorts = [...new Set([...commonPorts, ...customPorts])]
 
   const detectedServers = []
 
-  console.log('🔍 Checking for running dev servers...')
-
   for (const port of allPorts) {
     try {
-      await new Promise((resolve, reject) => {
+      await new Promise((resolve, _reject) => {
         const req = http.request(
           {
             hostname: 'localhost',
@@ -413,7 +393,6 @@ async function detectDevServers(customPorts = []) {
           (res) => {
             if (res.statusCode < 500) {
               detectedServers.push(`http://localhost:${port}`)
-              console.log(`  ✅ Found server on port ${port}`)
             }
             resolve()
           }
@@ -427,13 +406,12 @@ async function detectDevServers(customPorts = []) {
 
         req.end()
       })
-    } catch (e) {
+    } catch (_e) {
       // Port not available, continue
     }
   }
 
   if (detectedServers.length === 0) {
-    console.log('  ❌ No dev servers detected')
   }
 
   return detectedServers

@@ -16,14 +16,7 @@
  */
 
 import { sql } from 'drizzle-orm'
-import {
-  check,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core'
+import { check, pgTable, text, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 
 // ---------------------------------------------------------------------------
 // backoffice_roles
@@ -50,12 +43,8 @@ export const backofficeRoles = pgTable(
      * Added in STAGE_21 migration (20260302_001_rbac_role_permissions_complete.ts).
      */
     status: varchar('status', { length: 20 }).notNull().default('ACTIVE'),
-    created_at: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updated_at: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     /** CHECK constraint mirrors the DB-level check set in migration DDL. */

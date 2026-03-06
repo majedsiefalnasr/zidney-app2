@@ -48,9 +48,7 @@ describe('app-boot (Backoffice): FR-33 bootstrap order', () => {
   it('app mounts after use(pinia) and use(router) — bootstrap order verified', async () => {
     const app = createApp({ template: '<div />' })
     const useSpy = vi.spyOn(app, 'use')
-    const mountSpy = vi
-      .spyOn(app, 'mount')
-      .mockReturnValue(app as unknown as Element)
+    const mountSpy = vi.spyOn(app, 'mount').mockReturnValue(app as unknown as Element)
 
     const { createAppPinia } = await import('../../../src/core/state/index')
     const mockRouter = {

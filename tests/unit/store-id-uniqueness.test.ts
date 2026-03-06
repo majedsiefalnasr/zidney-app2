@@ -9,25 +9,22 @@
  */
 import { createPinia, setActivePinia } from 'pinia'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
-
-// MMC stores
-import { useMmcAppStore } from '../../apps/mmc/src/core/state/app.store'
-import { defineAuthStore as defineMmcAuthStore } from '../../apps/mmc/src/core/state/auth.store'
-import { useMmcNotificationStore } from '../../apps/mmc/src/core/state/notification.store'
-import { useMmcUiStore } from '../../apps/mmc/src/core/state/ui.store'
-
 // Backoffice stores
 import { useBackofficeAppStore } from '../../apps/backoffice/src/core/state/app.store'
 import { defineAuthStore as defineBackofficeAuthStore } from '../../apps/backoffice/src/core/state/auth.store'
 import { useBackofficeNotificationStore } from '../../apps/backoffice/src/core/state/notification.store'
 import { useBackofficeUiStore } from '../../apps/backoffice/src/core/state/ui.store'
 import { useBackofficeWorkspaceStore } from '../../apps/backoffice/src/core/state/workspace.store'
-
 // Frontoffice stores
 import { useFrontofficeAppStore } from '../../apps/frontoffice/src/core/state/app.store'
 import { defineAuthStore as defineFrontofficeAuthStore } from '../../apps/frontoffice/src/core/state/auth.store'
 import { useFrontofficeNotificationStore } from '../../apps/frontoffice/src/core/state/notification.store'
 import { useFrontofficeUiStore } from '../../apps/frontoffice/src/core/state/ui.store'
+// MMC stores
+import { useMmcAppStore } from '../../apps/mmc/src/core/state/app.store'
+import { defineAuthStore as defineMmcAuthStore } from '../../apps/mmc/src/core/state/auth.store'
+import { useMmcNotificationStore } from '../../apps/mmc/src/core/state/notification.store'
+import { useMmcUiStore } from '../../apps/mmc/src/core/state/ui.store'
 
 // ── Stub factories ─────────────────────────────────────────────────────────────
 function createStubAuthDeps() {
@@ -141,50 +138,20 @@ describe('Store ID Uniqueness (SC-010, FR-032)', () => {
   })
 
   it('each app uses its own namespace prefix', () => {
-    const {
-      authService: a1,
-      tokenManager: t1,
-      router: r1,
-    } = createStubAuthDeps()
-    const {
-      authService: a2,
-      tokenManager: t2,
-      router: r2,
-    } = createStubAuthDeps()
-    const {
-      authService: a3,
-      tokenManager: t3,
-      router: r3,
-    } = createStubAuthDeps()
+    const { authService: a1, tokenManager: t1, router: r1 } = createStubAuthDeps()
+    const { authService: a2, tokenManager: t2, router: r2 } = createStubAuthDeps()
+    const { authService: a3, tokenManager: t3, router: r3 } = createStubAuthDeps()
 
     const mmcIds = [
-      defineMmcAuthStore(
-        a1 as any,
-        t1 as any,
-        r1 as any,
-        'mmc-login',
-        () => null
-      )().$id,
+      defineMmcAuthStore(a1 as any, t1 as any, r1 as any, 'mmc-login', () => null)().$id,
       useMmcAppStore().$id,
     ]
     const boIds = [
-      defineBackofficeAuthStore(
-        a2 as any,
-        t2 as any,
-        r2 as any,
-        'bo-login',
-        () => null
-      )().$id,
+      defineBackofficeAuthStore(a2 as any, t2 as any, r2 as any, 'bo-login', () => null)().$id,
       useBackofficeAppStore().$id,
     ]
     const foIds = [
-      defineFrontofficeAuthStore(
-        a3 as any,
-        t3 as any,
-        r3 as any,
-        'fo-login',
-        () => null
-      )().$id,
+      defineFrontofficeAuthStore(a3 as any, t3 as any, r3 as any, 'fo-login', () => null)().$id,
       useFrontofficeAppStore().$id,
     ]
 

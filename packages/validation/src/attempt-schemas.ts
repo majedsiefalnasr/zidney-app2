@@ -19,7 +19,7 @@
  * - Type-safe validation with strict TypeScript
  */
 
-import { Logger } from '@zidney/logger'
+import type { Logger } from '@zidney/logger'
 import { z } from 'zod'
 
 // ============================================================================
@@ -34,10 +34,7 @@ import { z } from 'zod'
  * - attempt_notes: Optional notes from student
  */
 export const createAttemptRequestSchema = z.object({
-  exam_id: z
-    .string()
-    .uuid('exam_id must be a valid UUID')
-    .describe('UUID of exam to attempt'),
+  exam_id: z.string().uuid('exam_id must be a valid UUID').describe('UUID of exam to attempt'),
   attempt_notes: z
     .string()
     .max(1000, 'attempt_notes must be under 1000 characters')
@@ -85,15 +82,9 @@ export function validateCreateAttemptRequest(
  * flagged: Boolean indicating if student flagged for review
  */
 export const questionResponseSchema = z.object({
-  question_id: z
-    .string()
-    .uuid('question_id must be a valid UUID')
-    .describe('UUID of question'),
+  question_id: z.string().uuid('question_id must be a valid UUID').describe('UUID of question'),
   user_answer: z.unknown().describe('Answer in question-type-specific format'),
-  flagged: z
-    .boolean()
-    .default(false)
-    .describe('Is question flagged for review?'),
+  flagged: z.boolean().default(false).describe('Is question flagged for review?'),
 })
 
 export type QuestionResponse = z.infer<typeof questionResponseSchema>
@@ -358,8 +349,7 @@ export async function validateSubmissionBusiness(
     // Verify within time limit (+ 30s grace period)
     const time_limit_ms = attempt.time_limit_snapshot
     const grace_period_ms = 30 * 1000 // 30 seconds
-    const elapsed_ms =
-      new Date().getTime() - new Date(attempt.started_at).getTime()
+    const elapsed_ms = Date.now() - new Date(attempt.started_at).getTime()
     const max_allowed_ms = time_limit_ms + grace_period_ms
 
     if (elapsed_ms > max_allowed_ms) {

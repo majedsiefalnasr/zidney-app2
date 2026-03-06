@@ -104,11 +104,7 @@ describe('createBackofficeRBACGuard', () => {
     const { ctx, jsonFn } = makeContext({ tenant, enabledModules: ['MCQ'] })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
     await guard(ctx as any, next, undefined as any)
 
     expect(next).not.toHaveBeenCalled()
@@ -126,11 +122,7 @@ describe('createBackofficeRBACGuard', () => {
     const { ctx } = makeContext({ tenant, enabledModules: ['MCQ'] })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
     await guard(ctx as any, next, undefined as any)
 
     expect(next).toHaveBeenCalled()
@@ -145,11 +137,7 @@ describe('createBackofficeRBACGuard', () => {
     })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
     await guard(ctx as any, next, undefined as any)
 
     expect(jsonFn).toHaveBeenCalledWith(
@@ -165,11 +153,7 @@ describe('createBackofficeRBACGuard', () => {
     const { ctx } = makeContext({ tenant, enabledModules: ['MCQ'] })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
     await guard(ctx as any, next, undefined as any)
 
     expect(next).toHaveBeenCalled()
@@ -182,11 +166,7 @@ describe('createBackofficeRBACGuard', () => {
     const { ctx, jsonFn } = makeContext({ tenant, enabledModules: ['MCQ'] })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
     await guard(ctx as any, next, undefined as any)
 
     expect(next).not.toHaveBeenCalled()
@@ -204,11 +184,7 @@ describe('createBackofficeRBACGuard', () => {
     const { ctx } = makeContext({ tenant, enabledModules: ['MCQ'] })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
     await guard(ctx as any, next, undefined as any)
 
     expect(tenant._mocks.dbQuery).toHaveBeenCalledOnce()
@@ -227,11 +203,7 @@ describe('createBackofficeRBACGuard', () => {
     const { ctx, jsonFn } = makeContext({ tenant, enabledModules: ['MCQ'] })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
     await guard(ctx as any, next, undefined as any)
 
     expect(next).not.toHaveBeenCalled()
@@ -248,11 +220,7 @@ describe('createBackofficeRBACGuard', () => {
     const { ctx, jsonFn } = makeContext({ tenant, enabledModules: [] })
     const next = vi.fn()
 
-    const guard = createBackofficeRBACGuard(
-      logger as any,
-      MODULE_MCQ,
-      ACTION_VIEW
-    )
+    const guard = createBackofficeRBACGuard(logger as any, MODULE_MCQ, ACTION_VIEW)
     await guard(ctx as any, next, undefined as any)
 
     expect(next).not.toHaveBeenCalled()

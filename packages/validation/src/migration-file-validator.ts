@@ -4,7 +4,7 @@
  * Pure functions, no SQL execution
  */
 
-import crypto from 'crypto'
+import crypto from 'node:crypto'
 
 /**
  * Migration file header metadata extracted from SQL comments
@@ -50,21 +50,15 @@ export function extractMigrationHeader(sqlContent: string): MigrationHeader {
   const productVersionMatch = sqlContent.match(
     /--\s*Required\s+Minimum\s+Product\s+Version:\s*(\d+\.\d+\.\d+)/i
   )
-  const targetProductVersion = productVersionMatch
-    ? productVersionMatch[1]!
-    : undefined
+  const targetProductVersion = productVersionMatch ? productVersionMatch[1]! : undefined
 
   // Extract breaking flag (optional, defaults to false)
   const breakingMatch = sqlContent.match(/--\s*Breaking:\s*(true|false)/i)
-  const isBreaking = breakingMatch
-    ? breakingMatch[1]!.toLowerCase() === 'true'
-    : false
+  const isBreaking = breakingMatch ? breakingMatch[1]?.toLowerCase() === 'true' : false
 
   // Extract description (optional)
-  const descriptionMatch = sqlContent.match(
-    /--\s*Purpose:\s*(.+?)(?=\n--|\n[A-Z]|$)/
-  )
-  const description = descriptionMatch ? descriptionMatch[1]!.trim() : undefined
+  const descriptionMatch = sqlContent.match(/--\s*Purpose:\s*(.+?)(?=\n--|\n[A-Z]|$)/)
+  const description = descriptionMatch ? descriptionMatch[1]?.trim() : undefined
 
   return {
     targetVersion,
@@ -102,10 +96,7 @@ export function calculateChecksum(fileContent: string): string {
  * Example:
  *   validateChecksum(content, "abc123...") → true (if matches)
  */
-export function validateChecksum(
-  fileContent: string,
-  expectedChecksum: string
-): boolean {
+export function validateChecksum(fileContent: string, expectedChecksum: string): boolean {
   const calculated = calculateChecksum(fileContent)
   return calculated === expectedChecksum
 }
@@ -220,9 +211,7 @@ export function detectMigrationGap(fileList: string[]): Error | null {
 
   // Verify sequence starts at 1
   if (sorted[0] !== 1) {
-    return new Error(
-      `Migration sequence must start at 001, but found ${sorted[0] ?? 'undefined'}`
-    )
+    return new Error(`Migration sequence must start at 001, but found ${sorted[0] ?? 'undefined'}`)
   }
 
   return null

@@ -18,10 +18,9 @@
  * - Dependencies: roles and mmc_members tables must exist
  */
 
-import { PoolClient } from 'pg'
+import type { PoolClient } from 'pg'
 
-export const description =
-  'Create mmc_member_invitations table for onboarding workflow'
+export const description = 'Create mmc_member_invitations table for onboarding workflow'
 
 /**
  * Execute schema migration

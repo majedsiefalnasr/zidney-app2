@@ -19,9 +19,7 @@ import {
 function assertNoTokenInLogArgs(value: unknown, path = 'root'): void {
   if (typeof value === 'string') {
     if (looksLikeToken(value)) {
-      throw new Error(
-        `Token-like value found at ${path}: ${value.substring(0, 10)}...`
-      )
+      throw new Error(`Token-like value found at ${path}: ${value.substring(0, 10)}...`)
     }
     return
   }
@@ -37,8 +35,7 @@ function assertNoTokenInLogArgs(value: unknown, path = 'root'): void {
 }
 
 // ── SENSITIVE_KEYS coverage ──────────────────────────────────────────────────
-const FAKE_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0'
+const FAKE_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0'
 
 describe('redactSensitiveFields', () => {
   const SENSITIVE_KEY_CASES: Array<[string, string]> = [
@@ -124,9 +121,7 @@ describe('looksLikeToken', () => {
   })
 
   it('returns true for a long opaque access token string', () => {
-    expect(looksLikeToken('abcdefghijklmnopqrstuvwxyz1234567890ABCD')).toBe(
-      true
-    )
+    expect(looksLikeToken('abcdefghijklmnopqrstuvwxyz1234567890ABCD')).toBe(true)
   })
 
   it('returns false for a short string', () => {
@@ -152,9 +147,7 @@ describe('looksLikeToken', () => {
   })
 
   it('returns false for strings with special characters (not base64url)', () => {
-    expect(
-      looksLikeToken('hello world this is a long string with spaces!')
-    ).toBe(false)
+    expect(looksLikeToken('hello world this is a long string with spaces!')).toBe(false)
   })
 })
 
@@ -176,9 +169,7 @@ describe('assertNoTokenInLogArgs helper', () => {
   })
 
   it('throws when a token-like value is nested', () => {
-    expect(() =>
-      assertNoTokenInLogArgs({ nested: { deepToken: FAKE_TOKEN } })
-    ).toThrow()
+    expect(() => assertNoTokenInLogArgs({ nested: { deepToken: FAKE_TOKEN } })).toThrow()
   })
 
   it('throws when a token-like value is in an array', () => {

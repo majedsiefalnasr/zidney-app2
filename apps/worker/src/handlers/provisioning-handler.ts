@@ -24,11 +24,10 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Redis } from 'ioredis'
-import { Pool } from 'pg'
-import ProvisioningJob, {
-  IJobQueue,
-} from '../jobs/provisioning/ProvisioningJob'
+import type { Redis } from 'ioredis'
+import type { Pool } from 'pg'
+import type ProvisioningJob from '../jobs/provisioning/ProvisioningJob'
+import type { IJobQueue } from '../jobs/provisioning/ProvisioningJob'
 import { BaselineSeeder } from '../services/provisioning/BaselineSeeder'
 import { CheckpointManager } from '../services/provisioning/CheckpointManager'
 import { DistributedLock } from '../services/provisioning/DistributedLock'
@@ -172,18 +171,13 @@ export class ProvisioningHandler {
           await this.job_queue.nack(job.id, nextJob)
 
           // Update license to include retry information
-          await this.updateLicenseStatus(
-            job.license_id,
-            'PENDING_PROVISION',
-            null,
-            {
-              correlation_id: job.correlation_id,
-              job_id: job.id,
-              error: result.error,
-              attempt: nextJob.attempt,
-              next_retry_ms: backoff,
-            }
-          )
+          await this.updateLicenseStatus(job.license_id, 'PENDING_PROVISION', null, {
+            correlation_id: job.correlation_id,
+            job_id: job.id,
+            error: result.error,
+            attempt: nextJob.attempt,
+            next_retry_ms: backoff,
+          })
         } else {
           // Max retries exceeded → Move to DLQ + Mark as PROVISION_FAILED
           logger.error(
@@ -200,15 +194,10 @@ export class ProvisioningHandler {
           await this.job_queue.moveToDLQ(job.id, job)
 
           // Update license to PROVISION_FAILED
-          await this.updateLicenseStatus(
-            job.license_id,
-            'PROVISION_FAILED',
-            result.error ?? null,
-            {
-              correlation_id: job.correlation_id,
-              job_id: job.id,
-            }
-          )
+          await this.updateLicenseStatus(job.license_id, 'PROVISION_FAILED', result.error ?? null, {
+            correlation_id: job.correlation_id,
+            job_id: job.id,
+          })
         }
       }
     } catch (error) {
@@ -278,7 +267,7 @@ export class ProvisioningHandler {
    */
   private calculateBackoff(attempt: number): number {
     const base = this.retry_backoff_base_ms
-    const exponential = Math.pow(2, attempt - 1) * base
+    const exponential = 2 ** (attempt - 1) * base
     const jitter = 1 + Math.random() * 0.2 // ±0-20% jitter
     const withJitter = exponential * jitter
     const capped = Math.min(withJitter, 60000) // Max 60 seconds
@@ -312,10 +301,9 @@ export class ProvisioningHandler {
       await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
       // Acquire lock
-      const lockResult = await client.query(
-        'SELECT id FROM licenses WHERE id = $1 FOR UPDATE',
-        [license_id]
-      )
+      const lockResult = await client.query('SELECT id FROM licenses WHERE id = $1 FOR UPDATE', [
+        license_id,
+      ])
 
       if (!lockResult.rows.length) {
         throw new Error(`License not found: ${license_id}`)
@@ -332,10 +320,7 @@ export class ProvisioningHandler {
         RETURNING *
       `
 
-      const updateParams: Array<number | string> = [
-        new_status,
-        JSON.stringify(metadata),
-      ]
+      const updateParams: Array<number | string> = [new_status, JSON.stringify(metadata)]
       if (error_message) {
         updateParams.push(error_message)
       }

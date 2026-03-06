@@ -20,8 +20,7 @@ import type { MigrationConfig } from '../../migration-types'
 export const migration: MigrationConfig = {
   name: '0008_add_idempotent_submission',
   version: '1.1.0',
-  description:
-    'Add idempotency columns to attempts table for submission deduplication',
+  description: 'Add idempotency columns to attempts table for submission deduplication',
 
   up: async (db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
@@ -48,9 +47,8 @@ export const migration: MigrationConfig = {
         sql`ALTER TABLE attempts ADD COLUMN IF NOT EXISTS submission_cached_at TIMESTAMP WITH TIME ZONE`
       )
 
-      console.log(
-        `[${correlationId}][${workspaceId}] Added idempotency columns to attempts table`
-      )
+      // biome-ignore lint/suspicious/noConsole: migration runner output
+      console.log(`[${correlationId}][${workspaceId}] Added idempotency columns to attempts table`)
     }
   },
 
@@ -66,12 +64,9 @@ export const migration: MigrationConfig = {
       sql`ALTER TABLE attempts DROP COLUMN IF EXISTS submission_cached_result CASCADE`
     )
 
-    await db.execute(
-      sql`ALTER TABLE attempts DROP COLUMN IF EXISTS submission_cached_at CASCADE`
-    )
+    await db.execute(sql`ALTER TABLE attempts DROP COLUMN IF EXISTS submission_cached_at CASCADE`)
 
-    console.log(
-      `[${correlationId}] Removed idempotency columns from attempts table`
-    )
+    // biome-ignore lint/suspicious/noConsole: migration runner output
+    console.log(`[${correlationId}] Removed idempotency columns from attempts table`)
   },
 }

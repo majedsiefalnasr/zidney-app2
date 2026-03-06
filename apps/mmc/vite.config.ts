@@ -1,5 +1,5 @@
+import { resolve } from 'node:path'
 import vue from '@vitejs/plugin-vue'
-import { resolve } from 'path'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
@@ -13,10 +13,7 @@ export default defineConfig({
       },
       {
         find: '@zidney/ui-system',
-        replacement: resolve(
-          __dirname,
-          '../../packages/ui-system/src/index.ts'
-        ),
+        replacement: resolve(__dirname, '../../packages/ui-system/src/index.ts'),
       },
     ],
   },

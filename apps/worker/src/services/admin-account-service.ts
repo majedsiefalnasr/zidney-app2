@@ -13,7 +13,7 @@
  */
 
 import * as crypto from 'crypto'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 /**
  * Admin Account Creation Result
@@ -58,9 +58,7 @@ export class AdminAccountService {
       const verificationToken = crypto.randomBytes(32).toString('hex')
 
       // Get ADMIN role ID
-      const roleResult = await pool.query(
-        `SELECT id FROM roles WHERE name = 'ADMIN' LIMIT 1`
-      )
+      const roleResult = await pool.query(`SELECT id FROM roles WHERE name = 'ADMIN' LIMIT 1`)
 
       if (roleResult.rows.length === 0) {
         throw new Error('ADMIN role not found')
@@ -125,8 +123,7 @@ export class AdminAccountService {
    * (In production, use secure setup link instead)
    */
   private generateTemporaryPassword(): string {
-    const chars =
-      'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*'
     let password = ''
     for (let i = 0; i < 16; i++) {
       password += chars.charAt(Math.floor(Math.random() * chars.length))

@@ -49,98 +49,81 @@ const logger = getAuditLogger()
  *
  * Transaction: SERIALIZABLE
  */
-router.post(
-  '/',
-  validateJwtMiddleware('frontoffice'),
-  validateLicenseMiddleware(),
-  async (c) => {
-    const authPayload = c.get('authPayload')
-    const correlationId = c.get('correlationId')
-    const workspaceId = c.get('workspaceId')
-    const workspaceSlug = c.get('workspaceSlug')
-    const userId = authPayload.user_id
+router.post('/', validateJwtMiddleware('frontoffice'), validateLicenseMiddleware(), async (c) => {
+  const authPayload = c.get('authPayload')
+  const correlationId = c.get('correlationId')
+  const workspaceId = c.get('workspaceId')
+  const workspaceSlug = c.get('workspaceSlug')
+  const userId = authPayload.user_id
+
+  try {
+    if (!workspaceId) {
+      throwAuthError(AuthErrorCodes.WORKSPACE_INVALID, 'Workspace not found', 404)
+    }
+
+    const pool = getTenantPool(workspaceId)
+
+    if (!pool) {
+      throwAuthError(AuthErrorCodes.WORKSPACE_INVALID, 'Workspace not found', 404)
+    }
+
+    const client = await pool.connect()
 
     try {
-      if (!workspaceId) {
-        throwAuthError(
-          AuthErrorCodes.WORKSPACE_INVALID,
-          'Workspace not found',
-          404
-        )
-      }
+      await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
-      const pool = getTenantPool(workspaceId)
-
-      if (!pool) {
-        throwAuthError(
-          AuthErrorCodes.WORKSPACE_INVALID,
-          'Workspace not found',
-          404
-        )
-      }
-
-      const client = await pool.connect()
-
-      try {
-        await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
-
-        const result = await client.query(
-          `
+      const result = await client.query(
+        `
           UPDATE users
           SET token_version = token_version + 1,
               updated_at = NOW()
           WHERE id = $1
           RETURNING token_version
           `,
-          [userId]
-        )
+        [userId]
+      )
 
-        if (result.rows.length === 0) {
-          throw new Error('User not found')
-        }
-
-        const newVersion = result.rows[0].token_version
-
-        await client.query('COMMIT')
-
-        logger.info(
-          {
-            correlation_id: correlationId,
-            user_id: userId,
-            event: 'logout_all',
-            scope: 'frontoffice',
-            workspace_slug: workspaceSlug,
-            new_token_version: newVersion,
-          },
-          '[Frontoffice Auth] All sessions invalidated'
-        )
-
-        c.status(200)
-        return c.json({
-          success: true,
-          data: { message: 'All sessions invalidated' },
-          error: null,
-        })
-      } finally {
-        client.release()
+      if (result.rows.length === 0) {
+        throw new Error('User not found')
       }
-    } catch (err) {
-      logger.error(
+
+      const newVersion = result.rows[0].token_version
+
+      await client.query('COMMIT')
+
+      logger.info(
         {
           correlation_id: correlationId,
           user_id: userId,
-          error: err instanceof Error ? err.message : 'unknown',
+          event: 'logout_all',
+          scope: 'frontoffice',
+          workspace_slug: workspaceSlug,
+          new_token_version: newVersion,
         },
-        '[Frontoffice Auth] Logout all failed'
+        '[Frontoffice Auth] All sessions invalidated'
       )
 
-      throwAuthError(
-        AuthErrorCodes.INTERNAL_ERROR,
-        'Failed to logout from all sessions',
-        500
-      )
+      c.status(200)
+      return c.json({
+        success: true,
+        data: { message: 'All sessions invalidated' },
+        error: null,
+      })
+    } finally {
+      client.release()
     }
+  } catch (err) {
+    logger.error(
+      {
+        correlation_id: correlationId,
+        user_id: userId,
+        error: err instanceof Error ? err.message : 'unknown',
+      },
+      '[Frontoffice Auth] Logout all failed'
+    )
+
+    throwAuthError(AuthErrorCodes.INTERNAL_ERROR, 'Failed to logout from all sessions', 500)
   }
-)
+})
 
 export default router

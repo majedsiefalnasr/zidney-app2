@@ -19,8 +19,7 @@ import type { MigrationConfig } from '../../migration-types'
 export const migration: MigrationConfig = {
   name: '0009_add_idempotent_indexes',
   version: '1.1.0',
-  description:
-    'Create UNIQUE index for idempotency and covering index for cached results',
+  description: 'Create UNIQUE index for idempotency and covering index for cached results',
 
   up: async (db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
@@ -42,23 +41,17 @@ export const migration: MigrationConfig = {
           WHERE submission_cached_at IS NOT NULL`
     )
 
-    console.log(
-      `[${correlationId}] Created idempotency indexes on attempts table`
-    )
+    // biome-ignore lint/suspicious/noConsole: migration runner output
+    console.log(`[${correlationId}] Created idempotency indexes on attempts table`)
   },
 
   down: async (db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
 
-    await db.execute(
-      sql`DROP INDEX IF EXISTS idx_attempt_idempotent_key CASCADE`
-    )
-    await db.execute(
-      sql`DROP INDEX IF EXISTS idx_attempt_cached_result CASCADE`
-    )
+    await db.execute(sql`DROP INDEX IF EXISTS idx_attempt_idempotent_key CASCADE`)
+    await db.execute(sql`DROP INDEX IF EXISTS idx_attempt_cached_result CASCADE`)
 
-    console.log(
-      `[${correlationId}] Dropped idempotency indexes from attempts table`
-    )
+    // biome-ignore lint/suspicious/noConsole: migration runner output
+    console.log(`[${correlationId}] Dropped idempotency indexes from attempts table`)
   },
 }

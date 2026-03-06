@@ -1,4 +1,4 @@
-import { Queue, Worker } from 'bullmq'
+import type { Queue, Worker } from 'bullmq'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 
 describe('T103: Worker Retry Logic - 6 Backoff Attempts', () => {
@@ -30,13 +30,11 @@ describe('T103: Worker Retry Logic - 6 Backoff Attempts', () => {
       const baseDelay = 2000 // 2s
       const maxDelay = 64000 // 64s
       const jitter = Math.random() * 1000 // 0-1s jitter
-      const delayMs = Math.min(baseDelay * Math.pow(2, attempt - 1), maxDelay)
+      const delayMs = Math.min(baseDelay * 2 ** (attempt - 1), maxDelay)
       return delayMs + jitter
     }
 
-    const backoffs = Array.from({ length: 6 }, (_, i) =>
-      calculateBackoff(i + 1)
-    )
+    const backoffs = Array.from({ length: 6 }, (_, i) => calculateBackoff(i + 1))
 
     expect(backoffs[0]).toBeGreaterThanOrEqual(2000)
     expect(backoffs[0]).toBeLessThanOrEqual(3000)
@@ -92,10 +90,7 @@ describe('T103: Worker Retry Logic - 6 Backoff Attempts', () => {
   })
 
   it('should accumulate total time for 6 attempts: ~126 seconds', async () => {
-    const totalTime = [2, 4, 8, 16, 32, 64].reduce(
-      (sum, s) => sum + s * 1000,
-      0
-    )
+    const totalTime = [2, 4, 8, 16, 32, 64].reduce((sum, s) => sum + s * 1000, 0)
     expect(totalTime).toBe(126000) // 126 seconds = 2.1 minutes
   })
 

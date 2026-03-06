@@ -6,8 +6,9 @@
  * Purpose: List all affiliate codes with optional filtering and pagination
  */
 
-import { Affiliate } from '@zidney/domain-core/affiliates/types'
-import { Context } from 'hono'
+import type { Affiliate } from '@zidney/domain-core/affiliates/types'
+import { logger } from '@zidney/logger'
+import type { Context } from 'hono'
 import { pool } from '../../../../db'
 import { validateListAffiliatesRequest } from '../../../middleware/affiliate-validation'
 
@@ -49,8 +50,7 @@ export async function listAffiliatesHandler(c: Context) {
       paramIndex++
     }
 
-    const whereClause =
-      whereClauses.length > 0 ? 'WHERE ' + whereClauses.join(' AND ') : ''
+    const whereClause = whereClauses.length > 0 ? 'WHERE ' + whereClauses.join(' AND ') : ''
 
     // Get total count
     const countQuery = `SELECT COUNT(*) as count FROM affiliates ${whereClause}`
@@ -90,7 +90,7 @@ export async function listAffiliatesHandler(c: Context) {
       error: null,
     })
   } catch (error: any) {
-    console.error('[AFFILIATE] List error:', error)
+    logger.error('[AFFILIATE] List error:', { error })
 
     if (error.code === 'VALIDATION_ERROR') {
       c.status(400)

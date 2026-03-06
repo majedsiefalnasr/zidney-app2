@@ -5,8 +5,9 @@
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  * Task: T034
  */
-import { useMmcUiStore } from '@/core/state/ui.store'
+
 import { describe, expect, it } from 'vitest'
+import { useMmcUiStore } from '@/core/state/ui.store'
 import { useIsolatedPinia } from '../store-test-helper'
 
 describe('useMmcUiStore — layout state', () => {

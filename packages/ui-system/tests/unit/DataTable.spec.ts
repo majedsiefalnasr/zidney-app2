@@ -75,10 +75,9 @@ describe.skip('[QUARANTINED] DataTable - Unit Tests', () => {
         },
       })
 
-      expect(
-        wrapper.find('[role="status"]').exists() ||
-          wrapper.text().includes('Loading')
-      ).toBe(true)
+      expect(wrapper.find('[role="status"]').exists() || wrapper.text().includes('Loading')).toBe(
+        true
+      )
     })
 
     it('should display empty state when no rows', () => {
@@ -128,7 +127,7 @@ describe.skip('[QUARANTINED] DataTable - Unit Tests', () => {
         },
       })
 
-      const initialListenerCount = wrapper.vm.$el.addEventListener?.length || 0
+      const _initialListenerCount = wrapper.vm.$el.addEventListener?.length || 0
 
       await wrapper.setProps({ rows: mockRows })
       await wrapper.vm.$nextTick()
@@ -151,11 +150,11 @@ describe.skip('[QUARANTINED] DataTable - Unit Tests', () => {
         },
       })
 
-      const vm = wrapper.vm as any
+      const _vm = wrapper.vm as any
       const el = wrapper.element as HTMLElement
 
       // Store reference to any custom listeners
-      const listenersBefore = (el as any)._eventListeners?.length || 0
+      const _listenersBefore = (el as any)._eventListeners?.length || 0
 
       wrapper.unmount()
 
@@ -176,9 +175,7 @@ describe.skip('[QUARANTINED] DataTable - Unit Tests', () => {
         },
       })
 
-      const nextButton = wrapper
-        .findAll('button')
-        .find((b) => b.text().includes('Next'))
+      const nextButton = wrapper.findAll('button').find((b) => b.text().includes('Next'))
       if (nextButton) {
         await nextButton.trigger('click')
         expect(wrapper.emitted('pagination-changed')).toBeTruthy()
@@ -281,9 +278,7 @@ describe.skip('[QUARANTINED] DataTable - Unit Tests', () => {
     })
 
     it('should recover from async action errors', async () => {
-      const actionCallback = vi
-        .fn()
-        .mockRejectedValue(new Error('Action failed'))
+      const actionCallback = vi.fn().mockRejectedValue(new Error('Action failed'))
 
       const mockActions = [
         {

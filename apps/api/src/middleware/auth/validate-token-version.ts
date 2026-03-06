@@ -30,7 +30,8 @@
  */
 
 import { logTokenVersionMismatch } from '@zidney/domain-core/auth'
-import { Context, Next } from 'hono'
+import { logger } from '@zidney/logger'
+import type { Context, Next } from 'hono'
 
 /**
  * Validate that token version matches current user version in database
@@ -135,7 +136,7 @@ export function validateTokenVersionMiddleware(_scope?: string) {
       await next()
       return
     } catch (error) {
-      console.error('Token version validation error:', error)
+      logger.error('Token version validation error:', { error })
       c.status(500 as any)
       return c.json({
         success: false,

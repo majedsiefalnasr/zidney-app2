@@ -84,11 +84,7 @@ describe('createAppApiClient (mmc)', () => {
   // ── Returns ApiClient ──────────────────────────────────────────────────────
 
   it('returns an ApiClient instance (truthy object)', () => {
-    const client = createAppApiClient(
-      tokenManager,
-      refreshManager,
-      errorInterceptor
-    )
+    const client = createAppApiClient(tokenManager, refreshManager, errorInterceptor)
     expect(client).toBeTruthy()
   })
 

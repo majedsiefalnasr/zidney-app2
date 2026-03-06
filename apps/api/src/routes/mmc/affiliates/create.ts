@@ -10,12 +10,13 @@ import {
   AffiliateErrorCode,
   AffiliateErrorMessages,
 } from '@zidney/domain-core/affiliates/error-codes'
-import { Affiliate } from '@zidney/domain-core/affiliates/types'
+import type { Affiliate } from '@zidney/domain-core/affiliates/types'
 import {
   normalizePromoCode,
   validateAffiliateData,
 } from '@zidney/domain-core/affiliates/validators'
-import { Context } from 'hono'
+import { logger } from '@zidney/logger'
+import type { Context } from 'hono'
 import { pool } from '../../../../db'
 import { validateCreateAffiliateRequest } from '../../../middleware/affiliate-validation'
 
@@ -53,10 +54,9 @@ export async function createAffiliateHandler(c: Context) {
     }
 
     // Check for duplicate promo code (pre-query check)
-    const existingCheck = await pool.query(
-      'SELECT id FROM affiliates WHERE promo_code = $1',
-      [normalizedCode]
-    )
+    const existingCheck = await pool.query('SELECT id FROM affiliates WHERE promo_code = $1', [
+      normalizedCode,
+    ])
 
     if (existingCheck.rows.length > 0) {
       c.status(400)
@@ -66,9 +66,7 @@ export async function createAffiliateHandler(c: Context) {
         error: {
           code: AffiliateErrorCode.AFFILIATE_FORBIDDEN_DUPLICATE_PROMO_CODE,
           message:
-            AffiliateErrorMessages[
-              AffiliateErrorCode.AFFILIATE_FORBIDDEN_DUPLICATE_PROMO_CODE
-            ],
+            AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_FORBIDDEN_DUPLICATE_PROMO_CODE],
         },
       })
     }
@@ -101,7 +99,7 @@ export async function createAffiliateHandler(c: Context) {
     const affiliate: Affiliate = result.rows[0]
 
     // Log affiliate creation (structured logging would go here)
-    console.log('[AFFILIATE] Created:', {
+    logger.info('[AFFILIATE] Created:', {
       affiliate_id: affiliate.id,
       promo_code: affiliate.promo_code,
       correlation_id: c.get('correlation_id'),
@@ -114,7 +112,7 @@ export async function createAffiliateHandler(c: Context) {
       error: null,
     })
   } catch (error: any) {
-    console.error('[AFFILIATE] Create error:', error)
+    logger.error('[AFFILIATE] Create error:', { error })
 
     if (error.code === 'VALIDATION_ERROR') {
       c.status(400)
@@ -138,9 +136,7 @@ export async function createAffiliateHandler(c: Context) {
         error: {
           code: AffiliateErrorCode.AFFILIATE_FORBIDDEN_DUPLICATE_PROMO_CODE,
           message:
-            AffiliateErrorMessages[
-              AffiliateErrorCode.AFFILIATE_FORBIDDEN_DUPLICATE_PROMO_CODE
-            ],
+            AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_FORBIDDEN_DUPLICATE_PROMO_CODE],
         },
       })
     }

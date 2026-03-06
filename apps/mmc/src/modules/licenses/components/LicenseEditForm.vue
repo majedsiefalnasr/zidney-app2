@@ -5,12 +5,7 @@
  */
 
 import { Button } from '@zidney/ui/components/shadcn-vue/button'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@zidney/ui/components/shadcn-vue/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@zidney/ui/components/shadcn-vue/card'
 import { Input } from '@zidney/ui/components/shadcn-vue/input'
 import { ref } from 'vue'
 

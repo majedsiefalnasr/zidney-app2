@@ -131,37 +131,31 @@ describe.skip('[QUARANTINED] Schema Provisioning - Load Testing', () => {
     let poolOverflowDetected = false
 
     // Simulate 15 concurrent connections (some should queue)
-    const promises = Array.from(
-      { length: concurrentRequests },
-      async (_, i) => {
-        try {
-          // Attempt to connect
-          const client = await Promise.race([
-            pool.connect(),
-            new Promise((_, reject) =>
-              setTimeout(
-                () => reject(new Error('Pool connection timeout')),
-                1000
-              )
-            ),
-          ])
+    const promises = Array.from({ length: concurrentRequests }, async (_, i) => {
+      try {
+        // Attempt to connect
+        const client = await Promise.race([
+          pool.connect(),
+          new Promise((_, reject) =>
+            setTimeout(() => reject(new Error('Pool connection timeout')), 1000)
+          ),
+        ])
 
-          // If we got here without queueing, pool handled it
-          if (i >= 10) {
-            poolOverflowDetected = true
-          }
+        // If we got here without queueing, pool handled it
+        if (i >= 10) {
+          poolOverflowDetected = true
+        }
 
-          // Simulate work
-          await new Promise((resolve) => setTimeout(resolve, 100))
-          ;(client as any).release?.()
-        } catch (error) {
-          // Pool overflow scenario: Connection queued or rejected
-          if (i >= 10) {
-            poolOverflowDetected = true
-          }
+        // Simulate work
+        await new Promise((resolve) => setTimeout(resolve, 100))
+        ;(client as any).release?.()
+      } catch (_error) {
+        // Pool overflow scenario: Connection queued or rejected
+        if (i >= 10) {
+          poolOverflowDetected = true
         }
       }
-    )
+    })
 
     await Promise.all(promises)
     await pool.end()

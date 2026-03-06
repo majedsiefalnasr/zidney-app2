@@ -28,8 +28,8 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Context } from 'hono'
-import { Pool, PoolClient } from 'pg'
+import type { Context } from 'hono'
+import type { Pool, PoolClient } from 'pg'
 import {
   countAnsweredQuestions,
   countFlaggedQuestions,
@@ -74,8 +74,7 @@ export async function getAttemptStatusHandler(c: Context) {
   // Instructors/admins need explicit permission (simplified for now)
   if (attempt.user_id !== user.id) {
     // Check if user is instructor/admin with permission
-    const hasPermission =
-      user.roles?.includes('INSTRUCTOR') || user.roles?.includes('ADMIN')
+    const hasPermission = user.roles?.includes('INSTRUCTOR') || user.roles?.includes('ADMIN')
 
     if (!hasPermission) {
       logger.warn('Attempt status fetch failed: access denied', {

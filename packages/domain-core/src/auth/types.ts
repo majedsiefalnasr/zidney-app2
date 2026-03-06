@@ -93,10 +93,7 @@ export interface JwtPayloadFrontoffice extends JwtPayloadBase {
 /**
  * Union type for all JWT payload variants
  */
-export type JwtPayload =
-  | JwtPayloadMmc
-  | JwtPayloadBackoffice
-  | JwtPayloadFrontoffice
+export type JwtPayload = JwtPayloadMmc | JwtPayloadBackoffice | JwtPayloadFrontoffice
 
 /**
  * ================================================================

@@ -141,13 +141,10 @@ class GradingEngine {
     // Check for partial credit (partial match)
     const answerWords = normalizedAnswer.split(/\s+/)
     const correctWords = normalizedCorrect.split(/\s+/)
-    const matchingWords = answerWords.filter((w) =>
-      correctWords.includes(w)
-    ).length
+    const matchingWords = answerWords.filter((w) => correctWords.includes(w)).length
 
     if (matchingWords > 0 && matchingWords < correctWords.length) {
-      const partialCredit =
-        (matchingWords / correctWords.length) * question.weight
+      const partialCredit = (matchingWords / correctWords.length) * question.weight
       return {
         earned: Math.round(partialCredit * 100) / 100,
         feedback: `Partial credit: ${matchingWords}/${correctWords.length} key terms correct`,
@@ -160,10 +157,7 @@ class GradingEngine {
     }
   }
 
-  private gradeEssay(
-    question: Question,
-    answer: string
-  ): { earned: number; feedback: string } {
+  private gradeEssay(question: Question, answer: string): { earned: number; feedback: string } {
     // Simple essay grading based on length and keywords
     const rubric = question.rubric || {
       excellent: 5,
@@ -180,21 +174,20 @@ class GradingEngine {
       score = 0
       feedback = 'No response provided'
     } else if (wordCount < 50) {
-      score = rubric['poor'] || 0
+      score = rubric.poor || 0
       feedback = 'Response too brief'
     } else if (wordCount < 100) {
-      score = rubric['satisfactory'] || 2
+      score = rubric.satisfactory || 2
       feedback = 'Adequate but could be more detailed'
     } else if (wordCount < 200) {
-      score = rubric['good'] || 3
+      score = rubric.good || 3
       feedback = 'Good response with reasonable depth'
     } else {
-      score = rubric['excellent'] || 5
+      score = rubric.excellent || 5
       feedback = 'Excellent comprehensive response'
     }
 
-    const percentOfMax =
-      (score / Math.max(...Object.values(rubric))) * question.weight
+    const percentOfMax = (score / Math.max(...Object.values(rubric))) * question.weight
     return {
       earned: Math.round(percentOfMax * 100) / 100,
       feedback,
@@ -288,7 +281,7 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0]!.earned).toBe(5)
+      expect(result.questionResults[0]?.earned).toBe(5)
     })
 
     it('should calculate weighted scores', () => {
@@ -320,8 +313,8 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0]!.earned).toBe(10)
-      expect(result.questionResults[0]!.feedback).toBe('Correct')
+      expect(result.questionResults[0]?.earned).toBe(10)
+      expect(result.questionResults[0]?.feedback).toBe('Correct')
     })
 
     it('should reject incorrect answer', () => {
@@ -333,8 +326,8 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0]!.earned).toBe(0)
-      expect(result.questionResults[0]!.feedback).toContain('Incorrect')
+      expect(result.questionResults[0]?.earned).toBe(0)
+      expect(result.questionResults[0]?.feedback).toContain('Incorrect')
     })
   })
 
@@ -348,8 +341,8 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0]!.earned).toBe(5)
-      expect(result.questionResults[0]!.feedback).toBe('Correct')
+      expect(result.questionResults[0]?.earned).toBe(5)
+      expect(result.questionResults[0]?.feedback).toBe('Correct')
     })
 
     it('should accept case-insensitive match', () => {
@@ -361,7 +354,7 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0]!.earned).toBe(5)
+      expect(result.questionResults[0]?.earned).toBe(5)
     })
 
     it('should award partial credit for partial match', () => {
@@ -374,15 +367,13 @@ describe('Grading Algorithm', () => {
         },
       ]
 
-      const answers: StudentAnswer[] = [
-        { questionId: 'q1', answer: 'photosynthesis' },
-      ]
+      const answers: StudentAnswer[] = [{ questionId: 'q1', answer: 'photosynthesis' }]
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0]!.earned).toBeGreaterThan(0)
-      expect(result.questionResults[0]!.earned).toBeLessThan(10)
-      expect(result.questionResults[0]!.feedback).toContain('Partial credit')
+      expect(result.questionResults[0]?.earned).toBeGreaterThan(0)
+      expect(result.questionResults[0]?.earned).toBeLessThan(10)
+      expect(result.questionResults[0]?.feedback).toContain('Partial credit')
     })
   })
 
@@ -397,16 +388,13 @@ describe('Grading Algorithm', () => {
         },
       ]
 
-      const longAnswer =
-        'Detailed analysis of the topic with supporting evidence. '.repeat(70)
+      const longAnswer = 'Detailed analysis of the topic with supporting evidence. '.repeat(70)
 
-      const answers: StudentAnswer[] = [
-        { questionId: 'q1', answer: longAnswer },
-      ]
+      const answers: StudentAnswer[] = [{ questionId: 'q1', answer: longAnswer }]
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0]!.earned).toBeGreaterThan(0)
+      expect(result.questionResults[0]?.earned).toBeGreaterThan(0)
     })
 
     it('should give zero credit for empty response', () => {
@@ -423,8 +411,8 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0]!.earned).toBe(0)
-      expect(result.questionResults[0]!.feedback).toBe('Not answered')
+      expect(result.questionResults[0]?.earned).toBe(0)
+      expect(result.questionResults[0]?.feedback).toBe('Not answered')
     })
 
     it('should give partial credit for brief response', () => {
@@ -439,13 +427,11 @@ describe('Grading Algorithm', () => {
 
       const briefAnswer = 'Short'
 
-      const answers: StudentAnswer[] = [
-        { questionId: 'q1', answer: briefAnswer },
-      ]
+      const answers: StudentAnswer[] = [{ questionId: 'q1', answer: briefAnswer }]
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0]!.earned).toBe(0)
+      expect(result.questionResults[0]?.earned).toBe(0)
     })
   })
 
@@ -460,7 +446,7 @@ describe('Grading Algorithm', () => {
       const result = gradingEngine.gradeAttempt(questions, answers)
 
       expect(result.score).toBe(0)
-      expect(result.questionResults[0]!.feedback).toBe('Not answered')
+      expect(result.questionResults[0]?.feedback).toBe('Not answered')
     })
 
     it('should handle empty answer string', () => {
@@ -472,8 +458,8 @@ describe('Grading Algorithm', () => {
 
       const result = gradingEngine.gradeAttempt(questions, answers)
 
-      expect(result.questionResults[0]!.earned).toBe(0)
-      expect(result.questionResults[0]!.feedback).toBe('Not answered')
+      expect(result.questionResults[0]?.earned).toBe(0)
+      expect(result.questionResults[0]?.feedback).toBe('Not answered')
     })
   })
 

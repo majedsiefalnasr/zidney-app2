@@ -40,9 +40,9 @@
  * Error Code: 426 Upgrade Required
  */
 
-import { Logger } from '@zidney/logger'
-import { Context, Next } from 'hono'
-import { Pool } from 'pg'
+import type { Logger } from '@zidney/logger'
+import type { Context, Next } from 'hono'
+import type { Pool } from 'pg'
 
 /**
  * Current API version - must match schema_versions.version
@@ -123,8 +123,7 @@ export function createSchemaVersionMiddleware(
       const elapsedMs = Date.now() - startTime
 
       // Compare versions
-      const isCompatible =
-        compareVersions(schemaVersion!, minRequiredVersion) >= 0
+      const isCompatible = compareVersions(schemaVersion!, minRequiredVersion) >= 0
 
       logger.debug('Schema version check', {
         correlation_id: correlationId,
@@ -219,8 +218,8 @@ export function createSchemaVersionMiddleware(
  */
 export function compareVersions(version1: string, version2: string): number {
   // Extract base version (remove pre-release and build metadata)
-  const v1Parts = version1.split('-')[0]!.split('+')[0]!.split('.').map(Number)
-  const v2Parts = version2.split('-')[0]!.split('+')[0]!.split('.').map(Number)
+  const v1Parts = version1.split('-')[0]?.split('+')[0]?.split('.').map(Number)
+  const v2Parts = version2.split('-')[0]?.split('+')[0]?.split('.').map(Number)
 
   // Pad shorter version with zeros
   const maxLength = Math.max(v1Parts.length, v2Parts.length)

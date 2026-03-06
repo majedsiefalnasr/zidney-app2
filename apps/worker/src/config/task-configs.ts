@@ -99,11 +99,7 @@ export const APPLY_MIGRATION_CONFIG: TaskConfig = {
   },
 
   dlqBehavior: {
-    escalateOn: [
-      'schema_version_mismatch',
-      'downgrade_attempt',
-      'max_retries_exceeded',
-    ],
+    escalateOn: ['schema_version_mismatch', 'downgrade_attempt', 'max_retries_exceeded'],
     alertOn: ['schema_version_mismatch', 'max_retries_exceeded'],
     manualReviewRequired: true,
   },
@@ -127,9 +123,7 @@ export function determineTaskAction(
   attemptNumber: number
 ): 'RETRY' | 'DLQ' | 'SUCCESS' {
   const config =
-    taskType === 'INIT_TENANT_SCHEMA'
-      ? INIT_TENANT_SCHEMA_CONFIG
-      : APPLY_MIGRATION_CONFIG
+    taskType === 'INIT_TENANT_SCHEMA' ? INIT_TENANT_SCHEMA_CONFIG : APPLY_MIGRATION_CONFIG
 
   // SUCCESS: No action needed
   if (result.status === 'SUCCESS') {
@@ -168,9 +162,7 @@ export function determineTaskAction(
  */
 export function getRetryDelay(taskType: string, attemptNumber: number): number {
   const config =
-    taskType === 'INIT_TENANT_SCHEMA'
-      ? INIT_TENANT_SCHEMA_CONFIG
-      : APPLY_MIGRATION_CONFIG
+    taskType === 'INIT_TENANT_SCHEMA' ? INIT_TENANT_SCHEMA_CONFIG : APPLY_MIGRATION_CONFIG
 
   // attemptNumber = 1 means we've already tried once, next retry is backoffDelays[0]
   const retryIndex = attemptNumber - 1
@@ -197,9 +189,7 @@ export function shouldAlertOps(
   attemptNumber: number
 ): boolean {
   const config =
-    taskType === 'INIT_TENANT_SCHEMA'
-      ? INIT_TENANT_SCHEMA_CONFIG
-      : APPLY_MIGRATION_CONFIG
+    taskType === 'INIT_TENANT_SCHEMA' ? INIT_TENANT_SCHEMA_CONFIG : APPLY_MIGRATION_CONFIG
 
   // Check if result contains alert-trigger error codes
   if (result.error) {
@@ -247,9 +237,7 @@ export function createDLQMessage(
   attemptCount: number
 ): DLQMessage {
   const config =
-    taskType === 'INIT_TENANT_SCHEMA'
-      ? INIT_TENANT_SCHEMA_CONFIG
-      : APPLY_MIGRATION_CONFIG
+    taskType === 'INIT_TENANT_SCHEMA' ? INIT_TENANT_SCHEMA_CONFIG : APPLY_MIGRATION_CONFIG
 
   // Determine alert level
   let alertLevel: 'CRITICAL' | 'WARN' | 'INFO' = 'INFO'

@@ -12,9 +12,9 @@
  * Phase: 1 - Migration Infrastructure
  */
 
-import fs from 'fs/promises'
-import path from 'path'
-import { PoolClient } from 'pg'
+import fs from 'node:fs/promises'
+import path from 'node:path'
+import type { PoolClient } from 'pg'
 
 export interface Migration {
   version: string
@@ -37,9 +37,7 @@ export class MigrationLoader {
       const files = await fs.readdir(migrationDir)
 
       // Filter TypeScript files
-      const tsFiles = files.filter(
-        (f) => f.endsWith('.ts') && !f.endsWith('.d.ts')
-      )
+      const tsFiles = files.filter((f) => f.endsWith('.ts') && !f.endsWith('.d.ts'))
 
       const migrations: Migration[] = []
 

@@ -37,24 +37,16 @@ export function validateMigration(
   }
 
   // Parse versions
-  const fromParts = fromVersion.split('.').map(Number) as [
-    number,
-    number,
-    number,
-  ]
+  const fromParts = fromVersion.split('.').map(Number) as [number, number, number]
   const toParts = toVersion.split('.').map(Number) as [number, number, number]
 
   // Check version ordering (to > from)
   if (
     toParts[0] < fromParts[0] ||
     (toParts[0] === fromParts[0] && toParts[1] < fromParts[1]) ||
-    (toParts[0] === fromParts[0] &&
-      toParts[1] === fromParts[1] &&
-      toParts[2] < fromParts[2])
+    (toParts[0] === fromParts[0] && toParts[1] === fromParts[1] && toParts[2] < fromParts[2])
   ) {
-    errors.push(
-      `Target version ${toVersion} must be greater than current version ${fromVersion}`
-    )
+    errors.push(`Target version ${toVersion} must be greater than current version ${fromVersion}`)
   }
 
   // Check for major version incompatibility
@@ -64,9 +56,7 @@ export function validateMigration(
     )
 
     if (backwardCompatibilityMap?.[toVersion] === false) {
-      errors.push(
-        `Major version ${toParts[0]} is not backward compatible with ${fromParts[0]}`
-      )
+      errors.push(`Major version ${toParts[0]} is not backward compatible with ${fromParts[0]}`)
     }
   }
 
@@ -206,10 +196,7 @@ export async function validateMigrationPath(options: {
   }
 
   // 4. Validate schema_version table
-  const tableCheck = await validateSchemaVersionTable(
-    options.pool,
-    'workspace_id'
-  )
+  const tableCheck = await validateSchemaVersionTable(options.pool, 'workspace_id')
   if (!tableCheck.valid) {
     allErrors.push(tableCheck.error || 'Schema version table validation failed')
   }

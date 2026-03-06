@@ -21,20 +21,13 @@ export function createClient(
   const baseUrl = typeof options === 'string' ? options : options.baseURL
   const defaultToken = typeof options === 'string' ? undefined : options.token
 
-  async function request(
-    method: string,
-    path: string,
-    body?: unknown,
-    token?: string
-  ) {
+  async function request(method: string, path: string, body?: unknown, token?: string) {
     const authToken = token ?? defaultToken
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
     }
     if (authToken) {
-      headers['Authorization'] = authToken.startsWith('Bearer ')
-        ? authToken
-        : `Bearer ${authToken}`
+      headers['Authorization'] = authToken.startsWith('Bearer ') ? authToken : `Bearer ${authToken}`
     }
     const response = await fetch(`${baseUrl}${path}`, {
       method,

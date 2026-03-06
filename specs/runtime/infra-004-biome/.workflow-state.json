@@ -5,7 +5,7 @@
   "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_04_BIOME.md",
   "branch": "spec/infra-004-biome",
   "base_branch": "develop",
-  "current_step": "analyze",
+  "current_step": "implement",
   "stage_status": "IN PROGRESS",
   "clarifications_resolved": true,
   "drift_passed": true,

@@ -4,8 +4,9 @@
  *
  * Stage: STAGE_UI_06_STATE_MANAGEMENT
  */
-import { useBackofficeUiStore } from '@/core/state/ui.store'
+
 import { describe, expect, it } from 'vitest'
+import { useBackofficeUiStore } from '@/core/state/ui.store'
 import { useIsolatedPinia } from '../store-test-helper'
 
 describe('useBackofficeUiStore', () => {
@@ -21,43 +22,43 @@ describe('useBackofficeUiStore', () => {
   it('openModal sets modal to true', () => {
     const store = useBackofficeUiStore()
     store.openModal('confirm')
-    expect(store.modals['confirm']).toBe(true)
+    expect(store.modals.confirm).toBe(true)
   })
 
   it('closeModal sets modal to false', () => {
     const store = useBackofficeUiStore()
     store.openModal('confirm')
     store.closeModal('confirm')
-    expect(store.modals['confirm']).toBe(false)
+    expect(store.modals.confirm).toBe(false)
   })
 
   it('toggleModal toggles modal state', () => {
     const store = useBackofficeUiStore()
     store.toggleModal('settings')
-    expect(store.modals['settings']).toBe(true)
+    expect(store.modals.settings).toBe(true)
     store.toggleModal('settings')
-    expect(store.modals['settings']).toBe(false)
+    expect(store.modals.settings).toBe(false)
   })
 
   it('openDrawer sets drawer to true', () => {
     const store = useBackofficeUiStore()
     store.openDrawer('sidebar')
-    expect(store.drawers['sidebar']).toBe(true)
+    expect(store.drawers.sidebar).toBe(true)
   })
 
   it('closeDrawer sets drawer to false', () => {
     const store = useBackofficeUiStore()
     store.openDrawer('sidebar')
     store.closeDrawer('sidebar')
-    expect(store.drawers['sidebar']).toBe(false)
+    expect(store.drawers.sidebar).toBe(false)
   })
 
   it('toggleDrawer toggles drawer state', () => {
     const store = useBackofficeUiStore()
     store.toggleDrawer('nav')
-    expect(store.drawers['nav']).toBe(true)
+    expect(store.drawers.nav).toBe(true)
     store.toggleDrawer('nav')
-    expect(store.drawers['nav']).toBe(false)
+    expect(store.drawers.nav).toBe(false)
   })
 
   it('showOverlay sets overlayVisible to true', () => {

@@ -98,9 +98,7 @@ const props = defineProps<Props>()
 const step = ref<1 | 2 | 3>(1)
 const confirmationPhrase = ref('')
 const userInput = ref('')
-const phraseMatches = computed(
-  () => userInput.value === confirmationPhrase.value
-)
+const phraseMatches = computed(() => userInput.value === confirmationPhrase.value)
 const phraseError = ref<string | null>(null)
 const twoFaCode = ref('')
 const twoFaError = ref<string | null>(null)

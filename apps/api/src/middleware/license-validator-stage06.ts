@@ -15,8 +15,8 @@
  * - Forces graceful degradation: 423 (SOFT_LOCKED), 403 (ARCHIVED)
  */
 
-import { Logger } from '@zidney/logger'
-import { Context, MiddlewareHandler } from 'hono'
+import type { Logger } from '@zidney/logger'
+import type { Context, MiddlewareHandler } from 'hono'
 
 export interface LicenseContextStage06 {
   workspace_id: string
@@ -40,9 +40,7 @@ export interface LicenseContextStage06 {
  * - 423: LICENSE_SOFT_LOCKED / WORKSPACE_SOFT_LOCKED
  * - 426: SCHEMA_VERSION_INCOMPATIBLE / PRODUCT_VERSION_INCOMPATIBLE
  */
-export function createLicenseValidatorStage06(
-  logger: Logger
-): MiddlewareHandler {
+export function createLicenseValidatorStage06(logger: Logger): MiddlewareHandler {
   return async (c: Context, next) => {
     const correlation_id = c.get('correlationId') || 'unknown'
     const tenant = c.get('tenant')
@@ -153,8 +151,7 @@ export function createLicenseValidatorStage06(
             data: null,
             error: {
               code: 'WORKSPACE_SOFT_LOCKED',
-              message:
-                'Workspace is temporarily unavailable. Please try again later.',
+              message: 'Workspace is temporarily unavailable. Please try again later.',
             },
           },
           423
@@ -218,10 +215,7 @@ export function createLicenseValidatorStage06(
         return 0
       }
 
-      const version_cmp = versionCompare(
-        license.product_version,
-        CURRENT_PRODUCT_VERSION
-      )
+      const version_cmp = versionCompare(license.product_version, CURRENT_PRODUCT_VERSION)
       if (version_cmp < 0) {
         logger.warn('License validator: Product version incompatible', {
           correlation_id,

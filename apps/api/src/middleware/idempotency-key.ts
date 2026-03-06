@@ -4,10 +4,10 @@
  * Applied to: POST /api/admin/workspace/{workspace_id}/upgrade*
  */
 
+import crypto from 'node:crypto'
 import { createLogger } from '@zidney/logger'
-import crypto from 'crypto'
 import type { Context, MiddlewareHandler, Next } from 'hono'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 const logger = createLogger('idempotency-middleware')
 

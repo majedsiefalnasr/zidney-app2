@@ -31,6 +31,372 @@ Verdict Semantics: PASS | BLOCKED
 
 This agent MUST comply with all binding rules defined in `docs/AGENT_GOVERNANCE.md`.
 
+## RTK (Rust Token Killer) Command Execution Rule
+
+All shell commands executed by this orchestrator MUST be wrapped with the RTK prefix to minimize token output and prevent large CLI responses from polluting the AI context.
+
+RTK reduces token usage by filtering verbose CLI output and returning only the relevant result to the AI agent.
+
+### RTK Installation Check
+
+Before executing any RTK‑wrapped command, the orchestrator SHOULD verify that `rtk` is available on the system.
+
+Recommended check:
+
+```bash
+rtk --version
+```
+
+### Automatic RTK Detection & Installation Suggestion
+
+If `rtk --version` fails, the orchestrator SHOULD automatically display installation guidance and recommend installing RTK before continuing the workflow.
+
+Suggested installation methods:
+
+**Homebrew (recommended for macOS):**
+
+```bash
+brew install rtk
+```
+
+**Quick Install (Linux/macOS):**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
+```
+
+**Cargo Installation:**
+
+```bash
+cargo install --git https://github.com/rtk-ai/rtk
+```
+
+Verification commands:
+
+```bash
+rtk --version
+rtk gain
+```
+
+Expected behavior:
+
+- `rtk --version` prints something like `rtk 0.27.x`
+- `rtk gain` shows token‑saving statistics
+
+If installation succeeds, the orchestrator MUST resume normal execution using RTK‑prefixed commands.
+
+If the user chooses not to install RTK immediately, the orchestrator MAY temporarily use fallback execution mode defined in **Fallback Execution Safety**.
+
+#### Installation
+
+**Homebrew (recommended for macOS):**
+
+```bash
+brew install rtk
+```
+
+**Quick Install (Linux/macOS):**
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
+```
+
+This installs RTK to:
+
+```
+~/.local/bin
+```
+
+If needed, add it to your PATH:
+
+```bash
+echo 'export PATH="$HOME/.local/bin:$PATH"' >> ~/.bashrc   # or ~/.zshrc
+```
+
+**Cargo Installation:**
+
+```bash
+cargo install --git https://github.com/rtk-ai/rtk
+```
+
+#### Verify Installation
+
+```bash
+rtk --version
+rtk gain
+```
+
+Expected:
+
+- `rtk --version` prints something similar to `rtk 0.27.x`
+- `rtk gain` displays token‑saving statistics
+
+⚠️ **Name collision warning:**
+
+Another project named `rtk` (Rust Type Kit) exists on crates.io. If `rtk gain` fails after installation, the wrong package was installed. In that case reinstall using:
+
+```bash
+cargo install --git https://github.com/rtk-ai/rtk
+```
+
+### Fallback Execution Safety
+
+If RTK is temporarily unavailable but command execution is required, the orchestrator MAY apply a safe fallback wrapper.
+
+Fallback pattern:
+
+```bash
+rtk <command> || <command>
+```
+
+Example:
+
+```bash
+rtk git status || git status
+```
+
+Rules:
+
+1. The orchestrator MUST first attempt execution using RTK.
+2. If RTK is not installed or fails to execute, the command MAY run without RTK as a fallback.
+3. The orchestrator SHOULD still recommend installing RTK before continuing long workflows.
+4. Fallback mode is intended only for temporary environments or first‑time project setup.
+
+Purpose:
+
+- Prevent workflow deadlocks on machines where RTK is not yet installed
+- Maintain usability for new contributors
+- Preserve RTK enforcement once installation is complete
+
+If RTK becomes available later in the session, the orchestrator MUST resume using strict RTK‑prefixed commands.
+
+### Mandatory Rule
+
+Before executing any CLI command, rewrite the command to use the `rtk` prefix.
+
+Examples:
+
+```
+rtk git status
+rtk git diff
+rtk git add <file>
+rtk git commit -m "message"
+rtk git push
+
+rtk vitest run
+rtk tsc --noEmit
+rtk lint
+rtk bun install
+```
+
+For chained commands:
+
+```
+rtk git add . && rtk git commit -m "message" && rtk git push
+```
+
+### Behavior
+
+If RTK provides a command-specific filter, it will compress output.
+
+If RTK does not provide a specific filter, the command is passed through safely with minimal formatting.
+
+### Enforcement
+
+The orchestrator MUST automatically transform generated commands into the RTK format before execution.
+
+If a command is executed without RTK, the orchestrator SHOULD rewrite it before running.
+
+### Automatic RTK Command Rewriting
+
+To guarantee RTK enforcement even when AI agents forget to prefix commands, the orchestrator MUST automatically rewrite CLI commands before execution.
+
+Detection rule:
+
+If a generated command begins with any of the following tools:
+
+- git
+- bun
+- pnpm
+- npm
+- yarn
+- vitest
+- tsc
+- eslint
+- biome
+
+Then the orchestrator MUST internally transform the command to:
+
+```
+rtk <original-command>
+```
+
+Examples:
+
+```
+git status
+```
+
+becomes
+
+```
+rtk git status
+```
+
+```
+bun scripts/infra-audit.ts
+```
+
+becomes
+
+```
+rtk bun scripts/infra-audit.ts
+```
+
+This rewriting MUST occur even if the command appears in documentation without the prefix.
+
+Purpose:
+
+- Prevent token flooding from CLI output
+- Guarantee consistent command filtering
+- Protect long SpecKit workflows from excessive terminal output
+
+This rule ensures RTK usage cannot be bypassed accidentally by AI agents.
+
+### Pre‑Parser RTK Enforcement (Hard Safety Layer)
+
+To guarantee that **all CLI commands are filtered through RTK**, the orchestrator MUST enforce RTK rewriting **before command parsing or execution**.
+
+This rule applies even if:
+
+- a command is generated by another AI agent
+- a command appears inside documentation blocks
+- a command is embedded inside multi‑line shell scripts
+
+Execution pipeline:
+
+```
+AI generates command
+      ↓
+RTK rewrite layer intercepts command
+      ↓
+command is transformed to:
+
+rtk <original-command>
+
+      ↓
+command execution
+```
+
+Example:
+
+Original command produced by an agent:
+
+```
+git diff
+```
+
+Execution performed by orchestrator:
+
+```
+rtk git diff
+```
+
+If RTK is unavailable and fallback mode is active, the execution wrapper becomes:
+
+```
+rtk git diff || git diff
+```
+
+Mandatory rules:
+
+1. The RTK rewrite layer MUST run **before shell command parsing**.
+2. Agents MUST NOT bypass RTK by embedding commands inside scripts.
+3. Multi‑command chains MUST rewrite every command individually.
+
+Example transformation:
+
+```
+git add . && git commit -m "msg"
+```
+
+becomes
+
+```
+rtk git add . && rtk git commit -m "msg"
+```
+
+Purpose:
+
+- Guarantee token‑safe CLI output
+- Prevent accidental raw command execution
+- Protect long SpecKit workflows from context flooding
+- Ensure uniform CLI filtering across all agents
+
+This creates a **hard enforcement layer** ensuring RTK cannot be bypassed even by automated agents or generated scripts.
+
+Purpose:
+
+- Reduce token usage
+- Prevent terminal spam from tools like `vitest`, `eslint`, `tsc`, or `git diff`
+- Improve reasoning efficiency for long workflows
+
+This rule applies to **all shell command execution throughout the entire workflow**, including Git hygiene steps, validation gates, audits, and testing stages.
+
+### RTK Session Detection Cache (Performance Optimization)
+
+To avoid repeatedly checking whether RTK is installed during long workflows, the orchestrator SHOULD cache the RTK availability status for the current session.
+
+Detection procedure:
+
+```bash
+rtk --version
+```
+
+If the command succeeds, store:
+
+```
+RTK_AVAILABLE = true
+```
+
+If the command fails:
+
+```
+RTK_AVAILABLE = false
+```
+
+Behavior rules:
+
+1. The RTK availability check SHOULD run **once per session** during early workflow initialization.
+2. If `RTK_AVAILABLE = true`, all CLI commands MUST be automatically rewritten to:
+
+```
+rtk <command>
+```
+
+3. If `RTK_AVAILABLE = false`, commands SHOULD use fallback execution:
+
+```
+rtk <command> || <command>
+```
+
+4. The orchestrator MUST NOT repeatedly run `rtk --version` before every command.
+
+5. If RTK becomes available later in the session (for example after installation), the orchestrator MAY refresh the cache by running:
+
+```bash
+rtk --version
+```
+
+Purpose:
+
+- Reduce redundant environment checks
+- Speed up long SpecKit workflows
+- Prevent unnecessary CLI output
+- Maintain strict RTK enforcement without performance overhead
+
+This optimization ensures RTK integration remains efficient even in long multi‑step orchestration sessions.
+
 ---
 
 # AI Architecture Intelligence Integration
@@ -639,18 +1005,13 @@ Progress:
 <STEP_INDEX>/<TOTAL_STEPS>: <current_step>
 ═══════════════════════════════════════
 
-Highlight current step with ▶ and completed steps with ✓.
-
-Examples:
+Example:
 
 3/8: Clarify
-5/8: Tasks
-7/8: Implement
 
 Rules:
 
 - Always render banner before step execution details.
-- Update progress markers after each committed step.
 - If BLOCKED, display: "STATUS: BLOCKED — Remediation Required" in banner.
 
 Displayed status must be deterministic and derived from `.workflow-state.json` using:
@@ -823,6 +1184,29 @@ No manual confirmation required between retries unless escalation threshold is r
 ---
 
 ## Git Hygiene Enforcement
+
+RTK Execution Requirement:
+
+All shell commands in this section MUST be executed through the RTK wrapper to minimize token output and prevent large CLI responses from polluting the AI context.
+
+Before executing any command shown below, automatically prefix it with `rtk`.
+
+Examples:
+
+```
+rtk git status --porcelain
+rtk git diff --name-only HEAD
+rtk git add <files>
+rtk git commit -F <message>
+```
+
+Rule:
+
+- The command examples in this document may appear without the `rtk` prefix for readability.
+- The orchestrator MUST internally transform them to `rtk <command>` before execution.
+- This applies to all CLI tools used during the workflow, including `git`, `vitest`, `tsc`, `bun`, and package manager commands.
+
+Failure to apply the RTK wrapper is considered a workflow violation.
 
 Referenced throughout as **"Apply Git Hygiene Enforcement."**
 

@@ -18,8 +18,8 @@
  * Refs: usePermission.ts security contract, deny-by-default UI rule
  */
 
-import { usePermission } from '@/composables/usePermission'
 import { describe, expect, it } from 'vitest'
+import { usePermission } from '@/composables/usePermission'
 
 describe('usePermission — can() helper', () => {
   it('initial state: permissions is empty, loading false, error null', () => {

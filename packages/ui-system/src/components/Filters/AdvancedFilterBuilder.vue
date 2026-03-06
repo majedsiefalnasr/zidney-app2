@@ -144,10 +144,7 @@ import {
 } from '@shadcn-vue/ui/select'
 import { computed, ref, watch } from 'vue'
 import type { Filter } from '../../types'
-import {
-  checkUrlOverflow,
-  serializeFilters,
-} from '../../utils/filter-serializer'
+import { checkUrlOverflow, serializeFilters } from '../../utils/filter-serializer'
 
 type FilterOperator =
   | 'eq'
@@ -161,13 +158,7 @@ type FilterOperator =
   | 'endsWith'
   | 'in'
 
-type FilterFieldType =
-  | 'text'
-  | 'select'
-  | 'date'
-  | 'boolean'
-  | 'number'
-  | 'multiselect'
+type FilterFieldType = 'text' | 'select' | 'date' | 'boolean' | 'number' | 'multiselect'
 
 interface FilterField {
   id: string
@@ -198,9 +189,7 @@ const props = withDefaults(defineProps<Props>(), {
 const emit = defineEmits<Emits>()
 
 const localFilters = ref<Filter[]>(JSON.parse(JSON.stringify(props.filters)))
-const persistenceMode = ref<'url' | 'localStorage'>(
-  props.filterSerializationMode
-)
+const persistenceMode = ref<'url' | 'localStorage'>(props.filterSerializationMode)
 
 watch(
   () => props.filters,

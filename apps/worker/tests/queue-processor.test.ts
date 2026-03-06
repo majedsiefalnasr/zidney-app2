@@ -13,6 +13,7 @@
  */
 
 import { createLogger } from '@zidney/logger'
+import { beforeEach, describe, expect, it } from 'vitest'
 import {
   createDLQMessage,
   determineTaskAction,
@@ -21,7 +22,6 @@ import {
   shouldAlertOps,
 } from '../src/config/task-configs'
 import { TaskQueueProcessor } from '../src/processor/queue-processor'
-import { beforeEach, describe, expect, it } from 'vitest'
 
 const logger = createLogger('WorkerQueueProcessorTest')
 
@@ -64,18 +64,14 @@ describe('Worker Queue Processor - Failure Scenarios', () => {
 
     it('❌ Should escalate to DLQ after max retries', () => {
       // Attempt 4 exceeds maxRetries=3
-      const action = determineTaskAction(
-        'INIT_TENANT_SCHEMA',
-        { status: 'RETRY' },
-        4
-      )
+      const action = determineTaskAction('INIT_TENANT_SCHEMA', { status: 'RETRY' }, 4)
 
       expect(action).toBe('DLQ')
     })
 
     it('✅ Should schedule retry with correct delay', async () => {
       const task = {
-        id: 'task-retry-' + Date.now(),
+        id: `task-retry-${Date.now()}`,
         type: 'INIT_TENANT_SCHEMA',
         payload: { workspace_id: 'ws-1', schema_version: '1.0.0' },
         attempt: 1,
@@ -137,9 +133,7 @@ describe('Worker Queue Processor - Failure Scenarios', () => {
     it('❌ Should NEVER retry on lock timeout (suspicious activity)', () => {
       // If error includes lock timeout, should route to DLQ
       const config = INIT_TENANT_SCHEMA_CONFIG
-      const isSkipRetry = config.retryPolicy.skipRetryOn?.includes(
-        'lock_timeout_exceeded'
-      )
+      const isSkipRetry = config.retryPolicy.skipRetryOn?.includes('lock_timeout_exceeded')
 
       expect(isSkipRetry).toBe(true)
 
@@ -315,11 +309,7 @@ describe('Worker Queue Processor - Failure Scenarios', () => {
 
     testCases.forEach(({ name, result, attempt, expectedAction }) => {
       it(`Should route: ${name} → ${expectedAction}`, () => {
-        const action = determineTaskAction(
-          'INIT_TENANT_SCHEMA',
-          result,
-          attempt
-        )
+        const action = determineTaskAction('INIT_TENANT_SCHEMA', result, attempt)
         expect(action).toBe(expectedAction)
 
         logger.debug(`Routing verified: ${name}`, {
@@ -394,9 +384,7 @@ describe('Worker Queue Processor - Failure Scenarios', () => {
       }))
 
       // Simulate concurrent processing
-      const results = await Promise.all(
-        tasks.map((task) => processor.processTask(task))
-      )
+      const results = await Promise.all(tasks.map((task) => processor.processTask(task)))
 
       // Verify all tasks processed independently
       expect(results.length).toBe(10)
@@ -419,15 +407,9 @@ describe('Worker Queue Processor - Failure Scenarios', () => {
         attemptCount++
 
         const result =
-          attemptCount < 3
-            ? { status: 'RETRY', error: 'transient failure' }
-            : { status: 'SUCCESS' }
+          attemptCount < 3 ? { status: 'RETRY', error: 'transient failure' } : { status: 'SUCCESS' }
 
-        const action = determineTaskAction(
-          'INIT_TENANT_SCHEMA',
-          result,
-          attemptCount
-        )
+        const action = determineTaskAction('INIT_TENANT_SCHEMA', result, attemptCount)
 
         if (action === 'SUCCESS') {
           break
@@ -439,9 +421,7 @@ describe('Worker Queue Processor - Failure Scenarios', () => {
 
         // Wait with backoff
         const backoff = getRetryDelay('INIT_TENANT_SCHEMA', attemptCount)
-        await new Promise((resolve) =>
-          setTimeout(resolve, Math.min(backoff, 100))
-        ) // Reduced for testing
+        await new Promise((resolve) => setTimeout(resolve, Math.min(backoff, 100))) // Reduced for testing
       }
 
       expect(attemptCount).toBe(3) // Succeeds on 3rd attempt

@@ -6,8 +6,9 @@
  * Purpose: View usage history for an affiliate with aggregate statistics
  */
 
-import { AffiliateUsage } from '@zidney/domain-core/affiliates/types'
-import { Context } from 'hono'
+import type { AffiliateUsage } from '@zidney/domain-core/affiliates/types'
+import { logger } from '@zidney/logger'
+import type { Context } from 'hono'
 import { pool } from '../../../../db'
 
 interface UsageStats {
@@ -125,7 +126,7 @@ export async function getAffiliateUsagesHandler(c: Context) {
       error: null,
     })
   } catch (error: any) {
-    console.error('[AFFILIATE] Get usages error:', error)
+    logger.error('[AFFILIATE] Get usages error:', { error })
 
     c.status(500)
     return c.json({

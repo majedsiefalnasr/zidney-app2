@@ -48,9 +48,7 @@ const BASE_ACTOR_ID = '22222222-2222-2222-2222-222222222222'
 const BASE_LOG_ID = '33333333-3333-3333-3333-333333333333'
 const BASE_CHANGED_AT = new Date('2026-03-01T10:00:00Z')
 
-function baseContext(
-  overrides: Partial<WorkflowContext> = {}
-): WorkflowContext {
+function baseContext(overrides: Partial<WorkflowContext> = {}): WorkflowContext {
   return {
     entityType: 'subject',
     entityId: BASE_ENTITY_ID,
@@ -168,20 +166,12 @@ describe('T012 — executeTransition: valid COMPLETED→UNDER_REVIEW', () => {
 
     await executeTransition(db, ctx)
 
-    const calls = client._queryLog.map((q) =>
-      q.sql.split(/\s+/)[0]!.toUpperCase()
-    )
+    const calls = client._queryLog.map((q) => q.sql.split(/\s+/)[0]!.toUpperCase())
     const beginIdx = calls.indexOf('BEGIN')
     const select = client._queryLog.findIndex((q) => /FOR UPDATE/i.test(q.sql))
-    const update = client._queryLog.findIndex((q) =>
-      /^UPDATE/i.test(q.sql.trim())
-    )
-    const insert = client._queryLog.findIndex((q) =>
-      /INSERT INTO workflow_logs/i.test(q.sql)
-    )
-    const commit = client._queryLog.findIndex((q) =>
-      /^COMMIT/i.test(q.sql.trim())
-    )
+    const update = client._queryLog.findIndex((q) => /^UPDATE/i.test(q.sql.trim()))
+    const insert = client._queryLog.findIndex((q) => /INSERT INTO workflow_logs/i.test(q.sql))
+    const commit = client._queryLog.findIndex((q) => /^COMMIT/i.test(q.sql.trim()))
 
     expect(beginIdx).toBeGreaterThanOrEqual(0)
     expect(select).toBeGreaterThan(beginIdx)
@@ -421,9 +411,7 @@ describe('T027 — executeTransition: workflow_logs INSERT fields', () => {
     const result = await executeTransition(db, ctx)
 
     // Find the INSERT query in the query log
-    const insertCall = client._queryLog.find((q) =>
-      /INSERT INTO workflow_logs/i.test(q.sql)
-    )
+    const insertCall = client._queryLog.find((q) => /INSERT INTO workflow_logs/i.test(q.sql))
     expect(insertCall).toBeDefined()
 
     // Verify required params: [entityType, entityId, previousState, newState, changedBy, reason]
@@ -453,9 +441,7 @@ describe('T027 — executeTransition: workflow_logs INSERT fields', () => {
 
     await executeTransition(db, ctx)
 
-    const insertCall = client._queryLog.find((q) =>
-      /INSERT INTO workflow_logs/i.test(q.sql)
-    )
+    const insertCall = client._queryLog.find((q) => /INSERT INTO workflow_logs/i.test(q.sql))
     expect(insertCall!.params![5]).toBeNull()
   })
 })
@@ -474,20 +460,14 @@ describe('T028 — executeTransition: INSERT failure triggers ROLLBACK', () => {
       permissions: ['subject.review'],
     })
 
-    await expect(executeTransition(db, ctx)).rejects.toThrow(
-      'workflow_logs INSERT failed'
-    )
+    await expect(executeTransition(db, ctx)).rejects.toThrow('workflow_logs INSERT failed')
 
     // ROLLBACK must have been called
-    const rollbackCall = client._queryLog.find((q) =>
-      /^ROLLBACK/i.test(q.sql.trim())
-    )
+    const rollbackCall = client._queryLog.find((q) => /^ROLLBACK/i.test(q.sql.trim()))
     expect(rollbackCall).toBeDefined()
 
     // COMMIT must NOT have been called
-    const commitCall = client._queryLog.find((q) =>
-      /^COMMIT/i.test(q.sql.trim())
-    )
+    const commitCall = client._queryLog.find((q) => /^COMMIT/i.test(q.sql.trim()))
     expect(commitCall).toBeUndefined()
   })
 })

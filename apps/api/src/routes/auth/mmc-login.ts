@@ -78,11 +78,7 @@ router.post(
   '/login',
   zValidator('json', loginSchema, (result, _c) => {
     if (!result.success) {
-      throwAuthError(
-        AuthErrorCodes.VALIDATION_ERROR,
-        'Invalid login request',
-        400
-      )
+      throwAuthError(AuthErrorCodes.VALIDATION_ERROR, 'Invalid login request', 400)
     }
   }),
   async (c) => {
@@ -121,16 +117,9 @@ router.post(
           )
 
           // Use dummy hash to prevent timing attacks
-          await auth.password.verifyPassword(
-            request.password,
-            auth.password.getDummyHash()
-          )
+          await auth.password.verifyPassword(request.password, auth.password.getDummyHash())
 
-          throwAuthError(
-            AuthErrorCodes.INVALID_CREDENTIALS,
-            'Invalid email or password',
-            401
-          )
+          throwAuthError(AuthErrorCodes.INVALID_CREDENTIALS, 'Invalid email or password', 401)
         }
 
         const user = userResult.rows[0]
@@ -202,11 +191,7 @@ router.post(
             )
           }
 
-          throwAuthError(
-            AuthErrorCodes.INVALID_CREDENTIALS,
-            'Invalid email or password',
-            401
-          )
+          throwAuthError(AuthErrorCodes.INVALID_CREDENTIALS, 'Invalid email or password', 401)
         }
 
         // Phase 4: Success - reset counters and generate token

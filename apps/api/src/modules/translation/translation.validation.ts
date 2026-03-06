@@ -29,10 +29,7 @@ const languageCodeSchema = z
   .string()
   .min(2, 'language_code must be at least 2 characters')
   .max(10, 'language_code must not exceed 10 characters')
-  .regex(
-    /^[a-z]{2}(-[A-Z]{2})?$/,
-    'language_code must be a valid BCP-47 code (e.g. "en", "pt-BR")'
-  )
+  .regex(/^[a-z]{2}(-[A-Z]{2})?$/, 'language_code must be a valid BCP-47 code (e.g. "en", "pt-BR")')
 
 // ---------------------------------------------------------------------------
 // Single upsert item schema
@@ -99,9 +96,7 @@ export const GetTranslationsQuerySchema = z.object({
   page_size: z
     .string()
     .optional()
-    .transform((v: string | undefined) =>
-      v !== undefined ? parseInt(v, 10) : undefined
-    )
+    .transform((v: string | undefined) => (v !== undefined ? parseInt(v, 10) : undefined))
     .pipe(z.number().int().min(1).max(50).optional()),
 })
 

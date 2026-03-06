@@ -1,5 +1,5 @@
-import { Pool, PoolClient } from 'pg'
 import { logger } from '@zidney/logger'
+import { Pool, type PoolClient } from 'pg'
 
 /**
  * T048: Tenant DB connection management for worker

@@ -23,9 +23,7 @@ export function validateUpgradeRequest(body: any): {
   } else {
     // Validate SemVer format: X.Y.Z
     if (!/^\d+\.\d+\.\d+$/.test(body.target_schema_version)) {
-      errors.push(
-        `Invalid version format: "${body.target_schema_version}". Expected: X.Y.Z`
-      )
+      errors.push(`Invalid version format: "${body.target_schema_version}". Expected: X.Y.Z`)
     }
   }
 
@@ -58,9 +56,7 @@ export function validateRollbackRequest(body: any): {
   if (!body.snapshot_id) {
     errors.push('snapshot_id is required')
   } else if (
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      body.snapshot_id
-    )
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.snapshot_id)
   ) {
     errors.push('snapshot_id must be valid UUID')
   }

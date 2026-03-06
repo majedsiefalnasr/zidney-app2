@@ -1,13 +1,5 @@
 import type { PoolClient } from 'pg'
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../../src/db'
 
 const pool = db.master
@@ -136,14 +128,11 @@ describe('FK Cascade Delete Constraints', () => {
     )
     const subscriptionId = subResult.rows[0].id
 
-    await client.query('DELETE FROM subscriptions WHERE id = $1', [
+    await client.query('DELETE FROM subscriptions WHERE id = $1', [subscriptionId])
+
+    const countResult = await client.query('SELECT COUNT(*) FROM subscriptions WHERE id = $1', [
       subscriptionId,
     ])
-
-    const countResult = await client.query(
-      'SELECT COUNT(*) FROM subscriptions WHERE id = $1',
-      [subscriptionId]
-    )
     expect(parseInt(countResult.rows[0].count, 10)).toBe(0)
   })
 
@@ -179,10 +168,9 @@ describe('FK Cascade Delete Constraints', () => {
 
     await client.query('DELETE FROM attempts WHERE id = $1', [attemptId])
 
-    eventCount = await client.query(
-      'SELECT COUNT(*) FROM attempt_events WHERE attempt_id = $1',
-      [attemptId]
-    )
+    eventCount = await client.query('SELECT COUNT(*) FROM attempt_events WHERE attempt_id = $1', [
+      attemptId,
+    ])
     expect(parseInt(eventCount.rows[0].count, 10)).toBe(0)
   })
 
@@ -193,27 +181,25 @@ describe('FK Cascade Delete Constraints', () => {
     )
     const roleId = roleResult.rows[0].id
 
-    await client.query(
-      'INSERT INTO role_permissions (role_id, permission_code) VALUES ($1, $2)',
-      [roleId, 'exams:create']
-    )
-    await client.query(
-      'INSERT INTO role_permissions (role_id, permission_code) VALUES ($1, $2)',
-      [roleId, 'exams:read']
-    )
+    await client.query('INSERT INTO role_permissions (role_id, permission_code) VALUES ($1, $2)', [
+      roleId,
+      'exams:create',
+    ])
+    await client.query('INSERT INTO role_permissions (role_id, permission_code) VALUES ($1, $2)', [
+      roleId,
+      'exams:read',
+    ])
 
-    let permCount = await client.query(
-      'SELECT COUNT(*) FROM role_permissions WHERE role_id = $1',
-      [roleId]
-    )
+    let permCount = await client.query('SELECT COUNT(*) FROM role_permissions WHERE role_id = $1', [
+      roleId,
+    ])
     expect(parseInt(permCount.rows[0].count, 10)).toBe(2)
 
     await client.query('DELETE FROM roles WHERE id = $1', [roleId])
 
-    permCount = await client.query(
-      'SELECT COUNT(*) FROM role_permissions WHERE role_id = $1',
-      [roleId]
-    )
+    permCount = await client.query('SELECT COUNT(*) FROM role_permissions WHERE role_id = $1', [
+      roleId,
+    ])
     expect(parseInt(permCount.rows[0].count, 10)).toBe(0)
   })
 
@@ -224,14 +210,14 @@ describe('FK Cascade Delete Constraints', () => {
     )
     const categoryId = catResult.rows[0].id
 
-    await client.query(
-      'INSERT INTO category_values (category_id, value) VALUES ($1, $2)',
-      [categoryId, 'EASY']
-    )
-    await client.query(
-      'INSERT INTO category_values (category_id, value) VALUES ($1, $2)',
-      [categoryId, 'HARD']
-    )
+    await client.query('INSERT INTO category_values (category_id, value) VALUES ($1, $2)', [
+      categoryId,
+      'EASY',
+    ])
+    await client.query('INSERT INTO category_values (category_id, value) VALUES ($1, $2)', [
+      categoryId,
+      'HARD',
+    ])
 
     let valueCount = await client.query(
       'SELECT COUNT(*) FROM category_values WHERE category_id = $1',
@@ -241,10 +227,9 @@ describe('FK Cascade Delete Constraints', () => {
 
     await client.query('DELETE FROM categories WHERE id = $1', [categoryId])
 
-    valueCount = await client.query(
-      'SELECT COUNT(*) FROM category_values WHERE category_id = $1',
-      [categoryId]
-    )
+    valueCount = await client.query('SELECT COUNT(*) FROM category_values WHERE category_id = $1', [
+      categoryId,
+    ])
     expect(parseInt(valueCount.rows[0].count, 10)).toBe(0)
   })
 
@@ -255,36 +240,28 @@ describe('FK Cascade Delete Constraints', () => {
     )
     const userId = userResult.rows[0].id
 
-    await client.query(
-      'INSERT INTO notifications (user_id, message) VALUES ($1, $2)',
-      [userId, 'Test notification']
-    )
+    await client.query('INSERT INTO notifications (user_id, message) VALUES ($1, $2)', [
+      userId,
+      'Test notification',
+    ])
     await client.query(
       'INSERT INTO feedback (user_id, feedback_text, rating) VALUES ($1, $2, $3)',
       [userId, 'Great app', 5]
     )
 
-    let notifCount = await client.query(
-      'SELECT COUNT(*) FROM notifications WHERE user_id = $1',
-      [userId]
-    )
-    let feedCount = await client.query(
-      'SELECT COUNT(*) FROM feedback WHERE user_id = $1',
-      [userId]
-    )
+    let notifCount = await client.query('SELECT COUNT(*) FROM notifications WHERE user_id = $1', [
+      userId,
+    ])
+    let feedCount = await client.query('SELECT COUNT(*) FROM feedback WHERE user_id = $1', [userId])
     expect(parseInt(notifCount.rows[0].count, 10)).toBe(1)
     expect(parseInt(feedCount.rows[0].count, 10)).toBe(1)
 
     await client.query('DELETE FROM users WHERE id = $1', [userId])
 
-    notifCount = await client.query(
-      'SELECT COUNT(*) FROM notifications WHERE user_id = $1',
-      [userId]
-    )
-    feedCount = await client.query(
-      'SELECT COUNT(*) FROM feedback WHERE user_id = $1',
-      [userId]
-    )
+    notifCount = await client.query('SELECT COUNT(*) FROM notifications WHERE user_id = $1', [
+      userId,
+    ])
+    feedCount = await client.query('SELECT COUNT(*) FROM feedback WHERE user_id = $1', [userId])
     expect(parseInt(notifCount.rows[0].count, 10)).toBe(0)
     expect(parseInt(feedCount.rows[0].count, 10)).toBe(0)
   })

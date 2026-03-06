@@ -7,7 +7,7 @@
  * Reusable by API and Worker.
  */
 
-import { Affiliate, AffiliateValidationResult } from './types'
+import type { Affiliate, AffiliateValidationResult } from './types'
 
 const PROMO_CODE_PATTERN = /^[A-Z0-9]{3,50}$/
 const PROMO_CODE_MIN_LENGTH = 3
@@ -26,10 +26,7 @@ export function validatePromoCode(code: string | null | undefined): boolean {
   }
 
   const trimmed = code.trim()
-  if (
-    trimmed.length < PROMO_CODE_MIN_LENGTH ||
-    trimmed.length > PROMO_CODE_MAX_LENGTH
-  ) {
+  if (trimmed.length < PROMO_CODE_MIN_LENGTH || trimmed.length > PROMO_CODE_MAX_LENGTH) {
     return false
   }
 
@@ -46,9 +43,7 @@ export function normalizePromoCode(code: string): string {
  * Validate percentage is in valid range (0-100)
  * Supports numeric strings like "10", "10.5", "10.50"
  */
-export function validatePercentageRange(
-  percent: string | number | null | undefined
-): boolean {
+export function validatePercentageRange(percent: string | number | null | undefined): boolean {
   if (percent === null || percent === undefined) {
     return false
   }
@@ -71,10 +66,7 @@ export function validatePercentageRange(
 /**
  * Validate date range (start < end)
  */
-export function validateDateRange(
-  startDate: Date,
-  endDate: Date
-): AffiliateValidationResult {
+export function validateDateRange(startDate: Date, endDate: Date): AffiliateValidationResult {
   if (!startDate || !endDate) {
     return {
       valid: false,
@@ -118,10 +110,7 @@ export function checkAffiliateActive(affiliate: Affiliate): boolean {
 /**
  * Check if affiliate is within valid time window
  */
-export function checkTemporalValidity(
-  affiliate: Affiliate,
-  now: Date = new Date()
-): boolean {
+export function checkTemporalValidity(affiliate: Affiliate, now: Date = new Date()): boolean {
   return now >= affiliate.start_date && now < affiliate.end_date
 }
 
@@ -156,10 +145,7 @@ export function checkGlobalUsageLimit(affiliate: Affiliate): boolean {
  * Global usage limit check - for use in affiliate service
  * Returns true if usage is acceptable, false if exceeded
  */
-export function validateGlobalUsageLimit(
-  usageCount: number,
-  usageLimit: number | null
-): boolean {
+export function validateGlobalUsageLimit(usageCount: number, usageLimit: number | null): boolean {
   if (usageLimit === null || usageLimit === undefined) {
     return true // No limit set - always acceptable
   }

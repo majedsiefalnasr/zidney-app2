@@ -9,13 +9,13 @@ import { describe, expect, it } from 'vitest'
 import {
   calculateAvgRevenuePerLicense,
   enrichGeographicMetrics,
+  type GeographicMetrics,
+  type GeographicResult,
   getCountryName,
   getGeographicStatistics,
   getTopCountries,
   paginate,
   sortGeographic,
-  type GeographicMetrics,
-  type GeographicResult,
 } from '../../../packages/domain-core/mmc-dashboard/metrics/geographic-aggregator'
 
 describe('Geographic Aggregator - Unit Tests', () => {
@@ -256,16 +256,13 @@ describe('Geographic Aggregator - Unit Tests', () => {
     })
 
     it('should handle default limit of 10', () => {
-      const metrics: GeographicResult[] = Array.from(
-        { length: 20 },
-        (_, i) => ({
-          country_code: `C${i}`,
-          country_name: `Country ${i}`,
-          total_revenue_cents: (20 - i) * 10000,
-          license_count: i + 1,
-          avg_revenue_per_license_cents: 10000,
-        })
-      )
+      const metrics: GeographicResult[] = Array.from({ length: 20 }, (_, i) => ({
+        country_code: `C${i}`,
+        country_name: `Country ${i}`,
+        total_revenue_cents: (20 - i) * 10000,
+        license_count: i + 1,
+        avg_revenue_per_license_cents: 10000,
+      }))
       const result = getTopCountries(metrics)
       expect(result).toHaveLength(10)
     })

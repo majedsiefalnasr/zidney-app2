@@ -4,8 +4,9 @@
  */
 
 import { createSnapshot } from '@zidney/domain-core/migration/snapshot-manager'
+import { logger } from '@zidney/logger'
 import type { Pool } from 'pg'
-import { SchemaMigrationJob } from './schema-migration-job'
+import type { SchemaMigrationJob } from './schema-migration-job'
 
 /**
  * Execute snapshot creation phase
@@ -34,33 +35,23 @@ export async function executeSnapshotCreation(
       targetSchemaVersion: target_schema_version,
     })
 
-    console.log(
-      JSON.stringify({
-        level: 'INFO',
-        service: 'worker-upgrade',
-        event: 'snapshot_creation_phase_completed',
-        correlation_id,
-        workspace_id,
-        snapshot_id: snapshot.id,
-        location: snapshot.snapshot_location,
-        timestamp: new Date().toISOString(),
-      })
-    )
+    logger.info('snapshot_creation_phase_completed', {
+      service: 'worker-upgrade',
+      correlation_id,
+      workspace_id,
+      snapshot_id: snapshot.id,
+      location: snapshot.snapshot_location,
+    })
 
     return snapshot.id
   } catch (err: any) {
-    console.log(
-      JSON.stringify({
-        level: 'ERROR',
-        service: 'worker-upgrade',
-        event: 'snapshot_creation_phase_failed',
-        correlation_id,
-        workspace_id,
-        error_code: err.errorCode || 'SNAPSHOT_CREATION_FAILED',
-        error_message: err.message,
-        timestamp: new Date().toISOString(),
-      })
-    )
+    logger.error('snapshot_creation_phase_failed', {
+      service: 'worker-upgrade',
+      correlation_id,
+      workspace_id,
+      error_code: err.errorCode || 'SNAPSHOT_CREATION_FAILED',
+      error_message: err.message,
+    })
 
     throw err
   }

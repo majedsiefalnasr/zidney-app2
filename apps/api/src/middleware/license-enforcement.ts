@@ -40,8 +40,7 @@ const logger = createLogger('license-engine')
 export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
   try {
     // Extract workspace slug from context (set by tenant resolver)
-    const workspace_slug = (ctx.req.param('workspace_slug') ||
-      ctx.get('workspace_slug')) as string
+    const workspace_slug = (ctx.req.param('workspace_slug') || ctx.get('workspace_slug')) as string
     const correlation_id = ctx.get('correlation_id') || 'unknown'
 
     if (!workspace_slug) {
@@ -58,13 +57,9 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
     // ===========================================================================
     // STEP 1: Validate license status
     // ===========================================================================
-    const validationResult =
-      await resolver.validateLicenseStatus(workspace_slug)
+    const validationResult = await resolver.validateLicenseStatus(workspace_slug)
 
-    if (
-      !validationResult.valid &&
-      validationResult.status !== LicenseStatus.ACTIVE
-    ) {
+    if (!validationResult.valid && validationResult.status !== LicenseStatus.ACTIVE) {
       // Log: License invalid
       const log = {
         timestamp: new Date().toISOString(),
@@ -102,9 +97,7 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
     const license = await resolver.getLicenseBySlug(workspace_slug)
     const transitionService =
       ctx.get('transitionLicenseState') ||
-      (await import('@zidney/domain-core/license').then(
-        (m) => m.transitionLicenseState
-      ))
+      (await import('@zidney/domain-core/license').then((m) => m.transitionLicenseState))
 
     if (
       license &&
@@ -144,9 +137,7 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
           workspace_slug,
           action: 'soft_lock_expiry_transition_error',
           error_message:
-            transitionError instanceof Error
-              ? transitionError.message
-              : String(transitionError),
+            transitionError instanceof Error ? transitionError.message : String(transitionError),
         }
         logger.error('License soft-lock auto-transition failed', log)
         // Continue to return 403 anyway (license is expired)
@@ -170,13 +161,9 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
     // ===========================================================================
     // STEP 3: Validate schema version (forward-compatible)
     // ===========================================================================
-    const tenant_schema_version = (ctx.get('tenant_schema_version') ||
-      '1.0.0') as string
+    const tenant_schema_version = (ctx.get('tenant_schema_version') || '1.0.0') as string
 
-    const schemaValid = await resolver.validateVersions(
-      workspace_slug,
-      tenant_schema_version
-    )
+    const schemaValid = await resolver.validateVersions(workspace_slug, tenant_schema_version)
     if (!schemaValid) {
       const log = {
         timestamp: new Date().toISOString(),
@@ -290,8 +277,7 @@ export async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
         error: {
           code: 'LICENSE_CHECK_FAILED',
           message: 'License validation failed',
-          correlationId:
-            ctx.get('correlationId') ?? ctx.get('correlation_id') ?? 'unknown',
+          correlationId: ctx.get('correlationId') ?? ctx.get('correlation_id') ?? 'unknown',
         },
       },
       { status: 500 }

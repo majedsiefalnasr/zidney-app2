@@ -29,8 +29,8 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Context } from 'hono'
-import { Pool, PoolClient } from 'pg'
+import type { Context } from 'hono'
+import type { Pool, PoolClient } from 'pg'
 import { v4 as uuidv4 } from 'uuid'
 import { findAttemptById } from '../../db/attempt-queries'
 import type { UserContextStage06 } from '../../middleware/auth-context-stage06'
@@ -157,10 +157,7 @@ export async function updateProgressHandler(c: Context) {
     const { question_index, user_response } = response
 
     // Validate question exists in snapshot
-    if (
-      question_index < 0 ||
-      question_index >= attempt.question_snapshot.questions.length
-    ) {
+    if (question_index < 0 || question_index >= attempt.question_snapshot.questions.length) {
       logger.warn('Progress update failed: invalid question index', {
         correlation_id: correlationId,
         attempt_id: attemptId,
@@ -218,9 +215,7 @@ export async function updateProgressHandler(c: Context) {
         uuidv4(),
         attemptId,
         question.id,
-        responseValidation.normalized
-          ? JSON.stringify(responseValidation.normalized)
-          : null,
+        responseValidation.normalized ? JSON.stringify(responseValidation.normalized) : null,
         responseValidation.normalized ? now : null,
         response.flagged || false,
         now,

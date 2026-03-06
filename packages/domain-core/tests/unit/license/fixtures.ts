@@ -114,7 +114,6 @@ export class MockDatabaseClient {
     rows: any[] | null
     error?: any
   }> = []
-  private transactionActive = false
 
   private normalizeSql(sql: string): string {
     return sql.replace(/\s+/g, ' ').trim().toLowerCase()
@@ -158,10 +157,7 @@ export class MockDatabaseClient {
     }
 
     // Common INSERT behavior used by transaction-wrapper tests.
-    if (
-      normalizedSql.includes('insert into users') &&
-      normalizedSql.includes('returning id')
-    ) {
+    if (normalizedSql.includes('insert into users') && normalizedSql.includes('returning id')) {
       const id = params[0] || uuidv4()
       return { rows: [{ id }], rowCount: 1 }
     }
@@ -173,12 +169,7 @@ export class MockDatabaseClient {
     return { rows: [], rowCount: 0 }
   })
 
-  mockResult = (
-    sql: string | RegExp,
-    rows: any[] | null,
-    error?: any,
-    _metadata?: unknown
-  ) => {
+  mockResult = (sql: string | RegExp, rows: any[] | null, error?: any, _metadata?: unknown) => {
     this.mockedResults.push({ matcher: sql, rows, error })
   }
 
@@ -278,8 +269,7 @@ export function setupTestContext() {
 export function assertParameterizedQuery(query: string) {
   // Should use $1, $2, etc. for parameters (not string concatenation)
   const hasDollarParams = /$\d+/.test(query)
-  const hasStringConcat =
-    query.includes("'") && query.includes('+') && !query.includes("''")
+  const hasStringConcat = query.includes("'") && query.includes('+') && !query.includes("''")
 
   expect(hasDollarParams).toBe(true)
   expect(hasStringConcat).toBe(false)
@@ -290,8 +280,7 @@ export function assertParameterizedQuery(query: string) {
  */
 export function assertTransactionIsolation(query: string) {
   // Should include SERIALIZABLE or REPEATABLE READ
-  const hasIsolation =
-    query.includes('SERIALIZABLE') || query.includes('REPEATABLE READ')
+  const hasIsolation = query.includes('SERIALIZABLE') || query.includes('REPEATABLE READ')
   expect(hasIsolation).toBe(true)
 }
 
@@ -306,13 +295,7 @@ export function assertSelectForUpdate(query: string) {
  * Assert structured logging fields
  */
 export function assertStructuredLog(logObject: any) {
-  const requiredFields = [
-    'timestamp',
-    'level',
-    'service',
-    'correlation_id',
-    'action',
-  ]
+  const requiredFields = ['timestamp', 'level', 'service', 'correlation_id', 'action']
 
   for (const field of requiredFields) {
     expect(logObject).toHaveProperty(field)

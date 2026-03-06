@@ -149,7 +149,7 @@ describe('PATCH /api/v1/attempts/:id/progress Integration', () => {
        RETURNING id`,
       [workspaceId, userId]
     )
-    const submittedAttemptId = submitRes.rows[0].id
+    const _submittedAttemptId = submitRes.rows[0].id
 
     // Mock response
     const response = {
@@ -174,7 +174,7 @@ describe('PATCH /api/v1/attempts/:id/progress Integration', () => {
        RETURNING id`,
       [workspaceId]
     )
-    const otherUserId = otherUserRes.rows[0].id
+    const _otherUserId = otherUserRes.rows[0].id
 
     // Mock unauthorized response
     const response = {
@@ -207,17 +207,13 @@ describe('PATCH /api/v1/attempts/:id/progress Integration', () => {
 
   // T051.6: Multiple Progress Updates Idempotent
   test('Multiple progress updates on same question idempotent', async () => {
-    const responses = [
+    const _responses = [
       { question_index: 1, user_response: { selected: 'B' } },
       { question_index: 1, user_response: { selected: 'B' } },
       { question_index: 1, user_response: { selected: 'B' } },
     ]
 
-    const savedAtTimes = [
-      '2024-01-01T12:00:01Z',
-      '2024-01-01T12:00:01Z',
-      '2024-01-01T12:00:01Z',
-    ]
+    const savedAtTimes = ['2024-01-01T12:00:01Z', '2024-01-01T12:00:01Z', '2024-01-01T12:00:01Z']
 
     // All should have same timestamp
     expect(new Set(savedAtTimes).size).toBe(1)

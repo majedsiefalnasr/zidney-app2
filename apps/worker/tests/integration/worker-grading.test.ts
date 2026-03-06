@@ -178,18 +178,17 @@ describe('Worker Grading Integration', () => {
       { status: 'COMPLETED', updated_at: '2024-01-01T12:00:15Z' },
     ]
 
-    expect(jobStates[0]!.status).toBe('PENDING')
-    expect(jobStates[1]!.status).toBe('PROCESSING')
-    expect(jobStates[2]!.status).toBe('COMPLETED')
+    expect(jobStates[0]?.status).toBe('PENDING')
+    expect(jobStates[1]?.status).toBe('PROCESSING')
+    expect(jobStates[2]?.status).toBe('COMPLETED')
   })
 
   // T054.5: Result Snapshot Persisted
   test('Result snapshot persisted to database', async () => {
     // Verify result can be queried
-    const result = await pool.query(
-      `SELECT result_snapshot FROM attempts WHERE id = $1`,
-      [attemptId]
-    )
+    const result = await pool.query(`SELECT result_snapshot FROM attempts WHERE id = $1`, [
+      attemptId,
+    ])
 
     if (result.rows.length > 0 && result.rows[0].result_snapshot) {
       expect(result.rows[0].result_snapshot).toBeDefined()
@@ -199,10 +198,7 @@ describe('Worker Grading Integration', () => {
 
   // T054.6: Attempt Status Updated to FINALIZED
   test('Attempt status updated to FINALIZED', async () => {
-    const result = await pool.query(
-      `SELECT status FROM attempts WHERE id = $1`,
-      [attemptId]
-    )
+    const result = await pool.query(`SELECT status FROM attempts WHERE id = $1`, [attemptId])
 
     // After grading, should be FINALIZED
     expect(['SUBMITTED', 'FINALIZED']).toContain(result.rows[0]?.status)
@@ -214,9 +210,7 @@ describe('Worker Grading Integration', () => {
     const dbQuerySpy = vi.fn()
 
     // Grader should not query exams table
-    expect(dbQuerySpy).not.toHaveBeenCalledWith(
-      expect.stringContaining('SELECT * FROM exams')
-    )
+    expect(dbQuerySpy).not.toHaveBeenCalledWith(expect.stringContaining('SELECT * FROM exams'))
   })
 
   // T054.8: Handles Missing Responses

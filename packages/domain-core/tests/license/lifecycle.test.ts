@@ -1,10 +1,6 @@
 import type { Pool } from 'pg'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
-import {
-  createLicense,
-  getLicenseById,
-  transitionLicenseState,
-} from '../../src/license/service'
+import { createLicense, getLicenseById, transitionLicenseState } from '../../src/license/service'
 import { MockDatabaseClient, testFixtures } from './fixtures'
 
 /**
@@ -30,9 +26,7 @@ describe('LicenseLicecycle Integration', () => {
   it('T042.1: End-to-end license creation workflow', async () => {
     const product_id = 'product-uuid'
 
-    mockDb.mockResult('from products where id = $1', [
-      testFixtures.makeProduct({ id: product_id }),
-    ])
+    mockDb.mockResult('from products where id = $1', [testFixtures.makeProduct({ id: product_id })])
 
     mockDb.mockResult('insert into licenses', [
       testFixtures.makeLicense({ workspace_slug, product_id }),
@@ -53,18 +47,13 @@ describe('LicenseLicecycle Integration', () => {
   it('T042.2: License state progression ACTIVE→SOFT_LOCKED→ARCHIVED', async () => {
     const license = testFixtures.makeLicense()
 
-    mockDb.mockResult('SELECT * FROM licenses WHERE id = $1 FOR UPDATE', [
-      license,
-    ])
+    mockDb.mockResult('SELECT * FROM licenses WHERE id = $1 FOR UPDATE', [license])
 
-    const transitionResult = await transitionLicenseState(
-      mockDb as unknown as Pool,
-      {
-        license_id: license.id,
-        target_state: 'SOFT_LOCKED',
-        reason: 'payment_failed',
-      }
-    )
+    const transitionResult = await transitionLicenseState(mockDb as unknown as Pool, {
+      license_id: license.id,
+      target_state: 'SOFT_LOCKED',
+      reason: 'payment_failed',
+    })
 
     expect(transitionResult.success).toBe(true)
     expect(transitionResult.previous_state).toBe('ACTIVE')
@@ -119,18 +108,13 @@ describe('LicenseLicecycle Integration', () => {
     expect(isExpired).toBe(true)
 
     // Auto-transition should occur
-    mockDb.mockResult('SELECT * FROM licenses WHERE id = $1 FOR UPDATE', [
-      expiredLicense,
-    ])
+    mockDb.mockResult('SELECT * FROM licenses WHERE id = $1 FOR UPDATE', [expiredLicense])
 
-    const transitionResult = await transitionLicenseState(
-      mockDb as unknown as Pool,
-      {
-        license_id: expiredLicense.id,
-        target_state: 'ARCHIVED',
-        reason: 'soft_lock_expired_auto_transition',
-      }
-    )
+    const transitionResult = await transitionLicenseState(mockDb as unknown as Pool, {
+      license_id: expiredLicense.id,
+      target_state: 'ARCHIVED',
+      reason: 'soft_lock_expired_auto_transition',
+    })
 
     expect(transitionResult.success).toBe(true)
   })

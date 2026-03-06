@@ -347,6 +347,55 @@ bun run arch:generate
 
 ---
 
+## Linting & Formatting
+
+Zidney uses **[Biome](https://biomejs.dev/)** as its unified linting and formatting tool, replacing ESLint and Prettier.
+
+### VS Code Setup
+
+Install the Biome extension for real-time linting and format-on-save:
+
+```
+code --install-extension biomejs.biome
+```
+
+### Commands
+
+Check linting (errors exit non-zero):
+
+```
+bun run lint
+```
+
+Auto-fix linting issues and apply safe transformations:
+
+```
+bun run lint:fix
+```
+
+Check formatting (exits non-zero if diffs exist):
+
+```
+bun run format:check
+```
+
+Apply formatting:
+
+```
+bun run format
+```
+
+### Configuration
+
+Biome is configured at the monorepo root in `biome.json`. Key rules enforced as errors:
+
+- `noConsole` — all `console.*` calls must use `@zidney/logger`
+- `noUnusedImports` — unused imports in TypeScript files
+- `noDebugger` — no debugger statements
+- `useConst` — prefer const over let where possible
+
+---
+
 ## Common Development Workflows
 
 ### Creating a Feature

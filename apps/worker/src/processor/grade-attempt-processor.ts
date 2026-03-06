@@ -1,13 +1,9 @@
 import { logger } from '@zidney/logger'
 import { dlqManager } from '../modules/dlq/dlq-manager'
 import { gradeAttempt } from '../modules/grading/grader'
-import { jobQueue, JobQueueEntry, JobResult } from '../queue/job-queue'
 import { retryHandler } from '../modules/retry/retry-handler'
-import {
-  GradeAttemptJob,
-  isGradeAttemptJob,
-  validateJob,
-} from '../types/job-schema'
+import { type JobQueueEntry, type JobResult, jobQueue } from '../queue/job-queue'
+import { type GradeAttemptJob, isGradeAttemptJob, validateJob } from '../types/job-schema'
 
 /**
  * T046: Job processor entry point
@@ -28,11 +24,7 @@ export class GradeAttemptProcessor {
   /**
    * Main processor loop
    */
-  async start(
-    workspaceId: string,
-    batchSize = 1,
-    pollIntervalMs = 1000
-  ): Promise<void> {
+  async start(workspaceId: string, batchSize = 1, pollIntervalMs = 1000): Promise<void> {
     if (this.isRunning) {
       logger.warn(`Job processor already running for workspace ${workspaceId}`)
       return
@@ -78,10 +70,7 @@ export class GradeAttemptProcessor {
   /**
    * Process a batch of jobs
    */
-  private async processBatch(
-    workspaceId: string,
-    batchSize: number
-  ): Promise<void> {
+  private async processBatch(workspaceId: string, batchSize: number): Promise<void> {
     if (this.processingBatch) {
       return // Prevent concurrent batches
     }
@@ -148,8 +137,7 @@ export class GradeAttemptProcessor {
         duration_ms: Date.now() - startTime,
       })
     } catch (error) {
-      const errorMessage =
-        error instanceof Error ? error.message : String(error)
+      const errorMessage = error instanceof Error ? error.message : String(error)
 
       logger.error(`Job processing error`, {
         job_id: job.job_id,
@@ -194,10 +182,7 @@ export class GradeAttemptProcessor {
   /**
    * Handle job error - retry or DLQ
    */
-  private async handleJobError(
-    job: JobQueueEntry,
-    error: Error
-  ): Promise<void> {
+  private async handleJobError(job: JobQueueEntry, error: Error): Promise<void> {
     if (job.retry_count < job.max_retries) {
       // Retry with exponential backoff
       const backoffMs = await retryHandler.calculateBackoff(job.retry_count)

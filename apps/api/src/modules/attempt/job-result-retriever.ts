@@ -23,10 +23,7 @@ export interface PollOptions {
 /**
  * Retrieve job result with basic polling
  */
-export async function getJobResult(
-  jobId: string,
-  _timeoutMs = 30000
-): Promise<unknown | null> {
+export async function getJobResult(jobId: string, _timeoutMs = 30000): Promise<unknown | null> {
   try {
     const result = await jobQueue.getResult(jobId)
 

@@ -17,7 +17,7 @@
 
 import * as fs from 'fs'
 import * as path from 'path'
-import { Pool, PoolClient } from 'pg'
+import type { Pool, PoolClient } from 'pg'
 
 /**
  * Migration File Interface
@@ -58,10 +58,7 @@ export class MigrationRunnerService {
   /**
    * Run all baseline migrations on tenant database
    */
-  async runBaseline(
-    pool: Pool,
-    usesDivisions: boolean = false
-  ): Promise<MigrationRunResult> {
+  async runBaseline(pool: Pool, usesDivisions: boolean = false): Promise<MigrationRunResult> {
     const startTime = Date.now()
     const client = await pool.connect()
 
@@ -87,20 +84,13 @@ export class MigrationRunnerService {
 
       try {
         for (const migration of migrations) {
-          const alreadyApplied = await this.checkApplied(
-            client,
-            migration.version
-          )
+          const alreadyApplied = await this.checkApplied(client, migration.version)
 
           if (alreadyApplied) {
-            this.logger?.logStep(
-              'migration-skip',
-              `Skipping already-applied migration`,
-              {
-                version: migration.version,
-                filename: migration.filename,
-              }
-            )
+            this.logger?.logStep('migration-skip', `Skipping already-applied migration`, {
+              version: migration.version,
+              filename: migration.filename,
+            })
             skippedCount++
             continue
           }
@@ -218,15 +208,11 @@ export class MigrationRunnerService {
   /**
    * Check if migration already applied
    */
-  private async checkApplied(
-    client: PoolClient,
-    version: string
-  ): Promise<boolean> {
+  private async checkApplied(client: PoolClient, version: string): Promise<boolean> {
     try {
-      const result = await client.query(
-        `SELECT 1 FROM schema_versions WHERE version = $1`,
-        [version]
-      )
+      const result = await client.query(`SELECT 1 FROM schema_versions WHERE version = $1`, [
+        version,
+      ])
       return result.rows.length > 0
     } catch {
       // schema_versions table might not exist yet (first migration)
@@ -246,8 +232,6 @@ export class MigrationRunnerService {
 /**
  * Factory to create migration runner
  */
-export function createMigrationRunnerService(
-  logger?: any
-): MigrationRunnerService {
+export function createMigrationRunnerService(logger?: any): MigrationRunnerService {
   return new MigrationRunnerService(undefined, logger)
 }

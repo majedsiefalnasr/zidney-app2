@@ -200,20 +200,11 @@ export interface APIResponse<T> {
  */
 
 // Create request payloads (omit auto-generated fields)
-export type CreateProductInput = Omit<
-  Product,
-  'id' | 'created_at' | 'updated_at'
->
+export type CreateProductInput = Omit<Product, 'id' | 'created_at' | 'updated_at'>
 
-export type CreateLicenseInput = Omit<
-  License,
-  'id' | 'created_at' | 'updated_at'
->
+export type CreateLicenseInput = Omit<License, 'id' | 'created_at' | 'updated_at'>
 
-export type CreateTenantRegistryInput = Omit<
-  TenantRegistry,
-  'id' | 'created_at' | 'updated_at'
->
+export type CreateTenantRegistryInput = Omit<TenantRegistry, 'id' | 'created_at' | 'updated_at'>
 
 export type CreateMMCUserInput = Omit<MMCUser, 'id' | 'created_at'>
 
@@ -301,10 +292,7 @@ export function parseVersion(versionString: string): {
   return { major, minor, patch }
 }
 
-export function isVersionCompatible(
-  requested: string,
-  minimum: string
-): boolean {
+export function isVersionCompatible(requested: string, minimum: string): boolean {
   const r = parseVersion(requested)
   const m = parseVersion(minimum)
 
@@ -316,10 +304,7 @@ export function isVersionCompatible(
   return r.patch >= m.patch
 }
 
-export function isLicenseActive(
-  license: License,
-  now: Date = new Date()
-): boolean {
+export function isLicenseActive(license: License, now: Date = new Date()): boolean {
   if (license.deleted_at !== null && license.deleted_at < now) return false
   if (license.status === 'ARCHIVED') return false
   if (license.status === 'ACTIVE') return true

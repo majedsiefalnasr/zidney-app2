@@ -75,23 +75,17 @@ export interface MultiLanguageInputModalValidationChangedEvent {
 
 // ===== Form Component Events =====
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface DrawerFormLayoutSubmitEvent {
-  // Payload varies by form
-}
+export type DrawerFormLayoutSubmitEvent = {}
 
 export interface DrawerFormLayoutCancelEvent {
   isDirty: boolean
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface ModalFormLayoutSubmitEvent {
-  // Payload varies by form
-}
+export type ModalFormLayoutSubmitEvent = {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface ConfirmDialogConfirmEvent {
-  // Confirmation triggered
-}
+export type ConfirmDialogConfirmEvent = {}
 
 // ===== Filter Component Events =====
 export interface QuickFilterDropdownQueryChangedEvent {
@@ -120,14 +114,10 @@ export interface PaginationBarPageSizeChangedEvent {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface EmptyStatePrimaryActionClickedEvent {
-  // Action triggered
-}
+export type EmptyStatePrimaryActionClickedEvent = {}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-object-type
-export interface EmptyStateSecondaryActionClickedEvent {
-  // Action triggered
-}
+export type EmptyStateSecondaryActionClickedEvent = {}
 
 // ===== Generic Event Payload =====
 export interface BaseEventPayload {
@@ -141,9 +131,10 @@ export interface ErrorEventPayload extends BaseEventPayload {
 }
 
 // Event emitter type-safe wrapper
-export type EmitFn<T extends { [key: string]: any[] }> = {
-  <K extends keyof T>(event: K, ...args: T[K]): void
-}
+export type EmitFn<T extends { [key: string]: any[] }> = <K extends keyof T>(
+  event: K,
+  ...args: T[K]
+) => void
 
 // Common emit signatures
 export interface ComponentEmitsMap {
@@ -159,9 +150,7 @@ export interface ComponentEmitsMap {
   'column-visibility-changed': [event: DataTableColumnVisibilityChangedEvent]
   'filters-changed': [event: AdvancedFilterBuilderFiltersChangedEvent]
   'filter-overflow': [event: AdvancedFilterBuilderFilterOverflowEvent]
-  'storage-fallback-triggered': [
-    event: AdvancedFilterBuilderStorageFallbackTriggeredEvent,
-  ]
+  'storage-fallback-triggered': [event: AdvancedFilterBuilderStorageFallbackTriggeredEvent]
   'serialization-error': [event: AdvancedFilterBuilderSerializationErrorEvent]
   save: [event: MultiLanguageInputModalSaveEvent]
   cancel: []

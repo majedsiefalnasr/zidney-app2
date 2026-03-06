@@ -10,7 +10,7 @@
 
 import { createLogger } from '@zidney/logger'
 import type { Context, MiddlewareHandler, Next } from 'hono'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 const logger = createLogger('rate-limiter-upgrade')
 

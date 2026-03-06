@@ -38,20 +38,11 @@
  *
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  */
-import { useBackofficeAuthStore } from '@/core/state/auth.store'
-import { useBackofficeWorkspaceStore } from '@/core/state/workspace.store'
-import {
-  Avatar,
-  AvatarFallback,
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-  TopBar,
-} from '@zidney/ui-system'
+
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
+import { useBackofficeAuthStore } from '@/core/state/auth.store'
+import { useBackofficeWorkspaceStore } from '@/core/state/workspace.store'
 
 interface AppHeaderProps {
   showWorkspace?: boolean

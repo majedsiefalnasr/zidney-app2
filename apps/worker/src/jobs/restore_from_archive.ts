@@ -29,10 +29,7 @@ export async function restoreFromArchiveJob(payload: any, jobId: string) {
     // 6. Validate row counts
     // 7. UPDATE licenses SET status='ACTIVE'
 
-    logger.info(
-      { job_id: jobId, license_id, action: 'restore_completed' },
-      'Restore job completed'
-    )
+    logger.info({ job_id: jobId, license_id, action: 'restore_completed' }, 'Restore job completed')
 
     return {
       success: true,

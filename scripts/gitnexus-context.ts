@@ -1,10 +1,7 @@
-import { existsSync, readFileSync } from 'fs'
-import { resolve } from 'path'
+import { existsSync, readFileSync } from 'node:fs'
+import { resolve } from 'node:path'
 
-const BRAIN_PATH = resolve(
-  process.cwd(),
-  'docs/ai/context/ai-architecture-brain.json'
-)
+const BRAIN_PATH = resolve(process.cwd(), 'docs/ai/context/ai-architecture-brain.json')
 
 function loadBrain() {
   if (!existsSync(BRAIN_PATH)) {
@@ -42,7 +39,7 @@ function main() {
     }
   }
 
-  if (brain.hotspots && brain.hotspots.length) {
+  if (brain.hotspots?.length) {
     printHeader('Hotspot Modules')
     for (const h of brain.hotspots) {
       console.log(`- ${h.module} (score: ${h.score})`)
@@ -63,7 +60,7 @@ function main() {
     }
   }
 
-  if (brain.architectureDrift && brain.architectureDrift.length) {
+  if (brain.architectureDrift?.length) {
     printHeader('Architecture Drift')
     for (const d of brain.architectureDrift) {
       console.log(`- ${d}`)

@@ -174,8 +174,8 @@
  * ✓ 403 access-denied state handled
  */
 
-import { fetch } from '@/core/api/client'
 import { computed, onMounted, ref } from 'vue'
+import { fetch } from '@/core/api/client'
 import { usePermission } from '../../composables/usePermission'
 
 type Role = {
@@ -206,13 +206,11 @@ const togglingId = ref<string | null>(null)
 const deletingId = ref<string | null>(null)
 
 /** Display-only guards — server enforces actual access */
-const canCreate = computed(() => can('settings', 'create'))
-const canEdit = computed(() => can('settings', 'edit'))
-const canDelete = computed(() => can('settings', 'delete'))
+const _canCreate = computed(() => can('settings', 'create'))
+const _canEdit = computed(() => can('settings', 'edit'))
+const _canDelete = computed(() => can('settings', 'delete'))
 
-const totalPages = computed(() =>
-  Math.max(1, Math.ceil(total.value / PAGE_SIZE))
-)
+const totalPages = computed(() => Math.max(1, Math.ceil(total.value / PAGE_SIZE)))
 
 async function loadRoles(): Promise<void> {
   loading.value = true
@@ -248,20 +246,17 @@ async function loadRoles(): Promise<void> {
   }
 }
 
-async function toggleStatus(role: Role): Promise<void> {
+async function _toggleStatus(role: Role): Promise<void> {
   if (togglingId.value === role.id) return
   togglingId.value = role.id
   const newStatus = role.status === 'ACTIVE' ? 'DISABLED' : 'ACTIVE'
   try {
-    const response = await fetch(
-      `/api/v1/backoffice/workspace/roles/${role.id}`,
-      {
-        method: 'PATCH',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: newStatus }),
-      }
-    )
+    const response = await fetch(`/api/v1/backoffice/workspace/roles/${role.id}`, {
+      method: 'PATCH',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: newStatus }),
+    })
     if (response.ok) {
       role.status = newStatus
     }
@@ -270,17 +265,14 @@ async function toggleStatus(role: Role): Promise<void> {
   }
 }
 
-async function deleteRole(roleId: string): Promise<void> {
+async function _deleteRole(roleId: string): Promise<void> {
   if (!confirm('Are you sure you want to delete this role?')) return
   deletingId.value = roleId
   try {
-    const response = await fetch(
-      `/api/v1/backoffice/workspace/roles/${roleId}`,
-      {
-        method: 'DELETE',
-        credentials: 'include',
-      }
-    )
+    const response = await fetch(`/api/v1/backoffice/workspace/roles/${roleId}`, {
+      method: 'DELETE',
+      credentials: 'include',
+    })
     if (response.status === 204 || response.ok) {
       roles.value = roles.value.filter((r) => r.id !== roleId)
       total.value = Math.max(0, total.value - 1)
@@ -290,21 +282,21 @@ async function deleteRole(roleId: string): Promise<void> {
   }
 }
 
-function prev(): void {
+function _prev(): void {
   if (page.value > 1) {
     page.value--
     void loadRoles()
   }
 }
 
-function next(): void {
+function _next(): void {
   if (page.value < totalPages.value) {
     page.value++
     void loadRoles()
   }
 }
 
-function formatDate(iso: string): string {
+function _formatDate(iso: string): string {
   try {
     return new Date(iso).toLocaleDateString(undefined, {
       year: 'numeric',

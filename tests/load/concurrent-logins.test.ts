@@ -4,11 +4,7 @@
  */
 
 import { beforeEach, describe, expect, it } from 'vitest'
-import {
-  createTestClient,
-  createTestContext,
-  TestContext,
-} from '../test-helpers'
+import { createTestClient, createTestContext, type TestContext } from '../test-helpers'
 
 describe('T088: Concurrent Logins Load', () => {
   let ctx: TestContext
@@ -35,9 +31,7 @@ describe('T088: Concurrent Logins Load', () => {
     const rateLimitedCount = results.filter((r) => r.status === 429).length
     expect(rateLimitedCount).toBeGreaterThan(0)
 
-    const successCount = results.filter(
-      (r) => r.status === 200 || r.status === 401
-    ).length
+    const successCount = results.filter((r) => r.status === 200 || r.status === 401).length
     expect(successCount).toBeGreaterThan(0)
   })
 

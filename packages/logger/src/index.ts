@@ -64,14 +64,15 @@
  */
 
 // Main exports
+// Default export
 export {
   createChildLogger,
   createLogger,
   getLogger,
-  logger,
   Logger,
+  Logger as default,
+  logger,
 } from './logger'
-
 // Type exports
 export type {
   LogContext,
@@ -80,8 +81,4 @@ export type {
   LogLevel,
   OutputFormat,
 } from './types'
-
 export { FORBIDDEN_FIELDS, SENSITIVE_PATTERNS } from './types'
-
-// Default export
-export { Logger as default } from './logger'

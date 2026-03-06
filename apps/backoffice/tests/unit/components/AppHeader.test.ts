@@ -13,10 +13,11 @@
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  * Task: T041
  */
-import AppHeader from '@/components/layout/AppHeader.vue'
+
 import { createTestingPinia } from '@pinia/testing'
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import AppHeader from '@/components/layout/AppHeader.vue'
 
 const uiStubs = {
   TopBar: {
@@ -42,20 +43,13 @@ const uiStubs = {
 }
 
 function createWrapper(
-  opts: {
-    userName?: string | null
-    workspaceName?: string | null
-    showWorkspace?: boolean
-  } = {}
+  opts: { userName?: string | null; workspaceName?: string | null; showWorkspace?: boolean } = {}
 ) {
   const pinia = createTestingPinia({
     createSpy: vi.fn,
     initialState: {
       'backoffice-auth': {
-        user:
-          opts.userName !== null
-            ? { name: opts.userName ?? 'Test User' }
-            : null,
+        user: opts.userName !== null ? { name: opts.userName ?? 'Test User' } : null,
         isAuthenticated: opts.userName !== null,
       },
       'backoffice-workspace': {
@@ -113,9 +107,7 @@ describe('AppHeader — Backoffice', () => {
   })
 
   it('renders empty subtitle when workspace is null (no crash)', () => {
-    expect(() =>
-      createWrapper({ showWorkspace: true, workspaceName: null })
-    ).not.toThrow()
+    expect(() => createWrapper({ showWorkspace: true, workspaceName: null })).not.toThrow()
   })
 
   it('clicking "Sign out" item calls authStore.logout()', async () => {
@@ -124,7 +116,7 @@ describe('AppHeader — Backoffice', () => {
       .findAll('.stub-dropdown-item')
       .find((el) => el.text() === 'Sign out')
     expect(signOutButton).toBeDefined()
-    await signOutButton!.trigger('click')
+    await signOutButton?.trigger('click')
     const { useBackofficeAuthStore } = await import('@/core/state/auth.store')
     const authStore = useBackofficeAuthStore()
     expect(authStore.logout).toHaveBeenCalled()

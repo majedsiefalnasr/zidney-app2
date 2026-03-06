@@ -4,8 +4,9 @@
  *
  * Stage: STAGE_UI_06_STATE_MANAGEMENT
  */
-import { useMmcAppStore } from '@/core/state/app.store'
+
 import { describe, expect, it } from 'vitest'
+import { useMmcAppStore } from '@/core/state/app.store'
 import { useIsolatedPinia } from '../store-test-helper'
 
 describe('useMmcAppStore', () => {

@@ -103,6 +103,7 @@ async function loadAuditLogs() {
     // auditLogs.value = response.logs
     // hasMore.value = response.total_count > offset + limit
   } catch (err: any) {
+    // biome-ignore lint/suspicious/noConsole: frontend error boundary
     console.error('Failed to load audit logs:', err)
   } finally {
     loading.value = false
@@ -120,6 +121,7 @@ async function downloadAudit() {
     // Query all logs with current filters
     // Generate and download file
   } catch (err: any) {
+    // biome-ignore lint/suspicious/noConsole: frontend error boundary
     console.error('Failed to export audit logs:', err)
   }
 }

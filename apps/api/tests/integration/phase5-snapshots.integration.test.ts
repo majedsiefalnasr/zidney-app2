@@ -9,7 +9,7 @@
  * Stage: STAGE_02B_TENANT_BASELINE_SCHEMA
  */
 
-import { Pool, PoolClient } from 'pg'
+import { Pool, type PoolClient } from 'pg'
 import { afterAll, beforeAll, describe, expect, it } from 'vitest'
 
 const getConnectionString = () => {
@@ -201,15 +201,7 @@ describe('Phase 5: Snapshot Immutability Tests', () => {
           question_list_snapshot, started_at, created_by
         ) VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7)
         RETURNING question_list_snapshot`,
-        [
-          attemptId,
-          'MCQ',
-          examId,
-          userId,
-          JSON.stringify(questionsSnapshot),
-          new Date(),
-          userId,
-        ]
+        [attemptId, 'MCQ', examId, userId, JSON.stringify(questionsSnapshot), new Date(), userId]
       )
 
       expect(result.rows[0].question_list_snapshot).toHaveLength(3)
@@ -237,15 +229,7 @@ describe('Phase 5: Snapshot Immutability Tests', () => {
           id, exam_type, exam_id, user_id, configuration_snapshot,
           started_at, created_by
         ) VALUES ($1, $2, $3, $4, $5::jsonb, $6, $7)`,
-        [
-          attemptId,
-          'MCQ',
-          examId,
-          userId,
-          JSON.stringify(snapshot),
-          new Date(),
-          userId,
-        ]
+        [attemptId, 'MCQ', examId, userId, JSON.stringify(snapshot), new Date(), userId]
       )
 
       // Try to update snapshot (This should succeed via UPDATE, but demonstrates the pattern)
@@ -323,11 +307,9 @@ describe('Phase 5: Snapshot Immutability Tests', () => {
       const results = await Promise.all(promises)
 
       // Verify all snapshots are identical
-      const firstSnapshot = results[0]!.rows[0]!.configuration_snapshot
+      const firstSnapshot = results[0]?.rows[0]?.configuration_snapshot
       for (let i = 1; i < results.length; i++) {
-        expect(results[i]!.rows[0]!.configuration_snapshot).toEqual(
-          firstSnapshot
-        )
+        expect(results[i]?.rows[0]?.configuration_snapshot).toEqual(firstSnapshot)
       }
     })
 

@@ -29,8 +29,8 @@
  * Execution Time: ~5-10 seconds for 1320 records
  */
 
-import * as console from 'console'
-import { randomUUID } from 'crypto'
+import * as console from 'node:console'
+import { randomUUID } from 'node:crypto'
 import { Pool } from 'pg'
 
 // ============================================================================
@@ -43,9 +43,7 @@ const DATABASE_URL = process.env.DATABASE_URL
 
 // Safety check: prevent running in production
 if (ENVIRONMENT === 'production') {
-  console.error(
-    `❌ ABORT: seed-dashboard-test-data cannot run in production environment`
-  )
+  console.error(`❌ ABORT: seed-dashboard-test-data cannot run in production environment`)
   process.exit(1)
 }
 
@@ -116,9 +114,7 @@ async function seedDashboardTestData(): Promise<void> {
   const client = await pool.connect()
 
   try {
-    console.log(
-      `[${CORRELATION_ID}] Starting dashboard test data seeding... (ENV: ${ENVIRONMENT})`
-    )
+    console.log(`[${CORRELATION_ID}] Starting dashboard test data seeding... (ENV: ${ENVIRONMENT})`)
 
     // Check if test data already exists
     const existingLicenses = await client.query(
@@ -197,9 +193,7 @@ async function seedDashboardTestData(): Promise<void> {
       licenseCount++
 
       if ((i + 1) % 200 === 0) {
-        console.log(
-          `[${CORRELATION_ID}]   ~ Seeded ${i + 1} licenses so far...`
-        )
+        console.log(`[${CORRELATION_ID}]   ~ Seeded ${i + 1} licenses so far...`)
       }
     }
     console.log(
@@ -216,8 +210,7 @@ async function seedDashboardTestData(): Promise<void> {
     const sampleLicenses = licenseResults.rows
 
     for (let i = 0; i < 100; i++) {
-      const license =
-        sampleLicenses[i % sampleLicenses.length] || sampleLicenses[0]
+      const license = sampleLicenses[i % sampleLicenses.length] || sampleLicenses[0]
       const product = PRODUCT_NAMES[i % PRODUCT_NAMES.length]
       const country = COUNTRIES[i % COUNTRIES.length]
       const amountCents = Math.floor(Math.random() * 500000) + 50000 // $500 to $5500
@@ -242,9 +235,7 @@ async function seedDashboardTestData(): Promise<void> {
     console.log(`[${CORRELATION_ID}] ✓ Seeded 100 revenue records`)
 
     // Phase 4: Seed affiliates and affiliate usages (20 affiliates, 200 usages)
-    console.log(
-      `[${CORRELATION_ID}] [4/4] Seeding 20 affiliates with 200 usages...`
-    )
+    console.log(`[${CORRELATION_ID}] [4/4] Seeding 20 affiliates with 200 usages...`)
 
     const affiliateIds: string[] = []
 
@@ -253,8 +244,7 @@ async function seedDashboardTestData(): Promise<void> {
       affiliateIds.push(affiliateId)
 
       const affiliateName =
-        AFFILIATE_NAMES[i % AFFILIATE_NAMES.length] +
-        (i > 9 ? ` #${Math.floor(i / 10)}` : '')
+        AFFILIATE_NAMES[i % AFFILIATE_NAMES.length] + (i > 9 ? ` #${Math.floor(i / 10)}` : '')
 
       await client.query(
         `INSERT INTO affiliates (id, name, email, status, commission_rate, total_commission_cents)
@@ -292,29 +282,19 @@ async function seedDashboardTestData(): Promise<void> {
         ]
       )
     }
-    console.log(
-      `[${CORRELATION_ID}] ✓ Seeded 20 affiliates with 200 usage records`
-    )
+    console.log(`[${CORRELATION_ID}] ✓ Seeded 20 affiliates with 200 usage records`)
 
     // Summary
     console.log(`[${CORRELATION_ID}] `)
-    console.log(
-      `[${CORRELATION_ID}] ✅ SEEDING COMPLETE - Dashboard test data ready!`
-    )
+    console.log(`[${CORRELATION_ID}] ✅ SEEDING COMPLETE - Dashboard test data ready!`)
     console.log(`[${CORRELATION_ID}] `)
     console.log(`[${CORRELATION_ID}] Test Data Summary:`)
     console.log(`[${CORRELATION_ID}]   • 3 Products`)
-    console.log(
-      `[${CORRELATION_ID}]   • 1000 Licenses (ACTIVE/SOFT_LOCKED/ARCHIVED mix)`
-    )
-    console.log(
-      `[${CORRELATION_ID}]   • 100 Revenue Records (across 10 countries)`
-    )
+    console.log(`[${CORRELATION_ID}]   • 1000 Licenses (ACTIVE/SOFT_LOCKED/ARCHIVED mix)`)
+    console.log(`[${CORRELATION_ID}]   • 100 Revenue Records (across 10 countries)`)
     console.log(`[${CORRELATION_ID}]   • 20 Affiliates with 200 Usage Records`)
     console.log(`[${CORRELATION_ID}] `)
-    console.log(
-      `[${CORRELATION_ID}] Dashboard API is now ready for testing with realistic data.`
-    )
+    console.log(`[${CORRELATION_ID}] Dashboard API is now ready for testing with realistic data.`)
     console.log(`[${CORRELATION_ID}] Run: npm run dev:api`)
   } catch (error) {
     console.error(

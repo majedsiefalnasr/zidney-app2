@@ -69,12 +69,8 @@ describe('session clear wiring (backoffice)', () => {
   })
 
   function buildWiredSetup() {
-    const useAuthStore = defineAuthStore(
-      makeAuthService(),
-      tokenManager,
-      router,
-      LOGIN_ROUTE,
-      () => makeRefreshManager()
+    const useAuthStore = defineAuthStore(makeAuthService(), tokenManager, router, LOGIN_ROUTE, () =>
+      makeRefreshManager()
     )
     const authStore = useAuthStore(pinia)
     const getIsAuthenticated = () => authStore.isAuthenticated

@@ -18,11 +18,7 @@ describe('Area 4: Migration Discipline Validation', () => {
     // In a real implementation, this would scan all migration files
     // For now, we'll mock the verification
 
-    const destructivePatterns = [
-      /\bDROP\b/gi,
-      /\bTRUNCATE\b/gi,
-      /\bDELETE FROM\b/gi,
-    ]
+    const destructivePatterns = [/\bDROP\b/gi, /\bTRUNCATE\b/gi, /\bDELETE FROM\b/gi]
 
     const mockMigration = `
 -- UP
@@ -66,10 +62,7 @@ DROP TABLE users;
 
     // Simulate checking a migration
     const migrationContent = 'CREATE TABLE users (id UUID);'
-    const currentHash = crypto
-      .createHash('sha256')
-      .update(migrationContent)
-      .digest('hex')
+    const currentHash = crypto.createHash('sha256').update(migrationContent).digest('hex')
 
     // Verify hash format (should be hex string)
     expect(/^[a-f0-9]{64}$/.test(currentHash)).toBe(true)
@@ -81,17 +74,10 @@ DROP TABLE users;
    */
   it('Test 4.3: Detects duplicate migration IDs', async () => {
     // Mock migration file list
-    const mockFiles = [
-      '001-init.sql',
-      '002-users.sql',
-      '003-licenses.sql',
-      '004-attempts.sql',
-    ]
+    const mockFiles = ['001-init.sql', '002-users.sql', '003-licenses.sql', '004-attempts.sql']
 
     // Extract IDs
-    const ids = mockFiles
-      .map((file) => file.match(/^(\d+)/)?.[1])
-      .filter(Boolean)
+    const ids = mockFiles.map((file) => file.match(/^(\d+)/)?.[1]).filter(Boolean)
 
     // Check for duplicates
     const uniqueIds = new Set(ids)

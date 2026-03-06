@@ -65,14 +65,11 @@ describe('Load: Products - List Performance (T070)', () => {
     const sorted = Array.from({ length: 1000 }, (_, i) => ({
       id: `prod-${i}`,
       created_at: new Date(Date.now() - i * 1000),
-    })).sort(
-      (a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-    )
+    })).sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
     const duration = Date.now() - startTime
 
-    expect(sorted[0]!.created_at > sorted[999]!.created_at).toBe(true)
+    expect(sorted[0]?.created_at > sorted[999]?.created_at).toBe(true)
     expect(duration).toBeLessThan(100)
   })
 })

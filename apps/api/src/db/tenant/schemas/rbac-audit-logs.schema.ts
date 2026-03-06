@@ -20,15 +20,7 @@
  */
 
 import { sql } from 'drizzle-orm'
-import {
-  boolean,
-  index,
-  jsonb,
-  pgTable,
-  timestamp,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core'
+import { boolean, index, jsonb, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 
 // ---------------------------------------------------------------------------
 // RBAC_AUDIT_ACTIONS allowlist
@@ -93,9 +85,7 @@ export const rbacAuditLogs = pgTable(
      * Server-authoritative timestamp. Immutable after insert.
      * DEFAULT NOW() — client timestamps are never trusted per ADR-0006.
      */
-    timestamp: timestamp('timestamp', { withTimezone: true })
-      .notNull()
-      .default(sql`NOW()`),
+    timestamp: timestamp('timestamp', { withTimezone: true }).notNull().default(sql`NOW()`),
     /**
      * Database-level immutability flag.
      * Always true — signal to application layer that this row is final.

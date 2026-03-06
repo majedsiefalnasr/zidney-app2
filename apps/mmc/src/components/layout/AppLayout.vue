@@ -53,10 +53,11 @@
  *
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  */
+
+import { storeToRefs } from 'pinia'
 import { useBreakpoint } from '@/composables/useBreakpoint'
 import { navigationConfig } from '@/core/navigation/index'
 import { useMmcUiStore } from '@/core/state/ui.store'
-import { storeToRefs } from 'pinia'
 import AppHeader from './AppHeader.vue'
 import AppSidebar from './AppSidebar.vue'
 

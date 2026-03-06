@@ -98,7 +98,7 @@ describe('POST /submit Integration (Pessimistic Locking)', () => {
     const start = Date.now()
     try {
       await lockSpy()
-    } catch (e) {
+    } catch (_e) {
       // Expected
     }
     const elapsed = Date.now() - start
@@ -109,11 +109,11 @@ describe('POST /submit Integration (Pessimistic Locking)', () => {
 
   // T052.4: Idempotent - same submission twice = same job_id
   test('Idempotent: same submission twice returns same job_id', async () => {
-    const payload = {
+    const _payload = {
       reason: 'COMPLETED',
       all_responses: [{ question_index: 0, user_response: { selected: 'A' } }],
     }
-    const idempotencyKey = 'idempotency-key-123'
+    const _idempotencyKey = 'idempotency-key-123'
 
     // Mock responses
     const response1 = {
@@ -184,7 +184,7 @@ describe('POST /submit Integration (Pessimistic Locking)', () => {
   // T052.8: Cannot Submit Already Finalized Attempt
   test('Returns 409 if attempt already FINALIZED', async () => {
     // Create finalized attempt
-    const finalRes = await pool.query(
+    const _finalRes = await pool.query(
       `INSERT INTO attempts (workspace_id, user_id, exam_id, status)
        VALUES ($1, $2, 'exam-456', 'FINALIZED')
        RETURNING id`,
@@ -264,7 +264,7 @@ describe('POST /submit Integration (Pessimistic Locking)', () => {
   // T052.13: Lock Prevents Simultaneous Submissions
   test('Lock mechanism prevents multiple simultaneous submissions', async () => {
     // Simulate two concurrent submissions
-    const submissions = [
+    const _submissions = [
       { reason: 'COMPLETED', all_responses: [] },
       { reason: 'COMPLETED', all_responses: [] },
     ]
@@ -275,7 +275,7 @@ describe('POST /submit Integration (Pessimistic Locking)', () => {
       { status: 409 }, // Locked
     ]
 
-    expect(responses[0]!.status).toBe(202) // Success
-    expect(responses[1]!.status).toBe(409) // Conflict
+    expect(responses[0]?.status).toBe(202) // Success
+    expect(responses[1]?.status).toBe(409) // Conflict
   })
 })

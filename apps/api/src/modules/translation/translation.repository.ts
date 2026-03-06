@@ -285,9 +285,7 @@ export async function queryTranslationsBatch(
   entityType: string,
   entityIds: string[],
   languageCode: string
-): Promise<
-  Array<{ entity_id: string; field_name: string; translated_value: string }>
-> {
+): Promise<Array<{ entity_id: string; field_name: string; translated_value: string }>> {
   if (entityIds.length === 0) return []
 
   const placeholders = entityIds.map((_, i) => `$${i + 3}`).join(', ')

@@ -10,14 +10,10 @@
  */
 
 import * as productService from '@zidney/domain-core/products/productService'
-import { ProductStatus } from '@zidney/types/products/Product'
 import { Module } from '@zidney/types/enums/Module'
+import { ProductStatus } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import {
-  cleanupTestContext,
-  createTestContext,
-  TestContext,
-} from '../../test-helpers'
+import { cleanupTestContext, createTestContext, type TestContext } from '../../test-helpers'
 
 describe('T056: Product Status Change Integration Tests', () => {
   let ctx: TestContext
@@ -272,9 +268,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       expect(audits.rows.length).toBe(1)
       const audit = audits.rows[0]!
       // STATUS_CHANGE should not have version tracking
-      expect(
-        audit.previous_version === null || audit.new_version === null
-      ).toBe(true)
+      expect(audit.previous_version === null || audit.new_version === null).toBe(true)
     })
 
     it('should track all status transitions in audit log', async () => {
@@ -313,9 +307,7 @@ describe('T056: Product Status Change Integration Tests', () => {
       )
 
       expect(audits.rows.length).toBe(3)
-      expect(audits.rows.every((r: any) => r.action === 'STATUS_CHANGE')).toBe(
-        true
-      )
+      expect(audits.rows.every((r: any) => r.action === 'STATUS_CHANGE')).toBe(true)
     })
   })
 
@@ -393,10 +385,7 @@ describe('T056: Product Status Change Integration Tests', () => {
         ctx.userId
       )
 
-      const retrieved = await productService.getProductById(
-        dbClient,
-        product.id
-      )
+      const retrieved = await productService.getProductById(dbClient, product.id)
 
       expect(retrieved.status).toBe('INACTIVE')
     })

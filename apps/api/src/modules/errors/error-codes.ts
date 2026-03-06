@@ -215,17 +215,13 @@ export interface SchemaVersionErrorDetails {
   action: string
 }
 
-export function createSchemaVersionError(
-  tenantVersion: string,
-  appVersion: string
-): ErrorResponse {
+export function createSchemaVersionError(tenantVersion: string, appVersion: string): ErrorResponse {
   return {
     success: false,
     data: null,
     error: {
       code: ErrorCode.SCHEMA_VERSION_INCOMPATIBLE,
-      message:
-        'Database schema version incompatible with application. Please upgrade.',
+      message: 'Database schema version incompatible with application. Please upgrade.',
       details: {
         tenant_version: tenantVersion,
         app_version: appVersion,

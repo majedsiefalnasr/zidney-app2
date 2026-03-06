@@ -18,7 +18,7 @@
  * - Cache TTL: 5 minutes (refresh via cache middleware)
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 export interface SummaryQueryParams {
   correlation_id: string
@@ -29,7 +29,7 @@ export interface SummaryQueryParams {
  */
 export async function getLicenseCountsByStatus(
   pool: Pool,
-  correlationId: string
+  _correlationId: string
 ): Promise<{ status: string; count: number }[]> {
   const query = `
     SELECT status, COUNT(*) as count
@@ -55,10 +55,7 @@ export async function getLicenseCountsByStatus(
 /**
  * Get revenue for current month
  */
-export async function getRevenueCurrentMonth(
-  pool: Pool,
-  correlationId: string
-): Promise<number> {
+export async function getRevenueCurrentMonth(pool: Pool, _correlationId: string): Promise<number> {
   const query = `
     SELECT SUM(amount_cents) as total
     FROM revenue_records
@@ -73,10 +70,7 @@ export async function getRevenueCurrentMonth(
 /**
  * Get revenue for current year
  */
-export async function getRevenueCurrentYear(
-  pool: Pool,
-  correlationId: string
-): Promise<number> {
+export async function getRevenueCurrentYear(pool: Pool, _correlationId: string): Promise<number> {
   const query = `
     SELECT SUM(amount_cents) as total
     FROM revenue_records
@@ -90,10 +84,7 @@ export async function getRevenueCurrentYear(
 /**
  * Get revenue for last month
  */
-export async function getRevenueLastMonth(
-  pool: Pool,
-  correlationId: string
-): Promise<number> {
+export async function getRevenueLastMonth(pool: Pool, _correlationId: string): Promise<number> {
   const query = `
     SELECT SUM(amount_cents) as total
     FROM revenue_records
@@ -108,10 +99,7 @@ export async function getRevenueLastMonth(
 /**
  * Get total revenue across all time
  */
-export async function getRevenueTotal(
-  pool: Pool,
-  correlationId: string
-): Promise<number> {
+export async function getRevenueTotal(pool: Pool, _correlationId: string): Promise<number> {
   const query = `
     SELECT SUM(amount_cents) as total
     FROM revenue_records
@@ -126,11 +114,9 @@ export async function getRevenueTotal(
  */
 export async function getTopProducts(
   pool: Pool,
-  correlationId: string,
+  _correlationId: string,
   limit: number = 5
-): Promise<
-  { product_id: string; total_revenue: number; license_count: number }[]
-> {
+): Promise<{ product_id: string; total_revenue: number; license_count: number }[]> {
   const query = `
     SELECT
       r.product_id,

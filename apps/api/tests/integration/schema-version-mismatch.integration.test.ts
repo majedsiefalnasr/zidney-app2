@@ -34,15 +34,13 @@ describe('Schema Version Mismatch Handling', () => {
 
   it('T059-1: Product upgrade triggers migration detection', async () => {
     // Setup: Tenant at v1.0.0
-    await client.query(
-      `INSERT INTO ${schemaVersionTable} (version, checksum) VALUES ($1, $2)`,
-      ['1.0.0', 'abc123']
-    )
+    await client.query(`INSERT INTO ${schemaVersionTable} (version, checksum) VALUES ($1, $2)`, [
+      '1.0.0',
+      'abc123',
+    ])
 
     // Verify version
-    const versionResult = await client.query(
-      `SELECT version FROM ${schemaVersionTable}`
-    )
+    const versionResult = await client.query(`SELECT version FROM ${schemaVersionTable}`)
     expect(versionResult.rows[0].version).toBe('1.0.0')
 
     // Simulate product upgrade: license.product_version set to 1.1.0
@@ -52,10 +50,10 @@ describe('Schema Version Mismatch Handling', () => {
 
   it('T059-2: Version mismatch → 503 Migration in Progress response', async () => {
     // Setup: Tenant at v1.0.0
-    await client.query(
-      `INSERT INTO ${schemaVersionTable} (version, checksum) VALUES ($1, $2)`,
-      ['1.0.0', 'abc123']
-    )
+    await client.query(`INSERT INTO ${schemaVersionTable} (version, checksum) VALUES ($1, $2)`, [
+      '1.0.0',
+      'abc123',
+    ])
 
     // Application would:
     // 1. Compare tenant schema_version (1.0.0) vs license.product_version (1.1.0)
@@ -91,18 +89,16 @@ describe('Schema Version Mismatch Handling', () => {
     expect(updated.rows[0].version).toBe('1.1.0')
 
     // Verify final state
-    const final = await client.query(
-      `SELECT version FROM ${schemaVersionTable}`
-    )
+    const final = await client.query(`SELECT version FROM ${schemaVersionTable}`)
     expect(final.rows[0].version).toBe('1.1.0')
   })
 
   it('T059-4: Concurrent upgrade attempts on same workspace → only one succeeds', async () => {
     // Setup: v1.0.0
-    await client.query(
-      `INSERT INTO ${schemaVersionTable} (version, checksum) VALUES ($1, $2)`,
-      ['1.0.0', 'initial']
-    )
+    await client.query(`INSERT INTO ${schemaVersionTable} (version, checksum) VALUES ($1, $2)`, [
+      '1.0.0',
+      'initial',
+    ])
 
     // Simulate two concurrent update attempts
     const attempt1 = (async () => {
@@ -123,15 +119,14 @@ describe('Schema Version Mismatch Handling', () => {
   it('T059-5: Version validation middleware flow', async () => {
     // This test validates the middleware decision logic
     // Setup: Tenant schema v1.0.0
-    await client.query(
-      `INSERT INTO ${schemaVersionTable} (version, checksum) VALUES ($1, $2)`,
-      ['1.0.0', 'tenant_v1']
-    )
+    await client.query(`INSERT INTO ${schemaVersionTable} (version, checksum) VALUES ($1, $2)`, [
+      '1.0.0',
+      'tenant_v1',
+    ])
 
     // Scenario 1: Version match (proceed)
-    const tenantVersion = (
-      await client.query(`SELECT version FROM ${schemaVersionTable}`)
-    ).rows[0].version
+    const tenantVersion = (await client.query(`SELECT version FROM ${schemaVersionTable}`)).rows[0]
+      .version
     const licenseVersion = '1.0.0'
     expect(tenantVersion).toBe(licenseVersion)
     // Middleware would return: 200 OK, PROCEED

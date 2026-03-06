@@ -11,7 +11,7 @@
 
 import { createLogger } from '@zidney/logger'
 import type { Context, MiddlewareHandler, Next } from 'hono'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 const logger = createLogger('tenant-resolver')
 
@@ -186,8 +186,7 @@ export class TenantResolver {
               data: null,
               error: {
                 code: 'WS_002',
-                message:
-                  'Workspace is still provisioning, please try again later',
+                message: 'Workspace is still provisioning, please try again later',
               },
             },
             503
@@ -205,10 +204,7 @@ export class TenantResolver {
         } as TenantContext)
 
         // Propagate or generate correlation ID
-        c.set(
-          'correlation_id',
-          c.req.header('x-correlation-id') || crypto.randomUUID()
-        )
+        c.set('correlation_id', c.req.header('x-correlation-id') || crypto.randomUUID())
 
         return next()
       } catch (error) {

@@ -177,9 +177,9 @@
  * ✓ All server errors normalized to safe messages
  */
 
-import { fetch } from '@/core/api/client'
 import { computed, onMounted, ref } from 'vue'
 import { useRoute } from 'vue-router'
+import { fetch } from '@/core/api/client'
 import { usePermission } from '../../composables/usePermission'
 
 type Role = {
@@ -206,7 +206,7 @@ const route = useRoute()
 const roleId = computed(() => route.params.id as string)
 
 const { can, fetchPermissions } = usePermission()
-const canEdit = computed(() => can('settings', 'edit'))
+const _canEdit = computed(() => can('settings', 'edit'))
 
 const role = ref<Role | null>(null)
 const permissions = ref<Record<string, PermissionFlags>>({})
@@ -219,15 +219,11 @@ const saving = ref(false)
 const saveSuccess = ref(false)
 const saveError = ref<string | null>(null)
 
-function getPermission(module: string, flag: keyof PermissionFlags): boolean {
+function _getPermission(module: string, flag: keyof PermissionFlags): boolean {
   return permissions.value[module]?.[flag] ?? false
 }
 
-function setPermission(
-  module: string,
-  flag: keyof PermissionFlags,
-  value: boolean
-): void {
+function _setPermission(module: string, flag: keyof PermissionFlags, value: boolean): void {
   if (!permissions.value[module]) {
     permissions.value[module] = {
       can_view: false,
@@ -308,22 +304,19 @@ async function loadRoleAndPermissions(): Promise<void> {
   }
 }
 
-async function savePermissions(): Promise<void> {
+async function _savePermissions(): Promise<void> {
   if (saving.value) return
   saving.value = true
   saveSuccess.value = false
   saveError.value = null
 
   try {
-    const response = await fetch(
-      `/api/v1/backoffice/workspace/roles/${roleId.value}/permissions`,
-      {
-        method: 'PUT',
-        credentials: 'include',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ permissions: permissions.value }),
-      }
-    )
+    const response = await fetch(`/api/v1/backoffice/workspace/roles/${roleId.value}/permissions`, {
+      method: 'PUT',
+      credentials: 'include',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ permissions: permissions.value }),
+    })
     if (response.status === 403) {
       saveError.value = 'Access denied'
       return

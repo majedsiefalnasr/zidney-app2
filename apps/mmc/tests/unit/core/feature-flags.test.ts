@@ -11,7 +11,7 @@ describe('createFeatureFlags', () => {
   it('mutation throws on frozen flags', () => {
     const flags = createFeatureFlags({ enableDebugPanel: true })
     expect(() => {
-      ;(flags as Record<string, unknown>)['enableDebugPanel'] = false
+      ;(flags as Record<string, unknown>).enableDebugPanel = false
     }).toThrow()
     expect(flags.enableDebugPanel).toBe(true)
   })

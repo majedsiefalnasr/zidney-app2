@@ -5,7 +5,7 @@
  * Purpose: Pure validation functions reusable by API and Worker
  */
 
-import { Affiliate } from './types'
+import type { Affiliate } from './types'
 
 /**
  * Check if affiliate is in ACTIVE status
@@ -24,10 +24,7 @@ export function checkAffiliateActive(affiliate: Affiliate): boolean {
  * @param now - Current timestamp (defaults to Date.now())
  * @returns true if valid, false otherwise
  */
-export function checkTemporalValidity(
-  affiliate: Affiliate,
-  now: Date = new Date()
-): boolean {
+export function checkTemporalValidity(affiliate: Affiliate, now: Date = new Date()): boolean {
   const startTime = new Date(affiliate.start_date).getTime()
   const endTime = new Date(affiliate.end_date).getTime()
   const nowTime = now.getTime()
@@ -47,10 +44,7 @@ export function checkTemporalValidity(
  * @param usageLimit - Maximum usage limit (null = unlimited)
  * @returns true if usage acceptable, false if limit exceeded
  */
-export function checkGlobalUsageLimit(
-  usageCount: number,
-  usageLimit: number | null
-): boolean {
+export function checkGlobalUsageLimit(usageCount: number, usageLimit: number | null): boolean {
   if (usageLimit === null || usageLimit === undefined) {
     // No limit set - always acceptable
     return true
@@ -110,19 +104,12 @@ export function validateAffiliateEligibility(
   }
 
   // Check global usage limit
-  if (
-    !checkGlobalUsageLimit(affiliate.usage_count, affiliate.usage_limit_total)
-  ) {
+  if (!checkGlobalUsageLimit(affiliate.usage_count, affiliate.usage_limit_total)) {
     return { valid: false, failureReason: 'AFFILIATE_USAGE_LIMIT_EXCEEDED' }
   }
 
   // Check per-client usage limit
-  if (
-    !checkPerClientUsageLimit(
-      clientUsageCount,
-      affiliate.usage_limit_per_client
-    )
-  ) {
+  if (!checkPerClientUsageLimit(clientUsageCount, affiliate.usage_limit_per_client)) {
     return {
       valid: false,
       failureReason: 'AFFILIATE_USAGE_LIMIT_PER_CLIENT_EXCEEDED',

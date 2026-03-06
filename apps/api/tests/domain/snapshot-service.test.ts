@@ -12,9 +12,9 @@ import {
   captureExamSnapshot,
   compareSnapshots,
 } from '@zidney/domain-core/attempts/snapshot-service'
-import { Pool, PoolClient } from 'pg'
-import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { createLogger } from '@zidney/logger'
+import { Pool, type PoolClient } from 'pg'
+import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 
 const logger = createLogger('SnapshotServiceTest')
 
@@ -27,8 +27,7 @@ const getConnectionString = () => {
   const password = process.env.DB_PASSWORD || 'change-me-in-production'
   const host = process.env.DB_HOST || 'localhost'
   const port = process.env.DB_PORT || '5432'
-  const database =
-    process.env.DB_NAME || process.env.DB_DATABASE || 'zidney_master'
+  const database = process.env.DB_NAME || process.env.DB_DATABASE || 'zidney_master'
 
   return `postgresql://${user}:${password}@${host}:${port}/${database}`
 }
@@ -109,10 +108,7 @@ describe('Snapshot Service Unit Tests (T037)', () => {
   })
 
   it('Capture snapshot returns config + questions + grading', async () => {
-    const snapshot = await captureExamSnapshot(
-      examId,
-      client as unknown as Pool
-    )
+    const snapshot = await captureExamSnapshot(examId, client as unknown as Pool)
 
     expect(snapshot.config).toBeDefined()
     expect(snapshot.questions).toBeDefined()
@@ -135,10 +131,7 @@ describe('Snapshot Service Unit Tests (T037)', () => {
   })
 
   it('Snapshot includes all required config fields', async () => {
-    const snapshot = await captureExamSnapshot(
-      examId,
-      client as unknown as Pool
-    )
+    const snapshot = await captureExamSnapshot(examId, client as unknown as Pool)
 
     expect(snapshot.config.exam_id).toBeDefined()
     expect(snapshot.config.exam_name).toBeDefined()
@@ -150,10 +143,7 @@ describe('Snapshot Service Unit Tests (T037)', () => {
   })
 
   it('Snapshot includes all required grading fields', async () => {
-    const snapshot = await captureExamSnapshot(
-      examId,
-      client as unknown as Pool
-    )
+    const snapshot = await captureExamSnapshot(examId, client as unknown as Pool)
 
     expect(snapshot.grading.passing_score).toBeDefined()
     expect(snapshot.grading.total_questions).toBeDefined()
@@ -163,10 +153,7 @@ describe('Snapshot Service Unit Tests (T037)', () => {
   })
 
   it('Snapshot questions have correct structure', async () => {
-    const snapshot = await captureExamSnapshot(
-      examId,
-      client as unknown as Pool
-    )
+    const snapshot = await captureExamSnapshot(examId, client as unknown as Pool)
 
     expect(snapshot.questions.length).toBeGreaterThan(0)
 
@@ -199,10 +186,7 @@ describe('Snapshot Service Unit Tests (T037)', () => {
 
   it('Capture snapshot fails for non-existent exam', async () => {
     await expect(
-      captureExamSnapshot(
-        '00000000-0000-0000-0000-000000000000',
-        client as unknown as Pool
-      )
+      captureExamSnapshot('00000000-0000-0000-0000-000000000000', client as unknown as Pool)
     ).rejects.toThrow('Exam not found')
   })
 })

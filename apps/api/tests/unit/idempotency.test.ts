@@ -33,13 +33,8 @@ class InMemoryRedis {
     return item.value
   }
 
-  async set(
-    key: string,
-    value: string,
-    options?: { EX?: number }
-  ): Promise<'OK'> {
-    const expiresAt =
-      options?.EX !== undefined ? Date.now() + options.EX * 1000 : null
+  async set(key: string, value: string, options?: { EX?: number }): Promise<'OK'> {
+    const expiresAt = options?.EX !== undefined ? Date.now() + options.EX * 1000 : null
     this.store.set(key, { value, expiresAt })
     return 'OK'
   }
@@ -91,9 +86,7 @@ describe('Idempotency (Triple-Layer)', () => {
 
   beforeEach(async () => {
     redis.clear()
-    await pool.query(
-      'TRUNCATE TABLE submission_idempotency_keys, idempotency_test_attempts'
-    )
+    await pool.query('TRUNCATE TABLE submission_idempotency_keys, idempotency_test_attempts')
   })
 
   // T047.1: Redis Cache Prevents Duplicate Processing
@@ -290,9 +283,7 @@ describe('Idempotency (Triple-Layer)', () => {
     const results = await Promise.allSettled(promises)
 
     // At least one should succeed
-    expect(
-      results.filter((r) => r.status === 'fulfilled').length
-    ).toBeGreaterThanOrEqual(1)
+    expect(results.filter((r) => r.status === 'fulfilled').length).toBeGreaterThanOrEqual(1)
   })
 
   // T047.9: Idempotency Key Format Validation

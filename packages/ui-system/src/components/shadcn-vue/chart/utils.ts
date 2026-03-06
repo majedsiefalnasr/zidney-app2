@@ -1,7 +1,7 @@
-import type { ChartConfig } from '.'
 import { isClient } from '@vueuse/core'
 import { useId } from 'reka-ui'
 import { h, render } from 'vue'
+import type { ChartConfig } from '.'
 
 // Simple cache using a Map to store serialized object keys
 const cache = new Map<string, string>()
@@ -15,16 +15,14 @@ interface Constructor<P = any> {
   __isFragment?: never
   __isTeleport?: never
   __isSuspense?: never
-  new (...args: any[]): {
+  new (
+    ...args: any[]
+  ): {
     $props: P
   }
 }
 
-export function componentToString<P>(
-  config: ChartConfig,
-  component: Constructor<P>,
-  props?: P
-) {
+export function componentToString<P>(config: ChartConfig, component: Constructor<P>, props?: P) {
   if (!isClient) return
 
   // This function will be called once during mount lifecycle

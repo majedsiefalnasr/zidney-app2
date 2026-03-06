@@ -25,11 +25,7 @@ describe('Affiliate Usage Reporting', () => {
 
   describe('T031: Unit tests for usage reporting', () => {
     it('should calculate aggregate totals', () => {
-      const usages = [
-        { baseAmount: 100.0 },
-        { baseAmount: 200.0 },
-        { baseAmount: 300.0 },
-      ]
+      const usages = [{ baseAmount: 100.0 }, { baseAmount: 200.0 }, { baseAmount: 300.0 }]
       const total = usages.reduce((sum, u) => sum + u.baseAmount, 0)
       expect(total).toBe(600.0)
     })

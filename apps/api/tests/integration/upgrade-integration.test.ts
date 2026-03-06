@@ -25,12 +25,7 @@ describe('SchemaUpgradeIntegration', () => {
       // 4. Migrations executed
       // 5. Version updated
 
-      const upgradeResult = await runUpgradeWorkflow(
-        masterDb,
-        tenantDb,
-        '1.0.0',
-        '1.1.0'
-      )
+      const upgradeResult = await runUpgradeWorkflow(masterDb, tenantDb, '1.0.0', '1.1.0')
 
       expect(upgradeResult.success).toBe(true)
       expect(upgradeResult.newVersion).toBe('1.1.0')
@@ -118,9 +113,7 @@ describe('SchemaUpgradeIntegration', () => {
 
       const response = await callBusinessLogic(masterDb, tenantDb)
       expect(response.statusCode).toBe(426)
-      expect((response as any).body?.error?.code).toBe(
-        'SCHEMA_VERSION_MISMATCH'
-      )
+      expect((response as any).body?.error?.code).toBe('SCHEMA_VERSION_MISMATCH')
     })
 
     it('allows request when tenant >= minimum_supported', async () => {
@@ -135,21 +128,12 @@ describe('SchemaUpgradeIntegration', () => {
 })
 
 // Helper functions (stubs)
-async function runUpgradeWorkflow(
-  masterDb: any,
-  tenantDb: any,
-  from: string,
-  to: string
-) {
+async function runUpgradeWorkflow(_masterDb: any, _tenantDb: any, _from: string, to: string) {
   // Simulated workflow
   return { success: true, newVersion: to }
 }
 
-async function attemptUpgrade(
-  masterDb: any,
-  licenseStatus: string,
-  version: string
-) {
+async function attemptUpgrade(_masterDb: any, licenseStatus: string, _version: string) {
   if (licenseStatus === 'SOFT_LOCKED') {
     return { status: 423 }
   }
@@ -159,26 +143,23 @@ async function attemptUpgrade(
   return { status: 202 }
 }
 
-async function submitUpgrade(masterDb: any, targetVersion: string) {
+async function submitUpgrade(_masterDb: any, _targetVersion: string) {
   // Simulated HTTP request
   return { success: true, data: { upgrade_id: 'uuid' } }
 }
 
-async function submitUpgradeWithRetry(masterDb: any, targetVersion: string) {
+async function submitUpgradeWithRetry(_masterDb: any, _targetVersion: string) {
   // Simulated workflow with retry
   return { success: true }
 }
 
-async function attemptUpgradeWithHeldLock(
-  masterDb: any,
-  lockHoldTimeMs: number
-) {
+async function attemptUpgradeWithHeldLock(_masterDb: any, _lockHoldTimeMs: number) {
   // Simulated scenario
   return { statusCode: 504 }
 }
 
 let businessLogicCallCount = 0
-async function callBusinessLogic(masterDb: any, tenantDb: any) {
+async function callBusinessLogic(_masterDb: any, _tenantDb: any) {
   businessLogicCallCount += 1
   if (businessLogicCallCount === 1) {
     return {

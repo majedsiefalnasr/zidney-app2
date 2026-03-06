@@ -20,9 +20,9 @@
  * ADRs: ADR-0001 (tenant isolation)
  */
 
-import { Pool } from 'pg'
-import { randomUUID } from 'crypto'
 import { logger } from '@zidney/logger'
+import { randomUUID } from 'crypto'
+import type { Pool } from 'pg'
 
 /**
  * Interface: DLQ Record
@@ -178,10 +178,7 @@ export async function stopDLQConsumer(): Promise<void> {
  * @param masterDb - Master database pool
  * @param record - DLQ record to process
  */
-async function processDLQRecord(
-  masterDb: Pool,
-  record: DLQRecord
-): Promise<void> {
+async function processDLQRecord(masterDb: Pool, record: DLQRecord): Promise<void> {
   logger.error(
     {
       service: 'dlq-consumer',
@@ -286,10 +283,7 @@ async function getDLQRecords(
  * @param masterDb - Master database pool
  * @param dlqId - DLQ record ID
  */
-async function markDLQRecordReviewed(
-  masterDb: Pool,
-  dlqId: string
-): Promise<void> {
+async function markDLQRecordReviewed(masterDb: Pool, dlqId: string): Promise<void> {
   await masterDb.query(
     `
     UPDATE failed_grading_jobs

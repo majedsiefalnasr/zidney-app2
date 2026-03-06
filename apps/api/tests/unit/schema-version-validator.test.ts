@@ -3,12 +3,7 @@
  * Tests schema-version-validator functions
  */
 
-import {
-  compareVersions,
-  isCompatible,
-  parseVersion,
-  validateUpgrade,
-} from '@zidney/validation'
+import { compareVersions, isCompatible, parseVersion, validateUpgrade } from '@zidney/validation'
 
 describe('SemVerValidator', () => {
   describe('parseVersion', () => {
@@ -73,9 +68,7 @@ describe('SemVerValidator', () => {
 
     it('rejects downgrade', () => {
       const result = validateUpgrade('1.1.0', '1.0.0', '1.0.0')
-      expect(result).toContain(
-        'Target version must be greater than current version'
-      )
+      expect(result).toContain('Target version must be greater than current version')
     })
 
     it('rejects target below minimum', () => {

@@ -25,16 +25,11 @@ const getMasterTestConnectionString = () => {
 
   const user = process.env.TEST_DB_USER || process.env.DB_USER || 'zidney_app'
   const password =
-    process.env.TEST_DB_PASSWORD ||
-    process.env.DB_PASSWORD ||
-    'change-me-in-production'
+    process.env.TEST_DB_PASSWORD || process.env.DB_PASSWORD || 'change-me-in-production'
   const host = process.env.TEST_DB_HOST || process.env.DB_HOST || 'localhost'
   const port = process.env.TEST_DB_PORT || process.env.DB_PORT || '5432'
   const database =
-    process.env.TEST_DB_NAME ||
-    process.env.DB_DATABASE ||
-    process.env.DB_NAME ||
-    'zidney_master'
+    process.env.TEST_DB_NAME || process.env.DB_DATABASE || process.env.DB_NAME || 'zidney_master'
 
   return `postgresql://${user}:${password}@${host}:${port}/${database}`
 }
@@ -45,8 +40,7 @@ const ensureLegacyMasterSchema = async (pool: Pool) => {
   } catch (error: unknown) {
     const pgError = error as { code?: string; constraint?: string }
     const isConcurrentCreateRace =
-      pgError.code === '23505' &&
-      pgError.constraint === 'pg_extension_name_index'
+      pgError.code === '23505' && pgError.constraint === 'pg_extension_name_index'
     if (!isConcurrentCreateRace) {
       throw error
     }
@@ -133,21 +127,15 @@ const ensureLegacyMasterSchema = async (pool: Pool) => {
     )
   `)
 
-  await pool.query(
-    `CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug)`
-  )
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug)`)
   await pool.query(
     `CREATE INDEX IF NOT EXISTS idx_licenses_workspace_slug ON licenses(workspace_slug)`
   )
-  await pool.query(
-    `CREATE INDEX IF NOT EXISTS idx_licenses_status ON licenses(status)`
-  )
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_licenses_status ON licenses(status)`)
   await pool.query(
     `CREATE INDEX IF NOT EXISTS idx_tenants_registry_workspace_slug ON tenants_registry(workspace_slug)`
   )
-  await pool.query(
-    `CREATE INDEX IF NOT EXISTS idx_mmc_users_email ON mmc_users(email)`
-  )
+  await pool.query(`CREATE INDEX IF NOT EXISTS idx_mmc_users_email ON mmc_users(email)`)
 
   await pool.query(`
     INSERT INTO products (id, name, slug, description, version, enabled_modules)

@@ -76,13 +76,8 @@ describe('Account Lockout', () => {
       return
     }
     const pool = getTenantPool(workspace.id)!
-    await pool.query(`DELETE FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`, [
-      user.id,
-    ])
-    await db.master.query(
-      `DELETE FROM ${LOCKOUT_WORKSPACES_TABLE} WHERE id = $1`,
-      [workspace.id]
-    )
+    await pool.query(`DELETE FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1`, [user.id])
+    await db.master.query(`DELETE FROM ${LOCKOUT_WORKSPACES_TABLE} WHERE id = $1`, [workspace.id])
   })
 
   beforeEach(async () => {
@@ -107,7 +102,7 @@ describe('Account Lockout', () => {
       [user.id]
     )
 
-    expect(before.rows[0]!.failed_login_count).toBe(0)
+    expect(before.rows[0]?.failed_login_count).toBe(0)
 
     // Simulate failed login
     await pool.query(
@@ -120,7 +115,7 @@ describe('Account Lockout', () => {
       [user.id]
     )
 
-    expect(after.rows[0]!.failed_login_count).toBe(1)
+    expect(after.rows[0]?.failed_login_count).toBe(1)
   })
 
   it('should lock account after 5 failed attempts', async () => {
@@ -144,8 +139,8 @@ describe('Account Lockout', () => {
       [user.id]
     )
 
-    expect(result.rows[0]!.failed_login_count).toBe(5)
-    expect(result.rows[0]!.locked_until).not.toBeNull()
+    expect(result.rows[0]?.failed_login_count).toBe(5)
+    expect(result.rows[0]?.locked_until).not.toBeNull()
   })
 
   it('should reject login with 423 while locked', async () => {
@@ -156,7 +151,7 @@ describe('Account Lockout', () => {
       [user.id]
     )
 
-    const lockedUntil = result.rows[0]!.locked_until
+    const lockedUntil = result.rows[0]?.locked_until
 
     if (lockedUntil && lockedUntil > new Date()) {
       // Account is locked
@@ -182,8 +177,8 @@ describe('Account Lockout', () => {
       [user.id]
     )
 
-    expect(result.rows[0]!.failed_login_count).toBe(0)
-    expect(result.rows[0]!.locked_until).toBeNull()
+    expect(result.rows[0]?.failed_login_count).toBe(0)
+    expect(result.rows[0]?.locked_until).toBeNull()
   })
 
   it('should auto-unlock after timeout', async () => {
@@ -204,7 +199,7 @@ describe('Account Lockout', () => {
       [user.id]
     )
 
-    const lockedUntil = result.rows[0]!.locked_until
+    const lockedUntil = result.rows[0]?.locked_until
     const isExpired = lockedUntil && lockedUntil < new Date()
 
     expect(isExpired).toBe(true)
@@ -235,10 +230,9 @@ describe('Account Lockout', () => {
       await client2.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
 
       // Client 1 acquires lock first.
-      await client1.query(
-        `SELECT * FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1 FOR UPDATE`,
-        [user.id]
-      )
+      await client1.query(`SELECT * FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1 FOR UPDATE`, [
+        user.id,
+      ])
 
       // First completes while holding the lock.
       await client1.query(
@@ -248,10 +242,9 @@ describe('Account Lockout', () => {
       await client1.query('COMMIT')
 
       // Client 2 acquires lock after client 1 commits, then updates.
-      await client2.query(
-        `SELECT * FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1 FOR UPDATE`,
-        [user.id]
-      )
+      await client2.query(`SELECT * FROM ${LOCKOUT_USERS_TABLE} WHERE id = $1 FOR UPDATE`, [
+        user.id,
+      ])
       await client2.query(
         `UPDATE ${LOCKOUT_USERS_TABLE} SET failed_login_count = failed_login_count + 1 WHERE id = $1`,
         [user.id]
@@ -264,7 +257,7 @@ describe('Account Lockout', () => {
         [user.id]
       )
 
-      expect(result.rows[0]!.failed_login_count).toBe(2)
+      expect(result.rows[0]?.failed_login_count).toBe(2)
     } finally {
       try {
         await client1.query('ROLLBACK')

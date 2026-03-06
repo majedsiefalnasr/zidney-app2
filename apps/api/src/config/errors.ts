@@ -117,22 +117,17 @@ export const ErrorMessages: Record<ErrorCodeValue, string> = {
   [ErrorCodes.MALFORMED_JSON]: 'Request body must be valid JSON',
 
   // 401 - Unauthorized
-  [ErrorCodes.AUTHENTICATION_FAILED]:
-    'Authentication failed. Please check your credentials',
-  [ErrorCodes.AUTHENTICATION_REQUIRED]:
-    'Authentication is required for this resource',
+  [ErrorCodes.AUTHENTICATION_FAILED]: 'Authentication failed. Please check your credentials',
+  [ErrorCodes.AUTHENTICATION_REQUIRED]: 'Authentication is required for this resource',
   [ErrorCodes.INVALID_CREDENTIALS]: 'Invalid username or password',
 
   // 403 - Forbidden
-  [ErrorCodes.PERMISSION_DENIED]:
-    'You do not have permission to access this resource',
-  [ErrorCodes.INSUFFICIENT_PERMISSIONS]:
-    'Your role lacks the required permissions',
+  [ErrorCodes.PERMISSION_DENIED]: 'You do not have permission to access this resource',
+  [ErrorCodes.INSUFFICIENT_PERMISSIONS]: 'Your role lacks the required permissions',
   [ErrorCodes.ACCESS_DENIED]: 'Access denied',
 
   // 423 - Locked
-  [ErrorCodes.LICENSE_SOFT_LOCKED]:
-    'Workspace is temporarily locked. Please contact support',
+  [ErrorCodes.LICENSE_SOFT_LOCKED]: 'Workspace is temporarily locked. Please contact support',
   [ErrorCodes.WORKSPACE_LOCKED]: 'Workspace is currently locked',
 
   // 404 - Not Found
@@ -143,8 +138,7 @@ export const ErrorMessages: Record<ErrorCodeValue, string> = {
 
   // 409 - Conflict
   [ErrorCodes.CONFLICT_ERROR]: 'The request conflicts with the current state',
-  [ErrorCodes.VERSION_MISMATCH]:
-    'Version mismatch. Please refresh and try again',
+  [ErrorCodes.VERSION_MISMATCH]: 'Version mismatch. Please refresh and try again',
   [ErrorCodes.RESOURCE_ALREADY_EXISTS]: 'The resource already exists',
 
   // 429 - Too Many Requests
@@ -152,15 +146,12 @@ export const ErrorMessages: Record<ErrorCodeValue, string> = {
   [ErrorCodes.RATE_LIMIT_EXCEEDED]: 'Rate limit exceeded',
 
   // 500 - Internal Server Error
-  [ErrorCodes.INTERNAL_SERVER_ERROR]:
-    'An internal server error occurred. Please try again later',
+  [ErrorCodes.INTERNAL_SERVER_ERROR]: 'An internal server error occurred. Please try again later',
   [ErrorCodes.UNEXPECTED_ERROR]: 'An unexpected error occurred',
 
   // 503 - Service Unavailable
-  [ErrorCodes.SERVICE_UNAVAILABLE]:
-    'Service is currently unavailable. Please try again later',
-  [ErrorCodes.DATABASE_CONNECTION_ERROR]:
-    'Database connection error. Please try again later',
+  [ErrorCodes.SERVICE_UNAVAILABLE]: 'Service is currently unavailable. Please try again later',
+  [ErrorCodes.DATABASE_CONNECTION_ERROR]: 'Database connection error. Please try again later',
 }
 
 /**
@@ -173,11 +164,7 @@ export const ErrorMessages: Record<ErrorCodeValue, string> = {
  * @param context - Additional context data fields
  * @returns Error response object
  */
-export function createError(
-  code: ErrorCodeValue,
-  message?: string,
-  context?: Record<string, any>
-) {
+export function createError(code: ErrorCodeValue, message?: string, context?: Record<string, any>) {
   return {
     code,
     message: message || ErrorMessages[code],

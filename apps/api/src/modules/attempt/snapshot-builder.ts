@@ -22,7 +22,7 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import {
+import type {
   FlagsSnapshot,
   GradingConfigSnapshot,
   QuestionSnapshot,
@@ -56,9 +56,7 @@ interface InputQuestion {
  * @returns QuestionSnapshotContainer with validated metadata
  * @throws Error if questions invalid or incomplete
  */
-export function buildQuestionSnapshot(
-  questions: InputQuestion[]
-): QuestionSnapshotContainer {
+export function buildQuestionSnapshot(questions: InputQuestion[]): QuestionSnapshotContainer {
   if (!questions || questions.length === 0) {
     throw new Error('Question snapshot cannot be empty')
   }
@@ -98,21 +96,16 @@ export function buildQuestionSnapshot(
  * @param examConfig - Exam configuration object
  * @returns GradingConfigSnapshot
  */
-export function buildGradingConfigSnapshot(
-  examConfig: any
-): GradingConfigSnapshot {
+export function buildGradingConfigSnapshot(examConfig: any): GradingConfigSnapshot {
   if (!examConfig) {
     throw new Error('Exam config required for grading snapshot')
   }
 
   const snapshot: GradingConfigSnapshot = {
-    pass_score_percentage: validatePercentage(
-      examConfig.pass_score_percentage || 60
-    ),
+    pass_score_percentage: validatePercentage(examConfig.pass_score_percentage || 60),
     total_points: validatePoints(examConfig.total_points || 100),
     question_weights: examConfig.question_weights || {},
-    pass_fail_logic:
-      examConfig.pass_fail_logic || 'SUM_SCORE >= pass_score_percentage',
+    pass_fail_logic: examConfig.pass_fail_logic || 'SUM_SCORE >= pass_score_percentage',
     review_allowed: examConfig.review_allowed ?? true,
     hints_allowed: examConfig.hints_allowed ?? false,
     show_correct_answer: examConfig.show_correct_answer ?? false,
@@ -159,10 +152,7 @@ export function buildFlagsSnapshot(examConfig: any): FlagsSnapshot {
  * @param seed - Optional random seed for reproducibility
  * @returns Shuffled array of question IDs
  */
-export function shuffleQuestions(
-  questionIds: string[],
-  seed?: string
-): string[] {
+export function shuffleQuestions(questionIds: string[], seed?: string): string[] {
   if (!questionIds || questionIds.length === 0) {
     return []
   }
@@ -242,9 +232,7 @@ function validateQuestion(question: InputQuestion, index: number): void {
     throw new Error(`Question ${question.id} missing correct answer`)
   }
   if (!question.points || question.points <= 0) {
-    throw new Error(
-      `Question ${question.id} has invalid points ${question.points}`
-    )
+    throw new Error(`Question ${question.id} has invalid points ${question.points}`)
   }
 }
 

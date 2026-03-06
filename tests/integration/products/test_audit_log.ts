@@ -11,14 +11,10 @@
  */
 
 import * as productService from '@zidney/domain-core/products/productService'
-import { ProductStatus, AuditAction } from '@zidney/types/products/Product'
 import { Module } from '@zidney/types/enums/Module'
+import { AuditAction, ProductStatus } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import {
-  cleanupTestContext,
-  createTestContext,
-  TestContext,
-} from '../../test-helpers'
+import { cleanupTestContext, createTestContext, type TestContext } from '../../test-helpers'
 
 describe('T058: Audit Log Query Integration Tests', () => {
   let ctx: TestContext
@@ -51,11 +47,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         ctx.userId
       )
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {}
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {})
 
       expect(result.items).toBeDefined()
       expect(Array.isArray(result.items)).toBe(true)
@@ -74,15 +66,9 @@ describe('T058: Audit Log Query Integration Tests', () => {
         ctx.userId
       )
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {}
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {})
 
-      const createEntry = result.items.find(
-        (entry) => entry.action === AuditAction.CREATE
-      )
+      const createEntry = result.items.find((entry) => entry.action === AuditAction.CREATE)
       expect(createEntry).toBeDefined()
       expect(createEntry?.product_id).toBe(product.id)
     })
@@ -114,11 +100,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         ctx.userId
       )
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {}
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {})
 
       const actions = result.items.map((entry) => entry.action)
       expect(actions).toContain('CREATE')
@@ -152,57 +134,38 @@ describe('T058: Audit Log Query Integration Tests', () => {
     })
 
     it('should respect limit parameter', async () => {
-      const product = (await productService.listProducts(dbClient, {}))
-        .items[0]!
+      const product = (await productService.listProducts(dbClient, {})).items[0]!
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          limit: 3,
-        }
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {
+        limit: 3,
+      })
 
       expect(result.items.length).toBeLessThanOrEqual(3)
     })
 
     it('should respect offset parameter', async () => {
-      const product = (await productService.listProducts(dbClient, {}))
-        .items[0]!
+      const product = (await productService.listProducts(dbClient, {})).items[0]!
 
-      const page1 = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          limit: 2,
-          offset: 0,
-        }
-      )
+      const page1 = await productService.getProductAuditLog(dbClient, product.id, {
+        limit: 2,
+        offset: 0,
+      })
 
-      const page2 = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          limit: 2,
-          offset: 2,
-        }
-      )
+      const page2 = await productService.getProductAuditLog(dbClient, product.id, {
+        limit: 2,
+        offset: 2,
+      })
 
       expect(page1.items[0]!.id).not.toBe(page2.items[0]!.id)
     })
 
     it('should include pagination metadata', async () => {
-      const product = (await productService.listProducts(dbClient, {}))
-        .items[0]!
+      const product = (await productService.listProducts(dbClient, {})).items[0]!
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          limit: 5,
-          offset: 0,
-        }
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {
+        limit: 5,
+        offset: 0,
+      })
 
       expect(result.total).toBeDefined()
       expect(result.limit).toBeDefined()
@@ -238,59 +201,36 @@ describe('T058: Audit Log Query Integration Tests', () => {
     })
 
     it('should filter by action=CREATE', async () => {
-      const product = (await productService.listProducts(dbClient, {}))
-        .items[0]!
+      const product = (await productService.listProducts(dbClient, {})).items[0]!
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          action: AuditAction.CREATE,
-        }
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {
+        action: AuditAction.CREATE,
+      })
 
       expect(result.items.length).toBeGreaterThan(0)
-      expect(
-        result.items.every((entry) => entry.action === AuditAction.CREATE)
-      ).toBe(true)
+      expect(result.items.every((entry) => entry.action === AuditAction.CREATE)).toBe(true)
     })
 
     it('should filter by action=UPDATE', async () => {
-      const product = (await productService.listProducts(dbClient, {}))
-        .items[0]!
+      const product = (await productService.listProducts(dbClient, {})).items[0]!
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          action: AuditAction.UPDATE,
-        }
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {
+        action: AuditAction.UPDATE,
+      })
 
       expect(result.items.length).toBeGreaterThan(0)
-      expect(
-        result.items.every((entry) => entry.action === AuditAction.UPDATE)
-      ).toBe(true)
+      expect(result.items.every((entry) => entry.action === AuditAction.UPDATE)).toBe(true)
     })
 
     it('should filter by action=STATUS_CHANGE', async () => {
-      const product = (await productService.listProducts(dbClient, {}))
-        .items[0]!
+      const product = (await productService.listProducts(dbClient, {})).items[0]!
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          action: AuditAction.STATUS_CHANGE,
-        }
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {
+        action: AuditAction.STATUS_CHANGE,
+      })
 
       expect(result.items.length).toBeGreaterThan(0)
-      expect(
-        result.items.every(
-          (entry) => entry.action === AuditAction.STATUS_CHANGE
-        )
-      ).toBe(true)
+      expect(result.items.every((entry) => entry.action === AuditAction.STATUS_CHANGE)).toBe(true)
     })
   })
 
@@ -309,13 +249,9 @@ describe('T058: Audit Log Query Integration Tests', () => {
       const from = new Date()
       from.setDate(from.getDate() - 1)
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          from_date: from,
-        }
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {
+        from_date: from,
+      })
 
       expect(result.items.length).toBeGreaterThan(0)
     })
@@ -334,13 +270,9 @@ describe('T058: Audit Log Query Integration Tests', () => {
       const to = new Date()
       to.setDate(to.getDate() + 1)
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          to_date: to,
-        }
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {
+        to_date: to,
+      })
 
       expect(result.items.length).toBeGreaterThan(0)
     })
@@ -362,14 +294,10 @@ describe('T058: Audit Log Query Integration Tests', () => {
       const to = new Date()
       to.setDate(to.getDate() + 1)
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          from_date: from,
-          to_date: to,
-        }
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {
+        from_date: from,
+        to_date: to,
+      })
 
       expect(result.items.length).toBeGreaterThan(0)
     })
@@ -388,13 +316,9 @@ describe('T058: Audit Log Query Integration Tests', () => {
       const from = new Date()
       from.setDate(from.getDate() + 10)
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          from_date: from,
-        }
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {
+        from_date: from,
+      })
 
       expect(result.items.length).toBe(0)
     })
@@ -429,11 +353,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         ctx.userId
       )
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {}
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {})
 
       // Check sorting - should be descending (newest first)
       for (let i = 0; i < result.items.length - 1; i++) {
@@ -456,11 +376,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         ctx.userId
       )
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {}
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {})
 
       expect(result.items.length).toBeGreaterThan(0)
       const entry = result.items[0]!
@@ -483,11 +399,7 @@ describe('T058: Audit Log Query Integration Tests', () => {
         ctx.userId
       )
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {}
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {})
 
       const entry = result.items[0]!
       expect(entry.performed_by).toBe(ctx.userId)
@@ -511,13 +423,9 @@ describe('T058: Audit Log Query Integration Tests', () => {
         ctx.userId
       )
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          action: AuditAction.UPDATE,
-        }
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {
+        action: AuditAction.UPDATE,
+      })
 
       expect(result.items.length).toBeGreaterThan(0)
       const updateEntry = result.items[0]!
@@ -543,21 +451,14 @@ describe('T058: Audit Log Query Integration Tests', () => {
         ctx.userId
       )
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          action: AuditAction.STATUS_CHANGE,
-        }
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {
+        action: AuditAction.STATUS_CHANGE,
+      })
 
       expect(result.items.length).toBeGreaterThan(0)
       const statusEntry = result.items[0]!
       // STATUS_CHANGE should not have version info
-      expect(
-        statusEntry.previous_version === null ||
-          statusEntry.new_version === null
-      ).toBe(true)
+      expect(statusEntry.previous_version === null || statusEntry.new_version === null).toBe(true)
     })
   })
 

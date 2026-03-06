@@ -96,10 +96,7 @@ export function handleError(c: Context, error: Error | AppError): Response {
  *
  * Useful for manual error creation in handlers.
  */
-export function createErrorResponse(
-  code: string,
-  message?: string
-): ErrorResponse {
+export function createErrorResponse(code: string, message?: string): ErrorResponse {
   return {
     success: false,
     data: null,
@@ -123,10 +120,7 @@ export function mapToAppError(error: unknown): AppError {
 
     // Detect error type from message
     if (message.includes('duplicate')) {
-      return new AppError(
-        ErrorCodes.DUPLICATE_SLUG,
-        'Product slug already exists'
-      )
+      return new AppError(ErrorCodes.DUPLICATE_SLUG, 'Product slug already exists')
     }
 
     if (message.includes('not found') || message.includes('NOT_FOUND')) {

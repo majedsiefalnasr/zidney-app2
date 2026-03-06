@@ -19,60 +19,39 @@ describe('StateTransition', () => {
 
   // Valid transitions (6 tests)
   it('T035.1: ACTIVE → SOFT_LOCKED is valid', () => {
-    const result = stateMachine.isValidTransition(
-      LicenseStatus.ACTIVE,
-      LicenseStatus.SOFT_LOCKED
-    )
+    const result = stateMachine.isValidTransition(LicenseStatus.ACTIVE, LicenseStatus.SOFT_LOCKED)
     expect(result).toBe(true)
   })
 
   it('T035.2: SOFT_LOCKED → ACTIVE is valid (renewal)', () => {
-    const result = stateMachine.isValidTransition(
-      LicenseStatus.SOFT_LOCKED,
-      LicenseStatus.ACTIVE
-    )
+    const result = stateMachine.isValidTransition(LicenseStatus.SOFT_LOCKED, LicenseStatus.ACTIVE)
     expect(result).toBe(true)
   })
 
   it('T035.3: SOFT_LOCKED → ARCHIVED is valid (expiry)', () => {
-    const result = stateMachine.isValidTransition(
-      LicenseStatus.SOFT_LOCKED,
-      LicenseStatus.ARCHIVED
-    )
+    const result = stateMachine.isValidTransition(LicenseStatus.SOFT_LOCKED, LicenseStatus.ARCHIVED)
     expect(result).toBe(true)
   })
 
   it('T035.4: ARCHIVED → DELETED is valid', () => {
-    const result = stateMachine.isValidTransition(
-      LicenseStatus.ARCHIVED,
-      LicenseStatus.DELETED
-    )
+    const result = stateMachine.isValidTransition(LicenseStatus.ARCHIVED, LicenseStatus.DELETED)
     expect(result).toBe(true)
   })
 
   it('T035.5: ACTIVE → ARCHIVED is valid (direct archive)', () => {
-    const result = stateMachine.isValidTransition(
-      LicenseStatus.ACTIVE,
-      LicenseStatus.ARCHIVED
-    )
+    const result = stateMachine.isValidTransition(LicenseStatus.ACTIVE, LicenseStatus.ARCHIVED)
     expect(result).toBe(true)
   })
 
   it('T035.6: Any state → DELETED via archive is valid', () => {
-    const result = stateMachine.isValidTransition(
-      LicenseStatus.ACTIVE,
-      LicenseStatus.DELETED
-    )
+    const result = stateMachine.isValidTransition(LicenseStatus.ACTIVE, LicenseStatus.DELETED)
     // Direct transition not valid; must go through ARCHIVED first
     expect(result).toBe(false)
   })
 
   // Invalid transitions (10 tests)
   it('T035.7: ACTIVE → ACTIVE is invalid', () => {
-    const result = stateMachine.isValidTransition(
-      LicenseStatus.ACTIVE,
-      LicenseStatus.ACTIVE
-    )
+    const result = stateMachine.isValidTransition(LicenseStatus.ACTIVE, LicenseStatus.ACTIVE)
     expect(result).toBe(false)
   })
 
@@ -85,50 +64,32 @@ describe('StateTransition', () => {
   })
 
   it('T035.9: ARCHIVED → ACTIVE is valid (manual restore)', () => {
-    const result = stateMachine.isValidTransition(
-      LicenseStatus.ARCHIVED,
-      LicenseStatus.ACTIVE
-    )
+    const result = stateMachine.isValidTransition(LicenseStatus.ARCHIVED, LicenseStatus.ACTIVE)
     expect(result).toBe(true)
   })
 
   it('T035.10: DELETED → anything is invalid', () => {
-    const result = stateMachine.isValidTransition(
-      LicenseStatus.DELETED,
-      LicenseStatus.ACTIVE
-    )
+    const result = stateMachine.isValidTransition(LicenseStatus.DELETED, LicenseStatus.ACTIVE)
     expect(result).toBe(false)
   })
 
   it('T035.11: ARCHIVED → ARCHIVED is invalid', () => {
-    const result = stateMachine.isValidTransition(
-      LicenseStatus.ARCHIVED,
-      LicenseStatus.ARCHIVED
-    )
+    const result = stateMachine.isValidTransition(LicenseStatus.ARCHIVED, LicenseStatus.ARCHIVED)
     expect(result).toBe(false)
   })
 
   it('T035.12: ACTIVE → DELETED is invalid (must archive first)', () => {
-    const result = stateMachine.isValidTransition(
-      LicenseStatus.ACTIVE,
-      LicenseStatus.DELETED
-    )
+    const result = stateMachine.isValidTransition(LicenseStatus.ACTIVE, LicenseStatus.DELETED)
     expect(result).toBe(false)
   })
 
   it('T035.13: Invalid state returns false', () => {
-    const result = stateMachine.isValidTransition(
-      'INVALID' as any,
-      LicenseStatus.ACTIVE
-    )
+    const result = stateMachine.isValidTransition('INVALID' as any, LicenseStatus.ACTIVE)
     expect(result).toBe(false)
   })
 
   it('T035.14: Unrecognized target state returns false', () => {
-    const result = stateMachine.isValidTransition(
-      LicenseStatus.ACTIVE,
-      'UNKNOWN' as any
-    )
+    const result = stateMachine.isValidTransition(LicenseStatus.ACTIVE, 'UNKNOWN' as any)
     expect(result).toBe(false)
   })
 

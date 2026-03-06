@@ -26,8 +26,7 @@ export function serializeFilters(filters: Filter[]): string {
 
     return `${VERSION_PREFIX}${base64}`
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Unknown serialization error'
+    const message = error instanceof Error ? error.message : 'Unknown serialization error'
     throw new Error(`Cannot serialize filters: ${message}`)
   }
 }
@@ -48,9 +47,7 @@ export function deserializeFilters(encoded: string): Filter[] {
 
     // Validate structure
     if (!data.filters || !Array.isArray(data.filters)) {
-      throw new Error(
-        'Invalid filter structure: missing or invalid filters array'
-      )
+      throw new Error('Invalid filter structure: missing or invalid filters array')
     }
 
     // Map back to full Filter objects
@@ -68,8 +65,7 @@ export function deserializeFilters(encoded: string): Filter[] {
 
     return filters
   } catch (error) {
-    const message =
-      error instanceof Error ? error.message : 'Unknown deserialization error'
+    const message = error instanceof Error ? error.message : 'Unknown deserialization error'
     throw new Error(`Cannot deserialize filters: ${message}`)
   }
 }
@@ -165,8 +161,7 @@ export function getSerializationInfo(filters: Filter[]): {
     serializedSize,
     urlEncodedSize,
     isOverflow: checkUrlOverflow(filters),
-    compressionRatio:
-      rawSize > 0 ? ((serializedSize / rawSize).toFixed(2) as any) : 0,
+    compressionRatio: rawSize > 0 ? ((serializedSize / rawSize).toFixed(2) as any) : 0,
   }
 }
 
@@ -179,11 +174,7 @@ export function validateFilters(filters: any[]): boolean {
   return filters.every((f) => {
     if (!f || typeof f !== 'object') return false
     if (!f.fieldId || !f.operator) return false
-    if (
-      f.value === undefined &&
-      f.operator !== 'is_empty' &&
-      f.operator !== 'is_not_empty'
-    ) {
+    if (f.value === undefined && f.operator !== 'is_empty' && f.operator !== 'is_not_empty') {
       return false
     }
     return true
@@ -219,10 +210,7 @@ export function filterByColumnType(
 /**
  * Compare two filter arrays for equality
  */
-export function areFiltersEqual(
-  filters1: Filter[],
-  filters2: Filter[]
-): boolean {
+export function areFiltersEqual(filters1: Filter[], filters2: Filter[]): boolean {
   if (filters1.length !== filters2.length) return false
 
   return filters1.every((f1, index) => {

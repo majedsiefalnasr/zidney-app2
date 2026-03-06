@@ -25,10 +25,10 @@ import * as jwt from 'jsonwebtoken'
 import {
   AuthError,
   AuthErrorCode,
-  JwtPayload,
-  JwtPayloadBackoffice,
-  JwtPayloadFrontoffice,
-  JwtPayloadMmc,
+  type JwtPayload,
+  type JwtPayloadBackoffice,
+  type JwtPayloadFrontoffice,
+  type JwtPayloadMmc,
 } from './types'
 
 /**
@@ -104,14 +104,10 @@ export async function signMmcToken(user: {
     exp: Math.floor(Date.now() / 1000) + 15 * 60, // 15 minutes
   }
 
-  return jwt.sign(
-    payload as unknown as Record<string, unknown>,
-    config.secret,
-    {
-      algorithm: config.algorithm,
-      noTimestamp: false, // Let jwt lib manage iat/exp
-    }
-  )
+  return jwt.sign(payload as unknown as Record<string, unknown>, config.secret, {
+    algorithm: config.algorithm,
+    noTimestamp: false, // Let jwt lib manage iat/exp
+  })
 }
 
 /**
@@ -160,13 +156,9 @@ export async function signBackofficeToken(
     exp: Math.floor(Date.now() / 1000) + 15 * 60,
   }
 
-  return jwt.sign(
-    payload as unknown as Record<string, unknown>,
-    config.secret,
-    {
-      algorithm: config.algorithm,
-    }
-  )
+  return jwt.sign(payload as unknown as Record<string, unknown>, config.secret, {
+    algorithm: config.algorithm,
+  })
 }
 
 /**
@@ -217,13 +209,9 @@ export async function signFrontofficeToken(
     exp: Math.floor(Date.now() / 1000) + 15 * 60,
   }
 
-  return jwt.sign(
-    payload as unknown as Record<string, unknown>,
-    config.secret,
-    {
-      algorithm: config.algorithm,
-    }
-  )
+  return jwt.sign(payload as unknown as Record<string, unknown>, config.secret, {
+    algorithm: config.algorithm,
+  })
 }
 
 /**
@@ -243,11 +231,7 @@ export async function signFrontofficeToken(
  */
 export async function verifyAndDecodeToken(token: string): Promise<JwtPayload> {
   if (!token || typeof token !== 'string') {
-    throw new AuthError(
-      AuthErrorCode.TOKEN_INVALID,
-      'Token must be a non-empty string',
-      401
-    )
+    throw new AuthError(AuthErrorCode.TOKEN_INVALID, 'Token must be a non-empty string', 401)
   }
 
   try {
@@ -262,17 +246,9 @@ export async function verifyAndDecodeToken(token: string): Promise<JwtPayload> {
       throw new AuthError(AuthErrorCode.TOKEN_EXPIRED, 'Token has expired', 401)
     }
     if (error instanceof jwt.JsonWebTokenError) {
-      throw new AuthError(
-        AuthErrorCode.TOKEN_INVALID,
-        'Invalid token signature',
-        401
-      )
+      throw new AuthError(AuthErrorCode.TOKEN_INVALID, 'Invalid token signature', 401)
     }
-    throw new AuthError(
-      AuthErrorCode.TOKEN_INVALID,
-      'Token verification failed',
-      401
-    )
+    throw new AuthError(AuthErrorCode.TOKEN_INVALID, 'Token verification failed', 401)
   }
 }
 
@@ -293,11 +269,7 @@ export async function verifyAndDecodeToken(token: string): Promise<JwtPayload> {
  */
 export function extractTokenFromHeader(authHeader: string | undefined): string {
   if (!authHeader || typeof authHeader !== 'string') {
-    throw new AuthError(
-      AuthErrorCode.TOKEN_INVALID,
-      'Missing Authorization header',
-      401
-    )
+    throw new AuthError(AuthErrorCode.TOKEN_INVALID, 'Missing Authorization header', 401)
   }
 
   const parts = authHeader.split(' ')
@@ -336,18 +308,12 @@ export async function validateJwtClaims(
 ): Promise<boolean> {
   // Validate scope
   if (!['MMC', 'BACKOFFICE', 'FRONTOFFICE'].includes(payload.scope)) {
-    throw new AuthError(
-      AuthErrorCode.INVALID_SCOPE,
-      `Invalid token scope: ${payload.scope}`,
-      401
-    )
+    throw new AuthError(AuthErrorCode.INVALID_SCOPE, `Invalid token scope: ${payload.scope}`, 401)
   }
 
   // For tenant tokens, workspace_id is mandatory
   if (payload.scope !== 'MMC') {
-    const tenantPayload = payload as
-      | JwtPayloadBackoffice
-      | JwtPayloadFrontoffice
+    const tenantPayload = payload as JwtPayloadBackoffice | JwtPayloadFrontoffice
     if (!tenantPayload.workspace_id) {
       throw new AuthError(
         AuthErrorCode.MISSING_WORKSPACE_ID,
@@ -357,10 +323,7 @@ export async function validateJwtClaims(
     }
 
     // Workspace isolation: token workspace must match request context
-    if (
-      expectedWorkspaceId &&
-      tenantPayload.workspace_id !== expectedWorkspaceId
-    ) {
+    if (expectedWorkspaceId && tenantPayload.workspace_id !== expectedWorkspaceId) {
       throw new AuthError(
         AuthErrorCode.WORKSPACE_MISMATCH,
         'Token workspace does not match request workspace',
@@ -375,18 +338,11 @@ export async function validateJwtClaims(
 
   // Validate token_version (safety check)
   if (typeof payload.token_version !== 'number' || payload.token_version < 0) {
-    throw new AuthError(
-      AuthErrorCode.TOKEN_INVALID,
-      'Invalid token_version claim',
-      401
-    )
+    throw new AuthError(AuthErrorCode.TOKEN_INVALID, 'Invalid token_version claim', 401)
   }
 
   // Schema version validation (triggers upgrade flow if mismatch)
-  if (
-    expectedSchemaVersion &&
-    payload.schema_version !== expectedSchemaVersion
-  ) {
+  if (expectedSchemaVersion && payload.schema_version !== expectedSchemaVersion) {
     throw new AuthError(
       AuthErrorCode.SCHEMA_MISMATCH,
       'Token schema version does not match workspace schema version',

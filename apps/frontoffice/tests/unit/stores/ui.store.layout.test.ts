@@ -5,8 +5,9 @@
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  * Task: T036
  */
-import { useFrontofficeUiStore } from '@/core/state/ui.store'
+
 import { describe, expect, it } from 'vitest'
+import { useFrontofficeUiStore } from '@/core/state/ui.store'
 import { useIsolatedPinia } from '../store-test-helper'
 
 describe('useFrontofficeUiStore — layout state', () => {

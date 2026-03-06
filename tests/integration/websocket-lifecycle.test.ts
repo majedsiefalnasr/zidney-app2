@@ -8,7 +8,7 @@ import {
   cleanupTestContext,
   createTestContext,
   generateJWT,
-  TestContext,
+  type TestContext,
 } from '../test-helpers'
 
 describe('T085: WebSocket Lifecycle', () => {

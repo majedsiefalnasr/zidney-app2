@@ -31,7 +31,7 @@ interface RBACResult {
   requiredRoles?: UserRole[]
 }
 
-const roleHierarchy: Record<UserRole, number> = {
+const _roleHierarchy: Record<UserRole, number> = {
   student: 1,
   proctor: 2,
   admin: 3,
@@ -87,9 +87,7 @@ class RBACEnforcer {
   private auditLog: any[] = []
 
   checkPermission(ctx: RBACContext, allowedRoles: UserRole[]): RBACResult {
-    const userHasRequiredRole = ctx.roles.some((role) =>
-      allowedRoles.includes(role)
-    )
+    const userHasRequiredRole = ctx.roles.some((role) => allowedRoles.includes(role))
 
     if (!userHasRequiredRole) {
       this.auditLog.push({
@@ -144,8 +142,7 @@ describe('RBAC (Role-Based Access Control)', () => {
 
       const result = enforcer.checkPermission(
         ctx,
-        endpointPermissions['POST /attempt/{id}/submit']!
-          .allowed_roles as UserRole[]
+        endpointPermissions['POST /attempt/{id}/submit']?.allowed_roles as UserRole[]
       )
 
       expect(result.allowed).toBe(true)
@@ -162,8 +159,7 @@ describe('RBAC (Role-Based Access Control)', () => {
 
       const result = enforcer.checkPermission(
         ctx,
-        endpointPermissions['POST /attempt/{id}/submit']!
-          .allowed_roles as UserRole[]
+        endpointPermissions['POST /attempt/{id}/submit']?.allowed_roles as UserRole[]
       )
 
       expect(result.allowed).toBe(false)
@@ -181,8 +177,7 @@ describe('RBAC (Role-Based Access Control)', () => {
 
       const result = enforcer.checkPermission(
         ctx,
-        endpointPermissions['GET /admin/workspace/{id}/dlq']!
-          .allowed_roles as UserRole[]
+        endpointPermissions['GET /admin/workspace/{id}/dlq']?.allowed_roles as UserRole[]
       )
 
       expect(result.allowed).toBe(true)
@@ -199,8 +194,7 @@ describe('RBAC (Role-Based Access Control)', () => {
 
       const result = enforcer.checkPermission(
         ctx,
-        endpointPermissions['GET /admin/workspace/{id}/dlq']!
-          .allowed_roles as UserRole[]
+        endpointPermissions['GET /admin/workspace/{id}/dlq']?.allowed_roles as UserRole[]
       )
 
       expect(result.allowed).toBe(false)
@@ -217,8 +211,7 @@ describe('RBAC (Role-Based Access Control)', () => {
 
       const result = enforcer.checkPermission(
         ctx,
-        endpointPermissions['GET /attempt/{id}/status']!
-          .allowed_roles as UserRole[]
+        endpointPermissions['GET /attempt/{id}/status']?.allowed_roles as UserRole[]
       )
 
       expect(result.allowed).toBe(true)
@@ -230,9 +223,7 @@ describe('RBAC (Role-Based Access Control)', () => {
       const allowedRoles: UserRole[] = ['student', 'proctor', 'admin']
       const userRoles: UserRole[] = ['student']
 
-      const hasPermission = userRoles.some((role) =>
-        allowedRoles.includes(role)
-      )
+      const hasPermission = userRoles.some((role) => allowedRoles.includes(role))
 
       expect(hasPermission).toBe(true)
     })
@@ -241,9 +232,7 @@ describe('RBAC (Role-Based Access Control)', () => {
       const allowedRoles: UserRole[] = ['student', 'proctor']
       const userRoles: any[] = ['invalid_role']
 
-      const hasPermission = userRoles.some((role) =>
-        allowedRoles.includes(role)
-      )
+      const hasPermission = userRoles.some((role) => allowedRoles.includes(role))
 
       expect(hasPermission).toBe(false)
     })
@@ -252,9 +241,7 @@ describe('RBAC (Role-Based Access Control)', () => {
       const allowedRoles: UserRole[] = ['admin', 'org_admin']
       const userRoles: UserRole[] = ['student', 'proctor']
 
-      const hasPermission = userRoles.some((role) =>
-        allowedRoles.includes(role)
-      )
+      const hasPermission = userRoles.some((role) => allowedRoles.includes(role))
 
       expect(hasPermission).toBe(false)
     })
@@ -272,8 +259,7 @@ describe('RBAC (Role-Based Access Control)', () => {
 
       enforcer.checkPermission(
         ctx,
-        endpointPermissions['GET /admin/workspace/{id}/dlq']!
-          .allowed_roles as UserRole[]
+        endpointPermissions['GET /admin/workspace/{id}/dlq']?.allowed_roles as UserRole[]
       )
 
       const auditLog = enforcer.getAuditLog()
@@ -299,13 +285,12 @@ describe('RBAC (Role-Based Access Control)', () => {
 
       enforcer.checkPermission(
         ctx,
-        endpointPermissions['GET /admin/workspace/{id}/dlq']!
-          .allowed_roles as UserRole[]
+        endpointPermissions['GET /admin/workspace/{id}/dlq']?.allowed_roles as UserRole[]
       )
 
       const auditLog = enforcer.getAuditLog()
 
-      expect(auditLog[0]!.requiredRoles).toEqual(['admin', 'org_admin'])
+      expect(auditLog[0]?.requiredRoles).toEqual(['admin', 'org_admin'])
     })
 
     it('should include user roles in denial log', () => {
@@ -319,13 +304,12 @@ describe('RBAC (Role-Based Access Control)', () => {
 
       enforcer.checkPermission(
         ctx,
-        endpointPermissions['GET /admin/workspace/{id}/dlq']!
-          .allowed_roles as UserRole[]
+        endpointPermissions['GET /admin/workspace/{id}/dlq']?.allowed_roles as UserRole[]
       )
 
       const auditLog = enforcer.getAuditLog()
 
-      expect(auditLog[0]!.userRoles).toEqual(['student', 'proctor'])
+      expect(auditLog[0]?.userRoles).toEqual(['student', 'proctor'])
     })
 
     it('should not log successful permission checks', () => {
@@ -339,8 +323,7 @@ describe('RBAC (Role-Based Access Control)', () => {
 
       enforcer.checkPermission(
         ctx,
-        endpointPermissions['GET /admin/workspace/{id}/dlq']!
-          .allowed_roles as UserRole[]
+        endpointPermissions['GET /admin/workspace/{id}/dlq']?.allowed_roles as UserRole[]
       )
 
       const auditLog = enforcer.getAuditLog()
@@ -353,7 +336,7 @@ describe('RBAC (Role-Based Access Control)', () => {
     it('should respect role hierarchy for permission inheritance', () => {
       // Admin should implicitly have most proctor permissions
       const studentEndpoints = ['POST /attempt/{id}/submit']
-      const proctorEndpoints = [
+      const _proctorEndpoints = [
         'GET /attempt/{id}/status',
         'GET /attempt/{id}/result',
         'GET /ws/attempt/{id}',
@@ -364,9 +347,7 @@ describe('RBAC (Role-Based Access Control)', () => {
         'GET /admin/workspace/{id}/dlq',
       ]
 
-      expect(adminEndpoints.length).toBeGreaterThanOrEqual(
-        studentEndpoints.length
-      )
+      expect(adminEndpoints.length).toBeGreaterThanOrEqual(studentEndpoints.length)
     })
 
     it('should not allow lower roles to access higher role endpoints', () => {
@@ -380,8 +361,7 @@ describe('RBAC (Role-Based Access Control)', () => {
 
       const result = enforcer.checkPermission(
         studentCtx,
-        endpointPermissions['GET /admin/workspace/{id}/dlq']!
-          .allowed_roles as UserRole[]
+        endpointPermissions['GET /admin/workspace/{id}/dlq']?.allowed_roles as UserRole[]
       )
 
       expect(result.allowed).toBe(false)
@@ -400,8 +380,7 @@ describe('RBAC (Role-Based Access Control)', () => {
 
       const result = enforcer.checkPermission(
         ctx,
-        endpointPermissions['GET /admin/workspace/{id}/dlq']!
-          .allowed_roles as UserRole[]
+        endpointPermissions['GET /admin/workspace/{id}/dlq']?.allowed_roles as UserRole[]
       )
 
       expect(result.allowed).toBe(true)
@@ -418,8 +397,7 @@ describe('RBAC (Role-Based Access Control)', () => {
 
       const result = enforcer.checkPermission(
         ctx,
-        endpointPermissions['GET /admin/workspace/{id}/dlq']!
-          .allowed_roles as UserRole[]
+        endpointPermissions['GET /admin/workspace/{id}/dlq']?.allowed_roles as UserRole[]
       )
 
       expect(result.allowed).toBe(false)
@@ -428,13 +406,7 @@ describe('RBAC (Role-Based Access Control)', () => {
 
   describe('Public Endpoints', () => {
     it('should allow any role to access public endpoints', () => {
-      const publicAllowedRoles: UserRole[] = [
-        'student',
-        'proctor',
-        'admin',
-        'support',
-        'org_admin',
-      ]
+      const publicAllowedRoles: UserRole[] = ['student', 'proctor', 'admin', 'support', 'org_admin']
 
       const roles: UserRole[] = ['student']
       const hasAccess = roles.some((r) => publicAllowedRoles.includes(r))
@@ -443,13 +415,7 @@ describe('RBAC (Role-Based Access Control)', () => {
     })
 
     it('should allow unauthenticated users to login', () => {
-      const publicAllowedRoles: UserRole[] = [
-        'student',
-        'proctor',
-        'admin',
-        'support',
-        'org_admin',
-      ]
+      const publicAllowedRoles: UserRole[] = ['student', 'proctor', 'admin', 'support', 'org_admin']
 
       // Any role can login
       expect(publicAllowedRoles).toContain('student')
@@ -478,10 +444,8 @@ describe('RBAC (Role-Based Access Control)', () => {
       for (const ctx of contexts) {
         const allowedRoles =
           ctx.endpoint === 'GET /admin/workspace/{id}/dlq'
-            ? (endpointPermissions['GET /admin/workspace/{id}/dlq']!
-                .allowed_roles as UserRole[])
-            : (endpointPermissions['POST /attempt/{id}/submit']!
-                .allowed_roles as UserRole[])
+            ? (endpointPermissions['GET /admin/workspace/{id}/dlq']?.allowed_roles as UserRole[])
+            : (endpointPermissions['POST /attempt/{id}/submit']?.allowed_roles as UserRole[])
 
         enforcer.checkPermission(ctx, allowedRoles)
       }
@@ -489,8 +453,8 @@ describe('RBAC (Role-Based Access Control)', () => {
       const auditLog = enforcer.getAuditLog()
 
       expect(auditLog.length).toBe(2)
-      expect(auditLog[0]!.userId).toBe('user-13')
-      expect(auditLog[1]!.userId).toBe('user-14')
+      expect(auditLog[0]?.userId).toBe('user-13')
+      expect(auditLog[1]?.userId).toBe('user-14')
     })
 
     it('should timestamp all audit entries', () => {
@@ -504,14 +468,13 @@ describe('RBAC (Role-Based Access Control)', () => {
 
       enforcer.checkPermission(
         ctx,
-        endpointPermissions['GET /admin/workspace/{id}/dlq']!
-          .allowed_roles as UserRole[]
+        endpointPermissions['GET /admin/workspace/{id}/dlq']?.allowed_roles as UserRole[]
       )
 
       const auditLog = enforcer.getAuditLog()
 
-      expect(auditLog[0]!.timestamp).toBeDefined()
-      expect(new Date(auditLog[0]!.timestamp).getTime()).toBeGreaterThan(0)
+      expect(auditLog[0]?.timestamp).toBeDefined()
+      expect(new Date(auditLog[0]?.timestamp).getTime()).toBeGreaterThan(0)
     })
   })
 })

@@ -17,8 +17,8 @@
  * - No business logic leakage (pure validation)
  */
 
-import { Logger } from '@zidney/logger'
-import { Pool, PoolClient } from 'pg'
+import type { Logger } from '@zidney/logger'
+import type { Pool, PoolClient } from 'pg'
 
 /**
  * Validation result interface
@@ -233,9 +233,7 @@ export function validateQuestionInSnapshot(
     }
   }
 
-  const question = questionSnapshot.questions.find(
-    (q: any) => q.id === questionId
-  )
+  const question = questionSnapshot.questions.find((q: any) => q.id === questionId)
 
   if (!question) {
     return {
@@ -256,9 +254,7 @@ export function validateQuestionInSnapshot(
  * @param body - Request body
  * @returns ValidationResult<any>
  */
-export function validateCreateAttemptRequestFormat(
-  body: any
-): ValidationResult<any> {
+export function validateCreateAttemptRequestFormat(body: any): ValidationResult<any> {
   const errors: string[] = []
 
   if (!body.exam_id) {
@@ -266,9 +262,7 @@ export function validateCreateAttemptRequestFormat(
   } else if (typeof body.exam_id !== 'string') {
     errors.push('exam_id must be a string')
   } else if (
-    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(
-      body.exam_id
-    )
+    !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.exam_id)
   ) {
     errors.push('exam_id must be a valid UUID')
   }
@@ -300,17 +294,12 @@ export function validateCreateAttemptRequestFormat(
  * @param body - Request body
  * @returns ValidationResult<any>
  */
-export function validateProgressUpdateRequestFormat(
-  body: any
-): ValidationResult<any> {
+export function validateProgressUpdateRequestFormat(body: any): ValidationResult<any> {
   const errors: string[] = []
 
   if (!body.question_index && body.question_index !== 0) {
     errors.push('question_index is required')
-  } else if (
-    typeof body.question_index !== 'number' ||
-    body.question_index < 0
-  ) {
+  } else if (typeof body.question_index !== 'number' || body.question_index < 0) {
     errors.push('question_index must be a non-negative number')
   }
 

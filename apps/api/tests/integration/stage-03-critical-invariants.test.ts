@@ -313,10 +313,8 @@ describe('STAGE_03 Critical Invariants Validation - Specification', () => {
       const fixes = {
         FIX_1_schema_version_validation:
           'validate-jwt.ts updated to fetch and pass expectedSchemaVersion',
-        FIX_2_serializable_isolation:
-          'logout-all.ts refactored to use SERIALIZABLE + FOR UPDATE',
-        FIX_3_audit_immutability_trigger:
-          'prevent_audit_logs_update() trigger added to migration',
+        FIX_2_serializable_isolation: 'logout-all.ts refactored to use SERIALIZABLE + FOR UPDATE',
+        FIX_3_audit_immutability_trigger: 'prevent_audit_logs_update() trigger added to migration',
       }
 
       expect(Object.keys(fixes)).toHaveLength(3)

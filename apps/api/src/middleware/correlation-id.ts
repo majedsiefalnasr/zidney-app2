@@ -17,6 +17,7 @@
  * All logs must include correlationId from request context
  */
 
+import { logger } from '@zidney/logger'
 import type { Context, Next } from 'hono'
 import { v4 as uuidv4 } from 'uuid'
 import { MiddlewareStage, recordMiddlewareExecution } from './middleware-chain'
@@ -25,13 +26,9 @@ import { MiddlewareStage, recordMiddlewareExecution } from './middleware-chain'
  * Correlation ID middleware
  * Generates UUID v4 or extracts from X-Request-ID header
  */
-export async function correlationIdMiddleware(
-  c: Context,
-  next: Next
-): Promise<void> {
+export async function correlationIdMiddleware(c: Context, next: Next): Promise<void> {
   // T017: Generate or extract correlation ID
-  let correlationId =
-    c.req.header('x-request-id') || c.req.header('x-correlation-id')
+  let correlationId = c.req.header('x-request-id') || c.req.header('x-correlation-id')
 
   if (!correlationId) {
     // Generate new UUID v4 if not provided
@@ -55,9 +52,7 @@ export async function correlationIdMiddleware(
   c.header('x-correlation-id', correlationId)
 
   // Record execution in middleware chain
-  const recordExecution = recordMiddlewareExecution(
-    MiddlewareStage.CORRELATION_ID
-  )
+  const recordExecution = recordMiddlewareExecution(MiddlewareStage.CORRELATION_ID)
   await recordExecution(c, next)
 
   // Log after request completes
@@ -66,27 +61,22 @@ export async function correlationIdMiddleware(
   const path = c.req.path
   const statusCode = c.res.status
 
-  console.log(
-    JSON.stringify({
-      timestamp: new Date().toISOString(),
-      level: 'info',
-      service: 'api',
-      event: 'request_completed',
-      correlation_id: correlationId,
-      method,
-      path,
-      status_code: statusCode,
-      duration_ms: duration,
-    })
-  )
+  logger.info('request_completed', {
+    service: 'api',
+    event: 'request_completed',
+    correlation_id: correlationId,
+    method,
+    path,
+    status_code: statusCode,
+    duration_ms: duration,
+  })
 }
 
 /**
  * Validate UUID v4 format
  */
 function isValidUUID(uuid: string): boolean {
-  const uuidV4Regex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
+  const uuidV4Regex = /^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i
   return uuidV4Regex.test(uuid)
 }
 
@@ -105,13 +95,5 @@ export function logWithCorrelation(
   level: 'info' | 'warn' | 'error' | 'debug' = 'info',
   context?: any
 ): void {
-  console.log(
-    JSON.stringify({
-      timestamp: new Date().toISOString(),
-      level,
-      service: 'api',
-      message,
-      ...(context || {}),
-    })
-  )
+  logger[level](message, { service: 'api', ...(context || {}) })
 }

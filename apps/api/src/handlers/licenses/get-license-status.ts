@@ -12,19 +12,10 @@
  */
 
 import { createCorrelationId } from '@zidney/logger/correlation-context'
-import {
-  ProvisioningErrorCode,
-  getErrorDetails,
-} from '@zidney/types/errors/provisioning-errors'
-import {
-  LicenseStatus,
-  getLicenseHttpStatus,
-} from '@zidney/types/licenses/license-state'
-import { Context } from 'hono'
-import {
-  createErrorResponse,
-  createLicenseStatusResponse,
-} from './license-response'
+import { getErrorDetails, ProvisioningErrorCode } from '@zidney/types/errors/provisioning-errors'
+import { getLicenseHttpStatus, LicenseStatus } from '@zidney/types/licenses/license-state'
+import type { Context } from 'hono'
+import { createErrorResponse, createLicenseStatusResponse } from './license-response'
 
 /**
  * License Status Handler
@@ -38,10 +29,7 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
     const error = getErrorDetails(ProvisioningErrorCode.LICENSE_NOT_FOUND)
     c.status(error.httpStatus as any)
     return c.json(
-      createErrorResponse(
-        ProvisioningErrorCode.LICENSE_NOT_FOUND,
-        'License ID is required'
-      )
+      createErrorResponse(ProvisioningErrorCode.LICENSE_NOT_FOUND, 'License ID is required')
     )
   }
 
@@ -81,20 +69,14 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
       licenseData.organization_name,
       licenseData.status as LicenseStatus,
       (licenseData.created_at as Date).toISOString(),
-      licenseData.provisioned_at
-        ? (licenseData.provisioned_at as Date).toISOString()
-        : null,
-      licenseData.failed_at
-        ? (licenseData.failed_at as Date).toISOString()
-        : null,
+      licenseData.provisioned_at ? (licenseData.provisioned_at as Date).toISOString() : null,
+      licenseData.failed_at ? (licenseData.failed_at as Date).toISOString() : null,
       licenseData.last_provision_error,
       licenseData.retry_count
     )
 
     // Set appropriate HTTP status based on license state
-    const httpStatus = (getLicenseHttpStatus(
-      licenseData.status as LicenseStatus
-    ) || 200) as any
+    const httpStatus = (getLicenseHttpStatus(licenseData.status as LicenseStatus) || 200) as any
 
     // Add headers
     c.header('X-Correlation-ID', correlationId)
@@ -129,9 +111,7 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
 /**
  * Query license by ID from master database
  */
-async function queryLicenseById(
-  licenseId: string
-): Promise<Record<string, unknown> | null> {
+async function queryLicenseById(licenseId: string): Promise<Record<string, unknown> | null> {
   const db = require('../../db.ts').getDb()
 
   const result = await db.query(

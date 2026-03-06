@@ -332,8 +332,6 @@ describe('GET /backoffice/context', () => {
     expect(res.status).toBe(401)
     const body = await res.json()
     expect(body.success).toBe(false)
-    expect(['TOKEN_VERSION_MISMATCH', 'INVALID_TOKEN']).toContain(
-      body.error.code
-    )
+    expect(['TOKEN_VERSION_MISMATCH', 'INVALID_TOKEN']).toContain(body.error.code)
   })
 })

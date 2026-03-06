@@ -36,10 +36,7 @@ export class VersionValidator {
    * @param license_expected - License expected schema version (e.g., "1.0.0")
    * @returns true if compatible, false otherwise
    */
-  validateSchemaVersion(
-    tenant_version: string,
-    license_expected: string
-  ): boolean {
+  validateSchemaVersion(tenant_version: string, license_expected: string): boolean {
     const tenant = this.parseSemVer(tenant_version)
     const license = this.parseSemVer(license_expected)
 
@@ -69,10 +66,7 @@ export class VersionValidator {
    * @param runtime_version - Runtime product version (e.g., "1.8.2")
    * @returns true if compatible, false otherwise
    */
-  validateProductVersion(
-    license_version: string,
-    runtime_version: string
-  ): boolean {
+  validateProductVersion(license_version: string, runtime_version: string): boolean {
     const license = this.parseSemVer(license_version)
     const runtime = this.parseSemVer(runtime_version)
 
@@ -96,9 +90,7 @@ export class VersionValidator {
    * @param version - Version string
    * @returns { major, minor, patch } or null if invalid
    */
-  private parseSemVer(
-    version: string
-  ): { major: number; minor: number; patch: number } | null {
+  private parseSemVer(version: string): { major: number; minor: number; patch: number } | null {
     const match = version.match(/^(\d+)\.(\d+)\.(\d+)/)
     if (!match) {
       return null

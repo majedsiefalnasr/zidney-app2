@@ -9,7 +9,7 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 const logger = createLogger('SnapshotService')
 
@@ -56,10 +56,7 @@ export interface CapturedSnapshot {
  * - Question list with current order
  * - Grading configuration
  */
-export async function captureExamSnapshot(
-  examId: string,
-  pool: Pool
-): Promise<CapturedSnapshot> {
+export async function captureExamSnapshot(examId: string, pool: Pool): Promise<CapturedSnapshot> {
   // Get exam configuration
   const examResult = await pool.query(
     `SELECT id, name, duration_minutes, question_count, passing_score
@@ -129,10 +126,7 @@ export async function captureExamSnapshot(
 /**
  * Retrieve snapshot from attempt (read-only)
  */
-export async function getAttemptSnapshot(
-  attemptId: string,
-  pool: Pool
-): Promise<CapturedSnapshot> {
+export async function getAttemptSnapshot(attemptId: string, pool: Pool): Promise<CapturedSnapshot> {
   const result = await pool.query(
     `SELECT configuration_snapshot, question_list_snapshot, grading_config_snapshot
      FROM attempts WHERE id = $1`,
@@ -155,10 +149,7 @@ export async function getAttemptSnapshot(
 /**
  * Verify snapshot consistency (compare two snapshots)
  */
-export function compareSnapshots(
-  snap1: CapturedSnapshot,
-  snap2: CapturedSnapshot
-): boolean {
+export function compareSnapshots(snap1: CapturedSnapshot, snap2: CapturedSnapshot): boolean {
   return (
     JSON.stringify(snap1.config) === JSON.stringify(snap2.config) &&
     JSON.stringify(snap1.questions) === JSON.stringify(snap2.questions) &&

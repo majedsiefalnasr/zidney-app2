@@ -12,7 +12,7 @@
  * - Visibility timeout to detect stalled workers
  */
 
-import { JobQueueConfig } from '@zidney/types/jobs/provisioning-job'
+import type { JobQueueConfig } from '@zidney/types/jobs/provisioning-job'
 
 /**
  * Queue Configuration Factory
@@ -21,26 +21,13 @@ import { JobQueueConfig } from '@zidney/types/jobs/provisioning-job'
 export function createQueueConfig(): JobQueueConfig {
   const config: JobQueueConfig = {
     queueName: process.env.PROVISIONING_QUEUE_NAME || 'provisioning:jobs',
-    consumerGroup:
-      process.env.PROVISIONING_CONSUMER_GROUP || 'provisioning-worker',
+    consumerGroup: process.env.PROVISIONING_CONSUMER_GROUP || 'provisioning-worker',
     consumerName: `${process.env.PROVISIONING_CONSUMER_NAME || 'provisioning-consumer'}-${process.env.WORKER_ID || 'unknown'}`,
-    maxConcurrentJobs: parseInt(
-      process.env.PROVISIONING_MAX_CONCURRENT || '10',
-      10
-    ),
-    visibilityTimeout: parseInt(
-      process.env.PROVISIONING_VISIBILITY_TIMEOUT || '300',
-      10
-    ),
+    maxConcurrentJobs: parseInt(process.env.PROVISIONING_MAX_CONCURRENT || '10', 10),
+    visibilityTimeout: parseInt(process.env.PROVISIONING_VISIBILITY_TIMEOUT || '300', 10),
     lockTTL: parseInt(process.env.PROVISIONING_LOCK_TTL || '30', 10),
-    metricsInterval: parseInt(
-      process.env.PROVISIONING_METRICS_INTERVAL || '60',
-      10
-    ),
-    maxDeadLetterRetention: parseInt(
-      process.env.PROVISIONING_DLQ_RETENTION_HOURS || '504',
-      10
-    ),
+    metricsInterval: parseInt(process.env.PROVISIONING_METRICS_INTERVAL || '60', 10),
+    maxDeadLetterRetention: parseInt(process.env.PROVISIONING_DLQ_RETENTION_HOURS || '504', 10),
   }
 
   validateQueueConfig(config)
@@ -125,8 +112,7 @@ export const QUEUE_KEYS = {
    * @param idempotencyKey - Client-provided idempotency key
    * @returns Redis key for caching response
    */
-  idempotencyKey: (idempotencyKey: string) =>
-    `${QUEUE_NAMES.IDEMPOTENCY_PREFIX}${idempotencyKey}`,
+  idempotencyKey: (idempotencyKey: string) => `${QUEUE_NAMES.IDEMPOTENCY_PREFIX}${idempotencyKey}`,
 
   /**
    * Metrics counter key
@@ -203,8 +189,7 @@ export function calculateBackoffDelay(
   config: typeof RETRY_CONFIG = RETRY_CONFIG
 ): number {
   const exponentialDelay = Math.min(
-    config.INITIAL_DELAY_MS *
-      Math.pow(config.BACKOFF_MULTIPLIER, attemptNumber - 1),
+    config.INITIAL_DELAY_MS * config.BACKOFF_MULTIPLIER ** (attemptNumber - 1),
     config.MAX_DELAY_MS
   )
 
@@ -256,10 +241,8 @@ export const METRICS_CONFIG = {
 export const QUEUE_ENV_VARS = {
   REDIS_URL: process.env.REDIS_URL || 'redis://localhost:6379',
   MASTER_DB_URL: process.env.MASTER_DB_URL || 'postgresql://localhost/master',
-  PROVISIONING_QUEUE_NAME:
-    process.env.PROVISIONING_QUEUE_NAME || 'provisioning:jobs',
-  PROVISIONING_CONSUMER_GROUP:
-    process.env.PROVISIONING_CONSUMER_GROUP || 'provisioning-worker',
+  PROVISIONING_QUEUE_NAME: process.env.PROVISIONING_QUEUE_NAME || 'provisioning:jobs',
+  PROVISIONING_CONSUMER_GROUP: process.env.PROVISIONING_CONSUMER_GROUP || 'provisioning-worker',
   PROVISIONING_MAX_CONCURRENT: process.env.PROVISIONING_MAX_CONCURRENT || '10',
   PROVISIONING_LOCK_TTL: process.env.PROVISIONING_LOCK_TTL || '30',
   WORKER_ID: process.env.WORKER_ID || `worker-${Date.now()}`,

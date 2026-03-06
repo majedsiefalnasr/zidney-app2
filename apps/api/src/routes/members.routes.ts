@@ -14,24 +14,16 @@
  * All endpoints require MMC authentication + permission check
  */
 
-import {
-  AppError,
-  ErrorCode,
-  errorResponse,
-  successResponse,
-} from '@zidney/domain-core/errors'
-import { AuditService } from '@zidney/domain-core/services/audit.service'
-import { MemberService } from '@zidney/domain-core/services/member.service'
-import { Logger } from '@zidney/logger'
-import {
-  CreateMemberRequest,
-  UpdateMemberRequest,
-} from '@zidney/types/mmc.types'
-import { Context, Hono } from 'hono'
-import { Database } from 'postgres'
+import { AppError, ErrorCode, errorResponse, successResponse } from '@zidney/domain-core/errors'
+import type { AuditService } from '@zidney/domain-core/services/audit.service'
+import type { MemberService } from '@zidney/domain-core/services/member.service'
+import type { Logger } from '@zidney/logger'
+import type { CreateMemberRequest, UpdateMemberRequest } from '@zidney/types/mmc.types'
+import { type Context, Hono } from 'hono'
+import type { Database } from 'postgres'
 import {
   getRequestContext,
-  // @ts-ignore: LOGIC-BUG: requireMMCAuth is not exported from correlation-id.middleware — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+  // @ts-expect-error: LOGIC-BUG: requireMMCAuth is not exported from correlation-id.middleware — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
   requireMMCAuth,
 } from '../middleware/correlation-id.middleware'
 
@@ -56,7 +48,7 @@ export function createMembersRouter(
       const context = getRequestContext(ctx)
       requireMMCAuth(ctx)
 
-      const userId = context.mmcUser!.userId
+      const userId = context.mmcUser?.userId
       const correlationId = context.correlationId
       const ipAddress = ctx.req.header('X-Forwarded-For') || 'unknown'
       const userAgent = ctx.req.header('User-Agent') || 'unknown'
@@ -70,10 +62,10 @@ export function createMembersRouter(
           errorResponse(
             ErrorCode.VALIDATION_ERROR,
             'Missing required fields: username, email, password, role_id',
-            // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+            // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
             400
           ),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           400
         )
       }
@@ -110,7 +102,7 @@ export function createMembersRouter(
         )
         return ctx.json(
           errorResponse(error.code, error.message, error.details),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           error.statusCode
         )
       }
@@ -127,7 +119,7 @@ export function createMembersRouter(
         errorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to create member', {
           error: error instanceof Error ? error.message : String(error),
         }),
-        // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+        // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         500
       )
     }
@@ -149,16 +141,16 @@ export function createMembersRouter(
       const correlationId = context.correlationId
 
       // Validate UUID format
-      // @ts-ignore: LOGIC-BUG: this implicitly any in route handler closure — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+      // @ts-expect-error: LOGIC-BUG: this implicitly any in route handler closure — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
       if (!this.isValidUUID(memberId)) {
         return ctx.json(
           errorResponse(
             ErrorCode.INVALID_REQUEST,
             'Invalid member ID format',
-            // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+            // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
             400
           ),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           400
         )
       }
@@ -167,7 +159,7 @@ export function createMembersRouter(
       if (!member) {
         return ctx.json(
           errorResponse(ErrorCode.NOT_FOUND, 'Member not found'),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           404
         )
       }
@@ -192,7 +184,7 @@ export function createMembersRouter(
 
       return ctx.json(
         errorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to retrieve member'),
-        // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+        // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         500
       )
     }
@@ -212,22 +204,22 @@ export function createMembersRouter(
       requireMMCAuth(ctx)
 
       const memberId = ctx.req.param('id')
-      const userId = context.mmcUser!.userId
+      const userId = context.mmcUser?.userId
       const correlationId = context.correlationId
       const ipAddress = ctx.req.header('X-Forwarded-For') || 'unknown'
       const userAgent = ctx.req.header('User-Agent') || 'unknown'
 
       // Validate UUID format
-      // @ts-ignore: LOGIC-BUG: this implicitly any in route handler closure — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+      // @ts-expect-error: LOGIC-BUG: this implicitly any in route handler closure — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
       if (!this.isValidUUID(memberId)) {
         return ctx.json(
           errorResponse(
             ErrorCode.INVALID_REQUEST,
             'Invalid member ID format',
-            // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+            // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
             400
           ),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           400
         )
       }
@@ -267,7 +259,7 @@ export function createMembersRouter(
         )
         return ctx.json(
           errorResponse(error.code, error.message, error.details),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           error.statusCode
         )
       }
@@ -282,7 +274,7 @@ export function createMembersRouter(
 
       return ctx.json(
         errorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to update member'),
-        // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+        // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         500
       )
     }
@@ -302,22 +294,22 @@ export function createMembersRouter(
       requireMMCAuth(ctx)
 
       const memberId = ctx.req.param('id')
-      const userId = context.mmcUser!.userId
+      const userId = context.mmcUser?.userId
       const correlationId = context.correlationId
       const ipAddress = ctx.req.header('X-Forwarded-For') || 'unknown'
       const userAgent = ctx.req.header('User-Agent') || 'unknown'
 
       // Validate UUID format
-      // @ts-ignore: LOGIC-BUG: this implicitly any in route handler closure — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+      // @ts-expect-error: LOGIC-BUG: this implicitly any in route handler closure — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
       if (!this.isValidUUID(memberId)) {
         return ctx.json(
           errorResponse(
             ErrorCode.INVALID_REQUEST,
             'Invalid member ID format',
-            // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+            // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
             400
           ),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           400
         )
       }
@@ -328,10 +320,10 @@ export function createMembersRouter(
           errorResponse(
             ErrorCode.VALIDATION_ERROR,
             'Cannot disable your own account',
-            // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+            // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
             400
           ),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           400
         )
       }
@@ -372,7 +364,7 @@ export function createMembersRouter(
         )
         return ctx.json(
           errorResponse(error.code, error.message, error.details),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           error.statusCode
         )
       }
@@ -387,7 +379,7 @@ export function createMembersRouter(
 
       return ctx.json(
         errorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to disable member'),
-        // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+        // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         500
       )
     }

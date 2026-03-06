@@ -81,9 +81,7 @@ function makeErrorResponse(status: number, body: unknown): Response {
 describe('createApiClient', () => {
   describe('Authorization header', () => {
     it('attaches Authorization header when access token is set', async () => {
-      const mockFetch = vi
-        .fn()
-        .mockResolvedValue(makeSuccessResponse({ ok: true }))
+      const mockFetch = vi.fn().mockResolvedValue(makeSuccessResponse({ ok: true }))
       const tokenStore = makeTokenStore({
         getAccessToken: vi.fn().mockReturnValue('test-token-123'),
       })
@@ -93,7 +91,7 @@ describe('createApiClient', () => {
 
       const [, init] = mockFetch.mock.calls[0] as [string, RequestInit]
       const headers = init.headers as Record<string, string>
-      expect(headers['Authorization']).toBe('Bearer test-token-123')
+      expect(headers.Authorization).toBe('Bearer test-token-123')
     })
 
     it('omits Authorization header when no access token', async () => {
@@ -107,7 +105,7 @@ describe('createApiClient', () => {
 
       const [, init] = mockFetch.mock.calls[0] as [string, RequestInit]
       const headers = init.headers as Record<string, string>
-      expect(headers['Authorization']).toBeUndefined()
+      expect(headers.Authorization).toBeUndefined()
     })
   })
 
@@ -199,9 +197,7 @@ describe('createApiClient', () => {
       let callCount = 0
       const mockFetch = vi.fn().mockImplementation((url: string) => {
         if (url.includes('/auth/refresh')) {
-          return Promise.resolve(
-            makeSuccessResponse({ accessToken: 'new-token' })
-          )
+          return Promise.resolve(makeSuccessResponse({ accessToken: 'new-token' }))
         }
         callCount++
         if (callCount === 1) {

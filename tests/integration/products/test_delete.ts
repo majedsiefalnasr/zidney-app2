@@ -9,15 +9,11 @@
  */
 
 import * as productService from '@zidney/domain-core/products/productService'
+import { Module } from '@zidney/types/enums/Module'
 import { ErrorCodes } from '@zidney/types/errors/ErrorCodes'
 import { ProductStatus } from '@zidney/types/products/Product'
-import { Module } from '@zidney/types/enums/Module'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import {
-  cleanupTestContext,
-  createTestContext,
-  TestContext,
-} from '../../test-helpers'
+import { cleanupTestContext, createTestContext, type TestContext } from '../../test-helpers'
 
 describe('T057: Product Deletion Integration Tests', () => {
   let ctx: TestContext
@@ -197,12 +193,7 @@ describe('T057: Product Deletion Integration Tests', () => {
       await dbClient.query(
         `INSERT INTO licenses (id, product_id, workspace_id, status, created_at, updated_at)
          VALUES ($1, $2, $3, $4, NOW(), NOW())`,
-        [
-          'lic-' + Math.random().toString(36),
-          product.id,
-          ctx.workspaceId,
-          ProductStatus.ACTIVE,
-        ]
+        ['lic-' + Math.random().toString(36), product.id, ctx.workspaceId, ProductStatus.ACTIVE]
       )
 
       try {
@@ -213,10 +204,7 @@ describe('T057: Product Deletion Integration Tests', () => {
       }
 
       // Verify product still exists
-      const retrieved = await productService.getProductById(
-        dbClient,
-        product.id
-      )
+      const retrieved = await productService.getProductById(dbClient, product.id)
       expect(retrieved.id).toBe(product.id)
     })
 
@@ -235,12 +223,7 @@ describe('T057: Product Deletion Integration Tests', () => {
       await dbClient.query(
         `INSERT INTO licenses (id, product_id, workspace_id, status, created_at, updated_at)
          VALUES ($1, $2, $3, $4, NOW(), NOW())`,
-        [
-          'lic-' + Math.random().toString(36),
-          product.id,
-          ctx.workspaceId,
-          ProductStatus.ACTIVE,
-        ]
+        ['lic-' + Math.random().toString(36), product.id, ctx.workspaceId, ProductStatus.ACTIVE]
       )
 
       try {
@@ -312,10 +295,7 @@ describe('T057: Product Deletion Integration Tests', () => {
       }
 
       // Verify direct query returns nothing
-      const result = await dbClient.query(
-        'SELECT * FROM products WHERE id = $1',
-        [productId]
-      )
+      const result = await dbClient.query('SELECT * FROM products WHERE id = $1', [productId])
       expect(result.rows.length).toBe(0)
     })
 
@@ -369,10 +349,7 @@ describe('T057: Product Deletion Integration Tests', () => {
       await productService.deleteProduct(dbClient, product1.id)
 
       // Product 2 should still exist
-      const retrieved = await productService.getProductById(
-        dbClient,
-        product2.id
-      )
+      const retrieved = await productService.getProductById(dbClient, product2.id)
       expect(retrieved.id).toBe(product2.id)
 
       // List should still contain product 2

@@ -40,20 +40,10 @@ const COVERAGE_DB_RESULT = {
 // ---------------------------------------------------------------------------
 
 function createTestApp(
-  options: {
-    cacheHit?: boolean
-    dbRows?: any[]
-    dbError?: boolean
-    redisError?: boolean
-  } = {}
+  options: { cacheHit?: boolean; dbRows?: any[]; dbError?: boolean; redisError?: boolean } = {}
 ) {
   const app = new Hono<BackofficeEnv>()
-  const {
-    cacheHit = false,
-    dbRows,
-    dbError = false,
-    redisError = false,
-  } = options
+  const { cacheHit = false, dbRows, dbError = false, redisError = false } = options
 
   const mockRedis = {
     get: vi.fn(async () => {

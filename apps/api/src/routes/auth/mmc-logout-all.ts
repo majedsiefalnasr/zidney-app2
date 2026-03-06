@@ -114,11 +114,7 @@ router.post('/', validateJwtMiddleware('mmc'), async (c) => {
       '[MMC Auth] Logout all failed'
     )
 
-    throwAuthError(
-      AuthErrorCodes.INTERNAL_ERROR,
-      'Failed to logout from all sessions',
-      500
-    )
+    throwAuthError(AuthErrorCodes.INTERNAL_ERROR, 'Failed to logout from all sessions', 500)
   }
 })
 

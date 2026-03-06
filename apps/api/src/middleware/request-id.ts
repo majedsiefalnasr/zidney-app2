@@ -1,5 +1,5 @@
-import { randomUUID } from 'crypto'
-import { Context, Next } from 'hono'
+import { randomUUID } from 'node:crypto'
+import type { Context, Next } from 'hono'
 
 /**
  * Request ID middleware - generates unique UUID for each request.

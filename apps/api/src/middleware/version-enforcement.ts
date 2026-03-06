@@ -40,8 +40,7 @@ export async function versionEnforcementMiddleware(ctx: Context, next: Next) {
         )
 
         if (tenantResult.rows.length) {
-          const tenantSchemaVersion =
-            tenantResult.rows[0].current_schema_version
+          const tenantSchemaVersion = tenantResult.rows[0].current_schema_version
           const schemaValid = validator.validateSchemaVersion(
             tenantSchemaVersion,
             license.expected_schema_version

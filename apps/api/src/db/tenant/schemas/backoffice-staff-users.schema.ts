@@ -23,15 +23,7 @@
  */
 
 import { sql } from 'drizzle-orm'
-import {
-  boolean,
-  index,
-  integer,
-  pgTable,
-  timestamp,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core'
+import { boolean, index, integer, pgTable, timestamp, uuid, varchar } from 'drizzle-orm/pg-core'
 
 import { backofficeRoles } from './backoffice-roles.schema'
 
@@ -78,25 +70,15 @@ export const backofficeStaffUsers = pgTable(
      * Default empty array — existing rows unaffected by migration.
      * Added in STAGE_21 (migration 20260302_001_rbac_role_permissions_complete.ts).
      */
-    division_ids: uuid('division_ids')
-      .array()
-      .notNull()
-      .default(sql`'{}'::uuid[]`),
-    created_at: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updated_at: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    division_ids: uuid('division_ids').array().notNull().default(sql`'{}'::uuid[]`),
+    created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     /** Role lookup — used by DELETE /roles/:id active-user count guard. */
     idx_role_id: index('idx_bsu_role_id').on(table.role_id),
     /** Login lookup — workspace + email composite index. */
-    idx_workspace_email: index('idx_bsu_workspace_email').on(
-      table.workspace_id,
-      table.email
-    ),
+    idx_workspace_email: index('idx_bsu_workspace_email').on(table.workspace_id, table.email),
   })
 )
 

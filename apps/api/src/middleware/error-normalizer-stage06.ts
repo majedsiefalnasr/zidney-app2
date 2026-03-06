@@ -36,8 +36,8 @@
  * - Proper HTTP status codes
  */
 
-import { Logger } from '@zidney/logger'
-import { Context } from 'hono'
+import type { Logger } from '@zidney/logger'
+import type { Context } from 'hono'
 
 export interface NormalizedErrorResponse {
   success: false
@@ -200,12 +200,7 @@ export function createErrorNormalizerStage06(
       message = error.message || 'An unexpected error occurred'
     }
 
-    const normalized_error = createNormalizedError(
-      errorCode,
-      message,
-      correlation_id,
-      path
-    )
+    const normalized_error = createNormalizedError(errorCode, message, correlation_id, path)
 
     // Ensure HTTP status matches error definition
     normalized_error.error.status = http_status

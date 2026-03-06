@@ -127,10 +127,7 @@ describe.skip('[QUARANTINED] Utility Functions - Unit Tests (Phase 4C)', () => {
 
     it('should extract row key with function accessor', () => {
       const row = { userId: 'usr-1', profile: { name: 'John' } }
-      const key = extractRowKey(
-        row,
-        (row) => `${row.userId}-${row.profile.name}`
-      )
+      const key = extractRowKey(row, (row) => `${row.userId}-${row.profile.name}`)
 
       expect(key).toBe('usr-1-John')
     })
@@ -370,9 +367,7 @@ describe.skip('[QUARANTINED] Utility Functions - Unit Tests (Phase 4C)', () => {
     })
 
     it('should handle unicode characters', () => {
-      const filters = [
-        { fieldId: 'name', operator: 'contains', value: '你好世界 🌍' },
-      ]
+      const filters = [{ fieldId: 'name', operator: 'contains', value: '你好世界 🌍' }]
 
       const serialized = serializeFilters(filters)
       const deserialized = deserializeFilters(serialized)

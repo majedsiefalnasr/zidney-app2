@@ -9,7 +9,7 @@ import { describe, expect, it } from 'vitest'
 
 describe('Load: Products - Slug Concurrency (T069)', () => {
   it('should only allow one product with same slug when creating concurrently', () => {
-    const slug = `test-slug-${Date.now()}`
+    const _slug = `test-slug-${Date.now()}`
     const concurrentRequests = 10
 
     const results = Array.from({ length: concurrentRequests }, (_, i) => ({
@@ -25,7 +25,7 @@ describe('Load: Products - Slug Concurrency (T069)', () => {
   })
 
   it('should prevent phantom reads on slug uniqueness', () => {
-    const slug = `phantom-test-${Date.now()}`
+    const _slug = `phantom-test-${Date.now()}`
 
     const reader1Sees = { exists: true }
     const reader2Sees = { exists: true }

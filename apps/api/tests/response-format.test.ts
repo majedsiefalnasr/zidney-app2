@@ -52,9 +52,7 @@ describe('API Response Format - Snapshots', () => {
       }
 
       // Should NOT include password, token, or any auth details
-      expect(JSON.stringify(response)).not.toMatch(
-        /password|token|secret|bearer/i
-      )
+      expect(JSON.stringify(response)).not.toMatch(/password|token|secret|bearer/i)
     })
 
     it('PERMISSION_DENIED response format', () => {

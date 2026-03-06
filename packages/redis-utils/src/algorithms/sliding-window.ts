@@ -1,4 +1,5 @@
-import { createClient } from 'redis'
+import { logger } from '@zidney/logger'
+import type { createClient } from 'redis'
 
 /**
  * T014: Sliding Window Rate Limiter Algorithm
@@ -43,10 +44,7 @@ export class SlidingWindowRateLimiter {
    * Check if request is allowed under rate limit
    * Uses sliding window algorithm: track timestamps in Redis ZSET
    */
-  async checkLimit(
-    key: string,
-    config: RateLimitWindow
-  ): Promise<RateLimitResult> {
+  async checkLimit(key: string, config: RateLimitWindow): Promise<RateLimitResult> {
     const now = Date.now() / 1000 // Current time in seconds
     const windowStart = now - config.window
 
@@ -94,10 +92,7 @@ export class SlidingWindowRateLimiter {
         retryAfter,
       }
     } catch (error) {
-      console.error(
-        `[Sliding Window] Error checking limit for key ${key}:`,
-        error
-      )
+      logger.error('sliding_window_check_failed', { key, error: String(error) })
       // On Redis error, fail open (allow request)
       return {
         allowed: true,
@@ -115,10 +110,7 @@ export class SlidingWindowRateLimiter {
     try {
       await this.redis.del(key)
     } catch (error) {
-      console.error(
-        `[Sliding Window] Error resetting limit for key ${key}:`,
-        error
-      )
+      logger.error('sliding_window_reset_failed', { key, error: String(error) })
     }
   }
 
@@ -129,10 +121,7 @@ export class SlidingWindowRateLimiter {
     try {
       return await this.redis.zCard(key)
     } catch (error) {
-      console.error(
-        `[Sliding Window] Error getting count for key ${key}:`,
-        error
-      )
+      logger.error('sliding_window_get_failed', { key, error: String(error) })
       return 0
     }
   }
@@ -141,8 +130,6 @@ export class SlidingWindowRateLimiter {
 /**
  * Helper function to create sliding window limiter
  */
-export function createSlidingWindowLimiter(
-  redis: RedisClient
-): SlidingWindowRateLimiter {
+export function createSlidingWindowLimiter(redis: RedisClient): SlidingWindowRateLimiter {
   return new SlidingWindowRateLimiter(redis)
 }

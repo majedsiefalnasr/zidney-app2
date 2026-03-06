@@ -10,10 +10,11 @@
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  * Task: T042
  */
-import AppHeader from '@/components/layout/AppHeader.vue'
+
 import { createTestingPinia } from '@pinia/testing'
 import { mount } from '@vue/test-utils'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import AppHeader from '@/components/layout/AppHeader.vue'
 
 const uiStubs = {
   TopBar: { template: '<div class="stub-top-bar"><slot /></div>' },
@@ -34,9 +35,7 @@ const uiStubs = {
   DropdownMenuSeparator: { template: '<hr />' },
 }
 
-function createWrapper(
-  userState: Record<string, unknown> | null = { name: 'Test User' }
-) {
+function createWrapper(userState: Record<string, unknown> | null = { name: 'Test User' }) {
   const pinia = createTestingPinia({
     createSpy: vi.fn,
     initialState: {
@@ -79,7 +78,7 @@ describe('AppHeader — Frontoffice', () => {
       .findAll('.stub-dropdown-item')
       .find((el) => el.text() === 'Sign out')
     expect(signOutButton).toBeDefined()
-    await signOutButton!.trigger('click')
+    await signOutButton?.trigger('click')
     const { useFrontofficeAuthStore } = await import('@/core/state/auth.store')
     const authStore = useFrontofficeAuthStore()
     expect(authStore.logout).toHaveBeenCalled()

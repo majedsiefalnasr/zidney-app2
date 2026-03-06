@@ -40,18 +40,12 @@ const logger = createLogger('backoffice-ws')
 
 // WS license poll interval: env var, clamped 5 000–120 000 ms, default 30 000 ms
 const WS_POLL_MS = Math.min(
-  Math.max(
-    parseInt(process.env['WS_LICENSE_POLL_INTERVAL_MS'] ?? '30000', 10),
-    5000
-  ),
+  Math.max(parseInt(process.env['WS_LICENSE_POLL_INTERVAL_MS'] ?? '30000', 10), 5000),
   120000
 )
 
 // Max consecutive poll failures before fail-closed (M-01)
-const MAX_POLL_FAILURES = parseInt(
-  process.env['WS_MAX_POLL_FAILURES'] ?? '3',
-  10
-)
+const MAX_POLL_FAILURES = parseInt(process.env['WS_MAX_POLL_FAILURES'] ?? '3', 10)
 
 // F-01: Module-scoped shared Redis client — shared across ALL connections on this process.
 // Never created per-connection; never closed per-connection.
@@ -75,8 +69,7 @@ export function createBackofficeWsRoute() {
       schema_version: number
     }
     const staff_user = c.get('staff_user') as { user_id: string; role: string }
-    const correlation_id: string =
-      (c.get('correlationId') as string) || 'unknown'
+    const correlation_id: string = (c.get('correlationId') as string) || 'unknown'
 
     // WS-02: Hoist key to outer closure so onOpen/onClose/onError all share the same scope
     const wsKey = `ws:backoffice:${tenant.id}:${staff_user.user_id}`
@@ -134,11 +127,7 @@ export function createBackofficeWsRoute() {
 
             // Best-effort TTL refresh — non-fatal if it fails
             try {
-              await wsRedis.setex(
-                wsKey,
-                Math.ceil((WS_POLL_MS * 3) / 1000),
-                '1'
-              )
+              await wsRedis.setex(wsKey, Math.ceil((WS_POLL_MS * 3) / 1000), '1')
             } catch {
               // Intentionally swallowed — TTL expiry is handled by onOpen NX enforcement
             }
@@ -160,17 +149,14 @@ export function createBackofficeWsRoute() {
 
             // M-01: Fail-closed on repeated failures — suspend WS after MAX_POLL_FAILURES
             if (consecutivePollFailures >= MAX_POLL_FAILURES) {
-              logger.error(
-                'WS license poll exceeded max failures; closing fail-closed',
-                {
-                  workspace_id: tenant.id,
-                  workspace_slug: tenant.slug,
-                  correlation_id,
-                  user_id: staff_user.user_id,
-                  route_name: 'WS /ws/backoffice',
-                  consecutive_failures: consecutivePollFailures,
-                }
-              )
+              logger.error('WS license poll exceeded max failures; closing fail-closed', {
+                workspace_id: tenant.id,
+                workspace_slug: tenant.slug,
+                correlation_id,
+                user_id: staff_user.user_id,
+                route_name: 'WS /ws/backoffice',
+                consecutive_failures: consecutivePollFailures,
+              })
               clearInterval(pollInterval)
               ws.close(1011, 'POLL_FAILURE')
             } else {

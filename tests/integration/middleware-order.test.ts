@@ -8,7 +8,7 @@ import {
   cleanupTestContext,
   createTestClient,
   createTestContext,
-  TestContext,
+  type TestContext,
 } from '../test-helpers'
 
 describe('T081: Middleware Order', () => {

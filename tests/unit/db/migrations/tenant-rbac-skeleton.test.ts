@@ -127,8 +127,7 @@ describe('migration: 20260228_001_tenant_rbac_skeleton', () => {
       const allSql = executedSql.join('\n').toLowerCase()
       const hasUniqueUserRoles =
         allSql.includes('unique') &&
-        (allSql.includes('staff_user_roles') ||
-          allSql.includes('staff_user_id')) &&
+        (allSql.includes('staff_user_roles') || allSql.includes('staff_user_id')) &&
         allSql.includes('role_id')
 
       expect(hasUniqueUserRoles).toBe(true)
@@ -142,9 +141,7 @@ describe('migration: 20260228_001_tenant_rbac_skeleton', () => {
       await expect(up(client as any)).resolves.not.toThrow()
 
       // All DDL statements should use IF NOT EXISTS
-      const ddlStatements = executedSql.filter((sql) =>
-        sql.toUpperCase().startsWith('CREATE')
-      )
+      const ddlStatements = executedSql.filter((sql) => sql.toUpperCase().startsWith('CREATE'))
       for (const stmt of ddlStatements) {
         expect(stmt.toUpperCase()).toContain('IF NOT EXISTS')
       }
@@ -158,9 +155,7 @@ describe('migration: 20260228_001_tenant_rbac_skeleton', () => {
       expect(first).toBe('BEGIN')
 
       // COMMIT should appear (not necessarily last — ROLLBACK on error)
-      const hasCommit = executedSql.some(
-        (s) => s.trim().toUpperCase() === 'COMMIT'
-      )
+      const hasCommit = executedSql.some((s) => s.trim().toUpperCase() === 'COMMIT')
       expect(hasCommit).toBe(true)
     })
 

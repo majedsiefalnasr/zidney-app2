@@ -2,12 +2,9 @@
  * Compatibility re-export for auth route modules that import ../../auth.
  * The canonical implementations live in domain-core.
  */
+
+import { generateDummyHash, hashPassword, verifyPassword } from '@zidney/domain-core/auth'
 import * as jwt from 'jsonwebtoken'
-import {
-  generateDummyHash,
-  hashPassword,
-  verifyPassword,
-} from '@zidney/domain-core/auth'
 
 export * from '@zidney/domain-core/auth'
 
@@ -57,10 +54,7 @@ export const jwtCompat = {
       algorithms: ['HS256'],
     }) as LegacyJwtPayload
 
-    if (
-      expectedScope &&
-      normalizeScope(decoded.scope) !== normalizeScope(expectedScope)
-    ) {
+    if (expectedScope && normalizeScope(decoded.scope) !== normalizeScope(expectedScope)) {
       throw new Error('Token scope mismatch')
     }
 

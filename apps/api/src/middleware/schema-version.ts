@@ -32,19 +32,15 @@ export interface SchemaVersionInfo {
  * @param ctx - Hono context (with tenant and license information)
  * @param next - Next middleware function
  */
-export const schemaVersionMiddleware: MiddlewareHandler = async (
-  ctx: Context,
-  next: Next
-) => {
+export const schemaVersionMiddleware: MiddlewareHandler = async (ctx: Context, next: Next) => {
   const correlationId = ctx.get('correlation_id')
   const tenant = ctx.get('tenant')
   const license = ctx.get('license')
 
   if (!tenant || !license) {
-    logger.error(
-      'Schema version middleware called without tenant/license context',
-      { correlationId }
-    )
+    logger.error('Schema version middleware called without tenant/license context', {
+      correlationId,
+    })
     return ctx.json(
       {
         success: false,
@@ -92,11 +88,8 @@ export const schemaVersionMiddleware: MiddlewareHandler = async (
     }
 
     // Parse versions for comparison
-    const [currentMajor, currentMinor, currentPatch] = parseVersion(
-      currentVersion.version
-    )
-    const [expectedMajor, expectedMinor, expectedPatch] =
-      parseVersion(expectedVersion)
+    const [currentMajor, currentMinor, currentPatch] = parseVersion(currentVersion.version)
+    const [expectedMajor, expectedMinor, expectedPatch] = parseVersion(expectedVersion)
 
     // Tenant ahead of product (should not happen in normal flow)
     if (
@@ -188,9 +181,7 @@ export const schemaVersionMiddleware: MiddlewareHandler = async (
  * Get current schema version from tenant database (stub)
  * TODO: Implement actual DB query
  */
-async function getCurrentSchemaVersion(
-  _tenant: any
-): Promise<SchemaVersionInfo | null> {
+async function getCurrentSchemaVersion(_tenant: any): Promise<SchemaVersionInfo | null> {
   // Stub implementation
   throw new Error('Not implemented')
 }

@@ -40,9 +40,7 @@ describe('route coverage audit (frontoffice)', () => {
     })
 
     if (unprotectedUnknownRoutes.length > 0) {
-      const names = unprotectedUnknownRoutes
-        .map((r) => `${String(r.name)} (${r.path})`)
-        .join(', ')
+      const names = unprotectedUnknownRoutes.map((r) => `${String(r.name)} (${r.path})`).join(', ')
       throw new Error(
         `Route coverage audit FAILED: The following routes lack requiresAuth: true: [${names}]`
       )

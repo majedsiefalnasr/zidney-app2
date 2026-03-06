@@ -17,9 +17,10 @@
  * - DELETE /api/v1/mmc/products/:id (delete)
  */
 
+import * as productService from '@zidney/domain-core/products/productService'
 import { createLogger } from '@zidney/logger'
 import { AppError, ErrorCodes } from '@zidney/types/errors/ErrorCodes'
-import { ProductStatus } from '@zidney/types/products/Product'
+import type { ProductStatus } from '@zidney/types/products/Product'
 import {
   AuditLogQueryFiltersSchema,
   ChangeProductStatusSchema,
@@ -27,18 +28,12 @@ import {
   ProductQueryFiltersSchema,
   UpdateProductSchema,
 } from '@zidney/validation/products/productValidation'
-import { Hono, type Context } from 'hono'
-import * as productService from '@zidney/domain-core/products/productService'
+import { type Context, Hono } from 'hono'
 import { auditReadMiddleware } from '../../middleware/auditReadMiddleware'
 import { correlationIdMiddleware } from '../../middleware/correlationIdMiddleware'
 import { licenseMiddleware } from '../../middleware/licenseMiddleware'
 import { asyncHandler, handleError } from '../../utils/errorHandler'
-import {
-  sendCreated,
-  sendList,
-  sendNoContent,
-  sendSuccess,
-} from '../../utils/responseWrapper'
+import { sendCreated, sendList, sendNoContent, sendSuccess } from '../../utils/responseWrapper'
 
 const logger = createLogger('api')
 const router = new Hono()
@@ -69,10 +64,7 @@ router.get(
       // Get database client from context
       const client = c.get('dbClient')
       if (!client) {
-        throw new AppError(
-          ErrorCodes.INTERNAL_SERVER_ERROR,
-          'Database context not available'
-        )
+        throw new AppError(ErrorCodes.INTERNAL_SERVER_ERROR, 'Database context not available')
       }
 
       // Call domain service
@@ -89,13 +81,7 @@ router.get(
       })
 
       // Return paginated response
-      return sendList(
-        c,
-        result.items,
-        result.total,
-        result.limit,
-        result.offset
-      )
+      return sendList(c, result.items, result.total, result.limit, result.offset)
     } catch (error) {
       const appError =
         error instanceof AppError
@@ -126,10 +112,7 @@ router.get(
       // Get database client
       const client = c.get('dbClient')
       if (!client) {
-        throw new AppError(
-          ErrorCodes.INTERNAL_SERVER_ERROR,
-          'Database context not available'
-        )
+        throw new AppError(ErrorCodes.INTERNAL_SERVER_ERROR, 'Database context not available')
       }
 
       // Call domain service
@@ -185,18 +168,11 @@ router.get(
       // Get database client
       const client = c.get('dbClient')
       if (!client) {
-        throw new AppError(
-          ErrorCodes.INTERNAL_SERVER_ERROR,
-          'Database context not available'
-        )
+        throw new AppError(ErrorCodes.INTERNAL_SERVER_ERROR, 'Database context not available')
       }
 
       // Call domain service
-      const result = await productService.getProductAuditLog(
-        client,
-        productId,
-        filters as any
-      )
+      const result = await productService.getProductAuditLog(client, productId, filters as any)
 
       // Log successful operation
       logger.info('audit_log_get_success', {
@@ -207,13 +183,7 @@ router.get(
         duration_ms: Date.now() - startTime,
       })
 
-      return sendList(
-        c,
-        result.items,
-        result.total,
-        result.limit,
-        result.offset
-      )
+      return sendList(c, result.items, result.total, result.limit, result.offset)
     } catch (error) {
       const appError =
         error instanceof AppError
@@ -249,10 +219,7 @@ router.post(
       const userId = c.get('userId')
 
       if (!client || !userId) {
-        throw new AppError(
-          ErrorCodes.INTERNAL_SERVER_ERROR,
-          'Context not available'
-        )
+        throw new AppError(ErrorCodes.INTERNAL_SERVER_ERROR, 'Context not available')
       }
 
       // Call domain service
@@ -306,19 +273,11 @@ router.put(
       const userId = c.get('userId')
 
       if (!client || !userId) {
-        throw new AppError(
-          ErrorCodes.INTERNAL_SERVER_ERROR,
-          'Context not available'
-        )
+        throw new AppError(ErrorCodes.INTERNAL_SERVER_ERROR, 'Context not available')
       }
 
       // Call domain service
-      const product = await productService.updateProduct(
-        client,
-        productId,
-        input,
-        userId
-      )
+      const product = await productService.updateProduct(client, productId, input, userId)
 
       // Log successful update
       logger.info('product_updated_success', {
@@ -366,10 +325,7 @@ router.patch(
       const userId = c.get('userId')
 
       if (!client || !userId) {
-        throw new AppError(
-          ErrorCodes.INTERNAL_SERVER_ERROR,
-          'Context not available'
-        )
+        throw new AppError(ErrorCodes.INTERNAL_SERVER_ERROR, 'Context not available')
       }
 
       // Call domain service
@@ -422,10 +378,7 @@ router.delete(
       const userId = c.get('userId')
 
       if (!client || !userId) {
-        throw new AppError(
-          ErrorCodes.INTERNAL_SERVER_ERROR,
-          'Context not available'
-        )
+        throw new AppError(ErrorCodes.INTERNAL_SERVER_ERROR, 'Context not available')
       }
 
       // Call domain service to delete

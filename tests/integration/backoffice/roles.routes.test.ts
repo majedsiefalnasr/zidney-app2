@@ -322,23 +322,17 @@ describe('GET /api/v1/backoffice/workspace/roles', () => {
 describe('GET /api/v1/backoffice/workspace/roles/:id', () => {
   it('returns 200 with role data', async () => {
     const app = createTestApp()
-    const res = await app.request(
-      `/api/v1/backoffice/workspace/roles/${ROLE_ID}`,
-      {
-        method: 'GET',
-      }
-    )
+    const res = await app.request(`/api/v1/backoffice/workspace/roles/${ROLE_ID}`, {
+      method: 'GET',
+    })
     expect(res.status).toBe(200)
   })
 
   it('returns 404 when role not found', async () => {
     const app = createTestApp({ noRole: true })
-    const res = await app.request(
-      `/api/v1/backoffice/workspace/roles/${ROLE_ID}`,
-      {
-        method: 'GET',
-      }
-    )
+    const res = await app.request(`/api/v1/backoffice/workspace/roles/${ROLE_ID}`, {
+      method: 'GET',
+    })
     expect(res.status).toBe(404)
     const body = await res.json()
     expect(body.error.code).toBe('ROLE_NOT_FOUND')
@@ -352,14 +346,11 @@ describe('GET /api/v1/backoffice/workspace/roles/:id', () => {
 describe('PATCH /api/v1/backoffice/workspace/roles/:id', () => {
   it('updates role and returns 200', async () => {
     const app = createTestApp()
-    const res = await app.request(
-      `/api/v1/backoffice/workspace/roles/${ROLE_ID}`,
-      {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name: 'Updated Role' }),
-      }
-    )
+    const res = await app.request(`/api/v1/backoffice/workspace/roles/${ROLE_ID}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'Updated Role' }),
+    })
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.success).toBe(true)
@@ -374,14 +365,11 @@ describe('PATCH /api/v1/backoffice/workspace/roles/:id', () => {
       body: JSON.stringify({ status: 'DISABLED' }),
     })
     // Second disable — should not error
-    const res2 = await app.request(
-      `/api/v1/backoffice/workspace/roles/${ROLE_ID}`,
-      {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status: 'DISABLED' }),
-      }
-    )
+    const res2 = await app.request(`/api/v1/backoffice/workspace/roles/${ROLE_ID}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ status: 'DISABLED' }),
+    })
     expect([200, 404]).toContain(res2.status)
   })
 })
@@ -393,23 +381,20 @@ describe('PATCH /api/v1/backoffice/workspace/roles/:id', () => {
 describe('PUT /api/v1/backoffice/workspace/roles/:id/permissions', () => {
   it('updates permissions and returns 200 (SC-003 permission revocation end-to-end)', async () => {
     const app = createTestApp()
-    const res = await app.request(
-      `/api/v1/backoffice/workspace/roles/${ROLE_ID}/permissions`,
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          permissions: {
-            settings: {
-              can_view: true,
-              can_create: false,
-              can_edit: false,
-              can_delete: false,
-            },
+    const res = await app.request(`/api/v1/backoffice/workspace/roles/${ROLE_ID}/permissions`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        permissions: {
+          settings: {
+            can_view: true,
+            can_create: false,
+            can_edit: false,
+            can_delete: false,
           },
-        }),
-      }
-    )
+        },
+      }),
+    })
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.success).toBe(true)
@@ -420,14 +405,11 @@ describe('PUT /api/v1/backoffice/workspace/roles/:id/permissions', () => {
 
   it('returns 422 on missing permissions body', async () => {
     const app = createTestApp()
-    const res = await app.request(
-      `/api/v1/backoffice/workspace/roles/${ROLE_ID}/permissions`,
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      }
-    )
+    const res = await app.request(`/api/v1/backoffice/workspace/roles/${ROLE_ID}/permissions`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    })
     expect(res.status).toBe(422)
   })
 })
@@ -439,23 +421,17 @@ describe('PUT /api/v1/backoffice/workspace/roles/:id/permissions', () => {
 describe('DELETE /api/v1/backoffice/workspace/roles/:id', () => {
   it('returns 204 on successful delete', async () => {
     const app = createTestApp({ activeUsers: 0 })
-    const res = await app.request(
-      `/api/v1/backoffice/workspace/roles/${ROLE_ID}`,
-      {
-        method: 'DELETE',
-      }
-    )
+    const res = await app.request(`/api/v1/backoffice/workspace/roles/${ROLE_ID}`, {
+      method: 'DELETE',
+    })
     expect(res.status).toBe(204)
   })
 
   it('returns 409 when active users are assigned (SC-007 — no user count in error body)', async () => {
     const app = createTestApp({ activeUsers: 5 })
-    const res = await app.request(
-      `/api/v1/backoffice/workspace/roles/${ROLE_ID}`,
-      {
-        method: 'DELETE',
-      }
-    )
+    const res = await app.request(`/api/v1/backoffice/workspace/roles/${ROLE_ID}`, {
+      method: 'DELETE',
+    })
     expect(res.status).toBe(409)
     const body = await res.json()
     expect(body.success).toBe(false)
@@ -472,27 +448,21 @@ describe('DELETE /api/v1/backoffice/workspace/roles/:id', () => {
 describe('PATCH /api/v1/backoffice/workspace/staff/:userId/role', () => {
   it('assigns role and returns 200', async () => {
     const app = createTestApp()
-    const res = await app.request(
-      `/api/v1/backoffice/workspace/staff/${USER_ID}/role`,
-      {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ role_id: ROLE_ID }),
-      }
-    )
+    const res = await app.request(`/api/v1/backoffice/workspace/staff/${USER_ID}/role`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ role_id: ROLE_ID }),
+    })
     expect([200, 404]).toContain(res.status)
   })
 
   it('returns 422 when role_id is missing', async () => {
     const app = createTestApp()
-    const res = await app.request(
-      `/api/v1/backoffice/workspace/staff/${USER_ID}/role`,
-      {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({}),
-      }
-    )
+    const res = await app.request(`/api/v1/backoffice/workspace/staff/${USER_ID}/role`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({}),
+    })
     expect(res.status).toBe(422)
   })
 })
@@ -504,12 +474,9 @@ describe('PATCH /api/v1/backoffice/workspace/staff/:userId/role', () => {
 describe('GET /api/v1/backoffice/workspace/role-permission-modules', () => {
   it('returns 200 with module list (10 modules)', async () => {
     const app = createTestApp()
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/role-permission-modules',
-      {
-        method: 'GET',
-      }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/role-permission-modules', {
+      method: 'GET',
+    })
     expect(res.status).toBe(200)
     const body = await res.json()
     expect(body.success).toBe(true)
@@ -564,12 +531,9 @@ describe('SC-007: Error bodies must not expose internal state', () => {
 
   it('409 ROLE_HAS_ACTIVE_USERS does not contain user count', async () => {
     const app = createTestApp({ activeUsers: 99 })
-    const res = await app.request(
-      `/api/v1/backoffice/workspace/roles/${ROLE_ID}`,
-      {
-        method: 'DELETE',
-      }
-    )
+    const res = await app.request(`/api/v1/backoffice/workspace/roles/${ROLE_ID}`, {
+      method: 'DELETE',
+    })
     const body = await res.json()
     expect(JSON.stringify(body)).not.toContain('99')
   })

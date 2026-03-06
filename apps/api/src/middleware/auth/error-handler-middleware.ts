@@ -35,8 +35,8 @@
  * - Client sees sanitized message only
  */
 
-import { Context, Next } from 'hono'
 import { createLogger } from '@zidney/logger'
+import type { Context, Next } from 'hono'
 
 const logger = createLogger('api-errors')
 
@@ -170,26 +170,20 @@ function getHttpStatus(code: string): number {
  */
 function sanitizeMessage(code: string, originalMessage: string): string {
   const publicMessages: Record<string, string> = {
-    [AuthErrorCodes.INVALID_CREDENTIALS]:
-      'Invalid email or password. Please try again.',
-    [AuthErrorCodes.INVALID_TOKEN]:
-      'Your session has expired. Please log in again.',
-    [AuthErrorCodes.EXPIRED_TOKEN]:
-      'Your session has expired. Please log in again.',
-    [AuthErrorCodes.MALFORMED_TOKEN]:
-      'Invalid session token. Please log in again.',
+    [AuthErrorCodes.INVALID_CREDENTIALS]: 'Invalid email or password. Please try again.',
+    [AuthErrorCodes.INVALID_TOKEN]: 'Your session has expired. Please log in again.',
+    [AuthErrorCodes.EXPIRED_TOKEN]: 'Your session has expired. Please log in again.',
+    [AuthErrorCodes.MALFORMED_TOKEN]: 'Invalid session token. Please log in again.',
     [AuthErrorCodes.TOKEN_VERSION_MISMATCH]:
       'Your session has been invalidated. Please log in again.',
 
-    [AuthErrorCodes.PERMISSION_DENIED]:
-      'You do not have permission to access this resource.',
+    [AuthErrorCodes.PERMISSION_DENIED]: 'You do not have permission to access this resource.',
     [AuthErrorCodes.INSUFFICIENT_PERMISSIONS]:
       'You do not have the required permissions for this action.',
 
     [AuthErrorCodes.ACCOUNT_LOCKED]:
       'Your account is locked due to too many login attempts. Please try again later.',
-    [AuthErrorCodes.ACCOUNT_DISABLED]:
-      'Your account has been disabled. Please contact support.',
+    [AuthErrorCodes.ACCOUNT_DISABLED]: 'Your account has been disabled. Please contact support.',
 
     [AuthErrorCodes.SCHEMA_VERSION_MISMATCH]:
       'System upgrade required. Please refresh and try again.',
@@ -297,10 +291,7 @@ export async function errorHandlerMiddleware(c: Context, next: Next) {
       data: null,
       error: {
         code: AuthErrorCodes.INTERNAL_ERROR,
-        message: sanitizeMessage(
-          AuthErrorCodes.INTERNAL_ERROR,
-          'An unexpected error occurred'
-        ),
+        message: sanitizeMessage(AuthErrorCodes.INTERNAL_ERROR, 'An unexpected error occurred'),
       },
     } as ErrorResponse)
   }
@@ -309,10 +300,6 @@ export async function errorHandlerMiddleware(c: Context, next: Next) {
 /**
  * Helper to throw auth error from routes
  */
-export function throwAuthError(
-  code: string,
-  message: string,
-  statusCode?: number
-): never {
+export function throwAuthError(code: string, message: string, statusCode?: number): never {
   throw new AuthError(code, statusCode || getHttpStatus(code), message)
 }

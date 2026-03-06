@@ -13,7 +13,7 @@
  * - Admin user placeholder
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 /**
  * Seed Data Result
@@ -61,13 +61,7 @@ export class SeedDataService {
              uses_divisions = $4,
              default_language = $5
          WHERE id = (SELECT id FROM workspace_settings LIMIT 1)`,
-        [
-          organizationName,
-          studentLimit,
-          staffLimit,
-          usesDivisions,
-          defaultLanguage,
-        ]
+        [organizationName, studentLimit, staffLimit, usesDivisions, defaultLanguage]
       )
       totalRows += settingsResult.rowCount || 0
 
@@ -80,12 +74,7 @@ export class SeedDataService {
       )
       totalRows += adminResult.rowCount || 0
 
-      this.logger?.logDatabaseOperation(
-        'SEED',
-        'baseline_data',
-        Date.now() - startTime,
-        totalRows
-      )
+      this.logger?.logDatabaseOperation('SEED', 'baseline_data', Date.now() - startTime, totalRows)
 
       return {
         success: true,

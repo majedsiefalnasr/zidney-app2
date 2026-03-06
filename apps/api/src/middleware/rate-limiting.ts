@@ -22,16 +22,14 @@
  * 4. Endpoint-specific limits
  */
 
+import { logger } from '@zidney/logger'
 import { SlidingWindowRateLimiter } from '@zidney/redis-utils/algorithms/sliding-window'
 import { RATE_LIMIT_BY_ENDPOINT } from '@zidney/redis-utils/schemas/rate-limiting'
 import type { Context, Next } from 'hono'
 import { getRedisClient } from '../infrastructure/redis'
 import { MiddlewareStage, recordMiddlewareExecution } from './middleware-chain'
 
-export async function rateLimitingMiddleware(
-  c: Context,
-  next: Next
-): Promise<Response | void> {
+export async function rateLimitingMiddleware(c: Context, next: Next): Promise<Response | void> {
   const correlationId = c.state.correlationId || 'unknown'
   const workspace = c.state.workspace
   const endpoint = `${c.req.method} ${c.req.path}`
@@ -57,9 +55,7 @@ export async function rateLimitingMiddleware(
 
     // T021: Extract identifiers for rate limiting
     const clientIp =
-      c.req.header('x-forwarded-for') ||
-      c.req.header('cf-connecting-ip') ||
-      'unknown'
+      c.req.header('x-forwarded-for') || c.req.header('cf-connecting-ip') || 'unknown'
     const userId = c.state.user?.id || 'anonymous'
     const workspaceId = workspace?.id || 'unknown'
 
@@ -74,12 +70,10 @@ export async function rateLimitingMiddleware(
     })
 
     // Log rate limit check
-    console.log(
-      JSON.stringify({
-        timestamp: new Date().toISOString(),
-        level: result.allowed ? 'debug' : 'warn',
+    logger[result.allowed ? 'debug' : 'warn'](
+      result.allowed ? 'rate_limit_allowed' : 'rate_limit_exceeded',
+      {
         service: 'api',
-        event: result.allowed ? 'rate_limit_allowed' : 'rate_limit_exceeded',
         correlation_id: correlationId,
         endpoint,
         ip: clientIp,
@@ -87,7 +81,7 @@ export async function rateLimitingMiddleware(
         workspace_id: workspaceId,
         remaining: result.remaining,
         reset_at: result.resetAt,
-      })
+      }
     )
 
     // Store rate limit info in context
@@ -95,7 +89,7 @@ export async function rateLimitingMiddleware(
 
     // If rate limit exceeded, return 429
     if (!result.allowed) {
-      console.warn(
+      logger.warn(
         `[${correlationId}] Rate limit exceeded for ${endpoint} (${config.identifier}=${config.identifier})`
       )
 
@@ -129,13 +123,11 @@ export async function rateLimitingMiddleware(
     c.header('X-Rate-Limit-Reset', String(result.resetAt))
 
     // Record execution in middleware chain
-    const recordExecution = recordMiddlewareExecution(
-      MiddlewareStage.RATE_LIMITING
-    )
+    const recordExecution = recordMiddlewareExecution(MiddlewareStage.RATE_LIMITING)
     await recordExecution(c, next)
   } catch (error) {
     // On Redis error, fail open (allow request but log error)
-    console.error(`[${correlationId}] Rate limit check error:`, error)
+    logger.error(`[${correlationId}] Rate limit check error:`, { error })
     // Proceed without rate limiting
     await next()
   }
@@ -144,14 +136,9 @@ export async function rateLimitingMiddleware(
 /**
  * Get rate limit config for endpoint
  */
-function getEndpointRateLimit(
-  endpoint: string,
-  _workspaceId: string
-): RateLimitConfig | null {
+function getEndpointRateLimit(endpoint: string, _workspaceId: string): RateLimitConfig | null {
   // Map endpoint to rate limit config
-  const config = RATE_LIMIT_BY_ENDPOINT[
-    endpoint as keyof typeof RATE_LIMIT_BY_ENDPOINT
-  ] as
+  const config = RATE_LIMIT_BY_ENDPOINT[endpoint as keyof typeof RATE_LIMIT_BY_ENDPOINT] as
     | {
         pattern: string
         limit: number
@@ -165,8 +152,7 @@ function getEndpointRateLimit(
   }
 
   const identifierMatch = config.pattern.match(/\{(ip|user|workspace)\}/)
-  const identifier =
-    (identifierMatch?.[1] as RateLimitConfig['identifier']) || 'ip'
+  const identifier = (identifierMatch?.[1] as RateLimitConfig['identifier']) || 'ip'
 
   return {
     identifier,

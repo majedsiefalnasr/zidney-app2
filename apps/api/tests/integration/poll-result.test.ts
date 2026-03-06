@@ -71,7 +71,7 @@ describe('GET /api/v1/attempts/:id/result Integration (Polling)', () => {
        VALUES ('poll-ws', 'Poll WS', 1, '1.0.0', 'ACTIVE')
        RETURNING id`
     )
-    workspaceId = wsRes.rows[0]!.id
+    workspaceId = wsRes.rows[0]?.id
     pool = getTenantPool(workspaceId)
 
     // Create user
@@ -81,7 +81,7 @@ describe('GET /api/v1/attempts/:id/result Integration (Polling)', () => {
        RETURNING id`,
       [workspaceId]
     )
-    userId = userRes.rows[0]!.id
+    userId = userRes.rows[0]?.id
 
     // Create attempt
     const attemptRes = await pool.query(
@@ -90,7 +90,7 @@ describe('GET /api/v1/attempts/:id/result Integration (Polling)', () => {
        RETURNING id`,
       [workspaceId, userId]
     )
-    attemptId = attemptRes.rows[0]!.id
+    attemptId = attemptRes.rows[0]?.id
   })
 
   // T053.1: Job Pending Returns 202
@@ -178,7 +178,7 @@ describe('GET /api/v1/attempts/:id/result Integration (Polling)', () => {
     }
 
     expect(response.headers['retry-after']).toBeDefined()
-    expect(parseInt(response.headers['retry-after'])).toBeGreaterThan(0)
+    expect(parseInt(response.headers['retry-after'], 10)).toBeGreaterThan(0)
   })
 
   // T053.5: Returns 404 if attempt not found
@@ -206,9 +206,9 @@ describe('GET /api/v1/attempts/:id/result Integration (Polling)', () => {
       { status: 200, job_status: 'COMPLETED', score: 75 },
     ]
 
-    expect(polls[0]!.status).toBe(202)
-    expect(polls[3]!.status).toBe(200)
-    expect(polls[3]!.score).toBeDefined()
+    expect(polls[0]?.status).toBe(202)
+    expect(polls[3]?.status).toBe(200)
+    expect(polls[3]?.score).toBeDefined()
   })
 
   // T053.7: Result Snapshot Contains All Data
@@ -306,9 +306,7 @@ describe('GET /api/v1/attempts/:id/result Integration (Polling)', () => {
 
     retries.forEach((retry, index) => {
       if (index > 0) {
-        expect(retry.retryAfter).toBeGreaterThanOrEqual(
-          retries[index - 1]!.retryAfter
-        )
+        expect(retry.retryAfter).toBeGreaterThanOrEqual(retries[index - 1]?.retryAfter)
       }
     })
   })

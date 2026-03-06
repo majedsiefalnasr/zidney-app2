@@ -56,9 +56,7 @@ describe('401 storm guard (frontoffice) — FR-SEC-08', () => {
       onLicenseError: vi.fn(),
     })
 
-    const calls = Array.from({ length: 5 }, () =>
-      interceptor.handleAuthFailure()
-    )
+    const calls = Array.from({ length: 5 }, () => interceptor.handleAuthFailure())
     await Promise.all(calls)
 
     expect(onSessionExpiredCount).toBe(1)

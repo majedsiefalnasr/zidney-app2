@@ -10,12 +10,7 @@ import { describe, expect, it } from 'vitest'
 const API_BASE = 'http://localhost:3000/api/mmc/dashboard'
 const VALID_TOKEN = 'Bearer audit-test-token'
 
-async function makeRequest(
-  method: string,
-  endpoint: string,
-  token?: string,
-  body?: unknown
-) {
+async function makeRequest(method: string, endpoint: string, token?: string, body?: unknown) {
   const url = `${API_BASE}${endpoint}`
 
   const response = await fetch(url, {
@@ -38,9 +33,7 @@ async function makeRequest(
   return {
     status: response.status,
     data,
-    headers: Object.fromEntries(
-      Array.from(response.headers).map(([key, value]) => [key, value])
-    ),
+    headers: Object.fromEntries(Array.from(response.headers).map(([key, value]) => [key, value])),
   }
 }
 
@@ -107,13 +100,7 @@ describe('T068-T070: Audit, Compliance & Monitoring', () => {
     })
 
     it('should have consistent structured logging across all endpoints', async () => {
-      const endpoints = [
-        '/summary',
-        '/revenue-breakdown',
-        '/geographic',
-        '/affiliates',
-        '/trends',
-      ]
+      const endpoints = ['/summary', '/revenue-breakdown', '/geographic', '/affiliates', '/trends']
 
       for (const endpoint of endpoints) {
         const res = await makeRequest('GET', endpoint, VALID_TOKEN)
@@ -225,7 +212,7 @@ describe('T068-T070: Audit, Compliance & Monitoring', () => {
       if (res.status === 200) {
         // ✅ CRITICAL: For performance monitoring
         if (res.headers['x-db-queries']) {
-          const queries = parseInt(res.headers['x-db-queries'])
+          const queries = parseInt(res.headers['x-db-queries'], 10)
           expect(queries).toBeGreaterThanOrEqual(0)
         }
       }

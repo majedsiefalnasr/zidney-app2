@@ -69,9 +69,7 @@ export function calculateSHA256(filePath: string): string {
  * @param pool - Database connection pool
  * @returns Current schema version metadata, or null if no version found
  */
-export async function getCurrentSchemaVersion(
-  pool: Pool
-): Promise<MigrationMeta | null> {
+export async function getCurrentSchemaVersion(pool: Pool): Promise<MigrationMeta | null> {
   const logger_fn = createLogger('getCurrentSchemaVersion')
 
   try {
@@ -105,10 +103,7 @@ export async function getCurrentSchemaVersion(
  * @param storedChecksum - Checksum from task payload (calculated at API layer)
  * @returns true if checksums match, false otherwise
  */
-export function validateChecksum(
-  calculatedChecksum: string,
-  storedChecksum: string
-): boolean {
+export function validateChecksum(calculatedChecksum: string, storedChecksum: string): boolean {
   const logger_fn = createLogger('validateChecksum')
 
   if (calculatedChecksum !== storedChecksum) {
@@ -131,10 +126,7 @@ export function validateChecksum(
  * @param lockTimeout - Timeout in milliseconds (default: 5000 = 5 seconds)
  * @throws Error if lock cannot be acquired within timeout
  */
-export async function acquireSchemaLock(
-  pool: Pool,
-  lockTimeout: number = 5000
-): Promise<void> {
+export async function acquireSchemaLock(pool: Pool, lockTimeout: number = 5000): Promise<void> {
   const logger_fn = createLogger('acquireSchemaLock')
 
   try {
@@ -209,10 +201,7 @@ export async function insertSchemaVersion(
  * @param sqlStatements - SQL statements to execute (already read from file)
  * @throws Error if any statement fails (triggers automatic ROLLBACK)
  */
-export async function executeMigrationSQL(
-  pool: Pool,
-  sqlStatements: string
-): Promise<void> {
+export async function executeMigrationSQL(pool: Pool, sqlStatements: string): Promise<void> {
   const logger_fn = createLogger('executeMigrationSQL')
 
   try {
@@ -277,13 +266,7 @@ export async function verifySchemaIntegrity(pool: Pool): Promise<void> {
   const logger_fn = createLogger('verifySchemaIntegrity')
 
   // Critical tables that must exist
-  const criticalTables = [
-    'schema_version',
-    'users',
-    'roles',
-    'attempts',
-    'attempt_events',
-  ]
+  const criticalTables = ['schema_version', 'users', 'roles', 'attempts', 'attempt_events']
 
   try {
     for (const tableName of criticalTables) {
@@ -318,10 +301,7 @@ export async function verifySchemaIntegrity(pool: Pool): Promise<void> {
  * @param fileName - SQL file name (e.g., 'baseline-schema.sql')
  * @returns Absolute path to migration file
  */
-export function getMigrationFilePath(
-  migrationVersion: string,
-  fileName: string
-): string {
+export function getMigrationFilePath(migrationVersion: string, fileName: string): string {
   // Relative to apps/api
   return join(
     process.cwd(),

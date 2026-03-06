@@ -96,18 +96,10 @@ describe('Audit Logging', () => {
       return
     }
     const pool = getTenantPool(workspace.id)!
-    await pool.query(`DELETE FROM ${AUDIT_USERS_TABLE} WHERE id = $1`, [
-      user.id,
-    ])
+    await pool.query(`DELETE FROM ${AUDIT_USERS_TABLE} WHERE id = $1`, [user.id])
 
-    await db.master.query(
-      `DELETE FROM ${AUDIT_WORKSPACES_TABLE} WHERE id = $1`,
-      [workspace.id]
-    )
-    await db.master.query(
-      `DELETE FROM ${AUDIT_LOGS_TABLE} WHERE workspace_id = $1`,
-      [workspace.id]
-    )
+    await db.master.query(`DELETE FROM ${AUDIT_WORKSPACES_TABLE} WHERE id = $1`, [workspace.id])
+    await db.master.query(`DELETE FROM ${AUDIT_LOGS_TABLE} WHERE workspace_id = $1`, [workspace.id])
   })
 
   it('should create audit log entry', async () => {
@@ -122,13 +114,7 @@ describe('Audit Logging', () => {
         created_at
       ) VALUES ($1, $2, $3, $4, $5, NOW())
       RETURNING id, event_type, correlation_id`,
-      [
-        workspace.id,
-        user.id,
-        'login_success',
-        JSON.stringify({ ip: '127.0.0.1' }),
-        'corr-123',
-      ]
+      [workspace.id, user.id, 'login_success', JSON.stringify({ ip: '127.0.0.1' }), 'corr-123']
     )
 
     expect(logResult.rows).toHaveLength(1)
@@ -176,13 +162,7 @@ describe('Audit Logging', () => {
     await db.master.query(
       `INSERT INTO ${AUDIT_LOGS_TABLE} (workspace_id, user_id, event_type, event_data, correlation_id, created_at)
        VALUES ($1, $2, $3, $4, $5, NOW())`,
-      [
-        workspace.id,
-        user.id,
-        'login_success',
-        JSON.stringify(eventData),
-        correlationId,
-      ]
+      [workspace.id, user.id, 'login_success', JSON.stringify(eventData), correlationId]
     )
 
     const result = await db.master.query(
@@ -210,12 +190,7 @@ describe('Audit Logging', () => {
         created_at
       ) VALUES ($1, $2, $3, $4, NOW())
       RETURNING event_type`,
-      [
-        workspace.id,
-        user.id,
-        'login_success',
-        JSON.stringify({ password_valid: true }),
-      ]
+      [workspace.id, user.id, 'login_success', JSON.stringify({ password_valid: true })]
     )
 
     expect(result.rows[0].event_type).toBe('login_success')
@@ -263,12 +238,7 @@ describe('Audit Logging', () => {
     await db.master.query(
       `INSERT INTO ${AUDIT_LOGS_TABLE} (workspace_id, user_id, event_type, event_data, created_at)
        VALUES ($1, $2, $3, $4, NOW())`,
-      [
-        workspace.id,
-        user.id,
-        'logout_all',
-        JSON.stringify({ new_token_version: 2 }),
-      ]
+      [workspace.id, user.id, 'logout_all', JSON.stringify({ new_token_version: 2 })]
     )
 
     const result = await db.master.query(
@@ -301,12 +271,8 @@ describe('Audit Logging', () => {
     expect(result.rows).toHaveLength(1)
     const logTimestamp = new Date(result.rows[0].created_at)
 
-    expect(logTimestamp.getTime()).toBeGreaterThanOrEqual(
-      beforeInsert.getTime() - 5000
-    )
-    expect(logTimestamp.getTime()).toBeLessThanOrEqual(
-      afterInsert.getTime() + 5000
-    )
+    expect(logTimestamp.getTime()).toBeGreaterThanOrEqual(beforeInsert.getTime() - 5000)
+    expect(logTimestamp.getTime()).toBeLessThanOrEqual(afterInsert.getTime() + 5000)
   })
 
   it('should query audit logs by workspace', async () => {

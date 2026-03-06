@@ -63,10 +63,7 @@ export function computeJobPayloadHash(payload: any): string {
  * @param expectedHash - Hash computed at enqueue time
  * @returns true if hashes match, false if mutation detected
  */
-export function verifyPayloadHashConsistency(
-  payload: any,
-  expectedHash: string
-): boolean {
+export function verifyPayloadHashConsistency(payload: any, expectedHash: string): boolean {
   try {
     const currentHash = computeJobPayloadHash(payload)
     return currentHash === expectedHash

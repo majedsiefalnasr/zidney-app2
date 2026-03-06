@@ -146,10 +146,7 @@ export function isLicenseTerminal(status: LicenseStatus): boolean {
 /**
  * Helper: Check if transition is valid
  */
-export function isValidTransition(
-  from: LicenseStatus,
-  to: LicenseStatus
-): boolean {
+export function isValidTransition(from: LicenseStatus, to: LicenseStatus): boolean {
   const validTargets = VALID_TRANSITIONS[from]
   return validTargets.includes(to)
 }
@@ -162,10 +159,8 @@ export function getLicenseStatusMessage(status: LicenseStatus): string {
     [LicenseStatus.PENDING_PROVISION]:
       'Workspace is being provisioned. Please wait a few moments and refresh.',
     [LicenseStatus.ACTIVE]: 'Workspace is active and ready to use.',
-    [LicenseStatus.PROVISION_FAILED]:
-      'Workspace provisioning failed. Please contact support.',
-    [LicenseStatus.SOFT_LOCKED]:
-      'Workspace is temporarily locked. Please contact support.',
+    [LicenseStatus.PROVISION_FAILED]: 'Workspace provisioning failed. Please contact support.',
+    [LicenseStatus.SOFT_LOCKED]: 'Workspace is temporarily locked. Please contact support.',
     [LicenseStatus.ARCHIVED]: 'Workspace has been archived.',
     [LicenseStatus.DELETED]: 'Workspace has been deleted.',
   }

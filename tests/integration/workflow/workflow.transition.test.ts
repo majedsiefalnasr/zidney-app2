@@ -462,14 +462,11 @@ describe('T033 — US6: multiple entity types use same engine', () => {
       entityStatus: WorkflowState.COMPLETED,
       permissions: ['subject.review'],
     })
-    const subjectRes = await subjectApp.request(
-      transitionUrl('subject', ENTITY_ID),
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ target_state: 'UNDER_REVIEW' }),
-      }
-    )
+    const subjectRes = await subjectApp.request(transitionUrl('subject', ENTITY_ID), {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ target_state: 'UNDER_REVIEW' }),
+    })
     expect(subjectRes.status).toBe(200)
     const subjectBody = (await subjectRes.json()) as any
     expect(subjectBody.data.entityType).toBe('subject')
@@ -528,9 +525,7 @@ describe('T034 — Concurrent transitions: one success, one conflict', () => {
     const statuses = [first.status, second.status].sort()
     expect(statuses).toEqual([200, 400])
 
-    const failBody = (
-      second.status === 400 ? await second.json() : await first.json()
-    ) as any
+    const failBody = (second.status === 400 ? await second.json() : await first.json()) as any
     expect(failBody.success).toBe(false)
     expect(failBody.error.code).toBe('invalid_state_transition')
   })

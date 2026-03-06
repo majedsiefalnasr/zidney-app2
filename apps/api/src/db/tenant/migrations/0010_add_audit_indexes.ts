@@ -42,20 +42,18 @@ export const migration: MigrationConfig = {
           ON attempts (workspace_id, status, created_at DESC)`
     )
 
+    // biome-ignore lint/suspicious/noConsole: migration runner output
     console.log(`[${correlationId}] Created audit indexes on attempts table`)
   },
 
   down: async (db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
 
-    await db.execute(
-      sql`DROP INDEX IF EXISTS idx_attempt_completed_time CASCADE`
-    )
-    await db.execute(
-      sql`DROP INDEX IF EXISTS idx_attempt_by_user_recent CASCADE`
-    )
+    await db.execute(sql`DROP INDEX IF EXISTS idx_attempt_completed_time CASCADE`)
+    await db.execute(sql`DROP INDEX IF EXISTS idx_attempt_by_user_recent CASCADE`)
     await db.execute(sql`DROP INDEX IF EXISTS idx_attempt_by_status CASCADE`)
 
+    // biome-ignore lint/suspicious/noConsole: migration runner output
     console.log(`[${correlationId}] Dropped audit indexes from attempts table`)
   },
 }

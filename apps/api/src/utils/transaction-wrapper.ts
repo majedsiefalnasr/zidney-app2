@@ -1,6 +1,6 @@
 import { StudentStaffCounter } from '@zidney/domain-core/license'
 import { createLogger } from '@zidney/logger'
-import { Pool, PoolClient } from 'pg'
+import type { Pool, PoolClient } from 'pg'
 
 const logger = createLogger('transaction-wrapper')
 
@@ -167,10 +167,7 @@ export async function createUserWithLimitCheck(
     const userId = insertResult.rows[0].id
 
     // Step 5: Update licenses.updated_at to bust resolver cache
-    await masterClient.query(
-      'UPDATE licenses SET updated_at = $1 WHERE id = $2',
-      [now, license.id]
-    )
+    await masterClient.query('UPDATE licenses SET updated_at = $1 WHERE id = $2', [now, license.id])
 
     // Step 6: Commit both transactions
     await masterClient.query('COMMIT')
@@ -218,10 +215,7 @@ export async function createUserWithLimitCheck(
  * @param user_id User UUID
  * @returns Success or error
  */
-export async function softDeleteUser(
-  tenantDb: Pool,
-  user_id: string
-): Promise<TransactionResult> {
+export async function softDeleteUser(tenantDb: Pool, user_id: string): Promise<TransactionResult> {
   try {
     const result = await tenantDb.query(
       "UPDATE users SET status = 'DISABLED', updated_at = NOW() WHERE id = $1 RETURNING id",

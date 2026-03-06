@@ -89,12 +89,8 @@ export function validateSchemaCompatibility(
   product_schema_version: string
 ): { compatible: boolean; error?: string } {
   // Parse versions: expect format "1.2.3"
-  const snapshotParts = snapshot_version_tag
-    .split('.')
-    .map((v) => parseInt(v, 10))
-  const productParts = product_schema_version
-    .split('.')
-    .map((v) => parseInt(v, 10))
+  const snapshotParts = snapshot_version_tag.split('.').map((v) => parseInt(v, 10))
+  const productParts = product_schema_version.split('.').map((v) => parseInt(v, 10))
 
   if (snapshotParts.length !== 3 || productParts.length !== 3) {
     return {
@@ -103,16 +99,8 @@ export function validateSchemaCompatibility(
     }
   }
 
-  const [snapMajor, snapMinor, _snapPatch] = snapshotParts as [
-    number,
-    number,
-    number,
-  ]
-  const [prodMajor, prodMinor, _prodPatch] = productParts as [
-    number,
-    number,
-    number,
-  ]
+  const [snapMajor, snapMinor, _snapPatch] = snapshotParts as [number, number, number]
+  const [prodMajor, prodMinor, _prodPatch] = productParts as [number, number, number]
 
   // MAJOR must match
   if (snapMajor !== prodMajor) {
@@ -151,8 +139,7 @@ export function validateConcurrentModification(
   if (expected_updated_at.getTime() !== current_updated_at.getTime()) {
     return {
       safe: false,
-      error:
-        'License was modified by another transaction (concurrent modification detected)',
+      error: 'License was modified by another transaction (concurrent modification detected)',
     }
   }
 

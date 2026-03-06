@@ -1,3 +1,4 @@
+import { logger } from '@zidney/logger'
 import { sql } from 'drizzle-orm'
 import { up as applyRbacRolePermissionsComplete } from '../db/tenant/migrations/20260302_001_rbac_role_permissions_complete'
 
@@ -34,8 +35,7 @@ const TENANT_MIGRATIONS_1_1_0 = [
  * - CREATE rbac_audit_logs
  * - UPDATE schema_version 1.3.0 → 1.4.0
  */
-const TENANT_MIGRATIONS_1_4_0_NAME =
-  '20260302_001_rbac_role_permissions_complete'
+const TENANT_MIGRATIONS_1_4_0_NAME = '20260302_001_rbac_role_permissions_complete'
 
 /**
  * Apply tenant DB migrations during app boot
@@ -48,9 +48,7 @@ export async function registerAndApplyTenantMigrations(
   const correlationId = context?.correlationId || 'unknown'
   const failedTenants: string[] = []
 
-  console.log(
-    `[${correlationId}] Registering tenant migrations for schema 1.1.0`
-  )
+  logger.info(`[${correlationId}] Registering tenant migrations for schema 1.1.0`)
 
   // Iterate through all tenant connections
   for (const [workspaceSlug, db] of tenantConnections.entries()) {
@@ -64,7 +62,7 @@ export async function registerAndApplyTenantMigrations(
 
       // Skip if already at or beyond 1.1.0
       if (currentVersion >= '1.1.0') {
-        console.log(
+        logger.info(
           `[${correlationId}][${workspaceSlug}] Already at schema 1.1.0, skipping migrations`
         )
         continue
@@ -79,19 +77,14 @@ export async function registerAndApplyTenantMigrations(
               ON CONFLICT (name) DO NOTHING`
         )
 
-        console.log(
-          `[${correlationId}][${workspaceSlug}] Applied migration: ${migrationName}`
-        )
+        logger.info(`[${correlationId}][${workspaceSlug}] Applied migration: ${migrationName}`)
       }
 
-      console.log(
-        `[${correlationId}][${workspaceSlug}] Schema version updated to 1.1.0`
-      )
+      logger.info(`[${correlationId}][${workspaceSlug}] Schema version updated to 1.1.0`)
     } catch (error) {
-      console.error(
-        `[${correlationId}][${workspaceSlug}] Migration failed:`,
-        error
-      )
+      logger.error(`[${correlationId}][${workspaceSlug}] Migration failed:`, {
+        error,
+      })
       failedTenants.push(workspaceSlug)
     }
   }
@@ -102,9 +95,7 @@ export async function registerAndApplyTenantMigrations(
   for (const [workspaceSlug, db] of tenantConnections.entries()) {
     try {
       // Query schema_version from the canonical schema_version table
-      const versionResult = await db.execute(
-        sql`SELECT version FROM schema_version LIMIT 1`
-      )
+      const versionResult = await db.execute(sql`SELECT version FROM schema_version LIMIT 1`)
 
       const currentVersion = (versionResult?.[0]?.version as string) || '0.0.0'
 
@@ -138,14 +129,13 @@ export async function registerAndApplyTenantMigrations(
             ON CONFLICT (name) DO NOTHING`
       )
 
-      console.log(
+      logger.info(
         `[${correlationId}][${workspaceSlug}] Applied migration: ${TENANT_MIGRATIONS_1_4_0_NAME} (schema 1.3.0 → 1.4.0)`
       )
     } catch (error) {
-      console.error(
-        `[${correlationId}][${workspaceSlug}] STAGE_21 migration 1.4.0 failed:`,
-        error
-      )
+      logger.error(`[${correlationId}][${workspaceSlug}] STAGE_21 migration 1.4.0 failed:`, {
+        error,
+      })
       failedTenants.push(workspaceSlug)
     }
   }
@@ -153,11 +143,11 @@ export async function registerAndApplyTenantMigrations(
   // Block app startup if any tenant migration failed
   if (failedTenants.length > 0) {
     const message = `Tenant migrations failed for: ${failedTenants.join(', ')}. App cannot start.`
-    console.error(`[${correlationId}] ${message}`)
+    logger.error(`[${correlationId}] ${message}`)
     throw new Error(message)
   }
 
-  console.log(`[${correlationId}] All tenant migrations completed successfully`)
+  logger.info(`[${correlationId}] All tenant migrations completed successfully`)
 }
 
 /**
@@ -180,17 +170,14 @@ export async function verifyTenantSchemaVersion(
     const compatible = version >= '1.1.0'
 
     if (!compatible) {
-      console.warn(
+      logger.warn(
         `[${correlationId}][${workspaceId}] Schema version ${version} incompatible with app 1.1.0`
       )
     }
 
     return { compatible, version }
   } catch (error) {
-    console.error(
-      `[${correlationId}][${workspaceId}] Failed to verify schema:`,
-      error
-    )
+    logger.error(`[${correlationId}][${workspaceId}] Failed to verify schema:`, { error })
     return { compatible: false, version: 'unknown' }
   }
 }

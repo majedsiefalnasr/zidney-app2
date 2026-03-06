@@ -88,14 +88,8 @@ export function usePermission() {
    * @param action  - Permission action ('view' | 'create' | 'edit' | 'delete')
    * @returns boolean — defaults to false (deny-by-default in UI)
    */
-  function can(
-    module: string,
-    action: 'view' | 'create' | 'edit' | 'delete'
-  ): boolean {
-    return (
-      permissions.value[module]?.[`can_${action}` as keyof PermissionFlags] ??
-      false
-    )
+  function can(module: string, action: 'view' | 'create' | 'edit' | 'delete'): boolean {
+    return permissions.value[module]?.[`can_${action}` as keyof PermissionFlags] ?? false
   }
 
   return { permissions, loading, error, fetchPermissions, can }

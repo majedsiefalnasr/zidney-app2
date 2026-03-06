@@ -21,7 +21,7 @@ describe('Unit: Products - Service Edge Cases (T063)', () => {
         description: null,
       }
 
-      const isValid = product.name && product.name.en
+      const isValid = product.name?.en
       expect(isValid).toBe(true)
     })
 
@@ -138,21 +138,20 @@ describe('Unit: Products - Service Edge Cases (T063)', () => {
 
   describe('Description Edge Cases', () => {
     it('should accept empty description string', async () => {
-      const description = ''
+      const _description = ''
       // Empty description is allowed, treated as no description
       const isValid = true
       expect(isValid).toBe(true)
     })
 
     it('should accept very long description', async () => {
-      const description = 'a'.repeat(5000)
+      const _description = 'a'.repeat(5000)
       const isValid = true
       expect(isValid).toBe(true)
     })
 
     it('should handle description with special formatting', async () => {
-      const description =
-        'Product description\nwith newlines\n\nand multiple paragraphs'
+      const description = 'Product description\nwith newlines\n\nand multiple paragraphs'
       const isValid = description.length > 0
       expect(isValid).toBe(true)
     })

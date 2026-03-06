@@ -21,12 +21,12 @@ export async function executeSchemaVersionIncrement(db: any, context: any) {
   )
 
   const current = currentVersion?.[0]?.version || '1.0.0'
+  // biome-ignore lint/suspicious/noConsole: migration runner output
   console.log(`[${correlationId}] Current master schema version: ${current}`)
 
   if (current !== '1.0.0') {
-    console.warn(
-      `[${correlationId}] Schema version already >= 1.0.0. Skipping migration.`
-    )
+    // biome-ignore lint/suspicious/noConsole: migration runner output
+    console.warn(`[${correlationId}] Schema version already >= 1.0.0. Skipping migration.`)
     return
   }
 
@@ -37,9 +37,8 @@ export async function executeSchemaVersionIncrement(db: any, context: any) {
         ON CONFLICT DO NOTHING`
   )
 
-  console.log(
-    `[${correlationId}] Master schema version incremented: 1.0.0 → 1.1.0`
-  )
+  // biome-ignore lint/suspicious/noConsole: migration runner output
+  console.log(`[${correlationId}] Master schema version incremented: 1.0.0 → 1.1.0`)
 }
 
 /**

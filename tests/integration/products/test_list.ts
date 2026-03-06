@@ -11,18 +11,14 @@
  */
 
 import * as productService from '@zidney/domain-core/products/productService'
+import { Module } from '@zidney/types/enums/Module'
 import {
-  CreateProductInput,
-  ProductQueryFilters,
+  type CreateProductInput,
+  type ProductQueryFilters,
   ProductStatus,
 } from '@zidney/types/products/Product'
-import { Module } from '@zidney/types/enums/Module'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import {
-  cleanupTestContext,
-  createTestContext,
-  TestContext,
-} from '../../test-helpers'
+import { cleanupTestContext, createTestContext, type TestContext } from '../../test-helpers'
 
 describe('T053: Product Listing Integration Tests', () => {
   let ctx: TestContext
@@ -58,11 +54,7 @@ describe('T053: Product Listing Integration Tests', () => {
         enabled_modules: [Module.MCQ],
       }
 
-      const activeProduct = await productService.createProduct(
-        dbClient,
-        activeInput,
-        ctx.userId
-      )
+      const activeProduct = await productService.createProduct(dbClient, activeInput, ctx.userId)
       const inactiveProduct = await productService.createProduct(
         dbClient,
         inactiveInput,
@@ -153,18 +145,8 @@ describe('T053: Product Listing Integration Tests', () => {
         ctx.userId
       )
 
-      await productService.changeProductStatus(
-        dbClient,
-        p3.id,
-        ProductStatus.INACTIVE,
-        ctx.userId
-      )
-      await productService.changeProductStatus(
-        dbClient,
-        p4.id,
-        ProductStatus.INACTIVE,
-        ctx.userId
-      )
+      await productService.changeProductStatus(dbClient, p3.id, ProductStatus.INACTIVE, ctx.userId)
+      await productService.changeProductStatus(dbClient, p4.id, ProductStatus.INACTIVE, ctx.userId)
     })
 
     it('should filter by status=ACTIVE', async () => {
@@ -392,12 +374,7 @@ describe('T053: Product Listing Integration Tests', () => {
         ctx.userId
       )
 
-      await productService.changeProductStatus(
-        dbClient,
-        p2.id,
-        ProductStatus.INACTIVE,
-        ctx.userId
-      )
+      await productService.changeProductStatus(dbClient, p2.id, ProductStatus.INACTIVE, ctx.userId)
 
       const result = await productService.listProducts(dbClient, {
         status: ProductStatus.ACTIVE,

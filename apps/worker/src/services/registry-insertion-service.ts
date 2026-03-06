@@ -9,7 +9,7 @@
  * If this fails, the workspace is orphaned (DB exists but not registered).
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 /**
  * Registry Insertion Result

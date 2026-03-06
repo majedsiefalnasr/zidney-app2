@@ -35,15 +35,8 @@ const NO_RECONNECT_CODES = new Set([1008, 1011])
  * Creates a managed WebSocket client that connects to /ws/backoffice.
  * Returns a cleanup function to close the connection.
  */
-export function createBackofficeWsClient(
-  options: BackofficeWsOptions = {}
-): () => void {
-  const {
-    onTerminated,
-    onMessage,
-    reconnectDelayMs = 3000,
-    maxReconnectAttempts = 5,
-  } = options
+export function createBackofficeWsClient(options: BackofficeWsOptions = {}): () => void {
+  const { onTerminated, onMessage, reconnectDelayMs = 3000, maxReconnectAttempts = 5 } = options
 
   let ws: WebSocket | null = null
   let reconnectAttempts = 0

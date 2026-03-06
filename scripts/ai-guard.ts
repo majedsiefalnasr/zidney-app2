@@ -17,8 +17,8 @@
  *  - Architecture drift → FAIL
  */
 
-import { execSync } from 'child_process'
-import { readFileSync } from 'fs'
+import { execSync } from 'node:child_process'
+import { readFileSync } from 'node:fs'
 
 function getCurrentBranch(): string {
   try {
@@ -63,8 +63,7 @@ type ArchitectureBrain = {
   edges?: { from: string; to: string }[]
 }
 
-const CONTRACT_PATH =
-  'docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json'
+const CONTRACT_PATH = 'docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json'
 
 const ARCH_MAP_PATH = 'docs/architecture/intelligence/ARCHITECTURE_MAP.json'
 
@@ -102,9 +101,7 @@ function getChangedFiles(): string[] {
       .split('\n')
       .map((f) => f.trim())
       .filter(Boolean)
-      .filter(
-        (f) => f.endsWith('.ts') || f.endsWith('.tsx') || f.endsWith('.vue')
-      )
+      .filter((f) => f.endsWith('.ts') || f.endsWith('.tsx') || f.endsWith('.vue'))
   } catch {
     return []
   }
@@ -173,7 +170,7 @@ function resolveModulePath(module: string): string | null {
 
 function validateArchitectureMap(
   filePath: string,
-  fileModule: string,
+  _fileModule: string,
   imports: string[],
   archMap: ArchitectureMap
 ): string[] {
@@ -193,15 +190,11 @@ function validateArchitectureMap(
     if (!target) continue
 
     if (forbidden.includes(target)) {
-      violations.push(
-        `ARCH_MAP forbidden dependency: ${modulePath} → ${target}`
-      )
+      violations.push(`ARCH_MAP forbidden dependency: ${modulePath} → ${target}`)
     }
 
     if (allowed.length > 0 && !allowed.includes(target)) {
-      violations.push(
-        `ARCH_MAP dependency not allowed: ${modulePath} → ${target}`
-      )
+      violations.push(`ARCH_MAP dependency not allowed: ${modulePath} → ${target}`)
     }
   }
 
@@ -225,9 +218,7 @@ function validateRules(
     if (!module) continue
 
     if (forbidden.includes(module)) {
-      violations.push(
-        `${ruleType} violation: ${fileModule} → ${module} is forbidden`
-      )
+      violations.push(`${ruleType} violation: ${fileModule} → ${module} is forbidden`)
     }
   }
 
@@ -251,16 +242,14 @@ function validateCrossAppImports(
 
     // If an app imports another app directly → violation
     if (imp.startsWith('apps/') && module !== fileModule) {
-      violations.push(
-        `Cross-app violation: apps/${fileModule} → apps/${module} is forbidden`
-      )
+      violations.push(`Cross-app violation: apps/${fileModule} → apps/${module} is forbidden`)
     }
   }
 
   return violations
 }
 
-function validateRelativeLeaks(filePath: string, imports: string[]): string[] {
+function validateRelativeLeaks(_filePath: string, imports: string[]): string[] {
   const violations: string[] = []
 
   for (const imp of imports) {
@@ -278,10 +267,7 @@ function validateRelativeLeaks(filePath: string, imports: string[]): string[] {
   return violations
 }
 
-function getModuleDepsFromBrain(
-  modulePath: string,
-  brain: ArchitectureBrain
-): string[] {
+function getModuleDepsFromBrain(modulePath: string, brain: ArchitectureBrain): string[] {
   if (!brain?.edges) return []
 
   return brain.edges.filter((e) => e.from === modulePath).map((e) => e.to)
@@ -301,9 +287,7 @@ function validateBranchNaming(changedFiles: string[]): void {
 
   // Zidney Hard Mode requires spec branches for stage work
   if (!branch.startsWith('spec/')) {
-    console.error(
-      '\nAI Guard: Invalid branch for architecture-controlled changes.'
-    )
+    console.error('\nAI Guard: Invalid branch for architecture-controlled changes.')
     console.error(`Current branch: ${branch}`)
     console.error('Required pattern: spec/<stage-name>')
     console.error('Example: spec/005-tenant-provisioning-service\n')
@@ -341,9 +325,7 @@ function runGuard() {
 
   const brain = loadArchitectureBrain()
   if (brain) {
-    console.log(
-      'AI Guard: using ai-architecture-brain.json for rule validation.'
-    )
+    console.log('AI Guard: using ai-architecture-brain.json for rule validation.')
   }
 
   const contract = brain?.rules
@@ -367,9 +349,12 @@ function runGuard() {
 
     if (!fileModule) continue
 
-    let imports = extractImports(file)
+    // Raw imports from source file — used for relative-leak checks (must always be source-based)
+    const rawImports = extractImports(file)
 
-    // Prefer architecture brain graph if available
+    let imports = rawImports
+
+    // Prefer architecture brain graph if available for cross-layer/dep/arch-map checks
     if (brain) {
       const modulePath = resolveModulePath(file)
 
@@ -382,20 +367,12 @@ function runGuard() {
       }
     }
 
-    const archMapViolations = validateArchitectureMap(
-      file,
-      fileModule,
-      imports,
-      archMap
-    )
+    const archMapViolations = validateArchitectureMap(file, fileModule, imports, archMap)
 
-    const crossAppViolations = validateCrossAppImports(
-      fileModule,
-      file,
-      imports
-    )
+    const crossAppViolations = validateCrossAppImports(fileModule, file, imports)
 
-    const relativeLeakViolations = validateRelativeLeaks(file, imports)
+    // Relative leak check always uses raw source imports — brain paths are module IDs, not import strings
+    const relativeLeakViolations = validateRelativeLeaks(file, rawImports)
 
     const dependencyViolations = validateRules(
       'Dependency',
@@ -427,9 +404,7 @@ function runGuard() {
       console.error(' -', v)
     }
 
-    console.error(
-      '\nCommit rejected by Zidney AI Guard. Fix architecture violations.'
-    )
+    console.error('\nCommit rejected by Zidney AI Guard. Fix architecture violations.')
 
     process.exit(1)
   }

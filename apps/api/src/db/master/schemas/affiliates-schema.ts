@@ -37,9 +37,7 @@ export const affiliates = pgTable(
       precision: 5,
       scale: 2,
     }).notNull(),
-    allow_with_other_discounts: boolean('allow_with_other_discounts')
-      .notNull()
-      .default(false),
+    allow_with_other_discounts: boolean('allow_with_other_discounts').notNull().default(false),
     usage_limit_total: integer('usage_limit_total'),
     usage_limit_per_client: integer('usage_limit_per_client'),
     usage_count: integer('usage_count').notNull().default(0),
@@ -47,20 +45,13 @@ export const affiliates = pgTable(
     end_date: timestamp('end_date', { withTimezone: true }).notNull(),
     status: varchar('status', { length: 20 }).notNull().default('ACTIVE'),
     description: text('description'),
-    created_at: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updated_at: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
+    updated_at: timestamp('updated_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
     promoCodeIndex: index('idx_affiliates_promo_code').on(table.promo_code),
     statusIndex: index('idx_affiliates_status').on(table.status),
-    dateRangeIndex: index('idx_affiliates_date_range').on(
-      table.start_date,
-      table.end_date
-    ),
+    dateRangeIndex: index('idx_affiliates_date_range').on(table.start_date, table.end_date),
   })
 )
 
@@ -92,21 +83,15 @@ export const affiliate_usages = pgTable(
       precision: 12,
       scale: 2,
     }).notNull(),
-    created_at: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
-    affiliateIdIndex: index('idx_affiliate_usages_affiliate_id').on(
-      table.affiliate_id
-    ),
+    affiliateIdIndex: index('idx_affiliate_usages_affiliate_id').on(table.affiliate_id),
     clientAffiliateIndex: index('idx_affiliate_usages_client_affiliate').on(
       table.client_id,
       table.affiliate_id
     ),
-    createdAtIndex: index('idx_affiliate_usages_created_at').on(
-      table.created_at
-    ),
+    createdAtIndex: index('idx_affiliate_usages_created_at').on(table.created_at),
     fkAffiliateId: foreignKey({
       columns: [table.affiliate_id],
       foreignColumns: [affiliates.id],
@@ -131,21 +116,13 @@ export const affiliate_admin_audit = pgTable(
     old_values: text('old_values'), // JSONB stored as text (Drizzle limitation)
     new_values: text('new_values'), // JSONB stored as text
     ip_address: varchar('ip_address', { length: 45 }), // IPv4 or IPv6
-    created_at: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    created_at: timestamp('created_at', { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
-    affiliateIdIndex: index('idx_affiliate_admin_audit_affiliate_id').on(
-      table.affiliate_id
-    ),
-    adminIdIndex: index('idx_affiliate_admin_audit_admin_id').on(
-      table.admin_id
-    ),
+    affiliateIdIndex: index('idx_affiliate_admin_audit_affiliate_id').on(table.affiliate_id),
+    adminIdIndex: index('idx_affiliate_admin_audit_admin_id').on(table.admin_id),
     actionIndex: index('idx_affiliate_admin_audit_action').on(table.action),
-    createdAtIndex: index('idx_affiliate_admin_audit_created_at').on(
-      table.created_at
-    ),
+    createdAtIndex: index('idx_affiliate_admin_audit_created_at').on(table.created_at),
     fkAffiliateId: foreignKey({
       columns: [table.affiliate_id],
       foreignColumns: [affiliates.id],

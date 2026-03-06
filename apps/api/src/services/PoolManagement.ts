@@ -8,7 +8,7 @@
 import { createLogger } from '@zidney/logger'
 import type { Context, MiddlewareHandler, Next } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 const logger = createLogger('pool-management')
 
@@ -17,21 +17,10 @@ const logger = createLogger('pool-management')
 // ============================================================================
 
 export class SchemaVersionCheckMiddleware {
-  // @ts-ignore: TS6133 - stored in constructor but accessed via specific methods [INFRA-001]
-  private _master_pool: Pool
   private min_schema_version: string = '1.0.0'
   private max_schema_version: string = '2.0.0'
-  // @ts-ignore: TS6133 - stored in constructor but accessed via specific methods [INFRA-001]
-  private _schema_cache: Map<string, { version: string; timestamp: number }> =
-    new Map()
-  // @ts-ignore: TS6133 - stored in constructor but accessed via specific methods [INFRA-001]
-  private _cache_ttl_ms: number = 60 * 1000 // 1 minute
 
-  constructor(
-    master_pool: Pool,
-    min_version: string = '1.0.0',
-    max_version: string = '2.0.0'
-  ) {
+  constructor(master_pool: Pool, min_version: string = '1.0.0', max_version: string = '2.0.0') {
     this._master_pool = master_pool
     this.min_schema_version = min_version
     this.max_schema_version = max_version
@@ -50,9 +39,7 @@ export class SchemaVersionCheckMiddleware {
         LIMIT 1
       `)
 
-      return result.rows.length > 0
-        ? result.rows[0].current_schema_version
-        : null
+      return result.rows.length > 0 ? result.rows[0].current_schema_version : null
     } catch (error) {
       logger.error('Failed to query schema version', {
         error: error instanceof Error ? error.message : String(error),
@@ -67,16 +54,8 @@ export class SchemaVersionCheckMiddleware {
    * Compare semantic versions
    */
   private compareVersions(v1: string, v2: string): number {
-    const [major1, minor1, patch1] = v1.split('.').map(Number) as [
-      number,
-      number,
-      number,
-    ]
-    const [major2, minor2, patch2] = v2.split('.').map(Number) as [
-      number,
-      number,
-      number,
-    ]
+    const [major1, minor1, patch1] = v1.split('.').map(Number) as [number, number, number]
+    const [major2, minor2, patch2] = v2.split('.').map(Number) as [number, number, number]
 
     if (major1 !== major2) return major1 - major2
     if (minor1 !== minor2) return minor1 - minor2
@@ -92,14 +71,8 @@ export class SchemaVersionCheckMiddleware {
     error_code: string
     message: string
   } {
-    const min_cmp = this.compareVersions(
-      tenant_version,
-      this.min_schema_version
-    )
-    const max_cmp = this.compareVersions(
-      tenant_version,
-      this.max_schema_version
-    )
+    const min_cmp = this.compareVersions(tenant_version, this.min_schema_version)
+    const max_cmp = this.compareVersions(tenant_version, this.max_schema_version)
 
     if (min_cmp < 0) {
       // Tenant schema too old
@@ -281,18 +254,13 @@ export class PoolLifecycleManager {
   /**
    * Drain pool gracefully (wait for in-flight queries)
    */
-  async drainPoolGracefully(
-    slug: string,
-    timeout_ms: number = 10000
-  ): Promise<void> {
+  async drainPoolGracefully(slug: string, timeout_ms: number = 10000): Promise<void> {
     const pool = this.manager.getPool(slug)
     if (!pool) return
 
     try {
       // Simple drain: just wait for in-flight connections
-      await new Promise((resolve) =>
-        setTimeout(resolve, Math.min(timeout_ms / 10, 1000))
-      )
+      await new Promise((resolve) => setTimeout(resolve, Math.min(timeout_ms / 10, 1000)))
       return
     } catch (error) {
       logger.error('Failed to drain pool', {

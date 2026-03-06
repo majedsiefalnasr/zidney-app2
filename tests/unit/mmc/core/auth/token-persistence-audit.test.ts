@@ -17,8 +17,7 @@ import { looksLikeToken } from '../../../../../apps/mmc/src/core/auth/token-reda
 import type { AuthUser } from '../../../../../apps/mmc/src/core/auth/types'
 import { defineAuthStore } from '../../../../../apps/mmc/src/core/state/auth.store'
 
-const FAKE_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEifQ.fakeSignature'
+const FAKE_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJ1c2VyLTEifQ.fakeSignature'
 
 const LOGIN_ROUTE = 'mmc-login'
 
@@ -33,9 +32,7 @@ function makeAuthService(user: AuthUser | null = null): IAuthService {
       token: FAKE_TOKEN,
       user: user ?? { id: 'u1', email: 'test@test.com' },
     }),
-    fetchProfile: vi
-      .fn()
-      .mockResolvedValue(user ?? { id: 'u1', email: 'test@test.com' }),
+    fetchProfile: vi.fn().mockResolvedValue(user ?? { id: 'u1', email: 'test@test.com' }),
   } as unknown as IAuthService
 }
 
@@ -64,9 +61,7 @@ function makeRefreshManager(): IRefreshManager {
   return { refresh: vi.fn() } as unknown as IRefreshManager
 }
 
-function tokenWasWrittenToStorage(
-  storageFn: ReturnType<typeof vi.spyOn>
-): boolean {
+function tokenWasWrittenToStorage(storageFn: ReturnType<typeof vi.spyOn>): boolean {
   const calls = storageFn.mock.calls as Array<[string, string]>
   return calls.some(([, value]) => {
     if (typeof value !== 'string') return false
@@ -98,12 +93,8 @@ describe('token persistence audit (mmc) — no token reaches Web Storage', () =>
   })
 
   function makeStore() {
-    const useStore = defineAuthStore(
-      makeAuthService(),
-      tokenManager,
-      router,
-      LOGIN_ROUTE,
-      () => makeRefreshManager()
+    const useStore = defineAuthStore(makeAuthService(), tokenManager, router, LOGIN_ROUTE, () =>
+      makeRefreshManager()
     )
     return useStore(pinia)
   }

@@ -16,7 +16,7 @@
  * - Propagates to all logs and audit trails
  */
 
-import { Context, Next } from 'hono'
+import type { Context, Next } from 'hono'
 import { v4 as uuidv4 } from 'uuid'
 
 export interface RequestContext {
@@ -39,10 +39,7 @@ export interface RequestContext {
  * Extracts correlation ID from headers or generates new UUID.
  * All request-scoped operations are linked via this ID.
  */
-export async function correlationIdMiddleware(
-  ctx: Context,
-  next: Next
-): Promise<void> {
+export async function correlationIdMiddleware(ctx: Context, next: Next): Promise<void> {
   // Extract correlation ID from request header or generate new one
   const correlationId = ctx.req.header('X-Correlation-Id') || uuidv4()
 

@@ -186,7 +186,7 @@ describe('Contract: Products - OpenAPI Compliance (T067)', () => {
       Object.entries(statusMap).forEach(([status, codes]) => {
         codes.forEach((code) => {
           const response = {
-            status: parseInt(status),
+            status: parseInt(status, 10),
             body: { error: { code } },
           }
           expect(response.status).toBeGreaterThanOrEqual(400)

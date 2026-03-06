@@ -5,8 +5,9 @@
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  * Task: T035
  */
-import { useBackofficeUiStore } from '@/core/state/ui.store'
+
 import { describe, expect, it } from 'vitest'
+import { useBackofficeUiStore } from '@/core/state/ui.store'
 import { useIsolatedPinia } from '../store-test-helper'
 
 describe('useBackofficeUiStore — layout state', () => {

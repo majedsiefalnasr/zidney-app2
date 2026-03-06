@@ -32,13 +32,7 @@ const handleFilter = (status: string) => {
   emit('filter', status)
 }
 
-const statuses = [
-  'all',
-  'ACTIVE',
-  'SOFT_LOCKED',
-  'ARCHIVED',
-  'PENDING_PROVISION',
-]
+const statuses = ['all', 'ACTIVE', 'SOFT_LOCKED', 'ARCHIVED', 'PENDING_PROVISION']
 </script>
 
 <template>

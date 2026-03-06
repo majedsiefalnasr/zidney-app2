@@ -20,8 +20,7 @@ import {
 } from '../../apps/api/src/modules/workspace-settings/workspace-settings.service'
 
 // Test encryption key
-const TEST_ENCRYPTION_KEY =
-  'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2'
+const TEST_ENCRYPTION_KEY = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2'
 
 // ---------------------------------------------------------------------------
 // Mock DB helpers
@@ -56,11 +55,7 @@ function createMockDb(overrides: Partial<Record<string, any>> = {}) {
     query: vi.fn(async (sql: string, params?: unknown[]) => {
       queries.push({ sql, params })
 
-      if (
-        sql.includes('BEGIN') ||
-        sql.includes('COMMIT') ||
-        sql.includes('ROLLBACK')
-      ) {
+      if (sql.includes('BEGIN') || sql.includes('COMMIT') || sql.includes('ROLLBACK')) {
         return { rows: [], rowCount: 0 }
       }
 
@@ -175,9 +170,7 @@ describe('getWorkspaceSettings', () => {
 
     // Credentials NOT returned
     expect((result.payment_settings as any).encrypted_api_key).toBeUndefined()
-    expect(
-      (result.payment_settings as any).encrypted_secret_key
-    ).toBeUndefined()
+    expect((result.payment_settings as any).encrypted_secret_key).toBeUndefined()
     // Boolean sentinels returned
     expect(result.payment_settings.has_api_key).toBe(true)
     expect(result.payment_settings.has_secret_key).toBe(true)
@@ -240,10 +233,7 @@ describe('updateSettingsGroup', () => {
 
     // Verify audit entry was inserted
     expect(
-      queries.some(
-        (s: string) =>
-          s.includes('INSERT') && s.includes('workspace_settings_audit')
-      )
+      queries.some((s: string) => s.includes('INSERT') && s.includes('workspace_settings_audit'))
     ).toBe(true)
   })
 
@@ -321,13 +311,10 @@ describe('updateSettingsGroup', () => {
     const commitIdx = queries.findIndex((s: string) => s.includes('COMMIT'))
     const updateIdx = queries.findIndex(
       (s: string) =>
-        s.includes('UPDATE') &&
-        s.includes('workspace_settings') &&
-        !s.includes('audit')
+        s.includes('UPDATE') && s.includes('workspace_settings') && !s.includes('audit')
     )
     const auditIdx = queries.findIndex(
-      (s: string) =>
-        s.includes('INSERT') && s.includes('workspace_settings_audit')
+      (s: string) => s.includes('INSERT') && s.includes('workspace_settings_audit')
     )
 
     expect(beginIdx).toBeLessThan(updateIdx)
@@ -464,8 +451,7 @@ describe('updateSettingsGroup — audit', () => {
     )
 
     const auditInserts = db._queries.filter(
-      (q: any) =>
-        q.sql.includes('INSERT') && q.sql.includes('workspace_settings_audit')
+      (q: any) => q.sql.includes('INSERT') && q.sql.includes('workspace_settings_audit')
     )
     expect(auditInserts).toHaveLength(1)
   })
@@ -486,8 +472,7 @@ describe('updateSettingsGroup — audit', () => {
     )
 
     const auditInsert = db._queries.find(
-      (q: any) =>
-        q.sql.includes('INSERT') && q.sql.includes('workspace_settings_audit')
+      (q: any) => q.sql.includes('INSERT') && q.sql.includes('workspace_settings_audit')
     )
     expect(auditInsert).toBeDefined()
     const params = auditInsert!.params!
@@ -514,8 +499,7 @@ describe('updateSettingsGroup — audit', () => {
     )
 
     const auditInsert = db._queries.find(
-      (q: any) =>
-        q.sql.includes('INSERT') && q.sql.includes('workspace_settings_audit')
+      (q: any) => q.sql.includes('INSERT') && q.sql.includes('workspace_settings_audit')
     )
     const changes = JSON.parse(auditInsert!.params![4] as string)
     expect(Array.isArray(changes)).toBe(true)
@@ -565,13 +549,11 @@ describe('updateSettingsGroup — audit', () => {
     )
 
     const auditInsert = db._queries.find(
-      (q: any) =>
-        q.sql.includes('INSERT') && q.sql.includes('workspace_settings_audit')
+      (q: any) => q.sql.includes('INSERT') && q.sql.includes('workspace_settings_audit')
     )
     const changes = JSON.parse(auditInsert!.params![4] as string)
     const credentialChanges = changes.filter(
-      (c: any) =>
-        c.field === 'encrypted_api_key' || c.field === 'encrypted_secret_key'
+      (c: any) => c.field === 'encrypted_api_key' || c.field === 'encrypted_secret_key'
     )
 
     for (const change of credentialChanges) {
@@ -601,9 +583,7 @@ describe('getSettingsAudit', () => {
       user_id: 'user-001',
       settings_group: 'general',
       config_version: i + 1,
-      changes: [
-        { field: 'app_name', old_value: `Old ${i}`, new_value: `New ${i}` },
-      ],
+      changes: [{ field: 'app_name', old_value: `Old ${i}`, new_value: `New ${i}` }],
       request_id: `corr-${i}`,
       ip_address: '127.0.0.1',
       user_agent: 'TestAgent/1.0',
@@ -626,8 +606,7 @@ describe('getSettingsAudit', () => {
 
     // Verify the query includes group filter
     const selectQuery = db._queries.find(
-      (q: any) =>
-        q.sql.includes('SELECT') && q.sql.includes('workspace_settings_audit')
+      (q: any) => q.sql.includes('SELECT') && q.sql.includes('workspace_settings_audit')
     )
     expect(selectQuery?.sql).toContain('settings_group')
   })
@@ -670,8 +649,7 @@ describe('updateSettingsGroup — branding', () => {
     )
 
     const auditInsert = db._queries.find(
-      (q: any) =>
-        q.sql.includes('INSERT') && q.sql.includes('workspace_settings_audit')
+      (q: any) => q.sql.includes('INSERT') && q.sql.includes('workspace_settings_audit')
     )
     expect(auditInsert).toBeDefined()
     expect(auditInsert!.params![2]).toBe('branding')
@@ -748,9 +726,7 @@ describe('updateSettingsGroup — payment encryption', () => {
     // Find the UPDATE query and verify the stored value is encrypted
     const updateQuery = db._queries.find(
       (q: any) =>
-        q.sql.includes('UPDATE') &&
-        q.sql.includes('payment_settings') &&
-        !q.sql.includes('audit')
+        q.sql.includes('UPDATE') && q.sql.includes('payment_settings') && !q.sql.includes('audit')
     )
     expect(updateQuery).toBeDefined()
     const storedData = JSON.parse(updateQuery!.params![0] as string)
@@ -797,9 +773,7 @@ describe('updateSettingsGroup — payment encryption', () => {
 
     const updateQuery = db._queries.find(
       (q: any) =>
-        q.sql.includes('UPDATE') &&
-        q.sql.includes('payment_settings') &&
-        !q.sql.includes('audit')
+        q.sql.includes('UPDATE') && q.sql.includes('payment_settings') && !q.sql.includes('audit')
     )
     const storedData = JSON.parse(updateQuery!.params![0] as string)
     expect(storedData.encrypted_api_key).toBeNull()
@@ -845,9 +819,7 @@ describe('updateSettingsGroup — payment encryption', () => {
 
     const updateQuery = db._queries.find(
       (q: any) =>
-        q.sql.includes('UPDATE') &&
-        q.sql.includes('payment_settings') &&
-        !q.sql.includes('audit')
+        q.sql.includes('UPDATE') && q.sql.includes('payment_settings') && !q.sql.includes('audit')
     )
     const storedData = JSON.parse(updateQuery!.params![0] as string)
     expect(storedData.encrypted_api_key).toBe(existingKey)
@@ -940,8 +912,7 @@ describe('Credential non-exposure', () => {
     )
 
     const auditInsert = db._queries.find(
-      (q: any) =>
-        q.sql.includes('INSERT') && q.sql.includes('workspace_settings_audit')
+      (q: any) => q.sql.includes('INSERT') && q.sql.includes('workspace_settings_audit')
     )
     expect(auditInsert).toBeDefined()
     const changes = JSON.parse(auditInsert!.params![4] as string)
@@ -951,9 +922,7 @@ describe('Credential non-exposure', () => {
     expect(changesStr).not.toContain('pk_live_secret_value')
     expect(changesStr).not.toContain('sk_live_secret_value')
 
-    const apiKeyChange = changes.find(
-      (c: any) => c.field === 'encrypted_api_key'
-    )
+    const apiKeyChange = changes.find((c: any) => c.field === 'encrypted_api_key')
     if (apiKeyChange) {
       expect(apiKeyChange.new_value).toBe('[REDACTED]')
     }
@@ -1029,23 +998,18 @@ describe('updateSettingsGroup — security', () => {
     // Verify the update stored analytics_opt_in = true
     const updateQuery = db._queries.find(
       (q: any) =>
-        q.sql.includes('UPDATE') &&
-        q.sql.includes('security_settings') &&
-        !q.sql.includes('audit')
+        q.sql.includes('UPDATE') && q.sql.includes('security_settings') && !q.sql.includes('audit')
     )
     const storedData = JSON.parse(updateQuery!.params![0] as string)
     expect(storedData.analytics_opt_in).toBe(true)
 
     // Verify audit entry was created
     const auditInsert = db._queries.find(
-      (q: any) =>
-        q.sql.includes('INSERT') && q.sql.includes('workspace_settings_audit')
+      (q: any) => q.sql.includes('INSERT') && q.sql.includes('workspace_settings_audit')
     )
     expect(auditInsert).toBeDefined()
     const changes = JSON.parse(auditInsert!.params![4] as string)
-    const analyticsChange = changes.find(
-      (c: any) => c.field === 'analytics_opt_in'
-    )
+    const analyticsChange = changes.find((c: any) => c.field === 'analytics_opt_in')
     if (analyticsChange) {
       expect(analyticsChange.new_value).toBe(true)
     }

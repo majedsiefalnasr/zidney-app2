@@ -8,9 +8,9 @@
  * Tracks DLQ trends for operational insights.
  */
 
-import { ProvisioningLogger } from '@zidney/logger/provisioning-logger'
-// @ts-ignore: LOGIC-BUG: dlq-handler is in ../handlers/dlq-handler, not ./dlq-handler — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
-import { DLQHandler } from './dlq-handler'
+import type { ProvisioningLogger } from '@zidney/logger/provisioning-logger'
+// @ts-expect-error: LOGIC-BUG: dlq-handler is in ../handlers/dlq-handler, not ./dlq-handler — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+import type { DLQHandler } from './dlq-handler'
 
 /**
  * DLQ processor configuration
@@ -46,11 +46,7 @@ export class DLQProcessor {
   private alerts: DLQAlert[] = []
   private alertCallbacks: Array<(alert: DLQAlert) => void> = []
 
-  constructor(
-    dlqHandler: DLQHandler,
-    logger: ProvisioningLogger,
-    config: DLQProcessorConfig = {}
-  ) {
+  constructor(dlqHandler: DLQHandler, logger: ProvisioningLogger, config: DLQProcessorConfig = {}) {
     this.dlqHandler = dlqHandler
     this.logger = logger
     this.config = {
@@ -80,9 +76,7 @@ export class DLQProcessor {
     try {
       while (this.isRunning) {
         await this.checkDLQ()
-        await new Promise((resolve) =>
-          setTimeout(resolve, this.config.checkIntervalMs)
-        )
+        await new Promise((resolve) => setTimeout(resolve, this.config.checkIntervalMs))
       }
     } finally {
       this.isRunning = false
@@ -106,8 +100,7 @@ export class DLQProcessor {
 
       // Check if DLQ is growing
       if (this.previousStats) {
-        const countIncrease =
-          stats.total_entries - this.previousStats.total_entries
+        const countIncrease = stats.total_entries - this.previousStats.total_entries
 
         if (countIncrease > 5) {
           this.emitAlert({
@@ -124,9 +117,7 @@ export class DLQProcessor {
       // Check absolute threshold
       if (stats.total_entries > this.config.alertThreshold) {
         const entries = await this.dlqHandler.getDLQEntries(stats.total_entries)
-        const affectedLicenses = [
-          ...new Set(entries.map((e: any) => e.license_id)),
-        ] as string[]
+        const affectedLicenses = [...new Set(entries.map((e: any) => e.license_id))] as string[]
 
         this.emitAlert({
           timestamp: new Date().toISOString(),
@@ -141,9 +132,7 @@ export class DLQProcessor {
       // Check for manual intervention needs
       if (stats.manual_intervention_count > 0) {
         const entries = await this.dlqHandler.getDLQEntries(stats.total_entries)
-        const manualEntries = entries.filter(
-          (e: any) => e.requires_manual_intervention
-        )
+        const manualEntries = entries.filter((e: any) => e.requires_manual_intervention)
         const affectedLicenses = [
           ...new Set(manualEntries.map((e: any) => e.license_id)),
         ] as string[]
@@ -246,10 +235,7 @@ export class DLQProcessor {
   /**
    * Get alerts by type
    */
-  getAlertsByType(
-    alertType: DLQAlert['alert_type'],
-    limit: number = 50
-  ): DLQAlert[] {
+  getAlertsByType(alertType: DLQAlert['alert_type'], limit: number = 50): DLQAlert[] {
     return this.alerts.filter((a) => a.alert_type === alertType).slice(-limit)
   }
 

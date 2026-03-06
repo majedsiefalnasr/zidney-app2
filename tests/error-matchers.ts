@@ -16,11 +16,7 @@ export interface RFC7807Error {
 /**
  * Custom Vitest matcher for RFC 7807 error format
  */
-export function toMatchRFC7807(
-  received: any,
-  expectedStatus: number,
-  expectedCode: string
-) {
+export function toMatchRFC7807(received: any, expectedStatus: number, expectedCode: string) {
   const pass =
     received &&
     received.status === expectedStatus &&

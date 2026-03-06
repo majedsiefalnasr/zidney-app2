@@ -22,7 +22,7 @@
  * - Division-level overrides deferred to Phase 2+
  */
 
-import { PermissionResult, RbacContext } from './types'
+import type { PermissionResult, RbacContext } from './types'
 
 /**
  * Check if user has a specific permission
@@ -65,8 +65,7 @@ export function evaluatePermission(
 
   // Check permission
   const hasPermission =
-    Array.isArray(context.permissions) &&
-    context.permissions.includes(requiredPermission)
+    Array.isArray(context.permissions) && context.permissions.includes(requiredPermission)
 
   return {
     allowed: hasPermission,
@@ -117,10 +116,7 @@ export function evaluateResourcePermission(
   // For now: Allow if permission granted (division checks deferred to Phase 2)
   if (resourceDivisionId && context.division_id) {
     // Student can only access resources in their division
-    if (
-      context.role === 'STUDENT' &&
-      context.division_id !== resourceDivisionId
-    ) {
+    if (context.role === 'STUDENT' && context.division_id !== resourceDivisionId) {
       return {
         allowed: false,
         reason: 'Student cannot access resources outside their division',
@@ -189,9 +185,7 @@ export function evaluatePermissions(
 
   if (requireAll) {
     // AND logic: All required permissions must be present
-    const hasAll = requiredPermissions.every((perm) =>
-      userPermissions.has(perm)
-    )
+    const hasAll = requiredPermissions.every((perm) => userPermissions.has(perm))
 
     return {
       allowed: hasAll,
@@ -351,13 +345,7 @@ export function getDefaultPermissionsForRole(role: string): string[] {
       'report:download',
       'division:view',
     ],
-    STAFF: [
-      'exam:view',
-      'question:view',
-      'user:manage',
-      'division:view',
-      'report:view',
-    ],
+    STAFF: ['exam:view', 'question:view', 'user:manage', 'division:view', 'report:view'],
     ADMIN: [
       'exam:create',
       'exam:edit',

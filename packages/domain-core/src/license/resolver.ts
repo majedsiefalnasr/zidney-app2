@@ -100,11 +100,7 @@ export class LicenseResolver {
       const license = this.mapRowToLicense(result.rows[0])
 
       // Cache result for 5 minutes (after successful query)
-      await this.redis.setex(
-        cacheKey,
-        CACHE_TTL_SECONDS,
-        JSON.stringify(license)
-      )
+      await this.redis.setex(cacheKey, CACHE_TTL_SECONDS, JSON.stringify(license))
 
       return license
     } catch (error) {
@@ -164,9 +160,7 @@ export class LicenseResolver {
    * @param workspace_slug - Globally unique workspace identifier
    * @returns ValidationResult
    */
-  async validateLicenseStatus(
-    workspace_slug: string
-  ): Promise<ValidationResult> {
+  async validateLicenseStatus(workspace_slug: string): Promise<ValidationResult> {
     const license = await this.getLicenseBySlug(workspace_slug)
 
     if (!license) {
@@ -190,8 +184,7 @@ export class LicenseResolver {
             valid: false,
             status: license.status,
             error_code: 'LICENSE_SOFT_LOCKED_EXPIRED',
-            error_message:
-              'Workspace access temporarily suspended (soft-lock expired)',
+            error_message: 'Workspace access temporarily suspended (soft-lock expired)',
             http_status: 403,
           }
         }
@@ -244,10 +237,7 @@ export class LicenseResolver {
    *
    * Logic: tenant_schema_version >= license.expected_schema_version
    */
-  async validateVersions(
-    workspace_slug: string,
-    tenant_schema_version: string
-  ): Promise<boolean> {
+  async validateVersions(workspace_slug: string, tenant_schema_version: string): Promise<boolean> {
     const license = await this.getLicenseBySlug(workspace_slug)
 
     if (!license) {
@@ -302,9 +292,7 @@ export class LicenseResolver {
    * @param version - Version string (e.g., "1.2.3" or "1.2.3-beta.1")
    * @returns { major, minor, patch } or null if invalid
    */
-  private parseSemVer(
-    version: string
-  ): { major: number; minor: number; patch: number } | null {
+  private parseSemVer(version: string): { major: number; minor: number; patch: number } | null {
     const match = version.match(/^(\d+)\.(\d+)\.(\d+)/)
     if (!match) return null
 
@@ -347,9 +335,7 @@ export class LicenseResolver {
       student_limit: row.student_limit,
       staff_limit: row.staff_limit,
       status: row.status as LicenseStatus,
-      soft_lock_until: row.soft_lock_until
-        ? new Date(row.soft_lock_until)
-        : null,
+      soft_lock_until: row.soft_lock_until ? new Date(row.soft_lock_until) : null,
       archived_at: row.archived_at ? new Date(row.archived_at) : null,
       deleted_at: row.deleted_at ? new Date(row.deleted_at) : null,
       expected_schema_version: row.expected_schema_version,

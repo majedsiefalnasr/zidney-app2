@@ -8,9 +8,9 @@
  * Task: T031 (Unit test for immutability trigger)
  */
 
+import { createLogger } from '@zidney/logger'
 import { Pool } from 'pg'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import { createLogger } from '@zidney/logger'
 
 const logger = createLogger('ImmutabilityTriggerTest')
 const ATTEMPTS_TABLE = 'test_immut_attempts'
@@ -33,8 +33,7 @@ const getTenantTestConnectionString = () => {
   const password = process.env.DB_PASSWORD || 'change-me-in-production'
   const host = process.env.DB_HOST || 'localhost'
   const port = process.env.DB_PORT || '5432'
-  const database =
-    process.env.DB_DATABASE || process.env.DB_NAME || 'zidney_master'
+  const database = process.env.DB_DATABASE || process.env.DB_NAME || 'zidney_master'
 
   return `postgresql://${user}:${password}@${host}:${port}/${database}`
 }
@@ -77,9 +76,7 @@ describe('Immutability Trigger Tests (T031)', () => {
       $$ LANGUAGE plpgsql
     `)
 
-    await pool.query(
-      `DROP TRIGGER IF EXISTS ${UPDATE_TRIGGER} ON ${EVENTS_TABLE}`
-    )
+    await pool.query(`DROP TRIGGER IF EXISTS ${UPDATE_TRIGGER} ON ${EVENTS_TABLE}`)
     await pool.query(`
       CREATE TRIGGER ${UPDATE_TRIGGER}
       BEFORE UPDATE ON ${EVENTS_TABLE}
@@ -93,9 +90,7 @@ describe('Immutability Trigger Tests (T031)', () => {
   afterAll(async () => {
     if (pool) {
       try {
-        await pool.query(
-          `DROP TRIGGER IF EXISTS ${UPDATE_TRIGGER} ON ${EVENTS_TABLE}`
-        )
+        await pool.query(`DROP TRIGGER IF EXISTS ${UPDATE_TRIGGER} ON ${EVENTS_TABLE}`)
         await pool.query(`DROP FUNCTION IF EXISTS ${IMMUTABLE_FN}()`)
         await pool.query(`DROP TABLE IF EXISTS ${EVENTS_TABLE}`)
         await pool.query(`DROP TABLE IF EXISTS ${ATTEMPTS_TABLE}`)
@@ -106,12 +101,8 @@ describe('Immutability Trigger Tests (T031)', () => {
   })
 
   beforeEach(async () => {
-    await pool.query(
-      `TRUNCATE TABLE ${EVENTS_TABLE}, ${ATTEMPTS_TABLE} CASCADE`
-    )
-    const result = await pool.query(
-      `INSERT INTO ${ATTEMPTS_TABLE} DEFAULT VALUES RETURNING id`
-    )
+    await pool.query(`TRUNCATE TABLE ${EVENTS_TABLE}, ${ATTEMPTS_TABLE} CASCADE`)
+    const result = await pool.query(`INSERT INTO ${ATTEMPTS_TABLE} DEFAULT VALUES RETURNING id`)
     attemptId = result.rows[0].id
   })
 
@@ -141,10 +132,9 @@ describe('Immutability Trigger Tests (T031)', () => {
     const eventId = insertResult.rows[0].id
 
     try {
-      await pool.query(
-        `UPDATE ${EVENTS_TABLE} SET event_payload = '{"answer": 2}' WHERE id = $1`,
-        [eventId]
-      )
+      await pool.query(`UPDATE ${EVENTS_TABLE} SET event_payload = '{"answer": 2}' WHERE id = $1`, [
+        eventId,
+      ])
       expect.fail('UPDATE should have failed due to immutability trigger')
     } catch (error: unknown) {
       const pgError = error as { code?: string }
@@ -163,10 +153,7 @@ describe('Immutability Trigger Tests (T031)', () => {
     )
 
     const eventId = result.rows[0].id
-    const deleteResult = await pool.query(
-      `DELETE FROM ${EVENTS_TABLE} WHERE id = $1`,
-      [eventId]
-    )
+    const deleteResult = await pool.query(`DELETE FROM ${EVENTS_TABLE} WHERE id = $1`, [eventId])
 
     expect(deleteResult.rowCount).toBe(1)
     logger.info('DELETE test passed')

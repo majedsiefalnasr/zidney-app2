@@ -9,14 +9,10 @@
  */
 
 import * as productService from '@zidney/domain-core/products/productService'
-import { ProductStatus } from '@zidney/types/products/Product'
 import { Module } from '@zidney/types/enums/Module'
+import { ProductStatus } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import {
-  cleanupTestContext,
-  createTestContext,
-  TestContext,
-} from '../../test-helpers'
+import { cleanupTestContext, createTestContext, type TestContext } from '../../test-helpers'
 
 describe('T059: Transaction Atomicity Integration Tests', () => {
   let ctx: TestContext
@@ -45,17 +41,12 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         enabled_modules: [Module.MCQ],
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       // Verify all three records exist
-      const productResult = await dbClient.query(
-        'SELECT * FROM products WHERE id = $1',
-        [product.id]
-      )
+      const productResult = await dbClient.query('SELECT * FROM products WHERE id = $1', [
+        product.id,
+      ])
       const versionResult = await dbClient.query(
         'SELECT * FROM product_versions WHERE product_id = $1',
         [product.id]
@@ -77,11 +68,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       // All records should reference same product_id
       const versionResult = await dbClient.query(
@@ -97,9 +84,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
       expect(auditResult.rows[0]!.product_id).toBe(product.id)
 
       // Module arrays should match
-      expect(JSON.parse(versionResult.rows[0]!.enabled_modules)).toEqual(
-        input.enabled_modules
-      )
+      expect(JSON.parse(versionResult.rows[0]!.enabled_modules)).toEqual(input.enabled_modules)
     })
   })
 
@@ -132,10 +117,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
       }
 
       // Verify version didn't change
-      const retrieved = await productService.getProductById(
-        dbClient,
-        product.id
-      )
+      const retrieved = await productService.getProductById(dbClient, product.id)
       expect(retrieved.current_version).toBe(beforeVersion)
     })
 
@@ -232,10 +214,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
         ctx.userId
       )
 
-      const stateBefore = await productService.getProductById(
-        dbClient,
-        product.id
-      )
+      const stateBefore = await productService.getProductById(dbClient, product.id)
 
       // Try invalid operations
       try {
@@ -252,10 +231,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
       }
 
       // Product should be unchanged
-      const stateAfter = await productService.getProductById(
-        dbClient,
-        product.id
-      )
+      const stateAfter = await productService.getProductById(dbClient, product.id)
 
       expect(stateAfter.name).toEqual(stateBefore.name)
       expect(stateAfter.current_version).toBe(stateBefore.current_version)
@@ -364,24 +340,9 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
 
       // Rapid updates
       const updates = await Promise.all([
-        productService.updateProduct(
-          dbClient,
-          product.id,
-          { description: 'Update 1' },
-          ctx.userId
-        ),
-        productService.updateProduct(
-          dbClient,
-          product.id,
-          { description: 'Update 2' },
-          ctx.userId
-        ),
-        productService.updateProduct(
-          dbClient,
-          product.id,
-          { description: 'Update 3' },
-          ctx.userId
-        ),
+        productService.updateProduct(dbClient, product.id, { description: 'Update 1' }, ctx.userId),
+        productService.updateProduct(dbClient, product.id, { description: 'Update 2' }, ctx.userId),
+        productService.updateProduct(dbClient, product.id, { description: 'Update 3' }, ctx.userId),
       ])
 
       // Final state should be consistent
@@ -427,9 +388,7 @@ describe('T059: Transaction Atomicity Integration Tests', () => {
       }
 
       // Verify only one product created
-      const products = await dbClient.query(
-        'SELECT COUNT(*) as count FROM products'
-      )
+      const products = await dbClient.query('SELECT COUNT(*) as count FROM products')
       expect(parseInt(products.rows[0]!.count)).toBe(1)
 
       // Verify consistent state

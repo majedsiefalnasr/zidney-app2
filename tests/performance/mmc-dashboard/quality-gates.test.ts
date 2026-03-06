@@ -32,7 +32,7 @@ describe('Quality Gates - TS, Lint, Coverage', () => {
     it('should not use "any" type without justification', async () => {
       // Search for "any" in metric functions and dashboard routes
       // Each use of "any" must be commented with reason
-      // No bare @ts-ignore directives allowed
+      // No bare @ts-expect-error directives allowed
     })
 
     it('should have all function signatures properly typed', async () => {

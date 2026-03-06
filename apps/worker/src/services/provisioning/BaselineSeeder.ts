@@ -9,7 +9,8 @@
  * Stage: STAGE_05_TENANT_PROVISIONING_SERVICE
  */
 
-import { Pool, PoolClient } from 'pg'
+import { logger } from '@zidney/logger'
+import type { Pool, PoolClient } from 'pg'
 
 export interface SeedResult {
   roles_seeded: number
@@ -38,11 +39,7 @@ export class BaselineSeeder {
       const settings_seeded = await this.seedSettings(client)
 
       total_seeded =
-        roles_seeded +
-        permissions_seeded +
-        languages_seeded +
-        divisions_seeded +
-        settings_seeded
+        roles_seeded + permissions_seeded + languages_seeded + divisions_seeded + settings_seeded
 
       return {
         roles_seeded,
@@ -93,7 +90,7 @@ export class BaselineSeeder {
         )
         count++
       } catch (error) {
-        console.error(`Failed to seed role ${role.name}:`, error)
+        logger.error('baseline_seed_role_failed', { role_name: role.name, error: String(error) })
       }
     }
 
@@ -179,10 +176,10 @@ export class BaselineSeeder {
         )
         count++
       } catch (error) {
-        console.error(
-          `Failed to seed permission ${perm.permission_name}:`,
-          error
-        )
+        logger.error('baseline_seed_permission_failed', {
+          permission_name: perm.permission_name,
+          error: String(error),
+        })
       }
     }
 
@@ -223,7 +220,10 @@ export class BaselineSeeder {
         )
         count++
       } catch (error) {
-        console.error(`Failed to seed division ${div.name}:`, error)
+        logger.error('baseline_seed_division_failed', {
+          division_name: div.name,
+          error: String(error),
+        })
       }
     }
 
@@ -256,7 +256,10 @@ export class BaselineSeeder {
         )
         count++
       } catch (error) {
-        console.error(`Failed to seed setting ${setting.key}:`, error)
+        logger.error('baseline_seed_setting_failed', {
+          setting_key: setting.key,
+          error: String(error),
+        })
       }
     }
 

@@ -15,8 +15,8 @@ import {
   MAX_PAGE_SIZE,
 } from '@zidney/domain-core/licenses/constants'
 import { LicenseError } from '@zidney/domain-core/licenses/errors'
-import { LicenseService } from '@zidney/domain-core/licenses/service'
-import {
+import type { LicenseService } from '@zidney/domain-core/licenses/service'
+import type {
   ArchiveRequest,
   CreateLicenseRequest,
   EditLicenseRequest,
@@ -25,8 +25,8 @@ import {
   SoftLockRequest,
   UnlockRequest,
 } from '@zidney/domain-core/licenses/types'
-import { Context } from 'hono'
 import type { Logger } from '@zidney/logger'
+import type { Context } from 'hono'
 
 interface LicenseContext extends Context {
   license?: any
@@ -60,8 +60,7 @@ export class LicenseController {
             data: null,
             error: {
               code: 'VALIDATION_ERROR',
-              message:
-                'Missing required fields: product_id, workspace_slug, workspace_name',
+              message: 'Missing required fields: product_id, workspace_slug, workspace_name',
               status: 400,
             },
           },
@@ -69,10 +68,7 @@ export class LicenseController {
         )
       }
 
-      const license = await this.licenseService.create(
-        body as CreateLicenseRequest,
-        correlationId
-      )
+      const license = await this.licenseService.create(body as CreateLicenseRequest, correlationId)
 
       return ctx.json(
         {
@@ -96,9 +92,9 @@ export class LicenseController {
   async list(ctx: LicenseContext) {
     try {
       // Parse query parameters
-      const page = parseInt(ctx.req.query('page') || '1')
+      const page = parseInt(ctx.req.query('page') || '1', 10)
       const limit = Math.min(
-        parseInt(ctx.req.query('limit') || String(DEFAULT_PAGE_SIZE)),
+        parseInt(ctx.req.query('limit') || String(DEFAULT_PAGE_SIZE), 10),
         MAX_PAGE_SIZE
       )
       const status = ctx.req.query('status')
@@ -218,11 +214,7 @@ export class LicenseController {
         )
       }
 
-      const license = await this.licenseService.edit(
-        id,
-        body as EditLicenseRequest,
-        correlationId
-      )
+      const license = await this.licenseService.edit(id, body as EditLicenseRequest, correlationId)
 
       return ctx.json(
         {
@@ -265,11 +257,7 @@ export class LicenseController {
         )
       }
 
-      const license = await this.licenseService.softLock(
-        id,
-        body as SoftLockRequest,
-        correlationId
-      )
+      const license = await this.licenseService.softLock(id, body as SoftLockRequest, correlationId)
 
       return ctx.json(
         {
@@ -312,11 +300,7 @@ export class LicenseController {
         )
       }
 
-      const license = await this.licenseService.unlock(
-        id,
-        body as UnlockRequest,
-        correlationId
-      )
+      const license = await this.licenseService.unlock(id, body as UnlockRequest, correlationId)
 
       return ctx.json(
         {
@@ -359,11 +343,7 @@ export class LicenseController {
         )
       }
 
-      const license = await this.licenseService.archive(
-        id,
-        body as ArchiveRequest,
-        correlationId
-      )
+      const license = await this.licenseService.archive(id, body as ArchiveRequest, correlationId)
 
       return ctx.json(
         {
@@ -406,11 +386,7 @@ export class LicenseController {
         )
       }
 
-      const license = await this.licenseService.restore(
-        id,
-        body as RestoreRequest,
-        correlationId
-      )
+      const license = await this.licenseService.restore(id, body as RestoreRequest, correlationId)
 
       return ctx.json(
         {
@@ -528,17 +504,7 @@ export class LicenseController {
 
       return ctx.json(
         error.toResponse(),
-        error.httpStatus as
-          | 400
-          | 401
-          | 403
-          | 404
-          | 409
-          | 423
-          | 426
-          | 429
-          | 500
-          | 503
+        error.httpStatus as 400 | 401 | 403 | 404 | 409 | 423 | 426 | 429 | 500 | 503
       )
     }
 

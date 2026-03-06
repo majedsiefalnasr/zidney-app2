@@ -17,8 +17,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { workspaceSettingsRouter } from '../../apps/api/src/modules/workspace-settings/workspace-settings.routes'
 import type { BackofficeEnv } from '../../apps/api/src/routes/backoffice/types'
 
-const TEST_ENCRYPTION_KEY =
-  'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2'
+const TEST_ENCRYPTION_KEY = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2'
 
 // ---------------------------------------------------------------------------
 // Mock Settings Row
@@ -62,18 +61,11 @@ function createTestApp(overrides: {
   app.use('*', async (c, next) => {
     const mockPool = {
       query: vi.fn(async (sql: string, params?: unknown[]) => {
-        if (
-          sql.includes('BEGIN') ||
-          sql.includes('COMMIT') ||
-          sql.includes('ROLLBACK')
-        ) {
+        if (sql.includes('BEGIN') || sql.includes('COMMIT') || sql.includes('ROLLBACK')) {
           return { rows: [], rowCount: 0 }
         }
 
-        if (
-          sql.includes('SELECT') &&
-          sql.includes('workspace_settings_audit')
-        ) {
+        if (sql.includes('SELECT') && sql.includes('workspace_settings_audit')) {
           return { rows: [], rowCount: 0 }
         }
 
@@ -91,18 +83,14 @@ function createTestApp(overrides: {
           if (overrides.versionConflict) {
             return { rows: [], rowCount: 0 }
           }
-          const version = (overrides.settingsRow || DEFAULT_SETTINGS_ROW)
-            .config_version
+          const version = (overrides.settingsRow || DEFAULT_SETTINGS_ROW).config_version
           return {
             rows: [{ config_version: version + 1 }],
             rowCount: 1,
           }
         }
 
-        if (
-          sql.includes('INSERT') &&
-          sql.includes('workspace_settings_audit')
-        ) {
+        if (sql.includes('INSERT') && sql.includes('workspace_settings_audit')) {
           return { rows: [], rowCount: 1 }
         }
 
@@ -224,21 +212,18 @@ describe('PUT /api/v1/backoffice/workspace/settings/:group', () => {
 
   it('returns 200 on valid general settings update', async () => {
     const app = createTestApp({})
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/general',
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          config_version: 3,
-          settings: {
-            app_name: 'Updated University',
-            timezone: 'UTC',
-            date_format: 'YYYY-MM-DD',
-          },
-        }),
-      }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/general', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        config_version: 3,
+        settings: {
+          app_name: 'Updated University',
+          timezone: 'UTC',
+          date_format: 'YYYY-MM-DD',
+        },
+      }),
+    })
 
     expect(res.status).toBe(200)
     const body = await res.json()
@@ -249,21 +234,18 @@ describe('PUT /api/v1/backoffice/workspace/settings/:group', () => {
 
   it('returns 422 on invalid settings data', async () => {
     const app = createTestApp({})
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/general',
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          config_version: 3,
-          settings: {
-            app_name: '',
-            timezone: 'Invalid/Zone',
-            date_format: 'UNKNOWN',
-          },
-        }),
-      }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/general', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        config_version: 3,
+        settings: {
+          app_name: '',
+          timezone: 'Invalid/Zone',
+          date_format: 'UNKNOWN',
+        },
+      }),
+    })
 
     expect(res.status).toBe(422)
     const body = await res.json()
@@ -273,17 +255,14 @@ describe('PUT /api/v1/backoffice/workspace/settings/:group', () => {
 
   it('returns 400 for invalid group name', async () => {
     const app = createTestApp({})
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/invalid_group',
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          config_version: 3,
-          settings: { some: 'data' },
-        }),
-      }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/invalid_group', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        config_version: 3,
+        settings: { some: 'data' },
+      }),
+    })
 
     expect(res.status).toBe(400)
     const body = await res.json()
@@ -293,21 +272,18 @@ describe('PUT /api/v1/backoffice/workspace/settings/:group', () => {
 
   it('returns 409 on version conflict', async () => {
     const app = createTestApp({ versionConflict: true })
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/general',
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          config_version: 2,
-          settings: {
-            app_name: 'Test',
-            timezone: 'UTC',
-            date_format: 'YYYY-MM-DD',
-          },
-        }),
-      }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/general', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        config_version: 2,
+        settings: {
+          app_name: 'Test',
+          timezone: 'UTC',
+          date_format: 'YYYY-MM-DD',
+        },
+      }),
+    })
 
     expect(res.status).toBe(409)
     const body = await res.json()
@@ -317,17 +293,14 @@ describe('PUT /api/v1/backoffice/workspace/settings/:group', () => {
 
   it('returns 422 for missing request body schema', async () => {
     const app = createTestApp({})
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/general',
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          // Missing config_version and settings
-          wrong_field: true,
-        }),
-      }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/general', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        // Missing config_version and settings
+        wrong_field: true,
+      }),
+    })
 
     expect(res.status).toBe(422)
     const body = await res.json()
@@ -336,20 +309,17 @@ describe('PUT /api/v1/backoffice/workspace/settings/:group', () => {
 
   it('payment update returns 200 and encrypts credentials', async () => {
     const app = createTestApp({})
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/payment',
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          config_version: 3,
-          settings: {
-            use_custom_payment_gateway: true,
-            api_key: 'pk_live_test123',
-          },
-        }),
-      }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/payment', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        config_version: 3,
+        settings: {
+          use_custom_payment_gateway: true,
+          api_key: 'pk_live_test123',
+        },
+      }),
+    })
 
     expect(res.status).toBe(200)
     const body = await res.json()
@@ -363,20 +333,17 @@ describe('PUT /api/v1/backoffice/workspace/settings/:group', () => {
 
   it('language update with default_language not in supported returns 422', async () => {
     const app = createTestApp({})
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/language',
-      {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          config_version: 3,
-          settings: {
-            default_language: 'fr',
-            supported_languages: ['ar', 'en'],
-          },
-        }),
-      }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/language', {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        config_version: 3,
+        settings: {
+          default_language: 'fr',
+          supported_languages: ['ar', 'en'],
+        },
+      }),
+    })
 
     expect(res.status).toBe(422)
     const body = await res.json()
@@ -392,10 +359,7 @@ describe('PUT /api/v1/backoffice/workspace/settings/:group', () => {
 describe('GET /api/v1/backoffice/workspace/settings/audit', () => {
   it('returns 200 with empty audit list', async () => {
     const app = createTestApp({})
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/audit',
-      { method: 'GET' }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/audit', { method: 'GET' })
 
     expect(res.status).toBe(200)
     const body = await res.json()
@@ -406,10 +370,9 @@ describe('GET /api/v1/backoffice/workspace/settings/audit', () => {
 
   it('accepts group filter query parameter', async () => {
     const app = createTestApp({})
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/audit?group=general',
-      { method: 'GET' }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/audit?group=general', {
+      method: 'GET',
+    })
 
     expect(res.status).toBe(200)
     const body = await res.json()
@@ -418,10 +381,9 @@ describe('GET /api/v1/backoffice/workspace/settings/audit', () => {
 
   it('accepts limit query parameter', async () => {
     const app = createTestApp({})
-    const res = await app.request(
-      '/api/v1/backoffice/workspace/settings/audit?limit=10',
-      { method: 'GET' }
-    )
+    const res = await app.request('/api/v1/backoffice/workspace/settings/audit?limit=10', {
+      method: 'GET',
+    })
 
     expect(res.status).toBe(200)
   })

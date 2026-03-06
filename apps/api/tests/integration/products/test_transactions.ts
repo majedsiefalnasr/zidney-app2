@@ -12,7 +12,7 @@ describe('Integration: Products - Transactions & Atomicity (T059)', () => {
     // Simulated scenario: product insert succeeds, but version insert fails
     // Expected: entire transaction rolled back, product not in DB
 
-    const productId = uuidv4()
+    const _productId = uuidv4()
     const beforeQuery = {
       status: 200,
       body: {
@@ -51,7 +51,7 @@ describe('Integration: Products - Transactions & Atomicity (T059)', () => {
     const versionBefore = 2
 
     // Get current version before update
-    const beforeUpdate = {
+    const _beforeUpdate = {
       status: 200,
       body: { data: { current_version: versionBefore } },
     }
@@ -78,13 +78,13 @@ describe('Integration: Products - Transactions & Atomicity (T059)', () => {
   })
 
   it('should not create audit log if transaction rolls back', async () => {
-    const productId = uuidv4()
+    const _productId = uuidv4()
 
     // Get audit log count before transaction
     const auditCountBefore = 5
 
     // Simulate failed transaction
-    const failedOperation = {
+    const _failedOperation = {
       status: 500,
       body: {
         success: false,
@@ -113,7 +113,7 @@ describe('Integration: Products - Transactions & Atomicity (T059)', () => {
     }
 
     // Simulate failed operation
-    const failedOp = {
+    const _failedOp = {
       status: 500,
       body: undefined,
     }
@@ -132,11 +132,11 @@ describe('Integration: Products - Transactions & Atomicity (T059)', () => {
   })
 
   it('should not create duplicate version records on failure', async () => {
-    const productId = uuidv4()
+    const _productId = uuidv4()
     const versionsBefore = 3
 
     // Failed update attempt
-    const failedUpdate = {
+    const _failedUpdate = {
       status: 500,
       body: {
         success: false,
@@ -154,7 +154,7 @@ describe('Integration: Products - Transactions & Atomicity (T059)', () => {
     // Test that if any step of a complex operation fails,
     // all changes are rolled back atomically
 
-    const operation = {
+    const _operation = {
       status: 500,
       body: { success: false },
     }

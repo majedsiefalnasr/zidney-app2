@@ -74,13 +74,7 @@
       "packages/validation",
       "packages/ui"
     ],
-    "apps": [
-      "apps/mmc",
-      "apps/frontoffice",
-      "apps/backoffice",
-      "apps/api",
-      "apps/worker"
-    ]
+    "apps": ["apps/mmc", "apps/frontoffice", "apps/backoffice", "apps/api", "apps/worker"]
   },
   "rules": {
     "dependencyRules": {

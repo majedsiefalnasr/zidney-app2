@@ -7,11 +7,7 @@
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "types": ["node", "vitest/globals"],
     "paths": {
-      "@/*": [
-        "./apps/backoffice/src/*",
-        "./apps/frontoffice/src/*",
-        "./apps/mmc/src/*"
-      ],
+      "@/*": ["./apps/backoffice/src/*", "./apps/frontoffice/src/*", "./apps/mmc/src/*"],
       "@zidney/app/*": ["./apps/*/src"],
       "@zidney/app/api/*": ["./apps/api/src/*"],
       "@zidney/app/worker/*": ["./apps/worker/src/*"],
@@ -19,12 +15,8 @@
       "@zidney/ui/*": ["packages/ui-system/src/*"],
       "@zidney/domain-core": ["packages/domain-core/src/index.ts"],
       "@zidney/domain-core/*": ["packages/domain-core/src/*"],
-      "@zidney/domain-core/mmc-dashboard": [
-        "packages/domain-core/mmc-dashboard/index.ts"
-      ],
-      "@zidney/domain-core/mmc-dashboard/*": [
-        "packages/domain-core/mmc-dashboard/*"
-      ],
+      "@zidney/domain-core/mmc-dashboard": ["packages/domain-core/mmc-dashboard/index.ts"],
+      "@zidney/domain-core/mmc-dashboard/*": ["packages/domain-core/mmc-dashboard/*"],
       "@zidney/logger": ["packages/logger/src/index.ts"],
       "@zidney/logger/*": ["packages/logger/src/*"],
       "@zidney/types": ["packages/types/src/index.ts"],

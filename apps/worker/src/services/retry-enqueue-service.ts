@@ -10,10 +10,10 @@
 
 import {
   DEFAULT_RETRY_POLICY,
-  ProvisioningJob,
+  type ProvisioningJob,
   ProvisioningJobStatus,
 } from '@zidney/types/jobs/provisioning-job'
-import { Redis } from 'ioredis'
+import type { Redis } from 'ioredis'
 
 /**
  * Retry result interface
@@ -50,7 +50,7 @@ export class RetryEnqueueService {
     // Exponential backoff: 1s, 2s, 4s, ...
     // But capped at 60 seconds
     const baseDelay = 1000 // 1 second
-    const exponentialDelay = baseDelay * Math.pow(2, retryCount)
+    const exponentialDelay = baseDelay * 2 ** retryCount
     const maxDelay = 60000 // 60 seconds
 
     return Math.min(exponentialDelay, maxDelay)
@@ -92,17 +92,13 @@ export class RetryEnqueueService {
         ...job,
         retryCount,
         status: ProvisioningJobStatus.RETRYING,
-        // @ts-ignore: LOGIC-BUG: lastRetryAt does not exist in ProvisioningJob type — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+        // @ts-expect-error: LOGIC-BUG: lastRetryAt does not exist in ProvisioningJob type — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         lastRetryAt: new Date().toISOString(),
       }
 
       // Re-enqueue with delay using sorted set (ZADD)
       const scheduledTime = Date.now() + backoffDelay
-      await this.redis.zadd(
-        this.getScheduledQueueName(),
-        scheduledTime,
-        JSON.stringify(updatedJob)
-      )
+      await this.redis.zadd(this.getScheduledQueueName(), scheduledTime, JSON.stringify(updatedJob))
 
       this.logger?.logRetry('Job re-enqueued with backoff', {
         license_id: job.licenseId,
@@ -137,10 +133,7 @@ export class RetryEnqueueService {
   /**
    * Move job to dead-letter queue
    */
-  async moveToDLQ(
-    job: ProvisioningJob,
-    reason: string
-  ): Promise<RetryEnqueueResult> {
+  async moveToDLQ(job: ProvisioningJob, reason: string): Promise<RetryEnqueueResult> {
     const startTime = Date.now()
 
     try {
@@ -193,11 +186,7 @@ export class RetryEnqueueService {
       const now = Date.now()
 
       // Get all jobs ready to be promoted (score <= now)
-      const readyJobs = await this.redis.zrangebyscore(
-        this.getScheduledQueueName(),
-        '-inf',
-        now
-      )
+      const readyJobs = await this.redis.zrangebyscore(this.getScheduledQueueName(), '-inf', now)
 
       if (readyJobs.length === 0) {
         return 0
@@ -209,19 +198,11 @@ export class RetryEnqueueService {
       }
 
       // Remove from scheduled queue
-      await this.redis.zremrangebyscore(
-        this.getScheduledQueueName(),
-        '-inf',
-        now
-      )
+      await this.redis.zremrangebyscore(this.getScheduledQueueName(), '-inf', now)
 
-      this.logger?.logStep(
-        'scheduled-promotion',
-        'Scheduled jobs promoted to main queue',
-        {
-          count: readyJobs.length,
-        }
-      )
+      this.logger?.logStep('scheduled-promotion', 'Scheduled jobs promoted to main queue', {
+        count: readyJobs.length,
+      })
 
       return readyJobs.length
     } catch (error) {

@@ -16,38 +16,33 @@
  * On any failure: Transaction rollback, no partial state
  */
 
+import { logger } from '@zidney/logger'
 import { createCorrelationId } from '@zidney/logger/correlation-context'
-import {
-  ProvisioningErrorCode,
-  getErrorDetails,
-} from '@zidney/types/errors/provisioning-errors'
-import {
-  DEFAULT_RETRY_POLICY,
-  createProvisioningJob,
-} from '@zidney/types/jobs/provisioning-job'
+import { getErrorDetails, ProvisioningErrorCode } from '@zidney/types/errors/provisioning-errors'
+import { createProvisioningJob, DEFAULT_RETRY_POLICY } from '@zidney/types/jobs/provisioning-job'
 import { LicenseStatus } from '@zidney/types/licenses/license-state'
-import { Context } from 'hono'
+import type { Context } from 'hono'
 import {
   createErrorResponse,
   createLicenseCreationResponse,
   getValidatedData,
 } from './license-response'
-import { CreateLicenseRequest } from './validate-license-request'
+import type { CreateLicenseRequest } from './validate-license-request'
 
 /**
  * License Creation Handler
  */
 export async function createLicenseHandler(c: Context): Promise<Response> {
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const startTime = Date.now()
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const correlationId = c.get('correlationId') || createCorrelationId()
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const logger = c.get('logger')
 
   try {
     // Step 1: Get validated request data
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const request = getValidatedData<CreateLicenseRequest>(c)
 
     logger?.logStep('validation', 'License creation request validated', {
@@ -58,21 +53,19 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
     })
 
     // Step 2: Check if workspace slug already exists
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const slugExists = await checkSlugExists(request.workspace_slug)
     if (slugExists) {
       logger?.logWarn('Duplicate workspace slug attempt', {
         workspace_slug: request.workspace_slug,
       })
 
-      // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+      // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const error = getErrorDetails(ProvisioningErrorCode.WORKSPACE_SLUG_EXISTS)
       return c.json(
-        createErrorResponse(
-          ProvisioningErrorCode.WORKSPACE_SLUG_EXISTS,
-          error.message,
-          { slug: request.workspace_slug }
-        ),
+        createErrorResponse(ProvisioningErrorCode.WORKSPACE_SLUG_EXISTS, error.message, {
+          slug: request.workspace_slug,
+        }),
         error.httpStatus as any
       )
     }
@@ -82,22 +75,17 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
     })
 
     // Step 3: Verify product exists
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const productExists = await verifyProductExists(request.product_id)
     if (!productExists) {
       logger?.logWarn('Invalid product ID', {
         product_id: request.product_id,
       })
 
-      // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+      // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const error = getErrorDetails(ProvisioningErrorCode.INVALID_PRODUCT_ID)
       c.status(error.httpStatus as any)
-      return c.json(
-        createErrorResponse(
-          ProvisioningErrorCode.INVALID_PRODUCT_ID,
-          error.message
-        )
-      )
+      return c.json(createErrorResponse(ProvisioningErrorCode.INVALID_PRODUCT_ID, error.message))
     }
 
     logger?.logStep('product-check', 'Product verified', {
@@ -105,18 +93,18 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
     })
 
     // Step 4: Get platform versions from config
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const schemaVersion = c.get('schemaVersion') || '1.0.0'
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const productVersion = c.get('productVersion') || '1.0.0'
 
     // Step 5: Insert license record
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const licenseId = crypto.randomUUID()
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const createdAt = new Date()
 
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const _license = await insertLicenseRecord({
       id: licenseId,
       workspace_slug: request.workspace_slug,
@@ -139,12 +127,12 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
     })
 
     // Step 6: Create provisioning job
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const jobId = crypto.randomUUID()
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const _idempotencyKey = c.get('idempotencyKey') || jobId
 
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const job = createProvisioningJob({
       licenseId,
       correlationId,
@@ -167,47 +155,34 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
     })
 
     // Step 7: Enqueue job to queue
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const enqueueService = c.get('enqueueService')
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const enqueueResult = await enqueueService.enqueue(job)
 
     if (!enqueueResult.success) {
-      logger?.logError(
-        'Job enqueueing failed',
-        new Error(enqueueResult.error),
-        {
-          job_id: jobId,
-          license_id: licenseId,
-        }
-      )
+      logger?.logError('Job enqueueing failed', new Error(enqueueResult.error), {
+        job_id: jobId,
+        license_id: licenseId,
+      })
 
       // Rollback: delete license record on queue failure
       await deleteLicenseRecord(licenseId)
 
-      // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+      // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const error = getErrorDetails(ProvisioningErrorCode.JOB_ENQUEUE_FAILED)
       c.status(error.httpStatus as any)
-      return c.json(
-        createErrorResponse(
-          ProvisioningErrorCode.JOB_ENQUEUE_FAILED,
-          error.message
-        )
-      )
+      return c.json(createErrorResponse(ProvisioningErrorCode.JOB_ENQUEUE_FAILED, error.message))
     }
 
-    logger?.logSuccess(
-      'License provisioning workflow initiated',
-      Date.now() - startTime,
-      {
-        license_id: licenseId,
-        job_id: jobId,
-        workspace_slug: request.workspace_slug,
-      }
-    )
+    logger?.logSuccess('License provisioning workflow initiated', Date.now() - startTime, {
+      license_id: licenseId,
+      job_id: jobId,
+      workspace_slug: request.workspace_slug,
+    })
 
     // Success response
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const response = createLicenseCreationResponse(
       licenseId,
       request.workspace_slug,
@@ -219,7 +194,7 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
     )
 
     // Add rate limit headers
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const rateLimitHeaders = c.get('rateLimitHeaders')
     for (const [key, value] of Object.entries(rateLimitHeaders || {})) {
       c.header(key, String(value))
@@ -235,15 +210,10 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
       error instanceof Error ? error : new Error(String(error))
     )
 
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const generalError = getErrorDetails(ProvisioningErrorCode.PROVISION_FAILED)
     c.status(generalError.httpStatus as any)
-    return c.json(
-      createErrorResponse(
-        ProvisioningErrorCode.PROVISION_FAILED,
-        generalError.message
-      )
-    )
+    return c.json(createErrorResponse(ProvisioningErrorCode.PROVISION_FAILED, generalError.message))
   }
 }
 
@@ -253,17 +223,17 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
 async function checkSlugExists(slug: string): Promise<boolean> {
   // TODO: Implement database query to tenant_registry
   // This is a placeholder - actual implementation will query the master DB
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const db = require('../../db.ts').getDb()
   try {
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const result = await db.query(
       'SELECT 1 FROM tenant_registry WHERE workspace_slug = $1 LIMIT 1',
       [slug]
     )
     return result.rows.length > 0
   } catch (error) {
-    console.error('Error checking slug existence:', error)
+    logger.error('Error checking slug existence:', { error })
     throw error
   }
 }
@@ -273,17 +243,17 @@ async function checkSlugExists(slug: string): Promise<boolean> {
  */
 async function verifyProductExists(productId: string): Promise<boolean> {
   // TODO: Implement database query to products table
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const db = require('../../db.ts').getDb()
   try {
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const result = await db.query(
       'SELECT 1 FROM products WHERE id = $1 AND is_active = true LIMIT 1',
       [productId]
     )
     return result.rows.length > 0
   } catch (error) {
-    console.error('Error verifying product:', error)
+    logger.error('Error verifying product:', { error })
     throw error
   }
 }
@@ -306,10 +276,10 @@ async function insertLicenseRecord(data: {
   product_version: string
   created_at: Date
 }): Promise<Record<string, unknown>> {
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const db = require('../../db.ts').getDb()
 
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const result = await db.query(
     `INSERT INTO licenses (
       id, workspace_slug, organization_name, admin_email, product_id,
@@ -342,7 +312,7 @@ async function insertLicenseRecord(data: {
  * Helper: Delete license record (for rollback)
  */
 async function deleteLicenseRecord(licenseId: string): Promise<void> {
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const db = require('../../db.ts').getDb()
 
   await db.query('DELETE FROM licenses WHERE id = $1', [licenseId])

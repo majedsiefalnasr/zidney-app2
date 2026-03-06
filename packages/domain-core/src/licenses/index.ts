@@ -7,23 +7,6 @@
  * Centralizes all license domain exports for clean imports throughout the application.
  */
 
-// Types
-export * from './types'
-export type {
-  ArchiveRequest,
-  AuditLogEntry,
-  CreateLicenseRequest,
-  DeleteRequest,
-  EditLicenseRequest,
-  License,
-  LicenseStatus,
-  ProvisioningJobPayload,
-  RestoreRequest,
-  RetryProvisioningRequest,
-  SoftLockRequest,
-  UnlockRequest,
-} from './types'
-
 // Constants
 export * from './constants'
 export {
@@ -47,7 +30,6 @@ export {
   WORKSPACE_SLUG_MIN_LENGTH,
   WORKSPACE_SLUG_REGEX,
 } from './constants'
-
 // Errors
 export * from './errors'
 export {
@@ -60,3 +42,19 @@ export {
   ProvisioningError,
   VersionMismatchError,
 } from './errors'
+export type {
+  ArchiveRequest,
+  AuditLogEntry,
+  CreateLicenseRequest,
+  DeleteRequest,
+  EditLicenseRequest,
+  License,
+  LicenseStatus,
+  ProvisioningJobPayload,
+  RestoreRequest,
+  RetryProvisioningRequest,
+  SoftLockRequest,
+  UnlockRequest,
+} from './types'
+// Types
+export * from './types'

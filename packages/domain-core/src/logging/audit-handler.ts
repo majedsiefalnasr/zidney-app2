@@ -1,6 +1,6 @@
 import { createLogger } from '@zidney/logger'
 import { randomUUID } from 'crypto'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 const logger = createLogger('audit-handler')
 

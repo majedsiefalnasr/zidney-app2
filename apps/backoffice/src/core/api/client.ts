@@ -1,37 +1,28 @@
+import type { AdapterRequest, AdapterResponse, ApiClient, HttpAdapter } from '@zidney/api-client'
+import { createApiClient as createClient, createFetchAdapter } from '@zidney/api-client'
+import { createLogger } from '@zidney/logger'
 import type { IErrorInterceptor } from '@/core/api/interceptors/error.interceptor'
 import type { IRefreshManager } from '@/core/auth/refresh-manager'
 import type { ITokenManager } from '@/core/auth/token-manager'
+import type { TokenStore } from '@/core/auth/token-store'
+import type { AppConfig } from '@/core/config/app-config'
 import { appConfig } from '@/core/config/app-config'
-import type {
-  AdapterRequest,
-  AdapterResponse,
-  ApiClient,
-  HttpAdapter,
-} from '@zidney/api-client'
-import {
-  createApiClient as createClient,
-  createFetchAdapter,
-} from '@zidney/api-client'
-import { createLogger } from '@zidney/logger'
 
 const logger = createLogger('auth:api-client')
 
-// ─── Re-exports for convenience ─────────────────────────────────────────────
 export type {
   ApiClient,
   AppError,
   ClientResponse,
   RequestConfig,
 } from '@zidney/api-client'
-
-export { ErrorCodes, isAppError } from '@zidney/api-client'
-export { createAppError } from '@zidney/api-client'
+// ─── Re-exports for convenience ─────────────────────────────────────────────
+export { createAppError, ErrorCodes, isAppError } from '@zidney/api-client'
 
 // App-local fetch escape hatch for pre-store bootstrap/composables/pages that
 // still require direct HTTP calls. Importing from this module satisfies lint
 // rules that ban the global `fetch` in app-layer files.
-export const fetch: typeof globalThis.fetch = (input, init) =>
-  globalThis.fetch(input, init)
+export const fetch: typeof globalThis.fetch = (input, init) => globalThis.fetch(input, init)
 
 // ─── Factory ─────────────────────────────────────────────────────────────────
 /**
@@ -87,4 +78,116 @@ export function createAppApiClient(
     },
     adapter: interceptingAdapter,
   })
+}
+
+// ─── Simple API Client ────────────────────────────────────────────────────────
+/**
+ * Lightweight fetch-based API client for direct use in composables and tests.
+ * Handles auth headers, X-Correlation-ID, credentials, error normalization,
+ * and single-flight 401 → token refresh.
+ */
+export function createApiClient(
+  config: AppConfig,
+  tokenStore: TokenStore,
+  fetchFn: typeof globalThis.fetch = globalThis.fetch
+) {
+  let refreshPromise: Promise<string> | null = null
+
+  function buildHeaders(idempotencyKey?: string): Record<string, string> {
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+      'X-Correlation-ID': Math.random().toString(36).slice(2) + Date.now().toString(36),
+    }
+    const token = tokenStore.getAccessToken()
+    if (token) headers['Authorization'] = `Bearer ${token}`
+    if (idempotencyKey) headers['Idempotency-Key'] = idempotencyKey
+    return headers
+  }
+
+  async function doRefresh(): Promise<string> {
+    if (!refreshPromise) {
+      refreshPromise = fetchFn(`${config.env.apiBaseUrl}/auth/refresh`, {
+        method: 'POST',
+        credentials: 'include',
+      })
+        .then(async (res) => {
+          const body = (await res.json()) as { data?: { accessToken?: string } }
+          if (!res.ok || !body?.data?.accessToken) {
+            throw { code: 'AUTH_REFRESH_FAILED', httpStatus: res.status }
+          }
+          tokenStore.setAccessToken(body.data.accessToken)
+          return body.data.accessToken
+        })
+        .finally(() => {
+          refreshPromise = null
+        })
+    }
+    return refreshPromise
+  }
+
+  async function request(
+    method: string,
+    path: string,
+    body?: unknown,
+    idempotencyKey?: string
+  ): Promise<unknown> {
+    const url = `${config.env.apiBaseUrl}${path}`
+    const init: RequestInit = {
+      method,
+      credentials: 'include',
+      headers: buildHeaders(idempotencyKey),
+    }
+    if (body !== undefined) init.body = JSON.stringify(body)
+
+    const response = await fetchFn(url, init)
+
+    if (response.status === 401) {
+      try {
+        await doRefresh()
+      } catch (err) {
+        tokenStore.clearAccessToken()
+        tokenStore.router?.push('/login')
+        throw err
+      }
+      const retryInit: RequestInit = { ...init, headers: buildHeaders(idempotencyKey) }
+      const retryResponse = await fetchFn(url, retryInit)
+      if (!retryResponse.ok) {
+        const retryBody = (await retryResponse.json()) as { error?: Record<string, unknown> }
+        throw { ...(retryBody.error ?? {}), httpStatus: retryResponse.status }
+      }
+      const retryBody = (await retryResponse.json()) as { data?: unknown }
+      return retryBody.data
+    }
+
+    if (!response.ok) {
+      const errorBody = (await response.json()) as { error?: Record<string, unknown> }
+      throw { ...(errorBody.error ?? {}), httpStatus: response.status }
+    }
+
+    const responseBody = (await response.json()) as { data?: unknown }
+    return responseBody.data
+  }
+
+  return {
+    get: (path: string) => request('GET', path),
+    post: (path: string, body?: unknown, idempotencyKey?: string) =>
+      request('POST', path, body, idempotencyKey),
+    put: (path: string, body?: unknown) => request('PUT', path, body),
+    patch: (path: string, body?: unknown) => request('PATCH', path, body),
+    delete: (path: string) => request('DELETE', path),
+  }
+}
+
+// ─── Singleton getter ─────────────────────────────────────────────────────────
+
+let _apiClientInstance: ReturnType<typeof createApiClient> | null = null
+
+export function setApiClient(client: ReturnType<typeof createApiClient>): void {
+  _apiClientInstance = client
+}
+
+export function getApiClient(): ReturnType<typeof createApiClient> {
+  if (!_apiClientInstance)
+    throw new Error('[api] API client not initialized. Call setApiClient first.')
+  return _apiClientInstance
 }

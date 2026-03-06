@@ -33,7 +33,7 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Context, Next } from 'hono'
+import type { Context, Next } from 'hono'
 import { db } from '../../db'
 
 const logger = createLogger('parse-workspace')
@@ -61,7 +61,7 @@ function extractSlugFromSubdomain(host: string): string | null {
   const [hostWithoutPort] = host.split(':')
 
   // Split by dots
-  const parts = hostWithoutPort!.split('.')
+  const parts = hostWithoutPort?.split('.')
 
   // If less than 2 parts or only "api", "mmc" → no workspace
   if (parts.length < 2) {
@@ -89,7 +89,7 @@ function extractSlugFromSubdomain(host: string): string | null {
 function extractSlugFromPath(path: string): string | null {
   const match = path.match(/^\/workspaces\/([a-zA-Z0-9_-]+)/)
 
-  if (match && match[1]) {
+  if (match?.[1]) {
     return match[1]
   }
 
@@ -175,15 +175,8 @@ export async function parseWorkspaceMiddleware(c: Context, next: Next) {
   const path = c.req.path
 
   // Check if this is an MMC route (skip workspace resolution)
-  if (
-    host.includes('mmc') ||
-    path.startsWith('/mmc/') ||
-    path.startsWith('/platform/')
-  ) {
-    logger.debug(
-      { path, host },
-      '[Parse Workspace] Skipping workspace resolution for MMC route'
-    )
+  if (host.includes('mmc') || path.startsWith('/mmc/') || path.startsWith('/platform/')) {
+    logger.debug({ path, host }, '[Parse Workspace] Skipping workspace resolution for MMC route')
 
     // Set sentinel values for MMC
     c.set('workspaceSlug', 'mmc')
@@ -196,10 +189,7 @@ export async function parseWorkspaceMiddleware(c: Context, next: Next) {
   const slug = parseWorkspaceSlug(host, path)
 
   if (!slug) {
-    logger.warn(
-      { host, path },
-      '[Parse Workspace] No workspace found in host or path'
-    )
+    logger.warn({ host, path }, '[Parse Workspace] No workspace found in host or path')
     c.status(400)
     return c.json({
       success: false,
@@ -213,10 +203,7 @@ export async function parseWorkspaceMiddleware(c: Context, next: Next) {
 
   // Validate format
   if (!isValidWorkspaceSlug(slug)) {
-    logger.warn(
-      { slug, host, path },
-      '[Parse Workspace] Invalid workspace slug format'
-    )
+    logger.warn({ slug, host, path }, '[Parse Workspace] Invalid workspace slug format')
     c.status(400)
     return c.json({
       success: false,
@@ -274,9 +261,7 @@ export function requireWorkspaceContext(c: Context): WorkspaceContext {
   const workspaceName = c.get('workspaceName')
 
   if (!workspaceId || !workspaceSlug) {
-    throw new Error(
-      'Workspace context not found. Parse workspace middleware missing.'
-    )
+    throw new Error('Workspace context not found. Parse workspace middleware missing.')
   }
 
   return {

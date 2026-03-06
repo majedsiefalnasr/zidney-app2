@@ -21,9 +21,9 @@ const logger = createLogger('mmc:guards')
 // ─── Exports ──────────────────────────────────────────────────────────────────
 
 export {
+  type AuthGuardOptions,
   createAuthGuard,
   isSafeRedirect,
-  type AuthGuardOptions,
 } from './auth.guard'
 export { createFeatureFlagGuard } from './feature-flag.guard'
 export { createRoleGuard, type RoleGuardOptions } from './role.guard'
@@ -56,10 +56,7 @@ export interface RegisterGuardsOptions {
  * @param router - The Vue Router instance
  * @param options - Guard configuration options
  */
-export function registerGuards(
-  router: Router,
-  options: RegisterGuardsOptions
-): void {
+export function registerGuards(router: Router, options: RegisterGuardsOptions): void {
   let sessionInitialized = false
 
   const authGuard = createAuthGuard({
@@ -94,11 +91,8 @@ export function registerGuards(
     const roleResult = await Promise.resolve(roleGuard(to, from, () => {}))
     if (roleResult !== true && roleResult !== undefined) return roleResult
 
-    const featureResult = await Promise.resolve(
-      featureFlagGuard(to, from, () => {})
-    )
-    if (featureResult !== true && featureResult !== undefined)
-      return featureResult
+    const featureResult = await Promise.resolve(featureFlagGuard(to, from, () => {}))
+    if (featureResult !== true && featureResult !== undefined) return featureResult
 
     return true
   })

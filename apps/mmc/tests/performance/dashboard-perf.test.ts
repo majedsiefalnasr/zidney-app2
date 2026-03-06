@@ -10,12 +10,7 @@ import { describe, expect, it } from 'vitest'
 const API_BASE = 'http://localhost:3000/api/mmc/dashboard'
 const VALID_TOKEN = 'Bearer performance-test-token'
 
-async function makeRequest(
-  method: string,
-  endpoint: string,
-  token: string,
-  body?: unknown
-) {
+async function makeRequest(method: string, endpoint: string, token: string, body?: unknown) {
   const url = `${API_BASE}${endpoint}`
 
   const start = Date.now()
@@ -30,16 +25,12 @@ async function makeRequest(
 
   const duration = Date.now() - start
   const contentType = response.headers.get('content-type')
-  const data = await (contentType?.includes('application/json')
-    ? response.json()
-    : response.blob())
+  const data = await (contentType?.includes('application/json') ? response.json() : response.blob())
 
   return {
     status: response.status,
     data,
-    headers: Object.fromEntries(
-      Array.from(response.headers).map(([key, value]) => [key, value])
-    ),
+    headers: Object.fromEntries(Array.from(response.headers).map(([key, value]) => [key, value])),
     duration,
   }
 }
@@ -65,11 +56,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
       const durations: number[] = []
 
       for (let i = 0; i < 5; i++) {
-        const result = await makeRequest(
-          'GET',
-          '/revenue-breakdown',
-          VALID_TOKEN
-        )
+        const result = await makeRequest('GET', '/revenue-breakdown', VALID_TOKEN)
         durations.push(result.duration)
       }
 
@@ -81,11 +68,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
       const durations: number[] = []
 
       for (let i = 0; i < 5; i++) {
-        const result = await makeRequest(
-          'GET',
-          '/geographic?limit=50',
-          VALID_TOKEN
-        )
+        const result = await makeRequest('GET', '/geographic?limit=50', VALID_TOKEN)
         durations.push(result.duration)
       }
 
@@ -117,7 +100,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
 
       for (let i = 0; i < 10; i++) {
         requests.push(
-          makeRequest('GET', '/summary', VALID_TOKEN).catch((e) => ({
+          makeRequest('GET', '/summary', VALID_TOKEN).catch((_e) => ({
             status: 0,
             error: true,
           }))
@@ -133,18 +116,12 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
 
     it('should handle 20 concurrent mixed endpoint requests', async () => {
       const requests: Promise<any>[] = []
-      const endpoints = [
-        '/summary',
-        '/revenue-breakdown',
-        '/geographic',
-        '/affiliates',
-        '/trends',
-      ]
+      const endpoints = ['/summary', '/revenue-breakdown', '/geographic', '/affiliates', '/trends']
 
       for (let i = 0; i < 20; i++) {
         const endpoint = endpoints[i % endpoints.length]!
         requests.push(
-          makeRequest('GET', endpoint, VALID_TOKEN).catch((e) => ({
+          makeRequest('GET', endpoint, VALID_TOKEN).catch((_e) => ({
             status: 0,
             error: true,
           }))
@@ -168,15 +145,14 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
             durations.push(r.duration)
             return r
           })
-          .catch((e) => ({ status: 0 }))
+          .catch((_e) => ({ status: 0 }))
 
         requests.push(promise)
       }
 
       await Promise.all(requests)
 
-      const avgDuration =
-        durations.reduce((a, b) => a + b, 0) / durations.length
+      const avgDuration = durations.reduce((a, b) => a + b, 0) / durations.length
       console.log(`Under load - Avg: ${avgDuration.toFixed(0)}ms`)
 
       expect(avgDuration).toBeLessThan(500)
@@ -193,10 +169,8 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
       }
 
       // Check if rate limit headers present
-      if (results[0]!.headers['x-ratelimit-limit']) {
-        expect(
-          parseInt(results[0]!.headers['x-ratelimit-limit'])
-        ).toBeGreaterThan(0)
+      if (results[0]?.headers['x-ratelimit-limit']) {
+        expect(parseInt(results[0]?.headers['x-ratelimit-limit'], 10)).toBeGreaterThan(0)
       }
     })
 
@@ -211,9 +185,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
       const successCount = results.filter((r) => r.status === 200).length
       const rateLimited = results.filter((r) => r.status === 429).length
 
-      console.log(
-        `Rapid requests - Success: ${successCount}, Rate limited: ${rateLimited}`
-      )
+      console.log(`Rapid requests - Success: ${successCount}, Rate limited: ${rateLimited}`)
 
       // Should handle gracefully
       expect(successCount + rateLimited).toBe(10)
@@ -229,7 +201,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
             format: 'csv',
           })
           results.push(result.status)
-        } catch (e) {
+        } catch (_e) {
           results.push(0)
         }
       }
@@ -261,7 +233,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
       for (const [key, endpoint] of endpoints) {
         for (let i = 0; i < 3; i++) {
           const result = await makeRequest('GET', endpoint, VALID_TOKEN)
-          latencyData[key]!.push(result.duration)
+          latencyData[key]?.push(result.duration)
         }
       }
 
@@ -278,9 +250,7 @@ describe('T065-T067: Performance, Load & Security Tests', () => {
           [endpoint]: {
             min: sorted[0],
             max: sorted[sorted.length - 1],
-            avg: (durations.reduce((a, b) => a + b) / durations.length).toFixed(
-              2
-            ),
+            avg: (durations.reduce((a, b) => a + b) / durations.length).toFixed(2),
             p50: sorted[Math.floor(durations.length * 0.5)],
             p95: sorted[Math.floor(durations.length * 0.95)] || 0,
           },

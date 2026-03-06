@@ -19,8 +19,8 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Context } from 'hono'
-import { Pool, PoolClient } from 'pg'
+import type { Context } from 'hono'
+import type { Pool, PoolClient } from 'pg'
 import type { UserContextStage06 } from '../../middleware/auth-context-stage06'
 import { getJobByAttemptId } from '../../services/job-queue-service'
 
@@ -137,12 +137,7 @@ export async function getAttemptResultHandler(c: Context) {
     // 3. CHECK GRADING JOB STATUS
     // =========================================================================
 
-    const job = await getJobByAttemptId(
-      tenantDb,
-      attemptId,
-      workspace.id,
-      logger
-    )
+    const job = await getJobByAttemptId(tenantDb, attemptId, workspace.id, logger)
 
     if (!job) {
       logger.warn('No grading job found for attempt', {
@@ -234,9 +229,7 @@ export async function getAttemptResultHandler(c: Context) {
       })
 
       const resultData =
-        typeof job.result_data === 'string'
-          ? JSON.parse(job.result_data)
-          : job.result_data
+        typeof job.result_data === 'string' ? JSON.parse(job.result_data) : job.result_data
 
       return c.json(
         {

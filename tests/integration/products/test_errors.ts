@@ -17,11 +17,7 @@ import { Module } from '@zidney/types/enums/Module'
 import { ErrorCodes } from '@zidney/types/errors/ErrorCodes'
 import { ProductStatus } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import {
-  cleanupTestContext,
-  createTestContext,
-  TestContext,
-} from '../../test-helpers'
+import { cleanupTestContext, createTestContext, type TestContext } from '../../test-helpers'
 
 describe('T060: Error Handling Integration Tests', () => {
   let ctx: TestContext
@@ -233,12 +229,7 @@ describe('T060: Error Handling Integration Tests', () => {
       await dbClient.query(
         `INSERT INTO licenses (id, product_id, workspace_id, status, created_at, updated_at)
          VALUES ($1, $2, $3, $4, NOW(), NOW())`,
-        [
-          'lic-' + Math.random().toString(36),
-          product.id,
-          ctx.workspaceId,
-          ProductStatus.ACTIVE,
-        ]
+        ['lic-' + Math.random().toString(36), product.id, ctx.workspaceId, ProductStatus.ACTIVE]
       )
 
       try {

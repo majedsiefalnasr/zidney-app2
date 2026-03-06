@@ -11,8 +11,8 @@
  * Refs: token-redact.ts, logging security rules (no tokens in logs)
  */
 
-import { looksLikeToken, redactSensitiveFields } from '@/core/auth/token-redact'
 import { describe, expect, it } from 'vitest'
+import { looksLikeToken, redactSensitiveFields } from '@/core/auth/token-redact'
 
 describe('redactSensitiveFields', () => {
   describe('redacts all SENSITIVE_KEYS', () => {

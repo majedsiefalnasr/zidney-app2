@@ -17,7 +17,7 @@ import { db, getTenantPool } from '../../db'
 
 describe('Concurrent Submissions', () => {
   let workspaceId: string
-  let attemptId: string
+  let _attemptId: string
   let pool: any
 
   beforeAll(async () => {
@@ -37,12 +37,12 @@ describe('Concurrent Submissions', () => {
        RETURNING id`,
       [workspaceId]
     )
-    attemptId = attemptRes.rows[0].id
+    _attemptId = attemptRes.rows[0].id
   })
 
   // T056.1: 100 concurrent submissions handled correctly
   test('100 concurrent submissions to same attempt', async () => {
-    const submissions = Array(100).fill({
+    const _submissions = Array(100).fill({
       reason: 'COMPLETED',
       all_responses: [{ question_index: 0, user_response: { selected: 'A' } }],
     })

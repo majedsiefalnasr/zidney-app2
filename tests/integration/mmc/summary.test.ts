@@ -36,9 +36,7 @@ describe('GET /summary - Integration Tests', () => {
             { product_id: 'prod_1', revenue_cents: 800000, name: 'Product 1' },
             { product_id: 'prod_2', revenue_cents: 600000, name: 'Product 2' },
           ],
-          timestamp: expect.stringMatching(
-            /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/
-          ),
+          timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/),
           cache_hit: false,
         },
         error: null,

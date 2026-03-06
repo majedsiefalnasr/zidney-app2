@@ -3,15 +3,12 @@
  * Tasks 15-17: Upgrade request, status polling, rollback
  */
 
+import crypto from 'node:crypto'
 import { createLogger } from '@zidney/logger'
-import {
-  validateRollbackRequest,
-  validateUpgradeRequest,
-} from '@zidney/validation'
-import crypto from 'crypto'
+import { validateRollbackRequest, validateUpgradeRequest } from '@zidney/validation'
 import type { Context, Next } from 'hono'
 import { Hono } from 'hono'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 const logger = createLogger('upgrade-routes')
 
@@ -79,8 +76,7 @@ async function handlePostUpgrade(c: Context, deps: AppDependencies) {
       `SELECT minimum_supported_schema_version FROM platform_settings LIMIT 1`
     )
 
-    const minimumSupported =
-      platformResult.rows[0]?.minimum_supported_schema_version || '1.0.0'
+    const minimumSupported = platformResult.rows[0]?.minimum_supported_schema_version || '1.0.0'
 
     if (target_schema_version < minimumSupported) {
       return c.json(
@@ -386,14 +382,12 @@ export function createUpgradeRouter(deps: AppDependencies): Hono {
     async (c: Context) => handlePostUpgrade(c, deps)
   )
 
-  app.get(
-    '/api/admin/workspace/:workspace_id/upgrade/:upgrade_id',
-    async (c: Context) => handleGetUpgrade(c, deps)
+  app.get('/api/admin/workspace/:workspace_id/upgrade/:upgrade_id', async (c: Context) =>
+    handleGetUpgrade(c, deps)
   )
 
-  app.post(
-    '/api/admin/workspace/:workspace_id/upgrade/:upgrade_id/rollback',
-    async (c: Context) => handlePostRollback(c, deps)
+  app.post('/api/admin/workspace/:workspace_id/upgrade/:upgrade_id/rollback', async (c: Context) =>
+    handlePostRollback(c, deps)
   )
 
   return app

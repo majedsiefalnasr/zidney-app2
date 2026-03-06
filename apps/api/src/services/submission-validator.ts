@@ -19,11 +19,8 @@
  * Note: GRADING happens in Phase E worker; this just validates structure
  */
 
-import { Logger } from '@zidney/logger'
-import type {
-  QuestionSnapshot,
-  QuestionSnapshotContainer,
-} from '@zidney/types/attempt'
+import type { Logger } from '@zidney/logger'
+import type { QuestionSnapshot, QuestionSnapshotContainer } from '@zidney/types/attempt'
 import { QuestionType } from '@zidney/types/attempt'
 
 /**
@@ -106,26 +103,16 @@ export function validateSubmissionContent(
     })
 
     if (submission.length > questionCount) {
-      errors.push(
-        `Expected ${questionCount} responses, got ${submission.length}`
-      )
+      errors.push(`Expected ${questionCount} responses, got ${submission.length}`)
     } else {
-      errors.push(
-        `Missing responses for ${questionCount - submission.length} questions`
-      )
+      errors.push(`Missing responses for ${questionCount - submission.length} questions`)
     }
   }
 
   // Validate each submission item
   for (let i = 0; i < submission.length; i++) {
     const item = submission[i]
-    const itemErrors = validateSubmissionItem(
-      item,
-      snapshot.questions,
-      i,
-      logger,
-      correlationId
-    )
+    const itemErrors = validateSubmissionItem(item, snapshot.questions, i, logger, correlationId)
     errors.push(...itemErrors)
   }
 
@@ -200,12 +187,7 @@ function validateSubmissionItem(
   const response = item.user_response
 
   // Validate response against question type
-  const typeErrors = validateResponseType(
-    response,
-    question,
-    logger,
-    correlationId
-  )
+  const typeErrors = validateResponseType(response, question, logger, correlationId)
   errors.push(...typeErrors)
 
   // Check for extra fields in submission item (only question_index and user_response allowed)
@@ -281,10 +263,7 @@ function validateResponseType(
 /**
  * Validate MCQ response
  */
-function validateMcqResponse(
-  response: any,
-  question: QuestionSnapshot
-): string[] {
+function validateMcqResponse(response: any, question: QuestionSnapshot): string[] {
   const errors: string[] = []
 
   // MCQ response should have selected_option or selected
@@ -299,9 +278,7 @@ function validateMcqResponse(
     if (typeof selected !== 'string') {
       errors.push(`MCQ Q${question.id}: selected_option must be string`)
     } else if (question.options && !question.options.includes(selected)) {
-      errors.push(
-        `MCQ Q${question.id}: selected_option "${selected}" not in options`
-      )
+      errors.push(`MCQ Q${question.id}: selected_option "${selected}" not in options`)
     }
   }
 
@@ -326,10 +303,7 @@ function validateMcqResponse(
 /**
  * Validate true/false response
  */
-function validateTrueFalseResponse(
-  response: any,
-  question: QuestionSnapshot
-): string[] {
+function validateTrueFalseResponse(response: any, question: QuestionSnapshot): string[] {
   if (typeof response.selected !== 'boolean') {
     return [`True/False Q${question.id}: selected must be boolean`]
   }
@@ -339,10 +313,7 @@ function validateTrueFalseResponse(
 /**
  * Validate short answer response
  */
-function validateShortAnswerResponse(
-  response: any,
-  question: QuestionSnapshot
-): string[] {
+function validateShortAnswerResponse(response: any, question: QuestionSnapshot): string[] {
   const errors: string[] = []
 
   if (!('text' in response)) {
@@ -360,10 +331,7 @@ function validateShortAnswerResponse(
 /**
  * Validate essay response
  */
-function validateEssayResponse(
-  response: any,
-  question: QuestionSnapshot
-): string[] {
+function validateEssayResponse(response: any, question: QuestionSnapshot): string[] {
   const errors: string[] = []
 
   if (!('text' in response)) {
@@ -386,10 +354,7 @@ function validateEssayResponse(
 /**
  * Validate match response
  */
-function validateMatchResponse(
-  response: any,
-  question: QuestionSnapshot
-): string[] {
+function validateMatchResponse(response: any, question: QuestionSnapshot): string[] {
   const errors: string[] = []
 
   if (!('matches' in response)) {
@@ -404,9 +369,7 @@ function validateMatchResponse(
 
   for (const match of response.matches) {
     if (typeof match !== 'object' || !('from' in match) || !('to' in match)) {
-      errors.push(
-        `Match Q${question.id}: each match must have from and to fields`
-      )
+      errors.push(`Match Q${question.id}: each match must have from and to fields`)
     }
   }
 
@@ -416,10 +379,7 @@ function validateMatchResponse(
 /**
  * Validate fill-blank response
  */
-function validateFillBlankResponse(
-  response: any,
-  question: QuestionSnapshot
-): string[] {
+function validateFillBlankResponse(response: any, question: QuestionSnapshot): string[] {
   const errors: string[] = []
 
   if (!('text' in response)) {
@@ -437,10 +397,7 @@ function validateFillBlankResponse(
 /**
  * Validate ordering response
  */
-function validateOrderingResponse(
-  response: any,
-  question: QuestionSnapshot
-): string[] {
+function validateOrderingResponse(response: any, question: QuestionSnapshot): string[] {
   const errors: string[] = []
 
   if (!('order' in response)) {

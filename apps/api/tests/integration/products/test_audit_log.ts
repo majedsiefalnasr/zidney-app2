@@ -68,9 +68,7 @@ describe('Integration: Products - Audit Log (T058)', () => {
     }
 
     expect(response.status).toBe(200)
-    expect(
-      response.body.data.items.every((item) => item.action === 'UPDATE')
-    ).toBe(true)
+    expect(response.body.data.items.every((item) => item.action === 'UPDATE')).toBe(true)
   })
 
   it('should filter audit entries by date range', async () => {
@@ -112,10 +110,7 @@ describe('Integration: Products - Audit Log (T058)', () => {
       body: {
         success: true,
         data: {
-          items: [
-            { timestamp: date1.toISOString() },
-            { timestamp: date2.toISOString() },
-          ],
+          items: [{ timestamp: date1.toISOString() }, { timestamp: date2.toISOString() }],
           total: 2,
           limit: 20,
           offset: 0,
@@ -124,10 +119,8 @@ describe('Integration: Products - Audit Log (T058)', () => {
       },
     }
 
-    expect(
-      new Date(response.body.data.items[0]!.timestamp).getTime()
-    ).toBeGreaterThan(
-      new Date(response.body.data.items[1]!.timestamp).getTime()
+    expect(new Date(response.body.data.items[0]?.timestamp).getTime()).toBeGreaterThan(
+      new Date(response.body.data.items[1]?.timestamp).getTime()
     )
   })
 
@@ -197,6 +190,6 @@ describe('Integration: Products - Audit Log (T058)', () => {
     }
 
     expect(response.body.data.items[0]!).toHaveProperty('performed_by')
-    expect(response.body.data.items[0]!.performed_by).toBeTruthy()
+    expect(response.body.data.items[0]?.performed_by).toBeTruthy()
   })
 })

@@ -43,31 +43,26 @@ const logger = getAuditLogger()
  * Note: Client must delete token from client-side storage
  * Token remains valid until token_version is incremented (via logout-all)
  */
-router.post(
-  '/',
-  validateJwtMiddleware('mmc'),
-  validateTokenVersionMiddleware('mmc'),
-  async (c) => {
-    const authPayload = c.get('authPayload')
-    const correlationId = c.get('correlationId')
+router.post('/', validateJwtMiddleware('mmc'), validateTokenVersionMiddleware('mmc'), async (c) => {
+  const authPayload = c.get('authPayload')
+  const correlationId = c.get('correlationId')
 
-    logger.info(
-      {
-        correlation_id: correlationId,
-        user_id: authPayload.user_id,
-        event: 'logout',
-        scope: 'mmc',
-      },
-      '[MMC Auth] User logged out'
-    )
+  logger.info(
+    {
+      correlation_id: correlationId,
+      user_id: authPayload.user_id,
+      event: 'logout',
+      scope: 'mmc',
+    },
+    '[MMC Auth] User logged out'
+  )
 
-    c.status(200)
-    return c.json({
-      success: true,
-      data: { message: 'Logged out successfully' },
-      error: null,
-    })
-  }
-)
+  c.status(200)
+  return c.json({
+    success: true,
+    data: { message: 'Logged out successfully' },
+    error: null,
+  })
+})
 
 export default router

@@ -6,11 +6,7 @@
 
 import { computed, ref, watch } from 'vue'
 import type { Filter, FilterField } from '../types'
-import {
-  checkUrlOverflow,
-  deserializeFilters,
-  serializeFilters,
-} from '../utils/filter-serializer'
+import { checkUrlOverflow, deserializeFilters, serializeFilters } from '../utils/filter-serializer'
 
 export interface UseFilterBuilderOptions {
   initialFilters?: Filter[]
@@ -22,9 +18,7 @@ export interface UseFilterBuilderOptions {
 export function useFilterBuilder(options: UseFilterBuilderOptions = {}) {
   // State
   const filters = ref<Filter[]>(options.initialFilters ?? [])
-  const serializationMode = ref<'url' | 'localStorage'>(
-    options.serializationMode ?? 'url'
-  )
+  const serializationMode = ref<'url' | 'localStorage'>(options.serializationMode ?? 'url')
   const maxFilters = ref(options.maxFilters ?? 10)
   const error = ref<Error | null>(null)
 
@@ -122,8 +116,7 @@ export function useFilterBuilder(options: UseFilterBuilderOptions = {}) {
       localStorage.setItem(key, serialized.value)
       error.value = null
     } catch (e) {
-      error.value =
-        e instanceof Error ? e : new Error('Failed to save to localStorage')
+      error.value = e instanceof Error ? e : new Error('Failed to save to localStorage')
     }
   }
 
@@ -135,8 +128,7 @@ export function useFilterBuilder(options: UseFilterBuilderOptions = {}) {
         deserialize(stored)
       }
     } catch (e) {
-      error.value =
-        e instanceof Error ? e : new Error('Failed to load from localStorage')
+      error.value = e instanceof Error ? e : new Error('Failed to load from localStorage')
     }
   }
 

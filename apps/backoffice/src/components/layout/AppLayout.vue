@@ -54,12 +54,10 @@
  *
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  */
-import { useBreakpoint } from '@/composables/useBreakpoint'
-import { navigationConfig } from '@/core/navigation/index'
-import { useBackofficeUiStore } from '@/core/state/ui.store'
+
 import { storeToRefs } from 'pinia'
-import AppHeader from './AppHeader.vue'
-import AppSidebar from './AppSidebar.vue'
+import { useBreakpoint } from '@/composables/useBreakpoint'
+import { useBackofficeUiStore } from '@/core/state/ui.store'
 
 useBreakpoint()
 

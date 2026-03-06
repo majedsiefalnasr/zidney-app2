@@ -17,9 +17,7 @@ function buildFallbackMasterPool(): Pool {
       'zidney_master',
     user: process.env.MASTER_DB_USER || process.env.DB_USER || 'zidney_app',
     password:
-      process.env.MASTER_DB_PASSWORD ||
-      process.env.DB_PASSWORD ||
-      'change-me-in-production',
+      process.env.MASTER_DB_PASSWORD || process.env.DB_PASSWORD || 'change-me-in-production',
     max: 20,
     idleTimeoutMillis: 900000,
     connectionTimeoutMillis: 30000,

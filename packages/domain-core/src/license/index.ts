@@ -12,9 +12,26 @@
  * import { LicenseResolver, LicenseStatus, VersionValidator } from '@zidney/domain-core/license'
  */
 
-// Export types (using export type for interfaces when isolatedModules is enabled)
-export { LicenseStatus } from './types'
-
+// Export classes
+export { StudentStaffCounter } from './limit-enforcer'
+export { LicenseResolver } from './resolver'
+// Export service functions
+export {
+  type CreateLicenseOptions,
+  createLicense,
+  deleteLicense,
+  getLicenseById,
+  getLicenseByWorkspaceId,
+  restoreFromArchive,
+  type TransitionOptions,
+  type TransitionResult,
+  transitionLicenseState,
+  transitionToActive,
+  transitionToArchived,
+  transitionToDeleted,
+  transitionToSoftLock,
+} from './service'
+export { StateTransition } from './state-machine'
 export type {
   ArchiveSnapshot,
   CreateLicenseRequest,
@@ -24,26 +41,6 @@ export type {
   TransitionLicenseRequest,
   ValidationResult,
 } from './types'
-
-// Export classes
-export { StudentStaffCounter } from './limit-enforcer'
-export { LicenseResolver } from './resolver'
-export { StateTransition } from './state-machine'
+// Export types (using export type for interfaces when isolatedModules is enabled)
+export { LicenseStatus } from './types'
 export { VersionValidator } from './validator'
-
-// Export service functions
-export {
-  createLicense,
-  deleteLicense,
-  getLicenseById,
-  getLicenseByWorkspaceId,
-  restoreFromArchive,
-  transitionLicenseState,
-  transitionToActive,
-  transitionToArchived,
-  transitionToDeleted,
-  transitionToSoftLock,
-  type CreateLicenseOptions,
-  type TransitionOptions,
-  type TransitionResult,
-} from './service'

@@ -17,16 +17,9 @@
  * CLI utility — exempt from service-layer logging standards.
  */
 
-import { execSync } from 'child_process'
-import {
-  existsSync,
-  mkdirSync,
-  readdirSync,
-  readFileSync,
-  statSync,
-  writeFileSync,
-} from 'fs'
-import { basename, join, relative } from 'path'
+import { execSync } from 'node:child_process'
+import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
+import { basename, join, relative } from 'node:path'
 
 const ROOT = process.cwd()
 const QUICK_MODE = process.argv.includes('--quick')
@@ -66,13 +59,7 @@ if (!QUICK_MODE && !existsSync(AI_CONTEXT_DIR)) {
 /* -------------------------------------------------------------------------- */
 
 function loadArchitectureMap() {
-  const path = join(
-    ROOT,
-    'docs',
-    'architecture',
-    'intelligence',
-    'ARCHITECTURE_MAP.json'
-  )
+  const path = join(ROOT, 'docs', 'architecture', 'intelligence', 'ARCHITECTURE_MAP.json')
 
   if (!existsSync(path)) return null
 
@@ -119,9 +106,7 @@ function loadTsAliases(): TsAliasMap[] {
       }
 
       return aliases
-    } catch {
-      continue
-    }
+    } catch {}
   }
 
   return []
@@ -152,10 +137,7 @@ const VITEST_CONFIG_NAMES = new Set([
   'vitest.workspace.js',
 ])
 
-const PLAYWRIGHT_CONFIG_NAMES = new Set([
-  'playwright.config.ts',
-  'playwright.config.js',
-])
+const PLAYWRIGHT_CONFIG_NAMES = new Set(['playwright.config.ts', 'playwright.config.js'])
 
 const ESLINT_CONFIG_PATTERNS: RegExp[] = [
   /^eslint\.config\.(js|mjs|cjs|ts)$/,
@@ -198,12 +180,7 @@ const LAYER_RULES = {
 
 /* Test classification patterns */
 
-const SKIP_PATTERNS = [
-  /\.skip\s*\(/,
-  /\.todo\s*\(/,
-  /\bxit\s*\(/,
-  /\bxdescribe\s*\(/,
-]
+const SKIP_PATTERNS = [/\.skip\s*\(/, /\.todo\s*\(/, /\bxit\s*\(/, /\bxdescribe\s*\(/]
 
 const FLAKY_PATTERNS = [/\.retry\s*\(/, /\/\/\s*(flaky|unstable)/i]
 
@@ -319,8 +296,7 @@ function scanVitest(files: Map<string, string>): VitestEntry[] {
     const content = safeRead(full) ?? ''
 
     const env = content.match(/environment\s*:\s*['"]([^'"]+)['"]/)?.[1] ?? null
-    const globals =
-      content.match(/globals\s*:\s*(true|false)/)?.[1] === 'true' ? true : null
+    const globals = content.match(/globals\s*:\s*(true|false)/)?.[1] === 'true' ? true : null
 
     const coverage = /coverage\s*:/.test(content)
 
@@ -565,9 +541,7 @@ function scanDependencyBoundaries(files: Map<string, string>) {
       if (DEP_RULES.forbidAppsImportingOtherApps && rel.startsWith('apps/')) {
         const srcApp = rel.split('/')[1]
         const resolved = resolveImportTarget(imp)
-        const target = resolved?.startsWith('apps/')
-          ? resolved.split('/')[1]
-          : null
+        const target = resolved?.startsWith('apps/') ? resolved.split('/')[1] : null
 
         if (target && target !== srcApp) {
           violations.push({
@@ -708,8 +682,7 @@ function scanLayerViolations(files: Map<string, string>) {
 
       if (
         rel.startsWith(LAYER_RULES.forbidApiClientImportingWorker.source) &&
-        resolveImportTarget(imp) ===
-          LAYER_RULES.forbidApiClientImportingWorker.target
+        resolveImportTarget(imp) === LAYER_RULES.forbidApiClientImportingWorker.target
       ) {
         violations.push({
           file: rel,
@@ -723,10 +696,7 @@ function scanLayerViolations(files: Map<string, string>) {
   return violations
 }
 
-function scanArchitectureMapViolations(
-  files: Map<string, string>,
-  architectureMap: any | null
-) {
+function scanArchitectureMapViolations(files: Map<string, string>, architectureMap: any | null) {
   const violations: ArchitectureMapViolation[] = []
 
   if (!architectureMap || !architectureMap.modules) return violations
@@ -1015,9 +985,7 @@ const gitSha = (() => {
 
 const vitest = scanVitest(files)
 const eslint = scanEslint(files)
-const playwright = Array.from(files.keys()).filter((f) =>
-  PLAYWRIGHT_CONFIG_NAMES.has(basename(f))
-)
+const playwright = Array.from(files.keys()).filter((f) => PLAYWRIGHT_CONFIG_NAMES.has(basename(f)))
 
 const tests = countTests(files)
 const readmes = scanReadmes()
@@ -1027,20 +995,14 @@ const circularDependencies = scanCircularDependencies(files)
 const layerViolations = scanLayerViolations(files)
 const dependencyGraph = buildDependencyGraph(files)
 const architectureMap = loadArchitectureMap()
-const architectureMapViolations = scanArchitectureMapViolations(
-  files,
-  architectureMap
-)
+const architectureMapViolations = scanArchitectureMapViolations(files, architectureMap)
 const undeclaredModules: string[] = []
 
-if (architectureMap && architectureMap.modules) {
+if (architectureMap?.modules) {
   const declared = new Set(Object.keys(architectureMap.modules))
 
   for (const node of dependencyGraph.nodes) {
-    if (
-      (node.startsWith('packages/') || node.startsWith('apps/')) &&
-      !declared.has(node)
-    ) {
+    if ((node.startsWith('packages/') || node.startsWith('apps/')) && !declared.has(node)) {
       undeclaredModules.push(node)
     }
   }
@@ -1052,22 +1014,11 @@ if (architectureMap && architectureMap.modules) {
 
 const FIX_MAP = process.argv.includes('--fix-map')
 
-if (
-  FIX_MAP &&
-  architectureMap &&
-  architectureMap.modules &&
-  undeclaredModules.length > 0
-) {
-  console.log(
-    '[INFRA AUDIT] Applying self‑healing update to ARCHITECTURE_MAP.json'
-  )
+if (FIX_MAP && architectureMap && architectureMap.modules && undeclaredModules.length > 0) {
+  console.log('[INFRA AUDIT] Applying self‑healing update to ARCHITECTURE_MAP.json')
 
   for (const m of undeclaredModules) {
-    const layer = m.startsWith('packages/')
-      ? 'domain'
-      : m.startsWith('apps/')
-        ? 'ui'
-        : 'unknown'
+    const layer = m.startsWith('packages/') ? 'domain' : m.startsWith('apps/') ? 'ui' : 'unknown'
 
     architectureMap.modules[m] = {
       layer,
@@ -1081,13 +1032,7 @@ if (
   }
 
   try {
-    const archPath = join(
-      ROOT,
-      'docs',
-      'architecture',
-      'intelligence',
-      'ARCHITECTURE_MAP.json'
-    )
+    const archPath = join(ROOT, 'docs', 'architecture', 'intelligence', 'ARCHITECTURE_MAP.json')
 
     writeFileSync(archPath, JSON.stringify(architectureMap, null, 2))
 
@@ -1121,9 +1066,7 @@ function getPreviousArchitectureScore(): number | null {
     if (files.length < 2) return null
 
     const previousFile = files[files.length - 2]
-    const previous = JSON.parse(
-      readFileSync(join(ARCH_HISTORY_DIR, previousFile), 'utf-8')
-    )
+    const previous = JSON.parse(readFileSync(join(ARCH_HISTORY_DIR, previousFile), 'utf-8'))
 
     return previous.architectureScore ?? null
   } catch {
@@ -1134,9 +1077,7 @@ function getPreviousArchitectureScore(): number | null {
 const previousArchitectureScore = getPreviousArchitectureScore()
 
 const architectureScoreDelta =
-  previousArchitectureScore !== null
-    ? architectureScore - previousArchitectureScore
-    : null
+  previousArchitectureScore !== null ? architectureScore - previousArchitectureScore : null
 
 const moduleRisk = classifyModuleRisk(aiGraph.centrality)
 
@@ -1181,7 +1122,7 @@ const report = {
 }
 
 if (!QUICK_MODE) {
-  if (architectureMap && architectureMap.modules) {
+  if (architectureMap?.modules) {
     const modules = architectureMap.modules
 
     const layerModel = {
@@ -1200,15 +1141,9 @@ if (!QUICK_MODE) {
       forbiddenDependencies: m.forbidden_dependencies ?? [],
     }))
 
-    writeFileSync(
-      join(AI_CONTEXT_DIR, 'ai-layer-model.json'),
-      JSON.stringify(layerModel, null, 2)
-    )
+    writeFileSync(join(AI_CONTEXT_DIR, 'ai-layer-model.json'), JSON.stringify(layerModel, null, 2))
 
-    writeFileSync(
-      join(AI_CONTEXT_DIR, 'ai-module-map.json'),
-      JSON.stringify(moduleMap, null, 2)
-    )
+    writeFileSync(join(AI_CONTEXT_DIR, 'ai-module-map.json'), JSON.stringify(moduleMap, null, 2))
 
     writeFileSync(
       join(AI_CONTEXT_DIR, 'ai-dependency-graph.json'),
@@ -1221,10 +1156,8 @@ if (!QUICK_MODE) {
 
     const runtimeMap: Record<string, string[]> = {}
 
-    if (architectureMap && architectureMap.modules) {
-      for (const [name, _mod] of Object.entries(
-        architectureMap.modules as any
-      )) {
+    if (architectureMap?.modules) {
+      for (const [name, _mod] of Object.entries(architectureMap.modules as any)) {
         if (!name.startsWith('apps/')) continue
 
         const runtimeName = name.replace('apps/', '')
@@ -1235,10 +1168,7 @@ if (!QUICK_MODE) {
       }
     }
 
-    writeFileSync(
-      join(AI_CONTEXT_DIR, 'ai-runtime-map.json'),
-      JSON.stringify(runtimeMap, null, 2)
-    )
+    writeFileSync(join(AI_CONTEXT_DIR, 'ai-runtime-map.json'), JSON.stringify(runtimeMap, null, 2))
 
     /* ------------------------------------------------------------- */
     /* Runtime Dependents Map (reverse dependency graph)             */
@@ -1270,19 +1200,13 @@ if (!QUICK_MODE) {
       if (history.length >= 2) {
         const previousFile = history[history.length - 2]
 
-        const previous = JSON.parse(
-          readFileSync(join(ARCH_HISTORY_DIR, previousFile), 'utf-8')
-        )
+        const previous = JSON.parse(readFileSync(join(ARCH_HISTORY_DIR, previousFile), 'utf-8'))
 
         const prevEdges = new Set(
-          (previous.dependencyGraph?.edges ?? []).map(
-            (e: any) => `${e.from}->${e.to}`
-          )
+          (previous.dependencyGraph?.edges ?? []).map((e: any) => `${e.from}->${e.to}`)
         )
 
-        const newEdges = new Set(
-          dependencyGraph.edges.map((e) => `${e.from}->${e.to}`)
-        )
+        const newEdges = new Set(dependencyGraph.edges.map((e) => `${e.from}->${e.to}`))
 
         const added = [...newEdges].filter((e) => !prevEdges.has(e))
         const removed = [...prevEdges].filter((e) => !newEdges.has(e))
@@ -1371,25 +1295,16 @@ This file is automatically generated by infra-audit.ts and used by AI tooling
 
     writeFileSync(join(AI_CONTEXT_DIR, 'ai-architecture-summary.md'), summary)
   }
-  writeFileSync(
-    join(REPORT_DIR, 'infra-audit-report.json'),
-    JSON.stringify(report, null, 2)
-  )
+  writeFileSync(join(REPORT_DIR, 'infra-audit-report.json'), JSON.stringify(report, null, 2))
 
   writeFileSync(
     join(ARCH_GRAPHS_DIR, 'dependency-graph.json'),
     JSON.stringify(dependencyGraph, null, 2)
   )
 
-  writeFileSync(
-    join(ARCH_GRAPHS_DIR, 'dependency-graph-ai.json'),
-    JSON.stringify(aiGraph, null, 2)
-  )
+  writeFileSync(join(ARCH_GRAPHS_DIR, 'dependency-graph-ai.json'), JSON.stringify(aiGraph, null, 2))
 
-  writeFileSync(
-    join(ARCH_GRAPHS_DIR, 'dependency-graph.mmd'),
-    exportMermaidGraph(dependencyGraph)
-  )
+  writeFileSync(join(ARCH_GRAPHS_DIR, 'dependency-graph.mmd'), exportMermaidGraph(dependencyGraph))
 
   writeFileSync(
     join(ARCH_GRAPHS_DIR, 'architecture-graph.mmd'),
@@ -1452,15 +1367,9 @@ ${dependencyGraph.edges
   .join('\n')}
 `
 
-  writeFileSync(
-    join(ARCH_GRAPHS_DIR, 'architecture-overview.mmd'),
-    overviewMermaid
-  )
+  writeFileSync(join(ARCH_GRAPHS_DIR, 'architecture-overview.mmd'), overviewMermaid)
 
-  writeFileSync(
-    join(ARCH_GRAPHS_DIR, 'module-dependency-graph.mmd'),
-    moduleGraphMermaid
-  )
+  writeFileSync(join(ARCH_GRAPHS_DIR, 'module-dependency-graph.mmd'), moduleGraphMermaid)
 
   /* -------------------------------------------------------------------------- */
   /* Architecture Markdown Diagram Export (GitHub renderable)                  */
@@ -1510,10 +1419,7 @@ Source data:
 
 `
 
-  writeFileSync(
-    join(ARCH_DIR, 'ARCHITECTURE_DIAGRAMS.md'),
-    architectureMarkdown
-  )
+  writeFileSync(join(ARCH_DIR, 'ARCHITECTURE_DIAGRAMS.md'), architectureMarkdown)
 
   // Persist architecture history snapshots
   const historyFile = join(ARCH_HISTORY_DIR, `audit-${Date.now()}.json`)
@@ -1721,10 +1627,7 @@ new vis.Network(container, data, options)
 </html>
 `
 
-  writeFileSync(
-    join(ARCH_GRAPHS_DIR, 'architecture-graph.html'),
-    interactiveGraphHtml
-  )
+  writeFileSync(join(ARCH_GRAPHS_DIR, 'architecture-graph.html'), interactiveGraphHtml)
 } // end if (!QUICK_MODE)
 
 console.log('[INFRA AUDIT] Complete')
@@ -1742,9 +1645,7 @@ console.log('Architecture drift:', architectureDrift.length)
 console.log('Architecture score:', architectureScore, '/ 100')
 
 if (undeclaredModules.length > 0) {
-  console.warn(
-    '\n[INFRA AUDIT] ⚠️ Undeclared modules detected (not in ARCHITECTURE_MAP.json):'
-  )
+  console.warn('\n[INFRA AUDIT] ⚠️ Undeclared modules detected (not in ARCHITECTURE_MAP.json):')
 
   for (const m of undeclaredModules) {
     console.warn(` - ${m}`)
@@ -1753,11 +1654,7 @@ if (undeclaredModules.length > 0) {
   console.warn('\nSuggested ARCHITECTURE_MAP.json entries:\n')
 
   for (const m of undeclaredModules) {
-    const layer = m.startsWith('packages/')
-      ? 'domain'
-      : m.startsWith('apps/')
-        ? 'ui'
-        : 'unknown'
+    const layer = m.startsWith('packages/') ? 'domain' : m.startsWith('apps/') ? 'ui' : 'unknown'
 
     const suggestion = {
       [m]: {
@@ -1773,9 +1670,7 @@ if (undeclaredModules.length > 0) {
     console.warn('')
   }
 
-  console.warn(
-    'Add them to: docs/architecture/intelligence/ARCHITECTURE_MAP.json'
-  )
+  console.warn('Add them to: docs/architecture/intelligence/ARCHITECTURE_MAP.json')
   console.warn('Or run: bun run arch:add-module <module-path>')
 }
 
@@ -1792,10 +1687,7 @@ console.log('Dependency graph edges:', dependencyGraph.edges.length)
 const hottest = Object.entries(aiGraph.centrality)
   .sort((a, b) => b[1] - a[1])
   .slice(0, 5)
-console.log(
-  'Top architectural hotspots:',
-  hottest.map(([k, v]) => `${k}(${v})`).join(', ')
-)
+console.log('Top architectural hotspots:', hottest.map(([k, v]) => `${k}(${v})`).join(', '))
 const highRiskModules = Object.entries(moduleRisk)
   .filter(([, r]) => r === 'HIGH')
   .map(([m]) => m)
@@ -1804,15 +1696,11 @@ if (highRiskModules.length) {
   console.log('High risk modules:', highRiskModules.join(', '))
 }
 console.log('Architecture graphs exported to docs/architecture/graphs/')
-console.log(
-  'Interactive architecture graph: docs/architecture/graphs/architecture-graph.html'
-)
+console.log('Interactive architecture graph: docs/architecture/graphs/architecture-graph.html')
 console.log(
   'Architecture dashboard exported: docs/architecture/intelligence/ARCHITECTURE_DASHBOARD.md'
 )
-console.log(
-  'Architecture heatmap exported: docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md'
-)
+console.log('Architecture heatmap exported: docs/architecture/intelligence/ARCHITECTURE_HEATMAP.md')
 console.log(
   'AI architecture context exported: docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json'
 )
@@ -1831,27 +1719,19 @@ if (CI_MODE || QUICK_MODE) {
   const failures: string[] = []
 
   if (circularDependencies.length > 0) {
-    failures.push(
-      `Circular dependencies detected (${circularDependencies.length})`
-    )
+    failures.push(`Circular dependencies detected (${circularDependencies.length})`)
   }
 
   if (depViolations.length > 0) {
-    failures.push(
-      `Dependency boundary violations detected (${depViolations.length})`
-    )
+    failures.push(`Dependency boundary violations detected (${depViolations.length})`)
   }
 
   if (layerViolations.length > 0) {
-    failures.push(
-      `Architectural layer violations detected (${layerViolations.length})`
-    )
+    failures.push(`Architectural layer violations detected (${layerViolations.length})`)
   }
 
   if (architectureMapViolations.length > 0) {
-    failures.push(
-      `ARCHITECTURE_MAP violations detected (${architectureMapViolations.length})`
-    )
+    failures.push(`ARCHITECTURE_MAP violations detected (${architectureMapViolations.length})`)
   }
 
   if (CI_STRICT && undeclaredModules.length > 0) {
@@ -1877,9 +1757,7 @@ if (CI_MODE || QUICK_MODE) {
       console.error(` - ${f}`)
     }
 
-    console.error(
-      '\n[INFRA AUDIT][CI] Failing build due to governance violations.'
-    )
+    console.error('\n[INFRA AUDIT][CI] Failing build due to governance violations.')
 
     process.exit(1)
   } else {

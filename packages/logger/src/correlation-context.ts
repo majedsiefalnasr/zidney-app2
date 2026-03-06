@@ -41,12 +41,7 @@ const correlationStorage = new AsyncLocalStorage<CorrelationContextData>()
 export class CorrelationContext {
   private data: CorrelationContextData
 
-  constructor(
-    correlationId: string,
-    workspaceSlug?: string,
-    licenseId?: string,
-    userId?: string
-  ) {
+  constructor(correlationId: string, workspaceSlug?: string, licenseId?: string, userId?: string) {
     this.data = {
       correlationId,
       workspaceSlug,
@@ -74,9 +69,7 @@ export class CorrelationContext {
 /**
  * Get current correlation context data
  */
-export function getCorrelationContextData():
-  | CorrelationContextData
-  | undefined {
+export function getCorrelationContextData(): CorrelationContextData | undefined {
   return correlationStorage.getStore()
 }
 
@@ -139,14 +132,10 @@ function generateUuid(): string {
 /**
  * Middleware helper: Create and set correlation context from request headers
  */
-export function correlationIdFromHeaders(
-  headers: Record<string, string | string[]>
-): string {
+export function correlationIdFromHeaders(headers: Record<string, string | string[]>): string {
   // Check for X-Correlation-ID header
   const correlationId =
-    headers['x-correlation-id'] ||
-    headers['correlation-id'] ||
-    headers['x-request-id']
+    headers['x-correlation-id'] || headers['correlation-id'] || headers['x-request-id']
 
   if (typeof correlationId === 'string') {
     return correlationId
@@ -206,9 +195,7 @@ export function formatCorrelationContext(): Record<string, unknown> {
 /**
  * Propagate correlation context to async child tasks
  */
-export async function propagateCorrelationContext<T>(
-  task: () => Promise<T>
-): Promise<T> {
+export async function propagateCorrelationContext<T>(task: () => Promise<T>): Promise<T> {
   const context = correlationStorage.getStore()
   if (!context) {
     return task()

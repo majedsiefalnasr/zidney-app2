@@ -20,20 +20,20 @@ import { logProductError, logSlowOperation } from '@zidney/logger/products'
 import { AppError, ErrorCodes } from '@zidney/types/errors/ErrorCodes'
 import {
   AuditAction,
-  AuditLogQueryFilters,
-  CreateProductInput,
-  FieldDiff,
-  PaginatedResponse,
-  Product,
-  ProductAuditLogEntry,
+  type AuditLogQueryFilters,
+  type CreateProductInput,
+  type FieldDiff,
+  type PaginatedResponse,
+  type Product,
+  type ProductAuditLogEntry,
   ProductStatus,
-  UpdateProductInput,
+  type UpdateProductInput,
 } from '@zidney/types/products/Product'
 import {
   computeFieldDiff,
   generateChangeSummary,
 } from '@zidney/validation/products/productValidation'
-import { PoolClient } from 'pg'
+import type { PoolClient } from 'pg'
 
 /**
  * T013: Create product with initial version 1 and audit log
@@ -71,10 +71,7 @@ export async function createProduct(
     )
 
     if (productResult.rows.length === 0) {
-      throw new AppError(
-        ErrorCodes.INTERNAL_SERVER_ERROR,
-        'Failed to create product'
-      )
+      throw new AppError(ErrorCodes.INTERNAL_SERVER_ERROR, 'Failed to create product')
     }
 
     const product = productResult.rows[0]
@@ -107,14 +104,7 @@ export async function createProduct(
     await client.query(
       `INSERT INTO product_audit_logs (product_id, action, previous_version, new_version, changed_fields, performed_by, timestamp)
        VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
-      [
-        productId,
-        AuditAction.CREATE,
-        null,
-        1,
-        JSON.stringify(changedFields),
-        performedBy,
-      ]
+      [productId, AuditAction.CREATE, null, 1, JSON.stringify(changedFields), performedBy]
     )
 
     await client.query('COMMIT')
@@ -140,17 +130,11 @@ export async function createProduct(
       logProductError(ErrorCodes.DUPLICATE_SLUG, 'Slug already exists', {
         slug: input.slug,
       })
-      throw new AppError(
-        ErrorCodes.DUPLICATE_SLUG,
-        'Product slug already exists'
-      )
+      throw new AppError(ErrorCodes.DUPLICATE_SLUG, 'Product slug already exists')
     }
 
     logProductError(ErrorCodes.INTERNAL_SERVER_ERROR, errorMsg)
-    throw new AppError(
-      ErrorCodes.INTERNAL_SERVER_ERROR,
-      'Failed to create product'
-    )
+    throw new AppError(ErrorCodes.INTERNAL_SERVER_ERROR, 'Failed to create product')
   } finally {
     const duration = Date.now() - startTime
     logSlowOperation('createProduct', duration)
@@ -180,10 +164,7 @@ export async function updateProduct(
     await client.query('BEGIN')
 
     // Fetch current product
-    const currentResult = await client.query(
-      'SELECT * FROM products WHERE id = $1',
-      [productId]
-    )
+    const currentResult = await client.query('SELECT * FROM products WHERE id = $1', [productId])
     if (currentResult.rows.length === 0) {
       throw new AppError(ErrorCodes.PRODUCT_NOT_FOUND, 'Product not found')
     }
@@ -194,10 +175,7 @@ export async function updateProduct(
     // Build update data (only provided fields)
     const updateData = {
       name: input.name || current.name,
-      description:
-        input.description !== undefined
-          ? input.description
-          : current.description,
+      description: input.description !== undefined ? input.description : current.description,
       enabled_modules: input.enabled_modules || current.enabled_modules,
     }
 
@@ -266,14 +244,7 @@ export async function updateProduct(
     await client.query(
       `INSERT INTO product_audit_logs (product_id, action, previous_version, new_version, changed_fields, performed_by, timestamp)
        VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
-      [
-        productId,
-        AuditAction.UPDATE,
-        oldVersion,
-        newVersion,
-        JSON.stringify(diff),
-        performedBy,
-      ]
+      [productId, AuditAction.UPDATE, oldVersion, newVersion, JSON.stringify(diff), performedBy]
     )
 
     await client.query('COMMIT')
@@ -297,10 +268,7 @@ export async function updateProduct(
       ErrorCodes.INTERNAL_SERVER_ERROR,
       error instanceof Error ? error.message : 'Unknown error'
     )
-    throw new AppError(
-      ErrorCodes.INTERNAL_SERVER_ERROR,
-      'Failed to update product'
-    )
+    throw new AppError(ErrorCodes.INTERNAL_SERVER_ERROR, 'Failed to update product')
   } finally {
     const duration = Date.now() - startTime
     logSlowOperation('updateProduct', duration)
@@ -328,10 +296,7 @@ export async function changeProductStatus(
     await client.query('BEGIN')
 
     // Fetch current product
-    const currentResult = await client.query(
-      'SELECT * FROM products WHERE id = $1',
-      [productId]
-    )
+    const currentResult = await client.query('SELECT * FROM products WHERE id = $1', [productId])
     if (currentResult.rows.length === 0) {
       throw new AppError(ErrorCodes.PRODUCT_NOT_FOUND, 'Product not found')
     }
@@ -358,14 +323,7 @@ export async function changeProductStatus(
     await client.query(
       `INSERT INTO product_audit_logs (product_id, action, previous_version, new_version, changed_fields, performed_by, timestamp)
        VALUES ($1, $2, $3, $4, $5, $6, NOW())`,
-      [
-        productId,
-        AuditAction.STATUS_CHANGE,
-        null,
-        null,
-        JSON.stringify(changedFields),
-        performedBy,
-      ]
+      [productId, AuditAction.STATUS_CHANGE, null, null, JSON.stringify(changedFields), performedBy]
     )
 
     await client.query('COMMIT')
@@ -389,10 +347,7 @@ export async function changeProductStatus(
       ErrorCodes.INTERNAL_SERVER_ERROR,
       error instanceof Error ? error.message : 'Unknown error'
     )
-    throw new AppError(
-      ErrorCodes.INTERNAL_SERVER_ERROR,
-      'Failed to change product status'
-    )
+    throw new AppError(ErrorCodes.INTERNAL_SERVER_ERROR, 'Failed to change product status')
   } finally {
     const duration = Date.now() - startTime
     logSlowOperation('changeProductStatus', duration)
@@ -404,13 +359,8 @@ export async function changeProductStatus(
  *
  * Returns: Product or AppError if not found
  */
-export async function getProductById(
-  client: PoolClient,
-  productId: string
-): Promise<Product> {
-  const result = await client.query('SELECT * FROM products WHERE id = $1', [
-    productId,
-  ])
+export async function getProductById(client: PoolClient, productId: string): Promise<Product> {
+  const result = await client.query('SELECT * FROM products WHERE id = $1', [productId])
   if (result.rows.length === 0) {
     throw new AppError(ErrorCodes.PRODUCT_NOT_FOUND, 'Product not found')
   }
@@ -434,13 +384,8 @@ export async function getProductById(
  *
  * Returns: Product or AppError if not found
  */
-export async function getProductBySlug(
-  client: PoolClient,
-  slug: string
-): Promise<Product> {
-  const result = await client.query('SELECT * FROM products WHERE slug = $1', [
-    slug,
-  ])
+export async function getProductBySlug(client: PoolClient, slug: string): Promise<Product> {
+  const result = await client.query('SELECT * FROM products WHERE slug = $1', [slug])
   if (result.rows.length === 0) {
     throw new AppError(ErrorCodes.PRODUCT_NOT_FOUND, 'Product not found')
   }
@@ -501,8 +446,7 @@ export async function listProducts(
     params.push(searchTerm, searchTerm, searchTerm)
   }
 
-  const whereClause =
-    conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
+  const whereClause = conditions.length > 0 ? `WHERE ${conditions.join(' AND ')}` : ''
 
   // Get total count
   const countResult = await client.query(
@@ -551,19 +495,15 @@ export async function listProducts(
  * 3. Delete versions
  * 4. Delete product
  */
-export async function deleteProduct(
-  client: PoolClient,
-  productId: string
-): Promise<void> {
+export async function deleteProduct(client: PoolClient, productId: string): Promise<void> {
   try {
     await client.query('BEGIN')
 
     // Check for existing licenses (will be added in Stage 10)
     // For now, we just delete the product
-    const result = await client.query(
-      'DELETE FROM products WHERE id = $1 RETURNING id',
-      [productId]
-    )
+    const result = await client.query('DELETE FROM products WHERE id = $1 RETURNING id', [
+      productId,
+    ])
 
     if (result.rows.length === 0) {
       throw new AppError(ErrorCodes.PRODUCT_NOT_FOUND, 'Product not found')
@@ -578,10 +518,7 @@ export async function deleteProduct(
       ErrorCodes.INTERNAL_SERVER_ERROR,
       error instanceof Error ? error.message : 'Unknown error'
     )
-    throw new AppError(
-      ErrorCodes.INTERNAL_SERVER_ERROR,
-      'Failed to delete product'
-    )
+    throw new AppError(ErrorCodes.INTERNAL_SERVER_ERROR, 'Failed to delete product')
   }
 }
 

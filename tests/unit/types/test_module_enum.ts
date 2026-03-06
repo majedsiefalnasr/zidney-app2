@@ -104,11 +104,7 @@ describe('T064: Module Enum Unit Tests', () => {
   describe('Module compatibility', () => {
     it('should allow all modules in combination', () => {
       // Any combination of valid modules should be acceptable
-      const combinations = [
-        [VALID_MODULES[0]],
-        [VALID_MODULES[0], VALID_MODULES[1]],
-        VALID_MODULES,
-      ]
+      const combinations = [[VALID_MODULES[0]], [VALID_MODULES[0], VALID_MODULES[1]], VALID_MODULES]
 
       for (const combo of combinations) {
         expect(combo.every((m) => VALID_MODULES.includes(m!))).toBe(true)

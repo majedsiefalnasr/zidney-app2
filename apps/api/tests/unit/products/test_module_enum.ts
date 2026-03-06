@@ -24,14 +24,7 @@ describe('Unit: Products - Module Enum (T064)', () => {
   })
 
   it('should validate module values', () => {
-    const validModules = [
-      'MCQ',
-      'TRADITIONAL_EXAMS',
-      'EXERCISES',
-      'LIBRARY',
-      'LIVES',
-      'FORUM',
-    ]
+    const validModules = ['MCQ', 'TRADITIONAL_EXAMS', 'EXERCISES', 'LIBRARY', 'LIVES', 'FORUM']
 
     validModules.forEach((mod) => {
       expect(Object.values(Module)).toContain(mod)

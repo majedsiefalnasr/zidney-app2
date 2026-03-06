@@ -72,10 +72,7 @@ export interface RowContext<TRow = any> {
 }
 
 // Helper type for action handlers
-export type RowActionHandler<TRow> = (
-  row: TRow,
-  action: RowAction<TRow>
-) => Promise<void>
+export type RowActionHandler<TRow> = (row: TRow, action: RowAction<TRow>) => Promise<void>
 
 // Action group for organizing related actions
 export interface RowActionGroup<TRow = any> {

@@ -1,6 +1,6 @@
+import { createUserWithLimitCheck } from '@zidney/app/api/utils/transaction-wrapper'
 import type { Pool } from 'pg'
 import { beforeEach, describe, expect, it } from 'vitest'
-import { createUserWithLimitCheck } from '@zidney/app/api/utils/transaction-wrapper'
 import { MockDatabaseClient, testFixtures } from './fixtures'
 
 /**
@@ -28,12 +28,8 @@ describe('Concurrency: Limit Enforcement', () => {
     // Request 1: Lock acquired, count=0, INSERT succeeds
     // Request 2: Waits for lock, then recounts, sees count=1, fails with 402
 
-    masterDb.mockResult('from licenses where workspace_id = $1 for update', [
-      license,
-    ])
-    masterDb.mockResult('from licenses where workspace_id = $1 for update', [
-      license,
-    ])
+    masterDb.mockResult('from licenses where workspace_id = $1 for update', [license])
+    masterDb.mockResult('from licenses where workspace_id = $1 for update', [license])
 
     // First request: count = 0, can add
     tenantDb.mockResult(
@@ -85,9 +81,7 @@ describe('Concurrency: Limit Enforcement', () => {
       status: 'SOFT_LOCKED',
     })
 
-    masterDb.mockResult('from licenses where workspace_id = $1 for update', [
-      softLockedLicense,
-    ])
+    masterDb.mockResult('from licenses where workspace_id = $1 for update', [softLockedLicense])
 
     const result = await createUserWithLimitCheck(
       masterDb as unknown as Pool,
@@ -111,9 +105,7 @@ describe('Concurrency: Limit Enforcement', () => {
       status: 'ARCHIVED',
     })
 
-    masterDb.mockResult('from licenses where workspace_id = $1 for update', [
-      archivedLicense,
-    ])
+    masterDb.mockResult('from licenses where workspace_id = $1 for update', [archivedLicense])
 
     const result = await createUserWithLimitCheck(
       masterDb as unknown as Pool,
@@ -136,12 +128,8 @@ describe('Concurrency: Limit Enforcement', () => {
     // Both requests see same count due to FOR UPDATE lock
     const license = testFixtures.makeLicense({ student_limit: 2 })
 
-    masterDb.mockResult('from licenses where workspace_id = $1 for update', [
-      license,
-    ])
-    masterDb.mockResult('from licenses where workspace_id = $1 for update', [
-      license,
-    ])
+    masterDb.mockResult('from licenses where workspace_id = $1 for update', [license])
+    masterDb.mockResult('from licenses where workspace_id = $1 for update', [license])
 
     tenantDb.mockResult(
       "from users where workspace_id = $1 and status = 'enabled' and role = 'student'",
@@ -187,9 +175,7 @@ describe('Concurrency: Limit Enforcement', () => {
       student_limit: null,
     })
 
-    masterDb.mockResult('from licenses where workspace_id = $1 for update', [
-      unlimitedLicense,
-    ])
+    masterDb.mockResult('from licenses where workspace_id = $1 for update', [unlimitedLicense])
 
     tenantDb.mockResult(
       "from users where workspace_id = $1 and status = 'enabled' and role = 'student'",

@@ -8,14 +8,10 @@
  */
 
 import * as productService from '@zidney/domain-core/products/productService'
-import { ProductStatus } from '@zidney/types/products/Product'
 import { Module } from '@zidney/types/enums/Module'
+import { ProductStatus } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import {
-  cleanupTestContext,
-  createTestContext,
-  TestContext,
-} from '../../test-helpers'
+import { cleanupTestContext, createTestContext, type TestContext } from '../../test-helpers'
 
 describe('T068-T071: Load and Performance Tests', () => {
   let ctx: TestContext
@@ -79,12 +75,7 @@ describe('T068-T071: Load and Performance Tests', () => {
 
       const updatePromises = Array.from({ length: 15 }, (_, i) =>
         productService
-          .updateProduct(
-            dbClient,
-            product.id,
-            { description: `Concurrent ${i}` },
-            ctx.userId
-          )
+          .updateProduct(dbClient, product.id, { description: `Concurrent ${i}` }, ctx.userId)
           .catch((e) => ({ error: e }))
       )
 
@@ -116,18 +107,10 @@ describe('T068-T071: Load and Performance Tests', () => {
         ctx.userId
       )
 
-      const descriptions = Array.from(
-        { length: 10 },
-        (_, i) => `Description ${i}`
-      )
+      const descriptions = Array.from({ length: 10 }, (_, i) => `Description ${i}`)
       const updatePromises = descriptions.map((desc) =>
         productService
-          .updateProduct(
-            dbClient,
-            product.id,
-            { description: desc },
-            ctx.userId
-          )
+          .updateProduct(dbClient, product.id, { description: desc }, ctx.userId)
           .catch(() => null)
       )
 
@@ -153,12 +136,7 @@ describe('T068-T071: Load and Performance Tests', () => {
       const updateCount = 8
       const updatePromises = Array.from({ length: updateCount }, (_, i) =>
         productService
-          .updateProduct(
-            dbClient,
-            product.id,
-            { description: `Audit ${i}` },
-            ctx.userId
-          )
+          .updateProduct(dbClient, product.id, { description: `Audit ${i}` }, ctx.userId)
           .catch(() => null)
       )
 
@@ -223,15 +201,11 @@ describe('T068-T071: Load and Performance Tests', () => {
       const results = await Promise.all(createPromises)
 
       // Only one should succeed (201)
-      const succeeded = (results as any[]).filter(
-        (r) => !r.error && r.id
-      ).length
+      const succeeded = (results as any[]).filter((r) => !r.error && r.id).length
       expect(succeeded).toBe(1)
 
       // Rest should fail with DUPLICATE_SLUG error
-      const failed = (results as any[]).filter(
-        (r) => r.code === 'DUPLICATE_SLUG'
-      ).length
+      const failed = (results as any[]).filter((r) => r.code === 'DUPLICATE_SLUG').length
       expect(failed).toBeGreaterThan(0)
     })
 
@@ -437,12 +411,7 @@ describe('T068-T071: Load and Performance Tests', () => {
       })
       for (let i = 0; i < Math.floor(products.items.length / 2); i++) {
         await productService
-          .changeProductStatus(
-            dbClient,
-            products.items[i]!.id,
-            ProductStatus.INACTIVE,
-            ctx.userId
-          )
+          .changeProductStatus(dbClient, products.items[i]!.id, ProductStatus.INACTIVE, ctx.userId)
           .catch(() => null)
       }
 
@@ -490,14 +459,10 @@ describe('T068-T071: Load and Performance Tests', () => {
       // Measure audit query performance
       const startTime = performance.now()
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          limit: 100,
-          offset: 0,
-        }
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {
+        limit: 100,
+        offset: 0,
+      })
 
       const endTime = performance.now()
       const duration = endTime - startTime
@@ -536,30 +501,18 @@ describe('T068-T071: Load and Performance Tests', () => {
       // Test multiple pages
       const startTime = performance.now()
 
-      const page1 = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          limit: 10,
-          offset: 0,
-        }
-      )
-      const page2 = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          limit: 10,
-          offset: 10,
-        }
-      )
-      const page3 = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          limit: 10,
-          offset: 20,
-        }
-      )
+      const page1 = await productService.getProductAuditLog(dbClient, product.id, {
+        limit: 10,
+        offset: 0,
+      })
+      const page2 = await productService.getProductAuditLog(dbClient, product.id, {
+        limit: 10,
+        offset: 10,
+      })
+      const page3 = await productService.getProductAuditLog(dbClient, product.id, {
+        limit: 10,
+        offset: 20,
+      })
 
       const endTime = performance.now()
       const duration = endTime - startTime
@@ -604,13 +557,9 @@ describe('T068-T071: Load and Performance Tests', () => {
       // Measure filter performance
       const startTime = performance.now()
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          limit: 100,
-        }
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {
+        limit: 100,
+      })
 
       const endTime = performance.now()
       const duration = endTime - startTime
@@ -648,14 +597,10 @@ describe('T068-T071: Load and Performance Tests', () => {
       // Query with high limit
       const startTime = performance.now()
 
-      const result = await productService.getProductAuditLog(
-        dbClient,
-        product.id,
-        {
-          limit: 100,
-          offset: 0,
-        }
-      )
+      const result = await productService.getProductAuditLog(dbClient, product.id, {
+        limit: 100,
+        offset: 0,
+      })
 
       const endTime = performance.now()
       const duration = endTime - startTime
@@ -682,37 +627,20 @@ describe('T068-T071: Load and Performance Tests', () => {
       const operations = [
         ...Array.from({ length: 5 }, (_, i) =>
           productService
-            .updateProduct(
-              dbClient,
-              product.id,
-              { description: `Mixed ${i}` },
-              ctx.userId
-            )
+            .updateProduct(dbClient, product.id, { description: `Mixed ${i}` }, ctx.userId)
             .catch(() => null)
         ),
         ...Array.from({ length: 3 }, () =>
           productService
-            .changeProductStatus(
-              dbClient,
-              product.id,
-              ProductStatus.INACTIVE,
-              ctx.userId
-            )
+            .changeProductStatus(dbClient, product.id, ProductStatus.INACTIVE, ctx.userId)
             .catch(() => null)
         ),
         ...Array.from({ length: 3 }, () =>
           productService
-            .changeProductStatus(
-              dbClient,
-              product.id,
-              ProductStatus.ACTIVE,
-              ctx.userId
-            )
+            .changeProductStatus(dbClient, product.id, ProductStatus.ACTIVE, ctx.userId)
             .catch(() => null)
         ),
-        productService
-          .getProductAuditLog(dbClient, product.id, {})
-          .catch(() => null),
+        productService.getProductAuditLog(dbClient, product.id, {}).catch(() => null),
       ]
 
       const startTime = performance.now()

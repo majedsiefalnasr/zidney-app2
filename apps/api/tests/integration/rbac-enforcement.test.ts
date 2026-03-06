@@ -103,14 +103,12 @@ describe('RBAC Enforcement', () => {
     if (!pool) {
       return
     }
-    await pool.query(
-      `DELETE FROM ${RBAC_USERS_TABLE} WHERE role IN ($1, $2, $3)`,
-      ['admin', 'instructor', 'student']
-    )
-    await db.master.query(
-      `DELETE FROM ${RBAC_WORKSPACES_TABLE} WHERE id = $1`,
-      [workspace.id]
-    )
+    await pool.query(`DELETE FROM ${RBAC_USERS_TABLE} WHERE role IN ($1, $2, $3)`, [
+      'admin',
+      'instructor',
+      'student',
+    ])
+    await db.master.query(`DELETE FROM ${RBAC_WORKSPACES_TABLE} WHERE id = $1`, [workspace.id])
   })
 
   it('should grant admin all permissions', () => {
@@ -161,12 +159,11 @@ describe('RBAC Enforcement', () => {
     const pool = getTenantPool(workspace.id)!
 
     // Get user role
-    const result = await pool.query(
-      `SELECT role FROM ${RBAC_USERS_TABLE} WHERE id = $1`,
-      [admin.id]
-    )
+    const result = await pool.query(`SELECT role FROM ${RBAC_USERS_TABLE} WHERE id = $1`, [
+      admin.id,
+    ])
 
-    expect(result.rows[0]!.role).toBe('admin')
+    expect(result.rows[0]?.role).toBe('admin')
 
     // In real implementation, permissions loaded from DB based on role
     // Never cached in JWT token
@@ -179,7 +176,7 @@ describe('RBAC Enforcement', () => {
     // Response: 403 Forbidden
 
     const studentRole: string = 'student'
-    const requiredPermission = 'manage_users'
+    const _requiredPermission = 'manage_users'
 
     const hasPermission = studentRole === 'admin' // Only admin has this
 
@@ -192,32 +189,26 @@ describe('RBAC Enforcement', () => {
     const pool = getTenantPool(workspace.id)!
 
     // Get initial role
-    const initial = await pool.query(
-      `SELECT role FROM ${RBAC_USERS_TABLE} WHERE id = $1`,
-      [instructor.id]
-    )
-    expect(initial.rows[0]!.role).toBe('instructor')
+    const initial = await pool.query(`SELECT role FROM ${RBAC_USERS_TABLE} WHERE id = $1`, [
+      instructor.id,
+    ])
+    expect(initial.rows[0]?.role).toBe('instructor')
 
     // Simulate role change in DB
-    await pool.query(
-      `UPDATE ${RBAC_USERS_TABLE} SET role = 'admin' WHERE id = $1`,
-      [instructor.id]
-    )
+    await pool.query(`UPDATE ${RBAC_USERS_TABLE} SET role = 'admin' WHERE id = $1`, [instructor.id])
 
     // New request should see updated role immediately
     // (Permissions loaded fresh from DB, not from JWT)
-    const updated = await pool.query(
-      `SELECT role FROM ${RBAC_USERS_TABLE} WHERE id = $1`,
-      [instructor.id]
-    )
+    const updated = await pool.query(`SELECT role FROM ${RBAC_USERS_TABLE} WHERE id = $1`, [
+      instructor.id,
+    ])
 
-    expect(updated.rows[0]!.role).toBe('admin')
+    expect(updated.rows[0]?.role).toBe('admin')
 
     // Reset
-    await pool.query(
-      `UPDATE ${RBAC_USERS_TABLE} SET role = 'instructor' WHERE id = $1`,
-      [instructor.id]
-    )
+    await pool.query(`UPDATE ${RBAC_USERS_TABLE} SET role = 'instructor' WHERE id = $1`, [
+      instructor.id,
+    ])
   })
 
   it('should validate permission before route execution', () => {

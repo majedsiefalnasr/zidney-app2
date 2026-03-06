@@ -19,8 +19,8 @@ describe('DistributedLockService', () => {
     // Initialize Redis connection
     redis = new Redis({
       host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      db: parseInt(process.env.REDIS_DB || '1'),
+      port: parseInt(process.env.REDIS_PORT || '6379', 10),
+      db: parseInt(process.env.REDIS_DB || '1', 10),
     })
 
     lockService = new DistributedLockService(redis)
@@ -86,10 +86,7 @@ describe('DistributedLockService', () => {
       const lock = await lockService.acquireLock(testLockKey)
       expect(lock).toBeDefined()
 
-      const released = await lockService.releaseLock(
-        testLockKey,
-        lock!.leaseKey
-      )
+      const released = await lockService.releaseLock(testLockKey, lock?.leaseKey)
       expect(released).toBe(true)
 
       // Should be able to acquire again
@@ -101,10 +98,7 @@ describe('DistributedLockService', () => {
       const lock = await lockService.acquireLock(testLockKey)
       expect(lock).toBeDefined()
 
-      const released = await lockService.releaseLock(
-        testLockKey,
-        'wrong-lease-key'
-      )
+      const released = await lockService.releaseLock(testLockKey, 'wrong-lease-key')
       expect(released).toBe(false)
 
       // Lock should still be held
@@ -113,10 +107,7 @@ describe('DistributedLockService', () => {
     })
 
     it('should handle release of non-existent lock gracefully', async () => {
-      const released = await lockService.releaseLock(
-        testLockKey,
-        'any-lease-key'
-      )
+      const released = await lockService.releaseLock(testLockKey, 'any-lease-key')
       expect(released).toBe(false)
     })
   })
@@ -130,11 +121,7 @@ describe('DistributedLockService', () => {
       await new Promise((resolve) => setTimeout(resolve, 1000))
 
       // Renew lease
-      const renewed = await lockService.renewLease(
-        testLockKey,
-        lock!.leaseKey,
-        3
-      )
+      const renewed = await lockService.renewLease(testLockKey, lock?.leaseKey, 3)
       expect(renewed).toBe(true)
 
       // Wait original TTL would have expired
@@ -159,7 +146,7 @@ describe('DistributedLockService', () => {
       const lock = await lockService.acquireLock(testLockKey)
       expect(lock).toBeDefined()
 
-      const isValid = await lockService.isLockValid(testLockKey, lock!.leaseKey)
+      const isValid = await lockService.isLockValid(testLockKey, lock?.leaseKey)
       expect(isValid).toBe(true)
     })
 
@@ -203,10 +190,7 @@ describe('DistributedLockService', () => {
         expect(lock).toBeDefined()
         expect(lock).not.toBeNull()
 
-        const released = await lockService.releaseLock(
-          testLockKey,
-          lock!.leaseKey
-        )
+        const released = await lockService.releaseLock(testLockKey, lock?.leaseKey)
         expect(released).toBe(true)
       }
     })
@@ -230,8 +214,8 @@ describe('DistributedLockService', () => {
       expect(lock4).toBeNull() // Still held
 
       // Clean up
-      await lockService.releaseLock(key1, lock1!.leaseKey)
-      await lockService.releaseLock(key2, lock2!.leaseKey)
+      await lockService.releaseLock(key1, lock1?.leaseKey)
+      await lockService.releaseLock(key2, lock2?.leaseKey)
     })
   })
 
@@ -241,7 +225,7 @@ describe('DistributedLockService', () => {
       const lock = await lockService.acquireLock(longKey)
       expect(lock).toBeDefined()
 
-      await lockService.releaseLock(longKey, lock!.leaseKey)
+      await lockService.releaseLock(longKey, lock?.leaseKey)
     })
 
     it('should handle zero TTL gracefully', async () => {

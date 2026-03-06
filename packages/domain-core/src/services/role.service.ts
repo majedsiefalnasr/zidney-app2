@@ -20,13 +20,9 @@
  */
 
 import { AppError, ErrorCode } from '@zidney/domain-core/errors'
-import {
-  MMCRole,
-  PermissionDomain,
-  RolePermissionsMatrix,
-} from '@zidney/types/mmc.types'
-// @ts-ignore: postgres not declared as dependency of domain-core [INFRA-001-DEPS-05]
-import { Database } from 'postgres'
+import type { MMCRole, PermissionDomain, RolePermissionsMatrix } from '@zidney/types/mmc.types'
+// @ts-expect-error: postgres not declared as dependency of domain-core [INFRA-001-DEPS-05]
+import type { Database } from 'postgres'
 
 export interface UpdatePermissionsRequest {
   domain: PermissionDomain
@@ -112,10 +108,7 @@ export class RoleService {
    */
   async getPermissions(roleId: string): Promise<RolePermissionsMatrix | null> {
     // Verify role exists
-    const roleExists = await this.db.query(
-      `SELECT id FROM roles WHERE id = $1`,
-      [roleId]
-    )
+    const roleExists = await this.db.query(`SELECT id FROM roles WHERE id = $1`, [roleId])
 
     if (roleExists.rowCount === 0) {
       return null
@@ -159,10 +152,7 @@ export class RoleService {
     const updateArray = Array.isArray(updates) ? updates : [updates]
 
     // Validate role exists
-    const roleResult = await this.db.query(
-      `SELECT id FROM roles WHERE id = $1`,
-      [roleId]
-    )
+    const roleResult = await this.db.query(`SELECT id FROM roles WHERE id = $1`, [roleId])
 
     if (roleResult.rowCount === 0) {
       throw new AppError(ErrorCode.NOT_FOUND, 'Role not found', 404)

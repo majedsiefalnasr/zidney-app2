@@ -97,9 +97,7 @@ const emit = defineEmits<{
 }>()
 
 // Initialize from `collapsed` if provided, otherwise fall back to `defaultCollapsed`
-const isCollapsed = ref(
-  props.collapsed !== undefined ? props.collapsed : props.defaultCollapsed
-)
+const isCollapsed = ref(props.collapsed !== undefined ? props.collapsed : props.defaultCollapsed)
 
 // T055: Watch-synced collapsed prop — keeps isCollapsed in sync with external Pinia state
 watch(

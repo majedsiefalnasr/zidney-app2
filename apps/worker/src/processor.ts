@@ -13,12 +13,9 @@
  * Per clarification Q5: Payload hash verification detects configuration mutations (non-blocking).
  */
 
-import {
-  getHashMismatchDetails,
-  verifyPayloadHashConsistency,
-} from '@zidney/domain-core/job-hash'
+import { getHashMismatchDetails, verifyPayloadHashConsistency } from '@zidney/domain-core/job-hash'
 import { logger as baseLogger, type Logger } from '@zidney/logger'
-import { JobEnvelope } from '@zidney/types/job-envelope'
+import type { JobEnvelope } from '@zidney/types/job-envelope'
 import { dequeueJob, moveToDeadLetter, retryJob } from './queue'
 
 /**
@@ -57,15 +54,9 @@ function createJobLogger(job: JobEnvelope): Logger {
  * @param job_type - Job type name (e.g., 'finalize_attempt')
  * @param handler - Handler function
  */
-export function registerJobHandler(
-  job_type: string,
-  handler: JobHandler
-): void {
+export function registerJobHandler(job_type: string, handler: JobHandler): void {
   jobHandlers.set(job_type, handler)
-  console.log('Job handler registered', {
-    event: 'handler_registered',
-    job_type,
-  })
+  baseLogger.info('handler_registered', { job_type })
 }
 
 /**
@@ -83,27 +74,20 @@ export function registerJobHandler(
  * @param timeout_seconds - Dequeue timeout
  * @throws Error if dequeue or processing fails
  */
-export async function processJob(
-  job_type: string,
-  timeout_seconds: number = 0
-): Promise<void> {
+export async function processJob(job_type: string, timeout_seconds: number = 0): Promise<void> {
   // Step 1: Dequeue job
   const job = await dequeueJob(job_type, timeout_seconds)
 
   if (!job) {
-    console.debug('Queue empty, no job to process', { queue: job_type })
+    baseLogger.debug('queue_empty', { queue: job_type })
     return
   }
 
   // Step 2: Verify payload hash consistency
   const hashMatch = verifyPayloadHashConsistency(job.payload, job.payload_hash)
   if (!hashMatch) {
-    const mismatchDetails = getHashMismatchDetails(
-      job.payload,
-      job.payload_hash
-    )
-    console.warn('Payload hash mismatch detected', {
-      event: 'config_mutation_detected',
+    const mismatchDetails = getHashMismatchDetails(job.payload, job.payload_hash)
+    baseLogger.warn('config_mutation_detected', {
       job_id: job.job_id,
       request_id: job.request_id,
       ...mismatchDetails,
@@ -133,10 +117,7 @@ export async function processJob(
     })
 
     // Move to DLQ (no handler available)
-    await moveToDeadLetter(
-      job,
-      `No handler registered for job type: ${job.job_name}`
-    )
+    await moveToDeadLetter(job, `No handler registered for job type: ${job.job_name}`)
     return
   }
 
@@ -221,8 +202,7 @@ export async function startJobProcessor(
   dequeue_timeout: number = 0,
   poll_interval: number = 100
 ): Promise<void> {
-  console.log('Job processor starting', {
-    event: 'processor_started',
+  baseLogger.info('processor_started', {
     registered_job_types: Array.from(jobHandlers.keys()),
   })
 
@@ -250,8 +230,7 @@ export async function startJobProcessor(
         await new Promise((resolve) => setTimeout(resolve, poll_interval))
       }
     } catch (error) {
-      console.error('Job processor error', {
-        event: 'processor_error',
+      baseLogger.error('processor_error', {
         error_message: error instanceof Error ? error.message : String(error),
       })
 

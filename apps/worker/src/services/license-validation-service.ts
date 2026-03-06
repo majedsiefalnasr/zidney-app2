@@ -7,7 +7,7 @@
  * Prevents provisioning of invalid/expired licenses.
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 /**
  * License validation result
@@ -57,7 +57,7 @@ export class LicenseValidationService {
 
     try {
       // Query license from master database
-      // @ts-ignore: TS2558 - query<T> type arg not accepted here (global tsconfig) [INFRA-001]
+      // @ts-expect-error: TS2558 - query<T> type arg not accepted here (global tsconfig) [INFRA-001]
       const result = await this.masterDb.query<LicenseRecord>(
         `SELECT id, status, schema_version, product_version, created_at, expires_at
          FROM licenses
@@ -162,22 +162,17 @@ export class LicenseValidationService {
         }
       }
 
-      this.logger?.logStep(
-        'license-validation-pass',
-        'License validation successful',
-        {
-          license_id: licenseId,
-          status: license.status,
-          schema_version: license.schema_version,
-          product_version: license.product_version,
-        }
-      )
+      this.logger?.logStep('license-validation-pass', 'License validation successful', {
+        license_id: licenseId,
+        status: license.status,
+        schema_version: license.schema_version,
+        product_version: license.product_version,
+      })
 
       return {
         valid: true,
         licenseExists: true,
-        isActive:
-          license.status === 'ACTIVE' || license.status === 'PENDING_PROVISION',
+        isActive: license.status === 'ACTIVE' || license.status === 'PENDING_PROVISION',
         schemaVersion: license.schema_version,
         productVersion: license.product_version,
         durationMs: Date.now() - startTime,
@@ -201,17 +196,13 @@ export class LicenseValidationService {
    * Check if schema version is compatible (major.minor.patch)
    * Accepts: same major version, equal or greater minor version
    */
-  private isSchemaVersionCompatible(
-    licenseVersion: string,
-    requiredVersion: string
-  ): boolean {
+  private isSchemaVersionCompatible(licenseVersion: string, requiredVersion: string): boolean {
     try {
-      const [licenseMajor, licenseMinor] = licenseVersion
-        .split('.')
-        .map(Number) as [number, number]
-      const [requiredMajor, requiredMinor] = requiredVersion
-        .split('.')
-        .map(Number) as [number, number]
+      const [licenseMajor, licenseMinor] = licenseVersion.split('.').map(Number) as [number, number]
+      const [requiredMajor, requiredMinor] = requiredVersion.split('.').map(Number) as [
+        number,
+        number,
+      ]
 
       // Same major version, license minor >= required minor
       if (licenseMajor === requiredMajor) {
@@ -229,10 +220,7 @@ export class LicenseValidationService {
    * Check if product version is compatible
    * Immutable: license product_version cannot change, so must match exactly
    */
-  private isProductVersionCompatible(
-    licenseVersion: string,
-    requiredVersion: string
-  ): boolean {
+  private isProductVersionCompatible(licenseVersion: string, requiredVersion: string): boolean {
     // Product version is immutable, must match
     return licenseVersion === requiredVersion
   }

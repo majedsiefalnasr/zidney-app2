@@ -5,10 +5,7 @@ import { createApiClient } from '../src/client'
 import { ErrorCodes, isAppError } from '../src/http-error'
 import type { ClientConfig } from '../src/types'
 
-function createTestConfig(
-  adapter: MockAdapter,
-  overrides?: Partial<ClientConfig>
-): ClientConfig {
+function createTestConfig(adapter: MockAdapter, overrides?: Partial<ClientConfig>): ClientConfig {
   return {
     baseUrl: 'https://api.test.com',
     getAccessToken: () => null,
@@ -54,12 +51,9 @@ describe('ApiClient', () => {
       })
       const client = createApiClient(createTestConfig(adapter))
 
-      const result = await client.post<{ id: number; name: string }>(
-        '/products',
-        {
-          name: 'New',
-        }
-      )
+      const result = await client.post<{ id: number; name: string }>('/products', {
+        name: 'New',
+      })
 
       expect(result.data).toEqual({ id: 2, name: 'New' })
       const req = adapter.getLastRequest()!
@@ -198,9 +192,7 @@ describe('ApiClient', () => {
       // Verify retried request uses new token
       const requests = adapter.getRequests()
       expect(requests).toHaveLength(2)
-      expect(requests[1]!.headers['Authorization']).toBe(
-        'Bearer refreshed-token'
-      )
+      expect(requests[1]?.headers.Authorization).toBe('Bearer refreshed-token')
     })
 
     it('should call onAuthFailure when refresh fails', async () => {
@@ -214,9 +206,7 @@ describe('ApiClient', () => {
       })
 
       const onAuthFailure = vi.fn()
-      const onRefreshToken = vi
-        .fn()
-        .mockRejectedValue(new Error('Refresh failed'))
+      const onRefreshToken = vi.fn().mockRejectedValue(new Error('Refresh failed'))
       const client = createApiClient(
         createTestConfig(adapter, {
           getAccessToken: () => 'old-token',
@@ -350,9 +340,7 @@ describe('ApiClient', () => {
         },
       })
 
-      const onRefreshToken = vi
-        .fn()
-        .mockRejectedValue(new Error('Refresh failed'))
+      const onRefreshToken = vi.fn().mockRejectedValue(new Error('Refresh failed'))
       const onAuthFailure = vi.fn()
       const client = createApiClient(
         createTestConfig(adapter, {
@@ -362,13 +350,10 @@ describe('ApiClient', () => {
         })
       )
 
-      const results = await Promise.allSettled([
-        client.get('/a'),
-        client.get('/b'),
-      ])
+      const results = await Promise.allSettled([client.get('/a'), client.get('/b')])
 
-      expect(results[0]!.status).toBe('rejected')
-      expect(results[1]!.status).toBe('rejected')
+      expect(results[0]?.status).toBe('rejected')
+      expect(results[1]?.status).toBe('rejected')
       expect(onAuthFailure).toHaveBeenCalledTimes(1)
     })
   })
@@ -466,12 +451,8 @@ describe('ApiClient', () => {
       await client1.get('/data')
       await client2.get('/data')
 
-      expect(adapter1.getLastRequest()!.url).toBe(
-        'https://mmc-api.test.com/data'
-      )
-      expect(adapter2.getLastRequest()!.url).toBe(
-        'https://bo-api.test.com/data'
-      )
+      expect(adapter1.getLastRequest()?.url).toBe('https://mmc-api.test.com/data')
+      expect(adapter2.getLastRequest()?.url).toBe('https://bo-api.test.com/data')
     })
 
     it('should use different getAccessToken functions', async () => {
@@ -498,12 +479,8 @@ describe('ApiClient', () => {
       await client1.get('/data')
       await client2.get('/data')
 
-      expect(adapter1.getLastRequest()!.headers['Authorization']).toBe(
-        'Bearer token-mmc'
-      )
-      expect(adapter2.getLastRequest()!.headers['Authorization']).toBe(
-        'Bearer token-bo'
-      )
+      expect(adapter1.getLastRequest()?.headers.Authorization).toBe('Bearer token-mmc')
+      expect(adapter2.getLastRequest()?.headers.Authorization).toBe('Bearer token-bo')
     })
 
     it('should have isolated state between client instances', async () => {
@@ -535,9 +512,7 @@ describe('ApiClient', () => {
 
   describe('cancellation (US8)', () => {
     it('should throw REQUEST_CANCELLED AppError when signal is aborted', async () => {
-      adapter.enqueueError(
-        new DOMException('The operation was aborted.', 'AbortError')
-      )
+      adapter.enqueueError(new DOMException('The operation was aborted.', 'AbortError'))
       const client = createApiClient(createTestConfig(adapter))
 
       try {

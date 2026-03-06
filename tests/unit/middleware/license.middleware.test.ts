@@ -46,45 +46,41 @@ describe('License Middleware', () => {
     licensesBySlug.clear()
 
     mockDb = {
-      query: vi.fn(
-        async (sqlText: string, params?: unknown[]): Promise<QueryResult> => {
-          const normalized = sqlText.replace(/\s+/g, ' ').trim().toLowerCase()
+      query: vi.fn(async (sqlText: string, params?: unknown[]): Promise<QueryResult> => {
+        const normalized = sqlText.replace(/\s+/g, ' ').trim().toLowerCase()
 
-          if (normalized.startsWith('select * from licenses')) {
-            const workspaceSlug = String(params?.[0] ?? '')
-            const license = licensesBySlug.get(workspaceSlug)
-            if (!license || license.deleted_at) {
-              return { rows: [] }
-            }
-            return { rows: [license] }
+        if (normalized.startsWith('select * from licenses')) {
+          const workspaceSlug = String(params?.[0] ?? '')
+          const license = licensesBySlug.get(workspaceSlug)
+          if (!license || license.deleted_at) {
+            return { rows: [] }
           }
+          return { rows: [license] }
+        }
+
+        if (
+          normalized.startsWith(
+            'update licenses set status = $1, archived_at = now(), updated_at = now()'
+          )
+        ) {
+          const [newStatus, licenseId, expectedStatus] = params || []
+          const target = Array.from(licensesBySlug.values()).find((row) => row.id === licenseId)
 
           if (
-            normalized.startsWith(
-              'update licenses set status = $1, archived_at = now(), updated_at = now()'
-            )
+            !target ||
+            target.status !== expectedStatus ||
+            !target.soft_lock_until ||
+            new Date(target.soft_lock_until) >= new Date()
           ) {
-            const [newStatus, licenseId, expectedStatus] = params || []
-            const target = Array.from(licensesBySlug.values()).find(
-              (row) => row.id === licenseId
-            )
-
-            if (
-              !target ||
-              target.status !== expectedStatus ||
-              !target.soft_lock_until ||
-              new Date(target.soft_lock_until) >= new Date()
-            ) {
-              return { rows: [] }
-            }
-
-            target.status = newStatus as LicenseStatus
-            return { rows: [target] }
+            return { rows: [] }
           }
 
-          return { rows: [] }
+          target.status = newStatus as LicenseStatus
+          return { rows: [target] }
         }
-      ),
+
+        return { rows: [] }
+      }),
     }
 
     mockLogger = {
@@ -215,9 +211,7 @@ describe('License Middleware', () => {
         }),
         403
       )
-      expect(licensesBySlug.get('test-workspace')?.status).toBe(
-        LicenseStatus.ARCHIVED
-      )
+      expect(licensesBySlug.get('test-workspace')?.status).toBe(LicenseStatus.ARCHIVED)
     })
   })
 

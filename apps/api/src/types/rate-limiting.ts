@@ -203,10 +203,7 @@ export interface RateLimitHeaders {
 /**
  * Helper function to calculate Retry-After duration
  */
-export function calculateRetryAfter(
-  resetTime: number,
-  currentTime: number = Date.now()
-): number {
+export function calculateRetryAfter(resetTime: number, currentTime: number = Date.now()): number {
   const delayMs = Math.max(0, resetTime - currentTime)
   return Math.ceil(delayMs / 1000) // Convert to seconds
 }
@@ -236,7 +233,7 @@ function matchEndpointPattern(pattern: string, endpoint: string): boolean {
 
   if (pattern.includes('{')) {
     // Parameterized route: /attempt/{id}/submit matches /attempt/123/submit
-    const regex = new RegExp('^' + pattern.replace(/\{[^}]+\}/g, '[^/]+') + '$')
+    const regex = new RegExp(`^${pattern.replace(/\{[^}]+\}/g, '[^/]+')}$`)
     return regex.test(endpoint)
   }
 

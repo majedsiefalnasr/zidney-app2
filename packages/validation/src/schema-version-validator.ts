@@ -4,7 +4,7 @@
  * Restricted to X.Y.Z format only (no pre-releases, no build metadata)
  */
 
-import { SemVer } from '@zidney/types'
+import type { SemVer } from '@zidney/types'
 
 /**
  * Parse version string "X.Y.Z" into SemVer object
@@ -83,10 +83,7 @@ export function compareVersions(v1: string, v2: string): -1 | 0 | 1 {
  *   isCompatible("1.0.0", "2.0.0") → false
  *   isCompatible("1.0.0", "1.0.0") → true
  */
-export function isCompatible(
-  tenantVersion: string,
-  minimumRequired: string
-): boolean {
+export function isCompatible(tenantVersion: string, minimumRequired: string): boolean {
   return compareVersions(tenantVersion, minimumRequired) >= 0
 }
 
@@ -136,11 +133,7 @@ export function isMinorBump(oldVersion: string, newVersion: string): boolean {
 export function isPatchBump(oldVersion: string, newVersion: string): boolean {
   const sem1 = parseVersion(oldVersion)
   const sem2 = parseVersion(newVersion)
-  return (
-    sem1.major === sem2.major &&
-    sem1.minor === sem2.minor &&
-    sem1.patch !== sem2.patch
-  )
+  return sem1.major === sem2.major && sem1.minor === sem2.minor && sem1.patch !== sem2.patch
 }
 
 /**

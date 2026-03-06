@@ -24,8 +24,8 @@
  * 5. Phase G admin panel enables manual retry/inspection
  */
 
-import { createLogger, Logger } from '@zidney/logger'
-import { Pool, PoolClient } from 'pg'
+import { createLogger, type Logger } from '@zidney/logger'
+import type { Pool, PoolClient } from 'pg'
 
 /**
  * DLQ entry structure
@@ -115,8 +115,7 @@ export async function moveToDLQ(
       } catch (queueErr) {
         log.warn('Failed to push to Redis DLQ (will use DB-only)', {
           job_id: jobId,
-          error:
-            queueErr instanceof Error ? queueErr.message : String(queueErr),
+          error: queueErr instanceof Error ? queueErr.message : String(queueErr),
         })
         // Proceed; DB layer provides durability
       }
@@ -181,8 +180,7 @@ export async function getDLQJobs(
       } catch (parseErr) {
         logger.warn('Failed to parse DLQ entry', {
           workspace_id: workspaceId,
-          error:
-            parseErr instanceof Error ? parseErr.message : String(parseErr),
+          error: parseErr instanceof Error ? parseErr.message : String(parseErr),
         })
       }
     }
@@ -268,14 +266,10 @@ export async function retryDLQJob(
           queue_key: queueKey,
         })
       } catch (queueErr) {
-        logger.warn(
-          'Failed to re-enqueue job (will be picked up via DB scan)',
-          {
-            job_id: jobId,
-            error:
-              queueErr instanceof Error ? queueErr.message : String(queueErr),
-          }
-        )
+        logger.warn('Failed to re-enqueue job (will be picked up via DB scan)', {
+          job_id: jobId,
+          error: queueErr instanceof Error ? queueErr.message : String(queueErr),
+        })
       }
     }
   } catch (err) {

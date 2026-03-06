@@ -20,7 +20,7 @@
 import { createLogger } from '@zidney/logger'
 import type { Context, MiddlewareHandler, Next } from 'hono'
 import type { ContentfulStatusCode } from 'hono/utils/http-status'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 const logger = createLogger('license-validation')
 
@@ -35,10 +35,7 @@ export interface LicenseStatus {
  */
 export class LicenseValidationMiddleware {
   private master_pool: Pool
-  private license_cache: Map<
-    number,
-    { status: LicenseStatus; timestamp: number }
-  > = new Map()
+  private license_cache: Map<number, { status: LicenseStatus; timestamp: number }> = new Map()
   private cache_ttl_ms: number = 5 * 60 * 1000 // 5 minutes
 
   constructor(master_pool: Pool) {
@@ -49,9 +46,7 @@ export class LicenseValidationMiddleware {
    * Get license status from master database
    * Uses cache for performance (5 minute TTL)
    */
-  private async getLicenseStatus(
-    license_id: number
-  ): Promise<LicenseStatus | null> {
+  private async getLicenseStatus(license_id: number): Promise<LicenseStatus | null> {
     // Check cache
     const cached = this.license_cache.get(license_id)
     if (cached && Date.now() - cached.timestamp < this.cache_ttl_ms) {
@@ -134,8 +129,7 @@ export class LicenseValidationMiddleware {
         return {
           http_status: 503,
           error_code: 'WS_002',
-          message:
-            'Workspace is still provisioning, please try again in a moment',
+          message: 'Workspace is still provisioning, please try again in a moment',
         }
       default:
         return {
@@ -161,8 +155,7 @@ export class LicenseValidationMiddleware {
               data: null,
               error: {
                 code: 'SYSTEM_ERROR',
-                message:
-                  'Tenant context not found (tenantResolver must run first)',
+                message: 'Tenant context not found (tenantResolver must run first)',
               },
             },
             500

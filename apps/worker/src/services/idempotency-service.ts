@@ -12,7 +12,7 @@
  */
 
 import { ProvisioningErrorCode } from '@zidney/types/errors/provisioning-errors'
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 /**
  * Idempotency Check Result
@@ -67,10 +67,9 @@ export class IdempotencyService {
       }
 
       // Check license status
-      const licenseResult = await this.masterDb.query(
-        `SELECT status FROM licenses WHERE id = $1`,
-        [licenseId]
-      )
+      const licenseResult = await this.masterDb.query(`SELECT status FROM licenses WHERE id = $1`, [
+        licenseId,
+      ])
 
       if (licenseResult.rows.length === 0) {
         return {
@@ -93,8 +92,7 @@ export class IdempotencyService {
           isIdempotent: true,
           alreadyProvisioned: true,
           error: ProvisioningErrorCode.ORPHAN_DATABASE_DETECTED,
-          message:
-            'License is active but registry entry is missing (orphan database)',
+          message: 'License is active but registry entry is missing (orphan database)',
         }
       }
 
@@ -123,10 +121,9 @@ export class IdempotencyService {
    */
   async checkOrphanDatabase(dbName: string): Promise<boolean> {
     try {
-      const result = await this.masterDb.query(
-        `SELECT 1 FROM tenant_registry WHERE db_name = $1`,
-        [dbName]
-      )
+      const result = await this.masterDb.query(`SELECT 1 FROM tenant_registry WHERE db_name = $1`, [
+        dbName,
+      ])
 
       return result.rows.length === 0
     } catch (error) {
@@ -141,9 +138,6 @@ export class IdempotencyService {
 /**
  * Factory to create idempotency service
  */
-export function createIdempotencyService(
-  masterDb: Pool,
-  logger?: any
-): IdempotencyService {
+export function createIdempotencyService(masterDb: Pool, logger?: any): IdempotencyService {
   return new IdempotencyService(masterDb, logger)
 }

@@ -49,9 +49,7 @@ export interface IErrorInterceptor {
  *
  * @param options - Callbacks for session expiry and license error handling
  */
-export function createErrorInterceptor(
-  options: ErrorInterceptorOptions
-): IErrorInterceptor {
+export function createErrorInterceptor(options: ErrorInterceptorOptions): IErrorInterceptor {
   let _isHandling401 = false
 
   return {
@@ -62,9 +60,7 @@ export function createErrorInterceptor(
     async handleAuthFailure(): Promise<void> {
       // FR-SEC-07: only trigger expiry flow for authenticated sessions
       if (!options.getIsAuthenticated()) {
-        logger.debug(
-          '401 received on unauthenticated request — passing through'
-        )
+        logger.debug('401 received on unauthenticated request — passing through')
         return
       }
 

@@ -1,6 +1,6 @@
+import path from 'node:path'
 import tailwindcss from '@tailwindcss/vite'
 import vue from '@vitejs/plugin-vue'
-import path from 'path'
 import { defineConfig } from 'vite'
 
 export default defineConfig({
@@ -33,10 +33,7 @@ export default defineConfig({
     alias: {
       '@': path.resolve(__dirname, './src'),
       '~': path.resolve(__dirname, './src'),
-      '@zidney/shadcn-vue/ui': path.resolve(
-        __dirname,
-        './src/components/shadcn-vue'
-      ),
+      '@zidney/shadcn-vue/ui': path.resolve(__dirname, './src/components/shadcn-vue'),
     },
   },
 

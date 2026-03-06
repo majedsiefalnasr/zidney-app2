@@ -110,20 +110,14 @@ export function mapValidationErrorToAffiliateError(error: any): {
   if (message.includes('discount') && message.includes('100')) {
     return {
       code: AffiliateErrorCode.AFFILIATE_INVALID_DISCOUNT_PERCENTAGE,
-      message:
-        AffiliateErrorMessages[
-          AffiliateErrorCode.AFFILIATE_INVALID_DISCOUNT_PERCENTAGE
-        ],
+      message: AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_INVALID_DISCOUNT_PERCENTAGE],
     }
   }
 
   if (message.includes('commission') && message.includes('100')) {
     return {
       code: AffiliateErrorCode.AFFILIATE_INVALID_COMMISSION_PERCENTAGE,
-      message:
-        AffiliateErrorMessages[
-          AffiliateErrorCode.AFFILIATE_INVALID_COMMISSION_PERCENTAGE
-        ],
+      message: AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_INVALID_COMMISSION_PERCENTAGE],
     }
   }
 

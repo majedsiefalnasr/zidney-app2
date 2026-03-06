@@ -173,9 +173,7 @@ export function isGradeAttemptJob(job: JobEnvelope): job is GradeAttemptJob {
 /**
  * Type guard to check if job is a GenerateCertificateJob.
  */
-export function isGenerateCertificateJob(
-  job: JobEnvelope
-): job is GenerateCertificateJob {
+export function isGenerateCertificateJob(job: JobEnvelope): job is GenerateCertificateJob {
   return job.job_name === 'generate_certificate' && !!job.attempt_id
 }
 
@@ -218,7 +216,8 @@ export interface DrainLanguageTranslationsPayload {
  *   → worker removes language_status[language_code] → invalidates coverage cache
  *   → worker updates language_settings (removes from supported_languages)
  */
-export interface DrainLanguageTranslationsJob extends JobEnvelope<DrainLanguageTranslationsPayload> {
+export interface DrainLanguageTranslationsJob
+  extends JobEnvelope<DrainLanguageTranslationsPayload> {
   job_name: 'DRAIN_LANGUAGE_TRANSLATIONS'
 }
 

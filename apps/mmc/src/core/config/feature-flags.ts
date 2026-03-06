@@ -17,13 +17,10 @@ export type FeatureFlags = ZidneyFeatureFlags
  *
  * @param overrides - Optional partial overrides for testing
  */
-export function createFeatureFlags(
-  overrides?: Partial<FeatureFlags>
-): FeatureFlags {
+export function createFeatureFlags(overrides?: Partial<FeatureFlags>): FeatureFlags {
   const raw = readRawFeatureFlags()
 
   return Object.freeze({
-    enableDebugPanel:
-      overrides?.enableDebugPanel ?? parseBooleanFlag(raw.enableDebugPanel),
+    enableDebugPanel: overrides?.enableDebugPanel ?? parseBooleanFlag(raw.enableDebugPanel),
   })
 }

@@ -118,6 +118,8 @@
 </template>
 
 <script setup lang="ts">
+import { Globe, TrendingDown, TrendingUp } from 'lucide-vue-next'
+import { computed, ref } from 'vue'
 import {
   Button,
   Input,
@@ -127,8 +129,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui'
-import { Globe, TrendingDown, TrendingUp } from 'lucide-vue-next'
-import { computed, ref } from 'vue'
 
 interface GeographicData {
   country: string
@@ -177,8 +177,7 @@ const filteredData = computed(() => {
     const query = searchQuery.value.toLowerCase()
     result = result.filter(
       (item) =>
-        item.country.toLowerCase().includes(query) ||
-        item.countryCode.toLowerCase().includes(query)
+        item.country.toLowerCase().includes(query) || item.countryCode.toLowerCase().includes(query)
     )
   }
 

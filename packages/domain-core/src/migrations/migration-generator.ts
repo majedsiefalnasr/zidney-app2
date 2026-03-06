@@ -26,8 +26,7 @@ export function generateMigrationFile(options: {
   outputDir?: string
 }): GeneratedMigration {
   const { version, changeType, sqlStatements } = options
-  const outputDir =
-    options.outputDir || `apps/api/src/db/tenant/migrations/v${version}`
+  const outputDir = options.outputDir || `apps/api/src/db/tenant/migrations/v${version}`
 
   // Ensure directory exists
   try {
@@ -135,9 +134,7 @@ export function validateMigrationSQL(sql: string): {
   }
 
   if (sql.includes('DELETE FROM') && !sql.includes('WHERE')) {
-    issues.push(
-      'DELETE without WHERE clause detected (will delete all records)'
-    )
+    issues.push('DELETE without WHERE clause detected (will delete all records)')
   }
 
   // Check for proper transaction wrapping

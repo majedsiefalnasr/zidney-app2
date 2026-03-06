@@ -39,36 +39,33 @@
  */
 
 import { logger } from '@zidney/logger'
-import { Context, Next } from 'hono'
+import type { Context, Next } from 'hono'
 
 /**
  * Dashboard Logging Middleware
  *
  * Logs all dashboard requests with detailed tracing information
  */
-export async function dashboardLoggingMiddleware(
-  c: Context,
-  next: Next
-): Promise<void> {
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+export async function dashboardLoggingMiddleware(c: Context, next: Next): Promise<void> {
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const startTime = Date.now()
 
   // Extract context from headers (set by prior middleware)
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const correlationId = c.req.header('x-correlation-id') || 'unknown'
-  // @ts-ignore: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
+  // @ts-expect-error: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
   const userId = c.req.get('x-user-id') || 'unknown'
-  // @ts-ignore: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
+  // @ts-expect-error: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
   const workspaceId = c.req.get('x-workspace-id') || 'unknown'
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const endpoint = extractEndpointName(c.req.path)
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const method = c.req.method
 
   // ============================================================================
   // Log: DASHBOARD_REQUEST_START
   // ============================================================================
-  // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+  // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
   logger.log({
     timestamp: new Date().toISOString(),
     level: 'info',
@@ -84,10 +81,10 @@ export async function dashboardLoggingMiddleware(
   })
 
   // Check for license validation status (set by license middleware)
-  // @ts-ignore: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
+  // @ts-expect-error: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
   const licenseStatus = c.req.get('x-license-status')
   if (licenseStatus === 'ACTIVE') {
-    // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+    // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
     logger.log({
       timestamp: new Date().toISOString(),
       level: 'debug',
@@ -99,7 +96,7 @@ export async function dashboardLoggingMiddleware(
       license_status: licenseStatus,
     })
   } else if (licenseStatus) {
-    // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+    // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
     logger.log({
       timestamp: new Date().toISOString(),
       level: 'warn',
@@ -113,10 +110,10 @@ export async function dashboardLoggingMiddleware(
   }
 
   // Check for schema version validation
-  // @ts-ignore: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
+  // @ts-expect-error: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
   const schemaVersion = c.req.get('x-schema-version')
   if (schemaVersion) {
-    // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+    // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
     logger.log({
       timestamp: new Date().toISOString(),
       level: 'debug',
@@ -131,10 +128,10 @@ export async function dashboardLoggingMiddleware(
   }
 
   // Check for permission validation
-  // @ts-ignore: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
+  // @ts-expect-error: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
   const hasPermission = c.req.get('x-has-permission')
   if (hasPermission === 'true') {
-    // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+    // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
     logger.log({
       timestamp: new Date().toISOString(),
       level: 'debug',
@@ -144,16 +141,16 @@ export async function dashboardLoggingMiddleware(
       workspace_id: workspaceId,
       event: 'PERMISSION_CHECK_PASS',
       required_permission: 'reporting.view',
-      // @ts-ignore: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
+      // @ts-expect-error: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
       user_role: c.req.get('x-user-role') || 'unknown',
     })
   }
 
   // Check for rate limit validation
-  // @ts-ignore: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
+  // @ts-expect-error: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
   const rateLimitRemaining = c.req.get('x-ratelimit-remaining')
   if (rateLimitRemaining !== undefined) {
-    // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+    // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
     logger.log({
       timestamp: new Date().toISOString(),
       level: 'debug',
@@ -163,7 +160,7 @@ export async function dashboardLoggingMiddleware(
       workspace_id: workspaceId,
       event: 'RATE_LIMIT_CHECK_PASS',
       rate_limit_remaining: parseInt(rateLimitRemaining, 10),
-      // @ts-ignore: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
+      // @ts-expect-error: LOGIC-BUG: HonoRequest.get() does not exist; use .header() — see INFRA-001-LOGIC-06 [INFRA-001-LOGIC-06]
       rate_limit_limit: c.req.get('x-ratelimit-limit') || 'unknown',
     })
   }
@@ -171,24 +168,24 @@ export async function dashboardLoggingMiddleware(
   // ============================================================================
   // Execute handler and capture response
   // ============================================================================
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const startHandlerTime = Date.now()
 
   try {
     await next()
 
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const handlerTime = Date.now() - startHandlerTime
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const status = c.res.status
 
     // ============================================================================
     // Log: CACHE Hit/Miss (if header exists)
     // ============================================================================
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const cacheStatus = c.req.header('x-cache')
     if (cacheStatus) {
-      // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+      // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
       logger.log({
         timestamp: new Date().toISOString(),
         level: 'debug',
@@ -207,10 +204,10 @@ export async function dashboardLoggingMiddleware(
     // ============================================================================
     if (status >= 200 && status < 300) {
       // Get response body size if available
-      // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+      // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const contentLength = c.res.headers.get('content-length') || '0'
 
-      // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+      // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
       logger.log({
         timestamp: new Date().toISOString(),
         level: 'info',
@@ -230,9 +227,9 @@ export async function dashboardLoggingMiddleware(
     // ============================================================================
     // Log: RESPONSE_SENT (all responses)
     // ============================================================================
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const totalResponseTime = Date.now() - startTime
-    // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+    // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
     logger.log({
       timestamp: new Date().toISOString(),
       level: status >= 400 ? 'warn' : 'info',
@@ -253,7 +250,7 @@ export async function dashboardLoggingMiddleware(
     // Log: AUTHORIZATION_FAILED or QUERY_ERROR (if applicable)
     // ============================================================================
     if (status === 403) {
-      // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+      // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
       logger.log({
         timestamp: new Date().toISOString(),
         level: 'warn',
@@ -266,7 +263,7 @@ export async function dashboardLoggingMiddleware(
         reason: 'permission_denied',
       })
     } else if (status === 423) {
-      // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+      // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
       logger.log({
         timestamp: new Date().toISOString(),
         level: 'warn',
@@ -279,7 +276,7 @@ export async function dashboardLoggingMiddleware(
         reason: 'license_locked',
       })
     } else if (status === 429) {
-      // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+      // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
       logger.log({
         timestamp: new Date().toISOString(),
         level: 'warn',
@@ -292,7 +289,7 @@ export async function dashboardLoggingMiddleware(
         remaining_requests: c.req.header('x-ratelimit-remaining') || '0',
       })
     } else if (status >= 400 && status < 500) {
-      // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+      // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
       logger.log({
         timestamp: new Date().toISOString(),
         level: 'warn',
@@ -305,7 +302,7 @@ export async function dashboardLoggingMiddleware(
         error_code: status,
       })
     } else if (status >= 500) {
-      // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+      // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
       logger.log({
         timestamp: new Date().toISOString(),
         level: 'error',
@@ -323,10 +320,10 @@ export async function dashboardLoggingMiddleware(
     // ============================================================================
     // Log: Exception during request processing
     // ============================================================================
-    // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+    // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const totalResponseTime = Date.now() - startTime
 
-    // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+    // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
     logger.log({
       timestamp: new Date().toISOString(),
       level: 'error',
@@ -355,7 +352,7 @@ export async function dashboardLoggingMiddleware(
  * @returns Endpoint name (e.g., "summary")
  */
 function extractEndpointName(path: string): string {
-  // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const match = path.match(/\/dashboard\/([a-z-]+)/)
   return match ? match[1]! : 'unknown'
 }
@@ -363,8 +360,8 @@ function extractEndpointName(path: string): string {
 /**
  * Log helper: Format response size
  */
-// @ts-ignore: TS6133 - declared but never read [INFRA-001]
-function formatBytes(bytes: number): string {
+// @ts-expect-error: TS6133 - declared but never read [INFRA-001]
+function _formatBytes(bytes: number): string {
   if (bytes < 1024) return `${bytes}B`
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)}KB`
   return `${(bytes / (1024 * 1024)).toFixed(1)}MB`
@@ -375,9 +372,9 @@ function formatBytes(bytes: number): string {
  *
  * Usage in aggregation pipeline:
  * ```typescript
- // @ts-ignore: TS6133 - declared but never read [INFRA-001]
+ // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
  * const hitRatio = calculateCacheHitRatio(hits, total)
- // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+ // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
  * logger.log({ ..., cache_hit_ratio: hitRatio })
  * ```
  */
@@ -390,7 +387,7 @@ export function calculateCacheHitRatio(hits: number, total: number): number {
  *
  * Usage:
  * ```typescript
- // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+ // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
  * logger.log(createMetricsEvent({
  *   event: 'CACHE_HIT',
  *   endpoint: 'summary',
@@ -401,9 +398,7 @@ export function calculateCacheHitRatio(hits: number, total: number): number {
  * }))
  * ```
  */
-export function createMetricsEvent(
-  data: Record<string, any>
-): Record<string, any> {
+export function createMetricsEvent(data: Record<string, any>): Record<string, any> {
   return {
     timestamp: new Date().toISOString(),
     level: 'info',
@@ -424,7 +419,7 @@ export function logPerformanceAlert(
   thresholdMs: number = 300
 ): void {
   if (responseTimeMs > thresholdMs) {
-    // @ts-ignore: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
+    // @ts-expect-error: LOGIC-BUG: Logger.log() does not exist; use .info()/.warn()/.error() — see INFRA-001-LOGIC-07 [INFRA-001-LOGIC-07]
     logger.log({
       timestamp: new Date().toISOString(),
       level: 'warn',

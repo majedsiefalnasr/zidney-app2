@@ -1,6 +1,6 @@
+import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import vue from '@vitejs/plugin-vue'
-import { resolve } from 'path'
-import { fileURLToPath } from 'url'
 import { defineProject } from 'vitest/config'
 
 const __dirname = resolve(fileURLToPath(import.meta.url), '..')
@@ -20,10 +20,7 @@ export default defineProject({
       { find: '@', replacement: resolve(__dirname, 'src') },
       {
         find: '@zidney/ui-system',
-        replacement: resolve(
-          __dirname,
-          '../../packages/ui-system/src/index.ts'
-        ),
+        replacement: resolve(__dirname, '../../packages/ui-system/src/index.ts'),
       },
       {
         find: '@zidney/ui',
@@ -32,10 +29,7 @@ export default defineProject({
       {
         // Required: ui-system internal components use @shadcn-vue/ui/* imports
         find: '@shadcn-vue/ui',
-        replacement: resolve(
-          __dirname,
-          '../../packages/ui-system/src/components/shadcn-vue'
-        ),
+        replacement: resolve(__dirname, '../../packages/ui-system/src/components/shadcn-vue'),
       },
       {
         find: '@zidney/logger',
@@ -47,10 +41,7 @@ export default defineProject({
       },
       {
         find: '@zidney/api-client',
-        replacement: resolve(
-          __dirname,
-          '../../packages/api-client/src/index.ts'
-        ),
+        replacement: resolve(__dirname, '../../packages/api-client/src/index.ts'),
       },
     ],
   },

@@ -113,9 +113,7 @@ describe('Error Code Mapping', () => {
     })
 
     it('should map client errors (4xx)', () => {
-      const clientErrors = errorMappings.filter(
-        (m) => m.httpStatus >= 400 && m.httpStatus < 500
-      )
+      const clientErrors = errorMappings.filter((m) => m.httpStatus >= 400 && m.httpStatus < 500)
 
       expect(clientErrors.length).toBeGreaterThan(0)
       clientErrors.forEach((error) => {
@@ -144,18 +142,14 @@ describe('Error Code Mapping', () => {
     })
 
     it('should mark rate limit (429) as retryable', () => {
-      const rateLimitError = errorMappings.find(
-        (m) => m.code === 'TOO_MANY_REQUESTS'
-      )
+      const rateLimitError = errorMappings.find((m) => m.code === 'TOO_MANY_REQUESTS')
 
       expect(rateLimitError).toBeDefined()
       expect(rateLimitError?.retryable).toBe(true)
     })
 
     it('should mark client errors (4xx) except retryable ones as non-retryable', () => {
-      const clientErrors = errorMappings.filter(
-        (m) => m.httpStatus >= 400 && m.httpStatus < 500
-      )
+      const clientErrors = errorMappings.filter((m) => m.httpStatus >= 400 && m.httpStatus < 500)
       const retryableClientErrors = clientErrors.filter((m) => m.retryable)
 
       expect(retryableClientErrors.length).toBeLessThan(clientErrors.length)
@@ -228,9 +222,7 @@ describe('Error Code Mapping', () => {
 
       expect(rateLimitError.error.details).toBeDefined()
       expect(rateLimitError.error.details?.limit).toBe(5)
-      expect(rateLimitError.error.details?.retry_after_seconds).toBeGreaterThan(
-        0
-      )
+      expect(rateLimitError.error.details?.retry_after_seconds).toBeGreaterThan(0)
     })
   })
 
@@ -238,7 +230,7 @@ describe('Error Code Mapping', () => {
     it('should be a positive integer for retryable 5xx errors', () => {
       const serverErrors = errorMappings.filter((m) => m.httpStatus >= 500)
 
-      serverErrors.forEach((error) => {
+      serverErrors.forEach((_error) => {
         const retryAfter = Math.floor(Math.random() * 60) + 1
 
         expect(retryAfter).toBeGreaterThan(0)
@@ -247,9 +239,7 @@ describe('Error Code Mapping', () => {
     })
 
     it('should be calculated for rate limit (429) errors', () => {
-      const rateLimitError = errorMappings.find(
-        (m) => m.code === 'TOO_MANY_REQUESTS'
-      )
+      const rateLimitError = errorMappings.find((m) => m.code === 'TOO_MANY_REQUESTS')
 
       expect(rateLimitError).toBeDefined()
 
@@ -351,9 +341,7 @@ describe('Error Code Mapping', () => {
 
     it('should cover all major error categories', () => {
       const categories = {
-        client_4xx: errorMappings.filter(
-          (m) => m.httpStatus >= 400 && m.httpStatus < 500
-        ),
+        client_4xx: errorMappings.filter((m) => m.httpStatus >= 400 && m.httpStatus < 500),
         server_5xx: errorMappings.filter((m) => m.httpStatus >= 500),
       }
 

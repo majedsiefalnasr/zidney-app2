@@ -12,7 +12,8 @@
  */
 
 import { computeJobPayloadHash } from '@zidney/domain-core/job-hash'
-import { JobEnvelope } from '@zidney/types/job-envelope'
+import { logger } from '@zidney/logger'
+import type { JobEnvelope } from '@zidney/types/job-envelope'
 import { randomUUID } from 'crypto'
 
 /** Redis client (injected from service setup) */
@@ -79,8 +80,7 @@ export async function enqueueJob<T extends Record<string, any>>(
     await redisClient.lpush(queueKey, JSON.stringify(envelope))
 
     // Log enqueue event
-    console.log('Job enqueued', {
-      event: 'job_enqueued',
+    logger.info('job_enqueued', {
       job_id: jobId,
       request_id,
       job_type,
@@ -90,8 +90,7 @@ export async function enqueueJob<T extends Record<string, any>>(
 
     return jobId
   } catch (error) {
-    console.error('Failed to enqueue job', {
-      event: 'job_enqueue_failed',
+    logger.error('job_enqueue_failed', {
       job_type,
       error: error instanceof Error ? error.message : String(error),
     })
@@ -127,8 +126,7 @@ export async function dequeueJob(
     // Parse job envelope from Redis
     const envelope = JSON.parse(result[1]) as JobEnvelope
 
-    console.log('Job dequeued', {
-      event: 'job_dequeued',
+    logger.info('job_dequeued', {
       job_id: envelope.job_id,
       request_id: envelope.request_id,
       job_type: envelope.job_name,
@@ -137,8 +135,7 @@ export async function dequeueJob(
 
     return envelope
   } catch (error) {
-    console.error('Failed to dequeue job', {
-      event: 'job_dequeue_failed',
+    logger.error('job_dequeue_failed', {
       job_type,
       error: error instanceof Error ? error.message : String(error),
     })
@@ -158,8 +155,7 @@ export async function dequeueJob(
 export async function retryJob(job: JobEnvelope): Promise<boolean> {
   if (job.retry_count >= job.max_retries) {
     // Dead-letter: max retries exceeded
-    console.error('Job max retries exceeded', {
-      event: 'job_dead_lettered',
+    logger.error('job_max_retries_exceeded', {
       job_id: job.job_id,
       request_id: job.request_id,
       retry_count: job.retry_count,
@@ -179,8 +175,7 @@ export async function retryJob(job: JobEnvelope): Promise<boolean> {
     const queueKey = `queue:${job.job_name}`
     await redisClient.lpush(queueKey, JSON.stringify(retryJob))
 
-    console.log('Job re-enqueued for retry', {
-      event: 'job_retried',
+    logger.info('job_retried', {
       job_id: job.job_id,
       request_id: job.request_id,
       retry_count: retryJob.retry_count,
@@ -189,8 +184,7 @@ export async function retryJob(job: JobEnvelope): Promise<boolean> {
 
     return true
   } catch (error) {
-    console.error('Failed to retry job', {
-      event: 'job_retry_failed',
+    logger.error('job_retry_failed', {
       job_id: job.job_id,
       error: error instanceof Error ? error.message : String(error),
     })
@@ -204,10 +198,7 @@ export async function retryJob(job: JobEnvelope): Promise<boolean> {
  * @param job - Failed job
  * @param error_message - Optional error message
  */
-export async function moveToDeadLetter(
-  job: JobEnvelope,
-  error_message?: string
-): Promise<void> {
+export async function moveToDeadLetter(job: JobEnvelope, error_message?: string): Promise<void> {
   try {
     const dlqKey = 'dlq:failed_jobs'
     const dlqEntry = {
@@ -222,16 +213,14 @@ export async function moveToDeadLetter(
 
     await redisClient.lpush(dlqKey, JSON.stringify(dlqEntry))
 
-    console.error('Job moved to dead-letter queue', {
-      event: 'job_dead_lettered',
+    logger.error('job_moved_to_dlq', {
       job_id: job.job_id,
       request_id: job.request_id,
       job_type: job.job_name,
       dlq_key: dlqKey,
     })
   } catch (error) {
-    console.error('Failed to move job to DLQ', {
-      event: 'dlq_move_failed',
+    logger.error('dlq_move_failed', {
       job_id: job.job_id,
       error: error instanceof Error ? error.message : String(error),
     })

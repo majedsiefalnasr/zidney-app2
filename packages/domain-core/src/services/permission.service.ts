@@ -17,9 +17,9 @@
  * - No HTTP logic
  */
 
-import { PermissionDomain, RolePermission } from '@zidney/types/mmc.types'
-// @ts-ignore: postgres not declared as dependency of domain-core [INFRA-001-DEPS-05]
-import { Database } from 'postgres'
+import type { PermissionDomain, RolePermission } from '@zidney/types/mmc.types'
+// @ts-expect-error: postgres not declared as dependency of domain-core [INFRA-001-DEPS-05]
+import type { Database } from 'postgres'
 
 /**
  * Permission Service
@@ -40,10 +40,9 @@ export class PermissionService {
     action: 'view' | 'create' | 'edit' | 'delete'
   ): Promise<boolean> {
     // Get member's role
-    const memberResult = await this.db.query(
-      `SELECT role_id FROM mmc_members WHERE id = $1`,
-      [memberId]
-    )
+    const memberResult = await this.db.query(`SELECT role_id FROM mmc_members WHERE id = $1`, [
+      memberId,
+    ])
 
     if (memberResult.rowCount === 0) {
       return false // Member not found
@@ -75,10 +74,9 @@ export class PermissionService {
    */
   async resolvePermissions(memberId: string): Promise<RolePermission[] | null> {
     // Get member's role
-    const memberResult = await this.db.query(
-      `SELECT role_id FROM mmc_members WHERE id = $1`,
-      [memberId]
-    )
+    const memberResult = await this.db.query(`SELECT role_id FROM mmc_members WHERE id = $1`, [
+      memberId,
+    ])
 
     if (memberResult.rowCount === 0) {
       return null // Member not found
@@ -108,14 +106,9 @@ export class PermissionService {
   /**
    * Get all permissions for a role
    */
-  async getPermissionsForRole(
-    roleId: string
-  ): Promise<RolePermission[] | null> {
+  async getPermissionsForRole(roleId: string): Promise<RolePermission[] | null> {
     // Check if role exists
-    const roleResult = await this.db.query(
-      `SELECT id FROM roles WHERE id = $1`,
-      [roleId]
-    )
+    const roleResult = await this.db.query(`SELECT id FROM roles WHERE id = $1`, [roleId])
 
     if (roleResult.rowCount === 0) {
       return null // Role not found
@@ -154,10 +147,9 @@ export class PermissionService {
     }
 
     // Get member's role
-    const memberResult = await this.db.query(
-      `SELECT role_id FROM mmc_members WHERE id = $1`,
-      [memberId]
-    )
+    const memberResult = await this.db.query(`SELECT role_id FROM mmc_members WHERE id = $1`, [
+      memberId,
+    ])
 
     if (memberResult.rowCount === 0) {
       return [] // Member not found

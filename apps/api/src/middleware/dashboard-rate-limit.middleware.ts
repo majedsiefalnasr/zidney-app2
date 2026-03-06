@@ -41,9 +41,9 @@
  * - Limits still enforced (just per-instance, not distributed)
  */
 
-import { Logger } from '@zidney/logger'
-import { Context, Next } from 'hono'
-import { Redis } from 'ioredis'
+import type { Logger } from '@zidney/logger'
+import type { Context, Next } from 'hono'
+import type { Redis } from 'ioredis'
 import {
   buildRateLimitHeaders,
   generateRateLimitKey,
@@ -55,10 +55,7 @@ import {
  * Used if Redis is unavailable
  */
 class InMemoryRateLimiter {
-  private counters: Map<
-    string,
-    { count: number; resetAt: number; limit: number }
-  > = new Map()
+  private counters: Map<string, { count: number; resetAt: number; limit: number }> = new Map()
 
   increment(
     key: string,
@@ -135,13 +132,10 @@ class DashboardRateLimiter {
         })
         .catch((error) => {
           this.redisAvailable = false
-          this.logger.warn(
-            'Dashboard rate limiter: Redis unavailable, using in-memory fallback',
-            {
-              service: 'rate-limit',
-              error: error instanceof Error ? error.message : String(error),
-            }
-          )
+          this.logger.warn('Dashboard rate limiter: Redis unavailable, using in-memory fallback', {
+            service: 'rate-limit',
+            error: error instanceof Error ? error.message : String(error),
+          })
         })
     }
   }
@@ -214,10 +208,7 @@ class DashboardRateLimiter {
  * app.use('/api/mmc/dashboard/*', dashboardRateLimitMiddleware)
  * ```
  */
-export function createDashboardRateLimitMiddleware(
-  redis: Redis | null,
-  logger: Logger
-) {
+export function createDashboardRateLimitMiddleware(redis: Redis | null, logger: Logger) {
   const rateLimiter = new DashboardRateLimiter(redis, logger)
 
   return async (c: Context, next: Next) => {
@@ -239,7 +230,7 @@ export function createDashboardRateLimitMiddleware(
     try {
       // Check rate limit
       const { count, isExceeded, resetSeconds } = await rateLimiter.checkLimit(
-        // @ts-ignore: TS2345 - userId possibly undefined [INFRA-001]
+        // @ts-expect-error: TS2345 - userId possibly undefined [INFRA-001]
         userId,
         path,
         config.max,
@@ -305,9 +296,7 @@ export function createDashboardRateLimitMiddleware(
               'Retry-After': String(resetSeconds),
               'X-RateLimit-Limit': String(config.max),
               'X-RateLimit-Remaining': '0',
-              'X-RateLimit-Reset': String(
-                Math.floor(Date.now() / 1000) + resetSeconds
-              ),
+              'X-RateLimit-Reset': String(Math.floor(Date.now() / 1000) + resetSeconds),
             },
           }
         )

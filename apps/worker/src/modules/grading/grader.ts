@@ -1,5 +1,5 @@
 import { logger } from '@zidney/logger'
-import {
+import type {
   AttemptSnapshot,
   GradingResult,
   Question,
@@ -59,11 +59,7 @@ export async function gradeAttempt(
       )
 
       // Grade the question
-      const questionResult = gradeQuestion(
-        question,
-        studentAnswer,
-        attemptSnapshot.grading_rules
-      )
+      const questionResult = gradeQuestion(question, studentAnswer, attemptSnapshot.grading_rules)
 
       totalScore += questionResult.earned_points
       questionResults.push(questionResult)
@@ -73,8 +69,7 @@ export async function gradeAttempt(
     const scorePercent = maxScore > 0 ? (totalScore / maxScore) * 100 : 0
 
     // Determine pass/fail
-    const passed =
-      scorePercent >= attemptSnapshot.grading_rules.passing_score_percent
+    const passed = scorePercent >= attemptSnapshot.grading_rules.passing_score_percent
 
     // Generate feedback
     const feedback = generateFeedback(
@@ -278,9 +273,7 @@ function gradeEssay(
         result.earned_points = result.max_points
         result.is_correct = true
       } else if (matchPercent >= 50) {
-        result.earned_points = Math.round(
-          result.max_points * (matchPercent / 100)
-        )
+        result.earned_points = Math.round(result.max_points * (matchPercent / 100))
       }
     }
   }

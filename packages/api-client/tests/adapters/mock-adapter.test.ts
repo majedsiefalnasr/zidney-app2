@@ -10,9 +10,7 @@ describe('MockAdapter', () => {
     adapter = createMockAdapter()
   })
 
-  const makeRequest = (
-    overrides?: Partial<AdapterRequest>
-  ): AdapterRequest => ({
+  const makeRequest = (overrides?: Partial<AdapterRequest>): AdapterRequest => ({
     url: 'https://api.test.com/endpoint',
     method: 'GET',
     headers: {},
@@ -77,9 +75,7 @@ describe('MockAdapter', () => {
       const networkError = new TypeError('Failed to fetch')
       adapter.enqueueError(networkError)
 
-      await expect(adapter.execute(makeRequest())).rejects.toThrow(
-        'Failed to fetch'
-      )
+      await expect(adapter.execute(makeRequest())).rejects.toThrow('Failed to fetch')
     })
 
     it('should throw errors in FIFO order with responses', async () => {
@@ -89,9 +85,7 @@ describe('MockAdapter', () => {
       const first = await adapter.execute(makeRequest())
       expect(first.status).toBe(200)
 
-      await expect(adapter.execute(makeRequest())).rejects.toThrow(
-        'Network down'
-      )
+      await expect(adapter.execute(makeRequest())).rejects.toThrow('Network down')
     })
   })
 
@@ -108,9 +102,9 @@ describe('MockAdapter', () => {
 
       const requests = adapter.getRequests()
       expect(requests).toHaveLength(2)
-      expect(requests[0]!.url).toBe('/one')
-      expect(requests[1]!.url).toBe('/two')
-      expect(requests[1]!.method).toBe('POST')
+      expect(requests[0]?.url).toBe('/one')
+      expect(requests[1]?.url).toBe('/two')
+      expect(requests[1]?.method).toBe('POST')
     })
 
     it('should return the last request via getLastRequest()', async () => {
@@ -137,9 +131,7 @@ describe('MockAdapter', () => {
     })
 
     it('should throw when count does not match', () => {
-      expect(() => adapter.assertRequestCount(1)).toThrow(
-        'Expected 1 requests, but received 0'
-      )
+      expect(() => adapter.assertRequestCount(1)).toThrow('Expected 1 requests, but received 0')
     })
   })
 

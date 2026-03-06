@@ -19,6 +19,8 @@
  * ADRs: ADR-0001 (tenant isolation)
  */
 
+import { logger } from '@zidney/logger'
+
 /**
  * Environment Handling
  */
@@ -111,12 +113,9 @@ export class WorkerMetrics {
    */
   getMetrics() {
     const uptime = Date.now() - this.startTime.getTime()
-    const jobsPerMinute =
-      this.jobsProcessed > 0 ? (this.jobsProcessed / uptime) * 60000 : 0
+    const jobsPerMinute = this.jobsProcessed > 0 ? (this.jobsProcessed / uptime) * 60000 : 0
     const failureRate =
-      this.jobsProcessed > 0
-        ? (this.jobsFailed / (this.jobsProcessed + this.jobsFailed)) * 100
-        : 0
+      this.jobsProcessed > 0 ? (this.jobsFailed / (this.jobsProcessed + this.jobsFailed)) * 100 : 0
 
     return {
       jobs_processed: this.jobsProcessed,
@@ -163,17 +162,12 @@ export function validateWorkerConfig(): void {
   }
 
   // Check pool size
-  if (
-    WORKER_CONFIG.TENANT_DB_POOL_SIZE < 1 ||
-    WORKER_CONFIG.TENANT_DB_POOL_SIZE > 100
-  ) {
+  if (WORKER_CONFIG.TENANT_DB_POOL_SIZE < 1 || WORKER_CONFIG.TENANT_DB_POOL_SIZE > 100) {
     errors.push('TENANT_DB_POOL_SIZE must be between 1 and 100')
   }
 
   if (errors.length > 0) {
-    throw new Error(
-      `Configuration validation failed:\n${errors.map((e) => `- ${e}`).join('\n')}`
-    )
+    throw new Error(`Configuration validation failed:\n${errors.map((e) => `- ${e}`).join('\n')}`)
   }
 }
 
@@ -267,14 +261,5 @@ export const LOG_CONFIG = {
 export function initializeConfig(): void {
   validateWorkerConfig()
 
-  console.log(
-    JSON.stringify(
-      {
-        message: 'Worker configuration validated',
-        config_summary: getConfigSummary(),
-      },
-      null,
-      2
-    )
-  )
+  logger.info('config_validated', { config_summary: getConfigSummary() })
 }

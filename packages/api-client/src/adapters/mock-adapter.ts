@@ -13,9 +13,7 @@ export interface MockAdapter extends HttpAdapter {
 
 // ─── Queue Entry ────────────────────────────────────────────────────────────
 
-type QueueEntry =
-  | { type: 'response'; value: AdapterResponse }
-  | { type: 'error'; value: Error }
+type QueueEntry = { type: 'response'; value: AdapterResponse } | { type: 'error'; value: Error }
 
 // ─── Factory ────────────────────────────────────────────────────────────────
 
@@ -45,9 +43,7 @@ export function createMockAdapter(): MockAdapter {
 
       const entry = queue.shift()
       if (!entry) {
-        throw new Error(
-          'MockAdapter: No responses enqueued. Call enqueue() before execute().'
-        )
+        throw new Error('MockAdapter: No responses enqueued. Call enqueue() before execute().')
       }
 
       if (entry.type === 'error') {
@@ -72,9 +68,7 @@ export function createMockAdapter(): MockAdapter {
 
     assertRequestCount(count: number): void {
       if (requests.length !== count) {
-        throw new Error(
-          `Expected ${count} requests, but received ${requests.length}`
-        )
+        throw new Error(`Expected ${count} requests, but received ${requests.length}`)
       }
     },
   }

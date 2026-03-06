@@ -64,13 +64,14 @@
  *
  * Stage: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
  */
-import type { NavigationConfig, NavigationGroup } from '@/core/navigation/index'
-import { useMmcAuthStore } from '@/core/state/auth.store'
-import { useMmcUiStore } from '@/core/state/ui.store'
+
 import { SidebarLayout } from '@zidney/ui-system'
 import { storeToRefs } from 'pinia'
 import { computed } from 'vue'
 import { useRoute } from 'vue-router'
+import type { NavigationConfig, NavigationGroup } from '@/core/navigation/index'
+import { useMmcAuthStore } from '@/core/state/auth.store'
+import { useMmcUiStore } from '@/core/state/ui.store'
 
 interface AppSidebarProps {
   navigationConfig: NavigationConfig

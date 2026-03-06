@@ -23,18 +23,10 @@ describe('Concurrency & Transaction Safety Tests', () => {
         errorCode: i < 10 ? null : 'AFFILIATE_USAGE_LIMIT_EXCEEDED',
       }))
 
-      expect(
-        purchaseResults.filter((p) => p.status === 'SUCCESS')
-      ).toHaveLength(10)
-      expect(purchaseResults.filter((p) => p.status === 'FAILED')).toHaveLength(
-        2
-      )
-      expect(purchaseResults[10]!.errorCode).toBe(
-        'AFFILIATE_USAGE_LIMIT_EXCEEDED'
-      )
-      expect(purchaseResults[11]!.errorCode).toBe(
-        'AFFILIATE_USAGE_LIMIT_EXCEEDED'
-      )
+      expect(purchaseResults.filter((p) => p.status === 'SUCCESS')).toHaveLength(10)
+      expect(purchaseResults.filter((p) => p.status === 'FAILED')).toHaveLength(2)
+      expect(purchaseResults[10]!.errorCode).toBe('AFFILIATE_USAGE_LIMIT_EXCEEDED')
+      expect(purchaseResults[11]!.errorCode).toBe('AFFILIATE_USAGE_LIMIT_EXCEEDED')
     })
 
     it('should increment usage_count exactly 10 times (no double-counting)', () => {
@@ -83,12 +75,8 @@ describe('Concurrency & Transaction Safety Tests', () => {
         errorCode: i < 3 ? null : 'AFFILIATE_USAGE_LIMIT_PER_CLIENT_EXCEEDED',
       }))
 
-      expect(
-        purchaseResults.filter((p) => p.status === 'SUCCESS')
-      ).toHaveLength(3)
-      expect(purchaseResults.filter((p) => p.status === 'FAILED')).toHaveLength(
-        2
-      )
+      expect(purchaseResults.filter((p) => p.status === 'SUCCESS')).toHaveLength(3)
+      expect(purchaseResults.filter((p) => p.status === 'FAILED')).toHaveLength(2)
     })
 
     it('should count per-client usage correctly', () => {
@@ -181,12 +169,8 @@ describe('Concurrency & Transaction Safety Tests', () => {
         affiliateCountAfter: 5,
         affiliateUsagesCountAfter: 5,
       }
-      expect(consistency.affiliateCountAfter).toBe(
-        consistency.affiliateCountBefore
-      )
-      expect(consistency.affiliateUsagesCountAfter).toBe(
-        consistency.affiliateUsagesMatcher
-      )
+      expect(consistency.affiliateCountAfter).toBe(consistency.affiliateCountBefore)
+      expect(consistency.affiliateUsagesCountAfter).toBe(consistency.affiliateUsagesMatcher)
     })
   })
 })

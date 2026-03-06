@@ -8,12 +8,9 @@
  * Handles dead-letter queue for exhausted jobs.
  */
 
-import { ProvisioningLogger } from '@zidney/logger/provisioning-logger'
-import {
-  ProvisioningJob,
-  ProvisioningJobStatus,
-} from '@zidney/types/jobs/provisioning-job'
-import { Redis } from 'ioredis'
+import type { ProvisioningLogger } from '@zidney/logger/provisioning-logger'
+import { type ProvisioningJob, ProvisioningJobStatus } from '@zidney/types/jobs/provisioning-job'
+import type { Redis } from 'ioredis'
 
 /**
  * Consumer configuration
@@ -43,10 +40,7 @@ export interface JobProcessingResult {
 /**
  * Job handler type
  */
-export type JobHandler = (
-  job: ProvisioningJob,
-  logger: ProvisioningLogger
-) => Promise<void>
+export type JobHandler = (job: ProvisioningJob, logger: ProvisioningLogger) => Promise<void>
 
 /**
  * Provisioning Job Consumer
@@ -101,21 +95,15 @@ export class ProvisioningJobConsumer {
           if (jobStr) {
             const job = JSON.parse(jobStr) as ProvisioningJob
             this.processJobWithTimeout(job).catch((error) => {
-              this.logger.logError(
-                'Unhandled job processing error',
-                error as Error,
-                {
-                  job_id: job.id,
-                }
-              )
+              this.logger.logError('Unhandled job processing error', error as Error, {
+                job_id: job.id,
+              })
             })
           }
         }
 
         // Wait before polling again
-        await new Promise((resolve) =>
-          setTimeout(resolve, this.config.pollIntervalMs)
-        )
+        await new Promise((resolve) => setTimeout(resolve, this.config.pollIntervalMs))
       }
     } finally {
       this.isRunning = false
@@ -141,10 +129,7 @@ export class ProvisioningJobConsumer {
       this.activeJobs.delete(jobId)
     }
 
-    this.logger.logStep(
-      'consumer-graceful-shutdown',
-      'Consumer graceful shutdown completed'
-    )
+    this.logger.logStep('consumer-graceful-shutdown', 'Consumer graceful shutdown completed')
   }
 
   /**
@@ -170,10 +155,7 @@ export class ProvisioningJobConsumer {
   /**
    * Process a single job
    */
-  private async processJob(
-    job: ProvisioningJob,
-    signal: AbortSignal
-  ): Promise<void> {
+  private async processJob(job: ProvisioningJob, signal: AbortSignal): Promise<void> {
     const startTime = Date.now()
 
     try {
@@ -198,14 +180,10 @@ export class ProvisioningJobConsumer {
       // Call the handler
       await this.handler(updatedJob, this.logger)
 
-      this.logger.logSuccess(
-        'Job processing completed',
-        Date.now() - startTime,
-        {
-          job_id: job.id,
-          license_id: job.licenseId,
-        }
-      )
+      this.logger.logSuccess('Job processing completed', Date.now() - startTime, {
+        job_id: job.id,
+        license_id: job.licenseId,
+      })
     } catch (error) {
       const errorMsg = error instanceof Error ? error.message : String(error)
       const isAborted = signal.aborted

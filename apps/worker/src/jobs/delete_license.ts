@@ -15,10 +15,7 @@ export async function deleteLicenseJob(payload: any, jobId: string) {
   const { license_id, grace_period_until: _grace_period_until } = payload
 
   try {
-    logger.info(
-      { job_id: jobId, license_id, action: 'delete_started' },
-      'Delete job started'
-    )
+    logger.info({ job_id: jobId, license_id, action: 'delete_started' }, 'Delete job started')
 
     // TODO: Full phase 5 implementation:
     // 1. Pre-flight: verify ARCHIVED, no active users, grace period ≥ now
@@ -29,10 +26,7 @@ export async function deleteLicenseJob(payload: any, jobId: string) {
     //    - UPDATE licenses SET status='DELETED'
     //    - INSERT audit_log
 
-    logger.info(
-      { job_id: jobId, license_id, action: 'delete_completed' },
-      'Delete job completed'
-    )
+    logger.info({ job_id: jobId, license_id, action: 'delete_completed' }, 'Delete job completed')
 
     return {
       success: true,

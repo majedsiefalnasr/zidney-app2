@@ -21,14 +21,10 @@ const content = computed(() => {
   ]
 
   if (uniqueErrors.length === 1 && uniqueErrors[0]) {
-    return typeof uniqueErrors[0] === 'string'
-      ? uniqueErrors[0]
-      : uniqueErrors[0].message
+    return typeof uniqueErrors[0] === 'string' ? uniqueErrors[0] : uniqueErrors[0].message
   }
 
-  return uniqueErrors.map((error) =>
-    typeof error === 'string' ? error : error?.message
-  )
+  return uniqueErrors.map((error) => (typeof error === 'string' ? error : error?.message))
 })
 </script>
 

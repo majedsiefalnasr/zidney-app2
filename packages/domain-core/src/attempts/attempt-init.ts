@@ -10,7 +10,7 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Pool, PoolClient } from 'pg'
+import type { Pool, PoolClient } from 'pg'
 import { logAttemptEvent } from '../audit/attempt-event-logger'
 import { captureExamSnapshot } from './snapshot-service'
 
@@ -168,13 +168,8 @@ export async function getOrCreateAttempt(
 /**
  * Query attempt details
  */
-export async function getAttemptById(
-  attemptId: string,
-  pool: Pool
-): Promise<Attempt | null> {
-  const result = await pool.query(`SELECT * FROM attempts WHERE id = $1`, [
-    attemptId,
-  ])
+export async function getAttemptById(attemptId: string, pool: Pool): Promise<Attempt | null> {
+  const result = await pool.query(`SELECT * FROM attempts WHERE id = $1`, [attemptId])
 
   return result.rows.length > 0 ? (result.rows[0] as Attempt) : null
 }

@@ -15,9 +15,7 @@ import {
 function assertNoTokenInLogArgs(value: unknown, path = 'root'): void {
   if (typeof value === 'string') {
     if (looksLikeToken(value)) {
-      throw new Error(
-        `Token-like value found at ${path}: ${value.substring(0, 10)}...`
-      )
+      throw new Error(`Token-like value found at ${path}: ${value.substring(0, 10)}...`)
     }
     return
   }
@@ -32,8 +30,7 @@ function assertNoTokenInLogArgs(value: unknown, path = 'root'): void {
   }
 }
 
-const FAKE_TOKEN =
-  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0'
+const FAKE_TOKEN = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIn0'
 
 describe('redactSensitiveFields (frontoffice)', () => {
   const SENSITIVE_KEY_CASES: Array<[string, string]> = [
@@ -112,9 +109,7 @@ describe('assertNoTokenInLogArgs helper (frontoffice)', () => {
     expect(() => assertNoTokenInLogArgs({ token: FAKE_TOKEN })).toThrow()
   })
   it('throws for nested token-like value', () => {
-    expect(() =>
-      assertNoTokenInLogArgs({ nested: { deepToken: FAKE_TOKEN } })
-    ).toThrow()
+    expect(() => assertNoTokenInLogArgs({ nested: { deepToken: FAKE_TOKEN } })).toThrow()
   })
   it('passes after redaction', () => {
     const redacted = redactSensitiveFields({ token: FAKE_TOKEN })

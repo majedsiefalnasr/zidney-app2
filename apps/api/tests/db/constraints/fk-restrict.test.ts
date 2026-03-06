@@ -1,13 +1,5 @@
 import type { PoolClient } from 'pg'
-import {
-  afterAll,
-  afterEach,
-  beforeAll,
-  beforeEach,
-  describe,
-  expect,
-  it,
-} from 'vitest'
+import { afterAll, afterEach, beforeAll, beforeEach, describe, expect, it } from 'vitest'
 import { db } from '../../../src/db'
 
 const pool = db.master
@@ -127,10 +119,11 @@ describe('FK RESTRICT Constraints', () => {
     )
     const examId = examResult.rows[0].id
 
-    await client.query(
-      'INSERT INTO attempts (exam_type, exam_id, user_id) VALUES ($1, $2, $3)',
-      ['MCQ', examId, userId]
-    )
+    await client.query('INSERT INTO attempts (exam_type, exam_id, user_id) VALUES ($1, $2, $3)', [
+      'MCQ',
+      examId,
+      userId,
+    ])
 
     try {
       await client.query('DELETE FROM mcq_exams WHERE id = $1', [examId])
@@ -148,10 +141,11 @@ describe('FK RESTRICT Constraints', () => {
     )
     const divisionId = divResult.rows[0].id
 
-    await client.query(
-      'INSERT INTO departments (division_id, name, code) VALUES ($1, $2, $3)',
-      [divisionId, 'Test Department', 'TEST_DEPT']
-    )
+    await client.query('INSERT INTO departments (division_id, name, code) VALUES ($1, $2, $3)', [
+      divisionId,
+      'Test Department',
+      'TEST_DEPT',
+    ])
 
     try {
       await client.query('DELETE FROM divisions WHERE id = $1', [divisionId])
@@ -175,10 +169,10 @@ describe('FK RESTRICT Constraints', () => {
     )
     const roleId = roleResult.rows[0].id
 
-    await client.query(
-      'INSERT INTO role_assignments (user_id, role_id) VALUES ($1, $2)',
-      [userId, roleId]
-    )
+    await client.query('INSERT INTO role_assignments (user_id, role_id) VALUES ($1, $2)', [
+      userId,
+      roleId,
+    ])
 
     try {
       await client.query('DELETE FROM users WHERE id = $1', [userId])
@@ -202,10 +196,9 @@ describe('FK RESTRICT Constraints', () => {
     )
     const departmentId = deptResult.rows[0].id
 
-    const deptCheck = await client.query(
-      'SELECT division_id FROM departments WHERE id = $1',
-      [departmentId]
-    )
+    const deptCheck = await client.query('SELECT division_id FROM departments WHERE id = $1', [
+      departmentId,
+    ])
     expect(deptCheck.rowCount).toBeGreaterThan(0)
     expect(deptCheck.rows[0].division_id).toBe(divisionId)
   })
@@ -223,19 +216,14 @@ describe('FK RESTRICT Constraints', () => {
     )
     const subjectId = subjResult.rows[0].id
 
-    const check = await client.query('SELECT id FROM subjects WHERE id = $1', [
-      subjectId,
-    ])
+    const check = await client.query('SELECT id FROM subjects WHERE id = $1', [subjectId])
     expect(check.rowCount).toBe(1)
 
-    await client.query('UPDATE subjects SET is_deleted = true WHERE id = $1', [
+    await client.query('UPDATE subjects SET is_deleted = true WHERE id = $1', [subjectId])
+
+    const afterDelete = await client.query('SELECT is_deleted FROM subjects WHERE id = $1', [
       subjectId,
     ])
-
-    const afterDelete = await client.query(
-      'SELECT is_deleted FROM subjects WHERE id = $1',
-      [subjectId]
-    )
     expect(afterDelete.rows[0].is_deleted).toBe(true)
   })
 })

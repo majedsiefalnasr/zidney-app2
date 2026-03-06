@@ -46,12 +46,10 @@ function createVersionTestApp(tenantSchemaVersion: string) {
 
     // Version gate — 426 if schema version is incompatible
     const [tenantMajor, tenantMinor] = tenantVersion.split('.').map(Number)
-    const [reqMajor, reqMinor] =
-      STAGE_21_REQUIRED_VERSION.split('.').map(Number)
+    const [reqMajor, reqMinor] = STAGE_21_REQUIRED_VERSION.split('.').map(Number)
 
     const isCompatible =
-      tenantMajor > reqMajor ||
-      (tenantMajor === reqMajor && tenantMinor >= reqMinor)
+      tenantMajor > reqMajor || (tenantMajor === reqMajor && tenantMinor >= reqMinor)
 
     if (!isCompatible) {
       return c.json(
@@ -120,8 +118,9 @@ describe('STAGE_21 Migration — Version Compatibility', () => {
    */
   it('STAGE_21 migration targets schema_version 1.4.0', async () => {
     // Dynamic import of the migration to inspect its declared version
-    const migration =
-      await import('../../../apps/api/src/db/tenant/migrations/20260302_001_rbac_role_permissions_complete')
+    const migration = await import(
+      '../../../apps/api/src/db/tenant/migrations/20260302_001_rbac_role_permissions_complete'
+    )
     // Migrations don't directly export a version, but we can assert the migration
     // module has up() and down() exports (structural assertion)
     expect(typeof migration.up).toBe('function')
@@ -187,8 +186,9 @@ describe('STAGE_21 Migration — Version Compatibility', () => {
    * (AGENTS.md: Rollback = restore snapshot only; down() is forbidden)
    */
   it('migration down() throws to enforce forward-only migration policy', async () => {
-    const migration =
-      await import('../../../apps/api/src/db/tenant/migrations/20260302_001_rbac_role_permissions_complete')
+    const migration = await import(
+      '../../../apps/api/src/db/tenant/migrations/20260302_001_rbac_role_permissions_complete'
+    )
     await expect(migration.down()).rejects.toThrow()
   })
 })

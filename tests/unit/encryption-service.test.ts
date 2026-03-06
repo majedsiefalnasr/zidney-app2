@@ -12,12 +12,10 @@
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 
 // Test encryption key: 64 hex chars = 32 bytes
-const TEST_ENCRYPTION_KEY =
-  'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2'
+const TEST_ENCRYPTION_KEY = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b6c7d8e9f0a1b2'
 
 // Different key for wrong-key test
-const WRONG_ENCRYPTION_KEY =
-  'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
+const WRONG_ENCRYPTION_KEY = 'ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff'
 
 describe('Encryption Service', () => {
   beforeEach(() => {
@@ -34,8 +32,7 @@ describe('Encryption Service', () => {
    */
   async function loadModule() {
     // Clear module cache for fresh import
-    const modulePath =
-      '../../apps/api/src/modules/workspace-settings/encryption.service'
+    const modulePath = '../../apps/api/src/modules/workspace-settings/encryption.service'
     return await import(modulePath)
   }
 
@@ -136,16 +133,12 @@ describe('Encryption Service', () => {
 
     it('decrypt rejects malformed format strings', async () => {
       const { decrypt } = await loadModule()
-      expect(() => decrypt('not-a-valid-format')).toThrow(
-        'Malformed encrypted value'
-      )
+      expect(() => decrypt('not-a-valid-format')).toThrow('Malformed encrypted value')
     })
 
     it('decrypt rejects unknown key version', async () => {
       const { decrypt } = await loadModule()
-      expect(() => decrypt('v2:aaaa:bbbb:cccc')).toThrow(
-        "Unsupported encryption key version: 'v2'"
-      )
+      expect(() => decrypt('v2:aaaa:bbbb:cccc')).toThrow("Unsupported encryption key version: 'v2'")
     })
 
     it('decrypt throws on incorrect key', async () => {

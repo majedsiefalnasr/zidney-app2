@@ -198,13 +198,7 @@ describe('T027: Concurrency & Crash Recovery Tests', () => {
 // ============================================================================
 
 export const TEST_FIXTURES = {
-  VALID_SLUGS: [
-    'acme-university',
-    'my-school-123',
-    'org-name',
-    'a-b',
-    'acme-university-uk',
-  ],
+  VALID_SLUGS: ['acme-university', 'my-school-123', 'org-name', 'a-b', 'acme-university-uk'],
 
   INVALID_SLUGS: [
     'UPPERCASE',
@@ -216,12 +210,7 @@ export const TEST_FIXTURES = {
     'special@chars',
   ],
 
-  TEST_JOB: ProvisioningJob.create(
-    999,
-    'test-workspace',
-    888,
-    'test-correlation-id'
-  ),
+  TEST_JOB: ProvisioningJob.create(999, 'test-workspace', 888, 'test-correlation-id'),
 
   TEST_LICENSE_ID: 999,
   TEST_WORKSPACE_SLUG: 'test-workspace',

@@ -10,7 +10,7 @@
  * Phase: 1 - Backend Implementation (parallel)
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 export async function getTrendsData(pool: Pool, months: 3 | 6 | 12 = 12) {
   const startDate = new Date()

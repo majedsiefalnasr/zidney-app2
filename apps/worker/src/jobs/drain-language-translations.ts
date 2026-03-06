@@ -63,12 +63,7 @@ interface DbClient {
 
 interface RedisClient {
   get(key: string): Promise<string | null>
-  set(
-    key: string,
-    value: string,
-    expiryMode: 'EX',
-    time: number
-  ): Promise<string | null>
+  set(key: string, value: string, expiryMode: 'EX', time: number): Promise<string | null>
   del(key: string | string[]): Promise<number>
   scan(
     cursor: string,
@@ -115,9 +110,7 @@ export async function handleDrainLanguageTranslationsJob(
     return { success: false, error: new Error('Job is null or undefined') }
   }
 
-  const payloadParseResult = DrainLanguageTranslationsPayloadSchema.safeParse(
-    job.payload
-  )
+  const payloadParseResult = DrainLanguageTranslationsPayloadSchema.safeParse(job.payload)
   if (!payloadParseResult.success) {
     const msg = payloadParseResult.error.errors
       .map((e: z.ZodIssue) => `${e.path.join('.')}: ${e.message}`)
@@ -322,10 +315,7 @@ export async function handleDrainLanguageTranslationsJob(
  *   import { createDrainJobHandler } from './drain-language-translations'
  *   registerJobHandler('DRAIN_LANGUAGE_TRANSLATIONS', createDrainJobHandler(tenantPoolMap, redis))
  */
-export function createDrainJobHandler(
-  tenantPoolMap: Map<string, any>,
-  redis?: RedisClient
-) {
+export function createDrainJobHandler(tenantPoolMap: Map<string, any>, redis?: RedisClient) {
   return async (
     job: DrainLanguageTranslationsJob,
     jobLogger: any
@@ -339,9 +329,7 @@ export function createDrainJobHandler(
       })
       return {
         success: false,
-        error: new Error(
-          `Tenant pool not found for workspace_id: ${job.workspace_id}`
-        ),
+        error: new Error(`Tenant pool not found for workspace_id: ${job.workspace_id}`),
       }
     }
 

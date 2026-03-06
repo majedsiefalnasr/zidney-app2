@@ -1,5 +1,5 @@
-import { resolve } from 'path'
-import { fileURLToPath } from 'url'
+import { resolve } from 'node:path'
+import { fileURLToPath } from 'node:url'
 import { defineProject } from 'vitest/config'
 
 const __dirname = resolve(fileURLToPath(import.meta.url), '..')
@@ -25,17 +25,11 @@ export default defineProject({
       },
       {
         find: '@zidney/redis-utils',
-        replacement: resolve(
-          __dirname,
-          '../../packages/redis-utils/src/index.ts'
-        ),
+        replacement: resolve(__dirname, '../../packages/redis-utils/src/index.ts'),
       },
       {
         find: '@zidney/domain-core',
-        replacement: resolve(
-          __dirname,
-          '../../packages/domain-core/src/index.ts'
-        ),
+        replacement: resolve(__dirname, '../../packages/domain-core/src/index.ts'),
       },
       {
         find: '@zidney/config',

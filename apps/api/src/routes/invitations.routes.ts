@@ -2,23 +2,23 @@ import {
   ErrorCode,
   errorResponse,
   successResponse,
-  // @ts-ignore: LOGIC-BUG: module path missing - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+  // @ts-expect-error: LOGIC-BUG: module path missing - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
 } from '@zidney/domain-core/src/errors/index.js'
-// @ts-ignore: LOGIC-BUG: @zidney/domain-core subpath imports require .js extension alias — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+// @ts-expect-error: LOGIC-BUG: @zidney/domain-core subpath imports require .js extension alias — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
 import { AuditService } from '@zidney/domain-core/src/services/audit.service.js'
-// @ts-ignore: LOGIC-BUG: @zidney/domain-core subpath imports require .js extension alias — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+// @ts-expect-error: LOGIC-BUG: @zidney/domain-core subpath imports require .js extension alias — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
 import { InvitationService } from '@zidney/domain-core/src/services/invitation.service.js'
-// @ts-ignore: LOGIC-BUG: @zidney/domain-core subpath imports require .js extension alias — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+// @ts-expect-error: LOGIC-BUG: @zidney/domain-core subpath imports require .js extension alias — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
 import { EmailService } from '@zidney/domain-core/src/utils/email.js'
 import type { CreateInvitationRequest } from '@zidney/types'
 import {
   mmc_member_invitations,
   mmc_members,
   roles,
-  // @ts-ignore: LOGIC-BUG: module path missing - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+  // @ts-expect-error: LOGIC-BUG: module path missing - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
 } from '@zidney/types/db-schema'
 import { eq } from 'drizzle-orm'
-// @ts-ignore: LOGIC-BUG: drizzle-orm/node-postgres does not export Database — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+// @ts-expect-error: LOGIC-BUG: drizzle-orm/node-postgres does not export Database — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
 import type { Database } from 'drizzle-orm/node-postgres'
 import { Hono } from 'hono'
 import { generateAndHashToken } from '../utils/tokens.js'
@@ -53,19 +53,12 @@ export function createInvitationsRoutes(): Hono {
     const db = ctx.get('db') as Database
     const mmcUser = ctx.get('mmcUser')
     const correlationId = ctx.get('context')?.correlationId || ''
-    const ipAddress =
-      ctx.req.header('x-forwarded-for') ||
-      ctx.req.header('x-real-ip') ||
-      'unknown'
+    const ipAddress = ctx.req.header('x-forwarded-for') || ctx.req.header('x-real-ip') || 'unknown'
     const userAgent = ctx.req.header('user-agent') || ''
 
     if (!mmcUser) {
       return ctx.json(
-        errorResponse(
-          null,
-          ErrorCode.AUTHENTICATION_FAILED,
-          'Authentication required'
-        ),
+        errorResponse(null, ErrorCode.AUTHENTICATION_FAILED, 'Authentication required'),
         { status: 401 }
       )
     }
@@ -77,25 +70,16 @@ export function createInvitationsRoutes(): Hono {
       // Validate input
       if (!email || !role_id) {
         return ctx.json(
-          errorResponse(
-            null,
-            ErrorCode.VALIDATION_ERROR,
-            'Email and role_id are required'
-          ),
+          errorResponse(null, ErrorCode.VALIDATION_ERROR, 'Email and role_id are required'),
           { status: 400 }
         )
       }
 
       // Validate email format (basic)
       if (!email.includes('@')) {
-        return ctx.json(
-          errorResponse(
-            null,
-            ErrorCode.VALIDATION_ERROR,
-            'Invalid email format'
-          ),
-          { status: 400 }
-        )
+        return ctx.json(errorResponse(null, ErrorCode.VALIDATION_ERROR, 'Invalid email format'), {
+          status: 400,
+        })
       }
 
       // Initialize services
@@ -132,20 +116,13 @@ export function createInvitationsRoutes(): Hono {
         where: eq(mmc_members.id, mmcUser.userId),
       })
 
-      const inviterName =
-        inviter?.full_name || inviter?.username || 'Platform Admin'
+      const inviterName = inviter?.full_name || inviter?.username || 'Platform Admin'
 
       // Build invitation link
       const invitationLink = `${process.env.API_BASE_URL || 'http://localhost:3000'}/accept-invitation?token=${token}`
 
       // Send email asynchronously (non-blocking)
-      await emailService.sendInvitationEmail(
-        email,
-        invitationLink,
-        email,
-        roleName,
-        inviterName
-      )
+      await emailService.sendInvitationEmail(email, invitationLink, email, roleName, inviterName)
 
       // Log audit event
       await auditService.logInvitationSent({
@@ -165,11 +142,7 @@ export function createInvitationsRoutes(): Hono {
 
       if (!invitation) {
         return ctx.json(
-          errorResponse(
-            null,
-            ErrorCode.INTERNAL_ERROR,
-            'Failed to retrieve invitation'
-          ),
+          errorResponse(null, ErrorCode.INTERNAL_ERROR, 'Failed to retrieve invitation'),
           { status: 500 }
         )
       }
@@ -192,11 +165,7 @@ export function createInvitationsRoutes(): Hono {
 
         if (message.includes('already registered')) {
           return ctx.json(
-            errorResponse(
-              null,
-              ErrorCode.CONFLICT,
-              'Email already registered as MMC member'
-            ),
+            errorResponse(null, ErrorCode.CONFLICT, 'Email already registered as MMC member'),
             { status: 409 }
           )
         }
@@ -213,19 +182,14 @@ export function createInvitationsRoutes(): Hono {
         }
 
         if (message.includes('Role not found')) {
-          return ctx.json(
-            errorResponse(null, ErrorCode.VALIDATION_ERROR, 'Role not found'),
-            { status: 400 }
-          )
+          return ctx.json(errorResponse(null, ErrorCode.VALIDATION_ERROR, 'Role not found'), {
+            status: 400,
+          })
         }
       }
 
       return ctx.json(
-        errorResponse(
-          null,
-          ErrorCode.INTERNAL_ERROR,
-          'Failed to create invitation'
-        ),
+        errorResponse(null, ErrorCode.INTERNAL_ERROR, 'Failed to create invitation'),
         { status: 500 }
       )
     }
@@ -257,10 +221,7 @@ export function createInvitationsRoutes(): Hono {
   router.post('/mmc/invitations/:token/accept', async (ctx) => {
     const db = ctx.get('db') as Database
     const correlationId = ctx.get('context')?.correlationId || ''
-    const ipAddress =
-      ctx.req.header('x-forwarded-for') ||
-      ctx.req.header('x-real-ip') ||
-      'unknown'
+    const ipAddress = ctx.req.header('x-forwarded-for') || ctx.req.header('x-real-ip') || 'unknown'
     const token = ctx.req.param('token')
 
     try {
@@ -269,18 +230,13 @@ export function createInvitationsRoutes(): Hono {
 
       // Validate input
       if (!password) {
-        return ctx.json(
-          errorResponse(
-            null,
-            ErrorCode.VALIDATION_ERROR,
-            'Password is required'
-          ),
-          { status: 400 }
-        )
+        return ctx.json(errorResponse(null, ErrorCode.VALIDATION_ERROR, 'Password is required'), {
+          status: 400,
+        })
       }
 
       // Validate password complexity
-      // @ts-ignore: LOGIC-BUG: validatePassword does not exist in @zidney/validation exports — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+      // @ts-expect-error: LOGIC-BUG: validatePassword does not exist in @zidney/validation exports — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
       const { validatePassword } = await import('@zidney/validation')
       const passwordValidation = validatePassword(password)
       if (!passwordValidation.valid) {
@@ -306,7 +262,7 @@ export function createInvitationsRoutes(): Hono {
       let username = provided_username
       if (!username) {
         const { generateUniqueUsername } =
-          // @ts-ignore: LOGIC-BUG: @zidney/domain-core subpath import missing — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: @zidney/domain-core subpath import missing — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           await import('@zidney/domain-core/src/utils/username.js')
         const invitation = await db.query.mmc_member_invitations.findFirst({
           where: eq(mmc_member_invitations.token_hash, tokenHash),
@@ -316,11 +272,7 @@ export function createInvitationsRoutes(): Hono {
           username = await generateUniqueUsername(invitation.email, db)
         } else {
           return ctx.json(
-            errorResponse(
-              null,
-              ErrorCode.VALIDATION_ERROR,
-              'Invalid or expired invitation token'
-            ),
+            errorResponse(null, ErrorCode.VALIDATION_ERROR, 'Invalid or expired invitation token'),
             { status: 401 }
           )
         }
@@ -351,40 +303,27 @@ export function createInvitationsRoutes(): Hono {
 
         if (message.includes('expired')) {
           return ctx.json(
-            errorResponse(
-              null,
-              ErrorCode.VALIDATION_ERROR,
-              'Invitation token has expired'
-            ),
+            errorResponse(null, ErrorCode.VALIDATION_ERROR, 'Invitation token has expired'),
             { status: 401 }
           )
         }
 
         if (message.includes('already been used')) {
           return ctx.json(
-            errorResponse(
-              null,
-              ErrorCode.VALIDATION_ERROR,
-              'Invitation has already been used'
-            ),
+            errorResponse(null, ErrorCode.VALIDATION_ERROR, 'Invitation has already been used'),
             { status: 401 }
           )
         }
 
         if (message.includes('already taken')) {
-          return ctx.json(
-            errorResponse(null, ErrorCode.CONFLICT, 'Username already taken'),
-            { status: 409 }
-          )
+          return ctx.json(errorResponse(null, ErrorCode.CONFLICT, 'Username already taken'), {
+            status: 409,
+          })
         }
       }
 
       return ctx.json(
-        errorResponse(
-          null,
-          ErrorCode.INTERNAL_ERROR,
-          'Failed to accept invitation'
-        ),
+        errorResponse(null, ErrorCode.INTERNAL_ERROR, 'Failed to accept invitation'),
         { status: 500 }
       )
     }
@@ -429,35 +368,22 @@ export function createInvitationsRoutes(): Hono {
 
     if (!mmcUser) {
       return ctx.json(
-        errorResponse(
-          null,
-          ErrorCode.AUTHENTICATION_FAILED,
-          'Authentication required'
-        ),
+        errorResponse(null, ErrorCode.AUTHENTICATION_FAILED, 'Authentication required'),
         { status: 401 }
       )
     }
 
     try {
       // Get query parameters
-      const status = ctx.req.query('status') as
-        | 'PENDING'
-        | 'ACCEPTED'
-        | 'EXPIRED'
-        | undefined
+      const status = ctx.req.query('status') as 'PENDING' | 'ACCEPTED' | 'EXPIRED' | undefined
       const limit = Math.min(parseInt(ctx.req.query('limit') || '50', 10), 100)
       const offset = parseInt(ctx.req.query('offset') || '0', 10)
 
       // Validate status if provided
       if (status && !['PENDING', 'ACCEPTED', 'EXPIRED'].includes(status)) {
-        return ctx.json(
-          errorResponse(
-            null,
-            ErrorCode.VALIDATION_ERROR,
-            'Invalid status filter'
-          ),
-          { status: 400 }
-        )
+        return ctx.json(errorResponse(null, ErrorCode.VALIDATION_ERROR, 'Invalid status filter'), {
+          status: 400,
+        })
       }
 
       // Initialize service
@@ -465,11 +391,7 @@ export function createInvitationsRoutes(): Hono {
       const invitationService = new InvitationService({ db, auditService })
 
       // Get invitations
-      const { invitations, total } = await invitationService.getInvitations(
-        status,
-        limit,
-        offset
-      )
+      const { invitations, total } = await invitationService.getInvitations(status, limit, offset)
 
       return ctx.json(
         successResponse({
@@ -490,15 +412,10 @@ export function createInvitationsRoutes(): Hono {
         }),
         { status: 200 }
       )
-    } catch (err) {
-      return ctx.json(
-        errorResponse(
-          null,
-          ErrorCode.INTERNAL_ERROR,
-          'Failed to list invitations'
-        ),
-        { status: 500 }
-      )
+    } catch (_err) {
+      return ctx.json(errorResponse(null, ErrorCode.INTERNAL_ERROR, 'Failed to list invitations'), {
+        status: 500,
+      })
     }
   })
 

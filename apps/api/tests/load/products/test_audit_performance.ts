@@ -44,15 +44,11 @@ describe('Load: Products - Audit Query Performance (T071)', () => {
     const from = new Date('2026-02-01')
     const to = new Date('2026-02-28')
 
-    const allLogs = Array.from({ length: 10000 }, (_, i) => ({
-      timestamp: new Date(
-        from.getTime() + Math.random() * (to.getTime() - from.getTime())
-      ),
+    const allLogs = Array.from({ length: 10000 }, (_, _i) => ({
+      timestamp: new Date(from.getTime() + Math.random() * (to.getTime() - from.getTime())),
     }))
 
-    const filtered = allLogs.filter(
-      (log) => log.timestamp >= from && log.timestamp <= to
-    )
+    const filtered = allLogs.filter((log) => log.timestamp >= from && log.timestamp <= to)
 
     const duration = Date.now() - startTime
 
@@ -87,13 +83,12 @@ describe('Load: Products - Audit Query Performance (T071)', () => {
     }))
 
     const sorted = logs.sort(
-      (a, b) =>
-        new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+      (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
     )
 
     const duration = Date.now() - startTime
 
-    expect(sorted[0]!.timestamp > sorted[999]!.timestamp).toBe(true)
+    expect(sorted[0]?.timestamp > sorted[999]?.timestamp).toBe(true)
     expect(duration).toBeLessThan(200)
   })
 })

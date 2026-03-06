@@ -25,13 +25,7 @@ import { z } from 'zod'
 export const LOG_LEVEL = z.enum(['debug', 'info', 'warn', 'error'])
 export type LogLevel = z.infer<typeof LOG_LEVEL>
 
-export const SERVICE_NAME = z.enum([
-  'api',
-  'worker',
-  'backoffice',
-  'frontoffice',
-  'mmc',
-])
+export const SERVICE_NAME = z.enum(['api', 'worker', 'backoffice', 'frontoffice', 'mmc'])
 export type ServiceName = z.infer<typeof SERVICE_NAME>
 
 /**
@@ -41,9 +35,7 @@ export const BASE_LOG_ENTRY = z.object({
   timestamp: z.string().datetime(),
   level: LOG_LEVEL,
   service: SERVICE_NAME,
-  event: z
-    .string()
-    .regex(/^[a-z][a-z0-9_]*$/, 'Event must be lowercase with underscores'),
+  event: z.string().regex(/^[a-z][a-z0-9_]*$/, 'Event must be lowercase with underscores'),
   message: z.string().min(1),
 })
 
@@ -64,9 +56,7 @@ export const LOG_CONTEXT_FIELDS = z.object({
  * API request context
  */
 export const API_LOG_CONTEXT = z.object({
-  method: z
-    .enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD'])
-    .optional(),
+  method: z.enum(['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS', 'HEAD']).optional(),
   path: z.string().optional(),
   query_params: z.record(z.string()).optional(),
   status_code: z.number().int().min(100).max(599).optional(),
@@ -213,12 +203,7 @@ export const LogEventFactories = {
     errorCode?: string
   }): LogEntry => ({
     timestamp: new Date().toISOString(),
-    level:
-      params.statusCode >= 500
-        ? 'error'
-        : params.statusCode >= 400
-          ? 'warn'
-          : 'info',
+    level: params.statusCode >= 500 ? 'error' : params.statusCode >= 400 ? 'warn' : 'info',
     service: 'api',
     event: `http_${params.method.toLowerCase()}_${params.statusCode}`,
     message: `${params.method} ${params.path} completed with status ${params.statusCode}`,
@@ -317,12 +302,7 @@ export const LogEventFactories = {
     retryCount?: number
   }): LogEntry => ({
     timestamp: new Date().toISOString(),
-    level:
-      params.event === 'failed'
-        ? 'error'
-        : params.event === 'dlq'
-          ? 'error'
-          : 'info',
+    level: params.event === 'failed' ? 'error' : params.event === 'dlq' ? 'error' : 'info',
     service: 'worker',
     event: `job_${params.event}`,
     message: `Job ${params.jobId} ${params.event}`,

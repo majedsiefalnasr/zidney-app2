@@ -5,11 +5,12 @@
  * Starts Hono server with middleware and route handlers.
  */
 
+import { logger } from '@zidney/logger'
 import app from './app'
 
 const PORT = process.env.PORT || 3000
 
-console.log(`🚀 Starting Zidney API on port ${PORT}`)
+logger.info(`🚀 Starting Zidney API on port ${PORT}`)
 
 export default {
   port: PORT,

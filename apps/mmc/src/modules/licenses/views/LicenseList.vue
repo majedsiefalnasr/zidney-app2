@@ -134,11 +134,11 @@ implementation. */
 </template>
 
 <script setup lang="ts">
-import { licensesApi } from '@/modules/licenses/api'
-import LicenseStatusBadge from '@/modules/licenses/components/LicenseStatusBadge.vue'
 import type { License } from '@zidney/domain-core/licenses/types'
 import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { licensesApi } from '@/modules/licenses/api'
+import LicenseStatusBadge from '@/modules/licenses/components/LicenseStatusBadge.vue'
 
 // State
 const licenses = ref<License[]>([])
@@ -210,7 +210,6 @@ function editLicense(license: License) {
 
 function showActions(license: License) {
   // Show action menu
-  console.log('Actions for', license.id)
 }
 
 function navigateToCreate() {

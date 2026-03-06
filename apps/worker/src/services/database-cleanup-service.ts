@@ -7,7 +7,7 @@
  * Detects and cleans orphaned databases (registry missing).
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 
 /**
  * Cleanup result interface
@@ -94,9 +94,7 @@ export class DatabaseCleanupService {
       const allWorkspaceDbs: string[] = dbResult.rows.map((row) => row.datname)
 
       // Get all registered databases from tenant_registry
-      const regResult = await this.masterDb.query(
-        `SELECT DISTINCT db_name FROM tenant_registry`
-      )
+      const regResult = await this.masterDb.query(`SELECT DISTINCT db_name FROM tenant_registry`)
 
       const registeredDbs = new Set(regResult.rows.map((row) => row.db_name))
 
@@ -134,9 +132,7 @@ export class DatabaseCleanupService {
   /**
    * Batch cleanup for multiple orphans
    */
-  async cleanupMultipleOrphans(
-    orphanDbs: string[]
-  ): Promise<DatabaseCleanupResult> {
+  async cleanupMultipleOrphans(orphanDbs: string[]): Promise<DatabaseCleanupResult> {
     const startTime = Date.now()
     const results: DatabaseCleanupResult[] = []
 
@@ -148,23 +144,18 @@ export class DatabaseCleanupService {
     const successful = results.filter((r) => r.success).length
     const failed = results.filter((r) => !r.success).length
 
-    this.logger?.logStep(
-      'cleanup-batch-complete',
-      'Batch orphan cleanup completed',
-      {
-        total: orphanDbs.length,
-        successful,
-        failed,
-        durationMs: Date.now() - startTime,
-      }
-    )
+    this.logger?.logStep('cleanup-batch-complete', 'Batch orphan cleanup completed', {
+      total: orphanDbs.length,
+      successful,
+      failed,
+      durationMs: Date.now() - startTime,
+    })
 
     return {
       success: failed === 0,
       databaseDropped: successful > 0,
       durationMs: Date.now() - startTime,
-      errorMessage:
-        failed > 0 ? `${failed} databases failed to clean` : undefined,
+      errorMessage: failed > 0 ? `${failed} databases failed to clean` : undefined,
     }
   }
 }
@@ -172,9 +163,6 @@ export class DatabaseCleanupService {
 /**
  * Factory to create database cleanup service
  */
-export function createDatabaseCleanupService(
-  masterDb: Pool,
-  logger?: any
-): DatabaseCleanupService {
+export function createDatabaseCleanupService(masterDb: Pool, logger?: any): DatabaseCleanupService {
   return new DatabaseCleanupService(masterDb, logger)
 }

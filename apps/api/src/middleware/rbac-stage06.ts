@@ -18,8 +18,8 @@
  * - User can only access their own attempts (except instructors)
  */
 
-import { Logger } from '@zidney/logger'
-import { Context, MiddlewareHandler } from 'hono'
+import type { Logger } from '@zidney/logger'
+import type { Context, MiddlewareHandler } from 'hono'
 
 export type AttemptRole = 'student' | 'instructor' | 'admin'
 
@@ -83,8 +83,7 @@ export function createRBACMiddlewareStage06(logger: Logger): MiddlewareHandler {
       }
 
       // Check for suspended/restricted status
-      const is_restricted =
-        roles.includes('restricted') || roles.includes('suspended')
+      const is_restricted = roles.includes('restricted') || roles.includes('suspended')
 
       if (is_restricted) {
         logger.warn('RBAC middleware: User restricted', {
@@ -111,16 +110,10 @@ export function createRBACMiddlewareStage06(logger: Logger): MiddlewareHandler {
         role: primary_role,
         allowed: true,
         // Student permissions
-        can_create_attempt: ['student', 'instructor', 'admin'].includes(
-          primary_role
-        ),
-        can_submit_attempt: ['student', 'instructor', 'admin'].includes(
-          primary_role
-        ),
+        can_create_attempt: ['student', 'instructor', 'admin'].includes(primary_role),
+        can_submit_attempt: ['student', 'instructor', 'admin'].includes(primary_role),
         can_view_result:
-          primary_role === 'student' ||
-          primary_role === 'instructor' ||
-          primary_role === 'admin', // Can see own results
+          primary_role === 'student' || primary_role === 'instructor' || primary_role === 'admin', // Can see own results
         // Instructor/Admin permissions
         can_view_all_results: ['instructor', 'admin'].includes(primary_role),
       }

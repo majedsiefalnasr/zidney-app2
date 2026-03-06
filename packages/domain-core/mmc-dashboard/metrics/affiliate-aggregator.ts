@@ -16,10 +16,7 @@ export interface AffiliateMetrics {
   status: 'ACTIVE' | 'INACTIVE' | 'SUSPENDED'
 }
 
-export function calculateAverageCommission(
-  totalCents: number,
-  usageCount: number
-): number {
+export function calculateAverageCommission(totalCents: number, usageCount: number): number {
   if (usageCount === 0) return 0
   return Math.floor(totalCents / usageCount)
 }
@@ -48,9 +45,7 @@ export function calculatePaginationOffset(
 export function rankAffiliates(
   metrics: AffiliateMetrics[]
 ): (AffiliateMetrics & { rank: number })[] {
-  const sorted = [...metrics].sort(
-    (a, b) => b.total_commission_cents - a.total_commission_cents
-  )
+  const sorted = [...metrics].sort((a, b) => b.total_commission_cents - a.total_commission_cents)
 
   let rank = 1
   let previousCommission = -1

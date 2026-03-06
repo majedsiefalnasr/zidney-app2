@@ -10,8 +10,8 @@ import {
   TableHeader,
   TableRow,
 } from '@zidney/ui/components/shadcn-vue/table'
-import { type License } from '@/types/license'
 import { computed, onMounted, ref } from 'vue'
+import type { License } from '@/types/license'
 
 /**
  * T075: License List View
@@ -33,8 +33,7 @@ const paginatedLicenses = computed(() => {
   if (searchQuery.value) {
     filtered = filtered.filter(
       (l) =>
-        l.workspace_slug.includes(searchQuery.value) ||
-        l.product_id.includes(searchQuery.value)
+        l.workspace_slug.includes(searchQuery.value) || l.product_id.includes(searchQuery.value)
     )
   }
 

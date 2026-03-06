@@ -43,17 +43,11 @@ export function parseBooleanFlag(value: string | undefined): boolean {
  */
 export function createEnvConfig(overrides?: Partial<EnvConfig>): EnvConfig {
   const raw = {
-    apiBaseUrl: (import.meta.env as any)['VITE_API_BASE_URL'] as
-      | string
-      | undefined,
-    appEnv: (import.meta.env as any)['VITE_APP_ENV'] as string | undefined,
-    appName: (import.meta.env as any)['VITE_APP_NAME'] as string | undefined,
-    debugMode: (import.meta.env as any)['VITE_DEBUG_MODE'] as
-      | string
-      | undefined,
-    workspaceSlug: (import.meta.env as any)['VITE_WORKSPACE_SLUG'] as
-      | string
-      | undefined,
+    apiBaseUrl: (import.meta.env as any).VITE_API_BASE_URL as string | undefined,
+    appEnv: (import.meta.env as any).VITE_APP_ENV as string | undefined,
+    appName: (import.meta.env as any).VITE_APP_NAME as string | undefined,
+    debugMode: (import.meta.env as any).VITE_DEBUG_MODE as string | undefined,
+    workspaceSlug: (import.meta.env as any).VITE_WORKSPACE_SLUG as string | undefined,
   }
 
   const merged: EnvConfig = {
@@ -61,7 +55,7 @@ export function createEnvConfig(overrides?: Partial<EnvConfig>): EnvConfig {
     appEnv: overrides?.appEnv ?? normalizeAppEnv(raw.appEnv),
     appName: overrides?.appName ?? raw.appName ?? 'backoffice',
     debugMode: overrides?.debugMode ?? parseBooleanFlag(raw.debugMode),
-    workspaceSlug: overrides?.workspaceSlug ?? raw.workspaceSlug,
+    workspaceSlug: overrides !== undefined ? overrides.workspaceSlug : raw.workspaceSlug,
   }
 
   if (!merged.apiBaseUrl) {
@@ -79,8 +73,6 @@ export function readRawFeatureFlags(): {
   enableDebugPanel: string | undefined
 } {
   return {
-    enableDebugPanel: import.meta.env['VITE_ENABLE_DEBUG_PANEL'] as
-      | string
-      | undefined,
+    enableDebugPanel: import.meta.env.VITE_ENABLE_DEBUG_PANEL as string | undefined,
   }
 }

@@ -105,11 +105,7 @@ export function listResponse<T>(
 /**
  * Send success response from Hono context
  */
-export function sendSuccess<T>(
-  c: Context,
-  data: T,
-  status: number = 200
-): Response {
+export function sendSuccess<T>(c: Context, data: T, status: number = 200): Response {
   return c.json(successResponse(data), status as any)
 }
 
@@ -161,14 +157,10 @@ export function sendList<T>(
 /**
  * Type guards
  */
-export function isSuccessResponse<T>(
-  response: ApiResponse<T>
-): response is SuccessResponse<T> {
+export function isSuccessResponse<T>(response: ApiResponse<T>): response is SuccessResponse<T> {
   return response.success === true && 'data' in response
 }
 
-export function isErrorResponse(
-  response: ApiResponse
-): response is ErrorResponse {
+export function isErrorResponse(response: ApiResponse): response is ErrorResponse {
   return response.success === false && 'error' in response
 }

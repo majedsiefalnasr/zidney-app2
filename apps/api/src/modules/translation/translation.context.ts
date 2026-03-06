@@ -38,9 +38,7 @@ export async function buildTranslationContext(
   // Fetch language settings from DB
   const settingsResult = await db.query<{
     language_settings: unknown
-  }>(
-    `SELECT language_settings FROM workspace_settings WHERE singleton_key = 'SETTINGS' LIMIT 1`
-  )
+  }>(`SELECT language_settings FROM workspace_settings WHERE singleton_key = 'SETTINGS' LIMIT 1`)
 
   const rawSettings = settingsResult.rows[0]?.language_settings
 

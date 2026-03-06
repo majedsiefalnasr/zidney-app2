@@ -1,5 +1,5 @@
-import path from 'path'
-import { fileURLToPath } from 'url'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
 import tsconfigPaths from 'vite-tsconfig-paths'
 import { defineProject, defineWorkspace } from 'vitest/config'
 
@@ -32,38 +32,23 @@ export default defineWorkspace([
       alias: [
         {
           find: 'hono',
-          replacement: path.resolve(
-            __dirname,
-            'apps/api/node_modules/hono/dist/index.js'
-          ),
+          replacement: path.resolve(__dirname, 'apps/api/node_modules/hono/dist/index.js'),
         },
         {
           find: /^hono\/(.+)$/,
-          replacement: path.resolve(
-            __dirname,
-            'apps/api/node_modules/hono/dist/$1.js'
-          ),
+          replacement: path.resolve(__dirname, 'apps/api/node_modules/hono/dist/$1.js'),
         },
         {
           find: 'pg',
-          replacement: path.resolve(
-            __dirname,
-            'apps/api/node_modules/pg/lib/index.js'
-          ),
+          replacement: path.resolve(__dirname, 'apps/api/node_modules/pg/lib/index.js'),
         },
         {
           find: 'bcrypt',
-          replacement: path.resolve(
-            __dirname,
-            'apps/api/node_modules/bcrypt/bcrypt.js'
-          ),
+          replacement: path.resolve(__dirname, 'apps/api/node_modules/bcrypt/bcrypt.js'),
         },
         {
           find: 'redis',
-          replacement: path.resolve(
-            __dirname,
-            'apps/api/node_modules/redis/dist/index.js'
-          ),
+          replacement: path.resolve(__dirname, 'apps/api/node_modules/redis/dist/index.js'),
         },
         {
           find: 'jsonwebtoken',
@@ -78,10 +63,7 @@ export default defineWorkspace([
         },
         {
           find: 'pinia',
-          replacement: path.resolve(
-            __dirname,
-            'apps/mmc/node_modules/pinia/dist/pinia.mjs'
-          ),
+          replacement: path.resolve(__dirname, 'apps/mmc/node_modules/pinia/dist/pinia.mjs'),
         },
         {
           find: 'vue-router',
@@ -131,17 +113,11 @@ export default defineWorkspace([
         },
         {
           find: '@zidney/api-client',
-          replacement: path.resolve(
-            __dirname,
-            'packages/api-client/src/index.ts'
-          ),
+          replacement: path.resolve(__dirname, 'packages/api-client/src/index.ts'),
         },
         {
           find: '@zidney/domain-core',
-          replacement: path.resolve(
-            __dirname,
-            'packages/domain-core/src/index.ts'
-          ),
+          replacement: path.resolve(__dirname, 'packages/domain-core/src/index.ts'),
         },
         {
           find: '@zidney/logger',
@@ -153,17 +129,11 @@ export default defineWorkspace([
         },
         {
           find: '@zidney/validation',
-          replacement: path.resolve(
-            __dirname,
-            'packages/validation/src/index.ts'
-          ),
+          replacement: path.resolve(__dirname, 'packages/validation/src/index.ts'),
         },
         {
           find: '@zidney/redis-utils',
-          replacement: path.resolve(
-            __dirname,
-            'packages/redis-utils/src/index.ts'
-          ),
+          replacement: path.resolve(__dirname, 'packages/redis-utils/src/index.ts'),
         },
         {
           find: '@zidney/config',
@@ -177,12 +147,7 @@ export default defineWorkspace([
       environment: 'node',
       setupFiles: ['./tests/vitest.setup.ts'],
       include: ['./tests/**/*.test.ts'],
-      exclude: [
-        '**/node_modules/**',
-        '**/dist/**',
-        './tests/e2e/**',
-        '**/tests/e2e/**',
-      ],
+      exclude: ['**/node_modules/**', '**/dist/**', './tests/e2e/**', '**/tests/e2e/**'],
     },
   }),
 

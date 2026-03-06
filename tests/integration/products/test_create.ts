@@ -11,14 +11,10 @@
  */
 
 import * as productService from '@zidney/domain-core/products/productService'
-import { CreateProductInput } from '@zidney/types/products/Product'
 import { Module } from '@zidney/types/enums/Module'
+import type { CreateProductInput } from '@zidney/types/products/Product'
 import { afterAll, beforeAll, beforeEach, describe, expect, it } from 'vitest'
-import {
-  cleanupTestContext,
-  createTestContext,
-  TestContext,
-} from '../../test-helpers'
+import { cleanupTestContext, createTestContext, type TestContext } from '../../test-helpers'
 
 describe('T052: Product Creation Integration Tests', () => {
   let ctx: TestContext
@@ -49,11 +45,7 @@ describe('T052: Product Creation Integration Tests', () => {
         enabled_modules: [Module.MCQ, Module.TRADITIONAL_EXAMS],
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       expect(product).toBeDefined()
       expect(product.id).toBeDefined()
@@ -71,11 +63,7 @@ describe('T052: Product Creation Integration Tests', () => {
         enabled_modules: [Module.EXERCISES],
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       const versionResult = await dbClient.query(
         'SELECT * FROM product_versions WHERE product_id = $1',
@@ -96,11 +84,7 @@ describe('T052: Product Creation Integration Tests', () => {
         enabled_modules: [Module.LIBRARY],
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       const auditResult = await dbClient.query(
         'SELECT * FROM product_audit_logs WHERE product_id = $1',
@@ -122,11 +106,7 @@ describe('T052: Product Creation Integration Tests', () => {
         enabled_modules: [Module.LIVES],
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       expect(product.status).toBe('ACTIVE')
     })
@@ -139,11 +119,7 @@ describe('T052: Product Creation Integration Tests', () => {
         description: undefined,
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       expect(product.description).toBeNull()
     })
@@ -155,11 +131,7 @@ describe('T052: Product Creation Integration Tests', () => {
         enabled_modules: [Module.MCQ],
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       expect(product.name.en).toBe('English Only')
       expect(product.name.ar).toBeUndefined()
@@ -181,11 +153,7 @@ describe('T052: Product Creation Integration Tests', () => {
         enabled_modules: allModules as any[],
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       expect(product.enabled_modules.sort()).toEqual(allModules.sort())
     })
@@ -198,21 +166,13 @@ describe('T052: Product Creation Integration Tests', () => {
       }
 
       const beforeCreate = new Date()
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
       const afterCreate = new Date()
 
       expect(product.created_at).toBeDefined()
       expect(product.updated_at).toBeDefined()
-      expect(new Date(product.created_at).getTime()).toBeGreaterThanOrEqual(
-        beforeCreate.getTime()
-      )
-      expect(new Date(product.updated_at).getTime()).toBeLessThanOrEqual(
-        afterCreate.getTime()
-      )
+      expect(new Date(product.created_at).getTime()).toBeGreaterThanOrEqual(beforeCreate.getTime())
+      expect(new Date(product.updated_at).getTime()).toBeLessThanOrEqual(afterCreate.getTime())
     })
   })
 
@@ -280,11 +240,7 @@ describe('T052: Product Creation Integration Tests', () => {
       }
 
       try {
-        await productService.createProduct(
-          dbClient,
-          input as CreateProductInput,
-          ctx.userId
-        )
+        await productService.createProduct(dbClient, input as CreateProductInput, ctx.userId)
         expect.fail('Should have rejected empty name.en')
       } catch (error: any) {
         expect(error.code || error.message).toBeDefined()
@@ -316,11 +272,7 @@ describe('T052: Product Creation Integration Tests', () => {
         enabled_modules: [Module.MCQ],
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       expect(product.name.en.length).toBe(255)
     })
@@ -334,11 +286,7 @@ describe('T052: Product Creation Integration Tests', () => {
         enabled_modules: [Module.MCQ],
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       expect(product.description).toBe(specialDesc)
     })
@@ -350,11 +298,7 @@ describe('T052: Product Creation Integration Tests', () => {
         enabled_modules: [Module.MCQ],
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       expect(product.slug).toBe('a')
     })
@@ -366,11 +310,7 @@ describe('T052: Product Creation Integration Tests', () => {
         enabled_modules: [Module.MCQ],
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       expect(product.slug).toBe('12345')
     })
@@ -382,11 +322,7 @@ describe('T052: Product Creation Integration Tests', () => {
         enabled_modules: [Module.MCQ],
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       expect(product.slug).toBe('test--product--name')
     })
@@ -399,11 +335,7 @@ describe('T052: Product Creation Integration Tests', () => {
         description: 'Test description',
       }
 
-      const product = await productService.createProduct(
-        dbClient,
-        input,
-        ctx.userId
-      )
+      const product = await productService.createProduct(dbClient, input, ctx.userId)
 
       const auditResult = await dbClient.query(
         'SELECT change_summary FROM product_audit_logs WHERE product_id = $1',

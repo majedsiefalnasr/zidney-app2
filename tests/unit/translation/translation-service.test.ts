@@ -18,10 +18,10 @@ import {
   batchLoadTranslations,
   deleteEntityTranslations,
   deleteLanguageTranslations,
+  type EntityValidator,
   listEntityTranslations,
   resolveEntityTranslations,
   upsertTranslations,
-  type EntityValidator,
 } from '../../../packages/domain-core/src/translation/translation.service'
 import type { TranslationOperationContext } from '../../../packages/domain-core/src/translation/translation.types'
 
@@ -46,11 +46,7 @@ function createMockDb(queryResponses: Record<string, any> = {}) {
     query: vi.fn(async (sql: string, params?: unknown[]) => {
       queryLog.push({ sql, params })
 
-      if (
-        sql.includes('BEGIN') ||
-        sql.includes('COMMIT') ||
-        sql.includes('ROLLBACK')
-      ) {
+      if (sql.includes('BEGIN') || sql.includes('COMMIT') || sql.includes('ROLLBACK')) {
         return { rows: [], rowCount: 0 }
       }
 
@@ -224,12 +220,7 @@ describe('upsertTranslations', () => {
       },
     ]
 
-    const result = await upsertTranslations(
-      db as any,
-      baseCtx,
-      items,
-      alwaysExistsValidator
-    )
+    const result = await upsertTranslations(db as any, baseCtx, items, alwaysExistsValidator)
 
     expect(result).toHaveLength(1)
     expect(result[0]).toMatchObject({
@@ -309,14 +300,10 @@ describe('resolveEntityTranslations', () => {
       },
     })
 
-    const result = await resolveEntityTranslations(
-      db as any,
-      baseCtx,
-      'question',
-      'q-001',
-      'ar',
-      { text: 'Question text', explanation: 'Explanation' }
-    )
+    const result = await resolveEntityTranslations(db as any, baseCtx, 'question', 'q-001', 'ar', {
+      text: 'Question text',
+      explanation: 'Explanation',
+    })
 
     expect(result.fields.text).toBe('سؤال')
     expect(result.fields.explanation).toBe('شرح')
@@ -331,14 +318,10 @@ describe('resolveEntityTranslations', () => {
       },
     })
 
-    const result = await resolveEntityTranslations(
-      db as any,
-      baseCtx,
-      'question',
-      'q-001',
-      'ar',
-      { text: 'Question text', explanation: 'Fallback explanation' }
-    )
+    const result = await resolveEntityTranslations(db as any, baseCtx, 'question', 'q-001', 'ar', {
+      text: 'Question text',
+      explanation: 'Fallback explanation',
+    })
 
     // text has translation
     expect(result.fields.text).toBe('سؤال')
@@ -402,12 +385,7 @@ describe('batchLoadTranslations', () => {
       },
     })
 
-    const result = await batchLoadTranslations(
-      db as any,
-      'question',
-      ['q-001', 'q-002'],
-      'ar'
-    )
+    const result = await batchLoadTranslations(db as any, 'question', ['q-001', 'q-002'], 'ar')
 
     expect(result.get('q-001')?.get('text')).toBe('سؤال ١')
     expect(result.get('q-001')?.get('explanation')).toBe('شرح ١')
@@ -500,12 +478,7 @@ describe('deleteEntityTranslations', () => {
       'DELETE FROM translations': { rows: [], rowCount: 0 },
     })
 
-    const count = await deleteEntityTranslations(
-      db as any,
-      baseCtx,
-      'question',
-      'q-nonexistent'
-    )
+    const count = await deleteEntityTranslations(db as any, baseCtx, 'question', 'q-nonexistent')
 
     expect(count).toBe(0)
   })
@@ -524,12 +497,7 @@ describe('deleteEntityTranslations', () => {
       'DELETE FROM translations': { rows: deletedRows, rowCount: 1 },
     })
 
-    const count = await deleteEntityTranslations(
-      db as any,
-      baseCtx,
-      'question',
-      'q-001'
-    )
+    const count = await deleteEntityTranslations(db as any, baseCtx, 'question', 'q-001')
 
     expect(count).toBe(1)
 

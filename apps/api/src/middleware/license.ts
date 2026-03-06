@@ -44,10 +44,7 @@ export interface LicenseInfo {
  * @param ctx - Hono context (with tenant information from tenant resolver)
  * @param next - Next middleware function
  */
-export const licenseMiddleware: MiddlewareHandler = async (
-  ctx: Context,
-  next: Next
-) => {
+export const licenseMiddleware: MiddlewareHandler = async (ctx: Context, next: Next) => {
   const correlationId = ctx.get('correlation_id')
   const tenant = ctx.get('tenant')
 
@@ -175,9 +172,7 @@ export const licenseMiddleware: MiddlewareHandler = async (
  * Get license info for workspace (stub)
  * TODO: Implement actual DB query
  */
-async function getLicenseInfo(
-  _workspace_id: string
-): Promise<LicenseInfo | null> {
+async function getLicenseInfo(_workspace_id: string): Promise<LicenseInfo | null> {
   // Stub implementation
   throw new Error('Not implemented')
 }

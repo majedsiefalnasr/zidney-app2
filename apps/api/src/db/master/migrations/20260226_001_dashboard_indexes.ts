@@ -33,16 +33,14 @@ export const migration: MigrationConfig = {
 
   up: async (_db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
-    // @ts-ignore: LOGIC-BUG: getClient not on MigrationContext - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+    // @ts-expect-error: LOGIC-BUG: getClient not on MigrationContext - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
     const client = await context?.getClient?.()
 
     if (!client) {
       throw new Error('Database client not available in migration context')
     }
 
-    console.log(
-      `[${correlationId}] T002: Creating dashboard indexes for performance...`
-    )
+    console.log(`[${correlationId}] T002: Creating dashboard indexes for performance...`)
 
     // ============================================================================
     // LICENSES INDEXES (Summary endpoint)
@@ -111,9 +109,7 @@ export const migration: MigrationConfig = {
       CREATE INDEX IF NOT EXISTS idx_revenue_records_product_created 
       ON revenue_records(product_id, created_at DESC)
     `)
-    console.log(
-      `[${correlationId}] ✓ idx_revenue_records_product_created created`
-    )
+    console.log(`[${correlationId}] ✓ idx_revenue_records_product_created created`)
 
     // Index 9: Geographic aggregation (country-based queries)
     // Used by: /geographic endpoint for GROUP BY billing_country
@@ -121,9 +117,7 @@ export const migration: MigrationConfig = {
       CREATE INDEX IF NOT EXISTS idx_revenue_records_billing_country 
       ON revenue_records(billing_country)
     `)
-    console.log(
-      `[${correlationId}] ✓ idx_revenue_records_billing_country created`
-    )
+    console.log(`[${correlationId}] ✓ idx_revenue_records_billing_country created`)
 
     // ============================================================================
     // AFFILIATE & AFFILIATE_USAGES INDEXES (Affiliates, leaderboard)
@@ -133,9 +127,7 @@ export const migration: MigrationConfig = {
       CREATE INDEX IF NOT EXISTS idx_affiliate_usages_affiliate_id 
       ON affiliate_usages(affiliate_id)
     `)
-    console.log(
-      `[${correlationId}] ✓ idx_affiliate_usages_affiliate_id created`
-    )
+    console.log(`[${correlationId}] ✓ idx_affiliate_usages_affiliate_id created`)
 
     // Index 11: Time range queries on usage records
     await client.query(`
@@ -150,9 +142,7 @@ export const migration: MigrationConfig = {
       CREATE INDEX IF NOT EXISTS idx_affiliate_usages_affiliate_created 
       ON affiliate_usages(affiliate_id, created_at DESC)
     `)
-    console.log(
-      `[${correlationId}] ✓ idx_affiliate_usages_affiliate_created created`
-    )
+    console.log(`[${correlationId}] ✓ idx_affiliate_usages_affiliate_created created`)
 
     // Index 13: Affiliate status for filtering active/inactive
     await client.query(`
@@ -165,12 +155,8 @@ export const migration: MigrationConfig = {
     // MIGRATION SUMMARY
     // ============================================================================
     console.log(`[${correlationId}] T002: Dashboard indexes migration complete`)
-    console.log(
-      `[${correlationId}] Created 13 indexes across 5 tables for analytics workload`
-    )
-    console.log(
-      `[${correlationId}] Expected query improvement: <300ms latency guaranteed`
-    )
+    console.log(`[${correlationId}] Created 13 indexes across 5 tables for analytics workload`)
+    console.log(`[${correlationId}] Expected query improvement: <300ms latency guaranteed`)
 
     // Update schema version
     await client.query(
@@ -178,25 +164,20 @@ export const migration: MigrationConfig = {
       INSERT INTO schema_versions (version, previous_version, applied_at, description, applied_by, correlation_id)
       VALUES ('1.2.0', '1.1.0', NOW(), $1, 'migration-system', $2)
     `,
-      [
-        'Dashboard indexes created - performance baseline established',
-        correlationId,
-      ]
+      ['Dashboard indexes created - performance baseline established', correlationId]
     )
   },
 
   down: async (_db, _schema, context) => {
     const correlationId = context?.correlationId || 'unknown'
-    // @ts-ignore: LOGIC-BUG: getClient not on MigrationContext - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+    // @ts-expect-error: LOGIC-BUG: getClient not on MigrationContext - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
     const client = await context?.getClient?.()
 
     if (!client) {
       throw new Error('Database client not available in migration context')
     }
 
-    console.log(
-      `[${correlationId}] T002: Rollback - Dropping dashboard indexes...`
-    )
+    console.log(`[${correlationId}] T002: Rollback - Dropping dashboard indexes...`)
 
     // Drop all dashboard indexes (in reverse order)
     const indexes = [
@@ -223,8 +204,6 @@ export const migration: MigrationConfig = {
     // Rollback schema version
     await client.query(`DELETE FROM schema_versions WHERE version = '1.2.0'`)
 
-    console.log(
-      `[${correlationId}] T002: Rollback complete - dashboard indexes removed`
-    )
+    console.log(`[${correlationId}] T002: Rollback complete - dashboard indexes removed`)
   },
 }

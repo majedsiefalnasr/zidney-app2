@@ -92,10 +92,7 @@ export interface Question {
  * @param overrides Optional field overrides
  * @returns Workspace object
  */
-export async function seedWorkspace(
-  db: Pool,
-  overrides?: Partial<Workspace>
-): Promise<Workspace> {
+export async function seedWorkspace(db: Pool, overrides?: Partial<Workspace>): Promise<Workspace> {
   const id = overrides?.id ?? randomUUID()
   const slug = overrides?.slug ?? `test-ws-${randomUUID().slice(0, 8)}`
   const name = overrides?.name ?? `Test Workspace ${slug}`
@@ -117,10 +114,7 @@ export async function seedWorkspace(
  * @param overrides Optional field overrides
  * @returns License object
  */
-export async function seedLicense(
-  db: Pool,
-  overrides?: Partial<License>
-): Promise<License> {
+export async function seedLicense(db: Pool, overrides?: Partial<License>): Promise<License> {
   const id = overrides?.id ?? randomUUID()
   const workspace_id = overrides?.workspace_id ?? randomUUID()
   const product_id = overrides?.product_id ?? randomUUID()
@@ -159,10 +153,7 @@ export async function seedLicense(
  * @param overrides Optional field overrides
  * @returns User object
  */
-export async function seedUser(
-  db: Pool,
-  overrides?: Partial<User>
-): Promise<User> {
+export async function seedUser(db: Pool, overrides?: Partial<User>): Promise<User> {
   const id = overrides?.id ?? randomUUID()
   const workspace_id = overrides?.workspace_id ?? randomUUID()
   const email = overrides?.email ?? `user-${randomUUID().slice(0, 8)}@test.com`
@@ -215,10 +206,7 @@ export async function seedStudents(
  * @param overrides Optional field overrides
  * @returns Exam object
  */
-export async function seedExam(
-  db: Pool,
-  overrides?: Partial<Exam>
-): Promise<Exam> {
+export async function seedExam(db: Pool, overrides?: Partial<Exam>): Promise<Exam> {
   const id = overrides?.id ?? randomUUID()
   const workspace_id = overrides?.workspace_id ?? randomUUID()
   const title = overrides?.title ?? `Test Exam ${randomUUID().slice(0, 6)}`
@@ -256,10 +244,7 @@ export async function seedExam(
  * @param overrides Optional field overrides
  * @returns Attempt object
  */
-export async function seedAttempt(
-  db: Pool,
-  overrides?: Partial<Attempt>
-): Promise<Attempt> {
+export async function seedAttempt(db: Pool, overrides?: Partial<Attempt>): Promise<Attempt> {
   const id = overrides?.id ?? randomUUID()
   const workspace_id = overrides?.workspace_id ?? randomUUID()
   const student_id = overrides?.student_id ?? randomUUID()
@@ -269,9 +254,7 @@ export async function seedAttempt(
     exam_config: { pass_threshold: 60, passing_grade: 'D', questions: 5 },
   }
   const started_at = overrides?.started_at ?? new Date().toISOString()
-  const deadline_at =
-    overrides?.deadline_at ??
-    new Date(Date.now() + 60 * 60 * 1000).toISOString()
+  const deadline_at = overrides?.deadline_at ?? new Date(Date.now() + 60 * 60 * 1000).toISOString()
   const now = new Date().toISOString()
 
   const result = await db.query(

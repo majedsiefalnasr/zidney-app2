@@ -19,10 +19,7 @@
  * @param discountPercentage Discount percentage as number (0-100)
  * @returns Discount amount rounded to 2 decimal places
  */
-export function calculateDiscountPreview(
-  baseAmount: number,
-  discountPercentage: number
-): string {
+export function calculateDiscountPreview(baseAmount: number, discountPercentage: number): string {
   if (baseAmount === 0) {
     return '0.00'
   }
@@ -60,10 +57,7 @@ export function calculateCommissionPreview(
  * @param discountAmount Discount amount as number
  * @returns Final amount as string with 2 decimal places
  */
-export function calculateFinalAmount(
-  baseAmount: number,
-  discountAmount: number
-): string {
+export function calculateFinalAmount(baseAmount: number, discountAmount: number): string {
   const final = baseAmount - discountAmount
   return final.toFixed(2)
 }

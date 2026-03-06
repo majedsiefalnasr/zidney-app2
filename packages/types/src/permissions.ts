@@ -38,13 +38,8 @@ export type PermissionDomain = (typeof PermissionDomainValues)[number]
 /**
  * Check if string is valid permission domain
  */
-export function isValidPermissionDomain(
-  value: unknown
-): value is PermissionDomain {
-  return (
-    typeof value === 'string' &&
-    PermissionDomainValues.includes(value as PermissionDomain)
-  )
+export function isValidPermissionDomain(value: unknown): value is PermissionDomain {
+  return typeof value === 'string' && PermissionDomainValues.includes(value as PermissionDomain)
 }
 
 /**
@@ -63,25 +58,15 @@ export const PermissionDomainDescriptions: Record<PermissionDomain, string> = {
 /**
  * Permission actions for all domains
  */
-export const PermissionActionValues = [
-  'view',
-  'create',
-  'edit',
-  'delete',
-] as const
+export const PermissionActionValues = ['view', 'create', 'edit', 'delete'] as const
 
 export type PermissionAction = (typeof PermissionActionValues)[number]
 
 /**
  * Check if string is valid permission action
  */
-export function isValidPermissionAction(
-  value: unknown
-): value is PermissionAction {
-  return (
-    typeof value === 'string' &&
-    PermissionActionValues.includes(value as PermissionAction)
-  )
+export function isValidPermissionAction(value: unknown): value is PermissionAction {
+  return typeof value === 'string' && PermissionActionValues.includes(value as PermissionAction)
 }
 
 /**

@@ -3,16 +3,11 @@
  * Real database testing of tenant isolation enforcement
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import { createAuditHelper } from '../audit-helpers'
 import { createDbManager } from '../db-manager'
-import {
-  cleanupAllFixtures,
-  seedLicense,
-  seedUser,
-  seedWorkspace,
-} from '../fixtures'
+import { cleanupAllFixtures, seedLicense, seedUser, seedWorkspace } from '../fixtures'
 
 describe('Area 1: Tenant Isolation (Integration)', () => {
   let masterDb: Pool
@@ -111,10 +106,9 @@ describe('Area 1: Tenant Isolation (Integration)', () => {
     const originalId = workspaceA.id
 
     // Verify workspace ID doesn't change
-    const refetchedWorkspace = await masterDb.query(
-      'SELECT id FROM workspaces WHERE id = $1',
-      [originalId]
-    )
+    const refetchedWorkspace = await masterDb.query('SELECT id FROM workspaces WHERE id = $1', [
+      originalId,
+    ])
 
     expect(refetchedWorkspace.rows[0].id).toBe(originalId)
   })

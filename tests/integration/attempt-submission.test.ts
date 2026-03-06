@@ -11,7 +11,7 @@ import {
   generateJWT,
   insertTestAttempt,
   sleep,
-  TestContext,
+  type TestContext,
 } from '../test-helpers'
 
 describe('T082: Attempt Submission Lifecycle', () => {
@@ -38,12 +38,9 @@ describe('T082: Attempt Submission Lifecycle', () => {
   })
 
   it('should start attempt', async () => {
-    const attemptRes = await client.post(
-      `/workspace/${ctx.workspaceId}/attempt`,
-      {
-        exam_id: 'exam-1',
-      }
-    )
+    const attemptRes = await client.post(`/workspace/${ctx.workspaceId}/attempt`, {
+      exam_id: 'exam-1',
+    })
     const attemptId = attemptRes.data.id
 
     const startRes = await client.put(`/attempt/${attemptId}/start`, {})
@@ -52,12 +49,9 @@ describe('T082: Attempt Submission Lifecycle', () => {
   })
 
   it('should submit attempt and enqueue grading', async () => {
-    const attemptRes = await client.post(
-      `/workspace/${ctx.workspaceId}/attempt`,
-      {
-        exam_id: 'exam-1',
-      }
-    )
+    const attemptRes = await client.post(`/workspace/${ctx.workspaceId}/attempt`, {
+      exam_id: 'exam-1',
+    })
     const attemptId = attemptRes.data.id
 
     await client.put(`/attempt/${attemptId}/start`, {})
@@ -71,12 +65,9 @@ describe('T082: Attempt Submission Lifecycle', () => {
   })
 
   it('should grade attempt via worker', async () => {
-    const attemptRes = await client.post(
-      `/workspace/${ctx.workspaceId}/attempt`,
-      {
-        exam_id: 'exam-1',
-      }
-    )
+    const attemptRes = await client.post(`/workspace/${ctx.workspaceId}/attempt`, {
+      exam_id: 'exam-1',
+    })
     const attemptId = attemptRes.data.id
 
     await client.put(`/attempt/${attemptId}/start`, {})

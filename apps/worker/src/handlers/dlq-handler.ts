@@ -7,8 +7,8 @@
  * Logs all failed jobs with complete context for debugging.
  */
 
-import { ProvisioningJob } from '@zidney/types/jobs/provisioning-job'
-import { Redis } from 'ioredis'
+import type { ProvisioningJob } from '@zidney/types/jobs/provisioning-job'
+import type { Redis } from 'ioredis'
 
 /**
  * DLQ entry
@@ -64,8 +64,7 @@ export class DLQHandler {
         last_error_step: job.currentStep as string,
         moved_to_dlq_at: new Date().toISOString(),
         job_payload: job,
-        requires_manual_intervention:
-          this.requiresManualIntervention(errorCode),
+        requires_manual_intervention: this.requiresManualIntervention(errorCode),
         suggested_action: this.getSuggestedAction(errorCode, reason),
       }
 
@@ -218,9 +217,7 @@ export class DLQHandler {
     try {
       const entries = await this.getDLQEntries(10000)
 
-      const manualInterventionCount = entries.filter(
-        (e) => e.requires_manual_intervention
-      ).length
+      const manualInterventionCount = entries.filter((e) => e.requires_manual_intervention).length
 
       const byErrorCode: Record<string, number> = {}
       for (const entry of entries) {
@@ -310,10 +307,6 @@ export class DLQHandler {
 /**
  * Factory to create DLQ handler
  */
-export function createDLQHandler(
-  redis: Redis,
-  dlqName: string,
-  logger?: any
-): DLQHandler {
+export function createDLQHandler(redis: Redis, dlqName: string, logger?: any): DLQHandler {
   return new DLQHandler(redis, dlqName, logger)
 }

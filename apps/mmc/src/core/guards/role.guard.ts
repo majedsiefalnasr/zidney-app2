@@ -17,11 +17,7 @@
  * Stage: STAGE_UI_03_ROUTER_AND_GUARDS
  */
 import { createLogger } from '@zidney/logger'
-import type {
-  NavigationGuard,
-  RouteLocationNormalized,
-  RouteLocationRaw,
-} from 'vue-router'
+import type { NavigationGuard, RouteLocationNormalized, RouteLocationRaw } from 'vue-router'
 
 const logger = createLogger('mmc:role-guard')
 
@@ -59,14 +55,11 @@ export function createRoleGuard(options: {
       const userRole = options.getUserRole()
 
       if (!userRole || !roles.includes(userRole)) {
-        logger.debug(
-          'Role guard: role mismatch or null user, redirecting to unauthorized',
-          {
-            route: to.name?.toString() ?? to.path,
-            requiredRoles: roles,
-            userRole: userRole ?? 'null',
-          }
-        )
+        logger.debug('Role guard: role mismatch or null user, redirecting to unauthorized', {
+          route: to.name?.toString() ?? to.path,
+          requiredRoles: roles,
+          userRole: userRole ?? 'null',
+        })
         return { name: options.unauthorizedRouteName }
       }
 

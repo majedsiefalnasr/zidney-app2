@@ -10,8 +10,8 @@
 import { Module } from '@zidney/types/enums/Module'
 import {
   AuditAction,
-  Product,
-  ProductAuditLogEntry,
+  type Product,
+  type ProductAuditLogEntry,
   ProductStatus,
 } from '@zidney/types/products/Product'
 import { describe, expect, it } from 'vitest'
@@ -239,10 +239,7 @@ describe('T065: Product Type Tests', () => {
     })
 
     it('should limit to valid statuses', () => {
-      const validStatuses: ProductStatus[] = [
-        ProductStatus.ACTIVE,
-        ProductStatus.INACTIVE,
-      ]
+      const validStatuses: ProductStatus[] = [ProductStatus.ACTIVE, ProductStatus.INACTIVE]
 
       for (const status of validStatuses) {
         expect(['ACTIVE', 'INACTIVE']).toContain(status)

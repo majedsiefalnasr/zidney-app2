@@ -40,8 +40,7 @@ export const LICENSE_ERROR_CODES: Record<string, LicenseErrorDefinition> = {
     code: 'LICENSE_ARCHIVED',
     http_status: 403,
     message: 'Workspace is archived and no longer accessible',
-    user_friendly_message:
-      'Workspace is archived. Contact support to restore it.',
+    user_friendly_message: 'Workspace is archived. Contact support to restore it.',
   },
 
   LICENSE_DELETED: {
@@ -55,32 +54,28 @@ export const LICENSE_ERROR_CODES: Record<string, LicenseErrorDefinition> = {
     code: 'LICENSE_NOT_FOUND',
     http_status: 404,
     message: 'No active license found for this workspace',
-    user_friendly_message:
-      'Workspace license not found. Contact administrator.',
+    user_friendly_message: 'Workspace license not found. Contact administrator.',
   },
 
   LIMIT_EXCEEDED: {
     code: 'LIMIT_EXCEEDED',
     http_status: 402,
     message: 'Student or staff enrollment limit has been reached',
-    user_friendly_message:
-      'Enrollment limit reached. Upgrade your plan to add more users.',
+    user_friendly_message: 'Enrollment limit reached. Upgrade your plan to add more users.',
   },
 
   SCHEMA_VERSION_MISMATCH: {
     code: 'SCHEMA_VERSION_MISMATCH',
     http_status: 426,
     message: 'Workspace schema version is incompatible with license',
-    user_friendly_message:
-      'Workspace requires a schema upgrade. Contact administrator.',
+    user_friendly_message: 'Workspace requires a schema upgrade. Contact administrator.',
   },
 
   UPGRADE_REQUIRED: {
     code: 'UPGRADE_REQUIRED',
     http_status: 426,
     message: 'Workspace license requires product upgrade',
-    user_friendly_message:
-      'Workspace requires a product upgrade. Contact support.',
+    user_friendly_message: 'Workspace requires a product upgrade. Contact support.',
   },
 
   INVALID_STATE_TRANSITION: {
@@ -94,16 +89,14 @@ export const LICENSE_ERROR_CODES: Record<string, LicenseErrorDefinition> = {
     code: 'WORKSPACE_ALREADY_EXISTS',
     http_status: 409,
     message: 'Workspace with this slug already exists',
-    user_friendly_message:
-      'Workspace slug is already in use. Please choose another.',
+    user_friendly_message: 'Workspace slug is already in use. Please choose another.',
   },
 
   IDEMPOTENCY_CONFLICT: {
     code: 'IDEMPOTENCY_CONFLICT',
     http_status: 409,
     message: 'Retried request with different parameters',
-    user_friendly_message:
-      'Request parameters do not match previous submission.',
+    user_friendly_message: 'Request parameters do not match previous submission.',
   },
 }
 

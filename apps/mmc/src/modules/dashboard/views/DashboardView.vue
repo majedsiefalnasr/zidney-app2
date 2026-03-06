@@ -168,6 +168,18 @@
 </template>
 
 <script setup lang="ts">
+import {
+  AlertCircle,
+  Award,
+  BarChart3,
+  Download,
+  Globe,
+  LineChart,
+  Loader,
+  RefreshCw,
+  TrendingUp,
+} from 'lucide-vue-next'
+import { computed, onMounted, ref } from 'vue'
 import { dashboardClient } from '@/api/dashboard-client'
 import AffiliateLeaderboard from '@/components/Dashboard/AffiliateLeaderboard.vue'
 import CommercialHealth from '@/components/Dashboard/CommercialHealth.vue'
@@ -188,18 +200,6 @@ import {
   Skeleton,
 } from '@/components/ui'
 import { useDashboardStore } from '@/stores/dashboard-store'
-import {
-  AlertCircle,
-  Award,
-  BarChart3,
-  Download,
-  Globe,
-  LineChart,
-  Loader,
-  RefreshCw,
-  TrendingUp,
-} from 'lucide-vue-next'
-import { computed, onMounted, ref } from 'vue'
 
 // Store
 const dashboardStore = useDashboardStore()
@@ -244,8 +244,8 @@ const loadDashboardData = async () => {
 
     lastUpdated.value = new Date()
   } catch (err) {
-    error.value =
-      err instanceof Error ? err.message : 'Failed to load dashboard data'
+    error.value = err instanceof Error ? err.message : 'Failed to load dashboard data'
+    // biome-ignore lint/suspicious/noConsole: frontend error boundary
     console.error('Dashboard load error:', err)
   } finally {
     isLoading.value = false
@@ -268,8 +268,8 @@ const refreshData = async () => {
 
     lastUpdated.value = new Date()
   } catch (err) {
-    error.value =
-      err instanceof Error ? err.message : 'Failed to refresh dashboard data'
+    error.value = err instanceof Error ? err.message : 'Failed to refresh dashboard data'
+    // biome-ignore lint/suspicious/noConsole: frontend error boundary
     console.error('Dashboard refresh error:', err)
   } finally {
     isRefreshing.value = false
@@ -281,6 +281,7 @@ const handleExport = async (section: string) => {
     await dashboardClient.exportData(section, {})
   } catch (err) {
     error.value = err instanceof Error ? err.message : 'Export failed'
+    // biome-ignore lint/suspicious/noConsole: frontend error boundary
     console.error('Export error:', err)
   }
 }

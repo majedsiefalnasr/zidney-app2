@@ -189,12 +189,7 @@ export const METRIC_SCHEMA_VERIFICATION_MS = {
 export interface MetricsCollector {
   recordApiRequest(
     workspace_id: string,
-    result:
-      | 'success'
-      | 'conflict'
-      | 'license_error'
-      | 'version_error'
-      | 'error',
+    result: 'success' | 'conflict' | 'license_error' | 'version_error' | 'error',
     latency_ms: number
   ): void
 
@@ -207,19 +202,11 @@ export interface MetricsCollector {
 
   recordIdempotencyCache(hit_type: 'redis_hit' | 'db_hit' | 'cache_miss'): void
 
-  recordRetry(
-    workspace_id: string,
-    attempt_number: number,
-    reason: string
-  ): void
+  recordRetry(workspace_id: string, attempt_number: number, reason: string): void
 
   recordDLQEscalation(
     workspace_id: string,
-    reason:
-      | 'max_retries'
-      | 'tampering_detected'
-      | 'lock_timeout'
-      | 'critical_error'
+    reason: 'max_retries' | 'tampering_detected' | 'lock_timeout' | 'critical_error'
   ): void
 
   recordPoolUtilization(workspace_id: string, utilization_percent: number): void
@@ -255,14 +242,9 @@ export class InMemoryMetricsCollector implements MetricsCollector {
     schema_verifications: [],
   }
 
-  recordApiRequest(
-    workspace_id: string,
-    result: string,
-    latency_ms: number
-  ): void {
+  recordApiRequest(workspace_id: string, result: string, latency_ms: number): void {
     const key = `${workspace_id}:${result}`
-    this.metrics.requests_total[key] =
-      (this.metrics.requests_total[key] || 0) + 1
+    this.metrics.requests_total[key] = (this.metrics.requests_total[key] || 0) + 1
     this.metrics.api_latencies.push(latency_ms)
 
     logger.debug('API request recorded', {
@@ -291,17 +273,12 @@ export class InMemoryMetricsCollector implements MetricsCollector {
   }
 
   recordIdempotencyCache(hit_type: string): void {
-    this.metrics.idempotency_cache[hit_type] =
-      (this.metrics.idempotency_cache[hit_type] || 0) + 1
+    this.metrics.idempotency_cache[hit_type] = (this.metrics.idempotency_cache[hit_type] || 0) + 1
 
     logger.debug('Idempotency cache event', { hit_type })
   }
 
-  recordRetry(
-    workspace_id: string,
-    attempt_number: number,
-    reason: string
-  ): void {
+  recordRetry(workspace_id: string, attempt_number: number, reason: string): void {
     const key = `${workspace_id}:${attempt_number}:${reason}`
     this.metrics.retries[key] = (this.metrics.retries[key] || 0) + 1
 
@@ -314,8 +291,7 @@ export class InMemoryMetricsCollector implements MetricsCollector {
 
   recordDLQEscalation(workspace_id: string, reason: string): void {
     const key = `${workspace_id}:${reason}`
-    this.metrics.dlq_escalations[key] =
-      (this.metrics.dlq_escalations[key] || 0) + 1
+    this.metrics.dlq_escalations[key] = (this.metrics.dlq_escalations[key] || 0) + 1
 
     logger.warn('DLQ escalation recorded', {
       workspace_id,
@@ -323,10 +299,7 @@ export class InMemoryMetricsCollector implements MetricsCollector {
     })
   }
 
-  recordPoolUtilization(
-    workspace_id: string,
-    utilization_percent: number
-  ): void {
+  recordPoolUtilization(workspace_id: string, utilization_percent: number): void {
     this.metrics.pool_utilization[workspace_id] = utilization_percent
 
     if (utilization_percent > 80) {
@@ -366,12 +339,8 @@ export class InMemoryMetricsCollector implements MetricsCollector {
 
   getMetricsSnapshot(): Record<string, any> {
     // Calculate percentiles
-    const apiLatencies = this.metrics.api_latencies.sort(
-      (a: number, b: number) => a - b
-    )
-    const workerDurations = this.metrics.worker_durations.sort(
-      (a: number, b: number) => a - b
-    )
+    const apiLatencies = this.metrics.api_latencies.sort((a: number, b: number) => a - b)
+    const workerDurations = this.metrics.worker_durations.sort((a: number, b: number) => a - b)
 
     return {
       requests_total: this.metrics.requests_total,
@@ -379,8 +348,7 @@ export class InMemoryMetricsCollector implements MetricsCollector {
       api_latency_p95: apiLatencies[Math.floor(apiLatencies.length * 0.95)],
       api_latency_p99: apiLatencies[Math.floor(apiLatencies.length * 0.99)],
       worker_tasks_total: this.metrics.worker_tasks,
-      worker_duration_p95:
-        workerDurations[Math.floor(workerDurations.length * 0.95)],
+      worker_duration_p95: workerDurations[Math.floor(workerDurations.length * 0.95)],
       idempotency_cache: this.metrics.idempotency_cache,
       retries_total: this.metrics.retries,
       dlq_escalations: this.metrics.dlq_escalations,
@@ -529,12 +497,10 @@ export const DASHBOARD_DEFINITION = {
   alerts: [
     {
       name: 'HighDLQEscalations',
-      condition:
-        'sum(increase(schema_initialization_dlq_escalations_total[5m])) > 10',
+      condition: 'sum(increase(schema_initialization_dlq_escalations_total[5m])) > 10',
       duration: '5m',
       severity: 'critical',
-      annotation:
-        'Schema initialization failures detected. Check DLQ and investigate root cause.',
+      annotation: 'Schema initialization failures detected. Check DLQ and investigate root cause.',
     },
 
     {
@@ -551,14 +517,12 @@ export const DASHBOARD_DEFINITION = {
       condition: 'schema_initialization_pool_utilization_percent > 95',
       duration: '2m',
       severity: 'critical',
-      annotation:
-        'Connection pool near exhaustion. Scale pool or reduce concurrent loads.',
+      annotation: 'Connection pool near exhaustion. Scale pool or reduce concurrent loads.',
     },
 
     {
       name: 'HighAPILatency',
-      condition:
-        'histogram_quantile(0.95, schema_provisioning_api_latency_ms_bucket) > 1000',
+      condition: 'histogram_quantile(0.95, schema_provisioning_api_latency_ms_bucket) > 1000',
       duration: '5m',
       severity: 'warning',
       annotation: 'API latency elevated. Check database performance.',

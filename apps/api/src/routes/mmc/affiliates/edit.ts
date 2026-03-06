@@ -10,9 +10,10 @@ import {
   AffiliateErrorCode,
   AffiliateErrorMessages,
 } from '@zidney/domain-core/affiliates/error-codes'
-import { Affiliate } from '@zidney/domain-core/affiliates/types'
+import type { Affiliate } from '@zidney/domain-core/affiliates/types'
 import { validatePercentageRange } from '@zidney/domain-core/affiliates/validators'
-import { Context } from 'hono'
+import { logger } from '@zidney/logger'
+import type { Context } from 'hono'
 import { pool } from '../../../../db'
 import { validateUpdateAffiliateRequest } from '../../../middleware/affiliate-validation'
 
@@ -73,9 +74,7 @@ export async function editAffiliateHandler(c: Context) {
           error: {
             code: AffiliateErrorCode.AFFILIATE_INVALID_DISCOUNT_PERCENTAGE,
             message:
-              AffiliateErrorMessages[
-                AffiliateErrorCode.AFFILIATE_INVALID_DISCOUNT_PERCENTAGE
-              ],
+              AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_INVALID_DISCOUNT_PERCENTAGE],
           },
         })
       }
@@ -91,9 +90,7 @@ export async function editAffiliateHandler(c: Context) {
           error: {
             code: AffiliateErrorCode.AFFILIATE_INVALID_COMMISSION_PERCENTAGE,
             message:
-              AffiliateErrorMessages[
-                AffiliateErrorCode.AFFILIATE_INVALID_COMMISSION_PERCENTAGE
-              ],
+              AffiliateErrorMessages[AffiliateErrorCode.AFFILIATE_INVALID_COMMISSION_PERCENTAGE],
           },
         })
       }
@@ -127,9 +124,7 @@ export async function editAffiliateHandler(c: Context) {
     }
 
     // Build UPDATE query
-    const updateClauses = Object.keys(updates).map(
-      (key, idx) => `${key} = $${idx + 1}`
-    )
+    const updateClauses = Object.keys(updates).map((key, idx) => `${key} = $${idx + 1}`)
     const updateValues = Object.values(updates)
 
     const updateQuery = `
@@ -157,7 +152,7 @@ export async function editAffiliateHandler(c: Context) {
 
     // TODO: Insert into affiliate_admin_audit (requires admin_id context)
 
-    console.log('[AFFILIATE] Updated:', {
+    logger.info('[AFFILIATE] Updated:', {
       affiliate_id: affiliateId,
       fields_changed: Object.keys(updates),
       correlation_id: c.get('correlation_id'),
@@ -170,7 +165,7 @@ export async function editAffiliateHandler(c: Context) {
       error: null,
     })
   } catch (error: any) {
-    console.error('[AFFILIATE] Edit error:', error)
+    logger.error('[AFFILIATE] Edit error:', { error })
 
     if (error.code === 'VALIDATION_ERROR') {
       c.status(400)

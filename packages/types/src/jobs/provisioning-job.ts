@@ -9,7 +9,7 @@
  * across API → Queue → Worker pipeline.
  */
 
-import { ProvisioningErrorCode } from '../errors/provisioning-errors'
+import type { ProvisioningErrorCode } from '../errors/provisioning-errors'
 
 /**
  * Job Status enum

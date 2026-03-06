@@ -9,7 +9,7 @@ import {
   createTestClient,
   createTestContext,
   generateJWT,
-  TestContext,
+  type TestContext,
 } from '../test-helpers'
 
 describe('T110-T111: WebSocket & Admin Endpoints', () => {
@@ -57,33 +57,25 @@ describe('T110-T111: WebSocket & Admin Endpoints', () => {
 
   it('should retry DLQ job for admin', async () => {
     const dlqJobId = 'dlq-job-123'
-    const res = await client.post(
-      `/admin/workspace/${ctx.workspaceId}/dlq/${dlqJobId}/retry`,
-      {}
-    )
+    const res = await client.post(`/admin/workspace/${ctx.workspaceId}/dlq/${dlqJobId}/retry`, {})
     expect([200, 202, 403]).toContain(res.status)
   })
 
   it('should discard DLQ job for admin', async () => {
     const dlqJobId = 'dlq-job-456'
-    const res = await client.post(
-      `/admin/workspace/${ctx.workspaceId}/dlq/${dlqJobId}/discard`,
-      { reason: 'Invalid data' }
-    )
+    const res = await client.post(`/admin/workspace/${ctx.workspaceId}/dlq/${dlqJobId}/discard`, {
+      reason: 'Invalid data',
+    })
     expect([200, 403]).toContain(res.status)
   })
 
   it('should rate-limit audit for admin', async () => {
-    const res = await client.get(
-      `/admin/workspace/${ctx.workspaceId}/rate-limit-audit`
-    )
+    const res = await client.get(`/admin/workspace/${ctx.workspaceId}/rate-limit-audit`)
     expect([200, 403]).toContain(res.status)
   })
 
   it('should export rate-limit metrics for admin', async () => {
-    const res = await client.get(
-      `/admin/workspace/${ctx.workspaceId}/rate-limit-export`
-    )
+    const res = await client.get(`/admin/workspace/${ctx.workspaceId}/rate-limit-export`)
     expect([200, 403]).toContain(res.status)
   })
 })

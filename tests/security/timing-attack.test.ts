@@ -7,7 +7,7 @@ import {
   cleanupTestContext,
   createTestClient,
   createTestContext,
-  TestContext,
+  type TestContext,
 } from '../test-helpers'
 
 describe('T095: Timing Attack Prevention', () => {
@@ -38,9 +38,7 @@ describe('T095: Timing Attack Prevention', () => {
 
     // Check variance is low (constant-time)
     const avgTiming = timings.reduce((a, b) => a + b) / timings.length
-    const variance =
-      timings.reduce((sum, t) => sum + Math.pow(t - avgTiming, 2), 0) /
-      timings.length
+    const variance = timings.reduce((sum, t) => sum + (t - avgTiming) ** 2, 0) / timings.length
     expect(variance).toBeDefined() // Should use constant-time comparison
   })
 

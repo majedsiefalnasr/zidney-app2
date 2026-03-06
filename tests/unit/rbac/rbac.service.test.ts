@@ -293,12 +293,7 @@ describe('evaluatePermission()', () => {
         return { rows: [], rowCount: 0 }
       }),
     }
-    const actions = [
-      'can_view',
-      'can_create',
-      'can_edit',
-      'can_delete',
-    ] as const
+    const actions = ['can_view', 'can_create', 'can_edit', 'can_delete'] as const
     for (const action of actions) {
       const result = await evaluatePermission({
         db,
@@ -345,8 +340,7 @@ describe('createRole()', () => {
     const queryCalls: string[] = []
     const queryFn = vi.fn(async (sql: string) => {
       queryCalls.push(sql.trim())
-      if (/^BEGIN$|^COMMIT$|^ROLLBACK$/.test(sql.trim()))
-        return { rows: [], rowCount: 0 }
+      if (/^BEGIN$|^COMMIT$|^ROLLBACK$/.test(sql.trim())) return { rows: [], rowCount: 0 }
       if (sql.includes('INSERT INTO backoffice_roles')) {
         return {
           rows: [
@@ -381,8 +375,7 @@ describe('createRole()', () => {
     const queryCalls: string[] = []
     const queryFn = vi.fn(async (sql: string) => {
       queryCalls.push(sql.trim())
-      if (/^BEGIN$|^ROLLBACK$/.test(sql.trim()))
-        return { rows: [], rowCount: 0 }
+      if (/^BEGIN$|^ROLLBACK$/.test(sql.trim())) return { rows: [], rowCount: 0 }
       if (sql.includes('INSERT INTO backoffice_roles')) {
         throw new Error('Simulated DB failure during INSERT')
       }
@@ -419,8 +412,7 @@ describe('deleteRole()', () => {
 
   it('throws ROLE_HAS_ACTIVE_USERS when users are assigned', async () => {
     const queryFn = vi.fn(async (sql: string) => {
-      if (/^BEGIN$|^ROLLBACK$/.test(sql.trim()))
-        return { rows: [], rowCount: 0 }
+      if (/^BEGIN$|^ROLLBACK$/.test(sql.trim())) return { rows: [], rowCount: 0 }
       if (sql.includes('FOR UPDATE')) {
         return { rows: [{ id: ROLE_ID }], rowCount: 1 }
       }
@@ -431,62 +423,51 @@ describe('deleteRole()', () => {
       return { rows: [], rowCount: 0 }
     })
 
-    await expect(
-      deleteRole({ query: queryFn }, ROLE_ID, AUDIT_CTX)
-    ).rejects.toMatchObject({ code: 'ROLE_HAS_ACTIVE_USERS' })
+    await expect(deleteRole({ query: queryFn }, ROLE_ID, AUDIT_CTX)).rejects.toMatchObject({
+      code: 'ROLE_HAS_ACTIVE_USERS',
+    })
   })
 
   it('throws ROLE_NOT_FOUND when role does not exist', async () => {
     const queryFn = vi.fn(async (sql: string) => {
-      if (/^BEGIN$|^ROLLBACK$/.test(sql.trim()))
-        return { rows: [], rowCount: 0 }
+      if (/^BEGIN$|^ROLLBACK$/.test(sql.trim())) return { rows: [], rowCount: 0 }
       if (sql.includes('FOR UPDATE')) return { rows: [], rowCount: 0 }
       return { rows: [], rowCount: 0 }
     })
-    await expect(
-      deleteRole({ query: queryFn }, 'nonexistent-id', AUDIT_CTX)
-    ).rejects.toMatchObject({
-      code: 'ROLE_NOT_FOUND',
-    })
+    await expect(deleteRole({ query: queryFn }, 'nonexistent-id', AUDIT_CTX)).rejects.toMatchObject(
+      {
+        code: 'ROLE_NOT_FOUND',
+      }
+    )
   })
 
   it('rolls back and no audit log on tx failure — no orphan rows (SC-005)', async () => {
     const queryCalls: string[] = []
     const queryFn = vi.fn(async (sql: string) => {
       queryCalls.push(sql.trim())
-      if (/^BEGIN$|^ROLLBACK$/.test(sql.trim()))
-        return { rows: [], rowCount: 0 }
-      if (sql.includes('FOR UPDATE'))
-        return { rows: [{ id: ROLE_ID }], rowCount: 1 }
+      if (/^BEGIN$|^ROLLBACK$/.test(sql.trim())) return { rows: [], rowCount: 0 }
+      if (sql.includes('FOR UPDATE')) return { rows: [{ id: ROLE_ID }], rowCount: 1 }
       if (sql.includes('COUNT(*)')) return { rows: [{ cnt: '0' }], rowCount: 1 }
-      if (sql.includes('DELETE FROM backoffice_roles'))
-        throw new Error('DB failure on DELETE')
+      if (sql.includes('DELETE FROM backoffice_roles')) throw new Error('DB failure on DELETE')
       return { rows: [], rowCount: 0 }
     })
 
-    await expect(
-      deleteRole({ query: queryFn }, ROLE_ID, AUDIT_CTX)
-    ).rejects.toThrow()
+    await expect(deleteRole({ query: queryFn }, ROLE_ID, AUDIT_CTX)).rejects.toThrow()
 
     expect(queryCalls).toContain('ROLLBACK')
     expect(queryCalls).not.toContain('COMMIT')
     // Audit log INSERT must NOT appear (tx rolled back before audit)
-    expect(
-      queryCalls.some((s) => s.toLowerCase().includes('rbac_audit_logs'))
-    ).toBe(false)
+    expect(queryCalls.some((s) => s.toLowerCase().includes('rbac_audit_logs'))).toBe(false)
   })
 
   it('succeeds without active users — commits and writes audit log', async () => {
     const queryCalls: string[] = []
     const queryFn = vi.fn(async (sql: string) => {
       queryCalls.push(sql.trim())
-      if (/^BEGIN$|^COMMIT$|^ROLLBACK$/.test(sql.trim()))
-        return { rows: [], rowCount: 0 }
-      if (sql.includes('FOR UPDATE'))
-        return { rows: [{ id: ROLE_ID }], rowCount: 1 }
+      if (/^BEGIN$|^COMMIT$|^ROLLBACK$/.test(sql.trim())) return { rows: [], rowCount: 0 }
+      if (sql.includes('FOR UPDATE')) return { rows: [{ id: ROLE_ID }], rowCount: 1 }
       if (sql.includes('COUNT(*)')) return { rows: [{ cnt: '0' }], rowCount: 1 }
-      if (sql.includes('DELETE FROM backoffice_roles'))
-        return { rows: [], rowCount: 1 }
+      if (sql.includes('DELETE FROM backoffice_roles')) return { rows: [], rowCount: 1 }
       if (sql.includes('rbac_audit_logs')) return { rows: [], rowCount: 1 }
       return { rows: [], rowCount: 0 }
     })

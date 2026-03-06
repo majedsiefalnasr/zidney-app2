@@ -5,7 +5,7 @@
  * Stage: STAGE_05_TENANT_PROVISIONING_SERVICE
  */
 
-import { Pool } from 'pg'
+import type { Pool } from 'pg'
 import { LogLevel, StructuredLogger } from './ErrorHandling'
 
 export interface RollbackContext {
@@ -26,9 +26,7 @@ export class RollbackManager {
 
   constructor(master_pool: Pool, logger?: StructuredLogger) {
     this.master_pool = master_pool
-    this.logger =
-      logger ||
-      new StructuredLogger('provisioning-rollback', '1.0.0', LogLevel.INFO)
+    this.logger = logger || new StructuredLogger('provisioning-rollback', '1.0.0', LogLevel.INFO)
   }
 
   /**
@@ -91,13 +89,9 @@ export class RollbackManager {
         actions_taken.push('License marked as FAILED')
       } catch (error) {
         errors.push(`Failed to mark license as FAILED: ${error}`)
-        this.logger.error(
-          'License reset failed',
-          error instanceof Error ? error : String(error),
-          {
-            correlation_id: context.correlation_id,
-          }
-        )
+        this.logger.error('License reset failed', error instanceof Error ? error : String(error), {
+          correlation_id: context.correlation_id,
+        })
       }
 
       // Log completion
@@ -162,9 +156,7 @@ export class RollbackManager {
         details: { db_name },
       })
     } catch (error) {
-      throw new Error(
-        `Failed to drop database workspace_${workspace_slug}: ${error}`
-      )
+      throw new Error(`Failed to drop database workspace_${workspace_slug}: ${error}`)
     } finally {
       client.release()
     }
@@ -176,17 +168,13 @@ export class RollbackManager {
   private async cleanupRegistry(license_id: number): Promise<void> {
     const client = await this.master_pool.connect()
     try {
-      await client.query(`DELETE FROM tenants_registry WHERE license_id = $1`, [
-        license_id,
-      ])
+      await client.query(`DELETE FROM tenants_registry WHERE license_id = $1`, [license_id])
 
       this.logger.debug('Registry entry deleted', {
         details: { license_id },
       })
     } catch (error) {
-      throw new Error(
-        `Failed to delete registry entry for license ${license_id}: ${error}`
-      )
+      throw new Error(`Failed to delete registry entry for license ${license_id}: ${error}`)
     } finally {
       client.release()
     }
@@ -195,10 +183,7 @@ export class RollbackManager {
   /**
    * Mark license as FAILED
    */
-  private async resetLicenseToFailed(
-    license_id: number,
-    error: Error | string
-  ): Promise<void> {
+  private async resetLicenseToFailed(license_id: number, error: Error | string): Promise<void> {
     const client = await this.master_pool.connect()
     try {
       const error_str = typeof error === 'string' ? error : error.message
@@ -219,9 +204,7 @@ export class RollbackManager {
         },
       })
     } catch (error) {
-      throw new Error(
-        `Failed to mark license ${license_id} as FAILED: ${error}`
-      )
+      throw new Error(`Failed to mark license ${license_id} as FAILED: ${error}`)
     } finally {
       client.release()
     }
@@ -230,16 +213,11 @@ export class RollbackManager {
   /**
    * Safe force-cleanup (for manual intervention)
    */
-  async forceCleanup(
-    workspace_slug: string,
-    license_id: number
-  ): Promise<void> {
+  async forceCleanup(workspace_slug: string, license_id: number): Promise<void> {
     const client = await this.master_pool.connect()
     try {
       // Force delete from registry
-      await client.query(`DELETE FROM tenants_registry WHERE license_id = $1`, [
-        license_id,
-      ])
+      await client.query(`DELETE FROM tenants_registry WHERE license_id = $1`, [license_id])
 
       // Force mark license as FAILED
       await client.query(
@@ -252,14 +230,10 @@ export class RollbackManager {
         details: { license_id },
       })
     } catch (error) {
-      this.logger.error(
-        'Force cleanup failed',
-        error instanceof Error ? error : String(error),
-        {
-          workspace_slug,
-          details: { license_id },
-        }
-      )
+      this.logger.error('Force cleanup failed', error instanceof Error ? error : String(error), {
+        workspace_slug,
+        details: { license_id },
+      })
       throw error
     } finally {
       client.release()

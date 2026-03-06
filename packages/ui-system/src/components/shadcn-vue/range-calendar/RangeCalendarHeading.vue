@@ -1,13 +1,11 @@
 <script lang="ts" setup>
-import type { RangeCalendarHeadingProps } from 'reka-ui'
-import type { HTMLAttributes } from 'vue'
 import { reactiveOmit } from '@vueuse/core'
+import type { RangeCalendarHeadingProps } from 'reka-ui'
 import { RangeCalendarHeading, useForwardProps } from 'reka-ui'
+import type { HTMLAttributes } from 'vue'
 import { cn } from '@/lib/utils'
 
-const props = defineProps<
-  RangeCalendarHeadingProps & { class?: HTMLAttributes['class'] }
->()
+const props = defineProps<RangeCalendarHeadingProps & { class?: HTMLAttributes['class'] }>()
 
 defineSlots<{
   default: (props: { headingValue: string }) => any

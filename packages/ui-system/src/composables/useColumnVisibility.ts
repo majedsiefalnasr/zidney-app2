@@ -26,9 +26,7 @@ export function useColumnVisibility(options: UseColumnVisibilityOptions) {
   )
 
   // Computed: Are all columns visible?
-  const areAllVisible = computed(
-    () => visibleColumns.value.size === availableColumns.length
-  )
+  const areAllVisible = computed(() => visibleColumns.value.size === availableColumns.length)
 
   // Computed: Are all columns hidden?
   const areAllHidden = computed(() => visibleColumns.value.size === 0)
@@ -68,10 +66,7 @@ export function useColumnVisibility(options: UseColumnVisibilityOptions) {
     if (!persistKey) return
 
     try {
-      localStorage.setItem(
-        persistKey,
-        JSON.stringify([...visibleColumns.value])
-      )
+      localStorage.setItem(persistKey, JSON.stringify([...visibleColumns.value]))
     } catch {
       // localStorage unavailable or quota exceeded
     }

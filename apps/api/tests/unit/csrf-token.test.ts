@@ -34,9 +34,7 @@ class CSRFTokenManager {
   private readonly tokenTTL = 24 * 60 * 60 * 1000 // 24 hours
 
   generateToken(): string {
-    const randomBytes = Array.from({ length: 32 }, () =>
-      Math.floor(Math.random() * 256)
-    )
+    const randomBytes = Array.from({ length: 32 }, () => Math.floor(Math.random() * 256))
 
     return randomBytes.map((b) => b.toString(16).padStart(2, '0')).join('')
   }
@@ -56,11 +54,7 @@ class CSRFTokenManager {
     return csrfToken
   }
 
-  validateToken(
-    userId: string,
-    providedToken: string,
-    cookieToken: string
-  ): boolean {
+  validateToken(userId: string, providedToken: string, cookieToken: string): boolean {
     // Both header and cookie tokens must match
     if (providedToken !== cookieToken) {
       return false
@@ -99,8 +93,8 @@ class CSRFTokenManager {
   formatCookieHeader(cookie: CSRFCookie): string {
     const parts = [
       `${cookie.name}=${cookie.value}`,
-      'Path=' + cookie.path,
-      'SameSite=' + cookie.sameSite,
+      `Path=${cookie.path}`,
+      `SameSite=${cookie.sameSite}`,
       'HttpOnly',
     ]
 
@@ -210,11 +204,7 @@ describe('CSRF Token Management', () => {
     it('should reject invalid token', () => {
       const token = manager.createToken('user-1')
 
-      const isValid = manager.validateToken(
-        'user-1',
-        'wrong-token',
-        token.token
-      )
+      const isValid = manager.validateToken('user-1', 'wrong-token', token.token)
 
       expect(isValid).toBe(false)
     })
@@ -222,11 +212,7 @@ describe('CSRF Token Management', () => {
     it('should reject mismatched header and cookie tokens', () => {
       const token = manager.createToken('user-1')
 
-      const isValid = manager.validateToken(
-        'user-1',
-        token.token + 'extra',
-        token.token
-      )
+      const isValid = manager.validateToken('user-1', `${token.token}extra`, token.token)
 
       expect(isValid).toBe(false)
     })
@@ -243,14 +229,10 @@ describe('CSRF Token Management', () => {
     })
 
     it('should reject token from different user', () => {
-      const token1 = manager.createToken('user-1')
+      const _token1 = manager.createToken('user-1')
       const token2 = manager.createToken('user-2')
 
-      const isValid = manager.validateToken(
-        'user-1',
-        token2.token,
-        token2.token
-      )
+      const isValid = manager.validateToken('user-1', token2.token, token2.token)
 
       expect(isValid).toBe(false)
     })
@@ -258,16 +240,8 @@ describe('CSRF Token Management', () => {
     it('should require both tokens to match', () => {
       const token = manager.createToken('user-1')
 
-      const isValid1 = manager.validateToken(
-        'user-1',
-        token.token,
-        'different-cookie'
-      )
-      const isValid2 = manager.validateToken(
-        'user-1',
-        'different-header',
-        token.token
-      )
+      const isValid1 = manager.validateToken('user-1', token.token, 'different-cookie')
+      const isValid2 = manager.validateToken('user-1', 'different-header', token.token)
 
       expect(isValid1).toBe(false)
       expect(isValid2).toBe(false)
@@ -400,19 +374,11 @@ describe('CSRF Token Management', () => {
 
     it('should allow logout by invalidating token', () => {
       const token = manager.createToken('user-1')
-      const initialCheck = manager.validateToken(
-        'user-1',
-        token.token,
-        token.token
-      )
+      const initialCheck = manager.validateToken('user-1', token.token, token.token)
 
       manager.invalidateToken('user-1', token.token)
 
-      const finalCheck = manager.validateToken(
-        'user-1',
-        token.token,
-        token.token
-      )
+      const finalCheck = manager.validateToken('user-1', token.token, token.token)
 
       expect(initialCheck).toBe(true)
       expect(finalCheck).toBe(false)
@@ -453,11 +419,7 @@ describe('CSRF Token Management', () => {
 
       const valid1 = manager.validateToken('user-1', token1.token, token1.token)
       const valid2 = manager.validateToken('user-2', token2.token, token2.token)
-      const invalid = manager.validateToken(
-        'user-1',
-        token2.token,
-        token2.token
-      )
+      const invalid = manager.validateToken('user-1', token2.token, token2.token)
 
       expect(valid1).toBe(true)
       expect(valid2).toBe(true)
@@ -471,31 +433,23 @@ describe('CSRF Token Management', () => {
       const loginToken = manager.createToken('user-1')
 
       // Step 2: Send in response
-      const cookie = manager.generateCookie(loginToken.token, true)
+      const _cookie = manager.generateCookie(loginToken.token, true)
 
       // Step 3: Client uses token in header and cookie for subsequent requests
       const headerTokenValue = loginToken.token
       const cookieTokenValue = loginToken.token
 
       // Step 4: Validate on server
-      const isValid = manager.validateToken(
-        'user-1',
-        headerTokenValue,
-        cookieTokenValue
-      )
+      const isValid = manager.validateToken('user-1', headerTokenValue, cookieTokenValue)
 
       expect(isValid).toBe(true)
     })
 
     it('should reject CSRF without valid token pair', () => {
-      const loginToken = manager.createToken('user-1')
+      const _loginToken = manager.createToken('user-1')
 
       // Attacker tries to use different token values
-      const isValid = manager.validateToken(
-        'user-1',
-        'attacker-token',
-        'attacker-token'
-      )
+      const isValid = manager.validateToken('user-1', 'attacker-token', 'attacker-token')
 
       expect(isValid).toBe(false)
     })

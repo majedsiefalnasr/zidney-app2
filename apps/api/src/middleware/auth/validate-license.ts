@@ -24,7 +24,8 @@
  */
 
 import { logSchemaMismatch } from '@zidney/domain-core/auth'
-import { Context, Next } from 'hono'
+import { logger } from '@zidney/logger'
+import type { Context, Next } from 'hono'
 
 /**
  * Validate that token schema_version matches workspace schema_version
@@ -69,9 +70,7 @@ export async function validateSchemaVersionMiddleware(c: Context, next: Next) {
     }
 
     // Fetch workspace schema version
-    const workspaceResult = await tenantDb.query(
-      `SELECT schema_version FROM workspaces LIMIT 1`
-    )
+    const workspaceResult = await tenantDb.query(`SELECT schema_version FROM workspaces LIMIT 1`)
 
     if (workspaceResult.rows.length === 0) {
       return c.json(
@@ -119,7 +118,7 @@ export async function validateSchemaVersionMiddleware(c: Context, next: Next) {
     // Schema match - continue
     await next()
   } catch (error) {
-    console.error('Schema version validation error:', error)
+    logger.error('Schema version validation error:', { error })
     return c.json(
       {
         success: false,

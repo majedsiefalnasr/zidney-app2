@@ -4,12 +4,7 @@
  * T088 Extended: Soft-Lock Auto-Expiration UI
  */
 
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@zidney/ui/components/shadcn-vue/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@zidney/ui/components/shadcn-vue/card'
 import { computed, onMounted, ref } from 'vue'
 
 interface Props {
@@ -25,10 +20,7 @@ onMounted(() => {
   const total = props.gracePeriodDays * 24 * 60 * 60 * 1000
   const expires = new Date(props.softLockUntil).getTime()
   const remaining = expires - Date.now()
-  progress.value = Math.max(
-    0,
-    Math.min(100, ((total - remaining) / total) * 100)
-  )
+  progress.value = Math.max(0, Math.min(100, ((total - remaining) / total) * 100))
 })
 
 const statusColor = computed(() => {

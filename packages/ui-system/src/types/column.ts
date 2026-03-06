@@ -35,10 +35,7 @@ export interface ColumnDef<TRow = any> {
 }
 
 // Discriminated union: Primitive columns may omit accessor (inferred from id)
-export type PrimitiveColumnDef<TRow = any> = Omit<
-  ColumnDef<TRow>,
-  'accessor'
-> & {
+export type PrimitiveColumnDef<TRow = any> = Omit<ColumnDef<TRow>, 'accessor'> & {
   accessor?: Accessor<TRow>
 }
 
@@ -48,9 +45,7 @@ export type ComputedColumnDef<TRow = any> = ColumnDef<TRow> & {
 }
 
 // Union for use in component props
-export type AnyColumnDef<TRow = any> =
-  | PrimitiveColumnDef<TRow>
-  | ComputedColumnDef<TRow>
+export type AnyColumnDef<TRow = any> = PrimitiveColumnDef<TRow> | ComputedColumnDef<TRow>
 
 // Column group for multi-level headers
 export interface ColumnGroup<TRow = any> {
@@ -96,9 +91,7 @@ export interface PinnedColumns {
 }
 
 // Accessor utility types
-export type AccessorValue<TRow, TAcc = Accessor<TRow>> = TAcc extends (
-  row: any
-) => infer V
+export type AccessorValue<TRow, TAcc = Accessor<TRow>> = TAcc extends (row: any) => infer V
   ? V
   : TAcc extends string
     ? any

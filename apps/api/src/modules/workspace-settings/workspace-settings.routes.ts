@@ -27,16 +27,10 @@ import { createLogger } from '@zidney/logger'
 import { Hono } from 'hono'
 
 import type { BackofficeEnv } from '../../routes/backoffice/types'
-import {
-  InvalidSettingsGroupError,
-  WorkspaceSettingsError,
-} from './workspace-settings.errors'
+import { InvalidSettingsGroupError, WorkspaceSettingsError } from './workspace-settings.errors'
 import type { SettingsRequestContext } from './workspace-settings.service'
 import * as service from './workspace-settings.service'
-import {
-  settingsGroupSchema,
-  updateSettingsRequestSchema,
-} from './workspace-settings.validation'
+import { settingsGroupSchema, updateSettingsRequestSchema } from './workspace-settings.validation'
 
 const logger = createLogger('workspace-settings-routes')
 
@@ -57,8 +51,7 @@ function extractContext(c: any): SettingsRequestContext {
     workspace_slug: tenant.slug,
     user_id: staffUser?.user_id || 'unknown',
     correlation_id: correlationId,
-    ip_address:
-      c.req.header('x-forwarded-for') || c.req.header('x-real-ip') || null,
+    ip_address: c.req.header('x-forwarded-for') || c.req.header('x-real-ip') || null,
     user_agent: c.req.header('user-agent') || null,
     redis: tenant.redis,
   }
@@ -95,9 +88,7 @@ workspaceSettingsRouter.get('/settings/audit', async (c) => {
   try {
     const ctx = extractContext(c)
     const group = c.req.query('group') || undefined
-    const limit = c.req.query('limit')
-      ? Number(c.req.query('limit'))
-      : undefined
+    const limit = c.req.query('limit') ? Number(c.req.query('limit')) : undefined
     const cursor = c.req.query('cursor') || undefined
 
     const result = await service.getSettingsAudit(ctx, { group, limit, cursor })
@@ -136,8 +127,7 @@ workspaceSettingsRouter.put('/settings/:group', async (c) => {
     if (!bodyResult.success) {
       const issues = bodyResult.error.issues
         .map(
-          (i: { path: (string | number)[]; message: string }) =>
-            `${i.path.join('.')}: ${i.message}`
+          (i: { path: (string | number)[]; message: string }) => `${i.path.join('.')}: ${i.message}`
         )
         .join('; ')
       return c.json(

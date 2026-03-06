@@ -24,12 +24,7 @@ beforeAll(() => {
   client = createClient({ baseURL: API_URL, token: JWT_TOKEN })
 })
 
-async function makeRequest(
-  method: string,
-  endpoint: string,
-  body?: unknown,
-  customToken?: string
-) {
+async function makeRequest(method: string, endpoint: string, body?: unknown, customToken?: string) {
   const response = await fetch(`${API_URL}${endpoint}`, {
     method,
     headers: {
@@ -135,10 +130,7 @@ describe('Staging Smoke Tests - MMC Dashboard Deployment', () => {
   })
 
   it('T075i: GET /revenue-breakdown returns top products', async () => {
-    const response = await makeRequest(
-      'GET',
-      '/api/mmc/dashboard/revenue-breakdown?limit=5'
-    )
+    const response = await makeRequest('GET', '/api/mmc/dashboard/revenue-breakdown?limit=5')
 
     expect(response.status).toBe(200)
     expect(Array.isArray(response.data.data)).toBe(true)
@@ -153,10 +145,7 @@ describe('Staging Smoke Tests - MMC Dashboard Deployment', () => {
   })
 
   it('T075j: GET /geographic returns countries', async () => {
-    const response = await makeRequest(
-      'GET',
-      '/api/mmc/dashboard/geographic?limit=10'
-    )
+    const response = await makeRequest('GET', '/api/mmc/dashboard/geographic?limit=10')
 
     expect(response.status).toBe(200)
     expect(Array.isArray(response.data.data)).toBe(true)
@@ -170,20 +159,14 @@ describe('Staging Smoke Tests - MMC Dashboard Deployment', () => {
   })
 
   it('T075k: GET /affiliates returns affiliate data', async () => {
-    const response = await makeRequest(
-      'GET',
-      '/api/mmc/dashboard/affiliates?limit=10'
-    )
+    const response = await makeRequest('GET', '/api/mmc/dashboard/affiliates?limit=10')
 
     expect(response.status).toBe(200)
     expect(Array.isArray(response.data.data)).toBe(true)
   })
 
   it('T075l: GET /trends returns time series data', async () => {
-    const response = await makeRequest(
-      'GET',
-      '/api/mmc/dashboard/trends?months=12'
-    )
+    const response = await makeRequest('GET', '/api/mmc/dashboard/trends?months=12')
 
     expect(response.status).toBe(200)
     expect(response.data.data).toHaveProperty('months')
@@ -219,12 +202,8 @@ describe('Staging Smoke Tests - MMC Dashboard Deployment', () => {
     const first = await makeRequest('GET', '/api/mmc/dashboard/summary')
     const second = await makeRequest('GET', '/api/mmc/dashboard/summary')
 
-    const firstRemaining = parseInt(
-      first.headers['x-ratelimit-remaining'] as string
-    )
-    const secondRemaining = parseInt(
-      second.headers['x-ratelimit-remaining'] as string
-    )
+    const firstRemaining = parseInt(first.headers['x-ratelimit-remaining'] as string)
+    const secondRemaining = parseInt(second.headers['x-ratelimit-remaining'] as string)
 
     expect(secondRemaining).toBeLessThanOrEqual(firstRemaining)
   })
@@ -234,10 +213,7 @@ describe('Staging Smoke Tests - MMC Dashboard Deployment', () => {
   // ────────────────────────────────────────────────────────────────────────
 
   it('T076c: Invalid parameters return 400 Bad Request', async () => {
-    const response = await makeRequest(
-      'GET',
-      '/api/mmc/dashboard/geographic?limit=200'
-    )
+    const response = await makeRequest('GET', '/api/mmc/dashboard/geographic?limit=200')
 
     expect(response.status).toBe(400)
     expect(response.data.error.code).toBe('INVALID_PARAMETER')
@@ -256,10 +232,7 @@ describe('Staging Smoke Tests - MMC Dashboard Deployment', () => {
   })
 
   it("T076e: Error responses don't expose stack traces", async () => {
-    const response = await makeRequest(
-      'GET',
-      '/api/mmc/dashboard/invalid-endpoint'
-    )
+    const response = await makeRequest('GET', '/api/mmc/dashboard/invalid-endpoint')
 
     expect(response.data).not.toHaveProperty('stack')
     expect(response.data).not.toHaveProperty('stackTrace')

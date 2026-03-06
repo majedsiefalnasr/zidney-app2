@@ -19,40 +19,33 @@ const correlationIdMiddleware = async (c: any, next: any) => {
   await next()
 }
 
-// Tenant resolver middleware (mandatory second)
-import { tenantResolver } from './middleware/tenant-resolver'
-
-// License validation middleware (mandatory third)
-import licenseMiddleware from './middleware/license'
-
-// Schema version validation middleware (mandatory fourth)
-import schemaVersionMiddleware from './middleware/schema-version'
-
-// PHASE 1: Correlation context middleware (mandatory after license - binds logger context)
-import { correlationMiddleware } from './middleware/correlation'
-
-// PHASE 1: Redaction middleware (optional, applied for defense-in-depth)
-import { redactionMiddleware } from './middleware/redaction'
-
-// Route registration (Phase C, Phase D)
-import { registerStage06Routes } from './routes/attempts/index-stage06'
-import { registerStage06PhaseDRoutes } from './routes/attempts/submit-index'
-
+// Utility logger
+import { createLogger } from '@zidney/logger'
 // ============================================================================
 // STAGE 17: BACKOFFICE ROUTES + MIDDLEWARE
 // ============================================================================
 import { validateJwtMiddleware } from './middleware/auth/validate-jwt'
+// PHASE 1: Correlation context middleware (mandatory after license - binds logger context)
+import { correlationMiddleware } from './middleware/correlation'
+// License validation middleware (mandatory third)
+import licenseMiddleware from './middleware/license'
 import { licenseEnforcementMiddleware } from './middleware/license-enforcement'
 import { createRateLimitMiddleware } from './middleware/rate-limit.middleware'
+// PHASE 1: Redaction middleware (optional, applied for defense-in-depth)
+import { redactionMiddleware } from './middleware/redaction'
+// Schema version validation middleware (mandatory fourth)
+import schemaVersionMiddleware from './middleware/schema-version'
+// Tenant resolver middleware (mandatory second)
+import { tenantResolver } from './middleware/tenant-resolver'
+// Route registration (Phase C, Phase D)
+import { registerStage06Routes } from './routes/attempts/index-stage06'
+import { registerStage06PhaseDRoutes } from './routes/attempts/submit-index'
 import { backofficeContextRouter } from './routes/backoffice/context'
 import { rolesRouter } from './routes/backoffice/roles'
 import { workspaceSettingsRouter } from './routes/backoffice/settings'
 import { translationRouter } from './routes/backoffice/translations/index'
 import { workflowRouter } from './routes/backoffice/workflow/index'
 import { createBackofficeWsRoute } from './routes/backoffice/ws'
-
-// Utility logger
-import { createLogger } from '@zidney/logger'
 
 // ============================================================================
 // APPLICATION SETUP

@@ -91,9 +91,9 @@
 </template>
 
 <script setup lang="ts">
-import { Badge } from '@/components/ui'
 import { Activity, Info, TrendingDown, TrendingUp } from 'lucide-vue-next'
 import { computed } from 'vue'
+import { Badge } from '@/components/ui'
 
 interface CommercialHealthData {
   activeLicenses: number

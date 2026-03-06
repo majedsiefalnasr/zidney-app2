@@ -49,10 +49,9 @@
  * - GDPR: Support for right-to-be-forgotten (user_id → anonymized)
  */
 
-import { PoolClient } from 'pg'
+import type { PoolClient } from 'pg'
 
-export const description =
-  'Create audit_logs table for authentication event tracking'
+export const description = 'Create audit_logs table for authentication event tracking'
 
 /**
  * Execute schema migration

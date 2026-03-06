@@ -9,9 +9,7 @@ describe('FetchAdapter', () => {
     vi.restoreAllMocks()
   })
 
-  const makeRequest = (
-    overrides?: Partial<AdapterRequest>
-  ): AdapterRequest => ({
+  const makeRequest = (overrides?: Partial<AdapterRequest>): AdapterRequest => ({
     url: 'https://api.test.com/data',
     method: 'GET',
     headers: { 'X-Custom': 'value' },
@@ -19,18 +17,13 @@ describe('FetchAdapter', () => {
   })
 
   it('should call globalThis.fetch with correct URL and method', async () => {
-    const mockResponse = new Response(
-      JSON.stringify({ success: true, data: [] }),
-      {
-        status: 200,
-        headers: { 'content-type': 'application/json' },
-      }
-    )
+    const mockResponse = new Response(JSON.stringify({ success: true, data: [] }), {
+      status: 200,
+      headers: { 'content-type': 'application/json' },
+    })
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse)
 
-    await adapter.execute(
-      makeRequest({ url: 'https://api.test.com/products', method: 'GET' })
-    )
+    await adapter.execute(makeRequest({ url: 'https://api.test.com/products', method: 'GET' }))
 
     expect(globalThis.fetch).toHaveBeenCalledWith(
       'https://api.test.com/products',
@@ -59,12 +52,9 @@ describe('FetchAdapter', () => {
   })
 
   it('should pass body to fetch for mutations', async () => {
-    const mockResponse = new Response(
-      JSON.stringify({ success: true, data: {} }),
-      {
-        status: 201,
-      }
-    )
+    const mockResponse = new Response(JSON.stringify({ success: true, data: {} }), {
+      status: 201,
+    })
     vi.spyOn(globalThis, 'fetch').mockResolvedValue(mockResponse)
 
     const body = JSON.stringify({ name: 'Test' })
@@ -141,13 +131,9 @@ describe('FetchAdapter', () => {
   })
 
   it('should throw TypeError as-is on network error', async () => {
-    vi.spyOn(globalThis, 'fetch').mockRejectedValue(
-      new TypeError('Failed to fetch')
-    )
+    vi.spyOn(globalThis, 'fetch').mockRejectedValue(new TypeError('Failed to fetch'))
 
-    await expect(adapter.execute(makeRequest())).rejects.toThrow(
-      'Failed to fetch'
-    )
+    await expect(adapter.execute(makeRequest())).rejects.toThrow('Failed to fetch')
   })
 
   it('should apply credentials: include by default', async () => {

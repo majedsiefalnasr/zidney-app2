@@ -59,7 +59,7 @@ describe('Schema Provisioning API - Integration Tests', () => {
    * Validates: RFC 7231 Idempotency-Key header
    */
   it('✅ Should cache responses using Idempotency-Key header', () => {
-    const idempotencyKey = 'idem-key-abc123'
+    const _idempotencyKey = 'idem-key-abc123'
     const firstResponse = {
       task_id: 'task-123',
       status: 'QUEUED' as const,
@@ -204,8 +204,7 @@ describe('Schema Provisioning API - Integration Tests', () => {
       body: {
         error: {
           code: 'SERVICE_UNAVAILABLE',
-          message:
-            'Schema migration required. Service temporarily unavailable.',
+          message: 'Schema migration required. Service temporarily unavailable.',
         },
       },
     }

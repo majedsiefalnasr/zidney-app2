@@ -11,21 +11,16 @@
  * - GET /mmc/permissions/check (T033) - Check permissions (authenticated)
  */
 
-import {
-  AppError,
-  ErrorCode,
-  errorResponse,
-  successResponse,
-} from '@zidney/domain-core/errors'
-import { AuthService } from '@zidney/domain-core/services/auth.service'
-import { PermissionService } from '@zidney/domain-core/services/permission.service'
-import { Logger } from '@zidney/logger'
-import { PermissionDomain } from '@zidney/types/permissions'
-import { Context, Hono } from 'hono'
-import { Database } from 'postgres'
+import { AppError, ErrorCode, errorResponse, successResponse } from '@zidney/domain-core/errors'
+import type { AuthService } from '@zidney/domain-core/services/auth.service'
+import type { PermissionService } from '@zidney/domain-core/services/permission.service'
+import type { Logger } from '@zidney/logger'
+import type { PermissionDomain } from '@zidney/types/permissions'
+import { type Context, Hono } from 'hono'
+import type { Database } from 'postgres'
 import {
   getRequestContext,
-  // @ts-ignore: LOGIC-BUG: requireMMCAuth is not exported from correlation-id.middleware — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+  // @ts-expect-error: LOGIC-BUG: requireMMCAuth is not exported from correlation-id.middleware — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
   requireMMCAuth,
 } from '../middleware/correlation-id.middleware'
 import { resetLoginRateLimit } from '../middleware/rate-limit.middleware'
@@ -70,19 +65,16 @@ export function createAuthRouter(
           errorResponse(
             ErrorCode.VALIDATION_ERROR,
             'Missing required fields: username, password',
-            // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+            // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
             400
           ),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           400
         )
       }
 
       // Authenticate
-      const member = await authService.authenticateMember(
-        body.username,
-        body.password
-      )
+      const member = await authService.authenticateMember(body.username, body.password)
 
       // Audit log successful login
       await db.query(
@@ -104,11 +96,7 @@ export function createAuthRouter(
       )
 
       // Issue token
-      const token = await authService.issueToken(
-        member.id,
-        member.role_id,
-        member.token_version
-      )
+      const token = await authService.issueToken(member.id, member.role_id, member.token_version)
 
       // Reset rate limiter on success
       await resetLoginRateLimit(ctx)
@@ -165,7 +153,7 @@ export function createAuthRouter(
 
         return ctx.json(
           errorResponse(ErrorCode.AUTHENTICATION_FAILED, 'Invalid credentials'),
-          // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+          // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
           401
         )
       }
@@ -180,7 +168,7 @@ export function createAuthRouter(
 
       return ctx.json(
         errorResponse(ErrorCode.INTERNAL_ERROR, 'Login failed'),
-        // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+        // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         500
       )
     }
@@ -198,7 +186,7 @@ export function createAuthRouter(
       const context = getRequestContext(ctx)
       requireMMCAuth(ctx)
 
-      const userId = context.mmcUser!.userId
+      const userId = context.mmcUser?.userId
       const correlationId = context.correlationId
       const ipAddress = ctx.req.header('X-Forwarded-For') || 'unknown'
       const userAgent = ctx.req.header('User-Agent') || 'unknown'
@@ -209,17 +197,7 @@ export function createAuthRouter(
           actor_user_id, action_type, entity_type, entity_id,
           previous_state, new_state, correlation_id, ip_address, user_agent
         ) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9)`,
-        [
-          userId,
-          'LOGOUT',
-          'SESSION',
-          null,
-          null,
-          null,
-          correlationId,
-          ipAddress,
-          userAgent,
-        ]
+        [userId, 'LOGOUT', 'SESSION', null, null, null, correlationId, ipAddress, userAgent]
       )
 
       logger.info(
@@ -243,7 +221,7 @@ export function createAuthRouter(
 
       return ctx.json(
         errorResponse(ErrorCode.INTERNAL_ERROR, 'Logout failed'),
-        // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+        // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         500
       )
     }
@@ -265,7 +243,7 @@ export function createAuthRouter(
       const context = getRequestContext(ctx)
       requireMMCAuth(ctx)
 
-      const userId = context.mmcUser!.userId
+      const userId = context.mmcUser?.userId
       const correlationId = context.correlationId
       const domainsParam = ctx.req.query('domains')
 
@@ -278,10 +256,7 @@ export function createAuthRouter(
           .map((d) => d.trim())
           .filter((d) => d) as PermissionDomain[]
 
-        permissions = await permissionService.getPermissionsForDomains(
-          userId,
-          requestedDomains
-        )
+        permissions = await permissionService.getPermissionsForDomains(userId, requestedDomains)
       } else {
         // Return all permissions
         const allPerms = await permissionService.resolvePermissions(userId)
@@ -300,7 +275,7 @@ export function createAuthRouter(
       return ctx.json(
         successResponse({
           user_id: userId,
-          role_id: context.mmcUser!.roleId,
+          role_id: context.mmcUser?.roleId,
           permissions: permissions.map((p) => ({
             domain: p.domain,
             can_view: p.can_view,
@@ -321,7 +296,7 @@ export function createAuthRouter(
 
       return ctx.json(
         errorResponse(ErrorCode.INTERNAL_ERROR, 'Failed to check permissions'),
-        // @ts-ignore: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
+        // @ts-expect-error: LOGIC-BUG: ctx.json() status expects StatusCode not number - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
         500
       )
     }

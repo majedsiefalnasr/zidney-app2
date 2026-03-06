@@ -67,9 +67,7 @@ export function defineAuthStore(
       // isLoading is managed per-action — NOT reset here (MEDIUM-02)
     }
 
-    function buildResolvedPermissions(
-      profile: AuthUser
-    ): Record<string, boolean> {
+    function buildResolvedPermissions(profile: AuthUser): Record<string, boolean> {
       const perms = (profile as any).permissions
       if (!perms) return {}
       if (Array.isArray(perms)) {
@@ -102,12 +100,9 @@ export function defineAuthStore(
         resolvedPermissions.value = buildResolvedPermissions(profile)
         logger.info('Session initialized', { userId: profile.id })
       } catch (err: unknown) {
-        logger.info(
-          'Session initialization failed — treating as unauthenticated',
-          {
-            error: err instanceof Error ? err.message : 'unknown',
-          }
-        )
+        logger.info('Session initialization failed — treating as unauthenticated', {
+          error: err instanceof Error ? err.message : 'unknown',
+        })
         // FR-33: failure sets unauthenticated state — no redirect at this point
         resetState()
         setError('AUTH_INIT_FAILED', 'Session initialization failed')
@@ -217,9 +212,7 @@ export function defineAuthStore(
     async function expireSession(): Promise<void> {
       // Idempotency: skip if already handling expiry (not authenticated)
       if (!isAuthenticated.value) {
-        logger.debug(
-          'expireSession() called when already unauthenticated — no-op'
-        )
+        logger.debug('expireSession() called when already unauthenticated — no-op')
         return
       }
 

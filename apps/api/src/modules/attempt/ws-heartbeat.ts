@@ -66,16 +66,13 @@ export class WebSocketHeartbeatMonitor {
         this.missedPings.set(connectionId, missed)
 
         if (missed > this.config.maxMissedPings) {
-          logger.warn(
-            `WebSocket heartbeat timeout: max missed pings exceeded`,
-            {
-              connection_id: connectionId,
-              user_id: userId,
-              attempt_id: attemptId,
-              missed_pings: missed,
-              max_missed_pings: this.config.maxMissedPings,
-            }
-          )
+          logger.warn(`WebSocket heartbeat timeout: max missed pings exceeded`, {
+            connection_id: connectionId,
+            user_id: userId,
+            attempt_id: attemptId,
+            missed_pings: missed,
+            max_missed_pings: this.config.maxMissedPings,
+          })
           onHeartbeatTimeout()
           this.stopHeartbeat(connectionId)
           return

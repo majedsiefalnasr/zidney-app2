@@ -1,7 +1,7 @@
-// @ts-ignore: axios not declared as dependency of apps/mmc [INFRA-001-DEPS-06]
+// @ts-expect-error: axios not declared as dependency of apps/mmc [INFRA-001-DEPS-06]
 
 import type { AxiosInstance } from 'axios'
-// @ts-ignore: axios not declared as dependency of apps/mmc [INFRA-001-DEPS-06]
+// @ts-expect-error: axios not declared as dependency of apps/mmc [INFRA-001-DEPS-06]
 
 import axios from 'axios'
 
@@ -113,19 +113,13 @@ export class DashboardClient {
           switch (status) {
             case 423:
               // SOFT_LOCKED license
-              throw new Error(
-                'Your license is soft-locked. Please renew your subscription.'
-              )
+              throw new Error('Your license is soft-locked. Please renew your subscription.')
             case 403:
               // Missing permission
-              throw new Error(
-                'You do not have permission to view this dashboard.'
-              )
+              throw new Error('You do not have permission to view this dashboard.')
             case 426:
               // Schema version incompatible
-              throw new Error(
-                'Dashboard data format has changed. Please refresh the page.'
-              )
+              throw new Error('Dashboard data format has changed. Please refresh the page.')
             case 429:
               // Rate limited (especially export endpoint)
               throw new Error(
@@ -135,8 +129,7 @@ export class DashboardClient {
               throw new Error('Server error. Please try again later.')
             default:
               throw new Error(
-                error.response.data?.error?.message ||
-                  'Failed to fetch dashboard data'
+                error.response.data?.error?.message || 'Failed to fetch dashboard data'
               )
           }
         }
@@ -154,6 +147,7 @@ export class DashboardClient {
       const response = await this.client.get<SummaryResponse>('/summary')
       return response.data
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: frontend error boundary
       console.error('Failed to fetch summary:', error)
       throw error
     }
@@ -165,10 +159,10 @@ export class DashboardClient {
    */
   async getRevenueBreakdown(): Promise<RevenueBreakdownResponse> {
     try {
-      const response =
-        await this.client.get<RevenueBreakdownResponse>('/revenue-breakdown')
+      const response = await this.client.get<RevenueBreakdownResponse>('/revenue-breakdown')
       return response.data
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: frontend error boundary
       console.error('Failed to fetch revenue breakdown:', error)
       throw error
     }
@@ -186,6 +180,7 @@ export class DashboardClient {
       )
       return response.data
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: frontend error boundary
       console.error('Failed to fetch geographic data:', error)
       throw error
     }
@@ -196,16 +191,14 @@ export class DashboardClient {
    * Average response: 88ms
    * Optional filtering: ?minRevenue=0&minLicenses=0
    */
-  async getAffiliates(
-    minRevenue = 0,
-    minLicenses = 0
-  ): Promise<AffiliatesResponse> {
+  async getAffiliates(minRevenue = 0, minLicenses = 0): Promise<AffiliatesResponse> {
     try {
       const response = await this.client.get<AffiliatesResponse>(
         `/affiliates?minRevenue=${minRevenue}&minLicenses=${minLicenses}`
       )
       return response.data
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: frontend error boundary
       console.error('Failed to fetch affiliates:', error)
       throw error
     }
@@ -218,11 +211,10 @@ export class DashboardClient {
    */
   async getTrends(months = 12): Promise<TrendsResponse> {
     try {
-      const response = await this.client.get<TrendsResponse>(
-        `/trends?months=${months}`
-      )
+      const response = await this.client.get<TrendsResponse>(`/trends?months=${months}`)
       return response.data
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: frontend error boundary
       console.error('Failed to fetch trends:', error)
       throw error
     }
@@ -293,6 +285,7 @@ export class DashboardClient {
         message: `Export completed successfully`,
       }
     } catch (error) {
+      // biome-ignore lint/suspicious/noConsole: frontend error boundary
       console.error('Failed to export data:', error)
       throw error
     }
