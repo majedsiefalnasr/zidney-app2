@@ -18,30 +18,31 @@ This stage ensures consistent code style, eliminates toolchain fragmentation, an
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
+Step: clarify
+Risk Level: LOW
 Last Updated: 2026-03-06T00:00:00.000Z
 
 Scope Defined:
 
 - Replace ESLint + Prettier with Biome as unified lint/format engine
-- Single root biome.json — no per-package overrides
-- CI lint and format gates (blocking, before AI-Guard)
+- Single root biome.json with noConsole exception for packages/logger
+- CI gates in ci.yml only (blocking, before AI-Guard)
+- lint-staged updated to use bun biome check --apply-unsafe
+- Line width 100 (intentional change from Prettier 80)
 - Import organization enabled globally
-- Developer workflow and VSCode integration documented
 
 Deferred Scope:
 
-- Per-package biome.json overrides — explicitly excluded
+- Per-package biome.json overrides — explicitly excluded (logger exception documented)
 - Vue template syntax analysis — not supported by Biome
 - Custom Biome rule authoring — future enhancement
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 

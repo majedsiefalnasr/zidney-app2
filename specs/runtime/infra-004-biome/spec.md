@@ -487,3 +487,19 @@ This stage is complete when all of the following are true:
 - [ ] `lint-staged.config.mjs` uses Biome hooks in place of ESLint/Prettier
 - [ ] All existing Vitest tests continue to pass after the migration
 - [ ] Developer documentation reflects the new `bun biome` commands
+
+---
+
+## Clarifications
+
+### Session 2026-03-06
+
+- Q: Which CI workflow files should receive Biome gates? → A: Add Biome gates to `ci.yml` **only**. The `architecture-governance.yml` and `hard-mode-guard.yml` workflows operate on architecture/spec governance concerns and must **not** be modified to include code-style enforcement.
+
+- Q: Should the `packages/logger` package be exempt from the `noConsole` lint rule given it wraps `console.*` internally? → A: Yes. `packages/logger` requires a `biome.json` override to disable `noConsole` for its own source files — the rule `packages/logger/**/*.ts` must have `noConsole: "off"`. All **other** packages must replace `console.log` usages with `@zidney/logger` structured logging calls before running `biome check` with `noConsole` enabled. A migration pass addressing existing violations must be completed first.
+
+- Q: Should Biome be installed with a pinned version or as latest-stable, and how should the version be recorded? → A: Install `@biomejs/biome` **without** a version pin (`bun add -D @biomejs/biome`). The resolved version is recorded in the `$schema` URL inside `biome.json` (e.g., `"https://biomejs.dev/schemas/X.Y.Z/schema.json"`). No hardcoded version string in `package.json` — the registry resolves latest stable at install time.
+
+- Q: How should `lint-staged` be updated as part of this migration? → A: Update `lint-staged.config.mjs` to use `bun biome check --apply-unsafe` for `.ts`, `.js`, `.tsx`, `.jsx`, and `.json` files. Remove all ESLint and Prettier lint-staged entries entirely.
+
+- Q: The stage specification sets line width to 100, but current Prettier configuration uses 80. How should this discrepancy be handled? → A: Line width 100 is intentional per the stage specification. A full reformatting pass (`bun biome format --write .`) is executed as part of the migration. This will produce a large diff on the initial commit, which is expected and acceptable. The change must be documented explicitly in the PR description.
