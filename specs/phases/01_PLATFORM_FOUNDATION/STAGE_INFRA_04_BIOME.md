@@ -18,19 +18,16 @@ This stage ensures consistent code style, eliminates toolchain fragmentation, an
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
 Last Updated: 2026-03-06T00:00:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- 3-Pass migration: Install Biome → Resolve violations → Remove legacy toolchain
-- Single root biome.json with logger/scripts/test overrides
-- noConsole enforcement across all apps and packages (groups A and B separated)
-- CI gates in ci.yml only (lint + format check)
-- lint-staged updated to bun biome check --apply-unsafe
-- 8 ESLint packages and 1 Prettier package removed
-- 6 config files deleted
+- Total: 41 atomic tasks
+- 29 parallelizable tasks
+- 3 passes: Install (T001–T004), Resolve violations (T005–T028), Remove legacy (T029–T041)
+- Full coverage of all 10 functional requirements
 
 Deferred Scope:
 
@@ -40,12 +37,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 - Zidney Architecture Checker: PASS
 - Zidney API Designer: PASS
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
