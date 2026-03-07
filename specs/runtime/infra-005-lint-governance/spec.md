@@ -320,7 +320,7 @@ bun run arch:audit
 
 This command is an alias for `bun scripts/infra-audit.ts` and regenerates all architecture intelligence artifacts.
 
-[NEEDS CLARIFICATION: Should `bun run arch:audit` be added as a mandatory CI step that checks for staleness, or should AI-Guard's fallback to direct contract reading be considered sufficient for CI?]
+[Resolved: CL-01]
 
 **Acceptance Criterion:** `docs/architecture/intelligence/ARCHITECTURE_MAP.json` and `ARCHITECTURE_CONTRACT.json` exist in the repository. AI-Guard runs without fatal errors in both brain-enriched and fallback modes.
 
@@ -342,7 +342,7 @@ For changes to these packages, the following protections apply:
 2. `bun run arch:audit` must pass (manually or in CI) after changes.
 3. A human architecture reviewer must approve the PR — AI-generated changes to these modules must be flagged.
 
-[NEEDS CLARIFICATION: Should CODEOWNERS entries be created for `packages/domain-core`, `packages/logger`, and `packages/types` to enforce mandatory human review via GitHub's branch protection rules? If yes, this becomes a Git governance task in addition to tooling governance.]
+[Resolved: CL-02]
 
 This policy is documentation-level in this spec. Machine-readable enforcement is tracked in `ARCHITECTURE_MAP.json` — any module defined there with an `owner` field is subject to extended review policy.
 
@@ -577,3 +577,31 @@ All of the following must be true for this stage to be considered complete:
 | **CI Gate**                         | A blocking step in the continuous integration pipeline that must pass before a merge is allowed                                                      |
 | **Pre-commit Hook**                 | A script executed by Git before recording a commit; managed by Husky in this project                                                                 |
 | **`bun`**                           | The JavaScript runtime and package manager used across the entire Zidney monorepo                                                                    |
+
+---
+
+## Clarifications
+
+### Session 2026-03-07
+
+#### CL-01: FR-06 — Architecture Intelligence CI Gate
+
+**Question:** Should `bun run arch:audit` be a mandatory blocking CI step for architecture intelligence freshness?
+
+**Context:** `bun run arch:audit` regenerates the AI architecture brain files. Running it as a CI gate would ensure the brain is always fresh, but adds CI runtime cost.
+
+**Decision:** Advisory only. `bun run arch:audit` is NOT a blocking CI step. AI-Guard (`bun scripts/ai-guard.ts`) provides sufficient CI-blocking architectural validation. The arch:audit command is reserved for developer maintenance and pre-refactor workflows.
+
+**Impact on spec:** FR-06 updated to advisory role only. CI gate sequence remains: `bun run lint` → `bun run type-check` → `bun scripts/ai-guard.ts`.
+
+---
+
+#### CL-02: FR-07 — Module Ownership CODEOWNERS Enforcement
+
+**Question:** Should a `CODEOWNERS` file enforce mandatory human review for critical packages via GitHub branch protection?
+
+**Context:** A `CODEOWNERS` file would enforce that changes to `packages/logger`, `packages/types`, and `packages/domain-core` require review from designated owners.
+
+**Decision:** Deferred. This stage documents module ownership as a policy. A `CODEOWNERS` file is explicitly out of scope for this stage and will be created in a follow-up governance stage after the team structure is defined.
+
+**Impact on spec:** FR-07 scope is limited to documentation of critical package boundaries (list, rationale, protection policy). No `CODEOWNERS` file to be created in this stage.
