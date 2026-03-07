@@ -107,7 +107,9 @@ Fallback is for temporary environments and new contributor setup only. Once RTK 
 
 ### Scope
 
-RTK enforcement applies to **every shell command in this workflow**: Git hygiene, validation gates, architecture audits, tests, formatters, package manager invocations, and all SpecKit step commands.
+RTK enforcement applies to **every shell command in this workflow**: Git hygiene, validation gates, architecture audits, tests, package manager invocations, and all SpecKit step commands.
+
+> **Formatting is excluded from RTK scope.** Biome formatting is owned entirely by the Husky pre-commit hook via lint-staged. The agent MUST NOT invoke the formatter manually at any point — doing so before staging creates a redundant and potentially conflicting format pass.
 
 ---
 
@@ -117,10 +119,13 @@ This orchestrator operates with the Zidney **AI Architecture Intelligence Layer*
 
 Authoritative architecture sources:
 
-- `ARCHITECTURE_MAP.json`
+- `docs/architecture/intelligence/ARCHITECTURE_MAP.json` ← module-level dependency rules
+- `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json` ← machine-readable governance rules
 - `docs/architecture/adr/` (ADR decisions)
 - `docs/ai/AI_BOOTSTRAP.md`
 - `docs/ai/AI_CONTEXT_INDEX.md`
+
+> `ai-guard.ts` reads `ARCHITECTURE_CONTRACT.json` as its primary source. If `docs/ai/context/ai-architecture-brain.json` exists, it takes precedence over the contract for rule validation.
 
 Auto-generated architecture intelligence (produced by `scripts/infra-audit.ts`):
 
@@ -198,7 +203,7 @@ bun scripts/infra-audit.ts
 
 3. Architecture validation must respect:
 
-- module layer rules defined in `ARCHITECTURE_MAP.json`
+- module layer rules defined in `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
 - dependency rules enforced by `scripts/ai-guard.ts`
 - ADR constraints inside `docs/architecture/adr/`
 
@@ -298,7 +303,7 @@ Benefits:
 AI agents SHOULD prioritize architecture reasoning using the following order:
 
 1. `docs/ai/context/ai-architecture-brain.json`
-2. `ARCHITECTURE_MAP.json`
+2. `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
 3. ADR decisions inside `docs/architecture/adr/`
 4. GitNexus knowledge graph
 
@@ -332,7 +337,7 @@ gitnexus impact <symbol>
 Validation rules:
 
 1. If the impact analysis shows cross-layer dependency breakage → STOP.
-2. If a change violates rules defined in `ARCHITECTURE_MAP.json` → STOP.
+2. If a change violates rules defined in `docs/architecture/intelligence/ARCHITECTURE_MAP.json` → STOP.
 3. If ADR constraints in `docs/architecture/adr/` would be violated → STOP and request architectural review.
 
 Purpose:
@@ -364,7 +369,7 @@ Validation sequence:
 `ai-guard.ts` verifies that proposed changes respect rules defined in:
 
 ```
-ARCHITECTURE_MAP.json
+docs/architecture/intelligence/ARCHITECTURE_MAP.json
 ```
 
 2. **AI Architecture Brain Validation**
@@ -412,7 +417,7 @@ Guarantee that structural refactors cannot silently break Zidney's architecture.
 This creates a **three‑layer protection model**:
 
 ```
-ARCHITECTURE_MAP.json        → static architecture rules
+docs/architecture/intelligence/ARCHITECTURE_MAP.json        → static architecture rules
 AI Architecture Brain        → real repository structure
 GitNexus Knowledge Graph     → runtime dependency intelligence
 ```
@@ -461,14 +466,14 @@ Example PR output:
 Module: packages/domain-core
 Violation: Forbidden dependency on apps/api
 Rule: Domain layer cannot depend on runtime layer
-Reference: ARCHITECTURE_MAP.json
+Reference: docs/architecture/intelligence/ARCHITECTURE_MAP.json
 ```
 
 Rules:
 
 1. Architecture drift MUST fail CI when `--ci-strict` mode is enabled.
 2. In non‑strict mode, CI SHOULD still post a warning comment in the PR.
-3. Violations must reference the specific rule in `ARCHITECTURE_MAP.json`.
+3. Violations must reference the specific rule in `docs/architecture/intelligence/ARCHITECTURE_MAP.json`.
 
 Purpose:
 
@@ -508,7 +513,7 @@ During all other stages (feature, backend, UI, runtime, etc.), the orchestrator 
 Before implementation begins, the orchestrator MUST check for modifications to:
 
 ```
-ARCHITECTURE_MAP.json
+docs/architecture/intelligence/ARCHITECTURE_MAP.json
 scripts/ai-guard.ts
 scripts/infra-audit.ts
 docs/architecture/adr/
@@ -522,7 +527,7 @@ Example violation:
 ```
 ❌ Architecture Mutation Detected
 Stage: STAGE_22_DIVISIONS
-File: ARCHITECTURE_MAP.json
+File: docs/architecture/intelligence/ARCHITECTURE_MAP.json
 Rule: Architecture modifications allowed only in STAGE_INFRA_* stages
 ```
 
@@ -551,7 +556,7 @@ Non‑INFRA stages MAY:
 But they MUST NOT:
 
 - modify architecture layers
-- add modules to `ARCHITECTURE_MAP.json`
+- add modules to `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
 - modify ADR decisions
 - alter AI architecture intelligence files
 
@@ -573,6 +578,13 @@ Architecture evolution must occur through **explicit infrastructure governance s
 
 Before executing ANY workflow step (including Pre‑Step), the orchestrator MUST verify that the Zidney AI architecture intelligence system is synchronized.
 
+> **Actual file paths (aligned with `infra-audit.ts` and `ai-guard.ts` output paths):**
+>
+> - Architecture contract: `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json`
+> - Architecture map: `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
+> - Architecture brain: `docs/ai/context/ai-architecture-brain.json` ← ai-guard uses this if present, taking precedence over CONTRACT
+> - Architecture context: `docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json`
+
 Run the following checks:
 
 1. **Architecture Brain Exists**
@@ -589,19 +601,22 @@ If missing → regenerate architecture intelligence:
 bun scripts/infra-audit.ts
 ```
 
-2. **Architecture Map Exists**
+2. **Architecture Contract + Map Exist**
 
-Required file:
+Required files:
 
 ```
-ARCHITECTURE_MAP.json
+docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json
+docs/architecture/intelligence/ARCHITECTURE_MAP.json
 ```
 
-If missing → STOP and request regeneration using:
+If either is missing → regenerate:
 
 ```bash
-bun scripts/generate-architecture-map.ts
+bun scripts/infra-audit.ts
 ```
+
+If `infra-audit.ts` is also missing → STOP. Architecture enforcement infrastructure is missing. Request restoration before development begins.
 
 3. **AI Guard Script Exists**
 
@@ -639,6 +654,19 @@ Rules:
 
 - If architecture violations are detected → STOP and display violations.
 - Implementation MUST NOT begin while architecture violations exist.
+
+6. **Branch Naming Validation**
+
+`ai-guard.ts` enforces branch naming automatically when spec files are modified. The orchestrator must be aware:
+
+- If the current branch is `spec/<X>` and spec files for a different stage are being modified → the pre-commit hook will fail with a `Stage branch mismatch` error.
+- Always verify the active branch matches `spec/<STAGE_DIR_NAME>` before beginning any step that modifies stage files.
+
+```bash
+git rev-parse --abbrev-ref HEAD
+```
+
+Expected: `spec/<STAGE_DIR_NAME>`
 
 Purpose of this guard:
 
@@ -692,7 +720,7 @@ bun scripts/infra-audit.ts
 bun scripts/infra-audit.ts --fix-map
 ```
 
-4. If `ARCHITECTURE_MAP.json` is outdated relative to repository structure, the orchestrator MUST regenerate or repair it before proceeding.
+4. If `docs/architecture/intelligence/ARCHITECTURE_MAP.json` is outdated relative to repository structure, the orchestrator MUST regenerate or repair it before proceeding.
 
 Purpose:
 
@@ -702,6 +730,32 @@ so architectural reasoning is always accurate.
 ```
 
 This mechanism allows Zidney to maintain a **self‑updating AI architecture intelligence layer**.
+
+## Architecture Score Reference
+
+`infra-audit.ts` computes an architecture health score on every run. The orchestrator must understand this score to correctly diagnose pre-commit failures and analyze drift reports.
+
+**Threshold:** Score must be ≥ 85 to pass CI and `--quick` mode. Below 85 = commit blocked.
+
+**Deduction table (hardcoded in `infra-audit.ts`):**
+
+| Violation                            | Points Deducted |
+| ------------------------------------ | --------------- |
+| Circular dependency                  | −10 per cycle   |
+| Dependency boundary violation        | −5 each         |
+| Architectural layer violation        | −5 each         |
+| Architecture drift (packages → apps) | −5 each         |
+| Skipped test                         | −0.5 each       |
+| Flaky test                           | −1 each         |
+
+Score minimum is 0. Score is written to `docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json` and `ARCHITECTURE_CONTRACT.json` on full runs (not `--quick`).
+
+When diagnosing a score failure, the orchestrator MUST:
+
+1. Count the violations by type from the console output.
+2. Compute the estimated score impact using the table above.
+3. Prioritize fixing circular dependencies first (highest penalty), then boundary/layer/drift violations.
+4. Surface skipped/flaky test counts as secondary warnings — they accumulate quickly.
 
 ---
 
@@ -1003,6 +1057,135 @@ No manual confirmation required between retries unless escalation threshold is r
 
 ---
 
+## Pre-Commit Hook Enforcement
+
+> **Hard gate.** Every `git commit` in this workflow automatically triggers the Husky pre-commit hook. The agent MUST treat every commit as potentially rejected and MUST handle failures before continuing.
+
+The Husky pre-commit hook runs three gates in sequence:
+
+```
+1. lint-staged        → bunx lint-staged          (Biome: format + lint on staged files)
+2. ai-guard.ts        → bun scripts/ai-guard.ts   (architecture rule enforcement)
+3. infra-audit.ts     → bun scripts/infra-audit.ts --quick  (governance checks)
+```
+
+All three must exit with code 0 for the commit to succeed. Any non-zero exit **rejects the commit**.
+
+### Agent Commit Protocol
+
+After every `git commit` call:
+
+1. Capture the full terminal output and exit code.
+2. If exit code = 0 → commit succeeded. Continue workflow normally.
+3. If exit code ≠ 0 → **STOP immediately**. Do NOT proceed to the next workflow step. Diagnose which gate failed using the table below, fix the issue, and retry the commit.
+
+**Using `--no-verify` is strictly forbidden.** It bypasses all three gates and violates the Zidney architecture contract.
+
+### Failure Diagnosis by Gate
+
+#### Gate 1 — lint-staged (Biome)
+
+**Trigger:** Output contains `lint-staged` error or Biome lint errors.
+
+Biome runs `check --write` on staged `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.vue`, `.json` files. It auto-fixes formatting but will fail on lint errors it cannot auto-fix.
+
+Resolution protocol:
+
+1. Read the exact Biome error output — each error includes file, line, rule name.
+2. Fix the reported lint violations in the source files.
+3. Re-stage the fixed files: `git add <fixed-files>`
+4. Retry the commit.
+
+Common Biome failures and fixes:
+
+- `noUnusedVariables` → remove or use the variable
+- `noExplicitAny` → replace `any` with a proper type
+- `useConst` → change `let` to `const`
+- `noConsole` → replace `console.log` with structured logger
+
+#### Gate 2 — ai-guard.ts
+
+**Trigger:** Output contains `AI Guard: Architecture violations detected` or `Commit rejected by Zidney AI Guard`.
+
+`ai-guard.ts` enforces architecture rules from:
+
+- `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json` (primary)
+- `docs/architecture/intelligence/ARCHITECTURE_MAP.json` (module-level rules)
+- `docs/ai/context/ai-architecture-brain.json` (if present — takes precedence over CONTRACT)
+
+Violation types and fixes:
+
+| Violation Code                 | Meaning                                                                               | Fix                                                          |
+| ------------------------------ | ------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
+| `DEPENDENCY_VIOLATION`         | Module imports a forbidden dependency                                                 | Remove import or extract to allowed shared package           |
+| `LAYER_VIOLATION`              | Cross-layer import (e.g. UI → domain)                                                 | Reroute through allowed layer boundary                       |
+| `Cross-app boundary violation` | `apps/X` imports from `apps/Y`                                                        | Extract shared logic to `packages/`                          |
+| `Relative architecture leak`   | Relative path references `apps/` or `packages/`                                       | Replace with `@zidney/<module>` alias                        |
+| `ARCH_MAP_FORBIDDEN`           | Import explicitly forbidden in `docs/architecture/intelligence/ARCHITECTURE_MAP.json` | Remove dependency or request ADR review                      |
+| `ARCH_MAP_NOT_ALLOWED`         | Import not in `allowed_dependencies` list                                             | Add to allowed list via ADR or remove                        |
+| `Stage branch mismatch`        | Branch name doesn't match stage file being modified                                   | Ensure you are on the correct `spec/<STAGE_DIR_NAME>` branch |
+
+Resolution protocol:
+
+1. Read each `[AI-Guard]` violation line — it includes file path, violation code, and recommended fix.
+2. Apply fixes to the source files.
+3. Re-stage: `git add <fixed-files>`
+4. Retry the commit.
+
+If the violation requires an architectural change (e.g. updating `docs/architecture/intelligence/ARCHITECTURE_MAP.json`) → STOP. This requires an ADR and must go through an INFRA stage. Do not modify architecture files in a feature stage.
+
+#### Gate 3 — infra-audit.ts --quick
+
+**Trigger:** Output contains `[INFRA AUDIT][CI] ❌ Governance violations detected`.
+
+`--quick` mode skips all file writes (no JSON/HTML/MD outputs). It only runs governance checks and exits non-zero if any of these are found:
+
+| Failure                        | Score Impact  | Fix                                                                                                      |
+| ------------------------------ | ------------- | -------------------------------------------------------------------------------------------------------- |
+| Circular dependencies          | −10 per cycle | Break the cycle by introducing an interface or inverting the dependency                                  |
+| Dependency boundary violations | −5 each       | `packages/` must not import `apps/`; `apps/` must not import other `apps/`                               |
+| Architectural layer violations | −5 each       | `packages/ui-system` → `packages/domain-core` forbidden; `packages/api-client` → `apps/worker` forbidden |
+| `ARCHITECTURE_MAP` violations  | −5 each       | Same as ai-guard ARCH_MAP violations — fix forbidden/not-allowed imports                                 |
+| Architecture drift             | −5 each       | `packages/` importing `apps/` — move shared logic to `packages/`                                         |
+| Architecture score < 85        | hard fail     | Aggregate of above penalties; fix underlying violations to raise score                                   |
+
+> **Note on `--quick` mode:** Because `--quick` skips file writes, there are no report files to read after a failure. The agent MUST diagnose failures from the console output only.
+
+> **Note on undeclared modules:** `undeclared modules` warnings appear in `--quick` output but do NOT fail the commit (only fails under `--ci-strict`). The agent should surface them as informational warnings, not blockers.
+
+Architecture score formula:
+
+```
+score = 100
+  − (circular_deps × 10)
+  − (dep_violations × 5)
+  − (layer_violations × 5)
+  − (arch_drift × 5)
+  − (skipped_tests × 0.5)
+  − (flaky_tests × 1)
+minimum: 0
+threshold: 85 (commit fails if score < 85)
+```
+
+### Retry After Fix
+
+After fixing any gate failure:
+
+```bash
+# Re-stage fixed files (explicit paths only — never git add .)
+git add <fixed-files>
+
+# Verify scope is still correct
+git diff --name-only --cached
+
+# Retry commit
+git commit -F <(filled commit message from template)
+```
+
+If the same gate fails again on retry → treat as a recurring violation. Escalate to the user with a full diagnosis before attempting a third fix cycle.
+
+---
+
 ## Git Hygiene Enforcement
 
 > RTK enforcement applies to all commands here. See "RTK (Rust Token Killer) — Canonical Execution Rules" for the full reference.
@@ -1051,27 +1234,7 @@ Rules:
 - `specs/templates/` files must NEVER appear in any commit
 - If unrelated or cross-stage files appear → STOP, list them, require manual cleanup before continuing
 
-### 2. Format changed files (before staging)
-
-```bash
-git diff --name-only HEAD
-```
-
-This lists every file changed in this step (written or modified). Run the project formatter on that exact list — never on the entire repo.
-
-Apply Package Manager Enforcement — use `$PKG_MANAGER` (detected at Pre.1) to invoke the formatter. See the "Formatter invocation" rule in that section for the exact command per package manager.
-
-**Formatter execution rule (check in this order):**
-
-```bash
-# 1. If package.json has "format" script → bun run format -- <files> (or bun run format if script ignores file args)
-# 2. Else if package.json has "fmt" script → bun run fmt -- <files> (or bun run fmt if script ignores file args)
-# 3. Else fallback formatter → bunx prettier --write <files>
-```
-
-After formatting, run `git diff --name-only HEAD` again. If formatting touched files **outside** the active stage scope → STOP and require manual review before continuing.
-
-### 3. Stage files
+### 2. Stage files
 
 ```bash
 git add <explicit file list for this step>
@@ -1079,7 +1242,7 @@ git add <explicit file list for this step>
 
 Never use `git add .` or `git add -A`. Always stage by explicit path.
 
-### 4. Verify staged scope
+### 3. Verify staged scope
 
 ```bash
 git diff --name-only --cached
@@ -1087,11 +1250,35 @@ git diff --name-only --cached
 
 Confirm the staged file list is exactly what is expected for this step. If unexpected files appear → unstage and investigate before committing.
 
-### 5. Commit
+### 4. Commit (Hard Gate)
 
 ```bash
 git commit -F <(filled commit message from template)
 ```
+
+This command triggers the **Husky pre-commit hook automatically**. The hook runs three gates in sequence:
+
+```
+1. lint-staged        → bunx lint-staged          → Biome format + lint on staged files
+2. ai-guard.ts        → bun scripts/ai-guard.ts   → architecture rule enforcement
+3. infra-audit.ts     → bun scripts/infra-audit.ts --quick → governance checks
+```
+
+**After every commit attempt, the agent MUST:**
+
+1. Capture the full terminal output and exit code.
+2. If exit code = 0 → commit succeeded. Continue to the next workflow step.
+3. If exit code ≠ 0 → **HARD STOP.** Do NOT proceed. Do NOT retry blindly. Do NOT use `--no-verify`.
+
+Identify which gate failed:
+
+- Output contains `lint-staged` error or Biome rule name → **Gate 1 failed** — fix lint violations, re-stage, retry
+- Output contains `AI Guard: Architecture violations detected` → **Gate 2 failed** — fix architecture violations, re-stage, retry
+- Output contains `[INFRA AUDIT][CI] ❌` → **Gate 3 failed** — fix governance violations (see score formula), re-stage, retry
+
+See **Pre-Commit Hook Enforcement** for full diagnosis tables and resolution protocol per gate.
+
+If the same gate fails on the second attempt → escalate to the user with a full diagnosis. Do NOT attempt a third fix cycle without explicit user acknowledgment.
 
 ## Commit Message Templates
 
@@ -1193,26 +1380,6 @@ $PKG_MANAGER add <package-name>@latest
 
 # Update all packages
 $PKG_MANAGER update
-```
-
-### Formatter invocation
-
-Use the detected package manager when running formatters:
-
-```bash
-# Biome
-$PKG_MANAGER run format          # if format script exists in package.json
-# OR
-bunx biome format --write <files>   # bun
-pnpm dlx @biomejs/biome format --write <files>  # pnpm
-npx @biomejs/biome format --write <files>       # npm/yarn
-
-# Prettier
-$PKG_MANAGER run format          # if format script exists in package.json
-# OR
-bunx prettier --write <files>    # bun
-pnpm dlx prettier --write <files>  # pnpm
-npx prettier --write <files>       # npm/yarn
 ```
 
 ### Violation rule
@@ -1564,16 +1731,13 @@ Apply Git Hygiene Enforcement:
 # 1. Scope check
 git status --porcelain
 
-# 2. Format changed files (before staging)
-git diff --name-only HEAD
-# → run formatter on those files
 
-# 3. Stage
+# 2. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
-# 4. Verify staged scope
+# 3. Verify staged scope
 git diff --name-only --cached
 ```
 
@@ -1666,17 +1830,12 @@ Apply Git Hygiene Enforcement:
 # 1. Scope check
 git status --porcelain
 
-# 2. Format changed files (before staging)
-# Changed files this step: spec.md, checklists/requirements.md, SPECIFY_REPORT.md, README.md
-git diff --name-only HEAD
-# → run formatter on those files
-
-# 3. Stage
+# 2. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
-# 4. Verify staged scope
+# 3. Verify staged scope
 git diff --name-only --cached
 ```
 
@@ -1769,17 +1928,12 @@ Apply Git Hygiene Enforcement:
 # 1. Scope check
 git status --porcelain
 
-# 2. Format changed files (before staging)
-# Changed files this step: spec.md (updated in-place by speckit.clarify), CLARIFY_REPORT.md, README.md
-git diff --name-only HEAD
-# → run formatter on those files
-
-# 3. Stage
+# 2. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
-# 4. Verify staged scope
+# 3. Verify staged scope
 git diff --name-only --cached
 ```
 
@@ -1900,17 +2054,12 @@ Apply Git Hygiene Enforcement:
 # 1. Scope check
 git status --porcelain
 
-# 2. Format changed files (before staging)
-# Changed files this step: plan.md, research.md, data-model.md, quickstart.md (whichever were written), PLAN_REPORT.md, README.md
-git diff --name-only HEAD
-# → run formatter on those files
-
-# 3. Stage
+# 2. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
-# 4. Verify staged scope
+# 3. Verify staged scope
 git diff --name-only --cached
 ```
 
@@ -2014,17 +2163,12 @@ Apply Git Hygiene Enforcement:
 # 1. Scope check
 git status --porcelain
 
-# 2. Format changed files (before staging)
-# Changed files this step: tasks.md, TASKS_REPORT.md, README.md
-git diff --name-only HEAD
-# → run formatter on those files
-
-# 3. Stage
+# 2. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
-# 4. Verify staged scope
+# 3. Verify staged scope
 git diff --name-only --cached
 ```
 
@@ -2171,17 +2315,12 @@ Apply Git Hygiene Enforcement:
 # 1. Scope check
 git status --porcelain
 
-# 2. Format changed files (before staging)
-# Changed files this step: audits/ANALYZE_REPORT.md, README.md
-git diff --name-only HEAD
-# → run formatter on those files
-
-# 3. Stage
+# 2. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
-# 4. Verify staged scope
+# 3. Verify staged scope
 git diff --name-only --cached
 ```
 
@@ -2415,18 +2554,13 @@ Apply Git Hygiene Enforcement:
 # 1. Scope check — includes implementation source files this step
 git status --porcelain
 
-# 2. Format changed files (before staging)
-# Changed files this step: all implementation source files + tasks.md + IMPLEMENT_REPORT.md + VALIDATION_REPORT.md + README.md
-git diff --name-only HEAD
-# → run formatter on ALL of those files — both source code and generated docs
-
-# 3. Stage
+# 2. Stage
 git add <IMPLEMENTATION_FILES_FROM_PLAN_AND_TASKS>
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
-# 4. Verify staged scope — confirm only declared implementation files and stage artifacts are staged
+# 3. Verify staged scope — confirm only declared implementation files and stage artifacts are staged
 git diff --name-only --cached
 ```
 
@@ -2619,17 +2753,12 @@ Apply Git Hygiene Enforcement:
 # 1. Scope check
 git status --porcelain
 
-# 2. Format changed files (before staging)
-# Changed files this step: CLOSURE_REPORT.md, guides/TESTING_GUIDE.md, PR_SUMMARY.md, README.md
-git diff --name-only HEAD
-# → run formatter on those files
-
-# 3. Stage
+# 2. Stage
 git add specs/runtime/<STAGE_DIR_NAME>/ \
         specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json \
         specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>
 
-# 4. Verify staged scope
+# 3. Verify staged scope
 git diff --name-only --cached
 ```
 
@@ -2637,9 +2766,7 @@ Load `specs/templates/commits/commit-closure.md`.
 Fill all `{{PLACEHOLDER}}` tokens with real scope items, compliance results, and task counts.  
 This is the final stage commit — make it complete and meaningful.
 
-```bash
-git commit -F <(filled commit message)
-```
+Apply Git Hygiene Enforcement step 4 (Commit Hard Gate) to execute and handle the pre-commit hook result.
 
 ## 7.8 — Output Final Closure Summary
 
