@@ -3,17 +3,17 @@
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-07T00:03:00.000Z
+Last Updated: 2026-03-07T00:04:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- biome.json: noUnreachable severity warn → error
-- ci.yml: add arch-guard job after lint+typecheck
-- ci.yml: remove redundant bun biome format step
-- .husky/pre-commit: fix stale ESLint/Prettier comment
-- docs/governance/LINT_GOVERNANCE.md: drift prevention + module ownership policy
+- Total: 21 atomic tasks
+- Phase 1 — Baseline: 3 tasks (T001–T003)
+- Phase 2 — Core Changes: 7 tasks (T004–T010)
+- Phase 3 — Fix Violations: 2 tasks (T011–T012)
+- Phase 4 — Validation: 9 tasks (T013–T021)
 
 Deferred Scope:
 
@@ -22,12 +22,11 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 - INFRA stage — no runtime, tenant, or middleware changes
-- Guardian validation PASSED
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
