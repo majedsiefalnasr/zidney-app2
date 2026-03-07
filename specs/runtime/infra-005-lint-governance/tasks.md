@@ -104,7 +104,7 @@ If any prerequisite is missing, **stop and resolve it before proceeding.**
 
 ### 2d — Governance Documentation
 
-- [ ] T010 [P] Create `docs/governance/LINT_GOVERNANCE.md` with all of the following sections:
+- [ ] T010 [P] Create `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md` with all of the following sections:
   1. **Overview** — purpose and scope of this governance document
   2. **Four Governance Layers** — table: layer name, role, trigger (Biome/lint-staged, AI-Guard, Infra-Audit, Tests)
   3. **Import Order Convention** — 5-group canonical order with code examples (node:built-ins → external packages → `@zidney/*` internal → app-local → relative), blank line between groups, how to auto-fix with `bun run lint:fix`
@@ -139,7 +139,7 @@ If any prerequisite is missing, **stop and resolve it before proceeding.**
 - [ ] T017 Verify `lint-staged.config.mjs` contains exactly `'*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --write']`; no change should have been made to this file — this is a read-only verification
 - [ ] T018 Verify `.husky/pre-commit` contains: (a) updated Biome comment from T009, (b) `bunx lint-staged` command, (c) `bun scripts/ai-guard.ts` command, (d) `bun scripts/infra-audit.ts --quick` command — all present and correct
 - [ ] T019 Verify `.github/workflows/ci.yml` satisfies all three conditions: (a) `arch-guard` job exists with `needs: [lint, typecheck]`, (b) `unit-tests` job `needs` list includes `arch-guard`, (c) `lint` job contains `bun run lint` with no separate `bun biome format .` step
-- [ ] T020 Open `docs/governance/LINT_GOVERNANCE.md` and verify all 8 sections from T010 are present and complete; confirm the emergency override procedure includes the `--no-verify` warning; confirm the drift recovery playbook lists all 6 steps
+- [ ] T020 Open `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md` and verify all 8 sections from T010 are present and complete; confirm the emergency override procedure includes the `--no-verify` warning; confirm the drift recovery playbook lists all 6 steps
 - [ ] T021 Open `docs/architecture/intelligence/ARCHITECTURE_MAP.json` and confirm the `criticality` field is present for all five critical packages: `packages/domain-core` (`core`), `packages/types` (`core`), `packages/validation` (`core`), `packages/logger` (`infrastructure`), `packages/config` (`infrastructure`)
 
 ---
@@ -211,7 +211,7 @@ T013 → T014 → T015 → T016 → T017 → T018 → T019 → T020 → T021
 **Suggested commit sequence:**
 
 1. After Phase 1: `git add -A && git commit -m "chore: lint-governance baseline auto-fix [infra-005]"`
-2. After Phase 2: `git add biome.json .github/workflows/ci.yml .husky/pre-commit docs/governance/LINT_GOVERNANCE.md && git commit -m "feat: activate lint governance layer [infra-005]"`
+2. After Phase 2: `git add biome.json .github/workflows/ci.yml .husky/pre-commit docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md && git commit -m "feat: activate lint governance layer [infra-005]"`
 3. After Phase 3 (if violations fixed): `git add <files> && git commit -m "fix: resolve noUnreachable violations before governance hardening [infra-005]"`
 
 ---
@@ -231,5 +231,5 @@ All of the following must be true before this stage is marked COMPLETE:
 | `.github/workflows/ci.yml` test jobs have `needs: arch-guard`                                   | T019        |
 | `.github/workflows/ci.yml` lint job uses `bun run lint` only                                    | T019        |
 | `.husky/pre-commit` stale ESLint/Prettier comment replaced                                      | T018        |
-| `docs/governance/LINT_GOVERNANCE.md` created with 8 sections                                    | T020        |
+| `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md` created with 8 sections                                    | T020        |
 | Stage status updated in `specs/phases/01_platform_foundation/STAGE_INFRA_05_LINT_GOVERNANCE.md` | Manual      |
