@@ -1,7 +1,7 @@
 #!/bin/sh
 
 # ── Staged-file quality gates (lint-staged) ────────────────────────────────
-# Runs ESLint --fix + Prettier --write on staged .ts/.tsx/.vue/.md/.json files.
+# Runs Biome check --write on staged .ts/.tsx/.js/.jsx/.mjs/.vue/.json files.
 # Commit is blocked if any lint error remains after auto-fix.
 bunx lint-staged
 

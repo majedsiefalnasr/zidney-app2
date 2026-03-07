@@ -36,7 +36,6 @@ export const migration: MigrationConfig = {
       correlationId,
     })
 
-    // biome-ignore lint/suspicious/noConsole: migration runner output
     console.log(`[${correlationId}] Schema version incremented: 1.0.0 → 1.1.0`)
   },
 
@@ -46,7 +45,6 @@ export const migration: MigrationConfig = {
     // Rollback: Remove version record (not production recommendation)
     await db.delete(schema.schemaVersions).where(sql`version = '1.1.0'`)
 
-    // biome-ignore lint/suspicious/noConsole: migration runner output
     console.log(`[${correlationId}] Schema version rollback: 1.1.0 → 1.0.0`)
   },
 }

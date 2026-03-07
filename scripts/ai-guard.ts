@@ -94,14 +94,30 @@ function loadArchitectureBrain(): ArchitectureBrain | null {
 
 function getChangedFiles(): string[] {
   try {
-    const output = execSync('git diff --cached --name-only', {
+    const staged = execSync('git diff --cached --name-only', {
       encoding: 'utf-8',
     })
-    return output
       .split('\n')
       .map((f) => f.trim())
       .filter(Boolean)
       .filter((f) => f.endsWith('.ts') || f.endsWith('.tsx') || f.endsWith('.vue'))
+
+    // When no staged files are detected (e.g. in CI where git index is empty,
+    // or when invoked outside of a commit), fall back to scanning all tracked
+    // source files so the arch-guard CI job cannot be trivially bypassed.
+    if (staged.length === 0) {
+      const all = execSync('git ls-files -- "*.ts" "*.tsx" "*.vue"', {
+        encoding: 'utf-8',
+      })
+        .split('\n')
+        .map((f) => f.trim())
+        .filter(Boolean)
+      if (all.length > 0) {
+        return all
+      }
+    }
+
+    return staged
   } catch {
     return []
   }

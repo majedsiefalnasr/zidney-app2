@@ -32,7 +32,7 @@
       "recommended": true,
       "correctness": {
         "noUnusedImports": "error",
-        "noUnreachable": "warn",
+        "noUnreachable": "error",
         "noPrecisionLoss": "warn",
         "noVueDuplicateKeys": "warn"
       },

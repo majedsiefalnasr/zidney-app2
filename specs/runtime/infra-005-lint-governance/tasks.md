@@ -48,9 +48,9 @@ If any prerequisite is missing, **stop and resolve it before proceeding.**
 > Establishes a documented before/after baseline and surface any `noUnreachable` warnings
 > that must be resolved before `noUnreachable: error` is activated.
 
-- [ ] T001 Run `bun biome check . --reporter=json 2>&1 | tee /tmp/lint-baseline.json && echo "Baseline captured at /tmp/lint-baseline.json"` to capture full baseline violation report before making any changes
-- [ ] T002 Run `bun run lint:fix` to auto-fix all currently auto-fixable formatting, import ordering, and safe lint violations across the full monorepo (applies to all `*.{ts,tsx,js,jsx,mjs,vue,json}` files per `biome.json`)
-- [ ] T003 Run `bun run lint 2>&1 | grep -i "noUnreachable\|unreachable" || echo "No noUnreachable violations found"` to identify and record all remaining `noUnreachable` warnings requiring manual resolution; note the count before advancing to Phase 2
+- [x] T001 Run `bun biome check . --reporter=json 2>&1 | tee /tmp/lint-baseline.json && echo "Baseline captured at /tmp/lint-baseline.json"` to capture full baseline violation report before making any changes
+- [x] T002 Run `bun run lint:fix` to auto-fix all currently auto-fixable formatting, import ordering, and safe lint violations across the full monorepo (applies to all `*.{ts,tsx,js,jsx,mjs,vue,json}` files per `biome.json`)
+- [x] T003 Run `bun run lint 2>&1 | grep -i "noUnreachable\|unreachable" || echo "No noUnreachable violations found"` to identify and record all remaining `noUnreachable` warnings requiring manual resolution; note the count before advancing to Phase 2
 
 ---
 
@@ -62,12 +62,12 @@ If any prerequisite is missing, **stop and resolve it before proceeding.**
 
 ### 2a — biome.json: Rule Hardening
 
-- [ ] T004 [P] In `biome.json`, change the `noUnreachable` rule severity in `linter.rules.correctness` from `{ "level": "warn" }` to `{ "level": "error" }` — this is the only rule change required; all other rules and all overrides remain unchanged
+- [x] T004 [P] In `biome.json`, change the `noUnreachable` rule severity in `linter.rules.correctness` from `{ "level": "warn" }` to `{ "level": "error" }` — this is the only rule change required; all other rules and all overrides remain unchanged
 
 ### 2b — CI Pipeline: .github/workflows/ci.yml
 
-- [ ] T005 In `.github/workflows/ci.yml`, in the `lint` job, remove or replace the two-step lint sequence (`bun biome check .` followed by `bun biome format .`) with a single `bun run lint` step; use step name "Run Biome lint + format check" — this eliminates the redundant format step while preserving CI/local parity
-- [ ] T006 In `.github/workflows/ci.yml`, add a new `arch-guard` job with the following specification:
+- [x] T005 In `.github/workflows/ci.yml`, in the `lint` job, remove or replace the two-step lint sequence (`bun biome check .` followed by `bun biome format .`) with a single `bun run lint` step; use step name "Run Biome lint + format check" — this eliminates the redundant format step while preserving CI/local parity
+- [x] T006 In `.github/workflows/ci.yml`, add a new `arch-guard` job with the following specification:
 
   ```yaml
   arch-guard:
@@ -95,16 +95,16 @@ If any prerequisite is missing, **stop and resolve it before proceeding.**
 
   Place this job after the `typecheck` job definition, before `unit-tests`.
 
-- [ ] T007 In `.github/workflows/ci.yml`, add `arch-guard` to the `needs` list of the `unit-tests` job so it becomes a blocking prerequisite (the job must not start until AI-Guard passes)
-- [ ] T008 In `.github/workflows/ci.yml`, add `arch-guard` to the `needs` list of the `integration-tests` job so it becomes a blocking prerequisite (same pattern as T007)
+- [x] T007 In `.github/workflows/ci.yml`, add `arch-guard` to the `needs` list of the `unit-tests` job so it becomes a blocking prerequisite (the job must not start until AI-Guard passes)
+- [x] T008 In `.github/workflows/ci.yml`, add `arch-guard` to the `needs` list of the `integration-tests` job so it becomes a blocking prerequisite (same pattern as T007)
 
 ### 2c — Pre-Commit Hook: Stale Comment Fix
 
-- [ ] T009 [P] In `.husky/pre-commit`, update the stale lint-staged comment on the line reading "Runs ESLint --fix + Prettier --write on staged .ts/.tsx/.vue/.md/.json files." — replace it with "Runs Biome check --write on staged .ts/.tsx/.js/.jsx/.mjs/.vue/.json files." — this is a documentation-only fix; the `bunx lint-staged` command itself does not change
+- [x] T009 [P] In `.husky/pre-commit`, update the stale lint-staged comment on the line reading "Runs ESLint --fix + Prettier --write on staged .ts/.tsx/.vue/.md/.json files." — replace it with "Runs Biome check --write on staged .ts/.tsx/.js/.jsx/.mjs/.vue/.json files." — this is a documentation-only fix; the `bunx lint-staged` command itself does not change
 
 ### 2d — Governance Documentation
 
-- [ ] T010 [P] Create `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md` with all of the following sections:
+- [x] T010 [P] Create `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md` with all of the following sections:
   1. **Overview** — purpose and scope of this governance document
   2. **Four Governance Layers** — table: layer name, role, trigger (Biome/lint-staged, AI-Guard, Infra-Audit, Tests)
   3. **Import Order Convention** — 5-group canonical order with code examples (node:built-ins → external packages → `@zidney/*` internal → app-local → relative), blank line between groups, how to auto-fix with `bun run lint:fix`
@@ -122,8 +122,8 @@ If any prerequisite is missing, **stop and resolve it before proceeding.**
 > If T003 output was "No noUnreachable violations found", all tasks in this phase are no-ops —
 > mark T011 and T012 complete with note "no violations found" and proceed directly to Phase 4.
 
-- [ ] T011 For each `noUnreachable` violation identified in T003: either (a) remove the unreachable code block — preferred — or (b) if the unreachable code is intentional (e.g., assertion-only path), add `// biome-ignore lint/correctness/noUnreachable: <rationale>` on the line immediately above, replacing `<rationale>` with a specific explanation; apply to all files listed
-- [ ] T012 Run `bun run lint` to confirm all `noUnreachable` violations from T003 are now resolved; exit code must be 0 (or zero `noUnreachable` violations remain — other `warn`-level rules may still emit warnings)
+- [x] T011 For each `noUnreachable` violation identified in T003: either (a) remove the unreachable code block — preferred — or (b) if the unreachable code is intentional (e.g., assertion-only path), add `// biome-ignore lint/correctness/noUnreachable: <rationale>` on the line immediately above, replacing `<rationale>` with a specific explanation; apply to all files listed
+- [x] T012 Run `bun run lint` to confirm all `noUnreachable` violations from T003 are now resolved; exit code must be 0 (or zero `noUnreachable` violations remain — other `warn`-level rules may still emit warnings)
 
 ---
 
@@ -132,15 +132,15 @@ If any prerequisite is missing, **stop and resolve it before proceeding.**
 > **Goal:** Confirm every change made in Phases 2 and 3 is correct, all CI gates pass locally,
 > and the full governance pipeline is operational end-to-end.
 
-- [ ] T013 Run `bun run lint` — must exit code 0; confirm `noUnreachable` violations are gone; this validates both the biome.json change (T004) and the Phase 3 fixes (T011–T012)
-- [ ] T014 [P] Run `bun run typecheck` — must exit code 0; confirm no TypeScript errors were introduced by any change in this stage
-- [ ] T015 [P] Run `bun scripts/ai-guard.ts` — must exit code 0; confirm AI-Guard runs without fatal errors and both `ARCHITECTURE_MAP.json` and `ARCHITECTURE_CONTRACT.json` are detected; brain-enriched mode preferred but fallback mode also acceptable
-- [ ] T016 Confirm `biome.json` `assist.actions.source.organizeImports` is set to `"on"`; run `bun run lint:fix` on one sample file (e.g., `apps/api/src/index.ts`) and verify imports are auto-sorted into the correct 5-group order
-- [ ] T017 Verify `lint-staged.config.mjs` contains exactly `'*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --write']`; no change should have been made to this file — this is a read-only verification
-- [ ] T018 Verify `.husky/pre-commit` contains: (a) updated Biome comment from T009, (b) `bunx lint-staged` command, (c) `bun scripts/ai-guard.ts` command, (d) `bun scripts/infra-audit.ts --quick` command — all present and correct
-- [ ] T019 Verify `.github/workflows/ci.yml` satisfies all three conditions: (a) `arch-guard` job exists with `needs: [lint, typecheck]`, (b) `unit-tests` job `needs` list includes `arch-guard`, (c) `lint` job contains `bun run lint` with no separate `bun biome format .` step
-- [ ] T020 Open `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md` and verify all 8 sections from T010 are present and complete; confirm the emergency override procedure includes the `--no-verify` warning; confirm the drift recovery playbook lists all 6 steps
-- [ ] T021 Open `docs/architecture/intelligence/ARCHITECTURE_MAP.json` and confirm the `criticality` field is present for all five critical packages: `packages/domain-core` (`core`), `packages/types` (`core`), `packages/validation` (`core`), `packages/logger` (`infrastructure`), `packages/config` (`infrastructure`)
+- [x] T013 Run `bun run lint` — must exit code 0; confirm `noUnreachable` violations are gone; this validates both the biome.json change (T004) and the Phase 3 fixes (T011–T012)
+- [x] T014 [P] Run `bun run typecheck` — must exit code 0; confirm no TypeScript errors were introduced by any change in this stage
+- [x] T015 [P] Run `bun scripts/ai-guard.ts` — must exit code 0; confirm AI-Guard runs without fatal errors and both `ARCHITECTURE_MAP.json` and `ARCHITECTURE_CONTRACT.json` are detected; brain-enriched mode preferred but fallback mode also acceptable
+- [x] T016 Confirm `biome.json` `assist.actions.source.organizeImports` is set to `"on"`; run `bun run lint:fix` on one sample file (e.g., `apps/api/src/index.ts`) and verify imports are auto-sorted into the correct 5-group order
+- [x] T017 Verify `lint-staged.config.mjs` contains exactly `'*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --write']`; no change should have been made to this file — this is a read-only verification
+- [x] T018 Verify `.husky/pre-commit` contains: (a) updated Biome comment from T009, (b) `bunx lint-staged` command, (c) `bun scripts/ai-guard.ts` command, (d) `bun scripts/infra-audit.ts --quick` command — all present and correct
+- [x] T019 Verify `.github/workflows/ci.yml` satisfies all three conditions: (a) `arch-guard` job exists with `needs: [lint, typecheck]`, (b) `unit-tests` job `needs` list includes `arch-guard`, (c) `lint` job contains `bun run lint` with no separate `bun biome format .` step
+- [x] T020 Open `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md` and verify all 8 sections from T010 are present and complete; confirm the emergency override procedure includes the `--no-verify` warning; confirm the drift recovery playbook lists all 6 steps
+- [x] T021 Open `docs/architecture/intelligence/ARCHITECTURE_MAP.json` and confirm the `criticality` field is present for all five critical packages: `packages/domain-core` (`core`), `packages/types` (`core`), `packages/validation` (`core`), `packages/logger` (`infrastructure`), `packages/config` (`infrastructure`)
 
 ---
 
@@ -231,5 +231,5 @@ All of the following must be true before this stage is marked COMPLETE:
 | `.github/workflows/ci.yml` test jobs have `needs: arch-guard`                                   | T019        |
 | `.github/workflows/ci.yml` lint job uses `bun run lint` only                                    | T019        |
 | `.husky/pre-commit` stale ESLint/Prettier comment replaced                                      | T018        |
-| `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md` created with 8 sections                                    | T020        |
+| `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md` created with 8 sections               | T020        |
 | Stage status updated in `specs/phases/01_platform_foundation/STAGE_INFRA_05_LINT_GOVERNANCE.md` | Manual      |

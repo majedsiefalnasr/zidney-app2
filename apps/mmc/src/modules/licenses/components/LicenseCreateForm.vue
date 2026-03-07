@@ -27,6 +27,7 @@ const onSubmit = async () => {
     // TODO: Validate form
     // TODO: Call API: POST /v1/mmc/licenses
     // TODO: Redirect to detail page on success
+    // biome-ignore lint/correctness/noUnreachable: catch block retained as error boundary for pending TODO implementation
   } catch (err: any) {
     errors.value = err.details || {}
   } finally {

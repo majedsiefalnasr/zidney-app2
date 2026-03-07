@@ -30,13 +30,9 @@
 
 ### [NEEDS CLARIFICATION] Items
 
-- [ ] **FR-06 [NEEDS CLARIFICATION]**: Should `bun run arch:audit` be added as a mandatory blocking CI step that checks architecture intelligence layer freshness, or is AI-Guard's fallback to direct contract reading sufficient for CI gate purposes?
-  - Impact: Scope (adds a CI step vs. no change)
-  - Suggested default if not clarified: Keep fallback as sufficient; `arch:audit` is a maintenance command, not a CI gate.
+- [x] **FR-06** (CL-01 resolved in Step 2): `arch:audit` is advisory only; AI-Guard is the mandatory CI-blocking gate. `bun run arch:audit` is a maintenance/recovery command — not added as a blocking CI step.
 
-- [ ] **FR-07 [NEEDS CLARIFICATION]**: Should a `CODEOWNERS` file be created to enforce mandatory human review for `packages/domain-core`, `packages/logger`, and `packages/types` via GitHub branch protection, or is documentation-level ownership policy sufficient for this stage?
-  - Impact: Scope (adds GitHub governance work outside tooling)
-  - Suggested default if not clarified: Documentation-level only in this stage; CODEOWNERS is a follow-up task.
+- [x] **FR-07** (CL-02 resolved in Step 2 — formally deferred): CODEOWNERS enforcement deferred to a follow-up stage. Documentation-level ownership policy is sufficient for this stage.
 
 ---
 
