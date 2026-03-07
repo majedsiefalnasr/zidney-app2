@@ -22,9 +22,28 @@ import { readFileSync } from 'node:fs'
 
 function getCurrentBranch(): string {
   try {
-    return execSync('git rev-parse --abbrev-ref HEAD', {
+    const branch = execSync('git rev-parse --abbrev-ref HEAD', {
       encoding: 'utf-8',
     }).trim()
+
+    // In CI (especially GitHub Actions), git checkout can leave us in a detached HEAD state.
+    // Attempt to recover the actual branch name from environment variables.
+    if (branch === 'HEAD') {
+      // GitHub Actions pull_request event
+      if (process.env.GITHUB_HEAD_REF) {
+        return process.env.GITHUB_HEAD_REF
+      }
+
+      // GitHub Actions push/workflow_dispatch event
+      if (process.env.GITHUB_REF_NAME) {
+        return process.env.GITHUB_REF_NAME
+      }
+
+      // Local detached HEAD (not in CI) - cannot validate
+      return ''
+    }
+
+    return branch
   } catch {
     return ''
   }
