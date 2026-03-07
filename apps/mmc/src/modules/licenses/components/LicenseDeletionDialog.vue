@@ -112,6 +112,7 @@ onMounted(async () => {
       // const response = await fetch(`/api/v1/licenses/${props.licenseId}/delete/initiate`, { method: 'POST' })
       // const data = await response.json()
       // confirmationPhrase.value = data.confirmation_phrase
+      // biome-ignore lint/correctness/noUnreachable: catch block retained as error boundary for pending TODO implementation
     } catch (err: any) {
       phraseError.value = err.message
     }

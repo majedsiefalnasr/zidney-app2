@@ -120,6 +120,7 @@ async function downloadAudit() {
     // TODO: Trigger CSV/JSON export
     // Query all logs with current filters
     // Generate and download file
+    // biome-ignore lint/correctness/noUnreachable: catch block retained as error boundary for pending TODO implementation
   } catch (err: any) {
     // biome-ignore lint/suspicious/noConsole: frontend error boundary
     console.error('Failed to export audit logs:', err)

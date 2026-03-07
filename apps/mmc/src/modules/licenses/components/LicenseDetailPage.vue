@@ -138,6 +138,7 @@ async function archiveLicense() {
   try {
     // TODO: Call archive API endpoint
     // const response = await fetch(`/api/v1/licenses/${license.value?.id}/archive`, { method: 'POST' })
+    // biome-ignore lint/correctness/noUnreachable: catch block retained as error boundary for pending TODO implementation
   } catch (err: any) {
     error.value = err.message
   }

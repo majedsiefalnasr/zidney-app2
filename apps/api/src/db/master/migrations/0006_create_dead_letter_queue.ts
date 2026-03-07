@@ -76,7 +76,6 @@ export const migration: MigrationConfig = {
           )`
     )
 
-    // biome-ignore lint/suspicious/noConsole: migration runner output
     console.log(`[${correlationId}] Created dead_letter_queue table with indexes`)
   },
 
@@ -85,7 +84,6 @@ export const migration: MigrationConfig = {
 
     await db.execute(sql`DROP TABLE IF EXISTS dead_letter_queue CASCADE`)
 
-    // biome-ignore lint/suspicious/noConsole: migration runner output
     console.log(`[${correlationId}] Dropped dead_letter_queue table`)
   },
 }
