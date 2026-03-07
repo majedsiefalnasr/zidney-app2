@@ -3,32 +3,31 @@
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-03-07T00:02:00.000Z
+Last Updated: 2026-03-07T00:03:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Biome lint rule hardening (9 functional requirements)
-- AI-Guard pre-commit and CI activation
-- Import order 5-group canonical convention
-- lint-staged pre-commit hook verification
-- CI quality-gate sequence enforcement
-- Module ownership policy documentation
-- Drift prevention strategy
+- biome.json: noUnreachable severity warn → error
+- ci.yml: add arch-guard job after lint+typecheck
+- ci.yml: remove redundant bun biome format step
+- .husky/pre-commit: fix stale ESLint/Prettier comment
+- docs/governance/LINT_GOVERNANCE.md: drift prevention + module ownership policy
 
 Deferred Scope:
 
 - CODEOWNERS file enforcement (follow-up stage)
-- `bun run arch:audit` as CI-blocking step (advisory only)
+- arch:audit as CI-blocking step (advisory only)
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 - INFRA stage — no runtime, tenant, or middleware changes
+- Guardian validation PASSED
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
