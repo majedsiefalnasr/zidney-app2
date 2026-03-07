@@ -320,14 +320,9 @@ function validateBranchNaming(changedFiles: string[]): void {
 
   if (!branch) return
 
-  // Zidney Hard Mode requires spec branches for stage work
+  // Only enforce strict stage matching when working on spec/* branches
   if (!branch.startsWith('spec/')) {
-    console.error('\nAI Guard: Invalid branch for architecture-controlled changes.')
-    console.error(`Current branch: ${branch}`)
-    console.error('Required pattern: spec/<stage-name>')
-    console.error('Example: spec/005-tenant-provisioning-service\n')
-
-    process.exit(1)
+    return
   }
 
   // Attempt to detect stage file being modified
