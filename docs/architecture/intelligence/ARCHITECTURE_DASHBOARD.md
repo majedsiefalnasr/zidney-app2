@@ -1,7 +1,7 @@
 # Zidney Architecture Dashboard
 
-**Generated:** 2026-03-05T21:59:03.579Z
-**Git SHA:** 71f05a51949e03516d5154484add836c4dea373b
+**Generated:** 2026-03-07T20:54:02.411Z
+**Git SHA:** 291ea817423878025413033308ac8967be4e9c69
 
 ## Architecture Score
 
@@ -11,14 +11,14 @@
 
 ## System Health
 
-| Metric                | Value |
-| --------------------- | ----- |
-| Circular Dependencies | 0     |
-| Dependency Violations | 0     |
-| Layer Violations      | 0     |
-| Architecture Drift    | 0     |
-| Skipped Tests         | 0     |
-| Flaky Tests           | 0     |
+| Metric | Value |
+|------|------|
+| Circular Dependencies | 0 |
+| Dependency Violations | 0 |
+| Layer Violations | 0 |
+| Architecture Drift | 0 |
+| Skipped Tests | 0 |
+| Flaky Tests | 0 |
 
 ## Test Distribution
 
@@ -32,18 +32,18 @@ Total Tests: 206
 
 Nodes: 56
 
-Edges: 577
+Edges: 623
 
 ## Top Architectural Hotspots
 
-- packages/logger (186)
-- packages/types (101)
+- packages/logger (235)
+- packages/types (100)
 - packages/domain-core (77)
-- packages/api-client (18)
 - ./apps/mmc/srcvue/test-utils (17)
+- packages/api-client (17)
 - ./apps/mmc/srcpinia/testing (15)
-- ./apps/mmc/src/core/state/ui.store (12)
 - packages/validation (10)
+- ./apps/mmc/src/core/state/ui.store (10)
 - ./apps/mmc/src/core/auth/refresh-manager (9)
 - ./apps/mmc/srcvitejs/plugin-vue (8)
 

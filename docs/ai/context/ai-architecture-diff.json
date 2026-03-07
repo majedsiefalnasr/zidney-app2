@@ -1,0 +1,11 @@
+{
+  "addedEdges": [
+    "apps/frontoffice->./apps/mmc/src/core/auth/token-store",
+    "apps/backoffice->./apps/mmc/src/core/auth/token-store"
+  ],
+  "removedEdges": [
+    "apps/mmc->./apps/mmc/srctypescript-eslint/parser",
+    "apps/frontoffice->./apps/mmc/srctypescript-eslint/parser",
+    "apps/backoffice->./apps/mmc/srctypescript-eslint/parser"
+  ]
+}

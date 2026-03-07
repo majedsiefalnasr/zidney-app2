@@ -1,0 +1,24 @@
+graph TD
+
+  subgraph Domain
+  packages_domain_core
+  end
+
+  subgraph Infrastructure
+  packages_logger
+  packages_config
+  packages_redis_utils
+  packages_api_client
+  ._apps_mmc_src_core_config_app_config
+  end
+
+  subgraph Runtime
+  apps_api
+  apps_worker
+  end
+
+  subgraph UI
+  apps_mmc
+  apps_frontoffice
+  apps_backoffice
+  end

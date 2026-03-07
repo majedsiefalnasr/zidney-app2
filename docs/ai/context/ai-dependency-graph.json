@@ -16,9 +16,9 @@
     "packages/app",
     "packages/validation",
     "apps/mmc",
+    "./apps/mmc/srcpinia/testing",
     "./apps/mmc/src/composables/useBreakpoint",
     "./apps/mmc/src/core/state/ui.store",
-    "./apps/mmc/srcpinia/testing",
     "./apps/mmc/src/core/auth/token-redact",
     "./apps/mmc/src/core/state/app.store",
     "./apps/mmc/src/core/auth/types",
@@ -30,22 +30,22 @@
     "./apps/mmc/src/components/layout/AppHeader.vue",
     "./apps/mmc/src/App.vue",
     "./apps/mmc/srcplaywright/test",
-    "./apps/mmc/srctypescript-eslint/parser",
     "./apps/mmc/src/core/api/interceptors/error.interceptor",
     "./apps/mmc/src/core/auth/refresh-manager",
     "./apps/mmc/src/core/auth/token-manager",
     "./apps/mmc/src/core/config/app-config",
     "./apps/mmc/src/modules/dashboard/routes",
     "./apps/mmc/src/modules/licenses/routes",
-    "./apps/mmc/src/core/guards",
-    "./apps/mmc/src/core/router",
     "./apps/mmc/src/core/api/client",
     "./apps/mmc/src/core/auth/auth.service",
+    "./apps/mmc/src/core/guards",
+    "./apps/mmc/src/core/router",
     "./apps/mmc/src/core/state/license-status.store",
     "./apps/mmc/src/modules/dashboard/store",
     "packages/ui",
     "./apps/mmc/src/modules/dashboard/api",
     "apps/frontoffice",
+    "./apps/mmc/src/core/auth/token-store",
     "apps/backoffice",
     "./apps/mmc/src/composables/usePermission",
     "./apps/mmc/src/core/state/workspace.store",
@@ -58,6 +58,14 @@
     "./apps/mmc/srcaws-sdk/client-s3"
   ],
   "edges": [
+    {
+      "from": "packages/redis-utils",
+      "to": "packages/logger"
+    },
+    {
+      "from": "packages/redis-utils",
+      "to": "packages/logger"
+    },
     {
       "from": "packages/redis-utils",
       "to": "packages/logger"
@@ -168,6 +176,14 @@
     },
     {
       "from": "packages/domain-core",
+      "to": "packages/logger"
+    },
+    {
+      "from": "packages/domain-core",
+      "to": "packages/logger"
+    },
+    {
+      "from": "packages/domain-core",
       "to": "packages/types"
     },
     {
@@ -248,6 +264,10 @@
     },
     {
       "from": "packages/domain-core",
+      "to": "packages/logger"
+    },
+    {
+      "from": "packages/domain-core",
       "to": "packages/types"
     },
     {
@@ -265,6 +285,10 @@
     {
       "from": "packages/domain-core",
       "to": "packages/types"
+    },
+    {
+      "from": "packages/domain-core",
+      "to": "packages/logger"
     },
     {
       "from": "packages/domain-core",
@@ -293,14 +317,6 @@
     {
       "from": "packages/validation",
       "to": "packages/types"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/composables/useBreakpoint"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/state/ui.store"
     },
     {
       "from": "apps/mmc",
@@ -309,6 +325,14 @@
     {
       "from": "apps/mmc",
       "to": "./apps/mmc/srcvue/test-utils"
+    },
+    {
+      "from": "apps/mmc",
+      "to": "./apps/mmc/src/composables/useBreakpoint"
+    },
+    {
+      "from": "apps/mmc",
+      "to": "./apps/mmc/src/core/state/ui.store"
     },
     {
       "from": "apps/mmc",
@@ -344,6 +368,14 @@
     },
     {
       "from": "apps/mmc",
+      "to": "./apps/mmc/srcpinia/testing"
+    },
+    {
+      "from": "apps/mmc",
+      "to": "./apps/mmc/srcvue/test-utils"
+    },
+    {
+      "from": "apps/mmc",
       "to": "./apps/mmc/src/components/layout/AppSidebar.vue"
     },
     {
@@ -376,15 +408,15 @@
     },
     {
       "from": "apps/mmc",
+      "to": "./apps/mmc/src/core/state/app.store"
+    },
+    {
+      "from": "apps/mmc",
       "to": "./apps/mmc/srcpinia/testing"
     },
     {
       "from": "apps/mmc",
       "to": "./apps/mmc/srcvue/test-utils"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/state/app.store"
     },
     {
       "from": "apps/mmc",
@@ -396,23 +428,11 @@
     },
     {
       "from": "apps/mmc",
-      "to": "./apps/mmc/srcpinia/testing"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/srcvue/test-utils"
-    },
-    {
-      "from": "apps/mmc",
       "to": "./apps/mmc/srcplaywright/test"
     },
     {
       "from": "apps/mmc",
       "to": "./apps/mmc/srcplaywright/test"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/srctypescript-eslint/parser"
     },
     {
       "from": "apps/mmc",
@@ -464,6 +484,18 @@
     },
     {
       "from": "apps/mmc",
+      "to": "packages/api-client"
+    },
+    {
+      "from": "apps/mmc",
+      "to": "packages/api-client"
+    },
+    {
+      "from": "apps/mmc",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/mmc",
       "to": "./apps/mmc/src/core/api/interceptors/error.interceptor"
     },
     {
@@ -477,18 +509,6 @@
     {
       "from": "apps/mmc",
       "to": "./apps/mmc/src/core/config/app-config"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "packages/api-client"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "packages/api-client"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "packages/logger"
     },
     {
       "from": "apps/mmc",
@@ -520,14 +540,6 @@
     },
     {
       "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/guards"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/router"
-    },
-    {
-      "from": "apps/mmc",
       "to": "./apps/mmc/src/core/api/client"
     },
     {
@@ -560,6 +572,14 @@
     },
     {
       "from": "apps/mmc",
+      "to": "./apps/mmc/src/core/guards"
+    },
+    {
+      "from": "apps/mmc",
+      "to": "./apps/mmc/src/core/router"
+    },
+    {
+      "from": "apps/mmc",
       "to": "./apps/mmc/src/core/state/auth.store"
     },
     {
@@ -580,19 +600,19 @@
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/composables/useBreakpoint"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/state/ui.store"
-    },
-    {
-      "from": "apps/frontoffice",
       "to": "./apps/mmc/srcpinia/testing"
     },
     {
       "from": "apps/frontoffice",
       "to": "./apps/mmc/srcvue/test-utils"
+    },
+    {
+      "from": "apps/frontoffice",
+      "to": "./apps/mmc/src/composables/useBreakpoint"
+    },
+    {
+      "from": "apps/frontoffice",
+      "to": "./apps/mmc/src/core/state/ui.store"
     },
     {
       "from": "apps/frontoffice",
@@ -636,6 +656,14 @@
     },
     {
       "from": "apps/frontoffice",
+      "to": "./apps/mmc/srcpinia/testing"
+    },
+    {
+      "from": "apps/frontoffice",
+      "to": "./apps/mmc/srcvue/test-utils"
+    },
+    {
+      "from": "apps/frontoffice",
       "to": "./apps/mmc/src/components/layout/AppSidebar.vue"
     },
     {
@@ -668,15 +696,15 @@
     },
     {
       "from": "apps/frontoffice",
+      "to": "./apps/mmc/src/core/state/app.store"
+    },
+    {
+      "from": "apps/frontoffice",
       "to": "./apps/mmc/srcpinia/testing"
     },
     {
       "from": "apps/frontoffice",
       "to": "./apps/mmc/srcvue/test-utils"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/state/app.store"
     },
     {
       "from": "apps/frontoffice",
@@ -688,14 +716,6 @@
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcpinia/testing"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcvue/test-utils"
-    },
-    {
-      "from": "apps/frontoffice",
       "to": "./apps/mmc/srcplaywright/test"
     },
     {
@@ -704,19 +724,11 @@
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/srctypescript-eslint/parser"
-    },
-    {
-      "from": "apps/frontoffice",
       "to": "./apps/mmc/srcvitejs/plugin-vue"
     },
     {
       "from": "apps/frontoffice",
       "to": "./apps/mmc/srcvitejs/plugin-vue"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/state/ui.store"
     },
     {
       "from": "apps/frontoffice",
@@ -756,6 +768,18 @@
     },
     {
       "from": "apps/frontoffice",
+      "to": "packages/api-client"
+    },
+    {
+      "from": "apps/frontoffice",
+      "to": "packages/api-client"
+    },
+    {
+      "from": "apps/frontoffice",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/frontoffice",
       "to": "./apps/mmc/src/core/api/interceptors/error.interceptor"
     },
     {
@@ -765,6 +789,14 @@
     {
       "from": "apps/frontoffice",
       "to": "./apps/mmc/src/core/auth/token-manager"
+    },
+    {
+      "from": "apps/frontoffice",
+      "to": "./apps/mmc/src/core/auth/token-store"
+    },
+    {
+      "from": "apps/frontoffice",
+      "to": "./apps/mmc/src/core/config/app-config"
     },
     {
       "from": "apps/frontoffice",
@@ -784,31 +816,11 @@
     },
     {
       "from": "apps/frontoffice",
-      "to": "packages/api-client"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "packages/api-client"
-    },
-    {
-      "from": "apps/frontoffice",
       "to": "packages/logger"
     },
     {
       "from": "apps/frontoffice",
       "to": "packages/logger"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/guards"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/router"
     },
     {
       "from": "apps/frontoffice",
@@ -841,6 +853,14 @@
     {
       "from": "apps/frontoffice",
       "to": "./apps/mmc/src/core/auth/token-manager"
+    },
+    {
+      "from": "apps/frontoffice",
+      "to": "./apps/mmc/src/core/guards"
+    },
+    {
+      "from": "apps/frontoffice",
+      "to": "./apps/mmc/src/core/router"
     },
     {
       "from": "apps/frontoffice",
@@ -856,19 +876,19 @@
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/composables/useBreakpoint"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/ui.store"
-    },
-    {
-      "from": "apps/backoffice",
       "to": "./apps/mmc/srcpinia/testing"
     },
     {
       "from": "apps/backoffice",
       "to": "./apps/mmc/srcvue/test-utils"
+    },
+    {
+      "from": "apps/backoffice",
+      "to": "./apps/mmc/src/composables/useBreakpoint"
+    },
+    {
+      "from": "apps/backoffice",
+      "to": "./apps/mmc/src/core/state/ui.store"
     },
     {
       "from": "apps/backoffice",
@@ -888,11 +908,11 @@
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/workspace.store"
+      "to": "packages/api-client"
     },
     {
       "from": "apps/backoffice",
-      "to": "packages/api-client"
+      "to": "./apps/mmc/src/core/state/workspace.store"
     },
     {
       "from": "apps/backoffice",
@@ -913,6 +933,14 @@
     {
       "from": "apps/backoffice",
       "to": "./apps/mmc/src/core/state/ui.store"
+    },
+    {
+      "from": "apps/backoffice",
+      "to": "./apps/mmc/srcpinia/testing"
+    },
+    {
+      "from": "apps/backoffice",
+      "to": "./apps/mmc/srcvue/test-utils"
     },
     {
       "from": "apps/backoffice",
@@ -948,19 +976,19 @@
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcpinia/testing"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "./apps/mmc/srcvue/test-utils"
-    },
-    {
-      "from": "apps/backoffice",
       "to": "./apps/mmc/src/core/state/app.store"
     },
     {
       "from": "apps/backoffice",
       "to": "./apps/mmc/src/core/state/workspace.store"
+    },
+    {
+      "from": "apps/backoffice",
+      "to": "./apps/mmc/srcpinia/testing"
+    },
+    {
+      "from": "apps/backoffice",
+      "to": "./apps/mmc/srcvue/test-utils"
     },
     {
       "from": "apps/backoffice",
@@ -972,23 +1000,11 @@
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcpinia/testing"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "./apps/mmc/srcvue/test-utils"
-    },
-    {
-      "from": "apps/backoffice",
       "to": "./apps/mmc/srcplaywright/test"
     },
     {
       "from": "apps/backoffice",
       "to": "./apps/mmc/srcplaywright/test"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "./apps/mmc/srctypescript-eslint/parser"
     },
     {
       "from": "apps/backoffice",
@@ -1001,10 +1017,6 @@
     {
       "from": "apps/backoffice",
       "to": "packages/types"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/ui.store"
     },
     {
       "from": "apps/backoffice",
@@ -1045,6 +1057,18 @@
     {
       "from": "apps/backoffice",
       "to": "packages/logger"
+    },
+    {
+      "from": "apps/backoffice",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/backoffice",
+      "to": "packages/api-client"
+    },
+    {
+      "from": "apps/backoffice",
+      "to": "packages/api-client"
     },
     {
       "from": "apps/backoffice",
@@ -1064,6 +1088,14 @@
     },
     {
       "from": "apps/backoffice",
+      "to": "./apps/mmc/src/core/auth/token-store"
+    },
+    {
+      "from": "apps/backoffice",
+      "to": "./apps/mmc/src/core/config/app-config"
+    },
+    {
+      "from": "apps/backoffice",
       "to": "./apps/mmc/src/core/config/app-config"
     },
     {
@@ -1080,18 +1112,6 @@
     },
     {
       "from": "apps/backoffice",
-      "to": "packages/api-client"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "packages/api-client"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "packages/api-client"
-    },
-    {
-      "from": "apps/backoffice",
       "to": "packages/logger"
     },
     {
@@ -1101,14 +1121,6 @@
     {
       "from": "apps/backoffice",
       "to": "packages/logger"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "./apps/mmc/src/stores/context"
     },
     {
       "from": "apps/backoffice",
@@ -1152,7 +1164,7 @@
     },
     {
       "from": "apps/backoffice",
-      "to": "packages/types"
+      "to": "./apps/mmc/src/stores/context"
     },
     {
       "from": "apps/backoffice",
@@ -1336,6 +1348,10 @@
     },
     {
       "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
       "to": "packages/redis-utils"
     },
     {
@@ -1348,19 +1364,11 @@
     },
     {
       "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
       "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
     },
     {
       "from": "apps/api",
@@ -1388,6 +1396,10 @@
     },
     {
       "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
       "to": "packages/domain-core"
     },
     {
@@ -1401,6 +1413,34 @@
     {
       "from": "apps/api",
       "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
     },
     {
       "from": "apps/api",
@@ -1436,6 +1476,14 @@
     },
     {
       "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
       "to": "packages/types"
     },
     {
@@ -1480,7 +1528,7 @@
     },
     {
       "from": "apps/api",
-      "to": "packages/domain-core"
+      "to": "packages/logger"
     },
     {
       "from": "apps/api",
@@ -1489,6 +1537,14 @@
     {
       "from": "apps/api",
       "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
     },
     {
       "from": "apps/api",
@@ -1552,14 +1608,6 @@
     },
     {
       "from": "apps/api",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
       "to": "packages/logger"
     },
     {
@@ -1572,83 +1620,7 @@
     },
     {
       "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
       "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
     },
     {
       "from": "apps/api",
@@ -1676,6 +1648,110 @@
     },
     {
       "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
       "to": "packages/app"
     },
     {
@@ -1684,6 +1760,10 @@
     },
     {
       "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
       "to": "packages/app"
     },
     {
@@ -1696,6 +1776,10 @@
     },
     {
       "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
       "to": "packages/domain-core"
     },
     {
@@ -1725,6 +1809,10 @@
     {
       "from": "apps/api",
       "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
     },
     {
       "from": "apps/api",
@@ -1748,7 +1836,15 @@
     },
     {
       "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
       "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
     },
     {
       "from": "apps/api",
@@ -1764,7 +1860,7 @@
     },
     {
       "from": "apps/api",
-      "to": "packages/domain-core"
+      "to": "packages/logger"
     },
     {
       "from": "apps/api",
@@ -1780,7 +1876,15 @@
     },
     {
       "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
       "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
     },
     {
       "from": "apps/api",
@@ -1840,6 +1944,10 @@
     },
     {
       "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
       "to": "./apps/mmc/srchono/zod-validator"
     },
     {
@@ -1865,6 +1973,10 @@
     {
       "from": "apps/api",
       "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
     },
     {
       "from": "apps/api",
@@ -1912,58 +2024,6 @@
     },
     {
       "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/api",
       "to": "packages/domain-core"
     },
     {
@@ -1976,123 +2036,7 @@
     },
     {
       "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
       "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/domain-core"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/api",
-      "to": "packages/types"
     },
     {
       "from": "apps/api",
@@ -2115,6 +2059,186 @@
       "to": "packages/domain-core"
     },
     {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
       "from": "apps/worker",
       "to": "packages/types"
     },
@@ -2152,6 +2276,22 @@
     },
     {
       "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
       "to": "packages/types"
     },
     {
@@ -2176,18 +2316,6 @@
     },
     {
       "from": "apps/worker",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/logger"
-    },
-    {
-      "from": "apps/worker",
-      "to": "packages/types"
-    },
-    {
-      "from": "apps/worker",
       "to": "packages/types"
     },
     {
@@ -2197,6 +2325,10 @@
     {
       "from": "apps/worker",
       "to": "packages/types"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
     },
     {
       "from": "apps/worker",
@@ -2256,7 +2388,19 @@
     },
     {
       "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
       "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
     },
     {
       "from": "apps/worker",
@@ -2284,10 +2428,18 @@
     },
     {
       "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
       "to": "packages/domain-core"
     },
     {
       "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
       "to": "packages/domain-core"
     },
     {
@@ -2324,7 +2476,7 @@
     },
     {
       "from": "apps/worker",
-      "to": "packages/types"
+      "to": "packages/logger"
     },
     {
       "from": "apps/worker",
@@ -2345,6 +2497,34 @@
     {
       "from": "apps/worker",
       "to": "packages/types"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/types"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
     },
     {
       "from": "apps/worker",
@@ -2361,6 +2541,10 @@
     {
       "from": "apps/worker",
       "to": "packages/domain-core"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/logger"
     },
     {
       "from": "apps/worker",
