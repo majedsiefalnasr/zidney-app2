@@ -3,20 +3,32 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-07T00:00:00.000Z
+Last Updated: 2026-03-07T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Biome lint rule hardening (9 functional requirements)
+- AI-Guard pre-commit and CI activation
+- Import order 5-group canonical convention
+- lint-staged pre-commit hook verification
+- CI quality-gate sequence enforcement
+- Module ownership policy documentation
+- Drift prevention strategy
+
+Deferred Scope:
+
+- CODEOWNERS file enforcement (follow-up stage)
+- `bun run arch:audit` as CI-blocking step (advisory only)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
+- INFRA stage — no runtime, tenant, or middleware changes
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
