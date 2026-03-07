@@ -1,5 +1,25 @@
 # STAGE_INFRA_05_LINT_GOVERNANCE
 
+## Stage Status
+
+Status: DRAFT
+Step: pre_step
+Risk Level: UNKNOWN
+Initiated: 2026-03-07T00:00:00.000Z
+
+Scope Open:
+
+- Specification pending
+
+Constitutional Compliance:
+
+- Pending constitutional audit
+
+Notes:
+Stage initialized. Specification in progress.
+
+---
+
 ## Purpose
 
 Establish a strict lint governance layer for the Zidney monorepo. This stage defines how linting rules, architectural boundaries, and automated validation work together to prevent architecture drift and enforce consistent development practices.
