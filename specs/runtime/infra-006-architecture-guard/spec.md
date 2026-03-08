@@ -348,9 +348,29 @@ This stage explicitly does NOT:
 4. **Modify ARCHITECTURE_MAP.json or ARCHITECTURE_CONTRACT.json** — these are generated files
 5. **Add GitHub Actions CI workflow** — CI architecture governance workflow is covered in a later stage
 6. **Create architecture visualizations** — covered in STAGE_INFRA_08
-7. **Implement drift detection snapshots** — covered in STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION
-8. **Add module registration UI** — the `arch:add-module` CLI already exists
-9. **Modify any apps/ source code** — this is an INFRA stage only
+
+---
+
+## Clarifications
+
+### Session 2026-03-08
+
+**Ambiguity scan result:** No ambiguities found. All specification requirements are deterministic based on existing codebase state.
+
+**Audit dimensions reviewed:**
+
+| Dimension              | Finding                                           |
+| ---------------------- | ------------------------------------------------- |
+| Transaction strategy   | N/A — no database access in this stage            |
+| Idempotency strategy   | N/A — no endpoints or state mutations             |
+| Concurrency model      | N/A — CLI tooling only                            |
+| Version enforcement    | N/A — no API routes affecting version enforcement |
+| Middleware enforcement | N/A — no API routes                               |
+| Security validation    | N/A — developer tooling only, no user inputs      |
+| Error contract         | Defined: structured console output in ai-guard.ts |
+| Isolation boundaries   | N/A — no tenant-bound operations                  |
+
+**Conclusion:** No `[NEEDS CLARIFICATION]` markers. Spec is ready for planning. 7. **Implement drift detection snapshots** — covered in STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION 8. **Add module registration UI** — the `arch:add-module` CLI already exists 9. **Modify any apps/ source code** — this is an INFRA stage only
 
 ---
 

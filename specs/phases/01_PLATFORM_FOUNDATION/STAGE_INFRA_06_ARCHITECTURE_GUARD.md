@@ -316,9 +316,9 @@ This stage transforms Zidney into a **governed architecture platform rather than
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
-Last Updated: 2026-03-08T01:00:00.000Z
+Step: clarify
+Risk Level: LOW
+Last Updated: 2026-03-08T02:00:00.000Z
 
 Scope Defined:
 
@@ -335,7 +335,7 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. No `[NEEDS CLARIFICATION]` markers. Clarification step pending.
+All specification ambiguities resolved. No `[NEEDS CLARIFICATION]` markers. Ready for technical planning.
