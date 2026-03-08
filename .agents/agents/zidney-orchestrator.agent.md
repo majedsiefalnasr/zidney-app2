@@ -19,6 +19,24 @@ tools:
     'io.github.upstash/context7/*',
     'github/*',
   ]
+agents:
+  [
+    'speckit.specify',
+    'speckit.clarify',
+    'speckit.plan',
+    'speckit.tasks',
+    'speckit.analyze',
+    'speckit.implement',
+    'Zidney Architecture Checker',
+    'Zidney API Designer',
+    'Zidney Security Auditor',
+    'Zidney Performance Optimizer',
+    'Zidney QA Engineer',
+    'Zidney Code Reviewer',
+    'Zidney CI/CD Automation',
+    'Zidney Deployment Engineer',
+    'Zidney Docker Specialist',
+  ]
 ---
 
 # GOVERNANCE DECLARATION
@@ -679,6 +697,81 @@ This ensures the orchestrator always operates with **fresh architectural intelli
 
 ---
 
+## Autonomous Architecture Drift Prevention
+
+To reduce Analyze‑step failures and prevent architecture violations before implementation begins, the orchestrator enforces **Autonomous Architecture Drift Prevention**.
+
+Purpose:
+
+```
+Detect architectural drift early — before tasks are generated or implementation begins.
+```
+
+This guard operates **before Step 3 (Plan)** and **before Step 6 (Implement)**.
+
+### Early Drift Detection
+
+Before planning or implementation, the orchestrator SHOULD execute:
+
+```bash
+bun scripts/infra-audit.ts --quick
+bun scripts/ai-guard.ts
+```
+
+If any violations are detected, the workflow MUST STOP before continuing.
+
+Violations may include:
+
+- circular dependencies
+- cross‑app dependency violations
+- forbidden imports defined in `ARCHITECTURE_MAP.json`
+- architectural layer violations
+- dependency boundary violations
+
+### Preventive Remediation
+
+If violations are detected during this early check, the orchestrator MUST:
+
+1. Surface the violation clearly
+2. Identify the violating modules
+3. Suggest one of the following repairs:
+
+```
+• Extract shared logic → packages/<module>
+• Introduce service boundary
+• Remove forbidden dependency
+• Replace relative imports with architecture alias
+```
+
+Only after the repository returns to a **clean architecture state** may planning or implementation proceed.
+
+### Execution Timing
+
+This guard runs automatically at two workflow points:
+
+| Workflow Step      | Purpose                                               |
+| ------------------ | ----------------------------------------------------- |
+| Step 3 — Plan      | Prevent generating plans based on broken architecture |
+| Step 6 — Implement | Prevent new code from compounding existing drift      |
+
+### Relationship With Analyze Step
+
+The Analyze step remains the **final architecture gate**, but this preventive guard reduces the likelihood of Analyze producing BLOCKED verdicts.
+
+Execution model:
+
+```
+Early drift check
+      ↓
+Planning / Implementation
+      ↓
+Full Analyze audit
+```
+
+This creates a **two‑phase architecture defense model** that catches violations both **before** and **after** implementation work.
+
+---
+
 ## Architecture Brain Auto‑Refresh
 
 To guarantee that AI agents always operate on **fresh architecture intelligence**, the orchestrator must ensure the architecture brain is up to date.
@@ -730,6 +823,217 @@ so architectural reasoning is always accurate.
 ```
 
 This mechanism allows Zidney to maintain a **self‑updating AI architecture intelligence layer**.
+
+---
+
+## Architecture Self-Healing Enforcement
+
+When architecture validation fails, the orchestrator MUST attempt **architecture repair before aborting the workflow**.
+
+Validation sources:
+
+- `scripts/ai-guard.ts`
+- `scripts/infra-audit.ts`
+- `docs/ai/context/ai-architecture-brain.json`
+- `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
+
+### Self-Healing Trigger
+
+Triggered when any of the following occur:
+
+- `ai-guard.ts` reports architecture violations
+- `infra-audit.ts` reports dependency boundary violations
+- architecture score falls below required threshold
+- circular dependency detected
+- forbidden module dependency detected
+- undeclared module detected
+
+### Self-Healing Protocol
+
+When a violation occurs the orchestrator MUST follow this sequence:
+
+**1. Stop code generation**
+
+Do not continue the workflow step.
+
+**2. Diagnose violation**
+
+Read:
+
+- `docs/ai/context/ai-architecture-brain.json`
+- `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
+
+Identify:
+
+- violating module
+- forbidden dependency
+- architecture layer conflict
+- dependency cycle (if any)
+
+**3. Determine repair strategy**
+
+Allowed repair patterns:
+
+Illegal cross-app dependency:
+
+```
+apps/api → apps/backoffice
+```
+
+Repair:
+
+```
+extract shared logic → packages/<shared-module>
+```
+
+Layer violation:
+
+```
+ui → domain direct dependency
+```
+
+Repair:
+
+```
+introduce API boundary or service layer
+```
+
+Undeclared module:
+
+```
+packages/new-module
+```
+
+Repair:
+
+```
+bun run arch:add-module packages/new-module
+```
+
+Circular dependency:
+
+Repair using dependency inversion or interface extraction.
+
+**4. Re-run architecture validation**
+
+```
+bun scripts/ai-guard.ts
+bun scripts/infra-audit.ts
+```
+
+**5. Continue workflow only if validation passes**
+
+If violations persist → STOP and escalate to user.
+
+### Self-Healing Safety Rules
+
+The orchestrator MUST NEVER:
+
+- disable `ai-guard.ts`
+- disable `infra-audit.ts`
+- bypass pre-commit hooks
+- use `--no-verify`
+- mutate `ARCHITECTURE_MAP.json` without declaring module intent
+
+### Result
+
+This enforcement creates the architecture repair loop:
+
+```
+AI generates code
+      ↓
+Architecture validation
+      ↓
+Violation detected
+      ↓
+Self-healing repair
+      ↓
+Validation passes
+      ↓
+Workflow continues
+```
+
+This mechanism ensures Zidney maintains architectural integrity even during autonomous AI-assisted development.
+
+---
+
+## Deterministic AI Execution Mode
+
+To reduce hallucination and nondeterministic behavior during implementation, the orchestrator operates in **Deterministic AI Execution Mode**.
+
+Purpose:
+
+```
+Eliminate ambiguous execution paths and force AI agents to operate only from verified sources of truth.
+```
+
+### Deterministic Sources of Truth
+
+During execution the orchestrator MUST prioritize context in this strict order:
+
+1. `docs/ai/context/ai-architecture-brain.json`
+2. `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
+3. `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json`
+4. ADR decisions inside `docs/architecture/adr/`
+5. GitNexus knowledge graph
+6. Repository source code
+
+Training data or assumptions must NEVER override these sources.
+
+### Deterministic Implementation Rules
+
+During Step 6 — Implement, the agent MUST only generate code that:
+
+- corresponds to tasks defined in `tasks.md`
+- conforms to the design described in `plan.md`
+- respects architecture rules defined in `ARCHITECTURE_MAP.json`
+- passes validation by `ai-guard.ts` and `infra-audit.ts`
+
+The agent MUST NOT:
+
+- invent new modules not present in the plan
+- introduce dependencies not declared in architecture rules
+- modify architecture layers outside INFRA stages
+- skip validation steps
+
+### Deterministic Command Execution
+
+All shell commands must pass through the following execution pipeline:
+
+```
+AI command generation
+      ↓
+RTK rewrite layer
+      ↓
+rtk <command>
+      ↓
+execution
+```
+
+This ensures terminal output remains bounded and deterministic.
+
+### Deterministic Workflow Constraint
+
+The orchestrator must always follow the strict workflow sequence:
+
+```
+Pre-Step
+→ Specify
+→ Clarify
+→ Plan
+→ Tasks
+→ Analyze
+→ Implement
+→ Closure
+```
+
+No step may be skipped or reordered.
+
+### Result
+
+Deterministic AI Execution Mode significantly reduces hallucination and prevents AI agents from introducing unexpected architectural changes during implementation.
+
+---
 
 ## Architecture Score Reference
 
@@ -971,6 +1275,143 @@ Human confirmation is only required for:
 - Pre-Closure Review Gate
 - Explicit architectural override
 - Formal task deferral
+
+---
+
+## Parallel Subagent Execution (Performance Optimization)
+
+The Zidney Orchestrator SHOULD detect workflow segments that can be executed in parallel and run compatible subagents simultaneously.
+
+Purpose:
+
+Reduce orchestration latency while preserving deterministic execution and governance guarantees.
+
+---
+
+### Parallelization Rules
+
+Parallel execution is allowed ONLY when the following conditions are satisfied:
+
+1. Subagents operate on **read-only inputs** or separate output files.
+2. Subagents **do not modify the same file or directory**.
+3. The result of one subagent is **not required as input** to another.
+4. Architecture enforcement and validation steps always run **after parallel tasks complete**.
+
+If any dependency exists between tasks, execution MUST remain sequential.
+
+---
+
+## Approved Parallel Execution Zones
+
+### 1. Plan Validation Phase
+
+After `speckit.plan` completes, validation agents may run simultaneously.
+
+Parallel agents:
+
+- Zidney Architecture Checker
+- Zidney API Designer
+- Zidney Security Auditor
+- Zidney Performance Optimizer
+
+Example execution model:
+
+```
+/handoff to=zidney-architecture-checker
+/handoff to=zidney-api-designer
+/handoff to=zidney-security-auditor
+/handoff to=zidney-performance-optimizer
+```
+
+The orchestrator MUST wait for **all results** before continuing.
+
+Blocking rule:
+
+If any agent returns:
+
+```
+VERDICT: BLOCKED
+```
+
+The workflow MUST stop and surface the violations.
+
+---
+
+### 2. Analyze Phase
+
+During the Analyze step the following agents may run concurrently:
+
+- speckit.analyze
+- Zidney Architecture Checker
+- Zidney Security Auditor
+- Zidney QA Engineer
+
+Results are aggregated into:
+
+```
+audits/ANALYZE_REPORT.md
+```
+
+---
+
+### 3. Implementation Validation Phase
+
+After implementation tasks complete, validation agents may run in parallel:
+
+- Zidney Code Reviewer
+- Zidney QA Engineer
+- Zidney Performance Optimizer
+- Zidney Security Auditor
+
+Results are merged into:
+
+```
+audits/VALIDATION_REPORT.md
+```
+
+---
+
+## Synchronization Barrier
+
+After every parallel execution group the orchestrator MUST perform a synchronization barrier:
+
+```
+Wait for all subagents
+Collect verdicts
+Aggregate findings
+Apply governance rules
+```
+
+Only after all results are processed may the workflow proceed.
+
+---
+
+## Deterministic Constraint
+
+Parallel execution MUST NOT change the deterministic workflow order:
+
+```
+Specify → Clarify → Plan → Tasks → Analyze → Implement → Closure
+```
+
+Parallelism is permitted **inside steps**, never **between steps**.
+
+---
+
+## Failure Handling
+
+If any parallel subagent returns:
+
+```
+VERDICT: BLOCKED
+```
+
+The orchestrator MUST:
+
+1. Stop further execution in that step.
+2. Aggregate violations from all completed agents.
+3. Surface a remediation checklist.
+4. Prevent the workflow from advancing.
 
 ---
 

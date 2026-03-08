@@ -845,6 +845,94 @@ AI agents must refuse to continue if the trust chain is violated or if a stage l
 
 ---
 
+## Architecture Self‑Healing System (Advanced AI Governance)
+
+Zidney implements an **Architecture Self‑Healing mechanism** designed for AI‑assisted development environments.
+
+The purpose of this system is to ensure that when an AI agent introduces a change that violates architectural constraints, the system can **automatically detect, diagnose, and suggest a compliant repair strategy**.
+
+This mechanism integrates the following components:
+
+- `scripts/ai-guard.ts`
+- `scripts/infra-audit.ts`
+- `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
+- `docs/ai/context/ai-architecture-brain.json`
+- GitNexus MCP knowledge graph
+
+### Self‑Healing Workflow
+
+When an architectural violation is detected:
+
+1. `ai-guard.ts` identifies the rule violation.
+2. The violation is compared against `ARCHITECTURE_MAP.json`.
+3. `infra-audit.ts` analyzes the dependency graph and architecture layer rules.
+4. The AI Architecture Brain (`ai-architecture-brain.json`) provides context about module relationships.
+5. GitNexus MCP may be used to determine dependency flows and blast radius.
+
+The AI agent must then **repair the architecture instead of bypassing the rule**.
+
+### Examples of Self‑Healing Behavior
+
+Example 1 — Illegal Import
+
+Violation:
+
+apps/api importing from apps/backoffice
+
+Repair strategy:
+
+Move shared logic into a new `packages/*` module and update imports.
+
+Example 2 — Undeclared Module
+
+Violation:
+
+New module detected under `packages/` not declared in `ARCHITECTURE_MAP.json`.
+
+Repair strategy:
+
+AI must propose running:
+
+```
+bun run arch:add-module <module-path>
+```
+
+Example 3 — Layer Violation
+
+Violation:
+
+UI module importing domain logic incorrectly.
+
+Repair strategy:
+
+Refactor logic into a domain package and expose via API client.
+
+### AI Repair Requirement
+
+If `ai-guard.ts` or `infra-audit.ts` reports violations, AI agents must:
+
+1. Stop code generation.
+2. Diagnose the violation.
+3. Propose an architecture‑compliant fix.
+4. Regenerate code that satisfies governance rules.
+
+AI agents **must never suppress or bypass architecture validation scripts**.
+
+### Self‑Healing Audit Trigger
+
+AI agents should assume the following validation pipeline exists locally and in CI:
+
+```
+bun scripts/ai-guard.ts
+bun scripts/infra-audit.ts
+```
+
+If violations occur, AI must reason about the architecture graph and correct the structure before proceeding.
+
+This architecture self‑healing mechanism ensures Zidney remains **structurally stable even under autonomous AI‑driven development workflows**.
+
+---
+
 ## Auto‑Generated AI Architecture Intelligence Layer
 
 Zidney maintains an **AI‑readable architecture intelligence layer** to make automated reasoning about the codebase deterministic.
