@@ -221,8 +221,13 @@ type ModuleBoundaries = {
 - File present but malformed JSON → `console.error` + `process.exit(1)` (hard failure per FR-001)
 - File present and valid → parse and return
 
+> **Architectural Decision — NFR-003 governs the missing-file case**:  
+> FR-001 states "MUST fail with a clear error if the file is missing or malformed." NFR-003 states "must continue to work correctly if module-boundaries.json does not yet exist."  
+> These requirements conflict for the missing-file case only. NFR-003 takes precedence for this infra-rollout stage: module-boundaries.json is a new file being introduced progressively, so ai-guard.ts must not break existing installations that do not yet have it.  
+> FR-001's "fail" requirement is interpreted to govern **malformed/invalid** JSON only. Missing file = warn + fallback. Malformed/invalid file = process.exit(1).
+
 ```typescript
-function loadModuleBoundaries(): ModuleBoundaries | null {
+export function loadModuleBoundaries(): ModuleBoundaries | null {
   if (!existsSync(BOUNDARIES_PATH)) {
     console.warn(
       '[ai-guard] WARNING: module-boundaries.json not found — falling back to ARCHITECTURE_MAP.json only'
@@ -235,8 +240,10 @@ function loadModuleBoundaries(): ModuleBoundaries | null {
     if (
       !parsed.layers ||
       typeof parsed.layers !== 'object' ||
+      Array.isArray(parsed.layers) ||
       !parsed.allowed_dependencies ||
       typeof parsed.allowed_dependencies !== 'object' ||
+      Array.isArray(parsed.allowed_dependencies) ||
       !parsed.forbidden_dependencies ||
       typeof parsed.forbidden_dependencies !== 'object' ||
       Array.isArray(parsed.forbidden_dependencies)
@@ -262,7 +269,7 @@ function loadModuleBoundaries(): ModuleBoundaries | null {
 **Key differences from infra-audit.ts version**: Reads BOTH tsconfig.json AND tsconfig.base.json (merged), to capture `@zidney/api-client` which is only in `tsconfig.base.json`. Uses same strip-`/*` pattern. `tsconfig.json` entries take precedence for conflicts.
 
 ```typescript
-function loadTsAliases(): TsAliasMap[] {
+export function loadTsAliases(): TsAliasMap[] {
   const configs = ['tsconfig.json', 'tsconfig.base.json']
   const result: TsAliasMap[] = []
   const seen = new Set<string>()
@@ -473,8 +480,8 @@ violations.push(
 | `TsAliasMap` interface                     | Type                   | After `ArchitectureBrain` type     |
 | `CrossCuttingRule` type                    | Type                   | After `TsAliasMap`                 |
 | `ModuleBoundaries` type                    | Type                   | After `CrossCuttingRule`           |
-| `loadModuleBoundaries()`                   | Function               | After `loadArchitectureBrain()`    |
-| `loadTsAliases()`                          | Function               | After `loadModuleBoundaries()`     |
+| `loadModuleBoundaries()`                   | Exported function      | After `loadArchitectureBrain()`    |
+| `loadTsAliases()`                          | Exported function      | After `loadModuleBoundaries()`     |
 | `getLayerForModule()`                      | Helper                 | After `validateRelativeLeaks()`    |
 | `resolveImportToModule()`                  | Helper                 | After `getLayerForModule()`        |
 | `matchesGlobPattern()`                     | Helper                 | After `resolveImportToModule()`    |
@@ -763,6 +770,8 @@ This prevents `process.exit(1)` from terminating the Vitest runner during malfor
 - `bun run ai-guard` → exit 0
 - `bun run arch:audit` → 0 undeclared modules
 - `vitest run tests/unit/ai-guard/ai-guard-boundaries.test.ts` → all pass (note: `test:unit` enumerates named workspace projects and excludes the root project where this test lives — use `vitest run` directly)
+
+> **NFR-004 Performance Budget**: `bun run ai-guard` must complete in under 30 seconds on a full monorepo scan. Validated by T024 (wall-clock measurement). The implementation performs a single-pass file scan with O(n × m) complexity where n = source files and m = import statements per file; no recursive disk traversal or network calls. Expected runtime is well under 30 s for a monorepo of ≤ 200 source files on any CI runner.
 
 **On success**: Mark stage `IN PROGRESS → BACKEND CLOSED`.
 

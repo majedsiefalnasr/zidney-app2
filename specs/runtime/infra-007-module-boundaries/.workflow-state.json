@@ -11,9 +11,9 @@
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": true,
-  "tasks_total": 25,
+  "tasks_total": 26,
   "tasks_completed": 0,
-  "analyze_attempts": 4,
+  "analyze_attempts": 5,
   "analyze_last_blocked_at": "2025-07-17T02:00:00.000Z",
   "analyze_hard_stop_issued": true,
   "analyze_user_override_justification": "The remaining blockers are well-scoped implementation issues (alias loader warning, missing error-path tests, and test file placement). They do not indicate architectural flaws or governance violations. All previous attempt blockers were resolved, and these fixes are straightforward corrections to improve validation coverage and observability.",
@@ -113,16 +113,66 @@
       "severity": "MEDIUM",
       "rule": "T1: loadTsAliases() has no dedicated unit test coverage (speckit.analyze 21/22 strict-pass failure)",
       "location": "tasks.md T018 — imports list and test case enumeration",
-      "resolved": false
+      "resolved": true
     },
     {
       "severity": "MEDIUM",
       "rule": "T018(d) fixture apps/mmc→apps/api produces 2 violations (layer + cross-cutting rule) — test isolation failure",
       "location": "tasks.md T018(d)",
+      "resolved": true
+    }
+  ],
+  "analyze_violations_attempt_5": [
+    {
+      "severity": "HIGH",
+      "rule": "S2: NFR-004 performance budget (≤30s) not addressed anywhere in plan.md or tasks.md",
+      "location": "plan.md Step 9 / tasks.md (no T024)",
+      "resolved": false
+    },
+    {
+      "severity": "HIGH",
+      "rule": "S4: Scenario 3 acceptance criterion #2 missing — no negative test (module registered → zero warnings)",
+      "location": "tasks.md T017b",
+      "resolved": false
+    },
+    {
+      "severity": "HIGH",
+      "rule": "FINDING-1: loadModuleBoundaries() missing Array.isArray for layers and allowed_dependencies — malformed object silently passes typeof 'object' check",
+      "location": "plan.md §2d loadModuleBoundaries()",
+      "resolved": false
+    },
+    {
+      "severity": "HIGH",
+      "rule": "FINDING-2: Spec contradiction — FR-001 'fail if missing' vs NFR-003 'continue if missing' — unresolved, constitutes governance blocker",
+      "location": "spec.md FR-001 + NFR-003",
+      "resolved": false
+    },
+    {
+      "severity": "HIGH",
+      "rule": "CHECK-2: T018(m) validateLayerBoundaries no-violation happy-path missing",
+      "location": "tasks.md T018",
+      "resolved": false
+    },
+    {
+      "severity": "HIGH",
+      "rule": "CHECK-2: T018(n) loadModuleBoundaries valid-file happy-path missing",
+      "location": "tasks.md T018",
+      "resolved": false
+    },
+    {
+      "severity": "HIGH",
+      "rule": "Missing export keyword on loadModuleBoundaries() in plan.md §2d — T018(j)+(k)+(l) direct imports will fail at compile time",
+      "location": "plan.md §2d",
+      "resolved": false
+    },
+    {
+      "severity": "HIGH",
+      "rule": "Missing export keyword on loadTsAliases() in plan.md §2e — T018(l) direct import will fail at compile time",
+      "location": "plan.md §2e",
       "resolved": false
     }
   ],
-  "last_updated": "2025-07-17T02:30:00.000Z",
+  "last_updated": "2025-07-17T04:00:00.000Z",
   "history": [
     {
       "event": "branch_created",
@@ -222,6 +272,34 @@
         "RemFix-L: T018(d) fixture changed apps/mmc→apps/api to apps/mmc→apps/backoffice (same ui layer, isolates cross-cutting rule to 1 violation)"
       ],
       "timestamp": "2025-07-17T02:00:00.000Z"
+    },
+    {
+      "event": "analyze_attempt_5_blocked",
+      "blocked_rules": [
+        "S2: NFR-004 ≤30s performance budget absent from plan/tasks (speckit.analyze)",
+        "S4: T017b negative case missing (speckit.analyze)",
+        "FINDING-1: Array.isArray bypass vector in loadModuleBoundaries() (Security Auditor)",
+        "FINDING-2: FR-001 vs NFR-003 spec contradiction unresolved (Security Auditor)",
+        "CHECK-2: T018(m) + T018(n) happy-path tests missing (QA Engineer)",
+        "Missing export on loadModuleBoundaries() and loadTsAliases() (Code Reviewer)"
+      ],
+      "timestamp": "2025-07-17T03:00:00.000Z"
+    },
+    {
+      "event": "analyze_attempt_6_remediations_applied",
+      "fixes": [
+        "RemFix-M: FINDING-1 — Array.isArray(parsed.layers) + Array.isArray(parsed.allowed_dependencies) guards added to loadModuleBoundaries() in plan.md §2d",
+        "RemFix-N: FINDING-2 — Architectural Decision note added to plan.md §2d; NFR-003 governs missing-file case; FR-001 governs malformed/invalid; resolved spec contradiction",
+        "RemFix-O: export keyword added to loadModuleBoundaries() in plan.md §2d",
+        "RemFix-P: export keyword added to loadTsAliases() in plan.md §2e",
+        "RemFix-Q: Summary table updated — loadModuleBoundaries() and loadTsAliases() now show 'Exported function'",
+        "RemFix-R: Plan.md Step 9 NFR-004 performance budget note added (≤30s expectation + rationale)",
+        "RemFix-S: T017b extended with negative case (module registered → zero warnings) in tasks.md",
+        "RemFix-T: T018(m) validateLayerBoundaries no-violation path added to tasks.md",
+        "RemFix-U: T018(n) loadModuleBoundaries valid-file happy-path added to tasks.md",
+        "RemFix-V: T024 performance wall-clock task added to tasks.md; tasks_total 25→26"
+      ],
+      "timestamp": "2025-07-17T04:00:00.000Z"
     }
   ]
 }

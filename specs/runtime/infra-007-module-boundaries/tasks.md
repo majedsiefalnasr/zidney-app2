@@ -19,9 +19,9 @@
 | 5     | Package Script and CI Step          | T014–T015 |
 | 6     | infra-audit.ts Enhancement (FR-008) | T016      |
 | 7     | Tests                               | T017–T018 |
-| 8     | Final Validation                    | T019–T023 |
+| 8     | Final Validation                    | T019–T024 |
 
-**TASKS_TOTAL**: 23
+**TASKS_TOTAL**: 26
 
 ---
 
@@ -88,8 +88,8 @@
 > Create two test files. They touch different directories and can be written concurrently.
 
 - [ ] T017a [P] Create `tests/static/module-boundaries.test.ts` — static test (no mocking, no behavioral logic) that reads and parses `docs/architecture/module-boundaries.json` and asserts: `layers.infrastructure.length === 4`, `layers.domain.length === 2`, `layers.runtime.length === 2`, `layers.ui.length === 5`, total module count across all layers === 13, and that the file is well-formed valid JSON (FR-001, FR-002 automated verification)
-- [ ] T017b [P] Create `tests/unit/infra-audit/infra-audit-boundaries.test.ts` — behavioral unit test for FR-008 undeclared-module detection: use a fixture JSON (or `vi.mock` on `readdirSync`) that omits a module present on disk (e.g., `packages/canary-unregistered-test`); import and invoke the undeclared-module detection logic from `scripts/infra-audit.ts`; assert it reports `undeclared module: packages/canary-unregistered-test` (FR-008 automated verification)
-- [ ] T018 [P] Create `tests/unit/ai-guard/ai-guard-boundaries.test.ts` — unit tests importing `validateLayerBoundaries`, `resolveImportToModule`, `matchesGlobPattern`, `loadModuleBoundaries`, and `loadTsAliases` from `scripts/ai-guard.ts`; use the `process.exit` spy pattern from plan.md Step 8 in `beforeEach`/`afterEach` for all error-path tests; covering: (a) layer violation `ui → domain` (`packages/ui-system` importing `packages/domain-core`), (b) layer violation `domain → runtime` (`packages/domain-core` importing `apps/api`), (c) layer violation `infrastructure → domain` (`packages/config` importing `packages/validation`), (d) cross-cutting rule `no_cross_app_imports` — use fixture `apps/mmc` importing `apps/backoffice` (both `ui` layer; same-layer allowed by matrix so only the cross-cutting rule fires — exactly one violation), (e) cross-cutting rule `packages_no_apps` (`packages/ui-system` importing `apps/api`), (f) alias resolution via `@zidney/ui` → `packages/ui-system` triggering `runtime → ui` violation, (g) alias resolution via `@zidney/api-client` (tsconfig.base.json only) resolves correctly, (h) `null` returned for external npm package imports (not flagged), (i) missing `module-boundaries.json` fallback: spy on `validateLayerBoundaries` (or use `vi.fn()`) and assert it is NOT called when `loadModuleBoundaries` returns `null` — tests the `boundaries ? validateLayerBoundaries(...) : []` guard in `runGuard()`, (j) `loadModuleBoundaries()` malformed-JSON path: mock `readFileSync` to return invalid JSON (e.g., `"{broken"`); use process.exit spy from plan.md Step 8; assert process.exit was called with code 1, (k) `loadModuleBoundaries()` structurally-invalid path: mock `readFileSync` to return valid JSON missing the `layers` field; use process.exit spy; assert process.exit was called with code 1, (l) `loadTsAliases()` file-parsing and merge behavior: mock `readFileSync` (and `existsSync`) via `vi.mock('node:fs')` to return synthetic tsconfig.json and tsconfig.base.json content with overlapping and distinct alias keys; call `loadTsAliases()` directly; assert aliases from both files are merged, tsconfig.json wins on key conflict, `/*` is stripped from alias keys and target values, and the result is deduplicated; also assert that `console.warn` is emitted (spy on `console.warn`) when `readFileSync` throws for one of the config files
+- [ ] T017b [P] Create `tests/unit/infra-audit/infra-audit-boundaries.test.ts` — behavioral unit test for FR-008 undeclared-module detection: use a fixture JSON (or `vi.mock` on `readdirSync`) that omits a module present on disk (e.g., `packages/canary-unregistered-test`); import and invoke the undeclared-module detection logic from `scripts/infra-audit.ts`; assert it reports `undeclared module: packages/canary-unregistered-test` (FR-008 automated verification); also test the negative case: construct the fixture JSON WITH `packages/canary-unregistered-test` present as a registered module; invoke the detection logic; assert zero undeclared-module warnings are produced (verifies the "fix working" half of FR-008 acceptance — Scenario 3 criterion #2)
+- [ ] T018 [P] Create `tests/unit/ai-guard/ai-guard-boundaries.test.ts` — unit tests importing `validateLayerBoundaries`, `resolveImportToModule`, `matchesGlobPattern`, `loadModuleBoundaries`, and `loadTsAliases` from `scripts/ai-guard.ts`; use the `process.exit` spy pattern from plan.md Step 8 in `beforeEach`/`afterEach` for all error-path tests; covering: (a) layer violation `ui → domain` (`packages/ui-system` importing `packages/domain-core`), (b) layer violation `domain → runtime` (`packages/domain-core` importing `apps/api`), (c) layer violation `infrastructure → domain` (`packages/config` importing `packages/validation`), (d) cross-cutting rule `no_cross_app_imports` — use fixture `apps/mmc` importing `apps/backoffice` (both `ui` layer; same-layer allowed by matrix so only the cross-cutting rule fires — exactly one violation), (e) cross-cutting rule `packages_no_apps` (`packages/ui-system` importing `apps/api`), (f) alias resolution via `@zidney/ui` → `packages/ui-system` triggering `runtime → ui` violation, (g) alias resolution via `@zidney/api-client` (tsconfig.base.json only) resolves correctly, (h) `null` returned for external npm package imports (not flagged), (i) missing `module-boundaries.json` fallback: spy on `validateLayerBoundaries` (or use `vi.fn()`) and assert it is NOT called when `loadModuleBoundaries` returns `null` — tests the `boundaries ? validateLayerBoundaries(...) : []` guard in `runGuard()`, (j) `loadModuleBoundaries()` malformed-JSON path: mock `readFileSync` to return invalid JSON (e.g., `"{broken"`); use process.exit spy from plan.md Step 8; assert process.exit was called with code 1, (k) `loadModuleBoundaries()` structurally-invalid path: mock `readFileSync` to return valid JSON missing the `layers` field; use process.exit spy; assert process.exit was called with code 1, (l) `loadTsAliases()` file-parsing and merge behavior: mock `readFileSync` (and `existsSync`) via `vi.mock('node:fs')` to return synthetic tsconfig.json and tsconfig.base.json content with overlapping and distinct alias keys; call `loadTsAliases()` directly; assert aliases from both files are merged, tsconfig.json wins on key conflict, `/*` is stripped from alias keys and target values, and the result is deduplicated; also assert that `console.warn` is emitted (spy on `console.warn`) when `readFileSync` throws for one of the config files, (m) `validateLayerBoundaries` no-violation path: given `filePath = 'packages/domain-core/src/index.ts'` and `imports = ['packages/logger']` (infrastructure layer, allowed for domain), assert the returned violations array has length 0; add a second assertion: `filePath = 'apps/frontoffice/src/index.ts'`, `imports = ['packages/config']` (infrastructure layer, allowed for ui), assert zero violations, (n) `loadModuleBoundaries` valid-file happy path: mock `readFileSync` to return syntactically valid, structurally complete JSON with all three required fields (`layers`, `allowed_dependencies`, `forbidden_dependencies`) present as plain objects; assert the function returns a non-null `ModuleBoundaries` object with `.layers`, `.allowed_dependencies`, and `.forbidden_dependencies` all populated
 
 ---
 
@@ -103,6 +103,7 @@
 - [ ] T022 Run `vitest run tests/unit/ai-guard/ai-guard-boundaries.test.ts` directly to confirm the new unit test file passes (the `test:unit` script enumerates named vitest projects which excludes the `root` project where this file lives — running the file directly ensures it is not silently skipped)
 - [ ] T022b Run `vitest run tests/unit/infra-audit/infra-audit-boundaries.test.ts` directly to confirm the FR-008 behavioral test passes
 - [ ] T023 Run `bun run test:static` and confirm all static tests pass including `tests/static/module-boundaries.test.ts`
+- [ ] T024 Measure wall-clock time of `bun run ai-guard` from repo root and confirm it completes in under 30 seconds on the full monorepo scan — NFR-004 (performance budget) automated verification
 
 ---
 
@@ -121,7 +122,7 @@ T008 → T009 → T010 → T011 → T012 → T013
                                      T017b (parallel with T017a and T018)
                                      T018 (parallel with T017a and T017b)
                                           ↓
-                                     T019 → T020 → T021 → T022 → T022b → T023
+                                     T019 → T020 → T021 → T022 → T022b → T023 → T024
 ```
 
 **Key sequential chains**:
@@ -167,7 +168,7 @@ T018:  tests/unit/ai-guard/ai-guard-boundaries.test.ts
 5. T014–T015: CI + script alignment (FR-009, FR-010)
 6. T016: infra-audit enhancement (FR-008, Scenario 3)
 7. T017–T018: Test coverage
-8. T019–T023: Final gates
+8. T019–T024: Final gates
 
 ---
 
