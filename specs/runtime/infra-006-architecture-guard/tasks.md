@@ -27,7 +27,7 @@ Generated: 2026-03-08
 
 ## Infrastructure Tasks
 
-- [ ] T001 Add `export` keyword to 7 pure functions in `scripts/ai-guard.ts` — additive only, no logic change
+- [x] T001 Add `export` keyword to 7 pure functions in `scripts/ai-guard.ts` — additive only, no logic change
   - Layer: Developer Tooling (governance scripts)
   - Transaction: Not required
   - Idempotency: Not required
@@ -36,7 +36,7 @@ Generated: 2026-03-08
   - Functions to export: `detectModule`, `detectFileModule`, `extractImports`, `validateRules`, `validateCrossAppImports`, `validateRelativeLeaks`, `validateArchitectureMap`
   - Functions NOT to export: `validateBranchNaming` (calls `process.exit`), `runGuard` (entry point)
 
-- [ ] T002 Add `"arch:guard": "bun scripts/ai-guard.ts"` script to root `package.json`
+- [x] T002 Add `"arch:guard": "bun scripts/ai-guard.ts"` script to root `package.json`
   - Layer: Developer Tooling (build scripts)
   - Add after the existing `"arch:fix"` script entry
   - Transaction: Not required
@@ -48,31 +48,31 @@ Generated: 2026-03-08
 
 ## Testing Tasks — Fixture Files
 
-- [ ] T003 [P] Create fixture file `tests/unit/ai-guard/fixtures/valid-package-imports.ts` — imports within packages only (baseline "should pass" fixture)
+- [x] T003 [P] Create fixture file `tests/unit/ai-guard/fixtures/valid-package-imports.ts` — imports within packages only (baseline "should pass" fixture)
   - Layer: Test Infrastructure
   - Content: two or three import statements importing from `packages/` paths only
   - Must be syntactically valid TypeScript
   - Transaction: Not required
 
-- [ ] T004 [P] Create fixture file `tests/unit/ai-guard/fixtures/cross-app-violation.ts` — apps/api importing from apps/mmc (cross-app violation fixture)
+- [x] T004 [P] Create fixture file `tests/unit/ai-guard/fixtures/cross-app-violation.ts` — apps/api importing from apps/mmc (cross-app violation fixture)
   - Layer: Test Infrastructure
   - Content: one import from `apps/mmc/src/something`
   - Must be syntactically valid TypeScript
   - Transaction: Not required
 
-- [ ] T005 [P] Create fixture file `tests/unit/ai-guard/fixtures/packages-import-apps-violation.ts` — packages/domain-core importing from apps/api (packages→apps violation fixture)
+- [x] T005 [P] Create fixture file `tests/unit/ai-guard/fixtures/packages-import-apps-violation.ts` — packages/domain-core importing from apps/api (packages→apps violation fixture)
   - Layer: Test Infrastructure
   - Content: one import from `apps/api/src/something`
   - Must be syntactically valid TypeScript
   - Transaction: Not required
 
-- [ ] T006 [P] Create fixture file `tests/unit/ai-guard/fixtures/relative-leak-violation.ts` — relative import containing apps/ path segment (relative leak violation fixture)
+- [x] T006 [P] Create fixture file `tests/unit/ai-guard/fixtures/relative-leak-violation.ts` — relative import containing apps/ path segment (relative leak violation fixture)
   - Layer: Test Infrastructure
   - Content: one relative import such as `../../apps/api/something`
   - Must be syntactically valid TypeScript
   - Transaction: Not required
 
-- [ ] T007 [P] Create fixture file `tests/unit/ai-guard/fixtures/clean-api-file.ts` — single import from packages/logger only (clean single-import baseline fixture)
+- [x] T007 [P] Create fixture file `tests/unit/ai-guard/fixtures/clean-api-file.ts` — single import from packages/logger only (clean single-import baseline fixture)
   - Layer: Test Infrastructure
   - Content: one import from `@zidney/logger` or `packages/logger`
   - Must be syntactically valid TypeScript
@@ -82,7 +82,7 @@ Generated: 2026-03-08
 
 ## Testing Tasks — Unit Tests
 
-- [ ] T008 Create unit test suite `tests/unit/ai-guard/ai-guard-validation.test.ts` with 7 describe blocks (one per exported function)
+- [x] T008 Create unit test suite `tests/unit/ai-guard/ai-guard-validation.test.ts` with 7 describe blocks (one per exported function)
   - Layer: Test Infrastructure
   - Depends on: T001 (exports required for import), T003–T007 (fixtures required for extractImports)
   - Transaction: Not required
@@ -99,7 +99,7 @@ Generated: 2026-03-08
 
 ## Testing Tasks — Static Tests
 
-- [ ] T009 Create static contract test `tests/static/05-architecture-guard.test.ts` — 7 assertions against ARCHITECTURE_CONTRACT.json and governance tooling
+- [x] T009 Create static contract test `tests/static/05-architecture-guard.test.ts` — 7 assertions against ARCHITECTURE_CONTRACT.json and governance tooling
   - Layer: Test Infrastructure
   - Transaction: Not required
   - Test cases:
