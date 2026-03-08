@@ -16,6 +16,35 @@ The objective is to ensure that both human developers and AI agents cannot accid
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+Step: tasks
+Risk Level: LOW
+Last Updated: 2026-03-08T04:00:00.000Z
+
+Tasks Generated:
+
+- Total: 9 atomic tasks
+- Infrastructure: 2 (export fns, package.json script)
+- Fixture files: 5
+- Unit tests: 1 (7 describe blocks)
+- Static tests: 1 (7 assertions)
+
+Deferred Scope:
+
+- Modifications to `scripts/ai-guard.ts` logic (already functional)
+- Modifications to `.husky/pre-commit` hook (already correct)
+
+Constitutional Compliance:
+
+- Task set compliant — drift analysis required before implementation
+
+Notes:
+Atomic task set generated. Drift analysis gate pending.
+
+---
+
 # Core Concept
 
 Zidney's architecture is defined by **Architecture Decision Records (ADR)** stored in:
@@ -310,32 +339,3 @@ After this stage:
 - the monorepo maintains strict system boundaries
 
 This stage transforms Zidney into a **governed architecture platform rather than a conventional code repository**.
-
----
-
-## Stage Status
-
-Status: DRAFT
-Step: plan
-Risk Level: LOW
-Last Updated: 2026-03-08T03:00:00.000Z
-
-Scope Planned:
-
-- Add `arch:guard` npm script to `package.json`
-- Export 7 pure functions from `scripts/ai-guard.ts` (additive, non-logic change)
-- Create unit tests: `tests/unit/ai-guard/ai-guard-validation.test.ts`
-- Create 5 fixture files in `tests/unit/ai-guard/fixtures/`
-- Create static test: `tests/static/05-architecture-guard.test.ts`
-
-Deferred Scope:
-
-- Modifications to `scripts/ai-guard.ts` logic (already functional)
-- Modifications to `.husky/pre-commit` hook (already correct)
-
-Constitutional Compliance:
-
-- Technical plan compliant — task generation authorized
-
-Notes:
-Technical plan complete. Guardian validation passed. Task breakdown in progress.
