@@ -66,12 +66,12 @@
 
 ---
 
-## Phase 5 — Package Script and CI Step (Parallel — T014 and T015 are independent)
+## Phase 5 — Package Script and CI Step (Sequential — T015 depends on T014)
 
-> Add the `ai-guard` npm script and update the CI step name. These two edits touch different files and can be done concurrently.
+> Add the `ai-guard` npm script first, then update CI to invoke it. T015 must run after T014 because the CI workflow references the script name that T014 introduces to `package.json`.
 
-- [ ] T014 [P] Add `"ai-guard": "bun scripts/ai-guard.ts"` to the `scripts` object in root `package.json` — insert it alphabetically before `"arch:add-module"` (or directly after `"arch:guard"`), preserving the existing `"arch:guard"` entry (plan.md §File 3)
-- [ ] T015 [P] In `.github/workflows/ci.yml`, rename the step at line 82 from `name: Run AI-Guard architecture check` to `name: module-boundary-validation` and update `run: bun scripts/ai-guard.ts` to `run: bun run ai-guard` — no change to the job graph, `needs:` dependencies, or job name (plan.md §File 4)
+- [ ] T014 Add `"ai-guard": "bun scripts/ai-guard.ts"` to the `scripts` object in root `package.json` — insert it alphabetically before `"arch:add-module"` (or directly after `"arch:guard"`), preserving the existing `"arch:guard"` entry (plan.md §File 3)
+- [ ] T015 ⚠️ Depends on T014 — run only after T014 is complete. In `.github/workflows/ci.yml`, rename the step named `Run AI-Guard architecture check` (line ~82) to `name: module-boundary-validation` and update `run: bun scripts/ai-guard.ts` to `run: bun run ai-guard` — no change to the job graph, `needs:` dependencies, or job name (plan.md §File 4)
 
 ---
 
@@ -79,7 +79,7 @@
 
 > Extend the undeclared-module detection in `scripts/infra-audit.ts` to also check against `module-boundaries.json` so modules declared in boundaries but absent from `ARCHITECTURE_MAP.json` are not falsely reported, and modules present on disk but absent from both files are flagged (FR-008).
 
-- [ ] T016 Update the undeclared-module detection block in `scripts/infra-audit.ts` (around lines 999–1006) to load `docs/architecture/module-boundaries.json` alongside `ARCHITECTURE_MAP.json` and compare discovered `packages/*` and `apps/*` directory names against the union of both files' declared modules — any module present on disk but absent from `module-boundaries.json` must be reported as `undeclared module: <path>` per FR-008
+- [ ] T016 Update the undeclared-module detection block in `scripts/infra-audit.ts` (around lines 999–1006) to load `docs/architecture/module-boundaries.json` and compare discovered `packages/*` and `apps/*` directory names against the modules declared in `module-boundaries.json` — any module present on disk but absent from `module-boundaries.json` must be reported as `undeclared module: <path>` per FR-008 (do not use `ARCHITECTURE_MAP.json` as the reference source for this check — `module-boundaries.json` is authoritative)
 
 ---
 
@@ -88,7 +88,7 @@
 > Create two test files. They touch different directories and can be written concurrently.
 
 - [ ] T017 [P] Create `tests/static/module-boundaries.test.ts` — static test that reads and parses `docs/architecture/module-boundaries.json` and asserts: `layers.infrastructure.length === 4`, `layers.domain.length === 2`, `layers.runtime.length === 2`, `layers.ui.length === 5`, total module count across all layers === 13, and that the file is well-formed valid JSON (FR-001, FR-002 automated verification). Also add a test case that verifies FR-008 infra-audit.ts undeclared module detection: use a temp directory `packages/canary-unregistered-test` not present in `module-boundaries.json` and confirm `infra-audit.ts` would flag it as an undeclared module (mock the filesystem with `vi.mock` or use a fixture JSON without the temp module path to assert the detection logic)
-- [ ] T018 [P] Create `tests/unit/ai-guard/ai-guard-boundaries.test.ts` — unit tests importing `validateLayerBoundaries`, `resolveImportToModule`, and `matchesGlobPattern` from `scripts/ai-guard.ts`; covering: (a) layer violation `ui → domain` (`packages/ui-system` importing `packages/domain-core`), (b) layer violation `domain → runtime` (`packages/domain-core` importing `apps/api`), (c) layer violation `infrastructure → domain` (`packages/config` importing `packages/validation`), (d) cross-cutting rule `no_cross_app_imports` (`apps/mmc` importing `apps/api`), (e) cross-cutting rule `packages_no_apps` (`packages/ui-system` importing `apps/api`), (f) alias resolution via `@zidney/ui` → `packages/ui-system` triggering `runtime → ui` violation, (g) alias resolution via `@zidney/api-client` (tsconfig.base.json only) resolves correctly, (h) `null` returned for external npm package imports (not flagged), (i) missing `module-boundaries.json` fallback: `validateLayerBoundaries` returns empty array when `boundaries` is `null`
+- [ ] T018 [P] Create `tests/unit/ai-guard/ai-guard-boundaries.test.ts` — unit tests importing `validateLayerBoundaries`, `resolveImportToModule`, and `matchesGlobPattern` from `scripts/ai-guard.ts`; covering: (a) layer violation `ui → domain` (`packages/ui-system` importing `packages/domain-core`), (b) layer violation `domain → runtime` (`packages/domain-core` importing `apps/api`), (c) layer violation `infrastructure → domain` (`packages/config` importing `packages/validation`), (d) cross-cutting rule `no_cross_app_imports` (`apps/mmc` importing `apps/api`), (e) cross-cutting rule `packages_no_apps` (`packages/ui-system` importing `apps/api`), (f) alias resolution via `@zidney/ui` → `packages/ui-system` triggering `runtime → ui` violation, (g) alias resolution via `@zidney/api-client` (tsconfig.base.json only) resolves correctly, (h) `null` returned for external npm package imports (not flagged), (i) missing `module-boundaries.json` fallback: spy on `validateLayerBoundaries` (or use `vi.fn()`) and assert it is NOT called when `loadModuleBoundaries` returns `null` — tests the `boundaries ? validateLayerBoundaries(...) : []` guard in `runGuard()`
 
 ---
 

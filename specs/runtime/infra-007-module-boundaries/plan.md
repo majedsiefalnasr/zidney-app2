@@ -238,7 +238,8 @@ function loadModuleBoundaries(): ModuleBoundaries | null {
       !parsed.allowed_dependencies ||
       typeof parsed.allowed_dependencies !== 'object' ||
       !parsed.forbidden_dependencies ||
-      !Array.isArray(parsed.forbidden_dependencies)
+      typeof parsed.forbidden_dependencies !== 'object' ||
+      Array.isArray(parsed.forbidden_dependencies)
     ) {
       console.error(
         '[ai-guard] ERROR: module-boundaries.json is structurally invalid — missing required fields (layers, allowed_dependencies, forbidden_dependencies)'
@@ -758,7 +759,7 @@ This prevents `process.exit(1)` from terminating the Vitest runner during malfor
 - `bun run typecheck` → exit 0
 - `bun run ai-guard` → exit 0
 - `bun run arch:audit` → 0 undeclared modules
-- `bun run test:unit` → all pass
+- `vitest run tests/unit/ai-guard/ai-guard-boundaries.test.ts` → all pass (note: `test:unit` enumerates named workspace projects and excludes the root project where this test lives — use `vitest run` directly)
 
 **On success**: Mark stage `IN PROGRESS → BACKEND CLOSED`.
 

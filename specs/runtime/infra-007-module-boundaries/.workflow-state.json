@@ -13,7 +13,80 @@
   "plan_completed": true,
   "tasks_total": 23,
   "tasks_completed": 0,
-  "last_updated": "2026-03-08T00:00:00.000Z",
+  "analyze_attempts": 2,
+  "analyze_last_blocked_at": "2025-07-17T00:00:00.000Z",
+  "analyze_violations_attempt_1": [
+    {
+      "severity": "CRITICAL",
+      "rule": "C-001: FR-008 has no automated test",
+      "location": "tasks.md T017",
+      "resolved": true
+    },
+    {
+      "severity": "CRITICAL",
+      "rule": "C-002: resolveImportToModule/matchesGlobPattern not exported",
+      "location": "plan.md §2f",
+      "resolved": true
+    },
+    {
+      "severity": "CRITICAL",
+      "rule": "C-003: T022 test:unit excludes root vitest project",
+      "location": "tasks.md T022",
+      "resolved": true
+    },
+    {
+      "severity": "HIGH",
+      "rule": "loadModuleBoundaries() missing structural field validation",
+      "location": "plan.md §2d",
+      "resolved": true
+    },
+    {
+      "severity": "HIGH",
+      "rule": "process.exit spy pattern not prescribed in test plan",
+      "location": "plan.md Step 8",
+      "resolved": true
+    },
+    {
+      "severity": "MEDIUM",
+      "rule": "T015 [P] incorrect — T015 depends on T014",
+      "location": "tasks.md T015",
+      "resolved": false,
+      "note": "fix not applied in attempt 1 due to description text mismatch"
+    }
+  ],
+  "analyze_violations_attempt_2": [
+    {
+      "severity": "CRITICAL",
+      "rule": "H1: !Array.isArray(parsed.forbidden_dependencies) always true for Record<string,string[]> — process.exit(1) fires on every valid file",
+      "location": "plan.md §2d loadModuleBoundaries()",
+      "resolved": true
+    },
+    {
+      "severity": "HIGH",
+      "rule": "H2: T015 still has [P] marker; Phase 5 heading still says Parallel",
+      "location": "tasks.md Phase 5 / T015",
+      "resolved": true
+    },
+    {
+      "severity": "MEDIUM",
+      "rule": "M1: plan.md Step 9 still references bun run test:unit (excludes root project)",
+      "location": "plan.md Step 9",
+      "resolved": true
+    },
+    {
+      "severity": "MEDIUM",
+      "rule": "M2: T016 union wording contradicts FR-008 intent (module-boundaries.json only)",
+      "location": "tasks.md T016",
+      "resolved": true
+    },
+    {
+      "severity": "MEDIUM",
+      "rule": "M3: T018(i) null-boundaries test targets non-nullable validateLayerBoundaries signature directly",
+      "location": "tasks.md T018(i)",
+      "resolved": true
+    }
+  ],
+  "last_updated": "2025-07-17T00:00:00.000Z",
   "history": [
     {
       "event": "branch_created",
@@ -36,6 +109,37 @@
       "event": "tasks_complete",
       "tasks_total": 23,
       "timestamp": "2026-03-08T00:00:00.000Z"
+    },
+    {
+      "event": "analyze_attempt_1_blocked",
+      "blocked_rules": [
+        "C-001",
+        "C-002",
+        "C-003",
+        "loadModuleBoundaries structure",
+        "process.exit spy",
+        "T015 [P]"
+      ],
+      "timestamp": "2025-07-16T00:00:00.000Z"
+    },
+    {
+      "event": "analyze_attempt_2_blocked",
+      "blocked_rules": [
+        "Array.isArray regression in loadModuleBoundaries",
+        "Phase 5 T015 [P] persists"
+      ],
+      "timestamp": "2025-07-17T00:00:00.000Z"
+    },
+    {
+      "event": "analyze_attempt_3_remediations_applied",
+      "fixes": [
+        "RemFix-A: Array.isArray→typeof check in plan.md §2d",
+        "RemFix-B: Phase 5 Sequential+T015 in tasks.md",
+        "RemFix-C: Step 9 vitest run in plan.md",
+        "RemFix-D: T016 union→module-boundaries.json in tasks.md",
+        "RemFix-E: T018(i) null spy in tasks.md"
+      ],
+      "timestamp": "2025-07-17T00:00:00.000Z"
     }
   ]
 }
