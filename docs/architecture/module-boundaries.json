@@ -1,0 +1,63 @@
+{
+  "version": "1.0",
+  "description": "Authoritative module boundary map for Zidney monorepo. Loaded by scripts/ai-guard.ts as the primary layer classification and dependency matrix source. Complements docs/architecture/intelligence/ARCHITECTURE_MAP.json which retains per-module metadata.",
+  "layers": {
+    "infrastructure": [
+      "packages/logger",
+      "packages/config",
+      "packages/types",
+      "packages/redis-utils"
+    ],
+    "domain": ["packages/domain-core", "packages/validation"],
+    "runtime": ["apps/api", "apps/worker"],
+    "ui": [
+      "apps/mmc",
+      "apps/backoffice",
+      "apps/frontoffice",
+      "packages/ui-system",
+      "packages/api-client"
+    ]
+  },
+  "allowed_dependencies": {
+    "infrastructure": ["infrastructure"],
+    "domain": ["infrastructure", "domain"],
+    "runtime": ["domain", "infrastructure"],
+    "ui": ["ui", "infrastructure"]
+  },
+  "forbidden_dependencies": {
+    "infrastructure": ["domain", "runtime", "ui"],
+    "domain": ["runtime", "ui"],
+    "runtime": ["ui"],
+    "ui": ["runtime"]
+  },
+  "cross_cutting_rules": [
+    {
+      "rule": "packages_no_apps",
+      "description": "Packages must not import from apps",
+      "source_pattern": "packages/*",
+      "target_pattern": "apps/*",
+      "action": "FORBIDDEN"
+    },
+    {
+      "rule": "no_cross_app_imports",
+      "description": "Apps must not import from other apps",
+      "source_pattern": "apps/*",
+      "target_pattern": "apps/*",
+      "action": "FORBIDDEN"
+    },
+    {
+      "rule": "runtime_no_ui_system",
+      "description": "Runtime services must not import Vue component packages",
+      "source": ["apps/api", "apps/worker"],
+      "target": ["packages/ui-system"],
+      "action": "FORBIDDEN"
+    },
+    {
+      "rule": "ui_no_domain_packages",
+      "description": "UI modules must not import domain logic directly",
+      "source_layer": "ui",
+      "target": ["packages/domain-core", "packages/validation"],
+      "action": "FORBIDDEN"
+    }
+  ]
+}

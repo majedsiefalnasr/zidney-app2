@@ -18,7 +18,7 @@
  */
 
 import { execSync } from 'node:child_process'
-import { readFileSync } from 'node:fs'
+import { existsSync, readFileSync } from 'node:fs'
 
 function getCurrentBranch(): string {
   try {
@@ -82,11 +82,38 @@ type ArchitectureBrain = {
   edges?: { from: string; to: string }[]
 }
 
+export interface TsAliasMap {
+  alias: string
+  target: string
+}
+
+type CrossCuttingRule = {
+  rule: string
+  description?: string
+  action: 'FORBIDDEN'
+  source_pattern?: string
+  target_pattern?: string
+  source?: string[]
+  target?: string[]
+  source_layer?: string
+}
+
+type ModuleBoundaries = {
+  version: string
+  description?: string
+  layers: Record<string, string[]>
+  allowed_dependencies: Record<string, string[]>
+  forbidden_dependencies: Record<string, string[]>
+  cross_cutting_rules?: CrossCuttingRule[]
+}
+
 const CONTRACT_PATH = 'docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json'
 
 const ARCH_MAP_PATH = 'docs/architecture/intelligence/ARCHITECTURE_MAP.json'
 
 const AI_BRAIN_PATH = 'docs/ai/context/ai-architecture-brain.json'
+
+const BOUNDARIES_PATH = 'docs/architecture/module-boundaries.json'
 
 function loadContract(): ArchitectureContract {
   const raw = readFileSync(CONTRACT_PATH, 'utf-8')
@@ -109,6 +136,72 @@ function loadArchitectureBrain(): ArchitectureBrain | null {
   } catch {
     return null
   }
+}
+
+export function loadModuleBoundaries(): ModuleBoundaries | null {
+  if (!existsSync(BOUNDARIES_PATH)) {
+    console.warn(
+      '[ai-guard] WARNING: module-boundaries.json not found — falling back to ARCHITECTURE_MAP.json only'
+    )
+    return null
+  }
+  try {
+    const raw = readFileSync(BOUNDARIES_PATH, 'utf-8')
+    const parsed = JSON.parse(raw) as ModuleBoundaries
+    if (
+      !parsed.layers ||
+      typeof parsed.layers !== 'object' ||
+      Array.isArray(parsed.layers) ||
+      !parsed.allowed_dependencies ||
+      typeof parsed.allowed_dependencies !== 'object' ||
+      Array.isArray(parsed.allowed_dependencies) ||
+      !parsed.forbidden_dependencies ||
+      typeof parsed.forbidden_dependencies !== 'object' ||
+      Array.isArray(parsed.forbidden_dependencies)
+    ) {
+      console.error(
+        '[ai-guard] ERROR: module-boundaries.json is structurally invalid — missing required fields (layers, allowed_dependencies, forbidden_dependencies)'
+      )
+      process.exit(1)
+    }
+    return parsed
+  } catch {
+    console.error(
+      '[ai-guard] ERROR: module-boundaries.json is malformed — cannot validate boundaries'
+    )
+    process.exit(1)
+  }
+}
+
+export function loadTsAliases(): TsAliasMap[] {
+  const configs = ['tsconfig.json', 'tsconfig.base.json']
+  const result: TsAliasMap[] = []
+  const seen = new Set<string>()
+
+  for (const configFile of configs) {
+    try {
+      if (!existsSync(configFile)) continue
+      const json = JSON.parse(readFileSync(configFile, 'utf-8'))
+      const pathsConfig = json?.compilerOptions?.paths as Record<string, string[]> | undefined
+      if (!pathsConfig) continue
+
+      for (const key of Object.keys(pathsConfig)) {
+        const cleanKey = key.replace('/*', '')
+        if (seen.has(cleanKey)) continue
+        const rawTarget = pathsConfig[key]?.[0]
+        if (!rawTarget) continue
+        const cleanTarget = rawTarget.replace('/*', '')
+        seen.add(cleanKey)
+        result.push({ alias: cleanKey, target: cleanTarget })
+      }
+    } catch (err) {
+      console.warn(
+        `[ai-guard] WARNING: failed to load aliases from ${configFile} — alias-based boundary checks may be incomplete`,
+        err instanceof Error ? err.message : String(err)
+      )
+    }
+  }
+  return result
 }
 
 function getChangedFiles(): string[] {
@@ -302,6 +395,124 @@ export function validateRelativeLeaks(_filePath: string, imports: string[]): str
   return violations
 }
 
+function getLayerForModule(modulePath: string, boundaries: ModuleBoundaries): string | null {
+  for (const [layer, modules] of Object.entries(boundaries.layers)) {
+    if (modules.includes(modulePath)) return layer
+  }
+  return null
+}
+
+export function resolveImportToModule(importPath: string, aliases: TsAliasMap[]): string | null {
+  // 1. Try alias resolution — longest matching alias wins
+  let bestMatch: TsAliasMap | null = null
+  for (const entry of aliases) {
+    const { alias } = entry
+    if (importPath === alias || importPath.startsWith(`${alias}/`)) {
+      if (!bestMatch || alias.length > bestMatch.alias.length) {
+        bestMatch = entry
+      }
+    }
+  }
+
+  if (bestMatch) {
+    // Normalize target like "packages/ui-system/src/index.ts" → "packages/ui-system"
+    // Also handle leading "./" (e.g., "./packages/logger/src")
+    const cleanTarget = bestMatch.target.replace(/^\.\//, '')
+    const parts = cleanTarget.split('/')
+    if (parts.length >= 2 && (parts[0] === 'packages' || parts[0] === 'apps')) {
+      return `${parts[0]}/${parts[1]}`
+    }
+  }
+
+  // 2. Direct monorepo path (no alias needed)
+  if (importPath.startsWith('packages/') || importPath.startsWith('apps/')) {
+    return importPath.split('/').slice(0, 2).join('/')
+  }
+
+  // 3. External npm package — not a monorepo module
+  return null
+}
+
+export function matchesGlobPattern(modulePath: string, pattern: string): boolean {
+  if (pattern.endsWith('/*')) {
+    // "apps/*" matches "apps/mmc", "apps/api", etc. but NOT "apps" itself
+    return modulePath.startsWith(pattern.slice(0, -1))
+  }
+  return modulePath === pattern
+}
+
+function ruleSourceMatches(
+  rule: CrossCuttingRule,
+  sourceModule: string,
+  sourceLayer: string
+): boolean {
+  if (rule.source_pattern !== undefined)
+    return matchesGlobPattern(sourceModule, rule.source_pattern)
+  if (rule.source !== undefined) return rule.source.includes(sourceModule)
+  if (rule.source_layer !== undefined) return sourceLayer === rule.source_layer
+  return false
+}
+
+function ruleTargetMatches(rule: CrossCuttingRule, targetModule: string): boolean {
+  if (rule.target_pattern !== undefined)
+    return matchesGlobPattern(targetModule, rule.target_pattern)
+  if (rule.target !== undefined) return rule.target.includes(targetModule)
+  return false
+}
+
+export function validateLayerBoundaries(
+  filePath: string,
+  imports: string[],
+  boundaries: ModuleBoundaries,
+  aliases: TsAliasMap[]
+): string[] {
+  const violations: string[] = []
+
+  // Determine source module full path (e.g., "apps/mmc", "packages/ui-system")
+  const pathParts = filePath.split('/')
+  if (pathParts[0] !== 'apps' && pathParts[0] !== 'packages') return violations
+  const sourceModule = `${pathParts[0]}/${pathParts[1]}`
+
+  const sourceLayer = getLayerForModule(sourceModule, boundaries)
+  if (!sourceLayer) return violations // Undeclared module — infra-audit will warn
+
+  const allowedLayers = boundaries.allowed_dependencies[sourceLayer] ?? []
+  const crossCuttingRules = boundaries.cross_cutting_rules ?? []
+
+  for (const imp of imports) {
+    const targetModule = resolveImportToModule(imp, aliases)
+    if (!targetModule) continue
+    if (targetModule === sourceModule) continue
+
+    const targetLayer = getLayerForModule(targetModule, boundaries)
+    if (!targetLayer) continue // Undeclared target module — skip
+
+    // Layer matrix check: target layer must be in source's allowed_dependencies
+    if (!allowedLayers.includes(targetLayer)) {
+      violations.push(
+        `ARCHITECTURE VIOLATION — layer violation: ${sourceLayer} → ${targetLayer}: ` +
+          `${sourceModule} may not import ${targetModule}`
+      )
+      // Continue to also check cross-cutting rules — we want all violations reported
+    }
+
+    // Cross-cutting rules (evaluated independently of layer matrix)
+    for (const rule of crossCuttingRules) {
+      if (
+        ruleSourceMatches(rule, sourceModule, sourceLayer) &&
+        ruleTargetMatches(rule, targetModule)
+      ) {
+        violations.push(
+          `ARCHITECTURE VIOLATION — cross-cutting rule [${rule.rule}]: ` +
+            `${sourceModule} → ${targetModule} is forbidden`
+        )
+      }
+    }
+  }
+
+  return violations
+}
+
 function getModuleDepsFromBrain(modulePath: string, brain: ArchitectureBrain): string[] {
   if (!brain?.edges) return []
 
@@ -367,6 +578,13 @@ function runGuard() {
 
   const archMap = loadArchitectureMap()
 
+  const boundaries = loadModuleBoundaries()
+  const aliases = loadTsAliases()
+
+  if (boundaries) {
+    console.log('AI Guard: module-boundaries.json loaded — layer boundary validation enabled.')
+  }
+
   if (changedFiles.length === 0) {
     console.log('AI Guard: no changed files detected.')
     process.exit(0)
@@ -399,6 +617,10 @@ function runGuard() {
 
     const archMapViolations = validateArchitectureMap(file, fileModule, imports, archMap)
 
+    const layerBoundaryViolations = boundaries
+      ? validateLayerBoundaries(file, imports, boundaries, aliases)
+      : []
+
     const crossAppViolations = validateCrossAppImports(fileModule, file, imports)
 
     // Relative leak check always uses raw source imports — brain paths are module IDs, not import strings
@@ -423,7 +645,8 @@ function runGuard() {
       ...layerViolations.map((v) => `${file}: ${v}`),
       ...crossAppViolations.map((v) => `${file}: ${v}`),
       ...relativeLeakViolations.map((v) => `${file}: ${v}`),
-      ...archMapViolations.map((v) => `${file}: ${v}`)
+      ...archMapViolations.map((v) => `${file}: ${v}`),
+      ...layerBoundaryViolations.map((v) => `${file}: ${v}`)
     )
   }
 
