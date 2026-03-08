@@ -316,26 +316,26 @@ This stage transforms Zidney into a **governed architecture platform rather than
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-03-08T02:00:00.000Z
+Last Updated: 2026-03-08T03:00:00.000Z
 
-Scope Defined:
+Scope Planned:
 
 - Add `arch:guard` npm script to `package.json`
-- Create unit tests for `ai-guard.ts` validation functions
-- Create static architecture contract tests
-- Create test fixture files for deterministic test isolation
+- Export 7 pure functions from `scripts/ai-guard.ts` (additive, non-logic change)
+- Create unit tests: `tests/unit/ai-guard/ai-guard-validation.test.ts`
+- Create 5 fixture files in `tests/unit/ai-guard/fixtures/`
+- Create static test: `tests/static/05-architecture-guard.test.ts`
 
 Deferred Scope:
 
 - Modifications to `scripts/ai-guard.ts` logic (already functional)
 - Modifications to `.husky/pre-commit` hook (already correct)
-- Modifications to `ARCHITECTURE_CONTRACT.json` rules (already complete)
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. No `[NEEDS CLARIFICATION]` markers. Ready for technical planning.
+Technical plan complete. Guardian validation passed. Task breakdown in progress.
