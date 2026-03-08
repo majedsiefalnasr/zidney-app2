@@ -389,28 +389,30 @@ This stage finalizes the **architecture governance system for Zidney**.
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
 Last Updated: 2026-03-08T00:00:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- 13 modules classified into 4 architectural layers
-- `docs/architecture/module-boundaries.json` layer-first schema confirmed (distinct from ARCHITECTURE_MAP.json)
-- `ai-guard.ts` structural additions identified: 3 new functions, all existing validators preserved
-- Alias resolution: must use `loadTsAliases()` from `infra-audit.ts`
-- Existing violations are always errors (no warning mode)
-- CI step: `module-boundary-validation` in existing `arch-guard` job; `"ai-guard"` npm script to be added
+- `docs/architecture/module-boundaries.json` — layer-first JSON created with all 13 modules across 4 layers
+- `scripts/ai-guard.ts` — 14 backward-compatible additions: types, loaders, helper functions, `validateLayerBoundaries()`
+- `scripts/infra-audit.ts` — FR-008 undeclared module detection enhancement
+- `package.json` — `"ai-guard"` script added
+- `.github/workflows/ci.yml` — CI step renamed to `module-boundary-validation`
+- Unit + static tests for all 12 FRs
 
 Deferred Scope:
 
 - No business logic changes
 - No new npm packages
 - No tenant/license/attempt engine changes
+- `ARCHITECTURE_MAP.json` not modified (NFR-003)
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
+- Guardian validations: Architecture Checker PASS, API Designer PASS
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
