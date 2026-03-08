@@ -283,8 +283,11 @@ function loadTsAliases(): TsAliasMap[] {
         seen.add(cleanKey)
         result.push({alias: cleanKey, target: cleanTarget})
       }
-    } catch {
-      // Ignore parse errors for missing or malformed tsconfig files
+    } catch (err) {
+      console.warn(
+        `[ai-guard] WARNING: failed to load aliases from ${configFile} — alias-based boundary checks may be incomplete`,
+        err instanceof Error ? err.message : String(err)
+      )
     }
   }
   return result
