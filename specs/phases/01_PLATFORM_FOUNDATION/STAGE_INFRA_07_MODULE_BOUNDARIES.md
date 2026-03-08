@@ -389,27 +389,28 @@ This stage finalizes the **architecture governance system for Zidney**.
 ## Stage Status
 
 Status: DRAFT
-Step: specify
+Step: clarify
 Risk Level: LOW
 Last Updated: 2026-03-08T00:00:00.000Z
 
 Scope Defined:
 
 - 13 modules classified into 4 architectural layers
-- `docs/architecture/module-boundaries.json` to be produced
-- `ai-guard.ts` extended to load and validate module boundaries
-- CI `module-boundary-validation` step to be added
-- New module onboarding workflow documented
+- `docs/architecture/module-boundaries.json` layer-first schema confirmed (distinct from ARCHITECTURE_MAP.json)
+- `ai-guard.ts` structural additions identified: 3 new functions, all existing validators preserved
+- Alias resolution: must use `loadTsAliases()` from `infra-audit.ts`
+- Existing violations are always errors (no warning mode)
+- CI step: `module-boundary-validation` in existing `arch-guard` job; `"ai-guard"` npm script to be added
 
 Deferred Scope:
 
-- No business logic changes (explicitly excluded)
-- No new npm packages (explicitly excluded)
-- No tenant/license/attempt engine changes (not applicable)
+- No business logic changes
+- No new npm packages
+- No tenant/license/attempt engine changes
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.

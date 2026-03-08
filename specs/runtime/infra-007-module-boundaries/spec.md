@@ -483,10 +483,36 @@ This stage MUST NOT be implemented before STAGE_INFRA_05 and STAGE_INFRA_06 are 
 
 ## Clarifications
 
-No clarifications required. All design decisions have been resolved based on:
+### Session 2026-03-08
 
-- The stage file `STAGE_INFRA_07_MODULE_BOUNDARIES.md`
-- The existing `ARCHITECTURE_MAP.json` and `ARCHITECTURE_CONTRACT.json`
-- The `ai-guard.ts` source code analysis
-- The Zidney Constitution
-- The task specification provided
+**Q: Is `module-boundaries.json` structurally distinct from `ARCHITECTURE_MAP.json`, or does it extend or replace its schema?**
+
+A: Structurally distinct. Verified by direct inspection of both files. `ARCHITECTURE_MAP.json` (at `docs/architecture/intelligence/ARCHITECTURE_MAP.json`) uses a flat per-module format: each key is a module path (`packages/logger`, `apps/api`, etc.) containing `layer`, `description`, `criticality`, `allowed_dependencies`, and `forbidden_dependencies` per module. The `allowed_dependencies` arrays are all empty (`[]`) in the current file — enforcement is entirely via `forbidden_dependencies`. `module-boundaries.json` (at `docs/architecture/module-boundaries.json`, new file created by this stage) uses a layer-first format: `layers` as a map of layer-name → module list, `allowed_dependencies` and `forbidden_dependencies` keyed by layer name, and a `cross_cutting_rules` array. The two files coexist and complement each other: `module-boundaries.json` is the primary dependency-matrix authority; `ARCHITECTURE_MAP.json` retains per-module metadata (description, criticality) and module-specific forbidden overrides as a supplement. Additionally, `ARCHITECTURE_MAP.json` contains two classification discrepancies that `module-boundaries.json` corrects: `packages/types` is listed as `domain` in `ARCHITECTURE_MAP.json` but is authoritative `infrastructure` in `module-boundaries.json`; `packages/api-client` is listed as `infrastructure` in `ARCHITECTURE_MAP.json` but is authoritative `ui` in `module-boundaries.json`. `ARCHITECTURE_MAP.json` is not modified by this stage.
+
+---
+
+**Q: Does `ai-guard.ts` require structural changes (new functions, new validators) or only a new config-loading path?**
+
+A: Structural changes are required. Verified by reading `scripts/ai-guard.ts` in full. The current implementation: (1) has no reference to `docs/architecture/module-boundaries.json` — a new `BOUNDARIES_PATH` constant and `loadModuleBoundaries()` function must be added; (2) has no layer-based validation function — a new `validateLayerBoundaries()` is needed to apply the layer dependency matrix from `module-boundaries.json` (checking, for each import, whether the source module's layer is allowed to depend on the target module's layer); (3) has no cross-cutting rules evaluator for the structured `cross_cutting_rules` array in `module-boundaries.json`. The existing functions — `validateArchitectureMap`, `validateCrossAppImports`, `validateRelativeLeaks`, `validateRules`, `validateBranchNaming` — are preserved intact for backward compatibility (NFR-003). New violations from the module-boundaries checks must use the `ARCHITECTURE VIOLATION` prefix as specified in FR-012; the existing functions' prefixes (`Cross-app violation:`, `ARCH_MAP forbidden dependency:`) are not changed. The loading precedence in `runGuard()` is updated so `module-boundaries.json` is loaded first and its layer classification takes precedence over `ARCHITECTURE_MAP.json` for any module where both files define a layer.
+
+---
+
+**Q: What is the complete TypeScript alias set in `tsconfig.json` and `tsconfig.base.json`, and how should `ai-guard.ts` handle alias resolution?**
+
+A: Verified by reading both files. `tsconfig.json` (root) defines: `@/*` → `apps/*/src` (multi-target), `@zidney/app/*` → `apps/*/src`, `@zidney/package/*` → `packages/*/src`, `@zidney/ui` → `packages/ui-system/src/index.ts`, `@zidney/ui/*` → `packages/ui-system/src/*`, `@zidney/domain-core`, `@zidney/domain-core/*`, `@zidney/domain-core/mmc-dashboard`, `@zidney/logger`, `@zidney/logger/*`, `@zidney/types`, `@zidney/types/*`, `@zidney/validation`, `@zidney/validation/*`, `@zidney/redis-utils`, `@zidney/redis-utils/*`, `@zidney/config`, `@zidney/config/*`. Notably, `tsconfig.json` does NOT include `@zidney/api-client` in its paths (it is only in `tsconfig.base.json`). The current `ai-guard.ts` `resolveModulePath()` handles `@zidney/api-client` via direct `@zidney/` prefix stripping (`packages/api-client`), which is correct. However, `@zidney/ui/*` wildcard does NOT resolve correctly via plain prefix stripping alone — it would produce `packages/ui` instead of `packages/ui-system`. The implementation must adopt the `loadTsAliases()` pattern already present in `scripts/infra-audit.ts`, which reads `tsconfig.json` first and for each alias strips `/*` from both key and target before storing, then resolves imports by matching prefixes. This correctly maps `@zidney/ui/Button` → `packages/ui-system`. The new `ai-guard.ts` should call `loadTsAliases()` at startup (exactly as `infra-audit.ts` does) and use those aliases in its import resolution step.
+
+---
+
+**Q: Should existing boundary violations in the codebase be treated as blocking errors or as warnings on the first run after this stage ships?**
+
+A: Always blocking errors (exit code 1). No warning mode exists. Confirmed by SC-006 ("bun run ai-guard exits 0 on a clean monorepo"), SC-010 ("No violations exist in current codebase after this stage ships"), and the Risk Assessment entry: "Run `bun run ai-guard` against current codebase during implementation to identify and fix violations before stage goes live." The implementation workflow for this stage is: (1) implement the new module-boundaries enforcement in `ai-guard.ts`, (2) run `bun run ai-guard` against the full monorepo, (3) fix any violations found, (4) verify exit code 0 before marking the stage BACKEND CLOSED. There is no phased or graceful rollout — the tool either passes (exit 0) or fails (exit 1) upon completion of this stage.
+
+---
+
+**Q: What is the exact insertion point for `module-boundary-validation` in the actual CI pipeline, and does the `bun run ai-guard` script command already exist in `package.json`?**
+
+A: Confirmed by reading `.github/workflows/ci.yml` and root `package.json`. In `ci.yml`, the existing `arch-guard` job (Job 3, named "AI-Guard — Architecture Boundaries") already runs `bun scripts/ai-guard.ts` with `needs: [lint, typecheck]`. Unit tests have `needs: [lint, typecheck, arch-guard]`. This placement already satisfies FR-009's "after lint, before tests" requirement. The implementation change is: rename the step inside the `arch-guard` job from `"Run AI-Guard architecture check"` to `"module-boundary-validation"` (or add a new step by that name). No new GitHub Actions job is required — the existing job placement is correct. Regarding `package.json`: the current scripts include `"arch:guard": "bun scripts/ai-guard.ts"` but there is NO `"ai-guard"` script. FR-010 requires that `bun run ai-guard` works from the repository root. The implementation must add `"ai-guard": "bun scripts/ai-guard.ts"` to the root `package.json`. The existing `"arch:guard"` alias is preserved (no breaking changes to existing developer workflows).
+
+---
+
+**Clarification Status:** All ambiguities resolved. Codebase-verified findings documented above. Ready for technical planning.
