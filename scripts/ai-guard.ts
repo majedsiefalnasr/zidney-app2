@@ -142,7 +142,7 @@ function getChangedFiles(): string[] {
   }
 }
 
-function extractImports(filePath: string): string[] {
+export function extractImports(filePath: string): string[] {
   try {
     const content = readFileSync(filePath, 'utf-8')
 
@@ -161,7 +161,7 @@ function extractImports(filePath: string): string[] {
   }
 }
 
-function detectModule(importPath: string): string | null {
+export function detectModule(importPath: string): string | null {
   if (importPath.startsWith('@zidney/')) {
     return importPath.replace('@zidney/', '')
   }
@@ -177,7 +177,7 @@ function detectModule(importPath: string): string | null {
   return null
 }
 
-function detectFileModule(file: string): string | null {
+export function detectFileModule(file: string): string | null {
   if (file.startsWith('packages/')) {
     return file.split('/')[1]
   }
@@ -203,7 +203,7 @@ function resolveModulePath(module: string): string | null {
   return null
 }
 
-function validateArchitectureMap(
+export function validateArchitectureMap(
   filePath: string,
   _fileModule: string,
   imports: string[],
@@ -236,7 +236,7 @@ function validateArchitectureMap(
   return violations
 }
 
-function validateRules(
+export function validateRules(
   ruleType: string,
   fileModule: string,
   imports: string[],
@@ -260,7 +260,7 @@ function validateRules(
   return violations
 }
 
-function validateCrossAppImports(
+export function validateCrossAppImports(
   fileModule: string,
   filePath: string,
   imports: string[]
@@ -284,7 +284,7 @@ function validateCrossAppImports(
   return violations
 }
 
-function validateRelativeLeaks(_filePath: string, imports: string[]): string[] {
+export function validateRelativeLeaks(_filePath: string, imports: string[]): string[] {
   const violations: string[] = []
 
   for (const imp of imports) {
@@ -442,4 +442,7 @@ function runGuard() {
   console.log('AI Guard: architecture validation passed.')
 }
 
-runGuard()
+// Only execute when run directly (not when imported for unit testing)
+if ((import.meta as { main?: boolean }).main) {
+  runGuard()
+}
