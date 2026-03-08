@@ -316,17 +316,26 @@ This stage transforms Zidney into a **governed architecture platform rather than
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-08T00:00:00.000Z
+Last Updated: 2026-03-08T01:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Add `arch:guard` npm script to `package.json`
+- Create unit tests for `ai-guard.ts` validation functions
+- Create static architecture contract tests
+- Create test fixture files for deterministic test isolation
+
+Deferred Scope:
+
+- Modifications to `scripts/ai-guard.ts` logic (already functional)
+- Modifications to `.husky/pre-commit` hook (already correct)
+- Modifications to `ARCHITECTURE_CONTRACT.json` rules (already complete)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. No `[NEEDS CLARIFICATION]` markers. Clarification step pending.
