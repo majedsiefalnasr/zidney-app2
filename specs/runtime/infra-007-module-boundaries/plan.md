@@ -231,7 +231,21 @@ function loadModuleBoundaries(): ModuleBoundaries | null {
   }
   try {
     const raw = readFileSync(BOUNDARIES_PATH, 'utf-8')
-    return JSON.parse(raw) as ModuleBoundaries
+    const parsed = JSON.parse(raw) as ModuleBoundaries
+    if (
+      !parsed.layers ||
+      typeof parsed.layers !== 'object' ||
+      !parsed.allowed_dependencies ||
+      typeof parsed.allowed_dependencies !== 'object' ||
+      !parsed.forbidden_dependencies ||
+      !Array.isArray(parsed.forbidden_dependencies)
+    ) {
+      console.error(
+        '[ai-guard] ERROR: module-boundaries.json is structurally invalid — missing required fields (layers, allowed_dependencies, forbidden_dependencies)'
+      )
+      process.exit(1)
+    }
+    return parsed
   } catch {
     console.error(
       '[ai-guard] ERROR: module-boundaries.json is malformed — cannot validate boundaries'
@@ -289,7 +303,7 @@ function getLayerForModule(modulePath: string, boundaries: ModuleBoundaries): st
   return null
 }
 
-function resolveImportToModule(importPath: string, aliases: TsAliasMap[]): string | null {
+export function resolveImportToModule(importPath: string, aliases: TsAliasMap[]): string | null {
   // 1. Try alias resolution — longest matching alias wins
   let bestMatch: TsAliasMap | null = null
   for (const entry of aliases) {
@@ -320,7 +334,7 @@ function resolveImportToModule(importPath: string, aliases: TsAliasMap[]): strin
   return null
 }
 
-function matchesGlobPattern(modulePath: string, pattern: string): boolean {
+export function matchesGlobPattern(modulePath: string, pattern: string): boolean {
   if (pattern.endsWith('/*')) {
     // "apps/*" matches "apps/mmc", "apps/api", etc. but NOT "apps" itself
     return modulePath.startsWith(pattern.slice(0, -1))
@@ -713,7 +727,27 @@ The following sequence minimizes risk (each step is testable before the next pro
 - Unit test for `loadModuleBoundaries` missing file + malformed file cases
 - Unit test for `resolveImportToModule` alias resolution cases (especially `@zidney/ui`, `@zidney/api-client`)
 
-**Verification**: `bun run test:unit` passes. `bun run test:static` passes.
+**`process.exit` spy pattern** (mandatory for all tests that trigger `process.exit(1)`):
+
+```typescript
+import {vi, describe, it, expect, beforeEach, afterEach} from 'vitest'
+
+let exitSpy: ReturnType<typeof vi.spyOn>
+
+beforeEach(() => {
+  exitSpy = vi.spyOn(process, 'exit').mockImplementation((_code?: number) => {
+    throw new Error(`process.exit called with code ${_code}`)
+  })
+})
+
+afterEach(() => {
+  exitSpy.mockRestore()
+})
+```
+
+This prevents `process.exit(1)` from terminating the Vitest runner during malformed-JSON and missing-field error-path tests.
+
+**Verification**: `vitest run tests/unit/ai-guard/ai-guard-boundaries.test.ts` passes. `bun run test:static` passes.
 
 ### Step 9 — Final Validation
 
