@@ -389,18 +389,19 @@ This stage finalizes the **architecture governance system for Zidney**.
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
 Last Updated: 2026-03-08T00:00:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- `docs/architecture/module-boundaries.json` — layer-first JSON created with all 13 modules across 4 layers
-- `scripts/ai-guard.ts` — 14 backward-compatible additions: types, loaders, helper functions, `validateLayerBoundaries()`
-- `scripts/infra-audit.ts` — FR-008 undeclared module detection enhancement
-- `package.json` — `"ai-guard"` script added
-- `.github/workflows/ci.yml` — CI step renamed to `module-boundary-validation`
-- Unit + static tests for all 12 FRs
+- Total: 23 atomic tasks
+- Phase 1: 2 tasks (module-boundaries.json creation)
+- Phase 2-4: 11 tasks (ai-guard.ts extensions)
+- Phase 5: 2 tasks (package.json + ci.yml)
+- Phase 6: 1 task (infra-audit.ts FR-008)
+- Phase 7: 2 tasks (unit + static tests)
+- Phase 8: 5 tasks (validation gates)
 
 Deferred Scope:
 
@@ -411,8 +412,7 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Guardian validations: Architecture Checker PASS, API Designer PASS
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
