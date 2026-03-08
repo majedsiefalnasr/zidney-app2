@@ -1,23 +1,60 @@
 #!/bin/sh
+set -e
 
-# ── Pre-Push Quality Gate ───────────────────────────────────────────────────
-# Informational checks before push (non-blocking).
-# Development workflow: developers can push even if tests are failing locally,
-# but should investigate and fix failures.
-# CI will enforce full test suite on PR.
+# ── Zidney Pre-Push Governance Gate ─────────────────────────────────────────
+# This hook runs heavier checks than pre-commit. It validates architecture
+# integrity and repository health before code leaves the developer machine.
 #
-# NOTE: bun run lint and bun run typecheck are deferred until the pre-existing
-# baseline errors (12 lint errors + 2 TS2306 errors on develop, pre-infra-governance)
-# are resolved in a subsequent stage. lint-staged (pre-commit) already gates
-# per-file ESLint on every commit. Re-enable full-repo lint/typecheck here once
-# the baseline in apps/api, apps/mmc, apps/frontoffice is clean.
+# Philosophy:
+# - pre-commit  → ultra-fast developer feedback (<200ms)
+# - pre-push    → deeper validation (architecture + tests)
+# - CI          → full pipeline enforcement
 
-# Full unit test suite (informational — does not block push)
+
+# ── Detect changed files in this push ───────────────────────────────────────
+CHANGED_FILES=$(git diff --name-only HEAD @{u} 2>/dev/null || git diff --name-only HEAD)
+
+if [ -z "$CHANGED_FILES" ]; then
+  echo "No changes detected for push — skipping checks"
+  exit 0
+fi
+
+
+# ── Architecture Governance (blocking) ──────────────────────────────────────
+# Full architecture validation (not quick mode)
+echo "Running architecture governance validation..."
+bun scripts/ai-guard.ts
+
+
+# ── Infrastructure Audit (full) ─────────────────────────────────────────────
+echo "Running infrastructure audit..."
+bun scripts/infra-audit.ts
+
+
+# ── Unit Tests (informational) ──────────────────────────────────────────────
 echo "Running unit test suite..."
 if bun run test:unit 2>&1 | tail -20; then
   echo "✅ Unit tests passing — push will proceed."
 else
-  echo "⚠️  Unit tests failed locally. See above for details."
-  echo "   This is informational only. Push will proceed."
-  echo "   CI will enforce full test suite on PR."
+  echo "⚠️  Unit tests failed locally."
+  echo "   Push will still proceed, but CI will enforce tests on PR."
 fi
+
+
+# ── Optional TypeScript project validation ──────────────────────────────────
+TS_FILES=$(echo "$CHANGED_FILES" | grep -E '\.(ts|tsx)$' || true)
+
+if [ -n "$TS_FILES" ]; then
+  echo "Running project TypeScript validation..."
+  bunx tsc --noEmit --skipLibCheck || {
+    echo "❌ TypeScript validation failed — push blocked."
+    exit 1
+  }
+fi
+
+
+# ── Final Summary ───────────────────────────────────────────────────────────
+echo ""
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+echo "  Zidney Pre-Push Governance: PASSED"
+echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

@@ -1,17 +1,56 @@
 #!/bin/sh
+set -e
 
-# ── Staged-file quality gates (lint-staged) ────────────────────────────────
+# ── Detect staged files once (shared across steps) ─────────────────────────
+STAGED_FILES=$(git diff --cached --name-only --diff-filter=ACM | tr '\n' '\n')
+
+# Nothing staged → skip quickly
+if [ -z "$STAGED_FILES" ]; then
+  echo "No staged files — skipping hooks"
+  exit 0
+fi
+
+
+# ── Biome Formatter (staged files only, fast) ──────────────────────────────
+# Formats only staged files to avoid touching the entire repository.
+FORMAT_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|js|jsx|mjs|vue|json)$' || true)
+
+if [ -n "$FORMAT_FILES" ]; then
+  echo "Formatting staged files with Biome…"
+  echo "$FORMAT_FILES" | xargs -r bunx biome format --write
+  echo "$FORMAT_FILES" | xargs -r git add
+fi
+
+# ── Staged-file quality gates (lint-staged + Biome lint) ───────────────────
 # Runs Biome check --write on staged .ts/.tsx/.js/.jsx/.mjs/.vue/.json files.
 # Commit is blocked if any lint error remains after auto-fix.
 bunx lint-staged
 
-# ── AI Architecture Guard (hard gate) ──────────────────────────────────────
-# Checks ARCHITECTURE_CONTRACT.json for layer violations, dependency rule
-# violations, circular dependencies, and architecture drift.
-# Non-zero exit = commit blocked.
-bun scripts/ai-guard.ts
+# ── Optional TypeScript quick check (only if TS files changed) ─────────────
+TS_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx)$' || true)
 
-# ── Infrastructure Audit — Quick Mode (hard gate) ──────────────────────────
-# Runs structural governance checks (excludes slow file writes).
-# Non-zero exit = commit blocked.
-bun scripts/infra-audit.ts --quick
+if [ -n "$TS_FILES" ]; then
+  echo "Running TypeScript incremental validation…"
+  bunx tsc --noEmit --skipLibCheck
+fi
+
+# ── Architecture + Infrastructure Guards (skip if only docs/config changed) ──
+CODE_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|js|jsx|mjs|vue)$' || true)
+
+if [ -n "$CODE_FILES" ]; then
+  echo "Running architecture governance checks…"
+
+  # Run guards in parallel for faster commits
+  bun scripts/ai-guard.ts &
+  PID_AI=$!
+
+  bun scripts/infra-audit.ts --quick &
+  PID_INFRA=$!
+
+  wait $PID_AI
+  wait $PID_INFRA
+else
+  echo "Skipping architecture checks (no code files changed)"
+fi
+
+echo "✔ Pre-commit checks passed"
