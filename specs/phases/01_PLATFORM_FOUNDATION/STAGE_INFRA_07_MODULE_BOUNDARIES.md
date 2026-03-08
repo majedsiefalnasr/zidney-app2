@@ -388,34 +388,39 @@ This stage finalizes the **architecture governance system for Zidney**.
 
 ## Stage Status
 
-Status: IN PROGRESS
-Step: analyze
+Status: BACKEND CLOSED
+Step: implement
 Risk Level: LOW
-Last Updated: 2025-07-17T05:00:00.000Z
+Last Updated: 2025-07-18T00:00:00.000Z
 
-Drift Analysis: PASSED (all criteria — Attempt 6)
-Implementation: AUTHORIZED
+Implementation: COMPLETE
+Tasks: 26 / 26 completed
 
-Scope Authorized:
+Scope Closed:
 
-- docs/architecture/module-boundaries.json — new file (13 modules, 4 layers)
-- scripts/ai-guard.ts — 5 new exported functions (loadModuleBoundaries, loadTsAliases, resolveImportToModule, matchesGlobPattern, validateLayerBoundaries)
-- tests/static/module-boundaries.test.ts (T017a)
-- tests/unit/infra-audit/infra-audit-boundaries.test.ts (T017b)
-- 26 atomic tasks authorized for implementation
+- docs/architecture/module-boundaries.json — 13 modules, 4 layers, dependency matrix, 4 cross-cutting rules
+- scripts/ai-guard.ts — 5 exported functions: loadModuleBoundaries, loadTsAliases, resolveImportToModule, matchesGlobPattern, validateLayerBoundaries; wired into runGuard()
+- scripts/infra-audit.ts — findUndeclaredModulesFromBoundaries() + import.meta.main guard
+- tests/static/module-boundaries.test.ts — 7 static structure tests
+- tests/unit/infra-audit/infra-audit-boundaries.test.ts — 8 FR-008 behavioral tests
+- tests/unit/ai-guard/ai-guard-boundaries.test.ts — 28 unit tests (scenarios a–n)
+- package.json — ai-guard and test:unit:boundaries scripts
+- .github/workflows/ci.yml — module-boundary-validation step + Run module boundary unit tests step
+- All 43 tests pass; lint clean; typecheck clean; ai-guard 0.4s
 
 Deferred Scope:
 
-- No business logic changes
-- No new npm packages
-- No tenant/license/attempt engine changes
-- `ARCHITECTURE_MAP.json` not modified (NFR-003)
+- None — all 26 tasks complete. Pre-existing non-blocking observations recorded in VALIDATION_REPORT.md.
 
 Constitutional Compliance:
 
-- All drift criteria passed — implementation authorized
-- 4/4 guardian audits: PASS
-- Zero violations detected
+- ADR alignment verified
+- Implementation compliant with Zidney Constitution v1.2.0
+- Database-per-tenant isolation: not affected (no runtime code)
+- License middleware: not affected
+- Attempt engine snapshot: not affected
+- ARCHITECTURE_MAP.json not modified (NFR-003 preserved)
 
 Notes:
-Full drift analysis passed on Attempt 6 (5 prior attempts blocked — all remediations applied). Implementation gate open.
+Backend implementation complete. No structural backend modifications allowed.
+All 26 tasks delivered. 43 new tests. 3/3 pre-closure guardians PASS.
