@@ -1,6 +1,6 @@
 # Zidney AI Architecture Summary
 
-Generated: 2026-03-07T20:54:02.414Z
+Generated: 2026-03-08T20:31:02.989Z
 
 ## Layers
 
