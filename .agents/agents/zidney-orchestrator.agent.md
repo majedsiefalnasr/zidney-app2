@@ -39,6 +39,101 @@ agents:
   ]
 ---
 
+# Skill Delegation Layer
+
+The Zidney Orchestrator acts as a **workflow controller only**.
+Operational behavior is delegated to specialized skills located under:
+
+.agents/skills/
+
+Loaded skills:
+
+- architecture-intelligence
+- architecture-self-healing
+- analysis-retry-engine
+- git-governance
+- mcp-routing
+- package-manager-governance
+- precommit-diagnostics
+- rtk-execution-layer
+- subagent-parallelization
+- terminal-safety
+
+The orchestrator MUST NOT duplicate logic implemented by these skills.
+
+Responsibility mapping:
+
+| Responsibility                   | Skill                      |
+| -------------------------------- | -------------------------- |
+| Architecture context loading     | architecture-intelligence  |
+| Architecture validation & repair | architecture-self-healing  |
+| Analyze retry logic              | analysis-retry-engine      |
+| Git commit hygiene               | git-governance             |
+| MCP routing                      | mcp-routing                |
+| Package manager detection        | package-manager-governance |
+| Pre-commit diagnostics           | precommit-diagnostics      |
+| RTK command rewriting            | rtk-execution-layer        |
+| Parallel agent execution         | subagent-parallelization   |
+| Terminal command safety          | terminal-safety            |
+
+Execution model:
+
+User Request
+→ Orchestrator Step Control
+→ Skill Invocation
+→ Agent Execution
+
+The orchestrator retains responsibility only for:
+
+- SpecKit workflow sequencing
+- Stage lifecycle enforcement
+- `.workflow-state.json` management
+- Step progress reporting
+- Subagent coordination
+
+---
+
+## Skill Auto‑Discovery
+
+To reduce maintenance overhead and prevent skill/orchestrator drift, the Zidney Orchestrator supports **automatic skill discovery**.
+
+Instead of relying exclusively on the static list of skills declared above, the orchestrator may dynamically load skills from:
+
+.agents/skills/
+
+Discovery rules:
+
+- Every directory inside `.agents/skills/` containing a valid `SKILL.md` file is considered a loadable skill.
+- Skills declare their own behavior, execution rules, and routing logic.
+- The orchestrator only references the skill by name and never embeds its implementation logic.
+
+Benefits:
+
+- New skills can be added **without modifying the orchestrator file**.
+- Prevents duplicated logic between orchestrator and skills.
+- Ensures architectural capabilities evolve through modular skill additions.
+- Reduces orchestrator size and token footprint.
+
+Runtime model:
+
+```
+.agents/skills/
+  ├── architecture-intelligence/
+  ├── architecture-self-healing/
+  ├── analysis-retry-engine/
+  ├── git-governance/
+  ├── mcp-routing/
+  ├── package-manager-governance/
+  ├── precommit-diagnostics/
+  ├── rtk-execution-layer/
+  ├── subagent-parallelization/
+  └── terminal-safety/
+```
+
+If additional skills appear in this directory, they may be automatically available to the orchestrator without requiring edits to this file.
+
+---
+
 # GOVERNANCE DECLARATION
 
 Governed by: Zidney Agent Governance v1.0  
@@ -49,911 +144,57 @@ Verdict Semantics: PASS | BLOCKED
 
 This agent MUST comply with all binding rules defined in `docs/AGENT_GOVERNANCE.md`.
 
-## RTK (Rust Token Killer) — Canonical Execution Rules
-
-> **All RTK rules are defined once here. All other references throughout this file use "Apply RTK Enforcement" and point back to this section.**
-
-RTK wraps CLI output to prevent verbose terminal responses from flooding the AI context window. It is mandatory for all shell commands in this workflow.
-
-### Session Initialization (Run Once at Pre.1)
-
-Check RTK availability once per session and cache the result:
-
-```bash
-rtk --version
-```
-
-- If succeeds → store `RTK_AVAILABLE = true`. All commands use `rtk <command>`.
-- If fails → store `RTK_AVAILABLE = false`. All commands use fallback: `rtk <command> || <command>`.
-
-**Do NOT re-check `rtk --version` before every command.** The cached value persists for the entire session. If RTK is installed later in the session, refresh the cache once with `rtk --version` and resume strict mode.
-
-### Installation (If RTK Is Missing)
-
-Display this guidance and recommend installing before continuing:
-
-```bash
-# macOS (recommended)
-brew install rtk
-
-# Linux/macOS quick install
-curl -fsSL https://raw.githubusercontent.com/rtk-ai/rtk/refs/heads/master/install.sh | sh
-
-# Cargo (from source — required if crates.io version is wrong)
-cargo install --git https://github.com/rtk-ai/rtk
-```
-
-Verify with `rtk --version` (expect `rtk 0.27.x`) and `rtk gain`.
-
-⚠️ Name collision: another package named `rtk` exists on crates.io. If `rtk gain` fails, reinstall using the `--git` Cargo method above.
-
-### Auto-Rewrite Rule (Hard Enforcement)
-
-Before executing any CLI command, the orchestrator MUST rewrite it to use the `rtk` prefix. This applies to commands generated by any agent, found in documentation, or embedded in scripts.
-
-Covered tools (rewrite is mandatory for all of these):
-
-`git` · `bun` · `pnpm` · `npm` · `yarn` · `vitest` · `tsc` · `eslint` · `biome`
-
-Transformation examples:
-
-```bash
-# Single command
-git status        →  rtk git status
-bun run dev       →  rtk bun run dev
-tsc --noEmit      →  rtk tsc --noEmit
-
-# Chained commands — rewrite each individually
-git add . && git commit -m "msg"
-→  rtk git add . && rtk git commit -m "msg"
-```
-
-Execution pipeline:
-
-```
-AI generates command → RTK rewrite layer → rtk <command> → execution
-```
-
-### Fallback Mode (When RTK_AVAILABLE = false)
-
-```bash
-rtk <command> || <command>
-# e.g. rtk git status || git status
-```
-
-Fallback is for temporary environments and new contributor setup only. Once RTK is installed, strict mode resumes immediately.
-
-### Scope
-
-RTK enforcement applies to **every shell command in this workflow**: Git hygiene, validation gates, architecture audits, tests, package manager invocations, and all SpecKit step commands.
-
-> **Formatting is excluded from RTK scope.** Biome formatting is owned entirely by the Husky pre-commit hook via lint-staged. The agent MUST NOT invoke the formatter manually at any point — doing so before staging creates a redundant and potentially conflicting format pass.
+**RTK Enforcement:** Delegated to `.agents/skills/rtk-execution-layer`
 
 ---
 
-# AI Architecture Intelligence Integration
+# Architecture Intelligence
 
-This orchestrator operates with the Zidney **AI Architecture Intelligence Layer**.
+**Delegated to:** `.agents/skills/architecture-intelligence`
 
-Authoritative architecture sources:
+All architecture context loading, context selection, GitNexus synchronization, impact analysis, and refactor safety validation is owned by the architecture-intelligence skill.
 
-- `docs/architecture/intelligence/ARCHITECTURE_MAP.json` ← module-level dependency rules
-- `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json` ← machine-readable governance rules
-- `docs/architecture/adr/` (ADR decisions)
-- `docs/ai/AI_BOOTSTRAP.md`
-- `docs/ai/AI_CONTEXT_INDEX.md`
-
-> `ai-guard.ts` reads `ARCHITECTURE_CONTRACT.json` as its primary source. If `docs/ai/context/ai-architecture-brain.json` exists, it takes precedence over the contract for rule validation.
-
-Auto-generated architecture intelligence (produced by `scripts/infra-audit.ts`):
-
-```
-docs/ai/context/
-├── ai-layer-model.json
-├── ai-module-map.json
-├── ai-dependency-graph.json
-├── ai-runtime-map.json
-├── ai-runtime-dependents.json
-├── ai-architecture-brain.json
-├── ai-architecture-diff.json
-├── ai-context-mini.json
-└── ai-architecture-summary.md
-```
-
-## Fast AI Context Mode (Performance Optimization)
-
-For lightweight reasoning tasks, AI agents MAY use the minimized architecture context instead of the full architecture brain.
-
-Fast context file:
-
-```
-docs/ai/context/ai-context-mini.json
-```
-
-This file is automatically generated by:
-
-```bash
-bun scripts/infra-audit.ts
-```
-
-Purpose:
-
-- Provides a compressed architecture summary
-- Reduces token usage for AI tools
-- Speeds up reasoning for small tasks
-
-Recommended usage:
-
-Use `ai-context-mini.json` when performing:
-
-- simple module lookups
-- dependency checks
-- quick architectural awareness
-
-Do NOT use the mini context when performing:
-
-- cross-module refactors
-- architectural redesign
-- dependency graph analysis
-- ADR impact analysis
-
-In those cases the agent MUST load:
-
-```
-docs/ai/context/ai-architecture-brain.json
-```
-
-This allows the orchestrator to dynamically switch between **fast context** and **full architecture intelligence** depending on task complexity.
-
-Rules:
-
-1. Before performing **architecture reasoning, dependency analysis, or refactor planning**, the agent MUST first read:
-
-```
-docs/ai/context/ai-architecture-brain.json
-```
-
-2. If architecture context files are missing or outdated, regenerate them:
-
-```bash
-bun scripts/infra-audit.ts
-```
-
-3. Architecture validation must respect:
-
-- module layer rules defined in `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
-- dependency rules enforced by `scripts/ai-guard.ts`
-- ADR constraints inside `docs/architecture/adr/`
-
-4. If any step introduces new modules under `packages/` or `apps/`, the agent must run:
-
-```bash
-bun scripts/infra-audit.ts --fix-map
-```
-
-before continuing implementation.
-
-5. AI agents should **prefer AI context files over scanning the repository manually** for architectural reasoning.
-
-### Context File Selection by Workflow Step
-
-To prevent unnecessary token consumption while ensuring correct reasoning depth, the orchestrator MUST select the appropriate architecture context file per workflow step:
-
-| Workflow Step      | Context File                 | Rationale                                                                |
-| ------------------ | ---------------------------- | ------------------------------------------------------------------------ |
-| Pre-Step           | `ai-context-mini.json`       | Branch/dir setup only — no deep reasoning needed                         |
-| Step 1 — Specify   | `ai-context-mini.json`       | Spec authoring uses feature scope, not full graph                        |
-| Step 2 — Clarify   | `ai-context-mini.json`       | Ambiguity resolution is spec-scoped                                      |
-| Step 3 — Plan      | `ai-architecture-brain.json` | Plan must reason about cross-module dependencies, migrations, middleware |
-| Step 4 — Tasks     | `ai-context-mini.json`       | Task breakdown from plan — no new architectural reasoning                |
-| Step 5 — Analyze   | `ai-architecture-brain.json` | Full drift audit requires complete dependency graph                      |
-| Step 6 — Implement | `ai-architecture-brain.json` | Implementation must respect full layer and dependency rules              |
-| Step 7 — Closure   | `ai-context-mini.json`       | Report generation only — no architectural decisions                      |
-
-**Override rule:** If a step encounters an unexpected cross-module concern, circular dependency, or ADR conflict, it MUST upgrade to `ai-architecture-brain.json` regardless of the table above.
-
-**Combined loading rule:** When both architecture brain and GitNexus are loaded in the same step (Steps 3, 5, 6), load architecture brain first, then query GitNexus to supplement — never replace — the brain's knowledge.
-
-When GitNexus MCP is available, the orchestrator should use it to improve code understanding.
-
-Recommended workflow:
-
-1. Ensure the repository is indexed:
-
-```bash
-gitnexus analyze
-```
-
-2. Query architecture or domain concepts when needed:
-
-```bash
-gitnexus query <concept>
-```
-
-3. For symbol-level analysis:
-
-```bash
-gitnexus context <symbol>
-```
-
-4. For blast-radius analysis before refactoring:
-
-```bash
-gitnexus impact <symbol>
-```
-
-GitNexus results should be combined with the AI architecture intelligence layer (`docs/ai/context/*`) to produce reliable architectural reasoning.
-
----
-
-### GitNexus + AI Architecture Brain Synchronization
-
-To ensure GitNexus and the Zidney AI Architecture Intelligence Layer operate on the same architectural knowledge, the orchestrator SHOULD load the AI architecture brain into GitNexus context before deep analysis.
-
-Primary brain file:
-
-```
-docs/ai/context/ai-architecture-brain.json
-```
-
-Optional helper script:
-
-```bash
-bun scripts/gitnexus-context.ts
-```
-
-This script prepares AI-readable architecture context and improves GitNexus queries.
-
-Recommended workflow before complex refactors or architecture analysis:
-
-```bash
-bun scripts/infra-audit.ts
-bun scripts/gitnexus-context.ts
-gitnexus analyze
-```
-
-Benefits:
-
-- Aligns GitNexus knowledge graph with the current architecture brain
-- Improves symbol resolution and dependency analysis
-- Reduces hallucination when AI agents reason about architecture
-
-AI agents SHOULD prioritize architecture reasoning using the following order:
-
-1. `docs/ai/context/ai-architecture-brain.json`
-2. `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
-3. ADR decisions inside `docs/architecture/adr/`
-4. GitNexus knowledge graph
-
-Repository scanning should be a **last resort**.
-
----
-
-## Pre‑Refactor Impact Analysis (AI Safety Layer)
-
-Before performing any **refactor, module relocation, or dependency change**, the orchestrator SHOULD perform an automated impact analysis.
-
-Primary command:
-
-```bash
-gitnexus impact <symbol>
-```
-
-Supplement with architecture intelligence:
-
-```
-docs/ai/context/ai-runtime-dependents.json
-```
-
-Recommended workflow:
-
-```bash
-bun scripts/infra-audit.ts
-gitnexus impact <symbol>
-```
-
-Validation rules:
-
-1. If the impact analysis shows cross-layer dependency breakage → STOP.
-2. If a change violates rules defined in `docs/architecture/intelligence/ARCHITECTURE_MAP.json` → STOP.
-3. If ADR constraints in `docs/architecture/adr/` would be violated → STOP and request architectural review.
-
-Purpose:
-
-```
-Prevent architectural regressions before they reach implementation.
-```
-
-This mechanism allows the orchestrator to detect **breaking architectural changes before code modifications begin**.
-
----
-
-## Refactor Safety Mode (Architecture Lock)
-
-When performing **structural refactors** (module moves, dependency changes, package creation, or layer modifications), the orchestrator MUST activate **Refactor Safety Mode**.
-
-Refactor Safety Mode workflow:
-
-```bash
-bun scripts/infra-audit.ts
-bun scripts/ai-guard.ts
-gitnexus impact <symbol>
-```
-
-Validation sequence:
-
-1. **Architecture Map Validation**
-
-`ai-guard.ts` verifies that proposed changes respect rules defined in:
-
-```
-docs/architecture/intelligence/ARCHITECTURE_MAP.json
-```
-
-2. **AI Architecture Brain Validation**
-
-The orchestrator MUST read:
-
-```
-docs/ai/context/ai-architecture-brain.json
-```
-
-This file represents the **current architectural state of the repository**.
-
-3. **Dependency Impact Validation**
-
-Run blast‑radius analysis:
-
-```bash
-gitnexus impact <symbol>
-```
-
-4. **ADR Compliance Check**
-
-Verify no violation of architectural decisions stored in:
-
-```
-docs/architecture/adr/
-```
-
-Blocking rules:
-
-Implementation MUST STOP if any of the following occur:
-
-- Cross‑layer dependency violations
-- Forbidden dependency usage
-- Circular dependency introduction
-- ADR violation
-- Architecture drift detected by `infra-audit.ts`
-
-Purpose:
-
-```
-Guarantee that structural refactors cannot silently break Zidney's architecture.
-```
-
-This creates a **three‑layer protection model**:
-
-```
-docs/architecture/intelligence/ARCHITECTURE_MAP.json        → static architecture rules
-AI Architecture Brain        → real repository structure
-GitNexus Knowledge Graph     → runtime dependency intelligence
-```
-
-Together these systems ensure architectural integrity before any refactor proceeds.
-
----
-
-## Architecture Drift Alerts in Pull Requests
-
-To improve developer feedback loops, architecture violations SHOULD be surfaced directly in Pull Request discussions instead of only failing CI jobs.
-
-Primary detection sources:
-
-```
-scripts/infra-audit.ts
-scripts/ai-guard.ts
-```
-
-These scripts generate architecture intelligence artifacts such as:
-
-```
-docs/ai/context/ai-architecture-diff.json
-```
-
-CI workflow (`.github/workflows/architecture-governance.yml`) SHOULD parse this file and publish a PR summary comment when violations are detected.
-
-Recommended CI step:
-
-```bash
-bun scripts/infra-audit.ts
-bun scripts/ai-guard.ts
-```
-
-If violations exist:
-
-- Post a PR comment summarizing architecture violations
-- Include affected modules
-- Link to ADR rules or architecture layers that were violated
-
-Example PR output:
-
-```
-⚠️ Architecture Drift Detected
-
-Module: packages/domain-core
-Violation: Forbidden dependency on apps/api
-Rule: Domain layer cannot depend on runtime layer
-Reference: docs/architecture/intelligence/ARCHITECTURE_MAP.json
-```
-
-Rules:
-
-1. Architecture drift MUST fail CI when `--ci-strict` mode is enabled.
-2. In non‑strict mode, CI SHOULD still post a warning comment in the PR.
-3. Violations must reference the specific rule in `docs/architecture/intelligence/ARCHITECTURE_MAP.json`.
-
-Purpose:
-
-```
-Expose architecture violations early in the review process so developers can correct them before merge.
-```
-
-This improves transparency and ensures architectural governance is visible to both humans and AI agents during code review.
-
----
+Orchestrator responsibility: Invoke the skill when refactors or architectural reasoning is required during workflow steps.
 
 ## Stage‑Aware Architecture Guard
 
-The orchestrator MUST enforce **stage‑aware architecture protection**.
+**Delegated to:** `.agents/skills/architecture-self-healing`
 
-Purpose:
-
-```
-Prevent architectural changes during feature stages where architecture modification is not allowed.
-```
-
-Architecture changes are only permitted in **INFRA stages** (for example: `STAGE_INFRA_*`).
-
-Examples of allowed stages:
-
-```
-STAGE_INFRA_GOVERNANCE
-STAGE_INFRA_ALIGNMENT
-STAGE_INFRA_TYPESCRIPT_STABILIZATION
-STAGE_INFRA_LINT_GOVERNANCE
-```
-
-During all other stages (feature, backend, UI, runtime, etc.), the orchestrator MUST treat architecture as **read‑only**.
-
-### Detection Rules
-
-Before implementation begins, the orchestrator MUST check for modifications to:
-
-```
-docs/architecture/intelligence/ARCHITECTURE_MAP.json
-scripts/ai-guard.ts
-scripts/infra-audit.ts
-docs/architecture/adr/
-docs/ai/context/
-```
-
-If these files are modified during a **non‑INFRA stage**, the workflow MUST STOP.
-
-Example violation:
-
-```
-❌ Architecture Mutation Detected
-Stage: STAGE_22_DIVISIONS
-File: docs/architecture/intelligence/ARCHITECTURE_MAP.json
-Rule: Architecture modifications allowed only in STAGE_INFRA_* stages
-```
-
-### Enforcement Strategy
-
-The orchestrator should enforce this rule using:
-
-```bash
-bun scripts/ai-guard.ts
-```
-
-And by checking staged files before commit:
-
-```bash
-git diff --name-only --cached
-```
-
-### Allowed Behavior
-
-Non‑INFRA stages MAY:
-
-- read architecture context
-- query GitNexus
-- analyze dependency graphs
-
-But they MUST NOT:
-
-- modify architecture layers
-- add modules to `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
-- modify ADR decisions
-- alter AI architecture intelligence files
-
-### Result
-
-This rule ensures that:
-
-```
-Feature development cannot silently mutate Zidney's architecture.
-```
-
-Architecture evolution must occur through **explicit infrastructure governance stages**.
+Architecture modifications are only permitted in **STAGE*INFRA*\*** stages, even with ADR approval. All other stages treat architecture as read-only. Violations cause workflow STOP requiring explicit review and ADR.
 
 ---
 
 ---
 
-## Architecture Sanity Check (Pre‑Workflow Guard)
+## Architecture Sanity Check
 
-Before executing ANY workflow step (including Pre‑Step), the orchestrator MUST verify that the Zidney AI architecture intelligence system is synchronized.
+**Delegated to:** `.agents/skills/architecture-intelligence`
 
-> **Actual file paths (aligned with `infra-audit.ts` and `ai-guard.ts` output paths):**
->
-> - Architecture contract: `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json`
-> - Architecture map: `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
-> - Architecture brain: `docs/ai/context/ai-architecture-brain.json` ← ai-guard uses this if present, taking precedence over CONTRACT
-> - Architecture context: `docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json`
-
-Run the following checks:
-
-1. **Architecture Brain Exists**
-
-Required file:
-
-```
-docs/ai/context/ai-architecture-brain.json
-```
-
-If missing → regenerate architecture intelligence:
-
-```bash
-bun scripts/infra-audit.ts
-```
-
-2. **Architecture Contract + Map Exist**
-
-Required files:
-
-```
-docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json
-docs/architecture/intelligence/ARCHITECTURE_MAP.json
-```
-
-If either is missing → regenerate:
-
-```bash
-bun scripts/infra-audit.ts
-```
-
-If `infra-audit.ts` is also missing → STOP. Architecture enforcement infrastructure is missing. Request restoration before development begins.
-
-3. **AI Guard Script Exists**
-
-Required script:
-
-```
-scripts/ai-guard.ts
-```
-
-If missing → STOP. Architecture enforcement is required before development begins.
-
-4. **GitNexus Index Status (Optional but Recommended)**
-
-Check repository index status:
-
-```bash
-gitnexus status
-```
-
-If the repository is not indexed → recommend running:
-
-```bash
-gitnexus analyze
-```
-
-5. **Architecture Drift Detection**
-
-Run architecture validation:
-
-```bash
-bun scripts/ai-guard.ts
-```
-
-Rules:
-
-- If architecture violations are detected → STOP and display violations.
-- Implementation MUST NOT begin while architecture violations exist.
-
-6. **Branch Naming Validation**
-
-`ai-guard.ts` enforces branch naming automatically when spec files are modified. The orchestrator must be aware:
-
-- If the current branch is `spec/<X>` and spec files for a different stage are being modified → the pre-commit hook will fail with a `Stage branch mismatch` error.
-- Always verify the active branch matches `spec/<STAGE_DIR_NAME>` before beginning any step that modifies stage files.
-
-```bash
-git rev-parse --abbrev-ref HEAD
-```
-
-Expected: `spec/<STAGE_DIR_NAME>`
-
-Purpose of this guard:
-
-```
-Prevent AI agents from executing workflow steps while
-architecture context, enforcement, or dependency maps are outdated.
-```
-
-This ensures the orchestrator always operates with **fresh architectural intelligence**.
+Invoke architecture-intelligence skill to verify architecture context readiness before each workflow step.
 
 ---
 
 ## Autonomous Architecture Drift Prevention
 
-To reduce Analyze‑step failures and prevent architecture violations before implementation begins, the orchestrator enforces **Autonomous Architecture Drift Prevention**.
+**Delegated to:** `.agents/skills/architecture-self-healing`
 
-Purpose:
-
-```
-Detect architectural drift early — before tasks are generated or implementation begins.
-```
-
-This guard operates **before Step 3 (Plan)** and **before Step 6 (Implement)**.
-
-### Early Drift Detection
-
-Before planning or implementation, the orchestrator SHOULD execute:
-
-```bash
-bun scripts/infra-audit.ts --quick
-bun scripts/ai-guard.ts
-```
-
-If any violations are detected, the workflow MUST STOP before continuing.
-
-Violations may include:
-
-- circular dependencies
-- cross‑app dependency violations
-- forbidden imports defined in `ARCHITECTURE_MAP.json`
-- architectural layer violations
-- dependency boundary violations
-
-### Preventive Remediation
-
-If violations are detected during this early check, the orchestrator MUST:
-
-1. Surface the violation clearly
-2. Identify the violating modules
-3. Suggest one of the following repairs:
-
-```
-• Extract shared logic → packages/<module>
-• Introduce service boundary
-• Remove forbidden dependency
-• Replace relative imports with architecture alias
-```
-
-Only after the repository returns to a **clean architecture state** may planning or implementation proceed.
-
-### Execution Timing
-
-This guard runs automatically at two workflow points:
-
-| Workflow Step      | Purpose                                               |
-| ------------------ | ----------------------------------------------------- |
-| Step 3 — Plan      | Prevent generating plans based on broken architecture |
-| Step 6 — Implement | Prevent new code from compounding existing drift      |
-
-### Relationship With Analyze Step
-
-The Analyze step remains the **final architecture gate**, but this preventive guard reduces the likelihood of Analyze producing BLOCKED verdicts.
-
-Execution model:
-
-```
-Early drift check
-      ↓
-Planning / Implementation
-      ↓
-Full Analyze audit
-```
-
-This creates a **two‑phase architecture defense model** that catches violations both **before** and **after** implementation work.
+Early drift checks run before Plan and Implement steps prevent BLOCKED verdicts in Analyze.
 
 ---
 
 ## Architecture Brain Auto‑Refresh
 
-To guarantee that AI agents always operate on **fresh architecture intelligence**, the orchestrator must ensure the architecture brain is up to date.
+**Delegated to:** `.agents/skills/architecture-intelligence`
 
-Primary file:
-
-```
-docs/ai/context/ai-architecture-brain.json
-```
-
-This file is generated by:
-
-```bash
-bun scripts/infra-audit.ts
-```
-
-Refresh rules:
-
-1. If the architecture brain file is missing → regenerate immediately.
-
-2. If any of the following directories changed since the last commit:
-
-```
-apps/
-packages/
-scripts/
-docs/architecture/
-```
-
-then the orchestrator SHOULD refresh architecture intelligence:
-
-```bash
-bun scripts/infra-audit.ts
-```
-
-3. If a new module is introduced under `packages/` or `apps/`:
-
-```
-bun scripts/infra-audit.ts --fix-map
-```
-
-4. If `docs/architecture/intelligence/ARCHITECTURE_MAP.json` is outdated relative to repository structure, the orchestrator MUST regenerate or repair it before proceeding.
-
-Purpose:
-
-```
-Ensure AI context files remain synchronized with the repository
-so architectural reasoning is always accurate.
-```
-
-This mechanism allows Zidney to maintain a **self‑updating AI architecture intelligence layer**.
+Invoke architecture-intelligence skill to refresh architecture intelligence when repository structure changes.
 
 ---
 
 ## Architecture Self-Healing Enforcement
 
-When architecture validation fails, the orchestrator MUST attempt **architecture repair before aborting the workflow**.
+**Delegated to:** `.agents/skills/architecture-self-healing`
 
-Validation sources:
-
-- `scripts/ai-guard.ts`
-- `scripts/infra-audit.ts`
-- `docs/ai/context/ai-architecture-brain.json`
-- `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
-
-### Self-Healing Trigger
-
-Triggered when any of the following occur:
-
-- `ai-guard.ts` reports architecture violations
-- `infra-audit.ts` reports dependency boundary violations
-- architecture score falls below required threshold
-- circular dependency detected
-- forbidden module dependency detected
-- undeclared module detected
-
-### Self-Healing Protocol
-
-When a violation occurs the orchestrator MUST follow this sequence:
-
-**1. Stop code generation**
-
-Do not continue the workflow step.
-
-**2. Diagnose violation**
-
-Read:
-
-- `docs/ai/context/ai-architecture-brain.json`
-- `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
-
-Identify:
-
-- violating module
-- forbidden dependency
-- architecture layer conflict
-- dependency cycle (if any)
-
-**3. Determine repair strategy**
-
-Allowed repair patterns:
-
-Illegal cross-app dependency:
-
-```
-apps/api → apps/backoffice
-```
-
-Repair:
-
-```
-extract shared logic → packages/<shared-module>
-```
-
-Layer violation:
-
-```
-ui → domain direct dependency
-```
-
-Repair:
-
-```
-introduce API boundary or service layer
-```
-
-Undeclared module:
-
-```
-packages/new-module
-```
-
-Repair:
-
-```
-bun run arch:add-module packages/new-module
-```
-
-Circular dependency:
-
-Repair using dependency inversion or interface extraction.
-
-**4. Re-run architecture validation**
-
-```
-bun scripts/ai-guard.ts
-bun scripts/infra-audit.ts
-```
-
-**5. Continue workflow only if validation passes**
-
-If violations persist → STOP and escalate to user.
-
-### Self-Healing Safety Rules
-
-The orchestrator MUST NEVER:
-
-- disable `ai-guard.ts`
-- disable `infra-audit.ts`
-- bypass pre-commit hooks
-- use `--no-verify`
-- mutate `ARCHITECTURE_MAP.json` without declaring module intent
-
-### Result
-
-This enforcement creates the architecture repair loop:
-
-```
-AI generates code
-      ↓
-Architecture validation
-      ↓
-Violation detected
-      ↓
-Self-healing repair
-      ↓
-Validation passes
-      ↓
-Workflow continues
-```
-
-This mechanism ensures Zidney maintains architectural integrity even during autonomous AI-assisted development.
+Invoke architecture-self-healing skill when architecture validation fails. The orchestrator MUST NOT disable validators or bypass pre-commit hooks.
 
 ---
 
@@ -998,19 +239,11 @@ The agent MUST NOT:
 
 ### Deterministic Command Execution
 
-All shell commands must pass through the following execution pipeline:
+Command execution is routed through the RTK execution layer.
 
-```
-AI command generation
-      ↓
-RTK rewrite layer
-      ↓
-rtk <command>
-      ↓
-execution
-```
+Implementation: `.agents/skills/rtk-execution-layer`
 
-This ensures terminal output remains bounded and deterministic.
+All shell commands are automatically rewritten and executed through the RTK layer to ensure terminal output remains bounded and deterministic.
 
 ### Deterministic Workflow Constraint
 
@@ -1035,101 +268,73 @@ Deterministic AI Execution Mode significantly reduces hallucination and prevents
 
 ---
 
-## Architecture Score Reference
+## Stage‑Aware AI Context Compression
 
-`infra-audit.ts` computes an architecture health score on every run. The orchestrator must understand this score to correctly diagnose pre-commit failures and analyze drift reports.
+Large orchestrator files can increase token usage and introduce unnecessary reasoning overhead. To improve efficiency, Zidney uses **Stage‑Aware AI Context Compression**.
 
-**Threshold:** Score must be ≥ 85 to pass CI and `--quick` mode. Below 85 = commit blocked.
+Concept:
 
-**Deduction table (hardcoded in `infra-audit.ts`):**
+Instead of loading the entire orchestration logic into every AI reasoning step, the system dynamically loads **only the context relevant to the current workflow stage**.
 
-| Violation                            | Points Deducted |
-| ------------------------------------ | --------------- |
-| Circular dependency                  | −10 per cycle   |
-| Dependency boundary violation        | −5 each         |
-| Architectural layer violation        | −5 each         |
-| Architecture drift (packages → apps) | −5 each         |
-| Skipped test                         | −0.5 each       |
-| Flaky test                           | −1 each         |
+Context selection priority:
 
-Score minimum is 0. Score is written to `docs/architecture/intelligence/ARCHITECTURE_CONTEXT.json` and `ARCHITECTURE_CONTRACT.json` on full runs (not `--quick`).
+1. Current stage runtime directory  
+   `specs/runtime/<STAGE_DIR_NAME>/`
 
-When diagnosing a score failure, the orchestrator MUST:
+2. Stage workflow state  
+   `.workflow-state.json`
 
-1. Count the violations by type from the console output.
-2. Compute the estimated score impact using the table above.
-3. Prioritize fixing circular dependencies first (highest penalty), then boundary/layer/drift violations.
-4. Surface skipped/flaky test counts as secondary warnings — they accumulate quickly.
+3. Architecture intelligence context  
+   `docs/ai/context/ai-architecture-brain.json`
+
+4. Architecture rules  
+   `ARCHITECTURE_MAP.json`
+
+5. Relevant ADR decisions  
+   `docs/architecture/adr/`
+
+Only the context required for the current step is injected into the AI reasoning environment.
+
+Example:
+
+| Step      | Loaded Context                          |
+| --------- | --------------------------------------- |
+| Specify   | spec.md + architecture rules            |
+| Plan      | spec.md + clarifications + ADRs         |
+| Tasks     | plan.md + data model                    |
+| Analyze   | plan.md + tasks.md + architecture brain |
+| Implement | tasks.md + architecture map             |
+| Closure   | reports + tasks.md                      |
+
+Benefits:
+
+- Reduces orchestrator token usage by **60–80%**
+- Improves reasoning determinism
+- Minimizes hallucination risk
+- Speeds up AI decision cycles
+- Allows extremely large repositories to remain AI‑navigable
+
+Implementation strategy:
+
+- Skills retrieve context from the architecture brain and stage directory.
+- The orchestrator loads only minimal control logic.
+- Heavy reasoning context is delegated to the **architecture‑intelligence skill**.
+
+Result:
+
+The orchestrator remains a **thin deterministic workflow controller**, while context-heavy reasoning is handled by specialized skills and dynamically loaded architecture intelligence.
 
 ---
 
-## MCP Auto-Trigger Rules
+## Architecture Score Reference
 
-> This orchestrator inherits and enforces all MCP rules defined in `AGENTS.md`. The rules below specify how each MCP maps to workflow steps.
+See `docs/architecture/intelligence/ARCHITECTURE_SCORE_REFERENCE.md` for scoring algorithm, deduction table, and interpretation rules.
 
-The orchestrator MUST evaluate available MCPs before responding to any technical task. MCP-sourced context takes priority over training knowledge for all code, documentation, and architecture tasks.
+**Interpreter Rule:** If score ≥ 85 → PASS. If score < 85 → BLOCKED. Orchestrator does not encode scoring logic.
 
-### Context7 MCP — Auto-Trigger (no explicit prompt required)
+---
 
-Invoke automatically when any workflow step involves:
-
-- Looking up documentation for a third-party library or framework used in Zidney (Hono, Bun, Vue 3, shadcn-vue, Drizzle ORM, Tailwind CSS v4, Vite, etc.)
-- Generating or reviewing code that imports a third-party package (Step 3, Step 6)
-- Resolving API references, method signatures, or option interfaces for any non-Zidney dependency
-- Setup or configuration questions for external tooling
-
-**Step-specific triggers:**
-
-- Step 3 (Plan): invoke Context7 when `speckit.plan` produces `research.md` or `data-model.md` involving third-party APIs
-- Step 6 (Implement): invoke Context7 before implementing any task that touches a third-party library
-
-Context7 must NOT be used for Zidney internal packages. Use GitNexus for internal codebase context.
-
-### GitNexus MCP — Auto-Trigger (no explicit prompt required)
-
-Invoke automatically when any workflow step requires:
-
-- Understanding how a Zidney feature, module, or service works (Step 1, Step 3)
-- Assessing blast radius of proposed changes (Step 3, Step 5)
-- Tracing the cause of a bug or unexpected behavior (Step 5, Step 6)
-- Performing or planning a refactor, rename, extraction, or split (Step 6)
-
-Always read `gitnexus://repo/{name}/context` first to verify index freshness. If the index is stale, prompt the user to run `npx gitnexus analyze` before proceeding.
-
-### Postgres/DB MCP — Auto-Trigger (no explicit prompt required)
-
-Invoke automatically when:
-
-- Inspecting current schema before writing a migration (Step 3, Step 6)
-- Validating a query for correctness or performance (Step 5, Step 6)
-- Debugging a database-level error (Step 6)
-
-Must NOT be used to: execute destructive SQL, modify schema outside migration files, apply ad-hoc patches, or access production databases.
-
-### Filesystem MCP — Auto-Trigger (no explicit prompt required)
-
-Invoke automatically when:
-
-- Reading ADR files before any architectural decision (Pre-Step, Step 5)
-- Reading spec, plan, or tasks files before generating or modifying content (all steps)
-- Verifying a migration file, spec, or config file exists before referencing it (Step 3, Step 6)
-- Confirming directory structure before generating new files (Pre-Step)
-
-Must NOT be used to write or overwrite manually curated spec files, modify CLOSED/HARDENED stages, or bypass the SpecKit directory structure.
-
-### GitHub MCP — Auto-Trigger (no explicit prompt required)
-
-Invoke automatically when:
-
-- Checking PR status or open issues before suggesting changes (Step 3, Step 5)
-- Referencing a commit, diff, or change history for implementation context (Step 6)
-- Verifying whether a reported bug or feature conflict already exists (Step 1, Step 2)
-
-Must NOT be used to merge PRs, push commits, or close/modify issues without explicit user instruction.
-
-### General Rule
-
-AI must not rely solely on training knowledge when an MCP can provide current, project-specific, or authoritative context. MCP invocation is a mandatory step in the reasoning pipeline for all technical tasks.
+**MCP Routing:** Delegated to `.agents/skills/mcp-routing`
 
 ---
 
@@ -1278,140 +483,7 @@ Human confirmation is only required for:
 
 ---
 
-## Parallel Subagent Execution (Performance Optimization)
-
-The Zidney Orchestrator SHOULD detect workflow segments that can be executed in parallel and run compatible subagents simultaneously.
-
-Purpose:
-
-Reduce orchestration latency while preserving deterministic execution and governance guarantees.
-
----
-
-### Parallelization Rules
-
-Parallel execution is allowed ONLY when the following conditions are satisfied:
-
-1. Subagents operate on **read-only inputs** or separate output files.
-2. Subagents **do not modify the same file or directory**.
-3. The result of one subagent is **not required as input** to another.
-4. Architecture enforcement and validation steps always run **after parallel tasks complete**.
-
-If any dependency exists between tasks, execution MUST remain sequential.
-
----
-
-## Approved Parallel Execution Zones
-
-### 1. Plan Validation Phase
-
-After `speckit.plan` completes, validation agents may run simultaneously.
-
-Parallel agents:
-
-- Zidney Architecture Checker
-- Zidney API Designer
-- Zidney Security Auditor
-- Zidney Performance Optimizer
-
-Example execution model:
-
-```
-/handoff to=zidney-architecture-checker
-/handoff to=zidney-api-designer
-/handoff to=zidney-security-auditor
-/handoff to=zidney-performance-optimizer
-```
-
-The orchestrator MUST wait for **all results** before continuing.
-
-Blocking rule:
-
-If any agent returns:
-
-```
-VERDICT: BLOCKED
-```
-
-The workflow MUST stop and surface the violations.
-
----
-
-### 2. Analyze Phase
-
-During the Analyze step the following agents may run concurrently:
-
-- speckit.analyze
-- Zidney Architecture Checker
-- Zidney Security Auditor
-- Zidney QA Engineer
-
-Results are aggregated into:
-
-```
-audits/ANALYZE_REPORT.md
-```
-
----
-
-### 3. Implementation Validation Phase
-
-After implementation tasks complete, validation agents may run in parallel:
-
-- Zidney Code Reviewer
-- Zidney QA Engineer
-- Zidney Performance Optimizer
-- Zidney Security Auditor
-
-Results are merged into:
-
-```
-audits/VALIDATION_REPORT.md
-```
-
----
-
-## Synchronization Barrier
-
-After every parallel execution group the orchestrator MUST perform a synchronization barrier:
-
-```
-Wait for all subagents
-Collect verdicts
-Aggregate findings
-Apply governance rules
-```
-
-Only after all results are processed may the workflow proceed.
-
----
-
-## Deterministic Constraint
-
-Parallel execution MUST NOT change the deterministic workflow order:
-
-```
-Specify → Clarify → Plan → Tasks → Analyze → Implement → Closure
-```
-
-Parallelism is permitted **inside steps**, never **between steps**.
-
----
-
-## Failure Handling
-
-If any parallel subagent returns:
-
-```
-VERDICT: BLOCKED
-```
-
-The orchestrator MUST:
-
-1. Stop further execution in that step.
-2. Aggregate violations from all completed agents.
-3. Surface a remediation checklist.
-4. Prevent the workflow from advancing.
+**Parallel Execution:** Delegated to `.agents/skills/subagent-parallelization`
 
 ---
 
@@ -1436,405 +508,26 @@ The user should only see ONE logical next action at a time.
 
 ---
 
-## Intelligent Retry Logic — Analyze Gate
-
-When Step 5 (Analyze) results in BLOCKED:
-
-1. Clearly categorize violations by severity:
-   - 🚨 Critical
-   - ⚠️ High
-   - ⚡ Medium
-   - ℹ️ Low
-
-2. Automatically generate a structured remediation checklist based on exact violations found. Each checklist item must reference the specific rule violated, not a generic category:
-
-   ```
-   Remediation Checklist — Attempt <N>:
-   - [ ] [CRITICAL] Fix tenant isolation: <exact file/function> bypasses resolver
-   - [ ] [HIGH] Add missing transaction boundary in <endpoint>
-   - [ ] [HIGH] Add idempotency key enforcement to <route>
-   - [ ] [MEDIUM] License middleware missing on route: <route>
-   - [ ] [LOW] Structured logging missing correlation_id in <service>
-   ```
-
-3. Write remediation state to `.workflow-state.json` immediately:
-
-   ```json
-   {
-     "analyze_attempts": <N>,
-     "analyze_last_blocked_at": "<ISO_TIMESTAMP>",
-     "analyze_violations_attempt_<N>": [
-       { "severity": "CRITICAL", "rule": "<rule>", "location": "<file>", "resolved": false },
-       { "severity": "HIGH", "rule": "<rule>", "location": "<file>", "resolved": false }
-     ]
-   }
-   ```
-
-4. Before re-running the audit, diff violations from the previous attempt against the current attempt:
-   - Mark violations as `"resolved": true` if they no longer appear.
-   - Flag any **new** violations introduced during remediation as `[NEW]` in the report.
-   - Display a remediation progress summary:
-
-   ```
-   Remediation Progress (Attempt <N> → <N+1>):
-   ✅ Resolved: <count> violations
-   ❌ Remaining: <count> violations
-   🆕 New: <count> violations (introduced during remediation)
-   ```
-
-5. Retry Limit Logic:
-   - First BLOCK → Normal remediation flow.
-   - Second consecutive BLOCK → Escalation notice. Display unresolved violations from attempt 1 vs attempt 2 diff. Recommend ADR review or architectural consultation.
-   - Third consecutive BLOCK → HARD STOP. Require explicit user override with written justification before retrying. Record override in `.workflow-state.json`.
-
-6. Auto-Advance Rule:
-   If all criteria PASS on retry →
-   - Set `drift_passed = true`
-   - Set `implementation_allowed = true`
-   - Mark all violations as `"resolved": true` in state
-   - Automatically proceed to Implement step.
-
-No manual confirmation required between retries unless escalation threshold is reached.
+**Analyze Retry Logic:** Delegated to `.agents/skills/analysis-retry-engine`
 
 ---
 
-## Pre-Commit Hook Enforcement
-
-> **Hard gate.** Every `git commit` in this workflow automatically triggers the Husky pre-commit hook. The agent MUST treat every commit as potentially rejected and MUST handle failures before continuing.
-
-The Husky pre-commit hook runs three gates in sequence:
-
-```
-1. lint-staged        → bunx lint-staged          (Biome: format + lint on staged files)
-2. ai-guard.ts        → bun scripts/ai-guard.ts   (architecture rule enforcement)
-3. infra-audit.ts     → bun scripts/infra-audit.ts --quick  (governance checks)
-```
-
-All three must exit with code 0 for the commit to succeed. Any non-zero exit **rejects the commit**.
-
-### Agent Commit Protocol
-
-After every `git commit` call:
-
-1. Capture the full terminal output and exit code.
-2. If exit code = 0 → commit succeeded. Continue workflow normally.
-3. If exit code ≠ 0 → **STOP immediately**. Do NOT proceed to the next workflow step. Diagnose which gate failed using the table below, fix the issue, and retry the commit.
-
-**Using `--no-verify` is strictly forbidden.** It bypasses all three gates and violates the Zidney architecture contract.
-
-### Failure Diagnosis by Gate
-
-#### Gate 1 — lint-staged (Biome)
-
-**Trigger:** Output contains `lint-staged` error or Biome lint errors.
-
-Biome runs `check --write` on staged `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.vue`, `.json` files. It auto-fixes formatting but will fail on lint errors it cannot auto-fix.
-
-Resolution protocol:
-
-1. Read the exact Biome error output — each error includes file, line, rule name.
-2. Fix the reported lint violations in the source files.
-3. Re-stage the fixed files: `git add <fixed-files>`
-4. Retry the commit.
-
-Common Biome failures and fixes:
-
-- `noUnusedVariables` → remove or use the variable
-- `noExplicitAny` → replace `any` with a proper type
-- `useConst` → change `let` to `const`
-- `noConsole` → replace `console.log` with structured logger
-
-#### Gate 2 — ai-guard.ts
-
-**Trigger:** Output contains `AI Guard: Architecture violations detected` or `Commit rejected by Zidney AI Guard`.
-
-`ai-guard.ts` enforces architecture rules from:
-
-- `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json` (primary)
-- `docs/architecture/intelligence/ARCHITECTURE_MAP.json` (module-level rules)
-- `docs/ai/context/ai-architecture-brain.json` (if present — takes precedence over CONTRACT)
-
-Violation types and fixes:
-
-| Violation Code                 | Meaning                                                                               | Fix                                                          |
-| ------------------------------ | ------------------------------------------------------------------------------------- | ------------------------------------------------------------ |
-| `DEPENDENCY_VIOLATION`         | Module imports a forbidden dependency                                                 | Remove import or extract to allowed shared package           |
-| `LAYER_VIOLATION`              | Cross-layer import (e.g. UI → domain)                                                 | Reroute through allowed layer boundary                       |
-| `Cross-app boundary violation` | `apps/X` imports from `apps/Y`                                                        | Extract shared logic to `packages/`                          |
-| `Relative architecture leak`   | Relative path references `apps/` or `packages/`                                       | Replace with `@zidney/<module>` alias                        |
-| `ARCH_MAP_FORBIDDEN`           | Import explicitly forbidden in `docs/architecture/intelligence/ARCHITECTURE_MAP.json` | Remove dependency or request ADR review                      |
-| `ARCH_MAP_NOT_ALLOWED`         | Import not in `allowed_dependencies` list                                             | Add to allowed list via ADR or remove                        |
-| `Stage branch mismatch`        | Branch name doesn't match stage file being modified                                   | Ensure you are on the correct `spec/<STAGE_DIR_NAME>` branch |
-
-Resolution protocol:
-
-1. Read each `[AI-Guard]` violation line — it includes file path, violation code, and recommended fix.
-2. Apply fixes to the source files.
-3. Re-stage: `git add <fixed-files>`
-4. Retry the commit.
-
-If the violation requires an architectural change (e.g. updating `docs/architecture/intelligence/ARCHITECTURE_MAP.json`) → STOP. This requires an ADR and must go through an INFRA stage. Do not modify architecture files in a feature stage.
-
-#### Gate 3 — infra-audit.ts --quick
-
-**Trigger:** Output contains `[INFRA AUDIT][CI] ❌ Governance violations detected`.
-
-`--quick` mode skips all file writes (no JSON/HTML/MD outputs). It only runs governance checks and exits non-zero if any of these are found:
-
-| Failure                        | Score Impact  | Fix                                                                                                      |
-| ------------------------------ | ------------- | -------------------------------------------------------------------------------------------------------- |
-| Circular dependencies          | −10 per cycle | Break the cycle by introducing an interface or inverting the dependency                                  |
-| Dependency boundary violations | −5 each       | `packages/` must not import `apps/`; `apps/` must not import other `apps/`                               |
-| Architectural layer violations | −5 each       | `packages/ui-system` → `packages/domain-core` forbidden; `packages/api-client` → `apps/worker` forbidden |
-| `ARCHITECTURE_MAP` violations  | −5 each       | Same as ai-guard ARCH_MAP violations — fix forbidden/not-allowed imports                                 |
-| Architecture drift             | −5 each       | `packages/` importing `apps/` — move shared logic to `packages/`                                         |
-| Architecture score < 85        | hard fail     | Aggregate of above penalties; fix underlying violations to raise score                                   |
-
-> **Note on `--quick` mode:** Because `--quick` skips file writes, there are no report files to read after a failure. The agent MUST diagnose failures from the console output only.
-
-> **Note on undeclared modules:** `undeclared modules` warnings appear in `--quick` output but do NOT fail the commit (only fails under `--ci-strict`). The agent should surface them as informational warnings, not blockers.
-
-Architecture score formula:
-
-```
-score = 100
-  − (circular_deps × 10)
-  − (dep_violations × 5)
-  − (layer_violations × 5)
-  − (arch_drift × 5)
-  − (skipped_tests × 0.5)
-  − (flaky_tests × 1)
-minimum: 0
-threshold: 85 (commit fails if score < 85)
-```
-
-### Retry After Fix
-
-After fixing any gate failure:
-
-```bash
-# Re-stage fixed files (explicit paths only — never git add .)
-git add <fixed-files>
-
-# Verify scope is still correct
-git diff --name-only --cached
-
-# Retry commit
-git commit -F <(filled commit message from template)
-```
-
-If the same gate fails again on retry → treat as a recurring violation. Escalate to the user with a full diagnosis before attempting a third fix cycle.
+**Pre-Commit Diagnostics:** Delegated to `.agents/skills/precommit-diagnostics`
 
 ---
 
-## Git Hygiene Enforcement
+**Git Commit Hygiene:** Delegated to `.agents/skills/git-governance`
 
-> RTK enforcement applies to all commands here. See "RTK (Rust Token Killer) — Canonical Execution Rules" for the full reference.
+**Package Manager Governance:** Delegated to `.agents/skills/package-manager-governance`
 
-Referenced throughout as **"Apply Git Hygiene Enforcement."**
-
-Execute this exact sequence before every commit. Order is mandatory — do not reorder steps.
-
-### Step File Scope Reference
-
-Each step stages a specific set of files. Use this table to determine what to stage — never stage files outside the declared scope for the current step.
-
-| Step               | Files to Stage (in addition to `.workflow-state.json` and stage file)                                                                                            |
-| ------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Pre-Step           | `specs/runtime/<STAGE_DIR_NAME>/README.md`                                                                                                                       |
-| Step 1 — Specify   | `spec.md`, `checklists/requirements.md`, `reports/SPECIFY_REPORT.md`, `README.md`                                                                                |
-| Step 2 — Clarify   | `spec.md` (updated in-place), `reports/CLARIFY_REPORT.md`, `README.md`                                                                                           |
-| Step 3 — Plan      | `plan.md`, `research.md` (if written), `data-model.md` (if written), `quickstart.md` (if written), `reports/PLAN_REPORT.md`, `README.md`                         |
-| Step 4 — Tasks     | `tasks.md`, `reports/TASKS_REPORT.md`, `README.md`                                                                                                               |
-| Step 5 — Analyze   | `audits/ANALYZE_REPORT.md`, `README.md`                                                                                                                          |
-| Step 6 — Implement | All implementation source files from `PLAN_REPORT.md` + `TASKS_REPORT.md`, `tasks.md`, `reports/IMPLEMENT_REPORT.md`, `audits/VALIDATION_REPORT.md`, `README.md` |
-| Step 7 — Closure   | `reports/CLOSURE_REPORT.md`, `guides/TESTING_GUIDE.md`, `PR_SUMMARY.md`, `README.md`                                                                             |
-
-**Hard rules:**
-
-- `specs/templates/` files MUST NEVER appear in any commit.
-- Non-implementation steps (Pre through Step 5, Step 7): do NOT include implementation source files.
-- If unrelated or cross-stage files appear → STOP, list them, require manual cleanup before continuing.
-
-### 1. Scope check
-
-```bash
-git status --porcelain
-```
-
-Verify the working tree only contains files within the active stage scope:
-
-- `specs/runtime/<STAGE_DIR_NAME>/`
-- `specs/runtime/<STAGE_DIR_NAME>/.workflow-state.json`
-- `specs/phases/<PHASE_NAME>/<STAGE_FILE_NAME>`
-- Implementation source files declared in `PLAN_REPORT.md` and `TASKS_REPORT.md` (Step 6 only)
-
-Rules:
-
-- Non-implementation steps (Pre through Step 5, Step 7): do NOT include implementation source files
-- `specs/templates/` files must NEVER appear in any commit
-- If unrelated or cross-stage files appear → STOP, list them, require manual cleanup before continuing
-
-### 2. Stage files
-
-```bash
-git add <explicit file list for this step>
-```
-
-Never use `git add .` or `git add -A`. Always stage by explicit path.
-
-### 3. Verify staged scope
-
-```bash
-git diff --name-only --cached
-```
-
-Confirm the staged file list is exactly what is expected for this step. If unexpected files appear → unstage and investigate before committing.
-
-### 4. Commit (Hard Gate)
-
-```bash
-git commit -F <(filled commit message from template)
-```
-
-This command triggers the **Husky pre-commit hook automatically**. The hook runs three gates in sequence:
-
-```
-1. lint-staged        → bunx lint-staged          → Biome format + lint on staged files
-2. ai-guard.ts        → bun scripts/ai-guard.ts   → architecture rule enforcement
-3. infra-audit.ts     → bun scripts/infra-audit.ts --quick → governance checks
-```
-
-**After every commit attempt, the agent MUST:**
-
-1. Capture the full terminal output and exit code.
-2. If exit code = 0 → commit succeeded. Continue to the next workflow step.
-3. If exit code ≠ 0 → **HARD STOP.** Do NOT proceed. Do NOT retry blindly. Do NOT use `--no-verify`.
-
-Identify which gate failed:
-
-- Output contains `lint-staged` error or Biome rule name → **Gate 1 failed** — fix lint violations, re-stage, retry
-- Output contains `AI Guard: Architecture violations detected` → **Gate 2 failed** — fix architecture violations, re-stage, retry
-- Output contains `[INFRA AUDIT][CI] ❌` → **Gate 3 failed** — fix governance violations (see score formula), re-stage, retry
-
-See **Pre-Commit Hook Enforcement** for full diagnosis tables and resolution protocol per gate.
-
-If the same gate fails on the second attempt → escalate to the user with a full diagnosis. Do NOT attempt a third fix cycle without explicit user acknowledgment.
-
-## Commit Message Templates
-
-All commit messages MUST be generated by loading and filling the appropriate template:
-
-```
-specs/templates/commits/
-├── commit-pre-step.md
-├── commit-specify.md
-├── commit-clarify.md
-├── commit-plan.md
-├── commit-tasks.md
-├── commit-analyze.md
-├── commit-implement.md
-└── commit-closure.md
-```
-
-Replace all `{{PLACEHOLDER}}` tokens with actual values before committing.  
-Do NOT write commit messages inline — always load from template.
-
-## Package Manager Enforcement
-
-Referenced throughout as **"Apply Package Manager Enforcement."**
-
-### Runtime selection (run once per session, at Pre.1)
-
-Detect the project package manager by inspecting lockfiles — never assume:
-
-```bash
-# Run from repo root
-if [ -f "bun.lockb" ] || [ -f "bun.lock" ]; then
-  PKG_MANAGER="bun"
-elif [ -f "pnpm-lock.yaml" ]; then
-  PKG_MANAGER="pnpm"
-elif [ -f "yarn.lock" ]; then
-  PKG_MANAGER="yarn"
-elif [ -f "package-lock.json" ]; then
-  PKG_MANAGER="npm"
-else
-  echo "No lockfile found — presenting package manager selection to user."
-
-  # Present selection widget:
-  # widget choice
-  # prompt: "No lockfile detected. Which package manager does this project use?"
-  # options:
-  #   - label: "bun"   value: "bun"
-  #   - label: "pnpm"  value: "pnpm"
-  #   - label: "yarn"  value: "yarn"
-  #   - label: "npm"   value: "npm"
-  #
-  # Store the selected value as PKG_MANAGER and continue.
-fi
-
-echo "Detected package manager: $PKG_MANAGER"
-```
-
-Store `PKG_MANAGER` for the entire session. Every subsequent command that invokes a package manager MUST use this value — never hardcode `npm`, `pnpm`, `yarn`, or `bun`.
-
-### Running scripts
-
-Always use the detected package manager to run scripts:
-
-```bash
-$PKG_MANAGER run <script>
-# e.g. bun run dev  |  pnpm run build  |  yarn test  |  npm run lint
-```
-
-### Adding dependencies
-
-**NEVER edit `package.json` directly to add, remove, or update dependencies.**  
-Direct edits produce stale versions from training data. Always use the package manager CLI so the registry resolves the actual latest version:
-
-```bash
-# Runtime dependency
-$PKG_MANAGER add <package-name>
-
-# Dev dependency
-$PKG_MANAGER add -D <package-name>
-
-# Multiple packages at once
-$PKG_MANAGER add <pkg1> <pkg2> <pkg3>
-```
-
-If a specific version is explicitly required by the spec or constitution → pin it:
-
-```bash
-$PKG_MANAGER add <package-name>@<exact-version>
-```
-
-Otherwise always install without a version pin — let the registry resolve latest.
-
-### Updating dependencies
-
-Never bump a version number in `package.json` by hand. Use:
-
-```bash
-# Update a single package to latest
-$PKG_MANAGER add <package-name>@latest
-
-# Update all packages
-$PKG_MANAGER update
-```
-
-### Violation rule
-
-If any step attempts to write dependency entries into `package.json` directly (via file edit, string replacement, or template fill) → **STOP**. Remove the direct edit. Run `$PKG_MANAGER add <package>` instead.
-
-## Terminal Safety
-
-Before long-lived or interactive terminal commands, send `CTRL+C` once to clear in-flight processes.  
-One-shot commands (`git status`, `git add`, `git commit`, `mkdir`, `cat`) do not require a pre-interrupt.
+**Terminal Safety:** Delegated to `.agents/skills/terminal-safety`
 
 ---
 
 # Session Mode Detection
+
+Note:
+Operational behaviors such as Git validation, RTK rewriting, MCP routing, retry logic, and terminal safety are handled by skills. The orchestrator only coordinates workflow progression.
 
 Before presenting intake, the orchestrator MUST determine whether this is a **new session** or a **resume session**.
 
