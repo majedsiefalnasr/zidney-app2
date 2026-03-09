@@ -11,17 +11,18 @@ Visualization ensures that architecture is not only enforced but also **observab
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
 Last Updated: 2026-03-09T00:00:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- `scripts/architecture/visualize.ts` (new — 7 exported pure functions + main())
-- `docs/architecture/visualization/` (generated at runtime)
-- `tests/unit/visualize/` (new — 12 unit tests)
-- `tests/static/06-architecture-visualization.test.ts` (new — 6 static tests)
-- `package.json` (add `arch:visualize` script entry)
+- Total: 18 atomic tasks
+- Test Fixtures: 2 (T001–T002, parallel)
+- Script Implementation: 8 (T003–T010: scaffold + 5 pure functions + system overview + CLI main)
+- Unit Tests: 4 (T011–T014: 12 test cases)
+- Static Tests: 2 (T015–T016: 6 integration tests)
+- Config: 2 (T017–T018: package.json + output README)
 
 Deferred Scope:
 
@@ -29,12 +30,12 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
-- Architecture Checker VERDICT: PASS
+- Task set compliant — drift analysis required before implementation
+- Architecture Checker VERDICT: PASS (from Plan step)
 - API Designer: N/A (no API routes)
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
