@@ -11,31 +11,33 @@ The goal is to make AI-assisted development **architecture-aware by default**, e
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-09T00:00:00Z
+Last Updated: 2026-03-09T18:45:00Z
 Branch: spec/infra-009-ai-architecture-context
 
-Scope Planned:
+Tasks Generated:
 
-- Complete implementation roadmap (5 phases, 35 tasks, 190 hours)
-- 7 AI context artifacts specified with JSON schemas
-- All integration points documented (ai-guard.ts, infra-audit.ts, GitNexus, 4 consumer tools)
-- Change detection mechanism designed (intelligent hash-based)
-- 40+ success criteria aligned with specification
+- Total: 35 atomic tasks
+- Phase 0: 5 research tasks (ADR analysis, module-boundaries, pipeline, data flows)
+- Phase 1: 8 design tasks (types, schemas, contracts, CI/CD organization)
+- Phase 2: 12 implementation tasks (source loader, 7 builders, orchestrator, CLI, change detection)
+- Phase 3: 7 testing tasks (integration, unit, schema, performance, manual AI validation)
+- Phase 4: 3 deployment tasks (docs, runbooks, production)
+- Parallelization: 14 parallel-capable tasks identified
 
 Deferred Scope:
 
-- None — full scope captured in plan
+- None — full scope captured in tasks
 
 Constitutional Compliance:
 
-- ✅ Plan compliant with Zidney Constitution v1.2.0
-- ✅ Guardian validation PASSED (Architecture + API Design)
-- ✅ Task generation authorized
+- ✅ All 35 tasks align with specification acceptance criteria
+- ✅ Task set compliant with Zidney Constitution v1.2.0
+- ✅ Drift analysis required before implementation
 
 Notes:
-Comprehensive technical plan complete and validated. Ready for task breakdown and implementation.
+Atomic task set generated with execution order, dependencies, and parallelization strategy. Ready for drift analysis and implementation authorization.
 
 ---
 
