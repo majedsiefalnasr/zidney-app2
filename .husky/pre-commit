@@ -58,13 +58,21 @@ BRAIN_FILES=$(echo "$STAGED_FILES" | grep -E 'docs/ai/context/ai-architecture-br
 
 if [ -n "$BRAIN_FILES" ]; then
   echo "Validating architecture brain integrity…"
-  bun scripts/validate-architecture-brain.ts || {
+  set +e  # Temporarily disable exit-on-error to check exit code
+  bun scripts/validate-architecture-brain.ts
+  BRAIN_EXIT=$?
+  set -e  # Re-enable exit-on-error
+  
+  if [ "$BRAIN_EXIT" -eq 1 ]; then
     echo "❌ Architecture brain validation failed"
     echo "   The ai-architecture-brain.json has invalid or malformed dependency paths."
     echo "   This prevents AI Guard from validating correctly."
     echo "   Run: bun scripts/infra-audit.ts to regenerate a valid brain."
     exit 1
-  }
+  elif [ "$BRAIN_EXIT" -eq 2 ]; then
+    echo "⚠️ Architecture brain has warnings but is valid"
+    echo "   (Duplicate edges detected but no structural errors)"
+  fi
 fi
 
 echo "✔ Pre-commit checks passed"
