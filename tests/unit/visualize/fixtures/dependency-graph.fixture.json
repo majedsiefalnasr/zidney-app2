@@ -1,0 +1,18 @@
+{
+  "nodes": [
+    "apps/api",
+    "apps/mmc",
+    "packages/domain-core",
+    "packages/logger",
+    "packages/api-client",
+    "./apps/mmc/src/core/auth/token-manager",
+    "./apps/mmc/srcvue/test-utils"
+  ],
+  "edges": [
+    { "from": "apps/api", "to": "packages/domain-core" },
+    { "from": "apps/api", "to": "packages/logger" },
+    { "from": "apps/api", "to": "packages/logger" },
+    { "from": "apps/mmc", "to": "packages/api-client" },
+    { "from": "./apps/mmc/src/core/auth/token-manager", "to": "packages/domain-core" }
+  ]
+}

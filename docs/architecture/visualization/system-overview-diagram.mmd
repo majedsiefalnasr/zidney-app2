@@ -1,0 +1,24 @@
+flowchart TD
+  subgraph ui["UI Layer"]
+    mmc["MMC (Management Console)"]
+    backoffice["Backoffice (Institution Panel)"]
+    frontoffice["Frontoffice (Student Runtime)"]
+  end
+  subgraph backend["Backend Services"]
+    api["API (Bun + Hono)"]
+    worker["Worker (Job Processor)"]
+  end
+  subgraph Foundation["Foundation Packages"]
+    domain_core["packages/domain-core"]
+    pkg_logger["packages/logger"]
+    pkg_types["packages/types"]
+    pkg_config["packages/config"]
+    pkg_redis["packages/redis-utils"]
+  end
+
+  mmc --> api
+  backoffice --> api
+  frontoffice --> api
+  api --> worker
+  api --> Foundation
+  worker --> Foundation
