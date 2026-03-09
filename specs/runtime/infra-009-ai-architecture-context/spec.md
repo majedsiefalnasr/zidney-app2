@@ -914,3 +914,190 @@ This stage is foundational for enabling **safe, architecture-compliant AI-assist
 **Compliance Check:** ✅ **Compliant with Zidney Constitution v1.2.0 — No violations detected.**
 
 All requirements are clearly defined, acceptance conditions are measurable, assumed dependencies are documented, and risk mitigation strategies are in place. The specification is ready to proceed to the Planning phase.
+
+---
+
+## Clarifications
+
+### Session 2026-03-09
+
+This section captures clarification questions raised during the Clarify phase and their approved resolutions.
+
+#### Q1: Artifact Regeneration Automation Strategy
+
+**Question:** Should artifact regeneration be fully automated in CI on every commit, or should developers regenerate locally before each commit?
+
+**Ambiguity Identified:** Spec mentions both local regeneration and CI automation without clarity on which is primary or if both are required.
+
+**Approved Answer:** **Option C — Both (Local + CI Validation)**
+
+Developers must regenerate artifacts locally before commit to catch stale or incorrect artifacts early. CI performs a safety validation check to ensure artifacts are fresh and correct before main merge.
+
+**Implementation Implication:**
+
+- Add `bun run generate:ai-context` to pre-commit hooks (developers run locally)
+- CI job validates that artifacts match current source state (safety net)
+- Prevents stale artifacts from being committed to main
+
+**Affected Tasks:**
+
+- Task 1: Implement artifact generation script (`generate:ai-context`)
+- Task 3: Integrate into pre-commit hooks
+- Task 5: CI validation job
+
+---
+
+#### Q2: JSON Schema Formality Level
+
+**Question:** What level of schema formality and rigor is required for the 7 artifacts to ensure AI tool compatibility?
+
+**Ambiguity Identified:** Spec provides examples but lacks formal JSON schema definitions, creating risk of drift between generated artifacts and consumer expectations.
+
+**Approved Answer:** **TypeScript Interfaces + JSON Schema Files**
+
+1. Define TypeScript types for all 7 artifacts in `packages/types/src/ai-context.ts`
+2. Generate JSON schemas from TypeScript types using `typescript-json-schema`
+3. Validate generated artifacts against schemas in CI before accepting them
+4. Store JSON schemas in `docs/ai/context/schemas/` for reference
+5. Document schema version in each artifact for compatibility tracking
+
+**Implementation Implication:**
+
+- Create type definitions covering all artifact structures
+- Generate schemas automatically from types (single source of truth)
+- Add validation step in artifact generation pipeline
+- AI tools can validate compatibility before loading
+
+**Affected Tasks:**
+
+- Task 2: Define TypeScript types for all artifacts
+- Task 4: Implement schema validation
+- Task 5: CI integration of schema validation
+
+---
+
+#### Q3: Artifact Versioning Strategy
+
+**Question:** Should AI context artifacts include version metadata to handle breaking changes to schemas over time?
+
+**Ambiguity Identified:** No strategy documented for managing schema evolution or backward compatibility as Zidney architecture evolves.
+
+**Approved Answer:** **Yes — Semantic Versioning in Artifact Metadata**
+
+1. Add `"schema_version": "1.0.0"` to root of each artifact JSON file
+2. Use semantic versioning: MAJOR.MINOR.PATCH
+   - MAJOR: Breaking changes to schema structure
+   - MINOR: New optional fields added
+   - PATCH: Documentation or value updates
+3. AI tools can validate schema_version before loading artifact
+4. Maintain migration guide if MAJOR version changes
+
+**Implementation Implication:**
+
+- Include schema_version in TypeScript type definitions
+- Validate schema_version in artifact loading code
+- Document version compatibility in AI tool integration guides
+
+**Affected Tasks:**
+
+- Task 2: Include schema_version in all artifact type definitions
+- Task 6: Document versioning strategy for consumers
+
+---
+
+#### Q4: Change-Triggered Artifact Regeneration
+
+**Question:** Should artifact generation be triggered only when governance sources (ADRs, module-boundaries.json, infra-audit outputs) actually change, or always run as part of the build?
+
+**Ambiguity Identified:** Spec lacks guidance on optimization to avoid unnecessary regenerations and CI overhead.
+
+**Approved Answer:** **Intelligent Change Detection with Traceability**
+
+1. Monitor changes to source files:
+   - `docs/architecture/adr/**/*.md`
+   - `docs/architecture/module-boundaries.json`
+   - `infra-audit-report.json` (if present)
+2. Only regenerate artifacts if source files changed
+3. Include source metadata in each artifact:
+   - `"sources": { "adr_timestamp": "...", "module_boundaries_hash": "...", "audit_timestamp": "..." }`
+   - Helps developers understand artifact freshness
+
+4. CI job:
+   - Detect source changes
+   - Skip regeneration if no changes
+   - Validate artifact timestamps match source files
+
+**Implementation Implication:**
+
+- Add change detection logic to generate script
+- Include source hashes/timestamps in artifacts
+- Reduces CI time and unnecessary commits
+- Improves visibility into artifact freshness
+
+**Affected Tasks:**
+
+- Task 1: Implement change detection in generation script
+- Task 5: CI job enhancement for change-based triggering
+
+---
+
+#### Q5: AI Tool Integration Points and Access Patterns
+
+**Question:** Which AI tools should consume these artifacts, and through what mechanisms do they access them? How do we integrate with existing governance automation?
+
+**Ambiguity Identified:** Spec mentions AI tools but lacks specific integration patterns and access mechanisms.
+
+**Approved Answer:** **Multi-Tool Ecosystem with Standard Access Patterns**
+
+**Consumer Tools:**
+
+1. **Copilot (via ai-guard.ts)**
+   - Loads `ai-architecture-brain.json` for validation
+   - Checks proposed changes against architectural rules
+   - Blocks violations before code generation
+
+2. **GitNexus MCP**
+   - Loads `ai-module-map.json` and `ai-dependency-graph.json`
+   - Performs impact analysis and blast radius calculations
+   - Supports architecture-aware refactoring
+
+3. **SpecKit Agents**
+   - Load `ai-architecture-summary.md` and `ai-layer-model.json` during planning
+   - Understand architectural constraints before task generation
+   - Validate plan compliance with existing architecture
+
+4. **Claude/Custom AI Assistants**
+   - Artifacts can be pasted into context window
+   - Enables architecture-aware assistance on demand
+   - Especially useful for architecture questions
+
+**Access Method:**
+
+- Direct file read from `docs/ai/context/` directory
+- Can be loaded via MCP (GitHub file API, filesystem)
+- Can be included in LLM context as markdown/JSON
+
+**Integration with Governance:**
+
+- ai-guard.ts: Loads `ai-architecture-brain.json` automatically
+- infra-audit.ts: Reads and updates artifact freshness metadata
+- CI pipeline: Validates artifacts before merge
+
+**Implementation Implication:**
+
+- Document artifact loading in each consumer tool's integration guide
+- Ensure artifacts are valid, parseable JSON/markdown
+- Test artifact loading with actual consumer tools
+- Create usage examples for manual context inclusion
+
+**Affected Tasks:**
+
+- Task 3: Document artifact loading patterns
+- Task 6: Create AI tool integration guides
+- Task 5: Validate with actual consumer tools
+
+---
+
+**Clarification Status:** ✅ **All ambiguities resolved. Specification is now ready for planning.**
+
+**Updated:** 2026-03-09

@@ -6,9 +6,9 @@
   "branch": "spec/infra-009-ai-architecture-context",
   "base_branch": "develop",
   "package_manager": "bun",
-  "current_step": "specify",
+  "current_step": "clarify",
   "stage_status": "DRAFT",
-  "clarifications_resolved": false,
+  "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
@@ -24,6 +24,10 @@
     },
     {
       "event": "specify_complete",
+      "timestamp": "2026-03-09T00:00:00Z"
+    },
+    {
+      "event": "clarifications_locked",
       "timestamp": "2026-03-09T00:00:00Z"
     }
   ]

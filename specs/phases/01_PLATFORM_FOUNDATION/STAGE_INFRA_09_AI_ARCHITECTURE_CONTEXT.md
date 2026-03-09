@@ -11,31 +11,30 @@ The goal is to make AI-assisted development **architecture-aware by default**, e
 ## Stage Status
 
 Status: DRAFT
-Step: specify
+Step: clarify
 Risk Level: LOW
 Last Updated: 2026-03-09T00:00:00Z
 Branch: spec/infra-009-ai-architecture-context
 
-Scope Defined:
+Scope Defined and Clarified:
 
-- Specification of AI context layer architecture
-- 7 AI context artifacts defined (summary, maps, graphs, brain, mini)
-- Acceptance criteria specified (14 conditions)
-- Risk assessment completed (5 risks with mitigations)
-- Constitutional compliance verified (100% compliant)
-- Failure modes and recovery procedures documented
+- Artifact regeneration: Both local + CI validation
+- JSON schema: TypeScript interfaces + schema validation
+- Versioning: Semantic versioning in artifacts
+- Change detection: Intelligent change-triggered regeneration
+- Tool integration: 4 consumer tools with standard access patterns
 
 Deferred Scope:
 
-- None — complete scope captured in specification
+- None — all clarifications resolved
 
 Constitutional Compliance:
 
-- ✅ Specification compliant with Zidney Constitution v1.2.0
-- ✅ Clarification step pending
+- ✅ Specification clarified and confirmed compliant with Zidney Constitution v1.2.0
+- ✅ Planning authorization granted
 
 Notes:
-Specification complete and checked. All requirements captured. Ready for clarification and planning.
+All specification ambiguities resolved. Ready for technical planning phase.
 
 ---
 
