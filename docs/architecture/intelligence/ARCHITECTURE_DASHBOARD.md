@@ -1,11 +1,11 @@
 # Zidney Architecture Dashboard
 
-**Generated:** 2026-03-09T19:42:49.069Z
-**Git SHA:** 892811a4b54143292ee62abdfc14e60c0f1ab1cb
+**Generated:** 2026-03-09T21:00:45.860Z
+**Git SHA:** 617ff62d7ebe3bcc56e0a422cd8c067dd84bb89d
 
 ## Architecture Score
 
-**Score:** 100 / 100
+**Score:** 0 / 100
 
 **Trend:** 0 regression
 
@@ -14,9 +14,9 @@
 | Metric | Value |
 |------|------|
 | Circular Dependencies | 0 |
-| Dependency Violations | 0 |
+| Dependency Violations | 4 |
 | Layer Violations | 0 |
-| Architecture Drift | 0 |
+| Architecture Drift | 10 |
 | Skipped Tests | 0 |
 | Flaky Tests | 0 |
 
@@ -30,22 +30,22 @@ Total Tests: 207
 
 ## Dependency Graph
 
-Nodes: 56
+Nodes: 15
 
-Edges: 623
+Edges: 569
 
 ## Top Architectural Hotspots
 
 - packages/logger (235)
+- apps/mmc (121)
 - packages/types (100)
 - packages/domain-core (77)
-- ./apps/mmc/srcvue/test-utils (17)
 - packages/api-client (17)
-- ./apps/mmc/srcpinia/testing (15)
 - packages/validation (10)
-- ./apps/mmc/src/core/state/ui.store (10)
-- ./apps/mmc/src/core/auth/refresh-manager (9)
-- ./apps/mmc/srcvitejs/plugin-vue (8)
+- packages/app (5)
+- packages/redis-utils (3)
+- packages/ui (1)
+- packages/config (0)
 
 ---
 

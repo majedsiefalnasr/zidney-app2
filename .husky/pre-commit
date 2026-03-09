@@ -53,4 +53,18 @@ else
   echo "Skipping architecture checks (no code files changed)"
 fi
 
+# ── Validate Architecture Brain (if AI context files changed) ─────────────────
+BRAIN_FILES=$(echo "$STAGED_FILES" | grep -E 'docs/ai/context/ai-architecture-brain\.json' || true)
+
+if [ -n "$BRAIN_FILES" ]; then
+  echo "Validating architecture brain integrity…"
+  bun scripts/validate-architecture-brain.ts || {
+    echo "❌ Architecture brain validation failed"
+    echo "   The ai-architecture-brain.json has invalid or malformed dependency paths."
+    echo "   This prevents AI Guard from validating correctly."
+    echo "   Run: bun scripts/infra-audit.ts to regenerate a valid brain."
+    exit 1
+  }
+fi
+
 echo "✔ Pre-commit checks passed"

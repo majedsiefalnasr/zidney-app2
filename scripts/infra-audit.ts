@@ -237,6 +237,31 @@ const QUARANTINE_PATTERNS = [/\[QUARANTINED\]/i, /@quarantine/i]
 /* Helpers                                                                    */
 /* -------------------------------------------------------------------------- */
 
+function isTestOrConfigFile(path: string): boolean {
+  // Test files and config files are exempted from architecture rules
+  // because they have different allowances than production code
+  const isTestFile =
+    /\.(test|spec)\.(ts|js)$/.test(path) || path.includes('/tests/') || path.includes('/test/')
+  const isConfigFile =
+    path.endsWith('.config.ts') ||
+    path.endsWith('.config.js') ||
+    path.endsWith('.vite.ts') ||
+    path.endsWith('.vite.js') ||
+    /vitest\.config\.(ts|js)$/.test(path) ||
+    /playwright\.config\.(ts|js)$/.test(path)
+
+  return isTestFile || isConfigFile
+}
+
+function isValidModulePath(path: string): boolean {
+  // Valid monorepo module paths are: packages/<name> or apps/<name>
+  // Must have exactly 2 segments
+  const parts = path.split('/')
+  return (
+    parts.length === 2 && (parts[0] === 'packages' || parts[0] === 'apps') && parts[1].length > 0
+  )
+}
+
 function resolveImportTarget(imp: string): string | null {
   // direct workspace imports
   const pkg = imp.match(/^packages\/([^/]+)/)
@@ -252,19 +277,32 @@ function resolveImportTarget(imp: string): string | null {
   // TSConfig aliases
   for (const a of TS_ALIASES) {
     if (imp.startsWith(a.alias)) {
-      const resolved = imp.replace(a.alias, a.target)
+      // Normalize: remove leading ./ and collapse multiple slashes
+      const resolved = imp.replace(a.alias, a.target).replace(/^\.\//, '').replace(/\/+/g, '/')
 
       if (resolved.startsWith('packages/')) {
         const parts = resolved.split('/')
-        return `${parts[0]}/${parts[1]}`
+        const modulePath = `${parts[0]}/${parts[1]}`
+        // Validate it's a proper module path before returning
+        if (isValidModulePath(modulePath)) {
+          return modulePath
+        }
+        // If malformed, fall through to return null (external npm)
       }
 
       if (resolved.startsWith('apps/')) {
         const parts = resolved.split('/')
-        return `${parts[0]}/${parts[1]}`
+        const modulePath = `${parts[0]}/${parts[1]}`
+        // Validate it's a proper module path before returning
+        if (isValidModulePath(modulePath)) {
+          return modulePath
+        }
+        // If malformed, fall through to return null (external npm)
       }
 
-      return resolved
+      // If TSConfig alias resolves to something other than packages/apps,
+      // treat it as external npm — do NOT return the raw resolved value
+      return null
     }
   }
 
@@ -561,9 +599,13 @@ function scanTestStability(files: Map<string, string>) {
 
 function scanDependencyBoundaries(files: Map<string, string>) {
   const violations: any[] = []
+  const seen = new Map<string, any>() // Deduplicate by (module→module) pair
 
   for (const [rel, full] of files) {
     if (!rel.endsWith('.ts') && !rel.endsWith('.js')) continue
+
+    // Skip test/config files (test dependencies have different rules)
+    if (isTestOrConfigFile(rel)) continue
 
     const content = safeRead(full)
     if (!content) continue
@@ -578,11 +620,25 @@ function scanDependencyBoundaries(files: Map<string, string>) {
         rel.startsWith('packages/') &&
         imp.startsWith('apps/')
       ) {
-        violations.push({
-          file: rel,
-          importPath: imp,
-          rule: 'packages_must_not_import_apps',
-        })
+        const sourceModule = rel.split('/').slice(0, 2).join('/')
+        const key = `${sourceModule}→${imp}|packages_must_not_import_apps`
+
+        if (!seen.has(key)) {
+          const violation = {
+            file: rel,
+            importPath: imp,
+            rule: 'packages_must_not_import_apps',
+            examples: [rel],
+          }
+          seen.set(key, violation)
+          violations.push(violation)
+        } else {
+          // Track additional file examples
+          const existing = seen.get(key)
+          if (existing.examples.length < 3) {
+            existing.examples.push(rel)
+          }
+        }
       }
 
       if (DEP_RULES.forbidAppsImportingOtherApps && rel.startsWith('apps/')) {
@@ -591,11 +647,25 @@ function scanDependencyBoundaries(files: Map<string, string>) {
         const target = resolved?.startsWith('apps/') ? resolved.split('/')[1] : null
 
         if (target && target !== srcApp) {
-          violations.push({
-            file: rel,
-            importPath: imp,
-            rule: 'apps_must_not_import_other_apps',
-          })
+          const sourceModule = rel.split('/').slice(0, 2).join('/')
+          const targetModule = resolved?.split('/').slice(0, 2).join('/') ?? ''
+          const key = `${sourceModule}→${targetModule}|apps_must_not_import_other_apps`
+
+          if (!seen.has(key)) {
+            const violation = {
+              file: rel,
+              importPath: imp,
+              rule: 'apps_must_not_import_other_apps',
+              examples: [rel],
+            }
+            seen.set(key, violation)
+            violations.push(violation)
+          } else {
+            const existing = seen.get(key)
+            if (existing.examples.length < 3) {
+              existing.examples.push(rel)
+            }
+          }
         }
       }
     }
@@ -704,9 +774,13 @@ interface ArchitectureMapViolation {
 
 function scanLayerViolations(files: Map<string, string>) {
   const violations: LayerViolation[] = []
+  const seen = new Set<string>() // Deduplicate by rule
 
   for (const [rel, full] of files) {
     if (!rel.endsWith('.ts') && !rel.endsWith('.js')) continue
+
+    // Skip test/config files (test dependencies have different rules)
+    if (isTestOrConfigFile(rel)) continue
 
     const content = safeRead(full)
     if (!content) continue
@@ -720,22 +794,30 @@ function scanLayerViolations(files: Map<string, string>) {
         rel.startsWith(LAYER_RULES.forbidUiImportingDomain.source) &&
         resolveImportTarget(imp) === LAYER_RULES.forbidUiImportingDomain.target
       ) {
-        violations.push({
-          file: rel,
-          importPath: imp,
-          rule: 'ui_system_must_not_import_domain_core',
-        })
+        const key = `ui_system_must_not_import_domain_core|${LAYER_RULES.forbidUiImportingDomain.source}→${LAYER_RULES.forbidUiImportingDomain.target}`
+        if (!seen.has(key)) {
+          violations.push({
+            file: rel,
+            importPath: imp,
+            rule: 'ui_system_must_not_import_domain_core',
+          })
+          seen.add(key)
+        }
       }
 
       if (
         rel.startsWith(LAYER_RULES.forbidApiClientImportingWorker.source) &&
         resolveImportTarget(imp) === LAYER_RULES.forbidApiClientImportingWorker.target
       ) {
-        violations.push({
-          file: rel,
-          importPath: imp,
-          rule: 'api_client_must_not_import_worker',
-        })
+        const key = `api_client_must_not_import_worker|${LAYER_RULES.forbidApiClientImportingWorker.source}→${LAYER_RULES.forbidApiClientImportingWorker.target}`
+        if (!seen.has(key)) {
+          violations.push({
+            file: rel,
+            importPath: imp,
+            rule: 'api_client_must_not_import_worker',
+          })
+          seen.add(key)
+        }
       }
     }
   }
@@ -745,6 +827,7 @@ function scanLayerViolations(files: Map<string, string>) {
 
 function scanArchitectureMapViolations(files: Map<string, string>, architectureMap: any | null) {
   const violations: ArchitectureMapViolation[] = []
+  const seen = new Set<string>() // Deduplicate by (module→target|rule)
 
   if (!architectureMap || !architectureMap.modules) return violations
 
@@ -752,6 +835,9 @@ function scanArchitectureMapViolations(files: Map<string, string>, architectureM
 
   for (const [rel, full] of files) {
     if (!rel.endsWith('.ts') && !rel.endsWith('.js')) continue
+
+    // Skip test/config files (test dependencies have different rules)
+    if (isTestOrConfigFile(rel)) continue
 
     const content = safeRead(full)
     if (!content) continue
@@ -780,23 +866,25 @@ function scanArchitectureMapViolations(files: Map<string, string>, architectureM
 
       /* Forbidden dependency rules */
       for (const rule of forbidden) {
+        let matches = false
         if (rule.endsWith('/*')) {
           const prefix = rule.replace('/*', '')
-          if (target.startsWith(prefix)) {
+          matches = target.startsWith(prefix)
+        } else {
+          matches = target === rule
+        }
+
+        if (matches) {
+          const key = `${moduleRoot}→${target}|forbidden_dependency`
+          if (!seen.has(key)) {
             violations.push({
               file: rel,
               module: moduleRoot,
               importPath: imp,
               rule: 'forbidden_dependency',
             })
+            seen.add(key)
           }
-        } else if (target === rule) {
-          violations.push({
-            file: rel,
-            module: moduleRoot,
-            importPath: imp,
-            rule: 'forbidden_dependency',
-          })
         }
       }
 
@@ -811,12 +899,16 @@ function scanArchitectureMapViolations(files: Map<string, string>, architectureM
         })
 
         if (!allowedMatch && target !== moduleRoot) {
-          violations.push({
-            file: rel,
-            module: moduleRoot,
-            importPath: imp,
-            rule: 'not_in_allowed_dependencies',
-          })
+          const key = `${moduleRoot}→${target}|not_in_allowed_dependencies`
+          if (!seen.has(key)) {
+            violations.push({
+              file: rel,
+              module: moduleRoot,
+              importPath: imp,
+              rule: 'not_in_allowed_dependencies',
+            })
+            seen.add(key)
+          }
         }
       }
     }
@@ -838,6 +930,32 @@ interface AIDependencyGraph {
   nodes: { id: string; type: 'package' | 'app' }[]
   edges: { from: string; to: string }[]
   centrality: Record<string, number>
+}
+
+function validateDependencyGraphEdges(edges: { from: string; to: string }[]): number {
+  // Validate that all edges have valid monorepo module paths
+  // Count and log any malformed edges (should be filtered before we get here)
+  let malformed = 0
+
+  for (const edge of edges) {
+    // Both from and to must be valid module paths OR valid external indicators
+    // Valid monorepo paths: packages/<name> or apps/<name>
+    if (!isValidModulePath(edge.from)) {
+      console.warn(
+        `[INFRA AUDIT] WARNING: Malformed edge source: "${edge.from}" (not a valid module path)`
+      )
+      malformed++
+    }
+
+    if (!isValidModulePath(edge.to)) {
+      console.warn(
+        `[INFRA AUDIT] WARNING: Malformed edge target: "${edge.to}" (not a valid module path or external npm)`
+      )
+      malformed++
+    }
+  }
+
+  return malformed
 }
 
 function buildDependencyGraph(files: Map<string, string>): DependencyGraph {
@@ -868,10 +986,22 @@ function buildDependencyGraph(files: Map<string, string>): DependencyGraph {
       const target = resolveImportTarget(imp)
 
       if (target && target !== moduleRoot) {
-        nodes.add(target)
-        edges.push({ from: moduleRoot, to: target })
+        // Only add edge if it's a valid monorepo module path
+        if (isValidModulePath(target)) {
+          nodes.add(target)
+          edges.push({ from: moduleRoot, to: target })
+        }
+        // External npm packages are filtered out here — they don't create edges
       }
     }
+  }
+
+  // Validate final edges before export
+  const malformedCount = validateDependencyGraphEdges(edges)
+  if (malformedCount > 0) {
+    console.warn(
+      `[INFRA AUDIT] WARNING: ${malformedCount} malformed edges detected and filtered. Check logs above.`
+    )
   }
 
   return {

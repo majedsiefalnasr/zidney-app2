@@ -13,6 +13,7 @@ Before generating code:
 5. Verify ADR decisions
 6. Query GitNexus context
 7. Assume infra-audit.ts will validate changes
+8. **If regenerating architecture, validate the brain with validate-architecture-brain.ts before committing**
 
 ---
 
@@ -925,11 +926,48 @@ AI agents should assume the following validation pipeline exists locally and in 
 ```
 bun scripts/ai-guard.ts
 bun scripts/infra-audit.ts
+bun scripts/validate-architecture-brain.ts
 ```
 
 If violations occur, AI must reason about the architecture graph and correct the structure before proceeding.
 
 This architecture self‑healing mechanism ensures Zidney remains **structurally stable even under autonomous AI‑driven development workflows**.
+
+### Architecture Brain Validation (Critical Safety Gate)
+
+The ai-architecture-brain.json artifact is critical to AI Guard validation. **Corrupt brains lead to false-positive violations**, making it impossible to push valid code.
+
+**Prevention Rules:**
+
+AI agents MUST validate the architecture brain whenever:
+
+- Running `infra-audit.ts` (validates as part of audit)
+- Committing architecture intelligence files
+- Planning to push changes to the repository
+
+Before committing implementation changes that involve architecture regeneration:
+
+1. Run the full validation pipeline above.
+2. Verify `ai-guard.ts` passes with **zero violations**.
+3. Confirm `validate-architecture-brain.ts` returns valid brain (exit code 0).
+4. Only commit if both pass.
+
+**What to validate:**
+
+- All dependency graph edges have valid source and target modules (format: `packages/<name>` or `apps/<name>`)
+- No relative paths (`./ prefix`)
+- No path segments beyond the module root (no `src/`, `dist/`, etc.)
+- No malformed concatenations (like `srcvue/test-utils`)
+
+**If validation fails:**
+
+1. STOP all commits
+2. Check the validation error output for which edges are malformed
+3. Run `bun scripts/infra-audit.ts` to regenerate from source
+4. Do NOT manually edit the brain JSON
+5. Validate again before committing
+
+The pre-commit hook automatically validates the brain if architecture context files change — **commits with corrupt brains are automatically blocked**.
 
 ---
 

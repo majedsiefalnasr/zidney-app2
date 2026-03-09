@@ -21,27 +21,7 @@
       "type": "package"
     },
     {
-      "id": "./apps/mmc/srcvue/test-utils",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/srctailwindcss/vite",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/srcvitejs/plugin-vue",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/srcvueuse/core",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/srcunovis/vue",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/srctanstack/vue-table",
+      "id": "apps/mmc",
       "type": "app"
     },
     {
@@ -61,127 +41,11 @@
       "type": "package"
     },
     {
-      "id": "apps/mmc",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/srcpinia/testing",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/composables/useBreakpoint",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/state/ui.store",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/auth/token-redact",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/state/app.store",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/auth/types",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/state/auth.store",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/state/notification.store",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/components/layout/AppSidebar.vue",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/navigation/index",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/components/layout/AppLayout.vue",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/components/layout/AppHeader.vue",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/App.vue",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/srcplaywright/test",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/api/interceptors/error.interceptor",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/auth/refresh-manager",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/auth/token-manager",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/config/app-config",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/modules/dashboard/routes",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/modules/licenses/routes",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/api/client",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/auth/auth.service",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/guards",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/router",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/state/license-status.store",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/modules/dashboard/store",
-      "type": "app"
-    },
-    {
       "id": "packages/ui",
       "type": "package"
     },
     {
-      "id": "./apps/mmc/src/modules/dashboard/api",
-      "type": "app"
-    },
-    {
       "id": "apps/frontoffice",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/auth/token-store",
       "type": "app"
     },
     {
@@ -189,39 +53,11 @@
       "type": "app"
     },
     {
-      "id": "./apps/mmc/src/composables/usePermission",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/core/state/workspace.store",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/stores/context",
-      "type": "app"
-    },
-    {
       "id": "apps/api",
       "type": "app"
     },
     {
-      "id": "./apps/mmc/src/responses/license-error-handler",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/src/logging",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/srchono/zod-validator",
-      "type": "app"
-    },
-    {
       "id": "apps/worker",
-      "type": "app"
-    },
-    {
-      "id": "./apps/mmc/srcaws-sdk/client-s3",
       "type": "app"
     }
   ],
@@ -240,43 +76,43 @@
     },
     {
       "from": "packages/ui-system",
-      "to": "./apps/mmc/srcvue/test-utils"
+      "to": "apps/mmc"
     },
     {
       "from": "packages/ui-system",
-      "to": "./apps/mmc/srcvue/test-utils"
+      "to": "apps/mmc"
     },
     {
       "from": "packages/ui-system",
-      "to": "./apps/mmc/srctailwindcss/vite"
+      "to": "apps/mmc"
     },
     {
       "from": "packages/ui-system",
-      "to": "./apps/mmc/srcvitejs/plugin-vue"
+      "to": "apps/mmc"
     },
     {
       "from": "packages/ui-system",
-      "to": "./apps/mmc/srcvitejs/plugin-vue"
+      "to": "apps/mmc"
     },
     {
       "from": "packages/ui-system",
-      "to": "./apps/mmc/srcvueuse/core"
+      "to": "apps/mmc"
     },
     {
       "from": "packages/ui-system",
-      "to": "./apps/mmc/srcunovis/vue"
+      "to": "apps/mmc"
     },
     {
       "from": "packages/ui-system",
-      "to": "./apps/mmc/srcvueuse/core"
+      "to": "apps/mmc"
     },
     {
       "from": "packages/ui-system",
-      "to": "./apps/mmc/srctanstack/vue-table"
+      "to": "apps/mmc"
     },
     {
       "from": "packages/ui-system",
-      "to": "./apps/mmc/srctanstack/vue-table"
+      "to": "apps/mmc"
     },
     {
       "from": "packages/domain-core",
@@ -488,134 +324,6 @@
     },
     {
       "from": "apps/mmc",
-      "to": "./apps/mmc/srcpinia/testing"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/srcvue/test-utils"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/composables/useBreakpoint"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/state/ui.store"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/auth/token-redact"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/state/app.store"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/state/ui.store"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/auth/types"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/state/auth.store"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/state/notification.store"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/state/notification.store"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/state/ui.store"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/srcpinia/testing"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/srcvue/test-utils"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/components/layout/AppSidebar.vue"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/navigation/index"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/srcpinia/testing"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/srcvue/test-utils"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/components/layout/AppLayout.vue"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/srcpinia/testing"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/srcvue/test-utils"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/components/layout/AppHeader.vue"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/state/app.store"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/srcpinia/testing"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/srcvue/test-utils"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/App.vue"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/components/layout/AppLayout.vue"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/srcplaywright/test"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/srcplaywright/test"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/srcvitejs/plugin-vue"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/srcvitejs/plugin-vue"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/state/ui.store"
-    },
-    {
-      "from": "apps/mmc",
       "to": "packages/types"
     },
     {
@@ -664,22 +372,6 @@
     },
     {
       "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/api/interceptors/error.interceptor"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/auth/refresh-manager"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/auth/token-manager"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/config/app-config"
-    },
-    {
-      "from": "apps/mmc",
       "to": "packages/api-client"
     },
     {
@@ -697,206 +389,142 @@
     {
       "from": "apps/mmc",
       "to": "packages/logger"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/modules/dashboard/routes"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/modules/licenses/routes"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/api/client"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/api/client"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/api/interceptors/error.interceptor"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/auth/auth.service"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/auth/auth.service"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/auth/refresh-manager"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/auth/refresh-manager"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/auth/token-manager"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/guards"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/router"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/state/auth.store"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/core/state/license-status.store"
-    },
-    {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/modules/dashboard/store"
     },
     {
       "from": "apps/mmc",
       "to": "packages/ui"
     },
     {
-      "from": "apps/mmc",
-      "to": "./apps/mmc/src/modules/dashboard/api"
+      "from": "apps/frontoffice",
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcpinia/testing"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcvue/test-utils"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/composables/useBreakpoint"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/state/ui.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/auth/token-redact"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/state/app.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/state/ui.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/auth/types"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/state/auth.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/state/notification.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/state/notification.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/auth/types"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/state/auth.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/state/ui.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcpinia/testing"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcvue/test-utils"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/components/layout/AppSidebar.vue"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/navigation/index"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcpinia/testing"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcvue/test-utils"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/components/layout/AppLayout.vue"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcpinia/testing"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcvue/test-utils"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/components/layout/AppHeader.vue"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/state/app.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcpinia/testing"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcvue/test-utils"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/App.vue"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/components/layout/AppLayout.vue"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcplaywright/test"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcplaywright/test"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcvitejs/plugin-vue"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "./apps/mmc/srcvitejs/plugin-vue"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
@@ -948,27 +576,27 @@
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/api/interceptors/error.interceptor"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/auth/refresh-manager"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/auth/token-manager"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/auth/token-store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/config/app-config"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/config/app-config"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
@@ -992,87 +620,87 @@
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/api/client"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/api/client"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/api/interceptors/error.interceptor"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/auth/auth.service"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/auth/auth.service"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/auth/refresh-manager"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/auth/refresh-manager"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/auth/token-manager"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/guards"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/router"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/state/auth.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/frontoffice",
-      "to": "./apps/mmc/src/core/state/license-status.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/composables/usePermission"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcpinia/testing"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcvue/test-utils"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/composables/useBreakpoint"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/ui.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/app.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/ui.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/auth/types"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/auth.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
@@ -1080,107 +708,107 @@
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/workspace.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/notification.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/notification.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/auth/types"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/auth.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/ui.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcpinia/testing"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcvue/test-utils"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/components/layout/AppSidebar.vue"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/navigation/index"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcpinia/testing"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcvue/test-utils"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/components/layout/AppLayout.vue"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcpinia/testing"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcvue/test-utils"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/components/layout/AppHeader.vue"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/app.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/workspace.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcpinia/testing"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcvue/test-utils"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/App.vue"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/components/layout/AppLayout.vue"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcplaywright/test"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcplaywright/test"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcvitejs/plugin-vue"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/srcvitejs/plugin-vue"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
@@ -1244,31 +872,27 @@
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/api/interceptors/error.interceptor"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/auth/refresh-manager"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/auth/token-manager"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/auth/token-store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/config/app-config"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/config/app-config"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "packages/api-client"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
@@ -1276,7 +900,7 @@
     },
     {
       "from": "apps/backoffice",
-      "to": "packages/logger"
+      "to": "packages/api-client"
     },
     {
       "from": "apps/backoffice",
@@ -1292,47 +916,51 @@
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/api/client"
+      "to": "packages/logger"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/api/client"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/api/interceptors/error.interceptor"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/auth/auth.service"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/auth/auth.service"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/auth/refresh-manager"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/auth/refresh-manager"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/auth/token-manager"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/auth.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/core/state/license-status.store"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
-      "to": "./apps/mmc/src/stores/context"
+      "to": "apps/mmc"
+    },
+    {
+      "from": "apps/backoffice",
+      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
@@ -1760,14 +1388,6 @@
     },
     {
       "from": "apps/api",
-      "to": "./apps/mmc/src/responses/license-error-handler"
-    },
-    {
-      "from": "apps/api",
-      "to": "./apps/mmc/src/logging"
-    },
-    {
-      "from": "apps/api",
       "to": "packages/logger"
     },
     {
@@ -2116,27 +1736,27 @@
     },
     {
       "from": "apps/api",
-      "to": "./apps/mmc/srchono/zod-validator"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/api",
-      "to": "./apps/mmc/srchono/zod-validator"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/api",
-      "to": "./apps/mmc/srchono/zod-validator"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/api",
-      "to": "./apps/mmc/srchono/zod-validator"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/api",
-      "to": "./apps/mmc/srchono/zod-validator"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/api",
-      "to": "./apps/mmc/srchono/zod-validator"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/api",
@@ -2148,7 +1768,7 @@
     },
     {
       "from": "apps/api",
-      "to": "./apps/mmc/srchono/zod-validator"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/api",
@@ -2576,7 +2196,7 @@
     },
     {
       "from": "apps/worker",
-      "to": "./apps/mmc/srcaws-sdk/client-s3"
+      "to": "apps/mmc"
     },
     {
       "from": "apps/worker",
@@ -2725,56 +2345,15 @@
     "packages/config": 0,
     "packages/redis-utils": 3,
     "packages/ui-system": 0,
-    "./apps/mmc/srcvue/test-utils": 17,
-    "./apps/mmc/srctailwindcss/vite": 1,
-    "./apps/mmc/srcvitejs/plugin-vue": 8,
-    "./apps/mmc/srcvueuse/core": 2,
-    "./apps/mmc/srcunovis/vue": 1,
-    "./apps/mmc/srctanstack/vue-table": 2,
+    "apps/mmc": 121,
     "packages/api-client": 17,
     "packages/domain-core": 77,
     "packages/app": 5,
     "packages/validation": 10,
-    "apps/mmc": 0,
-    "./apps/mmc/srcpinia/testing": 15,
-    "./apps/mmc/src/composables/useBreakpoint": 3,
-    "./apps/mmc/src/core/state/ui.store": 10,
-    "./apps/mmc/src/core/auth/token-redact": 2,
-    "./apps/mmc/src/core/state/app.store": 6,
-    "./apps/mmc/src/core/auth/types": 5,
-    "./apps/mmc/src/core/state/auth.store": 8,
-    "./apps/mmc/src/core/state/notification.store": 6,
-    "./apps/mmc/src/components/layout/AppSidebar.vue": 3,
-    "./apps/mmc/src/core/navigation/index": 3,
-    "./apps/mmc/src/components/layout/AppLayout.vue": 6,
-    "./apps/mmc/src/components/layout/AppHeader.vue": 3,
-    "./apps/mmc/src/App.vue": 3,
-    "./apps/mmc/srcplaywright/test": 6,
-    "./apps/mmc/src/core/api/interceptors/error.interceptor": 6,
-    "./apps/mmc/src/core/auth/refresh-manager": 9,
-    "./apps/mmc/src/core/auth/token-manager": 6,
-    "./apps/mmc/src/core/config/app-config": 5,
-    "./apps/mmc/src/modules/dashboard/routes": 1,
-    "./apps/mmc/src/modules/licenses/routes": 1,
-    "./apps/mmc/src/core/api/client": 6,
-    "./apps/mmc/src/core/auth/auth.service": 6,
-    "./apps/mmc/src/core/guards": 2,
-    "./apps/mmc/src/core/router": 2,
-    "./apps/mmc/src/core/state/license-status.store": 3,
-    "./apps/mmc/src/modules/dashboard/store": 1,
     "packages/ui": 1,
-    "./apps/mmc/src/modules/dashboard/api": 1,
     "apps/frontoffice": 0,
-    "./apps/mmc/src/core/auth/token-store": 2,
     "apps/backoffice": 0,
-    "./apps/mmc/src/composables/usePermission": 1,
-    "./apps/mmc/src/core/state/workspace.store": 2,
-    "./apps/mmc/src/stores/context": 1,
     "apps/api": 0,
-    "./apps/mmc/src/responses/license-error-handler": 1,
-    "./apps/mmc/src/logging": 1,
-    "./apps/mmc/srchono/zod-validator": 7,
-    "apps/worker": 0,
-    "./apps/mmc/srcaws-sdk/client-s3": 1
+    "apps/worker": 0
   }
 }
