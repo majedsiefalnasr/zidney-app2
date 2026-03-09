@@ -13,7 +13,7 @@ import { up as applyRbacRolePermissionsComplete } from '../db/tenant/migrations/
  * License Middleware: Not applicable
  */
 
-type TenantDBConnection = any // Placeholder for actual DB connection type
+type TenantDBConnection = Record<string, unknown> // Placeholder for actual DB connection type
 
 /**
  * Register all tenant migrations required for 1.1.0 schema
@@ -43,7 +43,7 @@ const TENANT_MIGRATIONS_1_4_0_NAME = '20260302_001_rbac_role_permissions_complet
  */
 export async function registerAndApplyTenantMigrations(
   tenantConnections: Map<string, TenantDBConnection>,
-  context: any
+  context: Record<string, unknown>
 ) {
   const correlationId = context?.correlationId || 'unknown'
   const failedTenants: string[] = []
@@ -114,7 +114,7 @@ export async function registerAndApplyTenantMigrations(
 
       // Get a raw PoolClient to run the migration's transactional DDL
       // db.$client is the underlying pg.Pool in Drizzle's postgres-js / node-postgres driver
-      const pool = (db as any).$client
+      const pool = (db as Record<string, unknown>).$client
       const client = await pool.connect()
       try {
         await applyRbacRolePermissionsComplete(client)
@@ -157,7 +157,7 @@ export async function registerAndApplyTenantMigrations(
 export async function verifyTenantSchemaVersion(
   db: TenantDBConnection,
   workspaceId: string,
-  context: any
+  context: Record<string, unknown>
 ): Promise<{ compatible: boolean; version: string }> {
   const correlationId = context?.correlationId || 'unknown'
 

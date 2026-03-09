@@ -34,7 +34,7 @@ if (!('localStorage' in globalThis)) {
   const store = new Map<string, string>()
   const localStorageShim = {
     getItem(key: string): string | null {
-      return store.has(key) ? store.get(key)! : null
+      return store.has(key) ? (store.get(key) as string) : null
     },
     setItem(key: string, value: string): void {
       store.set(key, value)

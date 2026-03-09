@@ -207,7 +207,7 @@ export function validateProductVersion(productVersion: string): {
  * @param productVersion - Product version string
  * @returns Grading configuration for this version
  */
-export function getVersionGradingConfig(productVersion: string): any {
+export function getVersionGradingConfig(productVersion: string): Record<string, unknown> {
   const gradingByVersion = COMPATIBILITY_RULES.GRADING_BY_VERSION as Record<
     string,
     {
@@ -225,7 +225,7 @@ export function getVersionGradingConfig(productVersion: string): any {
 
   // Look up version-specific grading config
   // For 1.x versions, all use 1.0.0 grading logic
-  const majorVersion = parseInt(versionMatch[1]!, 10)
+  const majorVersion = versionMatch[1] ? parseInt(versionMatch[1], 10) : 0
   if (majorVersion === 1) {
     return gradingByVersion['1.0.0']
   }

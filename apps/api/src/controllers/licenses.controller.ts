@@ -29,8 +29,8 @@ import type { Logger } from '@zidney/logger'
 import type { Context } from 'hono'
 
 interface LicenseContext extends Context {
-  license?: any
-  user?: any
+  license?: Record<string, unknown>
+  user?: Record<string, unknown>
   correlation_id?: string
 }
 
@@ -78,7 +78,7 @@ export class LicenseController {
         },
         HTTP_STATUS_CREATED
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.handleError(ctx, error)
     }
   }
@@ -119,7 +119,7 @@ export class LicenseController {
 
       const result = await this.licenseService.list(
         {
-          status: status as any,
+          status: status as string,
           product_id,
           search,
         },
@@ -142,7 +142,7 @@ export class LicenseController {
         },
         200
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.handleError(ctx, error)
     }
   }
@@ -182,7 +182,7 @@ export class LicenseController {
         },
         200
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.handleError(ctx, error)
     }
   }
@@ -224,7 +224,7 @@ export class LicenseController {
         },
         200
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.handleError(ctx, error)
     }
   }
@@ -267,7 +267,7 @@ export class LicenseController {
         },
         200
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.handleError(ctx, error)
     }
   }
@@ -310,7 +310,7 @@ export class LicenseController {
         },
         200
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.handleError(ctx, error)
     }
   }
@@ -353,7 +353,7 @@ export class LicenseController {
         },
         200
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.handleError(ctx, error)
     }
   }
@@ -396,7 +396,7 @@ export class LicenseController {
         },
         200
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.handleError(ctx, error)
     }
   }
@@ -438,7 +438,7 @@ export class LicenseController {
         },
         200
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.handleError(ctx, error)
     }
   }
@@ -486,7 +486,7 @@ export class LicenseController {
         },
         200
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       return this.handleError(ctx, error)
     }
   }
@@ -494,7 +494,7 @@ export class LicenseController {
   /**
    * Error handler - converts business errors to RFC 7807 responses
    */
-  private handleError(ctx: LicenseContext, error: any): Response {
+  private handleError(ctx: LicenseContext, error: unknown): Response {
     if (error instanceof LicenseError) {
       this.logger.warn({
         event: 'license_error',

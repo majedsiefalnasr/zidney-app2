@@ -164,7 +164,11 @@ export const ErrorMessages: Record<ErrorCodeValue, string> = {
  * @param context - Additional context data fields
  * @returns Error response object
  */
-export function createError(code: ErrorCodeValue, message?: string, context?: Record<string, any>) {
+export function createError(
+  code: ErrorCodeValue,
+  message?: string,
+  context?: Record<string, unknown>
+) {
   return {
     code,
     message: message || ErrorMessages[code],
