@@ -1,0 +1,53 @@
+flowchart TD
+  subgraph ui["UI Layer"]
+    apps_backoffice["apps/backoffice"]
+    apps_frontoffice["apps/frontoffice"]
+    apps_mmc["apps/mmc"]
+    packages_ui_system["packages/ui-system"]
+  end
+  subgraph runtime["Runtime Layer"]
+    apps_api["apps/api"]
+    apps_worker["apps/worker"]
+  end
+  subgraph domain["Domain Layer"]
+    packages_domain_core["packages/domain-core"]
+    packages_types["packages/types"]
+    packages_validation["packages/validation"]
+  end
+  subgraph infrastructure["Infrastructure Layer"]
+    packages_api_client["packages/api-client"]
+    packages_config["packages/config"]
+    packages_logger["packages/logger"]
+    packages_redis_utils["packages/redis-utils"]
+  end
+  subgraph unknown["Unknown Layer"]
+    packages_app["packages/app"]
+    packages_ui["packages/ui"]
+  end
+
+  apps_api --> packages_app
+  apps_api --> packages_domain_core
+  apps_api --> packages_logger
+  apps_api --> packages_redis_utils
+  apps_api --> packages_types
+  apps_api --> packages_validation
+  apps_backoffice --> packages_api_client
+  apps_backoffice --> packages_logger
+  apps_backoffice --> packages_types
+  apps_frontoffice --> packages_api_client
+  apps_frontoffice --> packages_logger
+  apps_frontoffice --> packages_types
+  apps_mmc --> packages_api_client
+  apps_mmc --> packages_logger
+  apps_mmc --> packages_types
+  apps_mmc --> packages_ui
+  apps_worker --> packages_domain_core
+  apps_worker --> packages_logger
+  apps_worker --> packages_types
+  packages_domain_core --> packages_app
+  packages_domain_core --> packages_logger
+  packages_domain_core --> packages_types
+  packages_domain_core --> packages_validation
+  packages_redis_utils --> packages_logger
+  packages_validation --> packages_logger
+  packages_validation --> packages_types

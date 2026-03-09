@@ -42,7 +42,8 @@
     "arch:context": "bun scripts/gitnexus-context.ts",
     "arch:refresh": "bun scripts/infra-audit.ts && bun scripts/gitnexus-context.ts",
     "arch:fix": "bun scripts/infra-audit.ts --fix-map",
-    "arch:guard": "bun scripts/ai-guard.ts"
+    "arch:guard": "bun scripts/ai-guard.ts",
+    "arch:visualize": "bun scripts/architecture/visualize.ts"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",

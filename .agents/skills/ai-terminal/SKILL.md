@@ -111,6 +111,153 @@ rtk summarize large-file.ts
 
 RTK helps keep the AI context window efficient when working with large monorepos like Zidney.
 
+## Tool Availability & Installation
+
+Some advanced terminal tools referenced in this skill may not always be available in the environment. If a preferred tool is missing, the AI should attempt to detect the absence and suggest or execute a safe installation method when appropriate.
+
+Detection pattern:
+
+```
+command -v <tool>
+```
+
+Example:
+
+```
+command -v rg
+```
+
+If the tool is not installed, prefer installing via **Homebrew** (macOS) or the system package manager.
+
+Recommended installations:
+
+ripgrep:
+
+```
+brew install ripgrep
+```
+
+fd:
+
+```
+brew install fd
+```
+
+jq:
+
+```
+brew install jq
+```
+
+ast-grep:
+
+```
+brew install ast-grep
+```
+
+Biome:
+
+```
+brew install biome
+```
+
+RTK (Rust Token Killer):
+
+```
+brew install rtk
+```
+
+GitNexus:
+
+```
+npm install -g gitnexus
+```
+
+Installation rules:
+
+1. Prefer package managers over manual binaries.
+2. Never install tools globally without informing the user.
+3. Prefer verifying installation success before continuing:
+
+```
+<tool> --version
+```
+
+If installation is not possible (permissions, CI environments, etc.), fall back to the secondary tool hierarchy defined earlier in this document.
+
+Example fallback:
+
+```
+rg → grep
+fd → find
+jq → node -e / python json
+```
+
+The AI should always prefer the **best available tool** while maintaining compatibility with the environment.
+
+### Tool Capability Detection Cache
+
+To avoid repeatedly checking tool availability during a session, the AI should maintain a **temporary tool capability cache**.
+
+Purpose:
+
+- Prevent repeated `command -v` checks
+- Reduce terminal overhead
+- Speed up reasoning loops in large repositories
+
+Recommended pattern:
+
+1. On first use of a tool, verify availability:
+
+```
+command -v <tool>
+```
+
+2. Record the result in the session capability cache:
+
+Example cache structure (conceptual):
+
+```
+{
+  "rg": true,
+  "fd": true,
+  "jq": true,
+  "ast-grep": false
+}
+```
+
+3. Future commands should consult the cache before performing detection again.
+
+Cache rules:
+
+- Cache scope: **AI session only**
+- Cache must not be persisted to disk
+- Cache must be refreshed if the environment changes
+
+Example workflow:
+
+First usage:
+
+```
+command -v rg
+```
+
+Cache result:
+
+```
+rg: available
+```
+
+Future usage:
+
+```
+Use rg directly without rechecking
+```
+
+If a cached tool fails unexpectedly, the AI should re-run the detection step.
+
+This caching strategy reduces unnecessary terminal operations and improves responsiveness when operating inside large monorepos like Zidney.
+
 ## 2. Data Manipulation
 
 - **Tool:** `jq`

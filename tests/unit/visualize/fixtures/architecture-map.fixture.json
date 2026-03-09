@@ -1,0 +1,43 @@
+{
+  "system": "Zidney",
+  "architecture_model": "layered-monorepo",
+  "version": "1.0",
+  "layers": ["domain", "infrastructure", "runtime", "ui"],
+  "modules": {
+    "apps/api": {
+      "layer": "runtime",
+      "description": "Main backend API",
+      "criticality": "runtime",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": []
+    },
+    "apps/mmc": {
+      "layer": "ui",
+      "description": "Management console",
+      "criticality": "ui",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": []
+    },
+    "packages/domain-core": {
+      "layer": "domain",
+      "description": "Core domain models",
+      "criticality": "core",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": []
+    },
+    "packages/logger": {
+      "layer": "infrastructure",
+      "description": "Structured logging",
+      "criticality": "infrastructure",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": []
+    },
+    "packages/api-client": {
+      "layer": "infrastructure",
+      "description": "HTTP client for UI",
+      "criticality": "infrastructure",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": []
+    }
+  }
+}
