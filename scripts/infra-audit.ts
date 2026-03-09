@@ -295,13 +295,21 @@ function resolveImportTarget(imp: string, sourceFile?: string): string | null {
     if (imp.startsWith(a.alias)) {
       // Special handling for multi-target aliases like @/*
       // If source file is provided and the alias target is multi-target,
-      // resolve it relative to the source app
+      // resolve it relative to the source app/package
       if (a.alias === '@/*' && sourceFile) {
-        // Extract the source app from the source file
+        // Extract the source app/package from the source file
         const sourceApp = sourceFile.match(/^apps\/([^/]+)/)
         if (sourceApp) {
           // Return null because this is intra-app access via @/
           // Multi-target aliases like @/* are only used within their respective apps
+          return null
+        }
+
+        // Also check for packages (e.g., packages/ui-system/@/lib/utils)
+        const sourcePackage = sourceFile.match(/^packages\/([^/]+)/)
+        if (sourcePackage) {
+          // Return null because this is intra-package access via @/
+          // Packages contain their own lib/utils alongside components
           return null
         }
       }
