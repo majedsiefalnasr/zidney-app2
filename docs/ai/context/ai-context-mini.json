@@ -1,45 +1,97 @@
 {
-  "schema_version": "1.0.0",
-  "generated_at": "2026-03-09T15:04:20.279Z",
-  "layers": [
+  "architectureScore": 100,
+  "modules": [
+    "packages/types",
+    "packages/logger",
+    "packages/config",
+    "packages/redis-utils",
+    "packages/ui-system",
+    "./apps/mmc/srcvue/test-utils",
+    "./apps/mmc/srctailwindcss/vite",
+    "./apps/mmc/srcvitejs/plugin-vue",
+    "./apps/mmc/srcvueuse/core",
+    "./apps/mmc/srcunovis/vue",
+    "./apps/mmc/srctanstack/vue-table",
+    "packages/api-client",
+    "packages/domain-core",
+    "packages/app",
+    "packages/validation",
+    "apps/mmc",
+    "./apps/mmc/srcpinia/testing",
+    "./apps/mmc/src/composables/useBreakpoint",
+    "./apps/mmc/src/core/state/ui.store",
+    "./apps/mmc/src/core/auth/token-redact",
+    "./apps/mmc/src/core/state/app.store",
+    "./apps/mmc/src/core/auth/types",
+    "./apps/mmc/src/core/state/auth.store",
+    "./apps/mmc/src/core/state/notification.store",
+    "./apps/mmc/src/components/layout/AppSidebar.vue",
+    "./apps/mmc/src/core/navigation/index",
+    "./apps/mmc/src/components/layout/AppLayout.vue",
+    "./apps/mmc/src/components/layout/AppHeader.vue",
+    "./apps/mmc/src/App.vue",
+    "./apps/mmc/srcplaywright/test",
+    "./apps/mmc/src/core/api/interceptors/error.interceptor",
+    "./apps/mmc/src/core/auth/refresh-manager",
+    "./apps/mmc/src/core/auth/token-manager",
+    "./apps/mmc/src/core/config/app-config",
+    "./apps/mmc/src/modules/dashboard/routes",
+    "./apps/mmc/src/modules/licenses/routes",
+    "./apps/mmc/src/core/api/client",
+    "./apps/mmc/src/core/auth/auth.service",
+    "./apps/mmc/src/core/guards",
+    "./apps/mmc/src/core/router",
+    "./apps/mmc/src/core/state/license-status.store",
+    "./apps/mmc/src/modules/dashboard/store",
+    "packages/ui",
+    "./apps/mmc/src/modules/dashboard/api",
+    "apps/frontoffice",
+    "./apps/mmc/src/core/auth/token-store",
+    "apps/backoffice",
+    "./apps/mmc/src/composables/usePermission",
+    "./apps/mmc/src/core/state/workspace.store",
+    "./apps/mmc/src/stores/context",
+    "apps/api",
+    "./apps/mmc/src/responses/license-error-handler",
+    "./apps/mmc/src/logging",
+    "./apps/mmc/srchono/zod-validator",
+    "apps/worker",
+    "./apps/mmc/srcaws-sdk/client-s3"
+  ],
+  "hotspots": [
     {
-      "name": "infrastructure",
-      "description": "Infrastructure layer",
-      "order": 1
+      "module": "packages/logger",
+      "score": 235
     },
     {
-      "name": "domain",
-      "description": "Domain layer",
-      "order": 2
+      "module": "packages/types",
+      "score": 100
     },
     {
-      "name": "runtime",
-      "description": "Runtime layer",
-      "order": 3
+      "module": "packages/domain-core",
+      "score": 77
     },
     {
-      "name": "ui",
-      "description": "Ui layer",
-      "order": 4
+      "module": "./apps/mmc/srcvue/test-utils",
+      "score": 17
+    },
+    {
+      "module": "packages/api-client",
+      "score": 17
     }
   ],
-  "modules_by_layer": {
-    "runtime": [
-      "apps/mmc",
-      "apps/frontoffice",
-      "apps/backoffice",
-      "apps/api",
-      "apps/worker",
-      "packages/types",
-      "packages/api-client",
-      "packages/validation"
-    ],
-    "infrastructure": ["packages/logger", "packages/config", "packages/redis-utils"],
-    "ui": ["packages/ui-system"],
-    "domain": ["packages/domain-core"]
+  "dependencyRules": {
+    "forbidPackagesImportingApps": true,
+    "forbidAppsImportingOtherApps": true
   },
-  "rules": {},
-  "critical_violations": [],
-  "full_context_url": "docs/ai/context/",
-  "full_context_size_bytes": 15728640
+  "layerRules": {
+    "forbidUiImportingDomain": {
+      "source": "packages/ui-system",
+      "target": "packages/domain-core"
+    },
+    "forbidApiClientImportingWorker": {
+      "source": "packages/api-client",
+      "target": "apps/worker"
+    }
+  }
 }
