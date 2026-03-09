@@ -1,0 +1,168 @@
+name: AI Context Layer Validation
+
+on:
+  pull_request:
+    branches:
+      - main
+      - develop
+    paths:
+      - "scripts/ai-context/**"
+      - "docs/architecture/**"
+      - "docs/ai/**"
+      - "package.json"
+      - ".github/workflows/ai-context-validation.yml"
+  push:
+    branches:
+      - main
+      - develop
+    paths:
+      - "scripts/ai-context/**"
+      - "docs/architecture/**"
+      - "docs/ai/**"
+      - "package.json"
+
+jobs:
+  ai-context-validation:
+    name: AI Context Generation & Validation
+    runs-on: ubuntu-latest
+
+    steps:
+      # ── 1. Checkout ────────────────────────────────────────────────────
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      # ── 2. Setup Bun ───────────────────────────────────────────────────
+      - name: Setup Bun
+        uses: oven-sh/setup-bun@v1
+        with:
+          bun-version: latest
+
+      # ── 3. Install dependencies ────────────────────────────────────────
+      - name: Install dependencies
+        run: bun install
+
+      # ── 4. Test ai-context:generate command ────────────────────────────
+      - name: Test ai-context:generate command
+        run: |
+          echo "🧪 Testing ai-context:generate command..."
+          bun run ai-context:generate
+          if [ $? -ne 0 ]; then
+            echo "❌ ai-context:generate command failed"
+            exit 1
+          fi
+          echo "✅ ai-context:generate command succeeded"
+
+      # ── 5. Test ai-context:refresh command ─────────────────────────────
+      - name: Test ai-context:refresh command
+        run: |
+          echo "🧪 Testing ai-context:refresh command..."
+          bun run ai-context:refresh
+          if [ $? -ne 0 ]; then
+            echo "❌ ai-context:refresh command failed"
+            exit 1
+          fi
+          echo "✅ ai-context:refresh command succeeded"
+
+      # ── 6. Test ai-context:validate command ────────────────────────────
+      - name: Test ai-context:validate command
+        run: |
+          echo "🧪 Testing ai-context:validate command..."
+          bun run ai-context:validate
+          if [ $? -ne 0 ]; then
+            echo "❌ ai-context:validate command failed"
+            exit 1
+          fi
+          echo "✅ ai-context:validate command succeeded"
+
+      # ── 7. Test generate:ai-context alias ──────────────────────────────
+      - name: Test generate:ai-context alias
+        run: |
+          echo "🧪 Testing generate:ai-context alias..."
+          bun run generate:ai-context
+          if [ $? -ne 0 ]; then
+            echo "❌ generate:ai-context alias failed"
+            exit 1
+          fi
+          echo "✅ generate:ai-context alias succeeded"
+
+      # ── 8. Verify artifacts exist ──────────────────────────────────────
+      - name: Verify AI context artifacts exist
+        run: |
+          echo "📋 Verifying AI context artifacts..."
+
+          ARTIFACTS=(
+            "docs/ai/context/ai-architecture-summary.md"
+            "docs/ai/context/ai-module-map.json"
+            "docs/ai/context/ai-layer-model.json"
+            "docs/ai/context/ai-dependency-graph.json"
+            "docs/ai/context/ai-runtime-map.json"
+            "docs/ai/context/ai-architecture-brain.json"
+            "docs/ai/context/ai-context-mini.json"
+          )
+
+          MISSING=0
+          for artifact in "${ARTIFACTS[@]}"; do
+            if [ ! -f "$artifact" ]; then
+              echo "❌ Missing artifact: $artifact"
+              MISSING=$((MISSING + 1))
+            else
+              echo "✅ Found artifact: $artifact"
+            fi
+          done
+
+          if [ $MISSING -gt 0 ]; then
+            echo "❌ $MISSING artifact(s) missing"
+            exit 1
+          fi
+
+          echo "✅ All AI context artifacts generated successfully"
+
+      # ── 9. Validate JSON artifacts ─────────────────────────────────────
+      - name: Validate JSON artifact structure
+        run: |
+          echo "🔍 Validating JSON artifacts..."
+
+          ARTIFACTS=(
+            "docs/ai/context/ai-module-map.json"
+            "docs/ai/context/ai-layer-model.json"
+            "docs/ai/context/ai-dependency-graph.json"
+            "docs/ai/context/ai-runtime-map.json"
+            "docs/ai/context/ai-architecture-brain.json"
+            "docs/ai/context/ai-context-mini.json"
+          )
+
+          for artifact in "${ARTIFACTS[@]}"; do
+            if ! jq empty "$artifact" 2>/dev/null; then
+              echo "❌ Invalid JSON in $artifact"
+              exit 1
+            fi
+            echo "✅ Valid JSON: $artifact"
+          done
+
+          echo "✅ All JSON artifacts are valid"
+
+      # ── 10. Check artifact sizes ───────────────────────────────────────
+      - name: Summarize artifact sizes
+        run: |
+          echo "📊 AI Context Artifacts Summary:"
+          echo ""
+          du -h docs/ai/context/ai-*.* | sort -h
+          echo ""
+          echo "Total size:"
+          du -sh docs/ai/context/
+          echo ""
+          echo "✅ AI context artifacts generated and validated successfully"
+
+      # ── 11. Report results ────────────────────────────────────────────
+      - name: Generate summary
+        if: success()
+        run: |
+          echo "## ✅ AI Context Validation Passed" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "All AI context generation scripts executed successfully and produced valid artifacts." >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Generated Artifacts:" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          ls -lh docs/ai/context/ai-*.* | awk '{print "- " $9 " (" $5 ")"}' >> $GITHUB_STEP_SUMMARY

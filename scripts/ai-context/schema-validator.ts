@@ -5,14 +5,13 @@
  */
 
 import type {
-  AIModuleMap,
-  AILayerModel,
-  AIDependencyGraph,
-  AIRuntimeMap,
   AIArchitectureBrain,
   AIContextMini,
+  AIDependencyGraph,
+  AILayerModel,
+  AIModuleMap,
+  AIRuntimeMap,
 } from '../../packages/types/src/ai-context'
-import type { GenerationError } from './types'
 
 export interface ValidationResult {
   valid: boolean
@@ -312,7 +311,7 @@ export function validateContextMini(artifact: AIContextMini): ValidationError[] 
  * Helper: Check if string is valid ISO 8601
  */
 function isValidISO8601(dateString: string): boolean {
-  return !isNaN(Date.parse(dateString))
+  return !Number.isNaN(Date.parse(dateString))
 }
 
 /**
@@ -337,17 +336,19 @@ export function validateAllArtifacts(artifacts: {
   const startTime = performance.now()
   const results: { [key: string]: ValidationResult } = {}
 
-  const validators: Array<[string, (artifact: Record<string, unknown>) => ValidationError[]]> = [
-    ['ai-module-map.json', validateModuleMap],
-    ['ai-layer-model.json', validateLayerModel],
-    ['ai-dependency-graph.json', validateDependencyGraph],
-    ['ai-runtime-map.json', validateRuntimeMap],
-    ['ai-architecture-brain.json', validateArchitectureBrain],
-    ['ai-context-mini.json', validateContextMini],
+  const validators: Array<
+    [string, string, (artifact: Record<string, unknown>) => ValidationError[]]
+  > = [
+    ['ai-module-map.json', 'module_map', validateModuleMap],
+    ['ai-layer-model.json', 'layer_model', validateLayerModel],
+    ['ai-dependency-graph.json', 'dependency_graph', validateDependencyGraph],
+    ['ai-runtime-map.json', 'runtime_map', validateRuntimeMap],
+    ['ai-architecture-brain.json', 'architecture_brain', validateArchitectureBrain],
+    ['ai-context-mini.json', 'context_mini', validateContextMini],
   ]
 
-  for (const [name, validator] of validators) {
-    const artifactKey = name.replace('.json', '').replace('-', '_')
+  for (const [name, artifactKey, validator] of validators) {
+    // biome-ignore lint/suspicious/noExplicitAny: Dynamic property access requires any
     const artifact = (artifacts as any)[artifactKey]
 
     if (!artifact) {
