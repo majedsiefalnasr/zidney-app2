@@ -626,3 +626,24 @@ The generated `README.md` should reference `AGENTS.md` as the authoritative sour
 ---
 
 **Compliant with Zidney Constitution v1.2.0 — No violations detected.**
+
+---
+
+## Clarifications
+
+### Session 2026-03-09
+
+**Q1: Is `arch:visualize` the exact npm script name, and should `arch:refresh` be modified to chain it?**
+Answer: Confirmed. The exact script entry is `"arch:visualize": "bun scripts/architecture/visualize.ts"` as specified in FR-009. The existing `arch:` script family in `package.json` is: `arch:add-module`, `arch:generate`, `arch:audit`, `arch:context`, `arch:refresh`, `arch:fix`, `arch:guard`. `arch:visualize` is added as a standalone script only. `arch:refresh` (currently `bun scripts/infra-audit.ts && bun scripts/gitnexus-context.ts`) is **not modified** in this stage. The out-of-scope statement "CI integration is advisory and handled via `arch:refresh`" is forward-looking context only — no change to `arch:refresh` is part of this stage's implementation scope.
+
+**Q2: How should the script handle modules that exist in `dependency-graph.json` but are absent from `ARCHITECTURE_MAP.json` and the heuristic table?**
+Answer: The current `dependency-graph.json` contains 15 top-level nodes — two of which (`packages/app` and `packages/ui`) are not registered in `ARCHITECTURE_MAP.json` and do not appear in the FR-007 heuristic table. Both must be handled by the final heuristic fallback clause: "Any unrecognized path → unknown". The script must emit a warning for each: `[VISUALIZE] WARNING: No layer found for module packages/app — classified as Unknown` and `[VISUALIZE] WARNING: No layer found for module packages/ui — classified as Unknown`. These modules appear in an `Unknown` subgraph group in both `module-dependency-graph.mmd` and `layer-architecture-diagram.mmd`. The spec's references to "13 registered modules" refer specifically to the ARCHITECTURE_MAP.json registration count — the visualization script must handle any number of top-level nodes from the dependency graph, including unregistered ones.
+
+**Q3: What is the correct static test file sequence number for `tests/static/`?**
+Answer: Confirmed as `06`. The existing static test files are: `04-migration-discipline.test.ts`, `05-architecture-guard.test.ts` (plus `module-boundaries.test.ts` which is unnumbered). The next sequence number in the numbered series is `06`, making the correct filename `tests/static/06-architecture-visualization.test.ts` exactly as specified in the spec's Test Strategy section.
+
+**Q4: Does `system-overview-diagram.mmd` derive its content dynamically from the dependency graph, or is the content hardcoded?**
+Answer: The content is **hardcoded** (static). As explicitly stated in FR-006: "This diagram is static and annotated. It is not derived from the dependency graph dynamically — it reflects the Zidney platform topology as defined by the Trust Chain model in AGENTS.md and PROJECT_CONTEXT_PRIMER.md." The five application nodes (MMC, Backoffice, Frontoffice, API, Worker), their connections, and the Foundation subgraph (domain-core, logger, types, config, redis-utils) are fixed constants in the `generateSystemOverview()` function, which takes no input parameters (confirmed by the exported function signature in the spec).
+
+**Q5: Are there concurrency, idempotency, transaction, or isolation concerns for this stage?**
+Answer: None. This stage introduces a pure developer CLI tool with no database access, no middleware, no tenant context, and no shared runtime state. Idempotency is guaranteed structurally: FR-011 mandates deterministic output from identical inputs (alphabetically sorted nodes and edges), so every invocation with the same audit output produces the same files. Concurrent invocations could race on writing the output directory files, but this is an unguarded developer-local tool — no locking mechanism is required. There are no transaction boundaries, no license validation steps, and no version enforcement requirements, as confirmed by the Constitutional Compliance Declaration and the License & Version Enforcement section.

@@ -11,31 +11,29 @@ Visualization ensures that architecture is not only enforced but also **observab
 ## Stage Status
 
 Status: DRAFT
-Step: specify
+Step: clarify
 Risk Level: LOW
 Last Updated: 2026-03-09T00:00:00.000Z
 
 Scope Defined:
 
 - Architecture visualization pipeline (`scripts/architecture/visualize.ts`)
-- Three Mermaid diagram outputs: module-dependency-graph, layer-architecture-diagram, system-overview-diagram
-- Output directory: `docs/architecture/visualization/`
-- New package.json script: `arch:visualize`
-- Unit tests under `tests/unit/visualize/`
+- Three Mermaid diagrams: module-dependency-graph, layer-architecture-diagram, system-overview-diagram
+- Output: `docs/architecture/visualization/`; script: `arch:visualize`
+- Heuristic fallback for unregistered modules with warning output
+- Static system overview (trust-chain hardcoded, not dynamically derived)
 
 Deferred Scope:
 
-- SVG/PNG raster rendering (out of scope)
-- CI pipeline modification (advisory only)
-- HTTP diagram serving
+- SVG/PNG raster rendering, CI pipeline modification, HTTP serving
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 - No cross-tenant access, no DB, no middleware changes
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
