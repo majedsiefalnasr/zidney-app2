@@ -8,6 +8,30 @@ The goal is to make AI-assisted development **architecture-aware by default**, e
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+Step: pre_step
+Risk Level: UNKNOWN
+Initiated: 2026-03-09T00:00:00Z
+Branch: spec/infra-009-ai-architecture-context
+
+Scope Open:
+
+- Architecture context generation pending
+- AI-consumable artifact design pending
+- Implementation pending
+
+Constitutional Compliance:
+
+- Pending constitutional audit
+- Architecture governance integration pending
+
+Notes:
+Stage initialized with Pre-Step. Specification in progress.
+
+---
+
 # Core Idea
 
 Traditional documentation is written for humans.

@@ -1,0 +1,26 @@
+{
+  "stage": "AI Architecture Context",
+  "phase": "PHASE_01_PLATFORM_FOUNDATION",
+  "stage_dir": "specs/runtime/infra-009-ai-architecture-context",
+  "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_09_AI_ARCHITECTURE_CONTEXT.md",
+  "branch": "spec/infra-009-ai-architecture-context",
+  "base_branch": "develop",
+  "package_manager": "bun",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "dirty_tree_approval": true,
+  "last_updated": "2026-03-09T00:00:00Z",
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/infra-009-ai-architecture-context",
+      "timestamp": "2026-03-09T00:00:00Z"
+    }
+  ]
+}
