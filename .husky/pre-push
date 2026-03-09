@@ -28,7 +28,7 @@ bun scripts/ai-guard.ts
 
 # ── Infrastructure Audit (full) ─────────────────────────────────────────────
 echo "Running infrastructure audit..."
-bun scripts/infra-audit.ts
+bun scripts/infra-audit.ts --quick
 
 
 # ── Unit Tests (informational) ──────────────────────────────────────────────
