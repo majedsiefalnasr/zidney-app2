@@ -1,0 +1,24 @@
+{
+  "stage": "STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION",
+  "phase": "01_PLATFORM_FOUNDATION",
+  "stage_dir": "specs/runtime/infra-008-architecture-visualization",
+  "stage_file": "specs/phases/01_platform_foundation/STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION.md",
+  "branch": "spec/infra-008-architecture-visualization",
+  "base_branch": "develop",
+  "current_step": "pre_step",
+  "stage_status": "DRAFT",
+  "clarifications_resolved": false,
+  "drift_passed": false,
+  "implementation_allowed": false,
+  "plan_completed": false,
+  "tasks_total": null,
+  "tasks_completed": null,
+  "last_updated": "2026-03-09T00:00:00.000Z",
+  "history": [
+    {
+      "event": "branch_created",
+      "branch": "spec/infra-008-architecture-visualization",
+      "timestamp": "2026-03-09T00:00:00.000Z"
+    }
+  ]
+}
