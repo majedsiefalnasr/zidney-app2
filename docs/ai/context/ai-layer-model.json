@@ -1,70 +1,30 @@
 {
-  "layers": ["domain", "infrastructure", "runtime", "ui"],
-  "modules": [
+  "schema_version": "1.0.0",
+  "generated_at": "2026-03-09T15:04:20.279Z",
+  "source_metadata": {
+    "module_boundaries_hash": "3e6837cb"
+  },
+  "layers": [
     {
-      "module": "packages/types",
-      "layer": "domain",
-      "criticality": "core"
+      "name": "infrastructure",
+      "description": "Infrastructure layer",
+      "order": 1
     },
     {
-      "module": "packages/logger",
-      "layer": "infrastructure",
-      "criticality": "infrastructure"
+      "name": "domain",
+      "description": "Domain layer",
+      "order": 2
     },
     {
-      "module": "packages/config",
-      "layer": "infrastructure",
-      "criticality": "infrastructure"
+      "name": "runtime",
+      "description": "Runtime layer",
+      "order": 3
     },
     {
-      "module": "packages/redis-utils",
-      "layer": "infrastructure",
-      "criticality": "infrastructure"
-    },
-    {
-      "module": "packages/ui-system",
-      "layer": "ui",
-      "criticality": "ui"
-    },
-    {
-      "module": "packages/api-client",
-      "layer": "infrastructure",
-      "criticality": "infrastructure"
-    },
-    {
-      "module": "packages/domain-core",
-      "layer": "domain",
-      "criticality": "core"
-    },
-    {
-      "module": "packages/validation",
-      "layer": "domain",
-      "criticality": "core"
-    },
-    {
-      "module": "apps/mmc",
-      "layer": "ui",
-      "criticality": "ui"
-    },
-    {
-      "module": "apps/frontoffice",
-      "layer": "ui",
-      "criticality": "ui"
-    },
-    {
-      "module": "apps/backoffice",
-      "layer": "ui",
-      "criticality": "ui"
-    },
-    {
-      "module": "apps/api",
-      "layer": "runtime",
-      "criticality": "runtime"
-    },
-    {
-      "module": "apps/worker",
-      "layer": "runtime",
-      "criticality": "runtime"
+      "name": "ui",
+      "description": "Ui layer",
+      "order": 4
     }
-  ]
+  ],
+  "rules": {}
 }
