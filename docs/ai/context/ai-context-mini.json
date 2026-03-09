@@ -1,16 +1,16 @@
 {
-  "architectureScore": 0,
+  "architectureScore": 100,
   "modules": [
     "packages/types",
     "packages/logger",
     "packages/config",
     "packages/redis-utils",
     "packages/ui-system",
-    "apps/mmc",
     "packages/api-client",
     "packages/domain-core",
     "packages/app",
     "packages/validation",
+    "apps/mmc",
     "packages/ui",
     "apps/frontoffice",
     "apps/backoffice",
@@ -23,10 +23,6 @@
       "score": 235
     },
     {
-      "module": "apps/mmc",
-      "score": 121
-    },
-    {
       "module": "packages/types",
       "score": 100
     },
@@ -37,6 +33,10 @@
     {
       "module": "packages/api-client",
       "score": 17
+    },
+    {
+      "module": "packages/validation",
+      "score": 10
     }
   ],
   "dependencyRules": {

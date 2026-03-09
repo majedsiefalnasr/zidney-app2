@@ -144,12 +144,20 @@ function loadTsAliases(): TsAliasMap[] {
         const cleanKey = key.replace('/*', '')
         const target = pathsConfig[key][0]?.replace('/*', '')
 
-        if (target) {
-          aliases.push({
-            alias: cleanKey,
-            target,
-          })
-        }
+        if (!target) continue
+
+        // Skip multi-target aliases (e.g., @/* which maps to multiple app dirs)
+        // These need special context-aware resolution and shouldn't be processed as simple replacements
+        const targetsList = pathsConfig[key]
+        if (targetsList && targetsList.length > 1) continue
+
+        // Skip @/ which is a special multi-target alias
+        if (cleanKey === '@' || cleanKey === '~') continue
+
+        aliases.push({
+          alias: cleanKey,
+          target,
+        })
       }
 
       return aliases
@@ -262,7 +270,7 @@ function isValidModulePath(path: string): boolean {
   )
 }
 
-function resolveImportTarget(imp: string): string | null {
+function resolveImportTarget(imp: string, sourceFile?: string): string | null {
   // direct workspace imports
   const pkg = imp.match(/^packages\/([^/]+)/)
   if (pkg) return `packages/${pkg[1]}`
@@ -270,13 +278,34 @@ function resolveImportTarget(imp: string): string | null {
   const app = imp.match(/^apps\/([^/]+)/)
   if (app) return `apps/${app[1]}`
 
-  // Zidney alias pattern
+  // Zidney alias pattern (@zidney/package-name → packages/package-name)
   const zidneyAlias = imp.match(/^@zidney\/([^/]+)/)
   if (zidneyAlias) return `packages/${zidneyAlias[1]}`
 
-  // TSConfig aliases
+  // Local intra-app imports (@/ and ~/ are local to the app, not cross-module)
+  // Return null so they're not flagged as cross-app violations
+  const rootAlias = imp.match(/^@\//)
+  if (rootAlias) return null // Intra-app import, not a module violation
+
+  const tildeAlias = imp.match(/^~\//)
+  if (tildeAlias) return null // Intra-app import, not a module violation
+
+  // TSConfig aliases - only for workspace imports
   for (const a of TS_ALIASES) {
     if (imp.startsWith(a.alias)) {
+      // Special handling for multi-target aliases like @/*
+      // If source file is provided and the alias target is multi-target,
+      // resolve it relative to the source app
+      if (a.alias === '@/*' && sourceFile) {
+        // Extract the source app from the source file
+        const sourceApp = sourceFile.match(/^apps\/([^/]+)/)
+        if (sourceApp) {
+          // Return null because this is intra-app access via @/
+          // Multi-target aliases like @/* are only used within their respective apps
+          return null
+        }
+      }
+
       // Normalize: remove leading ./ and collapse multiple slashes
       const resolved = imp.replace(a.alias, a.target).replace(/^\.\//, '').replace(/\/+/g, '/')
 
@@ -306,13 +335,7 @@ function resolveImportTarget(imp: string): string | null {
     }
   }
 
-  // common Vite/TS root aliases
-  const rootAlias = imp.match(/^@\/([^/]+)/)
-  if (rootAlias) return rootAlias[1]
-
-  const tildeAlias = imp.match(/^~\/([^/]+)/)
-  if (tildeAlias) return tildeAlias[1]
-
+  // External npm package (no recognized workspace pattern)
   return null
 }
 
@@ -643,7 +666,11 @@ function scanDependencyBoundaries(files: Map<string, string>) {
 
       if (DEP_RULES.forbidAppsImportingOtherApps && rel.startsWith('apps/')) {
         const srcApp = rel.split('/')[1]
-        const resolved = resolveImportTarget(imp)
+        const resolved = resolveImportTarget(imp, rel)
+
+        // Skip external npm packages (anything that doesn't resolve to a workspace module)
+        if (!resolved) continue
+
         const target = resolved?.startsWith('apps/') ? resolved.split('/')[1] : null
 
         if (target && target !== srcApp) {
@@ -708,7 +735,7 @@ function scanCircularDependencies(files: Map<string, string>) {
     for (const m of imports) {
       const imp = m[1]
 
-      const target = resolveImportTarget(imp)
+      const target = resolveImportTarget(imp, rel)
 
       if (target && target !== moduleRoot) {
         graph[moduleRoot].add(target)
@@ -792,7 +819,7 @@ function scanLayerViolations(files: Map<string, string>) {
 
       if (
         rel.startsWith(LAYER_RULES.forbidUiImportingDomain.source) &&
-        resolveImportTarget(imp) === LAYER_RULES.forbidUiImportingDomain.target
+        resolveImportTarget(imp, rel) === LAYER_RULES.forbidUiImportingDomain.target
       ) {
         const key = `ui_system_must_not_import_domain_core|${LAYER_RULES.forbidUiImportingDomain.source}→${LAYER_RULES.forbidUiImportingDomain.target}`
         if (!seen.has(key)) {
@@ -807,7 +834,7 @@ function scanLayerViolations(files: Map<string, string>) {
 
       if (
         rel.startsWith(LAYER_RULES.forbidApiClientImportingWorker.source) &&
-        resolveImportTarget(imp) === LAYER_RULES.forbidApiClientImportingWorker.target
+        resolveImportTarget(imp, rel) === LAYER_RULES.forbidApiClientImportingWorker.target
       ) {
         const key = `api_client_must_not_import_worker|${LAYER_RULES.forbidApiClientImportingWorker.source}→${LAYER_RULES.forbidApiClientImportingWorker.target}`
         if (!seen.has(key)) {
@@ -860,7 +887,7 @@ function scanArchitectureMapViolations(files: Map<string, string>, architectureM
 
     for (const m of imports) {
       const imp = m[1]
-      const target = resolveImportTarget(imp)
+      const target = resolveImportTarget(imp, rel)
 
       if (!target) continue
 
@@ -983,7 +1010,7 @@ function buildDependencyGraph(files: Map<string, string>): DependencyGraph {
     for (const m of imports) {
       const imp = m[1]
 
-      const target = resolveImportTarget(imp)
+      const target = resolveImportTarget(imp, rel)
 
       if (target && target !== moduleRoot) {
         // Only add edge if it's a valid monorepo module path

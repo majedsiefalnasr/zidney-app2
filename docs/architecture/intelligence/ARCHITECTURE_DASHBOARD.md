@@ -1,11 +1,11 @@
 # Zidney Architecture Dashboard
 
-**Generated:** 2026-03-09T21:00:45.860Z
-**Git SHA:** 617ff62d7ebe3bcc56e0a422cd8c067dd84bb89d
+**Generated:** 2026-03-09T21:24:05.673Z
+**Git SHA:** 79b017371d064087b25fcaa681bfe56e612eb226
 
 ## Architecture Score
 
-**Score:** 0 / 100
+**Score:** 100 / 100
 
 **Trend:** 0 regression
 
@@ -14,9 +14,9 @@
 | Metric | Value |
 |------|------|
 | Circular Dependencies | 0 |
-| Dependency Violations | 4 |
+| Dependency Violations | 0 |
 | Layer Violations | 0 |
-| Architecture Drift | 10 |
+| Architecture Drift | 0 |
 | Skipped Tests | 0 |
 | Flaky Tests | 0 |
 
@@ -32,12 +32,11 @@ Total Tests: 207
 
 Nodes: 15
 
-Edges: 569
+Edges: 448
 
 ## Top Architectural Hotspots
 
 - packages/logger (235)
-- apps/mmc (121)
 - packages/types (100)
 - packages/domain-core (77)
 - packages/api-client (17)
@@ -46,6 +45,7 @@ Edges: 569
 - packages/redis-utils (3)
 - packages/ui (1)
 - packages/config (0)
+- packages/ui-system (0)
 
 ---
 

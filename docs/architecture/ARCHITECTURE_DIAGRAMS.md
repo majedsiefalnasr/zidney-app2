@@ -1,7 +1,7 @@
 # Zidney Architecture Diagrams
 
-Generated: 2026-03-09T21:00:45.864Z
-Git SHA: 617ff62d7ebe3bcc56e0a422cd8c067dd84bb89d
+Generated: 2026-03-09T21:24:05.676Z
+Git SHA: 79b017371d064087b25fcaa681bfe56e612eb226
 
 ---
 
@@ -43,16 +43,6 @@ graph LR
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
   packages_domain_core --> packages_app
   packages_domain_core --> packages_app
   packages_domain_core --> packages_logger
@@ -123,39 +113,6 @@ graph LR
   apps_mmc --> packages_logger
   apps_mmc --> packages_logger
   apps_mmc --> packages_ui
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
   apps_frontoffice --> packages_types
   apps_frontoffice --> packages_types
   apps_frontoffice --> packages_types
@@ -168,65 +125,12 @@ graph LR
   apps_frontoffice --> packages_api_client
   apps_frontoffice --> packages_api_client
   apps_frontoffice --> packages_logger
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
   apps_frontoffice --> packages_api_client
   apps_frontoffice --> packages_api_client
   apps_frontoffice --> packages_logger
   apps_frontoffice --> packages_logger
   apps_frontoffice --> packages_logger
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
   apps_backoffice --> packages_api_client
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
   apps_backoffice --> packages_types
   apps_backoffice --> packages_types
   apps_backoffice --> packages_types
@@ -242,29 +146,12 @@ graph LR
   apps_backoffice --> packages_api_client
   apps_backoffice --> packages_api_client
   apps_backoffice --> packages_logger
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
   apps_backoffice --> packages_api_client
   apps_backoffice --> packages_api_client
   apps_backoffice --> packages_logger
   apps_backoffice --> packages_logger
   apps_backoffice --> packages_logger
   apps_backoffice --> packages_logger
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
   apps_backoffice --> packages_types
   apps_api --> packages_types
   apps_api --> packages_types
@@ -458,15 +345,8 @@ graph LR
   apps_api --> packages_types
   apps_api --> packages_domain_core
   apps_api --> packages_logger
-  apps_api --> apps_mmc
-  apps_api --> apps_mmc
-  apps_api --> apps_mmc
-  apps_api --> apps_mmc
-  apps_api --> apps_mmc
-  apps_api --> apps_mmc
   apps_api --> packages_domain_core
   apps_api --> packages_logger
-  apps_api --> apps_mmc
   apps_api --> packages_domain_core
   apps_api --> packages_logger
   apps_api --> packages_logger
@@ -573,7 +453,6 @@ graph LR
   apps_worker --> packages_logger
   apps_worker --> packages_logger
   apps_worker --> packages_types
-  apps_worker --> apps_mmc
   apps_worker --> packages_logger
   apps_worker --> packages_logger
   apps_worker --> packages_domain_core
@@ -621,16 +500,6 @@ graph TD
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
-  packages_ui_system --> apps_mmc
   packages_domain_core --> packages_app
   packages_domain_core --> packages_app
   packages_domain_core --> packages_logger
@@ -701,39 +570,6 @@ graph TD
   apps_mmc --> packages_logger
   apps_mmc --> packages_logger
   apps_mmc --> packages_ui
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
   apps_frontoffice --> packages_types
   apps_frontoffice --> packages_types
   apps_frontoffice --> packages_types
@@ -746,65 +582,12 @@ graph TD
   apps_frontoffice --> packages_api_client
   apps_frontoffice --> packages_api_client
   apps_frontoffice --> packages_logger
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
   apps_frontoffice --> packages_api_client
   apps_frontoffice --> packages_api_client
   apps_frontoffice --> packages_logger
   apps_frontoffice --> packages_logger
   apps_frontoffice --> packages_logger
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_frontoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
   apps_backoffice --> packages_api_client
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
   apps_backoffice --> packages_types
   apps_backoffice --> packages_types
   apps_backoffice --> packages_types
@@ -820,29 +603,12 @@ graph TD
   apps_backoffice --> packages_api_client
   apps_backoffice --> packages_api_client
   apps_backoffice --> packages_logger
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
   apps_backoffice --> packages_api_client
   apps_backoffice --> packages_api_client
   apps_backoffice --> packages_logger
   apps_backoffice --> packages_logger
   apps_backoffice --> packages_logger
   apps_backoffice --> packages_logger
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
-  apps_backoffice --> apps_mmc
   apps_backoffice --> packages_types
   apps_api --> packages_types
   apps_api --> packages_types
@@ -1036,15 +802,8 @@ graph TD
   apps_api --> packages_types
   apps_api --> packages_domain_core
   apps_api --> packages_logger
-  apps_api --> apps_mmc
-  apps_api --> apps_mmc
-  apps_api --> apps_mmc
-  apps_api --> apps_mmc
-  apps_api --> apps_mmc
-  apps_api --> apps_mmc
   apps_api --> packages_domain_core
   apps_api --> packages_logger
-  apps_api --> apps_mmc
   apps_api --> packages_domain_core
   apps_api --> packages_logger
   apps_api --> packages_logger
@@ -1151,7 +910,6 @@ graph TD
   apps_worker --> packages_logger
   apps_worker --> packages_logger
   apps_worker --> packages_types
-  apps_worker --> apps_mmc
   apps_worker --> packages_logger
   apps_worker --> packages_logger
   apps_worker --> packages_domain_core

@@ -21,10 +21,6 @@
       "type": "package"
     },
     {
-      "id": "apps/mmc",
-      "type": "app"
-    },
-    {
       "id": "packages/api-client",
       "type": "package"
     },
@@ -39,6 +35,10 @@
     {
       "id": "packages/validation",
       "type": "package"
+    },
+    {
+      "id": "apps/mmc",
+      "type": "app"
     },
     {
       "id": "packages/ui",
@@ -73,46 +73,6 @@
     {
       "from": "packages/redis-utils",
       "to": "packages/logger"
-    },
-    {
-      "from": "packages/ui-system",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "packages/ui-system",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "packages/ui-system",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "packages/ui-system",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "packages/ui-system",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "packages/ui-system",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "packages/ui-system",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "packages/ui-system",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "packages/ui-system",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "packages/ui-system",
-      "to": "apps/mmc"
     },
     {
       "from": "packages/domain-core",
@@ -396,138 +356,6 @@
     },
     {
       "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
       "to": "packages/types"
     },
     {
@@ -576,30 +404,6 @@
     },
     {
       "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
       "to": "packages/api-client"
     },
     {
@@ -619,196 +423,8 @@
       "to": "packages/logger"
     },
     {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/frontoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
       "from": "apps/backoffice",
       "to": "packages/api-client"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
@@ -872,30 +488,6 @@
     },
     {
       "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
       "to": "packages/api-client"
     },
     {
@@ -917,50 +509,6 @@
     {
       "from": "apps/backoffice",
       "to": "packages/logger"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/backoffice",
-      "to": "apps/mmc"
     },
     {
       "from": "apps/backoffice",
@@ -1736,39 +1284,11 @@
     },
     {
       "from": "apps/api",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/api",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/api",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/api",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/api",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/api",
-      "to": "apps/mmc"
-    },
-    {
-      "from": "apps/api",
       "to": "packages/domain-core"
     },
     {
       "from": "apps/api",
       "to": "packages/logger"
-    },
-    {
-      "from": "apps/api",
-      "to": "apps/mmc"
     },
     {
       "from": "apps/api",
@@ -2193,10 +1713,6 @@
     {
       "from": "apps/worker",
       "to": "packages/types"
-    },
-    {
-      "from": "apps/worker",
-      "to": "apps/mmc"
     },
     {
       "from": "apps/worker",
@@ -2345,11 +1861,11 @@
     "packages/config": 0,
     "packages/redis-utils": 3,
     "packages/ui-system": 0,
-    "apps/mmc": 121,
     "packages/api-client": 17,
     "packages/domain-core": 77,
     "packages/app": 5,
     "packages/validation": 10,
+    "apps/mmc": 0,
     "packages/ui": 1,
     "apps/frontoffice": 0,
     "apps/backoffice": 0,
