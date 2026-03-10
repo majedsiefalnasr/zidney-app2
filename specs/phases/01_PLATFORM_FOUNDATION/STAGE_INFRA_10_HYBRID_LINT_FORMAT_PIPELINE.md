@@ -5,19 +5,19 @@
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
 Last Updated: 2026-03-10T00:00:00.000Z
 
-Scope Planned:
+Tasks Generated:
 
-- lint-staged.config.mjs extended with Markdown (prettier), YAML (yamllint), workflows (actionlint)
-- .prettierrc and .prettierignore created (Markdown-only scope)
-- .yamllint config created (system tool)
-- pre-push hook extended with actionlint full scan + graceful fallback
-- package.json: prettier devDep + 3 validation scripts added
-- Unit tests for lint-staged config structure
-- No changes to biome.json or pre-commit hook
+- Total: 12 atomic tasks
+- Setup (1): install prettier devDependency
+- Foundational (3): .prettierrc, .prettierignore, .yamllint
+- Prettier Markdown (3): lint-staged config, package.json scripts, verification
+- actionlint Pre-Push (1): pre-push hook extension
+- Unit Tests (2): lint-staged config test suite
+- Regression Validation (2): lint + typecheck
 
 Deferred Scope:
 
@@ -28,10 +28,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
