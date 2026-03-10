@@ -179,9 +179,10 @@ The Incremental Guard implements a **Change → Module → Impact → Validation
                  ▼
 ┌─────────────────────────────────────────────────────────────┐
 │ STEP 1: Detect Changed Files                                │
-│ (git diff --name-only HEAD~1..HEAD)                         │
+│ (pre-commit: git diff --cached --name-only)                 │
+│ (CI/pre-push: git diff --name-only $(git merge-base ...))   │
 │                                                              │
-│ Output: [file paths]                                        │
+│ Output: [file paths] (empty list → exit 0 immediately)      │
 └────────────────┬────────────────────────────────────────────┘
                  │
                  ▼
@@ -231,15 +232,22 @@ The Incremental Guard implements a **Change → Module → Impact → Validation
 **Output:** List of changed file paths  
 **Implementation:**
 
+The command is **context-dependent** — the correct form depends on where the guard runs:
+
 ```bash
+# Pre-commit hooks: commit does not exist yet; use staged index
+git diff --cached --name-only
+
+# CI and pre-push: commit already exists; compare branch to main baseline
 git diff --name-only $(git merge-base HEAD main)..HEAD
 ```
 
 **Rules:**
 
-- Detects all files added, modified, or deleted in current branch
-- Works in both feature branches and main branch
-- Baseline: merge-base with `main` branch
+- Pre-commit context uses the staging index (`--cached`); `HEAD` does not point to the new commit yet
+- CI/pre-push context uses the merge-base approach to capture all commits on the branch
+- If the changed files list is **empty** (e.g., `git commit --allow-empty`), validation exits immediately with code `0`; no modules are validated and the Architecture Impact Report records `modules_validated: 0`
+- Baseline for CI/pre-push: merge-base with `main` branch
 
 **Data Structure:**
 
@@ -266,9 +274,17 @@ For each changed file, find the longest matching module prefix:
 // Pseudo-code
 for (const file of changedFiles) {
   const module = ARCHITECTURE_MAP.modules.find((m) => file.startsWith(m.path));
+  if (!module) {
+    // File is outside any declared module (e.g. docs/, .github/, tooling/).
+    // Silently skip — no validation scope, no error, no fallback triggered.
+    skippedUnmappedCount++;
+    continue;
+  }
   changedModules.add(module.id);
 }
 ```
+
+**Unmapped File Behaviour:** Files whose paths do not match any `apps/*` or `packages/*` module prefix (e.g. `docs/`, `.github/`, `tooling/`) are silently skipped and do not contribute to the validation scope. The new-module fallback is triggered only when a **directory** under `apps/*` or `packages/*` exists on disk but is absent from `ARCHITECTURE_MAP.json` — not for arbitrary unmapped paths. The Architecture Impact Report must include a `skipped_unmapped_files` counter for observability.
 
 **Data Structure:**
 
@@ -404,6 +420,8 @@ if (
 bun scripts/ai-guard.ts --full
 ```
 
+> **Scope Note:** When the smart fallback triggers, full validation means **ALL modules declared in `ARCHITECTURE_MAP.json`** — not a larger-than-incremental subset. It is identical to what runs in CI. The Architecture Impact Report must set `validation_mode: "full"` and `modules_skipped: 0` when full validation runs via fallback.
+
 ### Guard Execution Modes
 
 #### Incremental Mode
@@ -523,13 +541,13 @@ bun scripts/ai-guard.ts --full
 
 The cache is automatically regenerated when:
 
-| Condition                     | Detection                                                                  | Action                                |
-| ----------------------------- | -------------------------------------------------------------------------- | ------------------------------------- |
-| New module added              | Directory `apps/*` or `packages/*` exists but not in ARCHITECTURE_MAP.json | Run `infra-audit.ts --generate-graph` |
-| ARCHITECTURE_MAP.json changed | File in git diff                                                           | Run `infra-audit.ts --generate-graph` |
-| Dependencies changed          | Import statement modifications detected                                    | Run `infra-audit.ts --generate-graph` |
-| Cache missing                 | `ai-dependency-graph.json` not found                                       | Run `infra-audit.ts --generate-graph` |
-| Cache stale                   | Generated >24 hours ago (configurable)                                     | Run `infra-audit.ts --generate-graph` |
+| Condition                     | Detection                                                                          | Action                                |
+| ----------------------------- | ---------------------------------------------------------------------------------- | ------------------------------------- |
+| New module added              | Directory `apps/*` or `packages/*` exists but not in ARCHITECTURE_MAP.json         | Run `infra-audit.ts --generate-graph` |
+| ARCHITECTURE_MAP.json changed | File in git diff                                                                   | Run `infra-audit.ts --generate-graph` |
+| Dependencies changed          | Import statement modifications detected                                            | Run `infra-audit.ts --generate-graph` |
+| Cache missing                 | `ai-dependency-graph.json` not found                                               | Run `infra-audit.ts --generate-graph` |
+| Cache stale                   | Generated >24 hours ago (default); override via `ARCH_GRAPH_MAX_AGE_HOURS` env var | Run `infra-audit.ts --generate-graph` |
 
 **Implementation (in ai-guard.ts):**
 
@@ -957,11 +975,38 @@ The following reasonable defaults are assumed:
 
 ---
 
+## Clarifications
+
+### Session 2026-03-10
+
+- Q: Which git diff command should the pre-commit hook use — `git diff --name-only HEAD~1..HEAD`, `git diff --name-only $(git merge-base HEAD main)..HEAD`, or `git diff --cached --name-only`? → A: Pre-commit hooks must use `git diff --cached --name-only` because the commit has not been created yet and `HEAD` still points to the previous commit. CI and pre-push hooks use `git diff --name-only $(git merge-base HEAD main)..HEAD`. The `HEAD~1..HEAD` form previously shown in the pipeline diagram was incorrect and has been replaced.
+
+  **Impact on implementation:** `ai-guard.ts --incremental` must detect its execution context (pre-commit vs. CI/pre-push) and select the correct git command. Detection is reliable via the `HUSKY` or `GIT_PARAMS` environment variables that Husky injects, or via an explicit `--context pre-commit|ci` flag.
+
+- Q: Where is the 24-hour cache staleness threshold configured? → A: Via the environment variable `ARCH_GRAPH_MAX_AGE_HOURS` (default: `24`). No separate config file is required; reading directly from the environment aligns with the no-secrets-in-code policy and keeps configuration portable across developer machines and CI environments.
+
+  **Impact on implementation:** The `graphIsStale()` helper reads `Number(process.env.ARCH_GRAPH_MAX_AGE_HOURS ?? 24)` when computing the staleness threshold. The cache table row has been updated to reflect this.
+
+- Q: What happens when a changed file does not match any declared module prefix in `ARCHITECTURE_MAP.json` (e.g., files in `docs/`, `.github/`, `tooling/`)? → A: Unmapped files are silently skipped. They produce no validation scope and no error. The new-module fallback is triggered only when a **directory** matching `apps/*` or `packages/*` exists on disk but is absent from `ARCHITECTURE_MAP.json` — not for arbitrary unmapped file paths outside those prefixes.
+
+  **Impact on implementation:** The module-mapping loop must handle a `null` module result gracefully (skip the file, no throw). The Architecture Impact Report must include a `skipped_unmapped_files` counter. The module mapping pseudo-code in the spec has been updated to reflect this null-safe handling.
+
+- Q: When the smart fallback triggers, does "full validation" mean ALL modules or only a larger-than-incremental subset? → A: Full validation triggered by the smart fallback always means **ALL declared modules in `ARCHITECTURE_MAP.json`** — identical to what CI runs via `bun scripts/ai-guard.ts --full`. There is no intermediate "partial-full" mode.
+
+  **Impact on implementation:** The fallback path calls `runFullValidation()` with no module filter. The Architecture Impact Report must set `validation_mode: "full"` and `modules_skipped: 0` when full validation runs via fallback. A note clarifying this has been added to the Smart Fallback section.
+
+- Q: How should empty commits (`git commit --allow-empty`) and merge commits be handled by the change detection step? → A: Empty commits (staged diff produces an empty list) cause validation to exit immediately with code `0` — no modules to validate, no possible violations. The Architecture Impact Report must record `modules_validated: 0`, `status: "pass"`, and `validation_mode: "incremental"` in this case. Merge commits in CI are handled correctly by the `git merge-base HEAD main` approach, which resolves the common ancestor regardless of the number of parents; no special-casing is needed.
+
+  **Impact on implementation:** Add a short-circuit check at the start of change detection: `if (changedFiles.length === 0) return earlyPassReport()`. The Component Step 1 rules have been updated to document this behaviour explicitly.
+
+---
+
 ## Document Version History
 
 | Date       | Status | Notes                                    |
 | ---------- | ------ | ---------------------------------------- |
 | 2026-03-10 | DRAFT  | Initial specification from stage outline |
+| 2026-03-10 | DRAFT  | Clarifications session added (5 items)   |
 
 ---
 

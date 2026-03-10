@@ -6,9 +6,9 @@
   "branch": "spec/infra-011-incremental-architecture-guard",
   "base_branch": "develop",
   "package_manager": "bun",
-  "current_step": "specify",
+  "current_step": "clarify",
   "stage_status": "DRAFT",
-  "clarifications_resolved": false,
+  "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": false,
@@ -29,6 +29,13 @@
       "architectural_requirements": 3,
       "clarifications_needed": 0,
       "timestamp": "2026-03-10T12:00:00Z"
+    },
+    {
+      "event": "clarifications_locked",
+      "clarifications_resolved": 5,
+      "open_items": 0,
+      "risk_level": "LOW",
+      "timestamp": "2026-03-10T12:01:00Z"
     }
   ]
 }

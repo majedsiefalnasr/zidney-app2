@@ -5,7 +5,7 @@
 ## Stage Status
 
 Status: DRAFT
-Step: specify
+Step: clarify
 Risk Level: LOW
 Last Updated: 2026-03-10T12:00:00Z
 
@@ -17,12 +17,20 @@ Scope Defined:
 - Three-tier integration: pre-commit, pre-push, CI
 - Architecture Impact Report for transparency
 - Support for both `--incremental` and `--full` modes
+- git diff --cached for pre-commit; merge-base for CI
+- ARCH_GRAPH_MAX_AGE_HOURS env var for cache TTL
+- Silent skip for unmapped files with audit counter
 
 Deferred Scope:
 
 - None
 
 Constitutional Compliance:
+
+- Clarifications resolved — planning authorized
+
+Notes:
+All specification ambiguities resolved. Ready for technical planning.
 
 - Specification drafted — constitutional audit pending
 
