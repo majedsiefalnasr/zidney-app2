@@ -5,18 +5,19 @@
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
 Last Updated: 2026-03-10T00:00:00.000Z
 
-Scope Defined:
+Scope Planned:
 
-- Hybrid Lint/Format Pipeline: Biome (primary) + Prettier/yamllint/actionlint (secondary)
-- lint-staged via lint-staged.config.mjs for sub-second pre-commit
-- Husky pre-commit: `bunx lint-staged`
-- Pre-push: `bun run lint` + architecture guard + infra audit + actionlint
-- No tool overlap: strict responsibility matrix enforced
-- 10 FR, 6 NFR, 8 clarifications resolved
+- lint-staged.config.mjs extended with Markdown (prettier), YAML (yamllint), workflows (actionlint)
+- .prettierrc and .prettierignore created (Markdown-only scope)
+- .yamllint config created (system tool)
+- pre-push hook extended with actionlint full scan + graceful fallback
+- package.json: prettier devDep + 3 validation scripts added
+- Unit tests for lint-staged config structure
+- No changes to biome.json or pre-commit hook
 
 Deferred Scope:
 
@@ -27,10 +28,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
+Technical plan complete. Task breakdown in progress.
 
 ---
 
