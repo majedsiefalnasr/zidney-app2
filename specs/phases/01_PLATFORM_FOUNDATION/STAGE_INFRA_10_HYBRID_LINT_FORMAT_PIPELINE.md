@@ -5,20 +5,33 @@
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: UNKNOWN
-Initiated: 2026-03-10T00:00:00.000Z
+Last Updated: 2026-03-10T00:00:00.000Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- Hybrid Lint/Format Pipeline for the Zidney monorepo
+- Biome as primary engine for TS/JS/TSX/JSX/Vue
+- Prettier scoped to Markdown only
+- yamllint for YAML files
+- actionlint for GitHub Actions workflows
+- Husky + lint-staged pre-commit integration (50–150ms target)
+- Pre-push pipeline: full Biome lint + architecture guard + infra audit
+
+Deferred Scope:
+
+- CI pipeline job definitions
+- Per-package biome.json overrides
+- Lint rule governance (STAGE_INFRA_05 scope)
+- TypeScript migration of existing files
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
