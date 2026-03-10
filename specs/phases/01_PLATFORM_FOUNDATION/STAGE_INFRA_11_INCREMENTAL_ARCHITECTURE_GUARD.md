@@ -5,19 +5,20 @@
 ## Stage Status
 
 Status: DRAFT
-Step: plan
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-10T14:00:00Z
+Last Updated: 2026-03-10T15:00:00Z
 
-Scope Planned:
+Tasks Generated:
 
-- CLI flags `--incremental`, `--full`, `--modules <csv>` for `scripts/ai-guard.ts`
-- CLI flag `--generate-graph` for `scripts/infra-audit.ts` (fast-path graph refresh)
-- Five-step incremental pipeline: staged files → module mapping → BFS scope → incremental validation → fallback
-- Schema migration of `ai-dependency-graph.json` to canonical `AIDependencyGraph` type
-- Pre-commit hook updated to pass `STAGED_FILES` env var + `--incremental` flag
-- Pre-push hook updated to explicit `--full` flag
-- `architecture-impact-report.json` added to `.gitignore` (CI-only artifact)
+- Total: 24 atomic tasks
+- Setup: 1 task (T001)
+- infra-audit.ts changes: 3 tasks (T002–T004)
+- ai-guard.ts changes: 7 tasks (T005–T011)
+- Hook updates: 2 tasks (T012–T013)
+- Unit tests: 4 tasks (T014–T017)
+- Integration tests: 3 tasks (T018–T020)
+- Post-implementation validation: 4 tasks (T021–T024)
 
 Deferred Scope:
 
@@ -25,11 +26,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Technical plan compliant — Guardian: Architecture Checker PASS
-- Task generation authorized
+- Task set compliant — drift analysis required before implementation
 
 Notes:
-Technical plan complete. Guardian validation passed. Task breakdown in progress.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 

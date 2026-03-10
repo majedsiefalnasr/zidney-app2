@@ -6,15 +6,15 @@
   "branch": "spec/infra-011-incremental-architecture-guard",
   "base_branch": "develop",
   "package_manager": "bun",
-  "current_step": "plan",
+  "current_step": "tasks",
   "stage_status": "DRAFT",
   "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": true,
-  "tasks_total": null,
-  "tasks_completed": null,
-  "last_updated": "2026-03-10T14:00:00Z",
+  "tasks_total": 24,
+  "tasks_completed": 0,
+  "last_updated": "2026-03-10T15:00:00Z",
   "history": [
     {
       "event": "branch_created",
@@ -43,6 +43,11 @@
       "artifacts": ["plan.md", "research.md", "data-model.md", "quickstart.md"],
       "schema_alignment_note": "Implementation must use AIDependencyGraph from packages/types/src/ai-context.ts",
       "timestamp": "2026-03-10T14:00:00Z"
+    },
+    {
+      "event": "tasks_complete",
+      "tasks_total": 24,
+      "timestamp": "2026-03-10T15:00:00Z"
     }
   ]
 }
