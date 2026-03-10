@@ -1,22 +1,22 @@
 # Zidney Architecture Dashboard
 
-**Generated:** 2026-03-09T21:35:32.165Z
-**Git SHA:** 234fcf39bb7995c33a8522b4fd49b9980c855f1c
+**Generated:** 2026-03-10T11:10:25.148Z
+**Git SHA:** 777c12a93f3242095878ee9ce51586190beea202
 
 ## Architecture Score
 
-**Score:** 100 / 100
+**Score:** 30 / 100
 
-**Trend:** 0 regression
+**Trend:** -70 regression
 
 ## System Health
 
 | Metric | Value |
 |------|------|
-| Circular Dependencies | 0 |
-| Dependency Violations | 0 |
+| Circular Dependencies | 5 |
+| Dependency Violations | 1 |
 | Layer Violations | 0 |
-| Architecture Drift | 0 |
+| Architecture Drift | 2 |
 | Skipped Tests | 0 |
 | Flaky Tests | 0 |
 
@@ -30,7 +30,7 @@ Total Tests: 207
 
 ## Dependency Graph
 
-Nodes: 15
+Nodes: 13
 
 Edges: 448
 
@@ -41,11 +41,11 @@ Edges: 448
 - packages/domain-core (77)
 - packages/api-client (17)
 - packages/validation (10)
-- packages/app (5)
 - packages/redis-utils (3)
-- packages/ui (1)
+- apps/worker (3)
+- apps/api (2)
+- packages/ui-system (1)
 - packages/config (0)
-- packages/ui-system (0)
 
 ---
 

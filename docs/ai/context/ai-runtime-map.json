@@ -17,7 +17,7 @@
     "packages/logger",
     "packages/logger",
     "packages/logger",
-    "packages/ui"
+    "packages/ui-system"
   ],
   "frontoffice": [
     "packages/types",
@@ -207,10 +207,10 @@
     "packages/logger",
     "packages/logger",
     "packages/logger",
-    "packages/app",
-    "packages/app",
+    "apps/worker",
+    "apps/worker",
     "packages/logger",
-    "packages/app",
+    "apps/worker",
     "packages/logger",
     "packages/logger",
     "packages/logger",

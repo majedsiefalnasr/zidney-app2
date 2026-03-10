@@ -7,13 +7,11 @@
     "packages/ui-system",
     "packages/api-client",
     "packages/domain-core",
-    "packages/app",
+    "apps/api",
     "packages/validation",
     "apps/mmc",
-    "packages/ui",
     "apps/frontoffice",
     "apps/backoffice",
-    "apps/api",
     "apps/worker"
   ],
   "edges": [
@@ -31,11 +29,11 @@
     },
     {
       "from": "packages/domain-core",
-      "to": "packages/app"
+      "to": "apps/api"
     },
     {
       "from": "packages/domain-core",
-      "to": "packages/app"
+      "to": "apps/api"
     },
     {
       "from": "packages/domain-core",
@@ -307,7 +305,7 @@
     },
     {
       "from": "apps/mmc",
-      "to": "packages/ui"
+      "to": "packages/ui-system"
     },
     {
       "from": "apps/frontoffice",
@@ -1043,11 +1041,11 @@
     },
     {
       "from": "apps/api",
-      "to": "packages/app"
+      "to": "apps/worker"
     },
     {
       "from": "apps/api",
-      "to": "packages/app"
+      "to": "apps/worker"
     },
     {
       "from": "apps/api",
@@ -1055,7 +1053,7 @@
     },
     {
       "from": "apps/api",
-      "to": "packages/app"
+      "to": "apps/worker"
     },
     {
       "from": "apps/api",

@@ -1,5 +1,5 @@
 {
-  "architectureScore": 100,
+  "architectureScore": 30,
   "modules": [
     "packages/types",
     "packages/logger",
@@ -8,13 +8,11 @@
     "packages/ui-system",
     "packages/api-client",
     "packages/domain-core",
-    "packages/app",
+    "apps/api",
     "packages/validation",
     "apps/mmc",
-    "packages/ui",
     "apps/frontoffice",
     "apps/backoffice",
-    "apps/api",
     "apps/worker"
   ],
   "hotspots": [

@@ -2,8 +2,8 @@ graph TD
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
-  packages_domain_core --> packages_app
-  packages_domain_core --> packages_app
+  packages_domain_core --> apps_api
+  packages_domain_core --> apps_api
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
@@ -71,7 +71,7 @@ graph TD
   apps_mmc --> packages_logger
   apps_mmc --> packages_logger
   apps_mmc --> packages_logger
-  apps_mmc --> packages_ui
+  apps_mmc --> packages_ui_system
   apps_frontoffice --> packages_types
   apps_frontoffice --> packages_types
   apps_frontoffice --> packages_types
@@ -255,10 +255,10 @@ graph TD
   apps_api --> packages_logger
   apps_api --> packages_logger
   apps_api --> packages_logger
-  apps_api --> packages_app
-  apps_api --> packages_app
+  apps_api --> apps_worker
+  apps_api --> apps_worker
   apps_api --> packages_logger
-  apps_api --> packages_app
+  apps_api --> apps_worker
   apps_api --> packages_logger
   apps_api --> packages_logger
   apps_api --> packages_logger

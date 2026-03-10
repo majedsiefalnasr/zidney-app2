@@ -236,13 +236,7 @@
     "apps/worker",
     "apps/worker"
   ],
-  "packages/app": [
-    "packages/domain-core",
-    "packages/domain-core",
-    "apps/api",
-    "apps/api",
-    "apps/api"
-  ],
+  "apps/api": ["packages/domain-core", "packages/domain-core"],
   "packages/types": [
     "packages/domain-core",
     "packages/domain-core",
@@ -376,7 +370,7 @@
     "apps/backoffice",
     "apps/backoffice"
   ],
-  "packages/ui": ["apps/mmc"],
+  "packages/ui-system": ["apps/mmc"],
   "packages/domain-core": [
     "apps/api",
     "apps/api",
@@ -456,5 +450,6 @@
     "apps/worker",
     "apps/worker"
   ],
-  "packages/redis-utils": ["apps/api", "apps/api", "apps/api"]
+  "packages/redis-utils": ["apps/api", "apps/api", "apps/api"],
+  "apps/worker": ["apps/api", "apps/api", "apps/api"]
 }

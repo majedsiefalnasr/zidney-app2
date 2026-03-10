@@ -1,6 +1,6 @@
 # Zidney Architecture Risk Heatmap
 
-Generated: 2026-03-09T21:35:32.169Z
+Generated: 2026-03-10T11:10:25.152Z
 
 ## Module Risk Classification
 
@@ -13,13 +13,11 @@ Generated: 2026-03-09T21:35:32.169Z
 | packages/ui-system | LOW |
 | packages/api-client | LOW |
 | packages/domain-core | LOW |
-| packages/app | LOW |
+| apps/api | LOW |
 | packages/validation | LOW |
 | apps/mmc | LOW |
-| packages/ui | LOW |
 | apps/frontoffice | LOW |
 | apps/backoffice | LOW |
-| apps/api | LOW |
 | apps/worker | LOW |
 
 ## Interpretation

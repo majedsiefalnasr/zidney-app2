@@ -1,8 +1,8 @@
 {
   "version": "1.0",
-  "generatedAt": "2026-03-09T21:35:32.169Z",
-  "gitSha": "234fcf39bb7995c33a8522b4fd49b9980c855f1c",
-  "architectureScore": 100,
+  "generatedAt": "2026-03-10T11:10:25.153Z",
+  "gitSha": "777c12a93f3242095878ee9ce51586190beea202",
+  "architectureScore": 30,
   "modules": [
     "packages/types",
     "packages/logger",
@@ -11,13 +11,11 @@
     "packages/ui-system",
     "packages/api-client",
     "packages/domain-core",
-    "packages/app",
+    "apps/api",
     "packages/validation",
     "apps/mmc",
-    "packages/ui",
     "apps/frontoffice",
     "apps/backoffice",
-    "apps/api",
     "apps/worker"
   ],
   "layers": {
@@ -29,11 +27,9 @@
       "packages/ui-system",
       "packages/api-client",
       "packages/domain-core",
-      "packages/app",
-      "packages/validation",
-      "packages/ui"
+      "packages/validation"
     ],
-    "apps": ["apps/mmc", "apps/frontoffice", "apps/backoffice", "apps/api", "apps/worker"]
+    "apps": ["apps/api", "apps/mmc", "apps/frontoffice", "apps/backoffice", "apps/worker"]
   },
   "rules": {
     "dependencyRules": {
@@ -59,13 +55,11 @@
     "packages/ui-system": "LOW",
     "packages/api-client": "LOW",
     "packages/domain-core": "LOW",
-    "packages/app": "LOW",
+    "apps/api": "LOW",
     "packages/validation": "LOW",
     "apps/mmc": "LOW",
-    "packages/ui": "LOW",
     "apps/frontoffice": "LOW",
     "apps/backoffice": "LOW",
-    "apps/api": "LOW",
     "apps/worker": "LOW"
   },
   "edges": [
@@ -83,11 +77,11 @@
     },
     {
       "from": "packages/domain-core",
-      "to": "packages/app"
+      "to": "apps/api"
     },
     {
       "from": "packages/domain-core",
-      "to": "packages/app"
+      "to": "apps/api"
     },
     {
       "from": "packages/domain-core",
@@ -359,7 +353,7 @@
     },
     {
       "from": "apps/mmc",
-      "to": "packages/ui"
+      "to": "packages/ui-system"
     },
     {
       "from": "apps/frontoffice",
@@ -1095,11 +1089,11 @@
     },
     {
       "from": "apps/api",
-      "to": "packages/app"
+      "to": "apps/worker"
     },
     {
       "from": "apps/api",
-      "to": "packages/app"
+      "to": "apps/worker"
     },
     {
       "from": "apps/api",
@@ -1107,7 +1101,7 @@
     },
     {
       "from": "apps/api",
-      "to": "packages/app"
+      "to": "apps/worker"
     },
     {
       "from": "apps/api",

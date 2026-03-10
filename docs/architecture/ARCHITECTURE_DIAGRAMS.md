@@ -1,7 +1,7 @@
 # Zidney Architecture Diagrams
 
-Generated: 2026-03-09T21:35:32.168Z
-Git SHA: 234fcf39bb7995c33a8522b4fd49b9980c855f1c
+Generated: 2026-03-10T11:10:25.152Z
+Git SHA: 777c12a93f3242095878ee9ce51586190beea202
 
 ---
 
@@ -43,8 +43,8 @@ graph LR
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
-  packages_domain_core --> packages_app
-  packages_domain_core --> packages_app
+  packages_domain_core --> apps_api
+  packages_domain_core --> apps_api
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
@@ -112,7 +112,7 @@ graph LR
   apps_mmc --> packages_logger
   apps_mmc --> packages_logger
   apps_mmc --> packages_logger
-  apps_mmc --> packages_ui
+  apps_mmc --> packages_ui_system
   apps_frontoffice --> packages_types
   apps_frontoffice --> packages_types
   apps_frontoffice --> packages_types
@@ -296,10 +296,10 @@ graph LR
   apps_api --> packages_logger
   apps_api --> packages_logger
   apps_api --> packages_logger
-  apps_api --> packages_app
-  apps_api --> packages_app
+  apps_api --> apps_worker
+  apps_api --> apps_worker
   apps_api --> packages_logger
-  apps_api --> packages_app
+  apps_api --> apps_worker
   apps_api --> packages_logger
   apps_api --> packages_logger
   apps_api --> packages_logger
@@ -500,8 +500,8 @@ graph TD
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
-  packages_domain_core --> packages_app
-  packages_domain_core --> packages_app
+  packages_domain_core --> apps_api
+  packages_domain_core --> apps_api
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
@@ -569,7 +569,7 @@ graph TD
   apps_mmc --> packages_logger
   apps_mmc --> packages_logger
   apps_mmc --> packages_logger
-  apps_mmc --> packages_ui
+  apps_mmc --> packages_ui_system
   apps_frontoffice --> packages_types
   apps_frontoffice --> packages_types
   apps_frontoffice --> packages_types
@@ -753,10 +753,10 @@ graph TD
   apps_api --> packages_logger
   apps_api --> packages_logger
   apps_api --> packages_logger
-  apps_api --> packages_app
-  apps_api --> packages_app
+  apps_api --> apps_worker
+  apps_api --> apps_worker
   apps_api --> packages_logger
-  apps_api --> packages_app
+  apps_api --> apps_worker
   apps_api --> packages_logger
   apps_api --> packages_logger
   apps_api --> packages_logger

@@ -29,8 +29,8 @@
       "type": "package"
     },
     {
-      "id": "packages/app",
-      "type": "package"
+      "id": "apps/api",
+      "type": "app"
     },
     {
       "id": "packages/validation",
@@ -41,19 +41,11 @@
       "type": "app"
     },
     {
-      "id": "packages/ui",
-      "type": "package"
-    },
-    {
       "id": "apps/frontoffice",
       "type": "app"
     },
     {
       "id": "apps/backoffice",
-      "type": "app"
-    },
-    {
-      "id": "apps/api",
       "type": "app"
     },
     {
@@ -76,11 +68,11 @@
     },
     {
       "from": "packages/domain-core",
-      "to": "packages/app"
+      "to": "apps/api"
     },
     {
       "from": "packages/domain-core",
-      "to": "packages/app"
+      "to": "apps/api"
     },
     {
       "from": "packages/domain-core",
@@ -352,7 +344,7 @@
     },
     {
       "from": "apps/mmc",
-      "to": "packages/ui"
+      "to": "packages/ui-system"
     },
     {
       "from": "apps/frontoffice",
@@ -1088,11 +1080,11 @@
     },
     {
       "from": "apps/api",
-      "to": "packages/app"
+      "to": "apps/worker"
     },
     {
       "from": "apps/api",
-      "to": "packages/app"
+      "to": "apps/worker"
     },
     {
       "from": "apps/api",
@@ -1100,7 +1092,7 @@
     },
     {
       "from": "apps/api",
-      "to": "packages/app"
+      "to": "apps/worker"
     },
     {
       "from": "apps/api",
@@ -1860,16 +1852,14 @@
     "packages/logger": 235,
     "packages/config": 0,
     "packages/redis-utils": 3,
-    "packages/ui-system": 0,
+    "packages/ui-system": 1,
     "packages/api-client": 17,
     "packages/domain-core": 77,
-    "packages/app": 5,
+    "apps/api": 2,
     "packages/validation": 10,
     "apps/mmc": 0,
-    "packages/ui": 1,
     "apps/frontoffice": 0,
     "apps/backoffice": 0,
-    "apps/api": 0,
-    "apps/worker": 0
+    "apps/worker": 3
   }
 }
