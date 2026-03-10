@@ -54,7 +54,7 @@ The Zidney monorepo currently suffers from the following issues without a consol
 
 - The monorepo uses Bun as its runtime and package manager.
 - Husky is already installed or will be installed as part of this stage.
-- The monorepo root `package.json` is the canonical location for lint-staged configuration.
+- The root `lint-staged.config.mjs` is the canonical location for lint-staged configuration (not inline in `package.json`).
 - `yamllint` is executed as a system tool (available via `brew` or container setup); it is not a Node.js package.
 - `actionlint` is executed as a system tool; it is not a Node.js package.
 - Biome's Vue support is limited to `<script>` blocks; `<template>` and `<style>` blocks are outside Biome's scope.
@@ -230,25 +230,24 @@ The Husky `pre-commit` hook must invoke `bunx lint-staged` as its only action. I
 
 **Acceptance:** Running `git commit` triggers `bunx lint-staged`, which processes only staged files through their respective tools in under 0.5 seconds.
 
-### FR-06 — lint-staged Configuration in Root package.json
+### FR-06 — lint-staged Configuration in `lint-staged.config.mjs`
 
-The root `package.json` must contain a `lint-staged` configuration block. Each file pattern must map to exactly one tool (or two for `*.yml` in `.github/workflows/`). The configuration must not invoke Biome on Markdown files or Prettier on TypeScript files.
+The root `lint-staged.config.mjs` file must define the lint-staged configuration. Each file pattern must map to exactly one tool (or two for `.github/workflows/*.yml` files, which receive both yamllint via the `*.{yml,yaml}` glob and actionlint via the explicit workflow glob). The configuration must not invoke Biome on Markdown files or Prettier on TypeScript files.
 
 **Required configuration shape:**
 
-```json
-{
-  "lint-staged": {
-    "*.{ts,tsx,js,jsx}": ["biome format --write", "biome check"],
-    "*.vue": ["biome format --write", "biome check"],
-    "*.md": ["prettier --write"],
-    "*.{yml,yaml}": ["yamllint"],
-    ".github/workflows/*.yml": ["actionlint"]
-  }
+```javascript
+// lint-staged.config.mjs
+/** @type {import('lint-staged').Config} */
+export default {
+  '*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --write'],
+  '*.md': ['prettier --write'],
+  '*.{yml,yaml}': ['yamllint'],
+  '.github/workflows/*.yml': ['actionlint'],
 }
 ```
 
-**Acceptance:** The above configuration block is present and the tool invocations execute successfully on their respective file types.
+**Acceptance:** `lint-staged.config.mjs` contains the above configuration at the repository root and tool invocations execute successfully on their respective file types.
 
 ### FR-07 — Pre-Push Hook: Full Validation Pipeline
 
@@ -256,11 +255,12 @@ The Husky `pre-push` hook must run a stricter validation pipeline that covers th
 
 **Required sequence:**
 
-1. Full Biome lint: `biome check`
+1. Full Biome lint: `bun run lint` (equivalent to `bun biome check .`)
 2. Architecture guard: `bun scripts/ai-guard.ts`
 3. Infrastructure audit: `bun scripts/infra-audit.ts`
+4. Full workflow validation: `actionlint .github/workflows/`
 
-**Acceptance:** `git push` triggers the pre-push hook; all three commands execute in sequence; a failure in any command aborts the push.
+**Acceptance:** `git push` triggers the pre-push hook; all four commands execute in sequence; a failure in any command aborts the push.
 
 ### FR-08 — Monorepo-Wide Tool Coverage
 
@@ -311,14 +311,14 @@ All formatting operations must be **deterministic**: running the same formatter 
 
 Tool configurations must be maintained in a single canonical location per tool:
 
-| Tool        | Configuration File              |
-| ----------- | ------------------------------- |
-| Biome       | `biome.json` (repository root)  |
-| Prettier    | `.prettierrc` or `package.json` |
-| yamllint    | `.yamllint` (repository root)   |
-| actionlint  | `.actionlint.yaml` (if needed)  |
-| lint-staged | `package.json` (root)           |
-| Husky       | `.husky/` directory             |
+| Tool        | Configuration File                         |
+| ----------- | ------------------------------------------ |
+| Biome       | `biome.json` (repository root)             |
+| Prettier    | `.prettierrc` or `package.json`            |
+| yamllint    | `.yamllint` (repository root)              |
+| actionlint  | `.actionlint.yaml` (if needed)             |
+| lint-staged | `lint-staged.config.mjs` (repository root) |
+| Husky       | `.husky/` directory                        |
 
 No per-package tool configuration is allowed unless explicitly required by a specific app's constraints.
 
@@ -581,3 +581,46 @@ This stage does **not**:
 Compliant with Zidney Constitution v1.2.0 — No violations detected.
 
 This stage is infrastructure tooling only. It does not interact with tenant databases, authentication middleware, license enforcement, attempt engine, or worker queues. No ADR exception is required. All architectural boundaries defined in `ARCHITECTURE_MAP.json` remain respected. No cross-tenant data access, no global DB singleton, no middleware bypass.
+
+---
+
+## Clarifications
+
+### Session 2026-03-10
+
+- **Q-01 ⚠️ CRITICAL — lint-staged config location: `package.json` inline vs `lint-staged.config.mjs`?**
+  → **A: Use the existing `lint-staged.config.mjs` at the repository root** (not inline in `package.json`).
+  → **Evidence:** The workspace already contains `lint-staged.config.mjs` using ESM `export default` syntax — lint-staged natively supports `.mjs` config files. FR-06 originally specified `package.json` inline without awareness of the existing file. NFR-03 designates `lint-staged.config.mjs` as the single canonical location. Implementation must update the existing file, not create a duplicate inline block in `package.json`.
+  → **Sections updated:** Assumptions, NFR-03 Configuration Table, FR-06 heading and body.
+
+- **Q-02 ⚠️ CRITICAL — Biome invocation in lint-staged: two commands (`biome format --write` + `biome check`) or single `bun biome check --write`?**
+  → **A: Single `bun biome check --write`** per file pattern group.
+  → **Evidence:** The existing `lint-staged.config.mjs` already uses `bun biome check --write`. `biome check --write` is the fix-mode command that applies format writes and auto-fixable lint fixes (import ordering, unused-variable stubs, etc.) in a single atomic pass. The spec's original two-command form ran `biome check` _without_ `--write`, leaving auto-fixable lint violations unremediated and blocking commits unnecessarily. `package.json` scripts also confirm the canonical invocation is `bun biome check`.
+  → **Sections updated:** FR-06 configuration shape.
+
+- **Q-03 — Should `*.mjs` and `*.json` be included in the Biome lint-staged glob?**
+  → **A: Yes — include both** in `*.{ts,tsx,js,jsx,mjs,vue,json}`.
+  → **Evidence:** The existing `lint-staged.config.mjs` already includes `mjs` and `json`. Biome v2.4.6 (pinned in `biome.json` schema and `package.json`) supports `.mjs` as valid ES module JavaScript and `.json` for formatting/validation. The `biome.json` `files.includes` covers `**`, picking up both types. Excluding them from lint-staged creates an inconsistency where staged Biome-supported files bypass pre-commit checking.
+  → **Sections updated:** FR-06 configuration shape.
+
+- **Q-04 ⚠️ CRITICAL — Pre-push `biome check` invocation: bare `biome check`, `bun biome check`, or `bun run lint`?**
+  → **A: `bun run lint`** (the defined npm script alias).
+  → **Evidence:** `package.json` defines `"lint": "bun biome check ."` — using the script alias always includes the `.` path argument and is idiomatic in this monorepo. Bare `biome check` can fail if the `biome` binary is not on the system `PATH` (it resides in `node_modules/.bin/`). All other monorepo CI-relevant scripts use the `bun run <script>` pattern.
+  → **Sections updated:** FR-07 required sequence.
+
+- **Q-05 ⚠️ CRITICAL — actionlint scope: staged files only (lint-staged) or also a full scan on push?**
+  → **A: Both.** Lint-staged runs actionlint on staged workflow files during pre-commit. The pre-push hook must additionally run `actionlint .github/workflows/` for full-repository coverage.
+  → **Evidence:** FR-04 acceptance criterion states "reports no errors on _all existing workflow files_" — this implies full coverage, not just staged files. Since lint-staged by design only processes staged files, the pre-push hook must include a full actionlint pass to satisfy FR-04. This is consistent with FR-07's stated goal of "a stricter validation pipeline that covers the entire repository." FR-07 was updated to include this as step 4.
+  → **Sections updated:** FR-07 required sequence and acceptance criterion.
+
+- **Q-06 (Confirmed Clear) — Biome Vue handling: `<script>` blocks only or full file?**
+  → **A: `<script>` blocks only.** `<template>` and `<style>` are outside Biome's scope.
+  → **Evidence:** Explicitly stated in the Assumptions section. Confirmed by `biome.json` which has a `**/*.vue` linter override (script-level processing) but no template/style handling. No spec change required.
+
+- **Q-07 (Confirmed Clear) — yamllint: system dependency or npm package?**
+  → **A: System tool** — installed via brew/apt/container, NOT an npm package.
+  → **Evidence:** Explicitly stated in the Assumptions section and confirmed in the Dependencies table. `package.json` devDependencies does not include yamllint. No spec change required.
+
+- **Q-08 (Confirmed Clear) — Biome installation: root only or also per-package?**
+  → **A: Root only.** `@biomejs/biome` is a root-level devDependency only.
+  → **Evidence:** `package.json` devDependencies has `"@biomejs/biome": "^2.4.6"` at root. NFR-03 prohibits per-package tool config. Scope section explicitly excludes per-package Biome configurations. No spec change required.

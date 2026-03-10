@@ -5,19 +5,18 @@
 ## Stage Status
 
 Status: DRAFT
-Step: specify
-Risk Level: UNKNOWN
+Step: clarify
+Risk Level: LOW
 Last Updated: 2026-03-10T00:00:00.000Z
 
 Scope Defined:
 
-- Hybrid Lint/Format Pipeline for the Zidney monorepo
-- Biome as primary engine for TS/JS/TSX/JSX/Vue
-- Prettier scoped to Markdown only
-- yamllint for YAML files
-- actionlint for GitHub Actions workflows
-- Husky + lint-staged pre-commit integration (50–150ms target)
-- Pre-push pipeline: full Biome lint + architecture guard + infra audit
+- Hybrid Lint/Format Pipeline: Biome (primary) + Prettier/yamllint/actionlint (secondary)
+- lint-staged via lint-staged.config.mjs for sub-second pre-commit
+- Husky pre-commit: `bunx lint-staged`
+- Pre-push: `bun run lint` + architecture guard + infra audit + actionlint
+- No tool overlap: strict responsibility matrix enforced
+- 10 FR, 6 NFR, 8 clarifications resolved
 
 Deferred Scope:
 
@@ -28,10 +27,10 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Clarifications resolved — planning authorized
 
 Notes:
-Specification complete. Clarification step pending.
+All specification ambiguities resolved. Ready for technical planning.
 
 ---
 
