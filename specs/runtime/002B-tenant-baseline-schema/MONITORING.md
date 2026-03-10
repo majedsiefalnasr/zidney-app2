@@ -231,8 +231,7 @@ groups:
 
       # WARNING: High initialization failure rate
       - alert: HighInitFailureRate
-        expr:
-          (increase(schema_initialization_failures_total[5m]) /
+        expr: (increase(schema_initialization_failures_total[5m]) /
           increase(schema_initialization_total[5m])) > 0.1
         for: 5m
         labels:

@@ -5,6 +5,7 @@ coverage/
 
 # AI tooling directories — not under project formatting governance
 .agents/
+.github/
 .specify/
 package-lock.json
 yarn.lock

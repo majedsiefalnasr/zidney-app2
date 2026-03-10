@@ -238,8 +238,7 @@ docker build --target=api -t zidney-api:v1.0.0 .  # Cache hit
 
 ```yaml
 healthcheck:
-  test:
-    [
+  test: [
       "CMD",
       "bun",
       "-e",
