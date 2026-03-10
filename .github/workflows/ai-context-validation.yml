@@ -76,16 +76,16 @@ jobs:
           fi
           echo "✅ ai-context:validate command succeeded"
 
-      # ── 7. Test generate:ai-context alias ──────────────────────────────
-      - name: Test generate:ai-context alias
+      # ── 7. Test ai-context:generate alias ──────────────────────────────
+      - name: Test ai-context:generate alias
         run: |
-          echo "🧪 Testing generate:ai-context alias..."
-          bun run generate:ai-context
+          echo "🧪 Testing ai-context:generate alias..."
+          bun run ai-context:generate
           if [ $? -ne 0 ]; then
-            echo "❌ generate:ai-context alias failed"
+            echo "❌ ai-context:generate alias failed"
             exit 1
           fi
-          echo "✅ generate:ai-context alias succeeded"
+          echo "✅ ai-context:generate alias succeeded"
 
       # ── 8. Verify artifacts exist ──────────────────────────────────────
       - name: Verify AI context artifacts exist

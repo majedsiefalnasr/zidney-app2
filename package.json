@@ -35,7 +35,6 @@
     "dev:frontoffice": "bun --cwd apps/frontoffice dev",
     "dev:all": "concurrently \"bun run dev:api\" \"bun run dev:worker\" \"bun run dev:mmc\" \"bun run dev:backoffice\" \"bun run dev:frontoffice\"",
     "prepare": "husky",
-    "ai-guard": "bun scripts/ai-guard.ts",
     "arch:add-module": "bun scripts/architecture/add-module.ts",
     "arch:generate": "bun scripts/architecture/generate-architecture-map.ts",
     "arch:audit": "bun scripts/infra-audit.ts",
@@ -47,8 +46,7 @@
     "arch:visualize": "bun scripts/architecture/visualize.ts",
     "ai-context:generate": "bun scripts/generate-ai-context.ts",
     "ai-context:refresh": "bun scripts/generate-ai-context.ts --force",
-    "ai-context:validate": "bun scripts/generate-ai-context.ts --validate",
-    "generate:ai-context": "bun scripts/generate-ai-context.ts"
+    "ai-context:validate": "bun scripts/generate-ai-context.ts --validate"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.4.6",
@@ -67,5 +65,6 @@
     "vite-tsconfig-paths": "4.3.2",
     "vitest": "^1.0.0",
     "wait-on": "^9.0.4"
-  }
+  },
+  "packageManager": "yarn@1.22.22+sha512.a6b2f7906b721bba3d67d4aff083df04dad64c399707841b7acf00f6b133b7ac24255f2652fa22ae3534329dc6180534e98d17432037ff6fd140556e2bb3137e"
 }

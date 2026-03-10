@@ -80,7 +80,7 @@ jobs:
         run: bun install --frozen-lockfile
 
       - name: module-boundary-validation
-        run: bun run ai-guard
+        run: bun run arch:guard
 
   # ── Job 4. Unit Tests ──────────────────────────────────────────────────
   unit-tests:
