@@ -1,4 +1,4 @@
-import { Hono } from 'hono'
+import { type Context, Hono, type Next } from 'hono'
 
 // Utility
 function generateId(): string {
@@ -13,7 +13,7 @@ function generateId(): string {
 import { requestIdMiddleware } from './middleware/request-id'
 
 // Correlation ID middleware (legacy, for backward compatibility)
-const correlationIdMiddleware = async (c: any, next: any) => {
+const correlationIdMiddleware = async (c: Context, next: Next) => {
   const correlationId = c.req.header('x-correlation-id') || generateId()
   c.set('correlationId', correlationId)
   await next()

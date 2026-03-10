@@ -11,7 +11,10 @@ import { sql } from 'drizzle-orm'
  * License Middleware: Not applicable
  */
 
-export async function executeSchemaVersionIncrement(db: any, context: any) {
+export async function executeSchemaVersionIncrement(
+  db: Record<string, unknown>,
+  context: Record<string, unknown>
+) {
   const correlationId = context?.correlationId || 'unknown'
 
   // T008: Atomically update master schema version
@@ -21,11 +24,9 @@ export async function executeSchemaVersionIncrement(db: any, context: any) {
   )
 
   const current = currentVersion?.[0]?.version || '1.0.0'
-  // biome-ignore lint/suspicious/noConsole: migration runner output
   console.log(`[${correlationId}] Current master schema version: ${current}`)
 
   if (current !== '1.0.0') {
-    // biome-ignore lint/suspicious/noConsole: migration runner output
     console.warn(`[${correlationId}] Schema version already >= 1.0.0. Skipping migration.`)
     return
   }
@@ -37,7 +38,6 @@ export async function executeSchemaVersionIncrement(db: any, context: any) {
         ON CONFLICT DO NOTHING`
   )
 
-  // biome-ignore lint/suspicious/noConsole: migration runner output
   console.log(`[${correlationId}] Master schema version incremented: 1.0.0 → 1.1.0`)
 }
 
@@ -45,7 +45,7 @@ export async function executeSchemaVersionIncrement(db: any, context: any) {
  * Verify master schema version for compatibility checks
  * Called before any schema-dependent operation
  */
-export async function verifyMasterSchemaVersion(db: any): Promise<string> {
+export async function verifyMasterSchemaVersion(db: Record<string, unknown>): Promise<string> {
   const result = await db.execute(
     sql`SELECT version FROM schema_versions ORDER BY applied_at DESC LIMIT 1`
   )

@@ -236,39 +236,6 @@
     "apps/worker",
     "apps/worker"
   ],
-  "./apps/mmc/srcvue/test-utils": [
-    "packages/ui-system",
-    "packages/ui-system",
-    "apps/mmc",
-    "apps/mmc",
-    "apps/mmc",
-    "apps/mmc",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice",
-    "apps/backoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/srctailwindcss/vite": ["packages/ui-system"],
-  "./apps/mmc/srcvitejs/plugin-vue": [
-    "packages/ui-system",
-    "packages/ui-system",
-    "apps/mmc",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/srcvueuse/core": ["packages/ui-system", "packages/ui-system"],
-  "./apps/mmc/srcunovis/vue": ["packages/ui-system"],
-  "./apps/mmc/srctanstack/vue-table": ["packages/ui-system", "packages/ui-system"],
   "packages/app": [
     "packages/domain-core",
     "packages/domain-core",
@@ -390,98 +357,6 @@
     "apps/api",
     "apps/api"
   ],
-  "./apps/mmc/srcpinia/testing": [
-    "apps/mmc",
-    "apps/mmc",
-    "apps/mmc",
-    "apps/mmc",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice",
-    "apps/backoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/composables/useBreakpoint": ["apps/mmc", "apps/frontoffice", "apps/backoffice"],
-  "./apps/mmc/src/core/state/ui.store": [
-    "apps/mmc",
-    "apps/mmc",
-    "apps/mmc",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/core/auth/token-redact": ["apps/mmc", "apps/frontoffice"],
-  "./apps/mmc/src/core/state/app.store": [
-    "apps/mmc",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/core/auth/types": [
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/core/state/auth.store": [
-    "apps/mmc",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/core/state/notification.store": [
-    "apps/mmc",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/components/layout/AppSidebar.vue": [
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/core/navigation/index": ["apps/mmc", "apps/frontoffice", "apps/backoffice"],
-  "./apps/mmc/src/components/layout/AppLayout.vue": [
-    "apps/mmc",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/components/layout/AppHeader.vue": [
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/App.vue": ["apps/mmc", "apps/frontoffice", "apps/backoffice"],
-  "./apps/mmc/srcplaywright/test": [
-    "apps/mmc",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
   "packages/api-client": [
     "apps/mmc",
     "apps/mmc",
@@ -501,72 +376,7 @@
     "apps/backoffice",
     "apps/backoffice"
   ],
-  "./apps/mmc/src/core/api/interceptors/error.interceptor": [
-    "apps/mmc",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/core/auth/refresh-manager": [
-    "apps/mmc",
-    "apps/mmc",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/core/auth/token-manager": [
-    "apps/mmc",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/core/config/app-config": [
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/modules/dashboard/routes": ["apps/mmc"],
-  "./apps/mmc/src/modules/licenses/routes": ["apps/mmc"],
-  "./apps/mmc/src/core/api/client": [
-    "apps/mmc",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/core/auth/auth.service": [
-    "apps/mmc",
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/frontoffice",
-    "apps/backoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/core/guards": ["apps/mmc", "apps/frontoffice"],
-  "./apps/mmc/src/core/router": ["apps/mmc", "apps/frontoffice"],
-  "./apps/mmc/src/core/state/license-status.store": [
-    "apps/mmc",
-    "apps/frontoffice",
-    "apps/backoffice"
-  ],
-  "./apps/mmc/src/modules/dashboard/store": ["apps/mmc"],
   "packages/ui": ["apps/mmc"],
-  "./apps/mmc/src/modules/dashboard/api": ["apps/mmc"],
-  "./apps/mmc/src/core/auth/token-store": ["apps/frontoffice", "apps/backoffice"],
-  "./apps/mmc/src/composables/usePermission": ["apps/backoffice"],
-  "./apps/mmc/src/core/state/workspace.store": ["apps/backoffice", "apps/backoffice"],
-  "./apps/mmc/src/stores/context": ["apps/backoffice"],
   "packages/domain-core": [
     "apps/api",
     "apps/api",
@@ -646,17 +456,5 @@
     "apps/worker",
     "apps/worker"
   ],
-  "packages/redis-utils": ["apps/api", "apps/api", "apps/api"],
-  "./apps/mmc/src/responses/license-error-handler": ["apps/api"],
-  "./apps/mmc/src/logging": ["apps/api"],
-  "./apps/mmc/srchono/zod-validator": [
-    "apps/api",
-    "apps/api",
-    "apps/api",
-    "apps/api",
-    "apps/api",
-    "apps/api",
-    "apps/api"
-  ],
-  "./apps/mmc/srcaws-sdk/client-s3": ["apps/worker"]
+  "packages/redis-utils": ["apps/api", "apps/api", "apps/api"]
 }

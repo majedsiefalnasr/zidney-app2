@@ -26,7 +26,7 @@
   {
     "module": "packages/ui-system",
     "layer": "ui",
-    "allowedDependencies": [],
+    "allowedDependencies": ["@vueuse/core"],
     "forbiddenDependencies": ["apps/*"]
   },
   {

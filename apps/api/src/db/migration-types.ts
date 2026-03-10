@@ -22,26 +22,26 @@ export interface MigrationContext {
  * Database schema types for migrations
  */
 export interface MasterSchema {
-  schemaVersions: any
-  products: any
-  licenses: any
-  tenantsRegistry: any
-  mmcUsers: any
-  auditLog: any
-  deadLetterQueue?: any
-  dlqResolutions?: any
+  schemaVersions: Record<string, unknown>
+  products: Record<string, unknown>
+  licenses: Record<string, unknown>
+  tenantsRegistry: Record<string, unknown>
+  mmcUsers: Record<string, unknown>
+  auditLog: Record<string, unknown>
+  deadLetterQueue?: Record<string, unknown>
+  dlqResolutions?: Record<string, unknown>
 }
 
 export interface TenantSchema {
-  schemaVersions: any
-  users: any
-  divisions: any
-  exams: any
-  questions: any
-  attempts: any
-  attemptProgress: any
-  auditLog: any
-  idempotencyKeys?: any
+  schemaVersions: Record<string, unknown>
+  users: Record<string, unknown>
+  divisions: Record<string, unknown>
+  exams: Record<string, unknown>
+  questions: Record<string, unknown>
+  attempts: Record<string, unknown>
+  attemptProgress: Record<string, unknown>
+  auditLog: Record<string, unknown>
+  idempotencyKeys?: Record<string, unknown>
 }
 
 /**
@@ -52,12 +52,12 @@ export interface MigrationConfig {
   version: string
   description: string
   up: (
-    db: NodePgDatabase<any>,
+    db: NodePgDatabase<Record<string, unknown>>,
     schema: MasterSchema | TenantSchema,
     context?: MigrationContext
   ) => Promise<void>
   down: (
-    db: NodePgDatabase<any>,
+    db: NodePgDatabase<Record<string, unknown>>,
     schema: MasterSchema | TenantSchema,
     context?: MigrationContext
   ) => Promise<void>

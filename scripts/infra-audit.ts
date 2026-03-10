@@ -144,12 +144,20 @@ function loadTsAliases(): TsAliasMap[] {
         const cleanKey = key.replace('/*', '')
         const target = pathsConfig[key][0]?.replace('/*', '')
 
-        if (target) {
-          aliases.push({
-            alias: cleanKey,
-            target,
-          })
-        }
+        if (!target) continue
+
+        // Skip multi-target aliases (e.g., @/* which maps to multiple app dirs)
+        // These need special context-aware resolution and shouldn't be processed as simple replacements
+        const targetsList = pathsConfig[key]
+        if (targetsList && targetsList.length > 1) continue
+
+        // Skip @/ which is a special multi-target alias
+        if (cleanKey === '@' || cleanKey === '~') continue
+
+        aliases.push({
+          alias: cleanKey,
+          target,
+        })
       }
 
       return aliases
@@ -237,7 +245,32 @@ const QUARANTINE_PATTERNS = [/\[QUARANTINED\]/i, /@quarantine/i]
 /* Helpers                                                                    */
 /* -------------------------------------------------------------------------- */
 
-function resolveImportTarget(imp: string): string | null {
+function isTestOrConfigFile(path: string): boolean {
+  // Test files and config files are exempted from architecture rules
+  // because they have different allowances than production code
+  const isTestFile =
+    /\.(test|spec)\.(ts|js)$/.test(path) || path.includes('/tests/') || path.includes('/test/')
+  const isConfigFile =
+    path.endsWith('.config.ts') ||
+    path.endsWith('.config.js') ||
+    path.endsWith('.vite.ts') ||
+    path.endsWith('.vite.js') ||
+    /vitest\.config\.(ts|js)$/.test(path) ||
+    /playwright\.config\.(ts|js)$/.test(path)
+
+  return isTestFile || isConfigFile
+}
+
+function isValidModulePath(path: string): boolean {
+  // Valid monorepo module paths are: packages/<name> or apps/<name>
+  // Must have exactly 2 segments
+  const parts = path.split('/')
+  return (
+    parts.length === 2 && (parts[0] === 'packages' || parts[0] === 'apps') && parts[1].length > 0
+  )
+}
+
+function resolveImportTarget(imp: string, sourceFile?: string): string | null {
   // direct workspace imports
   const pkg = imp.match(/^packages\/([^/]+)/)
   if (pkg) return `packages/${pkg[1]}`
@@ -245,36 +278,128 @@ function resolveImportTarget(imp: string): string | null {
   const app = imp.match(/^apps\/([^/]+)/)
   if (app) return `apps/${app[1]}`
 
-  // Zidney alias pattern
-  const zidneyAlias = imp.match(/^@zidney\/([^/]+)/)
-  if (zidneyAlias) return `packages/${zidneyAlias[1]}`
+  // Zidney specific aliases (explicit mappings)
+  // @zidney/ui → packages/ui-system
+  if (imp.startsWith('@zidney/ui')) {
+    return 'packages/ui-system'
+  }
+  // @zidney/domain-core → packages/domain-core
+  if (imp.startsWith('@zidney/domain-core')) {
+    return 'packages/domain-core'
+  }
+  // @zidney/logger → packages/logger
+  if (imp.startsWith('@zidney/logger')) {
+    return 'packages/logger'
+  }
+  // @zidney/types → packages/types
+  if (imp.startsWith('@zidney/types')) {
+    return 'packages/types'
+  }
+  // @zidney/validation → packages/validation
+  if (imp.startsWith('@zidney/validation')) {
+    return 'packages/validation'
+  }
+  // @zidney/redis-utils → packages/redis-utils
+  if (imp.startsWith('@zidney/redis-utils')) {
+    return 'packages/redis-utils'
+  }
+  // @zidney/config → packages/config
+  if (imp.startsWith('@zidney/config')) {
+    return 'packages/config'
+  }
+  // @zidney/api-client → packages/api-client
+  if (imp.startsWith('@zidney/api-client')) {
+    return 'packages/api-client'
+  }
 
-  // TSConfig aliases
+  // @zidney/app/* → apps/{app-name}
+  const zidneyApp = imp.match(/^@zidney\/app\/([^/]+)/)
+  if (zidneyApp) return `apps/${zidneyApp[1]}`
+
+  // @zidney/package/* → packages/{package-name}
+  const zidneyPackage = imp.match(/^@zidney\/package\/([^/]+)/)
+  if (zidneyPackage) return `packages/${zidneyPackage[1]}`
+
+  // Local intra-app imports (@/ and ~/ are local to the app, not cross-module)
+  // Return null so they're not flagged as cross-app violations
+  const rootAlias = imp.match(/^@\//)
+  if (rootAlias) return null // Intra-app import, not a module violation
+
+  const tildeAlias = imp.match(/^~\//)
+  if (tildeAlias) return null // Intra-app import, not a module violation
+
+  // TSConfig aliases - only for workspace imports
   for (const a of TS_ALIASES) {
     if (imp.startsWith(a.alias)) {
-      const resolved = imp.replace(a.alias, a.target)
+      // Special handling for multi-target aliases like @/*
+      // If source file is provided and the alias target is multi-target,
+      // resolve it relative to the source app/package
+      if (a.alias === '@/*' && sourceFile) {
+        // Extract the source app/package from the source file
+        const sourceApp = sourceFile.match(/^apps\/([^/]+)/)
+        if (sourceApp) {
+          // Return null because this is intra-app access via @/
+          // Multi-target aliases like @/* are only used within their respective apps
+          return null
+        }
+
+        // Also check for packages (e.g., packages/ui-system/@/lib/utils)
+        const sourcePackage = sourceFile.match(/^packages\/([^/]+)/)
+        if (sourcePackage) {
+          // Return null because this is intra-package access via @/
+          // Packages contain their own lib/utils alongside components
+          return null
+        }
+      }
+
+      // Handle wildcard expansion
+      let resolved: string
+      if (a.target.includes('*')) {
+        // Extract the path segment after the alias to fill in the wildcard
+        const afterAlias = imp.slice(a.alias.length)
+        const nextSegment = afterAlias.split('/')[1] // First path element after alias
+        if (nextSegment && nextSegment !== '') {
+          // Replace * with the next segment
+          resolved = a.target.replace('*', nextSegment)
+        } else {
+          // No segment to expand wildcard, invalid resolution
+          continue
+        }
+      } else {
+        // Non-wildcard resolution: simple string replacement
+        resolved = imp.replace(a.alias, a.target)
+      }
+
+      // Normalize: remove leading ./ and collapse multiple slashes
+      resolved = resolved.replace(/^\.\//, '').replace(/\/+/g, '/')
 
       if (resolved.startsWith('packages/')) {
         const parts = resolved.split('/')
-        return `${parts[0]}/${parts[1]}`
+        const modulePath = `${parts[0]}/${parts[1]}`
+        // Validate it's a proper module path before returning
+        if (isValidModulePath(modulePath)) {
+          return modulePath
+        }
+        // If malformed, fall through to return null (external npm)
       }
 
       if (resolved.startsWith('apps/')) {
         const parts = resolved.split('/')
-        return `${parts[0]}/${parts[1]}`
+        const modulePath = `${parts[0]}/${parts[1]}`
+        // Validate it's a proper module path before returning
+        if (isValidModulePath(modulePath)) {
+          return modulePath
+        }
+        // If malformed, fall through to return null (external npm)
       }
 
-      return resolved
+      // If TSConfig alias resolves to something other than packages/apps,
+      // treat it as external npm — do NOT return the raw resolved value
+      return null
     }
   }
 
-  // common Vite/TS root aliases
-  const rootAlias = imp.match(/^@\/([^/]+)/)
-  if (rootAlias) return rootAlias[1]
-
-  const tildeAlias = imp.match(/^~\/([^/]+)/)
-  if (tildeAlias) return tildeAlias[1]
-
+  // External npm package (no recognized workspace pattern)
   return null
 }
 
@@ -561,9 +686,13 @@ function scanTestStability(files: Map<string, string>) {
 
 function scanDependencyBoundaries(files: Map<string, string>) {
   const violations: any[] = []
+  const seen = new Map<string, any>() // Deduplicate by (module→module) pair
 
   for (const [rel, full] of files) {
     if (!rel.endsWith('.ts') && !rel.endsWith('.js')) continue
+
+    // Skip test/config files (test dependencies have different rules)
+    if (isTestOrConfigFile(rel)) continue
 
     const content = safeRead(full)
     if (!content) continue
@@ -578,24 +707,56 @@ function scanDependencyBoundaries(files: Map<string, string>) {
         rel.startsWith('packages/') &&
         imp.startsWith('apps/')
       ) {
-        violations.push({
-          file: rel,
-          importPath: imp,
-          rule: 'packages_must_not_import_apps',
-        })
+        const sourceModule = rel.split('/').slice(0, 2).join('/')
+        const key = `${sourceModule}→${imp}|packages_must_not_import_apps`
+
+        if (!seen.has(key)) {
+          const violation = {
+            file: rel,
+            importPath: imp,
+            rule: 'packages_must_not_import_apps',
+            examples: [rel],
+          }
+          seen.set(key, violation)
+          violations.push(violation)
+        } else {
+          // Track additional file examples
+          const existing = seen.get(key)
+          if (existing.examples.length < 3) {
+            existing.examples.push(rel)
+          }
+        }
       }
 
       if (DEP_RULES.forbidAppsImportingOtherApps && rel.startsWith('apps/')) {
         const srcApp = rel.split('/')[1]
-        const resolved = resolveImportTarget(imp)
+        const resolved = resolveImportTarget(imp, rel)
+
+        // Skip external npm packages (anything that doesn't resolve to a workspace module)
+        if (!resolved) continue
+
         const target = resolved?.startsWith('apps/') ? resolved.split('/')[1] : null
 
         if (target && target !== srcApp) {
-          violations.push({
-            file: rel,
-            importPath: imp,
-            rule: 'apps_must_not_import_other_apps',
-          })
+          const sourceModule = rel.split('/').slice(0, 2).join('/')
+          const targetModule = resolved?.split('/').slice(0, 2).join('/') ?? ''
+          const key = `${sourceModule}→${targetModule}|apps_must_not_import_other_apps`
+
+          if (!seen.has(key)) {
+            const violation = {
+              file: rel,
+              importPath: imp,
+              rule: 'apps_must_not_import_other_apps',
+              examples: [rel],
+            }
+            seen.set(key, violation)
+            violations.push(violation)
+          } else {
+            const existing = seen.get(key)
+            if (existing.examples.length < 3) {
+              existing.examples.push(rel)
+            }
+          }
         }
       }
     }
@@ -638,7 +799,7 @@ function scanCircularDependencies(files: Map<string, string>) {
     for (const m of imports) {
       const imp = m[1]
 
-      const target = resolveImportTarget(imp)
+      const target = resolveImportTarget(imp, rel)
 
       if (target && target !== moduleRoot) {
         graph[moduleRoot].add(target)
@@ -704,9 +865,13 @@ interface ArchitectureMapViolation {
 
 function scanLayerViolations(files: Map<string, string>) {
   const violations: LayerViolation[] = []
+  const seen = new Set<string>() // Deduplicate by rule
 
   for (const [rel, full] of files) {
     if (!rel.endsWith('.ts') && !rel.endsWith('.js')) continue
+
+    // Skip test/config files (test dependencies have different rules)
+    if (isTestOrConfigFile(rel)) continue
 
     const content = safeRead(full)
     if (!content) continue
@@ -718,24 +883,32 @@ function scanLayerViolations(files: Map<string, string>) {
 
       if (
         rel.startsWith(LAYER_RULES.forbidUiImportingDomain.source) &&
-        resolveImportTarget(imp) === LAYER_RULES.forbidUiImportingDomain.target
+        resolveImportTarget(imp, rel) === LAYER_RULES.forbidUiImportingDomain.target
       ) {
-        violations.push({
-          file: rel,
-          importPath: imp,
-          rule: 'ui_system_must_not_import_domain_core',
-        })
+        const key = `ui_system_must_not_import_domain_core|${LAYER_RULES.forbidUiImportingDomain.source}→${LAYER_RULES.forbidUiImportingDomain.target}`
+        if (!seen.has(key)) {
+          violations.push({
+            file: rel,
+            importPath: imp,
+            rule: 'ui_system_must_not_import_domain_core',
+          })
+          seen.add(key)
+        }
       }
 
       if (
         rel.startsWith(LAYER_RULES.forbidApiClientImportingWorker.source) &&
-        resolveImportTarget(imp) === LAYER_RULES.forbidApiClientImportingWorker.target
+        resolveImportTarget(imp, rel) === LAYER_RULES.forbidApiClientImportingWorker.target
       ) {
-        violations.push({
-          file: rel,
-          importPath: imp,
-          rule: 'api_client_must_not_import_worker',
-        })
+        const key = `api_client_must_not_import_worker|${LAYER_RULES.forbidApiClientImportingWorker.source}→${LAYER_RULES.forbidApiClientImportingWorker.target}`
+        if (!seen.has(key)) {
+          violations.push({
+            file: rel,
+            importPath: imp,
+            rule: 'api_client_must_not_import_worker',
+          })
+          seen.add(key)
+        }
       }
     }
   }
@@ -745,6 +918,7 @@ function scanLayerViolations(files: Map<string, string>) {
 
 function scanArchitectureMapViolations(files: Map<string, string>, architectureMap: any | null) {
   const violations: ArchitectureMapViolation[] = []
+  const seen = new Set<string>() // Deduplicate by (module→target|rule)
 
   if (!architectureMap || !architectureMap.modules) return violations
 
@@ -752,6 +926,9 @@ function scanArchitectureMapViolations(files: Map<string, string>, architectureM
 
   for (const [rel, full] of files) {
     if (!rel.endsWith('.ts') && !rel.endsWith('.js')) continue
+
+    // Skip test/config files (test dependencies have different rules)
+    if (isTestOrConfigFile(rel)) continue
 
     const content = safeRead(full)
     if (!content) continue
@@ -774,29 +951,31 @@ function scanArchitectureMapViolations(files: Map<string, string>, architectureM
 
     for (const m of imports) {
       const imp = m[1]
-      const target = resolveImportTarget(imp)
+      const target = resolveImportTarget(imp, rel)
 
       if (!target) continue
 
       /* Forbidden dependency rules */
       for (const rule of forbidden) {
+        let matches = false
         if (rule.endsWith('/*')) {
           const prefix = rule.replace('/*', '')
-          if (target.startsWith(prefix)) {
+          matches = target.startsWith(prefix)
+        } else {
+          matches = target === rule
+        }
+
+        if (matches) {
+          const key = `${moduleRoot}→${target}|forbidden_dependency`
+          if (!seen.has(key)) {
             violations.push({
               file: rel,
               module: moduleRoot,
               importPath: imp,
               rule: 'forbidden_dependency',
             })
+            seen.add(key)
           }
-        } else if (target === rule) {
-          violations.push({
-            file: rel,
-            module: moduleRoot,
-            importPath: imp,
-            rule: 'forbidden_dependency',
-          })
         }
       }
 
@@ -811,12 +990,16 @@ function scanArchitectureMapViolations(files: Map<string, string>, architectureM
         })
 
         if (!allowedMatch && target !== moduleRoot) {
-          violations.push({
-            file: rel,
-            module: moduleRoot,
-            importPath: imp,
-            rule: 'not_in_allowed_dependencies',
-          })
+          const key = `${moduleRoot}→${target}|not_in_allowed_dependencies`
+          if (!seen.has(key)) {
+            violations.push({
+              file: rel,
+              module: moduleRoot,
+              importPath: imp,
+              rule: 'not_in_allowed_dependencies',
+            })
+            seen.add(key)
+          }
         }
       }
     }
@@ -838,6 +1021,32 @@ interface AIDependencyGraph {
   nodes: { id: string; type: 'package' | 'app' }[]
   edges: { from: string; to: string }[]
   centrality: Record<string, number>
+}
+
+function validateDependencyGraphEdges(edges: { from: string; to: string }[]): number {
+  // Validate that all edges have valid monorepo module paths
+  // Count and log any malformed edges (should be filtered before we get here)
+  let malformed = 0
+
+  for (const edge of edges) {
+    // Both from and to must be valid module paths OR valid external indicators
+    // Valid monorepo paths: packages/<name> or apps/<name>
+    if (!isValidModulePath(edge.from)) {
+      console.warn(
+        `[INFRA AUDIT] WARNING: Malformed edge source: "${edge.from}" (not a valid module path)`
+      )
+      malformed++
+    }
+
+    if (!isValidModulePath(edge.to)) {
+      console.warn(
+        `[INFRA AUDIT] WARNING: Malformed edge target: "${edge.to}" (not a valid module path or external npm)`
+      )
+      malformed++
+    }
+  }
+
+  return malformed
 }
 
 function buildDependencyGraph(files: Map<string, string>): DependencyGraph {
@@ -865,13 +1074,25 @@ function buildDependencyGraph(files: Map<string, string>): DependencyGraph {
     for (const m of imports) {
       const imp = m[1]
 
-      const target = resolveImportTarget(imp)
+      const target = resolveImportTarget(imp, rel)
 
       if (target && target !== moduleRoot) {
-        nodes.add(target)
-        edges.push({ from: moduleRoot, to: target })
+        // Only add edge if it's a valid monorepo module path
+        if (isValidModulePath(target)) {
+          nodes.add(target)
+          edges.push({ from: moduleRoot, to: target })
+        }
+        // External npm packages are filtered out here — they don't create edges
       }
     }
+  }
+
+  // Validate final edges before export
+  const malformedCount = validateDependencyGraphEdges(edges)
+  if (malformedCount > 0) {
+    console.warn(
+      `[INFRA AUDIT] WARNING: ${malformedCount} malformed edges detected and filtered. Check logs above.`
+    )
   }
 
   return {

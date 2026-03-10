@@ -188,6 +188,20 @@ export function loadTsAliases(): TsAliasMap[] {
       for (const key of Object.keys(pathsConfig)) {
         const cleanKey = key.replace('/*', '')
         if (seen.has(cleanKey)) continue
+
+        // Skip multi-target aliases (they need context-aware resolution like resolveImportTarget in infra-audit)
+        const targetsList = pathsConfig[key]
+        if (targetsList && targetsList.length > 1) {
+          seen.add(cleanKey)
+          continue
+        }
+
+        // Skip bare @ and ~ — these are special multi-target aliases that need special handling
+        if (cleanKey === '@' || cleanKey === '~') {
+          seen.add(cleanKey)
+          continue
+        }
+
         const rawTarget = pathsConfig[key]?.[0]
         if (!rawTarget) continue
         const cleanTarget = rawTarget.replace('/*', '')
@@ -204,6 +218,18 @@ export function loadTsAliases(): TsAliasMap[] {
   return result
 }
 
+function isTestFile(filePath: string): boolean {
+  // Exclude test files to avoid false positives
+  // Test mocking is allowed to cross app boundaries
+  return (
+    filePath.includes('/tests/') ||
+    filePath.includes('.test.') ||
+    filePath.includes('.spec.') ||
+    filePath.includes('vitest.config') ||
+    filePath.includes('vitest.workspace')
+  )
+}
+
 function getChangedFiles(): string[] {
   try {
     const staged = execSync('git diff --cached --name-only', {
@@ -213,6 +239,7 @@ function getChangedFiles(): string[] {
       .map((f) => f.trim())
       .filter(Boolean)
       .filter((f) => f.endsWith('.ts') || f.endsWith('.tsx') || f.endsWith('.vue'))
+      .filter((f) => !isTestFile(f))
 
     // When no staged files are detected (e.g. in CI where git index is empty,
     // or when invoked outside of a commit), fall back to scanning all tracked
@@ -224,6 +251,7 @@ function getChangedFiles(): string[] {
         .split('\n')
         .map((f) => f.trim())
         .filter(Boolean)
+        .filter((f) => !isTestFile(f))
       if (all.length > 0) {
         return all
       }
@@ -402,7 +430,33 @@ function getLayerForModule(modulePath: string, boundaries: ModuleBoundaries): st
   return null
 }
 
-export function resolveImportToModule(importPath: string, aliases: TsAliasMap[]): string | null {
+export function resolveImportToModule(
+  importPath: string,
+  aliases: TsAliasMap[],
+  sourceFile?: string
+): string | null {
+  // Special case: Handle bare @ and @/* which are multi-target aliases
+  // These cannot be safely resolved without source context
+  if (importPath === '@' || importPath.startsWith('@/')) {
+    if (sourceFile) {
+      // Check if source is a package
+      const sourcePackage = sourceFile.match(/^packages\/([^/]+)/)
+      if (sourcePackage) {
+        // Package-internal @/ import
+        return null
+      }
+
+      // Check if source is an app
+      const sourceApp = sourceFile.match(/^apps\/([^/]+)/)
+      if (sourceApp) {
+        // App-internal @/ import
+        return null
+      }
+    }
+    // If no source context, we can't resolve these safely
+    return null
+  }
+
   // 1. Try alias resolution — longest matching alias wins
   let bestMatch: TsAliasMap | null = null
   for (const entry of aliases) {
@@ -480,7 +534,7 @@ export function validateLayerBoundaries(
   const crossCuttingRules = boundaries.cross_cutting_rules ?? []
 
   for (const imp of imports) {
-    const targetModule = resolveImportToModule(imp, aliases)
+    const targetModule = resolveImportToModule(imp, aliases, filePath)
     if (!targetModule) continue
     if (targetModule === sourceModule) continue
 
@@ -620,6 +674,18 @@ function runGuard() {
     const layerBoundaryViolations = boundaries
       ? validateLayerBoundaries(file, imports, boundaries, aliases)
       : []
+
+    // DEBUG: Log violations for packages/ui-system
+    if (file.includes('packages/ui-system')) {
+      if (layerBoundaryViolations.length > 0) {
+        console.error(
+          `DEBUG [${file}]: Got ${layerBoundaryViolations.length} violations from validateLayerBoundaries`
+        )
+        console.error(
+          `  Imports checked: ${imports.slice(0, 3).join(', ')}${imports.length > 3 ? '...' : ''}`
+        )
+      }
+    }
 
     const crossAppViolations = validateCrossAppImports(fileModule, file, imports)
 

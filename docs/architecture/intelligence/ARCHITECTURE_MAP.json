@@ -36,7 +36,7 @@
       "layer": "ui",
       "description": "Shared UI component system used by all frontend applications",
       "criticality": "ui",
-      "allowed_dependencies": [],
+      "allowed_dependencies": ["@vueuse/core"],
       "forbidden_dependencies": ["apps/*"]
     },
     "packages/api-client": {

@@ -102,7 +102,7 @@ export async function findAttemptsByUser(
     SELECT * FROM attempts
     WHERE workspace_id = $1 AND user_id = $2
   `
-  const params: any[] = [workspaceId, userId]
+  const params: (string | boolean | null)[] = [workspaceId, userId]
 
   if (status) {
     query += ` AND status = $3`
@@ -339,7 +339,7 @@ export async function countAttemptsByStatus(
  *
  * @private
  */
-function parseAttemptRow(row: any): Attempt {
+function parseAttemptRow(row: Record<string, unknown>): Attempt {
   return {
     id: row.id,
     workspace_id: row.workspace_id,
@@ -375,7 +375,7 @@ function parseAttemptRow(row: any): Attempt {
  *
  * @private
  */
-function parseProgressRow(row: any): AttemptProgress {
+function parseProgressRow(row: Record<string, unknown>): AttemptProgress {
   return {
     id: row.id,
     attempt_id: row.attempt_id,
@@ -393,7 +393,7 @@ function parseProgressRow(row: any): AttemptProgress {
  *
  * @private
  */
-function parseIdempotencyRow(row: any): SubmissionIdempotencyKey {
+function parseIdempotencyRow(row: Record<string, unknown>): SubmissionIdempotencyKey {
   return {
     id: row.id,
     workspace_id: row.workspace_id,

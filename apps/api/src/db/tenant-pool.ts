@@ -101,7 +101,8 @@ export async function getTenantDatabase(
 ): Promise<Pool> {
   // Fast path: pool already exists
   if (tenantPools.has(workspaceId)) {
-    return tenantPools.get(workspaceId)!
+    const pool = tenantPools.get(workspaceId)
+    if (pool) return pool
   }
 
   // Slow path: create pool with locking to prevent duplicates
@@ -138,7 +139,9 @@ export async function getTenantDatabase(
   }
 
   // Other callers are waiting for the same pool; join the creation promise
-  return await poolCreationLocks.get(workspaceId)!
+  const lock = poolCreationLocks.get(workspaceId)
+  if (lock) return await lock
+  throw new Error(`No pool creation lock found for workspace ${workspaceId}`)
 }
 
 /**
@@ -208,8 +211,8 @@ export async function queryTenantDatabase(
   workspaceId: string,
   tenantDatabaseUrl: string,
   query: string,
-  values: any[] = []
-): Promise<any> {
+  values: (string | number | boolean | null)[] = []
+): Promise<Record<string, unknown>> {
   const pool = await getTenantDatabase(workspaceId, tenantDatabaseUrl)
   return pool.query(query, values)
 }

@@ -31,6 +31,16 @@ echo "Running infrastructure audit..."
 bun scripts/infra-audit.ts --quick
 
 
+# ── Architecture Brain Validation (blocking) ─────────────────────────────────
+# Validate that the ai-architecture-brain.json is correct before pushing
+echo "Validating architecture brain integrity..."
+bun scripts/validate-architecture-brain.ts || {
+  echo "❌ Architecture brain validation failed — push blocked."
+  echo "   Run: bun scripts/infra-audit.ts to regenerate a valid brain"
+  exit 1
+}
+
+
 # ── Unit Tests (informational) ──────────────────────────────────────────────
 echo "Running unit test suite..."
 if bun run test:unit 2>&1 | tail -20; then

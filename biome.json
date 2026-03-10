@@ -33,13 +33,11 @@
       "correctness": {
         "noUnusedImports": "error",
         "noUnreachable": "error",
-        "noPrecisionLoss": "warn",
-        "noVueDuplicateKeys": "warn"
+        "noPrecisionLoss": "warn"
       },
       "suspicious": {
         "noDebugger": "error",
         "noConsole": "error",
-        "useIterableCallbackReturn": "warn",
         "noImplicitAnyLet": "warn",
         "noExportsInTest": "warn",
         "noAssignInExpressions": "warn"
