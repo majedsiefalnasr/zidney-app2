@@ -7,6 +7,12 @@ infrastructure stages.
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 # Objective
 
 This stage verifies that Zidney’s architecture governance system correctly protects the repository

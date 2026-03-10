@@ -6,6 +6,12 @@ those introduced by AI-assisted development.
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 # Objective
 
 Establish a **Type Safety Governance Layer** that guarantees:

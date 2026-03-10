@@ -7,6 +7,12 @@ Zidney repository and reports architectural drift, risk signals, and governance 
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 # Objective
 
 This stage introduces a **self‑monitoring architecture system** that continuously evaluates the

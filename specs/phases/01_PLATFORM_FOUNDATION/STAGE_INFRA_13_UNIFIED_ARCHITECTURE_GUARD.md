@@ -8,6 +8,12 @@ system.
 
 ---
 
+## Stage Status
+
+Status: DRAFT
+
+---
+
 # Objective
 
 This stage introduces a **centralized architecture enforcement engine** that replaces fragmented
