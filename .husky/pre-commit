@@ -11,13 +11,13 @@ if [ -z "$STAGED_FILES" ]; then
 fi
 
 
-# ── Biome Formatter (staged files only, fast) ──────────────────────────────
+# ── Formatter (staged files only, fast) ──────────────────────────────
 # Formats only staged files to avoid touching the entire repository.
-FORMAT_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|js|jsx|mjs|vue|json)$' || true)
+FORMAT_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|js|jsx|mjs|vue|json|md)$' || true)
 
 if [ -n "$FORMAT_FILES" ]; then
-  echo "Formatting staged files with Biome…"
-  echo "$FORMAT_FILES" | xargs -r bunx biome format --write
+  echo "Formatting staged files…"
+  echo "$FORMAT_FILES" | xargs -r bun run format
   echo "$FORMAT_FILES" | xargs -r git add
 fi
 

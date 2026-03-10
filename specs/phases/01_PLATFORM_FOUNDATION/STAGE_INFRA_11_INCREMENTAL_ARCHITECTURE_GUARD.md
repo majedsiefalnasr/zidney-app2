@@ -5,21 +5,19 @@
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: plan
 Risk Level: LOW
-Last Updated: 2026-03-10T12:00:00Z
+Last Updated: 2026-03-10T14:00:00Z
 
-Scope Defined:
+Scope Planned:
 
-- Incremental validation for changed modules only (<200ms pre-commit)
-- Smart fallback to full validation when metadata changes
-- Performance optimization via dependency graph caching (96-99% improvement)
-- Three-tier integration: pre-commit, pre-push, CI
-- Architecture Impact Report for transparency
-- Support for both `--incremental` and `--full` modes
-- git diff --cached for pre-commit; merge-base for CI
-- ARCH_GRAPH_MAX_AGE_HOURS env var for cache TTL
-- Silent skip for unmapped files with audit counter
+- CLI flags `--incremental`, `--full`, `--modules <csv>` for `scripts/ai-guard.ts`
+- CLI flag `--generate-graph` for `scripts/infra-audit.ts` (fast-path graph refresh)
+- Five-step incremental pipeline: staged files → module mapping → BFS scope → incremental validation → fallback
+- Schema migration of `ai-dependency-graph.json` to canonical `AIDependencyGraph` type
+- Pre-commit hook updated to pass `STAGED_FILES` env var + `--incremental` flag
+- Pre-push hook updated to explicit `--full` flag
+- `architecture-impact-report.json` added to `.gitignore` (CI-only artifact)
 
 Deferred Scope:
 
@@ -27,15 +25,11 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Clarifications resolved — planning authorized
+- Technical plan compliant — Guardian: Architecture Checker PASS
+- Task generation authorized
 
 Notes:
-All specification ambiguities resolved. Ready for technical planning.
-
-- Specification drafted — constitutional audit pending
-
-Notes:
-Specification complete. Clarification step pending. Quality score: 9.5/10
+Technical plan complete. Guardian validation passed. Task breakdown in progress.
 
 ---
 
