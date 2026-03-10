@@ -1,4 +1,4 @@
 {
   "addedEdges": [],
-  "removedEdges": ["packages/domain-core->apps/api"]
+  "removedEdges": []
 }
