@@ -14,7 +14,7 @@ File:** `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_10_HYBRID_LINT_FORMAT_P
 | Plan      | ✅        | plan.md, research.md, etc.  | reports/PLAN_REPORT.md      |
 | Tasks     | ✅        | tasks.md                    | reports/TASKS_REPORT.md     |
 | Analyze   | ✅ Passed | (read-only — no output)     | audits/ANALYZE_REPORT.md    |
-| Implement | ⬜        | tasks.md (tasks marked [X]) | reports/IMPLEMENT_REPORT.md |
+| Implement | ✅        | tasks.md (tasks marked [X]) | reports/IMPLEMENT_REPORT.md |
 | Closure   | ⬜        | —                           | reports/CLOSURE_REPORT.md   |
 
 ## Stage Artifacts

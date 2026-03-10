@@ -13,7 +13,8 @@ Before generating code:
 5. Verify ADR decisions
 6. Query GitNexus context
 7. Assume infra-audit.ts will validate changes
-8. **If regenerating architecture, validate the brain with validate-architecture-brain.ts before committing**
+8. **If regenerating architecture, validate the brain with validate-architecture-brain.ts before
+   committing**
 
 ---
 
@@ -28,13 +29,15 @@ AI agents must start reasoning by loading:
 5. docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json
 6. docs/architecture/ADR/
 
-AI_BOOTSTRAP.md defines the architecture‑first reasoning model and must always be loaded before any other AI context files.
+AI_BOOTSTRAP.md defines the architecture‑first reasoning model and must always be loaded before any
+other AI context files.
 
 ---
 
 ## Mandatory Context Initialization
 
-Before performing architectural analysis, implementation, planning, or modification of any feature, AI agents MUST read:
+Before performing architectural analysis, implementation, planning, or modification of any feature,
+AI agents MUST read:
 
 `docs/PROJECT_CONTEXT_PRIMER.md`
 
@@ -42,9 +45,11 @@ AI agents MUST also load the AI governance context:
 
 `docs/ai/AI_CONTEXT_INDEX.md`
 
-This file links the AI architecture contract, engineering rules, ADR references, and governance pipeline.
+This file links the AI architecture contract, engineering rules, ADR references, and governance
+pipeline.
 
-AI tools must treat `AI_CONTEXT_INDEX.md` as the entry point for all AI-specific guidance before generating code or proposing architectural changes.
+AI tools must treat `AI_CONTEXT_INDEX.md` as the entry point for all AI-specific guidance before
+generating code or proposing architectural changes.
 
 This file defines:
 
@@ -114,15 +119,11 @@ All DB access must originate from tenant resolver context.
 
 Allowed:
 
-apps/_ → packages/_
-packages/_ → packages/_
+apps/_ → packages/_ packages/_ → packages/_
 
 Not allowed:
 
-apps/_ → other apps/_
-packages/_ → apps/_
-UI → database schemas
-UI → backend logic
+apps/_ → other apps/_ packages/_ → apps/_ UI → database schemas UI → backend logic
 
 No cross-layer violations.
 
@@ -199,9 +200,7 @@ License middleware must validate on every workspace request:
 - Schema compatibility
 - Product version compatibility
 
-SOFT_LOCKED → 423
-ARCHIVED → 403
-NOT FOUND → 404
+SOFT_LOCKED → 423 ARCHIVED → 403 NOT FOUND → 404
 
 Limit enforcement must be transactional.
 
@@ -223,14 +222,7 @@ Limit enforcement must be transactional.
 
 All API responses must follow:
 
-{
-success: boolean,
-data: object | null,
-error: {
-code: string,
-message: string
-} | null
-}
+{ success: boolean, data: object | null, error: { code: string, message: string } | null }
 
 No unstructured error responses.
 
@@ -299,7 +291,8 @@ No merge without tests.
 
 ### AI Context Loading Requirement
 
-Before any reasoning, planning, code generation, or architectural analysis, AI must load the following files in this order:
+Before any reasoning, planning, code generation, or architectural analysis, AI must load the
+following files in this order:
 
 1. `docs/ai/AI_BOOTSTRAP.md`
 2. `docs/ai/AI_CONTEXT_INDEX.md`
@@ -307,15 +300,18 @@ Before any reasoning, planning, code generation, or architectural analysis, AI m
 4. `docs/ai/AI_ENGINEERING_RULES.md`
 5. `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json`
 
-`AI_BOOTSTRAP.md` establishes the AI reasoning model and governance pipeline and must always be loaded before any other AI context documents.
+`AI_BOOTSTRAP.md` establishes the AI reasoning model and governance pipeline and must always be
+loaded before any other AI context documents.
 
-These files together define the behavioral contract, architecture boundaries, and governance pipeline for AI-driven development inside Zidney.
+These files together define the behavioral contract, architecture boundaries, and governance
+pipeline for AI-driven development inside Zidney.
 
 If any conflict exists between these files, resolution order is:
 
 ADR > Specs > AI_CONTEXT_INDEX > AI_ENGINEERING_RULES > AGENTS.md > Implementation
 
-This section defines mandatory behavioral constraints for all AI agents (Copilot, MCP-enabled agents, Claude, GLM, etc.) operating inside Zidney.
+This section defines mandatory behavioral constraints for all AI agents (Copilot, MCP-enabled
+agents, Claude, GLM, etc.) operating inside Zidney.
 
 Violation of these rules is considered architectural failure.
 
@@ -444,8 +440,7 @@ AI agents must run or reason against these tools before proposing structural cha
 
 Key tools:
 
-scripts/infra-audit.ts
-Validates:
+scripts/infra-audit.ts Validates:
 
 - architecture boundaries
 - dependency graph
@@ -453,23 +448,21 @@ Validates:
 - undeclared modules
 - architecture drift
 
-scripts/ai-guard.ts
-Pre-commit enforcement:
+scripts/ai-guard.ts Pre-commit enforcement:
 
 - forbidden imports
 - layer violations
 - architecture map compliance
 
-scripts/architecture/architecture-diff.ts
-Detects architectural drift between commits.
+scripts/architecture/architecture-diff.ts Detects architectural drift between commits.
 
-docs/architecture/intelligence/ARCHITECTURE_MAP.json
-Defines the authoritative module dependency contract.
+docs/architecture/intelligence/ARCHITECTURE_MAP.json Defines the authoritative module dependency
+contract.
 
 AI must treat these tools as **architecture validators**.
 
-If a change affects module structure or dependencies,
-AI must assume `infra-audit.ts` will validate the change.
+If a change affects module structure or dependencies, AI must assume `infra-audit.ts` will validate
+the change.
 
 If a change would break the audit, AI must refuse to generate it.
 
@@ -482,14 +475,16 @@ bun run type-check
 bun run test
 ```
 
-Before proposing architectural refactors or module moves, AI should reason as if `infra-audit.ts` will immediately validate:
+Before proposing architectural refactors or module moves, AI should reason as if `infra-audit.ts`
+will immediately validate:
 
 - ARCHITECTURE_MAP.json compliance
 - layer boundaries
 - forbidden dependencies
 - undeclared modules
 
-If a new module is introduced under `packages/` or `apps/`, AI must also propose registering it using:
+If a new module is introduced under `packages/` or `apps/`, AI must also propose registering it
+using:
 
 ```
 bun run arch:add-module <module-path>
@@ -518,8 +513,8 @@ White-label customization is visual only.
 
 ### MCP Usage Restrictions & Auto-Trigger Rules
 
-AI must evaluate available MCPs before responding to any technical task.
-AI must prefer MCP-sourced context over training knowledge for all code, documentation, and architecture tasks.
+AI must evaluate available MCPs before responding to any technical task. AI must prefer MCP-sourced
+context over training knowledge for all code, documentation, and architecture tasks.
 
 ---
 
@@ -527,12 +522,14 @@ AI must prefer MCP-sourced context over training knowledge for all code, documen
 
 AI must automatically invoke Context7 MCP when:
 
-- Looking up documentation for any third-party library or framework (Hono, Bun, Vue 3, shadcn-vue, Drizzle ORM, Tailwind CSS, Vite, etc.).
+- Looking up documentation for any third-party library or framework (Hono, Bun, Vue 3, shadcn-vue,
+  Drizzle ORM, Tailwind CSS, Vite, etc.).
 - Generating code that imports or uses a third-party package.
 - Answering setup, installation, or configuration questions for external tools.
 - Resolving API references, method signatures, or option interfaces for any non-Zidney dependency.
 
-Context7 must not be used for Zidney internal packages. Use GitNexus MCP for internal codebase context.
+Context7 must not be used for Zidney internal packages. Use GitNexus MCP for internal codebase
+context.
 
 ---
 
@@ -545,7 +542,8 @@ AI must automatically invoke GitNexus MCP when:
 - Tracing the cause of a bug or unexpected behavior.
 - Performing or planning a refactor, rename, extraction, or split.
 
-AI must always read `gitnexus://repo/{name}/context` first to verify index freshness before any GitNexus query.
+AI must always read `gitnexus://repo/{name}/context` first to verify index freshness before any
+GitNexus query.
 
 If the index is stale, AI must prompt the user to run `npx gitnexus analyze` before proceeding.
 
@@ -556,7 +554,8 @@ GitNexus must be preferred over static reasoning when:
 - evaluating refactor safety
 - identifying affected services
 
-If GitNexus provides repository context, AI must treat that context as authoritative over training knowledge.
+If GitNexus provides repository context, AI must treat that context as authoritative over training
+knowledge.
 
 ---
 
@@ -575,7 +574,8 @@ AI must not use Postgres/DB MCP to:
 - Apply ad-hoc schema patches.
 - Modify production databases.
 
-Postgres/DB MCP is read-first. Controlled writes are allowed in development only, via migration system.
+Postgres/DB MCP is read-first. Controlled writes are allowed in development only, via migration
+system.
 
 ---
 
@@ -614,9 +614,11 @@ AI must not use GitHub MCP to:
 
 #### General MCP Enforcement Rule
 
-AI must not rely solely on training knowledge when an MCP can provide current, project-specific, or authoritative context.
+AI must not rely solely on training knowledge when an MCP can provide current, project-specific, or
+authoritative context.
 
-MCP usage is not optional — it is a mandatory step in the reasoning pipeline for all technical tasks.
+MCP usage is not optional — it is a mandatory step in the reasoning pipeline for all technical
+tasks.
 
 For Zidney internal code reasoning:
 
@@ -658,8 +660,7 @@ docs/architecture/intelligence/ARCHITECTURE_MAP.json
 
 If AI proposes a new module under:
 
-packages/_
-apps/_
+packages/_ apps/_
 
 AI must also propose registering the module using:
 
@@ -724,7 +725,8 @@ Rules:
    - AI must reference the original stage.
    - AI must maintain backward compatibility.
 
-6. SpecKit must not regenerate or overwrite any stage marked BACKEND CLOSED, PRODUCTION READY, or PRODUCTION HARDENED.
+6. SpecKit must not regenerate or overwrite any stage marked BACKEND CLOSED, PRODUCTION READY, or
+   PRODUCTION HARDENED.
 
 If Stage Status block is missing, AI must stop and request clarification before proceeding.
 
@@ -742,8 +744,7 @@ AI must:
 - Validate changes against version enforcement rules.
 - Validate changes against Attempt Engine immutability.
 
-If PROJECT_CONTEXT_PRIMER.md conflicts with implementation:
-AI must escalate before proceeding.
+If PROJECT_CONTEXT_PRIMER.md conflicts with implementation: AI must escalate before proceeding.
 
 PROJECT_CONTEXT_PRIMER.md is mandatory context, not documentation.
 
@@ -778,22 +779,10 @@ SpecKit workflow is mandatory for all new feature development.
 
 SpecKit must operate strictly within the following directory structure:
 
-specs/
-├── phases/
-│ ├── 01_platform_foundation/
-│ ├── 02_mmc/
-│ ├── 03_backoffice/
-│ ├── 04_runtime/
-│ └── 05_frontoffice/
-│
-├── templates/
-│ ├── specify_template.md
-│ ├── plan_template.md
-│ ├── tasks_template.md
-│ ├── analyze_template.md
-│ └── implement_gate_template.md
-│
-└── constitution.md
+specs/ ├── phases/ │ ├── 01_platform_foundation/ │ ├── 02_mmc/ │ ├── 03_backoffice/ │ ├──
+04_runtime/ │ └── 05_frontoffice/ │ ├── templates/ │ ├── specify_template.md │ ├── plan_template.md
+│ ├── tasks_template.md │ ├── analyze_template.md │ └── implement_gate_template.md │ └──
+constitution.md
 
 Hard Rules:
 
@@ -821,8 +810,7 @@ ZIDNEY CONTEXT ANCHOR
 
 You are operating inside Zidney — a stability-first, exam-centric, white-label SaaS platform.
 
-Architecture Trust Chain:
-Isolation → License → Authentication → Attempt → Runtime → Frontoffice
+Architecture Trust Chain: Isolation → License → Authentication → Attempt → Runtime → Frontoffice
 
 Non-Negotiable Rules:
 
@@ -842,15 +830,19 @@ If uncertain about architecture, stop and ask for clarification.
 
 ---
 
-AI agents must refuse to continue if the trust chain is violated or if a stage lifecycle status conflict exists.
+AI agents must refuse to continue if the trust chain is violated or if a stage lifecycle status
+conflict exists.
 
 ---
 
 ## Architecture Self‑Healing System (Advanced AI Governance)
 
-Zidney implements an **Architecture Self‑Healing mechanism** designed for AI‑assisted development environments.
+Zidney implements an **Architecture Self‑Healing mechanism** designed for AI‑assisted development
+environments.
 
-The purpose of this system is to ensure that when an AI agent introduces a change that violates architectural constraints, the system can **automatically detect, diagnose, and suggest a compliant repair strategy**.
+The purpose of this system is to ensure that when an AI agent introduces a change that violates
+architectural constraints, the system can **automatically detect, diagnose, and suggest a compliant
+repair strategy**.
 
 This mechanism integrates the following components:
 
@@ -867,7 +859,8 @@ When an architectural violation is detected:
 1. `ai-guard.ts` identifies the rule violation.
 2. The violation is compared against `ARCHITECTURE_MAP.json`.
 3. `infra-audit.ts` analyzes the dependency graph and architecture layer rules.
-4. The AI Architecture Brain (`ai-architecture-brain.json`) provides context about module relationships.
+4. The AI Architecture Brain (`ai-architecture-brain.json`) provides context about module
+   relationships.
 5. GitNexus MCP may be used to determine dependency flows and blast radius.
 
 The AI agent must then **repair the architecture instead of bypassing the rule**.
@@ -929,13 +922,16 @@ bun scripts/infra-audit.ts
 bun scripts/validate-architecture-brain.ts
 ```
 
-If violations occur, AI must reason about the architecture graph and correct the structure before proceeding.
+If violations occur, AI must reason about the architecture graph and correct the structure before
+proceeding.
 
-This architecture self‑healing mechanism ensures Zidney remains **structurally stable even under autonomous AI‑driven development workflows**.
+This architecture self‑healing mechanism ensures Zidney remains **structurally stable even under
+autonomous AI‑driven development workflows**.
 
 ### Architecture Brain Validation (Critical Safety Gate)
 
-The ai-architecture-brain.json artifact is critical to AI Guard validation. **Corrupt brains lead to false-positive violations**, making it impossible to push valid code.
+The ai-architecture-brain.json artifact is critical to AI Guard validation. **Corrupt brains lead to
+false-positive violations**, making it impossible to push valid code.
 
 **Prevention Rules:**
 
@@ -954,7 +950,8 @@ Before committing implementation changes that involve architecture regeneration:
 
 **What to validate:**
 
-- All dependency graph edges have valid source and target modules (format: `packages/<name>` or `apps/<name>`)
+- All dependency graph edges have valid source and target modules (format: `packages/<name>` or
+  `apps/<name>`)
 - No relative paths (`./ prefix`)
 - No path segments beyond the module root (no `src/`, `dist/`, etc.)
 - No malformed concatenations (like `srcvue/test-utils`)
@@ -967,15 +964,18 @@ Before committing implementation changes that involve architecture regeneration:
 4. Do NOT manually edit the brain JSON
 5. Validate again before committing
 
-The pre-commit hook automatically validates the brain if architecture context files change — **commits with corrupt brains are automatically blocked**.
+The pre-commit hook automatically validates the brain if architecture context files change —
+**commits with corrupt brains are automatically blocked**.
 
 ---
 
 ## Auto‑Generated AI Architecture Intelligence Layer
 
-Zidney maintains an **AI‑readable architecture intelligence layer** to make automated reasoning about the codebase deterministic.
+Zidney maintains an **AI‑readable architecture intelligence layer** to make automated reasoning
+about the codebase deterministic.
 
-This layer is generated from the repository structure and governance tools and must be treated as **machine‑readable architecture context**.
+This layer is generated from the repository structure and governance tools and must be treated as
+**machine‑readable architecture context**.
 
 Location:
 
@@ -1000,21 +1000,17 @@ docs/ai/context/
 
 Purpose of each artifact:
 
-ai-layer-model.json
-Defines Zidney’s architectural layers and allowed dependency directions.
+ai-layer-model.json Defines Zidney’s architectural layers and allowed dependency directions.
 
-ai-module-map.json
-Maps every module under `packages/` and `apps/` to its architecture layer.
+ai-module-map.json Maps every module under `packages/` and `apps/` to its architecture layer.
 
-ai-dependency-graph.json
-Machine-readable graph of module dependencies used by:
+ai-dependency-graph.json Machine-readable graph of module dependencies used by:
 
 - `infra-audit.ts`
 - `ai-guard.ts`
 - CI architecture validation
 
-ai-runtime-map.json
-Defines runtime services and how they interact:
+ai-runtime-map.json Defines runtime services and how they interact:
 
 - API
 - Worker
@@ -1022,24 +1018,24 @@ Defines runtime services and how they interact:
 - Backoffice
 - Frontoffice
 
-ai-architecture-summary.md
-Human-readable architecture overview automatically derived from the repository.
+ai-architecture-summary.md Human-readable architecture overview automatically derived from the
+repository.
 
-ai-runtime-dependents.json
-Reverse dependency graph showing which services or modules depend on a given module. Used for blast‑radius analysis and refactor safety.
+ai-runtime-dependents.json Reverse dependency graph showing which services or modules depend on a
+given module. Used for blast‑radius analysis and refactor safety.
 
-ai-architecture-brain.json
-Machine‑readable architecture intelligence produced by `infra-audit.ts`. Contains dependency graph, architecture score, hotspots, and rule sets. This file is consumed by:
+ai-architecture-brain.json Machine‑readable architecture intelligence produced by `infra-audit.ts`.
+Contains dependency graph, architecture score, hotspots, and rule sets. This file is consumed by:
 
 - `scripts/ai-guard.ts`
 - GitNexus MCP
 - AI agents performing architectural reasoning
 
-ai-architecture-diff.json
-Generated architecture diff between the current audit and the previous snapshot. Used for detecting architectural drift in CI and PR validation.
+ai-architecture-diff.json Generated architecture diff between the current audit and the previous
+snapshot. Used for detecting architectural drift in CI and PR validation.
 
-ai-context-mini.json
-A lightweight architecture context designed for MCP tools and AI agents that need fast bootstrap context without loading the full graph.
+ai-context-mini.json A lightweight architecture context designed for MCP tools and AI agents that
+need fast bootstrap context without loading the full graph.
 
 AI agents must prefer this intelligence layer when performing:
 
@@ -1048,9 +1044,11 @@ AI agents must prefer this intelligence layer when performing:
 - dependency tracing
 - blast radius analysis
 
-If these files exist, they are **authoritative for architecture discovery** and should be consulted before reasoning about module relationships.
+If these files exist, they are **authoritative for architecture discovery** and should be consulted
+before reasoning about module relationships.
 
-These files are generated automatically by the architecture governance system and must not be manually edited.
+These files are generated automatically by the architecture governance system and must not be
+manually edited.
 
 If these files become outdated, regenerate the architecture intelligence layer:
 
@@ -1058,7 +1056,8 @@ If these files become outdated, regenerate the architecture intelligence layer:
 bun scripts/infra-audit.ts
 ```
 
-To automatically register newly detected modules in `ARCHITECTURE_MAP.json`, run the self‑healing audit:
+To automatically register newly detected modules in `ARCHITECTURE_MAP.json`, run the self‑healing
+audit:
 
 ```
 bun scripts/infra-audit.ts --fix-map
@@ -1078,7 +1077,8 @@ This contract is authoritative.
 
 # GitNexus MCP
 
-This project is indexed by GitNexus as **zidney-app2** (7071 symbols, 13978 relationships, 300 execution flows).
+This project is indexed by GitNexus as **zidney-app2** (7071 symbols, 13978 relationships, 300
+execution flows).
 
 AI must use GitNexus for:
 
@@ -1116,7 +1116,8 @@ GitNexus is the authoritative internal code context.
 
 ## Golden Rule
 
-**Always prefix commands with `rtk`**. If RTK has a dedicated filter, it uses it. If not, it passes through unchanged. This means RTK is always safe to use.
+**Always prefix commands with `rtk`**. If RTK has a dedicated filter, it uses it. If not, it passes
+through unchanged. This means RTK is always safe to use.
 
 **Important**: Even in command chains with `&&`, use `rtk`:
 
