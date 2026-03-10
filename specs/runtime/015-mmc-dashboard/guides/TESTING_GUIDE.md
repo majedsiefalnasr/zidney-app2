@@ -9,7 +9,8 @@
 
 ## Overview
 
-This guide provides step-by-step testing procedures for the MMC Dashboard feature. All backend infrastructure has been implemented and tested in Phases 0-2. This guide is intended for:
+This guide provides step-by-step testing procedures for the MMC Dashboard feature. All backend
+infrastructure has been implemented and tested in Phases 0-2. This guide is intended for:
 
 - QA engineers validating production readiness
 - Frontend developers integrating API responses

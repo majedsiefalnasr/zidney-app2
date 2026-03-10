@@ -2,8 +2,8 @@
 
 Zidney uses database-per-tenant architecture.
 
-Every tenant database has its own schema version.
-Schema evolution must be deterministic, versioned, and reversible where possible.
+Every tenant database has its own schema version. Schema evolution must be deterministic, versioned,
+and reversible where possible.
 
 This document defines the only allowed migration workflow.
 

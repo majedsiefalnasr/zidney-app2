@@ -37,24 +37,21 @@ This checklist verifies that 5 non-negotiable security invariants are implemente
 export async function validateJwtClaims(
   payload: JwtPayload,
   expectedWorkspaceId?: string,
-  expectedSchemaVersion?: string
+  expectedSchemaVersion?: string,
 ): Promise<boolean> {
   // ... validates workspace_id claim exists (tenant tokens only)
 
   // Workspace isolation check (INVARIANT 1)
-  if (
-    expectedWorkspaceId &&
-    tenantPayload.workspace_id !== expectedWorkspaceId
-  ) {
+  if (expectedWorkspaceId && tenantPayload.workspace_id !== expectedWorkspaceId) {
     throw new AuthError(
       AuthErrorCode.WORKSPACE_MISMATCH,
-      'Token workspace does not match request workspace',
+      "Token workspace does not match request workspace",
       401, // ← Hard 401 (not 403)
       {
         tokenWorkspace: tenantPayload.workspace_id,
         expectedWorkspace: expectedWorkspaceId,
-      }
-    )
+      },
+    );
   }
   // ...
 }
@@ -72,7 +69,8 @@ export async function validateJwtClaims(
 
 ### ✅ INVARIANT 2: License Retroactive Enforcement
 
-**Requirement**: If workspace transitions ACTIVE → SOFT_LOCKED while token exists, existing token MUST be rejected on next request (hard 423)
+**Requirement**: If workspace transitions ACTIVE → SOFT_LOCKED while token exists, existing token
+MUST be rejected on next request (hard 423)
 
 **Rationale**: License is checked on EVERY request, not cached in token  
 **HTTP Status**: 423 (Locked - temporary)
@@ -99,8 +97,8 @@ const licenseResult = await masterDb.query(
    WHERE workspace_slug = $1 
    ORDER BY created_at DESC 
    LIMIT 1`,
-  [workspaceSlug]
-)
+  [workspaceSlug],
+);
 
 // ✅ Fetched on EVERY request (queryable from middleware execution order)
 // ✅ Not cached in JWT (license_status NOT in token claims)
@@ -113,13 +111,15 @@ const licenseResult = await masterDb.query(
 - ✅ Middleware execution at: `middleware/auth/validate-license-middleware.ts`
 - ✅ Responses: 423 SOFT_LOCKED, 403 ARCHIVED, 403 DELETED
 
-**Assessment**: ✅ **VERIFIED** - License retroactive enforcement enforced (fresh lookup per request)
+**Assessment**: ✅ **VERIFIED** - License retroactive enforcement enforced (fresh lookup per
+request)
 
 ---
 
 ### ⚠️ INVARIANT 3: Schema Downgrade Rejection
 
-**Requirement**: Old token with schema_version=1 MUST be rejected after workspace upgrades to schema_version=2 (hard 426)
+**Requirement**: Old token with schema_version=1 MUST be rejected after workspace upgrades to
+schema_version=2 (hard 426)
 
 **Rationale**: Schema migrations may be backward-incompatible  
 **HTTP Status**: 426 (Upgrade Required)
@@ -139,17 +139,17 @@ const licenseResult = await masterDb.query(
 
 ```typescript
 // From validate-jwt.ts:71 (CURRENT - INCOMPLETE)
-await validateJwtClaims(payload, resolvedWorkspaceId)
+await validateJwtClaims(payload, resolvedWorkspaceId);
 // ⚠️ Only 2 arguments - missing expectedSchemaVersion!
 
 // From jwt-handler.ts:375-380 (DEFINED - NOT USED)
 if (expectedSchemaVersion && payload.schema_version !== expectedSchemaVersion) {
   throw new AuthError(
     AuthErrorCode.SCHEMA_MISMATCH,
-    'Token schema version does not match workspace schema version',
+    "Token schema version does not match workspace schema version",
     426,
-    { tokenSchemaVersion: payload.schema_version, expectedSchemaVersion }
-  )
+    { tokenSchemaVersion: payload.schema_version, expectedSchemaVersion },
+  );
 }
 // ✅ Logic is correct, but never called!
 ```
@@ -161,27 +161,28 @@ if (expectedSchemaVersion && payload.schema_version !== expectedSchemaVersion) {
 - ❌ Validation logic NOT INVOKED in middleware
 - ❌ `expectedSchemaVersion` parameter NOT PASSED
 
-**Result**: Schema version mismatch is NOT currently rejected (clients can use old schema after upgrade)
+**Result**: Schema version mismatch is NOT currently rejected (clients can use old schema after
+upgrade)
 
 **Remediation Required**:
 
 Update `validate-jwt.ts` to fetch and pass workspace.schema_version:
 
 ```typescript
-const payload = await verifyAndDecodeToken(token)
-const resolvedWorkspaceId = c.get('workspaceId')
+const payload = await verifyAndDecodeToken(token);
+const resolvedWorkspaceId = c.get("workspaceId");
 
 // ✅ FIX: Fetch current schema version and pass to validator
 const workspaceSchema = await masterDb.query(
-  'SELECT schema_version FROM workspaces WHERE id = $1',
-  [resolvedWorkspaceId]
-)
+  "SELECT schema_version FROM workspaces WHERE id = $1",
+  [resolvedWorkspaceId],
+);
 
 await validateJwtClaims(
   payload,
   resolvedWorkspaceId,
-  workspaceSchema.rows[0]?.schema_version // ← ADD THIS
-)
+  workspaceSchema.rows[0]?.schema_version, // ← ADD THIS
+);
 ```
 
 **Assessment**: ⚠️ **REQUIRES FIX** - Schema version validation not invoked in middleware
@@ -190,7 +191,8 @@ await validateJwtClaims(
 
 ### ⚠️ INVARIANT 4: Token Version Race Safety
 
-**Requirement**: Two concurrent logout-all requests must deterministically invalidate both sessions (no race condition)
+**Requirement**: Two concurrent logout-all requests must deterministically invalidate both sessions
+(no race condition)
 
 **Rationale**: Prevent brute force attacks from exploiting race windows  
 **Mechanism**: SERIALIZABLE isolation + FOR UPDATE lock
@@ -217,8 +219,8 @@ const result = await tenantDb.query(
    SET token_version = $1, updated_at = NOW()
    WHERE id = $2 AND token_version = $3
    RETURNING token_version`,
-  [newTokenVersion, userId, currentTokenVersion]
-)
+  [newTokenVersion, userId, currentTokenVersion],
+);
 
 // Pattern: Optimistic Locking (checks old value in WHERE clause)
 // ⚠️ Issue: If WHERE condition fails, UPDATE returns 0 rows
@@ -240,23 +242,20 @@ const result = await tenantDb.query(
 
 ```typescript
 // ✅ CORRECT (but NOT implemented)
-await tenantDb.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
+await tenantDb.query("BEGIN ISOLATION LEVEL SERIALIZABLE");
 try {
-  const user = await tenantDb.query(
-    'SELECT id FROM users WHERE id = $1 FOR UPDATE',
-    [userId]
-  )
-  await tenantDb.query(
-    'UPDATE users SET token_version = token_version + 1 WHERE id = $1',
-    [userId]
-  )
-  await tenantDb.query('COMMIT')
+  const user = await tenantDb.query("SELECT id FROM users WHERE id = $1 FOR UPDATE", [userId]);
+  await tenantDb.query("UPDATE users SET token_version = token_version + 1 WHERE id = $1", [
+    userId,
+  ]);
+  await tenantDb.query("COMMIT");
 } catch (e) {
-  await tenantDb.query('ROLLBACK')
+  await tenantDb.query("ROLLBACK");
 }
 ```
 
-**Assessment**: ⚠️ **RACE CONDITION RISK** - Current implementation uses weak optimistic locking pattern
+**Assessment**: ⚠️ **RACE CONDITION RISK** - Current implementation uses weak optimistic locking
+pattern
 
 **Evidence**:
 
@@ -366,19 +365,19 @@ REVOKE UPDATE ON audit_logs FROM authenticated_user_role;
 
 ```typescript
 // BEFORE:
-await validateJwtClaims(payload, resolvedWorkspaceId)
+await validateJwtClaims(payload, resolvedWorkspaceId);
 
 // AFTER:
-const workspaceData = await masterDb.query(
-  'SELECT schema_version FROM workspaces WHERE id = $1',
-  [resolvedWorkspaceId]
-)
-const expectedSchemaVersion = workspaceData.rows[0]?.schema_version
+const workspaceData = await masterDb.query("SELECT schema_version FROM workspaces WHERE id = $1", [
+  resolvedWorkspaceId,
+]);
+const expectedSchemaVersion = workspaceData.rows[0]?.schema_version;
 
-await validateJwtClaims(payload, resolvedWorkspaceId, expectedSchemaVersion)
+await validateJwtClaims(payload, resolvedWorkspaceId, expectedSchemaVersion);
 ```
 
-**Impact**: Clients with outdated schema version will receive 426 error, preventing compatibility issues.
+**Impact**: Clients with outdated schema version will receive 426 error, preventing compatibility
+issues.
 
 ---
 
@@ -395,30 +394,30 @@ const result = await tenantDb.query(
    SET token_version = $1, updated_at = NOW()
    WHERE id = $2 AND token_version = $3
    RETURNING token_version`,
-  [newTokenVersion, userId, currentTokenVersion]
-)
+  [newTokenVersion, userId, currentTokenVersion],
+);
 
 // AFTER:
-const client = await tenantDb.connect()
+const client = await tenantDb.connect();
 try {
-  await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
+  await client.query("BEGIN ISOLATION LEVEL SERIALIZABLE");
 
   // Lock the user row
-  await client.query('SELECT id FROM users WHERE id = $1 FOR UPDATE', [userId])
+  await client.query("SELECT id FROM users WHERE id = $1 FOR UPDATE", [userId]);
 
   // Increment token_version atomically
   const result = await client.query(
-    'UPDATE users SET token_version = token_version + 1 WHERE id = $1 RETURNING token_version',
-    [userId]
-  )
+    "UPDATE users SET token_version = token_version + 1 WHERE id = $1 RETURNING token_version",
+    [userId],
+  );
 
-  await client.query('COMMIT')
-  return result
+  await client.query("COMMIT");
+  return result;
 } catch (error) {
-  await client.query('ROLLBACK')
-  throw error
+  await client.query("ROLLBACK");
+  throw error;
 } finally {
-  client.release()
+  client.release();
 }
 ```
 
@@ -447,7 +446,7 @@ await client.query(`
   BEFORE UPDATE ON audit_logs
   FOR EACH ROW
   EXECUTE FUNCTION prevent_audit_logs_update();
-`)
+`);
 ```
 
 **Impact**: Guarantees audit log integrity; compliance requirement for most frameworks.
@@ -491,4 +490,5 @@ await client.query(`
 3. Re-validate all 5 invariants
 4. Proceed to production deployment
 
-**Authority**: This checklist supersedes any prior documentation. All 3 fixes MUST be applied before marking PRODUCTION READY.
+**Authority**: This checklist supersedes any prior documentation. All 3 fixes MUST be applied before
+marking PRODUCTION READY.

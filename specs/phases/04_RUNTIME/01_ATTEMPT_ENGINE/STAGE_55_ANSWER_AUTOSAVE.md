@@ -68,11 +68,7 @@ POST /attempts/:attemptId/answers
 
 Payload:
 
-{
-question_id: string,
-answer_payload: JSON,
-client_timestamp: ISO8601
-}
+{ question_id: string, answer_payload: JSON, client_timestamp: ISO8601 }
 
 answer_payload:
 
@@ -106,8 +102,7 @@ If invalid:
 
 attempt_answers table must:
 
-- Use composite unique index:
-  (attempt_id, question_id)
+- Use composite unique index: (attempt_id, question_id)
 - Store:
   - answer_payload
   - updated_at

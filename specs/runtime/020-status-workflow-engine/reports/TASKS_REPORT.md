@@ -1,14 +1,15 @@
 # Tasks Report — STAGE_20_STATUS_WORKFLOW_ENGINE
 
-**Step:** 4 — Tasks
-**Timestamp:** 2026-03-01T00:04:00.000Z
-**Status:** COMPLETE
+**Step:** 4 — Tasks **Timestamp:** 2026-03-01T00:04:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-40 atomic tasks generated in dependency-execution order across 9 phases. Tasks cover the full implementation stack: domain engine package, tenant migration, API module, and test coverage (unit + integration). MVP scope is T001–T015 (complete forward-chain entry point fully tested). Parallel execution markers applied to all non-blocking tasks.
+40 atomic tasks generated in dependency-execution order across 9 phases. Tasks cover the full
+implementation stack: domain engine package, tenant migration, API module, and test coverage (unit +
+integration). MVP scope is T001–T015 (complete forward-chain entry point fully tested). Parallel
+execution markers applied to all non-blocking tasks.
 
 ---
 
@@ -61,15 +62,18 @@
 
 ## Transactional Tasks
 
-- **T005** — `workflow.engine.ts` implements 5-step `SELECT FOR UPDATE` atomic transaction: lock row → validate → update entity → insert log → commit; rollback on any step failure
+- **T005** — `workflow.engine.ts` implements 5-step `SELECT FOR UPDATE` atomic transaction: lock row
+  → validate → update entity → insert log → commit; rollback on any step failure
 - **T007** — Migration DDL uses single transactional block for `workflow_logs` table creation
 
 ---
 
 ## Idempotency Tasks
 
-- **T012/T013** — US1 tests include assertion that sending the same transition when entity is already in `UNDER_REVIEW` returns `400 invalid_state_transition` (FR-017)
-- **T034** — Concurrency test: two concurrent `SELECT FOR UPDATE` transitions; only one succeeds; second returns `400` or `409`
+- **T012/T013** — US1 tests include assertion that sending the same transition when entity is
+  already in `UNDER_REVIEW` returns `400 invalid_state_transition` (FR-017)
+- **T034** — Concurrency test: two concurrent `SELECT FOR UPDATE` transitions; only one succeeds;
+  second returns `400` or `409`
 
 ---
 

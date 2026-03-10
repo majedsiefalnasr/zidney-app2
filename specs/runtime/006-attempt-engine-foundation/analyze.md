@@ -14,7 +14,8 @@
 
 **Verdict**: IMPLEMENTATION APPROVED.
 
-This stage exhibits **comprehensive architectural alignment** with Zidney's constitutional framework. All 9 critical drift detection criteria are satisfied:
+This stage exhibits **comprehensive architectural alignment** with Zidney's constitutional
+framework. All 9 critical drift detection criteria are satisfied:
 
 - ✅ Isolation integrity verified across all 72 tasks
 - ✅ License middleware enforcement points confirmed
@@ -150,8 +151,10 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
 - **Verification**:
   - T011 defines MIN_SUPPORTED_SCHEMA_VERSION, CURRENT_SCHEMA_VERSION
   - T014 performs: `IF tenant.schema_version < MIN_SUPPORTED THEN 426`
-  - T042 (version checker) validates at grading: `IF expected_schema_version < MIN_SUPPORTED THEN error`
-- **Task Support**: T022 "Error Handling: 426 if schema version incompatible (handled by middleware)"
+  - T042 (version checker) validates at grading:
+    `IF expected_schema_version < MIN_SUPPORTED THEN error`
+- **Task Support**: T022 "Error Handling: 426 if schema version incompatible (handled by
+  middleware)"
 - **Risk Level**: GREEN – Version checks at creation and grading
 
 #### F2.4: Soft-Lock Behavior (COMPLIANT)
@@ -179,24 +182,32 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
 #### F3.1: Snapshot Captured at Attempt Creation (COMPLIANT)
 
 - **Location**: Spec lines 489-510 ("Atomic Operations – Attempt Creation")
-- **Declaration**: "System must snapshot: question set, shuffled order, grading config, mode, time limits, pass/fail logic"
+- **Declaration**: "System must snapshot: question set, shuffled order, grading config, mode, time
+  limits, pass/fail logic"
 - **Verification**:
   - T023 snapshot builder creates: question_snapshot, grading_config_snapshot, flags_snapshot
-  - T023 `buildQuestionSnapshot(questions)` captures: id, text, type, options, correct_answer, points, metadata
-  - T023 `buildGradingConfigSnapshot(exam)` captures: pass_score_percentage, total_points, question_weights, pass_fail_logic
-  - T023 `buildFlagsSnapshot(exam)` captures: review_allowed, hints_allowed, show_correct_answer, randomize_options
+  - T023 `buildQuestionSnapshot(questions)` captures: id, text, type, options, correct_answer,
+    points, metadata
+  - T023 `buildGradingConfigSnapshot(exam)` captures: pass_score_percentage, total_points,
+    question_weights, pass_fail_logic
+  - T023 `buildFlagsSnapshot(exam)` captures: review_allowed, hints_allowed, show_correct_answer,
+    randomize_options
   - T023 `shuffleQuestions(questions)` returns randomized UUID[] order
-- **Task Support**: T022 (create) "call snapshot builder" within transaction; T023 validates "snapshot is self-sufficient"
+- **Task Support**: T022 (create) "call snapshot builder" within transaction; T023 validates
+  "snapshot is self-sufficient"
 - **Risk Level**: GREEN – Complete snapshot capture specified
 
 #### F3.2: Snapshot Immutability After Creation (COMPLIANT)
 
 - **Location**: Spec lines 586-592 ("Snapshot Integrity Rules")
-- **Declaration**: "Snapshot is immutable after attempt creation; grading references snapshot only—never exam/question tables"
+- **Declaration**: "Snapshot is immutable after attempt creation; grading references snapshot
+  only—never exam/question tables"
 - **Verification**:
-  - Spec section 3 "Snapshot Integrity Rules" line 597: "Snapshot must NEVER query: exam tables, question tables, configuration tables"
+  - Spec section 3 "Snapshot Integrity Rules" line 597: "Snapshot must NEVER query: exam tables,
+    question tables, configuration tables"
   - T022 creates snapshot; no UPDATE snapshots anywhere in 72 tasks
-  - T037 (worker grading) "Load snapshot: question_snapshot, grading_config_snapshot from attempt" (no exam table reads)
+  - T037 (worker grading) "Load snapshot: question_snapshot, grading_config_snapshot from attempt"
+    (no exam table reads)
 - **Task Support**:
   - T022: INSERT attempts WITH snapshot fields; no subsequent UPDATE of snapshots
   - T037: SELECT attempts, load snapshot, compute score (NEVER SELECT exams or questions)
@@ -205,14 +216,19 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
 #### F3.3: Grading Uses Snapshot Only (COMPLIANT)
 
 - **Location**: Spec lines 778-783 ("Worker Grading Pipeline")
-- **Declaration**: "Worker must: Lock attempt row, Verify status = SUBMITTED, Load snapshot, Compute score from snapshot, Finalize"
+- **Declaration**: "Worker must: Lock attempt row, Verify status = SUBMITTED, Load snapshot, Compute
+  score from snapshot, Finalize"
 - **Verification**:
-  - T037 implementation step 7: "Load snapshot: question_snapshot, grading_config_snapshot from attempt"
+  - T037 implementation step 7: "Load snapshot: question_snapshot, grading_config_snapshot from
+    attempt"
   - T037 step 8: "Load answers: SELECT user_answer FROM attempt_progress"
-  - T037 step 9: Version compatibility check uses "expected_schema_version, expected_product_version" from snapshot
-  - T037 step 10: "Call gradingEngine.computeScore(questions, answers, gradingConfig)" (uses snapshot ONLY)
+  - T037 step 9: Version compatibility check uses "expected_schema_version,
+    expected_product_version" from snapshot
+  - T037 step 10: "Call gradingEngine.computeScore(questions, answers, gradingConfig)" (uses
+    snapshot ONLY)
   - T037 "No external service calls" in determinism requirement of T038
-- **Task Support**: T038 score engine "No external service calls; No time-based logic; Same input ALWAYS produces same output"
+- **Task Support**: T038 score engine "No external service calls; No time-based logic; Same input
+  ALWAYS produces same output"
 - **Risk Level**: GREEN – Grading engine isolated to snapshot; determinism required
 
 #### F3.4: Product Upgrade Safety Guaranteed (COMPLIANT)
@@ -223,22 +239,27 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
   - T011 stores version snapshots: expected_schema_version, expected_product_version
   - T042 version checker validates compatibility before grading
   - T042 "IF expected_product_version not in SUPPORTED_RANGE THEN error"
-  - Incompatible attempts fail gracefully: "mark attempt FINALIZED with error: 'Product version incompatible' (per spec line 414-417)
+  - Incompatible attempts fail gracefully: "mark attempt FINALIZED with error: 'Product version
+    incompatible' (per spec line 414-417)
 - **Task Support**: T037 "On version incompatibility: Mark attempt FINALIZED with error"
 - **Risk Level**: GREEN – Version-safe upgrade path confirmed
 
 #### F3.5: Snapshot Validation Rules (COMPLIANT)
 
 - **Location**: Plan lines 256-275 ("Validation Rules for Snapshot")
-- **Declaration**: "Snapshot must NOT include database IDs or external references; must be re-gradeable without access to live exam tables"
+- **Declaration**: "Snapshot must NOT include database IDs or external references; must be
+  re-gradeable without access to live exam tables"
 - **Verification**:
-  - T023 `validateSnapshot(snapshot)` verification rule: "snapshot must be self-sufficient (no external deps)"
-  - T023 snapshot builder notes: "Snapshot must include: id, text, type, options, correct_answer, points, metadata"
+  - T023 `validateSnapshot(snapshot)` verification rule: "snapshot must be self-sufficient (no
+    external deps)"
+  - T023 snapshot builder notes: "Snapshot must include: id, text, type, options, correct_answer,
+    points, metadata"
   - T023 success criteria: "Snapshots verifiable as independent (valid JSON schema)"
 - **Task Support**: T044 unit tests verify "Snapshot is self-sufficient (no external references)"
 - **Risk Level**: GREEN – Validation rules specified
 
-**Conclusion**: Snapshot immutability fully enforced; grading deterministic; upgrade-safe. COMPLIANT.
+**Conclusion**: Snapshot immutability fully enforced; grading deterministic; upgrade-safe.
+COMPLIANT.
 
 ---
 
@@ -256,10 +277,13 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
 - **Declaration**: "BEGIN TRANSACTION; [7 steps]; COMMIT"
 - **Verification**:
   - T022 "Transactional: YES (full transaction)"
-  - T022 phase breakdown: BEGIN → Validate → Capture snapshot → INSERT attempts → INSERT attempt_progress → COMMIT
-  - T022 "Failure Handling: If any step fails within transaction: All inserts rolled back; No partial attempt record created"
+  - T022 phase breakdown: BEGIN → Validate → Capture snapshot → INSERT attempts → INSERT
+    attempt_progress → COMMIT
+  - T022 "Failure Handling: If any step fails within transaction: All inserts rolled back; No
+    partial attempt record created"
   - T022 error conditions: "500 if snapshot capture fails (transaction rolls back)"
-- **Task Support**: T036 transaction wrapper utility provides `withTransaction(db, callback)` with auto-rollback
+- **Task Support**: T036 transaction wrapper utility provides `withTransaction(db, callback)` with
+  auto-rollback
 - **Risk Level**: GREEN – Full ACID semantics specified
 
 #### F4.2: Progress Save Transaction (COMPLIANT)
@@ -289,12 +313,15 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
 #### F4.4: Grading Transaction (COMPLIANT)
 
 - **Location**: Spec lines 560-577 ("Operation 4: Worker Grading")
-- **Declaration**: "BEGIN TRANSACTION; SELECT FOR UPDATE; Compute score; UPDATE status + results; COMMIT"
+- **Declaration**: "BEGIN TRANSACTION; SELECT FOR UPDATE; Compute score; UPDATE status + results;
+  COMMIT"
 - **Verification**:
   - T037 "Transactional: YES (pessimistic lock + atomic update)"
-  - T037 transaction steps: BEGIN → SELECT FOR UPDATE → Idempotency check → Version check → Compute → UPDATE → COMMIT
+  - T037 transaction steps: BEGIN → SELECT FOR UPDATE → Idempotency check → Version check → Compute
+    → UPDATE → COMMIT
   - T037 "If status = FINALIZED, ROLLBACK and exit (already graded)"
-  - T037 "Error Handling: Deadlock → Retry; Lock timeout → Retry; Version mismatch → Mark as error, finalize"
+  - T037 "Error Handling: Deadlock → Retry; Lock timeout → Retry; Version mismatch → Mark as error,
+    finalize"
 - **Task Support**: T037 "Lock timeout: 30 seconds" (per plan line 712)
 - **Risk Level**: GREEN – Full transaction protection with idempotency
 
@@ -305,7 +332,8 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
 - **Verification**:
   - T022 success criteria: "Transaction rolls back on error (no partial records)"
   - T028 success criteria: "Transaction rolls back if enqueue fails"
-  - T054 integration test validates "Snapshot capture fails: Entire transaction rolled back; no partial records"
+  - T054 integration test validates "Snapshot capture fails: Entire transaction rolled back; no
+    partial records"
   - T054 "If enqueue fails: No SUBMITTED status; no orphaned grading job"
   - T054 test case "Grading fails (compute error): Status remains SUBMITTED; no partial result"
 - **Task Support**: T036 transaction wrapper utility ensures rollback on exception
@@ -332,7 +360,8 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
   - T016 "Lookup sequence: Redis → PostgreSQL → Process new request"
   - T016 "If hit: Return cached response (existing status code and body)"
   - T004 submission_idempotency_keys table stores: idempotency_key, response_status, response_body
-  - T031 idempotency recorder "INSERT or UPDATE; UNIQUE constraint on (attempt_id, submission_sequence)"
+  - T031 idempotency recorder "INSERT or UPDATE; UNIQUE constraint on (attempt_id,
+    submission_sequence)"
 - **Task Support**:
   - T028 response shows idempotent behavior: "Attempt already submitted. Returning cached result."
   - T051 integration test validates "Duplicate submission: Returns same result (cached)"
@@ -358,7 +387,8 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
 - **Declaration**: "If already FINALIZED, return Idempotent response (already finalized)"
 - **Verification**:
   - T037 "Idempotency: YES (check status before grading; skip if already FINALIZED)"
-  - T037 transaction step 5: "Idempotency check: IF status = FINALIZED, ROLLBACK and exit (already graded)"
+  - T037 transaction step 5: "Idempotency check: IF status = FINALIZED, ROLLBACK and exit (already
+    graded)"
   - T037 "Idempotency Requirements: Deterministic: same input → same output"
   - T038 score engine "Determinism Requirements: Same input ALWAYS produces same output"
 - **Task Support**:
@@ -373,11 +403,14 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
 - **Verification**:
   - T004 creates idempotency table with:
     - UNIQUE constraint: "UNIQUE (attempt_id, submission_sequence)"
-    - Indexes: "idx_submission_idempotency_key UNIQUE ON (workspace_id, idempotency_key) WHERE expires_at > NOW()"
+    - Indexes: "idx_submission_idempotency_key UNIQUE ON (workspace_id, idempotency_key) WHERE
+      expires_at > NOW()"
     - TTL: "expires_at = NOW() + 24h"
-  - T016 middleware "Dual storage: Redis as fast-path; PostgreSQL submission_idempotency_keys table as fallback"
+  - T016 middleware "Dual storage: Redis as fast-path; PostgreSQL submission_idempotency_keys table
+    as fallback"
   - T016 "Storage Strategy: Redis as fast-path cache (24-hour TTL); PostgreSQL as fallback"
-- **Task Support**: T016 success criteria: "Redis cache returns in <1ms; PostgreSQL fallback works if Redis unavailable"
+- **Task Support**: T016 success criteria: "Redis cache returns in <1ms; PostgreSQL fallback works
+  if Redis unavailable"
 - **Risk Level**: GREEN – Hybrid idempotency storage robust
 
 #### F5.5: Duplicate Grading Prevention (COMPLIANT)
@@ -406,26 +439,33 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
 #### F6.1: Version Constants Defined (COMPLIANT)
 
 - **Location**: Spec lines 391-397; Plan lines 97-103
-- **Declaration**: "MIN_SUPPORTED_SCHEMA_VERSION = 1; CURRENT_SCHEMA_VERSION = 1; MIN_PRODUCT_VERSION = '1.0.0'"
+- **Declaration**: "MIN_SUPPORTED_SCHEMA_VERSION = 1; CURRENT_SCHEMA_VERSION = 1;
+  MIN_PRODUCT_VERSION = '1.0.0'"
 - **Verification**:
   - T011 "Create database versioning constant in apps/api/src/config/versions.ts"
-  - T011 constants: MIN_SUPPORTED_SCHEMA_VERSION = 1; CURRENT_SCHEMA_VERSION = 1; MIN_PRODUCT_VERSION = "1.0.0"; CURRENT_PRODUCT_VERSION = "1.0.0"
+  - T011 constants: MIN_SUPPORTED_SCHEMA_VERSION = 1; CURRENT_SCHEMA_VERSION = 1;
+    MIN_PRODUCT_VERSION = "1.0.0"; CURRENT_PRODUCT_VERSION = "1.0.0"
   - T008 migration bump: "schema_version from 0 to 1"
-  - Spec lines 394-398: "MIN_SUPPORTED_SCHEMA_VERSION = 1; CURRENT_SCHEMA_VERSION = 1; MIN_PRODUCT_VERSION = '1.0.0'; MAX_PRODUCT_VERSION = '∞'"
+  - Spec lines 394-398: "MIN_SUPPORTED_SCHEMA_VERSION = 1; CURRENT_SCHEMA_VERSION = 1;
+    MIN_PRODUCT_VERSION = '1.0.0'; MAX_PRODUCT_VERSION = '∞'"
 - **Task Support**: T011 "Constants exported; Used by license middleware (T014) for validation"
 - **Risk Level**: GREEN – Version constants properly defined
 
 #### F6.2: Version Check at Attempt Creation (COMPLIANT)
 
 - **Location**: Spec lines 398-410 ("On Attempt Creation")
-- **Declaration**: "Validate schema_version < MIN_SUPPORTED THEN 426; Validate product_version not in range THEN 426"
+- **Declaration**: "Validate schema_version < MIN_SUPPORTED THEN 426; Validate product_version not
+  in range THEN 426"
 - **Verification**:
-  - T014 license middleware "Validate schema version: workspace.schema_version >= MIN_SUPPORTED_SCHEMA_VERSION"
+  - T014 license middleware "Validate schema version: workspace.schema_version >=
+    MIN_SUPPORTED_SCHEMA_VERSION"
   - T014 "Validate product version compatibility"
   - T014 error responses: "426 SCHEMA_VERSION_INCOMPATIBLE; 426 PRODUCT_VERSION_INCOMPATIBLE"
-  - T022 attempt creation "Error Handling: 426 if schema version incompatible (handled by middleware)"
+  - T022 attempt creation "Error Handling: 426 if schema version incompatible (handled by
+    middleware)"
   - Spec line 403: "IF tenant.schema_version < MIN_SUPPORTED_SCHEMA_VERSION THEN return HTTP 426"
-- **Task Support**: T050 integration test "Incompatible schema_version: Attempt creation rejected (426)"
+- **Task Support**: T050 integration test "Incompatible schema_version: Attempt creation rejected
+  (426)"
 - **Risk Level**: GREEN – Version validation at entry point
 
 #### F6.3: Version Storage in Snapshot (COMPLIANT)
@@ -433,25 +473,33 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
 - **Location**: Spec lines 108-111 ("Snapshot Fields (Immutable after start)")
 - **Declaration**: "expected_schema_version, expected_product_version stored with attempt"
 - **Verification**:
-  - T002 attempts schema includes: "expected_schema_version INT NOT NULL; expected_product_version VARCHAR(20) NOT NULL"
+  - T002 attempts schema includes: "expected_schema_version INT NOT NULL; expected_product_version
+    VARCHAR(20) NOT NULL"
   - T022 "Snapshot Requirements: exam_version, expected_schema_version, expected_product_version"
   - T023 snapshot builder captures version fields at creation time
-  - Spec lines 397-398: "expected_schema_version = Tenant schema version at start; expected_product_version = Product version at start"
+  - Spec lines 397-398: "expected_schema_version = Tenant schema version at start;
+    expected_product_version = Product version at start"
 - **Task Support**: T022 success criteria: "Snapshot captured completely and accurately"
 - **Risk Level**: GREEN – Versions frozen in snapshot
 
 #### F6.4: Version Check at Grading (COMPLIANT)
 
 - **Location**: Spec lines 411-420 ("On Attempt Grading")
-- **Declaration**: "Worker must verify stored versions match runtime before grading; IF incompatible → mark error"
+- **Declaration**: "Worker must verify stored versions match runtime before grading; IF incompatible
+  → mark error"
 - **Verification**:
-  - T042 version compatibility checker "Schema version check: expected_schema_version >= MIN_SUPPORTED_SCHEMA_VERSION"
+  - T042 version compatibility checker "Schema version check: expected_schema_version >=
+    MIN_SUPPORTED_SCHEMA_VERSION"
   - T042 "Product version check: expected_product_version in SUPPORTED_RANGE"
-  - T042 "Behavior on Incompatibility: Mark attempt: score=0, passed=false, error_reason='Version incompatible'"
-  - T037 step 9: "Version compatibility check: IF expected_schema_version < MIN_SUPPORTED: score=0, passed=false, error='Schema incompatible'"
-  - Spec lines 413-417: "IF expected_schema_version < MIN_SUPPORTED THEN mark attempt FINALIZED with error"
+  - T042 "Behavior on Incompatibility: Mark attempt: score=0, passed=false, error_reason='Version
+    incompatible'"
+  - T037 step 9: "Version compatibility check: IF expected_schema_version < MIN_SUPPORTED: score=0,
+    passed=false, error='Schema incompatible'"
+  - Spec lines 413-417: "IF expected_schema_version < MIN_SUPPORTED THEN mark attempt FINALIZED with
+    error"
 - **Task Support**:
-  - T050 integration test "Attempt with old schema_version: Grading completes with error (score=0, passed=false)"
+  - T050 integration test "Attempt with old schema_version: Grading completes with error (score=0,
+    passed=false)"
   - T045 unit tests "Rejects schema_version < MIN_SUPPORTED"
 - **Risk Level**: GREEN – Graceful compatibility check at grading
 
@@ -464,8 +512,10 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
   - T001 success criteria: "Migration is forwards-only (no DROP statements)"
   - T001 "Review Checklist: [ ] Migration file is forwards-only (no DDL rollback)"
   - T008 schema version bump "Version bumped correctly (0 → 1)"
-  - Plan line 125: "Rollback: Forward-only migration. Rollback via snapshot restore only (per ADR-0008)"
-- **Task Support**: T010 migration test "Verify migration runs without errors; Verify schema_version updated to 1"
+  - Plan line 125: "Rollback: Forward-only migration. Rollback via snapshot restore only (per
+    ADR-0008)"
+- **Task Support**: T010 migration test "Verify migration runs without errors; Verify schema_version
+  updated to 1"
 - **Risk Level**: GREEN – Migration discipline enforced
 
 #### F6.6: Version Compatibility Testing (COMPLIANT)
@@ -473,7 +523,8 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
 - **Location**: No specific spec section (but implied)
 - **Verification**:
   - T050 integration test "Version Compatibility" with 4 test cases
-  - T045 unit tests for version checker "Rejects schema_version < MIN_SUPPORTED; Accepts current; Rejects incompatible product_version; Returns appropriate error reasons"
+  - T045 unit tests for version checker "Rejects schema_version < MIN_SUPPORTED; Accepts current;
+    Rejects incompatible product_version; Returns appropriate error reasons"
   - T050 test case: "Incompatible schema_version: Attempt creation rejected (426)"
   - T050 test case: "Attempt with old schema_version: Grading completes with error"
 - **Risk Level**: GREEN – Comprehensive version testing
@@ -493,7 +544,8 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
 #### F7.1: Zero Grading Logic in API (COMPLIANT)
 
 - **Location**: Spec lines 593-596
-- **Declaration**: "API layer contains zero grading logic; Grading computation delegated entirely to worker process"
+- **Declaration**: "API layer contains zero grading logic; Grading computation delegated entirely to
+  worker process"
 - **Verification**:
   - T022-T036 (all API routes): No `computeScore()` calls; no grading logic present
   - T022 success criteria: "Returns 201 with correct response structure" (no score calculation)
@@ -501,7 +553,8 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
   - T026 implementation: "Calculate time_remaining; Return status, progress counts" (no scoring)
   - T028 implementation: "UPDATE status = 'SUBMITTED'; ENQUEUE grading_job" (delegates to worker)
   - T032 implementation: "Parse result_snapshot (JSONB); Return result" (reads pre-computed result)
-- **Task Support**: T025, T026, T028 explicitly delegate scoring to worker; no grading computations anywhere
+- **Task Support**: T025, T026, T028 explicitly delegate scoring to worker; no grading computations
+  anywhere
 - **Risk Level**: GREEN – Zero grading logic in API
 
 #### F7.2: All Grading in Worker (COMPLIANT)
@@ -512,7 +565,8 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
   - T037 job processor step 10: "Call gradingEngine.computeScore(questions, answers, gradingConfig)"
   - T038 score engine "computeScore(questions, answers, gradingConfig) → Returns numeric score"
   - T038 "evaluatePassLogic(score, gradingConfig) → Returns boolean (passed)"
-  - T039 result builder "buildResultSnapshot(attemptId, questions, answers, scores, gradingConfig) → Full result"
+  - T039 result builder "buildResultSnapshot(attemptId, questions, answers, scores, gradingConfig) →
+    Full result"
   - All grading functions are in worker layer (T037-T039)
   - T037 "Queue: zidney.grading; Job type: GRADE_ATTEMPT"
 - **Task Support**: T037 "All computation in worker (T037-T039)" per summary
@@ -526,7 +580,8 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
   - T037 step 7: "Load snapshot: question_snapshot, grading_config_snapshot from attempt"
   - T037 step 8: "Load answers: SELECT user_answer FROM attempt_progress WHERE attempt_id = ?"
   - T037 "NEVER SELECT exams or questions" (spec line 597)
-  - T038 score engine "No external service calls; No time-based logic; Same input ALWAYS produces same output"
+  - T038 score engine "No external service calls; No time-based logic; Same input ALWAYS produces
+    same output"
   - T039 result builder calls are deterministic (JSONB construction)
 - **Task Support**: T046 unit tests verify "Same input ALWAYS produces same output"
 - **Risk Level**: GREEN – Worker snapshot-only design enforced
@@ -547,7 +602,8 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
 #### F7.5: Worker Authority Confirmed (COMPLIANT)
 
 - **Location**: PROJECT_CONTEXT_PRIMER line 134-150 ("Worker Authority Model")
-- **Declaration**: "Worker: Executes migrations, Executes provisioning, Executes grading, Handles retry + DLQ"
+- **Declaration**: "Worker: Executes migrations, Executes provisioning, Executes grading, Handles
+  retry + DLQ"
 - **Verification**:
   - T037 worker processes GRADE_ATTEMPT jobs
   - T037 "Max Retries: 5 (per spec; different from submission 3)"
@@ -572,13 +628,19 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
 #### F8.1: Logging Framework Declared (COMPLIANT)
 
 - **Location**: Spec section not explicitly present; PROJECT_CONTEXT_PRIMER lines 175-183
-- **Declaration**: "Structured JSON logging; correlation_id on every request; workspace_slug on every tenant-bound log"
+- **Declaration**: "Structured JSON logging; correlation_id on every request; workspace_slug on
+  every tenant-bound log"
 - **Verification**:
-  - T056 structured logging setup: "Logger format: JSON; Default fields: timestamp, level, service, message, correlation_id"
-  - T057 log event types: "attempt.created, attempt.progress_saved, attempt.submitted, attempt.license_invalid, grading.completed, grading.failed"
-  - T015 correlation ID middleware: "Attach to req.correlationId; Attach to response headers: X-Correlation-ID"
-  - T058 API logger instrumentation: "Log event: attempt.created with fields: correlation_id, workspace_id, attempt_id"
-  - T059 worker logger instrumentation: "grading.completed with fields: correlation_id, workspace_id"
+  - T056 structured logging setup: "Logger format: JSON; Default fields: timestamp, level, service,
+    message, correlation_id"
+  - T057 log event types: "attempt.created, attempt.progress_saved, attempt.submitted,
+    attempt.license_invalid, grading.completed, grading.failed"
+  - T015 correlation ID middleware: "Attach to req.correlationId; Attach to response headers:
+    X-Correlation-ID"
+  - T058 API logger instrumentation: "Log event: attempt.created with fields: correlation_id,
+    workspace_id, attempt_id"
+  - T059 worker logger instrumentation: "grading.completed with fields: correlation_id,
+    workspace_id"
 - **Task Support**: T056-T060 declare full logging layer
 - **Risk Level**: GREEN – Logging infrastructure specified
 
@@ -593,20 +655,25 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
   - T028 (submit) declares: "Log: submission.completed event" BUT no task implements it
   - T037 (grading) declares: "Log: grading.completed event" BUT no task implements it
 - **Evidence**:
-  - T058 lists functions to instrument: "T022 (create): Log attempt.created; T025 (save): Log attempt.progress_saved"
+  - T058 lists functions to instrument: "T022 (create): Log attempt.created; T025 (save): Log
+    attempt.progress_saved"
   - But T022 task description has NO explicit step: "call logger.info('attempt.created', {...})"
   - T058 is a SEPARATE task (instrumentation) not embedded in T022-T037
 - **Risk Assessment**: MODERATE
   - **Not a BLOCK**: Logging can be added as sub-task within T022-T037
-  - **Remediation**: Update T022-T037 to include step "6.5: Log event via logger" before returning response
-  - **Recommendation**: Add explicit logging code samples in task descriptions (T022, T025, T028, T032, T037, T041)
+  - **Remediation**: Update T022-T037 to include step "6.5: Log event via logger" before returning
+    response
+  - **Recommendation**: Add explicit logging code samples in task descriptions (T022, T025, T028,
+    T032, T037, T041)
 
 #### F8.3: Structured Format Verified (COMPLIANT)
 
 - **Location**: T058 example payload
 - **Verification**:
-  - T058 log payload includes: timestamp, level, service, message, operation, attempt_id, correlation_id, workspace_slug, duration_ms
-  - T060 integration test validates: "Log output is valid JSON; Mandatory fields present; No PII logged"
+  - T058 log payload includes: timestamp, level, service, message, operation, attempt_id,
+    correlation_id, workspace_slug, duration_ms
+  - T060 integration test validates: "Log output is valid JSON; Mandatory fields present; No PII
+    logged"
   - T057 log events define required and optional fields
 - **Risk Level**: GREEN – Structured format comprehensive
 
@@ -635,17 +702,20 @@ This stage exhibits **comprehensive architectural alignment** with Zidney's cons
 
 **Recommendation for F8.2**:
 
-The logging specification is complete and correct, but the INTEGRATION of logging calls into T022-T037 is incomplete.
+The logging specification is complete and correct, but the INTEGRATION of logging calls into
+T022-T037 is incomplete.
 
 **Remediation Action** (not blocking):
 
-1. Update T022 step 13: "Log: attempt.created event with fields [workspace_id, user_id, exam_id, attempt_id, mode, question_count]"
+1. Update T022 step 13: "Log: attempt.created event with fields [workspace_id, user_id, exam_id,
+   attempt_id, mode, question_count]"
 2. Update T025 implementation: "5.5. Log: attempt.progress_saved event"
 3. Update T028 implementation: "11. Log: submission.completed event"
 4. Update T032 implementation: "6. Log: result.retrieved event"
 5. Update T037 implementation: "15. Log: grading.completed event"
 
-**Conclusion**: Logging layer is FULLY SPECIFIED and will be COMPLIANT once T022-T037 are updated with explicit log.info() calls as implementation detail.
+**Conclusion**: Logging layer is FULLY SPECIFIED and will be COMPLIANT once T022-T037 are updated
+with explicit log.info() calls as implementation detail.
 
 ---
 
@@ -660,7 +730,8 @@ The logging specification is complete and correct, but the INTEGRATION of loggin
 #### F9.1: Tenant Resolution from Slug Only (COMPLIANT)
 
 - **Location**: Spec lines 336-350 ("Tenant Resolution")
-- **Declaration**: "Extract subdomain from request Host header (or path slug); No tenant override from request body allowed"
+- **Declaration**: "Extract subdomain from request Host header (or path slug); No tenant override
+  from request body allowed"
 - **Verification**:
   - T013 tenantResolver: "Extract slug from req.params.slug or subdomain"
   - T013 "Extract workspace slug from req.params.slug or subdomain; NOT from request body"
@@ -719,7 +790,8 @@ The logging specification is complete and correct, but the INTEGRATION of loggin
   - T035 "GET /attempt/{id}/progress: 60 per minute per user"
   - Spec line 430: "Checked at attempt creation time. If exceeded → return HTTP 429"
   - T022 error handling lists no 429 (implies rate limit at middleware level, not endpoint level)
-- **Task Support**: T035 success criteria: "Rate limits exported; Can be used by rate limiting middleware"
+- **Task Support**: T035 success criteria: "Rate limits exported; Can be used by rate limiting
+  middleware"
 - **Risk Level**: GREEN – Rate limiting specified
 
 #### F9.6: Error Messages Safe (COMPLIANT)
@@ -729,8 +801,10 @@ The logging specification is complete and correct, but the INTEGRATION of loggin
 - **Verification**:
   - T033 error formatter: "HTTP status codes correct; Error messages clear and actionable"
   - T033 error response format excludes stack traces
-  - Example T022 error (423): "Workspace license is soft-locked. Contact administrator." (no internals)
-  - Example T022 error (426): "Schema version 0 is not supported. Minimum required: 1" (actionable, no internals)
+  - Example T022 error (423): "Workspace license is soft-locked. Contact administrator." (no
+    internals)
+  - Example T022 error (426): "Schema version 0 is not supported. Minimum required: 1" (actionable,
+    no internals)
   - T060 test case: "No sensitive data in errors"
 - **Task Support**: T033 success criteria: "All errors use standard format; Messages clear"
 - **Risk Level**: GREEN – Error messages safe
@@ -793,7 +867,8 @@ The logging specification is complete and correct, but the INTEGRATION of loggin
 
 **Parallel Opportunities**: 32 tasks can execute in parallel (no dependencies)
 
-**Sequential Bottleneck**: Database (T001-T012) → Middleware (T013-T021) → API (T022-T036) → Worker (T037-T043) → Testing (T044-T065)
+**Sequential Bottleneck**: Database (T001-T012) → Middleware (T013-T021) → API (T022-T036) → Worker
+(T037-T043) → Testing (T044-T065)
 
 **Estimated Critical Path Duration**: 5 weeks ✅ REALISTIC
 
@@ -874,14 +949,16 @@ Isolation → License → Authentication → Attempt → Runtime → Frontoffice
 
 **C3: SOFT_LOCKED Grading Behavior**
 
-- **Spec** (line 375-379): "SOFT_LOCKED state returns HTTP 423; but: Grading completes in-flight attempts only"
+- **Spec** (line 375-379): "SOFT_LOCKED state returns HTTP 423; but: Grading completes in-flight
+  attempts only"
 - **Plan** (line 151-159): Attempt grading allowed if SOFT_LOCKED
 - **Status**: ✅ CONSISTENT (new submissions blocked; existing grading completes)
 
 **C4: License Schema Version Check Location**
 
 - **Spec** (line 404): "Load workspace schema_version from tenant DB"
-- **Plan** (line 160): "Validate schema version: workspace.schema_version >= MIN_SUPPORTED_SCHEMA_VERSION"
+- **Plan** (line 160): "Validate schema version: workspace.schema_version >=
+  MIN_SUPPORTED_SCHEMA_VERSION"
 - **Status**: ✅ CONSISTENT (schema_version loaded from tenant DB in T013)
 
 **Contradictions Found**: 0  
@@ -946,7 +1023,8 @@ Isolation → License → Authentication → Attempt → Runtime → Frontoffice
 
 1. ✅ **All 9 constitutional criteria satisfied** – No architecture violations detected
 2. ✅ **100% requirement coverage** – All spec/plan requirements mapped to tasks
-3. ✅ **Comprehensive compliance** – 8 of 9 criteria fully PASS; 1 criterion (logging) ATTENTION-level (not blocking)
+3. ✅ **Comprehensive compliance** – 8 of 9 criteria fully PASS; 1 criterion (logging)
+   ATTENTION-level (not blocking)
 4. ✅ **No contradictions** – Spec, Plan, and Tasks internally consistent
 5. ✅ **ADR-aligned** – 6/6 applicable ADRs respected
 6. ✅ **Trust chain intact** – Isolation → License → Authentication → Attempt flow undbroken
@@ -957,7 +1035,8 @@ Isolation → License → Authentication → Attempt → Runtime → Frontoffice
 **Minor Action Item (Non-Blocking)**:
 
 - Update T022-T037 task descriptions to include explicit logging code samples:
-  - T022: "6.5. Log: logger.info('attempt.created', {workspace_id, user_id, exam_id, attempt_id, ...})"
+  - T022: "6.5. Log: logger.info('attempt.created', {workspace_id, user_id, exam_id, attempt_id,
+    ...})"
   - T025: "5.5. Log: logger.info('attempt.progress_saved', {...})"
   - T028: "11. Log: logger.info('submission.completed', {...})"
   - T032: "6. Log: logger.info('result.retrieved', {...})"
@@ -993,7 +1072,8 @@ Isolation → License → Authentication → Attempt → Runtime → Frontoffice
 
 ## Conclusion
 
-**STAGE_06_ATTEMPT_ENGINE_FOUNDATION** is **architecturally sound** and **constitutionally compliant**.
+**STAGE_06_ATTEMPT_ENGINE_FOUNDATION** is **architecturally sound** and **constitutionally
+compliant**.
 
 The specification, plan, and task breakdown exhibit:
 
@@ -1015,4 +1095,5 @@ The specification, plan, and task breakdown exhibit:
 
 ---
 
-**Analysis Sign-Off**: 2026-02-18 | Architectural Drift Detector | Constitutional Compliance: VERIFIED
+**Analysis Sign-Off**: 2026-02-18 | Architectural Drift Detector | Constitutional Compliance:
+VERIFIED

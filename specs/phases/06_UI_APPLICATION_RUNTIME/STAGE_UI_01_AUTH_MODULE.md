@@ -8,22 +8,21 @@ UI Foundation — Authentication Runtime Module
 
 ## Stage Status
 
-Status: PRODUCTION READY
-Risk Level: MEDIUM
-Closure Date: 2026-03-01
+Status: PRODUCTION READY Risk Level: MEDIUM Closure Date: 2026-03-01
 
-Implementation: COMPLETE
-Tasks: 57 / 57 completed
+Implementation: COMPLETE Tasks: 57 / 57 completed
 
 Scope Closed:
 
-- AuthUser, AuthError, AuthErrorCode, ITokenManager, IRefreshManager, IAuthService, AuthGuardOptions types (all 3 apps)
+- AuthUser, AuthError, AuthErrorCode, ITokenManager, IRefreshManager, IAuthService, AuthGuardOptions
+  types (all 3 apps)
 - token-manager.ts: memory-only token storage (all 3 apps)
 - refresh-manager.ts: single-flight lock, factory injection pattern (all 3 apps)
 - auth.service.ts: login, logout (fire-and-forget), refresh, fetchCurrentUser (all 3 apps)
 - auth.store.ts: defineAuthStore factory with lazy getRefreshManager accessor (all 3 apps)
 - auth.guard.ts: createAuthGuard factory, requiresAuth / guestOnly routing (all 3 apps)
-- API client interceptor wiring: getAccessToken, onRefreshToken, onAuthFailure callbacks (all 3 apps)
+- API client interceptor wiring: getAccessToken, onRefreshToken, onAuthFailure callbacks (all 3
+  apps)
 - main.ts 9-step bootstrap with lazy accessor pattern (all 3 apps)
 - token-store.ts deleted from all 3 apps
 - Unit tests: 12 files, 143 tests — all passing (MMC)
@@ -40,9 +39,8 @@ Constitutional Compliance:
 - ADR alignment verified
 - Implementation compliant with Zidney Constitution v1.2.0
 
-Notes:
-Stage is production ready. No structural backend modifications allowed.
-Modifications require a new migration stage.
+Notes: Stage is production ready. No structural backend modifications allowed. Modifications require
+a new migration stage.
 
 ---
 
@@ -63,8 +61,7 @@ This stage implements:
 - Auth guards integration
 - Auth state store
 
-This stage does NOT implement login UI pages.
-It defines the runtime auth engine behind them.
+This stage does NOT implement login UI pages. It defines the runtime auth engine behind them.
 
 ---
 

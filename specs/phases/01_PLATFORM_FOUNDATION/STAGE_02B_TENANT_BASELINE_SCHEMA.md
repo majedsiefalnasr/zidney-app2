@@ -32,8 +32,7 @@ Constitutional Compliance:
 - ADR-0006 Server-authoritative time enforced
 - ADR-0008 Semantic versioning enforced
 
-Notes:
-Tenant schema is production-hardened and frozen. Modifications require new migration stage.
+Notes: Tenant schema is production-hardened and frozen. Modifications require new migration stage.
 
 ---
 
@@ -49,8 +48,8 @@ Each workspace database MUST:
 - Include audit fields on all business tables
 - Disallow schema drift
 
-No tenant-specific schema customization is allowed at DB level.
-Customization must occur via configuration tables only.
+No tenant-specific schema customization is allowed at DB level. Customization must occur via
+configuration tables only.
 
 ---
 
@@ -214,8 +213,7 @@ Migration order must:
 3. Update schema_version
 4. Commit transaction
 
-If migration fails:
-→ Rollback entire transaction
+If migration fails: → Rollback entire transaction
 
 No partial migrations allowed.
 
@@ -225,8 +223,8 @@ No partial migrations allowed.
 
 Tenant baseline schema defines runtime integrity.
 
-If baseline schema drifts,
-attempt engine, grading, subscription enforcement, and audit systems become unreliable.
+If baseline schema drifts, attempt engine, grading, subscription enforcement, and audit systems
+become unreliable.
 
 This stage must be frozen before implementing:
 

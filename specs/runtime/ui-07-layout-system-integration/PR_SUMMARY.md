@@ -26,11 +26,18 @@
 
 ## 3. Executive Summary
 
-- **Problem Solved**: Three Zidney frontend applications (MMC, Backoffice, Frontoffice) were rendering inconsistent layouts. This stage unifies the application shell architecture into a single, reusable, responsive component pattern.
+- **Problem Solved**: Three Zidney frontend applications (MMC, Backoffice, Frontoffice) were
+  rendering inconsistent layouts. This stage unifies the application shell architecture into a
+  single, reusable, responsive component pattern.
 
-- **Architectural Boundary**: Adds new **UI Layer** components (AppLayout, AppSidebar, AppHeader) to all three apps; extends **State Layer** (ui.store.ts, auth.store.ts) with layout/permissions management; updates **Router Layer** with new RouteMeta flags (standaloneLayout, hideSidebar).
+- **Architectural Boundary**: Adds new **UI Layer** components (AppLayout, AppSidebar, AppHeader) to
+  all three apps; extends **State Layer** (ui.store.ts, auth.store.ts) with layout/permissions
+  management; updates **Router Layer** with new RouteMeta flags (standaloneLayout, hideSidebar).
 
-- **Why Safe**: The change is fully backward-compatible. All routes continue to function; the layout wrapper is added as a conditional layer around authenticated routes. The router meta flags ensure auth routes (login, forgot-password) bypass the shell. No database changes; no API modifications; no tenant isolation changes.
+- **Why Safe**: The change is fully backward-compatible. All routes continue to function; the layout
+  wrapper is added as a conditional layer around authenticated routes. The router meta flags ensure
+  auth routes (login, forgot-password) bypass the shell. No database changes; no API modifications;
+  no tenant isolation changes.
 
 - **Constitutional Guarantees**:
   - ✅ Database-per-tenant isolation: Untouched (layout is UI-only)
@@ -87,7 +94,8 @@ Confirm compliance with Zidney Constitution v1.2.0:
 - [x] All write operations wrapped in transactions (N/A; no backend mutations)
 - [x] Proper isolation level declared (N/A; UI-only change)
 - [x] Explicit locking defined where required (N/A; Pinia store mutations are synchronous)
-- [x] Idempotency guarantees preserved (useBreakpoint composable is idempotent; toggle state is deterministic)
+- [x] Idempotency guarantees preserved (useBreakpoint composable is idempotent; toggle state is
+      deterministic)
 - [x] No race conditions introduced (store mutations are atomic; no async race conditions)
 
 ---
@@ -143,7 +151,9 @@ Test Results:
 
 ## 12. Stage Lifecycle Verification
 
-- [x] Stage Status updated in `specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION.md` → PRODUCTION READY
+- [x] Stage Status updated in
+      `specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION.md` → PRODUCTION
+      READY
 - [x] .workflow-state.json updated to `stage_status: "PRODUCTION READY"` with closure event
 - [x] README.md progress table complete (all 7 steps ✅)
 - [x] All 7 step reports generated in `specs/runtime/ui-07-layout-system-integration/reports/`
@@ -171,12 +181,17 @@ Explain why:
 
 The change is **LOW RISK** because:
 
-1. **Scope Isolation**: Layout is a pure UI-layer feature; no backend, database, or tenant isolation changes
-2. **Backward Compatibility**: Existing routes continue to render without modification; layout is a wrapper
-3. **No Infrastructure Changes**: No new services, migrations, or microservice interactions introduced
-4. **Full Test Coverage**: 162 assertions across 21 test files all passing; covered unit/composable/store/integration
+1. **Scope Isolation**: Layout is a pure UI-layer feature; no backend, database, or tenant isolation
+   changes
+2. **Backward Compatibility**: Existing routes continue to render without modification; layout is a
+   wrapper
+3. **No Infrastructure Changes**: No new services, migrations, or microservice interactions
+   introduced
+4. **Full Test Coverage**: 162 assertions across 21 test files all passing; covered
+   unit/composable/store/integration
 5. **Architectural Alignment**: 9/9 drift analysis criteria passed; all ADRs respected
-6. **Deployment Safety**: UI changes can be rolled back independently; no dependencies on deployment order
+6. **Deployment Safety**: UI changes can be rolled back independently; no dependencies on deployment
+   order
 
 ---
 
@@ -186,7 +201,9 @@ This PR maintains Zidney architectural integrity and complies with Hard Mode gov
 
 All workflow steps completed. All reports generated. Stage lifecycle updated to PRODUCTION READY.
 
-This PR delivers a unified, responsive application shell architecture across three Zidney frontend applications (MMC, Backoffice, Frontoffice), enabling consistent user experience and reducing layout code duplication.
+This PR delivers a unified, responsive application shell architecture across three Zidney frontend
+applications (MMC, Backoffice, Frontoffice), enabling consistent user experience and reducing layout
+code duplication.
 
 **Deliverables:**
 
@@ -207,11 +224,13 @@ Reviewer Sign-off:
 ## Architecture Impact
 
 Zidney maintains an **auto-generated architecture model**.  
-Before approving this PR, reviewers should verify that the change does not introduce architectural violations.
+Before approving this PR, reviewers should verify that the change does not introduce architectural
+violations.
 
 ### Architecture Validation Summary
 
-No architectural rules changed. This PR adds new UI-layer components and extends existing state/router layers. All changes remain within Phase 06 UI_APPLICATION_RUNTIME scope.
+No architectural rules changed. This PR adds new UI-layer components and extends existing
+state/router layers. All changes remain within Phase 06 UI_APPLICATION_RUNTIME scope.
 
 ### Verification Steps
 
@@ -235,8 +254,7 @@ Updated diagrams are generated automatically by:
 bun scripts/infra-audit.ts
 ```
 
-Review the rendered diagrams here:
-`docs/architecture/ARCHITECTURE_DIAGRAMS.md`
+Review the rendered diagrams here: `docs/architecture/ARCHITECTURE_DIAGRAMS.md`
 
 These diagrams include:
 

@@ -19,7 +19,9 @@
 
 ## Executive Summary
 
-The technical plan for STAGE_08 demonstrates **strong foundational architecture** in most areas, but contains **one critical violation** and **two medium-risk concerns** that must be resolved before implementation:
+The technical plan for STAGE_08 demonstrates **strong foundational architecture** in most areas, but
+contains **one critical violation** and **two medium-risk concerns** that must be resolved before
+implementation:
 
 | Check                                 | Status           | Finding                           |
 | ------------------------------------- | ---------------- | --------------------------------- |
@@ -91,7 +93,8 @@ Submission is:
 3. **Section 7 (Worker Integration) doesn't show grading job enqueue**
    - Only shows dead-letter queue for failed jobs
    - No evidence of grading job being queued initially
-4. **Worker comment is misleading** (section 3): "// Worker enqueues this job" appears in API handler code
+4. **Worker comment is misleading** (section 3): "// Worker enqueues this job" appears in API
+   handler code
 
 #### Architectural Risk:
 
@@ -144,7 +147,8 @@ BROKEN ISOLATION.
 **File:** Section 3, Attempt Submission flow  
 **Issue:**
 
-The plan shows database writes (attempt update, audit log) happening inside the API transaction (section 6, lines ~300-330):
+The plan shows database writes (attempt update, audit log) happening inside the API transaction
+(section 6, lines ~300-330):
 
 ```typescript
 // Inside transaction
@@ -152,7 +156,8 @@ await trx.attempts.update({ id: attemptId }, {...});
 await trx.attemptAudit.insert({...});
 ```
 
-But from PROJECT_CONTEXT_PRIMER: "All writes transactional" suggests writes should be wrapped in transactions WITH middleware guarantees.
+But from PROJECT_CONTEXT_PRIMER: "All writes transactional" suggests writes should be wrapped in
+transactions WITH middleware guarantees.
 
 **Current Implementation:** ✅ Uses `db.transaction()`  
 **Concern:** ⚠️ Ensure all writes include:
@@ -221,7 +226,8 @@ Currently, DLQ section references `job_type: 'grade_attempt'` but never shows jo
   3. **License Enforcement** ← Step 3
   4. Schema Version Check
   5. **Rate Limiting** ← Step 5
-- Plan states: "No exceptions allowed: Every authenticated route MUST execute all 5 middleware in order"
+- Plan states: "No exceptions allowed: Every authenticated route MUST execute all 5 middleware in
+  order"
 - Spec confirms: License checked before rate limiting
 
 **Impact:** SOFT_LOCKED workspaces return 423 before hitting rate limiter ✅
@@ -251,9 +257,7 @@ Currently, DLQ section references `job_type: 'grade_attempt'` but never shows jo
 - Section 6, Attempt Submission transaction:
 
 ```typescript
-const attempt = await trx.attempts
-  .findOne({ where: { id: attemptId } })
-  .forUpdate() // ← Row lock acquired
+const attempt = await trx.attempts.findOne({ where: { id: attemptId } }).forUpdate(); // ← Row lock acquired
 ```
 
 - Isolation level: SERIALIZABLE
@@ -327,7 +331,8 @@ if (decoded.workspace_id !== workspace.id) {  // ← Verify match
 **Evidence:**
 
 - Section 5 explicitly lists 5 middleware stages
-- Plan states: "No exceptions allowed: Every authenticated route MUST execute all 5 middleware in order."
+- Plan states: "No exceptions allowed: Every authenticated route MUST execute all 5 middleware in
+  order."
 - Pseudocode shows exact order:
   1. Correlation ID
   2. Tenant Resolver
@@ -378,13 +383,11 @@ if (decoded.workspace_id !== workspace.id) {  // ← Verify match
 
 ```typescript
 // Acquire exclusive lock
-const attempt = await trx.attempts
-  .findOne({ where: { id: attemptId } })
-  .forUpdate()
+const attempt = await trx.attempts.findOne({ where: { id: attemptId } }).forUpdate();
 
 // Verify state unchanged
-if (attempt.status !== 'IN_PROGRESS') {
-  throw new Error(`ATTEMPT_STATE_CHANGED`)
+if (attempt.status !== "IN_PROGRESS") {
+  throw new Error(`ATTEMPT_STATE_CHANGED`);
 }
 ```
 
@@ -553,17 +556,21 @@ if (attempt.status !== 'IN_PROGRESS') {
 
 **VERDICT: 🔴 BLOCKED**
 
-The technical plan for STAGE_08 is **architecturally mature** in most areas, but contains **one critical architectural violation** that must be resolved before entering the implementation phase:
+The technical plan for STAGE_08 is **architecturally mature** in most areas, but contains **one
+critical architectural violation** that must be resolved before entering the implementation phase:
 
-**The Violation:** Grading authority placement contradicts constitutional requirement that "Worker executes grading"
+**The Violation:** Grading authority placement contradicts constitutional requirement that "Worker
+executes grading"
 
 **Impact:** Breaks the trust chain isolation model and undermines asynchronous job isolation
 
 **Resolution Path:** Clarify whether grading happens in API or Worker, then update plan accordingly
 
-**Timeline:** This issue must be resolved before planning phase completion. **Recommend escalation to Product/Architecture team for decision.**
+**Timeline:** This issue must be resolved before planning phase completion. **Recommend escalation
+to Product/Architecture team for decision.**
 
-**Recommendation:** Request ADR clarification if API-layer grading is acceptable, OR redesign grading flow to use worker with result availability pattern.
+**Recommendation:** Request ADR clarification if API-layer grading is acceptable, OR redesign
+grading flow to use worker with result availability pattern.
 
 Once this critical violation is resolved, the plan is ready for implementation phase.
 

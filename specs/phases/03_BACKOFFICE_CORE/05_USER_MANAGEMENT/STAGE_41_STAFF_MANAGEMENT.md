@@ -117,8 +117,7 @@ Rules:
 - Division filtering must happen at query layer
 - UI filtering alone is insufficient
 
-If a staff has no divisions assigned:
-→ Access to division-scoped content is blocked
+If a staff has no divisions assigned: → Access to division-scoped content is blocked
 
 ---
 

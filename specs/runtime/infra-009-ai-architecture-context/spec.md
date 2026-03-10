@@ -13,7 +13,9 @@
 
 ### What Is Being Built
 
-This stage establishes an **AI-consumable architecture context layer** for the Zidney monorepo. Traditional documentation is written for human consumption. AI agents (Copilot, Claude, Cursor, SpecKit, GitNexus MCP) require **structured, machine-readable metadata** that describes:
+This stage establishes an **AI-consumable architecture context layer** for the Zidney monorepo.
+Traditional documentation is written for human consumption. AI agents (Copilot, Claude, Cursor,
+SpecKit, GitNexus MCP) require **structured, machine-readable metadata** that describes:
 
 - Architectural layering rules
 - Module boundaries and roles
@@ -26,7 +28,8 @@ This stage establishes an **AI-consumable architecture context layer** for the Z
 
 Transform authoritative architecture metadata into AI-optimized context artifacts that enable:
 
-1. **Architecture-aware code generation** — AI can validate proposed changes against actual architecture rules
+1. **Architecture-aware code generation** — AI can validate proposed changes against actual
+   architecture rules
 2. **Dependency impact analysis** — AI can trace blast radius before refactoring
 3. **Module placement decisions** — AI can suggest correct package/layer for new code
 4. **Governance compliance** — AI can automatically check ADR alignment
@@ -64,7 +67,8 @@ With this stage:
 
 Per Zidney Constitution v1.2.0:
 
-- ✅ **No cross-tenant access** — This stage operates on shared architecture metadata, not tenant data
+- ✅ **No cross-tenant access** — This stage operates on shared architecture metadata, not tenant
+  data
 - ✅ **No middleware bypass** — Not applicable; this is a governance layer
 - ✅ **No grading outside worker** — Not applicable; no grading involved
 - ✅ **No direct DB instantiation** — Not applicable; no database access required
@@ -76,7 +80,9 @@ Per Zidney Constitution v1.2.0:
 
 **This stage is compliant with Zidney Constitution v1.2.0 — No violations detected.**
 
-The AI context layer is a pure governance artifact. It does not interact with tenant databases, license enforcement, attempt engines, or any runtime system. It operates entirely on static architecture metadata and governance documents.
+The AI context layer is a pure governance artifact. It does not interact with tenant databases,
+license enforcement, attempt engines, or any runtime system. It operates entirely on static
+architecture metadata and governance documents.
 
 ---
 
@@ -98,7 +104,8 @@ The AI context layer is a pure governance artifact. It does not interact with te
 ✅ **No cross-tenant operations.**  
 ✅ **No data mutation.**
 
-The AI context artifacts are **governance metadata only**. They describe the architecture statically and do not access, modify, or leak any tenant data.
+The AI context artifacts are **governance metadata only**. They describe the architecture statically
+and do not access, modify, or leak any tenant data.
 
 ---
 
@@ -111,7 +118,9 @@ The AI context artifacts are **governance metadata only**. They describe the arc
 **Schema Version Check Required:** No  
 **Product Version Check Required:** No
 
-This is a **governance infrastructure stage**, not a runtime feature. It does not expose any endpoints, enforce limits, or interact with the license system. The generated context artifacts are read-only metadata.
+This is a **governance infrastructure stage**, not a runtime feature. It does not expose any
+endpoints, enforce limits, or interact with the license system. The generated context artifacts are
+read-only metadata.
 
 ### Impact on Existing Systems
 
@@ -153,7 +162,8 @@ The following **architecture context artifacts** are generated into `docs/ai/con
 
 - System layers overview (UI, Runtime, Domain, Infrastructure)
 - Applications directory (apps/api, apps/worker, apps/mmc, apps/backoffice, apps/frontoffice)
-- Packages directory (packages/domain-core, packages/ui-system, packages/api-client, packages/logger, etc.)
+- Packages directory (packages/domain-core, packages/ui-system, packages/api-client,
+  packages/logger, etc.)
 - Architecture principles summary
 - Key constraints and rules
 
@@ -333,7 +343,8 @@ The following **architecture context artifacts** are generated into `docs/ai/con
 
 ### Backward Compatibility
 
-✅ **Fully backward compatible.** These artifacts are new and do not modify existing schemas or tables.
+✅ **Fully backward compatible.** These artifacts are new and do not modify existing schemas or
+tables.
 
 ### Versioning Impact
 
@@ -418,7 +429,8 @@ If artifact generation fails:
 2. Commit new artifacts to repository
 3. Notify developers that architecture context has been updated
 
-**Mitigation:** CI pipeline runs infra-audit on every commit; PR validation checks artifact freshness
+**Mitigation:** CI pipeline runs infra-audit on every commit; PR validation checks artifact
+freshness
 
 ### Failure Mode 2: Architecture Violation Undetected
 
@@ -723,7 +735,8 @@ The stage is accepted when:
 
 ### Schedule Impact
 
-This stage introduces **zero runtime or data model changes**. It is a pure governance infrastructure addition.
+This stage introduces **zero runtime or data model changes**. It is a pure governance infrastructure
+addition.
 
 **Expected Duration:** 1-2 weeks (specification + implementation + testing)
 
@@ -889,13 +902,16 @@ This stage **explicitly does NOT**:
 9. ❌ Require new CI secrets or environment variables
 10. ❌ Change deployment procedures
 
-This is **purely a governance infrastructure stage** focused on making AI-assisted development safer and more informed.
+This is **purely a governance infrastructure stage** focused on making AI-assisted development safer
+and more informed.
 
 ---
 
 ## Conclusion
 
-The AI Architecture Context Layer transforms Zidney's architecture governance into **machine-readable metadata** that enables AI agents to understand, respect, and enforce architectural constraints automatically.
+The AI Architecture Context Layer transforms Zidney's architecture governance into
+**machine-readable metadata** that enables AI agents to understand, respect, and enforce
+architectural constraints automatically.
 
 By establishing a structured context layer, we:
 
@@ -905,7 +921,8 @@ By establishing a structured context layer, we:
 - Reduce architectural drift in AI-generated code
 - Speed onboarding of new AI assistants
 
-This stage is foundational for enabling **safe, architecture-compliant AI-assisted development** in subsequent phases.
+This stage is foundational for enabling **safe, architecture-compliant AI-assisted development** in
+subsequent phases.
 
 ---
 
@@ -913,7 +930,9 @@ This stage is foundational for enabling **safe, architecture-compliant AI-assist
 
 **Compliance Check:** ✅ **Compliant with Zidney Constitution v1.2.0 — No violations detected.**
 
-All requirements are clearly defined, acceptance conditions are measurable, assumed dependencies are documented, and risk mitigation strategies are in place. The specification is ready to proceed to the Planning phase.
+All requirements are clearly defined, acceptance conditions are measurable, assumed dependencies are
+documented, and risk mitigation strategies are in place. The specification is ready to proceed to
+the Planning phase.
 
 ---
 
@@ -921,17 +940,22 @@ All requirements are clearly defined, acceptance conditions are measurable, assu
 
 ### Session 2026-03-09
 
-This section captures clarification questions raised during the Clarify phase and their approved resolutions.
+This section captures clarification questions raised during the Clarify phase and their approved
+resolutions.
 
 #### Q1: Artifact Regeneration Automation Strategy
 
-**Question:** Should artifact regeneration be fully automated in CI on every commit, or should developers regenerate locally before each commit?
+**Question:** Should artifact regeneration be fully automated in CI on every commit, or should
+developers regenerate locally before each commit?
 
-**Ambiguity Identified:** Spec mentions both local regeneration and CI automation without clarity on which is primary or if both are required.
+**Ambiguity Identified:** Spec mentions both local regeneration and CI automation without clarity on
+which is primary or if both are required.
 
 **Approved Answer:** **Option C — Both (Local + CI Validation)**
 
-Developers must regenerate artifacts locally before commit to catch stale or incorrect artifacts early. CI performs a safety validation check to ensure artifacts are fresh and correct before main merge.
+Developers must regenerate artifacts locally before commit to catch stale or incorrect artifacts
+early. CI performs a safety validation check to ensure artifacts are fresh and correct before main
+merge.
 
 **Implementation Implication:**
 
@@ -949,9 +973,11 @@ Developers must regenerate artifacts locally before commit to catch stale or inc
 
 #### Q2: JSON Schema Formality Level
 
-**Question:** What level of schema formality and rigor is required for the 7 artifacts to ensure AI tool compatibility?
+**Question:** What level of schema formality and rigor is required for the 7 artifacts to ensure AI
+tool compatibility?
 
-**Ambiguity Identified:** Spec provides examples but lacks formal JSON schema definitions, creating risk of drift between generated artifacts and consumer expectations.
+**Ambiguity Identified:** Spec provides examples but lacks formal JSON schema definitions, creating
+risk of drift between generated artifacts and consumer expectations.
 
 **Approved Answer:** **TypeScript Interfaces + JSON Schema Files**
 
@@ -978,9 +1004,11 @@ Developers must regenerate artifacts locally before commit to catch stale or inc
 
 #### Q3: Artifact Versioning Strategy
 
-**Question:** Should AI context artifacts include version metadata to handle breaking changes to schemas over time?
+**Question:** Should AI context artifacts include version metadata to handle breaking changes to
+schemas over time?
 
-**Ambiguity Identified:** No strategy documented for managing schema evolution or backward compatibility as Zidney architecture evolves.
+**Ambiguity Identified:** No strategy documented for managing schema evolution or backward
+compatibility as Zidney architecture evolves.
 
 **Approved Answer:** **Yes — Semantic Versioning in Artifact Metadata**
 
@@ -1007,9 +1035,11 @@ Developers must regenerate artifacts locally before commit to catch stale or inc
 
 #### Q4: Change-Triggered Artifact Regeneration
 
-**Question:** Should artifact generation be triggered only when governance sources (ADRs, module-boundaries.json, infra-audit outputs) actually change, or always run as part of the build?
+**Question:** Should artifact generation be triggered only when governance sources (ADRs,
+module-boundaries.json, infra-audit outputs) actually change, or always run as part of the build?
 
-**Ambiguity Identified:** Spec lacks guidance on optimization to avoid unnecessary regenerations and CI overhead.
+**Ambiguity Identified:** Spec lacks guidance on optimization to avoid unnecessary regenerations and
+CI overhead.
 
 **Approved Answer:** **Intelligent Change Detection with Traceability**
 
@@ -1043,9 +1073,11 @@ Developers must regenerate artifacts locally before commit to catch stale or inc
 
 #### Q5: AI Tool Integration Points and Access Patterns
 
-**Question:** Which AI tools should consume these artifacts, and through what mechanisms do they access them? How do we integrate with existing governance automation?
+**Question:** Which AI tools should consume these artifacts, and through what mechanisms do they
+access them? How do we integrate with existing governance automation?
 
-**Ambiguity Identified:** Spec mentions AI tools but lacks specific integration patterns and access mechanisms.
+**Ambiguity Identified:** Spec mentions AI tools but lacks specific integration patterns and access
+mechanisms.
 
 **Approved Answer:** **Multi-Tool Ecosystem with Standard Access Patterns**
 

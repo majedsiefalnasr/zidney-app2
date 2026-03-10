@@ -6,8 +6,7 @@
 - Task: T037
 - Phase: 6 - Polish and Deployment Readiness
 -
-- Pre-deployment verification, deployment steps, and rollback plan
-  \*/
+- Pre-deployment verification, deployment steps, and rollback plan \*/
 
 # Master Database Implementation Checklist
 

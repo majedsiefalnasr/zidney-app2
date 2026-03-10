@@ -364,7 +364,8 @@ All tasks MUST maintain:
 
 ✅ **Locked Decision 1 (Pagination Agnostic):** Embedded in Task 5A; verified in DataTable.vue  
 ✅ **Locked Decision 2 (Row Actions Async-First):** Ready for Task 5B implementation  
-✅ **Locked Decision 3 (Filter Serialization URL-Primary):** Embedded in Tasks 2A, 3A; ready for Task 5C  
+✅ **Locked Decision 3 (Filter Serialization URL-Primary):** Embedded in Tasks 2A, 3A; ready for
+Task 5C  
 ✅ **Locked Decision 4 (Column Accessor Conditional):** Embedded in Tasks 1, 5A  
 ✅ **Locked Decision 5 (Multi-Language Min 1 Required):** Embedded in Tasks 1, 3D; ready for Task 6C
 

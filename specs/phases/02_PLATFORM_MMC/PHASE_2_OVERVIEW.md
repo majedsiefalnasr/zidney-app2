@@ -353,5 +353,4 @@ Only then may Phase 3 begin.
 
 ---
 
-Next Phase:
-03_BACKOFFICE_CORE
+Next Phase: 03_BACKOFFICE_CORE

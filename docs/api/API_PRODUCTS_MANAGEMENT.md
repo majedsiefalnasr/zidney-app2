@@ -2,7 +2,9 @@
 
 ## Overview
 
-The Products Management API provides comprehensive endpoints for managing exam products in the Zidney platform. This is part of the MMC (Master Management Console) and manages the product catalog with version control and audit logging.
+The Products Management API provides comprehensive endpoints for managing exam products in the
+Zidney platform. This is part of the MMC (Master Management Console) and manages the product catalog
+with version control and audit logging.
 
 ## Base URL
 
@@ -108,11 +110,7 @@ Create a new product with initial version 1.
     "name": { "en": "Calculus Assessment", "ar": "تقييم الحساب" },
     "slug": "calculus-assessment",
     "description": "Comprehensive calculus assessment",
-    "enabled_modules": [
-      "MODULE_ASSESSMENT",
-      "MODULE_ATTEMPT",
-      "MODULE_REPORTING"
-    ],
+    "enabled_modules": ["MODULE_ASSESSMENT", "MODULE_ATTEMPT", "MODULE_REPORTING"],
     "status": "ACTIVE",
     "current_version": 1,
     "created_at": "2024-01-15T10:30:00Z",
@@ -205,11 +203,7 @@ Retrieve a single product by ID.
     "name": { "en": "Calculus Assessment", "ar": "تقييم الحساب" },
     "slug": "calculus-assessment",
     "description": "Comprehensive calculus assessment",
-    "enabled_modules": [
-      "MODULE_ASSESSMENT",
-      "MODULE_ATTEMPT",
-      "MODULE_REPORTING"
-    ],
+    "enabled_modules": ["MODULE_ASSESSMENT", "MODULE_ATTEMPT", "MODULE_REPORTING"],
     "status": "ACTIVE",
     "current_version": 3,
     "created_at": "2024-01-15T10:30:00Z",
@@ -257,11 +251,7 @@ Update product details and create new version.
     "name": { "en": "Updated Name", "ar": "اسم محدث" },
     "slug": "calculus-assessment",
     "description": "Updated description",
-    "enabled_modules": [
-      "MODULE_ASSESSMENT",
-      "MODULE_ATTEMPT",
-      "MODULE_CONTENT"
-    ],
+    "enabled_modules": ["MODULE_ASSESSMENT", "MODULE_ATTEMPT", "MODULE_CONTENT"],
     "status": "ACTIVE",
     "current_version": 4,
     "created_at": "2024-01-15T10:30:00Z",
@@ -539,7 +529,8 @@ Available feature modules for products:
 | MODULE_PROCTOR    | Proctoring capabilities            |
 | MODULE_ANALYTICS  | Advanced analytics                 |
 
-At least one module must be enabled when creating a product. Multiple modules can be enabled simultaneously.
+At least one module must be enabled when creating a product. Multiple modules can be enabled
+simultaneously.
 
 ## Versioning
 

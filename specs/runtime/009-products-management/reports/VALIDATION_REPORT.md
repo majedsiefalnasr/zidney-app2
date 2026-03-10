@@ -18,14 +18,17 @@
 
 ## Executive Summary
 
-The Products Management API plan demonstrates **strong architectural foundations** in schema design, transaction management, and domain layer organization. However, **4 critical acceptance criteria are unmet** or insufficiently documented:
+The Products Management API plan demonstrates **strong architectural foundations** in schema design,
+transaction management, and domain layer organization. However, **4 critical acceptance criteria are
+unmet** or insufficiently documented:
 
 1. **Rate Limiting Strategy** – Not documented (CRITICAL)
 2. **API Versioning** – Missing from URI path (HIGH)
 3. **OpenAPI 3.0 Specification** – Not generated (MEDIUM)
 4. **Metrics Collection** – Not defined (MEDIUM)
 
-These gaps represent **non-negotiable architectural requirements** that must be addressed before proceeding to implementation.
+These gaps represent **non-negotiable architectural requirements** that must be addressed before
+proceeding to implementation.
 
 ---
 
@@ -66,7 +69,8 @@ These gaps represent **non-negotiable architectural requirements** that must be 
 - ✓ Zod schema defined: `createProductSchema` with validators for all fields
 - ✓ Response wrapper standardized: `ApiResponse<T>` with `{success, data, error}` structure
 - ✓ Error format consistent: All errors use `{code, message}` structure
-- ✓ Request validation layers: API layer (Zod) + Domain layer (validation functions) + DB (check constraints)
+- ✓ Request validation layers: API layer (Zod) + Domain layer (validation functions) + DB (check
+  constraints)
 
 **Evidence from Plan:**
 
@@ -109,17 +113,17 @@ interface ApiResponse<T> {
 
 ```typescript
 // Defaults prevent performance issues
-const limit = Math.min(query.limit || 50, 100) // Max 100
-const offset = query.offset || 0
+const limit = Math.min(query.limit || 50, 100); // Max 100
+const offset = query.offset || 0;
 
 // Status filter logic
-if (query.status === 'all') {
+if (query.status === "all") {
   // All products
-} else if (query.status === 'INACTIVE') {
-  q = q.where(eq(products.status, 'INACTIVE'))
+} else if (query.status === "INACTIVE") {
+  q = q.where(eq(products.status, "INACTIVE"));
 } else {
   // Default: ACTIVE only
-  q = q.where(eq(products.status, 'ACTIVE'))
+  q = q.where(eq(products.status, "ACTIVE"));
 }
 ```
 
@@ -138,13 +142,13 @@ if (query.status === 'all') {
 - ✓ Pagination metadata returned:
   ```typescript
   interface ListProductsResponse {
-    data: ProductResponse[]
-    pagination: { limit: number; offset: number; total: number }
+    data: ProductResponse[];
+    pagination: { limit: number; offset: number; total: number };
   }
   ```
 - ✓ Query count prevents full table scans:
   ```typescript
-  const total = await db.select({ count: countDistinct(products.id) })
+  const total = await db.select({ count: countDistinct(products.id) });
   ```
 
 **SQL Pattern Prevents N+1 Queries:**
@@ -193,14 +197,14 @@ Single query for total, single query for paginated data.
 
 ```typescript
 if (query.search) {
-  const searchPattern = `%${query.search.toLowerCase()}%`
+  const searchPattern = `%${query.search.toLowerCase()}%`;
   q = q.where(
     or(
       sql`LOWER(products.name->>'en') LIKE ${searchPattern}`,
       sql`LOWER(products.name->>'ar') LIKE ${searchPattern}`,
-      sql`LOWER(products.slug) LIKE ${searchPattern}`
-    )
-  )
+      sql`LOWER(products.slug) LIKE ${searchPattern}`,
+    ),
+  );
 }
 ```
 
@@ -269,12 +273,12 @@ if (query.search) {
 **License Validation:**
 
 ```typescript
-if (license.status === 'SOFT_LOCKED') {
-  return c.json({ error: { code: 'WORKSPACE_LOCKED' } }, 423)
+if (license.status === "SOFT_LOCKED") {
+  return c.json({ error: { code: "WORKSPACE_LOCKED" } }, 423);
 }
 
-if (license.status === 'ARCHIVED') {
-  return c.json({ error: { code: 'WORKSPACE_ARCHIVED' } }, 403)
+if (license.status === "ARCHIVED") {
+  return c.json({ error: { code: "WORKSPACE_ARCHIVED" } }, 403);
 }
 ```
 
@@ -284,8 +288,7 @@ if (license.status === 'ARCHIVED') {
 - All role checks from JWT claims (immutable after auth)
 - No body-based role override
 
-**Authorization Decorator:**
-All routes explicitly list middleware dependencies.
+**Authorization Decorator:** All routes explicitly list middleware dependencies.
 
 **Compliance:** Authorization model comprehensive, layered, and role-gated.
 
@@ -426,8 +429,7 @@ ISO 8601 format with `Z` timezone indicator correctly applied.
 
 **Validation:**
 
-**API Versioning Requirement:**
-Acceptance criteria states:
+**API Versioning Requirement:** Acceptance criteria states:
 
 ```
 - API versioning via URL (/api/v1/mmc/products) or header
@@ -490,21 +492,15 @@ Must clarify one of:
 
 **Plan Provides:**
 
-✓ Request/Response schemas (TypeScript interfaces)
-✓ Error codes with descriptions (table format)
-✓ Examples: Create product example shown
-✓ Error response examples shown
+✓ Request/Response schemas (TypeScript interfaces) ✓ Error codes with descriptions (table format) ✓
+Examples: Create product example shown ✓ Error response examples shown
 
 **Plan Lacks:**
 
-✗ No `api-spec.yaml` or `openapi.json` generated
-✗ No formal OpenAPI 3.0 document structure
-✗ No `components/schemas` section
-✗ No `paths` section with formal method definitions
-✗ No `info` section (title, version, description)
-✗ No `security` section (JWT bearer scheme)
-✗ No request body encoding specifications
-✗ No response header definitions (e.g., X-RateLimit-\*)
+✗ No `api-spec.yaml` or `openapi.json` generated ✗ No formal OpenAPI 3.0 document structure ✗ No
+`components/schemas` section ✗ No `paths` section with formal method definitions ✗ No `info` section
+(title, version, description) ✗ No `security` section (JWT bearer scheme) ✗ No request body encoding
+specifications ✗ No response header definitions (e.g., X-RateLimit-\*)
 
 **Impact:**
 
@@ -564,20 +560,20 @@ paths:
 
    ```typescript
    logger.info({
-     action: 'product_created',
+     action: "product_created",
      productId,
      slug,
      correlationId,
      workspaceId,
      userId,
-   })
+   });
    ```
 
 2. Correlation ID Middleware:
 
    ```typescript
-   const correlationId = c.req.header('x-correlation-id') || generateUUID()
-   c.res.headers.set('x-correlation-id', correlationId)
+   const correlationId = c.req.header("x-correlation-id") || generateUUID();
+   c.res.headers.set("x-correlation-id", correlationId);
    ```
 
 3. Required Log Fields:
@@ -696,8 +692,7 @@ metrics.histogram('api_request_duration_ms', duration, {
 - DDoS protection missing
 - Production reliability at risk
 
-**Required Action:**
-Add complete rate limiting section specifying:
+**Required Action:** Add complete rate limiting section specifying:
 
 - Limits per endpoint
 - Per-user vs per-IP decision
@@ -720,8 +715,7 @@ Add complete rate limiting section specifying:
 - No header-based versioning documented
 - Breaking change path unclear
 
-**Required Action:**
-Choose and document one:
+**Required Action:** Choose and document one:
 
 1. Add `/v1/` to all endpoints: `/api/v1/mmc/products`
 2. Document header versioning: `Accept: application/vnd.zidney.v1+json`
@@ -741,8 +735,7 @@ Choose and document one:
 - No SDK generation possible
 - No Swagger/ReDoc available
 
-**Required Action:**
-Generate `api-spec.yaml` (or `.json`) with:
+**Required Action:** Generate `api-spec.yaml` (or `.json`) with:
 
 - All paths, methods, parameters
 - Request/response schemas
@@ -765,8 +758,7 @@ Generate `api-spec.yaml` (or `.json`) with:
 - Observability stack incomplete
 - Alert thresholds missing
 
-**Required Action:**
-Define metrics section specifying:
+**Required Action:** Define metrics section specifying:
 
 - Latency histograms (p50, p95, p99)
 - Error rates by endpoint

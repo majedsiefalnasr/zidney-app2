@@ -8,7 +8,8 @@
 
 ## 1. Purpose
 
-Zidney Agent Governance defines the mandatory behavioral rules for all AI agents operating within the Zidney engineering system.
+Zidney Agent Governance defines the mandatory behavioral rules for all AI agents operating within
+the Zidney engineering system.
 
 This document governs:
 
@@ -209,7 +210,8 @@ No agent may operate outside this governance model.
 
 ## 7. UI System Enforcement (Shadcn-Vue + Tailwind v4)
 
-All agents generating UI components, layouts, or styling MUST enforce the following rules without exception.
+All agents generating UI components, layouts, or styling MUST enforce the following rules without
+exception.
 
 ### Rule 7.1 — Shadcn-Vue Base Component Requirement
 
@@ -232,8 +234,7 @@ Agents MUST NOT:
 - ❌ Bare `<input>` elements
 - ❌ Custom modal implementation
 
-**Verdict Logic:**
-If any custom component exists without a shadcn-vue base:
+**Verdict Logic:** If any custom component exists without a shadcn-vue base:
 
 ```
 VERDICT: BLOCKED — Custom component detected without shadcn-vue base
@@ -393,18 +394,18 @@ components/
 </template>
 
 <script setup lang="ts">
-import { defineProps } from 'vue'
-import { Button } from '@zidney/shadcn-vue'
+import { defineProps } from "vue";
+import { Button } from "@zidney/shadcn-vue";
 
 interface Props {
-  label: string
+  label: string;
 }
 
-defineProps<Props>()
+defineProps<Props>();
 
 const handleClick = () => {
   // Event handling
-}
+};
 </script>
 
 <style scoped>
@@ -418,8 +419,8 @@ const handleClick = () => {
 **index.ts:**
 
 ```typescript
-export { default as ComponentName } from './ComponentName.vue'
-export type { Props as ComponentNameProps } from './ComponentName.vue'
+export { default as ComponentName } from "./ComponentName.vue";
+export type { Props as ComponentNameProps } from "./ComponentName.vue";
 ```
 
 ---
@@ -441,17 +442,17 @@ Agents MUST NOT:
 
 ```typescript
 interface Props {
-  variant: 'primary' | 'secondary' | 'outline'
-  size: 'sm' | 'md' | 'lg'
-  disabled?: boolean
+  variant: "primary" | "secondary" | "outline";
+  size: "sm" | "md" | "lg";
+  disabled?: boolean;
 }
 
-defineProps<Props>()
+defineProps<Props>();
 
 const emit = defineEmits<{
-  click: [event: MouseEvent]
-  submit: [value: string]
-}>()
+  click: [event: MouseEvent];
+  submit: [value: string];
+}>();
 ```
 
 **❌ INCORRECT:**
@@ -461,9 +462,9 @@ const props = defineProps({
   variant: String, // ❌ No specific type
   size: Function, // ❌ Wrong type
   data: Object, // ❌ Implicit any
-})
+});
 
-const emit = defineEmits(['click', 'submit']) // ❌ No types
+const emit = defineEmits(["click", "submit"]); // ❌ No types
 ```
 
 ---
@@ -505,8 +506,7 @@ Agents MUST NOT:
 /* global.css */ .wrapper { display: flex; }
 ```
 
-**Verdict Logic:**
-If unscoped styles detected:
+**Verdict Logic:** If unscoped styles detected:
 
 ```
 VERDICT: BLOCKED — CSS pollution detected
@@ -535,8 +535,7 @@ All component styling MUST come from:
 3. `@apply` directive within scoped styles
 4. Workspace-overrideable CSS variables ONLY (brand colors)
 
-**Verdict Logic:**
-If manual styling detected:
+**Verdict Logic:** If manual styling detected:
 
 ```
 VERDICT: BLOCKED — Custom CSS detected outside Tailwind
@@ -606,7 +605,8 @@ Escalation: Requires manual remediation + re-audit
 
 ## 8. Effective Date
 
-This governance model is effective immediately upon adoption and applies to all current and future Zidney AI agents.
+This governance model is effective immediately upon adoption and applies to all current and future
+Zidney AI agents.
 
 ---
 

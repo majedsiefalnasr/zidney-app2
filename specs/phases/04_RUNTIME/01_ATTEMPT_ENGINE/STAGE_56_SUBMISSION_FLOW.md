@@ -49,9 +49,7 @@ POST /attempts/:attemptId/submit
 
 Optional body:
 
-{
-forced: boolean
-}
+{ forced: boolean }
 
 Forced is used internally for scheduled auto-submit.
 
@@ -73,8 +71,7 @@ On request:
 
 For scheduled attempts:
 
-- If now > scheduled_end + tolerance
-  → reject manual submission
+- If now > scheduled_end + tolerance → reject manual submission
 - Worker may force submission
 
 ---
@@ -91,8 +88,7 @@ Manual submission after expiration:
 - Return 409
 - Do not grade
 
-Expiration does not bypass grading.
-It only changes submission source.
+Expiration does not bypass grading. It only changes submission source.
 
 ---
 
@@ -139,19 +135,12 @@ BEGIN
 - Validate status = IN_PROGRESS
 - Lock attempt row FOR UPDATE
 - Compute grading
-- Update attempt:
-  status = GRADED
-  submitted_at = now
-  graded_at = now
-  total_score
-  percentage
-  passed
+- Update attempt: status = GRADED submitted_at = now graded_at = now total_score percentage passed
   forced_submission_reason (nullable)
 
 COMMIT
 
-If any failure:
-ROLLBACK
+If any failure: ROLLBACK
 
 No partial state allowed.
 
@@ -161,8 +150,7 @@ No partial state allowed.
 
 Update statement must include:
 
-WHERE attempt_id = ?
-AND status = 'IN_PROGRESS'
+WHERE attempt_id = ? AND status = 'IN_PROGRESS'
 
 Rows affected must equal 1.
 
@@ -184,8 +172,7 @@ After submission:
 - No answer modification allowed
 - No status reversal allowed
 
-Only allowed future state:
-GRADED (terminal)
+Only allowed future state: GRADED (terminal)
 
 ---
 
@@ -195,8 +182,7 @@ Worker must:
 
 - Detect expired attempts
 - Call internal submission service
-- Mark:
-  forced_submission_reason = "TIME_EXPIRED"
+- Mark: forced_submission_reason = "TIME_EXPIRED"
 
 Auto-submit uses identical grading logic.
 
@@ -212,8 +198,7 @@ Must support:
 - Without deadlocks
 - Without race conditions
 
-Row-level locking only.
-No table locking.
+Row-level locking only. No table locking.
 
 ---
 
@@ -264,5 +249,4 @@ Stage complete when:
 - Submission without transaction
 - Multiple grading passes
 
-Submission is finalization.
-After this stage, attempt is immutable.
+Submission is finalization. After this stage, attempt is immutable.

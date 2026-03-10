@@ -64,14 +64,16 @@ EXIT: 0
 EXIT: 0
 ```
 
-**Warnings:** All from `@typescript-eslint/no-explicit-any` (rule level: "warn") — non-blocking per project ESLint config. This is expected for the current codebase state; reducing explicit `any` warnings is follow-on work.
+**Warnings:** All from `@typescript-eslint/no-explicit-any` (rule level: "warn") — non-blocking per
+project ESLint config. This is expected for the current codebase state; reducing explicit `any`
+warnings is follow-on work.
 
-**Lint errors resolved in this stage:**
-| # | File | Error | Fix Applied |
-|---|---|---|---|
-| 1 | `apps/api/src/utils/idempotency.ts:176` | `Function` type | Replaced with `() => Promise<void>` |
-| 2-7 | `packages/domain-core/mmc-dashboard/queries/*.ts` | Parsing error: Invalid character | Reformatted 6 single-line files to proper newline-separated content |
-| 8-9 | `packages/validation/src/password.validator.ts:68,70` | `no-useless-escape` | Removed `\[` and `\"` unnecessary escapes |
+**Lint errors resolved in this stage:** | # | File | Error | Fix Applied | |---|---|---|---| | 1 |
+`apps/api/src/utils/idempotency.ts:176` | `Function` type | Replaced with `() => Promise<void>` | |
+2-7 | `packages/domain-core/mmc-dashboard/queries/*.ts` | Parsing error: Invalid character |
+Reformatted 6 single-line files to proper newline-separated content | | 8-9 |
+`packages/validation/src/password.validator.ts:68,70` | `no-useless-escape` | Removed `\[` and `\"`
+unnecessary escapes |
 
 ---
 
@@ -105,7 +107,10 @@ Test Files  12 failed | 156 passed | 7 skipped (175)
 EXIT: 1
 ```
 
-**Root cause:** All 137 test failures are `ECONNREFUSED ::1:3000` / `ECONNREFUSED 127.0.0.1:3000` — no API server running in local dev environment. These are infrastructure-dependency failures, not TypeScript or code failures. Integration tests pass in CI where the full stack is available (Docker Compose test environment).
+**Root cause:** All 137 test failures are `ECONNREFUSED ::1:3000` / `ECONNREFUSED 127.0.0.1:3000` —
+no API server running in local dev environment. These are infrastructure-dependency failures, not
+TypeScript or code failures. Integration tests pass in CI where the full stack is available (Docker
+Compose test environment).
 
 ---
 
@@ -131,7 +136,8 @@ EXIT: 0
 
 ## ESLint ban-ts-comment Enforcement
 
-Rule: `@typescript-eslint/ban-ts-comment` upgraded from "warn" to **"error"** with `descriptionFormat: "^: .+ \\[.+\\]$"`.  
+Rule: `@typescript-eslint/ban-ts-comment` upgraded from "warn" to **"error"** with
+`descriptionFormat: "^: .+ \\[.+\\]$"`.  
 All `@ts-ignore` directives verified to conform to: `// @ts-ignore: <reason> [<ref>]`  
 Non-conforming comments fixed: **152** across **30 files**  
 Result: `bunx eslint . --quiet` → **EXIT: 0**

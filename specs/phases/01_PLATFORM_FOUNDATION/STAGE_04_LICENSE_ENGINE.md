@@ -1,8 +1,7 @@
 # STAGE 04 – License Engine
 
-Phase: 1 – Platform Foundation
-Status: Critical
-Scope: License lifecycle, limits, and state transitions
+Phase: 1 – Platform Foundation Status: Critical Scope: License lifecycle, limits, and state
+transitions
 
 ---
 
@@ -118,30 +117,25 @@ DELETED
 
 ## State Transitions
 
-ACTIVE → SOFT_LOCKED
-Trigger:
+ACTIVE → SOFT_LOCKED Trigger:
 
 - Payment failure
 - Manual admin action
 
-SOFT_LOCKED → ACTIVE
-Trigger:
+SOFT_LOCKED → ACTIVE Trigger:
 
 - Renewal within 90 days
 
-SOFT_LOCKED → ARCHIVED
-Trigger:
+SOFT_LOCKED → ARCHIVED Trigger:
 
 - soft_lock_until expired
 
-ARCHIVED → ACTIVE
-Trigger:
+ARCHIVED → ACTIVE Trigger:
 
 - Manual restore
 - Snapshot restore
 
-ARCHIVED → DELETED
-Trigger:
+ARCHIVED → DELETED Trigger:
 
 - Manual confirmation only
 
@@ -227,8 +221,7 @@ Product version enforcement:
 
 - If license.expected_product_version incompatible with runtime → Reject request (426)
 
-License stores the expected contract.
-Tenant stores the actual applied version.
+License stores the expected contract. Tenant stores the actual applied version.
 
 License must never store runtime-derived schema values.
 
@@ -287,11 +280,9 @@ License validation is required for:
 
 On every request:
 
-If tenant.schema_version < minimum_supported_version
-→ Reject request (426 Upgrade Required)
+If tenant.schema_version < minimum_supported_version → Reject request (426 Upgrade Required)
 
-If license.product_version is outdated and incompatible
-→ Reject request (426)
+If license.product_version is outdated and incompatible → Reject request (426)
 
 This prevents:
 
@@ -347,11 +338,9 @@ ARCHIVED workspace must:
 If status = SOFT_LOCKED:
 
 - soft_lock_until must be validated on every request
-- If current_time > soft_lock_until
-  → Transition to ARCHIVED automatically
+- If current_time > soft_lock_until → Transition to ARCHIVED automatically
 
-Soft lock enforcement must not rely on cron only.
-Middleware must enforce expiration boundary.
+Soft lock enforcement must not rely on cron only. Middleware must enforce expiration boundary.
 
 ---
 
@@ -425,12 +414,10 @@ Stage complete when:
 
 License Engine controls revenue and operational status.
 
-If lifecycle is inconsistent,
-institutional trust is broken.
+If lifecycle is inconsistent, institutional trust is broken.
 
 No provisioning logic may proceed without stable license lifecycle.
 
 ---
 
-Next stage:
-STAGE_05_TENANT_PROVISIONING_SERVICE
+Next stage: STAGE_05_TENANT_PROVISIONING_SERVICE

@@ -8,7 +8,11 @@
 
 ## Summary
 
-9 atomic tasks generated for `STAGE_INFRA_06_ARCHITECTURE_GUARD`. All tasks are governance-tooling–only — no API routes, no database schema changes, no Worker jobs, no frontend code. Tasks are organized into two modified files and seven new files, covering one additive change to `scripts/ai-guard.ts`, one `package.json` script addition, five test fixture files, one unit test suite, and one static contract test.
+9 atomic tasks generated for `STAGE_INFRA_06_ARCHITECTURE_GUARD`. All tasks are
+governance-tooling–only — no API routes, no database schema changes, no Worker jobs, no frontend
+code. Tasks are organized into two modified files and seven new files, covering one additive change
+to `scripts/ai-guard.ts`, one `package.json` script addition, five test fixture files, one unit test
+suite, and one static contract test.
 
 ---
 
@@ -75,9 +79,14 @@ T009 (static tests) — independent
 
 ## Open Risks
 
-- **T001**: Adding `export` to functions in `scripts/ai-guard.ts` is non-logic but must be verified that TypeScript compilation still passes. Risk: Low.
-- **T008**: Unit tests call `extractImports()` which reads fixture files from disk via `fs.readFileSync`. Fixture files (T003–T007) must exist before T008 runs. Risk: Mitigated by execution order.
-- **T009**: Static test asserts rule values against `ARCHITECTURE_CONTRACT.json`. If the contract is regenerated with different structure before tests run, assertions may fail. Risk: Low — contract is stable.
+- **T001**: Adding `export` to functions in `scripts/ai-guard.ts` is non-logic but must be verified
+  that TypeScript compilation still passes. Risk: Low.
+- **T008**: Unit tests call `extractImports()` which reads fixture files from disk via
+  `fs.readFileSync`. Fixture files (T003–T007) must exist before T008 runs. Risk: Mitigated by
+  execution order.
+- **T009**: Static test asserts rule values against `ARCHITECTURE_CONTRACT.json`. If the contract is
+  regenerated with different structure before tests run, assertions may fail. Risk: Low — contract
+  is stable.
 
 ---
 

@@ -8,7 +8,12 @@
 
 ## Summary
 
-All 39 atomic tasks executed and marked `[X]`. Workflow state machine engine implemented as a pure domain package (`packages/domain-core/src/workflow/`), tenant migration created (`20260301_002_workflow_engine.ts`), API route handler implemented following the established `routes/backoffice/<feature>/` architecture pattern (F-001 drift correction applied). Full test suite: 41 unit tests + 16 integration tests, all passing. ESLint and TypeScript clean on all new files.
+All 39 atomic tasks executed and marked `[X]`. Workflow state machine engine implemented as a pure
+domain package (`packages/domain-core/src/workflow/`), tenant migration created
+(`20260301_002_workflow_engine.ts`), API route handler implemented following the established
+`routes/backoffice/<feature>/` architecture pattern (F-001 drift correction applied). Full test
+suite: 41 unit tests + 16 integration tests, all passing. ESLint and TypeScript clean on all new
+files.
 
 ---
 
@@ -121,7 +126,9 @@ All 39 atomic tasks executed and marked `[X]`. Workflow state machine engine imp
 
 ## Architecture Drift Correction Applied
 
-**F-001 (from Step 5 Analyze):** The plan specified `workflow.routes.ts` in `apps/api/src/modules/workflow/`. Per established codebase pattern (confirmed via translation module), route handlers must live in `apps/api/src/routes/backoffice/<feature>/`.
+**F-001 (from Step 5 Analyze):** The plan specified `workflow.routes.ts` in
+`apps/api/src/modules/workflow/`. Per established codebase pattern (confirmed via translation
+module), route handlers must live in `apps/api/src/routes/backoffice/<feature>/`.
 
 **Applied correction:**
 

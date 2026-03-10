@@ -9,7 +9,8 @@
 
 ## Executive Summary
 
-STAGE 06 Attempt Engine implementation is **100% compliant** with all 8 ADRs and constitutional requirements.
+STAGE 06 Attempt Engine implementation is **100% compliant** with all 8 ADRs and constitutional
+requirements.
 
 | Requirement                      | Status  | Evidence                                         | Verified   |
 | -------------------------------- | ------- | ------------------------------------------------ | ---------- |
@@ -26,7 +27,8 @@ STAGE 06 Attempt Engine implementation is **100% compliant** with all 8 ADRs and
 
 ## ADR-0001: Database-Per-Tenant Isolation
 
-**Requirement:** All database queries must include `workspace_id` filter to prevent cross-tenant data leaks.
+**Requirement:** All database queries must include `workspace_id` filter to prevent cross-tenant
+data leaks.
 
 ### Verification
 
@@ -48,16 +50,16 @@ grep -r "SELECT.*FROM.*attempts\|SELECT.*FROM.*attempt_progress\|SELECT.*FROM.*g
 
 ```typescript
 // ✅ CORRECT (ALL queries include workspace_id)
-const attempt = await db.query(
-  `SELECT * FROM attempts WHERE workspace_id = $1 AND id = $2`,
-  [workspaceId, attemptId]
-)
+const attempt = await db.query(`SELECT * FROM attempts WHERE workspace_id = $1 AND id = $2`, [
+  workspaceId,
+  attemptId,
+]);
 
 // ❌ NOT FOUND IN CODEBASE
 const attempt = await db.query(
   `SELECT * FROM attempts WHERE id = $1`, // WRONG!
-  [attemptId]
-)
+  [attemptId],
+);
 ```
 
 **Implementation Details:**
@@ -72,7 +74,7 @@ const attempt = await db.query(
 
    ```typescript
    // All queries use this pattern:
-   db.query(queries.selectAttempt, [workspaceId, attemptId])
+   db.query(queries.selectAttempt, [workspaceId, attemptId]);
    // WHERE queries.selectAttempt includes workspace_id filter
    ```
 
@@ -90,13 +92,15 @@ const attempt = await db.query(
 
 - [apps/api/src/middleware/tenantResolver.ts](../../apps/api/src/middleware/tenantResolver.ts)
 - [apps/api/src/db/queryBuilder.ts](../../apps/api/src/db/queryBuilder.ts)
-- [apps/api/src/handlers/attempts/\*.ts](../../apps/api/src/handlers/attempts/) (all use workspace_id)
+- [apps/api/src/handlers/attempts/\*.ts](../../apps/api/src/handlers/attempts/) (all use
+  workspace_id)
 
 ---
 
 ## ADR-0002: Snapshot-Based Attempt Immutability
 
-**Requirement:** Grading must use only snapshot data, never live configuration. Attempts must capture question list, options, and grading rules at creation time.
+**Requirement:** Grading must use only snapshot data, never live configuration. Attempts must
+capture question list, options, and grading rules at creation time.
 
 ### Verification
 
@@ -121,7 +125,7 @@ async function gradeAttempt(
   attempt: Attempt,
   questionSnapshot: Question[], // ← Frozen at creation
   gradingConfigSnapshot: GradingConfig, // ← Frozen at creation
-  progressData: ProgressRecord[]
+  progressData: ProgressRecord[],
 ): Promise<GradingResult> {
   // All grading logic uses snapshot parameters
   // NEVER fetches live exam data
@@ -131,9 +135,7 @@ async function gradeAttempt(
 }
 
 // ❌ NOT FOUND
-const liveQuestions = await db.query(
-  'SELECT * FROM questions WHERE exam_id = $1'
-)
+const liveQuestions = await db.query("SELECT * FROM questions WHERE exam_id = $1");
 // This would be a bug!
 ```
 
@@ -175,10 +177,10 @@ for (let i = 0; i < 100; i++) {
   const score = await scoreEngine.grade(
     snapshot.questionSnapshot,
     snapshot.gradingConfigSnapshot,
-    userResponses
-  )
+    userResponses,
+  );
 
-  expect(score).toBe(18) // All iterations identical
+  expect(score).toBe(18); // All iterations identical
 }
 ```
 
@@ -192,7 +194,8 @@ for (let i = 0; i < 100; i++) {
 
 ## ADR-0006: Runtime-Authoritative Time
 
-**Requirement:** All time validation and tracking must use server NOW() timestamp. Client clocks cannot be trusted.
+**Requirement:** All time validation and tracking must use server NOW() timestamp. Client clocks
+cannot be trusted.
 
 ### Verification
 
@@ -218,17 +221,17 @@ const submission = await db.query(
    SET status = 'SUBMITTED', 
        submitted_at = NOW(),    -- ← Server time (PostgreSQL NOW())
        updated_at = NOW()
-   WHERE id = $1 AND workspace_id = $2`
-)
+   WHERE id = $1 AND workspace_id = $2`,
+);
 
 // Time validation
-const remainingTime = duration - (NOW() - attempt.created_at)
+const remainingTime = duration - (NOW() - attempt.created_at);
 if (remainingTime <= 0) {
-  attempt.status = 'EXPIRED'
+  attempt.status = "EXPIRED";
 }
 
 // ❌ NOT FOUND (this would be wrong)
-const remainingTime = duration - (body.clientNow - body.clientStartTime)
+const remainingTime = duration - (body.clientNow - body.clientStartTime);
 ```
 
 **Implementation:**
@@ -257,7 +260,8 @@ const remainingTime = duration - (body.clientNow - body.clientStartTime)
 
 ## ADR-0007: Product Version Compatibility
 
-**Requirement:** Attempt grading must verify schema and product version compatibility at create, submit, and grade time.
+**Requirement:** Attempt grading must verify schema and product version compatibility at create,
+submit, and grade time.
 
 ### Verification
 
@@ -279,21 +283,21 @@ grep -r "schema_version\|product_version" apps/api/src/ apps/worker/src/ | wc -l
    ```typescript
    // License middleware validates
    async function validateLicense(req, res, next) {
-     const license = await getLicense(workspaceId)
+     const license = await getLicense(workspaceId);
 
-     if (license.schema_version !== '1.0.0') {
+     if (license.schema_version !== "1.0.0") {
        return res.status(426).json({
-         error: { code: 'SCHEMA_MISMATCH' },
-       })
+         error: { code: "SCHEMA_MISMATCH" },
+       });
      }
 
-     if (license.product_version < '1.0.0') {
+     if (license.product_version < "1.0.0") {
        return res.status(426).json({
-         error: { code: 'INCOMPATIBLE_VERSION' },
-       })
+         error: { code: "INCOMPATIBLE_VERSION" },
+       });
      }
 
-     next()
+     next();
    }
    ```
 
@@ -302,11 +306,11 @@ grep -r "schema_version\|product_version" apps/api/src/ apps/worker/src/ | wc -l
    ```typescript
    // Version still valid (no timeout check)
    async function validateSubmit(workspaceId, attemptId) {
-     const attempt = await getAttempt(workspaceId, attemptId)
-     const license = await getLicense(workspaceId)
+     const attempt = await getAttempt(workspaceId, attemptId);
+     const license = await getLicense(workspaceId);
 
-     if (license.schema_version !== '1.0.0') {
-       throw new VersionMismatchError()
+     if (license.schema_version !== "1.0.0") {
+       throw new VersionMismatchError();
      }
    }
    ```
@@ -316,17 +320,17 @@ grep -r "schema_version\|product_version" apps/api/src/ apps/worker/src/ | wc -l
    ```typescript
    // Worker verifies schema compatibility
    async function shouldGrade(attempt, workspace) {
-     if (workspace.schema_version !== '1.0.0') {
+     if (workspace.schema_version !== "1.0.0") {
        // Cannot grade with mismatched schema
-       return false
+       return false;
      }
 
-     if (attempt.grading_config_snapshot.version !== '1.0.0') {
+     if (attempt.grading_config_snapshot.version !== "1.0.0") {
        // Cannot grade with mismatched config
-       return false
+       return false;
      }
 
-     return true
+     return true;
    }
    ```
 
@@ -343,7 +347,8 @@ grep -r "schema_version\|product_version" apps/api/src/ apps/worker/src/ | wc -l
 
 ## ADR-0008: Semantic Versioning & Migrations
 
-**Requirement:** Forward-only migrations with strict semantic versioning (MAJOR.MINOR.PATCH). All migrations increment schema_version.
+**Requirement:** Forward-only migrations with strict semantic versioning (MAJOR.MINOR.PATCH). All
+migrations increment schema_version.
 
 ### Verification
 

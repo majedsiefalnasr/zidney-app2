@@ -7,19 +7,23 @@
 
 ## Summary
 
-Establish a centralized, typed HTTP client abstraction shared across MMC, Backoffice, and Frontoffice. The current codebase has **identical duplicated** `core/api/client.ts` and `core/errors/` in all three apps. This plan extracts the shared HTTP infrastructure into a new `packages/api-client` package, introduces an injectable `HttpAdapter` interface for testability, adds missing capabilities (AbortSignal, timeout, 429 retryAfter, isNetworkError), and converts each app's `core/api/` to thin configuration wrappers.
+Establish a centralized, typed HTTP client abstraction shared across MMC, Backoffice, and
+Frontoffice. The current codebase has **identical duplicated** `core/api/client.ts` and
+`core/errors/` in all three apps. This plan extracts the shared HTTP infrastructure into a new
+`packages/api-client` package, introduces an injectable `HttpAdapter` interface for testability,
+adds missing capabilities (AbortSignal, timeout, 429 retryAfter, isNetworkError), and converts each
+app's `core/api/` to thin configuration wrappers.
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x (strict mode)
-**Primary Dependencies**: None (zero-dependency package; uses native `fetch` via injectable adapter)
-**Storage**: N/A — pure HTTP transport layer
-**Testing**: Vitest (workspace-level config already present)
-**Target Platform**: Modern browsers (native `AbortController`, `crypto.randomUUID`)
-**Project Type**: Shared monorepo package (`packages/api-client`)
-**Performance Goals**: <5ms overhead per request (header construction + interceptor pipeline)
-**Constraints**: JSON-only content type; 30s default timeout; no auto-retry on network errors
-**Scale/Scope**: 3 consuming apps (MMC, Backoffice, Frontoffice), ~15 source files in package
+**Language/Version**: TypeScript 5.x (strict mode) **Primary Dependencies**: None (zero-dependency
+package; uses native `fetch` via injectable adapter) **Storage**: N/A — pure HTTP transport layer
+**Testing**: Vitest (workspace-level config already present) **Target Platform**: Modern browsers
+(native `AbortController`, `crypto.randomUUID`) **Project Type**: Shared monorepo package
+(`packages/api-client`) **Performance Goals**: <5ms overhead per request (header construction +
+interceptor pipeline) **Constraints**: JSON-only content type; 30s default timeout; no auto-retry on
+network errors **Scale/Scope**: 3 consuming apps (MMC, Backoffice, Frontoffice), ~15 source files in
+package
 
 ## Constitution Check
 
@@ -112,7 +116,8 @@ apps/frontoffice/src/core/api/
 eslint.config.mjs              # Add no-restricted-imports for fetch/axios
 ```
 
-**Structure Decision**: New `packages/api-client` package chosen over extending `packages/ui-system` because:
+**Structure Decision**: New `packages/api-client` package chosen over extending `packages/ui-system`
+because:
 
 1. `ui-system` is Vue-component-focused; HTTP client is framework-agnostic
 2. Separate package enables independent versioning
@@ -127,40 +132,53 @@ eslint.config.mjs              # Add no-restricted-imports for fetch/axios
 
 ### AD-1: Package Location
 
-**Decision**: `packages/api-client` (new package)
-**Rationale**: HTTP client is framework-agnostic infrastructure. `packages/ui-system` is tightly coupled to Vue/shadcn. A dedicated package provides clean boundaries.
-**Alternative rejected**: Embedding in `packages/ui-system` — would pollute a Vue-specific package with HTTP concerns.
+**Decision**: `packages/api-client` (new package) **Rationale**: HTTP client is framework-agnostic
+infrastructure. `packages/ui-system` is tightly coupled to Vue/shadcn. A dedicated package provides
+clean boundaries. **Alternative rejected**: Embedding in `packages/ui-system` — would pollute a
+Vue-specific package with HTTP concerns.
 
 ### AD-2: HttpAdapter as Interface
 
-**Decision**: Define `HttpAdapter` as a TypeScript interface with a single `execute(request): Promise<RawResponse>` method.
-**Rationale**: Enables constructor injection of mock adapters for testing without any monkey-patching. Production uses `FetchAdapter`; tests use `MockAdapter`.
-**Alternative rejected**: Passing `fetchFn` parameter (current approach) — insufficient abstraction; can't mock response headers, timeouts, or abort behavior cleanly.
+**Decision**: Define `HttpAdapter` as a TypeScript interface with a single
+`execute(request): Promise<RawResponse>` method. **Rationale**: Enables constructor injection of
+mock adapters for testing without any monkey-patching. Production uses `FetchAdapter`; tests use
+`MockAdapter`. **Alternative rejected**: Passing `fetchFn` parameter (current approach) —
+insufficient abstraction; can't mock response headers, timeouts, or abort behavior cleanly.
 
 ### AD-3: Interceptor Pipeline as Functions
 
-**Decision**: Interceptors are pure functions composed in a fixed pipeline order within `createApiClient`. Not a dynamic middleware chain.
-**Rationale**: The interceptor set is known and fixed (auth, correlation, idempotency, timeout). Dynamic middleware adds complexity without benefit. Fixed pipeline is easier to test and reason about.
-**Alternative rejected**: Express-style middleware chain — over-engineered for 4 fixed interceptors.
+**Decision**: Interceptors are pure functions composed in a fixed pipeline order within
+`createApiClient`. Not a dynamic middleware chain. **Rationale**: The interceptor set is known and
+fixed (auth, correlation, idempotency, timeout). Dynamic middleware adds complexity without benefit.
+Fixed pipeline is easier to test and reason about. **Alternative rejected**: Express-style
+middleware chain — over-engineered for 4 fixed interceptors.
 
 ### AD-4: AppError as Plain Object
 
 **Decision**: `AppError` is a plain TypeScript interface, not a class extending `Error`.
-**Rationale**: Plain objects serialize cleanly, are structurally typed (no `instanceof` issues across module boundaries), and align with the existing `NormalizedError` pattern in the codebase.
-**Alternative rejected**: `class AppError extends Error` — introduces prototype chain issues in monorepo, breaks structured clone, complicates serialization.
+**Rationale**: Plain objects serialize cleanly, are structurally typed (no `instanceof` issues
+across module boundaries), and align with the existing `NormalizedError` pattern in the codebase.
+**Alternative rejected**: `class AppError extends Error` — introduces prototype chain issues in
+monorepo, breaks structured clone, complicates serialization.
 
 ### AD-5: Per-App Configuration via Factory
 
-**Decision**: Each app calls `createApiClient(config)` with its own `ClientConfig` derived from `env.ts`. No singleton in the package; singleton pattern lives in each app's `core/api/client.ts`.
-**Rationale**: Apps own their lifecycle (Pinia init, router injection). Package provides the factory; app provides the configuration.
+**Decision**: Each app calls `createApiClient(config)` with its own `ClientConfig` derived from
+`env.ts`. No singleton in the package; singleton pattern lives in each app's `core/api/client.ts`.
+**Rationale**: Apps own their lifecycle (Pinia init, router injection). Package provides the
+factory; app provides the configuration.
 
 ### AD-6: Correlation ID Generation
 
-**Decision**: Client auto-generates a correlation ID (`crypto.randomUUID()`) for every request. Callers can override via `RequestConfig.correlationId`.
-**Rationale**: Observability baseline with zero developer friction. Override capability preserves spec requirement (FR-017).
-**Alternative rejected**: No auto-generation (spec says "optional") — missed observability for 99% of calls with no benefit.
+**Decision**: Client auto-generates a correlation ID (`crypto.randomUUID()`) for every request.
+Callers can override via `RequestConfig.correlationId`. **Rationale**: Observability baseline with
+zero developer friction. Override capability preserves spec requirement (FR-017). **Alternative
+rejected**: No auto-generation (spec says "optional") — missed observability for 99% of calls with
+no benefit.
 
 ### AD-7: Migration Strategy
 
-**Decision**: Incremental migration. Package built first, then each app migrated one at a time. Old `core/api/client.ts` and `core/errors/` files replaced, not immediately deleted (renamed with `.deprecated` suffix during transition, then removed).
-**Rationale**: Avoids big-bang breakage. Each app can be validated independently.
+**Decision**: Incremental migration. Package built first, then each app migrated one at a time. Old
+`core/api/client.ts` and `core/errors/` files replaced, not immediately deleted (renamed with
+`.deprecated` suffix during transition, then removed). **Rationale**: Avoids big-bang breakage. Each
+app can be validated independently.

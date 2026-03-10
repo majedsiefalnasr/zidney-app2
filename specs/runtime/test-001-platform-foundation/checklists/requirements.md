@@ -1,6 +1,7 @@
 # Validation Requirements Checklist: STAGE_TEST_01_PLATFORM_FOUNDATION
 
-**Purpose**: Validate that all architectural integrity tests pass before Phase 01 PLATFORM_FOUNDATION promotion to VALIDATED status.
+**Purpose**: Validate that all architectural integrity tests pass before Phase 01
+PLATFORM_FOUNDATION promotion to VALIDATED status.
 
 **Created**: 2026-02-26
 
@@ -45,7 +46,8 @@
 - [ ] Tenant context propagates through entire request lifecycle
 - [ ] Master DB only accessed for: license lookups, workspace metadata (read-only)
 - [ ] Master DB NEVER accessed for: student, attempt, submission data
-- [ ] Request middleware order matches specification (Correlation ID → Tenant Resolver → License → Schema Version → Handler)
+- [ ] Request middleware order matches specification (Correlation ID → Tenant Resolver → License →
+      Schema Version → Handler)
 - [ ] Resolver returns valid tenant context on all requests
 - [ ] **Test Status**: ☐ PASS ☐ FAIL ☐ NOT_RUN
 

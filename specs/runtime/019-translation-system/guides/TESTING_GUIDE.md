@@ -9,13 +9,18 @@
 
 ## Purpose
 
-This guide explains how to validate the translation system implementation end-to-end. Share with QA engineers and reviewing developers before merge.
+This guide explains how to validate the translation system implementation end-to-end. Share with QA
+engineers and reviewing developers before merge.
 
 ---
 
 ## Summary of Delivered Behavior
 
-The translation system provides a complete multi-language content layer for Zidney's exam platform. Staff users can upsert, list, and delete translations for exam entities (questions, exams, choices, passages) per language. Coverage is tracked and cached in Redis. When a workspace removes a supported language, translations are either deleted synchronously (≤10,000 rows) or queued for async batched deletion via the DRAIN_LANGUAGE_TRANSLATIONS worker job.
+The translation system provides a complete multi-language content layer for Zidney's exam platform.
+Staff users can upsert, list, and delete translations for exam entities (questions, exams, choices,
+passages) per language. Coverage is tracked and cached in Redis. When a workspace removes a
+supported language, translations are either deleted synchronously (≤10,000 rows) or queued for async
+batched deletion via the DRAIN_LANGUAGE_TRANSLATIONS worker job.
 
 Key outcomes:
 
@@ -108,7 +113,8 @@ Expected outcome: 72 unit tests pass, 4 integration test files execute successfu
 
 ### Scenario 1 — Create translations for a question
 
-**Purpose:** Verify that staff can upsert translations in a supported language for a question entity.
+**Purpose:** Verify that staff can upsert translations in a supported language for a question
+entity.
 
 1. Authenticate as staff user on a workspace with `supported_languages: ['en', 'ar']`
 2. Send `POST /api/backoffice/translations` with:
@@ -129,7 +135,8 @@ Expected outcome: 72 unit tests pass, 4 integration test files execute successfu
 
 Expected:
 
-- Row inserted in `translations` table: `(entity_type=question, entity_id=q-001, field_name=title, language_code=ar)`
+- Row inserted in `translations` table:
+  `(entity_type=question, entity_id=q-001, field_name=title, language_code=ar)`
 - Audit log entry with `action='upserted'`
 
 Troubleshooting:
@@ -169,7 +176,8 @@ Troubleshooting:
 **Purpose:** Verify that coverage correctly reflects % of translated fields across all entities.
 
 1. Create 5 questions in the workspace
-2. Translate `title` for 3 of them into Arabic (total field coverage = 3/5 = 60% for `title` field only; full coverage depends on field count)
+2. Translate `title` for 3 of them into Arabic (total field coverage = 3/5 = 60% for `title` field
+   only; full coverage depends on field count)
 3. Send `GET /api/backoffice/translations/coverage?entity_type=question&language_code=ar`
 
 Expected:
@@ -188,7 +196,8 @@ Troubleshooting:
 
 ### Scenario 4 — Language removal sync path (≤10,000 rows)
 
-**Purpose:** Verify that removing a language from supported_languages cleans up translations synchronously when row count is low.
+**Purpose:** Verify that removing a language from supported_languages cleans up translations
+synchronously when row count is low.
 
 1. Workspace has `supported_languages: ['en', 'ar']`
 2. Less than 10,000 Arabic translations exist
@@ -204,14 +213,16 @@ Expected:
 
 Troubleshooting:
 
-- `409 LANGUAGE_REMOVAL_REQUIRES_ASYNC` → unexpected (row count > threshold triggers async path; only expected if sync threshold is exceeded)
+- `409 LANGUAGE_REMOVAL_REQUIRES_ASYNC` → unexpected (row count > threshold triggers async path;
+  only expected if sync threshold is exceeded)
 - Default language removal → should return 422
 
 ---
 
 ### Scenario 5 — Language removal async path (>10,000 rows / DRAIN job)
 
-**Purpose:** Verify that the DRAIN worker correctly batches and completes deletion when row count exceeds threshold.
+**Purpose:** Verify that the DRAIN worker correctly batches and completes deletion when row count
+exceeds threshold.
 
 1. Workspace has `supported_languages: ['en', 'ar']`
 2. More than 10,000 Arabic translations exist (seed via test fixture)
@@ -221,7 +232,8 @@ Troubleshooting:
 
 Expected worker behavior:
 
-- `BEGIN` → `DELETE ... WHERE id IN (SELECT id ... LIMIT batch_size)` → `INSERT INTO translation_audit_logs` → `COMMIT` (repeated per batch)
+- `BEGIN` → `DELETE ... WHERE id IN (SELECT id ... LIMIT batch_size)` →
+  `INSERT INTO translation_audit_logs` → `COMMIT` (repeated per batch)
 - Final: `UPDATE workspace_settings` removes language, coverage SCAN invalidation
 - Worker log: `"event": "drain_complete", "total_deleted": N, "batches_processed": M`
 
@@ -262,7 +274,8 @@ All error responses follow:
 
 1. Use two workspaces: `workspace-a` and `workspace-b`.
 2. Create translations under `workspace-a` for `question/q-001/title/ar`.
-3. Repeat the same `GET /translations?entity_type=question&entity_id=q-001` request using `workspace-b` credentials.
+3. Repeat the same `GET /translations?entity_type=question&entity_id=q-001` request using
+   `workspace-b` credentials.
 4. Expected: `workspace-b` must return only its own translations — never `workspace-a` data.
 
 If any cross-workspace data appears, stop testing and report immediately.

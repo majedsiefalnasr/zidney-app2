@@ -28,7 +28,13 @@
 
 ## 3. Executive Summary
 
-This PR introduces machine-enforced module-boundary governance for Zidney's architecture. A new JSON schema (`docs/architecture/module-boundaries.json`) defines 4 architectural layers (infrastructure, domain, runtime, ui) containing 13 modules, with explicit dependency rules and cross-cutting constraints. The `ai-guard.ts` script is extended with 5 functions to validate imports against the contract at pre-commit time. 43 new tests (all passing) provide full coverage of the validation logic. This is a pure governance addition with zero impact on runtime code paths or production behavior.
+This PR introduces machine-enforced module-boundary governance for Zidney's architecture. A new JSON
+schema (`docs/architecture/module-boundaries.json`) defines 4 architectural layers (infrastructure,
+domain, runtime, ui) containing 13 modules, with explicit dependency rules and cross-cutting
+constraints. The `ai-guard.ts` script is extended with 5 functions to validate imports against the
+contract at pre-commit time. 43 new tests (all passing) provide full coverage of the validation
+logic. This is a pure governance addition with zero impact on runtime code paths or production
+behavior.
 
 **Key points:**
 
@@ -107,14 +113,16 @@ Confirm compliance with Zidney Constitution v1.2.0:
 
 **New files:**
 
-- `docs/architecture/module-boundaries.json` — 13-module governance contract (13 modules, 4 layers, dependency matrix, 4 cross-cutting rules)
+- `docs/architecture/module-boundaries.json` — 13-module governance contract (13 modules, 4 layers,
+  dependency matrix, 4 cross-cutting rules)
 - `tests/static/module-boundaries.test.ts` — 7 static structure validation tests
 - `tests/unit/ai-guard/ai-guard-boundaries.test.ts` — 28 ai-guard unit tests (all scenarios a–n)
 - `tests/unit/infra-audit/infra-audit-boundaries.test.ts` — 8 infra-audit integration tests
 
 **Modified files:**
 
-- `scripts/ai-guard.ts` — 5 new exported functions (loadModuleBoundaries, loadTsAliases, resolveImportToModule, matchesGlobPattern, validateLayerBoundaries); wired into runGuard()
+- `scripts/ai-guard.ts` — 5 new exported functions (loadModuleBoundaries, loadTsAliases,
+  resolveImportToModule, matchesGlobPattern, validateLayerBoundaries); wired into runGuard()
 - `scripts/infra-audit.ts` — findUndeclaredModulesFromBoundaries() function; import.meta.main guard
 - `package.json` — ai-guard and test:unit:boundaries scripts
 - `.github/workflows/ci.yml` — module-boundary-validation step + Run module boundary unit tests step
@@ -203,10 +211,12 @@ Before approving:
 
 ## 15. Notes
 
-- **Stage status:** This PR transitions stage status from IN_PROGRESS → BACKEND_CLOSED → PRODUCTION_READY
+- **Stage status:** This PR transitions stage status from IN_PROGRESS → BACKEND_CLOSED →
+  PRODUCTION_READY
 - **No further backend modifications allowed** without opening a new stage
 - **Governance is now live:** All future commits will be validated by ai-guard at pre-commit time
-- **Non-blocking warnings:** Undeclared modules `packages/app` and `packages/ui` exist in working tree but are documented in ANALYZE_REPORT; they do not block this PR
+- **Non-blocking warnings:** Undeclared modules `packages/app` and `packages/ui` exist in working
+  tree but are documented in ANALYZE_REPORT; they do not block this PR
 
 ---
 

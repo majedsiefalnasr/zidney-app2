@@ -1,17 +1,16 @@
 # SPECIFY REPORT — STAGE_INFRA_03_ALIGNMENT
 
-**Step:** 1 — Specify
-**Stage:** STAGE_INFRA_03_ALIGNMENT
-**Phase:** 01_PLATFORM_FOUNDATION
-**Branch:** `infra-003-alignment`
-**Date:** 2026-03-04
-**Agent:** speckit.specify
+**Step:** 1 — Specify **Stage:** STAGE_INFRA_03_ALIGNMENT **Phase:** 01_PLATFORM_FOUNDATION
+**Branch:** `infra-003-alignment` **Date:** 2026-03-04 **Agent:** speckit.specify
 
 ---
 
 ## Specification Summary
 
-The specification for **Infrastructure & Governance Alignment** has been generated from the stage design file (`STAGE_INFRA_03_ALIGNMENT.md`). This stage prepares the Zidney monorepo for governance enforcement by aligning test infrastructure, tooling, and documentation — without modifying any business logic or tenant database.
+The specification for **Infrastructure & Governance Alignment** has been generated from the stage
+design file (`STAGE_INFRA_03_ALIGNMENT.md`). This stage prepares the Zidney monorepo for governance
+enforcement by aligning test infrastructure, tooling, and documentation — without modifying any
+business logic or tenant database.
 
 ---
 
@@ -20,10 +19,12 @@ The specification for **Infrastructure & Governance Alignment** has been generat
 **In Scope:**
 
 - Consolidate fragmented Vitest configuration into a single root `vitest.config.ts` using projects
-- Normalize test directory structure (`tests/unit/`, `tests/integration/`, `tests/e2e/`) across all apps and packages
+- Normalize test directory structure (`tests/unit/`, `tests/integration/`, `tests/e2e/`) across all
+  apps and packages
 - Install Playwright and create per-app configs for MMC, Backoffice, Frontoffice
 - Create shared E2E smoke test at `tests/e2e/app-load.spec.ts`
-- Align ESLint + Prettier (install `prettier`, `eslint-config-prettier`; add `format`/`format:check` scripts)
+- Align ESLint + Prettier (install `prettier`, `eslint-config-prettier`; add `format`/`format:check`
+  scripts)
 - Stabilize or quarantine flaky tests
 - Review and document all skipped tests
 - Add README files to all `apps/*` and `packages/*` directories
@@ -67,7 +68,8 @@ The specification for **Infrastructure & Governance Alignment** has been generat
 
 ## Clarification Status
 
-**No [NEEDS CLARIFICATION] markers required.** The stage specification was complete and unambiguous. All assumptions are documented in the spec's Assumptions section.
+**No [NEEDS CLARIFICATION] markers required.** The stage specification was complete and unambiguous.
+All assumptions are documented in the spec's Assumptions section.
 
 **Key assumptions encoded into spec:**
 

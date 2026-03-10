@@ -10,7 +10,8 @@
 
 ## Executive Summary
 
-This report breaks down the Products Management stage into **46 atomic, dependency-ordered implementation tasks** across 5 layers:
+This report breaks down the Products Management stage into **46 atomic, dependency-ordered
+implementation tasks** across 5 layers:
 
 1. **Database Layer (8 tasks)** – Schema, migrations, indexes
 2. **Domain Layer (18 tasks)** – Services, validation, queries
@@ -59,8 +60,10 @@ Testing (TASK_040-046)
 **Transactional:** yes  
 **Idempotent:** yes
 
-**Description:**
-Create the initial database migration file that defines the `products` table schema with all columns, constraints, and indexes. This is the foundational table for the entire Products Management stage. The migration must be forward-only, idempotent (CREATE TABLE IF NOT EXISTS), and atomic.
+**Description:** Create the initial database migration file that defines the `products` table schema
+with all columns, constraints, and indexes. This is the foundational table for the entire Products
+Management stage. The migration must be forward-only, idempotent (CREATE TABLE IF NOT EXISTS), and
+atomic.
 
 **Acceptance Criteria:**
 
@@ -68,7 +71,8 @@ Create the initial database migration file that defines the `products` table sch
 - ✅ Executes all DDL statements in single transaction
 - ✅ Uses IF NOT EXISTS for all CREATE statements (idempotency)
 - ✅ Migration records schema_version increment
-- ✅ All constraints validated: status enum, name.en required, enabled_modules not empty, slug format
+- ✅ All constraints validated: status enum, name.en required, enabled_modules not empty, slug
+  format
 
 **Implementation Notes:**
 
@@ -90,12 +94,14 @@ Create the initial database migration file that defines the `products` table sch
 **Transactional:** yes  
 **Idempotent:** yes
 
-**Description:**
-Extend migration 001 to include the `product_versions` table DDL. This table is append-only and stores immutable snapshots of product configuration at each version. It must enforce uniqueness on (product_id, version_number) and reference products with ON DELETE RESTRICT.
+**Description:** Extend migration 001 to include the `product_versions` table DDL. This table is
+append-only and stores immutable snapshots of product configuration at each version. It must enforce
+uniqueness on (product_id, version_number) and reference products with ON DELETE RESTRICT.
 
 **Acceptance Criteria:**
 
-- ✅ `product_versions` table created with all columns (id, product_id, version_number, name, enabled_modules, description, change_summary, created_at)
+- ✅ `product_versions` table created with all columns (id, product_id, version_number, name,
+  enabled_modules, description, change_summary, created_at)
 - ✅ Foreign key constraint: `product_id` REFERENCES `products(id)` ON DELETE RESTRICT
 - ✅ Unique constraint on (product_id, version_number) enforced at DB level
 - ✅ Indexes created on product_id and version_number
@@ -120,12 +126,14 @@ Extend migration 001 to include the `product_versions` table DDL. This table is 
 **Transactional:** yes  
 **Idempotent:** yes
 
-**Description:**
-Extend migration 001 to include the `product_audit_logs` table DDL. This is an append-only audit trail that tracks all product mutations (CREATE, UPDATE, STATUS_CHANGE). It must preserve immutability and include all necessary fields for compliance and debugging.
+**Description:** Extend migration 001 to include the `product_audit_logs` table DDL. This is an
+append-only audit trail that tracks all product mutations (CREATE, UPDATE, STATUS_CHANGE). It must
+preserve immutability and include all necessary fields for compliance and debugging.
 
 **Acceptance Criteria:**
 
-- ✅ `product_audit_logs` table created with all columns (id, product_id, action, previous_version, new_version, changed_fields, performed_by, timestamp)
+- ✅ `product_audit_logs` table created with all columns (id, product_id, action, previous_version,
+  new_version, changed_fields, performed_by, timestamp)
 - ✅ Foreign key constraint: `product_id` REFERENCES `products(id)` ON DELETE RESTRICT
 - ✅ CHECK constraint: action IN ('CREATE', 'UPDATE', 'STATUS_CHANGE')
 - ✅ performed_by UUID field (references user, not enforced at DB level)
@@ -151,8 +159,9 @@ Extend migration 001 to include the `product_audit_logs` table DDL. This is an a
 **Transactional:** yes  
 **Idempotent:** yes
 
-**Description:**
-Create indexes on products table to optimize common queries: product lookup by slug, filtering by status, and ordering by creation time. All indexes use IF NOT EXISTS pattern for idempotency.
+**Description:** Create indexes on products table to optimize common queries: product lookup by
+slug, filtering by status, and ordering by creation time. All indexes use IF NOT EXISTS pattern for
+idempotency.
 
 **Acceptance Criteria:**
 
@@ -181,8 +190,8 @@ Create indexes on products table to optimize common queries: product lookup by s
 **Transactional:** yes  
 **Idempotent:** yes
 
-**Description:**
-Create indexes on product_versions table to optimize version history lookups and traversals. Common queries: get all versions for a product, get specific version number.
+**Description:** Create indexes on product_versions table to optimize version history lookups and
+traversals. Common queries: get all versions for a product, get specific version number.
 
 **Acceptance Criteria:**
 
@@ -209,8 +218,9 @@ Create indexes on product_versions table to optimize version history lookups and
 **Transactional:** yes  
 **Idempotent:** yes
 
-**Description:**
-Create indexes on product_audit_logs table to support efficient audit trail queries by product, action type, timestamp, and performed_by user. These queries are compliance-critical and may be accessed frequently.
+**Description:** Create indexes on product_audit_logs table to support efficient audit trail queries
+by product, action type, timestamp, and performed_by user. These queries are compliance-critical and
+may be accessed frequently.
 
 **Acceptance Criteria:**
 
@@ -239,8 +249,9 @@ Create indexes on product_audit_logs table to support efficient audit trail quer
 **Transactional:** yes  
 **Idempotent:** yes
 
-**Description:**
-After all DDL statements execute successfully, update the master DB schema registry to increment schema_version and record the migration ID. This ensures version enforcement middleware can validate schema compatibility.
+**Description:** After all DDL statements execute successfully, update the master DB schema registry
+to increment schema_version and record the migration ID. This ensures version enforcement middleware
+can validate schema compatibility.
 
 **Acceptance Criteria:**
 
@@ -269,8 +280,9 @@ After all DDL statements execute successfully, update the master DB schema regis
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Create a post-migration validation script that verifies all schema constraints are properly enforced: check constraints on status and modules, unique constraint on slug, foreign key constraints, etc. This runs after migration succeeds to catch schema drift.
+**Description:** Create a post-migration validation script that verifies all schema constraints are
+properly enforced: check constraints on status and modules, unique constraint on slug, foreign key
+constraints, etc. This runs after migration succeeds to catch schema drift.
 
 **Acceptance Criteria:**
 
@@ -302,8 +314,9 @@ Create a post-migration validation script that verifies all schema constraints a
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Define the Module enum (MCQ, TRADITIONAL_EXAMS, EXERCISES, LIBRARY, LIVES, FORUM) and export utility functions for validation and localization. This is a foundational type used across domain, API, and testing layers.
+**Description:** Define the Module enum (MCQ, TRADITIONAL_EXAMS, EXERCISES, LIBRARY, LIVES, FORUM)
+and export utility functions for validation and localization. This is a foundational type used
+across domain, API, and testing layers.
 
 **Acceptance Criteria:**
 
@@ -332,12 +345,13 @@ Define the Module enum (MCQ, TRADITIONAL_EXAMS, EXERCISES, LIBRARY, LIVES, FORUM
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Define TypeScript types/interfaces for Product, ProductVersion, AuditLogEntry, and related DTO types. These types are used across API responses, domain layer, and tests.
+**Description:** Define TypeScript types/interfaces for Product, ProductVersion, AuditLogEntry, and
+related DTO types. These types are used across API responses, domain layer, and tests.
 
 **Acceptance Criteria:**
 
-- ✅ Product interface defined with all fields (id, name, slug, enabled_modules, status, current_version, created_at, updated_at)
+- ✅ Product interface defined with all fields (id, name, slug, enabled_modules, status,
+  current_version, created_at, updated_at)
 - ✅ ProductVersion interface with version snapshot fields
 - ✅ AuditLogEntry interface with action, changed_fields, performed_by metadata
 - ✅ DTO types: CreateProductRequest, UpdateProductRequest, etc.
@@ -363,8 +377,9 @@ Define TypeScript types/interfaces for Product, ProductVersion, AuditLogEntry, a
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement validateProductName function that ensures name object has required English translation and optional Arabic translation. Both must be non-empty strings within length limits.
+**Description:** Implement validateProductName function that ensures name object has required
+English translation and optional Arabic translation. Both must be non-empty strings within length
+limits.
 
 **Acceptance Criteria:**
 
@@ -394,8 +409,8 @@ Implement validateProductName function that ensures name object has required Eng
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement validateModulesEnum function that ensures enabled_modules array contains at least one valid module from the enum. Rejects unknown modules, empty arrays, and non-arrays.
+**Description:** Implement validateModulesEnum function that ensures enabled_modules array contains
+at least one valid module from the enum. Rejects unknown modules, empty arrays, and non-arrays.
 
 **Acceptance Criteria:**
 
@@ -425,8 +440,9 @@ Implement validateModulesEnum function that ensures enabled_modules array contai
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement validateSlug function that ensures slug conforms to format: lowercase alphanumeric with hyphens (no spaces, uppercase, special chars). Regex: `^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$`
+**Description:** Implement validateSlug function that ensures slug conforms to format: lowercase
+alphanumeric with hyphens (no spaces, uppercase, special chars). Regex:
+`^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$`
 
 **Acceptance Criteria:**
 
@@ -456,8 +472,9 @@ Implement validateSlug function that ensures slug conforms to format: lowercase 
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement validateSlugUniqueness function that queries the DB to check if a slug already exists. Throws 'DUPLICATE_SLUG' if slug is taken. This runs as part of createProduct to prevent constraint violation.
+**Description:** Implement validateSlugUniqueness function that queries the DB to check if a slug
+already exists. Throws 'DUPLICATE_SLUG' if slug is taken. This runs as part of createProduct to
+prevent constraint violation.
 
 **Acceptance Criteria:**
 
@@ -487,8 +504,8 @@ Implement validateSlugUniqueness function that queries the DB to check if a slug
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement getProductById function that retrieves a single product by UUID. Returns Product | null. Used by update, status-change, and delete operations to verify product exists.
+**Description:** Implement getProductById function that retrieves a single product by UUID. Returns
+Product | null. Used by update, status-change, and delete operations to verify product exists.
 
 **Acceptance Criteria:**
 
@@ -519,8 +536,8 @@ Implement getProductById function that retrieves a single product by UUID. Retur
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement getProductBySlug function for UI lookups by human-readable slug. Useful for frontend to map product names to IDs. Returns Product | null.
+**Description:** Implement getProductBySlug function for UI lookups by human-readable slug. Useful
+for frontend to map product names to IDs. Returns Product | null.
 
 **Acceptance Criteria:**
 
@@ -550,12 +567,14 @@ Implement getProductBySlug function for UI lookups by human-readable slug. Usefu
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement listProducts function to retrieve paginated product list with optional filters for status (ACTIVE/INACTIVE/all), search by name/slug, and sort by creation time. Returns {data: Product[], total: number}.
+**Description:** Implement listProducts function to retrieve paginated product list with optional
+filters for status (ACTIVE/INACTIVE/all), search by name/slug, and sort by creation time. Returns
+{data: Product[], total: number}.
 
 **Acceptance Criteria:**
 
-- ✅ Function signature: `listProducts(query: QueryParams, db: Database): Promise<{data: Product[]; total: number}>`
+- ✅ Function signature:
+  `listProducts(query: QueryParams, db: Database): Promise<{data: Product[]; total: number}>`
 - ✅ Default: ACTIVE products only (status='ACTIVE' unless ?status=INACTIVE or ?status=all)
 - ✅ Supports search filter: ?search=term searches name.en, name.ar, slug
 - ✅ Supports pagination: ?limit=50&offset=0 (max 100)
@@ -583,12 +602,14 @@ Implement listProducts function to retrieve paginated product list with optional
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement getProductVersions function to retrieve all version snapshots for a product, ordered by version_number ascending. Used for displaying version history in UI and for validation.
+**Description:** Implement getProductVersions function to retrieve all version snapshots for a
+product, ordered by version_number ascending. Used for displaying version history in UI and for
+validation.
 
 **Acceptance Criteria:**
 
-- ✅ Function signature: `getProductVersions(productId: UUID, db: Database): Promise<ProductVersion[]>`
+- ✅ Function signature:
+  `getProductVersions(productId: UUID, db: Database): Promise<ProductVersion[]>`
 - ✅ Queries product_versions table: SELECT \* WHERE product_id = ? ORDER BY version_number ASC`
 - ✅ Returns array of ProductVersion objects (empty array if no versions)
 - ✅ Uses index on product_id for fast lookup
@@ -614,12 +635,14 @@ Implement getProductVersions function to retrieve all version snapshots for a pr
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement getProductAuditLog function to retrieve audit logs for a product with optional filters by action (CREATE/UPDATE/STATUS_CHANGE) and date range. Supports pagination and ordering by timestamp DESC.
+**Description:** Implement getProductAuditLog function to retrieve audit logs for a product with
+optional filters by action (CREATE/UPDATE/STATUS_CHANGE) and date range. Supports pagination and
+ordering by timestamp DESC.
 
 **Acceptance Criteria:**
 
-- ✅ Function signature: `getProductAuditLog(productId: UUID, query: QueryParams, db: Database): Promise<{data: AuditLogEntry[]; total: number}>`
+- ✅ Function signature:
+  `getProductAuditLog(productId: UUID, query: QueryParams, db: Database): Promise<{data: AuditLogEntry[]; total: number}>`
 - ✅ Supports filter: ?action=CREATE|UPDATE|STATUS_CHANGE
 - ✅ Supports date range: ?from_date=2026-02-20T00:00:00Z&to_date=2026-02-22T23:59:59Z
 - ✅ Orders by timestamp DESC (most recent first)
@@ -647,8 +670,8 @@ Implement getProductAuditLog function to retrieve audit logs for a product with 
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement countLicensesByProductId function that counts active licenses referencing a product. Used in deleteProduct to enforce 'no licenses' constraint. Returns integer count.
+**Description:** Implement countLicensesByProductId function that counts active licenses referencing
+a product. Used in deleteProduct to enforce 'no licenses' constraint. Returns integer count.
 
 **Acceptance Criteria:**
 
@@ -678,13 +701,15 @@ Implement countLicensesByProductId function that counts active licenses referenc
 **Transactional:** yes  
 **Idempotent:** no
 
-**Description:**
-Implement createProduct service function that creates a product with initial version 1 and audit log entry. All operations (INSERT product, INSERT version, INSERT audit log) must execute in single transaction. If any step fails, entire operation rolls back.
+**Description:** Implement createProduct service function that creates a product with initial
+version 1 and audit log entry. All operations (INSERT product, INSERT version, INSERT audit log)
+must execute in single transaction. If any step fails, entire operation rolls back.
 
 **Acceptance Criteria:**
 
 - ✅ Function signature: `createProduct(input: CreateProductInput, db: Database): Promise<Product>`
-- ✅ Validates all inputs: name (TASK_011), enabled_modules (TASK_012), slug (TASK_013-014) BEFORE transaction
+- ✅ Validates all inputs: name (TASK_011), enabled_modules (TASK_012), slug (TASK_013-014) BEFORE
+  transaction
 - ✅ Within transaction: INSERT product, INSERT product_version v1, INSERT audit_log (CREATE action)
 - ✅ Sets server time for created_at, updated_at (ADR-0006 compliance)
 - ✅ Generates UUID for product ID
@@ -715,8 +740,10 @@ Implement createProduct service function that creates a product with initial ver
 **Transactional:** yes  
 **Idempotent:** no
 
-**Description:**
-Implement updateProduct service function that updates product's structural fields (name, description, enabled_modules) and creates new version snapshot. Slug is immutable and cannot be changed. Only creates version record if actual changes detected. All updates within transaction for atomicity.
+**Description:** Implement updateProduct service function that updates product's structural fields
+(name, description, enabled_modules) and creates new version snapshot. Slug is immutable and cannot
+be changed. Only creates version record if actual changes detected. All updates within transaction
+for atomicity.
 
 **Acceptance Criteria:**
 
@@ -753,12 +780,14 @@ Implement updateProduct service function that updates product's structural field
 **Transactional:** yes  
 **Idempotent:** no
 
-**Description:**
-Implement changeProductStatus service function that changes product status (ACTIVE ↔ INACTIVE) without incrementing version. This is a metadata change, not a structural change. Creates audit log with action='STATUS_CHANGE' (no version fields).
+**Description:** Implement changeProductStatus service function that changes product status (ACTIVE
+↔ INACTIVE) without incrementing version. This is a metadata change, not a structural change.
+Creates audit log with action='STATUS_CHANGE' (no version fields).
 
 **Acceptance Criteria:**
 
-- ✅ Function signature: `changeProductStatus(input: StatusChangeInput, db: Database): Promise<Product>`
+- ✅ Function signature:
+  `changeProductStatus(input: StatusChangeInput, db: Database): Promise<Product>`
 - ✅ Fetch existing product first
 - ✅ Reject if status already matches (no change, return existing)
 - ✅ Validate status is in enum: ACTIVE | INACTIVE
@@ -789,8 +818,9 @@ Implement changeProductStatus service function that changes product status (ACTI
 **Transactional:** yes  
 **Idempotent:** no
 
-**Description:**
-Implement deleteProduct service function that hard deletes a product and all related data (versions, audit logs). Must verify no active licenses reference product. All deletes within transaction for atomicity. This is a rare operation (only when product never shipped).
+**Description:** Implement deleteProduct service function that hard deletes a product and all
+related data (versions, audit logs). Must verify no active licenses reference product. All deletes
+within transaction for atomicity. This is a rare operation (only when product never shipped).
 
 **Acceptance Criteria:**
 
@@ -798,7 +828,8 @@ Implement deleteProduct service function that hard deletes a product and all rel
 - ✅ Fetch product by ID first (fail if not found)
 - ✅ Check license count: countLicensesByProductId(id)
 - ✅ Reject if licenses exist: throw PRODUCT_HAS_LICENSES error
-- ✅ Within transaction: DELETE audit_logs, DELETE versions, DELETE product (order matters for integrity)
+- ✅ Within transaction: DELETE audit_logs, DELETE versions, DELETE product (order matters for
+  integrity)
 - ✅ All-or-nothing guarantee: any failure rolls back all deletes
 - ✅ ON DELETE RESTRICT at DB level prevents deletion if licenses exist (defense-in-depth)
 - ✅ Returns void on success
@@ -823,12 +854,14 @@ Implement deleteProduct service function that hard deletes a product and all rel
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement computeFieldDiff helper function that compares old and new product states and returns JSON object mapping changed fields to {old, new} values. Used in updateProduct to populate audit log changed_fields.
+**Description:** Implement computeFieldDiff helper function that compares old and new product states
+and returns JSON object mapping changed fields to {old, new} values. Used in updateProduct to
+populate audit log changed_fields.
 
 **Acceptance Criteria:**
 
-- ✅ Function signature: `computeFieldDiff(old: Product, newInput: UpdateProductInput): Record<string, {old: any, new: any}>`
+- ✅ Function signature:
+  `computeFieldDiff(old: Product, newInput: UpdateProductInput): Record<string, {old: any, new: any}>`
 - ✅ Iterates through updateable fields: name, description, enabled_modules
 - ✅ Only includes fields that actually changed
 - ✅ Returns empty object if no changes
@@ -855,8 +888,9 @@ Implement computeFieldDiff helper function that compares old and new product sta
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement generateChangeSummary helper function that generates human-readable text describing what changed during a product update. Used in product_versions table change_summary field for quick understanding of version diff.
+**Description:** Implement generateChangeSummary helper function that generates human-readable text
+describing what changed during a product update. Used in product_versions table change_summary field
+for quick understanding of version diff.
 
 **Acceptance Criteria:**
 
@@ -888,12 +922,14 @@ Implement generateChangeSummary helper function that generates human-readable te
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement licenseMiddleware function that validates workspace license status before allowing access to product routes. Required for all product endpoints. Checks license status (ACTIVE/SOFT_LOCKED/ARCHIVED) and returns appropriate HTTP status codes.
+**Description:** Implement licenseMiddleware function that validates workspace license status before
+allowing access to product routes. Required for all product endpoints. Checks license status
+(ACTIVE/SOFT_LOCKED/ARCHIVED) and returns appropriate HTTP status codes.
 
 **Acceptance Criteria:**
 
-- ✅ Middleware function signature: `licenseMiddleware(c: Context, next: () => Promise<void>): Promise<Response>`
+- ✅ Middleware function signature:
+  `licenseMiddleware(c: Context, next: () => Promise<void>): Promise<Response>`
 - ✅ Extracts workspaceId from JWT context
 - ✅ Queries master_db: SELECT \* FROM licenses WHERE workspace_id = ?`
 - ✅ Returns 404 if license not found (LICENSE_NOT_FOUND)
@@ -924,12 +960,14 @@ Implement licenseMiddleware function that validates workspace license status bef
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement correlationIdMiddleware that generates or extracts correlation ID (request_id) from incoming request headers. Propagates ID through all logs and audit trails for traceability.
+**Description:** Implement correlationIdMiddleware that generates or extracts correlation ID
+(request_id) from incoming request headers. Propagates ID through all logs and audit trails for
+traceability.
 
 **Acceptance Criteria:**
 
-- ✅ Middleware function signature: `correlationIdMiddleware(c: Context, next: () => Promise<void>): Promise<void>`
+- ✅ Middleware function signature:
+  `correlationIdMiddleware(c: Context, next: () => Promise<void>): Promise<void>`
 - ✅ Checks for x-correlation-id header in request
 - ✅ If not present, generates UUID for correlation ID
 - ✅ Stores in c.set('correlationId', correlationId)
@@ -957,8 +995,9 @@ Implement correlationIdMiddleware that generates or extracts correlation ID (req
 **Transactional:** yes  
 **Idempotent:** no
 
-**Description:**
-Implement POST /api/v1/mmc/products route that creates new product. Requires authentication and license validation. Calls createProduct service function. Returns 201 Created with product details.
+**Description:** Implement POST /api/v1/mmc/products route that creates new product. Requires
+authentication and license validation. Calls createProduct service function. Returns 201 Created
+with product details.
 
 **Acceptance Criteria:**
 
@@ -993,8 +1032,8 @@ Implement POST /api/v1/mmc/products route that creates new product. Requires aut
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement GET /api/v1/mmc/products route that lists products with pagination and filters. Supports query params: status, search, limit, offset. Default returns ACTIVE products only.
+**Description:** Implement GET /api/v1/mmc/products route that lists products with pagination and
+filters. Supports query params: status, search, limit, offset. Default returns ACTIVE products only.
 
 **Acceptance Criteria:**
 
@@ -1029,8 +1068,8 @@ Implement GET /api/v1/mmc/products route that lists products with pagination and
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement GET /api/v1/mmc/products/:id route that fetches single product by UUID. Returns 404 if product not found.
+**Description:** Implement GET /api/v1/mmc/products/:id route that fetches single product by UUID.
+Returns 404 if product not found.
 
 **Acceptance Criteria:**
 
@@ -1062,8 +1101,9 @@ Implement GET /api/v1/mmc/products/:id route that fetches single product by UUID
 **Transactional:** yes  
 **Idempotent:** no
 
-**Description:**
-Implement PUT /api/v1/mmc/products/:id route that updates product (name, description, enabled_modules). Slug is immutable and cannot be included in update payload. Returns updated product with incremented version.
+**Description:** Implement PUT /api/v1/mmc/products/:id route that updates product (name,
+description, enabled_modules). Slug is immutable and cannot be included in update payload. Returns
+updated product with incremented version.
 
 **Acceptance Criteria:**
 
@@ -1100,8 +1140,8 @@ Implement PUT /api/v1/mmc/products/:id route that updates product (name, descrip
 **Transactional:** yes  
 **Idempotent:** no
 
-**Description:**
-Implement PATCH /api/v1/mmc/products/:id/status route that changes product status (ACTIVE ↔ INACTIVE). Does not increment version. Returns updated product.
+**Description:** Implement PATCH /api/v1/mmc/products/:id/status route that changes product status
+(ACTIVE ↔ INACTIVE). Does not increment version. Returns updated product.
 
 **Acceptance Criteria:**
 
@@ -1137,15 +1177,16 @@ Implement PATCH /api/v1/mmc/products/:id/status route that changes product statu
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement GET /api/v1/mmc/products/:id/audit-log route that retrieves paginated audit trail for product. Supports filters by action, date range. Requires AUDIT_READ permission.
+**Description:** Implement GET /api/v1/mmc/products/:id/audit-log route that retrieves paginated
+audit trail for product. Supports filters by action, date range. Requires AUDIT_READ permission.
 
 **Acceptance Criteria:**
 
 - ✅ Route: GET /api/v1/mmc/products/:id/audit-log
 - ✅ Middleware chain: correlation ID → auth → license → auditReadPermission → rateLimiting
 - ✅ Path parameter: id (UUID)
-- ✅ Query parameters: ?action=CREATE|UPDATE|STATUS_CHANGE&limit=50&offset=0&from_date=...&to_date=...
+- ✅ Query parameters:
+  ?action=CREATE|UPDATE|STATUS_CHANGE&limit=50&offset=0&from_date=...&to_date=...
 - ✅ Requires AUDIT_READ permission (checked by middleware)
 - ✅ Calls getProductAuditLog(id, query, masterDb) from domain layer
 - ✅ Returns 200 with AuditLogResponse {data: AuditLogEntry[], pagination}
@@ -1173,12 +1214,13 @@ Implement GET /api/v1/mmc/products/:id/audit-log route that retrieves paginated 
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement rateLimitMiddleware using Redis sliding window algorithm. Applies per-user rate limits to product endpoints. Returns 429 if limit exceeded.
+**Description:** Implement rateLimitMiddleware using Redis sliding window algorithm. Applies
+per-user rate limits to product endpoints. Returns 429 if limit exceeded.
 
 **Acceptance Criteria:**
 
-- ✅ Middleware function signature: `rateLimitMiddleware(config: RateLimitConfig, c: Context): Promise<Response | null>`
+- ✅ Middleware function signature:
+  `rateLimitMiddleware(config: RateLimitConfig, c: Context): Promise<Response | null>`
 - ✅ Rate limit config includes: key prefix, limit count, window seconds
 - ✅ Redis key format: `{key}:{userId}` (per-user bucket)
 - ✅ Uses INCR and EXPIRE commands for sliding window
@@ -1208,8 +1250,8 @@ Implement rateLimitMiddleware using Redis sliding window algorithm. Applies per-
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement handleError function that maps domain/DB errors to standardized API error responses with appropriate HTTP status codes. Used in all product route handlers.
+**Description:** Implement handleError function that maps domain/DB errors to standardized API error
+responses with appropriate HTTP status codes. Used in all product route handlers.
 
 **Acceptance Criteria:**
 
@@ -1244,8 +1286,9 @@ Implement handleError function that maps domain/DB errors to standardized API er
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement structured logging for all product operations using Pino JSON logger. All logs include required fields: timestamp, level, service, correlationId, workspaceId, userId, action, productId.
+**Description:** Implement structured logging for all product operations using Pino JSON logger. All
+logs include required fields: timestamp, level, service, correlationId, workspaceId, userId, action,
+productId.
 
 **Acceptance Criteria:**
 
@@ -1278,8 +1321,8 @@ Implement structured logging for all product operations using Pino JSON logger. 
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Implement Prometheus metrics for product operations: latency histograms, error counters, throughput. Enables performance monitoring and alerting.
+**Description:** Implement Prometheus metrics for product operations: latency histograms, error
+counters, throughput. Enables performance monitoring and alerting.
 
 **Acceptance Criteria:**
 
@@ -1313,8 +1356,8 @@ Implement Prometheus metrics for product operations: latency histograms, error c
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Configure Prometheus alert rules for rate limit violations. Triggers alerts if rate limit exceed rate is high (suspicious activity or DDoS). Useful for security monitoring.
+**Description:** Configure Prometheus alert rules for rate limit violations. Triggers alerts if rate
+limit exceed rate is high (suspicious activity or DDoS). Useful for security monitoring.
 
 **Acceptance Criteria:**
 
@@ -1347,16 +1390,18 @@ Configure Prometheus alert rules for rate limit violations. Triggers alerts if r
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Create comprehensive unit tests for validation functions: validateProductName, validateModulesEnum, validateSlug, validateSlugUniqueness. Tests cover happy paths and error cases.
+**Description:** Create comprehensive unit tests for validation functions: validateProductName,
+validateModulesEnum, validateSlug, validateSlugUniqueness. Tests cover happy paths and error cases.
 
 **Acceptance Criteria:**
 
 - ✅ Test file: tests/unit/products/validation.test.ts
 - ✅ Tests for validateProductName: valid name, missing en, invalid length, optional ar
 - ✅ Tests for validateModulesEnum: valid modules, invalid module, empty array, all 6 modules
-- ✅ Tests for validateSlug: valid slug, uppercase rejection, space rejection, single char, empty slug
-- ✅ Tests for validateSlugUniqueness: unique slug accepted, duplicate rejected, case-insensitive match
+- ✅ Tests for validateSlug: valid slug, uppercase rejection, space rejection, single char, empty
+  slug
+- ✅ Tests for validateSlugUniqueness: unique slug accepted, duplicate rejected, case-insensitive
+  match
 - ✅ All error cases throw Expected error codes
 - ✅ Coverage: 100% of validation functions
 - ✅ Structured test names: "should accept...", "should reject..."
@@ -1381,8 +1426,9 @@ Create comprehensive unit tests for validation functions: validateProductName, v
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Create comprehensive unit tests for domain service functions: createProduct, updateProduct, changeProductStatus, deleteProduct, and helpers. Tests verify business logic, atomicity, version tracking.
+**Description:** Create comprehensive unit tests for domain service functions: createProduct,
+updateProduct, changeProductStatus, deleteProduct, and helpers. Tests verify business logic,
+atomicity, version tracking.
 
 **Acceptance Criteria:**
 
@@ -1416,8 +1462,8 @@ Create comprehensive unit tests for domain service functions: createProduct, upd
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Create comprehensive integration tests for all product API routes. Tests verify HTTP status codes, response formats, middleware behavior, and full request/response cycles.
+**Description:** Create comprehensive integration tests for all product API routes. Tests verify
+HTTP status codes, response formats, middleware behavior, and full request/response cycles.
 
 **Acceptance Criteria:**
 
@@ -1453,8 +1499,9 @@ Create comprehensive integration tests for all product API routes. Tests verify 
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Create tests that verify transaction atomicity: if any part of a transaction fails, entire operation rolls back. Tests simulate component failures (validation, DB, etc.) and verify no orphaned data.
+**Description:** Create tests that verify transaction atomicity: if any part of a transaction fails,
+entire operation rolls back. Tests simulate component failures (validation, DB, etc.) and verify no
+orphaned data.
 
 **Acceptance Criteria:**
 
@@ -1488,8 +1535,8 @@ Create tests that verify transaction atomicity: if any part of a transaction fai
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Create tests verifying that certain operations are idempotent (repeating request produces same result). Important for safety in distributed systems.
+**Description:** Create tests verifying that certain operations are idempotent (repeating request
+produces same result). Important for safety in distributed systems.
 
 **Acceptance Criteria:**
 
@@ -1522,8 +1569,8 @@ Create tests verifying that certain operations are idempotent (repeating request
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Create tests that verify product operations never access tenant databases. All product CRUD happens in master_db only. Tests spy on DB connections and verify isolation.
+**Description:** Create tests that verify product operations never access tenant databases. All
+product CRUD happens in master_db only. Tests spy on DB connections and verify isolation.
 
 **Acceptance Criteria:**
 
@@ -1556,8 +1603,8 @@ Create tests that verify product operations never access tenant databases. All p
 **Transactional:** no  
 **Idempotent:** yes
 
-**Description:**
-Create end-to-end scenario tests that exercise full product workflows: create → update → status change → audit log query. Validates entire system integration.
+**Description:** Create end-to-end scenario tests that exercise full product workflows: create →
+update → status change → audit log query. Validates entire system integration.
 
 **Acceptance Criteria:**
 
@@ -1633,9 +1680,9 @@ Create end-to-end scenario tests that exercise full product workflows: create �
 | TASK_045 | Create tenant isolation tests                 | Testing       | test/unit        | 4         | 1h       | low    |
 | TASK_046 | Create E2E scenario tests                     | Testing       | test/e2e         | 3         | 3h       | medium |
 
-**Total Estimated Duration:** ~48 hours (10 days with 8h/day work)
-**Dependency Depth:** 7 levels
-**Critical Path:** TASK_001 → TASK_002 → TASK_003 → TASK_004-006 → TASK_007 → TASK_021 → TASK_029 → TASK_042
+**Total Estimated Duration:** ~48 hours (10 days with 8h/day work) **Dependency Depth:** 7 levels
+**Critical Path:** TASK_001 → TASK_002 → TASK_003 → TASK_004-006 → TASK_007 → TASK_021 → TASK_029 →
+TASK_042
 
 ---
 
@@ -1718,7 +1765,8 @@ Create end-to-end scenario tests that exercise full product workflows: create �
 - ✅ Isolation guarantees preserved
 - ✅ Ready for implementation
 
-**Next Step:** Begin execution with Phase 1 (Database migrations), using this TASKS_REPORT as atomic work unit definitions.
+**Next Step:** Begin execution with Phase 1 (Database migrations), using this TASKS_REPORT as atomic
+work unit definitions.
 
 **Status:** READY FOR IMPLEMENTATION ✅
 

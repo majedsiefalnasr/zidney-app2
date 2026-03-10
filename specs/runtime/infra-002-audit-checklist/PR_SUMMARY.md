@@ -28,12 +28,19 @@
 
 ## 3. Executive Summary
 
-- **Purpose:** Non-destructive infrastructure audit before governance enforcement (STAGE_INFRA_GOVERNANCE)
-- **Problem Solved:** Reveals infrastructure readiness gaps and consolidation risks in Vitest configs, ESLint, CI pipelines, test coverage, Bun compatibility, and documentation
-- **Architectural Boundary:** READ-ONLY audit — no source, schema, test, or config modifications; only new tooling and documentation
-- **Safety:** Zero impact on running systems. Audit script is idempotent and produces only JSON output and markdown reports. All pre-existing issues (10 lint errors, 2 TS errors) are documented but not caused by this stage.
-- **Constitutional Compliance:** Full ADR alignment; no tenant isolation risk; no middleware bypass; structured logging enforced
-- **Strategic Value:** Provides evidence base for STAGE_INFRA_GOVERNANCE sub-stages (phases 1–3). Maps all findings to specific files/paths for actionable governance.
+- **Purpose:** Non-destructive infrastructure audit before governance enforcement
+  (STAGE_INFRA_GOVERNANCE)
+- **Problem Solved:** Reveals infrastructure readiness gaps and consolidation risks in Vitest
+  configs, ESLint, CI pipelines, test coverage, Bun compatibility, and documentation
+- **Architectural Boundary:** READ-ONLY audit — no source, schema, test, or config modifications;
+  only new tooling and documentation
+- **Safety:** Zero impact on running systems. Audit script is idempotent and produces only JSON
+  output and markdown reports. All pre-existing issues (10 lint errors, 2 TS errors) are documented
+  but not caused by this stage.
+- **Constitutional Compliance:** Full ADR alignment; no tenant isolation risk; no middleware bypass;
+  structured logging enforced
+- **Strategic Value:** Provides evidence base for STAGE_INFRA_GOVERNANCE sub-stages (phases 1–3).
+  Maps all findings to specific files/paths for actionable governance.
 
 ---
 
@@ -72,8 +79,10 @@ Confirm compliance with Zidney Constitution v1.2.0:
 - [x] No default DB fallback (N/A — read-only audit)
 - [x] All queries scoped to workspace_id (N/A — no queries)
 - [x] Structured logging enforced (`[INFRA AUDIT]` prefix throughout scripts/infra-audit.ts)
-- [x] Error contract compliance — Audit script returns early with partial JSON on parse errors; error logged with `[INFRA AUDIT] WARN` prefix
-- [x] Sensitive data not logged — Secret files skipped (`.env`, `*.pem`, `*.key`, `*.secret`) with SKIP message (filename only)
+- [x] Error contract compliance — Audit script returns early with partial JSON on parse errors;
+      error logged with `[INFRA AUDIT] WARN` prefix
+- [x] Sensitive data not logged — Secret files skipped (`.env`, `*.pem`, `*.key`, `*.secret`) with
+      SKIP message (filename only)
 
 ---
 
@@ -98,8 +107,10 @@ Confirm compliance with Zidney Constitution v1.2.0:
 
 ## 9. Testing Coverage
 
-- [x] Unit tests added/updated (N/A — read-only audit; test coverage deferred to STAGE_INFRA_GOVERNANCE)
-- [x] Integration tests added/updated (Audit script tested via `bun run scripts/infra-audit.ts` exit 0)
+- [x] Unit tests added/updated (N/A — read-only audit; test coverage deferred to
+      STAGE_INFRA_GOVERNANCE)
+- [x] Integration tests added/updated (Audit script tested via `bun run scripts/infra-audit.ts`
+      exit 0)
 - [x] Testing guide provided (guides/TESTING_GUIDE.md — 300+ lines with 5 manual scenarios)
 
 ---
@@ -201,7 +212,9 @@ Confirm compliance with Zidney Constitution v1.2.0:
    Expected: Exit 0; 11 keys present
 
 2. **Review one audit section in detail:**
-   - Read [specs/runtime/infra-002-audit-checklist/reports/GAP_REPORT.md](specs/runtime/infra-002-audit-checklist/reports/GAP_REPORT.md) US3 (ESLint section)
+   - Read
+     [specs/runtime/infra-002-audit-checklist/reports/GAP_REPORT.md](specs/runtime/infra-002-audit-checklist/reports/GAP_REPORT.md)
+     US3 (ESLint section)
    - Verify findings are specific (e.g., mentions `apps/api/eslint.config.js`)
 
 3. **Trace a finding to source:**
@@ -228,11 +241,14 @@ Confirm compliance with Zidney Constitution v1.2.0:
    ```
 
 2. **Share with QA/Reviewers:**
-   - Use [specs/runtime/infra-002-audit-checklist/guides/TESTING_GUIDE.md](specs/runtime/infra-002-audit-checklist/guides/TESTING_GUIDE.md)
+   - Use
+     [specs/runtime/infra-002-audit-checklist/guides/TESTING_GUIDE.md](specs/runtime/infra-002-audit-checklist/guides/TESTING_GUIDE.md)
 
 3. **Begin STAGE_INFRA_GOVERNANCE:**
    - Use findings to define sub-stages
-   - Reference [specs/runtime/infra-002-audit-checklist/reports/SAFE_ROLLOUT_PLAN.md](specs/runtime/infra-002-audit-checklist/reports/SAFE_ROLLOUT_PLAN.md) for phased approach
+   - Reference
+     [specs/runtime/infra-002-audit-checklist/reports/SAFE_ROLLOUT_PLAN.md](specs/runtime/infra-002-audit-checklist/reports/SAFE_ROLLOUT_PLAN.md)
+     for phased approach
 
 ---
 

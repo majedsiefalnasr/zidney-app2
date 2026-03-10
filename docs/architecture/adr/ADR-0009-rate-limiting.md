@@ -7,7 +7,10 @@
 
 ## 1. Summary
 
-Zidney implements a **dual-algorithm rate limiting strategy** combining Sliding Window algorithms (for login/general endpoints) and Token Bucket algorithms (for real-time WebSocket messaging). Rate limits are enforced at middleware level using Redis atomic operations, with differentiated policies per endpoint category to balance security, usability, and performance.
+Zidney implements a **dual-algorithm rate limiting strategy** combining Sliding Window algorithms
+(for login/general endpoints) and Token Bucket algorithms (for real-time WebSocket messaging). Rate
+limits are enforced at middleware level using Redis atomic operations, with differentiated policies
+per endpoint category to balance security, usability, and performance.
 
 ## 2. Problem
 
@@ -125,42 +128,39 @@ Behavior:
 
 ```typescript
 interface TokenBucket {
-  tokens: number // Current tokens available
-  lastRefillAt: number // Timestamp of last refill
-  capacity: number // Max tokens (100)
-  refillRate: number // Tokens per second (1)
+  tokens: number; // Current tokens available
+  lastRefillAt: number; // Timestamp of last refill
+  capacity: number; // Max tokens (100)
+  refillRate: number; // Tokens per second (1)
 }
 
-async function checkWebSocketLimit(
-  connectionId: string,
-  cost: number = 1
-): Promise<boolean> {
-  const bucket = await redis.json.get(`ws-bucket:${connectionId}`)
+async function checkWebSocketLimit(connectionId: string, cost: number = 1): Promise<boolean> {
+  const bucket = await redis.json.get(`ws-bucket:${connectionId}`);
 
   if (!bucket) {
     // New connection - start at capacity
-    await redis.json.set(`ws-bucket:${connectionId}`, '$', {
+    await redis.json.set(`ws-bucket:${connectionId}`, "$", {
       tokens: 100,
       lastRefillAt: now(),
       capacity: 100,
       refillRate: 1,
-    })
-    return cost <= 100
+    });
+    return cost <= 100;
   }
 
   // Refill based on elapsed time
-  const elapsed = now() - bucket.lastRefillAt
-  const tokensToAdd = Math.floor(elapsed * bucket.refillRate)
-  bucket.tokens = Math.min(bucket.tokens + tokensToAdd, bucket.capacity)
-  bucket.lastRefillAt = now()
+  const elapsed = now() - bucket.lastRefillAt;
+  const tokensToAdd = Math.floor(elapsed * bucket.refillRate);
+  bucket.tokens = Math.min(bucket.tokens + tokensToAdd, bucket.capacity);
+  bucket.lastRefillAt = now();
 
   if (bucket.tokens < cost) {
-    return false // Insufficient tokens
+    return false; // Insufficient tokens
   }
 
-  bucket.tokens -= cost
-  await redis.json.set(`ws-bucket:${connectionId}`, '$', bucket)
-  return true
+  bucket.tokens -= cost;
+  await redis.json.set(`ws-bucket:${connectionId}`, "$", bucket);
+  return true;
 }
 ```
 
@@ -215,7 +215,8 @@ async function checkWebSocketLimit(
    - Latency: +2-5ms per request (Redis ZREM + ZADD + EXPIRE round trips)
 
 2. **Implementation Complexity:**
-   - Middleware ordering critical: Rate limit must run AFTER tenant resolver (need workspace context)
+   - Middleware ordering critical: Rate limit must run AFTER tenant resolver (need workspace
+     context)
    - Cache invalidation: connection drops must clean up token bucket state
    - Clock skew: relies on synchronized system time across API instances
 
@@ -294,57 +295,53 @@ Business Logic (routing)
 // File: apps/api/src/middleware/index.ts
 
 const rateLimitMiddleware = middleware.use(async (c, next) => {
-  const clientIp = extractClientIP(c)
-  const workspaceId = c.state.workspace_id
-  const userId = c.state.user_id // May be undefined before login
+  const clientIp = extractClientIP(c);
+  const workspaceId = c.state.workspace_id;
+  const userId = c.state.user_id; // May be undefined before login
 
-  const endpoint = c.req.path
-  const policy = getRateLimitPolicy(endpoint)
+  const endpoint = c.req.path;
+  const policy = getRateLimitPolicy(endpoint);
 
-  for (const resource of ['ip', 'user', 'workspace']) {
+  for (const resource of ["ip", "user", "workspace"]) {
     const key = buildRedisKey(
       resource,
       endpoint,
-      resource === 'ip' ? clientIp : resource === 'user' ? userId : workspaceId
-    )
+      resource === "ip" ? clientIp : resource === "user" ? userId : workspaceId,
+    );
 
-    const allowed = await checkLimit(
-      key,
-      policy[resource].limit,
-      policy[resource].window
-    )
+    const allowed = await checkLimit(key, policy[resource].limit, policy[resource].window);
 
     if (!allowed) {
       logger.warn({
         correlation_id: c.state.correlation_id,
-        event: 'rate_limit_exceeded',
+        event: "rate_limit_exceeded",
         resource,
         endpoint,
         key,
-      })
+      });
 
       return c.json(
         {
           success: false,
           data: null,
           error: {
-            code: 'TOO_MANY_REQUESTS',
-            message: 'Rate limit exceeded',
+            code: "TOO_MANY_REQUESTS",
+            message: "Rate limit exceeded",
             correlationId: c.state.correlation_id,
           },
         },
         429,
         {
-          'Retry-After': policy[resource].window,
-          'X-Rate-Limit-Limit': policy[resource].limit,
-          'X-Rate-Limit-Remaining': 0,
-        }
-      )
+          "Retry-After": policy[resource].window,
+          "X-Rate-Limit-Limit": policy[resource].limit,
+          "X-Rate-Limit-Remaining": 0,
+        },
+      );
     }
   }
 
-  await next()
-})
+  await next();
+});
 ```
 
 ### 6.2 Error Response Format
@@ -416,49 +413,47 @@ rate_limit.redis_errors: Counter
 
 ```typescript
 // Test sliding window edge cases
-it('should handle requests at window boundary', async () => {
+it("should handle requests at window boundary", async () => {
   // Request at 0s, 30s, 60s, 60.1s
   // Verify old request at 0s drops out on 60.1s request
-})
+});
 
 // Test token bucket refill
-it('should refill tokens at correct rate', async () => {
+it("should refill tokens at correct rate", async () => {
   // Start with 100 tokens
   // Use 50 tokens
   // Wait 30 seconds
   // Verify 30 tokens available (not 50, due to limit test ordering)
-})
+});
 ```
 
 ### 8.2 Integration Tests (T084)
 
 ```typescript
 // Rate limiting enforcement
-it('should reject 6th login within 60s window', async () => {
-  const responses = []
+it("should reject 6th login within 60s window", async () => {
+  const responses = [];
   for (let i = 0; i < 6; i++) {
-    responses.push(await login(testUser))
+    responses.push(await login(testUser));
   }
 
-  expect(responses[0].status).toBe(200)
-  expect(responses[5].status).toBe(429)
-  expect(responses[5].json().error.code).toBe('TOO_MANY_REQUESTS')
-})
+  expect(responses[0].status).toBe(200);
+  expect(responses[5].status).toBe(429);
+  expect(responses[5].json().error.code).toBe("TOO_MANY_REQUESTS");
+});
 ```
 
 ### 8.3 Load Tests (T089-T092)
 
 ```typescript
 // Concurrent login from 100 IPs
-it('should handle 100 concurrent logins from different IPs', async () => {
-  const ips = Array.from({ length: 100 }, (_, i) => `192.168.1.${i}`)
-  const promises = ips.map((ip) =>
-    login(testUser, { headers: { 'X-Forwarded-For': ip } })
-  )
+it("should handle 100 concurrent logins from different IPs", async () => {
+  const ips = Array.from({ length: 100 }, (_, i) => `192.168.1.${i}`);
+  const promises = ips.map((ip) => login(testUser, { headers: { "X-Forwarded-For": ip } }));
 
-  const results = await Promise.all(promises)
-  expect(results.filter((r) => r.status === 200).length).toBe(100)
-})
+  const results = await Promise.all(promises);
+  expect(results.filter((r) => r.status === 200).length).toBe(100);
+});
 ```
 
 ## 9. Operational Runbooks

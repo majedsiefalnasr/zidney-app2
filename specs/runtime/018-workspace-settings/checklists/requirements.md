@@ -44,6 +44,8 @@
 
 ## Notes
 
-- All gaps in the feature description were resolved using informed defaults documented in the Assumptions section of the spec.
-- No clarification markers were needed — the stage file (STAGE_18) provided sufficient detail for all critical decisions.
+- All gaps in the feature description were resolved using informed defaults documented in the
+  Assumptions section of the spec.
+- No clarification markers were needed — the stage file (STAGE_18) provided sufficient detail for
+  all critical decisions.
 - Spec is ready for `/speckit.clarify` or `/speckit.plan`.

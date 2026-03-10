@@ -9,8 +9,8 @@
 
 ## Purpose
 
-This guide explains how to validate the router refactor and guard pipeline implementation across
-the three Zidney frontend applications (MMC, Backoffice, Frontoffice).
+This guide explains how to validate the router refactor and guard pipeline implementation across the
+three Zidney frontend applications (MMC, Backoffice, Frontoffice).
 
 ---
 
@@ -25,7 +25,8 @@ The router and guard system has been unified across all three apps using a canon
 - **RouteMeta Schema:** New canonical fields (`public`, `roles?`, `requiresWorkspace?`) replace
   legacy meta fields
 - **Fallback Views:** Consistent unauthorized/error pages across all apps
-- **Backoffice Migration:** Legacy router file deleted; all routes migrated to `core/router/index.ts`
+- **Backoffice Migration:** Legacy router file deleted; all routes migrated to
+  `core/router/index.ts`
 
 Key outcomes:
 
@@ -136,8 +137,7 @@ bun --cwd apps/mmc run test:coverage
 
 ### Scenario 1 — Unauthenticated User Accesses Protected Route
 
-**Purpose:**
-Verify that unauthenticated users are redirected to the login page when accessing
+**Purpose:** Verify that unauthenticated users are redirected to the login page when accessing
 protected routes, and that the redirect parameter is preserved for post-login navigation.
 
 **Setup:**
@@ -171,9 +171,8 @@ protected routes, and that the redirect parameter is preserved for post-login na
 
 ### Scenario 2 — Authenticated User Accesses Public Route
 
-**Purpose:**
-Verify that authenticated users cannot bypass the dashboard by accessing login/public routes;
-they are redirected to the dashboard instead.
+**Purpose:** Verify that authenticated users cannot bypass the dashboard by accessing login/public
+routes; they are redirected to the dashboard instead.
 
 **Setup:**
 
@@ -202,9 +201,8 @@ they are redirected to the dashboard instead.
 
 ### Scenario 3 — WorkspaceGuard Redirects to Workspace Selector (Backoffice only)
 
-**Purpose:**
-Verify that Backoffice routes requiring a workspace redirect to workspace selector if workspace
-is not resolved.
+**Purpose:** Verify that Backoffice routes requiring a workspace redirect to workspace selector if
+workspace is not resolved.
 
 **Setup:**
 
@@ -213,7 +211,8 @@ is not resolved.
 
 **Steps:**
 
-1. Try to access a workspace-dependent route (e.g., `/dashboard` if it has `requiresWorkspace: true`)
+1. Try to access a workspace-dependent route (e.g., `/dashboard` if it has
+   `requiresWorkspace: true`)
 2. Observe redirect to `/select-workspace` (bo-workspace-selector route)
 3. Verify in browser: URL should show `/select-workspace`
 4. If workspace selection is mocked in tests, verify mock was called
@@ -235,8 +234,8 @@ is not resolved.
 
 ### Scenario 4 — UnauthorizedView Renders When User Lacks Required Role
 
-**Purpose:**
-Verify that users without required roles see the unauthorized page instead of blank/broken pages.
+**Purpose:** Verify that users without required roles see the unauthorized page instead of
+blank/broken pages.
 
 **Setup:**
 
@@ -259,15 +258,15 @@ Verify that users without required roles see the unauthorized page instead of bl
 **Troubleshooting:**
 
 - If blank page: verify UnauthorizedView.vue component is imported correctly
-- If wrong route name in link: check that link uses `name: property of dashboard route per app
-(e.g., `mmc-dashboard`, `bo-dashboard`, `fo-home`)
+- If wrong route name in link: check that link uses
+  `name: property of dashboard route per app (e.g., `mmc-dashboard`, `bo-dashboard`, `fo-home`)
 
 ---
 
 ### Scenario 5 — Error Recovery Page Renders on Guard Exception
 
-**Purpose:**
-Verify that if a guard throws an error, the router redirects to a safe error page instead of breaking the app.
+**Purpose:** Verify that if a guard throws an error, the router redirects to a safe error page
+instead of breaking the app.
 
 **Setup:**
 
@@ -298,9 +297,8 @@ Verify that if a guard throws an error, the router redirects to a safe error pag
 
 ### Scenario 6 — Route Names Are Consistent Across Modules
 
-**Purpose:**
-Verify that all module routes follow the naming convention (`mmc-*`, `bo-*`, `fo-*`) and no old
-names like `'dashboard'` or `'login'` are used.
+**Purpose:** Verify that all module routes follow the naming convention (`mmc-*`, `bo-*`, `fo-*`)
+and no old names like `'dashboard'` or `'login'` are used.
 
 **Steps:**
 
@@ -330,8 +328,7 @@ names like `'dashboard'` or `'login'` are used.
 
 ### Scenario 7 — TypeScript Compilation and Type Safety
 
-**Purpose:**
-Verify no type errors and that RouteMeta augmentations are recognized by TypeScript.
+**Purpose:** Verify no type errors and that RouteMeta augmentations are recognized by TypeScript.
 
 **Steps:**
 
@@ -353,15 +350,14 @@ Verify no type errors and that RouteMeta augmentations are recognized by TypeScr
 **Troubleshooting:**
 
 - If TypeScript errors: check that `tsconfig.json` includes all app-specific tsconfigs
-- If IntelliSense not working: restart TypeScript language server (Ctrl+Shift+P →
-  "TypeScript: Restart TS Server")
+- If IntelliSense not working: restart TypeScript language server (Ctrl+Shift+P → "TypeScript:
+  Restart TS Server")
 
 ---
 
 ### Scenario 8 — Lint Passes and No Log Statements
 
-**Purpose:**
-Verify code quality: no console.log, proper imports, no `any` types in guards.
+**Purpose:** Verify code quality: no console.log, proper imports, no `any` types in guards.
 
 **Steps:**
 
@@ -390,8 +386,7 @@ Verify code quality: no console.log, proper imports, no `any` types in guards.
 
 ### Scenario 9 — No Singleton Router Export (Verify Cleanup)
 
-**Purpose:**
-Verify legacy singleton router patterns have been removed.
+**Purpose:** Verify legacy singleton router patterns have been removed.
 
 **Steps:**
 
@@ -421,8 +416,7 @@ Verify legacy singleton router patterns have been removed.
 
 ### Scenario 10 — Live App Navigation (Manual End-to-End)
 
-**Purpose:**
-Verify the router and guards work in a running application without crashing.
+**Purpose:** Verify the router and guards work in a running application without crashing.
 
 **Setup:**
 

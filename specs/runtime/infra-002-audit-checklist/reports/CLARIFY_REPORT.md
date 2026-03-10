@@ -8,7 +8,9 @@
 
 ## Summary
 
-8 clarifications were resolved in session 2026-03-04. Zero `[NEEDS CLARIFICATION]` markers exist. All answers reinforce the READ-ONLY audit constraint and introduce no new scope. The spec is unambiguous and ready for technical planning.
+8 clarifications were resolved in session 2026-03-04. Zero `[NEEDS CLARIFICATION]` markers exist.
+All answers reinforce the READ-ONLY audit constraint and introduce no new scope. The spec is
+unambiguous and ready for technical planning.
 
 ---
 
@@ -41,7 +43,8 @@ None.
 
 ## Spec Updates Applied
 
-- `## Clarifications / ### Session 2026-03-04` section appended to `spec.md` with all 8 resolved clarifications
+- `## Clarifications / ### Session 2026-03-04` section appended to `spec.md` with all 8 resolved
+  clarifications
 
 ---
 
@@ -62,4 +65,5 @@ None.
 
 ## Open Risks
 
-None identified. Risk level reassessed as LOW — this is a documentation-only stage with no runtime impact.
+None identified. Risk level reassessed as LOW — this is a documentation-only stage with no runtime
+impact.

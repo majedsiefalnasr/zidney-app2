@@ -9,7 +9,8 @@
 
 ## Quick Start
 
-For new hires and QA teams: **This guide provides step-by-step instructions to validate the entire provisioning pipeline.**
+For new hires and QA teams: **This guide provides step-by-step instructions to validate the entire
+provisioning pipeline.**
 
 **Typical Test Duration:** 30-45 minutes (all scenarios)  
 **Environment:** Local development or staging
@@ -79,7 +80,8 @@ Expected output: All 4 health checks passing ✅
 
 3. **Verify Response**
    - ✅ Status code: **201 Created**
-   - ✅ Response format: `{ success: true, data: { id: "...", status: "PENDING_PROVISION", created_at: "..." }, error: null }`
+   - ✅ Response format:
+     `{ success: true, data: { id: "...", status: "PENDING_PROVISION", created_at: "..." }, error: null }`
    - ✅ License ID returned
    - ✅ Status is `PENDING_PROVISION`
 
@@ -287,7 +289,8 @@ Expected output: All 4 health checks passing ✅
 
 2. **Verify Error Response**
    - ✅ Status code: **400 Bad Request** OR **409 Conflict**
-   - ✅ Response format: `{ success: false, data: null, error: { code: "INVALID_PRODUCT_ID", message: "..." } }`
+   - ✅ Response format:
+     `{ success: false, data: null, error: { code: "INVALID_PRODUCT_ID", message: "..." } }`
    - ✅ No license created (verify with GET)
 
 3. **Expected Result:** ✅ PASS
@@ -521,7 +524,8 @@ Quick 5-minute sanity check:
 
 **Fix:**
 
-1. Verify all required fields present: `workspace_slug`, `organization_name`, `product_id`, `admin_email`, `student_limit`, `staff_limit`
+1. Verify all required fields present: `workspace_slug`, `organization_name`, `product_id`,
+   `admin_email`, `student_limit`, `staff_limit`
 2. Check JSON syntax (use `jq` to validate)
 3. Verify header: `Content-Type: application/json`
 

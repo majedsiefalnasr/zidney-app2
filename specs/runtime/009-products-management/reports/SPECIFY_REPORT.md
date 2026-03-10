@@ -9,7 +9,8 @@
 
 ## Specification Overview
 
-A comprehensive specification has been generated for the Products Management feature in the Platform MMC layer.
+A comprehensive specification has been generated for the Products Management feature in the Platform
+MMC layer.
 
 ### Key Findings
 
@@ -90,7 +91,8 @@ PATCH  /api/mmc/products/:id/status    Change product status
 4. Insert `product_audit_logs` (action=UPDATE)
 5. Commit or rollback all
 
-**Idempotency Strategy:** Not idempotent by design. Slug uniqueness prevents duplicates. Callers must handle retries.
+**Idempotency Strategy:** Not idempotent by design. Slug uniqueness prevents duplicates. Callers
+must handle retries.
 
 #### 6. Test Coverage Strategy
 
@@ -158,11 +160,15 @@ PATCH  /api/mmc/products/:id/status    Change product status
 
 The following topics should be clarified in the Clarify phase to ensure zero ambiguities:
 
-1. **Product Reordering**: Should INACTIVE products stay in list or be hidden? Answer affects GET /products query logic.
-2. **Idempotency Key Support**: Should bulk product import (future Stage) have idempotency support? Affects next-stage planning.
+1. **Product Reordering**: Should INACTIVE products stay in list or be hidden? Answer affects GET
+   /products query logic.
+2. **Idempotency Key Support**: Should bulk product import (future Stage) have idempotency support?
+   Affects next-stage planning.
 3. **Name Localization**: How many languages supported in name JSONB? (Currently assumed: unlimited)
-4. **Module List Additions**: Process for adding new module types? (Currently assumed: requires code change + migration)
-5. **Admin Audit Visibility**: Should admins see who created/modified products (performed_by)? Clarify audit log exposure.
+4. **Module List Additions**: Process for adding new module types? (Currently assumed: requires code
+   change + migration)
+5. **Admin Audit Visibility**: Should admins see who created/modified products (performed_by)?
+   Clarify audit log exposure.
 
 These are non-blocking for Stage 9 but will improve Stage 2 clarity.
 

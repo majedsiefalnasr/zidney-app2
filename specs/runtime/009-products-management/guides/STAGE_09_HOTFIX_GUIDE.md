@@ -286,14 +286,14 @@ kubectl logs deployment/zidney-api-green -n production | grep "audit"
 
 ```typescript
 // productService.ts should follow this pattern:
-await client.query('BEGIN')
+await client.query("BEGIN");
 try {
   // ... product operations ...
-  await client.query('INSERT INTO product_audit_logs ...')
-  await client.query('COMMIT')
+  await client.query("INSERT INTO product_audit_logs ...");
+  await client.query("COMMIT");
 } catch (error) {
-  await client.query('ROLLBACK')
-  throw error
+  await client.query("ROLLBACK");
+  throw error;
 }
 ```
 
@@ -366,11 +366,11 @@ WHERE table_name = 'products' AND constraint_type = 'UNIQUE';
 ```typescript
 // productService.ts should catch unique violation
 try {
-  await client.query('INSERT INTO products ...')
+  await client.query("INSERT INTO products ...");
 } catch (error) {
-  if (error.code === '23505') {
+  if (error.code === "23505") {
     // Unique constraint violation
-    throw new AppError(ErrorCodes.SLUG_CONFLICT, 'Slug already exists')
+    throw new AppError(ErrorCodes.SLUG_CONFLICT, "Slug already exists");
   }
 }
 ```
@@ -404,15 +404,15 @@ grep -n "enum Module" packages/types/src/enums/Module.ts
 
 ```typescript
 // packages/validation/src/products/productValidation.ts
-import { Module } from '@zidney/types/enums/Module'
+import { Module } from "@zidney/types/enums/Module";
 
 export const CreateProductSchema = z.object({
   enabled_modules: z
     .array(
-      z.nativeEnum(Module) // ← Must use nativeEnum
+      z.nativeEnum(Module), // ← Must use nativeEnum
     )
     .min(1),
-})
+});
 ```
 
 #### 2. Database Constraint Not Enforced
@@ -483,16 +483,12 @@ SELECT * FROM information_schema.tables WHERE table_name = 'licenses';
 
 ```typescript
 // Should check licenses table
-const checkResult = await client.query(
-  'SELECT COUNT(*) FROM licenses WHERE product_id = $1',
-  [productId]
-)
+const checkResult = await client.query("SELECT COUNT(*) FROM licenses WHERE product_id = $1", [
+  productId,
+]);
 
 if (checkResult.rows[0].count > 0) {
-  throw new AppError(
-    ErrorCodes.CONFLICT,
-    'Cannot delete product with existing licenses'
-  )
+  throw new AppError(ErrorCodes.CONFLICT, "Cannot delete product with existing licenses");
 }
 ```
 
@@ -541,11 +537,11 @@ router.get(
 
 ```typescript
 // Must extract and pass to logger
-const correlationId = c.get('correlationId')
-logger.info('products_list', {
+const correlationId = c.get("correlationId");
+logger.info("products_list", {
   correlation_id: correlationId, // ← Must include
   // ... other fields
-})
+});
 ```
 
 ---
@@ -575,12 +571,12 @@ grep -n "sendSuccess\|sendList" apps/api/src/utils/responseWrapper.ts
 ```typescript
 // apps/api/src/routes/mmc/products.ts
 // WRONG:
-return c.json({ data: products })
+return c.json({ data: products });
 
 // CORRECT:
-return sendSuccess(c, products)
-return sendList(c, items, total, limit, offset)
-return sendCreated(c, product)
+return sendSuccess(c, products);
+return sendList(c, items, total, limit, offset);
+return sendCreated(c, product);
 ```
 
 #### 2. Error Response Not Following Contract

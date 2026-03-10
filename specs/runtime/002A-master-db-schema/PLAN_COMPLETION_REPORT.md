@@ -237,7 +237,8 @@ specs/runtime/002A-master-db-schema/
 
 ## Compliance Statement
 
-**Implementation plan for STAGE_02A_MASTER_DATABASE_SCHEMA is FULLY COMPLIANT with Zidney Constitution v1.2.0.**
+**Implementation plan for STAGE_02A_MASTER_DATABASE_SCHEMA is FULLY COMPLIANT with Zidney
+Constitution v1.2.0.**
 
 No architectural violations detected.  
 Ready for task generation phase.

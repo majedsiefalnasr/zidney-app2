@@ -9,10 +9,14 @@
 
 ## Executive Summary
 
-Technical planning for the observability baseline has been completed. The plan decomposes the specification into 5 distinct implementation phases spanning logger foundation, API services and audit integration, worker job lifecycle, error standardization, and comprehensive testing. All 22 planned tasks have been mapped with dependencies, time estimates, and architectural constraints.
+Technical planning for the observability baseline has been completed. The plan decomposes the
+specification into 5 distinct implementation phases spanning logger foundation, API services and
+audit integration, worker job lifecycle, error standardization, and comprehensive testing. All 22
+planned tasks have been mapped with dependencies, time estimates, and architectural constraints.
 
 **Total Planning Duration:** Design + review = ~2 hours  
-**Implementation Duration (Planned):** ~16.75 hours (sequential critical path); ~11.25 hours (optimized with parallelization)  
+**Implementation Duration (Planned):** ~16.75 hours (sequential critical path); ~11.25 hours
+(optimized with parallelization)  
 **Timeline with Buffers:** 5-6 working days
 
 ---
@@ -44,7 +48,8 @@ Technical planning for the observability baseline has been completed. The plan d
 
 - request_id: Generated per API request (UUID-v4); immutable through entire lifecycle
 - job_id: Generated per worker job; unique per job execution (includes retries)
-- Both logged together in worker processes (request_id links to originating request; job_id isolates job execution)
+- Both logged together in worker processes (request_id links to originating request; job_id isolates
+  job execution)
 - Enables end-to-end causality: API Request → Background Job → Worker Completion → Result
 
 **Impact on Logging:**
@@ -124,7 +129,8 @@ Technical planning for the observability baseline has been completed. The plan d
 | T004 | `apps/api/src/middleware/redaction.ts`   | Sensitive data redaction middleware  |
 | T005 | `apps/api/src/app.ts`                    | Register all 4 middlewares in router |
 
-**Key Constraint:** Middleware order IMMUTABLE → request-id → tenant → license → correlation → redaction
+**Key Constraint:** Middleware order IMMUTABLE → request-id → tenant → license → correlation →
+redaction
 
 **Parallelization:** T002-T004 can run in parallel (after T001); then T005 (depends on all)
 
@@ -163,7 +169,8 @@ Technical planning for the observability baseline has been completed. The plan d
 | T013 | `apps/worker/src/processor.ts`         | Job dequeue with hash verification |
 | T014 | `apps/worker/src/lib/logger.ts`        | Worker logger with job scope       |
 
-**Key Constraint:** Job envelope immutable; request_id inherited from API context; idempotent enqueue
+**Key Constraint:** Job envelope immutable; request_id inherited from API context; idempotent
+enqueue
 
 **Parallelization:** T010 & T011 can run in parallel; then T012-T014 sequential
 
@@ -181,7 +188,8 @@ Technical planning for the observability baseline has been completed. The plan d
 | T016 | `apps/api/src/config/errors.ts`            | Centralized error code registry            |
 | T017 | `apps/api/src/middleware/error-handler.ts` | Error handler middleware (no stack traces) |
 
-**Key Constraint:** All errors follow `{ success, data, error: { code, message } }` contract; no stack traces to client
+**Key Constraint:** All errors follow `{ success, data, error: { code, message } }` contract; no
+stack traces to client
 
 **Parallelization:** None (sequential chain: T016 → T017; T015 independent)
 

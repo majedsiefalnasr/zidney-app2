@@ -12,7 +12,8 @@
 
 ## 1. Feature Overview
 
-This stage implements the frontend authentication runtime engine shared across all three Zidney frontend applications:
+This stage implements the frontend authentication runtime engine shared across all three Zidney
+frontend applications:
 
 | Application | Directory           | Description                      | Role in Auth                                                  |
 | ----------- | ------------------- | -------------------------------- | ------------------------------------------------------------- |
@@ -20,7 +21,9 @@ This stage implements the frontend authentication runtime engine shared across a
 | Backoffice  | `apps/backoffice/`  | Institutional Tenant Admin Panel | Workspace-scoped tokens — integrates with WorkspaceGuard      |
 | Frontoffice | `apps/frontoffice/` | Student Runtime Exam App         | Student tokens — attempt access controlled server-side        |
 
-Authentication in Zidney is **server-authoritative**. The frontend never issues tokens, validates credentials, decodes JWTs to infer permissions, or trusts client time. The frontend's role is exclusively:
+Authentication in Zidney is **server-authoritative**. The frontend never issues tokens, validates
+credentials, decodes JWTs to infer permissions, or trusts client time. The frontend's role is
+exclusively:
 
 - Holding the access token in memory for the duration of a session
 - Orchestrating the refresh flow on token expiry (detected by 401 response only)
@@ -28,9 +31,11 @@ Authentication in Zidney is **server-authoritative**. The frontend never issues 
 - Protecting routes via auth guards that query backend-authoritative session state
 - Exposing a typed, testable auth interface to the rest of the application
 
-**This stage does NOT implement login UI pages.** It defines the runtime auth engine behind all authenticated interactions.
+**This stage does NOT implement login UI pages.** It defines the runtime auth engine behind all
+authenticated interactions.
 
-Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/` folder structure and auth module skeleton. This stage fully implements those auth contracts.
+Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/` folder structure
+and auth module skeleton. This stage fully implements those auth contracts.
 
 ---
 
@@ -62,12 +67,14 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 - Full implementation of `core/auth/token-manager.ts` — in-memory access token holder
 - Full implementation of `core/auth/refresh-manager.ts` — single-flight refresh orchestration
 - Full implementation of `core/router/guards/auth.guard.ts` — route protection via auth state
-- Definition and documentation of the `AuthService` composable interface (`core/auth/auth.service.ts`)
+- Definition and documentation of the `AuthService` composable interface
+  (`core/auth/auth.service.ts`)
 - Session model definition: what constitutes an active session from the frontend's perspective
 - Token lifecycle definition: acquisition, holding, expiry detection, refresh, and destruction
 - Logout mechanics: coordinated teardown of memory state + backend session invalidation
 - Error handling contract for auth failures (401, failed refresh, network errors during refresh)
-- Test suite targeting: refresh race conditions, concurrent request retry, logout during pending request, expired token simulation, failed refresh force-logout
+- Test suite targeting: refresh race conditions, concurrent request retry, logout during pending
+  request, expired token simulation, failed refresh force-logout
 
 ### 3.2 Out of Scope
 
@@ -95,9 +102,12 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 
 **Acceptance**:
 
-- Access token is stored only in `core/auth/token-manager.ts` reactive state, not in any browser storage API
-- `localStorage`, `sessionStorage`, `document.cookie`, `indexedDB`, and URL query parameters are never written with token data
-- On page reload, the session is not automatically restored from browser storage — the refresh endpoint is called to re-establish session
+- Access token is stored only in `core/auth/token-manager.ts` reactive state, not in any browser
+  storage API
+- `localStorage`, `sessionStorage`, `document.cookie`, `indexedDB`, and URL query parameters are
+  never written with token data
+- On page reload, the session is not automatically restored from browser storage — the refresh
+  endpoint is called to re-establish session
 - Token value is never emitted to console or error logging systems
 
 ---
@@ -110,9 +120,12 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 
 **Acceptance**:
 
-- `isAuthenticated` state is set to `true` only after a successful login or successful token refresh response from the backend
-- Frontend never infers authentication status from the presence of a token in memory alone — it reflects the last confirmed server response
-- The user profile (`user`) in the auth store is populated only from backend `/me` endpoint responses
+- `isAuthenticated` state is set to `true` only after a successful login or successful token refresh
+  response from the backend
+- Frontend never infers authentication status from the presence of a token in memory alone — it
+  reflects the last confirmed server response
+- The user profile (`user`) in the auth store is populated only from backend `/me` endpoint
+  responses
 - No client-side `exp` claim checking is performed; expiry is signaled exclusively by a 401 response
 
 ---
@@ -121,7 +134,8 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 
 **As a** developer responsible for concurrent API traffic,  
 **I need** the refresh flow to use a single-flight lock,  
-**So that** a burst of concurrent 401 responses triggers exactly one refresh request rather than N refresh requests.
+**So that** a burst of concurrent 401 responses triggers exactly one refresh request rather than N
+refresh requests.
 
 **Acceptance**:
 
@@ -143,7 +157,8 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 
 - Logout calls the backend logout endpoint before clearing local state
 - Even if the backend logout endpoint fails (network error), frontend state is still cleared
-- After logout: access token is cleared from memory, auth store is reset to initial state, user object is cleared
+- After logout: access token is cleared from memory, auth store is reset to initial state, user
+  object is cleared
 - After logout: router redirects to the login route of the current app
 - No residual reactive state (loading flags, user data, token) persists after logout completes
 
@@ -152,15 +167,19 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 ### AS-05 — Route Protection via Auth Guard
 
 **As a** platform operator,  
-**I need** unauthenticated users to be redirected away from protected routes before any view renders,  
+**I need** unauthenticated users to be redirected away from protected routes before any view
+renders,  
 **So that** authenticated content is never briefly visible before a redirect.
 
 **Acceptance**:
 
 - `auth.guard.ts` runs before any protected route renders
-- Routes marked `requiresAuth: true` (via route meta) redirect unauthenticated users to the login route
-- Routes marked `guestOnly: true` (via route meta) redirect authenticated users to the default dashboard route
-- Guards never decode the JWT payload to determine authentication state — they query the Pinia auth store
+- Routes marked `requiresAuth: true` (via route meta) redirect unauthenticated users to the login
+  route
+- Routes marked `guestOnly: true` (via route meta) redirect authenticated users to the default
+  dashboard route
+- Guards never decode the JWT payload to determine authentication state — they query the Pinia auth
+  store
 - Guards return redirect instructions; they never throw exceptions or call `router.push()` directly
 
 ---
@@ -169,12 +188,14 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 
 **As a** platform architect,  
 **I need** the auth module to function identically across MMC, Backoffice, and Frontoffice,  
-**So that** the authentication runtime is a single maintained codebase rather than three diverging implementations.
+**So that** the authentication runtime is a single maintained codebase rather than three diverging
+implementations.
 
 **Acceptance**:
 
 - `core/auth/` directory structure and module contracts are identical across all three apps
-- App-specific behavior (workspace scope for Backoffice, student scope for Frontoffice) is injected via configuration at bootstrap, not hardcoded in the auth module
+- App-specific behavior (workspace scope for Backoffice, student scope for Frontoffice) is injected
+  via configuration at bootstrap, not hardcoded in the auth module
 - No app-specific `if (app === 'mmc')` branching exists inside `core/auth/`
 - All three apps produce identical test coverage for the auth module behaviors
 
@@ -184,7 +205,8 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 
 **As a** developer building feature modules,  
 **I need** auth state to be reactive and accessible through a well-typed Pinia store,  
-**So that** any component or composable can respond to authentication state changes without direct coupling to the token machinery.
+**So that** any component or composable can respond to authentication state changes without direct
+coupling to the token machinery.
 
 **Acceptance**:
 
@@ -210,7 +232,8 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 | `isLoading`       | `boolean`           | True during in-flight auth operations (login, refresh, logout) |
 | `authError`       | `AuthError \| null` | Last auth error; cleared on successful operation               |
 
-**FR-03** — The `AuthUser` type must contain only: `id`, `email`, `name`, `role` (enum from backend). No JWT claims. No permissions array.
+**FR-03** — The `AuthUser` type must contain only: `id`, `email`, `name`, `role` (enum from
+backend). No JWT claims. No permissions array.
 
 **FR-04** — The auth store must expose the following actions:
 
@@ -222,11 +245,14 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 | `logout()`         | Coordinates backend logout → state reset → router redirect                                 |
 | `clearAuthError()` | Clears the `authError` field                                                               |
 
-**FR-05** — The auth store must not contain direct HTTP calls. All network operations must delegate to the API client or `AuthService`.
+**FR-05** — The auth store must not contain direct HTTP calls. All network operations must delegate
+to the API client or `AuthService`.
 
-**FR-06** — The auth store must not contain permission checks, role comparisons, or license validations.
+**FR-06** — The auth store must not contain permission checks, role comparisons, or license
+validations.
 
-**FR-07** — Token value must not be exposed as a store getter. Token access is internal to `token-manager.ts`.
+**FR-07** — Token value must not be exposed as a store getter. Token access is internal to
+`token-manager.ts`.
 
 ---
 
@@ -243,11 +269,13 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 | `clearToken()`    | Destroys the access token from memory               |
 | `hasToken()`      | Returns boolean — whether a token is currently held |
 
-**FR-10** — Token manager must never read from or write to `localStorage`, `sessionStorage`, `document.cookie`, `indexedDB`, or URL state.
+**FR-10** — Token manager must never read from or write to `localStorage`, `sessionStorage`,
+`document.cookie`, `indexedDB`, or URL state.
 
 **FR-11** — Token manager must never log the token value via any logging or console mechanism.
 
-**FR-12** — Token manager state is non-persistent: a full page reload destroys the in-memory token. Session recovery is via `initSession()` → silent refresh flow.
+**FR-12** — Token manager state is non-persistent: a full page reload destroys the in-memory token.
+Session recovery is via `initSession()` → silent refresh flow.
 
 ---
 
@@ -266,17 +294,23 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 | Network error during refresh           | Treated as refresh failure — triggers logout                        |
 | Backend returns non-2xx during refresh | Treated as refresh failure — triggers logout                        |
 
-**FR-15** — The refresh request must use the standard API client endpoint (e.g. `POST /auth/refresh`). The httpOnly cookie is sent automatically by the browser — frontend sends no explicit refresh token value.
+**FR-15** — The refresh request must use the standard API client endpoint (e.g.
+`POST /auth/refresh`). The httpOnly cookie is sent automatically by the browser — frontend sends no
+explicit refresh token value.
 
-**FR-16** — Refresh manager must not implement retry loops. One attempt only. Failure is final for that cycle.
+**FR-16** — Refresh manager must not implement retry loops. One attempt only. Failure is final for
+that cycle.
 
-**FR-17** — Refresh manager must expose a `refresh()` function returning `Promise<void>` that resolves on success or rejects on failure.
+**FR-17** — Refresh manager must expose a `refresh()` function returning `Promise<void>` that
+resolves on success or rejects on failure.
 
 ---
 
 ### 5.4 API Client Integration
 
-**FR-18** — The API client (`core/api/client.ts`, established in STAGE_UI_00) must attach the access token via `Authorization: Bearer <token>` header on every outbound request where `hasToken()` returns true.
+**FR-18** — The API client (`core/api/client.ts`, established in STAGE_UI_00) must attach the access
+token via `Authorization: Bearer <token>` header on every outbound request where `hasToken()`
+returns true.
 
 **FR-19** — On receipt of a 401 response, the API client must:
 
@@ -284,7 +318,8 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 2. If refresh succeeds — retry the original request exactly once with the new token
 3. If refresh fails — reject the original request with a normalized auth error
 
-**FR-20** — Retry-after-refresh happens exactly once per original request. A second 401 on the retried request must not trigger another refresh attempt — it propagates the error to the caller.
+**FR-20** — Retry-after-refresh happens exactly once per original request. A second 401 on the
+retried request must not trigger another refresh attempt — it propagates the error to the caller.
 
 **FR-21** — The access token is never logged in request or response interceptors.
 
@@ -292,7 +327,8 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 
 ### 5.5 Auth Guard
 
-**FR-22** — `core/router/guards/auth.guard.ts` must be registered as a `beforeEach` global guard in each app's router.
+**FR-22** — `core/router/guards/auth.guard.ts` must be registered as a `beforeEach` global guard in
+each app's router.
 
 **FR-23** — Guard logic:
 
@@ -304,19 +340,25 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 | `guestOnly: true`      | No            | Allow navigation                                 |
 | Neither meta field set | Any           | Allow navigation                                 |
 
-**FR-24** — Auth guard must use `authStore.isAuthenticated` to determine auth status. It must not check token manager directly or decode any JWT.
+**FR-24** — Auth guard must use `authStore.isAuthenticated` to determine auth status. It must not
+check token manager directly or decode any JWT.
 
-**FR-25** — Auth guard must return a redirect location object from the navigation guard function. It must never call `router.push()` or `router.replace()` imperatively inside the guard.
+**FR-25** — Auth guard must return a redirect location object from the navigation guard function. It
+must never call `router.push()` or `router.replace()` imperatively inside the guard.
 
-**FR-26** — Auth guard must not throw exceptions. Navigation errors must resolve to a redirect or a pass.
+**FR-26** — Auth guard must not throw exceptions. Navigation errors must resolve to a redirect or a
+pass.
 
-**FR-27** — The redirect target names (`'login'`, `'dashboard'`) must be configurable per app at guard registration time to support MMC, Backoffice, and Frontoffice having different route name conventions.
+**FR-27** — The redirect target names (`'login'`, `'dashboard'`) must be configurable per app at
+guard registration time to support MMC, Backoffice, and Frontoffice having different route name
+conventions.
 
 ---
 
 ### 5.6 Auth Service Composable
 
-**FR-28** — `core/auth/auth.service.ts` must expose an `AuthService` interface used by the auth store to perform backend interactions:
+**FR-28** — `core/auth/auth.service.ts` must expose an `AuthService` interface used by the auth
+store to perform backend interactions:
 
 | Method               | Description                                                              |
 | -------------------- | ------------------------------------------------------------------------ |
@@ -325,17 +367,23 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 | `refreshToken()`     | Calls backend refresh endpoint; returns new access token on success      |
 | `fetchProfile()`     | Fetches authenticated user profile from backend `/me` endpoint           |
 
-**FR-29** — `AuthService` must use the API client for all HTTP calls. It must not call `fetch()` or any HTTP library directly.
+**FR-29** — `AuthService` must use the API client for all HTTP calls. It must not call `fetch()` or
+any HTTP library directly.
 
-**FR-30** — `AuthService.logout()` must resolve (not reject) even if the backend returns an error. Frontend state cleanup must not depend on backend logout success.
+**FR-30** — `AuthService.logout()` must resolve (not reject) even if the backend returns an error.
+Frontend state cleanup must not depend on backend logout success.
 
-**FR-31** — `AuthService` methods must return typed response objects. No `any` return types permitted.
+**FR-31** — `AuthService` methods must return typed response objects. No `any` return types
+permitted.
 
 ---
 
 ### 5.7 Session Initialization
 
-**FR-32** — At app bootstrap (in `main.ts`, before `app.mount()`), `authStore.initSession()` must be called before any route guard runs. See CL-01 in section 16 for the authoritative call-site decision. The `onMounted` pattern is explicitly excluded due to the timing race it introduces with Vue Router's initial navigation.
+**FR-32** — At app bootstrap (in `main.ts`, before `app.mount()`), `authStore.initSession()` must be
+called before any route guard runs. See CL-01 in section 16 for the authoritative call-site
+decision. The `onMounted` pattern is explicitly excluded due to the timing race it introduces with
+Vue Router's initial navigation.
 
 **FR-33** — `initSession()` must call `AuthService.refreshToken()` silently:
 
@@ -344,7 +392,8 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 | Success             | Store access token, fetch user profile, set `isAuthenticated: true`                                                                   |
 | Failure (any error) | Set `isAuthenticated: false`, clear any cached state — do not force logout redirect at this point (no previous session to invalidate) |
 
-**FR-34** — During `initSession()`, `isLoading` must be `true`. No route guard resolves until `initSession()` completes. This prevents a flash of the login page for already-authenticated users.
+**FR-34** — During `initSession()`, `isLoading` must be `true`. No route guard resolves until
+`initSession()` completes. This prevents a flash of the login page for already-authenticated users.
 
 ---
 
@@ -359,15 +408,18 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 5. Redirect to login route
 6. Set `isLoading: false`
 
-**FR-36** — Logout must be idempotent. Calling `logout()` when already logged out must produce no errors and must not call the backend.
+**FR-36** — Logout must be idempotent. Calling `logout()` when already logged out must produce no
+errors and must not call the backend.
 
-**FR-37** — After logout, all in-memory auth state must be reset: `isAuthenticated: false`, `user: null`, `authError: null`, `isLoading: false`.
+**FR-37** — After logout, all in-memory auth state must be reset: `isAuthenticated: false`,
+`user: null`, `authError: null`, `isLoading: false`.
 
 ---
 
 ### 5.9 Error Handling
 
-**FR-38** — Auth errors must conform to the platform error contract: `{ code: string, message: string }`.
+**FR-38** — Auth errors must conform to the platform error contract:
+`{ code: string, message: string }`.
 
 **FR-39** — Auth-specific error codes:
 
@@ -379,15 +431,18 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 | `AUTH_INIT_FAILED`          | `initSession()` refresh call failed (user treated as unauthenticated) |
 | `AUTH_PROFILE_FETCH_FAILED` | `/me` endpoint returned error after successful token acquisition      |
 
-**FR-40** — Auth errors must be stored in `authStore.authError` and never logged with token values attached. Error log entries must reference only the error code and a sanitized message.
+**FR-40** — Auth errors must be stored in `authStore.authError` and never logged with token values
+attached. Error log entries must reference only the error code and a sanitized message.
 
 ---
 
 ## 6. Non-Functional Requirements
 
-**NFR-01** — The auth module must be implemented in strict TypeScript with no `any` type usage in public interfaces.
+**NFR-01** — The auth module must be implemented in strict TypeScript with no `any` type usage in
+public interfaces.
 
-**NFR-02** — The auth module must be app-agnostic. No app-specific identifiers (`'mmc'`, `'backoffice'`, `'frontoffice'`) are hardcoded inside `core/auth/`.
+**NFR-02** — The auth module must be app-agnostic. No app-specific identifiers (`'mmc'`,
+`'backoffice'`, `'frontoffice'`) are hardcoded inside `core/auth/`.
 
 **NFR-03** — Access token must never appear in:
 
@@ -397,15 +452,21 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 - Console logs, structured logs, or error payloads
 - Network request payloads (only in `Authorization` header)
 
-**NFR-04** — Refresh manager must handle concurrent request bursts without spawning multiple parallel refresh network calls, regardless of concurrency level.
+**NFR-04** — Refresh manager must handle concurrent request bursts without spawning multiple
+parallel refresh network calls, regardless of concurrency level.
 
-**NFR-05** — Auth guard execution must not cause perceptible UI flash (unauthenticated content visible before redirect). `initSession()` must complete before router navigation is unblocked.
+**NFR-05** — Auth guard execution must not cause perceptible UI flash (unauthenticated content
+visible before redirect). `initSession()` must complete before router navigation is unblocked.
 
-**NFR-06** — Auth module must be fully testable in isolation without a running backend. Test doubles must replace `AuthService` and the API client.
+**NFR-06** — Auth module must be fully testable in isolation without a running backend. Test doubles
+must replace `AuthService` and the API client.
 
-**NFR-07** — ESLint and TypeScript strict mode must pass with zero errors across all three apps' `core/auth/` implementations.
+**NFR-07** — ESLint and TypeScript strict mode must pass with zero errors across all three apps'
+`core/auth/` implementations.
 
-**NFR-08** — Console output (including `console.log`, `console.warn`, `console.error`) must never include token values. The structured logger abstraction from the platform logger package must be used where logging is required.
+**NFR-08** — Console output (including `console.log`, `console.warn`, `console.error`) must never
+include token values. The structured logger abstraction from the platform logger package must be
+used where logging is required.
 
 ---
 
@@ -415,10 +476,10 @@ Prior stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` established the canonical `core/`
 
 ```typescript
 interface AuthUser {
-  id: string
-  email: string
-  name: string
-  role: UserRole // enum from packages/types
+  id: string;
+  email: string;
+  name: string;
+  role: UserRole; // enum from packages/types
 }
 ```
 
@@ -426,8 +487,8 @@ interface AuthUser {
 
 ```typescript
 interface AuthError {
-  code: AuthErrorCode // 'AUTH_REFRESH_FAILED' | 'AUTH_SESSION_EXPIRED' | ...
-  message: string
+  code: AuthErrorCode; // 'AUTH_REFRESH_FAILED' | 'AUTH_SESSION_EXPIRED' | ...
+  message: string;
 }
 ```
 
@@ -435,10 +496,10 @@ interface AuthError {
 
 ```typescript
 interface AuthStoreState {
-  isAuthenticated: boolean
-  user: AuthUser | null
-  isLoading: boolean
-  authError: AuthError | null
+  isAuthenticated: boolean;
+  user: AuthUser | null;
+  isLoading: boolean;
+  authError: AuthError | null;
 }
 ```
 
@@ -446,10 +507,10 @@ interface AuthStoreState {
 
 ```typescript
 interface IAuthService {
-  login(credentials: LoginCredentials): Promise<LoginResponse>
-  logout(): Promise<void>
-  refreshToken(): Promise<{ accessToken: string }>
-  fetchProfile(): Promise<AuthUser>
+  login(credentials: LoginCredentials): Promise<LoginResponse>;
+  logout(): Promise<void>;
+  refreshToken(): Promise<{ accessToken: string }>;
+  fetchProfile(): Promise<AuthUser>;
 }
 ```
 
@@ -457,10 +518,10 @@ interface IAuthService {
 
 ```typescript
 interface ITokenManager {
-  getToken(): string | null
-  setToken(token: string): void
-  clearToken(): void
-  hasToken(): boolean
+  getToken(): string | null;
+  setToken(token: string): void;
+  clearToken(): void;
+  hasToken(): boolean;
 }
 ```
 
@@ -468,8 +529,8 @@ interface ITokenManager {
 
 ```typescript
 interface IRefreshManager {
-  refresh(): Promise<void>
-  isRefreshing(): boolean
+  refresh(): Promise<void>;
+  isRefreshing(): boolean;
 }
 ```
 
@@ -478,8 +539,8 @@ interface IRefreshManager {
 ```typescript
 // Extends Vue Router's RouteMeta
 interface AuthRouteMeta {
-  requiresAuth?: boolean
-  guestOnly?: boolean
+  requiresAuth?: boolean;
+  guestOnly?: boolean;
 }
 ```
 
@@ -487,8 +548,8 @@ interface AuthRouteMeta {
 
 ```typescript
 interface AuthGuardOptions {
-  loginRouteName: string // e.g. 'login' in MMC, 'tenant-login' in Backoffice
-  dashboardRouteName: string // e.g. 'dashboard' in MMC, 'overview' in Backoffice
+  loginRouteName: string; // e.g. 'login' in MMC, 'tenant-login' in Backoffice
+  dashboardRouteName: string; // e.g. 'dashboard' in MMC, 'overview' in Backoffice
 }
 ```
 
@@ -656,15 +717,19 @@ No isolation concerns exist for this stage. All multi-tenancy guarantees remain 
 
 Compliant with Zidney Constitution v1.2.0 — No violations detected.
 
-This stage implements the UI authentication runtime engine in strict conformance with the Zidney constitutional model:
+This stage implements the UI authentication runtime engine in strict conformance with the Zidney
+constitutional model:
 
-- Authentication is server-authoritative; no frontend credential validation, token issuance, or JWT decoding for permissions.
-- Access token is confined to reactive in-memory Pinia state; refresh token is managed exclusively by backend httpOnly cookie.
+- Authentication is server-authoritative; no frontend credential validation, token issuance, or JWT
+  decoding for permissions.
+- Access token is confined to reactive in-memory Pinia state; refresh token is managed exclusively
+  by backend httpOnly cookie.
 - Token expiry is detected by backend 401 response only; client time is never trusted.
 - Single-flight refresh prevents token refresh amplification under concurrent load.
 - Logout is coordinated: backend invalidation followed by unconditional frontend state teardown.
 - Route guards are declarative and query store state only — they never inspect JWT payloads.
-- All multi-tenancy isolation, license enforcement, and attempt engine integrity guarantees are unaffected and remain server-side.
+- All multi-tenancy isolation, license enforcement, and attempt engine integrity guarantees are
+  unaffected and remain server-side.
 
 ---
 
@@ -674,39 +739,51 @@ This stage implements the UI authentication runtime engine in strict conformance
 
 #### CL-01 — `initSession()` Call Site
 
-**Question:** FR-32/FR-34 states `initSession()` must complete before any route guard runs. Where should it be called?
+**Question:** FR-32/FR-34 states `initSession()` must complete before any route guard runs. Where
+should it be called?
 
-**Decision:** In `main.ts` before `app.mount()`, with a `router.beforeEach` guard that awaits a reactive `sessionInitialized` ref.
+**Decision:** In `main.ts` before `app.mount()`, with a `router.beforeEach` guard that awaits a
+reactive `sessionInitialized` ref.
 
-**Rationale:** This is the only reliable pattern. Calling `initSession()` in `App.vue` `onMounted` introduces a timing race — the Vue Router `beforeEach` hook fires during the initial navigation, which happens before `onMounted` runs. By executing `initSession()` in `main.ts` and gating the guard pipeline on a `sessionInitialized` boolean ref, the auth state is guaranteed to be resolved before any route guard evaluates. This prevents the login-flash anti-pattern described in NFR-05.
+**Rationale:** This is the only reliable pattern. Calling `initSession()` in `App.vue` `onMounted`
+introduces a timing race — the Vue Router `beforeEach` hook fires during the initial navigation,
+which happens before `onMounted` runs. By executing `initSession()` in `main.ts` and gating the
+guard pipeline on a `sessionInitialized` boolean ref, the auth state is guaranteed to be resolved
+before any route guard evaluates. This prevents the login-flash anti-pattern described in NFR-05.
 
 **Implementation contract:**
 
 ```typescript
 // main.ts — bootstrap pattern
-const authStore = useAuthStore(pinia)
-const sessionInitialized = ref(false)
+const authStore = useAuthStore(pinia);
+const sessionInitialized = ref(false);
 
 router.beforeEach(async () => {
   if (!sessionInitialized.value) {
-    await authStore.initSession()
-    sessionInitialized.value = true
+    await authStore.initSession();
+    sessionInitialized.value = true;
   }
   // delegate to auth.guard.ts logic
-})
+});
 
-app.mount('#app')
+app.mount("#app");
 ```
 
 ---
 
 #### CL-02 — Circular Dependency Resolution: Auth Store ↔ API Client ↔ Refresh Manager
 
-**Question:** The circular dependency `authStore.logout()` → API client → `refresh-manager.refresh()` → `authStore.logout()` must be broken. How?
+**Question:** The circular dependency `authStore.logout()` → API client →
+`refresh-manager.refresh()` → `authStore.logout()` must be broken. How?
 
-**Decision:** Pass an `onLogout` callback to the refresh-manager at initialization time (factory injection pattern).
+**Decision:** Pass an `onLogout` callback to the refresh-manager at initialization time (factory
+injection pattern).
 
-**Rationale:** This is the cleanest and most testable resolution. The refresh manager is created via a factory function that receives a `onLogout: () => void` callback at bootstrap. This breaks the module-level circular import by ensuring the refresh manager has zero compile-time dependency on Pinia or the auth store. In tests, `onLogout` is replaced with a Vitest spy, enabling isolated unit testing without instantiating Pinia.
+**Rationale:** This is the cleanest and most testable resolution. The refresh manager is created via
+a factory function that receives a `onLogout: () => void` callback at bootstrap. This breaks the
+module-level circular import by ensuring the refresh manager has zero compile-time dependency on
+Pinia or the auth store. In tests, `onLogout` is replaced with a Vitest spy, enabling isolated unit
+testing without instantiating Pinia.
 
 **Implementation contract:**
 
@@ -725,14 +802,22 @@ const refreshManager = createRefreshManager(apiClient, () => authStore.logout())
 
 #### CL-03 — API Client Interceptor Ownership
 
-**Question:** Do the 401-handling and token-injection interceptors (FR-18–FR-21) already exist from STAGE_UI_00, or are they created from scratch in this stage?
+**Question:** Do the 401-handling and token-injection interceptors (FR-18–FR-21) already exist from
+STAGE_UI_00, or are they created from scratch in this stage?
 
-**Decision:** STAGE_UI_00 provided the API client skeleton (base URL config, axios/fetch wrapper factory). This stage wires in the actual interceptor implementations: token injection and 401 → refresh → retry logic.
+**Decision:** STAGE_UI_00 provided the API client skeleton (base URL config, axios/fetch wrapper
+factory). This stage wires in the actual interceptor implementations: token injection and 401 →
+refresh → retry logic.
 
-**Rationale:** Stage 00's scope was folder structure and scaffolding. The interceptor hooks were left as stubs or empty extension points. This stage fills them in using `token-manager.getToken()` and `refresh-manager.refresh()`, completing the API client's auth integration contract.
+**Rationale:** Stage 00's scope was folder structure and scaffolding. The interceptor hooks were
+left as stubs or empty extension points. This stage fills them in using `token-manager.getToken()`
+and `refresh-manager.refresh()`, completing the API client's auth integration contract.
 
 **Implementation scope:**
 
-- Wire request interceptor: inject `Authorization: Bearer <token>` if `tokenManager.hasToken()` is true
-- Wire response interceptor: on 401, call `refreshManager.refresh()`, retry once, handle second 401 as terminal
-- The API client file (`core/api/client.ts`) is **modified** in all three apps — not created from scratch
+- Wire request interceptor: inject `Authorization: Bearer <token>` if `tokenManager.hasToken()` is
+  true
+- Wire response interceptor: on 401, call `refreshManager.refresh()`, retry once, handle second 401
+  as terminal
+- The API client file (`core/api/client.ts`) is **modified** in all three apps — not created from
+  scratch

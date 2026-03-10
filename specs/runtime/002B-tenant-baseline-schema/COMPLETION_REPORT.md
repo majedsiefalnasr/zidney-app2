@@ -9,7 +9,8 @@
 
 ## Executive Summary
 
-All **6 critical production vulnerabilities** have been systematically hardened with defense-in-depth patterns. The system is **production-ready** for immediate deployment.
+All **6 critical production vulnerabilities** have been systematically hardened with
+defense-in-depth patterns. The system is **production-ready** for immediate deployment.
 
 **Deployment Timeline**:
 
@@ -30,7 +31,8 @@ All **6 critical production vulnerabilities** have been systematically hardened 
   - Test: ✓ `tests/integration/schema-provisioning-must-items.test.ts` → "MUST Item 1"
 
 - [x] **MUST Item 2**: UNIQUE constraint + idempotency handler
-  - Files: `apps/api/src/db/master/migrations/20250216_002_create_provisioning_tasks.ts` + `packages/domain-core/src/provisioning/idempotency-handler.ts`
+  - Files: `apps/api/src/db/master/migrations/20250216_002_create_provisioning_tasks.ts` +
+    `packages/domain-core/src/provisioning/idempotency-handler.ts`
   - Status: COMPLETE - UNIQUE constraint + error handler for PostgreSQL 23505
   - Test: ✓ `tests/integration/schema-provisioning-must-items.test.ts` → "MUST Item 2"
 
@@ -45,12 +47,14 @@ All **6 critical production vulnerabilities** have been systematically hardened 
   - Test: ✓ `tests/integration/schema-provisioning-must-items.test.ts` → "MUST Item 4"
 
 - [x] **MUST Item 5**: Registry integrity verification
-  - Files: `docs/operations/verify-registry-integrity.sh` + `docs/operations/verify-registry-integrity.sql`
+  - Files: `docs/operations/verify-registry-integrity.sh` +
+    `docs/operations/verify-registry-integrity.sql`
   - Status: COMPLETE - 10-check verification script + SQL queries
   - Test: ✓ `tests/integration/schema-provisioning-must-items.test.ts` → "MUST Item 5"
 
 - [x] **MUST Item 6**: Production monitoring
-  - Files: `docs/monitoring/dashboard-schema-provisioning.json` + `docs/monitoring/alerts-schema-provisioning.json` + Terraform IaC
+  - Files: `docs/monitoring/dashboard-schema-provisioning.json` +
+    `docs/monitoring/alerts-schema-provisioning.json` + Terraform IaC
   - Status: COMPLETE - 8 metrics + 8 alert rules + Terraform deployment
   - Test: ✓ `tests/integration/schema-provisioning-must-items.test.ts` → "MUST Item 6"
 

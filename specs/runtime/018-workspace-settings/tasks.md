@@ -1,7 +1,8 @@
 # Tasks: Workspace Settings
 
 **Branch**: `018-workspace-settings` | **Date**: 2026-02-28  
-**Plan**: [plan.md](plan.md) | **Spec**: [spec.md](spec.md) | **Data Model**: [data-model.md](data-model.md)
+**Plan**: [plan.md](plan.md) | **Spec**: [spec.md](spec.md) | **Data Model**:
+[data-model.md](data-model.md)
 
 ---
 
@@ -67,16 +68,20 @@ Phase 10 (Polish & Integration) ◄───────────────
 
 **Parallel Execution Opportunities**:
 
-- Phase 5 (US2) can run in parallel with Phase 7 (US3), Phase 8 (US4), Phase 9 (US5) after Phase 4 completes
+- Phase 5 (US2) can run in parallel with Phase 7 (US3), Phase 8 (US4), Phase 9 (US5) after Phase 4
+  completes
 - Within phases: tasks marked `[P]` can execute concurrently
 
 ---
 
 ## Implementation Strategy
 
-1. **MVP Scope**: Phase 1–4 (Setup + Foundational + US7 Retrieval + US1 General Settings with Audit). This delivers a working read/write cycle for one settings group with audit trail.
-2. **Incremental Delivery**: Each subsequent phase adds validation coverage and testing for additional settings groups. No new infrastructure files are created after Phase 6.
-3. **Risk Mitigation**: Encryption service and migration are completed in Phase 2 (Foundational) to surface any integration issues early.
+1. **MVP Scope**: Phase 1–4 (Setup + Foundational + US7 Retrieval + US1 General Settings with
+   Audit). This delivers a working read/write cycle for one settings group with audit trail.
+2. **Incremental Delivery**: Each subsequent phase adds validation coverage and testing for
+   additional settings groups. No new infrastructure files are created after Phase 6.
+3. **Risk Mitigation**: Encryption service and migration are completed in Phase 2 (Foundational) to
+   surface any integration issues early.
 
 ---
 
@@ -86,10 +91,12 @@ Phase 10 (Polish & Integration) ◄───────────────
 
 - [x] T001 Create module directory structure at `apps/api/src/modules/workspace-settings/`
 
-- [x] T002 [P] Define TypeScript interfaces and type aliases in `apps/api/src/modules/workspace-settings/workspace-settings.types.ts`
+- [x] T002 [P] Define TypeScript interfaces and type aliases in
+      `apps/api/src/modules/workspace-settings/workspace-settings.types.ts`
   - `GeneralSettings`, `LanguageSettings`, `BrandingSettings`, `PaymentSettings`, `SecuritySettings`
   - `WorkspaceSettings` (aggregate with `config_version`, `updated_at`)
-  - `WorkspaceSettingsResponse` (payment credentials replaced with `has_api_key`, `has_secret_key` booleans)
+  - `WorkspaceSettingsResponse` (payment credentials replaced with `has_api_key`, `has_secret_key`
+    booleans)
   - `UpdateSettingsRequest` (group settings + `config_version`)
   - `AuditDiffEntry` (`{ field, old_value, new_value }`)
   - `WorkspaceSettingsAuditEntry` (audit record shape)
@@ -97,9 +104,11 @@ Phase 10 (Polish & Integration) ◄───────────────
   - `PasswordPolicy` (future-ready structure)
   - `EmailTemplateBranding`, `CertificateTemplateBranding`, `SeoMetadata` (nested branding types)
 
-- [x] T003 [P] Define custom error classes in `apps/api/src/modules/workspace-settings/workspace-settings.errors.ts`
+- [x] T003 [P] Define custom error classes in
+      `apps/api/src/modules/workspace-settings/workspace-settings.errors.ts`
   - `SettingsValidationError` → HTTP 422, code `SETTINGS_VALIDATION_FAILED`
-  - `SettingsVersionConflictError` → HTTP 409, code `SETTINGS_VERSION_CONFLICT` (includes current `config_version`)
+  - `SettingsVersionConflictError` → HTTP 409, code `SETTINGS_VERSION_CONFLICT` (includes current
+    `config_version`)
   - `SettingsNotFoundError` → HTTP 404, code `SETTINGS_NOT_FOUND`
   - `EncryptionServiceUnavailableError` → HTTP 503, code `ENCRYPTION_SERVICE_UNAVAILABLE`
   - `InvalidSettingsGroupError` → HTTP 400, code `INVALID_SETTINGS_GROUP`
@@ -109,55 +118,90 @@ Phase 10 (Polish & Integration) ◄───────────────
 
 ## Phase 2: Foundational Infrastructure
 
-**Goal**: Build data layer (migration + schema), encryption service, and validation schemas. These are blocking prerequisites for all user stories.
+**Goal**: Build data layer (migration + schema), encryption service, and validation schemas. These
+are blocking prerequisites for all user stories.
 
-- [x] T004 Create tenant database migration in `apps/api/src/db/tenant/migrations/20260228_002_workspace_settings_jsonb.ts`
-  - ALTER `workspace_settings` table: add `singleton_key VARCHAR(10) NOT NULL DEFAULT 'SETTINGS'` with CHECK (`singleton_key = 'SETTINGS'`) and UNIQUE constraint
+- [x] T004 Create tenant database migration in
+      `apps/api/src/db/tenant/migrations/20260228_002_workspace_settings_jsonb.ts`
+  - ALTER `workspace_settings` table: add `singleton_key VARCHAR(10) NOT NULL DEFAULT 'SETTINGS'`
+    with CHECK (`singleton_key = 'SETTINGS'`) and UNIQUE constraint
   - ADD `config_version INTEGER NOT NULL DEFAULT 1`
   - ADD `general_settings JSONB NOT NULL DEFAULT '{}'::jsonb`
   - ADD `language_settings JSONB NOT NULL DEFAULT '{}'::jsonb`
   - ADD `branding_settings JSONB NOT NULL DEFAULT '{}'::jsonb`
   - ADD `payment_settings JSONB NOT NULL DEFAULT '{}'::jsonb`
   - ADD `security_settings JSONB NOT NULL DEFAULT '{}'::jsonb`
-  - Migrate existing flat column values into JSONB structure (organization_name → general_settings.app_name, timezone → general_settings.timezone, default_language → language_settings.default_language, session_timeout_minutes → general_settings.session_timeout_minutes)
-  - CREATE TABLE `workspace_settings_audit` with columns: `id UUID`, `workspace_id UUID`, `user_id UUID`, `settings_group VARCHAR(30)`, `config_version INTEGER`, `changes JSONB`, `request_id VARCHAR(50)`, `ip_address INET`, `user_agent TEXT`, `created_at TIMESTAMP`
-  - CREATE indexes: `idx_wsa_workspace_id`, `idx_wsa_created_at`, `idx_wsa_settings_group`, `idx_wsa_config_version`
+  - Migrate existing flat column values into JSONB structure (organization_name →
+    general_settings.app_name, timezone → general_settings.timezone, default_language →
+    language_settings.default_language, session_timeout_minutes →
+    general_settings.session_timeout_minutes)
+  - CREATE TABLE `workspace_settings_audit` with columns: `id UUID`, `workspace_id UUID`,
+    `user_id UUID`, `settings_group VARCHAR(30)`, `config_version INTEGER`, `changes JSONB`,
+    `request_id VARCHAR(50)`, `ip_address INET`, `user_agent TEXT`, `created_at TIMESTAMP`
+  - CREATE indexes: `idx_wsa_workspace_id`, `idx_wsa_created_at`, `idx_wsa_settings_group`,
+    `idx_wsa_config_version`
   - DROP old singleton trigger (replaced by CHECK + UNIQUE)
   - Forward-only: no columns dropped from workspace_settings
   - Entire migration wrapped in transaction
 
-- [x] T005 Create Drizzle ORM schema in `apps/api/src/db/tenant/schemas/workspace-settings.schema.ts`
+- [x] T005 Create Drizzle ORM schema in
+      `apps/api/src/db/tenant/schemas/workspace-settings.schema.ts`
   - `workspaceSettings` pgTable definition matching migration DDL (JSONB columns typed as `jsonb()`)
   - `workspaceSettingsAudit` pgTable definition for audit table
   - Include `singleton_key`, `config_version`, all 5 JSONB columns, timestamps
   - Export both table definitions
   - Register schema exports in tenant schema barrel file (if one exists)
 
-- [x] T006 [P] Implement encryption service in `apps/api/src/modules/workspace-settings/encryption.service.ts`
-  - `encrypt(plaintext: string): string` — AES-256-GCM, returns `v1:<base64_iv>:<base64_authTag>:<base64_ciphertext>`
-  - `decrypt(encryptedValue: string): string` — Parses format string, decrypts with matching key version
-  - Key loaded from `process.env.WORKSPACE_SETTINGS_ENCRYPTION_KEY` (32-byte hex string → 256-bit key)
+- [x] T006 [P] Implement encryption service in
+      `apps/api/src/modules/workspace-settings/encryption.service.ts`
+  - `encrypt(plaintext: string): string` — AES-256-GCM, returns
+    `v1:<base64_iv>:<base64_authTag>:<base64_ciphertext>`
+  - `decrypt(encryptedValue: string): string` — Parses format string, decrypts with matching key
+    version
+  - Key loaded from `process.env.WORKSPACE_SETTINGS_ENCRYPTION_KEY` (32-byte hex string → 256-bit
+    key)
   - 12-byte random IV per encryption (never reused)
   - Key identifier `v1` prefix per CL-005 for future rotation support
   - Throws `EncryptionServiceUnavailableError` if key missing or empty
   - Throws on malformed encrypted value format during decrypt
   - No third-party dependencies — uses Node.js/Bun `crypto` module
 
-- [x] T007 [P] Create Zod validation schemas in `apps/api/src/modules/workspace-settings/workspace-settings.validation.ts`
-  - `generalSettingsSchema`: `app_name` (string, 1–255 chars, required), `timezone` (IANA validated via `Intl.supportedValuesOf('timeZone')`, required), `date_format` (enum: `YYYY-MM-DD | DD/MM/YYYY | MM/DD/YYYY | DD-MM-YYYY | DD.MM.YYYY`, required), `session_timeout_minutes` (integer, 5–480, optional)
-  - `languageSettingsSchema`: `default_language` (ISO 639-1, required), `supported_languages` (non-empty string array, required). Cross-field refinement: `default_language` MUST exist in `supported_languages`
-  - `brandingSettingsSchema`: `logo_url` (URL or null, optional), `favicon_url` (URL or null, optional), `primary_color` (hex regex `/^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/`, optional), `secondary_color` (hex, optional), `email_template_branding` (nested object, optional), `certificate_template_branding` (nested object, optional), `seo_metadata` (nested: title max 60, description max 160, og_image_url URL, optional)
-  - `paymentSettingsSchema`: `use_custom_payment_gateway` (boolean, required), `gateway_provider` (string or null, optional), `api_key` (string or null, optional — sentinel semantics), `secret_key` (string or null, optional — sentinel semantics)
-  - `securitySettingsSchema`: `analytics_opt_in` (boolean, optional), `max_login_attempts` (integer 1–20, optional), `lockout_duration_minutes` (integer 1–1440, optional), `password_policy` (future-ready nested object, optional)
-  - `updateSettingsRequestSchema`: wraps `config_version` (positive integer, required) + `settings` (validated per group)
+- [x] T007 [P] Create Zod validation schemas in
+      `apps/api/src/modules/workspace-settings/workspace-settings.validation.ts`
+  - `generalSettingsSchema`: `app_name` (string, 1–255 chars, required), `timezone` (IANA validated
+    via `Intl.supportedValuesOf('timeZone')`, required), `date_format` (enum:
+    `YYYY-MM-DD | DD/MM/YYYY | MM/DD/YYYY | DD-MM-YYYY | DD.MM.YYYY`, required),
+    `session_timeout_minutes` (integer, 5–480, optional)
+  - `languageSettingsSchema`: `default_language` (ISO 639-1, required), `supported_languages`
+    (non-empty string array, required). Cross-field refinement: `default_language` MUST exist in
+    `supported_languages`
+  - `brandingSettingsSchema`: `logo_url` (URL or null, optional), `favicon_url` (URL or null,
+    optional), `primary_color` (hex regex `/^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/`, optional),
+    `secondary_color` (hex, optional), `email_template_branding` (nested object, optional),
+    `certificate_template_branding` (nested object, optional), `seo_metadata` (nested: title max 60,
+    description max 160, og_image_url URL, optional)
+  - `paymentSettingsSchema`: `use_custom_payment_gateway` (boolean, required), `gateway_provider`
+    (string or null, optional), `api_key` (string or null, optional — sentinel semantics),
+    `secret_key` (string or null, optional — sentinel semantics)
+  - `securitySettingsSchema`: `analytics_opt_in` (boolean, optional), `max_login_attempts` (integer
+    1–20, optional), `lockout_duration_minutes` (integer 1–1440, optional), `password_policy`
+    (future-ready nested object, optional)
+  - `updateSettingsRequestSchema`: wraps `config_version` (positive integer, required) + `settings`
+    (validated per group)
   - `settingsGroupSchema`: Zod enum for valid group names
-  - `auditQuerySchema`: `group` (optional enum), `limit` (integer 1–100, default 20), `cursor` (optional string)
+  - `auditQuerySchema`: `group` (optional enum), `limit` (integer 1–100, default 20), `cursor`
+    (optional string)
   - Cache IANA timezone list at module load for performance
 
 - [x] T008 [P] Write encryption service unit tests in `tests/unit/encryption-service.test.ts`
-  - Test scenarios: encrypt/decrypt roundtrip produces original plaintext, different plaintexts produce different ciphertexts, each encryption produces unique IV (encrypt same value twice → different output), output format matches `v1:<iv>:<authTag>:<ciphertext>`, decrypt rejects malformed format strings, encrypt throws `EncryptionServiceUnavailableError` when key is missing, decrypt throws on incorrect key, handles empty string input, handles long string input
+  - Test scenarios: encrypt/decrypt roundtrip produces original plaintext, different plaintexts
+    produce different ciphertexts, each encryption produces unique IV (encrypt same value twice →
+    different output), output format matches `v1:<iv>:<authTag>:<ciphertext>`, decrypt rejects
+    malformed format strings, encrypt throws `EncryptionServiceUnavailableError` when key is
+    missing, decrypt throws on incorrect key, handles empty string input, handles long string input
 
-- [x] T009 [P] Write validation schema unit tests in `tests/unit/workspace-settings-validation.test.ts`
+- [x] T009 [P] Write validation schema unit tests in
+      `tests/unit/workspace-settings-validation.test.ts`
   - Test all 5 schemas with valid inputs (happy path)
   - Test required field missing → rejection with field-level error
   - Test invalid timezone string → rejection
@@ -174,17 +218,22 @@ Phase 10 (Polish & Integration) ◄───────────────
 
 ## Phase 3: US7 — Settings Retrieval with Defaults and Fallback (P1)
 
-**Story Goal**: System retrieves workspace settings with sensible defaults for unconfigured optional fields and never exposes payment credentials.
+**Story Goal**: System retrieves workspace settings with sensible defaults for unconfigured optional
+fields and never exposes payment credentials.
 
-**Independent Test Criteria**: Load settings from partially configured workspace → verify defaults applied for missing optional fields, payment credentials replaced with boolean sentinels, critical missing fields produce error not silent fallback.
+**Independent Test Criteria**: Load settings from partially configured workspace → verify defaults
+applied for missing optional fields, payment credentials replaced with boolean sentinels, critical
+missing fields produce error not silent fallback.
 
-- [x] T010 [US7] Implement `getSettings` in `apps/api/src/modules/workspace-settings/workspace-settings.repository.ts`
+- [x] T010 [US7] Implement `getSettings` in
+      `apps/api/src/modules/workspace-settings/workspace-settings.repository.ts`
   - SELECT from `workspace_settings` WHERE `singleton_key = 'SETTINGS'`
   - Return raw row or `null` if no settings row exists
   - Uses tenant DB pool from request context (no direct DB instantiation)
   - No transaction needed for read-only operation
 
-- [x] T011 [US7] Implement `getWorkspaceSettings` in `apps/api/src/modules/workspace-settings/workspace-settings.service.ts`
+- [x] T011 [US7] Implement `getWorkspaceSettings` in
+      `apps/api/src/modules/workspace-settings/workspace-settings.service.ts`
   - Call `repository.getSettings(db)`
   - If `null`: throw `SettingsNotFoundError`
   - Apply defaults for missing optional fields:
@@ -192,17 +241,21 @@ Phase 10 (Polish & Integration) ◄───────────────
     - `security_settings.analytics_opt_in` → `false`
     - `security_settings.max_login_attempts` → `5`
     - `security_settings.lockout_duration_minutes` → `15`
-  - Strip payment credentials: replace `encrypted_api_key` / `encrypted_secret_key` with `has_api_key: boolean` and `has_secret_key: boolean`
-  - Validate critical fields (timezone, date_format) — if corrupted, throw structured error rather than serving bad data
+  - Strip payment credentials: replace `encrypted_api_key` / `encrypted_secret_key` with
+    `has_api_key: boolean` and `has_secret_key: boolean`
+  - Validate critical fields (timezone, date_format) — if corrupted, throw structured error rather
+    than serving bad data
   - Return `WorkspaceSettingsResponse` shape with `config_version` and `updated_at`
   - Log with structured logger: `workspace_slug`, `correlation_id`
 
-- [x] T012 [US7] Create GET `/api/v1/backoffice/workspace/settings` route in `apps/api/src/modules/workspace-settings/workspace-settings.routes.ts`
+- [x] T012 [US7] Create GET `/api/v1/backoffice/workspace/settings` route in
+      `apps/api/src/modules/workspace-settings/workspace-settings.routes.ts`
   - Hono route definition
   - Calls `service.getWorkspaceSettings(ctx)`
   - Returns `{ success: true, data: WorkspaceSettingsResponse, error: null }`
   - Error responses follow standard format (404 for not found)
-  - Middleware chain: correlation ID → tenant resolver → license enforcement → schema version → rate limiting → auth (JWT) → RBAC (institution admin)
+  - Middleware chain: correlation ID → tenant resolver → license enforcement → schema version → rate
+    limiting → auth (JWT) → RBAC (institution admin)
 
 - [x] T013 [US7] Register workspace-settings routes in `apps/api/src/routes/backoffice/settings.ts`
   - Import workspace-settings route module
@@ -214,12 +267,17 @@ Phase 10 (Polish & Integration) ◄───────────────
 
 ## Phase 4: US1 — Configure General Workspace Settings (P1)
 
-**Story Goal**: Institution admin can update general settings (app_name, timezone, date_format, session_timeout), with config_version incremented and audit trail created on every update.
+**Story Goal**: Institution admin can update general settings (app_name, timezone, date_format,
+session_timeout), with config_version incremented and audit trail created on every update.
 
-**Independent Test Criteria**: Save general settings → verify persistence, config_version increment, audit entry creation. Submit invalid timezone → verify 422 rejection. Submit stale config_version → verify 409 conflict.
+**Independent Test Criteria**: Save general settings → verify persistence, config_version increment,
+audit entry creation. Submit invalid timezone → verify 422 rejection. Submit stale config_version →
+verify 409 conflict.
 
-- [x] T014 [US1] Implement `computeSettingsDiff` utility function in `apps/api/src/modules/workspace-settings/workspace-settings.service.ts`
-  - Signature: `computeSettingsDiff(group: string, oldValues: Record<string, unknown>, newValues: Record<string, unknown>, redactedFields: string[]): AuditDiffEntry[]`
+- [x] T014 [US1] Implement `computeSettingsDiff` utility function in
+      `apps/api/src/modules/workspace-settings/workspace-settings.service.ts`
+  - Signature:
+    `computeSettingsDiff(group: string, oldValues: Record<string, unknown>, newValues: Record<string, unknown>, redactedFields: string[]): AuditDiffEntry[]`
   - Compare old and new JSONB objects field-by-field (shallow diff, array-aware)
   - Return array of `{ field, old_value, new_value }` for changed fields only
   - Redact fields in `redactedFields` list: record `[REDACTED]` for both old and new values
@@ -227,41 +285,55 @@ Phase 10 (Polish & Integration) ◄───────────────
   - Handle array comparison for `supported_languages` (detect additions/removals)
   - Export function for independent testing
 
-- [x] T015 [US1] Implement `upsertSettings` in `apps/api/src/modules/workspace-settings/workspace-settings.repository.ts`
-  - Conditional UPDATE: `SET <group>_settings = :data, config_version = :expected + 1, updated_at = now() WHERE singleton_key = 'SETTINGS' AND config_version = :expected`
-  - Check `rowCount`: if 0 and no row exists → INSERT with `config_version = 1` and defaults for other groups
-  - Check `rowCount`: if 0 and row exists → throw `SettingsVersionConflictError` with current version
+- [x] T015 [US1] Implement `upsertSettings` in
+      `apps/api/src/modules/workspace-settings/workspace-settings.repository.ts`
+  - Conditional UPDATE:
+    `SET <group>_settings = :data, config_version = :expected + 1, updated_at = now() WHERE singleton_key = 'SETTINGS' AND config_version = :expected`
+  - Check `rowCount`: if 0 and no row exists → INSERT with `config_version = 1` and defaults for
+    other groups
+  - Check `rowCount`: if 0 and row exists → throw `SettingsVersionConflictError` with current
+    version
   - Return `{ config_version: number }` (the new version)
   - All operations within caller-provided transaction
   - Uses Drizzle `and(eq(...), eq(...))` for conditional WHERE
 
-- [x] T016 [US1] Implement `insertAuditEntry` in `apps/api/src/modules/workspace-settings/workspace-settings.repository.ts`
+- [x] T016 [US1] Implement `insertAuditEntry` in
+      `apps/api/src/modules/workspace-settings/workspace-settings.repository.ts`
   - INSERT into `workspace_settings_audit` table
-  - Fields: `workspace_id`, `user_id`, `settings_group`, `config_version`, `changes` (JSONB diff), `request_id`, `ip_address`, `user_agent`, `created_at = now()`
+  - Fields: `workspace_id`, `user_id`, `settings_group`, `config_version`, `changes` (JSONB diff),
+    `request_id`, `ip_address`, `user_agent`, `created_at = now()`
   - Immutable: no UPDATE or DELETE operations on audit table
   - Within caller-provided transaction (same transaction as upsert)
 
-- [x] T017 [US1] Implement `updateSettingsGroup` in `apps/api/src/modules/workspace-settings/workspace-settings.service.ts`
+- [x] T017 [US1] Implement `updateSettingsGroup` in
+      `apps/api/src/modules/workspace-settings/workspace-settings.service.ts`
   - Validate input against appropriate Zod schema based on `group` parameter
   - If validation fails → throw `SettingsValidationError` with field-level details
-  - If `group === 'payment'` and credentials provided → encrypt via encryption service (FR-017, FR-021)
-  - Apply sentinel pattern for payment credentials (CL-003): omit → keep, null → clear, string → encrypt & replace
+  - If `group === 'payment'` and credentials provided → encrypt via encryption service (FR-017,
+    FR-021)
+  - Apply sentinel pattern for payment credentials (CL-003): omit → keep, null → clear, string →
+    encrypt & replace
   - Open database transaction
   - Load current settings within transaction
   - Compute diff (old vs. new) with credential redaction for payment fields
   - Call `repository.upsertSettings(db, group, data, expectedVersion)` — handles optimistic locking
   - Call `repository.insertAuditEntry(db, auditEntry)` — audit within same transaction
   - Commit transaction
-  - Log settings update with structured logger: `workspace_slug`, `correlation_id`, `settings_group`, `config_version`
+  - Log settings update with structured logger: `workspace_slug`, `correlation_id`,
+    `settings_group`, `config_version`
   - Return `{ config_version, updated_group, updated_at }`
 
-- [x] T018 [US1] Create PUT `/api/v1/backoffice/workspace/settings/:group` route in `apps/api/src/modules/workspace-settings/workspace-settings.routes.ts`
-  - Validate `:group` path parameter against `settingsGroupSchema` → 400 `INVALID_SETTINGS_GROUP` if invalid
+- [x] T018 [US1] Create PUT `/api/v1/backoffice/workspace/settings/:group` route in
+      `apps/api/src/modules/workspace-settings/workspace-settings.routes.ts`
+  - Validate `:group` path parameter against `settingsGroupSchema` → 400 `INVALID_SETTINGS_GROUP` if
+    invalid
   - Parse request body with `updateSettingsRequestSchema`
   - Call `service.updateSettingsGroup(ctx, group, settings, configVersion)`
   - Return `{ success: true, data: { config_version, updated_group, updated_at }, error: null }`
-  - Error mapping: `SettingsValidationError` → 422, `SettingsVersionConflictError` → 409, `EncryptionServiceUnavailableError` → 503
-  - Middleware chain: correlation ID → tenant resolver → license → schema version → rate limiting → auth → RBAC
+  - Error mapping: `SettingsValidationError` → 422, `SettingsVersionConflictError` → 409,
+    `EncryptionServiceUnavailableError` → 503
+  - Middleware chain: correlation ID → tenant resolver → license → schema version → rate limiting →
+    auth → RBAC
 
 - [x] T019 [US1] Write audit diff unit tests in `tests/unit/audit-diff.test.ts`
   - Test: changed fields detected, unchanged excluded
@@ -273,9 +345,11 @@ Phase 10 (Polish & Integration) ◄───────────────
   - Test: empty diff when old === new
   - Test: only redacted fields changed → diff contains `[REDACTED]` entries
 
-- [x] T020 [US1] Write service unit tests for general settings in `tests/unit/workspace-settings-service.test.ts`
+- [x] T020 [US1] Write service unit tests for general settings in
+      `tests/unit/workspace-settings-service.test.ts`
   - Test: `getWorkspaceSettings` returns settings with defaults applied
-  - Test: `getWorkspaceSettings` strips payment credentials, returns `has_api_key`/`has_secret_key` booleans
+  - Test: `getWorkspaceSettings` strips payment credentials, returns `has_api_key`/`has_secret_key`
+    booleans
   - Test: `getWorkspaceSettings` throws `SettingsNotFoundError` when no row exists
   - Test: `updateSettingsGroup('general', ...)` validates, updates, creates audit entry
   - Test: `updateSettingsGroup` increments `config_version`
@@ -288,11 +362,16 @@ Phase 10 (Polish & Integration) ◄───────────────
 
 ## Phase 5: US2 — Manage Language Settings (P1)
 
-**Story Goal**: Institution admin configures default language and supported languages. Default language cannot be removed from supported list. Removing a language does not delete existing translations.
+**Story Goal**: Institution admin configures default language and supported languages. Default
+language cannot be removed from supported list. Removing a language does not delete existing
+translations.
 
-**Independent Test Criteria**: Set default_language = "ar", supported = ["ar", "en"] → verify persistence. Attempt to remove "ar" from supported → verify rejection. Remove "fr" → verify existing translations unaffected.
+**Independent Test Criteria**: Set default_language = "ar", supported = ["ar", "en"] → verify
+persistence. Attempt to remove "ar" from supported → verify rejection. Remove "fr" → verify existing
+translations unaffected.
 
-- [x] T021 [US2] Add language cross-field validation test cases in `tests/unit/workspace-settings-validation.test.ts`
+- [x] T021 [US2] Add language cross-field validation test cases in
+      `tests/unit/workspace-settings-validation.test.ts`
   - Test: `default_language` in `supported_languages` → accepted
   - Test: `default_language` NOT in `supported_languages` → rejected with clear error
   - Test: empty `supported_languages` array → rejected
@@ -300,21 +379,27 @@ Phase 10 (Polish & Integration) ◄───────────────
   - Test: valid ISO 639-1 codes accepted ("ar", "en", "fr", "es")
   - Test: adding new language to supported list → accepted
 
-- [x] T022 [US2] Add service language update test scenarios in `tests/unit/workspace-settings-service.test.ts`
+- [x] T022 [US2] Add service language update test scenarios in
+      `tests/unit/workspace-settings-service.test.ts`
   - Test: update language settings with valid default and supported → succeeds, audit created
   - Test: attempt to remove default_language from supported → 422 validation error
-  - Test: removing non-default language does not trigger translation deletion (service does not call translation delete)
+  - Test: removing non-default language does not trigger translation deletion (service does not call
+    translation delete)
   - Test: adding new language to supported triggers config_version increment
 
 ---
 
 ## Phase 6: US6 — Audit Trail for All Settings Changes (P1)
 
-**Story Goal**: Every settings update creates an immutable audit entry. Audit entries never contain credential data. Audit trail is queryable with cursor-based pagination.
+**Story Goal**: Every settings update creates an immutable audit entry. Audit entries never contain
+credential data. Audit trail is queryable with cursor-based pagination.
 
-**Independent Test Criteria**: Perform a settings update → verify audit entry contains user_id, workspace_id, changed fields, timestamp, request_id. Update payment credentials → verify audit entry contains `[REDACTED]`. Query audit with cursor → verify pagination.
+**Independent Test Criteria**: Perform a settings update → verify audit entry contains user_id,
+workspace_id, changed fields, timestamp, request_id. Update payment credentials → verify audit entry
+contains `[REDACTED]`. Query audit with cursor → verify pagination.
 
-- [x] T023 [US6] Implement `getAuditEntries` with cursor-based pagination in `apps/api/src/modules/workspace-settings/workspace-settings.repository.ts`
+- [x] T023 [US6] Implement `getAuditEntries` with cursor-based pagination in
+      `apps/api/src/modules/workspace-settings/workspace-settings.repository.ts`
   - Cursor: composite `(created_at, id)` — decode from opaque base64 cursor string
   - Filters: `settings_group` (optional), workspace scoped
   - Pagination: `limit` (default 20, max 100)
@@ -322,23 +407,29 @@ Phase 10 (Polish & Integration) ◄───────────────
   - Return `{ items: AuditEntry[], nextCursor: string | null }`
   - `nextCursor` is `null` when no more pages
 
-- [x] T024 [US6] Implement `getSettingsAudit` in `apps/api/src/modules/workspace-settings/workspace-settings.service.ts`
+- [x] T024 [US6] Implement `getSettingsAudit` in
+      `apps/api/src/modules/workspace-settings/workspace-settings.service.ts`
   - Validate query params with `auditQuerySchema`
   - Call `repository.getAuditEntries(db, filters)`
   - Return paginated audit entries
   - Log with structured logger: `workspace_slug`, `correlation_id`
 
-- [x] T025 [US6] Create GET `/api/v1/backoffice/workspace/settings/audit` route in `apps/api/src/modules/workspace-settings/workspace-settings.routes.ts`
+- [x] T025 [US6] Create GET `/api/v1/backoffice/workspace/settings/audit` route in
+      `apps/api/src/modules/workspace-settings/workspace-settings.routes.ts`
   - Parse query params: `group` (optional), `limit` (optional, default 20), `cursor` (optional)
   - Call `service.getSettingsAudit(ctx, filters)`
   - Return `{ success: true, data: { items, nextCursor }, error: null }`
-  - Middleware chain: correlation ID → tenant resolver → license → schema version → rate limiting → auth → RBAC
+  - Middleware chain: correlation ID → tenant resolver → license → schema version → rate limiting →
+    auth → RBAC
 
-- [x] T026 [US6] Add audit-specific service test cases in `tests/unit/workspace-settings-service.test.ts`
+- [x] T026 [US6] Add audit-specific service test cases in
+      `tests/unit/workspace-settings-service.test.ts`
   - Test: every `updateSettingsGroup` call produces exactly one audit entry
-  - Test: audit entry contains correct `user_id`, `workspace_id`, `settings_group`, `config_version`, `request_id`
+  - Test: audit entry contains correct `user_id`, `workspace_id`, `settings_group`,
+    `config_version`, `request_id`
   - Test: audit entry `changes` contains structured diff with field names + old/new values
-  - Test: payment credential update audit does NOT contain raw or encrypted values (only `[REDACTED]`)
+  - Test: payment credential update audit does NOT contain raw or encrypted values (only
+    `[REDACTED]`)
   - Test: `getSettingsAudit` returns paginated results with valid cursor
   - Test: `getSettingsAudit` with `group` filter returns only matching entries
 
@@ -346,11 +437,15 @@ Phase 10 (Polish & Integration) ◄───────────────
 
 ## Phase 7: US3 — Update Branding Settings (P2)
 
-**Story Goal**: Institution admin customizes visual identity (logo, favicon, colors, SEO metadata). Branding is visual-only and never influences business logic.
+**Story Goal**: Institution admin customizes visual identity (logo, favicon, colors, SEO metadata).
+Branding is visual-only and never influences business logic.
 
-**Independent Test Criteria**: Save branding settings with valid logo_url and hex colors → verify persistence. Submit invalid hex color → verify 422 rejection. Verify branding values never affect grading, permissions, or licensing behavior.
+**Independent Test Criteria**: Save branding settings with valid logo_url and hex colors → verify
+persistence. Submit invalid hex color → verify 422 rejection. Verify branding values never affect
+grading, permissions, or licensing behavior.
 
-- [x] T027 [P] [US3] Add branding validation test cases in `tests/unit/workspace-settings-validation.test.ts`
+- [x] T027 [P] [US3] Add branding validation test cases in
+      `tests/unit/workspace-settings-validation.test.ts`
   - Test: valid hex colors (#1E40AF, #9333EA, #1E40AF80) → accepted
   - Test: invalid color values (#GGG, rgb(1,2,3), "blue") → rejected
   - Test: valid URLs for logo_url, favicon_url → accepted
@@ -360,7 +455,8 @@ Phase 10 (Polish & Integration) ◄───────────────
   - Test: nested email_template_branding and certificate_template_branding validated
   - Test: all fields optional (empty branding settings object → accepted)
 
-- [x] T028 [P] [US3] Add service branding test scenarios in `tests/unit/workspace-settings-service.test.ts`
+- [x] T028 [P] [US3] Add service branding test scenarios in
+      `tests/unit/workspace-settings-service.test.ts`
   - Test: branding update persists values and increments config_version
   - Test: branding update creates audit entry with correct diff
   - Test: partial branding update (only logo_url) → other fields preserved
@@ -369,11 +465,16 @@ Phase 10 (Polish & Integration) ◄───────────────
 
 ## Phase 8: US4 — Configure Payment Gateway Credentials (P2)
 
-**Story Goal**: Institution admin configures payment gateway with credentials encrypted at rest. Credentials never returned in API responses or logged in audit entries. Encryption failure prevents persistence of plaintext credentials.
+**Story Goal**: Institution admin configures payment gateway with credentials encrypted at rest.
+Credentials never returned in API responses or logged in audit entries. Encryption failure prevents
+persistence of plaintext credentials.
 
-**Independent Test Criteria**: Save payment credentials → verify encrypted at rest, never in GET response, never in audit. Disable gateway → verify reflected. Encryption service unavailable → verify 503 error, no plaintext stored.
+**Independent Test Criteria**: Save payment credentials → verify encrypted at rest, never in GET
+response, never in audit. Disable gateway → verify reflected. Encryption service unavailable →
+verify 503 error, no plaintext stored.
 
-- [x] T029 [US4] Add payment sentinel validation test cases in `tests/unit/workspace-settings-validation.test.ts`
+- [x] T029 [US4] Add payment sentinel validation test cases in
+      `tests/unit/workspace-settings-validation.test.ts`
   - Test: `use_custom_payment_gateway = true` with provider → accepted
   - Test: `api_key` as string → accepted (will be encrypted by service)
   - Test: `api_key` as null → accepted (clear credential)
@@ -381,15 +482,22 @@ Phase 10 (Polish & Integration) ◄───────────────
   - Test: `secret_key` same sentinel semantics as `api_key`
   - Test: `use_custom_payment_gateway = false` → accepted regardless of credentials
 
-- [x] T030 [US4] Add service encryption integration tests in `tests/unit/workspace-settings-service.test.ts`
-  - Test: `updateSettingsGroup('payment', ...)` with new `api_key` string → encrypt called, encrypted value stored
+- [x] T030 [US4] Add service encryption integration tests in
+      `tests/unit/workspace-settings-service.test.ts`
+  - Test: `updateSettingsGroup('payment', ...)` with new `api_key` string → encrypt called,
+    encrypted value stored
   - Test: `updateSettingsGroup('payment', ...)` with `api_key = null` → credential cleared in DB
-  - Test: `updateSettingsGroup('payment', ...)` with `api_key` omitted → existing encrypted value preserved
-  - Test: encryption service unavailable → `EncryptionServiceUnavailableError` thrown, no plaintext persisted
-  - Test: `getWorkspaceSettings` NEVER returns `encrypted_api_key` or `encrypted_secret_key` — returns `has_api_key`/`has_secret_key` booleans only
+  - Test: `updateSettingsGroup('payment', ...)` with `api_key` omitted → existing encrypted value
+    preserved
+  - Test: encryption service unavailable → `EncryptionServiceUnavailableError` thrown, no plaintext
+    persisted
+  - Test: `getWorkspaceSettings` NEVER returns `encrypted_api_key` or `encrypted_secret_key` —
+    returns `has_api_key`/`has_secret_key` booleans only
 
-- [x] T031 [US4] Add credential non-exposure tests in `tests/unit/workspace-settings-service.test.ts`
-  - Test: audit entry for payment update contains `[REDACTED]` for credential fields, never actual values
+- [x] T031 [US4] Add credential non-exposure tests in
+      `tests/unit/workspace-settings-service.test.ts`
+  - Test: audit entry for payment update contains `[REDACTED]` for credential fields, never actual
+    values
   - Test: structured log output for payment update does NOT contain credential values
   - Test: response from payment update does NOT contain credential values
 
@@ -397,11 +505,15 @@ Phase 10 (Polish & Integration) ◄───────────────
 
 ## Phase 9: US5 — Manage Security Settings (P3)
 
-**Story Goal**: Institution admin configures security policies. Analytics opt-in defaults to false. Password policy accepted but not enforced (future-ready).
+**Story Goal**: Institution admin configures security policies. Analytics opt-in defaults to false.
+Password policy accepted but not enforced (future-ready).
 
-**Independent Test Criteria**: Load security settings without explicit configuration → verify analytics_opt_in = false by default. Save max_login_attempts and lockout_duration → verify persistence. Submit password_policy → verify accepted and persisted without enforcement.
+**Independent Test Criteria**: Load security settings without explicit configuration → verify
+analytics_opt_in = false by default. Save max_login_attempts and lockout_duration → verify
+persistence. Submit password_policy → verify accepted and persisted without enforcement.
 
-- [x] T032 [P] [US5] Add security validation test cases in `tests/unit/workspace-settings-validation.test.ts`
+- [x] T032 [P] [US5] Add security validation test cases in
+      `tests/unit/workspace-settings-validation.test.ts`
   - Test: `analytics_opt_in` defaults to `false` when not provided
   - Test: `max_login_attempts` bounds (0 rejected, 1 accepted, 20 accepted, 21 rejected)
   - Test: `lockout_duration_minutes` bounds (0 rejected, 1 accepted, 1440 accepted, 1441 rejected)
@@ -409,8 +521,10 @@ Phase 10 (Polish & Integration) ◄───────────────
   - Test: `password_policy` as null → accepted
   - Test: empty security settings object → accepted (all fields optional)
 
-- [x] T033 [P] [US5] Add service security settings test scenarios in `tests/unit/workspace-settings-service.test.ts`
-  - Test: `getWorkspaceSettings` applies security defaults (analytics_opt_in = false, max_login_attempts = 5, lockout_duration_minutes = 15)
+- [x] T033 [P] [US5] Add service security settings test scenarios in
+      `tests/unit/workspace-settings-service.test.ts`
+  - Test: `getWorkspaceSettings` applies security defaults (analytics_opt_in = false,
+    max_login_attempts = 5, lockout_duration_minutes = 15)
   - Test: `updateSettingsGroup('security', ...)` persists values and increments config_version
   - Test: explicit `analytics_opt_in = true` → saved and audit records opt-in activation
 
@@ -418,9 +532,11 @@ Phase 10 (Polish & Integration) ◄───────────────
 
 ## Phase 10: Polish & Cross-Cutting Concerns
 
-**Goal**: Full integration test coverage validating end-to-end API flow, middleware enforcement, and cross-cutting concerns.
+**Goal**: Full integration test coverage validating end-to-end API flow, middleware enforcement, and
+cross-cutting concerns.
 
-- [x] T034 Write integration tests for full API flow in `tests/integration/workspace-settings-api.test.ts`
+- [x] T034 Write integration tests for full API flow in
+      `tests/integration/workspace-settings-api.test.ts`
   - Test: GET /settings returns 200 with defaults when settings exist
   - Test: GET /settings returns 404 when no settings row
   - Test: PUT /settings/general with valid data → 200 with incremented config_version

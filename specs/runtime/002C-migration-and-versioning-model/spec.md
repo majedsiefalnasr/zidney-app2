@@ -287,7 +287,8 @@ BEGIN
 
 ### What Must Be Idempotent
 
-**Script-level idempotency (Q2.1):** Entire migration script replayable with same outcome (strict requirement)
+**Script-level idempotency (Q2.1):** Entire migration script replayable with same outcome (strict
+requirement)
 
 - Worker may retry full migration script (exponential backoff, max 3 retries, then DLQ)
 - Non-idempotent DML forbidden (e.g., `counter = counter + 1` not allowed)
@@ -492,7 +493,8 @@ DELETE FROM attempts WHERE id > 100
 
 - **Pattern:** Eventual consistency acceptable; cache may lag up to 60 seconds
 - **TTL:** In-memory cache of platform_settings with 60-second TTL
-- **Resolver behavior:** If mismatch detected, resolver uses tenant_db as truth during upgrade window
+- **Resolver behavior:** If mismatch detected, resolver uses tenant_db as truth during upgrade
+  window
 - **Invalidation signal:** Pubsub event `PLATFORM_SETTINGS_UPDATED` for immediate propagation
 
 ---
@@ -511,7 +513,8 @@ DELETE FROM attempts WHERE id > 100
 
 **Rule:** Upgrade target must be ≥ minimum_supported; otherwise reject upgrade request
 
-- If target_version < platform_settings.minimum_supported_schema_version: Reject with 400 Bad Request
+- If target_version < platform_settings.minimum_supported_schema_version: Reject with 400 Bad
+  Request
 - Minimum_supported is enforcement floor for runtime
 - Cannot bypass forced upgrade thresholds
 
@@ -651,7 +654,8 @@ All errors follow standard error contract:
 
 **Async errors returned via polling endpoint** (identical format to sync errors)
 
-**Partial success included in error response** (operations attempted, operation succeeded, failed operation with detail)
+**Partial success included in error response** (operations attempted, operation succeeded, failed
+operation with detail)
 
 ### Failure Scenarios
 

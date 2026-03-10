@@ -1,14 +1,16 @@
 # Specify Report — STAGE_UI_03_ROUTER_AND_GUARDS
 
-**Step:** 1 — Specify
-**Timestamp:** 2026-03-02T00:00:00.000Z
-**Status:** COMPLETE
+**Step:** 1 — Specify **Timestamp:** 2026-03-02T00:00:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Specification for the canonical routing system and guard pipeline across all three Zidney frontend applications (MMC, Backoffice, Frontoffice) is complete. The spec defines 10 user stories covering the full guard pipeline, RouteMeta schema standardization, WorkspaceGuard (Backoffice-only), RoleGuard (UI-hint only), navigation fallback views, redirect strategy, and router testability. All ambiguities were resolved without any `[NEEDS CLARIFICATION]` markers remaining.
+Specification for the canonical routing system and guard pipeline across all three Zidney frontend
+applications (MMC, Backoffice, Frontoffice) is complete. The spec defines 10 user stories covering
+the full guard pipeline, RouteMeta schema standardization, WorkspaceGuard (Backoffice-only),
+RoleGuard (UI-hint only), navigation fallback views, redirect strategy, and router testability. All
+ambiguities were resolved without any `[NEEDS CLARIFICATION]` markers remaining.
 
 ---
 
@@ -38,24 +40,29 @@ Specification for the canonical routing system and guard pipeline across all thr
 
 ## Functional Requirements Captured
 
-- FR-01: AuthGuard — unauthenticated user on protected route → redirect to login with `?redirect` query param
+- FR-01: AuthGuard — unauthenticated user on protected route → redirect to login with `?redirect`
+  query param
 - FR-02: AuthGuard — authenticated user on public/guest-only route → redirect to dashboard
 - FR-03: AuthGuard MUST NOT decode JWT or inspect JWT payload
-- FR-04: WorkspaceGuard (Backoffice only) — missing workspace context → redirect to workspace selector
+- FR-04: WorkspaceGuard (Backoffice only) — missing workspace context → redirect to workspace
+  selector
 - FR-05: WorkspaceGuard MUST NOT validate license, subscription, or make any API calls
-- FR-06: RoleGuard — `route.meta.roles` defined, user.role not in list → redirect to unauthorized page
+- FR-06: RoleGuard — `route.meta.roles` defined, user.role not in list → redirect to unauthorized
+  page
 - FR-07: RoleGuard is UI-level hint only; backend remains the authoritative RBAC enforcer
 - FR-08: 404 fallback — unmatched route → `NotFoundView`
 - FR-09: Unauthorized fallback — RoleGuard redirect target → `UnauthorizedView`
 - FR-10: Backoffice license guard removal — all license-state navigation logic must be stripped
 - FR-11: RouteMeta `public: true` must be explicit — no implicit public assumption
-- FR-12: Redirect save/restore — intended route saved before redirect to login; restored after successful auth
+- FR-12: Redirect save/restore — intended route saved before redirect to login; restored after
+  successful auth
 
 ---
 
 ## Clarifications Required
 
-None. All ambiguities resolved by cross-referencing stage file, existing router code, AGENTS.md, and Project Context Primer.
+None. All ambiguities resolved by cross-referencing stage file, existing router code, AGENTS.md, and
+Project Context Primer.
 
 ---
 
@@ -79,8 +86,12 @@ None. All ambiguities resolved by cross-referencing stage file, existing router 
 
 ## Open Risks
 
-- **Risk 1 (Medium):** Backoffice STAGE_17 migration (FR-10) modifies existing functional router code. Regression testing for Backoffice navigation is critical. Existing E2E or smoke tests for Backoffice login/workspace flows must be re-validated after migration.
-- **Risk 2 (Low):** RouteMeta schema change (`guestOnly` → `public`, `requiredRole` → `roles[]`) requires touching all existing route definitions in MMC and Frontoffice. Risk is limited to compile-time TypeScript errors caught by `tsc --noEmit`.
+- **Risk 1 (Medium):** Backoffice STAGE_17 migration (FR-10) modifies existing functional router
+  code. Regression testing for Backoffice navigation is critical. Existing E2E or smoke tests for
+  Backoffice login/workspace flows must be re-validated after migration.
+- **Risk 2 (Low):** RouteMeta schema change (`guestOnly` → `public`, `requiredRole` → `roles[]`)
+  requires touching all existing route definitions in MMC and Frontoffice. Risk is limited to
+  compile-time TypeScript errors caught by `tsc --noEmit`.
 
 ---
 

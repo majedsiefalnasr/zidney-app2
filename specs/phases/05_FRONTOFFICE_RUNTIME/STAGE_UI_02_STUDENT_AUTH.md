@@ -79,8 +79,7 @@ Optional (future):
 
 ### Login Execution Flow
 
-1. Submit credentials to:
-   `POST /v1/frontoffice/auth/login`
+1. Submit credentials to: `POST /v1/frontoffice/auth/login`
 
 2. Backend validates:
    - Workspace
@@ -125,8 +124,7 @@ Forbidden:
 On application mount:
 
 1. Check for existing token
-2. Validate token via:
-   `GET /v1/frontoffice/auth/me`
+2. Validate token via: `GET /v1/frontoffice/auth/me`
 3. If valid:
    - Restore auth store
    - Restore workspace context

@@ -8,7 +8,9 @@
 
 ## Summary
 
-Initial drift analysis returned BLOCKED (2 HIGH findings: H1 task ordering defect, H2 command sequence contradiction). After remediation, all 9 drift criteria pass and all 5 findings are resolved. Composite guardian verdict: PASS. Implementation is authorized.
+Initial drift analysis returned BLOCKED (2 HIGH findings: H1 task ordering defect, H2 command
+sequence contradiction). After remediation, all 9 drift criteria pass and all 5 findings are
+resolved. Composite guardian verdict: PASS. Implementation is authorized.
 
 **Retry count:** 1 (first BLOCKED → remediation → APPROVED)
 

@@ -8,23 +8,36 @@
 
 ## Summary
 
-Implement a reusable, deterministic, permission-gated workflow engine for all Backoffice content entity lifecycle management. The engine enforces the four-state sequence `COMPLETED → UNDER_REVIEW → APPROVED → ENABLED`, serialises concurrent transitions via `SELECT FOR UPDATE`, records every transition in an immutable `workflow_logs` audit table, and is callable via a single stateless function `executeTransition(db, context)` from any API route handler.
+Implement a reusable, deterministic, permission-gated workflow engine for all Backoffice content
+entity lifecycle management. The engine enforces the four-state sequence
+`COMPLETED → UNDER_REVIEW → APPROVED → ENABLED`, serialises concurrent transitions via
+`SELECT FOR UPDATE`, records every transition in an immutable `workflow_logs` audit table, and is
+callable via a single stateless function `executeTransition(db, context)` from any API route
+handler.
 
-**Technical approach**: Stateless exported functions in `packages/domain-core/src/workflow/` (domain package layer), one new tenant migration (`20260301_002_workflow_engine.ts`), and a generic API module in `apps/api/src/modules/workflow/`.
+**Technical approach**: Stateless exported functions in `packages/domain-core/src/workflow/` (domain
+package layer), one new tenant migration (`20260301_002_workflow_engine.ts`), and a generic API
+module in `apps/api/src/modules/workflow/`.
 
 ---
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x (strict mode), running on Bun  
-**Primary Dependencies**: `pg` (PoolClient for transactions), `@zidney/logger` (structured logging), `@zidney/domain-core` (workflow engine export), Hono (route handler framework at API layer)  
-**Storage**: PostgreSQL — tenant database per workspace; `workflow_logs` table + entity status columns  
-**Testing**: Vitest — unit tests for engine pure logic, integration tests for full transition flow via API  
+**Primary Dependencies**: `pg` (PoolClient for transactions), `@zidney/logger` (structured logging),
+`@zidney/domain-core` (workflow engine export), Hono (route handler framework at API layer)  
+**Storage**: PostgreSQL — tenant database per workspace; `workflow_logs` table + entity status
+columns  
+**Testing**: Vitest — unit tests for engine pure logic, integration tests for full transition flow
+via API  
 **Target Platform**: Bun server (Linux/Docker)  
 **Project Type**: Domain package (library) + web service (API routes)  
-**Performance Goals**: Transition p95 < 50ms under normal load (one DB round-trip per transition); `SELECT FOR UPDATE` serialises concurrent writes without retry overhead  
-**Constraints**: No cross-tenant DB access; no client-side timestamps; no business logic in route handlers; all writes atomic; server-authoritative time only  
-**Scale/Scope**: 7 entity types × N entities per tenant; 20 transitions/user/entity-type/minute rate limit
+**Performance Goals**: Transition p95 < 50ms under normal load (one DB round-trip per transition);
+`SELECT FOR UPDATE` serialises concurrent writes without retry overhead  
+**Constraints**: No cross-tenant DB access; no client-side timestamps; no business logic in route
+handlers; all writes atomic; server-authoritative time only  
+**Scale/Scope**: 7 entity types × N entities per tenant; 20 transitions/user/entity-type/minute rate
+limit
 
 ---
 
@@ -107,7 +120,8 @@ No imports from `pg` or any framework.
 
 Exports:
 
-- `WorkflowContext` — plain value object (entityType, entityId, targetState, actorId, permissions[], reason?, correlationId, workspaceSlug, workspaceId)
+- `WorkflowContext` — plain value object (entityType, entityId, targetState, actorId, permissions[],
+  reason?, correlationId, workspaceSlug, workspaceId)
 - `WorkflowTransitionResult` — return type of `executeTransition()`
 - `WorkflowEnabledEntityRow` — minimal shape the engine reads/writes per entity row
 - `DbClient` interface — `{ query, connect? }` compatible with `pg.Pool`
@@ -118,7 +132,8 @@ Exports:
 
 - `WORKFLOW_ERROR_CODES` — typed constant object
 - `WORKFLOW_ERROR_HTTP_STATUS` — Record mapping code → HTTP status
-- `WorkflowError extends Error` — with `.code` and `.httpStatus` properties; identical pattern to `TranslationError`
+- `WorkflowError extends Error` — with `.code` and `.httpStatus` properties; identical pattern to
+  `TranslationError`
 
 Pattern mirrors `translation.errors.ts` exactly for consistency.
 
@@ -129,8 +144,8 @@ Pattern mirrors `translation.errors.ts` exactly for consistency.
 ```typescript
 export async function executeTransition(
   db: DbClient,
-  context: WorkflowContext
-): Promise<WorkflowTransitionResult>
+  context: WorkflowContext,
+): Promise<WorkflowTransitionResult>;
 ```
 
 **5-step transaction sequence** (FR-009):
@@ -163,20 +178,20 @@ On any error in steps 4–10: ROLLBACK → rethrow
 
 ```typescript
 const ENTITY_TABLE_MAP: Record<string, string> = {
-  subject: 'subjects',
-  mcq_question: 'mcq_questions',
-  traditional_question: 'traditional_questions',
-  exam: 'exams',
-  topic: 'topics',
-  library_file: 'library_files',
-  template: 'templates',
-}
+  subject: "subjects",
+  mcq_question: "mcq_questions",
+  traditional_question: "traditional_questions",
+  exam: "exams",
+  topic: "topics",
+  library_file: "library_files",
+  template: "templates",
+};
 ```
 
 **Structured logging** (every transition attempt, success or failure):
 
 ```typescript
-logger.info('workflow.transition.attempt', {
+logger.info("workflow.transition.attempt", {
   workspace_slug: context.workspaceSlug, // from tenant resolver middleware — AGENTS.md required
   workspace_id: context.workspaceId, // from tenant resolver middleware — AGENTS.md required
   correlation_id: context.correlationId,
@@ -184,15 +199,15 @@ logger.info('workflow.transition.attempt', {
   entity_id: context.entityId,
   target_state: context.targetState,
   actor_id: context.actorId,
-})
+});
 // On success:
-logger.info('workflow.transition.success', {
+logger.info("workflow.transition.success", {
   ...previousState,
   newState,
   logId,
-})
+});
 // On failure:
-logger.warn('workflow.transition.rejected', { ...error.code })
+logger.warn("workflow.transition.rejected", { ...error.code });
 ```
 
 ---
@@ -205,17 +220,23 @@ logger.warn('workflow.transition.rejected', { ...error.code })
 
 **DDL sequence** (single transactional block):
 
-1. `CREATE TABLE IF NOT EXISTS workflow_logs` with CHECK constraints on `previous_state` and `new_state`
-2. `CREATE INDEX IF NOT EXISTS idx_wfl_entity_created` on `(entity_type, entity_id, changed_at DESC, id DESC)`
+1. `CREATE TABLE IF NOT EXISTS workflow_logs` with CHECK constraints on `previous_state` and
+   `new_state`
+2. `CREATE INDEX IF NOT EXISTS idx_wfl_entity_created` on
+   `(entity_type, entity_id, changed_at DESC, id DESC)`
 3. `CREATE INDEX IF NOT EXISTS idx_wfl_actor_created` on `(changed_by, changed_at DESC)`
 4. `CREATE INDEX IF NOT EXISTS idx_wfl_entity_type_created` on `(entity_type, changed_at DESC)`
 5. `DROP TRIGGER IF EXISTS prevent_workflow_log_modification ON workflow_logs`
 6. `CREATE TRIGGER prevent_workflow_log_modification BEFORE UPDATE OR DELETE ON workflow_logs FOR EACH ROW EXECUTE FUNCTION prevent_audit_modification()`
 7. `UPDATE schema_version SET version = '1.3.0', applied_at = NOW() WHERE id = '...'`
 
-**`down()` function**: throws `Error('Workflow engine migration is not reversible. Restore from snapshot.')` per ADR-0008.
+**`down()` function**: throws
+`Error('Workflow engine migration is not reversible. Restore from snapshot.')` per ADR-0008.
 
-**Note**: This migration creates `workflow_logs` only. Entity table status columns (`status`, `status_updated_at`, `status_updated_by`) are added via per-entity migrations in Stage 21+ when those entities are first created. They are not added here to avoid coupling the workflow engine migration to entity tables that do not yet exist.
+**Note**: This migration creates `workflow_logs` only. Entity table status columns (`status`,
+`status_updated_at`, `status_updated_by`) are added via per-entity migrations in Stage 21+ when
+those entities are first created. They are not added here to avoid coupling the workflow engine
+migration to entity tables that do not yet exist.
 
 ---
 
@@ -232,16 +253,17 @@ POST /api/backoffice/:workspaceSlug/workflow/:entityType/:entityId/transition
 1. Tenant resolver (resolves `workspaceSlug` → tenant DB connection)
 2. License validation middleware (403/423/404 on invalid license)
 3. Authentication middleware (JWT validation → sets `actorId`, `permissions[]` in context)
-4. Rate limiting middleware: `workflow-transition` key, 20 req/user/entity-type/minute → 429 on breach
+4. Rate limiting middleware: `workflow-transition` key, 20 req/user/entity-type/minute → 429 on
+   breach
 
 ### `workflow.validation.ts`
 
 ```typescript
 // Zod schema for POST body
 const TransitionRequestSchema = z.object({
-  target_state: z.enum(['COMPLETED', 'UNDER_REVIEW', 'APPROVED', 'ENABLED']),
+  target_state: z.enum(["COMPLETED", "UNDER_REVIEW", "APPROVED", "ENABLED"]),
   reason: z.string().optional(),
-})
+});
 ```
 
 ### `workflow.context.ts`
@@ -262,14 +284,14 @@ Extracts from Hono context:
 
 ```typescript
 // Route handler skeleton — no business logic
-app.post('/workflow/:entityType/:entityId/transition', async (c) => {
-  const db = c.get('tenantDb') // from tenant resolver middleware
-  const body = await parseBody(c, TransitionRequestSchema)
-  const ctx = buildWorkflowContext(c, body) // workflow.context.ts
+app.post("/workflow/:entityType/:entityId/transition", async (c) => {
+  const db = c.get("tenantDb"); // from tenant resolver middleware
+  const body = await parseBody(c, TransitionRequestSchema);
+  const ctx = buildWorkflowContext(c, body); // workflow.context.ts
 
   try {
-    const result = await executeTransition(db, ctx)
-    return c.json({ success: true, data: result, error: null }, 200)
+    const result = await executeTransition(db, ctx);
+    return c.json({ success: true, data: result, error: null }, 200);
   } catch (err) {
     if (err instanceof WorkflowError) {
       return c.json(
@@ -283,15 +305,16 @@ app.post('/workflow/:entityType/:entityId/transition', async (c) => {
             correlationId: ctx.correlationId,
           },
         },
-        err.httpStatus
-      )
+        err.httpStatus,
+      );
     }
-    throw err // unhandled — bubble to global error handler
+    throw err; // unhandled — bubble to global error handler
   }
-})
+});
 ```
 
-**Handler contract**: the route handler has zero business logic. It only: parses + validates input, builds `WorkflowContext`, calls `executeTransition`, maps result to response envelope.
+**Handler contract**: the route handler has zero business logic. It only: parses + validates input,
+builds `WorkflowContext`, calls `executeTransition`, maps result to response envelope.
 
 ---
 
@@ -299,10 +322,10 @@ app.post('/workflow/:entityType/:entityId/transition', async (c) => {
 
 ```typescript
 // Workflow engine (Stage 020)
-export * from './workflow/workflow.states'
-export * from './workflow/workflow.types'
-export * from './workflow/workflow.errors'
-export * from './workflow/workflow.engine'
+export * from "./workflow/workflow.states";
+export * from "./workflow/workflow.types";
+export * from "./workflow/workflow.errors";
+export * from "./workflow/workflow.engine";
 ```
 
 ---
@@ -336,7 +359,10 @@ executeTransition(db, context):
 - First transaction acquires exclusive lock via `SELECT FOR UPDATE`.
 - Second transaction blocks on the lock.
 - First commits: entity is now in new state.
-- Second unblocks: re-reads entity row — if entity is now in its-expected source state? No → `INVALID_STATE_TRANSITION`. If the second transition had a different target (e.g., both tried to go from COMPLETED to UNDER_REVIEW)? The second sees UNDER_REVIEW → returns `400 invalid_state_transition`.
+- Second unblocks: re-reads entity row — if entity is now in its-expected source state? No →
+  `INVALID_STATE_TRANSITION`. If the second transition had a different target (e.g., both tried to
+  go from COMPLETED to UNDER_REVIEW)? The second sees UNDER_REVIEW → returns
+  `400 invalid_state_transition`.
 
 No retry logic needed. No version column needed. No serialization failure errors.
 
@@ -344,11 +370,14 @@ No retry logic needed. No version column needed. No serialization failure errors
 
 ## Rate Limiting (FR-018)
 
-Rate limiting is **not** implemented inside the engine. It is enforced by the existing rate-limit middleware at the API route layer.
+Rate limiting is **not** implemented inside the engine. It is enforced by the existing rate-limit
+middleware at the API route layer.
 
 Key: `workflow-transition:{actorId}:{entityType}` — 20 tokens/minute.
 
-The route handler applies the middleware before the handler is invoked. The engine is never reached if the rate limit is exceeded. Error response is `429 rate_limit_exceeded` from the middleware, not the engine.
+The route handler applies the middleware before the handler is invoked. The engine is never reached
+if the rate limit is exceeded. Error response is `429 rate_limit_exceeded` from the middleware, not
+the engine.
 
 ---
 
@@ -379,7 +408,8 @@ All workflow routes return the Zidney standard envelope:
 | Concurrent transition conflict        | 409  | `workflow_conflict`          | Engine (caught pg error on ROLLBACK) |
 | Rate limit exceeded                   | 429  | `rate_limit_exceeded`        | API middleware                       |
 
-Note: `401 Unauthorized` never returned by workflow engine — authentication middleware handles it upstream.
+Note: `401 Unauthorized` never returned by workflow engine — authentication middleware handles it
+upstream.
 
 ---
 
@@ -454,7 +484,9 @@ All structured log entries must include (per AGENTS.md):
 
 No constitution violations detected. No ADR required for this feature. All gates pass.
 
-**Risk flags**: None. Engine introduces `SELECT FOR UPDATE` as a new pattern in the codebase (no prior usage found) — this is documented in research.md R-005 and is the mandated mechanism per FR-009 clarification.
+**Risk flags**: None. Engine introduces `SELECT FOR UPDATE` as a new pattern in the codebase (no
+prior usage found) — this is documented in research.md R-005 and is the mandated mechanism per
+FR-009 clarification.
 
 | Violation                  | Why Needed         | Simpler Alternative Rejected Because |
 | -------------------------- | ------------------ | ------------------------------------ |

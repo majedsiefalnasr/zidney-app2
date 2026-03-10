@@ -8,13 +8,13 @@
 
 ## Summary
 
-Full validation gate executed for STAGE_21 Role & Permission System (Backoffice RBAC).
-All 62 STAGE_21-specific tests pass across 4 test files. TypeScript type-check passes clean.
-ESLint exits with warnings only (no errors); all warnings are pre-existing in the codebase
-or minor style issues (`no-explicit-any`) in new files — none are blocking per governance rules.
-One pre-existing failing test suite (`tests/unit/mmc/auth.service.test.ts`) is unrelated to
-STAGE_21 (caused by missing `hono/jwt` module resolution in vitest config for MMC tests).
-Migration, idempotency, and version-compatibility validations are all covered by test cases.
+Full validation gate executed for STAGE_21 Role & Permission System (Backoffice RBAC). All 62
+STAGE_21-specific tests pass across 4 test files. TypeScript type-check passes clean. ESLint exits
+with warnings only (no errors); all warnings are pre-existing in the codebase or minor style issues
+(`no-explicit-any`) in new files — none are blocking per governance rules. One pre-existing failing
+test suite (`tests/unit/mmc/auth.service.test.ts`) is unrelated to STAGE_21 (caused by missing
+`hono/jwt` module resolution in vitest config for MMC tests). Migration, idempotency, and
+version-compatibility validations are all covered by test cases.
 
 ---
 
@@ -104,7 +104,8 @@ Exit code: 1 (due to warnings — no errors present)
 
 Pre-existing codebase warnings (not caused by STAGE_21):
 
-- `apps/api/src/app.ts`, `migration-registry.ts`, `errors.ts`, `versions.ts`, `licenses.controller.ts` (pre-existing)
+- `apps/api/src/app.ts`, `migration-registry.ts`, `errors.ts`, `versions.ts`,
+  `licenses.controller.ts` (pre-existing)
 
 ### Type Check
 
@@ -164,12 +165,12 @@ All concurrency scenarios pass.
 
 ### Lint Warnings in STAGE_21 Files
 
-All `no-explicit-any` warnings in guard factory and service files originate from database
-query result typing (Drizzle `QueryResult<Record<string, unknown>>` type inference). These
-are non-blocking per governance rules and represent a future typing improvement.
+All `no-explicit-any` warnings in guard factory and service files originate from database query
+result typing (Drizzle `QueryResult<Record<string, unknown>>` type inference). These are
+non-blocking per governance rules and represent a future typing improvement.
 
-The unused `RbacError` import in `rbac.service.test.ts` is a minor oversight; it is exported
-from the domain package and available for future test assertions.
+The unused `RbacError` import in `rbac.service.test.ts` is a minor oversight; it is exported from
+the domain package and available for future test assertions.
 
 ---
 

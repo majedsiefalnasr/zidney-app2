@@ -26,12 +26,19 @@
 
 ## 3. Executive Summary
 
-- Establishes the canonical SPA runtime architecture for all three Zidney UI apps (MMC, Backoffice, Frontoffice) — env config, error normalisation, token store, API client, guard pipeline, router, Pinia state, `useAuth` composable, and application bootstrap
-- MMC is migrated from a flat `src/components/` + `src/views/` layout to a `src/modules/<domain>/` hierarchy; no functional regressions
+- Establishes the canonical SPA runtime architecture for all three Zidney UI apps (MMC, Backoffice,
+  Frontoffice) — env config, error normalisation, token store, API client, guard pipeline, router,
+  Pinia state, `useAuth` composable, and application bootstrap
+- MMC is migrated from a flat `src/components/` + `src/views/` layout to a `src/modules/<domain>/`
+  hierarchy; no functional regressions
 - Backoffice and Frontoffice are scaffolded from scratch with the identical core layer pattern
-- Architecture is safe: pure UI layer, no DB access, no tenant isolation logic modified, no API endpoint changes, no migrations
-- Constitutional guarantees intact: `getApiClient()` lazy getter prevents Pinia activation race; `pendingRefresh` queue enforces token refresh idempotency; `NormalizedError` sealed type prevents stack trace leakage; boot order enforced
-- ESLint migrated from v8 (`.eslintrc.json`) to v9 flat config (`eslint.config.mjs`); all original rules preserved
+- Architecture is safe: pure UI layer, no DB access, no tenant isolation logic modified, no API
+  endpoint changes, no migrations
+- Constitutional guarantees intact: `getApiClient()` lazy getter prevents Pinia activation race;
+  `pendingRefresh` queue enforces token refresh idempotency; `NormalizedError` sealed type prevents
+  stack trace leakage; boot order enforced
+- ESLint migrated from v8 (`.eslintrc.json`) to v9 flat config (`eslint.config.mjs`); all original
+  rules preserved
 - 196 unit tests added across all three apps; all CI gates pass with exit 0
 
 ---
@@ -70,7 +77,8 @@
 - [x] All queries scoped to workspace_id (workspace slug from `VITE_WORKSPACE_SLUG` env var)
 - [x] Structured logging (no `console.log` in source files; `console.error` at boot failure only)
 - [x] Error contract compliance — `NormalizedError { code, message, status }` sealed type
-- [x] Sensitive data not logged (token store only holds string tokens; error normaliser strips stack traces)
+- [x] Sensitive data not logged (token store only holds string tokens; error normaliser strips stack
+      traces)
 
 ---
 
@@ -79,8 +87,10 @@
 - [x] All write operations wrapped in transactions (N/A — no DB writes)
 - [x] Proper isolation level declared (N/A)
 - [x] Explicit locking defined where required (N/A)
-- [x] Idempotency guarantees preserved — `pendingRefresh` queue deduplicates concurrent refresh calls
-- [x] No race conditions introduced — `getApiClient()` lazy getter prevents Pinia activation race on boot
+- [x] Idempotency guarantees preserved — `pendingRefresh` queue deduplicates concurrent refresh
+      calls
+- [x] No race conditions introduced — `getApiClient()` lazy getter prevents Pinia activation race on
+      boot
 
 ---
 
@@ -97,7 +107,8 @@
 
 - [x] Unit tests added — 196 total (MMC: 64, Backoffice: 70, Frontoffice: 62)
 - [x] Integration tests (N/A — UI infrastructure; integration tested via Vite build + boot)
-- [x] Edge cases covered — env validation failure, network error, duplicate refresh, role mismatch, workspace mismatch
+- [x] Edge cases covered — env validation failure, network error, duplicate refresh, role mismatch,
+      workspace mismatch
 - [x] Concurrency scenarios tested — `pendingRefresh` queue test in `api-client.test.ts`
 - [x] Coverage threshold met — 100% of core layer covered by unit tests
 
@@ -114,7 +125,8 @@ bunx vitest run --config apps/frontoffice/vitest.config.ts
 ## 10. Migration Impact
 
 - [ ] New migrations included — **N/A** (UI stage — no schema changes)
-- [x] Backward compatibility verified — existing MMC dashboard routes and components preserved under new module structure
+- [x] Backward compatibility verified — existing MMC dashboard routes and components preserved under
+      new module structure
 - [x] Rollback strategy defined — revert this branch; no DB state to roll back
 - [x] No untracked schema changes
 
@@ -132,7 +144,9 @@ bunx vitest run --config apps/frontoffice/vitest.config.ts
 
 ## 12. Stage Lifecycle Verification
 
-- [x] Stage Status updated in `specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_00_RUNTIME_ARCHITECTURE.md` → PRODUCTION READY
+- [x] Stage Status updated in
+      `specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_00_RUNTIME_ARCHITECTURE.md` → PRODUCTION
+      READY
 - [x] `.workflow-state.json` updated to `PRODUCTION READY`
 - [x] README.md progress table complete — all 7 steps ✅
 - [x] All step reports generated in `reports/`
@@ -156,7 +170,9 @@ Risk Level:
 - [ ] Medium
 - [ ] High
 
-This is a pure frontend infrastructure stage. No database, no API endpoint changes, no migrations. The only risk is JavaScript runtime regression in MMC's reorganised module structure — fully mitigated by 196 unit tests and Vite build verification.
+This is a pure frontend infrastructure stage. No database, no API endpoint changes, no migrations.
+The only risk is JavaScript runtime regression in MMC's reorganised module structure — fully
+mitigated by 196 unit tests and Vite build verification.
 
 ---
 

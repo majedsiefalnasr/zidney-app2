@@ -84,7 +84,8 @@ packages/ui-system   (shadcn-vue components, layout, shared utils)
 | App-local `src/shared/`            | App-specific cross-cutting components (AuditTrailViewer in MMC) | Only used by one app                                             |
 | App-local `src/modules/<feature>/` | All domain-specific components, views, stores, routes           | Feature isolation                                                |
 
-**Rule**: If a composable or component is needed in 2+ apps → `packages/ui-system`. If only in 1 app → `src/shared/` or `src/modules/`.
+**Rule**: If a composable or component is needed in 2+ apps → `packages/ui-system`. If only in 1 app
+→ `src/shared/` or `src/modules/`.
 
 ---
 
@@ -136,23 +137,26 @@ src/
 
 ### 3.1 `core/config/env.ts`
 
-**Purpose**: Single point of access for all environment variables. Validates at startup. No other file may reference `import.meta.env`.
+**Purpose**: Single point of access for all environment variables. Validates at startup. No other
+file may reference `import.meta.env`.
 
 ```typescript
 // Resolved at module initialization time
 interface AppConfig {
-  apiBaseUrl: string
-  buildEnv: 'development' | 'staging' | 'production'
-  debugMode: boolean
+  apiBaseUrl: string;
+  buildEnv: "development" | "staging" | "production";
+  debugMode: boolean;
 }
 
-function resolveConfig(): AppConfig
+function resolveConfig(): AppConfig;
 // Throws: Error(`[env] Missing required variable: VITE_API_BASE_URL`) if missing
 
-export const appConfig: AppConfig = resolveConfig()
+export const appConfig: AppConfig = resolveConfig();
 ```
 
-**Validation pattern**: Check `import.meta.env.VITE_API_BASE_URL` — throw descriptive error if falsy. Derive `buildEnv` from `import.meta.env.MODE`. Set `debugMode` from `import.meta.env.VITE_DEBUG_MODE === 'true'`.
+**Validation pattern**: Check `import.meta.env.VITE_API_BASE_URL` — throw descriptive error if
+falsy. Derive `buildEnv` from `import.meta.env.MODE`. Set `debugMode` from
+`import.meta.env.VITE_DEBUG_MODE === 'true'`.
 
 **Per-app env vars**:
 
@@ -166,46 +170,50 @@ export const appConfig: AppConfig = resolveConfig()
 
 ```typescript
 interface NormalizedError {
-  code: string // e.g. 'AUTH_REFRESH_FAILED', 'NETWORK_ERROR', 'UNKNOWN_ERROR'
-  message: string
-  httpStatus: number // 0 = network error, -1 = unknown shape, 4xx/5xx = HTTP status
+  code: string; // e.g. 'AUTH_REFRESH_FAILED', 'NETWORK_ERROR', 'UNKNOWN_ERROR'
+  message: string;
+  httpStatus: number; // 0 = network error, -1 = unknown shape, 4xx/5xx = HTTP status
 }
 
 interface ApiErrorResponse {
-  success: false
-  data: null
+  success: false;
+  data: null;
   error: {
-    code: string
-    message: string
-  }
+    code: string;
+    message: string;
+  };
 }
 ```
 
 **`error-normalizer.ts`**:
 
 ```typescript
-function normalizeError(raw: unknown): NormalizedError
+function normalizeError(raw: unknown): NormalizedError;
 ```
 
 Three failure modes (from spec FR-28):
 
-1. **Standard API error** (`{ success: false, error: { code, message } }` + HTTP status in response) → extract code, message, status
-2. **Network error** (TypeError / no response / `httpStatus === 0`) → `{ code: 'NETWORK_ERROR', message: 'Network request failed', httpStatus: 0 }`
-3. **Unknown shape** (anything else) → `{ code: 'UNKNOWN_ERROR', message: 'An unexpected error occurred', httpStatus: -1 }`
+1. **Standard API error** (`{ success: false, error: { code, message } }` + HTTP status in response)
+   → extract code, message, status
+2. **Network error** (TypeError / no response / `httpStatus === 0`) →
+   `{ code: 'NETWORK_ERROR', message: 'Network request failed', httpStatus: 0 }`
+3. **Unknown shape** (anything else) →
+   `{ code: 'UNKNOWN_ERROR', message: 'An unexpected error occurred', httpStatus: -1 }`
 
 **Purity constraint**: Pure function. No imports from Vue, Pinia, or Router. No side effects.
 
 ### 3.3 `core/api/client.ts`
 
-**Structure**: Factory function — `createApiClient(config: AppConfig): ApiClient`. Not a singleton. Injectable for tests.
+**Structure**: Factory function — `createApiClient(config: AppConfig): ApiClient`. Not a singleton.
+Injectable for tests.
 
 ```typescript
 interface RequestConfig {
-  url: string
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
-  params?: Record<string, unknown> // serialized via URLSearchParams (flat keys only; nested not supported in v1)
-  data?: unknown
-  idempotencyKey?: string
+  url: string;
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  params?: Record<string, unknown>; // serialized via URLSearchParams (flat keys only; nested not supported in v1)
+  data?: unknown;
+  idempotencyKey?: string;
 }
 
 // Base fetch options applied to every request:
@@ -213,28 +221,25 @@ interface RequestConfig {
 //   on cross-origin requests (e.g., app.mmc.zidney.com → api.zidney.com)
 // - content-type defaults are set per-method by contentTypeInterceptor
 const BASE_FETCH_OPTIONS: RequestInit = {
-  credentials: 'include',
-} as const
+  credentials: "include",
+} as const;
 
 interface ApiResponse<T = unknown> {
-  success: true
-  data: T
+  success: true;
+  data: T;
 }
 
 interface ApiClient {
-  get<T>(url: string, params?: Record<string, unknown>): Promise<ApiResponse<T>>
-  post<T>(
-    url: string,
-    data: unknown,
-    idempotencyKey?: string
-  ): Promise<ApiResponse<T>>
-  put<T>(url: string, data: unknown): Promise<ApiResponse<T>>
-  patch<T>(url: string, data: unknown): Promise<ApiResponse<T>>
-  delete<T>(url: string, data?: unknown): Promise<ApiResponse<T>> // data optional (bulk delete)
+  get<T>(url: string, params?: Record<string, unknown>): Promise<ApiResponse<T>>;
+  post<T>(url: string, data: unknown, idempotencyKey?: string): Promise<ApiResponse<T>>;
+  put<T>(url: string, data: unknown): Promise<ApiResponse<T>>;
+  patch<T>(url: string, data: unknown): Promise<ApiResponse<T>>;
+  delete<T>(url: string, data?: unknown): Promise<ApiResponse<T>>; // data optional (bulk delete)
 }
 ```
 
-**Lazy getter export**: `client.ts` exports BOTH the factory AND a lazy getter — `useAuthStore()` is **never** called at module evaluation time, eliminating the Pinia activation race:
+**Lazy getter export**: `client.ts` exports BOTH the factory AND a lazy getter — `useAuthStore()` is
+**never** called at module evaluation time, eliminating the Pinia activation race:
 
 ```typescript
 // Factory (used in tests — inject custom tokenStore + fetch)
@@ -256,37 +261,47 @@ export function getApiClient(): ApiClient {
 
 Request interceptors (applied in order):
 
-1. `authInterceptor` — reads `tokenStore.getAccessToken()`, attaches `Authorization: Bearer <token>` if present. NEVER logs the token.
-2. `contentTypeInterceptor` — attaches `Content-Type: application/json` for POST, PUT, PATCH only (not GET/DELETE).
+1. `authInterceptor` — reads `tokenStore.getAccessToken()`, attaches `Authorization: Bearer <token>`
+   if present. NEVER logs the token.
+2. `contentTypeInterceptor` — attaches `Content-Type: application/json` for POST, PUT, PATCH only
+   (not GET/DELETE).
 3. `idempotencyInterceptor` — attaches `Idempotency-Key` header if `idempotencyKey` provided.
 4. `correlationInterceptor` — attaches `X-Correlation-ID: crypto.randomUUID()` per request.
 
 Response interceptors (applied in order):
 
-1. `errorNormalizerInterceptor` — on non-2xx, calls `normalizeError(rawResponse)`, throws `NormalizedError`.
-2. `refreshInterceptor` — on `httpStatus === 401` (via normalized error with code check), triggers single-flight token refresh.
+1. `errorNormalizerInterceptor` — on non-2xx, calls `normalizeError(rawResponse)`, throws
+   `NormalizedError`.
+2. `refreshInterceptor` — on `httpStatus === 401` (via normalized error with code check), triggers
+   single-flight token refresh.
 
 **Single-flight refresh strategy**:
 
-- Maintain a closure-scoped `let refreshPromise: Promise<void> | null = null` (factory closure, not module-level — one per instance).
-- On 401: if `refreshPromise` is null, set it to the refresh request. Queue all concurrent failed requests.
+- Maintain a closure-scoped `let refreshPromise: Promise<void> | null = null` (factory closure, not
+  module-level — one per instance).
+- On 401: if `refreshPromise` is null, set it to the refresh request. Queue all concurrent failed
+  requests.
 - On refresh success: clear `refreshPromise`, drain queue, retry all queued requests.
-- On refresh failure: clear `refreshPromise`, reject all queued with `{ code: 'AUTH_REFRESH_FAILED', message: 'Session expired. Please log in again.', httpStatus: 401 }`. Clear auth store. Redirect to login.
+- On refresh failure: clear `refreshPromise`, reject all queued with
+  `{ code: 'AUTH_REFRESH_FAILED', message: 'Session expired. Please log in again.', httpStatus: 401 }`.
+  Clear auth store. Redirect to login.
 
 **Request queue type** (typed alongside `refreshPromise`):
 
 ```typescript
 type QueueEntry = {
-  resolve: (value: unknown) => void
-  reject: (reason: NormalizedError) => void
-  retry: () => Promise<unknown>
-}
-let requestQueue: QueueEntry[] = []
+  resolve: (value: unknown) => void;
+  reject: (reason: NormalizedError) => void;
+  retry: () => Promise<unknown>;
+};
+let requestQueue: QueueEntry[] = [];
 ```
 
-**Underlying transport**: Use native `fetch` with `credentials: 'include'` in base options (see `BASE_FETCH_OPTIONS` above). No axios. No ky. Avoids additional bundle weight.
+**Underlying transport**: Use native `fetch` with `credentials: 'include'` in base options (see
+`BASE_FETCH_OPTIONS` above). No axios. No ky. Avoids additional bundle weight.
 
-**Mockability**: Factory pattern ensures tests can inject a mock `tokenStore` and mock `fetch` without module-level singletons.
+**Mockability**: Factory pattern ensures tests can inject a mock `tokenStore` and mock `fetch`
+without module-level singletons.
 
 ### 3.4 `core/auth/token-store.ts`
 
@@ -315,18 +330,20 @@ getAccessToken(): string | null
 isAuthenticated: boolean   // computed: accessToken !== null
 ```
 
-**Critical constraint**: `accessToken` is ONLY ever in reactive Pinia state. No `localStorage.setItem`, `sessionStorage.setItem`, or cookie write is permitted. `workspaceSlug` is relevant only for Backoffice; MMC and Frontoffice set it to `undefined`.
+**Critical constraint**: `accessToken` is ONLY ever in reactive Pinia state. No
+`localStorage.setItem`, `sessionStorage.setItem`, or cookie write is permitted. `workspaceSlug` is
+relevant only for Backoffice; MMC and Frontoffice set it to `undefined`.
 
 ### 3.5 `core/auth/index.ts` — `useAuth()` composable
 
 ```typescript
 interface UseAuthReturn {
-  isAuthenticated: ComputedRef<boolean>
-  currentUser: ComputedRef<AuthUser | null>
-  logout(): Promise<void>
+  isAuthenticated: ComputedRef<boolean>;
+  currentUser: ComputedRef<AuthUser | null>;
+  logout(): Promise<void>;
 }
 
-export function useAuth(): UseAuthReturn
+export function useAuth(): UseAuthReturn;
 ```
 
 **Dependency injection for `useAuth()`**:
@@ -334,11 +351,13 @@ export function useAuth(): UseAuthReturn
 - `apiClient` is imported as the default singleton from `@/core/api/client`
 - `router` is obtained via `useRouter()` (Vue Router composable — valid inside `setup()` context)
 - `tokenStore` is obtained via `useAuthStore()` (Pinia)
-- `useAuth()` delegates to the auth store's actions for any state mutations; does NOT mutate store state directly
+- `useAuth()` delegates to the auth store's actions for any state mutations; does NOT mutate store
+  state directly
 
 **`logout()` contract**:
 
-1. Call `DELETE /auth/logout` via `apiClient` (best-effort — do not block on failure; catch and discard error)
+1. Call `DELETE /auth/logout` via `apiClient` (best-effort — do not block on failure; catch and
+   discard error)
 2. Call `tokenStore.clearAccessToken()`
 3. Call `router.push('/login')` via `useRouter()`
 
@@ -352,103 +371,104 @@ export const router: Router = createRouter({
     ...dashboardRoutes, // imported from modules/dashboard/routes.ts
     ...licensesRoutes, // imported from modules/licenses/routes.ts (MMC)
     {
-      path: '/:pathMatch(.*)*',
-      name: 'not-found',
-      component: () => import('@/shared/views/NotFound.vue'),
+      path: "/:pathMatch(.*)*",
+      name: "not-found",
+      component: () => import("@/shared/views/NotFound.vue"),
     },
   ],
-})
+});
 
 router.beforeEach(async (to, from) => {
-  const authStore = useAuthStore()
-  const authResult = await authGuard({ to, from, authStore })
-  if (authResult !== true) return authResult
+  const authStore = useAuthStore();
+  const authResult = await authGuard({ to, from, authStore });
+  if (authResult !== true) return authResult;
 
-  const roleResult = await roleGuard({ to, from, authStore })
-  if (roleResult !== true) return roleResult
+  const roleResult = await roleGuard({ to, from, authStore });
+  if (roleResult !== true) return roleResult;
 
   // workspaceGuard only in backoffice
-  return true
-})
+  return true;
+});
 ```
 
 **Route meta type extension**:
 
 ```typescript
-declare module 'vue-router' {
+declare module "vue-router" {
   interface RouteMeta {
-    requiresAuth: boolean
-    requiredRole?: string
-    requiresWorkspace?: boolean // backoffice only
+    requiresAuth: boolean;
+    requiredRole?: string;
+    requiresWorkspace?: boolean; // backoffice only
   }
 }
 ```
 
-**Lazy-loading**: All module views use `() => import('@/modules/<feature>/views/<View>.vue')`. No eager imports.
+**Lazy-loading**: All module views use `() => import('@/modules/<feature>/views/<View>.vue')`. No
+eager imports.
 
 ### 3.7 `core/guards/auth.guard.ts`
 
 ```typescript
-type GuardResult = true | RouteLocationRaw
+type GuardResult = true | RouteLocationRaw;
 
 interface GuardContext {
-  to: RouteLocationNormalized
-  from: RouteLocationNormalized
-  authStore: ReturnType<typeof useAuthStore>
+  to: RouteLocationNormalized;
+  from: RouteLocationNormalized;
+  authStore: ReturnType<typeof useAuthStore>;
 }
 
-type Guard = (context: GuardContext) => GuardResult | Promise<GuardResult>
+type Guard = (context: GuardContext) => GuardResult | Promise<GuardResult>;
 
 export const authGuard: Guard = ({ to, authStore }) => {
-  if (!to.meta.requiresAuth) return true
-  if (authStore.isAuthenticated) return true
-  return { name: 'login' }
-}
+  if (!to.meta.requiresAuth) return true;
+  if (authStore.isAuthenticated) return true;
+  return { name: "login" };
+};
 ```
 
-**Constraints**: No business logic. Reads only `to.meta.requiresAuth` and `authStore.isAuthenticated`. Returns redirect target, never throws.
+**Constraints**: No business logic. Reads only `to.meta.requiresAuth` and
+`authStore.isAuthenticated`. Returns redirect target, never throws.
 
 ### 3.8 `core/guards/role.guard.ts`
 
 ```typescript
 export const roleGuard: Guard = ({ to, authStore }) => {
-  if (!to.meta.requiredRole) return true
-  if (authStore.user?.role === to.meta.requiredRole) return true
-  return { name: 'forbidden' } // 403 route
-}
+  if (!to.meta.requiredRole) return true;
+  if (authStore.user?.role === to.meta.requiredRole) return true;
+  return { name: "forbidden" }; // 403 route
+};
 ```
 
 ### 3.9 `core/guards/workspace.guard.ts` (Backoffice only)
 
 ```typescript
 export const workspaceGuard: Guard = ({ to, authStore }) => {
-  if (!to.meta.requiresWorkspace) return true
-  const routeSlug = to.params['slug']
-  if (
-    typeof routeSlug === 'string' &&
-    routeSlug === authStore.user?.workspaceSlug
-  )
-    return true
-  return { name: 'forbidden' }
-}
+  if (!to.meta.requiresWorkspace) return true;
+  const routeSlug = to.params["slug"];
+  if (typeof routeSlug === "string" && routeSlug === authStore.user?.workspaceSlug) return true;
+  return { name: "forbidden" };
+};
 ```
 
 ### 3.10 `core/state/index.ts` — Pinia Initialization
 
 ```typescript
-import { createPinia, markRaw } from 'pinia'
-import type { Router } from 'vue-router'
+import { createPinia, markRaw } from "pinia";
+import type { Router } from "vue-router";
 
 export function createAppPinia(router: Router) {
-  const pinia = createPinia()
+  const pinia = createPinia();
   pinia.use(({ store }) => {
-    store.router = markRaw(router)
-  })
-  return pinia
+    store.router = markRaw(router);
+  });
+  return pinia;
 }
 ```
 
-**Strict mode note**: Pinia v2 does not have a formal `strict` flag in `createPinia()`. Strict mode in Zidney context means: (a) stores do not call other stores' actions directly, (b) stores expose typed interfaces only, (c) no direct mutation outside actions. Enforced by convention + ESLint rules, not a Pinia API flag.
+**Strict mode note**: Pinia v2 does not have a formal `strict` flag in `createPinia()`. Strict mode
+in Zidney context means: (a) stores do not call other stores' actions directly, (b) stores expose
+typed interfaces only, (c) no direct mutation outside actions. Enforced by convention + ESLint
+rules, not a Pinia API flag.
 
 ---
 
@@ -458,29 +478,29 @@ All three apps follow FR-33 bootstrap order:
 
 ```typescript
 // Step 1: Validate environment config (throws early if misconfigured)
-import { appConfig } from '@/core/config/env'
+import { appConfig } from "@/core/config/env";
 
 // Step 2: Create Pinia
-import { createAppPinia } from '@/core/state'
+import { createAppPinia } from "@/core/state";
 
 // Step 3: Create Router
-import { router } from '@/core/router'
+import { router } from "@/core/router";
 
 // Step 4: Create Vue app
-import { createApp } from 'vue'
-import App from './App.vue'
+import { createApp } from "vue";
+import App from "./App.vue";
 
-const pinia = createAppPinia(router)
-const app = createApp(App)
+const pinia = createAppPinia(router);
+const app = createApp(App);
 
 // Step 5: Register Pinia
-app.use(pinia)
+app.use(pinia);
 
 // Step 6: Register Router
-app.use(router)
+app.use(router);
 
 // Step 7: Mount
-app.mount('#app')
+app.mount("#app");
 ```
 
 ---
@@ -566,35 +586,24 @@ None — old directories are removed after migration. No files are deleted witho
 
 #### Files to CREATE
 
-**Configuration**:
-| Path | Description |
-|---|---|
-| `package.json` | Vue 3.4, vue-router v4, pinia v2.2, @zidney/ui-system workspace:_ |
-| `tsconfig.json` | Extends ../../tsconfig.base.json + `@/` paths |
-| `tsconfig.app.json` | Scoped includes for src/\*\*/_.ts, src/\*_/_.vue |
-| `vite.config.ts` | @vitejs/plugin-vue, @ alias, @zidney/ui alias |
-| `vitest.config.ts` | Vitest config — vue plugin, `@/` alias to `./src`, globals, setupFiles |
-| `index.html` | Vite entry HTML |
+**Configuration**: | Path | Description | |---|---| | `package.json` | Vue 3.4, vue-router v4, pinia
+v2.2, @zidney/ui-system workspace:_ | | `tsconfig.json` | Extends ../../tsconfig.base.json + `@/`
+paths | | `tsconfig.app.json` | Scoped includes for src/\*\*/_.ts, src/\*_/_.vue | |
+`vite.config.ts` | @vitejs/plugin-vue, @ alias, @zidney/ui alias | | `vitest.config.ts` | Vitest
+config — vue plugin, `@/` alias to `./src`, globals, setupFiles | | `index.html` | Vite entry HTML |
 | `.env.example` | VITE_API_BASE_URL= template |
 
-**Source**:
-| Path | Description |
-|---|---|
-| `src/main.ts` | Bootstrap sequence per §4 |
-| `src/App.vue` | Root component — `<RouterView />` only |
-| `src/core/config/env.ts` | AppConfig + startup validation |
-| `src/core/errors/types.ts` | NormalizedError, ApiErrorResponse |
-| `src/core/errors/error-normalizer.ts` | normalizeError() pure function |
-| `src/core/api/client.ts` | createApiClient() factory |
-| `src/core/auth/token-store.ts` | Pinia auth store — includes `workspaceSlug` field |
-| `src/core/auth/index.ts` | useAuth() composable |
-| `src/core/router/index.ts` | Vue Router 4 with workspace guard in pipeline |
-| `src/core/guards/auth.guard.ts` | Auth check guard |
-| `src/core/guards/role.guard.ts` | Role check guard |
-| `src/core/guards/workspace.guard.ts` | **Workspace slug match guard** (backoffice only) |
-| `src/core/state/index.ts` | createAppPinia() factory |
-| `src/shared/views/NotFound.vue` | 404 page stub |
-| `src/shared/views/ForbiddenView.vue` | 403 page stub |
+**Source**: | Path | Description | |---|---| | `src/main.ts` | Bootstrap sequence per §4 | |
+`src/App.vue` | Root component — `<RouterView />` only | | `src/core/config/env.ts` | AppConfig +
+startup validation | | `src/core/errors/types.ts` | NormalizedError, ApiErrorResponse | |
+`src/core/errors/error-normalizer.ts` | normalizeError() pure function | | `src/core/api/client.ts`
+| createApiClient() factory | | `src/core/auth/token-store.ts` | Pinia auth store — includes
+`workspaceSlug` field | | `src/core/auth/index.ts` | useAuth() composable | |
+`src/core/router/index.ts` | Vue Router 4 with workspace guard in pipeline | |
+`src/core/guards/auth.guard.ts` | Auth check guard | | `src/core/guards/role.guard.ts` | Role check
+guard | | `src/core/guards/workspace.guard.ts` | **Workspace slug match guard** (backoffice only) |
+| `src/core/state/index.ts` | createAppPinia() factory | | `src/shared/views/NotFound.vue` | 404
+page stub | | `src/shared/views/ForbiddenView.vue` | 403 page stub |
 
 **Directories to scaffold** (empty, with `.gitkeep`):
 
@@ -603,19 +612,16 @@ None — old directories are removed after migration. No files are deleted witho
 - `src/shared/composables/`
 - `src/shared/utils/`
 
-**Test files**:
-| Path | Coverage |
-|---|---|
-| `tests/unit/core/error-normalizer.test.ts` | Same 3 failure modes |
-| `tests/unit/core/api-client.test.ts` | Token attach, `credentials: 'include'`, refresh, AUTH_REFRESH_FAILED + router redirect |
-| `tests/unit/core/auth.guard.test.ts` | Auth redirect |
-| `tests/unit/core/role.guard.test.ts` | Role redirect |
-| `tests/unit/core/workspace.guard.test.ts` | Matching slug passes, mismatch redirects |
-| `tests/unit/core/token-store.test.ts` | With workspaceSlug field |
-| `tests/unit/core/env-config.test.ts` | Validation |
-| `tests/unit/core/useAuth.test.ts` | isAuthenticated reactivity, logout clears store + redirects |
-| `tests/unit/core/guard-pipeline.test.ts` | Guard order, auth before role, workspace last |
-| `tests/unit/core/app-boot.test.ts` | App mounts without errors, Pinia before store access |
+**Test files**: | Path | Coverage | |---|---| | `tests/unit/core/error-normalizer.test.ts` | Same 3
+failure modes | | `tests/unit/core/api-client.test.ts` | Token attach, `credentials: 'include'`,
+refresh, AUTH_REFRESH_FAILED + router redirect | | `tests/unit/core/auth.guard.test.ts` | Auth
+redirect | | `tests/unit/core/role.guard.test.ts` | Role redirect | |
+`tests/unit/core/workspace.guard.test.ts` | Matching slug passes, mismatch redirects | |
+`tests/unit/core/token-store.test.ts` | With workspaceSlug field | |
+`tests/unit/core/env-config.test.ts` | Validation | | `tests/unit/core/useAuth.test.ts` |
+isAuthenticated reactivity, logout clears store + redirects | |
+`tests/unit/core/guard-pipeline.test.ts` | Guard order, auth before role, workspace last | |
+`tests/unit/core/app-boot.test.ts` | App mounts without errors, Pinia before store access |
 
 ---
 
@@ -625,34 +631,23 @@ None — old directories are removed after migration. No files are deleted witho
 
 #### Files to CREATE
 
-**Configuration** (same pattern as backoffice):
-| Path | Description |
-|---|---|
-| `package.json` | Vue 3.4, vue-router v4, pinia v2.2, @zidney/ui-system workspace:\* |
-| `tsconfig.json` | Extends ../../tsconfig.base.json + `@/` paths |
-| `tsconfig.app.json` | Scoped includes |
-| `vite.config.ts` | Plugin-vue, @ alias, @zidney/ui alias |
-| `vitest.config.ts` | Vitest config — vue plugin, `@/` alias to `./src`, globals, setupFiles |
-| `index.html` | Vite entry HTML |
-| `.env.example` | VITE_API_BASE_URL= template |
+**Configuration** (same pattern as backoffice): | Path | Description | |---|---| | `package.json` |
+Vue 3.4, vue-router v4, pinia v2.2, @zidney/ui-system workspace:\* | | `tsconfig.json` | Extends
+../../tsconfig.base.json + `@/` paths | | `tsconfig.app.json` | Scoped includes | | `vite.config.ts`
+| Plugin-vue, @ alias, @zidney/ui alias | | `vitest.config.ts` | Vitest config — vue plugin, `@/`
+alias to `./src`, globals, setupFiles | | `index.html` | Vite entry HTML | | `.env.example` |
+VITE_API_BASE_URL= template |
 
-**Source**:
-| Path | Description |
-|---|---|
-| `src/main.ts` | Bootstrap sequence per §4 |
-| `src/App.vue` | Root component — `<RouterView />` only |
-| `src/core/config/env.ts` | AppConfig + startup validation |
-| `src/core/errors/types.ts` | NormalizedError, ApiErrorResponse |
-| `src/core/errors/error-normalizer.ts` | normalizeError() pure function |
-| `src/core/api/client.ts` | createApiClient() factory |
-| `src/core/auth/token-store.ts` | Pinia auth store — no `workspaceSlug` in student context |
-| `src/core/auth/index.ts` | useAuth() composable |
-| `src/core/router/index.ts` | Vue Router 4 — `auth.guard → role.guard` ONLY |
-| `src/core/guards/auth.guard.ts` | Auth check guard |
-| `src/core/guards/role.guard.ts` | Role check guard |
-| `src/core/state/index.ts` | createAppPinia() factory |
-| `src/shared/views/NotFound.vue` | 404 page stub |
-| `src/shared/views/ForbiddenView.vue` | 403 page stub |
+**Source**: | Path | Description | |---|---| | `src/main.ts` | Bootstrap sequence per §4 | |
+`src/App.vue` | Root component — `<RouterView />` only | | `src/core/config/env.ts` | AppConfig +
+startup validation | | `src/core/errors/types.ts` | NormalizedError, ApiErrorResponse | |
+`src/core/errors/error-normalizer.ts` | normalizeError() pure function | | `src/core/api/client.ts`
+| createApiClient() factory | | `src/core/auth/token-store.ts` | Pinia auth store — no
+`workspaceSlug` in student context | | `src/core/auth/index.ts` | useAuth() composable | |
+`src/core/router/index.ts` | Vue Router 4 — `auth.guard → role.guard` ONLY | |
+`src/core/guards/auth.guard.ts` | Auth check guard | | `src/core/guards/role.guard.ts` | Role check
+guard | | `src/core/state/index.ts` | createAppPinia() factory | | `src/shared/views/NotFound.vue` |
+404 page stub | | `src/shared/views/ForbiddenView.vue` | 403 page stub |
 
 **Note**: Per spec §8.3 and clarification §16:
 
@@ -660,20 +655,18 @@ None — old directories are removed after migration. No files are deleted witho
 - No `AttemptGuard` — deferred to Exam Runtime stage
 - Guard pipeline: `auth.guard → role.guard` only
 
-**Test files**:
-| Path | Coverage |
-|---|---|
-| `tests/unit/core/error-normalizer.test.ts` | Same 3 failure modes |
-| `tests/unit/core/api-client.test.ts` | Token attach, `credentials: 'include'`, refresh, AUTH_REFRESH_FAILED + router redirect |
-| `tests/unit/core/auth.guard.test.ts` | Auth redirect |
-| `tests/unit/core/role.guard.test.ts` | Role redirect |
-| `tests/unit/core/token-store.test.ts` | No workspaceSlug (student context) |
-| `tests/unit/core/env-config.test.ts` | Validation |
-| `tests/unit/core/useAuth.test.ts` | isAuthenticated reactivity, logout clears store + redirects |
-| `tests/unit/core/guard-pipeline.test.ts` | auth → role only (no workspace guard) |
-| `tests/unit/core/app-boot.test.ts` | App mounts without errors |
+**Test files**: | Path | Coverage | |---|---| | `tests/unit/core/error-normalizer.test.ts` | Same 3
+failure modes | | `tests/unit/core/api-client.test.ts` | Token attach, `credentials: 'include'`,
+refresh, AUTH_REFRESH_FAILED + router redirect | | `tests/unit/core/auth.guard.test.ts` | Auth
+redirect | | `tests/unit/core/role.guard.test.ts` | Role redirect | |
+`tests/unit/core/token-store.test.ts` | No workspaceSlug (student context) | |
+`tests/unit/core/env-config.test.ts` | Validation | | `tests/unit/core/useAuth.test.ts` |
+isAuthenticated reactivity, logout clears store + redirects | |
+`tests/unit/core/guard-pipeline.test.ts` | auth → role only (no workspace guard) | |
+`tests/unit/core/app-boot.test.ts` | App mounts without errors |
 
-**Note**: No `workspace.guard.test.ts` — WorkspaceGuard is backoffice-only (per spec §8.3 and §16 clarification).
+**Note**: No `workspace.guard.test.ts` — WorkspaceGuard is backoffice-only (per spec §8.3 and §16
+clarification).
 
 ---
 
@@ -691,37 +684,32 @@ None — old directories are removed after migration. No files are deleted witho
     },
   },
   "include": ["src/**/*.ts", "src/**/*.vue", "src/**/*.d.ts"],
-  "exclude": [
-    "node_modules",
-    "dist",
-    "tests/**/*",
-    "**/*.test.ts",
-    "**/*.spec.ts",
-  ],
+  "exclude": ["node_modules", "dist", "tests/**/*", "**/*.test.ts", "**/*.spec.ts"],
 }
 ```
 
-This aligns TypeScript's module resolver with Vite's runtime alias. The `tsconfig.base.json` already has global workspace aliases; this extends only for app-local `@/` resolution.
+This aligns TypeScript's module resolver with Vite's runtime alias. The `tsconfig.base.json` already
+has global workspace aliases; this extends only for app-local `@/` resolution.
 
 ### `vite.config.ts` per app (identical pattern)
 
 ```typescript
-import vue from '@vitejs/plugin-vue'
-import { resolve } from 'path'
-import { defineConfig } from 'vite'
+import vue from "@vitejs/plugin-vue";
+import { resolve } from "path";
+import { defineConfig } from "vite";
 
 export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: [
-      { find: '@', replacement: resolve(__dirname, 'src') },
+      { find: "@", replacement: resolve(__dirname, "src") },
       {
-        find: '@zidney/ui',
-        replacement: resolve(__dirname, '../../packages/ui-system/src'),
+        find: "@zidney/ui",
+        replacement: resolve(__dirname, "../../packages/ui-system/src"),
       },
     ],
   },
-})
+});
 ```
 
 MMC already has this. Backoffice and frontoffice need it created.
@@ -735,99 +723,97 @@ MMC already has this. Backoffice and frontoffice need it created.
 #### `error-normalizer.test.ts`
 
 ```typescript
-describe('normalizeError', () => {
-  it('handles standard API error response')
+describe("normalizeError", () => {
+  it("handles standard API error response");
   // Input: { success: false, data: null, error: { code: 'LICENSE_NOT_FOUND', message: 'Not found' } } + 404 status
   // Expected: { code: 'LICENSE_NOT_FOUND', message: 'Not found', httpStatus: 404 }
 
-  it('handles network error (TypeError / no response)')
+  it("handles network error (TypeError / no response)");
   // Input: new TypeError('Failed to fetch') or { httpStatus: 0 }
   // Expected: { code: 'NETWORK_ERROR', message: 'Network request failed', httpStatus: 0 }
 
-  it('handles unknown shape (fallback)')
+  it("handles unknown shape (fallback)");
   // Input: 'unexpected string', null, { foo: 'bar' }
   // Expected: { code: 'UNKNOWN_ERROR', message: 'An unexpected error occurred', httpStatus: -1 }
 
-  it('is a pure function — same input same output, no side effects')
-})
+  it("is a pure function — same input same output, no side effects");
+});
 ```
 
 #### `api-client.test.ts`
 
 ```typescript
-describe('createApiClient', () => {
-  it('attaches Authorization header when access token is set')
-  it('omits Authorization header when no access token')
-  it('attaches Idempotency-Key header when idempotencyKey provided')
-  it('attaches X-Correlation-ID header on every request')
-  it('normalizes error response on 4xx/5xx via error-normalizer')
-  it('triggers single-flight token refresh on 401')
-  it('retries original request after successful token refresh')
-  it('rejects all queued requests with AUTH_REFRESH_FAILED when refresh fails')
-  it('clears auth store on AUTH_REFRESH_FAILED')
+describe("createApiClient", () => {
+  it("attaches Authorization header when access token is set");
+  it("omits Authorization header when no access token");
+  it("attaches Idempotency-Key header when idempotencyKey provided");
+  it("attaches X-Correlation-ID header on every request");
+  it("normalizes error response on 4xx/5xx via error-normalizer");
+  it("triggers single-flight token refresh on 401");
+  it("retries original request after successful token refresh");
+  it("rejects all queued requests with AUTH_REFRESH_FAILED when refresh fails");
+  it("clears auth store on AUTH_REFRESH_FAILED");
   // Use mock fetch (vi.fn()), mock tokenStore, no real network calls
-})
+});
 ```
 
 #### `auth.guard.test.ts`
 
 ```typescript
-describe('authGuard', () => {
-  it('returns true when route does not require auth')
-  it('returns true when user is authenticated and route requires auth')
-  it(
-    'returns { name: "login" } when user is not authenticated and route requires auth'
-  )
-})
+describe("authGuard", () => {
+  it("returns true when route does not require auth");
+  it("returns true when user is authenticated and route requires auth");
+  it('returns { name: "login" } when user is not authenticated and route requires auth');
+});
 ```
 
 #### `role.guard.test.ts`
 
 ```typescript
-describe('roleGuard', () => {
-  it('returns true when route has no required role')
-  it('returns true when user role matches required role')
-  it('returns { name: "forbidden" } when user role does not match')
-  it('returns { name: "forbidden" } when user is null')
-})
+describe("roleGuard", () => {
+  it("returns true when route has no required role");
+  it("returns true when user role matches required role");
+  it('returns { name: "forbidden" } when user role does not match');
+  it('returns { name: "forbidden" } when user is null');
+});
 ```
 
 #### `workspace.guard.test.ts` (backoffice only)
 
 ```typescript
-describe('workspaceGuard', () => {
-  it('returns true when route does not require workspace')
-  it('returns true when route slug matches authStore.user.workspaceSlug')
-  it('returns { name: "forbidden" } when slugs do not match')
-  it('returns { name: "forbidden" } when user has no workspaceSlug')
-})
+describe("workspaceGuard", () => {
+  it("returns true when route does not require workspace");
+  it("returns true when route slug matches authStore.user.workspaceSlug");
+  it('returns { name: "forbidden" } when slugs do not match');
+  it('returns { name: "forbidden" } when user has no workspaceSlug');
+});
 ```
 
 #### `token-store.test.ts`
 
 ```typescript
-describe('useAuthStore (token-store)', () => {
-  beforeEach(() => setActivePinia(createPinia()))
+describe("useAuthStore (token-store)", () => {
+  beforeEach(() => setActivePinia(createPinia()));
 
-  it('initial state: accessToken is null, user is null')
-  it('setAccessToken stores token in state only')
-  it('getAccessToken returns current token')
-  it('clearAccessToken sets token and user to null')
-  it('isAuthenticated is false when token is null')
-  it('isAuthenticated is true when token is set')
-  it('never writes to localStorage or sessionStorage')
-})
+  it("initial state: accessToken is null, user is null");
+  it("setAccessToken stores token in state only");
+  it("getAccessToken returns current token");
+  it("clearAccessToken sets token and user to null");
+  it("isAuthenticated is false when token is null");
+  it("isAuthenticated is true when token is set");
+  it("never writes to localStorage or sessionStorage");
+});
 ```
 
 #### `env-config.test.ts`
 
 ```typescript
-describe('resolveConfig', () => {
-  it('returns valid AppConfig when all required env vars are present')
-  it('throws descriptive error when VITE_API_BASE_URL is missing')
-  it('sets buildEnv to "development" when MODE is development')
-  it('sets debugMode to true when VITE_DEBUG_MODE is "true"')
-})
+describe("resolveConfig", () => {
+  it("returns valid AppConfig when all required env vars are present");
+  it("throws descriptive error when VITE_API_BASE_URL is missing");
+  it('sets buildEnv to "development" when MODE is development');
+  it('sets debugMode to true when VITE_DEBUG_MODE is "true"');
+});
 ```
 
 ### 7.2 Integration Test Specifications
@@ -835,24 +821,24 @@ describe('resolveConfig', () => {
 #### Guard pipeline integration test
 
 ```typescript
-describe('Router guard pipeline', () => {
-  it('executes auth.guard before role.guard')
-  it('stops at auth.guard and redirects to login before checking role')
-  it('proceeds through auth.guard and checks role.guard when authenticated')
-  it('backoffice only: executes workspace.guard last after role.guard')
+describe("Router guard pipeline", () => {
+  it("executes auth.guard before role.guard");
+  it("stops at auth.guard and redirects to login before checking role");
+  it("proceeds through auth.guard and checks role.guard when authenticated");
+  it("backoffice only: executes workspace.guard last after role.guard");
   // Use createRouter + createPinia in isolation, no DOM mount needed
-})
+});
 ```
 
 #### App boot test
 
 ```typescript
-describe('App bootstrap', () => {
-  it('mounts without console errors when env vars are valid')
-  it('Pinia is registered before any store access')
-  it('Router is registered before navigation')
+describe("App bootstrap", () => {
+  it("mounts without console errors when env vars are valid");
+  it("Pinia is registered before any store access");
+  it("Router is registered before navigation");
   // Use @vue/test-utils mount with mocked env
-})
+});
 ```
 
 ### 7.3 Test Tool Requirements
@@ -925,8 +911,10 @@ Phase I: Package Config Updates
 Before marking this stage IN PROGRESS → BACKEND CLOSED:
 
 - [ ] All three apps have canonical `src/` structure
-- [ ] `core/api/client.ts` exists in all 3 apps — TypeScript strict passes, `credentials: 'include'` in base options
-- [ ] `core/api/client.ts` exports `createApiClient()` factory AND `getApiClient()` lazy getter (never calls `useAuthStore()` at module evaluation time — Pinia activation race eliminated)
+- [ ] `core/api/client.ts` exists in all 3 apps — TypeScript strict passes, `credentials: 'include'`
+      in base options
+- [ ] `core/api/client.ts` exports `createApiClient()` factory AND `getApiClient()` lazy getter
+      (never calls `useAuthStore()` at module evaluation time — Pinia activation race eliminated)
 - [ ] `core/router/index.ts` exists in all 3 apps — guard pipeline wired
 - [ ] Pinia initialized in all 3 apps — `package.json` updated
 - [ ] `core/auth/` skeleton present in all 3 apps
@@ -943,9 +931,12 @@ Before marking this stage IN PROGRESS → BACKEND CLOSED:
 - [ ] Existing MMC test imports updated after delta migration
 - [ ] `@pinia/testing` and `@vue/test-utils` in all 3 apps devDependencies
 - [ ] `@/` alias in all 3 `tsconfig.json` files
-- [ ] **ESLint `import/no-restricted-paths` rules configured per app** — prevents cross-app imports and `import.meta.env` outside `core/config/env.ts`
-- [ ] ESLint passes with zero errors (`eslint src/`) for all 3 apps after import boundary rules are applied
-- [ ] `getApiClient()` lazy getter confirmed safe in all 3 apps — `useAuthStore()` deferred until after `app.use(pinia)` in the application flow
+- [ ] **ESLint `import/no-restricted-paths` rules configured per app** — prevents cross-app imports
+      and `import.meta.env` outside `core/config/env.ts`
+- [ ] ESLint passes with zero errors (`eslint src/`) for all 3 apps after import boundary rules are
+      applied
+- [ ] `getApiClient()` lazy getter confirmed safe in all 3 apps — `useAuthStore()` deferred until
+      after `app.use(pinia)` in the application flow
 
 ---
 

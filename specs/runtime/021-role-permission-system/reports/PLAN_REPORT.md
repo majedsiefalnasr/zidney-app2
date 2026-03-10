@@ -1,20 +1,17 @@
 # Plan Report — STAGE_21_ROLE_PERMISSION_SYSTEM
 
-**Step:** 3 — Plan
-**Timestamp:** 2026-03-02T00:00:00.000Z
-**Status:** COMPLETE
+**Step:** 3 — Plan **Timestamp:** 2026-03-02T00:00:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Technical planning for the Role & Permission System (Backoffice) is complete. The plan
-discovered that STAGE_17 had already created a `backoffice_roles` table (missing `status`
-column) and a triplet-model `backoffice_role_permissions` table (incompatible with this
-stage's boolean-flags model). The plan introduces a new
-`backoffice_role_module_permissions` table alongside additive migration operations to
-extend the existing schema. A new `rbac_audit_logs` table is required because the
-existing STAGE_03 `audit_logs` table has an immutable `CHECK` constraint that cannot
+Technical planning for the Role & Permission System (Backoffice) is complete. The plan discovered
+that STAGE_17 had already created a `backoffice_roles` table (missing `status` column) and a
+triplet-model `backoffice_role_permissions` table (incompatible with this stage's boolean-flags
+model). The plan introduces a new `backoffice_role_module_permissions` table alongside additive
+migration operations to extend the existing schema. A new `rbac_audit_logs` table is required
+because the existing STAGE_03 `audit_logs` table has an immutable `CHECK` constraint that cannot
 accommodate new event types.
 
 Both Guardian Plan Validators returned **VERDICT: PASS**:
@@ -22,8 +19,8 @@ Both Guardian Plan Validators returned **VERDICT: PASS**:
 - **Zidney Architecture Checker**: PASS — all 14 architectural rules satisfied
 - **Zidney API Designer**: PASS — all 12 API standards satisfied
 
-Three low-severity recommendations noted (non-blocking): URI versioning documentation,
-cursor-based pagination future-proofing, and spec.md table name alignment.
+Three low-severity recommendations noted (non-blocking): URI versioning documentation, cursor-based
+pagination future-proofing, and spec.md table name alignment.
 
 ---
 
@@ -138,10 +135,16 @@ cursor-based pagination future-proofing, and spec.md table name alignment.
 
 ## Open Risks
 
-1. **Two permission table models coexist** — STAGE_17 triplet (`backoffice_role_permissions`) and STAGE_21 boolean-flags (`backoffice_role_module_permissions`) both exist in tenant DB. STAGE_21 guard targets only the new table. Formal deprecation deferred to a post-STAGE_21 cleanup stage.
-2. **JWT `workspace_id` claim in existing tokens** — Tokens issued before STAGE_21 may lack this claim. Guard returns 403 on mismatch; coordinated token rotation required if existing long-lived sessions exist.
-3. **Redis cache invalidation failure** — On Redis DEL failure: log ERROR, proceed with transaction; next request does fresh DB read. No stale data serves as permission bypass.
-4. **Route permission registry completeness** — All future Backoffice routes must be registered; missing registration = fail-closed (FR-024). Deployment checklist must verify registry coverage.
+1. **Two permission table models coexist** — STAGE_17 triplet (`backoffice_role_permissions`) and
+   STAGE_21 boolean-flags (`backoffice_role_module_permissions`) both exist in tenant DB. STAGE_21
+   guard targets only the new table. Formal deprecation deferred to a post-STAGE_21 cleanup stage.
+2. **JWT `workspace_id` claim in existing tokens** — Tokens issued before STAGE_21 may lack this
+   claim. Guard returns 403 on mismatch; coordinated token rotation required if existing long-lived
+   sessions exist.
+3. **Redis cache invalidation failure** — On Redis DEL failure: log ERROR, proceed with transaction;
+   next request does fresh DB read. No stale data serves as permission bypass.
+4. **Route permission registry completeness** — All future Backoffice routes must be registered;
+   missing registration = fail-closed (FR-024). Deployment checklist must verify registry coverage.
 
 ---
 

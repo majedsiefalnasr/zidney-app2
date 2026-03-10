@@ -4,13 +4,19 @@
 **Timestamp:** 2026-03-01T01:00:00.000Z  
 **Status:** APPROVED
 
-> **Note:** Sub-agent invocations for speckit.analyze and guardian agents were unavailable due to session token issues. This report was produced by the orchestrator performing all 9 drift criteria checks and 4 guardian roles directly against codebase evidence. All source file and migration facts verified via terminal inspection.
+> **Note:** Sub-agent invocations for speckit.analyze and guardian agents were unavailable due to
+> session token issues. This report was produced by the orchestrator performing all 9 drift criteria
+> checks and 4 guardian roles directly against codebase evidence. All source file and migration
+> facts verified via terminal inspection.
 
 ---
 
 ## Summary
 
-Full structural drift audit passed. All 9 criteria returned PASS or N/A. Codebase compatibility confirmed for all four critical areas (trigger function, schema version, domain-core export pattern, route registration). Two low/medium implementation guidance notes recorded — neither is a constitutional violation or implementation blocker.
+Full structural drift audit passed. All 9 criteria returned PASS or N/A. Codebase compatibility
+confirmed for all four critical areas (trigger function, schema version, domain-core export pattern,
+route registration). Two low/medium implementation guidance notes recorded — neither is a
+constitutional violation or implementation blocker.
 
 **Overall Verdict: APPROVED — Implementation Authorized.**
 
@@ -29,8 +35,10 @@ Full structural drift audit passed. All 9 criteria returned PASS or N/A. Codebas
 ### Codebase Evidence
 
 - `apps/api/src/db/tenant/migrations/` — migration file listing and latest migration content
-- `apps/api/src/db/tenant/migrations/20260301_001_translation_system.ts` — schema_version 1.2.0 confirmed
-- `apps/api/src/db/tenant/migrations/v1.0.0/triggers.sql` — `prevent_audit_modification()` confirmed present
+- `apps/api/src/db/tenant/migrations/20260301_001_translation_system.ts` — schema_version 1.2.0
+  confirmed
+- `apps/api/src/db/tenant/migrations/v1.0.0/triggers.sql` — `prevent_audit_modification()` confirmed
+  present
 - `apps/api/src/modules/translation/` — existing module helper pattern
 - `apps/api/src/routes/backoffice/translations/` — existing route handler location pattern
 - `apps/api/src/routes/backoffice/translations/index.ts` — router and middleware inheritance
@@ -81,7 +89,10 @@ No constitutional violations detected.
 
 ### F-001 — Route File Location Pattern (MEDIUM — Implementation Guidance)
 
-**Finding:** The plan and tasks place the Hono route handler at `apps/api/src/modules/workflow/workflow.routes.ts`. The established codebase architecture pattern puts route handlers in `apps/api/src/routes/backoffice/<feature>/` and only non-route business helpers in `apps/api/src/modules/<feature>/`.
+**Finding:** The plan and tasks place the Hono route handler at
+`apps/api/src/modules/workflow/workflow.routes.ts`. The established codebase architecture pattern
+puts route handlers in `apps/api/src/routes/backoffice/<feature>/` and only non-route business
+helpers in `apps/api/src/modules/<feature>/`.
 
 **Evidence:**
 
@@ -96,24 +107,36 @@ No constitutional violations detected.
 - Create `apps/api/src/routes/backoffice/workflow/index.ts` — Hono router exporting `workflowRouter`
 - Retain `apps/api/src/modules/workflow/workflow.validation.ts` — Zod schema (as T008)
 - Retain `apps/api/src/modules/workflow/workflow.context.ts` — context builder (as T009)
-- Register in `apps/api/src/app.ts`: `app.route('/api/v1/backoffice/workspace', workflowRouter)` with rate-limit 20/min middleware applied to the route group
-- Rate limiting: use `createRateLimitMiddleware` from `apps/api/src/middleware/rate-limit.middleware.ts` with key `workflow-transition:{actorId}:{entityType}`
+- Register in `apps/api/src/app.ts`: `app.route('/api/v1/backoffice/workspace', workflowRouter)`
+  with rate-limit 20/min middleware applied to the route group
+- Rate limiting: use `createRateLimitMiddleware` from
+  `apps/api/src/middleware/rate-limit.middleware.ts` with key
+  `workflow-transition:{actorId}:{entityType}`
 
-**Impact:** Non-blocking. T010 and T011 task descriptions describe correct behavior and will produce correct code — the file path is an implementation detail to correct at execution time.
+**Impact:** Non-blocking. T010 and T011 task descriptions describe correct behavior and will produce
+correct code — the file path is an implementation detail to correct at execution time.
 
 ### F-002 — `prevent_audit_modification()` Trigger Function (CONFIRMED PRESENT — No Action Required)
 
-**Finding:** The workflow migration (T006) plans to `EXECUTE FUNCTION prevent_audit_modification()` for the `workflow_logs` immutability trigger. This function must pre-exist in the tenant schema.
+**Finding:** The workflow migration (T006) plans to `EXECUTE FUNCTION prevent_audit_modification()`
+for the `workflow_logs` immutability trigger. This function must pre-exist in the tenant schema.
 
-**Evidence:** Confirmed in `apps/api/src/db/tenant/migrations/v1.0.0/triggers.sql` (defined in baseline). Also confirmed reused by `20260301_001_translation_system.ts` line 130. Function is present in all tenant DBs.
+**Evidence:** Confirmed in `apps/api/src/db/tenant/migrations/v1.0.0/triggers.sql` (defined in
+baseline). Also confirmed reused by `20260301_001_translation_system.ts` line 130. Function is
+present in all tenant DBs.
 
-**Action:** None required. T006 can safely use `EXECUTE FUNCTION prevent_audit_modification()` as planned.
+**Action:** None required. T006 can safely use `EXECUTE FUNCTION prevent_audit_modification()` as
+planned.
 
 ### F-003 — `packages/domain-core/src/index.ts` Export Pattern (CONFIRMED COMPATIBLE)
 
-**Finding:** T007 adds four `export * from './workflow/...'` lines to `packages/domain-core/src/index.ts`.
+**Finding:** T007 adds four `export * from './workflow/...'` lines to
+`packages/domain-core/src/index.ts`.
 
-**Evidence:** Existing pattern in `packages/domain-core/src/index.ts`: `export * from './auth/index'`, `export * from './license/index'`, etc. — direct file or index exports. Both direct file and index-level exports are used. T007 uses direct file exports (`export * from './workflow/workflow.states'`) — this is consistent.
+**Evidence:** Existing pattern in `packages/domain-core/src/index.ts`:
+`export * from './auth/index'`, `export * from './license/index'`, etc. — direct file or index
+exports. Both direct file and index-level exports are used. T007 uses direct file exports
+(`export * from './workflow/workflow.states'`) — this is consistent.
 
 **Action:** None required. T007 can proceed as planned.
 
@@ -121,7 +144,9 @@ No constitutional violations detected.
 
 **Finding:** Migration 20260301_002 assumes current version is 1.2.0.
 
-**Evidence:** `apps/api/src/db/tenant/migrations/20260301_001_translation_system.ts` line 138: `SET version = '1.2.0'`. No subsequent migration exists in the directory. 20260301_002 correctly targets 1.3.0.
+**Evidence:** `apps/api/src/db/tenant/migrations/20260301_001_translation_system.ts` line 138:
+`SET version = '1.2.0'`. No subsequent migration exists in the directory. 20260301_002 correctly
+targets 1.3.0.
 
 **Action:** None required.
 
@@ -129,7 +154,9 @@ No constitutional violations detected.
 
 ## Guardian Verdicts
 
-> Sub-agent guardian invocations (speckit.security-auditor, performance-optimizer, qa-engineer, code-reviewer) failed due to session token expiry. The orchestrator performed equivalent analysis inline using the gathered codebase evidence.
+> Sub-agent guardian invocations (speckit.security-auditor, performance-optimizer, qa-engineer,
+> code-reviewer) failed due to session token expiry. The orchestrator performed equivalent analysis
+> inline using the gathered codebase evidence.
 
 | Guardian Role         | Verdict | Key Findings                                                                                                                                                                                                                                                                                                                                 |
 | --------------------- | ------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |

@@ -63,6 +63,23 @@ if [ -n "$TS_FILES" ]; then
 fi
 
 
+# ── GitHub Actions Workflow Validation ──────────────────────────────────────
+# Full-repository actionlint scan — validates all .github/workflows/*.yml files.
+# Graceful skip if actionlint is not installed (local dev convenience).
+# CI must enforce actionlint unconditionally (no graceful skip there).
+if command -v actionlint > /dev/null 2>&1; then
+  echo "Validating GitHub Actions workflows..."
+  actionlint .github/workflows/ || {
+    echo "❌ GitHub Actions workflow validation failed — push blocked."
+    echo "   Fix the workflow issues reported above by actionlint."
+    exit 1
+  }
+else
+  echo "⚠️  actionlint not installed — skipping workflow validation."
+  echo "   Install: brew install actionlint"
+fi
+
+
 # ── Final Summary ───────────────────────────────────────────────────────────
 echo ""
 echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"

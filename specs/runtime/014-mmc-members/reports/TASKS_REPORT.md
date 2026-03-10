@@ -274,7 +274,8 @@ Phase 8 (7 tasks) [Polish] ─────────────→ (7 paralle
 
 ## Parallelization Opportunity
 
-- **Phase 3:** 6 of 8 tasks marked [P] (CRUD endpoints can be coded in parallel after member service)
+- **Phase 3:** 6 of 8 tasks marked [P] (CRUD endpoints can be coded in parallel after member
+  service)
 - **Phase 4:** 6 of 8 tasks marked [P] (role/permission endpoints independent)
 - **Phase 5:** 6 of 7 tasks marked [P]
 - **Phase 6:** 6 of 8 tasks marked [P]

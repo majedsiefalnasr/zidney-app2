@@ -18,7 +18,8 @@
 
 **VERDICT: PASS** ✅
 
-STAGE_09_PRODUCTS is **production-ready from a security perspective**. All 8 mandatory security criteria are fully satisfied. No critical vulnerabilities detected.
+STAGE_09_PRODUCTS is **production-ready from a security perspective**. All 8 mandatory security
+criteria are fully satisfied. No critical vulnerabilities detected.
 
 ---
 
@@ -179,10 +180,10 @@ if (!license)
 
 ```typescript
 // Regular CRUD
-authMiddleware() // Admin required
+authMiddleware(); // Admin required
 
 // Sensitive audit
-authMiddleware() + auditReadMiddleware()
+authMiddleware() + auditReadMiddleware();
 // Explicit AUDIT_READ permission enforced
 ```
 
@@ -207,23 +208,18 @@ authMiddleware() + auditReadMiddleware()
 
 ### Rate Limit Strategy
 
-**Specification:**
-| Endpoint | Method | Limit | Window |
-|----------|--------|-------|--------|
-| `/products` | POST | 10/min | 60s |
-| `/products/:id` | PUT | 20/min | 60s |
-| `/products` | GET | 100/min | 60s |
-| `/products/:id` | GET | 100/min | 60s |
-| `/products/:id/status` | PATCH | 20/min | 60s |
-| `/products/:id/audit-log` | GET | 50/min | 60s |
+**Specification:** | Endpoint | Method | Limit | Window | |----------|--------|-------|--------| |
+`/products` | POST | 10/min | 60s | | `/products/:id` | PUT | 20/min | 60s | | `/products` | GET |
+100/min | 60s | | `/products/:id` | GET | 100/min | 60s | | `/products/:id/status` | PATCH | 20/min
+| 60s | | `/products/:id/audit-log` | GET | 50/min | 60s |
 
 **Findings:**
 
 ✅ **Per-User Rate Limiting (Not Global)**
 
 ```typescript
-const key = `${config.key}:${userId}` // Scoped by user
-const current = await redis.incr(key)
+const key = `${config.key}:${userId}`; // Scoped by user
+const current = await redis.incr(key);
 ```
 
 - Redis sliding window algorithm
@@ -252,12 +248,12 @@ X-RateLimit-Reset: <timestamp>
 
 ```typescript
 logger.info({
-  action: 'rate_limit_check',
-  key: 'products:create:user-uuid',
+  action: "rate_limit_check",
+  key: "products:create:user-uuid",
   current: 8,
   limit: 10,
   remaining: 2,
-})
+});
 ```
 
 - Structured logging for monitoring
@@ -294,19 +290,10 @@ const createProductSchema = z.object({
     .regex(/^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/),
   description: z.string().max(1000).optional(),
   enabled_modules: z
-    .array(
-      z.enum([
-        'MCQ',
-        'TRADITIONAL_EXAMS',
-        'EXERCISES',
-        'LIBRARY',
-        'LIVES',
-        'FORUM',
-      ])
-    )
+    .array(z.enum(["MCQ", "TRADITIONAL_EXAMS", "EXERCISES", "LIBRARY", "LIVES", "FORUM"]))
     .min(1)
     .max(10),
-})
+});
 ```
 
 - Type-safe validation
@@ -437,17 +424,10 @@ enum Module {
 - Stack traces logged internally only
 - Client receives generic 500 for unhandled errors
 
-✅ **Error Codes Stable & Documented**
-| Code | HTTP | Layer |
-|------|------|-------|
-| INVALID_MODULE_ENUM | 400 | API |
-| DUPLICATE_SLUG | 409 | DB |
-| PRODUCT_NOT_FOUND | 404 | Query |
-| PRODUCT_HAS_LICENSES | 409 | Business Logic |
-| SLUG_NOT_MUTABLE | 400 | API |
-| UNAUTHORIZED | 401 | Auth |
-| FORBIDDEN | 403 | RBAC |
-| WORKSPACE_LOCKED | 423 | License |
+✅ **Error Codes Stable & Documented** | Code | HTTP | Layer | |------|------|-------| |
+INVALID_MODULE_ENUM | 400 | API | | DUPLICATE_SLUG | 409 | DB | | PRODUCT_NOT_FOUND | 404 | Query |
+| PRODUCT_HAS_LICENSES | 409 | Business Logic | | SLUG_NOT_MUTABLE | 400 | API | | UNAUTHORIZED |
+401 | Auth | | FORBIDDEN | 403 | RBAC | | WORKSPACE_LOCKED | 423 | License |
 
 All error codes documented in PLAN_REPORT Section 7.
 
@@ -455,16 +435,16 @@ All error codes documented in PLAN_REPORT Section 7.
 
 ```typescript
 logger.error({
-  level: 'error',
-  service: 'api',
-  action: 'error_handler',
-  correlationId: c.get('correlationId'), // Request tracking
+  level: "error",
+  service: "api",
+  action: "error_handler",
+  correlationId: c.get("correlationId"), // Request tracking
   error: {
     code: mapping.code,
     message: error.message,
     stack: error.stack, // Internal log only
   },
-})
+});
 
 return c.json(
   {
@@ -476,8 +456,8 @@ return c.json(
       correlationId: correlationId, // Client-facing
     },
   },
-  statusCode
-)
+  statusCode,
+);
 ```
 
 ✅ **No Sensitive Data in Errors**
@@ -500,7 +480,8 @@ return c.json(
 
 ✅ **Structured Logging**
 
-- Every error includes: timestamp, level, service, correlationId, workspaceId, userId, action, error.{code, message}
+- Every error includes: timestamp, level, service, correlationId, workspaceId, userId, action,
+  error.{code, message}
 - Correlation ID propagated through entire request lifecycle
 - Logging aggregated and searchable in production monitoring
 
@@ -692,15 +673,14 @@ product_audit_logs.product_id REFERENCES products(id) ON DELETE RESTRICT
 
 ✅ **No Explicit Idempotency Key for API**
 
-**Analysis:**
-Products creation uses slug as natural idempotency key:
+**Analysis:** Products creation uses slug as natural idempotency key:
 
 - If same slug provided: DUPLICATE_SLUG 409 (client can re-fetch)
 - If different fields with same slug: rejected immediately
 - Slug uniqueness enforced at database level
 
-**Potential Enhancement (Not Required for Stage 9):**
-For higher-concurrency scenarios, could implement:
+**Potential Enhancement (Not Required for Stage 9):** For higher-concurrency scenarios, could
+implement:
 
 ```typescript
 // Idempotency key in request header

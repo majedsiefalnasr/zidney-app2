@@ -1,9 +1,7 @@
 # VALIDATION REPORT — STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
 
-**Stage**: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
-**Generated**: 2026-03-06
-**Branch**: `ui-07-layout-system-integration`
-**Validator**: AI Agent (SpecKit Hard Mode)
+**Stage**: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION **Generated**: 2026-03-06 **Branch**:
+`ui-07-layout-system-integration` **Validator**: AI Agent (SpecKit Hard Mode)
 
 ---
 
@@ -26,7 +24,8 @@
 
 ### Per-app typecheck (authoritative)
 
-Each app was typechecked using its own `tsconfig.json` (which has the correct `@/*` alias scoped to `./src/*`):
+Each app was typechecked using its own `tsconfig.json` (which has the correct `@/*` alias scoped to
+`./src/*`):
 
 ```
 cd apps/mmc      && bunx tsc --noEmit   → ✅ Exit 0, 0 errors
@@ -43,7 +42,9 @@ Running `bun run typecheck` from the workspace root uses `tsconfig.json` which m
 "@/*": ["./apps/mmc/src/*", "./apps/backoffice/src/*", "./apps/frontoffice/src/*"]
 ```
 
-TypeScript resolves the first matching path when multiple are listed. This causes `@/core/state/ui.store` in backoffice/frontoffice to incorrectly resolve to the MMC version, producing spurious errors:
+TypeScript resolves the first matching path when multiple are listed. This causes
+`@/core/state/ui.store` in backoffice/frontoffice to incorrectly resolve to the MMC version,
+producing spurious errors:
 
 ```
 apps/backoffice/src/composables/useBreakpoint.ts(8,10):
@@ -53,9 +54,11 @@ apps/frontoffice/src/composables/useBreakpoint.ts(8,10):
   error TS2305: Module '"@/core/state/ui.store"' has no exported member 'useFrontofficeUiStore'
 ```
 
-**Root cause**: Pre-existing architectural limitation of the root monorepo tsconfig using a union `@/*` path for multi-app resolution. These files compile correctly in their per-app check.
+**Root cause**: Pre-existing architectural limitation of the root monorepo tsconfig using a union
+`@/*` path for multi-app resolution. These files compile correctly in their per-app check.
 
-**Impact**: Stage delivery is not blocked. The per-app typecheck is authoritative for each app's correctness.
+**Impact**: Stage delivery is not blocked. The per-app typecheck is authoritative for each app's
+correctness.
 
 ---
 
@@ -94,11 +97,14 @@ bunx eslint \
 | `apps/frontoffice/.../ui.store.ts`         | 92-94 | `@typescript-eslint/no-explicit-any` | `import.meta.hot` HMR cast             |
 | `packages/ui-system/.../SidebarLayout.vue` | 0:0   | `eslint-config`                      | No matching ESLint config in packages/ |
 
-All 9 `any` warnings are in the standard Pinia HMR boilerplate block (`if ((import.meta as any).hot)`). This is a known and accepted pattern — there is no TypeScript type declaration for `import.meta.hot` in JSDOM/worker environments.
+All 9 `any` warnings are in the standard Pinia HMR boilerplate block
+(`if ((import.meta as any).hot)`). This is a known and accepted pattern — there is no TypeScript
+type declaration for `import.meta.hot` in JSDOM/worker environments.
 
 ### Workspace-wide lint (pre-existing issues — not introduced by this stage)
 
-Running `bun run lint` across the whole workspace reports 11 errors and 2517 warnings, all in files not modified by this stage:
+Running `bun run lint` across the whole workspace reports 11 errors and 2517 warnings, all in files
+not modified by this stage:
 
 - `no-restricted-imports` in pre-existing API client test files
 - `no-loss-of-precision` in pre-existing numeric literal constants
@@ -210,23 +216,36 @@ During validation (after task completion), the following issues were found and r
 
 ### 1. `SidebarLayout.vue` — Broken internal imports
 
-- **Root cause**: T055 fix introduced `Badge`/`Button` imports using `@shadcn-vue/ui/*` — a non-existent package alias. Inside `packages/ui-system/src`, the correct path is relative.
-- **Fix**: Changed to relative imports `'../shadcn-vue/badge'` and `'../shadcn-vue/button'` (resolved independently of any alias context).
+- **Root cause**: T055 fix introduced `Badge`/`Button` imports using `@shadcn-vue/ui/*` — a
+  non-existent package alias. Inside `packages/ui-system/src`, the correct path is relative.
+- **Fix**: Changed to relative imports `'../shadcn-vue/badge'` and `'../shadcn-vue/button'`
+  (resolved independently of any alias context).
 
 ### 2. Missing `@shadcn-vue/ui` alias in app vitest configs
 
-- **Root cause**: When tests import `AppSidebar` → `@zidney/ui-system` → `DataTable.vue` → `@shadcn-vue/ui/button`, the alias was not defined in any app vitest config. `@shadcn-vue/ui` is a ui-system-internal virtual path.
-- **Fix**: Added `@shadcn-vue/ui` → `packages/ui-system/src/components/shadcn-vue` alias to `apps/mmc/vitest.config.ts`, `apps/backoffice/vitest.config.ts`, `apps/frontoffice/vitest.config.ts`.
+- **Root cause**: When tests import `AppSidebar` → `@zidney/ui-system` → `DataTable.vue` →
+  `@shadcn-vue/ui/button`, the alias was not defined in any app vitest config. `@shadcn-vue/ui` is a
+  ui-system-internal virtual path.
+- **Fix**: Added `@shadcn-vue/ui` → `packages/ui-system/src/components/shadcn-vue` alias to
+  `apps/mmc/vitest.config.ts`, `apps/backoffice/vitest.config.ts`,
+  `apps/frontoffice/vitest.config.ts`.
 
 ### 3. Missing `lib/utils.ts` in backoffice and frontoffice
 
-- **Root cause**: `Badge.vue` (inside `packages/ui-system/src/components/shadcn-vue/badge/`) imports `@/lib/utils`. In the backoffice/frontoffice vitest context, `@` → the app's own `src`. `apps/mmc/src/lib/utils.ts` exists (created by shadcn-vue CLI) but the same file was never created for backoffice or frontoffice.
-- **Fix**: Created `apps/backoffice/src/lib/utils.ts` and `apps/frontoffice/src/lib/utils.ts` with identical `cn()` utility.
+- **Root cause**: `Badge.vue` (inside `packages/ui-system/src/components/shadcn-vue/badge/`) imports
+  `@/lib/utils`. In the backoffice/frontoffice vitest context, `@` → the app's own `src`.
+  `apps/mmc/src/lib/utils.ts` exists (created by shadcn-vue CLI) but the same file was never created
+  for backoffice or frontoffice.
+- **Fix**: Created `apps/backoffice/src/lib/utils.ts` and `apps/frontoffice/src/lib/utils.ts` with
+  identical `cn()` utility.
 
 ### 4. `AppSidebar` test stub missing `footer` slot
 
-- **Root cause**: The `SidebarLayout` stub in all 3 `AppSidebar.test.ts` files only rendered `<slot />` (default slot). AppSidebar passes its `footer` prop via `<template #footer>`, which requires `<slot name="footer" />` in the stub.
-- **Fix**: Updated `sidebarLayoutStub.template` in all 3 `AppSidebar.test.ts` files to include `<slot name="footer" />`.
+- **Root cause**: The `SidebarLayout` stub in all 3 `AppSidebar.test.ts` files only rendered
+  `<slot />` (default slot). AppSidebar passes its `footer` prop via `<template #footer>`, which
+  requires `<slot name="footer" />` in the stub.
+- **Fix**: Updated `sidebarLayoutStub.template` in all 3 `AppSidebar.test.ts` files to include
+  `<slot name="footer" />`.
 
 ---
 

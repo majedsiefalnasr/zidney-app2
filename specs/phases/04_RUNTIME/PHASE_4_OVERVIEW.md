@@ -5,7 +5,8 @@
 This phase defines the real-time execution engine of Zidney.
 
 It governs how exams are executed after configuration is complete.  
-This layer is responsible for preserving academic integrity, grading determinism, and runtime safety under load.
+This layer is responsible for preserving academic integrity, grading determinism, and runtime safety
+under load.
 
 Phase 4 is where institutional trust is operationalized.
 
@@ -47,7 +48,8 @@ Phase 4 requires coordinated implementation across:
 
 This phase is backend-authoritative.
 
-UI may consume runtime endpoints, but runtime correctness must be validated independently of UI rendering.
+UI may consume runtime endpoints, but runtime correctness must be validated independently of UI
+rendering.
 
 Implementation must be executed in the following order:
 

@@ -67,17 +67,13 @@ All exam rules live in backend.
 
 ## Primary Routes
 
-Start:
-`POST /v1/frontoffice/attempt/start`
+Start: `POST /v1/frontoffice/attempt/start`
 
-Runtime:
-`/attempt/:attempt_id`
+Runtime: `/attempt/:attempt_id`
 
-Submission:
-`POST /v1/frontoffice/attempt/submit`
+Submission: `POST /v1/frontoffice/attempt/submit`
 
-Result polling:
-`GET /v1/frontoffice/attempt/:id/status`
+Result polling: `GET /v1/frontoffice/attempt/:id/status`
 
 ---
 
@@ -174,8 +170,7 @@ No score calculation in UI.
 On answer change:
 
 1. Debounce (e.g., 500–1000ms)
-2. Send PATCH to:
-   `PATCH /v1/frontoffice/attempt/{id}/progress`
+2. Send PATCH to: `PATCH /v1/frontoffice/attempt/{id}/progress`
 3. Include:
    - Question ID
    - Answer payload

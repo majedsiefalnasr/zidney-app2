@@ -1,9 +1,7 @@
 # Validation Report: Infrastructure Governance
 
-**Stage:** STAGE_INFRA_GOVERNANCE
-**Date:** 2026-03-05
-**Branch:** infra-governance
-**Validator:** GitHub Copilot (Claude Sonnet 4.6)
+**Stage:** STAGE_INFRA_GOVERNANCE **Date:** 2026-03-05 **Branch:** infra-governance **Validator:**
+GitHub Copilot (Claude Sonnet 4.6)
 
 ---
 
@@ -25,10 +23,15 @@ error: script "lint" exited with code 1
 **Notes:**
 
 - 12 errors are pre-existing in the codebase (confirmed by reviewing file paths)
-- 2 of the original 14 errors were in `scripts/infra-audit.ts` (no-useless-escape at lines 783-784 in `/[\/-]/` regex patterns). These were fixed as part of this stage to allow staged commits to pass lint-staged.
-- Remaining 12 errors are in `packages/api-client/tests/` (no-restricted-globals for `fetch`) and other pre-existing files
+- 2 of the original 14 errors were in `scripts/infra-audit.ts` (no-useless-escape at lines 783-784
+  in `/[\/-]/` regex patterns). These were fixed as part of this stage to allow staged commits to
+  pass lint-staged.
+- Remaining 12 errors are in `packages/api-client/tests/` (no-restricted-globals for `fetch`) and
+  other pre-existing files
 - **None of the errors were introduced by infra-governance stage work**
-- Our modified files (`package.json`, `vitest.config.ts`, `lint-staged.config.mjs`, `.husky/pre-commit`, `.husky/pre-push`, `scripts/infra-audit.ts`, `.github/workflows/ci.yml`) pass ESLint with 0 errors
+- Our modified files (`package.json`, `vitest.config.ts`, `lint-staged.config.mjs`,
+  `.husky/pre-commit`, `.husky/pre-push`, `scripts/infra-audit.ts`, `.github/workflows/ci.yml`) pass
+  ESLint with 0 errors
 
 ---
 
@@ -72,23 +75,29 @@ error: script "test:coverage" exited with code 1
 **Coverage Baseline Analysis:**
 
 - Test failures are pre-existing (integration tests require running Postgres + Redis infrastructure)
-- Coverage report (`coverage-summary.json`) was not generated because vitest workspace mode with v8 provider exits before finalizing the coverage report when tests fail
-- Single-project baseline (bun run test:unit --coverage --project api-client): All files coverage = 0.45% — dominated by uncovered test infrastructure files (test helpers, fixtures, shims) which are NOT excluded by the current exclude patterns
+- Coverage report (`coverage-summary.json`) was not generated because vitest workspace mode with v8
+  provider exits before finalizing the coverage report when tests fail
+- Single-project baseline (bun run test:unit --coverage --project api-client): All files coverage =
+  0.45% — dominated by uncovered test infrastructure files (test helpers, fixtures, shims) which are
+  NOT excluded by the current exclude patterns
 - Unit tests alone: 26 failed | 644 passed (96.1% pass rate)
 
 **T005 Coverage Threshold Gap Documentation:**
 
 - Target thresholds: lines ≥ 85, functions ≥ 85, statements ≥ 85, branches ≥ 80
-- Current measurable coverage: < 1% (due to test infrastructure file inclusion and coverage report not finalizing on test failures)
+- Current measurable coverage: < 1% (due to test infrastructure file inclusion and coverage report
+  not finalizing on test failures)
 - Root causes:
   1. 26 pre-existing failing unit tests prevent clean coverage report generation
-  2. Coverage excludes do not exclude `tests/**` — test helper/fixture files are included at 0% coverage
+  2. Coverage excludes do not exclude `tests/**` — test helper/fixture files are included at 0%
+     coverage
   3. Many integration tests require DB/Redis infrastructure not running in local dev
 - Remediation required (NOT in scope for this stage):
   1. Fix 26 failing unit tests (primarily in domain-core and backoffice/frontoffice auth modules)
   2. Extend coverage exclude patterns to include `tests/**` (excluding e2e) to focus on source files
   3. After fixes: re-run `bun run test:coverage` to establish true baseline
-- Decision: Thresholds set at target levels (85/85/85/80) per spec. CI coverage-validation job will fail until test failures are resolved, but this was already a failing state before this stage.
+- Decision: Thresholds set at target levels (85/85/85/80) per spec. CI coverage-validation job will
+  fail until test failures are resolved, but this was already a failing state before this stage.
 
 ---
 
@@ -145,8 +154,10 @@ Total tests: 185
 
 **File skip verification:**
 
-- `docs/reports/infra-audit-report.json` — timestamp unchanged (Mar 4), confirmed NOT written in quick mode ✓
-- `docs/architecture/graphs/dependency-graph.json` — timestamp unchanged (Mar 4), confirmed NOT written in quick mode ✓
+- `docs/reports/infra-audit-report.json` — timestamp unchanged (Mar 4), confirmed NOT written in
+  quick mode ✓
+- `docs/architecture/graphs/dependency-graph.json` — timestamp unchanged (Mar 4), confirmed NOT
+  written in quick mode ✓
 
 ## Baseline Comparison (develop vs infra-governance)
 
@@ -158,35 +169,42 @@ Confirmed by running ESLint and TypeScript checks on both branches:
 | ESLint warnings   | 2453           | 2453                  | 0                 |
 | TypeScript errors | 2 (TS2306)     | 2 (TS2306)            | 0                 |
 
-**Conclusion:** Our implementation introduced ZERO new lint or TypeScript errors. The remaining 12 errors are pre-existing on the base branch. Our changes actually fixed 2 errors (no-useless-escape in `scripts/infra-audit.ts`).
+**Conclusion:** Our implementation introduced ZERO new lint or TypeScript errors. The remaining 12
+errors are pre-existing on the base branch. Our changes actually fixed 2 errors (no-useless-escape
+in `scripts/infra-audit.ts`).
 
-**6.5A Decision:** Pre-existing failures do not block this stage. All errors are in files outside our implementation scope. This is recorded as a user waiver. Target files (package.json, vitest.config.ts, lint-staged.config.mjs, .husky/pre-commit, .husky/pre-push, scripts/infra-audit.ts, .github/workflows/ci.yml) are all lint-clean and type-clean.
+**6.5A Decision:** Pre-existing failures do not block this stage. All errors are in files outside
+our implementation scope. This is recorded as a user waiver. Target files (package.json,
+vitest.config.ts, lint-staged.config.mjs, .husky/pre-commit, .husky/pre-push,
+scripts/infra-audit.ts, .github/workflows/ci.yml) are all lint-clean and type-clean.
 
 ---
 
 ## Post-Validation Fix: pre-push hook `set -e`
 
-After T021 verification, a behavioral defect was identified in `.husky/pre-push`: without `set -e`, if only one command in the hook fails, the script exits with the last command's code — a passing `test:unit` would override a failing `lint`.
+After T021 verification, a behavioral defect was identified in `.husky/pre-push`: without `set -e`,
+if only one command in the hook fails, the script exits with the last command's code — a passing
+`test:unit` would override a failing `lint`.
 
-Fix applied: `set -e` added on line 2 of `.husky/pre-push`. This ensures any failing command immediately exits the hook with code 1.
+Fix applied: `set -e` added on line 2 of `.husky/pre-push`. This ensures any failing command
+immediately exits the hook with code 1.
 
 ---
 
 ### Step 1: Hook content (Husky v9 format, no \_/husky.sh)
 
-**Command:** `cat .husky/pre-commit | grep husky.sh | wc -l`
-**Output:** `0`
-**Result:** ✅ PASS — no `_/husky.sh` line found
+**Command:** `cat .husky/pre-commit | grep husky.sh | wc -l` **Output:** `0` **Result:** ✅ PASS —
+no `_/husky.sh` line found
 
 ### Step 2: Hook permissions
 
-**Command:** `ls -la .husky/ | grep "pre-"`
-**Output:** `-rwxr-xr-x` for both files
-**Result:** ✅ PASS — mode 755, both executable
+**Command:** `ls -la .husky/ | grep "pre-"` **Output:** `-rwxr-xr-x` for both files **Result:** ✅
+PASS — mode 755, both executable
 
 ### Step 3: Block test — pre-commit (lint violation)
 
-**Test:** Created `packages/types/src/lint_violation_TEMP.ts` with `no-loss-of-precision` error (number `9007199254740993` > MAX_SAFE_INTEGER, non-auto-fixable)
+**Test:** Created `packages/types/src/lint_violation_TEMP.ts` with `no-loss-of-precision` error
+(number `9007199254740993` > MAX_SAFE_INTEGER, non-auto-fixable)
 
 **pre-commit hook output:**
 
@@ -205,9 +223,11 @@ Fix applied: `set -e` added on line 2 of `.husky/pre-push`. This ensures any fai
 
 ### Step 4: Clean commit succeeds
 
-**Action:** `git restore --staged packages/types/src/lint_violation_TEMP.ts && rm -f packages/types/src/lint_violation_TEMP.ts`
+**Action:**
+`git restore --staged packages/types/src/lint_violation_TEMP.ts && rm -f packages/types/src/lint_violation_TEMP.ts`
 
-**Then:** `git add <stage-files> && git commit -m "feat(infra-governance): tooling stage implementation"`
+**Then:**
+`git add <stage-files> && git commit -m "feat(infra-governance): tooling stage implementation"`
 
 **pre-commit hook output:**
 
@@ -242,7 +262,10 @@ The hook ran all three commands:
 
 **Script exit code:** 1 (test:unit failed, push would be blocked)
 
-**Note:** The pre-push hook runs all 3 commands without early exit (`#!/bin/sh` without `set -e`). The final exit code is the exit code of the last command (`test:unit`). Since all 3 commands currently exit 1, any push attempt is blocked. Adding a deliberate failing test would be redundant — push is already blocked.
+**Note:** The pre-push hook runs all 3 commands without early exit (`#!/bin/sh` without `set -e`).
+The final exit code is the exit code of the last command (`test:unit`). Since all 3 commands
+currently exit 1, any push attempt is blocked. Adding a deliberate failing test would be redundant —
+push is already blocked.
 
 **Result:** ✅ PASS — push blocked with non-zero exit
 
@@ -269,13 +292,16 @@ The hook ran all three commands:
 | T021 Step 5 (pre-push blocks push)        | ✅ PASS         | Exit 1 due to pre-existing lint+test failures           |
 | T021 Step 6 (cleanup)                     | ✅ PASS         | Temp branch deleted                                     |
 
-**Overall:** All 21 automated tasks completed. T022 (GitHub branch protection) requires manual action in repository settings.
+**Overall:** All 21 automated tasks completed. T022 (GitHub branch protection) requires manual
+action in repository settings.
 
 ---
 
 ## Post-Closure Adjustment: pre-push Hook Relaxation
 
-**Issue:** Pre-push hook with `set -e` + `bun run test:unit` was blocking all pushes due to pre-existing test module resolution failures (20 failed test suites from missing files like `src/core/auth/token-store`).
+**Issue:** Pre-push hook with `set -e` + `bun run test:unit` was blocking all pushes due to
+pre-existing test module resolution failures (20 failed test suites from missing files like
+`src/core/auth/token-store`).
 
 **Resolution:** Modified `.husky/pre-push` to be **informational (non-blocking)**. The hook now:
 
@@ -287,9 +313,11 @@ The hook ran all three commands:
 **Rationale:**
 
 - Pre-push hook should not be a hard blocker on a repository with pre-existing failures
-- Legitimate developer pushes to feature branches should not be blocked by test infrastructure issues in unmodified files
+- Legitimate developer pushes to feature branches should not be blocked by test infrastructure
+  issues in unmodified files
 - CI/CD pipeline enforces full test suite on PR creation (hard gate before merge)
-- Developers are encouraged to run `bun run test:unit` locally for awareness, but are not prevented from pushing to discover CI-stage issues
+- Developers are encouraged to run `bun run test:unit` locally for awareness, but are not prevented
+  from pushing to discover CI-stage issues
 
-**Date Applied:** 2026-03-05 (post-closure, before first push of infra-governance branch)
-**Files Modified:** `.husky/pre-push`
+**Date Applied:** 2026-03-05 (post-closure, before first push of infra-governance branch) **Files
+Modified:** `.husky/pre-push`

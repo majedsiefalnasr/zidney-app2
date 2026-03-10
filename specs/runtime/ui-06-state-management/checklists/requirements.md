@@ -1,17 +1,19 @@
 # Specification Quality Checklist: UI State Management Architecture
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-03-03
-**Feature**: [spec.md](../spec.md)
+**Created**: 2026-03-03 **Feature**: [spec.md](../spec.md)
 
 ---
 
 ## Content Quality
 
 - [x] No implementation details (languages, frameworks, APIs)
-  - _Note_: References to Pinia and Vue 3 appear intentionally — this spec defines the runtime contract for a Pinia-based architecture as mandated by the stage. They are architectural constraints, not implementation choices.
+  - _Note_: References to Pinia and Vue 3 appear intentionally — this spec defines the runtime
+    contract for a Pinia-based architecture as mandated by the stage. They are architectural
+    constraints, not implementation choices.
 - [x] Focused on user value and business needs
-- [x] Written for non-technical stakeholders where possible; appropriately technical where the audience is developers
+- [x] Written for non-technical stakeholders where possible; appropriately technical where the
+      audience is developers
 - [x] All mandatory sections completed (User Scenarios, Requirements, Success Criteria)
 
 ---
@@ -19,12 +21,16 @@
 ## Requirement Completeness
 
 - [ ] No `[NEEDS CLARIFICATION]` markers remain
-  - **Remaining marker (1 of 1)**: Edge Cases section — concurrent async action loading state shape (single boolean vs. per-action pending map). This directly impacts the standard loading state contract for all stores. **Requires resolution before planning.**
+  - **Remaining marker (1 of 1)**: Edge Cases section — concurrent async action loading state shape
+    (single boolean vs. per-action pending map). This directly impacts the standard loading state
+    contract for all stores. **Requires resolution before planning.**
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable (quantitative and qualitative)
-- [x] Success criteria are technology-agnostic where possible (outcomes framed from developer/system perspective)
+- [x] Success criteria are technology-agnostic where possible (outcomes framed from developer/system
+      perspective)
 - [x] All acceptance scenarios are defined across all 5 user stories
-- [x] Edge cases are identified (session expiry mid-action, Pinia pre-init, concurrent actions, storage unavailability, stale JWT in localStorage)
+- [x] Edge cases are identified (session expiry mid-action, Pinia pre-init, concurrent actions,
+      storage unavailability, stale JWT in localStorage)
 - [x] Scope is clearly bounded — Out of Scope section explicitly lists what is excluded
 - [x] Dependencies and assumptions identified in the Assumptions section
 
@@ -66,9 +72,12 @@
 ## Feature Readiness
 
 - [x] All functional requirements (FR-001 – FR-037) have clear acceptance criteria in user scenarios
-- [x] User scenarios cover primary flows (store creation, component → store → API chain, cross-store reads, persistence, error/loading lifecycle)
+- [x] User scenarios cover primary flows (store creation, component → store → API chain, cross-store
+      reads, persistence, error/loading lifecycle)
 - [x] Feature meets measurable outcomes defined in Success Criteria (SC-001 – SC-010)
-- [ ] No implementation details leak into specification — **partial exception**: Pinia, Vue 3, TypeScript, `pinia-plugin-persistedstate` references are present as architectural constraints mandated by the stage. These are intentional, not leaks.
+- [ ] No implementation details leak into specification — **partial exception**: Pinia, Vue 3,
+      TypeScript, `pinia-plugin-persistedstate` references are present as architectural constraints
+      mandated by the stage. These are intentional, not leaks.
 
 ---
 
@@ -82,8 +91,13 @@
 
 ## Notes
 
-- The single `[NEEDS CLARIFICATION]` marker (concurrent loading state) must be resolved before this spec moves to planning. All other sections are complete and validated.
-- FR-002 explicitly mandates Composition API (setup stores) over Options API. This aligns with Vue 3 team recommendations and ensures consistency across all three apps.
-- The Assumptions section documents the dependency on `ui-02-api-client-layer` being stable. If that stage is re-opened, this spec must be reviewed.
-- FR-026 and FR-027 align with `ui-09-security-and-token-handling`. Any conflicts identified during planning should be escalated before implementation.
-- The success criterion SC-002 (zero direct API imports in components) is enforceable via ESLint import rules and should be implemented as a lint rule during the implementation gate.
+- The single `[NEEDS CLARIFICATION]` marker (concurrent loading state) must be resolved before this
+  spec moves to planning. All other sections are complete and validated.
+- FR-002 explicitly mandates Composition API (setup stores) over Options API. This aligns with Vue 3
+  team recommendations and ensures consistency across all three apps.
+- The Assumptions section documents the dependency on `ui-02-api-client-layer` being stable. If that
+  stage is re-opened, this spec must be reviewed.
+- FR-026 and FR-027 align with `ui-09-security-and-token-handling`. Any conflicts identified during
+  planning should be escalated before implementation.
+- The success criterion SC-002 (zero direct API imports in components) is enforceable via ESLint
+  import rules and should be implemented as a lint rule during the implementation gate.

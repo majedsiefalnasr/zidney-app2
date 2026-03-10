@@ -12,8 +12,8 @@ This phase defines the shared runtime architecture for all Zidney frontend appli
 - Backoffice (Tenant Admin)
 - Frontoffice (Student Runtime)
 
-This phase does NOT implement business features.
-It establishes the architectural runtime layer required before any UI feature stages begin.
+This phase does NOT implement business features. It establishes the architectural runtime layer
+required before any UI feature stages begin.
 
 ---
 
@@ -127,8 +127,7 @@ Only then may UI feature stages begin.
 
 # 🔄 Relationship With Other Phases
 
-This phase does not replace backend stages.
-It consumes backend APIs defined in:
+This phase does not replace backend stages. It consumes backend APIs defined in:
 
 - 01_PLATFORM_FOUNDATION
 - 02_PLATFORM_MMC

@@ -8,8 +8,7 @@ Zidney documentation is separated into two major systems:
 
 ## docs/
 
-Purpose:
-Operational governance and engineering standards.
+Purpose: Operational governance and engineering standards.
 
 Audience:
 
@@ -27,15 +26,13 @@ Contains:
 - Logging & observability
 - Architectural decision records (ADR)
 
-Docs do NOT define features.
-They define HOW features must be built.
+Docs do NOT define features. They define HOW features must be built.
 
 ---
 
 ## specs/phases/
 
-Purpose:
-Feature and domain specifications.
+Purpose: Feature and domain specifications.
 
 Audience:
 

@@ -91,8 +91,10 @@ affiliate_admin_audit (8 columns, immutable)
 
 ### Domain Layer (Pure Functions)
 
-✅ Calculations: `calculateDiscountPreview()`, `calculateCommissionPreview()`, `calculateFinalAmount()`  
-✅ Validators: `validatePromoCode()`, `validatePercentageRange()`, `validateDateRange()`, `validateUsageLimits()`, `validateAffiliateData()`  
+✅ Calculations: `calculateDiscountPreview()`, `calculateCommissionPreview()`,
+`calculateFinalAmount()`  
+✅ Validators: `validatePromoCode()`, `validatePercentageRange()`, `validateDateRange()`,
+`validateUsageLimits()`, `validateAffiliateData()`  
 ✅ Business Logic: `checkAffiliateActive()`, `checkTemporalValidity()`, `checkGlobalUsageLimit()`
 
 ### Financial Precision
@@ -134,7 +136,8 @@ affiliate_admin_audit (8 columns, immutable)
 **Status**: PENDING  
 **Tasks**: 3 tasks (all parallelizable [P])
 
-- [ ] T030 Implement GET /v1/mmc/affiliates/:id/usages handler (already done ✅, just needs integration)
+- [ ] T030 Implement GET /v1/mmc/affiliates/:id/usages handler (already done ✅, just needs
+      integration)
 - [ ] T031 Unit tests for usage reporting (aggregations, pagination, filtering)
 - [ ] T032 Integration test: View affiliate usage history
 
@@ -338,7 +341,9 @@ Before merging to main:
 
 ## Summary
 
-**This stage is on track for completion.** Core architecture, database schema, domain logic, CRUD endpoints, and comprehensive testing are complete. Remaining work focuses on license purchase integration, concurrency verification, observability setup, and documentation.
+**This stage is on track for completion.** Core architecture, database schema, domain logic, CRUD
+endpoints, and comprehensive testing are complete. Remaining work focuses on license purchase
+integration, concurrency verification, observability setup, and documentation.
 
 **Next executive handoff**: License purchase endpoint integration and concurrency safety validation.
 

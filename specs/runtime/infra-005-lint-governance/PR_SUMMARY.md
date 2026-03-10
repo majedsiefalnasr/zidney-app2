@@ -6,7 +6,8 @@
 
 ## Description
 
-This PR implements a comprehensive lint governance framework that unifies linting, architectural validation, and CI enforcement across the Zidney monorepo.
+This PR implements a comprehensive lint governance framework that unifies linting, architectural
+validation, and CI enforcement across the Zidney monorepo.
 
 **Stage:** STAGE_INFRA_05_LINT_GOVERNANCE  
 **Phase:** 01_PLATFORM_FOUNDATION  
@@ -31,7 +32,8 @@ This PR implements a comprehensive lint governance framework that unifies lintin
    - Updated job dependencies: `unit-tests` and `integration-tests` now depend on `arch-guard`
 
 3. **AI-Guard Architecture Validator (`scripts/ai-guard.ts`)**
-   - Added CI fallback mode: scans all tracked `.ts`/`.tsx`/`.vue` files via `git ls-files` when no staged files detected
+   - Added CI fallback mode: scans all tracked `.ts`/`.tsx`/`.vue` files via `git ls-files` when no
+     staged files detected
    - Solves C-01 vulnerability: `arch-guard` CI job no longer exits 0 trivially
    - Enables post-commit analysis in CI pipeline
 
@@ -60,13 +62,15 @@ This PR implements a comprehensive lint governance framework that unifies lintin
 7. **Migration File Cleanup (2 files)**
    - `apps/api/src/db/master/migrations/0005_schema_version_increment.ts`
    - `apps/api/src/db/master/migrations/0006_create_dead_letter_queue.ts`
-   - Removed obsolete `biome-ignore lint/suspicious/noConsole` comments (noConsole is already disabled for this directory in biome.json overrides)
+   - Removed obsolete `biome-ignore lint/suspicious/noConsole` comments (noConsole is already
+     disabled for this directory in biome.json overrides)
 
 ---
 
 ## Why These Changes
 
-**Problem:** Linting was decoupled from architecture validation. CI could pass tests while violating architectural boundaries.
+**Problem:** Linting was decoupled from architecture validation. CI could pass tests while violating
+architectural boundaries.
 
 **Solution:** Establish a formal lint governance layer that:
 

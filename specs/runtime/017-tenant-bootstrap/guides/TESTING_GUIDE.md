@@ -1,28 +1,26 @@
 # Testing Guide — TENANT_BOOTSTRAP
 
-**Stage:** TENANT_BOOTSTRAP
-**Phase:** 03_BACKOFFICE_CORE/01_FOUNDATION
-**Stage Directory:** 017-tenant-bootstrap
-**Generated On:** 2026-02-28
+**Stage:** TENANT_BOOTSTRAP **Phase:** 03_BACKOFFICE_CORE/01_FOUNDATION **Stage Directory:**
+017-tenant-bootstrap **Generated On:** 2026-02-28
 
 ---
 
 ## Purpose
 
-This guide explains how to validate the Stage 17 (Tenant Bootstrap) implementation end-to-end.
-It covers automated test execution, manual scenario testing, isolation verification,
-and log structure confirmation.
+This guide explains how to validate the Stage 17 (Tenant Bootstrap) implementation end-to-end. It
+covers automated test execution, manual scenario testing, isolation verification, and log structure
+confirmation.
 
 ---
 
 ## Summary of Delivered Behavior
 
-Stage 17 bootstraps the backoffice runtime for a tenant workspace. When a staff user opens
-the backoffice, the SPA loads and calls `GET /api/v1/backoffice/context` to retrieve workspace
-identity, license data, enabled modules, and the staff user profile. The middleware stack
-validates the workspace license (rejecting SOFT_LOCKED / ARCHIVED workspaces), enforces
-RBAC permissions (Redis-cached, DB-backed), and enforces module availability. A WebSocket
-endpoint at `/ws/backoffice` allows real-time updates with a single-connection-per-user guard.
+Stage 17 bootstraps the backoffice runtime for a tenant workspace. When a staff user opens the
+backoffice, the SPA loads and calls `GET /api/v1/backoffice/context` to retrieve workspace identity,
+license data, enabled modules, and the staff user profile. The middleware stack validates the
+workspace license (rejecting SOFT_LOCKED / ARCHIVED workspaces), enforces RBAC permissions
+(Redis-cached, DB-backed), and enforces module availability. A WebSocket endpoint at
+`/ws/backoffice` allows real-time updates with a single-connection-per-user guard.
 
 Key outcomes:
 
@@ -223,7 +221,8 @@ Troubleshooting:
 
 **Purpose:** Verify that a staff user without permission for a given module is denied access.
 
-1. Create a staff user with a role that does NOT have `read` permission on the `examinations` module.
+1. Create a staff user with a role that does NOT have `read` permission on the `examinations`
+   module.
 2. Send a GET request to an examinations-protected route:
    ```bash
    curl -H "Authorization: Bearer <limited_staff_jwt>" \
@@ -235,11 +234,13 @@ Troubleshooting:
 Expected:
 
 - Response: `403 Forbidden` with `RBAC_DENIED` error code.
-- API logs include: `{ "level": "warn", "msg": "backoffice rbac denied", "workspace_slug": "...", "correlation_id": "..." }`
+- API logs include:
+  `{ "level": "warn", "msg": "backoffice rbac denied", "workspace_slug": "...", "correlation_id": "..." }`
 
 Troubleshooting:
 
-- If `200` is returned, the RBAC guard is not applied. Check `apps/api/src/routes/backoffice/context.ts` middleware chain.
+- If `200` is returned, the RBAC guard is not applied. Check
+  `apps/api/src/routes/backoffice/context.ts` middleware chain.
 
 ---
 
@@ -247,7 +248,8 @@ Troubleshooting:
 
 **Purpose:** Verify that a second WS connection from the same user is rejected.
 
-1. Open a WebSocket connection to `ws://localhost:3000/ws/backoffice?workspace=<slug>` with a valid JWT.
+1. Open a WebSocket connection to `ws://localhost:3000/ws/backoffice?workspace=<slug>` with a valid
+   JWT.
    - Verify connection is accepted.
 2. Open a second WebSocket connection using the same user JWT and same workspace.
    - Verify the second connection is rejected (closed with `4029` or similar policy code).
@@ -259,7 +261,8 @@ Expected:
 
 Troubleshooting:
 
-- If both connections succeed, check `apps/api/src/routes/backoffice/ws.ts` — verify `SET NX` is in the connection handler.
+- If both connections succeed, check `apps/api/src/routes/backoffice/ws.ts` — verify `SET NX` is in
+  the connection handler.
 
 ---
 
@@ -322,7 +325,8 @@ Verify the following tables exist:
 | `backoffice_staff_users`      | `SELECT id, email FROM backoffice_staff_users LIMIT 5;`                    |
 | `backoffice_staff_user_roles` | `SELECT staff_user_id, role_id FROM backoffice_staff_user_roles LIMIT 5;`  |
 
-All tables should be present. `roles` and `role_permissions` (STAGE_12 baseline) must still exist unchanged.
+All tables should be present. `roles` and `role_permissions` (STAGE_12 baseline) must still exist
+unchanged.
 
 ---
 

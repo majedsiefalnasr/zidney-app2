@@ -48,21 +48,36 @@ Phase K → Phase L (verification runs on clean codebase)
 
 ### Task Phases A–C: Foundational Infrastructure
 
-**T001–T003** (Types): Zero runtime imports — pure TypeScript type files. Must produce no `any` in public interfaces. `AuthErrorCode` is a string literal union.
+**T001–T003** (Types): Zero runtime imports — pure TypeScript type files. Must produce no `any` in
+public interfaces. `AuthErrorCode` is a string literal union.
 
-**T004–T006** (Token Manager): `createTokenManager()` returns an `ITokenManager` instance. The token is held in a `let token: string | null = null` closure variable (NOT a Vue ref — ref is not needed here; the store is the reactive layer). Must verify: no `localStorage.setItem`, no `sessionStorage.setItem`, no `document.cookie` write.
+**T004–T006** (Token Manager): `createTokenManager()` returns an `ITokenManager` instance. The token
+is held in a `let token: string | null = null` closure variable (NOT a Vue ref — ref is not needed
+here; the store is the reactive layer). Must verify: no `localStorage.setItem`, no
+`sessionStorage.setItem`, no `document.cookie` write.
 
-**T007–T009** (Refresh Manager): `createRefreshManager(refreshFn, onLogout, tokenManager)` — three-argument factory. The `inFlight: Promise<void> | null` lock is set synchronously before the first `await` to guarantee atomicity in JavaScript's cooperative concurrency model.
+**T007–T009** (Refresh Manager): `createRefreshManager(refreshFn, onLogout, tokenManager)` —
+three-argument factory. The `inFlight: Promise<void> | null` lock is set synchronously before the
+first `await` to guarantee atomicity in JavaScript's cooperative concurrency model.
 
 ### Task Phases D–E: Application Layer
 
-**T010–T012** (Auth Service): Uses API client via injected `{ post, get }` functions (not by direct import). `logout()` always resolves — errors are caught and swallowed (FR-30). `fetchProfile()` returns typed `AuthUser`.
+**T010–T012** (Auth Service): Uses API client via injected `{ post, get }` functions (not by direct
+import). `logout()` always resolves — errors are caught and swallowed (FR-30). `fetchProfile()`
+returns typed `AuthUser`.
 
-**T013–T015** (Auth Store): `defineAuthStore(authService, tokenManager, router, loginRouteName, getRefreshManager)`. The `refresh()` action delegates to `getRefreshManager()?.refresh()` — the lazy accessor is `null` during the brief window between store creation and refresh manager creation in Steps 5–6 of bootstrap. This is safe because no 401 can occur before `app.mount()`.
+**T013–T015** (Auth Store):
+`defineAuthStore(authService, tokenManager, router, loginRouteName, getRefreshManager)`. The
+`refresh()` action delegates to `getRefreshManager()?.refresh()` — the lazy accessor is `null`
+during the brief window between store creation and refresh manager creation in Steps 5–6 of
+bootstrap. This is safe because no 401 can occur before `app.mount()`.
 
 ### Task Phase H: Bootstrap Wiring (Critical Ordering)
 
-**T031–T036** (main.ts): Must follow the 9-step bootstrap sequence. The `sessionInitialized` ref is used as a one-time gate in the first `router.beforeEach` invocation. **The `let apiClient` forward declaration pattern** (defined after authService but initialized after refreshManager) must be preserved to avoid circular import errors.
+**T031–T036** (main.ts): Must follow the 9-step bootstrap sequence. The `sessionInitialized` ref is
+used as a one-time gate in the first `router.beforeEach` invocation. **The `let apiClient` forward
+declaration pattern** (defined after authService but initialized after refreshManager) must be
+preserved to avoid circular import errors.
 
 ### Task Phase I: Unit Tests
 
@@ -72,11 +87,13 @@ All unit tests use:
 - `createMemoryHistory()` for router (no real browser navigation)
 - Factory injection for AuthService mock (pass `vi.fn()` implementations)
 
-Token leak test: verify token value never appears in `logger.info(...)` call arguments using `toHaveBeenCalledWith` assertions that exclude the token string.
+Token leak test: verify token value never appears in `logger.info(...)` call arguments using
+`toHaveBeenCalledWith` assertions that exclude the token string.
 
 ### Task Phase K: Cleanup
 
-**T055–T057** (Delete token-store.ts): Must occur AFTER index.ts re-exports are updated and unit tests pass. Deleting before re-exports are updated will break TypeScript compilation.
+**T055–T057** (Delete token-store.ts): Must occur AFTER index.ts re-exports are updated and unit
+tests pass. Deleting before re-exports are updated will break TypeScript compilation.
 
 ---
 

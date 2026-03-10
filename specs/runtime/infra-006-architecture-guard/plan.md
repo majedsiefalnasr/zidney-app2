@@ -86,7 +86,8 @@ This stage operates exclusively in the developer tooling layer:
 
 ## Version Enforcement Strategy
 
-**Not applicable.** This stage introduces no workspace-bound routes that validate `schema_version` or `product_version`.
+**Not applicable.** This stage introduces no workspace-bound routes that validate `schema_version`
+or `product_version`.
 
 ---
 
@@ -107,7 +108,8 @@ Developer tooling produces structured console output only:
 | Brain file used           | `AI Guard: using ai-architecture-brain.json…` |
 | Violations detected       | Structured violation list to stderr           |
 
-`console.log` usage in `ai-guard.ts` is acceptable for CLI tooling context and has been reviewed as such.
+`console.log` usage in `ai-guard.ts` is acceptable for CLI tooling context and has been reviewed as
+such.
 
 ---
 
@@ -135,7 +137,8 @@ Not applicable. This stage introduces no endpoints.
 - ✅ RBAC enforcement: not applicable (no API routes)
 - ✅ No secrets exposed: tooling reads only local JSON files
 - ✅ No sensitive data in logs: violation messages contain only file paths and rule names
-- ✅ No injection risk: all file paths are from `git diff --cached` or `git ls-files` (trusted source)
+- ✅ No injection risk: all file paths are from `git diff --cached` or `git ls-files` (trusted
+  source)
 
 ---
 
@@ -157,9 +160,11 @@ Add `export` keyword to the following functions (no logic changes — purely add
 | `validateRelativeLeaks`   | `export function validateRelativeLeaks(...)`                       | Pure — testable relative leak checker                  |
 | `validateArchitectureMap` | `export function validateArchitectureMap(...)`                     | Pure — testable map validator                          |
 
-`validateBranchNaming` and `runGuard` use `process.exit` and `git` — tested via static/integration testing only.
+`validateBranchNaming` and `runGuard` use `process.exit` and `git` — tested via static/integration
+testing only.
 
-**Why this is not a logic change:** `export` keywords expose the function outside the module but do not alter execution, parameters, return values, or side effects of any function.
+**Why this is not a logic change:** `export` keywords expose the function outside the module but do
+not alter execution, parameters, return values, or side effects of any function.
 
 ### Phase 2: Add `arch:guard` Script
 
@@ -215,7 +220,8 @@ Test structure — one `describe` block per function:
 
 #### `validateRules` (dependency violation)
 
-- `fileModule = 'domain-core'`, imports `['apps/api']`, rules `{ 'domain-core': ['api'] }` → violation
+- `fileModule = 'domain-core'`, imports `['apps/api']`, rules `{ 'domain-core': ['api'] }` →
+  violation
 - `fileModule = 'domain-core'`, imports `['packages/types']`, same rules → no violation
 - `fileModule = 'api'`, imports anything, no rules for `api` → no violation
 
@@ -249,8 +255,11 @@ Tests:
 3. **`rules.dependencyRules.forbidAppsImportingOtherApps` is `true`**
 4. **`rules.layerRules.forbidUiImportingDomain.source` equals `packages/ui-system`**
 5. **`rules.layerRules.forbidApiClientImportingWorker.source` equals `packages/api-client`**
-6. **`ai-guard.ts` exits code 0 when no TypeScript files are staged** (this is verified via the `getChangedFiles()` → fallback → 0 path — tested in unit test for `validateCrossAppImports` on a clean project dir)
-7. **`infra-audit.ts --quick` exits with code 0** (architecture score ≥ 85 — validates that changes in this stage haven't degraded governance)
+6. **`ai-guard.ts` exits code 0 when no TypeScript files are staged** (this is verified via the
+   `getChangedFiles()` → fallback → 0 path — tested in unit test for `validateCrossAppImports` on a
+   clean project dir)
+7. **`infra-audit.ts --quick` exits with code 0** (architecture score ≥ 85 — validates that changes
+   in this stage haven't degraded governance)
 
 ---
 
@@ -278,19 +287,22 @@ Tests:
 
 - **File:** `tests/unit/ai-guard/ai-guard-validation.test.ts`
 - **Runner:** Vitest
-- **Approach:** Import exported functions from `scripts/ai-guard.ts`, call with known inputs, assert known outputs
+- **Approach:** Import exported functions from `scripts/ai-guard.ts`, call with known inputs, assert
+  known outputs
 - **Fixtures:** `tests/unit/ai-guard/fixtures/*.ts` — deterministic, no git dependency
 
 ### Static Tests
 
 - **File:** `tests/static/05-architecture-guard.test.ts`
 - **Runner:** Vitest
-- **Approach:** Read `ARCHITECTURE_CONTRACT.json` from disk, assert required fields exist and have correct values
+- **Approach:** Read `ARCHITECTURE_CONTRACT.json` from disk, assert required fields exist and have
+  correct values
 - **Isolation:** Reads committed files only — no git state needed
 
 ### Integration Tests
 
-Not required for this stage. The existing pre-commit hook provides end-to-end integration testing. The architecture audit script (`bun run arch:audit`) serves as the integration smoke test.
+Not required for this stage. The existing pre-commit hook provides end-to-end integration testing.
+The architecture audit script (`bun run arch:audit`) serves as the integration smoke test.
 
 ---
 

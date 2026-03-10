@@ -151,20 +151,20 @@ Every method must log completion:
 
 ```typescript
 logger.info({
-  service: 'license-service',
-  method: 'transitionToSoftLock',
+  service: "license-service",
+  method: "transitionToSoftLock",
   license_id: licenseId,
   workspace_slug: tenantCtx.slug,
   workspace_id: tenantCtx.id,
   actor_id: params.actor_id,
   actor_type: params.actor_type,
-  new_status: 'SOFT_LOCKED',
+  new_status: "SOFT_LOCKED",
   soft_lock_until: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
   correlation_id: params.correlation_id,
   transition_metadata: params.metadata,
   execution_time_ms: Date.now() - startTime,
   timestamp: new Date().toISOString(),
-})
+});
 ```
 
 ---

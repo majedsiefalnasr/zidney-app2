@@ -8,7 +8,8 @@ Track: Tenant Backend + UI + Runtime Integration
 
 ## Purpose
 
-This stage validates the entire Backoffice stack after all Phase 3 backend and UI stages are complete.
+This stage validates the entire Backoffice stack after all Phase 3 backend and UI stages are
+complete.
 
 It is a full-system validation gate covering:
 

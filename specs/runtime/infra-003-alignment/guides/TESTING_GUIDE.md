@@ -1,22 +1,24 @@
 # Testing Guide — Infrastructure and Governance Alignment
 
-**Stage:** STAGE_INFRA_03_ALIGNMENT
-**Audience:** QA Engineers, Developers, CI/CD Pipeline
-**Last Updated:** 2026-03-04
-**Status:** Ready for Testing
+**Stage:** STAGE_INFRA_03_ALIGNMENT **Audience:** QA Engineers, Developers, CI/CD Pipeline **Last
+Updated:** 2026-03-04 **Status:** Ready for Testing
 
 ---
 
 ## Overview
 
-This guide explains the new infrastructure and governance alignment changes that affect how tests are run, organized, and reported in the Zidney codebase.
+This guide explains the new infrastructure and governance alignment changes that affect how tests
+are run, organized, and reported in the Zidney codebase.
 
 ### What Changed?
 
-1. **Vitest is now workspace-orchestrated** — one root `vitest.workspace.ts` coordinates 14 parallel test projects
-2. **Tests are organized consistently** — all tests live in `{app|package}/tests/{unit,integration,e2e}/`
+1. **Vitest is now workspace-orchestrated** — one root `vitest.workspace.ts` coordinates 14 parallel
+   test projects
+2. **Tests are organized consistently** — all tests live in
+   `{app|package}/tests/{unit,integration,e2e}/`
 3. **Playwright E2E is installed** — smoke tests are available for all apps
-4. **Flaky tests are quarantined** — 2 known flaky tests are excluded from CI (see Quarantine section below)
+4. **Flaky tests are quarantined** — 2 known flaky tests are excluded from CI (see Quarantine
+   section below)
 5. **Skip reasons are documented** — every `.skip()` now has an inline comment explaining why
 6. **ESLint + Prettier are aligned** — no conflicting formatting rules; run format before committing
 
@@ -113,15 +115,15 @@ apps/api/                          packages/domain-core/
 
 ```typescript
 // Example: apps/api/vitest.config.ts
-import { defineProject } from 'vitest/config'
-import tsconfigPaths from 'vite-tsconfig-paths'
+import { defineProject } from "vitest/config";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 export default defineProject({
-  name: 'api',
+  name: "api",
   test: {
-    include: ['src/**/*.test.ts', 'tests/**/*.test.ts'],
+    include: ["src/**/*.test.ts", "tests/**/*.test.ts"],
   },
-})
+});
 ```
 
 Each project:
@@ -160,7 +162,8 @@ Test API routes with database, middleware, auth, etc.
 - Provision flow end-to-end
 - License lifecycle (soft-lock, archival)
 
-**Note:** Integration tests may require Postgres + Redis running. See CI `.github/workflows/ci.yml` for service setup.
+**Note:** Integration tests may require Postgres + Redis running. See CI `.github/workflows/ci.yml`
+for service setup.
 
 **Run:**
 
@@ -178,7 +181,8 @@ Test full user flows in browser (UI + API).
 - Admin dashboard load (backoffice)
 - Exam submission and grading flow
 
-**Note:** E2E tests run Playwright against a live dev server. See `apps/*/playwright.config.ts` for port and config.
+**Note:** E2E tests run Playwright against a live dev server. See `apps/*/playwright.config.ts` for
+port and config.
 
 **Run Playwright tests:**
 
@@ -227,24 +231,26 @@ Tests use `.skip()` for reasons:
 
 **How Quarantine Works:**
 
-These files have `describe.skip` at top level AND are excluded in their project's `vitest.config.ts`:
+These files have `describe.skip` at top level AND are excluded in their project's
+`vitest.config.ts`:
 
 ```typescript
 // packages/ui-system/vitest.config.ts
 export default defineProject({
-  name: 'ui-system',
+  name: "ui-system",
   test: {
-    include: ['tests/**/*.spec.ts'],
+    include: ["tests/**/*.spec.ts"],
     exclude: [
-      'tests/unit/DataTable.spec.ts', // fully skipped
-      'tests/unit/composables.spec.ts', // fully skipped
-      'tests/unit/utilities.spec.ts', // fully skipped
+      "tests/unit/DataTable.spec.ts", // fully skipped
+      "tests/unit/composables.spec.ts", // fully skipped
+      "tests/unit/utilities.spec.ts", // fully skipped
     ],
   },
-})
+});
 ```
 
-This prevents Vitest from reporting "No test suite found" error (which it does when a file has only `describe.skip`).
+This prevents Vitest from reporting "No test suite found" error (which it does when a file has only
+`describe.skip`).
 
 ---
 
@@ -334,10 +340,10 @@ bun run test -- --reporter=verbose
 
 ```typescript
 // Add to test file:
-it('should validate', () => {
-  debugger // Breakpoint here
-  expect(result).toBe(true)
-})
+it("should validate", () => {
+  debugger; // Breakpoint here
+  expect(result).toBe(true);
+});
 ```
 
 Then run with:
@@ -354,9 +360,9 @@ Look for `SKIP REASON:` comment above `.skip()`:
 
 ```typescript
 // SKIP REASON: ERR_MODULE_NOT_FOUND: @shadcn-vue/ui/button pending vuetify removal
-describe.skip('DataTable', () => {
+describe.skip("DataTable", () => {
   // ...
-})
+});
 ```
 
 If skip reason points to another stage, that's the next place to fix it.
@@ -405,14 +411,15 @@ npx playwright test apps/backoffice/tests/e2e/my-flow.spec.ts
 **Solution:** Add file to `exclude` in the project's `vitest.config.ts`:
 
 ```typescript
-exclude: ['tests/unit/my-fully-skipped-file.spec.ts']
+exclude: ["tests/unit/my-fully-skipped-file.spec.ts"];
 ```
 
 ### Issue: Module not found errors in E2E tests
 
 **Problem:** Playwright E2E tests run in browser; they can't import Node.js modules.
 
-**Solution:** E2E tests should only import browser-safe modules (Vue, UI components). API calls go via HTTP.
+**Solution:** E2E tests should only import browser-safe modules (Vue, UI components). API calls go
+via HTTP.
 
 ### Issue: Tests pass locally but fail in CI
 
@@ -480,6 +487,7 @@ bun run test -- --grep "^(?!slow)"
 
 ## Questions?
 
-See `specs/runtime/infra-003-alignment/reports/IMPLEMENT_REPORT.md` for details on all 72 tasks and changes.
+See `specs/runtime/infra-003-alignment/reports/IMPLEMENT_REPORT.md` for details on all 72 tasks and
+changes.
 
 For bulk questions, open an issue in the repo or ask the maintainers.

@@ -55,7 +55,8 @@ Tasks Check:
 
 ### Guarantee
 
-MMC authentication context is isolated from workspace resolver. Tenant databases never accessed. No data cross-contamination possible.
+MMC authentication context is isolated from workspace resolver. Tenant databases never accessed. No
+data cross-contamination possible.
 
 ---
 
@@ -177,9 +178,8 @@ Every request passes through mandatory authentication and permission middleware.
 | GONE                 | Invitation expired (>24h)                               | 410         |
 | UNPROCESSABLE_ENTITY | Invalid email, weak password, FK violation              | 422         |
 
-✅ All endpoints covered (21 endpoints × 5 error types minimum)
-✅ No stack traces to client
-✅ All error codes in spec Q4 (Clarifications section)
+✅ All endpoints covered (21 endpoints × 5 error types minimum) ✅ No stack traces to client ✅ All
+error codes in spec Q4 (Clarifications section)
 
 ---
 
@@ -281,9 +281,8 @@ Guarantee:
   ✅ Race window eliminated (DB fallback covers Redis miss)
 ```
 
-✅ Specified in spec Q1 (Clarifications section)
-✅ Implemented in plan.md (Idempotency Strategy section)
-✅ Task T010: Explicit implementation requirement
+✅ Specified in spec Q1 (Clarifications section) ✅ Implemented in plan.md (Idempotency Strategy
+section) ✅ Task T010: Explicit implementation requirement
 
 ---
 

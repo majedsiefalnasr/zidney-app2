@@ -94,11 +94,9 @@ Expected outcome: all required tests pass.
 2. {{SCENARIO_1_STEP_2}}
 3. {{SCENARIO_1_STEP_3}}
 
-Expected:
-{{SCENARIO_1_EXPECTED}}
+Expected: {{SCENARIO_1_EXPECTED}}
 
-Troubleshooting:
-{{SCENARIO_1_TROUBLESHOOT}}
+Troubleshooting: {{SCENARIO_1_TROUBLESHOOT}}
 
 ### Scenario 2 — {{SCENARIO_2_TITLE}}
 
@@ -108,11 +106,9 @@ Troubleshooting:
 2. {{SCENARIO_2_STEP_2}}
 3. {{SCENARIO_2_STEP_3}}
 
-Expected:
-{{SCENARIO_2_EXPECTED}}
+Expected: {{SCENARIO_2_EXPECTED}}
 
-Troubleshooting:
-{{SCENARIO_2_TROUBLESHOOT}}
+Troubleshooting: {{SCENARIO_2_TROUBLESHOOT}}
 
 ### Scenario 3 — {{SCENARIO_3_TITLE}} (Edge Case)
 
@@ -121,8 +117,7 @@ Troubleshooting:
 1. {{SCENARIO_3_STEP_1}}
 2. {{SCENARIO_3_STEP_2}}
 
-Expected:
-{{SCENARIO_3_EXPECTED}}
+Expected: {{SCENARIO_3_EXPECTED}}
 
 ---
 

@@ -9,7 +9,8 @@
 
 ## Executive Summary
 
-All 24 clarification ambiguities have been resolved through stakeholder review and answered. Responses have been encoded back into specification documents:
+All 24 clarification ambiguities have been resolved through stakeholder review and answered.
+Responses have been encoded back into specification documents:
 
 - ✓ **spec.md** – Updated with all architectural decisions
 - ✓ **data-model.md** – Reflects transaction models and data structures
@@ -27,7 +28,8 @@ All 24 clarification ambiguities have been resolved through stakeholder review a
 
 **Answer:** Single transaction: BEGIN (all migrations + version update + registry records) COMMIT
 
-**Rationale:** All-or-nothing atomicity required. Master DB defines platform invariants. Partial success unacceptable.
+**Rationale:** All-or-nothing atomicity required. Master DB defines platform invariants. Partial
+success unacceptable.
 
 **Implementation:** Registry records written INSIDE transaction.
 
@@ -49,17 +51,21 @@ All 24 clarification ambiguities have been resolved through stakeholder review a
 
 ### Q1.4: Multi-Database Version Updates
 
-**Answer:** Separate transactions: Commit tenant_db first, then master_db; if master fails, async reconciliation
+**Answer:** Separate transactions: Commit tenant_db first, then master_db; if master fails, async
+reconciliation
 
-**Rationale:** Two-phase commit complex. Tenant_db is source of truth; master is cache. Cache-miss acceptable.
+**Rationale:** Two-phase commit complex. Tenant_db is source of truth; master is cache. Cache-miss
+acceptable.
 
-**Implementation:** DLQ reconciliation job for failed master updates. TTL ≤ 60 seconds eventual consistency.
+**Implementation:** DLQ reconciliation job for failed master updates. TTL ≤ 60 seconds eventual
+consistency.
 
 ### Q1.5: Version Check Race Condition
 
 **Answer:** Acceptable – point-in-time check (no long-lived read lock)
 
-**Rationale:** Resolver validates pre-flight. If upgrade during request, request uses old schema safely.
+**Rationale:** Resolver validates pre-flight. If upgrade during request, request uses old schema
+safely.
 
 **Implementation:** Write lock prevents schema mutation conflicts. Migration-based isolation.
 
@@ -77,7 +83,8 @@ All 24 clarification ambiguities have been resolved through stakeholder review a
 
 ### Q2.1: Script Idempotency Scope
 
-**Answer:** Script-level idempotency: Entire script replayable with same outcome (strict requirement)
+**Answer:** Script-level idempotency: Entire script replayable with same outcome (strict
+requirement)
 
 **Rationale:** Worker may retry full script. Must be safe to replay completely.
 
@@ -87,7 +94,8 @@ All 24 clarification ambiguities have been resolved through stakeholder review a
 
 **Answer:** Synchronous validation + Worker serialization (belt-and-suspenders)
 
-**Rationale:** API-layer dedup prevents double-queueing; worker enforces single active per workspace.
+**Rationale:** API-layer dedup prevents double-queueing; worker enforces single active per
+workspace.
 
 **Implementation:** API validates (workspace_id, target_version) uniqueness; Worker FIFO.
 
@@ -97,7 +105,8 @@ All 24 clarification ambiguities have been resolved through stakeholder review a
 
 **Rationale:** Script-level idempotency means replay is safe.
 
-**Implementation:** Exponential backoff (1s, 2s, 4s), max 3 retries, then DLQ. No per-statement tracking.
+**Implementation:** Exponential backoff (1s, 2s, 4s), max 3 retries, then DLQ. No per-statement
+tracking.
 
 ### Q2.4: Version Metadata Idempotency
 
@@ -123,7 +132,8 @@ All 24 clarification ambiguities have been resolved through stakeholder review a
 
 **Answer:** Block writes only; reads allowed; background jobs suspended
 
-**Rationale:** Reads safe; writes blocked during migration. Jobs suspended to prevent state mutation.
+**Rationale:** Reads safe; writes blocked during migration. Jobs suspended to prevent state
+mutation.
 
 **Implementation:** User writes get 423; reads allowed; jobs suspended.
 
@@ -137,7 +147,8 @@ All 24 clarification ambiguities have been resolved through stakeholder review a
 
 ### Q3.3: Concurrent Snapshots
 
-**Answer:** Snapshot creation inside write lock (serialized per workspace; parallel across workspaces)
+**Answer:** Snapshot creation inside write lock (serialized per workspace; parallel across
+workspaces)
 
 **Rationale:** Prevent snapshot conflicts per workspace. Parallel across workspaces OK.
 
@@ -157,7 +168,8 @@ All 24 clarification ambiguities have been resolved through stakeholder review a
 
 **Rationale:** TTL-based invalidation sufficient for migration window.
 
-**Implementation:** TTL ≤ 60s; Pubsub invalidation signal for immediate propagation. Resolver uses tenant_db on mismatch.
+**Implementation:** TTL ≤ 60s; Pubsub invalidation signal for immediate propagation. Resolver uses
+tenant_db on mismatch.
 
 ---
 
@@ -185,7 +197,8 @@ All 24 clarification ambiguities have been resolved through stakeholder review a
 
 **Rationale:** Cross-validation required but not auto-bump.
 
-**Implementation:** Migration header includes "Required Minimum Product Version". Validation pre-migration.
+**Implementation:** Migration header includes "Required Minimum Product Version". Validation
+pre-migration.
 
 ---
 
@@ -197,7 +210,8 @@ All 24 clarification ambiguities have been resolved through stakeholder review a
 
 **Rationale:** Early rejection for bad states; re-validation for state transitions.
 
-**Implementation:** Middleware: Checks ACTIVE/SOFT_LOCKED/ARCHIVED. Worker: Re-validates pre-migration.
+**Implementation:** Middleware: Checks ACTIVE/SOFT_LOCKED/ARCHIVED. Worker: Re-validates
+pre-migration.
 
 ### Q5.2: Cache Invalidation
 
@@ -215,9 +229,11 @@ All 24 clarification ambiguities have been resolved through stakeholder review a
 
 **Answer:** Three-layer: SQL parser + SHA256 checksum + Authorization
 
-**Rationale:** Defense-in-depth. Parser prevents obvious violations. Checksum detects tampering. Auth enforces approval.
+**Rationale:** Defense-in-depth. Parser prevents obvious violations. Checksum detects tampering.
+Auth enforces approval.
 
-**Implementation:** Parser rejects DROP COLUMN (except MAJOR approved). Checksum verified. No override without ADR.
+**Implementation:** Parser rejects DROP COLUMN (except MAJOR approved). Checksum verified. No
+override without ADR.
 
 ---
 
@@ -233,7 +249,8 @@ All 24 clarification ambiguities have been resolved through stakeholder review a
 - 409: WORKSPACE_UPGRADE_IN_PROGRESS
 - 423: LICENSE_INACTIVE
 - 426: SCHEMA_VERSION_MISMATCH
-- 500: MIGRATION_TAMPERING_DETECTED, MIGRATION_SEQUENCE_GAP, MIGRATION_VALIDATION_FAILED, SNAPSHOT_RESTORE_FAILED
+- 500: MIGRATION_TAMPERING_DETECTED, MIGRATION_SEQUENCE_GAP, MIGRATION_VALIDATION_FAILED,
+  SNAPSHOT_RESTORE_FAILED
 - 503: DATABASE_UNAVAILABLE
 - 504: MIGRATION_LOCK_TIMEOUT
 - 507: SNAPSHOT_STORAGE_FULL
@@ -250,7 +267,8 @@ All 24 clarification ambiguities have been resolved through stakeholder review a
 
 **Answer:** Detailed breakdown: attempted, succeeded, failed (with SQL error detail), skipped
 
-**Implementation:** Error response includes migration metrics + failed migration detail. SQL errors sanitized.
+**Implementation:** Error response includes migration metrics + failed migration detail. SQL errors
+sanitized.
 
 ---
 
@@ -262,7 +280,8 @@ All 24 clarification ambiguities have been resolved through stakeholder review a
 
 **Rationale:** Prevent cross-tenant data leakage.
 
-**Implementation:** MMC operators see full registry. Workspace admins see only own history. Role-based access control.
+**Implementation:** MMC operators see full registry. Workspace admins see only own history.
+Role-based access control.
 
 ### Q8.2: Cross-Tenant Snapshot Restore
 
@@ -270,7 +289,8 @@ All 24 clarification ambiguities have been resolved through stakeholder review a
 
 **Rationale:** Impossible to restore snapshot into wrong workspace.
 
-**Implementation:** Snapshot metadata includes workspace_id. Restore operation validates match before proceeding. API prevents cross-workspace calls.
+**Implementation:** Snapshot metadata includes workspace_id. Restore operation validates match
+before proceeding. API prevents cross-workspace calls.
 
 ---
 

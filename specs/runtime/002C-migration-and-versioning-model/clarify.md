@@ -10,7 +10,8 @@
 
 ## Audit Methodology
 
-This clarification audit identifies underspecified areas in the STAGE_02C specification by examining:
+This clarification audit identifies underspecified areas in the STAGE_02C specification by
+examining:
 
 - **Transactions** – State boundaries, rollback semantics
 - **Idempotency** – Replay safety, deduplication
@@ -30,7 +31,8 @@ This clarification audit identifies underspecified areas in the STAGE_02C specif
 ### Q1.1: Snapshot Atomicity with Migration Failure
 
 **Topic:** Master transaction boundaries  
-**Current spec:** "Single transaction per deployment" – all migrations + version update in one BEGIN/COMMIT
+**Current spec:** "Single transaction per deployment" – all migrations + version update in one
+BEGIN/COMMIT
 
 **Ambiguity:** What is the exact transaction scope?
 
@@ -40,12 +42,15 @@ When master migrations execute:
 
 1. Is the transaction scope: `BEGIN ... (all migrations) ... (version update) ... COMMIT`?
 2. Or: Each migration is separate transaction, final version update in separate transaction?
-3. If first approach and migration 003 of 005 fails: Does platform_settings get rolled back to old version (i.e., all-or-nothing)?
-4. When exactly are migration_registry records written – inside the main transaction or in separate transaction?
+3. If first approach and migration 003 of 005 fails: Does platform_settings get rolled back to old
+   version (i.e., all-or-nothing)?
+4. When exactly are migration_registry records written – inside the main transaction or in separate
+   transaction?
 
 **Options provided:**
 
-- A) Single transaction: BEGIN (all migrations + version update + registry records) COMMIT – all-or-nothing
+- A) Single transaction: BEGIN (all migrations + version update + registry records) COMMIT –
+  all-or-nothing
 - B) Per-migration transactions: Each migration commits separately, registry updated per-file
 - C) Per-migration committed, but version update in final separate transaction
 - D) Other (specify)
@@ -55,9 +60,11 @@ When master migrations execute:
 ### Q1.2: Tenant Migration Transaction Boundaries
 
 **Topic:** Tenant migration transactional model  
-**Current spec:** "Single transaction per workspace upgrade" with snapshot created "before transaction"
+**Current spec:** "Single transaction per workspace upgrade" with snapshot created "before
+transaction"
 
-**Ambiguity:** The exact boundary of the transaction isn't specified. Snapshot creation vs. migration vs. version update.
+**Ambiguity:** The exact boundary of the transaction isn't specified. Snapshot creation vs.
+migration vs. version update.
 
 **Clarification Question:**
 
@@ -71,9 +78,11 @@ For tenant upgrades, what is the precise transaction structure?
 
 **Options provided:**
 
-- A) Snapshot created outside transaction; BEGIN...migrations...version update...COMMIT; if snapshot fails, abort before transaction starts
+- A) Snapshot created outside transaction; BEGIN...migrations...version update...COMMIT; if snapshot
+  fails, abort before transaction starts
 - B) BEGIN...snapshot creation...migrations...version update...COMMIT (all atomic)
-- C) BEGIN...migrations...COMMIT; separate transaction: version update+registry; separate transaction: snapshot cleanup
+- C) BEGIN...migrations...COMMIT; separate transaction: version update+registry; separate
+  transaction: snapshot cleanup
 - D) Other (specify)
 
 ---
@@ -90,15 +99,18 @@ For tenant upgrades, what is the precise transaction structure?
 When a tenant migration transaction fails:
 
 1. Is the write lock released **before** the ROLLBACK completes, **during**, or **after**?
-2. If another request arrives while ROLLBACK is in progress, does it wait for lock release or get 423 Conflict?
+2. If another request arrives while ROLLBACK is in progress, does it wait for lock release or get
+   423 Conflict?
 3. What if the ROLLBACK itself fails (database hang)? Does lock remain held indefinitely?
 4. Is there a lock timeout, or is manual intervention required?
 
 **Options provided:**
 
-- A) Lock released only after COMMIT/ROLLBACK completes (lock held until DB confirms transaction closure)
+- A) Lock released only after COMMIT/ROLLBACK completes (lock held until DB confirms transaction
+  closure)
 - B) Lock released immediately after transaction begins (allows reads during ROLLBACK)
-- C) Lock released synchronously with transaction outcome (lock release = COMMIT/ROLLBACK completion)
+- C) Lock released synchronously with transaction outcome (lock release = COMMIT/ROLLBACK
+  completion)
 - D) Other (specify)
 
 ---
@@ -106,13 +118,15 @@ When a tenant migration transaction fails:
 ### Q1.4: Saga vs. Single Transaction for Multi-Database Upgrade
 
 **Topic:** Atomic update across master_db and tenant_db  
-**Current spec:** "Update tenant_db.schema_version" and "Update master_db.tenants_registry.schema_version" listed sequentially in same transaction
+**Current spec:** "Update tenant_db.schema_version" and "Update
+master_db.tenants_registry.schema_version" listed sequentially in same transaction
 
 **Ambiguity:** Are both databases in same transaction, or separate transactions?
 
 **Clarification Question:**
 
-The spec states version updates happen in "single transaction" but versions are in **two different databases**:
+The spec states version updates happen in "single transaction" but versions are in **two different
+databases**:
 
 - tenant_db.schema_version (source of truth)
 - master_db.tenants_registry.schema_version (cache)
@@ -125,8 +139,10 @@ The spec states version updates happen in "single transaction" but versions are 
 **Options provided:**
 
 - A) Two-phase commit across both databases (atomic dual-write, either both succeed or both fail)
-- B) Separate transactions: Commit tenant_db first, then master_db; if master fails, async retry via worker
-- C) Separate transactions: Commit master_db first (for visibility), tenant_db second; if tenant fails, DLQ reconciliation
+- B) Separate transactions: Commit tenant_db first, then master_db; if master fails, async retry via
+  worker
+- C) Separate transactions: Commit master_db first (for visibility), tenant_db second; if tenant
+  fails, DLQ reconciliation
 - D) Other (specify)
 
 ---
@@ -134,7 +150,8 @@ The spec states version updates happen in "single transaction" but versions are 
 ### Q1.5: Concurrency Between Version Check and Migration Start
 
 **Topic:** Race condition between resolver check and migration execution  
-**Current spec:** Resolver validates "tenant.schema_version ≥ minimum_supported" before request; migration checks same before executing
+**Current spec:** Resolver validates "tenant.schema_version ≥ minimum_supported" before request;
+migration checks same before executing
 
 **Ambiguity:** Time window between version read and migration execution.
 
@@ -152,7 +169,8 @@ Is this race condition acceptable, or must version be locked during request exec
 
 **Options provided:**
 
-- A) Acceptable – version check is point-in-time; if upgrade happens during request, request uses old schema
+- A) Acceptable – version check is point-in-time; if upgrade happens during request, request uses
+  old schema
 - B) Not acceptable – must acquire read lock on schema_version for duration of request
 - C) Not acceptable – must reload schema_version at transaction boundary of business logic
 - D) Other (specify)
@@ -179,7 +197,8 @@ When manually rolling back via snapshot:
 
 - A) Workspace locked for duration of restore; all requests get 423 Unavailable
 - B) Workspace transitions to ROLLING_BACK state; requests get 409 Conflict until restore completes
-- C) Restore happens in background; version metadata updated after restore completes; requests use stale schema version during restore
+- C) Restore happens in background; version metadata updated after restore completes; requests use
+  stale schema version during restore
 - D) Other (specify)
 
 ---
@@ -189,25 +208,32 @@ When manually rolling back via snapshot:
 ### Q2.1: Migration File Replay Rules
 
 **Topic:** What does idempotent mean for migration files?  
-**Current spec:** "Individual migration file execution (can safely replay)" and "All DDL must be idempotent: CREATE TABLE IF NOT EXISTS"
+**Current spec:** "Individual migration file execution (can safely replay)" and "All DDL must be
+idempotent: CREATE TABLE IF NOT EXISTS"
 
-**Ambiguity:** Idempotency scope – can we replay the entire migration, or just the DDL statements within?
+**Ambiguity:** Idempotency scope – can we replay the entire migration, or just the DDL statements
+within?
 
 **Clarification Question:**
 
 When we say migration file is "idempotent," do we mean:
 
-1. **Script-level:** Running the entire script twice produces same end state (e.g., CREATE TABLE IF NOT EXISTS)?
-2. **Or statement-level:** Each SQL statement is independently idempotent (but script as a whole might not be)?
+1. **Script-level:** Running the entire script twice produces same end state (e.g., CREATE TABLE IF
+   NOT EXISTS)?
+2. **Or statement-level:** Each SQL statement is independently idempotent (but script as a whole
+   might not be)?
 3. What if a migration includes: `INSERT ... ON CONFLICT DO NOTHING`?
-4. What if a migration includes: `UPDATE table SET counter = counter + 1`? (This is NOT idempotent by default)
+4. What if a migration includes: `UPDATE table SET counter = counter + 1`? (This is NOT idempotent
+   by default)
 5. Are stored procedures considered within idempotency scope, or exempted?
 
 **Options provided:**
 
 - A) Script-level idempotency: Entire script replayable with same outcome (strict requirement)
-- B) Statement-level idempotency: Each DDL statement safe, DML statements exempt from idempotency requirement
-- C) Declaration-based: Operator marks migration as idempotent or not; system allows replay if marked
+- B) Statement-level idempotency: Each DDL statement safe, DML statements exempt from idempotency
+  requirement
+- C) Declaration-based: Operator marks migration as idempotent or not; system allows replay if
+  marked
 - D) Other (specify)
 
 ---
@@ -215,7 +241,8 @@ When we say migration file is "idempotent," do we mean:
 ### Q2.2: Duplicate Detection for Idempotency
 
 **Topic:** How is duplicate migration execution prevented?  
-**Current spec:** "Check migration_registry before execution; If record exists with SUCCESS: Skip file, log warning; If record exists with FAILED: Re-run"
+**Current spec:** "Check migration_registry before execution; If record exists with SUCCESS: Skip
+file, log warning; If record exists with FAILED: Re-run"
 
 **Ambiguity:** What triggers a "duplicate execution" attempt, and how is it detected?
 
@@ -223,7 +250,8 @@ When we say migration file is "idempotent," do we mean:
 
 Scenario: Admin clicks "Upgrade Workspace" button twice in 1 second.
 
-1. Is duplicate detection synchronous (before queuing to worker), or asynchronous (worker deduplicates)?
+1. Is duplicate detection synchronous (before queuing to worker), or asynchronous (worker
+   deduplicates)?
 2. What stops second click from creating second upgrade job?
 3. If both requests reach worker: What prevents parallel execution?
 4. If first request is in-flight and second request comes in, does second request:
@@ -233,7 +261,8 @@ Scenario: Admin clicks "Upgrade Workspace" button twice in 1 second.
 
 **Options provided:**
 
-- A) Synchronous: Resolver or API validates (workspace_id, target_version) unique before accepting request
+- A) Synchronous: Resolver or API validates (workspace_id, target_version) unique before accepting
+  request
 - B) Asynchronous: Worker queue enforces: max 1 upgrade job per workspace at a time
 - C) Lock-based: Acquire lock before checking registry; if lock fails, retry or queue
 - D) Other (specify)
@@ -243,7 +272,8 @@ Scenario: Admin clicks "Upgrade Workspace" button twice in 1 second.
 ### Q2.3: Replay After Partial Failure
 
 **Topic:** What happens when migration fails mid-execution?  
-**Current spec:** "If migration fails: Transaction rolls back; Workspace remains on old schema_version"
+**Current spec:** "If migration fails: Transaction rolls back; Workspace remains on old
+schema_version"
 
 **Ambiguity:** What is "partial failure" and how do we resume?
 
@@ -291,16 +321,21 @@ UPDATE tenant_db.schema_version SET version = '1.2.0';
 UPDATE master_db.tenants_registry SET schema_version = '1.2.0';
 ```
 
-1. Is the idempotency property: "Running these updates twice produces same end state"? (Answer: Yes, obviously – SET is idempotent)
-2. Or is the question: "If we replay the entire upgrade job twice, does migration_registry prevent running migrations twice"?
-3. Is there also a UNIQUE constraint preventing duplicate (workspace_id, "1.2.0") entries in migration_registry?
+1. Is the idempotency property: "Running these updates twice produces same end state"? (Answer: Yes,
+   obviously – SET is idempotent)
+2. Or is the question: "If we replay the entire upgrade job twice, does migration_registry prevent
+   running migrations twice"?
+3. Is there also a UNIQUE constraint preventing duplicate (workspace_id, "1.2.0") entries in
+   migration_registry?
 4. Can we replay the version update without replaying the migrations?
 
 **Options provided:**
 
-- A) Version updates are trivially idempotent (SET); primary idempotency is migration_registry.UNIQUE constraint
+- A) Version updates are trivially idempotent (SET); primary idempotency is
+  migration_registry.UNIQUE constraint
 - B) Version updates + migration_registry unique constraint together provide idempotency
-- C) Version updates are intentionally non-idempotent in certain cases (e.g., product_version transitions)
+- C) Version updates are intentionally non-idempotent in certain cases (e.g., product_version
+  transitions)
 - D) Other (specify)
 
 ---
@@ -314,19 +349,24 @@ UPDATE master_db.tenants_registry SET schema_version = '1.2.0';
 
 **Clarification Question:**
 
-1. If we attempt to create a snapshot but storage is full, snapshot fails. When we retry the upgrade:
+1. If we attempt to create a snapshot but storage is full, snapshot fails. When we retry the
+   upgrade:
    - A) New snapshot is created (old failed snapshot attempt ignored)?
    - B) System detects failed snapshot in upgrade_snapshots table and retries?
    - C) System refuses upgrade until operator manually deletes failed snapshot?
 2. Are snapshot records immutable once created, or can they be updated?
-3. If two concurrent upgrade attempts both try to create snapshots, what prevents two snapshot records in upgrade_snapshots?
+3. If two concurrent upgrade attempts both try to create snapshots, what prevents two snapshot
+   records in upgrade_snapshots?
 4. Is there a backup/dedup strategy to prevent duplicate snapshots if upgrades are retried?
 
 **Options provided:**
 
-- A) Each upgrade attempt creates new snapshot record; old unconsumed snapshots deleted automatically
-- B) Snapshots deduplicated by (workspace_id, previous_schema_version); retry reuses existing snapshot
-- C) Snapshots keyed by (workspace_id, target_schema_version, migration_file_hash); prevents duplicates
+- A) Each upgrade attempt creates new snapshot record; old unconsumed snapshots deleted
+  automatically
+- B) Snapshots deduplicated by (workspace_id, previous_schema_version); retry reuses existing
+  snapshot
+- C) Snapshots keyed by (workspace_id, target_schema_version, migration_file_hash); prevents
+  duplicates
 - D) Other (specify)
 
 ---
@@ -345,7 +385,8 @@ UPDATE master_db.tenants_registry SET schema_version = '1.2.0';
 When workspace is locked during migration:
 
 1. Are **user data writes** (student attempts, exam submissions) blocked, or only schema operations?
-2. If user data writes are blocked, what error do they receive? (429 Too Many Requests? 423 Conflict?)
+2. If user data writes are blocked, what error do they receive? (429 Too Many Requests? 423
+   Conflict?)
 3. What is the scope: Migration only, or entire upgrade operation (including snapshot)?
 4. Can **reads** happen during the lock, or is it a full read-write lock?
 5. Can background jobs (scoring, notifications) execute during lock, or are they suspended?
@@ -376,7 +417,8 @@ If workspace is upgrading and admin clicks upgrade again:
    - C) Wait with timeout (e.g., 60 seconds), then fail?
    - D) Other?
 
-2. What HTTP status code if lock timeout? (504 Gateway Timeout? 409 Conflict? 429 Too Many Requests?)
+2. What HTTP status code if lock timeout? (504 Gateway Timeout? 409 Conflict? 429 Too Many
+   Requests?)
 3. Is there a max queue size? (If 100 requests waiting, does 101st get rejected?)
 4. What is admin's experience if they wait? Do they get status/ETA?
 
@@ -400,16 +442,19 @@ If workspace is upgrading and admin clicks upgrade again:
 
 If two upgrade requests both create snapshots concurrently:
 
-1. Does the write lock prevent concurrent snapshot creation, or is snapshot creation outside the lock?
+1. Does the write lock prevent concurrent snapshot creation, or is snapshot creation outside the
+   lock?
 2. Can snapshot operations happen in parallel across different workspaces?
 3. Is there a rate limit on snapshot creation (e.g., max snapshots per hour)?
 4. Does snapshot storage have a queue/serial constraint?
-5. If snapshots are created in parallel and storage fills up mid-way: Can we handle partial failure gracefully?
+5. If snapshots are created in parallel and storage fills up mid-way: Can we handle partial failure
+   gracefully?
 
 **Options provided:**
 
 - A) Snapshot creation is inside the write lock (serialized per workspace, no parallel snapshots)
-- B) Snapshot creation is outside the write lock (parallel snapshots possible; must handle race conditions)
+- B) Snapshot creation is outside the write lock (parallel snapshots possible; must handle race
+  conditions)
 - C) Snapshots are created async after migration succeeds (never parallel with migrations)
 - D) Other (specify)
 
@@ -442,7 +487,8 @@ During platform deployment:
 **Options provided:**
 
 - A) Master migrations block app startup entirely; no requests processed until master complete
-- B) Master migrations run in parallel with app startup; app uses old platform_settings until migrations complete
+- B) Master migrations run in parallel with app startup; app uses old platform_settings until
+  migrations complete
 - C) Master migrations are pre-flight check; app refuses to boot if any migration fails
 - D) Other (specify)
 
@@ -451,7 +497,8 @@ During platform deployment:
 ### Q3.5: Concurrent Version Reads from Cache vs. Truth
 
 **Topic:** Cache coherency between master_db and tenant_db versions  
-**Current spec:** "Source of truth remains tenant_db.schema_version; Cache in master_db.tenants_registry"
+**Current spec:** "Source of truth remains tenant_db.schema_version; Cache in
+master_db.tenants_registry"
 
 **Ambiguity:** What happens if cache diverges from truth during concurrent operations?
 
@@ -524,7 +571,8 @@ Scenario:
 
 **Clarification Question:**
 
-Scenario: Platform released; minimum_supported is 2.0.0. Workspace is on 1.5.0. Admin tries to upgrade to 1.8.0.
+Scenario: Platform released; minimum_supported is 2.0.0. Workspace is on 1.5.0. Admin tries to
+upgrade to 1.8.0.
 
 1. Should migration runner:
    - A) Reject upgrade because target (1.8.0) < minimum_supported (2.0.0)?
@@ -546,7 +594,8 @@ Scenario: Platform released; minimum_supported is 2.0.0. Workspace is on 1.5.0. 
 ### Q4.3: Product Version Compatibility with Schema Version
 
 **Topic:** Relationship between product version and schema version  
-**Current spec:** "Product version and schema version are independent but validated together at runtime"
+**Current spec:** "Product version and schema version are independent but validated together at
+runtime"
 
 **Ambiguity:** How are they "validated together"?
 
@@ -584,7 +633,8 @@ Scenario: Workspace attempts upgrade, but their license.product_version = 1.0.0 
 ### Q5.1: License Middleware Timing
 
 **Topic:** When is license validation executed?  
-**Current spec:** "Validates license ACTIVE; Validates compatibility preconditions; Takes full DB snapshot; Locks workspace"
+**Current spec:** "Validates license ACTIVE; Validates compatibility preconditions; Takes full DB
+snapshot; Locks workspace"
 
 **Ambiguity:** Is license check part of middleware chain, or migration runner?
 
@@ -652,7 +702,8 @@ Scenario: Platform operator updates `minimum_supported_schema_version` from 1.0.
 ### Q6.1: Migration File Content Validation
 
 **Topic:** What validates migration file content before execution?  
-**Current spec:** "Forbidden operations: DROP COLUMN, ALTER TABLE DROP COLUMN, ...Idempotency requirement: All DDL must be idempotent"
+**Current spec:** "Forbidden operations: DROP COLUMN, ALTER TABLE DROP COLUMN, ...Idempotency
+requirement: All DDL must be idempotent"
 
 **Ambiguity:** Who enforces these rules and when?
 
@@ -690,7 +741,8 @@ DROP COLUMN users.deprecated_field;
 ### Q7.1: Undefined Error Codes
 
 **Topic:** What error codes are returned for different failures?  
-**Current spec:** Includes SCHEMA_VERSION_MISMATCH for 426; but many failure modes not mapped to error codes
+**Current spec:** Includes SCHEMA_VERSION_MISMATCH for 426; but many failure modes not mapped to
+error codes
 
 **Ambiguity:** What error code for migration syntax error? Snapshot creation failure? Lock timeout?
 
@@ -720,7 +772,8 @@ Define error codes for:
 ### Q7.2: Error Response Structure for Async Operations
 
 **Topic:** Error format for worker-executed migrations  
-**Current spec:** "Worker executes migration asynchronously" but error response structure not specified
+**Current spec:** "Worker executes migration asynchronously" but error response structure not
+specified
 
 **Ambiguity:** How do async errors get reported to client?
 
@@ -757,7 +810,8 @@ Later, migration fails in worker. How does admin get error?
 ### Q7.3: Partial Success / Partial Failure Reporting
 
 **Topic:** Reporting for multi-step operations  
-**Current spec:** "All migrations in single transaction; Failure blocks platform boot; Full rollback on any migration failure"
+**Current spec:** "All migrations in single transaction; Failure blocks platform boot; Full rollback
+on any migration failure"
 
 **Ambiguity:** How is partial success communicated?
 
@@ -774,7 +828,8 @@ Error report should include:
 
 For tenant upgrades: If migration 4 of 4 fails mid-execution:
 
-1. Should error list include intermediate state (e.g., "Created 3 new tables before failing on index creation")?
+1. Should error list include intermediate state (e.g., "Created 3 new tables before failing on index
+   creation")?
 2. Or just "Migration failed, rolled back to previous state"?
 3. Is there a detailed SQL error message included, or redacted for security?
 
@@ -792,7 +847,8 @@ For tenant upgrades: If migration 4 of 4 fails mid-execution:
 ### Q8.1: Cross-Tenant Data in Migration Registry
 
 **Topic:** Can workspace A read migration history of workspace B?  
-**Current spec:** "migration_registry tracks all applied migrations" stored in master_db across all workspaces
+**Current spec:** "migration_registry tracks all applied migrations" stored in master_db across all
+workspaces
 
 **Ambiguity:** No access control specified.
 

@@ -2,8 +2,10 @@
 
 **Stage:** STAGE_09_PRODUCTS  
 **Phase:** 02_PLATFORM_MMC  
-**Spec File:** [specs/phases/02_PLATFORM_MMC/STAGE_09_PRODUCTS.md](../../phases/02_PLATFORM_MMC/STAGE_09_PRODUCTS.md)  
-**Plan Report:** [reports/PLAN_REPORT.md](reports/PLAN_REPORT.md)  
+**Spec File:**
+[specs/phases/02_PLATFORM_MMC/STAGE_09_PRODUCTS.md](../../phases/02_PLATFORM_MMC/STAGE_09_PRODUCTS.md)  
+**Plan
+Report:** [reports/PLAN_REPORT.md](reports/PLAN_REPORT.md)  
 **Analyze Report:** [reports/ANALYZE_REPORT.md](reports/ANALYZE_REPORT.md)
 
 **Organization**: Tasks organized by functional component to enable parallel implementation.
@@ -18,13 +20,15 @@
 
 - [x] T001 Create Module enum and validators in packages/types/src/enums/Module.ts
 - [x] T002 [P] Create Product type definitions in packages/types/src/products/Product.ts
-- [x] T003 [P] Create product validation schemas in packages/validation/src/products/productValidation.ts
+- [x] T003 [P] Create product validation schemas in
+      packages/validation/src/products/productValidation.ts
 - [x] T004 [P] Create API response types in packages/types/src/api/ApiResponse.ts
 - [x] T005 Create database migration type definitions in apps/api/src/db/types/Migration.ts
 - [x] T006 Initialize Pino logger for products service in packages/logger/src/products.ts
 - [x] T007 Create error codes constants in packages/types/src/errors/ErrorCodes.ts
 
-**Checkpoint**: Type system, enums, and validation infrastructure ready for database and service implementation
+**Checkpoint**: Type system, enums, and validation infrastructure ready for database and service
+implementation
 
 ---
 
@@ -34,27 +38,33 @@
 
 **Dependencies**: Must complete Phase 1 first
 
-- [x] T008 Create database migration file apps/api/src/db/master/migrations/001_initial_products_schema.ts with:
-  - `products` table (id, name, slug, description, enabled_modules, status, current_version, created_at, updated_at)
+- [x] T008 Create database migration file
+      apps/api/src/db/master/migrations/001_initial_products_schema.ts with:
+  - `products` table (id, name, slug, description, enabled_modules, status, current_version,
+    created_at, updated_at)
   - Check constraints (name.en required, slug format, status values, modules not empty)
   - Indexes on slug, status, created_at, updated_at
   - Foreign key with ON DELETE RESTRICT (for future licenses table)
 
 - [x] T009 Create product_versions table in same migration file:
-  - Columns: id, product_id, version_number, name, enabled_modules, description, change_summary, created_at
+  - Columns: id, product_id, version_number, name, enabled_modules, description, change_summary,
+    created_at
   - Unique constraint on (product_id, version_number)
   - Indexes on product_id and version_number
 
 - [x] T010 Create product_audit_logs table in same migration file:
-  - Columns: id, product_id, action, previous_version, new_version, changed_fields, performed_by, timestamp
+  - Columns: id, product_id, action, previous_version, new_version, changed_fields, performed_by,
+    timestamp
   - Check constraint on action values (CREATE, UPDATE, STATUS_CHANGE)
   - Indexes on product_id, action, timestamp, performed_by
 
-- [x] T011 Add transaction wrapper and idempotency checks in migration file (all DDL in single transaction)
+- [x] T011 Add transaction wrapper and idempotency checks in migration file (all DDL in single
+      transaction)
 
 - [x] T012 Create schema_version increment logic in migration post-execution
 
-**Checkpoint**: Master DB schema fully initialized with immutable version and audit tables. Migration is reversible via snapshot only.
+**Checkpoint**: Master DB schema fully initialized with immutable version and audit tables.
+Migration is reversible via snapshot only.
 
 ---
 
@@ -79,7 +89,8 @@
   - Generate change_summary
   - Return updated Product with incremented current_version
 
-- [x] T015 Implement changeProductStatus() in packages/domain-core/src/products/productService.ts with:
+- [x] T015 Implement changeProductStatus() in packages/domain-core/src/products/productService.ts
+      with:
   - Status validation (ACTIVE or INACTIVE)
   - Atomic transaction: update status → insert audit log (NO version increment)
   - Return updated Product with same current_version
@@ -97,7 +108,8 @@
   - Check for existing licenses (will throw error)
   - Cascade delete: audit logs → versions → product (atomic)
 
-- [x] T020 Implement getProductAuditLog() in packages/domain-core/src/products/productService.ts with:
+- [x] T020 Implement getProductAuditLog() in packages/domain-core/src/products/productService.ts
+      with:
   - Pagination (limit/offset, max 100)
   - Filters: action, from_date, to_date
   - Sorted by timestamp DESC
@@ -105,18 +117,25 @@
 
 ### Validation Functions
 
-- [x] T021 [P] Implement validateProductName() in packages/validation/src/products/productValidation.ts
-- [x] T022 [P] Implement validateModulesEnum() in packages/validation/src/products/productValidation.ts
+- [x] T021 [P] Implement validateProductName() in
+      packages/validation/src/products/productValidation.ts
+- [x] T022 [P] Implement validateModulesEnum() in
+      packages/validation/src/products/productValidation.ts
 - [x] T023 [P] Implement validateSlug() in packages/validation/src/products/productValidation.ts
-- [x] T024 [P] Implement validateSlugUniqueness() in packages/validation/src/products/productValidation.ts
-- [x] T025 [P] Implement getProductName() (localization helper) in packages/validation/src/products/productValidation.ts
+- [x] T024 [P] Implement validateSlugUniqueness() in
+      packages/validation/src/products/productValidation.ts
+- [x] T025 [P] Implement getProductName() (localization helper) in
+      packages/validation/src/products/productValidation.ts
 
 ### Helper Functions
 
-- [x] T026 [P] Implement generateChangeSummary() helper in packages/domain-core/src/products/productService.ts
-- [x] T027 [P] Implement computeFieldDiff() helper in packages/domain-core/src/products/productService.ts
+- [x] T026 [P] Implement generateChangeSummary() helper in
+      packages/domain-core/src/products/productService.ts
+- [x] T027 [P] Implement computeFieldDiff() helper in
+      packages/domain-core/src/products/productService.ts
 
-**Checkpoint**: All domain services functional and testable independently. Transaction atomicity verified. Version immutability enforced.
+**Checkpoint**: All domain services functional and testable independently. Transaction atomicity
+verified. Version immutability enforced.
 
 ---
 
@@ -126,17 +145,20 @@
 
 **Dependencies**: Must complete Phase 3 first
 
-- [x] T028 Create correlation ID middleware in apps/api/src/middleware/correlationIdMiddleware.ts with:
+- [x] T028 Create correlation ID middleware in apps/api/src/middleware/correlationIdMiddleware.ts
+      with:
   - Extract or generate x-correlation-id header
   - Set on context for all downstream handlers
   - Include in response header
 
-- [x] T029 Create license validation middleware in apps/api/src/middleware/licenseMiddleware.ts with:
+- [x] T029 Create license validation middleware in apps/api/src/middleware/licenseMiddleware.ts
+      with:
   - Validate license status (ACTIVE/SOFT_LOCKED/ARCHIVED/DELETED)
   - Return appropriate HTTP status (423/403/404) for locked/archived/missing
   - Log structured warning on failure
 
-- [x] T030 Create audit read permission middleware in apps/api/src/middleware/auditReadMiddleware.ts with:
+- [x] T030 Create audit read permission middleware in apps/api/src/middleware/auditReadMiddleware.ts
+      with:
   - Check if user has AUDIT_READ role/permission
   - Used only on GET /products/:id/audit-log endpoint
 
@@ -149,7 +171,8 @@
   - Success response: {success: true, data: {...}}
   - Error response: {success: false, data: null, error: {...}}
 
-**Checkpoint**: Middleware chain established in correct order. Error handling standardized. All responses follow API contract.
+**Checkpoint**: Middleware chain established in correct order. Error handling standardized. All
+responses follow API contract.
 
 ---
 
@@ -173,14 +196,17 @@
   - Return 404 if not found
   - Implement rate limiting: 100 req/min per user
 
-- [x] T035 [P] Implement GET /api/v1/mmc/products/:id/audit-log in apps/api/src/routes/mmc/products.ts with:
-  - Middleware chain: correlationIdMiddleware → authMiddleware → auditReadMiddleware → licenseMiddleware
+- [x] T035 [P] Implement GET /api/v1/mmc/products/:id/audit-log in
+      apps/api/src/routes/mmc/products.ts with:
+  - Middleware chain: correlationIdMiddleware → authMiddleware → auditReadMiddleware →
+    licenseMiddleware
   - Query params: limit, offset, action, from_date, to_date
   - Call getProductAuditLog() domain service
   - Return paginated AuditLogEntry[] with performed_by details
   - Implement rate limiting: 50 req/min per user
 
-**Checkpoint**: All read operations functional. Query filtering and pagination confirmed. Audit access restricted to authorized admins.
+**Checkpoint**: All read operations functional. Query filtering and pagination confirmed. Audit
+access restricted to authorized admins.
 
 ---
 
@@ -209,7 +235,8 @@
   - Handle version increment and change tracking
   - Implement rate limiting: 20 req/min per user
 
-- [x] T038 Implement PATCH /api/v1/mmc/products/:id/status in apps/api/src/routes/mmc/products.ts with:
+- [x] T038 Implement PATCH /api/v1/mmc/products/:id/status in apps/api/src/routes/mmc/products.ts
+      with:
   - Middleware chain: correlationIdMiddleware → authMiddleware → licenseMiddleware
   - Request body: {status: 'ACTIVE' | 'INACTIVE'}
   - Call changeProductStatus() domain service
@@ -218,7 +245,8 @@
   - Ensure status change does NOT increment version
   - Implement rate limiting: 20 req/min per user
 
-**Checkpoint**: All write operations functional. Atomic transactions verified. Version immutability confirmed across operations. Rate limiting applied.
+**Checkpoint**: All write operations functional. Atomic transactions verified. Version immutability
+confirmed across operations. Rate limiting applied.
 
 ---
 
@@ -237,7 +265,8 @@
   - Log structured info: product_deleted with productId
   - Note: Hard delete only, no soft delete
 
-**Checkpoint**: Delete operation enforces foreign key constraint. Conflict response prevents accidental deletion.
+**Checkpoint**: Delete operation enforces foreign key constraint. Conflict response prevents
+accidental deletion.
 
 ---
 
@@ -264,11 +293,14 @@
   - Log slow operations (> 500ms) at WARN level
 
 - [x] T043 Add Prometheus metrics in apps/api/src/metrics/products.ts:
-  - Histogram: product_create_duration_ms, product_update_duration_ms, product_list_duration_ms, product_delete_duration_ms
-  - Counter: product_create_total (by status: success/failure), product_update_total, product_delete_total, product_error_total (by error_code)
+  - Histogram: product_create_duration_ms, product_update_duration_ms, product_list_duration_ms,
+    product_delete_duration_ms
+  - Counter: product_create_total (by status: success/failure), product_update_total,
+    product_delete_total, product_error_total (by error_code)
   - Gauge: product_count (ACTIVE), product_count (INACTIVE), product_count_by_module_enabled
 
-**Checkpoint**: All operations produce struktured logs. Performance metrics collected. Correlation IDs propagate through entire request lifecycle.
+**Checkpoint**: All operations produce struktured logs. Performance metrics collected. Correlation
+IDs propagate through entire request lifecycle.
 
 ---
 
@@ -290,7 +322,8 @@
 - [x] T050 Apply rate limiting to GET /api/v1/mmc/products/:id/audit-log: 50 req/min per user
 - [x] T051 Return 429 Too Many Requests on rate limit exceeded
 
-**Checkpoint**: Rate limiting enforced on all endpoints. No endpoint accepts more than 100 requests/min per user.
+**Checkpoint**: Rate limiting enforced on all endpoints. No endpoint accepts more than 100
+requests/min per user.
 
 ---
 
@@ -371,7 +404,8 @@
   - WORKSPACE_LOCKED returns 423 with proper error response
   - All errors follow {success, data, error} format
 
-**Checkpoint**: All critical paths tested. Atomicity verified. Error responses correct. Integration complete.
+**Checkpoint**: All critical paths tested. Atomicity verified. Error responses correct. Integration
+complete.
 
 ---
 
@@ -383,7 +417,8 @@
 
 ### Domain Service Unit Tests
 
-- [x] T061 [P] Create productService validation tests in tests/unit/products/test_service_validation.ts:
+- [x] T061 [P] Create productService validation tests in
+      tests/unit/products/test_service_validation.ts:
   - validateProductName() accepts valid names, rejects invalid
   - validateModulesEnum() accepts valid modules, rejects invalid
   - validateSlug() accepts valid slugs, rejects invalid
@@ -415,7 +450,8 @@
   - AuditLogEntry interface complete
   - ApiResponse interface flexible for different data types
 
-**Checkpoint**: Unit tests verify business logic correctness. Edge cases handled. Type safety confirmed.
+**Checkpoint**: Unit tests verify business logic correctness. Edge cases handled. Type safety
+confirmed.
 
 ---
 
@@ -523,7 +559,8 @@
   - Verify structured logging in all operations
   - Verify no secrets in code
 
-**Checkpoint**: Implementation complete, documented, and validated. Ready for Stage 10 (License Engine).
+**Checkpoint**: Implementation complete, documented, and validated. Ready for Stage 10 (License
+Engine).
 
 ---
 
@@ -563,11 +600,13 @@ Phase 14 (Documentation & Finalization)
 
 ### User Story / Component View
 
-While this stage doesn't use traditional user stories, it can be viewed as **ONE cohesive platform feature**:
+While this stage doesn't use traditional user stories, it can be viewed as **ONE cohesive platform
+feature**:
 
 - **Core Feature: Product Management**
   - Components: Database, Services, API Endpoints, Audit Logging, Rate Limiting
-  - Independent Test: Create product → Verify version/audit → Update product → Verify version increments → Query audit logs → Delete (with constraints)
+  - Independent Test: Create product → Verify version/audit → Update product → Verify version
+    increments → Query audit logs → Delete (with constraints)
   - MVP Scope: All Phase 1-7 tasks (CRUD + audit + rate limiting)
 
 ### Parallel Opportunities
@@ -650,7 +689,8 @@ Week 4:
 
 ### Pre-Implementation
 
-- [ ] Review [STAGE_09_PRODUCTS.md](../../phases/02_PLATFORM_MMC/STAGE_09_PRODUCTS.md) specification thoroughly
+- [ ] Review [STAGE_09_PRODUCTS.md](../../phases/02_PLATFORM_MMC/STAGE_09_PRODUCTS.md) specification
+      thoroughly
 - [ ] Review [PLAN_REPORT.md](reports/PLAN_REPORT.md) for detailed architecture
 - [ ] Review [ANALYZE_REPORT.md](reports/ANALYZE_REPORT.md) for compliance verification
 - [ ] Ensure Phase 1 Setup complete before starting Phase 2+
@@ -714,12 +754,16 @@ Week 4:
 
 ### Critical Paths to Test
 
-1. **Version Immutability**: Update product → verify new version created → verify old version unmodified
+1. **Version Immutability**: Update product → verify new version created → verify old version
+   unmodified
 2. **Audit Trail**: Every CRUD operation → verify audit log entry created → verify immutable
 3. **Slug Uniqueness**: Create product with slug → attempt duplicate → verify 409
-4. **Status Change**: Change status → verify version NOT incremented → verify audit logged as STATUS_CHANGE
-5. **Delete Constraint**: Attempt delete product with licenses → verify 409 with PRODUCT_HAS_LICENSES
-6. **Concurrency**: 10+ updates to same product → verify all versions created correctly, no lost updates
+4. **Status Change**: Change status → verify version NOT incremented → verify audit logged as
+   STATUS_CHANGE
+5. **Delete Constraint**: Attempt delete product with licenses → verify 409 with
+   PRODUCT_HAS_LICENSES
+6. **Concurrency**: 10+ updates to same product → verify all versions created correctly, no lost
+   updates
 
 ### Test Execution Order
 
@@ -732,28 +776,39 @@ Week 4:
 
 ## Notes & Warnings
 
-⚠️ **IMMUTABILITY CRITICAL**: The product versioning model depends on product_versions table being append-only. Any migration or code that modifies existing version records breaks commercial trust. Verify in code review.
+⚠️ **IMMUTABILITY CRITICAL**: The product versioning model depends on product_versions table being
+append-only. Any migration or code that modifies existing version records breaks commercial trust.
+Verify in code review.
 
-⚠️ **AUDIT TRAIL CRITICAL**: The product_audit_logs table must be append-only. Verify no UPDATE/DELETE queries on this table.
+⚠️ **AUDIT TRAIL CRITICAL**: The product_audit_logs table must be append-only. Verify no
+UPDATE/DELETE queries on this table.
 
-⚠️ **ATOMIC TRANSACTIONS**: CreateProduct, UpdateProduct, DeleteProduct must all be atomic (all-or-nothing). If any part fails, entire transaction rolls back. Verify in transaction tests.
+⚠️ **ATOMIC TRANSACTIONS**: CreateProduct, UpdateProduct, DeleteProduct must all be atomic
+(all-or-nothing). If any part fails, entire transaction rolls back. Verify in transaction tests.
 
-⚠️ **LICENSE MIDDLEWARE**: All 6 endpoints require licenseMiddleware BEFORE route handler. Missing this is architectural failure. Verify in every endpoint.
+⚠️ **LICENSE MIDDLEWARE**: All 6 endpoints require licenseMiddleware BEFORE route handler. Missing
+this is architectural failure. Verify in every endpoint.
 
-⚠️ **RATE LIMITING**: All 6 endpoints must have rate limiting configured. No endpoint should accept > 100 req/min per user. Missing this is operational risk.
+⚠️ **RATE LIMITING**: All 6 endpoints must have rate limiting configured. No endpoint should
+accept > 100 req/min per user. Missing this is operational risk.
 
-⚠️ **SOFT DELETE NOT ALLOWED**: Products must use hard delete with 409 Conflict when licenses exist. No soft delete flag or deleted_at column.
+⚠️ **SOFT DELETE NOT ALLOWED**: Products must use hard delete with 409 Conflict when licenses exist.
+No soft delete flag or deleted_at column.
 
-⚠️ **SLUG IMMUTABLE**: Slug cannot be changed after creation. API must reject PUT requests that attempt to modify slug. Test this explicitly.
+⚠️ **SLUG IMMUTABLE**: Slug cannot be changed after creation. API must reject PUT requests that
+attempt to modify slug. Test this explicitly.
 
-⚠️ **VERSION ISOLATION**: When product is updated, existing licenses remain pinned to old version. New licenses at creation get new version. This prevents retroactive breakage of existing customer setups.
+⚠️ **VERSION ISOLATION**: When product is updated, existing licenses remain pinned to old version.
+New licenses at creation get new version. This prevents retroactive breakage of existing customer
+setups.
 
 ---
 
 ## Git Workflow
 
 1. Feature branch: `feature/stage-09-products`
-2. Commit per major component: `feat(products): database schema`, `feat(products): domain services`, etc.
+2. Commit per major component: `feat(products): database schema`, `feat(products): domain services`,
+   etc.
 3. PR review checklist:
    - Architecture validation passed
    - Tests all pass (unit + integration + contract)

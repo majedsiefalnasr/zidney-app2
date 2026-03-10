@@ -8,7 +8,9 @@
 
 ## Summary
 
-53 atomic tasks generated across 4 implementation phases. 33 tasks are parallelizable, reducing wall-clock time. All tasks are strictly read-only or additive — no existing source, config, schema, or test files are modified. No transactional database writes exist in this stage.
+53 atomic tasks generated across 4 implementation phases. 33 tasks are parallelizable, reducing
+wall-clock time. All tasks are strictly read-only or additive — no existing source, config, schema,
+or test files are modified. No transactional database writes exist in this stage.
 
 ---
 
@@ -41,7 +43,8 @@ None. No database writes in this stage.
 
 ## Idempotency Tasks
 
-- T016 (`bun run scripts/infra-audit.ts`): Script overwrites `infra-audit-report.json` on each run — idempotent by design (CL2)
+- T016 (`bun run scripts/infra-audit.ts`): Script overwrites `infra-audit-report.json` on each run —
+  idempotent by design (CL2)
 - T042–T046 (Bun commands): All exit-code-only checks; safe to re-run
 
 ---
@@ -59,4 +62,6 @@ None. No database writes in this stage.
 
 ## Stage Gate Condition
 
-This stage gates `STAGE_INFRA_GOVERNANCE`. T053 (cross-reference validation) is the final hard stop — all three written deliverables must be present, non-empty, and correctly cross-linked before stage completion.
+This stage gates `STAGE_INFRA_GOVERNANCE`. T053 (cross-reference validation) is the final hard stop
+— all three written deliverables must be present, non-empty, and correctly cross-linked before stage
+completion.

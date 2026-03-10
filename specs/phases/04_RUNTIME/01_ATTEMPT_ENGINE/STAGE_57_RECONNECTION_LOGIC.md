@@ -50,14 +50,11 @@ An attempt eligible for reconnection must:
 - submission_locked = false
 - expires_at > now (unless grace window applies)
 
-If status != IN_PROGRESS:
-Return 409.
+If status != IN_PROGRESS: Return 409.
 
-If submission_locked = true:
-Return 423.
+If submission_locked = true: Return 423.
 
-If expired and no grace allowed:
-Return 410.
+If expired and no grace allowed: Return 410.
 
 ---
 
@@ -107,8 +104,7 @@ If user does not reconnect within 30 seconds:
 - submission_locked = true.
 - forced_submission_reason = DISCONNECTED_TIMEOUT.
 
-Grace logic must be enforced by backend timer or worker job.
-Never rely on client timeout.
+Grace logic must be enforced by backend timer or worker job. Never rely on client timeout.
 
 ---
 

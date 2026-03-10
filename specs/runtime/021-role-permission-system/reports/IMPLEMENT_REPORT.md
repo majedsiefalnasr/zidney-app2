@@ -8,10 +8,10 @@
 
 ## Summary
 
-All 22 tasks completed. Role & Permission System (Backoffice RBAC v2) is fully implemented
-across all layers: database migration, Drizzle schemas, domain-core business logic, API
-middleware (permission guard v2), route handlers (9 endpoints), frontend Vue pages and
-composable, and 62 test cases covering all specified scenarios.
+All 22 tasks completed. Role & Permission System (Backoffice RBAC v2) is fully implemented across
+all layers: database migration, Drizzle schemas, domain-core business logic, API middleware
+(permission guard v2), route handlers (9 endpoints), frontend Vue pages and composable, and 62 test
+cases covering all specified scenarios.
 
 Validation: 62/62 STAGE_21 tests pass. TypeScript clean. Lint: warnings only (recorded in
 `audits/VALIDATION_REPORT.md`).
@@ -126,9 +126,12 @@ Validation: 62/62 STAGE_21 tests pass. TypeScript clean. Lint: warnings only (re
 
 ## Open Risks
 
-- Pre-existing failing test (`tests/unit/mmc/auth.service.test.ts`) — missing `hono/jwt` module in vitest config for MMC tests. Out of STAGE_21 scope.
-- Lint warnings (`no-explicit-any`) in guard factory and service for Drizzle query result types. Non-blocking; represent a future typing improvement ticket.
-- The unused `RbacError` import in `rbac.service.test.ts` is a minor oversight; the import is available for future test assertions.
+- Pre-existing failing test (`tests/unit/mmc/auth.service.test.ts`) — missing `hono/jwt` module in
+  vitest config for MMC tests. Out of STAGE_21 scope.
+- Lint warnings (`no-explicit-any`) in guard factory and service for Drizzle query result types.
+  Non-blocking; represent a future typing improvement ticket.
+- The unused `RbacError` import in `rbac.service.test.ts` is a minor oversight; the import is
+  available for future test assertions.
 
 ---
 

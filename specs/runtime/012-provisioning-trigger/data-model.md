@@ -90,7 +90,8 @@ CREATE INDEX idx_licenses_created_at ON licenses(created_at DESC);
 
 1. License created: `status='PENDING_PROVISION'`, `provisioned_at=NULL`, `failed_at=NULL`
 2. Provisioning succeeds: `status='ACTIVE'`, `provisioned_at=<server_time>`, `failed_at=NULL`
-3. Provisioning fails: `status='PROVISION_FAILED'`, `failed_at=<server_time>`, `last_provision_error=<msg>`
+3. Provisioning fails: `status='PROVISION_FAILED'`, `failed_at=<server_time>`,
+   `last_provision_error=<msg>`
 
 ---
 
@@ -113,7 +114,8 @@ CREATE INDEX idx_tenants_registry_workspace_slug ON tenants_registry(workspace_s
 CREATE INDEX idx_tenants_registry_db_name ON tenants_registry(db_name);
 ```
 
-**Purpose**: Central registry mapping license → workspace → database. Single source of truth for workspace existence.
+**Purpose**: Central registry mapping license → workspace → database. Single source of truth for
+workspace existence.
 
 **Fields**:
 
@@ -157,7 +159,8 @@ CREATE TABLE schema_versions (
 );
 ```
 
-**Purpose**: Track which schema migrations have been applied. Prevents re-application and detects anomalies.
+**Purpose**: Track which schema migrations have been applied. Prevents re-application and detects
+anomalies.
 
 **Fields**:
 
@@ -288,7 +291,8 @@ CREATE TABLE divisions (
 );
 ```
 
-**Purpose**: Organizational hierarchy (e.g., departments, faculties). Only created if `uses_divisions=true`.
+**Purpose**: Organizational hierarchy (e.g., departments, faculties). Only created if
+`uses_divisions=true`.
 
 **Baseline Division** (if enabled):
 
@@ -665,20 +669,20 @@ UPDATE master_db.licenses SET status = 'ACTIVE', provisioned_at = now()
 
 ```typescript
 interface License {
-  id: string // UUID
-  workspace_slug: string // Unique tenant identifier
-  product_id: string // UUID to product definition
-  status: 'PENDING_PROVISION' | 'ACTIVE' | 'PROVISION_FAILED'
-  schema_version: string // Semantic version (e.g., '1.2.0')
-  product_version: string // Semantic version
-  student_limit: number // Configuration limit
-  staff_limit: number // Configuration limit
-  retry_count: number // Number of provision attempts
-  last_provision_error?: string // Error message (if PROVISION_FAILED)
-  provisioned_at?: Date // When transitioned to ACTIVE
-  failed_at?: Date // When transitioned to PROVISION_FAILED
-  created_at: Date
-  updated_at: Date
+  id: string; // UUID
+  workspace_slug: string; // Unique tenant identifier
+  product_id: string; // UUID to product definition
+  status: "PENDING_PROVISION" | "ACTIVE" | "PROVISION_FAILED";
+  schema_version: string; // Semantic version (e.g., '1.2.0')
+  product_version: string; // Semantic version
+  student_limit: number; // Configuration limit
+  staff_limit: number; // Configuration limit
+  retry_count: number; // Number of provision attempts
+  last_provision_error?: string; // Error message (if PROVISION_FAILED)
+  provisioned_at?: Date; // When transitioned to ACTIVE
+  failed_at?: Date; // When transitioned to PROVISION_FAILED
+  created_at: Date;
+  updated_at: Date;
 }
 ```
 
@@ -686,13 +690,13 @@ interface License {
 
 ```typescript
 interface TenantRegistry {
-  id: string // UUID
-  license_id: string // UUID (FK to licenses)
-  workspace_slug: string // Unique identifier
-  db_name: string // PostgreSQL database name
-  schema_version: string // Version when provisioned
-  created_at: Date
-  updated_at: Date
+  id: string; // UUID
+  license_id: string; // UUID (FK to licenses)
+  workspace_slug: string; // Unique identifier
+  db_name: string; // PostgreSQL database name
+  schema_version: string; // Version when provisioned
+  created_at: Date;
+  updated_at: Date;
 }
 ```
 
@@ -700,51 +704,51 @@ interface TenantRegistry {
 
 ```typescript
 interface Role {
-  id: string
-  name: string // ADMIN, STAFF, STUDENT, SUPPORT
-  description?: string
-  created_at: Date
+  id: string;
+  name: string; // ADMIN, STAFF, STUDENT, SUPPORT
+  description?: string;
+  created_at: Date;
 }
 
 interface Permission {
-  id: string
-  name: string // CREATE_EXAM, etc.
-  description?: string
-  created_at: Date
+  id: string;
+  name: string; // CREATE_EXAM, etc.
+  description?: string;
+  created_at: Date;
 }
 
 interface WorkspaceSetting {
-  id: string
-  setting_key: string // STUDENT_LIMIT, DEFAULT_LANGUAGE, etc.
-  setting_value: string // Stored as string
-  value_type: 'string' | 'number' | 'boolean' | 'json'
-  created_at: Date
-  updated_at: Date
+  id: string;
+  setting_key: string; // STUDENT_LIMIT, DEFAULT_LANGUAGE, etc.
+  setting_value: string; // Stored as string
+  value_type: "string" | "number" | "boolean" | "json";
+  created_at: Date;
+  updated_at: Date;
 }
 
 interface User {
-  id: string
-  email: string
-  first_name?: string
-  last_name?: string
-  password_hash: string // bcrypt(password, 12)
-  role_id: string // FK to roles(id)
-  verified_at?: Date // Set after invite acceptance
-  created_at: Date
-  updated_at: Date
+  id: string;
+  email: string;
+  first_name?: string;
+  last_name?: string;
+  password_hash: string; // bcrypt(password, 12)
+  role_id: string; // FK to roles(id)
+  verified_at?: Date; // Set after invite acceptance
+  created_at: Date;
+  updated_at: Date;
 }
 
 interface Division {
-  id: string
-  name: string
-  code?: string
-  created_at: Date
+  id: string;
+  name: string;
+  code?: string;
+  created_at: Date;
 }
 
 interface SchemaVersion {
-  id: string
-  version: string // e.g., '1.2.0'
-  applied_at: Date
-  checksum: string // SHA256(migration_sql)
+  id: string;
+  version: string; // e.g., '1.2.0'
+  applied_at: Date;
+  checksum: string; // SHA256(migration_sql)
 }
 ```

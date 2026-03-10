@@ -2,7 +2,9 @@
 
 ## Purpose
 
-Shared Vue 3 + TypeScript UI component library for the Zidney platform. Built on **shadcn-vue** and **Tailwind CSS v4**. Provides all reusable UI components, composables, and utilities used by MMC, Backoffice, and Frontoffice SPAs.
+Shared Vue 3 + TypeScript UI component library for the Zidney platform. Built on **shadcn-vue** and
+**Tailwind CSS v4**. Provides all reusable UI components, composables, and utilities used by MMC,
+Backoffice, and Frontoffice SPAs.
 
 ---
 
@@ -41,7 +43,8 @@ bun run test:unit
 bun run typecheck
 ```
 
-> Some test suites are intentionally skipped — see `SKIP REASON` comments in `tests/unit/` for details.
+> Some test suites are intentionally skipped — see `SKIP REASON` comments in `tests/unit/` for
+> details.
 
 ---
 
@@ -53,11 +56,13 @@ None — this is a UI library; all configuration is done via component props and
 
 ## Known Boundaries
 
-- **shadcn-vue components first** — never introduce a custom component if a shadcn-vue equivalent exists
+- **shadcn-vue components first** — never introduce a custom component if a shadcn-vue equivalent
+  exists
 - **No hardcoded brand colors** — all colors must use CSS design tokens (`var(--color-brand-*)`)
 - **No global CSS** — all styles must be scoped or use `@apply` with Tailwind utilities
 - **White-label is visual only** — logos, brand tokens, favicon only; no behavioral customization
-- **Import rule**: may import from `packages/types`; must not import from `apps/*` or backend packages
+- **Import rule**: may import from `packages/types`; must not import from `apps/*` or backend
+  packages
 
 ---
 
@@ -88,7 +93,7 @@ import {
   TabsContent,
   Toast,
   ToastProvider,
-} from '@zidney/ui-system'
+} from "@zidney/ui-system";
 ```
 
 ### Composables
@@ -99,7 +104,7 @@ import {
   useFilterBuilder,
   useMultiLanguageForm,
   usePagination,
-} from '@zidney/ui-system/composables'
+} from "@zidney/ui-system/composables";
 ```
 
 ### Utilities
@@ -116,14 +121,15 @@ import {
   encodeURL,
   decodeURL,
   syncToURL,
-} from '@zidney/ui-system/utils'
+} from "@zidney/ui-system/utils";
 ```
 
 ---
 
 ## ⚠️ MANDATORY REQUIREMENTS
 
-This library enforces strict UI system standards (see **[UI System Guard](../../../docs/AGENT_GOVERNANCE.md#rule-71--shadcn-vue-base-component-requirement)**):
+This library enforces strict UI system standards (see
+**[UI System Guard](../../../docs/AGENT_GOVERNANCE.md#rule-71--shadcn-vue-base-component-requirement)**):
 
 - **Base Components:** All components extend shadcn-vue (NOT custom implementations)
 - **Styling:** Tailwind v4 classes only (NO custom CSS outside `@apply`)
@@ -157,28 +163,28 @@ pnpm add @zidney/ui-system @zidney/shadcn-vue tailwindcss vue
 **tailwind.config.ts** - MUST include shadcn-vue content:
 
 ```typescript
-import type { Config } from 'tailwindcss'
+import type { Config } from "tailwindcss";
 
 const config: Config = {
   content: [
-    './src/**/*.{vue,ts,tsx}',
-    './node_modules/@zidney/shadcn-vue/dist/**/*.{js,mjs,ts}',
-    './node_modules/@zidney/ui-system/dist/**/*.{js,mjs,ts}',
+    "./src/**/*.{vue,ts,tsx}",
+    "./node_modules/@zidney/shadcn-vue/dist/**/*.{js,mjs,ts}",
+    "./node_modules/@zidney/ui-system/dist/**/*.{js,mjs,ts}",
   ],
   theme: {
     extend: {
       colors: {
         brand: {
-          primary: 'var(--color-brand-primary, hsl(217.2 91.2% 59.8%))',
-          secondary: 'var(--color-brand-secondary, hsl(221.2 83.2% 53.3%))',
+          primary: "var(--color-brand-primary, hsl(217.2 91.2% 59.8%))",
+          secondary: "var(--color-brand-secondary, hsl(221.2 83.2% 53.3%))",
         },
       },
     },
   },
   plugins: [],
-}
+};
 
-export default config
+export default config;
 ```
 
 #### 2. PostCSS Configuration
@@ -188,11 +194,11 @@ export default config
 ```javascript
 export default {
   plugins: {
-    'tailwindcss/nesting': {},
+    "tailwindcss/nesting": {},
     tailwindcss: {},
     autoprefixer: {},
   },
-}
+};
 ```
 
 #### 3. CSS Entry Point
@@ -214,11 +220,11 @@ export default {
 #### 4. Import in Vue App
 
 ```typescript
-import { createApp } from 'vue'
-import App from './App.vue'
-import './main.css'
+import { createApp } from "vue";
+import App from "./App.vue";
+import "./main.css";
 
-createApp(App).mount('#app')
+createApp(App).mount("#app");
 ```
 
 ---
@@ -233,12 +239,7 @@ All components extend shadcn-vue, ensuring consistency:
 <template>
   <div class="flex flex-col gap-4 p-6">
     <!-- DataTable with shadcn-vue Table base -->
-    <DataTable
-      :rows="data"
-      :columns="columns"
-      :row-actions="actions"
-      @sort="handleSort"
-    />
+    <DataTable :rows="data" :columns="columns" :row-actions="actions" @sort="handleSort" />
 
     <!-- Button with shadcn-vue Button base -->
     <Button variant="primary" size="lg"> Actions </Button>
@@ -253,26 +254,26 @@ All components extend shadcn-vue, ensuring consistency:
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { DataTable, Button, Dialog, DialogContent } from '@zidney/ui-system'
+import { ref } from "vue";
+import { DataTable, Button, Dialog, DialogContent } from "@zidney/ui-system";
 
-const data = ref([])
-const isOpen = ref(false)
+const data = ref([]);
+const isOpen = ref(false);
 
 const columns = [
-  { id: 'id', header: 'ID', size: 'w-16' },
-  { id: 'name', header: 'Name', size: 'w-32' },
-  { id: 'email', header: 'Email', size: 'w-48' },
-]
+  { id: "id", header: "ID", size: "w-16" },
+  { id: "name", header: "Name", size: "w-32" },
+  { id: "email", header: "Email", size: "w-48" },
+];
 
 const actions = [
-  { id: 'edit', label: 'Edit', variant: 'primary' },
-  { id: 'delete', label: 'Delete', variant: 'destructive' },
-]
+  { id: "edit", label: "Edit", variant: "primary" },
+  { id: "delete", label: "Delete", variant: "destructive" },
+];
 
-const handleSort = (column: string, direction: 'asc' | 'desc') => {
-  console.log(`Sorting ${column} ${direction}`)
-}
+const handleSort = (column: string, direction: "asc" | "desc") => {
+  console.log(`Sorting ${column} ${direction}`);
+};
 </script>
 
 <style scoped>
@@ -288,9 +289,7 @@ const handleSort = (column: string, direction: 'asc' | 'desc') => {
 ✅ **Correct:**
 
 ```vue
-<div
-  class="flex items-center justify-between gap-4 p-6 border rounded-lg bg-white"
->
+<div class="flex items-center justify-between gap-4 p-6 border rounded-lg bg-white">
   <Button class="w-full">Submit</Button>
 </div>
 
@@ -347,22 +346,22 @@ All components are **fully typed** with strict TypeScript:
 
 ```typescript
 interface DataTableProps<T = any> {
-  rows: T[]
-  columns: Column<T>[]
-  rowActions?: RowAction[]
-  enableRowSelection?: boolean
-  enableColumnSorting?: boolean
-  paginationMode?: 'server' | 'client' | false
-  loading?: boolean
+  rows: T[];
+  columns: Column<T>[];
+  rowActions?: RowAction[];
+  enableRowSelection?: boolean;
+  enableColumnSorting?: boolean;
+  paginationMode?: "server" | "client" | false;
+  loading?: boolean;
 }
 
 interface Column<T = any> {
-  id: string
-  header: string
-  accessor?: keyof T
-  cell?: (row: T) => VNode
-  enableSorting?: boolean
-  size?: string
+  id: string;
+  header: string;
+  accessor?: keyof T;
+  cell?: (row: T) => VNode;
+  enableSorting?: boolean;
+  size?: string;
 }
 ```
 
@@ -443,12 +442,10 @@ pnpm test:ui
 
 ## Build
 
-// Component usage
-import { DataTable, DrawerFormLayout } from '@zidney/ui-system'
+// Component usage import { DataTable, DrawerFormLayout } from '@zidney/ui-system'
 
-const app = createApp(App)
-app.component('DataTable', DataTable)
-app.component('DrawerFormLayout', DrawerFormLayout)
+const app = createApp(App) app.component('DataTable', DataTable) app.component('DrawerFormLayout',
+DrawerFormLayout)
 
 ````
 
@@ -522,12 +519,7 @@ onMounted(() => {
       @close="isOpen = false"
     >
       <form @submit.prevent>
-        <input
-          v-model="formData.name"
-          type="text"
-          placeholder="Name"
-          @input="isDirty = true"
-        />
+        <input v-model="formData.name" type="text" placeholder="Name" @input="isDirty = true" />
         <!-- More form fields -->
       </form>
     </DrawerFormLayout>
@@ -535,20 +527,20 @@ onMounted(() => {
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { DrawerFormLayout } from '@zidney/ui-system'
+import { ref } from "vue";
+import { DrawerFormLayout } from "@zidney/ui-system";
 
-const isOpen = ref(false)
-const isSaving = ref(false)
-const isDirty = ref(false)
-const formData = ref({ name: '' })
+const isOpen = ref(false);
+const isSaving = ref(false);
+const isDirty = ref(false);
+const formData = ref({ name: "" });
 
 const handleSave = async () => {
-  isSaving.value = true
-  await saveUser(formData.value)
-  isOpen.value = false
-  isSaving.value = false
-}
+  isSaving.value = true;
+  await saveUser(formData.value);
+  isOpen.value = false;
+  isSaving.value = false;
+};
 </script>
 ```
 
@@ -568,15 +560,15 @@ const handleSave = async () => {
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { MultiLanguageInputModal } from '@zidney/ui-system'
+import { ref } from "vue";
+import { MultiLanguageInputModal } from "@zidney/ui-system";
 
-const isOpen = ref(false)
+const isOpen = ref(false);
 
 const handleSave = (values) => {
-  console.log('Saved translations:', values)
+  console.log("Saved translations:", values);
   // { en: 'Product', es: 'Producto', fr: 'Produit' }
-}
+};
 </script>
 ```
 
@@ -617,13 +609,13 @@ const handleSave = (values) => {
       id: 'edit',
       label: 'Edit',
       callback: async (row) => {
-        await updateRow(row)
+        await updateRow(row);
       },
     },
   ]"
   @action-end="
     ({ actionId, row, success }) => {
-      if (success) refetchData()
+      if (success) refetchData();
     }
   "
 />
@@ -700,7 +692,7 @@ const handleSave = (values) => {
 ### useFilterBuilder
 
 ```ts
-import { useFilterBuilder } from '@zidney/ui-system'
+import { useFilterBuilder } from "@zidney/ui-system";
 
 const {
   filters,
@@ -710,13 +702,13 @@ const {
   addFilter,
   removeFilter,
   updateFilter,
-} = useFilterBuilder(props)
+} = useFilterBuilder(props);
 ```
 
 ### usePagination
 
 ```ts
-import { usePagination } from '@zidney/ui-system'
+import { usePagination } from "@zidney/ui-system";
 
 const {
   currentPage,
@@ -727,47 +719,46 @@ const {
   goToPage,
   nextPage,
   previousPage,
-} = usePagination({ totalCount: 100, pageSize: 25 })
+} = usePagination({ totalCount: 100, pageSize: 25 });
 ```
 
 ### useColumnVisibility
 
 ```ts
-import { useColumnVisibility } from '@zidney/ui-system'
+import { useColumnVisibility } from "@zidney/ui-system";
 
 const { visibleColumns, toggleColumn, showAll, hideAll } = useColumnVisibility({
-  persistKey: 'my-table-visibility',
-  columns: ['name', 'email', 'status'],
-})
+  persistKey: "my-table-visibility",
+  columns: ["name", "email", "status"],
+});
 ```
 
 ### useMultiLanguageForm
 
 ```ts
-import { useMultiLanguageForm } from '@zidney/ui-system'
+import { useMultiLanguageForm } from "@zidney/ui-system";
 
-const {
-  formValues,
-  languageErrors,
-  isValid,
-  filledLanguages,
-  validateLanguage,
-  validateGlobal,
-} = useMultiLanguageForm({
-  languages: ['en', 'es', 'fr'],
-  requiredLanguages: ['en'],
-})
+const { formValues, languageErrors, isValid, filledLanguages, validateLanguage, validateGlobal } =
+  useMultiLanguageForm({
+    languages: ["en", "es", "fr"],
+    requiredLanguages: ["en"],
+  });
 ```
 
 ## Architecture Decisions
 
 This library embeds 5 locked architectural decisions:
 
-1. **DataTable Pagination (Agnostic)**: Component accepts `paginationMode: 'server' | 'client'`. Server mode delegates pagination to parent app.
-2. **Row Actions (Async-First)**: Row actions are async callbacks. Component manages loading state and emits events.
-3. **Filter Serialization (URL-Primary)**: Filters serialize to URL with 2000-char overflow limit. Falls back to localStorage.
-4. **Column Accessor (Conditional)**: Primitive columns don't require accessor prop; computed columns do.
-5. **Multi-Language (Min 1 Required)**: Default language is always required; at least 1 required language enforced.
+1. **DataTable Pagination (Agnostic)**: Component accepts `paginationMode: 'server' | 'client'`.
+   Server mode delegates pagination to parent app.
+2. **Row Actions (Async-First)**: Row actions are async callbacks. Component manages loading state
+   and emits events.
+3. **Filter Serialization (URL-Primary)**: Filters serialize to URL with 2000-char overflow limit.
+   Falls back to localStorage.
+4. **Column Accessor (Conditional)**: Primitive columns don't require accessor prop; computed
+   columns do.
+5. **Multi-Language (Min 1 Required)**: Default language is always required; at least 1 required
+   language enforced.
 
 See [`docs/architecture/`](../../docs/architecture/) for full ADR details.
 
@@ -775,15 +766,17 @@ See [`docs/architecture/`](../../docs/architecture/) for full ADR details.
 
 ### Multi-Tenant localStorage Isolation
 
-**⚠️ CRITICAL:** If your app uses path-based multi-tenancy (e.g., `app.com/workspace-1`, `app.com/workspace-2`), you **MUST** namespace localStorage keys by tenant + domain to prevent cross-workspace data leakage.
+**⚠️ CRITICAL:** If your app uses path-based multi-tenancy (e.g., `app.com/workspace-1`,
+`app.com/workspace-2`), you **MUST** namespace localStorage keys by tenant + domain to prevent
+cross-workspace data leakage.
 
 ```ts
 // ❌ WRONG - Leaks across workspaces
-useColumnVisibility({ persistKey: 'table-visibility' })
+useColumnVisibility({ persistKey: "table-visibility" });
 
 // ✅ CORRECT - Tenant-scoped
-const tenantId = getCurrentTenantId() // from context
-useColumnVisibility({ persistKey: `${tenantId}:table-visibility` })
+const tenantId = getCurrentTenantId(); // from context
+useColumnVisibility({ persistKey: `${tenantId}:table-visibility` });
 ```
 
 ## Performance

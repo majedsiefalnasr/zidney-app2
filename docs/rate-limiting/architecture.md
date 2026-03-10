@@ -4,7 +4,8 @@
 
 ## Overview
 
-Zidney implements centralized, Redis-based rate limiting with multiple enforcement levels to prevent abuse while maintaining platform availability.
+Zidney implements centralized, Redis-based rate limiting with multiple enforcement levels to prevent
+abuse while maintaining platform availability.
 
 ```
 ┌─────────────────────────────────────────────────┐
@@ -300,20 +301,20 @@ RATE_LIMIT_WS_PER_MINUTE=100       # Sustained
 
 ```typescript
 const rateLimitConfig = {
-  'POST /auth/login': {
+  "POST /auth/login": {
     per_ip: { limit: 5, window: 60 },
     per_user: { limit: 5, window: 60 },
     per_workspace: { limit: 20, window: 60 },
   },
-  'POST /attempt/{id}/submit': {
+  "POST /attempt/{id}/submit": {
     per_attempt: { limit: 1, window: -1 }, // -1 = unlimited window
     per_user: { limit: 0 }, // No per-user limit (per-attempt sufficient)
   },
-  'GET /ws/attempt/{id}': {
+  "GET /ws/attempt/{id}": {
     message_rate: { limit: 100, window: 60 },
     burst: 10,
   },
-}
+};
 ```
 
 ## Monitoring & Alerts
@@ -479,6 +480,7 @@ redis-cli MONITOR
 
 ## References
 
-- Rate Limiting Best Practices: https://cloud.google.com/architecture/rate-limiting-strategies-techniques
+- Rate Limiting Best Practices:
+  https://cloud.google.com/architecture/rate-limiting-strategies-techniques
 - Redis ZSET Documentation: https://redis.io/commands/zadd
 - Sliding Window Algorithm: https://en.wikipedia.org/wiki/Sliding_window_protocol

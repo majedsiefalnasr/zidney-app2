@@ -15,30 +15,41 @@
 
 - **Phase:** 01_PLATFORM_FOUNDATION
 - **Stage:** STAGE_05_TENANT_PROVISIONING_SERVICE
-- **Related ADRs:** ADR-0001 (Database-per-Tenant), ADR-0007 (Product Version Compatibility), ADR-0008 (Semantic Versioning)
-- **Related Spec File:** `specs/phases/01_PLATFORM_FOUNDATION/STAGE_05_TENANT_PROVISIONING_SERVICE/spec.md`
+- **Related ADRs:** ADR-0001 (Database-per-Tenant), ADR-0007 (Product Version Compatibility),
+  ADR-0008 (Semantic Versioning)
+- **Related Spec File:**
+  `specs/phases/01_PLATFORM_FOUNDATION/STAGE_05_TENANT_PROVISIONING_SERVICE/spec.md`
 
 ### 1.2 Architectural Scope Confirmation
 
-✅ **No cross-tenant data access:** All databases accessed exclusively through tenant-specific connection pools resolved from provenance. Each tenant owns one fully isolated database.
+✅ **No cross-tenant data access:** All databases accessed exclusively through tenant-specific
+connection pools resolved from provenance. Each tenant owns one fully isolated database.
 
-✅ **No middleware bypass:** License middleware mandatory before pool registration. Tenant resolver executes first on all subsequent workspace requests.
+✅ **No middleware bypass:** License middleware mandatory before pool registration. Tenant resolver
+executes first on all subsequent workspace requests.
 
-✅ **No direct DB instantiation:** All connections obtained through tenant resolver context or provisioning service within worker-only context.
+✅ **No direct DB instantiation:** All connections obtained through tenant resolver context or
+provisioning service within worker-only context.
 
-✅ **No global DB singleton:** Master pool is singleton for provisioning service only. Each tenant has separate pool in in-memory map.
+✅ **No global DB singleton:** Master pool is singleton for provisioning service only. Each tenant
+has separate pool in in-memory map.
 
 ✅ **No cross-tenant joins:** Database-level isolation prevents any JOIN between tenant databases.
 
-✅ **Correlation ID propagation:** All logs include `correlation_id`, `workspace_slug`, and tenant identifiers for full traceability.
+✅ **Correlation ID propagation:** All logs include `correlation_id`, `workspace_slug`, and tenant
+identifiers for full traceability.
 
-✅ **Structured logging only:** All event logs follow standardized JSON format with timestamp, level, service, and contextual fields.
+✅ **Structured logging only:** All event logs follow standardized JSON format with timestamp,
+level, service, and contextual fields.
 
-✅ **Transaction atomicity:** All critical writes (registry creation, license transition, schema initialization) are transactional with automatic rollback on failure.
+✅ **Transaction atomicity:** All critical writes (registry creation, license transition, schema
+initialization) are transactional with automatic rollback on failure.
 
-✅ **Idempotency provable:** Provisioning is safely retryable via checkpoint table, migration checksums, and upsert semantics for seeded data.
+✅ **Idempotency provable:** Provisioning is safely retryable via checkpoint table, migration
+checksums, and upsert semantics for seeded data.
 
-✅ **Worker-only execution:** Provisioning DDL and DML occurs exclusively in worker process, never in API process.
+✅ **Worker-only execution:** Provisioning DDL and DML occurs exclusively in worker process, never
+in API process.
 
 ---
 
@@ -761,27 +772,27 @@ For all workspace-bound API requests:
 ```typescript
 // Pseudo-code
 interface TenantContext {
-  workspace_slug: string
-  database_name: string
-  pool: ConnectionPool
-  license_id: number
+  workspace_slug: string;
+  database_name: string;
+  pool: ConnectionPool;
+  license_id: number;
 }
 
 async function resolveTenant(slug: string): Promise<TenantContext | null> {
   // Query master DB for registry entry
   const registry = await masterPool.query(
-    'SELECT license_id, database_name FROM tenants_registry WHERE workspace_slug = $1 AND is_active = true',
-    [slug]
-  )
+    "SELECT license_id, database_name FROM tenants_registry WHERE workspace_slug = $1 AND is_active = true",
+    [slug],
+  );
 
   if (!registry.rows.length) {
-    return null // 404
+    return null; // 404
   }
 
   // Get pool from in-memory map
-  const pool = getTenantPool(slug)
+  const pool = getTenantPool(slug);
   if (!pool) {
-    throw new ServiceUnavailable('Provisioning in progress') // 503
+    throw new ServiceUnavailable("Provisioning in progress"); // 503
   }
 
   return {
@@ -789,7 +800,7 @@ async function resolveTenant(slug: string): Promise<TenantContext | null> {
     database_name: registry.rows[0].database_name,
     pool,
     license_id: registry.rows[0].license_id,
-  }
+  };
 }
 ```
 
@@ -800,33 +811,33 @@ async function resolveTenant(slug: string): Promise<TenantContext | null> {
 ```typescript
 // Pseudo-code
 async function licenseEnforcementMiddleware(req, res, next) {
-  const tenant = req.tenant // From resolver
+  const tenant = req.tenant; // From resolver
 
   const license = await masterPool.query(
-    'SELECT status, schema_version FROM licenses WHERE id = $1',
-    [tenant.license_id]
-  )
+    "SELECT status, schema_version FROM licenses WHERE id = $1",
+    [tenant.license_id],
+  );
 
   if (!license.rows.length) {
-    return res.status(404).json(errorResponse('NOT_FOUND'))
+    return res.status(404).json(errorResponse("NOT_FOUND"));
   }
 
-  const status = license.rows[0].status
+  const status = license.rows[0].status;
 
   switch (status) {
-    case 'ACTIVE':
-      return next() // Proceed
-    case 'SOFT_LOCKED':
-      return res.status(423).json(errorResponse('SOFT_LOCKED'))
-    case 'ARCHIVED':
-      return res.status(403).json(errorResponse('ARCHIVED'))
-    case 'PROVISIONING':
-    case 'CREATED':
-      return res.status(503).json(errorResponse('SERVICE_UNAVAILABLE'))
-    case 'DELETED':
-      return res.status(404).json(errorResponse('NOT_FOUND'))
+    case "ACTIVE":
+      return next(); // Proceed
+    case "SOFT_LOCKED":
+      return res.status(423).json(errorResponse("SOFT_LOCKED"));
+    case "ARCHIVED":
+      return res.status(403).json(errorResponse("ARCHIVED"));
+    case "PROVISIONING":
+    case "CREATED":
+      return res.status(503).json(errorResponse("SERVICE_UNAVAILABLE"));
+    case "DELETED":
+      return res.status(404).json(errorResponse("NOT_FOUND"));
     default:
-      return res.status(503).json(errorResponse('UNKNOWN_LICENSE_STATE'))
+      return res.status(503).json(errorResponse("UNKNOWN_LICENSE_STATE"));
   }
 }
 ```
@@ -906,63 +917,63 @@ Job Lifecycle:
 ```typescript
 class ProvisioningService {
   async provision(job: ProvisioningJob): Promise<ProvisioningResult> {
-    const { license_id, workspace_slug, correlation_id } = job
+    const { license_id, workspace_slug, correlation_id } = job;
     const context = {
       license_id,
       workspace_slug,
       correlation_id,
       startTime: now(),
-    }
+    };
 
     try {
       // Step 1: Acquire distributed lock
-      const lockAcquired = await this.acquireLock(workspace_slug, context)
+      const lockAcquired = await this.acquireLock(workspace_slug, context);
       if (!lockAcquired) {
-        throw new TransientError('PROV_006', 'Lock collision')
+        throw new TransientError("PROV_006", "Lock collision");
       }
 
       // Step 2: Validate
-      await this.validateLicense(license_id, context)
-      await this.validateSlug(workspace_slug, context)
+      await this.validateLicense(license_id, context);
+      await this.validateSlug(workspace_slug, context);
 
       // Step 3: Create database
-      await this.createDatabase(workspace_slug, context)
+      await this.createDatabase(workspace_slug, context);
 
       // Step 4: Initialize schema
-      await this.initializeSchema(workspace_slug, context)
+      await this.initializeSchema(workspace_slug, context);
 
       // Step 5: Seed data
-      await this.seedBaselineData(workspace_slug, context)
+      await this.seedBaselineData(workspace_slug, context);
 
       // Step 6: Create registry entry
-      await this.createRegistryEntry(license_id, workspace_slug, context)
+      await this.createRegistryEntry(license_id, workspace_slug, context);
 
       // Step 7: Transition license
-      await this.transitionLicense(license_id, 'ACTIVE', context)
+      await this.transitionLicense(license_id, "ACTIVE", context);
 
       // Step 8: Register pool
-      this.registerPool(workspace_slug, context)
+      this.registerPool(workspace_slug, context);
 
       // Step 9: Release lock
-      await this.releaseLock(workspace_slug, context)
+      await this.releaseLock(workspace_slug, context);
 
       // Step 10: Log completion
-      log('provisioning_completed', {
+      log("provisioning_completed", {
         correlation_id,
         workspace_slug,
         license_id,
         duration_ms: now() - context.startTime,
-      })
+      });
 
-      return { success: true, license_id, workspace_slug }
+      return { success: true, license_id, workspace_slug };
     } catch (error) {
       // Comprehensive error handling with rollback
-      await this.rollback(workspace_slug, license_id, error, context)
+      await this.rollback(workspace_slug, license_id, error, context);
 
       if (isTransient(error)) {
-        throw new RetryableError(error.code, error.message)
+        throw new RetryableError(error.code, error.message);
       } else {
-        throw new PermanentError(error.code, error.message)
+        throw new PermanentError(error.code, error.message);
       }
     }
   }
@@ -1121,21 +1132,21 @@ Actions:
 
 ```typescript
 async function detectOrphans() {
-  const context = { correlation_id: generateId() }
+  const context = { correlation_id: generateId() };
 
   // Type 1: Databases without registry entries
   const orphanDatabases = await masterPool.query(`
     SELECT datname FROM pg_database 
     WHERE datname LIKE 'workspace_%'
     AND datname NOT IN (SELECT database_name FROM tenants_registry WHERE is_active = true)
-  `)
+  `);
 
   for (const db of orphanDatabases.rows) {
-    alert('ORPHAN_DATABASE', {
+    alert("ORPHAN_DATABASE", {
       database_name: db.datname,
-      action: 'Manual review; cleanup if confirmed orphan',
+      action: "Manual review; cleanup if confirmed orphan",
       correlation_id: context.correlation_id,
-    })
+    });
   }
 
   // Type 2: Registry entries without databases
@@ -1143,15 +1154,15 @@ async function detectOrphans() {
     SELECT workspace_slug, database_name FROM tenants_registry 
     WHERE is_active = true
     AND NOT EXISTS (SELECT 1 FROM pg_database WHERE datname = database_name)
-  `)
+  `);
 
   for (const entry of orphanRegistry.rows) {
-    alert('ORPHAN_REGISTRY', {
+    alert("ORPHAN_REGISTRY", {
       workspace_slug: entry.workspace_slug,
       database_name: entry.database_name,
-      action: 'Manual review; mark deleted_at if cleaned',
+      action: "Manual review; mark deleted_at if cleaned",
       correlation_id: context.correlation_id,
-    })
+    });
   }
 
   // Type 3: Active licenses without registry
@@ -1159,14 +1170,14 @@ async function detectOrphans() {
     SELECT licenses.id FROM licenses 
     WHERE licenses.status = 'ACTIVE'
     AND licenses.id NOT IN (SELECT license_id FROM tenants_registry WHERE is_active = true)
-  `)
+  `);
 
   for (const license of orphanLicenses.rows) {
-    alert('ORPHAN_LICENSE', {
+    alert("ORPHAN_LICENSE", {
       license_id: license.id,
-      action: 'Investigate provisioning failure; manual cleanup required',
+      action: "Investigate provisioning failure; manual cleanup required",
       correlation_id: context.correlation_id,
-    })
+    });
   }
 }
 ```
@@ -1831,8 +1842,7 @@ Provisioning Service
 **Alternatives Considered:**
 
 - Synchronous provisioning in API: Risk of API crashes losing partial state
-- Background job + API completion: Decouples better, less coordin
-  ation needed
+- Background job + API completion: Decouples better, less coordin ation needed
 
 #### Decision 3: Distributed Lock (Redis)
 
@@ -1973,17 +1983,16 @@ Provisioning Service
 
 ### 15.1 Constitution Alignment Checklist
 
-✅ **No cross-tenant access:** Pool isolation + database isolation enforced
-✅ **No middleware bypass:** All workspace requests go through tenant resolver + license check
-✅ **No direct DB instantiation:** All connections via resolver context or provisioning pool
-✅ **No global DB singleton:** Master pool for provisioning only; tenant pools per-workspace
-✅ **Transaction atomicity:** Critical writes transactional with REPEATABLE READ
-✅ **Idempotency proven:** Checksums + upserts + checkpoint table enable safe replay
-✅ **Correlation ID propagation:** All 14 events logged with correlation_id
-✅ **Structured logging only:** JSON format enforced; no console.log in production code
-✅ **Worker-only execution:** DDL/DML in worker, never in API process
-✅ **Version enforcement:** Schema version tracked, validated at runtime
-✅ **No weakening of snapshot integrity:** Configuration snapshotting in STAGE_06 (not here)
+✅ **No cross-tenant access:** Pool isolation + database isolation enforced ✅ **No middleware
+bypass:** All workspace requests go through tenant resolver + license check ✅ **No direct DB
+instantiation:** All connections via resolver context or provisioning pool ✅ **No global DB
+singleton:** Master pool for provisioning only; tenant pools per-workspace ✅ **Transaction
+atomicity:** Critical writes transactional with REPEATABLE READ ✅ **Idempotency proven:**
+Checksums + upserts + checkpoint table enable safe replay ✅ **Correlation ID propagation:** All 14
+events logged with correlation_id ✅ **Structured logging only:** JSON format enforced; no
+console.log in production code ✅ **Worker-only execution:** DDL/DML in worker, never in API process
+✅ **Version enforcement:** Schema version tracked, validated at runtime ✅ **No weakening of
+snapshot integrity:** Configuration snapshotting in STAGE_06 (not here)
 
 ### 15.2 ADR Compliance
 
@@ -2012,10 +2021,10 @@ Provisioning Service
 
 ### 15.4 Database Migration Policy
 
-✅ **One migration per feature:** Master DB changes in 1 file, tenant baseline in multiple files
-✅ **Never modify old migrations:** All migrations immutable-checksum enforced
-✅ **Forward-only migrations:** No rollback semantics; only restore-from-snapshot
-✅ **Version alignment:** Migration version = schema version (1.0.0)
+✅ **One migration per feature:** Master DB changes in 1 file, tenant baseline in multiple files ✅
+**Never modify old migrations:** All migrations immutable-checksum enforced ✅ **Forward-only
+migrations:** No rollback semantics; only restore-from-snapshot ✅ **Version alignment:** Migration
+version = schema version (1.0.0)
 
 ---
 
@@ -2034,7 +2043,8 @@ Provisioning Service
 
 ### 16.2 Core Assumptions
 
-1. **External Snapshot Storage Exists:** Assumes DevOps provisioned backup storage (S3, Azure Blob, etc.)
+1. **External Snapshot Storage Exists:** Assumes DevOps provisioned backup storage (S3, Azure Blob,
+   etc.)
 2. **PostgreSQL Configured:** Single PostgreSQL instance with `template0` database for cloning
 3. **Redis Available:** Redis instance/cluster for job queue and distributed locks
 4. **Server Clocks NTP-Synchronized:** Required for lock TTL reliability across servers
@@ -2048,18 +2058,18 @@ Provisioning Service
 
 > **Implementation plan compliant with Zidney Constitution v1.2.0 — No violations detected.**
 >
-> ✅ **Architectural Scope:** All work confined to provisioning service; no boundary violations
-> ✅ **Trust Chain:** Isolation layer established; enables subsequent License → Authentication → Runtime layers
-> ✅ **Multi-Tenancy:** Database-per-tenant isolation enforced at infrastructure level
-> ✅ **Middleware Ordering:** Tenant Resolver → License Enforcement → Schema Version → Route Handler
-> ✅ **Transaction Safety:** All critical writes atomic with REPEATABLE READ
-> ✅ **Idempotency:** Provisioning safely retryable via checkpoints + checksums
-> ✅ **Logging:** Structured JSON format; correlation_id propagated to all events
-> ✅ **Worker Authority:** All DDL/DML executes in worker; API process never touches schema
-> ✅ **Error Handling:** All errors mapped to HTTP status codes; recovery paths defined
-> ✅ **Version Enforcement:** Schema version tracked, validated pre-deployment
-> ✅ **Security:** No credential leakage, no PII in logs, no cross-tenant access vectors
-> ✅ **Testing:** Unit, integration, concurrency, and recovery tests defined
+> ✅ **Architectural Scope:** All work confined to provisioning service; no boundary violations ✅
+> **Trust Chain:** Isolation layer established; enables subsequent License → Authentication →
+> Runtime layers ✅ **Multi-Tenancy:** Database-per-tenant isolation enforced at infrastructure
+> level ✅ **Middleware Ordering:** Tenant Resolver → License Enforcement → Schema Version → Route
+> Handler ✅ **Transaction Safety:** All critical writes atomic with REPEATABLE READ ✅
+> **Idempotency:** Provisioning safely retryable via checkpoints + checksums ✅ **Logging:**
+> Structured JSON format; correlation_id propagated to all events ✅ **Worker Authority:** All
+> DDL/DML executes in worker; API process never touches schema ✅ **Error Handling:** All errors
+> mapped to HTTP status codes; recovery paths defined ✅ **Version Enforcement:** Schema version
+> tracked, validated pre-deployment ✅ **Security:** No credential leakage, no PII in logs, no
+> cross-tenant access vectors ✅ **Testing:** Unit, integration, concurrency, and recovery tests
+> defined
 
 **Status:** ✅ **READY FOR IMPLEMENTATION**
 

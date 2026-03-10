@@ -22,8 +22,7 @@ Implement a workspace-scoped promocode system that:
 - Supports targeting by academic structure
 - Integrates with subscription activation flow
 
-Promocodes are isolated per workspace.
-No cross-workspace sharing allowed.
+Promocodes are isolated per workspace. No cross-workspace sharing allowed.
 
 ---
 
@@ -113,9 +112,7 @@ System must validate:
 6. Plan eligible
 7. Student belongs to allowed division/group (if targeting configured)
 
-If any validation fails:
-→ Reject with 400
-→ Provide structured error code
+If any validation fails: → Reject with 400 → Provide structured error code
 
 ---
 
@@ -131,8 +128,7 @@ If is_stackable = true:
 - Must apply in deterministic order
 - Total discount must not exceed plan_price
 
-Stacking must be explicitly enabled.
-Default behavior: no stacking.
+Stacking must be explicitly enabled. Default behavior: no stacking.
 
 ---
 

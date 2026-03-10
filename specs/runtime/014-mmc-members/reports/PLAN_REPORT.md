@@ -203,7 +203,8 @@ Constraints:
 - GET /mmc/roles (list) — Permission: MEMBERS_MANAGEMENT.can_view
 - GET /mmc/roles/:id (detail) — Permission: MEMBERS_MANAGEMENT.can_view
 - GET /mmc/roles/:id/permissions (matrix) — Permission: MEMBERS_MANAGEMENT.can_view
-- PATCH /mmc/roles/:id/permissions (batch update) — Permission: MEMBERS_MANAGEMENT.can_edit + CASCADE
+- PATCH /mmc/roles/:id/permissions (batch update) — Permission: MEMBERS_MANAGEMENT.can_edit +
+  CASCADE
 - POST /mmc/roles (create) — Permission: MEMBERS_MANAGEMENT.can_create
 - DELETE /mmc/roles (delete with FK check) — Permission: MEMBERS_MANAGEMENT.can_delete
 
@@ -257,7 +258,8 @@ BEGIN TRANSACTION ISOLATION LEVEL SERIALIZABLE;
 COMMIT; -- All or nothing
 ```
 
-**Guarantee:** Either complete (all affected members invalidated + permissions updated) or rollback (no partial state).
+**Guarantee:** Either complete (all affected members invalidated + permissions updated) or rollback
+(no partial state).
 
 ### Session Invalidation Cascade
 

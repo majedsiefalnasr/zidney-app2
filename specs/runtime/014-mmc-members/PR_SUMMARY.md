@@ -9,7 +9,8 @@
 
 ## Summary
 
-This PR implements **STAGE_14_MMC_MEMBERS**: a complete internal MMC member management system with deterministic RBAC, atomic session invalidation, and production-grade observability.
+This PR implements **STAGE_14_MMC_MEMBERS**: a complete internal MMC member management system with
+deterministic RBAC, atomic session invalidation, and production-grade observability.
 
 **Delivery:**
 
@@ -61,7 +62,8 @@ This PR implements **STAGE_14_MMC_MEMBERS**: a complete internal MMC member mana
 - `PATCH /mmc/roles/:id/permissions` — Update permissions with atomic cascade
   - **Atomic Cascade:** Single transaction increments all affected members' token_version
   - **Serializable Isolation:** No race conditions, all-or-nothing semantics
-- **Permission Domains:** ORGANIZATION_SETTINGS, PRODUCT_MANAGEMENT, LICENSE_MANAGEMENT, CLIENT_MANAGEMENT, AFFILIATE_MANAGEMENT, MEMBERS_MANAGEMENT, REPORTING
+- **Permission Domains:** ORGANIZATION_SETTINGS, PRODUCT_MANAGEMENT, LICENSE_MANAGEMENT,
+  CLIENT_MANAGEMENT, AFFILIATE_MANAGEMENT, MEMBERS_MANAGEMENT, REPORTING
 
 #### 5. Authentication & Sessions (4 endpoints)
 
@@ -374,7 +376,8 @@ psql master_db < snapshot_YYYYMMDD_HHMMSS.sql
 
 ## Testing Guide
 
-For detailed testing scenarios, see [TESTING_GUIDE.md](specs/runtime/014-mmc-members/guides/TESTING_GUIDE.md):
+For detailed testing scenarios, see
+[TESTING_GUIDE.md](specs/runtime/014-mmc-members/guides/TESTING_GUIDE.md):
 
 - 8 manual testing scenarios (5-10 min each)
 - Automated test execution (npm run test)
@@ -391,9 +394,12 @@ For detailed testing scenarios, see [TESTING_GUIDE.md](specs/runtime/014-mmc-mem
 - **API Contracts:** [contracts/](specs/runtime/014-mmc-members/contracts/) (4 files)
 - **API Documentation:** [MMC_API_DOCUMENTATION.md](apps/api/docs/MMC_API_DOCUMENTATION.md)
 - **Security Review:** [STAGE_14_SECURITY_REVIEW.md](docs/STAGE_14_SECURITY_REVIEW.md)
-- **Testing & Validation:** [TESTING_GUIDE.md](specs/runtime/014-mmc-members/guides/TESTING_GUIDE.md)
-- **Implementation Report:** [IMPLEMENT_REPORT.md](specs/runtime/014-mmc-members/reports/IMPLEMENT_REPORT.md)
-- **Validation Report:** [VALIDATION_REPORT.md](specs/runtime/014-mmc-members/audits/VALIDATION_REPORT.md)
+- **Testing & Validation:**
+  [TESTING_GUIDE.md](specs/runtime/014-mmc-members/guides/TESTING_GUIDE.md)
+- **Implementation Report:**
+  [IMPLEMENT_REPORT.md](specs/runtime/014-mmc-members/reports/IMPLEMENT_REPORT.md)
+- **Validation Report:**
+  [VALIDATION_REPORT.md](specs/runtime/014-mmc-members/audits/VALIDATION_REPORT.md)
 - **Closure Report:** [CLOSURE_REPORT.md](specs/runtime/014-mmc-members/reports/CLOSURE_REPORT.md)
 
 ---
@@ -413,4 +419,5 @@ For detailed testing scenarios, see [TESTING_GUIDE.md](specs/runtime/014-mmc-mem
 
 ---
 
-**Questions?** See [TESTING_GUIDE.md](specs/runtime/014-mmc-members/guides/TESTING_GUIDE.md) or contact engineering team.
+**Questions?** See [TESTING_GUIDE.md](specs/runtime/014-mmc-members/guides/TESTING_GUIDE.md) or
+contact engineering team.

@@ -1,10 +1,14 @@
 # Zidney AI Bootstrap
 
-This file is the **primary bootstrap entrypoint for AI agents** working inside the Zidney repository.
+This file is the **primary bootstrap entrypoint for AI agents** working inside the Zidney
+repository.
 
-Any AI system interacting with this repository (Copilot, Cursor, Claude, SpecKit agents, GitNexus MCP agents, etc.) must **load this file first** before performing reasoning, code generation, planning, or refactoring.
+Any AI system interacting with this repository (Copilot, Cursor, Claude, SpecKit agents, GitNexus
+MCP agents, etc.) must **load this file first** before performing reasoning, code generation,
+planning, or refactoring.
 
-This ensures that AI reasoning starts from **architecture → governance → implementation**, rather than from raw code scanning.
+This ensures that AI reasoning starts from **architecture → governance → implementation**, rather
+than from raw code scanning.
 
 ---
 
@@ -49,9 +53,11 @@ docs/architecture/visualization/
 docs/ai/context/
 ```
 
-These artifacts are generated and maintained by the infrastructure governance system and must always take precedence over assumptions derived from raw source code.
+These artifacts are generated and maintained by the infrastructure governance system and must always
+take precedence over assumptions derived from raw source code.
 
-When architecture metadata and code appear to conflict, AI must assume that the **architecture documents are correct** and investigate the code for potential violations.
+When architecture metadata and code appear to conflict, AI must assume that the **architecture
+documents are correct** and investigate the code for potential violations.
 
 ---
 
@@ -290,7 +296,8 @@ This provides AI with **deep repository awareness**.
 
 # 12. AI Development Principle
 
-AI agents working in Zidney must behave as **architecture‑aware collaborators**, not simple code generators.
+AI agents working in Zidney must behave as **architecture‑aware collaborators**, not simple code
+generators.
 
 Responsibilities include:
 
@@ -313,4 +320,5 @@ Before generating code, AI must:
 3. Respect ADR decisions
 4. Follow the layered monorepo structure
 
-This bootstrap guarantees that AI reasoning begins with **system architecture rather than source code scanning**.
+This bootstrap guarantees that AI reasoning begins with **system architecture rather than source
+code scanning**.

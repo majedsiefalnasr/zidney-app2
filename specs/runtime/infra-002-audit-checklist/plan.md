@@ -12,16 +12,23 @@
 
 ## 1. Overview
 
-This plan delivers a complete, non-destructive infrastructure audit of the Zidney monorepo. The outputs are:
+This plan delivers a complete, non-destructive infrastructure audit of the Zidney monorepo. The
+outputs are:
 
-1. **`scripts/infra-audit.ts`** — a repeatable Bun-compatible read-only script that collects audit data and writes `infra-audit-report.json`.
-2. **`reports/GAP_REPORT.md`** — a structured document listing every gap between current state and target governance posture.
-3. **`reports/RISK_CLASSIFICATION.md`** — a risk-level table (LOW/MEDIUM/HIGH/CRITICAL) with one-sentence rationale per gap.
+1. **`scripts/infra-audit.ts`** — a repeatable Bun-compatible read-only script that collects audit
+   data and writes `infra-audit-report.json`.
+2. **`reports/GAP_REPORT.md`** — a structured document listing every gap between current state and
+   target governance posture.
+3. **`reports/RISK_CLASSIFICATION.md`** — a risk-level table (LOW/MEDIUM/HIGH/CRITICAL) with
+   one-sentence rationale per gap.
 4. **`reports/SAFE_ROLLOUT_PLAN.md`** — a sequenced remediation plan from lowest to highest risk.
 
-No source code, configuration, schema, CI workflow, or test file is modified. The only permitted write operations are creating `scripts/infra-audit.ts` and writing the ephemeral `infra-audit-report.json` at runtime.
+No source code, configuration, schema, CI workflow, or test file is modified. The only permitted
+write operations are creating `scripts/infra-audit.ts` and writing the ephemeral
+`infra-audit-report.json` at runtime.
 
-This stage is a prerequisite for `STAGE_INFRA_GOVERNANCE`. No governance enforcement work may begin until all three report documents are present and approved.
+This stage is a prerequisite for `STAGE_INFRA_GOVERNANCE`. No governance enforcement work may begin
+until all three report documents are present and approved.
 
 ---
 
@@ -29,11 +36,19 @@ This stage is a prerequisite for `STAGE_INFRA_GOVERNANCE`. No governance enforce
 
 This is a **read-only audit stage**. The execution strategy is:
 
-1. **Run the audit script** (`scripts/infra-audit.ts`) to automate data collection for Vitest config inventory, ESLint config inventory, test file counts, README presence, and skipped/flaky test markers.
-2. **Manually supplement** where the script cannot reach: ESLint rule severity values (require parsing flat config JS modules), CI workflow enforcement posture (YAML file reading), README section completeness, and Bun command exit codes.
-3. **Produce written deliverables** by synthesising script output (`infra-audit-report.json`) and manual findings into the three report documents.
+1. **Run the audit script** (`scripts/infra-audit.ts`) to automate data collection for Vitest config
+   inventory, ESLint config inventory, test file counts, README presence, and skipped/flaky test
+   markers.
+2. **Manually supplement** where the script cannot reach: ESLint rule severity values (require
+   parsing flat config JS modules), CI workflow enforcement posture (YAML file reading), README
+   section completeness, and Bun command exit codes.
+3. **Produce written deliverables** by synthesising script output (`infra-audit-report.json`) and
+   manual findings into the three report documents.
 
-The script never modifies tracked files. All writes go to the ephemeral `infra-audit-report.json` (gitignored). Report documents are new files under `specs/runtime/infra-002-audit-checklist/reports/`, which is the only permitted output location for committed artifacts.
+The script never modifies tracked files. All writes go to the ephemeral `infra-audit-report.json`
+(gitignored). Report documents are new files under
+`specs/runtime/infra-002-audit-checklist/reports/`, which is the only permitted output location for
+committed artifacts.
 
 ---
 
@@ -55,7 +70,8 @@ The script never modifies tracked files. All writes go to the ephemeral `infra-a
 | P0-06 | Verify all 4 GitHub workflow files exist (see research.md §5)                 | File check           |
 | P0-07 | Confirm `specs/runtime/infra-002-audit-checklist/reports/` directory exists   | Directory check      |
 
-**Exit criteria:** Bun ≥ 1.0 confirmed; `infra-audit-report.json` gitignored; `reports/` directory present; git SHA recorded.
+**Exit criteria:** Bun ≥ 1.0 confirmed; `infra-audit-report.json` gitignored; `reports/` directory
+present; git SHA recorded.
 
 ---
 
@@ -67,32 +83,41 @@ The script never modifies tracked files. All writes go to the ephemeral `infra-a
 
 **Script responsibilities:**
 
-The script must perform the following scans using only Bun/Node built-ins (`fs`, `path`, `process`). No cross-app imports. No network requests.
+The script must perform the following scans using only Bun/Node built-ins (`fs`, `path`, `process`).
+No cross-app imports. No network requests.
 
 #### 1.1 Filesystem Scanner (Core)
 
 - Recursively walk the entire repository from `process.cwd()`.
 - Skip directories: `node_modules`, `.git`, `.DS_Store`.
-- Skip files matching secret patterns: `.env`, `.env.*`, `*.pem`, `*.key`, `*.secret`, `*.p12`, `*.pfx`, `docker-compose.override.yml` — log each as `"SKIPPED (secret pattern)"`.
-- On file parse error: catch, log `"PARSE_ERROR"` with path and message, continue processing; do not abort.
+- Skip files matching secret patterns: `.env`, `.env.*`, `*.pem`, `*.key`, `*.secret`, `*.p12`,
+  `*.pfx`, `docker-compose.override.yml` — log each as `"SKIPPED (secret pattern)"`.
+- On file parse error: catch, log `"PARSE_ERROR"` with path and message, continue processing; do not
+  abort.
 
 #### 1.2 Vitest Config Inventory (FR-US1)
 
-- Locate all files named `vitest.config.ts`, `vitest.config.js`, `vitest.workspace.ts`, `vitest.workspace.js`.
-- For each: record `path`, attempt to read `test.environment`, `globals`, coverage-enabled flag, custom reporters.
+- Locate all files named `vitest.config.ts`, `vitest.config.js`, `vitest.workspace.ts`,
+  `vitest.workspace.js`.
+- For each: record `path`, attempt to read `test.environment`, `globals`, coverage-enabled flag,
+  custom reporters.
 - Flag conflicts where two configs define different values for the same property.
 - Classify consolidation risk: LOW (0–1 conflict), MEDIUM (2–3), HIGH (4+).
 
 #### 1.3 ESLint Config Inventory (FR-US3-1)
 
-- Locate all files matching `eslint.config.*`, `.eslintrc.*`, `.eslintrc.js`, `.eslintrc.json`, `.eslintrc.yaml`, `.eslintrc.yml`.
+- Locate all files matching `eslint.config.*`, `.eslintrc.*`, `.eslintrc.js`, `.eslintrc.json`,
+  `.eslintrc.yaml`, `.eslintrc.yml`.
 - For each: record `path`, format (flat vs legacy).
-- Rule severity extraction is marked as a manual supplement (flat config files are ES modules and cannot be statically imported at scan time without executing them).
-- Check `package.json` at root and per-app for presence of `eslint-config-prettier` and `prettier` in `devDependencies`.
+- Rule severity extraction is marked as a manual supplement (flat config files are ES modules and
+  cannot be statically imported at scan time without executing them).
+- Check `package.json` at root and per-app for presence of `eslint-config-prettier` and `prettier`
+  in `devDependencies`.
 
 #### 1.4 Test File Counter (FR-US2-1, FR-US2-2)
 
-- Count files matching `**/*.test.ts` and `**/*.test.js` under `apps/*/src/` → unit test count per app.
+- Count files matching `**/*.test.ts` and `**/*.test.js` under `apps/*/src/` → unit test count per
+  app.
 - Count files under `tests/integration/` and `apps/*/tests/integration/` → integration test count.
 - Count files matching `**/*.spec.ts` → spec test count (separate bucket).
 
@@ -107,8 +132,10 @@ The script must perform the following scans using only Bun/Node built-ins (`fs`,
 - For each directory directly under `apps/` and `packages/`:
   - Check for `README.md` (case-insensitive).
   - If present: scan for required sections (case-insensitive `#`–`###` headings):
-    - `Purpose`, `Responsibilities`, `Dependencies`, `Public API` (packages only), `How to Run Tests`, `Environment Variables`, `Known Boundaries`.
-  - For each section: classify as `PRESENT` (heading + non-blank body), `PRESENT_EMPTY` (heading only), or `MISSING`.
+    - `Purpose`, `Responsibilities`, `Dependencies`, `Public API` (packages only),
+      `How to Run Tests`, `Environment Variables`, `Known Boundaries`.
+  - For each section: classify as `PRESENT` (heading + non-blank body), `PRESENT_EMPTY` (heading
+    only), or `MISSING`.
 - If README absent: classify the entire directory as `README_MISSING`.
 
 #### 1.7 Skipped & Flaky Test Scanner (FR-US7-3, FR-US7-4 via CL5)
@@ -159,15 +186,21 @@ Emit structured section headers to stdout:
 [INFRA AUDIT] ✓ Complete. Output: infra-audit-report.json
 ```
 
-**Exit criteria:** `bun run scripts/infra-audit.ts` exits 0; `infra-audit-report.json` is present at repo root; JSON contains all required keys from AC-US9-3.
+**Exit criteria:** `bun run scripts/infra-audit.ts` exits 0; `infra-audit-report.json` is present at
+repo root; JSON contains all required keys from AC-US9-3.
 
 ---
 
 ### Phase 2: Manual Audit Supplements
 
-The following audit areas cannot be fully automated by the script and require manual inspection during implementation. Each must be incorporated into the written reports.
+The following audit areas cannot be fully automated by the script and require manual inspection
+during implementation. Each must be incorporated into the written reports.
 
-> **Plan-to-Tasks Sub-group Mapping (M3 remediation):** During task decomposition, Phase 2 expanded to 8 sub-groups. The 4 additional sub-groups not named as separate plan sub-phases are: Vitest Config Detail (tasks T020–T025, maps to US1), Test Distribution Verification (T026, maps to US2), Skipped/Flaky Test Verification (T047, maps to US7), and Enforcement Readiness Score Synthesis (T048–T049, maps to US8). These are covered by FR-US1, FR-US2, FR-US7, and FR-US8 respectively.
+> **Plan-to-Tasks Sub-group Mapping (M3 remediation):** During task decomposition, Phase 2 expanded
+> to 8 sub-groups. The 4 additional sub-groups not named as separate plan sub-phases are: Vitest
+> Config Detail (tasks T020–T025, maps to US1), Test Distribution Verification (T026, maps to US2),
+> Skipped/Flaky Test Verification (T047, maps to US7), and Enforcement Readiness Score Synthesis
+> (T048–T049, maps to US8). These are covered by FR-US1, FR-US2, FR-US7, and FR-US8 respectively.
 
 | tasks.md Sub-group                  | Plan Section                                     | US Labels |
 | ----------------------------------- | ------------------------------------------------ | --------- |
@@ -182,7 +215,8 @@ The following audit areas cannot be fully automated by the script and require ma
 
 #### 2.1 ESLint Rule Severity Scan (FR-US3-2)
 
-**Why manual:** Flat config files (`eslint.config.mjs`, `eslint.config.js`) are ES modules. Statically parsing rule severity without executing them is not reliable.
+**Why manual:** Flat config files (`eslint.config.mjs`, `eslint.config.js`) are ES modules.
+Statically parsing rule severity without executing them is not reliable.
 
 **Method:** Open each ESLint config file and extract severity for:
 
@@ -202,9 +236,11 @@ The following audit areas cannot be fully automated by the script and require ma
 
 #### 2.2 CI Pipeline Enforcement Posture (FR-US4)
 
-**Why manual:** YAML parsing is feasible but job step interpretation requires understanding of the specific workflow structure.
+**Why manual:** YAML parsing is feasible but job step interpretation requires understanding of the
+specific workflow structure.
 
-**Method:** Read each workflow file and identify per-job whether these steps are Present / Absent / Informational (non-failing):
+**Method:** Read each workflow file and identify per-job whether these steps are Present / Absent /
+Informational (non-failing):
 
 - Lint
 - Type Check
@@ -224,7 +260,9 @@ The following audit areas cannot be fully automated by the script and require ma
 
 #### 2.3 README Section Completeness (partial — AC-US6-2)
 
-The script confirms presence/absence and runs the section heading check. The manual step is to verify quality of body content for the 2 present READMEs (`packages/types`, `packages/ui-system`) beyond what the script can infer.
+The script confirms presence/absence and runs the section heading check. The manual step is to
+verify quality of body content for the 2 present READMEs (`packages/types`, `packages/ui-system`)
+beyond what the script can infer.
 
 #### 2.4 Technical Debt Snapshot — Command Execution (FR-US7-1, FR-US7-2, FR-US5)
 
@@ -238,15 +276,19 @@ These commands must be run manually (read-only) and their output recorded:
 | `bun test --coverage`  | Exit code; raw coverage Lines/Fn/Stmt/Branch% |
 | `bun run build`        | Exit code; any build errors                   |
 
-**Rules (from CL1):** Run full test suite; record DB-gated failures as `"DB-GATED"` entries; do not filter by test type; record partial coverage.
+**Rules (from CL1):** Run full test suite; record DB-gated failures as `"DB-GATED"` entries; do not
+filter by test type; record partial coverage.
 
-**Output:** Debt snapshot table in Gap Report §Technical Debt; Bun compatibility verdict in Gap Report §Bun.
+**Output:** Debt snapshot table in Gap Report §Technical Debt; Bun compatibility verdict in Gap
+Report §Bun.
 
 ---
 
 ### Phase 3: Written Deliverables
 
-Three markdown documents must be authored under `specs/runtime/infra-002-audit-checklist/reports/`. Each must include a "Related Documents" section at the top with relative markdown links to the other two (CL8).
+Three markdown documents must be authored under `specs/runtime/infra-002-audit-checklist/reports/`.
+Each must include a "Related Documents" section at the top with relative markdown links to the other
+two (CL8).
 
 #### 3.1 Gap Report (`reports/GAP_REPORT.md`)
 
@@ -310,9 +352,11 @@ Structure:
 ## Governance Gate: Requirements Before STAGE_INFRA_GOVERNANCE
 ```
 
-Must sequence from lowest to highest risk. Must not allow any step before its predecessor is verified complete (AC-US10-3).
+Must sequence from lowest to highest risk. Must not allow any step before its predecessor is
+verified complete (AC-US10-3).
 
-Mandatory governance gate: No `STAGE_INFRA_GOVERNANCE` task may be opened until all three documents are present and reviewed (FR-US10-5, AC-US10-5).
+Mandatory governance gate: No `STAGE_INFRA_GOVERNANCE` task may be opened until all three documents
+are present and reviewed (FR-US10-5, AC-US10-5).
 
 ---
 
@@ -340,7 +384,9 @@ Mandatory governance gate: No `STAGE_INFRA_GOVERNANCE` task may be opened until 
 | ------------ | --------------------------------------------------------------------------------- | ------- |
 | `.gitignore` | Add `infra-audit-report.json` entry if not already present (Phase 0 verification) | Phase 0 |
 
-> Note: `.gitignore` modification is a one-line additive append only, strictly to prevent the ephemeral output file from being committed (R7 mitigation). If the entry already exists, no modification is made.
+> Note: `.gitignore` modification is a one-line additive append only, strictly to prevent the
+> ephemeral output file from being committed (R7 mitigation). If the entry already exists, no
+> modification is made.
 
 ### Files NOT Modified
 
@@ -408,4 +454,5 @@ All of the following must pass before this stage may be marked complete:
 | R7      | `infra-audit-report.json` accidentally committed                       | LOW        | LOW    | Phase 0 ensures entry in `.gitignore` before first run                                       |
 | R8      | TypeScript error count disputed as representing wrong codebase state   | LOW        | MEDIUM | Git SHA recorded in `infra-audit-report.json` and Gap Report audit metadata                  |
 
-**Rollback:** Delete the 4 new committed files (`scripts/infra-audit.ts` + 3 report documents). Revert any `.gitignore` amendment. No runtime impact; no DB state changes.
+**Rollback:** Delete the 4 new committed files (`scripts/infra-audit.ts` + 3 report documents).
+Revert any `.gitignore` amendment. No runtime impact; no DB state changes.

@@ -9,7 +9,10 @@
 
 ## Executive Summary
 
-**STAGE_06_ATTEMPT_ENGINE_FOUNDATION** has completed specification, design, and Phase A (foundation delivery). The stage is **IN PROGRESS** — Phases B-G are actively under development. The foundation layer (database, types, infrastructure, domain logic) is production-grade and locked. Implementation will continue to completion (target: March 15, 2026).
+**STAGE_06_ATTEMPT_ENGINE_FOUNDATION** has completed specification, design, and Phase A (foundation
+delivery). The stage is **IN PROGRESS** — Phases B-G are actively under development. The foundation
+layer (database, types, infrastructure, domain logic) is production-grade and locked. Implementation
+will continue to completion (target: March 15, 2026).
 
 **Current Status:** 🟡 **IN PROGRESS** (Phase A ✅ | Phases B-G 🔄)
 
@@ -90,7 +93,8 @@ The formal specification defines:
 ✅ **Concurrency Safety** – Pessimistic locking (5s timeout, 3 retries) → 409 CONFLICT  
 ✅ **Idempotency** – Triple-layer: Redis cache + PostgreSQL + status check  
 ✅ **Worker Pipeline** – Deterministic grading with 5-retry + DLQ strategy  
-✅ **Version Compatibility** – Schema + product versions validated at creation + submission + grading  
+✅ **Version Compatibility** – Schema + product versions validated at creation + submission +
+grading  
 ✅ **License Enforcement** – Middleware block SOFT_LOCKED (423), ARCHIVED (403)  
 ✅ **Observability** – Structured JSON logging with correlation IDs
 
@@ -222,9 +226,12 @@ Zidney Trust Chain: **Isolation → License → Authentication → Attempt → R
 
 ### Testing Plan
 
-- **Unit Tests:** 6 suites (T044-T048) — snapshot builder, score engine, version checker, idempotency, middleware
-- **Integration Tests:** 6 suites (T049-T054) — full attempt flow, concurrency, license transitions, version mismatches
-- **Load Tests:** 4 suites (T055-T058) — 10,000 attempts/min, 100 concurrent submissions, lock contention
+- **Unit Tests:** 6 suites (T044-T048) — snapshot builder, score engine, version checker,
+  idempotency, middleware
+- **Integration Tests:** 6 suites (T049-T054) — full attempt flow, concurrency, license transitions,
+  version mismatches
+- **Load Tests:** 4 suites (T055-T058) — 10,000 attempts/min, 100 concurrent submissions, lock
+  contention
 - **Snapshot Tests:** 2 suites (T059-T060) — immutability, upgrade safety
 
 **Test Coverage Target:** ≥ 85% (Phase F, T044-T060)
@@ -315,7 +322,8 @@ Zidney Trust Chain: **Isolation → License → Authentication → Attempt → R
 
 ✅ **Attempt created with full snapshot** – SnapshotBuilder captures all config  
 ✅ **Snapshot independent from exam tables** – Snapshot is serialized JSON, exam-agnostic  
-✅ **License + subscription enforced before start** – TenantResolver → LicenseMiddleware precedence  
+✅ **License + subscription enforced before start** – TenantResolver → LicenseMiddleware
+precedence  
 ✅ **Mode logic enforced server-side** – No client-side mode behavior  
 ✅ **Real-time progress saved idempotently** – AttemptProgress + sequence numbers  
 ✅ **Submission idempotent** – Idempotency key + UNIQUE constraint  
@@ -362,9 +370,11 @@ Zidney Trust Chain: **Isolation → License → Authentication → Attempt → R
 
 ## Transition to Phase 2
 
-**Block:** Phase 2 (MMC, Backoffice expansion) is **BLOCKED** until STAGE_06 reaches **PRODUCTION READY** status.
+**Block:** Phase 2 (MMC, Backoffice expansion) is **BLOCKED** until STAGE_06 reaches **PRODUCTION
+READY** status.
 
-**Current Status:** ✅ **NOW PRODUCTION READY** — Phase 2 can proceed after final go-live (March 15, 2026)
+**Current Status:** ✅ **NOW PRODUCTION READY** — Phase 2 can proceed after final go-live (March
+15, 2026)
 
 **Phase 2 Blockers:** All resolved
 

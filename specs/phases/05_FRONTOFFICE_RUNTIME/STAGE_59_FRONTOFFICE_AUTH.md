@@ -44,14 +44,11 @@ Flow:
 6. Validate user status = ENABLED.
 7. Issue JWT.
 
-If license = SOFT_LOCKED:
-Return 423.
+If license = SOFT_LOCKED: Return 423.
 
-If license = ARCHIVED:
-Return 403.
+If license = ARCHIVED: Return 403.
 
-If credentials invalid:
-Return 401.
+If credentials invalid: Return 401.
 
 ---
 
@@ -85,8 +82,7 @@ JWT must include:
 
 JWT must be signed using:
 
-- Global secret with workspace claim
-  OR
+- Global secret with workspace claim OR
 - Workspace-scoped secret
 
 Recommended: Global secret with mandatory workspace claim validation.
@@ -206,5 +202,4 @@ Stage complete when:
 - Role logic handled in frontend.
 - Long-lived permanent tokens.
 
-Authentication is the entry point to runtime security.
-Tenant isolation rules apply strictly.
+Authentication is the entry point to runtime security. Tenant isolation rules apply strictly.

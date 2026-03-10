@@ -9,7 +9,9 @@
 
 ## Overview
 
-The specification phase has successfully defined the formal requirements for the Attempt Engine Foundation. The output document (`spec.md`) comprehensively defines all functional, technical, and compliance requirements for this critical academic integrity layer.
+The specification phase has successfully defined the formal requirements for the Attempt Engine
+Foundation. The output document (`spec.md`) comprehensively defines all functional, technical, and
+compliance requirements for this critical academic integrity layer.
 
 **Specification File:** [spec.md](spec.md)  
 **Size:** 1,241 lines
@@ -121,8 +123,10 @@ The specification phase has successfully defined the formal requirements for the
 
 The following items should be clarified before proceeding to planning:
 
-1. **Submission Idempotency Window** – How long after submission can duplicate submissions be accepted?
-2. **Concurrency Lock Strategy** – Pessimistic vs. optimistic locking trade-offs for high-volume exams?
+1. **Submission Idempotency Window** – How long after submission can duplicate submissions be
+   accepted?
+2. **Concurrency Lock Strategy** – Pessimistic vs. optimistic locking trade-offs for high-volume
+   exams?
 3. **Snapshot Size Limits** – Maximum JSON size for question/grading snapshots?
 4. **Grading Latency SLA** – Maximum time for worker-based grading completion?
 5. **Version Rollback Strategy** – How to handle attempts from superseded schema versions?

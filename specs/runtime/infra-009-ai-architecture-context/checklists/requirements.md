@@ -9,7 +9,8 @@
 
 ## Content Quality
 
-Validates that the specification is clear, business-focused, and technology-neutral where appropriate.
+Validates that the specification is clear, business-focused, and technology-neutral where
+appropriate.
 
 - [x] No implementation details (languages, frameworks, APIs) when describing features
 - [x] Focused on architectural governance and AI tool integration value
@@ -249,7 +250,8 @@ Validates that documentation requirements are complete.
 
 **Next Phase:** Proceed to `/speckit.plan` for detailed task breakdown and implementation planning.
 
-The specification is comprehensive, testable, governance-aligned, and ready to guide the implementation team through all phases (planning, implementation, validation, production).
+The specification is comprehensive, testable, governance-aligned, and ready to guide the
+implementation team through all phases (planning, implementation, validation, production).
 
 No clarifications required. No rework needed.
 

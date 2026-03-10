@@ -10,7 +10,8 @@
 
 ## What Changed?
 
-This PR aligns the Zidney codebase with modern CI/CD, testing, and code quality infrastructure standards. **No business logic, no schema changes, no tenant/license/attempt model modifications.**
+This PR aligns the Zidney codebase with modern CI/CD, testing, and code quality infrastructure
+standards. **No business logic, no schema changes, no tenant/license/attempt model modifications.**
 
 ### TL;DR
 
@@ -178,7 +179,8 @@ All stage-introduced changes avoid these files.
 
 1. Verify no business logic in created files (all configs/scaffolding)
 2. Verify no schema changes (grep for `CREATE TABLE`, `ALTER TABLE`, `DROP TABLE` — should be empty)
-3. Verify no new dependencies besides dev-time tooling (@playwright, prettier, eslint-config-prettier)
+3. Verify no new dependencies besides dev-time tooling (@playwright, prettier,
+   eslint-config-prettier)
 
 ---
 
@@ -199,7 +201,8 @@ All stage-introduced changes avoid these files.
 
 Once this PR merges to develop, the following become active:
 
-1. **CI/CD**: All PRs + pushes to develop trigger 5-job CI (`lint` → `typecheck` → `test` → `integration` → `e2e`)
+1. **CI/CD**: All PRs + pushes to develop trigger 5-job CI (`lint` → `typecheck` → `test` →
+   `integration` → `e2e`)
 2. **Testing**: Teams can now `bun run test` and get 14-project orchestrated execution
 3. **Formatting**: `bun run format` enforces consistency across codebase
 4. **E2E Framework**: Teams can add Playwright tests; skeleton already in place
@@ -210,10 +213,14 @@ Once this PR merges to develop, the following become active:
 
 ## Questions?
 
-1. **Why so many files?** — Infrastructure/governance alignment requires test configs per project, per-app Playwright configs, and E2E structure.
-2. **Why quarantine flaky tests?** — Preserves code for debugging; removes intermittent CI failures; prevents blame on real issues.
-3. **Why skip reason annotations?** — Future developers understand why tests are skipped; no "remove this .skip" confusion.
-4. **What's the LOC impact?** — ~1800 LOC added (mostly configs + test scaffolding); 0 core business logic changed.
+1. **Why so many files?** — Infrastructure/governance alignment requires test configs per project,
+   per-app Playwright configs, and E2E structure.
+2. **Why quarantine flaky tests?** — Preserves code for debugging; removes intermittent CI failures;
+   prevents blame on real issues.
+3. **Why skip reason annotations?** — Future developers understand why tests are skipped; no "remove
+   this .skip" confusion.
+4. **What's the LOC impact?** — ~1800 LOC added (mostly configs + test scaffolding); 0 core business
+   logic changed.
 
 ---
 

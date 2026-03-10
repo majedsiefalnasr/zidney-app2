@@ -1,10 +1,8 @@
 # Implementation Plan: infra-004-biome — Biome Toolchain Migration
 
-**Feature ID:** `infra-004-biome`
-**Phase:** `01_PLATFORM_FOUNDATION`
-**Branch:** `spec/infra-004-biome`
-**Planned:** 2026-03-06
-**Status:** Planning complete — ready for implementation
+**Feature ID:** `infra-004-biome` **Phase:** `01_PLATFORM_FOUNDATION` **Branch:**
+`spec/infra-004-biome` **Planned:** 2026-03-06 **Status:** Planning complete — ready for
+implementation
 
 ---
 
@@ -93,7 +91,8 @@ Run from repository root:
 bun add -D @biomejs/biome
 ```
 
-This adds `@biomejs/biome` to root `devDependencies`. No version pin. Verify the installed version and update the `$schema` URL in `biome.json` if the resolved version differs from `2.4.6`.
+This adds `@biomejs/biome` to root `devDependencies`. No version pin. Verify the installed version
+and update the `$schema` URL in `biome.json` if the resolved version differs from `2.4.6`.
 
 ### Step 1.2 — Create `biome.json`
 
@@ -208,7 +207,8 @@ Create `biome.json` at the repository root with the following exact content:
 bun biome check . 2>&1 | tail -20
 ```
 
-Exit gate: Command runs and produces output (violations are expected and acceptable at this stage). The command must not fail with a configuration error or unrecognised option.
+Exit gate: Command runs and produces output (violations are expected and acceptable at this stage).
+The command must not fail with a configuration error or unrecognised option.
 
 ---
 
@@ -229,7 +229,9 @@ This applies:
 - Trailing comma insertion (`es5`)
 - Semicolon removal
 
-**Expected result:** Large diff touching most source files. This is the largest single commit in the migration — document in PR description as "formatting: apply Biome formatter (replaces Prettier, line-width 100)".
+**Expected result:** Large diff touching most source files. This is the largest single commit in the
+migration — document in PR description as "formatting: apply Biome formatter (replaces Prettier,
+line-width 100)".
 
 ### Step 2.2 — Apply Auto-Fixable Lint Violations
 
@@ -243,17 +245,20 @@ This auto-fixes:
 - `noDuplicateImports` (deduplicates import entries)
 - `useConst` (promotes `let` to `const` where the variable is never reassigned)
 
-**Output:** Inspect the diff before committing. `noConsole` violations will remain (cannot be auto-fixed — requires manual replacement).
+**Output:** Inspect the diff before committing. `noConsole` violations will remain (cannot be
+auto-fixed — requires manual replacement).
 
 ### Step 2.3 — Manual console.\* Remediation
 
-This is the most labour-intensive step. All production source files listed below must have `console.*` calls replaced with structured `@zidney/logger` calls.
+This is the most labour-intensive step. All production source files listed below must have
+`console.*` calls replaced with structured `@zidney/logger` calls.
 
 **Priority order (highest to lowest risk):**
 
 #### Group A — apps/api/src (critical path middleware and handlers)
 
-Each of the following files contains `console.*` calls in production middleware, route handlers, or service code. Replace with `import { logger } from '@zidney/logger'` calls using structured fields.
+Each of the following files contains `console.*` calls in production middleware, route handlers, or
+service code. Replace with `import { logger } from '@zidney/logger'` calls using structured fields.
 
 ```
 apps/api/src/index.ts
@@ -297,7 +302,10 @@ apps/api/src/utils/idempotency.ts
 
 #### Group B — Migration runner files (API DB migrations)
 
-These files use `console.log` for migration progress output. They run in a non-HTTP context without access to the request-scoped logger. Apply `// biome-ignore lint/suspicious/noConsole: migration runner output` suppressions rather than replacing with `@zidney/logger`.
+These files use `console.log` for migration progress output. They run in a non-HTTP context without
+access to the request-scoped logger. Apply
+`// biome-ignore lint/suspicious/noConsole: migration runner output` suppressions rather than
+replacing with `@zidney/logger`.
 
 ```
 apps/api/src/db/master/migrations/0005_schema_version_increment.ts
@@ -335,7 +343,10 @@ apps/worker/src/services/provisioning/MigrationExecutor.ts
 apps/worker/src/services/provisioning/ProvisioningOrchestrator.ts
 ```
 
-**Note on `apps/worker/src/observability/structured-logger.ts`:** This file may be a logger bridge that wraps `console.*`. Evaluate whether it should receive the same `noConsole: "off"` override in `biome.json` (add to `overrides[0]["include"]` for logger-bridge files) or be migrated to use `@zidney/logger`.
+**Note on `apps/worker/src/observability/structured-logger.ts`:** This file may be a logger bridge
+that wraps `console.*`. Evaluate whether it should receive the same `noConsole: "off"` override in
+`biome.json` (add to `overrides[0]["include"]` for logger-bridge files) or be migrated to use
+`@zidney/logger`.
 
 #### Group D — apps/mmc/src (18 occurrences)
 
@@ -347,9 +358,16 @@ apps/worker/src/services/provisioning/ProvisioningOrchestrator.ts
 | `src/modules/dashboard/views/DashboardView.vue` | 3 x `console.error` | Replace with logger error |
 | `src/modules/dashboard/store.ts`                | 6 x `console.error` | Replace with logger error |
 
-**Note on Vue app logging:** Vue frontend apps typically don't have direct access to a structured backend logger. For Vue components, the appropriate response is to remove debug `console.log` calls entirely and to replace `console.error` calls with a frontend error capture mechanism (e.g., re-throw or set reactive error state). These are not replaceable with `@zidney/logger` — that package is backend-only.
+**Note on Vue app logging:** Vue frontend apps typically don't have direct access to a structured
+backend logger. For Vue components, the appropriate response is to remove debug `console.log` calls
+entirely and to replace `console.error` calls with a frontend error capture mechanism (e.g.,
+re-throw or set reactive error state). These are not replaceable with `@zidney/logger` — that
+package is backend-only.
 
-**Pragmatic option for Vue apps:** Add a `// biome-ignore lint/suspicious/noConsole: frontend error boundary` suppression on specific `console.error` calls that are critical error boundaries until a frontend error tracking integration is added.
+**Pragmatic option for Vue apps:** Add a
+`// biome-ignore lint/suspicious/noConsole: frontend error boundary` suppression on specific
+`console.error` calls that are critical error boundaries until a frontend error tracking integration
+is added.
 
 #### Group E — packages/domain-core/src
 
@@ -401,7 +419,8 @@ Remove the following entries from `devDependencies` in root `package.json`:
 "typescript-eslint": "^8.0.0"
 ```
 
-**Note:** `globals` is included because it is only used by `eslint.config.mjs`. If `globals` is used elsewhere, verify before removing.
+**Note:** `globals` is included because it is only used by `eslint.config.mjs`. If `globals` is used
+elsewhere, verify before removing.
 
 Remove the following entry from `devDependencies`:
 
@@ -418,7 +437,8 @@ Delete these files:
 - `apps/frontoffice/eslint.config.js`
 - `apps/mmc/eslint.config.js`
 
-**Do NOT delete:** `packages/ui-system/.eslintrc-ui-guard.md` — this is Markdown documentation, not a config file.
+**Do NOT delete:** `packages/ui-system/.eslintrc-ui-guard.md` — this is Markdown documentation, not
+a config file.
 
 ### Step 3.3 — Delete Prettier Configuration Files
 
@@ -434,8 +454,8 @@ Replace the entire file content with:
 ```js
 /** @type {import('lint-staged').Config} */
 export default {
-  '*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --apply'],
-}
+  "*.{ts,tsx,js,jsx,mjs,vue,json}": ["bun biome check --apply"],
+};
 ```
 
 **Changes from current:**
@@ -467,11 +487,16 @@ Update the `scripts` section in root `package.json`:
 "format:check": "bun biome format --check .",
 ```
 
-**Note:** `lint:fix` is a new script for applying safe auto-fixes locally. `--apply` (safe fixes only) is used in both `lint:fix` and the lint-staged pre-commit hook to prevent silent staged-code mutation. `--apply-unsafe` is reserved for explicit developer invocation: run `bun biome check --apply-unsafe .` directly when you want to apply all suggested fixes including potentially semantics-altering transformations.
+**Note:** `lint:fix` is a new script for applying safe auto-fixes locally. `--apply` (safe fixes
+only) is used in both `lint:fix` and the lint-staged pre-commit hook to prevent silent staged-code
+mutation. `--apply-unsafe` is reserved for explicit developer invocation: run
+`bun biome check --apply-unsafe .` directly when you want to apply all suggested fixes including
+potentially semantics-altering transformations.
 
 ### Step 3.6 — Update `.github/workflows/ci.yml`
 
-Replace the `lint` job's steps. Keep the YAML job key as `lint` to preserve all downstream `needs:` references.
+Replace the `lint` job's steps. Keep the YAML job key as `lint` to preserve all downstream `needs:`
+references.
 
 **Current `lint` job steps (replace these):**
 
@@ -497,7 +522,7 @@ Replace the `lint` job's steps. Keep the YAML job key as `lint` to preserve all 
 
 ```yaml
 lint:
-  name: 'Biome — Lint & Format' # ← was: Lint
+  name: "Biome — Lint & Format" # ← was: Lint
 ```
 
 **Full updated `lint` job:**
@@ -505,7 +530,7 @@ lint:
 ```yaml
 # ── Job 1. Biome Lint & Format ──────────────────────────────────────────
 lint:
-  name: 'Biome — Lint & Format'
+  name: "Biome — Lint & Format"
   runs-on: ubuntu-latest
   timeout-minutes: 10
   steps:
@@ -544,7 +569,10 @@ e2e + coverage          (parallel)
 build-verification      (final gate)
 ```
 
-**Note:** AI-Guard scripts (`scripts/ai-guard.ts`) are not currently a dedicated CI job in `ci.yml`. The spec's pipeline ordering (Biome → AI-Guard → Vitest) is fully satisfied: `lint` job runs Biome, then downstream jobs execute Vitest tests. AI-Guard enforcement occurs via pre-commit hook or the `architecture-governance.yml` workflow.
+**Note:** AI-Guard scripts (`scripts/ai-guard.ts`) are not currently a dedicated CI job in `ci.yml`.
+The spec's pipeline ordering (Biome → AI-Guard → Vitest) is fully satisfied: `lint` job runs Biome,
+then downstream jobs execute Vitest tests. AI-Guard enforcement occurs via pre-commit hook or the
+`architecture-governance.yml` workflow.
 
 ### Step 3.7 — Create `.vscode/extensions.json`
 
@@ -581,7 +609,8 @@ This enables automatic format-on-save for all developers using VS Code with the 
 }
 ```
 
-**Note:** Only add the Biome-specific keys. Do not overwrite existing `.vscode/settings.json` content.
+**Note:** Only add the Biome-specific keys. Do not overwrite existing `.vscode/settings.json`
+content.
 
 ### Step 3.8 — Regenerate Lockfile
 

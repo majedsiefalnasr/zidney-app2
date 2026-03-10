@@ -6,7 +6,9 @@
 
 ## Overview
 
-The Products Management API provides complete CRUD operations for managing product offerings in Zidney. Products define commercial offerings with configurable modules and manage the foundation of the licensing system.
+The Products Management API provides complete CRUD operations for managing product offerings in
+Zidney. Products define commercial offerings with configurable modules and manage the foundation of
+the licensing system.
 
 ## Base URL
 
@@ -171,7 +173,8 @@ Creates a new product with initial version 1
 - **name.ar** (optional, 1-255 chars): Arabic product name
 - **slug** (required, 1-100 chars): URL-friendly identifier (lowercase alphanumeric + dashes)
 - **description** (optional): Product description
-- **enabled_modules** (required, array): At least one of: `MCQ`, `TRADITIONAL_EXAMS`, `EXERCISES`, `LIBRARY`, `LIVES`, `FORUM`
+- **enabled_modules** (required, array): At least one of: `MCQ`, `TRADITIONAL_EXAMS`, `EXERCISES`,
+  `LIBRARY`, `LIVES`, `FORUM`
 
 #### Response (201 Created)
 
@@ -509,19 +512,19 @@ Six available modules:
 ### JavaScript/Node.js
 
 ```javascript
-const response = await fetch('https://api.zidney.com/api/v1/mmc/products', {
-  method: 'GET',
+const response = await fetch("https://api.zidney.com/api/v1/mmc/products", {
+  method: "GET",
   headers: {
-    Authorization: 'Bearer YOUR_TOKEN',
-    'Content-Type': 'application/json',
+    Authorization: "Bearer YOUR_TOKEN",
+    "Content-Type": "application/json",
   },
-})
+});
 
-const data = await response.json()
+const data = await response.json();
 if (data.success) {
   data.data.items.forEach((product) => {
-    console.log(`${product.name.en} (${product.slug})`)
-  })
+    console.log(`${product.name.en} (${product.slug})`);
+  });
 }
 ```
 
@@ -551,4 +554,5 @@ curl -X PUT https://api.zidney.com/api/v1/mmc/products/550e8400-e29b-41d4-a716-4
 
 ## Support
 
-For API issues or questions, contact support@zidney.com or refer to the [implementation guide](IMPLEMENTATION_PRODUCTS.md).
+For API issues or questions, contact support@zidney.com or refer to the
+[implementation guide](IMPLEMENTATION_PRODUCTS.md).

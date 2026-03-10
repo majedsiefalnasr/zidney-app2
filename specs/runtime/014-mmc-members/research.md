@@ -2,7 +2,8 @@
 
 ## Executive Summary
 
-This document captures architectural research and decisions for the MMC Members & RBAC system. All clarifications from spec.md are resolved with explicit rationale and alternative analysis.
+This document captures architectural research and decisions for the MMC Members & RBAC system. All
+clarifications from spec.md are resolved with explicit rationale and alternative analysis.
 
 ---
 
@@ -64,7 +65,8 @@ Why deterministic RBAC instead of dynamic/attribute-based access control?
 
 ### Decision
 
-**Phase 2 implements role-based access control only. No runtime policy evaluation, no attribute-based decisions.**
+**Phase 2 implements role-based access control only. No runtime policy evaluation, no
+attribute-based decisions.**
 
 ### Rationale
 
@@ -76,7 +78,8 @@ Why deterministic RBAC instead of dynamic/attribute-based access control?
 2. **Operational Simplicity:**
    - 7 domains × 4 permissions = 28 total policies to manage
    - Fits in single `role_permissions` table lookup
-   - ABAC with attributes would require: user attributes + resource attributes + policy language interpreter
+   - ABAC with attributes would require: user attributes + resource attributes + policy language
+     interpreter
 
 3. **Performance Guarantees:**
    - RBAC permission check: O(1) table lookup (one row per domain per role)
@@ -113,7 +116,8 @@ Why use `token_version` increment for session invalidation instead of polling or
 
 ### Decision
 
-**Token version cascade: atomic increment broadcasts to all affected sessions via next-request check.**
+**Token version cascade: atomic increment broadcasts to all affected sessions via next-request
+check.**
 
 ### Rationale
 
@@ -151,8 +155,10 @@ Why use `token_version` increment for session invalidation instead of polling or
 - Membership in mmc_members table: `token_version INTEGER DEFAULT 1`
 - JWT payload at issue: `token_version: 1`
 - Middleware on every request: `IF jwt.token_version != db.token_version THEN 401`
-- Role edit transaction: `UPDATE mmc_members SET token_version = token_version + 1 WHERE role_id = ?`
-- Member disable transaction: `UPDATE mmc_members SET token_version = token_version + 1 WHERE id = ?`
+- Role edit transaction:
+  `UPDATE mmc_members SET token_version = token_version + 1 WHERE role_id = ?`
+- Member disable transaction:
+  `UPDATE mmc_members SET token_version = token_version + 1 WHERE id = ?`
 
 ---
 
@@ -240,7 +246,8 @@ Why bcrypt cost=12 instead of cost=10 or Argon2?
 4. **Hardware Baseline:**
    - Cost=12 on 2024 CPU: ~200ms verification
    - Cost=12 on GPU: still ~2B operations; not economically viable to attack full table
-   - Cost=12 resists future hardware improvements (halving every ~1.5 years means cost=12 stays expensive for 10+ years)
+   - Cost=12 resists future hardware improvements (halving every ~1.5 years means cost=12 stays
+     expensive for 10+ years)
 
 ### Alternatives Considered
 
@@ -306,7 +313,8 @@ Why 24-hour invitation expiration? Why not customizable per environment?
 ### Implementation Consequence
 
 - Invitation creation: `expires_at = NOW() + INTERVAL '24 hours'` (hardcoded in code)
-- Acceptance validation: `SELECT * FROM mmc_member_invitations WHERE token_hash = ? AND status = 'PENDING' AND expires_at > NOW()`
+- Acceptance validation:
+  `SELECT * FROM mmc_member_invitations WHERE token_hash = ? AND status = 'PENDING' AND expires_at > NOW()`
 - Expired invitations never cleaned up (acceptable; they're audit proof)
 - No configuration table for TTL settings
 
@@ -383,7 +391,8 @@ Why 24-hour invitation expiration? Why not customizable per environment?
 
 ## References
 
-- OWASP Password Storage Cheat Sheet: https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
+- OWASP Password Storage Cheat Sheet:
+  https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html
 - Bcrypt Wikipedia: https://en.wikipedia.org/wiki/Bcrypt
 - ADR-0001: Database-per-tenant isolation
 - ADR-0003: Master DB schema

@@ -21,7 +21,8 @@ Status: DRAFT
 
 ## Purpose
 
-Implement the MMC Products Management user interface on top of the established shell and runtime foundation.
+Implement the MMC Products Management user interface on top of the established shell and runtime
+foundation.
 
 This stage delivers:
 
@@ -31,8 +32,8 @@ This stage delivers:
 - Activate / deactivate product actions
 - Product detail view (optional read-only panel)
 
-This stage consumes backend APIs defined in STAGE_09_PRODUCTS.
-It does NOT redefine backend validation rules.
+This stage consumes backend APIs defined in STAGE_09_PRODUCTS. It does NOT redefine backend
+validation rules.
 
 ---
 

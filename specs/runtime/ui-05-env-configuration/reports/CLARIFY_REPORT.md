@@ -8,7 +8,9 @@
 
 ## Summary
 
-5 clarification questions were identified through structured ambiguity scanning. All 5 were resolved with concrete, architecturally-aligned answers. The spec was updated in-place with a `## Clarifications` section appended. No outstanding ambiguities remain.
+5 clarification questions were identified through structured ambiguity scanning. All 5 were resolved
+with concrete, architecturally-aligned answers. The spec was updated in-place with a
+`## Clarifications` section appended. No outstanding ambiguities remain.
 
 ---
 

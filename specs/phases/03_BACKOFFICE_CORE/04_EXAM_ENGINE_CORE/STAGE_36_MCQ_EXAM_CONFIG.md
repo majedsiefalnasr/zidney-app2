@@ -1,8 +1,6 @@
 # STAGE 36 – MCQ Exam Configuration
 
-Phase: 03_BACKOFFICE_CORE
-Domain: 04_EXAM_ENGINE_CORE
-Database: Tenant DB
+Phase: 03_BACKOFFICE_CORE Domain: 04_EXAM_ENGINE_CORE Database: Tenant DB
 
 ---
 
@@ -28,8 +26,8 @@ It must support:
 - Division scoping
 - Workflow enforcement
 
-MCQ Assessment (user-generated) is NOT stored as mcq_exams.
-MCQ Scheduled Exam is implemented in scheduled engine stage.
+MCQ Assessment (user-generated) is NOT stored as mcq_exams. MCQ Scheduled Exam is implemented in
+scheduled engine stage.
 
 ---
 
@@ -167,8 +165,7 @@ Deletion must be blocked if:
 
 Soft disable via workflow recommended.
 
-Subject cannot be changed after creation.
-Division change allowed only before ENABLED.
+Subject cannot be changed after creation. Division change allowed only before ENABLED.
 
 ---
 
@@ -202,5 +199,4 @@ Stage complete when:
 
 ---
 
-Next:
-STAGE_37_TRADITIONAL_EXAM_CONFIG
+Next: STAGE_37_TRADITIONAL_EXAM_CONFIG

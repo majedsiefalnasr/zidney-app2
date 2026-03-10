@@ -123,12 +123,14 @@
 **Description:**  
 Add provisioning state tracking columns to the `licenses` table in the master database.
 
-**File Path:** `apps/api/src/db/master/migrations/2026-02-18-add-provisioning-fields-to-licenses.sql`
+**File Path:**
+`apps/api/src/db/master/migrations/2026-02-18-add-provisioning-fields-to-licenses.sql`
 
 **Acceptance Criteria:**
 
 1. Migration file exists at specified path
-2. Column `status` added with allowed values: CREATED, PROVISIONING, ACTIVE, SOFT_LOCKED, ARCHIVED, FAILED, DELETED
+2. Column `status` added with allowed values: CREATED, PROVISIONING, ACTIVE, SOFT_LOCKED, ARCHIVED,
+   FAILED, DELETED
 3. Column `schema_version` added (VARCHAR 20, nullable)
 4. Column `archived_at` added (TIMESTAMP, nullable)
 5. Index created on `status` for efficient querying
@@ -161,7 +163,8 @@ Add provisioning state tracking columns to the `licenses` table in the master da
 **Category:** Infrastructure (Master DB)
 
 **Description:**  
-Create the `tenants_registry` table to track all provisioned workspaces in master database. This table is the source of truth for workspace-to-database mapping and is queried by tenant resolver.
+Create the `tenants_registry` table to track all provisioned workspaces in master database. This
+table is the source of truth for workspace-to-database mapping and is queried by tenant resolver.
 
 **File Path:** `apps/api/src/db/master/migrations/2026-02-18-create-tenants-registry.sql`
 
@@ -213,7 +216,8 @@ Create the `tenants_registry` table to track all provisioned workspaces in maste
 **Category:** Infrastructure (Tenant DB)
 
 **Description:**  
-Create the `schema_version` table in the baseline tenant schema. This is a critical table for schema compatibility enforcement and must be created first (before any other table in baseline schema).
+Create the `schema_version` table in the baseline tenant schema. This is a critical table for schema
+compatibility enforcement and must be created first (before any other table in baseline schema).
 
 **File Path:** `apps/api/src/db/tenant/migrations/001-create-schema-version-table.sql`
 
@@ -256,7 +260,8 @@ Create the `schema_version` table in the baseline tenant schema. This is a criti
 **Category:** Infrastructure (Tenant DB)
 
 **Description:**  
-Create the `schema_migrations` table to track which migrations have been applied to the tenant database. Used for idempotency validation and checksum verification.
+Create the `schema_migrations` table to track which migrations have been applied to the tenant
+database. Used for idempotency validation and checksum verification.
 
 **File Path:** `apps/api/src/db/tenant/migrations/002-create-schema-migrations-table.sql`
 
@@ -303,7 +308,8 @@ Create the `schema_migrations` table to track which migrations have been applied
 **Category:** Infrastructure (Tenant DB)
 
 **Description:**  
-Create the `provisioning_checkpoints` table for crash recovery. Each step of provisioning writes a checkpoint that allows recovery after worker crash.
+Create the `provisioning_checkpoints` table for crash recovery. Each step of provisioning writes a
+checkpoint that allows recovery after worker crash.
 
 **File Path:** `apps/api/src/db/tenant/migrations/003-create-provisioning-checkpoints-table.sql`
 
@@ -350,7 +356,9 @@ Create the `provisioning_checkpoints` table for crash recovery. Each step of pro
 **Category:** Infrastructure (Tenant DB)
 
 **Description:**  
-Create baseline structural tables for the tenant database: users, roles, role_permissions, divisions, departments, groups, subscriptions, exams, attempts, questions, translations, certificates, settings. This is the foundational data model.
+Create baseline structural tables for the tenant database: users, roles, role_permissions,
+divisions, departments, groups, subscriptions, exams, attempts, questions, translations,
+certificates, settings. This is the foundational data model.
 
 **File Path:** `apps/api/src/db/tenant/migrations/004-create-core-application-tables.sql`
 
@@ -408,14 +416,16 @@ Create baseline structural tables for the tenant database: users, roles, role_pe
 **Category:** Worker (Design & Interface)
 
 **Description:**  
-Design and implement the `ProvisioningJob` class and Redis queue job message format. This defines the contract for all provisioning async work.
+Design and implement the `ProvisioningJob` class and Redis queue job message format. This defines
+the contract for all provisioning async work.
 
 **File Path:** `apps/worker/src/jobs/provisioning/ProvisioningJob.ts`
 
 **Acceptance Criteria:**
 
 1. Class `ProvisioningJob` created with:
-   - Properties: `id`, `license_id`, `workspace_slug`, `organization_id`, `correlation_id`, `enqueued_at`, `attempt`, `max_attempts`
+   - Properties: `id`, `license_id`, `workspace_slug`, `organization_id`, `correlation_id`,
+     `enqueued_at`, `attempt`, `max_attempts`
    - Methods: `fromRedisMessage()`, `toRedisMessage()`, `markAttempt()`, `isRetryable()`
 2. Job message format (Redis JSON):
    ```json
@@ -430,7 +440,8 @@ Design and implement the `ProvisioningJob` class and Redis queue job message for
      "max_attempts": 3
    }
    ```
-3. Queue interface defined: `JobQueue.enqueue()`, `JobQueue.dequeue()`, `JobQueue.nack()`, `JobQueue.ack()`
+3. Queue interface defined: `JobQueue.enqueue()`, `JobQueue.dequeue()`, `JobQueue.nack()`,
+   `JobQueue.ack()`
 4. Error handling for malformed messages
 5. Type definitions for all job states
 
@@ -463,7 +474,8 @@ Design and implement the `ProvisioningJob` class and Redis queue job message for
 **Category:** Worker (Core Service)
 
 **Description:**  
-Implement a distributed lock using Redis to prevent concurrent provisioning of the same workspace. Lock key: `provisioning:<workspace_slug>`, TTL: 60 seconds, auto-renewable.
+Implement a distributed lock using Redis to prevent concurrent provisioning of the same workspace.
+Lock key: `provisioning:<workspace_slug>`, TTL: 60 seconds, auto-renewable.
 
 **File Path:** `apps/worker/src/services/provisioning/DistributedLock.ts`
 
@@ -511,7 +523,8 @@ Implement a distributed lock using Redis to prevent concurrent provisioning of t
 **Category:** Worker (Queue Management)
 
 **Description:**  
-Implement job enqueueing (from API/License service) and dequeueing (by worker) using Redis as message queue. Includes job visibility timeout and nack handling.
+Implement job enqueueing (from API/License service) and dequeueing (by worker) using Redis as
+message queue. Includes job visibility timeout and nack handling.
 
 **File Path:** `apps/worker/src/services/provisioning/JobQueue.ts`
 
@@ -561,7 +574,8 @@ Implement job enqueueing (from API/License service) and dequeueing (by worker) u
 **Category:** Worker (Database Operations)
 
 **Description:**  
-Implement migration execution logic for tenant databases. Must validate checksums, ensure idempotency, and handle rollback on failure.
+Implement migration execution logic for tenant databases. Must validate checksums, ensure
+idempotency, and handle rollback on failure.
 
 **File Path:** `apps/worker/src/services/provisioning/MigrationExecutor.ts`
 
@@ -614,7 +628,8 @@ Implement migration execution logic for tenant databases. Must validate checksum
 **Category:** Worker (Database Operations)
 
 **Description:**  
-Implement seeding of baseline structural data (roles, permissions, default settings, language, division) into newly provisioned tenant databases. Must be idempotent.
+Implement seeding of baseline structural data (roles, permissions, default settings, language,
+division) into newly provisioned tenant databases. Must be idempotent.
 
 **File Path:** `apps/worker/src/services/provisioning/BaselineSeeder.ts`
 
@@ -668,7 +683,8 @@ Implement seeding of baseline structural data (roles, permissions, default setti
 **Category:** Worker (Core Orchestration)
 
 **Description:**  
-Implement the main provisioning orchestrator that coordinates all 9 steps of the provisioning pipeline. This is the central service that ties all worker components together.
+Implement the main provisioning orchestrator that coordinates all 9 steps of the provisioning
+pipeline. This is the central service that ties all worker components together.
 
 **File Path:** `apps/worker/src/services/provisioning/ProvisioningOrchestrator.ts`
 
@@ -686,7 +702,8 @@ Implement the main provisioning orchestrator that coordinates all 9 steps of the
    - Step 7: Transition license to ACTIVE
    - Step 8: Register connection pool in memory map
    - Step 9: Release distributed lock and log completion
-3. Error handling: On any step failure, rollback (drop database, release lock, update license to FAILED)
+3. Error handling: On any step failure, rollback (drop database, release lock, update license to
+   FAILED)
 4. Checkpoint writing: After each successful step
 5. Idempotency: Detect if DB already exists, skip creation, validate consistency
 6. Retry logic: Retryable errors move job to queue with backoff
@@ -723,7 +740,8 @@ Implement the main provisioning orchestrator that coordinates all 9 steps of the
 **Category:** Worker (Resilience)
 
 **Description:**  
-Implement checkpoint persistence and recovery logic. After each step, worker writes checkpoint to tenant DB. On worker crash/retry, recovery reads latest checkpoint and resumes from next step.
+Implement checkpoint persistence and recovery logic. After each step, worker writes checkpoint to
+tenant DB. On worker crash/retry, recovery reads latest checkpoint and resumes from next step.
 
 **File Path:** `apps/worker/src/services/provisioning/CheckpointManager.ts`
 
@@ -737,7 +755,8 @@ Implement checkpoint persistence and recovery logic. After each step, worker wri
 3. Step ordinals: 1=DB_CREATED, 2=MIGRATION_1_APPLIED, ... 10=LICENSE_TRANSITIONED
 4. Idempotency: Checkpoints keyed by correlation_id
 5. Recovery flow: Read latest checkpoint → Resume provisioning from next step
-6. Example: If worker crashes after step 5 (seed completed), recovery reads checkpoint, skips steps 1-5, starts step 6 (registry creation)
+6. Example: If worker crashes after step 5 (seed completed), recovery reads checkpoint, skips steps
+   1-5, starts step 6 (registry creation)
 7. Validation: Checksum re-verified for migrations on recovery
 8. Logging: Recovery events logged with original correlation_id
 
@@ -773,7 +792,9 @@ Implement checkpoint persistence and recovery logic. After each step, worker wri
 **Category:** API/Middleware
 
 **Description:**  
-Implement the tenant resolver middleware that resolves workspace_slug from request context and returns the corresponding connection pool. This is the core tenant isolation mechanism at the API layer.
+Implement the tenant resolver middleware that resolves workspace_slug from request context and
+returns the corresponding connection pool. This is the core tenant isolation mechanism at the API
+layer.
 
 **File Path:** `apps/api/src/middleware/tenantResolver.ts`
 
@@ -812,7 +833,8 @@ Implement the tenant resolver middleware that resolves workspace_slug from reque
 - Integration: 404 for invalid workspace
 - Integration: 503 for provisioning-in-progress workspace
 
-**Dependencies:** T002 (tenants_registry must exist) + T009 (job queue and pool registration context)
+**Dependencies:** T002 (tenants_registry must exist) + T009 (job queue and pool registration
+context)
 
 **Risk Assessment:** Critical (fundamental to routing)
 
@@ -825,7 +847,8 @@ Implement the tenant resolver middleware that resolves workspace_slug from reque
 **Category:** API/Middleware
 
 **Description:**  
-Implement license validation middleware that ensures license is in ACTIVE state before allowing workspace access. Must run AFTER tenant resolver and BEFORE schema version check.
+Implement license validation middleware that ensures license is in ACTIVE state before allowing
+workspace access. Must run AFTER tenant resolver and BEFORE schema version check.
 
 **File Path:** `apps/api/src/middleware/licenseValidation.ts`
 
@@ -875,7 +898,9 @@ Implement license validation middleware that ensures license is in ACTIVE state 
 **Category:** API/Middleware
 
 **Description:**  
-Implement schema version validation middleware that ensures tenant database schema version is compatible with runtime expectations. Validates SCHEMA VERSION ONLY (not product version). Must run AFTER license validation.
+Implement schema version validation middleware that ensures tenant database schema version is
+compatible with runtime expectations. Validates SCHEMA VERSION ONLY (not product version). Must run
+AFTER license validation.
 
 **File Path:** `apps/api/src/middleware/schemaVersionCheck.ts`
 
@@ -888,7 +913,8 @@ Implement schema version validation middleware that ensures tenant database sche
    - If tenant_schema_version < MIN_REQUIRED_SCHEMA_VERSION → 426 (Upgrade Required)
    - If tenant_schema_version > MAX_SUPPORTED_SCHEMA_VERSION → 503 (Service Unavailable)
    - Otherwise → Continue
-5. Schema version compatibility matrix: Defined in config (e.g., runtime 1.0.0 supports schema 1.0.x to 1.2.x)
+5. Schema version compatibility matrix: Defined in config (e.g., runtime 1.0.0 supports schema 1.0.x
+   to 1.2.x)
 6. Caching: Cache schema version for 1 minute per tenant
 7. Structured logging: Log version check with correlation_id, versions
 8. Error response: Include required schema version in error details
@@ -925,7 +951,8 @@ Implement schema version validation middleware that ensures tenant database sche
 **Category:** API/Middleware
 
 **Description:**  
-Implement the in-memory singleton map that stores all tenant connection pools. This is the registry of active tenant databases available to the API.
+Implement the in-memory singleton map that stores all tenant connection pools. This is the registry
+of active tenant databases available to the API.
 
 **File Path:** `apps/api/src/services/ConnectionPoolManager.ts`
 
@@ -975,7 +1002,8 @@ Implement the in-memory singleton map that stores all tenant connection pools. T
 **Category:** API/Middleware
 
 **Description:**  
-Implement pool cleanup and eviction logic for when workspaces are archived, deleted, or workers restart. Ensures no pooled connections leak.
+Implement pool cleanup and eviction logic for when workspaces are archived, deleted, or workers
+restart. Ensures no pooled connections leak.
 
 **File Path:** `apps/api/src/services/PoolLifecycleManager.ts`
 
@@ -1022,7 +1050,9 @@ Implement pool cleanup and eviction logic for when workspaces are archived, dele
 **Category:** Error Handling
 
 **Description:**  
-Create error code mapping and handler for provisioning error scenarios (PROV codes only). Maps internal provisioning error codes to appropriate HTTP status codes for API consumers. Note: Workspace access error codes (WS_001-005) are handled in separate stages.
+Create error code mapping and handler for provisioning error scenarios (PROV codes only). Maps
+internal provisioning error codes to appropriate HTTP status codes for API consumers. Note:
+Workspace access error codes (WS_001-005) are handled in separate stages.
 
 **File Path:** `apps/api/src/errors/ProvisioningErrorHandler.ts`
 
@@ -1039,7 +1069,9 @@ Create error code mapping and handler for provisioning error scenarios (PROV cod
    - PROV_008 (license not found) → 404
    - PROV_009 (license not in PROVISIONING state) → 400
    - PROV_010 (checksum mismatch) → 500
-2. **Scope Note:** This task handles PROVISIONING error codes (PROV_001-010). Workspace access error codes (WS_001-005: workspace not found, soft-locked, archived, schema incompatible, product incompatible) are handled by separate middleware/stages and are NOT part of this task.
+2. **Scope Note:** This task handles PROVISIONING error codes (PROV_001-010). Workspace access error
+   codes (WS_001-005: workspace not found, soft-locked, archived, schema incompatible, product
+   incompatible) are handled by separate middleware/stages and are NOT part of this task.
 3. Error response format:
    ```json
    {
@@ -1054,7 +1086,8 @@ Create error code mapping and handler for provisioning error scenarios (PROV cod
    ```
 4. Error handler function `handleProvisioningError(error, correlation_id)` → Response
 5. Structured logging: All errors logged with code, message, correlation_id
-6. Sensitive error masking: Never expose internal details to client (except correlation_id for support)
+6. Sensitive error masking: Never expose internal details to client (except correlation_id for
+   support)
 
 **Database:** None (error mapping only)  
 **Transactional:** N/A  
@@ -1087,7 +1120,8 @@ Create error code mapping and handler for provisioning error scenarios (PROV cod
 **Category:** Error Handling
 
 **Description:**  
-Implement rollback logic for failed provisioning. Must clean up partial state: drop partially-created database, release lock, update license to FAILED, and log all actions.
+Implement rollback logic for failed provisioning. Must clean up partial state: drop
+partially-created database, release lock, update license to FAILED, and log all actions.
 
 **File Path:** `apps/worker/src/services/provisioning/RollbackManager.ts`
 
@@ -1136,7 +1170,8 @@ Implement rollback logic for failed provisioning. Must clean up partial state: d
 **Category:** Error Handling
 
 **Description:**  
-Implement background job to detect orphaned workspaces (database exists but no registry entry, or vice versa) and alert operations team. Runs periodically (e.g., hourly).
+Implement background job to detect orphaned workspaces (database exists but no registry entry, or
+vice versa) and alert operations team. Runs periodically (e.g., hourly).
 
 **File Path:** `apps/worker/src/jobs/provisioning/OrphanDetectionJob.ts`
 
@@ -1184,7 +1219,8 @@ Implement background job to detect orphaned workspaces (database exists but no r
 **Category:** Error Handling
 
 **Description:**  
-Implement Dead Letter Queue (DLQ) handling for provisioning jobs that fail after max retries. Moves job to DLQ and alerts ops team for manual intervention.
+Implement Dead Letter Queue (DLQ) handling for provisioning jobs that fail after max retries. Moves
+job to DLQ and alerts ops team for manual intervention.
 
 **File Path:** `apps/worker/src/services/provisioning/DLQHandler.ts`
 
@@ -1237,7 +1273,8 @@ Implement Dead Letter Queue (DLQ) handling for provisioning jobs that fail after
 **Category:** Observability
 
 **Description:**  
-Implement structured logging for all provisioning events. All logs must include correlation ID, workspace slug, license ID, timestamp, level, and event-specific fields.
+Implement structured logging for all provisioning events. All logs must include correlation ID,
+workspace slug, license ID, timestamp, level, and event-specific fields.
 
 **File Path:** `apps/worker/src/utils/StructuredLogger.ts`
 
@@ -1315,7 +1352,8 @@ Implement structured logging for all provisioning events. All logs must include 
 **Category:** Observability
 
 **Description:**  
-Implement Prometheus metrics for provisioning operations: duration, retry count, lock wait time, migration duration. Metrics help ops team monitor provisioning health.
+Implement Prometheus metrics for provisioning operations: duration, retry count, lock wait time,
+migration duration. Metrics help ops team monitor provisioning health.
 
 **File Path:** `apps/worker/src/utils/MetricsCollector.ts`
 
@@ -1370,7 +1408,8 @@ Implement Prometheus metrics for provisioning operations: duration, retry count,
 **Category:** Testing
 
 **Description:**  
-Implement unit tests for core business logic: workspace slug validation, distributed lock acquisition/release, and checkpoint read/write operations.
+Implement unit tests for core business logic: workspace slug validation, distributed lock
+acquisition/release, and checkpoint read/write operations.
 
 **File Path:** `apps/worker/tests/unit/provisioning/`
 
@@ -1427,7 +1466,8 @@ Implement unit tests for core business logic: workspace slug validation, distrib
 **Category:** Testing
 
 **Description:**  
-Implement end-to-end integration test for the complete provisioning pipeline. Tests the happy path: enqueue job → provision workspace → verify all state.
+Implement end-to-end integration test for the complete provisioning pipeline. Tests the happy path:
+enqueue job → provision workspace → verify all state.
 
 **File Path:** `apps/worker/tests/integration/provisioning/`
 
@@ -1492,7 +1532,8 @@ Implement end-to-end integration test for the complete provisioning pipeline. Te
 **Category:** Testing
 
 **Description:**  
-Implement stress tests for concurrency safety and crash recovery. Tests multi-worker provisioning and resume-from-checkpoint scenarios.
+Implement stress tests for concurrency safety and crash recovery. Tests multi-worker provisioning
+and resume-from-checkpoint scenarios.
 
 **File Path:** `apps/worker/tests/integration/provisioning/`
 
@@ -1561,7 +1602,8 @@ Implement stress tests for concurrency safety and crash recovery. Tests multi-wo
 **Category:** Documentation
 
 **Description:**  
-Create operations documentation for provisioning service: runbook, troubleshooting guide, metrics dashboard guide, and DLQ recovery procedures.
+Create operations documentation for provisioning service: runbook, troubleshooting guide, metrics
+dashboard guide, and DLQ recovery procedures.
 
 **File Path:** `docs/operations/provisioning-runbook.md`
 
@@ -1804,8 +1846,10 @@ Before production deployment:
 
 ## Implementation Notes
 
-1. **Version Control:** Each migration file is immutable once committed. Never modify existing migrations.
-2. **Testing First:** Start unit tests before integration tests. Ensure 85%+ coverage before Phase 4.
+1. **Version Control:** Each migration file is immutable once committed. Never modify existing
+   migrations.
+2. **Testing First:** Start unit tests before integration tests. Ensure 85%+ coverage before
+   Phase 4.
 3. **Logging Standard:** Apply consistent structured logging from Day 1 (T023 early).
 4. **Code Review:** Each task requires peer review before merge. No exceptions.
 5. **CI/CD Integration:** All tests must pass in CI before deployment.

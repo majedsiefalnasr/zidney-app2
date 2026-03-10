@@ -12,7 +12,9 @@
 
 ### Purpose
 
-The Tenant Provisioning Service automates the lifecycle of workspace database creation, schema initialization, and baseline data seeding for Zidney SaaS tenants. This runbook guides operations teams through monitoring, troubleshooting, and recovery procedures.
+The Tenant Provisioning Service automates the lifecycle of workspace database creation, schema
+initialization, and baseline data seeding for Zidney SaaS tenants. This runbook guides operations
+teams through monitoring, troubleshooting, and recovery procedures.
 
 ### Architecture
 
@@ -41,9 +43,11 @@ API Middleware Stack
 
 ### Key Flows
 
-- **Provisioning Job**: POST /api/workspaces → enqueue → worker dequeues → 9-step pipeline → ACTIVE license
+- **Provisioning Job**: POST /api/workspaces → enqueue → worker dequeues → 9-step pipeline → ACTIVE
+  license
 - **Recovery**: Worker crash → Check checkpoint → Resume from next step → Complete provisioning
-- **Failure**: Step failure → Rollback (drop DB, delete registry) → License FAILED → Manual intervention via DLQ
+- **Failure**: Step failure → Rollback (drop DB, delete registry) → License FAILED → Manual
+  intervention via DLQ
 
 ---
 
@@ -569,7 +573,5 @@ Is provisioning stuck?
 
 ---
 
-**Document Status**: PRODUCTION READY v1.0
-**Last Reviewed**: 2026-02-18
-**Owner**: Operations Team
+**Document Status**: PRODUCTION READY v1.0 **Last Reviewed**: 2026-02-18 **Owner**: Operations Team
 **Feedback**: ops@zidney.app

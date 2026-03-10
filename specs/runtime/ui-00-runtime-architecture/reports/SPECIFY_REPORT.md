@@ -1,14 +1,16 @@
 # Specify Report — STAGE_UI_00_RUNTIME_ARCHITECTURE
 
-**Step:** 1 — Specify
-**Timestamp:** 2026-02-28T00:10:00Z
-**Status:** COMPLETE
+**Step:** 1 — Specify **Timestamp:** 2026-02-28T00:10:00Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Specification drafted for `STAGE_UI_00_RUNTIME_ARCHITECTURE` — a UI Foundation stage that establishes the canonical SPA runtime architecture shared across all three Zidney frontend applications (MMC, Backoffice, Frontoffice). The spec covers 35 functional requirements across 8 layers and 15 non-functional requirements. One non-blocking clarification marker was placed. The requirements checklist passes on first iteration.
+Specification drafted for `STAGE_UI_00_RUNTIME_ARCHITECTURE` — a UI Foundation stage that
+establishes the canonical SPA runtime architecture shared across all three Zidney frontend
+applications (MMC, Backoffice, Frontoffice). The spec covers 35 functional requirements across 8
+layers and 15 non-functional requirements. One non-blocking clarification marker was placed. The
+requirements checklist passes on first iteration.
 
 ---
 
@@ -155,5 +157,4 @@ Specification drafted for `STAGE_UI_00_RUNTIME_ARCHITECTURE` — a UI Foundation
 
 ## Next Step
 
-Clarification step recommended (non-blocking marker exists).
-Proceed to **Step 2 — Clarify**.
+Clarification step recommended (non-blocking marker exists). Proceed to **Step 2 — Clarify**.

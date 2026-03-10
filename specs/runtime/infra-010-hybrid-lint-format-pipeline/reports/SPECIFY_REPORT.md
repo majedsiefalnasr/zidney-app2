@@ -1,19 +1,19 @@
 # Specify Report — Hybrid Lint Format Pipeline
 
-**Stage:** STAGE_INFRA_10_HYBRID_LINT_FORMAT_PIPELINE
-**Phase:** 01_PLATFORM_FOUNDATION
-**Branch:** `spec/infra-010-hybrid-lint-format-pipeline`
-**Step:** 1 — Specify
-**Generated:** 2026-03-10T00:00:00.000Z
-**Status:** ✅ Complete
+**Stage:** STAGE_INFRA_10_HYBRID_LINT_FORMAT_PIPELINE **Phase:** 01_PLATFORM_FOUNDATION **Branch:**
+`spec/infra-010-hybrid-lint-format-pipeline` **Step:** 1 — Specify **Generated:**
+2026-03-10T00:00:00.000Z **Status:** ✅ Complete
 
 ---
 
 ## Summary
 
-The specification has been written for the Hybrid Lint Format Pipeline stage. This is an infrastructure-only stage that introduces a deterministic, fast, AI-safe linting and formatting pipeline for the Zidney monorepo.
+The specification has been written for the Hybrid Lint Format Pipeline stage. This is an
+infrastructure-only stage that introduces a deterministic, fast, AI-safe linting and formatting
+pipeline for the Zidney monorepo.
 
-**Constitutional Impact:** None — no tenant isolation, license enforcement, attempt engine, or cross-tenant concerns.
+**Constitutional Impact:** None — no tenant isolation, license enforcement, attempt engine, or
+cross-tenant concerns.
 
 ---
 
@@ -82,7 +82,8 @@ A unified tooling layer that:
 
 ## Clarification Markers
 
-None — all requirements are clearly defined in the stage file. No `[NEEDS CLARIFICATION]` markers were introduced.
+None — all requirements are clearly defined in the stage file. No `[NEEDS CLARIFICATION]` markers
+were introduced.
 
 ---
 

@@ -2,7 +2,8 @@
 
 ## Purpose
 
-Centralized environment variable parsing and validation package. Ensures all services access configuration through a typed, validated schema rather than raw `process.env` access.
+Centralized environment variable parsing and validation package. Ensures all services access
+configuration through a typed, validated schema rather than raw `process.env` access.
 
 ---
 
@@ -62,15 +63,16 @@ This package reads and validates the following variables when imported:
 ## Public API
 
 ```typescript
-import { config } from '@zidney/config'
-import type { AppConfig } from '@zidney/config'
+import { config } from "@zidney/config";
+import type { AppConfig } from "@zidney/config";
 
 // Access validated config values
-const port = config.api.port // number
-const dbUrl = config.database.url // string
-const redisUrl = config.redis.url // string
-const jwtSecret = config.jwt.secret // string
-const logLevel = config.logging.level // 'debug' | 'info' | 'warn' | 'error'
+const port = config.api.port; // number
+const dbUrl = config.database.url; // string
+const redisUrl = config.redis.url; // string
+const jwtSecret = config.jwt.secret; // string
+const logLevel = config.logging.level; // 'debug' | 'info' | 'warn' | 'error'
 ```
 
-**Exports**: `config`, `AppConfig`, `DatabaseConfig`, `RedisConfig`, `JwtConfig`, individual Zod schema exports for per-service partial validation
+**Exports**: `config`, `AppConfig`, `DatabaseConfig`, `RedisConfig`, `JwtConfig`, individual Zod
+schema exports for per-service partial validation

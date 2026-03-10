@@ -87,7 +87,8 @@ All routes require (in order):
 ### Payment Settings Response Notes
 
 - `encrypted_api_key` and `encrypted_secret_key` are **NEVER** returned.
-- Instead, boolean sentinel fields `has_api_key` and `has_secret_key` indicate whether credentials exist.
+- Instead, boolean sentinel fields `has_api_key` and `has_secret_key` indicate whether credentials
+  exist.
 
 ### Response: 404 Not Found (no settings row)
 
@@ -175,7 +176,8 @@ All routes require (in order):
 - **Send `null`** → clear credential
 - **Send new string** → encrypt and replace
 
-**Note:** Request fields are named `api_key` / `secret_key` (plaintext from client). The server encrypts before persistence as `encrypted_api_key` / `encrypted_secret_key` in the database.
+**Note:** Request fields are named `api_key` / `secret_key` (plaintext from client). The server
+encrypts before persistence as `encrypted_api_key` / `encrypted_secret_key` in the database.
 
 ### Response: 200 OK
 

@@ -9,7 +9,10 @@
 
 ## Overview
 
-This PR introduces the Zidney B2B Affiliate Program — a comprehensive affiliate management system enabling institutions (via MMC admins) to create time-limited promotional codes with flexible discount and commission structures, audit trails, and rate-limited API endpoints secured with MMC JWT tokens.
+This PR introduces the Zidney B2B Affiliate Program — a comprehensive affiliate management system
+enabling institutions (via MMC admins) to create time-limited promotional codes with flexible
+discount and commission structures, audit trails, and rate-limited API endpoints secured with MMC
+JWT tokens.
 
 **Scope:** Master database only (no tenant DB impact)  
 **Authorization:** Code-level validation COMPLETE (91/91 tests passing, all gates passed)  
@@ -300,7 +303,8 @@ Includes:
 
 ## Breaking Changes
 
-**None.** This is a new feature — no existing API contracts modified, no schema changes to existing tables.
+**None.** This is a new feature — no existing API contracts modified, no schema changes to existing
+tables.
 
 ---
 
@@ -320,7 +324,8 @@ Includes:
 
 ### Staging Validation (STAGE_13A — Future)
 
-This PR is marked BACKEND CLOSED (code-level validation complete). Promotion to PRODUCTION READY requires a separate stage (13A) validating:
+This PR is marked BACKEND CLOSED (code-level validation complete). Promotion to PRODUCTION READY
+requires a separate stage (13A) validating:
 
 1. ✅ **Deployment:** Code deployed to staging environment
 2. ✅ **Rollback:** Reverse migrations executed successfully
@@ -356,7 +361,8 @@ Estimated rollback time: **2 minutes** (DDL reversal only)
 ## Questions? Concerns?
 
 - **API Contract:** See `specs/runtime/013-affiliates/plan.md` (Section: API Boundaries)
-- **Security Architecture:** See `specs/runtime/013-affiliates/plan.md` (Sections A-D: JWT, SQL Injection, Rate Limiting, Logging)
+- **Security Architecture:** See `specs/runtime/013-affiliates/plan.md` (Sections A-D: JWT, SQL
+  Injection, Rate Limiting, Logging)
 - **Testing Procedures:** See `specs/runtime/013-affiliates/guides/TESTING_GUIDE.md`
 - **Schema Details:** See `specs/runtime/013-affiliates/data-model.md`
 

@@ -2,10 +2,10 @@
 
 Purpose
 
-This document defines mandatory behavioral constraints for any AI system generating code inside Zidney.
+This document defines mandatory behavioral constraints for any AI system generating code inside
+Zidney.
 
-These rules are not advisory.
-They are architectural enforcement contracts.
+These rules are not advisory. They are architectural enforcement contracts.
 
 ---
 
@@ -25,10 +25,8 @@ If a generated change violates this document, the change must be rejected.
 
 Core Principles
 
-AI must operate stage-by-stage.
-AI must never assume missing architecture.
-AI must never invent structure outside approved specs.
-AI must not perform speculative refactors.
+AI must operate stage-by-stage. AI must never assume missing architecture. AI must never invent
+structure outside approved specs. AI must not perform speculative refactors.
 
 All generated code must align strictly with:
 

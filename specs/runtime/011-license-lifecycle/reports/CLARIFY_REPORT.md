@@ -8,7 +8,11 @@
 
 ## Summary
 
-All five targeted clarification questions have been resolved. Clarifications capture architectural decisions on snapshot storage determinism, audit compliance, failure recovery, deletion authorization, and restore performance. All answers align with Zidney Constitutional constraints (immutability, determinism, middleware enforcement, worker delegation, idempotency, server-authoritative time). No additional ambiguities remain.
+All five targeted clarification questions have been resolved. Clarifications capture architectural
+decisions on snapshot storage determinism, audit compliance, failure recovery, deletion
+authorization, and restore performance. All answers align with Zidney Constitutional constraints
+(immutability, determinism, middleware enforcement, worker delegation, idempotency,
+server-authoritative time). No additional ambiguities remain.
 
 ---
 
@@ -88,7 +92,8 @@ All clarifications are implementable within Zidney architecture:
 - ✅ Manual audit purge: Add purge workflow to MMC Admin panel with 2-step confirmation
 - ✅ Retry + alert: Implement using existing Worker retry pattern + alert service
 - ✅ 2FA deletion: Integrate with existing auth middleware (STAGE 02A)
-- ✅ Async restore: Delegate to Worker; return job_id to client; use WebSocket or polling for progress
+- ✅ Async restore: Delegate to Worker; return job_id to client; use WebSocket or polling for
+  progress
 
 No new technology or architecture changes required.
 
@@ -96,13 +101,15 @@ No new technology or architecture changes required.
 
 ## Open Ambiguities Remaining
 
-**None.** All originally flagged ambiguities have been resolved through explicit decisions. Specification is now ready for technical planning.
+**None.** All originally flagged ambiguities have been resolved through explicit decisions.
+Specification is now ready for technical planning.
 
 ---
 
 ## Next Step
 
-Proceed to Step 3 — Plan. With all clarifications locked in, technical design can proceed with confidence on:
+Proceed to Step 3 — Plan. With all clarifications locked in, technical design can proceed with
+confidence on:
 
 - Exact snapshot storage paths and metadata schema
 - Audit log immutability constraints and purge mechanisms

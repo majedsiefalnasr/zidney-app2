@@ -52,7 +52,8 @@ Implementation must follow this strict order:
 10. STAGE_UI_08_NOTIFICATION_AND_FEEDBACK
 11. STAGE_TEST_01_UI_RUNTIME_VALIDATION
 
-STAGE_TEST_01_UI_RUNTIME_VALIDATION is a mandatory validation gate and must pass before Phase 06 can be marked VALIDATED.
+STAGE_TEST_01_UI_RUNTIME_VALIDATION is a mandatory validation gate and must pass before Phase 06 can
+be marked VALIDATED.
 
 ---
 
@@ -188,11 +189,9 @@ Phase 06 considered COMPLETE when:
 - Runtime manual smoke test complete
 - CI pipeline passes
 
-At completion:
-Status = UI_RUNTIME_FOUNDATION_COMPLETE
+At completion: Status = UI_RUNTIME_FOUNDATION_COMPLETE
 
-Not:
-PRODUCTION READY (feature UIs still required)
+Not: PRODUCTION READY (feature UIs still required)
 
 ---
 

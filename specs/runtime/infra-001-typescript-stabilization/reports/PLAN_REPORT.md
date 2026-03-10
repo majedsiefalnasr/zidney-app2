@@ -1,18 +1,21 @@
 # Plan Report — STAGE_INFRA_01_TYPESCRIPT_STABILIZATION
 
-**Step:** 3 — Plan
-**Timestamp:** 2026-02-27T00:03:00Z
-**Status:** COMPLETE
+**Step:** 3 — Plan **Timestamp:** 2026-02-27T00:03:00Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Technical plan drafted and validated for the TypeScript Infrastructure Stabilization stage. `speckit.plan` executed Phase 0 research against the actual codebase — confirming **866 TypeScript errors** (not estimated). The plan covers a 5-pass migration strategy with per-pass exit gates, Day 0 tsconfig hardening tasks, CI gate design (two-step typecheck), and vendor stub conventions.
+Technical plan drafted and validated for the TypeScript Infrastructure Stabilization stage.
+`speckit.plan` executed Phase 0 research against the actual codebase — confirming **866 TypeScript
+errors** (not estimated). The plan covers a 5-pass migration strategy with per-pass exit gates, Day
+0 tsconfig hardening tasks, CI gate design (two-step typecheck), and vendor stub conventions.
 
 Guardian validation: **Zidney Architecture Checker: PASS** | **Zidney API Designer: PASS**
 
-One architecture inconsistency (Design Decision 3 vs 7 — tsconfig.test.json CI gate scope) was identified and resolved by updating plan.md to adopt the two-step CI typecheck approach (`pnpm typecheck:src` + `pnpm typecheck:tests`).
+One architecture inconsistency (Design Decision 3 vs 7 — tsconfig.test.json CI gate scope) was
+identified and resolved by updating plan.md to adopt the two-step CI typecheck approach
+(`pnpm typecheck:src` + `pnpm typecheck:tests`).
 
 ---
 
@@ -82,15 +85,19 @@ Not applicable — no new API endpoints or worker jobs introduced.
 
 ## Day 0 Checklist (Required Before Pass 1)
 
-1. Add missing compiler options to `tsconfig.base.json` (`noImplicitAny`, `strictNullChecks`, `noUncheckedIndexedAccess`)
+1. Add missing compiler options to `tsconfig.base.json` (`noImplicitAny`, `strictNullChecks`,
+   `noUncheckedIndexedAccess`)
 2. Remove `strict: false` override from `apps/api/tsconfig.json`
 3. Remove `noImplicitAny: false` from `packages/domain-core/tsconfig.json`
-4. Remove additional weakening overrides from `apps/api/tsconfig.app.json` and `packages/ui-system/tsconfig.json`
-5. Create `tsconfig.test.json` (extends base, disables `noUnusedLocals`/`noUnusedParameters`, includes test paths)
+4. Remove additional weakening overrides from `apps/api/tsconfig.app.json` and
+   `packages/ui-system/tsconfig.json`
+5. Create `tsconfig.test.json` (extends base, disables `noUnusedLocals`/`noUnusedParameters`,
+   includes test paths)
 6. Update root `tsconfig.json` to exclude test paths
 7. Create `packages/redis-utils/tsconfig.json` (extends base)
 8. Create `packages/types/tsconfig.json` (extends base)
-9. Rename script: `type-check` → `typecheck:src`; add `typecheck:tests` and `typecheck` aggregator in root `package.json`
+9. Rename script: `type-check` → `typecheck:src`; add `typecheck:tests` and `typecheck` aggregator
+   in root `package.json`
 10. Re-run `pnpm typecheck:src` to establish new error baseline after tsconfig changes
 
 ---

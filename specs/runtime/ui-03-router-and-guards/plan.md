@@ -1,10 +1,7 @@
 # Implementation Plan — STAGE_UI_03_ROUTER_AND_GUARDS
 
-**Stage**: STAGE_UI_03_ROUTER_AND_GUARDS
-**Phase**: 06_UI_APPLICATION_RUNTIME
-**Branch**: `ui-03-router-and-guards`
-**Planned**: 2026-03-02
-**Status**: PLAN COMPLETE
+**Stage**: STAGE_UI_03_ROUTER_AND_GUARDS **Phase**: 06_UI_APPLICATION_RUNTIME **Branch**:
+`ui-03-router-and-guards` **Planned**: 2026-03-02 **Status**: PLAN COMPLETE
 
 ---
 
@@ -111,7 +108,8 @@ apps/<app>/src/
 
 **MMC Module Routes (existing)**:
 
-- `modules/dashboard/routes.ts` — route name `'dashboard'` (must become `'mmc-dashboard'`), uses `meta: { requiresAuth: true }` ✓
+- `modules/dashboard/routes.ts` — route name `'dashboard'` (must become `'mmc-dashboard'`), uses
+  `meta: { requiresAuth: true }` ✓
 - `modules/licenses/routes.ts` — must be inspected for route names and meta
 
 ### Backoffice — Current State
@@ -242,32 +240,32 @@ Canonical definition for all three apps. Place in `core/router/types.ts` of each
  *
  * Stage: STAGE_UI_03_ROUTER_AND_GUARDS
  */
-declare module 'vue-router' {
+declare module "vue-router" {
   interface RouteMeta {
     /**
      * When true: route is protected. Unauthenticated users are redirected to
      * the app's login route with `?redirect=<to.fullPath>`.
      * Mutually informative with `public` — define one per route.
      */
-    requiresAuth?: boolean
+    requiresAuth?: boolean;
 
     /**
      * When true: route is publicly accessible (login pages, error pages, landing).
      * Authenticated users are redirected to the dashboard.
      */
-    public?: boolean
+    public?: boolean;
 
     /**
      * When defined and non-empty: RoleGuard checks `AuthStore.user.role` is
      * present in this list. UI-hint only — backend is the authoritative RBAC layer.
      */
-    roles?: string[]
+    roles?: string[];
 
     /**
      * Backoffice only. When true: WorkspaceGuard validates workspace context
      * is resolved before allowing access. Has no effect in MMC or Frontoffice.
      */
-    requiresWorkspace?: boolean
+    requiresWorkspace?: boolean;
   }
 }
 
@@ -275,10 +273,10 @@ declare module 'vue-router' {
  * Convenience type alias — safe to use in route definitions and guard files.
  */
 export interface AppRouteMeta {
-  requiresAuth?: boolean
-  public?: boolean
-  roles?: string[]
-  requiresWorkspace?: boolean
+  requiresAuth?: boolean;
+  public?: boolean;
+  roles?: string[];
+  requiresWorkspace?: boolean;
 }
 ```
 
@@ -301,25 +299,21 @@ All guards placed in `apps/<app>/src/core/guards/`.
 ```typescript
 // apps/<app>/src/core/guards/auth.guard.ts
 
-import type {
-  NavigationGuard,
-  RouteLocationNormalized,
-  RouteLocationRaw,
-} from 'vue-router'
+import type { NavigationGuard, RouteLocationNormalized, RouteLocationRaw } from "vue-router";
 
 export interface AuthGuardOptions {
   /** App-specific login route name. e.g. 'mmc-login', 'bo-login', 'fo-login' */
-  loginRouteName: string
+  loginRouteName: string;
   /** App-specific post-login landing route. e.g. 'mmc-dashboard', 'bo-dashboard', 'fo-home' */
-  dashboardRouteName: string
+  dashboardRouteName: string;
   /** Default true. Set false to omit ?redirect param on redirect to login. */
-  preserveRedirect?: boolean
+  preserveRedirect?: boolean;
 }
 
 export function createAuthGuard(
   getIsAuthenticated: () => boolean,
-  options: AuthGuardOptions
-): NavigationGuard
+  options: AuthGuardOptions,
+): NavigationGuard;
 ```
 
 **Behavioral Contract**:
@@ -327,7 +321,8 @@ export function createAuthGuard(
 - If `to.meta.requiresAuth === true` and `!isAuthenticated()`:
   - Short-circuit: `to.name === loginRouteName` → return `true`
   - Otherwise: return `{ name: loginRouteName, query: { redirect: to.fullPath } }`
-  - Redirect `to.fullPath` is validated (must start with `/`, no external URLs) — else redirect to dashboard without param
+  - Redirect `to.fullPath` is validated (must start with `/`, no external URLs) — else redirect to
+    dashboard without param
 - If `to.meta.public === true` and `isAuthenticated()`:
   - return `{ name: dashboardRouteName }`
 - Otherwise: return `true`
@@ -340,21 +335,17 @@ export function createAuthGuard(
 ```typescript
 // apps/backoffice/src/core/guards/workspace.guard.ts
 
-import type {
-  NavigationGuard,
-  RouteLocationNormalized,
-  RouteLocationRaw,
-} from 'vue-router'
+import type { NavigationGuard, RouteLocationNormalized, RouteLocationRaw } from "vue-router";
 
 export interface WorkspaceGuardOptions {
   /** Short-circuit: if already on selector, pass through */
-  selectorRouteName: 'bo-workspace-selector'
+  selectorRouteName: "bo-workspace-selector";
 }
 
 export function createWorkspaceGuard(
   isWorkspaceResolved: () => boolean,
-  options?: WorkspaceGuardOptions
-): NavigationGuard
+  options?: WorkspaceGuardOptions,
+): NavigationGuard;
 ```
 
 **Behavioral Contract**:
@@ -366,13 +357,17 @@ export function createWorkspaceGuard(
 - MUST NOT call any API; MUST NOT read license status
 - Wrapped in `try/catch`; on error: log at `error` level, return `true`
 
-**WorkspaceStore Mapping**: The existing `contextStore` has `isActive` (license status) but NOT `isResolved` (workspace presence). The `isWorkspaceResolved` callback must be based on `!!(contextStore.context)` — i.e., whether a context object is loaded (not whether it's active). This is wired in `main.ts`:
+**WorkspaceStore Mapping**: The existing `contextStore` has `isActive` (license status) but NOT
+`isResolved` (workspace presence). The `isWorkspaceResolved` callback must be based on
+`!!(contextStore.context)` — i.e., whether a context object is loaded (not whether it's active).
+This is wired in `main.ts`:
 
 ```typescript
-isWorkspaceResolved: () => contextStore.context !== null
+isWorkspaceResolved: () => contextStore.context !== null;
 ```
 
-This avoids coupling the guard to license state while correctly representing "workspace context is available".
+This avoids coupling the guard to license state while correctly representing "workspace context is
+available".
 
 ---
 
@@ -381,28 +376,25 @@ This avoids coupling the guard to license state while correctly representing "wo
 ```typescript
 // apps/<app>/src/core/guards/role.guard.ts
 
-import type {
-  NavigationGuard,
-  RouteLocationNormalized,
-  RouteLocationRaw,
-} from 'vue-router'
+import type { NavigationGuard, RouteLocationNormalized, RouteLocationRaw } from "vue-router";
 
 export interface RoleGuardOptions {
   /** App-specific unauthorized route name. e.g. 'mmc-unauthorized', 'bo-unauthorized', 'fo-unauthorized' */
-  unauthorizedRouteName: string
+  unauthorizedRouteName: string;
 }
 
 export function createRoleGuard(
   getUser: () => { role: string } | null,
-  options: RoleGuardOptions
-): NavigationGuard
+  options: RoleGuardOptions,
+): NavigationGuard;
 ```
 
 **Behavioral Contract**:
 
 - If `to.meta.roles` is undefined or empty: return `true`
 - Short-circuit: `to.name === unauthorizedRouteName` → return `true`
-- If `getUser()` is null OR `getUser()!.role` not in `to.meta.roles`: return `{ name: unauthorizedRouteName }`
+- If `getUser()` is null OR `getUser()!.role` not in `to.meta.roles`: return
+  `{ name: unauthorizedRouteName }`
 - Otherwise: return `true`
 - Wrapped in `try/catch`; on error: log at `error` level, return `true`
 
@@ -413,15 +405,16 @@ export function createRoleGuard(
 ```typescript
 // apps/<app>/src/core/guards/feature-flag.guard.ts
 
-import type { NavigationGuard } from 'vue-router'
+import type { NavigationGuard } from "vue-router";
 
-export function createFeatureFlagGuard(): NavigationGuard
+export function createFeatureFlagGuard(): NavigationGuard;
 ```
 
 **Behavioral Contract**:
 
 - Always returns `true`
-- Contains the required comment: `// TODO(STAGE_UI_XX): Implement feature flag evaluation when feature flag service is ready.`
+- Contains the required comment:
+  `// TODO(STAGE_UI_XX): Implement feature flag evaluation when feature flag service is ready.`
 - Stub is registered in the pipeline at position 4 to reserve the slot
 
 ---
@@ -435,114 +428,108 @@ Each app exports a `registerGuards()` function that encapsulates the full pipeli
 **MMC / Frontoffice** (`core/guards/index.ts`):
 
 ```typescript
-import type { Router } from 'vue-router'
-import { createAuthGuard } from './auth.guard'
-import { createRoleGuard } from './role.guard'
-import { createFeatureFlagGuard } from './feature-flag.guard'
+import type { Router } from "vue-router";
+import { createAuthGuard } from "./auth.guard";
+import { createRoleGuard } from "./role.guard";
+import { createFeatureFlagGuard } from "./feature-flag.guard";
 
 export interface RegisterGuardsOptions {
-  isAuthenticated: () => boolean
-  getUser: () => { role: string } | null
-  loginRouteName: string
-  dashboardRouteName: string
-  unauthorizedRouteName: string
+  isAuthenticated: () => boolean;
+  getUser: () => { role: string } | null;
+  loginRouteName: string;
+  dashboardRouteName: string;
+  unauthorizedRouteName: string;
   /** Async hook called once before the first navigation — initializes session */
-  initSession: () => Promise<void>
+  initSession: () => Promise<void>;
 }
 
-export function registerGuards(
-  router: Router,
-  options: RegisterGuardsOptions
-): void {
-  let sessionInitialized = false
+export function registerGuards(router: Router, options: RegisterGuardsOptions): void {
+  let sessionInitialized = false;
 
   const authGuard = createAuthGuard(options.isAuthenticated, {
     loginRouteName: options.loginRouteName,
     dashboardRouteName: options.dashboardRouteName,
-  })
+  });
   const roleGuard = createRoleGuard(options.getUser, {
     unauthorizedRouteName: options.unauthorizedRouteName,
-  })
-  const featureGuard = createFeatureFlagGuard()
+  });
+  const featureGuard = createFeatureFlagGuard();
 
   router.beforeEach(async (to, from) => {
     if (!sessionInitialized) {
-      await options.initSession()
-      sessionInitialized = true
+      await options.initSession();
+      sessionInitialized = true;
     }
-    const authResult = await authGuard(to, from, () => {})
-    if (authResult !== true) return authResult
+    const authResult = await authGuard(to, from, () => {});
+    if (authResult !== true) return authResult;
 
-    const roleResult = await roleGuard(to, from, () => {})
-    if (roleResult !== true) return roleResult
+    const roleResult = await roleGuard(to, from, () => {});
+    if (roleResult !== true) return roleResult;
 
-    return featureGuard(to, from, () => {})
-  })
+    return featureGuard(to, from, () => {});
+  });
 
   router.onError((error) => {
     // Prevent blank screen on component import failure
     router.replace({ name: options.unauthorizedRouteName }).catch(() => {
       // If even the redirect fails, there is nothing safe to do
-    })
-  })
+    });
+  });
 }
 ```
 
 **Backoffice** (`core/guards/index.ts`) — includes WorkspaceGuard between Auth and Role:
 
 ```typescript
-import type { Router } from 'vue-router'
-import { createAuthGuard } from './auth.guard'
-import { createWorkspaceGuard } from './workspace.guard'
-import { createRoleGuard } from './role.guard'
-import { createFeatureFlagGuard } from './feature-flag.guard'
+import type { Router } from "vue-router";
+import { createAuthGuard } from "./auth.guard";
+import { createWorkspaceGuard } from "./workspace.guard";
+import { createRoleGuard } from "./role.guard";
+import { createFeatureFlagGuard } from "./feature-flag.guard";
 
 export interface RegisterGuardsOptions {
-  isAuthenticated: () => boolean
-  isWorkspaceResolved: () => boolean
-  getUser: () => { role: string } | null
-  loginRouteName: string
-  dashboardRouteName: string
-  unauthorizedRouteName: string
-  initSession: () => Promise<void>
+  isAuthenticated: () => boolean;
+  isWorkspaceResolved: () => boolean;
+  getUser: () => { role: string } | null;
+  loginRouteName: string;
+  dashboardRouteName: string;
+  unauthorizedRouteName: string;
+  initSession: () => Promise<void>;
 }
 
-export function registerGuards(
-  router: Router,
-  options: RegisterGuardsOptions
-): void {
-  let sessionInitialized = false
+export function registerGuards(router: Router, options: RegisterGuardsOptions): void {
+  let sessionInitialized = false;
 
   const authGuard = createAuthGuard(options.isAuthenticated, {
     loginRouteName: options.loginRouteName,
     dashboardRouteName: options.dashboardRouteName,
-  })
-  const workspaceGuard = createWorkspaceGuard(options.isWorkspaceResolved)
+  });
+  const workspaceGuard = createWorkspaceGuard(options.isWorkspaceResolved);
   const roleGuard = createRoleGuard(options.getUser, {
     unauthorizedRouteName: options.unauthorizedRouteName,
-  })
-  const featureGuard = createFeatureFlagGuard()
+  });
+  const featureGuard = createFeatureFlagGuard();
 
   router.beforeEach(async (to, from) => {
     if (!sessionInitialized) {
-      await options.initSession()
-      sessionInitialized = true
+      await options.initSession();
+      sessionInitialized = true;
     }
-    const authResult = await authGuard(to, from, () => {})
-    if (authResult !== true) return authResult
+    const authResult = await authGuard(to, from, () => {});
+    if (authResult !== true) return authResult;
 
-    const wsResult = await workspaceGuard(to, from, () => {})
-    if (wsResult !== true) return wsResult
+    const wsResult = await workspaceGuard(to, from, () => {});
+    if (wsResult !== true) return wsResult;
 
-    const roleResult = await roleGuard(to, from, () => {})
-    if (roleResult !== true) return roleResult
+    const roleResult = await roleGuard(to, from, () => {});
+    if (roleResult !== true) return roleResult;
 
-    return featureGuard(to, from, () => {})
-  })
+    return featureGuard(to, from, () => {});
+  });
 
   router.onError(() => {
-    router.replace({ name: 'bo-error' }).catch(() => {})
-  })
+    router.replace({ name: "bo-error" }).catch(() => {});
+  });
 }
 ```
 
@@ -550,7 +537,7 @@ export function registerGuards(
 
 ```typescript
 // Step 8: Register guards (replaces manual router.beforeEach)
-import { registerGuards } from '@/core/guards'
+import { registerGuards } from "@/core/guards";
 
 registerGuards(router, {
   isAuthenticated: () => authStore.isAuthenticated,
@@ -561,7 +548,7 @@ registerGuards(router, {
   initSession: () => authStore.initSession(),
   // Backoffice only:
   isWorkspaceResolved: () => contextStore.context !== null,
-})
+});
 ```
 
 ---
@@ -700,23 +687,31 @@ Backoffice currently has TWO router systems in parallel:
 1. `src/router/index.ts` — STAGE_17: runtime singleton with inline license + module guard
 2. `src/core/router/index.ts` — STAGE_UI_01: factory without guards (what `main.ts` already imports)
 
-The `main.ts` already imports from `@/core/router` (STAGE_UI_01). The STAGE_17 file (`src/router/index.ts`) is **not referenced by main.ts** — it is an orphaned legacy file. However, it defines routes that must be evaluated during migration.
+The `main.ts` already imports from `@/core/router` (STAGE_UI_01). The STAGE_17 file
+(`src/router/index.ts`) is **not referenced by main.ts** — it is an orphaned legacy file. However,
+it defines routes that must be evaluated during migration.
 
 ### Step-by-Step
 
 **Step 1: Audit `src/router/index.ts`**
 
-- Extract existing routes: `'dashboard'` (path `/`) and `'workspace-unavailable'` (path `/unavailable`)
+- Extract existing routes: `'dashboard'` (path `/`) and `'workspace-unavailable'` (path
+  `/unavailable`)
 - Note: `Dashboard.vue` component and `WorkspaceLocked.vue` component
 
 **Step 2: Migrate routes to `core/router/index.ts`**
 
-- `'dashboard'` route → must align with canonical naming. If a module-based route at `modules/dashboard/routes.ts` is planned, register it there. Route name: `'bo-dashboard'`
-- `'workspace-unavailable'` route (WorkspaceLocked.vue) → this view remains (A5 assumption) but is NOT driven by a guard; route meta becomes `meta: { requiresAuth: true, requiresWorkspace: false }` (or simply `requiresAuth: true` since WorkspaceLocked is backend-driven via 423). This view is accessible once authenticated.
+- `'dashboard'` route → must align with canonical naming. If a module-based route at
+  `modules/dashboard/routes.ts` is planned, register it there. Route name: `'bo-dashboard'`
+- `'workspace-unavailable'` route (WorkspaceLocked.vue) → this view remains (A5 assumption) but is
+  NOT driven by a guard; route meta becomes `meta: { requiresAuth: true, requiresWorkspace: false }`
+  (or simply `requiresAuth: true` since WorkspaceLocked is backend-driven via 423). This view is
+  accessible once authenticated.
 
 **Step 3: Add workspace-selector route**
 
-- FR-05.6 requires a route named `'bo-workspace-selector'` with `meta: { requiresAuth: true }` (no `requiresWorkspace`)
+- FR-05.6 requires a route named `'bo-workspace-selector'` with `meta: { requiresAuth: true }` (no
+  `requiresWorkspace`)
 - This route renders a workspace selection page (or the existing context loader)
 
 **Step 4: Remove inline `beforeEach` guard**
@@ -728,19 +723,20 @@ The `main.ts` already imports from `@/core/router` (STAGE_UI_01). The STAGE_17 f
 **Step 5: Relocate `contextStore.loadContext()` to `main.ts`**
 
 - The context loading logic that was in the STAGE_17 guard must move to `main.ts` bootstrap
-- Placement: after Pinia is set up, before `registerGuards()` call (so context is available when guards evaluate)
+- Placement: after Pinia is set up, before `registerGuards()` call (so context is available when
+  guards evaluate)
 
 ```typescript
 // main.ts — new Step 7.5 (between API client creation and guard registration)
-const contextStore = useContextStore(pinia)
-await contextStore.loadContext() // loads workspace context once at bootstrap
+const contextStore = useContextStore(pinia);
+await contextStore.loadContext(); // loads workspace context once at bootstrap
 ```
 
 **Step 6: Wire WorkspaceGuard**
 
 - In `registerGuards()` call in `main.ts`:
   ```typescript
-  isWorkspaceResolved: () => contextStore.context !== null
+  isWorkspaceResolved: () => contextStore.context !== null;
   ```
 - This reads workspace **presence** (is context loaded?), NOT `isActive` (license status)
 
@@ -756,7 +752,8 @@ await contextStore.loadContext() // loads workspace context once at bootstrap
 
 **Step 9: Remove `contextLoaded` flag**
 
-- This state was a one-time load sentinel inside the guard; it is no longer needed since context loads at bootstrap
+- This state was a one-time load sentinel inside the guard; it is no longer needed since context
+  loads at bootstrap
 
 ### Route Name Mapping
 
@@ -778,7 +775,8 @@ All three apps get three fallback view components in `shared/views/`.
 - **Route**: `path: '/:pathMatch(.*)*'`, `name: '<app>-not-found'`
 - **Meta**: `{ public: true }`
 - **Content**: "Page not found" message; link to dashboard (if authenticated) or login
-- **Existing**: `NotFound.vue` exists in all apps — **rename file** to `NotFoundView.vue`; **update route definition** for new name
+- **Existing**: `NotFound.vue` exists in all apps — **rename file** to `NotFoundView.vue`; **update
+  route definition** for new name
 
 ### UnauthorizedView.vue
 
@@ -809,11 +807,12 @@ Registered inside `registerGuards()` in `core/guards/index.ts`:
 ```typescript
 router.onError((_error, to) => {
   // Prevent blank screen on dynamic import failure
-  router.replace({ name: errorRouteName }).catch(() => {})
-})
+  router.replace({ name: errorRouteName }).catch(() => {});
+});
 ```
 
-`errorRouteName` is passed as an option to `registerGuards()` (e.g., `'mmc-error'`, `'bo-error'`, `'fo-error'`).
+`errorRouteName` is passed as an option to `registerGuards()` (e.g., `'mmc-error'`, `'bo-error'`,
+`'fo-error'`).
 
 ---
 
@@ -825,45 +824,41 @@ router.onError((_error, to) => {
 
 ```typescript
 // In createAuthGuard — if requiresAuth + !isAuthenticated + not already on login page
-const redirectPath = to.fullPath
+const redirectPath = to.fullPath;
 
 // Validate: only allow relative paths starting with '/'
 const safeRedirect =
-  redirectPath.startsWith('/') && !redirectPath.startsWith('//')
-    ? redirectPath
-    : undefined
+  redirectPath.startsWith("/") && !redirectPath.startsWith("//") ? redirectPath : undefined;
 
 return {
   name: options.loginRouteName,
   query: safeRedirect ? { redirect: safeRedirect } : undefined,
-}
+};
 ```
 
 **Restore** (post-login in auth store / login page component):
 
 ```typescript
 // In auth store's login() action or LoginView.vue onSubmit handler
-const redirectTarget = route.query.redirect as string | undefined
+const redirectTarget = route.query.redirect as string | undefined;
 
-if (
-  redirectTarget &&
-  redirectTarget.startsWith('/') &&
-  !redirectTarget.startsWith('//')
-) {
-  await router.push(redirectTarget)
+if (redirectTarget && redirectTarget.startsWith("/") && !redirectTarget.startsWith("//")) {
+  await router.push(redirectTarget);
 } else {
-  await router.push({ name: dashboardRouteName })
+  await router.push({ name: dashboardRouteName });
 }
 ```
 
-Note: This implementation is in the login flow (auth store or login page), which is within STAGE_UI_01 territory. STAGE_UI_03 defines the guard half (save); the restore half is documented here for completeness but wired in the login component.
+Note: This implementation is in the login flow (auth store or login page), which is within
+STAGE_UI_01 territory. STAGE_UI_03 defines the guard half (save); the restore half is documented
+here for completeness but wired in the login component.
 
 ### Logout Redirect (Clear `?redirect`)
 
 ```typescript
 // In auth store logout() action (already exists in STAGE_UI_01)
 // After clearing state, navigate to login WITHOUT any redirect query param
-await router.push({ name: loginRouteName })
+await router.push({ name: loginRouteName });
 // No `query: { redirect: ... }` — clean navigation clears any prior session param
 ```
 
@@ -873,10 +868,10 @@ Validation function (defined in `auth.guard.ts`, used at guard level):
 
 ```typescript
 function isSafeRedirect(path: unknown): path is string {
-  if (typeof path !== 'string') return false
+  if (typeof path !== "string") return false;
   // Allow only relative paths: must start with '/' and not with '//'
   // '//' is a protocol-relative URL and must be rejected
-  return path.startsWith('/') && !path.startsWith('//')
+  return path.startsWith("/") && !path.startsWith("//");
 }
 ```
 
@@ -992,14 +987,16 @@ apps/<app>/tests/integration/core/router/router.test.ts
 
 ### RISK-01: Route names used in `router.push()` across the apps
 
-**Risk**: Several places in components and stores use `router.push({ name: 'dashboard' })` or `router.push({ name: 'not-found' })`. Renaming routes will break silent-fail navigation calls.
+**Risk**: Several places in components and stores use `router.push({ name: 'dashboard' })` or
+`router.push({ name: 'not-found' })`. Renaming routes will break silent-fail navigation calls.
 
 **Mitigation**:
 
 - Run a codebase-wide grep for all route name strings before implementation
 - Update all callers at the same time as the route definitions
 - TypeScript will NOT catch string literals in `router.push()` calls — manual search required
-- Specifically check: auth store `logout()` calls, post-login redirect, any component-level navigation
+- Specifically check: auth store `logout()` calls, post-login redirect, any component-level
+  navigation
 
 **Search pattern**: `grep -r "name: '" apps/mmc/src apps/backoffice/src apps/frontoffice/src`
 
@@ -1007,20 +1004,25 @@ apps/<app>/tests/integration/core/router/router.test.ts
 
 ### RISK-02: Backoffice `contextStore.loadContext()` relocation
 
-**Risk**: The STAGE_17 `beforeEach` guard loaded context lazily (only on first navigation). Moving `loadContext()` to bootstrap synchronizes it at mount time. If `loadContext()` is slow or fails, the app may take longer to become interactive, or fail to mount.
+**Risk**: The STAGE_17 `beforeEach` guard loaded context lazily (only on first navigation). Moving
+`loadContext()` to bootstrap synchronizes it at mount time. If `loadContext()` is slow or fails, the
+app may take longer to become interactive, or fail to mount.
 
 **Mitigation**:
 
-- `contextStore.loadContext()` in `main.ts` must be non-blocking for the mount step (use `await` before `registerGuards` but after API client creation)
-- Error handling: if `loadContext()` throws, the error should be caught and logged; the app should still mount and redirect to an error page
-- WorkspaceGuard treats `context === null` as "not resolved" — so a failed load naturally redirects to workspace-selector
+- `contextStore.loadContext()` in `main.ts` must be non-blocking for the mount step (use `await`
+  before `registerGuards` but after API client creation)
+- Error handling: if `loadContext()` throws, the error should be caught and logged; the app should
+  still mount and redirect to an error page
+- WorkspaceGuard treats `context === null` as "not resolved" — so a failed load naturally redirects
+  to workspace-selector
 
 ```typescript
 // main.ts — safe context loading
 try {
-  await contextStore.loadContext()
+  await contextStore.loadContext();
 } catch (e) {
-  logger.error('Failed to load workspace context at bootstrap', { error: e })
+  logger.error("Failed to load workspace context at bootstrap", { error: e });
   // Guard will redirect naturally since contextStore.context === null
 }
 ```
@@ -1029,48 +1031,61 @@ try {
 
 ### RISK-03: Legacy singleton `export const router` removal in MMC and Frontoffice
 
-**Risk**: The current `main.ts` in both apps imports `{ router }` (the singleton). Removing the singleton and switching to `const router = createAppRouter()` in `main.ts` requires coordinating the import change.
+**Risk**: The current `main.ts` in both apps imports `{ router }` (the singleton). Removing the
+singleton and switching to `const router = createAppRouter()` in `main.ts` requires coordinating the
+import change.
 
 **Mitigation**:
 
 - The `main.ts` change and the `router/index.ts` change must be applied atomically (same commit)
-- After removing the exports, TypeScript will immediately surface any unresolved imports at compile time — run `tsc --noEmit` before marking complete
+- After removing the exports, TypeScript will immediately surface any unresolved imports at compile
+  time — run `tsc --noEmit` before marking complete
 
 ---
 
 ### RISK-04: `ForbiddenView.vue` in `shared/views/`
 
-**Risk**: All three apps have `shared/views/ForbiddenView.vue`. The spec requires `UnauthorizedView.vue`. These may overlap in purpose.
+**Risk**: All three apps have `shared/views/ForbiddenView.vue`. The spec requires
+`UnauthorizedView.vue`. These may overlap in purpose.
 
 **Mitigation**:
 
-- `ForbiddenView.vue` is not referenced by the canonical guard pipeline (guards redirect to `<app>-unauthorized`, which uses `UnauthorizedView.vue`)
-- `ForbiddenView.vue` is kept as-is (not deleted); if any existing component links to it, that link is preserved
+- `ForbiddenView.vue` is not referenced by the canonical guard pipeline (guards redirect to
+  `<app>-unauthorized`, which uses `UnauthorizedView.vue`)
+- `ForbiddenView.vue` is kept as-is (not deleted); if any existing component links to it, that link
+  is preserved
 - New `UnauthorizedView.vue` is created alongside it — no naming conflict
 
 ---
 
 ### RISK-05: `requiredModule` meta in Backoffice routes
 
-**Risk**: The STAGE_17 router file comments out an example route with `meta: { requiredModule: Module.MCQ }`. If similar fields exist in routes that are not commented out, stripping them is a safe no-op (no guard reads them post-migration) but requires audit.
+**Risk**: The STAGE_17 router file comments out an example route with
+`meta: { requiredModule: Module.MCQ }`. If similar fields exist in routes that are not commented
+out, stripping them is a safe no-op (no guard reads them post-migration) but requires audit.
 
 **Mitigation**:
 
-- Since `modules/` in Backoffice currently only has `.gitkeep`, there are no module routes with `requiredModule` in active code
-- The only live routes in STAGE_17 are `dashboard` and `workspace-unavailable` — neither uses `requiredModule`
-- Safe to proceed; strip `requiredModule` from `RouteMeta` type definition and leave a comment noting removal in `types.ts`
+- Since `modules/` in Backoffice currently only has `.gitkeep`, there are no module routes with
+  `requiredModule` in active code
+- The only live routes in STAGE_17 are `dashboard` and `workspace-unavailable` — neither uses
+  `requiredModule`
+- Safe to proceed; strip `requiredModule` from `RouteMeta` type definition and leave a comment
+  noting removal in `types.ts`
 
 ---
 
 ### RISK-06: `AuthRouteMeta` alias downstream references
 
-**Risk**: The `types.ts` convenience alias `AuthRouteMeta` (exported in all 3 apps) may be imported elsewhere.
+**Risk**: The `types.ts` convenience alias `AuthRouteMeta` (exported in all 3 apps) may be imported
+elsewhere.
 
 **Mitigation**:
 
 - Rename to `AppRouteMeta` in new implementation to signal the schema change
 - Grep for `AuthRouteMeta` imports before removing — update any callers
-- The `AuthRouteMeta` interface was largely unexported to tests/guards (guards use `RouteMeta` directly), so impact should be minimal
+- The `AuthRouteMeta` interface was largely unexported to tests/guards (guards use `RouteMeta`
+  directly), so impact should be minimal
 
 ---
 

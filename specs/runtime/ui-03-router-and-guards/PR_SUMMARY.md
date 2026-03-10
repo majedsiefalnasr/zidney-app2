@@ -28,20 +28,30 @@
 
 **Problem Solved:**
 
-- **Routing Fragmentation:** Each app (MMC, Backoffice, Frontoffice) had inconsistent guard patterns and singleton router exports, making testing and maintenance difficult.
-- **Naming Inconsistency:** Route names were app-specific (`'dashboard'`, `'login'`) causing coordination issues and name conflicts.
-- **Legacy Pattern Lock-in:** STAGE_17 BO router still existed; old guard classes in nested `core/router/guards/` directory shadowed newer patterns.
-- **Meta Field Confusion:** Legacy RouteMeta fields (`guestOnly`, `requiredRole`, `requiredModule`) were partially migrated; no canonical schema.
+- **Routing Fragmentation:** Each app (MMC, Backoffice, Frontoffice) had inconsistent guard patterns
+  and singleton router exports, making testing and maintenance difficult.
+- **Naming Inconsistency:** Route names were app-specific (`'dashboard'`, `'login'`) causing
+  coordination issues and name conflicts.
+- **Legacy Pattern Lock-in:** STAGE_17 BO router still existed; old guard classes in nested
+  `core/router/guards/` directory shadowed newer patterns.
+- **Meta Field Confusion:** Legacy RouteMeta fields (`guestOnly`, `requiredRole`, `requiredModule`)
+  were partially migrated; no canonical schema.
 
 **What This PR Delivers:**
 
-- **Unified Guard Pipeline:** Canonical `createAuthGuard`, `createRoleGuard`, `createWorkspaceGuard` (BO), `createFeatureFlagGuard` (stub) across all 3 apps
-- **Factory Pattern Router:** `createAppRouter(history?)` replaces singletons; enables dependency injection and testability without route navigation
-- **Session-Init Gate:** All guards gated behind `sessionInitialized` flag to prevent premature auth checks
-- **Canonical Naming:** All routes prefixed with app ID (`mmc-*`, `bo-*`, `fo-*`); eliminates naming collisions
+- **Unified Guard Pipeline:** Canonical `createAuthGuard`, `createRoleGuard`, `createWorkspaceGuard`
+  (BO), `createFeatureFlagGuard` (stub) across all 3 apps
+- **Factory Pattern Router:** `createAppRouter(history?)` replaces singletons; enables dependency
+  injection and testability without route navigation
+- **Session-Init Gate:** All guards gated behind `sessionInitialized` flag to prevent premature auth
+  checks
+- **Canonical Naming:** All routes prefixed with app ID (`mmc-*`, `bo-*`, `fo-*`); eliminates naming
+  collisions
 - **Modern RouteMeta:** New canonical schema with `public`, `roles?`, `requiresWorkspace?` fields
-- **Backoffice Cleanup:** STAGE_17 legacy router deleted; all routes migrated to `core/router/index.ts`
-- **Full Test Coverage:** 52 unit tests (guard scenarios), 6 integration tests (router + pipeline), 1 legacy test updated
+- **Backoffice Cleanup:** STAGE_17 legacy router deleted; all routes migrated to
+  `core/router/index.ts`
+- **Full Test Coverage:** 52 unit tests (guard scenarios), 6 integration tests (router + pipeline),
+  1 legacy test updated
 
 **Architectural Boundary Touched:**
 
@@ -54,7 +64,8 @@
 - **UI-Only Changes:** No backend modifications; guard decisions are read-only
 - **Type-Safe:** Full TypeScript strict mode compile; 0 errors
 - **Non-Breaking:** Old route names internally redirected to new names; apps don't crash
-- **Comprehensive Tests:** 78 new tests (52 unit + 26 integration) + legacy test updated; all passing
+- **Comprehensive Tests:** 78 new tests (52 unit + 26 integration) + legacy test updated; all
+  passing
 - **Constitutional Compliance:** All Zidney Constitution rules verified; no tenant isolation risks
 
 **Constitutional Guarantees Preserved:**
@@ -139,10 +150,12 @@ Confirm compliance with Zidney Constitution v1.2.0:
 
 ## 9. Testing Coverage
 
-- [x] **Unit tests added:** 52 new guard scenario tests (10 auth + 6 role + 5 workspace + 1 feature-flag per app)
+- [x] **Unit tests added:** 52 new guard scenario tests (10 auth + 6 role + 5 workspace + 1
+      feature-flag per app)
 - [x] **Integration tests added:** 6 new router + guard pipeline tests (2 per app)
 - [x] **Legacy test updated:** `auth.guard.test.ts` (MMC) updated to new options API
-- [x] **Edge cases covered:** redirect loop, missing auth, role mismatch, workspace unresolved, exceptions
+- [x] **Edge cases covered:** redirect loop, missing auth, role mismatch, workspace unresolved,
+      exceptions
 - [x] **Coverage threshold met:** All new code paths covered; 100% of guard logic exercised
 
 **Test Results:**
@@ -226,7 +239,8 @@ bun run lint
 ### Code Review Checklist:
 
 - [ ] All Git comments addressed
-- [ ] No `console.log` in guard files (automated check: `grep -r "console\\.log" apps/*/src/core/guards`)
+- [ ] No `console.log` in guard files (automated check:
+      `grep -r "console\\.log" apps/*/src/core/guards`)
 - [ ] No `any` types in guards (automated check: `grep -r "any" apps/*/src/core/guards`)
 - [ ] All route names follow `app-*` convention (automated check: T061 grep confirms 0 old names)
 - [ ] No singleton router exports (automated check: T062 grep confirms 0 results)
@@ -234,7 +248,8 @@ bun run lint
 
 ### QA Checklist:
 
-- [ ] Manual test scenarios 1–10 from [TESTING_GUIDE.md](specs/runtime/ui-03-router-and-guards/guides/TESTING_GUIDE.md) validated
+- [ ] Manual test scenarios 1–10 from
+      [TESTING_GUIDE.md](specs/runtime/ui-03-router-and-guards/guides/TESTING_GUIDE.md) validated
 - [ ] Live app navigation tested (no blank screens, smooth redirects)
 - [ ] Browser console clean (no exceptions)
 - [ ] DevTools Network tab: all requests succeed (no 500 errors)
@@ -264,18 +279,25 @@ bun run lint
 
 - **Stage Specification:** [spec.md](specs/runtime/ui-03-router-and-guards/spec.md)
 - **Technical Plan:** [plan.md](specs/runtime/ui-03-router-and-guards/plan.md)
-- **Testing Guide:** [guides/TESTING_GUIDE.md](specs/runtime/ui-03-router-and-guards/guides/TESTING_GUIDE.md)
-- **Implementation Report:** [reports/IMPLEMENT_REPORT.md](specs/runtime/ui-03-router-and-guards/reports/IMPLEMENT_REPORT.md)
-- **Closure Report:** [reports/CLOSURE_REPORT.md](specs/runtime/ui-03-router-and-guards/reports/CLOSURE_REPORT.md)
+- **Testing Guide:**
+  [guides/TESTING_GUIDE.md](specs/runtime/ui-03-router-and-guards/guides/TESTING_GUIDE.md)
+- **Implementation Report:**
+  [reports/IMPLEMENT_REPORT.md](specs/runtime/ui-03-router-and-guards/reports/IMPLEMENT_REPORT.md)
+- **Closure Report:**
+  [reports/CLOSURE_REPORT.md](specs/runtime/ui-03-router-and-guards/reports/CLOSURE_REPORT.md)
 
 ---
 
 ## 14. Post-Merge Actions
 
-1. **Monitor Production:** Watch for guard-pipeline errors in logs (search for `@zidney/logger` entries with "AuthGuard", "RoleGuard", etc.)
-2. **QA Sign-Off:** Have QA team follow [TESTING_GUIDE.md](specs/runtime/ui-03-router-and-guards/guides/TESTING_GUIDE.md) on production
-3. **Communicate Refactor:** Inform frontend team that route names now use `mmc-*`, `bo-*`, `fo-*` prefixes
-4. **Next Stage:** When Feature Flag service is ready, create STAGE_UI_XX to implement `createFeatureFlagGuard()` fully
+1. **Monitor Production:** Watch for guard-pipeline errors in logs (search for `@zidney/logger`
+   entries with "AuthGuard", "RoleGuard", etc.)
+2. **QA Sign-Off:** Have QA team follow
+   [TESTING_GUIDE.md](specs/runtime/ui-03-router-and-guards/guides/TESTING_GUIDE.md) on production
+3. **Communicate Refactor:** Inform frontend team that route names now use `mmc-*`, `bo-*`, `fo-*`
+   prefixes
+4. **Next Stage:** When Feature Flag service is ready, create STAGE_UI_XX to implement
+   `createFeatureFlagGuard()` fully
 
 ---
 

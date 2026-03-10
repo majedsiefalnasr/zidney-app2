@@ -1,27 +1,32 @@
 # Testing Guide — Workspace Settings
 
-**Stage:** WORKSPACE_SETTINGS
-**Phase:** 03_BACKOFFICE_CORE/01_FOUNDATION
-**Stage Directory:** 018-workspace-settings
-**Generated On:** 2026-02-28
+**Stage:** WORKSPACE_SETTINGS **Phase:** 03_BACKOFFICE_CORE/01_FOUNDATION **Stage Directory:**
+018-workspace-settings **Generated On:** 2026-02-28
 
 ---
 
 ## Purpose
 
-This guide explains how to validate the Workspace Settings implementation end-to-end. It covers automated tests, manual API testing, edge cases, and multi-tenant isolation verification.
+This guide explains how to validate the Workspace Settings implementation end-to-end. It covers
+automated tests, manual API testing, edge cases, and multi-tenant isolation verification.
 
 ---
 
 ## Summary of Delivered Behavior
 
-Workspace Settings provides a tenant-level configuration system allowing institution administrators to manage 5 settings groups (general, language, branding, payment, security) via REST API. Settings are stored as JSONB columns in a single-row-per-tenant table with optimistic locking. Payment credentials are encrypted with AES-256-GCM. All changes produce immutable audit trail entries with field-level diffs.
+Workspace Settings provides a tenant-level configuration system allowing institution administrators
+to manage 5 settings groups (general, language, branding, payment, security) via REST API. Settings
+are stored as JSONB columns in a single-row-per-tenant table with optimistic locking. Payment
+credentials are encrypted with AES-256-GCM. All changes produce immutable audit trail entries with
+field-level diffs.
 
 Key outcomes:
 
 - GET /api/v1/backoffice/workspace/settings — retrieve all settings with defaults applied
-- PUT /api/v1/backoffice/workspace/settings/:group — update a single settings group with version checking
-- GET /api/v1/backoffice/workspace/settings/audit — query audit trail with cursor pagination and optional group filter
+- PUT /api/v1/backoffice/workspace/settings/:group — update a single settings group with version
+  checking
+- GET /api/v1/backoffice/workspace/settings/audit — query audit trail with cursor pagination and
+  optional group filter
 
 ---
 
@@ -112,7 +117,8 @@ Expected outcome: 140 tests pass, 0 TypeScript errors, 0 lint errors.
 
 ### Scenario 1 — Retrieve Default Settings
 
-**Purpose:** Verify that GET /settings returns sensible defaults for a workspace with no prior settings.
+**Purpose:** Verify that GET /settings returns sensible defaults for a workspace with no prior
+settings.
 
 1. Authenticate as an institution admin (`institution_admin` role) for a test workspace
 2. Send `GET /api/v1/backoffice/workspace/settings`
@@ -135,7 +141,8 @@ Troubleshooting:
 
 ### Scenario 2 — Update General Settings with Version Check
 
-**Purpose:** Verify that PUT /:group validates, persists, increments version, and creates audit entry.
+**Purpose:** Verify that PUT /:group validates, persists, increments version, and creates audit
+entry.
 
 1. Send `GET /api/v1/backoffice/workspace/settings` — note `config_version` (e.g., 1)
 2. Send `PUT /api/v1/backoffice/workspace/settings/general` with body:
@@ -170,12 +177,15 @@ Troubleshooting:
 **Purpose:** Verify optimistic locking prevents concurrent overwrites.
 
 1. Send `GET /api/v1/backoffice/workspace/settings` — note `config_version` (e.g., 2)
-2. Send `PUT /api/v1/backoffice/workspace/settings/general` with `config_version: 2` (succeeds, version → 3)
-3. Send another `PUT /api/v1/backoffice/workspace/settings/language` with `config_version: 2` (stale!)
+2. Send `PUT /api/v1/backoffice/workspace/settings/general` with `config_version: 2` (succeeds,
+   version → 3)
+3. Send another `PUT /api/v1/backoffice/workspace/settings/language` with `config_version: 2`
+   (stale!)
 
 Expected:
 
-- Step 3: HTTP 409 with `{ success: false, error: { code: "SETTINGS_VERSION_CONFLICT", message: "..." } }`
+- Step 3: HTTP 409 with
+  `{ success: false, error: { code: "SETTINGS_VERSION_CONFLICT", message: "..." } }`
 
 ### Scenario 4 — Payment Credential Encryption
 
@@ -209,7 +219,8 @@ Expected:
 
 1. Make 3 different settings updates (general, language, branding) to create audit entries
 2. Send `GET /api/v1/backoffice/workspace/settings/audit?limit=2`
-3. Use the `next_cursor` from the response to paginate: `GET /api/v1/backoffice/workspace/settings/audit?limit=2&cursor=<next_cursor>`
+3. Use the `next_cursor` from the response to paginate:
+   `GET /api/v1/backoffice/workspace/settings/audit?limit=2&cursor=<next_cursor>`
 4. Filter by group: `GET /api/v1/backoffice/workspace/settings/audit?group=general`
 
 Expected:
@@ -269,7 +280,8 @@ Confirm the presence of:
 - `"level"` — info/warn/error
 - `"workspace_slug"` — present on all tenant-bound requests
 - `"correlation_id"` — present on all requests
-- `"event"` — e.g., `workspace_settings_updated`, `workspace_settings_retrieved`, `audit_trail_queried`
+- `"event"` — e.g., `workspace_settings_updated`, `workspace_settings_retrieved`,
+  `audit_trail_queried`
 - No `console.log` output
 - No raw credentials in log output (verify payment update logs show `[REDACTED]`)
 

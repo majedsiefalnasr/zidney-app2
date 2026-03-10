@@ -1,26 +1,35 @@
 # Implementation Plan: STAGE_21 — Role & Permission System
 
 **Branch**: `021-role-permission-system` | **Date**: 2026-03-02 | **Spec**: [spec.md](./spec.md)  
-**Input**: `specs/runtime/021-role-permission-system/spec.md` (635 lines, all clarifications resolved)
+**Input**: `specs/runtime/021-role-permission-system/spec.md` (635 lines, all clarifications
+resolved)
 
 ---
 
 ## Summary
 
-Implement a tenant-scoped RBAC system for Backoffice staff users. The system introduces boolean-flag module permissions on roles, a permission guard middleware (sitting after JWT auth, before route handlers), atomic role mutations with audit logging, and a route permission registry that fails-closed. All tables reside exclusively in the per-tenant database. The existing STAGE_17 RBAC skeleton (`backoffice_roles`, `backoffice_staff_users`) is extended — not replaced. A new `backoffice_role_module_permissions` table implements the boolean-flags model, and a new `rbac_audit_logs` table provides the immutable audit trail.
+Implement a tenant-scoped RBAC system for Backoffice staff users. The system introduces boolean-flag
+module permissions on roles, a permission guard middleware (sitting after JWT auth, before route
+handlers), atomic role mutations with audit logging, and a route permission registry that
+fails-closed. All tables reside exclusively in the per-tenant database. The existing STAGE_17 RBAC
+skeleton (`backoffice_roles`, `backoffice_staff_users`) is extended — not replaced. A new
+`backoffice_role_module_permissions` table implements the boolean-flags model, and a new
+`rbac_audit_logs` table provides the immutable audit trail.
 
 ---
 
 ## Technical Context
 
 **Language/Version**: TypeScript 5.x, Bun runtime  
-**Primary Dependencies**: Hono (routing + middleware), Drizzle ORM (schema definitions), pg (SQL execution in migrations), ioredis (optional cache), @zidney/logger (structured logging)  
+**Primary Dependencies**: Hono (routing + middleware), Drizzle ORM (schema definitions), pg (SQL
+execution in migrations), ioredis (optional cache), @zidney/logger (structured logging)  
 **Storage**: PostgreSQL per-tenant (Bun + pg pool manager), Redis (optional short-lived cache)  
 **Testing**: Vitest (unit + integration), supertest-style HTTP tests  
 **Target Platform**: Bun server, Linux container  
 **Project Type**: Web service (API layer) + domain package  
 **Performance Goals**: Permission evaluation ≤ 10ms p95 (per-request cache path)  
-**Constraints**: No cross-tenant joins; no global DB singleton; server-authoritative timestamps; no hardcoded admin bypass  
+**Constraints**: No cross-tenant joins; no global DB singleton; server-authoritative timestamps; no
+hardcoded admin bypass  
 **Scale/Scope**: 10 modules × 4 flags per role; expected < 100 roles per tenant
 
 ---
@@ -54,21 +63,25 @@ _Gate passed — pre-implementation and post-design._
 
 ### What it does (single DDL transaction)
 
-1. **ALTER TABLE `backoffice_roles`** — ADD COLUMN `status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'DISABLED'))`  
+1. **ALTER TABLE `backoffice_roles`** — ADD COLUMN
+   `status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'DISABLED'))`  
    → Existing rows automatically receive `status = 'ACTIVE'`. Additive, no data loss.
 
 2. **CREATE TABLE `backoffice_role_module_permissions`** — boolean-flags model  
-   → Columns: `id`, `role_id` (FK → backoffice_roles CASCADE), `module`, `can_view`, `can_create`, `can_edit`, `can_delete`, `created_at`, `updated_at`  
+   → Columns: `id`, `role_id` (FK → backoffice_roles CASCADE), `module`, `can_view`, `can_create`,
+   `can_edit`, `can_delete`, `created_at`, `updated_at`  
    → UNIQUE `(role_id, module)`  
    → Indexes: `idx_brmp_role_id`, `idx_brmp_role_module`
 
-3. **ALTER TABLE `backoffice_staff_users`** — ADD COLUMN `role_id UUID NULLABLE REFERENCES backoffice_roles(id) ON DELETE SET NULL`  
+3. **ALTER TABLE `backoffice_staff_users`** — ADD COLUMN
+   `role_id UUID NULLABLE REFERENCES backoffice_roles(id) ON DELETE SET NULL`  
    → Existing rows receive `role_id = NULL` (treated as no-access per FR-018).
 
 4. **ALTER TABLE `backoffice_staff_users`** — ADD COLUMN `division_ids UUID[] NOT NULL DEFAULT '{}'`
 
 5. **CREATE TABLE `rbac_audit_logs`** — immutable RBAC audit trail  
-   → Columns: `id`, `user_id` (nullable), `role_id` (nullable), `module` (nullable), `action`, `request_id`, `workspace_slug`, `timestamp`, `is_immutable`, `metadata` (JSONB)  
+   → Columns: `id`, `user_id` (nullable), `role_id` (nullable), `module` (nullable), `action`,
+   `request_id`, `workspace_slug`, `timestamp`, `is_immutable`, `metadata` (JSONB)  
    → Immutability trigger reuses existing `prevent_audit_modification()` function  
    → Indexes: `idx_rbac_al_role_id`, `idx_rbac_al_user_id`, `idx_rbac_al_timestamp`
 
@@ -80,8 +93,10 @@ _Gate passed — pre-implementation and post-design._
 
 - `roles` (STAGE_12) is a frontoffice/general model. Do not alter.
 - `role_permissions` (STAGE_12) uses string-code junction model. Do not alter.
-- `backoffice_role_permissions` (STAGE_17) uses triplet model. Cannot convert in-place — create new `backoffice_role_module_permissions` table.
-- `audit_logs` (STAGE_03) has rigid `event_type` CHECK constraint. Cannot extend — create new `rbac_audit_logs` table.
+- `backoffice_role_permissions` (STAGE_17) uses triplet model. Cannot convert in-place — create new
+  `backoffice_role_module_permissions` table.
+- `audit_logs` (STAGE_03) has rigid `event_type` CHECK constraint. Cannot extend — create new
+  `rbac_audit_logs` table.
 
 ---
 
@@ -112,40 +127,40 @@ File: `apps/api/src/middleware/route-permission-registry.ts`
 export const ROUTE_PERMISSION_REGISTRY: Record<
   string,
   {
-    module: string
-    action: 'can_view' | 'can_create' | 'can_edit' | 'can_delete'
+    module: string;
+    action: "can_view" | "can_create" | "can_edit" | "can_delete";
   }
 > = {
-  'GET /api/backoffice/roles': { module: 'settings', action: 'can_view' },
-  'POST /api/backoffice/roles': { module: 'settings', action: 'can_create' },
-  'GET /api/backoffice/roles/:id': { module: 'settings', action: 'can_view' },
-  'PATCH /api/backoffice/roles/:id': { module: 'settings', action: 'can_edit' },
-  'PUT /api/backoffice/roles/:id/permissions': {
-    module: 'settings',
-    action: 'can_edit',
+  "GET /api/backoffice/roles": { module: "settings", action: "can_view" },
+  "POST /api/backoffice/roles": { module: "settings", action: "can_create" },
+  "GET /api/backoffice/roles/:id": { module: "settings", action: "can_view" },
+  "PATCH /api/backoffice/roles/:id": { module: "settings", action: "can_edit" },
+  "PUT /api/backoffice/roles/:id/permissions": {
+    module: "settings",
+    action: "can_edit",
   },
-  'DELETE /api/backoffice/roles/:id': {
-    module: 'settings',
-    action: 'can_delete',
+  "DELETE /api/backoffice/roles/:id": {
+    module: "settings",
+    action: "can_delete",
   },
-  'GET /api/backoffice/roles/:id/users': {
-    module: 'settings',
-    action: 'can_view',
+  "GET /api/backoffice/roles/:id/users": {
+    module: "settings",
+    action: "can_view",
   },
-  'PATCH /api/backoffice/staff/:userId/role': {
-    module: 'users',
-    action: 'can_edit',
+  "PATCH /api/backoffice/staff/:userId/role": {
+    module: "users",
+    action: "can_edit",
   },
-  'GET /api/backoffice/role-permission-modules': {
-    module: 'settings',
-    action: 'can_view',
+  "GET /api/backoffice/role-permission-modules": {
+    module: "settings",
+    action: "can_view",
   },
-}
+};
 
 export const PUBLIC_ROUTES = new Set([
-  'GET /api/backoffice/health',
-  'GET /api/backoffice/context', // auth required but no module permission check
-])
+  "GET /api/backoffice/health",
+  "GET /api/backoffice/context", // auth required but no module permission check
+]);
 ```
 
 ### Guard factory
@@ -156,7 +171,7 @@ File: `apps/api/src/middleware/backoffice-permission-guard-v2.ts`
 export function createPermissionGuard(
   logger: Logger,
   module: string,
-  action: 'can_view' | 'can_create' | 'can_edit' | 'can_delete'
+  action: "can_view" | "can_create" | "can_edit" | "can_delete",
 ): MiddlewareHandler {
   return async (c, next) => {
     // 1. Workspace-id assertion (cross-tenant token replay guard)
@@ -170,7 +185,7 @@ export function createPermissionGuard(
     // 8. Check permission[action] === true → else 403
     // 9. All 403s use { code: 'FORBIDDEN', message: 'Access denied' }
     //    log at WARN with correlation_id, user_id, module, action, workspace_slug
-  }
+  };
 }
 ```
 
@@ -181,9 +196,11 @@ export function createPermissionGuard(
 | Per-request            | `Map<string, boolean>` created at guard entry, disposed at response    | N/A — request-scoped              |
 | Short-lived in-process | Redis key `rbac_v2:{workspace_id}:{user_id}:{module}:{action}` TTL 30s | Flush on role/permission mutation |
 
-Cache invalidation is **synchronous with mutation** — Redis DEL before transaction commits. If Redis DEL fails, log ERROR and proceed with transaction; next request does fresh DB read.
+Cache invalidation is **synchronous with mutation** — Redis DEL before transaction commits. If Redis
+DEL fails, log ERROR and proceed with transaction; next request does fresh DB read.
 
-Cache key prefix `rbac_v2:` is distinct from STAGE_17's `rbac:` to prevent cross-stage cache pollution.
+Cache key prefix `rbac_v2:` is distinct from STAGE_17's `rbac:` to prevent cross-stage cache
+pollution.
 
 ---
 
@@ -215,7 +232,8 @@ COMMIT;
 
 ## Error Handling
 
-All mutation errors follow the platform error contract `{ success, data, error: { code, message } }`.
+All mutation errors follow the platform error contract
+`{ success, data, error: { code, message } }`.
 
 | Scenario                           | Status | Code                    | Internal details exposed?                      |
 | ---------------------------------- | ------ | ----------------------- | ---------------------------------------------- |
@@ -302,7 +320,8 @@ apps/backoffice/src/composables/
 
 ### Files NOT modified in STAGE_21
 
-- `apps/api/src/middleware/backoffice-rbac-guard.ts` (STAGE_17 guard — not deleted; used by STAGE_17 routes)
+- `apps/api/src/middleware/backoffice-rbac-guard.ts` (STAGE_17 guard — not deleted; used by STAGE_17
+  routes)
 - Any master DB migrations
 - `apps/api/src/db/tenant/migrations/20260228_001_tenant_rbac_skeleton.ts` (STAGE_17 — forward-only)
 - `apps/api/src/db/tenant/migrations/20260217_002_create_audit_logs.ts` (STAGE_03 — forward-only)
@@ -318,21 +337,18 @@ apps/backoffice/src/composables/
 // PURPOSE: UI display aid only. Zero enforcement.
 // Enforcement is 100% server-side via permission guard middleware.
 export function usePermission() {
-  const permissions = ref<Record<string, Record<string, boolean>>>({})
+  const permissions = ref<Record<string, Record<string, boolean>>>({});
 
   async function fetchPermissions() {
     // GET /api/backoffice/context (already returns user context)
     // Extract permission set from context response and populate local map
   }
 
-  function can(
-    module: string,
-    action: 'view' | 'create' | 'edit' | 'delete'
-  ): boolean {
-    return permissions.value[module]?.[`can_${action}`] ?? false
+  function can(module: string, action: "view" | "create" | "edit" | "delete"): boolean {
+    return permissions.value[module]?.[`can_${action}`] ?? false;
   }
 
-  return { fetchPermissions, can }
+  return { fetchPermissions, can };
 }
 ```
 
@@ -347,7 +363,8 @@ export function usePermission() {
 
 - Use `<Table>` component from shadcn-vue for the role list
 - Use `<Switch>` component for enabling/disabling roles
-- Use a permission matrix component (custom grid built on shadcn-vue `<Checkbox>`) for PUT /roles/:id/permissions
+- Use a permission matrix component (custom grid built on shadcn-vue `<Checkbox>`) for PUT
+  /roles/:id/permissions
 - All writes go through the API; UI re-fetches after mutation
 
 ---
@@ -378,8 +395,12 @@ No Constitution violations detected. No ADR exceptions required for this stage.
 
 **Complexity flags**:
 
-- The `backoffice_role_permissions` (STAGE_17 triplet model) remains intact alongside the new `backoffice_role_module_permissions` (Phase 3 boolean-flags model). The STAGE_21 guard targets only the new table. The coexistence of two permission table models is a known technical artifact of forward-only migration policy. STAGE_22+ may deprecate the triplet table explicitly.
-- The `is_active BOOLEAN` vs `status VARCHAR` difference on `backoffice_staff_users` is handled by mapping `is_active = true → ACTIVE` in the guard logic. A future migration may normalize this.
+- The `backoffice_role_permissions` (STAGE_17 triplet model) remains intact alongside the new
+  `backoffice_role_module_permissions` (Phase 3 boolean-flags model). The STAGE_21 guard targets
+  only the new table. The coexistence of two permission table models is a known technical artifact
+  of forward-only migration policy. STAGE_22+ may deprecate the triplet table explicitly.
+- The `is_active BOOLEAN` vs `status VARCHAR` difference on `backoffice_staff_users` is handled by
+  mapping `is_active = true → ACTIVE` in the guard logic. A future migration may normalize this.
 
 | Violation                  | Why Needed         | Simpler Alternative Rejected Because |
 | -------------------------- | ------------------ | ------------------------------------ |

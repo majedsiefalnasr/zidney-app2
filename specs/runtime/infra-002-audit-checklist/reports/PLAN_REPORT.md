@@ -8,7 +8,12 @@
 
 ## Summary
 
-Technical plan is complete and architecturally compliant. This is a READ-ONLY tooling audit stage. The plan defines 4 implementation phases producing 7 new committed files: 1 Bun-compatible audit script (`scripts/infra-audit.ts`), 3 planning artifacts (`plan.md`, `research.md`, `quickstart.md` — already written), and 3 written deliverables (`GAP_REPORT.md`, `RISK_CLASSIFICATION.md`, `SAFE_ROLLOUT_PLAN.md`). No existing files are modified except an optional one-line `.gitignore` append.
+Technical plan is complete and architecturally compliant. This is a READ-ONLY tooling audit stage.
+The plan defines 4 implementation phases producing 7 new committed files: 1 Bun-compatible audit
+script (`scripts/infra-audit.ts`), 3 planning artifacts (`plan.md`, `research.md`, `quickstart.md` —
+already written), and 3 written deliverables (`GAP_REPORT.md`, `RISK_CLASSIFICATION.md`,
+`SAFE_ROLLOUT_PLAN.md`). No existing files are modified except an optional one-line `.gitignore`
+append.
 
 ---
 

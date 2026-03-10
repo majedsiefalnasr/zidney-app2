@@ -1,20 +1,22 @@
 # Clarify Report — STAGE_INFRA_05_LINT_GOVERNANCE
 
-**Step:** 2 — Clarify
-**Timestamp:** 2026-03-07T00:02:00.000Z
-**Status:** COMPLETE
+**Step:** 2 — Clarify **Timestamp:** 2026-03-07T00:02:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Both `[NEEDS CLARIFICATION]` markers from the specification have been resolved in this session. Clarification decisions were encoded back into `spec.md` inline (replacing markers with `[Resolved: CL-01]` / `[Resolved: CL-02]`) and a `## Clarifications → ### Session 2026-03-07` block was appended to the spec. No blockers remain. Planning is authorized.
+Both `[NEEDS CLARIFICATION]` markers from the specification have been resolved in this session.
+Clarification decisions were encoded back into `spec.md` inline (replacing markers with
+`[Resolved: CL-01]` / `[Resolved: CL-02]`) and a `## Clarifications → ### Session 2026-03-07` block
+was appended to the spec. No blockers remain. Planning is authorized.
 
 ---
 
 ## Inputs Reviewed
 
-- `specs/runtime/infra-005-lint-governance/spec.md` (including `## Clarifications` section just appended)
+- `specs/runtime/infra-005-lint-governance/spec.md` (including `## Clarifications` section just
+  appended)
 
 ---
 
@@ -37,7 +39,8 @@ None. All ambiguities resolved.
 
 - Replaced `[NEEDS CLARIFICATION]` marker in FR-06 body with `[Resolved: CL-01]`
 - Replaced `[NEEDS CLARIFICATION]` marker in FR-07 body with `[Resolved: CL-02]`
-- Appended `## Clarifications → ### Session 2026-03-07` block with full decision records for CL-01 and CL-02
+- Appended `## Clarifications → ### Session 2026-03-07` block with full decision records for CL-01
+  and CL-02
 
 ---
 

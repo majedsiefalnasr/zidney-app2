@@ -42,14 +42,11 @@ Enforced by database constraint:
 
 Unique partial index:
 
-(user_id, exam_id)
-WHERE status = 'IN_PROGRESS'
+(user_id, exam_id) WHERE status = 'IN_PROGRESS'
 
-This must be enforced at database level.
-Application checks alone are insufficient.
+This must be enforced at database level. Application checks alone are insufficient.
 
-If violation occurs:
-Return 409 Conflict.
+If violation occurs: Return 409 Conflict.
 
 ---
 
@@ -65,8 +62,7 @@ Transaction must:
 - Update attempt fields
 - Commit
 
-If transaction fails:
-Rollback completely.
+If transaction fails: Rollback completely.
 
 No partial grading writes allowed.
 
@@ -76,11 +72,9 @@ No partial grading writes allowed.
 
 Update statement must include:
 
-WHERE attempt_id = ?
-AND status = 'IN_PROGRESS'
+WHERE attempt_id = ? AND status = 'IN_PROGRESS'
 
-If rows affected = 0:
-Return 409.
+If rows affected = 0: Return 409.
 
 Submission must be idempotent-safe.
 
@@ -92,11 +86,9 @@ Auto-submit worker must prevent duplicate grading.
 
 Use Redis distributed lock:
 
-Key:
-attempt:{attempt_id}:submit_lock
+Key: attempt:{attempt_id}:submit_lock
 
-TTL:
-Short duration (e.g., 30 seconds)
+TTL: Short duration (e.g., 30 seconds)
 
 Worker flow:
 

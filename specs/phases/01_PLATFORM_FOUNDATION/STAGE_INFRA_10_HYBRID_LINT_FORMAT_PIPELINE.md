@@ -4,13 +4,9 @@
 
 ## Stage Status
 
-Status: IN PROGRESS
-Step: analyze
-Risk Level: LOW
-Last Updated: 2026-03-10T01:00:00.000Z
+Status: IN PROGRESS Step: analyze Risk Level: LOW Last Updated: 2026-03-10T01:00:00.000Z
 
-Drift Analysis: PASSED (all 9 criteria N/A; 2 remediations applied)
-Implementation: AUTHORIZED
+Drift Analysis: PASSED (all 9 criteria N/A; 2 remediations applied) Implementation: AUTHORIZED
 
 Scope Authorized:
 
@@ -35,15 +31,15 @@ Constitutional Compliance:
 - No tenant isolation, license middleware, snapshot, DB, or HTTP concerns
 - Drift analysis passed — implementation authorized
 
-Notes:
-Composite guardian audit completed. 2 false-positive BLOCKED verdicts cleared via evidence.
-2 genuine findings remediated in tasks.md. Stage cleared for implementation.
+Notes: Composite guardian audit completed. 2 false-positive BLOCKED verdicts cleared via evidence. 2
+genuine findings remediated in tasks.md. Stage cleared for implementation.
 
 ---
 
 ## Purpose
 
-Establish a deterministic, fast, and AI-safe linting and formatting pipeline for the Zidney monorepo.
+Establish a deterministic, fast, and AI-safe linting and formatting pipeline for the Zidney
+monorepo.
 
 This stage introduces a **Hybrid Lint/Format Architecture** where:
 
@@ -66,14 +62,13 @@ The goal is to provide:
 
 Modern monorepos often suffer from:
 
-• multiple overlapping linters
-• slow formatting pipelines
-• inconsistent formatting rules
-• AI-generated code violating lint rules
+• multiple overlapping linters • slow formatting pipelines • inconsistent formatting rules •
+AI-generated code violating lint rules
 
 Using both **ESLint + Prettier** typically leads to duplication and performance overhead.
 
-Biome solves most of these issues, but it does **not fully support every file type** in the Zidney repository.
+Biome solves most of these issues, but it does **not fully support every file type** in the Zidney
+repository.
 
 Therefore a **hybrid approach** is required.
 
@@ -253,9 +248,11 @@ Target runtime:
 
 ## lint-staged Integration (Required for Performance)
 
-To guarantee extremely fast pre‑commit execution in a large monorepo, the pipeline MUST use **lint-staged**.
+To guarantee extremely fast pre‑commit execution in a large monorepo, the pipeline MUST use
+**lint-staged**.
 
-Running formatters across the entire repository would violate the performance target defined in this stage.
+Running formatters across the entire repository would violate the performance target defined in this
+stage.
 
 Instead, only **staged files** are processed.
 
@@ -319,21 +316,21 @@ This replaces running multiple formatting commands manually.
 | Full repository scan              | 0.5–3 seconds    |
 | lint‑staged incremental execution | **50–150 ms**    |
 
-This design ensures the Zidney repository maintains **sub‑second commits even as the monorepo grows**.
+This design ensures the Zidney repository maintains **sub‑second commits even as the monorepo
+grows**.
 
 ---
 
 ### Governance Rule
 
-AI agents implementing this stage **must not** run Biome or Prettier across the full repository during pre‑commit.
+AI agents implementing this stage **must not** run Biome or Prettier across the full repository
+during pre‑commit.
 
 All formatting and linting MUST be executed through `lint-staged`.
 
 Full‑repository validation belongs only to:
 
-• CI pipelines
-• pre‑push hooks
-• architecture audit scripts
+• CI pipelines • pre‑push hooks • architecture audit scripts
 
 ---
 
@@ -341,9 +338,7 @@ Full‑repository validation belongs only to:
 
 The pre‑push hook performs stricter validation:
 
-• full Biome lint
-• architecture guard
-• infra audit
+• full Biome lint • architecture guard • infra audit
 
 Commands:
 

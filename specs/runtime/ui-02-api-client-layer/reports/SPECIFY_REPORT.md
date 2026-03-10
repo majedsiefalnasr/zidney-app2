@@ -8,7 +8,12 @@
 
 ## Summary
 
-Specification generated for the centralized API Client Layer shared across MMC, Backoffice, and Frontoffice apps. The spec defines a typed HTTP client abstraction with auth token injection, 401 refresh/retry, error normalization, idempotency support, rate-limit surfacing, request cancellation, and correlation ID propagation. 10 user stories, 23 functional requirements, and 10 measurable success criteria were captured. No unresolved clarification markers — all items passed the checklist.
+Specification generated for the centralized API Client Layer shared across MMC, Backoffice, and
+Frontoffice apps. The spec defines a typed HTTP client abstraction with auth token injection, 401
+refresh/retry, error normalization, idempotency support, rate-limit surfacing, request cancellation,
+and correlation ID propagation. 10 user stories, 23 functional requirements, and 10 measurable
+success criteria were captured. No unresolved clarification markers — all items passed the
+checklist.
 
 ---
 

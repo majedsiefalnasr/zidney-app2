@@ -9,7 +9,9 @@
 
 ## Overview
 
-Comprehensive specification for the MMC Dashboard — a read-only, master_db-only analytics platform providing platform-level visibility into commercial health, license states, revenue, and growth trends.
+Comprehensive specification for the MMC Dashboard — a read-only, master_db-only analytics platform
+providing platform-level visibility into commercial health, license states, revenue, and growth
+trends.
 
 ---
 
@@ -108,7 +110,8 @@ Master_db only. Zero tenant database access. All queries indexed. <300ms latency
 }
 ```
 
-- Error responses: `{ "success": false, "data": null, "error": { "code": "INVALID_LICENSE_STATE", "message": "..."} }`
+- Error responses:
+  `{ "success": false, "data": null, "error": { "code": "INVALID_LICENSE_STATE", "message": "..."} }`
 - All timestamps ISO 8601 UTC
 - All monetary values as integers (cents)
 - All percentages with 2 decimal places
@@ -257,7 +260,8 @@ Master_db only. No tenant database queries. All queries indexed. WHERE clauses o
 
 ## Assumptions (10)
 
-1. Master_db exists with all required tables (products, licenses, affiliates, affiliate_usages, revenue_records)
+1. Master_db exists with all required tables (products, licenses, affiliates, affiliate_usages,
+   revenue_records)
 2. All required indexes are present on master_db
 3. Revenue data in financial records table is authoritative
 4. Affiliate commission data in affiliate_usages is current

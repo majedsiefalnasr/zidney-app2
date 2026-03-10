@@ -10,7 +10,10 @@
 
 ## Executive Summary
 
-All 5 critical clarification questions have been answered and locked. These decisions establish the production-grade logging architecture for Zidney's observability baseline. The resolutions address logging persistence strategy, logger implementation pattern, request traceability model, sensitive data protection, and worker job state verification.
+All 5 critical clarification questions have been answered and locked. These decisions establish the
+production-grade logging architecture for Zidney's observability baseline. The resolutions address
+logging persistence strategy, logger implementation pattern, request traceability model, sensitive
+data protection, and worker job state verification.
 
 **Total Questions Asked:** 5  
 **Total Questions Answered:** 5  
@@ -88,16 +91,21 @@ All 5 critical clarification questions have been answered and locked. These deci
 
 ### For Worker Layer
 
-- **Dual ID Propagation:** Worker receives job with both `request_id` (from API) and generates `job_id` (for this execution)
-- **Payload Hashing:** Compute `SHA256(JSON.stringify(jobPayload))` at enqueue and retry; log mismatch as warning
+- **Dual ID Propagation:** Worker receives job with both `request_id` (from API) and generates
+  `job_id` (for this execution)
+- **Payload Hashing:** Compute `SHA256(JSON.stringify(jobPayload))` at enqueue and retry; log
+  mismatch as warning
 - **Context Binding:** Worker inherits request_id; create child logger for job-scoped context
 
 ### For Testing
 
 - **Logger Redaction Tests:** Verify passwords/tokens/emails are redacted across all log call sites
-- **Dual ID Tests:** Verify worker jobs link back to originating request_id; verify separate job_id for retry tracking
-- **Hash Integrity Tests:** Verify job_payload_hash computed correctly; update snapshot tests for hash mismatch scenario
-- **Singleton Persistence Tests:** Verify global Pino instance reused across multiple requests (no duplicate instances)
+- **Dual ID Tests:** Verify worker jobs link back to originating request_id; verify separate job_id
+  for retry tracking
+- **Hash Integrity Tests:** Verify job_payload_hash computed correctly; update snapshot tests for
+  hash mismatch scenario
+- **Singleton Persistence Tests:** Verify global Pino instance reused across multiple requests (no
+  duplicate instances)
 
 ---
 
@@ -144,13 +152,15 @@ All 5 critical clarification questions have been answered and locked. These deci
    - Test task generation
 2. **Update Specification File:** All clarifications have been integrated into spec.md
 
-3. **Inform Planning Phase:** All 5 decisions are locked and non-negotiable during task decomposition
+3. **Inform Planning Phase:** All 5 decisions are locked and non-negotiable during task
+   decomposition
 
 ---
 
 ## Decision Lock Statement
 
-**These 5 clarifications are LOCKED for planning and implementation phases. No further iteration expected on:**
+**These 5 clarifications are LOCKED for planning and implementation phases. No further iteration
+expected on:**
 
 - Log persistence boundary (audit DB vs. ephemeral stdout)
 - Logger initialization pattern (global singleton with child context)

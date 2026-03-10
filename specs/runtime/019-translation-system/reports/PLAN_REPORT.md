@@ -8,9 +8,15 @@
 
 ## Summary
 
-Technical plan is complete across 5 artifacts (plan.md, research.md, data-model.md, contracts/api-endpoints.md, contracts/worker-job-schema.md). Guardian validation passed from both Architecture Checker and API Designer with VERDICT: PASS. Two pre-task items were remediated: DRAIN DELETE pattern updated to include `RETURNING` clause for FR-032 audit compliance, and HTTP 202 corrected to 409 in research.md to align with spec Q3 clarification.
+Technical plan is complete across 5 artifacts (plan.md, research.md, data-model.md,
+contracts/api-endpoints.md, contracts/worker-job-schema.md). Guardian validation passed from both
+Architecture Checker and API Designer with VERDICT: PASS. Two pre-task items were remediated: DRAIN
+DELETE pattern updated to include `RETURNING` clause for FR-032 audit compliance, and HTTP 202
+corrected to 409 in research.md to align with spec Q3 clarification.
 
-The plan covers a full-stack translation system: tenant DB migration (2 new tables + schema_version 1.1.0→1.2.0), domain-core service layer, 4 API endpoints, and a Worker job for async language removal cascade.
+The plan covers a full-stack translation system: tenant DB migration (2 new tables + schema_version
+1.1.0→1.2.0), domain-core service layer, 4 API endpoints, and a Worker job for async language
+removal cascade.
 
 ---
 
@@ -66,19 +72,31 @@ The plan covers a full-stack translation system: tenant DB migration (2 new tabl
 
 ## Transaction Boundaries
 
-- **Single translation upsert**: 1 transaction — `translations` upsert + `translation_audit_logs` insert committed atomically
-- **Batch translation upsert (N items)**: 1 transaction — all N upserts + all N audit inserts are committed or rolled back as a unit (FR-029)
-- **Language removal (≤10K rows)**: 1 transaction — `workspace_settings` update + `translations` bulk delete + `translation_audit_logs` inserts (FR-016)
-- **Language removal (>10K rows)**: Transaction 1 — `workspace_settings` update (language_status → `removing`) + enqueue DRAIN job; Worker: 1 mini-transaction per batch of 1,000 rows (DELETE + audit inserts)
-- **Entity deletion cleanup**: Part of the entity deletion transaction — `DELETE FROM translations WHERE entity_type + entity_id` executed by domain service within the entity deletion transaction
+- **Single translation upsert**: 1 transaction — `translations` upsert + `translation_audit_logs`
+  insert committed atomically
+- **Batch translation upsert (N items)**: 1 transaction — all N upserts + all N audit inserts are
+  committed or rolled back as a unit (FR-029)
+- **Language removal (≤10K rows)**: 1 transaction — `workspace_settings` update + `translations`
+  bulk delete + `translation_audit_logs` inserts (FR-016)
+- **Language removal (>10K rows)**: Transaction 1 — `workspace_settings` update (language_status →
+  `removing`) + enqueue DRAIN job; Worker: 1 mini-transaction per batch of 1,000 rows (DELETE +
+  audit inserts)
+- **Entity deletion cleanup**: Part of the entity deletion transaction —
+  `DELETE FROM translations WHERE entity_type + entity_id` executed by domain service within the
+  entity deletion transaction
 
 ---
 
 ## Idempotency Strategy
 
-- **Translation upsert**: Composite key `(entity_type, entity_id, field_name, language_code)` is the idempotency key; submitting same key any number of times produces the same final state — no unique constraint errors; HTTP 200 always (Q4)
-- **Batch upsert**: Each item in the batch is individually idempotent via composite key; batch atomicity ensures no partial-save scenarios
-- **DRAIN_LANGUAGE_TRANSLATIONS**: Idempotent by design — job re-processes only rows that still exist; `language_status='removing'` flag prevents duplicate job enqueue (via `job-hash.ts` dedup); safe to retry after crash
+- **Translation upsert**: Composite key `(entity_type, entity_id, field_name, language_code)` is the
+  idempotency key; submitting same key any number of times produces the same final state — no unique
+  constraint errors; HTTP 200 always (Q4)
+- **Batch upsert**: Each item in the batch is individually idempotent via composite key; batch
+  atomicity ensures no partial-save scenarios
+- **DRAIN_LANGUAGE_TRANSLATIONS**: Idempotent by design — job re-processes only rows that still
+  exist; `language_status='removing'` flag prevents duplicate job enqueue (via `job-hash.ts` dedup);
+  safe to retry after crash
 
 ---
 
@@ -108,8 +126,12 @@ The plan covers a full-stack translation system: tenant DB migration (2 new tabl
 
 ## Open Risks
 
-- **Coverage cache invalidation at scale**: With millions of translation rows, invalidating on every individual upsert may cause cache thrashing. Recommend batch/debounce invalidation in a future optimization pass.
-- **Unknown entity_type governance**: If a consuming domain uses an entity_type not registered in TRANSLATABLE_FIELDS, coverage returns 0% with a warning. No hard error. Requires domain team discipline in keeping the registry current.
+- **Coverage cache invalidation at scale**: With millions of translation rows, invalidating on every
+  individual upsert may cause cache thrashing. Recommend batch/debounce invalidation in a future
+  optimization pass.
+- **Unknown entity_type governance**: If a consuming domain uses an entity_type not registered in
+  TRANSLATABLE_FIELDS, coverage returns 0% with a warning. No hard error. Requires domain team
+  discipline in keeping the registry current.
 
 ---
 

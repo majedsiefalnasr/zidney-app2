@@ -1,11 +1,13 @@
 # Tasks: Monorepo Setup
 
-**Input**: Design documents from `/specs/runtime/001-monorepo-setup/`
-**Prerequisites**: plan.md (required), spec.md (required for user stories), research.md, data-model.md, quickstart.md
+**Input**: Design documents from `/specs/runtime/001-monorepo-setup/` **Prerequisites**: plan.md
+(required), spec.md (required for user stories), research.md, data-model.md, quickstart.md
 
-**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if explicitly requested in the feature specification.
+**Tests**: The examples below include test tasks. Tests are OPTIONAL - only include them if
+explicitly requested in the feature specification.
 
-**Organization**: Tasks are grouped by user story to enable independent implementation and testing of each story.
+**Organization**: Tasks are grouped by user story to enable independent implementation and testing
+of each story.
 
 ## Format: `[ID] [P?] [Story] Description`
 
@@ -74,12 +76,14 @@ Examples of foundational tasks (adjust based on your project):
 
 **Goal**: Establish the repository structure and workspace boundaries for Zidney development
 
-**Independent Test**: Repository structure matches specification and Bun workspace functions correctly
+**Independent Test**: Repository structure matches specification and Bun workspace functions
+correctly
 
 ### Implementation for User Story 1
 
 - [x] T012 [US1] Create apps/ directory structure (api, worker, mmc, backoffice, frontoffice)
-- [x] T013 [US1] Create packages/ directory structure (domain-core, types, validation, ui-system, redis-utils, config)
+- [x] T013 [US1] Create packages/ directory structure (domain-core, types, validation, ui-system,
+      redis-utils, config)
 - [x] T014 [US1] Initialize package.json files for all apps and packages
 - [x] T015 [US1] Configure Bun workspaces in root package.json
 - [x] T016 [US1] Create AGENTS.md with architectural rules

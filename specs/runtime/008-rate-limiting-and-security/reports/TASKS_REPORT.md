@@ -10,7 +10,8 @@
 
 ## Executive Summary
 
-Task generation workflow successfully converted the approved technical plan into **111 atomic, independent, parallelizable implementation tasks** spanning 9 domain layers. All tasks are:
+Task generation workflow successfully converted the approved technical plan into **111 atomic,
+independent, parallelizable implementation tasks** spanning 9 domain layers. All tasks are:
 
 - ✅ Constitutional compliance verified
 - ✅ Dependency-ordered for parallel execution
@@ -52,7 +53,8 @@ Task generation workflow successfully converted the approved technical plan into
 **Key Tasks:**
 
 - T004: Create Master DB migration for audit log table
-- T005: Create Tenant migration for idempotent submission columns (idempotency_key, first_response_at, cached_result)
+- T005: Create Tenant migration for idempotent submission columns (idempotency_key,
+  first_response_at, cached_result)
 - T006: Create Tenant migration for rate limit audit table
 - T007: Create Tenant migration for rate limit burst table
 - T008: Create indexes for idempotency queries (query by id, idempotency_key)
@@ -62,7 +64,8 @@ Task generation workflow successfully converted the approved technical plan into
 
 **Transactional:** All migrations wrapped in transactions with rollback support  
 **Idempotency:** DB-level UNIQUE constraints on (attempt_id, idempotency_key)  
-**Compliance:** ADR-0002 (Snapshot Attempt Model) — idempotency columns locked with attempt configuration
+**Compliance:** ADR-0002 (Snapshot Attempt Model) — idempotency columns locked with attempt
+configuration
 
 ---
 
@@ -74,8 +77,10 @@ Task generation workflow successfully converted the approved technical plan into
 
 - T012: Initialize Redis connection pool with tenant-scoped connections
 - T013: Define rate limiter key pattern: `ratelimit:v1:<layer>:<key>:<cycle_id>`
-- T014: Configure sliding window algorithm with configurable window (60s), limit (5), burst_limit (10)
-- T015: Configure Redis TTL for all keys: 24h for completed attempts, 60s for active windows, 3600s for DLQ entries
+- T014: Configure sliding window algorithm with configurable window (60s), limit (5), burst_limit
+  (10)
+- T015: Configure Redis TTL for all keys: 24h for completed attempts, 60s for active windows, 3600s
+  for DLQ entries
 
 **Isolation:** All keys namespaced per tenant; no cross-tenant bucket sharing  
 **Compliance:** Multi-tenant token bucket algorithm per ADR-0001
@@ -98,13 +103,16 @@ Task generation workflow successfully converted the approved technical plan into
 
 - T016: Implement Correlation ID middleware (UUID generation, propagation via context)
 - T017: Tenant resolver already exists — verify workspace_id sourced from JWT + subdomain
-- T018: License enforcement middleware — check SOFT_LOCKED (423), ARCHIVED (403), return standardized error response
-- T019: Schema version middleware — check Master schema_version ≥ Client schema_version, return 426 on mismatch
+- T018: License enforcement middleware — check SOFT_LOCKED (423), ARCHIVED (403), return
+  standardized error response
+- T019: Schema version middleware — check Master schema_version ≥ Client schema_version, return 426
+  on mismatch
 - T020: Rate limiting middleware — check all layers (login, submission, WebSocket, admin)
 - T021: RBAC middleware — validate roles against endpoint permission matrix
 - T022: Security headers middleware — set CSP, X-Frame-Options, X-Content-Type-Options, etc.
 
-**Dependency:** Middleware 3 must execute before Middleware 5 (license checked before rate limiting applied)  
+**Dependency:** Middleware 3 must execute before Middleware 5 (license checked before rate limiting
+applied)  
 **Compliance:** Immutable order enforced; no reordering allowed
 
 ---
@@ -165,7 +173,8 @@ Task generation workflow successfully converted the approved technical plan into
 
 **Key Tasks:**
 
-- T043: Define GradeAttemptJob interface (job_id, type, workspace_id, correlation_id, payload, created_at, attempt_id, answers)
+- T043: Define GradeAttemptJob interface (job_id, type, workspace_id, correlation_id, payload,
+  created_at, attempt_id, answers)
 - T044: Implement job enqueueing in API layer (Redis job queue)
 - T045: Implement job persistence in PostgreSQL initially (for durability)
 - T046: Implement job processing loop in worker (pull from queue, execute grade, handle results)
@@ -183,7 +192,8 @@ Task generation workflow successfully converted the approved technical plan into
 
 **Idempotency:** Job processing is idempotent (no side effects on duplicate execution)  
 **Authority:** Worker is SOLE grading authority; API only orchestrates job enqueueing  
-**Compliance:** ADR-0002 (Snapshot Attempt Model) — worker reads attempt snapshot, performs grading, worker produces result
+**Compliance:** ADR-0002 (Snapshot Attempt Model) — worker reads attempt snapshot, performs grading,
+worker produces result
 
 ---
 
@@ -298,7 +308,8 @@ Task generation workflow successfully converted the approved technical plan into
 
 **Integration Tests (10 tasks):**
 
-- T091: Test middleware order (correlation → resolver → license → schema → rate limiting all execute in order)
+- T091: Test middleware order (correlation → resolver → license → schema → rate limiting all execute
+  in order)
 - T092: Test attempt submission flow (create → start → submit → grade → result)
 - T093: Test idempotent submission (duplicate submit returns cached result)
 - T094: Test rate limit enforcement (5 login attempts, then 429 on 6th)
@@ -321,7 +332,8 @@ Task generation workflow successfully converted the approved technical plan into
 - T105: Test CSRF token validation (POST without token returns 400)
 - T106: Test JWT workspace validation (JWT with mismatched workspace_id returns 403)
 - T107: Test SQL injection prevention (submission answer with SQL injection returns 400)
-- T108: Test timing attack resilience (failed login timing matches successful login timing within ±10ms)
+- T108: Test timing attack resilience (failed login timing matches successful login timing within
+  ±10ms)
 
 **Compliance:**
 
@@ -378,8 +390,10 @@ Documentation (T109-T113) [Parallel, can start earlier]
 
 ✅ **Database Migrations (T004-T011):** All independent schema changes; execute in parallel  
 ✅ **Redis Schema (T012-T015):** Independent initialization; execute in parallel  
-✅ **Middleware Stack (T016-T022):** Different files; execute in parallel (but maintain import dependency order)  
-✅ **API Endpoints (T023-T042):** Different routes; execute in parallel (except submission depends on worker integration)  
+✅ **Middleware Stack (T016-T022):** Different files; execute in parallel (but maintain import
+dependency order)  
+✅ **API Endpoints (T023-T042):** Different routes; execute in parallel (except submission depends
+on worker integration)  
 ✅ **Tests (T085-T108):** Independent test files; execute in parallel after components ready  
 ✅ **Documentation (T109-T113):** Can start early, parallelize across docs
 
@@ -427,7 +441,8 @@ Documentation (T109-T113) [Parallel, can start earlier]
 
 ✅ **Error Handling Standard:**
 
-- All 10 error codes mapped with standardized format: `{ error: { code, message, details, correlationId } }`
+- All 10 error codes mapped with standardized format:
+  `{ error: { code, message, details, correlationId } }`
 - No stack traces in responses
 - Retry-After header for 429 responses
 
@@ -437,8 +452,7 @@ Documentation (T109-T113) [Parallel, can start earlier]
 2. Tenant Resolver
 3. License Enforcement
 4. Schema Version Check
-5. Rate Limiting
-   This order is enforced in implementation
+5. Rate Limiting This order is enforced in implementation
 
 ---
 
@@ -460,7 +474,8 @@ Documentation (T109-T113) [Parallel, can start earlier]
 ## Next Steps
 
 1. **Execute Analyze step** — Review task set for feasibility, risk assessment, hidden dependencies
-2. **Confirm all tasks are drift-free** — No missing middleware, no isolation violations, no grading authority violations
+2. **Confirm all tasks are drift-free** — No missing middleware, no isolation violations, no grading
+   authority violations
 3. **Seek implementation gate approval** — If Analyze passes, implementation is authorized
 
 ---

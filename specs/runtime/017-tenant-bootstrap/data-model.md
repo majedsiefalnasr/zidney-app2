@@ -50,10 +50,9 @@
  * - ADR-0008: Semantic versioning / schema_version
  */
 
-import { PoolClient } from 'pg'
+import { PoolClient } from "pg";
 
-export const description =
-  'Create RBAC skeleton tables for STAGE_17 Tenant Bootstrap'
+export const description = "Create RBAC skeleton tables for STAGE_17 Tenant Bootstrap";
 
 /**
  * Forward migration — creates all 4 RBAC tables in a single DDL transaction.
@@ -63,7 +62,7 @@ export const description =
  * Provisioning worker retries up to 3 times before routing to DLQ.
  */
 export async function up(client: PoolClient): Promise<void> {
-  await client.query('BEGIN')
+  await client.query("BEGIN");
   try {
     // -----------------------------------------------------------------------
     // TABLE 1: roles
@@ -83,7 +82,7 @@ export async function up(client: PoolClient): Promise<void> {
         CONSTRAINT roles_pkey        PRIMARY KEY (id),
         CONSTRAINT roles_name_unique UNIQUE (workspace_id, name)
       )
-    `)
+    `);
 
     // -----------------------------------------------------------------------
     // TABLE 2: role_permissions
@@ -104,7 +103,7 @@ export async function up(client: PoolClient): Promise<void> {
         CONSTRAINT role_permissions_module_action_ck   CHECK (action IN ('view', 'create', 'edit', 'delete')),
         CONSTRAINT role_permissions_unique             UNIQUE (role_id, module, action)
       )
-    `)
+    `);
 
     // -----------------------------------------------------------------------
     // TABLE 3: staff_users
@@ -129,7 +128,7 @@ export async function up(client: PoolClient): Promise<void> {
         CONSTRAINT staff_users_email_unique UNIQUE (workspace_id, email),
         CONSTRAINT staff_users_tv_min       CHECK (token_version >= 0)
       )
-    `)
+    `);
 
     // -----------------------------------------------------------------------
     // TABLE 4: staff_user_roles
@@ -147,7 +146,7 @@ export async function up(client: PoolClient): Promise<void> {
         CONSTRAINT staff_user_roles_staff_user_fkey  FOREIGN KEY (staff_user_id) REFERENCES staff_users(id) ON DELETE CASCADE,
         CONSTRAINT staff_user_roles_role_fkey        FOREIGN KEY (role_id)       REFERENCES roles(id)       ON DELETE CASCADE
       )
-    `)
+    `);
 
     // -----------------------------------------------------------------------
     // INDEXES
@@ -157,42 +156,42 @@ export async function up(client: PoolClient): Promise<void> {
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_roles_workspace_id
         ON roles (workspace_id)
-    `)
+    `);
 
     // role_permissions — lookup by role_id (permission check hot path)
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_role_permissions_role_id
         ON role_permissions (role_id)
-    `)
+    `);
 
     // role_permissions — lookup by (role_id, module) for module-specific permission checks
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_role_permissions_role_module
         ON role_permissions (role_id, module)
-    `)
+    `);
 
     // staff_users — lookup by workspace_id + email (login)
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_staff_users_workspace_email
         ON staff_users (workspace_id, email)
-    `)
+    `);
 
     // staff_users — lookup by workspace_id (list all staff)
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_staff_users_workspace_id
         ON staff_users (workspace_id)
-    `)
+    `);
 
     // staff_user_roles — reverse lookup by role_id (which users have this role?)
     await client.query(`
       CREATE INDEX IF NOT EXISTS idx_staff_user_roles_role_id
         ON staff_user_roles (role_id)
-    `)
+    `);
 
-    await client.query('COMMIT')
+    await client.query("COMMIT");
   } catch (err) {
-    await client.query('ROLLBACK')
-    throw err
+    await client.query("ROLLBACK");
+    throw err;
   }
 }
 
@@ -204,9 +203,9 @@ export async function up(client: PoolClient): Promise<void> {
  */
 export async function down(_client: PoolClient): Promise<void> {
   throw new Error(
-    'STAGE_17_TENANT_BOOTSTRAP migration is forward-only. ' +
-      'Rollback must be performed via database snapshot restore.'
-  )
+    "STAGE_17_TENANT_BOOTSTRAP migration is forward-only. " +
+      "Rollback must be performed via database snapshot restore.",
+  );
 }
 ```
 
@@ -238,14 +237,16 @@ export async function down(_client: PoolClient): Promise<void> {
 
 **Notes:**
 
-- `workspace_id` is stored for cross-query safety, but all queries against this table are already within the tenant-scoped pool
+- `workspace_id` is stored for cross-query safety, but all queries against this table are already
+  within the tenant-scoped pool
 - `updated_at` must be set via application-layer `NOW()` on updates (no trigger in this stage)
 
 ---
 
 ### Table 2: `role_permissions`
 
-**Purpose:** Module-scoped permission assignments. Each row grants a role the ability to perform a specific action on a specific module.
+**Purpose:** Module-scoped permission assignments. Each row grants a role the ability to perform a
+specific action on a specific module.
 
 | Column    | Type          | Constraints                                       | Notes                       |
 | --------- | ------------- | ------------------------------------------------- | --------------------------- |
@@ -264,18 +265,22 @@ export async function down(_client: PoolClient): Promise<void> {
 **Indexes:**
 
 - `idx_role_permissions_role_id` — on `role_id` (all permissions for a role)
-- `idx_role_permissions_role_module` — on `(role_id, module)` (hot-path: "does role X have permission on module Y?")
+- `idx_role_permissions_role_module` — on `(role_id, module)` (hot-path: "does role X have
+  permission on module Y?")
 
 **Notes:**
 
-- No `created_at` on this table — permission assignment is atomic and not tracked temporally in this stage
-- `module` values are constrained by application-layer `Module` enum; no DB-level enum to keep migration simple and allow future enum extension without DDL changes
+- No `created_at` on this table — permission assignment is atomic and not tracked temporally in this
+  stage
+- `module` values are constrained by application-layer `Module` enum; no DB-level enum to keep
+  migration simple and allow future enum extension without DDL changes
 
 ---
 
 ### Table 3: `staff_users`
 
-**Purpose:** Backoffice staff accounts within this tenant. Separate from frontoffice student accounts.
+**Purpose:** Backoffice staff accounts within this tenant. Separate from frontoffice student
+accounts.
 
 | Column          | Type           | Constraints                         | Notes                                                        |
 | --------------- | -------------- | ----------------------------------- | ------------------------------------------------------------ |
@@ -302,8 +307,10 @@ export async function down(_client: PoolClient): Promise<void> {
 
 **Notes:**
 
-- `password_hash` column renamed from spec's `hashed_password` to `password_hash` to match the pattern already established in `20260217_001_add_auth_to_users.ts`
-- `is_active = FALSE` does not delete the record; session invalidation flow increments `token_version`
+- `password_hash` column renamed from spec's `hashed_password` to `password_hash` to match the
+  pattern already established in `20260217_001_add_auth_to_users.ts`
+- `is_active = FALSE` does not delete the record; session invalidation flow increments
+  `token_version`
 - Plaintext passwords must never be stored or logged — only `password_hash`
 
 ---
@@ -350,25 +357,25 @@ export async function down(_client: PoolClient): Promise<void> {
  * Separate from MMC-layer RBAC (rbac.ts / MasterDBPermission).
  */
 
-import { Module } from './enums/Module'
+import { Module } from "./enums/Module";
 
 /**
  * Actions that can be performed on a module.
  * Maps to the `action` column CHECK constraint in role_permissions.
  */
 export enum ActionEnum {
-  VIEW = 'view',
-  CREATE = 'create',
-  EDIT = 'edit',
-  DELETE = 'delete',
+  VIEW = "view",
+  CREATE = "create",
+  EDIT = "edit",
+  DELETE = "delete",
 }
 
 /**
  * A single permission entry: the ability to perform `action` on `module`.
  */
 export interface TenantRBACPermission {
-  module: Module
-  action: ActionEnum
+  module: Module;
+  action: ActionEnum;
 }
 
 /**
@@ -377,34 +384,34 @@ export interface TenantRBACPermission {
  * Never recomputed inside Backoffice; always treated as authoritative for the request lifetime.
  */
 export interface BackofficeContext {
-  workspace_id: string
-  workspace_slug: string
-  license_status: 'ACTIVE' | 'SOFT_LOCKED' | 'ARCHIVED'
-  enabled_modules: Module[]
-  student_limit: number | null // null = unlimited
-  staff_limit: number | null // null = unlimited
-  product_version: string // semver, e.g. "2.1.0"
-  schema_version: number // integer version counter
-  request_id: string // correlation ID
+  workspace_id: string;
+  workspace_slug: string;
+  license_status: "ACTIVE" | "SOFT_LOCKED" | "ARCHIVED";
+  enabled_modules: Module[];
+  student_limit: number | null; // null = unlimited
+  staff_limit: number | null; // null = unlimited
+  product_version: string; // semver, e.g. "2.1.0"
+  schema_version: number; // integer version counter
+  request_id: string; // correlation ID
 }
 
 /**
  * Staff user context as set in Hono `c.set('staff_user', ...)` by Authentication middleware.
  */
 export interface StaffUserContext {
-  user_id: string
-  workspace_id: string
-  email: string
-  role_id: string
-  permissions: TenantRBACPermission[]
-  token_version: number
+  user_id: string;
+  workspace_id: string;
+  email: string;
+  role_id: string;
+  permissions: TenantRBACPermission[];
+  token_version: number;
 }
 ```
 
 **Update `packages/types/src/index.ts`:** Add the following export:
 
 ```typescript
-export * from './tenant-rbac'
+export * from "./tenant-rbac";
 ```
 
 ---
@@ -466,4 +473,8 @@ LIMIT  1
 
 ## Schema Version Note
 
-The tenant `schema_version` entry for STAGE_17 must be recorded in the provisioning system after this migration completes successfully. The provisioning worker is responsible for updating `schema_versions` with a new record for STAGE_17. The migration file itself does not write to `schema_versions` directly — that is handled by the migration runner infrastructure established in STAGE_05.
+The tenant `schema_version` entry for STAGE_17 must be recorded in the provisioning system after
+this migration completes successfully. The provisioning worker is responsible for updating
+`schema_versions` with a new record for STAGE_17. The migration file itself does not write to
+`schema_versions` directly — that is handled by the migration runner infrastructure established in
+STAGE_05.

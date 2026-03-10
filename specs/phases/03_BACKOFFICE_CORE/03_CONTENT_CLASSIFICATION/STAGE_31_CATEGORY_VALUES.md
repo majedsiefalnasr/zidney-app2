@@ -31,7 +31,8 @@ Values: Easy, Medium, Hard
 Category: Bloom Level  
 Values: Remember, Understand, Apply
 
-Category Values must be structurally safe, strictly bound to their Category, and optimized for filtering performance.
+Category Values must be structurally safe, strictly bound to their Category, and optimized for
+filtering performance.
 
 ---
 
@@ -45,8 +46,8 @@ Each Category Value:
 - Cannot exist independently
 - Inherits the logical scope of its Category
 
-Categories define classification dimension.
-Category Values define the actual selectable dimension options.
+Categories define classification dimension. Category Values define the actual selectable dimension
+options.
 
 ---
 
@@ -242,5 +243,4 @@ Stage complete when:
 
 ---
 
-Next:
-STAGE_32_TAGS
+Next: STAGE_32_TAGS

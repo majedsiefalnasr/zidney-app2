@@ -2,7 +2,9 @@
 
 ## 📋 Summary
 
-This PR implements the complete **Licenses Management System** for Zidney's Platform MMC. This is a critical infrastructure feature that enables multi-tenant license provisioning, lifecycle management, and enforcement of product constraints across all customer workspaces.
+This PR implements the complete **Licenses Management System** for Zidney's Platform MMC. This is a
+critical infrastructure feature that enables multi-tenant license provisioning, lifecycle
+management, and enforcement of product constraints across all customer workspaces.
 
 **Branch:** `010-licenses-management`  
 **Target:** `develop`  
@@ -94,7 +96,8 @@ This PR implements the complete **Licenses Management System** for Zidney's Plat
 
 **New Files:**
 
-- `apps/worker/src/handlers/provisioning-handler.ts` — Job processing with retry/idempotency (320 lines)
+- `apps/worker/src/handlers/provisioning-handler.ts` — Job processing with retry/idempotency (320
+  lines)
 - `apps/worker/src/jobs/license-provisioning.ts` — Job queue definitions
 
 **Modified Files:**
@@ -138,7 +141,8 @@ This PR implements the complete **Licenses Management System** for Zidney's Plat
 - No cross-database joins possible
 - Isolation enforced at connection pool level
 
-**Link:** `specs/runtime/010-licenses-management/reports/PLAN_REPORT.md#Section 3: Database Architecture`
+**Link:**
+`specs/runtime/010-licenses-management/reports/PLAN_REPORT.md#Section 3: Database Architecture`
 
 ---
 
@@ -153,7 +157,8 @@ This PR implements the complete **Licenses Management System** for Zidney's Plat
 - Prevents thundering herd on grace boundary
 - Consistent with server-authoritative time
 
-**Link:** `specs/runtime/010-licenses-management/reports/PLAN_REPORT.md#Section 7: Soft-Lock Lifecycle`
+**Link:**
+`specs/runtime/010-licenses-management/reports/PLAN_REPORT.md#Section 7: Soft-Lock Lifecycle`
 
 ---
 
@@ -168,7 +173,8 @@ This PR implements the complete **Licenses Management System** for Zidney's Plat
 - Prevents duplicate workspace creation
 - Satisfies "exactly once" guarantee for provisioning
 
-**Link:** `specs/runtime/010-licenses-management/reports/PLAN_REPORT.md#Section 10: Idempotency Model`
+**Link:**
+`specs/runtime/010-licenses-management/reports/PLAN_REPORT.md#Section 10: Idempotency Model`
 
 ---
 
@@ -183,7 +189,8 @@ This PR implements the complete **Licenses Management System** for Zidney's Plat
 - Guarantees license validity across versions
 - Migration-safe even during schema evolution
 
-**Link:** `specs/runtime/010-licenses-management/reports/PLAN_REPORT.md#Section 4: Schema Versioning`
+**Link:**
+`specs/runtime/010-licenses-management/reports/PLAN_REPORT.md#Section 4: Schema Versioning`
 
 ---
 
@@ -429,17 +436,13 @@ docker logs zidney-worker | tail -20
 
 ## 📞 Support & Questions
 
-**For QA & Testing:**
-→ See `TESTING_GUIDE.md` for comprehensive testing instructions
+**For QA & Testing:** → See `TESTING_GUIDE.md` for comprehensive testing instructions
 
-**For Architecture Issues:**
-→ Reference `PLAN_REPORT.md`, Section 3-10 for design decisions
+**For Architecture Issues:** → Reference `PLAN_REPORT.md`, Section 3-10 for design decisions
 
-**For Implementation Details:**
-→ Check `IMPLEMENT_REPORT.md` for task-by-task breakdown
+**For Implementation Details:** → Check `IMPLEMENT_REPORT.md` for task-by-task breakdown
 
-**For Constitutional Compliance:**
-→ Verify against `AGENTS.md` and `ADR-000X` files
+**For Constitutional Compliance:** → Verify against `AGENTS.md` and `ADR-000X` files
 
 ---
 

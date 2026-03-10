@@ -8,7 +8,10 @@
 
 ## Summary
 
-Cross-artifact consistency analysis completed with 14 findings: 1 Critical, 3 High, 6 Medium, 4 Low. All critical/high findings relate to plan-document-level code snippet inconsistencies that the task set already corrects via guardian corrections applied in Step 4. All 4 guardians returned VERDICT: PASS. Implementation is authorized.
+Cross-artifact consistency analysis completed with 14 findings: 1 Critical, 3 High, 6 Medium, 4 Low.
+All critical/high findings relate to plan-document-level code snippet inconsistencies that the task
+set already corrects via guardian corrections applied in Step 4. All 4 guardians returned VERDICT:
+PASS. Implementation is authorized.
 
 ---
 
@@ -73,7 +76,9 @@ Cross-artifact consistency analysis completed with 14 findings: 1 Critical, 3 Hi
 
 **APPROVED — Implementation authorized.**
 
-All 4 guardians returned PASS. Structural drift findings are plan-document-level inconsistencies already corrected in the task set. No constitutional violations. No architectural drift. No security concerns. Implementation may proceed.
+All 4 guardians returned PASS. Structural drift findings are plan-document-level inconsistencies
+already corrected in the task set. No constitutional violations. No architectural drift. No security
+concerns. Implementation may proceed.
 
 ---
 

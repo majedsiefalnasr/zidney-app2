@@ -9,7 +9,8 @@
 
 ## Overview
 
-This document resolves infrastructure unknowns discovered during technical context analysis for the 31-test validation suite.
+This document resolves infrastructure unknowns discovered during technical context analysis for the
+31-test validation suite.
 
 ---
 
@@ -33,8 +34,8 @@ This document resolves infrastructure unknowns discovered during technical conte
 **Implementation**:
 
 ```typescript
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { createTestClient, createTestContext } from '../test-helpers'
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { createTestClient, createTestContext } from "../test-helpers";
 ```
 
 **Conclusion**: Use existing Vitest infrastructure. No new framework needed.
@@ -61,16 +62,16 @@ const workspace = await masterDb
   .values({
     id: workspaceId,
     slug: `test-${randomUUID()}`,
-    name: 'Test Workspace',
+    name: "Test Workspace",
     owner_id: adminUserId,
   })
-  .returning()
+  .returning();
 
 // Phase 2: Trigger provisioning (creates tenant database)
-await provisioningService.provision(workspaceId)
+await provisioningService.provision(workspaceId);
 
 // Phase 3: Create test data in tenant DB
-const tenantDb = await getTenantPool(workspaceId).getConnection()
+const tenantDb = await getTenantPool(workspaceId).getConnection();
 const student = await tenantDb
   .insert(students)
   .values({
@@ -79,7 +80,7 @@ const student = await tenantDb
     email: `student-${randomUUID()}@test.local`,
     enrollment_id: `ENR-${randomUUID()}`,
   })
-  .returning()
+  .returning();
 ```
 
 **Cleanup Strategy**:
@@ -127,7 +128,8 @@ const tenantBPool = tenantPoolManager.get('workspace-b')
 - Solution: Create 2-3 reusable test databases and reset schema between tests
 - Or: Use in-memory mock pools for non-integration tests
 
-**Conclusion**: Use test-helpers.ts InMemoryPool for unit tests. Use real PostgreSQL for integration tests (cached databases).
+**Conclusion**: Use test-helpers.ts InMemoryPool for unit tests. Use real PostgreSQL for integration
+tests (cached databases).
 
 ---
 
@@ -146,40 +148,37 @@ const tenantBPool = tenantPoolManager.get('workspace-b')
 ```typescript
 // InMemoryRedisClient (in test-helpers.ts) with instrumentation
 class InstrumentedRedisClient extends InMemoryRedisClient {
-  locks = new Map<string, { acquiredAt: number; owner: string }>()
+  locks = new Map<string, { acquiredAt: number; owner: string }>();
 
   async acquireLock(key: string, owner: string, ttl: number) {
     if (this.locks.has(key)) {
-      throw new Error(`Lock already held by ${this.locks.get(key)?.owner}`)
+      throw new Error(`Lock already held by ${this.locks.get(key)?.owner}`);
     }
     this.locks.set(key, {
       acquiredAt: Date.now(),
       owner,
-    })
+    });
     // Simulate lock TTL expiry
-    setTimeout(() => this.locks.delete(key), ttl * 1000)
+    setTimeout(() => this.locks.delete(key), ttl * 1000);
   }
 
   // Observable: Spies can track calls via Vitest mocking
   async releaseLock(key: string) {
-    this.locks.delete(key)
+    this.locks.delete(key);
   }
 }
 
 // In test:
-const redisClient = new InstrumentedRedisClient()
-const acquireSpy = vi.spyOn(redisClient, 'acquireLock')
+const redisClient = new InstrumentedRedisClient();
+const acquireSpy = vi.spyOn(redisClient, "acquireLock");
 
 // Simulate concurrent requests
-await Promise.all([
-  provisioning(workspace, redisClient),
-  provisioning(workspace, redisClient),
-])
+await Promise.all([provisioning(workspace, redisClient), provisioning(workspace, redisClient)]);
 
 // Verify only one acquisition succeeded
-expect(acquireSpy).toHaveBeenCalledTimes(2)
-expect(acquireSpy.mock.results[0].value.error).toBe(undefined) // First succeeded
-expect(acquireSpy.mock.results[1].value.error).toMatch(/already held/) // Second failed
+expect(acquireSpy).toHaveBeenCalledTimes(2);
+expect(acquireSpy.mock.results[0].value.error).toBe(undefined); // First succeeded
+expect(acquireSpy.mock.results[1].value.error).toMatch(/already held/); // Second failed
 ```
 
 **Real Redis Tests**:
@@ -187,7 +186,8 @@ expect(acquireSpy.mock.results[1].value.error).toMatch(/already held/) // Second
 - Integration test suite runs with real Redis
 - Separate from unit tests (in tests/integration/ directory)
 
-**Conclusion**: Use InMemoryRedisClient with Vitest spies for unit tests. Maintain separate integration test suite for real Redis.
+**Conclusion**: Use InMemoryRedisClient with Vitest spies for unit tests. Maintain separate
+integration test suite for real Redis.
 
 ---
 
@@ -206,39 +206,37 @@ expect(acquireSpy.mock.results[1].value.error).toMatch(/already held/) // Second
 ```typescript
 // Middleware timing wrapper
 type TimedMiddleware = {
-  name: string
-  duration_ms: number
-  sequence_number: number
-}
+  name: string;
+  duration_ms: number;
+  sequence_number: number;
+};
 
 // Hook into Hono middleware chain
-const timedApp = new Hono()
-const timings: TimedMiddleware[] = []
+const timedApp = new Hono();
+const timings: TimedMiddleware[] = [];
 
 timedApp.use(async (c, next) => {
-  const start = performance.now()
-  await next()
-  const duration_ms = performance.now() - start
+  const start = performance.now();
+  await next();
+  const duration_ms = performance.now() - start;
   timings.push({
-    name: 'correlationId',
+    name: "correlationId",
     duration_ms,
     sequence_number: 1,
-  })
-})
+  });
+});
 
 // After request, extract timings
-const response = await timedApp.fetch(request)
-const correlationId = response.headers.get('X-Correlation-ID')
-const requestTimings = extractTimings(correlationId)
+const response = await timedApp.fetch(request);
+const correlationId = response.headers.get("X-Correlation-ID");
+const requestTimings = extractTimings(correlationId);
 
 // Validate: middleware overhead < 1ms
 const middlewareTotal = requestTimings
-  .filter((t) =>
-    ['correlationId', 'tenantResolver', 'license', 'schema'].includes(t.name)
-  )
-  .reduce((sum, t) => sum + t.duration_ms, 0)
+  .filter((t) => ["correlationId", "tenantResolver", "license", "schema"].includes(t.name))
+  .reduce((sum, t) => sum + t.duration_ms, 0);
 
-expect(middlewareTotal).toBeLessThan(1)
+expect(middlewareTotal).toBeLessThan(1);
 ```
 
 **Load Testing Tools**:
@@ -250,16 +248,16 @@ expect(middlewareTotal).toBeLessThan(1)
 
 ```typescript
 type PerformanceMetrics = {
-  min_ms: number
-  p50_ms: number
-  p95_ms: number
-  p99_ms: number
-  max_ms: number
-  mean_ms: number
-}
+  min_ms: number;
+  p50_ms: number;
+  p95_ms: number;
+  p99_ms: number;
+  max_ms: number;
+  mean_ms: number;
+};
 
 function calculateMetrics(timings: number[]): PerformanceMetrics {
-  const sorted = timings.sort((a, b) => a - b)
+  const sorted = timings.sort((a, b) => a - b);
   return {
     min_ms: sorted[0],
     p50_ms: sorted[Math.floor(sorted.length * 0.5)],
@@ -267,11 +265,12 @@ function calculateMetrics(timings: number[]): PerformanceMetrics {
     p99_ms: sorted[Math.floor(sorted.length * 0.99)],
     max_ms: sorted[sorted.length - 1],
     mean_ms: timings.reduce((a, b) => a + b, 0) / timings.length,
-  }
+  };
 }
 ```
 
-**Conclusion**: Instrument Hono middleware with performance.now() timers. Use Vitest metrics collection. Separate load tests into dedicated suite.
+**Conclusion**: Instrument Hono middleware with performance.now() timers. Use Vitest metrics
+collection. Separate load tests into dedicated suite.
 
 ---
 
@@ -297,25 +296,25 @@ function calculateMetrics(timings: number[]): PerformanceMetrics {
 
 ```typescript
 // Test submission endpoint (HTTP, not WebSocket)
-const submission1 = await client.post(
-  `/api/workspaces/w1/attempts/a1/submissions`,
-  { questionId: 'q1', answer: 'A' }
-)
-expect(submission1.status).toBe(202) // Accepted, not processed
+const submission1 = await client.post(`/api/workspaces/w1/attempts/a1/submissions`, {
+  questionId: "q1",
+  answer: "A",
+});
+expect(submission1.status).toBe(202); // Accepted, not processed
 
 // Idempotent resubmission (same data)
-const submission2 = await client.post(
-  `/api/workspaces/w1/attempts/a1/submissions`,
-  { questionId: 'q1', answer: 'A' }
-)
-expect(submission2.status).toBe(202) // Idempotent, accepted again
+const submission2 = await client.post(`/api/workspaces/w1/attempts/a1/submissions`, {
+  questionId: "q1",
+  answer: "A",
+});
+expect(submission2.status).toBe(202); // Idempotent, accepted again
 
 // Different submission (distinct question)
-const submission3 = await client.post(
-  `/api/workspaces/w1/attempts/a1/submissions`,
-  { questionId: 'q2', answer: 'B' }
-)
-expect(submission3.status).toBe(202) // New submission, accepted
+const submission3 = await client.post(`/api/workspaces/w1/attempts/a1/submissions`, {
+  questionId: "q2",
+  answer: "B",
+});
+expect(submission3.status).toBe(202); // New submission, accepted
 ```
 
 **WebSocket Rate Limiting**:
@@ -372,9 +371,9 @@ expect(submission3.status).toBe(202) // New submission, accepted
 **Implementation Pattern**:
 
 ```typescript
-it('should serialize concurrent provisioning via lock', async () => {
-  const workspaceId = 'ws-concurrent-test'
-  const redisClient = new InstrumentedRedisClient()
+it("should serialize concurrent provisioning via lock", async () => {
+  const workspaceId = "ws-concurrent-test";
+  const redisClient = new InstrumentedRedisClient();
 
   // Simulate 5 concurrent provision attempts (within 100ms window)
   const results = await Promise.allSettled([
@@ -383,23 +382,17 @@ it('should serialize concurrent provisioning via lock', async () => {
     provisioning.provision(workspaceId, redisClient),
     provisioning.provision(workspaceId, redisClient),
     provisioning.provision(workspaceId, redisClient),
-  ])
+  ]);
 
   // Exactly one should succeed
-  const successes = results.filter(
-    (r) => r.status === 'fulfilled' && r.value.success
-  )
-  expect(successes.length).toBe(1)
+  const successes = results.filter((r) => r.status === "fulfilled" && r.value.success);
+  expect(successes.length).toBe(1);
 
   // Others should fail with lock error
-  const failures = results.filter(
-    (r) => r.status === 'rejected' || !r.value.success
-  )
-  expect(failures.length).toBe(4)
-  expect(
-    failures.every((f) => f.reason?.message.includes('already in progress'))
-  ).toBe(true)
-})
+  const failures = results.filter((r) => r.status === "rejected" || !r.value.success);
+  expect(failures.length).toBe(4);
+  expect(failures.every((f) => f.reason?.message.includes("already in progress"))).toBe(true);
+});
 ```
 
 **Alternative: Test Harness with Controlled Timing**:
@@ -407,7 +400,7 @@ it('should serialize concurrent provisioning via lock', async () => {
 ```typescript
 // If real concurrency needed, use test harness with controllable delays
 class ConcurrencyTestHarness {
-  private barriers = new Map<string, { waiters: number; release: () => void }>()
+  private barriers = new Map<string, { waiters: number; release: () => void }>();
 
   async synchronizeAndRelease(testId: string, count: number) {
     // Wait for exactly N tasks to arrive at barrier before releasing all
@@ -416,7 +409,8 @@ class ConcurrencyTestHarness {
 }
 ```
 
-**Conclusion**: Use Promise.allSettled() for simple concurrency tests. Use ConcurrencyTestHarness if precise ordering needed.
+**Conclusion**: Use Promise.allSettled() for simple concurrency tests. Use ConcurrencyTestHarness if
+precise ordering needed.
 
 ---
 
@@ -435,42 +429,37 @@ class ConcurrencyTestHarness {
 ```typescript
 // RFC 7807 response contract
 type RFC7807Response = {
-  type: string // URL to error documentation
-  title: string // Short error title
-  status: number // HTTP status code
-  detail: string // Detailed explanation
-  instance: string // Request identifier
+  type: string; // URL to error documentation
+  title: string; // Short error title
+  status: number; // HTTP status code
+  detail: string; // Detailed explanation
+  instance: string; // Request identifier
   // Optional extension fields
-  error_code?: string // Custom error code
-  limit?: number // For limit errors
-  current?: number // Current value
-}
+  error_code?: string; // Custom error code
+  limit?: number; // For limit errors
+  current?: number; // Current value
+};
 
 // Validation helper
 function validateRFC7807(response: unknown): boolean {
-  const required = ['type', 'title', 'status', 'detail', 'instance']
-  return required.every((field) => field in response)
+  const required = ["type", "title", "status", "detail", "instance"];
+  return required.every((field) => field in response);
 }
 
 // In test:
-const res = await client.get(`/api/workspaces/invalid/students`)
-expect(res.status).toBe(404)
-expect(validateRFC7807(res.body)).toBe(true)
-expect(res.body.status).toBe(404)
-expect(res.body.instance).toMatch(/\/api\/workspaces/)
+const res = await client.get(`/api/workspaces/invalid/students`);
+expect(res.status).toBe(404);
+expect(validateRFC7807(res.body)).toBe(true);
+expect(res.body.status).toBe(404);
+expect(res.body.instance).toMatch(/\/api\/workspaces/);
 ```
 
-**Error Code Mapping**:
-| HTTP Status | Error Code | Title | Instance |
-|------------|-----------|-------|----------|
-| 400 | INVALID_INPUT | Validation Error | /endpoint |
-| 401 | UNAUTHORIZED | Unauthorized | /endpoint |
-| 403 | FORBIDDEN | Insufficient Permission | /endpoint |
-| 404 | NOT_FOUND | Resource Not Found | /endpoint |
-| 409 | CONFLICT | State Machine Violation | /endpoint |
-| 426 | UPGRADE_REQUIRED | Schema Mismatch | /endpoint |
-| 429 | RATE_LIMITED | Too Many Requests | /endpoint |
-| 500 | INTERNAL_ERROR | Server Error | /endpoint |
+**Error Code Mapping**: | HTTP Status | Error Code | Title | Instance |
+|------------|-----------|-------|----------| | 400 | INVALID_INPUT | Validation Error | /endpoint |
+| 401 | UNAUTHORIZED | Unauthorized | /endpoint | | 403 | FORBIDDEN | Insufficient Permission |
+/endpoint | | 404 | NOT_FOUND | Resource Not Found | /endpoint | | 409 | CONFLICT | State Machine
+Violation | /endpoint | | 426 | UPGRADE_REQUIRED | Schema Mismatch | /endpoint | | 429 |
+RATE_LIMITED | Too Many Requests | /endpoint | | 500 | INTERNAL_ERROR | Server Error | /endpoint |
 
 **Conclusion**: Create RFC7807 schema validator. Use in all error tests.
 

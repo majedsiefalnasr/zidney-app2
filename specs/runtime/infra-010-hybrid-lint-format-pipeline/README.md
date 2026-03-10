@@ -1,22 +1,21 @@
 # Hybrid Lint Format Pipeline
 
-**Branch:** `spec/infra-010-hybrid-lint-format-pipeline`
-**Phase:** 01_PLATFORM_FOUNDATION
-**Stage File:** `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_10_HYBRID_LINT_FORMAT_PIPELINE.md`
+**Branch:** `spec/infra-010-hybrid-lint-format-pipeline` **Phase:** 01_PLATFORM_FOUNDATION **Stage
+File:** `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_10_HYBRID_LINT_FORMAT_PIPELINE.md`
 **Initiated:** 2026-03-10T00:00:00.000Z
 
 ## Workflow Progress
 
-| Step      | Status | SpecKit Output              | Orchestrator Output         |
-| --------- | ------ | --------------------------- | --------------------------- |
-| Pre-Step  | ✅     | —                           | —                           |
-| Specify   | ✅     | spec.md, checklists/        | reports/SPECIFY_REPORT.md   |
-| Clarify   | ✅     | spec.md (updated in-place)  | reports/CLARIFY_REPORT.md   |
-| Plan      | ✅     | plan.md, research.md, etc.  | reports/PLAN_REPORT.md      |
-| Tasks     | ✅     | tasks.md                    | reports/TASKS_REPORT.md     |
+| Step      | Status    | SpecKit Output              | Orchestrator Output         |
+| --------- | --------- | --------------------------- | --------------------------- |
+| Pre-Step  | ✅        | —                           | —                           |
+| Specify   | ✅        | spec.md, checklists/        | reports/SPECIFY_REPORT.md   |
+| Clarify   | ✅        | spec.md (updated in-place)  | reports/CLARIFY_REPORT.md   |
+| Plan      | ✅        | plan.md, research.md, etc.  | reports/PLAN_REPORT.md      |
+| Tasks     | ✅        | tasks.md                    | reports/TASKS_REPORT.md     |
 | Analyze   | ✅ Passed | (read-only — no output)     | audits/ANALYZE_REPORT.md    |
-| Implement | ⬜     | tasks.md (tasks marked [X]) | reports/IMPLEMENT_REPORT.md |
-| Closure   | ⬜     | —                           | reports/CLOSURE_REPORT.md   |
+| Implement | ⬜        | tasks.md (tasks marked [X]) | reports/IMPLEMENT_REPORT.md |
+| Closure   | ⬜        | —                           | reports/CLOSURE_REPORT.md   |
 
 ## Stage Artifacts
 

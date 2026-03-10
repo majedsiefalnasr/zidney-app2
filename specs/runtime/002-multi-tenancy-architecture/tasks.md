@@ -94,29 +94,38 @@ Dependency Order: Infrastructure → API → Observability → Testing
 - [x] T001 Create migration file for tenants_registry table in apps/api/src/db/master/migrations/
 - [x] T002 Update schema_version in master DB after migration
 - [x] T003 Add PLATFORM_PRODUCT_VERSION environment variable to API config
-- [x] T003A Create master registry repository in apps/api/src/repositories/master/tenant-registry.repository.ts
+- [x] T003A Create master registry repository in
+      apps/api/src/repositories/master/tenant-registry.repository.ts
 
 ---
 
 ## Phase 2: Foundational Tasks (Blocking Prerequisites)
 
-- [x] T004 [P] Implement tenant slug extraction from subdomain or path in apps/api/src/middleware/tenant-resolver.ts
+- [x] T004 [P] Implement tenant slug extraction from subdomain or path in
+      apps/api/src/middleware/tenant-resolver.ts
 - [x] T004A Ensure correlation ID middleware executes before tenant resolver in apps/api/src/app.ts
-- [x] T005 [P] Add registry caching with TTL=60s, key=workspace_slug, no manual invalidation in apps/api/src/middleware/tenant-resolver.ts
+- [x] T005 [P] Add registry caching with TTL=60s, key=workspace_slug, no manual invalidation in
+      apps/api/src/middleware/tenant-resolver.ts
 - [x] T006 [P] Implement lazy connection pool creation in apps/api/src/middleware/tenant-resolver.ts
 - [x] T006A Create tenant pool manager module in apps/api/src/db/tenant/pool-manager.ts
-- [x] T007 Wire tenant resolver middleware globally for /api/workspace/\* routes in apps/api/src/app.ts
+- [x] T007 Wire tenant resolver middleware globally for /api/workspace/\* routes in
+      apps/api/src/app.ts
 
 ---
 
 ## Phase 3: Core Implementation
 
 - [x] T008 Implement license status enforcement in apps/api/src/middleware/tenant-resolver.ts
-- [x] T009 Implement schema version compatibility check in apps/api/src/middleware/tenant-resolver.ts
-- [x] T010 Implement product version compatibility check using semver in apps/api/src/middleware/tenant-resolver.ts
-- [x] T011 Add connection pool guardrails (max 10 per pool) in apps/api/src/middleware/tenant-resolver.ts
-- [x] T012 Implement error response formatting with workspace and request_id in apps/api/src/middleware/tenant-resolver.ts
-- [x] T013 Add structured logging with workspace_slug and correlation_id in apps/api/src/middleware/tenant-resolver.ts
+- [x] T009 Implement schema version compatibility check in
+      apps/api/src/middleware/tenant-resolver.ts
+- [x] T010 Implement product version compatibility check using semver in
+      apps/api/src/middleware/tenant-resolver.ts
+- [x] T011 Add connection pool guardrails (max 10 per pool) in
+      apps/api/src/middleware/tenant-resolver.ts
+- [x] T012 Implement error response formatting with workspace and request_id in
+      apps/api/src/middleware/tenant-resolver.ts
+- [x] T013 Add structured logging with workspace_slug and correlation_id in
+      apps/api/src/middleware/tenant-resolver.ts
 
 ---
 
@@ -132,11 +141,16 @@ Dependency Order: Infrastructure → API → Observability → Testing
 
 ## Phase 5: Testing & Validation
 
-- [x] T019 [P] Add unit tests for slug extraction in apps/api/src/middleware/**tests**/tenant-resolver.test.ts
-- [x] T020 [P] Add unit tests for license enforcement in apps/api/src/middleware/**tests**/tenant-resolver.test.ts
-- [x] T021 [P] Add unit tests for version checks in apps/api/src/middleware/**tests**/tenant-resolver.test.ts
-- [x] T022 [P] Add integration test for resolver middleware in apps/api/tests/integration/tenant-resolver.test.ts
-- [x] T023 [P] Add isolation test to verify no cross-tenant access in apps/api/tests/integration/isolation.test.ts
+- [x] T019 [P] Add unit tests for slug extraction in
+      apps/api/src/middleware/**tests**/tenant-resolver.test.ts
+- [x] T020 [P] Add unit tests for license enforcement in
+      apps/api/src/middleware/**tests**/tenant-resolver.test.ts
+- [x] T021 [P] Add unit tests for version checks in
+      apps/api/src/middleware/**tests**/tenant-resolver.test.ts
+- [x] T022 [P] Add integration test for resolver middleware in
+      apps/api/tests/integration/tenant-resolver.test.ts
+- [x] T023 [P] Add isolation test to verify no cross-tenant access in
+      apps/api/tests/integration/isolation.test.ts
 - [x] T024 [P] Add version mismatch test in apps/api/tests/integration/version-compatibility.test.ts
 
 ---

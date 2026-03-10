@@ -27,13 +27,15 @@
 
 ## 3. Executive Summary
 
-- Introduces `packages/api-client` — a zero-dependency, framework-agnostic HTTP client shared by MMC, Backoffice, and Frontoffice
+- Introduces `packages/api-client` — a zero-dependency, framework-agnostic HTTP client shared by
+  MMC, Backoffice, and Frontoffice
 - Replaces per-app duplicate HTTP client code with a single tested implementation
 - Adds automatic `Idempotency-Key` header (IETF standard) on all POST/PUT/PATCH/DELETE mutations
 - Adds automatic `X-Correlation-ID` propagation on every request via `crypto.randomUUID()`
 - Implements single-flight 401 token refresh with queued request retry
 - Provides `MockAdapter` for deterministic unit testing of API interactions
-- Enforces `@zidney/api-client` usage via ESLint `no-restricted-imports` (axios/got/ky/node-fetch) and `no-restricted-globals` (fetch)
+- Enforces `@zidney/api-client` usage via ESLint `no-restricted-imports` (axios/got/ky/node-fetch)
+  and `no-restricted-globals` (fetch)
 - No database changes, no migrations, no new API endpoints — UI-only change with trivial rollback
 
 ---
@@ -134,7 +136,8 @@ cd packages/api-client && npx vitest run --reporter=verbose
 
 ## 12. Stage Lifecycle Verification
 
-- [x] Stage Status updated in `specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_02_API_CLIENT_LAYER.md`
+- [x] Stage Status updated in
+      `specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_02_API_CLIENT_LAYER.md`
 - [x] .workflow-state.json updated to `PRODUCTION READY`
 - [x] README.md progress table complete
 - [x] All 7 step reports generated in `reports/`
@@ -158,7 +161,9 @@ Risk Level:
 - [ ] Medium
 - [ ] High
 
-Explain why: UI-only shared package with zero external dependencies. No database changes, no migrations, no new endpoints. All three app wrappers are thin factories. 90 unit tests. Rollback = revert branch.
+Explain why: UI-only shared package with zero external dependencies. No database changes, no
+migrations, no new endpoints. All three app wrappers are thin factories. 90 unit tests. Rollback =
+revert branch.
 
 ---
 

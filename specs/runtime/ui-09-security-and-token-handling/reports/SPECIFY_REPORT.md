@@ -1,14 +1,17 @@
 # Specify Report — STAGE_UI_09_SECURITY_AND_TOKEN_HANDLING
 
-**Step:** 1 — Specify
-**Timestamp:** 2026-03-01T00:00:00.000Z
-**Status:** COMPLETE
+**Step:** 1 — Specify **Timestamp:** 2026-03-01T00:00:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Specification for STAGE_UI_09_SECURITY_AND_TOKEN_HANDLING is complete. The spec defines the frontend security architecture across all three UI applications (MMC, Backoffice, Frontoffice), covering token storage policy, authorization header injection, session expiry handling, secure logout, route protection, XSS/CSRF mitigation, and license-locked response handling. All constitutional constraints are satisfied with zero clarification markers remaining. The requirements checklist passed all 41 items across five validation categories.
+Specification for STAGE_UI_09_SECURITY_AND_TOKEN_HANDLING is complete. The spec defines the frontend
+security architecture across all three UI applications (MMC, Backoffice, Frontoffice), covering
+token storage policy, authorization header injection, session expiry handling, secure logout, route
+protection, XSS/CSRF mitigation, and license-locked response handling. All constitutional
+constraints are satisfied with zero clarification markers remaining. The requirements checklist
+passed all 41 items across five validation categories.
 
 ---
 
@@ -42,19 +45,22 @@ FR-SEC-01 through FR-SEC-22 captured across domains:
 
 - **Token Storage**: In-memory only, no persistent browser storage (FR-SEC-01 to FR-SEC-04)
 - **Header Injection**: Centralised interceptor, omit when no token (FR-SEC-05 to FR-SEC-06)
-- **401 Handling**: Idempotent, standardised 4-step flow, concurrent 401 coalescing (FR-SEC-07 to FR-SEC-09)
+- **401 Handling**: Idempotent, standardised 4-step flow, concurrent 401 coalescing (FR-SEC-07 to
+  FR-SEC-09)
 - **Refresh**: Single-flight with queuing, failure triggers full logout (FR-SEC-10 to FR-SEC-12)
 - **Logout**: Full state clear, redirect, optional backend call (FR-SEC-13 to FR-SEC-14)
 - **Route Guards**: Authentication gate only, no business rules (FR-SEC-15 to FR-SEC-16)
 - **XSS**: No raw HTML injection, Vue template escaping (FR-SEC-17 to FR-SEC-18)
 - **Sensitive Data**: No persistence, redact in logs (FR-SEC-19 to FR-SEC-20)
-- **License Responses**: 423 locked display, 426 upgrade display, no override (FR-SEC-21 to FR-SEC-22)
+- **License Responses**: 423 locked display, 426 upgrade display, no override (FR-SEC-21 to
+  FR-SEC-22)
 
 ---
 
 ## Clarifications Required
 
-None — all decisions resolved using stage source constraints, constitution, and documented reasonable defaults.
+None — all decisions resolved using stage source constraints, constitution, and documented
+reasonable defaults.
 
 ---
 

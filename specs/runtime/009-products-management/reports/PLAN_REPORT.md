@@ -12,7 +12,8 @@
 - **Phase:** 2 – Platform MMC
 - **Stage:** STAGE_09_PRODUCTS
 - **Related Spec File:** `specs/phases/02_PLATFORM_MMC/STAGE_09_PRODUCTS.md`
-- **Related ADRs:** ADR-0001 (Database Per Tenant), ADR-0002 (Snapshot Attempt Model), ADR-0006 (Server Authoritative Time)
+- **Related ADRs:** ADR-0001 (Database Per Tenant), ADR-0002 (Snapshot Attempt Model), ADR-0006
+  (Server Authoritative Time)
 
 **Scope Validation:**
 
@@ -32,8 +33,10 @@ From `PROJECT_CONTEXT_PRIMER.md`:
 
 - ✅ **Database-per-tenant**: All product operations in master_db only (no tenant DB access)
 - ✅ **Middleware order**: License middleware executes before all route handlers
-- ✅ **License model**: Product is source entity for licenses (Relationship: Product → License → Workspace)
-- ✅ **Versioning model**: Forward-only migrations, schema_version increments, no destructive rollback
+- ✅ **License model**: Product is source entity for licenses (Relationship: Product → License →
+  Workspace)
+- ✅ **Versioning model**: Forward-only migrations, schema_version increments, no destructive
+  rollback
 - ✅ **Structured logging**: All operations use Pino with correlation IDs
 - ✅ **Server-authoritative time**: created_at and updated_at set by server only
 - ✅ **Transaction safety**: ACID compliance for all mutations
@@ -41,7 +44,8 @@ From `PROJECT_CONTEXT_PRIMER.md`:
 - ✅ **Version history immutability**: product_versions append-only, never modified
 - ✅ **Soft lock enforcement**: Products cannot bypass license middleware
 
-**Compliance Statement:** Implementation plan consistent with Zidney Constitution v1.2.0 — No violations detected.
+**Compliance Statement:** Implementation plan consistent with Zidney Constitution v1.2.0 — No
+violations detected.
 
 ---
 
@@ -249,12 +253,12 @@ All validation enforced at multiple layers:
  * Reversibility: Snapshot restore only (no rollback)
  */
 
-import { sql } from 'drizzle-orm'
-import type { Migration } from '../types'
+import { sql } from "drizzle-orm";
+import type { Migration } from "../types";
 
 export const migration: Migration = {
-  id: '001_initial_products_schema',
-  name: 'Create products, product_versions, and product_audit_logs tables',
+  id: "001_initial_products_schema",
+  name: "Create products, product_versions, and product_audit_logs tables",
 
   // Forward migration
   up: async (db) => {
@@ -278,14 +282,14 @@ export const migration: Migration = {
           slug ~ '^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$'
         )
       );
-    `)
+    `);
 
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug);
       CREATE INDEX IF NOT EXISTS idx_products_status ON products(status);
       CREATE INDEX IF NOT EXISTS idx_products_created_at ON products(created_at);
       CREATE INDEX IF NOT EXISTS idx_products_updated_at ON products(updated_at);
-    `)
+    `);
 
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS product_versions (
@@ -299,12 +303,12 @@ export const migration: Migration = {
         created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT unique_product_version UNIQUE (product_id, version_number)
       );
-    `)
+    `);
 
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_product_versions_product_id ON product_versions(product_id);
       CREATE INDEX IF NOT EXISTS idx_product_versions_version_number ON product_versions(version_number);
-    `)
+    `);
 
     await db.execute(sql`
       CREATE TABLE IF NOT EXISTS product_audit_logs (
@@ -318,22 +322,22 @@ export const migration: Migration = {
         timestamp TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
         CONSTRAINT valid_action CHECK (action IN ('CREATE', 'UPDATE', 'STATUS_CHANGE'))
       );
-    `)
+    `);
 
     await db.execute(sql`
       CREATE INDEX IF NOT EXISTS idx_audit_logs_product_id ON product_audit_logs(product_id);
       CREATE INDEX IF NOT EXISTS idx_audit_logs_action ON product_audit_logs(action);
       CREATE INDEX IF NOT EXISTS idx_audit_logs_timestamp ON product_audit_logs(timestamp DESC);
       CREATE INDEX IF NOT EXISTS idx_audit_logs_performed_by ON product_audit_logs(performed_by);
-    `)
+    `);
   },
 
   // No rollback: snapshot restore only per Zidney Constitution
   down: async (db) => {
     // Migration rollback is prohibited. Rollback via snapshot restoration only.
-    throw new Error('Rollback not supported. Use snapshot restore.')
+    throw new Error("Rollback not supported. Use snapshot restore.");
   },
-}
+};
 ```
 
 ---
@@ -350,7 +354,7 @@ await db.execute(sql`
       last_migration_id = '001_initial_products_schema',
       last_migration_timestamp = CURRENT_TIMESTAMP
   WHERE workspace_id = 'master'  -- master_db is identified as 'master'
-`)
+`);
 ```
 
 ---
@@ -404,7 +408,8 @@ Rollback is via snapshot restore only:
 2. Point connection pool to restored database
 3. Reset schema_version to pre-migration value
 
-**Reason:** Zidney is compliance-first platform. Audit trails must be immutable. Snapshot restore preserves immutability guarantee.
+**Reason:** Zidney is compliance-first platform. Audit trails must be immutable. Snapshot restore
+preserves immutability guarantee.
 
 ---
 
@@ -416,7 +421,7 @@ All DDL executed within single transaction:
 await db.transaction(async (tx) => {
   // All DDL here
   // Either all succeed or entire transaction rolls back
-})
+});
 ```
 
 **Benefit:** Master DB schema is always in consistent state
@@ -444,74 +449,59 @@ Before production deployment:
 All routes in `apps/api/src/routes/mmc/products.ts`
 
 ```typescript
-import { Hono } from 'hono'
-import type { Context } from 'hono'
-import { z } from 'zod'
+import { Hono } from "hono";
+import type { Context } from "hono";
+import { z } from "zod";
 
-const app = new Hono()
+const app = new Hono();
 
 // POST /api/v1/mmc/products – Create product
 app.post(
-  '/api/v1/mmc/products',
+  "/api/v1/mmc/products",
   authMiddleware, // Authenticate request
   licenseMiddleware, // Validate license (MMC admin)
   async (c: Context) => {
     // Route handler
-  }
-)
+  },
+);
 
 // GET /api/v1/mmc/products – List products (with filters)
-app.get(
-  '/api/v1/mmc/products',
-  authMiddleware,
-  licenseMiddleware,
-  async (c: Context) => {
-    // Route handler
-  }
-)
+app.get("/api/v1/mmc/products", authMiddleware, licenseMiddleware, async (c: Context) => {
+  // Route handler
+});
 
 // GET /api/v1/mmc/products/:id – Get single product
-app.get(
-  '/api/v1/mmc/products/:id',
-  authMiddleware,
-  licenseMiddleware,
-  async (c: Context) => {
-    // Route handler
-  }
-)
+app.get("/api/v1/mmc/products/:id", authMiddleware, licenseMiddleware, async (c: Context) => {
+  // Route handler
+});
 
 // PUT /api/v1/mmc/products/:id – Update product
-app.put(
-  '/api/v1/mmc/products/:id',
-  authMiddleware,
-  licenseMiddleware,
-  async (c: Context) => {
-    // Route handler
-  }
-)
+app.put("/api/v1/mmc/products/:id", authMiddleware, licenseMiddleware, async (c: Context) => {
+  // Route handler
+});
 
 // PATCH /api/v1/mmc/products/:id/status – Change product status
 app.patch(
-  '/api/v1/mmc/products/:id/status',
+  "/api/v1/mmc/products/:id/status",
   authMiddleware,
   licenseMiddleware,
   async (c: Context) => {
     // Route handler
-  }
-)
+  },
+);
 
 // GET /api/v1/mmc/products/:id/audit-log – Get audit trail
 app.get(
-  '/api/v1/mmc/products/:id/audit-log',
+  "/api/v1/mmc/products/:id/audit-log",
   authMiddleware,
   auditReadMiddleware, // AUDIT_READ permission required
   licenseMiddleware,
   async (c: Context) => {
     // Route handler
-  }
-)
+  },
+);
 
-export default app
+export default app;
 ```
 
 ---
@@ -535,71 +525,71 @@ All routes execute middleware in order:
 
 ```typescript
 export async function licenseMiddleware(c: Context, next: () => Promise<void>) {
-  const workspaceId = c.get('workspaceId') // From JWT
-  const userId = c.get('userId')
-  const correlationId = c.get('correlationId')
+  const workspaceId = c.get("workspaceId"); // From JWT
+  const userId = c.get("userId");
+  const correlationId = c.get("correlationId");
 
   // Query master DB: GET license status for workspace
-  const license = await getLicenseForWorkspace(workspaceId)
+  const license = await getLicenseForWorkspace(workspaceId);
 
   if (!license) {
     logStructured({
-      level: 'warn',
-      service: 'api',
-      action: 'license_validation_failed',
+      level: "warn",
+      service: "api",
+      action: "license_validation_failed",
       workspaceId,
       userId,
       correlationId,
-      reason: 'LICENSE_NOT_FOUND',
-    })
+      reason: "LICENSE_NOT_FOUND",
+    });
     return c.json(
       {
         success: false,
-        error: { code: 'LICENSE_NOT_FOUND', message: 'Invalid workspace' },
+        error: { code: "LICENSE_NOT_FOUND", message: "Invalid workspace" },
       },
-      404
-    )
+      404,
+    );
   }
 
-  if (license.status === 'SOFT_LOCKED') {
+  if (license.status === "SOFT_LOCKED") {
     logStructured({
-      level: 'warn',
-      service: 'api',
-      action: 'license_soft_locked',
+      level: "warn",
+      service: "api",
+      action: "license_soft_locked",
       workspaceId,
       correlationId,
-    })
+    });
     return c.json(
       {
         success: false,
-        error: { code: 'WORKSPACE_LOCKED', message: 'Workspace is locked' },
+        error: { code: "WORKSPACE_LOCKED", message: "Workspace is locked" },
       },
-      423
-    ) // Locked
+      423,
+    ); // Locked
   }
 
-  if (license.status === 'ARCHIVED') {
+  if (license.status === "ARCHIVED") {
     logStructured({
-      level: 'warn',
-      service: 'api',
-      action: 'license_archived',
+      level: "warn",
+      service: "api",
+      action: "license_archived",
       workspaceId,
       correlationId,
-    })
+    });
     return c.json(
       {
         success: false,
-        error: { code: 'WORKSPACE_ARCHIVED', message: 'Workspace is archived' },
+        error: { code: "WORKSPACE_ARCHIVED", message: "Workspace is archived" },
       },
-      403
-    )
+      403,
+    );
   }
 
   // Store license context for route handler
-  c.set('license', license)
-  c.set('workspaceId', workspaceId)
+  c.set("license", license);
+  c.set("workspaceId", workspaceId);
 
-  await next()
+  await next();
 }
 ```
 
@@ -622,31 +612,22 @@ const createProductSchema = z.object({
     .regex(/^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/),
   description: z.string().max(1000).optional(),
   enabled_modules: z
-    .array(
-      z.enum([
-        'MCQ',
-        'TRADITIONAL_EXAMS',
-        'EXERCISES',
-        'LIBRARY',
-        'LIVES',
-        'FORUM',
-      ])
-    )
+    .array(z.enum(["MCQ", "TRADITIONAL_EXAMS", "EXERCISES", "LIBRARY", "LIVES", "FORUM"]))
     .min(1)
     .max(10),
-})
+});
 
-type CreateProductRequest = z.infer<typeof createProductSchema>
+type CreateProductRequest = z.infer<typeof createProductSchema>;
 
 // POST /api/v1/mmc/products request body format:
 interface CreateProductBody {
   name: {
-    en: string
-    ar?: string
-  }
-  slug: string
-  description?: string
-  enabled_modules: Module[]
+    en: string;
+    ar?: string;
+  };
+  slug: string;
+  description?: string;
+  enabled_modules: Module[];
 }
 ```
 
@@ -707,12 +688,12 @@ interface ApiResponse<T> {
 
 ```typescript
 interface ListProductsResponse {
-  data: ProductResponse[]
+  data: ProductResponse[];
   pagination: {
-    limit: number
-    offset: number
-    total: number
-  }
+    limit: number;
+    offset: number;
+    total: number;
+  };
 }
 ```
 
@@ -722,33 +703,33 @@ interface ListProductsResponse {
 
 ```typescript
 interface AuditLogEntry {
-  id: string
-  product_id: string
-  action: 'CREATE' | 'UPDATE' | 'STATUS_CHANGE'
-  previous_version: number | null
-  new_version: number | null
+  id: string;
+  product_id: string;
+  action: "CREATE" | "UPDATE" | "STATUS_CHANGE";
+  previous_version: number | null;
+  new_version: number | null;
   changed_fields: Record<
     string,
     {
-      old: unknown
-      new: unknown
+      old: unknown;
+      new: unknown;
     }
-  >
+  >;
   performed_by: {
-    id: string
-    email: string
-    name: string
-  }
-  timestamp: string // ISO 8601
+    id: string;
+    email: string;
+    name: string;
+  };
+  timestamp: string; // ISO 8601
 }
 
 interface ListAuditLogsResponse {
-  data: AuditLogEntry[]
+  data: AuditLogEntry[];
   pagination: {
-    limit: number
-    offset: number
-    total: number
-  }
+    limit: number;
+    offset: number;
+    total: number;
+  };
 }
 ```
 
@@ -847,25 +828,25 @@ All business logic in `packages/domain-core/src/products/productService.ts`
 // Domain module: packages/domain-core/src/products/
 
 export interface CreateProductInput {
-  name: { en: string; ar?: string }
-  slug: string
-  description?: string
-  enabled_modules: Module[]
-  performed_by: UUID
+  name: { en: string; ar?: string };
+  slug: string;
+  description?: string;
+  enabled_modules: Module[];
+  performed_by: UUID;
 }
 
 export interface UpdateProductInput {
-  id: UUID
-  name?: { en: string; ar?: string }
-  description?: string
-  enabled_modules?: Module[]
-  performed_by: UUID
+  id: UUID;
+  name?: { en: string; ar?: string };
+  description?: string;
+  enabled_modules?: Module[];
+  performed_by: UUID;
 }
 
 export interface StatusChangeInput {
-  id: UUID
-  status: 'ACTIVE' | 'INACTIVE'
-  performed_by: UUID
+  id: UUID;
+  status: "ACTIVE" | "INACTIVE";
+  performed_by: UUID;
 }
 
 /**
@@ -876,14 +857,11 @@ export interface StatusChangeInput {
  * - Insert version record
  * - Insert audit log
  */
-export async function createProduct(
-  input: CreateProductInput,
-  db: Database
-): Promise<Product> {
+export async function createProduct(input: CreateProductInput, db: Database): Promise<Product> {
   // Validation layer
-  validateProductName(input.name)
-  validateSlugUniqueness(input.slug, db)
-  validateModulesEnum(input.enabled_modules)
+  validateProductName(input.name);
+  validateSlugUniqueness(input.slug, db);
+  validateModulesEnum(input.enabled_modules);
 
   // Create with transaction
   const product = await db.transaction(async (tx) => {
@@ -894,11 +872,11 @@ export async function createProduct(
       slug: input.slug.toLowerCase(),
       description: input.description || null,
       enabled_modules: JSON.stringify(input.enabled_modules),
-      status: 'ACTIVE', // Default
+      status: "ACTIVE", // Default
       current_version: 1,
       created_at: new Date(),
       updated_at: new Date(),
-    })
+    });
 
     // Insert version 1
     await tx.insert(productVersions).values({
@@ -908,15 +886,15 @@ export async function createProduct(
       name: input.name,
       enabled_modules: JSON.stringify(input.enabled_modules),
       description: input.description || null,
-      change_summary: 'Initial version',
+      change_summary: "Initial version",
       created_at: new Date(),
-    })
+    });
 
     // Insert audit log
     await tx.insert(productAuditLogs).values({
       id: generateUUID(),
       product_id: newProduct.id,
-      action: 'CREATE',
+      action: "CREATE",
       previous_version: null,
       new_version: 1,
       changed_fields: JSON.stringify({
@@ -926,12 +904,12 @@ export async function createProduct(
       }),
       performed_by: input.performed_by,
       timestamp: new Date(),
-    })
+    });
 
-    return newProduct
-  })
+    return newProduct;
+  });
 
-  return product
+  return product;
 }
 
 /**
@@ -942,52 +920,43 @@ export async function createProduct(
  * - Insert new version record
  * - Insert audit log
  */
-export async function updateProduct(
-  input: UpdateProductInput,
-  db: Database
-): Promise<Product> {
+export async function updateProduct(input: UpdateProductInput, db: Database): Promise<Product> {
   // Fetch existing product
-  const existing = await getProductById(input.id, db)
-  if (!existing) throw new Error('PRODUCT_NOT_FOUND')
+  const existing = await getProductById(input.id, db);
+  if (!existing) throw new Error("PRODUCT_NOT_FOUND");
 
   // Validation
-  if (input.name) validateProductName(input.name)
-  if (input.enabled_modules) validateModulesEnum(input.enabled_modules)
+  if (input.name) validateProductName(input.name);
+  if (input.enabled_modules) validateModulesEnum(input.enabled_modules);
 
   // Check if actual changes (prevent unnecessary version bump)
   const hasChanges =
-    (input.name &&
-      JSON.stringify(input.name) !== JSON.stringify(existing.name)) ||
-    (input.description !== undefined &&
-      input.description !== existing.description) ||
+    (input.name && JSON.stringify(input.name) !== JSON.stringify(existing.name)) ||
+    (input.description !== undefined && input.description !== existing.description) ||
     (input.enabled_modules &&
-      JSON.stringify(input.enabled_modules) !==
-        JSON.stringify(existing.enabled_modules))
+      JSON.stringify(input.enabled_modules) !== JSON.stringify(existing.enabled_modules));
 
   if (!hasChanges) {
-    return existing // No version bump
+    return existing; // No version bump
   }
 
   // Update with transaction
   const updated = await db.transaction(async (tx) => {
-    const newVersion = existing.current_version + 1
+    const newVersion = existing.current_version + 1;
 
     // Update product record
     await tx
       .update(products)
       .set({
         name: input.name || existing.name,
-        description:
-          input.description !== undefined
-            ? input.description
-            : existing.description,
+        description: input.description !== undefined ? input.description : existing.description,
         enabled_modules: input.enabled_modules
           ? JSON.stringify(input.enabled_modules)
           : existing.enabled_modules,
         current_version: newVersion,
         updated_at: new Date(),
       })
-      .where(eq(products.id, input.id))
+      .where(eq(products.id, input.id));
 
     // Insert new version record
     await tx.insert(productVersions).values({
@@ -998,30 +967,27 @@ export async function updateProduct(
       enabled_modules: input.enabled_modules
         ? JSON.stringify(input.enabled_modules)
         : existing.enabled_modules,
-      description:
-        input.description !== undefined
-          ? input.description
-          : existing.description,
+      description: input.description !== undefined ? input.description : existing.description,
       change_summary: generateChangeSummary(existing, input),
       created_at: new Date(),
-    })
+    });
 
     // Insert audit log
     await tx.insert(productAuditLogs).values({
       id: generateUUID(),
       product_id: input.id,
-      action: 'UPDATE',
+      action: "UPDATE",
       previous_version: existing.current_version,
       new_version: newVersion,
       changed_fields: JSON.stringify(computeFieldDiff(existing, input)),
       performed_by: input.performed_by,
       timestamp: new Date(),
-    })
+    });
 
-    return { ...existing, ...input, current_version: newVersion }
-  })
+    return { ...existing, ...input, current_version: newVersion };
+  });
 
-  return updated
+  return updated;
 }
 
 /**
@@ -1035,13 +1001,13 @@ export async function updateProduct(
  */
 export async function changeProductStatus(
   input: StatusChangeInput,
-  db: Database
+  db: Database,
 ): Promise<Product> {
-  const existing = await getProductById(input.id, db)
-  if (!existing) throw new Error('PRODUCT_NOT_FOUND')
+  const existing = await getProductById(input.id, db);
+  if (!existing) throw new Error("PRODUCT_NOT_FOUND");
 
   if (existing.status === input.status) {
-    return existing // No change
+    return existing; // No change
   }
 
   const updated = await db.transaction(async (tx) => {
@@ -1052,13 +1018,13 @@ export async function changeProductStatus(
         status: input.status,
         updated_at: new Date(),
       })
-      .where(eq(products.id, input.id))
+      .where(eq(products.id, input.id));
 
     // Insert audit log (NO VERSION CHANGE)
     await tx.insert(productAuditLogs).values({
       id: generateUUID(),
       product_id: input.id,
-      action: 'STATUS_CHANGE',
+      action: "STATUS_CHANGE",
       previous_version: null,
       new_version: null,
       changed_fields: JSON.stringify({
@@ -1066,34 +1032,28 @@ export async function changeProductStatus(
       }),
       performed_by: input.performed_by,
       timestamp: new Date(),
-    })
+    });
 
-    return { ...existing, status: input.status }
-  })
+    return { ...existing, status: input.status };
+  });
 
-  return updated
+  return updated;
 }
 
 /**
  * Get product by ID
  */
-export async function getProductById(
-  id: UUID,
-  db: Database
-): Promise<Product | null> {
-  const result = await db.select().from(products).where(eq(products.id, id))
-  return result.length > 0 ? result[0] : null
+export async function getProductById(id: UUID, db: Database): Promise<Product | null> {
+  const result = await db.select().from(products).where(eq(products.id, id));
+  return result.length > 0 ? result[0] : null;
 }
 
 /**
  * Get product by slug (for UI lookups)
  */
-export async function getProductBySlug(
-  slug: string,
-  db: Database
-): Promise<Product | null> {
-  const result = await db.select().from(products).where(eq(products.slug, slug))
-  return result.length > 0 ? result[0] : null
+export async function getProductBySlug(slug: string, db: Database): Promise<Product | null> {
+  const result = await db.select().from(products).where(eq(products.slug, slug));
+  return result.length > 0 ? result[0] : null;
 }
 
 /**
@@ -1104,50 +1064,45 @@ export async function getProductBySlug(
  */
 export async function listProducts(
   query: {
-    status?: 'ACTIVE' | 'INACTIVE' | 'all'
-    limit?: number
-    offset?: number
-    search?: string // Search by name or slug
+    status?: "ACTIVE" | "INACTIVE" | "all";
+    limit?: number;
+    offset?: number;
+    search?: string; // Search by name or slug
   },
-  db: Database
+  db: Database,
 ): Promise<{ data: Product[]; total: number }> {
-  let q = db.select().from(products)
+  let q = db.select().from(products);
 
   // Default: ACTIVE only
-  if (query.status === 'all') {
+  if (query.status === "all") {
     // Return both ACTIVE and INACTIVE
-  } else if (query.status === 'INACTIVE') {
-    q = q.where(eq(products.status, 'INACTIVE'))
+  } else if (query.status === "INACTIVE") {
+    q = q.where(eq(products.status, "INACTIVE"));
   } else {
     // Default: ACTIVE
-    q = q.where(eq(products.status, 'ACTIVE'))
+    q = q.where(eq(products.status, "ACTIVE"));
   }
 
   // Search filter (optional)
   if (query.search) {
-    const searchPattern = `%${query.search.toLowerCase()}%`
+    const searchPattern = `%${query.search.toLowerCase()}%`;
     q = q.where(
       or(
         sql`LOWER(products.name->>'en') LIKE ${searchPattern}`,
         sql`LOWER(products.name->>'ar') LIKE ${searchPattern}`,
-        sql`LOWER(products.slug) LIKE ${searchPattern}`
-      )
-    )
+        sql`LOWER(products.slug) LIKE ${searchPattern}`,
+      ),
+    );
   }
 
   // Pagination
-  const limit = Math.min(query.limit || 50, 100) // Max 100
-  const offset = query.offset || 0
+  const limit = Math.min(query.limit || 50, 100); // Max 100
+  const offset = query.offset || 0;
 
-  const total = await db
-    .select({ count: countDistinct(products.id) })
-    .from(products)
-  const data = await q
-    .orderBy(desc(products.created_at))
-    .limit(limit)
-    .offset(offset)
+  const total = await db.select({ count: countDistinct(products.id) }).from(products);
+  const data = await q.orderBy(desc(products.created_at)).limit(limit).offset(offset);
 
-  return { data, total: total[0].count }
+  return { data, total: total[0].count };
 }
 
 /**
@@ -1158,26 +1113,26 @@ export async function listProducts(
  * Returns: 409 if licenses exist
  */
 export async function deleteProduct(id: UUID, db: Database): Promise<void> {
-  const product = await getProductById(id, db)
-  if (!product) throw new Error('PRODUCT_NOT_FOUND')
+  const product = await getProductById(id, db);
+  if (!product) throw new Error("PRODUCT_NOT_FOUND");
 
   // Check if any licenses reference this product
-  const licenseCount = await countLicensesByProductId(id, db)
+  const licenseCount = await countLicensesByProductId(id, db);
   if (licenseCount > 0) {
-    throw new Error('PRODUCT_HAS_LICENSES')
+    throw new Error("PRODUCT_HAS_LICENSES");
   }
 
   // Hard delete (no soft delete)
   await db.transaction(async (tx) => {
     // Delete audit logs first (cascade)
-    await tx.delete(productAuditLogs).where(eq(productAuditLogs.product_id, id))
+    await tx.delete(productAuditLogs).where(eq(productAuditLogs.product_id, id));
 
     // Delete versions
-    await tx.delete(productVersions).where(eq(productVersions.product_id, id))
+    await tx.delete(productVersions).where(eq(productVersions.product_id, id));
 
     // Delete product
-    await tx.delete(products).where(eq(products.id, id))
-  })
+    await tx.delete(products).where(eq(products.id, id));
+  });
 }
 
 /**
@@ -1186,44 +1141,38 @@ export async function deleteProduct(id: UUID, db: Database): Promise<void> {
 export async function getProductAuditLog(
   productId: UUID,
   query: {
-    limit?: number
-    offset?: number
-    action?: string
-    from_date?: string // ISO 8601
-    to_date?: string // ISO 8601
+    limit?: number;
+    offset?: number;
+    action?: string;
+    from_date?: string; // ISO 8601
+    to_date?: string; // ISO 8601
   },
-  db: Database
+  db: Database,
 ): Promise<{ data: AuditLogEntry[]; total: number }> {
-  let q = db
-    .select()
-    .from(productAuditLogs)
-    .where(eq(productAuditLogs.product_id, productId))
+  let q = db.select().from(productAuditLogs).where(eq(productAuditLogs.product_id, productId));
 
   if (query.action) {
-    q = q.where(eq(productAuditLogs.action, query.action))
+    q = q.where(eq(productAuditLogs.action, query.action));
   }
 
   if (query.from_date) {
-    q = q.where(gte(productAuditLogs.timestamp, new Date(query.from_date)))
+    q = q.where(gte(productAuditLogs.timestamp, new Date(query.from_date)));
   }
 
   if (query.to_date) {
-    q = q.where(lte(productAuditLogs.timestamp, new Date(query.to_date)))
+    q = q.where(lte(productAuditLogs.timestamp, new Date(query.to_date)));
   }
 
-  const limit = Math.min(query.limit || 50, 100)
-  const offset = query.offset || 0
+  const limit = Math.min(query.limit || 50, 100);
+  const offset = query.offset || 0;
 
   const total = await db
     .select({ count: countDistinct(productAuditLogs.id) })
     .from(productAuditLogs)
-    .where(eq(productAuditLogs.product_id, productId))
-  const data = await q
-    .orderBy(desc(productAuditLogs.timestamp))
-    .limit(limit)
-    .offset(offset)
+    .where(eq(productAuditLogs.product_id, productId));
+  const data = await q.orderBy(desc(productAuditLogs.timestamp)).limit(limit).offset(offset);
 
-  return { data, total: total[0].count }
+  return { data, total: total[0].count };
 }
 ```
 
@@ -1235,84 +1184,64 @@ export async function getProductAuditLog(
 // packages/validation/src/products/
 
 export function validateProductName(name: { en: string; ar?: string }): void {
-  if (!name.en || typeof name.en !== 'string' || name.en.trim() === '') {
-    throw new Error('INVALID_NAME_LOCALIZATION: English name is required')
+  if (!name.en || typeof name.en !== "string" || name.en.trim() === "") {
+    throw new Error("INVALID_NAME_LOCALIZATION: English name is required");
   }
 
   if (name.en.length < 1 || name.en.length > 255) {
-    throw new Error(
-      'INVALID_NAME_LOCALIZATION: English name must be 1-255 characters'
-    )
+    throw new Error("INVALID_NAME_LOCALIZATION: English name must be 1-255 characters");
   }
 
   if (name.ar && (name.ar.length < 1 || name.ar.length > 255)) {
-    throw new Error(
-      'INVALID_NAME_LOCALIZATION: Arabic name must be 1-255 characters if provided'
-    )
+    throw new Error("INVALID_NAME_LOCALIZATION: Arabic name must be 1-255 characters if provided");
   }
 }
 
 export function validateModulesEnum(modules: string[]): void {
-  const validModules = [
-    'MCQ',
-    'TRADITIONAL_EXAMS',
-    'EXERCISES',
-    'LIBRARY',
-    'LIVES',
-    'FORUM',
-  ]
+  const validModules = ["MCQ", "TRADITIONAL_EXAMS", "EXERCISES", "LIBRARY", "LIVES", "FORUM"];
 
   if (!Array.isArray(modules) || modules.length === 0) {
-    throw new Error('INVALID_MODULE_ENUM: At least one module required')
+    throw new Error("INVALID_MODULE_ENUM: At least one module required");
   }
 
   for (const module of modules) {
     if (!validModules.includes(module)) {
-      throw new Error(`INVALID_MODULE_ENUM: Unknown module '${module}'`)
+      throw new Error(`INVALID_MODULE_ENUM: Unknown module '${module}'`);
     }
   }
 }
 
 export function validateSlug(slug: string): void {
-  const slugRegex = /^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/
+  const slugRegex = /^[a-z0-9][a-z0-9-]*[a-z0-9]$|^[a-z0-9]$/;
 
-  if (!slug || typeof slug !== 'string') {
-    throw new Error('INVALID_SLUG: Slug must be a non-empty string')
+  if (!slug || typeof slug !== "string") {
+    throw new Error("INVALID_SLUG: Slug must be a non-empty string");
   }
 
   if (!slugRegex.test(slug)) {
     throw new Error(
-      'INVALID_SLUG: Slug must be lowercase alphanumeric with dashes (no spaces, uppercase)'
-    )
+      "INVALID_SLUG: Slug must be lowercase alphanumeric with dashes (no spaces, uppercase)",
+    );
   }
 
   if (slug.length > 255) {
-    throw new Error('INVALID_SLUG: Slug must be under 255 characters')
+    throw new Error("INVALID_SLUG: Slug must be under 255 characters");
   }
 }
 
-export async function validateSlugUniqueness(
-  slug: string,
-  db: Database
-): Promise<void> {
-  const existing = await db
-    .select()
-    .from(products)
-    .where(eq(products.slug, slug))
+export async function validateSlugUniqueness(slug: string, db: Database): Promise<void> {
+  const existing = await db.select().from(products).where(eq(products.slug, slug));
 
   if (existing.length > 0) {
-    throw new Error('DUPLICATE_SLUG')
+    throw new Error("DUPLICATE_SLUG");
   }
 }
 
-export function getProductName(
-  product: Product,
-  language: string = 'en'
-): string {
-  if (language === 'ar' && product.name.ar) {
-    return product.name.ar
+export function getProductName(product: Product, language: string = "en"): string {
+  if (language === "ar" && product.name.ar) {
+    return product.name.ar;
   }
-  return product.name.en // Fallback to English
+  return product.name.en; // Fallback to English
 }
 ```
 
@@ -1324,50 +1253,47 @@ export function getProductName(
 // packages/types/src/enums/Module.ts
 
 export enum Module {
-  MCQ = 'MCQ',
-  TRADITIONAL_EXAMS = 'TRADITIONAL_EXAMS',
-  EXERCISES = 'EXERCISES',
-  LIBRARY = 'LIBRARY',
-  LIVES = 'LIVES',
-  FORUM = 'FORUM',
+  MCQ = "MCQ",
+  TRADITIONAL_EXAMS = "TRADITIONAL_EXAMS",
+  EXERCISES = "EXERCISES",
+  LIBRARY = "LIBRARY",
+  LIVES = "LIVES",
+  FORUM = "FORUM",
 }
 
 export function isValidModule(value: unknown): value is Module {
-  return Object.values(Module).includes(value as Module)
+  return Object.values(Module).includes(value as Module);
 }
 
-export function getModuleLabel(
-  module: Module,
-  language: 'en' | 'ar' = 'en'
-): string {
-  const labels: Record<Module, Record<'en' | 'ar', string>> = {
+export function getModuleLabel(module: Module, language: "en" | "ar" = "en"): string {
+  const labels: Record<Module, Record<"en" | "ar", string>> = {
     [Module.MCQ]: {
-      en: 'Multiple Choice Questions',
-      ar: 'أسئلة الاختيار من متعدد',
+      en: "Multiple Choice Questions",
+      ar: "أسئلة الاختيار من متعدد",
     },
     [Module.TRADITIONAL_EXAMS]: {
-      en: 'Traditional Exams',
-      ar: 'الاختبارات التقليدية',
+      en: "Traditional Exams",
+      ar: "الاختبارات التقليدية",
     },
     [Module.EXERCISES]: {
-      en: 'Exercises',
-      ar: 'التمارين',
+      en: "Exercises",
+      ar: "التمارين",
     },
     [Module.LIBRARY]: {
-      en: 'Content Library',
-      ar: 'مكتبة المحتوى',
+      en: "Content Library",
+      ar: "مكتبة المحتوى",
     },
     [Module.LIVES]: {
-      en: 'Live Sessions',
-      ar: 'الجلسات المباشرة',
+      en: "Live Sessions",
+      ar: "الجلسات المباشرة",
     },
     [Module.FORUM]: {
-      en: 'Forum',
-      ar: 'المنتدى',
+      en: "Forum",
+      ar: "المنتدى",
     },
-  }
+  };
 
-  return labels[module][language]
+  return labels[module][language];
 }
 ```
 
@@ -1392,21 +1318,21 @@ Async provisioning begins in **Stage 10** (License Engine).
 All logs use **Pino** structured logging:
 
 ```typescript
-import { createPinoLogger } from 'packages/logger'
+import { createPinoLogger } from "packages/logger";
 
-const logger = createPinoLogger('api-products')
+const logger = createPinoLogger("api-products");
 
 // Example log entry
 logger.info({
-  action: 'product_created',
-  productId: 'uuid',
-  slug: 'basic-exam',
-  requestId: 'correlation-id',
-  workspaceId: 'workspace-uuid',
-  userId: 'admin-uuid',
-  enabled_modules: ['MCQ', 'EXERCISES'],
-  timestamp: '2026-02-22T10:30:00Z',
-})
+  action: "product_created",
+  productId: "uuid",
+  slug: "basic-exam",
+  requestId: "correlation-id",
+  workspaceId: "workspace-uuid",
+  userId: "admin-uuid",
+  enabled_modules: ["MCQ", "EXERCISES"],
+  timestamp: "2026-02-22T10:30:00Z",
+});
 ```
 
 ---
@@ -1418,18 +1344,18 @@ Every request carries `correlationId` (request_id):
 ```typescript
 // Middleware: Generate correlation ID
 export function correlationIdMiddleware(c: Context, next: () => Promise<void>) {
-  const correlationId = c.req.header('x-correlation-id') || generateUUID()
-  c.set('correlationId', correlationId)
-  c.res.headers.set('x-correlation-id', correlationId)
-  await next()
+  const correlationId = c.req.header("x-correlation-id") || generateUUID();
+  c.set("correlationId", correlationId);
+  c.res.headers.set("x-correlation-id", correlationId);
+  await next();
 }
 
 // All logs include correlationId:
 logger.info({
-  correlationId: c.get('correlationId'),
-  action: 'product_updated',
+  correlationId: c.get("correlationId"),
+  action: "product_updated",
   // ... more fields
-})
+});
 ```
 
 ---
@@ -1440,21 +1366,21 @@ Every log entry must include:
 
 ```typescript
 interface LogEntry {
-  timestamp: string // ISO 8601
-  level: 'error' | 'warn' | 'info' | 'debug'
-  service: string // 'api' | 'worker' | 'auth'
-  correlationId: string // Request ID
-  workspaceId?: string // Tenant identifier (if applicable)
-  workspaceSlug?: string // Human-readable tenant
-  userId?: string // User making request
-  action: string // What happened (e.g., 'product_created')
-  productId?: string // (If applicable to this action)
+  timestamp: string; // ISO 8601
+  level: "error" | "warn" | "info" | "debug";
+  service: string; // 'api' | 'worker' | 'auth'
+  correlationId: string; // Request ID
+  workspaceId?: string; // Tenant identifier (if applicable)
+  workspaceSlug?: string; // Human-readable tenant
+  userId?: string; // User making request
+  action: string; // What happened (e.g., 'product_created')
+  productId?: string; // (If applicable to this action)
   error?: {
-    code: string
-    message: string
-    stack?: string
-  }
-  durationMs?: number // How long operation took
+    code: string;
+    message: string;
+    stack?: string;
+  };
+  durationMs?: number; // How long operation took
 }
 ```
 
@@ -1466,43 +1392,43 @@ interface LogEntry {
 
 ```typescript
 logger.info({
-  level: 'info',
-  service: 'api',
-  action: 'product_create_start',
+  level: "info",
+  service: "api",
+  action: "product_create_start",
   correlationId,
   workspaceId,
   userId,
   slug: payload.slug,
-})
+});
 
 try {
-  const product = await createProduct(payload, db)
+  const product = await createProduct(payload, db);
 
   logger.info({
-    level: 'info',
-    service: 'api',
-    action: 'product_created',
+    level: "info",
+    service: "api",
+    action: "product_created",
     correlationId,
     productId: product.id,
     slug: product.slug,
-    status: 'success',
-  })
+    status: "success",
+  });
 
-  return c.json({ success: true, data: product }, 201)
+  return c.json({ success: true, data: product }, 201);
 } catch (error) {
   logger.error({
-    level: 'error',
-    service: 'api',
-    action: 'product_create_failed',
+    level: "error",
+    service: "api",
+    action: "product_create_failed",
     correlationId,
     slug: payload.slug,
     error: {
       code: error.code,
       message: error.message,
     },
-  })
+  });
 
-  return handleError(c, error)
+  return handleError(c, error);
 }
 ```
 
@@ -1512,24 +1438,21 @@ try {
 
 ```typescript
 logger.info({
-  action: 'product_update_start',
+  action: "product_update_start",
   correlationId,
   productId: id,
   changes: Object.keys(payload),
-})
+});
 
-const updated = await updateProduct(
-  { ...payload, id, performed_by: userId },
-  db
-)
+const updated = await updateProduct({ ...payload, id, performed_by: userId }, db);
 
 logger.info({
-  action: 'product_updated',
+  action: "product_updated",
   correlationId,
   productId: updated.id,
   oldVersion: updated.current_version - 1,
   newVersion: updated.current_version,
-})
+});
 ```
 
 ---
@@ -1538,12 +1461,12 @@ logger.info({
 
 ```typescript
 logger.info({
-  action: 'product_status_change',
+  action: "product_status_change",
   correlationId,
   productId: id,
   oldStatus: existing.status,
   newStatus: newStatus,
-})
+});
 ```
 
 ---
@@ -1552,7 +1475,7 @@ logger.info({
 
 ```typescript
 logger.info({
-  action: 'audit_log_queried',
+  action: "audit_log_queried",
   correlationId,
   userId, // Must be admin
   productId: id,
@@ -1562,7 +1485,7 @@ logger.info({
     action: query.action,
     date_range: [query.from_date, query.to_date],
   },
-})
+});
 ```
 
 ---
@@ -1589,37 +1512,37 @@ logger.info({
 ```typescript
 // apps/api/src/middleware/rateLimit.ts
 
-import { Redis } from 'redis'
-import { Context } from 'hono'
+import { Redis } from "redis";
+import { Context } from "hono";
 
-const redis = new Redis(process.env.REDIS_URL)
+const redis = new Redis(process.env.REDIS_URL);
 
 interface RateLimitConfig {
-  key: string // Redis key prefix
-  limit: number // Max requests
-  window: number // Time window in seconds
+  key: string; // Redis key prefix
+  limit: number; // Max requests
+  window: number; // Time window in seconds
 }
 
 export async function rateLimitMiddleware(config: RateLimitConfig, c: Context) {
-  const userId = c.get('user')?.id
+  const userId = c.get("user")?.id;
   if (!userId) {
-    return c.json({ error: 'Unauthorized' }, 401)
+    return c.json({ error: "Unauthorized" }, 401);
   }
 
-  const key = `${config.key}:${userId}`
-  const current = await redis.incr(key)
+  const key = `${config.key}:${userId}`;
+  const current = await redis.incr(key);
 
   if (current === 1) {
-    await redis.expire(key, config.window)
+    await redis.expire(key, config.window);
   }
 
-  const remaining = Math.max(0, config.limit - current)
-  const resetAt = await redis.ttl(key)
+  const remaining = Math.max(0, config.limit - current);
+  const resetAt = await redis.ttl(key);
 
   // Set rate limit headers
-  c.header('X-RateLimit-Limit', config.limit.toString())
-  c.header('X-RateLimit-Remaining', remaining.toString())
-  c.header('X-RateLimit-Reset', (Date.now() + resetAt * 1000).toString())
+  c.header("X-RateLimit-Limit", config.limit.toString());
+  c.header("X-RateLimit-Remaining", remaining.toString());
+  c.header("X-RateLimit-Reset", (Date.now() + resetAt * 1000).toString());
 
   if (current > config.limit) {
     return c.json(
@@ -1627,15 +1550,15 @@ export async function rateLimitMiddleware(config: RateLimitConfig, c: Context) {
         success: false,
         data: null,
         error: {
-          code: 'RATE_LIMIT_EXCEEDED',
+          code: "RATE_LIMIT_EXCEEDED",
           message: `Rate limit exceeded. Max ${config.limit} requests per ${config.window}s`,
         },
       },
-      429
-    )
+      429,
+    );
   }
 
-  return null // Pass through
+  return null; // Pass through
 }
 ```
 
@@ -1644,22 +1567,22 @@ export async function rateLimitMiddleware(config: RateLimitConfig, c: Context) {
 ```typescript
 // Apply rate limiting to all product routes
 router.post(
-  '/products',
-  rateLimitMiddleware({ key: 'products:create', limit: 10, window: 60 }),
-  createProductHandler
-)
+  "/products",
+  rateLimitMiddleware({ key: "products:create", limit: 10, window: 60 }),
+  createProductHandler,
+);
 
 router.get(
-  '/products',
-  rateLimitMiddleware({ key: 'products:list', limit: 100, window: 60 }),
-  listProductsHandler
-)
+  "/products",
+  rateLimitMiddleware({ key: "products:list", limit: 100, window: 60 }),
+  listProductsHandler,
+);
 
 router.put(
-  '/products/:id',
-  rateLimitMiddleware({ key: 'products:update', limit: 20, window: 60 }),
-  updateProductHandler
-)
+  "/products/:id",
+  rateLimitMiddleware({ key: "products:update", limit: 20, window: 60 }),
+  updateProductHandler,
+);
 ```
 
 **Metrics Emitted**:
@@ -1748,16 +1671,16 @@ router.post('/products', async (c) => {
 
 ```typescript
 const productUpdateLatency = new Histogram({
-  name: 'product_update_latency_ms',
-  help: 'Product update latency',
+  name: "product_update_latency_ms",
+  help: "Product update latency",
   buckets: [10, 25, 50, 100, 250, 500, 1000],
-})
+});
 
 const productUpdateTotal = new Counter({
-  name: 'product_update_total',
-  help: 'Total product updates',
-  labelNames: ['field_changed', 'status'],
-})
+  name: "product_update_total",
+  help: "Total product updates",
+  labelNames: ["field_changed", "status"],
+});
 
 // Middleware to track which fields were changed
 ```
@@ -1766,34 +1689,34 @@ const productUpdateTotal = new Counter({
 
 ```typescript
 const productErrorsTotal = new Counter({
-  name: 'product_errors_total',
-  help: 'Total product operation errors',
-  labelNames: ['error_code', 'operation', 'http_status'],
-})
+  name: "product_errors_total",
+  help: "Total product operation errors",
+  labelNames: ["error_code", "operation", "http_status"],
+});
 
 // In error handler:
 productErrorsTotal.inc({
   error_code: error.code,
-  operation: 'create|update|list|delete',
+  operation: "create|update|list|delete",
   http_status: error.statusCode,
-})
+});
 ```
 
 ### Request Rate Metrics
 
 ```typescript
 const productRequestsTotal = new Counter({
-  name: 'product_requests_total',
-  help: 'Total product requests',
-  labelNames: ['method', 'path', 'status'],
-})
+  name: "product_requests_total",
+  help: "Total product requests",
+  labelNames: ["method", "path", "status"],
+});
 
 const productRequestDurationSeconds = new Histogram({
-  name: 'product_request_duration_seconds',
-  help: 'Product request duration in seconds',
-  labelNames: ['method', 'path'],
+  name: "product_request_duration_seconds",
+  help: "Product request duration in seconds",
+  labelNames: ["method", "path"],
   buckets: [0.01, 0.025, 0.05, 0.1, 0.25, 0.5, 1, 2.5, 5],
-})
+});
 ```
 
 **Prometheus Scrape Config**:
@@ -1801,10 +1724,10 @@ const productRequestDurationSeconds = new Histogram({
 ```yaml
 # prometheus.yml
 scrape_configs:
-  - job_name: 'zidney-products'
+  - job_name: "zidney-products"
     static_configs:
-      - targets: ['localhost:9090']
-    metrics_path: '/metrics'
+      - targets: ["localhost:9090"]
+    metrics_path: "/metrics"
     scrape_interval: 15s
     scrape_timeout: 10s
 ```
@@ -1928,26 +1851,26 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CreateProductRequest'
+              $ref: "#/components/schemas/CreateProductRequest"
       responses:
-        '201':
+        "201":
           description: Product created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductResponse'
-        '400':
+                $ref: "#/components/schemas/ProductResponse"
+        "400":
           description: Validation error
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
-        '409':
+                $ref: "#/components/schemas/ErrorResponse"
+        "409":
           description: Conflict (duplicate slug)
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
     get:
       tags: [Products]
@@ -1979,12 +1902,12 @@ paths:
             type: integer
             default: 0
       responses:
-        '200':
+        "200":
           description: Product list
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductListResponse'
+                $ref: "#/components/schemas/ProductListResponse"
 
   /mmc/products/{id}:
     get:
@@ -2001,18 +1924,18 @@ paths:
             type: string
             format: uuid
       responses:
-        '200':
+        "200":
           description: Product details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductResponse'
-        '404':
+                $ref: "#/components/schemas/ProductResponse"
+        "404":
           description: Product not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ErrorResponse'
+                $ref: "#/components/schemas/ErrorResponse"
 
     put:
       tags: [Products]
@@ -2032,14 +1955,14 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/UpdateProductRequest'
+              $ref: "#/components/schemas/UpdateProductRequest"
       responses:
-        '200':
+        "200":
           description: Product updated
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductResponse'
+                $ref: "#/components/schemas/ProductResponse"
 
   /mmc/products/{id}/status:
     patch:
@@ -2066,12 +1989,12 @@ paths:
                   type: string
                   enum: [ACTIVE, INACTIVE]
       responses:
-        '200':
+        "200":
           description: Status changed
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ProductResponse'
+                $ref: "#/components/schemas/ProductResponse"
 
   /mmc/products/{id}/audit-log:
     get:
@@ -2114,12 +2037,12 @@ paths:
             type: string
             format: date-time
       responses:
-        '200':
+        "200":
           description: Audit trail
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/AuditLogResponse'
+                $ref: "#/components/schemas/AuditLogResponse"
 
 components:
   schemas:
@@ -2141,7 +2064,7 @@ components:
               maxLength: 255
         slug:
           type: string
-          pattern: '^[a-z0-9-]{1,255}$'
+          pattern: "^[a-z0-9-]{1,255}$"
         description:
           type: string
         enabled_modules:
@@ -2191,7 +2114,7 @@ components:
         data:
           type: array
           items:
-            $ref: '#/components/schemas/ProductResponse'
+            $ref: "#/components/schemas/ProductResponse"
         pagination:
           type: object
           properties:
@@ -2299,37 +2222,37 @@ components:
 
 ```typescript
 export function handleError(c: Context, error: Error): Response {
-  const correlationId = c.get('correlationId')
+  const correlationId = c.get("correlationId");
 
   // Map error to code + status
   const errorMap: Record<string, { code: string; status: number }> = {
-    INVALID_MODULE_ENUM: { code: 'INVALID_MODULE_ENUM', status: 400 },
+    INVALID_MODULE_ENUM: { code: "INVALID_MODULE_ENUM", status: 400 },
     INVALID_NAME_LOCALIZATION: {
-      code: 'INVALID_NAME_LOCALIZATION',
+      code: "INVALID_NAME_LOCALIZATION",
       status: 400,
     },
-    DUPLICATE_SLUG: { code: 'DUPLICATE_SLUG', status: 409 },
-    SLUG_NOT_MUTABLE: { code: 'SLUG_NOT_MUTABLE', status: 400 },
-    PRODUCT_NOT_FOUND: { code: 'PRODUCT_NOT_FOUND', status: 404 },
-    PRODUCT_HAS_LICENSES: { code: 'PRODUCT_HAS_LICENSES', status: 409 },
-  }
+    DUPLICATE_SLUG: { code: "DUPLICATE_SLUG", status: 409 },
+    SLUG_NOT_MUTABLE: { code: "SLUG_NOT_MUTABLE", status: 400 },
+    PRODUCT_NOT_FOUND: { code: "PRODUCT_NOT_FOUND", status: 404 },
+    PRODUCT_HAS_LICENSES: { code: "PRODUCT_HAS_LICENSES", status: 409 },
+  };
 
   const mapping = errorMap[error.message] || {
-    code: 'INTERNAL_SERVER_ERROR',
+    code: "INTERNAL_SERVER_ERROR",
     status: 500,
-  }
+  };
 
   logger.error({
-    level: 'error',
-    service: 'api',
-    action: 'error_handler',
+    level: "error",
+    service: "api",
+    action: "error_handler",
     correlationId,
     error: {
       code: mapping.code,
       message: error.message,
       stack: error.stack,
     },
-  })
+  });
 
   return c.json(
     {
@@ -2340,26 +2263,26 @@ export function handleError(c: Context, error: Error): Response {
         message: getErrorMessage(mapping.code),
       },
     },
-    mapping.status
-  )
+    mapping.status,
+  );
 }
 
 function getErrorMessage(code: string): string {
   const messages: Record<string, string> = {
     INVALID_MODULE_ENUM:
-      'Invalid module. Allowed: MCQ, TRADITIONAL_EXAMS, EXERCISES, LIBRARY, LIVES, FORUM',
-    INVALID_NAME_LOCALIZATION: 'Product name must include English translation',
-    DUPLICATE_SLUG: 'Product slug already exists',
-    SLUG_NOT_MUTABLE: 'Slug cannot be changed after creation',
-    PRODUCT_NOT_FOUND: 'Product not found',
-    PRODUCT_HAS_LICENSES: 'Cannot delete product with active licenses',
-    UNAUTHORIZED: 'Authentication required',
-    FORBIDDEN: 'Access denied',
-    WORKSPACE_LOCKED: 'Workspace is locked',
-    INTERNAL_SERVER_ERROR: 'Internal server error. Please try again.',
-  }
+      "Invalid module. Allowed: MCQ, TRADITIONAL_EXAMS, EXERCISES, LIBRARY, LIVES, FORUM",
+    INVALID_NAME_LOCALIZATION: "Product name must include English translation",
+    DUPLICATE_SLUG: "Product slug already exists",
+    SLUG_NOT_MUTABLE: "Slug cannot be changed after creation",
+    PRODUCT_NOT_FOUND: "Product not found",
+    PRODUCT_HAS_LICENSES: "Cannot delete product with active licenses",
+    UNAUTHORIZED: "Authentication required",
+    FORBIDDEN: "Access denied",
+    WORKSPACE_LOCKED: "Workspace is locked",
+    INTERNAL_SERVER_ERROR: "Internal server error. Please try again.",
+  };
 
-  return messages[code] || 'Unknown error'
+  return messages[code] || "Unknown error";
 }
 ```
 
@@ -2452,8 +2375,8 @@ await db.transaction(
     // - No non-repeatable reads
     // - Phantom reads possible (acceptable for product CRUD)
   },
-  { isolationLevel: 'REPEATABLE READ' }
-)
+  { isolationLevel: "REPEATABLE READ" },
+);
 ```
 
 ---
@@ -2471,7 +2394,7 @@ const query = `
   WHERE status = 'ACTIVE'
   ORDER BY created_at DESC
   LIMIT $1 OFFSET $2
-`
+`;
 
 // With explicit filter:
 const query = `
@@ -2479,7 +2402,7 @@ const query = `
   WHERE status = $1
   ORDER BY created_at DESC
   LIMIT $2 OFFSET $3
-`
+`;
 ```
 
 ---
@@ -2493,7 +2416,7 @@ const query = `
   SELECT * FROM products 
   WHERE LOWER(slug) = LOWER($1)
   LIMIT 1
-`
+`;
 ```
 
 ---
@@ -2520,7 +2443,7 @@ const query = `
     AND ($4::timestamp IS NULL OR timestamp <= $4)
   ORDER BY timestamp DESC
   LIMIT $5 OFFSET $6
-`
+`;
 ```
 
 ---
@@ -2534,7 +2457,7 @@ const query = `
   SELECT COUNT(*) as license_count
   FROM licenses
   WHERE product_id = $1
-`
+`;
 ```
 
 ---
@@ -2557,7 +2480,7 @@ const query = `
   WHERE p.status = $1
   ORDER BY p.created_at DESC
   LIMIT $2 OFFSET $3
-`
+`;
 ```
 
 ---
@@ -2575,7 +2498,7 @@ const query = `
     OR LOWER(slug) LIKE LOWER($1)
   ORDER BY created_at DESC
   LIMIT $2 OFFSET $3
-`
+`;
 ```
 
 ---
@@ -2589,99 +2512,92 @@ Location: `tests/unit/products/`
 ```typescript
 // tests/unit/products/validation.test.ts
 
-describe('Product Validation', () => {
-  describe('validateProductName', () => {
-    it('should accept valid English name', () => {
+describe("Product Validation", () => {
+  describe("validateProductName", () => {
+    it("should accept valid English name", () => {
       expect(() => {
-        validateProductName({ en: 'Basic Exam Suite' })
-      }).not.toThrow()
-    })
+        validateProductName({ en: "Basic Exam Suite" });
+      }).not.toThrow();
+    });
 
-    it('should reject missing English name', () => {
+    it("should reject missing English name", () => {
       expect(() => {
-        validateProductName({ en: '' })
-      }).toThrow('INVALID_NAME_LOCALIZATION')
-    })
+        validateProductName({ en: "" });
+      }).toThrow("INVALID_NAME_LOCALIZATION");
+    });
 
-    it('should accept optional Arabic name', () => {
+    it("should accept optional Arabic name", () => {
       expect(() => {
-        validateProductName({ en: 'Test', ar: 'اختبار' })
-      }).not.toThrow()
-    })
+        validateProductName({ en: "Test", ar: "اختبار" });
+      }).not.toThrow();
+    });
 
-    it('should accept missing Arabic name', () => {
+    it("should accept missing Arabic name", () => {
       expect(() => {
-        validateProductName({ en: 'Test' })
-      }).not.toThrow()
-    })
-  })
+        validateProductName({ en: "Test" });
+      }).not.toThrow();
+    });
+  });
 
-  describe('validateModulesEnum', () => {
-    it('should accept valid modules', () => {
+  describe("validateModulesEnum", () => {
+    it("should accept valid modules", () => {
       expect(() => {
-        validateModulesEnum(['MCQ', 'EXERCISES'])
-      }).not.toThrow()
-    })
+        validateModulesEnum(["MCQ", "EXERCISES"]);
+      }).not.toThrow();
+    });
 
-    it('should reject invalid module', () => {
+    it("should reject invalid module", () => {
       expect(() => {
-        validateModulesEnum(['INVALID_MODULE'])
-      }).toThrow('INVALID_MODULE_ENUM')
-    })
+        validateModulesEnum(["INVALID_MODULE"]);
+      }).toThrow("INVALID_MODULE_ENUM");
+    });
 
-    it('should reject empty modules array', () => {
+    it("should reject empty modules array", () => {
       expect(() => {
-        validateModulesEnum([])
-      }).toThrow('INVALID_MODULE_ENUM')
-    })
+        validateModulesEnum([]);
+      }).toThrow("INVALID_MODULE_ENUM");
+    });
 
-    it('should accept all known modules', () => {
-      const allModules = [
-        'MCQ',
-        'TRADITIONAL_EXAMS',
-        'EXERCISES',
-        'LIBRARY',
-        'LIVES',
-        'FORUM',
-      ]
+    it("should accept all known modules", () => {
+      const allModules = ["MCQ", "TRADITIONAL_EXAMS", "EXERCISES", "LIBRARY", "LIVES", "FORUM"];
       expect(() => {
-        validateModulesEnum(allModules)
-      }).not.toThrow()
-    })
-  })
+        validateModulesEnum(allModules);
+      }).not.toThrow();
+    });
+  });
 
-  describe('validateSlug', () => {
-    it('should accept valid lowercase slug', () => {
+  describe("validateSlug", () => {
+    it("should accept valid lowercase slug", () => {
       expect(() => {
-        validateSlug('basic-exam-suite')
-      }).not.toThrow()
-    })
+        validateSlug("basic-exam-suite");
+      }).not.toThrow();
+    });
 
-    it('should reject uppercase', () => {
+    it("should reject uppercase", () => {
       expect(() => {
-        validateSlug('Basic-Exam')
-      }).toThrow('INVALID_SLUG')
-    })
+        validateSlug("Basic-Exam");
+      }).toThrow("INVALID_SLUG");
+    });
 
-    it('should reject spaces', () => {
+    it("should reject spaces", () => {
       expect(() => {
-        validateSlug('basic exam')
-      }).toThrow('INVALID_SLUG')
-    })
+        validateSlug("basic exam");
+      }).toThrow("INVALID_SLUG");
+    });
 
-    it('should accept single character slug', () => {
+    it("should accept single character slug", () => {
       expect(() => {
-        validateSlug('a')
-      }).not.toThrow()
-    })
+        validateSlug("a");
+      }).not.toThrow();
+    });
 
-    it('should reject empty slug', () => {
+    it("should reject empty slug", () => {
       expect(() => {
-        validateSlug('')
-      }).toThrow('INVALID_SLUG')
-    })
-  })
-})
+        validateSlug("");
+      }).toThrow("INVALID_SLUG");
+    });
+  });
+});
 ```
 
 ---
@@ -2691,299 +2607,291 @@ describe('Product Validation', () => {
 Location: `tests/integration/products/api.test.ts`
 
 ```typescript
-describe('Products API', () => {
-  let testDb: Database
+describe("Products API", () => {
+  let testDb: Database;
 
   beforeAll(async () => {
-    testDb = await setupTestDatabase()
-  })
+    testDb = await setupTestDatabase();
+  });
 
-  describe('POST /api/v1/mmc/products', () => {
-    it('should create product with valid payload', async () => {
+  describe("POST /api/v1/mmc/products", () => {
+    it("should create product with valid payload", async () => {
       const response = await request(app)
-        .post('/api/v1/mmc/products')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .post("/api/v1/mmc/products")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send({
-          name: { en: 'Test Product', ar: 'منتج اختبار' },
-          slug: 'test-product',
-          enabled_modules: ['MCQ', 'EXERCISES'],
-        })
+          name: { en: "Test Product", ar: "منتج اختبار" },
+          slug: "test-product",
+          enabled_modules: ["MCQ", "EXERCISES"],
+        });
 
-      expect(response.status).toBe(201)
-      expect(response.body.success).toBe(true)
-      expect(response.body.data.id).toBeDefined()
-      expect(response.body.data.current_version).toBe(1)
-      expect(response.body.data.status).toBe('ACTIVE')
-    })
+      expect(response.status).toBe(201);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.id).toBeDefined();
+      expect(response.body.data.current_version).toBe(1);
+      expect(response.body.data.status).toBe("ACTIVE");
+    });
 
-    it('should reject duplicate slug', async () => {
+    it("should reject duplicate slug", async () => {
       // Create first product
       await request(app)
-        .post('/api/v1/mmc/products')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .post("/api/v1/mmc/products")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send({
-          name: { en: 'Product 1', ar: 'المنتج 1' },
-          slug: 'duplicate-slug',
-          enabled_modules: ['MCQ'],
-        })
+          name: { en: "Product 1", ar: "المنتج 1" },
+          slug: "duplicate-slug",
+          enabled_modules: ["MCQ"],
+        });
 
       // Try to create second with same slug
       const response = await request(app)
-        .post('/api/v1/mmc/products')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .post("/api/v1/mmc/products")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send({
-          name: { en: 'Product 2', ar: 'المنتج 2' },
-          slug: 'duplicate-slug',
-          enabled_modules: ['EXERCISES'],
-        })
+          name: { en: "Product 2", ar: "المنتج 2" },
+          slug: "duplicate-slug",
+          enabled_modules: ["EXERCISES"],
+        });
 
-      expect(response.status).toBe(409)
-      expect(response.body.error.code).toBe('DUPLICATE_SLUG')
-    })
+      expect(response.status).toBe(409);
+      expect(response.body.error.code).toBe("DUPLICATE_SLUG");
+    });
 
-    it('should reject invalid module', async () => {
+    it("should reject invalid module", async () => {
       const response = await request(app)
-        .post('/api/v1/mmc/products')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .post("/api/v1/mmc/products")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send({
-          name: { en: 'Test Product' },
-          slug: 'test-product',
-          enabled_modules: ['INVALID_MODULE'],
-        })
+          name: { en: "Test Product" },
+          slug: "test-product",
+          enabled_modules: ["INVALID_MODULE"],
+        });
 
-      expect(response.status).toBe(400)
-      expect(response.body.error.code).toBe('INVALID_MODULE_ENUM')
-    })
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe("INVALID_MODULE_ENUM");
+    });
 
-    it('should reject missing English name', async () => {
+    it("should reject missing English name", async () => {
       const response = await request(app)
-        .post('/api/v1/mmc/products')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .post("/api/v1/mmc/products")
+        .set("Authorization", `Bearer ${adminToken}`)
         .send({
-          name: { ar: 'منتج' }, // Missing 'en'
-          slug: 'test-product',
-          enabled_modules: ['MCQ'],
-        })
+          name: { ar: "منتج" }, // Missing 'en'
+          slug: "test-product",
+          enabled_modules: ["MCQ"],
+        });
 
-      expect(response.status).toBe(400)
-      expect(response.body.error.code).toBe('INVALID_NAME_LOCALIZATION')
-    })
-  })
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe("INVALID_NAME_LOCALIZATION");
+    });
+  });
 
-  describe('GET /api/v1/mmc/products', () => {
-    it('should return ACTIVE products by default', async () => {
+  describe("GET /api/v1/mmc/products", () => {
+    it("should return ACTIVE products by default", async () => {
       // Create ACTIVE product
       const active = await testDb.insert(products).values({
-        name: { en: 'Active Product' },
-        slug: 'active-1',
-        enabled_modules: ['MCQ'],
-        status: 'ACTIVE',
-      })
+        name: { en: "Active Product" },
+        slug: "active-1",
+        enabled_modules: ["MCQ"],
+        status: "ACTIVE",
+      });
 
       // Create INACTIVE product
       await testDb.insert(products).values({
-        name: { en: 'Inactive Product' },
-        slug: 'inactive-1',
-        enabled_modules: ['EXERCISES'],
-        status: 'INACTIVE',
-      })
+        name: { en: "Inactive Product" },
+        slug: "inactive-1",
+        enabled_modules: ["EXERCISES"],
+        status: "INACTIVE",
+      });
 
       const response = await request(app)
-        .get('/api/v1/mmc/products')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .get("/api/v1/mmc/products")
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(200)
-      expect(response.body.data.length).toBe(1)
-      expect(response.body.data[0].status).toBe('ACTIVE')
-    })
+      expect(response.status).toBe(200);
+      expect(response.body.data.length).toBe(1);
+      expect(response.body.data[0].status).toBe("ACTIVE");
+    });
 
-    it('should return INACTIVE products with explicit filter', async () => {
+    it("should return INACTIVE products with explicit filter", async () => {
       const response = await request(app)
-        .get('/api/v1/mmc/products?status=INACTIVE')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .get("/api/v1/mmc/products?status=INACTIVE")
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(200)
-      expect(
-        response.body.data.every((p: any) => p.status === 'INACTIVE')
-      ).toBe(true)
-    })
+      expect(response.status).toBe(200);
+      expect(response.body.data.every((p: any) => p.status === "INACTIVE")).toBe(true);
+    });
 
-    it('should return all products with status=all', async () => {
+    it("should return all products with status=all", async () => {
       const response = await request(app)
-        .get('/api/v1/mmc/products?status=all')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .get("/api/v1/mmc/products?status=all")
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(200)
+      expect(response.status).toBe(200);
       // Should include both ACTIVE and INACTIVE
-      const statuses = new Set(response.body.data.map((p: any) => p.status))
-      expect(statuses.size).toBeGreaterThan(1)
-    })
+      const statuses = new Set(response.body.data.map((p: any) => p.status));
+      expect(statuses.size).toBeGreaterThan(1);
+    });
 
-    it('should support pagination', async () => {
+    it("should support pagination", async () => {
       const response = await request(app)
-        .get('/api/v1/mmc/products?limit=10&offset=0')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .get("/api/v1/mmc/products?limit=10&offset=0")
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(200)
-      expect(response.body.pagination).toBeDefined()
-      expect(response.body.pagination.limit).toBe(10)
-      expect(response.body.pagination.offset).toBe(0)
-      expect(response.body.pagination.total).toBeGreaterThanOrEqual(0)
-    })
-  })
+      expect(response.status).toBe(200);
+      expect(response.body.pagination).toBeDefined();
+      expect(response.body.pagination.limit).toBe(10);
+      expect(response.body.pagination.offset).toBe(0);
+      expect(response.body.pagination.total).toBeGreaterThanOrEqual(0);
+    });
+  });
 
-  describe('PUT /api/v1/mmc/products/:id', () => {
-    it('should update product and increment version', async () => {
+  describe("PUT /api/v1/mmc/products/:id", () => {
+    it("should update product and increment version", async () => {
       const product = await testDb.insert(products).values({
-        name: { en: 'Original Name' },
-        slug: 'test-update',
-        enabled_modules: ['MCQ'],
+        name: { en: "Original Name" },
+        slug: "test-update",
+        enabled_modules: ["MCQ"],
         current_version: 1,
-      })
+      });
 
       const response = await request(app)
         .put(`/api/v1/mmc/products/${product.id}`)
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set("Authorization", `Bearer ${adminToken}`)
         .send({
-          name: { en: 'Updated Name', ar: 'الاسم المحدث' },
-          enabled_modules: ['MCQ', 'EXERCISES'],
-        })
+          name: { en: "Updated Name", ar: "الاسم المحدث" },
+          enabled_modules: ["MCQ", "EXERCISES"],
+        });
 
-      expect(response.status).toBe(200)
-      expect(response.body.data.current_version).toBe(2)
-      expect(response.body.data.name.en).toBe('Updated Name')
-    })
+      expect(response.status).toBe(200);
+      expect(response.body.data.current_version).toBe(2);
+      expect(response.body.data.name.en).toBe("Updated Name");
+    });
 
-    it('should prevent slug modification', async () => {
+    it("should prevent slug modification", async () => {
       const product = await testDb.insert(products).values({
-        name: { en: 'Test' },
-        slug: 'immutable-slug',
-        enabled_modules: ['MCQ'],
-      })
+        name: { en: "Test" },
+        slug: "immutable-slug",
+        enabled_modules: ["MCQ"],
+      });
 
       const response = await request(app)
         .put(`/api/v1/mmc/products/${product.id}`)
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set("Authorization", `Bearer ${adminToken}`)
         .send({
-          slug: 'new-slug', // Attempt to change
-        })
+          slug: "new-slug", // Attempt to change
+        });
 
-      expect(response.status).toBe(400)
-      expect(response.body.error.code).toBe('SLUG_NOT_MUTABLE')
-    })
-  })
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe("SLUG_NOT_MUTABLE");
+    });
+  });
 
-  describe('PATCH /api/v1/mmc/products/:id/status', () => {
-    it('should change status without incrementing version', async () => {
+  describe("PATCH /api/v1/mmc/products/:id/status", () => {
+    it("should change status without incrementing version", async () => {
       const product = await testDb.insert(products).values({
-        name: { en: 'Test' },
-        slug: 'status-test',
-        enabled_modules: ['MCQ'],
-        status: 'ACTIVE',
+        name: { en: "Test" },
+        slug: "status-test",
+        enabled_modules: ["MCQ"],
+        status: "ACTIVE",
         current_version: 1,
-      })
+      });
 
       const response = await request(app)
         .patch(`/api/v1/mmc/products/${product.id}/status`)
-        .set('Authorization', `Bearer ${adminToken}`)
-        .send({ status: 'INACTIVE' })
+        .set("Authorization", `Bearer ${adminToken}`)
+        .send({ status: "INACTIVE" });
 
-      expect(response.status).toBe(200)
-      expect(response.body.data.status).toBe('INACTIVE')
-      expect(response.body.data.current_version).toBe(1) // NO increment
-    })
-  })
+      expect(response.status).toBe(200);
+      expect(response.body.data.status).toBe("INACTIVE");
+      expect(response.body.data.current_version).toBe(1); // NO increment
+    });
+  });
 
-  describe('DELETE /api/v1/mmc/products/:id', () => {
-    it('should delete product with no licenses', async () => {
+  describe("DELETE /api/v1/mmc/products/:id", () => {
+    it("should delete product with no licenses", async () => {
       const product = await testDb.insert(products).values({
-        name: { en: 'Test' },
-        slug: 'delete-test',
-        enabled_modules: ['MCQ'],
-      })
+        name: { en: "Test" },
+        slug: "delete-test",
+        enabled_modules: ["MCQ"],
+      });
 
       const response = await request(app)
         .delete(`/api/v1/mmc/products/${product.id}`)
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(204)
-    })
+      expect(response.status).toBe(204);
+    });
 
-    it('should reject delete if licenses reference product', async () => {
+    it("should reject delete if licenses reference product", async () => {
       const product = await testDb.insert(products).values({
-        name: { en: 'Protected' },
-        slug: 'protected-product',
-        enabled_modules: ['MCQ'],
-      })
+        name: { en: "Protected" },
+        slug: "protected-product",
+        enabled_modules: ["MCQ"],
+      });
 
       // Create license referencing product
       await testDb.insert(licenses).values({
         product_id: product.id,
-        workspace_id: 'workspace-123',
-      })
+        workspace_id: "workspace-123",
+      });
 
       const response = await request(app)
         .delete(`/api/v1/mmc/products/${product.id}`)
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(409)
-      expect(response.body.error.code).toBe('PRODUCT_HAS_LICENSES')
-    })
-  })
+      expect(response.status).toBe(409);
+      expect(response.body.error.code).toBe("PRODUCT_HAS_LICENSES");
+    });
+  });
 
-  describe('GET /api/v1/mmc/products/:id/audit-log', () => {
-    it('should return audit log for product', async () => {
+  describe("GET /api/v1/mmc/products/:id/audit-log", () => {
+    it("should return audit log for product", async () => {
       const product = await testDb.insert(products).values({
-        name: { en: 'Test' },
-        slug: 'audit-test',
-        enabled_modules: ['MCQ'],
-      })
+        name: { en: "Test" },
+        slug: "audit-test",
+        enabled_modules: ["MCQ"],
+      });
 
       const response = await request(app)
         .get(`/api/v1/mmc/products/${product.id}/audit-log`)
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(200)
-      expect(Array.isArray(response.body.data)).toBe(true)
-      expect(response.body.data.length).toBeGreaterThanOrEqual(1)
-      expect(response.body.data[0].action).toBe('CREATE')
-    })
+      expect(response.status).toBe(200);
+      expect(Array.isArray(response.body.data)).toBe(true);
+      expect(response.body.data.length).toBeGreaterThanOrEqual(1);
+      expect(response.body.data[0].action).toBe("CREATE");
+    });
 
-    it('should filter audit log by action', async () => {
+    it("should filter audit log by action", async () => {
       const product = await testDb.insert(products).values({
-        name: { en: 'Test' },
-        slug: 'audit-filter-test',
-        enabled_modules: ['MCQ'],
-      })
+        name: { en: "Test" },
+        slug: "audit-filter-test",
+        enabled_modules: ["MCQ"],
+      });
 
       // Create and update to generate different actions
-      await updateProduct(product.id, { name: { en: 'Updated' } })
-      await changeProductStatus(product.id, 'INACTIVE')
+      await updateProduct(product.id, { name: { en: "Updated" } });
+      await changeProductStatus(product.id, "INACTIVE");
 
       const response = await request(app)
-        .get(
-          `/api/v1/mmc/products/${product.id}/audit-log?action=STATUS_CHANGE`
-        )
-        .set('Authorization', `Bearer ${adminToken}`)
+        .get(`/api/v1/mmc/products/${product.id}/audit-log?action=STATUS_CHANGE`)
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(200)
-      expect(
-        response.body.data.every(
-          (entry: any) => entry.action === 'STATUS_CHANGE'
-        )
-      ).toBe(true)
-    })
+      expect(response.status).toBe(200);
+      expect(response.body.data.every((entry: any) => entry.action === "STATUS_CHANGE")).toBe(true);
+    });
 
-    it('should support pagination on audit log', async () => {
+    it("should support pagination on audit log", async () => {
       const response = await request(app)
         .get(`/api/v1/mmc/products/any-id/audit-log?limit=10&offset=0`)
-        .set('Authorization', `Bearer ${adminToken}`)
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.body.pagination).toBeDefined()
-      expect(response.body.pagination.limit).toBe(10)
-    })
-  })
-})
+      expect(response.body.pagination).toBeDefined();
+      expect(response.body.pagination.limit).toBe(10);
+    });
+  });
+});
 ```
 
 ---
@@ -2993,59 +2901,59 @@ describe('Products API', () => {
 Location: `tests/integration/products/atomicity.test.ts`
 
 ```typescript
-describe('Transaction Atomicity', () => {
-  it('should rollback entire creation on any failure', async () => {
+describe("Transaction Atomicity", () => {
+  it("should rollback entire creation on any failure", async () => {
     // Simulate: version insert succeeds but audit log insert fails
     // Entire transaction should rollback
 
-    const beforeCount = await countProducts(testDb)
+    const beforeCount = await countProducts(testDb);
 
     try {
       await createProduct(
         {
-          name: { en: 'Test' },
-          slug: 'atom-test',
-          enabled_modules: ['INVALID_MODULE'], // Will fail validation
-          performed_by: 'admin-uuid',
+          name: { en: "Test" },
+          slug: "atom-test",
+          enabled_modules: ["INVALID_MODULE"], // Will fail validation
+          performed_by: "admin-uuid",
         },
-        testDb
-      )
+        testDb,
+      );
     } catch (error) {
       // Expected to fail
     }
 
-    const afterCount = await countProducts(testDb)
-    expect(beforeCount).toBe(afterCount) // No orphaned products
-  })
+    const afterCount = await countProducts(testDb);
+    expect(beforeCount).toBe(afterCount); // No orphaned products
+  });
 
-  it('should ensure version and audit log stay in sync', async () => {
+  it("should ensure version and audit log stay in sync", async () => {
     const product = await createProduct(
       {
-        name: { en: 'Test' },
-        slug: 'sync-test',
-        enabled_modules: ['MCQ'],
-        performed_by: 'admin-uuid',
+        name: { en: "Test" },
+        slug: "sync-test",
+        enabled_modules: ["MCQ"],
+        performed_by: "admin-uuid",
       },
-      testDb
-    )
+      testDb,
+    );
 
     // Update product
     await updateProduct(
       {
         id: product.id,
-        name: { en: 'Updated' },
-        performed_by: 'admin-uuid',
+        name: { en: "Updated" },
+        performed_by: "admin-uuid",
       },
-      testDb
-    )
+      testDb,
+    );
 
     // Verify: product version = audit log entry count
-    const current = await getProductById(product.id, testDb)
-    const auditCount = await countAuditLogsForProduct(product.id, testDb)
+    const current = await getProductById(product.id, testDb);
+    const auditCount = await countAuditLogsForProduct(product.id, testDb);
 
-    expect(current.current_version).toBe(auditCount) // Always in sync
-  })
-})
+    expect(current.current_version).toBe(auditCount); // Always in sync
+  });
+});
 ```
 
 ---
@@ -3055,42 +2963,42 @@ describe('Transaction Atomicity', () => {
 Location: `tests/unit/products/isolation.test.ts`
 
 ```typescript
-describe('Tenant Isolation (Products Master DB Only)', () => {
-  it('should never access tenant database', async () => {
+describe("Tenant Isolation (Products Master DB Only)", () => {
+  it("should never access tenant database", async () => {
     // Product operations should ONLY touch master_db
     // Spy on db connection calls
 
-    const spy = jest.spyOn(database, 'query')
+    const spy = jest.spyOn(database, "query");
 
     await createProduct(
       {
-        name: { en: 'Test' },
-        slug: 'isolation-test',
-        enabled_modules: ['MCQ'],
-        performed_by: 'admin-uuid',
+        name: { en: "Test" },
+        slug: "isolation-test",
+        enabled_modules: ["MCQ"],
+        performed_by: "admin-uuid",
       },
-      masterDb
-    )
+      masterDb,
+    );
 
     // Verify all queries went to master_db only
     spy.mock.calls.forEach((call) => {
-      expect(call[0]).toContain('master_db')
-    })
+      expect(call[0]).toContain("master_db");
+    });
 
-    spy.mockRestore()
-  })
+    spy.mockRestore();
+  });
 
-  it('should not reference tenant authentication context', () => {
+  it("should not reference tenant authentication context", () => {
     // Product service should not require tenant context
     // It's a platform-level service
 
-    const serviceInstance = new ProductService()
+    const serviceInstance = new ProductService();
 
     // Should exist and be callable without tenant context
-    expect(serviceInstance.createProduct).toBeDefined()
-    expect(serviceInstance.listProducts).toBeDefined()
-  })
-})
+    expect(serviceInstance.createProduct).toBeDefined();
+    expect(serviceInstance.listProducts).toBeDefined();
+  });
+});
 ```
 
 ---

@@ -2,7 +2,8 @@
 
 ## Overview
 
-Member management endpoints handle CRUD operations for MMC internal users with role assignment, status tracking, and token versioning for session invalidation.
+Member management endpoints handle CRUD operations for MMC internal users with role assignment,
+status tracking, and token versioning for session invalidation.
 
 ---
 

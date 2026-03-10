@@ -1,13 +1,10 @@
 # Specification: TypeScript Infrastructure Stabilization
 
-**Feature ID:** `infra-001-typescript-stabilization`
-**Phase:** `01_PLATFORM_FOUNDATION`
-**Stage File:** `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_01_TYPESCRIPT_STABILIZATION.md`
-**Stage Status:** DRAFT → IN PROGRESS
-**Type:** Infrastructure Hardening (non-feature)
-**Branch:** `infra-001-typescript-stabilization`
-**Initiated:** 2026-02-27T00:00:00Z
-**Spec Author:** SpecKit (speckit.specify)
+**Feature ID:** `infra-001-typescript-stabilization` **Phase:** `01_PLATFORM_FOUNDATION` **Stage
+File:** `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_01_TYPESCRIPT_STABILIZATION.md` **Stage
+Status:** DRAFT → IN PROGRESS **Type:** Infrastructure Hardening (non-feature) **Branch:**
+`infra-001-typescript-stabilization` **Initiated:** 2026-02-27T00:00:00Z **Spec Author:** SpecKit
+(speckit.specify)
 
 ---
 
@@ -15,7 +12,9 @@
 
 ### What Is Being Stabilized
 
-This stage hardens the TypeScript type-safety infrastructure across the entire Zidney monorepo. It does **not** introduce new user-facing features. It resolves a baseline audit finding of 800+ pre-existing TypeScript errors accumulated during earlier feature delivery.
+This stage hardens the TypeScript type-safety infrastructure across the entire Zidney monorepo. It
+does **not** introduce new user-facing features. It resolves a baseline audit finding of 800+
+pre-existing TypeScript errors accumulated during earlier feature delivery.
 
 The work covers:
 
@@ -62,22 +61,26 @@ Confirmed explicitly:
 | No weakening of transaction boundaries | ✅ Confirmed |
 | No weakening of version enforcement    | ✅ Confirmed |
 
-This is a type-layer change only. No runtime behavior is modified. No architectural invariant is altered.
+This is a type-layer change only. No runtime behavior is modified. No architectural invariant is
+altered.
 
-If any type fix during Pass 2 (Domain Contract Alignment) requires an interface change that affects a middleware contract or a domain boundary, an ADR must be raised before that change is merged.
+If any type fix during Pass 2 (Domain Contract Alignment) requires an interface change that affects
+a middleware contract or a domain boundary, an ADR must be raised before that change is merged.
 
 ---
 
 ## Purpose
 
-The Zidney monorepo accumulated 800+ TypeScript errors during rapid feature delivery in Phase 1. Although test suites pass, the absence of strict type enforcement means:
+The Zidney monorepo accumulated 800+ TypeScript errors during rapid feature delivery in Phase 1.
+Although test suites pass, the absence of strict type enforcement means:
 
 - Runtime assumptions that are not expressed in types can silently drift
 - Implicit `any` hides contract mismatches between API, domain, and worker layers
 - CI cannot currently block type regressions
 - The monorepo cannot be called production-safe without explicit type contracts
 
-This stage eliminates that gap. It produces a type-clean, strictly-typed monorepo where the build is deterministic, contracts are explicit, and CI enforces correctness going forward.
+This stage eliminates that gap. It produces a type-clean, strictly-typed monorepo where the build is
+deterministic, contracts are explicit, and CI enforces correctness going forward.
 
 **Core Philosophy Alignment:**
 
@@ -100,7 +103,8 @@ This stage eliminates that gap. It produces a type-clean, strictly-typed monorep
 6. Enable CI hard-fail: `pnpm typecheck` must return exit code `0` or the pipeline blocks
 7. Ensure test files comply with strict typing — no `any` in mocks or test helpers
 8. Validate cross-package type contracts: API ↔ domain ↔ worker message contracts are type-aligned
-9. Allow `// @ts-ignore` only with a documented justification comment — undocumented suppressions are forbidden
+9. Allow `// @ts-ignore` only with a documented justification comment — undocumented suppressions
+   are forbidden
 
 ---
 
@@ -134,7 +138,8 @@ This stage eliminates that gap. It produces a type-clean, strictly-typed monorep
 
 ### FR-01: Root tsconfig Strict Contract
 
-The root `tsconfig.base.json` must declare the following compiler options as the baseline for the entire monorepo:
+The root `tsconfig.base.json` must declare the following compiler options as the baseline for the
+entire monorepo:
 
 ```
 strict: true
@@ -148,21 +153,26 @@ noUncheckedIndexedAccess: true
 
 No sub-package `tsconfig` may override or weaken any of these settings.
 
-**Acceptance Criterion:** Any sub-package that attempts to set `strict: false` or `noImplicitAny: false` must be rejected at code review and blocked by linting rules.
+**Acceptance Criterion:** Any sub-package that attempts to set `strict: false` or
+`noImplicitAny: false` must be rejected at code review and blocked by linting rules.
 
 ---
 
 ### FR-02: Sub-Package tsconfig Inheritance
 
-Every sub-package in `apps/*` and `packages/*` must extend from `tsconfig.base.json`. Direct compiler option declarations that duplicate or contradict the root are forbidden.
+Every sub-package in `apps/*` and `packages/*` must extend from `tsconfig.base.json`. Direct
+compiler option declarations that duplicate or contradict the root are forbidden.
 
-**Acceptance Criterion:** All `tsconfig.json` files reference `tsconfig.base.json` in their `extends` field.
+**Acceptance Criterion:** All `tsconfig.json` files reference `tsconfig.base.json` in their
+`extends` field.
 
 ---
 
 ### FR-03: Zero Implicit Any
 
-All function parameters, return types, variable declarations, and object shapes must have explicit, non-`any` types. Cases where a genuine union or unknown type is needed must use `unknown` with explicit narrowing.
+All function parameters, return types, variable declarations, and object shapes must have explicit,
+non-`any` types. Cases where a genuine union or unknown type is needed must use `unknown` with
+explicit narrowing.
 
 **Acceptance Criterion:** `pnpm typecheck` produces no `implicit any` errors.
 
@@ -170,31 +180,39 @@ All function parameters, return types, variable declarations, and object shapes 
 
 ### FR-04: Zero Unsafe Type Assertions
 
-`as AnyType` assertions that hide a real type mismatch must be replaced with proper type guards or correct declarations. The only permitted assertions are narrowing from `unknown` with validation.
+`as AnyType` assertions that hide a real type mismatch must be replaced with proper type guards or
+correct declarations. The only permitted assertions are narrowing from `unknown` with validation.
 
-**Acceptance Criterion:** No `as any` in the codebase (enforced by ESLint `@typescript-eslint/no-explicit-any` rule where applicable).
+**Acceptance Criterion:** No `as any` in the codebase (enforced by ESLint
+`@typescript-eslint/no-explicit-any` rule where applicable).
 
 ---
 
 ### FR-05: Domain Contract Alignment
 
-API DTO types and worker message types must derive from or be structurally compatible with their corresponding domain entity types. Type drift between layers is not permitted.
+API DTO types and worker message types must derive from or be structurally compatible with their
+corresponding domain entity types. Type drift between layers is not permitted.
 
-**Acceptance Criterion:** No type casting required between domain return values and API response shapes; worker job payloads are typed and match the expected domain input contracts.
+**Acceptance Criterion:** No type casting required between domain return values and API response
+shapes; worker job payloads are typed and match the expected domain input contracts.
 
 ---
 
 ### FR-06: Strict Null Handling
 
-All optional chaining and nullish coalescing usage must be backed by explicit null/undefined guards or proper type narrowing. Unsafe access to potentially-undefined values must be replaced with explicit checks.
+All optional chaining and nullish coalescing usage must be backed by explicit null/undefined guards
+or proper type narrowing. Unsafe access to potentially-undefined values must be replaced with
+explicit checks.
 
-**Acceptance Criterion:** No `!` non-null assertions except in cases documented with a justification comment; no access to potentially-undefined array elements without a guard.
+**Acceptance Criterion:** No `!` non-null assertions except in cases documented with a justification
+comment; no access to potentially-undefined array elements without a guard.
 
 ---
 
 ### FR-07: Test File Type Compliance
 
-All test files, including mock factories, test helpers, and fixture builders, must be strictly typed. Test-specific `any` casts that exist only to bypass TypeScript checking are forbidden.
+All test files, including mock factories, test helpers, and fixture builders, must be strictly
+typed. Test-specific `any` casts that exist only to bypass TypeScript checking are forbidden.
 
 **Acceptance Criterion:** `pnpm typecheck` runs against test files and returns zero errors.
 
@@ -202,52 +220,55 @@ All test files, including mock factories, test helpers, and fixture builders, mu
 
 ### FR-08: CI Type Gate
 
-The CI pipeline must include a mandatory `pnpm typecheck` step that runs before any merge. This step must fail the pipeline with a non-zero exit code if any TypeScript error exists.
+The CI pipeline must include a mandatory `pnpm typecheck` step that runs before any merge. This step
+must fail the pipeline with a non-zero exit code if any TypeScript error exists.
 
-**Acceptance Criterion:** A CI configuration entry exists for the typecheck job; no pull request can be merged if this job fails.
+**Acceptance Criterion:** A CI configuration entry exists for the typecheck job; no pull request can
+be merged if this job fails.
 
 ---
 
 ### FR-09: Documented ts-ignore Policy
 
-Any remaining `// @ts-ignore` or `// @ts-expect-error` comment must be accompanied by an inline explanation of why the suppression is necessary and a reference to an issue or known limitation. Suppressions without documentation are forbidden.
+Any remaining `// @ts-ignore` or `// @ts-expect-error` comment must be accompanied by an inline
+explanation of why the suppression is necessary and a reference to an issue or known limitation.
+Suppressions without documentation are forbidden.
 
-**Acceptance Criterion:** No bare `// @ts-ignore` exists in the codebase; all suppressions include a comment of at least one sentence.
+**Acceptance Criterion:** No bare `// @ts-ignore` exists in the codebase; all suppressions include a
+comment of at least one sentence.
 
 ---
 
 ## User Scenarios & Testing
 
-> Note: This is an infrastructure stage. The "users" are engineers, CI systems, and future AI agents operating in the codebase. Scenarios are framed accordingly.
+> Note: This is an infrastructure stage. The "users" are engineers, CI systems, and future AI agents
+> operating in the codebase. Scenarios are framed accordingly.
 
 ### Scenario 1: Engineer Runs Type Check Locally
 
-**Given** an engineer clones or pulls the monorepo
-**When** they run `pnpm typecheck` from the repo root
-**Then** the command completes with exit code `0` and zero error lines in output
+**Given** an engineer clones or pulls the monorepo **When** they run `pnpm typecheck` from the repo
+root **Then** the command completes with exit code `0` and zero error lines in output
 
 ### Scenario 2: CI Pipeline Blocks a Type-Unsafe Pull Request
 
-**Given** a developer submits a PR that introduces an implicit `any` or a type mismatch
-**When** CI runs the typecheck job
-**Then** the job fails, the PR is blocked from merging, and the error is reported in the CI log
+**Given** a developer submits a PR that introduces an implicit `any` or a type mismatch **When** CI
+runs the typecheck job **Then** the job fails, the PR is blocked from merging, and the error is
+reported in the CI log
 
 ### Scenario 3: New Package Inherits Root Strict Contract
 
-**Given** a developer adds a new package under `packages/`
-**When** they configure the `tsconfig.json`
-**Then** it must extend `tsconfig.base.json`; any attempt to weaken strict settings is rejected at review
+**Given** a developer adds a new package under `packages/` **When** they configure the
+`tsconfig.json` **Then** it must extend `tsconfig.base.json`; any attempt to weaken strict settings
+is rejected at review
 
 ### Scenario 4: Cross-Package Type Contract Validated
 
-**Given** the API layer calls a domain function and passes the result to a worker message
-**When** the typecheck runs
-**Then** no casting is needed and type compatibility is verified at compile time
+**Given** the API layer calls a domain function and passes the result to a worker message **When**
+the typecheck runs **Then** no casting is needed and type compatibility is verified at compile time
 
 ### Scenario 5: Test Mock Fails Without Explicit Types
 
-**Given** a test mock is written without explicit type annotations
-**When** the typecheck runs
+**Given** a test mock is written without explicit type annotations **When** the typecheck runs
 **Then** the missing type annotation is reported as an error and the test file must be corrected
 
 ---
@@ -270,7 +291,8 @@ The stage is complete when all of the following are met:
 
 ## Migration Strategy
 
-The cleanup is structured in five sequential passes. Each pass must be committed independently to preserve reviewability and to allow targeted rollback if a pass introduces regressions.
+The cleanup is structured in five sequential passes. Each pass must be committed independently to
+preserve reviewability and to allow targeted rollback if a pass introduces regressions.
 
 ### Pass 1 — Remove Implicit Any
 
@@ -298,7 +320,8 @@ The cleanup is structured in five sequential passes. Each pass must be committed
 - Consolidate duplicate type declarations into `packages/types`
 - Remove ad-hoc inline type definitions that duplicate package types
 
-**Exit Gate:** No cross-layer casts required; type-only imports used where structural sharing is needed.
+**Exit Gate:** No cross-layer casts required; type-only imports used where structural sharing is
+needed.
 
 ---
 
@@ -343,7 +366,8 @@ The cleanup is structured in five sequential passes. Each pass must be committed
 - Ensure test helper constructors use the same types as production code
 - Validate that typed fixture builders conform to domain types
 
-**Exit Gate:** `pnpm typecheck` run against all test directories returns zero errors; full test suite passes after all passes.
+**Exit Gate:** `pnpm typecheck` run against all test directories returns zero errors; full test
+suite passes after all passes.
 
 ---
 
@@ -351,7 +375,8 @@ The cleanup is structured in five sequential passes. Each pass must be committed
 
 ### Risk 1: Large Refactor Surface
 
-**Description:** The 800+ error baseline means changes touch many files across many packages. A single incorrect type fix can hide or propagate a new error.
+**Description:** The 800+ error baseline means changes touch many files across many packages. A
+single incorrect type fix can hide or propagate a new error.
 
 **Likelihood:** High  
 **Impact:** Medium (type-only, no runtime behavior change if done correctly)
@@ -367,14 +392,17 @@ The cleanup is structured in five sequential passes. Each pass must be committed
 
 ### Risk 2: Hidden Runtime Assumptions
 
-**Description:** Some code may rely on a value being `undefined` in a way that the current non-strict types mask. Making the type explicit could reveal a genuine logic bug that was previously silent.
+**Description:** Some code may rely on a value being `undefined` in a way that the current
+non-strict types mask. Making the type explicit could reveal a genuine logic bug that was previously
+silent.
 
 **Likelihood:** Medium  
 **Impact:** High (could indicate a real defect, not just a type issue)
 
 **Mitigation:**
 
-- When a type fix reveals an apparent logic error, a separate fix issue must be opened — the type fix and logic fix must not be bundled
+- When a type fix reveals an apparent logic error, a separate fix issue must be opened — the type
+  fix and logic fix must not be bundled
 - Runtime smoke tests executed after each pass
 - Full integration test suite run after all passes complete
 - Any logic-layer finding escalated before proceeding to the next pass
@@ -383,26 +411,35 @@ The cleanup is structured in five sequential passes. Each pass must be committed
 
 ### Risk 3: Third-Party Type Definitions
 
-**Description:** Some dependencies may have incomplete or incorrect `@types/*` packages that produce errors even after correct local typing.
+**Description:** Some dependencies may have incomplete or incorrect `@types/*` packages that produce
+errors even after correct local typing.
 
 **Likelihood:** Low  
 **Impact:** Low
 
 **Mitigation:**
 
-- Add a module declaration (`declare module`) with documented justification for any third-party package that lacks accurate types
+- Add a module declaration (`declare module`) with documented justification for any third-party
+  package that lacks accurate types
 - Pin `@types/*` versions in `package.json` to avoid future type regressions from upstream changes
 
 ---
 
 ## Assumptions
 
-1. `pnpm` is the package manager and `pnpm typecheck` is the canonical type check command at the monorepo root.
-2. The CI system supports per-job blocking on non-zero exit codes (standard behavior for GitHub Actions / equivalent).
-3. `apps/frontoffice` and `apps/backoffice` are explicitly excluded from this pass; they will be addressed in a future stabilization stage.
-4. Generated files (Drizzle schema output, auto-generated client types) are excluded from manual type patching. If generated types need correction, the generator configuration is updated, not the output files.
-5. `// @ts-expect-error` is treated the same as `// @ts-ignore` — both require an inline documentation comment.
-6. No changes to runtime behavior are permitted during this stage. If a type fix reveals a logic defect, a separate issue is opened.
+1. `pnpm` is the package manager and `pnpm typecheck` is the canonical type check command at the
+   monorepo root.
+2. The CI system supports per-job blocking on non-zero exit codes (standard behavior for GitHub
+   Actions / equivalent).
+3. `apps/frontoffice` and `apps/backoffice` are explicitly excluded from this pass; they will be
+   addressed in a future stabilization stage.
+4. Generated files (Drizzle schema output, auto-generated client types) are excluded from manual
+   type patching. If generated types need correction, the generator configuration is updated, not
+   the output files.
+5. `// @ts-expect-error` is treated the same as `// @ts-ignore` — both require an inline
+   documentation comment.
+6. No changes to runtime behavior are permitted during this stage. If a type fix reveals a logic
+   defect, a separate issue is opened.
 
 ---
 
@@ -418,7 +455,8 @@ The cleanup is structured in five sequential passes. Each pass must be committed
 | Cross-tenant joins introduced | None           |
 | Shared tenant data risk       | None           |
 
-Isolation guarantees are **reinforced**, not weakened, by this stage. Explicit typing makes layer boundaries between tenant-scoped and non-scoped code verifiable at compile time.
+Isolation guarantees are **reinforced**, not weakened, by this stage. Explicit typing makes layer
+boundaries between tenant-scoped and non-scoped code verifiable at compile time.
 
 ---
 
@@ -433,7 +471,8 @@ Isolation guarantees are **reinforced**, not weakened, by this stage. Explicit t
 | Product version check required | Not applicable                 |
 | Limit enforcement changed      | No                             |
 
-No license or version enforcement logic is altered. If a type fix in Pass 2 touches a middleware interface, the fix must be reviewed against the middleware contract before merging.
+No license or version enforcement logic is altered. If a type fix in Pass 2 touches a middleware
+interface, the fix must be reviewed against the middleware contract before merging.
 
 ---
 
@@ -453,7 +492,8 @@ No license or version enforcement logic is altered. If a type fix in Pass 2 touc
 
 No new log lines are introduced by this stage. However, as a prerequisite quality gate:
 
-- All structured log calls in `apps/api` and `apps/worker` must have typed arguments after this stage — no `any`-typed log payloads permitted
+- All structured log calls in `apps/api` and `apps/worker` must have typed arguments after this
+  stage — no `any`-typed log payloads permitted
 - `packages/logger` must export a typed logging interface used uniformly across both apps
 
 These are type-contract requirements, not behavioral changes.
@@ -470,7 +510,8 @@ These are type-contract requirements, not behavioral changes.
 | Smoke tests               | Runtime smoke tests must pass after all passes complete                              |
 | Regression baseline       | Error count must monotonically decrease pass-by-pass (no regressions between passes) |
 
-No new test cases are required by this stage beyond verifying type compliance. If a pass reveals a logic defect, that defect's test is written in a separate issue.
+No new test cases are required by this stage beyond verifying type compliance. If a pass reveals a
+logic defect, that defect's test is written in a separate issue.
 
 ---
 
@@ -521,7 +562,8 @@ Upon completion:
 
 ---
 
-_Compliant with Zidney Constitution v1.2.0 — Infrastructure hardening stage. No behavioral changes introduced._
+_Compliant with Zidney Constitution v1.2.0 — Infrastructure hardening stage. No behavioral changes
+introduced._
 
 ---
 
@@ -533,39 +575,67 @@ _Compliant with Zidney Constitution v1.2.0 — Infrastructure hardening stage. N
 
 **Question:** Should `noUnusedLocals` and `noUnusedParameters` be enforced in test files?
 
-**Decision:** Add a `tsconfig.test.json` extending `tsconfig.base.json` that disables only `noUnusedLocals` and `noUnusedParameters`, scoped to test paths (e.g., `tests/**`, `**/*.test.ts`, `**/*.spec.ts`). All other strict settings remain enforced in test files.
+**Decision:** Add a `tsconfig.test.json` extending `tsconfig.base.json` that disables only
+`noUnusedLocals` and `noUnusedParameters`, scoped to test paths (e.g., `tests/**`, `**/*.test.ts`,
+`**/*.spec.ts`). All other strict settings remain enforced in test files.
 
-**Rationale:** This is the standard monorepo pattern and avoids the dead-parameter false-positive problem idiomatic to test code (e.g., unused `_ctx` parameters in test helpers, intentionally unused fixture arguments). Disabling these two flags globally or per-file would be too broad; scoping via a dedicated `tsconfig.test.json` preserves maximum strictness everywhere else.
+**Rationale:** This is the standard monorepo pattern and avoids the dead-parameter false-positive
+problem idiomatic to test code (e.g., unused `_ctx` parameters in test helpers, intentionally unused
+fixture arguments). Disabling these two flags globally or per-file would be too broad; scoping via a
+dedicated `tsconfig.test.json` preserves maximum strictness everywhere else.
 
 ---
 
 #### CL-02: Pass Sequencing Rigidity
 
-**Question:** Are the 5 migration passes (Pass 1–5) strictly sequential, or can teams run them in parallel across different packages?
+**Question:** Are the 5 migration passes (Pass 1–5) strictly sequential, or can teams run them in
+parallel across different packages?
 
-**Decision:** Passes are **strictly sequential within a package** but **can be parallelized across packages**. Each pass must have its own passing typecheck result before moving to the next pass within the same package.
+**Decision:** Passes are **strictly sequential within a package** but **can be parallelized across
+packages**. Each pass must have its own passing typecheck result before moving to the next pass
+within the same package.
 
-**Rationale:** This maintains incremental correctness and prevents compounding errors within a single package while allowing teams working on independent packages (e.g., `packages/domain-core` vs. `apps/worker`) to make progress concurrently. CI must gate each pass-commit on a clean typecheck for the affected package scope.
+**Rationale:** This maintains incremental correctness and prevents compounding errors within a
+single package while allowing teams working on independent packages (e.g., `packages/domain-core`
+vs. `apps/worker`) to make progress concurrently. CI must gate each pass-commit on a clean typecheck
+for the affected package scope.
 
 ---
 
 #### CL-03: Third-Party @types Placement and Missing Declaration Handling
 
-**Question:** How should type errors caused by missing or incorrect third-party `@types` packages be handled?
+**Question:** How should type errors caused by missing or incorrect third-party `@types` packages be
+handled?
 
-**Decision:** Install the correct `@types/*` package first. If no `@types` package exists and the library ships no declarations, create a minimal ambient declaration file at `packages/types/src/vendor/<library-name>.d.ts` with a `declare module` stub. Document the stub with a comment explaining why it exists. `@ts-ignore` is the last resort and requires a justification comment in the format defined by CL-05.
+**Decision:** Install the correct `@types/*` package first. If no `@types` package exists and the
+library ships no declarations, create a minimal ambient declaration file at
+`packages/types/src/vendor/<library-name>.d.ts` with a `declare module` stub. Document the stub with
+a comment explaining why it exists. `@ts-ignore` is the last resort and requires a justification
+comment in the format defined by CL-05.
 
-**Rationale:** Placing vendor stubs in `packages/types/src/vendor/` keeps them discoverable, versioned, and reviewable. This avoids scattering ad-hoc declaration files across app layers and ensures they are part of the shared type package included by all consumers. It also creates a clear audit trail for future `@types` package adoption.
+**Rationale:** Placing vendor stubs in `packages/types/src/vendor/` keeps them discoverable,
+versioned, and reviewable. This avoids scattering ad-hoc declaration files across app layers and
+ensures they are part of the shared type package included by all consumers. It also creates a clear
+audit trail for future `@types` package adoption.
 
 ---
 
 #### CL-04: Logic Bug Discovery During Type Fixes — Pass Exit Gate Behavior
 
-**Question:** What happens when a type fix during Pass 2 (Domain Contract Alignment) reveals a real logic bug?
+**Question:** What happens when a type fix during Pass 2 (Domain Contract Alignment) reveals a real
+logic bug?
 
-**Decision:** Stop the pass, raise a separate issue/ticket, and document the bug in the PR description. Do NOT fix the logic bug within the TypeScript stabilization PR. Stub the type correctly using a safe interim type and track the logic fix separately. If the bug is in a critical path (attempt engine, license enforcement, tenant isolation), escalate immediately before proceeding.
+**Decision:** Stop the pass, raise a separate issue/ticket, and document the bug in the PR
+description. Do NOT fix the logic bug within the TypeScript stabilization PR. Stub the type
+correctly using a safe interim type and track the logic fix separately. If the bug is in a critical
+path (attempt engine, license enforcement, tenant isolation), escalate immediately before
+proceeding.
 
-**Rationale:** Mixing behavioral fixes with type stabilization changes scope, increases review surface, and risks introducing regressions in critical subsystems. The TypeScript stabilization stage must remain a zero-behavioral-change operation. Interim type stubs (e.g., `unknown` narrowed at the call site) are acceptable as a holding pattern until the separate logic fix is merged and validated.
+**Rationale:** Mixing behavioral fixes with type stabilization changes scope, increases review
+surface, and risks introducing regressions in critical subsystems. The TypeScript stabilization
+stage must remain a zero-behavioral-change operation. Interim type stubs (e.g., `unknown` narrowed
+at the call site) are acceptable as a holding pattern until the separate logic fix is merged and
+validated.
 
 ---
 
@@ -573,7 +643,8 @@ _Compliant with Zidney Constitution v1.2.0 — Infrastructure hardening stage. N
 
 **Question:** What is the required format for `// @ts-ignore` justification comments?
 
-**Decision (amended):** The justification description must appear inline on the same line as the `// @ts-ignore` directive, using the format:
+**Decision (amended):** The justification description must appear inline on the same line as the
+`// @ts-ignore` directive, using the format:
 
 ```ts
 // @ts-ignore: <reason> [<issue-ref>]
@@ -585,8 +656,17 @@ Example:
 // @ts-ignore: library missing type declarations [INFRA-001]
 ```
 
-Suppressions without an inline description matching `: <reason> [<issue-ref>]` are forbidden and must fail lint (`pnpm lint`) and code review.
+Suppressions without an inline description matching `: <reason> [<issue-ref>]` are forbidden and
+must fail lint (`pnpm lint`) and code review.
 
-**Amendment note:** The original decision specified a two-line preceding-comment format (`// ts-ignore: ...` on the line above `// @ts-ignore`). This was revised post-QA audit because `@typescript-eslint/ban-ts-comment`’s `descriptionFormat` option enforces inline description text on the directive line — making the two approaches mutually incompatible. The inline format was selected as it is directly enforceable by the standard ESLint rule without custom scripting, produces simpler diffs, and provides the same audit traceability.
+**Amendment note:** The original decision specified a two-line preceding-comment format
+(`// ts-ignore: ...` on the line above `// @ts-ignore`). This was revised post-QA audit because
+`@typescript-eslint/ban-ts-comment`’s `descriptionFormat` option enforces inline description text on
+the directive line — making the two approaches mutually incompatible. The inline format was selected
+as it is directly enforceable by the standard ESLint rule without custom scripting, produces simpler
+diffs, and provides the same audit traceability.
 
-**Rationale:** A machine-parseable, consistent format enables the `@typescript-eslint/ban-ts-comment` ESLint rule to detect and reject undocumented suppressions automatically. The `[<issue-ref>]` field creates a traceable link to the tracking issue, making it possible to audit and remove suppressions once the upstream fix lands. This directly enforces FR-09.
+**Rationale:** A machine-parseable, consistent format enables the
+`@typescript-eslint/ban-ts-comment` ESLint rule to detect and reject undocumented suppressions
+automatically. The `[<issue-ref>]` field creates a traceable link to the tracking issue, making it
+possible to audit and remove suppressions once the upstream fix lands. This directly enforces FR-09.

@@ -1,14 +1,16 @@
 # Specify Report — STAGE_INFRA_05_LINT_GOVERNANCE
 
-**Step:** 1 — Specify
-**Timestamp:** 2026-03-07T00:00:00.000Z
-**Status:** COMPLETE
+**Step:** 1 — Specify **Timestamp:** 2026-03-07T00:00:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Specification for the Lint Governance infrastructure stage is complete. The spec defines a strict multi-layer enforcement pipeline composed of Biome (code style, lint, import hygiene), AI-Guard (architecture boundary validation), and Infra Audit (dependency graph health). Five developer-facing user stories and nine functional requirements are fully defined. Two low-risk clarification points were identified and documented with safe defaults.
+Specification for the Lint Governance infrastructure stage is complete. The spec defines a strict
+multi-layer enforcement pipeline composed of Biome (code style, lint, import hygiene), AI-Guard
+(architecture boundary validation), and Infra Audit (dependency graph health). Five developer-facing
+user stories and nine functional requirements are fully defined. Two low-risk clarification points
+were identified and documented with safe defaults.
 
 ---
 
@@ -44,11 +46,14 @@ Specification for the Lint Governance infrastructure stage is complete. The spec
 - FR-02: Import order convention — 5-group canonical import ordering enforced by Biome
 - FR-03: AI-Guard pre-commit activation — runs architectural boundary validation before every commit
 - FR-04: lint-staged verification — `biome check --write` applied to staged files
-- FR-05: CI gate enforcement — `bun run lint` + `bun run type-check` + `bun scripts/ai-guard.ts` are all blocking
-- FR-06: Architecture intelligence freshness (advisory) — `arch:audit` as maintenance command, not CI gate
+- FR-05: CI gate enforcement — `bun run lint` + `bun run type-check` + `bun scripts/ai-guard.ts` are
+  all blocking
+- FR-06: Architecture intelligence freshness (advisory) — `arch:audit` as maintenance command, not
+  CI gate
 - FR-07: Module ownership policy — critical packages documented; CODEOWNERS deferred
 - FR-08: Pre-push hook (advisory) — optional hook that runs full checks before push
-- FR-09: Drift prevention strategy — architecture drift prevention documented for developers and AI agents
+- FR-09: Drift prevention strategy — architecture drift prevention documented for developers and AI
+  agents
 
 ---
 
@@ -93,4 +98,5 @@ Both defaults accepted. No blockers.
 
 ## Next Step
 
-→ **Clarify** — resolve any remaining `[NEEDS CLARIFICATION]` markers and lock clarifications before planning.
+→ **Clarify** — resolve any remaining `[NEEDS CLARIFICATION]` markers and lock clarifications before
+planning.

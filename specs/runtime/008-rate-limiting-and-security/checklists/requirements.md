@@ -1,16 +1,19 @@
 # Specification Quality Checklist: STAGE 08 – Rate Limiting & Security Baseline
 
-**Purpose:** Validate specification completeness and quality before proceeding to clarification/planning  
+**Purpose:** Validate specification completeness and quality before proceeding to
+clarification/planning  
 **Created:** 2026-02-19  
 **Feature:** [spec.md](../spec.md)  
-**Stage File:** [STAGE_08_RATE_LIMITING_AND_SECURITY.md](../../phases/01_PLATFORM_FOUNDATION/STAGE_08_RATE_LIMITING_AND_SECURITY.md)
+**Stage File:**
+[STAGE_08_RATE_LIMITING_AND_SECURITY.md](../../phases/01_PLATFORM_FOUNDATION/STAGE_08_RATE_LIMITING_AND_SECURITY.md)
 
 ---
 
 ## Content Quality
 
 - [x] **No implementation details** (languages, frameworks, APIs)
-  - Spec uses technology-agnostic language (e.g., "Redis-based rate limiter" not "ioredis npm package")
+  - Spec uses technology-agnostic language (e.g., "Redis-based rate limiter" not "ioredis npm
+    package")
   - No code samples in main spec (only pseudocode for clarity)
   - No framework-specific implementation details
 

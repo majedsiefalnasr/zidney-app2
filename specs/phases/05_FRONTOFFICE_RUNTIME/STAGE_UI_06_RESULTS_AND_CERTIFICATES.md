@@ -64,14 +64,11 @@ All computed values must originate from backend APIs.
 
 ## Primary Routes
 
-Results list:
-`/results`
+Results list: `/results`
 
-Single result:
-`/results/:attempt_id`
+Single result: `/results/:attempt_id`
 
-Certificate (view/download trigger only):
-`/results/:attempt_id/certificate`
+Certificate (view/download trigger only): `/results/:attempt_id/certificate`
 
 All routes require:
 
@@ -183,8 +180,7 @@ If certificate_available = true:
 
 Certificate button must:
 
-- Call backend endpoint:
-  `GET /v1/frontoffice/results/{attempt_id}/certificate`
+- Call backend endpoint: `GET /v1/frontoffice/results/{attempt_id}/certificate`
 - Open secure download (PDF or generated document)
 
 Frontend must:

@@ -28,15 +28,15 @@
 
 ## 3. Executive Summary
 
-- Adds `bun run arch:guard` npm script — allows any developer to manually invoke the
-  architecture guard without going through a git commit
-- Exports 7 pure functions from `scripts/ai-guard.ts` without changing any logic —
-  enables clean unit-test imports using Bun's `import.meta.main` guard pattern
-- Delivers 37 unit tests across all 7 rule categories enforced by the guard
-  (`extractImports`, `detectModule`, `detectFileModule`, `validateRules`,
-  `validateArchitectureMap`, `validateCrossAppImports`, `validateRelativeLeaks`)
-- Delivers 7 static tests that assert `ARCHITECTURE_CONTRACT.json` correctly encodes
-  all required boundary rules
+- Adds `bun run arch:guard` npm script — allows any developer to manually invoke the architecture
+  guard without going through a git commit
+- Exports 7 pure functions from `scripts/ai-guard.ts` without changing any logic — enables clean
+  unit-test imports using Bun's `import.meta.main` guard pattern
+- Delivers 37 unit tests across all 7 rule categories enforced by the guard (`extractImports`,
+  `detectModule`, `detectFileModule`, `validateRules`, `validateArchitectureMap`,
+  `validateCrossAppImports`, `validateRelativeLeaks`)
+- Delivers 7 static tests that assert `ARCHITECTURE_CONTRACT.json` correctly encodes all required
+  boundary rules
 - Architecture score is 100/100 at every commit in this branch — no drift introduced
 - All 3 Husky gates pass at every commit (lint-staged, ai-guard, infra-audit --quick)
 - Zero constitutional violations — no API routes, no DB access, no tenant logic modified
@@ -152,7 +152,8 @@ bun run arch:guard
 
 ## 12. Stage Lifecycle Verification
 
-- [x] Stage Status updated in `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_06_ARCHITECTURE_GUARD.md` → PRODUCTION READY
+- [x] Stage Status updated in
+      `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_06_ARCHITECTURE_GUARD.md` → PRODUCTION READY
 - [x] `.workflow-state.json` updated to `stage_production_ready`
 - [x] `README.md` progress table complete (all 8 rows ✅)
 - [x] All 7 step reports generated in `reports/` and `audits/`

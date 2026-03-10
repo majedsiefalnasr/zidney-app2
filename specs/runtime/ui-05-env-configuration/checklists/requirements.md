@@ -14,7 +14,9 @@
 - [x] Written for non-technical stakeholders
 - [x] All mandatory sections completed
 
-**Notes**: Spec references `core/config/env.ts` paths and `VITE_` prefix convention as domain terms inherent to the feature (environment configuration plumbing), not as implementation instructions. No framework, library, or language choices are prescribed.
+**Notes**: Spec references `core/config/env.ts` paths and `VITE_` prefix convention as domain terms
+inherent to the feature (environment configuration plumbing), not as implementation instructions. No
+framework, library, or language choices are prescribed.
 
 ---
 
@@ -29,7 +31,9 @@
 - [x] Scope is clearly bounded
 - [x] Dependencies and assumptions identified
 
-**Notes**: All requirements use testable language (MUST, MUST NOT). Success criteria focus on observable outcomes (zero instances, visible errors, cannot mutate). Assumptions and non-goals sections explicitly bound scope.
+**Notes**: All requirements use testable language (MUST, MUST NOT). Success criteria focus on
+observable outcomes (zero instances, visible errors, cannot mutate). Assumptions and non-goals
+sections explicitly bound scope.
 
 ---
 
@@ -44,7 +48,8 @@
 
 - FR-001 through FR-018 each map to one or more acceptance scenarios in the user stories.
 - SC-001 through SC-008 are all verifiable without knowing the implementation approach.
-- User stories cover: centralized access (P1), API base resolution (P1), security (P1), mode helpers (P2), feature flags (P2), test support (P2), multi-app consistency (P3).
+- User stories cover: centralized access (P1), API base resolution (P1), security (P1), mode helpers
+  (P2), feature flags (P2), test support (P2), multi-app consistency (P3).
 
 ---
 
@@ -57,12 +62,16 @@
 | Feature Readiness    | 4      | 4      | 0      |
 | **Total**            | **16** | **16** | **0**  |
 
-**Result**: All checklist items pass. Specification is ready for `/speckit.clarify` or `/speckit.plan`.
+**Result**: All checklist items pass. Specification is ready for `/speckit.clarify` or
+`/speckit.plan`.
 
 ---
 
 ## Notes
 
-- No [NEEDS CLARIFICATION] markers were needed. The stage file provided sufficient detail to make informed decisions for all requirements.
-- Assumptions section documents reasonable defaults (Vite convention, per-app implementation, static flags).
-- Constitutional constraints (no secrets, read-only config, no license logic, no tenant computation) are reflected in FR-007 through FR-009, FR-015 through FR-018, and SC-003.
+- No [NEEDS CLARIFICATION] markers were needed. The stage file provided sufficient detail to make
+  informed decisions for all requirements.
+- Assumptions section documents reasonable defaults (Vite convention, per-app implementation, static
+  flags).
+- Constitutional constraints (no secrets, read-only config, no license logic, no tenant computation)
+  are reflected in FR-007 through FR-009, FR-015 through FR-018, and SC-003.

@@ -101,7 +101,8 @@
   - ✅ Concurrent provisioning attempts (distributed lock with 30s TTL)
 
 - [x] **Scope is clearly bounded**
-  - ✅ In scope: License creation, job enqueue, database creation, schema migration, seed data, admin account, registry insert, error recovery
+  - ✅ In scope: License creation, job enqueue, database creation, schema migration, seed data,
+    admin account, registry insert, error recovery
   - ✅ Out of scope: Backup/recovery, workspace deletion, product changes, tenant migration
   - ✅ Non-Goals section explicitly lists what is NOT handled
   - ✅ Explicit statement: "Workspace deletion/deprovisioning — future STAGE"
@@ -132,7 +133,8 @@
   - ✅ "Execute as a single atomic transaction" explicitly stated
   - ✅ All 7 steps (schema, seed roles, permissions, settings, division, admin, registry) or none
   - ✅ "If commit succeeds → update license; else rollback → PROVISION_FAILED"
-  - ✅ Test: Simulate failure at each step (step 6 of 7), verify database dropped and license remains PENDING_PROVISION
+  - ✅ Test: Simulate failure at each step (step 6 of 7), verify database dropped and license
+    remains PENDING_PROVISION
 
 - [x] **Worker idempotency guaranteed**
   - ✅ "If duplicate job → check registry, return success" is idempotent
@@ -174,10 +176,13 @@
 
 - [x] **All functional requirements have clear acceptance criteria**
   - ✅ Requirement: "License creation enqueues job" → Acceptance: "Job in Redis queue within 100ms"
-  - ✅ Requirement: "Database created automatically" → Acceptance: "Database named workspace\_<slug> exists in PostgreSQL"
+  - ✅ Requirement: "Database created automatically" → Acceptance: "Database named workspace\_<slug>
+    exists in PostgreSQL"
   - ✅ Requirement: "Schema applied" → Acceptance: "schema_versions table populated, no mismatches"
-  - ✅ Requirement: "Admin account created" → Acceptance: "User exists with ADMIN role, email verified, password hashed"
-  - ✅ Requirement: "Registry entry created" → Acceptance: "tenants_registry has row with license_id, workspace_slug, db_name, schema_version"
+  - ✅ Requirement: "Admin account created" → Acceptance: "User exists with ADMIN role, email
+    verified, password hashed"
+  - ✅ Requirement: "Registry entry created" → Acceptance: "tenants_registry has row with
+    license_id, workspace_slug, db_name, schema_version"
   - ✅ 11 success criteria fully defined and independently verifiable
 
 - [x] **User scenarios cover primary flows**
@@ -280,10 +285,13 @@
 
 ## Notes
 
-- **[NEEDS CLARIFICATION] Markers**: 0 — All architectural decisions made based on stage file requirements and Zidney constitution.
+- **[NEEDS CLARIFICATION] Markers**: 0 — All architectural decisions made based on stage file
+  requirements and Zidney constitution.
 - **Validation Iterations**: 1 — Specification passed all quality checks on first iteration.
-- **Architecture Authority**: Specification aligns with STAGE_12_PROVISIONING_TRIGGER stage file and PROJECT_CONTEXT_PRIMER.md.
-- **Constitutional Alignment**: No exceptions or modifications to isolation model, license enforcement, idempotency, or logging required.
+- **Architecture Authority**: Specification aligns with STAGE_12_PROVISIONING_TRIGGER stage file and
+  PROJECT_CONTEXT_PRIMER.md.
+- **Constitutional Alignment**: No exceptions or modifications to isolation model, license
+  enforcement, idempotency, or logging required.
 
 ---
 
@@ -292,4 +300,5 @@
 - **Specification Status**: ✅ READY FOR PLANNING PHASE
 - **Quality Certification**: All items passed
 - **Escalations Required**: None
-- **Recommended Action**: Proceed to `/speckit.plan` for architecture deep-dive and implementation planning
+- **Recommended Action**: Proceed to `/speckit.plan` for architecture deep-dive and implementation
+  planning

@@ -9,7 +9,8 @@
 
 ## Overview
 
-Worker jobs execute long-running asynchronous operations for license lifecycle management. All jobs follow idempotent patterns with retry logic and immutable audit trails.
+Worker jobs execute long-running asynchronous operations for license lifecycle management. All jobs
+follow idempotent patterns with retry logic and immutable audit trails.
 
 ---
 
@@ -335,7 +336,8 @@ Worker jobs execute long-running asynchronous operations for license lifecycle m
 - **Database Drop Failed**: Fail transaction, workspace remains ARCHIVED
 - **Registry Remove Failed**: Fail transaction, retry
 - **Grace Period Not Elapsed**: Defer deletion (enqueue for later retry)
-- **Concurrent Deletion**: If second deletion job arrives, first wins; second fails with "Already deleted"
+- **Concurrent Deletion**: If second deletion job arrives, first wins; second fails with "Already
+  deleted"
 
 **Immutability After Deletion**:
 
@@ -353,7 +355,8 @@ Worker jobs execute long-running asynchronous operations for license lifecycle m
 
 ## Job Type 4: soft_lock_expiry_transition (Optional Background Job)
 
-**Purpose**: Optional background job to expedite auto-transition of expired soft locks (middleware also performs this on-demand)
+**Purpose**: Optional background job to expedite auto-transition of expired soft locks (middleware
+also performs this on-demand)
 
 **Queue Name**: `queue:soft_lock_expiry_transition`
 
@@ -375,13 +378,16 @@ Worker jobs execute long-running asynchronous operations for license lifecycle m
 
 **Execution**:
 
-1. Query licenses table: `SELECT id FROM licenses WHERE status='SOFT_LOCKED' AND soft_lock_until < now()` (LIMIT batch_size)
+1. Query licenses table:
+   `SELECT id FROM licenses WHERE status='SOFT_LOCKED' AND soft_lock_until < now()` (LIMIT
+   batch_size)
 2. For each expired license:
    - Trigger snapshot_create job
    - Upon snapshot completion, trigger transition via License Service
 3. Audit log each transition
 
-**Note**: Middleware also performs this check on-demand, so this job is optional optimization (doesn't break if disabled)
+**Note**: Middleware also performs this check on-demand, so this job is optional optimization
+(doesn't break if disabled)
 
 ---
 
@@ -413,10 +419,10 @@ All job failures trigger structured alerts:
 Worker verifies job payload hasn't been modified:
 
 ```typescript
-const currentHash = computeJobPayloadHash(job.payload)
+const currentHash = computeJobPayloadHash(job.payload);
 if (currentHash !== job.payload_hash) {
   // Payload was mutated in transit; fail job
-  throw new Error('Payload mutation detected')
+  throw new Error("Payload mutation detected");
 }
 ```
 

@@ -8,14 +8,21 @@
 
 ## Summary
 
-5 targeted clarification questions resolved the top architectural ambiguities in the spec. Coverage denominator strategy, entity deletion cascade approach, large-scale language removal flow, idempotency semantics, and error contract are all fully resolved. One deferred item (schema_version bump requirement) was resolved by cross-referencing ADR-0008 — the translations table migration will require a MINOR schema_version bump per the new-table policy. All clarifications are appended in-place to `spec.md` under `## Clarifications / Session 2026-03-01`.
+5 targeted clarification questions resolved the top architectural ambiguities in the spec. Coverage
+denominator strategy, entity deletion cascade approach, large-scale language removal flow,
+idempotency semantics, and error contract are all fully resolved. One deferred item (schema_version
+bump requirement) was resolved by cross-referencing ADR-0008 — the translations table migration will
+require a MINOR schema_version bump per the new-table policy. All clarifications are appended
+in-place to `spec.md` under `## Clarifications / Session 2026-03-01`.
 
 ---
 
 ## Inputs Reviewed
 
-- `specs/runtime/019-translation-system/spec.md` (including `## Clarifications / Session 2026-03-01`)
-- `docs/architecture/adr/adr-0008-formalize-semantic-versioning-policy.md` (schema_version bump policy)
+- `specs/runtime/019-translation-system/spec.md` (including
+  `## Clarifications / Session 2026-03-01`)
+- `docs/architecture/adr/adr-0008-formalize-semantic-versioning-policy.md` (schema_version bump
+  policy)
 
 ---
 
@@ -47,7 +54,8 @@ None. All specification ambiguities are resolved.
 
 - Appended `## Clarifications / Session 2026-03-01` to `spec.md` (lines 241–287) with:
   - 5 Q&A entries defining the exact resolution for each ambiguity
-  - `### Clarification Implications for Technical Planning` section documenting concrete constraints for each resolved item
+  - `### Clarification Implications for Technical Planning` section documenting concrete constraints
+    for each resolved item
   - Entity deletion strategy (application-layer, same transaction, no FK)
   - Error contract constants (`UNSUPPORTED_LANGUAGE`, `ENTITY_NOT_FOUND`, `DEFAULT_LANGUAGE_WRITE`)
   - Hybrid language removal threshold (10,000 rows) and Worker job type
@@ -74,8 +82,13 @@ None. All specification ambiguities are resolved.
 
 ## Open Risks
 
-- **Hybrid threshold tuning**: The 10,000-row threshold for synchronous vs. async language removal is a default — if a workspace has consistently saturated cache with multiple large languages, the threshold may need tuning per deployment. This is an operational concern, not a blocking spec risk.
-- **TRANSLATABLE_FIELDS governance**: If a domain team adds a new translatable field without updating the denominator map, coverage percentages will be understated. The governance gate (code change + version bump) mitigates this but requires discipline.
+- **Hybrid threshold tuning**: The 10,000-row threshold for synchronous vs. async language removal
+  is a default — if a workspace has consistently saturated cache with multiple large languages, the
+  threshold may need tuning per deployment. This is an operational concern, not a blocking spec
+  risk.
+- **TRANSLATABLE_FIELDS governance**: If a domain team adds a new translatable field without
+  updating the denominator map, coverage percentages will be understated. The governance gate (code
+  change + version bump) mitigates this but requires discipline.
 
 ---
 

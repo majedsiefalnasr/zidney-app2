@@ -85,7 +85,8 @@ All Phase 2 features maintain backward compatibility with STAGE 06 schema.
 
 ## Breaking Changes
 
-**None.** Version 1.0.0 is a new feature launching into Phase 1. No API migration needed for existing systems.
+**None.** Version 1.0.0 is a new feature launching into Phase 1. No API migration needed for
+existing systems.
 
 ---
 

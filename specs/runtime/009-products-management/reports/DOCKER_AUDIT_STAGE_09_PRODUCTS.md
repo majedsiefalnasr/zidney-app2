@@ -59,13 +59,15 @@
 
 **Implementation:**
 
-- **Stage 1 (dependencies):** Installs production deps via `bun install --production --frozen-lockfile`
+- **Stage 1 (dependencies):** Installs production deps via
+  `bun install --production --frozen-lockfile`
 - **Stage 2 (builder):** Compiles TypeScript, builds all packages
 - **Stage 3 (api):** Bun runtime, only production deps + compiled API
 - **Stage 4 (worker):** Bun runtime, only production deps + compiled Worker
 - **Stage 5 (nginx):** Alpine nginx reverse proxy
 
-**Security Benefit:** Dev tools + TypeScript removed from production images; ~70% smaller runtime size
+**Security Benefit:** Dev tools + TypeScript removed from production images; ~70% smaller runtime
+size
 
 ---
 
@@ -238,10 +240,11 @@ docker build --target=api -t zidney-api:v1.0.0 .  # Cache hit
 healthcheck:
   test:
     [
-      'CMD',
-      'bun',
-      '-e',
-      "fetch('http://localhost:3000/health/live').then(r => r.ok ? process.exit(0) : process.exit(1))",
+      "CMD",
+      "bun",
+      "-e",
+      "fetch('http://localhost:3000/health/live').then(r => r.ok ? process.exit(0) :
+      process.exit(1))",
     ]
   interval: 30s
   timeout: 5s
@@ -259,7 +262,7 @@ healthcheck:
 
 ```yaml
 healthcheck:
-  test: ['CMD', 'bun', '-e', "console.log('worker-ok'); process.exit(0)"]
+  test: ["CMD", "bun", "-e", "console.log('worker-ok'); process.exit(0)"]
   interval: 30s
   timeout: 5s
   retries: 3
@@ -460,7 +463,8 @@ syft zidney-api:latest -o json > sbom-api.json
 
 ### 🟢 **PASS – PRODUCTION SAFE**
 
-**Assessment:** High-confidence containerization meeting all security, reliability, and compliance requirements.
+**Assessment:** High-confidence containerization meeting all security, reliability, and compliance
+requirements.
 
 **Reasoning:**
 

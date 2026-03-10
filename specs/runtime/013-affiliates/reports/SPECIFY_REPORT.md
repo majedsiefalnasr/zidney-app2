@@ -8,7 +8,11 @@
 
 ## Summary
 
-Specification for the B2B Affiliate Program successfully generated. The spec defines a master_db-only affiliate system enabling platform administrators to create and manage promotional codes for commercial license purchases. All 15/15 quality checklist items passed. No [NEEDS CLARIFICATION] markers remain. Constitutional compliance verified. The specification is production-ready and ready for technical planning.
+Specification for the B2B Affiliate Program successfully generated. The spec defines a
+master_db-only affiliate system enabling platform administrators to create and manage promotional
+codes for commercial license purchases. All 15/15 quality checklist items passed. No [NEEDS
+CLARIFICATION] markers remain. Constitutional compliance verified. The specification is
+production-ready and ready for technical planning.
 
 ---
 
@@ -42,7 +46,8 @@ Specification for the B2B Affiliate Program successfully generated. The spec def
 - Create new affiliate with promo code, discount %, commission %, usage limits, validity dates
 - Promo code must be uppercase, alphanumeric, globally unique
 - Edit affiliate (except promo_code) — all other fields are mutable
-- Deactivate affiliate (status = INACTIVE) — cannot be used for new purchases, historical data preserved
+- Deactivate affiliate (status = INACTIVE) — cannot be used for new purchases, historical data
+  preserved
 - View affiliate details and usage history
 - Enforce immutability of promo_code after creation
 
@@ -66,7 +71,8 @@ Specification for the B2B Affiliate Program successfully generated. The spec def
 
 **Observability & Audit:**
 
-- Every successful usage generates audit log entry with correlation ID, license_id, client_id, affiliate_id
+- Every successful usage generates audit log entry with correlation ID, license_id, client_id,
+  affiliate_id
 - Audit includes discount_amount, commission_amount, usage timestamp
 - Affiliate_usages table immutable (no UPDATE, no DELETE allowed)
 - Historical records preserved for reconciliation
@@ -94,7 +100,8 @@ Specification for the B2B Affiliate Program successfully generated. The spec def
 
 ## Clarifications Required
 
-**None** — All specifications are unambiguous, testable, and complete. No [NEEDS CLARIFICATION] markers remain.
+**None** — All specifications are unambiguous, testable, and complete. No [NEEDS CLARIFICATION]
+markers remain.
 
 ---
 

@@ -9,9 +9,7 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: PRODUCTION READY
-Risk Level: MEDIUM
-Closure Date: 2026-03-01
+Status: PRODUCTION READY Risk Level: MEDIUM Closure Date: 2026-03-01
 
 Scope Closed:
 
@@ -22,7 +20,8 @@ Scope Closed:
 - Workspace language management with threshold-gated sync/async removal flow
 - DRAIN_LANGUAGE_TRANSLATIONS worker job with per-batch transactions and audit trail
 - Append-only audit logging with DB-trigger immutability
-- Unit tests: translatable-fields (25), translation-service (20), coverage-service (19), drain worker (14) = 72 total
+- Unit tests: translatable-fields (25), translation-service (20), coverage-service (19), drain
+  worker (14) = 72 total
 - Integration tests: 4 files (upsert, list, coverage, language-removal)
 - 28 / 28 tasks completed
 
@@ -40,9 +39,8 @@ Constitutional Compliance:
 - ADR-0008 Semantic versioning enforced
 - Implementation compliant with Zidney Constitution v1.2.0
 
-Notes:
-Stage is production ready. No structural backend modifications allowed.
-Modifications require a new migration stage.
+Notes: Stage is production ready. No structural backend modifications allowed. Modifications require
+a new migration stage.
 
 - Database-per-tenant isolation enforced
 - Server-authoritative time enforced (ADR-0006)
@@ -50,9 +48,8 @@ Modifications require a new migration stage.
 - Redis SCAN used (never KEYS)
 - Worker finalizes async DRAIN operations
 
-Notes:
-Backend implementation complete. No structural backend modifications allowed.
-Modifications require a new migration stage.
+Notes: Backend implementation complete. No structural backend modifications allowed. Modifications
+require a new migration stage.
 
 ---
 
@@ -193,8 +190,7 @@ Constraints:
 
 Coverage calculation per language:
 
-Coverage % =
-(Translated fields count / Total translatable fields count) \* 100
+Coverage % = (Translated fields count / Total translatable fields count) \* 100
 
 Coverage must:
 

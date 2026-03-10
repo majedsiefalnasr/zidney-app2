@@ -8,16 +8,21 @@
 
 ## Summary
 
-Specification authored for STAGE_INFRA_06_ARCHITECTURE_GUARD — the repository-level architecture protection system for Zidney.
+Specification authored for STAGE_INFRA_06_ARCHITECTURE_GUARD — the repository-level architecture
+protection system for Zidney.
 
-The stage was found to have a significant portion of its implementation already in place (`scripts/ai-guard.ts`, `.husky/pre-commit`, `ARCHITECTURE_CONTRACT.json`). The spec accurately reflects this current state and scopes deliverables strictly to the **gap items** that complete the stage:
+The stage was found to have a significant portion of its implementation already in place
+(`scripts/ai-guard.ts`, `.husky/pre-commit`, `ARCHITECTURE_CONTRACT.json`). The spec accurately
+reflects this current state and scopes deliverables strictly to the **gap items** that complete the
+stage:
 
 1. `arch:guard` npm script (CLI entry point)
 2. Unit tests for `ai-guard.ts` validation functions
 3. Static architecture rule tests
 4. Test fixtures
 
-No `[NEEDS CLARIFICATION]` markers were added — all requirements are deterministic based on the existing codebase state.
+No `[NEEDS CLARIFICATION]` markers were added — all requirements are deterministic based on the
+existing codebase state.
 
 ---
 
@@ -52,7 +57,8 @@ No `[NEEDS CLARIFICATION]` markers were added — all requirements are determini
 ## Functional Requirements Captured
 
 - FR-01: `arch:guard` npm script → `package.json`
-- FR-02: Unit tests for all `ai-guard.ts` validation functions → `tests/unit/ai-guard/ai-guard-validation.test.ts`
+- FR-02: Unit tests for all `ai-guard.ts` validation functions →
+  `tests/unit/ai-guard/ai-guard-validation.test.ts`
 - FR-03: Static architecture rule test → `tests/static/05-architecture-guard.test.ts`
 - FR-04: `detectModule` / `detectFileModule` path resolution tests
 - FR-05: Pre-commit hook documentation verification (no content changes needed)
@@ -82,8 +88,10 @@ None — all requirements are deterministic based on existing codebase state.
 
 ## Open Risks
 
-- **Test isolation:** Unit tests must not depend on `git diff --staged` output (which varies by developer environment). Fixture file approach mitigates this.
-- **Test file linting:** New test files must pass Biome checks. Use correct TypeScript patterns to avoid `noExplicitAny` or `noUnusedVariables` violations.
+- **Test isolation:** Unit tests must not depend on `git diff --staged` output (which varies by
+  developer environment). Fixture file approach mitigates this.
+- **Test file linting:** New test files must pass Biome checks. Use correct TypeScript patterns to
+  avoid `noExplicitAny` or `noUnusedVariables` violations.
 
 ---
 

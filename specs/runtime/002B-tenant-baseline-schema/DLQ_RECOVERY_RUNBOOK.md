@@ -8,7 +8,8 @@
 
 ## Executive Summary
 
-This runbook provides step-by-step procedures for operations team to investigate and recover schema initialization failures from the Dead Letter Queue (DLQ).
+This runbook provides step-by-step procedures for operations team to investigate and recover schema
+initialization failures from the Dead Letter Queue (DLQ).
 
 **Critical Rules**:
 

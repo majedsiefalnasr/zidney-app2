@@ -12,16 +12,21 @@
 
 ### Architecture Overview
 
-The MMC Dashboard is a master_db-only, read-only analytics layer serving platform-level insights. No mutations, no tenant database access, no cross-tenant joins.
+The MMC Dashboard is a master_db-only, read-only analytics layer serving platform-level insights. No
+mutations, no tenant database access, no cross-tenant joins.
 
 **Architecture Principles:**
 
-1. **Master Database Isolation**: All queries execute exclusively on master_db; zero tenant database access
+1. **Master Database Isolation**: All queries execute exclusively on master_db; zero tenant database
+   access
 2. **Middleware-First Authorization**: License → Permission → Query execution order enforced
-3. **Tiered Caching Strategy**: High-read metrics cached at 5-min TTL; revenue/geographic queries always fresh (indexed)
-4. **Role-Based Query Filtering**: `reporting.view` permission required; query-level filtering enforces workspace scope
+3. **Tiered Caching Strategy**: High-read metrics cached at 5-min TTL; revenue/geographic queries
+   always fresh (indexed)
+4. **Role-Based Query Filtering**: `reporting.view` permission required; query-level filtering
+   enforces workspace scope
 5. **Performance Guarantee**: All endpoints <300ms (average <150ms) under 100 concurrent users
-6. **Audit Trail**: Structured logging with correlation_id, user_id, workspace_id, timestamp on all access
+6. **Audit Trail**: Structured logging with correlation_id, user_id, workspace_id, timestamp on all
+   access
 
 ### Data Flow
 
@@ -115,7 +120,8 @@ All endpoints require:
 **Key Details:**
 
 - License counts aggregated from `licenses` table WHERE `deleted_at IS NULL`, grouped by status
-- Revenue calculated from `revenue_records` WHERE `created_at >= DATE_TRUNC('month', NOW())` for current month
+- Revenue calculated from `revenue_records` WHERE `created_at >= DATE_TRUNC('month', NOW())` for
+  current month
 - YTD calculated WHERE `created_at >= DATE_TRUNC('year', NOW())`
 - All currency values returned as strings (2 decimal precision)
 - Cache: 5-minute TTL (summary data changes slowly)
@@ -198,9 +204,11 @@ All endpoints require:
 
 **Key Details:**
 
-- SQL: `SELECT product_id, SUM(amount) FROM revenue_records WHERE created_at BETWEEN ? AND ? GROUP BY product_id ORDER BY SUM(amount) DESC LIMIT 5`
+- SQL:
+  `SELECT product_id, SUM(amount) FROM revenue_records WHERE created_at BETWEEN ? AND ? GROUP BY product_id ORDER BY SUM(amount) DESC LIMIT 5`
 - All revenue values with 2-decimal precision, stored as strings
-- Growth calculated as: `(this_period - previous_period) / previous_period * 100`, rounded to 2 decimals
+- Growth calculated as: `(this_period - previous_period) / previous_period * 100`, rounded to 2
+  decimals
 - License count: `SELECT COUNT(*) FROM licenses WHERE product_id = ? AND status = 'ACTIVE'`
 - Cache: Fresh indexed query (no caching due to date range variability)
 
@@ -266,7 +274,8 @@ All endpoints require:
 
 **Key Details:**
 
-- SQL: `SELECT billing_country, SUM(amount) as revenue, COUNT(DISTINCT license_id) as license_count FROM revenue_records WHERE created_at BETWEEN ? AND ? GROUP BY billing_country ORDER BY {sort_by} DESC LIMIT ?`
+- SQL:
+  `SELECT billing_country, SUM(amount) as revenue, COUNT(DISTINCT license_id) as license_count FROM revenue_records WHERE created_at BETWEEN ? AND ? GROUP BY billing_country ORDER BY {sort_by} DESC LIMIT ?`
 - Country codes standardized to ISO 3166-1 alpha-2 (US, GB, etc.)
 - Country names resolved from reference table or hardcoded mapping
 - All currency values with 2-decimal precision, stored as strings
@@ -345,7 +354,8 @@ All endpoints require:
 
 **Key Details:**
 
-- SQL: `SELECT a.id, a.name, a.status, SUM(au.commission_amount) as total_commission, COUNT(au.id) as usage_count, MAX(au.created_at) as last_activity FROM affiliates a LEFT JOIN affiliate_usages au ON a.id = au.affiliate_id WHERE au.created_at BETWEEN ? AND ? AND a.status = ? GROUP BY a.id ORDER BY {sort_by} {sort_direction} LIMIT ? OFFSET ?`
+- SQL:
+  `SELECT a.id, a.name, a.status, SUM(au.commission_amount) as total_commission, COUNT(au.id) as usage_count, MAX(au.created_at) as last_activity FROM affiliates a LEFT JOIN affiliate_usages au ON a.id = au.affiliate_id WHERE au.created_at BETWEEN ? AND ? AND a.status = ? GROUP BY a.id ORDER BY {sort_by} {sort_direction} LIMIT ? OFFSET ?`
 - Commission amounts with 2-decimal precision, stored as strings
 - `avg_commission_per_usage = total_commission / usage_count`
 - Pagination: offset-based; default 50, max 100
@@ -414,8 +424,10 @@ All endpoints require:
 
 **Key Details:**
 
-- SQL: `SELECT DATE_TRUNC('month', created_at)::date as month, COUNT(DISTINCT license_id) as license_count, SUM(amount) as revenue FROM revenue_records WHERE created_at >= NOW() - INTERVAL ? GROUP BY DATE_TRUNC('month', created_at) ORDER BY month ASC`
-- Monthly data points aggregated using materialized view (refresh nightly) if available; falls back to raw query
+- SQL:
+  `SELECT DATE_TRUNC('month', created_at)::date as month, COUNT(DISTINCT license_id) as license_count, SUM(amount) as revenue FROM revenue_records WHERE created_at >= NOW() - INTERVAL ? GROUP BY DATE_TRUNC('month', created_at) ORDER BY month ASC`
+- Monthly data points aggregated using materialized view (refresh nightly) if available; falls back
+  to raw query
 - Revenue values with 2-decimal precision, stored as strings
 - `mrr` = Monthly Recurring Revenue = average of last 3 months (optional enhancement)
 - Cache: 10-minute TTL (precomputed summary tables used for stability)
@@ -525,8 +537,10 @@ GB,United Kingdom,32000.25,180,177.78
 **Behavior**:
 
 - Extract user_id from JWT token
-- Query master_db: `SELECT role_id FROM mmc_members WHERE user_id = ? AND workspace_id = ? AND deleted_at IS NULL`
-- Query master_db: `SELECT * FROM role_permissions WHERE role_id = ? AND permission_name = 'reporting.view'`
+- Query master_db:
+  `SELECT role_id FROM mmc_members WHERE user_id = ? AND workspace_id = ? AND deleted_at IS NULL`
+- Query master_db:
+  `SELECT * FROM role_permissions WHERE role_id = ? AND permission_name = 'reporting.view'`
 - If permission found: proceed to next middleware
 - If permission not found: return 403 (Forbidden)
 - Log authorization attempt with correlation_id, user_id, timestamp
@@ -550,7 +564,8 @@ GB,United Kingdom,32000.25,180,177.78
 
 ### Indexed Query Patterns
 
-All dashboard queries MUST use indexed columns exclusively. Query planner must confirm NO sequential scans.
+All dashboard queries MUST use indexed columns exclusively. Query planner must confirm NO sequential
+scans.
 
 **Pattern 1: License Status Aggregation**
 
@@ -662,7 +677,8 @@ const displayValue = new Decimal(databaseValue)
 // Output: "95000.46"
 ```
 
-Rationale: Aggregate rounding (sum first, then round) avoids cumulative rounding errors. Database stores full precision for audit trail; display rounds once at presentation layer.
+Rationale: Aggregate rounding (sum first, then round) avoids cumulative rounding errors. Database
+stores full precision for audit trail; display rounds once at presentation layer.
 
 ---
 
@@ -739,7 +755,8 @@ ORDER BY month ASC;
 
 ### Error Logging Strategy (SHALL NOT EXPOSE TO CLIENT)
 
-**Logged**: `[ERROR] License enforcement failed for workspace=acme-university, error_type=SOFT_LOCKED, correlation_id=uuid-xxx, timestamp=2026-02-26T15:30:00Z`
+**Logged**:
+`[ERROR] License enforcement failed for workspace=acme-university, error_type=SOFT_LOCKED, correlation_id=uuid-xxx, timestamp=2026-02-26T15:30:00Z`
 
 **NOT Logged**: Database connection strings, API keys, SQL syntax errors (sent to SentryLogs only)
 
@@ -851,10 +868,13 @@ mmc_dashboard:affiliates:mmc-workspace-uuid:sha256({"date_from":"2026-02-01","st
 
 **Solutions**:
 
-1. **Connection Pooling**: Maintain master_db connection pool with min=5, max=20 connections; reuse pooled connections
+1. **Connection Pooling**: Maintain master_db connection pool with min=5, max=20 connections; reuse
+   pooled connections
 2. **Query Optimization**: All queries use indexed columns; no full-table scans
-3. **Materialized Views** (Optional): For `/trends` endpoint, pre-aggregate monthly data in a summary table refreshed nightly
-4. **Read Replicas** (Optional Future): Dashboard queries can execute on read-only replicas to reduce primary load
+3. **Materialized Views** (Optional): For `/trends` endpoint, pre-aggregate monthly data in a
+   summary table refreshed nightly
+4. **Read Replicas** (Optional Future): Dashboard queries can execute on read-only replicas to
+   reduce primary load
 5. **Query Timeouts**: Set 5-second hard timeout; return 500 if query exceeds timeout
 
 **Concurrency Test Scenario**:
@@ -872,7 +892,8 @@ mmc_dashboard:affiliates:mmc-workspace-uuid:sha256({"date_from":"2026-02-01","st
 2. **Index Strategy**: See section 4 (Database Query Patterns) for full index list
 3. **Query Plan Analysis**: Use `EXPLAIN ANALYZE` to verify all queries use appropriate indexes
 4. **Result Set Limiting**: All queries use LIMIT to prevent returning unbounded results
-5. **Date Range Constraints**: All time-based queries include WHERE clause on `created_at` to scope search
+5. **Date Range Constraints**: All time-based queries include WHERE clause on `created_at` to scope
+   search
 
 ---
 
@@ -883,68 +904,64 @@ mmc_dashboard:affiliates:mmc-workspace-uuid:sha256({"date_from":"2026-02-01","st
 **File**: `apps/api/tests/unit/mmc-dashboard/metrics.test.ts`
 
 ```typescript
-describe('Dashboard Metrics', () => {
-  describe('Revenue Calculations', () => {
-    test('should calculate total revenue with aggregate rounding', () => {
-      const records = [
-        { amount: '100.445' },
-        { amount: '200.556' },
-        { amount: '300.001' },
-      ]
-      const total = sumAndRound(records)
-      expect(total).toBe('601.00') // 100.445 + 200.556 + 300.001 = 601.002 → '601.00'
-    })
+describe("Dashboard Metrics", () => {
+  describe("Revenue Calculations", () => {
+    test("should calculate total revenue with aggregate rounding", () => {
+      const records = [{ amount: "100.445" }, { amount: "200.556" }, { amount: "300.001" }];
+      const total = sumAndRound(records);
+      expect(total).toBe("601.00"); // 100.445 + 200.556 + 300.001 = 601.002 → '601.00'
+    });
 
-    test('should handle empty revenue set', () => {
-      const total = sumAndRound([])
-      expect(total).toBe('0.00')
-    })
-  })
+    test("should handle empty revenue set", () => {
+      const total = sumAndRound([]);
+      expect(total).toBe("0.00");
+    });
+  });
 
-  describe('License Status Aggregation', () => {
-    test('should count licenses by status', () => {
+  describe("License Status Aggregation", () => {
+    test("should count licenses by status", () => {
       const licenses = [
-        { status: 'ACTIVE' },
-        { status: 'ACTIVE' },
-        { status: 'SOFT_LOCKED' },
-        { status: 'ARCHIVED' },
-      ]
-      const counts = aggregateLicensesByStatus(licenses)
+        { status: "ACTIVE" },
+        { status: "ACTIVE" },
+        { status: "SOFT_LOCKED" },
+        { status: "ARCHIVED" },
+      ];
+      const counts = aggregateLicensesByStatus(licenses);
       expect(counts).toEqual({
         active: 2,
         soft_locked: 1,
         archived: 1,
-      })
-    })
-  })
+      });
+    });
+  });
 
-  describe('Geographic Aggregation', () => {
-    test('should group revenue by country with no duplicates', () => {
+  describe("Geographic Aggregation", () => {
+    test("should group revenue by country with no duplicates", () => {
       const records = [
-        { billing_country: 'US', amount: '1000' },
-        { billing_country: 'US', amount: '500' },
-        { billing_country: 'GB', amount: '800' },
-      ]
-      const geo = aggregateByCountry(records)
+        { billing_country: "US", amount: "1000" },
+        { billing_country: "US", amount: "500" },
+        { billing_country: "GB", amount: "800" },
+      ];
+      const geo = aggregateByCountry(records);
       expect(geo).toEqual([
-        { country: 'US', revenue: '1500.00' },
-        { country: 'GB', revenue: '800.00' },
-      ])
-    })
-  })
+        { country: "US", revenue: "1500.00" },
+        { country: "GB", revenue: "800.00" },
+      ]);
+    });
+  });
 
-  describe('Permission Validation', () => {
-    test('should return true if user has reporting.view', () => {
-      const user = { permissions: ['reporting.view', 'admin'] }
-      expect(hasReportingView(user)).toBe(true)
-    })
+  describe("Permission Validation", () => {
+    test("should return true if user has reporting.view", () => {
+      const user = { permissions: ["reporting.view", "admin"] };
+      expect(hasReportingView(user)).toBe(true);
+    });
 
-    test('should return false if user lacks reporting.view', () => {
-      const user = { permissions: ['admin'] }
-      expect(hasReportingView(user)).toBe(false)
-    })
-  })
-})
+    test("should return false if user lacks reporting.view", () => {
+      const user = { permissions: ["admin"] };
+      expect(hasReportingView(user)).toBe(false);
+    });
+  });
+});
 ```
 
 ---
@@ -954,104 +971,102 @@ describe('Dashboard Metrics', () => {
 **File**: `apps/api/tests/integration/mmc-dashboard/endpoints.test.ts`
 
 ```typescript
-describe('MMC Dashboard Endpoints', () => {
-  describe('GET /api/mmc/dashboard/summary', () => {
-    test('should return 200 with license counts and revenue', async () => {
+describe("MMC Dashboard Endpoints", () => {
+  describe("GET /api/mmc/dashboard/summary", () => {
+    test("should return 200 with license counts and revenue", async () => {
       // Setup: Seed master_db with test licenses and revenue
       const response = await request(app)
-        .get('/api/mmc/dashboard/summary')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .get("/api/mmc/dashboard/summary")
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(200)
-      expect(response.body.success).toBe(true)
-      expect(response.body.data.licenses.total).toBeGreaterThan(0)
-      expect(response.body.data.revenue.this_month).toBeDefined()
-    })
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.licenses.total).toBeGreaterThan(0);
+      expect(response.body.data.revenue.this_month).toBeDefined();
+    });
 
-    test('should return 403 if user lacks reporting.view permission', async () => {
+    test("should return 403 if user lacks reporting.view permission", async () => {
       const response = await request(app)
-        .get('/api/mmc/dashboard/summary')
-        .set('Authorization', `Bearer ${limitedUserToken}`)
+        .get("/api/mmc/dashboard/summary")
+        .set("Authorization", `Bearer ${limitedUserToken}`);
 
-      expect(response.status).toBe(403)
-      expect(response.body.error.code).toBe('PERMISSION_DENIED')
-    })
+      expect(response.status).toBe(403);
+      expect(response.body.error.code).toBe("PERMISSION_DENIED");
+    });
 
-    test('should return 423 if license is SOFT_LOCKED', async () => {
+    test("should return 423 if license is SOFT_LOCKED", async () => {
       // Setup: Soft-lock the MMC workspace license
-      await masterDb.query(
-        'UPDATE licenses SET status = $1 WHERE workspace_slug = $2',
-        ['SOFT_LOCKED', 'mmc']
-      )
+      await masterDb.query("UPDATE licenses SET status = $1 WHERE workspace_slug = $2", [
+        "SOFT_LOCKED",
+        "mmc",
+      ]);
 
       const response = await request(app)
-        .get('/api/mmc/dashboard/summary')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .get("/api/mmc/dashboard/summary")
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(423)
-      expect(response.body.error.code).toBe('LICENSE_LOCKED')
-    })
+      expect(response.status).toBe(423);
+      expect(response.body.error.code).toBe("LICENSE_LOCKED");
+    });
 
-    test('should respond within 300ms', async () => {
-      const start = Date.now()
+    test("should respond within 300ms", async () => {
+      const start = Date.now();
       const response = await request(app)
-        .get('/api/mmc/dashboard/summary')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .get("/api/mmc/dashboard/summary")
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      const elapsed = Date.now() - start
-      expect(elapsed).toBeLessThan(300)
-    })
-  })
+      const elapsed = Date.now() - start;
+      expect(elapsed).toBeLessThan(300);
+    });
+  });
 
-  describe('GET /api/mmc/dashboard/revenue-breakdown', () => {
-    test('should return top 5 products by revenue', async () => {
+  describe("GET /api/mmc/dashboard/revenue-breakdown", () => {
+    test("should return top 5 products by revenue", async () => {
       const response = await request(app)
-        .get('/api/mmc/dashboard/revenue-breakdown')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .get("/api/mmc/dashboard/revenue-breakdown")
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(200)
-      expect(response.body.data.products).toHaveLength(5)
-      expect(response.body.data.products[0].revenue_this_period).toBeDefined()
-    })
+      expect(response.status).toBe(200);
+      expect(response.body.data.products).toHaveLength(5);
+      expect(response.body.data.products[0].revenue_this_period).toBeDefined();
+    });
 
-    test('should return 400 if date_to < date_from', async () => {
+    test("should return 400 if date_to < date_from", async () => {
       const response = await request(app)
-        .get(
-          '/api/mmc/dashboard/revenue-breakdown?date_from=2026-02-26&date_to=2026-01-01'
-        )
-        .set('Authorization', `Bearer ${adminToken}`)
+        .get("/api/mmc/dashboard/revenue-breakdown?date_from=2026-02-26&date_to=2026-01-01")
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(400)
-      expect(response.body.error.code).toBe('INVALID_DATE_RANGE')
-    })
+      expect(response.status).toBe(400);
+      expect(response.body.error.code).toBe("INVALID_DATE_RANGE");
+    });
 
-    test('should respond within 300ms with indexed query', async () => {
-      const start = Date.now()
+    test("should respond within 300ms with indexed query", async () => {
+      const start = Date.now();
       await request(app)
-        .get('/api/mmc/dashboard/revenue-breakdown')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .get("/api/mmc/dashboard/revenue-breakdown")
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      const elapsed = Date.now() - start
-      expect(elapsed).toBeLessThan(300)
-    })
-  })
+      const elapsed = Date.now() - start;
+      expect(elapsed).toBeLessThan(300);
+    });
+  });
 
-  describe('Isolation Tests', () => {
-    test('should NOT query any tenant database', async () => {
+  describe("Isolation Tests", () => {
+    test("should NOT query any tenant database", async () => {
       // Setup: Mock tenant DB to error if queried
       const tenantDbMock = jest
-        .spyOn(tenantDbPool, 'query')
-        .mockRejectedValue(new Error('Tenant DB should not be queried'))
+        .spyOn(tenantDbPool, "query")
+        .mockRejectedValue(new Error("Tenant DB should not be queried"));
 
       const response = await request(app)
-        .get('/api/mmc/dashboard/summary')
-        .set('Authorization', `Bearer ${adminToken}`)
+        .get("/api/mmc/dashboard/summary")
+        .set("Authorization", `Bearer ${adminToken}`);
 
-      expect(response.status).toBe(200) // Should succeed without tenant DB
-      expect(tenantDbMock).not.toHaveBeenCalled() // Verify tenant DB not queried
-    })
-  })
-})
+      expect(response.status).toBe(200); // Should succeed without tenant DB
+      expect(tenantDbMock).not.toHaveBeenCalled(); // Verify tenant DB not queried
+    });
+  });
+});
 ```
 
 ---
@@ -1061,32 +1076,30 @@ describe('MMC Dashboard Endpoints', () => {
 **File**: `apps/api/tests/performance/mmc-dashboard/concurrent-load.test.ts`
 
 ```typescript
-describe('Dashboard Concurrent Load', () => {
-  test('should handle 100 concurrent users with <300ms max latency', async () => {
+describe("Dashboard Concurrent Load", () => {
+  test("should handle 100 concurrent users with <300ms max latency", async () => {
     const users = Array.from({ length: 100 }, (_, i) => ({
       token: generateUserToken(i),
-      workspace: 'mmc',
-    }))
+      workspace: "mmc",
+    }));
 
     const promises = users.map((user) =>
-      request(app)
-        .get('/api/mmc/dashboard/summary')
-        .set('Authorization', `Bearer ${user.token}`)
-    )
+      request(app).get("/api/mmc/dashboard/summary").set("Authorization", `Bearer ${user.token}`),
+    );
 
-    const start = Date.now()
-    const results = await Promise.all(promises)
-    const totalTime = Date.now() - start
+    const start = Date.now();
+    const results = await Promise.all(promises);
+    const totalTime = Date.now() - start;
 
-    const times = results.map((r) => r.body.responseTime || 100)
-    const avgTime = times.reduce((a, b) => a + b) / times.length
-    const maxTime = Math.max(...times)
+    const times = results.map((r) => r.body.responseTime || 100);
+    const avgTime = times.reduce((a, b) => a + b) / times.length;
+    const maxTime = Math.max(...times);
 
-    expect(maxTime).toBeLessThan(300)
-    expect(avgTime).toBeLessThan(150)
-    expect(results.every((r) => r.status === 200)).toBe(true)
-  })
-})
+    expect(maxTime).toBeLessThan(300);
+    expect(avgTime).toBeLessThan(150);
+    expect(results.every((r) => r.status === 200)).toBe(true);
+  });
+});
 ```
 
 ---
@@ -1095,27 +1108,26 @@ describe('Dashboard Concurrent Load', () => {
 
 ### Schema Version Enforcement
 
-- Dashboard requires `master_db.schema_version >= 8` (assumes revenue_records and affiliate tables added)
+- Dashboard requires `master_db.schema_version >= 8` (assumes revenue_records and affiliate tables
+  added)
 - If schema version incompatible: return 426 (Upgrade Required)
 
 **Check**: Executed after license middleware, before query execution
 
 ```typescript
-const schemaCheck = await masterDb.query(
-  'SELECT schema_version FROM master_db_version LIMIT 1'
-)
+const schemaCheck = await masterDb.query("SELECT schema_version FROM master_db_version LIMIT 1");
 if (schemaCheck.rows[0].schema_version < 8) {
   return ctx.json(
     {
       success: false,
       data: null,
       error: {
-        code: 'SCHEMA_INCOMPATIBLE',
-        message: 'Dashboard requires master_db schema version 8 or higher',
+        code: "SCHEMA_INCOMPATIBLE",
+        message: "Dashboard requires master_db schema version 8 or higher",
       },
     },
-    426
-  )
+    426,
+  );
 }
 ```
 
@@ -1147,7 +1159,8 @@ if (schemaCheck.rows[0].schema_version < 8) {
 ### Phase 3: Frontend Implementation (Day 4)
 
 1. Create Dashboard component: `apps/mmc/src/views/Dashboard.vue`
-2. Create sub-components: CommercialHealth, GeographicDistribution, AffiliateLeaderboard, GrowthTrends
+2. Create sub-components: CommercialHealth, GeographicDistribution, AffiliateLeaderboard,
+   GrowthTrends
 3. Integrate with API client
 4. Add error boundaries and loading states
 
@@ -1187,8 +1200,10 @@ if (schemaCheck.rows[0].schema_version < 8) {
 
 **Alternative Considered**: Materialized views only (no Redis)
 
-- Rejection: Materialized views have fixed refresh schedule; cannot provide sub-second freshness for summary data
-- Dashboard `/summary` needs <50ms response; materialized view refresh (once nightly) too stale for active monitoring
+- Rejection: Materialized views have fixed refresh schedule; cannot provide sub-second freshness for
+  summary data
+- Dashboard `/summary` needs <50ms response; materialized view refresh (once nightly) too stale for
+  active monitoring
 
 ---
 
@@ -1202,12 +1217,14 @@ if (schemaCheck.rows[0].schema_version < 8) {
 - Per-transaction rounding (round each transaction, then sum) accumulates rounding errors
 - Example: Three transactions of $100.00 (after rounding)
   - Aggregate: $100.001 + $100.002 + $100.001 = $300.004 → round to $300.00 ✓
-  - Per-transaction: round($100.001)=$100.00 + round($100.002)=$100.00 + round($100.001)=$100.00 = $300.00 ✓ (matches)
+  - Per-transaction: round($100.001)=$100.00 + round($100.002)=$100.00 + round($100.001)=$100.00 =
+    $300.00 ✓ (matches)
 - Edge case: Three transactions of $100.005
   - Aggregate: $100.005 + $100.005 + $100.005 = $300.015 → round to $300.02
   - Per-transaction: $100.01 + $100.01 + $100.01 = $300.03 ✗ (doesn't match; error = $0.01)
 
-**Conclusion**: Aggregate rounding ensures audit trail accuracy and matches financial reconciliation.
+**Conclusion**: Aggregate rounding ensures audit trail accuracy and matches financial
+reconciliation.
 
 ---
 
@@ -1217,7 +1234,8 @@ if (schemaCheck.rows[0].schema_version < 8) {
 
 **Rationale**:
 
-- SQL-level filtering prevents accidental data exposure if application code bypasses permission check
+- SQL-level filtering prevents accidental data exposure if application code bypasses permission
+  check
 - SQL ensures authorization is enforced at database access layer (defense-in-depth principle)
 - Query patterns:
 
@@ -1231,7 +1249,8 @@ if (schemaCheck.rows[0].schema_version < 8) {
   -- Forces authorization at data retrieval, even if app code flawed
   ```
 
-For MMC Dashboard (master_db only), scope is implicit: all metrics are platform-wide for authenticated `reporting.view` users. No multi-workspace filtering needed.
+For MMC Dashboard (master_db only), scope is implicit: all metrics are platform-wide for
+authenticated `reporting.view` users. No multi-workspace filtering needed.
 
 ---
 
@@ -1242,19 +1261,23 @@ For MMC Dashboard (master_db only), scope is implicit: all metrics are platform-
 **Rationale**:
 
 - Memory safety: Streaming 50k rows uses ~50MB RAM; 500k rows uses ~500MB (risk of OOM crash)
-- Compliance: Financial data exports likely subject to data retention policies; 50k row limit forces users to explicitly filter (audit trail of export requests)
-- User experience: 50k rows = ~20 screens of data; users should filter by date/country/product instead of exporting entire dataset
+- Compliance: Financial data exports likely subject to data retention policies; 50k row limit forces
+  users to explicitly filter (audit trail of export requests)
+- User experience: 50k rows = ~20 screens of data; users should filter by date/country/product
+  instead of exporting entire dataset
 - Precedent: Google Sheets, Salesforce, Tableau all have export row limits (typically 10k-100k)
 
 **Alternative Considered**: Async export (queue for later download)
 
-- Rejection: Added complexity for MVP; dashboard is primarily browsing use case, not daily bulk exports
+- Rejection: Added complexity for MVP; dashboard is primarily browsing use case, not daily bulk
+  exports
 
 ---
 
 ### Why Tiered Caching vs Uniform TTL?
 
-**Decision**: Different TTL for different endpoints (5-min summary, 1-min affiliates, 10-min trends, 0-min revenue)
+**Decision**: Different TTL for different endpoints (5-min summary, 1-min affiliates, 10-min trends,
+0-min revenue)
 
 **Rationale**:
 
@@ -1263,7 +1286,8 @@ For MMC Dashboard (master_db only), scope is implicit: all metrics are platform-
   - Affiliate metrics change more frequently (new usages constantly); 1-min cache = ~60% hit rate
   - Trends (monthly aggregations) almost never change; 10-min cache = 95%+ hit rate
   - Revenue breakdown (product split) varies with every new order; 0 cache (always fresh)
-- Uniform 5-min TTL would be too stale for real-time affiliate metrics; 1-min TTL would waste cache for trends
+- Uniform 5-min TTL would be too stale for real-time affiliate metrics; 1-min TTL would waste cache
+  for trends
 - Tiered approach balances performance optimization with data freshness requirements
 
 ---
@@ -1274,7 +1298,8 @@ For MMC Dashboard (master_db only), scope is implicit: all metrics are platform-
 
 ✅ All 6 endpoints respond within 300ms (average <150ms) under 100 concurrent users  
 ✅ Zero queries to tenant databases; 100% master_db-only access (verified via audit logs)  
-✅ All authorization failures (missing permission, locked license) return appropriate error codes <50ms  
+✅ All authorization failures (missing permission, locked license) return appropriate error codes
+<50ms  
 ✅ CSV export streams >50k row requests return 413 with helpful error message  
 ✅ Audit logging includes correlation_id, user_id, workspace_id, endpoint, response_time  
 ✅ All monetary values displayed with 2-decimal precision (aggregate rounding)  
@@ -1317,7 +1342,8 @@ For MMC Dashboard (master_db only), scope is implicit: all metrics are platform-
 6. ✅ License middleware implementation
 7. ✅ Correlation ID middleware (already in place)
 
-**To Verify**: Check master_db schema version; if <8, may need to add revenue_records and affiliate indexes.
+**To Verify**: Check master_db schema version; if <8, may need to add revenue_records and affiliate
+indexes.
 
 ---
 

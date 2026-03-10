@@ -105,8 +105,8 @@ Constitutional Compliance:
 - ✅ ADR-0007: Version compatibility enforced
 - ✅ Specification drafted — clarification step pending
 
-Notes:
-Specification complete (1,241 lines). All functional, technical, and compliance requirements defined. Clarification step pending.
+Notes: Specification complete (1,241 lines). All functional, technical, and compliance requirements
+defined. Clarification step pending.
 
 ---
 
@@ -349,8 +349,7 @@ Submission endpoint must:
 
 Submission must be idempotent.
 
-If already FINALIZED:
-→ Return existing result.
+If already FINALIZED: → Return existing result.
 
 ---
 
@@ -370,8 +369,7 @@ Worker must:
    - status = FINALIZED
 6. Commit
 
-If status already FINALIZED:
-→ Exit safely.
+If status already FINALIZED: → Exit safely.
 
 Grading must be idempotent.
 
@@ -522,6 +520,7 @@ Phase 2 Blocking:
 - **Current gate:** IN PROGRESS — Phase 2 remains blocked
 - **Estimated unblock:** March 15, 2026 (72/72 tasks complete)
 
-Notes:
-Stage IN PROGRESS. Phase A foundation locked and production-ready. Phases B-G under active development. Phase 2 remains BLOCKED until all 72 tasks complete and tested. Target completion: March 15, 2026.
-Drift analysis passed. Implementation authorized. Begin Phase A (Database & Schema) immediately. Minor logging integration point (non-blocking, 5-minute fix per task).
+Notes: Stage IN PROGRESS. Phase A foundation locked and production-ready. Phases B-G under active
+development. Phase 2 remains BLOCKED until all 72 tasks complete and tested. Target completion:
+March 15, 2026. Drift analysis passed. Implementation authorized. Begin Phase A (Database & Schema)
+immediately. Minor logging integration point (non-blocking, 5-minute fix per task).

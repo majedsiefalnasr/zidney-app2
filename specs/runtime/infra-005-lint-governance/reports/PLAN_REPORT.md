@@ -1,14 +1,17 @@
 # Plan Report — STAGE_INFRA_05_LINT_GOVERNANCE
 
-**Step:** 3 — Plan
-**Timestamp:** 2026-03-07T00:03:00.000Z
-**Status:** COMPLETE — Guardian Validation: PASS
+**Step:** 3 — Plan **Timestamp:** 2026-03-07T00:03:00.000Z **Status:** COMPLETE — Guardian
+Validation: PASS
 
 ---
 
 ## Summary
 
-Technical plan for lint governance is complete. Research identified a minimal change set: one Biome lint rule severity adjustment, one new CI arch-guard job, one stale CI step removal, and one stale comment fix in the pre-commit hook. The plan is surgical — 4 files changed, 1 documentation file created. lint-staged is already compliant. AI-Guard is already active locally. The primary gap closed by this stage is the missing CI architectural gate on `infra-*` and `feature/*` branches.
+Technical plan for lint governance is complete. Research identified a minimal change set: one Biome
+lint rule severity adjustment, one new CI arch-guard job, one stale CI step removal, and one stale
+comment fix in the pre-commit hook. The plan is surgical — 4 files changed, 1 documentation file
+created. lint-staged is already compliant. AI-Guard is already active locally. The primary gap
+closed by this stage is the missing CI architectural gate on `infra-*` and `feature/*` branches.
 
 ---
 
@@ -81,7 +84,8 @@ Not applicable — this is an INFRA toolchain stage with no database writes.
 
 ## Idempotency Strategy
 
-Not applicable — lint operations are inherently idempotent. Running `biome check` multiple times produces the same result.
+Not applicable — lint operations are inherently idempotent. Running `biome check` multiple times
+produces the same result.
 
 ---
 

@@ -9,9 +9,12 @@
 
 ## Executive Summary
 
-A comprehensive specification for the Shared UI System has been produced, defining a strictly reusable UI component library under `packages/ui-system` that provides unified, framework-consistent building blocks for MMC, Backoffice, and Frontoffice applications.
+A comprehensive specification for the Shared UI System has been produced, defining a strictly
+reusable UI component library under `packages/ui-system` that provides unified, framework-consistent
+building blocks for MMC, Backoffice, and Frontoffice applications.
 
-**Key Deliverable:** 13 core components across 4 categories (Layout, Data, Forms, Utility) with complete API definitions, TypeScript type contracts, design constraints, and acceptance criteria.
+**Key Deliverable:** 13 core components across 4 categories (Layout, Data, Forms, Utility) with
+complete API definitions, TypeScript type contracts, design constraints, and acceptance criteria.
 
 ---
 
@@ -20,23 +23,28 @@ A comprehensive specification for the Shared UI System has been produced, defini
 ### What Specification Covers
 
 1. **Feature Overview** — What problem the shared UI system solves and its positioning in Zidney
-2. **Constitutional Compliance Declaration** — Verification that the feature violates no architectural trust chain elements
+2. **Constitutional Compliance Declaration** — Verification that the feature violates no
+   architectural trust chain elements
 3. **Isolation Impact Analysis** — Database access, tenant resolution, data flow verification
 4. **License & Version Enforcement** — Scope and boundaries (n/a for UI layer)
 5. **Data Model Changes** — None; UI-only package
 6. **Transaction Boundaries** — None within package; parent application responsibility
 7. **Authoritative Time Usage** — None; time concerns delegated to API/Worker layers
-8. **Idempotency Strategy** — Component-level idempotency via controlled patterns; app-level enforcement upstream
+8. **Idempotency Strategy** — Component-level idempotency via controlled patterns; app-level
+   enforcement upstream
 9. **Integration Points** — MMC (primary), Backoffice (secondary), Frontoffice (tertiary)
-10. **Technical Architecture** — Directory structure, layering model, dependency constraints, framework commitments
+10. **Technical Architecture** — Directory structure, layering model, dependency constraints,
+    framework commitments
 11. **Component API Definitions** — 13 core components with complete prop/event contracts
 12. **Styling and Token System** — Design tokens, Tailwind integration, white-label customization
 13. **Type Definitions** — All TypeScript interfaces for filters, tables, forms, layouts
 14. **Error Handling** — Component-level error state via props; validation error display
-15. **Performance Considerations** — Rendering optimization, data handling, bundle size, browser performance
+15. **Performance Considerations** — Rendering optimization, data handling, bundle size, browser
+    performance
 16. **Testing Strategy** — Unit, integration, snapshot, type, and accessibility test requirements
 17. **Acceptance Criteria** — 15 objective completion criteria
-18. **User-Impacting Changes** — Changes for MMC users, Backoffice users, Frontoffice users, developers
+18. **User-Impacting Changes** — Changes for MMC users, Backoffice users, Frontoffice users,
+    developers
 19. **Explicit Non-Goals** — Scope boundaries and what feature does NOT do
 
 ### What Specification Does NOT Cover
@@ -144,7 +152,8 @@ Consuming App → UI Component (props) → DOM Rendering
 
 ## Ambiguity Resolution
 
-No ambiguities detected in the specification. The following were explicitly confirmed as non-concerns at UI layer:
+No ambiguities detected in the specification. The following were explicitly confirmed as
+non-concerns at UI layer:
 
 | Concern                   | Decision       | Rationale                                         |
 | ------------------------- | -------------- | ------------------------------------------------- |
@@ -192,7 +201,8 @@ No ambiguities detected in the specification. The following were explicitly conf
 ❌ Error tracking integration  
 ❌ Notification/toast system
 
-**Scope boundary enforcement:** If a requirement spans both sides (e.g., "auto-save column visibility"), decomposition occurs:
+**Scope boundary enforcement:** If a requirement spans both sides (e.g., "auto-save column
+visibility"), decomposition occurs:
 
 - Shared UI part: Emit event
 - App part: Listen and persist
@@ -203,13 +213,17 @@ No ambiguities detected in the specification. The following were explicitly conf
 
 ### Technical Risk: LOW
 
-**No data model changes** — This is a UI-only package; no schema modifications, no migrations, no database concerns.
+**No data model changes** — This is a UI-only package; no schema modifications, no migrations, no
+database concerns.
 
-**No architectural boundary violations** — Dependency flow is clean; no reverse dependencies; no implicit state coupling.
+**No architectural boundary violations** — Dependency flow is clean; no reverse dependencies; no
+implicit state coupling.
 
-**Clear API contracts** — All component APIs are fully typed; TypeScript strict mode prevents most integration errors.
+**Clear API contracts** — All component APIs are fully typed; TypeScript strict mode prevents most
+integration errors.
 
-**Well-defined constraints** — Explicit list of what components CAN and CANNOT do prevents architectural drift.
+**Well-defined constraints** — Explicit list of what components CAN and CANNOT do prevents
+architectural drift.
 
 ### Integration Risk: MEDIUM-LOW
 
@@ -226,7 +240,8 @@ No ambiguities detected in the specification. The following were explicitly conf
 
 ### Scope Creep Risk: MEDIUM
 
-**Risk:** Temptation to add business logic, state management, or validation frameworks to shared UI system.
+**Risk:** Temptation to add business logic, state management, or validation frameworks to shared UI
+system.
 
 **Mitigation:**
 
@@ -354,4 +369,5 @@ Will decompose into atomic tasks:
 **API Contracts:** ✅ PASS  
 **Acceptance Criteria:** ✅ PASS
 
-Specification is architecturally sound and ready for the Clarify step to resolve any residual ambiguities before planning begins.
+Specification is architecturally sound and ready for the Clarify step to resolve any residual
+ambiguities before planning begins.

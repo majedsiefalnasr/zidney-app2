@@ -2,7 +2,8 @@
 
 **Purpose:** Prevent architectural violations in artifact placement and naming.
 
-**When to Use:** BEFORE ANY create_file() call for SpecKit artifacts (plan.md, tasks.md, spec.md, \*\_REPORT.md)
+**When to Use:** BEFORE ANY create_file() call for SpecKit artifacts (plan.md, tasks.md, spec.md,
+\*\_REPORT.md)
 
 **MANDATORY: Complete this checklist before writing any file**
 
@@ -50,7 +51,8 @@
   - ❌ `specs/phases/<PHASE_NAME>/reports/*_REPORT.md`
   - ❌ `specs/runtime/016-shared-ui-system/*_REPORT.md` (must be in /reports/ subdirectory)
 - [ ] **Correct Filename Pattern:** `SPECIFY_REPORT.md`, `CLARIFY_REPORT.md`, `PLAN_REPORT.md`, etc.
-- [ ] **Directory exists:** Verify `specs/runtime/<STAGE_DIR_NAME>/reports/` exists (Pre-Step creates this)
+- [ ] **Directory exists:** Verify `specs/runtime/<STAGE_DIR_NAME>/reports/` exists (Pre-Step
+      creates this)
 
 ---
 
@@ -139,6 +141,7 @@ If hook blocks your commit, review this checklist and fix the artifact location.
 
 ## Reference Documents
 
-- **SpecKit Directory Structure Lock:** [AGENTS.md > modeInstructions > SpecKit Directory Structure (Locked)](../AGENTS.md)
+- **SpecKit Directory Structure Lock:**
+  [AGENTS.md > modeInstructions > SpecKit Directory Structure (Locked)](../AGENTS.md)
 - **Git Hook Enforcement:** [.git/hooks/pre-commit](./.git/hooks/pre-commit)
 - **Governance Authority:** [docs/AGENT_GOVERNANCE.md](docs/AGENT_GOVERNANCE.md)

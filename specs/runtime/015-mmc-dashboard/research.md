@@ -9,7 +9,8 @@
 
 ## Research Scope
 
-This document resolves technical uncertainties for MMC Dashboard implementation. Each research task documents:
+This document resolves technical uncertainties for MMC Dashboard implementation. Each research task
+documents:
 
 - **Question**: The technical uncertainty
 - **Investigation**: How it was resolved
@@ -23,7 +24,8 @@ This document resolves technical uncertainties for MMC Dashboard implementation.
 
 ### Question
 
-How should Redis be configured to support 100+ concurrent dashboard users with tiered TTL caching while maintaining cluster safety?
+How should Redis be configured to support 100+ concurrent dashboard users with tiered TTL caching
+while maintaining cluster safety?
 
 ### Investigation
 
@@ -57,9 +59,12 @@ How should Redis be configured to support 100+ concurrent dashboard users with t
 
 **TTL Strategy Testing**:
 
-- Summary endpoint (5-min TTL): Cache hit rate simulated at 87% (test with 100 requests, 20-minute window)
-- Affiliate endpoint (1-min TTL): Cache hit rate simulated at 62% (test with 100 requests, 5-minute window)
-- Trends endpoint (10-min TTL): Cache hit rate simulated at 94% (test with 100 requests, 30-minute window)
+- Summary endpoint (5-min TTL): Cache hit rate simulated at 87% (test with 100 requests, 20-minute
+  window)
+- Affiliate endpoint (1-min TTL): Cache hit rate simulated at 62% (test with 100 requests, 5-minute
+  window)
+- Trends endpoint (10-min TTL): Cache hit rate simulated at 94% (test with 100 requests, 30-minute
+  window)
 - Overall weighted average: 71% cache hit rate
 
 ### Decision
@@ -70,12 +75,12 @@ How should Redis be configured to support 100+ concurrent dashboard users with t
 
    ```typescript
    const cacheConfig = {
-     host: process.env.REDIS_HOST || 'localhost',
+     host: process.env.REDIS_HOST || "localhost",
      port: process.env.REDIS_PORT || 6379,
      db: 1, // Dedicated DB for dashboard cache
      retryStrategy: (times) => Math.min(times * 50, 2000),
      maxRetriesPerRequest: 3,
-   }
+   };
    ```
 
 2. **TTL by Endpoint**:
@@ -95,23 +100,27 @@ How should Redis be configured to support 100+ concurrent dashboard users with t
 4. **Invalidation Strategy**:
    - **Time-Based**: Redis TTL automatic expiry (no manual cleanup needed)
    - **Event-Based** (Future Enhancement):
-     - On `revenue_record.created` event: Publish to Redis channel `mmc:dashboard:invalidate:revenue`
+     - On `revenue_record.created` event: Publish to Redis channel
+       `mmc:dashboard:invalidate:revenue`
      - Worker service listening on channel invalidates relevant cache keys
 
 ### Alternatives Considered
 
 ❌ **Uniform 5-min TTL** – Rejected because affiliate metrics would be stale; needs 1-min refresh
 
-❌ **Materialized Views Only** – Rejected because nightly refresh (24-hour cycle) too stale for summary metrics requiring <100ms latency
+❌ **Materialized Views Only** – Rejected because nightly refresh (24-hour cycle) too stale for
+summary metrics requiring <100ms latency
 
-❌ **Hybrid: Cache + Materialized Views** – Accepted as future enhancement (combine for ultra-high hit rate)
+❌ **Hybrid: Cache + Materialized Views** – Accepted as future enhancement (combine for ultra-high
+hit rate)
 
 ### Implementation Implication
 
 - Install `redis` npm package: `npm install redis@4.6.0`
 - Create Redis client factory in `packages/redis-utils/src/dashboard-cache.ts`
 - Implement cache middleware: `apps/api/src/middleware/dashboard-cache.middleware.ts`
-- All endpoint handlers check cache first; miss rate triggers query (with monitor/alert if miss rate < 50%)
+- All endpoint handlers check cache first; miss rate triggers query (with monitor/alert if miss rate
+  < 50%)
 
 ---
 
@@ -119,7 +128,8 @@ How should Redis be configured to support 100+ concurrent dashboard users with t
 
 ### Question
 
-What index strategy minimizes query latency for dashboard aggregations querying 1000+ licenses, 10k+ revenue records, 100+ affiliates?
+What index strategy minimizes query latency for dashboard aggregations querying 1000+ licenses, 10k+
+revenue records, 100+ affiliates?
 
 ### Investigation
 
@@ -209,8 +219,10 @@ GROUP BY a.id;
 
 **Concurrency Impact**:
 
-- At 100 concurrent queries (all using proper indexes), PostgreSQL connection pool (min=5, max=20) maintains <300ms latency
-- Without indexes, connection pool saturation would occur around 20-30 concurrent queries, causing queue delays
+- At 100 concurrent queries (all using proper indexes), PostgreSQL connection pool (min=5, max=20)
+  maintains <300ms latency
+- Without indexes, connection pool saturation would occur around 20-30 concurrent queries, causing
+  queue delays
 
 ### Decision
 
@@ -265,13 +277,15 @@ GROUP BY a.id;
 
 ❌ **Hash Indexes** – Rejected; only work on equality; dashboard uses range queries on created_at
 
-❌ **Materialized View Instead of Indexes** – Accepted as secondary optimization for `/trends`; primary optimization is indexes for real-time queries
+❌ **Materialized View Instead of Indexes** – Accepted as secondary optimization for `/trends`;
+primary optimization is indexes for real-time queries
 
 ### Implementation Implication
 
 - Create migration: `apps/api/src/db/master/migrations/20260226_010_create_dashboard_indexes.ts`
 - Run `EXPLAIN ANALYZE` on all 6 endpoint queries to validate index usage (no seq scans)
-- Add performance test: `apps/api/tests/performance/mmc-dashboard/query-plans.test.ts` with EXPLAIN output verification
+- Add performance test: `apps/api/tests/performance/mmc-dashboard/query-plans.test.ts` with EXPLAIN
+  output verification
 - Document index maintenance policy (monitor for bloat; REINDEX quarterly if needed)
 
 ---
@@ -280,7 +294,8 @@ GROUP BY a.id;
 
 ### Question
 
-Should dashboard trends be computed from raw revenue_records (on-demand) or pre-aggregated in a materialized view (scheduled refresh)?
+Should dashboard trends be computed from raw revenue_records (on-demand) or pre-aggregated in a
+materialized view (scheduled refresh)?
 
 ### Investigation
 
@@ -384,7 +399,8 @@ Execution Time: 1ms
 | Materialized View Only  | 1ms         | 2ms         | 3ms         | 0 queries        | 2% (refresh job only) |
 | On-Demand + Redis Cache | 8ms         | 15ms        | 25ms        | 0-2 queries      | 5%                    |
 
-**Conclusion**: Materialized View + Redis Cache optimal for dashboard use case (predictable latency + freshness within acceptable window).
+**Conclusion**: Materialized View + Redis Cache optimal for dashboard use case (predictable
+latency + freshness within acceptable window).
 
 ### Decision
 
@@ -411,45 +427,47 @@ Execution Time: 1ms
    // runs nightly at 02:00 UTC
    const refreshTrendsView = async () => {
      const result = await masterDb.query(
-       'REFRESH MATERIALIZED VIEW CONCURRENTLY revenue_summary_monthly'
-     )
+       "REFRESH MATERIALIZED VIEW CONCURRENTLY revenue_summary_monthly",
+     );
      logger.info({
-       event: 'trends_view_refresh',
+       event: "trends_view_refresh",
        rows_updated: result.rowCount,
        timestamp: new Date().toISOString(),
-     })
-   }
+     });
+   };
    ```
 
 3. **Query Strategy** (Dashboard Endpoint):
 
    ```typescript
    const getTrends = async (req) => {
-     const cacheKey = `mmc:dashboard:trends:mmc-workspace:12-months`
+     const cacheKey = `mmc:dashboard:trends:mmc-workspace:12-months`;
 
      // Check Redis cache (10-min TTL)
-     let trends = await redisClient.get(cacheKey)
+     let trends = await redisClient.get(cacheKey);
      if (trends) {
-       return JSON.parse(trends) // Cache hit
+       return JSON.parse(trends); // Cache hit
      }
 
      // Query materialized view (fast pre-aggregation)
      trends = await masterDb.query(
-       'SELECT * FROM revenue_summary_monthly ORDER BY month ASC LIMIT 12'
-     )
+       "SELECT * FROM revenue_summary_monthly ORDER BY month ASC LIMIT 12",
+     );
 
      // Store in Redis
-     await redisClient.setex(cacheKey, 600, JSON.stringify(trends.rows))
+     await redisClient.setex(cacheKey, 600, JSON.stringify(trends.rows));
 
-     return trends.rows
-   }
+     return trends.rows;
+   };
    ```
 
 ### Alternatives Considered
 
-❌ **On-Demand Only** – Rejected; at 100 concurrent users, latency approaches 300ms ceiling; no safety margin
+❌ **On-Demand Only** – Rejected; at 100 concurrent users, latency approaches 300ms ceiling; no
+safety margin
 
-❌ **Materialized View Every 5 Minutes** – Accepted as future optimization; nightly refresh sufficient for MVP
+❌ **Materialized View Every 5 Minutes** – Accepted as future optimization; nightly refresh
+sufficient for MVP
 
 ### Implementation Implication
 
@@ -465,7 +483,8 @@ Execution Time: 1ms
 
 ### Question
 
-Should `reporting.view` permission enforcement happen at SQL level (WHERE clause) or application layer (post-fetch filtering)?
+Should `reporting.view` permission enforcement happen at SQL level (WHERE clause) or application
+layer (post-fetch filtering)?
 
 ### Investigation
 
@@ -475,18 +494,18 @@ Should `reporting.view` permission enforcement happen at SQL level (WHERE clause
 
 ```typescript
 // Middleware checks permission
-if (!user.permissions.includes('reporting.view')) {
-  throw new PermissionError()
+if (!user.permissions.includes("reporting.view")) {
+  throw new PermissionError();
 }
 
 // Handler executes query (on trusting application code)
 const result = await masterDb.query(
-  'SELECT * FROM revenue_records' // Unbounded query!
-)
+  "SELECT * FROM revenue_records", // Unbounded query!
+);
 
 // Application filters result
-const filtered = result.rows.filter((r) => user.canAccess(r))
-return filtered
+const filtered = result.rows.filter((r) => user.canAccess(r));
+return filtered;
 ```
 
 **Risks**:
@@ -502,8 +521,8 @@ return filtered
 
 ```typescript
 // Middleware checks permission
-if (!user.permissions.includes('reporting.view')) {
-  throw new PermissionError()
+if (!user.permissions.includes("reporting.view")) {
+  throw new PermissionError();
 }
 
 // Handler enforces authorization at SQL query level
@@ -513,11 +532,11 @@ const result = await masterDb.query(
      SELECT workspace_id FROM licenses 
      WHERE workspace_slug = $1
    )`,
-  [workspaceSlug]
-)
+  [workspaceSlug],
+);
 
 // Result already filtered by SQL WHERE clause
-return result.rows
+return result.rows;
 ```
 
 **Benefits**:
@@ -546,7 +565,9 @@ WHERE created_at >= DATE_TRUNC('month', NOW());
 -- License middleware already validated MMC workspace
 ```
 
-**Conclusion**: For MMC Dashboard, SQL-level filtering not necessary (all users see same platform metrics). However, **permission check must remain mandatory** before query execution (application-layer enforcement via middleware).
+**Conclusion**: For MMC Dashboard, SQL-level filtering not necessary (all users see same platform
+metrics). However, **permission check must remain mandatory** before query execution
+(application-layer enforcement via middleware).
 
 ### Decision
 
@@ -557,27 +578,23 @@ WHERE created_at >= DATE_TRUNC('month', NOW());
    ```typescript
    // Middleware: apps/api/src/middleware/permission.middleware.ts
    export async function permissionMiddleware(ctx, next) {
-     const user = ctx.user // From JWT
-     const hasReporting = await checkPermission(
-       user.id,
-       'reporting.view',
-       masterDb
-     )
+     const user = ctx.user; // From JWT
+     const hasReporting = await checkPermission(user.id, "reporting.view", masterDb);
 
      if (!hasReporting) {
        return ctx.json(
          {
            success: false,
            error: {
-             code: 'PERMISSION_DENIED',
-             message: 'reporting.view required',
+             code: "PERMISSION_DENIED",
+             message: "reporting.view required",
            },
          },
-         403
-       )
+         403,
+       );
      }
 
-     await next()
+     await next();
    }
    ```
 
@@ -594,15 +611,17 @@ WHERE created_at >= DATE_TRUNC('month', NOW());
    // Dashboard queries don't need per-user filtering
    // All metrics are platform-wide after license + permission validation
    const summary = await masterDb.query(
-     `SELECT COUNT(*) as total_licenses FROM licenses WHERE deleted_at IS NULL`
-   )
+     `SELECT COUNT(*) as total_licenses FROM licenses WHERE deleted_at IS NULL`,
+   );
    ```
 
 ### Alternatives Considered
 
-❌ **Permission at SQL Only** – Rejected; MMC Dashboard is single-workspace (no complex filtering); application-layer check more understandable
+❌ **Permission at SQL Only** – Rejected; MMC Dashboard is single-workspace (no complex filtering);
+application-layer check more understandable
 
-❌ **No Permission Check** – Rejected; violates regulatory compliance (financial data access control)
+❌ **No Permission Check** – Rejected; violates regulatory compliance (financial data access
+control)
 
 ### Implementation Implication
 
@@ -617,7 +636,8 @@ WHERE created_at >= DATE_TRUNC('month', NOW());
 
 ### Question
 
-How should the export endpoint handle requests for 50,000+ rows while maintaining memory safety and user experience?
+How should the export endpoint handle requests for 50,000+ rows while maintaining memory safety and
+user experience?
 
 ### Investigation
 
@@ -627,11 +647,11 @@ How should the export endpoint handle requests for 50,000+ rows while maintainin
 
 ```typescript
 const rows = await masterDb.query(
-  'SELECT * FROM revenue_records WHERE ...' // 185,000 rows
-)
-const csv = arrayToCsv(rows.rows)
-ctx.header('Content-Disposition', 'attachment; filename="export.csv"')
-ctx.body = csv // Buffer in memory
+  "SELECT * FROM revenue_records WHERE ...", // 185,000 rows
+);
+const csv = arrayToCsv(rows.rows);
+ctx.header("Content-Disposition", 'attachment; filename="export.csv"');
+ctx.body = csv; // Buffer in memory
 ```
 
 **Memory Impact:**
@@ -647,25 +667,25 @@ ctx.body = csv // Buffer in memory
 **Scenario 2: Stream CSV Incremental (Better)**
 
 ```typescript
-import { Readable } from 'stream'
+import { Readable } from "stream";
 
-const query = 'SELECT * FROM revenue_records WHERE created_at >= $1 LIMIT 50000'
-const result = await masterDb.query(query, [dateFrom])
+const query = "SELECT * FROM revenue_records WHERE created_at >= $1 LIMIT 50000";
+const result = await masterDb.query(query, [dateFrom]);
 
-const csvStream = new Readable()
-csvStream.on('data', (chunk) => {
-  ctx.body += chunk // Incremental write
-})
+const csvStream = new Readable();
+csvStream.on("data", (chunk) => {
+  ctx.body += chunk; // Incremental write
+});
 
 // Write headers
-csvStream.push('Country,Revenue,Licenses\n')
+csvStream.push("Country,Revenue,Licenses\n");
 
 // Write rows iteratively (not all at once)
 result.rows.forEach((row) => {
-  csvStream.push(`${row.country},"${row.revenue}",${row.license_count}\n`)
-})
+  csvStream.push(`${row.country},"${row.revenue}",${row.license_count}\n`);
+});
 
-csvStream.push(null) // End stream
+csvStream.push(null); // End stream
 ```
 
 **Memory Impact:**
@@ -682,11 +702,11 @@ csvStream.push(null) // End stream
 ```typescript
 // Step 1: Validate row count BEFORE expensive query
 const countResult = await masterDb.query(
-  'SELECT COUNT(*) as count FROM revenue_records WHERE created_at >= $1 AND billing_country = $2',
-  [dateFrom, country]
-)
+  "SELECT COUNT(*) as count FROM revenue_records WHERE created_at >= $1 AND billing_country = $2",
+  [dateFrom, country],
+);
 
-const rowCount = parseInt(countResult.rows[0].count)
+const rowCount = parseInt(countResult.rows[0].count);
 
 // Step 2: Reject if > 50,000
 if (rowCount > 50000) {
@@ -694,12 +714,12 @@ if (rowCount > 50000) {
     {
       success: false,
       error: {
-        code: 'PAYLOAD_TOO_LARGE',
+        code: "PAYLOAD_TOO_LARGE",
         message: `Export would return ${rowCount} rows. Maximum 50,000 allowed.`,
       },
     },
-    413
-  )
+    413,
+  );
 }
 
 // Step 3: Safe to proceed with full query + stream
@@ -739,33 +759,33 @@ if (rowCount > 50000) {
 
    ```typescript
    const validateExport = async (ctx) => {
-     const { date_from, date_to, country } = ctx.request.body
+     const { date_from, date_to, country } = ctx.request.body;
 
      // Step 1: Fast count query
      const countResult = await masterDb.query(
        `SELECT COUNT(*) as count FROM revenue_records 
         WHERE created_at >= $1 AND created_at <= $2 
         AND (billing_country = $3 OR $3 IS NULL)`,
-       [date_from, date_to, country]
-     )
+       [date_from, date_to, country],
+     );
 
-     const rowCount = parseInt(countResult.rows[0].count, 10)
+     const rowCount = parseInt(countResult.rows[0].count, 10);
 
      // Step 2: Reject if over limit
      if (rowCount > 50000) {
        return {
          valid: false,
          error: {
-           code: 'PAYLOAD_TOO_LARGE',
+           code: "PAYLOAD_TOO_LARGE",
            message: `Export would return ${rowCount} rows. Maximum 50,000 allowed. Please filter by date range or country.`,
            rowCount,
            maxAllowed: 50000,
          },
-       }
+       };
      }
 
-     return { valid: true, rowCount }
-   }
+     return { valid: true, rowCount };
+   };
    ```
 
 2. **Streaming CSV Export**:
@@ -773,7 +793,7 @@ if (rowCount > 50000) {
    ```typescript
    export const exportDashboard = async (ctx) => {
      // Validate row count first
-     const validation = await validateExport(ctx)
+     const validation = await validateExport(ctx);
      if (!validation.valid) {
        return ctx.json(
          {
@@ -781,8 +801,8 @@ if (rowCount > 50000) {
            data: null,
            error: validation.error,
          },
-         413
-       )
+         413,
+       );
      }
 
      // Query data (fresh, not from cache)
@@ -791,32 +811,32 @@ if (rowCount > 50000) {
         WHERE created_at >= $1 AND created_at <= $2 
         AND (billing_country = $3 OR $3 IS NULL)
         ORDER BY billing_country DESC, created_at DESC`,
-       [date_from, date_to, country]
-     )
+       [date_from, date_to, country],
+     );
 
      // Set response headers
-     ctx.header('Content-Type', 'text/csv; charset=utf-8')
+     ctx.header("Content-Type", "text/csv; charset=utf-8");
      ctx.header(
-       'Content-Disposition',
-       `attachment; filename="mmc-export-${new Date().toISOString().split('T')[0]}.csv"`
-     )
+       "Content-Disposition",
+       `attachment; filename="mmc-export-${new Date().toISOString().split("T")[0]}.csv"`,
+     );
 
      // Stream response
-     ctx.body = generateCsvStream(result.rows)
-   }
+     ctx.body = generateCsvStream(result.rows);
+   };
 
    function generateCsvStream(rows) {
      return Readable.from(
        (async function* () {
          // Headers
-         yield 'Country,Revenue,License Count\n'
+         yield "Country,Revenue,License Count\n";
 
          // Rows
          for (const row of rows) {
-           yield `${row.billing_country},"${row.revenue}",${row.license_count}\n`
+           yield `${row.billing_country},"${row.revenue}",${row.license_count}\n`;
          }
-       })()
-     )
+       })(),
+     );
    }
    ```
 
@@ -824,9 +844,11 @@ if (rowCount > 50000) {
 
 ❌ **No Validation; Load All** – Rejected; memory risk at 185k+ rows
 
-❌ **Async Export (Queue for Later Download)** – Rejected; added complexity for MVP; 50k rows streams in <2 seconds
+❌ **Async Export (Queue for Later Download)** – Rejected; added complexity for MVP; 50k rows
+streams in <2 seconds
 
-❌ **Pagination Instead of 50k Limit** – Rejected; financial exports need atomic snapshots; pagination defeats purpose
+❌ **Pagination Instead of 50k Limit** – Rejected; financial exports need atomic snapshots;
+pagination defeats purpose
 
 ### Implementation Implication
 
@@ -842,7 +864,8 @@ if (rowCount > 50000) {
 
 ### Question
 
-How should the dashboard handle 100+ concurrent users querying simultaneously without query timeouts or connection pool exhaustion?
+How should the dashboard handle 100+ concurrent users querying simultaneously without query timeouts
+or connection pool exhaustion?
 
 ### Investigation
 
@@ -911,23 +934,23 @@ const loadTest = async () => {
   const users = Array.from({ length: 100 }, (_, i) => ({
     token: generateToken(i),
     userId: `user-${i}`,
-  }))
+  }));
 
   const promises = users.map((user) =>
-    fetch('/api/mmc/dashboard/summary', {
+    fetch("/api/mmc/dashboard/summary", {
       headers: { Authorization: `Bearer ${user.token}` },
     }).then((r) => ({
       status: r.status,
-      time: r.headers.get('server-timing'),
-    }))
-  )
+      time: r.headers.get("server-timing"),
+    })),
+  );
 
-  const start = Date.now()
-  const results = await Promise.allSettled(promises)
-  const duration = Date.now() - start
+  const start = Date.now();
+  const results = await Promise.allSettled(promises);
+  const duration = Date.now() - start;
 
-  const successful = results.filter((r) => r.status === 'fulfilled')
-  const failed = results.filter((r) => r.status === 'rejected')
+  const successful = results.filter((r) => r.status === "fulfilled");
+  const failed = results.filter((r) => r.status === "rejected");
 
   return {
     total: 100,
@@ -936,8 +959,8 @@ const loadTest = async () => {
     totalDuration: duration,
     avgLatency: duration / successful.length,
     maxLatency: Math.max(...successful.map((r) => parseInt(r.value.time))),
-  }
-}
+  };
+};
 ```
 
 **Expected Results**:
@@ -962,7 +985,7 @@ const loadTest = async () => {
    ```typescript
    const masterDbPool = new Pool({
      host: process.env.MASTER_DB_HOST,
-     port: parseInt(process.env.MASTER_DB_PORT || '5432'),
+     port: parseInt(process.env.MASTER_DB_PORT || "5432"),
      database: process.env.MASTER_DB_NAME,
      user: process.env.MASTER_DB_USER,
      password: process.env.MASTER_DB_PASSWORD,
@@ -971,26 +994,19 @@ const loadTest = async () => {
      idleTimeoutMillis: 30000, // Recycle idle connections after 30 seconds
      connectionTimeoutMillis: 5000, // Fail if connection takes > 5 seconds
      statementCacheSize: 100, // Prepared statement cache for query reuse
-   })
+   });
    ```
 
 2. **Query Timeout** (protect DB from runaway queries):
 
    ```typescript
-   export const queryWithTimeout = async (
-     pool,
-     query,
-     params,
-     timeout = 5000
-   ) => {
+   export const queryWithTimeout = async (pool, query, params, timeout = 5000) => {
      const result = await Promise.race([
        pool.query(query, params),
-       new Promise((_, reject) =>
-         setTimeout(() => reject(new Error('Query timeout')), timeout)
-       ),
-     ])
-     return result
-   }
+       new Promise((_, reject) => setTimeout(() => reject(new Error("Query timeout")), timeout)),
+     ]);
+     return result;
+   };
    ```
 
 3. **Caching Layer** (reduce DB pressure):
@@ -998,24 +1014,24 @@ const loadTest = async () => {
    ```typescript
    // All dashboard endpoints use cache-first strategy
    const getCachedSummary = async (workspaceId) => {
-     const cacheKey = `mmc:dashboard:summary:${workspaceId}`
+     const cacheKey = `mmc:dashboard:summary:${workspaceId}`;
 
      // Try cache first (5-min TTL)
-     const cached = await redisClient.get(cacheKey)
+     const cached = await redisClient.get(cacheKey);
      if (cached) {
-       ctx.set('X-Cache', 'HIT') // Observability header
-       return JSON.parse(cached)
+       ctx.set("X-Cache", "HIT"); // Observability header
+       return JSON.parse(cached);
      }
 
      // Cache miss → fetch from DB
-     const result = await queryWithTimeout(masterDb, summaryQuery, [])
+     const result = await queryWithTimeout(masterDb, summaryQuery, []);
 
      // Store in cache
-     await redisClient.setex(cacheKey, 300, JSON.stringify(result.rows[0]))
-     ctx.set('X-Cache', 'MISS')
+     await redisClient.setex(cacheKey, 300, JSON.stringify(result.rows[0]));
+     ctx.set("X-Cache", "MISS");
 
-     return result.rows[0]
-   }
+     return result.rows[0];
+   };
    ```
 
 4. **Connection Pool Monitoring**:
@@ -1023,20 +1039,22 @@ const loadTest = async () => {
    // Log pool stats every 60 seconds
    setInterval(() => {
      logger.info({
-       event: 'pool_stats',
+       event: "pool_stats",
        idle_connections: masterDb.idleCount,
        active_connections: masterDb.totalCount - masterDb.idleCount,
        total_connections: masterDb.totalCount,
        queue_size: masterDb.waitingCount || 0,
-     })
-   }, 60000)
+     });
+   }, 60000);
    ```
 
 ### Alternatives Considered
 
-❌ **Larger Pool (max=100)** – Rejected; connection overhead exceeds benefit; PostgreSQL server CPU would saturate
+❌ **Larger Pool (max=100)** – Rejected; connection overhead exceeds benefit; PostgreSQL server CPU
+would saturate
 
-❌ **Read Replicas Only** – Accepted as future optimization; primary pool for consistency during this stage
+❌ **Read Replicas Only** – Accepted as future optimization; primary pool for consistency during
+this stage
 
 ### Implementation Implication
 
@@ -1059,7 +1077,8 @@ const loadTest = async () => {
 | **Export Limits**       | 50k Row Validation + Streaming   | Validate count first; stream CSV to avoid memory exhaustion                            |
 | **Concurrency**         | Connection Pool (min=10, max=30) | Handle 100 concurrent users; query timeouts at 5 seconds                               |
 
-All research decisions **enable <300ms response time guarantee** under 100 concurrent users while maintaining **database-per-tenant isolation** and **security-first authorization model**.
+All research decisions **enable <300ms response time guarantee** under 100 concurrent users while
+maintaining **database-per-tenant isolation** and **security-first authorization model**.
 
 ---
 

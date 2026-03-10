@@ -32,6 +32,9 @@
 ## Notes
 
 - All items passed validation.
-- The spec describes typed generic methods (e.g., `client.get<T>()`) as part of the functional requirement. These are behavioral descriptions of what the client must support, not implementation directives. The spec does not prescribe a language, framework, or library.
-- Code paths in folder structure (`core/api/client.ts`) are organizational requirements mandated by the stage file, not implementation leakage.
+- The spec describes typed generic methods (e.g., `client.get<T>()`) as part of the functional
+  requirement. These are behavioral descriptions of what the client must support, not implementation
+  directives. The spec does not prescribe a language, framework, or library.
+- Code paths in folder structure (`core/api/client.ts`) are organizational requirements mandated by
+  the stage file, not implementation leakage.
 - Spec is ready for `/speckit.clarify` or `/speckit.plan`.

@@ -8,7 +8,9 @@
 
 ## Summary
 
-54 atomic tasks generated across 5 implementation phases. All 5 guardian corrections from the Plan step are distributed across 13 tasks. 25 tasks are marked parallel-safe. Tasks follow dependency order within each phase; Phases 3 and 4 can execute in parallel.
+54 atomic tasks generated across 5 implementation phases. All 5 guardian corrections from the Plan
+step are distributed across 13 tasks. 25 tasks are marked parallel-safe. Tasks follow dependency
+order within each phase; Phases 3 and 4 can execute in parallel.
 
 ---
 

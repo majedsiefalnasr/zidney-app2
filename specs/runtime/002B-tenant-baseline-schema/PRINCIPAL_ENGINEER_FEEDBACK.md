@@ -8,7 +8,8 @@
 
 ## Summary of Refinements
 
-The principal engineer's deep architectural review identified **3 critical blind spots** and provided **5 structural improvements**. All have been incorporated into the audit.
+The principal engineer's deep architectural review identified **3 critical blind spots** and
+provided **5 structural improvements**. All have been incorporated into the audit.
 
 ### ✅ Blind Spot #1: Static Workspace Context
 
@@ -19,7 +20,8 @@ The principal engineer's deep architectural review identified **3 critical blind
 - ✅ "No static variable storing current workspace outside request context"
 - ✅ "Background jobs receive workspace_id via task payload; no implicit context"
 
-**Impact**: Closes subtle multi-tenant leak vector (in-memory cache keyed incorrectly, global singleton storing last resolved workspace).
+**Impact**: Closes subtle multi-tenant leak vector (in-memory cache keyed incorrectly, global
+singleton storing last resolved workspace).
 
 ---
 
@@ -35,7 +37,8 @@ The principal engineer's deep architectural review identified **3 critical blind
 - 🔴 Changed verdict from "optional long-term" to "MUST be enforced at DB layer before production"
 - 🔴 Escalated from Phase 02C backlog to **pre-production hardening task**
 
-**Recommendation**: Add trigger `enforce_attempts_snapshots_immutable` to baseline schema BEFORE production deployment.
+**Recommendation**: Add trigger `enforce_attempts_snapshots_immutable` to baseline schema BEFORE
+production deployment.
 
 ```sql
 CREATE TRIGGER enforce_attempts_snapshots_immutable
@@ -68,7 +71,8 @@ EXECUTE FUNCTION raise_immutable_violation();
 - Added action: "Verify UNIQUE(workspace_id, idempotency_key) on provisioning_tasks table"
 - Added status: 🟡 MEDIUM idempotency risk (from 🟢 LOW)
 
-**Required Verification**: Check if provisioning_tasks table has UNIQUE constraint to prevent duplicates.
+**Required Verification**: Check if provisioning_tasks table has UNIQUE constraint to prevent
+duplicates.
 
 ---
 
@@ -95,10 +99,10 @@ EXECUTE FUNCTION raise_immutable_violation();
 
 ```typescript
 // Current (acceptable but weak)
-await client.query(`SET LOCAL lock_timeout = '${lockTimeout}ms'`)
+await client.query(`SET LOCAL lock_timeout = '${lockTimeout}ms'`);
 
 // Better (consistent pattern)
-await client.query(`SET LOCAL lock_timeout = $1`, [`${lockTimeout}ms`])
+await client.query(`SET LOCAL lock_timeout = $1`, [`${lockTimeout}ms`]);
 ```
 
 **Status**: Documented as technical debt for Phase 02C cleanup.
@@ -125,7 +129,8 @@ await client.query(`SET LOCAL lock_timeout = $1`, [`${lockTimeout}ms`])
 
 **Principal Assessment**: 🟠 **MEDIUM-HIGH**
 
-**Rationale**: Immutability is core to exam integrity. ADR-0002 violation without DB-layer enforcement.
+**Rationale**: Immutability is core to exam integrity. ADR-0002 violation without DB-layer
+enforcement.
 
 ---
 
@@ -294,8 +299,10 @@ Overall Production Risk:    🟢 LOW (after hardening + staging)
 
 ### Optional But Strong Improvements
 
-- **Background Task Context Validation**: Ensure all worker tasks contain `workspace_id` in payload; no implicit context
-- **Pool Exhaustion Simulation**: Test > 10 concurrent connections per tenant to validate pooling behavior
+- **Background Task Context Validation**: Ensure all worker tasks contain `workspace_id` in payload;
+  no implicit context
+- **Pool Exhaustion Simulation**: Test > 10 concurrent connections per tenant to validate pooling
+  behavior
 
 ---
 
@@ -334,7 +341,8 @@ Production Risk: 🟢 LOW ✅ (ONLY if all 6 MUST items complete)
 Production Risk: 🟠 MEDIUM ⚠️ (If any MUST item skipped)
 ```
 
-**Critical Dependency**: All 6 MUST items are production gates. Skipping any downgrades to 🟠 MEDIUM risk.
+**Critical Dependency**: All 6 MUST items are production gates. Skipping any downgrades to 🟠 MEDIUM
+risk.
 
 ---
 

@@ -197,8 +197,7 @@ No heavy nested structures.
 
 Short-lived caching allowed (optional):
 
-- Per student cache key:
-  dashboard:{workspace_id}:{student_id}
+- Per student cache key: dashboard:{workspace_id}:{student_id}
 
 TTL: 30–60 seconds maximum.
 
@@ -274,7 +273,6 @@ Stage is complete when:
 
 The dashboard is the student’s first impression.
 
-If it is slow or inconsistent,
-perceived platform stability is damaged.
+If it is slow or inconsistent, perceived platform stability is damaged.
 
 Aggregation must be lightweight, deterministic, and safe.

@@ -8,7 +8,8 @@
 
 ## Overview
 
-This guide covers deployment of production-grade monitoring for Zidney's tenant schema provisioning system. Includes:
+This guide covers deployment of production-grade monitoring for Zidney's tenant schema provisioning
+system. Includes:
 
 - **Grafana Dashboard**: Real-time metrics visualization
 - **Prometheus Alerts**: Automated incident detection
@@ -262,7 +263,8 @@ curl -s http://prometheus:9090/api/v1/rules | jq '.data.groups[] | select(.name 
 
 **Notifications not received**:
 
-1. Check notification channel config: `jq . terraform/modules/monitoring/schema-provisioning/main.tf`
+1. Check notification channel config:
+   `jq . terraform/modules/monitoring/schema-provisioning/main.tf`
 2. Verify webhook URL: `curl -v ${WEBHOOK_URL}`
 3. Check Grafana logs: `docker logs grafana` (if containerized)
 
@@ -291,6 +293,7 @@ curl -s http://prometheus:9090/api/v1/rules | jq '.data.groups[] | select(.name 
 
 ---
 
-**Status**: CRITICAL - This monitoring is production-blocking. Schema provisioning cannot launch without dashboards + alerts operational.
+**Status**: CRITICAL - This monitoring is production-blocking. Schema provisioning cannot launch
+without dashboards + alerts operational.
 
 For questions: ops-team@internal | #zidney-alerts

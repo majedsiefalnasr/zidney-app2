@@ -8,7 +8,9 @@
 
 ## Executive Summary
 
-This document consolidates findings from investigations into existing Zidney license infrastructure, worker patterns, database schema structures, audit logging patterns, and dependency locations. All clarifications from spec.md have been resolved and are incorporated into design decisions below.
+This document consolidates findings from investigations into existing Zidney license infrastructure,
+worker patterns, database schema structures, audit logging patterns, and dependency locations. All
+clarifications from spec.md have been resolved and are incorporated into design decisions below.
 
 ---
 
@@ -19,13 +21,15 @@ This document consolidates findings from investigations into existing Zidney lic
 **License Enforcement Middleware** (`apps/api/src/middleware/license-enforcement.ts`)
 
 - Status: EXISTS and IMPLEMENTED
-- Execution position: 3rd in middleware stack (after correlation-id, tenant-resolver; before schema-version)
+- Execution position: 3rd in middleware stack (after correlation-id, tenant-resolver; before
+  schema-version)
 - Current behavior:
   - Validates license status on every workspace-bound request
   - Returns 423 (Locked) for SOFT_LOCKED licenses (not expired)
   - Returns 403 (Forbidden) for ARCHIVED or SOFT_LOCKED_EXPIRED licenses
   - Returns 404 for DELETED licenses
-  - **Implements auto-expiration**: When SOFT_LOCKED + current_time > soft_lock_until, atomically transitions to ARCHIVED
+  - **Implements auto-expiration**: When SOFT_LOCKED + current_time > soft_lock_until, atomically
+    transitions to ARCHIVED
   - Performs version compatibility checks (schema_version + product_version)
 
 **Key Pattern Observed**:
@@ -52,7 +56,8 @@ Middleware execution order:
 
 **Existing Components**:
 
-- `types.ts` - Defines LicenseStatus enum (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED) and License interface
+- `types.ts` - Defines LicenseStatus enum (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED) and License
+  interface
 - `service.ts` - Contains `createLicense()` function, 480 lines
 - `state-machine.ts` - State transition logic
 - `resolver.ts` - License lookup and validation
@@ -64,28 +69,28 @@ Middleware execution order:
 
 ```typescript
 enum LicenseStatus {
-  ACTIVE = 'ACTIVE',
-  SOFT_LOCKED = 'SOFT_LOCKED',
-  ARCHIVED = 'ARCHIVED',
-  DELETED = 'DELETED',
+  ACTIVE = "ACTIVE",
+  SOFT_LOCKED = "SOFT_LOCKED",
+  ARCHIVED = "ARCHIVED",
+  DELETED = "DELETED",
 }
 
 interface License {
-  id: string
-  product_id: string
-  workspace_id: string
-  workspace_slug: string
-  student_limit: number | null
-  staff_limit: number | null
-  status: LicenseStatus
-  soft_lock_until: Date | null
-  archived_at: Date | null
-  deleted_at: Date | null
-  expected_schema_version: string
-  expected_product_version: string
-  created_at: Date
-  updated_at: Date
-  snapshot_id: string | null
+  id: string;
+  product_id: string;
+  workspace_id: string;
+  workspace_slug: string;
+  student_limit: number | null;
+  staff_limit: number | null;
+  status: LicenseStatus;
+  soft_lock_until: Date | null;
+  archived_at: Date | null;
+  deleted_at: Date | null;
+  expected_schema_version: string;
+  expected_product_version: string;
+  created_at: Date;
+  updated_at: Date;
+  snapshot_id: string | null;
 }
 ```
 
@@ -185,17 +190,17 @@ interface License {
 
 ```typescript
 interface JobEnvelope<T> {
-  job_id: string // Generated UUID
-  request_id: string // Inherited from API
-  workspace_id: string
-  user_id?: string
-  job_name: string // e.g., 'snapshot_create', 'restore_from_archive'
-  attempt_id?: string
-  payload: T
-  payload_hash: string // SHA256 for mutation detection
-  retry_count: number
-  max_retries: number
-  created_at: string // ISO timestamp
+  job_id: string; // Generated UUID
+  request_id: string; // Inherited from API
+  workspace_id: string;
+  user_id?: string;
+  job_name: string; // e.g., 'snapshot_create', 'restore_from_archive'
+  attempt_id?: string;
+  payload: T;
+  payload_hash: string; // SHA256 for mutation detection
+  retry_count: number;
+  max_retries: number;
+  created_at: string; // ISO timestamp
 }
 ```
 
@@ -352,9 +357,9 @@ interface JobEnvelope<T> {
 
 ### Database Connections
 
-**Master DB**: Single PostgreSQL instance, connection pool managed per tenant
-**Tenant DBs**: Isolated per workspace, created/destroyed with license lifecycle
-**Connection Pool Management**: In-memory map per tenant from tenant resolver
+**Master DB**: Single PostgreSQL instance, connection pool managed per tenant **Tenant DBs**:
+Isolated per workspace, created/destroyed with license lifecycle **Connection Pool Management**:
+In-memory map per tenant from tenant resolver
 
 ### HTTP Status Codes (License Lifecycle Specific)
 
@@ -427,7 +432,8 @@ Isolation → License → Authentication → Attempt → Runtime → Frontoffice
 
 ## Conclusion
 
-All technical context clarifications have been resolved. Zidney's existing infrastructure supports the four-state license lifecycle model with:
+All technical context clarifications have been resolved. Zidney's existing infrastructure supports
+the four-state license lifecycle model with:
 
 - Deterministic middleware enforcement
 - Immutable audit trails

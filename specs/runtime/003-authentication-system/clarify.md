@@ -9,7 +9,8 @@
 
 ## Audit Framework
 
-This clarification follows the SpecKit Hard Mode Clarify Phase mandate. It audits ambiguities across 8 critical areas:
+This clarification follows the SpecKit Hard Mode Clarify Phase mandate. It audits ambiguities across
+8 critical areas:
 
 1. **Transactions** — Atomicity, ACID guarantees, rollback paths
 2. **Idempotency** — Replay safety, duplicate handling
@@ -36,8 +37,7 @@ This clarification follows the SpecKit Hard Mode Clarify Phase mandate. It audit
 - REPEATABLE READ (recommended): Prevents dirty reads, non-repeatable reads
 - READ COMMITTED (weakest): Default PostgreSQL, sufficient for password checks
 
-**Resolution:**
-$$\boxed{\text{REPEATABLE READ}}$$
+**Resolution:** $$\boxed{\text{REPEATABLE READ}}$$
 
 - Password verification must be deterministic (same input → same result)
 - Row lock (FOR UPDATE) provides serialization for token_version
@@ -73,8 +73,7 @@ BEGIN → INSERT login_attempts → COMMIT
 BEGIN → COUNT → LOCK → COMMIT
 ```
 
-**Resolution:**
-$$\boxed{\text{Option A: Single transaction}}$$
+**Resolution:** $$\boxed{\text{Option A: Single transaction}}$$
 
 **Rationale:**
 
@@ -83,7 +82,8 @@ $$\boxed{\text{Option A: Single transaction}}$$
 - Failed login insert must not succeed while lock fails
 - If insert succeeds but lock fails, inconsistency occurs
 
-**Implication:** login_attempts INSERT must be in same SERIALIZABLE transaction as account lock update.
+**Implication:** login_attempts INSERT must be in same SERIALIZABLE transaction as account lock
+update.
 
 ---
 
@@ -99,8 +99,7 @@ $$\boxed{\text{Option A: Single transaction}}$$
 - (B) Entire login transaction → no side effects, clean rollback
 - (C) Partial rollback → insert audit log before rollback
 
-**Resolution:**
-$$\boxed{\text{Option B: Full rollback}}$$
+**Resolution:** $$\boxed{\text{Option B: Full rollback}}$$
 
 **Flow:**
 
@@ -123,7 +122,9 @@ ENDIF
 - Audit log insertion part of transaction
 - User can retry login
 
-**Implication:** JWT generation is last step in login transaction. If it fails, ROLLBACK includes audit log, meaning user sees 500 without event logged. Consider moving audit log insert AFTER COMMIT for non-failure cases.
+**Implication:** JWT generation is last step in login transaction. If it fails, ROLLBACK includes
+audit log, meaning user sees 500 without event logged. Consider moving audit log insert AFTER COMMIT
+for non-failure cases.
 
 ---
 
@@ -135,13 +136,10 @@ ENDIF
 
 **Clarification Required:** With REPEATABLE READ isolation:
 
-Thread 1: SELECT token_version = 5
-Thread 2: SELECT token_version = 5
-Thread 1: UPDATE token_version = 6, COMMIT
-Thread 2: UPDATE token_version = 6, COMMIT ← RACE!
+Thread 1: SELECT token_version = 5 Thread 2: SELECT token_version = 5 Thread 1: UPDATE token_version
+= 6, COMMIT Thread 2: UPDATE token_version = 6, COMMIT ← RACE!
 
-**Resolution:**
-$$\boxed{\text{Use FOR UPDATE to serialize}}$$
+**Resolution:** $$\boxed{\text{Use FOR UPDATE to serialize}}$$
 
 **Corrected Flow:**
 
@@ -155,7 +153,8 @@ BEGIN TRANSACTION (SERIALIZABLE or REPEATABLE READ)
 
 **With FOR UPDATE:** Thread 2 blocks until Thread 1 commits, then reads updated value. No race.
 
-**Implication:** Logout-all (token version increment) MUST use FOR UPDATE lock. Update spec to clarify this.
+**Implication:** Logout-all (token version increment) MUST use FOR UPDATE lock. Update spec to
+clarify this.
 
 ---
 
@@ -182,8 +181,7 @@ Scenario:
 - (B) Same token (idempotent on same timestamp)?
 - (C) Error (duplicate detected)?
 
-**Resolution:**
-$$\boxed{\text{Option A: New token}}$$
+**Resolution:** $$\boxed{\text{Option A: New token}}$$
 
 **Reasoning:**
 
@@ -192,9 +190,11 @@ $$\boxed{\text{Option A: New token}}$$
 - Multiple tokens per session acceptable
 - Both tokens valid independently
 
-**Edge case:** If first request succeeded but client didn't receive response, second call creates second valid token. Both work. This is acceptable.
+**Edge case:** If first request succeeded but client didn't receive response, second call creates
+second valid token. Both work. This is acceptable.
 
-**Implication:** No idempotency guarantee for login. Client is responsible for single-submit via UI. Document this clearly.
+**Implication:** No idempotency guarantee for login. Client is responsible for single-submit via UI.
+Document this clearly.
 
 ---
 
@@ -206,8 +206,7 @@ $$\boxed{\text{Option A: New token}}$$
 
 **Clarification Required:** Is "same outcome" really idempotent?
 
-First call: `token_version: 5 → 6`
-Second call: `token_version: 6 → 7`
+First call: `token_version: 5 → 6` Second call: `token_version: 6 → 7`
 
 Result: Both calls invalidate all old tokens, but are they truly idempotent?
 
@@ -217,8 +216,7 @@ Here: f(f(5)) = f(6) = 7, but f(5) = 6. NOT idempotent by strict definition.
 
 **Operational Definition:** Same business effect (all old tokens invalid).
 
-**Resolution:**
-$$\boxed{\text{Logout-all is NOT strictly idempotent, but outcome-idempotent}}$$
+**Resolution:** $$\boxed{\text{Logout-all is NOT strictly idempotent, but outcome-idempotent}}$$
 
 **Clarification to Spec:**
 
@@ -240,12 +238,10 @@ $$\boxed{\text{Logout-all is NOT strictly idempotent, but outcome-idempotent}}$$
 
 Scenario: User submits new_password in request with correlation_id.
 
-Option A: Use (user_id, correlation_id) as idempotency key → same hash
-Option B: Always hash new_password, let duplicate fail on unique constraint
-Option C: Out of scope for Phase 1
+Option A: Use (user_id, correlation_id) as idempotency key → same hash Option B: Always hash
+new_password, let duplicate fail on unique constraint Option C: Out of scope for Phase 1
 
-**Resolution:**
-$$\boxed{\text{Option C: Out of scope for Phase 1}}$$
+**Resolution:** $$\boxed{\text{Option C: Out of scope for Phase 1}}$$
 
 **Reasoning:** Spec doesn't define password change endpoint. Phase 2+ feature.
 
@@ -259,22 +255,22 @@ $$\boxed{\text{Option C: Out of scope for Phase 1}}$$
 
 **Ambiguity:** Can two users log in with same email simultaneously?
 
-**Specification Say:** "Unique constraint on email" but doesn't specify behavior if concurrent logins succeed.
+**Specification Say:** "Unique constraint on email" but doesn't specify behavior if concurrent
+logins succeed.
 
 **Clarification Required:** With constraints:
 
 - unique(email) → one active account
 - But what if two requests start before either hits DB?
 
-Thread 1: User@example.com begins login
-Thread 2: User@example.com begins login (fast network, arrives before Thread 1 commits)
+Thread 1: User@example.com begins login Thread 2: User@example.com begins login (fast network,
+arrives before Thread 1 commits)
 
 Result: Both may read password_hash, both verify OK, both generate tokens, both succeed.
 
 **Question:** Is this allowed?
 
-**Resolution:**
-$$\boxed{\text{YES - Multiple tokens per user allowed}}$$
+**Resolution:** $$\boxed{\text{YES - Multiple tokens per user allowed}}$$
 
 **Rationale:**
 
@@ -284,7 +280,8 @@ $$\boxed{\text{YES - Multiple tokens per user allowed}}$$
 - No conflict — tokens don't interact
 - Logout-all handles revocation
 
-**Implication:** Concurrent login from same email creates multiple valid sessions. This is correct. No session singleton required.
+**Implication:** Concurrent login from same email creates multiple valid sessions. This is correct.
+No session singleton required.
 
 ---
 
@@ -305,8 +302,7 @@ All commit successfully → 5 insertions, account not locked
 
 **Question:** Is this a problem?
 
-**Resolution:**
-$$\boxed{\text{YES - Use SERIALIZABLE or SELECT FOR UPDATE}}$$
+**Resolution:** $$\boxed{\text{YES - Use SERIALIZABLE or SELECT FOR UPDATE}}$$
 
 **Corrected Flow:**
 
@@ -319,9 +315,11 @@ BEGIN TRANSACTION (SERIALIZABLE)
 COMMIT
 ```
 
-**With SERIALIZABLE:** Thread 2 waits until Thread 1 commits, sees updated count, enforces lock correctly.
+**With SERIALIZABLE:** Thread 2 waits until Thread 1 commits, sees updated count, enforces lock
+correctly.
 
-**Implication:** Failed login counter needs serialization. Update spec to mandate SERIALIZABLE for failed login path or add explicit row lock.
+**Implication:** Failed login counter needs serialization. Update spec to mandate SERIALIZABLE for
+failed login path or add explicit row lock.
 
 ---
 
@@ -335,12 +333,10 @@ COMMIT
 
 **Clarification Required:**
 
-Option A: Drizzle default pool (10-20 connections)
-Option B: Configurable per workspace
-Option C: Specification doesn't mandate
+Option A: Drizzle default pool (10-20 connections) Option B: Configurable per workspace Option C:
+Specification doesn't mandate
 
-**Resolution:**
-$$\boxed{\text{Option A: Drizzle default + configurable override}}$$
+**Resolution:** $$\boxed{\text{Option A: Drizzle default + configurable override}}$$
 
 **Implication:**
 
@@ -357,16 +353,15 @@ $$\boxed{\text{Option A: Drizzle default + configurable override}}$$
 
 **Ambiguity:** When exactly does schema_version increment?
 
-**Specification Say:** "Schema increment required (MAJOR.MINOR.0+1)" but doesn't define increments per stage or per change.
+**Specification Say:** "Schema increment required (MAJOR.MINOR.0+1)" but doesn't define increments
+per stage or per change.
 
 **Clarification Required:**
 
-Option A: One increment per migration file
-Option B: One increment per release
-Option C: Specified per stage in migration plan
+Option A: One increment per migration file Option B: One increment per release Option C: Specified
+per stage in migration plan
 
-**Resolution:**
-$$\boxed{\text{Option A: One increment per migration file}}$$
+**Resolution:** $$\boxed{\text{Option A: One increment per migration file}}$$
 
 **Rationale:**
 
@@ -393,8 +388,7 @@ Example matrix:
 - Product 2.0.0 token in 2.1.0 runtime → Compatible?
 - Product 2.0.0 token in 3.0.0 runtime → Compatible?
 
-**Resolution:**
-$$\boxed{\text{Use SemVer compatibility rules}}$$
+**Resolution:** $$\boxed{\text{Use SemVer compatibility rules}}$$
 
 Reference ADR-0008 (Semantic Versioning):
 
@@ -420,7 +414,8 @@ Compatibility: major(token) != major(runtime) → NO, 426
 
 ### Question 4.3: Schema Version Minimum Threshold
 
-**Ambiguity:** Specification mentions "minimum_supported_schema_version" but doesn't define how it's set.
+**Ambiguity:** Specification mentions "minimum_supported_schema_version" but doesn't define how it's
+set.
 
 **Clarification Required:**
 
@@ -430,12 +425,12 @@ Who decides minimum supported version?
 - (B) Code (hardcoded in runtime)
 - (C) Automatic (based on latest migration)
 
-**Resolution:**
-$$\boxed{\text{Option A: Operator-configurable}}$$
+**Resolution:** $$\boxed{\text{Option A: Operator-configurable}}$$
 
 **Implication:**
 
-- Admin can force minimum upgrade: `UPDATE platform_settings SET minimum_supported_schema_version = '2.0.0'`
+- Admin can force minimum upgrade:
+  `UPDATE platform_settings SET minimum_supported_schema_version = '2.0.0'`
 - Tenants below 2.0.0 receive 426 Upgrade Required
 - Forces staggered upgrades if needed
 
@@ -447,7 +442,8 @@ $$\boxed{\text{Option A: Operator-configurable}}$$
 
 **Ambiguity:** Specification states middleware order but doesn't specify how to prevent bypasses.
 
-**Specification Say:** "Correlation ID → Tenant Resolver → License Enforcement → Schema Validation → Route"
+**Specification Say:** "Correlation ID → Tenant Resolver → License Enforcement → Schema Validation →
+Route"
 
 **Clarification Required:** How to prevent accidental bypass?
 
@@ -472,7 +468,8 @@ protectedRouter.get('/exams', ...);
 
 **Guarantee:** Every route on protectedRouter runs full middleware stack.
 
-**Implication:** Use router composition, not decorators. Document this pattern in implementation guide.
+**Implication:** Use router composition, not decorators. Document this pattern in implementation
+guide.
 
 ---
 
@@ -482,12 +479,10 @@ protectedRouter.get('/exams', ...);
 
 **Clarification Required:**
 
-Option A: Always generate new (ignore request header)
-Option B: Use request header if present, else generate
-Option C: Extract from header, reject if missing
+Option A: Always generate new (ignore request header) Option B: Use request header if present, else
+generate Option C: Extract from header, reject if missing
 
-**Resolution:**
-$$\boxed{\text{Option B: Extract if present, else generate}}$$
+**Resolution:** $$\boxed{\text{Option B: Extract if present, else generate}}$$
 
 **Logic:**
 
@@ -514,12 +509,10 @@ ENDIF
 
 **Clarification Required:**
 
-Option A: Query every request (100% current, slower)
-Option B: Cache 1 minute TTL (stale tolerance, faster)
-Option C: Cache in JWT (already happening for product_version)
+Option A: Query every request (100% current, slower) Option B: Cache 1 minute TTL (stale tolerance,
+faster) Option C: Cache in JWT (already happening for product_version)
 
-**Resolution:**
-$$\boxed{\text{Option B: Cache 1 minute TTL}}$$
+**Resolution:** $$\boxed{\text{Option B: Cache 1 minute TTL}}$$
 
 **Logic:**
 
@@ -554,8 +547,7 @@ Should we validate:
 - Complexity (uppercase, number, special)?
 - Common passwords (blocklist)?
 
-**Resolution:**
-$$\boxed{\text{Minimal Phase 1: Length only}}$$
+**Resolution:** $$\boxed{\text{Minimal Phase 1: Length only}}$$
 
 **Requirements:**
 
@@ -586,8 +578,7 @@ Secret rotation:
 - When? (Not Phase 1)
 - How? (Not Phase 1)
 
-**Resolution:**
-$$\boxed{\text{Phase 1: Static secret, rotation Phase 2+}}$$
+**Resolution:** $$\boxed{\text{Phase 1: Static secret, rotation Phase 2+}}$$
 
 **Implication:**
 
@@ -610,8 +601,7 @@ If server clock is 1 hour behind (NTP drift):
 
 **Question:** How to detect/prevent?
 
-**Resolution:**
-$$\boxed{\text{NTP sync is DevOps responsibility}}$$
+**Resolution:** $$\boxed{\text{NTP sync is DevOps responsibility}}$$
 
 **Phase 1:**
 
@@ -644,8 +634,7 @@ Response options:
 
 **Also timing:** If we query DB for user, timing may reveal email doesn't exist (timing attack).
 
-**Resolution:**
-$$\boxed{\text{Option A: Same message + hash dummy password if user not found}}$$
+**Resolution:** $$\boxed{\text{Option A: Same message + hash dummy password if user not found}}$$
 
 **Implementation:**
 
@@ -680,8 +669,7 @@ Scenarios:
 
 Are these the right codes?
 
-**Resolution:**
-$$\boxed{\text{Yes, all correct per HTTP semantics:}}$$
+**Resolution:** $$\boxed{\text{Yes, all correct per HTTP semantics:}}$$
 
 - **401 Unauthorized:** Token/auth information invalid (wrong sig, wrong workspace, expired)
 - **403 Forbidden:** Permission denied (RBAC, archived license)
@@ -699,11 +687,9 @@ $$\boxed{\text{Yes, all correct per HTTP semantics:}}$$
 
 **Clarification Required:**
 
-Phase 1: All English (OK)
-Phase 2+: Translations
+Phase 1: All English (OK) Phase 2+: Translations
 
-**Resolution:**
-$$\boxed{\text{Static English Phase 1, i18n Phase 2+}}$$
+**Resolution:** $$\boxed{\text{Static English Phase 1, i18n Phase 2+}}$$
 
 **Implication:** No i18n layer now. Structure code to support it later.
 
@@ -713,7 +699,8 @@ $$\boxed{\text{Static English Phase 1, i18n Phase 2+}}$$
 
 ### Question 8.1: Cross-Domain Token Rejection
 
-**Ambiguity:** Specification says MMC token should reject at frontoffice. Where does this check happen?
+**Ambiguity:** Specification says MMC token should reject at frontoffice. Where does this check
+happen?
 
 **Clarification Required:**
 
@@ -725,8 +712,7 @@ Check location:
 - (B) Route handler (inside logic)
 - (C) Implicit (scope doesn't match, permission denied)
 
-**Resolution:**
-$$\boxed{\text{Option A: Middleware}}$$
+**Resolution:** $$\boxed{\text{Option A: Middleware}}$$
 
 **Implementation:**
 
@@ -751,8 +737,8 @@ Middleware checks: IF token.scope NOT IN allowed_scopes → 401 Unauthorized
 
 **Clarification Required:**
 
-Scenario: Student logs in, gets token with division_id = "DIV_A"
-Request: GET /frontoffice/divisions/DIV_B/exams
+Scenario: Student logs in, gets token with division_id = "DIV_A" Request: GET
+/frontoffice/divisions/DIV_B/exams
 
 Question: Should this return:
 
@@ -760,8 +746,7 @@ Question: Should this return:
 - (B) 403 Forbidden (permission denied)
 - (C) Empty list (no exams in that division)
 
-**Resolution:**
-$$\boxed{\text{Option B: 403 Forbidden}}$$
+**Resolution:** $$\boxed{\text{Option B: 403 Forbidden}}$$
 
 **Logic:**
 
@@ -793,8 +778,7 @@ Can MMC admin:
 - (B) Query tenant_db.users of any workspace (NO - cross-tenant)
 - (C) Query audit logs of any workspace (?)
 
-**Resolution:**
-$$\boxed{\text{A: YES, B: NO, C: NO}}$$
+**Resolution:** $$\boxed{\text{A: YES, B: NO, C: NO}}$$
 
 **Rationale:**
 
@@ -899,13 +883,15 @@ All clarifications validate against:
 
 **Status:** ✅ RESOLVED
 
-**Answer:** No. Three completely separate domains with different token structures, user tables, and middleware chains.
+**Answer:** No. Three completely separate domains with different token structures, user tables, and
+middleware chains.
 
 - MMC users: master_db.mmc_users
 - Workspace staff/students: tenant_db.users
 - Token validation: scope-aware (rejects cross-domain tokens)
 
-**Justification:** ADR-0001 (database-per-tenant). Even MMC users are "platform-per-tenant" logic, warranting complete isolation.
+**Justification:** ADR-0001 (database-per-tenant). Even MMC users are "platform-per-tenant" logic,
+warranting complete isolation.
 
 ---
 
@@ -913,7 +899,8 @@ All clarifications validate against:
 
 **Status:** ✅ RESOLVED
 
-**Answer:** Tokens become invalid (426 Upgrade Required). User must re-login to get a new token with updated schema_version.
+**Answer:** Tokens become invalid (426 Upgrade Required). User must re-login to get a new token with
+updated schema_version.
 
 **Example:**
 
@@ -924,7 +911,8 @@ Next request with old token: 426 Upgrade Required
 User re-logs in: Gets new token with schema_version=1.1.0
 ```
 
-**Rationale:** Ensure session-specific compatibility checks. Prevents old code paths from executing against new schema.
+**Rationale:** Ensure session-specific compatibility checks. Prevents old code paths from executing
+against new schema.
 
 ---
 
@@ -948,9 +936,11 @@ User re-logs in: Gets new token with schema_version=1.1.0
 
 **Answer:** Phase 1: No, one role per user (ADMIN, STAFF, INSTRUCTOR, or STUDENT).
 
-Phase 2+: Yes, via user_roles many-to-many table. Permission grants would be additive (union of role permissions).
+Phase 2+: Yes, via user_roles many-to-many table. Permission grants would be additive (union of role
+permissions).
 
-**Phase 1 Implementation:** user_roles table exists but enforces UNIQUE(user_id, role_id), ensuring one-to-one during Phase 1.
+**Phase 1 Implementation:** user_roles table exists but enforces UNIQUE(user_id, role_id), ensuring
+one-to-one during Phase 1.
 
 ---
 
@@ -1013,7 +1003,8 @@ IF jwt.division_id != exam.division_id
   → Return 403 Forbidden
 ```
 
-**Future Phase 1+:** Student can change division (rare use case), which increments token_version, forcing re-login.
+**Future Phase 1+:** Student can change division (rare use case), which increments token_version,
+forcing re-login.
 
 ---
 
@@ -1046,7 +1037,8 @@ IF jwt.division_id != exam.division_id
 - Each token valid independently
 - Client responsible for single-submit via UI
 
-**Why not?** Idempotent login would require session tracking (violates statelessness). Better to let client handle it.
+**Why not?** Idempotent login would require session tracking (violates statelessness). Better to let
+client handle it.
 
 ---
 
@@ -1058,8 +1050,10 @@ IF jwt.division_id != exam.division_id
 
 **Query Patterns:**
 
-- `SELECT * FROM audit_logs WHERE user_id = ? AND timestamp > ? ORDER BY timestamp DESC` — User activity
-- `SELECT * FROM audit_logs WHERE workspace_id = ? AND event_type = 'login_success'` — Successful logins only
+- `SELECT * FROM audit_logs WHERE user_id = ? AND timestamp > ? ORDER BY timestamp DESC` — User
+  activity
+- `SELECT * FROM audit_logs WHERE workspace_id = ? AND event_type = 'login_success'` — Successful
+  logins only
 - `SELECT * FROM audit_logs WHERE correlation_id = ?` — Trace single request
 
 **Retention:** 90 days default (compliance-dependent).
@@ -1088,7 +1082,8 @@ IF jwt.division_id != exam.division_id
 
 **Answer:** Per-user (stored in users table).
 
-**Rationale:** Logout-all invalidates all tokens for that user, not per-app. If user logs in from web + mobile, both get invalidated.
+**Rationale:** Logout-all invalidates all tokens for that user, not per-app. If user logs in from
+web + mobile, both get invalidated.
 
 ---
 
@@ -1153,7 +1148,8 @@ _(None currently — all clarifications resolved.)_
 
 **Assumption:** An email can log in to one workspace only.
 
-**Implication:** Support staff using multiple workspaces must have separate email accounts per workspace.
+**Implication:** Support staff using multiple workspaces must have separate email accounts per
+workspace.
 
 **Rationale:** Simplified token model (no workspace-switching).
 

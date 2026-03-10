@@ -1,14 +1,16 @@
 # Clarify Report — STAGE_UI_09_SECURITY_AND_TOKEN_HANDLING
 
-**Step:** 2 — Clarify
-**Timestamp:** 2026-03-01T00:00:00.000Z
-**Status:** COMPLETE
+**Step:** 2 — Clarify **Timestamp:** 2026-03-01T00:00:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Clarification scan on `spec.md` produced 5 targeted questions across 7 audit domains (idempotency, concurrency, security validation, error contract, version enforcement). All 5 were auto-resolved from the spec, the Zidney Constitution, and standard security best practices. Zero unresolved items. Two functional requirements (FR-SEC-07, FR-SEC-08) and one Success Criteria row were amended for precision. Safe to proceed to planning.
+Clarification scan on `spec.md` produced 5 targeted questions across 7 audit domains (idempotency,
+concurrency, security validation, error contract, version enforcement). All 5 were auto-resolved
+from the spec, the Zidney Constitution, and standard security best practices. Zero unresolved items.
+Two functional requirements (FR-SEC-07, FR-SEC-08) and one Success Criteria row were amended for
+precision. Safe to proceed to planning.
 
 ---
 

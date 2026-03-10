@@ -8,7 +8,8 @@ Purpose: UI Runtime Integrity & Security Verification
 
 # 1. OBJECTIVE
 
-This stage validates the integrity, security, and architectural correctness of the UI Runtime layer before Phase 06 can be marked VALIDATED.
+This stage validates the integrity, security, and architectural correctness of the UI Runtime layer
+before Phase 06 can be marked VALIDATED.
 
 This stage verifies foundational guarantees that apply to:
 
@@ -16,8 +17,7 @@ This stage verifies foundational guarantees that apply to:
 - Backoffice
 - Frontoffice
 
-This is not a feature validation stage.
-This is a runtime integrity stage.
+This is not a feature validation stage. This is a runtime integrity stage.
 
 Failure in any section blocks promotion.
 

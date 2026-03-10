@@ -32,8 +32,8 @@ This stage delivers:
 - View affiliate performance summary (read-only metrics)
 - Associate promo code (if backend supports)
 
-This stage consumes STAGE_13_AFFILIATES backend APIs.
-It does NOT implement payout logic or financial disbursement.
+This stage consumes STAGE_13_AFFILIATES backend APIs. It does NOT implement payout logic or
+financial disbursement.
 
 ---
 

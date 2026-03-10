@@ -12,16 +12,21 @@
 
 ### What Is Being Built
 
-A secure internal member management system for Zidney Platform Operations (MMC) with deterministic role-based access control (RBAC).
+A secure internal member management system for Zidney Platform Operations (MMC) with deterministic
+role-based access control (RBAC).
 
-Zidney MMC requires strict isolation from tenant databases and governance over platform operations. This stage implements:
+Zidney MMC requires strict isolation from tenant databases and governance over platform operations.
+This stage implements:
 
 - **Member lifecycle management:** Create, edit, disable, delete MMC internal users
-- **Deterministic RBAC model:** One user → One role → Many permissions (no ABAC, no dynamic evaluation)
-- **Seven permission domains:** ORGANIZATION_SETTINGS, PRODUCT_MANAGEMENT, LICENSE_MANAGEMENT, CLIENT_MANAGEMENT, AFFILIATE_MANAGEMENT, MEMBERS_MANAGEMENT, REPORTING
+- **Deterministic RBAC model:** One user → One role → Many permissions (no ABAC, no dynamic
+  evaluation)
+- **Seven permission domains:** ORGANIZATION_SETTINGS, PRODUCT_MANAGEMENT, LICENSE_MANAGEMENT,
+  CLIENT_MANAGEMENT, AFFILIATE_MANAGEMENT, MEMBERS_MANAGEMENT, REPORTING
 - **Permission enforcement:** Verified at API layer before business logic execution
 - **Token isolation:** MMC JWT never accepted by tenant APIs; tenant JWT never accepted by MMC APIs
-- **Session invalidation:** Role changes and member disablement instantly invalidate active sessions via token_version increment
+- **Session invalidation:** Role changes and member disablement instantly invalidate active sessions
+  via token_version increment
 - **Invite workflow:** One-time-token based member onboarding with password creation
 - **Audit trail:** Immutable append-only audit log of all destructive actions and role changes
 - **Concurrency guarantees:** Atomic role edits, member disablement, and permission changes
@@ -36,7 +41,8 @@ Zidney MMC requires strict isolation from tenant databases and governance over p
 
 ### Affected Architectural Layers
 
-- **Isolation:** Critical enforcement — MMC users and permissions exist in master_db only, never tenant_db; MMC operations bypass workspace resolver
+- **Isolation:** Critical enforcement — MMC users and permissions exist in master_db only, never
+  tenant_db; MMC operations bypass workspace resolver
 - **License Enforcement:** Not applicable (MMC is platform control, not customer-dependent)
 - **Attempt Engine:** Not applicable
 - **Worker:** Not needed for Phase 2 (synchronous only)
@@ -50,13 +56,17 @@ Zidney MMC requires strict isolation from tenant databases and governance over p
 
 **Mandatory Compliance Confirmations:**
 
-✓ **No cross-tenant access** — MMC never runs resolver middleware; cannot access tenant databases; all queries scoped to master_db  
-✓ **No middleware bypass** — Correlation ID → MMC Authentication → Permission Enforcement → Route Handler  
+✓ **No cross-tenant access** — MMC never runs resolver middleware; cannot access tenant databases;
+all queries scoped to master_db  
+✓ **No middleware bypass** — Correlation ID → MMC Authentication → Permission Enforcement → Route
+Handler  
 ✓ **No grading outside worker** — Not applicable to MMC  
 ✓ **No direct DB instantiation** — All MMC queries use global master_db connection pool  
 ✓ **No snapshot integrity weakening** — Not applicable to MMC  
-✓ **No transaction boundary weakening** — Member disablement, role changes, permission edits atomically committed  
-✓ **No version enforcement weakening** — No tenant schema versioning; MMC schema is platform versioned once globally
+✓ **No transaction boundary weakening** — Member disablement, role changes, permission edits
+atomically committed  
+✓ **No version enforcement weakening** — No tenant schema versioning; MMC schema is platform
+versioned once globally
 
 **Governance References:**
 
@@ -65,7 +75,8 @@ Zidney MMC requires strict isolation from tenant databases and governance over p
 - ADR-0006: Runtime authoritative time (server time for audit timestamps)
 - AGENTS.md § AI Behavioral Enforcement § Tenant Isolation Protection
 
-**Status:** COMPLIANT — MMC is explicitly exempted from tenant resolver because it is explicitly defined as master context. No architectural exceptions required.
+**Status:** COMPLIANT — MMC is explicitly exempted from tenant resolver because it is explicitly
+defined as master context. No architectural exceptions required.
 
 ---
 
@@ -127,13 +138,15 @@ Route handler (queries tenant_db)
 
 ### Cross-Context Token Rejection
 
-**Hard rule:** If an MMC endpoint receives a token with workspace_id attached, authentication fails immediately (401).
+**Hard rule:** If an MMC endpoint receives a token with workspace_id attached, authentication fails
+immediately (401).
 
 Reason: MMC must never accidentally execute tenant-scoped permissions.
 
 ### No MMC→Tenant Access
 
-**Hard rule:** MMC services must not import tenant connection pools, tenant resolver, or tenant database modules.
+**Hard rule:** MMC services must not import tenant connection pools, tenant resolver, or tenant
+database modules.
 
 Enforcement:
 
@@ -147,11 +160,13 @@ Enforcement:
 
 ### Applicability to MMC
 
-**License middleware:** Not required for MMC operations (MMC is platform control, not customer-dependent)
+**License middleware:** Not required for MMC operations (MMC is platform control, not
+customer-dependent)
 
 **Version enforcement:** Not required per-tenant (no tenant context exists)
 
-**Schema version control:** Master schema is versioned globally once. All MMC platform operations use same schema version.
+**Schema version control:** Master schema is versioned globally once. All MMC platform operations
+use same schema version.
 
 ### Rationale
 
@@ -371,7 +386,8 @@ BEGIN TRANSACTION
 COMMIT
 ```
 
-Effect: All active sessions immediately invalidated (token_version mismatch detected on next request).
+Effect: All active sessions immediately invalidated (token_version mismatch detected on next
+request).
 
 #### Role Edit with Permission Cascade
 
@@ -405,8 +421,10 @@ Rationale: Never delete role while members assigned.
 
 ### Isolation Level
 
-- **All writes:** SERIALIZABLE or REPEATABLE_READ (PostgreSQL default: READ_COMMITTED is insufficient for critical sections)
-- **Specific requirement:** Token_version increment must be serializable (no race condition where two edits increment to same value)
+- **All writes:** SERIALIZABLE or REPEATABLE_READ (PostgreSQL default: READ_COMMITTED is
+  insufficient for critical sections)
+- **Specific requirement:** Token_version increment must be serializable (no race condition where
+  two edits increment to same value)
 
 ---
 
@@ -851,7 +869,8 @@ Alternative via Compare-and-Set:
 - Username immutable after creation (enforced by constraint)
 - Email unique across all MMC members
 
-**Testable:** Given member creation request, verify (a) member record exists, (b) password hashed, (c) audit logged
+**Testable:** Given member creation request, verify (a) member record exists, (b) password hashed,
+(c) audit logged
 
 ### F2: Role Assignment
 
@@ -864,11 +883,13 @@ Alternative via Compare-and-Set:
 - Role must exist in roles table
 - Foreign key enforced
 
-**Testable:** Attempt to assign non-existent role → 400 error; attempt to assign INACTIVE role → 400 error
+**Testable:** Attempt to assign non-existent role → 400 error; attempt to assign INACTIVE role → 400
+error
 
 ### F3: Deterministic Permission Resolution
 
-**Requirement:** Permissions resolved from role_permissions table; no implicit inheritance or runtime evaluation
+**Requirement:** Permissions resolved from role_permissions table; no implicit inheritance or
+runtime evaluation
 
 **Details:**
 
@@ -972,13 +993,16 @@ Alternative via Compare-and-Set:
 
 1. **Member onboarding time:** New member operational within 5 minutes of invitation acceptance
 2. **Permission application time:** Role changes effective within 30 seconds across all active users
-3. **Error clarity:** Permission denial errors include specific domain + action (e.g., "PRODUCT_MANAGEMENT.create")
+3. **Error clarity:** Permission denial errors include specific domain + action (e.g.,
+   "PRODUCT_MANAGEMENT.create")
 
 ### Security Metrics
 
-1. **Zero cross-tenant token acceptance:** MMC tokens with workspace_id rejected at authentication layer
+1. **Zero cross-tenant token acceptance:** MMC tokens with workspace_id rejected at authentication
+   layer
 2. **Session invalidation:** Role/disablement changes invalidate sessions within 1 second
-3. **Audit trail completeness:** 100% of destructive actions logged with actor, timestamp, and change snapshot
+3. **Audit trail completeness:** 100% of destructive actions logged with actor, timestamp, and
+   change snapshot
 
 ### Operational Metrics
 
@@ -1008,7 +1032,8 @@ Alternative via Compare-and-Set:
 - ❌ Missing permission rows for a role (UNIQUE constraint enforces one row per domain per role)
 - ❌ MMC tokens accepted by tenant APIs (middleware rejects if workspace_id present)
 - ❌ Audit log updates or deletes via API (append-only)
-- ❌ Implicit permission inference (role_permissions table is source of truth, permissions not in table = denied)
+- ❌ Implicit permission inference (role_permissions table is source of truth, permissions not in
+  table = denied)
 - ❌ Client-side permission checks as security boundary (UI hints only; API enforces)
 
 ---
@@ -1021,8 +1046,10 @@ Alternative via Compare-and-Set:
 4. **Master DB connection pool singleton:** Assumed available as `getMasterPool()` utility
 5. **Email service available:** Assumed invitation emails can be sent asynchronously (no blocking)
 6. **24-hour invitation TTL acceptable:** No customization per environment in Phase 2
-7. **One role per member sufficient:** Phase 2 does not require multi-role or dynamic role assignment
-8. **No external RBAC system:** All authorization data lives in Zidney (not delegated to external IdP)
+7. **One role per member sufficient:** Phase 2 does not require multi-role or dynamic role
+   assignment
+8. **No external RBAC system:** All authorization data lives in Zidney (not delegated to external
+   IdP)
 9. **Server time synchronized:** Assumed NTP sync on all Zidney servers (clock drift < 1 second)
 
 ---

@@ -11,11 +11,13 @@
 
 ## Specification Summary
 
-STAGE_10_LICENSES defines the License Management domain as the commercial activation and lifecycle control layer for Zidney. A License is the commercial contract unit that binds:
+STAGE_10_LICENSES defines the License Management domain as the commercial activation and lifecycle
+control layer for Zidney. A License is the commercial contract unit that binds:
 
 **Product → License → Workspace (Tenant Database)**
 
-The specification establishes how MMC creates, manages, and tracks licenses throughout their operational lifecycle. License is the authoritative source of truth for:
+The specification establishes how MMC creates, manages, and tracks licenses throughout their
+operational lifecycle. License is the authoritative source of truth for:
 
 - Commercial entitlement (product binding, limits, features)
 - Workspace activation state (status transitions)
@@ -23,27 +25,48 @@ The specification establishes how MMC creates, manages, and tracks licenses thro
 - Provisioning triggers (asynchronous job queue)
 - Resource limits (student_limit, staff_limit)
 
-License does not contain runtime data, tenant credentials, or academic information. License is the bridge between Platform MMC (master_db) and Tenant Provisioning Service (tenant-specific databases).
+License does not contain runtime data, tenant credentials, or academic information. License is the
+bridge between Platform MMC (master_db) and Tenant Provisioning Service (tenant-specific databases).
 
 ---
 
 ## Key Architectural Decisions
 
-- **Single Source of Truth for Commercial State:** License status (stored in master_db.licenses.status) is the authoritative source for workspace operational state. Tenant registry must reflect license state, never redefine it. This prevents divergence between commercial contract and technical infrastructure.
+- **Single Source of Truth for Commercial State:** License status (stored in
+  master_db.licenses.status) is the authoritative source for workspace operational state. Tenant
+  registry must reflect license state, never redefine it. This prevents divergence between
+  commercial contract and technical infrastructure.
 
-- **Database-per-Tenant with License Binding:** Each license provisions exactly one tenant database. Workspace slugs are globally unique. The relationship 1:1:1 (License:Workspace:TenantDB) is immutable after creation, enforcing the ADR-0001 database-per-tenant isolation model.
+- **Database-per-Tenant with License Binding:** Each license provisions exactly one tenant database.
+  Workspace slugs are globally unique. The relationship 1:1:1 (License:Workspace:TenantDB) is
+  immutable after creation, enforcing the ADR-0001 database-per-tenant isolation model.
 
-- **Asynchronous Provisioning Model:** License creation and database provisioning are decoupled. License inserted with PENDING_PROVISION status; provisioning executed via job queue; status transitions to ACTIVE asynchronously. This prevents blocking MMC operations and improves system resilience.
+- **Asynchronous Provisioning Model:** License creation and database provisioning are decoupled.
+  License inserted with PENDING_PROVISION status; provisioning executed via job queue; status
+  transitions to ACTIVE asynchronously. This prevents blocking MMC operations and improves system
+  resilience.
 
-- **Immutability of Critical Commercial Fields:** Once created, product_id and workspace_slug cannot be changed. Changing product requires new license creation. This ensures audit trail integrity and prevents mid-contract product swaps that could invalidate institution configurations.
+- **Immutability of Critical Commercial Fields:** Once created, product_id and workspace_slug cannot
+  be changed. Changing product requires new license creation. This ensures audit trail integrity and
+  prevents mid-contract product swaps that could invalidate institution configurations.
 
-- **Version Integrity Carried in License:** Both schema_version and product_version are stored at license creation time and locked to the snapshots of those versions at provisioning time. This enforces ADR-0008 (semantic versioning) and ADR-0005 (opt-in upgrades) by binding commercial entitlement to specific versions.
+- **Version Integrity Carried in License:** Both schema_version and product_version are stored at
+  license creation time and locked to the snapshots of those versions at provisioning time. This
+  enforces ADR-0008 (semantic versioning) and ADR-0005 (opt-in upgrades) by binding commercial
+  entitlement to specific versions.
 
-- **Status-Driven Lifecycle with Explicit Transitions:** Lifecycle state transitions (ACTIVE → SOFT_LOCKED → ARCHIVED → DELETED) are strictly defined. Forbidden transitions explicitly listed. Transitions routed through License Service only, never direct SQL. This prevents orphaned states or data inconsistency.
+- **Status-Driven Lifecycle with Explicit Transitions:** Lifecycle state transitions (ACTIVE →
+  SOFT_LOCKED → ARCHIVED → DELETED) are strictly defined. Forbidden transitions explicitly listed.
+  Transitions routed through License Service only, never direct SQL. This prevents orphaned states
+  or data inconsistency.
 
-- **License as Limits Authority:** Student and staff limits are stored in license and enforced at tenant API layer. Limit changes take immediate effect. Limits are transactionally checked and never cached, ensuring authoritative resource control.
+- **License as Limits Authority:** Student and staff limits are stored in license and enforced at
+  tenant API layer. Limit changes take immediate effect. Limits are transactionally checked and
+  never cached, ensuring authoritative resource control.
 
-- **MMC Cannot Directly Provision:** MMC must not create databases, execute migrations, or bypass job queue. All provisioning delegated to Provisioning Service (Stage 05). This enforces clean layering and prevents infrastructure bypass.
+- **MMC Cannot Directly Provision:** MMC must not create databases, execute migrations, or bypass
+  job queue. All provisioning delegated to Provisioning Service (Stage 05). This enforces clean
+  layering and prevents infrastructure bypass.
 
 ---
 
@@ -55,21 +78,27 @@ License does not contain runtime data, tenant credentials, or academic informati
 - **Foreign key:** product_id → products.id (immutable, enforced)
 - **Unique identifier:** workspace_slug (globally unique, immutable, lowercase alphanumeric + dash)
 - **Workspace metadata:** workspace_name (display name, mutable)
-- **Resource limits:** student_limit, staff_limit (nullable = unlimited, mutable, immediately effective)
-- **Commercial configuration:** use_zidney_payment (boolean), commission_per_user (numeric, nullable, mutable)
+- **Resource limits:** student_limit, staff_limit (nullable = unlimited, mutable, immediately
+  effective)
+- **Commercial configuration:** use_zidney_payment (boolean), commission_per_user (numeric,
+  nullable, mutable)
 - **Institutional settings:** default_language (string, mutable), uses_divisions (boolean, mutable)
 - **Status field:** status (ENUM: PENDING_PROVISION, ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED)
 - **Soft lock grace period:** soft_lock_until (timestamp, nullable, set during soft lock)
 - **Archive timestamp:** archived_at (timestamp, nullable, set during archive)
 - **Deletion timestamp:** deleted_at (timestamp, nullable, set only after ARCHIVED)
-- **Version fields:** schema_version (integer, set at creation from platform current), product_version (integer, set at creation from product current)
-- **Audit fields:** created_at (server-set, immutable), updated_at (server-set, updated on each mutation)
+- **Version fields:** schema_version (integer, set at creation from platform current),
+  product_version (integer, set at creation from product current)
+- **Audit fields:** created_at (server-set, immutable), updated_at (server-set, updated on each
+  mutation)
 
 ### MMC API Endpoints
 
 - **Create License:** POST /licenses
-  - Input: product_id, workspace_slug, workspace_name, student_limit, staff_limit, use_zidney_payment, commission_per_user, default_language, uses_divisions
-  - Validation: product exists and ACTIVE, slug unique, slug format (lowercase alphanumeric + dash), limits ≥ 0 or NULL
+  - Input: product_id, workspace_slug, workspace_name, student_limit, staff_limit,
+    use_zidney_payment, commission_per_user, default_language, uses_divisions
+  - Validation: product exists and ACTIVE, slug unique, slug format (lowercase alphanumeric + dash),
+    limits ≥ 0 or NULL
   - Response: license record with status PENDING_PROVISION
   - Side effect: enqueue provisioning job
 
@@ -77,13 +106,15 @@ License does not contain runtime data, tenant credentials, or academic informati
   - Filters: status, product_id, search by workspace_slug
   - Quick filters: ACTIVE, SOFT_LOCKED, ARCHIVED
   - Pagination with sorting by created_at
-  - Response includes: workspace_slug, workspace_name, product_name, status, limits, created_at, usage metrics (read-only from tenant DB if available)
+  - Response includes: workspace_slug, workspace_name, product_name, status, limits, created_at,
+    usage metrics (read-only from tenant DB if available)
 
 - **Get License Details:** GET /licenses/:id
   - Response: full license record
 
 - **Edit Limits:** PATCH /licenses/:id
-  - Editable fields only: student_limit, staff_limit, commission_per_user, use_zidney_payment, default_language, uses_divisions
+  - Editable fields only: student_limit, staff_limit, commission_per_user, use_zidney_payment,
+    default_language, uses_divisions
   - Immutable fields rejected: product_id, workspace_slug, schema_version, product_version
   - Response: updated license record
 
@@ -117,15 +148,22 @@ License does not contain runtime data, tenant credentials, or academic informati
 
 ### License Lifecycle States
 
-- **PENDING_PROVISION:** License created, awaiting database provisioning. Login blocked. Provisioning job queued. Awaiting worker completion.
+- **PENDING_PROVISION:** License created, awaiting database provisioning. Login blocked.
+  Provisioning job queued. Awaiting worker completion.
 
-- **ACTIVE:** Fully operational. Workspace accessible. Authentication allowed. Attempt engine allowed. All product modules accessible. Limits enforced. Workspace online.
+- **ACTIVE:** Fully operational. Workspace accessible. Authentication allowed. Attempt engine
+  allowed. All product modules accessible. Limits enforced. Workspace online.
 
-- **SOFT_LOCKED:** Commercial issue (non-payment, suspension). Access blocked (login forbidden, API 403). Data preserved. 90-day grace window. Recoverable immediately if renewal. Auto-transitions to ARCHIVED if soft_lock_until expires.
+- **SOFT_LOCKED:** Commercial issue (non-payment, suspension). Access blocked (login forbidden, API
+  403). Data preserved. 90-day grace window. Recoverable immediately if renewal. Auto-transitions to
+  ARCHIVED if soft_lock_until expires.
 
-- **ARCHIVED:** Workspace snapshot taken and preserved. Workspace database read-only or inaccessible. Long-term preservation. Recoverable by restore (transitions to ACTIVE). Can be permanently deleted.
+- **ARCHIVED:** Workspace snapshot taken and preserved. Workspace database read-only or
+  inaccessible. Long-term preservation. Recoverable by restore (transitions to ACTIVE). Can be
+  permanently deleted.
 
-- **DELETED:** Terminal state. Tenant database dropped. Snapshot removed. License permanently locked. Cannot be restored or reactivated.
+- **DELETED:** Terminal state. Tenant database dropped. Snapshot removed. License permanently
+  locked. Cannot be restored or reactivated.
 
 State transition rules:
 
@@ -134,72 +172,103 @@ State transition rules:
 
 ### Limits Management
 
-- **student_limit:** Total registered students (not concurrent). NULL means unlimited. Integer ≥ 0 or NULL.
-- **staff_limit:** Total registered staff (not concurrent). NULL means unlimited. Integer ≥ 0 or NULL.
+- **student_limit:** Total registered students (not concurrent). NULL means unlimited. Integer ≥ 0
+  or NULL.
+- **staff_limit:** Total registered staff (not concurrent). NULL means unlimited. Integer ≥ 0 or
+  NULL.
 - **Enforcement location:** Tenant API layer, not MMC layer.
-- **Enforcement model:** Transactional check per request, never cached counter. Current count retrieved from tenant DB.
+- **Enforcement model:** Transactional check per request, never cached counter. Current count
+  retrieved from tenant DB.
 - **Changes take immediate effect:** Limit updates apply to next request without cache invalidation.
-- **No limit validation in MMC:** MMC only stores limits in license record. Tenant API responsible for enforcement.
+- **No limit validation in MMC:** MMC only stores limits in license record. Tenant API responsible
+  for enforcement.
 
 ### Provisioning Integration
 
-- **License creation triggers async provisioning:** When license inserted, provisioning job enqueued with payload (license_id, workspace_slug, product_id, product_version, student_limit, staff_limit, default_language, uses_divisions).
+- **License creation triggers async provisioning:** When license inserted, provisioning job enqueued
+  with payload (license_id, workspace_slug, product_id, product_version, student_limit, staff_limit,
+  default_language, uses_divisions).
 
-- **Provisioning worker executes asynchronously:** Worker validates license, creates tenant database, runs baseline schema migrations, seeds baseline data (roles, permissions, settings), creates admin account, inserts tenants_registry entry, updates license.status to ACTIVE.
+- **Provisioning worker executes asynchronously:** Worker validates license, creates tenant
+  database, runs baseline schema migrations, seeds baseline data (roles, permissions, settings),
+  creates admin account, inserts tenants_registry entry, updates license.status to ACTIVE.
 
-- **MMC never provisions directly:** No database creation, no migrations, no tenant DB writes from MMC. All provisioning through Provisioning Service (Stage 05).
+- **MMC never provisions directly:** No database creation, no migrations, no tenant DB writes from
+  MMC. All provisioning through Provisioning Service (Stage 05).
 
-- **Asynchronous failure handling:** On failure, worker drops partial database, removes partial registry, sets license.status to PROVISION_FAILED, logs structured error. Allows manual retry from MMC.
+- **Asynchronous failure handling:** On failure, worker drops partial database, removes partial
+  registry, sets license.status to PROVISION_FAILED, logs structured error. Allows manual retry from
+  MMC.
 
-- **Idempotent provisioning:** Worker can safely retry on same license_id. Validates no existing database, validates slug still unique, increments retry counter, re-enqueues job.
+- **Idempotent provisioning:** Worker can safely retry on same license_id. Validates no existing
+  database, validates slug still unique, increments retry counter, re-enqueues job.
 
 - **Timeout handling:** Long-running provisioning must have timeout and failure recovery.
 
 ### UI Requirements (MMC)
 
-- **License table display:** workspace_slug, workspace_name, product_name, status, student_limit, staff_limit, created_at, usage metrics (student count if available).
+- **License table display:** workspace_slug, workspace_name, product_name, status, student_limit,
+  staff_limit, created_at, usage metrics (student count if available).
 
-- **License listing features:** Filter by status (ACTIVE/SOFT_LOCKED/ARCHIVED/DELETED), filter by product, search by workspace_slug, pagination, sort by created_at.
+- **License listing features:** Filter by status (ACTIVE/SOFT_LOCKED/ARCHIVED/DELETED), filter by
+  product, search by workspace_slug, pagination, sort by created_at.
 
-- **Row actions:** View details, edit limits, soft lock, archive, delete (conditional on ARCHIVED status).
+- **Row actions:** View details, edit limits, soft lock, archive, delete (conditional on ARCHIVED
+  status).
 
-- **License creation form:** Product selection (dropdown of ACTIVE products), workspace slug (input with uniqueness indication), workspace name (input), student limit (number input, optional), staff limit (number input, optional), use_zidney_payment (checkbox), commission_per_user (number input, optional), default_language (select), uses_divisions (checkbox).
+- **License creation form:** Product selection (dropdown of ACTIVE products), workspace slug (input
+  with uniqueness indication), workspace name (input), student limit (number input, optional), staff
+  limit (number input, optional), use_zidney_payment (checkbox), commission_per_user (number input,
+  optional), default_language (select), uses_divisions (checkbox).
 
-- **Usage metrics display:** Current student count (read safely from tenant DB, graceful fallback if unavailable), current staff count, limits display.
+- **Usage metrics display:** Current student count (read safely from tenant DB, graceful fallback if
+  unavailable), current staff count, limits display.
 
-- **Status indicators:** Visual indicators for PENDING_PROVISION, ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED states.
+- **Status indicators:** Visual indicators for PENDING_PROVISION, ACTIVE, SOFT_LOCKED, ARCHIVED,
+  DELETED states.
 
 ### Version Integrity
 
-- **schema_version stored in license:** Snapshotted at license creation from platform current schema version. Locked to specific version. Used for compatibility checks.
+- **schema_version stored in license:** Snapshotted at license creation from platform current schema
+  version. Locked to specific version. Used for compatibility checks.
 
-- **product_version stored in license:** Snapshotted at license creation from product current version. Locked to specific version. Indicates which product feature set is provisioned.
+- **product_version stored in license:** Snapshotted at license creation from product current
+  version. Locked to specific version. Indicates which product feature set is provisioned.
 
-- **Version upgrade model:** When product updates (new version), license is notified of upgrade_available, but workspace must opt-in to upgrade. Upgrade triggers migration execution before version increment in license.
+- **Version upgrade model:** When product updates (new version), license is notified of
+  upgrade_available, but workspace must opt-in to upgrade. Upgrade triggers migration execution
+  before version increment in license.
 
 - **No auto-downgrade:** License version never decrements. Forward-only versioning enforced.
 
-- **Version compatibility enforcement:** Version fields matched at tenant DB access time (in middleware). If mismatch or incompatibility, request rejected (426 or 503).
+- **Version compatibility enforcement:** Version fields matched at tenant DB access time (in
+  middleware). If mismatch or incompatibility, request rejected (426 or 503).
 
 ---
 
 ## Deferred Scope
 
-- **Usage analytics and reporting:** Aggregate metrics across licenses (tenant counts, exam statistics, etc.) deferred to Stage 15 (MMC Dashboard).
+- **Usage analytics and reporting:** Aggregate metrics across licenses (tenant counts, exam
+  statistics, etc.) deferred to Stage 15 (MMC Dashboard).
 
-- **Bulk license operations:** Bulk import, bulk license creation, batch status changes deferred to future enhancement.
+- **Bulk license operations:** Bulk import, bulk license creation, batch status changes deferred to
+  future enhancement.
 
 - **Product A/B testing:** Feature flag testing per license deferred to future enhancement.
 
-- **License suspension reasons:** Detailed suspension reason tracking (payment, compliance, etc.) deferred to future enhancement.
+- **License suspension reasons:** Detailed suspension reason tracking (payment, compliance, etc.)
+  deferred to future enhancement.
 
-- **Renewal and subscription management:** Billing cycle management, auto-renewal logic deferred to future enhancement.
+- **Renewal and subscription management:** Billing cycle management, auto-renewal logic deferred to
+  future enhancement.
 
 - **License sharing or accounts:** Multi-account license access deferred to future enhancement.
 
-- **Provisioning customization:** Custom seed data or institution-specific provisioning scripts deferred to future enhancement.
+- **Provisioning customization:** Custom seed data or institution-specific provisioning scripts
+  deferred to future enhancement.
 
-- **Tenant runtime data access from MMC:** MMC purposefully prevented from directly querying tenant databases. Only usage metrics read-only queries allowed as exception.
+- **Tenant runtime data access from MMC:** MMC purposefully prevented from directly querying tenant
+  databases. Only usage metrics read-only queries allowed as exception.
 
 ---
 
@@ -207,19 +276,26 @@ State transition rules:
 
 ### Hard Dependencies (Must be complete first)
 
-- **STAGE_09_PRODUCTS:** Product table, product CRUD operations, product versioning, product status (ACTIVE/INACTIVE), enabled_modules definition. Status: PRODUCTION READY. Required for license.product_id foreign key and version binding.
+- **STAGE_09_PRODUCTS:** Product table, product CRUD operations, product versioning, product status
+  (ACTIVE/INACTIVE), enabled_modules definition. Status: PRODUCTION READY. Required for
+  license.product_id foreign key and version binding.
 
 ### Soft Dependencies (Should exist, referenced by specification)
 
-- **Stage 05 Provisioning Service:** Specification assumes provisioning worker exists to execute async provisioning jobs. Likely in Phase 01 or early Phase 02.
+- **Stage 05 Provisioning Service:** Specification assumes provisioning worker exists to execute
+  async provisioning jobs. Likely in Phase 01 or early Phase 02.
 
-- **Authentication & Tenant Resolver:** License status must be enforced in middleware chain. License middleware positioned after tenant resolver. Likely Stage 03 or Stage 04 domain.
+- **Authentication & Tenant Resolver:** License status must be enforced in middleware chain. License
+  middleware positioned after tenant resolver. Likely Stage 03 or Stage 04 domain.
 
-- **Database Schema versioning:** Tenant DB must have schema_version table and versioning mechanism. Stored at license.schema_version. Likely Phase 01 foundational stage.
+- **Database Schema versioning:** Tenant DB must have schema_version table and versioning mechanism.
+  Stored at license.schema_version. Likely Phase 01 foundational stage.
 
 ### Referenced but File Not Found
 
-- **Stage 04 Licensing Foundation:** Specification claims "Status ENUM must be identical to Stage 04 definition" but STAGE_04_LICENSING_FOUNDATION.md does not exist in specs/phases/02_PLATFORM_MMC/. Assumed to be architecture/adr definition or foundational stage from earlier phase.
+- **Stage 04 Licensing Foundation:** Specification claims "Status ENUM must be identical to Stage 04
+  definition" but STAGE_04_LICENSING_FOUNDATION.md does not exist in specs/phases/02_PLATFORM_MMC/.
+  Assumed to be architecture/adr definition or foundational stage from earlier phase.
 
 ---
 
@@ -233,7 +309,8 @@ State transition rules:
 - One license provisions exactly one tenant database.
 - workspace_slug is globally unique, immutable.
 - No cross-tenant joins possible because each license has isolated database.
-- License as contract unit ensures database isolation boundary is business-enforced, not just technical.
+- License as contract unit ensures database isolation boundary is business-enforced, not just
+  technical.
 - Specification prohibits license from containing tenant credentials or tenant data.
 
 **Validation:** ✅ PASS
@@ -287,7 +364,8 @@ State transition rules:
 **Compliance: ENFORCED**
 
 - Project Contact Primer defines: "One License = One Workspace"
-- Specification enforces: workspace_slug uniqueness, product immutability, status as authoritative access control.
+- Specification enforces: workspace_slug uniqueness, product immutability, status as authoritative
+  access control.
 - License binding Product → License → Workspace is strict 1:1:1 relationship.
 - License immutability prevents mid-contract product swaps.
 - Status model (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED) matches primer exactly.
@@ -308,14 +386,16 @@ Middleware chain per primer:
 4. Schema version enforcement middleware
 5. Route handler
 
-This specification defines what License Middleware does but defers actual middleware implementation. Middleware must:
+This specification defines what License Middleware does but defers actual middleware implementation.
+Middleware must:
 
 - Extract license from tenant resolver context
 - Validate license status
 - Block PENDING_PROVISION, SOFT_LOCKED, ARCHIVED, DELETED
 - Allow only ACTIVE
 
-**Validation:** ✅ PASS (specification aligned; implementation deferred to Stage 11 or middleware stage)
+**Validation:** ✅ PASS (specification aligned; implementation deferred to Stage 11 or middleware
+stage)
 
 ---
 
@@ -324,7 +404,8 @@ This specification defines what License Middleware does but defers actual middle
 **Compliance: ENFORCED**
 
 - License stores schema_version and product_version.
-- Compatibility middleware must check stored versions against actual schema version and product version.
+- Compatibility middleware must check stored versions against actual schema version and product
+  version.
 - Incompatible versions trigger 426 (Upgrade Required) or 503 (Service Unavailable).
 - Prevents version drift between license and tenant database.
 
@@ -350,7 +431,8 @@ This specification defines what License Middleware does but defers actual middle
 
 **Compliance: ENFORCED**
 
-- Specification explicitly states: "Status stored in master_db.licenses.status is the single source of truth."
+- Specification explicitly states: "Status stored in master_db.licenses.status is the single source
+  of truth."
 - tenants_registry must reflect license state, never redefine it.
 - Status transitions routed through License Service only.
 - Prevents status divergence between commercial contract (license) and infrastructure (registry).
@@ -364,7 +446,8 @@ This specification defines what License Middleware does but defers actual middle
 
 ### 1. **Stage 04 Reference — Status Enum Definition** (PRIORITY: HIGH)
 
-**Ambiguity:** Specification states "Status ENUM must be identical to Stage 04 definition" but file STAGE_04_LICENSING_FOUNDATION.md does not exist in specs/phases/02_PLATFORM_MMC/.
+**Ambiguity:** Specification states "Status ENUM must be identical to Stage 04 definition" but file
+STAGE_04_LICENSING_FOUNDATION.md does not exist in specs/phases/02_PLATFORM_MMC/.
 
 **Impact:** Scope creep risk if Stage 04 defines status model differently than this specification.
 
@@ -378,7 +461,8 @@ This specification defines what License Middleware does but defers actual middle
 
 ### 2. **Status Divergence Prevention Between master_db and tenants_registry** (PRIORITY: HIGH)
 
-**Ambiguity:** Specification requires "tenants_registry must reflect license state, never redefine it" but synchronization mechanism is not defined.
+**Ambiguity:** Specification requires "tenants_registry must reflect license state, never redefine
+it" but synchronization mechanism is not defined.
 
 **Questions:**
 
@@ -387,7 +471,8 @@ This specification defines what License Middleware does but defers actual middle
 - Is tenants_registry only read-only copy of license status?
 - Who owns consistency guarantee (MMC or Provisioning Service)?
 
-**Impact:** Status divergence could allow access to ARCHIVED licenses or block access to ACTIVE licenses.
+**Impact:** Status divergence could allow access to ARCHIVED licenses or block access to ACTIVE
+licenses.
 
 **Resolution Needed:** Define explicit synchronization rules. Example options:
 
@@ -399,7 +484,8 @@ This specification defines what License Middleware does but defers actual middle
 
 ### 3. **upgrade_available Field Not Listed in License Table** (PRIORITY: MEDIUM)
 
-**Ambiguity:** Version Integrity section mentions "License stores 'upgrade_available'" but this field is not included in License Table field list.
+**Ambiguity:** Version Integrity section mentions "License stores 'upgrade_available'" but this
+field is not included in License Table field list.
 
 **Impact:** Unclear whether upgrade_available is:
 
@@ -417,7 +503,9 @@ This specification defines what License Middleware does but defers actual middle
 
 ### 4. **PROVISION_FAILED Status Not Listed in License Status Model** (PRIORITY: MEDIUM)
 
-**Ambiguity:** STAGE_12_PROVISIONING_TRIGGER.md references "license.status = PROVISION_FAILED" but this status is not listed in License Status Model section (PENDING_PROVISION, ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED).
+**Ambiguity:** STAGE_12_PROVISIONING_TRIGGER.md references "license.status = PROVISION_FAILED" but
+this status is not listed in License Status Model section (PENDING_PROVISION, ACTIVE, SOFT_LOCKED,
+ARCHIVED, DELETED).
 
 **Impact:** Specification scope uncertainty:
 
@@ -445,7 +533,8 @@ This specification defines what License Middleware does but defers actual middle
 
 **Resolution Needed:** Define:
 
-- Where failures are persisted (suggestion: failure_reason field in licenses table + structured logs)
+- Where failures are persisted (suggestion: failure_reason field in licenses table + structured
+  logs)
 - How MMC surfaces failures to operator
 - How manual retry is triggered
 
@@ -453,18 +542,21 @@ This specification defines what License Middleware does but defers actual middle
 
 ### 6. **Definition of "Recoverable" for SOFT_LOCKED vs ARCHIVED** (PRIORITY: LOW)
 
-**Ambiguity:** Specification says SOFT_LOCKED is "recoverable" and ARCHIVED is "recoverable" but doesn't clearly distinguish:
+**Ambiguity:** Specification says SOFT_LOCKED is "recoverable" and ARCHIVED is "recoverable" but
+doesn't clearly distinguish:
 
 - What data mutations occur during recovery from each state?
 - Is snapshot involved during soft lock recovery?
 - Is snapshot required during archive recovery?
 - Are they equivalent or different recovery processes?
 
-**Impact:** Operational clarity. Staff might incorrectly restore from ARCHIVED without understanding implications.
+**Impact:** Operational clarity. Staff might incorrectly restore from ARCHIVED without understanding
+implications.
 
 **Resolution Needed:** Define recovery process for each state:
 
-- SOFT_LOCKED recovery: Status → ACTIVE, soft_lock_until cleared, no data mutation, no snapshot operation
+- SOFT_LOCKED recovery: Status → ACTIVE, soft_lock_until cleared, no data mutation, no snapshot
+  operation
 - ARCHIVED recovery: Status → ACTIVE, snapshot operations, database state verification
 
 (Note: Specification partially addresses this but could be clearer)
@@ -473,7 +565,8 @@ This specification defines what License Middleware does but defers actual middle
 
 ### 7. **Auto-Transition from SOFT_LOCKED to ARCHIVED on Expiration** (PRIORITY: LOW)
 
-**Ambiguity:** Specification states middleware "must check If status = SOFT_LOCKED AND now > soft_lock_until → Auto-transition to ARCHIVED" but doesn't specify:
+**Ambiguity:** Specification states middleware "must check If status = SOFT_LOCKED AND now >
+soft_lock_until → Auto-transition to ARCHIVED" but doesn't specify:
 
 - Is this a synchronous check on every request (performance impact)?
 - Is this an async cron job?
@@ -510,7 +603,8 @@ This specification defines what License Middleware does but defers actual middle
 
 #### Risk 1: Asynchronous Provisioning Race Conditions (SEVERITY: HIGH)
 
-**Description:** License status PENDING_PROVISION but provisioning worker fails. User sees "created" license but cannot access workspace. Unclear if retry needed.
+**Description:** License status PENDING_PROVISION but provisioning worker fails. User sees "created"
+license but cannot access workspace. Unclear if retry needed.
 
 **Potential Failure Mode:**
 
@@ -527,13 +621,15 @@ This specification defines what License Middleware does but defers actual middle
 - Monitoring: Alert on stuck PENDING_PROVISION licenses
 - Idempotency: Worker must validate no partial database, retry safely
 
-**Specification Gap:** Mention PROVISION_FAILED status or permanent PENDING_PROVISION state. Clarify visibility to users.
+**Specification Gap:** Mention PROVISION_FAILED status or permanent PENDING_PROVISION state. Clarify
+visibility to users.
 
 ---
 
 #### Risk 2: Status Divergence Between master_db and tenants_registry (SEVERITY: HIGH)
 
-**Description:** License status in master_db conflicts with tenants_registry status. Middleware sees different states, blocks/allows incorrectly.
+**Description:** License status in master_db conflicts with tenants_registry status. Middleware sees
+different states, blocks/allows incorrectly.
 
 **Potential Failure Mode:**
 
@@ -554,7 +650,8 @@ This specification defines what License Middleware does but defers actual middle
 
 #### Risk 3: Orphaned Databases on Provisioning Failure (SEVERITY: HIGH)
 
-**Description:** Provisioning worker partially creates database but fails before completing tenants_registry insert. Database exists but license knows nothing about it.
+**Description:** Provisioning worker partially creates database but fails before completing
+tenants_registry insert. Database exists but license knows nothing about it.
 
 **Potential Failure Mode:**
 
@@ -571,13 +668,15 @@ This specification defines what License Middleware does but defers actual middle
 - Transaction scope: All provisioning operations in same transaction if possible
 - Retry-safe validation: On retry, validate no existing database before proceeding
 
-**Specification Gap:** Specification mentions "drop partially created database" but doesn't define conditions for detecting partial state or cleanup trigger.
+**Specification Gap:** Specification mentions "drop partially created database" but doesn't define
+conditions for detecting partial state or cleanup trigger.
 
 ---
 
 #### Risk 4: Limit Enforcement Transactionality (SEVERITY: MEDIUM)
 
-**Description:** student_limit is 100, but 120 students get registered because limit check uses stale count.
+**Description:** student_limit is 100, but 120 students get registered because limit check uses
+stale count.
 
 **Potential Failure Mode:**
 
@@ -592,7 +691,8 @@ This specification defines what License Middleware does but defers actual middle
 - Or: Post-insert validation with explicit limit enforcement
 - Or: Application-level queue/semaphore
 
-**Specification Gap:** Specification says "must be transactional" but doesn't define mechanism. Could clarify "SELECT FOR UPDATE" or similar approach.
+**Specification Gap:** Specification says "must be transactional" but doesn't define mechanism.
+Could clarify "SELECT FOR UPDATE" or similar approach.
 
 ---
 
@@ -600,7 +700,8 @@ This specification defines what License Middleware does but defers actual middle
 
 #### Risk 1: Product Immutability Preventing Flexibility (SEVERITY: MEDIUM)
 
-**Description:** Institution needs to upgrade product mid-contract but specification forbids in-place product swap. Must create new license and migrate.
+**Description:** Institution needs to upgrade product mid-contract but specification forbids
+in-place product swap. Must create new license and migrate.
 
 **Impact:**
 
@@ -608,9 +709,11 @@ This specification defines what License Middleware does but defers actual middle
 - Requires migration of institutional data
 - Could fragment workspace history
 
-**Rationale for Immutability:** Prevents audit trail corruption, ensures version consistency, simplifies versioning logic.
+**Rationale for Immutability:** Prevents audit trail corruption, ensures version consistency,
+simplifies versioning logic.
 
-**Mitigation Strategy:** Acceptable tradeoff. Immutability chosen for stability. If flexibility needed, design clear product migration process outside License scope.
+**Mitigation Strategy:** Acceptable tradeoff. Immutability chosen for stability. If flexibility
+needed, design clear product migration process outside License scope.
 
 **Risk Level:** MEDIUM (intentional constraint, not defect)
 
@@ -618,7 +721,8 @@ This specification defines what License Middleware does but defers actual middle
 
 #### Risk 2: License Status as Access Control Single Point of Failure (SEVERITY: MEDIUM)
 
-**Description:** If license status becomes wrong (corrupted), access control fails system-wide. No bypass.
+**Description:** If license status becomes wrong (corrupted), access control fails system-wide. No
+bypass.
 
 **Potential Failure Mode:**
 
@@ -639,7 +743,8 @@ This specification defines what License Middleware does but defers actual middle
 
 #### Risk 3: 90-Day Soft Lock Grace Period Too Long (SEVERITY: LOW)
 
-**Description:** Institution payment lapse detected, soft lock triggered. But 90 days later auto-archives. Institution might forget, workspace unexpectedly archived.
+**Description:** Institution payment lapse detected, soft lock triggered. But 90 days later
+auto-archives. Institution might forget, workspace unexpectedly archived.
 
 **Impact:**
 
@@ -649,7 +754,8 @@ This specification defines what License Middleware does but defers actual middle
 
 **Rationale:** 90-day grace gives time for institution to renew.
 
-**Mitigation Strategy:** Explicit notification/reminders before auto-archive. Specification defines state transition rule; implementation should add notification workflow.
+**Mitigation Strategy:** Explicit notification/reminders before auto-archive. Specification defines
+state transition rule; implementation should add notification workflow.
 
 **Risk Level:** LOW (operational, not technical)
 
@@ -659,7 +765,8 @@ This specification defines what License Middleware does but defers actual middle
 
 #### Risk 1: Permanent Deletion Only After Archive (SEVERITY: MEDIUM)
 
-**Description:** Specification requires ARCHIVED state before DELETED. What if institution wants immediate deletion?
+**Description:** Specification requires ARCHIVED state before DELETED. What if institution wants
+immediate deletion?
 
 **Impact:**
 
@@ -668,7 +775,8 @@ This specification defines what License Middleware does but defers actual middle
 
 **Rationale:** Archive preserves snapshot for compliance/recovery. Safe deletion pattern.
 
-**Mitigation Strategy:** Accepted constraint. Clear documentation that deletion is two-step process for safety.
+**Mitigation Strategy:** Accepted constraint. Clear documentation that deletion is two-step process
+for safety.
 
 **Risk Level:** LOW (intentional, not defect)
 
@@ -676,7 +784,8 @@ This specification defines what License Middleware does but defers actual middle
 
 #### Risk 2: Version Incompatibility Could Block Production Access (SEVERITY: MEDIUM)
 
-**Description:** Middleware version check detects schema_version mismatch (tenant DB schema newer than license.schema_version). Requests blocked with 426.
+**Description:** Middleware version check detects schema_version mismatch (tenant DB schema newer
+than license.schema_version). Requests blocked with 426.
 
 **Potential Failure Mode:**
 
@@ -698,7 +807,8 @@ This specification defines what License Middleware does but defers actual middle
 
 #### Risk 3: Limits Enforcement Could Break Organizational Onboarding (SEVERITY: MEDIUM)
 
-**Description:** Staff limit is 10, but institution wants to register 15 staff members. Request rejected.
+**Description:** Staff limit is 10, but institution wants to register 15 staff members. Request
+rejected.
 
 **Impact:**
 
@@ -763,17 +873,23 @@ This specification is **ready for Clarify step**, where:
 
 ## Conclusion
 
-STAGE_10_LICENSES is a **foundational, specification-complete** stage that defines the commercial and architectural contract for workspace activation. The License entity is authoritative, immutable in critical fields, and serves as the single source of truth for workspace operational state.
+STAGE_10_LICENSES is a **foundational, specification-complete** stage that defines the commercial
+and architectural contract for workspace activation. The License entity is authoritative, immutable
+in critical fields, and serves as the single source of truth for workspace operational state.
 
 **Constitutional Alignment:** ✅ PASS (ADR-0001, ADR-0005, ADR-0008 fully supported)
 
 **Architectural Role:** Clear (Product → License → Workspace binding established)
 
-**Stability:** High (status-driven design prevents orphaned states, immutability prevents audit log corruption)
+**Stability:** High (status-driven design prevents orphaned states, immutability prevents audit log
+corruption)
 
-**Risk:** Identified and mitigated (provisioning idempotency, status divergence prevention, limit enforcement clarity)
+**Risk:** Identified and mitigated (provisioning idempotency, status divergence prevention, limit
+enforcement clarity)
 
-The specification is **ready for CLARIFY step** after resolving the 8 identified ambiguities. Once clarified, specification can proceed to PLAN phase for detailed API specification and implementation task decomposition.
+The specification is **ready for CLARIFY step** after resolving the 8 identified ambiguities. Once
+clarified, specification can proceed to PLAN phase for detailed API specification and implementation
+task decomposition.
 
 ---
 

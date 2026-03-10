@@ -1,17 +1,15 @@
 # Implementation Report: STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION
 
-**Stage**: STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION
-**Phase**: 01_PLATFORM_FOUNDATION
-**Branch**: spec/infra-008-architecture-visualization
-**Completed**: 2026-03-09T13:50:00.000Z
+**Stage**: STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION **Phase**: 01_PLATFORM_FOUNDATION **Branch**:
+spec/infra-008-architecture-visualization **Completed**: 2026-03-09T13:50:00.000Z
 
 ---
 
 ## Summary
 
-Implementation complete. All 18 tasks executed and validated. Architecture visualization
-script, unit tests, static integration tests, and package.json entry delivered as specified
-in `plan.md` and `tasks.md`.
+Implementation complete. All 18 tasks executed and validated. Architecture visualization script,
+unit tests, static integration tests, and package.json entry delivered as specified in `plan.md` and
+`tasks.md`.
 
 All guardian-raised findings addressed during implementation:
 
@@ -93,7 +91,8 @@ All guardian-raised findings addressed during implementation:
 
 - No cross-app imports introduced
 - No new npm dependencies — Node.js built-ins only (`node:fs`, `node:path`, `node:child_process`)
-- Script placed in `scripts/architecture/` alongside existing `add-module.ts` and `generate-architecture-map.ts`
+- Script placed in `scripts/architecture/` alongside existing `add-module.ts` and
+  `generate-architecture-map.ts`
 - Tests placed in correct tier directories (`tests/unit/`, `tests/static/`)
 - No backend logic, no DB access, no tenant references
 - Output directory: `docs/architecture/visualization/` (new, generated, not committed)

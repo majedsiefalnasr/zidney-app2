@@ -9,7 +9,8 @@
 
 ## Overview
 
-Five critical clarifications resolved to refine specification before technical planning. All ambiguities locked; zero remaining unknowns.
+Five critical clarifications resolved to refine specification before technical planning. All
+ambiguities locked; zero remaining unknowns.
 
 ---
 
@@ -29,11 +30,13 @@ Specification defined ±0.01 USD tolerance but left unclear:
 - **Database storage:** Full precision (no rounding)
 - **Display layer:** Round to 2 decimals using standard rounding (round-half-up)
 - **Applies to:** All monetary displays (revenue summaries, MRR, commission)
-- **Why:** Financial industry standard; minimizes cumulative rounding errors; maintains audit accuracy
+- **Why:** Financial industry standard; minimizes cumulative rounding errors; maintains audit
+  accuracy
 
 **Impact on spec:**
 
-- SC-002 (revenue accuracy): Updated to "aggregate rounding to 2 decimal places at display; database stores full precision"
+- SC-002 (revenue accuracy): Updated to "aggregate rounding to 2 decimal places at display; database
+  stores full precision"
 - FR-005 (revenue display): All displays use banker's round function
 - API response format: MoneyDisplay type enforces 2-decimal rounding
 
@@ -51,13 +54,16 @@ Commission aggregation strategy undefined:
 **Decision: B – Sum with full precision, round final total at display**
 
 - **Database:** affiliate_usages.commission_amount remains source of truth (stores full precision)
-- **Aggregation:** SUM(commission_amount) across all affiliates, then round once at display (2 decimals)
+- **Aggregation:** SUM(commission_amount) across all affiliates, then round once at display (2
+  decimals)
 - **Display:** Standard rounding applied to final sum only
-- **Why:** Matches revenue rounding pattern; prevents cascading rounding errors; maintains financial accuracy
+- **Why:** Matches revenue rounding pattern; prevents cascading rounding errors; maintains financial
+  accuracy
 
 **Impact on spec:**
 
-- FR-024 (commission aggregation): Specifies sequence: query full precision, sum all rows, round for display
+- FR-024 (commission aggregation): Specifies sequence: query full precision, sum all rows, round for
+  display
 - FR-026 (commission accuracy): ±0.00 USD now verifiable with aggregate rounding
 - Test scenario T-027 (commission isolation): Validates no cross-affiliate contamination in sum
 
@@ -82,8 +88,10 @@ Commission aggregation strategy undefined:
   - **Affiliate leaderboard:** Cached (affiliate rankings change infrequently)
   - **Trends:** Cached (historical data immutable)
   - **Export:** Always fresh query (financial record integrity)
-- **Performance guarantee:** Hard <300ms on all 6 endpoints (not 95th percentile) under 100 concurrent user load
-- **Why:** Balances performance with freshness; fresh queries for operational data; cache for historical/immutable data; stability-first approach
+- **Performance guarantee:** Hard <300ms on all 6 endpoints (not 95th percentile) under 100
+  concurrent user load
+- **Why:** Balances performance with freshness; fresh queries for operational data; cache for
+  historical/immutable data; stability-first approach
 
 **Impact on spec:**
 
@@ -106,10 +114,13 @@ Export constraints and data freshness undefined:
 **Decision: B – Max 50,000 rows; 413 on larger requests; always fresh query**
 
 - **Export size limit:** 50,000 rows per file (balances compliance export needs with memory safety)
-- **Over-limit behavior:** Return HTTP 413 Payload Too Large with message suggesting date/country/product filters
-- **Data freshness:** Exports always execute fresh query (never from cache) to ensure financial data integrity
+- **Over-limit behavior:** Return HTTP 413 Payload Too Large with message suggesting
+  date/country/product filters
+- **Data freshness:** Exports always execute fresh query (never from cache) to ensure financial data
+  integrity
 - **Pagination:** Clients must filter dataset to <50k rows; no server-side pagination for exports
-- **Why:** 50k rows is typical for compliance report exports; prevents memory exhaustion; fresh queries ensure audit-trail accuracy
+- **Why:** 50k rows is typical for compliance report exports; prevents memory exhaustion; fresh
+  queries ensure audit-trail accuracy
 
 **Impact on spec:**
 
@@ -132,17 +143,22 @@ Role-based view filtering undefined:
 **Decision: A – Role hierarchy with workspace-scoped visibility**
 
 - **Role hierarchy:** `platform_owner ⊃ member` (owner superset of member)
-- **platform_owner:** Views all workspaces + cross-workspace aggregations (commercial health, geographic distribution, growth trends across all)
-- **member with `reporting.view`:** Views only own workspace metrics (all queries filtered by workspace_id at database level)
+- **platform_owner:** Views all workspaces + cross-workspace aggregations (commercial health,
+  geographic distribution, growth trends across all)
+- **member with `reporting.view`:** Views only own workspace metrics (all queries filtered by
+  workspace_id at database level)
 - **Query enforcement:** Workspace filter applied at SQL WHERE clause (not application layer)
-- **Why:** Maintains database-per-tenant isolation; supports operator oversight; prevents accidental cross-workspace data leaks
+- **Why:** Maintains database-per-tenant isolation; supports operator oversight; prevents accidental
+  cross-workspace data leaks
 
 **Impact on spec:**
 
 - FR-009: Updated to specify `platform_owner` scope = all workspaces; member scope = own workspace
-- Middleware section: Added "Role-based Query Filtering" subsection documenting WHERE clause injection by role
+- Middleware section: Added "Role-based Query Filtering" subsection documenting WHERE clause
+  injection by role
 - Query templates: Each endpoint includes role-based filtering in example SQL
-- Isolation tests (I-T-001-009): Include role-boundary tests (member cannot see other workspace data)
+- Isolation tests (I-T-001-009): Include role-boundary tests (member cannot see other workspace
+  data)
 
 ---
 
@@ -163,10 +179,13 @@ Role-based view filtering undefined:
 **All clarifications are:**
 
 ✅ **Documented & Traceable** — All decisions recorded in spec.md § Clarifications  
-✅ **Actionable & Concrete** — Each decision includes implementation guidance (rounding function, cache TTL, query WHERE clause, etc.)  
+✅ **Actionable & Concrete** — Each decision includes implementation guidance (rounding function,
+cache TTL, query WHERE clause, etc.)  
 ✅ **Tested & Verifiable** — Corresponding test scenarios updated to verify each decision  
-✅ **Risk-aware** — No unresolved ambiguities; high-risk decisions (role hierarchy, export freshness) documented as tests  
-✅ **Compliant** — All decisions align with Zidney constitutional constraints (multi-tenancy isolation, middleware order, structured logging)
+✅ **Risk-aware** — No unresolved ambiguities; high-risk decisions (role hierarchy, export
+freshness) documented as tests  
+✅ **Compliant** — All decisions align with Zidney constitutional constraints (multi-tenancy
+isolation, middleware order, structured logging)
 
 ---
 

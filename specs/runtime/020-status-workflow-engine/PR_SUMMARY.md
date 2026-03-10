@@ -1,23 +1,30 @@
 # Pull Request: Status Workflow Engine Implementation
 
-**Type:** Backend Feature | **Stage:** 020-status-workflow-engine | **Phase:** 03_BACKOFFICE_CORE/01_FOUNDATION
+**Type:** Backend Feature | **Stage:** 020-status-workflow-engine | **Phase:**
+03_BACKOFFICE_CORE/01_FOUNDATION
 
 ---
 
 ## Executive Summary
 
-This PR implements the **Status Workflow Engine** — a reusable, deterministic state machine for managing entity lifecycles with audit immutability, granular permission enforcement, and concurrency safety.
+This PR implements the **Status Workflow Engine** — a reusable, deterministic state machine for
+managing entity lifecycles with audit immutability, granular permission enforcement, and concurrency
+safety.
 
-**Scope:** 39 tasks across domain package, API layer, database migrations, and comprehensive test coverage.  
+**Scope:** 39 tasks across domain package, API layer, database migrations, and comprehensive test
+coverage.  
 **Tests:** 41 unit + 16 integration tests, all passing.  
 **Quality:** ESLint 0 errors, TypeScript 0 new errors, lint warnings resolved.  
-**Risk Level:** 🟢 **LOW** (additive only, no breaking changes, no schema modifications to existing tables)
+**Risk Level:** 🟢 **LOW** (additive only, no breaking changes, no schema modifications to existing
+tables)
 
 ---
 
 ## Problem Statement
 
-Before this implementation, there was no standardized mechanism for managing entity state transitions (e.g., COMPLETED → UNDER_REVIEW → APPROVED → ENABLED) across different entity types in the Zidney backoffice.
+Before this implementation, there was no standardized mechanism for managing entity state
+transitions (e.g., COMPLETED → UNDER_REVIEW → APPROVED → ENABLED) across different entity types in
+the Zidney backoffice.
 
 - State transitions required custom logic in each module
 - No audit trail protection (logs could be modified post-hoc)
@@ -44,23 +51,31 @@ Before this implementation, there was no standardized mechanism for managing ent
 
 ### Key Features
 
-✅ **Deterministic State Graph** — 5 edges (3 forward: COMPLETED→UNDER_REVIEW→APPROVED→ENABLED; 2 backward: UNDER_REVIEW↔COMPLETED, APPROVED→UNDER_REVIEW)
+✅ **Deterministic State Graph** — 5 edges (3 forward: COMPLETED→UNDER_REVIEW→APPROVED→ENABLED; 2
+backward: UNDER_REVIEW↔COMPLETED, APPROVED→UNDER_REVIEW)
 
-✅ **Granular RBAC** — Each transition requires a specific permission (e.g., `subject.review`, `subject.approve`, `subject.return`)
+✅ **Granular RBAC** — Each transition requires a specific permission (e.g., `subject.review`,
+`subject.approve`, `subject.return`)
 
-✅ **Backward Transition Justification** — Reversals require a non-empty reason field for auditability
+✅ **Backward Transition Justification** — Reversals require a non-empty reason field for
+auditability
 
-✅ **Atomic Transactions** — Five-step SELECT FOR UPDATE protocol prevents concurrent state corruption
+✅ **Atomic Transactions** — Five-step SELECT FOR UPDATE protocol prevents concurrent state
+corruption
 
-✅ **Audit Immutability** — All transitions logged in immutable workflow_logs table (trigger prevents post-hoc modification)
+✅ **Audit Immutability** — All transitions logged in immutable workflow_logs table (trigger
+prevents post-hoc modification)
 
-✅ **Multi-Entity Support** — Works with 7 entity types (subject, mcq_question, traditional_question, exam, topic, library_file, template)
+✅ **Multi-Entity Support** — Works with 7 entity types (subject, mcq_question,
+traditional_question, exam, topic, library_file, template)
 
 ✅ **Rate Limiting** — 20 transitions per user per entity type per minute
 
-✅ **Observability** — Structured logging with correlation IDs, workspace slugs, actor tracking, entity IDs
+✅ **Observability** — Structured logging with correlation IDs, workspace slugs, actor tracking,
+entity IDs
 
-✅ **Soft-Lock Enforcement** — Returns 423 if workspace license is soft-locked (before engine invoked)
+✅ **Soft-Lock Enforcement** — Returns 423 if workspace license is soft-locked (before engine
+invoked)
 
 ---
 
@@ -85,8 +100,8 @@ Before this implementation, there was no standardized mechanism for managing ent
  */
 export async function executeTransition(
   db: DbClient,
-  context: WorkflowContext
-): Promise<TransitionResultPayload>
+  context: WorkflowContext,
+): Promise<TransitionResultPayload>;
 ```
 
 **Why SELECT FOR UPDATE?**
@@ -100,9 +115,11 @@ export async function executeTransition(
 
 **File:** `apps/api/src/db/tenant/migrations/20260301_002_workflow_engine.ts`
 
-- Creates `workflow_logs` table with (entity_type, entity_id + created_at DESC + id DESC) composite index
+- Creates `workflow_logs` table with (entity_type, entity_id + created_at DESC + id DESC) composite
+  index
 - Uses VARCHAR(50)+CHECK for state columns (migration-safe, not PG ENUM)
-- Applies immutability trigger: `prevent_audit_modification()` function blocks UPDATE/DELETE on workflow_logs
+- Applies immutability trigger: `prevent_audit_modification()` function blocks UPDATE/DELETE on
+  workflow_logs
 - Increments schema_version from 1.2.0 to 1.3.0 (triggers license middleware compatibility check)
 
 **Index Strategy:**
@@ -165,7 +182,8 @@ Handler sequence:
 - ✅ Audit Trail Integrity: workflow_logs entry immutable (trigger prevents UPDATE/DELETE)
 - ✅ Soft-Locked License: 423 returned by licenseEnforcementMiddleware (engine never invoked)
 - ✅ All Supported Entity Types: Transitions work for all 7 types
-- ✅ Structured Logging: All 6 required fields present (workspace_slug, workspace_id, correlation_id, entity_type, entity_id, actor_id)
+- ✅ Structured Logging: All 6 required fields present (workspace_slug, workspace_id,
+  correlation_id, entity_type, entity_id, actor_id)
 - ✅ Error Response Envelope: All errors include (code, message, details: null, correlationId)
 - ✅ Backward Transition Reason Stored: reason field in workflow_logs contains justification text
 - ✅ Schema Version Check: Migration increments version to 1.3.0; license middleware validates
@@ -213,7 +231,8 @@ Handler sequence:
 
 - **Additive only** — No modifications to existing tables or migrations
 - **New table** — workflow_logs table addition does not affect existing queries
-- **New routes** — Isolated to `/api/v1/backoffice/workspace/workflow/*` — no changes to existing endpoints
+- **New routes** — Isolated to `/api/v1/backoffice/workspace/workflow/*` — no changes to existing
+  endpoints
 - **New middleware** — Rate limiter scoped to workflow routes only
 - **No breaking changes** — Existing API / worker / UI behavior unchanged
 
@@ -248,7 +267,8 @@ Handler sequence:
 - [ ] `bun run lint` passes (no ESLint errors)
 - [ ] Database migration: `bun run db:migrate` verified in staging
 - [ ] Schema: schema_version 1.3.0 confirmed in staging database
-- [ ] Smoke test: POST /api/v1/backoffice/workspace/workflow/subject/:id/transition works with valid token
+- [ ] Smoke test: POST /api/v1/backoffice/workspace/workflow/subject/:id/transition works with valid
+      token
 
 ### Database Migration Safety
 
@@ -318,7 +338,8 @@ After merge to `develop`:
 1. **Staging Deployment** — Deploy to staging environment; verify rate limiting and audit logs
 2. **QA Validation** — Run manual test scenarios from `guides/TESTING_GUIDE.md`
 3. **Monitor** — Watch for workflow permission errors and transition patterns
-4. **Stage 21+** — Future stages can depend on this workflow engine for other entity types and workflow extensions
+4. **Stage 21+** — Future stages can depend on this workflow engine for other entity types and
+   workflow extensions
 
 ---
 

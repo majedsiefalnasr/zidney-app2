@@ -40,8 +40,10 @@
 ✓ Each requirement tied to test methodology  
 ✓ Success criteria include metrics (24-hour TTL, <500ms p95, 100% audit coverage)  
 ✓ No framework/language specifics in criteria  
-✓ 4 user scenarios cover primary flows (onboarding, role update, member disablement, permission check)  
-✓ Edge cases documented (expired invitations, rate limiting, concurrent edits, token version mismatch)  
+✓ 4 user scenarios cover primary flows (onboarding, role update, member disablement, permission
+check)  
+✓ Edge cases documented (expired invitations, rate limiting, concurrent edits, token version
+mismatch)  
 ✓ Scope explicitly bounded: MMC members & RBAC only (not dashboard, not customer-facing)  
 ✓ Dependencies on STAGE_02A (Master DB), STAGE_03 (Auth), packages (logger, validation)
 
@@ -164,7 +166,8 @@
 ✓ **Token isolation:** MMC tokens never contain workspace_id; tenant tokens never accepted by MMC  
 ✓ **Permission enforcement:** Required at API layer before business logic; no UI-only checks  
 ✓ **Rate limiting:** Login 5/min/IP; member creation 10/min/user; other endpoints 20-60/min  
-✓ **Audit:** All destructive actions (create, edit, delete) with actor, timestamp, before/after snapshots  
+✓ **Audit:** All destructive actions (create, edit, delete) with actor, timestamp, before/after
+snapshots  
 ✓ **Forbidden patterns:** No passwords in logs, no stack traces to client, no implicit super-admin
 
 ---
@@ -258,7 +261,8 @@ The specification is complete and ready for `/speckit.plan` phase.
 3. **Open questions for implementation phase:**
    - Will Bcrypt or Argon2 be chosen? (Either acceptable per spec)
    - Will invitations be async (email) or sync? (Async assumed here)
-   - Will token_version be incremented synchronously or via background job? (Sync assumed, must be transactional)
+   - Will token_version be incremented synchronously or via background job? (Sync assumed, must be
+     transactional)
 
 ---
 

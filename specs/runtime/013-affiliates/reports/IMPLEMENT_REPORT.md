@@ -8,7 +8,9 @@
 
 ## Executive Summary
 
-Full implementation of affiliate B2B promotion system completed. All 43 tasks marked `[X]` (uppercase). Code generation, testing, and validation gates all passed. Stage transitioned to BACKEND CLOSED pending staging deployment validation.
+Full implementation of affiliate B2B promotion system completed. All 43 tasks marked `[X]`
+(uppercase). Code generation, testing, and validation gates all passed. Stage transitioned to
+BACKEND CLOSED pending staging deployment validation.
 
 **Tasks Completed: 43/43 ✅**  
 **Test Coverage: 91/91 PASSED ✅**  
@@ -45,7 +47,8 @@ Full implementation of affiliate B2B promotion system completed. All 43 tasks ma
   - Accept affiliate creation request (promo_code, discount%, commission%, limits, dates)
   - Insert into master_db affiliates table
   - Return 201 Created with full affiliate object
-  - Error: 400 Bad Request (validation), 403 Forbidden (insufficient RBAC), 409 Conflict (UNIQUE constraint)
+  - Error: 400 Bad Request (validation), 403 Forbidden (insufficient RBAC), 409 Conflict (UNIQUE
+    constraint)
 
 - **list.ts** — GET /v1/mmc/affiliates
   - List all affiliates with optional filters (status, date range, promo code pattern)
@@ -82,21 +85,28 @@ Full implementation of affiliate B2B promotion system completed. All 43 tasks ma
 
 - **009_create_affiliates_tables.sql** — Master schema (affiliates + affiliate_usages)
   - Table: `affiliates` (15 columns)
-    - `id` (UUID PK), `promo_code` (VARCHAR UNIQUE), `discount_percentage` (NUMERIC 5,2), `commission_percentage` (NUMERIC 5,2)
-    - `usage_limit_total` (INTEGER, nullable), `usage_limit_per_client` (INTEGER, nullable), `usage_count` (INTEGER)
+    - `id` (UUID PK), `promo_code` (VARCHAR UNIQUE), `discount_percentage` (NUMERIC 5,2),
+      `commission_percentage` (NUMERIC 5,2)
+    - `usage_limit_total` (INTEGER, nullable), `usage_limit_per_client` (INTEGER, nullable),
+      `usage_count` (INTEGER)
     - `start_date` (DATE), `end_date` (DATE), `status` (ENUM: ACTIVE/INACTIVE)
-    - `allow_with_other_discounts` (BOOLEAN), `description` (TEXT), `created_at` (TIMESTAMP), `updated_at` (TIMESTAMP)
+    - `allow_with_other_discounts` (BOOLEAN), `description` (TEXT), `created_at` (TIMESTAMP),
+      `updated_at` (TIMESTAMP)
     - Indexes: UNIQUE promo_code, status, (start_date, end_date)
-    - Constraints: CHECK (discount_percentage BETWEEN 0 AND 100), CHECK (commission_percentage BETWEEN 0 AND 100), CHECK (start_date < end_date)
+    - Constraints: CHECK (discount_percentage BETWEEN 0 AND 100), CHECK (commission_percentage
+      BETWEEN 0 AND 100), CHECK (start_date < end_date)
   - Table: `affiliate_usages` (8 columns, INSERT-ONLY immutable)
     - `id` (UUID PK), `affiliate_id` (UUID FK → affiliates), `client_id` (UUID), `license_id` (UUID)
-    - `base_amount` (NUMERIC 12,2), `discount_amount` (NUMERIC 12,2), `commission_amount` (NUMERIC 12,2), `created_at` (TIMESTAMP)
-    - Trigger: Prevent UPDATE/DELETE (immutability enforcement via trigger), ON DELETE RESTRICT on affiliates FK
+    - `base_amount` (NUMERIC 12,2), `discount_amount` (NUMERIC 12,2), `commission_amount` (NUMERIC
+      12,2), `created_at` (TIMESTAMP)
+    - Trigger: Prevent UPDATE/DELETE (immutability enforcement via trigger), ON DELETE RESTRICT on
+      affiliates FK
     - Indexes: (affiliate_id, created_at), (client_id, affiliate_id)
 
 - **010_create_affiliate_admin_audit.sql** — Audit trail
   - Table: `affiliate_admin_audit` (8 columns, INSERT-ONLY)
-    - `id` (UUID PK), `affiliate_id` (UUID FK), `admin_id` (UUID), `action` (ENUM: CREATE/UPDATE/DISABLE)
+    - `id` (UUID PK), `affiliate_id` (UUID FK), `admin_id` (UUID), `action` (ENUM:
+      CREATE/UPDATE/DISABLE)
     - `old_values` (JSONB), `new_values` (JSONB), `ip_address` (VARCHAR), `created_at` (TIMESTAMP)
     - Trigger: Prevent UPDATE/DELETE (immutability enforcement)
     - Indexes: (affiliate_id, created_at), (admin_id, created_at)
@@ -113,12 +123,14 @@ Full implementation of affiliate B2B promotion system completed. All 43 tasks ma
   - Function: `calculateCommission(baseAmount: Decimal, commissionPercentage: Decimal): Decimal`
     - Same formula as discount calculation
     - Deterministic rounding (NUMERIC type)
-  - Function: `validateAndLockAffiliate(affiliateId: UUID, clientId: UUID, baseAmount: Decimal, tx: Transaction): Promise<AffiliateDiscount>`
+  - Function:
+    `validateAndLockAffiliate(affiliateId: UUID, clientId: UUID, baseAmount: Decimal, tx: Transaction): Promise<AffiliateDiscount>`
     - SELECT ... FROM affiliates WHERE id = $1 FOR UPDATE (row-level lock)
     - Validate status = ACTIVE
     - Validate date range: CURRENT_TIMESTAMP BETWEEN start_date AND end_date
     - Validate global limit: usage_count < usage_limit_total (if set)
-    - Validate per-client limit: COUNT usage records for (affiliate_id, client_id) < usage_limit_per_client (if set)
+    - Validate per-client limit: COUNT usage records for (affiliate_id, client_id) <
+      usage_limit_per_client (if set)
     - Calculate discount/commission via ROUND()
     - INSERT into affiliate_usages (immutable record)
     - UPDATE affiliates SET usage_count = usage_count + 1 (atomically within lock)
@@ -141,42 +153,42 @@ Full implementation of affiliate B2B promotion system completed. All 43 tasks ma
 
   ```typescript
   interface Affiliate {
-    id: UUID
-    promo_code: string
-    discount_percentage: Decimal
-    commission_percentage: Decimal
-    usage_limit_total: number | null
-    usage_limit_per_client: number | null
-    usage_count: number
-    start_date: Date
-    end_date: Date
-    status: 'ACTIVE' | 'INACTIVE'
-    allow_with_other_discounts: boolean
-    description?: string
-    created_at: Date
-    updated_at: Date
+    id: UUID;
+    promo_code: string;
+    discount_percentage: Decimal;
+    commission_percentage: Decimal;
+    usage_limit_total: number | null;
+    usage_limit_per_client: number | null;
+    usage_count: number;
+    start_date: Date;
+    end_date: Date;
+    status: "ACTIVE" | "INACTIVE";
+    allow_with_other_discounts: boolean;
+    description?: string;
+    created_at: Date;
+    updated_at: Date;
   }
 
   interface AffiliateUsage {
-    id: UUID
-    affiliate_id: UUID
-    client_id: UUID
-    license_id: UUID
-    base_amount: Decimal
-    discount_amount: Decimal
-    commission_amount: Decimal
-    created_at: Date
+    id: UUID;
+    affiliate_id: UUID;
+    client_id: UUID;
+    license_id: UUID;
+    base_amount: Decimal;
+    discount_amount: Decimal;
+    commission_amount: Decimal;
+    created_at: Date;
   }
 
   interface AffiliateAdminAudit {
-    id: UUID
-    affiliate_id: UUID
-    admin_id: UUID
-    action: 'CREATE' | 'UPDATE' | 'DISABLE'
-    old_values: Record<string, any>
-    new_values: Record<string, any>
-    ip_address: string
-    created_at: Date
+    id: UUID;
+    affiliate_id: UUID;
+    admin_id: UUID;
+    action: "CREATE" | "UPDATE" | "DISABLE";
+    old_values: Record<string, any>;
+    new_values: Record<string, any>;
+    ip_address: string;
+    created_at: Date;
   }
   ```
 
@@ -184,46 +196,46 @@ Full implementation of affiliate B2B promotion system completed. All 43 tasks ma
   ```typescript
   export const AFFILIATE_ERROR_CODES = {
     AFFILIATE_CODE_EXPIRED: {
-      code: 'AFFILIATE_CODE_EXPIRED',
+      code: "AFFILIATE_CODE_EXPIRED",
       status: 400,
-      message: 'Affiliate code is no longer valid',
+      message: "Affiliate code is no longer valid",
     },
     AFFILIATE_CODE_INACTIVE: {
-      code: 'AFFILIATE_CODE_INACTIVE',
+      code: "AFFILIATE_CODE_INACTIVE",
       status: 400,
-      message: 'Affiliate code is inactive',
+      message: "Affiliate code is inactive",
     },
     AFFILIATE_USAGE_LIMIT_EXCEEDED: {
-      code: 'AFFILIATE_USAGE_LIMIT_EXCEEDED',
+      code: "AFFILIATE_USAGE_LIMIT_EXCEEDED",
       status: 400,
-      message: 'Affiliate usage limit exceeded',
+      message: "Affiliate usage limit exceeded",
     },
     AFFILIATE_PER_CLIENT_LIMIT_EXCEEDED: {
-      code: 'AFFILIATE_PER_CLIENT_LIMIT_EXCEEDED',
+      code: "AFFILIATE_PER_CLIENT_LIMIT_EXCEEDED",
       status: 400,
-      message: 'Client has reached per-client usage limit',
+      message: "Client has reached per-client usage limit",
     },
     AFFILIATE_NOT_FOUND: {
-      code: 'AFFILIATE_NOT_FOUND',
+      code: "AFFILIATE_NOT_FOUND",
       status: 404,
-      message: 'Affiliate not found',
+      message: "Affiliate not found",
     },
     INVALID_PROMO_CODE: {
-      code: 'INVALID_PROMO_CODE',
+      code: "INVALID_PROMO_CODE",
       status: 400,
-      message: 'Promo code format invalid',
+      message: "Promo code format invalid",
     },
     IMMUTABLE_FIELD_MODIFICATION: {
-      code: 'IMMUTABLE_FIELD_MODIFICATION',
+      code: "IMMUTABLE_FIELD_MODIFICATION",
       status: 400,
-      message: 'Cannot modify immutable fields (promo_code, status)',
+      message: "Cannot modify immutable fields (promo_code, status)",
     },
     AFFILIATE_CONSTRAINT_VIOLATION: {
-      code: 'AFFILIATE_CONSTRAINT_VIOLATION',
+      code: "AFFILIATE_CONSTRAINT_VIOLATION",
       status: 409,
-      message: 'Affiliate constraint violation (e.g., duplicate code)',
+      message: "Affiliate constraint violation (e.g., duplicate code)",
     },
-  }
+  };
   ```
 
 ### 4. Middleware (Authentication, Validation, Token Validation)
@@ -252,12 +264,12 @@ Full implementation of affiliate B2B promotion system completed. All 43 tasks ma
       description: z.string().optional(),
     })
     .refine((data) => data.start_date < data.end_date, {
-      message: 'start_date must be before end_date',
-    })
+      message: "start_date must be before end_date",
+    });
 
   export const editAffiliateSchema = createAffiliateSchema.partial().omit({
     promo_code: true, // immutable
-  })
+  });
   ```
 
 - **affiliate-validation.ts** — Request validation middleware
@@ -269,7 +281,7 @@ Full implementation of affiliate B2B promotion system completed. All 43 tasks ma
 - **auth/mmc-token-validator.ts** — JWT MMC token validation (NEW file)
   ```typescript
   export async function validateMMCToken(
-    authHeader: string
+    authHeader: string,
   ): Promise<{ admin_id: UUID; scope: string[] }> {
     // 1. Extract token from "Bearer <token>"
     // 2. Verify HS256 signature using MMC_JWT_SECRET
@@ -500,7 +512,8 @@ All implementation artifacts comply with:
 
 No tasks formally deferred. However, following items documented for future stages:
 
-- **T019: Affiliate CRUD Workflow Integration Tests** — Deferred to staging validation stage (requires DB connectivity)
+- **T019: Affiliate CRUD Workflow Integration Tests** — Deferred to staging validation stage
+  (requires DB connectivity)
 - **T042 Execution: SQL Injection Test** — Test payload defined, requires staging endpoint testing
 - **Rate Limiting Load Test** — Requires production staging environment
 - **MMC Token Edge Cases (Expired, Tampered, Wrong Scope)** — Requires staging validation
@@ -543,10 +556,13 @@ No tasks formally deferred. However, following items documented for future stage
 - ❌ Load testing (rate limiting, concurrency)
 - ❌ Runtime security validation (token edge cases, SQL injection execution, logging redaction)
 
-**Next Stage:** Staging validation stage (separate STAGE_13A) OR promotion to PRODUCTION READY after manual staging validation by ops/security teams.
+**Next Stage:** Staging validation stage (separate STAGE_13A) OR promotion to PRODUCTION READY after
+manual staging validation by ops/security teams.
 
 ---
 
 ## Conclusion
 
-Backend implementation of STAGE_13_AFFILIATES (B2B Affiliate Program) is complete and ready for staging deployment validation. All code-level requirements met. Stage transitioned to BACKEND CLOSED. Testing guide and PR summary generated for code review and deployment.
+Backend implementation of STAGE_13_AFFILIATES (B2B Affiliate Program) is complete and ready for
+staging deployment validation. All code-level requirements met. Stage transitioned to BACKEND
+CLOSED. Testing guide and PR summary generated for code review and deployment.

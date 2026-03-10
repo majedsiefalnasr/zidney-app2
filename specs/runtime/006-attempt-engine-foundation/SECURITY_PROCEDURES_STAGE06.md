@@ -8,7 +8,8 @@
 
 ## Overview
 
-This document defines security procedures for the Attempt Engine (STAGE 06) covering data protection, access control, vulnerability management, and incident response.
+This document defines security procedures for the Attempt Engine (STAGE 06) covering data
+protection, access control, vulnerability management, and incident response.
 
 ---
 
@@ -45,7 +46,8 @@ SELECT pgp_sym_decrypt(encrypted_data, 'secret_key') AS data
 FROM encrypted_attempts;
 ```
 
-**Note:** Current implementation (v1.0.0) does NOT encrypt user responses. Phase 2 will add optional encryption.
+**Note:** Current implementation (v1.0.0) does NOT encrypt user responses. Phase 2 will add optional
+encryption.
 
 #### In-Transit Encryption (TLS/SSL)
 
@@ -63,16 +65,16 @@ psql "postgresql://user:pass@postgres.example.com:5432/zidney_tenant?sslmode=req
 
 ```javascript
 // Node.js database connection (enforce TLS)
-const connectionString = process.env.DATABASE_URL
+const connectionString = process.env.DATABASE_URL;
 // Should include: ?sslmode=require
 
 const pool = new Pool({
   connectionString: connectionString,
   ssl: {
     rejectUnauthorized: true, // Verify certificate
-    ca: fs.readFileSync('/etc/ssl/certs/ca.crt', 'utf8'),
+    ca: fs.readFileSync("/etc/ssl/certs/ca.crt", "utf8"),
   },
-})
+});
 ```
 
 #### Backup Encryption
@@ -138,32 +140,32 @@ CREATE AUDIT TABLE:
 
 ```typescript
 // API middleware - enforce roles
-type UserRole = 'admin' | 'teacher' | 'student'
+type UserRole = "admin" | "teacher" | "student";
 
 async function enforceRole(req: Request, requiredRoles: UserRole[]) {
-  const userRole = req.user.role // From JWT
+  const userRole = req.user.role; // From JWT
 
   if (!requiredRoles.includes(userRole)) {
     return res.status(403).json({
-      error: { code: 'FORBIDDEN', message: 'Insufficient permissions' },
-    })
+      error: { code: "FORBIDDEN", message: "Insufficient permissions" },
+    });
   }
 }
 
 // Usage
 app.post(
-  '/api/v1/attempts',
-  enforceRole(['student']), // Only students can take exams
+  "/api/v1/attempts",
+  enforceRole(["student"]), // Only students can take exams
   authMiddleware,
-  createAttemptHandler
-)
+  createAttemptHandler,
+);
 
 app.post(
-  '/api/admin/grades/override',
-  enforceRole(['admin']), // Only admins can override
+  "/api/admin/grades/override",
+  enforceRole(["admin"]), // Only admins can override
   authMiddleware,
-  overrideGradeHandler
-)
+  overrideGradeHandler,
+);
 ```
 
 #### Authentication
@@ -171,24 +173,24 @@ app.post(
 ```typescript
 // JWT Configuration
 interface JWTPayload {
-  sub: string // user_id
-  workspace_slug: string // tenant identifier
-  role: 'admin' | 'teacher' | 'student'
-  iat: number // issued at
-  exp: number // expiration (1 hour)
+  sub: string; // user_id
+  workspace_slug: string; // tenant identifier
+  role: "admin" | "teacher" | "student";
+  iat: number; // issued at
+  exp: number; // expiration (1 hour)
 }
 
 // Token Validation
 function validateJWT(token: string): JWTPayload {
   try {
     const payload = jwt.verify(token, process.env.JWT_PUBLIC_KEY, {
-      algorithms: ['RS256'],
-      issuer: 'https://zidney.com',
-      audience: 'api.zidney.com',
-    })
-    return payload
+      algorithms: ["RS256"],
+      issuer: "https://zidney.com",
+      audience: "api.zidney.com",
+    });
+    return payload;
   } catch (error) {
-    throw new UnauthorizedError('Invalid token')
+    throw new UnauthorizedError("Invalid token");
   }
 }
 
@@ -259,12 +261,12 @@ ALTER TABLE audit_log
 
 ```typescript
 // ✅ SAFE (parameterized)
-const query = 'SELECT * FROM attempts WHERE workspace_id = $1 AND id = $2'
-const result = db.query(query, [workspaceId, attemptId])
+const query = "SELECT * FROM attempts WHERE workspace_id = $1 AND id = $2";
+const result = db.query(query, [workspaceId, attemptId]);
 
 // ❌ UNSAFE (string concatenation)
-const query = `SELECT * FROM attempts WHERE workspace_id = '${workspaceId}'`
-const result = db.query(query) // SQL injection risk!
+const query = `SELECT * FROM attempts WHERE workspace_id = '${workspaceId}'`;
+const result = db.query(query); // SQL injection risk!
 ```
 
 **Verification:**
@@ -305,17 +307,17 @@ function sanitizeOutput(text: string): string {
 // No cookies = No CSRF (modern SPA model)
 
 // Alternative: CSRF tokens for forms
-app.post('/api/form', (req, res) => {
-  const csrf = req.headers['x-csrf-token']
+app.post("/api/form", (req, res) => {
+  const csrf = req.headers["x-csrf-token"];
 
   if (!csrf || !validateCSRFToken(csrf)) {
     return res.status(403).json({
-      error: { code: 'INVALID_CSRF' },
-    })
+      error: { code: "INVALID_CSRF" },
+    });
   }
 
   // Process form
-})
+});
 ```
 
 ### Dependency Vulnerabilities
@@ -348,12 +350,12 @@ limiter.login = rateLimit({
   keyGenerator: (req) => req.ip,
   handler: (req, res) => {
     res.status(429).json({
-      error: { code: 'TOO_MANY_LOGIN_ATTEMPTS' },
-    })
+      error: { code: "TOO_MANY_LOGIN_ATTEMPTS" },
+    });
   },
-})
+});
 
-app.post('/auth/login', limiter.login, loginHandler)
+app.post("/auth/login", limiter.login, loginHandler);
 ```
 
 ### API Attempts
@@ -366,12 +368,12 @@ limiter.attempts = rateLimit({
   keyGenerator: (req) => req.user.id, // Per user
   handler: (req, res) => {
     res.status(429).json({
-      error: { code: 'TOO_MANY_ATTEMPTS' },
-    })
+      error: { code: "TOO_MANY_ATTEMPTS" },
+    });
   },
-})
+});
 
-app.post('/api/v1/attempts', limiter.attempts, createAttemptHandler)
+app.post("/api/v1/attempts", limiter.attempts, createAttemptHandler);
 ```
 
 ---
@@ -412,17 +414,17 @@ const password = 'super_secret_pass';  // Never!
 
 ```typescript
 // ❌ WRONG - leaks secret
-console.log('JWT Key:', jwtKey)
+console.log("JWT Key:", jwtKey);
 
 // ✅ CORRECT - never log secrets
-logger.debug('JWT key loaded successfully')
+logger.debug("JWT key loaded successfully");
 
 // ✅ CORRECT - only log redacted values
 const sanitized = {
-  database: 'postgresql://user:****@host:5432/db',
-  apiKey: 'sk-****...****',
-}
-logger.info('Credentials loaded', sanitized)
+  database: "postgresql://user:****@host:5432/db",
+  apiKey: "sk-****...****",
+};
+logger.info("Credentials loaded", sanitized);
 ```
 
 ---

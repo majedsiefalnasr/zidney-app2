@@ -7,7 +7,8 @@
 
 ## Overview
 
-This guide provides operational procedures for keeping AI context artifacts fresh and troubleshooting regeneration issues.
+This guide provides operational procedures for keeping AI context artifacts fresh and
+troubleshooting regeneration issues.
 
 ---
 
@@ -339,9 +340,9 @@ bash scripts/check-ai-context-freshness.sh
 # Pseudo-code for operations dashboard
 health_checks:
   ai_context_freshness:
-    command: 'jq .generated_at docs/ai/context/ai-module-map.json'
-    expected: 'within 24 hours'
-    alert_if: 'stale'
+    command: "jq .generated_at docs/ai/context/ai-module-map.json"
+    expected: "within 24 hours"
+    alert_if: "stale"
 ```
 
 ### Adding to Runbooks

@@ -1,9 +1,8 @@
 # STAGE_INFRA_06_ARCHITECTURE_GUARD
 
-**Branch:** `spec/infra-006-architecture-guard`
-**Phase:** 01_PLATFORM_FOUNDATION
-**Stage File:** `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_06_ARCHITECTURE_GUARD.md`
-**Initiated:** 2026-03-08T00:00:00.000Z
+**Branch:** `spec/infra-006-architecture-guard` **Phase:** 01_PLATFORM_FOUNDATION **Stage File:**
+`specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_06_ARCHITECTURE_GUARD.md` **Initiated:**
+2026-03-08T00:00:00.000Z
 
 ## Workflow Progress
 
@@ -28,5 +27,4 @@
 | Spec Checklist    | SpecKit      | checklists/requirements.md                                      | Step 1       |
 | Workflow State    | Orchestrator | specs/runtime/infra-006-architecture-guard/.workflow-state.json | Pre-Step     |
 
-**Final Status:** 🟢 PRODUCTION READY — 2026-03-08
-**Tasks:** 9 / 9 completed
+**Final Status:** 🟢 PRODUCTION READY — 2026-03-08 **Tasks:** 9 / 9 completed

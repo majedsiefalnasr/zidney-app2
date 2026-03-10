@@ -1,10 +1,7 @@
 chore({{STAGE_DIR_NAME}}): initialize stage branch and directory
 
-Step: Pre-Step
-Stage: {{STAGE_NAME}}
-Phase: {{PHASE_NAME}}
-Branch: {{STAGE_DIR_NAME}}
-Base: {{BASE_BRANCH}}
+Step: Pre-Step Stage: {{STAGE_NAME}} Phase: {{PHASE_NAME}} Branch: {{STAGE_DIR_NAME}} Base:
+{{BASE_BRANCH}}
 
 - Branch created from {{BASE_BRANCH}}
 - Directory structure initialized: specs/runtime/{{STAGE_DIR_NAME}}/

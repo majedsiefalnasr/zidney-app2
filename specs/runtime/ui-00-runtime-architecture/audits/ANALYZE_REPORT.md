@@ -8,7 +8,11 @@
 
 ## Summary
 
-Structural drift audit returned ALL 9/9 constitutional criteria PASS. Five consistency findings were detected (C1–C5); C1 (HIGH) and C2 (MEDIUM) were applied as mandatory fixes. Composite guardian audit Round 1 returned two BLOCKED verdicts (QA Engineer, Code Reviewer) with 7 total blocking findings. All 7 were remediated and Round 2 returned unanimous PASS across all 4 composite guardians. Final gate: APPROVED. Implementation authorized.
+Structural drift audit returned ALL 9/9 constitutional criteria PASS. Five consistency findings were
+detected (C1–C5); C1 (HIGH) and C2 (MEDIUM) were applied as mandatory fixes. Composite guardian
+audit Round 1 returned two BLOCKED verdicts (QA Engineer, Code Reviewer) with 7 total blocking
+findings. All 7 were remediated and Round 2 returned unanimous PASS across all 4 composite
+guardians. Final gate: APPROVED. Implementation authorized.
 
 ---
 
@@ -137,7 +141,8 @@ Total changes applied during Step 5:
 
 `APPROVED — Implementation authorized.`
 
-All 7 blocking findings remediated. All 6 guardian verdicts PASS in Round 2. 9/9 constitutional criteria PASS. 161 tasks covering 35 FRs and 15 NFRs. Stage is clear to proceed to implementation.
+All 7 blocking findings remediated. All 6 guardian verdicts PASS in Round 2. 9/9 constitutional
+criteria PASS. 161 tasks covering 35 FRs and 15 NFRs. Stage is clear to proceed to implementation.
 
 ---
 

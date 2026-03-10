@@ -22,7 +22,8 @@ All Backoffice API routes must traverse this chain in this exact order:
 7. Route Handler          → executes business logic
 ```
 
-**Hard rule:** No Backoffice route handler may execute before steps 1–6 complete successfully. Each middleware must call `next()` only on success, or return the appropriate structured error response.
+**Hard rule:** No Backoffice route handler may execute before steps 1–6 complete successfully. Each
+middleware must call `next()` only on success, or return the appropriate structured error response.
 
 **WebSocket chain:**
 
@@ -43,7 +44,9 @@ All Backoffice API routes must traverse this chain in this exact order:
 - `up()` uses `BEGIN`/`COMMIT`; `down()` throws (forward-only)
 - Idempotent via `CREATE TABLE IF NOT EXISTS` + `CREATE INDEX IF NOT EXISTS`
 
-**Validation test:** After migration on a fresh tenant DB, all 4 tables and all 6 indexes must be present. Run `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'` to confirm.
+**Validation test:** After migration on a fresh tenant DB, all 4 tables and all 6 indexes must be
+present. Run `SELECT table_name FROM information_schema.tables WHERE table_schema = 'public'` to
+confirm.
 
 ---
 
@@ -51,15 +54,21 @@ All Backoffice API routes must traverse this chain in this exact order:
 
 **File:** `apps/api/src/routes/backoffice/context.ts`
 
-**Purpose:** Returns the runtime `BackofficeContext` object to the Backoffice SPA for initializing the Pinia store on mount. This is the only endpoint that exposes middleware-injected context as a serialized response.
+**Purpose:** Returns the runtime `BackofficeContext` object to the Backoffice SPA for initializing
+the Pinia store on mount. This is the only endpoint that exposes middleware-injected context as a
+serialized response.
 
-**Auth requirement:** Requires valid workspace-scoped JWT delivered via **HttpOnly SameSite=Strict cookie** set by the STAGE_03 authentication API. The middleware reads the JWT from the cookie; the SPA sends `credentials: 'include'` — no `Authorization` header.
+**Auth requirement:** Requires valid workspace-scoped JWT delivered via **HttpOnly SameSite=Strict
+cookie** set by the STAGE_03 authentication API. The middleware reads the JWT from the cookie; the
+SPA sends `credentials: 'include'` — no `Authorization` header.
 
-**Middleware chain:** Full chain (Correlation ID → Tenant Resolver → License Enforcement → Schema Version → Authentication). No RBAC guard on this route — reading context is available to any authenticated staff user.
+**Middleware chain:** Full chain (Correlation ID → Tenant Resolver → License Enforcement → Schema
+Version → Authentication). No RBAC guard on this route — reading context is available to any
+authenticated staff user.
 
-**Request:** `GET /api/v1/backoffice/context`
-**Auth transport:** HttpOnly cookie (`backoffice_token`)
-**Headers:** No explicit `Authorization` header — cookie sent automatically via `credentials: 'include'`
+**Request:** `GET /api/v1/backoffice/context` **Auth transport:** HttpOnly cookie
+(`backoffice_token`) **Headers:** No explicit `Authorization` header — cookie sent automatically via
+`credentials: 'include'`
 
 **Success response (200):**
 
@@ -92,51 +101,52 @@ All Backoffice API routes must traverse this chain in this exact order:
 
 ```typescript
 // apps/api/src/routes/backoffice/types.ts  (new file — imported by context.ts, ws.ts, and all backoffice middleware)
-import type { TenantContext, LicenseStatus, Module } from '@zidney/types'
+import type { TenantContext, LicenseStatus, Module } from "@zidney/types";
 
-export type StaffUserContext = { user_id: string; role: string }
+export type StaffUserContext = { user_id: string; role: string };
 
 export type BackofficeVariables = {
-  correlationId: string
-  tenant: TenantContext
-  staff_user: StaffUserContext
-  license_status: LicenseStatus
-  enabled_modules: Module[]
-  student_limit: number
-  staff_limit: number
-  product_version: string
-  schema_version: number
-}
+  correlationId: string;
+  tenant: TenantContext;
+  staff_user: StaffUserContext;
+  license_status: LicenseStatus;
+  enabled_modules: Module[];
+  student_limit: number;
+  staff_limit: number;
+  product_version: string;
+  schema_version: number;
+};
 
-export type BackofficeEnv = { Variables: BackofficeVariables }
+export type BackofficeEnv = { Variables: BackofficeVariables };
 ```
 
-All backoffice Hono instances must be typed: `new Hono<BackofficeEnv>()`. Every `c.get()` call returns a fully typed value — no `unknown` inferences.
+All backoffice Hono instances must be typed: `new Hono<BackofficeEnv>()`. Every `c.get()` call
+returns a fully typed value — no `unknown` inferences.
 
 **Implementation:**
 
 ```typescript
 // apps/api/src/routes/backoffice/context.ts
-import { createLogger } from '@zidney/logger'
-import { Hono } from 'hono'
-import type { BackofficeEnv } from './types'
+import { createLogger } from "@zidney/logger";
+import { Hono } from "hono";
+import type { BackofficeEnv } from "./types";
 
-const logger = createLogger('backoffice-context')
+const logger = createLogger("backoffice-context");
 
-export const backofficeContextRouter = new Hono<BackofficeEnv>()
+export const backofficeContextRouter = new Hono<BackofficeEnv>();
 
-backofficeContextRouter.get('/backoffice/context', async (c: Context) => {
-  const correlation_id = c.get('correlationId') || 'unknown'
-  const tenant = c.get('tenant')
-  const staff_user = c.get('staff_user')
+backofficeContextRouter.get("/backoffice/context", async (c: Context) => {
+  const correlation_id = c.get("correlationId") || "unknown";
+  const tenant = c.get("tenant");
+  const staff_user = c.get("staff_user");
 
-  logger.info('Backoffice context requested', {
+  logger.info("Backoffice context requested", {
     workspace_slug: tenant.slug,
     workspace_id: tenant.id,
     correlation_id,
-    route_name: 'GET /api/v1/backoffice/context',
+    route_name: "GET /api/v1/backoffice/context",
     user_id: staff_user.user_id,
-  })
+  });
 
   return c.json(
     {
@@ -144,19 +154,19 @@ backofficeContextRouter.get('/backoffice/context', async (c: Context) => {
       data: {
         workspace_id: tenant.id,
         workspace_slug: tenant.slug,
-        license_status: c.get('license_status'),
-        enabled_modules: c.get('enabled_modules'),
-        student_limit: c.get('student_limit'),
-        staff_limit: c.get('staff_limit'),
-        product_version: c.get('product_version'),
+        license_status: c.get("license_status"),
+        enabled_modules: c.get("enabled_modules"),
+        student_limit: c.get("student_limit"),
+        staff_limit: c.get("staff_limit"),
+        product_version: c.get("product_version"),
         schema_version: tenant.schema_version,
         request_id: correlation_id,
       },
       error: null,
     },
-    200
-  )
-})
+    200,
+  );
+});
 ```
 
 ---
@@ -165,28 +175,29 @@ backofficeContextRouter.get('/backoffice/context', async (c: Context) => {
 
 **File:** `apps/api/src/middleware/backoffice-rbac-guard.ts`
 
-**Purpose:** Per-route RBAC enforcement. Validates that the authenticated staff user holds the required `module` + `action` permission in the tenant DB.
+**Purpose:** Per-route RBAC enforcement. Validates that the authenticated staff user holds the
+required `module` + `action` permission in the tenant DB.
 
 **Registration:** Added as the 6th middleware step, registered per-route before the route handler:
 
 ```typescript
 app.post(
-  '/api/backoffice/some-resource',
+  "/api/backoffice/some-resource",
   createBackofficeRBACGuard(logger, Module.MCQ, ActionEnum.CREATE), // logger is first param
-  someResourceHandler
-)
+  someResourceHandler,
+);
 ```
 
 **Implementation:**
 
 ```typescript
 // apps/api/src/middleware/backoffice-rbac-guard.ts
-import { createLogger } from '@zidney/logger'
-import { Module } from '@zidney/types'
-import { ActionEnum } from '@zidney/types'
-import { Context, MiddlewareHandler } from 'hono'
+import { createLogger } from "@zidney/logger";
+import { Module } from "@zidney/types";
+import { ActionEnum } from "@zidney/types";
+import { Context, MiddlewareHandler } from "hono";
 
-const logger = createLogger('backoffice-rbac-guard')
+const logger = createLogger("backoffice-rbac-guard");
 
 /**
  * Creates an RBAC Permission Guard middleware for a specific module + action.
@@ -199,12 +210,12 @@ const logger = createLogger('backoffice-rbac-guard')
 export function createBackofficeRBACGuard(
   logger: ReturnType<typeof createLogger>,
   requiredModule: Module,
-  requiredAction: ActionEnum
+  requiredAction: ActionEnum,
 ): MiddlewareHandler {
   return async (c: Context, next) => {
-    const correlation_id = c.get('correlationId') || 'unknown'
-    const staff_user = c.get('staff_user')
-    const tenant = c.get('tenant')
+    const correlation_id = c.get("correlationId") || "unknown";
+    const staff_user = c.get("staff_user");
+    const tenant = c.get("tenant");
 
     if (!staff_user) {
       return c.json(
@@ -212,38 +223,38 @@ export function createBackofficeRBACGuard(
           success: false,
           data: null,
           error: {
-            code: 'UNAUTHORIZED',
-            message: 'Staff user context not found',
+            code: "UNAUTHORIZED",
+            message: "Staff user context not found",
             correlationId: correlation_id,
           },
         },
-        401
-      )
+        401,
+      );
     }
 
     // Check enabled_modules first (fast client-side gate before DB query)
-    const enabled_modules: string[] = c.get('enabled_modules') ?? []
+    const enabled_modules: string[] = c.get("enabled_modules") ?? [];
     if (!enabled_modules.includes(requiredModule)) {
-      logger.warn('Module not licensed', {
+      logger.warn("Module not licensed", {
         workspace_slug: tenant.slug,
         workspace_id: tenant.id,
         correlation_id,
         route_name: c.req.routePath,
         user_id: staff_user.user_id,
         module: requiredModule,
-      })
+      });
       return c.json(
         {
           success: false,
           data: null,
           error: {
-            code: 'MODULE_NOT_LICENSED',
+            code: "MODULE_NOT_LICENSED",
             message: `Module ${requiredModule} is not enabled for this workspace`,
             correlationId: correlation_id,
           },
         },
-        403
-      )
+        403,
+      );
     }
 
     // F-02: RBAC Caching Strategy
@@ -252,13 +263,13 @@ export function createBackofficeRBACGuard(
     // TTL: 30 seconds (matches WS poll interval — permissions change infrequently in bootstrap phase)
     // Cache invalidation: not required for STAGE_17 (no RBAC mutation APIs yet)
     // The first miss fetches from tenant DB; subsequent requests within the TTL return Redis hit.
-    const rbacCacheKey = `rbac:${tenant.id}:${staff_user.user_id}:${requiredModule}:${requiredAction}`
-    const cached = await tenant.redis?.get(rbacCacheKey) // uses tenant-scoped redis if available, else falls through
+    const rbacCacheKey = `rbac:${tenant.id}:${staff_user.user_id}:${requiredModule}:${requiredAction}`;
+    const cached = await tenant.redis?.get(rbacCacheKey); // uses tenant-scoped redis if available, else falls through
     if (cached !== null && cached !== undefined) {
-      const hasPermission = cached === '1'
+      const hasPermission = cached === "1";
       if (!hasPermission) {
         // Serve cached denial from Redis — no DB query
-        logger.warn('RBAC permission denied (cached)', {
+        logger.warn("RBAC permission denied (cached)", {
           workspace_slug: tenant.slug,
           workspace_id: tenant.id,
           correlation_id,
@@ -266,26 +277,26 @@ export function createBackofficeRBACGuard(
           user_id: staff_user.user_id,
           module: requiredModule,
           action: requiredAction,
-        })
+        });
         return c.json(
           {
             success: false,
             data: null,
             error: {
-              code: 'RBAC_PERMISSION_DENIED',
-              message: 'Insufficient permissions',
+              code: "RBAC_PERMISSION_DENIED",
+              message: "Insufficient permissions",
               correlationId: correlation_id,
             },
           },
-          403
-        )
+          403,
+        );
       }
-      await next()
-      return
+      await next();
+      return;
     }
 
     // Cache miss — Query tenant DB for permission
-    const tenantDb = tenant.pool
+    const tenantDb = tenant.pool;
     const result = await tenantDb.query<{ has_permission: boolean }>(
       `
       SELECT EXISTS (
@@ -297,15 +308,15 @@ export function createBackofficeRBACGuard(
         AND    rp.action         = $3
       ) AS has_permission
     `,
-      [staff_user.user_id, requiredModule, requiredAction]
-    )
+      [staff_user.user_id, requiredModule, requiredAction],
+    );
 
-    const hasPermission = result.rows[0]?.has_permission ?? false
+    const hasPermission = result.rows[0]?.has_permission ?? false;
     // Store result in Redis cache (TTL = 30 s)
-    await tenant.redis?.set(rbacCacheKey, hasPermission ? '1' : '0', { EX: 30 })
+    await tenant.redis?.set(rbacCacheKey, hasPermission ? "1" : "0", { EX: 30 });
 
     if (!hasPermission) {
-      logger.warn('RBAC permission denied', {
+      logger.warn("RBAC permission denied", {
         workspace_slug: tenant.slug,
         workspace_id: tenant.id,
         correlation_id,
@@ -313,23 +324,23 @@ export function createBackofficeRBACGuard(
         user_id: staff_user.user_id,
         module: requiredModule,
         action: requiredAction,
-      })
+      });
       return c.json(
         {
           success: false,
           data: null,
           error: {
-            code: 'RBAC_PERMISSION_DENIED',
-            message: 'Insufficient permissions',
+            code: "RBAC_PERMISSION_DENIED",
+            message: "Insufficient permissions",
             correlationId: correlation_id,
           },
         },
-        403
-      )
+        403,
+      );
     }
 
-    await next()
-  }
+    await next();
+  };
 }
 ```
 
@@ -337,9 +348,14 @@ export function createBackofficeRBACGuard(
 
 ### API-04: License Gate Middleware — Backoffice-Specific Responses
 
-**File:** `apps/api/src/middleware/license-enforcement.ts` (**UPDATE existing file** — add `correlationId` to all non-ACTIVE error responses)
+**File:** `apps/api/src/middleware/license-enforcement.ts` (**UPDATE existing file** — add
+`correlationId` to all non-ACTIVE error responses)
 
-**V-06 implementation note:** The existing `license-enforcement.ts` returns `{ code, message }` in error objects without `correlationId`. As part of this stage's API-04 task, the `toLicenseError()` helper (or the middleware's response builder) must be updated to include `correlationId: c.get('correlationId') ?? 'unknown'` in every non-ACTIVE error response. This is a mandatory change in the existing file, not a new file.
+**V-06 implementation note:** The existing `license-enforcement.ts` returns `{ code, message }` in
+error objects without `correlationId`. As part of this stage's API-04 task, the `toLicenseError()`
+helper (or the middleware's response builder) must be updated to include
+`correlationId: c.get('correlationId') ?? 'unknown'` in every non-ACTIVE error response. This is a
+mandatory change in the existing file, not a new file.
 
 **Requirement:** All non-ACTIVE responses must use the standard error contract with typed codes:
 
@@ -349,7 +365,8 @@ export function createBackofficeRBACGuard(
 | `ARCHIVED`          | 403  | `LICENSE_ARCHIVED`    |
 | Workspace not found | 404  | `WORKSPACE_NOT_FOUND` |
 
-The existing `license-enforcement.ts` uses `toLicenseError()` helper — confirm this helper produces the above codes. If not, add the missing codes to the helper.
+The existing `license-enforcement.ts` uses `toLicenseError()` helper — confirm this helper produces
+the above codes. If not, add the missing codes to the helper.
 
 **Structured response (all non-ACTIVE):**
 
@@ -371,51 +388,51 @@ The existing `license-enforcement.ts` uses `toLicenseError()` helper — confirm
 
 **File:** `apps/api/src/middleware/backoffice-module-guard.ts`
 
-**Purpose:** Blocks API endpoints scoped to a disabled module before the RBAC check. This is a lightweight guard that checks `c.get('enabled_modules')` without a DB query.
+**Purpose:** Blocks API endpoints scoped to a disabled module before the RBAC check. This is a
+lightweight guard that checks `c.get('enabled_modules')` without a DB query.
 
 ```typescript
 // apps/api/src/middleware/backoffice-module-guard.ts
-import { Module } from '@zidney/types'
-import { createLogger } from '@zidney/logger'
-import { Context, MiddlewareHandler } from 'hono'
-import type { Logger } from '@zidney/logger'
+import { Module } from "@zidney/types";
+import { createLogger } from "@zidney/logger";
+import { Context, MiddlewareHandler } from "hono";
+import type { Logger } from "@zidney/logger";
 
 // M-02 FIX: logger is required to emit security audit log on denial
-export function createModuleGuard(
-  logger: Logger,
-  requiredModule: Module
-): MiddlewareHandler {
+export function createModuleGuard(logger: Logger, requiredModule: Module): MiddlewareHandler {
   return async (c: Context, next) => {
-    const enabled_modules: string[] = c.get('enabled_modules') ?? []
+    const enabled_modules: string[] = c.get("enabled_modules") ?? [];
     if (!enabled_modules.includes(requiredModule)) {
       // M-02 FIX: emit security audit log on every module guard denial
-      logger.warn('Module guard denied request', {
+      logger.warn("Module guard denied request", {
         module: requiredModule,
-        workspace_id: c.get('workspace_id') ?? 'unknown',
-        workspace_slug: c.get('workspace_slug') ?? 'unknown',
-        correlation_id: c.get('correlationId') ?? 'unknown',
-        user_id: c.get('staff_user')?.user_id ?? 'unknown',
+        workspace_id: c.get("workspace_id") ?? "unknown",
+        workspace_slug: c.get("workspace_slug") ?? "unknown",
+        correlation_id: c.get("correlationId") ?? "unknown",
+        user_id: c.get("staff_user")?.user_id ?? "unknown",
         route_name: `${c.req.method} ${c.req.path}`,
-      })
+      });
       return c.json(
         {
           success: false,
           data: null,
           error: {
-            code: 'MODULE_NOT_LICENSED',
+            code: "MODULE_NOT_LICENSED",
             message: `Module ${requiredModule} is not available for this workspace`,
-            correlationId: c.get('correlationId') ?? 'unknown',
+            correlationId: c.get("correlationId") ?? "unknown",
           },
         },
-        403
-      )
+        403,
+      );
     }
-    await next()
-  }
+    await next();
+  };
 }
 ```
 
-**Note:** The RBAC guard (API-03) also performs the module check as a fast pre-step. The standalone `ModuleGuard` is used on routes that need module enforcement without RBAC (e.g., read-only public module pages where no role check is needed).
+**Note:** The RBAC guard (API-03) also performs the module check as a fast pre-step. The standalone
+`ModuleGuard` is used on routes that need module enforcement without RBAC (e.g., read-only public
+module pages where no role check is needed).
 
 ---
 
@@ -423,7 +440,8 @@ export function createModuleGuard(
 
 **File:** `apps/api/src/routes/backoffice/ws.ts`
 
-**Purpose:** Establishes a WebSocket connection for Backoffice. Validates workspace, license, and auth on handshake. Polls license status every `WS_LICENSE_POLL_INTERVAL_MS` ms during the session.
+**Purpose:** Establishes a WebSocket connection for Backoffice. Validates workspace, license, and
+auth on handshake. Polls license status every `WS_LICENSE_POLL_INTERVAL_MS` ms during the session.
 
 **Handshake requirements:**
 
@@ -443,21 +461,21 @@ export function createModuleGuard(
 
 ```typescript
 // apps/api/src/routes/backoffice/ws.ts
-import { createLogger } from '@zidney/logger'
-import { upgradeWebSocket } from 'hono/bun'
-import { createRedisClient } from '@zidney/redis-utils'
+import { createLogger } from "@zidney/logger";
+import { upgradeWebSocket } from "hono/bun";
+import { createRedisClient } from "@zidney/redis-utils";
 
-const logger = createLogger('backoffice-ws')
+const logger = createLogger("backoffice-ws");
 
 const WS_POLL_MS = Math.min(
-  Math.max(parseInt(process.env.WS_LICENSE_POLL_INTERVAL_MS ?? '30000'), 5000),
-  120000
-)
+  Math.max(parseInt(process.env.WS_LICENSE_POLL_INTERVAL_MS ?? "30000"), 5000),
+  120000,
+);
 
 // F-01 FIX: Module-scoped shared Redis client — shared across ALL connections on this process.
 // Never created per-connection; never closed per-connection.
 // Lifetime is process lifetime (same pattern as license middleware Redis client).
-const moduleWsRedis = createRedisClient() // @zidney/redis-utils — module singleton
+const moduleWsRedis = createRedisClient(); // @zidney/redis-utils — module singleton
 
 // Redis-backed connection registry: key = ws:backoffice:{workspace_id}:{user_id}, TTL = WS_POLL_MS * 3
 // Enforces single-connection-per-user across all nodes
@@ -465,153 +483,146 @@ const moduleWsRedis = createRedisClient() // @zidney/redis-utils — module sing
 
 export function createBackofficeWsRoute() {
   return upgradeWebSocket((c) => {
-    const tenant = c.get('tenant')
-    const staff_user = c.get('staff_user')
-    const correlation_id = c.get('correlationId') || 'unknown'
+    const tenant = c.get("tenant");
+    const staff_user = c.get("staff_user");
+    const correlation_id = c.get("correlationId") || "unknown";
     // WS-02 FIX: Hoist key to outer closure so onOpen/onClose/onError all share the same scope
     // F-01 FIX: Use module-scoped moduleWsRedis (no per-connection client)
-    const wsKey = `ws:backoffice:${tenant.id}:${staff_user.user_id}`
-    const wsRedis = moduleWsRedis // alias for clarity within handler scope
-    let pollInterval: ReturnType<typeof setInterval>
+    const wsKey = `ws:backoffice:${tenant.id}:${staff_user.user_id}`;
+    const wsRedis = moduleWsRedis; // alias for clarity within handler scope
+    let pollInterval: ReturnType<typeof setInterval>;
     // M-01 FIX: fail-closed on repeated poll failures
-    let consecutivePollFailures = 0
-    const MAX_POLL_FAILURES = parseInt(process.env.WS_MAX_POLL_FAILURES ?? '3')
+    let consecutivePollFailures = 0;
+    const MAX_POLL_FAILURES = parseInt(process.env.WS_MAX_POLL_FAILURES ?? "3");
 
     return {
       async onOpen(_, ws) {
         // H-02 FIX: Atomic SET NX prevents TOCTOU race — replaces two-step GET + SETEX
-        const registered = await wsRedis.set(wsKey, '1', {
+        const registered = await wsRedis.set(wsKey, "1", {
           NX: true,
           EX: Math.ceil((WS_POLL_MS * 3) / 1000),
-        })
+        });
         if (!registered) {
           // registered === null means key already exists → duplicate connection
-          logger.warn('Duplicate WS connection rejected', {
+          logger.warn("Duplicate WS connection rejected", {
             workspace_id: tenant.id,
             workspace_slug: tenant.slug,
             correlation_id,
             user_id: staff_user.user_id,
-            route_name: 'WS /ws/backoffice',
-          })
-          ws.close(1008, 'DUPLICATE_CONNECTION')
-          return
+            route_name: "WS /ws/backoffice",
+          });
+          ws.close(1008, "DUPLICATE_CONNECTION");
+          return;
         }
-        logger.info('Backoffice WS connected', {
+        logger.info("Backoffice WS connected", {
           workspace_id: tenant.id,
           workspace_slug: tenant.slug,
           correlation_id,
           user_id: staff_user.user_id,
-          route_name: 'WS /ws/backoffice',
-        })
+          route_name: "WS /ws/backoffice",
+        });
 
         pollInterval = setInterval(async () => {
           try {
             // V-04 FIX: Reuse outer-scope wsRedis client — no new Redis client per tick
-            const status = await wsRedis.get(`license:status:${tenant.id}`)
+            const status = await wsRedis.get(`license:status:${tenant.id}`);
             // CR FIX: Reset failure counter immediately after license is confirmed — BEFORE the
             // best-effort TTL refresh. If setex throws (transient Redis write hiccup) the
             // connection stays open because the license was confirmed ACTIVE on this tick.
-            consecutivePollFailures = 0
+            consecutivePollFailures = 0;
             // Best-effort TTL refresh — non-fatal if it fails
             try {
-              await wsRedis.setex(
-                wsKey,
-                Math.ceil((WS_POLL_MS * 3) / 1000),
-                '1'
-              )
+              await wsRedis.setex(wsKey, Math.ceil((WS_POLL_MS * 3) / 1000), "1");
             } catch {
               // Intentionally swallowed — TTL expiry is handled by onOpen NX enforcement
             }
-            if (status !== 'ACTIVE') {
-              logger.warn('WS license became non-ACTIVE; closing connection', {
+            if (status !== "ACTIVE") {
+              logger.warn("WS license became non-ACTIVE; closing connection", {
                 workspace_id: tenant.id,
                 workspace_slug: tenant.slug,
                 correlation_id,
                 user_id: staff_user.user_id,
-                license_status: status ?? 'UNKNOWN',
-                route_name: 'WS /ws/backoffice',
-              })
-              clearInterval(pollInterval)
-              ws.close(1008, 'WORKSPACE_SUSPENDED')
+                license_status: status ?? "UNKNOWN",
+                route_name: "WS /ws/backoffice",
+              });
+              clearInterval(pollInterval);
+              ws.close(1008, "WORKSPACE_SUSPENDED");
             }
           } catch (err) {
-            consecutivePollFailures++
+            consecutivePollFailures++;
             // M-01 FIX: fail-closed on repeated failures — suspend WS after MAX_POLL_FAILURES
             if (consecutivePollFailures >= MAX_POLL_FAILURES) {
-              logger.error(
-                'WS license poll exceeded max failures; closing fail-closed',
-                {
-                  workspace_id: tenant.id,
-                  workspace_slug: tenant.slug,
-                  correlation_id,
-                  user_id: staff_user.user_id,
-                  route_name: 'WS /ws/backoffice',
-                  consecutive_failures: consecutivePollFailures,
-                }
-              )
-              clearInterval(pollInterval)
-              ws.close(1011, 'POLL_FAILURE')
-            } else {
-              logger.error('WS license poll failed', {
+              logger.error("WS license poll exceeded max failures; closing fail-closed", {
                 workspace_id: tenant.id,
                 workspace_slug: tenant.slug,
                 correlation_id,
                 user_id: staff_user.user_id,
-                route_name: 'WS /ws/backoffice',
+                route_name: "WS /ws/backoffice",
+                consecutive_failures: consecutivePollFailures,
+              });
+              clearInterval(pollInterval);
+              ws.close(1011, "POLL_FAILURE");
+            } else {
+              logger.error("WS license poll failed", {
+                workspace_id: tenant.id,
+                workspace_slug: tenant.slug,
+                correlation_id,
+                user_id: staff_user.user_id,
+                route_name: "WS /ws/backoffice",
                 attempt: consecutivePollFailures,
-              })
+              });
             }
           }
-        }, WS_POLL_MS)
+        }, WS_POLL_MS);
       },
 
       onClose() {
-        clearInterval(pollInterval)
+        clearInterval(pollInterval);
         // CR FIX: Log Redis del failure (silent failure leaves presence key alive until TTL expiry)
         wsRedis.del(wsKey).catch((e: unknown) =>
-          logger.error('WS cleanup Redis del failed on close', {
+          logger.error("WS cleanup Redis del failed on close", {
             workspace_id: tenant.id,
             workspace_slug: tenant.slug,
             correlation_id,
             user_id: staff_user.user_id,
-            route_name: 'WS /ws/backoffice',
+            route_name: "WS /ws/backoffice",
             error: e instanceof Error ? e.message : String(e),
-          })
-        )
-        logger.info('Backoffice WS disconnected', {
+          }),
+        );
+        logger.info("Backoffice WS disconnected", {
           workspace_id: tenant.id,
           workspace_slug: tenant.slug,
           correlation_id,
           user_id: staff_user.user_id,
-          route_name: 'WS /ws/backoffice',
-        })
+          route_name: "WS /ws/backoffice",
+        });
       },
 
       onError(evt) {
-        clearInterval(pollInterval)
+        clearInterval(pollInterval);
         // CR FIX: Log Redis del failure + log evt.error for production observability
         wsRedis.del(wsKey).catch((e: unknown) =>
-          logger.error('WS cleanup Redis del failed on error', {
+          logger.error("WS cleanup Redis del failed on error", {
             workspace_id: tenant.id,
             workspace_slug: tenant.slug,
             correlation_id,
             user_id: staff_user.user_id,
-            route_name: 'WS /ws/backoffice',
+            route_name: "WS /ws/backoffice",
             error: e instanceof Error ? e.message : String(e),
-          })
-        )
-        logger.error('Backoffice WS error', {
+          }),
+        );
+        logger.error("Backoffice WS error", {
           workspace_id: tenant.id,
           workspace_slug: tenant.slug,
           correlation_id,
           user_id: staff_user.user_id,
-          route_name: 'WS /ws/backoffice',
+          route_name: "WS /ws/backoffice",
           // CR FIX: Include actual error diagnostic — evt.error was previously never read
           error_message: evt instanceof ErrorEvent ? evt.message : String(evt),
-        })
+        });
       },
-    }
-  })
+    };
+  });
 }
 ```
 
@@ -621,12 +632,13 @@ export function createBackofficeWsRoute() {
 
 **File:** `apps/api/src/app.ts` (or wherever Backoffice routes are mounted)
 
-Backoffice routes must be mounted under a workspace-scoped prefix with the full middleware chain applied:
+Backoffice routes must be mounted under a workspace-scoped prefix with the full middleware chain
+applied:
 
 ```typescript
 // Mount backoffice context route with full middleware chain + rate limiting
 app.use(
-  '/api/v1/backoffice/*',
+  "/api/v1/backoffice/*",
   correlationIdMiddleware,
   createTenantResolverMiddleware(logger, poolManager),
   licenseEnforcementMiddleware,
@@ -634,39 +646,39 @@ app.use(
   createRateLimitMiddleware({
     windowMs: 60_000,
     max: 60,
-    keyPrefix: 'backoffice',
+    keyPrefix: "backoffice",
   }), // V-05: @zidney/rate-limit.middleware
-  createAuthenticationMiddleware(logger) // validates workspace-scoped JWT from HttpOnly cookie
-)
+  createAuthenticationMiddleware(logger), // validates workspace-scoped JWT from HttpOnly cookie
+);
 
 // V-01 FIX: WebSocket endpoint needs its own explicit middleware chain (outside /api/v1/* scope)
 // H-01 FIX: Add rate limiting to WS upgrade path — identical window as API chain
 app.use(
-  '/ws/backoffice',
+  "/ws/backoffice",
   correlationIdMiddleware,
   createTenantResolverMiddleware(logger, poolManager),
   licenseEnforcementMiddleware,
   createRateLimitMiddleware({
     windowMs: 60_000,
     max: 10, // Lower limit for WS upgrades vs API requests
-    keyPrefix: 'backoffice-ws',
+    keyPrefix: "backoffice-ws",
   }),
-  createAuthenticationMiddleware(logger)
-)
+  createAuthenticationMiddleware(logger),
+);
 
 // Context endpoint (no RBAC guard — available to all authenticated staff)
-app.route('/api/v1', backofficeContextRouter)
+app.route("/api/v1", backofficeContextRouter);
 
 // WebSocket endpoint (no RBAC guard)
-app.get('/ws/backoffice', createBackofficeWsRoute())
+app.get("/ws/backoffice", createBackofficeWsRoute());
 
 // Example module-gated route (MCQ) — logger must be declared at module scope
-const routeLogger = createLogger('backoffice-routes')
+const routeLogger = createLogger("backoffice-routes");
 app.get(
-  '/api/v1/backoffice/mcq',
+  "/api/v1/backoffice/mcq",
   createBackofficeRBACGuard(routeLogger, Module.MCQ, ActionEnum.VIEW),
-  mcqListHandler
-)
+  mcqListHandler,
+);
 ```
 
 ---
@@ -705,52 +717,54 @@ apps/backoffice/
 
 **File:** `apps/backoffice/src/stores/context.ts`
 
-**Purpose:** Fetches and stores the `BackofficeContext` from `GET /api/backoffice/context`. Initialized once on app mount. All components and route guards consume this store — no additional API calls needed.
+**Purpose:** Fetches and stores the `BackofficeContext` from `GET /api/backoffice/context`.
+Initialized once on app mount. All components and route guards consume this store — no additional
+API calls needed.
 
 ```typescript
 // apps/backoffice/src/stores/context.ts
-import { defineStore } from 'pinia'
-import { ref, computed } from 'vue'
-import type { BackofficeContext } from '@zidney/types'
-import { Module } from '@zidney/types'
+import { defineStore } from "pinia";
+import { ref, computed } from "vue";
+import type { BackofficeContext } from "@zidney/types";
+import { Module } from "@zidney/types";
 
-export const useContextStore = defineStore('backoffice-context', () => {
-  const context = ref<BackofficeContext | null>(null)
-  const loading = ref(false)
-  const error = ref<{ code: string; message: string } | null>(null)
+export const useContextStore = defineStore("backoffice-context", () => {
+  const context = ref<BackofficeContext | null>(null);
+  const loading = ref(false);
+  const error = ref<{ code: string; message: string } | null>(null);
 
-  const isActive = computed(() => context.value?.license_status === 'ACTIVE')
-  const enabledModules = computed(() => context.value?.enabled_modules ?? [])
-  const licenseStatus = computed(() => context.value?.license_status ?? null)
-  const licenseErrorCode = computed(() => error.value?.code ?? null)
+  const isActive = computed(() => context.value?.license_status === "ACTIVE");
+  const enabledModules = computed(() => context.value?.enabled_modules ?? []);
+  const licenseStatus = computed(() => context.value?.license_status ?? null);
+  const licenseErrorCode = computed(() => error.value?.code ?? null);
 
   function hasModule(module: Module): boolean {
-    return enabledModules.value.includes(module)
+    return enabledModules.value.includes(module);
   }
 
   async function loadContext(): Promise<void> {
-    loading.value = true
-    error.value = null
+    loading.value = true;
+    error.value = null;
     try {
-      const response = await fetch('/api/v1/backoffice/context', {
+      const response = await fetch("/api/v1/backoffice/context", {
         // FE-01 FIX: HttpOnly SameSite=Strict cookie set by STAGE_03 auth API is sent automatically.
         // No Authorization header; no token read from JS-accessible storage.
-        credentials: 'include',
-      })
-      const json = await response.json()
+        credentials: "include",
+      });
+      const json = await response.json();
       if (!json.success) {
-        error.value = json.error
-        context.value = null
-        return
+        error.value = json.error;
+        context.value = null;
+        return;
       }
-      context.value = json.data as BackofficeContext
+      context.value = json.data as BackofficeContext;
     } catch (e) {
       error.value = {
-        code: 'NETWORK_ERROR',
-        message: 'Failed to load workspace context',
-      }
+        code: "NETWORK_ERROR",
+        message: "Failed to load workspace context",
+      };
     } finally {
-      loading.value = false
+      loading.value = false;
     }
   }
 
@@ -764,8 +778,8 @@ export const useContextStore = defineStore('backoffice-context', () => {
     licenseErrorCode,
     hasModule,
     loadContext,
-  }
-})
+  };
+});
 ```
 
 ---
@@ -783,59 +797,59 @@ export const useContextStore = defineStore('backoffice-context', () => {
 
 ```typescript
 // apps/backoffice/src/router/index.ts
-import { createRouter, createWebHistory, type RouteRecordRaw } from 'vue-router'
-import { Module } from '@zidney/types'
+import { createRouter, createWebHistory, type RouteRecordRaw } from "vue-router";
+import { Module } from "@zidney/types";
 
 const routes: RouteRecordRaw[] = [
   {
-    path: '/',
-    name: 'dashboard',
-    component: () => import('../views/Dashboard.vue'),
+    path: "/",
+    name: "dashboard",
+    component: () => import("../views/Dashboard.vue"),
     meta: { requiresAuth: true },
   },
   {
-    path: '/unavailable',
-    name: 'workspace-unavailable',
-    component: () => import('../views/WorkspaceUnavailable.vue'),
+    path: "/unavailable",
+    name: "workspace-unavailable",
+    component: () => import("../views/WorkspaceUnavailable.vue"),
     meta: { requiresAuth: false },
   },
   // Future module routes — registered here with requiredModule meta:
   // { path: '/mcq', name: 'mcq', component: ..., meta: { requiresAuth: true, requiredModule: Module.MCQ } },
-]
+];
 
 const router = createRouter({
   history: createWebHistory(),
   routes,
-})
+});
 
 router.beforeEach(async (to, _from, next) => {
   // Lazy import to avoid circular dep
-  const { useContextStore } = await import('../stores/context')
-  const contextStore = useContextStore()
+  const { useContextStore } = await import("../stores/context");
+  const contextStore = useContextStore();
 
   // Load context if not loaded
   if (!contextStore.context && !contextStore.loading) {
-    await contextStore.loadContext()
+    await contextStore.loadContext();
   }
 
   // License gate — redirect on non-ACTIVE
   if (to.meta.requiresAuth !== false && !contextStore.isActive) {
     return next({
-      name: 'workspace-unavailable',
-      query: { code: contextStore.licenseErrorCode ?? 'UNKNOWN' },
-    })
+      name: "workspace-unavailable",
+      query: { code: contextStore.licenseErrorCode ?? "UNKNOWN" },
+    });
   }
 
   // Module gate — redirect if module not enabled
-  const requiredModule = to.meta.requiredModule as Module | undefined
+  const requiredModule = to.meta.requiredModule as Module | undefined;
   if (requiredModule && !contextStore.hasModule(requiredModule)) {
-    return next({ name: 'dashboard' }) // or a module-unavailable route
+    return next({ name: "dashboard" }); // or a module-unavailable route
   }
 
-  next()
-})
+  next();
+});
 
-export default router
+export default router;
 ```
 
 ---
@@ -844,7 +858,9 @@ export default router
 
 **File:** `apps/backoffice/src/layouts/BackofficeLayout.vue`
 
-**Purpose:** Composes `AppLayout`, `SidebarLayout`, `TopBar` from `packages/ui-system`. Maps `enabledModules` from the Pinia context store into `SidebarLayout` `items` using `MODULE_LABELS` from `@zidney/types`. No hardcoded navigation items.
+**Purpose:** Composes `AppLayout`, `SidebarLayout`, `TopBar` from `packages/ui-system`. Maps
+`enabledModules` from the Pinia context store into `SidebarLayout` `items` using `MODULE_LABELS`
+from `@zidney/types`. No hardcoded navigation items.
 
 ```vue
 <!-- apps/backoffice/src/layouts/BackofficeLayout.vue -->
@@ -869,19 +885,17 @@ export default router
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
-import { AppLayout, SidebarLayout, TopBar } from '@zidney/ui-system'
-import { MODULE_LABELS } from '@zidney/types'
-import { useContextStore } from '../stores/context'
+import { computed } from "vue";
+import { useRouter, useRoute } from "vue-router";
+import { AppLayout, SidebarLayout, TopBar } from "@zidney/ui-system";
+import { MODULE_LABELS } from "@zidney/types";
+import { useContextStore } from "../stores/context";
 
-const contextStore = useContextStore()
-const router = useRouter()
-const route = useRoute()
+const contextStore = useContextStore();
+const router = useRouter();
+const route = useRoute();
 
-const workspaceName = computed(
-  () => contextStore.context?.workspace_slug ?? 'Backoffice'
-)
+const workspaceName = computed(() => contextStore.context?.workspace_slug ?? "Backoffice");
 
 // Build nav items from enabled_modules — NO hardcoded module list
 const navItems = computed(() =>
@@ -889,15 +903,13 @@ const navItems = computed(() =>
     id: mod,
     label: MODULE_LABELS[mod]?.en ?? mod,
     show: true,
-  }))
-)
+  })),
+);
 
-const activeNavItem = computed(
-  () => (route.meta.requiredModule as string) ?? ''
-)
+const activeNavItem = computed(() => (route.meta.requiredModule as string) ?? "");
 
 function handleNavClick(item: { id: string }) {
-  router.push({ name: item.id.toLowerCase() })
+  router.push({ name: item.id.toLowerCase() });
 }
 </script>
 ```
@@ -908,51 +920,50 @@ function handleNavClick(item: { id: string }) {
 
 **File:** `apps/backoffice/src/views/WorkspaceUnavailable.vue`
 
-**Purpose:** Renders a neutral "Workspace unavailable" screen. Reads `code` from route query params to select the appropriate variant. Never branches on HTTP status code alone (per FR-02.8).
+**Purpose:** Renders a neutral "Workspace unavailable" screen. Reads `code` from route query params
+to select the appropriate variant. Never branches on HTTP status code alone (per FR-02.8).
 
 ```vue
 <!-- apps/backoffice/src/views/WorkspaceUnavailable.vue -->
 <template>
-  <div
-    class="flex flex-col items-center justify-center min-h-screen text-center p-8"
-  >
+  <div class="flex flex-col items-center justify-center min-h-screen text-center p-8">
     <h1 class="text-2xl font-semibold text-gray-900 mb-2">{{ heading }}</h1>
     <p class="text-gray-500">{{ message }}</p>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
-import { useRoute } from 'vue-router'
+import { computed } from "vue";
+import { useRoute } from "vue-router";
 
-const route = useRoute()
-const code = computed(() => (route.query.code as string) ?? '')
+const route = useRoute();
+const code = computed(() => (route.query.code as string) ?? "");
 
 const heading = computed(() => {
   switch (code.value) {
-    case 'LICENSE_SOFT_LOCKED':
-      return 'Workspace Suspended'
-    case 'LICENSE_ARCHIVED':
-      return 'Workspace Archived'
-    case 'WORKSPACE_NOT_FOUND':
-      return 'Workspace Not Found'
+    case "LICENSE_SOFT_LOCKED":
+      return "Workspace Suspended";
+    case "LICENSE_ARCHIVED":
+      return "Workspace Archived";
+    case "WORKSPACE_NOT_FOUND":
+      return "Workspace Not Found";
     default:
-      return 'Workspace Unavailable'
+      return "Workspace Unavailable";
   }
-})
+});
 
 const message = computed(() => {
   switch (code.value) {
-    case 'LICENSE_SOFT_LOCKED':
-      return 'This workspace has been temporarily suspended. Please contact support.'
-    case 'LICENSE_ARCHIVED':
-      return 'This workspace has been permanently archived.'
-    case 'WORKSPACE_NOT_FOUND':
-      return 'The workspace you are looking for does not exist.'
+    case "LICENSE_SOFT_LOCKED":
+      return "This workspace has been temporarily suspended. Please contact support.";
+    case "LICENSE_ARCHIVED":
+      return "This workspace has been permanently archived.";
+    case "WORKSPACE_NOT_FOUND":
+      return "The workspace you are looking for does not exist.";
     default:
-      return 'This workspace is currently unavailable.'
+      return "This workspace is currently unavailable.";
   }
-})
+});
 </script>
 ```
 
@@ -975,14 +986,16 @@ const message = computed(() => {
 **Update `packages/types/src/index.ts`:**
 
 ```typescript
-export * from './tenant-rbac'
+export * from "./tenant-rbac";
 ```
 
 ### PKG-02: `packages/ui-system` — No New Components Required
 
-`AppLayout.vue`, `SidebarLayout.vue`, and `TopBar.vue` already exist with the required API. No new components needed for STAGE_17. `ContentArea` is served by `AppLayout`'s default slot.
+`AppLayout.vue`, `SidebarLayout.vue`, and `TopBar.vue` already exist with the required API. No new
+components needed for STAGE_17. `ContentArea` is served by `AppLayout`'s default slot.
 
-If STAGE_16 is incomplete and these components are missing, STAGE_17 UI work must be blocked pending that dependency.
+If STAGE_16 is incomplete and these components are missing, STAGE_17 UI work must be blocked pending
+that dependency.
 
 ---
 

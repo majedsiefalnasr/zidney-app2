@@ -9,7 +9,9 @@
 
 ## Executive Summary
 
-Phase 6 migrates 3 existing MMC pages from custom table implementations to the shared Zidney UI System (DataTable, AdvancedFilterBuilder, MultiLanguageInputModal). All pages maintain existing functionality while gaining:
+Phase 6 migrates 3 existing MMC pages from custom table implementations to the shared Zidney UI
+System (DataTable, AdvancedFilterBuilder, MultiLanguageInputModal). All pages maintain existing
+functionality while gaining:
 
 - ✅ Consistent UI/UX across MMC
 - ✅ Reduced code duplication

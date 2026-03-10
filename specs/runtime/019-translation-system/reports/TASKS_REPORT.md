@@ -8,7 +8,11 @@
 
 ## Summary
 
-28 atomic, dependency-ordered tasks generated spanning 6 execution phases: Setup (types/errors/constants), Migration (2 Drizzle schemas + DB migration), Domain (translation + coverage services), API (4 route handlers + workspace-settings integration), Worker (DRAIN_LANGUAGE_TRANSLATIONS job), and Tests (unit + integration + contract). Task ordering enforces all cross-phase dependencies.
+28 atomic, dependency-ordered tasks generated spanning 6 execution phases: Setup
+(types/errors/constants), Migration (2 Drizzle schemas + DB migration), Domain (translation +
+coverage services), API (4 route handlers + workspace-settings integration), Worker
+(DRAIN_LANGUAGE_TRANSLATIONS job), and Tests (unit + integration + contract). Task ordering enforces
+all cross-phase dependencies.
 
 ---
 
@@ -39,19 +43,27 @@
 
 ## Transactional Tasks
 
-- **T007** (translation.service.ts): upsertTranslations commits N upserts + N audit inserts atomically; batch validation failure triggers full rollback
+- **T007** (translation.service.ts): upsertTranslations commits N upserts + N audit inserts
+  atomically; batch validation failure triggers full rollback
 - **T008** (coverage.service.ts): no direct write transactions; invalidation call is fire-and-forget
-- **T014** (POST translations route): 1 transaction per single/batch write — all rows + audit entries committed together
-- **T018** (workspace-settings.service.ts): language removal ≤10K: `workspace_settings` update + translations DELETE + audit entries in 1 transaction; language removal >10K: 1 transaction for `language_status='removing'` + job enqueue only
-- **T020** (DRAIN job handler): 1 mini-transaction per batch of 1,000: DELETE with RETURNING + audit inserts committed atomically per batch
+- **T014** (POST translations route): 1 transaction per single/batch write — all rows + audit
+  entries committed together
+- **T018** (workspace-settings.service.ts): language removal ≤10K: `workspace_settings` update +
+  translations DELETE + audit entries in 1 transaction; language removal >10K: 1 transaction for
+  `language_status='removing'` + job enqueue only
+- **T020** (DRAIN job handler): 1 mini-transaction per batch of 1,000: DELETE with RETURNING + audit
+  inserts committed atomically per batch
 
 ---
 
 ## Idempotency Tasks
 
-- **T007** (translation.service.ts): Drizzle `onConflictDoUpdate` on composite unique constraint — submitting same composite key always safe; HTTP 200 for both create and update
-- **T020** (DRAIN job handler): reads only rows that still exist; `language_status='removing'` guard prevents duplicate job enqueue; safe to retry after crash
-- **T024** (integration tests): explicit idempotency test — rapid duplicate upsert submission produces no unique-constraint error, correct final state
+- **T007** (translation.service.ts): Drizzle `onConflictDoUpdate` on composite unique constraint —
+  submitting same composite key always safe; HTTP 200 for both create and update
+- **T020** (DRAIN job handler): reads only rows that still exist; `language_status='removing'` guard
+  prevents duplicate job enqueue; safe to retry after crash
+- **T024** (integration tests): explicit idempotency test — rapid duplicate upsert submission
+  produces no unique-constraint error, correct final state
 
 ---
 
@@ -71,8 +83,12 @@
 
 ## Open Risks
 
-- **T018 scope**: Modifying `workspace-settings.service.ts` for language removal cascade requires careful merge with any concurrent workspace settings work. This is the only task that touches an existing non-trivially shared file.
-- **Test infrastructure**: T024–T028 assume the integration test DB setup helper supports tenant DB isolation. If the test bootstrap for tenant DB is not stable, integration tests may have setup failures unrelated to the translation system itself.
+- **T018 scope**: Modifying `workspace-settings.service.ts` for language removal cascade requires
+  careful merge with any concurrent workspace settings work. This is the only task that touches an
+  existing non-trivially shared file.
+- **Test infrastructure**: T024–T028 assume the integration test DB setup helper supports tenant DB
+  isolation. If the test bootstrap for tenant DB is not stable, integration tests may have setup
+  failures unrelated to the translation system itself.
 
 ---
 

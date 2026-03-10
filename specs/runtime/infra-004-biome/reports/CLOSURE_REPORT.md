@@ -30,7 +30,8 @@
 
 - Single root `biome.json` configuration replacing ESLint + Prettier
 - Unified formatter (line width 100, single quotes, no semicolons, es5 trailing commas)
-- Unified linter with recommended rules + noUnusedImports + noDuplicateImports + noConsole enforcement
+- Unified linter with recommended rules + noUnusedImports + noDuplicateImports + noConsole
+  enforcement
 - Integrated import sorting (organizeImports)
 - Per-app test file overrides to silence noConsole in test suites
 - Per-app logger bridge overrides (structured-logger.ts, master-db-logger.ts)
@@ -47,7 +48,8 @@
 
 - 45 atomic migration tasks across 9 application/package zones
 - All production `console.*` calls replaced with structured `@zidney/logger` calls (backend)
-- Database migration runners, logger bridges, Vue error boundaries suppressed with biome-ignore comments
+- Database migration runners, logger bridges, Vue error boundaries suppressed with biome-ignore
+  comments
 - Zero `noConsole` violations after Pass 2 exit gate
 
 **Codebase Metrics:**

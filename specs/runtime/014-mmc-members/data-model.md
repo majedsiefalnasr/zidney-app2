@@ -2,7 +2,8 @@
 
 ## Overview
 
-This document specifies the complete database schema for MMC Members & RBAC. All entities are stored in `master_db` (platform context, not tenant context).
+This document specifies the complete database schema for MMC Members & RBAC. All entities are stored
+in `master_db` (platform context, not tenant context).
 
 ---
 
@@ -79,7 +80,8 @@ CREATE UNIQUE INDEX idx_mmc_members_username ON mmc_members(username);
 - **NOT NULL (username, email, password_hash, role_id, status):** Required fields cannot be omitted
 - **NOT NULL (created_at, updated_at):** All records timestamped
 - **FOREIGN KEY (role_id):** Members must reference existing role; orphaned members prevented
-- **FOREIGN KEY (created_by, updated_by):** Audit trail references must be valid or NULL (creator could leave org)
+- **FOREIGN KEY (created_by, updated_by):** Audit trail references must be valid or NULL (creator
+  could leave org)
 - **CHECK (status):** Only valid statuses allowed
 - **CHECK (token_version > 0):** Prevents invalid version numbers
 - **CHECK (LENGTH(username) > 2):** Prevents single-character usernames
@@ -96,7 +98,8 @@ CREATE UNIQUE INDEX idx_mmc_members_username ON mmc_members(username);
 
 ### Table 2: `roles`
 
-**Purpose:** Define MMC role definitions; each role has a set of permissions (domain × ability matrix).
+**Purpose:** Define MMC role definitions; each role has a set of permissions (domain × ability
+matrix).
 
 **Location:** master_db
 
@@ -139,7 +142,8 @@ CREATE INDEX idx_roles_status ON roles(status);
 
 ### Table 3: `role_permissions`
 
-**Purpose:** Deterministic permission matrix (one row per role × domain). Encodes which abilities each role has for each domain.
+**Purpose:** Deterministic permission matrix (one row per role × domain). Encodes which abilities
+each role has for each domain.
 
 **Location:** master_db
 
@@ -185,7 +189,8 @@ CREATE UNIQUE INDEX idx_role_permissions_role_domain ON role_permissions(role_id
 - **PRIMARY KEY (id):** Each permission row is unique
 - **UNIQUE (role_id, domain):** One row per role × domain guarantees determinism
 - **NOT NULL (role_id, domain):** Both are required
-- **NOT NULL (can_view, can_create, can_edit, can_delete):** All permission bits required (default FALSE if not specified)
+- **NOT NULL (can_view, can_create, can_edit, can_delete):** All permission bits required (default
+  FALSE if not specified)
 - **FOREIGN KEY (role_id):** Must reference existing role
 - **CHECK (domain IN (...)):** Only valid domains allowed
 - **NOT NULL (created_at, updated_at):** All records timestamped
@@ -215,7 +220,8 @@ When: User in Role Y attempts action on Domain D
 
 ### Table 4: `mmc_member_invitations`
 
-**Purpose:** One-time invitation workflow for member onboarding. Encodes invitation state (pending, accepted, expired) and one-time token.
+**Purpose:** One-time invitation workflow for member onboarding. Encodes invitation state (pending,
+accepted, expired) and one-time token.
 
 **Location:** master_db
 
@@ -256,9 +262,11 @@ CREATE UNIQUE INDEX idx_invitations_token_hash ON mmc_member_invitations(token_h
 - **PRIMARY KEY (id):** Each invitation is unique
 - **UNIQUE (token_hash):** One-time token cannot be reused
 - **NOT NULL (email, role_id, token_hash, status, expires_at, invited_by):** Required fields
-- **FOREIGN KEY (role_id):** Must reference existing role ON DELETE RESTRICT (preventing deletion of role with pending invitations)
+- **FOREIGN KEY (role_id):** Must reference existing role ON DELETE RESTRICT (preventing deletion of
+  role with pending invitations)
 - **FOREIGN KEY (invited_by):** MMC member who created invitation; ON DELETE SET NULL
-- **FOREIGN KEY (accepted_by_user_id):** Who created account from this invitation; ON DELETE SET NULL
+- **FOREIGN KEY (accepted_by_user_id):** Who created account from this invitation; ON DELETE SET
+  NULL
 - **CHECK (status):** Only valid statuses allowed
 - **NOT NULL (created_at, updated_at):** All records timestamped
 
@@ -294,7 +302,8 @@ Never: DELETE invitation (immutable audit trail).
 
 ### Table 5: `mmc_audit_log`
 
-**Purpose:** Immutable append-only audit trail of all destructive and administrative actions. Source of regulatory compliance evidence.
+**Purpose:** Immutable append-only audit trail of all destructive and administrative actions. Source
+of regulatory compliance evidence.
 
 **Location:** master_db
 
@@ -434,7 +443,8 @@ When action affects entity state, capture before/after:
 
 ### Table: `request_log`
 
-**Purpose:** Fallback idempotency cache when Redis unavailable; stores responses for duplicate requests.
+**Purpose:** Fallback idempotency cache when Redis unavailable; stores responses for duplicate
+requests.
 
 **Location:** master_db
 
@@ -463,7 +473,8 @@ CREATE UNIQUE INDEX idx_request_log_user_key ON request_log(user_id, idempotency
 
 - **PRIMARY KEY (id):** Each entry unique
 - **UNIQUE (user_id, idempotency_key):** One response per user × key
-- **NOT NULL (user_id, idempotency_key, http_method, http_path, response_status, response_body):** Required
+- **NOT NULL (user_id, idempotency_key, http_method, http_path, response_status, response_body):**
+  Required
 - **FOREIGN KEY (user_id):** MMC member; ON DELETE CASCADE (cleanup when user deleted)
 - **CHECK (response_status):** Only 2xx codes (success); failures not cached
 

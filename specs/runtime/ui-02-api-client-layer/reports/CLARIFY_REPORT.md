@@ -8,7 +8,9 @@
 
 ## Summary
 
-5 ambiguities identified and resolved with recommended defaults. Clarifications added FR-024 through FR-028, expanded edge cases, and updated assumptions. All categories are now fully resolved — no outstanding or deferred items remain.
+5 ambiguities identified and resolved with recommended defaults. Clarifications added FR-024 through
+FR-028, expanded edge cases, and updated assumptions. All categories are now fully resolved — no
+outstanding or deferred items remain.
 
 ---
 
@@ -44,7 +46,8 @@
 - Added FR-027: No internal logging/tracing in client
 - Added FR-028: No explicit queue limit during 401 refresh
 - Added `timeout` field to `RequestConfig` entity
-- Added 4 new edge case scenarios (timeout, network error code, queue depth, non-JSON body rejection)
+- Added 4 new edge case scenarios (timeout, network error code, queue depth, non-JSON body
+  rejection)
 - Added 4 new assumptions (JSON-only, no logging, timeout default, no network retry)
 - Appended `## Clarifications > ### Session 2026-03-01` section
 

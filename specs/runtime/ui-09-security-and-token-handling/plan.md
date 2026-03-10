@@ -12,7 +12,9 @@
 
 **No new ADR required.**
 
-This stage is purely additive and corrective within the existing auth layer. All changes extend existing factories with backward-compatible signatures. No structural changes to `packages/api-client` or any backend component.
+This stage is purely additive and corrective within the existing auth layer. All changes extend
+existing factories with backward-compatible signatures. No structural changes to
+`packages/api-client` or any backend component.
 
 ---
 
@@ -101,10 +103,10 @@ packages/api-client/src/client.ts             — already compliant (single-flig
 ### State Shape (existing — confirmed compliant)
 
 ```typescript
-const isAuthenticated = ref<boolean>(false) // FR-SEC-15: guard checks this only
-const user = ref<AuthUser | null>(null)
-const isLoading = ref<boolean>(false)
-const authError = ref<AuthError | null>(null) // carries AUTH_SESSION_EXPIRED on 401 expiry
+const isAuthenticated = ref<boolean>(false); // FR-SEC-15: guard checks this only
+const user = ref<AuthUser | null>(null);
+const isLoading = ref<boolean>(false);
+const authError = ref<AuthError | null>(null); // carries AUTH_SESSION_EXPIRED on 401 expiry
 ```
 
 ### Actions (existing — confirmed compliant)
@@ -119,34 +121,40 @@ const authError = ref<AuthError | null>(null) // carries AUTH_SESSION_EXPIRED on
 
 ### Session-Expired Notification Pattern
 
-When the `error.interceptor.ts` triggers the session-expiry flow, it sets `authError` on the store with `code: 'AUTH_SESSION_EXPIRED'` **before** calling `logout()`. The login page reads `authStore.authError` and displays the "Session expired — please sign in again" message. This requires no new notification store.
+When the `error.interceptor.ts` triggers the session-expiry flow, it sets `authError` on the store
+with `code: 'AUTH_SESSION_EXPIRED'` **before** calling `logout()`. The login page reads
+`authStore.authError` and displays the "Session expired — please sign in again" message. This
+requires no new notification store.
 
 ```typescript
 // In error.interceptor.ts (called from onAuthFailure wiring):
 authStore.authError = {
-  code: 'AUTH_SESSION_EXPIRED',
-  message: 'Session expired. Please sign in again.',
-}
-await authStore.logout()
+  code: "AUTH_SESSION_EXPIRED",
+  message: "Session expired. Please sign in again.",
+};
+await authStore.logout();
 ```
 
-The `logout()` action does NOT reset `authError` (it calls `resetState()` which resets `isAuthenticated`, `user`, `authError`). Therefore the interceptor must set `authError` AFTER calling logout, OR `resetState()` must be patched to preserve `AUTH_SESSION_EXPIRED`.
+The `logout()` action does NOT reset `authError` (it calls `resetState()` which resets
+`isAuthenticated`, `user`, `authError`). Therefore the interceptor must set `authError` AFTER
+calling logout, OR `resetState()` must be patched to preserve `AUTH_SESSION_EXPIRED`.
 
-**Resolution**: The interceptor calls a new `expireSession()` action (to be added — see below) that sets `authError` as part of the logout flow:
+**Resolution**: The interceptor calls a new `expireSession()` action (to be added — see below) that
+sets `authError` as part of the logout flow:
 
 ```typescript
 // New action added to auth.store.ts in all 3 apps:
 async function expireSession(): Promise<void> {
   // Idempotency: skip if already handling expiry
-  if (!isAuthenticated.value) return
+  if (!isAuthenticated.value) return;
 
   // Clear auth state immediately
-  tokenManager.clearToken()
-  isAuthenticated.value = false
-  user.value = null
+  tokenManager.clearToken();
+  isAuthenticated.value = false;
+  user.value = null;
 
   // Navigate to login
-  await router.push({ name: loginRouteName })
+  await router.push({ name: loginRouteName });
 
   // Set session-expired error AFTER navigation so it is not cleared by any
   // navigation-triggered store reaction. Note: expireSession() intentionally
@@ -154,14 +162,15 @@ async function expireSession(): Promise<void> {
   // The server already invalidated the session (it returned 401), so no
   // backend call is necessary or safe to make here.
   authError.value = {
-    code: 'AUTH_SESSION_EXPIRED',
-    message: 'Session expired. Please sign in again.',
-  }
-  logger.info('Session expired — user redirected to login')
+    code: "AUTH_SESSION_EXPIRED",
+    message: "Session expired. Please sign in again.",
+  };
+  logger.info("Session expired — user redirected to login");
 }
 ```
 
-**Updated file**: `apps/*/src/core/state/auth.store.ts` — add `expireSession()` action and export it.
+**Updated file**: `apps/*/src/core/state/auth.store.ts` — add `expireSession()` action and export
+it.
 
 ---
 
@@ -169,7 +178,10 @@ async function expireSession(): Promise<void> {
 
 **File**: `apps/*/src/core/api/interceptors/auth.interceptor.ts`
 
-> **Note**: Authorization header injection is ALREADY handled centrally in `packages/api-client/src/interceptors.ts:applyAuthHeader()`. This file is a **documentation shim** that describes the injection point and re-exports the relevant type for app-level wiring documentation. No business logic here.
+> **Note**: Authorization header injection is ALREADY handled centrally in
+> `packages/api-client/src/interceptors.ts:applyAuthHeader()`. This file is a **documentation shim**
+> that describes the injection point and re-exports the relevant type for app-level wiring
+> documentation. No business logic here.
 
 ```typescript
 /**
@@ -190,14 +202,21 @@ async function expireSession(): Promise<void> {
  * Stage: STAGE_UI_09_SECURITY_AND_TOKEN_HANDLING
  */
 export const AUTH_INTERCEPTOR_DOCS = {
-  location: 'packages/api-client/src/interceptors.ts:applyAuthHeader',
-  frs: ['FR-SEC-04', 'FR-SEC-05', 'FR-SEC-06'],
-} as const
+  location: "packages/api-client/src/interceptors.ts:applyAuthHeader",
+  frs: ["FR-SEC-04", "FR-SEC-05", "FR-SEC-06"],
+} as const;
 ```
 
-This file enforces the architectural rule that injection is single-location, serves as a discoverable reference, and satisfies the spec's `core/api/interceptors/` directory structure requirement.
+This file enforces the architectural rule that injection is single-location, serves as a
+discoverable reference, and satisfies the spec's `core/api/interceptors/` directory structure
+requirement.
 
-> **F-PLAN-S2 (Scope clarification)**: `auth.interceptor.ts` is **NOT created by STAGE_UI_09**. FR-SEC-04/05/06 (single-location Authorization header injection) is already satisfied by `packages/api-client/src/interceptors.ts:applyAuthHeader()`, which is wired at app startup in `core/api/client.ts`. The documentation shim above is included for architectural clarity only. No implementation task references this file. If a future stage requires explicit per-app documentation of the injection policy, it should create this file at that point.
+> **F-PLAN-S2 (Scope clarification)**: `auth.interceptor.ts` is **NOT created by STAGE_UI_09**.
+> FR-SEC-04/05/06 (single-location Authorization header injection) is already satisfied by
+> `packages/api-client/src/interceptors.ts:applyAuthHeader()`, which is wired at app startup in
+> `core/api/client.ts`. The documentation shim above is included for architectural clarity only. No
+> implementation task references this file. If a future stage requires explicit per-app
+> documentation of the injection policy, it should create this file at that point.
 
 ---
 
@@ -220,17 +239,17 @@ This file enforces the architectural rule that injection is single-location, ser
  *
  * Stage: STAGE_UI_09_SECURITY_AND_TOKEN_HANDLING
  */
-import { createLogger } from '@zidney/logger'
+import { createLogger } from "@zidney/logger";
 
-const logger = createLogger('auth:error-interceptor')
+const logger = createLogger("auth:error-interceptor");
 
 export interface ErrorInterceptorOptions {
   /** Returns current isAuthenticated value from auth store */
-  getIsAuthenticated: () => boolean
+  getIsAuthenticated: () => boolean;
   /** Triggers session-expiry flow: set authError + clear state + redirect to login */
-  onSessionExpired: () => Promise<void>
+  onSessionExpired: () => Promise<void>;
   /** Triggered for 423 (workspace locked) and 426 (upgrade required) responses */
-  onLicenseError: (status: 423 | 426) => void
+  onLicenseError: (status: 423 | 426) => void;
 }
 
 export interface IErrorInterceptor {
@@ -238,58 +257,54 @@ export interface IErrorInterceptor {
    * Call this from the onAuthFailure callback in createAppApiClient.
    * Applies the isAuthenticated guard before triggering session expiry.
    */
-  handleAuthFailure(): Promise<void>
+  handleAuthFailure(): Promise<void>;
   /**
    * Call this when a non-ok HTTP response is received with status 423 or 426.
    */
-  handleLicenseError(status: 423 | 426): void
+  handleLicenseError(status: 423 | 426): void;
   /**
    * True while a 401 expiry flow is in progress.
    * Prevents concurrent interceptor invocations from re-entering the flow.
    */
-  readonly isHandling401: boolean
+  readonly isHandling401: boolean;
 }
 
-export function createErrorInterceptor(
-  options: ErrorInterceptorOptions
-): IErrorInterceptor {
-  let _isHandling401 = false
+export function createErrorInterceptor(options: ErrorInterceptorOptions): IErrorInterceptor {
+  let _isHandling401 = false;
 
   return {
     get isHandling401() {
-      return _isHandling401
+      return _isHandling401;
     },
 
     async handleAuthFailure(): Promise<void> {
       // FR-SEC-07: only trigger expiry flow for authenticated sessions
       if (!options.getIsAuthenticated()) {
-        logger.debug(
-          '401 received on unauthenticated request — passing through'
-        )
-        return
+        logger.debug("401 received on unauthenticated request — passing through");
+        return;
       }
 
       // FR-SEC-08: idempotency guard — drop storm
       if (_isHandling401) {
-        logger.debug('401 expiry flow already in progress — dropping duplicate')
-        return
+        logger.debug("401 expiry flow already in progress — dropping duplicate");
+        return;
       }
 
-      _isHandling401 = true
-      logger.warn('Authenticated session 401 — initiating session expiry flow')
+      _isHandling401 = true;
+      logger.warn("Authenticated session 401 — initiating session expiry flow");
 
       try {
-        await options.onSessionExpired()
+        await options.onSessionExpired();
       } finally {
-        _isHandling401 = false
+        _isHandling401 = false;
       }
     },
 
     handleLicenseError(status: 423 | 426): void {
-      logger.warn('License-related HTTP response received', { status })
-      options.onLicenseError(status)
+      logger.warn("License-related HTTP response received", { status });
+      options.onLicenseError(status);
     },
-  }
+  };
 }
 ```
 
@@ -301,11 +316,11 @@ The `createAppApiClient` factory is extended:
 export function createAppApiClient(
   tokenManager: ITokenManager,
   refreshManager: IRefreshManager,
-  errorInterceptor: IErrorInterceptor // ← new parameter
+  errorInterceptor: IErrorInterceptor, // ← new parameter
 ): ApiClient {
   const rawClient = createClient({
     baseUrl: appConfig.env.apiBaseUrl,
-    credentials: 'include',
+    credentials: "include",
     getAccessToken: () => tokenManager.getToken(),
     onRefreshToken: async (): Promise<string> => {
       /* unchanged */
@@ -313,15 +328,15 @@ export function createAppApiClient(
     onAuthFailure: () => {
       // FR-SEC-07/FR-SEC-08: delegated to error interceptor
       errorInterceptor.handleAuthFailure().catch((err: unknown) => {
-        logger.error('Error in auth failure handler', {
-          error: err instanceof Error ? err.message : 'unknown',
-        })
+        logger.error("Error in auth failure handler", {
+          error: err instanceof Error ? err.message : "unknown",
+        });
         // Fallback hard-redirect if router.push() fails inside expireSession()
-        window.location.href = '/'
-      })
+        window.location.href = "/";
+      });
     },
     adapter: createFetchAdapter(),
-  })
+  });
 
   // C1: 423/426 license response detection (FR-SEC-20/21).
   // packages/api-client does not expose an onLicenseError hook; the detection
@@ -334,22 +349,20 @@ export function createAppApiClient(
     ...rawClient,
     execute: async (request) => {
       try {
-        return await rawClient.execute(request)
+        return await rawClient.execute(request);
       } catch (err) {
-        if (
-          err instanceof ApiError &&
-          (err.status === 423 || err.status === 426)
-        ) {
-          errorInterceptor.handleLicenseError(err.status as 423 | 426)
+        if (err instanceof ApiError && (err.status === 423 || err.status === 426)) {
+          errorInterceptor.handleLicenseError(err.status as 423 | 426);
         }
-        throw err
+        throw err;
       }
     },
-  }
+  };
 }
 ```
 
-The `IErrorInterceptor` is created in `main.ts` after the auth store is initialized, then passed to `createAppApiClient`. This preserves the existing factory/dependency-injection pattern.
+The `IErrorInterceptor` is created in `main.ts` after the auth store is initialized, then passed to
+`createAppApiClient`. This preserves the existing factory/dependency-injection pattern.
 
 ### `main.ts` Wiring Sketch (all 3 apps)
 
@@ -365,21 +378,17 @@ const errorInterceptor = createErrorInterceptor({
   //     feature stages add them, without modifying the shared auth store.
   // T055–T057 MUST test this callback integration, not the expireSession() internals.
   onSessionExpired: async () => {
-    await authStore.expireSession() // clears auth state only
-    clearUserSpecificStores() // clears all session-bound UI stores
+    await authStore.expireSession(); // clears auth state only
+    clearUserSpecificStores(); // clears all session-bound UI stores
   },
   onLicenseError: (status) => {
     // Set a license-error flag in a UI state store (details in section 5)
-    if (status === 423) licenseStatusStore.setWorkspaceLocked(true)
-    if (status === 426) licenseStatusStore.setUpgradeRequired(true)
+    if (status === 423) licenseStatusStore.setWorkspaceLocked(true);
+    if (status === 426) licenseStatusStore.setUpgradeRequired(true);
   },
-})
+});
 
-const apiClient = createAppApiClient(
-  tokenManager,
-  refreshManager,
-  errorInterceptor
-)
+const apiClient = createAppApiClient(tokenManager, refreshManager, errorInterceptor);
 ```
 
 ---
@@ -394,35 +403,36 @@ Extend the unauthenticated redirect to preserve the intended route as `?redirect
 
 ```typescript
 // Before (existing):
-return { name: options.loginRouteName }
+return { name: options.loginRouteName };
 
 // After (extended, PF-03 — Code Reviewer / Performance Optimizer):
 // 1. Guard against redirect loops: if the target is already the login route, pass through.
 //    This is defense-in-depth in case meta.public is accidentally omitted from the login route.
-if (to.name === options.loginRouteName) return true
+if (to.name === options.loginRouteName) return true;
 
 // 2. Preserve the intended destination for post-login redirect.
 if (options.preserveRedirect !== false) {
   return {
     name: options.loginRouteName,
     query: { redirect: to.fullPath },
-  }
+  };
 }
-return { name: options.loginRouteName }
+return { name: options.loginRouteName };
 ```
 
 Extend `AuthGuardOptions`:
 
 ```typescript
 export interface AuthGuardOptions {
-  loginRouteName: string
-  dashboardRouteName: string
+  loginRouteName: string;
+  dashboardRouteName: string;
   /** When true, preserves the intended route as ?redirect query on unauthenticated access */
-  preserveRedirect?: boolean // default: true
+  preserveRedirect?: boolean; // default: true
 }
 ```
 
-The login page reads `route.query.redirect` after successful authentication and calls `router.push(query.redirect ?? { name: dashboardRouteName })`.
+The login page reads `route.query.redirect` after successful authentication and calls
+`router.push(query.redirect ?? { name: dashboardRouteName })`.
 
 ---
 
@@ -441,24 +451,38 @@ The login page reads `route.query.redirect` after successful authentication and 
 5. Calls `router.push({ name: loginRouteName })` ✅
 6. Sets `isLoading = false` after navigation resolves ✅
 
-No changes to the `logout()` action. The `expireSession()` action supplements it for the 401-triggered scenario.
+No changes to the `logout()` action. The `expireSession()` action supplements it for the
+401-triggered scenario.
 
 ### User-Specific State Clearing
 
-**FR-SEC-11 deferral (explicitly documented):** STAGE_UI_09 cannot enumerate session-bound Pinia stores because no feature stores exist yet — they are created in subsequent feature stages. Per FR-SEC-11, logout must clear all user-specific UI state. The implementation strategy is:
+**FR-SEC-11 deferral (explicitly documented):** STAGE_UI_09 cannot enumerate session-bound Pinia
+stores because no feature stores exist yet — they are created in subsequent feature stages. Per
+FR-SEC-11, logout must clear all user-specific UI state. The implementation strategy is:
 
-1. Each app's `main.ts` wiring defines a `clearUserSpecificStores()` helper and calls it from the `onSessionExpired` callback (after `authStore.expireSession()` resolves) — see Section 3 wiring sketch for the canonical pattern.
-2. As feature stages add session-bound stores, they are added to `clearUserSpecificStores()` in each app's `main.ts`.
-3. `logout()` action must also call `clearUserSpecificStores()` — but since `logout()` is user-initiated and wired at app startup (it can call a registered callback), the wiring pattern is identical: `logout()` in `auth.store.ts` accepts an optional `onClearUserSpecificStores?: () => void` callback registered at startup in `main.ts`. This is an extension to the existing `logout()` signature.
+1. Each app's `main.ts` wiring defines a `clearUserSpecificStores()` helper and calls it from the
+   `onSessionExpired` callback (after `authStore.expireSession()` resolves) — see Section 3 wiring
+   sketch for the canonical pattern.
+2. As feature stages add session-bound stores, they are added to `clearUserSpecificStores()` in each
+   app's `main.ts`.
+3. `logout()` action must also call `clearUserSpecificStores()` — but since `logout()` is
+   user-initiated and wired at app startup (it can call a registered callback), the wiring pattern
+   is identical: `logout()` in `auth.store.ts` accepts an optional
+   `onClearUserSpecificStores?: () => void` callback registered at startup in `main.ts`. This is an
+   extension to the existing `logout()` signature.
 
-> **Architectural clarification (C2)**: `clearUserSpecificStores()` is NOT called from within `expireSession()` itself. It is the responsibility of the `main.ts` wiring — specifically the `onSessionExpired` callback — to ensure user-specific stores are cleared after the auth state teardown. This prevents the auth store from depending on app-level store topology.
+> **Architectural clarification (C2)**: `clearUserSpecificStores()` is NOT called from within
+> `expireSession()` itself. It is the responsibility of the `main.ts` wiring — specifically the
+> `onSessionExpired` callback — to ensure user-specific stores are cleared after the auth state
+> teardown. This prevents the auth store from depending on app-level store topology.
 
 **Known session-bound stores at time of this stage (for initial implementation):**
 
 - `auth.store` (cleared by `resetState()` already)
 - Additional stores: per-app task to enumerate once feature stages land
 
-This is **not a deferral of implementation** — it is recognition that the list is currently empty. The wiring must be in place from day one.
+This is **not a deferral of implementation** — it is recognition that the list is currently empty.
+The wiring must be in place from day one.
 
 ```typescript
 // In main.ts or a dedicated session utilities file:
@@ -494,23 +518,23 @@ function clearUserSpecificStores(): void {
 
 /** Well-known log fields that may contain token values. */
 const SENSITIVE_KEYS = new Set([
-  'token',
-  'accessToken',
-  'access_token',
-  'refreshToken',
-  'refresh_token',
-  'authorization',
-  'Authorization',
-  'password',
-  'credential',
+  "token",
+  "accessToken",
+  "access_token",
+  "refreshToken",
+  "refresh_token",
+  "authorization",
+  "Authorization",
+  "password",
+  "credential",
   // CSRF tokens (FR-SEC-03: all credential-class fields must be redacted)
-  'csrfToken',
-  'csrf_token',
-  'x-csrf-token',
-  'X-CSRF-Token',
-])
+  "csrfToken",
+  "csrf_token",
+  "x-csrf-token",
+  "X-CSRF-Token",
+]);
 
-const REDACTED = '[REDACTED]' as const
+const REDACTED = "[REDACTED]" as const;
 
 /**
  * Returns a shallow copy of `logObject` with sensitive fields replaced by "[REDACTED]".
@@ -524,16 +548,14 @@ const REDACTED = '[REDACTED]' as const
  * tested in T026–T028 (token-redact unit tests). Shallow-copy behaviour is intentional:
  * nested objects must be pre-flattened by the caller before passing to this function.
  */
-export function redactSensitiveFields<T extends Record<string, unknown>>(
-  logObject: T
-): T {
-  const result = { ...logObject }
+export function redactSensitiveFields<T extends Record<string, unknown>>(logObject: T): T {
+  const result = { ...logObject };
   for (const key of Object.keys(result)) {
     if (SENSITIVE_KEYS.has(key)) {
-      result[key as keyof T] = REDACTED as unknown as T[keyof T]
+      result[key as keyof T] = REDACTED as unknown as T[keyof T];
     }
   }
-  return result
+  return result;
 }
 
 /**
@@ -541,15 +563,15 @@ export function redactSensitiveFields<T extends Record<string, unknown>>(
  * (long base64url string). Used in tests to verify no token leaked.
  */
 export function looksLikeToken(value: unknown): boolean {
-  if (typeof value !== 'string') return false
-  return value.length > 20 && /^[A-Za-z0-9\-_=.]+$/.test(value)
+  if (typeof value !== "string") return false;
+  return value.length > 20 && /^[A-Za-z0-9\-_=.]+$/.test(value);
 }
 ```
 
 ### Export from `core/auth/index.ts` (all 3 apps)
 
 ```typescript
-export { redactSensitiveFields, looksLikeToken } from './token-redact'
+export { redactSensitiveFields, looksLikeToken } from "./token-redact";
 ```
 
 ---
@@ -565,7 +587,11 @@ No new code files are required. The following is the enforcement baseline:
 | No `eval()` / `Function()` with user data | ESLint `no-eval` + `no-new-func`                                           |
 | Templates through Vue compiler only       | Architecture constraint — no server-side template injection possible       |
 
-**Action**: Enforce `vue/no-v-html` as `'error'` in `eslint.config.mjs`. Do not use `'warn'` — advisory-only enforcement is insufficient for XSS prevention and violates the constitutional security posture. Task T025 must audit all existing `v-html` usages first and eliminate or sanitize them before enabling the rule as `'error'`. If any unsanitized `v-html` usage is found, it must be resolved in the same PR. No new files needed beyond the ESLint config change.
+**Action**: Enforce `vue/no-v-html` as `'error'` in `eslint.config.mjs`. Do not use `'warn'` —
+advisory-only enforcement is insufficient for XSS prevention and violates the constitutional
+security posture. Task T025 must audit all existing `v-html` usages first and eliminate or sanitize
+them before enabling the rule as `'error'`. If any unsanitized `v-html` usage is found, it must be
+resolved in the same PR. No new files needed beyond the ESLint config change.
 
 ---
 
@@ -573,26 +599,27 @@ No new code files are required. The following is the enforcement baseline:
 
 ### UI State Store Extension
 
-Each app that already has a Pinia `ui` or `app` state store should add locked/upgrade flags. If no such store exists, a minimal `core/state/license-status.store.ts` is created per app.
+Each app that already has a Pinia `ui` or `app` state store should add locked/upgrade flags. If no
+such store exists, a minimal `core/state/license-status.store.ts` is created per app.
 
 ```typescript
 // core/state/license-status.store.ts (new, if no existing ui store)
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
+import { defineStore } from "pinia";
+import { ref } from "vue";
 
-export const useLicenseStatusStore = defineStore('licenseStatus', () => {
-  const isWorkspaceLocked = ref(false) // 423
-  const isUpgradeRequired = ref(false) // 426
+export const useLicenseStatusStore = defineStore("licenseStatus", () => {
+  const isWorkspaceLocked = ref(false); // 423
+  const isUpgradeRequired = ref(false); // 426
 
   function setWorkspaceLocked(): void {
-    isWorkspaceLocked.value = true
+    isWorkspaceLocked.value = true;
   }
   function setUpgradeRequired(): void {
-    isUpgradeRequired.value = true
+    isUpgradeRequired.value = true;
   }
   function clearLicenseStatus(): void {
-    isWorkspaceLocked.value = false
-    isUpgradeRequired.value = false
+    isWorkspaceLocked.value = false;
+    isUpgradeRequired.value = false;
   }
 
   return {
@@ -601,11 +628,13 @@ export const useLicenseStatusStore = defineStore('licenseStatus', () => {
     setWorkspaceLocked,
     setUpgradeRequired,
     clearLicenseStatus,
-  }
-})
+  };
+});
 ```
 
-The root `App.vue` in each app reads these flags and renders the appropriate full-page message (e.g., `WorkspaceLocked.vue`, `UpgradeRequired.vue`). This follows the passive consumer pattern defined in the spec's License & Version Enforcement section.
+The root `App.vue` in each app reads these flags and renders the appropriate full-page message
+(e.g., `WorkspaceLocked.vue`, `UpgradeRequired.vue`). This follows the passive consumer pattern
+defined in the spec's License & Version Enforcement section.
 
 **Rules enforced**:
 
@@ -692,18 +721,21 @@ refresh fails →
   refreshPromise = null
 ```
 
-`onAuthFailure()` is called exactly once per refresh cycle, regardless of how many concurrent 401s arrive.
+`onAuthFailure()` is called exactly once per refresh cycle, regardless of how many concurrent 401s
+arrive.
 
 ### Layer 2 — `error.interceptor.ts` `isHandling401` flag (new)
 
-Even if `onAuthFailure` is somehow called twice (e.g., due to timing on no-refresh path), the `_isHandling401` flag inside `createErrorInterceptor` ensures:
+Even if `onAuthFailure` is somehow called twice (e.g., due to timing on no-refresh path), the
+`_isHandling401` flag inside `createErrorInterceptor` ensures:
 
 ```
 Call 1: isHandling401 = false → set true → call onSessionExpired()
 Call 2: isHandling401 = true  → log debug "duplicate dropped" → return
 ```
 
-The flag is reset to `false` in the `finally` block after `onSessionExpired()` completes — meaning a completely new session cycle (after re-login) can trigger the flow again if needed.
+The flag is reset to `false` in the `finally` block after `onSessionExpired()` completes — meaning a
+completely new session cycle (after re-login) can trigger the flow again if needed.
 
 ### Layer 3 — `expireSession()` `isAuthenticated` guard (auth store)
 

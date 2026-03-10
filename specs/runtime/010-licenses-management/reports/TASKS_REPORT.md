@@ -20,7 +20,9 @@ This stage implements comprehensive License Management across all layers:
 - Testing (17 test suites)
 - Security & performance (8 tasks)
 
-All tasks are scoped to a single coherent unit (one file, one schema table, one API endpoint, one component). Task ordering enforces dependency resolution and enables parallel execution where appropriate.
+All tasks are scoped to a single coherent unit (one file, one schema table, one API endpoint, one
+component). Task ordering enforces dependency resolution and enables parallel execution where
+appropriate.
 
 ---
 
@@ -83,21 +85,29 @@ The following 8 tasks enforce deterministic, replay-safe operations:
 
 ### Job-Level Idempotency
 
-- **T043:** Implement provisioning job handler with `job_id` deduplication (INSERT with unique constraint on `attempts(job_id, workspace_id)`)
-- **T045:** Add deduplication check before status update (SELECT to confirm job_id already processed)
-- **T048:** Implement timeout detection and FAILED state transition (idempotent: state already FAILED or job in DLQ)
-- **T050:** Add provision failure handler with idempotent cleanup (DELETE removed only if cleanup not run)
+- **T043:** Implement provisioning job handler with `job_id` deduplication (INSERT with unique
+  constraint on `attempts(job_id, workspace_id)`)
+- **T045:** Add deduplication check before status update (SELECT to confirm job_id already
+  processed)
+- **T048:** Implement timeout detection and FAILED state transition (idempotent: state already
+  FAILED or job in DLQ)
+- **T050:** Add provision failure handler with idempotent cleanup (DELETE removed only if cleanup
+  not run)
 
 ### API-Level Idempotency
 
-- **T029:** Implement POST /v1/licenses (idempotency key via unique workspace_slug; POST not idempotent but database constraint prevents duplicates)
+- **T029:** Implement POST /v1/licenses (idempotency key via unique workspace_slug; POST not
+  idempotent but database constraint prevents duplicates)
 - **T032:** Implement PATCH /v1/licenses/:id/limits (idempotent UPDATE; same payload = same result)
-- **T033:** Implement POST /v1/licenses/:id/soft-lock (idempotent; setting same duration = no change if already locked)
-- **T034:** Implement POST /v1/licenses/:id/archive (idempotent DELETE; archiving archived license = no-op)
+- **T033:** Implement POST /v1/licenses/:id/soft-lock (idempotent; setting same duration = no change
+  if already locked)
+- **T034:** Implement POST /v1/licenses/:id/archive (idempotent DELETE; archiving archived license =
+  no-op)
 
 ### Idempotent Caching & Deduplication
 
-- **T054:** Add job idempotency window (60 seconds; replayed requests within window return cached result)
+- **T054:** Add job idempotency window (60 seconds; replayed requests within window return cached
+  result)
 - **T055:** Add exponential backoff with jitter (prevents thundering herd on retries)
 
 **Idempotency Guarantee Per Endpoint:**
@@ -179,7 +189,8 @@ The following task groups can execute in parallel:
 **Recommended Execution Strategy:**
 
 1. **Phase 1 (Days 1–2):** T001–T015 (setup + schema)
-2. **Phase 2 (Days 2–4, parallel):** T016–T034 (repo + service + API), T075–T085 (UI), T086–T091 (validation)
+2. **Phase 2 (Days 2–4, parallel):** T016–T034 (repo + service + API), T075–T085 (UI), T086–T091
+   (validation)
 3. **Phase 3 (Days 4–5, parallel):** T042–T063 (worker + logging), T064–T074 (tests)
 4. **Phase 4 (Days 6–7):** T092–T097 (E2E), T098–T117 (integration + security + performance)
 

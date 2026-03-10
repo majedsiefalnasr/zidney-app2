@@ -1,14 +1,15 @@
 # Analyze Report — STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
 
-**Step:** 5 — Analyze (Drift Detector)
-**Timestamp:** 2026-03-05T00:00:00Z
-**Status:** APPROVED
+**Step:** 5 — Analyze (Drift Detector) **Timestamp:** 2026-03-05T00:00:00Z **Status:** APPROVED
 
 ---
 
 ## Summary
 
-All 9 constitutional drift criteria passed. Zero critical issues. Zero high issues. Four medium and three low residual findings were identified — none are architectural blockers. All 8 targeted remediations from the first blocked pass have been verified present in the remediated artifacts. Implementation gate is open.
+All 9 constitutional drift criteria passed. Zero critical issues. Zero high issues. Four medium and
+three low residual findings were identified — none are architectural blockers. All 8 targeted
+remediations from the first blocked pass have been verified present in the remediated artifacts.
+Implementation gate is open.
 
 ### Remediation Verification
 
@@ -41,19 +42,27 @@ All 9 constitutional drift criteria passed. Zero critical issues. Zero high issu
 
 **Result: ✅ PASS**
 
-Frontend-only stage. No DB access, no connection pools, no cross-tenant joins. All components read from pre-resolved store state (auth.store, ui.store, workspace.store) — never raw tenant resolution. T001–T056 contain zero DB queries, zero tenant resolver calls, zero connection pool instantiations.
+Frontend-only stage. No DB access, no connection pools, no cross-tenant joins. All components read
+from pre-resolved store state (auth.store, ui.store, workspace.store) — never raw tenant resolution.
+T001–T056 contain zero DB queries, zero tenant resolver calls, zero connection pool instantiations.
 
 ### Criterion 2 — License Middleware Bypass
 
 **Result: ✅ PASS**
 
-`standaloneLayout: true` bypasses AppLayout shell rendering only — not the Vue Router `beforeEach` guard chain. AppLayout is a downstream visual wrapper; license enforcement runs before any view mounts. T026–T028 annotate: "do NOT pass `<router-view>` as slot content" — the standalone path renders bare `<router-view />` while router guards still execute on every navigation. T049/T050 integration tests assert this explicitly.
+`standaloneLayout: true` bypasses AppLayout shell rendering only — not the Vue Router `beforeEach`
+guard chain. AppLayout is a downstream visual wrapper; license enforcement runs before any view
+mounts. T026–T028 annotate: "do NOT pass `<router-view>` as slot content" — the standalone path
+renders bare `<router-view />` while router guards still execute on every navigation. T049/T050
+integration tests assert this explicitly.
 
 ### Criterion 3 — Snapshot Integrity
 
 **Result: ✅ PASS (N/A)**
 
-Frontend-only stage. No attempt engine code. No grading logic. T031 marks Frontoffice attempt runtime routes as `standaloneLayout: true`, which positively isolates the attempt runtime from layout interference.
+Frontend-only stage. No attempt engine code. No grading logic. T031 marks Frontoffice attempt
+runtime routes as `standaloneLayout: true`, which positively isolates the attempt runtime from
+layout interference.
 
 ### Criterion 4 — Missing Transactions
 
@@ -71,21 +80,27 @@ No API mutations, no Worker jobs, no attempt state transitions. Not applicable.
 
 **Result: ✅ PASS (N/A)**
 
-Version compatibility is enforced by backend middleware before views mount. Layout layer operates downstream of all version checks.
+Version compatibility is enforced by backend middleware before views mount. Layout layer operates
+downstream of all version checks.
 
 ### Criterion 7 — API vs Worker Authority
 
 **Result: ✅ PASS (N/A)**
 
-No new API routes or Worker job logic. AppHeader logout dispatches to `auth.store.logout()` (store action) — the store manages the API call, not the layout component.
+No new API routes or Worker job logic. AppHeader logout dispatches to `auth.store.logout()` (store
+action) — the store manages the API call, not the layout component.
 
 ### Criterion 8 — Logging Deficiencies
 
 **Result: ✅ PASS**
 
-No `console.log` in production layout code. Constitution logging rules (correlation_id, workspace_slug, service) apply to the server-side layer — not frontend UI obligations. ESLint `no-console` rule enforced via NFR-012.
+No `console.log` in production layout code. Constitution logging rules (correlation_id,
+workspace_slug, service) apply to the server-side layer — not frontend UI obligations. ESLint
+`no-console` rule enforced via NFR-012.
 
-**Residual (MEDIUM, non-blocking):** `handleLogout()` previously had no try/catch. Remediated in tasks.md — T017–T019 now require `handleLogout()` to wrap `await authStore.logout()` in try/catch to prevent uncaught promise rejections on network failure.
+**Residual (MEDIUM, non-blocking):** `handleLogout()` previously had no try/catch. Remediated in
+tasks.md — T017–T019 now require `handleLogout()` to wrap `await authStore.logout()` in try/catch to
+prevent uncaught promise rejections on network failure.
 
 ### Criterion 9 — Security Violations
 
@@ -158,7 +173,9 @@ drift_passed: true
 implementation_allowed: true
 ```
 
-All 9 criteria: **PASS**. All 8 first-pass remediations verified. Additional F4/F5/F6 pre-implementation improvements applied. Zero blocking violations. Four accepted/deferred low-risk gaps documented.
+All 9 criteria: **PASS**. All 8 first-pass remediations verified. Additional F4/F5/F6
+pre-implementation improvements applied. Zero blocking violations. Four accepted/deferred low-risk
+gaps documented.
 
 ---
 

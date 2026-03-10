@@ -67,8 +67,11 @@
 | Blocking     | 7     |
 | Non-Blocking | 18    |
 
-> **Blocking gaps** must be resolved before `STAGE_INFRA_GOVERNANCE` tasks can open. See [SAFE_ROLLOUT_PLAN.md](./SAFE_ROLLOUT_PLAN.md) for sequencing.
+> **Blocking gaps** must be resolved before `STAGE_INFRA_GOVERNANCE` tasks can open. See
+> [SAFE_ROLLOUT_PLAN.md](./SAFE_ROLLOUT_PLAN.md) for sequencing.
 
 ### Overall Risk Level
 
-**HIGH** — 9 of 25 gaps are HIGH severity, with 7 confirmed blocking gaps. The monorepo is not ready for governance enforcement. No `STAGE_INFRA_GOVERNANCE` task may open until all blocking gaps are resolved.
+**HIGH** — 9 of 25 gaps are HIGH severity, with 7 confirmed blocking gaps. The monorepo is not ready
+for governance enforcement. No `STAGE_INFRA_GOVERNANCE` task may open until all blocking gaps are
+resolved.

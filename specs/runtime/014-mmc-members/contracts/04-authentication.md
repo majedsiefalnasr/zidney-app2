@@ -2,7 +2,8 @@
 
 ## Overview
 
-Authentication and permission verification endpoints handle MMC member login, JWT issuance, session management via token versioning, and permission querying for UI optimization.
+Authentication and permission verification endpoints handle MMC member login, JWT issuance, session
+management via token versioning, and permission querying for UI optimization.
 
 ---
 
@@ -71,7 +72,8 @@ X-Forwarded-For: 203.0.113.45 (optional; IP detection)
 | token_version | integer     | Current token_version from DB; used for session invalidation |
 | exp           | timestamp   | Expiration (unix seconds); typically NOW + 3600              |
 
-**Important:** Token NEVER contains `workspace_id`. If token received by tenant endpoint with workspace_id, it's a cross-context rejection.
+**Important:** Token NEVER contains `workspace_id`. If token received by tenant endpoint with
+workspace_id, it's a cross-context rejection.
 
 ### Error Responses
 
@@ -463,7 +465,8 @@ def mmc_auth_middleware(request):
     return next()
 ```
 
-**Rationale:** MMC token issued by MMC issuer; if it contains workspace_id, it's a tenant token being misused. Reject immediately.
+**Rationale:** MMC token issued by MMC issuer; if it contains workspace_id, it's a tenant token
+being misused. Reject immediately.
 
 ---
 

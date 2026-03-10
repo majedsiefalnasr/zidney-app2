@@ -7,8 +7,7 @@
 - Phase: 6 - Polish and Deployment Readiness
 -
 - Complete reference for all MasterDBErrorCode values, HTTP status mappings,
-- and when each error is thrown
-  \*/
+- and when each error is thrown \*/
 
 # Master Database Error Codes Reference
 

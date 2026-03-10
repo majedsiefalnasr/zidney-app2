@@ -9,7 +9,9 @@
 
 ## Executive Summary
 
-Task decomposition has been completed, yielding **37 atomic, dependency-ordered tasks** across **12 categories**. All tasks embed locked architectural decisions, declare transactional status, idempotency requirements, middleware dependencies, and isolation guarantees.
+Task decomposition has been completed, yielding **37 atomic, dependency-ordered tasks** across **12
+categories**. All tasks embed locked architectural decisions, declare transactional status,
+idempotency requirements, middleware dependencies, and isolation guarantees.
 
 **Key Artifact:** [STAGE_16_TASKS.md](../STAGE_16_TASKS.md) (1,709 lines)
 
@@ -56,7 +58,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 2A: Filter Serialization Utilities**
 
-- **Scope:** Serialize/deserialize filters with base64 encoding, overflow detection (2000 char limit per DECISION 3)
+- **Scope:** Serialize/deserialize filters with base64 encoding, overflow detection (2000 char limit
+  per DECISION 3)
 - **Deliverable:** src/utils/filterSerialization.ts
 - **Transactional:** No – Pure functions
 - **Idempotency:** 100% – Deterministic output from input
@@ -68,7 +71,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 2B: Table State Management Utilities**
 
-- **Scope:** Utilities for managing DataTable state (sorting, filtering, column visibility, row selection)
+- **Scope:** Utilities for managing DataTable state (sorting, filtering, column visibility, row
+  selection)
 - **Deliverable:** src/utils/tableStateManagement.ts
 - **Transactional:** No – Pure helpers
 - **Idempotency:** 100%
@@ -79,7 +83,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 2C: URL State Synchronization Utilities**
 
-- **Scope:** Bi-directional URL ↔ filter state sync (restore from query params, update query on filter change)
+- **Scope:** Bi-directional URL ↔ filter state sync (restore from query params, update query on
+  filter change)
 - **Deliverable:** src/utils/urlStateSync.ts
 - **Transactional:** No – Pure helpers
 - **Idempotency:** 100%
@@ -102,7 +107,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 - **Isolation:** N/A – Client-side Vue state only
 - **Effort:** 6 hours
 - **Criticality:** HIGH
-- **Locked Decision Embedding:** DECISION 3 (URL primary with localStorage fallback, overflow detection, `isPersistedExternally` computed property)
+- **Locked Decision Embedding:** DECISION 3 (URL primary with localStorage fallback, overflow
+  detection, `isPersistedExternally` computed property)
 
 **Task 3B: usePagination Composable**
 
@@ -118,7 +124,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 3C: useColumnVisibility Composable**
 
-- **Scope:** Manage column visibility state with localStorage persistence, show/hide/toggle operations
+- **Scope:** Manage column visibility state with localStorage persistence, show/hide/toggle
+  operations
 - **Deliverable:** src/composables/useColumnVisibility.ts
 - **Transactional:** No – Vue state
 - **Idempotency:** N/A – Each call creates new instance
@@ -129,7 +136,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 3D: useMultiLanguageForm Composable**
 
-- **Scope:** Manage multi-language translation state, per-language validation, minimum 1 required language constraint
+- **Scope:** Manage multi-language translation state, per-language validation, minimum 1 required
+  language constraint
 - **Deliverable:** src/composables/useMultiLanguageForm.ts
 - **Transactional:** No – Vue state
 - **Idempotency:** N/A – Each call creates new instance
@@ -137,7 +145,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 - **Isolation:** N/A – Client-side only
 - **Effort:** 6 hours
 - **Criticality:** HIGH
-- **Locked Decision Embedding:** DECISION 5 (Per-language validation with `requiredLanguages.length >= 1` enforcement)
+- **Locked Decision Embedding:** DECISION 5 (Per-language validation with
+  `requiredLanguages.length >= 1` enforcement)
 
 ---
 
@@ -145,7 +154,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 4A: AppLayout Component**
 
-- **Scope:** Top-level layout (Sidebar, TopBar, MainContent slots; collapsible sidebar, navigation injection)
+- **Scope:** Top-level layout (Sidebar, TopBar, MainContent slots; collapsible sidebar, navigation
+  injection)
 - **Deliverable:** src/components/layouts/AppLayout.vue
 - **Transactional:** No – Presentational component
 - **Idempotency:** N/A – Deterministic rendering from props
@@ -156,7 +166,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 4B: SidebarLayout Component**
 
-- **Scope:** Compact sidebar layout with collapsible sections, navigation items, role-aware rendering
+- **Scope:** Compact sidebar layout with collapsible sections, navigation items, role-aware
+  rendering
 - **Deliverable:** src/components/layouts/SidebarLayout.vue
 - **Transactional:** No
 - **Idempotency:** N/A
@@ -182,7 +193,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 5A: DataTable Component – Core Implementation**
 
-- **Scope:** DataTable with server/client pagination (DECISION 1), column definitions, accessor logic (DECISION 4), controlled component pattern, row rendering
+- **Scope:** DataTable with server/client pagination (DECISION 1), column definitions, accessor
+  logic (DECISION 4), controlled component pattern, row rendering
 - **Deliverable:** src/components/data/DataTable.vue
 - **Transactional:** No – Presentational state only
 - **Idempotency:** N/A – Deterministic rendering from props
@@ -190,11 +202,13 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 - **Isolation:** Verified – No direct data access; all data via props
 - **Effort:** 12 hours
 - **Criticality:** CRITICAL
-- **Locked Decision Embedding:** DECISION 1 (Agnostic pagination), DECISION 4 (Optional accessor for primitives)
+- **Locked Decision Embedding:** DECISION 1 (Agnostic pagination), DECISION 4 (Optional accessor for
+  primitives)
 
 **Task 5B: DataTable Component – Async Row Actions**
 
-- **Scope:** Async row action callbacks, loading state management, error display, `@action-start`/`@action-end` events (DECISION 2)
+- **Scope:** Async row action callbacks, loading state management, error display,
+  `@action-start`/`@action-end` events (DECISION 2)
 - **Deliverable:** Modifications to src/components/data/DataTable.vue
 - **Transactional:** No – Local component state for loading feedback
 - **Idempotency:** N/A – Deterministic from props
@@ -202,11 +216,13 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 - **Isolation:** Verified – Events emitted; parent handles mutation
 - **Effort:** 8 hours
 - **Criticality:** CRITICAL
-- **Locked Decision Embedding:** DECISION 2 (Async row actions with component-managed loading; `@action-start`/`@action-end` events)
+- **Locked Decision Embedding:** DECISION 2 (Async row actions with component-managed loading;
+  `@action-start`/`@action-end` events)
 
 **Task 5C: AdvancedFilterBuilder Component**
 
-- **Scope:** Filter builder UI with field rendering, operator selection, overflow detection (2000 chars), localStorage fallback, `isPersistedExternally` flag (DECISION 3)
+- **Scope:** Filter builder UI with field rendering, operator selection, overflow detection (2000
+  chars), localStorage fallback, `isPersistedExternally` flag (DECISION 3)
 - **Deliverable:** src/components/data/AdvancedFilterBuilder.vue
 - **Transactional:** No – Presentational component
 - **Idempotency:** N/A – Deterministic rendering
@@ -214,11 +230,13 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 - **Isolation:** Verified – No data access
 - **Effort:** 10 hours
 - **Criticality:** CRITICAL
-- **Locked Decision Embedding:** DECISION 3 (URL primary, localStorage fallback with visibility indicator, overflow detection)
+- **Locked Decision Embedding:** DECISION 3 (URL primary, localStorage fallback with visibility
+  indicator, overflow detection)
 
 **Task 5D: ColumnVisibilityDropdown Component**
 
-- **Scope:** Multi-select dropdown for showing/hiding columns, integrates with useColumnVisibility composable
+- **Scope:** Multi-select dropdown for showing/hiding columns, integrates with useColumnVisibility
+  composable
 - **Deliverable:** src/components/data/ColumnVisibilityDropdown.vue
 - **Transactional:** No
 - **Idempotency:** N/A
@@ -255,7 +273,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 6A: DrawerFormLayout Component**
 
-- **Scope:** Drawer/side panel layout for forms with title, form slot, button footer, validation error display
+- **Scope:** Drawer/side panel layout for forms with title, form slot, button footer, validation
+  error display
 - **Deliverable:** src/components/forms/DrawerFormLayout.vue
 - **Transactional:** No – Presentational
 - **Idempotency:** N/A
@@ -277,7 +296,9 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 6C: MultiLanguageInputModal Component**
 
-- **Scope:** Modal for multi-language translation inputs, per-language validation (DECISION 5), minimum 1 required language enforcement, language filtering (all/filled/unfilled), translation coverage indicator
+- **Scope:** Modal for multi-language translation inputs, per-language validation (DECISION 5),
+  minimum 1 required language enforcement, language filtering (all/filled/unfilled), translation
+  coverage indicator
 - **Deliverable:** src/components/forms/MultiLanguageInputModal.vue
 - **Transactional:** No – Modal state only
 - **Idempotency:** N/A
@@ -285,7 +306,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 - **Isolation:** Verified – No data mutation; events only
 - **Effort:** 9 hours
 - **Criticality:** MEDIUM
-- **Locked Decision Embedding:** DECISION 5 (Per-language validation with `requiredLanguages.length >= 1` constraint)
+- **Locked Decision Embedding:** DECISION 5 (Per-language validation with
+  `requiredLanguages.length >= 1` constraint)
 
 ---
 
@@ -293,7 +315,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 7A: ConfirmDialog Component**
 
-- **Scope:** Confirmation modal for destructive actions (delete, archive) with title, message, confirm/cancel buttons
+- **Scope:** Confirmation modal for destructive actions (delete, archive) with title, message,
+  confirm/cancel buttons
 - **Deliverable:** src/components/utility/ConfirmDialog.vue
 - **Transactional:** No
 - **Idempotency:** N/A
@@ -326,7 +349,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 7D: EmptyState & LoadingState Components**
 
-- **Scope:** Placeholder UI for empty results and loading states with skeleton support, custom messages, optional action
+- **Scope:** Placeholder UI for empty results and loading states with skeleton support, custom
+  messages, optional action
 - **Deliverable:** src/components/utility/EmptyState.vue, src/components/utility/LoadingState.vue
 - **Transactional:** No
 - **Idempotency:** N/A
@@ -341,7 +365,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 8A: Package Structure & Configuration**
 
-- **Scope:** Setup packages/ui-system directory, tsconfig.json, vite.config.ts, tailwind integration, package.json dependencies
+- **Scope:** Setup packages/ui-system directory, tsconfig.json, vite.config.ts, tailwind
+  integration, package.json dependencies
 - **Deliverable:** packages/ui-system/ directory with all config files
 - **Transactional:** N/A – Configuration only
 - **Idempotency:** Yes – Idempotent to run multiple times
@@ -352,7 +377,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 8B: Exports & Barrel Export**
 
-- **Scope:** Create index.ts barrel export for all components, composables, types, utilities; configure TypeScript declarations
+- **Scope:** Create index.ts barrel export for all components, composables, types, utilities;
+  configure TypeScript declarations
 - **Deliverable:** src/index.ts, build output configuration
 - **Transactional:** N/A – Export configuration
 - **Idempotency:** Yes
@@ -367,7 +393,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 9A: Component Unit Tests**
 
-- **Scope:** Unit tests for all 13 components with ≥80% coverage; test props validation, event emission, loading states, error handling
+- **Scope:** Unit tests for all 13 components with ≥80% coverage; test props validation, event
+  emission, loading states, error handling
 - **Deliverable:** src/components/\*_/_.spec.ts (25+ test suites)
 - **Transactional:** No – Tests isolated
 - **Idempotency:** Yes – Tests fully replayable
@@ -378,7 +405,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 9B: Composable Unit Tests**
 
-- **Scope:** Unit tests for 4 composables with ≥85% coverage; test state management, event emission, error handling
+- **Scope:** Unit tests for 4 composables with ≥85% coverage; test state management, event emission,
+  error handling
 - **Deliverable:** src/composables/\*_/_.spec.ts (12+ test suites)
 - **Transactional:** No
 - **Idempotency:** Yes
@@ -389,7 +417,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 9C: Utility Function Tests**
 
-- **Scope:** Unit tests for all utilities (filter serialization, table state, URL sync) with ≥90% coverage
+- **Scope:** Unit tests for all utilities (filter serialization, table state, URL sync) with ≥90%
+  coverage
 - **Deliverable:** src/utils/\*_/_.spec.ts (8+ test suites)
 - **Transactional:** No
 - **Idempotency:** Yes
@@ -404,7 +433,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 10A: DataTable + Filter Integration**
 
-- **Scope:** Test filter → DataTable update → URL sync flow; verify serialization, deserialization, overflow handling
+- **Scope:** Test filter → DataTable update → URL sync flow; verify serialization, deserialization,
+  overflow handling
 - **Deliverable:** specs/integration/table-filter-flow.spec.ts
 - **Transactional:** No – Integration test environment
 - **Idempotency:** Yes
@@ -415,7 +445,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 10B: Form + MultiLanguage Integration**
 
-- **Scope:** Test form → MultiLanguage modal → form update flow; verify validation per language, minimum 1 required constraint
+- **Scope:** Test form → MultiLanguage modal → form update flow; verify validation per language,
+  minimum 1 required constraint
 - **Deliverable:** specs/integration/form-language-flow.spec.ts
 - **Transactional:** No
 - **Idempotency:** Yes
@@ -430,7 +461,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 11A: Component API Documentation**
 
-- **Scope:** Document all 13 components with prop signatures, event signatures, usage examples, accessibility notes
+- **Scope:** Document all 13 components with prop signatures, event signatures, usage examples,
+  accessibility notes
 - **Deliverable:** docs/api/components.md, inline TSDoc comments
 - **Transactional:** N/A – Documentation
 - **Idempotency:** Yes
@@ -441,7 +473,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 11B: Developer Guide & Migration Guide**
 
-- **Scope:** Guide for MMC developers on using shared UI components; refactoring guide for migrating old components
+- **Scope:** Guide for MMC developers on using shared UI components; refactoring guide for migrating
+  old components
 - **Deliverable:** docs/DEVELOPER_GUIDE.md, docs/MIGRATION_GUIDE.md
 - **Transactional:** N/A – Documentation
 - **Idempotency:** Yes
@@ -456,7 +489,8 @@ Task decomposition has been completed, yielding **37 atomic, dependency-ordered 
 
 **Task 12A: Refactor Audit Log Page (Phase 1)**
 
-- **Scope:** Migrate Audit Log listing page to use shared DataTable abstraction; validate in non-critical screen first
+- **Scope:** Migrate Audit Log listing page to use shared DataTable abstraction; validate in
+  non-critical screen first
 - **Deliverable:** Modified apps/mmc/src/pages/audit-log.vue
 - **Transactional:** Yes – Page refactor must not break MMC functionality
 - **Idempotency:** Yes – Can refactor multiple times, each yields same end state

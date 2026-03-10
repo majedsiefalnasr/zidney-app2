@@ -26,12 +26,18 @@
 
 ## 3. Executive Summary
 
-- **Adds tenant-level workspace settings** — 5 JSONB groups (general, language, branding, payment, security) stored in a single-row-per-tenant table with optimistic locking
-- **Payment credential encryption** — AES-256-GCM with environment-based key, v1: prefix for future rotation, credentials never exposed in API responses or logs
-- **Immutable audit trail** — DB-level trigger prevents UPDATE/DELETE on audit records, cursor-based pagination, field-level diff tracking with credential redaction
-- **Full middleware chain** — tenant resolver → license enforcement → schema version → rate limiting → JWT auth → RBAC (institution_admin)
-- **Database-per-tenant isolation preserved** — all DB access through tenant pool from request context, no cross-tenant vectors
-- **Constitutional guarantees intact** — server-authoritative time, transactional writes, idempotent upsert, structured logging with correlation_id
+- **Adds tenant-level workspace settings** — 5 JSONB groups (general, language, branding, payment,
+  security) stored in a single-row-per-tenant table with optimistic locking
+- **Payment credential encryption** — AES-256-GCM with environment-based key, v1: prefix for future
+  rotation, credentials never exposed in API responses or logs
+- **Immutable audit trail** — DB-level trigger prevents UPDATE/DELETE on audit records, cursor-based
+  pagination, field-level diff tracking with credential redaction
+- **Full middleware chain** — tenant resolver → license enforcement → schema version → rate limiting
+  → JWT auth → RBAC (institution_admin)
+- **Database-per-tenant isolation preserved** — all DB access through tenant pool from request
+  context, no cross-tenant vectors
+- **Constitutional guarantees intact** — server-authoritative time, transactional writes, idempotent
+  upsert, structured logging with correlation_id
 
 ---
 
@@ -89,7 +95,8 @@ Confirm compliance with Zidney Constitution v1.2.0:
 
 - [x] Structured logging enforced (@zidney/logger)
 - [x] Correlation IDs propagated (correlation_id in all log entries)
-- [x] Events emitted: workspace_settings_updated, workspace_settings_retrieved, audit_trail_queried, settings_operation_failed
+- [x] Events emitted: workspace_settings_updated, workspace_settings_retrieved, audit_trail_queried,
+      settings_operation_failed
 - [x] Alerts updated: N/A (new feature, no existing alerts to modify)
 
 ---
@@ -102,7 +109,8 @@ Confirm compliance with Zidney Constitution v1.2.0:
   - audit-diff.test.ts (12 tests)
   - workspace-settings-service.test.ts (33 tests)
 - [x] Integration tests added: 16 tests in workspace-settings-api.test.ts
-- [x] Edge cases covered: version conflict, invalid timezone, missing encryption key, credential sentinel values
+- [x] Edge cases covered: version conflict, invalid timezone, missing encryption key, credential
+      sentinel values
 - [x] Concurrency scenarios tested: optimistic locking 409, upsert ON CONFLICT
 - [x] Coverage: 140 total tests, 218 assertions
 
@@ -117,7 +125,8 @@ npx vitest run tests/unit/encryption-service.test.ts tests/unit/workspace-settin
 ## 10. Migration Impact
 
 - [x] New migration included: `20260228_002_workspace_settings_jsonb.ts`
-- [x] Backward compatibility verified: additive-only (new tables + columns, no ALTER on existing data)
+- [x] Backward compatibility verified: additive-only (new tables + columns, no ALTER on existing
+      data)
 - [x] Rollback strategy defined: database snapshot restore (forward-only policy)
 - [x] No untracked schema changes
 
@@ -152,7 +161,8 @@ Guardian Verdicts:
 
 ## 12. Stage Lifecycle Verification
 
-- [x] Stage Status updated in `specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_18_WORKSPACE_SETTINGS.md`
+- [x] Stage Status updated in
+      `specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_18_WORKSPACE_SETTINGS.md`
 - [x] .workflow-state.json updated to `PRODUCTION READY`
 - [x] README.md progress table complete
 - [x] All 7 step reports generated in `reports/`
@@ -176,7 +186,8 @@ Risk Level:
 - [ ] Medium
 - [ ] High
 
-Additive-only schema change. Singleton-row pattern. AES-256-GCM encryption. 140 tests covering all paths. Graceful degradation when encryption key is missing (503 only for payment operations).
+Additive-only schema change. Singleton-row pattern. AES-256-GCM encryption. 140 tests covering all
+paths. Graceful degradation when encryption key is missing (503 only for payment operations).
 
 ---
 

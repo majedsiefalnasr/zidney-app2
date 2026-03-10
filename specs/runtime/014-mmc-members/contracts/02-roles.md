@@ -2,7 +2,8 @@
 
 ## Overview
 
-Role management endpoints handle RBAC configuration: role definitions, permission matrices, and cascading permission updates across all members with session invalidation.
+Role management endpoints handle RBAC configuration: role definitions, permission matrices, and
+cascading permission updates across all members with session invalidation.
 
 ---
 
@@ -355,7 +356,8 @@ BEGIN TRANSACTION SERIALIZABLE
 COMMIT
 ```
 
-**Atomicity:** All updates committed together; if any fails, entire transaction rolls back (no partial permission changes).
+**Atomicity:** All updates committed together; if any fails, entire transaction rolls back (no
+partial permission changes).
 
 ---
 

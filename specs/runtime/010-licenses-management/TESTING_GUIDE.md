@@ -9,7 +9,8 @@
 
 ## Overview
 
-This testing guide covers comprehensive verification of the Licenses Management feature. The feature includes:
+This testing guide covers comprehensive verification of the Licenses Management feature. The feature
+includes:
 
 - License provisioning and lifecycle management
 - Soft-lock grace period enforcement (90 days)

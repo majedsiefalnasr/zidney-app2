@@ -1,9 +1,7 @@
 # Validation Report: STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION
 
-**Stage**: STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION
-**Phase**: 01_PLATFORM_FOUNDATION
-**Branch**: spec/infra-008-architecture-visualization
-**Validated**: 2026-03-09T13:50:00.000Z
+**Stage**: STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION **Phase**: 01_PLATFORM_FOUNDATION **Branch**:
+spec/infra-008-architecture-visualization **Validated**: 2026-03-09T13:50:00.000Z
 
 ---
 
@@ -30,7 +28,8 @@ bun -e "JSON.parse(require('fs').readFileSync('tests/unit/visualize/fixtures/arc
 
 ### T014 — Lint (New Files)
 
-**Command**: `bun run lint 2>&1 | grep -E "(scripts/architecture/visualize|tests/unit/visualize|tests/static/06)"`
+**Command**:
+`bun run lint 2>&1 | grep -E "(scripts/architecture/visualize|tests/unit/visualize|tests/static/06)"`
 
 **Result**: ✅ PASS — zero violations in new files.
 
@@ -44,7 +43,8 @@ bun -e "JSON.parse(require('fs').readFileSync('tests/unit/visualize/fixtures/arc
 
 **Result**: ✅ PASS — zero TypeScript errors in any new file.
 
-**Note**: Pre-existing type errors in `apps/api`, `apps/backoffice`, `packages/domain-core`, `scripts/ai-guard.ts`, `scripts/infra-audit.ts` are not introduced by this stage.
+**Note**: Pre-existing type errors in `apps/api`, `apps/backoffice`, `packages/domain-core`,
+`scripts/ai-guard.ts`, `scripts/infra-audit.ts` are not introduced by this stage.
 
 ---
 

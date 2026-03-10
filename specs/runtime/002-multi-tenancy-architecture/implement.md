@@ -18,7 +18,10 @@ State clearly:
 
 - Phase: 1 – Platform Foundation
 - Stage: STAGE_02_MULTI_TENANCY_ARCHITECTURE
-- Files allowed to change: apps/api/src/db/master/migrations/, apps/api/src/config/, apps/api/src/repositories/master/, apps/api/src/middleware/, apps/api/src/app.ts, apps/api/src/db/tenant/, .env.example, apps/api/src/middleware/**tests**/, apps/api/tests/integration/
+- Files allowed to change: apps/api/src/db/master/migrations/, apps/api/src/config/,
+  apps/api/src/repositories/master/, apps/api/src/middleware/, apps/api/src/app.ts,
+  apps/api/src/db/tenant/, .env.example, apps/api/src/middleware/**tests**/,
+  apps/api/tests/integration/
 - Files forbidden to change: Any outside API layer, any existing business logic
 
 No file outside stage scope may be modified.
@@ -91,7 +94,8 @@ Code must:
 **Migration: `apps/api/src/db/master/migrations/20260216_001_create_tenants_registry.ts`**
 
 - Creates `tenants_registry` table in master DB
-- Fields: id, workspace_slug, db_name, db_host, db_port, db_user, db_password, schema_version, created_at, updated_at
+- Fields: id, workspace_slug, db_name, db_host, db_port, db_user, db_password, schema_version,
+  created_at, updated_at
 - Uses Drizzle ORM for migration
 
 **Pool Manager: `apps/api/src/db/tenant/pool-manager.ts`**
@@ -116,7 +120,8 @@ Code must:
 - Schema version enforcement (current: 1.0.0)
 - Product version compatibility using semver
 - Connection pool creation via TenantPoolManager
-- Structured error responses: 404 (not found), 403 (archived), 423 (soft-locked), 426 (version mismatch), 503 (DB unavailable)
+- Structured error responses: 404 (not found), 403 (archived), 423 (soft-locked), 426 (version
+  mismatch), 503 (DB unavailable)
 - Correlation ID logging
 
 **App Wiring: `apps/api/src/app.ts`**

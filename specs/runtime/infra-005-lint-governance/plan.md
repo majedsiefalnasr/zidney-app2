@@ -13,7 +13,8 @@
 
 ## Overview
 
-This plan activates and completes the lint governance layer for the Zidney monorepo. Based on the research phase, the platform is approximately 80% compliant. The primary work is:
+This plan activates and completes the lint governance layer for the Zidney monorepo. Based on the
+research phase, the platform is approximately 80% compliant. The primary work is:
 
 1. One Biome rule change (`noUnreachable`: `warn` → `error`)
 2. One CI workflow addition (AI-Guard gate in `ci.yml`)
@@ -56,7 +57,9 @@ Before tasks.md execution begins:
 - [x] `.husky/pre-commit` exists with `bunx lint-staged` and `bun scripts/ai-guard.ts`
 - [ ] Baseline lint violations must be resolved before `noUnreachable: error` is activated
 
-**Pre-activation step:** Run `bun run lint:fix` across the full codebase before making the `noUnreachable` severity change. Any remaining unreachable code after auto-fix must be manually resolved or suppressed with a biome-ignore comment and rationale.
+**Pre-activation step:** Run `bun run lint:fix` across the full codebase before making the
+`noUnreachable` severity change. Any remaining unreachable code after auto-fix must be manually
+resolved or suppressed with a biome-ignore comment and rationale.
 
 ---
 
@@ -87,7 +90,10 @@ Promote `noUnreachable` from `warn` to `error`:
 }
 ```
 
-**Rationale:** Unreachable code always signals a logic error — a dead branch, an incorrect early return, or a condition that can never be true. At `warn` level, developers can commit unreachable code without a hard block. At `error` level, the commit is blocked until the code is fixed or explicitly suppressed.
+**Rationale:** Unreachable code always signals a logic error — a dead branch, an incorrect early
+return, or a condition that can never be true. At `warn` level, developers can commit unreachable
+code without a hard block. At `error` level, the commit is blocked until the code is fixed or
+explicitly suppressed.
 
 ### 1.2 Rules That Do NOT Change
 
@@ -108,7 +114,8 @@ These rules are already correct per spec FR-01:
 All existing overrides in `biome.json` are preserved without modification:
 
 - `packages/logger/**`, `apps/worker/src/observability/structured-logger.ts`: `noConsole: off`
-- Migration files (`apps/api/src/db/master/migrations/**`, `apps/api/src/db/tenant/migrations/**`): `noConsole: off`
+- Migration files (`apps/api/src/db/master/migrations/**`, `apps/api/src/db/tenant/migrations/**`):
+  `noConsole: off`
 - `scripts/**`: `noConsole: off`
 - Test files (`tests/**`, `**/*.test.ts`, `**/*.spec.ts`): `noConsole: off`
 - `**/*.vue`: `noUnusedImports: warn` (downgraded for Vue SFCs)
@@ -153,9 +160,11 @@ Group 5: Relative imports
   import type { LocalType } from './types'
 ```
 
-Each group is separated by a blank line. Biome applies this ordering automatically when `bun run lint:fix` is run. No additional `biome.json` configuration is needed.
+Each group is separated by a blank line. Biome applies this ordering automatically when
+`bun run lint:fix` is run. No additional `biome.json` configuration is needed.
 
-**How to fix import ordering:** Run `bun run lint:fix` on any file. Biome will sort and group imports automatically.
+**How to fix import ordering:** Run `bun run lint:fix` on any file. Biome will sort and group
+imports automatically.
 
 ### 1.5 Baseline Validation Step (Pre-Change)
 
@@ -174,7 +183,8 @@ bun run lint
 #      // biome-ignore lint/correctness/noUnreachable: <reason>
 ```
 
-**Expected scope:** Research indicates only a small number of `noUnreachable` warnings exist at baseline. The migration from `warn` to `error` should be low-friction.
+**Expected scope:** Research indicates only a small number of `noUnreachable` warnings exist at
+baseline. The migration from `warn` to `error` should be low-friction.
 
 ---
 
@@ -186,13 +196,15 @@ bun run lint
 
 ```js
 export default {
-  '*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --write'],
-}
+  "*.{ts,tsx,js,jsx,mjs,vue,json}": ["bun biome check --write"],
+};
 ```
 
 **Assessment: COMPLIANT — no changes required.**
 
-This configuration exactly matches spec FR-04. The pattern covers all TypeScript, JavaScript, Vue, and JSON staged files. The `--write` flag enables auto-fix. The `bun` invocation is correct per the monorepo convention.
+This configuration exactly matches spec FR-04. The pattern covers all TypeScript, JavaScript, Vue,
+and JSON staged files. The `--write` flag enables auto-fix. The `bun` invocation is correct per the
+monorepo convention.
 
 ### 2.2 How lint-staged Works in This Context
 
@@ -235,7 +247,8 @@ bun scripts/infra-audit.ts --quick
 
 ### 3.2 What AI-Guard Validates
 
-On each commit, AI-Guard reads `git diff --cached --name-only` to get staged `.ts`/`.tsx`/`.vue` files, then validates:
+On each commit, AI-Guard reads `git diff --cached --name-only` to get staged `.ts`/`.tsx`/`.vue`
+files, then validates:
 
 | Check                          | Rule Source                                | Exit on Failure |
 | ------------------------------ | ------------------------------------------ | --------------- |
@@ -276,10 +289,14 @@ This is a cosmetic documentation fix. It does not change hook behavior.
 
 If AI-Guard blocks a commit that is believed to be a false positive:
 
-1. **First:** Verify the violation is actually a false positive by reviewing `ARCHITECTURE_MAP.json` and `ARCHITECTURE_CONTRACT.json`.
-2. **If a rule is wrong:** Update `ARCHITECTURE_MAP.json` allowed/forbidden dependencies for the relevant module. Commit the map update first.
-3. **As an absolute last resort only:** Use `git commit --no-verify` to bypass hooks temporarily. This creates a CI-detectable violation that MUST be fixed before merge.
-4. **Never merge with an active AI-Guard bypass.** The CI gate in `architecture-governance.yml` and (after this stage) `ci.yml` will catch and block any bypass.
+1. **First:** Verify the violation is actually a false positive by reviewing `ARCHITECTURE_MAP.json`
+   and `ARCHITECTURE_CONTRACT.json`.
+2. **If a rule is wrong:** Update `ARCHITECTURE_MAP.json` allowed/forbidden dependencies for the
+   relevant module. Commit the map update first.
+3. **As an absolute last resort only:** Use `git commit --no-verify` to bypass hooks temporarily.
+   This creates a CI-detectable violation that MUST be fixed before merge.
+4. **Never merge with an active AI-Guard bypass.** The CI gate in `architecture-governance.yml` and
+   (after this stage) `ci.yml` will catch and block any bypass.
 
 ---
 
@@ -294,7 +311,8 @@ The CI quality gate is split across two workflows:
 | `ci.yml`                      | Push to `main/infra-*/feature-*/fix/*`; PR to `main/develop` | Lint + Typecheck                   |
 | `architecture-governance.yml` | Push/PR to `main/develop` only                               | AI-Guard + Infra-Audit + Arch-Diff |
 
-**Gap:** Pushes to `infra-*` and `feature/*` branches receive lint + typecheck but NOT the AI-Guard gate.
+**Gap:** Pushes to `infra-*` and `feature/*` branches receive lint + typecheck but NOT the AI-Guard
+gate.
 
 ### 4.2 Required Change: Add AI-Guard Job to `ci.yml`
 
@@ -305,7 +323,8 @@ Add a new job `arch-guard` that:
 - Depends on `lint` and `typecheck` completing first (`needs: [lint, typecheck]`)
 - Runs `bun scripts/ai-guard.ts`
 - Is non-optional (no `continue-on-error`)
-- Has a `timeout-minutes: 5` (AI-Guard is fast on staged file sets; full-repo scan in CI still finishes quickly)
+- Has a `timeout-minutes: 5` (AI-Guard is fast on staged file sets; full-repo scan in CI still
+  finishes quickly)
 
 **Placement in job dependency graph:**
 
@@ -326,7 +345,7 @@ This ensures:
 ```yaml
 # ── Job 3. AI-Guard Architecture Gate ─────────────────────────────────────
 arch-guard:
-  name: 'AI-Guard — Architecture Boundaries'
+  name: "AI-Guard — Architecture Boundaries"
   runs-on: ubuntu-latest
   timeout-minutes: 5
   needs:
@@ -372,7 +391,8 @@ The canonical CI quality gate sequence is:
   run: bun biome format .       ← REDUNDANT
 ```
 
-`bun biome check .` already validates formatting. The separate `bun biome format .` step adds CI time with no value. Replace with the canonical script alias:
+`bun biome check .` already validates formatting. The separate `bun biome format .` step adds CI
+time with no value. Replace with the canonical script alias:
 
 ```yaml
 - name: Run Biome lint + format check
@@ -387,20 +407,28 @@ Using `bun run lint` (the script alias) is preferred over direct Biome invocatio
 
 ### 4.6 `typecheck` vs `type-check` Naming
 
-The spec and planning brief reference `bun run type-check`. The actual package.json script is `bun run typecheck` (no hyphen). The CI `typecheck` job already correctly uses `bun run typecheck:src` and `bun run typecheck:tests`.
+The spec and planning brief reference `bun run type-check`. The actual package.json script is
+`bun run typecheck` (no hyphen). The CI `typecheck` job already correctly uses
+`bun run typecheck:src` and `bun run typecheck:tests`.
 
-**Resolution:** All documentation, spec, and CI references should use `bun run typecheck` (no hyphen). No package.json change is needed — the alias simply does not exist and should not be created to avoid confusion.
+**Resolution:** All documentation, spec, and CI references should use `bun run typecheck` (no
+hyphen). No package.json change is needed — the alias simply does not exist and should not be
+created to avoid confusion.
 
 ### 4.7 `architecture-governance.yml` — Overlap Assessment
 
-The `architecture-governance.yml` workflow continues to run on PRs/pushes to `main`/`develop` and provides:
+The `architecture-governance.yml` workflow continues to run on PRs/pushes to `main`/`develop` and
+provides:
 
-- `bun scripts/ai-guard.ts` (overlaps with new `arch-guard` job — acceptable duplication for defense-in-depth)
-- `bun scripts/infra-audit.ts --ci` (full architecture audit — more comprehensive than AI-Guard alone)
+- `bun scripts/ai-guard.ts` (overlaps with new `arch-guard` job — acceptable duplication for
+  defense-in-depth)
+- `bun scripts/infra-audit.ts --ci` (full architecture audit — more comprehensive than AI-Guard
+  alone)
 - `bun scripts/architecture-diff.ts` (drift detection between commits)
 - GitHub Step Summary publication
 
-This workflow should NOT be modified. The `arch-guard` job in `ci.yml` adds coverage for non-main branches; the `architecture-governance.yml` provides the full audit for main branch PRs.
+This workflow should NOT be modified. The `arch-guard` job in `ci.yml` adds coverage for non-main
+branches; the `architecture-governance.yml` provides the full audit for main branch PRs.
 
 ---
 
@@ -419,7 +447,8 @@ This workflow should NOT be modified. The `arch-guard` job in `ci.yml` adds cove
 | `arch:refresh`    | `bun scripts/infra-audit.ts && bun scripts/gitnexus-context.ts` | ✅ Yes  | Full refresh                         |
 | `arch:fix`        | `bun scripts/infra-audit.ts --fix-map`                          | ✅ Yes  | Self-healing architecture map        |
 
-**No new scripts are required.** All scripts needed by this stage are already present and correctly implemented.
+**No new scripts are required.** All scripts needed by this stage are already present and correctly
+implemented.
 
 ### 5.2 Commands Reference for This Stage
 
@@ -438,7 +467,8 @@ This workflow should NOT be modified. The `arch-guard` job in `ci.yml` adds cove
 
 ### 6.1 Critical Infrastructure Packages
 
-The following packages are designated **Critical Infrastructure** and require elevated care for any structural change:
+The following packages are designated **Critical Infrastructure** and require elevated care for any
+structural change:
 
 | Package                | Layer          | Criticality    | Why Critical                                                                                                                                      |
 | ---------------------- | -------------- | -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -450,7 +480,8 @@ The following packages are designated **Critical Infrastructure** and require el
 
 ### 6.2 Machine-Readable Criticality
 
-The `criticality` field in `docs/architecture/intelligence/ARCHITECTURE_MAP.json` already marks all five critical packages:
+The `criticality` field in `docs/architecture/intelligence/ARCHITECTURE_MAP.json` already marks all
+five critical packages:
 
 ```json
 "packages/types":        { "criticality": "core" }
@@ -467,9 +498,12 @@ AI-Guard and `infra-audit.ts` can read these fields. No schema change is require
 Changes to **core**-criticality packages (types, domain-core, validation) require:
 
 1. **AI-Guard passes** (automatically enforced at commit and CI).
-2. **`bun run arch:audit` passes** (must be run manually after structural changes; also runs in `architecture-governance.yml` CI).
-3. **Human architecture reviewer approval** — AI-generated changes to these modules must be explicitly flagged in the PR description: `CRITICAL PACKAGE CHANGE: packages/domain-core`.
-4. **Backward compatibility confirmed** — if types or validation schemas change, all consuming packages must be verified.
+2. **`bun run arch:audit` passes** (must be run manually after structural changes; also runs in
+   `architecture-governance.yml` CI).
+3. **Human architecture reviewer approval** — AI-generated changes to these modules must be
+   explicitly flagged in the PR description: `CRITICAL PACKAGE CHANGE: packages/domain-core`.
+4. **Backward compatibility confirmed** — if types or validation schemas change, all consuming
+   packages must be verified.
 
 Changes to **infrastructure**-criticality packages (logger, config) require:
 
@@ -477,7 +511,8 @@ Changes to **infrastructure**-criticality packages (logger, config) require:
 2. `bun run arch:audit` passes.
 3. Review that all test suites still pass (interfaces must remain stable).
 
-**Note:** CODEOWNERS file enforcement is deferred to a future governance stage (CL-02 clarification decision). The policy above is documentation-level enforcement for now.
+**Note:** CODEOWNERS file enforcement is deferred to a future governance stage (CL-02 clarification
+decision). The policy above is documentation-level enforcement for now.
 
 ### 6.4 Forbidden Dependencies for Critical Packages
 
@@ -561,7 +596,8 @@ bun scripts/ai-guard.ts
 
 ### 7.3 Drift Recovery Playbook
 
-**When:** CI reports architecture drift | `bun run arch:audit` shows violations | Architecture intelligence files are stale
+**When:** CI reports architecture drift | `bun run arch:audit` shows violations | Architecture
+intelligence files are stale
 
 **Step-by-step recovery:**
 
@@ -626,13 +662,15 @@ git commit -m "chore: refresh architecture intelligence [arch-refresh]"
 └─────────────────────────────────────────────────────────────────┘
 ```
 
-Each layer is additive. A violation in any layer blocks the commit or CI run. Layers do not substitute for each other.
+Each layer is additive. A violation in any layer blocks the commit or CI run. Layers do not
+substitute for each other.
 
 ---
 
 ## Section 8: File-Level Change Manifest
 
-The following files require changes in this stage. This manifest is the direct input for `tasks.md` generation.
+The following files require changes in this stage. This manifest is the direct input for `tasks.md`
+generation.
 
 ### Files to MODIFY
 
@@ -674,17 +712,20 @@ After all changes are implemented, verify each acceptance criterion from the spe
 ### FR-01 (Biome Rule Hardening)
 
 - [ ] `bun run lint` exits 0 on a clean codebase
-- [ ] Staging a file with unreachable code → `bun run lint` exits non-zero and prints `lint/correctness/noUnreachable`
+- [ ] Staging a file with unreachable code → `bun run lint` exits non-zero and prints
+      `lint/correctness/noUnreachable`
 - [ ] Existing overrides (logger, migrations, test files) still exempt from `noConsole`
 
 ### FR-02 (Import Order)
 
-- [ ] Running `bun run lint:fix` on a file with out-of-order imports produces correctly ordered groups
+- [ ] Running `bun run lint:fix` on a file with out-of-order imports produces correctly ordered
+      groups
 - [ ] Running `bun run lint` on the same file exits 0 after fix
 
 ### FR-03 (AI-Guard Pre-Commit)
 
-- [ ] Staging a file with a cross-app import and running `git commit` → blocked with violation message
+- [ ] Staging a file with a cross-app import and running `git commit` → blocked with violation
+      message
 - [ ] Staging a clean file and running `git commit` → AI-Guard passes, commit succeeds
 
 ### FR-04 (lint-staged)
@@ -740,7 +781,8 @@ Create `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md` covering:
 1. **What runs on every commit** (lint-staged Biome + AI-Guard + infra-audit --quick)
 2. **What runs in CI** (bun run lint + bun run typecheck + bun scripts/ai-guard.ts)
 3. **Import order convention** (the 5-group canonical order)
-4. **How to fix a blocked commit** (auto-fix with `bun run lint:fix`, then resolve `ai-guard` violations)
+4. **How to fix a blocked commit** (auto-fix with `bun run lint:fix`, then resolve `ai-guard`
+   violations)
 5. **Critical package list** with protection policy
 6. **How to recover from architecture drift** (`bun run arch:audit` → `bun run arch:fix`)
 7. **Emergency override procedure** (when and how to use `--no-verify`)

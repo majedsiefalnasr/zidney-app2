@@ -31,13 +31,13 @@
   provider, and a restructured GitHub Actions CI pipeline with isolated E2E jobs per app.
 - **Architectural boundaries touched**: Monorepo tooling layer only. No application code, no
   database, no API endpoints, no tenant logic, no middleware.
-- **Why it is safe**: Zero risk to production workloads. Every change is a local-only developer
-  tool (hooks, CI config, test config). Overly strict gates relaxed conservatively with explicit
+- **Why it is safe**: Zero risk to production workloads. Every change is a local-only developer tool
+  (hooks, CI config, test config). Overly strict gates relaxed conservatively with explicit
   documentation debt tracked for re-enablement.
-- **Constitutional guarantees preserved**: All ADRs N/A (tooling-only). No cross-tenant joins, no
-  DB singletons, no middleware bypasses, no license enforcement changes.
-- **Husky upgraded**: v8 → v9. New hook format (no `_/husky.sh` sourcing). Hooks verified
-  executable and behaviorally tested (6-step T021).
+- **Constitutional guarantees preserved**: All ADRs N/A (tooling-only). No cross-tenant joins, no DB
+  singletons, no middleware bypasses, no license enforcement changes.
+- **Husky upgraded**: v8 → v9. New hook format (no `_/husky.sh` sourcing). Hooks verified executable
+  and behaviorally tested (6-step T021).
 - **Pre-existing errors NOT introduced**: develop baseline had 14 lint errors + 2 TS2306 errors.
   This PR reduces it to 12 lint errors (fixed 2 `no-useless-escape` in infra-audit.ts). TS2306
   errors unchanged and pre-existing. Both waivers documented in VALIDATION_REPORT.md.
@@ -76,7 +76,8 @@
 - [x] No cross-workspace joins (N/A)
 - [x] No default DB fallback (N/A)
 - [x] All queries scoped to workspace_id (N/A)
-- [x] Structured logging (infra-audit.ts uses structured output; console.log only in CLI tool context)
+- [x] Structured logging (infra-audit.ts uses structured output; console.log only in CLI tool
+      context)
 - [x] Error contract compliance (N/A — no API endpoints)
 - [x] Sensitive data not logged (no PII in hook output)
 
@@ -93,7 +94,8 @@
 ## 8. Observability & Monitoring
 
 - [x] Structured logging enforced (infra-audit.ts: structured JSON output to `docs/reports/`)
-- [x] Architecture graphs exported on every full audit run (architecture-graph.html, ARCHITECTURE_DASHBOARD.md)
+- [x] Architecture graphs exported on every full audit run (architecture-graph.html,
+      ARCHITECTURE_DASHBOARD.md)
 - [ ] Metrics/alerts not applicable for tooling stage
 
 ---
@@ -133,7 +135,8 @@ bun run test:unit
 
 ## 12. Stage Lifecycle Verification
 
-- [x] Stage Status updated to PRODUCTION READY in `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_GOVERNANCE.md`
+- [x] Stage Status updated to PRODUCTION READY in
+      `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_GOVERNANCE.md`
 - [x] .workflow-state.json updated to `stage_production_ready`
 - [x] README.md progress table complete (all 8 rows ✅)
 - [x] All step reports generated in `reports/` and `audits/`
@@ -155,11 +158,11 @@ Risk Level:
 
 - [x] Low
 
-Explanation: This is a pure tooling stage. No application behavior changes. No database. No API.
-No tenant logic. The only impact is on the local developer workflow (commit hooks, test runner,
-CI) and CI pipelines. All relaxations (failOnError:false, deferred lint in pre-push) are
-conservative safety decisions that prevent developer workflow breakage from pre-existing issues
-on the develop branch. These are explicitly tracked as documentation debt to re-enable.
+Explanation: This is a pure tooling stage. No application behavior changes. No database. No API. No
+tenant logic. The only impact is on the local developer workflow (commit hooks, test runner, CI) and
+CI pipelines. All relaxations (failOnError:false, deferred lint in pre-push) are conservative safety
+decisions that prevent developer workflow breakage from pre-existing issues on the develop branch.
+These are explicitly tracked as documentation debt to re-enable.
 
 ---
 

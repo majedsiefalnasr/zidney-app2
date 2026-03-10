@@ -8,7 +8,11 @@
 
 ## Summary
 
-The TRANSLATION_SYSTEM stage (Stage 19) has been successfully implemented, validated, and closed. All 28 tasks were completed across the domain layer, API layer, worker layer, and test suite. The implementation delivers a complete, idempotent, tenant-isolated translation system for Zidney exam entities with Redis-backed coverage caching, audit logging, and async language removal via the DRAIN_LANGUAGE_TRANSLATIONS worker job. No tasks were deferred.
+The TRANSLATION_SYSTEM stage (Stage 19) has been successfully implemented, validated, and closed.
+All 28 tasks were completed across the domain layer, API layer, worker layer, and test suite. The
+implementation delivers a complete, idempotent, tenant-isolated translation system for Zidney exam
+entities with Redis-backed coverage caching, audit logging, and async language removal via the
+DRAIN_LANGUAGE_TRANSLATIONS worker job. No tasks were deferred.
 
 ---
 
@@ -29,15 +33,24 @@ The TRANSLATION_SYSTEM stage (Stage 19) has been successfully implemented, valid
 
 ## Scope Delivered
 
-- **Translatable-fields registry** — entity-to-field mapping for `question`, `exam`, `choice`, `passage`
-- **Translation domain service** — upsert (idempotent via `ON CONFLICT DO UPDATE`), list with fallback, batch delete, audit log insert
-- **Coverage service** — per `(entity_type, language_code)` coverage computation with Redis SCAN-based invalidation
-- **DB migration** — `translations` and `translation_audit_logs` tables with unique index, GIN index, trigram index
-- **API routes** — `POST /translations`, `GET /translations`, `GET /translations/coverage` with full validation and error contract
-- **Workspace-settings language removal** — sync path (≤10k rows) and async DRAIN path (>10k rows) with 409 threshold gate
-- **DRAIN_LANGUAGE_TRANSLATIONS worker job** — per-batch transactions (BEGIN/DELETE/audit-INSERT/COMMIT), idempotent re-entry, coverage invalidation on completion
-- **Unit tests** — 72 tests across 4 files (translatable-fields, translation-service, coverage-service, drain worker)
-- **Integration tests** — 4 files (upsert, list, coverage, language-removal) ready for DB environment execution
+- **Translatable-fields registry** — entity-to-field mapping for `question`, `exam`, `choice`,
+  `passage`
+- **Translation domain service** — upsert (idempotent via `ON CONFLICT DO UPDATE`), list with
+  fallback, batch delete, audit log insert
+- **Coverage service** — per `(entity_type, language_code)` coverage computation with Redis
+  SCAN-based invalidation
+- **DB migration** — `translations` and `translation_audit_logs` tables with unique index, GIN
+  index, trigram index
+- **API routes** — `POST /translations`, `GET /translations`, `GET /translations/coverage` with full
+  validation and error contract
+- **Workspace-settings language removal** — sync path (≤10k rows) and async DRAIN path (>10k rows)
+  with 409 threshold gate
+- **DRAIN_LANGUAGE_TRANSLATIONS worker job** — per-batch transactions
+  (BEGIN/DELETE/audit-INSERT/COMMIT), idempotent re-entry, coverage invalidation on completion
+- **Unit tests** — 72 tests across 4 files (translatable-fields, translation-service,
+  coverage-service, drain worker)
+- **Integration tests** — 4 files (upsert, list, coverage, language-removal) ready for DB
+  environment execution
 
 ---
 
@@ -73,7 +86,8 @@ The TRANSLATION_SYSTEM stage (Stage 19) has been successfully implemented, valid
 
 **Risk Level:** MEDIUM
 
-**Justification:** The translation system introduces new tables, indexes, and API routes in the tenant DB schema. The DRAIN worker processes large delete batches. Risk is mitigated by:
+**Justification:** The translation system introduces new tables, indexes, and API routes in the
+tenant DB schema. The DRAIN worker processes large delete batches. Risk is mitigated by:
 
 - Per-batch transactions (no mega-transaction)
 - Idempotent re-entry for DRAIN jobs

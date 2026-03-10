@@ -3,7 +3,9 @@
 **Stage**: `STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION`  
 **Phase**: `01_PLATFORM_FOUNDATION`  
 **Data Model Generated**: 2026-03-09  
-**Source**: Derived from `research.md`, `spec.md` (FR section), and inspection of `docs/architecture/graphs/dependency-graph.json` and `docs/architecture/intelligence/ARCHITECTURE_MAP.json`
+**Source**: Derived from `research.md`, `spec.md` (FR section), and inspection of
+`docs/architecture/graphs/dependency-graph.json` and
+`docs/architecture/intelligence/ARCHITECTURE_MAP.json`
 
 ---
 
@@ -19,17 +21,18 @@ These interfaces describe the shape of data the script **reads** from disk.
  * Produced by: bun run arch:audit (scripts/infra-audit.ts)
  */
 interface DependencyGraph {
-  nodes: string[] // Mix of top-level and deep submodule paths
+  nodes: string[]; // Mix of top-level and deep submodule paths
   edges: Array<{
-    from: string // Source module path (may be deep submodule path)
-    to: string // Target module path (may be deep submodule path)
-  }>
+    from: string; // Source module path (may be deep submodule path)
+    to: string; // Target module path (may be deep submodule path)
+  }>;
 }
 ```
 
 **Key observations**:
 
-- `nodes` contains both top-level paths (`apps/api`, `packages/types`) and deep submodule paths (`./apps/mmc/src/core/auth/token-manager`)
+- `nodes` contains both top-level paths (`apps/api`, `packages/types`) and deep submodule paths
+  (`./apps/mmc/src/core/auth/token-manager`)
 - `edges` contains duplicates — the same `(from, to)` pair may appear multiple times
 - No metadata fields — the schema is exactly `{ nodes, edges }`
 
@@ -41,19 +44,19 @@ interface DependencyGraph {
  * Produced by: bun run arch:generate or bun run arch:fix
  */
 interface ArchitectureMapModule {
-  layer: string // "domain" | "infrastructure" | "runtime" | "ui"
-  description: string
-  criticality: string
-  allowed_dependencies: string[]
-  forbidden_dependencies: string[]
+  layer: string; // "domain" | "infrastructure" | "runtime" | "ui"
+  description: string;
+  criticality: string;
+  allowed_dependencies: string[];
+  forbidden_dependencies: string[];
 }
 
 interface ArchitectureMap {
-  system: string // "Zidney"
-  architecture_model: string // "layered-monorepo"
-  version: string // "1.0"
-  layers: string[] // ["domain", "infrastructure", "runtime", "ui"]
-  modules: Record<string, ArchitectureMapModule>
+  system: string; // "Zidney"
+  architecture_model: string; // "layered-monorepo"
+  version: string; // "1.0"
+  layers: string[]; // ["domain", "infrastructure", "runtime", "ui"]
+  modules: Record<string, ArchitectureMapModule>;
 }
 ```
 
@@ -74,10 +77,12 @@ These types describe intermediate state used during diagram generation.
  * Key: module path (e.g., "apps/api")
  * Value: layer name (e.g., "runtime") or "unknown" for unclassified modules
  */
-type LayerMap = Map<string, string>
+type LayerMap = Map<string, string>;
 ```
 
-**Construction rule**: For each top-level node, check `ArchitectureMap.modules[node].layer`. If absent or if ArchitectureMap is null, apply `classifyLayerHeuristic(node)`. If heuristic also returns `"unknown"`, emit a warning.
+**Construction rule**: For each top-level node, check `ArchitectureMap.modules[node].layer`. If
+absent or if ArchitectureMap is null, apply `classifyLayerHeuristic(node)`. If heuristic also
+returns `"unknown"`, emit a warning.
 
 ### 2.2 `Edge`
 
@@ -87,8 +92,8 @@ type LayerMap = Map<string, string>
  * Both from and to are guaranteed to be in the top-level module set
  */
 interface Edge {
-  from: string // Top-level module path (e.g., "apps/api")
-  to: string // Top-level module path (e.g., "packages/domain-core")
+  from: string; // Top-level module path (e.g., "apps/api")
+  to: string; // Top-level module path (e.g., "packages/domain-core")
 }
 ```
 
@@ -99,8 +104,8 @@ interface Edge {
  * A single generated Mermaid diagram
  */
 interface DiagramResult {
-  filename: string // e.g., "module-dependency-graph.mmd"
-  content: string // Full Mermaid source text
+  filename: string; // e.g., "module-dependency-graph.mmd"
+  content: string; // Full Mermaid source text
 }
 ```
 
@@ -111,23 +116,23 @@ interface DiagramResult {
 All file paths resolved relative to `process.cwd()` (repository root).
 
 ```typescript
-const DEPENDENCY_GRAPH_PATH = 'docs/architecture/graphs/dependency-graph.json'
-const ARCHITECTURE_MAP_PATH = 'docs/architecture/intelligence/ARCHITECTURE_MAP.json'
-const OUTPUT_DIR = 'docs/architecture/visualization'
+const DEPENDENCY_GRAPH_PATH = "docs/architecture/graphs/dependency-graph.json";
+const ARCHITECTURE_MAP_PATH = "docs/architecture/intelligence/ARCHITECTURE_MAP.json";
+const OUTPUT_DIR = "docs/architecture/visualization";
 
 const OUTPUT_FILES = {
-  moduleDependencyGraph: 'module-dependency-graph.mmd',
-  layerArchitectureDiagram: 'layer-architecture-diagram.mmd',
-  systemOverviewDiagram: 'system-overview-diagram.mmd',
-  readme: 'README.md',
-} as const
+  moduleDependencyGraph: "module-dependency-graph.mmd",
+  layerArchitectureDiagram: "layer-architecture-diagram.mmd",
+  systemOverviewDiagram: "system-overview-diagram.mmd",
+  readme: "README.md",
+} as const;
 
 /**
  * Top-level module filter pattern
  * Matches: "apps/<name>" and "packages/<name>" with exactly two segments
  * Excludes: "./apps/...", paths with 3+ segments, non-apps/packages roots
  */
-const TOP_LEVEL_MODULE_PATTERN = /^(apps|packages)\/[^/]+$/
+const TOP_LEVEL_MODULE_PATTERN = /^(apps|packages)\/[^/]+$/;
 ```
 
 ---
@@ -138,23 +143,23 @@ Used when `ARCHITECTURE_MAP.json` is unavailable or a module is absent from it.
 
 ```typescript
 const HEURISTIC_LAYER_MAP: Record<string, string> = {
-  'apps/mmc': 'ui',
-  'apps/backoffice': 'ui',
-  'apps/frontoffice': 'ui',
-  'apps/api': 'runtime',
-  'apps/worker': 'runtime',
-  'packages/ui-system': 'ui',
-  'packages/api-client': 'infrastructure',
-  'packages/domain-core': 'domain',
-  'packages/validation': 'domain',
-  'packages/types': 'domain',
-  'packages/logger': 'infrastructure',
-  'packages/config': 'infrastructure',
-  'packages/redis-utils': 'infrastructure',
-}
+  "apps/mmc": "ui",
+  "apps/backoffice": "ui",
+  "apps/frontoffice": "ui",
+  "apps/api": "runtime",
+  "apps/worker": "runtime",
+  "packages/ui-system": "ui",
+  "packages/api-client": "infrastructure",
+  "packages/domain-core": "domain",
+  "packages/validation": "domain",
+  "packages/types": "domain",
+  "packages/logger": "infrastructure",
+  "packages/config": "infrastructure",
+  "packages/redis-utils": "infrastructure",
+};
 
 // Default for any unrecognized path
-const UNKNOWN_LAYER = 'unknown'
+const UNKNOWN_LAYER = "unknown";
 ```
 
 ---
@@ -172,7 +177,7 @@ const UNKNOWN_LAYER = 'unknown'
  *   "packages/redis-utils" → "packages_redis_utils"
  */
 function toNodeId(modulePath: string): string {
-  return modulePath.replace(/[/-]/g, '_')
+  return modulePath.replace(/[/-]/g, "_");
 }
 ```
 
@@ -199,7 +204,8 @@ function toNodeId(modulePath: string): string {
 
 **Edge format**: `sourceNodeId --> targetNodeId`
 
-**Ordering**: Nodes within subgraphs sorted alphabetically by module path. Edges sorted by `from` then `to` (alphabetical).
+**Ordering**: Nodes within subgraphs sorted alphabetically by module path. Edges sorted by `from`
+then `to` (alphabetical).
 
 **Example fragment**:
 
@@ -237,14 +243,21 @@ flowchart TD
 
 **Directive**: `flowchart TD`
 
-**Structure**: Identical structure to `module-dependency-graph.mmd` — this diagram also uses subgraph blocks with edge declarations below them. The key difference is that this diagram is explicitly named "Layer Architecture" and is designed to highlight cross-layer dependencies visually.
+**Structure**: Identical structure to `module-dependency-graph.mmd` — this diagram also uses
+subgraph blocks with edge declarations below them. The key difference is that this diagram is
+explicitly named "Layer Architecture" and is designed to highlight cross-layer dependencies
+visually.
 
-**Note**: Both diagrams use the same generation algorithm (`generateLayerDiagram` is the canonical implementation for the layer-grouped view). The `module-dependency-graph.mmd` uses `generateModuleGraph` which follows the same subgraph pattern. The functional distinction is:
+**Note**: Both diagrams use the same generation algorithm (`generateLayerDiagram` is the canonical
+implementation for the layer-grouped view). The `module-dependency-graph.mmd` uses
+`generateModuleGraph` which follows the same subgraph pattern. The functional distinction is:
 
 - `module-dependency-graph.mmd` — focused on module relationships, primary navigation artifact
 - `layer-architecture-diagram.mmd` — focused on layer groupings, makes layer violations visible
 
-**Implementation**: `generateLayerDiagram()` produces this file. It uses the same subgraph layout as `generateModuleGraph()` but includes all defined layers (UI, Runtime, Domain, Infrastructure) as subgraph labels, making the layer assignment explicit even for modules with no edges.
+**Implementation**: `generateLayerDiagram()` produces this file. It uses the same subgraph layout as
+`generateModuleGraph()` but includes all defined layers (UI, Runtime, Domain, Infrastructure) as
+subgraph labels, making the layer assignment explicit even for modules with no edges.
 
 ---
 
@@ -302,8 +315,7 @@ end
 
 > **Auto-generated** — do not edit manually. Re-run `bun run arch:visualize` to refresh.
 
-Generated: <ISO 8601 timestamp>
-Git SHA: <git rev-parse HEAD output>
+Generated: <ISO 8601 timestamp> Git SHA: <git rev-parse HEAD output>
 
 ---
 
@@ -311,18 +323,15 @@ Git SHA: <git rev-parse HEAD output>
 
 ### module-dependency-graph.mmd
 
-Top-level module dependency graph with layer subgraph annotations.
-...
+Top-level module dependency graph with layer subgraph annotations. ...
 
 ### layer-architecture-diagram.mmd
 
-Layer hierarchy showing all modules grouped by architectural layer.
-...
+Layer hierarchy showing all modules grouped by architectural layer. ...
 
 ### system-overview-diagram.mmd
 
-Static Zidney platform trust chain and service topology.
-...
+Static Zidney platform trust chain and service topology. ...
 
 ---
 
@@ -345,32 +354,32 @@ See AGENTS.md for the authoritative Zidney trust chain and platform identity.
 
 ```typescript
 // Unit-testable exported functions
-export function filterTopLevelNodes(nodes: string[]): string[]
+export function filterTopLevelNodes(nodes: string[]): string[];
 export function deduplicateEdges(
-  edges: Array<{from: string; to: string}>,
-  topLevelNodes: Set<string>
-): Array<{from: string; to: string}>
-export function classifyLayerHeuristic(modulePath: string): string
-export function toNodeId(modulePath: string): string
+  edges: Array<{ from: string; to: string }>,
+  topLevelNodes: Set<string>,
+): Array<{ from: string; to: string }>;
+export function classifyLayerHeuristic(modulePath: string): string;
+export function toNodeId(modulePath: string): string;
 export function generateModuleGraph(
   nodes: string[],
-  edges: Array<{from: string; to: string}>,
-  layerMap: Map<string, string>
-): string
+  edges: Array<{ from: string; to: string }>,
+  layerMap: Map<string, string>,
+): string;
 export function generateLayerDiagram(
   nodes: string[],
-  edges: Array<{from: string; to: string}>,
-  layerMap: Map<string, string>
-): string
-export function generateSystemOverview(): string
-export function generateReadme(generatedAt: Date, gitSha: string): string
+  edges: Array<{ from: string; to: string }>,
+  layerMap: Map<string, string>,
+): string;
+export function generateSystemOverview(): string;
+export function generateReadme(generatedAt: Date, gitSha: string): string;
 
 // Internal (not exported — implementation details)
-function loadDependencyGraph(filePath: string): DependencyGraph
-function loadArchitectureMap(filePath: string): ArchitectureMap | null
-function buildLayerMap(nodes: string[], archMap: ArchitectureMap | null): Map<string, string>
-function getGitSha(): string
-async function main(): Promise<void> // CLI entry point, calls process.exit()
+function loadDependencyGraph(filePath: string): DependencyGraph;
+function loadArchitectureMap(filePath: string): ArchitectureMap | null;
+function buildLayerMap(nodes: string[], archMap: ArchitectureMap | null): Map<string, string>;
+function getGitSha(): string;
+async function main(): Promise<void>; // CLI entry point, calls process.exit()
 ```
 
 ---
@@ -379,7 +388,8 @@ async function main(): Promise<void> // CLI entry point, calls process.exit()
 
 ### 8.1 `tests/unit/visualize/fixtures/dependency-graph.fixture.json`
 
-Minimal fixture for unit tests — 5 top-level modules + 2 deep submodule paths + 3 edges (1 duplicate):
+Minimal fixture for unit tests — 5 top-level modules + 2 deep submodule paths + 3 edges (1
+duplicate):
 
 ```json
 {
@@ -393,11 +403,11 @@ Minimal fixture for unit tests — 5 top-level modules + 2 deep submodule paths 
     "./apps/mmc/srcvue/test-utils"
   ],
   "edges": [
-    {"from": "apps/api", "to": "packages/domain-core"},
-    {"from": "apps/api", "to": "packages/logger"},
-    {"from": "apps/api", "to": "packages/logger"},
-    {"from": "apps/mmc", "to": "packages/api-client"},
-    {"from": "./apps/mmc/src/core/auth/token-manager", "to": "packages/domain-core"}
+    { "from": "apps/api", "to": "packages/domain-core" },
+    { "from": "apps/api", "to": "packages/logger" },
+    { "from": "apps/api", "to": "packages/logger" },
+    { "from": "apps/mmc", "to": "packages/api-client" },
+    { "from": "./apps/mmc/src/core/auth/token-manager", "to": "packages/domain-core" }
   ]
 }
 ```

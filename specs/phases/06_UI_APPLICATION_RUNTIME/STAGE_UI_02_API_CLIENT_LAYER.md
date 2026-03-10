@@ -8,9 +8,7 @@ UI Foundation — Centralized API Client Architecture
 
 ## Stage Status
 
-Status: PRODUCTION READY
-Risk Level: LOW
-Closure Date: 2026-03-01
+Status: PRODUCTION READY Risk Level: LOW Closure Date: 2026-03-01
 
 Scope Closed:
 
@@ -35,9 +33,8 @@ Constitutional Compliance:
 - ADR-0007 Version compatibility enforced
 - ADR-0008 Semantic versioning enforced
 
-Notes:
-Stage is production ready. No structural backend modifications allowed.
-Modifications require a new migration stage.
+Notes: Stage is production ready. No structural backend modifications allowed. Modifications require
+a new migration stage.
 
 ---
 
@@ -173,8 +170,7 @@ If backend returns 401:
 3. Retry original request once
 4. If retry fails → propagate error
 
-No infinite loops.
-No more than 1 retry.
+No infinite loops. No more than 1 retry.
 
 ---
 

@@ -1,8 +1,6 @@
 # Specify Report — STAGE_21_ROLE_PERMISSION_SYSTEM
 
-**Step:** 1 — Specify
-**Timestamp:** 2026-03-02T00:00:00.000Z
-**Status:** COMPLETE
+**Step:** 1 — Specify **Timestamp:** 2026-03-02T00:00:00.000Z **Status:** COMPLETE
 
 ---
 
@@ -75,12 +73,15 @@ The specification produced two artifacts:
 
 ## Clarifications Required
 
-None. All `[NEEDS CLARIFICATION]` markers were resolved during specification. Three items are
-noted for human review (non-blocking):
+None. All `[NEEDS CLARIFICATION]` markers were resolved during specification. Three items are noted
+for human review (non-blocking):
 
-1. **`staff_users` migration history** — plan phase should confirm no prior migration already added `role_id` with different semantics.
-2. **Audit log long-term strategy** — audit placed in tenant DB for isolation; centralized audit ADR may require a follow-up mapping stage.
-3. **Cache implementation choice** — per-request vs. short-lived process cache deferred to plan phase; only observable behavior (immediate next-request effect) is specified.
+1. **`staff_users` migration history** — plan phase should confirm no prior migration already added
+   `role_id` with different semantics.
+2. **Audit log long-term strategy** — audit placed in tenant DB for isolation; centralized audit ADR
+   may require a follow-up mapping stage.
+3. **Cache implementation choice** — per-request vs. short-lived process cache deferred to plan
+   phase; only observable behavior (immediate next-request effect) is specified.
 
 ---
 
@@ -101,9 +102,12 @@ noted for human review (non-blocking):
 
 ## Open Risks
 
-1. **`staff_users` schema extension** — nullable `role_id` column must be additive; plan phase must verify no prior migration conflict.
-2. **Permission hot-path latency** — 10-step evaluation on every API call; caching strategy needs latency budget in plan phase.
-3. **Audit log growth** — no retention policy defined in this spec; a future maintenance stage may be needed.
+1. **`staff_users` schema extension** — nullable `role_id` column must be additive; plan phase must
+   verify no prior migration conflict.
+2. **Permission hot-path latency** — 10-step evaluation on every API call; caching strategy needs
+   latency budget in plan phase.
+3. **Audit log growth** — no retention policy defined in this spec; a future maintenance stage may
+   be needed.
 
 ---
 

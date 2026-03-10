@@ -213,23 +213,17 @@ Attendance creation must be logged with correlation ID.
 
 ## Failure Cases
 
-If license not ACTIVE:
-→ 423 or 403
+If license not ACTIVE: → 423 or 403
 
-If subscription expired:
-→ 403
+If subscription expired: → 403
 
-If division mismatch:
-→ 403
+If division mismatch: → 403
 
-If session not found:
-→ 404
+If session not found: → 404
 
-If session not ENABLED:
-→ 403
+If session not ENABLED: → 403
 
-If outside time window:
-→ 409
+If outside time window: → 409
 
 All errors must follow platform error standard.
 

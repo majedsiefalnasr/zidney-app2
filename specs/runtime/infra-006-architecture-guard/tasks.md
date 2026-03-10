@@ -27,13 +27,15 @@ Generated: 2026-03-08
 
 ## Infrastructure Tasks
 
-- [x] T001 Add `export` keyword to 7 pure functions in `scripts/ai-guard.ts` — additive only, no logic change
+- [x] T001 Add `export` keyword to 7 pure functions in `scripts/ai-guard.ts` — additive only, no
+      logic change
   - Layer: Developer Tooling (governance scripts)
   - Transaction: Not required
   - Idempotency: Not required
   - Version enforcement: Not required
   - License middleware: Not required
-  - Functions to export: `detectModule`, `detectFileModule`, `extractImports`, `validateRules`, `validateCrossAppImports`, `validateRelativeLeaks`, `validateArchitectureMap`
+  - Functions to export: `detectModule`, `detectFileModule`, `extractImports`, `validateRules`,
+    `validateCrossAppImports`, `validateRelativeLeaks`, `validateArchitectureMap`
   - Functions NOT to export: `validateBranchNaming` (calls `process.exit`), `runGuard` (entry point)
 
 - [x] T002 Add `"arch:guard": "bun scripts/ai-guard.ts"` script to root `package.json`
@@ -48,31 +50,36 @@ Generated: 2026-03-08
 
 ## Testing Tasks — Fixture Files
 
-- [x] T003 [P] Create fixture file `tests/unit/ai-guard/fixtures/valid-package-imports.ts` — imports within packages only (baseline "should pass" fixture)
+- [x] T003 [P] Create fixture file `tests/unit/ai-guard/fixtures/valid-package-imports.ts` — imports
+      within packages only (baseline "should pass" fixture)
   - Layer: Test Infrastructure
   - Content: two or three import statements importing from `packages/` paths only
   - Must be syntactically valid TypeScript
   - Transaction: Not required
 
-- [x] T004 [P] Create fixture file `tests/unit/ai-guard/fixtures/cross-app-violation.ts` — apps/api importing from apps/mmc (cross-app violation fixture)
+- [x] T004 [P] Create fixture file `tests/unit/ai-guard/fixtures/cross-app-violation.ts` — apps/api
+      importing from apps/mmc (cross-app violation fixture)
   - Layer: Test Infrastructure
   - Content: one import from `apps/mmc/src/something`
   - Must be syntactically valid TypeScript
   - Transaction: Not required
 
-- [x] T005 [P] Create fixture file `tests/unit/ai-guard/fixtures/packages-import-apps-violation.ts` — packages/domain-core importing from apps/api (packages→apps violation fixture)
+- [x] T005 [P] Create fixture file `tests/unit/ai-guard/fixtures/packages-import-apps-violation.ts`
+      — packages/domain-core importing from apps/api (packages→apps violation fixture)
   - Layer: Test Infrastructure
   - Content: one import from `apps/api/src/something`
   - Must be syntactically valid TypeScript
   - Transaction: Not required
 
-- [x] T006 [P] Create fixture file `tests/unit/ai-guard/fixtures/relative-leak-violation.ts` — relative import containing apps/ path segment (relative leak violation fixture)
+- [x] T006 [P] Create fixture file `tests/unit/ai-guard/fixtures/relative-leak-violation.ts` —
+      relative import containing apps/ path segment (relative leak violation fixture)
   - Layer: Test Infrastructure
   - Content: one relative import such as `../../apps/api/something`
   - Must be syntactically valid TypeScript
   - Transaction: Not required
 
-- [x] T007 [P] Create fixture file `tests/unit/ai-guard/fixtures/clean-api-file.ts` — single import from packages/logger only (clean single-import baseline fixture)
+- [x] T007 [P] Create fixture file `tests/unit/ai-guard/fixtures/clean-api-file.ts` — single import
+      from packages/logger only (clean single-import baseline fixture)
   - Layer: Test Infrastructure
   - Content: one import from `@zidney/logger` or `packages/logger`
   - Must be syntactically valid TypeScript
@@ -82,28 +89,37 @@ Generated: 2026-03-08
 
 ## Testing Tasks — Unit Tests
 
-- [x] T008 Create unit test suite `tests/unit/ai-guard/ai-guard-validation.test.ts` with 7 describe blocks (one per exported function)
+- [x] T008 Create unit test suite `tests/unit/ai-guard/ai-guard-validation.test.ts` with 7 describe
+      blocks (one per exported function)
   - Layer: Test Infrastructure
   - Depends on: T001 (exports required for import), T003–T007 (fixtures required for extractImports)
   - Transaction: Not required
   - Test cases:
-    - `detectModule`: 4 assertions (module alias → name, package path → name, app path → name, node:builtin → null)
-    - `detectFileModule`: 4 assertions (app file → app name, package file → package name, mmc file → mmc, scripts/ → null)
-    - `extractImports`: 3 assertions (reads clean-api-file, reads cross-app-violation, non-existent → [])
+    - `detectModule`: 4 assertions (module alias → name, package path → name, app path → name,
+      node:builtin → null)
+    - `detectFileModule`: 4 assertions (app file → app name, package file → package name, mmc file →
+      mmc, scripts/ → null)
+    - `extractImports`: 3 assertions (reads clean-api-file, reads cross-app-violation, non-existent
+      → [])
     - `validateRules`: 3 assertions (violation match, no violation, module not in rules → [])
-    - `validateCrossAppImports`: 3 assertions (cross-app import → violation, packages import → [], app imports packages → [])
-    - `validateRelativeLeaks`: 4 assertions (../../apps/ → violation, ../../packages/ → violation, ../utils/ → [], ./local → [])
-    - `validateArchitectureMap`: 3 assertions (forbidden dep → violation, allowed dep → [], module not in map → [])
+    - `validateCrossAppImports`: 3 assertions (cross-app import → violation, packages import → [],
+      app imports packages → [])
+    - `validateRelativeLeaks`: 4 assertions (../../apps/ → violation, ../../packages/ → violation,
+      ../utils/ → [], ./local → [])
+    - `validateArchitectureMap`: 3 assertions (forbidden dep → violation, allowed dep → [], module
+      not in map → [])
 
 ---
 
 ## Testing Tasks — Static Tests
 
-- [x] T009 Create static contract test `tests/static/05-architecture-guard.test.ts` — 7 assertions against ARCHITECTURE_CONTRACT.json and governance tooling
+- [x] T009 Create static contract test `tests/static/05-architecture-guard.test.ts` — 7 assertions
+      against ARCHITECTURE_CONTRACT.json and governance tooling
   - Layer: Test Infrastructure
   - Transaction: Not required
   - Test cases:
-    - Contract file `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json` exists and parses as valid JSON
+    - Contract file `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json` exists and parses as
+      valid JSON
     - `rules.dependencyRules.forbidPackagesImportingApps` equals `true`
     - `rules.dependencyRules.forbidAppsImportingOtherApps` equals `true`
     - `rules.layerRules.forbidUiImportingDomain.source` equals `packages/ui-system`

@@ -8,9 +8,7 @@ Purpose: Non-destructive audit before governance enforcement
 
 ## Stage Status
 
-Status: PRODUCTION READY
-Risk Level: LOW
-Closure Date: 2026-03-04T00:00:00.000Z
+Status: PRODUCTION READY Risk Level: LOW Closure Date: 2026-03-04T00:00:00.000Z
 
 Scope Closed:
 
@@ -35,9 +33,8 @@ Constitutional Compliance:
 - All drift criteria PASSED
 - All guardian verdicts PASS
 
-Notes:
-Stage is production ready. Merge to develop and use GAP_REPORT findings to drive STAGE_INFRA_GOVERNANCE roadmap.
-Audit findings are evidence-based and cross-referenced.
+Notes: Stage is production ready. Merge to develop and use GAP_REPORT findings to drive
+STAGE_INFRA_GOVERNANCE roadmap. Audit findings are evidence-based and cross-referenced.
 
 ---
 
@@ -309,8 +306,7 @@ Proceed to STAGE_INFRA_GOVERNANCE implementation.
 
 ---
 
-Status Upon Completion:
-AUDIT COMPLETE — READY FOR GOVERNANCE ALIGNMENT
+Status Upon Completion: AUDIT COMPLETE — READY FOR GOVERNANCE ALIGNMENT
 
 ---
 
@@ -318,52 +314,51 @@ AUDIT COMPLETE — READY FOR GOVERNANCE ALIGNMENT
 
 To avoid manual counting and ensure repeatability, create a Bun-compatible audit script:
 
-Recommended location:
-scripts/infra-audit.ts
+Recommended location: scripts/infra-audit.ts
 
 Suggested implementation:
 
 ```ts
-import { readdirSync, statSync, existsSync, writeFileSync } from 'fs'
-import { join } from 'path'
+import { readdirSync, statSync, existsSync, writeFileSync } from "fs";
+import { join } from "path";
 
 function findFiles(dir: string, pattern: RegExp, results: string[] = []) {
-  const entries = readdirSync(dir, { withFileTypes: true })
+  const entries = readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
-    const fullPath = join(dir, entry.name)
+    const fullPath = join(dir, entry.name);
     if (entry.isDirectory()) {
-      if (!fullPath.includes('node_modules') && !fullPath.includes('.git')) {
-        findFiles(fullPath, pattern, results)
+      if (!fullPath.includes("node_modules") && !fullPath.includes(".git")) {
+        findFiles(fullPath, pattern, results);
       }
     } else if (pattern.test(entry.name)) {
-      results.push(fullPath)
+      results.push(fullPath);
     }
   }
-  return results
+  return results;
 }
 
 function findDirectories(dir: string, results: string[] = []) {
-  const entries = readdirSync(dir, { withFileTypes: true })
+  const entries = readdirSync(dir, { withFileTypes: true });
   for (const entry of entries) {
     if (entry.isDirectory()) {
-      results.push(join(dir, entry.name))
+      results.push(join(dir, entry.name));
     }
   }
-  return results
+  return results;
 }
 
-const vitestConfigs = findFiles('.', /vitest\.config|vitest\.workspace/)
-const eslintConfigs = findFiles('.', /\.eslintrc|eslint\.config/)
-const playwrightConfigs = findFiles('.', /playwright\.config/)
-const testFiles = findFiles('.', /\.test\.ts$/)
+const vitestConfigs = findFiles(".", /vitest\.config|vitest\.workspace/);
+const eslintConfigs = findFiles(".", /\.eslintrc|eslint\.config/);
+const playwrightConfigs = findFiles(".", /playwright\.config/);
+const testFiles = findFiles(".", /\.test\.ts$/);
 
-const appsDirs = existsSync('apps') ? findDirectories('apps') : []
-const packagesDirs = existsSync('packages') ? findDirectories('packages') : []
+const appsDirs = existsSync("apps") ? findDirectories("apps") : [];
+const packagesDirs = existsSync("packages") ? findDirectories("packages") : [];
 
 const readmeAudit = [...appsDirs, ...packagesDirs].map((dir) => ({
   directory: dir,
-  hasReadme: existsSync(join(dir, 'README.md')),
-}))
+  hasReadme: existsSync(join(dir, "README.md")),
+}));
 
 const report = {
   vitestConfigs,
@@ -372,13 +367,13 @@ const report = {
   totalTestFiles: testFiles.length,
   readmeAudit,
   timestamp: new Date().toISOString(),
-}
+};
 
-console.log('=== INFRA AUDIT SNAPSHOT ===')
-console.log(JSON.stringify(report, null, 2))
+console.log("=== INFRA AUDIT SNAPSHOT ===");
+console.log(JSON.stringify(report, null, 2));
 
-writeFileSync('infra-audit-report.json', JSON.stringify(report, null, 2))
-console.log('Report written to infra-audit-report.json')
+writeFileSync("infra-audit-report.json", JSON.stringify(report, null, 2));
+console.log("Report written to infra-audit-report.json");
 ```
 
 Run with:
@@ -394,10 +389,8 @@ Optional enhancements:
 - Add Playwright config detection
 - Export JSON report
 
-This script must remain read-only.
-No modifications allowed during audit phase.
+This script must remain read-only. No modifications allowed during audit phase.
 
 ---
 
-Status remains unchanged:
-AUDIT COMPLETE — READY FOR GOVERNANCE ALIGNMENT
+Status remains unchanged: AUDIT COMPLETE — READY FOR GOVERNANCE ALIGNMENT

@@ -17,7 +17,9 @@
 | Pre-existing errors (apps/api/ raw fetch) | 9     | All in `apps/api/src/`; pre-date this stage; not in scope |
 | Stage-introduced errors                   | 0     | Resolved via ESLint firewall fix (see Fixes section)      |
 
-**Fix applied:** `eslint.config.mjs` — `no-restricted-imports` rule initially covered `apps/*/src/core/api/**` and `apps/*/src/core/auth/**` (infrastructure wrappers that legitimately import `@zidney/api-client`). Both paths added to `ignores`. Error count returned to 9 (baseline).
+**Fix applied:** `eslint.config.mjs` — `no-restricted-imports` rule initially covered
+`apps/*/src/core/api/**` and `apps/*/src/core/auth/**` (infrastructure wrappers that legitimately
+import `@zidney/api-client`). Both paths added to `ignores`. Error count returned to 9 (baseline).
 
 ---
 
@@ -31,9 +33,15 @@
 | `guards/index.ts` is not a module | `apps/frontoffice/src/main.ts:17` | Pre-existing (STAGE_UI_03 scope) |
 | `guards/index.ts` is not a module | `apps/mmc/src/main.ts:28`         | Pre-existing (STAGE_UI_03 scope) |
 
-**Pre-existing evidence:** These errors existed before this stage. Line numbers shifted by +1 in both files because this stage added `pinia.use(createPersistedState())` above the existing guards integration line. The errors are not stage-introduced.
+**Pre-existing evidence:** These errors existed before this stage. Line numbers shifted by +1 in
+both files because this stage added `pinia.use(createPersistedState())` above the existing guards
+integration line. The errors are not stage-introduced.
 
-**Fix applied:** `apps/backoffice/src/core/state/workspace.store.ts` — initial implementation imported `AppError` from `@zidney/types` (wrong) and used `new AppError(...)` (incorrect — `AppError` is an interface, not a class). Fixed to import `type AppError, createAppError` from `@zidney/api-client` (stores are in the ESLint ignore list) and use `createAppError({code, message, httpStatus: 0, isNetworkError: false})`.
+**Fix applied:** `apps/backoffice/src/core/state/workspace.store.ts` — initial implementation
+imported `AppError` from `@zidney/types` (wrong) and used `new AppError(...)` (incorrect —
+`AppError` is an interface, not a class). Fixed to import `type AppError, createAppError` from
+`@zidney/api-client` (stores are in the ESLint ignore list) and use
+`createAppError({code, message, httpStatus: 0, isNetworkError: false})`.
 
 ---
 
@@ -70,8 +78,10 @@
 
 **Fixes applied:**
 
-- `backoffice/vitest.config.ts` — added `@zidney/api-client` alias (missing; workspace.store imports from it)
-- `auth.store.test.ts` — fixed broken relative import paths to use `@/` alias; fixed `store-test-helper` path
+- `backoffice/vitest.config.ts` — added `@zidney/api-client` alias (missing; workspace.store imports
+  from it)
+- `auth.store.test.ts` — fixed broken relative import paths to use `@/` alias; fixed
+  `store-test-helper` path
 - `workspace.store.test.ts` — fixed `AppError` usage to use `createAppError({...})` factory
 
 ### Frontoffice (`apps/frontoffice/`)
@@ -93,7 +103,8 @@
 **Command:** `cd apps/backoffice && bunx vitest run tests/integration/`  
 **Result:** ✅ PASS — 16 / 16 tests
 
-**Fix applied:** `pinia-bootstrap.test.ts` — changed `../../../src/core/state/...` import paths to `@/core/state/...`
+**Fix applied:** `pinia-bootstrap.test.ts` — changed `../../../src/core/state/...` import paths to
+`@/core/state/...`
 
 ### Frontoffice
 
@@ -110,9 +121,15 @@
 **Fixes applied:**
 
 - `pinia-bootstrap.test.ts` — same import path fix
-- "app store persists sidebarCollapsed" test replaced with white-box config verification: `pinia-plugin-persistedstate` does not write synchronously to jsdom `localStorage` in the mmc vitest environment (spy shows `setItem` never called for `'mmc-app'`). Test now verifies `$id === 'mmc-app'` and `persist.pick` config rather than asserting localStorage state. The QuotaExceededError test remains and exercises the write path.
+- "app store persists sidebarCollapsed" test replaced with white-box config verification:
+  `pinia-plugin-persistedstate` does not write synchronously to jsdom `localStorage` in the mmc
+  vitest environment (spy shows `setItem` never called for `'mmc-app'`). Test now verifies
+  `$id === 'mmc-app'` and `persist.pick` config rather than asserting localStorage state. The
+  QuotaExceededError test remains and exercises the write path.
 
-**Out-of-scope file removed:** `apps/mmc/tests/integration/core/router/router.test.ts` — tagged `Stage: STAGE_UI_03_ROUTER_AND_GUARDS` in header; created erroneously by speckit.implement; tests `registerGuards` which is not exported by `apps/mmc/src/core/guards/index.ts`. Deleted.
+**Out-of-scope file removed:** `apps/mmc/tests/integration/core/router/router.test.ts` — tagged
+`Stage: STAGE_UI_03_ROUTER_AND_GUARDS` in header; created erroneously by speckit.implement; tests
+`registerGuards` which is not exported by `apps/mmc/src/core/guards/index.ts`. Deleted.
 
 ---
 
@@ -135,7 +152,8 @@
 
 **Status:** ⚠️ DEFERRED (not applicable)
 
-The dev runtime boot check (`bun run dev`) requires Docker infrastructure (`dev:infra`). The runtime boot verification is recorded as deferred for this stage's validation since:
+The dev runtime boot check (`bun run dev`) requires Docker infrastructure (`dev:infra`). The runtime
+boot verification is recorded as deferred for this stage's validation since:
 
 1. All stores are purely reactive (no HTTP calls at boot time)
 2. Bootstrap integration tests cover the Pinia plugin registration and store init path

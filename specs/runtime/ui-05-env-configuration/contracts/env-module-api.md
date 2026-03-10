@@ -6,9 +6,11 @@
 
 ## Overview
 
-This contract defines the public API surface that all three Zidney frontend apps (MMC, Backoffice, Frontoffice) must implement for environment configuration.
+This contract defines the public API surface that all three Zidney frontend apps (MMC, Backoffice,
+Frontoffice) must implement for environment configuration.
 
-Each app implements the contract independently. Conformance is enforced at compile time via shared TypeScript interfaces in `packages/types`.
+Each app implements the contract independently. Conformance is enforced at compile time via shared
+TypeScript interfaces in `packages/types`.
 
 ---
 
@@ -18,10 +20,10 @@ Each app implements the contract independently. Conformance is enforced at compi
 
 ```typescript
 export interface ZidneyEnvConfig {
-  readonly apiBaseUrl: string
-  readonly appEnv: 'development' | 'staging' | 'production'
-  readonly appName: string
-  readonly debugMode: boolean
+  readonly apiBaseUrl: string;
+  readonly appEnv: "development" | "staging" | "production";
+  readonly appName: string;
+  readonly debugMode: boolean;
 }
 ```
 
@@ -29,7 +31,7 @@ export interface ZidneyEnvConfig {
 
 ```typescript
 export interface ZidneyFeatureFlags {
-  readonly enableDebugPanel: boolean
+  readonly enableDebugPanel: boolean;
 }
 ```
 
@@ -37,8 +39,8 @@ export interface ZidneyFeatureFlags {
 
 ```typescript
 export interface ZidneyAppConfig {
-  readonly env: ZidneyEnvConfig
-  readonly flags: ZidneyFeatureFlags
+  readonly env: ZidneyEnvConfig;
+  readonly flags: ZidneyFeatureFlags;
 }
 ```
 
@@ -100,7 +102,8 @@ export interface ZidneyAppConfig {
 
 - `createEnvConfig(overrides)` accepts partial overrides for test injection
 - `createFeatureFlags(envConfig)` accepts any `EnvConfig` (including test instances)
-- Tests must NOT rely on `vi.stubEnv()` for the primary mock pattern — factory overrides are preferred
+- Tests must NOT rely on `vi.stubEnv()` for the primary mock pattern — factory overrides are
+  preferred
 
 ### Lint Enforcement
 
@@ -118,7 +121,7 @@ export interface ZidneyAppConfig {
 
 ```typescript
 interface BackofficeEnvConfig extends ZidneyEnvConfig {
-  readonly workspaceSlug?: string // development convenience only
+  readonly workspaceSlug?: string; // development convenience only
 }
 ```
 

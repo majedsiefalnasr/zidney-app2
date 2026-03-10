@@ -1,9 +1,8 @@
 # Research: Infrastructure Governance — Pre-Planning Inventory
 
-**Stage:** STAGE_INFRA_GOVERNANCE
-**Phase:** 01_PLATFORM_FOUNDATION
-**Date:** 2026-03-05
-**Purpose:** Existing configuration inventory, gap analysis, and decision rationale used as input to plan.md.
+**Stage:** STAGE_INFRA_GOVERNANCE **Phase:** 01_PLATFORM_FOUNDATION **Date:** 2026-03-05
+**Purpose:** Existing configuration inventory, gap analysis, and decision rationale used as input to
+plan.md.
 
 ---
 
@@ -22,7 +21,9 @@
 | `apps/worker/vitest.config.ts`      | EXISTS — COMPLIANT     | `defineProject`, node env, aliases.                                                                                                  |
 | `packages/*/vitest.config.ts`       | EXISTS × 8 — COMPLIANT | All 8 packages have project-entry configs referenced in `vitest.workspace.ts`.                                                       |
 
-**Gap identified:** `vitest.config.ts` coverage block is missing `thresholds`. FR-05.6 requires Lines ≥ 85%, Functions ≥ 85%, Statements ≥ 85%, Branches ≥ 80%. Additionally, `@vitest/coverage-v8` is not in `devDependencies` and is not installed.
+**Gap identified:** `vitest.config.ts` coverage block is missing `thresholds`. FR-05.6 requires
+Lines ≥ 85%, Functions ≥ 85%, Statements ≥ 85%, Branches ≥ 80%. Additionally, `@vitest/coverage-v8`
+is not in `devDependencies` and is not installed.
 
 ---
 
@@ -71,11 +72,16 @@ No gaps. FR-07 is satisfied in full.
 
 **CI gaps identified:**
 
-1. **E2E jobs are a single monolithic job** (`e2e-tests`) that runs all three apps sequentially. FR-10 requires three separate per-app jobs: `e2e-mmc`, `e2e-backoffice`, `e2e-frontoffice` — each independently blockable.
+1. **E2E jobs are a single monolithic job** (`e2e-tests`) that runs all three apps sequentially.
+   FR-10 requires three separate per-app jobs: `e2e-mmc`, `e2e-backoffice`, `e2e-frontoffice` — each
+   independently blockable.
 
-2. **Coverage Validation job missing** — FR-10 Step 6: a dedicated job that depends on `unit-tests`, runs unit tests with coverage, and enforces thresholds. Without this, coverage threshold failures do not block merge.
+2. **Coverage Validation job missing** — FR-10 Step 6: a dedicated job that depends on `unit-tests`,
+   runs unit tests with coverage, and enforces thresholds. Without this, coverage threshold failures
+   do not block merge.
 
-3. **Build Verification job missing** — FR-10 Step 7: a job that depends on all prior jobs and runs `bun workspaces run build` (already in package.json as `build` script).
+3. **Build Verification job missing** — FR-10 Step 7: a job that depends on all prior jobs and runs
+   `bun workspaces run build` (already in package.json as `build` script).
 
 ---
 
@@ -122,7 +128,10 @@ All 13 apps and packages have `README.md` files. Complete section audit:
 | `scripts/ai-guard.ts`    | EXISTS | Reads `ARCHITECTURE_CONTRACT.json`, checks layer violations, dependency rules, circular deps, arch drift. Exits non-zero on violations. Idempotent — does not write state. |
 | `scripts/infra-audit.ts` | EXISTS | Full monorepo governance scanner. Has `--ci` mode (exits non-zero on violations). **Does NOT support `--quick` flag**.                                                     |
 
-**Gap identified:** `infra-audit.ts` must have `--quick` flag support per FR-08.4. The `--quick` mode must: (a) skip writing large report files (fast), (b) run only structural checks that do not require full filesystem traversal, (c) exit non-zero on violations. Currently only `--ci` mode exists (which does enforce violations but runs the full scan including file writes).
+**Gap identified:** `infra-audit.ts` must have `--quick` flag support per FR-08.4. The `--quick`
+mode must: (a) skip writing large report files (fast), (b) run only structural checks that do not
+require full filesystem traversal, (c) exit non-zero on violations. Currently only `--ci` mode
+exists (which does enforce violations but runs the full scan including file writes).
 
 ---
 
@@ -135,7 +144,9 @@ All 13 apps and packages have `README.md` files. Complete section audit:
 | CI install                 | `bun install --frozen-lockfile`                 | Compliant                                                   |
 | Package manager resolution | Hybrid: pnpm workspace resolution + bun runtime | Husky hooks must use `bun` for script execution             |
 
-**Decision:** The `packageManager` field in package.json declares pnpm as the workspace resolver. All scripts use bun as the executor. Husky hooks will call `bun` (not `pnpm run`) for lint, typecheck, and test commands, consistent with all existing scripts.
+**Decision:** The `packageManager` field in package.json declares pnpm as the workspace resolver.
+All scripts use bun as the executor. Husky hooks will call `bun` (not `pnpm run`) for lint,
+typecheck, and test commands, consistent with all existing scripts.
 
 ---
 
@@ -161,48 +172,65 @@ All 13 apps and packages have `README.md` files. Complete section audit:
 
 ### D-01: Husky version — v9
 
-**Decision:** Use Husky v9 (current stable, `^9.0.0`).
-**Rationale:** The `.husky/_/` directory does not exist, meaning Husky has never been properly initialized in this repo. Starting fresh with v9 is cleaner than retrofitting v8 compatibility. Husky v9 hooks do not require sourcing `_/husky.sh` — they are plain shell scripts, compatible with `bun` as the executor.
-**Alternative considered:** Husky v8 — requires `.husky/_/husky.sh` which does not exist; would require additional init step. v9 is simpler and current.
+**Decision:** Use Husky v9 (current stable, `^9.0.0`). **Rationale:** The `.husky/_/` directory does
+not exist, meaning Husky has never been properly initialized in this repo. Starting fresh with v9 is
+cleaner than retrofitting v8 compatibility. Husky v9 hooks do not require sourcing `_/husky.sh` —
+they are plain shell scripts, compatible with `bun` as the executor. **Alternative considered:**
+Husky v8 — requires `.husky/_/husky.sh` which does not exist; would require additional init step. v9
+is simpler and current.
 
 ### D-02: lint-staged configuration location — `lint-staged.config.mjs`
 
-**Decision:** Create a dedicated `lint-staged.config.mjs` at the repo root.
-**Rationale:** Keeps `package.json` clean. Allows the config to use ES module syntax consistent with the rest of the codebase (`*.mjs` pattern). Lint-staged supports this file name natively.
-**Alternative considered:** Inline `package.json["lint-staged"]` key — valid but adds noise to package.json.
+**Decision:** Create a dedicated `lint-staged.config.mjs` at the repo root. **Rationale:** Keeps
+`package.json` clean. Allows the config to use ES module syntax consistent with the rest of the
+codebase (`*.mjs` pattern). Lint-staged supports this file name natively. **Alternative
+considered:** Inline `package.json["lint-staged"]` key — valid but adds noise to package.json.
 
 ### D-03: infra-audit.ts `--quick` flag — skip report writes, run structural checks only
 
-**Decision:** Add `--quick` flag that runs the violation checks (circular deps, layer violations, dep boundary violations, arch drift) but skips writing `infra-audit-report.json` and other large file outputs.
-**Rationale:** Pre-commit hooks must be fast (under 3 minutes per FR-09). The full scan writes multiple JSON report files; this is unnecessary for a pre-commit gate. The `--ci` mode already has the right enforcement logic — `--quick` reuses that logic but skips file I/O.
-**Implementation note:** `--quick` implies `--ci` enforcement behavior. The check `process.argv.includes('--quick')` sets `QUICK_MODE = true`, which skips `writeFileSync` calls and behaves identically to `--ci` for the exit code decision.
+**Decision:** Add `--quick` flag that runs the violation checks (circular deps, layer violations,
+dep boundary violations, arch drift) but skips writing `infra-audit-report.json` and other large
+file outputs. **Rationale:** Pre-commit hooks must be fast (under 3 minutes per FR-09). The full
+scan writes multiple JSON report files; this is unnecessary for a pre-commit gate. The `--ci` mode
+already has the right enforcement logic — `--quick` reuses that logic but skips file I/O.
+**Implementation note:** `--quick` implies `--ci` enforcement behavior. The check
+`process.argv.includes('--quick')` sets `QUICK_MODE = true`, which skips `writeFileSync` calls and
+behaves identically to `--ci` for the exit code decision.
 
 ### D-04: CI E2E — 3 separate jobs (not matrix strategy)
 
-**Decision:** Create 3 explicit jobs (`e2e-mmc`, `e2e-backoffice`, `e2e-frontoffice`) rather than using `strategy.matrix`.
-**Rationale:** Each app has different env vars (base URL, port), different dev server start commands, and potentially different wait conditions. Explicit jobs are clearer, independently blockable, and avoid matrix complexity where the jobs are not truly homogeneous.
+**Decision:** Create 3 explicit jobs (`e2e-mmc`, `e2e-backoffice`, `e2e-frontoffice`) rather than
+using `strategy.matrix`. **Rationale:** Each app has different env vars (base URL, port), different
+dev server start commands, and potentially different wait conditions. Explicit jobs are clearer,
+independently blockable, and avoid matrix complexity where the jobs are not truly homogeneous.
 
 ### D-05: Coverage Validation job — runs `test:unit` with `--coverage` flag
 
-**Decision:** The CI Coverage Validation job runs `bun run test:unit --coverage`. No new script is required.
-**Rationale:** The `test:unit` script already targets the correct set of unit-test projects. Adding `--coverage` applies coverage collection and threshold enforcement (from `vitest.config.ts`) without needing a separate script entry.
-**Clarification alignment:** FR-10 Step 6 coverage depends on `unit-tests` only. Integration test coverage is informational. This matches the clarification: "Unit-test coverage only is threshold-enforced in this stage."
+**Decision:** The CI Coverage Validation job runs `bun run test:unit --coverage`. No new script is
+required. **Rationale:** The `test:unit` script already targets the correct set of unit-test
+projects. Adding `--coverage` applies coverage collection and threshold enforcement (from
+`vitest.config.ts`) without needing a separate script entry. **Clarification alignment:** FR-10 Step
+6 coverage depends on `unit-tests` only. Integration test coverage is informational. This matches
+the clarification: "Unit-test coverage only is threshold-enforced in this stage."
 
 ### D-06: `@vitest/coverage-v8` as coverage provider
 
-**Decision:** Use `@vitest/coverage-v8` (V8-based, no instrumentation overhead).
-**Rationale:** Compatible with Bun/Node, does not require Babel instrumentation like `@vitest/coverage-istanbul`. Faster for a monorepo. The `provider: 'v8'` must be set in `vitest.config.ts`.
+**Decision:** Use `@vitest/coverage-v8` (V8-based, no instrumentation overhead). **Rationale:**
+Compatible with Bun/Node, does not require Babel instrumentation like `@vitest/coverage-istanbul`.
+Faster for a monorepo. The `provider: 'v8'` must be set in `vitest.config.ts`.
 
 ---
 
 ## 4. Files That Are Already Correct and Must Not Be Modified
 
-The following files are fully compliant with all functional requirements and **must not be changed** by this stage implementation:
+The following files are fully compliant with all functional requirements and **must not be changed**
+by this stage implementation:
 
 - `eslint.config.mjs`
 - `prettier.config.mjs`
 - `vitest.workspace.ts`
-- All per-app and per-package `vitest.config.ts` files (`apps/*/vitest.config.ts`, `packages/*/vitest.config.ts`)
+- All per-app and per-package `vitest.config.ts` files (`apps/*/vitest.config.ts`,
+  `packages/*/vitest.config.ts`)
 - All `apps/*/playwright.config.ts` files
 - All `apps/*/README.md` and `packages/*/README.md` files
 - `.github/workflows/architecture-governance.yml`

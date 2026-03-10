@@ -36,7 +36,8 @@ All findings produced by direct codebase inspection of:
 | `translations`                | `20260301_001_translation_system.ts` (STAGE_19)   | Unrelated to RBAC                                                                                   |
 | `workflow_logs`               | `20260301_002_workflow_engine.ts` (STAGE_20)      | Unrelated to RBAC                                                                                   |
 
-**Decision**: Use `backoffice_` prefix for all new STAGE_21 tables to maintain consistency with STAGE_17 pattern and avoid collision.
+**Decision**: Use `backoffice_` prefix for all new STAGE_21 tables to maintain consistency with
+STAGE_17 pattern and avoid collision.
 
 ---
 
@@ -49,11 +50,14 @@ All findings produced by direct codebase inspection of:
 
 ## R-003: backoffice_roles — Missing `status` Column
 
-**Finding**: `backoffice_roles` (STAGE_17) has columns `id`, `workspace_id`, `name`, `description`, `created_at`, `updated_at`. **No `status` column.**
+**Finding**: `backoffice_roles` (STAGE_17) has columns `id`, `workspace_id`, `name`, `description`,
+`created_at`, `updated_at`. **No `status` column.**
 
 **Decision**:
 
-- STAGE_21 migration adds `status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'DISABLED'))` to `backoffice_roles`
+- STAGE_21 migration adds
+  `status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE' CHECK (status IN ('ACTIVE', 'DISABLED'))` to
+  `backoffice_roles`
 - All existing rows automatically receive `status = 'ACTIVE'` via default value
 - Additive migration — no data loss
 
@@ -61,20 +65,28 @@ All findings produced by direct codebase inspection of:
 
 ## R-004: backoffice_role_permissions — Schema Model Mismatch
 
-**Finding**: STAGE_17 `backoffice_role_permissions` uses a **triplet model**: one row per `(role_id, module, action)` with a CHECK constraint `action IN ('view', 'create', 'edit', 'delete')`.
+**Finding**: STAGE_17 `backoffice_role_permissions` uses a **triplet model**: one row per
+`(role_id, module, action)` with a CHECK constraint
+`action IN ('view', 'create', 'edit', 'delete')`.
 
-**Spec STAGE_21 requires**: A **boolean-flags model** — one row per `(role_id, module)` with columns `can_view`, `can_create`, `can_edit`, `can_delete`.
+**Spec STAGE_21 requires**: A **boolean-flags model** — one row per `(role_id, module)` with columns
+`can_view`, `can_create`, `can_edit`, `can_delete`.
 
-These are fundamentally different schemas and cannot be migrated in-place without destructive change.
+These are fundamentally different schemas and cannot be migrated in-place without destructive
+change.
 
 **Decision**:
 
 - Create new table: `backoffice_role_module_permissions` (boolean flags model)
-- The STAGE_17 `backoffice_role_permissions` table remains intact (not dropped) to avoid breaking any STAGE_17 code paths
-- The STAGE_21 permission guard, repositories, and domain logic target `backoffice_role_module_permissions` exclusively
+- The STAGE_17 `backoffice_role_permissions` table remains intact (not dropped) to avoid breaking
+  any STAGE_17 code paths
+- The STAGE_21 permission guard, repositories, and domain logic target
+  `backoffice_role_module_permissions` exclusively
 - `backoffice_role_permissions` is treated as legacy/deprecated for STAGE_21 scope
 
-**Rationale**: Forward-only migration policy forbids destructive changes. The STAGE_17 guard (`backoffice-rbac-guard.ts`) references the old schema; it will be superseded by the new STAGE_21 guard for new routes but is not deleted in this stage.
+**Rationale**: Forward-only migration policy forbids destructive changes. The STAGE_17 guard
+(`backoffice-rbac-guard.ts`) references the old schema; it will be superseded by the new STAGE_21
+guard for new routes but is not deleted in this stage.
 
 ---
 
@@ -95,27 +107,34 @@ These are fundamentally different schemas and cannot be migrated in-place withou
 
 - STAGE_21 migration ADDS `role_id UUID NULLABLE FK → backoffice_roles(id) ON DELETE SET NULL`
 - STAGE_21 migration ADDS `division_ids UUID[] NOT NULL DEFAULT '{}'`
-- The `is_active BOOLEAN` field is mapped in the permission guard as `is_active = true → ACTIVE` (no schema change needed for status evaluation)
-- The legacy `backoffice_staff_user_roles` junction table remains (not dropped); `role_id` on `backoffice_staff_users` provides the single-role assignment model
+- The `is_active BOOLEAN` field is mapped in the permission guard as `is_active = true → ACTIVE` (no
+  schema change needed for status evaluation)
+- The legacy `backoffice_staff_user_roles` junction table remains (not dropped); `role_id` on
+  `backoffice_staff_users` provides the single-role assignment model
 
 ---
 
 ## R-006: Audit Log — RBAC Events Not Supported
 
-**Finding**: `audit_logs` (STAGE_03) has a rigid `event_type CHECK` constraint supporting only 14 predefined event types (`login_success`, `login_failed`, etc.). RBAC audit events (`CREATE_ROLE`, `UPDATE_ROLE`, `DISABLE_ROLE`, `DELETE_ROLE`, `UPDATE_PERMISSIONS`) are **not in the constraint list**.
+**Finding**: `audit_logs` (STAGE_03) has a rigid `event_type CHECK` constraint supporting only 14
+predefined event types (`login_success`, `login_failed`, etc.). RBAC audit events (`CREATE_ROLE`,
+`UPDATE_ROLE`, `DISABLE_ROLE`, `DELETE_ROLE`, `UPDATE_PERMISSIONS`) are **not in the constraint
+list**.
 
 **Decision**:
 
 - Per forward-only migration policy, the existing `audit_logs` table constraint cannot be modified
 - STAGE_21 migration creates a new **`rbac_audit_logs`** table with an immutability trigger
 - This pattern is identical to `translation_audit_logs` (created in STAGE_19)
-- `rbac_audit_logs` contains: `id`, `user_id`, `role_id`, `module`, `action`, `request_id`, `workspace_slug`, `timestamp`, `is_immutable`
+- `rbac_audit_logs` contains: `id`, `user_id`, `role_id`, `module`, `action`, `request_id`,
+  `workspace_slug`, `timestamp`, `is_immutable`
 
 ---
 
 ## R-007: Middleware Chain — Existing Patterns
 
-**Existing middleware chain** (from `apps/api/src/routes/backoffice/context.ts` and `apps/api/src/middleware/auth/`):
+**Existing middleware chain** (from `apps/api/src/routes/backoffice/context.ts` and
+`apps/api/src/middleware/auth/`):
 
 ```
 correlationId → tenantResolver → licenseEnforcement → schemaVersion → rateLimit → authentication → route handler
@@ -127,14 +146,17 @@ correlationId → tenantResolver → licenseEnforcement → schemaVersion → ra
 correlationId → tenantResolver → licenseMiddleware → auth-jwt → [permission-guard] → route handler
 ```
 
-**Existing STAGE_17 guard** (`backoffice-rbac-guard.ts`): Pattern factory `createBackofficeRBACGuard(logger, module, action)`. The STAGE_21 guard follows this same factory pattern but uses:
+**Existing STAGE_17 guard** (`backoffice-rbac-guard.ts`): Pattern factory
+`createBackofficeRBACGuard(logger, module, action)`. The STAGE_21 guard follows this same factory
+pattern but uses:
 
 - `backoffice_role_module_permissions` (new boolean-flags table)
 - Route permission registry map
 - `backoffice_roles.status` enforcement
 - `backoffice_staff_users.is_active` enforcement
 
-**Decision**: New guard file `apps/api/src/middleware/backoffice-permission-guard-v2.ts` with factory function `createPermissionGuard(logger, module, action)`.
+**Decision**: New guard file `apps/api/src/middleware/backoffice-permission-guard-v2.ts` with
+factory function `createPermissionGuard(logger, module, action)`.
 
 ---
 
@@ -153,11 +175,18 @@ correlationId → tenantResolver → licenseMiddleware → auth-jwt → [permiss
 
 ## R-009: JWT Workspace Claim
 
-**Finding**: `validate-jwt.ts` calls `validateJwtClaims(payload, resolvedWorkspaceId, ...)` from `@zidney/domain-core/auth`. The `resolvedWorkspaceId` is from `c.get('workspaceId')`. This validates workspace scope.
+**Finding**: `validate-jwt.ts` calls `validateJwtClaims(payload, resolvedWorkspaceId, ...)` from
+`@zidney/domain-core/auth`. The `resolvedWorkspaceId` is from `c.get('workspaceId')`. This validates
+workspace scope.
 
-**Gap**: The spec (A2 / FR-007 updated) requires asserting `jwt.workspace_id === resolvedTenant.id` as a mandatory sub-step. The current `validateJwtClaims` call passes `resolvedWorkspaceId` which should perform this check — but it depends on the `@zidney/domain-core/auth` implementation.
+**Gap**: The spec (A2 / FR-007 updated) requires asserting `jwt.workspace_id === resolvedTenant.id`
+as a mandatory sub-step. The current `validateJwtClaims` call passes `resolvedWorkspaceId` which
+should perform this check — but it depends on the `@zidney/domain-core/auth` implementation.
 
-**Decision**: The STAGE_21 permission guard adds an explicit `workspace_id` assertion as a first step (reading from `c.get('tenant').workspaceId` vs JWT payload `workspace_id` claim), logged at WARN on mismatch. This ensures the check is present regardless of how `validateJwtClaims` is implemented.
+**Decision**: The STAGE_21 permission guard adds an explicit `workspace_id` assertion as a first
+step (reading from `c.get('tenant').workspaceId` vs JWT payload `workspace_id` claim), logged at
+WARN on mismatch. This ensures the check is present regardless of how `validateJwtClaims` is
+implemented.
 
 ---
 
@@ -169,7 +198,8 @@ correlationId → tenantResolver → licenseMiddleware → auth-jwt → [permiss
 - `translations.schema.ts`
 - `workspace-settings.schema.ts`
 
-These use Drizzle ORM (`drizzle-orm/pg-core`) with `pgTable`, `uuid`, `varchar`, `boolean`, `timestamp` imports.
+These use Drizzle ORM (`drizzle-orm/pg-core`) with `pgTable`, `uuid`, `varchar`, `boolean`,
+`timestamp` imports.
 
 **Decision**: New Drizzle schema files follow the same pattern:
 
@@ -180,7 +210,8 @@ These use Drizzle ORM (`drizzle-orm/pg-core`) with `pgTable`, `uuid`, `varchar`,
 
 ## R-011: Domain Package Structure
 
-**Finding**: `packages/domain-core/src/` has subdirectories: `auth/`, `audit/`, `errors/`, `services/`, `translation/`, `workflow/`, etc.
+**Finding**: `packages/domain-core/src/` has subdirectories: `auth/`, `audit/`, `errors/`,
+`services/`, `translation/`, `workflow/`, etc.
 
 **Decision**: New RBAC business logic lives in `packages/domain-core/src/rbac/` with:
 
@@ -193,14 +224,18 @@ These use Drizzle ORM (`drizzle-orm/pg-core`) with `pgTable`, `uuid`, `varchar`,
 
 ## R-012: Caching Model
 
-**Finding**: Existing `backoffice-rbac-guard.ts` uses Redis with TTL 30s (`rbac:{workspace_id}:{user_id}:{module}:{action}` → `'1'|'0'`).
+**Finding**: Existing `backoffice-rbac-guard.ts` uses Redis with TTL 30s
+(`rbac:{workspace_id}:{user_id}:{module}:{action}` → `'1'|'0'`).
 
 **Decision for STAGE_21**:
 
 - Default: **per-request in-memory** (Map populated at request start, discarded at end)
-- Opt-in: Short-lived in-process cache (30s) if Redis is available — consistent with STAGE_17 pattern
-- Invalidation: On any `backoffice_roles` or `backoffice_role_module_permissions` mutation, flush all `rbac:{workspace_id}:*` keys from Redis
-- Cache key format: `rbac_v2:{workspace_id}:{user_id}:{module}:{action}` (new prefix to avoid collision with STAGE_17 keys)
+- Opt-in: Short-lived in-process cache (30s) if Redis is available — consistent with STAGE_17
+  pattern
+- Invalidation: On any `backoffice_roles` or `backoffice_role_module_permissions` mutation, flush
+  all `rbac:{workspace_id}:*` keys from Redis
+- Cache key format: `rbac_v2:{workspace_id}:{user_id}:{module}:{action}` (new prefix to avoid
+  collision with STAGE_17 keys)
 
 ---
 
@@ -208,7 +243,9 @@ These use Drizzle ORM (`drizzle-orm/pg-core`) with `pgTable`, `uuid`, `varchar`,
 
 **Finding**: `apps/backoffice/src/` exists but there is no permission composable yet.
 
-**Decision**: A Vue 3 composable `usePermission(module, action)` will be documented as a **display-only** aid (not enforcement). The composable calls the API to fetch the authenticated user's permission set on mount. Zero enforcement logic in frontend.
+**Decision**: A Vue 3 composable `usePermission(module, action)` will be documented as a
+**display-only** aid (not enforcement). The composable calls the API to fetch the authenticated
+user's permission set on mount. Zero enforcement logic in frontend.
 
 ---
 

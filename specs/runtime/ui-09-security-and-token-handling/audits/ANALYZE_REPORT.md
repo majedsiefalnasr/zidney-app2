@@ -1,45 +1,48 @@
 # Analyze Report — STAGE_UI_09_SECURITY_AND_TOKEN_HANDLING
 
-**Step:** 5 — Analyze (Drift Detector)
-**Timestamp:** 2026-03-02T00:00:00Z
-**Status:** APPROVED
+**Step:** 5 — Analyze (Drift Detector) **Timestamp:** 2026-03-02T00:00:00Z **Status:** APPROVED
 
 ---
 
 ## Summary
 
 The structural drift analysis (speckit.analyze) and all four composite guardian audits have passed.
-STAGE_UI_09_SECURITY_AND_TOKEN_HANDLING is a purely additive frontend security layer stage across three
-Vue 3 apps (MMC, Backoffice, Frontoffice). No backend, database, migration, or shared-package changes
-are introduced. The stage is fully aligned with the Zidney Constitution v1.2.0.
+STAGE_UI_09_SECURITY_AND_TOKEN_HANDLING is a purely additive frontend security layer stage across
+three Vue 3 apps (MMC, Backoffice, Frontoffice). No backend, database, migration, or shared-package
+changes are introduced. The stage is fully aligned with the Zidney Constitution v1.2.0.
 
-Two guardian runs (Security Auditor and QA Engineer) initially returned BLOCKED. All blocking findings
-were remediated in the same step iteration:
+Two guardian runs (Security Auditor and QA Engineer) initially returned BLOCKED. All blocking
+findings were remediated in the same step iteration:
 
 - SENSITIVE_KEYS extended with 4 CSRF keys (csrfToken, csrf_token, x-csrf-token, X-CSRF-Token)
 - `vue/no-v-html` enforcement upgraded from advisory `'warn'` to constitutional `'error'`
 - Test helper documentation (`assertNoTokenInLogArgs`) added to plan.md
 - 18 missing test tasks (T040–T057) added to tasks.md covering: token persistence audit, auth header
-  injection, integration 401 race, license-status store unit tests, route coverage audit, session-clear
-  wiring integration tests
-- 423/426 detection hook explicitly specified in plan.md (C1: `execute()` catch wrapper in client.ts)
+  injection, integration 401 race, license-status store unit tests, route coverage audit,
+  session-clear wiring integration tests
+- 423/426 detection hook explicitly specified in plan.md (C1: `execute()` catch wrapper in
+  client.ts)
 - `clearUserSpecificStores()` injection architecture clarified (C2/PF-02: called from main.ts
   `onSessionExpired` callback, not from inside `expireSession()`)
 - Auth guard redirect-loop protection added (PF-03: `to.name !== loginRouteName` early-exit)
 - Security Logic Placement table in spec.md updated to reflect actual `core/api/interceptors/` path
 
 After all remediations, all four guardians and the structural drift audit returned PASS or APPROVED.
-Implementation is authorized. Final task count: 57 tasks (T001–T057) + T038–T039 (lint/typecheck) = 59 total.
+Implementation is authorized. Final task count: 57 tasks (T001–T057) + T038–T039 (lint/typecheck) =
+59 total.
 
 ---
 
 ## Inputs Reviewed
 
 - `specs/runtime/ui-09-security-and-token-handling/spec.md` (496 lines; Status: IN PROGRESS)
-- `specs/runtime/ui-09-security-and-token-handling/plan.md` (752 lines; includes C1/C2/PF-02/PF-03 fixes)
+- `specs/runtime/ui-09-security-and-token-handling/plan.md` (752 lines; includes C1/C2/PF-02/PF-03
+  fixes)
 - `specs/runtime/ui-09-security-and-token-handling/tasks.md` (410 lines; 59 tasks)
-- `specs/runtime/ui-09-security-and-token-handling/research.md` (245 lines; STAGE_UI_01 gap analysis)
-- `specs/runtime/ui-09-security-and-token-handling/checklists/requirements.md` (41 items, all passing)
+- `specs/runtime/ui-09-security-and-token-handling/research.md` (245 lines; STAGE_UI_01 gap
+  analysis)
+- `specs/runtime/ui-09-security-and-token-handling/checklists/requirements.md` (41 items, all
+  passing)
 - Guardian outputs from Step 5.1A (4 guardians; see Guardian Verdicts section)
 
 ---
@@ -143,7 +146,8 @@ No structural drift detected. All 9 criteria pass.
 
 ## Implementation Authorization
 
-All Stage UI-09 blocking conditions have been resolved. All four guardian audit runs return PASS after remediation.
+All Stage UI-09 blocking conditions have been resolved. All four guardian audit runs return PASS
+after remediation.
 
 **Implementation is AUTHORIZED.**
 
@@ -155,8 +159,8 @@ Tasks remaining for implementation: T001–T057, T038–T039 (59 total).
 
 `APPROVED — Implementation authorized.`
 
-Drift analysis and composite guardian audit complete. All critical, high, and constitutional violations
-resolved. Advisory findings documented above for implementer awareness.
+Drift analysis and composite guardian audit complete. All critical, high, and constitutional
+violations resolved. Advisory findings documented above for implementer awareness.
 
 ---
 

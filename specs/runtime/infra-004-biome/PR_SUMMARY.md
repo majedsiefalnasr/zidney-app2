@@ -2,7 +2,9 @@
 
 ## Overview
 
-This pull request completes **STAGE_INFRA_04_BIOME** — a comprehensive migration from ESLint + Prettier to Biome as the single unified linting and formatting engine across the entire Zidney monorepo.
+This pull request completes **STAGE_INFRA_04_BIOME** — a comprehensive migration from ESLint +
+Prettier to Biome as the single unified linting and formatting engine across the entire Zidney
+monorepo.
 
 **Branch:** `spec/infra-004-biome`  
 **Base:** `develop`  
@@ -16,8 +18,10 @@ This pull request completes **STAGE_INFRA_04_BIOME** — a comprehensive migrati
 ### 🔧 Biome Toolchain Setup
 
 - Single root `biome.json` configuration file (v2.4.6+ compatible)
-- Unified formatter with consistent rules: line width 100, single quotes, no semicolons, es5 trailing commas
-- Unified linter with recommended rules + custom violations: noUnusedImports, noDuplicateImports, noDebugger, noConsole (with overrides for tests, migration runners, logger bridges)
+- Unified formatter with consistent rules: line width 100, single quotes, no semicolons, es5
+  trailing commas
+- Unified linter with recommended rules + custom violations: noUnusedImports, noDuplicateImports,
+  noDebugger, noConsole (with overrides for tests, migration runners, logger bridges)
 - Integrated import sorting (organizeImports)
 
 ### 📦 Integration Points
@@ -25,21 +29,26 @@ This pull request completes **STAGE_INFRA_04_BIOME** — a comprehensive migrati
 - **Pre-commit:** lint-staged invokes `bun biome check --apply` (safe fixes only)
 - **CI/CD:** `.github/workflows/ci.yml` lint job runs two Biome checks (lint + format)
 - **npm scripts:** `bun run lint`, `bun run format`, `bun run format:check`, `bun run lint:fix`
-- **VS Code:** `.vscode/extensions.json` recommends `biomejs.biome`, `.vscode/settings.json` sets it as default formatter
+- **VS Code:** `.vscode/extensions.json` recommends `biomejs.biome`, `.vscode/settings.json` sets it
+  as default formatter
 
 ### 🔄 Source Code Hardening
 
 - 45 atomic migration tasks (all completed)
 - All production `console.*` calls replaced with structured `@zidney/logger` calls (backend only)
-- Database migration runners and logger bridges preserved via `biome-ignore` comments (no runtime context for logging)
-- Vue frontend error boundaries suppressed with `biome-ignore` comments (frontend has no logger library access)
+- Database migration runners and logger bridges preserved via `biome-ignore` comments (no runtime
+  context for logging)
+- Vue frontend error boundaries suppressed with `biome-ignore` comments (frontend has no logger
+  library access)
 
 ### ♻️ Cleanup
 
-- ❌ Removed: All ESLint packages (@eslint/js, eslint, eslint-config-prettier, eslint-plugin-vue, typescript-eslint, globals, etc.)
+- ❌ Removed: All ESLint packages (@eslint/js, eslint, eslint-config-prettier, eslint-plugin-vue,
+  typescript-eslint, globals, etc.)
 - ❌ Removed: Prettier package (prettier)
 - 🗑️ Deleted: Root `eslint.config.mjs`, `prettier.config.mjs`
-- 🗑️ Deleted: Per-app ESLint configs: `apps/backoffice/eslint.config.js`, `apps/frontoffice/eslint.config.js`, `apps/mmc/eslint.config.js`
+- 🗑️ Deleted: Per-app ESLint configs: `apps/backoffice/eslint.config.js`,
+  `apps/frontoffice/eslint.config.js`, `apps/mmc/eslint.config.js`
 
 ### 📚 Documentation
 
@@ -54,8 +63,10 @@ This pull request completes **STAGE_INFRA_04_BIOME** — a comprehensive migrati
 ### What Changed
 
 - **Toolchain:** ESLint + Prettier → Biome (single unified engine)
-- **Logging:** Structured logging enforced via `@zidney/logger` (backend) + biome-ignore suppressions (migration runners)
-- **Developer Experience:** Simplified lint/format commands, VS Code integration via official extension
+- **Logging:** Structured logging enforced via `@zidney/logger` (backend) + biome-ignore
+  suppressions (migration runners)
+- **Developer Experience:** Simplified lint/format commands, VS Code integration via official
+  extension
 
 ### What Didn't Change
 
@@ -226,8 +237,10 @@ Format Check:   ✅ bun run format:check exits 0
 
 ## Additional Resources
 
-- 📖 **Testing Guide:** `specs/runtime/infra-004-biome/guides/TESTING_GUIDE.md` (14 comprehensive test scenarios)
-- 📋 **Closure Report:** `specs/runtime/infra-004-biome/reports/CLOSURE_REPORT.md` (full implementation audit)
+- 📖 **Testing Guide:** `specs/runtime/infra-004-biome/guides/TESTING_GUIDE.md` (14 comprehensive
+  test scenarios)
+- 📋 **Closure Report:** `specs/runtime/infra-004-biome/reports/CLOSURE_REPORT.md` (full
+  implementation audit)
 - 📝 **Tasks Completed:** `specs/runtime/infra-004-biome/tasks.md` (all 45 tasks marked [x])
 - 🔍 **Specification:** `specs/runtime/infra-004-biome/spec.md` (with clarifications)
 

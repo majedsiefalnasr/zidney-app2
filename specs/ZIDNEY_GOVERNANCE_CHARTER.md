@@ -8,7 +8,8 @@ Scope: Entire Zidney Platform (All Phases, All Stages, All UI Layers)
 
 # 1. PURPOSE
 
-This Governance Charter defines the binding architectural, execution, and validation rules for the Zidney platform.
+This Governance Charter defines the binding architectural, execution, and validation rules for the
+Zidney platform.
 
 It exists to:
 

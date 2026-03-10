@@ -9,13 +9,18 @@
 
 ## Purpose
 
-This guide explains how to validate the Backoffice Role & Permission System (RBAC v2) implementation end-to-end. The stage introduces tenant-scoped role-based access control for backoffice staff users.
+This guide explains how to validate the Backoffice Role & Permission System (RBAC v2) implementation
+end-to-end. The stage introduces tenant-scoped role-based access control for backoffice staff users.
 
 ---
 
 ## Summary of Delivered Behavior
 
-The implementation adds a strict, server-side, tenant-isolated role-based access control (RBAC) system to the Backoffice. Backoffice staff users are assigned roles, and roles contain boolean-flagged permissions for 10 modules × 4 actions (view, create, edit, delete). Permission evaluation is transactional, cached (Redis), audited (immutable log), and enforced at every API route.
+The implementation adds a strict, server-side, tenant-isolated role-based access control (RBAC)
+system to the Backoffice. Backoffice staff users are assigned roles, and roles contain
+boolean-flagged permissions for 10 modules × 4 actions (view, create, edit, delete). Permission
+evaluation is transactional, cached (Redis), audited (immutable log), and enforced at every API
+route.
 
 Key outcomes:
 
@@ -268,9 +273,11 @@ bun test --coverage
 
 **If test fails:**
 
-- Verify permission guard is registered in the route: check `apps/api/src/routes/backoffice/roles.ts`
+- Verify permission guard is registered in the route: check
+  `apps/api/src/routes/backoffice/roles.ts`
 - Check API logs for permission evaluation steps
-- Verify role/permission data is in DB: `SELECT * FROM backoffice_role_module_permissions WHERE role_id = '{{ role_id }}' LIMIT 1`
+- Verify role/permission data is in DB:
+  `SELECT * FROM backoffice_role_module_permissions WHERE role_id = '{{ role_id }}' LIMIT 1`
 
 ---
 
@@ -352,7 +359,8 @@ bun test --coverage
 **If test fails:**
 
 - Verify `prevent_audit_modification()` trigger was created
-- Check: `SELECT * FROM information_schema.triggers WHERE trigger_name = 'prevent_rbac_audit_modification' LIMIT 1;`
+- Check:
+  `SELECT * FROM information_schema.triggers WHERE trigger_name = 'prevent_rbac_audit_modification' LIMIT 1;`
 
 ---
 
@@ -398,7 +406,8 @@ bun test --coverage
 | `roles.routes.test.ts`          | 18    | All 9 endpoints, idempotency, error scenarios, SC-007 (no error info leakage), SC-008 (tenant isolation)                    |
 | `version-compatibility.test.ts` | 6     | Migration schema_version bump, forward-compat, rollback policy                                                              |
 
-**All should pass:** `bun test tests/unit/rbac tests/integration/rbac tests/integration/backoffice/roles.routes.test.ts`
+**All should pass:**
+`bun test tests/unit/rbac tests/integration/rbac tests/integration/backoffice/roles.routes.test.ts`
 
 ---
 

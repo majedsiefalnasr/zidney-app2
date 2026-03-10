@@ -9,9 +9,12 @@
 
 ## Executive Summary
 
-STAGE_12_PROVISIONING_TRIGGER specification is **complete, validated, and ready for technical planning**. Zero unresolved ambiguities. Full constitutional compliance verified.
+STAGE_12_PROVISIONING_TRIGGER specification is **complete, validated, and ready for technical
+planning**. Zero unresolved ambiguities. Full constitutional compliance verified.
 
-The specification defines controlled tenant provisioning orchestration: MMC signals intent → Job Queue mediates → Provisioning Worker executes asynchronously → PostgreSQL tenant DB brought online atomically.
+The specification defines controlled tenant provisioning orchestration: MMC signals intent → Job
+Queue mediates → Provisioning Worker executes asynchronously → PostgreSQL tenant DB brought online
+atomically.
 
 ---
 
@@ -34,37 +37,74 @@ The specification defines controlled tenant provisioning orchestration: MMC sign
 
 ### Content Quality (4/4 PASS ✅)
 
-- [x] **Clarity**: Plain English. Non-technical stakeholders understand provisioning workflow, job queue pattern, worker responsibilities, and failure recovery.
-- [x] **Completeness**: No gaps. Every architectural layer covered: MMC coordination, queue system, worker processing, database creation, schema migration, seed data, admin creation, tenant registry insertion, license state transitions.
-- [x] **Precision**: Technical decisions unambiguous. Redis queue, distributed lock (SETNX 30s TTL), idempotency triple-check (registry → license → DB existence), bcrypt password hashing, 3-attempt retry with exponential backoff, NTP-synced server time only.
-- [x] **Scope**: Explicit in-scope/out-of-scope/non-goals. Provisioning flow covered; backup strategy, multi-DB support, and graceful deletion deferred to future stages.
+- [x] **Clarity**: Plain English. Non-technical stakeholders understand provisioning workflow, job
+      queue pattern, worker responsibilities, and failure recovery.
+- [x] **Completeness**: No gaps. Every architectural layer covered: MMC coordination, queue system,
+      worker processing, database creation, schema migration, seed data, admin creation, tenant
+      registry insertion, license state transitions.
+- [x] **Precision**: Technical decisions unambiguous. Redis queue, distributed lock (SETNX 30s TTL),
+      idempotency triple-check (registry → license → DB existence), bcrypt password hashing,
+      3-attempt retry with exponential backoff, NTP-synced server time only.
+- [x] **Scope**: Explicit in-scope/out-of-scope/non-goals. Provisioning flow covered; backup
+      strategy, multi-DB support, and graceful deletion deferred to future stages.
 
 ### Requirement Completeness (7/7 PASS ✅)
 
-- [x] **Isolation**: Database-per-tenant model enforced. New tenant database created per workspace_slug. Master DB tables (licenses, tenants_registry) use tenant_id FK for auditability. No cross-tenant provisioning logic.
-- [x] **License Enforcement**: Version compatibility enforced before provisioning. schema_version and product_version written at creation time, validated by Worker before DB creation.
-- [x] **Transaction Safety**: All-or-nothing semantics. MMC writes license + enqueues job (atomic per app-level transaction). Worker wraps all 15 steps in savepoint. Rollback triggers database drop and license.status = PROVISION_FAILED.
-- [x] **Idempotency**: Worker is safely replayable. Triple-check: registry entry exists (skip to next step); license.status = ACTIVE (idempotent success); database exists (idempotent creation). Same payload replayed 3x = same end state.
-- [x] **Observability**: Structured JSON logging on every state transition. 11 required fields: timestamp, level, service, workspace_slug, workspace_id, user_id, correlation_id, license_id, event, step_number, error_code.
-- [x] **Time Authority**: Server-only. Worker uses NOW() at start of provisioning, uses same timestamp for all logical operations (license created_at, admin account verified_at, registry entry created_at). No client timestamps accepted.
-- [x] **Worker Semantics**: Background job processor. MMC never blocks on provisioning. Immediate response to UI (license status PENDING_PROVISION). Worker finalizes asynchronously. Attempts up to 3 times with 5s/10s/30s backoff.
+- [x] **Isolation**: Database-per-tenant model enforced. New tenant database created per
+      workspace_slug. Master DB tables (licenses, tenants_registry) use tenant_id FK for
+      auditability. No cross-tenant provisioning logic.
+- [x] **License Enforcement**: Version compatibility enforced before provisioning. schema_version
+      and product_version written at creation time, validated by Worker before DB creation.
+- [x] **Transaction Safety**: All-or-nothing semantics. MMC writes license + enqueues job (atomic
+      per app-level transaction). Worker wraps all 15 steps in savepoint. Rollback triggers database
+      drop and license.status = PROVISION_FAILED.
+- [x] **Idempotency**: Worker is safely replayable. Triple-check: registry entry exists (skip to
+      next step); license.status = ACTIVE (idempotent success); database exists (idempotent
+      creation). Same payload replayed 3x = same end state.
+- [x] **Observability**: Structured JSON logging on every state transition. 11 required fields:
+      timestamp, level, service, workspace_slug, workspace_id, user_id, correlation_id, license_id,
+      event, step_number, error_code.
+- [x] **Time Authority**: Server-only. Worker uses NOW() at start of provisioning, uses same
+      timestamp for all logical operations (license created_at, admin account verified_at, registry
+      entry created_at). No client timestamps accepted.
+- [x] **Worker Semantics**: Background job processor. MMC never blocks on provisioning. Immediate
+      response to UI (license status PENDING_PROVISION). Worker finalizes asynchronously. Attempts
+      up to 3 times with 5s/10s/30s backoff.
 
 ### Feature Readiness (4/4 PASS ✅)
 
-- [x] **Testability**: 24 specified test cases across 6 categories (unit, integration, transactional, idempotency, observability, version compatibility). All success & failure paths covered. Edge cases documented (concurrent provisioning, replay, timeout, DB creation failure).
-- [x] **Security**: Validation at every gate. License existence, status, version compatibility checked before DB creation. Workspace_slug uniqueness enforced via constraint. Admin password hashed (bcrypt), never logged. Correlation_id prevents cross-tenant log data leakage.
-- [x] **Deployment Readiness**: No blockers. Backward compatible. Schema migrations can be run in rolling mode (add columns first, backfill, then make NOT NULL). Worker can safely restart.
-- [x] **Monitoring Integration**: 8 structured log events defined (license_created, provisioning_started, database_created, migrations_completed, seed_completed, admin_created, registry_inserted, provisioning_completed, provisioning_failed). All events include correlation_id for tracing.
+- [x] **Testability**: 24 specified test cases across 6 categories (unit, integration,
+      transactional, idempotency, observability, version compatibility). All success & failure paths
+      covered. Edge cases documented (concurrent provisioning, replay, timeout, DB creation
+      failure).
+- [x] **Security**: Validation at every gate. License existence, status, version compatibility
+      checked before DB creation. Workspace_slug uniqueness enforced via constraint. Admin password
+      hashed (bcrypt), never logged. Correlation_id prevents cross-tenant log data leakage.
+- [x] **Deployment Readiness**: No blockers. Backward compatible. Schema migrations can be run in
+      rolling mode (add columns first, backfill, then make NOT NULL). Worker can safely restart.
+- [x] **Monitoring Integration**: 8 structured log events defined (license_created,
+      provisioning_started, database_created, migrations_completed, seed_completed, admin_created,
+      registry_inserted, provisioning_completed, provisioning_failed). All events include
+      correlation_id for tracing.
 
 ### Constitutional & Governance Compliance (7/7 PASS ✅)
 
-- [x] **ADR-0001 (Database-per-Tenant)**: Enforced. One PostgreSQL instance, one database per tenant. Connection pool per tenant (in-memory map) to be managed by Worker.
-- [x] **ADR-0002 (Snapshot Integrity)**: Not applicable to provisioning (no exam snapshots), acknowledged in spec.
-- [x] **ADR-0006 (Server-Authoritative Time)**: Enforced. Worker uses NOW() as single time source. No client timestamps in payload. All dates in DB use server-issued timestamps.
-- [x] **ADR-0007 (Version Compatibility)**: Enforced. schema_version and product_version captured at license creation, validated by Worker before DB creation. Prevents stale provisioning logic from running against new schema.
-- [x] **ADR-0008 (Semantic Versioning)**: Referenced in version enforcement model. License payload includes product_version; Worker checks compatibility before proceeding.
-- [x] **License Enforcement Middleware**: Documented. Resolver middleware (tenant + license bypass) validates license.status. PENDING_PROVISION → 423 Locked. PROVISION_FAILED → 503 Service Unavailable. ACTIVE → 200 OK.
-- [x] **Test Coverage**: Mandatory unit + integration + transactional + idempotency tests specified. No merge without full test suite.
+- [x] **ADR-0001 (Database-per-Tenant)**: Enforced. One PostgreSQL instance, one database per
+      tenant. Connection pool per tenant (in-memory map) to be managed by Worker.
+- [x] **ADR-0002 (Snapshot Integrity)**: Not applicable to provisioning (no exam snapshots),
+      acknowledged in spec.
+- [x] **ADR-0006 (Server-Authoritative Time)**: Enforced. Worker uses NOW() as single time source.
+      No client timestamps in payload. All dates in DB use server-issued timestamps.
+- [x] **ADR-0007 (Version Compatibility)**: Enforced. schema_version and product_version captured at
+      license creation, validated by Worker before DB creation. Prevents stale provisioning logic
+      from running against new schema.
+- [x] **ADR-0008 (Semantic Versioning)**: Referenced in version enforcement model. License payload
+      includes product_version; Worker checks compatibility before proceeding.
+- [x] **License Enforcement Middleware**: Documented. Resolver middleware (tenant + license bypass)
+      validates license.status. PENDING_PROVISION → 423 Locked. PROVISION_FAILED → 503 Service
+      Unavailable. ACTIVE → 200 OK.
+- [x] **Test Coverage**: Mandatory unit + integration + transactional + idempotency tests specified.
+      No merge without full test suite.
 
 ---
 
@@ -150,7 +190,8 @@ The specification defines controlled tenant provisioning orchestration: MMC sign
 ### Checklist Validation: 22/22 Items PASS ✅
 
 - **Content Quality** (4/4): Clarity, completeness, precision, scope
-- **Requirement Completeness** (7/7): Isolation, licensing, transactions, idempotency, observability, time authority, worker semantics
+- **Requirement Completeness** (7/7): Isolation, licensing, transactions, idempotency,
+  observability, time authority, worker semantics
 - **Feature Readiness** (4/4): Testability, security, deployment readiness, monitoring integration
 - **Governance** (7/7): All ADRs verified, license middleware modeled, test coverage mandated
 
@@ -160,7 +201,8 @@ The specification defines controlled tenant provisioning orchestration: MMC sign
 
 **Count: 0** ✅
 
-All specification details are finalized. No `[NEEDS CLARIFICATION]` markers remain. Proceed directly to planning phase without clarification loop.
+All specification details are finalized. No `[NEEDS CLARIFICATION]` markers remain. Proceed directly
+to planning phase without clarification loop.
 
 ---
 
@@ -182,12 +224,17 @@ All specification details are finalized. No `[NEEDS CLARIFICATION]` markers rema
 
 When Step 3 (Plan) begins, focus on:
 
-1. **Data Migration Strategy**: DDL for licenses table enhancements, tenants_registry creation, migration sequencing
-2. **Worker Implementation Blueprint**: Job processor skeleton, validation checks, error handlers, logging instrumentation
+1. **Data Migration Strategy**: DDL for licenses table enhancements, tenants_registry creation,
+   migration sequencing
+2. **Worker Implementation Blueprint**: Job processor skeleton, validation checks, error handlers,
+   logging instrumentation
 3. **API Contracts**: License creation endpoint (POST /mmc/licenses), response schema, error codes
-4. **Integration Points**: Queue producer (MMC → Redis), consumer (Worker ← Redis), error dead-letter queues
-5. **Observability Build-out**: Structured logger setup, correlation_id propagation, log aggregation schema
-6. **Test Harness**: Unit test scaffold for utility functions, integration test scaffold for full flow, idempotency replay rig
+4. **Integration Points**: Queue producer (MMC → Redis), consumer (Worker ← Redis), error
+   dead-letter queues
+5. **Observability Build-out**: Structured logger setup, correlation_id propagation, log aggregation
+   schema
+6. **Test Harness**: Unit test scaffold for utility functions, integration test scaffold for full
+   flow, idempotency replay rig
 
 ---
 
@@ -211,7 +258,8 @@ When Step 3 (Plan) begins, focus on:
 
 1. ✅ **Step 1.2** (This Report) — Completed
 2. ⏭️ **Step 1.3** — Update Stage Status Block to reflect specification approval
-3. ⏭️ **Step 1.4** — Update .workflow-state.json: `current_step = "specify"`, `stage_status = "DRAFT"`
+3. ⏭️ **Step 1.4** — Update .workflow-state.json: `current_step = "specify"`,
+   `stage_status = "DRAFT"`
 4. ⏭️ **Step 1.5** — Update README.md: mark Specify row as ✅
 5. ⏭️ **Step 1.6** — Commit Specify step
 6. ⏭️ **Step 2** — Proceed to Clarify phase (likely skip if no ambiguities emerge in review)

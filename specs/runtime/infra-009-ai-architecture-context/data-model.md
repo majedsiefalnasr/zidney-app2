@@ -10,7 +10,8 @@
 
 ## Overview
 
-This document defines the data model for all 7 AI context artifacts. These are governance metadata, not runtime data, and are generated from source systems rather than produced by runtime operations.
+This document defines the data model for all 7 AI context artifacts. These are governance metadata,
+not runtime data, and are generated from source systems rather than produced by runtime operations.
 
 ---
 
@@ -29,8 +30,7 @@ This document defines the data model for all 7 AI context artifacts. These are g
 ```markdown
 # Zidney Architecture Summary
 
-Generated: [ISO-8601 timestamp]
-Schema Version: 1.0.0
+Generated: [ISO-8601 timestamp] Schema Version: 1.0.0
 
 ## System Layers Overview
 
@@ -121,8 +121,8 @@ Schema Version: 1.0.0
 
 **Layer:** Domain  
 **Type:** Business logic package  
-**Purpose:** Core business rules, attempt logic, grading
-**Constraints:** No framework dependencies, no external service calls
+**Purpose:** Core business rules, attempt logic, grading **Constraints:** No framework dependencies,
+no external service calls
 
 ### packages/types
 
@@ -140,29 +140,26 @@ Schema Version: 1.0.0
 
 **Layer:** UI / Infrastructure  
 **Type:** HTTP client  
-**Purpose:** API communication from UI apps
-**Constraint:** No domain-core imports
+**Purpose:** API communication from UI apps **Constraint:** No domain-core imports
 
 ### packages/ui-system
 
 **Layer:** UI  
 **Type:** UI component library  
-**Purpose:** shadcn-vue components, theme tokens, design system
-**Constraint:** No domain logic, no external service calls
+**Purpose:** shadcn-vue components, theme tokens, design system **Constraint:** No domain logic, no
+external service calls
 
 ### packages/logger
 
 **Layer:** Infrastructure  
 **Type:** Logging service  
-**Purpose:** Structured JSON logging
-**Consumers:** All services
+**Purpose:** Structured JSON logging **Consumers:** All services
 
 ### packages/config
 
 **Layer:** Infrastructure  
 **Type:** Configuration management  
-**Purpose:** Environment-aware configuration
-**Consumers:** All services
+**Purpose:** Environment-aware configuration **Consumers:** All services
 
 ### packages/redis-utils
 
@@ -317,7 +314,7 @@ Explicit state management, no implicit behavior.
           },
           "dependencies": {
             "type": "array",
-            "items": {"type": "string"},
+            "items": { "type": "string" },
             "description": "Direct dependencies (optional)"
           }
         }
@@ -399,7 +396,7 @@ See `packages/types/src/ai-context.ts#AIModuleMap`
     "source_metadata": {
       "type": "object",
       "properties": {
-        "module_boundaries_hash": {"type": "string"}
+        "module_boundaries_hash": { "type": "string" }
       }
     },
     "layers": {
@@ -412,7 +409,7 @@ See `packages/types/src/ai-context.ts#AIModuleMap`
             "type": "string",
             "enum": ["ui", "runtime", "domain", "infrastructure"]
           },
-          "description": {"type": "string"}
+          "description": { "type": "string" }
         }
       }
     },
@@ -425,12 +422,12 @@ See `packages/types/src/ai-context.ts#AIModuleMap`
         "properties": {
           "imports_allowed": {
             "type": "array",
-            "items": {"type": "string"},
+            "items": { "type": "string" },
             "description": "Whitelist of allowed imports"
           },
           "imports_forbidden": {
             "type": "array",
-            "items": {"type": "string"},
+            "items": { "type": "string" },
             "description": "Blacklist of forbidden imports"
           }
         }
@@ -540,12 +537,12 @@ See `packages/types/src/ai-context.ts#AILayerModel`
   "type": "object",
   "required": ["schema_version", "generated_at", "modules"],
   "properties": {
-    "schema_version": {"type": "string"},
-    "generated_at": {"type": "string", "format": "date-time"},
+    "schema_version": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
     "source_metadata": {
       "type": "object",
       "properties": {
-        "infra_audit_timestamp": {"type": "string"}
+        "infra_audit_timestamp": { "type": "string" }
       }
     },
     "modules": {
@@ -555,10 +552,10 @@ See `packages/types/src/ai-context.ts#AILayerModel`
         "properties": {
           "dependencies": {
             "type": "array",
-            "items": {"type": "string"}
+            "items": { "type": "string" }
           },
-          "layer": {"type": "string"},
-          "type": {"type": "string"}
+          "layer": { "type": "string" },
+          "type": { "type": "string" }
         }
       }
     },
@@ -567,7 +564,7 @@ See `packages/types/src/ai-context.ts#AILayerModel`
       "description": "Who depends on this module",
       "additionalProperties": {
         "type": "array",
-        "items": {"type": "string"}
+        "items": { "type": "string" }
       }
     },
     "violations": {
@@ -575,10 +572,10 @@ See `packages/types/src/ai-context.ts#AILayerModel`
       "items": {
         "type": "object",
         "properties": {
-          "from": {"type": "string"},
-          "to": {"type": "string"},
-          "reason": {"type": "string"},
-          "severity": {"enum": ["error", "warning"]}
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "reason": { "type": "string" },
+          "severity": { "enum": ["error", "warning"] }
         }
       }
     }
@@ -638,8 +635,8 @@ See `packages/types/src/ai-context.ts#AIDependencyGraph`
   "type": "object",
   "required": ["schema_version", "generated_at", "services"],
   "properties": {
-    "schema_version": {"type": "string"},
-    "generated_at": {"type": "string", "format": "date-time"},
+    "schema_version": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
     "services": {
       "type": "object",
       "additionalProperties": {
@@ -660,13 +657,13 @@ See `packages/types/src/ai-context.ts#AIDependencyGraph`
           },
           "depends_on": {
             "type": "array",
-            "items": {"type": "string"},
+            "items": { "type": "string" },
             "description": "External dependencies (postgres, redis, etc.)"
           },
-          "port": {"type": "integer"},
+          "port": { "type": "integer" },
           "environment": {
             "type": "object",
-            "additionalProperties": {"type": "string"}
+            "additionalProperties": { "type": "string" }
           }
         }
       }
@@ -741,18 +738,18 @@ See `packages/types/src/ai-context.ts#AIRuntimeMap`
     "architecture_score"
   ],
   "properties": {
-    "schema_version": {"type": "string"},
-    "generated_at": {"type": "string", "format": "date-time"},
+    "schema_version": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
     "metadata": {
       "type": "object",
       "properties": {
-        "total_modules": {"type": "integer"},
+        "total_modules": { "type": "integer" },
         "layer_distribution": {
           "type": "object",
-          "additionalProperties": {"type": "integer"}
+          "additionalProperties": { "type": "integer" }
         },
-        "total_dependencies": {"type": "integer"},
-        "violations_found": {"type": "integer"}
+        "total_dependencies": { "type": "integer" },
+        "violations_found": { "type": "integer" }
       }
     },
     "module_assignments": {
@@ -760,9 +757,9 @@ See `packages/types/src/ai-context.ts#AIRuntimeMap`
       "additionalProperties": {
         "type": "object",
         "properties": {
-          "layer": {"type": "string"},
-          "type": {"type": "string"},
-          "risk_level": {"enum": ["LOW", "MEDIUM", "HIGH"]}
+          "layer": { "type": "string" },
+          "type": { "type": "string" },
+          "risk_level": { "enum": ["LOW", "MEDIUM", "HIGH"] }
         }
       }
     },
@@ -772,7 +769,7 @@ See `packages/types/src/ai-context.ts#AIRuntimeMap`
     "rules_active": {
       /* same as AILayerModel.rules */
     },
-    "violations": {"type": "array"},
+    "violations": { "type": "array" },
     "architecture_score": {
       "type": "integer",
       "minimum": 0,
@@ -852,33 +849,33 @@ See `packages/types/src/ai-context.ts#AIArchitectureBrain`
     "forbidden_dependencies"
   ],
   "properties": {
-    "schema_version": {"type": "string"},
-    "generated_at": {"type": "string", "format": "date-time"},
+    "schema_version": { "type": "string" },
+    "generated_at": { "type": "string", "format": "date-time" },
     "layers": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "name": {"type": "string"},
-          "description": {"type": "string"}
+          "name": { "type": "string" },
+          "description": { "type": "string" }
         }
       }
     },
     "module_to_layer": {
       "type": "object",
-      "additionalProperties": {"type": "string"}
+      "additionalProperties": { "type": "string" }
     },
     "key_constraints": {
       "type": "array",
-      "items": {"type": "string"}
+      "items": { "type": "string" }
     },
     "forbidden_dependencies": {
       "type": "array",
       "items": {
         "type": "object",
         "properties": {
-          "from": {"type": "string"},
-          "to": {"type": "string"}
+          "from": { "type": "string" },
+          "to": { "type": "string" }
         }
       }
     }
@@ -924,9 +921,9 @@ See `packages/types/src/ai-context.ts#AIArchitectureBrain`
     "Server time is authoritative"
   ],
   "forbidden_dependencies": [
-    {"from": "packages/ui-system", "to": "packages/domain-core"},
-    {"from": "apps/api", "to": "apps/worker"},
-    {"from": "packages/api-client", "to": "packages/domain-core"}
+    { "from": "packages/ui-system", "to": "packages/domain-core" },
+    { "from": "apps/api", "to": "apps/worker" },
+    { "from": "packages/api-client", "to": "packages/domain-core" }
   ]
 }
 ```
@@ -967,9 +964,9 @@ All artifacts follow semantic versioning per ADR-0008:
 AI tools should check `schema_version` before loading:
 
 ```typescript
-const artifact = loadArtifact('ai-architecture-brain.json')
-if (artifact.schema_version !== '1.0.0') {
-  console.warn(`Schema version mismatch: ${artifact.schema_version}`)
+const artifact = loadArtifact("ai-architecture-brain.json");
+if (artifact.schema_version !== "1.0.0") {
+  console.warn(`Schema version mismatch: ${artifact.schema_version}`);
 }
 ```
 

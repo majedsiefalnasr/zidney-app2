@@ -1,10 +1,8 @@
 # Specification Quality Checklist: Lint Governance — Architecture Enforcement and Pre-Commit Pipeline
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-03-07
-**Feature**: [spec.md](../spec.md)
-**Feature ID**: `infra-005-lint-governance`
-**Stage**: `STAGE_INFRA_05_LINT_GOVERNANCE`
+**Created**: 2026-03-07 **Feature**: [spec.md](../spec.md) **Feature ID**:
+`infra-005-lint-governance` **Stage**: `STAGE_INFRA_05_LINT_GOVERNANCE`
 
 ---
 
@@ -30,9 +28,12 @@
 
 ### [NEEDS CLARIFICATION] Items
 
-- [x] **FR-06** (CL-01 resolved in Step 2): `arch:audit` is advisory only; AI-Guard is the mandatory CI-blocking gate. `bun run arch:audit` is a maintenance/recovery command — not added as a blocking CI step.
+- [x] **FR-06** (CL-01 resolved in Step 2): `arch:audit` is advisory only; AI-Guard is the mandatory
+      CI-blocking gate. `bun run arch:audit` is a maintenance/recovery command — not added as a
+      blocking CI step.
 
-- [x] **FR-07** (CL-02 resolved in Step 2 — formally deferred): CODEOWNERS enforcement deferred to a follow-up stage. Documentation-level ownership policy is sufficient for this stage.
+- [x] **FR-07** (CL-02 resolved in Step 2 — formally deferred): CODEOWNERS enforcement deferred to a
+      follow-up stage. Documentation-level ownership policy is sufficient for this stage.
 
 ---
 
@@ -64,7 +65,8 @@
 ## Feature Readiness
 
 - [x] All functional requirements have acceptance criteria
-- [x] User stories cover primary developer flows (pre-commit, CI, import order, ownership, drift recovery)
+- [x] User stories cover primary developer flows (pre-commit, CI, import order, ownership, drift
+      recovery)
 - [x] Test strategy covers manual verification scenarios and CI gate scenarios
 - [x] Risk assessment identifies key risks with mitigations
 - [x] Assumptions section documents what must be true before implementation
@@ -92,5 +94,7 @@
 ## Notes
 
 - Items marked incomplete require spec updates before `/speckit.clarify` or `/speckit.plan`.
-- The two [NEEDS CLARIFICATION] markers are low-risk; both have documented reasonable defaults that allow implementation to proceed without clarification if needed.
-- This spec is **ready for `/speckit.plan`** once the two clarification questions are answered or their defaults are accepted.
+- The two [NEEDS CLARIFICATION] markers are low-risk; both have documented reasonable defaults that
+  allow implementation to proceed without clarification if needed.
+- This spec is **ready for `/speckit.plan`** once the two clarification questions are answered or
+  their defaults are accepted.

@@ -15,7 +15,8 @@ AI context artifacts are **machine-readable metadata** about Zidney's architectu
 - 📊 Impact analysis before making changes
 - 🎯 Architecture-aware code suggestions
 
-**Key insight:** AI tools can now say "that violates the domain layer constraint" without human intervention.
+**Key insight:** AI tools can now say "that violates the domain layer constraint" without human
+intervention.
 
 ---
 
@@ -237,21 +238,21 @@ Before proposing changes, verify:
 ```typescript
 // GitNexus can analyze impact using ai-dependency-graph.json
 
-const graph = loadArtifact('ai-dependency-graph.json')
+const graph = loadArtifact("ai-dependency-graph.json");
 
 function getBlastRadius(module) {
-  const directDeps = graph.reverse_dependencies[module] || []
-  const transitiveDeps = transitiveDependents(module, graph)
+  const directDeps = graph.reverse_dependencies[module] || [];
+  const transitiveDeps = transitiveDependents(module, graph);
 
   return {
     direct: directDeps.length,
     transitive: transitiveDeps.length,
-    risk: transitiveDeps.length > 5 ? 'HIGH' : 'MEDIUM',
-  }
+    risk: transitiveDeps.length > 5 ? "HIGH" : "MEDIUM",
+  };
 }
 
 // Usage:
-const impact = getBlastRadius('packages/types')
+const impact = getBlastRadius("packages/types");
 // Output: {direct: 3, transitive: 8, risk: 'HIGH'}
 // → Refactoring packages/types is risky!
 ```
@@ -270,13 +271,11 @@ Load architecture summary to understand constraints:
 - Domain layer changes must be carefully gated
 - Snapshot integrity must be preserved
 
-Validate plan against layer model:
-For each task in plan {
+Validate plan against layer model: For each task in plan {
 
 - Check module target is valid
 - Verify task doesn't add upward dependencies
-- Flag if modifying high-risk modules (packages/types, domain-core)
-  }
+- Flag if modifying high-risk modules (packages/types, domain-core) }
 ```
 
 ---
@@ -490,15 +489,18 @@ A: Check the source:
 
 **Q: How often should I regenerate?**
 
-A: Automatically on every commit (pre-commit hook). Manual regeneration needed only if pre-commit fails or sources change outside commits.
+A: Automatically on every commit (pre-commit hook). Manual regeneration needed only if pre-commit
+fails or sources change outside commits.
 
 **Q: Which artifact should I read first?**
 
-A: Start with ai-architecture-summary.md (human-readable overview), then dive into specific artifacts as needed.
+A: Start with ai-architecture-summary.md (human-readable overview), then dive into specific
+artifacts as needed.
 
 **Q: Can I use artifacts in my CI/CD pipeline?**
 
-A: Yes! Load artifacts to validate architecture before merging. Example: GitNexus uses ai-dependency-graph.json for impact analysis.
+A: Yes! Load artifacts to validate architecture before merging. Example: GitNexus uses
+ai-dependency-graph.json for impact analysis.
 
 ---
 

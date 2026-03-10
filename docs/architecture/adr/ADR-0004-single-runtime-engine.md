@@ -26,8 +26,7 @@ Multiple attempt tables would create:
 
 All exam types use:
 
-Single Attempt table
-With type flags and snapshot configs.
+Single Attempt table With type flags and snapshot configs.
 
 ---
 

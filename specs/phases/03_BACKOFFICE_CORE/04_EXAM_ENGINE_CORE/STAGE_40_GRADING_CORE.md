@@ -142,11 +142,9 @@ For every attempt:
 
 4. Determine pass/fail:
 
-If pass_type = PERCENTAGE:
-percentage >= pass_value
+If pass_type = PERCENTAGE: percentage >= pass_value
 
-If pass_type = SCORE:
-total_score >= pass_value
+If pass_type = SCORE: total_score >= pass_value
 
 5. Persist:
 
@@ -274,10 +272,9 @@ Stage complete when:
 
 Grading determines academic trust.
 
-If grading references live config, is non-deterministic, or mutable without audit,
-the platform loses institutional credibility.
+If grading references live config, is non-deterministic, or mutable without audit, the platform
+loses institutional credibility.
 
 This stage must be verified before runtime submission flow (Phase 04_RUNTIME).
 
-Next:
-STAGE_41_ATTEMPT_SCHEMA
+Next: STAGE_41_ATTEMPT_SCHEMA

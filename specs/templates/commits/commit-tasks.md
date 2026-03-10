@@ -1,9 +1,6 @@
 chore({{STAGE_DIR_NAME}}): complete tasks step
 
-Step: Tasks (4/7)
-Stage: {{STAGE_NAME}}
-Phase: {{PHASE_NAME}}
-Status: DRAFT
+Step: Tasks (4/7) Stage: {{STAGE_NAME}} Phase: {{PHASE_NAME}} Status: DRAFT
 
 Tasks generated: {{TASKS_TOTAL}}
 
@@ -16,8 +13,7 @@ Breakdown:
 - Observability: {{OBS_TASK_COUNT}} tasks
 - Testing: {{TEST_TASK_COUNT}} tasks
 
-Transactional tasks: {{TRANSACTIONAL_TASK_COUNT}}
-Idempotency tasks: {{IDEMPOTENCY_TASK_COUNT}}
+Transactional tasks: {{TRANSACTIONAL_TASK_COUNT}} Idempotency tasks: {{IDEMPOTENCY_TASK_COUNT}}
 
 Artifacts:
 

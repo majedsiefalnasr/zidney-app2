@@ -42,9 +42,12 @@ Establish the migration system infrastructure for master database schema deploym
 
 - [x] T001 Create migration directory structure in apps/api/src/db/master/migrations/
 - [x] T002 Create migration runner utility class in apps/api/src/db/master/runner.ts
-- [x] T003 Create \_schema_migrations tracking table definition in apps/api/src/db/master/schema-migrations.ts
-- [x] T004 Implement migration discovery logic (scan migrations/ directory) in apps/api/src/db/master/loader.ts
-- [x] T005 Implement migration version validation (semantic versioning check) in apps/api/src/db/master/validator.ts
+- [x] T003 Create \_schema_migrations tracking table definition in
+      apps/api/src/db/master/schema-migrations.ts
+- [x] T004 Implement migration discovery logic (scan migrations/ directory) in
+      apps/api/src/db/master/loader.ts
+- [x] T005 Implement migration version validation (semantic versioning check) in
+      apps/api/src/db/master/validator.ts
 
 ---
 
@@ -52,7 +55,8 @@ Establish the migration system infrastructure for master database schema deploym
 
 ### Migration Goal
 
-Create the primary migration file that establishes all master database tables with constraints and indexes.
+Create the primary migration file that establishes all master database tables with constraints and
+indexes.
 
 ### Independent Test Criteria
 
@@ -65,43 +69,52 @@ Create the primary migration file that establishes all master database tables wi
 
 ---
 
-- [x] T006 Create migration file 001_initial_schema.ts with products table DDL in apps/api/src/db/master/migrations/001_initial_schema.ts
+- [x] T006 Create migration file 001_initial_schema.ts with products table DDL in
+      apps/api/src/db/master/migrations/001_initial_schema.ts
   - Transaction: YES (wrapped in BEGIN/COMMIT)
   - Idempotency: YES (CREATE IF NOT EXISTS + migration tracking)
   - Middleware: N/A (DDL, not endpoint)
 
-- [x] T007 Add licenses table DDL to migration 001_initial_schema.ts in apps/api/src/db/master/migrations/001_initial_schema.ts
+- [x] T007 Add licenses table DDL to migration 001_initial_schema.ts in
+      apps/api/src/db/master/migrations/001_initial_schema.ts
   - Transaction: YES (same transaction as T006)
   - Idempotency: YES
   - Foreign key to products with ON DELETE RESTRICT
 
-- [x] T008 Add tenants_registry table DDL to migration 001_initial_schema.ts in apps/api/src/db/master/migrations/001_initial_schema.ts
+- [x] T008 Add tenants_registry table DDL to migration 001_initial_schema.ts in
+      apps/api/src/db/master/migrations/001_initial_schema.ts
   - Transaction: YES (same transaction as T006)
   - Idempotency: YES
   - Foreign key to licenses with ON DELETE RESTRICT
   - Architectural rule: NO status field (reads from licenses)
 
-- [x] T009 Add mmc_users table DDL to migration 001_initial_schema.ts in apps/api/src/db/master/migrations/001_initial_schema.ts
+- [x] T009 Add mmc_users table DDL to migration 001_initial_schema.ts in
+      apps/api/src/db/master/migrations/001_initial_schema.ts
   - Transaction: YES (same transaction as T006)
   - Idempotency: YES
   - Role enum validation check
 
-- [x] T010 Add platform_schema_version table DDL to migration 001_initial_schema.ts in apps/api/src/db/master/migrations/001_initial_schema.ts
+- [x] T010 Add platform_schema_version table DDL to migration 001_initial_schema.ts in
+      apps/api/src/db/master/migrations/001_initial_schema.ts
   - Transaction: YES (same transaction as T006)
   - Idempotency: YES
   - Single-row constraint (id = 1)
 
-- [x] T011 Add index creation to migration 001_initial_schema.ts in apps/api/src/db/master/migrations/001_initial_schema.ts
-  - Create 5 indexes: products(slug), licenses(workspace_slug), licenses(status), tenants_registry(workspace_slug), mmc_users(email)
+- [x] T011 Add index creation to migration 001_initial_schema.ts in
+      apps/api/src/db/master/migrations/001_initial_schema.ts
+  - Create 5 indexes: products(slug), licenses(workspace_slug), licenses(status),
+    tenants_registry(workspace_slug), mmc_users(email)
   - Transaction: YES (indexes in same transaction)
   - Idempotency: YES (CREATE INDEX IF NOT EXISTS)
 
-- [x] T012 Add platform_schema_version initialization to migration 001_initial_schema.ts in apps/api/src/db/master/migrations/001_initial_schema.ts
+- [x] T012 Add platform_schema_version initialization to migration 001_initial_schema.ts in
+      apps/api/src/db/master/migrations/001_initial_schema.ts
   - INSERT initial version: 1.0.0
   - Transaction: YES (same transaction)
   - Idempotency: YES (ON CONFLICT DO NOTHING or IF NOT EXISTS)
 
-- [x] T013 Implement transaction error handling and rollback logic in migration executor in apps/api/src/db/master/runner.ts
+- [x] T013 Implement transaction error handling and rollback logic in migration executor in
+      apps/api/src/db/master/runner.ts
   - Catch SQL errors and log structured JSON
   - Automatic rollback on any error
   - Prevent partial schema creation
@@ -176,8 +189,10 @@ Implement runtime validation for input data and utility functions for common ope
   - RolePermissions object with admin, operator, read_only roles
   - Define permissions: create_product, update_product, delete_product, etc.
 
-- [x] T021 Create logging utilities for master DB operations in packages/domain-core/src/logging/master-db-logger.ts
-  - Structured JSON logger with required fields: timestamp, level, service, correlation_id, migration_version
+- [x] T021 Create logging utilities for master DB operations in
+      packages/domain-core/src/logging/master-db-logger.ts
+  - Structured JSON logger with required fields: timestamp, level, service, correlation_id,
+    migration_version
   - Log migration start, completion, failure events
 
 ---
@@ -186,7 +201,8 @@ Implement runtime validation for input data and utility functions for common ope
 
 ### Test Goal
 
-Validate schema integrity, migration execution, isolation, and transaction safety through unit, integration, and isolation tests.
+Validate schema integrity, migration execution, isolation, and transaction safety through unit,
+integration, and isolation tests.
 
 ### Independent Test Criteria (All tests pass)
 
@@ -200,7 +216,8 @@ Validate schema integrity, migration execution, isolation, and transaction safet
 
 ---
 
-- [x] T022 [P] Write schema constraint validation tests in apps/api/tests/db/master/schema-constraints.test.ts
+- [x] T022 [P] Write schema constraint validation tests in
+      apps/api/tests/db/master/schema-constraints.test.ts
   - Test products table: UUID PK, unique slug constraint, JSONB validation
   - Test licenses table: UUID PK, FK to products, unique workspace_slug, status enum
   - Test tenants_registry table: UUID PK, FK to licenses, unique workspace_slug
@@ -225,13 +242,15 @@ Validate schema integrity, migration execution, isolation, and transaction safet
   - Verify connection pool isolation maintained
   - Verify no cross-tenant data access possible
 
-- [x] T026 [P] Write transaction atomicity tests in apps/api/tests/db/master/transaction-atomicity.test.ts
+- [x] T026 [P] Write transaction atomicity tests in
+      apps/api/tests/db/master/transaction-atomicity.test.ts
   - Simulate migration failure (e.g., FK constraint error)
   - Verify no partial schema created
   - Verify all changes rolled back
   - Verify \_schema_migrations entry NOT inserted on failure
 
-- [x] T027 [P] Write transaction rollback tests in apps/api/tests/db/master/transaction-rollback.test.ts
+- [x] T027 [P] Write transaction rollback tests in
+      apps/api/tests/db/master/transaction-rollback.test.ts
   - Verify ROLLBACK on SQL error reverses all changes
   - Verify database state consistent after rollback
   - Verify no orphaned tables or indexes
@@ -242,7 +261,8 @@ Validate schema integrity, migration execution, isolation, and transaction safet
   - Test product_version validation logic
   - Test minimum version enforcement
 
-- [x] T029 [P] Write license state validation tests in apps/api/tests/db/master/license-state.test.ts
+- [x] T029 [P] Write license state validation tests in
+      apps/api/tests/db/master/license-state.test.ts
   - Test isLicenseActive() for ACTIVE status
   - Test isLicenseActive() for SOFT_LOCKED (with deadline check)
   - Test isLicenseActive() for ARCHIVED status
@@ -422,7 +442,8 @@ Phase 6 (Polish)
 
 **Sequential Dependencies**: Phases 1-6 must execute sequentially
 
-**Parallelizable Within Phase 5**: Tests T022-T032 can execute in parallel (11 independent test files)
+**Parallelizable Within Phase 5**: Tests T022-T032 can execute in parallel (11 independent test
+files)
 
 **Suggested Developer Assignment**:
 
@@ -464,15 +485,9 @@ For minimal viable deployment:
 
 A task is complete when:
 
-✓ Code written and compiles
-✓ Tests pass (if applicable)
-✓ File path matches spec
-✓ No unrelated files modified
-✓ Layer isolation maintained
-✓ Transaction/idempotency requirements met
-✓ Logging structured JSON compliant
-✓ No console.log() statements
-✓ TypeScript strict mode passing
+✓ Code written and compiles ✓ Tests pass (if applicable) ✓ File path matches spec ✓ No unrelated
+files modified ✓ Layer isolation maintained ✓ Transaction/idempotency requirements met ✓ Logging
+structured JSON compliant ✓ No console.log() statements ✓ TypeScript strict mode passing
 
 ---
 

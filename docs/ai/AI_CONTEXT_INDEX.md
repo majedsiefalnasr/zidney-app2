@@ -4,8 +4,8 @@ This file must be loaded AFTER:
 
 docs/ai/AI_BOOTSTRAP.md
 
-AI_BOOTSTRAP.md defines the architecture‑first reasoning model, governance pipeline, and repository mental model for Zidney.
-AI agents must load AI_BOOTSTRAP.md before reading this file.
+AI_BOOTSTRAP.md defines the architecture‑first reasoning model, governance pipeline, and repository
+mental model for Zidney. AI agents must load AI_BOOTSTRAP.md before reading this file.
 
 Required reasoning order for all AI tools:
 
@@ -27,13 +27,11 @@ This document is the **navigation map for AI assistants** working inside the Zid
 
 It provides a structured overview of:
 
-• architecture rules
-• governance enforcement
-• system layering
-• module boundaries
-• AI development constraints
+• architecture rules • governance enforcement • system layering • module boundaries • AI development
+constraints
 
-AI tools should read this file **before performing any code generation, refactoring, or architectural changes**.
+AI tools should read this file **before performing any code generation, refactoring, or
+architectural changes**.
 
 ---
 
@@ -47,11 +45,8 @@ docs/architecture/ZIDNEY_ARCHITECTURE_SYSTEM.md
 
 This document defines:
 
-• system architecture layers
-• monorepo structure
-• architecture governance pipeline
-• architecture visualization
-• AI architecture awareness layer
+• system architecture layers • monorepo structure • architecture governance pipeline • architecture
+visualization • AI architecture awareness layer
 
 AI agents must treat this document as the **primary architecture knowledge source**.
 
@@ -67,11 +62,8 @@ docs/ai/AI_ENGINEERING_RULES.md
 
 Defines:
 
-• repository architecture rules
-• module boundaries
-• forbidden dependencies
-• domain isolation requirements
-• governance pipeline enforcement
+• repository architecture rules • module boundaries • forbidden dependencies • domain isolation
+requirements • governance pipeline enforcement
 
 AI must **always follow these rules before generating code**.
 
@@ -87,17 +79,12 @@ Defines the **formal architecture rules used by automation**.
 
 Contents include:
 
-• dependency rules
-• forbidden module imports
-• layer definitions
-• architecture scoring data
-• system boundaries
+• dependency rules • forbidden module imports • layer definitions • architecture scoring data •
+system boundaries
 
 Automation tools using this contract:
 
-• AI Guard
-• Infrastructure Audit
-• Architecture Diff
+• AI Guard • Infrastructure Audit • Architecture Diff
 
 AI assistants should consult this file when deciding **module placement or imports**.
 
@@ -113,10 +100,8 @@ docs/architecture/module-boundaries.json
 
 Rules enforce:
 
-• apps cannot import other apps
-• packages cannot import apps
-• runtime cannot depend on UI
-• UI cannot depend on runtime internals
+• apps cannot import other apps • packages cannot import apps • runtime cannot depend on UI • UI
+cannot depend on runtime internals
 
 AI Guard validates these boundaries automatically.
 
@@ -134,23 +119,16 @@ Important ADRs define the core Zidney architecture decisions.
 
 Examples include:
 
-ADR‑0001 — Database Per Tenant
-ADR‑0002 — Snapshot Attempt Model
-ADR‑0003 — White Label Visual Isolation
-ADR‑0004 — Single Runtime Engine
-ADR‑0005 — Upgrade Opt‑In Model
-ADR‑0006 — Runtime Authoritative Time
-ADR‑0007 — Product Version Compatibility
-ADR‑0008 — Semantic Versioning Policy
+ADR‑0001 — Database Per Tenant ADR‑0002 — Snapshot Attempt Model ADR‑0003 — White Label Visual
+Isolation ADR‑0004 — Single Runtime Engine ADR‑0005 — Upgrade Opt‑In Model ADR‑0006 — Runtime
+Authoritative Time ADR‑0007 — Product Version Compatibility ADR‑0008 — Semantic Versioning Policy
 ADR‑0009 — Rate Limiting Strategy
 
 AI must **never violate ADR decisions** when generating code.
 
 If a change conflicts with an ADR, AI must propose:
 
-• a new ADR
-• an architectural discussion
-• a migration plan
+• a new ADR • an architectural discussion • a migration plan
 
 ---
 
@@ -164,9 +142,7 @@ docs/architecture/visualization/
 
 Examples:
 
-• module-dependency-graph.svg
-• layer-architecture-diagram.svg
-• system-overview-diagram.svg
+• module-dependency-graph.svg • layer-architecture-diagram.svg • system-overview-diagram.svg
 
 These diagrams provide a **visual understanding of system structure**.
 
@@ -184,16 +160,11 @@ docs/ai/context/
 
 Artifacts include:
 
-• ai-architecture-summary.md
-• ai-module-map.json
-• ai-layer-model.json
-• ai-dependency-graph.json
+• ai-architecture-summary.md • ai-module-map.json • ai-layer-model.json • ai-dependency-graph.json
 
 These files help AI agents understand:
 
-• architecture layers
-• module roles
-• dependency relationships
+• architecture layers • module roles • dependency relationships
 
 ---
 
@@ -222,10 +193,8 @@ packages/
 
 Rules:
 
-• apps cannot import other apps
-• packages cannot import apps
-• domain-core must remain framework‑independent
-• UI code must remain inside ui-system
+• apps cannot import other apps • packages cannot import apps • domain-core must remain
+framework‑independent • UI code must remain inside ui-system
 
 Shared logic must live in `packages/`.
 
@@ -284,9 +253,8 @@ apps/*/tests/e2e
 
 Rules:
 
-• tests must respect architecture boundaries
-• integration tests verify module contracts
-• e2e tests validate system flows
+• tests must respect architecture boundaries • integration tests verify module contracts • e2e tests
+validate system flows
 
 ---
 
@@ -324,11 +292,8 @@ AI assistants must behave as **architecture‑aware engineering partners**.
 
 Responsibilities include:
 
-• respecting architecture contracts
-• avoiding forbidden dependencies
-• preserving domain isolation
-• preventing circular dependencies
-• recommending architecture improvements
+• respecting architecture contracts • avoiding forbidden dependencies • preserving domain isolation
+• preventing circular dependencies • recommending architecture improvements
 
 AI must prefer **safe architecture changes over quick code shortcuts**.
 
@@ -347,4 +312,5 @@ Before generating code AI must review:
 7. Architecture Decision Records
 8. AI context artifacts
 
-These resources ensure all AI‑generated code **remains compliant with Zidney's architecture governance system**.
+These resources ensure all AI‑generated code **remains compliant with Zidney's architecture
+governance system**.

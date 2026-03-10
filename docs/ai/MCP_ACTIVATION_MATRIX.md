@@ -25,8 +25,7 @@ Not required:
 
 - Load testing
 
-Purpose:
-Architecture, isolation, migrations, provisioning.
+Purpose: Architecture, isolation, migrations, provisioning.
 
 ---
 
@@ -43,8 +42,7 @@ Restricted:
 
 - No tenant DB schema changes unless explicitly defined
 
-Purpose:
-Commercial control layer only.
+Purpose: Commercial control layer only.
 
 ---
 
@@ -58,8 +56,7 @@ Allowed MCPs:
 - Redis
 - Docker
 
-Purpose:
-Domain modeling and content structure.
+Purpose: Domain modeling and content structure.
 
 ---
 
@@ -74,8 +71,7 @@ Allowed MCPs:
 - Docker
 - Load testing (recommended)
 
-Purpose:
-High-concurrency runtime safety.
+Purpose: High-concurrency runtime safety.
 
 ---
 
@@ -90,8 +86,7 @@ Allowed MCPs:
 - Docker
 - Load testing (recommended)
 
-Purpose:
-Student-facing stability.
+Purpose: Student-facing stability.
 
 ---
 

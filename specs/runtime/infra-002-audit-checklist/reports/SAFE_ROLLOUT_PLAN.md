@@ -29,7 +29,8 @@ This plan may only be executed when:
    - [RISK_CLASSIFICATION.md](./RISK_CLASSIFICATION.md) ✅
    - [SAFE_ROLLOUT_PLAN.md](./SAFE_ROLLOUT_PLAN.md) ✅ (this document)
 3. `infra-audit-report.json` has been generated at the current git SHA.
-4. No stage-closing work from `STAGE_INFRA_GOVERNANCE` may begin until all Phase 1 items below are **verified complete**.
+4. No stage-closing work from `STAGE_INFRA_GOVERNANCE` may begin until all Phase 1 items below are
+   **verified complete**.
 
 ---
 
@@ -37,9 +38,12 @@ This plan may only be executed when:
 
 Remediation is ordered from lowest to highest risk, with each phase depending on the previous:
 
-- **Phase 1 (LOW Risk):** Foundational fixes that are non-breaking, additive-only, and reduce the noise that would otherwise obscure Phase 2 work.
-- **Phase 2 (MEDIUM Risk):** Structural improvements to test infrastructure, ESLint enforcement, CI matrix, and documentation — each item is independent but benefits from Phase 1 being clean.
-- **Phase 3 (HIGH/CRITICAL Risk):** Items that require architectural review, may cause CI breakage during fix, or affect other teams (TypeScript errors, skipped tests, coverage gates).
+- **Phase 1 (LOW Risk):** Foundational fixes that are non-breaking, additive-only, and reduce the
+  noise that would otherwise obscure Phase 2 work.
+- **Phase 2 (MEDIUM Risk):** Structural improvements to test infrastructure, ESLint enforcement, CI
+  matrix, and documentation — each item is independent but benefits from Phase 1 being clean.
+- **Phase 3 (HIGH/CRITICAL Risk):** Items that require architectural review, may cause CI breakage
+  during fix, or affect other teams (TypeScript errors, skipped tests, coverage gates).
 
 **No Phase 2 item may be worked on until Phase 1 is verified complete.**  
 **No Phase 3 item may be worked on until Phase 2 is verified complete.**
@@ -67,7 +71,8 @@ _Target: all items non-breaking and additive-only. No CI breakage expected._
 
 ## Phase 2: MEDIUM-Risk Governance Items
 
-_Requires Phase 1 complete and verified. Each item may cause temporary CI noise or require minor refactoring._
+_Requires Phase 1 complete and verified. Each item may cause temporary CI noise or require minor
+refactoring._
 
 ### 2.1 Vitest Consolidation
 
@@ -120,7 +125,8 @@ _Requires Phase 1 complete and verified. Each item may cause temporary CI noise 
 
 ## Phase 3: HIGH-Risk Items (Requires Architectural Review)
 
-_Requires Phase 2 verified complete. These items may break CI during fix, require cross-team coordination, or involve significant refactoring._
+_Requires Phase 2 verified complete. These items may break CI during fix, require cross-team
+coordination, or involve significant refactoring._
 
 ### 3.1 TypeScript Errors (Blocking)
 
@@ -176,7 +182,9 @@ _Requires Phase 2 verified complete. These items may break CI during fix, requir
 
 **This section enforces FR-US10-5:**
 
-> No `STAGE_INFRA_GOVERNANCE` task may be opened until **all three audit report documents are present and reviewed**, and no remediation task may begin until this audit is marked **AUDIT COMPLETE**.
+> No `STAGE_INFRA_GOVERNANCE` task may be opened until **all three audit report documents are
+> present and reviewed**, and no remediation task may begin until this audit is marked **AUDIT
+> COMPLETE**.
 
 ### Gate Conditions (All Must Be True)
 
@@ -193,11 +201,13 @@ _Requires Phase 2 verified complete. These items may break CI during fix, requir
 
 - No `STAGE_INFRA_GOVERNANCE` stage file may be created
 - No `STAGE_INFRA_GOVERNANCE` tasks may be written or executed
-- No enforcement flag in any config file (ESLint severity escalation, coverage threshold insertion) may be committed until Phase 1 is complete and verified
+- No enforcement flag in any config file (ESLint severity escalation, coverage threshold insertion)
+  may be committed until Phase 1 is complete and verified
 
 ### What May Start Now (After Stage Close)
 
-- Phase 1 LOW-risk items (1.1–1.4) may be executed in the NEXT feature branch after this stage is merged and marked AUDIT COMPLETE.
+- Phase 1 LOW-risk items (1.1–1.4) may be executed in the NEXT feature branch after this stage is
+  merged and marked AUDIT COMPLETE.
 
 ---
 

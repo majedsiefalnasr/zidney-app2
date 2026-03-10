@@ -13,7 +13,8 @@
 - `packages/ui-system/src/types/column.ts` - Column definition types with generics
 - `packages/ui-system/src/types/row-action.ts` - Row action types (LOCKED DECISION 2)
 - `packages/ui-system/src/types/validation.ts` - Validation rules and multi-language types
-- `packages/ui-system/src/types/component-props.ts` - All component props (LOCKED DECISIONS 1,3,5 embedded)
+- `packages/ui-system/src/types/component-props.ts` - All component props (LOCKED DECISIONS 1,3,5
+  embedded)
 - `packages/ui-system/src/types/events.ts` - Event payload types
 - `packages/ui-system/src/types/index.ts` - Barrel export
 
@@ -50,8 +51,7 @@
 
 #### Task 2B: Table State Management Utilities ✅
 
-**Status:** COMPLETE
-**File:** `packages/ui-system/src/utils/table-helpers.ts`
+**Status:** COMPLETE **File:** `packages/ui-system/src/utils/table-helpers.ts`
 
 **Functions Implemented:**
 
@@ -65,8 +65,7 @@
 
 #### Task 2C: URL State Sync Utilities ✅
 
-**Status:** COMPLETE
-**File:** `packages/ui-system/src/utils/url-sync.ts`
+**Status:** COMPLETE **File:** `packages/ui-system/src/utils/url-sync.ts`
 
 **Functions Implemented:**
 
@@ -81,8 +80,7 @@
 
 #### Task 3A: useFilterBuilder Composable ✅
 
-**Status:** COMPLETE
-**File:** `packages/ui-system/src/composables/useFilterBuilder.ts`
+**Status:** COMPLETE **File:** `packages/ui-system/src/composables/useFilterBuilder.ts`
 
 **State & Methods:**
 
@@ -97,8 +95,7 @@
 
 #### Task 3B: usePagination Composable ✅
 
-**Status:** COMPLETE
-**File:** `packages/ui-system/src/composables/usePagination.ts`
+**Status:** COMPLETE **File:** `packages/ui-system/src/composables/usePagination.ts`
 
 **State & Methods (LOCKED DECISION 1 - Agnostic):**
 
@@ -110,8 +107,7 @@
 
 #### Task 3C: useColumnVisibility Composable ✅
 
-**Status:** COMPLETE
-**File:** `packages/ui-system/src/composables/useColumnVisibility.ts`
+**Status:** COMPLETE **File:** `packages/ui-system/src/composables/useColumnVisibility.ts`
 
 **State & Methods:**
 
@@ -123,8 +119,7 @@
 
 #### Task 3D: useMultiLanguageForm Composable ✅
 
-**Status:** COMPLETE
-**File:** `packages/ui-system/src/composables/useMultiLanguageForm.ts`
+**Status:** COMPLETE **File:** `packages/ui-system/src/composables/useMultiLanguageForm.ts`
 
 **State & Methods (LOCKED DECISION 5):**
 
@@ -241,44 +236,42 @@
 
 ```typescript
 // Discriminated unions for safety
-type AnyColumnDef<TRow> = PrimitiveColumnDef<TRow> | ComputedColumnDef<TRow>
+type AnyColumnDef<TRow> = PrimitiveColumnDef<TRow> | ComputedColumnDef<TRow>;
 
 // TypeScript enforces accessor requirement for computed columns
 const columns: AnyColumnDef<User>[] = [
-  { id: 'email', header: 'Email' }, // Primitive: accessor inferred from id
+  { id: "email", header: "Email" }, // Primitive: accessor inferred from id
   {
-    id: 'fullName',
-    header: 'Name',
+    id: "fullName",
+    header: "Name",
     accessor: (user) => `${user.firstName} ${user.lastName}`, // Computed: required
   },
-]
+];
 ```
 
 ### Serialization Pattern (Task 2A)
 
 ```typescript
 // Compact representation: f (fieldId), op (operator), v (value)
-const compact = { filters: [{ f: 'email', op: 'contains', v: 'user' }] }
-const base64 = btoa(JSON.stringify(compact))
-const serialized = `v1:${base64}` // Version prefix for future schema changes
+const compact = { filters: [{ f: "email", op: "contains", v: "user" }] };
+const base64 = btoa(JSON.stringify(compact));
+const serialized = `v1:${base64}`; // Version prefix for future schema changes
 ```
 
 ### Composable State Management Pattern (Tasks 3A-3D)
 
 ```typescript
 // Reactive state with computed properties
-const filters = ref<Filter[]>([])
-const serialized = computed(() => serializeFilters(filters.value))
-const isOverflowed = computed(() => checkUrlOverflow(filters.value))
+const filters = ref<Filter[]>([]);
+const serialized = computed(() => serializeFilters(filters.value));
+const isOverflowed = computed(() => checkUrlOverflow(filters.value));
 ```
 
 ### Locked Decision 3 Implementation (useFilterBuilder)
 
 ```typescript
 // isPersistedExternally flag exposes fallback status
-const isPersistedExternally = computed(
-  () => serializationMode.value === 'localStorage'
-)
+const isPersistedExternally = computed(() => serializationMode.value === "localStorage");
 // Component emits @storage-fallback-triggered when switching modes
 ```
 

@@ -1,9 +1,7 @@
 # Deployment Checklist: Schema Provisioning MUST Items
 
-**Date**: 2026-02-16
-**Status**: CRITICAL - Required for production deployment
-**Owner**: Principal Engineer
-**Audience**: DevOps, SRE, Platform Team
+**Date**: 2026-02-16 **Status**: CRITICAL - Required for production deployment **Owner**: Principal
+Engineer **Audience**: DevOps, SRE, Platform Team
 
 ---
 
@@ -514,6 +512,5 @@ pg_restore -d zidney_master < backup-master-pre-deploy.sql.gz
 
 ---
 
-**Document Version**: 1.0
-**Last Updated**: 2026-02-16
-**Next Review**: 2026-02-23 (post-deployment validation)
+**Document Version**: 1.0 **Last Updated**: 2026-02-16 **Next Review**: 2026-02-23 (post-deployment
+validation)

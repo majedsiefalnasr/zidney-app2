@@ -13,7 +13,9 @@
 
 ### What is Being Built
 
-The License Engine is the commercial authority of Zidney. It implements the complete license lifecycle, enforces institutional limits, and controls tenant operational status through middleware-enforced validation on every workspace-bound request.
+The License Engine is the commercial authority of Zidney. It implements the complete license
+lifecycle, enforces institutional limits, and controls tenant operational status through
+middleware-enforced validation on every workspace-bound request.
 
 **Scope**:
 
@@ -50,7 +52,8 @@ The License Engine is the commercial authority of Zidney. It implements the comp
 ✅ **No Middleware Bypass**: License middleware mandatory for ALL workspace-bound routes  
 ✅ **No Direct DB Instantiation**: License queries routed through domain-core resolver  
 ✅ **No Weakening of Transaction Boundaries**: Limit enforcement is transactional  
-✅ **No Weakening of Version Enforcement**: Product version stored in license; validated on every request  
+✅ **No Weakening of Version Enforcement**: Product version stored in license; validated on every
+request  
 ✅ **Database-Per-Tenant Preserved**: Master DB holds licenses; tenant DB holds institution data
 
 ---
@@ -98,11 +101,14 @@ Comparison Logic:
 
 **Direction Semantics**:
 
-- `tenant.schema_version > license.expected_schema_version` → **Allowed** (tenant ahead; forward-compatible)
+- `tenant.schema_version > license.expected_schema_version` → **Allowed** (tenant ahead;
+  forward-compatible)
 - `tenant.schema_version = license.expected_schema_version` → **Allowed** (exact match)
-- `tenant.schema_version < license.expected_schema_version` → **Blocked** (tenant behind; return 426)
+- `tenant.schema_version < license.expected_schema_version` → **Blocked** (tenant behind;
+  return 426)
 
-**Rationale**: Tenant can be ahead of license (runtime code handles old license contracts). Tenant cannot be behind (runtime code assumes minimum version features).
+**Rationale**: Tenant can be ahead of license (runtime code handles old license contracts). Tenant
+cannot be behind (runtime code assumes minimum version features).
 
 **Product Version Enforcement**:
 
@@ -169,7 +175,8 @@ CREATE INDEX idx_licenses_status ON licenses(status);
 
 **Actor**: MMC Admin
 
-**Scenario**: Institution purchases Zidney; product assigned to workspace; license created linking product to workspace.
+**Scenario**: Institution purchases Zidney; product assigned to workspace; license created linking
+product to workspace.
 
 **Why P1**: Prerequisite for all operations.
 
@@ -177,9 +184,11 @@ CREATE INDEX idx_licenses_status ON licenses(status);
 
 **Acceptance Scenarios**:
 
-1. **Given** product BASIC assigned, **When** MMC admin creates license for workspace "acme.edu", **Then** license stored with status=ACTIVE, limits per product, expected_schema_version=1.0.0
+1. **Given** product BASIC assigned, **When** MMC admin creates license for workspace "acme.edu",
+   **Then** license stored with status=ACTIVE, limits per product, expected_schema_version=1.0.0
 
-2. **Given** workspace_slug already exists, **When** admin tries to create second license, **Then** request fails with 409 (conflict)
+2. **Given** workspace_slug already exists, **When** admin tries to create second license, **Then**
+   request fails with 409 (conflict)
 
 3. **Given** license created, **When** workspace admin logs in, **Then** license middleware succeeds
 
@@ -189,19 +198,24 @@ CREATE INDEX idx_licenses_status ON licenses(status);
 
 **Actor**: Automated system / Admin
 
-**Scenario**: Payment renewal fails; license transitions to SOFT_LOCKED. New logins/attempts blocked; existing sessions valid.
+**Scenario**: Payment renewal fails; license transitions to SOFT_LOCKED. New logins/attempts
+blocked; existing sessions valid.
 
 **Why P1**: Revenue protection; critical business model requirement.
 
-**Independent Test**: Soft-lock state tested separately from archive. System correctly rejects new logins.
+**Independent Test**: Soft-lock state tested separately from archive. System correctly rejects new
+logins.
 
 **Acceptance Scenarios**:
 
-1. **Given** status=ACTIVE, **When** payment fails and admin triggers SOFT_LOCK, **Then** status=SOFT_LOCKED, soft_lock_until=NOW()+90 days
+1. **Given** status=ACTIVE, **When** payment fails and admin triggers SOFT_LOCK, **Then**
+   status=SOFT_LOCKED, soft_lock_until=NOW()+90 days
 
-2. **Given** status=SOFT_LOCKED, **When** existing user submits request with valid token, **Then** middleware returns 423 (Locked)
+2. **Given** status=SOFT_LOCKED, **When** existing user submits request with valid token, **Then**
+   middleware returns 423 (Locked)
 
-3. **Given** status=SOFT_LOCKED and soft_lock_until=NOW(), **When** middleware checks on next request, **Then** auto-transition to ARCHIVED
+3. **Given** status=SOFT_LOCKED and soft_lock_until=NOW(), **When** middleware checks on next
+   request, **Then** auto-transition to ARCHIVED
 
 ---
 
@@ -209,19 +223,24 @@ CREATE INDEX idx_licenses_status ON licenses(status);
 
 **Actor**: Institutional admin
 
-**Scenario**: Institution has BASIC plan (student_limit=300); admin tries to onboard 301st student; system blocks creation.
+**Scenario**: Institution has BASIC plan (student_limit=300); admin tries to onboard 301st student;
+system blocks creation.
 
 **Why P1**: Hard commercial guarantee; violation impacts revenue.
 
-**Independent Test**: Limit enforcement tested with any institution by querying count + comparing with limit.
+**Independent Test**: Limit enforcement tested with any institution by querying count + comparing
+with limit.
 
 **Acceptance Scenarios**:
 
-1. **Given** 299 active students, limit=300, **When** admin creates student#300, **Then** user created successfully
+1. **Given** 299 active students, limit=300, **When** admin creates student#300, **Then** user
+   created successfully
 
-2. **Given** 300 active students, limit=300, **When** admin tries to create student#301, **Then** fails with 402 (Payment Required)
+2. **Given** 300 active students, limit=300, **When** admin tries to create student#301, **Then**
+   fails with 402 (Payment Required)
 
-3. **Given** 300 active students (all enabled), **When** one soft-deleted, **Then** limit check counts 299
+3. **Given** 300 active students (all enabled), **When** one soft-deleted, **Then** limit check
+   counts 299
 
 ---
 
@@ -229,7 +248,8 @@ CREATE INDEX idx_licenses_status ON licenses(status);
 
 **Actor**: Automated system
 
-**Scenario**: Soft-lock grace period expires (90 days); system auto-transitions to ARCHIVED; snapshot enqueued; snapshot stored; license updated.
+**Scenario**: Soft-lock grace period expires (90 days); system auto-transitions to ARCHIVED;
+snapshot enqueued; snapshot stored; license updated.
 
 **Why P1**: Data preservation critical; archive without snapshot = data loss.
 
@@ -237,9 +257,11 @@ CREATE INDEX idx_licenses_status ON licenses(status);
 
 **Acceptance Scenarios**:
 
-1. **Given** status=SOFT_LOCKED, soft_lock_until=YESTERDAY, **When** next API request hit middleware, **Then** auto-transition to ARCHIVED, snapshot job enqueued
+1. **Given** status=SOFT_LOCKED, soft_lock_until=YESTERDAY, **When** next API request hit
+   middleware, **Then** auto-transition to ARCHIVED, snapshot job enqueued
 
-2. **Given** snapshot job executed, **When** pg_dump completes, **Then** snapshot stored, snapshot_id recorded
+2. **Given** snapshot job executed, **When** pg_dump completes, **Then** snapshot stored,
+   snapshot_id recorded
 
 3. **Given** status=ARCHIVED, **When** user accesses, **Then** middleware returns 403 (Forbidden)
 
@@ -257,7 +279,8 @@ CREATE INDEX idx_licenses_status ON licenses(status);
 
 **Acceptance Scenarios**:
 
-1. **Given** tenant.schema_version=1.0.0, license.expected_schema_version=2.0.0, **When** API request, **Then** returns 426 (Upgrade Required)
+1. **Given** tenant.schema_version=1.0.0, license.expected_schema_version=2.0.0, **When** API
+   request, **Then** returns 426 (Upgrade Required)
 
 2. **Given** versions match, **When** API request, **Then** allows request
 
@@ -267,21 +290,25 @@ CREATE INDEX idx_licenses_status ON licenses(status);
 
 **Actor**: MMC Admin
 
-**Scenario**: Admin manually deletes archived license; requires snapshot verification + explicit confirmation; tenant DB dropped; license marked DELETED.
+**Scenario**: Admin manually deletes archived license; requires snapshot verification + explicit
+confirmation; tenant DB dropped; license marked DELETED.
 
 **Why P3**: Data destruction rare; requires explicit action.
 
 **Acceptance Scenarios**:
 
-1. **Given** status=ARCHIVED, **When** admin initiates deletion, **Then** system verifies snapshot, requires confirmation
+1. **Given** status=ARCHIVED, **When** admin initiates deletion, **Then** system verifies snapshot,
+   requires confirmation
 
-2. **Given** deletion confirmed, **When** executed, **Then** tenant DB dropped, deleted_at=NOW(), status=DELETED
+2. **Given** deletion confirmed, **When** executed, **Then** tenant DB dropped, deleted_at=NOW(),
+   status=DELETED
 
 ---
 
 ### Edge Cases
 
-- What happens when SOFT_LOCKED grace period expires during active session? Network issue prevents auto-transition?
+- What happens when SOFT_LOCKED grace period expires during active session? Network issue prevents
+  auto-transition?
 - How does system handle simultaneous user creation attempts against limit?
 - How does system handle license status change (ACTIVE→SOFT_LOCKED) while user mid-request?
 
@@ -291,20 +318,28 @@ CREATE INDEX idx_licenses_status ON licenses(status);
 
 ### Functional Requirements
 
-- **FR-1**: License creation accepts product_id, workspace_id, workspace_slug; validates uniqueness; stores with ACTIVE status
-- **FR-2**: License middleware executes on every workspace-bound request; validates status (ACTIVE/SOFT_LOCKED/ARCHIVED/DELETED); returns appropriate HTTP codes
-- **FR-3**: Student limit enforced transactionally at user creation; blocks creation if limit reached (402)
+- **FR-1**: License creation accepts product_id, workspace_id, workspace_slug; validates uniqueness;
+  stores with ACTIVE status
+- **FR-2**: License middleware executes on every workspace-bound request; validates status
+  (ACTIVE/SOFT_LOCKED/ARCHIVED/DELETED); returns appropriate HTTP codes
+- **FR-3**: Student limit enforced transactionally at user creation; blocks creation if limit
+  reached (402)
 - **FR-4**: Staff limit enforced transactionally at user creation; same as FR-3
-- **FR-5**: State transition ACTIVE→SOFT_LOCKED sets status + soft_lock_until (NOW()+90 days); idempotent
-- **FR-6**: State transition SOFT_LOCKED→ARCHIVED auto-triggered when soft_lock_until expires; enqueues snapshot job
+- **FR-5**: State transition ACTIVE→SOFT_LOCKED sets status + soft_lock_until (NOW()+90 days);
+  idempotent
+- **FR-6**: State transition SOFT_LOCKED→ARCHIVED auto-triggered when soft_lock_until expires;
+  enqueues snapshot job
 - **FR-7**: State transition SOFT_LOCKED→ACTIVE (renewal) resets soft_lock_until to NULL; idempotent
-- **FR-8**: Archive snapshot executed by worker; pg_dump + store; idempotent (checks if snapshot_id set)
+- **FR-8**: Archive snapshot executed by worker; pg_dump + store; idempotent (checks if snapshot_id
+  set)
 - **FR-9**: workspace_slug immutable after creation; update attempts rejected (409)
-- **FR-10**: Version fields (expected_schema_version, expected_product_version) stored at creation; never derived from runtime
+- **FR-10**: Version fields (expected_schema_version, expected_product_version) stored at creation;
+  never derived from runtime
 
 ### Key Entities
 
-- **License**: Commercial entity linking Product→Workspace; has lifecycle states, limits, version expectations
+- **License**: Commercial entity linking Product→Workspace; has lifecycle states, limits, version
+  expectations
 - **Product**: Base configuration (from STAGE_09); provides limit defaults
 - **Workspace**: Tenant identifier; has workspace_slug as immutable identifier
 - **Archive Snapshot**: Captures tenant DB state; referenced by license; enables restoration
@@ -315,13 +350,18 @@ CREATE INDEX idx_licenses_status ON licenses(status);
 
 ### Measurable Outcomes
 
-- **SC-1**: License lifecycle operational - ACTIVE workspace allows operations; SOFT_LOCKED blocks logins (423) within 1 req latency; ARCHIVED blocks all (403)
-- **SC-2**: Limit enforcement reliable - No user created if limit exceeded; soft-deleted don't count; transactional enforcement (no race)
+- **SC-1**: License lifecycle operational - ACTIVE workspace allows operations; SOFT_LOCKED blocks
+  logins (423) within 1 req latency; ARCHIVED blocks all (403)
+- **SC-2**: Limit enforcement reliable - No user created if limit exceeded; soft-deleted don't
+  count; transactional enforcement (no race)
 - **SC-3**: Middleware validation fast - < 50ms p95; 100% coverage on workspace routes
 - **SC-4**: Version enforcement working - Mismatch detected; blocked with 426
-- **SC-5**: Archive & snapshot operational - Auto-expire works; snapshot captured before ARCHIVED persisted
-- **SC-6**: Data integrity preserved - No cross-tenant leakage; all writes transactional; workspace_slug immutable
-- **SC-7**: Observability complete - All ops logged with correlation_id; error codes match contract; metrics available
+- **SC-5**: Archive & snapshot operational - Auto-expire works; snapshot captured before ARCHIVED
+  persisted
+- **SC-6**: Data integrity preserved - No cross-tenant leakage; all writes transactional;
+  workspace_slug immutable
+- **SC-7**: Observability complete - All ops logged with correlation_id; error codes match contract;
+  metrics available
 - **SC-8**: Idempotency enforced - State transitions idempotent; snapshot job safe to retry
 
 ---
@@ -331,7 +371,8 @@ CREATE INDEX idx_licenses_status ON licenses(status);
 ### Operations Requiring Transactions
 
 **T1 - Create License**: Validate → INSERT (atomic)  
-**T2 - Student Limit Check**: SELECT FOR UPDATE COUNT + INSERT (atomic; row-level lock prevents race)  
+**T2 - Student Limit Check**: SELECT FOR UPDATE COUNT + INSERT (atomic; row-level lock prevents
+race)  
 **T3 - State Transition**: UPDATE status (atomic)  
 **T4 - State Transition + Archive Enqueue**: UPDATE + enqueue (atomic)  
 **T5 - Archive Snapshot (worker)**: pg_dump + INSERT + UPDATE (atomic)
@@ -398,9 +439,11 @@ IF license.status = 'SOFT_LOCKED' AND NOW() > license.soft_lock_until
 
 **Cost**: One additional timestamp comparison per request (negligible)
 
-**Cron Job Optional**: Background cron can optionally batch-transition expired licenses (optimization, not required)
+**Cron Job Optional**: Background cron can optionally batch-transition expired licenses
+(optimization, not required)
 
-**Rationale**: Fail-fast; users immediately see 403 after expiry; no stale state from delayed cron execution
+**Rationale**: Fail-fast; users immediately see 403 after expiry; no stale state from delayed cron
+execution
 
 ---
 
@@ -409,15 +452,15 @@ IF license.status = 'SOFT_LOCKED' AND NOW() > license.soft_lock_until
 ### State Transitions (SOFT_LOCK, ARCHIVE, RESTORE) — Clarification Q2: Redis Cache with TTL
 
 **Idempotency Key**: `{license_id}_{target_state}`  
-**Storage**: Redis cache (not database)
-**TTL**: 24 hours
-**Key Format**: `idempotency:{license_id}:{target_state}:{request_id_hash}`
-**Behavior**:
+**Storage**: Redis cache (not database) **TTL**: 24 hours **Key Format**:
+`idempotency:{license_id}:{target_state}:{request_id_hash}` **Behavior**:
 
 - If key exists in cache → return cached response (HTTP 200, cached response body)
 - If key not in cache → execute transition, store result in Redis with 24hr TTL, return result
-- **Important**: If two requests have same key but different payload (rare edge case), first submission's **payload wins**; second request gets cached response ignoring its different payload
-- TTL reasoning: 24 hours sufficient for typical retry windows; after TTL, new request treated as fresh transition
+- **Important**: If two requests have same key but different payload (rare edge case), first
+  submission's **payload wins**; second request gets cached response ignoring its different payload
+- TTL reasoning: 24 hours sufficient for typical retry windows; after TTL, new request treated as
+  fresh transition
 
 **Collision Handling**:
 
@@ -428,13 +471,14 @@ IF license.status = 'SOFT_LOCKED' AND NOW() > license.soft_lock_until
 ### Archive Snapshot (Worker) — Clarification Q2: Snapshot Deduplication
 
 **Idempotency Key**: `{license_id}_{snapshot_timestamp_epoch}`  
-**Storage**: Database (query existing snapshots)
-**Behavior**:
+**Storage**: Database (query existing snapshots) **Behavior**:
 
-- Before pg_dump, check: `SELECT snapshot_id FROM archive_snapshots WHERE license_id = $1 AND snapshot_ts > NOW() - INTERVAL '1 hour'`
+- Before pg_dump, check:
+  `SELECT snapshot_id FROM archive_snapshots WHERE license_id = $1 AND snapshot_ts > NOW() - INTERVAL '1 hour'`
 - If recent snapshot exists → skip re-dump, update license.snapshot_id, return success (200)
 - If no recent snapshot → execute pg_dump, store, update license.snapshot_id
-- **Rationale**: Worker retries on failure; timestamp-based dedup prevents duplicate snapshots within 1 hour window
+- **Rationale**: Worker retries on failure; timestamp-based dedup prevents duplicate snapshots
+  within 1 hour window
 
 ---
 

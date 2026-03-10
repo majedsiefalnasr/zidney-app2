@@ -1,14 +1,15 @@
 # Closure Report — API Client Layer
 
-**Step:** 7 — Closure
-**Timestamp:** 2026-03-01T13:10:00Z
-**Status:** PRODUCTION READY
+**Step:** 7 — Closure **Timestamp:** 2026-03-01T13:10:00Z **Status:** PRODUCTION READY
 
 ---
 
 ## Summary
 
-The API Client Layer stage is complete and production ready. A new `packages/api-client` package delivers a framework-agnostic, zero-dependency HTTP client shared across all three frontend applications (MMC, Backoffice, Frontoffice). All 76 tasks were completed, 90 unit tests pass, and all constitutional compliance checks are satisfied. No scope was deferred.
+The API Client Layer stage is complete and production ready. A new `packages/api-client` package
+delivers a framework-agnostic, zero-dependency HTTP client shared across all three frontend
+applications (MMC, Backoffice, Frontoffice). All 76 tasks were completed, 90 unit tests pass, and
+all constitutional compliance checks are satisfied. No scope was deferred.
 
 ---
 
@@ -30,8 +31,10 @@ The API Client Layer stage is complete and production ready. A new `packages/api
 ## Scope Delivered
 
 - `packages/api-client` — framework-agnostic HTTP client with injectable `HttpAdapter` transport
-- `ClientResponse<T>` — typed response wrapper (renamed from ApiResponse to avoid collision with `@zidney/types`)
-- `AppError` — plain interface (not class) for error normalization across network, HTTP, and validation errors
+- `ClientResponse<T>` — typed response wrapper (renamed from ApiResponse to avoid collision with
+  `@zidney/types`)
+- `AppError` — plain interface (not class) for error normalization across network, HTTP, and
+  validation errors
 - Fixed interceptor pipeline: auth → correlation-id → content-type → idempotency → timeout
 - Single-flight 401 token refresh with queued retry
 - `Idempotency-Key` header (IETF standard) on POST/PUT/PATCH/DELETE mutations
@@ -40,7 +43,8 @@ The API Client Layer stage is complete and production ready. A new `packages/api
 - `FetchAdapter` — production transport wrapping native `fetch` with `credentials: 'include'`
 - `MockAdapter` — queue-based test adapter for deterministic unit testing
 - Per-app factory wrappers: `apps/mmc`, `apps/backoffice`, `apps/frontoffice`
-- ESLint enforcement: `no-restricted-imports` (axios/got/ky/node-fetch) and `no-restricted-globals` (fetch)
+- ESLint enforcement: `no-restricted-imports` (axios/got/ky/node-fetch) and `no-restricted-globals`
+  (fetch)
 - 90 unit tests across 6 test files, all passing
 
 ---
@@ -73,7 +77,10 @@ None — all 76 tasks completed.
 
 Risk Level: `LOW`
 
-Justification: This is a UI-only shared package with zero external dependencies. It introduces no database changes, no migrations, and no new API endpoints. All three app wrappers are thin factories over the shared client. 90 unit tests provide comprehensive coverage. Rollback is trivial (revert to previous per-app client implementations).
+Justification: This is a UI-only shared package with zero external dependencies. It introduces no
+database changes, no migrations, and no new API endpoints. All three app wrappers are thin factories
+over the shared client. 90 unit tests provide comprehensive coverage. Rollback is trivial (revert to
+previous per-app client implementations).
 
 ---
 

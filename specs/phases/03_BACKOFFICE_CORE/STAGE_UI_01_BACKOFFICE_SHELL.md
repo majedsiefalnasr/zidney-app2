@@ -123,10 +123,7 @@ Router must:
 
 Each route must define:
 
-meta: {
-requiresAuth: true,
-permissions: ['exam:create', 'student:view'] // example
-}
+meta: { requiresAuth: true, permissions: ['exam:create', 'student:view'] // example }
 
 ---
 

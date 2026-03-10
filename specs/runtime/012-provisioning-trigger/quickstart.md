@@ -1,6 +1,7 @@
 # Quickstart: Local Provisioning Development
 
-**Purpose**: Set up local development environment for testing STAGE 12 – Provisioning Trigger system  
+**Purpose**: Set up local development environment for testing STAGE 12 – Provisioning Trigger
+system  
 **Time Required**: 15-20 minutes  
 **Prerequisites**: Docker, Node.js 18+, PostgreSQL client tools
 

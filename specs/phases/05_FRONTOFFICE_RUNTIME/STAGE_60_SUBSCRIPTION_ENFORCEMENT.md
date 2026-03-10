@@ -243,5 +243,5 @@ Stage complete when:
 - Reading subscription from JWT without DB validation
 - Modifying grading based on subscription
 
-Subscription enforcement is a runtime access guard.
-It must be deterministic and server-authoritative.
+Subscription enforcement is a runtime access guard. It must be deterministic and
+server-authoritative.

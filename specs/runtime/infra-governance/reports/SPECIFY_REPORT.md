@@ -1,14 +1,16 @@
 # Specify Report — Infra Governance
 
-**Step:** 1 — Specify
-**Timestamp:** 2026-03-05T00:00:00.000Z
-**Status:** COMPLETE
+**Step:** 1 — Specify **Timestamp:** 2026-03-05T00:00:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-The specification for the **Infra Governance** stage has been completed and validated. This is a constitutional-level, tooling-only stage that establishes mandatory infrastructure governance across the entire Zidney monorepo. The spec defines 12 functional requirement groups (FR-01 through FR-12) covering all eight governance areas from the source stage file. No `[NEEDS CLARIFICATION]` markers remain. All checklist items pass.
+The specification for the **Infra Governance** stage has been completed and validated. This is a
+constitutional-level, tooling-only stage that establishes mandatory infrastructure governance across
+the entire Zidney monorepo. The spec defines 12 functional requirement groups (FR-01 through FR-12)
+covering all eight governance areas from the source stage file. No `[NEEDS CLARIFICATION]` markers
+remain. All checklist items pass.
 
 ---
 
@@ -36,14 +38,20 @@ The specification for the **Infra Governance** stage has been completed and vali
 
 - **FR-01** — Test Tier Separation: Unit / Integration / E2E glob patterns locked
 - **FR-02** — Unit Test Requirements: in-memory only, no network/DB, ≥85% coverage
-- **FR-03** — Integration Test Requirements: controlled DB/Redis, RFC 7807 compliance, isolation boundary assertions
-- **FR-04** — E2E Per-App Isolation (LOCKED): each app owns Playwright config, no cross-app fixtures, traces on failure
-- **FR-05** — Vitest Monorepo Configuration: root workspace file, per-project entries, global coverage thresholds
-- **FR-06** — ESLint Configuration: root-only, `@typescript-eslint` + `eslint-plugin-vue` + `eslint-config-prettier`
+- **FR-03** — Integration Test Requirements: controlled DB/Redis, RFC 7807 compliance, isolation
+  boundary assertions
+- **FR-04** — E2E Per-App Isolation (LOCKED): each app owns Playwright config, no cross-app
+  fixtures, traces on failure
+- **FR-05** — Vitest Monorepo Configuration: root workspace file, per-project entries, global
+  coverage thresholds
+- **FR-06** — ESLint Configuration: root-only, `@typescript-eslint` + `eslint-plugin-vue` +
+  `eslint-config-prettier`
 - **FR-07** — Prettier Configuration: root-only, Vue3 + TypeScript + Tailwind compatible
-- **FR-08** — Pre-Commit Gate: Husky + lint-staged (ESLint fix + Prettier write) + ai-guard + infra-audit
+- **FR-08** — Pre-Commit Gate: Husky + lint-staged (ESLint fix + Prettier write) + ai-guard +
+  infra-audit
 - **FR-09** — Pre-Push Gate: full lint + typecheck + unit tests (target: <3 min)
-- **FR-10** — CI Enforcement Matrix: 8-step sequence, no `continue-on-error`, branch protection enforced
+- **FR-10** — CI Enforcement Matrix: 8-step sequence, no `continue-on-error`, branch protection
+  enforced
 - **FR-11** — README Governance: 7 mandatory sections in every `apps/*` and `packages/*`
 - **FR-12** — Hard Mode Enforcement: governance rules mandatory for all future stages
 
@@ -73,8 +81,10 @@ None. All specification items are fully defined.
 
 ## Open Risks
 
-- **Husky hooks depend on `prepare` script execution** — developers who clone without running `bun install` will lack hooks. Mitigation: CI enforces the same checks independently.
-- **Coverage baseline measurement must be done before enforcing thresholds** — if thresholds are enforced before measurement, previously passing stages may surface unexpected failures.
+- **Husky hooks depend on `prepare` script execution** — developers who clone without running
+  `bun install` will lack hooks. Mitigation: CI enforces the same checks independently.
+- **Coverage baseline measurement must be done before enforcing thresholds** — if thresholds are
+  enforced before measurement, previously passing stages may surface unexpected failures.
 
 ---
 

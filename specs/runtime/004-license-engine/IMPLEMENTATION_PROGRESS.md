@@ -10,11 +10,14 @@
 
 ### ✅ Phase 1: Database Infrastructure (T001)
 
-- **File**: `apps/api/src/db/master/migrations/20260217_004_enhance_licenses_and_add_archive_snapshots.ts`
+- **File**:
+  `apps/api/src/db/master/migrations/20260217_004_enhance_licenses_and_add_archive_snapshots.ts`
 - **Status**: COMPLETE
 - **Contents**:
-  - ALTER licenses table: Add `expected_schema_version`, `expected_product_version` (VARCHAR 20, NOT NULL)
-  - CREATE archive_snapshots table (5 columns: id, license_id PK, snapshot_location, snapshot_timestamp, created_at)
+  - ALTER licenses table: Add `expected_schema_version`, `expected_product_version` (VARCHAR 20, NOT
+    NULL)
+  - CREATE archive_snapshots table (5 columns: id, license_id PK, snapshot_location,
+    snapshot_timestamp, created_at)
   - CREATE 2 indexes (license_id, created_at DESC)
   - UPDATE platform_schema_version 1.0.0 → 1.1.0
   - UP/DOWN functions (atomic transactions)

@@ -24,8 +24,7 @@ Groups are used for:
 - Notification targeting
 - Operational segmentation inside a division or department
 
-Groups are not structural hierarchy entities.
-They are logical clustering entities.
+Groups are not structural hierarchy entities. They are logical clustering entities.
 
 ---
 
@@ -87,8 +86,7 @@ Group does not directly require division.
 
 However:
 
-If department_id is provided,
-then department.division_id defines indirect division boundary.
+If department_id is provided, then department.division_id defines indirect division boundary.
 
 Division-based filtering must be enforced at query layer.
 
@@ -151,19 +149,11 @@ Soft delete recommended over hard delete.
 
 All content queries must apply:
 
-WHERE
-(
-content.group_id IS NULL
-OR content.group_id = student.group_id
-)
+WHERE ( content.group_id IS NULL OR content.group_id = student.group_id )
 
 For staff:
 
-WHERE
-(
-content.group_id IS NULL
-OR content.group_id IN (staff assigned groups)
-)
+WHERE ( content.group_id IS NULL OR content.group_id IN (staff assigned groups) )
 
 Enforcement must occur in backend only.
 
@@ -193,5 +183,4 @@ Stage is complete when:
 
 ---
 
-Next:
-STAGE_25_HIERARCHY_TREE
+Next: STAGE_25_HIERARCHY_TREE

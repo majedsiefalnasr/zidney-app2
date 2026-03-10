@@ -11,7 +11,8 @@
 
 ## Completion Summary
 
-All 57 atomic tasks were executed and marked `[X]`. Implementation spans 12 phases across all three front-end applications (MMC, Backoffice, Frontoffice).
+All 57 atomic tasks were executed and marked `[X]`. Implementation spans 12 phases across all three
+front-end applications (MMC, Backoffice, Frontoffice).
 
 ---
 
@@ -126,17 +127,23 @@ All 57 atomic tasks were executed and marked `[X]`. Implementation spans 12 phas
 
 ### AD-IMPL-01: File Location for auth-store and auth-guard
 
-**Decision:** auth.store.ts placed in `core/state/`, auth.guard.ts placed in `core/router/guards/` — not in `core/auth/`.
+**Decision:** auth.store.ts placed in `core/state/`, auth.guard.ts placed in `core/router/guards/` —
+not in `core/auth/`.
 
-**Reason:** Aligned with existing Stage 00 conventions where stores live in `core/state/` and guards in `core/router/guards/`. This is the correct location per the existing scaffolding.
+**Reason:** Aligned with existing Stage 00 conventions where stores live in `core/state/` and guards
+in `core/router/guards/`. This is the correct location per the existing scaffolding.
 
 ### AD-IMPL-02: tasks.md actual count = 57 (not 67)
 
-**Decision:** Confirmed 57 T-numbered implementation tasks. The prior workflow-state stored 67, which included completion criteria checklist items. The actual implementation tasks were 57 — all completed.
+**Decision:** Confirmed 57 T-numbered implementation tasks. The prior workflow-state stored 67,
+which included completion criteria checklist items. The actual implementation tasks were 57 — all
+completed.
 
 ### AD-IMPL-03: Backoffice/Frontoffice test infrastructure deferred
 
-**Decision:** MMC test suite (143 tests) provides full coverage of the shared auth patterns. Backoffice and Frontoffice implementations are identical replications verified by TypeScript passing. Adding vitest configs to those apps is a future infrastructure task.
+**Decision:** MMC test suite (143 tests) provides full coverage of the shared auth patterns.
+Backoffice and Frontoffice implementations are identical replications verified by TypeScript
+passing. Adding vitest configs to those apps is a future infrastructure task.
 
 ---
 

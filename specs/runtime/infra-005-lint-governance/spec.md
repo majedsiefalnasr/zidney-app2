@@ -1,14 +1,10 @@
 # Specification: Lint Governance — Architecture Enforcement and Pre-Commit Pipeline
 
-**Feature ID:** `infra-005-lint-governance`
-**Phase:** `01_PLATFORM_FOUNDATION`
-**Stage File:** `specs/phases/01_platform_foundation/STAGE_INFRA_05_LINT_GOVERNANCE.md`
-**Stage Status:** DRAFT → IN PROGRESS
-**Type:** Infrastructure Governance (non-feature)
-**Branch:** `spec/infra-005-lint-governance`
-**Initiated:** 2026-03-07T00:00:00Z
-**Spec Author:** SpecKit (speckit.specify)
-**Depends On:** `infra-004-biome` (STAGE_INFRA_04_BIOME — must be complete)
+**Feature ID:** `infra-005-lint-governance` **Phase:** `01_PLATFORM_FOUNDATION` **Stage File:**
+`specs/phases/01_platform_foundation/STAGE_INFRA_05_LINT_GOVERNANCE.md` **Stage Status:** DRAFT → IN
+PROGRESS **Type:** Infrastructure Governance (non-feature) **Branch:**
+`spec/infra-005-lint-governance` **Initiated:** 2026-03-07T00:00:00Z **Spec Author:** SpecKit
+(speckit.specify) **Depends On:** `infra-004-biome` (STAGE_INFRA_04_BIOME — must be complete)
 
 ---
 
@@ -16,15 +12,20 @@
 
 ### What Is Being Established
 
-This stage establishes a strict **lint governance layer** over the Zidney monorepo. Where `infra-004-biome` replaced ESLint and Prettier with Biome as the unified linting engine, this stage activates and hardens the full governance pipeline that sits on top of Biome.
+This stage establishes a strict **lint governance layer** over the Zidney monorepo. Where
+`infra-004-biome` replaced ESLint and Prettier with Biome as the unified linting engine, this stage
+activates and hardens the full governance pipeline that sits on top of Biome.
 
 The work covers:
 
-- Hardening the Biome lint rule set (configuring error-level rules for correctness and style violations)
+- Hardening the Biome lint rule set (configuring error-level rules for correctness and style
+  violations)
 - Configuring and activating AI-Guard (`scripts/ai-guard.ts`) as an architectural boundary enforcer
 - Establishing explicit import order governance enforced by Biome's import organizer
-- Activating and verifying lint-staged pre-commit hooks to run Biome and AI-Guard before every commit
-- Verifying and enforcing the CI quality-gate sequence: `bun run lint` → `bun run type-check` → `bun scripts/ai-guard.ts`
+- Activating and verifying lint-staged pre-commit hooks to run Biome and AI-Guard before every
+  commit
+- Verifying and enforcing the CI quality-gate sequence: `bun run lint` → `bun run type-check` →
+  `bun scripts/ai-guard.ts`
 - Documenting the multi-layer governance model for developers and AI agents
 - Defining module ownership rules and critical module protection policy
 - Establishing a drift prevention strategy anchored to the architecture intelligence layer
@@ -33,7 +34,8 @@ The work covers:
 
 - Phase: `01_PLATFORM_FOUNDATION`
 - This stage directly follows `infra-004-biome` and completes the developer governance toolchain.
-- It is a prerequisite for all subsequent feature development stages — no feature may start until lint governance is enforced.
+- It is a prerequisite for all subsequent feature development stages — no feature may start until
+  lint governance is enforced.
 
 ### Governance Layers (Authoritative)
 
@@ -89,23 +91,35 @@ Confirmed explicitly:
 | No weakening of transaction boundaries | ✅ Confirmed |
 | No weakening of version enforcement    | ✅ Confirmed |
 
-This is a developer toolchain governance change only. No runtime behavior, no API logic, and no database schema is modified. All governance tooling operates exclusively on source files during development and CI — nothing is deployed to production artifacts.
+This is a developer toolchain governance change only. No runtime behavior, no API logic, and no
+database schema is modified. All governance tooling operates exclusively on source files during
+development and CI — nothing is deployed to production artifacts.
 
-**Architecture impact:** Architectural governance artifacts (`ARCHITECTURE_CONTRACT.json`, `ARCHITECTURE_MAP.json`, `ai-architecture-brain.json`) are read by AI-Guard. This stage validates and activates their use. If any of these files are missing or stale, the governance pipeline will emit warnings and fail CI. Regenerating them with `bun run arch:audit` is the resolution path.
+**Architecture impact:** Architectural governance artifacts (`ARCHITECTURE_CONTRACT.json`,
+`ARCHITECTURE_MAP.json`, `ai-architecture-brain.json`) are read by AI-Guard. This stage validates
+and activates their use. If any of these files are missing or stale, the governance pipeline will
+emit warnings and fail CI. Regenerating them with `bun run arch:audit` is the resolution path.
 
 ---
 
 ## Purpose
 
-The Biome stage (`infra-004`) established formatting and basic linting. However, governance is incomplete without:
+The Biome stage (`infra-004`) established formatting and basic linting. However, governance is
+incomplete without:
 
-1. **Architecture boundary enforcement at commit time** — AI-Guard must actively block code that violates module boundaries before it enters the repository.
-2. **A documented and verified pre-commit hook sequence** — developers must get instant, actionable feedback before code reaches CI.
-3. **Import order governance** — consistent import ordering across the monorepo prevents noisy diffs and signals intent clearly.
-4. **Critical module protection** — changes to core packages (`packages/domain-core`, `packages/logger`, `packages/types`) must be flagged for stricter review.
-5. **CI gate completion** — the CI pipeline must enforce all three gates (`lint`, `type-check`, `ai-guard`) as blocking conditions.
+1. **Architecture boundary enforcement at commit time** — AI-Guard must actively block code that
+   violates module boundaries before it enters the repository.
+2. **A documented and verified pre-commit hook sequence** — developers must get instant, actionable
+   feedback before code reaches CI.
+3. **Import order governance** — consistent import ordering across the monorepo prevents noisy diffs
+   and signals intent clearly.
+4. **Critical module protection** — changes to core packages (`packages/domain-core`,
+   `packages/logger`, `packages/types`) must be flagged for stricter review.
+5. **CI gate completion** — the CI pipeline must enforce all three gates (`lint`, `type-check`,
+   `ai-guard`) as blocking conditions.
 
-Without this stage, architecture drift can enter the repository undetected. With it, drift becomes immediately visible at the point of authorship.
+Without this stage, architecture drift can enter the repository undetected. With it, drift becomes
+immediately visible at the point of authorship.
 
 **Core Philosophy Alignment:**
 
@@ -120,7 +134,8 @@ Without this stage, architecture drift can enter the repository undetected. With
 
 ## Objectives
 
-1. Activate AI-Guard as a **mandatory pre-commit gate** that blocks architecture violations at the point of authorship.
+1. Activate AI-Guard as a **mandatory pre-commit gate** that blocks architecture violations at the
+   point of authorship.
 2. Harden Biome's lint rule set to `error` level for all critical correctness and style violations.
 3. Verify and document the import ordering convention enforced by Biome's import organizer.
 4. Ensure the pre-commit hook runs both `lint-staged` (Biome) and AI-Guard in sequence.
@@ -135,21 +150,27 @@ Without this stage, architecture drift can enter the repository undetected. With
 
 ### US-01 — Developer: Catch Violations Before Commit
 
-> As a developer, I want lint violations, import errors, and architecture boundary violations to be caught and reported automatically before my commit is recorded, so that I never accidentally push broken or non-compliant code.
+> As a developer, I want lint violations, import errors, and architecture boundary violations to be
+> caught and reported automatically before my commit is recorded, so that I never accidentally push
+> broken or non-compliant code.
 
 **Acceptance Criteria:**
 
 - When I run `git commit`, lint-staged runs Biome checks on staged files first.
-- If Biome finds a lint error or formatting deviation, the commit is blocked with a clear error message.
+- If Biome finds a lint error or formatting deviation, the commit is blocked with a clear error
+  message.
 - After Biome passes, AI-Guard runs against staged files.
-- If AI-Guard detects an architecture boundary violation, the commit is blocked with the violated rule reported.
+- If AI-Guard detects an architecture boundary violation, the commit is blocked with the violated
+  rule reported.
 - All feedback is displayed in the terminal within seconds — no web UI required.
 
 ---
 
 ### US-02 — Developer: Catch Violations in CI Before Merge
 
-> As a developer, I want the CI pipeline to enforce the same lint, type-check, and architecture checks that run locally, so that a passing CI run guarantees no governance violations have been merged.
+> As a developer, I want the CI pipeline to enforce the same lint, type-check, and architecture
+> checks that run locally, so that a passing CI run guarantees no governance violations have been
+> merged.
 
 **Acceptance Criteria:**
 
@@ -163,7 +184,9 @@ Without this stage, architecture drift can enter the repository undetected. With
 
 ### US-03 — Developer: Understand Import Order Requirements
 
-> As a developer, I want a documented and automatically enforced import ordering convention, so that I do not have to manually manage import order and reviews are not cluttered with import ordering noise.
+> As a developer, I want a documented and automatically enforced import ordering convention, so that
+> I do not have to manually manage import order and reviews are not cluttered with import ordering
+> noise.
 
 **Acceptance Criteria:**
 
@@ -175,7 +198,9 @@ Without this stage, architecture drift can enter the repository undetected. With
 
 ### US-04 — Developer: Know Which Modules Are Critically Protected
 
-> As a developer (or AI agent generating code), I want to know which packages are considered critical infrastructure, so that I understand why changes to those modules require extra care and architectural review.
+> As a developer (or AI agent generating code), I want to know which packages are considered
+> critical infrastructure, so that I understand why changes to those modules require extra care and
+> architectural review.
 
 **Acceptance Criteria:**
 
@@ -187,13 +212,16 @@ Without this stage, architecture drift can enter the repository undetected. With
 
 ### US-05 — Developer: Recover from Architecture Drift
 
-> As a developer, I want a single, documented command that detects and reports architecture drift, so that I can verify the codebase health at any time and recover from a stale architecture intelligence index.
+> As a developer, I want a single, documented command that detects and reports architecture drift,
+> so that I can verify the codebase health at any time and recover from a stale architecture
+> intelligence index.
 
 **Acceptance Criteria:**
 
 - `bun run arch:audit` runs the infra audit and reports any drift.
 - The output identifies drifted modules and violated dependencies.
-- If the architecture intelligence layer is stale, the output instructs the developer how to regenerate it.
+- If the architecture intelligence layer is stale, the output instructs the developer how to
+  regenerate it.
 
 ---
 
@@ -201,7 +229,8 @@ Without this stage, architecture drift can enter the repository undetected. With
 
 ### FR-01: Biome Lint Rule Hardening
 
-All critical Biome lint rules must be set to `error` severity (not `warn`) in `biome.json`. The following rules must be enforced at error level:
+All critical Biome lint rules must be set to `error` severity (not `warn`) in `biome.json`. The
+following rules must be enforced at error level:
 
 | Rule              | Category    | Rationale                                            |
 | ----------------- | ----------- | ---------------------------------------------------- |
@@ -211,7 +240,8 @@ All critical Biome lint rules must be set to `error` severity (not `warn`) in `b
 | `useConst`        | style       | Prevents accidental mutation via `let`               |
 | `noUnreachable`   | correctness | Unreachable code signals logic errors                |
 
-Rules currently configured at `warn` level that should remain at `warn` (not promoted to error in this stage):
+Rules currently configured at `warn` level that should remain at `warn` (not promoted to error in
+this stage):
 
 | Rule                        | Category    | Rationale for keeping as warn                                |
 | --------------------------- | ----------- | ------------------------------------------------------------ |
@@ -219,18 +249,24 @@ Rules currently configured at `warn` level that should remain at `warn` (not pro
 | `noImplicitAnyLet`          | suspicious  | TypeScript strict mode handles this at type level            |
 | `useIterableCallbackReturn` | suspicious  | Low-impact; TypeScript covers most cases                     |
 
-**Acceptance Criterion:** `bun run lint` exits code `0`; violations of error-level rules fail the run with a non-zero exit code and print the violated rule and file location.
+**Acceptance Criterion:** `bun run lint` exits code `0`; violations of error-level rules fail the
+run with a non-zero exit code and print the violated rule and file location.
 
-**Exceptions:** Files listed in `biome.json` overrides retain their overridden rule set. Specifically:
+**Exceptions:** Files listed in `biome.json` overrides retain their overridden rule set.
+Specifically:
 
-- `packages/logger`, `apps/worker/src/observability/structured-logger.ts`, and migration files are exempt from `noConsole` (they provide the console-replacement or require it for migration tooling).
-- Test files (`tests/**`, `**/*.test.ts`, `**/*.spec.ts`) are exempt from `noConsole` for debugging convenience.
+- `packages/logger`, `apps/worker/src/observability/structured-logger.ts`, and migration files are
+  exempt from `noConsole` (they provide the console-replacement or require it for migration
+  tooling).
+- Test files (`tests/**`, `**/*.test.ts`, `**/*.spec.ts`) are exempt from `noConsole` for debugging
+  convenience.
 
 ---
 
 ### FR-02: Import Order Convention Enforcement
 
-Biome's import organizer must be enabled (it is already enabled via `biome.json`). The canonical import order for all TypeScript and Vue files in the monorepo is:
+Biome's import organizer must be enabled (it is already enabled via `biome.json`). The canonical
+import order for all TypeScript and Vue files in the monorepo is:
 
 ```
 1. Node.js built-ins          (e.g., import fs from 'node:fs')
@@ -240,15 +276,19 @@ Biome's import organizer must be enabled (it is already enabled via `biome.json`
 5. Relative imports           (e.g., import { helper } from './utils')
 ```
 
-Each group must be separated by a blank line. Biome's formatter enforces this separation automatically when `biome format --write` is run.
+Each group must be separated by a blank line. Biome's formatter enforces this separation
+automatically when `biome format --write` is run.
 
-**Acceptance Criterion:** Running `bun run lint:fix` on any file in scope produces correctly ordered imports with group separators; `bun run lint` on the same file exits `0` with no import-order violations.
+**Acceptance Criterion:** Running `bun run lint:fix` on any file in scope produces correctly ordered
+imports with group separators; `bun run lint` on the same file exits `0` with no import-order
+violations.
 
 ---
 
 ### FR-03: AI-Guard Pre-Commit Activation
 
-The `.husky/pre-commit` hook must invoke `bun scripts/ai-guard.ts` after `lint-staged` completes. The hook execution order is:
+The `.husky/pre-commit` hook must invoke `bun scripts/ai-guard.ts` after `lint-staged` completes.
+The hook execution order is:
 
 ```sh
 # Step 1: Biome (via lint-staged)
@@ -268,25 +308,30 @@ AI-Guard enforces the following rules on **staged files only** (not the full rep
 | Dependency contract    | Forbidden dependencies in `ARCHITECTURE_CONTRACT.json` must not appear |
 | Relative path leaks    | Relative paths must not reference other packages or apps directly      |
 
-If any violation is detected, the commit is blocked and the violated rule is printed to the terminal.
+If any violation is detected, the commit is blocked and the violated rule is printed to the
+terminal.
 
-**Acceptance Criterion:** A commit that introduces a cross-app import is blocked by AI-Guard with a printed violation message; a clean commit passes through without intervention.
+**Acceptance Criterion:** A commit that introduces a cross-app import is blocked by AI-Guard with a
+printed violation message; a clean commit passes through without intervention.
 
 ---
 
 ### FR-04: lint-staged Configuration Verification
 
-The `lint-staged.config.mjs` must configure Biome to run on all staged JavaScript, TypeScript, Vue, and JSON files:
+The `lint-staged.config.mjs` must configure Biome to run on all staged JavaScript, TypeScript, Vue,
+and JSON files:
 
 ```js
 export default {
-  '*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --write'],
-}
+  "*.{ts,tsx,js,jsx,mjs,vue,json}": ["bun biome check --write"],
+};
 ```
 
-`--write` enables auto-fix for formatting and safe lint fixes. If a violation cannot be auto-fixed, lint-staged exits non-zero and the commit is blocked.
+`--write` enables auto-fix for formatting and safe lint fixes. If a violation cannot be auto-fixed,
+lint-staged exits non-zero and the commit is blocked.
 
-**Acceptance Criterion:** Staging a file with a lint violation and running `git commit` causes the commit to be blocked at the lint-staged step with the violation reported.
+**Acceptance Criterion:** Staging a file with a lint violation and running `git commit` causes the
+commit to be blocked at the lint-staged step with the violation reported.
 
 ---
 
@@ -300,17 +345,22 @@ The CI pipeline must run all three quality gates as blocking steps for every pul
 | 2    | `bun run type-check`      | Fail CI run; print TypeScript errors |
 | 3    | `bun scripts/ai-guard.ts` | Fail CI run; print arch violations   |
 
-All three steps must pass before any merge is allowed. No gate may be skipped or marked as non-blocking.
+All three steps must pass before any merge is allowed. No gate may be skipped or marked as
+non-blocking.
 
-**Acceptance Criterion:** Introducing a lint violation, a type error, or an architecture boundary violation in a PR causes CI to fail at the corresponding gate; a clean PR passes all three gates.
+**Acceptance Criterion:** Introducing a lint violation, a type error, or an architecture boundary
+violation in a PR causes CI to fail at the corresponding gate; a clean PR passes all three gates.
 
 ---
 
 ### FR-06: Architecture Intelligence Layer Validation
 
-The architecture intelligence layer (`docs/ai/context/ai-architecture-brain.json`, `docs/architecture/intelligence/ARCHITECTURE_MAP.json`, `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json`) must exist and be current.
+The architecture intelligence layer (`docs/ai/context/ai-architecture-brain.json`,
+`docs/architecture/intelligence/ARCHITECTURE_MAP.json`,
+`docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json`) must exist and be current.
 
-If these files are absent or stale, AI-Guard will fall back to reading `ARCHITECTURE_CONTRACT.json` directly without brain enrichment. This is accepted as a degraded-mode fallback.
+If these files are absent or stale, AI-Guard will fall back to reading `ARCHITECTURE_CONTRACT.json`
+directly without brain enrichment. This is accepted as a degraded-mode fallback.
 
 The recommended regeneration command is:
 
@@ -318,17 +368,21 @@ The recommended regeneration command is:
 bun run arch:audit
 ```
 
-This command is an alias for `bun scripts/infra-audit.ts` and regenerates all architecture intelligence artifacts.
+This command is an alias for `bun scripts/infra-audit.ts` and regenerates all architecture
+intelligence artifacts.
 
 [Resolved: CL-01]
 
-**Acceptance Criterion:** `docs/architecture/intelligence/ARCHITECTURE_MAP.json` and `ARCHITECTURE_CONTRACT.json` exist in the repository. AI-Guard runs without fatal errors in both brain-enriched and fallback modes.
+**Acceptance Criterion:** `docs/architecture/intelligence/ARCHITECTURE_MAP.json` and
+`ARCHITECTURE_CONTRACT.json` exist in the repository. AI-Guard runs without fatal errors in both
+brain-enriched and fallback modes.
 
 ---
 
 ### FR-07: Module Ownership Policy — Critical Infrastructure Packages
 
-The following packages are designated **critical infrastructure** and require elevated review for any structural change:
+The following packages are designated **critical infrastructure** and require elevated review for
+any structural change:
 
 | Package                | Why Critical                                                            |
 | ---------------------- | ----------------------------------------------------------------------- |
@@ -340,32 +394,40 @@ For changes to these packages, the following protections apply:
 
 1. AI-Guard architecture validation runs as normal (already enforced).
 2. `bun run arch:audit` must pass (manually or in CI) after changes.
-3. A human architecture reviewer must approve the PR — AI-generated changes to these modules must be flagged.
+3. A human architecture reviewer must approve the PR — AI-generated changes to these modules must be
+   flagged.
 
 [Resolved: CL-02]
 
-This policy is documentation-level in this spec. Machine-readable enforcement is tracked in `ARCHITECTURE_MAP.json` — any module defined there with an `owner` field is subject to extended review policy.
+This policy is documentation-level in this spec. Machine-readable enforcement is tracked in
+`ARCHITECTURE_MAP.json` — any module defined there with an `owner` field is subject to extended
+review policy.
 
-**Acceptance Criterion:** The three critical packages are identified in this spec and their protections documented. `ARCHITECTURE_MAP.json` reflects their criticality via the `owner` or `critical` field if supported by the schema.
+**Acceptance Criterion:** The three critical packages are identified in this spec and their
+protections documented. `ARCHITECTURE_MAP.json` reflects their criticality via the `owner` or
+`critical` field if supported by the schema.
 
 ---
 
 ### FR-08: Pre-Push Hook — Non-Blocking Informational Gate
 
-The `.husky/pre-push` hook currently runs informational checks only. This stage validates that the hook does not block push by default, but documents the recommended developer workflow:
+The `.husky/pre-push` hook currently runs informational checks only. This stage validates that the
+hook does not block push by default, but documents the recommended developer workflow:
 
 - Before pushing, run `bun run lint && bun run type-check` locally.
 - CI enforces the full gate; the pre-push hook is advisory only.
 
 If the pre-push hook already has lint/type-check gates enabled, this requirement is a no-op.
 
-**Acceptance Criterion:** The pre-push hook exists and does not prevent pushing; its purpose and non-blocking nature are documented for developers.
+**Acceptance Criterion:** The pre-push hook exists and does not prevent pushing; its purpose and
+non-blocking nature are documented for developers.
 
 ---
 
 ### FR-09: Drift Prevention Strategy Documentation
 
-The drift prevention strategy must be documented for all contributors (human and AI). The canonical strategy is:
+The drift prevention strategy must be documented for all contributors (human and AI). The canonical
+strategy is:
 
 ```
 1. Author writes code.
@@ -381,7 +443,9 @@ The drift prevention strategy must be documented for all contributors (human and
    that slipped through (e.g., generated files outside the commit hook).
 ```
 
-**Acceptance Criterion:** The strategy is documented in this spec (this section is the documentation). A developer or AI agent reading this spec can understand the complete validation pipeline.
+**Acceptance Criterion:** The strategy is documented in this spec (this section is the
+documentation). A developer or AI agent reading this spec can understand the complete validation
+pipeline.
 
 ---
 
@@ -389,27 +453,36 @@ The drift prevention strategy must be documented for all contributors (human and
 
 ### NFR-01: Pre-Commit Latency
 
-The combined lint-staged + AI-Guard pre-commit hook must complete within **15 seconds** for a typical commit of 1–10 files. Biome's Rust-based execution makes this achievable; AI-Guard operates on staged files only (not the full repository).
+The combined lint-staged + AI-Guard pre-commit hook must complete within **15 seconds** for a
+typical commit of 1–10 files. Biome's Rust-based execution makes this achievable; AI-Guard operates
+on staged files only (not the full repository).
 
 ### NFR-02: No New Runtime Dependencies
 
-This stage must not introduce any runtime dependency. All tooling (Biome, AI-Guard, Husky, lint-staged) is `devDependency`-scoped.
+This stage must not introduce any runtime dependency. All tooling (Biome, AI-Guard, Husky,
+lint-staged) is `devDependency`-scoped.
 
 ### NFR-03: No Business Logic Changes
 
-This is an INFRA stage. No changes to any API route handler, domain logic, migration, or tenant resolver are permitted.
+This is an INFRA stage. No changes to any API route handler, domain logic, migration, or tenant
+resolver are permitted.
 
 ### NFR-04: Idempotent Governance Tooling
 
-Running `bun run lint` repeatedly on a clean codebase must always exit `0`. Running `bun scripts/ai-guard.ts` on a clean staged set must always exit `0`. Governance tooling must not have side effects that cause subsequent runs to fail.
+Running `bun run lint` repeatedly on a clean codebase must always exit `0`. Running
+`bun scripts/ai-guard.ts` on a clean staged set must always exit `0`. Governance tooling must not
+have side effects that cause subsequent runs to fail.
 
 ### NFR-05: Monorepo-Wide Scope
 
-All lint and architecture governance applies to the full monorepo. No package or app is exempt from the Biome rule set, except where explicit overrides appear in `biome.json` (already defined in `infra-004-biome`). No app-level Biome config file may override the root config.
+All lint and architecture governance applies to the full monorepo. No package or app is exempt from
+the Biome rule set, except where explicit overrides appear in `biome.json` (already defined in
+`infra-004-biome`). No app-level Biome config file may override the root config.
 
 ### NFR-06: `bun` as Exclusive Package Manager
 
-All commands must use `bun` (not `npm`, `yarn`, or `pnpm`). This is a project-wide Hard Rule. Scripts, CI steps, and hooks must all call `bun` directly.
+All commands must use `bun` (not `npm`, `yarn`, or `pnpm`). This is a project-wide Hard Rule.
+Scripts, CI steps, and hooks must all call `bun` directly.
 
 ---
 
@@ -423,7 +496,8 @@ This stage has **no tenant isolation impact**. Confirmed:
 - No shared tenant data is introduced or referenced.
 - No new tables are created.
 
-Governance tooling operates entirely at the source code level and has no presence in deployed artifacts.
+Governance tooling operates entirely at the source code level and has no presence in deployed
+artifacts.
 
 ---
 
@@ -440,7 +514,8 @@ This stage has **no license enforcement requirements**. Confirmed:
 
 ## Data Model Changes
 
-**None.** This stage introduces no database tables, no migration files, and no schema changes. No version bump is required.
+**None.** This stage introduces no database tables, no migration files, and no schema changes. No
+version bump is required.
 
 ---
 
@@ -454,7 +529,8 @@ This stage has **no license enforcement requirements**. Confirmed:
 | MMC does not access tenant DB           | ✅ Confirmed |
 | No direct DB creation outside provision | ✅ Confirmed |
 
-This stage modifies only developer toolchain configuration files and documentation. No layer separation is violated or affected.
+This stage modifies only developer toolchain configuration files and documentation. No layer
+separation is violated or affected.
 
 ---
 
@@ -477,12 +553,19 @@ The following items are explicitly excluded from this stage:
 
 ## Assumptions
 
-1. `infra-004-biome` is complete: `biome.json` exists at the repository root, `@biomejs/biome` is installed, and `bun run lint` / `bun run lint:fix` are operational.
-2. Husky is installed and `prepare` script is registered in `package.json` (confirmed in root `package.json`).
+1. `infra-004-biome` is complete: `biome.json` exists at the repository root, `@biomejs/biome` is
+   installed, and `bun run lint` / `bun run lint:fix` are operational.
+2. Husky is installed and `prepare` script is registered in `package.json` (confirmed in root
+   `package.json`).
 3. `lint-staged` is installed as a `devDependency` (confirmed in root `package.json`).
-4. The architecture intelligence files (`ARCHITECTURE_CONTRACT.json`, `ARCHITECTURE_MAP.json`) exist in `docs/architecture/intelligence/`. If absent, they must be generated with `bun run arch:generate` before this stage completes.
-5. `scripts/ai-guard.ts` is the authoritative architecture boundary enforcement script. It reads `ARCHITECTURE_CONTRACT.json` and optionally `ai-architecture-brain.json`. No modifications to the script are required in this stage — only its activation in the pre-commit hook is in scope.
-6. The current `biome.json` overrides (logger, migrations, test files exempted from `noConsole`) are preserved without change.
+4. The architecture intelligence files (`ARCHITECTURE_CONTRACT.json`, `ARCHITECTURE_MAP.json`) exist
+   in `docs/architecture/intelligence/`. If absent, they must be generated with
+   `bun run arch:generate` before this stage completes.
+5. `scripts/ai-guard.ts` is the authoritative architecture boundary enforcement script. It reads
+   `ARCHITECTURE_CONTRACT.json` and optionally `ai-architecture-brain.json`. No modifications to the
+   script are required in this stage — only its activation in the pre-commit hook is in scope.
+6. The current `biome.json` overrides (logger, migrations, test files exempted from `noConsole`) are
+   preserved without change.
 7. The pre-push hook is advisory only — its role does not change in this stage.
 
 ---
@@ -516,31 +599,44 @@ The following items are explicitly excluded from this stage:
 
 ## Test Strategy
 
-This is an infrastructure tooling stage. The test strategy focuses on verifying governance tooling itself rather than business logic.
+This is an infrastructure tooling stage. The test strategy focuses on verifying governance tooling
+itself rather than business logic.
 
 ### Pre-Commit Hook Tests (Manual Verification)
 
-- **TC-01:** Stage a file with a Biome lint error (e.g., unused import). Run `git commit`. Verify commit is blocked and error is reported.
-- **TC-02:** Stage a file with correct code. Run `git commit`. Verify commit succeeds after hooks pass.
-- **TC-03:** Stage a file that imports across app boundaries (e.g., `apps/api` importing `apps/frontoffice`). Run `git commit`. Verify AI-Guard blocks the commit with the violation message.
-- **TC-04:** Stage a clean file with correct architecture. Run `git commit`. Verify AI-Guard passes without error.
+- **TC-01:** Stage a file with a Biome lint error (e.g., unused import). Run `git commit`. Verify
+  commit is blocked and error is reported.
+- **TC-02:** Stage a file with correct code. Run `git commit`. Verify commit succeeds after hooks
+  pass.
+- **TC-03:** Stage a file that imports across app boundaries (e.g., `apps/api` importing
+  `apps/frontoffice`). Run `git commit`. Verify AI-Guard blocks the commit with the violation
+  message.
+- **TC-04:** Stage a clean file with correct architecture. Run `git commit`. Verify AI-Guard passes
+  without error.
 
 ### CI Gate Tests
 
-- **TC-05:** Introduce a Biome lint violation (e.g., `noDebugger`) in a test branch. Verify `bun run lint` exits non-zero and CI fails at the lint gate.
-- **TC-06:** Introduce a TypeScript type error in a test branch. Verify `bun run type-check` exits non-zero and CI fails at the type-check gate.
-- **TC-07:** Introduce an architecture boundary violation in a test branch. Verify `bun scripts/ai-guard.ts` exits non-zero and CI fails at the AI-Guard gate.
+- **TC-05:** Introduce a Biome lint violation (e.g., `noDebugger`) in a test branch. Verify
+  `bun run lint` exits non-zero and CI fails at the lint gate.
+- **TC-06:** Introduce a TypeScript type error in a test branch. Verify `bun run type-check` exits
+  non-zero and CI fails at the type-check gate.
+- **TC-07:** Introduce an architecture boundary violation in a test branch. Verify
+  `bun scripts/ai-guard.ts` exits non-zero and CI fails at the AI-Guard gate.
 - **TC-08:** Submit a clean branch. Verify all three CI gates pass.
 
 ### Import Order Tests
 
-- **TC-09:** Run `bun run lint:fix` on a file with out-of-order imports. Verify imports are reordered into the documented canonical order.
+- **TC-09:** Run `bun run lint:fix` on a file with out-of-order imports. Verify imports are
+  reordered into the documented canonical order.
 - **TC-10:** Run `bun run lint` on a correctly ordered file. Verify exit code `0`.
 
 ### Drift Recovery Test
 
-- **TC-11:** Run `bun run arch:audit`. Verify it completes without fatal errors and regenerates architecture intelligence artifacts.
-- **TC-12:** Delete `docs/ai/context/ai-architecture-brain.json`. Run `bun scripts/ai-guard.ts` with staged files. Verify AI-Guard falls back to reading `ARCHITECTURE_CONTRACT.json` directly and still validates boundaries.
+- **TC-11:** Run `bun run arch:audit`. Verify it completes without fatal errors and regenerates
+  architecture intelligence artifacts.
+- **TC-12:** Delete `docs/ai/context/ai-architecture-brain.json`. Run `bun scripts/ai-guard.ts` with
+  staged files. Verify AI-Guard falls back to reading `ARCHITECTURE_CONTRACT.json` directly and
+  still validates boundaries.
 
 ---
 
@@ -551,11 +647,14 @@ All of the following must be true for this stage to be considered complete:
 1. Every developer commit runs Biome and AI-Guard automatically — no manual invocation required.
 2. A commit containing a lint violation is blocked before it is recorded.
 3. A commit containing an architecture boundary violation is blocked before it is recorded.
-4. CI fails (non-zero exit) when a PR introduces a Biome violation, a TypeScript error, or an architecture boundary violation.
+4. CI fails (non-zero exit) when a PR introduces a Biome violation, a TypeScript error, or an
+   architecture boundary violation.
 5. Import order is automatically enforced across the monorepo — no manual import ordering is needed.
 6. The module ownership policy for critical infrastructure packages is documented and discoverable.
-7. `bun run arch:audit` runs and produces a valid architecture intelligence report without fatal errors.
-8. A developer reading this spec can understand the complete governance pipeline without additional context.
+7. `bun run arch:audit` runs and produces a valid architecture intelligence report without fatal
+   errors.
+8. A developer reading this spec can understand the complete governance pipeline without additional
+   context.
 
 ---
 
@@ -586,22 +685,32 @@ All of the following must be true for this stage to be considered complete:
 
 #### CL-01: FR-06 — Architecture Intelligence CI Gate
 
-**Question:** Should `bun run arch:audit` be a mandatory blocking CI step for architecture intelligence freshness?
+**Question:** Should `bun run arch:audit` be a mandatory blocking CI step for architecture
+intelligence freshness?
 
-**Context:** `bun run arch:audit` regenerates the AI architecture brain files. Running it as a CI gate would ensure the brain is always fresh, but adds CI runtime cost.
+**Context:** `bun run arch:audit` regenerates the AI architecture brain files. Running it as a CI
+gate would ensure the brain is always fresh, but adds CI runtime cost.
 
-**Decision:** Advisory only. `bun run arch:audit` is NOT a blocking CI step. AI-Guard (`bun scripts/ai-guard.ts`) provides sufficient CI-blocking architectural validation. The arch:audit command is reserved for developer maintenance and pre-refactor workflows.
+**Decision:** Advisory only. `bun run arch:audit` is NOT a blocking CI step. AI-Guard
+(`bun scripts/ai-guard.ts`) provides sufficient CI-blocking architectural validation. The arch:audit
+command is reserved for developer maintenance and pre-refactor workflows.
 
-**Impact on spec:** FR-06 updated to advisory role only. CI gate sequence remains: `bun run lint` → `bun run type-check` → `bun scripts/ai-guard.ts`.
+**Impact on spec:** FR-06 updated to advisory role only. CI gate sequence remains: `bun run lint` →
+`bun run type-check` → `bun scripts/ai-guard.ts`.
 
 ---
 
 #### CL-02: FR-07 — Module Ownership CODEOWNERS Enforcement
 
-**Question:** Should a `CODEOWNERS` file enforce mandatory human review for critical packages via GitHub branch protection?
+**Question:** Should a `CODEOWNERS` file enforce mandatory human review for critical packages via
+GitHub branch protection?
 
-**Context:** A `CODEOWNERS` file would enforce that changes to `packages/logger`, `packages/types`, and `packages/domain-core` require review from designated owners.
+**Context:** A `CODEOWNERS` file would enforce that changes to `packages/logger`, `packages/types`,
+and `packages/domain-core` require review from designated owners.
 
-**Decision:** Deferred. This stage documents module ownership as a policy. A `CODEOWNERS` file is explicitly out of scope for this stage and will be created in a follow-up governance stage after the team structure is defined.
+**Decision:** Deferred. This stage documents module ownership as a policy. A `CODEOWNERS` file is
+explicitly out of scope for this stage and will be created in a follow-up governance stage after the
+team structure is defined.
 
-**Impact on spec:** FR-07 scope is limited to documentation of critical package boundaries (list, rationale, protection policy). No `CODEOWNERS` file to be created in this stage.
+**Impact on spec:** FR-07 scope is limited to documentation of critical package boundaries (list,
+rationale, protection policy). No `CODEOWNERS` file to be created in this stage.

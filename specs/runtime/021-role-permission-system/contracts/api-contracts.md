@@ -57,7 +57,8 @@ correlationId → tenantResolver → licenseMiddleware → auth-jwt
 
 **Purpose**: Create a new role and its initial set of module permissions atomically.  
 **Permission guard**: `module=settings, action=can_create`  
-**Transaction**: Single transaction — roles INSERT + all role_permissions INSERTs + rbac_audit_logs INSERT. Full rollback on any failure.
+**Transaction**: Single transaction — roles INSERT + all role_permissions INSERTs + rbac_audit_logs
+INSERT. Full rollback on any failure.
 
 ### Request
 
@@ -182,7 +183,8 @@ Authorization: Bearer <token>
 }
 ```
 
-> Note: Permissions are NOT included in the list response. Use GET /roles/:id for full permission matrix.
+> Note: Permissions are NOT included in the list response. Use GET /roles/:id for full permission
+> matrix.
 
 ---
 
@@ -250,9 +252,11 @@ Authorization: Bearer <token>
 
 ## 4. PATCH /api/backoffice/roles/:id
 
-**Purpose**: Update role name, description, or status. Disabling a role takes effect on the very next request by assigned users.  
+**Purpose**: Update role name, description, or status. Disabling a role takes effect on the very
+next request by assigned users.  
 **Permission guard**: `module=settings, action=can_edit`  
-**Transaction**: Single transaction — UPDATE roles + rbac_audit_logs INSERT + cache invalidation (synchronous).
+**Transaction**: Single transaction — UPDATE roles + rbac_audit_logs INSERT + cache invalidation
+(synchronous).
 
 ### Request
 
@@ -307,9 +311,11 @@ All fields are optional. At least one field must be provided.
 
 ## 5. PUT /api/backoffice/roles/:id/permissions
 
-**Purpose**: Replace the entire permission set for this role. All existing `backoffice_role_module_permissions` rows for this role are deleted and re-inserted atomically.  
+**Purpose**: Replace the entire permission set for this role. All existing
+`backoffice_role_module_permissions` rows for this role are deleted and re-inserted atomically.  
 **Permission guard**: `module=settings, action=can_edit`  
-**Transaction**: Single transaction — DELETE existing rows + INSERT new rows + rbac_audit_logs INSERT + cache invalidation (synchronous).  
+**Transaction**: Single transaction — DELETE existing rows + INSERT new rows + rbac_audit_logs
+INSERT + cache invalidation (synchronous).  
 **Idempotency**: Full replace semantics. Providing the same payload twice is idempotent.
 
 ### Request
@@ -387,10 +393,13 @@ Authorization: Bearer <token>
 
 ## 6. DELETE /api/backoffice/roles/:id
 
-**Purpose**: Permanently delete a role. Rejected if any ACTIVE staff user is assigned to this role.  
+**Purpose**: Permanently delete a role. Rejected if any ACTIVE staff user is assigned to this
+role.  
 **Permission guard**: `module=settings, action=can_delete`  
-**Transaction**: BEGIN → SELECT FOR UPDATE on roles row → count ACTIVE assigned users → DELETE roles + CASCADE deletes role_permissions + rbac_audit_logs INSERT → COMMIT.  
-**Concurrency**: `SELECT ... FOR UPDATE` serializes concurrent delete attempts. Second request sees either role deleted (404) or blocked until first commits.
+**Transaction**: BEGIN → SELECT FOR UPDATE on roles row → count ACTIVE assigned users → DELETE
+roles + CASCADE deletes role_permissions + rbac_audit_logs INSERT → COMMIT.  
+**Concurrency**: `SELECT ... FOR UPDATE` serializes concurrent delete attempts. Second request sees
+either role deleted (404) or blocked until first commits.
 
 ### Request
 
@@ -466,7 +475,8 @@ Authorization: Bearer <token>
 
 **Purpose**: Assign or remove the single role for a staff user.  
 **Permission guard**: `module=users, action=can_edit`  
-**Transaction**: Single transaction — UPDATE backoffice_staff_users + rbac_audit_logs INSERT + cache invalidation.  
+**Transaction**: Single transaction — UPDATE backoffice_staff_users + rbac_audit_logs INSERT + cache
+invalidation.  
 **Idempotency**: Assigning the same `role_id` twice is a no-op.
 
 ### Request
@@ -516,7 +526,8 @@ Pass `"role_id": null` to unassign the role (user reverts to no-access).
 
 ## 9. GET /api/backoffice/role-permission-modules
 
-**Purpose**: Return the complete list of valid module keys and their display names for this platform version. Used by the frontend to render the permission matrix UI.  
+**Purpose**: Return the complete list of valid module keys and their display names for this platform
+version. Used by the frontend to render the permission matrix UI.  
 **Permission guard**: `module=settings, action=can_view`  
 **Cache**: Response may be cached aggressively (module list is static per platform version).
 

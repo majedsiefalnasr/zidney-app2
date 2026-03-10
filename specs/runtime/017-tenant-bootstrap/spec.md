@@ -5,7 +5,8 @@
 **Stage:** STAGE_17_TENANT_BOOTSTRAP  
 **Status:** Specification  
 **Priority:** Critical  
-**Feature Area:** Backoffice runtime initialization, license enforcement, RBAC skeleton, module-aware layout  
+**Feature Area:** Backoffice runtime initialization, license enforcement, RBAC skeleton,
+module-aware layout  
 **Date:** 2026-02-28
 
 ---
@@ -14,9 +15,11 @@
 
 ### What Is Being Built
 
-A deterministic, license-aware runtime foundation that governs every Backoffice request from the moment a staff user enters the system. This stage establishes:
+A deterministic, license-aware runtime foundation that governs every Backoffice request from the
+moment a staff user enters the system. This stage establishes:
 
-- Authoritative runtime context injection (tenant identity, license state, enabled modules, limits, versions)
+- Authoritative runtime context injection (tenant identity, license state, enabled modules, limits,
+  versions)
 - License gate enforcement: only ACTIVE workspaces may access Backoffice
 - Module visibility contract: server-side enforcement of which modules are accessible per license
 - RBAC skeleton: minimal role/permission tables in the tenant DB with middleware enforcement
@@ -26,13 +29,15 @@ A deterministic, license-aware runtime foundation that governs every Backoffice 
 - WebSocket lifecycle validation (workspace, license, token, request tracing)
 - Structured observability on every request
 
-No academic content, no examination logic, and no business workflows are introduced. This stage defines the runtime boundary only.
+No academic content, no examination logic, and no business workflows are introduced. This stage
+defines the runtime boundary only.
 
 ### Phase & Stage Mapping
 
 - **Phase:** 03 – Backoffice Core
 - **Domain:** 01 – Foundation
-- **Stage File:** [STAGE_17_TENANT_BOOTSTRAP.md](../../../phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_17_TENANT_BOOTSTRAP.md)
+- **Stage File:**
+  [STAGE_17_TENANT_BOOTSTRAP.md](../../../phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_17_TENANT_BOOTSTRAP.md)
 - **Prerequisite Stages:**
   - STAGE_02 – Multi-Tenancy Architecture (tenant resolution, DB-per-tenant, connection pool)
   - STAGE_03 – Authentication System (workspace-scoped JWT, token_version, staff auth)
@@ -42,11 +47,14 @@ No academic content, no examination logic, and no business workflows are introdu
 
 ### Affected Architectural Layers
 
-- **Isolation:** Core enforcement — all Backoffice DB access is scoped to the resolved tenant DB; never master_db
-- **License Enforcement:** Mandatory — ACTIVE status required; enforcement occurs before any route resolves
+- **Isolation:** Core enforcement — all Backoffice DB access is scoped to the resolved tenant DB;
+  never master_db
+- **License Enforcement:** Mandatory — ACTIVE status required; enforcement occurs before any route
+  resolves
 - **Attempt Engine:** Not in scope for this stage
 - **Worker:** Not in scope for this stage
-- **Runtime:** Runtime context (modules, limits, versions) is injected by middleware; Backoffice consumes it, never recomputes it
+- **Runtime:** Runtime context (modules, limits, versions) is injected by middleware; Backoffice
+  consumes it, never recomputes it
 - **Frontoffice:** Separate runtime; shares packages/ui-system but has a distinct layout boundary
 
 ---
@@ -55,13 +63,18 @@ No academic content, no examination logic, and no business workflows are introdu
 
 **Mandatory Compliance Confirmations:**
 
-✓ **No cross-tenant access** — All DB operations use the tenant-scoped connection pool; workspace_id is validated on every authenticated request  
-✓ **No middleware bypass** — Middleware order: Correlation ID → Tenant Resolver → License Enforcement → Schema Version → Authentication → RBAC Permission Guard → Route Handler  
+✓ **No cross-tenant access** — All DB operations use the tenant-scoped connection pool; workspace_id
+is validated on every authenticated request  
+✓ **No middleware bypass** — Middleware order: Correlation ID → Tenant Resolver → License
+Enforcement → Schema Version → Authentication → RBAC Permission Guard → Route Handler  
 ✓ **No grading outside worker** — This stage contains no grading logic  
-✓ **No direct DB instantiation** — All queries execute within the tenant resolver context; no global DB singleton  
+✓ **No direct DB instantiation** — All queries execute within the tenant resolver context; no global
+DB singleton  
 ✓ **No snapshot integrity weakening** — Attempt engine not in scope  
-✓ **No transaction boundary weakening** — RBAC table initialization is migration-managed; runtime reads are read-only  
-✓ **No version enforcement weakening** — schema_version and product_version compatibility validated by middleware before Backoffice executes
+✓ **No transaction boundary weakening** — RBAC table initialization is migration-managed; runtime
+reads are read-only  
+✓ **No version enforcement weakening** — schema_version and product_version compatibility validated
+by middleware before Backoffice executes
 
 **Governance References:**
 
@@ -84,7 +97,8 @@ No academic content, no examination logic, and no business workflows are introdu
 | MMC         | master_db | N/A           | No            | Global pool        |
 | Frontoffice | tenant_db | Per workspace | Yes           | Tenant-scoped pool |
 
-**Backoffice never accesses master_db.** Runtime context (modules, license state, product version) is received from middleware — not fetched from master_db by Backoffice.
+**Backoffice never accesses master_db.** Runtime context (modules, license state, product version)
+is received from middleware — not fetched from master_db by Backoffice.
 
 ### Tenant Isolation Guarantees
 
@@ -102,7 +116,8 @@ No academic content, no examination logic, and no business workflows are introdu
 | `staff_users`      | Backoffice staff accounts in tenant DB        |
 | `staff_user_roles` | Junction: staff_user ↔ role (many-to-many)    |
 
-All four tables reside exclusively in the **tenant DB**. No equivalent tables exist in master_db via this stage.
+All four tables reside exclusively in the **tenant DB**. No equivalent tables exist in master_db via
+this stage.
 
 ---
 
@@ -110,7 +125,8 @@ All four tables reside exclusively in the **tenant DB**. No equivalent tables ex
 
 ### US-01 — License Gate
 
-> As a staff user attempting to access Backoffice, I am blocked with a meaningful status screen when my workspace license is not ACTIVE, so that I cannot use a suspended or archived workspace.
+> As a staff user attempting to access Backoffice, I am blocked with a meaningful status screen when
+> my workspace license is not ACTIVE, so that I cannot use a suspended or archived workspace.
 
 **Acceptance Scenarios:**
 
@@ -123,7 +139,9 @@ All four tables reside exclusively in the **tenant DB**. No equivalent tables ex
 
 ### US-02 — Module-Aware Navigation
 
-> As a staff user, I only see navigation items and can only reach routes for modules that my institution's license has enabled, so that I am never exposed to functionality outside the licensed product scope.
+> As a staff user, I only see navigation items and can only reach routes for modules that my
+> institution's license has enabled, so that I am never exposed to functionality outside the
+> licensed product scope.
 
 **Acceptance Scenarios:**
 
@@ -136,7 +154,8 @@ All four tables reside exclusively in the **tenant DB**. No equivalent tables ex
 
 ### US-03 — Role-Based Access Control
 
-> As a Backoffice administrator, I can assign roles to staff users so that each staff member can access only the resources their role permits.
+> As a Backoffice administrator, I can assign roles to staff users so that each staff member can
+> access only the resources their role permits.
 
 **Acceptance Scenarios:**
 
@@ -149,7 +168,8 @@ All four tables reside exclusively in the **tenant DB**. No equivalent tables ex
 
 ### US-04 — Workspace-Scoped Authentication
 
-> As the system, I ensure that a staff JWT token issued for one workspace cannot be used to access any other workspace, so that cross-tenant data leakage is impossible.
+> As the system, I ensure that a staff JWT token issued for one workspace cannot be used to access
+> any other workspace, so that cross-tenant data leakage is impossible.
 
 **Acceptance Scenarios:**
 
@@ -162,19 +182,23 @@ All four tables reside exclusively in the **tenant DB**. No equivalent tables ex
 
 ### US-05 — Limit Awareness Display
 
-> As a Backoffice administrator, I can see the student and staff capacity limits for my workspace so that I can manage headcount planning, even though those limits are not enforced during bootstrap.
+> As a Backoffice administrator, I can see the student and staff capacity limits for my workspace so
+> that I can manage headcount planning, even though those limits are not enforced during bootstrap.
 
 **Acceptance Scenarios:**
 
 - The runtime context exposes `student_limit` and `staff_limit` to the UI layer
 - The UI can display these values without making additional API calls beyond the context endpoint
-- Changing the limits in the license record is reflected in the context on the next request without Backoffice recomputing
+- Changing the limits in the license record is reflected in the context on the next request without
+  Backoffice recomputing
 
 ---
 
 ### US-06 — Observability & Request Tracing
 
-> As a platform operator, every Backoffice request produces a structured log entry containing workspace identity and request tracing fields so that incidents can be diagnosed without ambiguity.
+> As a platform operator, every Backoffice request produces a structured log entry containing
+> workspace identity and request tracing fields so that incidents can be diagnosed without
+> ambiguity.
 
 **Acceptance Scenarios:**
 
@@ -187,27 +211,32 @@ All four tables reside exclusively in the **tenant DB**. No equivalent tables ex
 
 ### US-07 — WebSocket Lifecycle Safety
 
-> As the system, I ensure that any WebSocket connection established in Backoffice is bound to the workspace and license state, so that a workspace suspension immediately closes active connections.
+> As the system, I ensure that any WebSocket connection established in Backoffice is bound to the
+> workspace and license state, so that a workspace suspension immediately closes active connections.
 
 **Acceptance Scenarios:**
 
 - WebSocket handshake validates `workspace_id`, `license_status`, and authentication token
 - A WebSocket connection includes `request_id` for tracing
-- When license transitions from ACTIVE to SOFT_LOCKED or ARCHIVED during an active session, the WebSocket connection is terminated
+- When license transitions from ACTIVE to SOFT_LOCKED or ARCHIVED during an active session, the
+  WebSocket connection is terminated
 - Only one WebSocket connection per authenticated user per session is permitted
 
 ---
 
 ### US-08 — Module-Aware Layout Rendering
 
-> As a staff user, the Backoffice shell layout renders dynamically based on the modules available to my workspace, so that the navigation always reflects the current license configuration.
+> As a staff user, the Backoffice shell layout renders dynamically based on the modules available to
+> my workspace, so that the navigation always reflects the current license configuration.
 
 **Acceptance Scenarios:**
 
-- The `AppLayout` component renders `Sidebar`, `TopBar`, and `ContentArea` based on injected module configuration
+- The `AppLayout` component renders `Sidebar`, `TopBar`, and `ContentArea` based on injected module
+  configuration
 - Navigation configuration is passed as data, not hardcoded in the component tree
 - Sidebar supports collapse behavior
-- All layout components use `packages/ui-system` shared components; no custom component duplicates exist
+- All layout components use `packages/ui-system` shared components; no custom component duplicates
+  exist
 
 ---
 
@@ -362,18 +391,23 @@ All four tables reside exclusively in the **tenant DB**. No equivalent tables ex
 
 - Every request produces a structured log entry; no silent paths
 - `request_id` (correlation ID) must propagate from entry middleware to WebSocket frames
-- Log retention and alerting triggers are a platform-level concern (STAGE_07), not re-implemented here
+- Log retention and alerting triggers are a platform-level concern (STAGE_07), not re-implemented
+  here
 
 ### NFR-04 — Extensibility
 
-- RBAC table schema must accommodate future addition of division-scoped permissions without requiring a breaking migration
-- Module navigation configuration must be data-driven; adding a new module must not require Backoffice code changes other than route registration
+- RBAC table schema must accommodate future addition of division-scoped permissions without
+  requiring a breaking migration
+- Module navigation configuration must be data-driven; adding a new module must not require
+  Backoffice code changes other than route registration
 
 ### NFR-05 — Performance Baseline
 
-- Runtime context injection (middleware) must not add more than one additional synchronous middleware step per request
+- Runtime context injection (middleware) must not add more than one additional synchronous
+  middleware step per request
 - RBAC permission lookup must use indexed queries on `staff_user_roles` and `role_permissions`
-- Layout component tree must not trigger additional back-end requests beyond the initial context resolution
+- Layout component tree must not trigger additional back-end requests beyond the initial context
+  resolution
 
 ### NFR-06 — Dependency Management
 
@@ -447,12 +481,16 @@ Primary key: `(staff_user_id, role_id)`.
 
 ### Migration Notes
 
-- All four tables are created in a single STAGE_17-specific tenant DB migration file — this migration is **separate** from the STAGE_05 baseline tenant schema
-- All four `CREATE TABLE` statements execute within a **single DDL transaction**; a failure in any statement rolls back the entire migration
+- All four tables are created in a single STAGE_17-specific tenant DB migration file — this
+  migration is **separate** from the STAGE_05 baseline tenant schema
+- All four `CREATE TABLE` statements execute within a **single DDL transaction**; a failure in any
+  statement rolls back the entire migration
 - Migration is forward-only
-- `schema_version` is incremented by this STAGE_17 migration, independent of any STAGE_05 version increment
+- `schema_version` is incremented by this STAGE_17 migration, independent of any STAGE_05 version
+  increment
 - No master_db migrations required for this stage
-- Existing tenants provisioned before STAGE_17 must have this migration run by the provisioning worker at next startup
+- Existing tenants provisioned before STAGE_17 must have this migration run by the provisioning
+  worker at next startup
 
 ---
 
@@ -516,7 +554,8 @@ All log output is structured JSON. Logger: `packages/logger`.
 
 ## Layer Separation Confirmation
 
-✓ **Frontend contains no business logic** — Module visibility, RBAC decisions, and license checks are server-enforced  
+✓ **Frontend contains no business logic** — Module visibility, RBAC decisions, and license checks
+are server-enforced  
 ✓ **API contains no grading logic** — Not in scope for this stage  
 ✓ **Worker contains no HTTP logic** — Migration execution only; no HTTP in worker  
 ✓ **MMC does not access tenant DB** — MMC operates on master_db; Backoffice operates on tenant_db  
@@ -587,7 +626,8 @@ The following are explicitly not implemented in STAGE_17:
 - Staff user invitation or onboarding flows
 - License renewal endpoints
 - Feature flag system (distinct from module visibility)
-- Audit log persistence (structured logging covers traceability; an audit log table is a future concern)
+- Audit log persistence (structured logging covers traceability; an audit log table is a future
+  concern)
 - Frontend form validation flows beyond route/permission guarding
 
 ---
@@ -674,7 +714,8 @@ The following are explicitly not implemented in STAGE_17:
 
 **Given** the Backoffice navigation configuration  
 **When** the source code is reviewed  
-**Then** no static / hardcoded list of module names exists in layout components or route configuration; all module presence is determined from runtime-injected `enabled_modules`
+**Then** no static / hardcoded list of module names exists in layout components or route
+configuration; all module presence is determined from runtime-injected `enabled_modules`
 
 ---
 
@@ -694,7 +735,8 @@ The following are explicitly not implemented in STAGE_17:
 
 **Given** a valid JWT issued for workspace A  
 **When** it is presented to workspace B's Backoffice  
-**Then** the request is rejected (HTTP 401 or 403) and the mismatch is recorded in the structured log
+**Then** the request is rejected (HTTP 401 or 403) and the mismatch is recorded in the structured
+log
 
 ---
 
@@ -702,7 +744,8 @@ The following are explicitly not implemented in STAGE_17:
 
 **Given** a freshly provisioned tenant that has undergone this migration  
 **When** the tenant DB schema is inspected  
-**Then** the tables `roles`, `role_permissions`, `staff_users`, and `staff_user_roles` exist with the defined columns and constraints
+**Then** the tables `roles`, `role_permissions`, `staff_users`, and `staff_user_roles` exist with
+the defined columns and constraints
 
 ---
 
@@ -722,7 +765,8 @@ The following are explicitly not implemented in STAGE_17:
 
 **Given** the Backoffice AppLayout, Sidebar, TopBar, and ContentArea components  
 **When** their import sources are inspected  
-**Then** all shared UI components are imported from `packages/ui-system` and no duplicate component implementations exist in the Backoffice app
+**Then** all shared UI components are imported from `packages/ui-system` and no duplicate component
+implementations exist in the Backoffice app
 
 ---
 
@@ -730,7 +774,8 @@ The following are explicitly not implemented in STAGE_17:
 
 **Given** a staff user whose `token_version` has been incremented (forced invalidation)  
 **When** a request is submitted with the old token  
-**Then** the request is rejected (HTTP 401) and the `token_version` mismatch is recorded in the structured log
+**Then** the request is rejected (HTTP 401) and the `token_version` mismatch is recorded in the
+structured log
 
 ---
 
@@ -738,11 +783,37 @@ The following are explicitly not implemented in STAGE_17:
 
 ### Session 2026-02-28
 
-- Q: Are the four RBAC tables (`roles`, `role_permissions`, `staff_users`, `staff_user_roles`) created as part of the STAGE_05 tenant baseline schema, or as a separate STAGE_17-specific tenant DB migration? → A: Separate STAGE_17 tenant DB migration — distinct from STAGE_05 baseline provisioning. Per "one migration per feature" platform rule, STAGE_05 owns the bare tenant schema and STAGE_17 adds RBAC tables via its own forward-only migration file, incrementing `schema_version` independently.
-- Q: When `license_status` transitions to SOFT_LOCKED or ARCHIVED mid-session (FR-08.5), what is the notification mechanism to the active WebSocket handler — periodic polling or an internal event/push? → A: The WebSocket handler polls the `license_status` from the injected runtime context at a 30-second interval per connection. An event-bus push mechanism is deferred to a future stage. The polling interval is configurable via environment variable (`WS_LICENSE_POLL_INTERVAL_MS`, default `30000`).
-- Q: For non-ACTIVE license responses (HTTP 423 / 403 / 404), does the API return a structured JSON body or a bare HTTP status for both browser SPA and programmatic API consumers? → A: All non-ACTIVE license responses return the standard Zidney error contract `{ success: false, data: null, error: { code: string, message: string } }` with typed error codes: `LICENSE_SOFT_LOCKED` (423), `LICENSE_ARCHIVED` (403), `WORKSPACE_NOT_FOUND` (404). The Backoffice SPA reads the `error.code` field to select the correct "Workspace unavailable" screen variant.
-- Q: Within the single STAGE_17 tenant DB migration file, are all four RBAC table `CREATE TABLE` statements executed inside a single DDL transaction so that a partial failure rolls back completely? → A: Yes — all four `CREATE TABLE` statements must be wrapped in a single DDL transaction (PostgreSQL supports transactional DDL). If any statement fails, the entire transaction rolls back and the provisioning worker retries up to 3 times before routing to the DLQ.
-- Q: Is the RBAC permission check implemented as a distinct middleware function registered separately after Authentication in the Hono chain, or is it embedded inside the Authentication middleware? → A: RBAC is a separate, independently-registered middleware function. The authoritative middleware order is: `Correlation ID → Tenant Resolver → License Enforcement → Schema Version → Authentication → RBAC Permission Guard → Route Handler`. This allows per-route opt-in to specific module+action permission requirements without coupling authorization to identity validation.
+- Q: Are the four RBAC tables (`roles`, `role_permissions`, `staff_users`, `staff_user_roles`)
+  created as part of the STAGE_05 tenant baseline schema, or as a separate STAGE_17-specific tenant
+  DB migration? → A: Separate STAGE_17 tenant DB migration — distinct from STAGE_05 baseline
+  provisioning. Per "one migration per feature" platform rule, STAGE_05 owns the bare tenant schema
+  and STAGE_17 adds RBAC tables via its own forward-only migration file, incrementing
+  `schema_version` independently.
+- Q: When `license_status` transitions to SOFT_LOCKED or ARCHIVED mid-session (FR-08.5), what is the
+  notification mechanism to the active WebSocket handler — periodic polling or an internal
+  event/push? → A: The WebSocket handler polls the `license_status` from the injected runtime
+  context at a 30-second interval per connection. An event-bus push mechanism is deferred to a
+  future stage. The polling interval is configurable via environment variable
+  (`WS_LICENSE_POLL_INTERVAL_MS`, default `30000`).
+- Q: For non-ACTIVE license responses (HTTP 423 / 403 / 404), does the API return a structured JSON
+  body or a bare HTTP status for both browser SPA and programmatic API consumers? → A: All
+  non-ACTIVE license responses return the standard Zidney error contract
+  `{ success: false, data: null, error: { code: string, message: string } }` with typed error codes:
+  `LICENSE_SOFT_LOCKED` (423), `LICENSE_ARCHIVED` (403), `WORKSPACE_NOT_FOUND` (404). The Backoffice
+  SPA reads the `error.code` field to select the correct "Workspace unavailable" screen variant.
+- Q: Within the single STAGE_17 tenant DB migration file, are all four RBAC table `CREATE TABLE`
+  statements executed inside a single DDL transaction so that a partial failure rolls back
+  completely? → A: Yes — all four `CREATE TABLE` statements must be wrapped in a single DDL
+  transaction (PostgreSQL supports transactional DDL). If any statement fails, the entire
+  transaction rolls back and the provisioning worker retries up to 3 times before routing to the
+  DLQ.
+- Q: Is the RBAC permission check implemented as a distinct middleware function registered
+  separately after Authentication in the Hono chain, or is it embedded inside the Authentication
+  middleware? → A: RBAC is a separate, independently-registered middleware function. The
+  authoritative middleware order is:
+  `Correlation ID → Tenant Resolver → License Enforcement → Schema Version → Authentication → RBAC Permission Guard → Route Handler`.
+  This allows per-route opt-in to specific module+action permission requirements without coupling
+  authorization to identity validation.
 
 ---
 
@@ -763,11 +834,18 @@ The following are explicitly not implemented in STAGE_17:
 
 The following assumptions were made during specification; team review recommended:
 
-1. **STAGE_16 (Shared UI System) is complete**: `packages/ui-system` exposes `AppLayout`, `Sidebar`, `TopBar`, and `ContentArea` with module-injection support. If not, UI components must be deferred to a spike.
-2. **Tenant middleware context shape is stable**: The context fields listed in FR-01.1 are already produced by STAGE_02 / STAGE_04 middleware and will not change field names.
-3. **staff_users table in tenant DB separate from student users**: Staff authentication is Backoffice-only; student authentication is Frontoffice-only. The `staff_users` table is independent.
-4. **Module enum values are centralized in packages/types**: A shared `ModuleEnum` type is available so that `enabled_modules` values are type-safe across API and UI.
-5. **WebSocket infrastructure exists**: At minimum, the Hono/Bun WebSocket upgrade path has been established; this stage defines validation constraints, not the socket server itself.
+1. **STAGE_16 (Shared UI System) is complete**: `packages/ui-system` exposes `AppLayout`, `Sidebar`,
+   `TopBar`, and `ContentArea` with module-injection support. If not, UI components must be deferred
+   to a spike.
+2. **Tenant middleware context shape is stable**: The context fields listed in FR-01.1 are already
+   produced by STAGE_02 / STAGE_04 middleware and will not change field names.
+3. **staff_users table in tenant DB separate from student users**: Staff authentication is
+   Backoffice-only; student authentication is Frontoffice-only. The `staff_users` table is
+   independent.
+4. **Module enum values are centralized in packages/types**: A shared `ModuleEnum` type is available
+   so that `enabled_modules` values are type-safe across API and UI.
+5. **WebSocket infrastructure exists**: At minimum, the Hono/Bun WebSocket upgrade path has been
+   established; this stage defines validation constraints, not the socket server itself.
 
 ---
 
@@ -775,5 +853,8 @@ The following assumptions were made during specification; team review recommende
 
 Compliant with Zidney Constitution v1.2.0 — No violations detected.
 
-All architectural trust chain links are preserved: Isolation → License → Authentication → RBAC → Runtime → Backoffice.  
-No master_db access. No cross-tenant joins. No hardcoded module logic. No grading or business logic in bootstrap. No client-side permission enforcement. Migration-managed schema. Worker-executed provisioning.
+All architectural trust chain links are preserved: Isolation → License → Authentication → RBAC →
+Runtime → Backoffice.  
+No master_db access. No cross-tenant joins. No hardcoded module logic. No grading or business logic
+in bootstrap. No client-side permission enforcement. Migration-managed schema. Worker-executed
+provisioning.

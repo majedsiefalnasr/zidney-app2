@@ -1,16 +1,19 @@
 # Plan Report — STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
 
-**Step:** 3 — Plan
-**Timestamp:** 2026-03-05T00:00:00Z
-**Status:** COMPLETE
+**Step:** 3 — Plan **Timestamp:** 2026-03-05T00:00:00Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-A complete technical implementation plan has been produced for the Layout System Integration stage. Research across all three app codebases (MMC, Backoffice, Frontoffice) and `packages/ui-system` revealed 12 key codebase findings that shaped the plan.
+A complete technical implementation plan has been produced for the Layout System Integration stage.
+Research across all three app codebases (MMC, Backoffice, Frontoffice) and `packages/ui-system`
+revealed 12 key codebase findings that shaped the plan.
 
-Both guardian validators (Architecture Checker and API Designer) returned **VERDICT: PASS**. The plan is architecturally compliant with zero critical or high violations. Two medium findings will be resolved during implementation (layout component directory placement and dead router-view slot content in App.vue).
+Both guardian validators (Architecture Checker and API Designer) returned **VERDICT: PASS**. The
+plan is architecturally compliant with zero critical or high violations. Two medium findings will be
+resolved during implementation (layout component directory placement and dead router-view slot
+content in App.vue).
 
 Estimated task count: **~60 atomic tasks** across 20 implementation steps.
 
@@ -21,7 +24,8 @@ Estimated task count: **~60 atomic tasks** across 20 implementation steps.
 - `specs/runtime/ui-07-layout-system-integration/spec.md`
 - `specs/runtime/ui-07-layout-system-integration/plan.md`
 - `specs/runtime/ui-07-layout-system-integration/research.md`
-- Codebase: `apps/mmc/src/`, `apps/backoffice/src/`, `apps/frontoffice/src/`, `packages/ui-system/src/`
+- Codebase: `apps/mmc/src/`, `apps/backoffice/src/`, `apps/frontoffice/src/`,
+  `packages/ui-system/src/`
 
 ---
 
@@ -56,11 +60,15 @@ Estimated task count: **~60 atomic tasks** across 20 implementation steps.
 
 Key codebase discoveries from `research.md`:
 
-1. **ui.store exists but lacks sidebar state** — All 3 apps have `ui.store.ts` from stage 016, but only manage modal/drawer visibility.
-2. **auth.store exists but lacks `resolvedPermissions`** — All 3 apps have `auth.store.ts`; user object is stored but `resolvedPermissions` map is absent.
-3. **BackofficeLayout.vue exists (legacy)** — `apps/backoffice/src/layouts/BackofficeLayout.vue` uses old slot pattern and must be removed.
+1. **ui.store exists but lacks sidebar state** — All 3 apps have `ui.store.ts` from stage 016, but
+   only manage modal/drawer visibility.
+2. **auth.store exists but lacks `resolvedPermissions`** — All 3 apps have `auth.store.ts`; user
+   object is stored but `resolvedPermissions` map is absent.
+3. **BackofficeLayout.vue exists (legacy)** — `apps/backoffice/src/layouts/BackofficeLayout.vue`
+   uses old slot pattern and must be removed.
 4. **MMC has no @zidney/ui-system dep** — Must be added to `apps/mmc/package.json`.
-5. **ui-system has `SidebarLayout`, `Button`, `Avatar`, `DropdownMenu` components** — Group heading support needs verification.
+5. **ui-system has `SidebarLayout`, `Button`, `Avatar`, `DropdownMenu` components** — Group heading
+   support needs verification.
 6. **No layout components exist in MMC or Frontoffice** — Fully greenfield for those apps.
 
 ---
@@ -77,13 +85,16 @@ Key codebase discoveries from `research.md`:
 
 ## Transaction Boundaries
 
-Not applicable — layout layer performs no write operations to any database. All store mutations are pure in-memory Pinia state changes with no persistence requirements.
+Not applicable — layout layer performs no write operations to any database. All store mutations are
+pure in-memory Pinia state changes with no persistence requirements.
 
 ---
 
 ## Idempotency Strategy
 
-Not applicable — layout rendering is inherently idempotent. Sidebar collapse state persists in-memory (non-persisted Pinia store); all store action calls produce the same state outcome regardless of call count.
+Not applicable — layout rendering is inherently idempotent. Sidebar collapse state persists
+in-memory (non-persisted Pinia store); all store action calls produce the same state outcome
+regardless of call count.
 
 ---
 
@@ -92,7 +103,8 @@ Not applicable — layout rendering is inherently idempotent. Sidebar collapse s
 ### Architecture Checker: VERDICT: PASS
 
 - Zero critical/high violations
-- 2 medium findings (resolved in plan): layout component directory placement, dead router-view in App.vue
+- 2 medium findings (resolved in plan): layout component directory placement, dead router-view in
+  App.vue
 - 2 low findings: AuthUser.permissions field shape, SidebarLayout group heading support
 
 ### API Designer: VERDICT: PASS

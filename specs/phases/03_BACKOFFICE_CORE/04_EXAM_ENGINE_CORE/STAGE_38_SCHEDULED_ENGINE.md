@@ -112,9 +112,7 @@ No time-based decision may rely on client payload.
 
 User may start scheduled exam only if:
 
-current_time >= (start_datetime - late_tolerance_minutes)
-AND
-current_time <= end_datetime
+current_time >= (start_datetime - late_tolerance_minutes) AND current_time <= end_datetime
 
 If:
 
@@ -140,10 +138,7 @@ attempt row must include:
 - is_scheduled = true
 - scheduled_exam_id
 - snapshot of base exam config
-- attempt_end_time = min(
-  start_time + exam_duration,
-  scheduled_exam.end_datetime
-  )
+- attempt_end_time = min( start_time + exam_duration, scheduled_exam.end_datetime )
 
 No attempt may exceed scheduled end_datetime.
 

@@ -291,11 +291,7 @@ Every job emits structured logs (JSON format) with:
   "retry_count": 3,
   "failed_at": "2026-02-24T10:15:30.000Z",
   "operator_action_required": true,
-  "actions": [
-    "Review migration SQL file",
-    "Fix schema error",
-    "Manual retry via API"
-  ]
+  "actions": ["Review migration SQL file", "Fix schema error", "Manual retry via API"]
 }
 ```
 

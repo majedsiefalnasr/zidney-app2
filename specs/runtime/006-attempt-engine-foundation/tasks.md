@@ -11,7 +11,8 @@
 
 ## Executive Summary
 
-This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomic, dependency-ordered tasks organized by implementation layer. Each task:
+This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomic,
+dependency-ordered tasks organized by implementation layer. Each task:
 
 - Is scoped to ONE layer (database, API, worker, middleware, observability, testing)
 - Declares transactional requirements
@@ -35,7 +36,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ### Infrastructure Layer — Schema Setup
 
-- [x] T001 Create migration file `apps/api/src/db/tenant/migrations/001_create_attempt_engine_tables.sql`
+- [x] T001 Create migration file
+      `apps/api/src/db/tenant/migrations/001_create_attempt_engine_tables.sql`
   - **Layer**: Database
   - **Scope**: Tenant database schema
   - **Transactional**: N/A (migration system handles)
@@ -63,13 +65,19 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
   - **Transactional**: N/A (migration)
   - **Idempotency**: N/A
   - **Dependencies**: T001 (migration file exists)
-  - **Fields to Include**: id, workspace_id, user_id, attempt_type, exam_id, question_snapshot (JSONB), question_order (UUID[]), grading_config_snapshot (JSONB), mode, flags_snapshot (JSONB), time_limit_snapshot (BIGINT), exam_version, expected_schema_version (INT), expected_product_version (VARCHAR), started_at, submitted_at, finalized_at, server_start_time, certificate_enabled, single_attempt_rule, status (VARCHAR with CHECK), score (NUMERIC), passed (BOOLEAN), result_snapshot (JSONB), created_at, updated_at
+  - **Fields to Include**: id, workspace_id, user_id, attempt_type, exam_id, question_snapshot
+    (JSONB), question_order (UUID[]), grading_config_snapshot (JSONB), mode, flags_snapshot (JSONB),
+    time_limit_snapshot (BIGINT), exam_version, expected_schema_version (INT),
+    expected_product_version (VARCHAR), started_at, submitted_at, finalized_at, server_start_time,
+    certificate_enabled, single_attempt_rule, status (VARCHAR with CHECK), score (NUMERIC), passed
+    (BOOLEAN), result_snapshot (JSONB), created_at, updated_at
   - **Constraints to Include**:
     - PRIMARY KEY (id)
     - FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
     - CHECK (status IN ('IN_PROGRESS','SUBMITTED','FINALIZED','EXPIRED','ABORTED'))
     - CHECK (mode IN ('RELAX','CHRONO','RUSH'))
-    - CHECK (attempt_type IN ('MCQ_ASSESSMENT','MCQ_EXAM','MCQ_SCHEDULED','TOPIC_EXAM','EXERCISE_EXAM','TRADITIONAL_SCHEDULED'))
+    - CHECK (attempt_type IN
+      ('MCQ_ASSESSMENT','MCQ_EXAM','MCQ_SCHEDULED','TOPIC_EXAM','EXERCISE_EXAM','TRADITIONAL_SCHEDULED'))
     - CHECK (score IS NULL OR (score >= 0 AND score <= 100))
   - **Success Criteria**:
     - Table created with exact schema
@@ -87,7 +95,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
   - **Transactional**: N/A (migration)
   - **Idempotency**: N/A
   - **Dependencies**: T002 (attempts table exists)
-  - **Fields to Include**: id, attempt_id, question_id, user_answer (JSONB), answered_at (TIMESTAMP), flagged (BOOLEAN), created_at, updated_at
+  - **Fields to Include**: id, attempt_id, question_id, user_answer (JSONB), answered_at
+    (TIMESTAMP), flagged (BOOLEAN), created_at, updated_at
   - **Constraints to Include**:
     - PRIMARY KEY (id)
     - FOREIGN KEY (attempt_id) REFERENCES attempts(id) ON DELETE CASCADE
@@ -106,15 +115,19 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
   - **Transactional**: N/A (migration)
   - **Idempotency**: N/A
   - **Dependencies**: T001 (migration file)
-  - **Fields to Include**: id, workspace_id, attempt_id, submission_sequence, idempotency_key (VARCHAR 255), request_timestamp, response_status, response_body (JSONB), created_at, expires_at (NOW() + 24 hours)
+  - **Fields to Include**: id, workspace_id, attempt_id, submission_sequence, idempotency_key
+    (VARCHAR 255), request_timestamp, response_status, response_body (JSONB), created_at, expires_at
+    (NOW() + 24 hours)
   - **Constraints to Include**:
     - PRIMARY KEY (id)
     - FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
     - FOREIGN KEY (attempt_id) REFERENCES attempts(id) ON DELETE CASCADE
     - UNIQUE (attempt_id, submission_sequence)
   - **Indexes to Include**:
-    - UNIQUE INDEX idx_submission_idempotency_key ON submission_idempotency_keys(workspace_id, idempotency_key) WHERE expires_at > NOW()
-    - INDEX idx_submission_cleanup ON submission_idempotency_keys(workspace_id, expires_at) WHERE expires_at <= NOW()
+    - UNIQUE INDEX idx_submission_idempotency_key ON submission_idempotency_keys(workspace_id,
+      idempotency_key) WHERE expires_at > NOW()
+    - INDEX idx_submission_cleanup ON submission_idempotency_keys(workspace_id, expires_at) WHERE
+      expires_at <= NOW()
   - **Success Criteria**:
     - Table created with exact schema
     - Composite UNIQUE on (workspace_id, idempotency_key) with time-based filtering
@@ -131,10 +144,13 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
   - **Dependencies**: T002 (attempts table exists)
   - **Indexes to Create**:
     - idx_attempts_workspace_user_exam ON (workspace_id, user_id, exam_id, status)
-    - idx_attempts_workspace_user_status ON (workspace_id, user_id, status) WHERE status IN ('IN_PROGRESS','SUBMITTED')
+    - idx_attempts_workspace_user_status ON (workspace_id, user_id, status) WHERE status IN
+      ('IN_PROGRESS','SUBMITTED')
     - idx_attempts_status_finalized ON (workspace_id, status, finalized_at)
-    - idx_attempts_started_expiration ON (workspace_id, started_at, time_limit_snapshot) WHERE status = 'IN_PROGRESS'
-    - idx_single_attempt_rule UNIQUE ON (exam_id, user_id) WHERE status = 'IN_PROGRESS' AND single_attempt_rule = TRUE
+    - idx_attempts_started_expiration ON (workspace_id, started_at, time_limit_snapshot) WHERE
+      status = 'IN_PROGRESS'
+    - idx_single_attempt_rule UNIQUE ON (exam_id, user_id) WHERE status = 'IN_PROGRESS' AND
+      single_attempt_rule = TRUE
     - idx_attempts_created_at ON (workspace_id, created_at DESC)
   - **Rationale**:
     - workspace_user_exam: Queries for existing attempt before creation
@@ -279,9 +295,11 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
   - **Dependencies**: T007 (types defined)
   - **Query Builders to Create**:
     - `findAttemptById(db, workspaceId, attemptId)` → SELECT \* WHERE id = ? AND workspace_id = ?
-    - `findInProgressAttemptForUser(db, workspaceId, userId, examId)` → SELECT \* WHERE ... AND status = 'IN_PROGRESS'
+    - `findInProgressAttemptForUser(db, workspaceId, userId, examId)` → SELECT \* WHERE ... AND
+      status = 'IN_PROGRESS'
     - `findProgressByAttemptId(db, attemptId)` → SELECT ALL progress records for attempt
-    - `findIdempotencyRecord(db, idempotencyKey, workspaceId)` → SELECT from submission_idempotency_keys
+    - `findIdempotencyRecord(db, idempotencyKey, workspaceId)` → SELECT from
+      submission_idempotency_keys
     - `getExpiredAttempts(db, workspaceId)` → SELECT IN_PROGRESS attempts past time limit
   - **Success Criteria**:
     - All query builders exported and usable
@@ -391,11 +409,13 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
     - Extract idempotency key from req.headers['idempotency-key'] or generate one
     - Query Redis first: GET idempotency:${key}
     - If hit: Return cached response (existing status code and body)
-    - If miss: Query PostgreSQL: SELECT \* FROM submission_idempotency_keys WHERE idempotency_key = ? AND expires_at > NOW()
+    - If miss: Query PostgreSQL: SELECT \* FROM submission_idempotency_keys WHERE idempotency_key =
+      ? AND expires_at > NOW()
     - If DB hit: Return cached response
     - If no cache: Proceed to route handler
     - Intercept res.json() to cache response in both Redis and PostgreSQL
-    - Store in PostgreSQL with: workspace_id, idempotency_key, response_status, response_body, expires_at = NOW() + 24h
+    - Store in PostgreSQL with: workspace_id, idempotency_key, response_status, response_body,
+      expires_at = NOW() + 24h
   - **Success Criteria**:
     - Idempotency key lookup works
     - Redis cache returns in <1ms
@@ -503,12 +523,15 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ### API Routes — Attempt Creation
 
-- [ ] T022 Create `POST /api/workspaces/:slug/attempts` endpoint in `apps/api/src/routes/attempts/create.ts`
+- [ ] T022 Create `POST /api/workspaces/:slug/attempts` endpoint in
+      `apps/api/src/routes/attempts/create.ts`
   - **Layer**: API
   - **Scope**: Attempt creation endpoint
   - **Transactional**: YES (full transaction)
-  - **Idempotency**: YES (UNIQUE constraint on workspace_id, user_id, exam_id; return existing if duplicate)
-  - **Middleware Stack**: tenantResolver → licenseMiddleware → correlationId → authContext → rbacMiddleware
+  - **Idempotency**: YES (UNIQUE constraint on workspace_id, user_id, exam_id; return existing if
+    duplicate)
+  - **Middleware Stack**: tenantResolver → licenseMiddleware → correlationId → authContext →
+    rbacMiddleware
   - **License Requirement**: Must be ACTIVE (T014 enforces 423/403 if not)
   - **Dependencies**: T013, T014, T015, T017, T018, T019
   - **Implementation**:
@@ -523,8 +546,10 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
       7. Shuffle question order; store in question_order UUID[]
       8. Create grading config snapshot from exam grading configuration
       9. Create flags snapshot from exam settings
-      10. INSERT INTO attempts (id, workspace_id, user_id, exam_id, ..., snapshot fields..., status='IN_PROGRESS', started_at=NOW())
-      11. INSERT INTO attempt_progress for each question (attempt_id, question_id, user_answer=NULL, flagged=FALSE)
+      10. INSERT INTO attempts (id, workspace_id, user_id, exam_id, ..., snapshot fields...,
+          status='IN_PROGRESS', started_at=NOW())
+      11. INSERT INTO attempt_progress for each question (attempt_id, question_id, user_answer=NULL,
+          flagged=FALSE)
       12. COMMIT
       13. Log: attempt.created event
       14. Return 201 Created with: attempt_id, questions[], time_limit_seconds, mode
@@ -608,7 +633,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
   - **Idempotency**: N/A
   - **Dependencies**: T007
   - **Functions to Create**:
-    - `loadExamById(db, workspaceId, examId)` → SELECT \* FROM exams WHERE id = ? AND workspace_id = ?
+    - `loadExamById(db, workspaceId, examId)` → SELECT \* FROM exams WHERE id = ? AND workspace_id =
+      ?
     - `loadQuestionsForExam(db, examId)` → SELECT \* FROM questions WHERE exam_id = ?
     - `validateExamAvailability(exam)` → Check if exam is active and accepting attempts
     - `validateUserEligibility(db, workspaceId, userId, examId)` → Check user can take this exam
@@ -620,24 +646,28 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ### API Routes — Progress Tracking
 
-- [ ] T025 Create `POST /api/workspaces/:slug/attempts/:id/progress` endpoint in `apps/api/src/routes/attempts/progress.ts`
+- [ ] T025 Create `POST /api/workspaces/:slug/attempts/:id/progress` endpoint in
+      `apps/api/src/routes/attempts/progress.ts`
   - **Layer**: API
   - **Scope**: Answer progress/autosave endpoint
   - **Transactional**: No (UPSERT is non-blocking)
   - **Idempotency**: YES (UPSERT: INSERT ON CONFLICT DO UPDATE)
-  - **Middleware Stack**: tenantResolver → licenseMiddleware → correlationId → authContext → rbacMiddleware
+  - **Middleware Stack**: tenantResolver → licenseMiddleware → correlationId → authContext →
+    rbacMiddleware
   - **License Requirement**: ACTIVE (middleware enforces)
   - **Dependencies**: T013, T014, T015, T017, T018, T020
   - **Implementation**:
     - Route: POST /api/workspaces/:slug/attempts/:id/progress
     - Route handler:
-      1. Validate attempt exists: SELECT \* FROM attempts WHERE id = ? AND workspace_id = ? AND user_id = req.user.id
+      1. Validate attempt exists: SELECT \* FROM attempts WHERE id = ? AND workspace_id = ? AND
+         user_id = req.user.id
       2. Verify status is IN_PROGRESS (else return 409)
       3. For each response in request.responses:
          - Validate question_id is in snapshot
          - Validate user_answer format matches question type
-         - UPSERT INTO attempt_progress (attempt_id, question_id, user_answer, answered_at, updated_at)
-           ON CONFLICT (attempt_id, question_id) DO UPDATE SET (user_answer, answered_at, updated_at) = (...)
+         - UPSERT INTO attempt_progress (attempt_id, question_id, user_answer, answered_at,
+           updated_at) ON CONFLICT (attempt_id, question_id) DO UPDATE SET (user_answer,
+           answered_at, updated_at) = (...)
       4. Calculate time remaining: time_remaining = time_limit_snapshot - (NOW() - started_at)
       5. Log: progress.saved event
       6. Return 200 OK with: responses_saved, time_remaining_seconds
@@ -667,20 +697,24 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ---
 
-- [ ] T026 Create `GET /api/workspaces/:slug/attempts/:id` endpoint status in `apps/api/src/routes/attempts/status.ts`
+- [ ] T026 Create `GET /api/workspaces/:slug/attempts/:id` endpoint status in
+      `apps/api/src/routes/attempts/status.ts`
   - **Layer**: API
   - **Scope**: Get attempt status and progress
   - **Transactional**: No (read-only)
   - **Idempotency**: N/A
-  - **Middleware Stack**: tenantResolver → licenseMiddleware → correlationId → authContext → rbacMiddleware
+  - **Middleware Stack**: tenantResolver → licenseMiddleware → correlationId → authContext →
+    rbacMiddleware
   - **Dependencies**: T013, T014, T015, T017, T018
   - **Implementation**:
     - Route: GET /api/workspaces/:slug/attempts/:id
     - Route handler:
       1. SELECT \* FROM attempts WHERE id = ? AND workspace_id = ? (verify user owns attempt)
       2. If status IN_PROGRESS:
-         - SELECT COUNT(\*) answered_count FROM attempt_progress WHERE attempt_id = ? AND user_answer IS NOT NULL
-         - SELECT COUNT(\*) flagged_count FROM attempt_progress WHERE attempt_id = ? AND flagged = TRUE
+         - SELECT COUNT(\*) answered_count FROM attempt_progress WHERE attempt_id = ? AND
+           user_answer IS NOT NULL
+         - SELECT COUNT(\*) flagged_count FROM attempt_progress WHERE attempt_id = ? AND flagged =
+           TRUE
          - Calculate time_remaining = time_limit_snapshot - (NOW() - started_at)
          - Return: status, progress counts, time_remaining, mode
       3. If status FINALIZED:
@@ -737,12 +771,14 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ### API Routes — Submission
 
-- [ ] T028 Create `POST /api/workspaces/:slug/attempts/:id/submit` endpoint in `apps/api/src/routes/attempts/submit.ts`
+- [ ] T028 Create `POST /api/workspaces/:slug/attempts/:id/submit` endpoint in
+      `apps/api/src/routes/attempts/submit.ts`
   - **Layer**: API
   - **Scope**: Attempt submission (state transition to SUBMITTED)
   - **Transactional**: YES (pessimistic lock, FOR UPDATE)
   - **Idempotency**: YES (submission_idempotency_keys table + status check)
-  - **Middleware Stack**: tenantResolver → licenseMiddleware → correlationId → authContext → rbacMiddleware → idempotencyMiddleware
+  - **Middleware Stack**: tenantResolver → licenseMiddleware → correlationId → authContext →
+    rbacMiddleware → idempotencyMiddleware
   - **License Requirement**: ACTIVE (prevent new submissions if SOFT_LOCKED/ARCHIVED per spec)
   - **Concurrency**: Pessimistic lock with timeout (per clarification Q3)
   - **Lock Timeout**: 5 seconds per attempt
@@ -757,7 +793,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
          - If lock timeout: catch error, retry with backoff
       4. Verify status = IN_PROGRESS (else return 409 ALREADY_SUBMITTED or CONFLICT)
       5. Verify not already submitted: submitted_at IS NULL
-      6. Verify attempt not expired: (NOW() - started_at) <= time_limit_snapshot + grace_period (30s)
+      6. Verify attempt not expired: (NOW() - started_at) <= time_limit_snapshot + grace_period
+         (30s)
       7. UPDATE attempts SET status = 'SUBMITTED', submitted_at = NOW(), updated_at = NOW()
       8. ENQUEUE grading_job(attempt_id, submission_sequence, idempotency_key)
          - If enqueue fails: ROLLBACK (transaction reverts; attempt remains IN_PROGRESS)
@@ -817,7 +854,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
   - **Retry Backoff**: [1, 2, 4] seconds
   - **Dependencies**: None
   - **Functions to Create**:
-    - `acquireAttemptLock(db, attemptId, workspaceId, maxRetries)` → Tries to acquire FOR UPDATE lock with retries
+    - `acquireAttemptLock(db, attemptId, workspaceId, maxRetries)` → Tries to acquire FOR UPDATE
+      lock with retries
     - `handleLockTimeout(error, retryCount, maxRetries)` → Decides whether to retry or fail
     - `withAttemptLock(db, attemptId, workspaceId, callback)` → Execute callback within lock
   - **Success Criteria**:
@@ -830,12 +868,14 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 - [ ] T030 Create grading job enqueue service in `apps/api/src/modules/attempt/grading-enqueue.ts`
   - **Layer**: API (Domain Logic)
   - **Scope**: Enqueue grading job to worker queue
-  - **Transactional**: Transactionally coupled with submission (if enqueue fails, transaction rolls back)
+  - **Transactional**: Transactionally coupled with submission (if enqueue fails, transaction rolls
+    back)
   - **Idempotency**: Job broker handles deduplication
   - **Dependencies**: None (service integrates with job broker)
   - **Functions to Create**:
     - `enqueueGradingJob(jobBroker, attemptId, workspaceId, correlationId)` → Enqueue job
-    - Job payload: {job_type: 'GRADE_ATTEMPT', attempt_id, submission_sequence, idempotency_key, correlation_id, created_at}
+    - Job payload: {job_type: 'GRADE_ATTEMPT', attempt_id, submission_sequence, idempotency_key,
+      correlation_id, created_at}
   - **Queue Configuration**:
     - Queue name: 'zidney.grading'
     - Job type: 'GRADE_ATTEMPT'
@@ -847,14 +887,16 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ---
 
-- [ ] T031 Create submission idempotency recorder in `apps/api/src/modules/attempt/idempotency-recorder.ts`
+- [ ] T031 Create submission idempotency recorder in
+      `apps/api/src/modules/attempt/idempotency-recorder.ts`
   - **Layer**: API (Domain Logic)
   - **Scope**: Record submission to idempotency table
   - **Transactional**: Transactionally coupled with submission
   - **Idempotency**: UNIQUE constraint on (attempt_id, submission_sequence) prevents duplicates
   - **Dependencies**: T004 (idempotency table)
   - **Functions to Create**:
-    - `recordSubmissionIdempotency(db, workspaceId, attemptId, sequenceNum, idempotencyKey, responseStatus, responseBody)` → INSERT or UPDATE
+    - `recordSubmissionIdempotency(db, workspaceId, attemptId, sequenceNum, idempotencyKey, responseStatus, responseBody)`
+      → INSERT or UPDATE
   - **Success Criteria**:
     - Submission recorded to database
     - Idempotency key unique per submission_sequence
@@ -863,12 +905,14 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ### API Routes — Results
 
-- [ ] T032 Create `GET /api/workspaces/:slug/attempts/:id/result` endpoint in `apps/api/src/routes/attempts/result.ts`
+- [ ] T032 Create `GET /api/workspaces/:slug/attempts/:id/result` endpoint in
+      `apps/api/src/routes/attempts/result.ts`
   - **Layer**: API
   - **Scope**: Get attempt result (only after FINALIZED)
   - **Transactional**: No (read-only)
   - **Idempotency**: N/A
-  - **Middleware Stack**: tenantResolver → licenseMiddleware → correlationId → authContext → rbacMiddleware
+  - **Middleware Stack**: tenantResolver → licenseMiddleware → correlationId → authContext →
+    rbacMiddleware
   - **Dependencies**: T013, T014, T015, T017, T018
   - **Implementation**:
     - Route: GET /api/workspaces/:slug/attempts/:id/result
@@ -1036,11 +1080,13 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
       7. Load snapshot: question_snapshot, grading_config_snapshot from attempt
       8. Load answers: SELECT user_answer FROM attempt_progress WHERE attempt_id = ?
       9. Version compatibility check:
-         - IF expected_schema_version < MIN_SUPPORTED: score=0, passed=false, error="Schema incompatible"
+         - IF expected_schema_version < MIN_SUPPORTED: score=0, passed=false, error="Schema
+           incompatible"
          - IF expected_product_version not in supported range: same
       10. Call gradingEngine.computeScore(questions, answers, gradingConfig)
       11. Build result_snapshot with per-question breakdown
-      12. UPDATE attempts SET status='FINALIZED', score=?, passed=?, result_snapshot=?, finalized_at=NOW()
+      12. UPDATE attempts SET status='FINALIZED', score=?, passed=?, result_snapshot=?,
+          finalized_at=NOW()
       13. IF passed AND certificate_enabled: ENQUEUE generate_certificate_job
       14. COMMIT
       15. Log: grading.completed event
@@ -1061,7 +1107,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ---
 
-- [x] T038 Create deterministic score computation engine in `apps/worker/src/grading/score-engine.ts`
+- [x] T038 Create deterministic score computation engine in
+      `apps/worker/src/grading/score-engine.ts`
   - **Layer**: Worker (Domain Logic)
   - **Scope**: Calculate scores deterministically
   - **Transactional**: No
@@ -1156,7 +1203,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 - [ ] T041 Create certificate job enqueue trigger in `apps/worker/src/jobs/certificate-trigger.ts`
   - **Layer**: Worker (Domain Logic)
   - **Scope**: Enqueue certificate generation if applicable
-  - **Transactional**: Transactionally coupled with grading (if enqueue fails, grading still succeeds; retry certificate separately)
+  - **Transactional**: Transactionally coupled with grading (if enqueue fails, grading still
+    succeeds; retry certificate separately)
   - **Idempotency**: N/A (certificate job handles dedup)
   - **Dependencies**: T037 (grading processor)
   - **Functions to Create**:
@@ -1229,7 +1277,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ---
 
-- [ ] T045 Create unit tests for version compatibility in `apps/worker/tests/unit/version-checker.test.ts`
+- [ ] T045 Create unit tests for version compatibility in
+      `apps/worker/tests/unit/version-checker.test.ts`
   - **Layer**: Testing (Unit)
   - **Scope**: Version checking logic
   - **Transactional**: N/A
@@ -1288,7 +1337,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ### Testing Layer — Integration Tests
 
-- [ ] T048 Create integration test for full attempt flow in `apps/api/tests/integration/attempt-flow.test.ts`
+- [ ] T048 Create integration test for full attempt flow in
+      `apps/api/tests/integration/attempt-flow.test.ts`
   - **Layer**: Testing (Integration)
   - **Scope**: End-to-end attempt lifecycle
   - **Transactional**: N/A
@@ -1311,7 +1361,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ---
 
-- [ ] T049 Create integration test for license enforcement in `apps/api/tests/integration/license-enforcement.test.ts`
+- [ ] T049 Create integration test for license enforcement in
+      `apps/api/tests/integration/license-enforcement.test.ts`
   - **Layer**: Testing (Integration)
   - **Scope**: License middleware behavior
   - **Transactional**: N/A
@@ -1330,7 +1381,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ---
 
-- [ ] T050 Create integration test for version compatibility in `apps/api/tests/integration/version-compatibility.test.ts`
+- [ ] T050 Create integration test for version compatibility in
+      `apps/api/tests/integration/version-compatibility.test.ts`
   - **Layer**: Testing (Integration)
   - **Scope**: Version checks at creation and grading
   - **Transactional**: N/A
@@ -1348,7 +1400,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ---
 
-- [ ] T051 Create integration test for idempotency in `apps/api/tests/integration/idempotency.test.ts`
+- [ ] T051 Create integration test for idempotency in
+      `apps/api/tests/integration/idempotency.test.ts`
   - **Layer**: Testing (Integration)
   - **Scope**: Idempotent operations
   - **Transactional**: N/A
@@ -1367,7 +1420,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ---
 
-- [ ] T052 Create integration test for concurrency in `apps/api/tests/integration/concurrency.test.ts`
+- [ ] T052 Create integration test for concurrency in
+      `apps/api/tests/integration/concurrency.test.ts`
   - **Layer**: Testing (Integration)
   - **Scope**: Concurrent submission safety
   - **Transactional**: N/A
@@ -1391,7 +1445,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ---
 
-- [ ] T053 Create integration test for multi-tenant isolation in `apps/api/tests/integration/isolation.test.ts`
+- [ ] T053 Create integration test for multi-tenant isolation in
+      `apps/api/tests/integration/isolation.test.ts`
   - **Layer**: Testing (Integration)
   - **Scope**: Tenant data isolation
   - **Transactional**: N/A
@@ -1409,7 +1464,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ---
 
-- [ ] T054 Create integration test for transaction rollback in `apps/api/tests/integration/transactions.test.ts`
+- [ ] T054 Create integration test for transaction rollback in
+      `apps/api/tests/integration/transactions.test.ts`
   - **Layer**: Testing (Integration)
   - **Scope**: Transaction atomicity and rollback
   - **Transactional**: N/A (test validates)
@@ -1426,7 +1482,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ---
 
-- [ ] T055 Create integration test for time-based operations in `apps/api/tests/integration/timing.test.ts`
+- [ ] T055 Create integration test for time-based operations in
+      `apps/api/tests/integration/timing.test.ts`
   - **Layer**: Testing (Integration)
   - **Scope**: Server-authoritative time validation
   - **Transactional**: N/A
@@ -1566,7 +1623,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ---
 
-- [ ] T060 Create integration test for structured logging in `apps/api/tests/integration/logging.test.ts`
+- [ ] T060 Create integration test for structured logging in
+      `apps/api/tests/integration/logging.test.ts`
   - **Layer**: Testing (Integration)
   - **Scope**: Verify structured logging
   - **Transactional**: N/A
@@ -1588,7 +1646,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 
 ### Final Validation Tests
 
-- [ ] T061 Create constitutional compliance validation test in `apps/api/tests/compliance/constitution.test.ts`
+- [ ] T061 Create constitutional compliance validation test in
+      `apps/api/tests/compliance/constitution.test.ts`
   - **Layer**: Testing (Compliance)
   - **Scope**: Verify all constitutional requirements met
   - **Transactional**: N/A
@@ -1777,7 +1836,8 @@ This document breaks down the Attempt Engine Foundation (Stage 06) into 72 atomi
 ### Testing Layer (Tasks 44-65)
 
 - Unit tests: Snapshot, Version, Score, Errors (4 tests)
-- Integration tests: Flow, License, Version, Idempotency, Concurrency, Isolation, Transactions, Timing (8 tests)
+- Integration tests: Flow, License, Version, Idempotency, Concurrency, Isolation, Transactions,
+  Timing (8 tests)
 - Compliance tests: Constitutional validation
 - Performance tests: Benchmarks (1 test)
 - Logging tests: Integration test for structured logging

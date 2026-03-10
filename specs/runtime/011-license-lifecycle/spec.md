@@ -9,28 +9,41 @@
 
 ## Stage Status
 
-**Current Status**: IN PROGRESS (CI/CD automation framework implemented, final validation audit pending)  
+**Current Status**: IN PROGRESS (CI/CD automation framework implemented, final validation audit
+pending)  
 **Last Updated**: 2026-02-24  
 **Determined By**: Zidney Deployment Governance v1.0  
-**Modification Policy**: This stage is IN PROGRESS. Structural changes to core license state machine (4-state model, middleware enforcement, transition logic) are LOCKED. Changes limited to: CI/CD automation refinements, task acceptance criteria clarifications, deployment procedures documentation, and bug fixes in implemented code. No scope expansion without architectural review.
+**Modification Policy**: This stage is IN PROGRESS. Structural changes to core license state machine
+(4-state model, middleware enforcement, transition logic) are LOCKED. Changes limited to: CI/CD
+automation refinements, task acceptance criteria clarifications, deployment procedures
+documentation, and bug fixes in implemented code. No scope expansion without architectural review.
 
 ---
 
 ## Executive Summary
 
-Implement strict, state-driven license lifecycle management that ensures institutional data is protected through deterministic state transitions, middleware-enforced access control, and audit-logged operations. License status transitions from ACTIVE → SOFT_LOCKED → ARCHIVED → DELETED are controlled through the License Service, middleware-enforced at the Tenant Resolver level, and fully recoverable until permanent deletion.
+Implement strict, state-driven license lifecycle management that ensures institutional data is
+protected through deterministic state transitions, middleware-enforced access control, and
+audit-logged operations. License status transitions from ACTIVE → SOFT_LOCKED → ARCHIVED → DELETED
+are controlled through the License Service, middleware-enforced at the Tenant Resolver level, and
+fully recoverable until permanent deletion.
 
 ---
 
 ## Objectives
 
-- Implement four-state license lifecycle model (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED) with strictly defined transitions
-- Enforce license status in Tenant Resolver middleware before any tenant DB access, blocking non-ACTIVE states with appropriate HTTP responses
-- Implement soft lock enforcement with automatic expiration to ARCHIVED state after 90-day grace period
+- Implement four-state license lifecycle model (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED) with
+  strictly defined transitions
+- Enforce license status in Tenant Resolver middleware before any tenant DB access, blocking
+  non-ACTIVE states with appropriate HTTP responses
+- Implement soft lock enforcement with automatic expiration to ARCHIVED state after 90-day grace
+  period
 - Implement snapshot-based archival and restore process for archived workspaces
 - Implement permanent deletion process requiring double confirmation from MMC
-- Create audit log for all state transitions recording actor, timestamp, previous/new status, and reason
-- Provide MMC UI to display license status, countdown timers, snapshot metadata, and state-specific actions
+- Create audit log for all state transitions recording actor, timestamp, previous/new status, and
+  reason
+- Provide MMC UI to display license status, countdown timers, snapshot metadata, and state-specific
+  actions
 - Validate all transitions through License Service (no direct SQL updates allowed)
 - Ensure data integrity through transactional state changes and idempotent restore operations
 
@@ -40,28 +53,50 @@ Implement strict, state-driven license lifecycle management that ensures institu
 
 ### In Scope
 
-1. **License State Definitions**: Authoritative state model (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED) stored in `licenses.status` table
-2. **State Transition Logic**: Valid transitions (ACTIVE → SOFT_LOCKED, SOFT_LOCKED → ACTIVE/ARCHIVED, ARCHIVED → ACTIVE/DELETED) with forbidden transitions (ACTIVE → ARCHIVED, ACTIVE → DELETED, SOFT_LOCKED → DELETED) enforced at service layer
+1. **License State Definitions**: Authoritative state model (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED)
+   stored in `licenses.status` table
+2. **State Transition Logic**: Valid transitions (ACTIVE → SOFT_LOCKED, SOFT_LOCKED →
+   ACTIVE/ARCHIVED, ARCHIVED → ACTIVE/DELETED) with forbidden transitions (ACTIVE → ARCHIVED, ACTIVE
+   → DELETED, SOFT_LOCKED → DELETED) enforced at service layer
 3. **Soft Lock Enforcement (Two Modes)**:
-   - **Mode 1 — Pre-Session Gate**: Block new sessions (new attempt creation, new login, new API session)
-   - **Mode 2 — In-Flight Continuation**: Allow existing in-progress attempts to continue/complete if created before soft-lock (safeguards exam integrity)
-   - Implementation: License middleware checks attempt.created_at < license.soft_lock_until; if true, allow continuation
-4. **Soft Lock Expiration**: Middleware auto-transition from SOFT_LOCKED to ARCHIVED when now > soft_lock_until (atomic operation, not cron-dependent)
-5. **Soft Lock Renewal**: Transition to ACTIVE restores access immediately with no reprovisioning or data mutation
-6. **RBAC Lock Decision — Admin-Only Lifecycle**: Only platform-level MMC Admin (not workspace-level role) can transition license state; enforced at License Service layer; requires audit entry, 2FA re-auth, confirmation phrase
-7. **Archival Process**: Snapshot tenant DB, store snapshot metadata (snapshot_id, snapshot_location, snapshot_timestamp, version_tag), transition status to ARCHIVED, set archived_at timestamp
-8. **Archive Enforcement**: Tenant Resolver returns 403 for ARCHIVED licenses, blocks DB writes, allows only snapshot restore operations
-9. **Restore From Archive**: Restore DB from snapshot, validate schema_version compatibility, transition to ACTIVE, idempotent operation
-10. **Permanent Deletion**: Drop tenant database, delete snapshot, remove tenant registry entry, set status = DELETED, set deleted_at, requires explicit double-confirmation with confirmation phrase validation from MMC Admin only
+   - **Mode 1 — Pre-Session Gate**: Block new sessions (new attempt creation, new login, new API
+     session)
+   - **Mode 2 — In-Flight Continuation**: Allow existing in-progress attempts to continue/complete
+     if created before soft-lock (safeguards exam integrity)
+   - Implementation: License middleware checks attempt.created_at < license.soft_lock_until; if
+     true, allow continuation
+4. **Soft Lock Expiration**: Middleware auto-transition from SOFT_LOCKED to ARCHIVED when now >
+   soft_lock_until (atomic operation, not cron-dependent)
+5. **Soft Lock Renewal**: Transition to ACTIVE restores access immediately with no reprovisioning or
+   data mutation
+6. **RBAC Lock Decision — Admin-Only Lifecycle**: Only platform-level MMC Admin (not workspace-level
+   role) can transition license state; enforced at License Service layer; requires audit entry, 2FA
+   re-auth, confirmation phrase
+7. **Archival Process**: Snapshot tenant DB, store snapshot metadata (snapshot_id,
+   snapshot_location, snapshot_timestamp, version_tag), transition status to ARCHIVED, set
+   archived_at timestamp
+8. **Archive Enforcement**: Tenant Resolver returns 403 for ARCHIVED licenses, blocks DB writes,
+   allows only snapshot restore operations
+9. **Restore From Archive**: Restore DB from snapshot, validate schema_version compatibility,
+   transition to ACTIVE, idempotent operation
+10. **Permanent Deletion**: Drop tenant database, delete snapshot, remove tenant registry entry, set
+    status = DELETED, set deleted_at, requires explicit double-confirmation with confirmation phrase
+    validation from MMC Admin only
 11. **Resolver-Level Enforcement (Dual-Mode)**:
     - **ACTIVE** → continue to handler (200 OK)
-    - **SOFT_LOCKED** → Pre-Session Gate: Block new attempts/logins (HTTP 423 Locked); In-Flight Continuation: Allow existing attempts created before soft_lock_until to complete
+    - **SOFT_LOCKED** → Pre-Session Gate: Block new attempts/logins (HTTP 423 Locked); In-Flight
+      Continuation: Allow existing attempts created before soft_lock_until to complete
     - **ARCHIVED** → HTTP 403 (Forbidden) — no attempts or logins allowed
     - **DELETED** → HTTP 404 (Not Found) — workspace access terminated
-12. **Audit Logging**: Immutable audit logs recording license_id, previous_status, new_status, actor_id, timestamp, reason for every transition
-13. **MMC UI**: License detail page displaying current status, soft lock countdown, archived/deleted timestamps, snapshot existence, product version, schema version, usage counts, with actions restricted by state
-14. **Transaction Enforcement**: All transitions wrapped in transaction with state validation before commit
-15. **Service Layer Consolidation**: All lifecycle logic centralized in License Service (no duplication across services)
+12. **Audit Logging**: Immutable audit logs recording license_id, previous_status, new_status,
+    actor_id, timestamp, reason for every transition
+13. **MMC UI**: License detail page displaying current status, soft lock countdown, archived/deleted
+    timestamps, snapshot existence, product version, schema version, usage counts, with actions
+    restricted by state
+14. **Transaction Enforcement**: All transitions wrapped in transaction with state validation before
+    commit
+15. **Service Layer Consolidation**: All lifecycle logic centralized in License Service (no
+    duplication across services)
 
 ### Out of Scope
 
@@ -78,28 +113,45 @@ Implement strict, state-driven license lifecycle management that ensures institu
 
 ### Zidney Constitutional Constraints
 
-1. **Multi-Tenancy Isolation**: License state is the primary isolation vector; no cross-tenant joins allowed, no shared state tables
-2. **Middleware Execution Order**: License enforcement middleware executes after Tenant Resolver, before route handler; breaking this order violates trust chain
-3. **Database-per-Tenant Model**: Each workspace maintains completely isolated tenant database; archival/deletion affects only target tenant DB
-4. **Forward-Only Versioning**: Archived snapshots must be version-tagged; restoration must validate schema_version compatibility
-5. **Audit Trail Immutability**: Audit logs stored in master_db are immutable; no retroactive editing of lifecycle timestamps allowed
-6. **Server-Authoritative Time**: All timestamp operations (soft_lock_until, archived_at, deleted_at) use server-provided time only, never client time
-7. **Worker Authority**: Provisioning Service (worker) executes snapshot/restore operations; API never directly mutates snapshots
-8. **Error Response Standard**: All responses follow standard envelope {success, data, error {code, message}}
-9. **Structured Logging**: All lifecycle operations logged via structured JSON logger with correlation_id, workspace_slug, workspace_id, actor_id, timestamp
+1. **Multi-Tenancy Isolation**: License state is the primary isolation vector; no cross-tenant joins
+   allowed, no shared state tables
+2. **Middleware Execution Order**: License enforcement middleware executes after Tenant Resolver,
+   before route handler; breaking this order violates trust chain
+3. **Database-per-Tenant Model**: Each workspace maintains completely isolated tenant database;
+   archival/deletion affects only target tenant DB
+4. **Forward-Only Versioning**: Archived snapshots must be version-tagged; restoration must validate
+   schema_version compatibility
+5. **Audit Trail Immutability**: Audit logs stored in master_db are immutable; no retroactive
+   editing of lifecycle timestamps allowed
+6. **Server-Authoritative Time**: All timestamp operations (soft_lock_until, archived_at,
+   deleted_at) use server-provided time only, never client time
+7. **Worker Authority**: Provisioning Service (worker) executes snapshot/restore operations; API
+   never directly mutates snapshots
+8. **Error Response Standard**: All responses follow standard envelope {success, data, error {code,
+   message}}
+9. **Structured Logging**: All lifecycle operations logged via structured JSON logger with
+   correlation_id, workspace_slug, workspace_id, actor_id, timestamp
 
 ### Stage-Specific Hard Rules
 
-1. **No Skipping SOFT_LOCK**: Cannot transition directly from ACTIVE to ARCHIVED or DELETED; must pass through SOFT_LOCKED state first
+1. **No Skipping SOFT_LOCK**: Cannot transition directly from ACTIVE to ARCHIVED or DELETED; must
+   pass through SOFT_LOCKED state first
 2. **No Direct Delete from ACTIVE**: Permanent deletion allowed only from ARCHIVED state
-3. **No Manual DB Manipulation**: All operations through License Service only; direct SQL updates to status prohibited
+3. **No Manual DB Manipulation**: All operations through License Service only; direct SQL updates to
+   status prohibited
 4. **No Silent Transitions**: Every state change must be logged with complete audit trail
-5. **No Unconfirmed Deletion**: Permanent deletion requires explicit MMC confirmation with confirmation phrase validation
-6. **No Partial Restore**: Restoration must be all-or-nothing; schema compatibility must be validated before any data restored
-7. **No Automatic Renewal during SOFT_LOCK**: Renewal can only occur through explicit MMC action, not automatic
-8. **Snapshot Immutability During Archive**: Once archived, snapshot cannot be modified; only restore or delete allowed
-9. **No DELETED License Restoration**: Permanent deletion is irreversible; no restore option available
-10. **Deterministic Expiration**: Soft lock expiration must not rely on cron; middleware must atomically transition when checking status
+5. **No Unconfirmed Deletion**: Permanent deletion requires explicit MMC confirmation with
+   confirmation phrase validation
+6. **No Partial Restore**: Restoration must be all-or-nothing; schema compatibility must be
+   validated before any data restored
+7. **No Automatic Renewal during SOFT_LOCK**: Renewal can only occur through explicit MMC action,
+   not automatic
+8. **Snapshot Immutability During Archive**: Once archived, snapshot cannot be modified; only
+   restore or delete allowed
+9. **No DELETED License Restoration**: Permanent deletion is irreversible; no restore option
+   available
+10. **Deterministic Expiration**: Soft lock expiration must not rely on cron; middleware must
+    atomically transition when checking status
 
 ---
 
@@ -115,23 +167,29 @@ Implement strict, state-driven license lifecycle management that ensures institu
 
 2. **A2: State Transition Service Validates**
    - License Service method validates current state before executing transition
-   - Forbidden transitions (ACTIVE→ARCHIVED, ACTIVE→DELETED, SOFT_LOCKED→DELETED) raise ValidationError with descriptive message
+   - Forbidden transitions (ACTIVE→ARCHIVED, ACTIVE→DELETED, SOFT_LOCKED→DELETED) raise
+     ValidationError with descriptive message
    - Allowed transitions execute without error
-   - **Testable**: Call License Service transitions, verify error for forbidden paths, success for allowed paths
+   - **Testable**: Call License Service transitions, verify error for forbidden paths, success for
+     allowed paths
 
 3. **A3: Soft Lock Blocks Access**
    - When license status = SOFT_LOCKED, Tenant Resolver returns HTTP 423 response
    - Response includes Retry-After header with seconds until expiration
    - No tenant DB connection opened for SOFT_LOCKED license
-   - **Testable (New Attempt Mode)**: Set license to SOFT_LOCKED, attempt to create new attempt, verify HTTP 423 response
-   - **Testable (In-Flight Mode)**: Set license to SOFT_LOCKED, existing in-progress attempt before soft-lock time should continue to submission (no 423)
+   - **Testable (New Attempt Mode)**: Set license to SOFT_LOCKED, attempt to create new attempt,
+     verify HTTP 423 response
+   - **Testable (In-Flight Mode)**: Set license to SOFT_LOCKED, existing in-progress attempt before
+     soft-lock time should continue to submission (no 423)
 
 4. **A4: Soft Lock Auto-Expires**
-   - When license status = SOFT_LOCKED and current_time > soft_lock_until, middleware atomically transitions to ARCHIVED
+   - When license status = SOFT_LOCKED and current_time > soft_lock_until, middleware atomically
+     transitions to ARCHIVED
    - Transition includes audit log entry
    - No cron job required; happens during next request
    - After expiration, requests return HTTP 403 (ARCHIVED state)
-   - **Testable**: Set license SOFT_LOCKED with past soft_lock_until, make request, verify status changed to ARCHIVED
+   - **Testable**: Set license SOFT_LOCKED with past soft_lock_until, make request, verify status
+     changed to ARCHIVED
 
 5. **A5: Renewal During Soft Lock Restores Access**
    - When license status = SOFT_LOCKED, License Service can transition to ACTIVE
@@ -149,11 +207,13 @@ Implement strict, state-driven license lifecycle management that ensures institu
 
 7. **A7: Snapshot Captured on Archival**
    - When transitioning SOFT_LOCKED → ARCHIVED, Provisioning Service captures snapshot
-   - Snapshot metadata stored in master_db: snapshot_id, snapshot_location, snapshot_timestamp, version_tag
+   - Snapshot metadata stored in master_db: snapshot_id, snapshot_location, snapshot_timestamp,
+     version_tag
    - Version tag matches current `licenses.schema_version`
    - Snapshot_timestamp in UTC
    - Idempotent: re-archiving same license doesn't create duplicate snapshot
-   - **Testable**: Archive license, verify snapshot metadata in master_db, re-archive, verify no duplicate
+   - **Testable**: Archive license, verify snapshot metadata in master_db, re-archive, verify no
+     duplicate
 
 8. **A8: Restore From Archive Returns Workspace to ACTIVE**
    - When license status = ARCHIVED, License Service can transition to ACTIVE
@@ -165,21 +225,25 @@ Implement strict, state-driven license lifecycle management that ensures institu
 
 9. **A9: Deleted License is Permanent**
    - When license status = ARCHIVED, License Service can transition to DELETED
-   - Transaction sequence: drop tenant DB, delete snapshot, remove tenant registry entry, set status=DELETED, set deleted_at
+   - Transaction sequence: drop tenant DB, delete snapshot, remove tenant registry entry, set
+     status=DELETED, set deleted_at
    - After deletion, workspaces resolve to HTTP 404
    - Attempting to restore DELETED license raises UnrecoverableError
    - **Testable**: Delete archived license, verify HTTP 404, attempt restore, verify error
 
 10. **A10: Deletion Requires Double Confirmation**
-    - Delete action from MMC UI presents confirmation dialog with confirmation phrase (random string displayed to user)
+    - Delete action from MMC UI presents confirmation dialog with confirmation phrase (random string
+      displayed to user)
     - User must type exact confirmation phrase to proceed
     - MMC logs deletion request with user_id and confirmation timestamp
     - Without correct phrase, deletion is prevented
-    - **Testable**: Attempt deletion without phrase, verify prevented; enter correct phrase, verify deletion proceeds
+    - **Testable**: Attempt deletion without phrase, verify prevented; enter correct phrase, verify
+      deletion proceeds
 
 11. **A11: Audit Logs Record All Transitions**
     - Every state transition creates immutable audit_log entry in master_db
-    - Entry includes: license_id, previous_status, new_status, actor_id (MMC member), timestamp (UTC), reason (string)
+    - Entry includes: license_id, previous_status, new_status, actor_id (MMC member), timestamp
+      (UTC), reason (string)
     - Audit logs queryable by license_id for full lifecycle history
     - Audit log entry creation is part of transition transaction; rollback removes entry
     - **Testable**: Execute transition, query audit_logs, verify entry exists with correct fields
@@ -194,7 +258,8 @@ Implement strict, state-driven license lifecycle management that ensures institu
     - **Testable**: Make requests to different license states, verify correct status codes
 
 13. **A13: MMC License Detail Page Displays Correct Information**
-    - License detail shows current status (with visual indicator: green=ACTIVE, yellow=SOFT_LOCKED, red=ARCHIVED, grey=DELETED)
+    - License detail shows current status (with visual indicator: green=ACTIVE, yellow=SOFT_LOCKED,
+      red=ARCHIVED, grey=DELETED)
     - If SOFT_LOCKED: shows countdown "Expires in X days Y hours Z minutes"
     - If ARCHIVED: shows "Archived at [timestamp]" and "Snapshot available" (if snapshot exists)
     - If DELETED: shows "Permanently deleted at [timestamp]" with no recovery option
@@ -209,7 +274,8 @@ Implement strict, state-driven license lifecycle management that ensures institu
     - DELETED state: shows no action buttons
     - Clicking action button executes transition through License Service
     - Disabled buttons have tooltips explaining why (e.g., "Not available for ACTIVE licenses")
-    - **Testable**: Verify button states match current license status, click buttons, verify transitions execute
+    - **Testable**: Verify button states match current license status, click buttons, verify
+      transitions execute
 
 15. **A15: Soft Lock Grace Period is 90 Days**
     - soft_lock_until = now + exactly 90 days (7776000 seconds)
@@ -223,13 +289,15 @@ Implement strict, state-driven license lifecycle management that ensures institu
     - Attempting transitions from non-current state raises StateTransitionError
     - Error includes current_state and attempted_transition in message
     - Rejected transition included in audit log as "TRANSITION_REJECTED" event
-    - **Testable**: Try to renew ARCHIVED license, verify error; try to archive ACTIVE license, verify error
+    - **Testable**: Try to renew ARCHIVED license, verify error; try to archive ACTIVE license,
+      verify error
 
 17. **A17: Concurrent Transition Protection**
     - Two simultaneous requests attempting different transitions on same license execute atomically
     - One succeeds, other fails with ConcurrentModificationError
     - Audit log shows both attempts with timestamps
-    - **Testable**: Send two concurrent transition requests, verify one succeeds and one fails atomically
+    - **Testable**: Send two concurrent transition requests, verify one succeeds and one fails
+      atomically
 
 ### Data Integrity
 
@@ -243,7 +311,8 @@ Implement strict, state-driven license lifecycle management that ensures institu
     - If snapshot was taken at schema_version=2 but current product requires schema_version≥3
     - Restore raises SchemaCompatibilityError
     - Snapshot not applied; license remains ARCHIVED
-    - **Testable**: Create snapshot at old schema version, update product schema, attempt restore, verify error
+    - **Testable**: Create snapshot at old schema version, update product schema, attempt restore,
+      verify error
 
 ### Performance & Limits
 
@@ -273,7 +342,8 @@ Implement strict, state-driven license lifecycle management that ensures institu
 **Trigger**: Payment not received
 
 1. Billing records failure in payment system
-2. Billing system calls MMC API: `POST /licenses/{id}/soft-lock` with reason="Payment failed for invoice INV-2026-001"
+2. Billing system calls MMC API: `POST /licenses/{id}/soft-lock` with reason="Payment failed for
+   invoice INV-2026-001"
 3. License Service transitions ACTIVE → SOFT_LOCKED, sets soft_lock_until = now + 90 days
 4. Student attempts login: Tenant Resolver returns 423
 5. Backoffice admin sees red license status with "Soft locked - expires in 90 days"
@@ -281,7 +351,8 @@ Implement strict, state-driven license lifecycle management that ensures institu
 7. License Service transitions SOFT_LOCKED → ACTIVE immediately
 8. Student can login again; no data loss
 
-**Test**: Create license, set SOFT_LOCKED, verify HTTP 423, renew, verify HTTP 200 response and data access
+**Test**: Create license, set SOFT_LOCKED, verify HTTP 423, renew, verify HTTP 200 response and data
+access
 
 ### Scenario 2: 90-Day Expiration to Archive
 
@@ -300,8 +371,7 @@ Implement strict, state-driven license lifecycle management that ensures institu
 
 ### Scenario 3: Archive Snapshot and Restore
 
-**Actor**: MMC admin
-**Trigger**: Institutional request to archive workspace
+**Actor**: MMC admin **Trigger**: Institutional request to archive workspace
 
 1. MMC admin navigates to license detail
 2. License is SOFT_LOCKED; admin clicks "Archive" button
@@ -316,12 +386,12 @@ Implement strict, state-driven license lifecycle management that ensures institu
 11. License transitions to ACTIVE
 12. All student data unchanged; no data loss
 
-**Test**: Archive license, verify snapshot metadata exists, restore, verify data intact and status=ACTIVE
+**Test**: Archive license, verify snapshot metadata exists, restore, verify data intact and
+status=ACTIVE
 
 ### Scenario 4: Permanent Deletion with Confirmation
 
-**Actor**: MMC admin
-**Trigger**: Final institutional departure
+**Actor**: MMC admin **Trigger**: Final institutional departure
 
 1. License is ARCHIVED; admin clicks "Permanently Delete"
 2. Confirmation dialog appears: "Are you sure? Type CONFIRM_DELETE_ABC123 to proceed"
@@ -338,7 +408,8 @@ Implement strict, state-driven license lifecycle management that ensures institu
 9. Any request to this workspace now returns 404
 10. Restore attempt raises UnrecoverableError
 
-**Test**: Delete archived license with confirmation phrase, verify HTTP 404, attempt restore, verify error
+**Test**: Delete archived license with confirmation phrase, verify HTTP 404, attempt restore, verify
+error
 
 ### Scenario 5: Schema Version Compatibility Check
 
@@ -356,7 +427,8 @@ Implement strict, state-driven license lifecycle management that ensures institu
 9. License remains ARCHIVED
 10. Snapshot is NOT applied; no data corruption
 
-**Test**: Create snapshot at old schema, upgrade product schema, attempt restore, verify SchemaCompatibilityError
+**Test**: Create snapshot at old schema, upgrade product schema, attempt restore, verify
+SchemaCompatibilityError
 
 ### Scenario 6: Concurrent Transition Attempt
 
@@ -370,11 +442,13 @@ Implement strict, state-driven license lifecycle management that ensures institu
 5. Database transaction executes first request: SOFT_LOCKED → ACTIVE
 6. Second request reads current state = ACTIVE
 7. Validation fails: cannot transition ACTIVE → ARCHIVED
-8. Admin B receives: StateTransitionError "License is no longer in SOFT_LOCKED state. Current state: ACTIVE"
+8. Admin B receives: StateTransitionError "License is no longer in SOFT_LOCKED state. Current state:
+   ACTIVE"
 9. Audit log records both attempts with timestamps
 10. License successfully transitioned by first request
 
-**Test**: Send concurrent transition requests to same license, verify atomic execution and proper error
+**Test**: Send concurrent transition requests to same license, verify atomic execution and proper
+error
 
 ---
 
@@ -426,9 +500,12 @@ Implement strict, state-driven license lifecycle management that ensures institu
 
 ## Success Criteria
 
-1. All four license states (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED) enforce access control correctly through Tenant Resolver middleware
-2. State transitions validate current state before executing; forbidden transitions rejected with descriptive errors
-3. Soft lock automatically expires to ARCHIVED state 90 days after transition (middleware-driven, no cron)
+1. All four license states (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED) enforce access control correctly
+   through Tenant Resolver middleware
+2. State transitions validate current state before executing; forbidden transitions rejected with
+   descriptive errors
+3. Soft lock automatically expires to ARCHIVED state 90 days after transition (middleware-driven, no
+   cron)
 4. Snapshots captured on archival, versioned with schema_version, and verified on restore
 5. Restore operation is idempotent: restoring same snapshot twice produces identical state
 6. Permanent deletion requires confirmation phrase validation; deleted licenses unrecoverable
@@ -443,14 +520,21 @@ Implement strict, state-driven license lifecycle management that ensures institu
 
 ## Assumptions
 
-1. **Snapshot Storage**: Snapshots stored in S3 (or equivalent object storage); snapshot_location is URI format
-2. **Actor Authentication**: All lifecycle operations require authenticated MMC user; actor_id sourced from session
-3. **Confirmation Phrase Format**: Random 32-character alphanumeric string generated per deletion request, valid for 5 minutes
-4. **Tenant Registry Sync**: Tenants registry mirrors licenses.status for performance; reconciliation job runs hourly
-5. **Schema Version Tagging**: Product always maintains current schema_version in licenses table; migration increments version
-6. **Snapshot Retention**: Archived snapshots retained indefinitely unless explicitly deleted with license
+1. **Snapshot Storage**: Snapshots stored in S3 (or equivalent object storage); snapshot_location is
+   URI format
+2. **Actor Authentication**: All lifecycle operations require authenticated MMC user; actor_id
+   sourced from session
+3. **Confirmation Phrase Format**: Random 32-character alphanumeric string generated per deletion
+   request, valid for 5 minutes
+4. **Tenant Registry Sync**: Tenants registry mirrors licenses.status for performance;
+   reconciliation job runs hourly
+5. **Schema Version Tagging**: Product always maintains current schema_version in licenses table;
+   migration increments version
+6. **Snapshot Retention**: Archived snapshots retained indefinitely unless explicitly deleted with
+   license
 7. **Timezone Convention**: All timestamps in UTC; client timezones handled in frontend display
-8. **Concurrent Request Handling**: Application uses database-level row locks for transaction safety during concurrent transitions
+8. **Concurrent Request Handling**: Application uses database-level row locks for transaction safety
+   during concurrent transitions
 
 ---
 
@@ -467,11 +551,18 @@ Implement strict, state-driven license lifecycle management that ensures institu
 
 ## Known Risks
 
-1. **[NEEDS CLARIFICATION: Snapshot Location Finality]** Snapshot location must be immutable once archived. Clarification needed: Are snapshot paths calculated deterministically (e.g., by license_id + timestamp), or does the system allow overriding snapshot location? If overridable, how is location validation enforced?
+1. **[NEEDS CLARIFICATION: Snapshot Location Finality]** Snapshot location must be immutable once
+   archived. Clarification needed: Are snapshot paths calculated deterministically (e.g., by
+   license_id + timestamp), or does the system allow overriding snapshot location? If overridable,
+   how is location validation enforced?
 
-2. **Concurrent Deletion Metadata**: If deletion process is interrupted after DB dropped but before registry entry removed, workspace left in inconsistent state. Mitigation: Wrap entire deletion in single transaction, or implement recovery job to identify and retry incomplete deletions.
+2. **Concurrent Deletion Metadata**: If deletion process is interrupted after DB dropped but before
+   registry entry removed, workspace left in inconsistent state. Mitigation: Wrap entire deletion in
+   single transaction, or implement recovery job to identify and retry incomplete deletions.
 
-3. **Large Database Snapshots**: Snapshot capture time may exceed 10-minute SLA for institutions with very large datasets (500GB+). Mitigation: Implement incremental snapshots or background snapshot process separate from request-response cycle.
+3. **Large Database Snapshots**: Snapshot capture time may exceed 10-minute SLA for institutions
+   with very large datasets (500GB+). Mitigation: Implement incremental snapshots or background
+   snapshot process separate from request-response cycle.
 
 ---
 
@@ -481,14 +572,16 @@ Implement strict, state-driven license lifecycle management that ensures institu
 
 #### Q1: Snapshot Location Determinism
 
-**Question:** Are snapshot storage paths deterministically calculated (e.g., `s3://snapshots/{license_id}/{timestamp}.tar.gz`) or configurable per workspace?
+**Question:** Are snapshot storage paths deterministically calculated (e.g.,
+`s3://snapshots/{license_id}/{timestamp}.tar.gz`) or configurable per workspace?
 
 **Decision: OPTION A — Deterministic paths**
 
 - **Path Format**: `s3://snapshots/{license_id}/{timestamp}.tar.gz`
 - **Calculation**: Deterministic = `license_id` + server-timestamp(UTC) at snapshot creation time
 - **Immutability**: Once archived, snapshot path is final and immutable
-- **No Workspace Override**: Per-workspace configurable paths not allowed (prevents drift and misconfiguration risks)
+- **No Workspace Override**: Per-workspace configurable paths not allowed (prevents drift and
+  misconfiguration risks)
 
 **Rationale (Zidney-Aligned)**:
 
@@ -502,7 +595,8 @@ Implement strict, state-driven license lifecycle management that ensures institu
 
 #### Q2: Audit Trail Retention & Compliance
 
-**Question:** How long should audit logs be retained before purge is allowed? Should retention be automatic or manual?
+**Question:** How long should audit logs be retained before purge is allowed? Should retention be
+automatic or manual?
 
 **Decision: OPTION C — Never auto-delete; manual purge only**
 
@@ -523,7 +617,8 @@ Implement strict, state-driven license lifecycle management that ensures institu
 
 #### Q3: Snapshot Failure Recovery Strategy
 
-**Question:** How should the system behave when snapshot creation fails? Should archival rollback, proceed without snapshot, or remain blocked?
+**Question:** How should the system behave when snapshot creation fails? Should archival rollback,
+proceed without snapshot, or remain blocked?
 
 **Decision: OPTION A — Retry with alert on persistent failure**
 
@@ -553,7 +648,8 @@ Implement strict, state-driven license lifecycle management that ensures institu
 - **2FA Re-authentication**: Second factor authentication required before deletion
 - **Confirmation Phrase**: Mandatory entry of workspace slug (e.g., "confirm-delete-acme-corp")
 - **Audit Log Entry**: Immutable record including actor, timestamp, confirmation phrase hash
-- **Grace Period (Optional)**: Soft-delete grace period of 7 days (workspace marked for deletion but recoverable until grace expires)
+- **Grace Period (Optional)**: Soft-delete grace period of 7 days (workspace marked for deletion but
+  recoverable until grace expires)
 
 **Required Safeguards**:
 
@@ -615,8 +711,8 @@ DELETE action => {
 
 #### Q6: Exam Engine Integrity During Soft Lock (Architectural Reconciliation)
 
-**Question (Guardian Finding):**
-Spec says "SOFT_LOCKED blocks all access (423)" but QA requires "In-progress exams must be allowed to complete". These conflict. Which is authoritative?
+**Question (Guardian Finding):** Spec says "SOFT_LOCKED blocks all access (423)" but QA requires
+"In-progress exams must be allowed to complete". These conflict. Which is authoritative?
 
 **Resolution: TWO-MODE ENFORCEMENT (Dual-Layer Architecture)**
 
@@ -651,7 +747,8 @@ Resolver Logic for SOFT_LOCKED License:
 **Why This Is Correct**:
 
 - **Preserves snapshot immutability** (ADR-0002): No mid-flight state mutations
-- **Deterministic grading** (ADR-0003): Exams started before soft-lock complete with same configuration
+- **Deterministic grading** (ADR-0003): Exams started before soft-lock complete with same
+  configuration
 - **Server-authoritative time** (ADR-0006): soft_lock_until is authoritative boundary
 - **No data corruption**: Existing attempts isolated from new session blocking
 - **Enterprise SaaS best practice**: Soft lock = grace period, not hard stop
@@ -666,14 +763,15 @@ Resolver Logic for SOFT_LOCKED License:
 
 #### Q7: RBAC Clarification — Who Can Transition License State? (Architectural Lock)
 
-**Question (Guardian Finding):**
-Spec says "non-admin can renew/archive" but Plan says "admin-only". Contradiction. Which is authoritative?
+**Question (Guardian Finding):** Spec says "non-admin can renew/archive" but Plan says "admin-only".
+Contradiction. Which is authoritative?
 
 **Decision: ADMIN-ONLY FOR ALL LIFECYCLE TRANSITIONS**
 
 **Correct Enterprise Rule**:
 
-- Only **platform-level MMC Admin** (not workspace-level roles) can execute license state transitions
+- Only **platform-level MMC Admin** (not workspace-level roles) can execute license state
+  transitions
 - No workspace staff, no teachers, no students, no institution admins at workspace level
 - **Enforced at License Service layer** (before API handler, validated in domain logic)
 
@@ -711,14 +809,15 @@ License Service validateTransition():
 
 - Update spec.md acceptance criteria A1, A2: "Only MMC Admin can transition license state"
 - Update plan.md Authorization section: "License Service enforces admin-only scope"
-- Update API contract: All lifecycle endpoints require `Authorization: Bearer <admin_token>` + scope validation
+- Update API contract: All lifecycle endpoints require `Authorization: Bearer <admin_token>` + scope
+  validation
 
 ---
 
 #### Q8: Rate-Limit Bypass Tier for Admins (Security Guardian Remediation)
 
-**Question (Security Guardian Finding):**
-Plan says "admin bypass" but implementation is undefined. Does admin bypass exist or not?
+**Question (Security Guardian Finding):** Plan says "admin bypass" but implementation is undefined.
+Does admin bypass exist or not?
 
 **Decision: DOCUMENTED ADMIN BYPASS WITH LOGGING**
 
@@ -755,17 +854,21 @@ Rate Limiter Logic:
 
 #### Q9: Cross-Workspace Authorization Validation (Security Guardian Remediation)
 
-**Question (Security Guardian Finding):**
-MMC admin from Workspace A could potentially transition licenses in Workspace B. How is this prevented?
+**Question (Security Guardian Finding):** MMC admin from Workspace A could potentially transition
+licenses in Workspace B. How is this prevented?
 
 **Decision: EXPLICIT WORKSPACE MEMBERSHIP VALIDATION**
 
 **Specification**:
 
-- **Admin Workspace Scope**: Each MMC admin user has explicit `workspace_id` association (stored in mmc_users table)
-- **Transition Validation**: Before executing license state transition, validate `admin.workspace_id == license.workspace_id`
-- **Mismatch Response**: If admin attempts action on unauthorized workspace, return 403 Forbidden with error code `ADMIN_WORKSPACE_MISMATCH`
-- **JWT Constraint**: Transitional operation JWT tokens must NOT include workspace override parameters in request body
+- **Admin Workspace Scope**: Each MMC admin user has explicit `workspace_id` association (stored in
+  mmc_users table)
+- **Transition Validation**: Before executing license state transition, validate
+  `admin.workspace_id == license.workspace_id`
+- **Mismatch Response**: If admin attempts action on unauthorized workspace, return 403 Forbidden
+  with error code `ADMIN_WORKSPACE_MISMATCH`
+- **JWT Constraint**: Transitional operation JWT tokens must NOT include workspace override
+  parameters in request body
 
 **Implementation**:
 
@@ -788,18 +891,22 @@ License Service validateCrossWorkspaceAccess():
 
 #### Q10: 2FA Freshness Enforcement for Deletions (Security Guardian Remediation)
 
-**Question (Security Guardian Finding):**
-Plan says "2FA within 5 minutes" but freshness validation mechanism undefined. How is 5-minute window enforced?
+**Question (Security Guardian Finding):** Plan says "2FA within 5 minutes" but freshness validation
+mechanism undefined. How is 5-minute window enforced?
 
 **Decision: SESSION-TIME-BOUNDED 2FA VERIFICATION**
 
 **Specification**:
 
-- **2FA Session Tracking**: After user completes 2FA authentication, set `session.two_fa_verified_at = now(UTC)`
+- **2FA Session Tracking**: After user completes 2FA authentication, set
+  `session.two_fa_verified_at = now(UTC)`
 - **One-Time ID**: Generate `2fa_verification_id = UUID()` (prevents token reuse across sessions)
-- **Freshness Check**: On delete/confirm endpoint, middleware validates: `(now() - session.two_fa_verified_at) <= 5 minutes`
-- **Expired Response**: If older than 5 minutes, return 401 Unauthorized with error code `2FA_SESSION_EXPIRED`
-- **Missing Response**: If 2FA not performed in session, return 401 Unauthorized with error code `2FA_NOT_VERIFIED`
+- **Freshness Check**: On delete/confirm endpoint, middleware validates:
+  `(now() - session.two_fa_verified_at) <= 5 minutes`
+- **Expired Response**: If older than 5 minutes, return 401 Unauthorized with error code
+  `2FA_SESSION_EXPIRED`
+- **Missing Response**: If 2FA not performed in session, return 401 Unauthorized with error code
+  `2FA_NOT_VERIFIED`
 
 **Implementation**:
 
@@ -840,8 +947,10 @@ Middleware 2FA Freshness Check:
 
 ## References
 
-- [PROJECT_CONTEXT_PRIMER.md](../../../docs/PROJECT_CONTEXT_PRIMER.md) - Trust chain, multi-tenancy model, license enforcement
-- [STAGE_11_LICENSE_LIFECYCLE.md](../../../specs/phases/02_PLATFORM_MMC/STAGE_11_LICENSE_LIFECYCLE.md) - Stage definition
+- [PROJECT_CONTEXT_PRIMER.md](../../../docs/PROJECT_CONTEXT_PRIMER.md) - Trust chain, multi-tenancy
+  model, license enforcement
+- [STAGE_11_LICENSE_LIFECYCLE.md](../../../specs/phases/02_PLATFORM_MMC/STAGE_11_LICENSE_LIFECYCLE.md) -
+  Stage definition
 - [AGENTS.md](../../../AGENTS.md) - AI behavioral contracts for architecture alignment
 - ADR-0003: License Model and Product Versioning (if exists)
 - ADR-0006: Deterministic Time and Server Authority (if exists)

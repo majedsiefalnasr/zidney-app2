@@ -154,9 +154,9 @@ TYPESCRIPT ERRORS:      0 ✅
 ```typescript
 // LOCKED DECISION 4: Discriminated union ensures column accessor type safety
 type ColumnDef<TRow> = {
-  PrimitiveColumn: { id: string; accessor?: string /* optional */ }
-  ComputedColumn: { id: string; accessor: (row: TRow) => any /* required */ }
-}
+  PrimitiveColumn: { id: string; accessor?: string /* optional */ };
+  ComputedColumn: { id: string; accessor: (row: TRow) => any /* required */ };
+};
 ```
 
 ### Composable-First State Management
@@ -164,8 +164,8 @@ type ColumnDef<TRow> = {
 ```typescript
 // LOCKED DECISION 1: usePagination makes NO API calls
 export function usePagination() {
-  const currentPage = ref(1)
-  const goToPage = (page) => (currentPage.value = clampPage(page))
+  const currentPage = ref(1);
+  const goToPage = (page) => (currentPage.value = clampPage(page));
   // Parent app owns API calls — component doesn't know about requests
 }
 ```
@@ -175,15 +175,15 @@ export function usePagination() {
 ```typescript
 // LOCKED DECISION 2: Component manages UI, app owns logic
 const executeAction = async (action, row) => {
-  emit('action-start', { actionId: action.id, row })
+  emit("action-start", { actionId: action.id, row });
   try {
-    await action.callback(row) // App provides logic
-    emit('action-end', { actionId, row, success: true })
+    await action.callback(row); // App provides logic
+    emit("action-end", { actionId, row, success: true });
   } catch (err) {
-    emit('action-end', { actionId, row, success: false, error: err })
+    emit("action-end", { actionId, row, success: false, error: err });
     // Clear error UI after 2 seconds
   }
-}
+};
 ```
 
 ### Serialization with Overflow Detection
@@ -191,9 +191,9 @@ const executeAction = async (action, row) => {
 ```typescript
 // LOCKED DECISION 3: URL-primary with fallback
 const serialized = computed(() => {
-  const compact = serializeFilters(filters.value) // "v1:eyJ..."
-  return compact.length > 2000 ? (useStorage = true) : (useStorage = false)
-})
+  const compact = serializeFilters(filters.value); // "v1:eyJ..."
+  return compact.length > 2000 ? (useStorage = true) : (useStorage = false);
+});
 ```
 
 ### Multi-Language Validation
@@ -201,14 +201,11 @@ const serialized = computed(() => {
 ```typescript
 // LOCKED DECISION 5: Min 1 language required, default always mandatory
 const isValid = computed(() => {
-  const filled = Object.keys(formValues).filter((lang) =>
-    formValues[lang].trim()
-  )
+  const filled = Object.keys(formValues).filter((lang) => formValues[lang].trim());
   return (
-    filled.length >= Math.max(1, requiredLanguages.length) &&
-    !isEmpty(formValues[defaultLanguage])
-  )
-})
+    filled.length >= Math.max(1, requiredLanguages.length) && !isEmpty(formValues[defaultLanguage])
+  );
+});
 ```
 
 ---
@@ -418,7 +415,8 @@ For detailed context, reference:
 
 **Remaining Effort:** ~226 hours of implementation work across 24 tasks
 
-**Continuation Readiness:** ✅ **HIGH** — All blocking dependencies resolved; Phase 2 implementation can proceed immediately
+**Continuation Readiness:** ✅ **HIGH** — All blocking dependencies resolved; Phase 2 implementation
+can proceed immediately
 
 ---
 

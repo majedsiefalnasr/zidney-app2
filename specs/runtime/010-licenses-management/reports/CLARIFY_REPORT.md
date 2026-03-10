@@ -11,7 +11,8 @@
 
 ## Executive Summary
 
-All 8 ambiguities identified in SPECIFY_REPORT.md have been clarified and locked into authoritative design decisions. These decisions:
+All 8 ambiguities identified in SPECIFY_REPORT.md have been clarified and locked into authoritative
+design decisions. These decisions:
 
 - **Preserve ADR compliance** (ADR-0001, ADR-0005, ADR-0008 fully maintained)
 - **Enforce multi-tenancy guarantees** (database-per-tenant, no row-based sharing)
@@ -29,7 +30,8 @@ All decisions are **consensus-validated** against:
 
 ## Ambiguity 1: Stage 04 Reference — Status Enum Definition
 
-**Issue:** Specification states "Status ENUM must be identical to Stage 04 definition" but file location was ambiguous.
+**Issue:** Specification states "Status ENUM must be identical to Stage 04 definition" but file
+location was ambiguous.
 
 **Finding:** STAGE_04_LICENSE_ENGINE.md exists and is PRODUCTION READY in Phase 01 Foundation.
 
@@ -44,7 +46,8 @@ All decisions are **consensus-validated** against:
 
 **Additional Status Required for Stage 10 (MMC Layer):**
 
-During license creation phase (before provisioning completes), license exists in an intermediate state awaiting database provisioning. This state must be represented.
+During license creation phase (before provisioning completes), license exists in an intermediate
+state awaiting database provisioning. This state must be represented.
 
 **Options Considered:**
 
@@ -82,15 +85,19 @@ PENDING_PROVISION | ACTIVE | SOFT_LOCKED | ARCHIVED | DELETED
 
 **Rationale:**
 
-1. **Stage Lifecycle Governance:** Stage 04 is PRODUCTION READY in Phase 01. Cannot be retroactively modified. Stage 10 can extend without breaking Stage 04.
+1. **Stage Lifecycle Governance:** Stage 04 is PRODUCTION READY in Phase 01. Cannot be retroactively
+   modified. Stage 10 can extend without breaking Stage 04.
 
-2. **Constitutional Alignment:** STAGE_04_LICENSE_ENGINE explicitly lists states needed for runtime. STAGE_10 adds MMC-layer provisioning state. No conflict, only extension.
+2. **Constitutional Alignment:** STAGE_04_LICENSE_ENGINE explicitly lists states needed for runtime.
+   STAGE_10 adds MMC-layer provisioning state. No conflict, only extension.
 
-3. **Implementation Clarity:** PENDING_PROVISION is an MMC-specific state. Stage 04 doesn't cover MMC provisioning logic (that's Stage 05 responsibility in provisioning service).
+3. **Implementation Clarity:** PENDING_PROVISION is an MMC-specific state. Stage 04 doesn't cover
+   MMC provisioning logic (that's Stage 05 responsibility in provisioning service).
 
 4. **State Machine Correctness:**
    - `PENDING_PROVISION` → (provisioning success) → `ACTIVE`
-   - `PENDING_PROVISION` → (provisioning failure) → `PROVISION_FAILED` _or_ `ACTIVE_LOCKED_MANUAL_RETRY`
+   - `PENDING_PROVISION` → (provisioning failure) → `PROVISION_FAILED` _or_
+     `ACTIVE_LOCKED_MANUAL_RETRY`
    - All other states from Stage 04 operational model remain unchanged
 
 **Specification Update Required:**
@@ -126,14 +133,16 @@ Status is immutable except by explicit transition operations.
 
 - [ ] Update STAGE_10_LICENSES.md section "License Status Model" to clarify Stage 04 reference
 - [ ] Add migration: ALTER TYPE license_status ADD VALUE 'PENDING_PROVISION' BEFORE 'ACTIVE'
-- [ ] Update middleware license enforcement to handle PENDING_PROVISION state (block with 503 Service Unavailable)
+- [ ] Update middleware license enforcement to handle PENDING_PROVISION state (block with 503
+      Service Unavailable)
 - [ ] Add status validation in License Service (enum constraint in SQL)
 
 ---
 
 ## Ambiguity 2: Status Divergence Prevention Between master_db and tenants_registry
 
-**Issue:** Specification requires "tenants_registry must reflect license state, never redefine it" but synchronization mechanism not defined.
+**Issue:** Specification requires "tenants_registry must reflect license state, never redefine it"
+but synchronization mechanism not defined.
 
 **Risk:**
 
@@ -158,13 +167,15 @@ If `master_db.licenses.status` ≠ `tenants_registry.access_status`:
   - Con: Database code complexity
   - Con: Bug in trigger breaks system silently
 
-- **Option C:** tenants_registry cached, license status is source of truth, tenant resolver validates on access
+- **Option C:** tenants_registry cached, license status is source of truth, tenant resolver
+  validates on access
   - Pro: Distributed cache flexibility
   - Pro: Matches Zidney cache policy elsewhere
   - Con: Stale data window (cache TTL)
   - Con: Soft-lock edge case: license changes status, cache not updated immediately
 
-- **Option D:** Hybrid — tenants_registry stored as is (for workspace discovery), but status never used from registry. Always read status from licenses table.
+- **Option D:** Hybrid — tenants_registry stored as is (for workspace discovery), but status never
+  used from registry. Always read status from licenses table.
   - Pro: Eliminates sync problem entirely
   - Pro: Single source of truth (licenses table)
   - Con: Registry becomes minimal (only needed for workspace lookups, not status)
@@ -206,15 +217,20 @@ tenants_registry contains:
 
 **Rationale:**
 
-1. **Single Source of Truth (ADR-0001 principle):** One field, one table, one version of truth. Eliminates divergence by design (not by sync discipline).
+1. **Single Source of Truth (ADR-0001 principle):** One field, one table, one version of truth.
+   Eliminates divergence by design (not by sync discipline).
 
-2. **Immutability Protection**: Even if tenants_registry is somehow stale or corrupted, license status from master_db is still authoritative. System remains safe.
+2. **Immutability Protection**: Even if tenants_registry is somehow stale or corrupted, license
+   status from master_db is still authoritative. System remains safe.
 
-3. **Concurrency Safety:** No race condition possible. Multiple requests can check license status concurrently; all read from same source. No sync window exists.
+3. **Concurrency Safety:** No race condition possible. Multiple requests can check license status
+   concurrently; all read from same source. No sync window exists.
 
-4. **Audit Trail Integrity:** All status changes logged through licenses table. tenants_registry is just workspace directory (like DNS).
+4. **Audit Trail Integrity:** All status changes logged through licenses table. tenants_registry is
+   just workspace directory (like DNS).
 
-5. **Aligns with PROJECT_CONTEXT_PRIMER:** Primer states "License status is single source of truth for workspace operational state."
+5. **Aligns with PROJECT_CONTEXT_PRIMER:** Primer states "License status is single source of truth
+   for workspace operational state."
 
 **Example Sequence:**
 
@@ -228,23 +244,28 @@ Route handler: License status already validated in context
 
 **Implementation Impact:**
 
-- [ ] tenants_registry schema: Remove any `status` or `access_level` field, keep only `workspace_slug`, `workspace_id`, `product_id`
+- [ ] tenants_registry schema: Remove any `status` or `access_level` field, keep only
+      `workspace_slug`, `workspace_id`, `product_id`
 - [ ] Middleware: On every request, AFTER tenant resolution, query licenses table to validate status
-- [ ] Add database index: CREATE INDEX idx_licenses_workspace_id ON master_db.licenses(workspace_slug) for fast status lookup
-- [ ] Cache consideration: License status can be cached in memory (TTL=60s) NOT in redis, must be invalidated on status change
+- [ ] Add database index: CREATE INDEX idx_licenses_workspace_id ON
+      master_db.licenses(workspace_slug) for fast status lookup
+- [ ] Cache consideration: License status can be cached in memory (TTL=60s) NOT in redis, must be
+      invalidated on status change
 - [ ] tenants_registry is "directory lookup only", status is "always from licenses table"
 
 ---
 
 ## Ambiguity 3: upgrade_available Field Location
 
-**Issue:** Specification mentions "workspace notified of upgrade_available" but field not listed in License Table schema. Unclear if:
+**Issue:** Specification mentions "workspace notified of upgrade_available" but field not listed in
+License Table schema. Unclear if:
 
 - Stored database field
 - Computed on-read
 - Stored elsewhere
 
-**Context:** ADR-0005 (Upgrade Opt-In Model) states license stores `product_version` at creation time. When product updates, upgrade is available.
+**Context:** ADR-0005 (Upgrade Opt-In Model) states license stores `product_version` at creation
+time. When product updates, upgrade is available.
 
 **Options Considered:**
 
@@ -264,7 +285,8 @@ Route handler: License status already validated in context
   - Con: Extra table complexity
   - Con: Still requires sync job or trigger
 
-- **Option D:** Not stored in Stage 10; deferred to Stage 11 (License Lifecycle) or Stage 15 (MMC Dashboard)
+- **Option D:** Not stored in Stage 10; deferred to Stage 11 (License Lifecycle) or Stage 15 (MMC
+  Dashboard)
   - Pro: Stage 10 stays focused on license creation/provisioning
   - Con: Violates specification promise that Stage 10 provides License GET response
 
@@ -306,15 +328,20 @@ upgrade_available = (
 
 **Rationale:**
 
-1. **No Sync Required:** If product version is updated (Stage 09), license sees it immediately via computation. No background job to maintain flag.
+1. **No Sync Required:** If product version is updated (Stage 09), license sees it immediately via
+   computation. No background job to maintain flag.
 
-2. **Consistency:** Upgrade availability is derived fact from product state. Derived facts computed on read, not stored.
+2. **Consistency:** Upgrade availability is derived fact from product state. Derived facts computed
+   on read, not stored.
 
-3. **Aligns ADR-0005:** License stores snapshot (`product_version`). Upgrade check is comparison against current product version. Computation enforces this contract.
+3. **Aligns ADR-0005:** License stores snapshot (`product_version`). Upgrade check is comparison
+   against current product version. Computation enforces this contract.
 
-4. **Stage 10 Scope:** License GET endpoint is Stage 10 scope. Computing on-read keeps logic in Stage 10.
+4. **Stage 10 Scope:** License GET endpoint is Stage 10 scope. Computing on-read keeps logic in
+   Stage 10.
 
-5. **Deferred to Stage 11:** Actual upgrade execution (migration, version increment) is Stage 11 scope. Stage 10 only _reports_ availability.
+5. **Deferred to Stage 11:** Actual upgrade execution (migration, version increment) is Stage 11
+   scope. Stage 10 only _reports_ availability.
 
 **Edge Cases:**
 
@@ -342,13 +369,15 @@ ON products(id, status, version DESC)
 
 ## Ambiguity 4: PROVISION_FAILED Status — Handling After Provisioning Timeout
 
-**Issue:** Specification says "no auto-transition to FAILED state" but doesn't define what happens after provisioning timeout (5 min). Options:
+**Issue:** Specification says "no auto-transition to FAILED state" but doesn't define what happens
+after provisioning timeout (5 min). Options:
 
 - License stays PENDING_PROVISION indefinitely
 - Auto-delete license
 - Auto-transition to new PROVISION_FAILED status
 
-**Context:** Stage 05 (Provisioning Service) owns timeout logic. Stage 10 defines what happens post-timeout.
+**Context:** Stage 05 (Provisioning Service) owns timeout logic. Stage 10 defines what happens
+post-timeout.
 
 **Options Considered:**
 
@@ -361,7 +390,8 @@ ON products(id, status, version DESC)
 - **Option B:** Auto-delete if timeout (move to DELETED state)
   - Pro: Cleans up stuck provisioning
   - Con: No recovery path (license gone, data deleted)
-  - Con: If provisioning actually succeeds (delayed job), database already exists, no license to point to (orphan DB)
+  - Con: If provisioning actually succeeds (delayed job), database already exists, no license to
+    point to (orphan DB)
   - Con: Violates principle "all provisioning operations reach terminal success or explicit failure"
 
 - **Option C:** Add PROVISION_FAILED state, transition on timeout
@@ -413,17 +443,22 @@ provisioning_last_attempt_at TIMESTAMP;  -- Last job execution time
 
 **Rationale:**
 
-1. **Clear Failure Signal:** PROVISION_FAILED explicitly indicates provisioning did not complete. Not ambiguous.
+1. **Clear Failure Signal:** PROVISION_FAILED explicitly indicates provisioning did not complete.
+   Not ambiguous.
 
-2. **Recovery Path:** Unlike auto-delete (option B), failed license can retry. Preserves commercial intent ("I want to activate this workspace").
+2. **Recovery Path:** Unlike auto-delete (option B), failed license can retry. Preserves commercial
+   intent ("I want to activate this workspace").
 
 3. **Audit Trail:** Failure reasons logged. Staff can investigate why provisioning failed.
 
-4. **Aligns Stage 05 (Provisioning Service):** Stage 05 owns job execution, timeout, and failure detection. Stage 10 owns license state representation.
+4. **Aligns Stage 05 (Provisioning Service):** Stage 05 owns job execution, timeout, and failure
+   detection. Stage 10 owns license state representation.
 
-5. **Matches Job Queue Semantics:** Standard pattern: enqueue job → job succeeds/fails → mark state → operator retries if needed.
+5. **Matches Job Queue Semantics:** Standard pattern: enqueue job → job succeeds/fails → mark state
+   → operator retries if needed.
 
-6. **No Orphan Databases:** Worker responsible for cleaning up partial databases on failure. License status reflects actual state.
+6. **No Orphan Databases:** Worker responsible for cleaning up partial databases on failure. License
+   status reflects actual state.
 
 **State Transition Rules for PROVISION_FAILED:**
 
@@ -441,8 +476,10 @@ Forbidden:
 
 - [ ] Update STAGE_10_LICENSES.md: Add PROVISION_FAILED to status enum
 - [ ] Migration: ALTER TYPE license_status ADD VALUE 'PROVISION_FAILED' AFTER 'PENDING_PROVISION'
-- [ ] Migration: Add columns provisioning_error, provisioning_retries, provisioning_last_attempt_at to licenses table
-- [ ] API Endpoint: POST /licenses/:id/retry-provisioning (staff only, precondition: status = PROVISION_FAILED)
+- [ ] Migration: Add columns provisioning_error, provisioning_retries, provisioning_last_attempt_at
+      to licenses table
+- [ ] API Endpoint: POST /licenses/:id/retry-provisioning (staff only, precondition: status =
+      PROVISION_FAILED)
 - [ ] MMC UI: Show PROVISION_FAILED licenses with error details and "Retry Provisioning" button
 - [ ] Worker update: Set status = PROVISION_FAILED and populate provisioning_error on failure
 - [ ] Middleware: Treat PROVISION_FAILED same as PENDING_PROVISION (503 to client, access blocked)
@@ -451,7 +488,8 @@ Forbidden:
 
 ## Ambiguity 5: Provisioning Failure Logging and Visibility
 
-**Issue:** Should provisioning failures be visible in MMC UI or logged to backend only? Spec says "provisioning failures logged safely" but visibility unclear.
+**Issue:** Should provisioning failures be visible in MMC UI or logged to backend only? Spec says
+"provisioning failures logged safely" but visibility unclear.
 
 **Options Considered:**
 
@@ -537,32 +575,41 @@ All provisioning activities logged to structured JSON logs:
 
 **Rationale:**
 
-1. **Operational Clarity:** Staff needs to know if/when provisioning failed. Status in UI makes it immediately visible.
+1. **Operational Clarity:** Staff needs to know if/when provisioning failed. Status in UI makes it
+   immediately visible.
 
-2. **Security Balance:** Error scoping prevents infrastructure exposure while giving staff enough info to investigate.
+2. **Security Balance:** Error scoping prevents infrastructure exposure while giving staff enough
+   info to investigate.
 
 3. **Support Self-Service:** Staff can retry without escalating to engineering for every failure.
 
-4. **Audit Trail:** All provisioning events in structured logs for compliance and debugging (engineering access only).
+4. **Audit Trail:** All provisioning events in structured logs for compliance and debugging
+   (engineering access only).
 
-5. **Aligns Zidney Logging Standard:** PROJECT_CONTEXT_PRIMER defines structured logging with correlation IDs for traceability.
+5. **Aligns Zidney Logging Standard:** PROJECT_CONTEXT_PRIMER defines structured logging with
+   correlation IDs for traceability.
 
 **Implementation Impact:**
 
-- [ ] Add `provisioning_error` field to licenses table (TEXT, nullable) — stores user-safe error message
-- [ ] Error message mapping: Internal error codes → user-safe descriptions (e.g., PG_CONNECTION_TIMEOUT → "Database connection timeout")
+- [ ] Add `provisioning_error` field to licenses table (TEXT, nullable) — stores user-safe error
+      message
+- [ ] Error message mapping: Internal error codes → user-safe descriptions (e.g.,
+      PG_CONNECTION_TIMEOUT → "Database connection timeout")
 - [ ] MMC UI component: Provisioning status panel with error display and retry button
 - [ ] Worker: Catch provisioning failures, format error message, store in license.provisioning_error
-- [ ] Logs: Structured logging on all provisioning events (enqueue, start, progress, success, failure)
+- [ ] Logs: Structured logging on all provisioning events (enqueue, start, progress, success,
+      failure)
 - [ ] Log filtering: provisioning_error in logs marked as "sanitized" vs "raw" for audit distinction
 
 ---
 
 ## Ambiguity 6: Retry Strategy for Provisioning Jobs
 
-**Issue:** Specification says "worker retries on failure" but doesn't define count, backoff strategy, or max total time.
+**Issue:** Specification says "worker retries on failure" but doesn't define count, backoff
+strategy, or max total time.
 
-**Job Queue Context:** Using Redis-based worker (from PROJECT_CONTEXT_PRIMER). Needs explicit retry policy.
+**Job Queue Context:** Using Redis-based worker (from PROJECT_CONTEXT_PRIMER). Needs explicit retry
+policy.
 
 **Options Considered:**
 
@@ -619,29 +666,29 @@ Total elapsed: ~60 seconds for happy path, ~30 min worst case
 async function provisionLicense(licenseId, attemptNumber = 1) {
   try {
     // Execute provisioning
-    await createTenantDatabase(licenseId)
-    await runMigrations(licenseId)
-    updateLicenseStatus(licenseId, 'ACTIVE')
-    return { success: true }
+    await createTenantDatabase(licenseId);
+    await runMigrations(licenseId);
+    updateLicenseStatus(licenseId, "ACTIVE");
+    return { success: true };
   } catch (error) {
     if (attemptNumber < 5) {
       const delay = Math.min(
         2000 * Math.pow(2, attemptNumber - 1), // exponential
-        300000 // 5 min max
-      )
-      const jitter = delay * (Math.random() * 0.2 - 0.1) // ±10%
-      scheduleRetry(licenseId, delay + jitter, attemptNumber + 1)
-      return { success: false, retry: true, attemptNumber }
+        300000, // 5 min max
+      );
+      const jitter = delay * (Math.random() * 0.2 - 0.1); // ±10%
+      scheduleRetry(licenseId, delay + jitter, attemptNumber + 1);
+      return { success: false, retry: true, attemptNumber };
     } else {
       // Max retries exhausted
-      updateLicenseStatus(licenseId, 'PROVISION_FAILED')
+      updateLicenseStatus(licenseId, "PROVISION_FAILED");
       logStructuredError({
         license_id: licenseId,
         error: error.message,
         attempts: attemptNumber,
         terminal: true,
-      })
-      return { success: false, retry: false }
+      });
+      return { success: false, retry: false };
     }
   }
 }
@@ -649,15 +696,20 @@ async function provisionLicense(licenseId, attemptNumber = 1) {
 
 **Rationale:**
 
-1. **Academic Workload Reality:** Large institutions may have 10k+ students. Database creation + migrations can approach 2-3 min. 30 min total SLA allows for realistic provisioning time.
+1. **Academic Workload Reality:** Large institutions may have 10k+ students. Database creation +
+   migrations can approach 2-3 min. 30 min total SLA allows for realistic provisioning time.
 
-2. **Network Resilience:** Exponential backoff with jitter prevents retry storms. 5 attempts provides safety margin without excessive polling.
+2. **Network Resilience:** Exponential backoff with jitter prevents retry storms. 5 attempts
+   provides safety margin without excessive polling.
 
-3. **Staff Feedback Loop:** 30 min is long enough to complete provisioning, but staff sees PROVISION_FAILED within 30 min of creation. Clear signal for operator.
+3. **Staff Feedback Loop:** 30 min is long enough to complete provisioning, but staff sees
+   PROVISION_FAILED within 30 min of creation. Clear signal for operator.
 
-4. **Matches SaaS Standards:** 5 retries + exponential backoff is industry standard for critical operations.
+4. **Matches SaaS Standards:** 5 retries + exponential backoff is industry standard for critical
+   operations.
 
-5. **Aligns PROJECT_CONTEXT_PRIMER:** Worker is authority for provisioning. Retry strategy owned by worker implementation.
+5. **Aligns PROJECT_CONTEXT_PRIMER:** Worker is authority for provisioning. Retry strategy owned by
+   worker implementation.
 
 **Implementation Impact:**
 
@@ -671,7 +723,8 @@ async function provisionLicense(licenseId, attemptNumber = 1) {
 
 ## Ambiguity 7: Soft-Lock Edge Case — Past Timestamp
 
-**Issue:** If `soft_lock_until` is set to a PAST timestamp (e.g., system clock jumped backward, or past timestamp entered), is license locked?
+**Issue:** If `soft_lock_until` is set to a PAST timestamp (e.g., system clock jumped backward, or
+past timestamp entered), is license locked?
 
 **Example Scenario:**
 
@@ -764,13 +817,17 @@ CHECK (
 
 **Rationale:**
 
-1. **State Machine Correctness:** `soft_lock_until IS NULL` means not soft-locked. `soft_lock_until > NOW()` means currently locked. No edge cases.
+1. **State Machine Correctness:** `soft_lock_until IS NULL` means not soft-locked.
+   `soft_lock_until > NOW()` means currently locked. No edge cases.
 
-2. **Prevents Invalid State:** Database constraint prevents corruption (past timestamp in soft-locked state).
+2. **Prevents Invalid State:** Database constraint prevents corruption (past timestamp in
+   soft-locked state).
 
-3. **Clear Middleware Logic:** Middleware doesn't guess; it checks `soft_lock_until > NOW()`. If false, license is not locked.
+3. **Clear Middleware Logic:** Middleware doesn't guess; it checks `soft_lock_until > NOW()`. If
+   false, license is not locked.
 
-4. **Aligns ADR-0001:** Database-per-tenant isolation requires deterministic access control. Ambiguous states break isolation guarantees.
+4. **Aligns ADR-0001:** Database-per-tenant isolation requires deterministic access control.
+   Ambiguous states break isolation guarantees.
 
 **Implementation Impact:**
 
@@ -783,9 +840,11 @@ CHECK (
 
 ## Ambiguity 8: Auto-Transition for Expired Soft-Locks
 
-**Issue:** Should soft-lock expire automatically when `soft_lock_until` passes, or require manual unlock?
+**Issue:** Should soft-lock expire automatically when `soft_lock_until` passes, or require manual
+unlock?
 
-**Current Spec Statement:** "Middleware must check: If status = SOFT_LOCKED AND now > soft_lock_until → Auto-transition to ARCHIVED"
+**Current Spec Statement:** "Middleware must check: If status = SOFT_LOCKED AND now >
+soft_lock_until → Auto-transition to ARCHIVED"
 
 **Problem:** Implementation strategy unclear. Options:
 
@@ -826,42 +885,42 @@ Soft-lock expiration handled by middleware on first request after `soft_lock_unt
 
 ```javascript
 async function licenseMiddleware(req, context) {
-  const license = await loadLicense(context.tenantId)
+  const license = await loadLicense(context.tenantId);
 
-  if (license.status === 'SOFT_LOCKED' && license.soft_lock_until <= NOW()) {
+  if (license.status === "SOFT_LOCKED" && license.soft_lock_until <= NOW()) {
     // Auto-transition: SOFT_LOCKED → ARCHIVED
     // Use CAS (compare-and-set) to prevent race condition
     const updated = await db.licenses.updateAtomic({
       id: license.id,
       whereVersion: license.version, // optimistic lock
       set: {
-        status: 'ARCHIVED',
+        status: "ARCHIVED",
         archived_at: NOW(),
         soft_lock_until: NULL,
         version: license.version + 1,
       },
-    })
+    });
 
     if (!updated) {
       // Concurrent request already updated; reload
-      license = await loadLicense(context.tenantId)
+      license = await loadLicense(context.tenantId);
     }
 
     // Log transition
     logStructuredEvent({
-      event: 'soft_lock_auto_archived',
+      event: "soft_lock_auto_archived",
       license_id: license.id,
       soft_lock_until: license.soft_lock_until,
       timestamp: NOW(),
-    })
+    });
   }
 
   // Now check status as normal
-  if (license.status === 'ARCHIVED') {
-    return 403 // Archived, access forbidden
+  if (license.status === "ARCHIVED") {
+    return 403; // Archived, access forbidden
   }
-  if (license.status === 'SOFT_LOCKED') {
-    return 423 // Soft-locked, access locked
+  if (license.status === "SOFT_LOCKED") {
+    return 423; // Soft-locked, access locked
   }
 }
 ```
@@ -885,15 +944,20 @@ Request 2: Returns 403
 
 **Rationale:**
 
-1. **Workload-Driven:** Expiration only checked when workspace is accessed. No background job needed.
+1. **Workload-Driven:** Expiration only checked when workspace is accessed. No background job
+   needed.
 
-2. **Atomicity:** Write operation is atomic. Version check prevents concurrent duplicate transitions.
+2. **Atomicity:** Write operation is atomic. Version check prevents concurrent duplicate
+   transitions.
 
-3. **Consistency:** First request after expiration sees new state (ARCHIVED). Subsequent requests see consistent state.
+3. **Consistency:** First request after expiration sees new state (ARCHIVED). Subsequent requests
+   see consistent state.
 
-4. **Matches Zidney Determinism:** Explicit transition logged, auditable, not silent background magic.
+4. **Matches Zidney Determinism:** Explicit transition logged, auditable, not silent background
+   magic.
 
-5. **Aligns PROJECT_CONTEXT_PRIMER:** No background jobs except worker queue. Middleware handles sync operations.
+5. **Aligns PROJECT_CONTEXT_PRIMER:** No background jobs except worker queue. Middleware handles
+   sync operations.
 
 **Alternative (Cron Job) — Documented but Not Recommended:**
 
@@ -915,12 +979,14 @@ CronJob (every 5 minutes):
       SKIP (concurrent update or already archived)
 ```
 
-Not recommended for Stage 10 (adds infrastructure complexity). Can be added in Stage 15 (MMC Dashboard) if needed for scale.
+Not recommended for Stage 10 (adds infrastructure complexity). Can be added in Stage 15 (MMC
+Dashboard) if needed for scale.
 
 **Implementation Impact:**
 
 - [ ] Middleware license check: Add expiration logic before status validation
-- [ ] Use optimistic locking (version field on licenses table) to prevent concurrent duplicate transitions
+- [ ] Use optimistic locking (version field on licenses table) to prevent concurrent duplicate
+      transitions
 - [ ] Logging: Log all auto-transitions (event: 'soft_lock_auto_archived') with timestamps
 - [ ] Tests: Verify race condition handling (concurrent requests, both see expiration)
 - [ ] Documentation: Note that soft-lock expiration is lazy (best-effort on next access)
@@ -975,11 +1041,14 @@ All decisions validated against Zidney Constitution and ADRs:
 Documents to update:
 
 1. **STAGE_10_LICENSES.md**
-   - [ ] Section: License Status Model — Add PENDING_PROVISION and PROVISION_FAILED, clarify Stage 04 reference
+   - [ ] Section: License Status Model — Add PENDING_PROVISION and PROVISION_FAILED, clarify Stage
+         04 reference
    - [ ] Section: Provisioning Integration — Add retry strategy table (Decision #6)
-   - [ ] Section: License Creation Flow — Add failure handling, PROVISION_FAILED state, error logging (Decision #4, #5)
+   - [ ] Section: License Creation Flow — Add failure handling, PROVISION_FAILED state, error
+         logging (Decision #4, #5)
    - [ ] Section: Soft-Lock Operation — Add validation rule for future timestamps (Decision #7)
-   - [ ] Section: Soft-Lock Expiration — Add auto-transition logic with middleware race condition handling (Decision #8)
+   - [ ] Section: Soft-Lock Expiration — Add auto-transition logic with middleware race condition
+         handling (Decision #8)
 
 2. **STAGE_04_LICENSE_ENGINE.md**
    - Nothing (PRODUCTION READY, immutable)
@@ -1013,7 +1082,8 @@ All locked decisions are binding for implementation. Any deviation requires:
 
 **Approved By:** [PENDING ARCHITECTURE REVIEW]  
 **Approved Date:** [TBD]  
-**Next Phase:** PLAN step — Generate detailed API specs, database migrations, and implementation tasks
+**Next Phase:** PLAN step — Generate detailed API specs, database migrations, and implementation
+tasks
 
 ---
 

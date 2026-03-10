@@ -8,7 +8,8 @@
 
 ## Executive Summary
 
-STAGE_03 Authentication System has successfully completed critical security invariant validation and all required fixes have been applied. The stage is now **PRODUCTION READY**.
+STAGE_03 Authentication System has successfully completed critical security invariant validation and
+all required fixes have been applied. The stage is now **PRODUCTION READY**.
 
 **Key Results**:
 
@@ -31,16 +32,16 @@ STAGE_03 Authentication System has successfully completed critical security inva
 
 ```typescript
 // Fetch current schema version from workspace (for schema version validation)
-let expectedSchemaVersion: string | undefined
+let expectedSchemaVersion: string | undefined;
 if (masterDb && resolvedWorkspaceId) {
   try {
     const schemaResult = await masterDb.query(
-      'SELECT schema_version FROM workspaces WHERE id = $1',
-      [resolvedWorkspaceId]
-    )
-    expectedSchemaVersion = schemaResult.rows[0]?.schema_version
+      "SELECT schema_version FROM workspaces WHERE id = $1",
+      [resolvedWorkspaceId],
+    );
+    expectedSchemaVersion = schemaResult.rows[0]?.schema_version;
   } catch (err) {
-    console.warn('Failed to fetch schema version:', err)
+    console.warn("Failed to fetch schema version:", err);
   }
 }
 
@@ -48,8 +49,8 @@ if (masterDb && resolvedWorkspaceId) {
 await validateJwtClaims(
   payload,
   resolvedWorkspaceId,
-  expectedSchemaVersion // ← NOW PASSED
-)
+  expectedSchemaVersion, // ← NOW PASSED
+);
 ```
 
 **Impact**: Clients using outdated schema version will receive 426 (Upgrade Required) error

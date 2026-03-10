@@ -27,15 +27,23 @@
 
 ## 3. Executive Summary
 
-This PR implements the shared frontend security architecture across three UI applications (MMC, Backoffice, Frontoffice). It standardizes:
+This PR implements the shared frontend security architecture across three UI applications (MMC,
+Backoffice, Frontoffice). It standardizes:
 
-- **Token Lifecycle**: Tokens are stored in-memory only (cleared on page refresh), eliminated from browser storage APIs, and never exposed in logs
-- **Session Expiry**: A 401 response triggers idempotent logout exactly once—even with concurrent 401s—via a single-flight guard (`isHandling401`), redirecting unauthenticated users to login without retry loops
-- **License Status Reactions**: The UI reacts to 423 (workspace locked) and 426 (upgrade required) responses with appropriate messaging, without attempting to bypass or retry
-- **XSS Mitigation**: All `v-html` usages eliminated; ESLint rule `vue/no-v-html` enforced as error to prevent future template injection vulnerabilities
-- **Structured Logging**: Token redaction utility prevents tokens from ever appearing in logs; all auth events use `@zidney/logger`
+- **Token Lifecycle**: Tokens are stored in-memory only (cleared on page refresh), eliminated from
+  browser storage APIs, and never exposed in logs
+- **Session Expiry**: A 401 response triggers idempotent logout exactly once—even with concurrent
+  401s—via a single-flight guard (`isHandling401`), redirecting unauthenticated users to login
+  without retry loops
+- **License Status Reactions**: The UI reacts to 423 (workspace locked) and 426 (upgrade required)
+  responses with appropriate messaging, without attempting to bypass or retry
+- **XSS Mitigation**: All `v-html` usages eliminated; ESLint rule `vue/no-v-html` enforced as error
+  to prevent future template injection vulnerabilities
+- **Structured Logging**: Token redaction utility prevents tokens from ever appearing in logs; all
+  auth events use `@zidney/logger`
 
-All constitutional guarantees remain intact. No database access. No tenant isolation risk. No middleware bypass. All 57 tasks complete. 31 test files, 273 tests—all passing. No deferred scope.
+All constitutional guarantees remain intact. No database access. No tenant isolation risk. No
+middleware bypass. All 57 tasks complete. 31 test files, 273 tests—all passing. No deferred scope.
 
 ---
 
@@ -184,14 +192,16 @@ The stage implements an identical security layer across three applications:
 
 **Source Files (39 total):**
 
-- 13 mmc app files (license store, token redact, error interceptor, auth store, client, guard, main.ts)
+- 13 mmc app files (license store, token redact, error interceptor, auth store, client, guard,
+  main.ts)
 - 13 backoffice app files (identical structure)
 - 13 frontoffice app files (identical structure)
 - 3 root files (eslint.config.mjs, vitest.config.ts, package.json)
 
 **Test Files (39 total):**
 
-- 3×10 unit test files per app (token-redact, error-interceptor, auth.guard, auth.store, client, license-status.store) = 30 files
+- 3×10 unit test files per app (token-redact, error-interceptor, auth.guard, auth.store, client,
+  license-status.store) = 30 files
 - 3×3 audit test files per app (token-persistence-audit, route-coverage-audit) + 1 per app = 6 files
 - 3×3 integration test files per app (401-race, session-clear-wiring) = 9 files
 - Total: 31 files, 273 tests
@@ -236,8 +246,10 @@ The stage implements an identical security layer across three applications:
 
 ## 12. Deferred Scope (Intentional)
 
-- **Refresh Token Strategy**: Conditionally disabled by default. Future stage if backend implements refresh endpoint.
-- **User-Specific Store Clearance**: `clearUserSpecificStores()` callback stub in place; enumeration deferred until feature stages add persisted UI state.
+- **Refresh Token Strategy**: Conditionally disabled by default. Future stage if backend implements
+  refresh endpoint.
+- **User-Specific Store Clearance**: `clearUserSpecificStores()` callback stub in place; enumeration
+  deferred until feature stages add persisted UI state.
 - **Backend Authentication**: Out of scope; server-side responsibility.
 - **RBAC Enforcement**: Out of scope; server-side only.
 - **2FA / OAuth Flows**: Out of scope; deferred to future stages.
@@ -332,7 +344,8 @@ The stage implements an identical security layer across three applications:
 
 ## 17. Questions for Reviewers
 
-- Are there any token storage exceptions or refresh token requirements we should address in a follow-up stage?
+- Are there any token storage exceptions or refresh token requirements we should address in a
+  follow-up stage?
 - Should we enable refresh token logic now, or keep it deferred?
 - Any additional XSS vectors we should audit?
 - Should we add telemetry for 401/423/426 response rates?

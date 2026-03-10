@@ -7,11 +7,13 @@
 
 ## Purpose
 
-This directory contains the complete specification for implementing Zidney's workspace-isolated authentication system across three independent domains (MMC, Backoffice, Frontoffice).
+This directory contains the complete specification for implementing Zidney's workspace-isolated
+authentication system across three independent domains (MMC, Backoffice, Frontoffice).
 
 ## Files
 
-- **spec.md** — Detailed technical specification with data models, transaction boundaries, and compliance requirements
+- **spec.md** — Detailed technical specification with data models, transaction boundaries, and
+  compliance requirements
 - **data-model.md** — Entity-relationship diagram and table definitions
 - **plan.md** — Implementation roadmap and architecture
 - **tasks.md** — Actionable implementation tasks
@@ -19,7 +21,8 @@ This directory contains the complete specification for implementing Zidney's wor
 
 ## Quick Start
 
-Start with [spec.md](./spec.md) for the full specification, then review [data-model.md](./data-model.md) for schema details.
+Start with [spec.md](./spec.md) for the full specification, then review
+[data-model.md](./data-model.md) for schema details.
 
 ## Key Concepts
 
@@ -57,7 +60,8 @@ This enables stateless logout-all without maintaining a token blacklist.
 
 ### Version Compatibility
 
-Tokens include `schema_version` and `product_version`. Mismatches return 426 Upgrade Required, preventing old sessions from surviving schema upgrades.
+Tokens include `schema_version` and `product_version`. Mismatches return 426 Upgrade Required,
+preventing old sessions from surviving schema upgrades.
 
 ## Compliance
 
@@ -70,6 +74,8 @@ Tokens include `schema_version` and `product_version`. Mismatches return 426 Upg
 
 ## Reference
 
-- **Phase Stage:** [STAGE_03_AUTHENTICATION_SYSTEM.md](../../../phases/01_PLATFORM_FOUNDATION/STAGE_03_AUTHENTICATION_SYSTEM.md)
+- **Phase Stage:**
+  [STAGE_03_AUTHENTICATION_SYSTEM.md](../../../phases/01_PLATFORM_FOUNDATION/STAGE_03_AUTHENTICATION_SYSTEM.md)
 - **Constitution:** [PROJECT_CONTEXT_PRIMER.md](../../../docs/PROJECT_CONTEXT_PRIMER.md)
-- **ADR References:** ADR-0001 (isolation), ADR-0006 (time), ADR-0007 (versioning), ADR-0008 (semver)
+- **ADR References:** ADR-0001 (isolation), ADR-0006 (time), ADR-0007 (versioning), ADR-0008
+  (semver)

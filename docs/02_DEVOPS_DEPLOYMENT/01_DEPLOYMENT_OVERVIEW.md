@@ -2,7 +2,8 @@
 
 This document defines the official production deployment architecture for Zidney.
 
-Zidney is designed as a database-per-tenant white-label SaaS platform. Infrastructure must enforce strict isolation, version safety, and operational stability.
+Zidney is designed as a database-per-tenant white-label SaaS platform. Infrastructure must enforce
+strict isolation, version safety, and operational stability.
 
 ---
 
@@ -25,19 +26,8 @@ No service is allowed to run directly on the host outside Docker.
 
 ## High-Level Architecture Flow
 
-Internet
-↓
-Nginx (reverse proxy)
-↓
-API (Bun + Hono)
-↓
-PgBouncer
-↓
-PostgreSQL
-├── master*db
-├── workspace*<slug*1>
-├── workspace*<slug*2>
-└── workspace*<slug_n>
+Internet ↓ Nginx (reverse proxy) ↓ API (Bun + Hono) ↓ PgBouncer ↓ PostgreSQL ├── master*db ├──
+workspace*<slug*1> ├── workspace*<slug*2> └── workspace*<slug_n>
 
 Redis is used for:
 
@@ -134,5 +124,4 @@ Infrastructure must remain simple, predictable, and auditable.
 
 ---
 
-Next document:
-02_DOCKER_ARCHITECTURE.md
+Next document: 02_DOCKER_ARCHITECTURE.md

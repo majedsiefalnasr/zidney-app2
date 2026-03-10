@@ -36,15 +36,29 @@ All guardian findings were resolved in plan artifacts before this report was wri
 
 ### Core Design Decisions
 
-**Token Storage** — Access token stored exclusively in a `ref<string | null>(null)` inside `token-manager.ts`. No browser storage APIs are ever written. Page reload destroys the in-memory token; `initSession()` restores the session via silent refresh.
+**Token Storage** — Access token stored exclusively in a `ref<string | null>(null)` inside
+`token-manager.ts`. No browser storage APIs are ever written. Page reload destroys the in-memory
+token; `initSession()` restores the session via silent refresh.
 
-**Single-Flight Refresh** — `createRefreshManager(refreshFn, onLogout, tokenManager)` uses a `let inFlight: Promise<void> | null` pattern. The first concurrent 401 claimant sets `inFlight`; all subsequent callers receive the same promise. On resolution or rejection, `inFlight = null` in `finally`. JavaScript's cooperative concurrency guarantees no race condition in this pattern.
+**Single-Flight Refresh** — `createRefreshManager(refreshFn, onLogout, tokenManager)` uses a
+`let inFlight: Promise<void> | null` pattern. The first concurrent 401 claimant sets `inFlight`; all
+subsequent callers receive the same promise. On resolution or rejection, `inFlight = null` in
+`finally`. JavaScript's cooperative concurrency guarantees no race condition in this pattern.
 
-**Circular Dependency Resolution (CL-02)** — The `onLogout` callback is passed to the refresh manager factory at bootstrap time from `main.ts`. The store provides `getRefreshManager: () => IRefreshManager | null` via a lazy accessor — `refreshManagerInstance` is set to `null` initially and populated after Step 6 of the bootstrap sequence. This breaks the module-level circular import.
+**Circular Dependency Resolution (CL-02)** — The `onLogout` callback is passed to the refresh
+manager factory at bootstrap time from `main.ts`. The store provides
+`getRefreshManager: () => IRefreshManager | null` via a lazy accessor — `refreshManagerInstance` is
+set to `null` initially and populated after Step 6 of the bootstrap sequence. This breaks the
+module-level circular import.
 
-**Bootstrap Ordering (CL-01)** — `initSession()` is called from a `router.beforeEach` guard in `main.ts` that runs once on the first navigation, before `app.mount()` enables any rendering. A `sessionInitialized` ref prevents re-running on subsequent navigations.
+**Bootstrap Ordering (CL-01)** — `initSession()` is called from a `router.beforeEach` guard in
+`main.ts` that runs once on the first navigation, before `app.mount()` enables any rendering. A
+`sessionInitialized` ref prevents re-running on subsequent navigations.
 
-**API Client Interceptors (CL-03)** — Stage 00 provided empty extension points (`getAccessToken`, `onRefreshToken`, `onAuthFailure` callbacks). This stage wires them: `getAccessToken` → `tokenManager.getToken()`, `onRefreshToken` → `refreshManager.refresh()`, `onAuthFailure` → `authStore.logout()`.
+**API Client Interceptors (CL-03)** — Stage 00 provided empty extension points (`getAccessToken`,
+`onRefreshToken`, `onAuthFailure` callbacks). This stage wires them: `getAccessToken` →
+`tokenManager.getToken()`, `onRefreshToken` → `refreshManager.refresh()`, `onAuthFailure` →
+`authStore.logout()`.
 
 ---
 
@@ -92,7 +106,8 @@ All guardian findings were resolved in plan artifacts before this report was wri
 
 ## Data Model Artifacts
 
-[specs/runtime/ui-01-auth-module/data-model.md](../data-model.md) defines 12 TypeScript interfaces/types:
+[specs/runtime/ui-01-auth-module/data-model.md](../data-model.md) defines 12 TypeScript
+interfaces/types:
 
 - `AuthUser`, `AuthError`, `AuthErrorCode` (enum)
 - `AuthStoreState`, `LoginCredentials`, `LoginResponse`
@@ -133,4 +148,5 @@ All guardian findings were resolved in plan artifacts before this report was wri
 
 ## Plan Compliance Statement
 
-The plan is compliant with Zidney Constitution v1.2.0. No architectural violations. No new ADRs required. The plan implements existing spec contracts without structural changes to the trust chain.
+The plan is compliant with Zidney Constitution v1.2.0. No architectural violations. No new ADRs
+required. The plan implements existing spec contracts without structural changes to the trust chain.

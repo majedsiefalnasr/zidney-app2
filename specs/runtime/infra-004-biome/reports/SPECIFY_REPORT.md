@@ -1,18 +1,18 @@
 # Specify Report — STAGE_INFRA_04_BIOME
 
-**Step:** 1 — Specify
-**Stage:** STAGE_INFRA_04_BIOME
-**Phase:** 01_PLATFORM_FOUNDATION
-**Branch:** spec/infra-004-biome
-**Generated:** 2026-03-06T00:00:00.000Z
+**Step:** 1 — Specify **Stage:** STAGE_INFRA_04_BIOME **Phase:** 01_PLATFORM_FOUNDATION **Branch:**
+spec/infra-004-biome **Generated:** 2026-03-06T00:00:00.000Z
 
 ---
 
 ## Summary
 
-The specification for the Biome unified linting and formatting engine stage is complete. This is a pure infrastructure tooling replacement stage — no runtime behavior, database schema, authentication, or tenant isolation is affected.
+The specification for the Biome unified linting and formatting engine stage is complete. This is a
+pure infrastructure tooling replacement stage — no runtime behavior, database schema,
+authentication, or tenant isolation is affected.
 
-**Outcome:** PASS — spec.md written, requirements checklist fully satisfied, no `[NEEDS CLARIFICATION]` markers remain.
+**Outcome:** PASS — spec.md written, requirements checklist fully satisfied, no
+`[NEEDS CLARIFICATION]` markers remain.
 
 ---
 
@@ -78,12 +78,15 @@ The specification for the Biome unified linting and formatting engine stage is c
 
 ## Key Assumptions (from spec.md)
 
-1. All current `console.log` usages in production code will be replaced with the Zidney structured logger (`@zidney/logger`) before or during this stage.
-2. Vue file support is limited to embedded TypeScript/JavaScript script blocks; template syntax is out of Biome's scope.
+1. All current `console.log` usages in production code will be replaced with the Zidney structured
+   logger (`@zidney/logger`) before or during this stage.
+2. Vue file support is limited to embedded TypeScript/JavaScript script blocks; template syntax is
+   out of Biome's scope.
 3. No per-package `biome.json` overrides are required or permitted.
 4. `lint-staged` integration with Biome is in scope for pre-commit hooks.
 5. The current Biome stable release is compatible with the TypeScript version in use.
-6. ESLint and Prettier removal is safe as all rules with runtime impact (none) are being mapped to Biome equivalents.
+6. ESLint and Prettier removal is safe as all rules with runtime impact (none) are being mapped to
+   Biome equivalents.
 
 ---
 

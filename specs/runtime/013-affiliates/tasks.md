@@ -3,7 +3,8 @@
 **Feature**: Affiliate Program (B2B License Discounts & Commissions)  
 **Stage**: STAGE_13_AFFILIATES  
 **Phase**: 02_PLATFORM_MMC  
-**Target**: Implement master_db-only affiliate system with promo code management, transactional usage tracking, and comprehensive audit logging  
+**Target**: Implement master_db-only affiliate system with promo code management, transactional
+usage tracking, and comprehensive audit logging  
 **Status**: PHASE_2_READY  
 **Date Created**: 2026-02-25
 
@@ -11,13 +12,17 @@
 
 ## Overview
 
-This task list orchestrates the full implementation of the affiliate program within the Zidney architecture. Tasks are organized by user story to enable parallel development and independent testing. All tasks maintain database-per-tenant isolation, transactional integrity, and deterministic financial calculations.
+This task list orchestrates the full implementation of the affiliate program within the Zidney
+architecture. Tasks are organized by user story to enable parallel development and independent
+testing. All tasks maintain database-per-tenant isolation, transactional integrity, and
+deterministic financial calculations.
 
 **Total Task Count**: 41 tasks (verified)  
 **Estimated Duration**: 4-5 developer weeks  
 **Parallelizable Tasks**: 18 tasks can run in parallel (marked [P])  
 **Testing Coverage**: Unit, integration, and concurrency test tasks included  
-**No Breaking Changes**: Affiliate system is entirely within master_db; existing license flow unaffected
+**No Breaking Changes**: Affiliate system is entirely within master_db; existing license flow
+unaffected
 
 ---
 
@@ -26,10 +31,14 @@ This task list orchestrates the full implementation of the affiliate program wit
 _Duration: 0.5 day | Prerequisite for all other phases_
 
 - [x] T001 Create project structure per plan.md in apps/api/src/ and packages/domain-core/src/
-- [x] T002 [P] Create database schema definition file: apps/api/src/db/master/schemas/affiliates-schema.ts (Drizzle table definitions)
-- [x] T003 [P] Create TypeScript domain types: packages/domain-core/src/affiliates/types.ts (interfaces for Affiliate, AffiliateUsage, AdminAudit)
-- [x] T004 [P] Create error code constants: packages/domain-core/src/affiliates/error-codes.ts (define all 8 error codes)
-- [x] T005 [P] Create Zod validation schemas: apps/api/src/middleware/affiliate-schemas.ts (request validation schemas for create/edit/list)
+- [x] T002 [P] Create database schema definition file:
+      apps/api/src/db/master/schemas/affiliates-schema.ts (Drizzle table definitions)
+- [x] T003 [P] Create TypeScript domain types: packages/domain-core/src/affiliates/types.ts
+      (interfaces for Affiliate, AffiliateUsage, AdminAudit)
+- [x] T004 [P] Create error code constants: packages/domain-core/src/affiliates/error-codes.ts
+      (define all 8 error codes)
+- [x] T005 [P] Create Zod validation schemas: apps/api/src/middleware/affiliate-schemas.ts (request
+      validation schemas for create/edit/list)
 
 ---
 
@@ -39,14 +48,19 @@ _Duration: 1 day | Blocking prerequisite for all user stories_
 
 ### Database Migrations
 
-- [x] T006 Create master_db migration 009: apps/api/src/db/master/migrations/009_create_affiliates_tables.sql (affiliates + affiliate_usages tables, enums, indexes, constraints)
-- Create table: affiliates (15 columns, UNIQUE promo_code, date constraints, NUMERIC financial fields)
+- [x] T006 Create master_db migration 009:
+      apps/api/src/db/master/migrations/009_create_affiliates_tables.sql (affiliates +
+      affiliate_usages tables, enums, indexes, constraints)
+- Create table: affiliates (15 columns, UNIQUE promo_code, date constraints, NUMERIC financial
+  fields)
 - Create indexes: promo_code UNIQUE, status, start_date/end_date composite
 - Create immutability triggers for affiliate_usages (prevent UPDATE/DELETE)
 - Create CHECK constraints for percentages (0-100), date ranges, usage limits
 - Create FOREIGN KEY relationships with referential integrity (ON DELETE RESTRICT)
 
-- [x] T007 Create master_db migration 010: apps/api/src/db/master/migrations/010_create_affiliate_admin_audit.sql (affiliate_admin_audit table, immutability enforcement)
+- [x] T007 Create master_db migration 010:
+      apps/api/src/db/master/migrations/010_create_affiliate_admin_audit.sql (affiliate_admin_audit
+      table, immutability enforcement)
 - Create table: affiliate_admin_audit (8 columns, admin tracking)
 - Create JSONB old_values/new_values columns
 - Create indexes for forensic analysis (affiliate_id, admin_id, action, created_at)
@@ -58,7 +72,8 @@ _Duration: 1 day | Blocking prerequisite for all user stories_
 - Function: calculateDiscount(baseAmount: Decimal, discountPercentage: Decimal): Decimal
 - Function: calculateCommission(baseAmount: Decimal, commissionPercentage: Decimal): Decimal
 - Rounding strategy: NUMERIC(12,2) with database-side SQL ROUND() function
-- Unit test file: tests/unit/affiliates/calculations.test.ts (edge cases: 0%, 100%, fractional cents, large amounts) ✓ CREATED
+- Unit test file: tests/unit/affiliates/calculations.test.ts (edge cases: 0%, 100%, fractional
+  cents, large amounts) ✓ CREATED
 - No floating-point math: all calculations via PostgreSQL
 
 - [x] T009 [P] Implement affiliate validators: packages/domain-core/src/affiliates/validators.ts
@@ -70,7 +85,8 @@ _Duration: 1 day | Blocking prerequisite for all user stories_
 
 ### Middleware Integration
 
-- [x] T010 [P] Create affiliate request validation middleware: apps/api/src/middleware/affiliate-validation.ts
+- [x] T010 [P] Create affiliate request validation middleware:
+      apps/api/src/middleware/affiliate-validation.ts
 - Parse and validate: promo_code format, discount_percentage range, commission_percentage range
 - Date validation: start_date < end_date
 - Usage limit validation: null or non-negative
@@ -83,11 +99,13 @@ _Duration: 1 day | Blocking prerequisite for all user stories_
 
 _Duration: 1.5 days | Independent from other stories_  
 **Story Goal**: Enabled MMC admin to create, list, edit, and disable affiliate promotional codes  
-**Test Criteria**: All CRUD operations work atomically; promo_code is immutable; soft delete via status field; audit trail logs all admin mutations
+**Test Criteria**: All CRUD operations work atomically; promo_code is immutable; soft delete via
+status field; audit trail logs all admin mutations
 
 ### Create Affiliate Endpoint
 
-- [x] T011 [US1] [P] Implement POST /v1/mmc/affiliates handler: apps/api/src/routes/mmc/affiliates/create.ts
+- [x] T011 [US1] [P] Implement POST /v1/mmc/affiliates handler:
+      apps/api/src/routes/mmc/affiliates/create.ts
 - Extract MMC token + admin auth
 - Validate request body via Zod schema (all 8 fields)
 - Check UNIQUE constraint on promo_code (pre-check before DB)
@@ -96,7 +114,8 @@ _Duration: 1.5 days | Independent from other stories_
 - Return 201 Created with full affiliate object
 - Error handling: 400 Bad Request for validation failures, 403 Forbidden for insufficient RBAC
 
-- [x] T012 [US1] [P] Create unit tests for create affiliate: tests/unit/affiliates/ (covered by validation tests)
+- [x] T012 [US1] [P] Create unit tests for create affiliate: tests/unit/affiliates/ (covered by
+      validation tests)
 - Test: Valid create with all fields
 - Test: Reject duplicate promo_code (UNIQUE constraint)
 - Test: Reject invalid percentage values (> 100)
@@ -106,7 +125,8 @@ _Duration: 1.5 days | Independent from other stories_
 
 ### List Affiliates Endpoint
 
-- [x] T013 [US1] [P] Implement GET /v1/mmc/affiliates handler: apps/api/src/routes/mmc/affiliates/list.ts
+- [x] T013 [US1] [P] Implement GET /v1/mmc/affiliates handler:
+      apps/api/src/routes/mmc/affiliates/list.ts
 - Extract query parameters: status (filter), created_after/created_before, page, limit
 - Query affiliates table with optional WHERE clauses
 - Pagination: default limit=20, max limit=100
@@ -115,7 +135,8 @@ _Duration: 1.5 days | Independent from other stories_
 - Log list operation with pagination details
 - Error handling: 400 for invalid pagination params
 
-- [x] T014 [US1] [P] Create unit tests for list affiliates: tests/unit/affiliates/ (covered by validation tests)
+- [x] T014 [US1] [P] Create unit tests for list affiliates: tests/unit/affiliates/ (covered by
+      validation tests)
 - Test: Return all affiliates (default)
 - Test: Filter by status=ACTIVE
 - Test: Filter by date range
@@ -124,9 +145,11 @@ _Duration: 1.5 days | Independent from other stories_
 
 ### Edit Affiliate Endpoint
 
-- [x] T015 [US1] [P] Implement PATCH /v1/mmc/affiliates/:id handler: apps/api/src/routes/mmc/affiliates/edit.ts
+- [x] T015 [US1] [P] Implement PATCH /v1/mmc/affiliates/:id handler:
+      apps/api/src/routes/mmc/affiliates/edit.ts
 - Extract affiliate ID from path
-- Validate request body (only mutable fields: discount_pct, commission_pct, usage_limits, description, allow_with_other_discounts)
+- Validate request body (only mutable fields: discount_pct, commission_pct, usage_limits,
+  description, allow_with_other_discounts)
 - Reject attempts to edit promo_code (immutable)
 - Update affiliates record
 - Capture old_values + new_values for audit trail
@@ -135,7 +158,8 @@ _Duration: 1.5 days | Independent from other stories_
 - Return 200 OK with updated affiliates object
 - Error handling: 400 for validation, 404 for not found, 409 for immutability violation
 
-- [x] T016 [US1] [P] Create unit tests for edit affiliate: tests/unit/affiliates/ (covered by validation tests)
+- [x] T016 [US1] [P] Create unit tests for edit affiliate: tests/unit/affiliates/ (covered by
+      validation tests)
 - Test: Update single field (discount_percentage)
 - Test: Update multiple fields
 - Test: Old/new values captured in audit record
@@ -144,7 +168,8 @@ _Duration: 1.5 days | Independent from other stories_
 
 ### Disable Affiliate Endpoint
 
-- [x] T017 [US1] [P] Implement POST /v1/mmc/affiliates/:id/disable handler: apps/api/src/routes/mmc/affiliates/disable.ts
+- [x] T017 [US1] [P] Implement POST /v1/mmc/affiliates/:id/disable handler:
+      apps/api/src/routes/mmc/affiliates/disable.ts
 - Extract affiliate ID from path
 - Load current affiliate record (status check)
 - If already INACTIVE: return 400 (already disabled)
@@ -154,7 +179,8 @@ _Duration: 1.5 days | Independent from other stories_
 - Return 200 OK with updated affiliate (status=INACTIVE)
 - Error handling: 404 if not found, 400 if already inactive
 
-- [x] T018 [US1] [P] Create unit tests for disable affiliate: tests/unit/affiliates/ (covered by validation tests)
+- [x] T018 [US1] [P] Create unit tests for disable affiliate: tests/unit/affiliates/ (covered by
+      validation tests)
 - Test: Transition from ACTIVE to INACTIVE
 - Test: Audit record created with old status, new status
 - Test: Reject disable of already-INACTIVE affiliate
@@ -162,7 +188,8 @@ _Duration: 1.5 days | Independent from other stories_
 
 ### Integration Tests: Affiliate CRUD
 
-- [x] T019 [US1] Create integration tests for CRUD workflow: tests/integration/affiliates/crud-workflow.test.ts
+- [x] T019 [US1] Create integration tests for CRUD workflow:
+      tests/integration/affiliates/crud-workflow.test.ts
 - Test: Full lifecycle (create → list → edit → disable → validate in list)
 - Test: Multiple affiliates in system, separate CRUD ops
 - Test: Pagination with multiple affiliates
@@ -172,9 +199,13 @@ _Duration: 1.5 days | Independent from other stories_
 
 ## Phase 4: User Story 2 - License Purchase Integration (Affiliate Validation)
 
-_Duration: 1.5 days | Depends on Phase 3 (affiliate records exist), independent database transaction_  
-**Story Goal**: When purchasing a license with optional promo_code, validate affiliate code and apply discount transactionally  
-**Test Criteria**: Affiliate code validation works atomically; discount/commission calculated correctly; usage counter incremented; per-client limits enforced; concurrent purchases handled safely
+_Duration: 1.5 days | Depends on Phase 3 (affiliate records exist), independent database
+transaction_  
+**Story Goal**: When purchasing a license with optional promo_code, validate affiliate code and
+apply discount transactionally  
+**Test Criteria**: Affiliate code validation works atomically; discount/commission calculated
+correctly; usage counter incremented; per-client limits enforced; concurrent purchases handled
+safely
 
 ### License Purchase Route Modification
 
@@ -186,13 +217,16 @@ _Duration: 1.5 days | Depends on Phase 3 (affiliate records exist), independent 
 - If validation fails: return appropriate error (400/409) without completing purchase
 - COMPLETED: Core extension point created
 
-- [x] T021 [US2] [P] Create affiliate validation service: apps/api/src/services/affiliates/affiliate-service.ts
-- Function: validateAndApplyAffiliateCode(affiliateCode: string, clientId: UUID, baseAmount: Decimal, tx: Transaction): Promise<AffiliateDiscount>
+- [x] T021 [US2] [P] Create affiliate validation service:
+      apps/api/src/services/affiliates/affiliate-service.ts
+- Function: validateAndApplyAffiliateCode(affiliateCode: string, clientId: UUID, baseAmount:
+  Decimal, tx: Transaction): Promise<AffiliateDiscount>
 - SELECT ... FROM affiliates WHERE promo_code = $1 FOR UPDATE (row-level lock)
 - Validate status = ACTIVE
 - Validate temporal range: CURRENT_TIMESTAMP BETWEEN start_date AND end_date
 - Validate global usage_count < usage_limit_total (if limit set)
-- COUNT affiliate_usages for (affiliate_id, client_id), validate < usage_limit_per_client (if limit set)
+- COUNT affiliate_usages for (affiliate_id, client_id), validate < usage_limit_per_client (if limit
+  set)
 - Calculate discount_amount via database ROUND() function
 - Calculate commission_amount via database ROUND() function
 - INSERT into affiliate_usages (immutable audit record)
@@ -203,18 +237,21 @@ _Duration: 1.5 days | Depends on Phase 3 (affiliate records exist), independent 
 
 ### Affiliate Validation Logic
 
-- [x] T022 [US2] [P] Implement affiliates.ts domain logic: packages/domain-core/src/affiliates/validation-logic.ts
+- [x] T022 [US2] [P] Implement affiliates.ts domain logic:
+      packages/domain-core/src/affiliates/validation-logic.ts
 - Function: checkAffiliateActive(affiliate: Affiliate): boolean
 - Function: checkTemporalValidity(affiliate: Affiliate, now: Date = new Date()): boolean
 - Function: checkGlobalUsageLimit(affiliate: Affiliate): boolean
-- Function: checkPerClientUsageLimit(affiliate: Affiliate, clientId: UUID, usageCount: number): boolean
+- Function: checkPerClientUsageLimit(affiliate: Affiliate, clientId: UUID, usageCount: number):
+  boolean
 - All pure functions (no DB access)
 - Reusable by API and Worker
 - COMPLETED: Pure validation functions created
 
 ### Financial Calculations in License Purchase
 
-- [x] T023 [US2] [P] Create license purchase with affiliate calculation: apps/api/src/handlers/licenses/purchase-with-affiliate.ts
+- [x] T023 [US2] [P] Create license purchase with affiliate calculation:
+      apps/api/src/handlers/licenses/purchase-with-affiliate.ts
 - Extract base license amount from request
 - If affiliate code provided: call validateAndApplyAffiliateCode()
 - Calculate final purchase amount: base_amount - discount_amount (if applicable)
@@ -226,13 +263,15 @@ _Duration: 1.5 days | Depends on Phase 3 (affiliate records exist), independent 
 
 ### License Purchase Integration Tests
 
-- [x] T024 [US2] [P] Create integration test: Purchase license without affiliate code: tests/integration/affiliates/license-purchase.test.ts
+- [x] T024 [US2] [P] Create integration test: Purchase license without affiliate code:
+      tests/integration/affiliates/license-purchase.test.ts
 - Test: Existing license purchase flow works unchanged
 - Test: Response format unchanged for backward compatibility
 - Test: Promo code parameter optional
 - COMPLETED: Test suite created with all scenarios
 
-- [x] T025 [US2] [P] Create integration test: Purchase license with valid affiliate code: tests/integration/affiliates/license-purchase.test.ts
+- [x] T025 [US2] [P] Create integration test: Purchase license with valid affiliate code:
+      tests/integration/affiliates/license-purchase.test.ts
 - Test: Create test affiliate first
 - Test: Purchase license with valid promo_code
 - Test: Discount applied correctly (verify calculation)
@@ -242,7 +281,8 @@ _Duration: 1.5 days | Depends on Phase 3 (affiliate records exist), independent 
 - Test: Response includes discount_amount, commission_amount, final_amount
 - COMPLETED: Test suite created with validation
 
-- [x] T026 [US2] [P] Create integration test: Purchase license with invalid affiliate codes: tests/integration/affiliates/license-purchase.test.ts
+- [x] T026 [US2] [P] Create integration test: Purchase license with invalid affiliate codes:
+      tests/integration/affiliates/license-purchase.test.ts
 - Test: Non-existent code → AFFILIATE_CODE_NOT_FOUND
 - Test: Inactive code → AFFILIATE_CODE_INACTIVE
 - Test: Expired code → AFFILIATE_CODE_EXPIRED
@@ -253,7 +293,8 @@ _Duration: 1.5 days | Depends on Phase 3 (affiliate records exist), independent 
 
 ### Concurrency & Transaction Safety Tests
 
-- [x] T027 [US2] [P] Create concurrency test: Concurrent affiliate code purchases: tests/integration/affiliates/concurrency-safety.test.ts
+- [x] T027 [US2] [P] Create concurrency test: Concurrent affiliate code purchases:
+      tests/integration/affiliates/concurrency-safety.test.ts
 - Setup: Create affiliate with usage_limit_total = 10
 - Test: Simulate 12 concurrent license purchases with same promo_code
 - Test: First 10 succeed (usage_count increments 1-10)
@@ -263,7 +304,8 @@ _Duration: 1.5 days | Depends on Phase 3 (affiliate records exist), independent 
 - Verify: Row-level lock prevents double-counting
 - COMPLETED: Concurrency test suite created
 
-- [x] T028 [US2] [P] Create concurrency test: Per-client usage limit under concurrency: tests/integration/affiliates/concurrency-safety.test.ts
+- [x] T028 [US2] [P] Create concurrency test: Per-client usage limit under concurrency:
+      tests/integration/affiliates/concurrency-safety.test.ts
 - Setup: Create affiliate with usage_limit_per_client = 3
 - Test: Same client attempts 5 concurrent purchases
 - Test: First 3 succeed
@@ -273,7 +315,8 @@ _Duration: 1.5 days | Depends on Phase 3 (affiliate records exist), independent 
 
 ### Transaction Atomicity Tests
 
-- [x] T029 [US2] [P] Create integration test: Transaction rollback on affiliate validation failure: tests/integration/affiliates/concurrency-safety.test.ts
+- [x] T029 [US2] [P] Create integration test: Transaction rollback on affiliate validation failure:
+      tests/integration/affiliates/concurrency-safety.test.ts
 - Test: Expired code → transaction rolls back → license NOT created
 - Test: Over limit → transaction rolls back → usage_count NOT incremented
 - Test: Invalid amount → transaction rolls back → no record created
@@ -285,12 +328,15 @@ _Duration: 1.5 days | Depends on Phase 3 (affiliate records exist), independent 
 ## Phase 5: User Story 3 - Usage Reporting & Analytics
 
 _Duration: 1 day | Depends on Phase 4 (affiliate usage records created)_  
-**Story Goal**: MMC admin can view affiliate usage reports and understand business metrics (total receipts, commission payouts, etc.)  
-**Test Criteria**: Usage reports calculated correctly; pagination works; time-based filtering supported
+**Story Goal**: MMC admin can view affiliate usage reports and understand business metrics (total
+receipts, commission payouts, etc.)  
+**Test Criteria**: Usage reports calculated correctly; pagination works; time-based filtering
+supported
 
 ### Get Affiliate Usages Endpoint
 
-- [x] T030 [US3] [P] Implement GET /v1/mmc/affiliates/:id/usages handler: apps/api/src/handlers/affiliates/get-affiliate-usages.ts
+- [x] T030 [US3] [P] Implement GET /v1/mmc/affiliates/:id/usages handler:
+      apps/api/src/handlers/affiliates/get-affiliate-usages.ts
 - Extract affiliate ID from path
 - Load affiliate record (validate exists)
 - Query affiliate_usages WHERE affiliate_id = $1, ordered by created_at DESC
@@ -301,14 +347,16 @@ _Duration: 1 day | Depends on Phase 4 (affiliate usage records created)_
 - Error handling: 404 if affiliate not found
 - COMPLETED: Usage reporting endpoint design created
 
-- [x] T031 [US3] [P] Create unit tests for usage reporting: tests/integration/affiliates/usage-reporting.test.ts
+- [x] T031 [US3] [P] Create unit tests for usage reporting:
+      tests/integration/affiliates/usage-reporting.test.ts
 - Test: Aggregate calculations (sum, count)
 - Test: Pagination (page offset, limit)
 - Test: Sorting by created_at DESC
 - Test: Filtering by date range (optional)
 - COMPLETED: Unit tests for reporting created
 
-- [x] T032 [US3] [P] Create integration test: View affiliate usage history: tests/integration/affiliates/usage-reporting.test.ts
+- [x] T032 [US3] [P] Create integration test: View affiliate usage history:
+      tests/integration/affiliates/usage-reporting.test.ts
 - Setup: Create affiliate, create 5 usage records
 - Test: GET /usages returns all 5 records
 - Test: Aggregate totals calculated correctly
@@ -320,39 +368,48 @@ _Duration: 1 day | Depends on Phase 4 (affiliate usage records created)_
 ## Phase 6: Admin Audit Trail & Observability
 
 _Duration: 1 day | Cross-cutting concern, leverages phases 3-5_  
-**Story Goal**: Comprehensive audit logging of all affiliate operations; forensic investigation enabled; compliance reporting possible  
-**Test Criteria**: All admin actions logged; usage events logged; error events captured; correlation ID propagates through all logs
+**Story Goal**: Comprehensive audit logging of all affiliate operations; forensic investigation
+enabled; compliance reporting possible  
+**Test Criteria**: All admin actions logged; usage events logged; error events captured; correlation
+ID propagates through all logs
 
 ### Audit Trail Implementation
 
 - [x] T033 [P] Create affiliate admin audit logger: apps/api/src/services/audit-logger.ts
-- Function: logAffiliateCreate(affiliateId: UUID, adminId: UUID, newValues: object, ipAddress: string): Promise<void>
-- Function: logAffiliateUpdate(affiliateId: UUID, adminId: UUID, oldValues: object, newValues: object, ipAddress: string): Promise<void>
+- Function: logAffiliateCreate(affiliateId: UUID, adminId: UUID, newValues: object, ipAddress:
+  string): Promise<void>
+- Function: logAffiliateUpdate(affiliateId: UUID, adminId: UUID, oldValues: object, newValues:
+  object, ipAddress: string): Promise<void>
 - Function: logAffiliateDisable(affiliateId: UUID, adminId: UUID, ipAddress: string): Promise<void>
 - Functions insert into affiliate_admin_audit table transactionally
 - Capture: admin_id, action, old_values, new_values, ip_address, created_at
 - COMPLETED: Audit logging design established
 
 - [x] T034 [P] Create affiliate usage audit logger: apps/api/src/services/usage-logger.ts
-- Function: logAffiliateCodeApplied(affiliateId: UUID, clientId: UUID, licenseId: UUID, discount: Decimal, commission: Decimal, correlationId: string): Promise<void>
-- Function: logAffiliateCodeRejected(code: string, reason: string, clientId: UUID, correlationId: string): Promise<void>
+- Function: logAffiliateCodeApplied(affiliateId: UUID, clientId: UUID, licenseId: UUID, discount:
+  Decimal, commission: Decimal, correlationId: string): Promise<void>
+- Function: logAffiliateCodeRejected(code: string, reason: string, clientId: UUID, correlationId:
+  string): Promise<void>
 - Use structured logging (Pino) with required fields
 - Include: correlation_id, workspace_id (if applicable), user_id, affiliate_id, event_name
 - COMPLETED: Usage logging design established
 
 ### Structured Logging Integration
 
-- [x] T035 [P] Implement structured logging for affiliate operations: apps/api/src/middleware/affiliate-logging.ts
+- [x] T035 [P] Implement structured logging for affiliate operations:
+      apps/api/src/middleware/affiliate-logging.ts
 - Create Pino logger instance with context (service, correlation_id)
 - Log affiliate_created: event, affiliate_id, promo_code, discount_pct, commission_pct
 - Log affiliate_updated: event, affiliate_id, old_values, new_values
 - Log affiliate_disabled: event, affiliate_id
-- Log affiliate_code_applied: event, affiliate_id, promo_code, base_amount, discount_amount, commission_amount, license_id, client_id
+- Log affiliate_code_applied: event, affiliate_id, promo_code, base_amount, discount_amount,
+  commission_amount, license_id, client_id
 - Log affiliate_code_rejected: event, code, reason_code, client_id
 - All logs include timestamp, level, service, correlation_id
 - COMPLETED: Structured logging framework design established
 
-- [x] T036 [P] Create integration test: Audit trail integrity: tests/integration/affiliates/usage-reporting.test.ts
+- [x] T036 [P] Create integration test: Audit trail integrity:
+      tests/integration/affiliates/usage-reporting.test.ts
 - Test: Create affiliate → audit record exists with ACTION='CREATE'
 - Test: Update affiliate → audit record with ACTION='UPDATE', old/new values
 - Test: Disable affiliate → audit record with ACTION='DISABLE'
@@ -365,12 +422,15 @@ _Duration: 1 day | Cross-cutting concern, leverages phases 3-5_
 ## Phase 7: Error Handling & Validation
 
 _Duration: 1 day | Cross-cutting concern for all phases_  
-**Story Goal**: Comprehensive error handling; all error codes correctly returned; validation complete at API boundary  
-**Test Criteria**: All 8 error codes returned correctly; HTTP status codes match error type; error messages match spec
+**Story Goal**: Comprehensive error handling; all error codes correctly returned; validation
+complete at API boundary  
+**Test Criteria**: All 8 error codes returned correctly; HTTP status codes match error type; error
+messages match spec
 
 ### Error Handling Implementation
 
-- [x] T037 [P] Create affiliate error handler: apps/api/src/services/affiliates/ (integrated in handlers)
+- [x] T037 [P] Create affiliate error handler: apps/api/src/services/affiliates/ (integrated in
+      handlers)
 - Map error codes to HTTP status codes:
   - AFFILIATE_CODE_NOT_FOUND → 400
   - AFFILIATE_CODE_INACTIVE → 400
@@ -396,8 +456,10 @@ _Duration: 1 day | Cross-cutting concern for all phases_
 ## Phase 8: Edge Cases & Financial Precision
 
 _Duration: 1 day | Specialized testing for complex scenarios_  
-**Story Goal**: Ensure financial calculations remain deterministic; edge cases handled safely; no precision loss  
-**Test Criteria**: Fractional cent rounding consistent; large amounts calculated correctly; negative/zero amounts rejected
+**Story Goal**: Ensure financial calculations remain deterministic; edge cases handled safely; no
+precision loss  
+**Test Criteria**: Fractional cent rounding consistent; large amounts calculated correctly;
+negative/zero amounts rejected
 
 ### Financial Edge Case Tests
 
@@ -501,8 +563,10 @@ T039, T040, T041 → Edge case testing
 ### Suggested Execution Timeline
 
 **Day 1**: T001-T010 (Setup + Foundation: 0.5 + 1 day)  
-**Day 2-3**: T011-T019 (Affiliate CRUD) + T020-T029 (License Integration, stories can develop in parallel)  
-**Day 4**: T030-T032 (Usage Reporting) + T033-T041 (Observability & Edge Cases, can run in parallel)  
+**Day 2-3**: T011-T019 (Affiliate CRUD) + T020-T029 (License Integration, stories can develop in
+parallel)  
+**Day 4**: T030-T032 (Usage Reporting) + T033-T041 (Observability & Edge Cases, can run in
+parallel)  
 **Day 5**: T042-T043 (Documentation + Final Integration Tests if needed)
 
 ### Independent Test Criteria (Each Story Testable Independently)
@@ -595,13 +659,15 @@ COMMIT or ROLLBACK
 ### Error Recovery
 
 - **Lock timeout**: Return HTTP 409 Conflict (client may retry)
-- **Validation failure**: Return HTTP 400 Bad Request with specific error code (client must fix request)
+- **Validation failure**: Return HTTP 400 Bad Request with specific error code (client must fix
+  request)
 - **Data corruption**: Return HTTP 500 with correlation ID (ops team investigates logs)
 
 ### No Affiliate-Specific Rate Limiting Needed
 
 - MMC CRUD endpoints: Reuse existing admin rate limits
-- License purchase: Reuse existing license endpoint rate limits (affiliate validation is subcomponent)
+- License purchase: Reuse existing license endpoint rate limits (affiliate validation is
+  subcomponent)
 - Concurrency naturally throttled by row-level locking
 
 ---

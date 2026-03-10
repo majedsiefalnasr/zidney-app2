@@ -4,7 +4,8 @@
 **Stage:** STAGE_03_AUTHENTICATION_SYSTEM  
 **Analysis Date:** 2026-02-17  
 **Audit Scope:** spec.md ↔ plan.md ↔ tasks.md consistency  
-**Related Docs:** [spec.md](./spec.md), [plan.md](./plan.md), [tasks.md](./tasks.md), [clarify.md](./clarify.md)
+**Related Docs:** [spec.md](./spec.md), [plan.md](./plan.md), [tasks.md](./tasks.md),
+[clarify.md](./clarify.md)
 
 ---
 
@@ -43,7 +44,8 @@
 - Scope boundary: ✓ Isolated to auth layer
 - Prerequisite fulfillment: ✓ STAGE_02A/B/C ready
 - Dependency on future stages: ✓ None blocked
-- New table creation: ✓ mmc_users (MMC), users/roles/role_permissions/login_attempts/audit_logs (Tenant)
+- New table creation: ✓ mmc_users (MMC), users/roles/role_permissions/login_attempts/audit_logs
+  (Tenant)
 - New API scope: ✓ /mmc/auth/_, /backoffice/auth/_, /frontoffice/auth/\*
 
 **Result:** ✓ NO SCOPE CREEP
@@ -66,7 +68,8 @@
 **Plan Implementation:**
 
 - Login queries: `SELECT users WHERE email = $1` (tenant_db only)
-- Failed attempt tracking: `SELECT login_attempts WHERE email = $1 AND created_at > $2` (tenant_db only)
+- Failed attempt tracking: `SELECT login_attempts WHERE email = $1 AND created_at > $2` (tenant_db
+  only)
 - Token validation: `SELECT users WHERE id = $1` (tenant_db only)
 - Audit logging: `INSERT audit_logs (workspace_id = $1)` (explicit workspace_id)
 
@@ -203,13 +206,11 @@ licenseEnforcementMiddleware:
 ```typescript
 // In JWT validation middleware
 if (token.schema_version !== workspace.schema_version) {
-  throw UpgradeRequiredError(426) // User must re-login
+  throw UpgradeRequiredError(426); // User must re-login
 }
 
-if (
-  !isProductVersionCompatible(token.product_version, workspace.product_version)
-) {
-  throw UpgradeRequiredError(426)
+if (!isProductVersionCompatible(token.product_version, workspace.product_version)) {
+  throw UpgradeRequiredError(426);
 }
 ```
 
@@ -359,7 +360,8 @@ COMMIT
 - API-004: Backoffice login counts failures ✓
 - TEST-006: Concurrency test verifies no race condition ✓
 
-**Implementation Note:** Failed attempt counting happens INSIDE main login transaction (REPEATABLE READ), which ensures all updates are atomic.
+**Implementation Note:** Failed attempt counting happens INSIDE main login transaction (REPEATABLE
+READ), which ensures all updates are atomic.
 
 **Result:** ✓ FAILED ATTEMPT SERIALIZATION SAFE
 
@@ -394,15 +396,15 @@ COMMIT
 **Implementation:**
 
 ```typescript
-await tenantDb.transaction('repeatable_read', async (trx) => {
+await tenantDb.transaction("repeatable_read", async (trx) => {
   // 1-5: Perform updates
 
   // 6. Generate JWT
-  const token = await signJWT(claims) // May throw
+  const token = await signJWT(claims); // May throw
 
   // If signJWT throws, entire transaction rolls back automatically
   // No partial updates committed
-})
+});
 ```
 
 **Exception Handling:**
@@ -582,7 +584,7 @@ UPDATE schema_metadata SET schema_version = '1.1.0' WHERE version_type = 'tenant
 
 ```typescript
 if (token.schema_version !== workspace.schema_version) {
-  throw UpgradeRequiredError(426)
+  throw UpgradeRequiredError(426);
 }
 ```
 
@@ -601,9 +603,9 @@ if (token.schema_version !== workspace.schema_version) {
 ```typescript
 // SemVer compatibility function
 function isProductVersionCompatible(tokenVersion, runtimeVersion) {
-  const [tMajor] = tokenVersion.split('.')
-  const [rMajor] = runtimeVersion.split('.')
-  return tMajor === rMajor // Major must match
+  const [tMajor] = tokenVersion.split(".");
+  const [rMajor] = runtimeVersion.split(".");
+  return tMajor === rMajor; // Major must match
 }
 ```
 
@@ -648,17 +650,17 @@ function isProductVersionCompatible(tokenVersion, runtimeVersion) {
 // ✓ CORRECT
 logger.info({
   timestamp: new Date().toISOString(),
-  level: 'info',
-  service: 'auth',
-  correlation_id: c.get('correlation_id'),
+  level: "info",
+  service: "auth",
+  correlation_id: c.get("correlation_id"),
   workspace_id: workspaceId,
   user_id: userId,
-  event_type: 'login_success',
-  result: 'SUCCESS',
-})
+  event_type: "login_success",
+  result: "SUCCESS",
+});
 
 // ✗ FORBIDDEN
-console.log('User logged in') // Not structured, not Pino
+console.log("User logged in"); // Not structured, not Pino
 ```
 
 **Tasks Coverage:**
@@ -749,12 +751,12 @@ console.log('User logged in') // Not structured, not Pino
 
 ```typescript
 // ✓ BACKEND: Enforced on every request
-router.delete('/exams/:id', requirePermission('exams.delete'), handler)
+router.delete("/exams/:id", requirePermission("exams.delete"), handler);
 
 // ✗ FRONTEND: Not enforced (advisory only)
 if (userCanDelete) {
   // UI suggestion, NOT security
-  show('Delete button')
+  show("Delete button");
 }
 ```
 
@@ -774,11 +776,11 @@ if (userCanDelete) {
 **Implementation:**
 
 ```typescript
-const tokenWorkspaceId = claims.workspace_id
-const resolvedWorkspaceId = c.get('workspace_id')
+const tokenWorkspaceId = claims.workspace_id;
+const resolvedWorkspaceId = c.get("workspace_id");
 
 if (tokenWorkspaceId !== resolvedWorkspaceId) {
-  throw UnauthorizedError('Workspace mismatch') // 401
+  throw UnauthorizedError("Workspace mismatch"); // 401
 }
 ```
 
@@ -829,8 +831,7 @@ apps/api/src/routes/  ← API consume shared logic
 <button v-if="userRole === 'admin'" @click="deleteExam">Delete</button>
 
 <!-- ✗ WRONG: Frontend enforcing security -->
-if (!hasPermission('exams.delete')) { throw Error('Forbidden') // Fake security
-}
+if (!hasPermission('exams.delete')) { throw Error('Forbidden') // Fake security }
 ```
 
 **Tasks Coverage:**
@@ -848,8 +849,8 @@ if (!hasPermission('exams.delete')) { throw Error('Forbidden') // Fake security
 
 ```typescript
 if (!user) {
-  await hashPassword('') // Dummy hash (~1000ms)
-  throw InvalidCredentialsError() // Same message
+  await hashPassword(""); // Dummy hash (~1000ms)
+  throw InvalidCredentialsError(); // Same message
 }
 ```
 
@@ -875,14 +876,10 @@ if (!user) {
 
 ```typescript
 // ✓ SAFE: Parameterized via Drizzle
-const user = await trx
-  .select()
-  .from(users)
-  .where(eq(users.email, email))
-  .for('update')
+const user = await trx.select().from(users).where(eq(users.email, email)).for("update");
 
 // ✗ UNSAFE (not present): String concatenation
-const user = await db.query(`SELECT * FROM users WHERE email = '${email}'`)
+const user = await db.query(`SELECT * FROM users WHERE email = '${email}'`);
 ```
 
 **Tasks Confirmation:** All API routes use Drizzle ✓
@@ -908,11 +905,11 @@ const user = await db.query(`SELECT * FROM users WHERE email = '${email}'`)
 
 ```typescript
 cors({
-  origin: process.env.ALLOWED_ORIGINS.split(','),
+  origin: process.env.ALLOWED_ORIGINS.split(","),
   credentials: true,
-  methods: ['GET', 'POST'],
-  allowedHeaders: ['content-type', 'authorization', 'x-correlation-id'],
-})
+  methods: ["GET", "POST"],
+  allowedHeaders: ["content-type", "authorization", "x-correlation-id"],
+});
 ```
 
 **Tasks Coverage:**
@@ -1100,7 +1097,8 @@ cors({
 ## Next Steps
 
 1. **Share with team** — Distribute spec.md, plan.md, tasks.md, analyze.md
-2. **Assign tasks** — Follow dependency order (INFRA → DOMAIN → API → FRONTEND → OBS → TESTING → SECURITY → DEPLOY)
+2. **Assign tasks** — Follow dependency order (INFRA → DOMAIN → API → FRONTEND → OBS → TESTING →
+   SECURITY → DEPLOY)
 3. **Begin implementation** — Execute tasks in sequence
 4. **Run tests** — All tests must pass before merge
 5. **Merge to develop** — After all tasks complete and reviewed

@@ -1,11 +1,9 @@
 # Technical Implementation Plan: Layout System Integration
 
-**Stage**: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
-**Phase**: 06_UI_APPLICATION_RUNTIME
-**Related Spec**: `specs/runtime/ui-07-layout-system-integration/spec.md`
-**Related ADR**: None specific — aligns with import boundary rules and UI system rules in AGENTS.md
-**Branch**: `ui-07-layout-system-integration`
-**Plan Date**: 2026-03-05
+**Stage**: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION **Phase**: 06_UI_APPLICATION_RUNTIME **Related
+Spec**: `specs/runtime/ui-07-layout-system-integration/spec.md` **Related ADR**: None specific —
+aligns with import boundary rules and UI system rules in AGENTS.md **Branch**:
+`ui-07-layout-system-integration` **Plan Date**: 2026-03-05
 
 ---
 
@@ -95,7 +93,8 @@ Not applicable. No API mutations, no attempt workflows, no state-critical extern
 
 ## Version Enforcement Strategy
 
-Not applicable. Version compatibility is enforced by backend middleware before views mount. Layout layer operates downstream of all version checks.
+Not applicable. Version compatibility is enforced by backend middleware before views mount. Layout
+layer operates downstream of all version checks.
 
 ---
 
@@ -107,7 +106,8 @@ Not applicable. Layout layer does not involve time-sensitive operations.
 
 ## Prerequisite Gap Resolution
 
-Before implementing any layout component, the following prerequisite gaps identified in research must be resolved first:
+Before implementing any layout component, the following prerequisite gaps identified in research
+must be resolved first:
 
 ### Gap 1 — Add @zidney/ui-system to MMC
 
@@ -120,11 +120,14 @@ MMC's `apps/mmc/package.json` does not include `@zidney/ui-system`. Add it.
 
 ### Gap 2 — Extend ui.store in All Three Apps
 
-Add `sidebarCollapsed`, `isMobile`, `toggleSidebar()`, `setMobile()` to each app's existing `ui.store.ts`. Preserve existing modal/drawer state unchanged.
+Add `sidebarCollapsed`, `isMobile`, `toggleSidebar()`, `setMobile()` to each app's existing
+`ui.store.ts`. Preserve existing modal/drawer state unchanged.
 
 ### Gap 3 — Add resolvedPermissions to auth.store in All Three Apps
 
-Add `resolvedPermissions: ref<Record<string, boolean>>({})` to each auth store's state. Populate during `setSession()` and `initSession()` from the user profile's permissions data. Clear in `resetState()`.
+Add `resolvedPermissions: ref<Record<string, boolean>>({})` to each auth store's state. Populate
+during `setSession()` and `initSession()` from the user profile's permissions data. Clear in
+`resetState()`.
 
 ### Gap 4 — Extend RouteMeta in All Three Apps
 
@@ -144,27 +147,27 @@ Add `standaloneLayout?: boolean` and `hideSidebar?: boolean` to each app's `core
 
 ```ts
 // Add to each ui.store.ts — preserve all existing state unchanged
-const sidebarCollapsed = ref<boolean>(false)
-const isMobile = ref<boolean>(false)
+const sidebarCollapsed = ref<boolean>(false);
+const isMobile = ref<boolean>(false);
 ```
 
 ### New Actions (to add alongside existing actions):
 
 ```ts
 function toggleSidebar(): void {
-  sidebarCollapsed.value = !sidebarCollapsed.value
+  sidebarCollapsed.value = !sidebarCollapsed.value;
 }
 
 function setMobile(val: boolean): void {
-  if (isMobile.value === val) return // no-op if unchanged
-  isMobile.value = val
+  if (isMobile.value === val) return; // no-op if unchanged
+  isMobile.value = val;
   // CL-005: atomic reset of sidebarCollapsed on breakpoint transition
   if (val) {
     // Desktop → Mobile: hide sidebar by default
-    sidebarCollapsed.value = true
+    sidebarCollapsed.value = true;
   } else {
     // Mobile → Desktop: expand sidebar
-    sidebarCollapsed.value = false
+    sidebarCollapsed.value = false;
   }
 }
 ```
@@ -178,7 +181,7 @@ return {
   isMobile,
   toggleSidebar,
   setMobile,
-}
+};
 ```
 
 ### Updated $reset (extend existing):
@@ -186,8 +189,8 @@ return {
 ```ts
 function $reset(): void {
   // ... existing resets ...
-  sidebarCollapsed.value = false
-  isMobile.value = false
+  sidebarCollapsed.value = false;
+  isMobile.value = false;
 }
 ```
 
@@ -211,7 +214,7 @@ function $reset(): void {
 
 ```ts
 // Add inside defineStore factory, alongside existing state refs
-const resolvedPermissions = ref<Record<string, boolean>>({})
+const resolvedPermissions = ref<Record<string, boolean>>({});
 ```
 
 ### Integration with existing actions:
@@ -219,22 +222,22 @@ const resolvedPermissions = ref<Record<string, boolean>>({})
 ```ts
 // Inside setSession():
 function setSession(accessToken: string, profile: AuthUser): void {
-  tokenManager.setToken(accessToken)
-  user.value = profile
-  isAuthenticated.value = true
-  isLoading.value = false
-  authError.value = null
+  tokenManager.setToken(accessToken);
+  user.value = profile;
+  isAuthenticated.value = true;
+  isLoading.value = false;
+  authError.value = null;
   // Populate resolved permissions from profile
-  resolvedPermissions.value = buildResolvedPermissions(profile)
-  logger.info('Session established', { userId: profile.id })
+  resolvedPermissions.value = buildResolvedPermissions(profile);
+  logger.info("Session established", { userId: profile.id });
 }
 
 // Inside resetState() helper:
 function resetState(): void {
-  isAuthenticated.value = false
-  user.value = null
-  authError.value = null
-  resolvedPermissions.value = {} // ← clear on logout/expire
+  isAuthenticated.value = false;
+  user.value = null;
+  authError.value = null;
+  resolvedPermissions.value = {}; // ← clear on logout/expire
 }
 ```
 
@@ -246,12 +249,12 @@ function buildResolvedPermissions(profile: AuthUser): Record<string, boolean> {
   // If AuthUser has a permissions array or record, transform it here.
   // Implementation depends on AuthUser.permissions field shape.
   // Safe default: empty record if profile has no permissions field.
-  if (!profile.permissions) return {}
+  if (!profile.permissions) return {};
   if (Array.isArray(profile.permissions)) {
-    return Object.fromEntries(profile.permissions.map((p: string) => [p, true]))
+    return Object.fromEntries(profile.permissions.map((p: string) => [p, true]));
   }
   // If already a Record<string, boolean>, return as-is
-  return profile.permissions as Record<string, boolean>
+  return profile.permissions as Record<string, boolean>;
 }
 ```
 
@@ -261,10 +264,12 @@ function buildResolvedPermissions(profile: AuthUser): Record<string, boolean> {
 return {
   // ... existing returns ...
   resolvedPermissions,
-}
+};
 ```
 
-> **Note**: The exact `AuthUser.permissions` shape must be verified against `apps/mmc/src/core/auth/types.ts` during implementation. The builder function handles both array-of-strings and record formats safely.
+> **Note**: The exact `AuthUser.permissions` shape must be verified against
+> `apps/mmc/src/core/auth/types.ts` during implementation. The builder function handles both
+> array-of-strings and record formats safely.
 
 ---
 
@@ -288,24 +293,24 @@ hideSidebar?: boolean
 ### Example (MMC types.ts after change):
 
 ```ts
-declare module 'vue-router' {
+declare module "vue-router" {
   interface RouteMeta {
-    requiresAuth?: boolean
-    public?: boolean
-    roles?: string[]
-    requiresWorkspace?: boolean
-    standaloneLayout?: boolean // ← new
-    hideSidebar?: boolean // ← new (Frontoffice only, but defined in all for type safety)
+    requiresAuth?: boolean;
+    public?: boolean;
+    roles?: string[];
+    requiresWorkspace?: boolean;
+    standaloneLayout?: boolean; // ← new
+    hideSidebar?: boolean; // ← new (Frontoffice only, but defined in all for type safety)
   }
 }
 
 export interface RouteMeta extends VueRouteMeta {
-  requiresAuth?: boolean
-  public?: boolean
-  roles?: string[]
-  requiresWorkspace?: boolean
-  standaloneLayout?: boolean // ← new
-  hideSidebar?: boolean // ← new
+  requiresAuth?: boolean;
+  public?: boolean;
+  roles?: string[];
+  requiresWorkspace?: boolean;
+  standaloneLayout?: boolean; // ← new
+  hideSidebar?: boolean; // ← new
 }
 ```
 
@@ -330,15 +335,15 @@ export interface RouteMeta extends VueRouteMeta {
  */
 export interface NavigationItem {
   /** Named route (must exist in this app's router) */
-  routeName: string
+  routeName: string;
   /** Display label (may be i18n key or raw string) */
-  label: string
+  label: string;
   /** Lucide icon name from @zidney/ui-system icon set */
-  icon?: string
+  icon?: string;
   /** Permission key — looked up in auth.store.resolvedPermissions */
-  permission?: string
+  permission?: string;
   /** Nested items (max 1 level deep) */
-  children?: NavigationItem[]
+  children?: NavigationItem[];
 }
 
 /**
@@ -346,15 +351,15 @@ export interface NavigationItem {
  */
 export interface NavigationGroup {
   /** Optional group section label */
-  label?: string
-  items: NavigationItem[]
+  label?: string;
+  items: NavigationItem[];
 }
 
 /**
  * Full navigation configuration for the app.
  * Type alias: array of NavigationGroup entries.
  */
-export type NavigationConfig = NavigationGroup[]
+export type NavigationConfig = NavigationGroup[];
 ```
 
 ### MMC Navigation Config (starter — platform-level items only):
@@ -364,23 +369,23 @@ export type NavigationConfig = NavigationGroup[]
 
 export const navigationConfig: NavigationConfig = [
   {
-    label: 'Platform',
+    label: "Platform",
     items: [
       {
-        routeName: 'mmc.dashboard',
-        label: 'Dashboard',
-        icon: 'LayoutDashboard',
-        permission: 'platform.view',
+        routeName: "mmc.dashboard",
+        label: "Dashboard",
+        icon: "LayoutDashboard",
+        permission: "platform.view",
       },
       {
-        routeName: 'mmc.workspaces',
-        label: 'Workspaces',
-        icon: 'Building2',
-        permission: 'workspace.list',
+        routeName: "mmc.workspaces",
+        label: "Workspaces",
+        icon: "Building2",
+        permission: "workspace.list",
       },
     ],
   },
-]
+];
 ```
 
 ### Backoffice Navigation Config (starter — workspace-level items):
@@ -390,22 +395,22 @@ export const navigationConfig: NavigationConfig = [
 
 export const navigationConfig: NavigationConfig = [
   {
-    label: 'Management',
+    label: "Management",
     items: [
       {
-        routeName: 'bo.dashboard',
-        label: 'Dashboard',
-        icon: 'LayoutDashboard',
+        routeName: "bo.dashboard",
+        label: "Dashboard",
+        icon: "LayoutDashboard",
       },
       {
-        routeName: 'bo.exams',
-        label: 'Exams',
-        icon: 'FileText',
-        permission: 'exam.list',
+        routeName: "bo.exams",
+        label: "Exams",
+        icon: "FileText",
+        permission: "exam.list",
       },
     ],
   },
-]
+];
 ```
 
 ### Frontoffice Navigation Config (starter — minimal student items):
@@ -417,21 +422,23 @@ export const navigationConfig: NavigationConfig = [
   {
     items: [
       {
-        routeName: 'fo.home',
-        label: 'Home',
-        icon: 'Home',
+        routeName: "fo.home",
+        label: "Home",
+        icon: "Home",
       },
       {
-        routeName: 'fo.exams',
-        label: 'My Exams',
-        icon: 'ClipboardList',
+        routeName: "fo.exams",
+        label: "My Exams",
+        icon: "ClipboardList",
       },
     ],
   },
-]
+];
 ```
 
-> **Note**: Actual route names must be verified against each app's router before final implementation. These are starter configs — feature teams will add their entries in their respective stages.
+> **Note**: Actual route names must be verified against each app's router before final
+> implementation. These are starter configs — feature teams will add their entries in their
+> respective stages.
 
 ---
 
@@ -497,7 +504,8 @@ export function useBreakpoint(): void {
 - Tablet: `768px – 1023px` (md range)
 - Desktop: `≥ 1024px` (lg+)
 
-The composable uses a single `MOBILE_BREAKPOINT` threshold (768px) to toggle the `isMobile` flag. Desktop/tablet distinction is handled via CSS Tailwind classes responding to `isMobile` store state.
+The composable uses a single `MOBILE_BREAKPOINT` threshold (768px) to toggle the `isMobile` flag.
+Desktop/tablet distinction is handled via CSS Tailwind classes responding to `isMobile` store state.
 
 ---
 
@@ -514,7 +522,7 @@ The composable uses a single `MOBILE_BREAKPOINT` threshold (768px) to toggle the
 ```ts
 interface AppHeaderProps {
   /** Show workspace name region (Backoffice: true; MMC + Frontoffice: false) */
-  showWorkspace?: boolean
+  showWorkspace?: boolean;
 }
 ```
 
@@ -527,7 +535,8 @@ interface AppHeaderProps {
 
 ### Store Dependencies (read-only):
 
-- **All apps**: `auth.store.currentUser` (user name/avatar display), `auth.store.logout()` (header logout action)
+- **All apps**: `auth.store.currentUser` (user name/avatar display), `auth.store.logout()` (header
+  logout action)
 - **Backoffice only**: `workspace.store.workspace?.name` (workspace display name)
 
 ### Template Structure (MMC/Frontoffice variant):
@@ -643,10 +652,10 @@ async function handleLogout(): Promise<void> {
 
 ```ts
 // CL-003 correction applied: NavigationConfig (not NavigationConfig[])
-import type { NavigationConfig } from '../core/navigation'
+import type { NavigationConfig } from "../core/navigation";
 
 interface AppSidebarProps {
-  navigationConfig: NavigationConfig // NavigationGroup[]
+  navigationConfig: NavigationConfig; // NavigationGroup[]
 }
 ```
 
@@ -671,18 +680,17 @@ interface AppSidebarProps {
 // Applied per NavigationGroup:
 function filterItems(items: NavigationItem[]): NavigationItem[] {
   return items.filter(
-    (item) =>
-      !item.permission || resolvedPermissions.value[item.permission] === true
-  )
+    (item) => !item.permission || resolvedPermissions.value[item.permission] === true,
+  );
 }
 ```
 
 ### Active Route Detection:
 
 ```ts
-import { useRoute } from 'vue-router'
-const route = useRoute()
-const activeRouteName = computed(() => route.name as string | undefined)
+import { useRoute } from "vue-router";
+const route = useRoute();
+const activeRouteName = computed(() => route.name as string | undefined);
 ```
 
 ### Template Structure:
@@ -708,25 +716,27 @@ const activeRouteName = computed(() => route.name as string | undefined)
 ```ts
 function handleCollapseToggle(_collapsed: boolean): void {
   // Delegate to store — no direct property mutation (FR-009)
-  uiStore.toggleSidebar()
+  uiStore.toggleSidebar();
 }
 ```
 
 ### Mobile Overlay Mode:
 
-When `isMobile === true`, the sidebar renders as an overlay drawer (positioned fixed over content). When `isMobile === false`, sidebar is inline.
+When `isMobile === true`, the sidebar renders as an overlay drawer (positioned fixed over content).
+When `isMobile === false`, sidebar is inline.
 
 ```ts
 const sidebarClass = computed(() => ({
-  'app-sidebar--overlay': isMobile.value,
-  'app-sidebar--inline': !isMobile.value,
-  'app-sidebar--collapsed': sidebarCollapsed.value,
-}))
+  "app-sidebar--overlay": isMobile.value,
+  "app-sidebar--inline": !isMobile.value,
+  "app-sidebar--collapsed": sidebarCollapsed.value,
+}));
 ```
 
 ### Processed Navigation Items:
 
-The component transforms `NavigationConfig` into the `NavItem[]` shape expected by `SidebarLayout`, applying permission filtering:
+The component transforms `NavigationConfig` into the `NavItem[]` shape expected by `SidebarLayout`,
+applying permission filtering:
 
 ```ts
 const processedNavItems = computed(() => {
@@ -736,12 +746,14 @@ const processedNavItems = computed(() => {
       label: item.label,
       icon: item.icon,
       show: true,
-    }))
-  )
-})
+    })),
+  );
+});
 ```
 
-> **Note**: Group labels are rendered separately using the `SidebarLayout`'s structure. Investigate `SidebarLayout`'s actual API — if it does not natively support group headings, they may need to be rendered as non-interactive dividers inside the items array or via custom slot content.
+> **Note**: Group labels are rendered separately using the `SidebarLayout`'s structure. Investigate
+> `SidebarLayout`'s actual API — if it does not natively support group headings, they may need to be
+> rendered as non-interactive dividers inside the items array or via custom slot content.
 
 ---
 
@@ -758,7 +770,7 @@ const processedNavItems = computed(() => {
 ```ts
 interface AppLayoutProps {
   /** Hides AppSidebar entirely (Frontoffice route-meta-driven, CL-004) */
-  hideSidebar?: boolean
+  hideSidebar?: boolean;
 }
 ```
 
@@ -876,7 +888,8 @@ const showWorkspaceInHeader = false
 
 ### Per-App Deltas:
 
-- **Backoffice**: `showWorkspaceInHeader = true`; import `useBackofficeUiStore` and `useBackofficeAuthStore`
+- **Backoffice**: `showWorkspaceInHeader = true`; import `useBackofficeUiStore` and
+  `useBackofficeAuthStore`
 - **Frontoffice**: `showWorkspaceInHeader = false`; import `useFrontofficeUiStore`
 
 ---
@@ -902,10 +915,10 @@ const showWorkspaceInHeader = false
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-import AppLayout from './components/AppLayout.vue'
+import { useRoute } from "vue-router";
+import AppLayout from "./components/AppLayout.vue";
 
-const route = useRoute()
+const route = useRoute();
 </script>
 ```
 
@@ -922,14 +935,19 @@ const route = useRoute()
 </template>
 
 <script setup lang="ts">
-import { useRoute } from 'vue-router'
-import AppLayout from './components/AppLayout.vue'
+import { useRoute } from "vue-router";
+import AppLayout from "./components/AppLayout.vue";
 
-const route = useRoute()
+const route = useRoute();
 </script>
 ```
 
-> **Note on router-view inside AppLayout**: The `<router-view />` inside `<AppLayout>` renders into the AppLayout's default/content slot (or is placed in the main content area by AppLayout's template structure, not via slot). The AppLayout's template directly contains `<router-view />` — feature views do not need to pass themselves as slots. The AppLayout's `content-top` and `content-bottom` slots are optionally filled by feature views using Vue's `<template v-slot:content-top>` syntax from their own templates.
+> **Note on router-view inside AppLayout**: The `<router-view />` inside `<AppLayout>` renders into
+> the AppLayout's default/content slot (or is placed in the main content area by AppLayout's
+> template structure, not via slot). The AppLayout's template directly contains `<router-view />` —
+> feature views do not need to pass themselves as slots. The AppLayout's `content-top` and
+> `content-bottom` slots are optionally filled by feature views using Vue's
+> `<template v-slot:content-top>` syntax from their own templates.
 
 ---
 
@@ -942,7 +960,9 @@ Existing routes that must declare `meta: { standaloneLayout: true }`:
 - Frontoffice: attempt runtime routes must declare `meta: { standaloneLayout: true }`
 - Frontoffice: routes where sidebar is hidden declare `meta: { hideSidebar: true }`
 
-> **Implementation note**: Identify and update all such existing route definitions in each app's router. This is a cross-cutting concern that touches the existing route files in `apps/<app>/src/core/router/index.ts`.
+> **Implementation note**: Identify and update all such existing route definitions in each app's
+> router. This is a cross-cutting concern that touches the existing route files in
+> `apps/<app>/src/core/router/index.ts`.
 
 ---
 
@@ -987,22 +1007,22 @@ tests/unit/frontoffice/core/state/ui.store.layout.test.ts
 
 ```ts
 // Pattern for all component tests
-import { createTestingPinia } from '@pinia/testing'
-import { mount } from '@vue/test-utils'
-import { vi } from 'vitest'
+import { createTestingPinia } from "@pinia/testing";
+import { mount } from "@vue/test-utils";
+import { vi } from "vitest";
 
 const mockUiStore = {
   sidebarCollapsed: false,
   isMobile: false,
   toggleSidebar: vi.fn(),
   setMobile: vi.fn(),
-}
+};
 
 const mockAuthStore = {
-  user: { id: '1', name: 'Test User', email: 'test@example.com' },
-  resolvedPermissions: { 'exam.list': true, 'platform.view': true },
+  user: { id: "1", name: "Test User", email: "test@example.com" },
+  resolvedPermissions: { "exam.list": true, "platform.view": true },
   logout: vi.fn(),
-}
+};
 
 const wrapper = mount(AppLayout, {
   global: {
@@ -1010,14 +1030,14 @@ const wrapper = mount(AppLayout, {
       createTestingPinia({
         createSpy: vi.fn,
         initialState: {
-          'mmc-ui': mockUiStore,
-          'mmc-auth': mockAuthStore,
+          "mmc-ui": mockUiStore,
+          "mmc-auth": mockAuthStore,
         },
       }),
     ],
     stubs: { RouterView: true },
   },
-})
+});
 ```
 
 ### Test Plan per Component:
@@ -1072,7 +1092,9 @@ const wrapper = mount(AppLayout, {
 | Calls `setMobile` when window resize crosses threshold | Store action called on simulated resize |
 | Removes event listener on unmount                      | No memory leaks                         |
 
-**Responsive testing methodology** (NFR-005): Mock `window.innerWidth` by setting `Object.defineProperty(window, 'innerWidth', { value: 767, writable: true })` before mount, then dispatch a synthetic `resize` event.
+**Responsive testing methodology** (NFR-005): Mock `window.innerWidth` by setting
+`Object.defineProperty(window, 'innerWidth', { value: 767, writable: true })` before mount, then
+dispatch a synthetic `resize` event.
 
 #### ui.store layout extension tests:
 
@@ -1114,19 +1136,16 @@ tests/unit/mmc/App.test.ts
 ```ts
 const wrapper = mount(AppLayout, {
   slots: {
-    'header-left': '<div data-testid="header-left-injection">Title</div>',
-    'header-right': '<div data-testid="header-right-injection">Actions</div>',
-    'sidebar-footer': '<div data-testid="sidebar-footer-injection">v1.0</div>',
-    'content-top': '<div data-testid="content-top-injection">Breadcrumb</div>',
-    'content-bottom':
-      '<div data-testid="content-bottom-injection">Footer</div>',
+    "header-left": '<div data-testid="header-left-injection">Title</div>',
+    "header-right": '<div data-testid="header-right-injection">Actions</div>',
+    "sidebar-footer": '<div data-testid="sidebar-footer-injection">v1.0</div>',
+    "content-top": '<div data-testid="content-top-injection">Breadcrumb</div>',
+    "content-bottom": '<div data-testid="content-bottom-injection">Footer</div>',
   },
   // ... store mocks
-})
+});
 
-expect(wrapper.find('[data-testid="header-left-injection"]').exists()).toBe(
-  true
-)
+expect(wrapper.find('[data-testid="header-left-injection"]').exists()).toBe(true);
 // etc.
 ```
 
@@ -1157,7 +1176,8 @@ expect(wrapper.find('[data-testid="header-left-injection"]').exists()).toBe(
 | 19   | Write App.vue standalone bypass tests (all 3 apps)           | `tests/unit/*/App.test.ts`                           | Step 10          |
 | 20   | Run lint + type-check across all apps                        | CI validation                                        | All above        |
 
-**Total estimated tasks**: ~60 discrete tasks (20 steps × 3 apps average, with some steps app-specific)
+**Total estimated tasks**: ~60 discrete tasks (20 steps × 3 apps average, with some steps
+app-specific)
 
 ---
 
@@ -1165,38 +1185,58 @@ expect(wrapper.find('[data-testid="header-left-injection"]').exists()).toBe(
 
 ### Risk 1 — ui.store Extension Regression (HIGH)
 
-**Risk**: Adding `sidebarCollapsed`/`isMobile` to existing ui.store may conflict with existing modal/drawer usage or break existing tests that assert on store state shape.
-**Mitigation**: Add new state in a separate section of the store file. Ensure `$reset()` extension does not interfere with existing reset behavior. Run existing ui.store tests after the extension.
+**Risk**: Adding `sidebarCollapsed`/`isMobile` to existing ui.store may conflict with existing
+modal/drawer usage or break existing tests that assert on store state shape. **Mitigation**: Add new
+state in a separate section of the store file. Ensure `$reset()` extension does not interfere with
+existing reset behavior. Run existing ui.store tests after the extension.
 
 ### Risk 2 — auth.store resolvedPermissions Population Timing (HIGH)
 
-**Risk**: `resolvedPermissions` may be `{}` during initial render if `setSession()` hasn't been called yet (e.g., during session restore via `initSession()`). Sidebar will render with all permission-gated items hidden until permissions populate.
-**Mitigation**: AppSidebar's `filterItems` must handle the empty-record case gracefully (items with `permission` are hidden until permissions load). This is expected behavior per spec edge cases. Ensure `initSession()` also populates `resolvedPermissions` from the fetched profile.
+**Risk**: `resolvedPermissions` may be `{}` during initial render if `setSession()` hasn't been
+called yet (e.g., during session restore via `initSession()`). Sidebar will render with all
+permission-gated items hidden until permissions populate. **Mitigation**: AppSidebar's `filterItems`
+must handle the empty-record case gracefully (items with `permission` are hidden until permissions
+load). This is expected behavior per spec edge cases. Ensure `initSession()` also populates
+`resolvedPermissions` from the fetched profile.
 
 ### Risk 3 — BackofficeLayout.vue Migration (MEDIUM)
 
-**Risk**: Existing routes that render inside `BackofficeLayout.vue` use it as a layout wrapper component placed in the router (not App.vue). Migrating to the App.vue shell approach may break existing route tree structures.
-**Mitigation**: Audit all Backoffice routes that currently use `BackofficeLayout.vue`. Remove it from route definitions and replace with the canonical `meta: { requiresAuth: true }` approach after App.vue wraps with AppLayout. Ensure no feature views directly import BackofficeLayout.
+**Risk**: Existing routes that render inside `BackofficeLayout.vue` use it as a layout wrapper
+component placed in the router (not App.vue). Migrating to the App.vue shell approach may break
+existing route tree structures. **Mitigation**: Audit all Backoffice routes that currently use
+`BackofficeLayout.vue`. Remove it from route definitions and replace with the canonical
+`meta: { requiresAuth: true }` approach after App.vue wraps with AppLayout. Ensure no feature views
+directly import BackofficeLayout.
 
 ### Risk 4 — MMC Missing @zidney/ui-system (MEDIUM)
 
 **Risk**: After adding `@zidney/ui-system` to MMC, the package bundle size increases significantly.
-**Mitigation**: Tree-shaking via Vite's ESM build will limit the impact. Only imported components are included. Monitor bundle size in CI.
+**Mitigation**: Tree-shaking via Vite's ESM build will limit the impact. Only imported components
+are included. Monitor bundle size in CI.
 
 ### Risk 5 — SidebarLayout Group Headings (LOW)
 
-**Risk**: `SidebarLayout.vue` in ui-system does not natively support group labels — it only renders `NavItem[]` flat. The `NavigationGroup.label` field cannot be rendered without ui-system modification or a custom rendering approach.
-**Mitigation**: In Phase 1 implementation, render group labels as non-interactive separator items in the processed nav items array (with a special `disabled: true` + no `icon` shape), or handle groups entirely in `AppSidebar.vue`'s template alongside the `SidebarLayout`. If this is a blocker, an enhancement to `SidebarLayout` in `@zidney/ui-system` may be needed.
+**Risk**: `SidebarLayout.vue` in ui-system does not natively support group labels — it only renders
+`NavItem[]` flat. The `NavigationGroup.label` field cannot be rendered without ui-system
+modification or a custom rendering approach. **Mitigation**: In Phase 1 implementation, render group
+labels as non-interactive separator items in the processed nav items array (with a special
+`disabled: true` + no `icon` shape), or handle groups entirely in `AppSidebar.vue`'s template
+alongside the `SidebarLayout`. If this is a blocker, an enhancement to `SidebarLayout` in
+`@zidney/ui-system` may be needed.
 
 ### Risk 6 — AuthUser.permissions Type Shape (LOW)
 
-**Risk**: `AuthUser` type (in `apps/*/src/core/auth/types.ts`) may not include a `permissions` field, requiring the `buildResolvedPermissions` helper to return `{}` always until the auth module adds it.
-**Mitigation**: Verify `AuthUser` type at implementation time. If no permissions field exists yet, `resolvedPermissions` defaults to `{}` and the sidebar shows only `permission`-free items. Document this as a prerequisite for `ui-01-auth-module` extension.
+**Risk**: `AuthUser` type (in `apps/*/src/core/auth/types.ts`) may not include a `permissions`
+field, requiring the `buildResolvedPermissions` helper to return `{}` always until the auth module
+adds it. **Mitigation**: Verify `AuthUser` type at implementation time. If no permissions field
+exists yet, `resolvedPermissions` defaults to `{}` and the sidebar shows only `permission`-free
+items. Document this as a prerequisite for `ui-01-auth-module` extension.
 
 ### Risk 7 — BackofficeLayout.vue Import Dependencies (LOW)
 
-**Risk**: Other files may import from `BackofficeLayout.vue` directly (violating FR-007 but potentially existing already).
-**Mitigation**: Search all Backoffice source files for imports of `BackofficeLayout` before deprecating. Clean up any found imports.
+**Risk**: Other files may import from `BackofficeLayout.vue` directly (violating FR-007 but
+potentially existing already). **Mitigation**: Search all Backoffice source files for imports of
+`BackofficeLayout` before deprecating. Clean up any found imports.
 
 ---
 

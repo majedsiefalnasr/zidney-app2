@@ -11,9 +11,11 @@
 
 ## Executive Overview
 
-This plan establishes the implementation roadmap for transforming Zidney's architecture governance metadata into **machine-readable artifacts optimized for AI consumption**.
+This plan establishes the implementation roadmap for transforming Zidney's architecture governance
+metadata into **machine-readable artifacts optimized for AI consumption**.
 
-The stage generates 7 JSON/Markdown artifacts into `docs/ai/context/` that enable AI agents (Copilot, GitNexus, SpecKit, Claude) to:
+The stage generates 7 JSON/Markdown artifacts into `docs/ai/context/` that enable AI agents
+(Copilot, GitNexus, SpecKit, Claude) to:
 
 1. Understand architectural layering rules
 2. Validate module boundary compliance
@@ -21,9 +23,11 @@ The stage generates 7 JSON/Markdown artifacts into `docs/ai/context/` that enabl
 4. Load architecture context automatically
 5. Detect governance violations in generated code
 
-**Scope:** Pure governance infrastructure — zero runtime impact, zero data model changes, zero tenant isolation modifications.
+**Scope:** Pure governance infrastructure — zero runtime impact, zero data model changes, zero
+tenant isolation modifications.
 
-**Key Decision:** Artifacts are generated from source metadata + infra-audit output, validated by schema, and consumed by multiple AI tools through standard access patterns.
+**Key Decision:** Artifacts are generated from source metadata + infra-audit output, validated by
+schema, and consumed by multiple AI tools through standard access patterns.
 
 ---
 
@@ -298,150 +302,150 @@ Consumer Layer:
 
 ```typescript
 // Semantic versioning for artifact schema compatibility
-type SchemaVersion = string // "1.0.0"
+type SchemaVersion = string; // "1.0.0"
 
 // 1. ai-architecture-summary.md
 // No strict type; Markdown is human-readable
 // But document structure:
 interface ArchitectureSummaryStructure {
   sections: {
-    systemLayersOverview: string
-    applicationsDirectory: string
-    packagesDirectory: string
-    architecturePrinciples: string
-    keyConstraintsAndRules: string
-  }
+    systemLayersOverview: string;
+    applicationsDirectory: string;
+    packagesDirectory: string;
+    architecturePrinciples: string;
+    keyConstraintsAndRules: string;
+  };
 }
 
 // 2. ai-module-map.json
 interface AIModuleMap {
-  schema_version: SchemaVersion
-  generated_at: string // ISO 8601
+  schema_version: SchemaVersion;
+  generated_at: string; // ISO 8601
   source_metadata: {
-    module_boundaries_hash: string
-    audit_timestamp: string
-  }
+    module_boundaries_hash: string;
+    audit_timestamp: string;
+  };
   modules: {
-    [modulePath: string]: ModuleEntry
-  }
+    [modulePath: string]: ModuleEntry;
+  };
 }
 
 interface ModuleEntry {
-  layer: 'ui' | 'runtime' | 'domain' | 'infrastructure'
-  type: 'application' | 'package'
-  description: string
-  path: string
-  dependencies?: string[]
+  layer: "ui" | "runtime" | "domain" | "infrastructure";
+  type: "application" | "package";
+  description: string;
+  path: string;
+  dependencies?: string[];
 }
 
 // 3. ai-layer-model.json
 interface AILayerModel {
-  schema_version: SchemaVersion
-  generated_at: string
+  schema_version: SchemaVersion;
+  generated_at: string;
   source_metadata: {
-    module_boundaries_hash: string
-  }
+    module_boundaries_hash: string;
+  };
   layers: Array<{
-    name: 'ui' | 'runtime' | 'domain' | 'infrastructure'
-    description: string
-  }>
+    name: "ui" | "runtime" | "domain" | "infrastructure";
+    description: string;
+  }>;
   rules: {
-    [layerName: string]: LayerRule
-  }
+    [layerName: string]: LayerRule;
+  };
 }
 
 interface LayerRule {
-  imports_allowed: string[]
-  imports_forbidden: string[]
+  imports_allowed: string[];
+  imports_forbidden: string[];
 }
 
 // 4. ai-dependency-graph.json
 interface AIDependencyGraph {
-  schema_version: SchemaVersion
-  generated_at: string
+  schema_version: SchemaVersion;
+  generated_at: string;
   source_metadata: {
-    infra_audit_timestamp: string
-  }
+    infra_audit_timestamp: string;
+  };
   modules: {
     [modulePath: string]: {
-      dependencies: string[]
-      layer: string
-      type: 'app' | 'package'
-    }
-  }
+      dependencies: string[];
+      layer: string;
+      type: "app" | "package";
+    };
+  };
   reverse_dependencies: {
-    [modulePath: string]: string[]
-  }
-  violations?: DependencyViolation[]
+    [modulePath: string]: string[];
+  };
+  violations?: DependencyViolation[];
 }
 
 interface DependencyViolation {
-  from: string
-  to: string
-  reason: string
-  severity: 'error' | 'warning'
+  from: string;
+  to: string;
+  reason: string;
+  severity: "error" | "warning";
 }
 
 // 5. ai-runtime-map.json
 interface AIRuntimeMap {
-  schema_version: SchemaVersion
-  generated_at: string
+  schema_version: SchemaVersion;
+  generated_at: string;
   services: {
-    [serviceName: string]: ServiceDefinition
-  }
+    [serviceName: string]: ServiceDefinition;
+  };
 }
 
 interface ServiceDefinition {
-  module: string
-  runtime: string
-  framework: string
-  depends_on: string[]
+  module: string;
+  runtime: string;
+  framework: string;
+  depends_on: string[];
   environment?: {
-    [key: string]: string
-  }
+    [key: string]: string;
+  };
 }
 
 // 6. ai-architecture-brain.json
 interface AIArchitectureBrain {
-  schema_version: SchemaVersion
-  generated_at: string
+  schema_version: SchemaVersion;
+  generated_at: string;
   metadata: {
-    total_modules: number
+    total_modules: number;
     layer_distribution: {
-      [layer: string]: number
-    }
-    total_dependencies: number
-    violations_found: number
-  }
+      [layer: string]: number;
+    };
+    total_dependencies: number;
+    violations_found: number;
+  };
   module_assignments: {
     [modulePath: string]: {
-      layer: string
-      type: string
-      risk_level: 'LOW' | 'MEDIUM' | 'HIGH'
-    }
-  }
-  dependency_graph: AIDependencyGraph
-  rules_active: AILayerModel['rules']
-  violations: DependencyViolation[]
-  architecture_score: number // 0-100
+      layer: string;
+      type: string;
+      risk_level: "LOW" | "MEDIUM" | "HIGH";
+    };
+  };
+  dependency_graph: AIDependencyGraph;
+  rules_active: AILayerModel["rules"];
+  violations: DependencyViolation[];
+  architecture_score: number; // 0-100
 }
 
 // 7. ai-context-mini.json
 interface AIContextMini {
-  schema_version: SchemaVersion
-  generated_at: string
+  schema_version: SchemaVersion;
+  generated_at: string;
   layers: Array<{
-    name: string
-    description: string
-  }>
+    name: string;
+    description: string;
+  }>;
   module_to_layer: {
-    [modulePath: string]: string
-  }
-  key_constraints: string[]
+    [modulePath: string]: string;
+  };
+  key_constraints: string[];
   forbidden_dependencies: Array<{
-    from: string
-    to: string
-  }>
+    from: string;
+    to: string;
+  }>;
 }
 ```
 
@@ -559,12 +563,12 @@ docs/ai/context/schemas/
 6. **Logging & Observability**
    ```typescript
    type GenerationMetrics = {
-     total_modules: number
-     layer_distribution: {[key: string]: number}
-     artifact_sizes: {[key: string]: number}
-     generation_duration_ms: number
-     violations_found: number
-   }
+     total_modules: number;
+     layer_distribution: { [key: string]: number };
+     artifact_sizes: { [key: string]: number };
+     generation_duration_ms: number;
+     violations_found: number;
+   };
    ```
 
 **Execution Flow:**
@@ -594,7 +598,8 @@ generate-ai-context.ts
 └─ Exit with status code 0 (success) or 1+ (error)
 ```
 
-**Expected Deliverable:** Complete TypeScript implementation of generation script with error handling.
+**Expected Deliverable:** Complete TypeScript implementation of generation script with error
+handling.
 
 ---
 
@@ -651,18 +656,18 @@ generate-ai-context.ts
 async function validateArchitecture() {
   // 1. Load ai-architecture-brain.json
   const brain = await loadArtifact<AIArchitectureBrain>(
-    'docs/ai/context/ai-architecture-brain.json'
-  )
+    "docs/ai/context/ai-architecture-brain.json",
+  );
 
   // 2. Get staged files
-  const stagedFiles = await getGitStagedFiles()
+  const stagedFiles = await getGitStagedFiles();
 
   // 3. For each file, validate against rules
   for (const file of stagedFiles) {
-    const violations = validateImports(file, brain.rules_active)
+    const violations = validateImports(file, brain.rules_active);
     if (violations.length > 0) {
       // Report and block commit
-      throw new ArchitectureViolationError(violations)
+      throw new ArchitectureViolationError(violations);
     }
   }
 }
@@ -674,13 +679,13 @@ async function validateArchitecture() {
 // In GitNexus MCP handler
 function handleImpactAnalysisQuery(module: string): ImpactAnalysis {
   // 1. Load ai-dependency-graph.json
-  const graph = await loadArtifact<AIDependencyGraph>('docs/ai/context/ai-dependency-graph.json')
+  const graph = await loadArtifact<AIDependencyGraph>("docs/ai/context/ai-dependency-graph.json");
 
   // 2. Find reverse dependencies
-  const dependents = graph.reverse_dependencies[module] || []
+  const dependents = graph.reverse_dependencies[module] || [];
 
   // 3. Trace transitive dependencies
-  const blastRadius = transitiveDependents(module, graph)
+  const blastRadius = transitiveDependents(module, graph);
 
   // 4. Return impact analysis
   return {
@@ -688,7 +693,7 @@ function handleImpactAnalysisQuery(module: string): ImpactAnalysis {
     direct_dependents: dependents,
     transitive_dependents: blastRadius,
     risk_level: calculateRisk(blastRadius),
-  }
+  };
 }
 ```
 
@@ -698,19 +703,19 @@ function handleImpactAnalysisQuery(module: string): ImpactAnalysis {
 // In SpecKit planning phase
 async function validatePlanArchitecture(plan: ImplementationPlan) {
   // 1. Load ai-architecture-summary.md and ai-layer-model.json
-  const summary = await loadMarkdown('docs/ai/context/ai-architecture-summary.md')
-  const layers = await loadArtifact<AILayerModel>('docs/ai/context/ai-layer-model.json')
+  const summary = await loadMarkdown("docs/ai/context/ai-architecture-summary.md");
+  const layers = await loadArtifact<AILayerModel>("docs/ai/context/ai-layer-model.json");
 
   // 2. For each task in plan, validate layer assignment
   for (const task of plan.tasks) {
-    const module = task.target_module
-    const assignedLayer = findLayerForModule(module, layers)
+    const module = task.target_module;
+    const assignedLayer = findLayerForModule(module, layers);
 
     // 3. Verify task is appropriate for layer
-    const isValid = validateTaskForLayer(task, assignedLayer)
+    const isValid = validateTaskForLayer(task, assignedLayer);
     if (!isValid) {
       // Warn that task may violate architecture
-      console.warn(`Task ${task.id} may violate layer rules for ${module}`)
+      console.warn(`Task ${task.id} may violate layer rules for ${module}`);
     }
   }
 }
@@ -1005,26 +1010,26 @@ ai-guard.ts (STAGE_INFRA_06) validates architecture in pre-commit.
 
 ```typescript
 // In ai-guard.ts
-import {AIArchitectureBrain} from 'packages/types/src/ai-context'
+import { AIArchitectureBrain } from "packages/types/src/ai-context";
 
 async function validateArchitectureViaAIContext() {
   // 1. Load generated ai-architecture-brain.json
   const brain = await loadArtifact<AIArchitectureBrain>(
-    'docs/ai/context/ai-architecture-brain.json'
-  )
+    "docs/ai/context/ai-architecture-brain.json",
+  );
 
   // 2. Use brain.rules_active instead of parsing module-boundaries manually
-  const rules = brain.rules_active
+  const rules = brain.rules_active;
 
   // 3. Validate staged files against rules
-  const violations = checkViolations(stagedFiles, rules)
+  const violations = checkViolations(stagedFiles, rules);
 
   // 4. Freshen brain if stale (> 7 days)
   if (isStale(brain.generated_at)) {
-    console.warn('AI context is stale; regenerate with: bun run generate:ai-context')
+    console.warn("AI context is stale; regenerate with: bun run generate:ai-context");
   }
 
-  return violations
+  return violations;
 }
 ```
 
@@ -1051,24 +1056,24 @@ infra-audit.ts generates infra-audit-report.json with dependency graph.
 // After generating infra-audit-report.json:
 
 // 1. Trigger ai-context generation
-const {execSync} = require('child_process')
+const { execSync } = require("child_process");
 try {
-  execSync('bun run generate:ai-context --force', {stdio: 'inherit'})
+  execSync("bun run generate:ai-context --force", { stdio: "inherit" });
 } catch (error) {
-  console.warn('AI context generation failed; continuing audit')
+  console.warn("AI context generation failed; continuing audit");
 }
 
 // 2. Load ai-dependency-graph.json to verify consistency
-const aiGraph = await loadArtifact<AIDependencyGraph>('docs/ai/context/ai-dependency-graph.json')
+const aiGraph = await loadArtifact<AIDependencyGraph>("docs/ai/context/ai-dependency-graph.json");
 
 // 3. Compare against own output
-const auditGraph = generateDependencyGraph()
-const inconsistencies = compareGraphs(auditGraph, aiGraph)
+const auditGraph = generateDependencyGraph();
+const inconsistencies = compareGraphs(auditGraph, aiGraph);
 
 if (inconsistencies.length > 0) {
-  console.error('Dependency graph mismatch:')
-  inconsistencies.forEach(i => console.error(`  ${i}`))
-  process.exit(1)
+  console.error("Dependency graph mismatch:");
+  inconsistencies.forEach((i) => console.error(`  ${i}`));
+  process.exit(1);
 }
 ```
 
@@ -1089,65 +1094,65 @@ if (inconsistencies.length > 0) {
 ```typescript
 // test/validation/ai-context-generation.test.ts
 
-describe('AI Context Generation', () => {
-  describe('Module Map Builder', () => {
-    test('assigns all modules to correct layer', () => {
+describe("AI Context Generation", () => {
+  describe("Module Map Builder", () => {
+    test("assigns all modules to correct layer", () => {
       // Load test module-boundaries.json
       // Run builder
       // Verify every module from apps/ and packages/ is mapped
       // Verify layer assignments match boundaries
-    })
+    });
 
-    test('includes required metadata fields', () => {
+    test("includes required metadata fields", () => {
       // Build artifact
       // Verify schema_version present
       // Verify generated_at is valid ISO 8601
       // Verify source_metadata present
-    })
-  })
+    });
+  });
 
-  describe('Layer Model Builder', () => {
-    test('extracts all allowed/forbidden rules', () => {
+  describe("Layer Model Builder", () => {
+    test("extracts all allowed/forbidden rules", () => {
       // Load test module-boundaries.json with rules
       // Build artifact
       // Verify all rules extracted
       // Verify correct format
-    })
+    });
 
-    test('detects conflicting rules', () => {
+    test("detects conflicting rules", () => {
       // Load module-boundaries with conflicting rules
       // Verify builder detects and reports conflict
-    })
-  })
+    });
+  });
 
-  describe('Schema Validation', () => {
-    test('rejects artifacts with missing required fields', () => {
+  describe("Schema Validation", () => {
+    test("rejects artifacts with missing required fields", () => {
       // Create artifact with missing schema_version
       // Run validator
       // Expect error
-    })
+    });
 
-    test('validates nested structures', () => {
+    test("validates nested structures", () => {
       // Create valid artifact
       // Run validator
       // Expect success
-    })
-  })
+    });
+  });
 
-  describe('Change Detection', () => {
-    test('detects when ADR directory changes', () => {
+  describe("Change Detection", () => {
+    test("detects when ADR directory changes", () => {
       // Create initial hashes
       // Modify ADR file
       // Detect change
       // Expect change flag = true
-    })
+    });
 
-    test('skips regeneration if no sources changed', () => {
+    test("skips regeneration if no sources changed", () => {
       // Run generation twice
       // Expect flag = skipped on second run
-    })
-  })
-})
+    });
+  });
+});
 ```
 
 **Integration Tests:**
@@ -1155,27 +1160,27 @@ describe('AI Context Generation', () => {
 ```typescript
 // test/integration/ai-context-generation-integration.test.ts
 
-describe('AI Context Integration', () => {
-  test('ai-guard can load and validate with ai-context', async () => {
+describe("AI Context Integration", () => {
+  test("ai-guard can load and validate with ai-context", async () => {
     // Generate full artifacts
     // Load ai-architecture-brain.json
     // Run ai-guard validation
     // Verify no errors
-  })
+  });
 
-  test('infra-audit output matches ai-dependency-graph', async () => {
+  test("infra-audit output matches ai-dependency-graph", async () => {
     // Run infra-audit
     // Load ai-dependency-graph.json
     // Compare outputs
     // Expect graphs are equivalent
-  })
+  });
 
-  test('GitNexus can use ai-dependency-graph for impact analysis', async () => {
+  test("GitNexus can use ai-dependency-graph for impact analysis", async () => {
     // Load ai-dependency-graph.json
     // Query for dependencies of known module
     // Verify results are correct
-  })
-})
+  });
+});
 ```
 
 **Schema Validation Tests:**
@@ -1183,18 +1188,18 @@ describe('AI Context Integration', () => {
 ```typescript
 // test/validation/artifact-schema-validation.test.ts
 
-describe('Artifact Schema Validation', () => {
-  const schemas = loadAllSchemas()
-  const fixtures = loadAllFixtures()
+describe("Artifact Schema Validation", () => {
+  const schemas = loadAllSchemas();
+  const fixtures = loadAllFixtures();
 
   Object.entries(fixtures).forEach(([artifactName, expectedArtifact]) => {
     test(`${artifactName} validates against schema`, () => {
-      const schema = schemas[artifactName]
-      const result = validateAgainstSchema(expectedArtifact, schema)
-      expect(result.valid).toBe(true)
-    })
-  })
-})
+      const schema = schemas[artifactName];
+      const result = validateAgainstSchema(expectedArtifact, schema);
+      expect(result.valid).toBe(true);
+    });
+  });
+});
 ```
 
 **Manual AI Tool Testing:**
@@ -1225,27 +1230,27 @@ describe('Artifact Schema Validation', () => {
 **Benchmarking Tests:**
 
 ```typescript
-test('artifact generation completes in < 5 seconds', async () => {
-  const start = performance.now()
-  await generateAllArtifacts()
-  const duration = performance.now() - start
-  expect(duration).toBeLessThan(5000) // 5 seconds
-})
+test("artifact generation completes in < 5 seconds", async () => {
+  const start = performance.now();
+  await generateAllArtifacts();
+  const duration = performance.now() - start;
+  expect(duration).toBeLessThan(5000); // 5 seconds
+});
 
-test('total artifact size is < 15MB', async () => {
-  const artifacts = await generateAllArtifacts()
-  let totalSize = 0
+test("total artifact size is < 15MB", async () => {
+  const artifacts = await generateAllArtifacts();
+  let totalSize = 0;
   for (const artifact of artifacts) {
-    totalSize += Buffer.byteLength(JSON.stringify(artifact))
+    totalSize += Buffer.byteLength(JSON.stringify(artifact));
   }
-  expect(totalSize).toBeLessThan(15 * 1024 * 1024) // 15MB
-})
+  expect(totalSize).toBeLessThan(15 * 1024 * 1024); // 15MB
+});
 
-test('ai-context-mini is < 1MB for fast loading', async () => {
-  const mini = await generateContextMini()
-  const size = Buffer.byteLength(JSON.stringify(mini))
-  expect(size).toBeLessThan(1024 * 1024) // 1MB
-})
+test("ai-context-mini is < 1MB for fast loading", async () => {
+  const mini = await generateContextMini();
+  const size = Buffer.byteLength(JSON.stringify(mini));
+  expect(size).toBeLessThan(1024 * 1024); // 1MB
+});
 ```
 
 **Expected Deliverable:** Performance benchmarking suite.
@@ -1987,7 +1992,8 @@ This plan:
 ✅ Follows all ADR decisions  
 ✅ Maintains backward compatibility
 
-The AI Architecture Context Layer is a **pure governance infrastructure enhancement** that enables AI-assisted development without compromising platform stability or security.
+The AI Architecture Context Layer is a **pure governance infrastructure enhancement** that enables
+AI-assisted development without compromising platform stability or security.
 
 ---
 

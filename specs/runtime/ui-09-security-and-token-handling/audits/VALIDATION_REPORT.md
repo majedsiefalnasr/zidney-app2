@@ -8,7 +8,11 @@
 
 ## Summary
 
-All stage-scoped tests pass: 31 test files, 273 tests. ESLint exits with 0 errors. App-level TypeScript checks (vue-tsc --noEmit) exit with code 0 for all 3 apps. No migration required. Idempotency and concurrency validated via integration tests. The root-level `bun run typecheck` reports pre-existing path resolution noise for `@/*` aliases in the multi-app tsconfig context; these errors are not new and do not affect app builds (all app-level vue-tsc checks pass).
+All stage-scoped tests pass: 31 test files, 273 tests. ESLint exits with 0 errors. App-level
+TypeScript checks (vue-tsc --noEmit) exit with code 0 for all 3 apps. No migration required.
+Idempotency and concurrency validated via integration tests. The root-level `bun run typecheck`
+reports pre-existing path resolution noise for `@/*` aliases in the multi-app tsconfig context;
+these errors are not new and do not affect app builds (all app-level vue-tsc checks pass).
 
 ---
 
@@ -117,8 +121,12 @@ validated for all 3 apps (mmc, backoffice, frontoffice).
 
 ## Failures and Risks
 
-- **Root-level TypeScript path resolution** (`@/*` in multi-app tsconfig): Pre-existing issue not introduced by this stage. App-level vue-tsc checks pass with exit 0. Risk: LOW — does not affect builds or runtime behavior.
-- **Pre-existing `tests/unit/mmc/auth.service.test.ts`**: Imports `hono/jwt` (API layer module) from a UI test context — fails in the root vitest run. Not in scope for this stage. Risk: LOW — pre-existing issue from STAGE_14_MMC_MEMBERS.
+- **Root-level TypeScript path resolution** (`@/*` in multi-app tsconfig): Pre-existing issue not
+  introduced by this stage. App-level vue-tsc checks pass with exit 0. Risk: LOW — does not affect
+  builds or runtime behavior.
+- **Pre-existing `tests/unit/mmc/auth.service.test.ts`**: Imports `hono/jwt` (API layer module) from
+  a UI test context — fails in the root vitest run. Not in scope for this stage. Risk: LOW —
+  pre-existing issue from STAGE_14_MMC_MEMBERS.
 
 ---
 

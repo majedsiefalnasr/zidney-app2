@@ -10,15 +10,21 @@
 
 ## 1. Executive Summary
 
-The platform is approximately 80% of the way to full lint governance. The major infrastructure (`biome.json`, `lint-staged.config.mjs`, `scripts/ai-guard.ts`, Husky hooks) is already in place and operational. The remaining gaps are:
+The platform is approximately 80% of the way to full lint governance. The major infrastructure
+(`biome.json`, `lint-staged.config.mjs`, `scripts/ai-guard.ts`, Husky hooks) is already in place and
+operational. The remaining gaps are:
 
 1. One Biome rule severity correction (`noUnreachable` must be promoted from `warn` to `error`).
-2. The CI pipeline (`ci.yml`) does not gate non-main-branch pushes through AI-Guard — only the separate `architecture-governance.yml` workflow does, and it only triggers on `main`/`develop`.
+2. The CI pipeline (`ci.yml`) does not gate non-main-branch pushes through AI-Guard — only the
+   separate `architecture-governance.yml` workflow does, and it only triggers on `main`/`develop`.
 3. The pre-commit hook has a stale comment referencing ESLint/Prettier rather than Biome.
-4. The CI `ci.yml` lint job runs both `bun biome check .` and `bun biome format .` redundantly (format checking is already included in `check`).
-5. The canonical CI command referenced in the spec as `bun run type-check` does not match the actual script name `bun run typecheck`.
+4. The CI `ci.yml` lint job runs both `bun biome check .` and `bun biome format .` redundantly
+   (format checking is already included in `check`).
+5. The canonical CI command referenced in the spec as `bun run type-check` does not match the actual
+   script name `bun run typecheck`.
 
-No new packages or scripts are required. All installation prerequisites (`@biomejs/biome`, `husky`, `lint-staged`) are present and correctly versioned.
+No new packages or scripts are required. All installation prerequisites (`@biomejs/biome`, `husky`,
+`lint-staged`) are present and correctly versioned.
 
 ---
 
@@ -60,7 +66,8 @@ No new packages or scripts are required. All installation prerequisites (`@biome
 
 ### 2.3 Import Organizer
 
-The `assist.actions.source.organizeImports` is set to `"on"`. This activates Biome's import organizer globally.
+The `assist.actions.source.organizeImports` is set to `"on"`. This activates Biome's import
+organizer globally.
 
 Biome's organizer automatically applies its canonical group order:
 
@@ -69,9 +76,12 @@ Biome's organizer automatically applies its canonical group order:
 3. Internal monorepo packages (including `@zidney/*`)
 4. App-local and relative imports
 
-This satisfies FR-02. The grouping is applied automatically by `bun biome check --write` and `bun run lint:fix`. No additional configuration is needed.
+This satisfies FR-02. The grouping is applied automatically by `bun biome check --write` and
+`bun run lint:fix`. No additional configuration is needed.
 
-**Decision:** Biome's default import organizer grouping is sufficient. No custom import group configuration exists in the schema version in use. The canonical 5-group order defined in FR-02 is enforced by Biome's built-in heuristic.
+**Decision:** Biome's default import organizer grouping is sufficient. No custom import group
+configuration exists in the schema version in use. The canonical 5-group order defined in FR-02 is
+enforced by Biome's built-in heuristic.
 
 ### 2.4 Overrides — Preserved Exemptions
 
@@ -97,15 +107,19 @@ All overrides are intentional and preserved as-is per Assumption 6 from the spec
 
 ```js
 export default {
-  '*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --write'],
-}
+  "*.{ts,tsx,js,jsx,mjs,vue,json}": ["bun biome check --write"],
+};
 ```
 
-**Assessment:** This EXACTLY matches the FR-04 requirement. The pattern covers all JavaScript/TypeScript/Vue/JSON staged files. The `--write` flag enables auto-fix for formatting and safe lint fixes. The `bun` invocation is correct.
+**Assessment:** This EXACTLY matches the FR-04 requirement. The pattern covers all
+JavaScript/TypeScript/Vue/JSON staged files. The `--write` flag enables auto-fix for formatting and
+safe lint fixes. The `bun` invocation is correct.
 
 **Decision:** No change required. lint-staged configuration is already compliant with FR-04.
 
-**Note:** The planning task description also mentioned `cjs` extension coverage. This extension is absent from both the current config and spec FR-04. Since `cjs` files are not present in this monorepo (which uses ESM exclusively via Bun), this is a non-issue.
+**Note:** The planning task description also mentioned `cjs` extension coverage. This extension is
+absent from both the current config and spec FR-04. Since `cjs` files are not present in this
+monorepo (which uses ESM exclusively via Bun), this is a non-issue.
 
 ---
 
@@ -144,7 +158,8 @@ bun scripts/infra-audit.ts --quick
 
 **AI-Guard is already active as a pre-commit gate.** No script activation is required.
 
-**Single required change:** Update the stale comment on line 4 from "Runs ESLint --fix + Prettier --write" to reference Biome.
+**Single required change:** Update the stale comment on line 4 from "Runs ESLint --fix + Prettier
+--write" to reference Biome.
 
 ---
 
@@ -160,9 +175,15 @@ bun scripts/infra-audit.ts --quick
 # are resolved in a subsequent stage.
 ```
 
-**Assessment:** The pre-push hook is currently advisory-only (runs unit tests informationally; does not block push). This matches spec FR-08 requirements exactly. The hook's comment indicates lint/typecheck were intentionally deferred — this is the condition being resolved by this INFRA-05 stage.
+**Assessment:** The pre-push hook is currently advisory-only (runs unit tests informationally; does
+not block push). This matches spec FR-08 requirements exactly. The hook's comment indicates
+lint/typecheck were intentionally deferred — this is the condition being resolved by this INFRA-05
+stage.
 
-**Decision:** After INFRA-05 baseline lint errors are resolved, the pre-push hook SHOULD be updated to include `bun run lint && bun run typecheck` as informational gates. However, FR-08 states the hook must remain non-blocking. This is a follow-up documentation note, not a hard requirement of this stage.
+**Decision:** After INFRA-05 baseline lint errors are resolved, the pre-push hook SHOULD be updated
+to include `bun run lint && bun run typecheck` as informational gates. However, FR-08 states the
+hook must remain non-blocking. This is a follow-up documentation note, not a hard requirement of
+this stage.
 
 ---
 
@@ -184,11 +205,14 @@ bun scripts/infra-audit.ts --quick
 
 ### 6.2 File Targeting
 
-AI-Guard reads staged files via `git diff --cached --name-only` and filters for `.ts`, `.tsx`, `.vue` extensions. This is the correct scope for pre-commit validation.
+AI-Guard reads staged files via `git diff --cached --name-only` and filters for `.ts`, `.tsx`,
+`.vue` extensions. This is the correct scope for pre-commit validation.
 
 ### 6.3 Fallback Mode
 
-If `docs/ai/context/ai-architecture-brain.json` is absent, AI-Guard falls back to reading `ARCHITECTURE_CONTRACT.json` directly. Brain-enriched analysis uses the module dependency graph from `infra-audit.ts`. This satisfies FR-06.
+If `docs/ai/context/ai-architecture-brain.json` is absent, AI-Guard falls back to reading
+`ARCHITECTURE_CONTRACT.json` directly. Brain-enriched analysis uses the module dependency graph from
+`infra-audit.ts`. This satisfies FR-06.
 
 ### 6.4 Exit Codes
 
@@ -197,7 +221,8 @@ If `docs/ai/context/ai-architecture-brain.json` is absent, AI-Guard falls back t
 
 ### 6.5 Conclusion
 
-**AI-Guard requires no code changes.** It is fully implemented and already active in the pre-commit hook. The only requirement in this stage is documentation and CI integration verification.
+**AI-Guard requires no code changes.** It is fully implemented and already active in the pre-commit
+hook. The only requirement in this stage is documentation and CI integration verification.
 
 ---
 
@@ -217,8 +242,10 @@ If `docs/ai/context/ai-architecture-brain.json` is absent, AI-Guard falls back t
 **Gaps in `ci.yml`:**
 
 1. `bun scripts/ai-guard.ts` is **not present** as a CI step in `ci.yml`.
-2. `bun biome check .` already includes format checking; running `bun biome format .` separately is redundant.
-3. The lint job should call `bun run lint` (the script alias) rather than direct Biome invocation for consistency.
+2. `bun biome check .` already includes format checking; running `bun biome format .` separately is
+   redundant.
+3. The lint job should call `bun run lint` (the script alias) rather than direct Biome invocation
+   for consistency.
 
 ### 7.2 `architecture-governance.yml` — Jobs Analysis
 
@@ -232,15 +259,22 @@ If `docs/ai/context/ai-architecture-brain.json` is absent, AI-Guard falls back t
 | Run Architecture Diff        | `bun scripts/architecture-diff.ts` |
 | Publish Architecture Summary | Publishes to GITHUB_STEP_SUMMARY   |
 
-**Assessment:** AI-Guard IS run as a CI step in `architecture-governance.yml`, but only for PRs/pushes targeting `main` and `develop`. It is NOT run for pushes to `infra-*` or `feature/*` branches.
+**Assessment:** AI-Guard IS run as a CI step in `architecture-governance.yml`, but only for
+PRs/pushes targeting `main` and `develop`. It is NOT run for pushes to `infra-*` or `feature/*`
+branches.
 
-**Critical Gap:** A developer pushing to a `feature/` or `infra-*` branch gets lint + typecheck gates via `ci.yml` but NOT the AI-Guard gate. The governance pipeline is not uniform across all branch types.
+**Critical Gap:** A developer pushing to a `feature/` or `infra-*` branch gets lint + typecheck
+gates via `ci.yml` but NOT the AI-Guard gate. The governance pipeline is not uniform across all
+branch types.
 
-**Decision:** Add AI-Guard to `ci.yml` as a dedicated job that runs after the `lint` and `typecheck` jobs. This ensures all branch types — including feature and infra branches — receive the AI-Guard gate in CI.
+**Decision:** Add AI-Guard to `ci.yml` as a dedicated job that runs after the `lint` and `typecheck`
+jobs. This ensures all branch types — including feature and infra branches — receive the AI-Guard
+gate in CI.
 
 ### 7.3 `hard-mode-guard.yml`
 
-Validates Hard Mode workflow state for `spec/*` branches. This is infra tooling for the SpecKit pipeline itself. No changes required or relevant to this stage.
+Validates Hard Mode workflow state for `spec/*` branches. This is infra tooling for the SpecKit
+pipeline itself. No changes required or relevant to this stage.
 
 ---
 
@@ -262,7 +296,9 @@ Validates Hard Mode workflow state for `spec/*` branches. This is infra tooling 
 | `arch:refresh`    | `bun scripts/infra-audit.ts && bun scripts/gitnexus-context.ts` | ✅ Exists |
 | `arch:fix`        | `bun scripts/infra-audit.ts --fix-map`                          | ✅ Exists |
 
-**Important naming discrepancy:** The spec and planning brief reference `bun run type-check` (hyphenated). The actual script name is `bun run typecheck` (no hyphen). All spec documentation must reference `bun run typecheck` as the canonical command.
+**Important naming discrepancy:** The spec and planning brief reference `bun run type-check`
+(hyphenated). The actual script name is `bun run typecheck` (no hyphen). All spec documentation must
+reference `bun run typecheck` as the canonical command.
 
 **No new scripts are required** for this stage. All scripts are present and correctly implemented.
 
@@ -278,11 +314,14 @@ Validates Hard Mode workflow state for `spec/*` branches. This is infra tooling 
 
 **ARCHITECTURE_MAP.json** contains:
 
-- All top-level modules (`packages/*`, `apps/*`) mapped with `layer`, `criticality`, and `forbidden_dependencies`.
+- All top-level modules (`packages/*`, `apps/*`) mapped with `layer`, `criticality`, and
+  `forbidden_dependencies`.
 - `criticality: "core"` on `packages/domain-core`, `packages/types`, `packages/validation`.
-- `criticality: "infrastructure"` on `packages/logger`, `packages/config`, `packages/redis-utils`, `packages/api-client`.
+- `criticality: "infrastructure"` on `packages/logger`, `packages/config`, `packages/redis-utils`,
+  `packages/api-client`.
 
-The `criticality` field in `ARCHITECTURE_MAP.json` already provides the machine-readable marker required by FR-07.
+The `criticality` field in `ARCHITECTURE_MAP.json` already provides the machine-readable marker
+required by FR-07.
 
 ---
 

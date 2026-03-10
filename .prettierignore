@@ -2,6 +2,10 @@ node_modules/
 dist/
 build/
 coverage/
+
+# AI tooling directories — not under project formatting governance
+.agents/
+.specify/
 package-lock.json
 yarn.lock
 pnpm-lock.yaml
@@ -12,3 +16,14 @@ bun.lockb
 out/
 .turbo/
 .nyc_output/
+
+# Biome-managed file types — do not process with Prettier
+*.ts
+*.tsx
+*.js
+*.jsx
+*.mjs
+*.cjs
+*.vue
+*.json
+*.jsonc

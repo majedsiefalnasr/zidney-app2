@@ -46,8 +46,7 @@ Department is NOT:
 - A tagging system
 - A commercial structure
 
-Division remains the primary isolation boundary.
-Department is secondary segmentation.
+Division remains the primary isolation boundary. Department is secondary segmentation.
 
 ---
 
@@ -109,7 +108,8 @@ Staff:
 - May belong to multiple departments
 - Managed through staff_departments join table
 - Must belong to at least one division (enforced by Division stage)
-- Department assignment must match at least one of staff's divisions if department.division_id is not null
+- Department assignment must match at least one of staff's divisions if department.division_id is
+  not null
 
 Validation enforced at API layer.
 
@@ -253,8 +253,8 @@ Stage complete when:
 
 Department is a structural segmentation layer.
 
-If hierarchy integrity fails or division boundaries are bypassed,
-academic segmentation becomes unreliable.
+If hierarchy integrity fails or division boundaries are bypassed, academic segmentation becomes
+unreliable.
 
 This stage must be stable before:
 

@@ -8,7 +8,8 @@
 
 ## Overview
 
-Metrics middleware collects performance and business data from all API endpoints. Metrics are emitted to Prometheus via `/metrics` endpoint.
+Metrics middleware collects performance and business data from all API endpoints. Metrics are
+emitted to Prometheus via `/metrics` endpoint.
 
 ---
 
@@ -16,16 +17,16 @@ Metrics middleware collects performance and business data from all API endpoints
 
 ```typescript
 // apps/api/src/index.ts
-import { Hono } from 'hono'
-import { metricsMiddleware } from './middleware/metrics.middleware'
+import { Hono } from "hono";
+import { metricsMiddleware } from "./middleware/metrics.middleware";
 
-const app = new Hono()
+const app = new Hono();
 
 // Add metrics middleware early in the chain
-app.use(metricsMiddleware)
+app.use(metricsMiddleware);
 
 // All routes will now emit metrics
-app.get('/mmc/members', handleGetMembers)
+app.get("/mmc/members", handleGetMembers);
 ```
 
 ---
@@ -63,77 +64,74 @@ app.get('/mmc/members', handleGetMembers)
 
 ```typescript
 // apps/api/src/middleware/metrics.middleware.ts
-import { Context } from 'hono'
-import { Registry, Counter, Histogram } from 'prom-client'
+import { Context } from "hono";
+import { Registry, Counter, Histogram } from "prom-client";
 
-const register = new Registry()
+const register = new Registry();
 
 // Define metrics
 const httpRequestsTotal = new Counter({
-  name: 'http_requests_total',
-  help: 'Total HTTP requests',
-  labelNames: ['method', 'path', 'status'],
+  name: "http_requests_total",
+  help: "Total HTTP requests",
+  labelNames: ["method", "path", "status"],
   registers: [register],
-})
+});
 
 const httpRequestDurationMs = new Histogram({
-  name: 'http_request_duration_ms',
-  help: 'HTTP request duration in milliseconds',
-  labelNames: ['method', 'path'],
+  name: "http_request_duration_ms",
+  help: "HTTP request duration in milliseconds",
+  labelNames: ["method", "path"],
   buckets: [10, 50, 100, 250, 500, 1000, 2500, 5000],
   registers: [register],
-})
+});
 
 const mmcPermissionChecksTotal = new Counter({
-  name: 'mmc_permission_checks_total',
-  help: 'Total permission checks',
-  labelNames: ['domain', 'allowed'],
+  name: "mmc_permission_checks_total",
+  help: "Total permission checks",
+  labelNames: ["domain", "allowed"],
   registers: [register],
-})
+});
 
-export const metricsMiddleware = async (
-  c: Context,
-  next: () => Promise<void>
-) => {
-  const startTime = Date.now()
-  const method = c.req.method
-  const path = c.req.path
+export const metricsMiddleware = async (c: Context, next: () => Promise<void>) => {
+  const startTime = Date.now();
+  const method = c.req.method;
+  const path = c.req.path;
 
   try {
-    await next()
+    await next();
 
-    const duration = Date.now() - startTime
-    const status = c.res.status
+    const duration = Date.now() - startTime;
+    const status = c.res.status;
 
     // Emit metrics
     httpRequestsTotal.inc({
       method,
       path,
       status: String(status),
-    })
+    });
 
-    httpRequestDurationMs.observe({ method, path }, duration)
+    httpRequestDurationMs.observe({ method, path }, duration);
   } catch (error) {
-    const duration = Date.now() - startTime
+    const duration = Date.now() - startTime;
 
     httpRequestsTotal.inc({
       method,
       path,
-      status: '500',
-    })
+      status: "500",
+    });
 
-    httpRequestDurationMs.observe({ method, path }, duration)
-    throw error
+    httpRequestDurationMs.observe({ method, path }, duration);
+    throw error;
   }
-}
+};
 
 // Expose metrics on /metrics endpoint
 export const metricsRoute = (app) => {
-  app.get('/metrics', async (c) => {
-    c.header('Content-Type', register.contentType)
-    return c.text(await register.metrics())
-  })
-}
+  app.get("/metrics", async (c) => {
+    c.header("Content-Type", register.contentType);
+    return c.text(await register.metrics());
+  });
+};
 ```
 
 ---
@@ -272,15 +270,15 @@ rate(mmc_login_attempts_total{success="true"}[5m]) / rate(mmc_login_attempts_tot
 Verify metrics are emitted:
 
 ```typescript
-it('should emit member_created metric', async () => {
-  const counterSpy = jest.spyOn(mmcMembersCreatedTotal, 'inc')
+it("should emit member_created metric", async () => {
+  const counterSpy = jest.spyOn(mmcMembersCreatedTotal, "inc");
 
-  await memberService.createMember(data)
+  await memberService.createMember(data);
 
   expect(counterSpy).toHaveBeenCalledWith({
     role_id: expect.any(String),
-  })
-})
+  });
+});
 ```
 
 ---

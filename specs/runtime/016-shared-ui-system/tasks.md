@@ -5,8 +5,7 @@
 **Plan Reference:** specs/phases/02_PLATFORM_MMC/STAGE_16_PLAN.md  
 **Spec Reference:** specs/phases/02_PLATFORM_MMC/STAGE_16_SHARED_UI_SYSTEM.md  
 **Plan Status:** LOCKED ARCHITECTURAL DECISIONS EMBEDDED  
-**Task Generation Date:** 2026-02-19
-**Implementation Status:** ✅ ALL PHASES COMPLETE (37/37 tasks)
+**Task Generation Date:** 2026-02-19 **Implementation Status:** ✅ ALL PHASES COMPLETE (37/37 tasks)
 
 ---
 
@@ -102,7 +101,8 @@ Every task MUST include:
 - ✅ Unit test: Type definitions compile with strict tsconfig
 - ✅ No circular type dependencies
 - ✅ Exported from `packages/ui-system/src/index.ts`
-- ✅ **CSS SCOPING VERIFICATION (NEW):** Add ESLint rule enforcing `<style scoped>` or CSS Modules in all `.vue` files (pre-build validation, fail if violated)
+- ✅ **CSS SCOPING VERIFICATION (NEW):** Add ESLint rule enforcing `<style scoped>` or CSS Modules
+  in all `.vue` files (pre-build validation, fail if violated)
 
 **Blockers:** None (foundational task)
 
@@ -339,12 +339,17 @@ Every task MUST include:
 
 **Acceptance Criteria:**
 
-- ✅ Composable exports `useColumnVisibility(persistKey?: string, columns: Column[]): ColumnVisibilityState`
+- ✅ Composable exports
+  `useColumnVisibility(persistKey?: string, columns: Column[]): ColumnVisibilityState`
 - ✅ Reactive visibility state: `ref<Set<string>>`
 - ✅ localStorage persistence with workspaceSlug-based key
-- ✅ **SECURITY ENHANCEMENT (NEW):** Add documentation: "SECURITY: App MUST namespace persistKey by authenticated tenant+domain. Path-based multi-tenancy requires key validation to prevent cross-tenant localStorage access."
-- ✅ **TEST COVERAGE (NEW):** Add test case: "localStorage keys are tenant-agnostic (verify key structure does NOT embed tenant data)"
-- ✅ **TEST COVERAGE (NEW):** Add cross-tenant isolation test: "Two workspaces on same domain → separate localStorage namespaces"
+- ✅ **SECURITY ENHANCEMENT (NEW):** Add documentation: "SECURITY: App MUST namespace persistKey by
+  authenticated tenant+domain. Path-based multi-tenancy requires key validation to prevent
+  cross-tenant localStorage access."
+- ✅ **TEST COVERAGE (NEW):** Add test case: "localStorage keys are tenant-agnostic (verify key
+  structure does NOT embed tenant data)"
+- ✅ **TEST COVERAGE (NEW):** Add cross-tenant isolation test: "Two workspaces on same domain →
+  separate localStorage namespaces"
 - ✅ Unit tests: 12+ test cases including localStorage, cross-tenant, and export scenarios
 - ✅ 85% code coverage
 
@@ -453,7 +458,8 @@ Every task MUST include:
 **Deliverables:**
 
 - SidebarLayout component with:
-  - Props: `items: NavItem[]`, `collapsible: boolean`, `defaultCollapsed?: boolean`, `activeItem?: string`
+  - Props: `items: NavItem[]`, `collapsible: boolean`, `defaultCollapsed?: boolean`,
+    `activeItem?: string`
   - Events: `@item-clicked { itemId: string }`, `@collapse-toggled { isCollapsed: boolean }`
   - Slots: `default`, `footer`
   - Collapse animation smooth (CSS transition)
@@ -516,7 +522,8 @@ Every task MUST include:
 #### Task 5A: DataTable Component – Core with Server-Side Pagination (LOCKED DECISIONS 1, 2, 4)
 
 - **Layer:** packages/ui-system/src/components/DataTable
-- **Scope:** Generic data table with server/client pagination modes, column definitions, row selection
+- **Scope:** Generic data table with server/client pagination modes, column definitions, row
+  selection
 - **Transactional:** No – Component state only
 - **Idempotency:** N/A – Pure rendering from props
 - **Middleware Dependency:** None
@@ -534,9 +541,13 @@ Every task MUST include:
 **Deliverables:**
 
 - DataTable<TRow> generic component:
-  - Props: `rows`, `columns`, `totalCount`, `paginationMode: 'server' | 'client'` (LOCKED DECISION 1), `paginationState`, `loading`, `selectedRows`, `enableColumnVisibility`, `enableRowSelection`, `enableColumnSorting`
-  - Events: `@pagination-changed`, `@sort-changed`, `@filter-changed`, `@row-selected`, `@export-triggered`, `@quick-filter-changed`, `@column-visibility-changed`
-  - Column definitions with accessors (optional for primitives, required for computed — LOCKED DECISION 4)
+  - Props: `rows`, `columns`, `totalCount`, `paginationMode: 'server' | 'client'` (LOCKED DECISION
+    1), `paginationState`, `loading`, `selectedRows`, `enableColumnVisibility`,
+    `enableRowSelection`, `enableColumnSorting`
+  - Events: `@pagination-changed`, `@sort-changed`, `@filter-changed`, `@row-selected`,
+    `@export-triggered`, `@quick-filter-changed`, `@column-visibility-changed`
+  - Column definitions with accessors (optional for primitives, required for computed — LOCKED
+    DECISION 4)
   - Server mode: does NOT paginate data locally; respects `paginationState` prop
   - Client mode: slices rows locally based on `paginationState`
   - Loading state: skeleton or empty row placeholder
@@ -551,10 +562,14 @@ Every task MUST include:
 - ✅ Row selection state controlled by parent (no internal mutation)
 - ✅ Loading state displays correctly
 - ✅ Sorting emits event (does NOT sort internally)
-- ✅ **PERFORMANCE SLO (NEW):** Rendering N ≤ 50 rows with M ≤ 10 columns must complete in < 16ms (enforced via performance.now() in unit tests)
-- ✅ **DETERMINISTIC RENDERING (NEW):** Test case: "Re-mount component with identical props → DOM output identical"
-- ✅ **EVENT TIMING (NEW):** Test case: "@pagination-changed event emits < 1ms after user clicks next"
-- ✅ Unit tests: 25+ test cases including performance assertions, deterministic rendering, and event timing
+- ✅ **PERFORMANCE SLO (NEW):** Rendering N ≤ 50 rows with M ≤ 10 columns must complete in < 16ms
+  (enforced via performance.now() in unit tests)
+- ✅ **DETERMINISTIC RENDERING (NEW):** Test case: "Re-mount component with identical props → DOM
+  output identical"
+- ✅ **EVENT TIMING (NEW):** Test case: "@pagination-changed event emits < 1ms after user clicks
+  next"
+- ✅ Unit tests: 25+ test cases including performance assertions, deterministic rendering, and event
+  timing
 - ✅ 95% code coverage
 - ✅ 85%+ code coverage
 
@@ -567,7 +582,8 @@ Every task MUST include:
 #### Task 5B: DataTable Component – Async Row Actions with Loading State (LOCKED DECISION 2)
 
 - **Layer:** packages/ui-system/src/components/DataTable
-- **Scope:** Row action button rendering, async callback execution, per-row loading state, error indicator
+- **Scope:** Row action button rendering, async callback execution, per-row loading state, error
+  indicator
 - **Transactional:** No – Component state only
 - **Idempotency:** N/A – Pure rendering
 - **Middleware Dependency:** None
@@ -583,7 +599,8 @@ Every task MUST include:
 
 - Row action execution engine:
   - Props: `rowActions: RowAction<TRow>[]` (callback async functions)
-  - Events: `@action-start { actionId, row }`, `@action-end { actionId, row, success, error }` (LOCKED DECISION 2)
+  - Events: `@action-start { actionId, row }`, `@action-end { actionId, row, success, error }`
+    (LOCKED DECISION 2)
   - Internal state: per-row, per-action loading flag (Map<rowId, Map<actionId, boolean>>)
   - Execution flow:
     1. User clicks action button
@@ -604,11 +621,16 @@ Every task MUST include:
 - ✅ Multiple actions on same row: execute independently (separate state)
 - ✅ Component does NOT retry failed actions (verified via test)
 - ✅ Component does NOT auto-refetch data (verified via test)
-- ✅ **UNMOUNT SAFETY (NEW):** Test case: "Navigate away during 2-second error timeout → no console errors, no memory leaks"
-- ✅ **CONCURRENT ACTIONS (NEW):** Test case: "User clicks action on row 1, then row 2 while first still loading → both execute independently"
-- ✅ **ASYNC HANDLER ERRORS (NEW):** Test case: "Parent @action-end listener throws → component remains responsive (emits do not crash)"
-- ✅ **EVENT EMISSION LATENCY (NEW):** Test assertion: "@action-start emits < 1ms after button click"
-- ✅ **TIMEOUT GUARD (NEW):** Error clearing timeout must check isUnmounting flag (prevent state mutation after unmount)
+- ✅ **UNMOUNT SAFETY (NEW):** Test case: "Navigate away during 2-second error timeout → no console
+  errors, no memory leaks"
+- ✅ **CONCURRENT ACTIONS (NEW):** Test case: "User clicks action on row 1, then row 2 while first
+  still loading → both execute independently"
+- ✅ **ASYNC HANDLER ERRORS (NEW):** Test case: "Parent @action-end listener throws → component
+  remains responsive (emits do not crash)"
+- ✅ **EVENT EMISSION LATENCY (NEW):** Test assertion: "@action-start emits < 1ms after button
+  click"
+- ✅ **TIMEOUT GUARD (NEW):** Error clearing timeout must check isUnmounting flag (prevent state
+  mutation after unmount)
 - ✅ Unit tests: 30+ test cases including concurrent, timeout, error handler, and unmount scenarios
 - ✅ 95% code coverage
 
@@ -640,10 +662,14 @@ Every task MUST include:
 **Deliverables:**
 
 - AdvancedFilterBuilder component:
-  - Props: `filters: Filter[]`, `availableFields: FilterField[]`, `filterSerializationMode: 'url' | 'localStorage'`
-  - Events: `@filters-changed`, `@filter-overflow { suggestedMode }` (LOCKED DECISION 3), `@storage-fallback-triggered { reason }`
-  - Computed: `isPersistedExternally: boolean` (LOCKED DECISION 3), `isOverflowed: boolean`, `overflowSize: number`
-  - Methods: `serializeFilters()`, `deserializeFilters()`, `checkUrlOverflow()`, `triggerStorageFallback()`
+  - Props: `filters: Filter[]`, `availableFields: FilterField[]`,
+    `filterSerializationMode: 'url' | 'localStorage'`
+  - Events: `@filters-changed`, `@filter-overflow { suggestedMode }` (LOCKED DECISION 3),
+    `@storage-fallback-triggered { reason }`
+  - Computed: `isPersistedExternally: boolean` (LOCKED DECISION 3), `isOverflowed: boolean`,
+    `overflowSize: number`
+  - Methods: `serializeFilters()`, `deserializeFilters()`, `checkUrlOverflow()`,
+    `triggerStorageFallback()`
   - URL overflow detection: if serialized > 2000 chars, show warning and disable "Add Filter"
   - Storage fallback UI: "Use Session Storage" button appears when overflow detected
   - Serialization: compact JSON (f, op, v keys) + Base64 + v1: prefix
@@ -720,7 +746,8 @@ Every task MUST include:
 **Deliverables:**
 
 - QuickFilterDropdown component:
-  - Props: `query: string`, `placeholder: string`, `suggestions?: string[]`, `debounceMs?: number` (default 300)
+  - Props: `query: string`, `placeholder: string`, `suggestions?: string[]`, `debounceMs?: number`
+    (default 300)
   - Events: `@query-changed { query: string }`, `@suggestion-selected { value: string }`
   - Features: Text input with debouncing, suggestion dropdown (optional)
 
@@ -762,7 +789,8 @@ Every task MUST include:
   - Features: Previous/Next buttons, page indicator, page size selector, total count display
 
 - **StatsCard:**
-  - Props: `title`, `value: string | number`, `unit?`, `trend?: { direction, percentage }`, `icon?`, `isLoading?`
+  - Props: `title`, `value: string | number`, `unit?`, `trend?: { direction, percentage }`, `icon?`,
+    `isLoading?`
   - Features: Icon, title, large value display, optional trend indicator
 
 **Acceptance Criteria:**
@@ -837,7 +865,8 @@ Every task MUST include:
 **Deliverables:**
 
 - ModalFormLayout component:
-  - Props: `isOpen`, `title`, `size: 'sm' | 'md' | 'lg' | 'xl'`, `isLoading?`, `submitLabel?`, `submitVariant?: 'primary' | 'destructive'`
+  - Props: `isOpen`, `title`, `size: 'sm' | 'md' | 'lg' | 'xl'`, `isLoading?`, `submitLabel?`,
+    `submitVariant?: 'primary' | 'destructive'`
   - Events: `@submit`, `@cancel`
   - Slots: `default` (form content)
   - Features: Centered modal, backdrop closes modal, size variants
@@ -860,7 +889,8 @@ Every task MUST include:
 #### Task 6C: MultiLanguageInputModal Component (LOCKED DECISION 5)
 
 - **Layer:** packages/ui-system/src/components/Forms
-- **Scope:** Multi-language input form with per-language validation, minimum 1 required language enforcement
+- **Scope:** Multi-language input form with per-language validation, minimum 1 required language
+  enforcement
 - **Transactional:** No – Form component
 - **Idempotency:** N/A – Pure rendering
 - **Middleware Dependency:** None
@@ -877,7 +907,9 @@ Every task MUST include:
 **Deliverables:**
 
 - MultiLanguageInputModal component:
-  - Props: `isOpen`, `title`, `languages`, `requiredLanguages: string[]` (LOCKED DECISION 5), `initialValues?`, `validationRules?`, `filterMode: 'all' | 'filled' | 'unfilled'`, `allowLanguageSearch?`
+  - Props: `isOpen`, `title`, `languages`, `requiredLanguages: string[]` (LOCKED DECISION 5),
+    `initialValues?`, `validationRules?`, `filterMode: 'all' | 'filled' | 'unfilled'`,
+    `allowLanguageSearch?`
   - Events: `@save { values }`, `@cancel`, `@validation-changed { isValid, validationErrors }`
   - Features (LOCKED DECISION 5):
     - Default language always required
@@ -927,7 +959,8 @@ Every task MUST include:
 **Deliverables:**
 
 - ConfirmDialog component:
-  - Props: `isOpen`, `title`, `message`, `confirmLabel?`, `cancelLabel?`, `isDangerous?: boolean` (red confirm button)
+  - Props: `isOpen`, `title`, `message`, `confirmLabel?`, `cancelLabel?`, `isDangerous?: boolean`
+    (red confirm button)
   - Events: `@confirm`, `@cancel`
   - Features: Modal dialog, warning icon, dangerous variant (red button)
 
@@ -1099,8 +1132,10 @@ Every task MUST include:
 - ✅ Build script produces minified output
 - ✅ Tree-shaking enabled (bundled size analysis)
 - ✅ No console.log in build output
-- ✅ **CSS SCOPING VALIDATION (NEW):** Pre-build step runs ESLint rule to fail if any `.vue` component has unscoped `<style>` blocks
-- ✅ **SLO ENFORCEMENT (NEW):** Build step includes performance.now() timing framework; unit tests will measure component rendering latency
+- ✅ **CSS SCOPING VALIDATION (NEW):** Pre-build step runs ESLint rule to fail if any `.vue`
+  component has unscoped `<style>` blocks
+- ✅ **SLO ENFORCEMENT (NEW):** Build step includes performance.now() timing framework; unit tests
+  will measure component rendering latency
 - ✅ Output includes CSS with data-v-xxx selectors proving scoping applied
 
 **Blockers:** Tasks 1-7 must exist first (to build them)
@@ -1149,7 +1184,9 @@ Every task MUST include:
 - ✅ `npm run build` outputs dist/index.d.ts
 - ✅ All components, hooks, types accessible
 - ✅ No dead imports in generated dist/
-- ✅ **SECURITY DOCUMENTATION (NEW):** Add a SECURITY.md note in package.json scripts: "Multi-tenant risk: apps must namespace localStorage persistence keys by tenant+domain to prevent cross-workspace data leakage."
+- ✅ **SECURITY DOCUMENTATION (NEW):** Add a SECURITY.md note in package.json scripts: "Multi-tenant
+  risk: apps must namespace localStorage persistence keys by tenant+domain to prevent
+  cross-workspace data leakage."
 
 **Blockers:** Task 8A
 
@@ -1242,7 +1279,8 @@ Every task MUST include:
 #### Task 9B: Composable Unit Tests (85%+ Coverage)
 
 - **Layer:** packages/ui-system/tests/unit
-- **Scope:** Unit tests for useFilterBuilder, usePagination, useColumnVisibility, useMultiLanguageForm
+- **Scope:** Unit tests for useFilterBuilder, usePagination, useColumnVisibility,
+  useMultiLanguageForm
 - **Transactional:** No – Tests isolated
 - **Idempotency:** Yes – Repeatable
 - **Middleware Dependency:** None
@@ -1430,10 +1468,14 @@ Every task MUST include:
 - ✅ Default language always required
 - ✅ Per-language rules apply independently
 - ✅ Multiple language updates handled correctly
-- ✅ **FORM IMMUTABILITY ENFORCEMENT (NEW):** Test asserts: Form data submitted via @save is NOT mutated by parent (deep clone verification)
-- ✅ **HANDLER ERROR RECOVERY (NEW):** Test case: Form submission callback throws → form remains editable and responsive
-- ✅ **CONCURRENT FORM ACTIONS (NEW):** Test case: User submits form, simultaneously clicks DataTable row action → both complete independently without state collision
-- ✅ **ASYNC CLEANUP (NEW):** Test case: User closes multi-language modal during validation → pending validation doesn't cause memory leak
+- ✅ **FORM IMMUTABILITY ENFORCEMENT (NEW):** Test asserts: Form data submitted via @save is NOT
+  mutated by parent (deep clone verification)
+- ✅ **HANDLER ERROR RECOVERY (NEW):** Test case: Form submission callback throws → form remains
+  editable and responsive
+- ✅ **CONCURRENT FORM ACTIONS (NEW):** Test case: User submits form, simultaneously clicks
+  DataTable row action → both complete independently without state collision
+- ✅ **ASYNC CLEANUP (NEW):** Test case: User closes multi-language modal during validation →
+  pending validation doesn't cause memory leak
 - ✅ Test passes consistently
 
 **Blockers:** Tasks 6C, 9B

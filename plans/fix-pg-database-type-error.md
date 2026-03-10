@@ -4,7 +4,8 @@
 
 TypeScript error: `Module '"pg"' has no exported member 'Database'`
 
-The `pg` (node-postgres) package does not export a type called `Database`. This is causing TypeScript compilation errors in multiple files.
+The `pg` (node-postgres) package does not export a type called `Database`. This is causing
+TypeScript compilation errors in multiple files.
 
 ## Root Cause
 
@@ -31,9 +32,13 @@ Replace `Database` with `Pool` from `pg` in all affected files.
 
 ### Why `Pool` is the Correct Type
 
-1. The code uses `connection_pool.connect()` in [`tenant-migration-runner.ts:69`](packages/domain-core/src/migration/tenant-migration-runner.ts:69) - this method exists on `Pool`
+1. The code uses `connection_pool.connect()` in
+   [`tenant-migration-runner.ts:69`](packages/domain-core/src/migration/tenant-migration-runner.ts:69) -
+   this method exists on `Pool`
 2. The `.query()` method is available on both `Pool` and `PoolClient`
-3. Other files in the project correctly use `Pool` from `pg` (see [`ProvisioningOrchestrator.ts`](apps/worker/src/services/provisioning/ProvisioningOrchestrator.ts:23), [`Operations.ts`](apps/worker/src/services/provisioning/Operations.ts:12), etc.)
+3. Other files in the project correctly use `Pool` from `pg` (see
+   [`ProvisioningOrchestrator.ts`](apps/worker/src/services/provisioning/ProvisioningOrchestrator.ts:23),
+   [`Operations.ts`](apps/worker/src/services/provisioning/Operations.ts:12), etc.)
 
 ## Implementation Steps
 
@@ -41,10 +46,10 @@ Replace `Database` with `Pool` from `pg` in all affected files.
 
 ```typescript
 // Before
-import { Database } from 'pg'
+import { Database } from "pg";
 
 // After
-import { Pool } from 'pg'
+import { Pool } from "pg";
 ```
 
 Update interface:
@@ -52,20 +57,20 @@ Update interface:
 ```typescript
 // Before
 export interface TenantMigrationContext {
-  workspace_id: string
-  workspace_slug: string
-  connection_pool: Database
-  masterDb: Database
-  correlationId: string
+  workspace_id: string;
+  workspace_slug: string;
+  connection_pool: Database;
+  masterDb: Database;
+  correlationId: string;
 }
 
 // After
 export interface TenantMigrationContext {
-  workspace_id: string
-  workspace_slug: string
-  connection_pool: Pool
-  masterDb: Pool
-  correlationId: string
+  workspace_id: string;
+  workspace_slug: string;
+  connection_pool: Pool;
+  masterDb: Pool;
+  correlationId: string;
 }
 ```
 
@@ -73,10 +78,10 @@ export interface TenantMigrationContext {
 
 ```typescript
 // Before
-import { Database } from 'pg'
+import { Database } from "pg";
 
 // After
-import { Pool } from 'pg'
+import { Pool } from "pg";
 ```
 
 Update function signature:
@@ -87,26 +92,26 @@ export async function executeMigrationPhase(
   job: SchemaMigrationJob,
   masterDb: Database,
   tenantDb: Database,
-  workspace_slug: string
-): Promise<{ success: boolean; error?: any }>
+  workspace_slug: string,
+): Promise<{ success: boolean; error?: any }>;
 
 // After
 export async function executeMigrationPhase(
   job: SchemaMigrationJob,
   masterDb: Pool,
   tenantDb: Pool,
-  workspace_slug: string
-): Promise<{ success: boolean; error?: any }>
+  workspace_slug: string,
+): Promise<{ success: boolean; error?: any }>;
 ```
 
 ### Step 3: Fix apps/worker/src/jobs/lock-manager.ts
 
 ```typescript
 // Before
-import { Database } from 'pg'
+import { Database } from "pg";
 
 // After
-import { Pool } from 'pg'
+import { Pool } from "pg";
 ```
 
 Update function signatures:
@@ -116,35 +121,32 @@ Update function signatures:
 export async function acquireWorkspaceLock(
   workspace_id: string,
   masterDb: Database,
-  timeoutMs: number = 60000
-): Promise<LockHandle>
+  timeoutMs: number = 60000,
+): Promise<LockHandle>;
 
 export async function releaseWorkspaceLock(
   lockHandle: LockHandle,
-  masterDb: Database
-): Promise<void>
+  masterDb: Database,
+): Promise<void>;
 
 // After
 export async function acquireWorkspaceLock(
   workspace_id: string,
   masterDb: Pool,
-  timeoutMs: number = 60000
-): Promise<LockHandle>
+  timeoutMs: number = 60000,
+): Promise<LockHandle>;
 
-export async function releaseWorkspaceLock(
-  lockHandle: LockHandle,
-  masterDb: Pool
-): Promise<void>
+export async function releaseWorkspaceLock(lockHandle: LockHandle, masterDb: Pool): Promise<void>;
 ```
 
 ### Step 4: Fix apps/worker/src/jobs/snapshot-phase.ts
 
 ```typescript
 // Before
-import { Database } from 'pg'
+import { Database } from "pg";
 
 // After
-import { Pool } from 'pg'
+import { Pool } from "pg";
 ```
 
 Update function signature:
@@ -154,15 +156,15 @@ Update function signature:
 export async function executeSnapshotCreation(
   job: SchemaMigrationJob,
   masterDb: Database,
-  tenantDb: Database
-): Promise<string>
+  tenantDb: Database,
+): Promise<string>;
 
 // After
 export async function executeSnapshotCreation(
   job: SchemaMigrationJob,
   masterDb: Pool,
-  tenantDb: Pool
-): Promise<string>
+  tenantDb: Pool,
+): Promise<string>;
 ```
 
 ## Verification

@@ -8,7 +8,10 @@
 
 ## Summary
 
-All 7 workflow steps executed and completed successfully. Specification, clarification, technical planning, task generation, drift analysis, full implementation (39/40 atomic tasks), and closure all passed. Workflow state machine engine is production-ready, with 100% test coverage (41 unit + 16 integration tests passing), zero lint errors, and constitutional compliance verified.
+All 7 workflow steps executed and completed successfully. Specification, clarification, technical
+planning, task generation, drift analysis, full implementation (39/40 atomic tasks), and closure all
+passed. Workflow state machine engine is production-ready, with 100% test coverage (41 unit + 16
+integration tests passing), zero lint errors, and constitutional compliance verified.
 
 ---
 
@@ -29,22 +32,33 @@ All 7 workflow steps executed and completed successfully. Specification, clarifi
 
 ## Scope Delivered
 
-- **Reusable workflow state machine** — deterministic, configuration-agnostic entity lifecycle engine
-- **Workflow states** — COMPLETED → UNDER_REVIEW → APPROVED → ENABLED (+ 2 backward transitions + 1 re-enable path)
-- **Domain package** — `packages/domain-core/src/workflow/` (4 pure-function files: states, types, errors, engine)
-- **Tenant migration** — `20260301_002_workflow_engine.ts` with workflow_logs table, 3 performance indexes, immutability trigger
-- **API route handler** — Hono route `POST /api/v1/backoffice/workspace/workflow/:entityType/:entityId/transition` with full middleware stack (tenant resolver → license → auth → rate limit 20/min)
-- **API module** — Zod validation schema + context builder extracting workspace context from Hono context
+- **Reusable workflow state machine** — deterministic, configuration-agnostic entity lifecycle
+  engine
+- **Workflow states** — COMPLETED → UNDER_REVIEW → APPROVED → ENABLED (+ 2 backward transitions + 1
+  re-enable path)
+- **Domain package** — `packages/domain-core/src/workflow/` (4 pure-function files: states, types,
+  errors, engine)
+- **Tenant migration** — `20260301_002_workflow_engine.ts` with workflow_logs table, 3 performance
+  indexes, immutability trigger
+- **API route handler** — Hono route
+  `POST /api/v1/backoffice/workspace/workflow/:entityType/:entityId/transition` with full middleware
+  stack (tenant resolver → license → auth → rate limit 20/min)
+- **API module** — Zod validation schema + context builder extracting workspace context from Hono
+  context
 - **Concurrency safety** — SELECT FOR UPDATE prevents concurrent state mutations
-- **Audit immutability** — PostgreSQL trigger `prevent_audit_modification()` locks workflow_logs rows from modification
-- **Tests** — 41 unit tests + 16 integration tests covering all 6 user stories + edge cases + concurrency + rate limiting + soft-locked license handling
-- **Architecture correction** — F-001 route placement aligned with established `routes/backoffice/<feature>/` pattern
+- **Audit immutability** — PostgreSQL trigger `prevent_audit_modification()` locks workflow_logs
+  rows from modification
+- **Tests** — 41 unit tests + 16 integration tests covering all 6 user stories + edge cases +
+  concurrency + rate limiting + soft-locked license handling
+- **Architecture correction** — F-001 route placement aligned with established
+  `routes/backoffice/<feature>/` pattern
 
 ---
 
 ## Deferred Scope
 
-None. All 39 real tasks completed. (The 40th line is the template placeholder header `T###` — not a real task.)
+None. All 39 real tasks completed. (The 40th line is the template placeholder header `T###` — not a
+real task.)
 
 ---
 
@@ -76,9 +90,11 @@ None. All 39 real tasks completed. (The 40th line is the template placeholder he
 
 ### Lint
 
-- **Files checked:** 12 (engine, states, types, errors, context, validation, route handler, router, migration, 3 test files)
+- **Files checked:** 12 (engine, states, types, errors, context, validation, route handler, router,
+  migration, 3 test files)
 - **Exit code:** 0 (no errors)
-- **Command:** `npx eslint packages/domain-core/src/workflow/ apps/api/src/modules/workflow/ apps/api/src/routes/backoffice/workflow/ ...`
+- **Command:**
+  `npx eslint packages/domain-core/src/workflow/ apps/api/src/modules/workflow/ apps/api/src/routes/backoffice/workflow/ ...`
 
 ### TypeScript
 
@@ -167,7 +183,8 @@ ee52cbb  chore(020-status-workflow-engine): complete clarify step
 
 ### API Route Integration
 
-- Full middleware stack: tenant resolver → license enforcer → schema validator → rate limiter (20/min) → auth → handler
+- Full middleware stack: tenant resolver → license enforcer → schema validator → rate limiter
+  (20/min) → auth → handler
 - Workspace context extracted from Hono context (not request body) — prevents tenant override
 - Structured error envelope with `correlationId` for observability
 - Concurrent requests handled safely via SELECT FOR UPDATE + T034 test validation

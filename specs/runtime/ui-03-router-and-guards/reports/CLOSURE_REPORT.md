@@ -9,9 +9,9 @@
 ## Summary
 
 STAGE_UI_03_ROUTER_AND_GUARDS has successfully completed all 63 implementation tasks. The canonical
-routing system and guard pipeline are now unified across three frontend applications (MMC, Backoffice,
-Frontoffice). All validation gates have been passed, integration with the broader Zidney platform
-architecture is complete, and the stage is ready for production deployment.
+routing system and guard pipeline are now unified across three frontend applications (MMC,
+Backoffice, Frontoffice). All validation gates have been passed, integration with the broader Zidney
+platform architecture is complete, and the stage is ready for production deployment.
 
 ---
 
@@ -34,14 +34,14 @@ architecture is complete, and the stage is ready for production deployment.
 
 ## Scope Delivered
 
-- **Guard Pipeline:** `createAuthGuard`, `createRoleGuard`, `createWorkspaceGuard` (Backoffice only),
-  `createFeatureFlagGuard` (stub) — all implemented with full test coverage across all 3 apps
+- **Guard Pipeline:** `createAuthGuard`, `createRoleGuard`, `createWorkspaceGuard` (Backoffice
+  only), `createFeatureFlagGuard` (stub) — all implemented with full test coverage across all 3 apps
 - **Guard Orchestrator:** `registerGuards(router, options)` — pipeline enforcement with session-init
   gate; `router.onError` handler per app
 - **Router Factories:** `createAppRouter(history?)` — singleton exports removed; factory pattern
   adopted for testability; all 3 apps aligned
-- **RouteMeta Schema Migration:** `guestOnly` → `public`; `requiredRole` → `roles?`; `requiredModule`
-  removed; canonical `AppRouteMeta` type defined per app
+- **RouteMeta Schema Migration:** `guestOnly` → `public`; `requiredRole` → `roles?`;
+  `requiredModule` removed; canonical `AppRouteMeta` type defined per app
 - **Fallback Views:** `NotFoundView`, `UnauthorizedView`, `GlobalErrorView` — created consistently
   across all 3 apps with appropriate links and no error detail exposure
 - **Module Route Migration:** All module routes in MMC, Backoffice, Frontoffice updated to canonical
@@ -58,8 +58,8 @@ architecture is complete, and the stage is ready for production deployment.
 ## Deferred Scope
 
 - `createFeatureFlagGuard()` is a stub — returns `true` for all routes. Implementation requires a
-  future stage (STAGE_UI_XX) when the Feature Flag service is available and ready to integrate.
-  TODO marker placed per spec §4.5.
+  future stage (STAGE_UI_XX) when the Feature Flag service is available and ready to integrate. TODO
+  marker placed per spec §4.5.
 
 ---
 
@@ -108,7 +108,8 @@ All SpecKit-owned files (generated at implementation step and finalized at closu
 - `plan.md` — technical design and architecture plan
 - `tasks.md` — 63/63 atomic tasks marked complete
 - `checklists/requirements.md` — spec quality checklist
-- Optional: `research.md`, `data-model.md`, `contracts/`, `quickstart.md` (if created during planning)
+- Optional: `research.md`, `data-model.md`, `contracts/`, `quickstart.md` (if created during
+  planning)
 
 All orchestrator-owned files:
 
@@ -134,7 +135,8 @@ User-facing guides:
 ✅ **Documentation:** Comprehensive inline JSDoc + guide templates  
 ✅ **Test coverage:** 100% of new code paths; legacy code updated where needed  
 ✅ **Deployment risk:** Low; UI-only changes; no API/DB modifications  
-✅ **Backward compatibility:** Old singleton exports removed cleanly; new factory pattern is opt-in  
+✅ **Backward compatibility:** Old singleton exports removed cleanly; new factory pattern is
+opt-in  
 ✅ **Performance:** No regressions; guard pipeline is O(1) per route transition  
 ✅ **Constitutional alignment:** All Zidney Constitution rules verified  
 ✅ **ADR compliance:** Full alignment with ADRs 0001, 0006, 0007, 0008
@@ -144,7 +146,8 @@ User-facing guides:
 ## Next Steps
 
 1. **Open PR:** Use [PR_SUMMARY.md](PR_SUMMARY.md) as the PR description
-2. **Code Review:** Share with team; reference [audits/VALIDATION_REPORT.md](audits/VALIDATION_REPORT.md) for test evidence
+2. **Code Review:** Share with team; reference
+   [audits/VALIDATION_REPORT.md](audits/VALIDATION_REPORT.md) for test evidence
 3. **QA Onboarding:** Share [guides/TESTING_GUIDE.md](guides/TESTING_GUIDE.md) with QA team
 4. **Merge & Deploy:** Once approved, merge to `develop` via standard CI/CD
 5. **Monitor:** Watch for guard-pipeline errors in production logging (via `@zidney/logger`)

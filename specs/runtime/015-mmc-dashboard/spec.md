@@ -21,7 +21,8 @@ The MMC Dashboard is a platform-level, read-only analytics interface providing i
 - Affiliate performance (usage metrics, commission tracking)
 - Growth trends (optional: license and revenue trends over time)
 
-The dashboard is **insight-only**: no mutations, no provisioning triggers, no license modifications. All data derives strictly from master_db pre-aggregated tables and indexed queries.
+The dashboard is **insight-only**: no mutations, no provisioning triggers, no license modifications.
+All data derives strictly from master_db pre-aggregated tables and indexed queries.
 
 ### Phase & Stage Context
 
@@ -53,13 +54,17 @@ The dashboard is **insight-only**: no mutations, no provisioning triggers, no li
 
 ### Mandatory Guarantees
 
-✅ **Database-Per-Tenant Preserved**: Dashboard queries master_db only; tenant databases never accessed or joined  
+✅ **Database-Per-Tenant Preserved**: Dashboard queries master_db only; tenant databases never
+accessed or joined  
 ✅ **No Cross-Tenant Data Leakage**: All metrics scope strictly to workspace metadata in master DB  
 ✅ **No Middleware Bypass**: License middleware enforces workspace access before analytics queries  
 ✅ **No Unauthorized Access**: Permission middleware (reporting.view) blocks unauthenticated users  
-✅ **No Mutations**: Dashboard is read-only; no state transitions, license changes, or tenant modifications  
-✅ **No Real-Time Aggregation**: Heavy computations pre-aggregated; queries use indexed columns only  
-✅ **Audit Logging Mandatory**: All dashboard access logged with correlation_id, user_id, timestamp  
+✅ **No Mutations**: Dashboard is read-only; no state transitions, license changes, or tenant
+modifications  
+✅ **No Real-Time Aggregation**: Heavy computations pre-aggregated; queries use indexed columns
+only  
+✅ **Audit Logging Mandatory**: All dashboard access logged with correlation_id, user_id,
+timestamp  
 ✅ **Server-Authoritative Time**: All timestamps sourced from server, never client
 
 ---
@@ -69,7 +74,8 @@ The dashboard is **insight-only**: no mutations, no provisioning triggers, no li
 The MMC Dashboard MUST:
 
 - **Data Source**: Query `master_db` only
-- **Schema**: Use `products`, `licenses`, `mmc_members`, `affiliates`, `affiliate_usages`, `revenue_records` tables exclusively
+- **Schema**: Use `products`, `licenses`, `mmc_members`, `affiliates`, `affiliate_usages`,
+  `revenue_records` tables exclusively
 - **Aggregation**: Use indexed columns and pre-computed summary tables where dataset grows large
 - **Performance**: Complete all responses within 300ms under normal load (1000+ licenses)
 - **Authorization**: Enforce `reporting.view` permission per STAGE_14_MMC_MEMBERS
@@ -126,19 +132,29 @@ The MMC Dashboard MUST NOT:
 ### Session 2026-02-26
 
 **Q1: Revenue Calculation Precision & Rounding**  
-**A:** C – Aggregate rounding with standard round-half-up at display level. Database stores full precision; display rounds to 2 decimals only. Applies to all monetary displays (revenue, commission, MRR).
+**A:** C – Aggregate rounding with standard round-half-up at display level. Database stores full
+precision; display rounds to 2 decimals only. Applies to all monetary displays (revenue, commission,
+MRR).
 
 **Q2: Affiliate Commission Rounding Method**  
-**A:** B – Sum all commissions with full precision in database; round final total once at display (2 decimals). Matches revenue rounding pattern. `affiliate_usages.commission_amount` remains source of truth.
+**A:** B – Sum all commissions with full precision in database; round final total once at display (2
+decimals). Matches revenue rounding pattern. `affiliate_usages.commission_amount` remains source of
+truth.
 
 **Q3: Concurrent Load Definition & Caching Strategy**  
-**A:** B – "100+ concurrent sessions" = 100 concurrent users (active browser/socket sessions). Tiered caching via Redis: 5-min TTL for summary/trends; revenue breakdown and geographic queries always fresh (indexed). All 6 endpoints maintain hard <300ms guarantee (not 95th percentile).
+**A:** B – "100+ concurrent sessions" = 100 concurrent users (active browser/socket sessions).
+Tiered caching via Redis: 5-min TTL for summary/trends; revenue breakdown and geographic queries
+always fresh (indexed). All 6 endpoints maintain hard <300ms guarantee (not 95th percentile).
 
 **Q4: Export File Size Limits & Materialized View Refresh**  
-**A:** B – Maximum 50,000 rows per export file. Requests >50k rows return 413 Payload Too Large. Exports always execute fresh query (not from cache) to ensure financial data integrity. Users must filter via date/country/product for larger datasets.
+**A:** B – Maximum 50,000 rows per export file. Requests >50k rows return 413 Payload Too Large.
+Exports always execute fresh query (not from cache) to ensure financial data integrity. Users must
+filter via date/country/product for larger datasets.
 
 **Q5: User Role Hierarchy & Data Visibility**  
-**A:** A – Role hierarchy enforced: platform_owner ⊃ member. platform_owner views all workspaces + cross-workspace aggregations. member with `reporting.view` permission views only own workspace metrics (filtered at query level). Multi-tenancy isolation maintained.
+**A:** A – Role hierarchy enforced: platform_owner ⊃ member. platform_owner views all workspaces +
+cross-workspace aggregations. member with `reporting.view` permission views only own workspace
+metrics (filtered at query level). Multi-tenancy isolation maintained.
 
 **Integration Summary:**
 
@@ -348,10 +364,14 @@ CREATE INDEX idx_affiliate_summary_monthly_affiliate ON affiliate_summary_monthl
 
 **Acceptance Scenarios**:
 
-1. **Given** admin is authenticated as MMC member, **When** they access Dashboard, **Then** system displays license counts (ACTIVE, SOFT_LOCKED, ARCHIVED) matching licenses table
-2. **Given** revenue_records table has 100 entries, **When** admin views revenue summary, **Then** total_revenue and monthly_revenue calculations match pre-calculated values
-3. **Given** admin lacks reporting.view permission, **When** they request dashboard data, **Then** system returns 403 Forbidden
-4. **Given** MMC workspace license is SOFT_LOCKED or ARCHIVED, **When** admin requests dashboard, **Then** system blocks access with appropriate error
+1. **Given** admin is authenticated as MMC member, **When** they access Dashboard, **Then** system
+   displays license counts (ACTIVE, SOFT_LOCKED, ARCHIVED) matching licenses table
+2. **Given** revenue_records table has 100 entries, **When** admin views revenue summary, **Then**
+   total_revenue and monthly_revenue calculations match pre-calculated values
+3. **Given** admin lacks reporting.view permission, **When** they request dashboard data, **Then**
+   system returns 403 Forbidden
+4. **Given** MMC workspace license is SOFT_LOCKED or ARCHIVED, **When** admin requests dashboard,
+   **Then** system blocks access with appropriate error
 
 ---
 
@@ -370,7 +390,8 @@ CREATE INDEX idx_affiliate_summary_monthly_affiliate ON affiliate_summary_monthl
 3. Admin filters by date range (default: last 12 months)
 4. Admin exports data as CSV
 
-**Why this priority**: Secondary reporting need; requires geographic aggregation; enables market segmentation
+**Why this priority**: Secondary reporting need; requires geographic aggregation; enables market
+segmentation
 
 **Independent Test**:
 
@@ -380,10 +401,14 @@ CREATE INDEX idx_affiliate_summary_monthly_affiliate ON affiliate_summary_monthl
 
 **Acceptance Scenarios**:
 
-1. **Given** revenue_records have entries from 5 countries, **When** admin views geographic distribution, **Then** revenue is correctly grouped by country with accurate sums
-2. **Given** admin requests geographic data, **When** system executes query, **Then** query completes within 300ms
-3. **Given** revenue_records for a country show $10,000 total, **When** admin views that country's revenue, **Then** displayed amount matches $10,000
-4. **Given** admin requests CSV export, **When** system processes request, **Then** file contains all countries sorted by revenue descending
+1. **Given** revenue_records have entries from 5 countries, **When** admin views geographic
+   distribution, **Then** revenue is correctly grouped by country with accurate sums
+2. **Given** admin requests geographic data, **When** system executes query, **Then** query
+   completes within 300ms
+3. **Given** revenue_records for a country show $10,000 total, **When** admin views that country's
+   revenue, **Then** displayed amount matches $10,000
+4. **Given** admin requests CSV export, **When** system processes request, **Then** file contains
+   all countries sorted by revenue descending
 
 ---
 
@@ -402,7 +427,8 @@ CREATE INDEX idx_affiliate_summary_monthly_affiliate ON affiliate_summary_monthl
 3. Admin filters by time period (default: last 30 days)
 4. Admin can drill down into individual affiliate performance
 
-**Why this priority**: Affiliate management is core to MMC; requires aggregation of affiliate_usages table
+**Why this priority**: Affiliate management is core to MMC; requires aggregation of affiliate_usages
+table
 
 **Independent Test**:
 
@@ -412,10 +438,14 @@ CREATE INDEX idx_affiliate_summary_monthly_affiliate ON affiliate_summary_monthl
 
 **Acceptance Scenarios**:
 
-1. **Given** 5 affiliates with distinct commission amounts, **When** admin views affiliate leaderboard, **Then** affiliates are ranked by commission descending with correct totals
-2. **Given** query includes 1000 usages, **When** system aggregates, **Then** response time is <300ms
-3. **Given** an affiliate has 50 usages in the period, **When** admin views affiliate performance, **Then** usage count displays as 50
-4. **Given** admin filters by last 30 days, **When** system executes query, **Then** only usages with created_at >= 30 days ago are included
+1. **Given** 5 affiliates with distinct commission amounts, **When** admin views affiliate
+   leaderboard, **Then** affiliates are ranked by commission descending with correct totals
+2. **Given** query includes 1000 usages, **When** system aggregates, **Then** response time is
+   <300ms
+3. **Given** an affiliate has 50 usages in the period, **When** admin views affiliate performance,
+   **Then** usage count displays as 50
+4. **Given** admin filters by last 30 days, **When** system executes query, **Then** only usages
+   with created_at >= 30 days ago are included
 
 ---
 
@@ -433,7 +463,8 @@ CREATE INDEX idx_affiliate_summary_monthly_affiliate ON affiliate_summary_monthl
 3. Admin can toggle individual trend lines on/off
 4. Admin can zoom into specific month for detail
 
-**Why this priority**: Strategic planning; nice-to-have for initial MVP; requires precomputed monthly summaries
+**Why this priority**: Strategic planning; nice-to-have for initial MVP; requires precomputed
+monthly summaries
 
 **Independent Test**:
 
@@ -443,23 +474,35 @@ CREATE INDEX idx_affiliate_summary_monthly_affiliate ON affiliate_summary_monthl
 
 **Acceptance Scenarios**:
 
-1. **Given** historical data for 12 months, **When** admin views trend chart, **Then** each month's data is plotted accurately
-2. **Given** license count grew from 100 to 150 over 12 months, **When** admin views license trend, **Then** chart shows upward trajectory
-3. **Given** admin requests trend data, **When** system executes query, **Then** response time is <500ms (precomputed tables allowed)
-4. **Given** revenue increased from $10K to $50K over period, **When** admin views revenue trend, **Then** chart displays correct monthly progression
+1. **Given** historical data for 12 months, **When** admin views trend chart, **Then** each month's
+   data is plotted accurately
+2. **Given** license count grew from 100 to 150 over 12 months, **When** admin views license trend,
+   **Then** chart shows upward trajectory
+3. **Given** admin requests trend data, **When** system executes query, **Then** response time is
+   <500ms (precomputed tables allowed)
+4. **Given** revenue increased from $10K to $50K over period, **When** admin views revenue trend,
+   **Then** chart displays correct monthly progression
 
 ---
 
 ### Edge Cases
 
-- **Empty master_db**: If no licenses, revenue records, or affiliates exist, dashboard displays "No data available" with helpful messaging
-- **No revenue_records table**: If payment system disabled, revenue section displays "Reporting not enabled" (per stage spec section 4.2)
-- **User lacks reporting.view permission**: Request returns 403; error message does not leak dashboard data
-- **Timezone handling**: All timestamps normalized to server timezone; no client-side time interpretation
-- **Large dataset (1000+ licenses, 100+ affiliates)**: Query response time must remain <300ms; uses indexed queries and precomputed summaries
-- **Concurrent dashboard access**: Multiple admins viewing dashboard simultaneously must not cause query contention (indexed query design)
-- **Session timeout**: User session expires during dashboard viewing; subsequent data fetch returns 401 Unauthorized
-- **Affiliate commission calculation inconsistency**: If affiliate_usages.commission_amount differs from expected calculation, dashboard displays actual stored value (not recalculated)
+- **Empty master_db**: If no licenses, revenue records, or affiliates exist, dashboard displays "No
+  data available" with helpful messaging
+- **No revenue_records table**: If payment system disabled, revenue section displays "Reporting not
+  enabled" (per stage spec section 4.2)
+- **User lacks reporting.view permission**: Request returns 403; error message does not leak
+  dashboard data
+- **Timezone handling**: All timestamps normalized to server timezone; no client-side time
+  interpretation
+- **Large dataset (1000+ licenses, 100+ affiliates)**: Query response time must remain <300ms; uses
+  indexed queries and precomputed summaries
+- **Concurrent dashboard access**: Multiple admins viewing dashboard simultaneously must not cause
+  query contention (indexed query design)
+- **Session timeout**: User session expires during dashboard viewing; subsequent data fetch returns
+  401 Unauthorized
+- **Affiliate commission calculation inconsistency**: If affiliate_usages.commission_amount differs
+  from expected calculation, dashboard displays actual stored value (not recalculated)
 
 ---
 
@@ -467,76 +510,115 @@ CREATE INDEX idx_affiliate_summary_monthly_affiliate ON affiliate_summary_monthl
 
 ### Dashboard Endpoint Requirements
 
-- **Fr-001**: System MUST provide `/api/mmc/dashboard/summary` endpoint returning license counts grouped by status (ACTIVE, SOFT_LOCKED, ARCHIVED) from master_db licenses table
-- **Fr-002**: System MUST calculate revenue_this_month and revenue_this_year from revenue_records table, displaying in USD with 2 decimal precision (round-half-up) at display level; database stores full precision to avoid cumulative rounding errors
-- **Fr-003**: System MUST provide `/api/mmc/dashboard/revenue-breakdown` endpoint returning revenue by product (top 5), ordered descending by total revenue, with display precision of 2 decimals (aggregate rounding)
-- **Fr-004**: System MUST provide `/api/mmc/dashboard/geographic` endpoint returning revenue and license counts grouped by billing_country, sorted descending by revenue, with revenue displayed in 2 decimal precision
-- **Fr-005**: System MUST provide `/api/mmc/dashboard/affiliates` endpoint returning top affiliates by total_commission_generated, including usage count and status (ACTIVE/INACTIVE)
-- **Fr-006**: System MUST provide `/api/mmc/dashboard/trends` endpoint (optional) returning monthly license and revenue trends for the past 12 months, queryable by date range
+- **Fr-001**: System MUST provide `/api/mmc/dashboard/summary` endpoint returning license counts
+  grouped by status (ACTIVE, SOFT_LOCKED, ARCHIVED) from master_db licenses table
+- **Fr-002**: System MUST calculate revenue_this_month and revenue_this_year from revenue_records
+  table, displaying in USD with 2 decimal precision (round-half-up) at display level; database
+  stores full precision to avoid cumulative rounding errors
+- **Fr-003**: System MUST provide `/api/mmc/dashboard/revenue-breakdown` endpoint returning revenue
+  by product (top 5), ordered descending by total revenue, with display precision of 2 decimals
+  (aggregate rounding)
+- **Fr-004**: System MUST provide `/api/mmc/dashboard/geographic` endpoint returning revenue and
+  license counts grouped by billing_country, sorted descending by revenue, with revenue displayed in
+  2 decimal precision
+- **Fr-005**: System MUST provide `/api/mmc/dashboard/affiliates` endpoint returning top affiliates
+  by total_commission_generated, including usage count and status (ACTIVE/INACTIVE)
+- **Fr-006**: System MUST provide `/api/mmc/dashboard/trends` endpoint (optional) returning monthly
+  license and revenue trends for the past 12 months, queryable by date range
 
 ### Authorization & Security
 
-- **Fr-007**: System MUST enforce `reporting.view` permission before returning any dashboard data; unauthorized requests return 403 Forbidden
-- **Fr-008**: System MUST validate MMC member workspace license status (must be ACTIVE); if SOFT_LOCKED, ARCHIVED, or DELETED, return 423 (Locked) or appropriate error
-- **Fr-009**: System MUST include correlation_id, user_id, workspace_id, timestamp in all dashboard access logs
-- **Fr-010**: System MUST NOT expose tenant-specific financial data in dashboard responses; all metrics scoped to master_db only
-- **Fr-011**: System MUST NOT include sensitive PII (e.g., member emails, affiliate private keys) in dashboard JSON responses
+- **Fr-007**: System MUST enforce `reporting.view` permission before returning any dashboard data;
+  unauthorized requests return 403 Forbidden
+- **Fr-008**: System MUST validate MMC member workspace license status (must be ACTIVE); if
+  SOFT_LOCKED, ARCHIVED, or DELETED, return 423 (Locked) or appropriate error
+- **Fr-009**: System MUST include correlation_id, user_id, workspace_id, timestamp in all dashboard
+  access logs
+- **Fr-010**: System MUST NOT expose tenant-specific financial data in dashboard responses; all
+  metrics scoped to master_db only
+- **Fr-011**: System MUST NOT include sensitive PII (e.g., member emails, affiliate private keys) in
+  dashboard JSON responses
 
 ### Data Accuracy
 
-- **Fr-012**: System MUST query exclusively from master_db; zero queries to any tenant database allowed
-- **Fr-013**: System MUST use indexed columns only; full-table scans prohibited for performance compliance
-- **Fr-014**: System MUST calculate license_count from `licenses` table WHERE `deleted_at IS NULL`; do not include deleted licenses
-- **Fr-015**: System MUST calculate total_revenue from `revenue_records` table; never derive from tenant subscription or payment records
-- **Fr-016**: System MUST aggregate affiliate metrics from `affiliate_usages` table; commission_amount must be summed directly, not recalculated
+- **Fr-012**: System MUST query exclusively from master_db; zero queries to any tenant database
+  allowed
+- **Fr-013**: System MUST use indexed columns only; full-table scans prohibited for performance
+  compliance
+- **Fr-014**: System MUST calculate license_count from `licenses` table WHERE `deleted_at IS NULL`;
+  do not include deleted licenses
+- **Fr-015**: System MUST calculate total_revenue from `revenue_records` table; never derive from
+  tenant subscription or payment records
+- **Fr-016**: System MUST aggregate affiliate metrics from `affiliate_usages` table;
+  commission_amount must be summed directly, not recalculated
 
 ### Performance
 
-- **Fr-017**: System MUST return all dashboard endpoints within 300ms under normal load (1000+ licenses, 100+ affiliates); if latency exceeds threshold, use precomputed summary tables
-- **Fr-018**: System MUST use pagination for large result sets (e.g., affiliate lists); default 50 items per page, max 100
+- **Fr-017**: System MUST return all dashboard endpoints within 300ms under normal load (1000+
+  licenses, 100+ affiliates); if latency exceeds threshold, use precomputed summary tables
+- **Fr-018**: System MUST use pagination for large result sets (e.g., affiliate lists); default 50
+  items per page, max 100
 - **Fr-019**: System MUST include `X-Response-Time` header in all dashboard responses for monitoring
-- **Fr-020**: System MUST avoid N+1 query patterns; use JOIN or LEFT JOIN for related data, not sequential queries
+- **Fr-020**: System MUST avoid N+1 query patterns; use JOIN or LEFT JOIN for related data, not
+  sequential queries
 
 ### API Response Contract
 
-- **Fr-021**: System MUST return all API responses in standardized format: `{ success: boolean, data: object | null, error: { code: string, message: string } | null }`
+- **Fr-021**: System MUST return all API responses in standardized format:
+  `{ success: boolean, data: object | null, error: { code: string, message: string } | null }`
 - **Fr-022**: System MUST include `correlation_id` in response headers for request tracing
-- **Fr-023**: System MUST return HTTP 303 for invalid date ranges with specific error message (e.g., "Invalid date range: end_date must be after start_date")
-- **Fr-024**: System MUST cache read-only responses (if implementing caching) with appropriate Cache-Control headers; cache expiry default 5 minutes for summary data
+- **Fr-023**: System MUST return HTTP 303 for invalid date ranges with specific error message (e.g.,
+  "Invalid date range: end_date must be after start_date")
+- **Fr-024**: System MUST cache read-only responses (if implementing caching) with appropriate
+  Cache-Control headers; cache expiry default 5 minutes for summary data
 
 ### Logging & Audit
 
-- **Fr-025**: System MUST log all dashboard access with structured logging (service, timestamp, user_id, workspace_id, correlation_id, endpoint, response_time)
-- **Fr-026**: System MUST log authorization failures with failure reason (e.g., "PERMISSION_DENIED: reporting.view required")
-- **Fr-027**: System MUST NOT log sensitive financial payloads; log only metric names, timestamps, and query parameters
+- **Fr-025**: System MUST log all dashboard access with structured logging (service, timestamp,
+  user_id, workspace_id, correlation_id, endpoint, response_time)
+- **Fr-026**: System MUST log authorization failures with failure reason (e.g., "PERMISSION_DENIED:
+  reporting.view required")
+- **Fr-027**: System MUST NOT log sensitive financial payloads; log only metric names, timestamps,
+  and query parameters
 - **Fr-028**: System MUST support audit trail export via separate compliance endpoint (future stage)
 
 ### Frontend Rendering
 
-- **Fr-029**: Frontend MUST display all metrics in "Commercial Health" card with clear labels (e.g., "ACTIVE Licenses", "This Month Revenue")
-- **Fr-030**: Frontend MUST display geographic data in sortable table with columns: Country, Revenue, License Count, YoY Growth %
-- **Fr-031**: Frontend MUST display affiliate data in sortable leaderboard with columns: Rank, Affiliate Name, Usages, Commission, Status
-- **Fr-032**: Frontend MUST provide date range picker for filtering (default: last 30 days for metrics, last 12 months for trends)
-- **Fr-033**: Frontend MUST display loading state while fetching data and error state if API returns error
-- **Fr-034**: Frontend MUST include "Export as CSV" button for all tabular data (geographic, affiliate lists)
+- **Fr-029**: Frontend MUST display all metrics in "Commercial Health" card with clear labels (e.g.,
+  "ACTIVE Licenses", "This Month Revenue")
+- **Fr-030**: Frontend MUST display geographic data in sortable table with columns: Country,
+  Revenue, License Count, YoY Growth %
+- **Fr-031**: Frontend MUST display affiliate data in sortable leaderboard with columns: Rank,
+  Affiliate Name, Usages, Commission, Status
+- **Fr-032**: Frontend MUST provide date range picker for filtering (default: last 30 days for
+  metrics, last 12 months for trends)
+- **Fr-033**: Frontend MUST display loading state while fetching data and error state if API returns
+  error
+- **Fr-034**: Frontend MUST include "Export as CSV" button for all tabular data (geographic,
+  affiliate lists)
 
 ### Error Handling
 
 - **Fr-035**: System MUST return 401 if user session expired or authentication failed
 - **Fr-036**: System MUST return 403 if user lacks `reporting.view` permission
 - **Fr-037**: System MUST return 423 if MMC workspace license is not ACTIVE
-- **Fr-038**: System MUST return 500 with generic error message if database query fails; specific error logged (not exposed to client)
+- **Fr-038**: System MUST return 500 with generic error message if database query fails; specific
+  error logged (not exposed to client)
 
 ---
 
 ## Key Entities
 
-- **Dashboard Metrics**: Aggregated insight objects (license counts, revenue totals, affiliate performance) computed from master_db
-- **License Summary**: Snapshot of license states and counts at dashboard query time (queries licenses table)
-- **Revenue Record**: Financial transaction entry linking to product, affiliate (if applicable), and billing address (from revenue_records table)
+- **Dashboard Metrics**: Aggregated insight objects (license counts, revenue totals, affiliate
+  performance) computed from master_db
+- **License Summary**: Snapshot of license states and counts at dashboard query time (queries
+  licenses table)
+- **Revenue Record**: Financial transaction entry linking to product, affiliate (if applicable), and
+  billing address (from revenue_records table)
 - **Affiliate Performance**: Aggregated usage and commission metrics per affiliate over time period
 - **Geographic Distribution**: Country-level aggregation of revenue and license activity
-- **Monthly Trend**: Precomputed or calculated monthly snapshots of license count and revenue for growth visualization
+- **Monthly Trend**: Precomputed or calculated monthly snapshots of license count and revenue for
+  growth visualization
 
 ---
 
@@ -544,55 +626,89 @@ CREATE INDEX idx_affiliate_summary_monthly_affiliate ON affiliate_summary_monthl
 
 ### Measurable Outcomes
 
-- **SC-001**: Dashboard displays accurate license count breakdowns (by status) matching licenses table within <300ms query latency
-- **SC-002**: Revenue summary calculations (total, monthly, annual, by product) match pre-agreed financial reconciliation within ±0.01 USD for 100-entry test dataset
-- **SC-003**: Geographic distribution correctly groups revenue by country with no double-counting; query completes within 300ms for 1000+ revenue records
-- **SC-004**: Affiliate performance metrics (top affiliates by commission, total usages) match precomputed values; query latency <300ms with 100+ affiliates
-- **SC-005**: 100% of unauthorized access attempts (missing reporting.view permission) return 403 Forbidden within 50ms (no data leakage)
-- **SC-006**: Zero queries to tenant databases observed in 100+ dashboard access test runs; 100% of queries isolated to master_db
-- **SC-007**: Dashboard response time remains <300ms under concurrent load (100 simultaneous dashboard viewers, tiered caching); average response time <150ms with <300ms hard ceiling
-- **SC-008**: All dashboard access logged with correlation_id, user_id, workspace_id, timestamp; audit trail is complete and queryable
-- **SC-009**: No sensitive financial payloads or PII exposed in logs or error messages; compliance checklist passes manual review
-- **SC-010**: CSV export files contain all rows and columns matching on-screen display with no truncation or formatting errors; exports completed within 2 seconds for <10K rows
+- **SC-001**: Dashboard displays accurate license count breakdowns (by status) matching licenses
+  table within <300ms query latency
+- **SC-002**: Revenue summary calculations (total, monthly, annual, by product) match pre-agreed
+  financial reconciliation within ±0.01 USD for 100-entry test dataset
+- **SC-003**: Geographic distribution correctly groups revenue by country with no double-counting;
+  query completes within 300ms for 1000+ revenue records
+- **SC-004**: Affiliate performance metrics (top affiliates by commission, total usages) match
+  precomputed values; query latency <300ms with 100+ affiliates
+- **SC-005**: 100% of unauthorized access attempts (missing reporting.view permission) return 403
+  Forbidden within 50ms (no data leakage)
+- **SC-006**: Zero queries to tenant databases observed in 100+ dashboard access test runs; 100% of
+  queries isolated to master_db
+- **SC-007**: Dashboard response time remains <300ms under concurrent load (100 simultaneous
+  dashboard viewers, tiered caching); average response time <150ms with <300ms hard ceiling
+- **SC-008**: All dashboard access logged with correlation_id, user_id, workspace_id, timestamp;
+  audit trail is complete and queryable
+- **SC-009**: No sensitive financial payloads or PII exposed in logs or error messages; compliance
+  checklist passes manual review
+- **SC-010**: CSV export files contain all rows and columns matching on-screen display with no
+  truncation or formatting errors; exports completed within 2 seconds for <10K rows
 
 ### Quality Gates
 
-- **QG-001**: All functional requirements have passing unit tests (>90% coverage for dashboard domain logic)
-- **QG-002**: All dashboard endpoints have passing integration tests with real (test) master_db queries
-- **QG-003**: Permission enforcement tested via integration tests (verify 403 for missing reporting.view, 423 for inactive license)
-- **QG-004**: Query performance tested; all endpoints confirmed <300ms (average <150ms) under normal load
-- **QG-005**: No cross-tenant data leakage in 100+ test scenarios; audit review confirms isolation intact
-- **QG-006**: Schema migration (if summary tables added) passes forward-compatibility validation per ADR-0008
-- **QG-007**: Frontend component tests verify all metrics render correctly; CSV export functionality tested end-to-end
+- **QG-001**: All functional requirements have passing unit tests (>90% coverage for dashboard
+  domain logic)
+- **QG-002**: All dashboard endpoints have passing integration tests with real (test) master_db
+  queries
+- **QG-003**: Permission enforcement tested via integration tests (verify 403 for missing
+  reporting.view, 423 for inactive license)
+- **QG-004**: Query performance tested; all endpoints confirmed <300ms (average <150ms) under normal
+  load
+- **QG-005**: No cross-tenant data leakage in 100+ test scenarios; audit review confirms isolation
+  intact
+- **QG-006**: Schema migration (if summary tables added) passes forward-compatibility validation per
+  ADR-0008
+- **QG-007**: Frontend component tests verify all metrics render correctly; CSV export functionality
+  tested end-to-end
 - **QG-008**: Linting and type checking pass (TypeScript strict mode for API and frontend code)
 
 ---
 
 ## Assumptions
 
-- **Revenue System Enabled**: Assumes `revenue_records` table exists and is populated by payment system; if payment system disabled, revenue section displays "Not Enabled" (per stage spec)
-- **Billing Country Provided**: Assumes revenue_records includes `billing_country` field; if not populated, geographic aggregation returns "Unknown" bucket
-- **Indexed Columns Available**: Assumes master_db has indexes on `licenses.status`, `revenue_records.created_at`, `affiliate_usages.affiliate_id`, `revenue_records.product_id`; performance requirements depend on these indexes
-- **No Client-Side Aggregation**: All calculations performed server-side; frontend receives fully computed metrics ready for display
-- **Timestamp Normalization**: All times in ISO 8601 format, UTC-normalized by backend; frontend displays in user's local timezone (if supported by MMC frontend layer)
-- **Affiliate Commission Model Stable**: Assumes affiliate_usages.commission_amount is final; no retroactive recalculation of commissions
-- **No Real-Time Revenue Updates**: Revenue records are eventually-consistent; dashboard may be 1-2 hours behind live financial system
-- **MMC Workspace Always Active**: MMC platform workspace must never be archived or deleted; license checks enforce this
-- **Permission Model Inherited**: Permissions (reporting.view) defined in STAGE_14_MMC_MEMBERS; assumes role-based access control implementation available
+- **Revenue System Enabled**: Assumes `revenue_records` table exists and is populated by payment
+  system; if payment system disabled, revenue section displays "Not Enabled" (per stage spec)
+- **Billing Country Provided**: Assumes revenue_records includes `billing_country` field; if not
+  populated, geographic aggregation returns "Unknown" bucket
+- **Indexed Columns Available**: Assumes master_db has indexes on `licenses.status`,
+  `revenue_records.created_at`, `affiliate_usages.affiliate_id`, `revenue_records.product_id`;
+  performance requirements depend on these indexes
+- **No Client-Side Aggregation**: All calculations performed server-side; frontend receives fully
+  computed metrics ready for display
+- **Timestamp Normalization**: All times in ISO 8601 format, UTC-normalized by backend; frontend
+  displays in user's local timezone (if supported by MMC frontend layer)
+- **Affiliate Commission Model Stable**: Assumes affiliate_usages.commission_amount is final; no
+  retroactive recalculation of commissions
+- **No Real-Time Revenue Updates**: Revenue records are eventually-consistent; dashboard may be 1-2
+  hours behind live financial system
+- **MMC Workspace Always Active**: MMC platform workspace must never be archived or deleted; license
+  checks enforce this
+- **Permission Model Inherited**: Permissions (reporting.view) defined in STAGE_14_MMC_MEMBERS;
+  assumes role-based access control implementation available
 
 ---
 
 ## Out of Scope (Explicitly Not Included)
 
 - **Tenant-Level Analytics**: No per-workspace drilldown; MMC Dashboard is platform-level only
-- **Real-Time Financial Recalculation**: Heavy aggregations moved to scheduled worker jobs with materialized views
-- **Mutation Operations**: No license changes, affiliate modifications, or revenue adjustments from dashboard
-- **Advanced Visualization**: Initial MVP is tables and basic charts; advanced visualizations (heatmaps, 3D graphs) are future stages
-- **Custom Report Builder**: No ad-hoc query or report generation in this stage; fixed dashboard sections only
-- **Cross-Tenant Benchmarking**: Comparison of tenant performance against peers not allowed (multi-tenancy isolation)
+- **Real-Time Financial Recalculation**: Heavy aggregations moved to scheduled worker jobs with
+  materialized views
+- **Mutation Operations**: No license changes, affiliate modifications, or revenue adjustments from
+  dashboard
+- **Advanced Visualization**: Initial MVP is tables and basic charts; advanced visualizations
+  (heatmaps, 3D graphs) are future stages
+- **Custom Report Builder**: No ad-hoc query or report generation in this stage; fixed dashboard
+  sections only
+- **Cross-Tenant Benchmarking**: Comparison of tenant performance against peers not allowed
+  (multi-tenancy isolation)
 - **Predictive Analytics**: No forecasting, trend extrapolation, or ML-based anomaly detection
-- **Real-Time Webhooks**: No event streams or live updates; dashboard is pull-based (refresh on user request)
-- **Mobile Optimization**: Initial MVP assumes desktop/tablet access; mobile optimization is future stage
+- **Real-Time Webhooks**: No event streams or live updates; dashboard is pull-based (refresh on user
+  request)
+- **Mobile Optimization**: Initial MVP assumes desktop/tablet access; mobile optimization is future
+  stage
 - **Integrations**: No export to Salesforce, Tableau, or other platforms in this stage
 
 ---
@@ -605,18 +721,22 @@ CREATE INDEX idx_affiliate_summary_monthly_affiliate ON affiliate_summary_monthl
 - STAGE_13_AFFILIATES (affiliate_usages table and aggregation logic)
 - License Engine (licenses table populated and accessible)
 - Revenue Records infrastructure (revenue_records table and payment system integration)
-- Master DB schema (products, licenses, revenue_records, affiliates, affiliate_usages tables indexed)
+- Master DB schema (products, licenses, revenue_records, affiliates, affiliate_usages tables
+  indexed)
 
 **Schema Changes**:
 
 - No breaking changes to existing tables
-- Optional addition of summary tables for performance (revenue_summary_monthly, affiliate_summary_monthly)
+- Optional addition of summary tables for performance (revenue_summary_monthly,
+  affiliate_summary_monthly)
 - All new tables are additive; no column modifications to existing production tables
 
 **Migration Strategy**:
 
-- If summary tables added: initial migration creates empty tables; nightly worker job populates retroactively over 7 days
-- Backward compatible: dashboard works with or without summary tables (uses raw queries if summaries unavailable)
+- If summary tables added: initial migration creates empty tables; nightly worker job populates
+  retroactively over 7 days
+- Backward compatible: dashboard works with or without summary tables (uses raw queries if summaries
+  unavailable)
 - Forward compatible: queries include fallback logic for future schema evolution
 
 ---
@@ -625,54 +745,84 @@ CREATE INDEX idx_affiliate_summary_monthly_affiliate ON affiliate_summary_monthl
 
 ### Unit Tests
 
-- **UT-001**: Revenue calculation logic (total, monthly, by product) returns correct sums with mock data
-- **UT-002**: License count aggregation (by status) matches expected counts; handles deleted_at NULL filtering
+- **UT-001**: Revenue calculation logic (total, monthly, by product) returns correct sums with mock
+  data
+- **UT-002**: License count aggregation (by status) matches expected counts; handles deleted_at NULL
+  filtering
 - **UT-003**: Permission check utility returns true/false for reporting.view permission correctly
-- **UT-004**: Date range validation (end_date > start_date); rejects invalid ranges with appropriate error
+- **UT-004**: Date range validation (end_date > start_date); rejects invalid ranges with appropriate
+  error
 - **UT-005**: Geographic aggregation groups revenue correctly by country_code with no duplicates
-- **UT-006**: Affiliate commission summation correctly calculates total commission and usage count from fixture data
-- **UT-007**: Metric formatting (currency, percentages, large numbers) displays correctly with comma separators and precision
+- **UT-006**: Affiliate commission summation correctly calculates total commission and usage count
+  from fixture data
+- **UT-007**: Metric formatting (currency, percentages, large numbers) displays correctly with comma
+  separators and precision
 
 ### Integration Tests
 
-- **IT-001**: Dashboard summary endpoint returns correct license counts querying real (test) master_db; response time <300ms
-- **IT-002**: Revenue endpoints return calculated values matching pre-agreed test fixtures; response contract matches spec
-- **IT-003**: Geographic endpoint groups diverse country data correctly; no country appears twice in response
-- **IT-004**: Affiliate endpoint ranks affiliates correctly by commission; pagination works (default 50, max 100)
-- **IT-005**: Permission enforcement: unauthorized requests (lacking reporting.view) return 403; authorized requests return 200
-- **IT-006**: License validation: if MMC workspace license is not ACTIVE, dashboard returns 423; if ACTIVE, proceeds to query
-- **IT-007**: Concurrent load test: 50 simultaneous requests achieve average response time <150ms, max <300ms
-- **IT-008**: Audit logging: all successful dashboard queries logged with correlation_id, user_id, workspace_id, timestamp
-- **IT-009**: Authorization failure logging: failed access attempts logged with reason (PERMISSION_DENIED, LICENSE_INVALID)
+- **IT-001**: Dashboard summary endpoint returns correct license counts querying real (test)
+  master_db; response time <300ms
+- **IT-002**: Revenue endpoints return calculated values matching pre-agreed test fixtures; response
+  contract matches spec
+- **IT-003**: Geographic endpoint groups diverse country data correctly; no country appears twice in
+  response
+- **IT-004**: Affiliate endpoint ranks affiliates correctly by commission; pagination works (default
+  50, max 100)
+- **IT-005**: Permission enforcement: unauthorized requests (lacking reporting.view) return 403;
+  authorized requests return 200
+- **IT-006**: License validation: if MMC workspace license is not ACTIVE, dashboard returns 423; if
+  ACTIVE, proceeds to query
+- **IT-007**: Concurrent load test: 50 simultaneous requests achieve average response time <150ms,
+  max <300ms
+- **IT-008**: Audit logging: all successful dashboard queries logged with correlation_id, user_id,
+  workspace_id, timestamp
+- **IT-009**: Authorization failure logging: failed access attempts logged with reason
+  (PERMISSION_DENIED, LICENSE_INVALID)
 
 ### Contract Tests (Response Format)
 
-- **CT-001**: All endpoints return standardized response format: `{ success: boolean, data: object | null, error: null | { code, message } }`
-- **CT-002**: Success responses include correlation_id in header and request_id in body (if applicable)
-- **CT-003**: Error responses include descriptive error code (e.g., "PERMISSION_DENIED", "LICENSE_INACTIVE") and user-friendly message
-- **CT-004**: Timestamp fields use ISO 8601 format with timezone info; no ambiguity about UTC vs local time
+- **CT-001**: All endpoints return standardized response format:
+  `{ success: boolean, data: object | null, error: null | { code, message } }`
+- **CT-002**: Success responses include correlation_id in header and request_id in body (if
+  applicable)
+- **CT-003**: Error responses include descriptive error code (e.g., "PERMISSION_DENIED",
+  "LICENSE_INACTIVE") and user-friendly message
+- **CT-004**: Timestamp fields use ISO 8601 format with timezone info; no ambiguity about UTC vs
+  local time
 
 ### Isolation Tests (Critical)
 
-- **IsT-001**: Dashboard queries never access tenant databases; audit query log confirms 100% master_db-only access
-- **IsT-002**: No cross-tenant joins executed; revenue and license for tenant A never combined with tenant B data
-- **IsT-003**: Revenue records from different products don't cross-contaminate in per-product breakdown; GROUP BY ensures isolation
-- **IsT-004**: Affiliate data for different affiliates not mixed; affiliate_usages grouped correctly by affiliate_id
+- **IsT-001**: Dashboard queries never access tenant databases; audit query log confirms 100%
+  master_db-only access
+- **IsT-002**: No cross-tenant joins executed; revenue and license for tenant A never combined with
+  tenant B data
+- **IsT-003**: Revenue records from different products don't cross-contaminate in per-product
+  breakdown; GROUP BY ensures isolation
+- **IsT-004**: Affiliate data for different affiliates not mixed; affiliate_usages grouped correctly
+  by affiliate_id
 
 ### Performance Tests
 
-- **PT-001**: License summary query (<300ms): 1000+ licenses in test DB; query returns count in <300ms
-- **PT-002**: Revenue time-range query (<300ms): 10,000 revenue records; monthly aggregation completes <300ms
+- **PT-001**: License summary query (<300ms): 1000+ licenses in test DB; query returns count in
+  <300ms
+- **PT-002**: Revenue time-range query (<300ms): 10,000 revenue records; monthly aggregation
+  completes <300ms
 - **PT-003**: Geographic grouping (<300ms): 1000+ revenue records across 50+ countries; query <300ms
-- **PT-004**: Affiliate aggregation (<300ms): 100 affiliates with 1000+ usages; top 10 affiliates query <300ms
-- **PT-005**: Concurrent access: 50 simultaneous requests all complete <300ms; no query timeout or connection pool exhaustion
+- **PT-004**: Affiliate aggregation (<300ms): 100 affiliates with 1000+ usages; top 10 affiliates
+  query <300ms
+- **PT-005**: Concurrent access: 50 simultaneous requests all complete <300ms; no query timeout or
+  connection pool exhaustion
 
 ### Snapshot Tests
 
-- **ST-001**: Revenue calculation snapshot: Compare calculated revenue against golden snapshot for consistency across code changes
-- **ST-002**: License breakdown snapshot: Verify license count distribution (ACTIVE, SOFT_LOCKED, ARCHIVED) against known-good snapshot
-- **ST-003**: Geographic aggregation snapshot: Confirm country grouping and revenue distribution matches expected output
-- **ST-004**: CSV export snapshot: Verify exported file content (headers, data rows, formatting) against golden snapshot
+- **ST-001**: Revenue calculation snapshot: Compare calculated revenue against golden snapshot for
+  consistency across code changes
+- **ST-002**: License breakdown snapshot: Verify license count distribution (ACTIVE, SOFT_LOCKED,
+  ARCHIVED) against known-good snapshot
+- **ST-003**: Geographic aggregation snapshot: Confirm country grouping and revenue distribution
+  matches expected output
+- **ST-004**: CSV export snapshot: Verify exported file content (headers, data rows, formatting)
+  against golden snapshot
 
 ---
 
@@ -680,43 +830,64 @@ CREATE INDEX idx_affiliate_summary_monthly_affiliate ON affiliate_summary_monthl
 
 ### Architecture Patterns
 
-1. **Read-Only Query Pattern**: All dashboard endpoints execute SELECT queries only; no UPDATE, INSERT, DELETE allowed
-2. **Indexed Access Pattern**: All queries explicitly use indexed columns; query planner should never recommend sequential scan
-3. **Aggregation Layer**: Heavy computations delegated to precomputed summary tables (updated by worker job); real-time queries use indexed aggregations only
-4. **Middleware Stack**: License → Permission → Query execution order enforced via middleware composition
-5. **Response Caching**: Tiered strategy to support 100 concurrent users with <300ms hard guarantee: (a) 5-minute TTL for dashboard summary and geographic data (low-write, high-read); (b) 1-minute TTL for affiliate leaderboard (more volatile); (c) 10-minute TTL for trend data (precomputed summary tables); cache key includes workspace_id to prevent cross-tenant leakage
+1. **Read-Only Query Pattern**: All dashboard endpoints execute SELECT queries only; no UPDATE,
+   INSERT, DELETE allowed
+2. **Indexed Access Pattern**: All queries explicitly use indexed columns; query planner should
+   never recommend sequential scan
+3. **Aggregation Layer**: Heavy computations delegated to precomputed summary tables (updated by
+   worker job); real-time queries use indexed aggregations only
+4. **Middleware Stack**: License → Permission → Query execution order enforced via middleware
+   composition
+5. **Response Caching**: Tiered strategy to support 100 concurrent users with <300ms hard guarantee:
+   (a) 5-minute TTL for dashboard summary and geographic data (low-write, high-read); (b) 1-minute
+   TTL for affiliate leaderboard (more volatile); (c) 10-minute TTL for trend data (precomputed
+   summary tables); cache key includes workspace_id to prevent cross-tenant leakage
 
 ### Frontend Architecture
 
-- **Stateless Components**: Dashboard sections (Commercial Health, Geographic, Affiliate) implemented as lightweight presentational components
-- **Data Fetching**: Centralized API client handles all dashboard requests; no data duplication across components
-- **Error Boundaries**: Graceful fallback if individual section fails to load; don't block entire dashboard
+- **Stateless Components**: Dashboard sections (Commercial Health, Geographic, Affiliate)
+  implemented as lightweight presentational components
+- **Data Fetching**: Centralized API client handles all dashboard requests; no data duplication
+  across components
+- **Error Boundaries**: Graceful fallback if individual section fails to load; don't block entire
+  dashboard
 - **Responsive Layout**: Dashboard adapts to MMC workspace theme tokens (shadcn-vue + Tailwind v4)
 
 ### Logging Strategy
 
-- **Request-Level Logging**: Every dashboard endpoint logs method, path, query parameters, response status, response_time
-- **Error Logging**: Failed queries logged with correlation_id and specific error reason (e.g., "PERMISSION_DENIED", "LICENSE_LOCKED")
-- **Audit Events**: Successful dashboard access for reporting.view permission logged as AUDIT_DASHBOARD_ACCESS
-- **PII Protection**: No user secrets, affiliate API keys, or detailed addresses logged; log only aggregated metrics
+- **Request-Level Logging**: Every dashboard endpoint logs method, path, query parameters, response
+  status, response_time
+- **Error Logging**: Failed queries logged with correlation_id and specific error reason (e.g.,
+  "PERMISSION_DENIED", "LICENSE_LOCKED")
+- **Audit Events**: Successful dashboard access for reporting.view permission logged as
+  AUDIT_DASHBOARD_ACCESS
+- **PII Protection**: No user secrets, affiliate API keys, or detailed addresses logged; log only
+  aggregated metrics
 
 ---
 
 ## Compliance & Governance
 
-- **GDPR Compliance**: Dashboard aggregates no personal data; no PII in metrics or exports (confirmed in security review)
-- **Financial Data Sensitivity**: Revenue data classified as internal confidential; access restricted to reporting.view role
-- **Audit Trail**: All dashboard access logged for compliance review; audit logs retained per data retention policy
-- **Constitutional Alignment**: Dashboard preserves database-per-tenant isolation, enforces license middleware, uses no global DB singleton
+- **GDPR Compliance**: Dashboard aggregates no personal data; no PII in metrics or exports
+  (confirmed in security review)
+- **Financial Data Sensitivity**: Revenue data classified as internal confidential; access
+  restricted to reporting.view role
+- **Audit Trail**: All dashboard access logged for compliance review; audit logs retained per data
+  retention policy
+- **Constitutional Alignment**: Dashboard preserves database-per-tenant isolation, enforces license
+  middleware, uses no global DB singleton
 
 ---
 
 ## Future Enhancements (Post-MVP)
 
 - **Advanced Visualizations**: Map view for geographic distribution, 3D trend charts
-- **Custom Report Builder**: Ad-hoc query interface for power users (requires strict permission controls)
-- **Real-Time Dashboard**: WebSocket subscription for live metrics (requires caching and materialized view strategy)
-- **Alerting**: Automated notifications for anomalies (e.g., sudden revenue spike/drop, license threshold warning)
+- **Custom Report Builder**: Ad-hoc query interface for power users (requires strict permission
+  controls)
+- **Real-Time Dashboard**: WebSocket subscription for live metrics (requires caching and
+  materialized view strategy)
+- **Alerting**: Automated notifications for anomalies (e.g., sudden revenue spike/drop, license
+  threshold warning)
 - **Predictive Analytics**: Trend forecasting, customer churn risk scoring
 - **Mobile Optimization**: Responsive design for iOS/Android tablet access
 - **Scheduled Reports**: Email delivery of dashboard snapshot on regular schedule

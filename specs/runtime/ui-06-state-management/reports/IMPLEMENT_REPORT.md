@@ -10,7 +10,8 @@
 
 All 42 tasks in `tasks.md` were implemented and verified. The step delivered:
 
-- `pinia-plugin-persistedstate@^4.2.0` installed and registered in all three apps (MMC, Backoffice, Frontoffice)
+- `pinia-plugin-persistedstate@^4.2.0` installed and registered in all three apps (MMC, Backoffice,
+  Frontoffice)
 - New stores (`app`, `ui`, `notification`) created in all three apps; `auth.store.ts` IDs namespaced
 - `workspace.store.ts` created in Backoffice with structured error handling via `@zidney/logger`
 - All store `index.ts` barrels updated; `main.ts` Pinia bootstrap updated in all three apps
@@ -221,9 +222,12 @@ The following were present before this stage and remain unresolved (not in scope
 
 ## Open Risks
 
-- The two pre-existing TypeScript errors in `guards/index.ts` (frontoffice + mmc) should be resolved in STAGE_UI_03 or a dedicated hotfix stage.
-- `workspace.store.ts` implements only the skeleton `loadWorkspace` action stub — full workspace API integration is deferred to a future backend integration stage.
-- `AppNotification` toast-display integration (consuming `notification.store.ts` in the UI component layer) is deferred to a dedicated UI component stage.
+- The two pre-existing TypeScript errors in `guards/index.ts` (frontoffice + mmc) should be resolved
+  in STAGE_UI_03 or a dedicated hotfix stage.
+- `workspace.store.ts` implements only the skeleton `loadWorkspace` action stub — full workspace API
+  integration is deferred to a future backend integration stage.
+- `AppNotification` toast-display integration (consuming `notification.store.ts` in the UI component
+  layer) is deferred to a dedicated UI component stage.
 
 ---
 

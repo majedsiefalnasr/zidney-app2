@@ -96,7 +96,8 @@ Phase 4: T033-T035 (Sequential: docs → runbooks → deployment)
 ✅ **Database-per-tenant enforced**
 
 - AI context generation does NOT access tenant DBs
-- Metadata sourced from: ADRs (repo-level), module-boundaries.json (global), infra-audit.ts (computed)
+- Metadata sourced from: ADRs (repo-level), module-boundaries.json (global), infra-audit.ts
+  (computed)
 - No table sharing, no cross-tenant joins
 - Task T024 (change detection) operates on repo metadata only
 

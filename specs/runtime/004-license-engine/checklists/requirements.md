@@ -18,7 +18,8 @@
 
 **Evidence**:
 
-- Feature Overview describes WHAT (license lifecycle, enforcement) not HOW (PostgreSQL tables, Hono middleware are in technical sections)
+- Feature Overview describes WHAT (license lifecycle, enforcement) not HOW (PostgreSQL tables, Hono
+  middleware are in technical sections)
 - User Scenarios focus on institutional admin workflows (signup, limit enforcement, renewal)
 - Constitutional Compliance section written for governance stakeholders
 - No Python/TypeScript/SQL embedded in non-technical sections
@@ -40,12 +41,16 @@
 
 **Evidence**:
 
-- FR-1 through FR-10: All specify clear behavior ("License creation accepts product_id, workspace_id, workspace_slug")
+- FR-1 through FR-10: All specify clear behavior ("License creation accepts product_id,
+  workspace_id, workspace_slug")
 - Acceptance Scenarios use BDD format (Given/When/Then)
-- Success Criteria include measurable metrics ("SOFT_LOCKED blocks logins (423) within 1 req latency")
+- Success Criteria include measurable metrics ("SOFT_LOCKED blocks logins (423) within 1 req
+  latency")
 - No client-side tech requirements in success criteria
-- Edge Cases section identifies 3 scenarios (soft-lock expiration, concurrent creation, status change mid-request)
-- Scope clearly states: License lifecycle, limits, soft-lock, archive, version validation (NOT: products, billing, auth, grading)
+- Edge Cases section identifies 3 scenarios (soft-lock expiration, concurrent creation, status
+  change mid-request)
+- Scope clearly states: License lifecycle, limits, soft-lock, archive, version validation (NOT:
+  products, billing, auth, grading)
 - Dependencies and Assumptions sections complete
 
 ---
@@ -62,9 +67,12 @@
 **Evidence**:
 
 - Each FR has explicit acceptance scenario(s) in User Stories section
-- 6 user stories cover: License creation (P1), Soft-lock (P1), Student limit (P1), Archive (P1), Version mismatch (P2), Manual deletion (P3)
-- 8 Success Criteria map to implementation areas (lifecycle operational, limits reliable, middleware fast, version enforcement, archive/snapshot, data integrity, observability, idempotency)
-- Technical implementation details (SQL schema, transaction boundaries, idempotency keys) properly separated in corresponding sections, not in Feature Overview or Requirements
+- 6 user stories cover: License creation (P1), Soft-lock (P1), Student limit (P1), Archive (P1),
+  Version mismatch (P2), Manual deletion (P3)
+- 8 Success Criteria map to implementation areas (lifecycle operational, limits reliable, middleware
+  fast, version enforcement, archive/snapshot, data integrity, observability, idempotency)
+- Technical implementation details (SQL schema, transaction boundaries, idempotency keys) properly
+  separated in corresponding sections, not in Feature Overview or Requirements
 
 ---
 
@@ -123,10 +131,12 @@
 
 **Evidence**:
 
-- FR-3 "Student limit enforced transactionally at user creation; blocks creation if limit reached (402)"
+- FR-3 "Student limit enforced transactionally at user creation; blocks creation if limit reached
+  (402)"
   - Testable: Count students, attempt creation, verify count+1 ≤ limit OR creation fails
   - Implementation-neutral: No mention of SQL, transactions, how counting works
-  - Implies scenarios: At limit (success), over limit (fail), NULL limit (unlimited), soft-deleted excluded
+  - Implies scenarios: At limit (success), over limit (fail), NULL limit (unlimited), soft-deleted
+    excluded
 - FR-6 "Auto-transition SOFT_LOCKED→ARCHIVED when soft_lock_until expires"
   - Testable: Set soft_lock_until to past time, verify auto-transition on next request
   - Implementation-neutral: No mention of cron, middleware, database queries
@@ -145,10 +155,14 @@
 
 **Evidence**:
 
-- SC-1: "SOFT_LOCKED blocks logins (423) within 1 req latency" — Measurable (HTTP status, timing), observable (test with invalid license)
-- SC-2: "No user created if limit exceeded; transactional enforcement (no race)" — Measurable (verify user count), observable (concurrent creation test)
-- SC-3: "< 50ms p95; 100% coverage on workspace routes" — Measurable (performance metric), quantifiable (coverage percentage)
-- SC-7: "All ops logged with correlation_id; metrics available" — Verifiable (grep logs, query metrics)
+- SC-1: "SOFT_LOCKED blocks logins (423) within 1 req latency" — Measurable (HTTP status, timing),
+  observable (test with invalid license)
+- SC-2: "No user created if limit exceeded; transactional enforcement (no race)" — Measurable
+  (verify user count), observable (concurrent creation test)
+- SC-3: "< 50ms p95; 100% coverage on workspace routes" — Measurable (performance metric),
+  quantifiable (coverage percentage)
+- SC-7: "All ops logged with correlation_id; metrics available" — Verifiable (grep logs, query
+  metrics)
 - All are technology-agnostic: No "Redis", "PostgreSQL", "Hono" in metrics
 
 ---
@@ -165,7 +179,8 @@
 
 **Evidence**:
 
-- P1 stories (License creation, Soft-lock, Student limit, Archive) are foundational; each blocks others
+- P1 stories (License creation, Soft-lock, Student limit, Archive) are foundational; each blocks
+  others
 - P2 story (Version enforcement) is protective; doesn't block primary operations
 - P3 story (Manual deletion) is rare; doesn't block primary operations
 - Independent tests stated for each:
@@ -188,9 +203,12 @@
 
 **Evidence**:
 
-- Edge Cases identify: Soft-lock expiry during active session, concurrent creation against limit, license status change mid-request
-- Failure Modes table covers: Master DB unavailable, version mismatch, soft-lock at request, limit exceeded, snapshot job fails
-- Transaction handling: "If UPDATE succeeds but snapshot enqueue fails: License is in ARCHIVED state (correct); Worker will eventually snapshot it"
+- Edge Cases identify: Soft-lock expiry during active session, concurrent creation against limit,
+  license status change mid-request
+- Failure Modes table covers: Master DB unavailable, version mismatch, soft-lock at request, limit
+  exceeded, snapshot job fails
+- Transaction handling: "If UPDATE succeeds but snapshot enqueue fails: License is in ARCHIVED state
+  (correct); Worker will eventually snapshot it"
 - All recovery paths specify next action: "Retry", "DLQ", "Manual intervention", "Auto-retry"
 
 ---
@@ -206,9 +224,11 @@
 
 **Evidence**:
 
-- External Dependencies: All prior stages (02A, 02B, 02C, 03) listed with ✅; subsequent stages (05, 06) listed with ⏭️
+- External Dependencies: All prior stages (02A, 02B, 02C, 03) listed with ✅; subsequent stages
+  (05, 06) listed with ⏭️
 - Internal Dependencies: Domain-core resolver, error contract, middleware composition, worker queue
-- Assumptions justified: Soft-lock grace period (90 days = industry standard), archive location (infrastructure provided), version rules (ADR-0008), retry count (3x before DLQ)
+- Assumptions justified: Soft-lock grace period (90 days = industry standard), archive location
+  (infrastructure provided), version rules (ADR-0008), retry count (3x before DLQ)
 
 ---
 
@@ -244,9 +264,11 @@
 
 **Evidence**:
 
-- Observability section specifies JSON structure with timestamp, level, service, correlation_id, workspace_slug, action, status, error_code
+- Observability section specifies JSON structure with timestamp, level, service, correlation_id,
+  workspace_slug, action, status, error_code
 - Error contract: All responses follow `{ success, data, error: { code, message } }` pattern
-- Metrics: license_middleware_duration_ms, limit_enforcement_duration_ms, state_transition_duration_ms, archive_snapshot_duration_ms
+- Metrics: license_middleware_duration_ms, limit_enforcement_duration_ms,
+  state_transition_duration_ms, archive_snapshot_duration_ms
 - Correlation ID mandatory field in logging
 
 ---

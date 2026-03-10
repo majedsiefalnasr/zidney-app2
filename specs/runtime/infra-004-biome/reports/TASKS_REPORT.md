@@ -1,16 +1,14 @@
 # Tasks Report — STAGE_INFRA_04_BIOME
 
-**Step:** 4 — Tasks
-**Stage:** STAGE_INFRA_04_BIOME
-**Phase:** 01_PLATFORM_FOUNDATION
-**Branch:** spec/infra-004-biome
-**Generated:** 2026-03-06T00:00:00.000Z
+**Step:** 4 — Tasks **Stage:** STAGE_INFRA_04_BIOME **Phase:** 01_PLATFORM_FOUNDATION **Branch:**
+spec/infra-004-biome **Generated:** 2026-03-06T00:00:00.000Z
 
 ---
 
 ## Summary
 
-45 atomic tasks generated across 17 phases. 30 tasks are parallelizable. Full coverage of 3-pass migration strategy.
+45 atomic tasks generated across 17 phases. 30 tasks are parallelizable. Full coverage of 3-pass
+migration strategy.
 
 **Drift analysis gate required before implementation.**
 

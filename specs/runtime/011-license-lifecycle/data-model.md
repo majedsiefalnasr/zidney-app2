@@ -8,7 +8,9 @@
 
 ## Executive Summary
 
-This document defines the complete data model for license lifecycle operations, including schema extensions, new tables, relationships, validations, and state transitions. All entities are stored in the master database (PostgreSQL) to ensure transactional consistency across license states.
+This document defines the complete data model for license lifecycle operations, including schema
+extensions, new tables, relationships, validations, and state transitions. All entities are stored
+in the master database (PostgreSQL) to ensure transactional consistency across license states.
 
 ---
 
@@ -184,7 +186,8 @@ CREATE INDEX idx_snapshots_created_at ON snapshots(created_at);
   - Distinguishes manual vs. automatic transitions
 - `reason` (VARCHAR 512, NOT NULL)
   - Business reason for transition
-  - Examples: "Payment failed", "90-day soft lock expiry", "Admin manual archive", "License deleted per institution request"
+  - Examples: "Payment failed", "90-day soft lock expiry", "Admin manual archive", "License deleted
+    per institution request"
 - `transition_metadata` (JSONB, NULL)
   - Optional structured data specific to transition type
   - Examples:
@@ -513,7 +516,8 @@ All state transitions must be wrapped in a transaction with:
 
 ### Idempotency
 
-- If restore attempt submitted twice with same snapshot_id, both succeed identically (no data corruption)
+- If restore attempt submitted twice with same snapshot_id, both succeed identically (no data
+  corruption)
 - If soft lock attempted on already soft-locked license, second attempt idempotently succeeds
 - If archive attempted during ongoing snapshot, operation is serialized (no concurrent snapshots)
 
@@ -549,6 +553,10 @@ Once a state transition row is written to license_audit_logs:
 
 ## Conclusion
 
-This data model maintains strict isolation via database-per-tenant while centralizing license lifecycle state in the master database. All state transitions are transactional, immutable audit trails are enforced, and performance-critical lookups are indexed properly.
+This data model maintains strict isolation via database-per-tenant while centralizing license
+lifecycle state in the master database. All state transitions are transactional, immutable audit
+trails are enforced, and performance-critical lookups are indexed properly.
 
-The four-state model (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED) is enforced at the schema level through constraints, enabling deterministic middleware enforcement and complete compliance audit trails.
+The four-state model (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED) is enforced at the schema level
+through constraints, enabling deterministic middleware enforcement and complete compliance audit
+trails.

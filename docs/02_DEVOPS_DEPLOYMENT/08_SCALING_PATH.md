@@ -1,7 +1,6 @@
 # Scaling Path
 
-Phase: DevOps & Deployment
-Scope: Infrastructure evolution strategy for Zidney
+Phase: DevOps & Deployment Scope: Infrastructure evolution strategy for Zidney
 
 ---
 

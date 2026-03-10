@@ -1,8 +1,7 @@
 # STAGE 44 – Plans & Subscriptions
 
-Phase: 3 – Backoffice Core
-Domain: Commercial Layer
-Scope: Student subscription management per workspace
+Phase: 3 – Backoffice Core Domain: Commercial Layer Scope: Student subscription management per
+workspace
 
 ---
 
@@ -24,8 +23,7 @@ Implement the subscription system inside each workspace to:
 
 This stage governs B2C access control inside a workspace.
 
-License limits (B2B) are handled in Stage 43.
-This stage handles student subscriptions only.
+License limits (B2B) are handled in Stage 43. This stage handles student subscriptions only.
 
 ---
 
@@ -82,8 +80,8 @@ Plan deletion must be blocked if:
 - Active subscriptions reference the plan
 - Historical subscription data exists (soft delete only)
 
-Plans must be versioned implicitly via immutable ID.
-Editing a plan does not affect historical subscriptions.
+Plans must be versioned implicitly via immutable ID. Editing a plan does not affect historical
+subscriptions.
 
 ---
 
@@ -101,7 +99,8 @@ System:
 
 ### Gateway Activation
 
-If workspace uses payment gateway: 1. Student selects plan 2. Payment initiated 3. On successful callback:
+If workspace uses payment gateway: 1. Student selects plan 2. Payment initiated 3. On successful
+callback:
 
 - Create subscription
 - Activate
@@ -172,12 +171,9 @@ Examples:
 
 Access logic:
 
-If module not enabled in plan:
-→ Frontoffice must hide module
-→ API must block access
+If module not enabled in plan: → Frontoffice must hide module → API must block access
 
-Module enforcement must exist in backend.
-Frontend visibility is secondary.
+Module enforcement must exist in backend. Frontend visibility is secondary.
 
 ## Subscription Integrity Rules
 

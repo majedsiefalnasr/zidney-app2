@@ -11,7 +11,9 @@
 
 ## Overview
 
-All specification ambiguities have been resolved through targeted clarification questions. The Clarifications section has been appended to `spec.md` with 5 detailed Q&A entries covering critical architectural and implementation decisions.
+All specification ambiguities have been resolved through targeted clarification questions. The
+Clarifications section has been appended to `spec.md` with 5 detailed Q&A entries covering critical
+architectural and implementation decisions.
 
 ---
 

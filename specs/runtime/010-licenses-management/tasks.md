@@ -15,19 +15,22 @@
 - **Related Plan:** specs/runtime/010-licenses-management/reports/PLAN_REPORT.md
 - **Related Spec:** specs/runtime/010-licenses-management/reports/SPECIFY_REPORT.md
 - **Related Clarification:** specs/runtime/010-licenses-management/reports/CLARIFY_REPORT.md
-- **Related ADR:** ADR-0001 (Multi-Tenancy), ADR-0005 (Opt-In Upgrades), ADR-0008 (Semantic Versioning)
+- **Related ADR:** ADR-0001 (Multi-Tenancy), ADR-0005 (Opt-In Upgrades), ADR-0008 (Semantic
+  Versioning)
 
 ---
 
 ## Phase 1: Setup & Infrastructure Preparation
 
-**Objective:** Prepare API structure and shared infrastructure for license management implementation.
+**Objective:** Prepare API structure and shared infrastructure for license management
+implementation.
 
 ---
 
 ### T001: Create License Domain Package Structure
 
-- [x] T001 Create domain package directory structure in `packages/domain-core/src/licenses/` ✅ COMPLETE
+- [x] T001 Create domain package directory structure in `packages/domain-core/src/licenses/` ✅
+      COMPLETE
   - **Files to create:**
     - `packages/domain-core/src/licenses/index.ts` (barrel export)
     - `packages/domain-core/src/licenses/types.ts` (TypeScript interfaces)
@@ -45,7 +48,8 @@
     - `License` (full entity with 21 fields per plan)
     - `CreateLicenseRequest` (user input schema)
     - `EditLicenseRequest` (mutable fields only)
-    - `LicenseStatus` (enum: PENDING_PROVISION | ACTIVE | SOFT_LOCKED | PROVISION_FAILED | ARCHIVED | DELETED)
+    - `LicenseStatus` (enum: PENDING_PROVISION | ACTIVE | SOFT_LOCKED | PROVISION_FAILED | ARCHIVED
+      | DELETED)
     - `ProvisioningJobPayload` (worker input)
   - **Exports:** Named exports from `packages/domain-core/src/licenses/index.ts`
   - **Transaction:** No
@@ -55,15 +59,18 @@
 
 ### T003: Create License Constants & Error Codes
 
-- [x] T003 Define license error codes in `packages/domain-core/src/licenses/constants.ts` ✅ COMPLETE
+- [x] T003 Define license error codes in `packages/domain-core/src/licenses/constants.ts` ✅
+      COMPLETE
   - **Error codes (14 total per plan):**
-    - VALIDATION_ERROR (INVALID_SLUG_FORMAT, SLUG_NOT_UNIQUE, INVALID_PRODUCT_ID, INVALID_LIMIT, INVALID_LANGUAGE)
+    - VALIDATION_ERROR (INVALID_SLUG_FORMAT, SLUG_NOT_UNIQUE, INVALID_PRODUCT_ID, INVALID_LIMIT,
+      INVALID_LANGUAGE)
     - INVALID_STATE_TRANSITION
     - UNAUTHORIZED (AUTH_MISSING, AUTH_INVALID)
     - FORBIDDEN (PERMISSION_DENIED, LICENSE_SOFT_LOCKED, LICENSE_ARCHIVED)
     - NOT_FOUND (LICENSE_NOT_FOUND, WORKSPACE_NOT_FOUND)
     - UPGRADE_REQUIRED (SCHEMA_VERSION_MISMATCH)
-    - SERVICE_UNAVAILABLE (PROVISIONING_QUEUE_UNAVAILABLE, PROVISIONING_FAILED, LICENSE_PENDING_PROVISION)
+    - SERVICE_UNAVAILABLE (PROVISIONING_QUEUE_UNAVAILABLE, PROVISIONING_FAILED,
+      LICENSE_PENDING_PROVISION)
   - **Status enum:** PENDING_PROVISION, ACTIVE, SOFT_LOCKED, PROVISION_FAILED, ARCHIVED, DELETED
   - **Transaction:** No
   - **Idempotency:** N/A
@@ -106,9 +113,11 @@
 
 ### T006: [P] Create API Controller Stubs
 
-- [x] T006 [P] Create controller stub in `apps/api/src/controllers/licenses.controller.ts` ✅ COMPLETE
+- [x] T006 [P] Create controller stub in `apps/api/src/controllers/licenses.controller.ts` ✅
+      COMPLETE
   - **Methods (stubs with placeholder implementations):**
-    - `create()`, `list()`, `getDetail()`, `edit()`, `softLock()`, `unlock()`, `archive()`, `restore()`, `delete()`, `retryProvisioning()`
+    - `create()`, `list()`, `getDetail()`, `edit()`, `softLock()`, `unlock()`, `archive()`,
+      `restore()`, `delete()`, `retryProvisioning()`
   - **Response format:** RFC 7807 with { success, data, error }
   - **Transaction:** No
   - **Idempotency:** N/A
@@ -117,9 +126,11 @@
 
 ### T007: [P] Create License Service Stub
 
-- [x] T007 [P] Create service stub in `packages/domain-core/src/licenses/license.service.ts` ✅ COMPLETE
+- [x] T007 [P] Create service stub in `packages/domain-core/src/licenses/license.service.ts` ✅
+      COMPLETE
   - **Methods (placeholders):**
-    - `create()`, `list()`, `getById()`, `edit()`, `softLock()`, `unlock()`, `archive()`, `restore()`, `delete()`, `retryProvisioning()`
+    - `create()`, `list()`, `getById()`, `edit()`, `softLock()`, `unlock()`, `archive()`,
+      `restore()`, `delete()`, `retryProvisioning()`
   - **Dependency injection:** Constructor with repositories, queue, logger
   - **Transaction:** No
   - **Idempotency:** N/A
@@ -128,9 +139,11 @@
 
 ### T008: [P] Create License Repository Stub
 
-- [x] T008 [P] Create repository stub in `packages/domain-core/src/licenses/license.repository.ts` ✅ COMPLETE
+- [x] T008 [P] Create repository stub in `packages/domain-core/src/licenses/license.repository.ts`
+      ✅ COMPLETE
   - **Methods (placeholders):**
-    - `create()`, `getById()`, `listByStatus()`, `listByProduct()`, `update()`, `softLock()`, `unlock()`, `archive()`, `restore()`, `delete()`
+    - `create()`, `getById()`, `listByStatus()`, `listByProduct()`, `update()`, `softLock()`,
+      `unlock()`, `archive()`, `restore()`, `delete()`
   - **Database access:** Use masterDB connection pool
   - **Transaction:** No (queries will be wrapped in transaction tasks)
   - **Idempotency:** N/A
@@ -141,21 +154,26 @@
 
 ## Phase 2: Database Schema & Migrations
 
-**Objective:** Create and version the master database schema for licenses table and supporting structures.
+**Objective:** Create and version the master database schema for licenses table and supporting
+structures.
 
 ---
 
 ### T009: Create Main Licenses Table Migration
 
-- [x] T009 Create migration file `apps/api/src/db/master/migrations/001_create_licenses_table.ts` ✅ COMPLETE
+- [x] T009 Create migration file `apps/api/src/db/master/migrations/001_create_licenses_table.ts` ✅
+      COMPLETE
   - **Migration tasks:**
-    - Create `status_enum` type with values: PENDING_PROVISION, ACTIVE, SOFT_LOCKED, PROVISION_FAILED, ARCHIVED, DELETED
+    - Create `status_enum` type with values: PENDING_PROVISION, ACTIVE, SOFT_LOCKED,
+      PROVISION_FAILED, ARCHIVED, DELETED
     - Create `licenses` table with 21 fields (see plan for field definitions)
     - Primary key: `id` (UUID)
     - Foreign key: `product_id` → products.id (ON DELETE RESTRICT, ON UPDATE CASCADE)
     - Unique constraint: `workspace_slug` (globally unique)
     - Check constraints: slug format, limits non-negative, length bounds
-    - NOT NULL constraints: id, product_id, workspace_slug, workspace_name, status, schema_version, product_version, created_at, updated_at, use_zidney_payment, default_language, uses_divisions, provisioning_retries
+    - NOT NULL constraints: id, product_id, workspace_slug, workspace_name, status, schema_version,
+      product_version, created_at, updated_at, use_zidney_payment, default_language, uses_divisions,
+      provisioning_retries
   - **Indexes created:**
     - idx_licenses_status (on status)
     - idx_licenses_created_at (on created_at DESC)
@@ -169,12 +187,15 @@
 
 ### T010: Create Provisioning Fields Migration
 
-- [x] T010 Create migration file `apps/api/src/db/master/migrations/002_add_provisioning_fields.ts` ✅ COMPLETE
+- [x] T010 Create migration file `apps/api/src/db/master/migrations/002_add_provisioning_fields.ts`
+      ✅ COMPLETE
   - **Migration tasks:**
     - ALTER TABLE licenses ADD COLUMN provisioning_error TEXT DEFAULT NULL
     - ALTER TABLE licenses ADD COLUMN provisioning_retries INTEGER DEFAULT 0 NOT NULL
-    - ALTER TABLE licenses ADD COLUMN provisioning_last_attempt_at TIMESTAMP WITH TIME ZONE DEFAULT NULL
-    - Create composite index `idx_licenses_soft_lock_until` (on soft_lock_until WHERE status = 'SOFT_LOCKED')
+    - ALTER TABLE licenses ADD COLUMN provisioning_last_attempt_at TIMESTAMP WITH TIME ZONE DEFAULT
+      NULL
+    - Create composite index `idx_licenses_soft_lock_until` (on soft_lock_until WHERE status =
+      'SOFT_LOCKED')
   - **Down migration:** DROP COLUMN (reverse order)
   - **Transaction:** Single transaction
   - **Idempotency:** Idempotent (IF NOT EXISTS on columns)
@@ -184,11 +205,13 @@
 
 ### T011: Create Status Enum Extension Migration
 
-- [x] T011 Create migration file `apps/api/src/db/master/migrations/003_add_status_enum_values.ts` ✅ COMPLETE
+- [x] T011 Create migration file `apps/api/src/db/master/migrations/003_add_status_enum_values.ts`
+      ✅ COMPLETE
   - **Migration tasks:**
     - ALTER TYPE status_enum ADD VALUE 'PROVISION_FAILED' (before 'ARCHIVED' if ordering matters)
     - Validate existing records still valid
-  - **Down migration:** Note (PostgreSQL ENUM limitation: cannot remove values; requires type recreation if needed)
+  - **Down migration:** Note (PostgreSQL ENUM limitation: cannot remove values; requires type
+    recreation if needed)
   - **Transaction:** Single transaction
   - **Idempotency:** Idempotent (careful sequencing, no IF EXISTS for ENUM)
   - **Middleware:** N/A
@@ -209,7 +232,8 @@
 
 ### T013: [P] Create Audit Log Table
 
-- [x] T013 [P] Create audit table migration in `apps/api/src/db/master/migrations/005_create_audit_log_table.ts` ✅ COMPLETE
+- [x] T013 [P] Create audit table migration in
+      `apps/api/src/db/master/migrations/005_create_audit_log_table.ts` ✅ COMPLETE
   - **Table:** `audit_log`
   - **Fields:**
     - id (UUID, PK)
@@ -228,13 +252,15 @@
 
 ### T014: Create Tenants Registry Table Update for License Binding
 
-- [x] T014 Create migration to link existing `tenants_registry` to licenses in `apps/api/src/db/master/migrations/006_update_tenants_registry_for_licenses.ts` ✅ COMPLETE
+- [x] T014 Create migration to link existing `tenants_registry` to licenses in
+      `apps/api/src/db/master/migrations/006_update_tenants_registry_for_licenses.ts` ✅ COMPLETE
   - **Migration tasks:**
     - Add column `license_id` (UUID, FK → licenses.id) to tenants_registry
     - Create index `idx_tenants_registry_license_id`
     - Add NOT NULL constraint (after backfilling)
     - Add unique constraint on license_id (1:1 relationship)
-  - **Notes per spec:** tenants_registry must NOT contain status field (status only in licenses table)
+  - **Notes per spec:** tenants_registry must NOT contain status field (status only in licenses
+    table)
   - **Transaction:** Single transaction
   - **Idempotency:** Idempotent
   - **Middleware:** N/A
@@ -265,9 +291,11 @@
 
 ### T016: Implement License Repository — Create
 
-- [x] T016 Implement `create()` method in `packages/domain-core/src/licenses/license.repository.ts` ✅ COMPLETE
+- [x] T016 Implement `create()` method in `packages/domain-core/src/licenses/license.repository.ts`
+      ✅ COMPLETE
   - **Query template:**
-    - INSERT INTO licenses (id, product_id, workspace_slug, workspace_name, ..., status, created_at, updated_at)
+    - INSERT INTO licenses (id, product_id, workspace_slug, workspace_name, ..., status, created_at,
+      updated_at)
     - VALUES (?, ?, ?, ..., 'PENDING_PROVISION', NOW(), NOW())
   - **Transaction:** Yes (wrap in transaction task T035)
   - **Idempotency:** No (unique constraint on workspace_slug enforced)
@@ -276,13 +304,15 @@
 
 ### T017: Implement License Repository — Get By ID
 
-- [x] T017 Implement `getById()` method in `packages/domain-core/src/licenses/license.repository.ts` ✅ COMPLETE
+- [x] T017 Implement `getById()` method in `packages/domain-core/src/licenses/license.repository.ts`
+      ✅ COMPLETE
   - **Query:** SELECT \* FROM licenses WHERE id = ? AND deleted_at IS NULL
   - **Return:** License object or null
 
 ### T018: [P] Implement License Repository — List Methods
 
-- [x] T018 [P] Implement list methods in `packages/domain-core/src/licenses/license.repository.ts` ✅ COMPLETE
+- [x] T018 [P] Implement list methods in `packages/domain-core/src/licenses/license.repository.ts`
+      ✅ COMPLETE
   - **Methods:**
     - `listByStatus(status: LicenseStatus, limit, offset): Promise<License[]>`
     - `listByProduct(product_id: UUID, limit, offset): Promise<License[]>`
@@ -293,7 +323,8 @@
 
 ### T019: [P] Implement License Repository — Update Methods
 
-- [x] T019 [P] Implement update methods in `packages/domain-core/src/licenses/license.repository.ts` ✅ COMPLETE
+- [x] T019 [P] Implement update methods in `packages/domain-core/src/licenses/license.repository.ts`
+      ✅ COMPLETE
   - **Methods:**
     - `update(id: UUID, data: Partial<License>): Promise<License>`
     - `updateStatus(id: UUID, status: LicenseStatus): Promise<License>`
@@ -304,7 +335,8 @@
 
 ### T020: [P] Implement License Repository — Status Transition Methods
 
-- [x] T020 [P] Implement status transition methods in `packages/domain-core/src/licenses/license.repository.ts` ✅ COMPLETE
+- [x] T020 [P] Implement status transition methods in
+      `packages/domain-core/src/licenses/license.repository.ts` ✅ COMPLETE
   - **Methods:**
     - `softLock(id: UUID, grace_period_days: number): Promise<License>`
     - `unlock(id: UUID): Promise<License>`
@@ -327,14 +359,16 @@
 
 ### T022: Implement Platform Schema Version Getter
 
-- [x] T022 Implement `getPlatformSchemaVersion()` in `packages/domain-core/src/licenses/license.repository.ts` ✅ COMPLETE
+- [x] T022 Implement `getPlatformSchemaVersion()` in
+      `packages/domain-core/src/licenses/license.repository.ts` ✅ COMPLETE
   - **Query:** SELECT version FROM schema_versions ORDER BY version DESC LIMIT 1
   - **Return:** number (current schema version)
   - **Error handling:** Throw if not found
 
 ### T023: Implement License Service — Create
 
-- [x] T023 Implement `create()` method in `packages/domain-core/src/licenses/license.service.ts` ✅ COMPLETE
+- [x] T023 Implement `create()` method in `packages/domain-core/src/licenses/license.service.ts` ✅
+      COMPLETE
   - **Business logic steps:**
     1. Validate product exists and status = ACTIVE → throw INVALID_PRODUCT_ID
     2. Validate workspace slug format (regex ^[a-z0-9-]+$, length 3-64) → throw INVALID_SLUG_FORMAT
@@ -354,7 +388,8 @@
 
 ### T024: Implement License Service — Validation Methods
 
-- [x] T024 Implement validation helper methods in `packages/domain-core/src/licenses/license.service.ts` ✅ COMPLETE
+- [x] T024 Implement validation helper methods in
+      `packages/domain-core/src/licenses/license.service.ts` ✅ COMPLETE
   - **Methods:**
     - `validateWorkspaceSlug(slug: string): void`
     - `validateLimits(student_limit, staff_limit): void`
@@ -365,7 +400,8 @@
 
 ### T025: [P] Implement License Service — Read Methods
 
-- [x] T025 [P] Implement read methods in `packages/domain-core/src/licenses/license.service.ts` ✅ COMPLETE
+- [x] T025 [P] Implement read methods in `packages/domain-core/src/licenses/license.service.ts` ✅
+      COMPLETE
   - **Methods:**
     - `getById(id: UUID): Promise<License>`
     - `list(filters, pagination): Promise<{items, total}>`
@@ -374,10 +410,12 @@
 
 ### T026: [P] Implement License Service — Edit
 
-- [x] T026 [P] Implement `edit()` method in `packages/domain-core/src/licenses/license.service.ts` ✅ COMPLETE
+- [x] T026 [P] Implement `edit()` method in `packages/domain-core/src/licenses/license.service.ts`
+      ✅ COMPLETE
   - **Business logic steps:**
     1. Fetch license by ID → throw NOT_FOUND
-    2. Validate only editable fields in request (student_limit, staff_limit, commission_per_user, use_zidney_payment, default_language, uses_divisions)
+    2. Validate only editable fields in request (student_limit, staff_limit, commission_per_user,
+       use_zidney_payment, default_language, uses_divisions)
     3. Reject if immutable fields present → throw INVALID_FIELD_EDIT
     4. Validate new values (limits, language, etc.)
     5. Call repository.update()
@@ -388,7 +426,8 @@
 
 ### T027: [P] Implement License Service — Status Transitions
 
-- [x] T027 [P] Implement status transition methods in `packages/domain-core/src/licenses/license.service.ts` ✅ COMPLETE
+- [x] T027 [P] Implement status transition methods in
+      `packages/domain-core/src/licenses/license.service.ts` ✅ COMPLETE
   - **Methods:**
     - `softLock(id: UUID, grace_period_days: number, reason?: string): Promise<License>`
     - `unlock(id: UUID, reason?: string): Promise<License>`
@@ -405,12 +444,14 @@
   - **Transaction:** Yes (each wrapped in transaction)
   - **Side effects:**
     - Insert audit_log entry
-    - Emit events: license:soft_locked, license:unlocked, license:archived, license:restored, license:deleted
+    - Emit events: license:soft_locked, license:unlocked, license:archived, license:restored,
+      license:deleted
   - **Logging:** Structured logs for each transition
 
 ### T028: Implement License Service — Retry Provisioning
 
-- [x] T028 Implement `retryProvisioning()` method in `packages/domain-core/src/licenses/license.service.ts` ✅ COMPLETE
+- [x] T028 Implement `retryProvisioning()` method in
+      `packages/domain-core/src/licenses/license.service.ts` ✅ COMPLETE
   - **Business logic steps:**
     1. Fetch license by ID → throw NOT_FOUND
     2. Verify status = PROVISION_FAILED → throw INVALID_STATE_TRANSITION
@@ -438,7 +479,8 @@
 
 ### T029: Implement License Controller — Create Endpoint
 
-- [x] T029 Implement `create()` method in `apps/api/src/controllers/licenses.controller.ts` ✅ COMPLETE
+- [x] T029 Implement `create()` method in `apps/api/src/controllers/licenses.controller.ts` ✅
+      COMPLETE
   - **HTTP Semantics:**
     - Route: POST /v1/mmc/licenses
     - Status code: 201 Created
@@ -456,22 +498,26 @@
 
 ### T030: Implement License Controller — List Endpoint
 
-- [x] T030 Implement `list()` method in `apps/api/src/controllers/licenses.controller.ts` ✅ COMPLETE
+- [x] T030 Implement `list()` method in `apps/api/src/controllers/licenses.controller.ts` ✅
+      COMPLETE
   - **HTTP Semantics:**
     - Route: GET /v1/mmc/licenses
     - Query params: status, product_id, search, page, limit, sort_by, sort_order
     - Status code: 200 OK
-    - Response format: { success: true, data: {licenses: [], pagination: {page, limit, total, pages}}, error: null }
+    - Response format: { success: true, data: {licenses: [], pagination: {page, limit, total,
+      pages}}, error: null }
   - **Steps:**
     1. Validate query parameters (page >= 1, limit <= 100)
     2. Call licenseService.list() with filters
-    3. Include usage metrics (student_count, staff_count) if available (graceful fallback if tenant DB unreachable)
+    3. Include usage metrics (student_count, staff_count) if available (graceful fallback if tenant
+       DB unreachable)
     4. Return 200 with paginated results
   - **Error handling:** Bad pagination params → 400 VALIDATION_ERROR
 
 ### T031: Implement License Controller — Get Details Endpoint
 
-- [x] T031 Implement `getDetail()` method in `apps/api/src/controllers/licenses.controller.ts` ✅ COMPLETE
+- [x] T031 Implement `getDetail()` method in `apps/api/src/controllers/licenses.controller.ts` ✅
+      COMPLETE
   - **HTTP Semantics:**
     - Route: GET /v1/mmc/licenses/:id
     - Status code: 200 OK
@@ -485,7 +531,8 @@
 
 ### T032: Implement License Controller — Edit Endpoint
 
-- [x] T032 Implement `edit()` method in `apps/api/src/controllers/licenses.controller.ts` ✅ COMPLETE
+- [x] T032 Implement `edit()` method in `apps/api/src/controllers/licenses.controller.ts` ✅
+      COMPLETE
   - **HTTP Semantics:**
     - Route: PATCH /v1/mmc/licenses/:id
     - Status code: 200 OK
@@ -500,7 +547,8 @@
 
 ### T033: [P] Implement License Controller — Status Transition Endpoints
 
-- [x] T033 [P] Implement status transition methods in `apps/api/src/controllers/licenses.controller.ts` ✅ COMPLETE
+- [x] T033 [P] Implement status transition methods in
+      `apps/api/src/controllers/licenses.controller.ts` ✅ COMPLETE
   - **Methods:**
     - `softLock(context)` → POST /v1/mmc/licenses/:id/soft-lock → 200
     - `unlock(context)` → POST /v1/mmc/licenses/:id/unlock → 200
@@ -514,7 +562,8 @@
 
 ### T034: Implement License Controller — Retry Provisioning Endpoint
 
-- [x] T034 Implement `retryProvisioning()` method in `apps/api/src/controllers/licenses.controller.ts` ✅ COMPLETE
+- [x] T034 Implement `retryProvisioning()` method in
+      `apps/api/src/controllers/licenses.controller.ts` ✅ COMPLETE
   - **HTTP Semantics:**
     - Route: POST /v1/mmc/licenses/:id/retry-provisioning
     - Status code: 200 OK
@@ -537,14 +586,16 @@
 
 ### T035: Implement Transaction Wrapper for Write Operations
 
-- [x] T035 Implement transaction wrapper in `packages/domain-core/src/licenses/license.repository.ts` ✅ COMPLETE
+- [x] T035 Implement transaction wrapper in
+      `packages/domain-core/src/licenses/license.repository.ts` ✅ COMPLETE
   - **Pattern:** Helper method `withTransaction(callback)` that:
     1. BEGIN transaction
     2. Execute callback
     3. COMMIT on success
     4. ROLLBACK on error
     5. Return result or throw error
-  - **Usage:** Used by create(), update(), softLock(), unlock(), archive(), restore(), delete() methods
+  - **Usage:** Used by create(), update(), softLock(), unlock(), archive(), restore(), delete()
+    methods
   - **Database atomicity:** All-or-nothing guarantee
   - **Rollback handling:** Automatic on error; no partial updates
 
@@ -584,7 +635,8 @@
 
 ### T039: Implement License Middleware
 
-- [x] T039 Implement `licenseLicenseMiddleware()` in `apps/api/src/middleware/license.middleware.ts` ✅ COMPLETE
+- [x] T039 Implement `licenseLicenseMiddleware()` in `apps/api/src/middleware/license.middleware.ts`
+      ✅ COMPLETE
   - **Purpose:** Validate license before allowing tenant API access
   - **Steps:**
     1. Query master_db for license by workspace_slug
@@ -632,7 +684,8 @@
 
 ### T042: Define Provisioning Job Queue
 
-- [ ] T042 Define provisioning job queue in `apps/worker/src/queues/provisioning.ts` 🚫 DEFERRED - Queue definition (Bull configuration)
+- [ ] T042 Define provisioning job queue in `apps/worker/src/queues/provisioning.ts` 🚫 DEFERRED -
+      Queue definition (Bull configuration)
   - **Queue name:** `provisioning:license`
   - **Bull Job configuration:**
     - Max retries: 5
@@ -678,7 +731,8 @@
 
 ### T045: Implement Baseline Schema Migration Execution
 
-- [x] T045 Implement schema migration runner for tenant database in `apps/worker/src/tenant-provisioning/migrate.ts` ✅ COMPLETE
+- [x] T045 Implement schema migration runner for tenant database in
+      `apps/worker/src/tenant-provisioning/migrate.ts` ✅ COMPLETE
   - **Purpose:** Execute all tenant baseline schema migrations on new database
   - **Steps:**
     1. Connect to tenant database
@@ -690,7 +744,8 @@
 
 ### T046: Implement Tenant Database Seeding
 
-- [x] T046 Implement baseline data seeding in `apps/worker/src/tenant-provisioning/seed.ts` ✅ COMPLETE
+- [x] T046 Implement baseline data seeding in `apps/worker/src/tenant-provisioning/seed.ts` ✅
+      COMPLETE
   - **Seed data:**
     - Default roles (admin, instructor, student, guest)
     - Default permissions (per role)
@@ -701,7 +756,8 @@
 
 ### T047: Implement Admin Account Creation
 
-- [x] T047 Implement admin account creation in `apps/worker/src/tenant-provisioning/admin.ts` ✅ COMPLETE
+- [x] T047 Implement admin account creation in `apps/worker/src/tenant-provisioning/admin.ts` ✅
+      COMPLETE
   - **Account details:**
     - Email: `admin@{workspace_slug}.internal`
     - Temporary password: Generated securely, stored in log (or returned to UI)
@@ -712,7 +768,8 @@
 ### T048: Implement Tenants Registry Insertion
 
 - [x] T048 Implement tenants registry insertion in provisioning handler ✅ COMPLETE
-  - **Query:** INSERT INTO tenants_registry (license_id, workspace_slug, database_name, workspace_id, created_at) VALUES (?, ?, ?, ?, NOW())
+  - **Query:** INSERT INTO tenants_registry (license_id, workspace_slug, database_name,
+    workspace_id, created_at) VALUES (?, ?, ?, ?, NOW())
   - **Fields:**
     - license_id: From job payload
     - workspace_slug: From job payload
@@ -755,8 +812,10 @@
 
 ### T052: Implement Provisioning Error Message Sanitization
 
-- [x] T052 Create sanitization utility for provisioning errors in `packages/domain-core/src/errors/sanitize.ts` ✅ COMPLETE
-  - **Purpose:** Remove implementation details from error messages before storing in license.provisioning_error
+- [x] T052 Create sanitization utility for provisioning errors in
+      `packages/domain-core/src/errors/sanitize.ts` ✅ COMPLETE
+  - **Purpose:** Remove implementation details from error messages before storing in
+    license.provisioning_error
   - **Examples:**
     - DB connection error → "Database connection failed"
     - Migration error → "Schema validation failed"
@@ -805,21 +864,24 @@
 
 ### T056: [P] Implement Snapshot Job Enqueueing
 
-- [x] T056 [P] Create snapshot job handler stubs in `apps/worker/src/jobs/snapshot.handler.ts` ✅ COMPLETE
+- [x] T056 [P] Create snapshot job handler stubs in `apps/worker/src/jobs/snapshot.handler.ts` ✅
+      COMPLETE
   - **Stub:** Implement enqueueing in archive endpoint
   - **Payload:** {license_id, workspace_slug, snapshot_type: 'archive'}
   - **Full implementation:** Deferred to snapshot/archive enhancement
 
 ### T057: [P] Implement Restore Job Enqueueing
 
-- [x] T057 [P] Create restore job handler stubs in `apps/worker/src/jobs/restore.handler.ts` ✅ COMPLETE
+- [x] T057 [P] Create restore job handler stubs in `apps/worker/src/jobs/restore.handler.ts` ✅
+      COMPLETE
   - **Stub:** Implement enqueueing in restore endpoint
   - **Payload:** {license_id, workspace_slug}
   - **Full implementation:** Deferred to restore enhancement
 
 ### T058: [P] Implement Database Drop Job Enqueueing
 
-- [x] T058 [P] Create database drop job handler stubs in `apps/worker/src/jobs/database-drop.handler.ts` ✅ COMPLETE
+- [x] T058 [P] Create database drop job handler stubs in
+      `apps/worker/src/jobs/database-drop.handler.ts` ✅ COMPLETE
   - **Stub:** Implement enqueueing in delete endpoint
   - **Payload:** {license_id, workspace_slug}
   - **Full implementation:** Deferred to deletion enhancement
@@ -834,7 +896,8 @@
 
 ### T059: Implement Structured Logging for License Operations
 
-- [x] T059 Implement structured logging service in `packages/logger/src/license-logger.ts` ✅ COMPLETE
+- [x] T059 Implement structured logging service in `packages/logger/src/license-logger.ts` ✅
+      COMPLETE
   - **Logger methods:**
     - `license_created(license, correlation_id)`
     - `license_edited(license, changed_fields, correlation_id)`
@@ -860,7 +923,8 @@
 
 ### T060: [P] Implement Correlation ID Generation & Propagation
 
-- [x] T060 [P] Implement correlation ID middleware in `apps/api/src/middleware/correlation-id.middleware.ts` ✅ COMPLETE
+- [x] T060 [P] Implement correlation ID middleware in
+      `apps/api/src/middleware/correlation-id.middleware.ts` ✅ COMPLETE
   - **Pattern:**
     1. Extract from request header: X-Correlation-ID or x-request-id
     2. If not present: Generate new UUID
@@ -889,7 +953,8 @@
 
 ### T063: [P] Implement Audit Log Querying
 
-- [x] T063 [P] Create audit log query service in `packages/domain-core/src/licenses/audit.service.ts` ✅ COMPLETE
+- [x] T063 [P] Create audit log query service in
+      `packages/domain-core/src/licenses/audit.service.ts` ✅ COMPLETE
   - **Methods:**
     - `getByLicenseId(license_id): Promise<AuditEntry[]>`
     - `getRecentTransitions(limit): Promise<AuditEntry[]>`
@@ -916,7 +981,8 @@
 
 ### T065: Create License Repository Tests
 
-- [x] T065 Create tests in `tests/integration/domain/licenses/license.repository.test.ts` ✅ COMPLETE
+- [x] T065 Create tests in `tests/integration/domain/licenses/license.repository.test.ts` ✅
+      COMPLETE
   - **Test cases:**
     - create(): Insert and verify all fields
     - create() idempotency: Duplicate slug → unique violation
@@ -1056,8 +1122,10 @@
 
 - [x] T075 Create `apps/mmc/src/views/licenses/LicenseList.vue` ✅ COMPLETE
   - **Features:**
-    - Table display: workspace_slug, workspace_name, product_name, status, limits, created_at, actions
-    - Status colors: Green (ACTIVE), Orange (SOFT_LOCKED), Gray (ARCHIVED), Blue (PENDING), Red (FAILED)
+    - Table display: workspace_slug, workspace_name, product_name, status, limits, created_at,
+      actions
+    - Status colors: Green (ACTIVE), Orange (SOFT_LOCKED), Gray (ARCHIVED), Blue (PENDING), Red
+      (FAILED)
     - Filters: Status dropdown, Product dropdown, Search input
     - Pagination: Page selector, limit selector (20/50/100)
     - Row actions: View, Edit, Soft Lock, Archive, Delete (conditional)
@@ -1231,7 +1299,8 @@
 
 ### T086: Create Workspace Slug Validation Schema
 
-- [x] T086 Create slug validation in `packages/validation/src/licenses/slug.validation.ts` ✅ COMPLETE
+- [x] T086 Create slug validation in `packages/validation/src/licenses/slug.validation.ts` ✅
+      COMPLETE
   - **Rules:**
     - Pattern: ^[a-z0-9-]+$
     - Length: 3-64 characters
@@ -1244,7 +1313,8 @@
 
 ### T087: Create Limit Validation Schema
 
-- [x] T087 Create limit validation in `packages/validation/src/licenses/limits.validation.ts` ✅ COMPLETE
+- [x] T087 Create limit validation in `packages/validation/src/licenses/limits.validation.ts` ✅
+      COMPLETE
   - **Rules:**
     - Type: Number or null
     - Range: >= 0 or null (for unlimited)
@@ -1255,7 +1325,8 @@
 
 ### T088: Create Language Code Validation
 
-- [x] T088 Create language validation in `packages/validation/src/licenses/language.validation.ts` ✅ COMPLETE
+- [x] T088 Create language validation in `packages/validation/src/licenses/language.validation.ts`
+      ✅ COMPLETE
   - **Supported codes:** en, ar, fr, de, es, etc. (ISO 639-1)
   - **Pattern:** ^[a-z]{2}(-[A-Z]{2})?$
   - **Error:** "Invalid language code"
@@ -1265,7 +1336,8 @@
 
 - [x] T089 Create request schemas in `packages/validation/src/licenses/schemas.ts` ✅ COMPLETE
   - **Schemas:**
-    - `CreateLicenseRequestSchema` (required fields: product_id, workspace_slug, workspace_name, etc.)
+    - `CreateLicenseRequestSchema` (required fields: product_id, workspace_slug, workspace_name,
+      etc.)
     - `EditLicenseRequestSchema` (optional fields: only editable ones)
     - `SoftLockRequestSchema` (optional: grace_period_days, reason)
     - `RetryProvisioningRequestSchema` (optional: reason)
@@ -1297,7 +1369,8 @@
 
 - [x] T091 Create mapping in `packages/domain-core/src/errors/error-codes.ts` ✅ COMPLETE
   - **Mapping:** Error code → HTTP status + RFC 7807 response
-  - **14+ error codes:** VALIDATION_ERROR, INVALID_STATE_TRANSITION, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, UPGRADE_REQUIRED, SERVICE_UNAVAILABLE, etc.
+  - **14+ error codes:** VALIDATION_ERROR, INVALID_STATE_TRANSITION, UNAUTHORIZED, FORBIDDEN,
+    NOT_FOUND, UPGRADE_REQUIRED, SERVICE_UNAVAILABLE, etc.
   - **Usage:** Controller error handlers reference this mapping
 
 ---
@@ -1530,7 +1603,8 @@
 
 ### T112: [P] Create Caching Strategy (If Needed)
 
-- [x] T112 [P] Implement optional caching layer in `packages/domain-core/src/licenses/cache.ts` ✅ COMPLETE
+- [x] T112 [P] Implement optional caching layer in `packages/domain-core/src/licenses/cache.ts` ✅
+      COMPLETE
   - **Candidates:** List endpoint (user rarely changes filters mid-session)
   - **Implementation:** Redis-backed cache with TTL
   - **Invalidation:** Clear on create/edit
@@ -1652,7 +1726,8 @@ Phase 17 (Security)
 
 1. **T002, T003, T004** — Type definitions, constants, errors (independent)
 2. **T005, T006, T007, T008** — Route, controller, service, repository stubs (independent)
-3. **T009, T010, T011, T012, T013, T014** — Migrations (sequential order required, but can run once dependencies clear)
+3. **T009, T010, T011, T012, T013, T014** — Migrations (sequential order required, but can run once
+   dependencies clear)
 4. **T016–T022** — Repository methods (independent, can parallelize)
 5. **T023–T028** — Service methods (independent, can parallelize)
 6. **T029–T034** — Controller methods (independent, can parallelize)

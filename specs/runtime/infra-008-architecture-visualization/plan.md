@@ -4,7 +4,8 @@
 **Stage**: `STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION`  
 **Phase**: `01_PLATFORM_FOUNDATION`  
 **Related Spec File**: `specs/runtime/infra-008-architecture-visualization/spec.md`  
-**Related ADR**: None — this stage consumes existing architectural decisions without introducing new ones  
+**Related ADR**: None — this stage consumes existing architectural decisions without introducing new
+ones  
 **Plan Generated**: 2026-03-09  
 **Status**: Draft — ready for implementation gate review
 
@@ -37,7 +38,8 @@
 
 ## Architecture Overview
 
-`scripts/architecture/visualize.ts` is a standalone CLI script that reads two existing architecture data files and produces four curated output files:
+`scripts/architecture/visualize.ts` is a standalone CLI script that reads two existing architecture
+data files and produces four curated output files:
 
 ```
 INPUTS (read-only)
@@ -87,7 +89,8 @@ No imports from other scripts/*
 ### Test Layer (`tests/`)
 
 - **Unit tests**: `tests/unit/visualize/visualize.test.ts` — pure function tests, no file I/O
-- **Static test**: `tests/static/06-architecture-visualization.test.ts` — file existence and structure validation
+- **Static test**: `tests/static/06-architecture-visualization.test.ts` — file existence and
+  structure validation
 - **Test fixtures**: `tests/unit/visualize/fixtures/` — minimal JSON files
 
 ### Configuration Layer (`package.json`)
@@ -110,7 +113,9 @@ No imports from other scripts/*
 
 ## Idempotency Plan
 
-**Structurally idempotent by design** (FR-011). Identical input files produce byte-identical output files on every run. The only non-deterministic element is the README.md timestamp, which is acceptable per spec.
+**Structurally idempotent by design** (FR-011). Identical input files produce byte-identical output
+files on every run. The only non-deterministic element is the README.md timestamp, which is
+acceptable per spec.
 
 ---
 
@@ -122,7 +127,8 @@ No imports from other scripts/*
 
 ## Authoritative Time Handling
 
-**Not applicable as a security concern.** The generation timestamp in README.md (from `new Date()`) is informational only — not used for any deadline or lock enforcement.
+**Not applicable as a security concern.** The generation timestamp in README.md (from `new Date()`)
+is informational only — not used for any deadline or lock enforcement.
 
 ---
 
@@ -163,16 +169,17 @@ No imports from other scripts/*
     "./apps/mmc/srcvue/test-utils"
   ],
   "edges": [
-    {"from": "apps/api", "to": "packages/domain-core"},
-    {"from": "apps/api", "to": "packages/logger"},
-    {"from": "apps/api", "to": "packages/logger"},
-    {"from": "apps/mmc", "to": "packages/api-client"},
-    {"from": "./apps/mmc/src/core/auth/token-manager", "to": "packages/domain-core"}
+    { "from": "apps/api", "to": "packages/domain-core" },
+    { "from": "apps/api", "to": "packages/logger" },
+    { "from": "apps/api", "to": "packages/logger" },
+    { "from": "apps/mmc", "to": "packages/api-client" },
+    { "from": "./apps/mmc/src/core/auth/token-manager", "to": "packages/domain-core" }
   ]
 }
 ```
 
-**Validation after creation**: `JSON.parse(readFileSync(...))` must not throw. Contains 5 top-level nodes, 2 deep submodule nodes, 5 edges (1 duplicate, 1 involving a deep submodule).
+**Validation after creation**: `JSON.parse(readFileSync(...))` must not throw. Contains 5 top-level
+nodes, 2 deep submodule nodes, 5 edges (1 duplicate, 1 involving a deep submodule).
 
 ---
 
@@ -238,67 +245,67 @@ No imports from other scripts/*
 
 ```typescript
 // CLI utility — exempt from service-layer logging standards.
-import {execSync} from 'node:child_process'
-import {existsSync, mkdirSync, readFileSync, writeFileSync} from 'node:fs'
-import {join} from 'node:path'
+import { execSync } from "node:child_process";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
+import { join } from "node:path";
 
-const ROOT = process.cwd()
-const DEPENDENCY_GRAPH_PATH = join(ROOT, 'docs/architecture/graphs/dependency-graph.json')
-const ARCHITECTURE_MAP_PATH = join(ROOT, 'docs/architecture/intelligence/ARCHITECTURE_MAP.json')
-const OUTPUT_DIR = join(ROOT, 'docs/architecture/visualization')
+const ROOT = process.cwd();
+const DEPENDENCY_GRAPH_PATH = join(ROOT, "docs/architecture/graphs/dependency-graph.json");
+const ARCHITECTURE_MAP_PATH = join(ROOT, "docs/architecture/intelligence/ARCHITECTURE_MAP.json");
+const OUTPUT_DIR = join(ROOT, "docs/architecture/visualization");
 
 // ─── Type Definitions ────────────────────────────────────────────────────────
 
 interface DependencyGraph {
-  nodes: string[]
-  edges: Array<{from: string; to: string}>
+  nodes: string[];
+  edges: Array<{ from: string; to: string }>;
 }
 
 interface ArchitectureMapModule {
-  layer: string
-  description: string
-  criticality: string
-  allowed_dependencies: string[]
-  forbidden_dependencies: string[]
+  layer: string;
+  description: string;
+  criticality: string;
+  allowed_dependencies: string[];
+  forbidden_dependencies: string[];
 }
 
 interface ArchitectureMap {
-  system: string
-  architecture_model: string
-  version: string
-  layers: string[]
-  modules: Record<string, ArchitectureMapModule>
+  system: string;
+  architecture_model: string;
+  version: string;
+  layers: string[];
+  modules: Record<string, ArchitectureMapModule>;
 }
 
 // ─── Constants ───────────────────────────────────────────────────────────────
 
-const TOP_LEVEL_PATTERN = /^(apps|packages)\/[^/]+$/
+const TOP_LEVEL_PATTERN = /^(apps|packages)\/[^/]+$/;
 
 const HEURISTIC_LAYER_MAP: Record<string, string> = {
-  'apps/mmc': 'ui',
-  'apps/backoffice': 'ui',
-  'apps/frontoffice': 'ui',
-  'apps/api': 'runtime',
-  'apps/worker': 'runtime',
-  'packages/ui-system': 'ui',
-  'packages/api-client': 'infrastructure',
-  'packages/domain-core': 'domain',
-  'packages/validation': 'domain',
-  'packages/types': 'domain',
-  'packages/logger': 'infrastructure',
-  'packages/config': 'infrastructure',
-  'packages/redis-utils': 'infrastructure',
-}
+  "apps/mmc": "ui",
+  "apps/backoffice": "ui",
+  "apps/frontoffice": "ui",
+  "apps/api": "runtime",
+  "apps/worker": "runtime",
+  "packages/ui-system": "ui",
+  "packages/api-client": "infrastructure",
+  "packages/domain-core": "domain",
+  "packages/validation": "domain",
+  "packages/types": "domain",
+  "packages/logger": "infrastructure",
+  "packages/config": "infrastructure",
+  "packages/redis-utils": "infrastructure",
+};
 
-const LAYER_ORDER = ['ui', 'runtime', 'domain', 'infrastructure', 'unknown']
+const LAYER_ORDER = ["ui", "runtime", "domain", "infrastructure", "unknown"];
 
 const LAYER_LABELS: Record<string, string> = {
-  ui: 'UI Layer',
-  runtime: 'Runtime Layer',
-  domain: 'Domain Layer',
-  infrastructure: 'Infrastructure Layer',
-  unknown: 'Unknown Layer',
-}
+  ui: "UI Layer",
+  runtime: "Runtime Layer",
+  domain: "Domain Layer",
+  infrastructure: "Infrastructure Layer",
+  unknown: "Unknown Layer",
+};
 
 // ─── Pure Exported Functions (unit-testable) ──────────────────────────────────
 
@@ -307,7 +314,7 @@ const LAYER_LABELS: Record<string, string> = {
  * Keeps only paths matching apps/<name> or packages/<name> (exactly 2 segments).
  */
 export function filterTopLevelNodes(nodes: string[]): string[] {
-  return nodes.filter(n => TOP_LEVEL_PATTERN.test(n))
+  return nodes.filter((n) => TOP_LEVEL_PATTERN.test(n));
 }
 
 /**
@@ -316,27 +323,27 @@ export function filterTopLevelNodes(nodes: string[]): string[] {
  * Output is sorted alphabetically by from then to (determinism).
  */
 export function deduplicateEdges(
-  edges: Array<{from: string; to: string}>,
-  topLevelNodes: Set<string>
-): Array<{from: string; to: string}> {
-  const seen = new Set<string>()
-  const result: Array<{from: string; to: string}> = []
+  edges: Array<{ from: string; to: string }>,
+  topLevelNodes: Set<string>,
+): Array<{ from: string; to: string }> {
+  const seen = new Set<string>();
+  const result: Array<{ from: string; to: string }> = [];
 
   for (const edge of edges) {
-    if (!topLevelNodes.has(edge.from) || !topLevelNodes.has(edge.to)) continue
-    if (edge.from === edge.to) continue
+    if (!topLevelNodes.has(edge.from) || !topLevelNodes.has(edge.to)) continue;
+    if (edge.from === edge.to) continue;
 
-    const key = `${edge.from}||${edge.to}`
-    if (seen.has(key)) continue
+    const key = `${edge.from}||${edge.to}`;
+    if (seen.has(key)) continue;
 
-    seen.add(key)
-    result.push({from: edge.from, to: edge.to})
+    seen.add(key);
+    result.push({ from: edge.from, to: edge.to });
   }
 
   return result.sort((a, b) => {
-    const fromCmp = a.from.localeCompare(b.from)
-    return fromCmp !== 0 ? fromCmp : a.to.localeCompare(b.to)
-  })
+    const fromCmp = a.from.localeCompare(b.from);
+    return fromCmp !== 0 ? fromCmp : a.to.localeCompare(b.to);
+  });
 }
 
 /**
@@ -345,7 +352,7 @@ export function deduplicateEdges(
  * Returns "unknown" for unrecognized paths.
  */
 export function classifyLayerHeuristic(modulePath: string): string {
-  return HEURISTIC_LAYER_MAP[modulePath] ?? 'unknown'
+  return HEURISTIC_LAYER_MAP[modulePath] ?? "unknown";
 }
 
 /**
@@ -356,7 +363,7 @@ export function classifyLayerHeuristic(modulePath: string): string {
  * "packages/domain-core" → "packages_domain_core"
  */
 export function toNodeId(modulePath: string): string {
-  return modulePath.replace(/[/-]/g, '_')
+  return modulePath.replace(/[/-]/g, "_");
 }
 
 /**
@@ -365,33 +372,33 @@ export function toNodeId(modulePath: string): string {
  */
 export function generateModuleGraph(
   nodes: string[],
-  edges: Array<{from: string; to: string}>,
-  layerMap: Map<string, string>
+  edges: Array<{ from: string; to: string }>,
+  layerMap: Map<string, string>,
 ): string {
-  const sorted = [...nodes].sort()
-  const byLayer = groupNodesByLayer(sorted, layerMap)
-  const lines: string[] = ['flowchart TD']
+  const sorted = [...nodes].sort();
+  const byLayer = groupNodesByLayer(sorted, layerMap);
+  const lines: string[] = ["flowchart TD"];
 
   for (const layer of LAYER_ORDER) {
-    const layerNodes = byLayer.get(layer)
-    if (!layerNodes || layerNodes.length === 0) continue
+    const layerNodes = byLayer.get(layer);
+    if (!layerNodes || layerNodes.length === 0) continue;
 
-    const label = LAYER_LABELS[layer] ?? layer
-    lines.push(`  subgraph ${toNodeId(layer)}["${label}"]`)
+    const label = LAYER_LABELS[layer] ?? layer;
+    lines.push(`  subgraph ${toNodeId(layer)}["${label}"]`);
     for (const n of layerNodes) {
-      lines.push(`    ${toNodeId(n)}["${n}"]`)
+      lines.push(`    ${toNodeId(n)}["${n}"]`);
     }
-    lines.push('  end')
+    lines.push("  end");
   }
 
   if (edges.length > 0) {
-    lines.push('')
+    lines.push("");
     for (const edge of edges) {
-      lines.push(`  ${toNodeId(edge.from)} --> ${toNodeId(edge.to)}`)
+      lines.push(`  ${toNodeId(edge.from)} --> ${toNodeId(edge.to)}`);
     }
   }
 
-  return lines.join('\n') + '\n'
+  return lines.join("\n") + "\n";
 }
 
 /**
@@ -401,34 +408,34 @@ export function generateModuleGraph(
  */
 export function generateLayerDiagram(
   nodes: string[],
-  edges: Array<{from: string; to: string}>,
-  layerMap: Map<string, string>
+  edges: Array<{ from: string; to: string }>,
+  layerMap: Map<string, string>,
 ): string {
-  const sorted = [...nodes].sort()
-  const byLayer = groupNodesByLayer(sorted, layerMap)
-  const lines: string[] = ['flowchart TD']
+  const sorted = [...nodes].sort();
+  const byLayer = groupNodesByLayer(sorted, layerMap);
+  const lines: string[] = ["flowchart TD"];
 
   for (const layer of LAYER_ORDER) {
-    const layerNodes = byLayer.get(layer) ?? []
+    const layerNodes = byLayer.get(layer) ?? [];
     // Always emit the four defined layers; skip Unknown if empty
-    if (layer === 'unknown' && layerNodes.length === 0) continue
+    if (layer === "unknown" && layerNodes.length === 0) continue;
 
-    const label = LAYER_LABELS[layer] ?? layer
-    lines.push(`  subgraph ${toNodeId(layer)}["${label}"]`)
+    const label = LAYER_LABELS[layer] ?? layer;
+    lines.push(`  subgraph ${toNodeId(layer)}["${label}"]`);
     for (const n of layerNodes) {
-      lines.push(`    ${toNodeId(n)}["${n}"]`)
+      lines.push(`    ${toNodeId(n)}["${n}"]`);
     }
-    lines.push('  end')
+    lines.push("  end");
   }
 
   if (edges.length > 0) {
-    lines.push('')
+    lines.push("");
     for (const edge of edges) {
-      lines.push(`  ${toNodeId(edge.from)} --> ${toNodeId(edge.to)}`)
+      lines.push(`  ${toNodeId(edge.from)} --> ${toNodeId(edge.to)}`);
     }
   }
 
-  return lines.join('\n') + '\n'
+  return lines.join("\n") + "\n";
 }
 
 /**
@@ -438,32 +445,32 @@ export function generateLayerDiagram(
  */
 export function generateSystemOverview(): string {
   return [
-    'flowchart TD',
+    "flowchart TD",
     '  subgraph ui["UI Layer"]',
     '    mmc["MMC\\n(Management Console)"]',
     '    backoffice["Backoffice\\n(Institution Panel)"]',
     '    frontoffice["Frontoffice\\n(Student Runtime)"]',
-    '  end',
+    "  end",
     '  subgraph backend["Backend Services"]',
     '    api["API\\n(Bun + Hono)"]',
     '    worker["Worker\\n(Job Processor)"]',
-    '  end',
+    "  end",
     '  subgraph Foundation["Foundation Packages"]',
     '    domain_core["packages/domain-core"]',
     '    pkg_logger["packages/logger"]',
     '    pkg_types["packages/types"]',
     '    pkg_config["packages/config"]',
     '    pkg_redis["packages/redis-utils"]',
-    '  end',
-    '',
-    '  mmc --> api',
-    '  backoffice --> api',
-    '  frontoffice --> api',
-    '  api --> worker',
-    '  api --> Foundation',
-    '  worker --> Foundation',
-    '',
-  ].join('\n')
+    "  end",
+    "",
+    "  mmc --> api",
+    "  backoffice --> api",
+    "  frontoffice --> api",
+    "  api --> worker",
+    "  api --> Foundation",
+    "  worker --> Foundation",
+    "",
+  ].join("\n");
 }
 
 /**
@@ -471,183 +478,184 @@ export function generateSystemOverview(): string {
  */
 export function generateReadme(generatedAt: Date, gitSha: string): string {
   return [
-    '# Architecture Visualization',
-    '',
-    '> **Auto-generated** — do not edit manually.',
-    '> Re-run `bun run arch:visualize` to refresh after running `bun run arch:audit`.',
-    '',
+    "# Architecture Visualization",
+    "",
+    "> **Auto-generated** — do not edit manually.",
+    "> Re-run `bun run arch:visualize` to refresh after running `bun run arch:audit`.",
+    "",
     `Generated: ${generatedAt.toISOString()}`,
     `Git SHA: ${gitSha}`,
-    '',
-    '---',
-    '',
-    '## Diagrams',
-    '',
-    '### [module-dependency-graph.mmd](./module-dependency-graph.mmd)',
-    '',
-    'Top-level module dependency graph with layer subgraph annotations.',
-    'Shows all registered `apps/*` and `packages/*` modules and their deduplicated',
-    'dependency edges, grouped by architectural layer (UI, Runtime, Domain, Infrastructure).',
-    '',
-    '### [layer-architecture-diagram.mmd](./layer-architecture-diagram.mmd)',
-    '',
-    'Layer hierarchy diagram showing modules grouped by their assigned architectural layer.',
-    'Cross-layer dependency edges are rendered after subgraph declarations — any edge',
-    'pointing against the `UI → Runtime → Domain → Infrastructure` direction indicates',
-    'a potential architectural violation.',
-    '',
-    '### [system-overview-diagram.mmd](./system-overview-diagram.mmd)',
-    '',
-    'Static Zidney platform trust chain and service topology.',
-    'Shows the five named services (MMC, Backoffice, Frontoffice, API, Worker) and the',
-    'Foundation package group. Reflects the trust chain model defined in `AGENTS.md`.',
-    '',
-    '---',
-    '',
-    '## How to View',
-    '',
-    '- **GitHub**: `.mmd` files render automatically as Mermaid diagrams in the GitHub UI.',
-    '- **VS Code**: Install the [Mermaid Preview](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid) extension.',
-    '- **Online**: Paste the `.mmd` file content into [mermaid.live](https://mermaid.live).',
-    '',
-    '---',
-    '',
-    '## Data Sources',
-    '',
-    '| File | Role |',
-    '| ---- | ---- |',
-    '| `docs/architecture/graphs/dependency-graph.json` | Primary data source (required). Produced by `bun run arch:audit`. |',
-    '| `docs/architecture/intelligence/ARCHITECTURE_MAP.json` | Layer classification source (optional). Produced by `bun run arch:generate`. |',
-    '',
-    '---',
-    '',
-    '## Governance Reference',
-    '',
-    'See `AGENTS.md` for the authoritative Zidney trust chain, platform identity, and',
-    'multi-tenancy rules that govern the architecture shown in these diagrams.',
-    '',
-    'See `docs/PROJECT_CONTEXT_PRIMER.md` for the full platform context.',
-    '',
-  ].join('\n')
+    "",
+    "---",
+    "",
+    "## Diagrams",
+    "",
+    "### [module-dependency-graph.mmd](./module-dependency-graph.mmd)",
+    "",
+    "Top-level module dependency graph with layer subgraph annotations.",
+    "Shows all registered `apps/*` and `packages/*` modules and their deduplicated",
+    "dependency edges, grouped by architectural layer (UI, Runtime, Domain, Infrastructure).",
+    "",
+    "### [layer-architecture-diagram.mmd](./layer-architecture-diagram.mmd)",
+    "",
+    "Layer hierarchy diagram showing modules grouped by their assigned architectural layer.",
+    "Cross-layer dependency edges are rendered after subgraph declarations — any edge",
+    "pointing against the `UI → Runtime → Domain → Infrastructure` direction indicates",
+    "a potential architectural violation.",
+    "",
+    "### [system-overview-diagram.mmd](./system-overview-diagram.mmd)",
+    "",
+    "Static Zidney platform trust chain and service topology.",
+    "Shows the five named services (MMC, Backoffice, Frontoffice, API, Worker) and the",
+    "Foundation package group. Reflects the trust chain model defined in `AGENTS.md`.",
+    "",
+    "---",
+    "",
+    "## How to View",
+    "",
+    "- **GitHub**: `.mmd` files render automatically as Mermaid diagrams in the GitHub UI.",
+    "- **VS Code**: Install the [Mermaid Preview](https://marketplace.visualstudio.com/items?itemName=bierner.markdown-mermaid) extension.",
+    "- **Online**: Paste the `.mmd` file content into [mermaid.live](https://mermaid.live).",
+    "",
+    "---",
+    "",
+    "## Data Sources",
+    "",
+    "| File | Role |",
+    "| ---- | ---- |",
+    "| `docs/architecture/graphs/dependency-graph.json` | Primary data source (required). Produced by `bun run arch:audit`. |",
+    "| `docs/architecture/intelligence/ARCHITECTURE_MAP.json` | Layer classification source (optional). Produced by `bun run arch:generate`. |",
+    "",
+    "---",
+    "",
+    "## Governance Reference",
+    "",
+    "See `AGENTS.md` for the authoritative Zidney trust chain, platform identity, and",
+    "multi-tenancy rules that govern the architecture shown in these diagrams.",
+    "",
+    "See `docs/PROJECT_CONTEXT_PRIMER.md` for the full platform context.",
+    "",
+  ].join("\n");
 }
 
 // ─── Internal Helpers ─────────────────────────────────────────────────────────
 
 function groupNodesByLayer(
   sortedNodes: string[],
-  layerMap: Map<string, string>
+  layerMap: Map<string, string>,
 ): Map<string, string[]> {
-  const result = new Map<string, string[]>()
+  const result = new Map<string, string[]>();
 
   for (const n of sortedNodes) {
-    const layer = layerMap.get(n) ?? 'unknown'
-    if (!result.has(layer)) result.set(layer, [])
-    result.get(layer)!.push(n)
+    const layer = layerMap.get(n) ?? "unknown";
+    if (!result.has(layer)) result.set(layer, []);
+    result.get(layer)!.push(n);
   }
 
-  return result
+  return result;
 }
 
 function loadDependencyGraph(filePath: string): DependencyGraph {
   if (!existsSync(filePath)) {
     console.log(
-      `[VISUALIZE] ERROR: dependency-graph.json not found. Run 'bun run arch:audit' first.`
-    )
-    process.exit(1)
+      `[VISUALIZE] ERROR: dependency-graph.json not found. Run 'bun run arch:audit' first.`,
+    );
+    process.exit(1);
   }
 
   try {
-    const raw = readFileSync(filePath, 'utf-8')
-    return JSON.parse(raw) as DependencyGraph
+    const raw = readFileSync(filePath, "utf-8");
+    return JSON.parse(raw) as DependencyGraph;
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err)
-    console.log(`[VISUALIZE] ERROR: Failed to parse dependency-graph.json — ${message}`)
-    process.exit(1)
+    const message = err instanceof Error ? err.message : String(err);
+    console.log(`[VISUALIZE] ERROR: Failed to parse dependency-graph.json — ${message}`);
+    process.exit(1);
   }
 }
 
 function loadArchitectureMap(filePath: string): ArchitectureMap | null {
   if (!existsSync(filePath)) {
     console.log(
-      `[VISUALIZE] WARNING: ARCHITECTURE_MAP.json not found — using heuristic layer classification.`
-    )
-    return null
+      `[VISUALIZE] WARNING: ARCHITECTURE_MAP.json not found — using heuristic layer classification.`,
+    );
+    return null;
   }
 
   try {
-    const raw = readFileSync(filePath, 'utf-8')
-    return JSON.parse(raw) as ArchitectureMap
+    const raw = readFileSync(filePath, "utf-8");
+    return JSON.parse(raw) as ArchitectureMap;
   } catch (err) {
-    const message = err instanceof Error ? err.message : String(err)
+    const message = err instanceof Error ? err.message : String(err);
     console.log(
-      `[VISUALIZE] WARNING: Failed to parse ARCHITECTURE_MAP.json (${message}) — using heuristic layer classification.`
-    )
-    return null
+      `[VISUALIZE] WARNING: Failed to parse ARCHITECTURE_MAP.json (${message}) — using heuristic layer classification.`,
+    );
+    return null;
   }
 }
 
 function buildLayerMap(nodes: string[], archMap: ArchitectureMap | null): Map<string, string> {
-  const result = new Map<string, string>()
+  const result = new Map<string, string>();
 
   for (const node of nodes) {
-    let layer: string
+    let layer: string;
 
     if (archMap && archMap.modules[node]) {
-      layer = archMap.modules[node].layer
+      layer = archMap.modules[node].layer;
     } else {
-      layer = classifyLayerHeuristic(node)
+      layer = classifyLayerHeuristic(node);
     }
 
-    if (layer === 'unknown') {
-      console.log(`[VISUALIZE] WARNING: No layer found for module ${node} — classified as Unknown`)
+    if (layer === "unknown") {
+      console.log(`[VISUALIZE] WARNING: No layer found for module ${node} — classified as Unknown`);
     }
 
-    result.set(node, layer)
+    result.set(node, layer);
   }
 
-  return result
+  return result;
 }
 
 function getGitSha(): string {
   try {
-    return execSync('git rev-parse HEAD', {encoding: 'utf-8'}).trim()
+    return execSync("git rev-parse HEAD", { encoding: "utf-8" }).trim();
   } catch {
-    return 'unknown'
+    return "unknown";
   }
 }
 
 // ─── CLI Entry Point ──────────────────────────────────────────────────────────
 
 async function main(): Promise<void> {
-  const graph = loadDependencyGraph(DEPENDENCY_GRAPH_PATH)
-  const archMap = loadArchitectureMap(ARCHITECTURE_MAP_PATH)
+  const graph = loadDependencyGraph(DEPENDENCY_GRAPH_PATH);
+  const archMap = loadArchitectureMap(ARCHITECTURE_MAP_PATH);
 
-  const topLevelNodes = filterTopLevelNodes(graph.nodes)
-  const topLevelNodeSet = new Set(topLevelNodes)
-  const edges = deduplicateEdges(graph.edges, topLevelNodeSet)
-  const layerMap = buildLayerMap(topLevelNodes, archMap)
+  const topLevelNodes = filterTopLevelNodes(graph.nodes);
+  const topLevelNodeSet = new Set(topLevelNodes);
+  const edges = deduplicateEdges(graph.edges, topLevelNodeSet);
+  const layerMap = buildLayerMap(topLevelNodes, archMap);
 
-  mkdirSync(OUTPUT_DIR, {recursive: true})
+  mkdirSync(OUTPUT_DIR, { recursive: true });
 
-  const moduleGraph = generateModuleGraph(topLevelNodes, edges, layerMap)
-  const layerDiagram = generateLayerDiagram(topLevelNodes, edges, layerMap)
-  const systemOverview = generateSystemOverview()
-  const readme = generateReadme(new Date(), getGitSha())
+  const moduleGraph = generateModuleGraph(topLevelNodes, edges, layerMap);
+  const layerDiagram = generateLayerDiagram(topLevelNodes, edges, layerMap);
+  const systemOverview = generateSystemOverview();
+  const readme = generateReadme(new Date(), getGitSha());
 
-  writeFileSync(join(OUTPUT_DIR, 'module-dependency-graph.mmd'), moduleGraph, 'utf-8')
-  writeFileSync(join(OUTPUT_DIR, 'layer-architecture-diagram.mmd'), layerDiagram, 'utf-8')
-  writeFileSync(join(OUTPUT_DIR, 'system-overview-diagram.mmd'), systemOverview, 'utf-8')
-  writeFileSync(join(OUTPUT_DIR, 'README.md'), readme, 'utf-8')
+  writeFileSync(join(OUTPUT_DIR, "module-dependency-graph.mmd"), moduleGraph, "utf-8");
+  writeFileSync(join(OUTPUT_DIR, "layer-architecture-diagram.mmd"), layerDiagram, "utf-8");
+  writeFileSync(join(OUTPUT_DIR, "system-overview-diagram.mmd"), systemOverview, "utf-8");
+  writeFileSync(join(OUTPUT_DIR, "README.md"), readme, "utf-8");
 
-  console.log(`[VISUALIZE] Done — 3 diagrams written to docs/architecture/visualization/`)
+  console.log(`[VISUALIZE] Done — 3 diagrams written to docs/architecture/visualization/`);
 }
 
-main()
+main();
 ```
 
 **Validation after creation**:
 
-- File must be runnable: `bun scripts/architecture/visualize.ts` (requires `dependency-graph.json` to exist)
+- File must be runnable: `bun scripts/architecture/visualize.ts` (requires `dependency-graph.json`
+  to exist)
 - Type check: `bun typecheck:src` must pass
 - Lint: `bun lint` must pass
 - All exported function names must match the function signatures in `data-model.md §7`
@@ -670,9 +678,9 @@ main()
  * Stage: STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION
  */
 
-import {readFileSync} from 'node:fs'
-import {join} from 'node:path'
-import {describe, expect, it} from 'vitest'
+import { readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
 import {
   classifyLayerHeuristic,
   deduplicateEdges,
@@ -681,228 +689,231 @@ import {
   generateModuleGraph,
   generateSystemOverview,
   toNodeId,
-} from '../../../scripts/architecture/visualize'
+} from "../../../scripts/architecture/visualize";
 
-const FIXTURES_DIR = join(process.cwd(), 'tests/unit/visualize/fixtures')
+const FIXTURES_DIR = join(process.cwd(), "tests/unit/visualize/fixtures");
 
 const GRAPH_FIXTURE = JSON.parse(
-  readFileSync(join(FIXTURES_DIR, 'dependency-graph.fixture.json'), 'utf-8')
-)
+  readFileSync(join(FIXTURES_DIR, "dependency-graph.fixture.json"), "utf-8"),
+);
 const MAP_FIXTURE = JSON.parse(
-  readFileSync(join(FIXTURES_DIR, 'architecture-map.fixture.json'), 'utf-8')
-)
+  readFileSync(join(FIXTURES_DIR, "architecture-map.fixture.json"), "utf-8"),
+);
 
 // Build a minimal layerMap from the fixture for use in diagram tests
 function buildFixtureLayerMap(): Map<string, string> {
-  const map = new Map<string, string>()
+  const map = new Map<string, string>();
   for (const [module, meta] of Object.entries(
-    MAP_FIXTURE.modules as Record<string, {layer: string}>
+    MAP_FIXTURE.modules as Record<string, { layer: string }>,
   )) {
-    map.set(module, meta.layer)
+    map.set(module, meta.layer);
   }
-  return map
+  return map;
 }
 
-describe('visualize.ts — unit tests', () => {
+describe("visualize.ts — unit tests", () => {
   // ─── filterTopLevelNodes ───────────────────────────────────────────────────
 
-  describe('filterTopLevelNodes', () => {
+  describe("filterTopLevelNodes", () => {
     /**
      * Test 1: Deep submodule paths starting with './' are excluded
      */
     it('Test 1: excludes deep submodule paths starting with "./"', () => {
-      const result = filterTopLevelNodes(GRAPH_FIXTURE.nodes as string[])
+      const result = filterTopLevelNodes(GRAPH_FIXTURE.nodes as string[]);
       for (const node of result) {
-        expect(node).not.toMatch(/^\.\//)
+        expect(node).not.toMatch(/^\.\//);
       }
-    })
+    });
 
     /**
      * Test 2: apps/* and packages/* top-level nodes are retained
      */
-    it('Test 2: retains apps/* and packages/* top-level nodes', () => {
-      const result = filterTopLevelNodes(GRAPH_FIXTURE.nodes as string[])
-      expect(result).toContain('apps/api')
-      expect(result).toContain('apps/mmc')
-      expect(result).toContain('packages/domain-core')
-      expect(result).toContain('packages/logger')
-      expect(result).toContain('packages/api-client')
-    })
-  })
+    it("Test 2: retains apps/* and packages/* top-level nodes", () => {
+      const result = filterTopLevelNodes(GRAPH_FIXTURE.nodes as string[]);
+      expect(result).toContain("apps/api");
+      expect(result).toContain("apps/mmc");
+      expect(result).toContain("packages/domain-core");
+      expect(result).toContain("packages/logger");
+      expect(result).toContain("packages/api-client");
+    });
+  });
 
   // ─── deduplicateEdges ──────────────────────────────────────────────────────
 
-  describe('deduplicateEdges', () => {
+  describe("deduplicateEdges", () => {
     const topLevel = new Set([
-      'apps/api',
-      'apps/mmc',
-      'packages/domain-core',
-      'packages/logger',
-      'packages/api-client',
-    ])
+      "apps/api",
+      "apps/mmc",
+      "packages/domain-core",
+      "packages/logger",
+      "packages/api-client",
+    ]);
 
     /**
      * Test 3: Duplicate (from, to) pairs are reduced to a single edge
      */
-    it('Test 3: deduplicates multiple identical edges', () => {
-      const result = deduplicateEdges(GRAPH_FIXTURE.edges, topLevel)
-      const apApiToLogger = result.filter(e => e.from === 'apps/api' && e.to === 'packages/logger')
-      expect(apApiToLogger).toHaveLength(1)
-    })
+    it("Test 3: deduplicates multiple identical edges", () => {
+      const result = deduplicateEdges(GRAPH_FIXTURE.edges, topLevel);
+      const apApiToLogger = result.filter(
+        (e) => e.from === "apps/api" && e.to === "packages/logger",
+      );
+      expect(apApiToLogger).toHaveLength(1);
+    });
 
     /**
      * Test 4: Edges involving deep submodule nodes are excluded
      */
-    it('Test 4: excludes edges involving deep submodule nodes', () => {
-      const result = deduplicateEdges(GRAPH_FIXTURE.edges, topLevel)
+    it("Test 4: excludes edges involving deep submodule nodes", () => {
+      const result = deduplicateEdges(GRAPH_FIXTURE.edges, topLevel);
       for (const edge of result) {
-        expect(edge.from).not.toMatch(/^\.\//)
-        expect(edge.to).not.toMatch(/^\.\//)
+        expect(edge.from).not.toMatch(/^\.\//);
+        expect(edge.to).not.toMatch(/^\.\//);
       }
-    })
-  })
+    });
+  });
 
   // ─── generateModuleGraph ───────────────────────────────────────────────────
 
-  describe('generateModuleGraph', () => {
+  describe("generateModuleGraph", () => {
     /**
      * Test 5: Output contains valid Mermaid flowchart TD directive and subgraph blocks
      */
-    it('Test 5: generates valid Mermaid flowchart TD with subgraph blocks', () => {
-      const topLevel = filterTopLevelNodes(GRAPH_FIXTURE.nodes as string[])
-      const topLevelSet = new Set(topLevel)
-      const edges = deduplicateEdges(GRAPH_FIXTURE.edges, topLevelSet)
-      const layerMap = buildFixtureLayerMap()
+    it("Test 5: generates valid Mermaid flowchart TD with subgraph blocks", () => {
+      const topLevel = filterTopLevelNodes(GRAPH_FIXTURE.nodes as string[]);
+      const topLevelSet = new Set(topLevel);
+      const edges = deduplicateEdges(GRAPH_FIXTURE.edges, topLevelSet);
+      const layerMap = buildFixtureLayerMap();
 
-      const result = generateModuleGraph(topLevel, edges, layerMap)
+      const result = generateModuleGraph(topLevel, edges, layerMap);
 
-      expect(result).toMatch(/^flowchart TD/)
-      expect(result).toContain('subgraph')
-      expect(result).toContain('end')
-    })
+      expect(result).toMatch(/^flowchart TD/);
+      expect(result).toContain("subgraph");
+      expect(result).toContain("end");
+    });
 
     /**
      * Test 12: Output is stable when nodes are ordered alphabetically
      */
-    it('Test 12: output is stable — same input always produces identical output', () => {
-      const topLevel = filterTopLevelNodes(GRAPH_FIXTURE.nodes as string[])
-      const topLevelSet = new Set(topLevel)
-      const edges = deduplicateEdges(GRAPH_FIXTURE.edges, topLevelSet)
-      const layerMap = buildFixtureLayerMap()
+    it("Test 12: output is stable — same input always produces identical output", () => {
+      const topLevel = filterTopLevelNodes(GRAPH_FIXTURE.nodes as string[]);
+      const topLevelSet = new Set(topLevel);
+      const edges = deduplicateEdges(GRAPH_FIXTURE.edges, topLevelSet);
+      const layerMap = buildFixtureLayerMap();
 
-      const result1 = generateModuleGraph(topLevel, edges, layerMap)
-      const result2 = generateModuleGraph(topLevel, edges, layerMap)
+      const result1 = generateModuleGraph(topLevel, edges, layerMap);
+      const result2 = generateModuleGraph(topLevel, edges, layerMap);
 
-      expect(result1).toBe(result2)
-    })
-  })
+      expect(result1).toBe(result2);
+    });
+  });
 
   // ─── generateLayerDiagram ─────────────────────────────────────────────────
 
-  describe('generateLayerDiagram', () => {
+  describe("generateLayerDiagram", () => {
     /**
      * Test 6: Nodes appear in the correct layer subgraph
      */
-    it('Test 6: nodes appear in correct layer subgraph', () => {
-      const topLevel = filterTopLevelNodes(GRAPH_FIXTURE.nodes as string[])
-      const topLevelSet = new Set(topLevel)
-      const edges = deduplicateEdges(GRAPH_FIXTURE.edges, topLevelSet)
-      const layerMap = buildFixtureLayerMap()
+    it("Test 6: nodes appear in correct layer subgraph", () => {
+      const topLevel = filterTopLevelNodes(GRAPH_FIXTURE.nodes as string[]);
+      const topLevelSet = new Set(topLevel);
+      const edges = deduplicateEdges(GRAPH_FIXTURE.edges, topLevelSet);
+      const layerMap = buildFixtureLayerMap();
 
-      const result = generateLayerDiagram(topLevel, edges, layerMap)
+      const result = generateLayerDiagram(topLevel, edges, layerMap);
 
       // apps/api is runtime — its node ID should appear after the runtime subgraph declaration
-      const runtimeIdx = result.indexOf('subgraph runtime')
-      const appsApiIdx = result.indexOf('apps_api["apps/api"]')
-      expect(runtimeIdx).toBeGreaterThanOrEqual(0)
-      expect(appsApiIdx).toBeGreaterThan(runtimeIdx)
-    })
+      const runtimeIdx = result.indexOf("subgraph runtime");
+      const appsApiIdx = result.indexOf('apps_api["apps/api"]');
+      expect(runtimeIdx).toBeGreaterThanOrEqual(0);
+      expect(appsApiIdx).toBeGreaterThan(runtimeIdx);
+    });
 
     /**
      * Test 7: Cross-layer edges appear after all subgraph declarations
      */
-    it('Test 7: cross-layer edges appear after subgraph declarations', () => {
-      const topLevel = filterTopLevelNodes(GRAPH_FIXTURE.nodes as string[])
-      const topLevelSet = new Set(topLevel)
-      const edges = deduplicateEdges(GRAPH_FIXTURE.edges, topLevelSet)
-      const layerMap = buildFixtureLayerMap()
+    it("Test 7: cross-layer edges appear after subgraph declarations", () => {
+      const topLevel = filterTopLevelNodes(GRAPH_FIXTURE.nodes as string[]);
+      const topLevelSet = new Set(topLevel);
+      const edges = deduplicateEdges(GRAPH_FIXTURE.edges, topLevelSet);
+      const layerMap = buildFixtureLayerMap();
 
-      const result = generateLayerDiagram(topLevel, edges, layerMap)
+      const result = generateLayerDiagram(topLevel, edges, layerMap);
 
-      const lastEndIdx = result.lastIndexOf('  end')
-      const firstEdgeIdx = result.indexOf('-->')
+      const lastEndIdx = result.lastIndexOf("  end");
+      const firstEdgeIdx = result.indexOf("-->");
 
-      expect(lastEndIdx).toBeGreaterThanOrEqual(0)
-      expect(firstEdgeIdx).toBeGreaterThan(lastEndIdx)
-    })
-  })
+      expect(lastEndIdx).toBeGreaterThanOrEqual(0);
+      expect(firstEdgeIdx).toBeGreaterThan(lastEndIdx);
+    });
+  });
 
   // ─── generateSystemOverview ───────────────────────────────────────────────
 
-  describe('generateSystemOverview', () => {
+  describe("generateSystemOverview", () => {
     /**
      * Test 8: System overview contains all five expected service nodes
      */
-    it('Test 8: contains all five Zidney service nodes', () => {
-      const result = generateSystemOverview()
+    it("Test 8: contains all five Zidney service nodes", () => {
+      const result = generateSystemOverview();
 
-      expect(result).toContain('mmc')
-      expect(result).toContain('backoffice')
-      expect(result).toContain('frontoffice')
-      expect(result).toContain('api')
-      expect(result).toContain('worker')
-    })
-  })
+      expect(result).toContain("mmc");
+      expect(result).toContain("backoffice");
+      expect(result).toContain("frontoffice");
+      expect(result).toContain("api");
+      expect(result).toContain("worker");
+    });
+  });
 
   // ─── classifyLayerHeuristic ───────────────────────────────────────────────
 
-  describe('classifyLayerHeuristic', () => {
+  describe("classifyLayerHeuristic", () => {
     /**
      * Test 9: Correctly classifies all 13 known modules
      */
-    it('Test 9: correctly classifies all known modules', () => {
-      expect(classifyLayerHeuristic('apps/mmc')).toBe('ui')
-      expect(classifyLayerHeuristic('apps/backoffice')).toBe('ui')
-      expect(classifyLayerHeuristic('apps/frontoffice')).toBe('ui')
-      expect(classifyLayerHeuristic('apps/api')).toBe('runtime')
-      expect(classifyLayerHeuristic('apps/worker')).toBe('runtime')
-      expect(classifyLayerHeuristic('packages/ui-system')).toBe('ui')
-      expect(classifyLayerHeuristic('packages/api-client')).toBe('infrastructure')
-      expect(classifyLayerHeuristic('packages/domain-core')).toBe('domain')
-      expect(classifyLayerHeuristic('packages/validation')).toBe('domain')
-      expect(classifyLayerHeuristic('packages/types')).toBe('domain')
-      expect(classifyLayerHeuristic('packages/logger')).toBe('infrastructure')
-      expect(classifyLayerHeuristic('packages/config')).toBe('infrastructure')
-      expect(classifyLayerHeuristic('packages/redis-utils')).toBe('infrastructure')
-    })
+    it("Test 9: correctly classifies all known modules", () => {
+      expect(classifyLayerHeuristic("apps/mmc")).toBe("ui");
+      expect(classifyLayerHeuristic("apps/backoffice")).toBe("ui");
+      expect(classifyLayerHeuristic("apps/frontoffice")).toBe("ui");
+      expect(classifyLayerHeuristic("apps/api")).toBe("runtime");
+      expect(classifyLayerHeuristic("apps/worker")).toBe("runtime");
+      expect(classifyLayerHeuristic("packages/ui-system")).toBe("ui");
+      expect(classifyLayerHeuristic("packages/api-client")).toBe("infrastructure");
+      expect(classifyLayerHeuristic("packages/domain-core")).toBe("domain");
+      expect(classifyLayerHeuristic("packages/validation")).toBe("domain");
+      expect(classifyLayerHeuristic("packages/types")).toBe("domain");
+      expect(classifyLayerHeuristic("packages/logger")).toBe("infrastructure");
+      expect(classifyLayerHeuristic("packages/config")).toBe("infrastructure");
+      expect(classifyLayerHeuristic("packages/redis-utils")).toBe("infrastructure");
+    });
 
     /**
      * Test 10: Returns "unknown" for unrecognized paths
      */
     it('Test 10: returns "unknown" for unrecognized module paths', () => {
-      expect(classifyLayerHeuristic('packages/app')).toBe('unknown')
-      expect(classifyLayerHeuristic('packages/ui')).toBe('unknown')
-      expect(classifyLayerHeuristic('apps/something-new')).toBe('unknown')
-    })
-  })
+      expect(classifyLayerHeuristic("packages/app")).toBe("unknown");
+      expect(classifyLayerHeuristic("packages/ui")).toBe("unknown");
+      expect(classifyLayerHeuristic("apps/something-new")).toBe("unknown");
+    });
+  });
 
   // ─── toNodeId ─────────────────────────────────────────────────────────────
 
-  describe('toNodeId', () => {
+  describe("toNodeId", () => {
     /**
      * Test 11: Handles '/' and '-' characters correctly
      */
     it('Test 11: converts "/" and "-" to "_" in node IDs', () => {
-      expect(toNodeId('apps/api')).toBe('apps_api')
-      expect(toNodeId('packages/domain-core')).toBe('packages_domain_core')
-      expect(toNodeId('packages/redis-utils')).toBe('packages_redis_utils')
-      expect(toNodeId('apps/mmc')).toBe('apps_mmc')
-    })
-  })
-})
+      expect(toNodeId("apps/api")).toBe("apps_api");
+      expect(toNodeId("packages/domain-core")).toBe("packages_domain_core");
+      expect(toNodeId("packages/redis-utils")).toBe("packages_redis_utils");
+      expect(toNodeId("apps/mmc")).toBe("apps_mmc");
+    });
+  });
+});
 ```
 
-**Test coverage**: 12 test cases across 7 exported functions. All pure function tests — no file I/O mocking required.
+**Test coverage**: 12 test cases across 7 exported functions. All pure function tests — no file I/O
+mocking required.
 
 ---
 
@@ -926,100 +937,100 @@ describe('visualize.ts — unit tests', () => {
  * Stage: STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION
  */
 
-import {existsSync, readFileSync} from 'node:fs'
-import {join} from 'node:path'
-import {describe, expect, it} from 'vitest'
+import { existsSync, readFileSync } from "node:fs";
+import { join } from "node:path";
+import { describe, expect, it } from "vitest";
 
-const VIZ_DIR = join(process.cwd(), 'docs/architecture/visualization')
-const MODULE_GRAPH = join(VIZ_DIR, 'module-dependency-graph.mmd')
-const LAYER_DIAGRAM = join(VIZ_DIR, 'layer-architecture-diagram.mmd')
-const SYSTEM_OVERVIEW = join(VIZ_DIR, 'system-overview-diagram.mmd')
-const README = join(VIZ_DIR, 'README.md')
+const VIZ_DIR = join(process.cwd(), "docs/architecture/visualization");
+const MODULE_GRAPH = join(VIZ_DIR, "module-dependency-graph.mmd");
+const LAYER_DIAGRAM = join(VIZ_DIR, "layer-architecture-diagram.mmd");
+const SYSTEM_OVERVIEW = join(VIZ_DIR, "system-overview-diagram.mmd");
+const README = join(VIZ_DIR, "README.md");
 
-describe('Area 6: Architecture Visualization Output Validation', () => {
+describe("Area 6: Architecture Visualization Output Validation", () => {
   /**
    * Test 6.1: Output directory exists
    */
-  it('Test 6.1: docs/architecture/visualization/ directory exists', () => {
-    expect(existsSync(VIZ_DIR)).toBe(true)
-  })
+  it("Test 6.1: docs/architecture/visualization/ directory exists", () => {
+    expect(existsSync(VIZ_DIR)).toBe(true);
+  });
 
   /**
    * Test 6.2: All four expected output files exist
    */
-  it('Test 6.2: all four output files exist', () => {
+  it("Test 6.2: all four output files exist", () => {
     expect(
       existsSync(MODULE_GRAPH),
-      `module-dependency-graph.mmd must exist — run 'bun run arch:visualize' first`
-    ).toBe(true)
+      `module-dependency-graph.mmd must exist — run 'bun run arch:visualize' first`,
+    ).toBe(true);
     expect(
       existsSync(LAYER_DIAGRAM),
-      `layer-architecture-diagram.mmd must exist — run 'bun run arch:visualize' first`
-    ).toBe(true)
+      `layer-architecture-diagram.mmd must exist — run 'bun run arch:visualize' first`,
+    ).toBe(true);
     expect(
       existsSync(SYSTEM_OVERVIEW),
-      `system-overview-diagram.mmd must exist — run 'bun run arch:visualize' first`
-    ).toBe(true)
+      `system-overview-diagram.mmd must exist — run 'bun run arch:visualize' first`,
+    ).toBe(true);
     expect(existsSync(README), `README.md must exist — run 'bun run arch:visualize' first`).toBe(
-      true
-    )
-  })
+      true,
+    );
+  });
 
   /**
    * Test 6.3: module-dependency-graph.mmd contains no deep submodule paths
    */
-  it('Test 6.3: module-dependency-graph.mmd contains no deep submodule paths', () => {
-    if (!existsSync(MODULE_GRAPH)) return // Skip if not generated yet
+  it("Test 6.3: module-dependency-graph.mmd contains no deep submodule paths", () => {
+    if (!existsSync(MODULE_GRAPH)) return; // Skip if not generated yet
 
-    const content = readFileSync(MODULE_GRAPH, 'utf-8')
+    const content = readFileSync(MODULE_GRAPH, "utf-8");
 
     // Deep submodule paths start with './' or contain more than two path segments
     // in the form apps/.../something or packages/.../something
-    expect(content).not.toContain('./')
-    expect(content).not.toMatch(/apps\/[^/\s"]+\/[^/\s"]+/)
-    expect(content).not.toMatch(/packages\/[^/\s"]+\/[^/\s"]+/)
-  })
+    expect(content).not.toContain("./");
+    expect(content).not.toMatch(/apps\/[^/\s"]+\/[^/\s"]+/);
+    expect(content).not.toMatch(/packages\/[^/\s"]+\/[^/\s"]+/);
+  });
 
   /**
    * Test 6.4: layer-architecture-diagram.mmd contains at least four subgraph declarations
    */
-  it('Test 6.4: layer-architecture-diagram.mmd contains at least four subgraph declarations', () => {
-    if (!existsSync(LAYER_DIAGRAM)) return
+  it("Test 6.4: layer-architecture-diagram.mmd contains at least four subgraph declarations", () => {
+    if (!existsSync(LAYER_DIAGRAM)) return;
 
-    const content = readFileSync(LAYER_DIAGRAM, 'utf-8')
-    const subgraphCount = (content.match(/subgraph /g) ?? []).length
+    const content = readFileSync(LAYER_DIAGRAM, "utf-8");
+    const subgraphCount = (content.match(/subgraph /g) ?? []).length;
 
-    expect(subgraphCount).toBeGreaterThanOrEqual(4)
-  })
+    expect(subgraphCount).toBeGreaterThanOrEqual(4);
+  });
 
   /**
    * Test 6.5: system-overview-diagram.mmd contains all five application node identifiers
    */
-  it('Test 6.5: system-overview-diagram.mmd contains all five application nodes', () => {
-    if (!existsSync(SYSTEM_OVERVIEW)) return
+  it("Test 6.5: system-overview-diagram.mmd contains all five application nodes", () => {
+    if (!existsSync(SYSTEM_OVERVIEW)) return;
 
-    const content = readFileSync(SYSTEM_OVERVIEW, 'utf-8')
+    const content = readFileSync(SYSTEM_OVERVIEW, "utf-8");
 
-    expect(content).toContain('mmc')
-    expect(content).toContain('backoffice')
-    expect(content).toContain('frontoffice')
-    expect(content).toContain('api')
-    expect(content).toContain('worker')
-  })
+    expect(content).toContain("mmc");
+    expect(content).toContain("backoffice");
+    expect(content).toContain("frontoffice");
+    expect(content).toContain("api");
+    expect(content).toContain("worker");
+  });
 
   /**
    * Test 6.6: README.md references all three diagram files
    */
-  it('Test 6.6: README.md references all three diagram files', () => {
-    if (!existsSync(README)) return
+  it("Test 6.6: README.md references all three diagram files", () => {
+    if (!existsSync(README)) return;
 
-    const content = readFileSync(README, 'utf-8')
+    const content = readFileSync(README, "utf-8");
 
-    expect(content).toContain('module-dependency-graph.mmd')
-    expect(content).toContain('layer-architecture-diagram.mmd')
-    expect(content).toContain('system-overview-diagram.mmd')
-  })
-})
+    expect(content).toContain("module-dependency-graph.mmd");
+    expect(content).toContain("layer-architecture-diagram.mmd");
+    expect(content).toContain("system-overview-diagram.mmd");
+  });
+});
 ```
 
 ---
@@ -1137,7 +1148,8 @@ mv /tmp/dep-graph-backup.json docs/architecture/graphs/dependency-graph.json
 bun scripts/infra-audit.ts
 ```
 
-Expected: `scripts/architecture/visualize.ts` must not introduce any layer violations or undeclared module warnings.
+Expected: `scripts/architecture/visualize.ts` must not introduce any layer violations or undeclared
+module warnings.
 
 ---
 
@@ -1185,7 +1197,8 @@ All error paths are handled in `main()` or the loader functions. No unhandled ex
 
 ## Success Criteria
 
-1. `bun run arch:visualize` exits 0 and prints `[VISUALIZE] Done — 3 diagrams written to docs/architecture/visualization/`
+1. `bun run arch:visualize` exits 0 and prints
+   `[VISUALIZE] Done — 3 diagrams written to docs/architecture/visualization/`
 2. Four files exist in `docs/architecture/visualization/` after the run
 3. `module-dependency-graph.mmd` contains zero deep submodule paths and zero duplicate edges
 4. `layer-architecture-diagram.mmd` contains at least four `subgraph` blocks
@@ -1202,17 +1215,27 @@ All error paths are handled in `main()` or the loader functions. No unhandled ex
 
 ### No `vi.mock` Required for Unit Tests
 
-Unlike `tests/unit/ai-guard/ai-guard-boundaries.test.ts`, the visualize unit tests do **not** need to mock `node:fs`. All exported functions are pure — they accept data as parameters and return strings. File I/O is isolated in `loadDependencyGraph()`, `loadArchitectureMap()`, `buildLayerMap()`, and `main()`, which are **not exported** and are tested via the static integration test instead.
+Unlike `tests/unit/ai-guard/ai-guard-boundaries.test.ts`, the visualize unit tests do **not** need
+to mock `node:fs`. All exported functions are pure — they accept data as parameters and return
+strings. File I/O is isolated in `loadDependencyGraph()`, `loadArchitectureMap()`,
+`buildLayerMap()`, and `main()`, which are **not exported** and are tested via the static
+integration test instead.
 
 ### Static Test Graceful Skip Pattern
 
-The static test uses `if (!existsSync(...)) return` for individual test cases. This allows the static test file to be included in the test suite even before `arch:visualize` has been run, without causing hard failures. The first test (`Test 6.1: directory exists`) will fail if the directory does not exist — this is intentional and serves as the gating failure.
+The static test uses `if (!existsSync(...)) return` for individual test cases. This allows the
+static test file to be included in the test suite even before `arch:visualize` has been run, without
+causing hard failures. The first test (`Test 6.1: directory exists`) will fail if the directory does
+not exist — this is intentional and serves as the gating failure.
 
-In CI, `arch:visualize` must be run before `test:static` if the visualization tests must pass. This is advisory (per spec Scenario 2 note on CI integration) and is not implemented as a CI file change in this stage.
+In CI, `arch:visualize` must be run before `test:static` if the visualization tests must pass. This
+is advisory (per spec Scenario 2 note on CI integration) and is not implemented as a CI file change
+in this stage.
 
 ### Biome Formatting
 
-The script file must comply with the Biome configuration in `biome.json`. Key rules observed from existing scripts:
+The script file must comply with the Biome configuration in `biome.json`. Key rules observed from
+existing scripts:
 
 - Single quotes for strings
 - No trailing semicolons (Biome auto-formats)
@@ -1224,7 +1247,9 @@ The script file must comply with the Biome configuration in `biome.json`. Key ru
 The `LAYER_ORDER` constant controls the order of subgraph declarations:
 
 ```typescript
-const LAYER_ORDER = ['ui', 'runtime', 'domain', 'infrastructure', 'unknown']
+const LAYER_ORDER = ["ui", "runtime", "domain", "infrastructure", "unknown"];
 ```
 
-This top-to-bottom order matches the Zidney trust chain direction (UI at top, Infrastructure at bottom), making the flowchart visually intuitive: data and requests flow downward, matching the `flowchart TD` (top-down) rendering direction.
+This top-to-bottom order matches the Zidney trust chain direction (UI at top, Infrastructure at
+bottom), making the flowchart visually intuitive: data and requests flow downward, matching the
+`flowchart TD` (top-down) rendering direction.

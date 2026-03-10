@@ -8,7 +8,8 @@
 
 ## Entity: workspace_settings (Tenant Database)
 
-**Purpose**: Single-row configuration record per tenant workspace. Contains five JSONB setting groups plus versioning and timestamp metadata.
+**Purpose**: Single-row configuration record per tenant workspace. Contains five JSONB setting
+groups plus versioning and timestamp metadata.
 
 **Table**: `workspace_settings` (extends existing baseline_004 table)
 
@@ -59,10 +60,10 @@
 
 ```typescript
 interface GeneralSettings {
-  app_name: string // Required. Workspace display name. Max 255 chars.
-  timezone: string // Required. Valid IANA timezone (e.g., "Asia/Riyadh").
-  date_format: string // Required. Enum: "YYYY-MM-DD" | "DD/MM/YYYY" | "MM/DD/YYYY" | "DD-MM-YYYY" | "DD.MM.YYYY"
-  session_timeout_minutes?: number // Optional. Integer >= 5, <= 480. Default: 30.
+  app_name: string; // Required. Workspace display name. Max 255 chars.
+  timezone: string; // Required. Valid IANA timezone (e.g., "Asia/Riyadh").
+  date_format: string; // Required. Enum: "YYYY-MM-DD" | "DD/MM/YYYY" | "MM/DD/YYYY" | "DD-MM-YYYY" | "DD.MM.YYYY"
+  session_timeout_minutes?: number; // Optional. Integer >= 5, <= 480. Default: 30.
 }
 ```
 
@@ -78,8 +79,8 @@ interface GeneralSettings {
 
 ```typescript
 interface LanguageSettings {
-  default_language: string // Required. ISO 639-1 code (e.g., "ar", "en").
-  supported_languages: string[] // Required. Non-empty array of ISO 639-1 codes. Must contain default_language.
+  default_language: string; // Required. ISO 639-1 code (e.g., "ar", "en").
+  supported_languages: string[]; // Required. Non-empty array of ISO 639-1 codes. Must contain default_language.
 }
 ```
 
@@ -87,7 +88,8 @@ interface LanguageSettings {
 
 - `default_language` MUST exist in `supported_languages`.
 - `supported_languages` must contain at least one entry.
-- Removing a language marks it as inactive — does NOT delete translations (enforced at service layer).
+- Removing a language marks it as inactive — does NOT delete translations (enforced at service
+  layer).
 
 ---
 
@@ -95,24 +97,24 @@ interface LanguageSettings {
 
 ```typescript
 interface BrandingSettings {
-  logo_url?: string // Optional. Valid URL or null.
-  favicon_url?: string // Optional. Valid URL or null.
-  primary_color?: string // Optional. Hex color: /^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/
-  secondary_color?: string // Optional. Hex color format.
+  logo_url?: string; // Optional. Valid URL or null.
+  favicon_url?: string; // Optional. Valid URL or null.
+  primary_color?: string; // Optional. Hex color: /^#[0-9A-Fa-f]{6}([0-9A-Fa-f]{2})?$/
+  secondary_color?: string; // Optional. Hex color format.
   email_template_branding?: {
-    header_logo_url?: string
-    footer_text?: string
-  }
+    header_logo_url?: string;
+    footer_text?: string;
+  };
   certificate_template_branding?: {
-    logo_url?: string
-    signature_url?: string
-    institution_name?: string
-  }
+    logo_url?: string;
+    signature_url?: string;
+    institution_name?: string;
+  };
   seo_metadata?: {
-    title?: string // Max 60 chars
-    description?: string // Max 160 chars
-    og_image_url?: string // Valid URL
-  }
+    title?: string; // Max 60 chars
+    description?: string; // Max 160 chars
+    og_image_url?: string; // Valid URL
+  };
 }
 ```
 
@@ -120,7 +122,8 @@ interface BrandingSettings {
 
 - All URLs must pass URL format validation.
 - Color values must match hex pattern.
-- Branding is visual-only — MUST NOT influence business logic (enforced by architecture, not schema).
+- Branding is visual-only — MUST NOT influence business logic (enforced by architecture, not
+  schema).
 
 ---
 
@@ -128,10 +131,10 @@ interface BrandingSettings {
 
 ```typescript
 interface PaymentSettings {
-  use_custom_payment_gateway: boolean // Required. Default: false.
-  gateway_provider?: string | null // Optional. Provider name (e.g., "stripe", "moyasar").
-  encrypted_api_key?: string | null // Encrypted at rest. Format: "v1:<iv>:<authTag>:<ciphertext>". NEVER returned in API.
-  encrypted_secret_key?: string | null // Encrypted at rest. Same format. NEVER returned in API.
+  use_custom_payment_gateway: boolean; // Required. Default: false.
+  gateway_provider?: string | null; // Optional. Provider name (e.g., "stripe", "moyasar").
+  encrypted_api_key?: string | null; // Encrypted at rest. Format: "v1:<iv>:<authTag>:<ciphertext>". NEVER returned in API.
+  encrypted_secret_key?: string | null; // Encrypted at rest. Same format. NEVER returned in API.
 }
 ```
 
@@ -162,17 +165,17 @@ Where `v1` is the key identifier for future rotation support.
 
 ```typescript
 interface SecuritySettings {
-  analytics_opt_in: boolean // Default: false. Must be explicit opt-in.
-  max_login_attempts?: number // Optional. Integer >= 1, <= 20. Default: 5.
-  lockout_duration_minutes?: number // Optional. Integer >= 1, <= 1440. Default: 15.
+  analytics_opt_in: boolean; // Default: false. Must be explicit opt-in.
+  max_login_attempts?: number; // Optional. Integer >= 1, <= 20. Default: 5.
+  lockout_duration_minutes?: number; // Optional. Integer >= 1, <= 1440. Default: 15.
   password_policy?: {
     // Future-ready. Accepted, persisted, NOT enforced.
-    min_length?: number
-    require_uppercase?: boolean
-    require_lowercase?: boolean
-    require_numbers?: boolean
-    require_special_chars?: boolean
-  }
+    min_length?: number;
+    require_uppercase?: boolean;
+    require_lowercase?: boolean;
+    require_numbers?: boolean;
+    require_special_chars?: boolean;
+  };
 }
 ```
 
@@ -188,7 +191,8 @@ interface SecuritySettings {
 
 ## Entity: workspace_settings_audit (Tenant Database)
 
-**Purpose**: Immutable audit trail for all workspace settings changes. One entry per settings update.
+**Purpose**: Immutable audit trail for all workspace settings changes. One entry per settings
+update.
 
 **Table**: `workspace_settings_audit`
 
@@ -245,9 +249,12 @@ interface SecuritySettings {
 
 For payment credential fields (`encrypted_api_key`, `encrypted_secret_key`):
 
-- If changed: record `{ field: "encrypted_api_key", old_value: "[REDACTED]", new_value: "[REDACTED]" }`
-- If cleared (null): record `{ field: "encrypted_api_key", old_value: "[REDACTED]", new_value: null }`
-- If set for first time: record `{ field: "encrypted_api_key", old_value: null, new_value: "[REDACTED]" }`
+- If changed: record
+  `{ field: "encrypted_api_key", old_value: "[REDACTED]", new_value: "[REDACTED]" }`
+- If cleared (null): record
+  `{ field: "encrypted_api_key", old_value: "[REDACTED]", new_value: null }`
+- If set for first time: record
+  `{ field: "encrypted_api_key", old_value: null, new_value: "[REDACTED]" }`
 
 ---
 

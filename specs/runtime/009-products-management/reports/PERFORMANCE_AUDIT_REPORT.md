@@ -85,7 +85,8 @@ CREATE INDEX idx_products_updated_at ON products(updated_at);  -- ✅
 | `ORDER BY created_at DESC LIMIT 50`         | idx_products_created_at DESC                  | ✅ O(log n + k)       | ~50μs (k=50)              |
 | Search: `LOWER(name->>'en') LIKE ?`         | ❌ NONE                                       | ⚠️ O(n) FULL SCAN     | ~50-100ms on 10K          |
 
-**Finding:** Full-text search on JSONB field uses **no index**. LIKE query will trigger full table scan.
+**Finding:** Full-text search on JSONB field uses **no index**. LIKE query will trigger full table
+scan.
 
 **Recommendation:** Add **GIN index** for JSONB search acceleration:
 
@@ -101,7 +102,8 @@ CREATE INDEX idx_products_name_en_trig ON products
   );
 ```
 
-**Impact if not added:** Search queries on 10K products with LIKE pattern could degrade to 50-100ms. With GIN index, reduces to ~5-10ms.
+**Impact if not added:** Search queries on 10K products with LIKE pattern could degrade to 50-100ms.
+With GIN index, reduces to ~5-10ms.
 
 ---
 
@@ -154,7 +156,8 @@ CREATE INDEX idx_audit_logs_product_action_ts
   ON product_audit_logs(product_id, action, timestamp DESC);
 ```
 
-**Current Performance:** Still acceptable (product_id index used, then filters by action). Composite would optimize further but not critical for 50-100K logs.
+**Current Performance:** Still acceptable (product_id index used, then filters by action). Composite
+would optimize further but not critical for 50-100K logs.
 
 ---
 
@@ -195,37 +198,32 @@ export async function createProduct(input: CreateProductInput, db: Database) {
 
 ```typescript
 export async function listProducts(query, db) {
-  let q = db.select().from(products)
+  let q = db.select().from(products);
 
-  if (query.status === 'INACTIVE') {
-    q = q.where(eq(products.status, 'INACTIVE'))
+  if (query.status === "INACTIVE") {
+    q = q.where(eq(products.status, "INACTIVE"));
   } else {
-    q = q.where(eq(products.status, 'ACTIVE')) // Default
+    q = q.where(eq(products.status, "ACTIVE")); // Default
   }
 
   if (query.search) {
-    const searchPattern = `%${query.search.toLowerCase()}%`
+    const searchPattern = `%${query.search.toLowerCase()}%`;
     q = q.where(
       or(
         sql`LOWER(products.name->>'en') LIKE ${searchPattern}`,
         sql`LOWER(products.name->>'ar') LIKE ${searchPattern}`,
-        sql`LOWER(products.slug) LIKE ${searchPattern}`
-      )
-    )
+        sql`LOWER(products.slug) LIKE ${searchPattern}`,
+      ),
+    );
   }
 
-  const limit = Math.min(query.limit || 50, 100)
-  const offset = query.offset || 0
+  const limit = Math.min(query.limit || 50, 100);
+  const offset = query.offset || 0;
 
-  const total = await db
-    .select({ count: countDistinct(products.id) })
-    .from(products) // ⚠️ Query 1: COUNT
-  const data = await q
-    .orderBy(desc(products.created_at))
-    .limit(limit)
-    .offset(offset) // ⚠️ Query 2: SELECT data
+  const total = await db.select({ count: countDistinct(products.id) }).from(products); // ⚠️ Query 1: COUNT
+  const data = await q.orderBy(desc(products.created_at)).limit(limit).offset(offset); // ⚠️ Query 2: SELECT data
 
-  return { data, total: total[0].count }
+  return { data, total: total[0].count };
 }
 ```
 
@@ -233,7 +231,8 @@ export async function listProducts(query, db) {
 
 - ⚠️ **2 queries:** One COUNT (total) and one SELECT (paginated data)
   - Both hit `products` table independently
-  - COUNT query executes before SELECT (cannot be optimized into single query in current implementation)
+  - COUNT query executes before SELECT (cannot be optimized into single query in current
+    implementation)
 
 **Performance Impact:**
 
@@ -261,12 +260,9 @@ const [{ data, total }] = await db.select({
 #### ✅ GET /api/v1/mmc/products/:id (Get Single)
 
 ```typescript
-export async function getProductById(
-  id: UUID,
-  db: Database
-): Promise<Product | null> {
-  const result = await db.select().from(products).where(eq(products.id, id))
-  return result.length > 0 ? result[0] : null
+export async function getProductById(id: UUID, db: Database): Promise<Product | null> {
+  const result = await db.select().from(products).where(eq(products.id, id));
+  return result.length > 0 ? result[0] : null;
 }
 ```
 
@@ -341,37 +337,31 @@ export async function changeProductStatus(input: StatusChangeInput, db) {
 
 ```typescript
 export async function getProductAuditLog(productId, query, db) {
-  let q = db
-    .select()
-    .from(productAuditLogs)
-    .where(eq(productAuditLogs.product_id, productId))
+  let q = db.select().from(productAuditLogs).where(eq(productAuditLogs.product_id, productId));
 
   if (query.action) {
-    q = q.where(eq(productAuditLogs.action, query.action))
+    q = q.where(eq(productAuditLogs.action, query.action));
   }
 
   if (query.from_date) {
-    q = q.where(gte(productAuditLogs.timestamp, new Date(query.from_date)))
+    q = q.where(gte(productAuditLogs.timestamp, new Date(query.from_date)));
   }
 
   if (query.to_date) {
-    q = q.where(lte(productAuditLogs.timestamp, new Date(query.to_date)))
+    q = q.where(lte(productAuditLogs.timestamp, new Date(query.to_date)));
   }
 
-  const limit = Math.min(query.limit || 50, 100)
-  const offset = query.offset || 0
+  const limit = Math.min(query.limit || 50, 100);
+  const offset = query.offset || 0;
 
   const total = await db
     .select({ count: countDistinct(productAuditLogs.id) })
     .from(productAuditLogs)
-    .where(eq(productAuditLogs.product_id, productId)) // Query 1: COUNT
+    .where(eq(productAuditLogs.product_id, productId)); // Query 1: COUNT
 
-  const data = await q
-    .orderBy(desc(productAuditLogs.timestamp))
-    .limit(limit)
-    .offset(offset) // Query 2: SELECT
+  const data = await q.orderBy(desc(productAuditLogs.timestamp)).limit(limit).offset(offset); // Query 2: SELECT
 
-  return { data, total: total[0].count }
+  return { data, total: total[0].count };
 }
 ```
 
@@ -479,7 +469,8 @@ T1: Admin B PUTs /products/123 {name: "B's Update"}
     → 1 row updated ❌ (B's update overwrites A's, version collision not detected)
 ```
 
-**Finding:** ⚠️ **No optimistic locking check** – B's update is not rejected despite version collision.
+**Finding:** ⚠️ **No optimistic locking check** – B's update is not rejected despite version
+collision.
 
 **Recommended Implementation:**
 
@@ -512,7 +503,8 @@ export async function updateProduct(input: UpdateProductInput, db: Database) {
 }
 ```
 
-**Status in Plan:** ⚠️ Not explicitly implemented in PLAN_REPORT, but version field exists enabling this pattern.
+**Status in Plan:** ⚠️ Not explicitly implemented in PLAN_REPORT, but version field exists enabling
+this pattern.
 
 ---
 
@@ -587,11 +579,11 @@ export async function changeProductStatus(input: StatusChangeInput, db) {
 From **PLAN_REPORT Section 10.6:**
 
 ```typescript
-describe('Concurrency Tests', () => {
+describe("Concurrency Tests", () => {
   // Tests defined for concurrent slug creation
   // Tests defined for simultaneous updates
   // Tests defined for lost update prevention
-})
+});
 ```
 
 **Coverage:** ✅ Tests planned but not yet executed
@@ -608,7 +600,8 @@ describe('Concurrency Tests', () => {
 | Version field semantics              | ✅ PRESERVED   | Version NOT incremented on status change |
 | Audit trail immutability             | ✅ GUARANTEED  | After INSERT, immutable                  |
 
-**Recommendation:** Implement optimistic locking check in updateProduct() to prevent silent lost updates.
+**Recommendation:** Implement optimistic locking check in updateProduct() to prevent silent lost
+updates.
 
 ---
 
@@ -622,8 +615,7 @@ describe('Concurrency Tests', () => {
 
 > **Section 5: Worker/Async (N/A for Stage 9)**
 >
-> Stage 9 has no async/background jobs.
-> All CRUD operations are synchronous and return immediately.
+> Stage 9 has no async/background jobs. All CRUD operations are synchronous and return immediately.
 > Async provisioning begins in **Stage 10** (License Engine).
 
 **Tests Verify:**
@@ -678,61 +670,61 @@ CREATE TABLE products (
 **Verification Test:**
 
 ```typescript
-describe('Idempotency: Concurrent Slug Duplication', () => {
-  it('should allow exactly 1 success when 100 creates use same slug', async () => {
-    const slug = 'unique-test-' + Date.now()
+describe("Idempotency: Concurrent Slug Duplication", () => {
+  it("should allow exactly 1 success when 100 creates use same slug", async () => {
+    const slug = "unique-test-" + Date.now();
 
     const results = await Promise.allSettled(
       Array.from({ length: 100 }).map(() =>
         createProduct({
           slug,
-          name: { en: 'Test' },
-          enabled_modules: ['MCQ'],
-          performed_by: 'admin-uuid',
-        })
-      )
-    )
+          name: { en: "Test" },
+          enabled_modules: ["MCQ"],
+          performed_by: "admin-uuid",
+        }),
+      ),
+    );
 
-    const successes = results.filter((r) => r.status === 'fulfilled')
-    const failures = results.filter((r) => r.status === 'rejected')
+    const successes = results.filter((r) => r.status === "fulfilled");
+    const failures = results.filter((r) => r.status === "rejected");
 
-    expect(successes.length).toBe(1) // Exactly 1 made it
-    expect(failures.length).toBe(99) // 99 rejected
-    expect(failures.every((f) => f.reason.code === 'DUPLICATE_SLUG')).toBe(true)
-  })
+    expect(successes.length).toBe(1); // Exactly 1 made it
+    expect(failures.length).toBe(99); // 99 rejected
+    expect(failures.every((f) => f.reason.code === "DUPLICATE_SLUG")).toBe(true);
+  });
 
-  it('should not create partial inserts on duplicate slug', async () => {
+  it("should not create partial inserts on duplicate slug", async () => {
     const product1 = await createProduct({
-      slug: 'test-partial',
-      name: { en: 'Test' },
-      enabled_modules: ['MCQ'],
-      performed_by: 'admin-uuid',
-    })
+      slug: "test-partial",
+      name: { en: "Test" },
+      enabled_modules: ["MCQ"],
+      performed_by: "admin-uuid",
+    });
 
     // Try another create with same slug
     expect(() =>
       createProduct({
-        slug: 'test-partial',
-        name: { en: 'Test 2' },
-        enabled_modules: ['EXERCISES'],
-        performed_by: 'admin-uuid',
-      })
-    ).rejects.toThrow('DUPLICATE_SLUG')
+        slug: "test-partial",
+        name: { en: "Test 2" },
+        enabled_modules: ["EXERCISES"],
+        performed_by: "admin-uuid",
+      }),
+    ).rejects.toThrow("DUPLICATE_SLUG");
 
     // Verify no orphaned versions or audit logs created
     const versions = await db
       .select()
       .from(productVersions)
-      .where(eq(productVersions.product_id, product1.id))
+      .where(eq(productVersions.product_id, product1.id));
     const audits = await db
       .select()
       .from(productAuditLogs)
-      .where(eq(productAuditLogs.product_id, product1.id))
+      .where(eq(productAuditLogs.product_id, product1.id));
 
-    expect(versions.length).toBe(1) // Only version 1 exists
-    expect(audits.length).toBe(1) // Only CREATE audit exists
-  })
-})
+    expect(versions.length).toBe(1); // Only version 1 exists
+    expect(audits.length).toBe(1); // Only CREATE audit exists
+  });
+});
 ```
 
 **Verdict:** ✅ PASS
@@ -821,22 +813,22 @@ CREATE INDEX IF NOT EXISTS idx_products_slug ON products(slug) (...)
 **Verification Test:**
 
 ```typescript
-it('should handle migration re-run without errors', async () => {
+it("should handle migration re-run without errors", async () => {
   // First run
-  await runMigration('001_initial_products_schema')
+  await runMigration("001_initial_products_schema");
   const tablesAfter1 = await db.queryRaw(
-    "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'products'"
-  )
+    "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'products'",
+  );
 
   // Second run (should not fail)
-  await runMigration('001_initial_products_schema')
+  await runMigration("001_initial_products_schema");
   const tablesAfter2 = await db.queryRaw(
-    "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'products'"
-  )
+    "SELECT COUNT(*) FROM information_schema.tables WHERE table_name = 'products'",
+  );
 
-  expect(tablesAfter1).toBe(1)
-  expect(tablesAfter2).toBe(1) // Table still exists exactly once
-})
+  expect(tablesAfter1).toBe(1);
+  expect(tablesAfter2).toBe(1); // Table still exists exactly once
+});
 ```
 
 **Verdict:** ✅ PASS
@@ -1092,30 +1084,30 @@ From PLAN_REPORT Section 7.1:
 
 ```typescript
 export async function rateLimitMiddleware(config: RateLimitConfig, c: Context) {
-  const userId = c.get('user')?.id
-  const key = `${config.key}:${userId}`
+  const userId = c.get("user")?.id;
+  const key = `${config.key}:${userId}`;
 
-  const current = await redis.incr(key)
+  const current = await redis.incr(key);
   if (current === 1) {
-    await redis.expire(key, config.window)
+    await redis.expire(key, config.window);
   }
 
-  const remaining = Math.max(0, config.limit - current)
+  const remaining = Math.max(0, config.limit - current);
 
-  c.header('X-RateLimit-Limit', config.limit.toString())
-  c.header('X-RateLimit-Remaining', remaining.toString())
+  c.header("X-RateLimit-Limit", config.limit.toString());
+  c.header("X-RateLimit-Remaining", remaining.toString());
 
   if (current > config.limit) {
     return c.json(
       {
         success: false,
         error: {
-          code: 'RATE_LIMIT_EXCEEDED',
+          code: "RATE_LIMIT_EXCEEDED",
           message: `Rate limit exceeded. Max ${config.limit} requests per ${config.window}s`,
         },
       },
-      429
-    )
+      429,
+    );
   }
 }
 ```
@@ -1176,8 +1168,8 @@ export async function rateLimitMiddleware(config: RateLimitConfig, c: Context) {
 **Current Query:**
 
 ```typescript
-;(sql`LOWER(products.name->>'en') LIKE ${searchPattern}`,
-  sql`LOWER(products.name->>'ar') LIKE ${searchPattern}`)
+(sql`LOWER(products.name->>'en') LIKE ${searchPattern}`,
+  sql`LOWER(products.name->>'ar') LIKE ${searchPattern}`);
 ```
 
 **Problem:**

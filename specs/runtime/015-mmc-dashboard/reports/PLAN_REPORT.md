@@ -9,7 +9,8 @@
 
 ## Overview
 
-Comprehensive technical plan generated with 5 core architecture artifacts covering API design, database schema, caching strategy, middleware implementation, and development guide.
+Comprehensive technical plan generated with 5 core architecture artifacts covering API design,
+database schema, caching strategy, middleware implementation, and development guide.
 
 **Guardian Validation Result:** ✅ **PASS** (after auto-remediation)
 
@@ -118,7 +119,7 @@ Developer implementation guide:
 ```typescript
 revenue: z.object({
   this_month: z.string(), // "24500.50"
-})
+});
 ```
 
 **After (Compliant - Integer Cents):**
@@ -126,7 +127,7 @@ revenue: z.object({
 ```typescript
 revenue: z.object({
   this_month: z.number().int(), // 2450050 (cents)
-})
+});
 ```
 
 **Impact:** All 6 endpoints: summary, revenue-breakdown, geographic, affiliates, trends, export
@@ -319,7 +320,8 @@ All plan artifacts meet production standards:
 
 **Ready for:** Step 4 – Tasks (speckit.tasks)
 
-All 5 critical API issues have been auto-fixed and are production-ready. Plan artifacts are complete, verified by guardians, and ready for implementation task generation.
+All 5 critical API issues have been auto-fixed and are production-ready. Plan artifacts are
+complete, verified by guardians, and ready for implementation task generation.
 
 **Pre-Implementation Checklist:**
 

@@ -16,7 +16,8 @@
 
 - **Lines:** 1,300+
 - **Sections:** 14
-- **Data Tables Defined:** 5 (mmc_members, roles, role_permissions, mmc_member_invitations, mmc_audit_log)
+- **Data Tables Defined:** 5 (mmc_members, roles, role_permissions, mmc_member_invitations,
+  mmc_audit_log)
 - **Atomic Operations:** 6
 - **User Flows:** 4
 - **Requirements:** 10 (F1-F10)
@@ -111,12 +112,9 @@
 
 ## Security Boundaries
 
-✅ **No plaintext secrets** in logs
-✅ **Password hashing** enforced (Argon2/bcrypt)
-✅ **Permission enforcement** at API layer (not frontend)
-✅ **Audit logging** for all state changes
-✅ **Token invalidation** cascades
-✅ **JWT isolation** (MMC tokens rejected at tenant API)
+✅ **No plaintext secrets** in logs ✅ **Password hashing** enforced (Argon2/bcrypt) ✅ **Permission
+enforcement** at API layer (not frontend) ✅ **Audit logging** for all state changes ✅ **Token
+invalidation** cascades ✅ **JWT isolation** (MMC tokens rejected at tenant API)
 
 ---
 

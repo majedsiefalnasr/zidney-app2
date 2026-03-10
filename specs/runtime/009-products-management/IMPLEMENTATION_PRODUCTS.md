@@ -153,8 +153,8 @@ CREATE TABLE product_audit_logs (
 async function createProduct(
   client: PoolClient,
   input: CreateProductInput,
-  performedBy: string
-): Promise<Product>
+  performedBy: string,
+): Promise<Product>;
 ```
 
 **Transaction:**
@@ -184,20 +184,20 @@ async function updateProduct(
   client: PoolClient,
   id: string,
   input: UpdateProductInput,
-  performedBy: string
-): Promise<Product>
+  performedBy: string,
+): Promise<Product>;
 ```
 
 **Version Increment Logic:**
 
 ```typescript
-const hasChanges = computeFieldDiff(old, input)
+const hasChanges = computeFieldDiff(old, input);
 if (!hasChanges) {
   // Return without incrementing version
-  return product
+  return product;
 }
 // Increment version and create audit log
-const newVersion = product.current_version + 1
+const newVersion = product.current_version + 1;
 ```
 
 ### 3. changeProductStatus()
@@ -241,13 +241,13 @@ const newVersion = product.current_version + 1
 **Pagination Logic:**
 
 ```typescript
-const limit = Math.min(filters.limit || 20, 100) // Cap at 100
-const offset = filters.offset || 0
+const limit = Math.min(filters.limit || 20, 100); // Cap at 100
+const offset = filters.offset || 0;
 
 // Build WHERE clause
-let where = ''
-if (filters.status === 'ACTIVE' || filters.status === 'INACTIVE') {
-  where += `WHERE status = '${filters.status}'`
+let where = "";
+if (filters.status === "ACTIVE" || filters.status === "INACTIVE") {
+  where += `WHERE status = '${filters.status}'`;
 }
 
 // Execute query
@@ -255,8 +255,8 @@ const results = await client.query(
   `SELECT * FROM products ${where} 
    ORDER BY created_at DESC 
    LIMIT $1 OFFSET $2`,
-  [limit, offset]
-)
+  [limit, offset],
+);
 ```
 
 ### 7. deleteProduct()
@@ -306,7 +306,7 @@ const isValid =
   name.en &&
   name.en.length >= 1 &&
   name.en.length <= 255 &&
-  (!name.ar || (name.ar.length >= 1 && name.ar.length <= 255))
+  (!name.ar || (name.ar.length >= 1 && name.ar.length <= 255));
 ```
 
 ### validateModulesEnum()
@@ -317,18 +317,11 @@ const isValid =
 // - All modules must be valid enum values
 // - No duplicates allowed
 
-const validModules = [
-  'MCQ',
-  'TRADITIONAL_EXAMS',
-  'EXERCISES',
-  'LIBRARY',
-  'LIVES',
-  'FORUM',
-]
+const validModules = ["MCQ", "TRADITIONAL_EXAMS", "EXERCISES", "LIBRARY", "LIVES", "FORUM"];
 const isValid =
   modules.length > 0 &&
   modules.every((m) => validModules.includes(m)) &&
-  new Set(modules).size === modules.length
+  new Set(modules).size === modules.length;
 ```
 
 ### validateSlug()
@@ -341,21 +334,16 @@ const isValid =
 // - No spaces or special chars
 
 const isValid =
-  /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(slug) &&
-  slug.length >= 1 &&
-  slug.length <= 100
+  /^[a-z0-9]([a-z0-9-]*[a-z0-9])?$/.test(slug) && slug.length >= 1 && slug.length <= 100;
 ```
 
 ### validateSlugUniqueness()
 
 ```typescript
-const result = await client.query(
-  'SELECT COUNT(*) as count FROM products WHERE slug = $1',
-  [slug]
-)
-const isDuplicate = result.rows[0].count > 0
+const result = await client.query("SELECT COUNT(*) as count FROM products WHERE slug = $1", [slug]);
+const isDuplicate = result.rows[0].count > 0;
 if (isDuplicate) {
-  throw new AppError(ErrorCodes.DUPLICATE_SLUG, 'Product slug already exists')
+  throw new AppError(ErrorCodes.DUPLICATE_SLUG, "Product slug already exists");
 }
 ```
 
@@ -364,14 +352,11 @@ if (isDuplicate) {
 ```typescript
 // Localization fallback
 // Returns requested language if available, else English
-export function getProductName(
-  product: Product,
-  lang: 'en' | 'ar' = 'en'
-): string {
-  if (lang === 'ar' && product.name.ar) {
-    return product.name.ar
+export function getProductName(product: Product, lang: "en" | "ar" = "en"): string {
+  if (lang === "ar" && product.name.ar) {
+    return product.name.ar;
   }
-  return product.name.en
+  return product.name.en;
 }
 ```
 
@@ -383,20 +368,16 @@ export function getProductName(
 
 ```typescript
 Router.post(
-  '/products',
+  "/products",
   correlationIdMiddleware,
   licenseMiddleware,
   asyncHandler(async (c: Context) => {
-    const body = c.req.json()
-    const validated = CreateProductSchema.parse(body)
-    const product = await productService.createProduct(
-      dbClient,
-      validated,
-      userId
-    )
-    return sendCreated(c, product)
-  })
-)
+    const body = c.req.json();
+    const validated = CreateProductSchema.parse(body);
+    const product = await productService.createProduct(dbClient, validated, userId);
+    return sendCreated(c, product);
+  }),
+);
 ```
 
 **Rate Limit:** 10 req/min
@@ -418,20 +399,15 @@ Router.post(
 ```typescript
 // Important: Version NOT incremented
 Router.patch(
-  '/products/:id/status',
+  "/products/:id/status",
   correlationIdMiddleware,
   licenseMiddleware,
   asyncHandler(async (c: Context) => {
-    const { status } = c.req.json()
-    const product = await productService.changeProductStatus(
-      dbClient,
-      productId,
-      status,
-      userId
-    )
-    return sendSuccess(c, product)
-  })
-)
+    const { status } = c.req.json();
+    const product = await productService.changeProductStatus(dbClient, productId, status, userId);
+    return sendSuccess(c, product);
+  }),
+);
 ```
 
 **Rate Limit:** 20 req/min
@@ -445,20 +421,16 @@ Router.patch(
 ```typescript
 // Additional middleware: auditReadMiddleware
 Router.get(
-  '/products/:id/audit-log',
+  "/products/:id/audit-log",
   correlationIdMiddleware,
   auditReadMiddleware, // Verify AUDIT_READ permission
   licenseMiddleware,
   asyncHandler(async (c: Context) => {
-    const filters = AuditLogQueryFiltersSchema.parse(c.req.query())
-    const logs = await productService.getProductAuditLog(
-      dbClient,
-      productId,
-      filters
-    )
-    return sendList(c, logs.items, logs.total, logs.limit, logs.offset)
-  })
-)
+    const filters = AuditLogQueryFiltersSchema.parse(c.req.query());
+    const logs = await productService.getProductAuditLog(dbClient, productId, filters);
+    return sendList(c, logs.items, logs.total, logs.limit, logs.offset);
+  }),
+);
 ```
 
 **Rate Limit:** 50 req/min
@@ -475,19 +447,19 @@ To add a new module:
 
 ```typescript
 export enum Module {
-  MCQ = 'MCQ',
-  TRADITIONAL_EXAMS = 'TRADITIONAL_EXAMS',
-  EXERCISES = 'EXERCISES',
-  LIBRARY = 'LIBRARY',
-  LIVES = 'LIVES',
-  FORUM = 'FORUM',
-  NEW_MODULE = 'NEW_MODULE', // Add here
+  MCQ = "MCQ",
+  TRADITIONAL_EXAMS = "TRADITIONAL_EXAMS",
+  EXERCISES = "EXERCISES",
+  LIBRARY = "LIBRARY",
+  LIVES = "LIVES",
+  FORUM = "FORUM",
+  NEW_MODULE = "NEW_MODULE", // Add here
 }
 
 export const ModuleLabels: Record<Module, { en: string; ar: string }> = {
   // ... existing
-  [Module.NEW_MODULE]: { en: 'New Module', ar: 'وحدة جديدة' },
-}
+  [Module.NEW_MODULE]: { en: "New Module", ar: "وحدة جديدة" },
+};
 ```
 
 ### 2. Update Validation
@@ -495,10 +467,10 @@ export const ModuleLabels: Record<Module, { en: string; ar: string }> = {
 **File:** `packages/validation/src/products/productValidation.ts`
 
 ```typescript
-const VALID_MODULES = Object.values(Module)
+const VALID_MODULES = Object.values(Module);
 
 export function validateModulesEnum(modules: unknown[]): boolean {
-  return modules.every((m) => VALID_MODULES.includes(m as Module))
+  return modules.every((m) => VALID_MODULES.includes(m as Module));
 }
 ```
 
@@ -535,7 +507,7 @@ const ErrorCodeToStatusMap = {
   WORKSPACE_ARCHIVED: 403,
   VERSION_MISMATCH: 426,
   INTERNAL_SERVER_ERROR: 500,
-}
+};
 ```
 
 ### Throwing Errors
@@ -593,14 +565,14 @@ npm run test -- tests/contract/products
 All operations include correlation ID:
 
 ```typescript
-logger.info('product_created', {
+logger.info("product_created", {
   correlation_id: correlationId,
   workspace_id: workspaceId,
   user_id: userId,
   product_id: product.id,
   product_slug: product.slug,
   duration_ms: Date.now() - startTime,
-})
+});
 ```
 
 ### Metrics

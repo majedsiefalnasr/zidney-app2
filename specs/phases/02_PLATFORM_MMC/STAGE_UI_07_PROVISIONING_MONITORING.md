@@ -35,8 +35,7 @@ This stage provides operational visibility and limited control over:
 - Snapshot status (if applicable)
 - Provisioning queue health
 
-This UI is strictly operational.
-It does NOT execute provisioning logic directly.
+This UI is strictly operational. It does NOT execute provisioning logic directly.
 
 All provisioning state is backend-authoritative.
 
@@ -59,9 +58,7 @@ The Provisioning Monitoring UI must support:
 7. View job duration and timestamps
 8. Display queue health summary
 
-No manual DB operations.
-No forced provisioning state changes.
-No direct tenant DB inspection.
+No manual DB operations. No forced provisioning state changes. No direct tenant DB inspection.
 
 ---
 

@@ -8,7 +8,11 @@
 
 ## Summary
 
-The specification for `INFRA_AUDIT_CHECKLIST` is complete. This is a READ-ONLY audit stage that produces a Gap Report, Risk Classification, and Safe Rollout Plan for the Zidney monorepo's testing toolchain, linting configuration, CI pipeline, Bun runtime compatibility, and documentation coverage. No source code or configuration files may be modified during this stage. The only permitted new artifact is a read-only Bun-compatible audit script at `scripts/infra-audit.ts`.
+The specification for `INFRA_AUDIT_CHECKLIST` is complete. This is a READ-ONLY audit stage that
+produces a Gap Report, Risk Classification, and Safe Rollout Plan for the Zidney monorepo's testing
+toolchain, linting configuration, CI pipeline, Bun runtime compatibility, and documentation
+coverage. No source code or configuration files may be modified during this stage. The only
+permitted new artifact is a read-only Bun-compatible audit script at `scripts/infra-audit.ts`.
 
 ---
 

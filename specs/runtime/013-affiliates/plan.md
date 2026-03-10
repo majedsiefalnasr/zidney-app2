@@ -1,7 +1,8 @@
 # Implementation Plan: Affiliate Program (B2B License Discounts & Commissions)
 
-**Branch**: `013-affiliates` | **Date**: 2026-02-25 | **Spec**: [specs/runtime/013-affiliates/spec.md](spec.md)
-**Input**: Feature specification from `/specs/runtime/013-affiliates/spec.md`
+**Branch**: `013-affiliates` | **Date**: 2026-02-25 | **Spec**:
+[specs/runtime/013-affiliates/spec.md](spec.md) **Input**: Feature specification from
+`/specs/runtime/013-affiliates/spec.md`
 
 **Phase**: 02_PLATFORM_MMC | **Stage**: STAGE_13_AFFILIATES
 
@@ -9,25 +10,37 @@
 
 ## Summary
 
-Implement a master_db-only affiliate system for platform administrators to manage B2B promotional codes for commercial license purchases. The system tracks usage, enforces financial integrity with deterministic calculations, maintains transactional concurrency safety, and provides comprehensive audit logging for revenue reporting. Core deliverables: MMC CRUD APIs for affiliate management, promo code validation hook in license purchase flow, immutable usage audit trail, and admin action tracking.
+Implement a master_db-only affiliate system for platform administrators to manage B2B promotional
+codes for commercial license purchases. The system tracks usage, enforces financial integrity with
+deterministic calculations, maintains transactional concurrency safety, and provides comprehensive
+audit logging for revenue reporting. Core deliverables: MMC CRUD APIs for affiliate management,
+promo code validation hook in license purchase flow, immutable usage audit trail, and admin action
+tracking.
 
 ---
 
 ## Technical Context
 
 **Language/Version**: TypeScript (Node.js) + Bun runtime  
-**Primary Dependencies**: Hono (web framework), PostgreSQL (via node-pg), Drizzle ORM, Zod (validation), Pino (structured logging), Redis (for user session state and rate limiting)  
-**Storage**: PostgreSQL master_db (new tables: `affiliates`, `affiliate_usages`, `affiliate_admin_audit`)  
+**Primary Dependencies**: Hono (web framework), PostgreSQL (via node-pg), Drizzle ORM, Zod
+(validation), Pino (structured logging), Redis (for user session state and rate limiting)  
+**Storage**: PostgreSQL master_db (new tables: `affiliates`, `affiliate_usages`,
+`affiliate_admin_audit`)  
 **Testing**: Vitest (unit + integration tests), Playwright (e2e if MMC UI testing included)  
 **Target Platform**: Backend API server (Bun + Hono)  
 **Project Type**: Web service (B2B SaaS platform component)  
-**Performance Goals**: Sub-200ms p95 for affiliate validation during license purchase; no performance regression on existing license flow  
-**Constraints**: Transactional integrity with row-level locking; deterministic NUMERIC(12,2) financial calculations; no floating-point math; no tenant database changes; master_db schema version bump required  
-**Scale/Scope**: B2B commercial licensing system; supports unlimited affiliate codes; supports per-client usage limits; audit trail immutable and append-only
+**Performance Goals**: Sub-200ms p95 for affiliate validation during license purchase; no
+performance regression on existing license flow  
+**Constraints**: Transactional integrity with row-level locking; deterministic NUMERIC(12,2)
+financial calculations; no floating-point math; no tenant database changes; master_db schema version
+bump required  
+**Scale/Scope**: B2B commercial licensing system; supports unlimited affiliate codes; supports
+per-client usage limits; audit trail immutable and append-only
 
 ## Constitution Check
 
-**GATE: All checks PASS. Feature is architecturally compliant. Re-check after Phase 1 design: PASS.**
+**GATE: All checks PASS. Feature is architecturally compliant. Re-check after Phase 1 design:
+PASS.**
 
 | Principle                             | Status | Notes                                                                                                                                                                                                                          |
 | ------------------------------------- | ------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
@@ -44,7 +57,8 @@ Implement a master_db-only affiliate system for platform administrators to manag
 | **Operational Integrity**             | ✓ PASS | All mutations within transactional boundary. Affiliate CRUD is idempotent (unique constraint on promo_code, status-based soft delete). Usage tracking append-only. Admin actions logged separately. Audit trail comprehensive. |
 | **Error Handling**                    | ✓ PASS | All errors follow Zidney error standard (success/data/error JSON). Specific error codes for affiliate validations (AFFILIATE_CODE_NOT_FOUND, AFFILIATE_CODE_EXPIRED, etc.). Structured error responses.                        |
 
-**No Violations Detected**: Affiliate system adheres strictly to Constitution v1.2.0 across all 9 core principles.
+**No Violations Detected**: Affiliate system adheres strictly to Constitution v1.2.0 across all 9
+core principles.
 
 ---
 
@@ -131,7 +145,8 @@ Implement a master_db-only affiliate system for platform administrators to manag
 
 ### 4. Concurrency & Transactional Safety
 
-**Challenge**: Multiple concurrent license purchases with same affiliate code → race condition on usage_count.
+**Challenge**: Multiple concurrent license purchases with same affiliate code → race condition on
+usage_count.
 
 **Solution: Pessimistic Locking**:
 
@@ -143,7 +158,8 @@ Implement a master_db-only affiliate system for platform administrators to manag
 
 **Per-Client Limit Atomicity**:
 
-- `SELECT COUNT(*) FROM affiliate_usages WHERE affiliate_id = $1 AND client_id = $2` within transaction
+- `SELECT COUNT(*) FROM affiliate_usages WHERE affiliate_id = $1 AND client_id = $2` within
+  transaction
 - Count compared against `usage_limit_per_client` within same locked transaction
 - No stale counts possible
 
@@ -273,7 +289,8 @@ POST /v1/mmc/affiliates:
 - `affiliate_updated` - Fields modified (old_values, new_values logged as JSONB)
 - `affiliate_disabled` - Status changed to INACTIVE
 - `affiliate_code_applied` - Code successfully validated and used
-- `affiliate_code_rejected` - Code validation failed (reason: EXPIRED, INACTIVE, LIMIT_EXCEEDED, etc)
+- `affiliate_code_rejected` - Code validation failed (reason: EXPIRED, INACTIVE, LIMIT_EXCEEDED,
+  etc)
 - `affiliate_usage_limit_check_failed` - Admin attempted operation on limit fields
 
 **Compliance**: All logs include correlation_id for request tracing and audit trail reconstruction.
@@ -350,7 +367,9 @@ tests/
 
 ## Complexity Tracking
 
-**Justification**: No Constitution violations. All gates pass. Feature is architecturally sound and isolated within master_db. Concurrency handled via pessimistic locking. Financial precision via NUMERIC.
+**Justification**: No Constitution violations. All gates pass. Feature is architecturally sound and
+isolated within master_db. Concurrency handled via pessimistic locking. Financial precision via
+NUMERIC.
 
 **Implementation Complexity**: MODERATE
 
@@ -379,7 +398,8 @@ Implementation details:
   5. Check `exp` timestamp (reject if expired)
   6. Extract and return `admin_id` from `sub` claim + `scope`
   7. Throw AuthenticationError(401, "INVALID_TOKEN") on any failure
-- Middleware chain: Express middleware that calls validateMMCToken() and attaches admin_id to req.user
+- Middleware chain: Express middleware that calls validateMMCToken() and attaches admin_id to
+  req.user
 - Rejection response: HTTP 401 with error code `UNAUTHORIZED`
 
 Integration:
@@ -443,7 +463,8 @@ Integration:
 
 **Policy**:
 
-1. **Promo Codes**: Do NOT log full code in audit_trail. Log hash prefix only (first 3 chars + "\*").
+1. **Promo Codes**: Do NOT log full code in audit_trail. Log hash prefix only (first 3 chars +
+   "\*").
    - Example: Code "SPRING25" logs as "SPR\*"
    - Rationale: Prevents information leakage if logs are exposed; still useful for forensic tracing
 2. **JWT Tokens**: Do NOT log full token. Log token_id (sub claim) + expiry time only.

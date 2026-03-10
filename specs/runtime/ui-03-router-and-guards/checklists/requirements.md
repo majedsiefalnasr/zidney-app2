@@ -1,9 +1,7 @@
 # Specification Quality Checklist: Router & Access Guard Architecture
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-03-02
-**Stage**: STAGE_UI_03_ROUTER_AND_GUARDS
-**Feature**: [spec.md](../spec.md)
+**Created**: 2026-03-02 **Stage**: STAGE_UI_03_ROUTER_AND_GUARDS **Feature**: [spec.md](../spec.md)
 **Checklist Version**: 1.0
 
 ---
@@ -92,9 +90,11 @@
 
 - [x] Guard unit test requirements documented (Testability Contract section)
 - [x] Test file location convention defined
-- [x] All required test scenarios listed per guard (AuthGuard: 7 scenarios, WorkspaceGuard: 4 scenarios, RoleGuard: 5 scenarios)
+- [x] All required test scenarios listed per guard (AuthGuard: 7 scenarios, WorkspaceGuard: 4
+      scenarios, RoleGuard: 5 scenarios)
 - [x] Router integration test requirements listed
-- [x] Test infrastructure requirements specified (fresh router per test, injectable mocks, Pinia test isolation)
+- [x] Test infrastructure requirements specified (fresh router per test, injectable mocks, Pinia
+      test isolation)
 - [x] `createAppRouter()` factory pattern mandated for testability (FR-01.1, AC10.1)
 - [x] Guards are injectable (no direct store imports inside factory) — AC10.3
 
@@ -154,7 +154,15 @@
 
 ## Notes
 
-- The most significant hidden complexity in this stage is the **Backoffice STAGE_17 migration**. The existing `apps/backoffice/src/router/index.ts` embeds a license-check guard (`isActive`) which is a constitutional violation. FR-10 specifies its removal. The planner must account for this as a refactoring task with regression risk.
-- The **RouteMeta schema migration** (from `guestOnly`/`requiredRole` to `public`/`roles[]`) affects existing routes in MMC and Frontoffice. These are low-risk but must be tracked as explicit migration tasks.
-- The **`FeatureFlagGuard` stub** is intentionally a no-op. Its sole purpose is to hold pipeline position 4 for a future stage. The planner should create a simple stub task, not a full implementation task.
-- No clarifications were needed — all ambiguities were resolved by reading the stage file, existing router code, and AGENTS.md constitutional constraints.
+- The most significant hidden complexity in this stage is the **Backoffice STAGE_17 migration**. The
+  existing `apps/backoffice/src/router/index.ts` embeds a license-check guard (`isActive`) which is
+  a constitutional violation. FR-10 specifies its removal. The planner must account for this as a
+  refactoring task with regression risk.
+- The **RouteMeta schema migration** (from `guestOnly`/`requiredRole` to `public`/`roles[]`) affects
+  existing routes in MMC and Frontoffice. These are low-risk but must be tracked as explicit
+  migration tasks.
+- The **`FeatureFlagGuard` stub** is intentionally a no-op. Its sole purpose is to hold pipeline
+  position 4 for a future stage. The planner should create a simple stub task, not a full
+  implementation task.
+- No clarifications were needed — all ambiguities were resolved by reading the stage file, existing
+  router code, and AGENTS.md constitutional constraints.

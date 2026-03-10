@@ -166,15 +166,15 @@ Reference: [clarify.md](./clarify.md)
 ✅ **Correct Pattern:**
 
 ```typescript
-const tenantDb = c.get('tenant_db') // From middleware
-const user = await tenantDb.select().from(users).where(eq(users.email, email))
+const tenantDb = c.get("tenant_db"); // From middleware
+const user = await tenantDb.select().from(users).where(eq(users.email, email));
 ```
 
 ❌ **Forbidden Pattern:**
 
 ```typescript
-const db = new Database(CONNECTION_URL) // Direct instantiation
-const pool = getGlobalPool() // Global singleton
+const db = new Database(CONNECTION_URL); // Direct instantiation
+const pool = getGlobalPool(); // Global singleton
 ```
 
 **Enforcement:** Router composition prevents bypass (middleware required)

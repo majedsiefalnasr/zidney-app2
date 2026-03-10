@@ -1,11 +1,9 @@
 # Plan Report — Hybrid Lint Format Pipeline
 
-**Stage:** STAGE_INFRA_10_HYBRID_LINT_FORMAT_PIPELINE
-**Phase:** 01_PLATFORM_FOUNDATION
-**Branch:** `spec/infra-010-hybrid-lint-format-pipeline`
-**Step:** 3 — Plan
-**Generated:** 2026-03-10T00:00:00.000Z
-**Guardian Verdict:** ✅ PASS (Architecture Checker) | ✅ PASS (API Designer — N/A, infra-only stage)
+**Stage:** STAGE_INFRA_10_HYBRID_LINT_FORMAT_PIPELINE **Phase:** 01_PLATFORM_FOUNDATION **Branch:**
+`spec/infra-010-hybrid-lint-format-pipeline` **Step:** 3 — Plan **Generated:**
+2026-03-10T00:00:00.000Z **Guardian Verdict:** ✅ PASS (Architecture Checker) | ✅ PASS (API
+Designer — N/A, infra-only stage)
 
 ---
 
@@ -13,7 +11,8 @@
 
 ### What This Stage Does
 
-An **additive-only** infrastructure update that extends the existing lint/format pipeline to cover Markdown, YAML, and GitHub Actions workflow files. No existing functionality is removed or replaced.
+An **additive-only** infrastructure update that extends the existing lint/format pipeline to cover
+Markdown, YAML, and GitHub Actions workflow files. No existing functionality is removed or replaced.
 
 ### Files Created (4)
 
@@ -49,19 +48,23 @@ Canonical ESM config file, not inline in `package.json`. Already in use.
 
 ### 2. Single `bun biome check --write` Command
 
-Covers format + lint + import organization atomically. Two-command form leaves auto-fixable lint unremediated.
+Covers format + lint + import organization atomically. Two-command form leaves auto-fixable lint
+unremediated.
 
 ### 3. prettier Scoped to `*.md` Only
 
-`.prettierignore` enforces the no-overlap rule — Biome manages all code files. A comment in the config declares: `// Prettier: md ONLY - TS/JS/Vue handled exclusively by Biome.`
+`.prettierignore` enforces the no-overlap rule — Biome manages all code files. A comment in the
+config declares: `// Prettier: md ONLY - TS/JS/Vue handled exclusively by Biome.`
 
 ### 4. actionlint Graceful Fallback
 
-Pre-push hook uses `command -v actionlint || { echo "⚠️  actionlint not installed..."; exit 0; }` to avoid blocking pushes on machines without actionlint. Installation documented in TESTING_GUIDE.
+Pre-push hook uses `command -v actionlint || { echo "⚠️  actionlint not installed..."; exit 0; }` to
+avoid blocking pushes on machines without actionlint. Installation documented in TESTING_GUIDE.
 
 ### 5. yamllint as System Tool
 
-Not an npm package. Requires `brew install yamllint` or OS equivalent. Graceful skip on missing binary.
+Not an npm package. Requires `brew install yamllint` or OS equivalent. Graceful skip on missing
+binary.
 
 ---
 
@@ -76,7 +79,8 @@ Not an npm package. Requires `brew install yamllint` or OS equivalent. Graceful 
 
 ### API Designer
 
-N/A — This is an infrastructure-only stage. No API endpoints, routes, or HTTP contracts are involved.
+N/A — This is an infrastructure-only stage. No API endpoints, routes, or HTTP contracts are
+involved.
 
 ---
 

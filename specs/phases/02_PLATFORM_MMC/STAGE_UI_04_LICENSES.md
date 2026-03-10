@@ -35,8 +35,7 @@ This stage provides the operational UI for:
 - Observing schema/product version compatibility
 - Viewing audit trail (read-only)
 
-This stage strictly consumes backend APIs.
-No business logic is implemented in the UI.
+This stage strictly consumes backend APIs. No business logic is implemented in the UI.
 
 ---
 
@@ -287,9 +286,7 @@ LicenseAuditTimeline must:
 - Show actor
 - Show metadata summary
 
-No editing.
-No deletion.
-Read-only display.
+No editing. No deletion. Read-only display.
 
 ---
 

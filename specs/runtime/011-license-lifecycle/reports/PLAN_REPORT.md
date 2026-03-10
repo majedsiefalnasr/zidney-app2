@@ -8,7 +8,11 @@
 
 ## Summary
 
-Comprehensive technical implementation plan generated across five phases: research (existing infrastructure), data model (schema blueprint with migrations), contracts (License Service methods, Worker jobs, API endpoints, Tenant Resolver middleware), quickstart guide (developer scenarios), and detailed plan document. All design decisions explicitly tied to locked clarifications. Plan estimates 5-week implementation timeline with 4-phase concurrent deployment strategy.
+Comprehensive technical implementation plan generated across five phases: research (existing
+infrastructure), data model (schema blueprint with migrations), contracts (License Service methods,
+Worker jobs, API endpoints, Tenant Resolver middleware), quickstart guide (developer scenarios), and
+detailed plan document. All design decisions explicitly tied to locked clarifications. Plan
+estimates 5-week implementation timeline with 4-phase concurrent deployment strategy.
 
 ---
 
@@ -233,14 +237,17 @@ elif license.status == 'DELETED':
 - `metadata` (JSONB) — Additional context (snapshot_id, old_snapshot_id, etc.)
 - `timestamp` (TIMESTAMP) — Server-generated (UTC)
 
-**Purge Policy:** No auto-delete; admin (with 2FA) can manually purge old entries by license_id (adds audit entry for purge itself).
+**Purge Policy:** No auto-delete; admin (with 2FA) can manually purge old entries by license_id
+(adds audit entry for purge itself).
 
 ---
 
 ## MMC UI Components (New)
 
-- **License Detail Page** — Status badge, soft-lock countdown (live), snapshots list, audit trail paginated
-- **License List** — Filter by status (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED), sort by soft_lock_until
+- **License Detail Page** — Status badge, soft-lock countdown (live), snapshots list, audit trail
+  paginated
+- **License List** — Filter by status (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED), sort by
+  soft_lock_until
 - **Deletion Dialog** — Input confirmation phrase, 2FA re-prompt, irreversible warning
 - **Snapshot Restore Dialog** — Schema version compatibility check, restore job monitor with ETA
 - **Job Status Monitor** — Visual progress for async restore/deletion (polling or WebSocket)
@@ -263,12 +270,12 @@ elif license.status == 'DELETED':
 
 ## Deployment Strategy (4 Phases)
 
-**Phase 1: Databases** — Run migrations A001–A005 in staging
-**Phase 2: Backend** — Deploy License Service + Worker jobs
-**Phase 3: Middleware** — Activate License Enforcement Middleware (enhance for auto-expiry)
-**Phase 4: UI** — Deploy MMC UI components + monitoring
+**Phase 1: Databases** — Run migrations A001–A005 in staging **Phase 2: Backend** — Deploy License
+Service + Worker jobs **Phase 3: Middleware** — Activate License Enforcement Middleware (enhance for
+auto-expiry) **Phase 4: UI** — Deploy MMC UI components + monitoring
 
-**Rollback Plan:** Each phase is independently reversible up to Phase 4. Phase 3 (middleware) blocks all SOFT_LOCKED and ARCHIVED requests; if needed, revert to previous middleware code.
+**Rollback Plan:** Each phase is independently reversible up to Phase 4. Phase 3 (middleware) blocks
+all SOFT_LOCKED and ARCHIVED requests; if needed, revert to previous middleware code.
 
 ---
 
@@ -295,7 +302,8 @@ elif license.status == 'DELETED':
 - **Week 4** — MMC UI components + integration testing
 - **Week 5** — Load tests, security tests, deployment prep + staging UAT
 
-**Prerequisite**: Ensure STAGE 10 (Licenses Management) is PRODUCTION READY (already done: 010-licenses-management merged)
+**Prerequisite**: Ensure STAGE 10 (Licenses Management) is PRODUCTION READY (already done:
+010-licenses-management merged)
 
 ---
 
@@ -323,4 +331,5 @@ Both must return `VERDICT: PASS`. If any returns `BLOCKED` → fix and re-valida
 
 ## Next Step
 
-Proceed to Step 3A: Guardian Plan Validation (Architecture Checker + API Designer). Upon dual PASS verdicts, proceed to Step 4 — Tasks.
+Proceed to Step 3A: Guardian Plan Validation (Architecture Checker + API Designer). Upon dual PASS
+verdicts, proceed to Step 4 — Tasks.

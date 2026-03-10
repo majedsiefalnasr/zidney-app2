@@ -61,8 +61,10 @@ COMMIT;
 
 **Impact**:
 
-- **If rolled back**: Client must implement retry logic; risk of submission storms if client keeps retrying
-- **If committed without job**: Attempt is stranded in SUBMITTED state forever; student never gets result
+- **If rolled back**: Client must implement retry logic; risk of submission storms if client keeps
+  retrying
+- **If committed without job**: Attempt is stranded in SUBMITTED state forever; student never gets
+  result
 - **If deferred async** (hybrid): Need separate mechanism to handle enqueue failures
 
 **Context for Answer**:
@@ -114,9 +116,12 @@ Idempotency techniques used:
 
 **Questions NOT answered**:
 
-- For submission idempotency: How long should a duplicate submission be treated as a "retry" vs a new submission?
-  - If student submits at 09:00, then submits again at 09:01 → Is it idempotent (return cached result)?
-  - If student submits at 09:00, then submits again at 14:00 → Is it a new submission or still idempotent?
+- For submission idempotency: How long should a duplicate submission be treated as a "retry" vs a
+  new submission?
+  - If student submits at 09:00, then submits again at 09:01 → Is it idempotent (return cached
+    result)?
+  - If student submits at 09:00, then submits again at 14:00 → Is it a new submission or still
+    idempotent?
 - Where is idempotency state stored for submission?
   - Database table `submission_idempotency_keys`?
   - Redis cache with TTL?
@@ -156,7 +161,8 @@ But doesn't specify where "cached result" is stored or for how long.
 
 ### Q3: Concurrency Lock Strategy & Lock Contention Handling
 
-**Topic**: Should we use pessimistic locking (FOR UPDATE) or optimistic locking with version fields  
+**Topic**: Should we use pessimistic locking (FOR UPDATE) or optimistic locking with version
+fields  
 **Section Affected**: Transaction Boundaries → Atomic Operations; Idempotency & Safety Guarantee  
 **Coverage**: Non-Functional Quality Attributes → Performance, Scalability, Reliability
 
@@ -182,7 +188,8 @@ FOR UPDATE;  -- LOCK ROW
 - Should we use optimistic locking instead (MVCC with version field + retry loop)?
   - Pros: No lock waits; scales better under contention
   - Cons: Client must implement retry loop; more complex
-- Deadlock risk: If two workers try to grade same attempt AND grab another resource, could we deadlock?
+- Deadlock risk: If two workers try to grade same attempt AND grab another resource, could we
+  deadlock?
 
 **Impact**:
 
@@ -220,8 +227,10 @@ This assumes deadlocks can happen, but spec doesn't define lock acquisition time
 
 ### Q4: Product/Schema Version Compatibility Enforcement Timing
 
-**Topic**: When should version checks occur (attempt start, submission, grading) and what's the upgrade semantics  
-**Section Affected**: License & Version Enforcement; Failure Modes & Recovery → Version Mismatch During Grading  
+**Topic**: When should version checks occur (attempt start, submission, grading) and what's the
+upgrade semantics  
+**Section Affected**: License & Version Enforcement; Failure Modes & Recovery → Version Mismatch
+During Grading  
 **Coverage**: Constraints & Tradeoffs, Integration & External Dependencies
 
 **Ambiguity**:
@@ -251,7 +260,8 @@ The spec mentions version checks at multiple points:
 **Impact**:
 
 - **If upgrade blocks submission**: Students cannot submit during upgrade windows; downtime
-- **If upgrade allows submission but fails at grading**: Confusing UX; student thinks submission succeeded, then gets error
+- **If upgrade allows submission but fails at grading**: Confusing UX; student thinks submission
+  succeeded, then gets error
 - **If recompute using old logic**: Risky; logic changes might not be version-aware
 - **If exact match required**: Blocks feature rollouts during answer collection window
 
@@ -290,7 +300,8 @@ Not explicit: What if expected_schema_version > current_schema_version (downgrad
 
 ### Q5: License State Transition Semantics During In-Flight Attempts
 
-**Topic**: What happens to IN_PROGRESS attempts when license transitions to SOFT_LOCKED or ARCHIVED  
+**Topic**: What happens to IN_PROGRESS attempts when license transitions to SOFT_LOCKED or
+ARCHIVED  
 **Section Affected**: License Enforcement; Failure Modes & Recovery  
 **Coverage**: Functional Scope & Behavior, Compliance / Regulatory Constraints
 
@@ -310,7 +321,8 @@ The spec states (lines 169-179):
 
 **Questions NOT answered**:
 
-- For SOFT_LOCKED state: Does "No (423)" mean block submission, or block submission AND block further progress updates?
+- For SOFT_LOCKED state: Does "No (423)" mean block submission, or block submission AND block
+  further progress updates?
   - Can student still update answers while license is SOFT_LOCKED?
   - Or is license check enforced for ALL workspace-bound routes (including answer updates)?
 - If license becomes SOFT_LOCKED after student has answered 5 questions and before submission:
@@ -496,7 +508,8 @@ _(These sections will be updated as answers are recorded)_
 - 3 retries with exponential backoff balances resilience and system stability
 - After max retries, move to DLQ/manual recovery to prevent silent corruption
 
-**Implementation:** Enqueue failure → retry with exponential backoff; after max retries → DLQ with manual recovery flag
+**Implementation:** Enqueue failure → retry with exponential backoff; after max retries → DLQ with
+manual recovery flag
 
 ---
 
@@ -508,7 +521,8 @@ _(These sections will be updated as answers are recorded)_
 
 **Scope:** Per-workspace (tenant-scoped)
 
-**Implementation:** UNIQUE constraint on (attempt_id, submission_sequence); Redis fast-path; DB fallback prevents duplicate grading
+**Implementation:** UNIQUE constraint on (attempt_id, submission_sequence); Redis fast-path; DB
+fallback prevents duplicate grading
 
 ---
 
@@ -534,7 +548,8 @@ _(These sections will be updated as answers are recorded)_
 
 **Upgrade During Active Exam:** No
 
-**Implementation:** Snapshot versions at creation; validate at submission; worker validates at grading
+**Implementation:** Snapshot versions at creation; validate at submission; worker validates at
+grading
 
 ---
 
@@ -546,7 +561,8 @@ _(These sections will be updated as answers are recorded)_
 
 **ARCHIVED During Active Exam:** Continue submission, block new attempts
 
-**Implementation:** License transitions do NOT cancel in-flight attempts; new attempts require ACTIVE license
+**Implementation:** License transitions do NOT cancel in-flight attempts; new attempts require
+ACTIVE license
 
 ---
 

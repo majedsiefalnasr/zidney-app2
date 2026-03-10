@@ -1,8 +1,10 @@
 # Definition of Done
 
-This document defines the mandatory completion criteria for any feature, module, or system change in Zidney.
+This document defines the mandatory completion criteria for any feature, module, or system change in
+Zidney.
 
-No feature may be merged, deployed, or considered complete unless all conditions below are satisfied.
+No feature may be merged, deployed, or considered complete unless all conditions below are
+satisfied.
 
 ---
 

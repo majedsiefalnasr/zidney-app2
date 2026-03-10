@@ -8,7 +8,10 @@
 
 ## Summary
 
-All mandatory validation checks passed. Unit tests 41/41, integration tests 16/16, ESLint 0 errors on workflow files, TypeScript 0 new errors introduced. Pre-existing typecheck errors (12 — `@zidney/api-client` unresolved modules in backoffice/frontoffice/mmc) are confirmed pre-existing on the `develop` base branch and unrelated to this stage.
+All mandatory validation checks passed. Unit tests 41/41, integration tests 16/16, ESLint 0 errors
+on workflow files, TypeScript 0 new errors introduced. Pre-existing typecheck errors (12 —
+`@zidney/api-client` unresolved modules in backoffice/frontoffice/mmc) are confirmed pre-existing on
+the `develop` base branch and unrelated to this stage.
 
 ---
 
@@ -85,7 +88,8 @@ $ npx eslint \
 EXIT_CODE: 0
 ```
 
-Note: `bun run lint` (full project) reports 102 pre-existing errors across the codebase. The workflow-specific ESLint check exits with code 0 — zero errors in workflow files.
+Note: `bun run lint` (full project) reports 102 pre-existing errors across the codebase. The
+workflow-specific ESLint check exits with code 0 — zero errors in workflow files.
 
 ### Type Check
 

@@ -1,10 +1,7 @@
 # Implementation Plan: Hybrid Lint Format Pipeline
 
-**Phase:** 01_PLATFORM_FOUNDATION
-**Stage:** STAGE_INFRA_10_HYBRID_LINT_FORMAT_PIPELINE
-**Spec:** [spec.md](./spec.md)
-**Branch:** `spec/infra-010-hybrid-lint-format-pipeline`
-**Date:** 2026-03-10
+**Phase:** 01_PLATFORM_FOUNDATION **Stage:** STAGE_INFRA_10_HYBRID_LINT_FORMAT_PIPELINE **Spec:**
+[spec.md](./spec.md) **Branch:** `spec/infra-010-hybrid-lint-format-pipeline` **Date:** 2026-03-10
 **Status:** READY FOR IMPLEMENTATION
 
 ---
@@ -123,8 +120,8 @@ No database changes. No migrations. No schema changes.
 ```js
 /** @type {import('lint-staged').Config} */
 export default {
-  '*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --write'],
-}
+  "*.{ts,tsx,js,jsx,mjs,vue,json}": ["bun biome check --write"],
+};
 ```
 
 **New content:**
@@ -132,21 +129,25 @@ export default {
 ```js
 /** @type {import('lint-staged').Config} */
 export default {
-  '*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --write'],
-  '*.md': ['prettier --write'],
-  '*.{yml,yaml}': ['yamllint'],
-  '.github/workflows/*.yml': ['actionlint'],
-}
+  "*.{ts,tsx,js,jsx,mjs,vue,json}": ["bun biome check --write"],
+  "*.md": ["prettier --write"],
+  "*.{yml,yaml}": ["yamllint"],
+  ".github/workflows/*.yml": ["actionlint"],
+};
 ```
 
 **Design decisions:**
 
-- `prettier --write` (not `bunx prettier --write`) — prettier will be in `node_modules/.bin/` once installed; lint-staged resolves local binaries automatically.
+- `prettier --write` (not `bunx prettier --write`) — prettier will be in `node_modules/.bin/` once
+  installed; lint-staged resolves local binaries automatically.
 - `yamllint` invoked without flags — relies on `.yamllint` config file at repo root.
-- `actionlint` invoked without flags — processes files passed by lint-staged as positional arguments.
+- `actionlint` invoked without flags — processes files passed by lint-staged as positional
+  arguments.
 - No entry added for `*.mdx` — out of scope; not a file type in this repo.
 
-**Glob ordering:** lint-staged processes patterns from top to bottom. A GitHub workflow `.yml` file stages both the `*.{yml,yaml}` entry (yamllint) AND the `.github/workflows/*.yml` entry (actionlint) — this additive behavior is intended per spec Formatting Responsibility Matrix.
+**Glob ordering:** lint-staged processes patterns from top to bottom. A GitHub workflow `.yml` file
+stages both the `*.{yml,yaml}` entry (yamllint) AND the `.github/workflows/*.yml` entry (actionlint)
+— this additive behavior is intended per spec Formatting Responsibility Matrix.
 
 ---
 
@@ -160,7 +161,9 @@ export default {
 +   "prettier": "^3.0.0",
 ```
 
-**Exact version:** Use `"prettier": "^3.0.0"` (Prettier v3 is the stable LTS with ESM support and async API — compatible with Bun). Pin to major version `^3` to stay current within the Prettier 3.x line.
+**Exact version:** Use `"prettier": "^3.0.0"` (Prettier v3 is the stable LTS with ESM support and
+async API — compatible with Bun). Pin to major version `^3` to stay current within the Prettier 3.x
+line.
 
 **New scripts:**
 
@@ -174,8 +177,10 @@ export default {
 
 **Why these script names:**
 
-- `format:check:md` — follows the existing `format:check` naming pattern; scoped suffix `:md` signals markdown-only.
-- `validate:yaml` — `validate:` prefix distinguishes validation-only tools from format tools; yamllint does not auto-fix.
+- `format:check:md` — follows the existing `format:check` naming pattern; scoped suffix `:md`
+  signals markdown-only.
+- `validate:yaml` — `validate:` prefix distinguishes validation-only tools from format tools;
+  yamllint does not auto-fix.
 - `validate:workflows` — mirrors yamllint convention; actionlint is also validation-only.
 
 ---
@@ -210,10 +215,14 @@ fi
 
 **Design decisions:**
 
-- Full-repository scan (not filtered to changed files) — satisfies FR-04 acceptance criterion: "reports no errors on all existing workflow files."
-- Graceful skip if `.github/workflows/` has no `.yml` files — prevents failure on branches without workflows.
-- Blocking (`exit 1`) — consistent with pre-push philosophy (architecture guard, brain validation also block).
-- Placed after `infra-audit.ts --quick` and before unit tests — maintains the ordering: governance → tooling validation → test suite.
+- Full-repository scan (not filtered to changed files) — satisfies FR-04 acceptance criterion:
+  "reports no errors on all existing workflow files."
+- Graceful skip if `.github/workflows/` has no `.yml` files — prevents failure on branches without
+  workflows.
+- Blocking (`exit 1`) — consistent with pre-push philosophy (architecture guard, brain validation
+  also block).
+- Placed after `infra-audit.ts --quick` and before unit tests — maintains the ordering: governance →
+  tooling validation → test suite.
 
 ---
 
@@ -240,9 +249,12 @@ fi
 **Design decisions:**
 
 - `printWidth: 100` — matches Biome's `lineWidth: 100` for visual consistency across file types.
-- `proseWrap: "always"` — re-wraps Markdown paragraphs at 100 characters for consistent ADR/spec formatting.
-- Only `*.md` override specified in `overrides` — functional scope restriction declared in `.prettierignore`.
-- No TypeScript/JavaScript options in `.prettierrc` — irrelevant because `.prettierignore` blocks those files.
+- `proseWrap: "always"` — re-wraps Markdown paragraphs at 100 characters for consistent ADR/spec
+  formatting.
+- Only `*.md` override specified in `overrides` — functional scope restriction declared in
+  `.prettierignore`.
+- No TypeScript/JavaScript options in `.prettierrc` — irrelevant because `.prettierignore` blocks
+  those files.
 
 ---
 
@@ -270,7 +282,8 @@ docs/ai/context/
 
 **Design decisions:**
 
-- Explicit glob exclusion of every Biome-managed file type — enforces FR-02 (Prettier scoped to Markdown only) and AI-02 rule.
+- Explicit glob exclusion of every Biome-managed file type — enforces FR-02 (Prettier scoped to
+  Markdown only) and AI-02 rule.
 - `docs/ai/context/` excluded — machine-generated JSON files; not human-authored markdown.
 
 ---
@@ -294,16 +307,20 @@ rules:
   document-start:
     level: warning
   truthy:
-    allowed-values: ['true', 'false', 'on', 'off', 'yes', 'no']
+    allowed-values: ["true", "false", "on", "off", "yes", "no"]
     check-keys: false
 ```
 
 **Design decisions:**
 
-- `extends: default` — uses yamllint recommended ruleset as baseline (consistent with NFR-03 single config location).
-- `line-length: 120 warning` — slightly longer than Biome/Prettier's 100 to accommodate YAML's inherently verbose syntax (GitHub Actions steps, Docker Compose mappings).
-- `document-start: warning` — many YAML files in the repo omit `---`; treat as warning until codebase is migrated.
-- `truthy.check-keys: false` — GitHub Actions `on:` key would otherwise trigger a truthy false-positive.
+- `extends: default` — uses yamllint recommended ruleset as baseline (consistent with NFR-03 single
+  config location).
+- `line-length: 120 warning` — slightly longer than Biome/Prettier's 100 to accommodate YAML's
+  inherently verbose syntax (GitHub Actions steps, Docker Compose mappings).
+- `document-start: warning` — many YAML files in the repo omit `---`; treat as warning until
+  codebase is migrated.
+- `truthy.check-keys: false` — GitHub Actions `on:` key would otherwise trigger a truthy
+  false-positive.
 
 ---
 
@@ -311,7 +328,8 @@ rules:
 
 #### Unit Tests — `tests/unit/lint-staged/lint-staged-config.test.ts`
 
-Tests verify the structural correctness of lint-staged configuration without executing the toolchain binaries.
+Tests verify the structural correctness of lint-staged configuration without executing the toolchain
+binaries.
 
 **Test cases:**
 
@@ -351,7 +369,9 @@ Tests verify the structural correctness of lint-staged configuration without exe
 
 #### Integration Tests — `tests/integration/lint-staged/pre-commit-pipeline.test.ts`
 
-> ⚠️ Integration tests for hook execution require a controlled Git environment. These tests use a temp Git repo to isolate from the actual repository state. They are informational and do not run in CI as part of the standard lint-check suite.
+> ⚠️ Integration tests for hook execution require a controlled Git environment. These tests use a
+> temp Git repo to isolate from the actual repository state. They are informational and do not run
+> in CI as part of the standard lint-check suite.
 
 **Test cases:**
 
@@ -379,7 +399,8 @@ Tests verify the structural correctness of lint-staged configuration without exe
 
 #### Performance Tests
 
-> Note: Performance targets are defined in NFR-01. These are measured manually during implementation validation, not as automated vitest tests.
+> Note: Performance targets are defined in NFR-01. These are measured manually during implementation
+> validation, not as automated vitest tests.
 
 | Scenario                               | Target  | Measurement Method                          |
 | -------------------------------------- | ------- | ------------------------------------------- |
@@ -390,7 +411,10 @@ Tests verify the structural correctness of lint-staged configuration without exe
 
 ### System Tool Documentation
 
-**Approach:** Add installation instructions to `apps/api/AGENTS.md` (developer env section) and document in `docs/03_ENGINEERING_WORKFLOW/` or equivalent setup guide. This plan proposes a dedicated section in the AGENTS files rather than a new standalone document (minimizes file proliferation).
+**Approach:** Add installation instructions to `apps/api/AGENTS.md` (developer env section) and
+document in `docs/03_ENGINEERING_WORKFLOW/` or equivalent setup guide. This plan proposes a
+dedicated section in the AGENTS files rather than a new standalone document (minimizes file
+proliferation).
 
 **Content to add:**
 
@@ -403,24 +427,20 @@ The following system tools are required for pre-commit and pre-push hooks to fun
 
 Validates YAML syntax in all .yml/.yaml files.
 
-macOS:
-brew install yamllint
+macOS: brew install yamllint
 
-Ubuntu/Debian:
-sudo apt-get install yamllint
+Ubuntu/Debian: sudo apt-get install yamllint
 
-Docker CI (already in base image for most linux runners):
-pip install yamllint
+Docker CI (already in base image for most linux runners): pip install yamllint
 
 ### actionlint
 
 Validates GitHub Actions workflow files.
 
-macOS:
-brew install actionlint
+macOS: brew install actionlint
 
-Ubuntu/Debian:
-bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+Ubuntu/Debian: bash <(curl
+https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
 
 Verify: actionlint --version
 ```
@@ -443,15 +463,20 @@ All changes in this stage are **additive**:
 | Create `.prettierignore`                            | Blocks prettier from non-markdown files             | Only relevant if someone runs `prettier .` manually   |
 | Create `.yamllint`                                  | yamllint reads this automatically on invocation     | Existing YAML files may surface new warnings          |
 
-**Potential disruption:** Existing `.yml` and `.md` files may fail the new hooks if they contain violations. Per spec Out of Scope: "Migrating or rewriting existing code to comply with new lint rules is excluded." Developers encountering failures on existing files must fix or suppress per-file with inline comments.
+**Potential disruption:** Existing `.yml` and `.md` files may fail the new hooks if they contain
+violations. Per spec Out of Scope: "Migrating or rewriting existing code to comply with new lint
+rules is excluded." Developers encountering failures on existing files must fix or suppress per-file
+with inline comments.
 
-**Breaking change classification:** None — no existing scripts, hooks, or configurations are removed or modified in a breaking way.
+**Breaking change classification:** None — no existing scripts, hooks, or configurations are removed
+or modified in a breaking way.
 
 ---
 
 ## Implementation Sequence
 
-Tasks must be executed in this order to avoid intermediate states where hooks reference missing config:
+Tasks must be executed in this order to avoid intermediate states where hooks reference missing
+config:
 
 ```
 Step 1: Install prettier devDependency
@@ -490,15 +515,19 @@ Step 10: Verify no regressions
 
 ### Architecture Map Impact
 
-No new modules introduced under `packages/` or `apps/`. No `ARCHITECTURE_MAP.json` update required. No `bun run arch:add-module` invocation needed.
+No new modules introduced under `packages/` or `apps/`. No `ARCHITECTURE_MAP.json` update required.
+No `bun run arch:add-module` invocation needed.
 
 ### infra-audit.ts Compliance
 
-Changes are limited to root-level config files (`.prettierrc`, `.yamllint`, `.prettierignore`, `lint-staged.config.mjs`) and shell scripts (`.husky/pre-push`). None of these are tracked as architecture modules.
+Changes are limited to root-level config files (`.prettierrc`, `.yamllint`, `.prettierignore`,
+`lint-staged.config.mjs`) and shell scripts (`.husky/pre-push`). None of these are tracked as
+architecture modules.
 
 ### ai-guard.ts Compliance
 
-No new imports added. No cross-layer boundaries introduced. `ai-guard.ts` will not flag these changes.
+No new imports added. No cross-layer boundaries introduced. `ai-guard.ts` will not flag these
+changes.
 
 ---
 
@@ -534,7 +563,11 @@ No new imports added. No cross-layer boundaries introduced. `ai-guard.ts` will n
 ## Notes
 
 - `biome.json` requires **zero changes** — it is correctly configured for this stage's requirements.
-- The `.husky/pre-commit` hook requires **zero changes** — `bunx lint-staged` already invokes whatever `lint-staged.config.mjs` defines.
-- The `prettier` devDependency is the only new npm package introduced. All other new tooling (yamllint, actionlint) is system-level.
-- If `yamllint` or `actionlint` are not installed when a developer attempts to commit a YAML or workflow file, the hook will fail with `command not found`. This is intentional (FR-06) — failure transparency is required by NFR-06.
+- The `.husky/pre-commit` hook requires **zero changes** — `bunx lint-staged` already invokes
+  whatever `lint-staged.config.mjs` defines.
+- The `prettier` devDependency is the only new npm package introduced. All other new tooling
+  (yamllint, actionlint) is system-level.
+- If `yamllint` or `actionlint` are not installed when a developer attempts to commit a YAML or
+  workflow file, the hook will fail with `command not found`. This is intentional (FR-06) — failure
+  transparency is required by NFR-06.
 - The stage is purely additive. No existing workflow is disrupted by this implementation.

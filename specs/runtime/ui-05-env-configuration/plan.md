@@ -7,21 +7,24 @@
 
 ## Summary
 
-Establish a standardized, immutable environment configuration strategy across all three Zidney frontend apps (MMC, Backoffice, Frontoffice). The implementation replaces the existing `resolveConfig()` pattern with a factory function (`createEnvConfig(overrides?)`) that supports testability, adds feature flags and mode helpers, enforces `import.meta.env` prohibition via lint rules, and shares a TypeScript interface contract via `packages/types` for compile-time consistency across apps.
+Establish a standardized, immutable environment configuration strategy across all three Zidney
+frontend apps (MMC, Backoffice, Frontoffice). The implementation replaces the existing
+`resolveConfig()` pattern with a factory function (`createEnvConfig(overrides?)`) that supports
+testability, adds feature flags and mode helpers, enforces `import.meta.env` prohibition via lint
+rules, and shares a TypeScript interface contract via `packages/types` for compile-time consistency
+across apps.
 
 ---
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x (strict mode)
-**Primary Dependencies**: Vue 3, Vite 6.x, ESLint (flat config)
-**Storage**: N/A (no database entities — pure frontend configuration)
-**Testing**: Vitest + jsdom
-**Target Platform**: Browser (Chrome, Firefox, Safari, Edge — all modern)
-**Project Type**: Frontend web applications (3 Vue SPA apps)
-**Performance Goals**: N/A (configuration is synchronous, one-time initialization)
-**Constraints**: Configuration must be synchronous, frozen, and initialized before `createApp().mount()`
-**Scale/Scope**: 3 apps, ~6 files per app modified/created, 1 shared types file
+**Language/Version**: TypeScript 5.x (strict mode) **Primary Dependencies**: Vue 3, Vite 6.x, ESLint
+(flat config) **Storage**: N/A (no database entities — pure frontend configuration) **Testing**:
+Vitest + jsdom **Target Platform**: Browser (Chrome, Firefox, Safari, Edge — all modern) **Project
+Type**: Frontend web applications (3 Vue SPA apps) **Performance Goals**: N/A (configuration is
+synchronous, one-time initialization) **Constraints**: Configuration must be synchronous, frozen,
+and initialized before `createApp().mount()` **Scale/Scope**: 3 apps, ~6 files per app
+modified/created, 1 shared types file
 
 ---
 
@@ -43,7 +46,8 @@ _GATE: Must pass before Phase 0 research. Re-checked after Phase 1 design._
 | 10  | **No tenant isolation violation**    | PASS   | No cross-tenant logic. Workspace slug is development-only convenience. |
 | 11  | **Stage lifecycle respected**        | PASS   | Stage status is DRAFT — planning authorized.                           |
 
-**Post-Design Re-check**: All gates remain PASS. The design introduces no new violations. Shared types in `packages/types` are type-only exports (zero runtime) — no import boundary violation.
+**Post-Design Re-check**: All gates remain PASS. The design introduces no new violations. Shared
+types in `packages/types` are type-only exports (zero runtime) — no import boundary violation.
 
 ---
 
@@ -88,7 +92,9 @@ apps/{app}/tests/unit/core/
 └── app-config.test.ts               # NEW: aggregate + mode helper tests
 ```
 
-**Structure Decision**: Per-app implementation with shared type-only contract. Each app owns its `core/config/` directory. No shared runtime package. `packages/types` provides compile-time interfaces only.
+**Structure Decision**: Per-app implementation with shared type-only contract. Each app owns its
+`core/config/` directory. No shared runtime package. `packages/types` provides compile-time
+interfaces only.
 
 ---
 
@@ -107,14 +113,19 @@ No constitution violations requiring justification. The design is minimal:
 
 ### D1: Factory Function Pattern (from research.md)
 
-**Current state**: `resolveConfig()` is called at module scope, creating `appConfig` singleton. Tests use `vi.stubEnv()` + `vi.resetModules()` + dynamic `import()`.
+**Current state**: `resolveConfig()` is called at module scope, creating `appConfig` singleton.
+Tests use `vi.stubEnv()` + `vi.resetModules()` + dynamic `import()`.
 
 **New pattern**: `createEnvConfig(overrides?)` factory.
 
-- Production: called once in `main.ts` with no args → frozen result stored as module-level `appConfig`
-- Tests: called with `{ apiBaseUrl: 'http://test.local', appEnv: 'development' }` → testable instance
+- Production: called once in `main.ts` with no args → frozen result stored as module-level
+  `appConfig`
+- Tests: called with `{ apiBaseUrl: 'http://test.local', appEnv: 'development' }` → testable
+  instance
 
-**Migration**: The existing `resolveConfig()` function in each app becomes `createEnvConfig()`. The module-level `appConfig` singleton is preserved but now computed via the factory. Existing call sites that import `appConfig` continue to work unchanged.
+**Migration**: The existing `resolveConfig()` function in each app becomes `createEnvConfig()`. The
+module-level `appConfig` singleton is preserved but now computed via the factory. Existing call
+sites that import `appConfig` continue to work unchanged.
 
 ### D2: Lint Rule — `no-restricted-syntax` (from research.md)
 
@@ -134,7 +145,8 @@ Each app's `eslint.config.js` gets:
 }
 ```
 
-This catches `import.meta.env` and `import.meta.env.VITE_*` patterns via AST selector. The existing `import/no-restricted-paths` zones are preserved for redundancy.
+This catches `import.meta.env` and `import.meta.env.VITE_*` patterns via AST selector. The existing
+`import/no-restricted-paths` zones are preserved for redundancy.
 
 ### D3: Module Dependency Graph
 
@@ -148,7 +160,8 @@ All other modules:
   └── import { appConfig, isDev, getApiBase } from '@/core/config/app-config'
 ```
 
-Only `env.ts` touches `import.meta.env`. `feature-flags.ts` receives parsed env config. `app-config.ts` composes both.
+Only `env.ts` touches `import.meta.env`. `feature-flags.ts` receives parsed env config.
+`app-config.ts` composes both.
 
 ### D4: Backoffice Extension
 
@@ -156,18 +169,19 @@ Backoffice's `env.ts` extends the base interface:
 
 ```typescript
 interface BackofficeEnvConfig extends ZidneyEnvConfig {
-  readonly workspaceSlug?: string
+  readonly workspaceSlug?: string;
 }
 ```
 
-The `createEnvConfig()` in Backoffice reads `VITE_WORKSPACE_SLUG` additionally. This is a development-only convenience — in production, workspace context comes from the route/backend.
+The `createEnvConfig()` in Backoffice reads `VITE_WORKSPACE_SLUG` additionally. This is a
+development-only convenience — in production, workspace context comes from the route/backend.
 
 ### D5: Feature Flag Normalization
 
 ```typescript
 function parseBooleanFlag(value: string | undefined): boolean {
-  if (!value) return false
-  return ['true', '1', 'yes'].includes(value.toLowerCase())
+  if (!value) return false;
+  return ["true", "1", "yes"].includes(value.toLowerCase());
 }
 ```
 
@@ -179,11 +193,11 @@ Each app's `vite-env.d.ts` is augmented with:
 
 ```typescript
 interface ImportMetaEnv {
-  readonly VITE_API_BASE_URL: string
-  readonly VITE_APP_ENV: string
-  readonly VITE_APP_NAME: string
-  readonly VITE_DEBUG_MODE?: string
-  readonly VITE_ENABLE_DEBUG_PANEL?: string
+  readonly VITE_API_BASE_URL: string;
+  readonly VITE_APP_ENV: string;
+  readonly VITE_APP_NAME: string;
+  readonly VITE_DEBUG_MODE?: string;
+  readonly VITE_ENABLE_DEBUG_PANEL?: string;
 }
 ```
 
@@ -195,7 +209,8 @@ This gives TypeScript awareness of available `import.meta.env` keys inside `env.
 
 ### Phase 1: Shared Types
 
-1. Create `packages/types/src/env-config.ts` with `ZidneyEnvConfig`, `ZidneyFeatureFlags`, `ZidneyAppConfig` interfaces
+1. Create `packages/types/src/env-config.ts` with `ZidneyEnvConfig`, `ZidneyFeatureFlags`,
+   `ZidneyAppConfig` interfaces
 2. Export from `packages/types/src/index.ts`
 
 ### Phase 2: MMC (Reference Implementation)
@@ -238,128 +253,128 @@ Same as MMC — no extensions needed.
 ```typescript
 // Type-only exports — zero runtime footprint
 export interface ZidneyEnvConfig {
-  readonly apiBaseUrl: string
-  readonly appEnv: 'development' | 'staging' | 'production'
-  readonly appName: string
-  readonly debugMode: boolean
+  readonly apiBaseUrl: string;
+  readonly appEnv: "development" | "staging" | "production";
+  readonly appName: string;
+  readonly debugMode: boolean;
 }
 
 export interface ZidneyFeatureFlags {
-  readonly enableDebugPanel: boolean
+  readonly enableDebugPanel: boolean;
 }
 
 export interface ZidneyAppConfig {
-  readonly env: ZidneyEnvConfig
-  readonly flags: ZidneyFeatureFlags
+  readonly env: ZidneyEnvConfig;
+  readonly flags: ZidneyFeatureFlags;
 }
 ```
 
 ### `core/config/env.ts` (MMC / Frontoffice variant)
 
 ```typescript
-import type { ZidneyEnvConfig } from '@zidney/types'
+import type { ZidneyEnvConfig } from "@zidney/types";
 
 export interface EnvConfig extends ZidneyEnvConfig {}
 
 export function createEnvConfig(overrides?: Partial<EnvConfig>): EnvConfig {
   const raw = {
-    apiBaseUrl: import.meta.env['VITE_API_BASE_URL'] as string | undefined,
-    appEnv: import.meta.env['VITE_APP_ENV'] as string | undefined,
-    appName: import.meta.env['VITE_APP_NAME'] as string | undefined,
-    debugMode: import.meta.env['VITE_DEBUG_MODE'] as string | undefined,
-  }
+    apiBaseUrl: import.meta.env["VITE_API_BASE_URL"] as string | undefined,
+    appEnv: import.meta.env["VITE_APP_ENV"] as string | undefined,
+    appName: import.meta.env["VITE_APP_NAME"] as string | undefined,
+    debugMode: import.meta.env["VITE_DEBUG_MODE"] as string | undefined,
+  };
 
   const merged = {
-    apiBaseUrl: overrides?.apiBaseUrl ?? raw.apiBaseUrl ?? '',
+    apiBaseUrl: overrides?.apiBaseUrl ?? raw.apiBaseUrl ?? "",
     appEnv: normalizeAppEnv(overrides?.appEnv ?? raw.appEnv),
-    appName: overrides?.appName ?? raw.appName ?? 'mmc', // default per app
-    debugMode: overrides?.debugMode ?? raw.debugMode === 'true',
-  }
+    appName: overrides?.appName ?? raw.appName ?? "mmc", // default per app
+    debugMode: overrides?.debugMode ?? raw.debugMode === "true",
+  };
 
   if (!merged.apiBaseUrl) {
-    throw new Error('[env] Missing required variable: VITE_API_BASE_URL')
+    throw new Error("[env] Missing required variable: VITE_API_BASE_URL");
   }
 
-  return Object.freeze(merged)
+  return Object.freeze(merged);
 }
 
-function normalizeAppEnv(value: string | undefined): EnvConfig['appEnv'] {
-  if (value === 'staging') return 'staging'
-  if (value === 'production') return 'production'
-  return 'development'
+function normalizeAppEnv(value: string | undefined): EnvConfig["appEnv"] {
+  if (value === "staging") return "staging";
+  if (value === "production") return "production";
+  return "development";
 }
 ```
 
 ### `core/config/feature-flags.ts`
 
 ```typescript
-import type { ZidneyFeatureFlags } from '@zidney/types'
-import type { EnvConfig } from './env'
+import type { ZidneyFeatureFlags } from "@zidney/types";
+import type { EnvConfig } from "./env";
 
 export interface FeatureFlags extends ZidneyFeatureFlags {}
 
 export function createFeatureFlags(_env?: EnvConfig): FeatureFlags {
   return Object.freeze({
     enableDebugPanel: parseBooleanFlag(
-      import.meta.env['VITE_ENABLE_DEBUG_PANEL'] as string | undefined
+      import.meta.env["VITE_ENABLE_DEBUG_PANEL"] as string | undefined,
     ),
-  })
+  });
 }
 
 function parseBooleanFlag(value: string | undefined): boolean {
-  if (!value) return false
-  return ['true', '1', 'yes'].includes(value.toLowerCase())
+  if (!value) return false;
+  return ["true", "1", "yes"].includes(value.toLowerCase());
 }
 ```
 
 ### `core/config/app-config.ts`
 
 ```typescript
-import type { ZidneyAppConfig } from '@zidney/types'
-import { createEnvConfig, type EnvConfig } from './env'
-import { createFeatureFlags, type FeatureFlags } from './feature-flags'
+import type { ZidneyAppConfig } from "@zidney/types";
+import { createEnvConfig, type EnvConfig } from "./env";
+import { createFeatureFlags, type FeatureFlags } from "./feature-flags";
 
 export interface AppConfig extends ZidneyAppConfig {
-  readonly env: EnvConfig
-  readonly flags: FeatureFlags
+  readonly env: EnvConfig;
+  readonly flags: FeatureFlags;
 }
 
 // Initialize synchronously — throws before mount if invalid
-const envConfig = createEnvConfig()
-const flags = createFeatureFlags(envConfig)
+const envConfig = createEnvConfig();
+const flags = createFeatureFlags(envConfig);
 
 export const appConfig: AppConfig = Object.freeze({
   env: envConfig,
   flags,
-})
+});
 
 // Mode helpers
 export function isDev(): boolean {
-  return envConfig.appEnv === 'development'
+  return envConfig.appEnv === "development";
 }
 
 export function isProd(): boolean {
-  return envConfig.appEnv === 'production'
+  return envConfig.appEnv === "production";
 }
 
 export function isStaging(): boolean {
-  return envConfig.appEnv === 'staging'
+  return envConfig.appEnv === "staging";
 }
 
 export function getApiBase(): string {
-  return envConfig.apiBaseUrl
+  return envConfig.apiBaseUrl;
 }
 
 // Re-export for convenience
-export { type EnvConfig } from './env'
-export { type FeatureFlags } from './feature-flags'
+export { type EnvConfig } from "./env";
+export { type FeatureFlags } from "./feature-flags";
 ```
 
 ### `main.ts` Changes
 
 ```typescript
 // Step 1: Validate environment config at import time — throws early if misconfigured
-import '@/core/config/app-config'
+import "@/core/config/app-config";
 // (replaces: import '@/core/config/env')
 ```
 
@@ -417,8 +432,10 @@ import '@/core/config/app-config'
 
 ### Breaking Changes
 
-- `resolveConfig()` renamed to `createEnvConfig()` — internal to `core/config/`, no external callers expected
-- `appConfig` import path changes from `@/core/config/env` to `@/core/config/app-config` — all existing call sites must be updated
+- `resolveConfig()` renamed to `createEnvConfig()` — internal to `core/config/`, no external callers
+  expected
+- `appConfig` import path changes from `@/core/config/env` to `@/core/config/app-config` — all
+  existing call sites must be updated
 - `appConfig.buildEnv` renamed to `appConfig.env.appEnv` — existing consumers must update
 - `appConfig.debugMode` moves to `appConfig.env.debugMode` — single-level access changes to nested
 
@@ -430,7 +447,8 @@ import '@/core/config/app-config'
 
 ### Migration Checklist Per App
 
-1. Update all `import { appConfig } from '@/core/config/env'` → `import { appConfig } from '@/core/config/app-config'`
+1. Update all `import { appConfig } from '@/core/config/env'` →
+   `import { appConfig } from '@/core/config/app-config'`
 2. Update `appConfig.apiBaseUrl` → `appConfig.env.apiBaseUrl` or `getApiBase()`
 3. Update `appConfig.buildEnv` → `appConfig.env.appEnv`
 4. Update `appConfig.debugMode` → `appConfig.env.debugMode`

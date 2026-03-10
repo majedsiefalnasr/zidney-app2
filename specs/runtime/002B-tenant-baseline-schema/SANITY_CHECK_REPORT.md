@@ -19,7 +19,8 @@
 | All tables have `updated_by (UUID)`        | ✅ PASS | All transactional tables include updated_by   |
 | All tables have `is_deleted (BOOLEAN)`     | ✅ PASS | Soft delete column on all tables              |
 
-**Exception (Intentional)**: `attempt_events` table deliberately omits `updated_at` and `updated_by` because it is **immutable (append-only)** per requirement.
+**Exception (Intentional)**: `attempt_events` table deliberately omits `updated_at` and `updated_by`
+because it is **immutable (append-only)** per requirement.
 
 ### Foreign Key Constraints (Explicit ON DELETE Rules)
 
@@ -43,7 +44,8 @@
 | SET NULL      | divisions → divisions (parent)   | Allow parent deletion   | ✅     |
 | SET NULL      | categories → categories (parent) | Allow parent deletion   | ✅     |
 
-**Summary**: All 17+ foreign key constraints explicitly specify ON DELETE behavior (no implicit defaults).
+**Summary**: All 17+ foreign key constraints explicitly specify ON DELETE behavior (no implicit
+defaults).
 
 ### Polymorphic Exam References
 

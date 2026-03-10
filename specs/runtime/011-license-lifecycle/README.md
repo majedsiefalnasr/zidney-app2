@@ -1,9 +1,7 @@
 # License Lifecycle
 
-**Branch:** `011-license-lifecycle`
-**Phase:** 02_PLATFORM_MMC
-**Stage File:** `specs/phases/02_PLATFORM_MMC/STAGE_11_LICENSE_LIFECYCLE.md`
-**Initiated:** 2026-02-24T00:00:00Z
+**Branch:** `011-license-lifecycle` **Phase:** 02_PLATFORM_MMC **Stage File:**
+`specs/phases/02_PLATFORM_MMC/STAGE_11_LICENSE_LIFECYCLE.md` **Initiated:** 2026-02-24T00:00:00Z
 
 ## Workflow Progress
 

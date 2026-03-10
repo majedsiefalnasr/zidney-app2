@@ -8,8 +8,7 @@ Scope: Workspace-isolated authentication, JWT governance & access enforcement
 
 ## Stage Status
 
-Status: BACKEND CLOSED
-Closure Date: 2026-02-17
+Status: BACKEND CLOSED Closure Date: 2026-02-17
 
 ---
 

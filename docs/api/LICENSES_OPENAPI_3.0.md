@@ -4,7 +4,8 @@
 
 - Title: Zidney Licenses Management API
 - Version: 1.0.0
-- Description: Multi-tenant commercial license management with provisioning, status transitions, and audit logging
+- Description: Multi-tenant commercial license management with provisioning, status transitions, and
+  audit logging
 
 ## Base URL
 
@@ -360,17 +361,12 @@
 }
 ```
 
-**HTTP Status Mapping:**
-| Code | Status | Meaning |
-|------|--------|---------|
-| VALIDATION_ERROR | 400 | Invalid input |
-| INVALID_STATE_TRANSITION | 409 | Cannot transition from current state |
-| AUTH_MISSING | 401 | Missing authentication token |
-| UNAUTHORIZED | 403 | Invalid role/permissions |
-| LICENSE_NOT_FOUND | 404 | License ID not found |
-| LICENSE_SOFT_LOCKED | 423 | In grace period |
-| LICENSE_ARCHIVED | 403 | Read-only (archived) |
-| SERVICE_UNAVAILABLE | 503 | Database/queue unavailable |
+**HTTP Status Mapping:** | Code | Status | Meaning | |------|--------|---------| | VALIDATION_ERROR
+| 400 | Invalid input | | INVALID_STATE_TRANSITION | 409 | Cannot transition from current state | |
+AUTH_MISSING | 401 | Missing authentication token | | UNAUTHORIZED | 403 | Invalid role/permissions
+| | LICENSE_NOT_FOUND | 404 | License ID not found | | LICENSE_SOFT_LOCKED | 423 | In grace period |
+| LICENSE_ARCHIVED | 403 | Read-only (archived) | | SERVICE_UNAVAILABLE | 503 | Database/queue
+unavailable |
 
 ---
 

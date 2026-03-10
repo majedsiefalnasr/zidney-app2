@@ -225,7 +225,8 @@
 
 ### "What if I have questions about a decision?"
 
-→ See the **research.md** file. Each decision (R1-R11) explains the rationale, alternatives considered, and conclusion.
+→ See the **research.md** file. Each decision (R1-R11) explains the rationale, alternatives
+considered, and conclusion.
 
 ### "How do I seed test data?"
 
@@ -241,11 +242,13 @@
 
 ### "How long will this take to implement?"
 
-→ See **plan.md** → "Implementation Roadmap" or **EXECUTION_COMPLETE.md** → "Implementation Timeline". Estimated 2-3 weeks.
+→ See **plan.md** → "Implementation Roadmap" or **EXECUTION_COMPLETE.md** → "Implementation
+Timeline". Estimated 2-3 weeks.
 
 ### "What blocks promotion?"
 
-→ See **plan.md** → "Success Criteria" or **EXECUTION_COMPLETE.md** → "Success Criteria". Hard blocks listed.
+→ See **plan.md** → "Success Criteria" or **EXECUTION_COMPLETE.md** → "Success Criteria". Hard
+blocks listed.
 
 ---
 

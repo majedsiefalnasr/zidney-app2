@@ -5,9 +5,9 @@
 **Generated**: 2026-03-01  
 **Location**: `apps/{mmc,backoffice,frontoffice}/src/core/auth/types.ts`
 
-These types are defined identically in each app's `core/auth/types.ts`. They are
-**not** placed in `packages/types` because they are UI-layer runtime types (not
-shared domain contracts) and each app may eventually specialize `UserRole`.
+These types are defined identically in each app's `core/auth/types.ts`. They are **not** placed in
+`packages/types` because they are UI-layer runtime types (not shared domain contracts) and each app
+may eventually specialize `UserRole`.
 
 ---
 
@@ -18,17 +18,17 @@ shared domain contracts) and each app may eventually specialize `UserRole`.
 // TODO: Replace with packages/types UserRole once a shared frontend-facing enum
 //       is defined. MMC currently uses MMCUserRole from packages/types/master-db.
 //       Backoffice and Frontoffice role enums are pending their respective stages.
-export type UserRole = string
+export type UserRole = string;
 ```
 
 **Notes**:
 
-- MMC app: import `{ MMCUserRole }` from `@zidney/types` and use as the concrete
-  `UserRole` value in login response mapping.
-- Backoffice / Frontoffice: use plain `string` until tenant/student role enums are
-  introduced in their respective stages.
-- The `AuthUser.role` field is typed `UserRole = string` here, keeping strict mode
-  happy while allowing any role discriminant value from the backend.
+- MMC app: import `{ MMCUserRole }` from `@zidney/types` and use as the concrete `UserRole` value in
+  login response mapping.
+- Backoffice / Frontoffice: use plain `string` until tenant/student role enums are introduced in
+  their respective stages.
+- The `AuthUser.role` field is typed `UserRole = string` here, keeping strict mode happy while
+  allowing any role discriminant value from the backend.
 
 ---
 
@@ -37,15 +37,15 @@ export type UserRole = string
 ```typescript
 // core/auth/types.ts
 export type AuthErrorCode =
-  | 'AUTH_REFRESH_FAILED' // refresh endpoint returned non-2xx or network error
-  | 'AUTH_SESSION_EXPIRED' // 401 received after refresh was already attempted
-  | 'AUTH_LOGOUT_FAILED' // logout endpoint error (non-fatal; state still cleared)
-  | 'AUTH_INIT_FAILED' // initSession() silent refresh failed
-  | 'AUTH_PROFILE_FETCH_FAILED' // /me endpoint failed after successful token acquisition
+  | "AUTH_REFRESH_FAILED" // refresh endpoint returned non-2xx or network error
+  | "AUTH_SESSION_EXPIRED" // 401 received after refresh was already attempted
+  | "AUTH_LOGOUT_FAILED" // logout endpoint error (non-fatal; state still cleared)
+  | "AUTH_INIT_FAILED" // initSession() silent refresh failed
+  | "AUTH_PROFILE_FETCH_FAILED"; // /me endpoint failed after successful token acquisition
 ```
 
-**Usage**: `AuthError.code` field. Each code maps to a distinct workflow branch in
-the auth store and/or API client interceptor.
+**Usage**: `AuthError.code` field. Each code maps to a distinct workflow branch in the auth store
+and/or API client interceptor.
 
 ---
 
@@ -55,9 +55,9 @@ the auth store and/or API client interceptor.
 // core/auth/types.ts
 export interface AuthError {
   /** Machine-readable error discriminant from AuthErrorCode union */
-  code: AuthErrorCode
+  code: AuthErrorCode;
   /** Human-readable message — must NOT contain token values */
-  message: string
+  message: string;
 }
 ```
 
@@ -75,13 +75,13 @@ export interface AuthError {
 // core/auth/types.ts
 export interface AuthUser {
   /** Backend-assigned UUID for the user */
-  id: string
+  id: string;
   /** Primary email address */
-  email: string
+  email: string;
   /** Display name — from backend /me response */
-  name: string
+  name: string;
   /** Role discriminant — populated from /me response, not JWT payload */
-  role: UserRole
+  role: UserRole;
 }
 ```
 
@@ -100,13 +100,13 @@ export interface AuthUser {
 // core/auth/types.ts
 export interface AuthStoreState {
   /** True only after a backend-confirmed session (login or silent refresh) */
-  isAuthenticated: boolean
+  isAuthenticated: boolean;
   /** Populated from /me endpoint; null when not authenticated */
-  user: AuthUser | null
+  user: AuthUser | null;
   /** True during in-flight auth operations (initSession, login, logout) */
-  isLoading: boolean
+  isLoading: boolean;
   /** Last auth failure; null after any successful auth operation */
-  authError: AuthError | null
+  authError: AuthError | null;
 }
 ```
 
@@ -131,16 +131,15 @@ export interface AuthStoreState {
 // core/auth/types.ts
 export interface LoginCredentials {
   /** User email address */
-  email: string
+  email: string;
   /** Raw password — passed directly to backend without frontend validation */
-  password: string
+  password: string;
 }
 ```
 
 **Notes**:
 
-- No frontend password validation rules applied (spec compliant: no frontend
-  credential validation).
+- No frontend password validation rules applied (spec compliant: no frontend credential validation).
 - The backend enforces all password policy rules.
 
 ---
@@ -151,18 +150,18 @@ export interface LoginCredentials {
 // core/auth/types.ts
 export interface LoginResponse {
   /** Short-lived access token — stored in TokenManager memory only */
-  accessToken: string
+  accessToken: string;
   /** Minimal user profile — same shape as AuthUser */
-  user: AuthUser
+  user: AuthUser;
 }
 ```
 
 **Notes**:
 
-- The refresh token is **not** in this type — it is delivered exclusively as an
-  httpOnly cookie by the backend, never accessible to JavaScript.
-- `accessToken` is immediately passed to `tokenManager.setToken()` and must never
-  be passed to any logger.
+- The refresh token is **not** in this type — it is delivered exclusively as an httpOnly cookie by
+  the backend, never accessible to JavaScript.
+- `accessToken` is immediately passed to `tokenManager.setToken()` and must never be passed to any
+  logger.
 
 ---
 
@@ -172,13 +171,13 @@ export interface LoginResponse {
 // core/auth/token-manager.ts
 export interface ITokenManager {
   /** Returns the current in-memory access token or null if not set */
-  getToken(): string | null
+  getToken(): string | null;
   /** Stores the access token in reactive memory — no browser storage side effects */
-  setToken(token: string): void
+  setToken(token: string): void;
   /** Destroys the access token from reactive memory */
-  clearToken(): void
+  clearToken(): void;
   /** Returns true if a token is currently held in memory */
-  hasToken(): boolean
+  hasToken(): boolean;
 }
 ```
 
@@ -186,7 +185,8 @@ export interface ITokenManager {
 
 - Backed by a Vue `ref<string | null>(null)` — reactive, but the ref is not exported.
 - The token `ref` value is never returned directly; only string/null is returned from `getToken()`.
-- `hasToken()` is a pure boolean check; guards use this to decide whether to inject the Authorization header.
+- `hasToken()` is a pure boolean check; guards use this to decide whether to inject the
+  Authorization header.
 
 ---
 
@@ -200,27 +200,27 @@ export interface IRefreshManager {
    * Resolves when the new token is available in TokenManager.
    * Rejects when refresh fails — onLogout callback is automatically triggered.
    */
-  refresh(): Promise<void>
+  refresh(): Promise<void>;
   /** Returns true if a refresh request is currently in flight */
-  isRefreshing(): boolean
+  isRefreshing(): boolean;
 }
 
 /** Factory signature for creating a RefreshManager instance */
 export type RefreshManagerFactory = (
   refreshFn: () => Promise<string>,
   onLogout: () => void,
-  tokenManager: ITokenManager
-) => IRefreshManager
+  tokenManager: ITokenManager,
+) => IRefreshManager;
 ```
 
 **Dependency contract**:
 
-- `refreshFn` — injected by `main.ts`; calls `POST /auth/refresh` via api-client.
-  Returns the new `accessToken` string on success, throws on failure.
-- `onLogout` — injected by `main.ts`; calls `authStore.logout()`.
-  Zero compile-time dependency on Pinia; breaks circular import chain.
-- `tokenManager` — injected by `main.ts`; calls `tokenManager.setToken(newToken)` after successful refresh.
-  Ensures the new access token is stored before queued requests are retried.
+- `refreshFn` — injected by `main.ts`; calls `POST /auth/refresh` via api-client. Returns the new
+  `accessToken` string on success, throws on failure.
+- `onLogout` — injected by `main.ts`; calls `authStore.logout()`. Zero compile-time dependency on
+  Pinia; breaks circular import chain.
+- `tokenManager` — injected by `main.ts`; calls `tokenManager.setToken(newToken)` after successful
+  refresh. Ensures the new access token is stored before queued requests are retried.
 
 ---
 
@@ -234,28 +234,28 @@ export interface IAuthService {
    * Returns access token + user profile on success.
    * Throws AuthError on failure.
    */
-  login(credentials: LoginCredentials): Promise<LoginResponse>
+  login(credentials: LoginCredentials): Promise<LoginResponse>;
 
   /**
    * Calls the backend logout endpoint.
    * Always resolves — never rejects.
    * Frontend state cleanup must not depend on this call's success.
    */
-  logout(): Promise<void>
+  logout(): Promise<void>;
 
   /**
    * Calls POST /auth/refresh.
    * Returns the new access token string on success.
    * Throws on failure (used by refresh-manager's refreshFn).
    */
-  refreshToken(): Promise<{ accessToken: string }>
+  refreshToken(): Promise<{ accessToken: string }>;
 
   /**
    * Fetches the authenticated user's profile from GET /auth/me.
    * Returns typed AuthUser.
    * Throws AuthError with code AUTH_PROFILE_FETCH_FAILED on failure.
    */
-  fetchProfile(): Promise<AuthUser>
+  fetchProfile(): Promise<AuthUser>;
 }
 ```
 
@@ -266,19 +266,19 @@ export interface IAuthService {
 ```typescript
 // core/router/types.ts  (or declared inside the router index file)
 // Extends Vue Router's RouteMeta to add auth-specific fields.
-declare module 'vue-router' {
+declare module "vue-router" {
   interface RouteMeta {
     /** When true: unauthenticated users are redirected to the login route */
-    requiresAuth?: boolean
+    requiresAuth?: boolean;
     /** When true: authenticated users are redirected to the dashboard route */
-    guestOnly?: boolean
+    guestOnly?: boolean;
   }
 }
 
 // Convenience type alias for use in guards
 export interface AuthRouteMeta {
-  requiresAuth?: boolean
-  guestOnly?: boolean
+  requiresAuth?: boolean;
+  guestOnly?: boolean;
 }
 ```
 
@@ -295,7 +295,7 @@ export interface AuthGuardOptions {
    * Backoffice: 'bo-login'
    * Frontoffice: 'fo-login'
    */
-  loginRouteName: string
+  loginRouteName: string;
 
   /**
    * Name of the default authenticated landing route.
@@ -303,7 +303,7 @@ export interface AuthGuardOptions {
    * Backoffice: 'bo-dashboard'
    * Frontoffice: 'fo-home'
    */
-  dashboardRouteName: string
+  dashboardRouteName: string;
 }
 ```
 

@@ -1,14 +1,14 @@
 # Clarify Report — STAGE_20_STATUS_WORKFLOW_ENGINE
 
-**Step:** 2 — Clarify
-**Timestamp:** 2026-03-01T00:02:00.000Z
-**Status:** COMPLETE
+**Step:** 2 — Clarify **Timestamp:** 2026-03-01T00:02:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-5 targeted clarification questions were asked and resolved. All material ambiguities eliminated. spec.md updated in-place with a `## Clarifications / ### Session 2026-03-01` section. 18 functional requirements (was 17) now defined after adding FR-018 for rate limiting. Zero remaining open items.
+5 targeted clarification questions were asked and resolved. All material ambiguities eliminated.
+spec.md updated in-place with a `## Clarifications / ### Session 2026-03-01` section. 18 functional
+requirements (was 17) now defined after adding FR-018 for rate limiting. Zero remaining open items.
 
 ---
 
@@ -38,11 +38,15 @@ None — all ambiguities resolved.
 
 ## Spec Updates Applied
 
-- **FR-009** rewritten: 5-step atomic transaction sequence now explicitly includes `SELECT FOR UPDATE` row lock as step 1
+- **FR-009** rewritten: 5-step atomic transaction sequence now explicitly includes
+  `SELECT FOR UPDATE` row lock as step 1
 - **FR-004** updated: "authorization error" replaced with explicit `403` HTTP status code
-- **FR-015** expanded: tenant DB injection contract defined — `executeTransition(db: TenantDb, context: WorkflowContext)` — no global singleton
-- **FR-018** added: rate limiting — 20 transitions/user/entity-type/minute enforced at API route layer
-- **WorkflowContext entity** updated: `permissions: string[]` field added, pre-resolved by route handler
+- **FR-015** expanded: tenant DB injection contract defined —
+  `executeTransition(db: TenantDb, context: WorkflowContext)` — no global singleton
+- **FR-018** added: rate limiting — 20 transitions/user/entity-type/minute enforced at API route
+  layer
+- **WorkflowContext entity** updated: `permissions: string[]` field added, pre-resolved by route
+  handler
 - **Error Contract section** added (new): full HTTP status code mapping for all workflow error cases
 - **`## Clarifications` section** appended to `spec.md` with `### Session 2026-03-01`
 

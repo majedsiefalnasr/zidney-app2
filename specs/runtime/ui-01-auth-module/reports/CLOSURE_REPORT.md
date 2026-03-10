@@ -8,7 +8,12 @@
 
 ## Summary
 
-STAGE_UI_01_AUTH_MODULE has completed the full Hard Mode workflow across all 7 steps. All 57 atomic implementation tasks were executed and verified. The auth module is now fully wired across MMC, Backoffice, and Frontoffice — providing memory-only token management, single-flight refresh, factory-based auth stores with lazy accessor disambiguation, universal route guards, and a 9-step bootstrap sequence. TypeScript, lint, and 143 unit/integration tests all pass. Stage is production ready.
+STAGE_UI_01_AUTH_MODULE has completed the full Hard Mode workflow across all 7 steps. All 57 atomic
+implementation tasks were executed and verified. The auth module is now fully wired across MMC,
+Backoffice, and Frontoffice — providing memory-only token management, single-flight refresh,
+factory-based auth stores with lazy accessor disambiguation, universal route guards, and a 9-step
+bootstrap sequence. TypeScript, lint, and 143 unit/integration tests all pass. Stage is production
+ready.
 
 ---
 
@@ -29,16 +34,24 @@ STAGE_UI_01_AUTH_MODULE has completed the full Hard Mode workflow across all 7 s
 
 ## Scope Delivered
 
-- **AuthUser, AuthError, AuthErrorCode, ITokenManager, IRefreshManager, IAuthService, AuthGuardOptions** type definitions in all 3 apps
+- **AuthUser, AuthError, AuthErrorCode, ITokenManager, IRefreshManager, IAuthService,
+  AuthGuardOptions** type definitions in all 3 apps
 - **`createTokenManager()`** — in-memory access token; zero browser storage side effects
-- **`createRefreshManager(refreshFn, onLogout, tokenManager)`** — factory-injection pattern; single-flight `inFlight` lock; `onLogout` called exactly once on failure
-- **`createAuthService(apiClient, workspaceSlug)`** — login, logout (fire-and-forget), refresh, fetchCurrentUser; typed `AuthError` returns
-- **`defineAuthStore(authService, tokenManager, router, loginRouteName, getRefreshManager)`** — Pinia factory with lazy accessor; MEDIUM-02 compliant `logout()` sequencing
-- **`createAuthGuard(getIsAuthenticated, options)`** — configurable `requiresAuth`/`guestOnly` route guard factory
-- **API client interceptor wiring** — `getAccessToken`, `onRefreshToken`, `onAuthFailure` callbacks connected to auth module in all 3 apps
+- **`createRefreshManager(refreshFn, onLogout, tokenManager)`** — factory-injection pattern;
+  single-flight `inFlight` lock; `onLogout` called exactly once on failure
+- **`createAuthService(apiClient, workspaceSlug)`** — login, logout (fire-and-forget), refresh,
+  fetchCurrentUser; typed `AuthError` returns
+- **`defineAuthStore(authService, tokenManager, router, loginRouteName, getRefreshManager)`** —
+  Pinia factory with lazy accessor; MEDIUM-02 compliant `logout()` sequencing
+- **`createAuthGuard(getIsAuthenticated, options)`** — configurable `requiresAuth`/`guestOnly` route
+  guard factory
+- **API client interceptor wiring** — `getAccessToken`, `onRefreshToken`, `onAuthFailure` callbacks
+  connected to auth module in all 3 apps
 - **`main.ts` 9-step bootstrap** — creation-order safe via `let refreshManagerInstance` lazy pattern
 - **Deleted `token-store.ts`** and legacy `core/guards/` directory from all 3 apps
-- **12 test files, 143 tests passing** — unit + integration coverage for token-manager, refresh-manager, auth-service, auth-store, auth-guard, concurrent refresh, session init, logout flow
+- **12 test files, 143 tests passing** — unit + integration coverage for token-manager,
+  refresh-manager, auth-service, auth-store, auth-guard, concurrent refresh, session init, logout
+  flow
 
 ---
 
@@ -74,7 +87,11 @@ STAGE_UI_01_AUTH_MODULE has completed the full Hard Mode workflow across all 7 s
 
 **Risk Level:** `MEDIUM`
 
-**Justification:** The auth module is a foundational runtime component in all three front-end applications. Any regression in token handling, refresh logic, or route guard behavior would affect all authenticated flows. Risk is mitigated by: 143 passing tests (including concurrency and idempotency scenarios), strict TypeScript, security greps confirming no token leaks, and phased architecture allowing per-app isolation of issues.
+**Justification:** The auth module is a foundational runtime component in all three front-end
+applications. Any regression in token handling, refresh logic, or route guard behavior would affect
+all authenticated flows. Risk is mitigated by: 143 passing tests (including concurrency and
+idempotency scenarios), strict TypeScript, security greps confirming no token leaks, and phased
+architecture allowing per-app isolation of issues.
 
 ---
 

@@ -1,15 +1,14 @@
 # Testing Guide — ENV Configuration
 
-**Stage:** ENV Configuration
-**Phase:** 06_UI_APPLICATION_RUNTIME
-**Stage Directory:** ui-05-env-configuration
-**Generated On:** 2026-02-28
+**Stage:** ENV Configuration **Phase:** 06_UI_APPLICATION_RUNTIME **Stage Directory:**
+ui-05-env-configuration **Generated On:** 2026-02-28
 
 ---
 
 ## Purpose
 
-This guide explains how to validate the environment configuration implementation across all 3 Zidney frontend apps (MMC, Backoffice, Frontoffice).
+This guide explains how to validate the environment configuration implementation across all 3 Zidney
+frontend apps (MMC, Backoffice, Frontoffice).
 
 ---
 
@@ -150,11 +149,10 @@ Expected outcome: 105 tests pass, 0 lint errors, 0 new typecheck errors.
 4. Run `bun run dev` in that app directory
 5. Open the browser — app should load without errors
 
-Expected:
-App mounts successfully. No console errors about missing environment variables.
+Expected: App mounts successfully. No console errors about missing environment variables.
 
-Troubleshooting:
-If the app fails to start, check that `VITE_API_BASE_URL` is set in `.env`. The config layer throws `[env] Missing required variable: VITE_API_BASE_URL` if it's missing.
+Troubleshooting: If the app fails to start, check that `VITE_API_BASE_URL` is set in `.env`. The
+config layer throws `[env] Missing required variable: VITE_API_BASE_URL` if it's missing.
 
 ### Scenario 2 — App Fails Fast Without VITE_API_BASE_URL
 
@@ -164,11 +162,11 @@ If the app fails to start, check that `VITE_API_BASE_URL` is set in `.env`. The 
 2. Run `bun run dev`
 3. Open the browser console
 
-Expected:
-An error is thrown: `[env] Missing required variable: VITE_API_BASE_URL`. The app does not mount.
+Expected: An error is thrown: `[env] Missing required variable: VITE_API_BASE_URL`. The app does not
+mount.
 
-Troubleshooting:
-If the app mounts anyway, check that `createEnvConfig()` is being called before `createApp()` in `main.ts`.
+Troubleshooting: If the app mounts anyway, check that `createEnvConfig()` is being called before
+`createApp()` in `main.ts`.
 
 ### Scenario 3 — Unrecognized VITE_APP_ENV Value (Edge Case)
 
@@ -178,8 +176,8 @@ If the app mounts anyway, check that `createEnvConfig()` is being called before 
 2. Run `bun run dev`
 3. In the browser console, check: `isDev()` → `false`, `isProd()` → `false`, `isStaging()` → `false`
 
-Expected:
-All three mode helpers return `false` for unrecognized values. The value `custom-env` is preserved in `appConfig.env.appEnv`.
+Expected: All three mode helpers return `false` for unrecognized values. The value `custom-env` is
+preserved in `appConfig.env.appEnv`.
 
 ### Scenario 4 — Feature Flag Toggle
 
@@ -188,10 +186,10 @@ All three mode helpers return `false` for unrecognized values. The value `custom
 1. Set `VITE_ENABLE_DEBUG_PANEL=true` in `.env`
 2. Run `bun run dev`
 3. Verify `appConfig.flags.enableDebugPanel === true`
-4. Try to mutate: `appConfig.flags.enableDebugPanel = false` → should throw in strict mode or silently fail
+4. Try to mutate: `appConfig.flags.enableDebugPanel = false` → should throw in strict mode or
+   silently fail
 
-Expected:
-Feature flag reads correctly. Mutation is prevented by `Object.freeze`.
+Expected: Feature flag reads correctly. Mutation is prevented by `Object.freeze`.
 
 ### Scenario 5 — Backoffice workspaceSlug Extension
 
@@ -201,8 +199,8 @@ Feature flag reads correctly. Mutation is prevented by `Object.freeze`.
 2. Run `bun run dev` in `apps/backoffice/`
 3. Verify `appConfig.env.workspaceSlug === 'test-workspace'`
 
-Expected:
-The optional `workspaceSlug` field is available in Backoffice config but not in MMC or Frontoffice.
+Expected: The optional `workspaceSlug` field is available in Backoffice config but not in MMC or
+Frontoffice.
 
 ---
 

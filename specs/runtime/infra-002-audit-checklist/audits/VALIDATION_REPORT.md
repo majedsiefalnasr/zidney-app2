@@ -1,25 +1,21 @@
 # Validation Report — INFRA_AUDIT_CHECKLIST
 
-**Step:** 6.5 — Mandatory Validation Gate
-**Timestamp:** 2026-03-04T00:00:00.000Z
-**Stage:** INFRA_AUDIT_CHECKLIST
-**Branch:** infra-002-audit-checklist
-**Git SHA:** 10d878c3ae506e15ecd470327598ac87de186fb2
-**Status:** ⚠️ PASS WITH PRE-EXISTING ISSUES (no new failures introduced by this stage)
+**Step:** 6.5 — Mandatory Validation Gate **Timestamp:** 2026-03-04T00:00:00.000Z **Stage:**
+INFRA_AUDIT_CHECKLIST **Branch:** infra-002-audit-checklist **Git SHA:**
+10d878c3ae506e15ecd470327598ac87de186fb2 **Status:** ⚠️ PASS WITH PRE-EXISTING ISSUES (no new
+failures introduced by this stage)
 
 ---
 
 ## Summary
 
-Mandatory validation gate executed for the INFRA_AUDIT_CHECKLIST stage. This is a
-**READ-ONLY AUDIT STAGE** — no source, schema, config, test, or CI files were
-modified. The only new production code artifact is `scripts/infra-audit.ts` (a
-non-destructive Bun CLI script).
+Mandatory validation gate executed for the INFRA_AUDIT_CHECKLIST stage. This is a **READ-ONLY AUDIT
+STAGE** — no source, schema, config, test, or CI files were modified. The only new production code
+artifact is `scripts/infra-audit.ts` (a non-destructive Bun CLI script).
 
-All validation failures documented below are **pre-existing baseline issues** that
-this audit was specifically designed to identify and document. No new failures were
-introduced by this stage. The audit script itself executes cleanly with exit code 0
-and produces a valid 11-key JSON report.
+All validation failures documented below are **pre-existing baseline issues** that this audit was
+specifically designed to identify and document. No new failures were introduced by this stage. The
+audit script itself executes cleanly with exit code 0 and produces a valid 11-key JSON report.
 
 ---
 
@@ -88,9 +84,8 @@ EXIT: 0
 
 JSON output keys verified (11/11 required keys):
 
-- timestamp, gitSha, vitestConfigs, eslintConfigs, playwrightConfigs,
-  totalTestFiles, readmeAudit, skippedTests, flakyTests,
-  consolidationRisk, prettierConflictRisk
+- timestamp, gitSha, vitestConfigs, eslintConfigs, playwrightConfigs, totalTestFiles, readmeAudit,
+  skippedTests, flakyTests, consolidationRisk, prettierConflictRisk
 
 ### Bun Install
 
@@ -116,9 +111,8 @@ EXIT: 0 (bun run wrapper)
 Total TS errors: 2 (PRE-EXISTING — documented in GAP_REPORT.md §7)
 ```
 
-> **Note:** These 2 errors pre-date this stage. `infra-audit.ts` introduces zero
-> new TypeScript errors (verified via `bun run tsc --noEmit scripts/infra-audit.ts`
-> — no errors).
+> **Note:** These 2 errors pre-date this stage. `infra-audit.ts` introduces zero new TypeScript
+> errors (verified via `bun run tsc --noEmit scripts/infra-audit.ts` — no errors).
 
 ### Lint
 
@@ -135,9 +129,9 @@ Error sources (10 pre-existing):
 - Additional rule violations in apps/backoffice, apps/frontoffice
 ```
 
-> **Note:** All 10 errors are pre-existing. `scripts/infra-audit.ts` was excluded
-> from ESLint scope (no app-level ESLint config covers the scripts/ directory).
-> Documented in GAP_REPORT.md §3 (ESLint Configuration).
+> **Note:** All 10 errors are pre-existing. `scripts/infra-audit.ts` was excluded from ESLint scope
+> (no app-level ESLint config covers the scripts/ directory). Documented in GAP_REPORT.md §3 (ESLint
+> Configuration).
 
 ### Tests
 
@@ -151,8 +145,8 @@ Status: DB-GATED (requires `docker-compose -f docker-compose.test.yml up`)
 Coverage baseline: DEFERRED — requires test infrastructure
 ```
 
-> This is the expected behavior when running tests outside the Docker Compose
-> test environment. Coverage reporting requires `docker-compose.test.yml`.
+> This is the expected behavior when running tests outside the Docker Compose test environment.
+> Coverage reporting requires `docker-compose.test.yml`.
 
 ---
 
@@ -173,9 +167,8 @@ Coverage baseline: DEFERRED — requires test infrastructure
 
 ## Failure Classification
 
-All failures are **pre-existing baseline deficiencies** that are the **subject of
-this audit**. The purpose of INFRA_AUDIT_CHECKLIST is to inventory and document
-these findings, not to fix them.
+All failures are **pre-existing baseline deficiencies** that are the **subject of this audit**. The
+purpose of INFRA_AUDIT_CHECKLIST is to inventory and document these findings, not to fix them.
 
 | Failure             | Classification | Action                         |
 | ------------------- | -------------- | ------------------------------ |
@@ -201,6 +194,6 @@ these findings, not to fix them.
 
 **Validation Status: ⚠️ PASS WITH PRE-EXISTING ISSUES**
 
-The INFRA_AUDIT_CHECKLIST stage implementation is complete and valid. All
-pre-existing issues are documented and are the subject of the gap analysis
-deliverables. No new defects were introduced. The stage is ready for closure.
+The INFRA_AUDIT_CHECKLIST stage implementation is complete and valid. All pre-existing issues are
+documented and are the subject of the gap analysis deliverables. No new defects were introduced. The
+stage is ready for closure.

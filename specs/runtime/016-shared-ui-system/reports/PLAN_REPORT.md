@@ -9,7 +9,9 @@
 
 ## Executive Summary
 
-A comprehensive technical design plan has been generated that embeds all 5 locked architectural decisions and translates them into detailed implementation architecture, file structure, component contracts, and testing strategy.
+A comprehensive technical design plan has been generated that embeds all 5 locked architectural
+decisions and translates them into detailed implementation architecture, file structure, component
+contracts, and testing strategy.
 
 **Key Artifact:** [STAGE_16_PLAN.md](../STAGE_16_PLAN.md) (2,781 lines)
 
@@ -25,14 +27,18 @@ The plan covers all 12 required design sections:
 ✅ **Section 2:** Component Implementation Architecture (13 components)  
 ✅ **Section 3:** File Structure and Directory Layout (packages/ui-system organization)  
 ✅ **Section 4:** Build System Integration (Vite, Vue 3, TypeScript, Tailwind)  
-✅ **Section 5:** Component Implementation Details (DataTable async actions, filter overflow, validation)  
+✅ **Section 5:** Component Implementation Details (DataTable async actions, filter overflow,
+validation)  
 ✅ **Section 6:** Styling and Token System (CSS custom properties, white-label boundaries)  
 ✅ **Section 7:** Type System Architecture (Generic typing, discriminated unions, prop types)  
 ✅ **Section 8:** Testing Strategy (Unit, integration, coverage targets, test scenarios)  
 ✅ **Section 9:** Migration Strategy for MMC (5-phase approach, backwards compatibility)  
-✅ **Section 10:** Composable Utilities (useFilterBuilder, usePagination, useColumnVisibility, useMultiLanguageForm)  
-✅ **Section 11:** Error Handling & Edge Cases (action interruption, localStorage unavailability, validation failure)  
-✅ **Section 12:** Performance Optimization, API Integration, Non-Goals, Rollback Strategy, Compliance Statement
+✅ **Section 10:** Composable Utilities (useFilterBuilder, usePagination, useColumnVisibility,
+useMultiLanguageForm)  
+✅ **Section 11:** Error Handling & Edge Cases (action interruption, localStorage unavailability,
+validation failure)  
+✅ **Section 12:** Performance Optimization, API Integration, Non-Goals, Rollback Strategy,
+Compliance Statement
 
 ---
 
@@ -50,7 +56,8 @@ The plan covers all 12 required design sections:
 - Component manages internal pagination in client mode
 - Constraint: DataTable is stateless regarding page transitions
 
-**Design Implication:** Maximum flexibility; each app chooses pagination strategy based on dataset size and API capabilities.
+**Design Implication:** Maximum flexibility; each app chooses pagination strategy based on dataset
+size and API capabilities.
 
 ---
 
@@ -69,7 +76,8 @@ The plan covers all 12 required design sections:
 - Error state displayed for 2 seconds, then reset
 - No automatic retry or state mutation
 
-**Design Implication:** Common async pattern (API calls) handled natively; reduces boilerplate; prevents accidental duplicate actions.
+**Design Implication:** Common async pattern (API calls) handled natively; reduces boilerplate;
+prevents accidental duplicate actions.
 
 ---
 
@@ -81,7 +89,8 @@ The plan covers all 12 required design sections:
 
 - Primary: URL query params (`?filters=base64-encoded-json`)
 - Fallback: localStorage key `{workspaceSlug}:filter-state`
-- AdvancedFilterBuilder detects overflow: if serialized string > 2000 chars, emit warning and `@storage-fallback-triggered`
+- AdvancedFilterBuilder detects overflow: if serialized string > 2000 chars, emit warning and
+  `@storage-fallback-triggered`
 - Expose `isPersistedExternally` computed property
 - Apps must manually sync URL and localStorage
 - Component provides serialization/deserialization utilities only
@@ -90,13 +99,14 @@ The plan covers all 12 required design sections:
 
 ```typescript
 interface FilterSerializationConfig {
-  maxUrlLength: 2000 // Overflow threshold
-  localStorageKey: string
-  version: number // For future migration
+  maxUrlLength: 2000; // Overflow threshold
+  localStorageKey: string;
+  version: number; // For future migration
 }
 ```
 
-**Design Implication:** Seamless UX without app-side URL length validation; visibility flag prevents silent failures.
+**Design Implication:** Seamless UX without app-side URL length validation; visibility flag prevents
+silent failures.
 
 ---
 
@@ -106,7 +116,8 @@ interface FilterSerializationConfig {
 
 **Implementation Approach:**
 
-- Primitive columns: `accessor` optional; inferred from column `id` (e.g., `id: 'email'` → `row.email`)
+- Primitive columns: `accessor` optional; inferred from column `id` (e.g., `id: 'email'` →
+  `row.email`)
 - Computed columns: `accessor` required (enforced via TypeScript)
 - Type system enforces distinction
 - Null/undefined values render as "—" (configurable via `renderNull` prop)
@@ -115,24 +126,25 @@ interface FilterSerializationConfig {
 **TypeScript Discriminated Union:**
 
 ```typescript
-type ColumnDef<TRow> = PrimitiveColumn<TRow> | ComputedColumn<TRow>
+type ColumnDef<TRow> = PrimitiveColumn<TRow> | ComputedColumn<TRow>;
 
 type PrimitiveColumn<TRow> = {
-  id: string
-  header: string
-  accessor?: string // OPTIONAL
+  id: string;
+  header: string;
+  accessor?: string; // OPTIONAL
   // ...
-}
+};
 
 type ComputedColumn<TRow> = {
-  id: string
-  header: string
-  accessor: (row: TRow) => any // REQUIRED
+  id: string;
+  header: string;
+  accessor: (row: TRow) => any; // REQUIRED
   // ...
-}
+};
 ```
 
-**Design Implication:** DX optimized for common case (primitives); type safety for edge case (computed).
+**Design Implication:** DX optimized for common case (primitives); type safety for edge case
+(computed).
 
 ---
 
@@ -145,8 +157,10 @@ type ComputedColumn<TRow> = {
 - Per-language validation rules: `validationRules: { [languageCode: string]: ValidationRule[] }`
 - Each language validated independently
 - Global constraint: `requiredLanguages.length >= 1` (enforced)
-- Component computes `isValid: boolean` (returns false if any language fails validation OR fewer than 1 required languages have content)
-- Emit `@validation-changed { isValid: boolean; validationErrors: { [language: string]: string[] } }`
+- Component computes `isValid: boolean` (returns false if any language fails validation OR fewer
+  than 1 required languages have content)
+- Emit
+  `@validation-changed { isValid: boolean; validationErrors: { [language: string]: string[] } }`
 - If `requiredLanguages` empty, component warns and defaults to at least 1 language
 
 **Design Implication:** Matches real-world translation workflows; prevents accidental empty records.
@@ -270,28 +284,28 @@ packages/ui-system/
 ```typescript
 // DataTable generic
 type DataTable<TRow> = {
-  rows: TRow[]
-  columns: ColumnDef<TRow>[]
-  paginationState: PaginationState
+  rows: TRow[];
+  columns: ColumnDef<TRow>[];
+  paginationState: PaginationState;
   // ...
-}
+};
 
 // Filter system
-type FilterFieldType = 'text' | 'select' | 'date' | 'boolean' | 'number'
+type FilterFieldType = "text" | "select" | "date" | "boolean" | "number";
 type AdvancedFilter = {
-  fieldId: string
-  operator: FilterOperator
-  value: any
-  valueSecond?: any // For 'between'
-}
+  fieldId: string;
+  operator: FilterOperator;
+  value: any;
+  valueSecond?: any; // For 'between'
+};
 
 // Multi-language
 type MultiLanguageModalProps = {
-  languages: LanguageConfig[]
-  requiredLanguages: string[] // Minimum 1
-  validationRules: Record<string, ValidationRule[]>
-  translations?: Record<string, string>
-}
+  languages: LanguageConfig[];
+  requiredLanguages: string[]; // Minimum 1
+  validationRules: Record<string, ValidationRule[]>;
+  translations?: Record<string, string>;
+};
 ```
 
 ---
@@ -302,7 +316,8 @@ type MultiLanguageModalProps = {
 
 **Test Structure:**
 
-- DataTable: 25 test suites (pagination, async actions, column visibility, empty state, error display)
+- DataTable: 25 test suites (pagination, async actions, column visibility, empty state, error
+  display)
 - AdvancedFilterBuilder: 15 test suites (serialization, overflow detection, localStorage fallback)
 - MultiLanguageInputModal: 12 test suites (per-language validation, minimum 1 required)
 - Layout components: 8 test suites per component
@@ -317,8 +332,10 @@ type MultiLanguageModalProps = {
 
 1. DataTable + Filter: User changes filter → DataTable updates → URL syncs
 2. Form + MultiLanguage Modal: User opens modal → enters translations → modal saves → form updates
-3. Action flow: User clicks action button → loading state → callback executes → error/success displayed
-4. Filter overflow: User builds complex filters → URL exceeds 2000 chars → system falls back to localStorage
+3. Action flow: User clicks action button → loading state → callback executes → error/success
+   displayed
+4. Filter overflow: User builds complex filters → URL exceeds 2000 chars → system falls back to
+   localStorage
 
 ### Test Coverage Targets
 
@@ -446,28 +463,28 @@ function useFilterBuilder(options?: {
 
 ```typescript
 function usePagination(options: {
-  mode: 'server' | 'client'
-  totalCount: number
-  pageSize?: number
-  initialPage?: number
+  mode: "server" | "client";
+  totalCount: number;
+  pageSize?: number;
+  initialPage?: number;
 }) {
-  const currentPage = ref(options.initialPage || 1)
-  const pageSize = ref(options.pageSize || 25)
-  const totalCount = ref(options.totalCount)
+  const currentPage = ref(options.initialPage || 1);
+  const pageSize = ref(options.pageSize || 25);
+  const totalCount = ref(options.totalCount);
 
-  const pageCount = computed(() => Math.ceil(totalCount.value / pageSize.value))
-  const canPrevious = computed(() => currentPage.value > 1)
-  const canNext = computed(() => currentPage.value < pageCount.value)
+  const pageCount = computed(() => Math.ceil(totalCount.value / pageSize.value));
+  const canPrevious = computed(() => currentPage.value > 1);
+  const canNext = computed(() => currentPage.value < pageCount.value);
 
   const goToPage = (page: number) => {
     /* validate + update */
-  }
+  };
   const nextPage = () => {
     /* ... */
-  }
+  };
   const previousPage = () => {
     /* ... */
-  }
+  };
 
   return {
     currentPage,
@@ -479,7 +496,7 @@ function usePagination(options: {
     goToPage,
     nextPage,
     previousPage,
-  }
+  };
 }
 ```
 
@@ -527,30 +544,28 @@ function useColumnVisibility<TRow>(options: {
 
 ```typescript
 function useMultiLanguageForm(options: {
-  languages: LanguageConfig[]
-  requiredLanguages: string[] // Minimum 1 enforced
-  initialTranslations?: Record<string, string>
-  validationRules?: Record<string, ValidationRule[]>
+  languages: LanguageConfig[];
+  requiredLanguages: string[]; // Minimum 1 enforced
+  initialTranslations?: Record<string, string>;
+  validationRules?: Record<string, ValidationRule[]>;
 }) {
-  const translations = ref<Record<string, string>>(
-    options.initialTranslations || {}
-  )
-  const validationErrors = ref<Record<string, string[]>>({})
+  const translations = ref<Record<string, string>>(options.initialTranslations || {});
+  const validationErrors = ref<Record<string, string[]>>({});
 
   const isValid = computed(() => {
     // Check all translations validated
     // Check at least 1 required language has content
-  })
+  });
 
   const updateTranslation = (language: string, value: string) => {
     /* ... */
-  }
+  };
   const validateLanguage = (language: string) => {
     /* run rules */
-  }
+  };
   const validateAll = () => {
     /* run all validations */
-  }
+  };
 
   return {
     translations,
@@ -559,7 +574,7 @@ function useMultiLanguageForm(options: {
     updateTranslation,
     validateLanguage,
     validateAll,
-  }
+  };
 }
 ```
 
@@ -634,4 +649,5 @@ Plan is ready to be decomposed into atomic tasks covering:
 **Architecture Coherence:** ✅ VERIFIED  
 **Feasibility:** ✅ CONFIRMED
 
-The technical plan is comprehensive, architecturally sound, and ready to guide the Tasks step for task decomposition and implementation.
+The technical plan is comprehensive, architecturally sound, and ready to guide the Tasks step for
+task decomposition and implementation.

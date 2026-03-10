@@ -12,7 +12,8 @@
 
 ### Analysis Scope
 
-This report audits cross-artifact consistency and constitutional compliance for STAGE_05_TENANT_PROVISIONING_SERVICE using the 12-point drift detection matrix:
+This report audits cross-artifact consistency and constitutional compliance for
+STAGE_05_TENANT_PROVISIONING_SERVICE using the 12-point drift detection matrix:
 
 1. Isolation Violations (ADR-0001)
 2. License Middleware Bypass (ADR-0007)
@@ -61,15 +62,19 @@ This report audits cross-artifact consistency and constitutional compliance for 
 
 ### Summary
 
-Three medium-priority clarification issues identified in initial analysis have been resolved via documentation updates to spec.md, plan.md, and tasks.md. No structural changes to architecture or scope required.
+Three medium-priority clarification issues identified in initial analysis have been resolved via
+documentation updates to spec.md, plan.md, and tasks.md. No structural changes to architecture or
+scope required.
 
 ### C1: Registry + License Atomicity ✅ RESOLVED
 
-**Issue:** Steps 9-10 were separately documented but should be explicitly combined into atomic transaction.
+**Issue:** Steps 9-10 were separately documented but should be explicitly combined into atomic
+transaction.
 
 **Actions Taken:**
 
-- **plan.md § Step 9-10:** Combined into single section "Step 9-10: Registry Entry & License Transition (Master DB) [ATOMIC]" with clear atomicity guarantee
+- **plan.md § Step 9-10:** Combined into single section "Step 9-10: Registry Entry & License
+  Transition (Master DB) [ATOMIC]" with clear atomicity guarantee
 - **spec.md § 6.6:** Already documented transactional requirement; no changes needed
 - **Future task:** T016 atomicity test will verify mutual transactional behavior
 
@@ -79,31 +84,40 @@ Three medium-priority clarification issues identified in initial analysis have b
 
 ### C2: Product Version Enforcement Timing ✅ RESOLVED
 
-**Issue:** Product version compatibility was described as middleware check, but belongs to STAGE_06, not STAGE_05.
+**Issue:** Product version compatibility was described as middleware check, but belongs to STAGE_06,
+not STAGE_05.
 
 **Actions Taken:**
 
-- **spec.md § 4.3:** Clarified that `product_version` is stored but NOT enforced in STAGE_05; deferred to STAGE_06
-- **spec.md § 4.3:** Added explicit note "DEFER: This validation is not implemented in STAGE_05; belongs to STAGE_06"
+- **spec.md § 4.3:** Clarified that `product_version` is stored but NOT enforced in STAGE_05;
+  deferred to STAGE_06
+- **spec.md § 4.3:** Added explicit note "DEFER: This validation is not implemented in STAGE_05;
+  belongs to STAGE_06"
 - **spec.md § 13.2:** Updated to note product version validation is in STAGE_06
 - **spec.md § 11.2:** Cross-referenced WS_005 error code with "(STAGE_06)" note
-- **tasks.md § T016:** Simplified description to scope SCHEMA VERSION ONLY (not product version); added explicit NOTE about deferral
+- **tasks.md § T016:** Simplified description to scope SCHEMA VERSION ONLY (not product version);
+  added explicit NOTE about deferral
 
-**Impact:** Clean separation of concerns: STAGE_05 = infrastructure provisioning, STAGE_06 = runtime version enforcement.
+**Impact:** Clean separation of concerns: STAGE_05 = infrastructure provisioning, STAGE_06 = runtime
+version enforcement.
 
 ---
 
 ### C3: Error Code Task Description ✅ RESOLVED
 
-**Issue:** Task T019 didn't explicitly clarify that it handles PROVISIONING codes (PROV_001-010) only; workspace access codes (WS_001-005) handled elsewhere.
+**Issue:** Task T019 didn't explicitly clarify that it handles PROVISIONING codes (PROV_001-010)
+only; workspace access codes (WS_001-005) handled elsewhere.
 
 **Actions Taken:**
 
-- **tasks.md § T019:** Updated description to explicitly state "Provisioning error scenarios (PROV codes only)"
-- **tasks.md § T019:** Added "Scope Note" in Acceptance Criteria clearly separating PROV_001-010 from WS_001-005
+- **tasks.md § T019:** Updated description to explicitly state "Provisioning error scenarios (PROV
+  codes only)"
+- **tasks.md § T019:** Added "Scope Note" in Acceptance Criteria clearly separating PROV_001-010
+  from WS_001-005
 - **tasks.md § T019:** Documented that WS codes are handled by middleware and separate stages
 
-**Impact:** Eliminates scope ambiguity; test implementation will focus correctly on provisioning errors only.
+**Impact:** Eliminates scope ambiguity; test implementation will focus correctly on provisioning
+errors only.
 
 ---
 
@@ -125,7 +139,8 @@ Three medium-priority clarification issues identified in initial analysis have b
 
 **Plan Implementation (plan.md §2.1):**
 
-> "Each workspace owns one fully isolated database. Master pool is singleton for provisioning service only. Each tenant has separate pool in in-memory map."
+> "Each workspace owns one fully isolated database. Master pool is singleton for provisioning
+> service only. Each tenant has separate pool in in-memory map."
 
 **Task Mapping (tasks.md §T002, T014, T017):**
 
@@ -195,7 +210,8 @@ Three medium-priority clarification issues identified in initial analysis have b
 
 **Plan Implementation (plan.md §2.1):**
 
-> "Global DB singleton: Master pool for provisioning service only. Each tenant pool isolated in memory map."
+> "Global DB singleton: Master pool for provisioning service only. Each tenant pool isolated in
+> memory map."
 
 **Task Specification (tasks.md §T017):**
 
@@ -252,13 +268,15 @@ Middleware Stack (for subsequent workspace requests):
 
 **Task Specification (tasks.md §T015):**
 
-> "Middleware function `licenseValidation()` created. Requires `request.tenant`. Runs AFTER tenant resolver and BEFORE schema version check."
+> "Middleware function `licenseValidation()` created. Requires `request.tenant`. Runs AFTER tenant
+> resolver and BEFORE schema version check."
 
 **Finding:** ✅ **COMPLIANT**
 
 - Middleware execution order specified correctly
 - License validation BEFORE schema version check (correct order)
-- License middleware runs AFTER tenant resolver (schema: resolve tenant → validate license → check schema)
+- License middleware runs AFTER tenant resolver (schema: resolve tenant → validate license → check
+  schema)
 - Plan explicitly states: "License status is source of truth for workspace authorization"
 
 ---
@@ -294,7 +312,8 @@ Step 2: Validate License & Slug
 
 **Specification Statement (spec.md §4.2):**
 
-> "Schema version compatibility validated at runtime middleware. If tenant.schema_version < minimum → Reject (426). If tenant.schema_version > maximum → Reject (503)."
+> "Schema version compatibility validated at runtime middleware. If tenant.schema_version < minimum
+> → Reject (426). If tenant.schema_version > maximum → Reject (503)."
 
 **Plan Implementation (plan.md §4.1, Step 5):**
 
@@ -350,7 +369,8 @@ Middleware: Schema Version Check
 
 **Plan Statement (plan.md §1.2):**
 
-> "No snapshot integrity weakening: Configuration snapshots immutable post-provisioning (handled in STAGE_06)."
+> "No snapshot integrity weakening: Configuration snapshots immutable post-provisioning (handled in
+> STAGE_06)."
 
 **Task Statement (tasks.md Executive Summary):**
 
@@ -369,7 +389,8 @@ Middleware: Schema Version Check
 
 **Specification Statement (spec.md §5.8, Q5 answer):**
 
-> "Checkpoint table in tenant DB tracks provisioning progress. On retry: Read checkpoint → Resume from last successful step."
+> "Checkpoint table in tenant DB tracks provisioning progress. On retry: Read checkpoint → Resume
+> from last successful step."
 
 **Plan Implementation (plan.md §3.2.4):**
 
@@ -404,7 +425,8 @@ CREATE TABLE provisioning_checkpoints (
 
 **Specification Statement (spec.md §5.4):**
 
-> "Execute in transaction (all-or-nothing). If any migration fails: ROLLBACK entire transaction, drop database, log error"
+> "Execute in transaction (all-or-nothing). If any migration fails: ROLLBACK entire transaction,
+> drop database, log error"
 
 **Plan Implementation (plan.md §2.1, Step 7):**
 
@@ -421,7 +443,8 @@ Verify schema_version table exists
 
 **Task Specification (tasks.md §T010):**
 
-> "Migration execution: Wrapped in transaction (REPEATABLE READ). Rollback behavior: Automatic transaction rollback on any error."
+> "Migration execution: Wrapped in transaction (REPEATABLE READ). Rollback behavior: Automatic
+> transaction rollback on any error."
 
 **Finding:** ✅ **COMPLIANT**
 
@@ -436,7 +459,8 @@ Verify schema_version table exists
 
 **Specification Statement (spec.md §5.6, §5.7):**
 
-> "Same transaction as license update. Registry row insert + license status update in single transaction. Integrity Guarantee: Registry row exists ↔ Database exists ↔ License active."
+> "Same transaction as license update. Registry row insert + license status update in single
+> transaction. Integrity Guarantee: Registry row exists ↔ Database exists ↔ License active."
 
 **Plan Implementation (plan.md §2.1, Steps 9-10):**
 
@@ -501,7 +525,8 @@ COMMIT TRANSACTION
 
 **Task Specification (tasks.md §T026):**
 
-> "Test file: provisioning-idempotency.test.ts. Provision workspace once → success. Replay same job → no-op (or detect already provisioned)."
+> "Test file: provisioning-idempotency.test.ts. Provision workspace once → success. Replay same job
+> → no-op (or detect already provisioned)."
 
 **Finding:** ✅ **COMPLIANT**
 
@@ -515,7 +540,8 @@ COMMIT TRANSACTION
 
 **Specification Statement (spec.md §5.4):**
 
-> "Each migration must be idempotent (safe to replay). Checksum validation: Verify migration hash matches expected (SHA256)"
+> "Each migration must be idempotent (safe to replay). Checksum validation: Verify migration hash
+> matches expected (SHA256)"
 
 **Plan Implementation (plan.md §2.1, Step 7):**
 
@@ -528,7 +554,9 @@ Write to schema_migrations(version, checksum, installed_on)
 
 **Task Specification (tasks.md §T010):**
 
-> "Class MigrationExecutor created with: `validateChecksum(migration, hash)` → boolean. Checksum validation: SHA256 hash comparison. Already-applied migration detection: Query schema_migrations table."
+> "Class MigrationExecutor created with: `validateChecksum(migration, hash)` → boolean. Checksum
+> validation: SHA256 hash comparison. Already-applied migration detection: Query schema_migrations
+> table."
 
 **Finding:** ✅ **COMPLIANT**
 
@@ -569,7 +597,8 @@ ON CONFLICT (name) DO NOTHING;
 
 **Specification Statement (spec.md §5.6):**
 
-> "Insert: workspace_slug, license_id, database_name, expected_schema_version. Validate: No duplicate slug exists"
+> "Insert: workspace_slug, license_id, database_name, expected_schema_version. Validate: No
+> duplicate slug exists"
 
 **Plan Implementation (plan.md §3.1.2):**
 
@@ -595,7 +624,8 @@ database_name VARCHAR(255) NOT NULL UNIQUE
 
 **Specification Statement (spec.md §Q5 answer):**
 
-> "On retry: Read checkpoint → Resume from last successful step. Example: If worker crashes after migration_003 applied, retry worker sees checkpoint, skips to migration_004"
+> "On retry: Read checkpoint → Resume from last successful step. Example: If worker crashes after
+> migration_003 applied, retry worker sees checkpoint, skips to migration_004"
 
 **Plan Implementation (plan.md §6.2.3 - Orphan Detection):**
 
@@ -606,7 +636,8 @@ No-op remainder → Success
 
 **Task Specification (tasks.md §T013):**
 
-> "Recovery flow: Read latest checkpoint → Resume provisioning from next step. Example: If worker crashes after step 5 (seed completed), recovery reads checkpoint, skips steps 1-5, starts step 6"
+> "Recovery flow: Read latest checkpoint → Resume provisioning from next step. Example: If worker
+> crashes after step 5 (seed completed), recovery reads checkpoint, skips steps 1-5, starts step 6"
 
 **Finding:** ✅ **COMPLIANT**
 
@@ -623,7 +654,9 @@ No-op remainder → Success
 
 **Specification Statement (spec.md §13.1):**
 
-> "Baseline Schema Version: `1.0.0` (Semantic Versioning). Stored in `tenant_db.schema_version.current_schema_version`, `master_db.licenses.schema_version`, `master_db.tenants_registry.expected_schema_version`"
+> "Baseline Schema Version: `1.0.0` (Semantic Versioning). Stored in
+> `tenant_db.schema_version.current_schema_version`, `master_db.licenses.schema_version`,
+> `master_db.tenants_registry.expected_schema_version`"
 
 **Plan Implementation (plan.md §3.2.2):**
 
@@ -651,7 +684,8 @@ VALUES
 
 **Specification Statement (spec.md §4.2):**
 
-> "If `tenant.schema_version < runtime.min_supported_schema` → Reject (426 Upgrade Required). If `tenant.schema_version > runtime.max_supported_schema` → Reject (503 Service Unavailable)"
+> "If `tenant.schema_version < runtime.min_supported_schema` → Reject (426 Upgrade Required). If
+> `tenant.schema_version > runtime.max_supported_schema` → Reject (503 Service Unavailable)"
 
 **Plan Implementation (plan.md §4.1, Step 5):**
 
@@ -663,7 +697,8 @@ If too new: Return 503 Service Unavailable
 
 **Task Specification (tasks.md §T016):**
 
-> "Validate compatibility: If tenant_version < MIN_REQUIRED_VERSION → 426. If tenant_version > MAX_SUPPORTED_VERSION → 503."
+> "Validate compatibility: If tenant_version < MIN_REQUIRED_VERSION → 426. If tenant_version >
+> MAX_SUPPORTED_VERSION → 503."
 
 **Finding:** ✅ **COMPLIANT**
 
@@ -678,7 +713,8 @@ If too new: Return 503 Service Unavailable
 
 **Specification Statement (spec.md §4.3):**
 
-> "License stores `product_version`. Runtime defines compatible version range. On license middleware execution: Validate `license.product_version` in compatible range"
+> "License stores `product_version`. Runtime defines compatible version range. On license middleware
+> execution: Validate `license.product_version` in compatible range"
 
 **Plan Implementation (plan.md §4.1):**
 
@@ -698,7 +734,8 @@ If too new: Return 503 Service Unavailable
 
 **Specification Statement (spec.md §5.4):**
 
-> "Migration Execution: Checksum validation: Verify migration hash matches expected (SHA256). On success: Write migration metadata to `schema_migrations` table"
+> "Migration Execution: Checksum validation: Verify migration hash matches expected (SHA256). On
+> success: Write migration metadata to `schema_migrations` table"
 
 **Plan Implementation (plan.md §3.2.3):**
 
@@ -712,7 +749,8 @@ CREATE TABLE schema_migrations (
 
 **Task Specification (tasks.md §T004):**
 
-> "Unique constraints on: version, checksum. Checksum length constraint: CHECK (LENGTH(checksum) = 64)"
+> "Unique constraints on: version, checksum. Checksum length constraint: CHECK (LENGTH(checksum) =
+> 64)"
 
 **Finding:** ✅ **COMPLIANT**
 
@@ -729,7 +767,8 @@ CREATE TABLE schema_migrations (
 
 **Specification Statement (spec.md §6.6):**
 
-> "Server NOW() used for all critical timestamps. Checkpoint timestamps server-generated. No time trust to worker/client"
+> "Server NOW() used for all critical timestamps. Checkpoint timestamps server-generated. No time
+> trust to worker/client"
 
 **Plan Implementation (plan.md §2.1):**
 
@@ -805,7 +844,8 @@ CREATE TABLE provisioning_checkpoints (
 
 **Specification Statement (spec.md §8.4):**
 
-> "Provisioning is worker-only, never in API process. API never creates databases (no DDL in API process)."
+> "Provisioning is worker-only, never in API process. API never creates databases (no DDL in API
+> process)."
 
 **Plan Implementation (plan.md §8.4):**
 
@@ -821,7 +861,8 @@ Worker Process (Background):
 
 **Task Specification (tasks.md):**
 
-> "Worker Process (Provisioning Service): All 9 steps in worker. API/Middleware: No DDL execution. Implements tenant resolver only."
+> "Worker Process (Provisioning Service): All 9 steps in worker. API/Middleware: No DDL execution.
+> Implements tenant resolver only."
 
 **Finding:** ✅ **COMPLIANT**
 
@@ -850,7 +891,8 @@ License Service (in API or MMC)
 
 **Task Specification (tasks.md §T009):**
 
-> "Implement job enqueue/dequeue (Redis queue). `enqueue(job: ProvisioningJob)` → Stores in Redis list"
+> "Implement job enqueue/dequeue (Redis queue). `enqueue(job: ProvisioningJob)` → Stores in Redis
+> list"
 
 **Finding:** ✅ **COMPLIANT**
 
@@ -865,7 +907,8 @@ License Service (in API or MMC)
 
 **Specification Statement (spec.md §5.8):**
 
-> "Pool availability becomes explicit signal: 'Database is ready for application use'. API cannot register pools; worker registers after provisioning completes."
+> "Pool availability becomes explicit signal: 'Database is ready for application use'. API cannot
+> register pools; worker registers after provisioning completes."
 
 **Plan Implementation (plan.md §2.1, Step 8):**
 
@@ -877,7 +920,8 @@ Step 8: Register Pool (Worker Memory)
 
 **Task Specification (tasks.md §T017, T018):**
 
-> "Pool registration: Called from provisioning worker after license transition. Pool removal: Called on workspace deletion or restoration."
+> "Pool registration: Called from provisioning worker after license transition. Pool removal: Called
+> on workspace deletion or restoration."
 
 **Finding:** ✅ **COMPLIANT**
 
@@ -929,12 +973,14 @@ Step 8: Register Pool (Worker Memory)
 
 **Task Specification (tasks.md §T023):**
 
-> "All logs follow format with timestamp, level, service, correlation_id, workspace_slug, license_id"
+> "All logs follow format with timestamp, level, service, correlation_id, workspace_slug,
+> license_id"
 
 **Finding:** ✅ **COMPLIANT**
 
 - Structured JSON format fully specified
-- All required fields present (timestamp, level, service, correlation_id, workspace_slug, license_id)
+- All required fields present (timestamp, level, service, correlation_id, workspace_slug,
+  license_id)
 - Optional fields (organization_id, duration_ms) included
 - Error object format defined
 
@@ -965,8 +1011,7 @@ Step 8: Register Pool (Worker Memory)
 
 ### 9.3 14 Logging Events Documented
 
-**Specification Statement (spec.md §12.2):**
-Lists all 14 events:
+**Specification Statement (spec.md §12.2):** Lists all 14 events:
 
 1. provisioning_job_dequeued
 2. provisioning_lock_acquired
@@ -983,13 +1028,11 @@ Lists all 14 events:
 13. provisioning_job_retry
 14. provisioning_job_dlq
 
-**Plan Implementation (plan.md §8.2):**
-All 14 events documented with format
+**Plan Implementation (plan.md §8.2):** All 14 events documented with format
 
 **Task Specification (tasks.md §T023):**
 
-> "14 logging events implemented:"
-> All 14 listed (identical to spec)
+> "14 logging events implemented:" All 14 listed (identical to spec)
 
 **Finding:** ✅ **COMPLIANT**
 
@@ -1004,7 +1047,8 @@ All 14 events documented with format
 
 **Specification Statement (spec.md §7.4):**
 
-> "No PII in Logs: Slug is workspace identifier (metadata). No user data in logs. No credentials in logs. No connection strings in logs."
+> "No PII in Logs: Slug is workspace identifier (metadata). No user data in logs. No credentials in
+> logs. No connection strings in logs."
 
 **Plan Implementation (plan.md §7.1):**
 
@@ -1029,7 +1073,9 @@ All 14 events documented with format
 
 **Specification Statement (spec.md §7.1):**
 
-> "Slug Format: Regex `^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$` (lowercase, alphanumeric, dash, 3-50 chars). All slug usage via parameterized queries. Slug used as database name validated against whitelist pattern."
+> "Slug Format: Regex `^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$` (lowercase, alphanumeric, dash, 3-50
+> chars). All slug usage via parameterized queries. Slug used as database name validated against
+> whitelist pattern."
 
 **Plan Implementation (plan.md §3.1.2):**
 
@@ -1040,7 +1086,8 @@ CONSTRAINT valid_slug_format
 
 **Task Specification (tasks.md §T025):**
 
-> "Test file: slug-validation.test.ts. Valid slug patterns pass. Invalid slug patterns rejected. SQL injection attempts blocked."
+> "Test file: slug-validation.test.ts. Valid slug patterns pass. Invalid slug patterns rejected. SQL
+> injection attempts blocked."
 
 **Finding:** ✅ **COMPLIANT**
 
@@ -1055,7 +1102,9 @@ CONSTRAINT valid_slug_format
 
 **Specification Statement (spec.md §7.3):**
 
-> "Master DB: Single service account (provisioner role). Tenant DB: Single service account per tenant (minimal CRUD permissions). Credentials stored in secrets manager (not committed). No shared credentials across tenants."
+> "Master DB: Single service account (provisioner role). Tenant DB: Single service account per
+> tenant (minimal CRUD permissions). Credentials stored in secrets manager (not committed). No
+> shared credentials across tenants."
 
 **Plan Implementation (plan.md §10.1):**
 
@@ -1071,7 +1120,8 @@ Credential Scope:
 
 **Task Specification (tasks.md §T008):**
 
-> "Worker loads credentials from PROVISIONING_DB_USER / PROVISIONING_DB_PASSWORD environment at startup"
+> "Worker loads credentials from PROVISIONING_DB_USER / PROVISIONING_DB_PASSWORD environment at
+> startup"
 
 **Finding:** ✅ **COMPLIANT**
 
@@ -1109,7 +1159,8 @@ Credential Scope:
 
 **Specification Statement (spec.md §7.1):**
 
-> "Checksum validation: Verify migration hash matches expected (SHA256). On checksum mismatch: No silent corruption."
+> "Checksum validation: Verify migration hash matches expected (SHA256). On checksum mismatch: No
+> silent corruption."
 
 **Plan Implementation (plan.md §2.1, Step 7):**
 
@@ -1136,15 +1187,19 @@ Validate checksum matches expected (SHA256)
 
 ### 11.1 Applicability to Current Stage
 
-**Context:** STAGE_05 is about infrastructure provisioning (worker + migrations). Layering rules primarily apply to subsequent stages (STAGE_06+) when domain logic and UI are introduced.
+**Context:** STAGE_05 is about infrastructure provisioning (worker + migrations). Layering rules
+primarily apply to subsequent stages (STAGE_06+) when domain logic and UI are introduced.
 
 **Specification Statement (spec.md §Scope):**
 
-> "Included: Asynchronous provisioning via job queue, distributed lock, schema initialization, baseline data seeding, registry creation, archive snapshot management. Out of Scope: Public HTTP endpoints for provisioning (internal only)"
+> "Included: Asynchronous provisioning via job queue, distributed lock, schema initialization,
+> baseline data seeding, registry creation, archive snapshot management. Out of Scope: Public HTTP
+> endpoints for provisioning (internal only)"
 
 **Plan Implementation (plan.md §All sections):**
 
-> Provisioning logic isolated to worker service. No UI component. No direct domain business logic in provisioning (only structural tables created).
+> Provisioning logic isolated to worker service. No UI component. No direct domain business logic in
+> provisioning (only structural tables created).
 
 **Task Specification (tasks.md):**
 
@@ -1186,7 +1241,8 @@ Error codes documented (PROV_001 through PROV_010)
 
 **Task Specification (tasks.md §T019):**
 
-> "Error handler function `handleProvisioningError(error, correlation_id)` → Response with format {success: false, data: null, error: {...}}"
+> "Error handler function `handleProvisioningError(error, correlation_id)` → Response with format
+> {success: false, data: null, error: {...}}"
 
 **Finding:** ✅ **COMPLIANT**
 
@@ -1199,8 +1255,8 @@ Error codes documented (PROV_001 through PROV_010)
 
 ### 12.2 Error Codes Mapped to HTTP Status
 
-**Specification Statement (spec.md §11.1, §11.2):**
-Documents 10 provisioning errors + 5 workspace access errors with HTTP status codes:
+**Specification Statement (spec.md §11.1, §11.2):** Documents 10 provisioning errors + 5 workspace
+access errors with HTTP status codes:
 
 - PROV_001 → 409
 - PROV_002 → 500
@@ -1208,8 +1264,8 @@ Documents 10 provisioning errors + 5 workspace access errors with HTTP status co
 - WS_001 → 404
 - ... (5 total workspace access codes)
 
-**Plan Implementation (plan.md §6.1):**
-Complete error code matrix with HTTP status, description, retry decision
+**Plan Implementation (plan.md §6.1):** Complete error code matrix with HTTP status, description,
+retry decision
 
 **Task Specification (tasks.md §T019):**
 
@@ -1267,10 +1323,10 @@ Complete error code matrix with HTTP status, description, retry decision
 8. Restore from snapshot
 9. Permanent deletion
 10. Rollback on failure
-11. Version compatibility
-    ... (26 total)
+11. Version compatibility ... (26 total)
 
-**Plan Coverage:** 2.1 (9-step architecture + middleware), 3 (Schema), 5 (Retry Strategy), 6 (Error Handling), 7 (Testing)
+**Plan Coverage:** 2.1 (9-step architecture + middleware), 3 (Schema), 5 (Retry Strategy), 6 (Error
+Handling), 7 (Testing)
 
 **Task Coverage:**
 
@@ -1290,7 +1346,8 @@ Complete error code matrix with HTTP status, description, retry decision
 
 ### Check 2: Error Codes Mapped
 
-**Requirement:** All 10 provisioning error codes + 5 workspace access codes mapped in plan and tasks.
+**Requirement:** All 10 provisioning error codes + 5 workspace access codes mapped in plan and
+tasks.
 
 **Spec (§11.1-11.2):** 15 error codes total with HTTP status, condition, action
 
@@ -1298,7 +1355,8 @@ Complete error code matrix with HTTP status, description, retry decision
 
 **Tasks (§T019):** "Error code map created for all 10 provisioning errors"
 
-**Note:** T019 says "10 provisioning errors" but spec defines 15 total (10 provisioning + 5 workspace access).
+**Note:** T019 says "10 provisioning errors" but spec defines 15 total (10 provisioning + 5
+workspace access).
 
 **Finding:** ⚠️ **MINOR CLARIFICATION** (See Issue C3 below)
 
@@ -1308,7 +1366,8 @@ Complete error code matrix with HTTP status, description, retry decision
 
 **Requirement:** All middleware integration points identified in plan, mapped to tasks.
 
-**Spec (§4.1-4.3):** License validation before pool registration, schema version check after, tenant resolver first
+**Spec (§4.1-4.3):** License validation before pool registration, schema version check after, tenant
+resolver first
 
 **Plan (§4.1, §4.2, §4.3):**
 
@@ -1338,7 +1397,8 @@ Complete error code matrix with HTTP status, description, retry decision
 
 **Spec (§5.4, §9.2):** Migrations idempotent, checksummed, tracked in schema_migrations
 
-**Plan (§3.2.1-3.2.5):** 4 critical tables (schema_version, schema_migrations, provisioning_checkpoints, core tables)
+**Plan (§3.2.1-3.2.5):** 4 critical tables (schema_version, schema_migrations,
+provisioning_checkpoints, core tables)
 
 **Tasks (§T001-T006, T010):**
 
@@ -1356,7 +1416,8 @@ Complete error code matrix with HTTP status, description, retry decision
 
 ### Check 5: Testing Strategy Aligned with Non-Functional Requirements
 
-**Requirement:** Testing strategy from plan maps to tasks, covers concurrency, crash recovery, idempotency.
+**Requirement:** Testing strategy from plan maps to tasks, covers concurrency, crash recovery,
+idempotency.
 
 **Plan (§7):**
 
@@ -1402,7 +1463,8 @@ Complete error code matrix with HTTP status, description, retry decision
 
 ### Trust Chain Verification
 
-**Trust Chain (PROJECT_CONTEXT_PRIMER):** Isolation → License → Authentication → Attempt → Runtime → Frontoffice
+**Trust Chain (PROJECT_CONTEXT_PRIMER):** Isolation → License → Authentication → Attempt → Runtime →
+Frontoffice
 
 **STAGE_05 Position:** Establishes **Isolation layer** (first in chain)
 
@@ -1454,10 +1516,12 @@ Complete error code matrix with HTTP status, description, retry decision
 
 **Discrepancy:**
 
-- **Spec says:** "Same transaction as license update. Registry row insert + license status update in single transaction."
+- **Spec says:** "Same transaction as license update. Registry row insert + license status update in
+  single transaction."
 - **Plan shows:** Step 9 (Registry INSERT) then Step 10 (License UPDATE) in separate transactions.
 
-**Risk:** If registry write succeeds but license update fails, registry entry exists without corresponding ACTIVE license (broken invariant).
+**Risk:** If registry write succeeds but license update fails, registry entry exists without
+corresponding ACTIVE license (broken invariant).
 
 **Proposed Resolution:**
 
@@ -1502,7 +1566,8 @@ Option A (combined) is simpler and recommended.
 - **Plan shows:** Only license status check (no product version validation)
 - **Tasks (T015):** Only checks status = 'ACTIVE' (no product version)
 
-**Question:** Should product version validation occur in T015 (license middleware), or is this deferred to STAGE_06?
+**Question:** Should product version validation occur in T015 (license middleware), or is this
+deferred to STAGE_06?
 
 **Analysis:**
 
@@ -1530,8 +1595,10 @@ Recommendation: DEFER to STAGE_06 (clean separation)
 
 **Recommendation:**
 
-- Add clarification to spec.md §4.3: "Product version compatibility enforcement deferred to STAGE_06."
-- Update tasks.md §T015 acceptance criteria: "Store license.product_version but do not validate (deferred to STAGE_06)"
+- Add clarification to spec.md §4.3: "Product version compatibility enforcement deferred to
+  STAGE_06."
+- Update tasks.md §T015 acceptance criteria: "Store license.product_version but do not validate
+  (deferred to STAGE_06)"
 - Capture as dependency for STAGE_06 planning
 
 **Severity:** MEDIUM (clarification of scope, not a code issue)
@@ -1546,13 +1613,15 @@ Recommendation: DEFER to STAGE_06 (clean separation)
 
 **Discrepancy:**
 
-- **Spec lists:** 10 provisioning errors (PROV_001-PROV_010) + 5 workspace access errors (WS_001-WS_005) = 15 total
+- **Spec lists:** 10 provisioning errors (PROV_001-PROV_010) + 5 workspace access errors
+  (WS_001-WS_005) = 15 total
 - **Task T019 says:** "Error code map created for all 10 provisioning errors"
 - **Missing:** WS codes not mentioned in task description
 
 **Analysis:**
 
-- Workspace access errors (WS_001-WS_005) are handled by middleware (T015, T016), not provisioning service
+- Workspace access errors (WS_001-WS_005) are handled by middleware (T015, T016), not provisioning
+  service
 - T019 is specifically about provisioning error codes (10)
 - No missing work, just task description could be clearer
 

@@ -2,8 +2,7 @@
 
 ---
 
-⚖ Governance Authority:
-This roadmap operates under the binding authority of:
+⚖ Governance Authority: This roadmap operates under the binding authority of:
 
 - Zidney Constitution v1.2.0
 - ZIDNEY_GOVERNANCE_CHARTER.md (specs/ZIDNEY_GOVERNANCE_CHARTER.md)
@@ -426,8 +425,8 @@ All UI Phases CONSUME:
 
 # 🔢 PHASE‑TO‑STAGE NUMERIC DEPENDENCY TABLE
 
-This table defines the official numeric stage ranges per phase.
-It prevents stage misalignment and enforces execution boundaries.
+This table defines the official numeric stage ranges per phase. It prevents stage misalignment and
+enforces execution boundaries.
 
 | Phase | Name                        | Stage Range | Depends On Phase | Notes                               |
 | ----- | --------------------------- | ----------- | ---------------- | ----------------------------------- |

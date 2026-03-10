@@ -11,7 +11,8 @@
 
 ## Overview
 
-A comprehensive specification has been generated for **STAGE_INFRA_09_AI_ARCHITECTURE_CONTEXT**, establishing an AI-consumable architecture context layer for the Zidney monorepo.
+A comprehensive specification has been generated for **STAGE_INFRA_09_AI_ARCHITECTURE_CONTEXT**,
+establishing an AI-consumable architecture context layer for the Zidney monorepo.
 
 ---
 
@@ -19,7 +20,8 @@ A comprehensive specification has been generated for **STAGE_INFRA_09_AI_ARCHITE
 
 ### What Is Being Built
 
-An architecture context layer that transforms static architecture metadata into **machine-readable artifacts for AI tools**. This enables:
+An architecture context layer that transforms static architecture metadata into **machine-readable
+artifacts for AI tools**. This enables:
 
 - ✅ Architecture-aware code generation
 - ✅ Dependency impact analysis
@@ -89,7 +91,8 @@ All criteria are measurable and verifiable:
 ### Identified Risks
 
 1. **Risk: Artifact Staleness** — Context artifacts become outdated if infra-audit isn't re-run
-   - **Mitigation:** Document when artifacts should be regenerated; add CI check to validate freshness
+   - **Mitigation:** Document when artifacts should be regenerated; add CI check to validate
+     freshness
 
 2. **Risk: Schema Drift** — AI tools may expect different artifact structure than what's generated
    - **Mitigation:** Define JSON schemas for all artifacts; validate against schemas before commit
@@ -101,7 +104,8 @@ All criteria are measurable and verifiable:
    - **Mitigation:** Implement tiered context (full brain + lightweight mini); add caching
 
 5. **Risk: Governance Bypass** — AI tools might ignore or override architectural constraints
-   - **Mitigation:** Integrate artifact validation into ai-guard.ts; block violations before code generation
+   - **Mitigation:** Integrate artifact validation into ai-guard.ts; block violations before code
+     generation
 
 ---
 
@@ -173,7 +177,8 @@ Then **Step 3 — Plan** will:
 ## Artifacts Generated
 
 - ✅ `specs/runtime/infra-009-ai-architecture-context/spec.md` — Complete specification
-- ✅ `specs/runtime/infra-009-ai-architecture-context/checklists/requirements.md` — Quality checklist
+- ✅ `specs/runtime/infra-009-ai-architecture-context/checklists/requirements.md` — Quality
+  checklist
 
 **Location:** `specs/runtime/infra-009-ai-architecture-context/`
 

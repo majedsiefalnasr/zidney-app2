@@ -8,7 +8,14 @@
 
 ## Summary
 
-Layout system integration stage completed successfully. All 56 implementation tasks delivered, 162/162 test assertions passing, zero lint/typecheck errors. Shared UI store (sidebarCollapsed, isMobile, toggleSidebar, setMobile, reset) + auth store (resolvedPermissions, buildResolvedPermissions) deployed to all 3 apps (mmc, backoffice, frontoffice). Responsive layout shell (AppHeader, AppSidebar, AppLayout) created. SidebarLayout reactive props (ui-system) fixed. Router meta types + navigation configs + useBreakpoint composable + conditional layout routing all implemented. BackofficeLayout.vue deleted; 4 backoffice views updated to drop legacy wrapper. Stage is production ready for integration testing and deployment.
+Layout system integration stage completed successfully. All 56 implementation tasks delivered,
+162/162 test assertions passing, zero lint/typecheck errors. Shared UI store (sidebarCollapsed,
+isMobile, toggleSidebar, setMobile, reset) + auth store (resolvedPermissions,
+buildResolvedPermissions) deployed to all 3 apps (mmc, backoffice, frontoffice). Responsive layout
+shell (AppHeader, AppSidebar, AppLayout) created. SidebarLayout reactive props (ui-system) fixed.
+Router meta types + navigation configs + useBreakpoint composable + conditional layout routing all
+implemented. BackofficeLayout.vue deleted; 4 backoffice views updated to drop legacy wrapper. Stage
+is production ready for integration testing and deployment.
 
 ---
 
@@ -65,7 +72,8 @@ Layout system integration stage completed successfully. All 56 implementation ta
 **Backoffice Layout Cleanup:**
 
 - Deleted BackofficeLayout.vue (legacy wrapper)
-- Updated 4 backoffice view files (Dashboard, CreateRolePage, RoleDetailPage, RolesListPage) to remove BackofficeLayout wrapper
+- Updated 4 backoffice view files (Dashboard, CreateRolePage, RoleDetailPage, RolesListPage) to
+  remove BackofficeLayout wrapper
 
 **Summary Metrics:**
 
@@ -117,15 +125,18 @@ None. All scope delivered in full without deferrals or scope creep.
 - All tests passing (21 files, 162 assertions)
 - Zero lint/typecheck errors
 - Shared ui.store and auth.store use Pinia + TypeScript strict mode (type-safe state mutations)
-- Breaking change: BackofficeLayout.vue deletion — backward-compatible because only backoffice views used it (all updated); no external consumers
-- Post-implementation fixes: 4 valid fixes applied (import paths, vitest aliases, lib/utils.ts creation, AppSidebar stub slots) — all verified to resolve errors
+- Breaking change: BackofficeLayout.vue deletion — backward-compatible because only backoffice views
+  used it (all updated); no external consumers
+- Post-implementation fixes: 4 valid fixes applied (import paths, vitest aliases, lib/utils.ts
+  creation, AppSidebar stub slots) — all verified to resolve errors
 
 ---
 
 ## Testing Readiness
 
 **Unit Tests:** Ready for integration testing. All 21 test files pass with 162 assertions.  
-**Integration Tests:** Ready for end-to-end flows. All routes tested. Auth guards + layout routing verified.  
+**Integration Tests:** Ready for end-to-end flows. All routes tested. Auth guards + layout routing
+verified.  
 **Manual Testing:** See `guides/TESTING_GUIDE.md` for step-by-step testing scenarios.
 
 ---

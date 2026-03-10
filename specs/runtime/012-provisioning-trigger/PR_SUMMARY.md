@@ -10,7 +10,9 @@
 
 ## Overview
 
-This PR implements the **Provisioning Trigger** system — the complete pipeline for transforming a license purchase into a fully initialized workspace. The system ensures transactional consistency, idempotent operations, comprehensive audit logging, and graceful error handling with DLQ recovery.
+This PR implements the **Provisioning Trigger** system — the complete pipeline for transforming a
+license purchase into a fully initialized workspace. The system ensures transactional consistency,
+idempotent operations, comprehensive audit logging, and graceful error handling with DLQ recovery.
 
 ### What This Enables
 

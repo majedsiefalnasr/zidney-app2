@@ -1,7 +1,7 @@
 # Data Model: Implement multi-tenancy architecture for Zidney platform
 
-**Date**: 2026-02-15
-**Feature**: [specs/runtime/002-multi-tenancy-architecture/spec.md](specs/runtime/002-multi-tenancy-architecture/spec.md)
+**Date**: 2026-02-15 **Feature**:
+[specs/runtime/002-multi-tenancy-architecture/spec.md](specs/runtime/002-multi-tenancy-architecture/spec.md)
 
 ## Entities
 

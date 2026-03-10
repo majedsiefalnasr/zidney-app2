@@ -1,6 +1,7 @@
 # Data Model: Tenant Baseline Schema
 
-**Purpose**: Define all entities, relationships, validation rules, and state transitions for baseline schema
+**Purpose**: Define all entities, relationships, validation rules, and state transitions for
+baseline schema
 
 **Version**: 1.0.0  
 **Created**: 2026-02-16
@@ -326,7 +327,8 @@ Entity Name:
   - Exactly one of mcq_exam_id or traditional_exam_id (not both, not neither)
   - scheduled_date ≥ today
   - One of exam types must be non-null
-  - Check: (mcq_exam_id IS NOT NULL AND traditional_exam_id IS NULL) OR (mcq_exam_id IS NULL AND traditional_exam_id IS NOT NULL)
+  - Check: (mcq_exam_id IS NOT NULL AND traditional_exam_id IS NULL) OR (mcq_exam_id IS NULL AND
+    traditional_exam_id IS NOT NULL)
 
 ---
 
@@ -373,7 +375,8 @@ Entity Name:
 - **Purpose**: Single question answer within attempt
 - **Attributes**:
   - id, attempt_id (FK, ON DELETE CASCADE), question_id (UUID, NOT NULL)
-  - submitted_answer (JSONB, NOT NULL): Answer data (format varies: MCQ → {option_index: 2}, Essay → {text: "..."})
+  - submitted_answer (JSONB, NOT NULL): Answer data (format varies: MCQ → {option_index: 2}, Essay →
+    {text: "..."})
   - submitted_at (TIMESTAMPTZ, NOT NULL): When student submitted this answer
   - submission_order (INT, NOT NULL): Chronological order within attempt
   - is_correct (BOOLEAN, NULLABLE): Set by grader post-submission
@@ -386,7 +389,8 @@ Entity Name:
   - Unique: (attempt_id, question_id) — one answer per question per attempt
   - is_correct immutable after grading complete
   - submission_order ≥ 1
-- **Notes**: question_id denormalized (not foreign key) to preserve snapshot integrity; actual question details stored in attempt.question_list_snapshot
+- **Notes**: question_id denormalized (not foreign key) to preserve snapshot integrity; actual
+  question details stored in attempt.question_list_snapshot
 
 ### Entity: Attempt_Event
 
@@ -395,7 +399,8 @@ Entity Name:
 - **Attributes**:
   - id (UUID, PK)
   - attempt_id (FK → attempts, ON DELETE CASCADE)
-  - event_type (ENUM: START, RESUME, PAUSE, ANSWER_SUBMIT, TIME_WARNING, SUBMIT_REQUEST, FINALIZED, GRADED, ARCHIVED)
+  - event_type (ENUM: START, RESUME, PAUSE, ANSWER_SUBMIT, TIME_WARNING, SUBMIT_REQUEST, FINALIZED,
+    GRADED, ARCHIVED)
   - event_payload (JSONB, NULLABLE): Event metadata (e.g., answer submitted, time warning at 5min)
   - occurred_at (TIMESTAMPTZ, NOT NULL): Server time when event occurred
   - created_at (TIMESTAMPTZ, DEFAULT now()): Log creation time
@@ -454,7 +459,8 @@ Entity Name:
 - **Type**: Business entity
 - **Purpose**: Discount code
 - **Attributes**:
-  - id, code (VARCHAR 50, UNIQUE), discount_percent (INT), max_uses (INT), times_used (INT, DEFAULT 0)
+  - id, code (VARCHAR 50, UNIQUE), discount_percent (INT), max_uses (INT), times_used (INT,
+    DEFAULT 0)
   - expiry_date (DATE, NULLABLE)
   - is_active (BOOLEAN, DEFAULT true)
   - created_at, updated_at, is_deleted
@@ -470,7 +476,8 @@ Entity Name:
 - **Type**: System entity
 - **Purpose**: Subscription lifecycle audit
 - **Attributes**:
-  - id, subscription_id (FK), event_type (ENUM: CREATED, ACTIVATED, RENEWED, PAUSED, CANCELLED, UPGRADED, DOWNGRADED)
+  - id, subscription_id (FK), event_type (ENUM: CREATED, ACTIVATED, RENEWED, PAUSED, CANCELLED,
+    UPGRADED, DOWNGRADED)
   - details (JSONB, NULLABLE)
   - created_at, created_by, is_deleted
 - **Relationships**:
@@ -487,7 +494,8 @@ Entity Name:
 - **Type**: Business entity
 - **Purpose**: User alert (exam reminder, grade posted)
 - **Attributes**:
-  - id, user_id (FK), title, message, notification_type (ENUM: EXAM_REMINDER, GRADE_POSTED, ANNOUNCEMENT)
+  - id, user_id (FK), title, message, notification_type (ENUM: EXAM_REMINDER, GRADE_POSTED,
+    ANNOUNCEMENT)
   - is_read (BOOLEAN, DEFAULT false), read_at (TIMESTAMPTZ, NULLABLE)
   - created_at, updated_at, is_deleted
 - **Relationships**:

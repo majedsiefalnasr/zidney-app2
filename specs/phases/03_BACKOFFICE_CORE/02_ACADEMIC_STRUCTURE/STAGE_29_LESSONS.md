@@ -137,5 +137,4 @@ Stage is complete when:
 
 ---
 
-Next stage:
-STAGE_30_CATEGORIES
+Next stage: STAGE_30_CATEGORIES

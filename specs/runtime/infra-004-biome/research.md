@@ -1,14 +1,14 @@
 # Research: infra-004-biome — Biome Toolchain Migration
 
-**Feature ID:** `infra-004-biome`
-**Researched:** 2026-03-06
-**Status:** Complete — all NEEDS CLARIFICATION resolved
+**Feature ID:** `infra-004-biome` **Researched:** 2026-03-06 **Status:** Complete — all NEEDS
+CLARIFICATION resolved
 
 ---
 
 ## Overview
 
-This document records findings from a full codebase scan performed to support the Biome migration plan. All unknowns listed in the spec have been resolved by reading actual files.
+This document records findings from a full codebase scan performed to support the Biome migration
+plan. All unknowns listed in the spec have been resolved by reading actual files.
 
 ---
 
@@ -29,9 +29,11 @@ This document records findings from a full codebase scan performed to support th
 | `globals`                           | `^15.0.0`               |
 | `typescript-eslint`                 | `^8.0.0`                |
 
-**Note:** No ESLint packages appear in per-package `package.json` files. All per-app ESLint configs import from the root workspace `node_modules`.
+**Note:** No ESLint packages appear in per-package `package.json` files. All per-app ESLint configs
+import from the root workspace `node_modules`.
 
-**Decision:** All 8 packages are removed from root `devDependencies` in Pass 3. No per-package removal needed.
+**Decision:** All 8 packages are removed from root `devDependencies` in Pass 3. No per-package
+removal needed.
 
 ---
 
@@ -45,7 +47,8 @@ This document records findings from a full codebase scan performed to support th
 | ---------- | ----------------------- |
 | `prettier` | `^3.8.1`                |
 
-**Note:** No Prettier plugins are installed. `eslint-config-prettier` is listed separately above under ESLint (it bridges the two tools).
+**Note:** No Prettier plugins are installed. `eslint-config-prettier` is listed separately above
+under ESLint (it bridges the two tools).
 
 **Decision:** `prettier` (1 package) removed from root `devDependencies` in Pass 3.
 
@@ -63,15 +66,15 @@ This document records findings from a full codebase scan performed to support th
 export default {
   semi: false,
   singleQuote: true,
-  trailingComma: 'es5',
+  trailingComma: "es5",
   printWidth: 100, // ← already 100, NOT 80
   tabWidth: 2,
   useTabs: false,
   bracketSpacing: true,
-  arrowParens: 'always',
-  endOfLine: 'lf',
+  arrowParens: "always",
+  endOfLine: "lf",
   plugins: [],
-}
+};
 ```
 
 ### `.prettierrc` (root)
@@ -85,9 +88,14 @@ export default {
 }
 ```
 
-**Key finding:** `prettier.config.mjs` already sets `printWidth: 100`. The spec's clarification states "line width 100 replaces Prettier 80 (intentional)" — however `prettier.config.mjs` is already at 100. The `.prettierrc` file does not specify `printWidth`, which means it falls back to Prettier's default of 80. If Prettier was loading `.prettierrc` rather than `prettier.config.mjs`, the effective line width may have been 80. The Biome migration normalises this to 100 unambiguously.
+**Key finding:** `prettier.config.mjs` already sets `printWidth: 100`. The spec's clarification
+states "line width 100 replaces Prettier 80 (intentional)" — however `prettier.config.mjs` is
+already at 100. The `.prettierrc` file does not specify `printWidth`, which means it falls back to
+Prettier's default of 80. If Prettier was loading `.prettierrc` rather than `prettier.config.mjs`,
+the effective line width may have been 80. The Biome migration normalises this to 100 unambiguously.
 
-**Formatting delta:** The Biome reformatting pass will produce a large diff. This is expected and documented in the PR description.
+**Formatting delta:** The Biome reformatting pass will produce a large diff. This is expected and
+documented in the PR description.
 
 **Biome formatter settings to use:**
 
@@ -116,9 +124,17 @@ export default {
 
 **Total files to delete:** 4
 
-**Important note on per-app ESLint configs:** Each of the three app configs (`backoffice/eslint.config.js`, `frontoffice/eslint.config.js`, `mmc/eslint.config.js`) enforces application-specific import restrictions (e.g., no direct axios imports, no cross-app imports). These rules were NOT purely duplicating the root config — they add localised restrictions on top.
+**Important note on per-app ESLint configs:** Each of the three app configs
+(`backoffice/eslint.config.js`, `frontoffice/eslint.config.js`, `mmc/eslint.config.js`) enforces
+application-specific import restrictions (e.g., no direct axios imports, no cross-app imports).
+These rules were NOT purely duplicating the root config — they add localised restrictions on top.
 
-**Biome migration decision for these per-app rules:** Biome does not have an equivalent of ESLint's `no-restricted-imports` rule. However, `ai-guard.ts` enforces import boundary rules architecturally at the CI level. The cross-app import restrictions enforced by `eslint-plugin-import-x` in `eslint.config.mjs` (root) cover the same architectural concerns. Removing per-app ESLint configs does not weaken the architecture boundary enforcement because AI-Guard already covers it. **Document this explicitly in the PR description.**
+**Biome migration decision for these per-app rules:** Biome does not have an equivalent of ESLint's
+`no-restricted-imports` rule. However, `ai-guard.ts` enforces import boundary rules architecturally
+at the CI level. The cross-app import restrictions enforced by `eslint-plugin-import-x` in
+`eslint.config.mjs` (root) cover the same architectural concerns. Removing per-app ESLint configs
+does not weaken the architecture boundary enforcement because AI-Guard already covers it. **Document
+this explicitly in the PR description.**
 
 ---
 
@@ -145,9 +161,9 @@ export default {
 
 ```js
 export default {
-  '*.{ts,tsx,vue}': ['eslint --fix', 'prettier --write'],
-  '*.{md,json}': ['prettier --write'],
-}
+  "*.{ts,tsx,vue}": ["eslint --fix", "prettier --write"],
+  "*.{md,json}": ["prettier --write"],
+};
 ```
 
 **Required change:** Replace entirely with Biome-based hooks per spec clarification.
@@ -156,13 +172,14 @@ export default {
 
 ```js
 export default {
-  '*.{ts,tsx,js,jsx,mjs,vue,json}': ['bun biome check --apply-unsafe'],
-}
+  "*.{ts,tsx,js,jsx,mjs,vue,json}": ["bun biome check --apply-unsafe"],
+};
 ```
 
 **Rationale:**
 
-- `--apply-unsafe` applies both safe and unsafe auto-fixes (including import sorting and some style fixes)
+- `--apply-unsafe` applies both safe and unsafe auto-fixes (including import sorting and some style
+  fixes)
 - The `json` and `mjs` types are added vs. the previous config to match Biome's coverage
 - Markdown files are excluded because Biome does not lint/format Markdown
 
@@ -201,15 +218,21 @@ lint:
 **Jobs that depend on `lint` via `needs:`:**
 
 - `unit-tests`: `needs: [lint, typecheck]`
-- `build-verification`: `needs: [lint, typecheck, unit-tests, integration-tests, e2e-mmc, e2e-backoffice, e2e-frontoffice, coverage-validation]`
+- `build-verification`:
+  `needs: [lint, typecheck, unit-tests, integration-tests, e2e-mmc, e2e-backoffice, e2e-frontoffice, coverage-validation]`
 
-**Decision:** Rename the `lint` step's display name to `Biome — Lint & Format` but **keep the YAML job key as `lint`** to avoid updating all `needs:` references downstream. Replace the two steps (`Run ESLint`, `Check Prettier formatting`) with two Biome steps. The `bun run lint -- --debug` invocation is replaced by `bun biome check .`; the `bun run format:check` step is replaced by `bun biome format --check .`.
+**Decision:** Rename the `lint` step's display name to `Biome — Lint & Format` but **keep the YAML
+job key as `lint`** to avoid updating all `needs:` references downstream. Replace the two steps
+(`Run ESLint`, `Check Prettier formatting`) with two Biome steps. The `bun run lint -- --debug`
+invocation is replaced by `bun biome check .`; the `bun run format:check` step is replaced by
+`bun biome format --check .`.
 
 ---
 
 ## Finding 08: console.\* Violations Inventory
 
-**Research task:** Count and categorise all `console.*` usages across source files (excluding `dist/`, `node_modules/`).
+**Research task:** Count and categorise all `console.*` usages across source files (excluding
+`dist/`, `node_modules/`).
 
 **Source:** Executed `grep -rn "console\."` across all source paths — results inspected directly.
 
@@ -229,11 +252,13 @@ lint:
 | `apps/api/tests/integration/phase4-audit-trail.integration.test.ts` | 1 x `console.error` |
 | `apps/api/tests/performance/dashboard-query-plans.test.ts`          | 1 x `console.log`   |
 
-**Decision:** Test files may use `console.*` sparingly. Add `tests/**` to the `noConsole: "off"` override.
+**Decision:** Test files may use `console.*` sparingly. Add `tests/**` to the `noConsole: "off"`
+override.
 
 ### Category C: Source files — must migrate to `@zidney/logger`
 
-These files contain `console.*` calls in production source code that must be replaced with structured logger calls before `biome check .` can pass with `noConsole: "error"`.
+These files contain `console.*` calls in production source code that must be replaced with
+structured logger calls before `biome check .` can pass with `noConsole: "error"`.
 
 **apps/mmc/src (18 occurrences across 5 files):**
 
@@ -247,18 +272,24 @@ These files contain `console.*` calls in production source code that must be rep
 
 **apps/frontoffice/src:** 0 violations
 
-**apps/api/src (~45 files):** Large volumes. Key files include all middleware, route handlers, service layers, and DB migration runner files. A complete file list is included in the plan.
+**apps/api/src (~45 files):** Large volumes. Key files include all middleware, route handlers,
+service layers, and DB migration runner files. A complete file list is included in the plan.
 
-**apps/worker/src (~15 files):** Worker processor, queue infrastructure, provisioning orchestrator, and observability wrappers.
+**apps/worker/src (~15 files):** Worker processor, queue infrastructure, provisioning orchestrator,
+and observability wrappers.
 
-**packages/domain-core/src (~12 files):** Auth, migration runners, email utility, logging bridge, tenant-resolver version-check.
+**packages/domain-core/src (~12 files):** Auth, migration runners, email utility, logging bridge,
+tenant-resolver version-check.
 
 **packages/redis-utils/src (2 files):** Rate limiting algorithm implementations.
 
 **Total estimated scope for Pass 2 console migration:** ~75 source files.
 
-**Special case — migration runner files:**
-Files in `apps/api/src/db/**/migrations/` use `console.log` for migration progress output. These are non-interactive batch scripts. For Pass 2, these are candidates for `// biome-ignore lint/suspicious/noConsole: migration runner output` suppression comments rather than full logger replacement, acknowledging they run in a non-request context without a logger instance.
+**Special case — migration runner files:** Files in `apps/api/src/db/**/migrations/` use
+`console.log` for migration progress output. These are non-interactive batch scripts. For Pass 2,
+these are candidates for `// biome-ignore lint/suspicious/noConsole: migration runner output`
+suppression comments rather than full logger replacement, acknowledging they run in a non-request
+context without a logger instance.
 
 ---
 
@@ -266,13 +297,16 @@ Files in `apps/api/src/db/**/migrations/` use `console.log` for migration progre
 
 **Research task:** Determine the Biome version to record in `biome.json`'s `$schema` URL.
 
-**Method:** `curl https://registry.npmjs.org/@biomejs/biome/latest` — latest version field read directly.
+**Method:** `curl https://registry.npmjs.org/@biomejs/biome/latest` — latest version field read
+directly.
 
 **Finding:** Latest stable `@biomejs/biome` version as of 2026-03-06 is **2.4.6**.
 
 **Schema URL:** `https://biomejs.dev/schemas/2.4.6/schema.json`
 
-**Per spec clarification:** Biome is installed without a version pin (`bun add -D @biomejs/biome`). The resolved version is recorded in the `$schema` URL inside `biome.json`. After running the install command, the actual installed version should be verified and the schema URL updated accordingly.
+**Per spec clarification:** Biome is installed without a version pin (`bun add -D @biomejs/biome`).
+The resolved version is recorded in the `$schema` URL inside `biome.json`. After running the install
+command, the actual installed version should be verified and the schema URL updated accordingly.
 
 ---
 
@@ -283,10 +317,12 @@ Files in `apps/api/src/db/**/migrations/` use `console.log` for migration progre
 **Finding:** Confirmed zero impact.
 
 - Biome does not read or depend on `tsconfig.json` for its operation.
-- `tsconfig.json`, `tsconfig.base.json`, `tsconfig.test.json`, and per-app tsconfig files are immutable by this migration.
+- `tsconfig.json`, `tsconfig.base.json`, `tsconfig.test.json`, and per-app tsconfig files are
+  immutable by this migration.
 - Vite build system is unaffected — no Vite plugin references ESLint or Prettier.
 - `vitest.config.ts` is unaffected.
-- The removal of `eslint-import-resolver-typescript` (which resolves TypeScript path aliases for ESLint's import resolver) does not affect the TypeScript compiler or build.
+- The removal of `eslint-import-resolver-typescript` (which resolves TypeScript path aliases for
+  ESLint's import resolver) does not affect the TypeScript compiler or build.
 
 ---
 
@@ -302,7 +338,9 @@ Files in `apps/api/src/db/**/migrations/` use `console.log` for migration progre
 | `noDuplicateImports` | `lint.correctness.noDuplicateImports` | Also handled by import organizer |
 | `useConst`           | `lint.style.useConst`                 | Available in Biome 1.0+          |
 
-**Note:** `noDuplicateImports` is also enforced structurally by `organizeImports.enabled: true` — the import organizer deduplicates imports when running `biome format --write`. The lint rule provides a gate during `biome check .`.
+**Note:** `noDuplicateImports` is also enforced structurally by `organizeImports.enabled: true` —
+the import organizer deduplicates imports when running `biome format --write`. The lint rule
+provides a gate during `biome check .`.
 
 ---
 
@@ -310,7 +348,8 @@ Files in `apps/api/src/db/**/migrations/` use `console.log` for migration progre
 
 **Research task:** Check if `.vscode/extensions.json` exists and needs to be created.
 
-**Finding:** `.vscode/` directory exists but contains only `mcp.json` and `settings.json`. No `extensions.json` file exists.
+**Finding:** `.vscode/` directory exists but contains only `mcp.json` and `settings.json`. No
+`extensions.json` file exists.
 
 **Decision:** Create `.vscode/extensions.json` in Pass 3 with the Biome extension recommendation:
 
@@ -334,12 +373,12 @@ Files in `apps/api/src/db/**/migrations/` use `console.log` for migration progre
 | `format`       | `prettier --write .` | `bun biome format --write .` |
 | `format:check` | `prettier --check .` | `bun biome format --check .` |
 
-**Additional script to add:**
-| Script Key | New Value | Purpose |
-| -------------- | -------------------------------- | -------------------------------- |
-| `lint:fix` | `bun biome check --apply .` | Apply safe lint fixes |
+**Additional script to add:** | Script Key | New Value | Purpose | | -------------- |
+-------------------------------- | -------------------------------- | | `lint:fix` |
+`bun biome check --apply .` | Apply safe lint fixes |
 
-**No changes needed to other scripts** — `typecheck`, `test`, `build`, `dev:*`, `arch:*` are unaffected.
+**No changes needed to other scripts** — `typecheck`, `test`, `build`, `dev:*`, `arch:*` are
+unaffected.
 
 ---
 

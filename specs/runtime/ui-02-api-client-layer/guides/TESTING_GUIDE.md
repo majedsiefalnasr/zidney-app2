@@ -1,28 +1,31 @@
 # Testing Guide — API Client Layer
 
-**Stage:** API Client Layer
-**Phase:** 06_UI_APPLICATION_RUNTIME
-**Stage Directory:** ui-02-api-client-layer
-**Generated On:** 2026-03-01
+**Stage:** API Client Layer **Phase:** 06_UI_APPLICATION_RUNTIME **Stage Directory:**
+ui-02-api-client-layer **Generated On:** 2026-03-01
 
 ---
 
 ## Purpose
 
-This guide explains how to validate the `@zidney/api-client` package implementation end-to-end — covering automated tests, manual integration verification, and edge case scenarios.
+This guide explains how to validate the `@zidney/api-client` package implementation end-to-end —
+covering automated tests, manual integration verification, and edge case scenarios.
 
 ---
 
 ## Summary of Delivered Behavior
 
-A new shared `packages/api-client` package replaces per-app HTTP client implementations across MMC, Backoffice, and Frontoffice. It provides a framework-agnostic HTTP client with injectable transport, automatic auth token injection, error normalization, idempotency keys, and correlation ID propagation.
+A new shared `packages/api-client` package replaces per-app HTTP client implementations across MMC,
+Backoffice, and Frontoffice. It provides a framework-agnostic HTTP client with injectable transport,
+automatic auth token injection, error normalization, idempotency keys, and correlation ID
+propagation.
 
 Key outcomes:
 
 - All HTTP requests from any Zidney frontend app go through a single, tested client implementation
 - Automatic `Idempotency-Key` headers on all mutation requests (POST/PUT/PATCH/DELETE)
 - Automatic `X-Correlation-ID` on every request for distributed tracing
-- Single-flight 401 refresh: if a token expires mid-session, one refresh is attempted and all queued requests retry
+- Single-flight 401 refresh: if a token expires mid-session, one refresh is attempted and all queued
+  requests retry
 - Structured `AppError` objects replace raw error objects across all error paths
 
 ---
@@ -100,7 +103,8 @@ Expected outcome: 90 tests pass, 0 type errors, 0 lint errors.
 **Purpose:** Verify the per-app wrapper correctly delegates to the shared client.
 
 1. Open `apps/backoffice/src/core/api/client.ts` and confirm it imports from `@zidney/api-client`
-2. In a Backoffice Vue component, call `apiClient.get('/api/v1/health')` from the browser console or a test page
+2. In a Backoffice Vue component, call `apiClient.get('/api/v1/health')` from the browser console or
+   a test page
 3. Open browser DevTools → Network tab
 
 Expected:
@@ -128,7 +132,8 @@ Expected:
 
 Troubleshooting:
 
-- If `Idempotency-Key` is missing → check `applyIdempotencyKey` in `interceptors.ts` and verify method is POST/PUT/PATCH/DELETE
+- If `Idempotency-Key` is missing → check `applyIdempotencyKey` in `interceptors.ts` and verify
+  method is POST/PUT/PATCH/DELETE
 - GET requests should NOT have `Idempotency-Key`
 
 ### Scenario 3 — 401 Token Refresh (Edge Case)
@@ -162,11 +167,11 @@ Error responses follow the `AppError` interface:
 
 ```typescript
 interface AppError {
-  code: string
-  message: string
-  status?: number
-  details?: Record<string, unknown>
-  retryAfter?: number
+  code: string;
+  message: string;
+  status?: number;
+  details?: Record<string, unknown>;
+  retryAfter?: number;
 }
 ```
 
@@ -174,7 +179,8 @@ interface AppError {
 
 ## Multi-Tenant Isolation Verification
 
-This package is a **UI-only HTTP client** — it does not access databases directly. Tenant isolation is enforced by:
+This package is a **UI-only HTTP client** — it does not access databases directly. Tenant isolation
+is enforced by:
 
 1. Each app wrapper configures `baseURL` with the tenant-specific API endpoint
 2. Auth interceptor injects tenant-scoped tokens

@@ -10,7 +10,8 @@
 
 ## What Was Delivered
 
-This stage implemented a complete Pinia 2 state management layer for three Zidney applications: **MMC**, **Backoffice**, and **Frontoffice**. Key changes:
+This stage implemented a complete Pinia 2 state management layer for three Zidney applications:
+**MMC**, **Backoffice**, and **Frontoffice**. Key changes:
 
 1. `pinia-plugin-persistedstate` registered in all three app bootstraps
 2. Auth store IDs namespaced per app to prevent cross-app collision
@@ -76,10 +77,13 @@ bun /path/to/scripts/check-store-cycles.ts
 
 1. In a browser with MMC running locally, open DevTools → Application → Local Storage
 2. Observe there is no `auth` key (bare, un-namespaced)
-3. The auth store for MMC is `mmc-auth`, for Backoffice `backoffice-auth`, for Frontoffice `frontoffice-auth`
-4. Confirm no persistence key leaks auth tokens into localStorage (auth stores have `persist: false`)
+3. The auth store for MMC is `mmc-auth`, for Backoffice `backoffice-auth`, for Frontoffice
+   `frontoffice-auth`
+4. Confirm no persistence key leaks auth tokens into localStorage (auth stores have
+   `persist: false`)
 
-**Expected:** Each app's auth store uses its own namespaced ID. No auth tokens stored in localStorage.
+**Expected:** Each app's auth store uses its own namespaced ID. No auth tokens stored in
+localStorage.
 
 ---
 
@@ -95,7 +99,8 @@ bun /path/to/scripts/check-store-cycles.ts
 4. Reload the page
 5. Confirm sidebar collapsed state is **preserved**
 6. Open DevTools → Application → Local Storage → look for key `mmc-app`
-7. Confirm the stored JSON contains `sidebarCollapsed: true` and `theme: "dark"` but **no user/token fields**
+7. Confirm the stored JSON contains `sidebarCollapsed: true` and `theme: "dark"` but **no user/token
+   fields**
 
 **Expected:** sidebarCollapsed, theme, locale persisted; auth data absent.
 
@@ -124,7 +129,8 @@ bun /path/to/scripts/check-store-cycles.ts
 
 **Steps (Backoffice):**
 
-1. Programmatically push 3 notifications (via `useBackofficeNotificationStore().push(...)` in dev console or through a UI trigger)
+1. Programmatically push 3 notifications (via `useBackofficeNotificationStore().push(...)` in dev
+   console or through a UI trigger)
 2. Confirm all 3 appear in the notification queue
 3. Dismiss notification #2 by its UUID
 4. Confirm notifications #1 and #3 remain; #2 is gone
@@ -140,16 +146,19 @@ bun /path/to/scripts/check-store-cycles.ts
 
 **Steps:**
 
-1. In a Backoffice browser session, observe the `useBackofficeWorkspaceStore()` state via Vue DevTools
+1. In a Backoffice browser session, observe the `useBackofficeWorkspaceStore()` state via Vue
+   DevTools
 2. Trigger `loadWorkspace()` — observe `isLoading: true` during the call, `isLoading: false` after
 3. Simulate a failure (e.g., kill the API, reload) — confirm:
    - `isLoading` returns to `false`
    - `error` field is populated with an `AppError` object with `code: 'WORKSPACE_LOAD_FAILED'`
    - The user-visible error message is generic (not an internal error detail)
 4. Check browser console — confirm **no** `console.log` or `console.error` calls from store files
-5. Check server logs — confirm structured log entry with `error_code: 'WORKSPACE_LOAD_FAILED'` and `internal_message` (server-side only)
+5. Check server logs — confirm structured log entry with `error_code: 'WORKSPACE_LOAD_FAILED'` and
+   `internal_message` (server-side only)
 
-**Expected:** Loading state transitions correctly; errors are handled gracefully; no sensitive details reach the client.
+**Expected:** Loading state transitions correctly; errors are handled gracefully; no sensitive
+details reach the client.
 
 ---
 
@@ -160,12 +169,14 @@ bun /path/to/scripts/check-store-cycles.ts
 **Steps:**
 
 1. Open MMC in browser, open DevTools Console
-2. Fill localStorage: `for(let i=0;i<1000;i++){try{localStorage.setItem('fill'+i, 'x'.repeat(10000))}catch(e){}}`
+2. Fill localStorage:
+   `for(let i=0;i<1000;i++){try{localStorage.setItem('fill'+i, 'x'.repeat(10000))}catch(e){}}`
 3. Trigger a store state change that would normally persist (e.g., collapse sidebar)
 4. Confirm **no unhandled exceptions** in the console
 5. Confirm the app continues to function normally
 
-**Expected:** `pinia-plugin-persistedstate` handles the `QuotaExceededError` gracefully; app does not crash.
+**Expected:** `pinia-plugin-persistedstate` handles the `QuotaExceededError` gracefully; app does
+not crash.
 
 ---
 
@@ -178,7 +189,8 @@ bun /path/to/scripts/check-store-cycles.ts
 1. Open MMC in one browser tab and Backoffice in another
 2. Set `sidebarCollapsed: true` in MMC via localStorage injection
 3. In Backoffice, reload the page
-4. Observe that Backoffice sidebar state is unaffected (Backoffice uses its own `backoffice-app` key)
+4. Observe that Backoffice sidebar state is unaffected (Backoffice uses its own `backoffice-app`
+   key)
 
 **Expected:** Each app has isolated localStorage keys. State from one app never bleeds into another.
 

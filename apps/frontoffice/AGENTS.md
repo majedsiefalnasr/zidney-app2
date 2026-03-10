@@ -14,9 +14,7 @@ AI agents working in this directory MUST:
 - Never compute grading or subscription rules locally
 - Never duplicate backend validation logic
 
-If an API contract is unclear:
-Stop and request clarification.
-Do not guess.
+If an API contract is unclear: Stop and request clarification. Do not guess.
 
 ---
 

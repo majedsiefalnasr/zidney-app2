@@ -1,8 +1,6 @@
 # STAGE 35 – Traditional Question Model
 
-Phase: 03_BACKOFFICE_CORE
-Domain: 04_EXAM_ENGINE_CORE
-Database: Tenant DB
+Phase: 03_BACKOFFICE_CORE Domain: 04_EXAM_ENGINE_CORE Database: Tenant DB
 
 ---
 
@@ -39,10 +37,7 @@ Design must:
 
 Traditional questions belong to an exam template structure:
 
-Exam Template
-└── Sections
-└── Subsections
-└── Questions
+Exam Template └── Sections └── Subsections └── Questions
 
 Rules:
 
@@ -245,8 +240,7 @@ Stage complete when:
 
 Traditional engine must remain separate from MCQ engine.
 
-No shared option tables.
-No polymorphic question table.
+No shared option tables. No polymorphic question table.
 
 Separation ensures:
 

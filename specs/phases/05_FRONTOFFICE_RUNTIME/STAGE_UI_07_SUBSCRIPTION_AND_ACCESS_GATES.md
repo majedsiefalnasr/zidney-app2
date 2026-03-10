@@ -33,8 +33,8 @@ This stage defines how the frontend:
 - Handles soft-lock scenarios
 - Prevents unauthorized UI navigation
 
-The frontend must NEVER enforce subscription rules independently.
-It must only reflect backend decisions.
+The frontend must NEVER enforce subscription rules independently. It must only reflect backend
+decisions.
 
 ---
 

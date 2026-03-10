@@ -4,7 +4,8 @@
 
 ## Overview
 
-The Dead Letter Queue (DLQ) collects jobs that fail permanently after exhausting all retry attempts. Manual inspection and recovery is possible through the admin API.
+The Dead Letter Queue (DLQ) collects jobs that fail permanently after exhausting all retry attempts.
+Manual inspection and recovery is possible through the admin API.
 
 ## How Jobs End Up in DLQ
 

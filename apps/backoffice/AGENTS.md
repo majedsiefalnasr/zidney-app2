@@ -4,9 +4,8 @@ This document is a strict behavioral contract for AI agents and developers worki
 
 apps/backoffice/
 
-Backoffice is the institutional (B2B) control panel.
-It manages workspace-level configuration and content.
-It does not execute runtime business logic.
+Backoffice is the institutional (B2B) control panel. It manages workspace-level configuration and
+content. It does not execute runtime business logic.
 
 Stack:
 
@@ -191,8 +190,7 @@ Rules:
 - Translations stored inside tenant DB
 - No cross-workspace translation leakage
 
-Backoffice displays coverage only.
-API enforces integrity.
+Backoffice displays coverage only. API enforces integrity.
 
 ---
 
@@ -297,8 +295,7 @@ AI generating Backoffice code MUST:
 - Never modify license lifecycle
 - Never store business authority in frontend
 
-If backend contract is unclear:
-Stop and request clarification.
+If backend contract is unclear: Stop and request clarification.
 
 ---
 

@@ -3,7 +3,8 @@
 **Stage:** INFRA_AUDIT_CHECKLIST  
 **Phase:** 01_PLATFORM_FOUNDATION  
 **Authored:** 2026-03-04  
-**Purpose:** Catalog the existing monorepo structure as the factual foundation for the implementation plan.
+**Purpose:** Catalog the existing monorepo structure as the factual foundation for the
+implementation plan.
 
 ---
 
@@ -48,7 +49,9 @@ Total: **8 packages**
 | `apps/mmc/vitest.config.ts`            | App     | App-specific config                     |
 | `packages/api-client/vitest.config.ts` | Package | Package-specific config                 |
 
-**Not found:** `apps/api/`, `apps/worker/`, and most `packages/*` do not have standalone Vitest configs — they likely rely on the root config or are covered by the `vitest.workspace.ts` pattern (none found at root).
+**Not found:** `apps/api/`, `apps/worker/`, and most `packages/*` do not have standalone Vitest
+configs — they likely rely on the root config or are covered by the `vitest.workspace.ts` pattern
+(none found at root).
 
 Total discovered: **5 vitest.config.ts files**. No `vitest.workspace.*` files found.
 
@@ -63,7 +66,8 @@ Total discovered: **5 vitest.config.ts files**. No `vitest.workspace.*` files fo
 | `apps/frontoffice/eslint.config.js` | Flat (v9) | App   |
 | `apps/mmc/eslint.config.js`         | Flat (v9) | App   |
 
-**Not found:** No ESLint configs in `apps/api/`, `apps/worker/`, or any `packages/*` directory. These directories likely inherit from the root config or have no independent ESLint configuration.
+**Not found:** No ESLint configs in `apps/api/`, `apps/worker/`, or any `packages/*` directory.
+These directories likely inherit from the root config or have no independent ESLint configuration.
 
 All configs use flat config format (ESLint v9). No legacy `.eslintrc.*` files found.
 
@@ -80,7 +84,8 @@ Total: **4 eslint.config.\* files**
 | `.github/workflows/mmc-dashboard-deploy.yml` | Deployment pipeline for MMC dashboard    |
 | `.github/workflows/hard-mode-guard.yml`      | SpecKit Hard Mode governance guard       |
 
-Total: **4 workflow files**. Enforcement posture per workflow requires reading each file's job steps (Phase 1, manual supplement).
+Total: **4 workflow files**. Enforcement posture per workflow requires reading each file's job steps
+(Phase 1, manual supplement).
 
 ---
 
@@ -88,7 +93,8 @@ Total: **4 workflow files**. Enforcement posture per workflow requires reading e
 
 No `playwright.config.*` files found anywhere in the monorepo.
 
-**Finding:** E2E testing with Playwright is **not configured** in any app. This is a confirmed gap that will appear in the Gap Report.
+**Finding:** E2E testing with Playwright is **not configured** in any app. This is a confirmed gap
+that will appear in the Gap Report.
 
 ---
 
@@ -119,7 +125,8 @@ No `playwright.config.*` files found anywhere in the monorepo.
 | `packages/ui-system`   | YES            |
 | `packages/validation`  | NO             |
 
-**6 of 8 packages are missing README files.** The 2 present (`types`, `ui-system`) require section-completeness checks during Phase 2. All 6 missing packages are HIGH documentation debt.
+**6 of 8 packages are missing README files.** The 2 present (`types`, `ui-system`) require
+section-completeness checks during Phase 2. All 6 missing packages are HIGH documentation debt.
 
 ---
 
@@ -149,7 +156,8 @@ No `playwright.config.*` files found anywhere in the monorepo.
 
 ## 10. Research Gaps (Require Script Execution)
 
-The following data points cannot be determined by static filesystem inspection and require running `scripts/infra-audit.ts`:
+The following data points cannot be determined by static filesystem inspection and require running
+`scripts/infra-audit.ts`:
 
 - Exact test file counts per app and package
 - Coverage percentages (Lines%, Functions%, Statements%, Branches%)

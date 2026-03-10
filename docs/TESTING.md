@@ -147,27 +147,27 @@ touch tests/integration/09-new-feature.test.ts
 ### 2. Use Pattern
 
 ```typescript
-import { describe, it, expect, beforeEach, afterEach } from 'vitest'
-import { createDbManager } from '../../db-manager'
-import { seedWorkspace } from '../../fixtures'
+import { describe, it, expect, beforeEach, afterEach } from "vitest";
+import { createDbManager } from "../../db-manager";
+import { seedWorkspace } from "../../fixtures";
 
-describe('Area 9: New Feature', () => {
-  let masterDb: any
+describe("Area 9: New Feature", () => {
+  let masterDb: any;
 
   beforeEach(async () => {
-    const dbManager = createDbManager()
-    masterDb = await dbManager.getMasterDb()
-  })
+    const dbManager = createDbManager();
+    masterDb = await dbManager.getMasterDb();
+  });
 
   afterEach(async () => {
     // Cleanup
-  })
+  });
 
-  it('Test description', async () => {
+  it("Test description", async () => {
     // Test implementation
-    expect(true).toBe(true)
-  })
-})
+    expect(true).toBe(true);
+  });
+});
 ```
 
 ### 3. Run Your Tests

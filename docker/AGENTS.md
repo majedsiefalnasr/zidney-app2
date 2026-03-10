@@ -25,8 +25,7 @@ Infrastructure enforces:
 
 Isolation → License → Attempt → Runtime → Frontoffice
 
-If infrastructure is misconfigured,
-all higher layers become unreliable.
+If infrastructure is misconfigured, all higher layers become unreliable.
 
 ---
 

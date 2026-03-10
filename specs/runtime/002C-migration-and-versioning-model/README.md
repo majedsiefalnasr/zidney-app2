@@ -9,7 +9,8 @@
 
 ## What Is This Stage?
 
-STAGE_02C defines Zidney's deterministic, auditable schema evolution system. It operationalizes ADR-0008 (Semantic Versioning Policy) and ensures:
+STAGE_02C defines Zidney's deterministic, auditable schema evolution system. It operationalizes
+ADR-0008 (Semantic Versioning Policy) and ensures:
 
 - **No schema drift** across tenants
 - **Controlled upgrades** (opt-in, not automatic)

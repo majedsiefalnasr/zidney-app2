@@ -9,7 +9,8 @@
 
 ## Overview
 
-Tenant Resolver middleware enforces license status BEFORE route handlers execute, implementing the trust chain:
+Tenant Resolver middleware enforces license status BEFORE route handlers execute, implementing the
+trust chain:
 
 ```
 Correlation ID → Tenant Resolver → License Enforcement → Schema Validation → Handler
@@ -45,14 +46,15 @@ This document defines the license-specific contract for Tenant Resolver.
 
 **Input**: Request URL/headers
 
-- `workspace_slug`: From subdomain (e.g., `acme-corp.zidney.com`) OR path (e.g., `/workspace/acme-corp/...`)
+- `workspace_slug`: From subdomain (e.g., `acme-corp.zidney.com`) OR path (e.g.,
+  `/workspace/acme-corp/...`)
 
 **Output**: Set on Hono context:
 
 ```typescript
-ctx.set('workspace_slug', 'acme-corp')
-ctx.set('workspace_id', 'uuid')
-ctx.set('license_id', 'uuid')
+ctx.set("workspace_slug", "acme-corp");
+ctx.set("workspace_id", "uuid");
+ctx.set("license_id", "uuid");
 ```
 
 ### 2. Establish Per-Tenant Connection Pool
@@ -112,15 +114,15 @@ SELECT status, soft_lock_until FROM licenses WHERE workspace_id = $1
 
 ```typescript
 async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
-  const workspace_slug = ctx.get('workspace_slug')
+  const workspace_slug = ctx.get("workspace_slug");
 
   // 1. Get license status from resolver
-  const validationResult = await resolver.validateLicenseStatus(workspace_slug)
+  const validationResult = await resolver.validateLicenseStatus(workspace_slug);
 
   // 2. Check status and respond accordingly
   if (validationResult.status === LicenseStatus.ACTIVE) {
     // ACTIVE: Proceed to route handler
-    return await next()
+    return await next();
   }
 
   // 3. Auto-transition soft-lock expiry
@@ -131,15 +133,15 @@ async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
     // Soft lock has expired: auto-transition to ARCHIVED
     await transitionLicenseState(ctx, {
       license_id: validationResult.license_id,
-      target_state: 'ARCHIVED',
-      reason: 'soft_lock_expired_auto_transition',
-    })
+      target_state: "ARCHIVED",
+      reason: "soft_lock_expired_auto_transition",
+    });
     // Fall through to return 403 (now ARCHIVED)
-    validationResult.status = LicenseStatus.ARCHIVED
+    validationResult.status = LicenseStatus.ARCHIVED;
   }
 
   // 4. Return appropriate HTTP response per status
-  return handleLicenseStatusResponse(ctx, validationResult)
+  return handleLicenseStatusResponse(ctx, validationResult);
 }
 ```
 
@@ -149,7 +151,7 @@ async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
 
 ```typescript
 // License is valid, proceed to route handler
-return await next()
+return await next();
 ```
 
 **Middleware overhead**: < 1ms (single index lookup + switch statement)
@@ -162,21 +164,18 @@ return ctx.json(
     success: false,
     data: null,
     error: {
-      code: 'LICENSE_SOFT_LOCKED',
-      message:
-        'Institution license is soft-locked. Contact support for renewal.',
+      code: "LICENSE_SOFT_LOCKED",
+      message: "Institution license is soft-locked. Contact support for renewal.",
       expires_in_seconds: Math.floor((license.soft_lock_until - now()) / 1000),
     },
   },
   {
     status: 423,
     headers: {
-      'Retry-After': String(
-        Math.ceil((license.soft_lock_until - now()) / 1000)
-      ),
+      "Retry-After": String(Math.ceil((license.soft_lock_until - now()) / 1000)),
     },
-  }
-)
+  },
+);
 ```
 
 **Behavior**:
@@ -195,13 +194,13 @@ return ctx.json(
     success: false,
     data: null,
     error: {
-      code: 'LICENSE_ARCHIVED',
+      code: "LICENSE_ARCHIVED",
       message:
-        'Institution license is archived. Workspace data is not accessible. Contact MMC for restoration or deletion.',
+        "Institution license is archived. Workspace data is not accessible. Contact MMC for restoration or deletion.",
     },
   },
-  { status: 403 }
-)
+  { status: 403 },
+);
 ```
 
 **Behavior**:
@@ -218,12 +217,12 @@ return ctx.json(
     success: false,
     data: null,
     error: {
-      code: 'LICENSE_DELETED',
-      message: 'This workspace has been permanently deleted.',
+      code: "LICENSE_DELETED",
+      message: "This workspace has been permanently deleted.",
     },
   },
-  { status: 404 }
-)
+  { status: 404 },
+);
 ```
 
 **Behavior**:
@@ -243,18 +242,17 @@ return ctx.json(
 **Action**: Atomically transition to ARCHIVED
 
 ```typescript
-if (license.status === 'SOFT_LOCKED' && new Date() > license.soft_lock_until) {
+if (license.status === "SOFT_LOCKED" && new Date() > license.soft_lock_until) {
   // Transaction: SELECT FOR UPDATE + UPDATE + INSERT audit
   const result = await db.transaction(async (tx) => {
     // 1. Lock row to prevent concurrent transitions
-    const currentLicense = await tx.query(
-      'SELECT * FROM licenses WHERE id = $1 FOR UPDATE',
-      [licenses.id]
-    )
+    const currentLicense = await tx.query("SELECT * FROM licenses WHERE id = $1 FOR UPDATE", [
+      licenses.id,
+    ]);
 
     // 2. Verify still SOFT_LOCKED (not already transitioned)
-    if (currentLicense.status !== 'SOFT_LOCKED') {
-      throw new Error('License already transitioned')
+    if (currentLicense.status !== "SOFT_LOCKED") {
+      throw new Error("License already transitioned");
     }
 
     // 3. Update status
@@ -262,32 +260,25 @@ if (license.status === 'SOFT_LOCKED' && new Date() > license.soft_lock_until) {
       `UPDATE licenses 
        SET status = $2, archived_at = now(), soft_lock_until = NULL, updated_at = now()
        WHERE id = $1`,
-      [licenses.id, 'ARCHIVED']
-    )
+      [licenses.id, "ARCHIVED"],
+    );
 
     // 4. Create audit log
     await tx.query(
       `INSERT INTO license_audit_logs 
        (license_id, previous_status, new_status, actor_type, reason, timestamp, correlation_id, created_at)
        VALUES ($1, $2, $3, $4, $5, now(), $6, now())`,
-      [
-        licenses.id,
-        'SOFT_LOCKED',
-        'ARCHIVED',
-        'SYSTEM',
-        'Soft lock 90-day expiry',
-        correlation_id,
-      ]
-    )
-  })
+      [licenses.id, "SOFT_LOCKED", "ARCHIVED", "SYSTEM", "Soft lock 90-day expiry", correlation_id],
+    );
+  });
 
   // 5. Log transition
-  logger.info('Soft lock auto-expired to ARCHIVED', {
+  logger.info("Soft lock auto-expired to ARCHIVED", {
     license_id: license.id,
     workspace_slug,
     correlation_id,
     triggered_by_request: true,
-  })
+  });
 }
 ```
 
@@ -340,7 +331,8 @@ router.get('/attempts/:attemptId', async (ctx) => {
 
 ### Non-Tenant Route
 
-Routes that don't require workspace context (e.g., `POST /licenses`, global admin endpoints) should skip license enforcement:
+Routes that don't require workspace context (e.g., `POST /licenses`, global admin endpoints) should
+skip license enforcement:
 
 ```typescript
 // Option 1: Explicit bypass annotation
@@ -452,20 +444,20 @@ If license status lookup fails (network error, DB unavailable):
 // → FAIL CLOSED (deny access, don't permit on uncertainty)
 
 try {
-  const validationResult = await resolver.validateLicenseStatus(workspace_slug)
+  const validationResult = await resolver.validateLicenseStatus(workspace_slug);
 } catch (error) {
-  logger.error('License validation failed', { error, workspace_slug })
+  logger.error("License validation failed", { error, workspace_slug });
   return ctx.json(
     {
       success: false,
       data: null,
       error: {
-        code: 'LICENSE_CHECK_UNAVAILABLE',
-        message: 'Unable to verify license status. Please try again.',
+        code: "LICENSE_CHECK_UNAVAILABLE",
+        message: "Unable to verify license status. Please try again.",
       },
     },
-    { status: 503 } // Service Unavailable
-  )
+    { status: 503 }, // Service Unavailable
+  );
 }
 ```
 
@@ -490,4 +482,6 @@ TENANT_CONNECTION_POOL_SIZE=20            # Per-tenant pool size
 
 ## Conclusion
 
-Tenant Resolver middleware implements deterministic license enforcement at the request layer, ensuring the trust chain is never broken. Auto-expiry is handled on-demand without cron jobs, and all access decisions are atomic and auditable.
+Tenant Resolver middleware implements deterministic license enforcement at the request layer,
+ensuring the trust chain is never broken. Auto-expiry is handled on-demand without cron jobs, and
+all access decisions are atomic and auditable.

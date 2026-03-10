@@ -209,8 +209,8 @@ GET /v1/mmc/affiliates/aff-001/usages?sort_by=created_at&sort_order=desc&limit=2
 Verify total commissions owed to affiliate:
 
 ```typescript
-GET / v1 / mmc / affiliates / { affiliate_id } / usages
-total_commission_amount: '$4737.75' // Sum of all commissions
+GET / v1 / mmc / affiliates / { affiliate_id } / usages;
+total_commission_amount: "$4737.75"; // Sum of all commissions
 ```
 
 ### Usage Audit

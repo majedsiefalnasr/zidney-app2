@@ -159,8 +159,7 @@ Format: `MAJOR.MINOR.PATCH`
 
 #### PATCH Version (1.0.0 → 1.0.1)
 
-**When**: Backward-compatible bug fixes, data corrections
-**Changes**:
+**When**: Backward-compatible bug fixes, data corrections **Changes**:
 
 - Add index on existing column
 - Add NOT NULL column with default
@@ -175,8 +174,7 @@ Format: `MAJOR.MINOR.PATCH`
 
 #### MINOR Version (1.0.0 → 1.1.0)
 
-**When**: Backward-compatible new features
-**Changes**:
+**When**: Backward-compatible new features **Changes**:
 
 - Add new column with default
 - Add new table
@@ -191,8 +189,7 @@ Format: `MAJOR.MINOR.PATCH`
 
 #### MAJOR Version (1.0.0 → 2.0.0)
 
-**When**: Breaking changes to schema
-**Changes**:
+**When**: Breaking changes to schema **Changes**:
 
 - Remove column
 - Drop table
@@ -200,8 +197,7 @@ Format: `MAJOR.MINOR.PATCH`
 - Enforce new constraint
 - Change column data type
 
-**Compatibility**: Old code breaks (requires code update)
-**Deployment Order**:
+**Compatibility**: Old code breaks (requires code update) **Deployment Order**:
 
 1. Deploy code changes first
 2. Then apply migration

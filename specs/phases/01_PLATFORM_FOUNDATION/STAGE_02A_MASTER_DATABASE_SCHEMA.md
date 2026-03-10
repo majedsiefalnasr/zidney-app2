@@ -29,8 +29,7 @@ Constitutional Compliance:
 - Master DB strictly separated from tenant data
 - No runtime data stored in master_db
 
-Notes:
-Master schema considered stable. Breaking changes require new stage.
+Notes: Master schema considered stable. Breaking changes require new stage.
 
 ---
 
@@ -38,8 +37,7 @@ Master schema considered stable. Breaking changes require new stage.
 
 Define the authoritative schema for `master_db`.
 
-Master DB is the control plane of Zidney.
-It must remain small, secure, and stable.
+Master DB is the control plane of Zidney. It must remain small, secure, and stable.
 
 It never stores tenant runtime data.
 

@@ -9,13 +9,15 @@
 
 ## Purpose
 
-This guide explains how to validate the runtime architecture implementation for MMC, Backoffice, and Frontoffice Vue 3 apps. Share with QA engineers and reviewing developers before approving this PR.
+This guide explains how to validate the runtime architecture implementation for MMC, Backoffice, and
+Frontoffice Vue 3 apps. Share with QA engineers and reviewing developers before approving this PR.
 
 ---
 
 ## Summary of Delivered Behavior
 
-This stage establishes the canonical SPA runtime architecture shared across three Vue 3 applications (MMC, Backoffice, Frontoffice). Each app has an identical core layer covering:
+This stage establishes the canonical SPA runtime architecture shared across three Vue 3 applications
+(MMC, Backoffice, Frontoffice). Each app has an identical core layer covering:
 
 - Environment config loading from `import.meta.env`
 - Error normalisation to a sealed `NormalizedError` type
@@ -109,7 +111,8 @@ bun run dev:api
 bun run dev:worker
 ```
 
-Backoffice and Frontoffice each have their own dev scripts in `apps/backoffice/package.json` and `apps/frontoffice/package.json`:
+Backoffice and Frontoffice each have their own dev scripts in `apps/backoffice/package.json` and
+`apps/frontoffice/package.json`:
 
 ```bash
 bun --cwd apps/backoffice run dev   # port 5174
@@ -144,7 +147,8 @@ Expected: all exit with code 0.
 bunx eslint "apps/mmc/src/**/*.ts" "apps/backoffice/src/**/*.ts" "apps/frontoffice/src/**/*.ts"
 ```
 
-Expected: 0 errors. Pre-existing `no-console` and `@typescript-eslint/no-explicit-any` warnings are acceptable.
+Expected: 0 errors. Pre-existing `no-console` and `@typescript-eslint/no-explicit-any` warnings are
+acceptable.
 
 ### Unit Tests (196 pass expected)
 
@@ -177,15 +181,18 @@ Expected: all complete without errors, output in respective `dist/` directories.
 
 ### Scenario 1 — Unauthenticated Redirect (Auth Guard)
 
-**Purpose:** Verify that the `authGuard` redirects unauthenticated users to `/login` before accessing protected routes.
+**Purpose:** Verify that the `authGuard` redirects unauthenticated users to `/login` before
+accessing protected routes.
 
 1. Start MMC: `bun run dev:mmc`
 2. Open browser, navigate to `http://localhost:5173/dashboard`
-3. Ensure no access token is present (open DevTools → Application → Cookies — clear any auth cookies)
+3. Ensure no access token is present (open DevTools → Application → Cookies — clear any auth
+   cookies)
 
 Expected: Browser is redirected to `/login`. The dashboard content is never rendered.
 
-Troubleshooting: If the redirect does not happen, check `apps/mmc/src/core/guards/auth.guard.ts` and confirm the guard is registered in `apps/mmc/src/core/router/index.ts` via `router.beforeEach`.
+Troubleshooting: If the redirect does not happen, check `apps/mmc/src/core/guards/auth.guard.ts` and
+confirm the guard is registered in `apps/mmc/src/core/router/index.ts` via `router.beforeEach`.
 
 ---
 
@@ -196,11 +203,15 @@ Troubleshooting: If the redirect does not happen, check `apps/mmc/src/core/guard
 1. Open browser DevTools → Network tab
 2. Log in to the dashboard
 3. Expire the access token (manually clear it from cookies or wait for expiry)
-4. Trigger multiple API calls simultaneously (e.g., switch tabs rapidly or reload a page with multiple data fetches)
+4. Trigger multiple API calls simultaneously (e.g., switch tabs rapidly or reload a page with
+   multiple data fetches)
 
-Expected: Only **one** `POST /auth/refresh` request appears in the Network tab, regardless of how many concurrent 401 responses were received. All other requests resume after the single refresh resolves.
+Expected: Only **one** `POST /auth/refresh` request appears in the Network tab, regardless of how
+many concurrent 401 responses were received. All other requests resume after the single refresh
+resolves.
 
-Troubleshooting: If multiple refresh requests appear, check `pendingRefresh` queue logic in `apps/mmc/src/core/api/client.ts`.
+Troubleshooting: If multiple refresh requests appear, check `pendingRefresh` queue logic in
+`apps/mmc/src/core/api/client.ts`.
 
 ---
 
@@ -211,9 +222,11 @@ Troubleshooting: If multiple refresh requests appear, check `pendingRefresh` que
 1. Log in with a `viewer` role account
 2. Attempt to navigate directly to a route configured with `meta.roles: ['admin']`
 
-Expected: User is redirected to `/forbidden` (403 view). The protected route content is never rendered.
+Expected: User is redirected to `/forbidden` (403 view). The protected route content is never
+rendered.
 
-Troubleshooting: Check `apps/mmc/src/core/guards/role.guard.ts` and confirm `meta.roles` is set on the target route in `apps/mmc/src/modules/*/routes.ts`.
+Troubleshooting: Check `apps/mmc/src/core/guards/role.guard.ts` and confirm `meta.roles` is set on
+the target route in `apps/mmc/src/modules/*/routes.ts`.
 
 ---
 
@@ -231,7 +244,10 @@ Troubleshooting: Check `apps/mmc/src/core/guards/role.guard.ts` and confirm `met
 
 ## Tenant Isolation Note
 
-This is a pure UI stage. No tenant database queries are made from the frontend. Tenant identity is derived from `VITE_WORKSPACE_SLUG` environment variable (set at build time per deployment). Cross-tenant isolation is enforced at the API layer — the UI simply scopes all requests to the configured workspace slug via the API base URL.
+This is a pure UI stage. No tenant database queries are made from the frontend. Tenant identity is
+derived from `VITE_WORKSPACE_SLUG` environment variable (set at build time per deployment).
+Cross-tenant isolation is enforced at the API layer — the UI simply scopes all requests to the
+configured workspace slug via the API base URL.
 
 ---
 

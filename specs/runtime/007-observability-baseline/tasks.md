@@ -17,14 +17,16 @@
 ```
 
 - **[P]**: Can run in parallel (different files, no inter-task dependencies)
-- **[Story]**: Applied when task is part of a logical feature phase (Logger Foundation, API Services, Worker Integration, etc.)
+- **[Story]**: Applied when task is part of a logical feature phase (Logger Foundation, API
+  Services, Worker Integration, etc.)
 - **File paths**: Exact locations where code must be implemented
 
 ---
 
 ## Phase 1: Logger Foundation (5 tasks)
 
-**Purpose**: Establish global Pino logger singleton, request ID generation, and correlation context binding.
+**Purpose**: Establish global Pino logger singleton, request ID generation, and correlation context
+binding.
 
 **Dependencies**: None (foundational)
 
@@ -45,8 +47,10 @@
 **Time Estimate:** 1.5 hours  
 **Difficulty:** 🟢 Easy
 
-**Description:**
-Implement a global Pino logger singleton with `getLogger()` and `getChildLogger()` exports. Logger must be instantiated once at service startup, support structured JSON output, include serializers for request/response objects, and provide child context binding for request-scoped logging.
+**Description:** Implement a global Pino logger singleton with `getLogger()` and `getChildLogger()`
+exports. Logger must be instantiated once at service startup, support structured JSON output,
+include serializers for request/response objects, and provide child context binding for
+request-scoped logging.
 
 **Acceptance Criteria:**
 
@@ -65,7 +69,8 @@ Implement a global Pino logger singleton with `getLogger()` and `getChildLogger(
 
 - Use `pino()` constructor with appropriate transport configuration
 - Implement `serializers` for `req` and `res` objects (include request_id if available)
-- Export both named functions: `export const getLogger = () => logger` and `export const getChildLogger = (context) => logger.child(context)`
+- Export both named functions: `export const getLogger = () => logger` and
+  `export const getChildLogger = (context) => logger.child(context)`
 - NO per-request logger instantiation (singleton reuse mandatory)
 - Test singleton by importing in multiple files and verifying referential equality
 
@@ -87,8 +92,9 @@ Implement a global Pino logger singleton with `getLogger()` and `getChildLogger(
 **Time Estimate:** 1 hour  
 **Difficulty:** 🟢 Easy
 
-**Description:**
-Implement middleware that generates a unique UUID-v4 (or UUID-v7 time-based) for each incoming request and attaches it to the request context. Request ID must be available to all downstream middleware and handlers without modification.
+**Description:** Implement middleware that generates a unique UUID-v4 (or UUID-v7 time-based) for
+each incoming request and attaches it to the request context. Request ID must be available to all
+downstream middleware and handlers without modification.
 
 **Acceptance Criteria:**
 
@@ -121,7 +127,8 @@ Implement middleware that generates a unique UUID-v4 (or UUID-v7 time-based) for
 
 ### Task 3: Create Correlation Context Middleware
 
-- [x] T003 [P] Create correlation context binding middleware in `apps/api/src/middleware/correlation.ts`
+- [x] T003 [P] Create correlation context binding middleware in
+      `apps/api/src/middleware/correlation.ts`
 
 **Layer:** API  
 **Transactional:** No  
@@ -130,22 +137,27 @@ Implement middleware that generates a unique UUID-v4 (or UUID-v7 time-based) for
 **Time Estimate:** 1.5 hours  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Implement middleware that binds request context (request_id, workspace_id, workspace_slug, user_id) to the logger via `pino.child()`. All subsequent logs within the request will automatically include these fields without requiring explicit parameter passing.
+**Description:** Implement middleware that binds request context (request_id, workspace_id,
+workspace_slug, user_id) to the logger via `pino.child()`. All subsequent logs within the request
+will automatically include these fields without requiring explicit parameter passing.
 
 **Acceptance Criteria:**
 
 - [ ] Middleware receives request_id from T002 (already attached to req.context)
 - [ ] Middleware extracts workspace_id from tenant resolver context (assumed available)
 - [ ] Middleware extracts workspace_slug from tenant resolver context
-- [ ] Middleware extracts user_id from authentication context (if authenticated, null if public endpoint)
-- [ ] Child logger created via `getChildLogger({ request_id, workspace_id, workspace_slug, user_id })`
+- [ ] Middleware extracts user_id from authentication context (if authenticated, null if public
+      endpoint)
+- [ ] Child logger created via
+      `getChildLogger({ request_id, workspace_id, workspace_slug, user_id })`
 - [ ] Child logger attached to request context for downstream use (`req.context.logger`)
-- [ ] All logs in handlers automatically include injected fields (no manual parameter passing required)
+- [ ] All logs in handlers automatically include injected fields (no manual parameter passing
+      required)
 - [ ] Child logger is not reused across requests (fresh child per request)
 - [ ] Non-authenticated requests (user_id null) do not block middleware
 - [ ] Workspace-less requests (MMC endpoints) do not block middleware
-- [ ] Middleware executes AFTER tenant resolver and AFTER license middleware (middleware order immutable)
+- [ ] Middleware executes AFTER tenant resolver and AFTER license middleware (middleware order
+      immutable)
 
 **Implementation Notes:**
 
@@ -176,8 +188,9 @@ Implement middleware that binds request context (request_id, workspace_id, works
 **Time Estimate:** 1.5 hours  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Implement middleware that applies defense-in-depth sensitive data redaction at the serializer level. Middleware must use regex patterns to detect and mask passwords, JWT tokens, emails, SSNs, credit cards, and other PII before logs are written to storage.
+**Description:** Implement middleware that applies defense-in-depth sensitive data redaction at the
+serializer level. Middleware must use regex patterns to detect and mask passwords, JWT tokens,
+emails, SSNs, credit cards, and other PII before logs are written to storage.
 
 **Acceptance Criteria:**
 
@@ -189,7 +202,8 @@ Implement middleware that applies defense-in-depth sensitive data redaction at t
 - [ ] Regex pattern for credit card matches `####-####-####-####` format
 - [ ] Redaction integrated into Pino serializers (applied before JSON output)
 - [ ] All plaintext passwords, tokens, emails, SSNs removed from logs (verified by grep test)
-- [ ] Redaction markers used: `[REDACTED]` for generic, `***@***.***` for masked email, `****-****-****-****` for masked card
+- [ ] Redaction markers used: `[REDACTED]` for generic, `***@***.***` for masked email,
+      `****-****-****-****` for masked card
 - [ ] Redaction is non-blocking (< 2ms overhead per log entry)
 - [ ] Redaction handles edge cases: multiple patterns in single log, nested JSON, array values
 - [ ] Redaction does not strip legitimate data (false positive test)
@@ -199,7 +213,8 @@ Implement middleware that applies defense-in-depth sensitive data redaction at t
 - Implement as Pino serializer hook (not as middleware function)
 - Redaction patterns registered with Pino during logger initialization
 - Applied during serialization phase (before writing to transport)
-- Defense-in-depth: Middleware layer catches 90%, developers handle remaining 10% via manual `[REDACTED]` at call sites
+- Defense-in-depth: Middleware layer catches 90%, developers handle remaining 10% via manual
+  `[REDACTED]` at call sites
 - Test with integration tests that check actual log output
 - Use regex with global flag (g) to replace all occurrences
 
@@ -214,23 +229,27 @@ Implement middleware that applies defense-in-depth sensitive data redaction at t
 
 ### Task 5: Register Middlewares in API Router
 
-- [x] T005 Register request-id, correlation, and redaction middlewares in API router in `apps/api/src/index.ts`
+- [x] T005 Register request-id, correlation, and redaction middlewares in API router in
+      `apps/api/src/index.ts`
 
 **Layer:** API  
 **Transactional:** No  
 **Idempotent:** Yes  
-**Dependencies:** T001 (logger), T002 (request-id middleware), T003 (correlation middleware), T004 (redaction middleware)  
+**Dependencies:** T001 (logger), T002 (request-id middleware), T003 (correlation middleware), T004
+(redaction middleware)  
 **Time Estimate:** 1 hour  
 **Difficulty:** 🟢 Easy
 
-**Description:**
-Register all three middlewares (request-id, correlation, redaction) in the correct order in the Hono router. Middleware order is immutable per constitution: request-id → tenant-resolver → license-enforcement → correlation → redaction → route handlers.
+**Description:** Register all three middlewares (request-id, correlation, redaction) in the correct
+order in the Hono router. Middleware order is immutable per constitution: request-id →
+tenant-resolver → license-enforcement → correlation → redaction → route handlers.
 
 **Acceptance Criteria:**
 
 - [ ] Request-ID middleware registered first (before tenant resolver)
 - [ ] Tenant resolver middleware position verified (unchanged, pre-existing)
-- [ ] License enforcement middleware position verified (unchanged, pre-existing, after tenant resolver)
+- [ ] License enforcement middleware position verified (unchanged, pre-existing, after tenant
+      resolver)
 - [ ] Correlation middleware registered after license enforcement
 - [ ] Redaction middleware registered after correlation, before route handlers
 - [ ] All four middlewares registered in correct order (immutable)
@@ -243,7 +262,8 @@ Register all three middlewares (request-id, correlation, redaction) in the corre
 
 - Middleware registered via `app.use()` in Hono (order matters)
 - Verify existing tenant resolver and license middleware positions before adding new ones
-- Middleware stack: `app.use(requestIdMiddleware)` → [existing] → `app.use(correlationMiddleware)` → `app.use(redactionMiddleware)` → [routes]
+- Middleware stack: `app.use(requestIdMiddleware)` → [existing] → `app.use(correlationMiddleware)` →
+  `app.use(redactionMiddleware)` → [routes]
 - Add integration test to verify middleware order cannot be accidentally changed
 - Document middleware order in code comment (per constitution)
 
@@ -253,7 +273,8 @@ Register all three middlewares (request-id, correlation, redaction) in the corre
 - Integration tests: Full request lifecycle with all middlewares active
 - Coverage target: >80%
 
-**Checkpoint**: Phase 1 complete. Logger foundation (singleton + context injection + redaction) ready. Proceed to Phase 2.
+**Checkpoint**: Phase 1 complete. Logger foundation (singleton + context injection + redaction)
+ready. Proceed to Phase 2.
 
 ---
 
@@ -263,7 +284,8 @@ Register all three middlewares (request-id, correlation, redaction) in the corre
 
 **Dependencies**: Phase 1 complete
 
-**Parallel Opportunities**: T007 (migration) and T006 (audit service) can run in parallel, then both feed into T008-T009.
+**Parallel Opportunities**: T007 (migration) and T006 (audit service) can run in parallel, then both
+feed into T008-T009.
 
 **Critical Path**: T002 → T006 → [T008, T009 in sequence] (audit table must exist before writes)
 
@@ -280,13 +302,16 @@ Register all three middlewares (request-id, correlation, redaction) in the corre
 **Time Estimate:** 1.5 hours  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Implement audit service with methods to record four critical event types: LICENSE_CHANGE, TENANT_PROVISION, SCHEMA_UPGRADE, ROLE_CHANGE. Service must be transaction-safe and support recording previous/new state changes for audit trail reconstruction.
+**Description:** Implement audit service with methods to record four critical event types:
+LICENSE_CHANGE, TENANT_PROVISION, SCHEMA_UPGRADE, ROLE_CHANGE. Service must be transaction-safe and
+support recording previous/new state changes for audit trail reconstruction.
 
 **Acceptance Criteria:**
 
-- [ ] Audit service exports four methods: `recordLicenseChange()`, `recordTenantProvisioned()`, `recordSchemaUpgrade()`, `recordRoleChange()`
-- [ ] Each method accepts: workspace_id, actor_id (nullable for system events), previous_state, new_state
+- [ ] Audit service exports four methods: `recordLicenseChange()`, `recordTenantProvisioned()`,
+      `recordSchemaUpgrade()`, `recordRoleChange()`
+- [ ] Each method accepts: workspace_id, actor_id (nullable for system events), previous_state,
+      new_state
 - [ ] Method signatures include optional metadata (request_id, user_agent)
 - [ ] Methods return Promise<void> (async transactional writes)
 - [ ] Methods are idempotent (same call twice → same audit row, no duplication)
@@ -302,9 +327,11 @@ Implement audit service with methods to record four critical event types: LICENS
 
 - Service does NOT instantiate database connections (uses injected context)
 - Service receives database connection from calling handler (getTenantDb())
-- Build audit record as plain object: `{ workspace_id, actor_id, action_type, previous_state, new_state, created_at: new Date() }`
+- Build audit record as plain object:
+  `{ workspace_id, actor_id, action_type, previous_state, new_state, created_at: new Date() }`
 - Implement methods as async functions
-- Pass database connection to audit methods: `recordLicenseChange(db, workspace_id, actor_id, previous, new_state)`
+- Pass database connection to audit methods:
+  `recordLicenseChange(db, workspace_id, actor_id, previous, new_state)`
 - Each method orchestrates single INSERT to audit_log table
 - Implement soft error handling (log warning if audit fails, continue operation)
 
@@ -318,7 +345,8 @@ Implement audit service with methods to record four critical event types: LICENS
 
 ### Task 7: Create Audit Log Schema & Migration
 
-- [x] T007 [P] Create audit log table migration in `apps/api/src/db/master/migrations/[YYYYMMDDHHMMSS]_create_audit_log.sql`
+- [x] T007 [P] Create audit log table migration in
+      `apps/api/src/db/master/migrations/[YYYYMMDDHHMMSS]_create_audit_log.sql`
 
 **Layer:** Database  
 **Transactional:** Yes  
@@ -327,8 +355,9 @@ Implement audit service with methods to record four critical event types: LICENS
 **Time Estimate:** 1 hour  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Create forward-only SQL migration that provisions the audit_log table in the master database. Table must be append-only with proper indexing for workspace isolation and efficient audit trail queries.
+**Description:** Create forward-only SQL migration that provisions the audit_log table in the master
+database. Table must be append-only with proper indexing for workspace isolation and efficient audit
+trail queries.
 
 **Acceptance Criteria:**
 
@@ -344,8 +373,10 @@ Create forward-only SQL migration that provisions the audit_log table in the mas
 - [ ] Column: `metadata` (JSONB, optional for request_id, user_agent, IP)
 - [ ] Index on (workspace_id, created_at DESC) for efficient audit trail retrieval
 - [ ] Index on action_type for event filtering
-- [ ] Foreign key: CONSTRAINT fk_audit_workspace FOREIGN KEY (workspace_id) REFERENCES workspaces(id) ON DELETE CASCADE
-- [ ] Constraints: No UPDATE/DELETE allowed on audit_log (append-only enforced via permissions or application logic)
+- [ ] Foreign key: CONSTRAINT fk_audit_workspace FOREIGN KEY (workspace_id) REFERENCES
+      workspaces(id) ON DELETE CASCADE
+- [ ] Constraints: No UPDATE/DELETE allowed on audit_log (append-only enforced via permissions or
+      application logic)
 - [ ] Migration includes forward + reverse SQL (reversible)
 - [ ] Migration is production-safe (no blocking operations)
 
@@ -368,7 +399,8 @@ Create forward-only SQL migration that provisions the audit_log table in the mas
 
 ### Task 8: Integrate Audit Service into License Service
 
-- [x] T008 Integrate audit service into license change workflow in `apps/api/src/services/license.service.ts`
+- [x] T008 Integrate audit service into license change workflow in
+      `apps/api/src/services/license.service.ts`
 
 **Layer:** API  
 **Transactional:** Yes  
@@ -377,13 +409,15 @@ Create forward-only SQL migration that provisions the audit_log table in the mas
 **Time Estimate:** 1 hour  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Integrate audit service into the license status change workflow. When license status changes (ACTIVE → SOFT_LOCKED, etc.), call `audit.recordLicenseChange()` to record the event for compliance tracking.
+**Description:** Integrate audit service into the license status change workflow. When license
+status changes (ACTIVE → SOFT_LOCKED, etc.), call `audit.recordLicenseChange()` to record the event
+for compliance tracking.
 
 **Acceptance Criteria:**
 
 - [ ] License service updated with audit integration (no API changes, side-effect only)
-- [ ] On license status change, call `recordLicenseChange(db, workspace_id, actor_id, previous_status, new_status)`
+- [ ] On license status change, call
+      `recordLicenseChange(db, workspace_id, actor_id, previous_status, new_status)`
 - [ ] License change acceptance criteria: actor_id captured (user or system)
 - [ ] Previous and new license states passed to audit service
 - [ ] Audit call non-blocking (does not delay license status update)
@@ -412,7 +446,8 @@ Integrate audit service into the license status change workflow. When license st
 
 ### Task 9: Integrate Audit Service into Provisioning Service
 
-- [x] T009 Integrate audit service into tenant provisioning workflow in `apps/api/src/services/provisioning.service.ts`
+- [x] T009 Integrate audit service into tenant provisioning workflow in
+      `apps/api/src/services/provisioning.service.ts`
 
 **Layer:** API  
 **Transactional:** Yes  
@@ -421,15 +456,18 @@ Integrate audit service into the license status change workflow. When license st
 **Time Estimate:** 1 hour  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Integrate audit service into tenant provisioning workflow. When a new tenant is provisioned, call `audit.recordTenantProvisioned()` to record the event for institutional accountability and compliance.
+**Description:** Integrate audit service into tenant provisioning workflow. When a new tenant is
+provisioned, call `audit.recordTenantProvisioned()` to record the event for institutional
+accountability and compliance.
 
 **Acceptance Criteria:**
 
 - [ ] Provisioning service updated with audit integration (no API changes, side-effect only)
-- [ ] On tenant provisioning, call `recordTenantProvisioned(db, workspace_id, actor_id, tenant_config)`
+- [ ] On tenant provisioning, call
+      `recordTenantProvisioned(db, workspace_id, actor_id, tenant_config)`
 - [ ] Actor_id captured (user or system provisioning the tenant)
-- [ ] Tenant configuration (name, slug, product_version, schema_version) passed to audit service as new_state
+- [ ] Tenant configuration (name, slug, product_version, schema_version) passed to audit service as
+      new_state
 - [ ] Previous_state is null (new tenant, no prior state)
 - [ ] Audit call non-blocking (does not delay tenant creation)
 - [ ] Audit event recorded within same transaction as tenant creation (atomic)
@@ -453,17 +491,20 @@ Integrate audit service into tenant provisioning workflow. When a new tenant is 
 - Snapshot tests: Audit event format
 - Coverage target: >80%
 
-**Checkpoint**: Phase 2 complete. Audit service and database layer ready. Critical events (license, provisioning) tracked. Proceed to Phase 3.
+**Checkpoint**: Phase 2 complete. Audit service and database layer ready. Critical events (license,
+provisioning) tracked. Proceed to Phase 3.
 
 ---
 
 ## Phase 3: Worker Job Lifecycle (5 tasks)
 
-**Purpose**: Implement dual ID tracking (request_id + job_id), job envelope structure, and worker logging.
+**Purpose**: Implement dual ID tracking (request_id + job_id), job envelope structure, and worker
+logging.
 
 **Dependencies**: Phase 1 complete, Phase 2 optional (worker independent)
 
-**Parallel Opportunities**: T010-T011 (types + hash function) can run in parallel, then T012 depends on both.
+**Parallel Opportunities**: T010-T011 (types + hash function) can run in parallel, then T012 depends
+on both.
 
 **Critical Path**: [T010, T011 in parallel] → T012 → T013 → T014
 
@@ -480,8 +521,8 @@ Integrate audit service into tenant provisioning workflow. When a new tenant is 
 **Time Estimate:** 1 hour  
 **Difficulty:** 🟢 Easy
 
-**Description:**
-Define TypeScript interface for job envelope structure supporting dual ID tracking (request_id + job_id), payload hashing, and retry counting per clarification Q3.
+**Description:** Define TypeScript interface for job envelope structure supporting dual ID tracking
+(request_id + job_id), payload hashing, and retry counting per clarification Q3.
 
 **Acceptance Criteria:**
 
@@ -529,8 +570,9 @@ Define TypeScript interface for job envelope structure supporting dual ID tracki
 **Time Estimate:** 0.5 hours  
 **Difficulty:** 🟢 Easy
 
-**Description:**
-Implement deterministic SHA256 hashing of job payload for integrity verification during retries per clarification Q5. Hash must be computed identically at enqueue and retry to detect configuration mutations.
+**Description:** Implement deterministic SHA256 hashing of job payload for integrity verification
+during retries per clarification Q5. Hash must be computed identically at enqueue and retry to
+detect configuration mutations.
 
 **Acceptance Criteria:**
 
@@ -548,10 +590,10 @@ Implement deterministic SHA256 hashing of job payload for integrity verification
 
 ```typescript
 // Pattern:
-const crypto = require('crypto')
+const crypto = require("crypto");
 export function computeJobPayloadHash(payload: JobPayload): string {
-  const jsonStr = JSON.stringify(payload) // Deterministic
-  return crypto.createHash('sha256').update(jsonStr).digest('hex')
+  const jsonStr = JSON.stringify(payload); // Deterministic
+  return crypto.createHash("sha256").update(jsonStr).digest("hex");
 }
 ```
 
@@ -570,7 +612,8 @@ export function computeJobPayloadHash(payload: JobPayload): string {
 
 ### Task 12: Update Job Enqueue to Include Dual IDs & Hash
 
-- [x] T012 Update job enqueue in `apps/worker/src/queue.ts` to generate job_id and compute payload_hash
+- [x] T012 Update job enqueue in `apps/worker/src/queue.ts` to generate job_id and compute
+      payload_hash
 
 **Layer:** Worker  
 **Transactional:** Yes  
@@ -579,8 +622,8 @@ export function computeJobPayloadHash(payload: JobPayload): string {
 **Time Estimate:** 1.5 hours  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Update job enqueue function to generate job_id (separate from request_id), compute payload hash, and structure job envelope per clarification Q3.
+**Description:** Update job enqueue function to generate job_id (separate from request_id), compute
+payload hash, and structure job envelope per clarification Q3.
 
 **Acceptance Criteria:**
 
@@ -603,7 +646,8 @@ Update job enqueue function to generate job_id (separate from request_id), compu
 - Call `computeJobPayloadHash(payload)` to get hash
 - Build QueuedJob object with all fields per T010 interface
 - Serialize to JSON for Redis (JSON.stringify)
-- Use request-scoped logger (from T003) to log: `logger.info({ event: 'job_enqueued', job_id, request_id })`
+- Use request-scoped logger (from T003) to log:
+  `logger.info({ event: 'job_enqueued', job_id, request_id })`
 - Integration test: Enqueue job, verify Redis contains correct structure
 
 **Test Coverage:**
@@ -621,12 +665,13 @@ Update job enqueue function to generate job_id (separate from request_id), compu
 **Layer:** Worker  
 **Transactional:** No  
 **Idempotent:** Yes  
-**Dependencies:** T010 (QueuedJob interface), T011 (computeJobPayloadHash), T012 (job_id available at enqueue)  
+**Dependencies:** T010 (QueuedJob interface), T011 (computeJobPayloadHash), T012 (job_id available
+at enqueue)  
 **Time Estimate:** 1.5 hours  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Update job processor to dequeue job envelope, verify payload hash (detect configuration mutations per Q5), and extract dual IDs for logging.
+**Description:** Update job processor to dequeue job envelope, verify payload hash (detect
+configuration mutations per Q5), and extract dual IDs for logging.
 
 **Acceptance Criteria:**
 
@@ -635,7 +680,9 @@ Update job processor to dequeue job envelope, verify payload hash (detect config
 - [ ] Recompute payload_hash using `computeJobPayloadHash(job.payload)`
 - [ ] Compare recomputed hash with original hash from job envelope
 - [ ] If hashes match: log `{ event: 'payload_integrity_verified', job_id, request_id }`
-- [ ] If hashes differ: log warning `{ event: 'config_mutation_detected', previous_hash, current_hash, severity: 'warning' }` (non-blocking)
+- [ ] If hashes differ: log warning
+      `{ event: 'config_mutation_detected', previous_hash, current_hash, severity: 'warning' }`
+      (non-blocking)
 - [ ] Continue job processing regardless of hash match/mismatch (non-blocking decision per Q5)
 - [ ] Set `processing_started_at` timestamp (server-authoritative)
 - [ ] Dual ID logging: all logs include both `job_id` and `request_id`
@@ -669,14 +716,15 @@ Update job processor to dequeue job envelope, verify payload hash (detect config
 **Time Estimate:** 1 hour  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Implement worker logger following same Pino singleton pattern as API (T001) but with job scope injection for dual ID tracking (request_id + job_id + attempt_id).
+**Description:** Implement worker logger following same Pino singleton pattern as API (T001) but
+with job scope injection for dual ID tracking (request_id + job_id + attempt_id).
 
 **Acceptance Criteria:**
 
 - [ ] Worker logger: Pino singleton (same pattern as API T001)
 - [ ] Export `getLogger()` and `getJobLogger(job: QueuedJob)` functions
-- [ ] `getJobLogger()` creates child logger with: `{ request_id, job_id, job_name, attempt_id, workspace_id }`
+- [ ] `getJobLogger()` creates child logger with:
+      `{ request_id, job_id, job_name, attempt_id, workspace_id }`
 - [ ] All worker logs automatically include dual IDs (no manual parameter passing)
 - [ ] Logger configuration: same service name, environment, log level as API
 - [ ] Dual ID propagation: every worker log includes `job_id` and `request_id`
@@ -686,7 +734,8 @@ Implement worker logger following same Pino singleton pattern as API (T001) but 
 **Implementation Notes:**
 
 - Reuse same Pino logger initialization pattern as `apps/api/src/lib/logger.ts`
-- Create child logger for each job: `pino.child({ request_id: job.request_id, job_id: job.job_id, job_name: job.job_name, attempt_id: job.attempt_id })`
+- Create child logger for each job:
+  `pino.child({ request_id: job.request_id, job_id: job.job_id, job_name: job.job_name, attempt_id: job.attempt_id })`
 - Store child logger in job context or pass to job handler
 - All worker services (grading, certificates) use job logger for dual ID tracking
 - Integration test: Worker processes job, verify logs include both request_id and job_id
@@ -697,7 +746,8 @@ Implement worker logger following same Pino singleton pattern as API (T001) but 
 - Integration tests: Dual ID in worker logs
 - Coverage target: >85%
 
-**Checkpoint**: Phase 3 complete. Worker job lifecycle tracking implemented with dual IDs. Proceed to Phase 4.
+**Checkpoint**: Phase 3 complete. Worker job lifecycle tracking implemented with dual IDs. Proceed
+to Phase 4.
 
 ---
 
@@ -715,7 +765,8 @@ Implement worker logger following same Pino singleton pattern as API (T001) but 
 
 ### Task 15: Update Attempt Grading Worker
 
-- [x] T015 Update attempt grading worker in `apps/worker/src/jobs/grade-attempt.ts` to use dual ID logging
+- [x] T015 Update attempt grading worker in `apps/worker/src/jobs/grade-attempt.ts` to use dual ID
+      logging
 
 **Layer:** Worker  
 **Transactional:** Yes  
@@ -724,15 +775,17 @@ Implement worker logger following same Pino singleton pattern as API (T001) but 
 **Time Estimate:** 1 hour  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Update grading worker to use job-scoped logger (T014) for all logging, enabling dual ID tracking (request_id + job_id + attempt_id) for end-to-end attempt tracing per clarification Q3.
+**Description:** Update grading worker to use job-scoped logger (T014) for all logging, enabling
+dual ID tracking (request_id + job_id + attempt_id) for end-to-end attempt tracing per clarification
+Q3.
 
 **Acceptance Criteria:**
 
 - [ ] Grading worker receives QueuedJob with request_id, job_id, attempt_id
 - [ ] Use `getJobLogger(job)` to get job-scoped child logger (from T014)
 - [ ] All grading logs include: request_id, job_id, attempt_id (dual ID + context)
-- [ ] State transition logs: `{ event: 'attempt_state_changed', previous_state, new_state, attempt_id }`
+- [ ] State transition logs:
+      `{ event: 'attempt_state_changed', previous_state, new_state, attempt_id }`
 - [ ] Grading decision logs: `{ event: 'attempt_graded', score, grade_reason }`
 - [ ] No changes to grading business logic (logging is side-effect only)
 - [ ] No changes to grading algorithm or scoring
@@ -768,14 +821,18 @@ Update grading worker to use job-scoped logger (T014) for all logging, enabling 
 **Time Estimate:** 0.75 hours  
 **Difficulty:** 🟢 Easy
 
-**Description:**
-Define standardized error codes and HTTP status mappings for all API errors. Registry provides unified error response format (success: false, error: { code, message, request_id }).
+**Description:** Define standardized error codes and HTTP status mappings for all API errors.
+Registry provides unified error response format (success: false, error: { code, message, request_id
+}).
 
 **Acceptance Criteria:**
 
-- [ ] Error codes defined: VALIDATION_ERROR, AUTHENTICATION_FAILED, PERMISSION_DENIED, LICENSE_SOFT_LOCKED, RESOURCE_NOT_FOUND, CONFLICT_ERROR, RATE_LIMIT_EXCEEDED, INTERNAL_SERVER_ERROR, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT (minimum 10)
+- [ ] Error codes defined: VALIDATION_ERROR, AUTHENTICATION_FAILED, PERMISSION_DENIED,
+      LICENSE_SOFT_LOCKED, RESOURCE_NOT_FOUND, CONFLICT_ERROR, RATE_LIMIT_EXCEEDED,
+      INTERNAL_SERVER_ERROR, SERVICE_UNAVAILABLE, GATEWAY_TIMEOUT (minimum 10)
 - [ ] Extensible enum structure for future error codes
-- [ ] Each error code mapped to HTTP status: VALIDATION_ERROR → 400, AUTHENTICATION_FAILED → 401, etc.
+- [ ] Each error code mapped to HTTP status: VALIDATION_ERROR → 400, AUTHENTICATION_FAILED → 401,
+      etc.
 - [ ] Each error code includes human-readable message template
 - [ ] Error factory function: `createError(code, message, context)`
 - [ ] Error response shape: `{ success: false, error: { code, message, request_id } }`
@@ -787,23 +844,23 @@ Define standardized error codes and HTTP status mappings for all API errors. Reg
 ```typescript
 // Pattern:
 export const ErrorCodes = {
-  VALIDATION_ERROR: 'VALIDATION_ERROR',
-  AUTHENTICATION_FAILED: 'AUTHENTICATION_FAILED',
+  VALIDATION_ERROR: "VALIDATION_ERROR",
+  AUTHENTICATION_FAILED: "AUTHENTICATION_FAILED",
   // ... more codes
-}
+};
 
 export const ErrorStatusMap = {
   [ErrorCodes.VALIDATION_ERROR]: 400,
   [ErrorCodes.AUTHENTICATION_FAILED]: 401,
   // ... more mappings
-}
+};
 
 export function createError(code: string, message: string, context?: object) {
   return {
     code,
     message,
     ...(context && { context }),
-  }
+  };
 }
 ```
 
@@ -821,7 +878,8 @@ export function createError(code: string, message: string, context?: object) {
 
 ### Task 17: Update API Error Handling Middleware
 
-- [x] T017 Update API error handling middleware in `apps/api/src/middleware/error-handler.ts` to use error code registry
+- [x] T017 Update API error handling middleware in `apps/api/src/middleware/error-handler.ts` to use
+      error code registry
 
 **Layer:** API  
 **Transactional:** No  
@@ -830,8 +888,9 @@ export function createError(code: string, message: string, context?: object) {
 **Time Estimate:** 1.5 hours  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Update error handling middleware to format all API errors according to standardized error code taxonomy. Middleware must intercept exceptions, map to error codes, and return structured responses without exposing internal details.
+**Description:** Update error handling middleware to format all API errors according to standardized
+error code taxonomy. Middleware must intercept exceptions, map to error codes, and return structured
+responses without exposing internal details.
 
 **Acceptance Criteria:**
 
@@ -867,7 +926,8 @@ Update error handling middleware to format all API errors according to standardi
 - Snapshot tests: Error response format for all error codes
 - Coverage target: >85%
 
-**Checkpoint**: Phase 4 complete. Error standardization and grading worker logging ready. Proceed to Phase 5 (Testing & Validation).
+**Checkpoint**: Phase 4 complete. Error standardization and grading worker logging ready. Proceed to
+Phase 5 (Testing & Validation).
 
 ---
 
@@ -894,8 +954,8 @@ Update error handling middleware to format all API errors according to standardi
 **Time Estimate:** 1 hour  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Write comprehensive unit tests for logger singleton behavior, child context injection, JSON serialization, and field injection patterns.
+**Description:** Write comprehensive unit tests for logger singleton behavior, child context
+injection, JSON serialization, and field injection patterns.
 
 **Acceptance Criteria:**
 
@@ -916,21 +976,21 @@ Write comprehensive unit tests for logger singleton behavior, child context inje
 
 ```typescript
 // Test pattern:
-describe('Logger Abstraction', () => {
-  test('singleton pattern', () => {
-    const logger1 = getLogger()
-    const logger2 = getLogger()
-    expect(logger1).toBe(logger2)
-  })
+describe("Logger Abstraction", () => {
+  test("singleton pattern", () => {
+    const logger1 = getLogger();
+    const logger2 = getLogger();
+    expect(logger1).toBe(logger2);
+  });
 
-  test('child logger context injection', () => {
-    const logger = getLogger()
-    const child = logger.child({ request_id: 'test-123' })
+  test("child logger context injection", () => {
+    const logger = getLogger();
+    const child = logger.child({ request_id: "test-123" });
     // Manually test log output includes request_id
-  })
+  });
 
   // More tests...
-})
+});
 ```
 
 - Use Vitest for testing framework
@@ -944,7 +1004,8 @@ describe('Logger Abstraction', () => {
 
 ### Task 19: Integration Tests – Request ID & Correlation Lifecycle
 
-- [ ] T019 [P] Create integration tests for request ID and correlation in `apps/api/tests/correlation.test.ts`
+- [ ] T019 [P] Create integration tests for request ID and correlation in
+      `apps/api/tests/correlation.test.ts`
 
 **Layer:** Testing  
 **Transactional:** No  
@@ -953,8 +1014,9 @@ describe('Logger Abstraction', () => {
 **Time Estimate:** 1.5 hours  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Test full request lifecycle: request arrives → request_id generated → correlation context bound → all logs include context → response sent. Verify workspace isolation (no cross-tenant log pollution).
+**Description:** Test full request lifecycle: request arrives → request_id generated → correlation
+context bound → all logs include context → response sent. Verify workspace isolation (no
+cross-tenant log pollution).
 
 **Acceptance Criteria:**
 
@@ -975,22 +1037,22 @@ Test full request lifecycle: request arrives → request_id generated → correl
 
 ```typescript
 // Test pattern:
-describe('Request Correlation Lifecycle', () => {
-  test('request ID generated and available in handler', async () => {
-    const response = await request(app).get('/api/test')
-    expect(response.body.request_id).toBeDefined()
-    expect(() => UUID.validate(response.body.request_id)).not.toThrow()
-  })
+describe("Request Correlation Lifecycle", () => {
+  test("request ID generated and available in handler", async () => {
+    const response = await request(app).get("/api/test");
+    expect(response.body.request_id).toBeDefined();
+    expect(() => UUID.validate(response.body.request_id)).not.toThrow();
+  });
 
-  test('workspace isolation in concurrent requests', async () => {
-    const req1 = request(app).get('/api/test').set('X-Workspace-ID', '1')
-    const req2 = request(app).get('/api/test').set('X-Workspace-ID', '2')
-    const [res1, res2] = await Promise.all([req1, req2])
-    expect(res1.body.workspace_id).not.toEqual(res2.body.workspace_id)
-  })
+  test("workspace isolation in concurrent requests", async () => {
+    const req1 = request(app).get("/api/test").set("X-Workspace-ID", "1");
+    const req2 = request(app).get("/api/test").set("X-Workspace-ID", "2");
+    const [res1, res2] = await Promise.all([req1, req2]);
+    expect(res1.body.workspace_id).not.toEqual(res2.body.workspace_id);
+  });
 
   // More tests...
-})
+});
 ```
 
 - Use Vitest + supertest for HTTP testing
@@ -1013,8 +1075,8 @@ describe('Request Correlation Lifecycle', () => {
 **Time Estimate:** 1.5 hours  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Test worker job lifecycle: enqueue → dequeue → payload hash verification → logging with dual IDs → completion. Verify retry handling and dead-letter queue scenarios.
+**Description:** Test worker job lifecycle: enqueue → dequeue → payload hash verification → logging
+with dual IDs → completion. Verify retry handling and dead-letter queue scenarios.
 
 **Acceptance Criteria:**
 
@@ -1077,8 +1139,9 @@ describe('Worker Job Lifecycle', () => {
 **Time Estimate:** 1.5 hours  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Test audit event recording, database persistence, workspace isolation, and idempotency. Verify each audit event type (LICENSE_CHANGE, TENANT_PROVISION, SCHEMA_UPGRADE, ROLE_CHANGE).
+**Description:** Test audit event recording, database persistence, workspace isolation, and
+idempotency. Verify each audit event type (LICENSE_CHANGE, TENANT_PROVISION, SCHEMA_UPGRADE,
+ROLE_CHANGE).
 
 **Acceptance Criteria:**
 
@@ -1102,35 +1165,33 @@ Test audit event recording, database persistence, workspace isolation, and idemp
 
 ```typescript
 // Test pattern:
-describe('Audit Event Recording', () => {
-  test('LICENSE_CHANGE event recorded', async () => {
-    await recordLicenseChange(db, workspace, actor, 'ACTIVE', 'SOFT_LOCKED')
-    const event = await db.query(
-      'SELECT * FROM audit_log WHERE action_type = ?',
-      ['LICENSE_CHANGE']
-    )
+describe("Audit Event Recording", () => {
+  test("LICENSE_CHANGE event recorded", async () => {
+    await recordLicenseChange(db, workspace, actor, "ACTIVE", "SOFT_LOCKED");
+    const event = await db.query("SELECT * FROM audit_log WHERE action_type = ?", [
+      "LICENSE_CHANGE",
+    ]);
     expect(event).toContainEqual(
       expect.objectContaining({
-        action_type: 'LICENSE_CHANGE',
-        previous_state: { status: 'ACTIVE' },
-        new_state: { status: 'SOFT_LOCKED' },
-      })
-    )
-  })
+        action_type: "LICENSE_CHANGE",
+        previous_state: { status: "ACTIVE" },
+        new_state: { status: "SOFT_LOCKED" },
+      }),
+    );
+  });
 
-  test('workspace isolation', async () => {
-    await recordLicenseChange(db, workspace1, actor, 'ACTIVE', 'SOFT_LOCKED')
-    await recordLicenseChange(db, workspace2, actor, 'ACTIVE', 'ARCHIVED')
-    const ws1Events = await db.query(
-      'SELECT * FROM audit_log WHERE workspace_id = ?',
-      [workspace1.id]
-    )
-    expect(ws1Events).toHaveLength(1)
-    expect(ws1Events[0].workspace_id).toEqual(workspace1.id)
-  })
+  test("workspace isolation", async () => {
+    await recordLicenseChange(db, workspace1, actor, "ACTIVE", "SOFT_LOCKED");
+    await recordLicenseChange(db, workspace2, actor, "ACTIVE", "ARCHIVED");
+    const ws1Events = await db.query("SELECT * FROM audit_log WHERE workspace_id = ?", [
+      workspace1.id,
+    ]);
+    expect(ws1Events).toHaveLength(1);
+    expect(ws1Events[0].workspace_id).toEqual(workspace1.id);
+  });
 
   // More tests...
-})
+});
 ```
 
 - Use test transaction isolation (rollback after each test)
@@ -1144,7 +1205,8 @@ describe('Audit Event Recording', () => {
 
 ### Task 22: Snapshot Tests – Response Formats & Audit Log Schema
 
-- [x] T022 [P] Create snapshot tests for response formats in `apps/api/tests/response-format.test.ts`
+- [x] T022 [P] Create snapshot tests for response formats in
+      `apps/api/tests/response-format.test.ts`
 
 **Layer:** Testing  
 **Transactional:** No  
@@ -1153,8 +1215,8 @@ describe('Audit Event Recording', () => {
 **Time Estimate:** 1 hour  
 **Difficulty:** 🟡 Medium
 
-**Description:**
-Establish snapshot tests for error response format and audit log schema. Snapshots provide regression protection against accidental changes to API contracts.
+**Description:** Establish snapshot tests for error response format and audit log schema. Snapshots
+provide regression protection against accidental changes to API contracts.
 
 **Acceptance Criteria:**
 
@@ -1176,31 +1238,31 @@ Establish snapshot tests for error response format and audit log schema. Snapsho
 
 ```typescript
 // Test pattern:
-describe('Response Format Snapshots', () => {
-  test('VALIDATION_ERROR response matches snapshot', () => {
+describe("Response Format Snapshots", () => {
+  test("VALIDATION_ERROR response matches snapshot", () => {
     const error = {
-      code: 'VALIDATION_ERROR',
-      message: 'Invalid input',
-      context: { field: 'email' },
-    }
-    const response = { success: false, error }
-    expect(response).toMatchSnapshot()
-  })
+      code: "VALIDATION_ERROR",
+      message: "Invalid input",
+      context: { field: "email" },
+    };
+    const response = { success: false, error };
+    expect(response).toMatchSnapshot();
+  });
 
-  test('audit log schema matches snapshot', () => {
+  test("audit log schema matches snapshot", () => {
     const auditLog = {
-      id: 'uuid',
-      workspace_id: 'uuid',
-      action_type: 'LICENSE_CHANGE',
-      previous_state: { status: 'ACTIVE' },
-      new_state: { status: 'SOFT_LOCKED' },
-      created_at: '2026-02-18T14:32:00Z',
-    }
-    expect(auditLog).toMatchSnapshot()
-  })
+      id: "uuid",
+      workspace_id: "uuid",
+      action_type: "LICENSE_CHANGE",
+      previous_state: { status: "ACTIVE" },
+      new_state: { status: "SOFT_LOCKED" },
+      created_at: "2026-02-18T14:32:00Z",
+    };
+    expect(auditLog).toMatchSnapshot();
+  });
 
   // More snapshots...
-})
+});
 ```
 
 - Use Vitest snapshot testing
@@ -1420,7 +1482,8 @@ All success criteria from plan.md must be met before moving to Analyze phase:
 - [ ] Error responses standardized (no stack traces to client)
 - [ ] Unit + integration + worker tests >= 50 scenarios completed
 - [ ] Middleware order unchanged (license before observability)
-- [ ] All logs include required fields (timestamp, level, service, request_id, workspace_id on bound requests)
+- [ ] All logs include required fields (timestamp, level, service, request_id, workspace_id on bound
+      requests)
 - [ ] No cross-tenant log pollution (workspace_id isolation verified in tests)
 - [ ] Constitution compliance validated (no isolation weakening, no middleware bypass)
 - [ ] No architectural drift from ADRs (logging is side-effect only, no business logic changes)

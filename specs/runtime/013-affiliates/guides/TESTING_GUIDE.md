@@ -68,7 +68,8 @@ What's tested:
 
 - ✅ **Promo Code Validation:**
   - Valid: `SPRING25`, `EARLYBIRD`, `PROMO123` (uppercase alphanumeric, 3-50 chars)
-  - Invalid: `spring25` (lowercase), `PROMO-2024` (hyphen), `PRO` (too short), `A` (repeat 51 times = too long)
+  - Invalid: `spring25` (lowercase), `PROMO-2024` (hyphen), `PRO` (too short), `A` (repeat 51 times
+    = too long)
   - Normalization: input `spring 25` → trimmed → `SPRING25` → validated
 
 - ✅ **Percentage Range Validation:**
@@ -497,8 +498,7 @@ Before promoting to PRODUCTION READY, validate:
 
 ### Tests Fail: ECONNREFUSED PostgreSQL
 
-**Issue:** Integration tests connect to DB
-**Solution:** Start PostgreSQL or skip integration tests
+**Issue:** Integration tests connect to DB **Solution:** Start PostgreSQL or skip integration tests
 
 ```bash
 # Run unit tests only (no DB needed)
@@ -507,8 +507,7 @@ npm run test -- tests/unit/affiliates
 
 ### API Won't Start: Migration Failed
 
-**Issue:** Migration 009/010 didn't execute
-**Solution:** Check PostgreSQL connection + migrate:
+**Issue:** Migration 009/010 didn't execute **Solution:** Check PostgreSQL connection + migrate:
 
 ```bash
 npm run migrate:master
@@ -517,19 +516,17 @@ npm run dev:api
 
 ### Unit Tests Pass, but Endpoint Returns 404
 
-**Issue:** Routes not registered
-**Solution:** Verify affiliates-router.ts is imported in app.ts:
+**Issue:** Routes not registered **Solution:** Verify affiliates-router.ts is imported in app.ts:
 
 ```typescript
 // In apps/api/src/app.ts
-import affiliatesRouter from './routes/mmc/affiliates-router'
-app.use('/api/v1/mmc', affiliatesRouter)
+import affiliatesRouter from "./routes/mmc/affiliates-router";
+app.use("/api/v1/mmc", affiliatesRouter);
 ```
 
 ### Promo Code Validation Rejects Valid Code
 
-**Issue:** Case sensitivity
-**Solution:** Input must be uppercase or automatically normalized:
+**Issue:** Case sensitivity **Solution:** Input must be uppercase or automatically normalized:
 
 ```bash
 # This works:
@@ -559,4 +556,5 @@ POST {"promo_code": "Spring25"}  # lowercase 's' in middle remains
 
 ---
 
-**Questions?** Contact DevOps or Security team for staging environment access and deployment procedures.
+**Questions?** Contact DevOps or Security team for staging environment access and deployment
+procedures.

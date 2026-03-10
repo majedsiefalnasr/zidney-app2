@@ -1,36 +1,34 @@
 # Testing Guide — STAGE_INFRA_01_TYPESCRIPT_STABILIZATION
 
-**Stage:** STAGE_INFRA_01_TYPESCRIPT_STABILIZATION
-**Phase:** 01_PLATFORM_FOUNDATION
-**Stage Directory:** infra-001-typescript-stabilization
-**Generated On:** 2026-02-28
+**Stage:** STAGE_INFRA_01_TYPESCRIPT_STABILIZATION **Phase:** 01_PLATFORM_FOUNDATION **Stage
+Directory:** infra-001-typescript-stabilization **Generated On:** 2026-02-28
 
 ---
 
 ## Purpose
 
-This guide explains how to validate that the TypeScript stabilization implementation is
-correct and that no regressions have been introduced. The stage made **no runtime changes** —
-it is type-system enforcement only. Validation is therefore primarily static (typecheck, lint,
-tsconfig audit) plus unit test confirmation.
+This guide explains how to validate that the TypeScript stabilization implementation is correct and
+that no regressions have been introduced. The stage made **no runtime changes** — it is type-system
+enforcement only. Validation is therefore primarily static (typecheck, lint, tsconfig audit) plus
+unit test confirmation.
 
 ---
 
 ## Summary of Delivered Behavior
 
-This stage enforced TypeScript strict mode across the entire Zidney monorepo. Before this
-stage, the codebase had 866 source-level TypeScript errors and ~700 test-file errors. After
-this stage, both counts are zero. A CI gate prevents any future regression.
+This stage enforced TypeScript strict mode across the entire Zidney monorepo. Before this stage, the
+codebase had 866 source-level TypeScript errors and ~700 test-file errors. After this stage, both
+counts are zero. A CI gate prevents any future regression.
 
 Key outcomes:
 
 - `bun run typecheck:src` passes with 0 errors on every PR
 - `bun run typecheck:tests` passes with 0 errors on every PR
 - `bun run lint` passes with 0 errors (ban-ts-comment format enforced)
-- `bash scripts/check-tsconfig-strict.sh` confirms all 7 strict flags are present and no
-  package is weakening them
-- All 152 `@ts-ignore` comments carry a `[INFRA-001-LOGIC-XX]` reference traceable to a
-  follow-up ticket
+- `bash scripts/check-tsconfig-strict.sh` confirms all 7 strict flags are present and no package is
+  weakening them
+- All 152 `@ts-ignore` comments carry a `[INFRA-001-LOGIC-XX]` reference traceable to a follow-up
+  ticket
 
 ---
 
@@ -125,16 +123,14 @@ bun run test:static
 **Purpose:** Confirm that the CI gate blocks regressions.
 
 1. Open any file in `apps/api/src/` — e.g. `apps/api/src/routes/health.ts`
-2. Add a deliberately wrong type: change a typed parameter to accept `any` without annotation
-   (e.g. `function foo(x) { return x; }`)
+2. Add a deliberately wrong type: change a typed parameter to accept `any` without annotation (e.g.
+   `function foo(x) { return x; }`)
 3. Run `bun run typecheck:src`
 
-Expected:
-TypeScript reports a new error with the exact file and line number. Exit code is non-zero.
+Expected: TypeScript reports a new error with the exact file and line number. Exit code is non-zero.
 
-Troubleshooting:
-If no error is reported, check that `tsconfig.base.json` still contains `"noImplicitAny": true`
-and that the app's `tsconfig.json` extends `tsconfig.base.json`.
+Troubleshooting: If no error is reported, check that `tsconfig.base.json` still contains
+`"noImplicitAny": true` and that the app's `tsconfig.json` extends `tsconfig.base.json`.
 
 ---
 
@@ -145,17 +141,16 @@ and that the app's `tsconfig.json` extends `tsconfig.base.json`.
 1. Open any source file and add:
    ```ts
    // @ts-ignore
-   const x = badCall()
+   const x = badCall();
    ```
 2. Run `bun run lint`
 
-Expected:
-ESLint reports: `Do not use "@ts-ignore" because it alters compilation errors.` with an
+Expected: ESLint reports: `Do not use "@ts-ignore" because it alters compilation errors.` with an
 indication that a description matching `^: .+ \[.+\]$` is required. Exit code is non-zero.
 
-Troubleshooting:
-If the error is not raised, check `.eslintrc.json` — the `@typescript-eslint/ban-ts-comment`
-rule must be at `"error"` level with `"ts-ignore": { "descriptionFormat": "^: .+ \\[.+\\]$" }`.
+Troubleshooting: If the error is not raised, check `.eslintrc.json` — the
+`@typescript-eslint/ban-ts-comment` rule must be at `"error"` level with
+`"ts-ignore": { "descriptionFormat": "^: .+ \\[.+\\]$" }`.
 
 ---
 
@@ -167,13 +162,11 @@ rule must be at `"error"` level with `"ts-ignore": { "descriptionFormat": "^: .+
 2. Add `"strict": false` inside `compilerOptions`.
 3. Run `bash scripts/check-tsconfig-strict.sh`
 
-Expected:
-Script prints a warning/error about a weakening override found in that file and exits with
+Expected: Script prints a warning/error about a weakening override found in that file and exits with
 code 1.
 
-Troubleshooting:
-If exit code is 0, check `scripts/check-tsconfig-strict.sh` — Phase 2 of the script must
-scan for `"strict": false`, `"noImplicitAny": false`, etc. across all package tsconfigs.
+Troubleshooting: If exit code is 0, check `scripts/check-tsconfig-strict.sh` — Phase 2 of the script
+must scan for `"strict": false`, `"noImplicitAny": false`, etc. across all package tsconfigs.
 
 Undo:
 
@@ -196,8 +189,8 @@ git checkout packages/domain-core/tsconfig.json
 
 ## Multi-Tenant Isolation Verification
 
-This stage introduces no runtime code changes. No multi-tenant test is required. If verifying
-in staging, confirm that existing workspace-scoped endpoints still return isolated data:
+This stage introduces no runtime code changes. No multi-tenant test is required. If verifying in
+staging, confirm that existing workspace-scoped endpoints still return isolated data:
 
 1. Authenticate as a user in `workspace-a`.
 2. Call any tenant-scoped endpoint (e.g. `/api/members`).

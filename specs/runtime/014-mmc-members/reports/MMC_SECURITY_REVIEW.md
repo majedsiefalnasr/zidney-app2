@@ -9,7 +9,8 @@
 
 ## Executive Summary
 
-MMC implements authentication, authorization, and role-based access control (RBAC) with security-first design principles:
+MMC implements authentication, authorization, and role-based access control (RBAC) with
+security-first design principles:
 
 - ✅ Multi-tenant database isolation (no row-based multi-tenancy)
 - ✅ Password hashing (Bcrypt with salt rounds ≥12)
@@ -27,7 +28,8 @@ MMC implements authentication, authorization, and role-based access control (RBA
 ## Authentication Security (10 items)
 
 - [ ] **AU-01:** Password hashing algorithm is Bcrypt with `rounds ≥ 12`
-  - **Evidence:** `apps/api/src/services/auth.service.ts` → `hashPassword()` uses `bcrypt.hash(password, 12)`
+  - **Evidence:** `apps/api/src/services/auth.service.ts` → `hashPassword()` uses
+    `bcrypt.hash(password, 12)`
   - **Status:** ✅ PASS
 
 - [ ] **AU-02:** Password field is never logged or returned in API responses
@@ -44,11 +46,13 @@ MMC implements authentication, authorization, and role-based access control (RBA
   - **Status:** ✅ PASS
 
 - [ ] **AU-05:** Expired tokens are rejected server-side
-  - **Evidence:** `middleware/auth.middleware.ts` → `verify(token, secret, { algorithms: ['HS256'] })` throws on expired
+  - **Evidence:** `middleware/auth.middleware.ts` →
+    `verify(token, secret, { algorithms: ['HS256'] })` throws on expired
   - **Status:** ✅ PASS
 
 - [ ] **AU-06:** Password reset uses single-use tokens with 15-minute expiration
-  - **Evidence:** `apps/api/src/tables/invitations.sql` → `token` field is unique, `created_at + 15min` window enforced
+  - **Evidence:** `apps/api/src/tables/invitations.sql` → `token` field is unique,
+    `created_at + 15min` window enforced
   - **Status:** ✅ PASS
 
 - [ ] **AU-07:** Login rate limiting: max 5 attempts per IP per minute
@@ -65,7 +69,8 @@ MMC implements authentication, authorization, and role-based access control (RBA
   - **Status:** ✅ PASS
 
 - [ ] **AU-10:** Account lockout after 10 failed attempts
-  - **Evidence:** `apps/api/src/tables/request_log.sql → lockout_until field, 30-minute lockout enforced`
+  - **Evidence:**
+    `apps/api/src/tables/request_log.sql → lockout_until field, 30-minute lockout enforced`
   - **Status:** ✅ PASS
 
 ---
@@ -88,7 +93,8 @@ MMC implements authentication, authorization, and role-based access control (RBA
   - **Status:** ✅ PASS
 
 - [ ] **AU-RB-04:** No insecure permission defaults (deny by default)
-  - **Evidence:** `permissionService.checkPermission()` returns `false` if no matching permission found
+  - **Evidence:** `permissionService.checkPermission()` returns `false` if no matching permission
+    found
   - **Testing:** `tests/unit/mmc/permissions.test.ts → default deny tests`
   - **Status:** ✅ PASS
 
@@ -103,7 +109,8 @@ MMC implements authentication, authorization, and role-based access control (RBA
   - **Status:** ✅ PASS
 
 - [ ] **AU-RB-07:** Cascading deletions respect RBAC (role delete cascades to members)
-  - **Evidence:** `roleService.deleteRole()` → cascades via FK constraints in SERIALIZABLE transaction
+  - **Evidence:** `roleService.deleteRole()` → cascades via FK constraints in SERIALIZABLE
+    transaction
   - **Testing:** `tests/integration/mmc/roles.test.ts → cascade tests`
   - **Status:** ✅ PASS
 
@@ -138,11 +145,13 @@ MMC implements authentication, authorization, and role-based access control (RBA
 
 - [ ] **DA-01:** Password field stored as Bcrypt hash only (plaintext never stored)
   - **DB Schema:** `mmc_members.password_hash` type `VARCHAR(255)` — hash only
-  - **Verification:** `grep password_hash apps/api/src/db/tenant/migrations/*.sql | grep -v password_hash`
+  - **Verification:**
+    `grep password_hash apps/api/src/db/tenant/migrations/*.sql | grep -v password_hash`
   - **Status:** ✅ PASS
 
 - [ ] **DA-02:** PII (email, name) is NOT logged to any output (console, files, metrics)
-  - **Evidence:** `loggers` sanitize PII; `grep -r 'member.email' *.ts` returns zero (no raw data logged)
+  - **Evidence:** `loggers` sanitize PII; `grep -r 'member.email' *.ts` returns zero (no raw data
+    logged)
   - **Testing:** `tests/integration/mmc/logging.test.ts → PII leak tests`
   - **Status:** ✅ PASS
 
@@ -153,7 +162,8 @@ MMC implements authentication, authorization, and role-based access control (RBA
 
 - [ ] **DA-04:** Audit trail captures all security-relevant actions with timestamps
   - **Evidence:** `audit_log` table records: user_id, action, resource_id, timestamp, ip_address
-  - **Actions Tracked:** login, permission_check (on deny), role_created, role_modified, member_deleted
+  - **Actions Tracked:** login, permission_check (on deny), role_created, role_modified,
+    member_deleted
   - **Status:** ✅ PASS
 
 - [ ] **DA-05:** Audit logs are append-only (cannot be modified/deleted retroactively)
@@ -201,7 +211,8 @@ MMC implements authentication, authorization, and role-based access control (RBA
 
 - [ ] **NE-05:** API versioning prevents breaking changes
   - **Evidence:** Endpoint paths include version: `/api/v1/mmc/members` (v1 frozen in migration)
-  - **Backward Compatibility:** New minor fields default to `null`, no required field additions after v1
+  - **Backward Compatibility:** New minor fields default to `null`, no required field additions
+    after v1
   - **Status:** ✅ PASS
 
 - [ ] **NE-06:** Error responses do NOT expose implementation details
@@ -234,7 +245,8 @@ MMC implements authentication, authorization, and role-based access control (RBA
   - **Status:** ✅ PASS
 
 - [ ] **IN-04:** Password requirements enforced (min 12 chars, complexity)
-  - **Evidence:** `password.validator.ts` → length ≥12, contains uppercase + lowercase + number + special
+  - **Evidence:** `password.validator.ts` → length ≥12, contains uppercase + lowercase + number +
+    special
   - **Testing:** `tests/unit/validation/password.test.ts`
   - **Status:** ✅ PASS
 
@@ -284,7 +296,8 @@ MMC implements authentication, authorization, and role-based access control (RBA
 
 - [ ] **CR-05:** Secrets NOT logged or exposed in error messages
   - **Evidence:** Error handler sanitizes JWT from logs
-  - **Verification:** `grep -r 'process.env' apps/api/src/middleware | grep -v '//'` returns zero logs
+  - **Verification:** `grep -r 'process.env' apps/api/src/middleware | grep -v '//'` returns zero
+    logs
   - **Status:** ✅ PASS
 
 - [ ] **CR-06:** Key rotation strategy documented (JWT secret rollover plan)
@@ -330,7 +343,8 @@ MMC implements authentication, authorization, and role-based access control (RBA
 
 - [ ] **MT-07:** Audit logs isolated by tenant (no cross-workspace audit leakage)
   - **Evidence:** `audit_log` table created per tenant database
-  - **Query:** `SELECT * FROM audit_log WHERE workspace_id = ?` always includes tenant filter (redundant)
+  - **Query:** `SELECT * FROM audit_log WHERE workspace_id = ?` always includes tenant filter
+    (redundant)
   - **Status:** ✅ PASS
 
 - [ ] **MT-08:** Backup/restore per tenant (disaster recovery maintains isolation)
@@ -414,7 +428,8 @@ MMC implements authentication, authorization, and role-based access control (RBA
 
 - [ ] **TE-02:** Integration tests for auth flows (login, token expiry, permission denial)
   - **Evidence:** `tests/integration/mmc/auth.test.ts` → 50+ test cases
-  - **Scenarios:** Valid login, wrong password, account locked, token expired, cross-workspace denial
+  - **Scenarios:** Valid login, wrong password, account locked, token expired, cross-workspace
+    denial
   - **Status:** ✅ PASS
 
 - [ ] **TE-03:** Concurrency tests for race conditions in permission evaluation

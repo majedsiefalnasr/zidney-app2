@@ -1,12 +1,8 @@
 # Technical Plan: Infrastructure Governance
 
-**Stage:** STAGE_INFRA_GOVERNANCE
-**Phase:** 01_PLATFORM_FOUNDATION
-**Spec:** `specs/runtime/infra-governance/spec.md`
-**Research:** `specs/runtime/infra-governance/research.md`
-**Plan Version:** 1.0.0
-**Date:** 2026-03-05
-**Status:** READY FOR IMPLEMENTATION
+**Stage:** STAGE_INFRA_GOVERNANCE **Phase:** 01_PLATFORM_FOUNDATION **Spec:**
+`specs/runtime/infra-governance/spec.md` **Research:** `specs/runtime/infra-governance/research.md`
+**Plan Version:** 1.0.0 **Date:** 2026-03-05 **Status:** READY FOR IMPLEMENTATION
 
 ---
 
@@ -32,7 +28,8 @@
 
 ### 2.1 What is already compliant (do not touch)
 
-- `eslint.config.mjs` — fully satisfies FR-06 (eslint-config-prettier last, no-console warn, explicit-any warn, all import boundaries)
+- `eslint.config.mjs` — fully satisfies FR-06 (eslint-config-prettier last, no-console warn,
+  explicit-any warn, all import boundaries)
 - `prettier.config.mjs` — fully satisfies FR-07
 - `vitest.workspace.ts` — all 13 projects registered, no standalone configs
 - All per-app and per-package `vitest.config.ts` — correct project-entry format
@@ -148,9 +145,14 @@ Note: Pin to same major as `vitest` (`^1.0.0`).
 "prepare": "husky"
 ```
 
-The `prepare` lifecycle script runs automatically on `bun install`, ensuring all contributors get hooks installed without additional steps.
+The `prepare` lifecycle script runs automatically on `bun install`, ensuring all contributors get
+hooks installed without additional steps.
 
-**After T004 and T005 (hook rewrites):** Run `bun install` then `bun run prepare` (or `bunx husky`) to install Husky v9 and make hook files executable. ⚠️ Do NOT run `bun install` before completing T004 and T005. Running `bun install` installs Husky v9 (via `prepare: husky`) which removes `_/husky.sh`. The existing `.husky/pre-commit` still sources `_/husky.sh` (v8 format); rewriting it in v9 format (T004) must be completed first to avoid a broken-hook window.
+**After T004 and T005 (hook rewrites):** Run `bun install` then `bun run prepare` (or `bunx husky`)
+to install Husky v9 and make hook files executable. ⚠️ Do NOT run `bun install` before completing
+T004 and T005. Running `bun install` installs Husky v9 (via `prepare: husky`) which removes
+`_/husky.sh`. The existing `.husky/pre-commit` still sources `_/husky.sh` (v8 format); rewriting it
+in v9 format (T004) must be completed first to avoid a broken-hook window.
 
 ---
 
@@ -162,11 +164,11 @@ The `prepare` lifecycle script runs automatically on `bun install`, ensuring all
 /** @type {import('lint-staged').Config} */
 export default {
   // TypeScript and Vue files: auto-fix lint errors, then format
-  '*.{ts,tsx,vue}': ['eslint --fix', 'prettier --write'],
+  "*.{ts,tsx,vue}": ["eslint --fix", "prettier --write"],
 
   // Markdown and JSON files: format only
-  '*.{md,json}': ['prettier --write'],
-}
+  "*.{md,json}": ["prettier --write"],
+};
 ```
 
 **Notes:**
@@ -228,7 +230,8 @@ bun scripts/ai-guard.ts
 bun scripts/infra-audit.ts --quick
 ```
 
-**Note:** Husky v9 hooks are plain shell scripts — no `_/husky.sh` sourcing required. After `husky` is initialized (by running `bun run prepare`), Husky makes this file executable automatically.
+**Note:** Husky v9 hooks are plain shell scripts — no `_/husky.sh` sourcing required. After `husky`
+is initialized (by running `bun run prepare`), Husky makes this file executable automatically.
 
 ---
 
@@ -265,7 +268,8 @@ bun run test:unit
 
 **File:** `scripts/infra-audit.ts`
 
-**Change type:** Additive — one new constant + conditional wrapping around `writeFileSync` calls + extended enforcement block.
+**Change type:** Additive — one new constant + conditional wrapping around `writeFileSync` calls +
+extended enforcement block.
 
 **Description:** The `--quick` flag enables fast pre-commit mode. When active:
 
@@ -277,17 +281,22 @@ bun run test:unit
 **Change at top of file — line 32, immediately after `const ROOT = process.cwd()` at line 31:**
 
 ```ts
-const ROOT = process.cwd()
-const QUICK_MODE = process.argv.includes('--quick') // ← add here (line 32)
+const ROOT = process.cwd();
+const QUICK_MODE = process.argv.includes("--quick"); // ← add here (line 32)
 // ... rest of file unchanged ...
 // CI_MODE stays at line 876+ — it is only used at line ~1288 and is safely declared before its use
 ```
 
-> ⚠️ **PLACEMENT WARNING**: `QUICK_MODE` MUST be declared at line 32 (after `ROOT`), NOT after `CI_MODE` at line 876. The `mkdirSync` blocks that `QUICK_MODE` guards are at lines 39–56. JavaScript `const` is not hoisted — declaring at line 877 and using at line 39 throws `ReferenceError: Cannot access 'QUICK_MODE' before initialization` at runtime.
+> ⚠️ **PLACEMENT WARNING**: `QUICK_MODE` MUST be declared at line 32 (after `ROOT`), NOT after
+> `CI_MODE` at line 876. The `mkdirSync` blocks that `QUICK_MODE` guards are at lines 39–56.
+> JavaScript `const` is not hoisted — declaring at line 877 and using at line 39 throws
+> `ReferenceError: Cannot access 'QUICK_MODE' before initialization` at runtime.
 
-**Pattern for all report-writing blocks:** Wrap each `writeFileSync` / directory-creation call with `if (!QUICK_MODE) { ... }`.
+**Pattern for all report-writing blocks:** Wrap each `writeFileSync` / directory-creation call with
+`if (!QUICK_MODE) { ... }`.
 
-**Enforcement block addition:** The existing `if (CI_MODE)` block must be extended to also trigger on `QUICK_MODE`:
+**Enforcement block addition:** The existing `if (CI_MODE)` block must be extended to also trigger
+on `QUICK_MODE`:
 
 ```ts
 if (CI_MODE || QUICK_MODE) {
@@ -296,7 +305,8 @@ if (CI_MODE || QUICK_MODE) {
 }
 ```
 
-**Important:** The `--quick` flag does NOT change what violations are checked — it only skips file I/O and runs in the same enforcement posture as `--ci`. This makes it idempotent per FR-08.4.
+**Important:** The `--quick` flag does NOT change what violations are checked — it only skips file
+I/O and runs in the same enforcement posture as `--ci`. This makes it idempotent per FR-08.4.
 
 **Specific sections to wrap with `if (!QUICK_MODE)`:**
 
@@ -304,7 +314,8 @@ if (CI_MODE || QUICK_MODE) {
 - `writeFileSync` call for architecture graph outputs
 - Any other `writeFileSync` / `mkdirSync` for report/graph/history directories
 
-The violation scan variables (`circularDependencies`, `depViolations`, `layerViolations`, `architectureDrift`, `architectureScore`) must still be computed — only the file writes are guarded.
+The violation scan variables (`circularDependencies`, `depViolations`, `layerViolations`,
+`architectureDrift`, `architectureScore`) must still be computed — only the file writes are guarded.
 
 ---
 
@@ -323,7 +334,7 @@ The violation scan variables (`circularDependencies`, `depViolations`, `layerVio
 # Job 5a: E2E — MMC
 # ──────────────────────────────────────────────────────────────────────────
 e2e-mmc:
-  name: 'E2E: MMC'
+  name: "E2E: MMC"
   runs-on: ubuntu-latest
   timeout-minutes: 30
   needs:
@@ -366,7 +377,7 @@ e2e-mmc:
 # Job 5b: E2E — Backoffice
 # ──────────────────────────────────────────────────────────────────────────
 e2e-backoffice:
-  name: 'E2E: Backoffice'
+  name: "E2E: Backoffice"
   runs-on: ubuntu-latest
   timeout-minutes: 30
   needs:
@@ -409,7 +420,7 @@ e2e-backoffice:
 # Job 5c: E2E — Frontoffice
 # ──────────────────────────────────────────────────────────────────────────
 e2e-frontoffice:
-  name: 'E2E: Frontoffice'
+  name: "E2E: Frontoffice"
   runs-on: ubuntu-latest
   timeout-minutes: 30
   needs:
@@ -487,7 +498,9 @@ coverage-validation:
         retention-days: 14
 ```
 
-**Note:** The `--coverage` flag passes threshold enforcement via `vitest.config.ts`. If any threshold is not met, `vitest` exits non-zero, blocking merge. The `upload-artifact` step runs `if: always()` to preserve the report even on threshold failure.
+**Note:** The `--coverage` flag passes threshold enforcement via `vitest.config.ts`. If any
+threshold is not met, `vitest` exits non-zero, blocking merge. The `upload-artifact` step runs
+`if: always()` to preserve the report even on threshold failure.
 
 #### 7c: Add Build Verification job (Step 7)
 
@@ -569,7 +582,8 @@ typecheck ───────────────────────�
 
 ## 6. Branch Protection Requirements
 
-After CI is updated, GitHub branch protection rules on `main` must require all of the following status checks before merge:
+After CI is updated, GitHub branch protection rules on `main` must require all of the following
+status checks before merge:
 
 - `Lint`
 - `Type Check`
@@ -581,7 +595,9 @@ After CI is updated, GitHub branch protection rules on `main` must require all o
 - `Coverage Validation`
 - `Build Verification`
 
-**This is a manual GitHub repository setting** — it cannot be set via a workflow file. The implementer must update the branch protection rules in the repository settings after deploying the updated `ci.yml`.
+**This is a manual GitHub repository setting** — it cannot be set via a workflow file. The
+implementer must update the branch protection rules in the repository settings after deploying the
+updated `ci.yml`.
 
 ---
 
@@ -601,7 +617,8 @@ cat .husky/pre-commit
 cat .husky/pre-push
 ```
 
-If `bun run prepare` fails because `bun lockfile` is frozen in CI, the lockfile must be updated locally and committed. This is expected for first-time package additions.
+If `bun run prepare` fails because `bun lockfile` is frozen in CI, the lockfile must be updated
+locally and committed. This is expected for first-time package additions.
 
 ---
 
@@ -626,13 +643,18 @@ All changes in this plan are non-destructive:
 
 FR-05.6 sets thresholds at Lines ≥ 85%, Functions ≥ 85%, Statements ≥ 85%, Branches ≥ 80%.
 
-Per spec Assumption 3: "Thresholds are not enforced retroactively against code that was written before the thresholds were established. The first measurement after stage completion sets the enforced baseline."
+Per spec Assumption 3: "Thresholds are not enforced retroactively against code that was written
+before the thresholds were established. The first measurement after stage completion sets the
+enforced baseline."
 
 **Rollout approach:**
 
-1. First, run `bun run test:unit --coverage` locally without thresholds to measure the current baseline.
-2. If baseline is below the FR-05.6 targets, the thresholds in `vitest.config.ts` must be set to the measured baseline values initially, with a tracked issue to reach the FR-05.6 targets.
-3. If baseline already meets or exceeds FR-05.6 targets, set thresholds to the FR-05.6 values directly.
+1. First, run `bun run test:unit --coverage` locally without thresholds to measure the current
+   baseline.
+2. If baseline is below the FR-05.6 targets, the thresholds in `vitest.config.ts` must be set to the
+   measured baseline values initially, with a tracked issue to reach the FR-05.6 targets.
+3. If baseline already meets or exceeds FR-05.6 targets, set thresholds to the FR-05.6 values
+   directly.
 4. Document the measured baseline in the stage completion notes.
 
 This prevents a coverage threshold failure from blocking the initial stage deployment.
@@ -669,4 +691,5 @@ The following are explicitly NOT part of this plan:
 - No README changes — all READMEs already have all required sections.
 - No ADR — this stage is tooling-only with no runtime architectural impact.
 - No multi-browser E2E — Chromium-only, deferred per spec Out of Scope section.
-- No escalation of `no-console` from `warn` to `error` — deferred to a future enforcement stage per FR-06.5 and FR-12.6.
+- No escalation of `no-console` from `warn` to `error` — deferred to a future enforcement stage per
+  FR-06.5 and FR-12.6.

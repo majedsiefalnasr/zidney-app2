@@ -191,15 +191,8 @@ No schema change may occur without version bump.
 
 ## Migration Folder Structure
 
-backend/
-migrations/
-master/
-001_init.sql
-002_license_engine.sql
-tenant/
-001_baseline.sql
-002_attempt_engine.sql
-003_exam_engine.sql
+backend/ migrations/ master/ 001_init.sql 002_license_engine.sql tenant/ 001_baseline.sql
+002_attempt_engine.sql 003_exam_engine.sql
 
 Rules:
 
@@ -273,8 +266,7 @@ Resolver must validate:
 - tenant.schema_version ≥ minimum_supported_schema_version
 - license.product_version compatible with runtime (ADR-0008)
 
-If incompatible:
-→ Reject request (426 Upgrade Required)
+If incompatible: → Reject request (426 Upgrade Required)
 
 Runtime execution must never proceed under incompatible conditions.
 
@@ -326,8 +318,7 @@ Migration runner must:
 - Detect missing migration gaps
 - Refuse to continue if gap detected
 
-If migration 003 missing:
-→ Execution must stop.
+If migration 003 missing: → Execution must stop.
 
 No migration skipping allowed.
 

@@ -1,14 +1,16 @@
 # Closure Report — ENV Configuration
 
-**Step:** 7 — Closure
-**Timestamp:** 2026-02-28T21:40:00Z
-**Status:** PRODUCTION READY
+**Step:** 7 — Closure **Timestamp:** 2026-02-28T21:40:00Z **Status:** PRODUCTION READY
 
 ---
 
 ## Summary
 
-The ENV Configuration stage is complete. All 54 tasks delivered across 3 frontend apps (MMC, Backoffice, Frontoffice) and 1 shared types package. The stage establishes a centralized, immutable, testable environment configuration pattern with compile-time enforcement. 105 unit tests pass, lint clean, TypeScript clean for all implementation files. All 7 workflow steps completed successfully with full guardian approval at every gate.
+The ENV Configuration stage is complete. All 54 tasks delivered across 3 frontend apps (MMC,
+Backoffice, Frontoffice) and 1 shared types package. The stage establishes a centralized, immutable,
+testable environment configuration pattern with compile-time enforcement. 105 unit tests pass, lint
+clean, TypeScript clean for all implementation files. All 7 workflow steps completed successfully
+with full guardian approval at every gate.
 
 ---
 
@@ -29,12 +31,18 @@ The ENV Configuration stage is complete. All 54 tasks delivered across 3 fronten
 
 ## Scope Delivered
 
-- **Shared TypeScript interfaces** (`packages/types/src/env-config.ts`): `ZidneyEnvConfig`, `ZidneyFeatureFlags`, `ZidneyAppConfig` — type-only, zero runtime footprint
-- **Three-file config pattern** per app: `env.ts` (factory + raw reads) → `feature-flags.ts` (flags via env bridge) → `app-config.ts` (aggregate + mode helpers)
-- **`createEnvConfig(overrides?)` factory**: immutable via `Object.freeze`, throw-on-missing-`VITE_API_BASE_URL`, test-injectable via overrides
-- **`createFeatureFlags(overrides?)` factory**: reads through `readRawFeatureFlags()` bridge (never touches `import.meta.env` directly)
-- **Mode helpers**: `isDev()`, `isProd()`, `isStaging()`, `getApiBase()` — unrecognized `appEnv` values cause all helpers to return `false`
-- **ESLint enforcement**: `no-restricted-syntax` AST selector blocks direct `import.meta.env` access outside `env.ts`
+- **Shared TypeScript interfaces** (`packages/types/src/env-config.ts`): `ZidneyEnvConfig`,
+  `ZidneyFeatureFlags`, `ZidneyAppConfig` — type-only, zero runtime footprint
+- **Three-file config pattern** per app: `env.ts` (factory + raw reads) → `feature-flags.ts` (flags
+  via env bridge) → `app-config.ts` (aggregate + mode helpers)
+- **`createEnvConfig(overrides?)` factory**: immutable via `Object.freeze`,
+  throw-on-missing-`VITE_API_BASE_URL`, test-injectable via overrides
+- **`createFeatureFlags(overrides?)` factory**: reads through `readRawFeatureFlags()` bridge (never
+  touches `import.meta.env` directly)
+- **Mode helpers**: `isDev()`, `isProd()`, `isStaging()`, `getApiBase()` — unrecognized `appEnv`
+  values cause all helpers to return `false`
+- **ESLint enforcement**: `no-restricted-syntax` AST selector blocks direct `import.meta.env` access
+  outside `env.ts`
 - **ImportMetaEnv augmentation**: TypeScript type declarations for all `VITE_*` variables
 - **Backoffice extension**: optional `workspaceSlug` field for dev convenience
 - **`.env.example` files**: all apps documented with `VITE_APP_ENV` migration note
@@ -75,7 +83,10 @@ The ENV Configuration stage is complete. All 54 tasks delivered across 3 fronten
 
 Risk Level: `LOW`
 
-Justification: Frontend-only stage with zero backend, database, or infrastructure impact. All config objects are immutable (`Object.freeze`). Compile-time enforcement via ESLint prevents future regressions. Factory pattern ensures testability. No runtime dependencies added. Deployment is standard static asset replacement with < 1 minute rollback.
+Justification: Frontend-only stage with zero backend, database, or infrastructure impact. All config
+objects are immutable (`Object.freeze`). Compile-time enforcement via ESLint prevents future
+regressions. Factory pattern ensures testability. No runtime dependencies added. Deployment is
+standard static asset replacement with < 1 minute rollback.
 
 ---
 

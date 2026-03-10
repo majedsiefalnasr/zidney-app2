@@ -12,7 +12,8 @@
 
 ### What Is Being Built
 
-A secure, strictly isolated authentication system across three independent domains (MMC, Backoffice, Frontoffice) that guarantees:
+A secure, strictly isolated authentication system across three independent domains (MMC, Backoffice,
+Frontoffice) that guarantees:
 
 - Zero cross-workspace token leakage via workspace_id validation
 - License-aware login enforcement (SOFT_LOCKED, ARCHIVED blocks)
@@ -27,9 +28,11 @@ Authentication is Zidney's second layer of institutional trust after tenant isol
 
 - **Phase:** 1 – Platform Foundation
 - **Stage:** STAGE_03_AUTHENTICATION_SYSTEM
-- **Prerequisite Stages:** STAGE_02A (Master DB), STAGE_02B (Tenant baseline), STAGE_02C (Versioning)
+- **Prerequisite Stages:** STAGE_02A (Master DB), STAGE_02B (Tenant baseline), STAGE_02C
+  (Versioning)
 - **Provides foundation for:** All user-bound routes, license enforcement, runtime security
-- **Reference:** [STAGE_03_AUTHENTICATION_SYSTEM.md](../../../phases/01_PLATFORM_FOUNDATION/STAGE_03_AUTHENTICATION_SYSTEM.md)
+- **Reference:**
+  [STAGE_03_AUTHENTICATION_SYSTEM.md](../../../phases/01_PLATFORM_FOUNDATION/STAGE_03_AUTHENTICATION_SYSTEM.md)
 
 ### Affected Architectural Layers
 
@@ -46,8 +49,10 @@ Authentication is Zidney's second layer of institutional trust after tenant isol
 
 **Mandatory Compliance Confirmations:**
 
-✓ **No cross-tenant access** — workspace_id in token compared against resolved workspace on every request  
-✓ **No middleware bypass** — Correlation ID → Tenant Resolver → License Enforcement → Schema Validation → Route  
+✓ **No cross-tenant access** — workspace_id in token compared against resolved workspace on every
+request  
+✓ **No middleware bypass** — Correlation ID → Tenant Resolver → License Enforcement → Schema
+Validation → Route  
 ✓ **No grading outside worker** — Auth is stateless, no grading involvement  
 ✓ **No direct DB instantiation** — All queries execute within tenant resolver context  
 ✓ **No snapshot integrity weakening** — Not applicable (auth is not attempt-related)  

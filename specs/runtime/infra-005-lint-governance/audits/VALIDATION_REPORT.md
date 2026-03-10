@@ -1,9 +1,7 @@
 # Validation Report: STAGE_INFRA_05_LINT_GOVERNANCE
 
-**Stage:** STAGE_INFRA_05_LINT_GOVERNANCE
-**Phase:** 01_PLATFORM_FOUNDATION
-**Branch:** `spec/infra-005-lint-governance`
-**Generated:** 2026-03-07T00:10:00.000Z
+**Stage:** STAGE_INFRA_05_LINT_GOVERNANCE **Phase:** 01_PLATFORM_FOUNDATION **Branch:**
+`spec/infra-005-lint-governance` **Generated:** 2026-03-07T00:10:00.000Z
 
 ---
 
@@ -23,32 +21,30 @@
 
 ## Lint Gate Detail
 
-**Command:** `bun run lint`
-**Exit Code:** 0
-**Output summary:**
+**Command:** `bun run lint` **Exit Code:** 0 **Output summary:**
 
 - Files checked: 1575
 - Warnings: 3835 (pre-existing — no new warnings introduced by this stage)
 - Errors: 0
 - Infos: 159
 
-**Note:** The 3835 warnings are pre-existing across the codebase and outside the scope of this stage. This stage only promotes `noUnreachable` from `warn` to `error`. Four violations were found and suppressed with documented `biome-ignore` comments in Vue scaffold files.
+**Note:** The 3835 warnings are pre-existing across the codebase and outside the scope of this
+stage. This stage only promotes `noUnreachable` from `warn` to `error`. Four violations were found
+and suppressed with documented `biome-ignore` comments in Vue scaffold files.
 
 ---
 
 ## TypeScript Gate Detail
 
-**Command:** `bun run typecheck`
-**Exit Code:** 0
-**Output:** Pre-existing errors in test files (`DrainLanguageTranslationsJob`, `WorkflowState` type mismatches) predated this stage. Zero new TypeScript errors introduced.
+**Command:** `bun run typecheck` **Exit Code:** 0 **Output:** Pre-existing errors in test files
+(`DrainLanguageTranslationsJob`, `WorkflowState` type mismatches) predated this stage. Zero new
+TypeScript errors introduced.
 
 ---
 
 ## AI-Guard Gate Detail
 
-**Command:** `bun scripts/ai-guard.ts`
-**Exit Code:** 0
-**Output:**
+**Command:** `bun scripts/ai-guard.ts` **Exit Code:** 0 **Output:**
 
 ```
 AI Guard: using ai-architecture-brain.json for rule validation.
@@ -61,8 +57,7 @@ Mode: brain-enriched. No dependency boundary violations detected.
 
 ## Pre-commit Hook Validation
 
-**File:** `.husky/pre-commit`
-**Components verified:**
+**File:** `.husky/pre-commit` **Components verified:**
 
 1. ✅ `bun run lint:staged` call present
 2. ✅ `bun scripts/ai-guard.ts` call present
@@ -73,8 +68,7 @@ Mode: brain-enriched. No dependency boundary violations detected.
 
 ## CI Workflow Validation
 
-**File:** `.github/workflows/ci.yml`
-**Conditions verified:**
+**File:** `.github/workflows/ci.yml` **Conditions verified:**
 
 1. ✅ Two lint steps merged into single `bun run lint` step
 2. ✅ `arch-guard` job added (`runs-on: ubuntu-latest`, `bun scripts/ai-guard.ts`)
@@ -84,8 +78,7 @@ Mode: brain-enriched. No dependency boundary violations detected.
 
 ## Governance Document Validation
 
-**File:** `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md`
-**Sections verified (8/8):**
+**File:** `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md` **Sections verified (8/8):**
 
 1. ✅ Introduction
 2. ✅ Layer Model (Biome → AI-Guard → Infra Audit → Tests)
@@ -102,8 +95,8 @@ Mode: brain-enriched. No dependency boundary violations detected.
 
 ## ARCHITECTURE_MAP Verification
 
-**File:** `docs/architecture/intelligence/ARCHITECTURE_MAP.json` (or equivalent)
-**Packages verified:**
+**File:** `docs/architecture/intelligence/ARCHITECTURE_MAP.json` (or equivalent) **Packages
+verified:**
 
 - ✅ `domain-core` — `criticality` field present
 - ✅ `types` — `criticality` field present
@@ -137,5 +130,4 @@ Mode: brain-enriched. No dependency boundary violations detected.
 
 ## Verdict
 
-**All mandatory validation gates: PASSED**
-Implementation is compliant and ready for closure.
+**All mandatory validation gates: PASSED** Implementation is compliant and ready for closure.

@@ -10,7 +10,8 @@ Guardian Verdicts: **Zidney Architecture Checker — PASS | Zidney API Designer 
 
 ## Summary
 
-Technical plan completed for STAGE_INFRA_06_ARCHITECTURE_GUARD. The plan covers 9 file changes across `package.json`, `scripts/ai-guard.ts`, `tests/unit/ai-guard/`, and `tests/static/`:
+Technical plan completed for STAGE_INFRA_06_ARCHITECTURE_GUARD. The plan covers 9 file changes
+across `package.json`, `scripts/ai-guard.ts`, `tests/unit/ai-guard/`, and `tests/static/`:
 
 1. Add `arch:guard` npm script to `package.json`
 2. Add `export` to 7 pure functions in `scripts/ai-guard.ts` (non-logic change, enables testability)
@@ -97,8 +98,10 @@ Not applicable. No state-mutating operations.
 
 ## Open Risks
 
-- **Biome linting on new test files**: Unit test files must not trigger `noExplicitAny`, `noUnusedVariables`, or `noConsole` violations. Tests must use typed assertions throughout.
-- **Fixture file compilation**: Fixture `.ts` files are never compiled by the production build — verified by tsconfig exclusion patterns. They are source-read-only by `extractImports()`.
+- **Biome linting on new test files**: Unit test files must not trigger `noExplicitAny`,
+  `noUnusedVariables`, or `noConsole` violations. Tests must use typed assertions throughout.
+- **Fixture file compilation**: Fixture `.ts` files are never compiled by the production build —
+  verified by tsconfig exclusion patterns. They are source-read-only by `extractImports()`.
 
 ---
 

@@ -9,9 +9,12 @@
 
 ## Executive Summary
 
-This document defines the complete test implementation strategy for validating 31 atomic test scenarios across 8 architectural areas. The plan establishes testing infrastructure, artifact organization, execution phases, and validation criteria.
+This document defines the complete test implementation strategy for validating 31 atomic test
+scenarios across 8 architectural areas. The plan establishes testing infrastructure, artifact
+organization, execution phases, and validation criteria.
 
-**Objective**: Establish that Phase 01 PLATFORM_FOUNDATION meets all non-negotiable architectural guarantees before promotion to PRODUCTION_READY.
+**Objective**: Establish that Phase 01 PLATFORM_FOUNDATION meets all non-negotiable architectural
+guarantees before promotion to PRODUCTION_READY.
 
 ---
 
@@ -76,24 +79,24 @@ tests/
 
 ```typescript
 // tests/unit/setup.ts
-import { InMemoryPool } from '../test-helpers'
-import { InstrumentedRedisClient } from '../test-helpers'
-import { createMockTenantPool } from '../test-helpers'
+import { InMemoryPool } from "../test-helpers";
+import { InstrumentedRedisClient } from "../test-helpers";
+import { createMockTenantPool } from "../test-helpers";
 
 beforeEach(async () => {
   // Create isolated test environment
-  const masterDb = new InMemoryPool()
-  const tenantPoolMap = new Map()
-  const redis = new InstrumentedRedisClient()
+  const masterDb = new InMemoryPool();
+  const tenantPoolMap = new Map();
+  const redis = new InstrumentedRedisClient();
 
   // Return shared context
-  return { masterDb, tenantPoolMap, redis }
-})
+  return { masterDb, tenantPoolMap, redis };
+});
 
 afterEach(async () => {
   // Clear all mocks
-  vi.clearAllMocks()
-})
+  vi.clearAllMocks();
+});
 ```
 
 #### Unit Test Files
@@ -101,217 +104,206 @@ afterEach(async () => {
 **1. tests/unit/01-tenant-isolation.test.ts** (Tests 1.1-1.4)
 
 ```typescript
-describe('Area 1: Tenant Isolation Validation', () => {
-  it('Test 1.1: Cross-tenant data access rejection', async () => {
+describe("Area 1: Tenant Isolation Validation", () => {
+  it("Test 1.1: Cross-tenant data access rejection", async () => {
     // Setup
-    const wsA = await seedWorkspace(masterDb, { slug: 'ws-a' })
-    const wsB = await seedWorkspace(masterDb, { slug: 'ws-b' })
-    const userA = await seedUser(tenantDbA, { workspace_id: wsA.id })
+    const wsA = await seedWorkspace(masterDb, { slug: "ws-a" });
+    const wsB = await seedWorkspace(masterDb, { slug: "ws-b" });
+    const userA = await seedUser(tenantDbA, { workspace_id: wsA.id });
 
     // Act
-    const jwtA = generateJWT(userA.id, wsA.id)
-    const response = await client
-      .setJWT(jwtA)
-      .get(`/api/workspaces/${wsB.slug}/students`)
+    const jwtA = generateJWT(userA.id, wsA.id);
+    const response = await client.setJWT(jwtA).get(`/api/workspaces/${wsB.slug}/students`);
 
     // Assert
-    expect(response.status).toBe(403)
-    expect(response.body.error.code).toBe('FORBIDDEN')
-    expect(response.body).toMatchObject(RFC7807_ERROR_SCHEMA)
-  })
+    expect(response.status).toBe(403);
+    expect(response.body.error.code).toBe("FORBIDDEN");
+    expect(response.body).toMatchObject(RFC7807_ERROR_SCHEMA);
+  });
 
-  it('Test 1.2: Master database boundary enforcement', async () => {
+  it("Test 1.2: Master database boundary enforcement", async () => {
     // Scan codebase for direct master_db access in tenant routes
-    const routeFiles = await glob('apps/api/src/routes/**/*.ts')
+    const routeFiles = await glob("apps/api/src/routes/**/*.ts");
     for (const file of routeFiles) {
-      const content = readFileSync(file, 'utf-8')
+      const content = readFileSync(file, "utf-8");
       // Verify: no direct master_db.query() in tenant-bound routes
-      expect(content).not.toMatch(/tenant.*route.*master_db\.query/)
+      expect(content).not.toMatch(/tenant.*route.*master_db\.query/);
     }
-  })
+  });
 
-  it('Test 1.3: Resolver middleware enforcement', async () => {
+  it("Test 1.3: Resolver middleware enforcement", async () => {
     // Verify service fails without resolver
     const appWithoutResolver = new Hono()
       .use(correlationId)
       // .use(tenantResolver) ← MISSING
       .use(license)
-      .get('/api/test', (c) => c.json({ ok: true }))
+      .get("/api/test", (c) => c.json({ ok: true }));
 
-    const res = await appWithoutResolver.request(
-      new Request('http://localhost/api/test')
-    )
+    const res = await appWithoutResolver.request(new Request("http://localhost/api/test"));
 
-    expect(res.status).toBe(500)
-    expect(res.ok).toBe(false)
-  })
+    expect(res.status).toBe(500);
+    expect(res.ok).toBe(false);
+  });
 
-  it('Test 1.4: Workspace slug immutability in context', async () => {
+  it("Test 1.4: Workspace slug immutability in context", async () => {
     // Attempt override via request body
-    const userA = seedUser(tenantDbA)
-    const jwtA = generateJWT(userA.id, wsA.id)
+    const userA = seedUser(tenantDbA);
+    const jwtA = generateJWT(userA.id, wsA.id);
 
-    const response = await client
-      .setJWT(jwtA)
-      .post(`/api/workspaces/${wsA.slug}/students`, {
-        email: 'new@example.com',
-        workspace_slug: 'workspace-b-evil', // ← Attempt override
-      })
+    const response = await client.setJWT(jwtA).post(`/api/workspaces/${wsA.slug}/students`, {
+      email: "new@example.com",
+      workspace_slug: "workspace-b-evil", // ← Attempt override
+    });
 
     // Resolver should ignore body, use authenticated context
-    expect(response.body.data.workspace_id).toBe(wsA.id)
-  })
-})
+    expect(response.body.data.workspace_id).toBe(wsA.id);
+  });
+});
 ```
 
 **2. tests/unit/03-license-engine.test.ts** (Tests 3.1-3.3)
 
 ```typescript
-describe('Area 3: License Engine Validation', () => {
-  describe('Test 3.1: License State Machine', () => {
-    it('3.1a: Valid transition ACTIVE → SOFT_LOCKED', async () => {
-      const license = await seedLicense(masterDb, { status: 'ACTIVE' })
+describe("Area 3: License Engine Validation", () => {
+  describe("Test 3.1: License State Machine", () => {
+    it("3.1a: Valid transition ACTIVE → SOFT_LOCKED", async () => {
+      const license = await seedLicense(masterDb, { status: "ACTIVE" });
       const response = await client.patch(`/api/licenses/${license.id}`, {
-        status: 'SOFT_LOCKED',
-      })
+        status: "SOFT_LOCKED",
+      });
 
-      expect(response.status).toBe(200)
-      expect(response.data.license.status).toBe('SOFT_LOCKED')
-    })
+      expect(response.status).toBe(200);
+      expect(response.data.license.status).toBe("SOFT_LOCKED");
+    });
 
-    it('3.1d: Invalid transition ARCHIVED → ACTIVE (rejected)', async () => {
-      const license = await seedLicense(masterDb, { status: 'ARCHIVED' })
+    it("3.1d: Invalid transition ARCHIVED → ACTIVE (rejected)", async () => {
+      const license = await seedLicense(masterDb, { status: "ARCHIVED" });
       const response = await client.patch(`/api/licenses/${license.id}`, {
-        status: 'ACTIVE',
-      })
+        status: "ACTIVE",
+      });
 
-      expect(response.status).toBe(409)
-      expect(response.body.error_code).toBe('INVALID_TRANSITION')
+      expect(response.status).toBe(409);
+      expect(response.body.error_code).toBe("INVALID_TRANSITION");
       expect(response.body).toMatchObject({
         ...RFC7807_ERROR_SCHEMA,
-        current_state: 'ARCHIVED',
-        requested_state: 'ACTIVE',
-      })
-    })
+        current_state: "ARCHIVED",
+        requested_state: "ACTIVE",
+      });
+    });
 
     // 3.1b, 3.1c, 3.1e follow same pattern...
-  })
+  });
 
-  it('Test 3.2: Version Enforcement', async () => {
-    const workspace = await seedWorkspace(masterDb)
-    const license = await seedLicense(masterDb, { workspace_id: workspace.id })
+  it("Test 3.2: Version Enforcement", async () => {
+    const workspace = await seedWorkspace(masterDb);
+    const license = await seedLicense(masterDb, { workspace_id: workspace.id });
 
     // Simulate version mismatch
-    const tenantDb = createMockTenantDb()
-    await tenantDb.update(schemaVersion).set({ version: '1.9.0' })
+    const tenantDb = createMockTenantDb();
+    await tenantDb.update(schemaVersion).set({ version: "1.9.0" });
 
     // Expected schema version is 2.0.0
-    const response = await client.get(
-      `/api/workspaces/${workspace.slug}/students`
-    )
+    const response = await client.get(`/api/workspaces/${workspace.slug}/students`);
 
-    expect(response.status).toBe(426)
-    expect(response.body.error_code).toBe('UPGRADE_REQUIRED')
-  })
+    expect(response.status).toBe(426);
+    expect(response.body.error_code).toBe("UPGRADE_REQUIRED");
+  });
 
-  describe('Test 3.3: Limit Enforcement', () => {
-    it('3.3a: Student limit enforcement', async () => {
-      const license = await seedLicense(masterDb, { max_students: 100 })
-      const students = await seedStudentsBulk(tenantDb, 100)
+  describe("Test 3.3: Limit Enforcement", () => {
+    it("3.3a: Student limit enforcement", async () => {
+      const license = await seedLicense(masterDb, { max_students: 100 });
+      const students = await seedStudentsBulk(tenantDb, 100);
 
       // Attempt 101st
-      const response = await client.post(
-        `/api/workspaces/${ws.slug}/students`,
-        {
-          email: 'over-limit@example.com',
-        }
-      )
+      const response = await client.post(`/api/workspaces/${ws.slug}/students`, {
+        email: "over-limit@example.com",
+      });
 
-      expect(response.status).toBe(409)
+      expect(response.status).toBe(409);
       expect(response.body).toMatchObject({
-        error_code: 'LIMIT_EXCEEDED',
+        error_code: "LIMIT_EXCEEDED",
         limit: 100,
         current: 100,
-      })
-    })
+      });
+    });
 
-    it('3.3c: Limit check is transactional', async () => {
+    it("3.3c: Limit check is transactional", async () => {
       // Within transaction, create 11 when limit is 10
       expect(async () => {
         await tenantDb.transaction(async (tx) => {
-          await seedStudentsBulk(tx, 11)
-        })
-      }).rejects.toThrow('LIMIT_EXCEEDED')
+          await seedStudentsBulk(tx, 11);
+        });
+      }).rejects.toThrow("LIMIT_EXCEEDED");
 
       // Verify 0 students created (all-or-nothing)
-      const count = await tenantDb.select(sql`count(*)`).from(students)
-      expect(count).toBe(0)
-    })
-  })
-})
+      const count = await tenantDb.select(sql`count(*)`).from(students);
+      expect(count).toBe(0);
+    });
+  });
+});
 ```
 
 **3. tests/unit/05-rate-limiting.test.ts** (Tests 5.1-5.2)
 
 ```typescript
-describe('Area 5: Rate Limiting Validation', () => {
-  describe('Test 5.1: Threshold Enforcement', () => {
-    it('5.1a: Login endpoint rate limit (5/min per IP)', async () => {
+describe("Area 5: Rate Limiting Validation", () => {
+  describe("Test 5.1: Threshold Enforcement", () => {
+    it("5.1a: Login endpoint rate limit (5/min per IP)", async () => {
       for (let i = 0; i < 5; i++) {
-        const res = await client.post('/api/login', {
-          email: 'test@example.com',
-          password: 'wrong',
-        })
-        expect([200, 401]).toContain(res.status) // Success or auth failure
+        const res = await client.post("/api/login", {
+          email: "test@example.com",
+          password: "wrong",
+        });
+        expect([200, 401]).toContain(res.status); // Success or auth failure
       }
 
       // 6th request should be rate-limited
-      const res = await client.post('/api/login', {
-        email: 'test@example.com',
-        password: 'wrong',
-      })
-      expect(res.status).toBe(429)
-      expect(res.headers.get('Retry-After')).toBeDefined()
-    })
+      const res = await client.post("/api/login", {
+        email: "test@example.com",
+        password: "wrong",
+      });
+      expect(res.status).toBe(429);
+      expect(res.headers.get("Retry-After")).toBeDefined();
+    });
 
-    it('5.1c: Submission idempotency bypasses rate limiting', async () => {
+    it("5.1c: Submission idempotency bypasses rate limiting", async () => {
       const submission1 = await client.post(
         `/api/workspaces/${ws.slug}/attempts/${att.id}/submissions`,
-        { questionId: 'q1', answer: 'A' }
-      )
-      expect(submission1.status).toBe(202)
+        { questionId: "q1", answer: "A" },
+      );
+      expect(submission1.status).toBe(202);
 
       // Identical resubmission (idempotent)
       const submission2 = await client.post(
         `/api/workspaces/${ws.slug}/attempts/${att.id}/submissions`,
-        { questionId: 'q1', answer: 'A' }
-      )
-      expect(submission2.status).toBe(202) // Not rate-limited
+        { questionId: "q1", answer: "A" },
+      );
+      expect(submission2.status).toBe(202); // Not rate-limited
 
       // Different question (distinct operation)
       const submission3 = await client.post(
         `/api/workspaces/${ws.slug}/attempts/${att.id}/submissions`,
-        { questionId: 'q2', answer: 'B' }
-      )
-      expect(submission3.status).toBe(202)
-    })
-  })
+        { questionId: "q2", answer: "B" },
+      );
+      expect(submission3.status).toBe(202);
+    });
+  });
 
-  it('Test 5.2: Rate limit header verification', async () => {
-    const res = await client.get(`/api/workspaces/${ws.slug}/students`)
+  it("Test 5.2: Rate limit header verification", async () => {
+    const res = await client.get(`/api/workspaces/${ws.slug}/students`);
 
-    expect(res.headers.get('X-RateLimit-Limit')).toBe('1000')
-    expect(res.headers.get('X-RateLimit-Remaining')).toMatch(/^\d+$/)
-    expect(res.headers.get('X-RateLimit-Reset')).toMatch(/^\d+$/)
+    expect(res.headers.get("X-RateLimit-Limit")).toBe("1000");
+    expect(res.headers.get("X-RateLimit-Remaining")).toMatch(/^\d+$/);
+    expect(res.headers.get("X-RateLimit-Reset")).toMatch(/^\d+$/);
 
     // Verify decrease on subsequent request
-    const remaining1 = parseInt(res.headers.get('X-RateLimit-Remaining')!)
-    const res2 = await client.get(`/api/workspaces/${ws.slug}/students`)
-    const remaining2 = parseInt(res2.headers.get('X-RateLimit-Remaining')!)
+    const remaining1 = parseInt(res.headers.get("X-RateLimit-Remaining")!);
+    const res2 = await client.get(`/api/workspaces/${ws.slug}/students`);
+    const remaining2 = parseInt(res2.headers.get("X-RateLimit-Remaining")!);
 
-    expect(remaining2).toBe(remaining1 - 1)
-  })
-})
+    expect(remaining2).toBe(remaining1 - 1);
+  });
+});
 ```
 
 ---
@@ -326,7 +318,7 @@ describe('Area 5: Rate Limiting Validation', () => {
 
 ```yaml
 # docker-compose.test.yml
-version: '3.8'
+version: "3.8"
 services:
   postgres:
     image: postgres:15
@@ -336,12 +328,12 @@ services:
     volumes:
       - postgres_data_test:/var/lib/postgresql/data
     ports:
-      - '5433:5432'
+      - "5433:5432"
 
   redis:
     image: redis:7
     ports:
-      - '6380:6379'
+      - "6380:6379"
 ```
 
 **Startup Command**:
@@ -357,59 +349,57 @@ npm run test:integration
 **1. tests/integration/01-tenant-isolation.test.ts** (Tests 1.1-1.4 with real DB)
 
 ```typescript
-describe('Area 1: Tenant Isolation (Integration)', () => {
-  let masterDb: Database
-  let redis: RedisClient
+describe("Area 1: Tenant Isolation (Integration)", () => {
+  let masterDb: Database;
+  let redis: RedisClient;
 
   beforeAll(async () => {
     // Connect to real Docker PostgreSQL
     masterDb = new Database({
-      host: 'localhost',
+      host: "localhost",
       port: 5433,
-      database: 'master_db',
-      password: 'test',
-    })
+      database: "master_db",
+      password: "test",
+    });
 
     redis = new RedisClient({
-      host: 'localhost',
+      host: "localhost",
       port: 6380,
-    })
+    });
 
-    await masterDb.init()
-    await redis.connect()
-  })
+    await masterDb.init();
+    await redis.connect();
+  });
 
   afterAll(async () => {
-    await masterDb.close()
-    await redis.disconnect()
-  })
+    await masterDb.close();
+    await redis.disconnect();
+  });
 
   beforeEach(async () => {
     // Create fresh test environments for each test
-    const env = await setupMultiWorkspaceTest(masterDb)
-    return { env }
-  })
+    const env = await setupMultiWorkspaceTest(masterDb);
+    return { env };
+  });
 
   afterEach(async () => {
     // Cleanup (drop tenant databases, delete master records)
-    await teardownTestEnvironment(env)
-  })
+    await teardownTestEnvironment(env);
+  });
 
-  it('Test 1.1: Cross-tenant data access rejection (Real DB)', async () => {
-    const { env } = getContext()
+  it("Test 1.1: Cross-tenant data access rejection (Real DB)", async () => {
+    const { env } = getContext();
 
     // Authenticate as user from Workspace A
-    const jwtA = generateJWT(env.userA.id, env.wsA.id)
+    const jwtA = generateJWT(env.userA.id, env.wsA.id);
 
     // Attempt to access Workspace B resource
-    const response = await httpClient
-      .setJWT(jwtA)
-      .get(`/api/workspaces/${env.wsB.slug}/students`)
+    const response = await httpClient.setJWT(jwtA).get(`/api/workspaces/${env.wsB.slug}/students`);
 
-    expect(response.status).toBe(403)
+    expect(response.status).toBe(403);
 
     // Verify no data leakage
-    expect(response.body.data).toBeNull()
+    expect(response.body.data).toBeNull();
 
     // Verify audit log recorded attempt
     const auditLogs = await masterDb
@@ -417,49 +407,47 @@ describe('Area 1: Tenant Isolation (Integration)', () => {
       .from(auditLog)
       .where(
         and(
-          eq(auditLog.action, 'unauthorized_access_attempt'),
-          eq(auditLog.workspace_id, env.wsB.id)
-        )
-      )
-    expect(auditLogs.length).toBeGreaterThan(0)
-  })
-})
+          eq(auditLog.action, "unauthorized_access_attempt"),
+          eq(auditLog.workspace_id, env.wsB.id),
+        ),
+      );
+    expect(auditLogs.length).toBeGreaterThan(0);
+  });
+});
 ```
 
 **2. tests/integration/02-provisioning.test.ts** (Tests 2.1-2.3)
 
 ```typescript
-describe('Area 2: Provisioning Validation', () => {
-  it('Test 2.1: Deterministic database creation (idempotency)', async () => {
-    const ws = await seedWorkspace(masterDb, { slug: 'test-idempotent' })
-    const lic = await seedLicense(masterDb, { workspace_id: ws.id })
+describe("Area 2: Provisioning Validation", () => {
+  it("Test 2.1: Deterministic database creation (idempotency)", async () => {
+    const ws = await seedWorkspace(masterDb, { slug: "test-idempotent" });
+    const lic = await seedLicense(masterDb, { workspace_id: ws.id });
 
     // First provision
-    const result1 = await provisioning.provision(ws.id)
-    expect(result1.success).toBe(true)
+    const result1 = await provisioning.provision(ws.id);
+    expect(result1.success).toBe(true);
 
     // Query database list
-    const dbList1 = await adminDb.query(
-      `SELECT datname FROM pg_database WHERE datname LIKE $1`,
-      [`${ws.slug}_tenant_db`]
-    )
-    expect(dbList1.rows.length).toBe(1)
+    const dbList1 = await adminDb.query(`SELECT datname FROM pg_database WHERE datname LIKE $1`, [
+      `${ws.slug}_tenant_db`,
+    ]);
+    expect(dbList1.rows.length).toBe(1);
 
     // Second provision (idempotent)
-    const result2 = await provisioning.provision(ws.id)
-    expect(result2.success).toBe(true)
-    expect(result2.message).toMatch(/already provisioned/)
+    const result2 = await provisioning.provision(ws.id);
+    expect(result2.success).toBe(true);
+    expect(result2.message).toMatch(/already provisioned/);
 
     // Verify still only one database
-    const dbList2 = await adminDb.query(
-      `SELECT datname FROM pg_database WHERE datname LIKE $1`,
-      [`${ws.slug}_tenant_db`]
-    )
-    expect(dbList2.rows.length).toBe(1)
-  })
+    const dbList2 = await adminDb.query(`SELECT datname FROM pg_database WHERE datname LIKE $1`, [
+      `${ws.slug}_tenant_db`,
+    ]);
+    expect(dbList2.rows.length).toBe(1);
+  });
 
-  it('Test 2.2: Distributed lock enforcement under concurrency', async () => {
-    const ws = await seedWorkspace(masterDb, { slug: 'test-concurrent' })
+  it("Test 2.2: Distributed lock enforcement under concurrency", async () => {
+    const ws = await seedWorkspace(masterDb, { slug: "test-concurrent" });
 
     // Simulate 5 concurrent provisioning requests
     const results = await Promise.allSettled([
@@ -468,206 +456,198 @@ describe('Area 2: Provisioning Validation', () => {
       provisioning.provision(ws.id),
       provisioning.provision(ws.id),
       provisioning.provision(ws.id),
-    ])
+    ]);
 
-    const successes = results.filter(
-      (r) => r.status === 'fulfilled' && r.value.success
-    )
-    const failures = results.filter(
-      (r) => r.status === 'rejected' || !r.value?.success
-    )
+    const successes = results.filter((r) => r.status === "fulfilled" && r.value.success);
+    const failures = results.filter((r) => r.status === "rejected" || !r.value?.success);
 
-    expect(successes.length).toBe(1) // Exactly one succeeded
-    expect(failures.length).toBe(4) // Others failed
-    expect(
-      failures.every((f) => f.reason?.message.includes('already in progress'))
-    ).toBe(true)
-  })
+    expect(successes.length).toBe(1); // Exactly one succeeded
+    expect(failures.length).toBe(4); // Others failed
+    expect(failures.every((f) => f.reason?.message.includes("already in progress"))).toBe(true);
+  });
 
-  it('Test 2.3: Baseline schema integrity', async () => {
-    const ws = await seedWorkspace(masterDb)
-    await provisioning.provision(ws.id)
+  it("Test 2.3: Baseline schema integrity", async () => {
+    const ws = await seedWorkspace(masterDb);
+    await provisioning.provision(ws.id);
 
-    const tenantDb = await getTenantPool(ws.id).getConnection()
+    const tenantDb = await getTenantPool(ws.id).getConnection();
 
     // Check required tables
     const requiredTables = [
-      'users',
-      'roles',
-      'permissions',
-      'students',
-      'staff',
-      'attempts',
-      'submissions',
-      'questions_snapshot',
-      'schema_version',
-    ]
+      "users",
+      "roles",
+      "permissions",
+      "students",
+      "staff",
+      "attempts",
+      "submissions",
+      "questions_snapshot",
+      "schema_version",
+    ];
 
     for (const table of requiredTables) {
       const exists = await tenantDb.query(
         `SELECT 1 FROM information_schema.tables WHERE table_name = $1`,
-        [table]
-      )
-      expect(exists.rows.length).toBe(1, `Table ${table} should exist`)
+        [table],
+      );
+      expect(exists.rows.length).toBe(1, `Table ${table} should exist`);
     }
 
     // Verify schema_version
-    const [version] = await tenantDb.select().from(schemaVersion).limit(1)
-    expect(version.version).toMatch(/^\d+\.\d+\.\d+$/) // Semantic version
-  })
-})
+    const [version] = await tenantDb.select().from(schemaVersion).limit(1);
+    expect(version.version).toMatch(/^\d+\.\d+\.\d+$/); // Semantic version
+  });
+});
 ```
 
 **3. tests/integration/06-observability.test.ts** (Tests 6.1-6.2)
 
 ```typescript
-describe('Area 6: Observability Validation', () => {
-  let logSpy: any
+describe("Area 6: Observability Validation", () => {
+  let logSpy: any;
 
   beforeEach(() => {
     // Capture logs
-    logSpy = vi.spyOn(logger, 'log')
-  })
+    logSpy = vi.spyOn(logger, "log");
+  });
 
-  it('Test 6.1: Structured logging compliance', async () => {
-    const ws = await seedWorkspace(masterDb)
-    const client = createHttpClient()
+  it("Test 6.1: Structured logging compliance", async () => {
+    const ws = await seedWorkspace(masterDb);
+    const client = createHttpClient();
 
     // Make request
-    const response = await client.get(`/api/workspaces/${ws.slug}/students`)
+    const response = await client.get(`/api/workspaces/${ws.slug}/students`);
 
     // Examine logs
     const logCalls = logSpy.mock.calls.filter(([entry]) =>
-      entry.message?.includes('GET /api/workspaces')
-    )
+      entry.message?.includes("GET /api/workspaces"),
+    );
 
-    expect(logCalls.length).toBeGreaterThan(0)
+    expect(logCalls.length).toBeGreaterThan(0);
 
-    const entry = logCalls[0][0]
+    const entry = logCalls[0][0];
 
     // Verify required fields
     expect(entry).toMatchObject({
       timestamp: expect.stringMatching(/^\d{4}-\d{2}-\d{2}T/), // ISO 8601
       level: expect.stringMatching(/INFO|WARN|ERROR/),
-      service: 'api',
+      service: "api",
       workspace_slug: ws.slug,
       workspace_id: ws.id,
       correlation_id: expect.any(String),
       message: expect.any(String),
-    })
+    });
 
     // Verify log is valid JSON
-    expect(() => JSON.parse(JSON.stringify(entry))).not.toThrow()
-  })
+    expect(() => JSON.parse(JSON.stringify(entry))).not.toThrow();
+  });
 
-  it('Test 6.2: Error response contract (RFC 7807)', async () => {
-    const response = await client.get(`/api/workspaces/nonexistent/students`)
+  it("Test 6.2: Error response contract (RFC 7807)", async () => {
+    const response = await client.get(`/api/workspaces/nonexistent/students`);
 
-    expect(response.status).toBe(404)
+    expect(response.status).toBe(404);
     expect(response.body).toMatchObject({
-      type: 'https://api.zidney.io/errors/not_found',
-      title: 'Resource Not Found',
+      type: "https://api.zidney.io/errors/not_found",
+      title: "Resource Not Found",
       status: 404,
-      detail: expect.stringContaining('workspace'),
-      instance: '/api/workspaces/nonexistent/students',
-      error_code: 'NOT_FOUND',
-    })
-  })
-})
+      detail: expect.stringContaining("workspace"),
+      instance: "/api/workspaces/nonexistent/students",
+      error_code: "NOT_FOUND",
+    });
+  });
+});
 ```
 
 **4. tests/integration/07-attempt-engine.test.ts** (Tests 7.1-7.3)
 
 ```typescript
-describe('Area 7: Attempt Engine Validation', () => {
-  it('Test 7.1: Snapshot immutability', async () => {
-    const ws = await setupCompleteTestEnvironment()
+describe("Area 7: Attempt Engine Validation", () => {
+  it("Test 7.1: Snapshot immutability", async () => {
+    const ws = await setupCompleteTestEnvironment();
     const exam = await seedExam(ws.tenantDb, {
-      title: 'Original Exam',
+      title: "Original Exam",
       total_points: 100,
       pass_threshold: 60,
-    })
-    const student = await seedStudent(ws.tenantDb, 1)
+    });
+    const student = await seedStudent(ws.tenantDb, 1);
 
     // Student starts attempt (snapshot created)
     const attempt = await seedAttempt(ws.tenantDb, {
       exam_id: exam.id,
       student_id: student.id,
       snapshot_config: JSON.stringify({
-        exam_title: 'Original Exam',
+        exam_title: "Original Exam",
         total_points: 100,
         pass_threshold: 60,
-        passing_grade: 'D',
+        passing_grade: "D",
       }),
-    })
+    });
 
     // Modify exam after attempt started
     await ws.tenantDb
       .update(exams)
-      .set({ pass_threshold: 80, passing_grade: 'C' })
-      .where(eq(exams.id, exam.id))
+      .set({ pass_threshold: 80, passing_grade: "C" })
+      .where(eq(exams.id, exam.id));
 
     // Verify attempt snapshot unchanged
-    const snapshotConfig = JSON.parse(attempt.snapshot_config)
-    expect(snapshotConfig.pass_threshold).toBe(60) // Not 80
-    expect(snapshotConfig.passing_grade).toBe('D') // Not C
-  })
+    const snapshotConfig = JSON.parse(attempt.snapshot_config);
+    expect(snapshotConfig.pass_threshold).toBe(60); // Not 80
+    expect(snapshotConfig.passing_grade).toBe("D"); // Not C
+  });
 
-  it('Test 7.2: Worker-only grading authority', async () => {
+  it("Test 7.2: Worker-only grading authority", async () => {
     // Scan API codebase
-    const apiFiles = await glob('apps/api/src/routes/**/*.ts')
+    const apiFiles = await glob("apps/api/src/routes/**/*.ts");
     for (const file of apiFiles) {
-      const content = readFileSync(file, 'utf-8')
+      const content = readFileSync(file, "utf-8");
       // Verify no grading logic in routes
-      expect(content).not.toMatch(
-        /calculateScore|gradeSubmission|evaluateAnswer/
-      )
+      expect(content).not.toMatch(/calculateScore|gradeSubmission|evaluateAnswer/);
     }
 
     // Make submission
-    const ws = await setupCompleteTestEnvironment()
+    const ws = await setupCompleteTestEnvironment();
     const response = await client.post(
       `/api/workspaces/${ws.workspace.slug}/attempts/${ws.attempt.id}/submissions`,
-      { questionId: 'q1', answer: 'A' }
-    )
+      { questionId: "q1", answer: "A" },
+    );
 
     // Verify 202 (not 200) — async processing
-    expect(response.status).toBe(202)
+    expect(response.status).toBe(202);
 
     // Verify score is NULL (not yet graded)
-    const submission = response.data.submission
-    expect(submission.score).toBeNull()
+    const submission = response.data.submission;
+    expect(submission.score).toBeNull();
 
     // Verify task queued for Worker
-    const queueLength = await redis.lLen('worker:grading:queue')
-    expect(queueLength).toBeGreaterThan(0)
-  })
+    const queueLength = await redis.lLen("worker:grading:queue");
+    expect(queueLength).toBeGreaterThan(0);
+  });
 
-  it('Test 7.3: Server-authoritative time only', async () => {
-    const ws = await setupCompleteTestEnvironment()
-    const attemptDeadline = new Date(Date.now() + 60000) // 60 sec from now
+  it("Test 7.3: Server-authoritative time only", async () => {
+    const ws = await setupCompleteTestEnvironment();
+    const attemptDeadline = new Date(Date.now() + 60000); // 60 sec from now
     const attempt = await seedAttempt(ws.tenantDb, {
       deadline_at: attemptDeadline,
-    })
+    });
 
     // Malicious client tries to manipulate time
-    const fakeFutureTime = new Date(Date.now() + 120000) // Fake: 2 min in future
+    const fakeFutureTime = new Date(Date.now() + 120000); // Fake: 2 min in future
 
     const response = await client.post(
       `/api/workspaces/${ws.workspace.slug}/attempts/${attempt.id}/submissions`,
       {
-        questionId: 'q1',
-        answer: 'A',
+        questionId: "q1",
+        answer: "A",
         client_timestamp: fakeFutureTime.toISOString(), // ← Ignored
-      }
-    )
+      },
+    );
 
     // Server time used for deadline, not client time
-    const submission = response.data.submission
-    expect(submission.submitted_at).toBeCloseTo(new Date())
-    expect(submission.submitted_at).not.toBeCloseTo(fakeFutureTime)
-  })
-})
+    const submission = response.data.submission;
+    expect(submission.submitted_at).toBeCloseTo(new Date());
+    expect(submission.submitted_at).not.toBeCloseTo(fakeFutureTime);
+  });
+});
 ```
 
 ---
@@ -683,80 +663,72 @@ describe('Area 7: Attempt Engine Validation', () => {
 **tests/static/04-migration-discipline.test.ts**
 
 ```typescript
-describe('Area 4: Migration Discipline Validation', () => {
-  it('Test 4.1: Forward-only migration check', async () => {
-    const migrationsPath = 'apps/api/src/db/*/migrations'
-    const migrationFiles = (await glob(migrationsPath)) + '/**/*.sql'
+describe("Area 4: Migration Discipline Validation", () => {
+  it("Test 4.1: Forward-only migration check", async () => {
+    const migrationsPath = "apps/api/src/db/*/migrations";
+    const migrationFiles = (await glob(migrationsPath)) + "/**/*.sql";
 
     for (const file of migrationFiles) {
-      const content = readFileSync(file, 'utf-8')
+      const content = readFileSync(file, "utf-8");
 
       // Split into UP and DOWN
-      const upMatch = content.match(/^-- UP([\s\S]+?)(?:-- DOWN|$)/m)
-      const upSection = upMatch?.[1] || ''
+      const upMatch = content.match(/^-- UP([\s\S]+?)(?:-- DOWN|$)/m);
+      const upSection = upMatch?.[1] || "";
 
       // Forbidden patterns in UP section
-      const forbiddenPatterns = [
-        'DROP TABLE',
-        'DROP COLUMN',
-        'DELETE FROM',
-        'TRUNCATE',
-      ]
+      const forbiddenPatterns = ["DROP TABLE", "DROP COLUMN", "DELETE FROM", "TRUNCATE"];
       for (const pattern of forbiddenPatterns) {
         expect(upSection.toUpperCase()).not.toContain(
           pattern,
-          `${file} contains ${pattern} in UP section`
-        )
+          `${file} contains ${pattern} in UP section`,
+        );
       }
     }
-  })
+  });
 
-  it('Test 4.2: Migration hash immutability', async () => {
+  it("Test 4.2: Migration hash immutability", async () => {
     // Load historical migration hashes from .migrations.json
-    const hashFile = 'apps/api/.migrations.json'
-    const hashData = JSON.parse(readFileSync(hashFile, 'utf-8'))
+    const hashFile = "apps/api/.migrations.json";
+    const hashData = JSON.parse(readFileSync(hashFile, "utf-8"));
 
     // Calculate current hashes
-    const migrationsPath = 'apps/api/src/db/*/migrations/**/*.sql'
-    const migrationFiles = await glob(migrationsPath)
+    const migrationsPath = "apps/api/src/db/*/migrations/**/*.sql";
+    const migrationFiles = await glob(migrationsPath);
 
     for (const file of migrationFiles) {
-      const content = readFileSync(file, 'utf-8')
-      const currentHash = crypto
-        .createHash('sha256')
-        .update(content)
-        .digest('hex')
+      const content = readFileSync(file, "utf-8");
+      const currentHash = crypto.createHash("sha256").update(content).digest("hex");
 
-      const filename = path.basename(file)
+      const filename = path.basename(file);
       if (hashData[filename]) {
         expect(currentHash).toBe(
           hashData[filename],
-          `${filename} hash changed (immutability violation)`
-        )
+          `${filename} hash changed (immutability violation)`,
+        );
       }
     }
-  })
+  });
 
-  it('Test 4.3: Duplicate migration ID detection', async () => {
-    const migrationsPath = 'apps/api/src/db/*/migrations/**/*.sql'
-    const migrationFiles = await glob(migrationsPath)
+  it("Test 4.3: Duplicate migration ID detection", async () => {
+    const migrationsPath = "apps/api/src/db/*/migrations/**/*.sql";
+    const migrationFiles = await glob(migrationsPath);
 
     // Extract migration IDs (numbers)
     const migrationIds = migrationFiles.map((file) => {
-      const match = path.basename(file).match(/^(\d+)_/)
-      return match ? parseInt(match[1]) : null
-    })
+      const match = path.basename(file).match(/^(\d+)_/);
+      return match ? parseInt(match[1]) : null;
+    });
 
     // Check for duplicates
-    const uniqueIds = new Set(migrationIds)
+    const uniqueIds = new Set(migrationIds);
     expect(uniqueIds.size).toBe(
       migrationIds.length,
       `Duplicate migration IDs detected: ${[...migrationIds].filter(
-        (id, idx) => migrationIds.indexOf(id) !== idx
-      )}`
-    )
-  })
-})
+        (id, idx) => migrationIds.indexOf(id) !== idx,
+      )}`,
+    );
+  });
+});
 ```
 
 ---
@@ -772,109 +744,105 @@ describe('Area 4: Migration Discipline Validation', () => {
 **tests/performance/08-performance-baseline.test.ts**
 
 ```typescript
-describe('Area 8: Performance Baseline', () => {
-  it('Test 8.1: Middleware overhead < 1ms', async () => {
+describe("Area 8: Performance Baseline", () => {
+  it("Test 8.1: Middleware overhead < 1ms", async () => {
     // Create minimal endpoint with all middleware
     const app = new Hono()
       .use(correlationId)
       .use(tenantResolver)
       .use(license)
       .use(schemaVersion)
-      .get('/api/test/echo', (c) => c.json({ ok: true }))
+      .get("/api/test/echo", (c) => c.json({ ok: true }));
 
     // Baseline: no middleware
-    const baselineApp = new Hono().get('/api/test/echo', (c) =>
-      c.json({ ok: true })
-    )
+    const baselineApp = new Hono().get("/api/test/echo", (c) => c.json({ ok: true }));
 
-    const timings: number[] = []
+    const timings: number[] = [];
 
     for (let i = 0; i < 1000; i++) {
-      const start = performance.now()
-      await app.request(new Request('http://localhost/api/test/echo'))
-      timings.push(performance.now() - start)
+      const start = performance.now();
+      await app.request(new Request("http://localhost/api/test/echo"));
+      timings.push(performance.now() - start);
     }
 
-    const baselineTimings: number[] = []
+    const baselineTimings: number[] = [];
     for (let i = 0; i < 1000; i++) {
-      const start = performance.now()
-      await baselineApp.request(new Request('http://localhost/api/test/echo'))
-      baselineTimings.push(performance.now() - start)
+      const start = performance.now();
+      await baselineApp.request(new Request("http://localhost/api/test/echo"));
+      baselineTimings.push(performance.now() - start);
     }
 
-    const metrics = calculateMetrics(timings)
-    const baselineMetrics = calculateMetrics(baselineTimings)
+    const metrics = calculateMetrics(timings);
+    const baselineMetrics = calculateMetrics(baselineTimings);
     const overhead = {
       p95: metrics.p95_ms - baselineMetrics.p95_ms,
       p99: metrics.p99_ms - baselineMetrics.p99_ms,
-    }
+    };
 
-    expect(overhead.p95).toBeLessThan(1)
-    expect(overhead.p99).toBeLessThan(1.5)
-  })
+    expect(overhead.p95).toBeLessThan(1);
+    expect(overhead.p99).toBeLessThan(1.5);
+  });
 
-  it('Test 8.2: License check query < 5ms', async () => {
+  it("Test 8.2: License check query < 5ms", async () => {
     // Create 10,000 license records
     const licenses = Array(10000)
       .fill(0)
       .map(() => ({
         id: randomUUID(),
         workspace_id: randomUUID(),
-        status: 'ACTIVE',
-      }))
+        status: "ACTIVE",
+      }));
 
-    await masterDb.insert(licenseTable).values(licenses)
+    await masterDb.insert(licenseTable).values(licenses);
 
-    const timings: number[] = []
+    const timings: number[] = [];
 
     for (let i = 0; i < 1000; i++) {
-      const randomId = licenses[Math.floor(Math.random() * licenses.length)].id
+      const randomId = licenses[Math.floor(Math.random() * licenses.length)].id;
 
-      const start = performance.now()
+      const start = performance.now();
       await masterDb
         .select()
         .from(licenseTable)
-        .where(
-          and(eq(licenseTable.id, randomId), eq(licenseTable.status, 'ACTIVE'))
-        )
-        .limit(1)
-      timings.push(performance.now() - start)
+        .where(and(eq(licenseTable.id, randomId), eq(licenseTable.status, "ACTIVE")))
+        .limit(1);
+      timings.push(performance.now() - start);
     }
 
-    const metrics = calculateMetrics(timings)
+    const metrics = calculateMetrics(timings);
 
-    expect(metrics.p95_ms).toBeLessThan(5)
-    expect(metrics.p99_ms).toBeLessThan(7)
-  })
+    expect(metrics.p95_ms).toBeLessThan(5);
+    expect(metrics.p99_ms).toBeLessThan(7);
+  });
 
-  it('Test 8.3: Provisioning lock resolution < 50ms', async () => {
+  it("Test 8.3: Provisioning lock resolution < 50ms", async () => {
     const redis = new RedisClient({
-      host: 'localhost',
+      host: "localhost",
       port: 6380,
-    })
+    });
 
-    const timings: number[] = []
+    const timings: number[] = [];
 
     for (let i = 0; i < 100; i++) {
-      const lockKey = `provision:ws-${i}`
+      const lockKey = `provision:ws-${i}`;
 
       // Measure lock acquisition
-      const acquireStart = performance.now()
-      const acquired = await redis.set(lockKey, 'owner', 'EX', 60, 'NX')
-      timings.push(performance.now() - acquireStart)
+      const acquireStart = performance.now();
+      const acquired = await redis.set(lockKey, "owner", "EX", 60, "NX");
+      timings.push(performance.now() - acquireStart);
 
       // Measure lock release
-      const releaseStart = performance.now()
-      await redis.del(lockKey)
-      timings.push(performance.now() - releaseStart)
+      const releaseStart = performance.now();
+      await redis.del(lockKey);
+      timings.push(performance.now() - releaseStart);
     }
 
-    const metrics = calculateMetrics(timings)
+    const metrics = calculateMetrics(timings);
 
-    expect(metrics.p95_ms).toBeLessThan(50)
-    expect(metrics.p99_ms).toBeLessThan(100)
-  })
-})
+    expect(metrics.p95_ms).toBeLessThan(50);
+    expect(metrics.p99_ms).toBeLessThan(100);
+  });
+});
 ```
 
 ---
