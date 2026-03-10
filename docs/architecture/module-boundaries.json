@@ -6,7 +6,8 @@
       "packages/logger",
       "packages/config",
       "packages/types",
-      "packages/redis-utils"
+      "packages/redis-utils",
+      "packages/job-queue"
     ],
     "domain": ["packages/domain-core", "packages/validation"],
     "runtime": ["apps/api", "apps/worker"],

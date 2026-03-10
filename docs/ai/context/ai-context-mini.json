@@ -1,18 +1,19 @@
 {
-  "architectureScore": 30,
+  "architectureScore": 100,
   "modules": [
-    "packages/types",
+    "packages/job-queue",
     "packages/logger",
+    "packages/types",
     "packages/config",
     "packages/redis-utils",
     "packages/ui-system",
     "packages/api-client",
     "packages/domain-core",
-    "apps/api",
     "packages/validation",
     "apps/mmc",
     "apps/frontoffice",
     "apps/backoffice",
+    "apps/api",
     "apps/worker"
   ],
   "hotspots": [

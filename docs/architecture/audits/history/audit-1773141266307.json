@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-03-10T12:08:27.442Z",
+  "timestamp": "2026-03-10T11:14:26.302Z",
   "gitSha": "f6370b496de5a60e85a5fe0d1908a408a2861286",
   "vitestConfigs": [
     {
@@ -234,10 +234,6 @@
       }
     },
     {
-      "directory": "packages/job-queue",
-      "hasReadme": false
-    },
-    {
       "directory": "packages/types",
       "hasReadme": true,
       "sections": {
@@ -358,33 +354,67 @@
     "apps/worker/tests/unit/provisioning/provisioning.test.ts",
     "apps/worker/tests/load-testing.test.ts"
   ],
-  "dependencyViolations": [],
-  "circularDependencies": [],
+  "dependencyViolations": [
+    {
+      "file": "apps/api/src/modules/attempt/job-enqueuer.ts",
+      "importPath": "@zidney/app/worker/queue/job-queue",
+      "rule": "apps_must_not_import_other_apps",
+      "examples": [
+        "apps/api/src/modules/attempt/job-enqueuer.ts",
+        "apps/api/src/modules/attempt/job-enqueuer.ts",
+        "apps/api/src/modules/attempt/job-result-retriever.ts"
+      ]
+    }
+  ],
+  "circularDependencies": [
+    {
+      "from": "packages/domain-core",
+      "to": "apps/api"
+    },
+    {
+      "from": "apps/api",
+      "to": "packages/domain-core"
+    },
+    {
+      "from": "packages/domain-core",
+      "to": "apps/api"
+    },
+    {
+      "from": "apps/api",
+      "to": "apps/worker"
+    },
+    {
+      "from": "apps/worker",
+      "to": "packages/domain-core"
+    }
+  ],
   "layerViolations": [],
-  "architectureMapViolations": [],
+  "architectureMapViolations": [
+    {
+      "file": "apps/api/src/modules/attempt/job-enqueuer.ts",
+      "module": "apps/api",
+      "importPath": "@zidney/app/worker/queue/job-queue",
+      "rule": "forbidden_dependency"
+    }
+  ],
   "dependencyGraph": {
     "nodes": [
-      "packages/job-queue",
-      "packages/logger",
       "packages/types",
+      "packages/logger",
       "packages/config",
       "packages/redis-utils",
       "packages/ui-system",
       "packages/api-client",
       "packages/domain-core",
+      "apps/api",
       "packages/validation",
       "apps/mmc",
       "apps/frontoffice",
       "apps/backoffice",
-      "apps/api",
       "apps/worker"
     ],
     "edges": [
       {
-        "from": "packages/job-queue",
-        "to": "packages/logger"
-      },
-      {
         "from": "packages/redis-utils",
         "to": "packages/logger"
       },
@@ -395,6 +425,14 @@
       {
         "from": "packages/redis-utils",
         "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "apps/api"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "apps/api"
       },
       {
         "from": "packages/domain-core",
@@ -423,10 +461,6 @@
       {
         "from": "packages/domain-core",
         "to": "packages/validation"
-      },
-      {
-        "from": "packages/domain-core",
-        "to": "packages/logger"
       },
       {
         "from": "packages/domain-core",
@@ -1274,6 +1308,14 @@
       },
       {
         "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
         "to": "packages/types"
       },
       {
@@ -1398,7 +1440,11 @@
       },
       {
         "from": "apps/api",
-        "to": "packages/job-queue"
+        "to": "apps/worker"
+      },
+      {
+        "from": "apps/api",
+        "to": "apps/worker"
       },
       {
         "from": "apps/api",
@@ -1406,7 +1452,7 @@
       },
       {
         "from": "apps/api",
-        "to": "packages/job-queue"
+        "to": "apps/worker"
       },
       {
         "from": "apps/api",
@@ -1646,10 +1692,6 @@
       },
       {
         "from": "apps/api",
-        "to": "packages/domain-core"
-      },
-      {
-        "from": "apps/api",
         "to": "packages/logger"
       },
       {
@@ -1978,11 +2020,7 @@
       },
       {
         "from": "apps/worker",
-        "to": "packages/job-queue"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/job-queue"
+        "to": "packages/logger"
       },
       {
         "from": "apps/worker",
@@ -2170,19 +2208,24 @@
       }
     ]
   },
-  "architectureDrift": [],
+  "architectureDrift": [
+    {
+      "from": "packages/domain-core",
+      "to": "apps/api"
+    },
+    {
+      "from": "packages/domain-core",
+      "to": "apps/api"
+    }
+  ],
   "aiGraph": {
     "nodes": [
       {
-        "id": "packages/job-queue",
+        "id": "packages/types",
         "type": "package"
       },
       {
         "id": "packages/logger",
-        "type": "package"
-      },
-      {
-        "id": "packages/types",
         "type": "package"
       },
       {
@@ -2206,6 +2249,10 @@
         "type": "package"
       },
       {
+        "id": "apps/api",
+        "type": "app"
+      },
+      {
         "id": "packages/validation",
         "type": "package"
       },
@@ -2222,20 +2269,12 @@
         "type": "app"
       },
       {
-        "id": "apps/api",
-        "type": "app"
-      },
-      {
         "id": "apps/worker",
         "type": "app"
       }
     ],
     "edges": [
       {
-        "from": "packages/job-queue",
-        "to": "packages/logger"
-      },
-      {
         "from": "packages/redis-utils",
         "to": "packages/logger"
       },
@@ -2246,6 +2285,14 @@
       {
         "from": "packages/redis-utils",
         "to": "packages/logger"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "apps/api"
+      },
+      {
+        "from": "packages/domain-core",
+        "to": "apps/api"
       },
       {
         "from": "packages/domain-core",
@@ -2274,10 +2321,6 @@
       {
         "from": "packages/domain-core",
         "to": "packages/validation"
-      },
-      {
-        "from": "packages/domain-core",
-        "to": "packages/logger"
       },
       {
         "from": "packages/domain-core",
@@ -3125,6 +3168,14 @@
       },
       {
         "from": "apps/api",
+        "to": "packages/domain-core"
+      },
+      {
+        "from": "apps/api",
+        "to": "packages/logger"
+      },
+      {
+        "from": "apps/api",
         "to": "packages/types"
       },
       {
@@ -3249,7 +3300,11 @@
       },
       {
         "from": "apps/api",
-        "to": "packages/job-queue"
+        "to": "apps/worker"
+      },
+      {
+        "from": "apps/api",
+        "to": "apps/worker"
       },
       {
         "from": "apps/api",
@@ -3257,7 +3312,7 @@
       },
       {
         "from": "apps/api",
-        "to": "packages/job-queue"
+        "to": "apps/worker"
       },
       {
         "from": "apps/api",
@@ -3497,10 +3552,6 @@
       },
       {
         "from": "apps/api",
-        "to": "packages/domain-core"
-      },
-      {
-        "from": "apps/api",
         "to": "packages/logger"
       },
       {
@@ -3829,11 +3880,7 @@
       },
       {
         "from": "apps/worker",
-        "to": "packages/job-queue"
-      },
-      {
-        "from": "apps/worker",
-        "to": "packages/job-queue"
+        "to": "packages/logger"
       },
       {
         "from": "apps/worker",
@@ -4021,37 +4068,35 @@
       }
     ],
     "centrality": {
-      "packages/job-queue": 4,
-      "packages/logger": 235,
       "packages/types": 100,
+      "packages/logger": 235,
       "packages/config": 0,
       "packages/redis-utils": 3,
       "packages/ui-system": 1,
       "packages/api-client": 17,
       "packages/domain-core": 77,
+      "apps/api": 2,
       "packages/validation": 10,
       "apps/mmc": 0,
       "apps/frontoffice": 0,
       "apps/backoffice": 0,
-      "apps/api": 0,
-      "apps/worker": 0
+      "apps/worker": 3
     }
   },
-  "architectureScore": 100,
+  "architectureScore": 30,
   "moduleRisk": {
-    "packages/job-queue": "LOW",
-    "packages/logger": "HIGH",
     "packages/types": "MEDIUM",
+    "packages/logger": "HIGH",
     "packages/config": "LOW",
     "packages/redis-utils": "LOW",
     "packages/ui-system": "LOW",
     "packages/api-client": "LOW",
     "packages/domain-core": "LOW",
+    "apps/api": "LOW",
     "packages/validation": "LOW",
     "apps/mmc": "LOW",
     "apps/frontoffice": "LOW",
     "apps/backoffice": "LOW",
-    "apps/api": "LOW",
     "apps/worker": "LOW"
   },
   "consolidationRisk": "LOW"

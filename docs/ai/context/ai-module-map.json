@@ -48,6 +48,12 @@
     "forbiddenDependencies": ["apps/*"]
   },
   {
+    "module": "packages/job-queue",
+    "layer": "infrastructure",
+    "allowedDependencies": [],
+    "forbiddenDependencies": ["apps/*", "packages/ui-system"]
+  },
+  {
     "module": "apps/mmc",
     "layer": "ui",
     "allowedDependencies": [],

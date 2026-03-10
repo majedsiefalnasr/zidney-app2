@@ -1,4 +1,4 @@
-import { createUserWithLimitCheck } from '@zidney/app/api/utils/transaction-wrapper'
+import { createUserWithLimitCheck } from '@zidney/domain-core/license/transaction-wrapper'
 import type { Pool } from 'pg'
 import { beforeEach, describe, expect, it } from 'vitest'
 import { MockDatabaseClient, testFixtures } from './fixtures'

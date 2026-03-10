@@ -42,6 +42,11 @@
       "criticality": "core"
     },
     {
+      "module": "packages/job-queue",
+      "layer": "infrastructure",
+      "criticality": "infrastructure"
+    },
+    {
       "module": "apps/mmc",
       "layer": "ui",
       "criticality": "ui"

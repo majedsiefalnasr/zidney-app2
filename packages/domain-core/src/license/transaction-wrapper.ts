@@ -186,7 +186,7 @@ export async function createUserWithLimitCheck(
       success: true,
       user_id: userId,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     await masterClient.query('ROLLBACK').catch(() => {})
     await tenantClient.query('ROLLBACK').catch(() => {})
 
@@ -239,7 +239,7 @@ export async function softDeleteUser(tenantDb: Pool, user_id: string): Promise<T
       success: true,
       user_id,
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('User soft-delete failed', {
       action: 'user_soft_delete_error',
       user_id,

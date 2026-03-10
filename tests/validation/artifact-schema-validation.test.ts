@@ -4,23 +4,23 @@
  * Path: tests/validation/artifact-schema-validation.test.ts
  */
 
-import { describe, it, expect } from 'vitest'
-import {
-  validateModuleMap,
-  validateLayerModel,
-  validateDependencyGraph,
-  validateRuntimeMap,
-  validateArchitectureBrain,
-  validateContextMini,
-} from '../../scripts/ai-context/schema-validator'
+import { describe, expect, it } from 'vitest'
 import type {
-  AIModuleMap,
-  AILayerModel,
-  AIDependencyGraph,
-  AIRuntimeMap,
   AIArchitectureBrain,
   AIContextMini,
+  AIDependencyGraph,
+  AILayerModel,
+  AIModuleMap,
+  AIRuntimeMap,
 } from '../../packages/types/src/ai-context'
+import {
+  validateArchitectureBrain,
+  validateContextMini,
+  validateDependencyGraph,
+  validateLayerModel,
+  validateModuleMap,
+  validateRuntimeMap,
+} from '../../scripts/ai-context/schema-validator'
 
 describe('Schema Validation', () => {
   describe('Module Map Validation', () => {

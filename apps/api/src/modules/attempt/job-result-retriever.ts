@@ -1,7 +1,19 @@
-import { jobQueue } from '@zidney/app/worker/queue/job-queue'
+import { JobQueue } from '@zidney/job-queue'
 import { createLogger } from '@zidney/logger'
+import { getRedisClient } from '../../infrastructure/redis'
 
 const logger = createLogger('job-result-retriever')
+
+// Lazy-initialize jobQueue singleton
+let jobQueue: JobQueue | null = null
+
+function getJobQueue(): JobQueue {
+  if (!jobQueue) {
+    const redis = getRedisClient()
+    jobQueue = new JobQueue(redis)
+  }
+  return jobQueue
+}
 
 /**
  * T045: Job result retrieval from queue
@@ -25,7 +37,8 @@ export interface PollOptions {
  */
 export async function getJobResult(jobId: string, _timeoutMs = 30000): Promise<unknown | null> {
   try {
-    const result = await jobQueue.getResult(jobId)
+    const queue = getJobQueue()
+    const result = await queue.getResult(jobId)
 
     if (result) {
       logger.debug(`Job result retrieved`, {
@@ -34,7 +47,7 @@ export async function getJobResult(jobId: string, _timeoutMs = 30000): Promise<u
       })
 
       // Clean up result from Redis asynchronously
-      jobQueue.clearResults([jobId]).catch((e: unknown) => {
+      queue.clearResults([jobId]).catch((e: unknown) => {
         logger.warn(`Failed to clean up job result`, {
           job_id: jobId,
           error: e instanceof Error ? e.message : String(e),
@@ -71,7 +84,8 @@ export async function pollJobResult(
 
   while (Date.now() - startTime < timeoutMs) {
     try {
-      const result = await jobQueue.getResult(jobId)
+      const queue = getJobQueue()
+      const result = await queue.getResult(jobId)
 
       if (result) {
         logger.info(`Job result retrieved via polling`, {
@@ -81,7 +95,7 @@ export async function pollJobResult(
         })
 
         // Clean up result asynchronously
-        jobQueue.clearResults([jobId]).catch((e: unknown) => {
+        queue.clearResults([jobId]).catch((e: unknown) => {
           logger.warn(`Failed to clean up job result`, {
             job_id: jobId,
             error: e instanceof Error ? e.message : String(e),
@@ -142,7 +156,8 @@ export async function pollJobResults(
  */
 export async function isJobResultReady(jobId: string): Promise<boolean> {
   try {
-    const result = await jobQueue.getResult(jobId)
+    const queue = getJobQueue()
+    const result = await queue.getResult(jobId)
     return result !== null
   } catch (error) {
     logger.error(`Job result readiness check error`, {

@@ -32,6 +32,11 @@ export {
   transitionToSoftLock,
 } from './service'
 export { StateTransition } from './state-machine'
+export {
+  createUserWithLimitCheck,
+  type TransactionResult,
+  type UserCreationOptions,
+} from './transaction-wrapper'
 export type {
   ArchiveSnapshot,
   CreateLicenseRequest,

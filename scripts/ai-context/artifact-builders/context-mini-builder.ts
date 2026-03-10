@@ -4,8 +4,7 @@
  * Path: scripts/ai-context/artifact-builders/context-mini-builder.ts
  */
 
-import type { AIArchitectureBrain } from '../../../packages/types/src/ai-context'
-import type { AIContextMini } from '../../../packages/types/src/ai-context'
+import type { AIArchitectureBrain, AIContextMini } from '../../../packages/types/src/ai-context'
 
 export async function buildContextMini(
   architectureBrain: AIArchitectureBrain

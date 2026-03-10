@@ -181,6 +181,20 @@
         "vitest": "^1.0.0",
       },
     },
+    "packages/job-queue": {
+      "name": "@zidney/job-queue",
+      "version": "1.0.0",
+      "dependencies": {
+        "@zidney/logger": "workspace:*",
+        "uuid": "^9.0.0",
+      },
+      "devDependencies": {
+        "@types/uuid": "9.0.0",
+        "@zidney/types": "workspace:*",
+        "typescript": "^5.3.3",
+        "vitest": "^1.0.0",
+      },
+    },
     "packages/logger": {
       "name": "@zidney/logger",
       "version": "1.0.0",
@@ -1117,6 +1131,8 @@
     "@zidney/domain-core": ["@zidney/domain-core@workspace:packages/domain-core"],
 
     "@zidney/frontoffice": ["@zidney/frontoffice@workspace:apps/frontoffice"],
+
+    "@zidney/job-queue": ["@zidney/job-queue@workspace:packages/job-queue"],
 
     "@zidney/logger": ["@zidney/logger@workspace:packages/logger"],
 

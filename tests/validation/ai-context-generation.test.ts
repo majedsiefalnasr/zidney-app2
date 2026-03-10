@@ -4,13 +4,13 @@
  * Path: tests/validation/ai-context-generation.test.ts
  */
 
-import { describe, it, expect } from 'vitest'
-import type { SourceMetadata } from '../../scripts/ai-context/source-loader'
-import { buildModuleMap } from '../../scripts/ai-context/artifact-builders/module-map-builder'
-import { buildLayerModel } from '../../scripts/ai-context/artifact-builders/layer-model-builder'
-import { buildDependencyGraph } from '../../scripts/ai-context/artifact-builders/dependency-graph-builder'
+import { describe, expect, it } from 'vitest'
 import { buildArchitectureSummary } from '../../scripts/ai-context/artifact-builders/architecture-summary-builder'
+import { buildDependencyGraph } from '../../scripts/ai-context/artifact-builders/dependency-graph-builder'
+import { buildLayerModel } from '../../scripts/ai-context/artifact-builders/layer-model-builder'
+import { buildModuleMap } from '../../scripts/ai-context/artifact-builders/module-map-builder'
 import { buildRuntimeMap } from '../../scripts/ai-context/artifact-builders/runtime-map-builder'
+import type { SourceMetadata } from '../../scripts/ai-context/source-loader'
 
 const mockMetadata: SourceMetadata = {
   adrFiles: [

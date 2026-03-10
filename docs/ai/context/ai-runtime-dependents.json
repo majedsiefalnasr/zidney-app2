@@ -1,8 +1,10 @@
 {
   "packages/logger": [
+    "packages/job-queue",
     "packages/redis-utils",
     "packages/redis-utils",
     "packages/redis-utils",
+    "packages/domain-core",
     "packages/domain-core",
     "packages/domain-core",
     "packages/domain-core",
@@ -187,8 +189,6 @@
     "apps/api",
     "apps/api",
     "apps/api",
-    "apps/api",
-    "apps/worker",
     "apps/worker",
     "apps/worker",
     "apps/worker",
@@ -236,7 +236,6 @@
     "apps/worker",
     "apps/worker"
   ],
-  "apps/api": ["packages/domain-core", "packages/domain-core"],
   "packages/types": [
     "packages/domain-core",
     "packages/domain-core",
@@ -451,5 +450,5 @@
     "apps/worker"
   ],
   "packages/redis-utils": ["apps/api", "apps/api", "apps/api"],
-  "apps/worker": ["apps/api", "apps/api", "apps/api"]
+  "packages/job-queue": ["apps/api", "apps/api", "apps/worker", "apps/worker"]
 }

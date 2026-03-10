@@ -1,7 +1,7 @@
 # Zidney Architecture Diagrams
 
-Generated: 2026-03-10T11:10:25.152Z
-Git SHA: 777c12a93f3242095878ee9ce51586190beea202
+Generated: 2026-03-10T12:08:27.446Z
+Git SHA: f6370b496de5a60e85a5fe0d1908a408a2861286
 
 ---
 
@@ -40,11 +40,10 @@ graph TD
 
 ```mermaid
 graph LR
+  packages_job_queue --> packages_logger
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
-  packages_domain_core --> apps_api
-  packages_domain_core --> apps_api
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
@@ -52,6 +51,7 @@ graph LR
   packages_domain_core --> packages_types
   packages_domain_core --> packages_types
   packages_domain_core --> packages_validation
+  packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
@@ -263,8 +263,6 @@ graph LR
   apps_api --> packages_logger
   apps_api --> packages_types
   apps_api --> packages_logger
-  apps_api --> packages_domain_core
-  apps_api --> packages_logger
   apps_api --> packages_types
   apps_api --> packages_logger
   apps_api --> packages_logger
@@ -296,10 +294,9 @@ graph LR
   apps_api --> packages_logger
   apps_api --> packages_logger
   apps_api --> packages_logger
-  apps_api --> apps_worker
-  apps_api --> apps_worker
+  apps_api --> packages_job_queue
   apps_api --> packages_logger
-  apps_api --> apps_worker
+  apps_api --> packages_job_queue
   apps_api --> packages_logger
   apps_api --> packages_logger
   apps_api --> packages_logger
@@ -359,6 +356,7 @@ graph LR
   apps_api --> packages_logger
   apps_api --> packages_domain_core
   apps_api --> packages_logger
+  apps_api --> packages_domain_core
   apps_api --> packages_logger
   apps_api --> packages_domain_core
   apps_api --> packages_logger
@@ -441,7 +439,8 @@ graph LR
   apps_worker --> packages_domain_core
   apps_worker --> packages_logger
   apps_worker --> packages_types
-  apps_worker --> packages_logger
+  apps_worker --> packages_job_queue
+  apps_worker --> packages_job_queue
   apps_worker --> packages_logger
   apps_worker --> packages_types
   apps_worker --> packages_logger
@@ -497,11 +496,10 @@ graph LR
 
 ```mermaid
 graph TD
+  packages_job_queue --> packages_logger
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
-  packages_domain_core --> apps_api
-  packages_domain_core --> apps_api
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
@@ -509,6 +507,7 @@ graph TD
   packages_domain_core --> packages_types
   packages_domain_core --> packages_types
   packages_domain_core --> packages_validation
+  packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
@@ -720,8 +719,6 @@ graph TD
   apps_api --> packages_logger
   apps_api --> packages_types
   apps_api --> packages_logger
-  apps_api --> packages_domain_core
-  apps_api --> packages_logger
   apps_api --> packages_types
   apps_api --> packages_logger
   apps_api --> packages_logger
@@ -753,10 +750,9 @@ graph TD
   apps_api --> packages_logger
   apps_api --> packages_logger
   apps_api --> packages_logger
-  apps_api --> apps_worker
-  apps_api --> apps_worker
+  apps_api --> packages_job_queue
   apps_api --> packages_logger
-  apps_api --> apps_worker
+  apps_api --> packages_job_queue
   apps_api --> packages_logger
   apps_api --> packages_logger
   apps_api --> packages_logger
@@ -816,6 +812,7 @@ graph TD
   apps_api --> packages_logger
   apps_api --> packages_domain_core
   apps_api --> packages_logger
+  apps_api --> packages_domain_core
   apps_api --> packages_logger
   apps_api --> packages_domain_core
   apps_api --> packages_logger
@@ -898,7 +895,8 @@ graph TD
   apps_worker --> packages_domain_core
   apps_worker --> packages_logger
   apps_worker --> packages_types
-  apps_worker --> packages_logger
+  apps_worker --> packages_job_queue
+  apps_worker --> packages_job_queue
   apps_worker --> packages_logger
   apps_worker --> packages_types
   apps_worker --> packages_logger

@@ -1,7 +1,7 @@
+import { createUserWithLimitCheck } from '@zidney/domain-core/license/transaction-wrapper'
 import { createLogger } from '@zidney/logger'
 import { type Context, Hono } from 'hono'
 import { toLicenseError } from '../../responses/license-error-handler'
-import { createUserWithLimitCheck } from '../../utils/transaction-wrapper'
 
 const logger = createLogger('backoffice-users')
 
@@ -236,7 +236,7 @@ backofficeUsersRouter.post('/backoffice/users', async (ctx: Context) => {
       },
       { status: 201 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       {
         correlation_id: correlationId,
@@ -290,13 +290,13 @@ backofficeUsersRouter.get('/backoffice/users', async (ctx: Context) => {
       },
       { status: 200 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       {
         correlation_id: correlationId,
         action: 'users_list_error',
         workspace_id,
-        error_message: error.message,
+        error_message: error instanceof Error ? error.message : String(error),
       },
       'Failed to list users'
     )
@@ -358,13 +358,13 @@ backofficeUsersRouter.get('/backoffice/users/:user_id', async (ctx: Context) => 
       },
       { status: 200 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       {
         correlation_id: correlationId,
         action: 'user_get_error',
         user_id,
-        error_message: error.message,
+        error_message: error instanceof Error ? error.message : String(error),
       },
       'Failed to retrieve user'
     )
@@ -431,13 +431,13 @@ backofficeUsersRouter.patch('/backoffice/users/:user_id/soft-delete', async (ctx
       },
       { status: 200 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       {
         correlation_id: correlationId,
         action: 'user_soft_delete_error',
         user_id,
-        error_message: error.message,
+        error_message: error instanceof Error ? error.message : String(error),
       },
       'Failed to soft-delete user'
     )

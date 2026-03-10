@@ -1,12 +1,24 @@
-import { jobQueue } from '@zidney/app/worker/queue/job-queue'
 import {
   type AttemptSnapshot,
   createGradeAttemptJob,
+  JobQueue,
   type SubmissionData,
-} from '@zidney/app/worker/types/job-schema'
+} from '@zidney/job-queue'
 import { createLogger } from '@zidney/logger'
+import { getRedisClient } from '../../infrastructure/redis'
 
 const logger = createLogger('job-enqueuer')
+
+// Lazy-initialize jobQueue singleton
+let jobQueue: JobQueue | null = null
+
+function getJobQueue(): JobQueue {
+  if (!jobQueue) {
+    const redis = getRedisClient()
+    jobQueue = new JobQueue(redis)
+  }
+  return jobQueue
+}
 
 /**
  * T044: Job enqueueing in API layer
@@ -67,7 +79,8 @@ export async function enqueueGradingJob(
     )
 
     // Enqueue to worker
-    const jobId = await jobQueue.enqueue(
+    const queue = getJobQueue()
+    const jobId = await queue.enqueue(
       workspaceId,
       workspaceSlug,
       'grade_attempt',
@@ -84,7 +97,7 @@ export async function enqueueGradingJob(
     })
 
     // Wait for result with timeout
-    const result = await jobQueue.waitForResult(jobId, timeoutMs, 100)
+    const result = await queue.waitForResult(jobId, timeoutMs, 100)
 
     if (!result) {
       logger.warn(`Grading job timeout: no result received`, {

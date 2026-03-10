@@ -60,6 +60,13 @@
       "allowed_dependencies": [],
       "forbidden_dependencies": ["apps/*"]
     },
+    "packages/job-queue": {
+      "layer": "infrastructure",
+      "description": "Shared job queue implementation for async processing (API and Worker)",
+      "criticality": "infrastructure",
+      "allowed_dependencies": [],
+      "forbidden_dependencies": ["apps/*", "packages/ui-system"]
+    },
     "apps/mmc": {
       "layer": "ui",
       "description": "Master management console application",

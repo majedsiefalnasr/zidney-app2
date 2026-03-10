@@ -4,8 +4,8 @@
  * Path: scripts/ai-context/artifact-builders/runtime-map-builder.ts
  */
 
-import type { SourceMetadata } from '../source-loader'
 import type { AIRuntimeMap } from '../../../packages/types/src/ai-context'
+import type { SourceMetadata } from '../source-loader'
 
 export async function buildRuntimeMap(metadata: SourceMetadata): Promise<AIRuntimeMap> {
   const services: AIRuntimeMap['services'] = {}

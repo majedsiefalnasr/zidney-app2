@@ -1,0 +1,37 @@
+{
+  "name": "@zidney/job-queue",
+  "version": "1.0.0",
+  "description": "Shared job queue types and interfaces for API and Worker",
+  "type": "module",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./queue": {
+      "import": "./dist/job-queue.js",
+      "types": "./dist/job-queue.d.ts"
+    },
+    "./types": {
+      "import": "./dist/job-schema.js",
+      "types": "./dist/job-schema.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "test": "vitest"
+  },
+  "dependencies": {
+    "@zidney/logger": "workspace:*",
+    "uuid": "^9.0.0"
+  },
+  "devDependencies": {
+    "@types/uuid": "9.0.0",
+    "@zidney/types": "workspace:*",
+    "typescript": "^5.3.3",
+    "vitest": "^1.0.0"
+  }
+}

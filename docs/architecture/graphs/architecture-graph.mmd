@@ -1,7 +1,8 @@
 graph TD
   subgraph packages
-    packages_types[packages/types]
+    packages_job_queue[packages/job-queue]
     packages_logger[packages/logger]
+    packages_types[packages/types]
     packages_config[packages/config]
     packages_redis_utils[packages/redis-utils]
     packages_ui_system[packages/ui-system]
@@ -10,17 +11,16 @@ graph TD
     packages_validation[packages/validation]
   end
   subgraph apps
-    apps_api[[apps/api]]
     apps_mmc[[apps/mmc]]
     apps_frontoffice[[apps/frontoffice]]
     apps_backoffice[[apps/backoffice]]
+    apps_api[[apps/api]]
     apps_worker[[apps/worker]]
   end
+  packages_job_queue --> packages_logger
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
-  packages_domain_core --> apps_api
-  packages_domain_core --> apps_api
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
@@ -28,6 +28,7 @@ graph TD
   packages_domain_core --> packages_types
   packages_domain_core --> packages_types
   packages_domain_core --> packages_validation
+  packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
@@ -239,8 +240,6 @@ graph TD
   apps_api --> packages_logger
   apps_api --> packages_types
   apps_api --> packages_logger
-  apps_api --> packages_domain_core
-  apps_api --> packages_logger
   apps_api --> packages_types
   apps_api --> packages_logger
   apps_api --> packages_logger
@@ -272,10 +271,9 @@ graph TD
   apps_api --> packages_logger
   apps_api --> packages_logger
   apps_api --> packages_logger
-  apps_api --> apps_worker
-  apps_api --> apps_worker
+  apps_api --> packages_job_queue
   apps_api --> packages_logger
-  apps_api --> apps_worker
+  apps_api --> packages_job_queue
   apps_api --> packages_logger
   apps_api --> packages_logger
   apps_api --> packages_logger
@@ -335,6 +333,7 @@ graph TD
   apps_api --> packages_logger
   apps_api --> packages_domain_core
   apps_api --> packages_logger
+  apps_api --> packages_domain_core
   apps_api --> packages_logger
   apps_api --> packages_domain_core
   apps_api --> packages_logger
@@ -417,7 +416,8 @@ graph TD
   apps_worker --> packages_domain_core
   apps_worker --> packages_logger
   apps_worker --> packages_types
-  apps_worker --> packages_logger
+  apps_worker --> packages_job_queue
+  apps_worker --> packages_job_queue
   apps_worker --> packages_logger
   apps_worker --> packages_types
   apps_worker --> packages_logger

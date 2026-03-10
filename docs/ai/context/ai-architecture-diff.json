@@ -1,12 +1,4 @@
 {
-  "addedEdges": [
-    "packages/domain-core->apps/api",
-    "apps/mmc->packages/ui-system",
-    "apps/api->apps/worker"
-  ],
-  "removedEdges": [
-    "packages/domain-core->packages/app",
-    "apps/mmc->packages/ui",
-    "apps/api->packages/app"
-  ]
+  "addedEdges": [],
+  "removedEdges": ["packages/domain-core->apps/api"]
 }

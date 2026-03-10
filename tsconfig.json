@@ -15,6 +15,8 @@
       "@zidney/domain-core/mmc-dashboard/*": ["packages/domain-core/mmc-dashboard/*"],
       "@zidney/logger": ["packages/logger/src/index.ts"],
       "@zidney/logger/*": ["packages/logger/src/*"],
+      "@zidney/job-queue": ["packages/job-queue/src/index.ts"],
+      "@zidney/job-queue/*": ["packages/job-queue/src/*"],
       "@zidney/types": ["packages/types/src/index.ts"],
       "@zidney/types/*": ["packages/types/src/*"],
       "@zidney/validation": ["packages/validation/src/index.ts"],

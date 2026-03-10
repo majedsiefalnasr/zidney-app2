@@ -4,9 +4,9 @@
  * Path: tests/integration/ai-context-integration.test.ts
  */
 
-import { describe, it, expect, beforeAll } from 'vitest'
+import { rm } from 'node:fs/promises'
 import { join } from 'node:path'
-import { writeFile, rm } from 'node:fs/promises'
+import { beforeAll, describe, expect, it } from 'vitest'
 import { generateAllArtifacts } from '../../scripts/ai-context/artifact-generator'
 
 const TEST_OUTPUT_DIR = './test-ai-context-output'

@@ -4,8 +4,8 @@
  * Path: scripts/ai-context/source-loader.ts
  */
 
-import { readFile, readdir } from 'fs/promises'
-import { join, relative } from 'path'
+import { readdir, readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import type { GenerationError } from './types'
 
 /**
@@ -189,14 +189,14 @@ async function loadDockerServices(composePath: string): Promise<DockerService[]>
       } else if (line.match(/^\s{4}image:/) && currentService) {
         currentService.image = line.split(':')[1]?.trim() || ''
       } else if (line.match(/^\s{2}[a-z0-9_]+:/) || line.trim() === '') {
-        if (currentService && currentService.name) {
+        if (currentService?.name) {
           services.push(currentService as DockerService)
         }
         currentService = null
       }
     }
 
-    if (currentService && currentService.name) {
+    if (currentService?.name) {
       services.push(currentService as DockerService)
     }
 
@@ -282,4 +282,4 @@ export async function loadSourceMetadata(repoRoot: string): Promise<SourceMetada
 /**
  * Export source metadata for testing
  */
-export { ADRFile, ModuleInfo, DockerService }
+export type { ADRFile, ModuleInfo, DockerService }

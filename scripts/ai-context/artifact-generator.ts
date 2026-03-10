@@ -4,17 +4,17 @@
  * Path: scripts/ai-context/artifact-generator.ts
  */
 
-import { writeFile, mkdir } from 'fs/promises'
-import { join } from 'path'
-import { loadSourceMetadata } from './source-loader'
-import { buildModuleMap } from './artifact-builders/module-map-builder'
-import { buildLayerModel } from './artifact-builders/layer-model-builder'
-import { buildDependencyGraph } from './artifact-builders/dependency-graph-builder'
-import { buildArchitectureSummary } from './artifact-builders/architecture-summary-builder'
-import { buildRuntimeMap } from './artifact-builders/runtime-map-builder'
+import { mkdir, writeFile } from 'node:fs/promises'
+import { join } from 'node:path'
 import { buildArchitectureBrain } from './artifact-builders/architecture-brain-builder'
+import { buildArchitectureSummary } from './artifact-builders/architecture-summary-builder'
 import { buildContextMini } from './artifact-builders/context-mini-builder'
+import { buildDependencyGraph } from './artifact-builders/dependency-graph-builder'
+import { buildLayerModel } from './artifact-builders/layer-model-builder'
+import { buildModuleMap } from './artifact-builders/module-map-builder'
+import { buildRuntimeMap } from './artifact-builders/runtime-map-builder'
 import { validateAllArtifacts } from './schema-validator'
+import { loadSourceMetadata } from './source-loader'
 import type { GenerationResult } from './types'
 
 export interface OrchestratorOptions {

@@ -1,9 +1,8 @@
 graph LR
+  packages_job_queue --> packages_logger
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
   packages_redis_utils --> packages_logger
-  packages_domain_core --> apps_api
-  packages_domain_core --> apps_api
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
@@ -11,6 +10,7 @@ graph LR
   packages_domain_core --> packages_types
   packages_domain_core --> packages_types
   packages_domain_core --> packages_validation
+  packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_logger
@@ -222,8 +222,6 @@ graph LR
   apps_api --> packages_logger
   apps_api --> packages_types
   apps_api --> packages_logger
-  apps_api --> packages_domain_core
-  apps_api --> packages_logger
   apps_api --> packages_types
   apps_api --> packages_logger
   apps_api --> packages_logger
@@ -255,10 +253,9 @@ graph LR
   apps_api --> packages_logger
   apps_api --> packages_logger
   apps_api --> packages_logger
-  apps_api --> apps_worker
-  apps_api --> apps_worker
+  apps_api --> packages_job_queue
   apps_api --> packages_logger
-  apps_api --> apps_worker
+  apps_api --> packages_job_queue
   apps_api --> packages_logger
   apps_api --> packages_logger
   apps_api --> packages_logger
@@ -318,6 +315,7 @@ graph LR
   apps_api --> packages_logger
   apps_api --> packages_domain_core
   apps_api --> packages_logger
+  apps_api --> packages_domain_core
   apps_api --> packages_logger
   apps_api --> packages_domain_core
   apps_api --> packages_logger
@@ -400,7 +398,8 @@ graph LR
   apps_worker --> packages_domain_core
   apps_worker --> packages_logger
   apps_worker --> packages_types
-  apps_worker --> packages_logger
+  apps_worker --> packages_job_queue
+  apps_worker --> packages_job_queue
   apps_worker --> packages_logger
   apps_worker --> packages_types
   apps_worker --> packages_logger

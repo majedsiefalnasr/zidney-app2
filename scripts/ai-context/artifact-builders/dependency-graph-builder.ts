@@ -4,8 +4,8 @@
  * Path: scripts/ai-context/artifact-builders/dependency-graph-builder.ts
  */
 
-import type { SourceMetadata } from '../source-loader'
 import type { AIDependencyGraph } from '../../../packages/types/src/ai-context'
+import type { SourceMetadata } from '../source-loader'
 
 export async function buildDependencyGraph(metadata: SourceMetadata): Promise<AIDependencyGraph> {
   const modules: AIDependencyGraph['modules'] = {}

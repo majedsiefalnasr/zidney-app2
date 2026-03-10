@@ -4,11 +4,13 @@
  * Path: scripts/ai-context/artifact-builders/architecture-brain-builder.ts
  */
 
+import type {
+  AIArchitectureBrain,
+  AIDependencyGraph,
+  AILayerModel,
+  AIModuleMap,
+} from '../../../packages/types/src/ai-context'
 import type { SourceMetadata } from '../source-loader'
-import type { AIArchitectureBrain } from '../../../packages/types/src/ai-context'
-import type { AIModuleMap } from '../../../packages/types/src/ai-context'
-import type { AILayerModel } from '../../../packages/types/src/ai-context'
-import type { AIDependencyGraph } from '../../../packages/types/src/ai-context'
 
 export async function buildArchitectureBrain(
   metadata: SourceMetadata,

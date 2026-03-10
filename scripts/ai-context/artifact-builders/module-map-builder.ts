@@ -4,8 +4,8 @@
  * Path: scripts/ai-context/artifact-builders/module-map-builder.ts
  */
 
-import type { SourceMetadata } from '../source-loader'
 import type { AIModuleMap } from '../../../packages/types/src/ai-context'
+import type { SourceMetadata } from '../source-loader'
 
 export async function buildModuleMap(metadata: SourceMetadata): Promise<AIModuleMap> {
   const modules: AIModuleMap['modules'] = {}
