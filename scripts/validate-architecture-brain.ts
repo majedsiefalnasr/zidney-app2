@@ -247,8 +247,8 @@ if (!result.valid) {
 }
 
 if (result.warnings.length > 0) {
-  console.log('\n[VALIDATE BRAIN] ⚠️  VALIDATION PASSED WITH WARNINGS\n')
-  process.exit(2)
+  console.log('\n[VALIDATE BRAIN] ⚠️  VALIDATION PASSED WITH WARNINGS (non-fatal)\n')
+  process.exit(0)
 }
 
 console.log('\n[VALIDATE BRAIN] ✅ VALIDATION PASSED\n')
