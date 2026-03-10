@@ -25,8 +25,8 @@
 
 This stage is **purely additive**. No existing configuration is removed or broken. All changes fall into three buckets:
 
-1. **New files:** `.prettierrc`, `.prettierignore`, `.yamllint`
-2. **File modifications:** `lint-staged.config.mjs`, `.husky/pre-push`, `package.json`
+1. **New files:** `.prettierrc`, `.yamllint`
+2. **File modifications:** `.prettierignore` (extend existing), `lint-staged.config.mjs`, `.husky/pre-push`, `package.json`
 3. **New test file:** `tests/unit/lint-staged/lint-staged-config.test.ts`
 
 **Files confirmed NOT modified by this stage:**
@@ -55,7 +55,7 @@ This stage is **purely additive**. No existing configuration is removed or broke
 
 - [ ] T002 [P] Create Prettier configuration with `printWidth: 100`, `proseWrap: "always"`, and `*.md` override block — `.prettierrc`
 
-- [ ] T003 [P] Create Prettier ignore file excluding all Biome-managed types: `**/*.ts`, `**/*.tsx`, `**/*.js`, `**/*.jsx`, `**/*.mjs`, `**/*.cjs`, `**/*.vue`, `**/*.json`, `**/*.jsonc`, plus `node_modules/`, `dist/`, `coverage/`, `docs/ai/context/` — `.prettierignore`
+- [ ] T003 [P] **Update** (not create) the existing `.prettierignore` to add Biome-managed type exclusions while preserving all current entries (`build/`, `coverage/`, `.next/`, `out/`, `*.min.js`, lock files, etc.) — append `*.ts`, `*.tsx`, `*.js`, `*.jsx`, `*.mjs`, `*.cjs`, `*.vue`, `*.json`, `*.jsonc` lines that are not already present — `.prettierignore`
 
 - [ ] T004 [P] Create yamllint configuration with `extends: default`, `line-length: max 120 (warning)`, `indentation: 2 spaces`, `document-start: warning`, `truthy.check-keys: false` — `.yamllint`
 
@@ -69,8 +69,9 @@ This stage is **purely additive**. No existing configuration is removed or broke
 
 - [ ] T005 [US1] Update lint-staged configuration to add scope comment and three new entries — `lint-staged.config.mjs`
   - `'*.md': ['prettier --write']`
-  - `'*.{yml,yaml}': ['yamllint']`
-  - `'.github/workflows/*.yml': ['actionlint']`
+  - `'*.{yml,yaml}': ['bash', '-c', 'command -v yamllint > /dev/null 2>&1 && yamllint "$@" || (echo "⚠️  yamllint not installed – skipping. Install: brew install yamllint" && exit 0)', '--']` — graceful fallback if yamllint not installed (mirrors actionlint pattern in pre-push)
+  - `'.github/workflows/*.yml': ['actionlint']` — note: workflow files also matched by yamllint above; both run intentionally (yamllint for syntax, actionlint for Actions-specific rules)
+  - Add JSDoc type annotation: `/** @type {import('lint-staged').Config} */`
 
 - [ ] T006 [P] [US1] Add three new validation scripts after the existing `format:check` entry — `package.json`
   - `"format:check:md": "prettier --check \"**/*.md\""`
@@ -109,17 +110,20 @@ _All US3 implementation is complete after T005, T006, and T007._
 
 **Independent test criterion:** All 8 test cases pass via vitest; zero failures.
 
-- [ ] T009 [US4] Create lint-staged config unit test file with all 8 test cases — `tests/unit/lint-staged/lint-staged-config.test.ts`
+- [ ] T009 [US4] Create lint-staged config unit test file with all 11 test cases — `tests/unit/lint-staged/lint-staged-config.test.ts`
   - **T1:** Biome entry exists with command `['bun biome check --write']`
   - **T2:** Prettier entry exists for `'*.md'` with command `['prettier --write']`
-  - **T3:** yamllint entry exists for `'*.{yml,yaml}'` with command `['yamllint']`
-  - **T4:** actionlint entry exists for `'.github/workflows/*.yml'` with command `['actionlint']`
+  - **T3:** yamllint entry exists for `'*.{yml,yaml}'` with a command array containing `yamllint`
+  - **T4:** actionlint entry exists for `'.github/workflows/*.yml'` with a command array containing `actionlint`
   - **T5:** No TS/JS key maps to a command containing `prettier`
   - **T6:** Key `'*.md'` does not map to any command containing `biome`
   - **T7:** Key `'*.{yml,yaml}'` does not map to any command containing `prettier`
   - **T8:** Config export is a plain object (`typeof config === 'object' && !Array.isArray(config)`)
+  - **T9 (config drift):** Read `.prettierrc` — assert `printWidth === 100` and `proseWrap === 'always'`
+  - **T10 (config drift):** Read `.prettierignore` — assert it does NOT contain a line matching `*.md` or `**/*.md` (prettier must process .md)
+  - **T11 (config drift):** Read `.yamllint` (parsed as YAML) — assert `extends === 'default'`, `rules.truthy['check-keys'] === false`, and `rules['line-length'].max === 120`
 
-- [ ] T010 [US4] Run unit test suite targeting the new test file and confirm 8 passed, 0 failed — `tests/unit/lint-staged/lint-staged-config.test.ts`
+- [ ] T010 [US4] Run unit test suite targeting the new test file and confirm 11 passed, 0 failed — `tests/unit/lint-staged/lint-staged-config.test.ts`
 
 ---
 
@@ -186,14 +190,14 @@ Production-ready pipeline with verified tests and confirmed zero regressions:
 | ---- | --------------------------------------------- | -------------------------------------------------------------------- |
 | T001 | FR-02 (partial), FR-10                        | `grep prettier package.json` returns a `^3.x` entry                 |
 | T002 | FR-02, NFR-03                                 | `.prettierrc` exists at repo root with `printWidth: 100`             |
-| T003 | FR-02, AI-02                                  | `.prettierignore` exists; `**/*.ts` and `**/*.vue` listed            |
+| T003 | FR-02, AI-02                                  | `.prettierignore` updated; `*.ts` and `*.vue` listed; existing entries preserved |
 | T004 | FR-03, NFR-03                                 | `.yamllint` exists at repo root with `extends: default`              |
 | T005 | FR-06, FR-05 (additive)                       | `lint-staged.config.mjs` contains all 4 patterns                    |
 | T006 | FR-02, FR-03, FR-04                           | `package.json` scripts include `format:check:md`, `validate:yaml`, `validate:workflows` |
 | T007 | FR-07, FR-04                                  | `.husky/pre-push` contains actionlint block with graceful skip       |
 | T008 | FR-02 (acceptance validation)                 | `bun run format:check:md` exits 0 from repo root                     |
-| T009 | Testing Requirement                           | File created with 8 `describe/it` blocks                             |
-| T010 | Testing Requirement                           | `bun run test:unit` reports 8 passed, 0 failed                       |
+| T009 | Testing Requirement                           | File created with 11 `describe/it` blocks (8 structural + 3 config-drift)         |
+| T010 | Testing Requirement                           | `bun run test:unit` reports 11 passed, 0 failed                       |
 | T011 | NFR-01, regression safety                     | `bun run lint` exits 0 — no new Biome violations                     |
 | T012 | Regression safety                             | `bun run typecheck` exits 0 — no type errors                         |
 
