@@ -278,9 +278,47 @@ function resolveImportTarget(imp: string, sourceFile?: string): string | null {
   const app = imp.match(/^apps\/([^/]+)/)
   if (app) return `apps/${app[1]}`
 
-  // Zidney alias pattern (@zidney/package-name → packages/package-name)
-  const zidneyAlias = imp.match(/^@zidney\/([^/]+)/)
-  if (zidneyAlias) return `packages/${zidneyAlias[1]}`
+  // Zidney specific aliases (explicit mappings)
+  // @zidney/ui → packages/ui-system
+  if (imp.startsWith('@zidney/ui')) {
+    return 'packages/ui-system'
+  }
+  // @zidney/domain-core → packages/domain-core
+  if (imp.startsWith('@zidney/domain-core')) {
+    return 'packages/domain-core'
+  }
+  // @zidney/logger → packages/logger
+  if (imp.startsWith('@zidney/logger')) {
+    return 'packages/logger'
+  }
+  // @zidney/types → packages/types
+  if (imp.startsWith('@zidney/types')) {
+    return 'packages/types'
+  }
+  // @zidney/validation → packages/validation
+  if (imp.startsWith('@zidney/validation')) {
+    return 'packages/validation'
+  }
+  // @zidney/redis-utils → packages/redis-utils
+  if (imp.startsWith('@zidney/redis-utils')) {
+    return 'packages/redis-utils'
+  }
+  // @zidney/config → packages/config
+  if (imp.startsWith('@zidney/config')) {
+    return 'packages/config'
+  }
+  // @zidney/api-client → packages/api-client
+  if (imp.startsWith('@zidney/api-client')) {
+    return 'packages/api-client'
+  }
+
+  // @zidney/app/* → apps/{app-name}
+  const zidneyApp = imp.match(/^@zidney\/app\/([^/]+)/)
+  if (zidneyApp) return `apps/${zidneyApp[1]}`
+
+  // @zidney/package/* → packages/{package-name}
+  const zidneyPackage = imp.match(/^@zidney\/package\/([^/]+)/)
+  if (zidneyPackage) return `packages/${zidneyPackage[1]}`
 
   // Local intra-app imports (@/ and ~/ are local to the app, not cross-module)
   // Return null so they're not flagged as cross-app violations
@@ -314,8 +352,26 @@ function resolveImportTarget(imp: string, sourceFile?: string): string | null {
         }
       }
 
+      // Handle wildcard expansion
+      let resolved: string
+      if (a.target.includes('*')) {
+        // Extract the path segment after the alias to fill in the wildcard
+        const afterAlias = imp.slice(a.alias.length)
+        const nextSegment = afterAlias.split('/')[1] // First path element after alias
+        if (nextSegment && nextSegment !== '') {
+          // Replace * with the next segment
+          resolved = a.target.replace('*', nextSegment)
+        } else {
+          // No segment to expand wildcard, invalid resolution
+          continue
+        }
+      } else {
+        // Non-wildcard resolution: simple string replacement
+        resolved = imp.replace(a.alias, a.target)
+      }
+
       // Normalize: remove leading ./ and collapse multiple slashes
-      const resolved = imp.replace(a.alias, a.target).replace(/^\.\//, '').replace(/\/+/g, '/')
+      resolved = resolved.replace(/^\.\//, '').replace(/\/+/g, '/')
 
       if (resolved.startsWith('packages/')) {
         const parts = resolved.split('/')

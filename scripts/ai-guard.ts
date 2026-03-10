@@ -218,6 +218,18 @@ export function loadTsAliases(): TsAliasMap[] {
   return result
 }
 
+function isTestFile(filePath: string): boolean {
+  // Exclude test files to avoid false positives
+  // Test mocking is allowed to cross app boundaries
+  return (
+    filePath.includes('/tests/') ||
+    filePath.includes('.test.') ||
+    filePath.includes('.spec.') ||
+    filePath.includes('vitest.config') ||
+    filePath.includes('vitest.workspace')
+  )
+}
+
 function getChangedFiles(): string[] {
   try {
     const staged = execSync('git diff --cached --name-only', {
@@ -227,6 +239,7 @@ function getChangedFiles(): string[] {
       .map((f) => f.trim())
       .filter(Boolean)
       .filter((f) => f.endsWith('.ts') || f.endsWith('.tsx') || f.endsWith('.vue'))
+      .filter((f) => !isTestFile(f))
 
     // When no staged files are detected (e.g. in CI where git index is empty,
     // or when invoked outside of a commit), fall back to scanning all tracked
@@ -238,6 +251,7 @@ function getChangedFiles(): string[] {
         .split('\n')
         .map((f) => f.trim())
         .filter(Boolean)
+        .filter((f) => !isTestFile(f))
       if (all.length > 0) {
         return all
       }
