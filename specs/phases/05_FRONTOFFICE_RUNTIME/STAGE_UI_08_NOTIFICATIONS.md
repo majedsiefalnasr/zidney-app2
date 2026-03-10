@@ -65,11 +65,9 @@ Backend determines:
 
 ## Primary Routes
 
-Notification center:
-`/notifications`
+Notification center: `/notifications`
 
-Optional detail route:
-`/notifications/:notification_id`
+Optional detail route: `/notifications/:notification_id`
 
 All routes require:
 

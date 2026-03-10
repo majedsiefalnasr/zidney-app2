@@ -1,8 +1,7 @@
 # STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION
 
-**Branch:** `spec/infra-008-architecture-visualization`
-**Phase:** 01_PLATFORM_FOUNDATION
-**Stage File:** `specs/phases/01_platform_foundation/STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION.md`
+**Branch:** `spec/infra-008-architecture-visualization` **Phase:** 01_PLATFORM_FOUNDATION **Stage
+File:** `specs/phases/01_platform_foundation/STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION.md`
 **Initiated:** 2026-03-09T00:00:00.000Z
 
 ## Workflow Progress

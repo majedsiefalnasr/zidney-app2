@@ -11,7 +11,8 @@
 
 ### Purpose
 
-Stores all non-default-language translated values for translatable entity fields. Never holds default-language content (enforced at service layer per FR-005, FR-008).
+Stores all non-default-language translated values for translatable entity fields. Never holds
+default-language content (enforced at service layer per FR-005, FR-008).
 
 ### Column Definitions
 
@@ -33,7 +34,8 @@ CONSTRAINT translations_composite_unique
   UNIQUE (entity_type, entity_id, field_name, language_code)
 ```
 
-This constraint is the upsert conflict target (per Q4 clarification). Submitting the same composite key twice is always safe — the second call updates `translated_value` and `updated_at`.
+This constraint is the upsert conflict target (per Q4 clarification). Submitting the same composite
+key twice is always safe — the second call updates `translated_value` and `updated_at`.
 
 ### Indexes
 
@@ -58,57 +60,40 @@ CREATE INDEX idx_translations_language
 
 - At 5M rows per tenant, B-tree indexes on the above columns support sub-50ms indexed lookups.
 - Fill factor left at default (90%) — suitable for upsert-heavy tables.
-- Forward-compatible with declarative range partitioning by `language_code` or `entity_type` without application changes. Partitioning not introduced at this stage.
+- Forward-compatible with declarative range partitioning by `language_code` or `entity_type` without
+  application changes. Partitioning not introduced at this stage.
 - Autovacuum tuning recommended for this table in operations runbook (upserts generate dead tuples).
 
 ### Drizzle Schema Definition (TypeScript)
 
 ```typescript
 // apps/api/src/db/tenant/schemas/translations.schema.ts
-import {
-  index,
-  pgTable,
-  text,
-  timestamp,
-  unique,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core'
+import { index, pgTable, text, timestamp, unique, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const translations = pgTable(
-  'translations',
+  "translations",
   {
-    id: uuid('id').primaryKey().defaultRandom(),
-    entity_type: varchar('entity_type', { length: 100 }).notNull(),
-    entity_id: uuid('entity_id').notNull(),
-    field_name: varchar('field_name', { length: 100 }).notNull(),
-    language_code: varchar('language_code', { length: 10 }).notNull(),
-    translated_value: text('translated_value').notNull(),
-    created_at: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
-    updated_at: timestamp('updated_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    entity_type: varchar("entity_type", { length: 100 }).notNull(),
+    entity_id: uuid("entity_id").notNull(),
+    field_name: varchar("field_name", { length: 100 }).notNull(),
+    language_code: varchar("language_code", { length: 10 }).notNull(),
+    translated_value: text("translated_value").notNull(),
+    created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updated_at: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
-    compositeUnique: unique('translations_composite_unique').on(
+    compositeUnique: unique("translations_composite_unique").on(
       table.entity_type,
       table.entity_id,
       table.field_name,
-      table.language_code
+      table.language_code,
     ),
-    entityIndex: index('idx_translations_entity').on(
-      table.entity_type,
-      table.entity_id
-    ),
-    coverageIndex: index('idx_translations_coverage').on(
-      table.entity_type,
-      table.language_code
-    ),
-    languageIndex: index('idx_translations_language').on(table.language_code),
-  })
-)
+    entityIndex: index("idx_translations_entity").on(table.entity_type, table.entity_id),
+    coverageIndex: index("idx_translations_coverage").on(table.entity_type, table.language_code),
+    languageIndex: index("idx_translations_language").on(table.language_code),
+  }),
+);
 ```
 
 ---
@@ -117,7 +102,9 @@ export const translations = pgTable(
 
 ### Purpose
 
-Immutable, append-only audit trail for all translation write events (create, update, delete). Scoped exclusively to the tenant database. Never modified or deleted (enforced by trigger). Satisfies FR-031 through FR-035.
+Immutable, append-only audit trail for all translation write events (create, update, delete). Scoped
+exclusively to the tenant database. Never modified or deleted (enforced by trigger). Satisfies
+FR-031 through FR-035.
 
 ### Column Definitions
 
@@ -139,7 +126,8 @@ Immutable, append-only audit trail for all translation write events (create, upd
 
 ### Immutability Enforcement
 
-A trigger prevents UPDATE and DELETE on this table, identical to the pattern used by `workspace_settings_audit`:
+A trigger prevents UPDATE and DELETE on this table, identical to the pattern used by
+`workspace_settings_audit`:
 
 ```sql
 CREATE TRIGGER prevent_translation_audit_modification
@@ -164,49 +152,40 @@ CREATE INDEX idx_tal_language_created
 
 ```typescript
 // apps/api/src/db/tenant/schemas/translation-audit-logs.schema.ts
-import {
-  index,
-  pgTable,
-  text,
-  timestamp,
-  uuid,
-  varchar,
-} from 'drizzle-orm/pg-core'
+import { index, pgTable, text, timestamp, uuid, varchar } from "drizzle-orm/pg-core";
 
 export const translationAuditLogs = pgTable(
-  'translation_audit_logs',
+  "translation_audit_logs",
   {
-    id: uuid('id').primaryKey().defaultRandom(),
-    workspace_id: uuid('workspace_id').notNull(),
-    entity_type: varchar('entity_type', { length: 100 }).notNull(),
-    entity_id: uuid('entity_id').notNull(),
-    field_name: varchar('field_name', { length: 100 }).notNull(),
-    language_code: varchar('language_code', { length: 10 }).notNull(),
-    action: varchar('action', { length: 20 }).notNull(), // 'created'|'updated'|'deleted'
-    previous_value: text('previous_value'),
-    new_value: text('new_value'),
-    user_id: uuid('user_id').notNull(),
-    correlation_id: varchar('correlation_id', { length: 50 }).notNull(),
-    reason: varchar('reason', { length: 100 }),
-    created_at: timestamp('created_at', { withTimezone: true })
-      .notNull()
-      .defaultNow(),
+    id: uuid("id").primaryKey().defaultRandom(),
+    workspace_id: uuid("workspace_id").notNull(),
+    entity_type: varchar("entity_type", { length: 100 }).notNull(),
+    entity_id: uuid("entity_id").notNull(),
+    field_name: varchar("field_name", { length: 100 }).notNull(),
+    language_code: varchar("language_code", { length: 10 }).notNull(),
+    action: varchar("action", { length: 20 }).notNull(), // 'created'|'updated'|'deleted'
+    previous_value: text("previous_value"),
+    new_value: text("new_value"),
+    user_id: uuid("user_id").notNull(),
+    correlation_id: varchar("correlation_id", { length: 50 }).notNull(),
+    reason: varchar("reason", { length: 100 }),
+    created_at: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => ({
-    entityCreatedIndex: index('idx_tal_entity_created').on(
+    entityCreatedIndex: index("idx_tal_entity_created").on(
       table.workspace_id,
       table.entity_type,
       table.entity_id,
       table.created_at,
-      table.id
+      table.id,
     ),
-    languageCreatedIndex: index('idx_tal_language_created').on(
+    languageCreatedIndex: index("idx_tal_language_created").on(
       table.workspace_id,
       table.language_code,
-      table.created_at
+      table.created_at,
     ),
-  })
-)
+  }),
+);
 ```
 
 ---
@@ -215,7 +194,8 @@ export const translationAuditLogs = pgTable(
 
 ### Purpose
 
-Defines the canonical set of translatable fields per entity_type. Serves as the single source of truth for:
+Defines the canonical set of translatable fields per entity_type. Serves as the single source of
+truth for:
 
 1. Field validation in translation write operations (FR-025 extension)
 2. Coverage denominator calculation (spec Q5 clarification)
@@ -238,37 +218,33 @@ Defines the canonical set of translatable fields per entity_type. Serves as the 
  *   3. No DB migration required (translations table is open-ended)
  */
 export const TRANSLATABLE_FIELDS = {
-  subject: ['title', 'description'],
-  category: ['name', 'description'],
-  question: ['text', 'explanation'],
-  exam: ['title', 'description', 'instructions'],
+  subject: ["title", "description"],
+  category: ["name", "description"],
+  question: ["text", "explanation"],
+  exam: ["title", "description", "instructions"],
   // Extend as new translatable entities are added to the platform
-} as const satisfies Record<string, readonly string[]>
+} as const satisfies Record<string, readonly string[]>;
 
 /** Union of all registered entity types */
-export type TranslatableEntityType = keyof typeof TRANSLATABLE_FIELDS
+export type TranslatableEntityType = keyof typeof TRANSLATABLE_FIELDS;
 
 /** Union of all field names for a given entity type */
 export type TranslatableFieldName<T extends TranslatableEntityType> =
-  (typeof TRANSLATABLE_FIELDS)[T][number]
+  (typeof TRANSLATABLE_FIELDS)[T][number];
 
 /**
  * Returns the list of translatable fields for an entity_type.
  * Returns empty array for unknown entity types (logs warning at service layer).
  */
 export function getTranslatableFields(entityType: string): readonly string[] {
-  return (
-    (TRANSLATABLE_FIELDS as Record<string, readonly string[]>)[entityType] ?? []
-  )
+  return (TRANSLATABLE_FIELDS as Record<string, readonly string[]>)[entityType] ?? [];
 }
 
 /**
  * Returns true if entity_type is a registered translatable entity.
  */
-export function isTranslatableEntityType(
-  entityType: string
-): entityType is TranslatableEntityType {
-  return entityType in TRANSLATABLE_FIELDS
+export function isTranslatableEntityType(entityType: string): entityType is TranslatableEntityType {
+  return entityType in TRANSLATABLE_FIELDS;
 }
 ```
 
@@ -287,8 +263,8 @@ export function isTranslatableEntityType(
 
 ```typescript
 interface LanguageSettings {
-  default_language: string // ISO 639-1, e.g. "ar"
-  supported_languages: string[] // e.g. ["ar", "en", "fr"]
+  default_language: string; // ISO 639-1, e.g. "ar"
+  supported_languages: string[]; // e.g. ["ar", "en", "fr"]
 }
 ```
 
@@ -296,8 +272,8 @@ interface LanguageSettings {
 
 ```typescript
 interface LanguageSettings {
-  default_language: string
-  supported_languages: string[]
+  default_language: string;
+  supported_languages: string[];
   /**
    * Per-language operational status.
    * Key: language_code (ISO 639-1)
@@ -313,16 +289,18 @@ interface LanguageSettings {
    *   - DRAIN_LANGUAGE_TRANSLATIONS worker job (removes entry after drain)
    * It MUST NOT be set via the public settings update API for arbitrary values.
    */
-  language_status?: Record<string, 'active' | 'removing'>
+  language_status?: Record<string, "active" | "removing">;
 }
 ```
 
 ### Backward Compatibility
 
 - `language_status` is optional — all existing `workspace_settings` rows are valid without it.
-- Absent `language_status` key = all languages are `'active'` (computed default, not stored default).
+- Absent `language_status` key = all languages are `'active'` (computed default, not stored
+  default).
 - No database migration for this change. The JSONB column absorbs the new field on first write.
-- Validation schema update: `workspace-settings.validation.ts` `languageSettingsSchema` must add `language_status: z.record(z.enum(['active', 'removing'])).optional()`.
+- Validation schema update: `workspace-settings.validation.ts` `languageSettingsSchema` must add
+  `language_status: z.record(z.enum(['active', 'removing'])).optional()`.
 
 ### State Machine for Language Removal
 
@@ -345,7 +323,8 @@ Language in supported_languages, no status key (= 'active')
 
 The `translation.service.ts` MUST check `language_status` before accepting translation writes:
 
-- If `language_status[language_code] === 'removing'` → reject with `UNSUPPORTED_LANGUAGE` (422) — the language is being removed and no new translations are accepted.
+- If `language_status[language_code] === 'removing'` → reject with `UNSUPPORTED_LANGUAGE` (422) —
+  the language is being removed and no new translations are accepted.
 - If `language_code` not in `supported_languages` → reject with `UNSUPPORTED_LANGUAGE` (422).
 
 ---
@@ -354,7 +333,8 @@ The `translation.service.ts` MUST check `language_status` before accepting trans
 
 ### Version Bump
 
-Per ADR-0008: adding new tables (`translations`, `translation_audit_logs`) is an **additive** database change → **MINOR** bump.
+Per ADR-0008: adding new tables (`translations`, `translation_audit_logs`) is an **additive**
+database change → **MINOR** bump.
 
 - Current schema version: `1.1.0`
 - New schema version: `1.2.0`
@@ -377,12 +357,15 @@ The single forward-only migration performs, in transaction order:
 6. `CREATE TABLE translation_audit_logs` with all columns
 7. `CREATE INDEX idx_tal_entity_created ON translation_audit_logs (...)`
 8. `CREATE INDEX idx_tal_language_created ON translation_audit_logs (...)`
-9. `CREATE TRIGGER prevent_translation_audit_modification ...` (reuses existing `prevent_audit_modification()` function)
-10. `UPDATE schema_version SET version = '1.2.0', applied_at = NOW()` (per schema_version table pattern)
+9. `CREATE TRIGGER prevent_translation_audit_modification ...` (reuses existing
+   `prevent_audit_modification()` function)
+10. `UPDATE schema_version SET version = '1.2.0', applied_at = NOW()` (per schema_version table
+    pattern)
 
 ### Compliance Checklist
 
-- [ ] Forward-only: `down()` throws `new Error('Translation system migration is not reversible. Restore from snapshot.')`
+- [ ] Forward-only: `down()` throws
+      `new Error('Translation system migration is not reversible. Restore from snapshot.')`
 - [ ] Transactional: all statements in one BEGIN/COMMIT block
 - [ ] Idempotent: all `CREATE ... IF NOT EXISTS`
 - [ ] No existing table modification (additive only)

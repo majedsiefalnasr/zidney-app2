@@ -1,9 +1,8 @@
 # STAGE_INFRA_04_BIOME
 
-**Branch:** `spec/infra-004-biome`
-**Phase:** 01_PLATFORM_FOUNDATION
-**Stage File:** `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_04_BIOME.md`
-**Initiated:** 2026-03-06T00:00:00.000Z
+**Branch:** `spec/infra-004-biome` **Phase:** 01_PLATFORM_FOUNDATION **Stage File:**
+`specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_04_BIOME.md` **Initiated:**
+2026-03-06T00:00:00.000Z
 
 ## Workflow Progress
 

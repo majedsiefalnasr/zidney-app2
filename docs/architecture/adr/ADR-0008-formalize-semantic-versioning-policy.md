@@ -54,11 +54,9 @@ Represents functional configuration surface:
 - Feature behavior
 - Runtime expectations
 
-Stored in:
-master_db.licenses.product_version
+Stored in: master_db.licenses.product_version
 
-Upgrade model:
-Opt-in per license.
+Upgrade model: Opt-in per license.
 
 ---
 
@@ -72,8 +70,7 @@ Represents database structure compatibility:
 - Indexes
 - Migration state
 
-Stored in:
-tenant_db.schema_version
+Stored in: tenant_db.schema_version
 
 Upgraded via migration pipeline only.
 
@@ -83,8 +80,7 @@ Upgraded via migration pipeline only.
 
 Represents deployed backend code version.
 
-Defined in:
-packages/config/runtimeVersion.ts
+Defined in: packages/config/runtimeVersion.ts
 
 Used for compatibility checks.
 
@@ -239,8 +235,7 @@ PATCH changes are not rollback-managed.
 
 Version format must follow strict SemVer:
 
-Example:
-1.4.2
+Example: 1.4.2
 
 Stored as string.
 
@@ -304,9 +299,7 @@ Potential future ADRs:
 
 ## Final Rule
 
-If versioning discipline breaks,
-platform integrity breaks.
+If versioning discipline breaks, platform integrity breaks.
 
-No schema change without version change.
-No breaking change without MAJOR increment.
-No runtime drift allowed.
+No schema change without version change. No breaking change without MAJOR increment. No runtime
+drift allowed.

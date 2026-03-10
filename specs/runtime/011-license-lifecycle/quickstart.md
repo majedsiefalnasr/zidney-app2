@@ -41,7 +41,8 @@ ACTIVE ─┬──────► SOFT_LOCKED ──────► ARCHIVED �
 
 ### Business Context
 
-Payment processor detects failed payment. Billing system initiates soft lock to preserve data while blocking access.
+Payment processor detects failed payment. Billing system initiates soft lock to preserve data while
+blocking access.
 
 ### Flow Diagram
 
@@ -80,19 +81,19 @@ Response: 200 OK {license, soft_lock_until}
 **1. API Route** (`apps/api/src/routes/licenses.ts`):
 
 ```typescript
-router.post('/licenses/:licenseId/soft-lock', async (ctx) => {
-  const { licenseId } = ctx.req.param()
-  const { reason } = ctx.req.json()
+router.post("/licenses/:licenseId/soft-lock", async (ctx) => {
+  const { licenseId } = ctx.req.param();
+  const { reason } = ctx.req.json();
 
   const result = await licenseService.transitionToSoftLock(
     masterDb,
     licenseId,
     reason,
-    ctx.get('user_id')
-  )
+    ctx.get("user_id"),
+  );
 
-  return ctx.json({ success: true, data: { license: result.license } })
-})
+  return ctx.json({ success: true, data: { license: result.license } });
+});
 ```
 
 **2. License Service** (`packages/domain-core/src/license/service.ts`):
@@ -160,7 +161,8 @@ export async function transitionToSoftLock(
 
 ### Business Context
 
-Payment not received within 90-day grace period. System automatically transitions workspace to ARCHIVED state on next user access attempt.
+Payment not received within 90-day grace period. System automatically transitions workspace to
+ARCHIVED state on next user access attempt.
 
 ### Flow Diagram
 
@@ -194,44 +196,40 @@ Return HTTP 403 Forbidden
 
 ```typescript
 async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
-  const workspace_slug = ctx.get('workspace_slug')
-  const license = await resolver.getLicenseBySlug(workspace_slug)
+  const workspace_slug = ctx.get("workspace_slug");
+  const license = await resolver.getLicenseBySlug(workspace_slug);
 
   // Check for soft lock expiry
-  if (
-    license.status === 'SOFT_LOCKED' &&
-    new Date() > new Date(license.soft_lock_until)
-  ) {
+  if (license.status === "SOFT_LOCKED" && new Date() > new Date(license.soft_lock_until)) {
     // Auto-transition to ARCHIVED
-    const client = await masterDb.connect()
+    const client = await masterDb.connect();
     try {
-      await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
+      await client.query("BEGIN ISOLATION LEVEL SERIALIZABLE");
 
       // Double-check status (prevent race)
-      const current = await client.query(
-        'SELECT status FROM licenses WHERE id = $1 FOR UPDATE',
-        [license.id]
-      )
+      const current = await client.query("SELECT status FROM licenses WHERE id = $1 FOR UPDATE", [
+        license.id,
+      ]);
 
-      if (current.rows[0].status === 'SOFT_LOCKED') {
+      if (current.rows[0].status === "SOFT_LOCKED") {
         // Transition occurs here
         await client.query(
           `UPDATE licenses 
            SET status=$1, archived_at=now(), soft_lock_until=NULL, updated_at=now()
            WHERE id=$2`,
-          ['ARCHIVED', license.id]
-        )
+          ["ARCHIVED", license.id],
+        );
 
         // Audit entry with SYSTEM actor
         await client.query(
           `INSERT INTO license_audit_logs 
-            (...) VALUES (..., 'SYSTEM', 'Soft lock 90-day expiry', ...)`
-        )
+            (...) VALUES (..., 'SYSTEM', 'Soft lock 90-day expiry', ...)`,
+        );
       }
 
-      await client.query('COMMIT')
+      await client.query("COMMIT");
     } finally {
-      client.release()
+      client.release();
     }
 
     // Return 403 (now ARCHIVED)
@@ -239,14 +237,14 @@ async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
       {
         success: false,
         data: null,
-        error: { code: 'LICENSE_ARCHIVED', message: 'Workspace archived' },
+        error: { code: "LICENSE_ARCHIVED", message: "Workspace archived" },
       },
-      { status: 403 }
-    )
+      { status: 403 },
+    );
   }
 
   // Continue with other status checks...
-  return await next()
+  return await next();
 }
 ```
 
@@ -256,7 +254,8 @@ async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
 
 ### Business Context
 
-Workspace is soft-locked. Admin archives it to preserve data, then 3 days later decides to restore it.
+Workspace is soft-locked. Admin archives it to preserve data, then 3 days later decides to restore
+it.
 
 ### Flow Diagram: Archival
 
@@ -327,16 +326,13 @@ export async function transitionToArchived(
   licenseId: string,
   snapshotId: string,
   reason: string,
-  actorId: string | null
+  actorId: string | null,
 ): Promise<TransitionResult> {
   // Validate snapshot exists and is CREATED
-  const snapshot = await masterDb.query(
-    'SELECT * FROM snapshots WHERE id = $1',
-    [snapshotId]
-  )
+  const snapshot = await masterDb.query("SELECT * FROM snapshots WHERE id = $1", [snapshotId]);
 
-  if (!snapshot.rows.length || snapshot.rows[0].status !== 'CREATED') {
-    throw new SnapshotFailedError('Snapshot not ready')
+  if (!snapshot.rows.length || snapshot.rows[0].status !== "CREATED") {
+    throw new SnapshotFailedError("Snapshot not ready");
   }
 
   // Transaction: Update license + audit
@@ -344,8 +340,8 @@ export async function transitionToArchived(
     `UPDATE licenses SET 
       status='ARCHIVED', archived_at=now(), current_snapshot_id=$1, updated_at=now()
      WHERE id=$2`,
-    [snapshotId, licenseId]
-  )
+    [snapshotId, licenseId],
+  );
 
   // Audit log
   // ...
@@ -358,7 +354,7 @@ export async function transitionToArchived(
 export async function restoreFromArchive(
   masterDb: Pool,
   licenseId: string,
-  actorId: string
+  actorId: string,
 ): Promise<TransitionResult> {
   // Get license and snapshot
   const license = await masterDb.query(
@@ -366,30 +362,30 @@ export async function restoreFromArchive(
      FROM licenses l
      JOIN snapshots s ON l.current_snapshot_id = s.id
      WHERE l.id = $1`,
-    [licenseId]
-  )
+    [licenseId],
+  );
 
   // Validate schema compatibility
-  const snapshotVersion = license.rows[0].version_tag
-  const currentVersion = license.rows[0].expected_schema_version
+  const snapshotVersion = license.rows[0].version_tag;
+  const currentVersion = license.rows[0].expected_schema_version;
 
   if (!isCompatible(snapshotVersion, currentVersion)) {
-    throw new SchemaCompatibilityError('Snapshot version too old')
+    throw new SchemaCompatibilityError("Snapshot version too old");
   }
 
   // Enqueue restore job
   const jobId = await enqueueJob(
-    'restore_from_archive',
+    "restore_from_archive",
     {
       license_id: licenseId,
       snapshot_id: license.rows[0].snapshot_id,
       snapshot_location: license.rows[0].location,
     },
-    ctx.get('correlation_id'),
-    workspace_id
-  )
+    ctx.get("correlation_id"),
+    workspace_id,
+  );
 
-  return { success: true, job_id: jobId }
+  return { success: true, job_id: jobId };
 }
 ```
 
@@ -430,7 +426,8 @@ export async function executeRestoreFromArchive(job: JobEnvelope) {
 
 ### Business Context
 
-Workspace is archived. Admin confirms permanent deletion with 2FA and confirmation phrase. Non-recoverable operation.
+Workspace is archived. Admin confirms permanent deletion with 2FA and confirmation phrase.
+Non-recoverable operation.
 
 ### Flow Diagram
 
@@ -476,10 +473,10 @@ Any request to workspace: HTTP 404
 **Delete Initiation** (`apps/api/src/routes/licenses.ts`):
 
 ```typescript
-router.post('/licenses/:licenseId/delete/initiate', async (ctx) => {
+router.post("/licenses/:licenseId/delete/initiate", async (ctx) => {
   // Generate confirmation phrase
-  const phrase = generateRandomPhrase(24) // "CONFIRM_DELETE_ABC12XYZ"
-  const hash = sha256(phrase)
+  const phrase = generateRandomPhrase(24); // "CONFIRM_DELETE_ABC12XYZ"
+  const hash = sha256(phrase);
 
   // Store in confirmations table
   await masterDb.query(
@@ -487,8 +484,8 @@ router.post('/licenses/:licenseId/delete/initiate', async (ctx) => {
       (id, license_id, confirmation_phrase_hash, actor_id, 
        confirmed_at, deletion_initiated_at, created_at)
      VALUES ($1, $2, $3, $4, now(), now(), now())`,
-    [uuidv4(), licenseId, hash, userId]
-  )
+    [uuidv4(), licenseId, hash, userId],
+  );
 
   return ctx.json({
     success: true,
@@ -496,88 +493,83 @@ router.post('/licenses/:licenseId/delete/initiate', async (ctx) => {
       confirmation_phrase: phrase,
       valid_until: new Date(Date.now() + 5 * 60 * 1000), // 5 minutes
     },
-  })
-})
+  });
+});
 ```
 
 **Delete Confirmation** (`apps/api/src/routes/licenses.ts`):
 
 ```typescript
-router.post('/licenses/:licenseId/delete/confirm', async (ctx) => {
-  const { confirmation_id, confirmation_phrase } = ctx.req.json()
+router.post("/licenses/:licenseId/delete/confirm", async (ctx) => {
+  const { confirmation_id, confirmation_phrase } = ctx.req.json();
 
   // Validate confirmation
   const confirmation = await masterDb.query(
-    'SELECT * FROM license_deletion_confirmations WHERE id = $1',
-    [confirmation_id]
-  )
+    "SELECT * FROM license_deletion_confirmations WHERE id = $1",
+    [confirmation_id],
+  );
 
-  const phraseHash = sha256(confirmation_phrase)
+  const phraseHash = sha256(confirmation_phrase);
   if (phraseHash !== confirmation.rows[0].confirmation_phrase_hash) {
-    throw new InvalidConfirmationError('Phrase mismatch')
+    throw new InvalidConfirmationError("Phrase mismatch");
   }
 
   // Enqueue deletion
-  const jobId = await enqueueJob('delete_license', {
+  const jobId = await enqueueJob("delete_license", {
     license_id: licenseId,
     actor_id: userId,
-  })
+  });
 
-  return ctx.json({ success: true, data: { job_id: jobId } })
-})
+  return ctx.json({ success: true, data: { job_id: jobId } });
+});
 ```
 
 **Worker Deletion** (`apps/worker/src/jobs/delete.ts`):
 
 ```typescript
 export async function executeDeleteLicense(job: JobEnvelope) {
-  const { license_id } = job.payload
+  const { license_id } = job.payload;
 
-  const client = await masterDb.connect()
+  const client = await masterDb.connect();
 
   try {
-    await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
+    await client.query("BEGIN ISOLATION LEVEL SERIALIZABLE");
 
     // Get license and snapshot
-    const license = await client.query(
-      `SELECT * FROM licenses WHERE id = $1 FOR UPDATE`,
-      [license_id]
-    )
+    const license = await client.query(`SELECT * FROM licenses WHERE id = $1 FOR UPDATE`, [
+      license_id,
+    ]);
 
-    if (license.rows[0].status !== 'ARCHIVED') {
-      throw new Error('License not in ARCHIVED state')
+    if (license.rows[0].status !== "ARCHIVED") {
+      throw new Error("License not in ARCHIVED state");
     }
 
     // 1. Drop tenant DB
-    await dropDatabase(license.rows[0].workspace_id)
+    await dropDatabase(license.rows[0].workspace_id);
 
     // 2. Delete snapshot from S3
     if (license.rows[0].current_snapshot_id) {
-      const snapshot = await client.query(
-        'SELECT snapshot_location FROM snapshots WHERE id = $1',
-        [license.rows[0].current_snapshot_id]
-      )
-      await s3.deleteObject(snapshot.rows[0].snapshot_location).promise()
+      const snapshot = await client.query("SELECT snapshot_location FROM snapshots WHERE id = $1", [
+        license.rows[0].current_snapshot_id,
+      ]);
+      await s3.deleteObject(snapshot.rows[0].snapshot_location).promise();
     }
 
     // 3. Remove registry entry
-    await client.query('DELETE FROM tenants_registry WHERE license_id = $1', [
-      license_id,
-    ])
+    await client.query("DELETE FROM tenants_registry WHERE license_id = $1", [license_id]);
 
     // 4. Update license
-    await client.query(
-      `UPDATE licenses SET status='DELETED', deleted_at=now() WHERE id=$1`,
-      [license_id]
-    )
+    await client.query(`UPDATE licenses SET status='DELETED', deleted_at=now() WHERE id=$1`, [
+      license_id,
+    ]);
 
     // 5. Audit log
-    await client.query(`INSERT INTO license_audit_logs (...) VALUES (...)`)
+    await client.query(`INSERT INTO license_audit_logs (...) VALUES (...)`);
 
-    await client.query('COMMIT')
-    logger.info('License deleted', { license_id })
+    await client.query("COMMIT");
+    logger.info("License deleted", { license_id });
   } finally {
-    client.release()
+    client.release();
   }
 }
 ```
@@ -591,14 +583,14 @@ export async function executeDeleteLicense(job: JobEnvelope) {
 ```typescript
 // Always validate current state before transition
 const validTransitions = {
-  ACTIVE: ['SOFT_LOCKED'],
-  SOFT_LOCKED: ['ACTIVE', 'ARCHIVED'],
-  ARCHIVED: ['ACTIVE', 'DELETED'],
+  ACTIVE: ["SOFT_LOCKED"],
+  SOFT_LOCKED: ["ACTIVE", "ARCHIVED"],
+  ARCHIVED: ["ACTIVE", "DELETED"],
   DELETED: [],
-}
+};
 
 function isValidTransition(from: string, to: string): boolean {
-  return validTransitions[from]?.includes(to) ?? false
+  return validTransitions[from]?.includes(to) ?? false;
 }
 ```
 
@@ -606,21 +598,18 @@ function isValidTransition(from: string, to: string): boolean {
 
 ```typescript
 // SELECT FOR UPDATE prevents race conditions
-await db.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
+await db.query("BEGIN ISOLATION LEVEL SERIALIZABLE");
 
-const current = await db.query(
-  'SELECT * FROM licenses WHERE id = $1 FOR UPDATE',
-  [licenseId]
-)
+const current = await db.query("SELECT * FROM licenses WHERE id = $1 FOR UPDATE", [licenseId]);
 
 // Verify state before mutation
-if (current.rows[0].status !== expectedStatus) throw StateTransitionError
+if (current.rows[0].status !== expectedStatus) throw StateTransitionError;
 
 // Update + audit in same transaction
-await db.query('UPDATE licenses SET ...')
-await db.query('INSERT INTO license_audit_logs ...')
+await db.query("UPDATE licenses SET ...");
+await db.query("INSERT INTO license_audit_logs ...");
 
-await db.query('COMMIT')
+await db.query("COMMIT");
 ```
 
 ### Pattern 3: Idempotent Restore
@@ -628,14 +617,12 @@ await db.query('COMMIT')
 ```typescript
 // Restore is idempotent: can be called twice safely
 export async function executeRestore(job: JobEnvelope) {
-  const { license_id } = job.payload
+  const { license_id } = job.payload;
 
   // Check if already restored (should be ACTIVE)
-  const license = await db.query('SELECT status FROM licenses WHERE id = $1', [
-    license_id,
-  ])
-  if (license.rows[0].status === 'ACTIVE') {
-    return { success: true } // Already restored
+  const license = await db.query("SELECT status FROM licenses WHERE id = $1", [license_id]);
+  if (license.rows[0].status === "ACTIVE") {
+    return { success: true }; // Already restored
   }
 
   // Restore normally...
@@ -650,41 +637,34 @@ export async function executeRestore(job: JobEnvelope) {
 
 ```typescript
 // Test state machine validation
-expect(isValidTransition('ACTIVE', 'ARCHIVED')).toBe(false)
-expect(isValidTransition('ACTIVE', 'SOFT_LOCKED')).toBe(true)
+expect(isValidTransition("ACTIVE", "ARCHIVED")).toBe(false);
+expect(isValidTransition("ACTIVE", "SOFT_LOCKED")).toBe(true);
 
 // Test soft lock calculation
-const until = calculateSoftLockUntil(now)
-expect(until.getTime() - now.getTime()).toBe(90 * 24 * 60 * 60 * 1000)
+const until = calculateSoftLockUntil(now);
+expect(until.getTime() - now.getTime()).toBe(90 * 24 * 60 * 60 * 1000);
 ```
 
 ### Integration Tests
 
 ```typescript
 // Full flow: ACTIVE → SOFT_LOCKED → ARCHIVED → DELETED
-const license = createTestLicense({ status: 'ACTIVE' })
+const license = createTestLicense({ status: "ACTIVE" });
 
 // Soft lock
-await licenseService.transitionToSoftLock(db, license.id, 'test')
+await licenseService.transitionToSoftLock(db, license.id, "test");
 expect(
-  (await db.query('SELECT status FROM licenses WHERE id = $1', [license.id]))
-    .rows[0].status
-).toBe('SOFT_LOCKED')
+  (await db.query("SELECT status FROM licenses WHERE id = $1", [license.id])).rows[0].status,
+).toBe("SOFT_LOCKED");
 
 // Archive
-const snapshot = createTestSnapshot({ license_id: license.id })
-await licenseService.transitionToArchived(
-  db,
-  license.id,
-  snapshot.id,
-  'test',
-  userId
-)
-expect((await db.query('...')).rows[0].status).toBe('ARCHIVED')
+const snapshot = createTestSnapshot({ license_id: license.id });
+await licenseService.transitionToArchived(db, license.id, snapshot.id, "test", userId);
+expect((await db.query("...")).rows[0].status).toBe("ARCHIVED");
 
 // Delete
-await workerJobs.executeDeleteLicense({ payload: { license_id: license.id } })
-expect((await db.query('...')).rows[0].status).toBe('DELETED')
+await workerJobs.executeDeleteLicense({ payload: { license_id: license.id } });
+expect((await db.query("...")).rows[0].status).toBe("DELETED");
 ```
 
 ---
@@ -711,8 +691,10 @@ expect((await db.query('...')).rows[0].status).toBe('DELETED')
 
 ## Next Steps
 
-1. **Implement** the License Service methods (transitionToSoftLock, renewLicense, archive, restore, delete)
-2. **Extend** the licenses table schema (soft_lock_until, archived_at, deleted_at, current_snapshot_id)
+1. **Implement** the License Service methods (transitionToSoftLock, renewLicense, archive, restore,
+   delete)
+2. **Extend** the licenses table schema (soft_lock_until, archived_at, deleted_at,
+   current_snapshot_id)
 3. **Create** worker jobs (snapshot_create, restore_from_archive, delete_license)
 4. **Add** API routes for all transitions
 5. **Update** Tenant Resolver middleware to enforce license status

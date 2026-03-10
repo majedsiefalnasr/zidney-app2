@@ -1,11 +1,6 @@
-// Migration Execution Protocol
-//
-// Feature: 002A-master-db-schema
-// Format: Protocol specification
-// Created: 2026-02-16
-//
-// This document defines the contract for how master database migrations
-// are executed, tracked, and rolled back.
+// Migration Execution Protocol // // Feature: 002A-master-db-schema // Format: Protocol
+specification // Created: 2026-02-16 // // This document defines the contract for how master
+database migrations // are executed, tracked, and rolled back.
 
 /\*\*
 
@@ -15,23 +10,16 @@
 - apps/api/src/db/master/migrations/{VERSION}\_{NAME}.ts
 -
 - Example:
-- apps/api/src/db/master/migrations/001_initial_schema.ts
-  \*/
+- apps/api/src/db/master/migrations/001_initial_schema.ts \*/
 
-export interface MigrationFile {
-// Migration version (e.g., "001")
-version: string;
+export interface MigrationFile { // Migration version (e.g., "001") version: string;
 
-// Human-readable description
-description: string;
+// Human-readable description description: string;
 
-// Up migration: Apply the schema change
-up: (client: PostgreSQLClient) => Promise<void>;
+// Up migration: Apply the schema change up: (client: PostgreSQLClient) => Promise<void>;
 
-// Down migration: NEVER IMPLEMENTED
-// Instead, use database snapshot restore (see Rollback Strategy)
-down?: never;
-}
+// Down migration: NEVER IMPLEMENTED // Instead, use database snapshot restore (see Rollback
+Strategy) down?: never; }
 
 /\*\*
 
@@ -45,56 +33,40 @@ down?: never;
 - b. Execute migration.up()
 - c. Record in \_schema_migrations
 - d. Commit transaction
-- 5.  If any error: Rollback transaction, log error, exit
-      \*/
+- 5.  If any error: Rollback transaction, log error, exit \*/
 
-export interface MigrationExecutor {
-/\*\*
+export interface MigrationExecutor { /\*\*
 
-- Load all migration files from the migrations directory.
-  \*/
-  loadMigrations(directory: string): Promise<MigrationFile[]>;
+- Load all migration files from the migrations directory. \*/ loadMigrations(directory: string):
+  Promise<MigrationFile[]>;
 
 /\*\*
 
-- Sort migrations by version (ascending).
-  \*/
-  sortMigrations(migrations: MigrationFile[]): MigrationFile[];
+- Sort migrations by version (ascending). \*/ sortMigrations(migrations: MigrationFile[]):
+  MigrationFile[];
 
 /\*\*
 
-- Get list of applied migrations from database.
-  \*/
-  getAppliedMigrations(client: PostgreSQLClient): Promise<string[]>;
+- Get list of applied migrations from database. \*/ getAppliedMigrations(client: PostgreSQLClient):
+  Promise<string[]>;
 
 /\*\*
 
-- Find unapplied migrations (not in \_schema_migrations).
-  \*/
-  getUnappliedMigrations(
-  migrations: MigrationFile[],
-  applied: string[]
-  ): MigrationFile[];
+- Find unapplied migrations (not in \_schema_migrations). \*/ getUnappliedMigrations( migrations:
+  MigrationFile[], applied: string[] ): MigrationFile[];
 
 /\*\*
 
 - Execute single migration in transaction.
 -
-- Rollback on error (automatic if any SQL fails).
-  \*/
-  executeMigration(
-  client: PostgreSQLClient,
-  migration: MigrationFile
-  ): Promise<void>;
+- Rollback on error (automatic if any SQL fails). \*/ executeMigration( client: PostgreSQLClient,
+  migration: MigrationFile ): Promise<void>;
 
 /\*\*
 
 - Execute all unapplied migrations in sequence.
 -
-- Stops on first failure.
-  \*/
-  executeAll(client: PostgreSQLClient): Promise<void>;
-  }
+- Stops on first failure. \*/ executeAll(client: PostgreSQLClient): Promise<void>; }
 
 /\*\*
 
@@ -116,14 +88,10 @@ export interface MigrationExecutor {
 - - Entire transaction rolled back
 - - No partial schema created
 - - No migration record inserted
-- - Error logged (structured JSON)
-    \*/
+- - Error logged (structured JSON) \*/
 
-export interface TransactionGuarantee {
-atomicity: "ALL_OR_NOTHING";
-isolation: "READ_COMMITTED";
-rollback_on_error: boolean;
-}
+export interface TransactionGuarantee { atomicity: "ALL_OR_NOTHING"; isolation: "READ_COMMITTED";
+rollback_on_error: boolean; }
 
 /\*\*
 
@@ -141,14 +109,10 @@ rollback_on_error: boolean;
 - This means:
 - - Re-running migration system does not re-apply migrations
 - - Safe to restart on failure (after fixing root cause)
-- - Each version applied exactly once
-    \*/
+- - Each version applied exactly once \*/
 
-export interface IdempotencyStrategy {
-mechanism: "MIGRATION_TRACKING_TABLE";
-detection: "VERSION_LOOKUP";
-behavior_on_duplicate: "SKIP";
-}
+export interface IdempotencyStrategy { mechanism: "MIGRATION_TRACKING_TABLE"; detection:
+"VERSION_LOOKUP"; behavior_on_duplicate: "SKIP"; }
 
 /\*\*
 
@@ -174,67 +138,41 @@ behavior_on_duplicate: "SKIP";
 - Migration System Never Reverses:
 - - No DELETE or DROP in migration system
 - - Version only increments
-- - Migrations are write-only
-    \*/
+- - Migrations are write-only \*/
 
-export interface RollbackStrategy {
-type: "SNAPSHOT_RESTORE";
-implementation: "DATABASE_BACKUP";
-down_migrations: "NEVER_IMPLEMENTED";
-data_loss_prevention: "SNAPSHOT_COVERAGE";
-}
+export interface RollbackStrategy { type: "SNAPSHOT_RESTORE"; implementation: "DATABASE_BACKUP";
+down_migrations: "NEVER_IMPLEMENTED"; data_loss_prevention: "SNAPSHOT_COVERAGE"; }
 
 /\*\*
 
-- Error Handling During Migration
-  \*/
+- Error Handling During Migration \*/
 
-export interface MigrationError {
-phase: "LOAD" | "PARSE" | "EXECUTE" | "RECORD";
-version: string;
-error: Error;
-stack_trace: string;
-recovery_action: string; // "MANUAL_INTERVENTION" or "RETRY_AFTER_FIX"
-}
+export interface MigrationError { phase: "LOAD" | "PARSE" | "EXECUTE" | "RECORD"; version: string;
+error: Error; stack_trace: string; recovery_action: string; // "MANUAL_INTERVENTION" or
+"RETRY_AFTER_FIX" }
 
 /\*\*
 
 - Logging Requirements
 -
-- All migration operations must be logged in structured format.
-  \*/
+- All migration operations must be logged in structured format. \*/
 
-export interface MigrationLog {
-timestamp: string; // ISO 8601 UTC
-level: "INFO" | "WARN" | "ERROR";
-service: "master-db-migration";
-correlation_id: string; // Unique ID for this migration run
-phase: string; // "load" | "validate" | "execute" | "record"
-migration_version: string;
-migration_name: string;
-status: "started" | "completed" | "failed";
-duration_ms: number;
-tables_affected?: string[];
-error?: {
-code: string;
-message: string;
-};
-}
+export interface MigrationLog { timestamp: string; // ISO 8601 UTC level: "INFO" | "WARN" | "ERROR";
+service: "master-db-migration"; correlation_id: string; // Unique ID for this migration run phase:
+string; // "load" | "validate" | "execute" | "record" migration_version: string; migration_name:
+string; status: "started" | "completed" | "failed"; duration_ms: number; tables_affected?: string[];
+error?: { code: string; message: string; }; }
 
 /\*\*
 
 - Schema Migration Table: \_schema_migrations
 -
 - This table tracks which migrations have been applied.
-- It is automatically created by the migration system.
-  \*/
+- It is automatically created by the migration system. \*/
 
-export interface SchemaMigrationRecord {
-version: string; // e.g., "001"
-description: string; // e.g., "Initial master database schema"
-applied_at: Date; // Server timestamp (UTC) when applied
-execution_time_ms: number; // How long the migration took
-}
+export interface SchemaMigrationRecord { version: string; // e.g., "001" description: string; //
+e.g., "Initial master database schema" applied_at: Date; // Server timestamp (UTC) when applied
+execution_time_ms: number; // How long the migration took }
 
 /\*\*
 
@@ -250,50 +188,25 @@ execution_time_ms: number; // How long the migration took
 - ✓ Version number incremented
 - ✓ Tests pass (migration rollback test)
 - ✓ Backup / snapshot created
-- ✓ Rollback plan documented
-  \*/
+- ✓ Rollback plan documented \*/
 
-export interface PreDeploymentChecklist {
-sql_syntax_validated: boolean;
-constraints_defined: boolean;
-indexes_created: boolean;
-no_hardcoded_data: boolean;
-no_destructive_ddl: boolean;
-no_old_migration_modifications: boolean;
-version_incremented: boolean;
-tests_passed: boolean;
-backup_created: boolean;
-rollback_plan_documented: boolean;
-}
+export interface PreDeploymentChecklist { sql_syntax_validated: boolean; constraints_defined:
+boolean; indexes_created: boolean; no_hardcoded_data: boolean; no_destructive_ddl: boolean;
+no_old_migration_modifications: boolean; version_incremented: boolean; tests_passed: boolean;
+backup_created: boolean; rollback_plan_documented: boolean; }
 
 /\*\*
 
 - Example Migration File
 -
-- File: apps/api/src/db/master/migrations/001_initial_schema.ts
-  \*/
+- File: apps/api/src/db/master/migrations/001_initial_schema.ts \*/
 
-/\*
-import { PostgreSQLClient } from '@zidney/db';
+/\* import { PostgreSQLClient } from '@zidney/db';
 
-export const migration = {
-version: '001',
-description: 'Initial master database schema',
+export const migration = { version: '001', description: 'Initial master database schema',
 
-async up(client: PostgreSQLClient) {
-// Create products table
-await client.query(`       CREATE TABLE IF NOT EXISTS products (
-        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-        name VARCHAR(255) NOT NULL,
-        slug VARCHAR(100) NOT NULL UNIQUE,
-        description TEXT,
-        version VARCHAR(20) NOT NULL,
-        enabled_modules JSONB NOT NULL,
-        created_at TIMESTAMP NOT NULL DEFAULT NOW(),
-        updated_at TIMESTAMP NOT NULL DEFAULT NOW()
-      );
-      CREATE INDEX idx_products_slug ON products(slug);
-    `);
+async up(client: PostgreSQLClient) { // Create products table await
+client.query(`       CREATE TABLE IF NOT EXISTS products (         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),         name VARCHAR(255) NOT NULL,         slug VARCHAR(100) NOT NULL UNIQUE,         description TEXT,         version VARCHAR(20) NOT NULL,         enabled_modules JSONB NOT NULL,         created_at TIMESTAMP NOT NULL DEFAULT NOW(),         updated_at TIMESTAMP NOT NULL DEFAULT NOW()       );       CREATE INDEX idx_products_slug ON products(slug);     `);
 
     // Create licenses table
     await client.query(`
@@ -367,9 +280,7 @@ await client.query(`       CREATE TABLE IF NOT EXISTS products (
       ON CONFLICT (id) DO NOTHING;
     `);
 
-}
-};
-\*/
+} }; \*/
 
 /\*\*
 
@@ -384,14 +295,10 @@ await client.query(`       CREATE TABLE IF NOT EXISTS products (
 - 010 - Tenth migration
 - 100 - Hundredth migration
 -
-- This ensures natural sorting when ordered as strings.
-  \*/
+- This ensures natural sorting when ordered as strings. \*/
 
-export const VersionFormat = {
-pattern: /^\d{3}$/,
-examples: ["001", "002", "010", "100"],
-notes: "Always 3 digits, zero-padded",
-};
+export const VersionFormat = { pattern: /^\d{3}$/, examples: ["001", "002", "010", "100"], notes:
+"Always 3 digits, zero-padded", };
 
 /\*\*
 
@@ -403,5 +310,4 @@ notes: "Always 3 digits, zero-padded",
 - ✓ Failures are atomic (no partial schema)
 - ✓ Errors are logged structured
 - ✓ Rollback is via snapshot restore (safe)
-- ✓ Schema version is always forward-only
-  \*/
+- ✓ Schema version is always forward-only \*/

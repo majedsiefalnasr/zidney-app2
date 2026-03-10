@@ -137,11 +137,7 @@ export async function insertProvisioningTaskIdempotent(
 
 ```typescript
 // API calls insertProvisioningTaskIdempotent()
-const result = await insertProvisioningTaskIdempotent(
-  pool,
-  workspace_id,
-  idempotency_key
-)
+const result = await insertProvisioningTaskIdempotent(pool, workspace_id, idempotency_key);
 
 // Returns task_id for BOTH new and duplicate requests
 // Duplicate request gets same task_id → worker processes once
@@ -256,27 +252,25 @@ COMMENT ON CONSTRAINT no_alter_snapshots_check ON attempts IS
 ```typescript
 // IDEMPOTENCY CHECK WITH INTEGRITY VERIFICATION
 const existingVersionResult = await client.query(
-  `SELECT version, applied_at FROM schema_version LIMIT 1`
-)
+  `SELECT version, applied_at FROM schema_version LIMIT 1`,
+);
 
 if (existingVersionResult.rows.length > 0) {
   // schema_version exists - VERIFY baseline tables exist
-  const existingVersion = existingVersionResult.rows[0]
+  const existingVersion = existingVersionResult.rows[0];
 
   try {
     // CRITICAL: Call verifySchemaIntegrity()
-    await verifySchemaIntegrity(client as any)
+    await verifySchemaIntegrity(client as any);
 
     // Tables exist → Success (full init complete)
-    return { status: 'SUCCESS', version: existingVersion.version }
+    return { status: "SUCCESS", version: existingVersion.version };
   } catch (integrityError) {
     // Tables missing → Partial init detected
-    logger.error(
-      'PARTIAL INITIALIZATION: schema_version exists but tables incomplete'
-    )
+    logger.error("PARTIAL INITIALIZATION: schema_version exists but tables incomplete");
 
     // Return RETRY (not SUCCESS)
-    return { status: 'RETRY', error: 'Partial initialization detected' }
+    return { status: "RETRY", error: "Partial initialization detected" };
   }
 }
 ```
@@ -295,23 +289,23 @@ if (existingVersionResult.rows.length > 0) {
 ```typescript
 export async function verifySchemaIntegrity(client: PoolClient) {
   const requiredTables = [
-    'schema_version', // Must exist
-    'users', // Identity layer
-    'roles', // Authorization
-    'attempts', // Exam runtime
-    'attempt_events', // Audit trail
+    "schema_version", // Must exist
+    "users", // Identity layer
+    "roles", // Authorization
+    "attempts", // Exam runtime
+    "attempt_events", // Audit trail
     // ... 35+ more tables
-  ]
+  ];
 
   for (const table of requiredTables) {
     const result = await client.query(
       `SELECT COUNT(*) FROM information_schema.tables 
        WHERE table_name = $1`,
-      [table]
-    )
+      [table],
+    );
 
     if (result.rows[0].count === 0) {
-      throw new Error(`Table ${table} not found`)
+      throw new Error(`Table ${table} not found`);
     }
   }
 }

@@ -1,14 +1,14 @@
 # Validation Report — API Client Layer
 
-**Step:** 6.5 — Mandatory Validation Gate
-**Timestamp:** 2026-02-28T22:45:00Z
-**Status:** PASS
+**Step:** 6.5 — Mandatory Validation Gate **Timestamp:** 2026-02-28T22:45:00Z **Status:** PASS
 
 ---
 
 ## Summary
 
-All validation checks passed. 90 unit tests pass, TypeScript strict mode clean, ESLint clean with `--max-warnings=0`, full monorepo typecheck clean. No schema changes, no database migrations required.
+All validation checks passed. 90 unit tests pass, TypeScript strict mode clean, ESLint clean with
+`--max-warnings=0`, full monorepo typecheck clean. No schema changes, no database migrations
+required.
 
 ---
 
@@ -16,7 +16,8 @@ All validation checks passed. 90 unit tests pass, TypeScript strict mode clean, 
 
 - `specs/runtime/ui-02-api-client-layer/tasks.md`
 - `specs/runtime/ui-02-api-client-layer/plan.md`
-- Implementation diffs across `packages/api-client/`, `apps/mmc/`, `apps/backoffice/`, `apps/frontoffice/`
+- Implementation diffs across `packages/api-client/`, `apps/mmc/`, `apps/backoffice/`,
+  `apps/frontoffice/`
 
 ---
 
@@ -79,7 +80,8 @@ $ tsc --noEmit
 
 ### Integration / Snapshot / Migration
 
-N/A — This is a frontend HTTP client package with no API routes, no grading logic, and no database schema changes.
+N/A — This is a frontend HTTP client package with no API routes, no grading logic, and no database
+schema changes.
 
 ### Idempotency Validation
 

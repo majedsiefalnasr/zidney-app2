@@ -58,4 +58,5 @@ Cmd + Shift + V
 
 ---
 
-If you want, next we can generate a “Trust Boundary Diagram” that shows what runs in master_db vs tenant_db vs worker vs client.
+If you want, next we can generate a “Trust Boundary Diagram” that shows what runs in master_db vs
+tenant_db vs worker vs client.

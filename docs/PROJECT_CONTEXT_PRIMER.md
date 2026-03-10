@@ -4,9 +4,11 @@
 
 This document is the architectural memory anchor for Zidney.
 
-It compresses the core architectural, governance, and enforcement principles of the platform into a single authoritative context reference.
+It compresses the core architectural, governance, and enforcement principles of the platform into a
+single authoritative context reference.
 
-All AI agents, engineers, and reviewers must treat this document as the high-level alignment source before proposing changes.
+All AI agents, engineers, and reviewers must treat this document as the high-level alignment source
+before proposing changes.
 
 If any major architectural decision changes, this file must be updated in the same pull request.
 
@@ -16,8 +18,7 @@ If any major architectural decision changes, this file must be updated in the sa
 
 Zidney is a stability-first, database-per-tenant, white-label SaaS platform for institutions.
 
-Primary Identity:
-White-label SaaS for institutions (B2B2C) with exams as the architectural core.
+Primary Identity: White-label SaaS for institutions (B2B2C) with exams as the architectural core.
 
 Core Philosophy:
 
@@ -70,8 +71,7 @@ No route may bypass tenant + license validation.
 
 ## License Model
 
-Relationship:
-Product → License → Workspace (Tenant DB)
+Relationship: Product → License → Workspace (Tenant DB)
 
 Rules:
 
@@ -87,9 +87,7 @@ States:
 - ARCHIVED
 - DELETED
 
-SOFT_LOCK blocks access but preserves data.
-ARCHIVED requires snapshot.
-DELETED is terminal.
+SOFT_LOCK blocks access but preserves data. ARCHIVED requires snapshot. DELETED is terminal.
 
 ---
 
@@ -101,8 +99,7 @@ DELETED is terminal.
 - Schema version stored per tenant
 - Product version compatibility enforced in middleware
 
-If schema version incompatible:
-→ Reject request (426 or 503 depending on context)
+If schema version incompatible: → Reject request (426 or 503 depending on context)
 
 Migrations are:
 
@@ -195,8 +192,7 @@ Console logging must be replaced by structured logger abstraction (Pino).
 
 ## Governance Model
 
-Authority Order:
-ADR → Specs → PROJECT_CONTEXT_PRIMER.md → AGENTS.md → Code
+Authority Order: ADR → Specs → PROJECT_CONTEXT_PRIMER.md → AGENTS.md → Code
 
 SpecKit Hard Mode workflow enforced.
 
@@ -271,9 +267,7 @@ Failure to update this file when architecture changes is considered governance d
 
 Zidney is built for institutional trust.
 
-Stability > Features.
-Isolation > Performance shortcuts.
-Determinism > Convenience.
-Governance > Speed.
+Stability > Features. Isolation > Performance shortcuts. Determinism > Convenience. Governance >
+Speed.
 
 All AI-generated or human-written code must align with this foundation.

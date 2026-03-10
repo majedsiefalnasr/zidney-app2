@@ -1,16 +1,19 @@
 # Specify Report — STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
 
-**Step:** 1 — Specify
-**Timestamp:** 2026-03-05T00:00:00Z
-**Status:** COMPLETE
+**Step:** 1 — Specify **Timestamp:** 2026-03-05T00:00:00Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Specification for the Layout System Integration stage has been fully drafted and validated. The spec covers the unified application shell architecture across all three Zidney frontend applications (MMC, Backoffice, Frontoffice). All 23 checklist items in `checklists/requirements.md` passed. No `[NEEDS CLARIFICATION]` markers remain.
+Specification for the Layout System Integration stage has been fully drafted and validated. The spec
+covers the unified application shell architecture across all three Zidney frontend applications
+(MMC, Backoffice, Frontoffice). All 23 checklist items in `checklists/requirements.md` passed. No
+`[NEEDS CLARIFICATION]` markers remain.
 
-The spec defines 50 functional requirements, 6 user stories with Given/When/Then acceptance scenarios, 7 edge cases, 10 measurable success criteria, and 14 explicit non-goals. All requirements are technology-agnostic, testable, and aligned with Zidney Constitution v1.2.0.
+The spec defines 50 functional requirements, 6 user stories with Given/When/Then acceptance
+scenarios, 7 edge cases, 10 measurable success criteria, and 14 explicit non-goals. All requirements
+are technology-agnostic, testable, and aligned with Zidney Constitution v1.2.0.
 
 ---
 
@@ -53,7 +56,8 @@ The spec defines 50 functional requirements, 6 user stories with Given/When/Then
 - All layout components use `@zidney/ui-system` primitives (FR-014)
 - No inline Tailwind duplication when UI system provides the primitive (FR-015)
 - Responsive breakpoints use Tailwind v4 defaults via composable abstraction (FR-016, FR-017)
-- `AppHeader` displays workspace name, user avatar, logout, search placeholder, notification indicator (FR-018–FR-022)
+- `AppHeader` displays workspace name, user avatar, logout, search placeholder, notification
+  indicator (FR-018–FR-022)
 - `AppHeader` must not validate tokens, fetch user, or manage auth state (FR-023–FR-025)
 
 **Per-App Requirements (FR-026–FR-050):**
@@ -66,11 +70,13 @@ The spec defines 50 functional requirements, 6 user stories with Given/When/Then
 
 ## Clarifications Required
 
-None. All ambiguities resolved via reasonable defaults documented in the Assumptions section of `spec.md`.
+None. All ambiguities resolved via reasonable defaults documented in the Assumptions section of
+`spec.md`.
 
 Pre-planning assumptions to confirm:
 
-1. `ui.store` from `ui-06-state-management` exposes `sidebarCollapsed` and `isMobile` with expected action signatures.
+1. `ui.store` from `ui-06-state-management` exposes `sidebarCollapsed` and `isMobile` with expected
+   action signatures.
 2. `auth.store.resolvedPermissions` exposes a typed map matching `NavigationItem.permission` keys.
 3. `AppLayout` is per-app (not a shared base component in `@zidney/ui-system`).
 
@@ -95,7 +101,8 @@ Pre-planning assumptions to confirm:
 
 ## Open Risks
 
-- `ui.store` shape dependency — if `ui-06-state-management` is not yet closed, planning must confirm store interface compatibility before proceeding.
+- `ui.store` shape dependency — if `ui-06-state-management` is not yet closed, planning must confirm
+  store interface compatibility before proceeding.
 - `auth.store.resolvedPermissions` type is assumed but not verified against the auth module spec.
 
 ---

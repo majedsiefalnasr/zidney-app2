@@ -8,7 +8,10 @@
 
 ## Summary
 
-STAGE_21_ROLE_PERMISSION_SYSTEM (Backoffice Role & Permission System) is complete, tested, and ready for production deployment. The full Hard Mode workflow (Pre-Step → Step 7) executed successfully across all 8 steps. All 22 implementation tasks are complete and validated. No deferred scope. Stage is production-ready with zero blocking issues.
+STAGE_21_ROLE_PERMISSION_SYSTEM (Backoffice Role & Permission System) is complete, tested, and ready
+for production deployment. The full Hard Mode workflow (Pre-Step → Step 7) executed successfully
+across all 8 steps. All 22 implementation tasks are complete and validated. No deferred scope. Stage
+is production-ready with zero blocking issues.
 
 ---
 
@@ -41,22 +44,28 @@ STAGE_21_ROLE_PERMISSION_SYSTEM (Backoffice Role & Permission System) is complet
 
 ### Tenant Schema Extensions
 
-- `backoffice-roles.schema.ts` — 7 columns (id, workspace_id, name, description, status, created_by, created_at)
-- `backoffice-role-module-permissions.schema.ts` — Boolean-flags permission model (10 modules × 4 actions)
+- `backoffice-roles.schema.ts` — 7 columns (id, workspace_id, name, description, status, created_by,
+  created_at)
+- `backoffice-role-module-permissions.schema.ts` — Boolean-flags permission model (10 modules × 4
+  actions)
 - `rbac-audit-logs.schema.ts` — Immutable audit trail (co-transactional with mutations)
 - `backoffice-staff-users.schema.ts` — Added role_id (nullable FK) + division_ids (text array)
 
 ### Domain Package (Business Logic)
 
-- `rbac.types.ts` — 10+ TypeScript types (Role, RoleWithPermissions, ModulePermissions, RbacAuditEntry, RbacError, etc.)
-- `rbac.service.ts` — 8 business functions (createRole, getRoles, getRoleById, updateRole, deleteRole, updatePermissions, assignRoleToStaff, evaluatePermission)
+- `rbac.types.ts` — 10+ TypeScript types (Role, RoleWithPermissions, ModulePermissions,
+  RbacAuditEntry, RbacError, etc.)
+- `rbac.service.ts` — 8 business functions (createRole, getRoles, getRoleById, updateRole,
+  deleteRole, updatePermissions, assignRoleToStaff, evaluatePermission)
 - `rbac.audit.ts` — writeRbacAuditLog with co-transactional insert
-- `permission-registry.ts` — SINGLE SOURCE OF TRUTH for permission model (10 modules, 4 actions, validation functions)
+- `permission-registry.ts` — SINGLE SOURCE OF TRUTH for permission model (10 modules, 4 actions,
+  validation functions)
 
 ### API Layer
 
 - **Permission Guard v2:** `backoffice-permission-guard-v2.ts`
-  - 7-step permission evaluation chain (tenant → license → JWT → workspace_id → staff user → role → permissions)
+  - 7-step permission evaluation chain (tenant → license → JWT → workspace_id → staff user → role →
+    permissions)
   - Cache-first strategy: Redis `rbac_v2:` prefix (NOT `rbac:` — STAGE_17 uses that)
   - Cache invalidation: SCAN cursor + DEL (not KEYS — O(N) blocking forbidden)
   - Starts at step 2: workspace_id assertion delegated to chain-level middleware (no duplication)
@@ -88,12 +97,16 @@ STAGE_21_ROLE_PERMISSION_SYSTEM (Backoffice Role & Permission System) is complet
 ### Testing
 
 - **Unit Tests:** 38 passing
-  - `tests/unit/rbac/rbac.service.test.ts` — 18 tests (all service branches, transactions, rollback, concurrency)
-  - `tests/unit/rbac/permission-registry.test.ts` — 20 tests (registry completeness, validation functions)
+  - `tests/unit/rbac/rbac.service.test.ts` — 18 tests (all service branches, transactions, rollback,
+    concurrency)
+  - `tests/unit/rbac/permission-registry.test.ts` — 20 tests (registry completeness, validation
+    functions)
 
 - **Integration Tests:** 24 passing
-  - `tests/integration/backoffice/roles.routes.test.ts` — 18 tests (all 9 endpoints, SC-003, SC-007, SC-008, idempotency)
-  - `tests/integration/rbac/version-compatibility.test.ts` — 6 tests (schema_version 1.4.0 increment, rollback forward-only, compat matrix)
+  - `tests/integration/backoffice/roles.routes.test.ts` — 18 tests (all 9 endpoints, SC-003, SC-007,
+    SC-008, idempotency)
+  - `tests/integration/rbac/version-compatibility.test.ts` — 6 tests (schema_version 1.4.0
+    increment, rollback forward-only, compat matrix)
 
 - **Total STAGE_21 coverage:** 62/62 tests passing
 
@@ -105,8 +118,10 @@ STAGE_21_ROLE_PERMISSION_SYSTEM (Backoffice Role & Permission System) is complet
 - **Division-Scoped RBAC** — Future phase (organizational unit permission scoping)
 - **Audit Log Retention/Archival** — Future stage (long-term audit retention policy)
 - **STAGE_17 Triplet Table Deprecation** — Post-STAGE_21 cleanup (migrate old RBAC v1 data)
-- **Structured Logging Upgrades** — P1 follow-up (migrate console.log to @zidney/logger in migration-registry.ts)
-- **Schema Version Verification Fix** — P1 follow-up (schema_versions vs schema_version table name consistency in verifyTenantSchemaVersion())
+- **Structured Logging Upgrades** — P1 follow-up (migrate console.log to @zidney/logger in
+  migration-registry.ts)
+- **Schema Version Verification Fix** — P1 follow-up (schema_versions vs schema_version table name
+  consistency in verifyTenantSchemaVersion())
 
 ---
 
@@ -166,13 +181,15 @@ STAGE_21_ROLE_PERMISSION_SYSTEM (Backoffice Role & Permission System) is complet
 
 **P1 Follow-ups (Non-Blocking):**
 
-1. Schema version verification (`verifyTenantSchemaVersion()` reads `schema_versions` plural not `schema_version` singular) — must fix before raising enforcement threshold to 1.4.0+
+1. Schema version verification (`verifyTenantSchemaVersion()` reads `schema_versions` plural not
+   `schema_version` singular) — must fix before raising enforcement threshold to 1.4.0+
 2. Structured logging in `migration-registry.ts` — migrate console.log/warn/error to @zidney/logger
 
 **Non-Blocking Pre-Existing Issues:**
 
 - ESLint warnings: `no-explicit-any` in domain package (latent typing improvement)
-- Tests failing: `tests/unit/mmc/auth.service.test.ts` — pre-existing `hono/jwt` module resolution issue (out of STAGE_21 scope)
+- Tests failing: `tests/unit/mmc/auth.service.test.ts` — pre-existing `hono/jwt` module resolution
+  issue (out of STAGE_21 scope)
 - `docker/nginx.conf` volume mount mismatch (pre-existing, out of scope)
 
 ---
@@ -184,7 +201,8 @@ STAGE_21_ROLE_PERMISSION_SYSTEM (Backoffice Role & Permission System) is complet
 - `specs/runtime/021-role-permission-system/spec.md` — complete with clarifications
 - `specs/runtime/021-role-permission-system/plan.md` — architectural roadmap
 - `specs/runtime/021-role-permission-system/tasks.md` — all 22 tasks marked [X]
-- `specs/runtime/021-role-permission-system/reports/` — SPECIFY, CLARIFY, PLAN, TASKS, IMPLEMENT, CLOSURE
+- `specs/runtime/021-role-permission-system/reports/` — SPECIFY, CLARIFY, PLAN, TASKS, IMPLEMENT,
+  CLOSURE
 - `specs/runtime/021-role-permission-system/audits/` — ANALYZE, VALIDATION
 - `specs/runtime/021-role-permission-system/guides/TESTING_GUIDE.md` — ready (generated in Step 7.2)
 - `specs/runtime/021-role-permission-system/PR_SUMMARY.md` — ready (generated in Step 7.6)
@@ -192,8 +210,10 @@ STAGE_21_ROLE_PERMISSION_SYSTEM (Backoffice Role & Permission System) is complet
 ✅ **Branch state:**
 
 - Branch: `021-role-permission-system`
-- Commits: 7 total (Pre-Step + Specify + Clarify + Plan + Tasks + Analyze + Implement + Closure commits)
-- Working tree: Clean (only out-of-scope `.github/agents/copilot-instructions.md` locally modified, not staged)
+- Commits: 7 total (Pre-Step + Specify + Clarify + Plan + Tasks + Analyze + Implement + Closure
+  commits)
+- Working tree: Clean (only out-of-scope `.github/agents/copilot-instructions.md` locally modified,
+  not staged)
 
 ✅ **Test results:**
 
@@ -206,7 +226,8 @@ STAGE_21_ROLE_PERMISSION_SYSTEM (Backoffice Role & Permission System) is complet
 ## Next Step
 
 1. Open PR using `specs/runtime/021-role-permission-system/PR_SUMMARY.md`
-2. Share `specs/runtime/021-role-permission-system/guides/TESTING_GUIDE.md` with QA and reviewing engineers
+2. Share `specs/runtime/021-role-permission-system/guides/TESTING_GUIDE.md` with QA and reviewing
+   engineers
 3. Deploy `021-role-permission-system` branch to staging for pre-production smoke tests
 4. After QA approval, merge to `develop` and trigger production deployment
 5. Post-merge: track P1 follow-ups in separate issues

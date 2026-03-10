@@ -12,7 +12,8 @@
 
 ### A. ✅ No Hidden Cross-Tenant Access
 
-**Assertion**: No JOIN between master DB and tenant DB, no shared connection pool reused across tenants, no global mutable context, no static variables storing workspace.
+**Assertion**: No JOIN between master DB and tenant DB, no shared connection pool reused across
+tenants, no global mutable context, no static variables storing workspace.
 
 **Verification Results**:
 
@@ -31,9 +32,11 @@
 
 ### B. ✅ Schema Version Lock Safety
 
-**Assertion**: LOCK inside transaction, 5s timeout, 30s statement timeout, version updated AFTER migration, lock mode prevents concurrent reads.
+**Assertion**: LOCK inside transaction, 5s timeout, 30s statement timeout, version updated AFTER
+migration, lock mode prevents concurrent reads.
 
-**File**: [apps/worker/src/tasks/apply-migration.ts](apps/worker/src/tasks/apply-migration.ts#L50-L170)
+**File**:
+[apps/worker/src/tasks/apply-migration.ts](apps/worker/src/tasks/apply-migration.ts#L50-L170)
 
 | Step               | Code Line     | Status | Verification                                                                                                              |
 | ------------------ | ------------- | ------ | ------------------------------------------------------------------------------------------------------------------------- |
@@ -55,9 +58,11 @@
 
 ### C. ✅ Snapshot Immutability Edge Case
 
-**Assertion**: Snapshots taken BEFORE attempt INSERT, no background re-generation, no UPDATE allowed to columns, no JSON merge logic.
+**Assertion**: Snapshots taken BEFORE attempt INSERT, no background re-generation, no UPDATE allowed
+to columns, no JSON merge logic.
 
-**File**: [packages/domain-core/src/attempts/attempt-init.ts](packages/domain-core/src/attempts/attempt-init.ts#L50-L100)
+**File**:
+[packages/domain-core/src/attempts/attempt-init.ts](packages/domain-core/src/attempts/attempt-init.ts#L50-L100)
 
 | Check                           | Status | Evidence                                                                   |
 | ------------------------------- | ------ | -------------------------------------------------------------------------- |
@@ -67,25 +72,35 @@
 | No UPDATE to snapshot columns   | ⚠️     | **ISSUE**: No trigger prevents UPDATE on snapshot columns (see note below) |
 | No JSON merge logic             | ✅     | Snapshots immutable via atomic capture                                     |
 
-**🔴 ARCHITECTURAL ISSUE FOUND**: The `attempts` table lacks a trigger to enforce snapshot immutability. While snapshots are captured atomically and intended to be immutable, there is NO database-level constraint preventing `UPDATE attempts SET configuration_snapshot = ...`.
+**🔴 ARCHITECTURAL ISSUE FOUND**: The `attempts` table lacks a trigger to enforce snapshot
+immutability. While snapshots are captured atomically and intended to be immutable, there is NO
+database-level constraint preventing `UPDATE attempts SET configuration_snapshot = ...`.
 
-**Impact**: Violates ADR-0002 (Snapshot Immutability). If future refactoring accidentally introduces an UPDATE to snapshot columns, there is no database-level defense.
+**Impact**: Violates ADR-0002 (Snapshot Immutability). If future refactoring accidentally introduces
+an UPDATE to snapshot columns, there is no database-level defense.
 
-**Current Status**: Application-layer enforcement only. This is fragile and creates maintenance risk.
+**Current Status**: Application-layer enforcement only. This is fragile and creates maintenance
+risk.
 
-**Test Evidence**: [apps/api/tests/integration/snapshot-immutability.integration.test.ts](apps/api/tests/integration/snapshot-immutability.integration.test.ts#L106-L215) attempts UPDATE and verifies it fails at application layer.
+**Test Evidence**:
+[apps/api/tests/integration/snapshot-immutability.integration.test.ts](apps/api/tests/integration/snapshot-immutability.integration.test.ts#L106-L215)
+attempts UPDATE and verifies it fails at application layer.
 
-**Principal Engineer Recommendation**: Add DB-level trigger to enforce immutability BEFORE production deployment. This is not optional long-term.
+**Principal Engineer Recommendation**: Add DB-level trigger to enforce immutability BEFORE
+production deployment. This is not optional long-term.
 
-**Verdict**: ⚠️ **CONDITIONAL PASS** — Snapshot immutability **MUST be enforced at DB layer** before production. Escalate from Phase 02C to pre-deployment hardening task.
+**Verdict**: ⚠️ **CONDITIONAL PASS** — Snapshot immutability **MUST be enforced at DB layer** before
+production. Escalate from Phase 02C to pre-deployment hardening task.
 
 ---
 
 ### D. ✅ Idempotency Edge Case
 
-**Assertion**: Redis failure doesn't allow duplicates, UNIQUE constraint protects, no duplicate task enqueue, no key collision, double-check race protected.
+**Assertion**: Redis failure doesn't allow duplicates, UNIQUE constraint protects, no duplicate task
+enqueue, no key collision, double-check race protected.
 
-**File**: [apps/api/src/modules/schema/idempotency.service.ts](apps/api/src/modules/schema/idempotency.service.ts#L60-L130)
+**File**:
+[apps/api/src/modules/schema/idempotency.service.ts](apps/api/src/modules/schema/idempotency.service.ts#L60-L130)
 
 | Check                                        | Status    | Evidence                                                                                                                                                                                                                                                                                                |
 | -------------------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -99,9 +114,9 @@
 
 ```typescript
 // From idempotency.service.ts line 90
-const cached = await redis.get(cacheKey)
+const cached = await redis.get(cacheKey);
 if (cached) {
-  return cached // Return existing task_id (idempotent replay)
+  return cached; // Return existing task_id (idempotent replay)
 }
 // If cache miss, check DB (true source of truth)
 ```
@@ -114,9 +129,12 @@ if (cached) {
 
 ### E. ✅ Tampering Enforcement
 
-**Assertion**: SHA256 computed from disk, checksum validated, mismatch sets flag, worker blocks retry, DLQ escalates CRITICAL.
+**Assertion**: SHA256 computed from disk, checksum validated, mismatch sets flag, worker blocks
+retry, DLQ escalates CRITICAL.
 
-**File**: [apps/worker/src/tasks/apply-migration.ts](apps/worker/src/tasks/apply-migration.ts#L88-L110) + [apps/worker/src/config/task-configs.ts](apps/worker/src/config/task-configs.ts#L138-L155)
+**File**:
+[apps/worker/src/tasks/apply-migration.ts](apps/worker/src/tasks/apply-migration.ts#L88-L110) +
+[apps/worker/src/config/task-configs.ts](apps/worker/src/config/task-configs.ts#L138-L155)
 
 | Step                      | Code Location            | Status | Verification                                              |
 | ------------------------- | ------------------------ | ------ | --------------------------------------------------------- |
@@ -131,11 +149,8 @@ if (cached) {
 
 ```typescript
 // determineTaskAction() - task-configs.ts:139
-if (
-  result.tampering_detected ||
-  config.retryPolicy.skipRetryOn?.includes('tampering_detected')
-) {
-  return 'DLQ' // NO RETRY escalation
+if (result.tampering_detected || config.retryPolicy.skipRetryOn?.includes("tampering_detected")) {
+  return "DLQ"; // NO RETRY escalation
 }
 ```
 
@@ -165,7 +180,8 @@ if (
 | 9. Idempotency Effectiveness   | ✅     | Counter, cache hit vs miss            |
 | 10. Throughput                 | ✅     | Gauge, requests/sec                   |
 
-**Production Requirement**: Dashboard should NOT be manually recreated. For production-grade platform:
+**Production Requirement**: Dashboard should NOT be manually recreated. For production-grade
+platform:
 
 - ✅ **MUST**: Export Grafana dashboard JSON and version-control it
 - ✅ **MUST**: Automate dashboard creation via Terraform or IaC
@@ -173,13 +189,15 @@ if (
 
 **Risk**: 🟡 **MEDIUM** — Operational risk if dashboard is manual and gets lost.
 
-**Verdict**: 🟡 CONDITIONAL — Export dashboard JSON to repository before production. Action: Add dashboard JSON to version control.
+**Verdict**: 🟡 CONDITIONAL — Export dashboard JSON to repository before production. Action: Add
+dashboard JSON to version control.
 
 ---
 
 ### ✅ Alerts Tested with Simulated Failure
 
-**File**: [packages/domain-core/src/monitoring/provisioning-metrics.ts](packages/domain-core/src/monitoring/provisioning-metrics.ts#L525-L562)
+**File**:
+[packages/domain-core/src/monitoring/provisioning-metrics.ts](packages/domain-core/src/monitoring/provisioning-metrics.ts#L525-L562)
 
 | Alert              | Threshold    | Test Coverage          |
 | ------------------ | ------------ | ---------------------- |
@@ -194,7 +212,8 @@ if (
 
 ### ✅ DLQ Recovery Tested in Staging
 
-**File**: [specs/runtime/002B-tenant-baseline-schema/DLQ_RECOVERY_RUNBOOK.md](DLQ_RECOVERY_RUNBOOK.md)
+**File**:
+[specs/runtime/002B-tenant-baseline-schema/DLQ_RECOVERY_RUNBOOK.md](DLQ_RECOVERY_RUNBOOK.md)
 
 5 documented recovery procedures provided. Recovery status depends on staging deployment.
 
@@ -204,9 +223,11 @@ if (
 
 ### ✅ Rollback Tested Using Actual Restore
 
-**Evidence**: [apps/api/tests/integration/schema-provisioning-flow.integration.test.ts](apps/api/tests/integration/schema-provisioning-flow.integration.test.ts#L400-L450)
+**Evidence**:
+[apps/api/tests/integration/schema-provisioning-flow.integration.test.ts](apps/api/tests/integration/schema-provisioning-flow.integration.test.ts#L400-L450)
 
-Rollback via snapshot-based restore is tested. Database-level transactions ensure rollback semantics.
+Rollback via snapshot-based restore is tested. Database-level transactions ensure rollback
+semantics.
 
 **Verdict**: ✅ PASS
 
@@ -220,10 +241,11 @@ Rollback via snapshot-based restore is tested. Database-level transactions ensur
 
 ```typescript
 // Test assertion: At least 10 rps throughput
-expect(throughput).toBeGreaterThan(10) // Line 103
+expect(throughput).toBeGreaterThan(10); // Line 103
 ```
 
-**Issue**: Tests are defined but have NOT been executed against production-like PostgreSQL instance. This is a **TEST STAGING GATE requirement**.
+**Issue**: Tests are defined but have NOT been executed against production-like PostgreSQL instance.
+This is a **TEST STAGING GATE requirement**.
 
 **Verdict**: ⚠️ **CONDITIONAL** — Staging deployment required to execute load tests against real DB.
 
@@ -239,7 +261,8 @@ expect(throughput).toBeGreaterThan(10) // Line 103
 | api/src/modules/schema/migration-enqueue.ts          | 70     | ⚠️ MINOR | Should use structured logger                    |
 | packages/domain-core/src/logging/master-db-logger.ts | 165    | ✅ OK    | Inside structured logger wrapper                |
 
-**Verdict**: 🟡 **MINOR ISSUE** — Non-critical for merge. Recommend: Use structured logger instead of console.log in production deployment.
+**Verdict**: 🟡 **MINOR ISSUE** — Non-critical for merge. Recommend: Use structured logger instead
+of console.log in production deployment.
 
 ---
 
@@ -250,14 +273,15 @@ expect(throughput).toBeGreaterThan(10) // Line 103
 | packages/domain-core/src/migrations/migrate.ts | 147    | `SET LOCAL lock_timeout = '${lockTimeout}ms'` | ⚠️ Even internal constants should use parameterized queries ($1) for architectural hygiene |
 | tenant-registry.repository.ts                  | 16, 24 | `SELECT *` (template literal)                 | ✅ Parameterized values only                                                               |
 
-**Principal Engineer Recommendation**: SQL string interpolation is architectural debt even for internal constants. Use parameterized queries consistently:
+**Principal Engineer Recommendation**: SQL string interpolation is architectural debt even for
+internal constants. Use parameterized queries consistently:
 
 ```typescript
 // Current (acceptable but weak)
-await client.query(`SET LOCAL lock_timeout = '${lockTimeout}ms'`)
+await client.query(`SET LOCAL lock_timeout = '${lockTimeout}ms'`);
 
 // Better (consistent pattern)
-await client.query(`SET LOCAL lock_timeout = $1`, [`${lockTimeout}ms`])
+await client.query(`SET LOCAL lock_timeout = $1`, [`${lockTimeout}ms`]);
 ```
 
 **Verdict**: 🟡 **MINOR** — Not blocking merge, but flag as technical debt for Phase 02C cleanup.
@@ -310,12 +334,12 @@ await client.query(`SET LOCAL lock_timeout = $1`, [`${lockTimeout}ms`])
 
 ```typescript
 // app.ts line 34: Correlation ID (mandatory first)
-app.use('*', correlationIdMiddleware)
+app.use("*", correlationIdMiddleware);
 
 // app.use statements enforce order:
-app.use('/api/workspaces/*', tenantResolver) // 2nd
-app.use('/api/workspaces/*', licenseMiddleware) // 3rd
-app.use('/api/workspaces/*', schemaVersionMiddleware) // 4th
+app.use("/api/workspaces/*", tenantResolver); // 2nd
+app.use("/api/workspaces/*", licenseMiddleware); // 3rd
+app.use("/api/workspaces/*", schemaVersionMiddleware); // 4th
 ```
 
 **Verdict**: ✅ PASS — Middleware order enforced.
@@ -324,7 +348,8 @@ app.use('/api/workspaces/*', schemaVersionMiddleware) // 4th
 
 ### No Route Bypasses Middleware
 
-**Result**: Grep for `app.post|app.get|app.put|app.delete` returned only health check (correctly unprotected).
+**Result**: Grep for `app.post|app.get|app.put|app.delete` returned only health check (correctly
+unprotected).
 
 **Verdict**: ✅ PASS — No protected routes bypass middleware.
 
@@ -334,7 +359,8 @@ app.use('/api/workspaces/*', schemaVersionMiddleware) // 4th
 
 **Assertion**: "No worker task directly accesses master DB without repository abstraction"
 
-**Result**: Worker tasks use tenant pool (from context). No direct master DB connection in critical path.
+**Result**: Worker tasks use tenant pool (from context). No direct master DB connection in critical
+path.
 
 **Verdict**: ✅ PASS
 
@@ -342,7 +368,8 @@ app.use('/api/workspaces/*', schemaVersionMiddleware) // 4th
 
 ### No Accidental Coupling
 
-**Result**: Attempt engine and migration engine are orthogonal (different task types, different queues).
+**Result**: Attempt engine and migration engine are orthogonal (different task types, different
+queues).
 
 **Verdict**: ✅ PASS
 

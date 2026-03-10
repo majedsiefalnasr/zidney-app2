@@ -8,7 +8,11 @@
 
 ## Summary
 
-Technical plan generated for a new `packages/api-client` package providing a framework-agnostic HTTP client abstraction. Plan includes research (10 items resolved), data model (9 entities), TypeScript contract, and quickstart guide. Two BLOCKED findings from Guardian validation (idempotency header name, credentials mode) were resolved through artifact updates. Both Architecture Checker and API Designer returned VERDICT: PASS.
+Technical plan generated for a new `packages/api-client` package providing a framework-agnostic HTTP
+client abstraction. Plan includes research (10 items resolved), data model (9 entities), TypeScript
+contract, and quickstart guide. Two BLOCKED findings from Guardian validation (idempotency header
+name, credentials mode) were resolved through artifact updates. Both Architecture Checker and API
+Designer returned VERDICT: PASS.
 
 ---
 
@@ -65,7 +69,8 @@ Technical plan generated for a new `packages/api-client` package providing a fra
 
 ## Transaction Boundaries
 
-- N/A — This is a frontend HTTP client package. No direct database writes. Backend owns all transaction boundaries.
+- N/A — This is a frontend HTTP client package. No direct database writes. Backend owns all
+  transaction boundaries.
 
 ---
 

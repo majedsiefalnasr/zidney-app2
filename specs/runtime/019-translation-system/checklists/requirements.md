@@ -1,8 +1,7 @@
 # Specification Quality Checklist: Translation System
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-03-01
-**Feature**: [spec.md](../spec.md)
+**Created**: 2026-03-01 **Feature**: [spec.md](../spec.md)
 
 ---
 
@@ -33,16 +32,21 @@
 
 ## Domain Coverage
 
-- [x] Translation model (entity_type, entity_id, field_name, language_code, translated_value) specified
+- [x] Translation model (entity_type, entity_id, field_name, language_code, translated_value)
+      specified
 - [x] translations table schema with indexes and unique constraint specified
 - [x] Default language strategy (no duplication in translations table) specified
 - [x] Fallback logic (deterministic, API-layer only, not database triggers) specified
-- [x] Language management (add/remove/set default via workspace_settings.language_settings) specified
+- [x] Language management (add/remove/set default via workspace_settings.language_settings)
+      specified
 - [x] Coverage tracking (scoped per entity_type and language, default language excluded) specified
 - [x] Write rules (upsert, validate language, validate entity, transactional, idempotent) specified
-- [x] Audit logging (entity_type, entity_id, language_code, field_name, user_id, timestamp, correlation_id) specified
-- [x] Performance requirements (indexed queries, no N+1, batch loading, pagination, no full-table scans) specified
-- [x] Scale considerations (millions of rows, partitioning strategy as forward-compatible upgrade) specified
+- [x] Audit logging (entity_type, entity_id, language_code, field_name, user_id, timestamp,
+      correlation_id) specified
+- [x] Performance requirements (indexed queries, no N+1, batch loading, pagination, no full-table
+      scans) specified
+- [x] Scale considerations (millions of rows, partitioning strategy as forward-compatible upgrade)
+      specified
 
 ## Constraint Compliance
 
@@ -60,7 +64,12 @@
 ## Notes
 
 - All checklist items pass. No [NEEDS CLARIFICATION] markers were generated in the spec.
-- Assumptions section documents agreed-upon defaults to avoid over-specification (entity_type open-ended registry, translatable field list owned by domain layer, student-facing frontoffice reads only).
-- SC-007 (5 million rows per tenant within 50ms) is an aspirational scale target informed by stage guidance; planning phase should validate with load testing strategy.
-- Partitioning (FR-039) is forward-compatible guidance only — the spec specifies schema compatibility, not implementation timing.
-- Translation versioning (history of past values) is explicitly out of scope per Assumptions section; a future stage may address this if required.
+- Assumptions section documents agreed-upon defaults to avoid over-specification (entity_type
+  open-ended registry, translatable field list owned by domain layer, student-facing frontoffice
+  reads only).
+- SC-007 (5 million rows per tenant within 50ms) is an aspirational scale target informed by stage
+  guidance; planning phase should validate with load testing strategy.
+- Partitioning (FR-039) is forward-compatible guidance only — the spec specifies schema
+  compatibility, not implementation timing.
+- Translation versioning (history of past values) is explicitly out of scope per Assumptions
+  section; a future stage may address this if required.

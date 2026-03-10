@@ -72,7 +72,8 @@
 
 ### Phase 7: Comprehensive Testing (T033-T050)
 
-- ✅ 21 unit tests (resolver, validator, state-machine, limit-enforcer, middleware, handlers, worker)
+- ✅ 21 unit tests (resolver, validator, state-machine, limit-enforcer, middleware, handlers,
+  worker)
 - ✅ 5 integration tests (lifecycle, soft-lock expiry, concurrency, snapshots)
 - ✅ 24 specialized tests (idempotency, rollback, version enforcement, isolation)
 - ✅ **Total: 50 tests** with fixtures and mock framework
@@ -109,7 +110,8 @@
 - ✅ `packages/domain-core/src/license/validator.ts` – Version compatibility
 - ✅ `packages/domain-core/src/license/state-machine.ts` – State transition validation
 - ✅ `packages/domain-core/src/license/limit-enforcer.ts` – User counting
-- ✅ `packages/domain-core/src/license/service.ts` – Core business logic (create, transition, delete)
+- ✅ `packages/domain-core/src/license/service.ts` – Core business logic (create, transition,
+  delete)
 
 ### API Layer (8 files)
 
@@ -236,11 +238,15 @@
 
 ### Key Files to Review
 
-1. **Business Logic**: [packages/domain-core/src/license/service.ts](packages/domain-core/src/license/service.ts)
+1. **Business Logic**:
+   [packages/domain-core/src/license/service.ts](packages/domain-core/src/license/service.ts)
 2. **API Endpoints**: [apps/api/src/routes/license-router.ts](apps/api/src/routes/license-router.ts)
-3. **User Management**: [apps/api/src/routes/backoffice/users.ts](apps/api/src/routes/backoffice/users.ts)
-4. **Transactions**: [apps/api/src/utils/transaction-wrapper.ts](apps/api/src/utils/transaction-wrapper.ts)
-5. **Worker Jobs**: [apps/worker/src/jobs/archive-snapshot.ts](apps/worker/src/jobs/archive-snapshot.ts)
+3. **User Management**:
+   [apps/api/src/routes/backoffice/users.ts](apps/api/src/routes/backoffice/users.ts)
+4. **Transactions**:
+   [apps/api/src/utils/transaction-wrapper.ts](apps/api/src/utils/transaction-wrapper.ts)
+5. **Worker Jobs**:
+   [apps/worker/src/jobs/archive-snapshot.ts](apps/worker/src/jobs/archive-snapshot.ts)
 6. **Tests**: [packages/domain-core/tests/license/](packages/domain-core/tests/license/)
 
 ### Documentation

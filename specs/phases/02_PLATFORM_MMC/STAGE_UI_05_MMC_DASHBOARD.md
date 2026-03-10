@@ -33,8 +33,8 @@ This dashboard provides high-level operational visibility for:
 - Provisioning health
 - System health indicators (read-only)
 
-The dashboard is strictly read-only.
-It aggregates backend-provided metrics and must not perform business calculations.
+The dashboard is strictly read-only. It aggregates backend-provided metrics and must not perform
+business calculations.
 
 ---
 
@@ -64,9 +64,8 @@ The MMC Dashboard must include:
    - Go to Products
    - Go to Affiliates
 
-No analytics forecasting.
-No financial modeling.
-No time-series charts unless backend explicitly provides aggregated endpoint.
+No analytics forecasting. No financial modeling. No time-series charts unless backend explicitly
+provides aggregated endpoint.
 
 ---
 
@@ -245,8 +244,7 @@ Provide:
 - Navigate to Affiliates
 - Navigate to Members (if exists)
 
-Must use router push.
-No hard page reload.
+Must use router push. No hard page reload.
 
 ---
 

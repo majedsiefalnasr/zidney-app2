@@ -49,8 +49,7 @@ TESTING (T046-T070)
 - [x] **Version Enforcement**: YES (schema_version 1.0.0 → 1.1.0)
 - [x] **Middleware Required**: NO
 
-**Description**:
-Create master database migration file. Includes:
+**Description**: Create master database migration file. Includes:
 
 - `licenses` table with all columns, constraints, indexes
 - `archive_snapshots` table with deduplication logic
@@ -80,8 +79,7 @@ Create master database migration file. Includes:
 - [x] **Version Enforcement**: NO
 - [x] **Middleware Required**: NO
 
-**Description**:
-Create license domain-core module structure. Includes:
+**Description**: Create license domain-core module structure. Includes:
 
 - `resolver.ts` - LicenseResolver class (query master_db, cache 5min)
 - `validator.ts` - VersionValidator (schema + product compatibility)
@@ -124,8 +122,7 @@ packages/domain-core/src/license/
 - [x] **Version Enforcement**: NO
 - [x] **Middleware Required**: NO
 
-**Description**:
-Create test fixture and helper setup for license domain package.
+**Description**: Create test fixture and helper setup for license domain package.
 
 **File Structure**:
 
@@ -159,18 +156,14 @@ packages/domain-core/tests/license/
 - [x] **Version Enforcement**: NO
 - [x] **Middleware Required**: NO
 
-**Description**:
-Implement LicenseResolver class. Queries master_db licenses, caches 5 minutes.
+**Description**: Implement LicenseResolver class. Queries master_db licenses, caches 5 minutes.
 
 ```typescript
 class LicenseResolver {
-  async getLicense(workspace_id: UUID): Promise<License | null>
-  async getLicenseBySlug(workspace_slug: string): Promise<License | null>
-  async validateLicenseStatus(workspace_id: UUID): Promise<ValidationResult>
-  async validateVersions(
-    workspace_id: UUID,
-    schema_version: string
-  ): Promise<Boolean>
+  async getLicense(workspace_id: UUID): Promise<License | null>;
+  async getLicenseBySlug(workspace_slug: string): Promise<License | null>;
+  async validateLicenseStatus(workspace_id: UUID): Promise<ValidationResult>;
+  async validateVersions(workspace_id: UUID, schema_version: string): Promise<Boolean>;
 }
 ```
 
@@ -202,19 +195,13 @@ class LicenseResolver {
 - [x] **Version Enforcement**: YES (logic)
 - [x] **Middleware Required**: NO
 
-**Description**:
-Implement VersionValidator class. Validates schema + product version compatibility (per ADR-0008).
+**Description**: Implement VersionValidator class. Validates schema + product version compatibility
+(per ADR-0008).
 
 ```typescript
 class VersionValidator {
-  validateSchemaVersion(
-    tenant_version: string,
-    license_expected: string
-  ): Boolean
-  validateProductVersion(
-    license_version: string,
-    runtime_version: string
-  ): Boolean
+  validateSchemaVersion(tenant_version: string, license_expected: string): Boolean;
+  validateProductVersion(license_version: string, runtime_version: string): Boolean;
 }
 ```
 
@@ -245,13 +232,12 @@ class VersionValidator {
 - [x] **Version Enforcement**: NO
 - [x] **Middleware Required**: NO
 
-**Description**:
-Implement StateTransition class. Validates allowed state transitions.
+**Description**: Implement StateTransition class. Validates allowed state transitions.
 
 ```typescript
 class StateTransition {
-  isValidTransition(from: LicenseStatus, to: LicenseStatus): Boolean
-  getIdempotencyKey(license_id: UUID, target_state: string): string
+  isValidTransition(from: LicenseStatus, to: LicenseStatus): Boolean;
+  getIdempotencyKey(license_id: UUID, target_state: string): string;
 }
 ```
 
@@ -291,15 +277,15 @@ INVALID: ACTIVE→ACTIVE, ACTIVE→DELETED, etc.
 - [x] **Version Enforcement**: NO
 - [x] **Middleware Required**: NO
 
-**Description**:
-Implement StudentStaffCounter class. Counts active users, respects soft-delete flag.
+**Description**: Implement StudentStaffCounter class. Counts active users, respects soft-delete
+flag.
 
 ```typescript
 class StudentStaffCounter {
-  async countStudents(tenant_db: Database, workspace_id: UUID): Promise<number>
-  async countStaff(tenant_db: Database, workspace_id: UUID): Promise<number>
-  canAddStudent(count: number, limit: number | null): Boolean
-  canAddStaff(count: number, limit: number | null): Boolean
+  async countStudents(tenant_db: Database, workspace_id: UUID): Promise<number>;
+  async countStaff(tenant_db: Database, workspace_id: UUID): Promise<number>;
+  canAddStudent(count: number, limit: number | null): Boolean;
+  canAddStaff(count: number, limit: number | null): Boolean;
 }
 ```
 
@@ -336,8 +322,8 @@ SELECT COUNT(*) FROM users
 - [x] **Version Enforcement**: YES (calls validator)
 - [x] **Middleware Required**: N/A (this IS the middleware)
 
-**Description**:
-Implement license enforcement middleware. Executes on every workspace-bound request (3rd in stack).
+**Description**: Implement license enforcement middleware. Executes on every workspace-bound request
+(3rd in stack).
 
 **Logic**:
 
@@ -379,8 +365,8 @@ Implement license enforcement middleware. Executes on every workspace-bound requ
 - [x] **Version Enforcement**: NO
 - [x] **Middleware Required**: NO
 
-**Description**:
-Create error mapping function. Converts license errors to standard response contract.
+**Description**: Create error mapping function. Converts license errors to standard response
+contract.
 
 **Error Code Mapping** (from clarification Q5):
 
@@ -396,15 +382,12 @@ Create error mapping function. Converts license errors to standard response cont
 **Function**:
 
 ```typescript
-function toLicenseError(
-  scenario: string,
-  httpStatus: number
-): StandardErrorResponse {
+function toLicenseError(scenario: string, httpStatus: number): StandardErrorResponse {
   return {
     success: false,
     data: null,
     error: { code: errorCodeMap[scenario], message: messageMap[scenario] },
-  }
+  };
 }
 ```
 
@@ -428,8 +411,7 @@ function toLicenseError(
 - [x] **Version Enforcement**: NO
 - [x] **Middleware Required**: YES (this task IS wiring it)
 
-**Description**:
-Register license middleware on router. Middleware stack (order matters):
+**Description**: Register license middleware on router. Middleware stack (order matters):
 
 1. Correlation ID middleware
 2. Tenant resolver middleware
@@ -444,7 +426,7 @@ const protectedRouter = new Hono()
   .use(correlationIdMiddleware())
   .use(tenantResolverMiddleware())
   .use(licenseEnforcementMiddleware()) // ← ADD THIS
-  .use(schemaVersionMiddleware())
+  .use(schemaVersionMiddleware());
 // All routes added to protectedRouter inherit full stack
 ```
 
@@ -470,16 +452,16 @@ const protectedRouter = new Hono()
 - **Version Enforcement**: NO
 - **Middleware Required**: NO
 
-**Description**:
-Implement createLicense() service function. Validates product, workspace, creates license record.
+**Description**: Implement createLicense() service function. Validates product, workspace, creates
+license record.
 
 ```typescript
 async function createLicense(
   masterDb: Database,
   product_id: UUID,
   workspace_id: UUID,
-  workspace_slug: string
-): Promise<{ license_id: UUID; status: 'ACTIVE'; created_at: Date }>
+  workspace_slug: string,
+): Promise<{ license_id: UUID; status: "ACTIVE"; created_at: Date }>;
 ```
 
 **Logic**:
@@ -519,8 +501,8 @@ COMMIT
 - **Version Enforcement**: NO
 - **Middleware Required**: YES (requires MMC auth role)
 
-**Description**:
-Implement POST /api/mmc/licenses handler. Validates input, calls createLicense, returns license.
+**Description**: Implement POST /api/mmc/licenses handler. Validates input, calls createLicense,
+returns license.
 
 **Route**: `POST /api/mmc/licenses`
 
@@ -583,8 +565,7 @@ Implement POST /api/mmc/licenses handler. Validates input, calls createLicense, 
 - **Version Enforcement**: NO
 - **Middleware Required**: YES (MMC auth)
 
-**Description**:
-Implement GET /api/mmc/licenses/{license_id} handler. Returns full license object.
+**Description**: Implement GET /api/mmc/licenses/{license_id} handler. Returns full license object.
 
 **Route**: `GET /api/mmc/licenses/{license_id}`
 
@@ -616,27 +597,19 @@ Implement GET /api/mmc/licenses/{license_id} handler. Returns full license objec
 - **Version Enforcement**: NO
 - **Middleware Required**: NO
 
-**Description**:
-Implement idempotency key generation and Redis cache wrapper.
+**Description**: Implement idempotency key generation and Redis cache wrapper.
 
 **Functions**:
 
 ```typescript
-function generateIdempotencyKey(
-  license_id: UUID,
-  target_state: string,
-  request_id: string
-): string
-async function checkIdempotency(
-  redis: Redis,
-  key: string
-): Promise<CachedResponse | null>
+function generateIdempotencyKey(license_id: UUID, target_state: string, request_id: string): string;
+async function checkIdempotency(redis: Redis, key: string): Promise<CachedResponse | null>;
 async function storeIdempotency(
   redis: Redis,
   key: string,
   response: any,
-  ttl: 86400
-): Promise<void>
+  ttl: 86400,
+): Promise<void>;
 ```
 
 **Logic**:
@@ -667,8 +640,8 @@ async function storeIdempotency(
 - **Version Enforcement**: NO
 - **Middleware Required**: YES (license middleware; workspace admin auth)
 
-**Description**:
-Implement GET /api/admin/workspace/{workspace_id}/license handler. Returns license (without sensitive fields).
+**Description**: Implement GET /api/admin/workspace/{workspace_id}/license handler. Returns license
+(without sensitive fields).
 
 **Route**: `GET /api/admin/workspace/{workspace_id}/license`
 
@@ -713,16 +686,16 @@ Implement GET /api/admin/workspace/{workspace_id}/license handler. Returns licen
 - **Version Enforcement**: NO
 - **Middleware Required**: NO
 
-**Description**:
-Implement transitionLicenseState() service function. Validates transition, updates license.
+**Description**: Implement transitionLicenseState() service function. Validates transition, updates
+license.
 
 ```typescript
 async function transitionLicenseState(
   masterDb: Database,
   license_id: UUID,
   target_state: LicenseStatus,
-  reason?: string
-): Promise<License>
+  reason?: string,
+): Promise<License>;
 ```
 
 **Logic**:
@@ -766,8 +739,7 @@ COMMIT
 - **Version Enforcement**: NO
 - **Middleware Required**: YES (MMC auth)
 
-**Description**:
-Implement PATCH /api/mmc/licenses/{id}/state handler. Transitions license state.
+**Description**: Implement PATCH /api/mmc/licenses/{id}/state handler. Transitions license state.
 
 **Route**: `PATCH /api/mmc/licenses/{id}/state`
 
@@ -822,15 +794,15 @@ Idempotency-Key: uuid-here
 
 ### T018: Create Soft-Lock Expiry Auto-Transition
 
-- [x] **[US2]** [P] Expiry logic in license middleware `apps/api/src/middleware/license-enforcement.ts`
+- [x] **[US2]** [P] Expiry logic in license middleware
+      `apps/api/src/middleware/license-enforcement.ts`
 - **Layer**: API (middleware)
 - **Transactions**: YES (UPDATE if transitioning)
 - **Idempotency**: YES (SELECT FOR UPDATE prevents dups)
 - **Version Enforcement**: NO
 - **Middleware Required**: N/A (this IS middleware)
 
-**Description**:
-Enhance license middleware to auto-transition SOFT_LOCKED→ARCHIVED on expiry.
+**Description**: Enhance license middleware to auto-transition SOFT_LOCKED→ARCHIVED on expiry.
 
 **Logic** (in middleware after status validation):
 
@@ -873,19 +845,16 @@ IF license.status = 'SOFT_LOCKED' AND NOW() > license.soft_lock_until:
 - **Version Enforcement**: NO
 - **Middleware Required**: NO
 
-**Description**:
-Implement transactional limit check wrapper. Atomic: SELECT FOR UPDATE COUNT + INSERT.
+**Description**: Implement transactional limit check wrapper. Atomic: SELECT FOR UPDATE COUNT +
+INSERT.
 
 ```typescript
 async function enforceStudentLimitTransaction(
   tenantDb: Database,
   workspace_id: UUID,
   studentLimit: number | null,
-  newStudentData: any
-): Promise<
-  | { success: true; user_id: UUID }
-  | { success: false; error_code: 'LIMIT_EXCEEDED' }
->
+  newStudentData: any,
+): Promise<{ success: true; user_id: UUID } | { success: false; error_code: "LIMIT_EXCEEDED" }>;
 ```
 
 **Logic**:
@@ -932,8 +901,8 @@ COMMIT
 - **Version Enforcement**: NO
 - **Middleware Required**: YES (license middleware; backoffice auth)
 
-**Description**:
-Implement POST /api/backoffice/users endpoint. Creates user with transactional limit check.
+**Description**: Implement POST /api/backoffice/users endpoint. Creates user with transactional
+limit check.
 
 **Route**: `POST /api/backoffice/users`
 
@@ -988,8 +957,8 @@ Implement POST /api/backoffice/users endpoint. Creates user with transactional l
 - **Version Enforcement**: NO
 - **Middleware Required**: YES (license middleware)
 
-**Description**:
-Implement PATCH /api/backoffice/users/{user_id}/soft-delete. Marks user as soft-deleted (status='DISABLED').
+**Description**: Implement PATCH /api/backoffice/users/{user_id}/soft-delete. Marks user as
+soft-deleted (status='DISABLED').
 
 **Route**: `PATCH /api/backoffice/users/{user_id}/soft-delete`
 
@@ -1026,8 +995,8 @@ COMMIT
 - **Version Enforcement**: NO
 - **Middleware Required**: NO
 
-**Description**:
-Implement ARCHIVE_SNAPSHOT worker job. Executes pg_dump, uploads snapshot, updates license.
+**Description**: Implement ARCHIVE_SNAPSHOT worker job. Executes pg_dump, uploads snapshot, updates
+license.
 
 **Job Payload**:
 
@@ -1097,20 +1066,20 @@ Implement ARCHIVE_SNAPSHOT worker job. Executes pg_dump, uploads snapshot, updat
 - **Version Enforcement**: NO
 - **Middleware Required**: NO
 
-**Description**:
-Add snapshot job enqueue to license state transition handler (SOFT_LOCKED→ARCHIVED).
+**Description**: Add snapshot job enqueue to license state transition handler
+(SOFT_LOCKED→ARCHIVED).
 
 **Logic** (in transitionLicenseState service):
 
 ```typescript
-if (target_state === 'ARCHIVED') {
+if (target_state === "ARCHIVED") {
   // Within same transaction as UPDATE:
-  await enqueueJob('zidney-archive-jobs', {
-    type: 'ARCHIVE_SNAPSHOT',
+  await enqueueJob("zidney-archive-jobs", {
+    type: "ARCHIVE_SNAPSHOT",
     license_id: license_id,
     workspace_id: license.workspace_id,
     snapshot_timestamp: new Date().toISOString(),
-  })
+  });
 }
 ```
 
@@ -1140,8 +1109,7 @@ if (target_state === 'ARCHIVED') {
 - **Version Enforcement**: NO
 - **Middleware Required**: NO
 
-**Description**:
-Configure 'zidney-archive-jobs' queue. Set concurrency, retry policy, DLQ.
+**Description**: Configure 'zidney-archive-jobs' queue. Set concurrency, retry policy, DLQ.
 
 **Configuration**:
 
@@ -1180,17 +1148,16 @@ Configure 'zidney-archive-jobs' queue. Set concurrency, retry policy, DLQ.
 - **Version Enforcement**: NO
 - **Middleware Required**: NO
 
-**Description**:
-Register ARCHIVE_SNAPSHOT handler with worker processor.
+**Description**: Register ARCHIVE_SNAPSHOT handler with worker processor.
 
 **Logic**:
 
 ```typescript
-worker.on('zidney-archive-jobs', async (job) => {
-  if (job.payload.type === 'ARCHIVE_SNAPSHOT') {
-    await archiveSnapshotJob(job)
+worker.on("zidney-archive-jobs", async (job) => {
+  if (job.payload.type === "ARCHIVE_SNAPSHOT") {
+    await archiveSnapshotJob(job);
   }
-})
+});
 ```
 
 **Acceptance Criteria**:
@@ -1214,8 +1181,7 @@ worker.on('zidney-archive-jobs', async (job) => {
 - **Version Enforcement**: YES
 - **Middleware Required**: N/A (this IS middleware)
 
-**Description**:
-Enhance license middleware to validate schema + product versions.
+**Description**: Enhance license middleware to validate schema + product versions.
 
 **Logic** (after license status check):
 
@@ -1265,8 +1231,7 @@ Enhance license middleware to validate schema + product versions.
 - **Version Enforcement**: NO
 - **Middleware Required**: NO
 
-**Description**:
-Add 426 error mappings for schema + product version mismatches.
+**Description**: Add 426 error mappings for schema + product version mismatches.
 
 **Error Codes**:
 
@@ -1297,15 +1262,15 @@ Add 426 error mappings for schema + product version mismatches.
 - **Version Enforcement**: NO
 - **Middleware Required**: NO
 
-**Description**:
-Implement deleteLicense() service function. Marks license as DELETED; optionally drops tenant DB.
+**Description**: Implement deleteLicense() service function. Marks license as DELETED; optionally
+drops tenant DB.
 
 ```typescript
 async function deleteLicense(
   masterDb: Database,
   license_id: UUID,
-  confirm_deletion: boolean
-): Promise<{ success: true; deleted_at: Date }>
+  confirm_deletion: boolean,
+): Promise<{ success: true; deleted_at: Date }>;
 ```
 
 **Logic**:
@@ -1357,8 +1322,7 @@ COMMIT
 - **Version Enforcement**: NO
 - **Middleware Required**: YES (MMC auth; super-admin only)
 
-**Description**:
-Implement DELETE /api/mmc/licenses/{id} handler. Deletes license with confirmation.
+**Description**: Implement DELETE /api/mmc/licenses/{id} handler. Deletes license with confirmation.
 
 **Route**: `DELETE /api/mmc/licenses/{id}`
 
@@ -1420,8 +1384,8 @@ Implement DELETE /api/mmc/licenses/{id} handler. Deletes license with confirmati
 - **Version Enforcement**: NO
 - **Middleware Required**: NO
 
-**Description**:
-Implement license logging middleware. Emits structured JSON for all license operations.
+**Description**: Implement license logging middleware. Emits structured JSON for all license
+operations.
 
 **Log Fields** (from plan.md):
 
@@ -1483,8 +1447,7 @@ Implement license logging middleware. Emits structured JSON for all license oper
 - **Version Enforcement**: NO
 - **Middleware Required**: NO
 
-**Description**:
-Implement metrics collection for license operations.
+**Description**: Implement metrics collection for license operations.
 
 **Metrics**:
 
@@ -1521,8 +1484,7 @@ Implement metrics collection for license operations.
 - **Version Enforcement**: NO
 - **Middleware Required**: NO
 
-**Description**:
-Create centralized error code registry. All license errors mapped consistently.
+**Description**: Create centralized error code registry. All license errors mapped consistently.
 
 **Error Codes** (from clarification Q5):
 
@@ -1672,8 +1634,7 @@ const LICENSE_ERRORS = {
 - 3 idempotency tests
 - 1 rollback test
 - 1 version enforcement test
-- 1 isolation test
-  Plus edge cases and error scenarios
+- 1 isolation test Plus edge cases and error scenarios
 
 **Acceptance Criteria (all tests)**:
 

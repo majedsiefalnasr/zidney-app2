@@ -334,7 +334,8 @@ Critical Path Timeline: ~13 hours
 | **Aggressive parallelization**      | ~11.25 hours | Maximum overlap, all parallelizable tasks concurrent |
 | **With buffer (15% contingency)**   | ~15 hours    | Recommended + 15% buffer = 13h × 1.15                |
 
-**Recommended approach**: Conservative parallelization (~15 hours) with 15% buffer = **realistic 17.25-hour timeline**
+**Recommended approach**: Conservative parallelization (~15 hours) with 15% buffer = **realistic
+17.25-hour timeline**
 
 ---
 

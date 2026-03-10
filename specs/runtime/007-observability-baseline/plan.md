@@ -1,7 +1,9 @@
 # Implementation Plan: STAGE 07 – Observability Baseline
 
-**Branch**: `007-observability-baseline` | **Date**: 2026-02-18 | **Spec**: [specs/runtime/007-observability-baseline/spec.md](specs/runtime/007-observability-baseline/spec.md)
-**Input**: Production-grade observability baseline for end-to-end request tracing, attempt audit trails, and worker job tracking
+**Branch**: `007-observability-baseline` | **Date**: 2026-02-18 | **Spec**:
+[specs/runtime/007-observability-baseline/spec.md](specs/runtime/007-observability-baseline/spec.md)
+**Input**: Production-grade observability baseline for end-to-end request tracing, attempt audit
+trails, and worker job tracking
 
 **Stage Status**: PLANNING PHASE | **Clarifications Locked**: 5/5 (immutable)
 
@@ -9,16 +11,22 @@
 
 ## Summary
 
-STAGE_07 implements a production-grade observability baseline enabling comprehensive request tracing, attempt audit trails, and worker job tracking. All requests, attempts, and background operations will be traceable end-to-end via correlated IDs and structured JSON logging. The implementation uses:
+STAGE_07 implements a production-grade observability baseline enabling comprehensive request
+tracing, attempt audit trails, and worker job tracking. All requests, attempts, and background
+operations will be traceable end-to-end via correlated IDs and structured JSON logging. The
+implementation uses:
 
-- **Pino** (global singleton logger) for structured logging with automatic request context injection via `pino.child()`
-- **Dual ID tracking** (request_id + job_id) for end-to-end traceability and job lifecycle independence
+- **Pino** (global singleton logger) for structured logging with automatic request context injection
+  via `pino.child()`
+- **Dual ID tracking** (request_id + job_id) for end-to-end traceability and job lifecycle
+  independence
 - **Audit logging** (4 event types) persisted to `audit_log` table (master DB) for compliance
 - **Defense-in-depth redaction** (middleware + call-site) for sensitive data protection
 - **Job payload hashing** (SHA256) to detect configuration mutations during retries
 - **Server-authoritative time** (no client clock trust) for all timeline calculations
 
-This stage executes **after license middleware** (per middleware authority principle) and is orthogonal to existing business logic (side-effect logging only).
+This stage executes **after license middleware** (per middleware authority principle) and is
+orthogonal to existing business logic (side-effect logging only).
 
 ---
 
@@ -123,7 +131,8 @@ Request Received
 Response Sent + Request Timeline Logged
 ```
 
-**No Reordering Allowed**: License middleware must execute before observability context binding (immutable per middleware authority).
+**No Reordering Allowed**: License middleware must execute before observability context binding
+(immutable per middleware authority).
 
 ---
 
@@ -200,7 +209,8 @@ tests/
 
 ### 1. Logger Abstraction (Clarification Q2: Global Singleton with pino.child())
 
-**Decision**: Global Pino singleton initialized once at service startup; request-scoped context via `pino.child()`.
+**Decision**: Global Pino singleton initialized once at service startup; request-scoped context via
+`pino.child()`.
 
 **Rationale**:
 
@@ -214,11 +224,9 @@ tests/
 ```typescript
 // Global singleton (instantiated once per service)
 const logger = pino({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.LOG_LEVEL || "info",
   transport:
-    process.env.NODE_ENV !== 'prod'
-      ? pino.transport({ target: 'pino-pretty' })
-      : undefined,
+    process.env.NODE_ENV !== "prod" ? pino.transport({ target: "pino-pretty" }) : undefined,
   serializers: {
     req: (r) => ({
       method: r.method,
@@ -227,11 +235,11 @@ const logger = pino({
     }),
     res: (r) => ({ statusCode: r.statusCode }),
   },
-})
+});
 
 // Export helper
-export const getLogger = () => logger
-export const getChildLogger = (context: LogContext) => logger.child(context)
+export const getLogger = () => logger;
+export const getChildLogger = (context: LogContext) => logger.child(context);
 ```
 
 **Usage Pattern**:
@@ -243,25 +251,28 @@ const childLogger = getLogger().child({
   workspace_id,
   user_id,
   workspace_slug,
-})
+});
 
 // Child logger automatically injects context into all downstream logs
-childLogger.info({ event: 'request_received', route: '/api/attempt' })
+childLogger.info({ event: "request_received", route: "/api/attempt" });
 // Output: { timestamp, level: 'info', service, environment, request_id, workspace_id, event, route }
 ```
 
-**No Per-Request Instantiation**: Singleton pattern prevents instantiation overhead; `pino.child()` is lightweight (reference only).
+**No Per-Request Instantiation**: Singleton pattern prevents instantiation overhead; `pino.child()`
+is lightweight (reference only).
 
 ---
 
 ### 2. Request ID Propagation (Clarification Q1: Dual ID Strategy for Worker)
 
-**Decision**: Global UUID-v4 per API request; separate job_id generated when job enqueued; both IDs propagate through job payload.
+**Decision**: Global UUID-v4 per API request; separate job_id generated when job enqueued; both IDs
+propagate through job payload.
 
 **Rationale**:
 
 - `request_id`: Links job back to originating API request (end-to-end causality)
-- `job_id`: Tracks independent job lifecycle (retries, dead-letter queue, separate lifecycle from original request)
+- `job_id`: Tracks independent job lifecycle (retries, dead-letter queue, separate lifecycle from
+  original request)
 - Enables full reconstruction: Frontend → API request → Worker job → Attempt finalization
 
 **Flow**:
@@ -284,18 +295,18 @@ Full causality chain reconstructible: query logs by request_id → find worker j
 
 ```typescript
 interface QueuedJob {
-  job_id: string // UUID-v4, unique per job execution
-  request_id: string // Inherited from API request context
-  workspace_id: string // From tenant resolver
-  user_id: string // From authenticated context
-  job_name: string // 'finalize_attempt' | 'generate_certificate' | ...
-  attempt_id?: string // For attempt-related jobs
-  payload: JobPayload // Job-specific data
-  payload_hash: string // SHA256 (Per Q5)
-  retry_count: number // Incremented per retry
-  max_retries: number // Job-specific limit
-  created_at: ISO8601 // Server time
-  processing_started_at?: ISO8601
+  job_id: string; // UUID-v4, unique per job execution
+  request_id: string; // Inherited from API request context
+  workspace_id: string; // From tenant resolver
+  user_id: string; // From authenticated context
+  job_name: string; // 'finalize_attempt' | 'generate_certificate' | ...
+  attempt_id?: string; // For attempt-related jobs
+  payload: JobPayload; // Job-specific data
+  payload_hash: string; // SHA256 (Per Q5)
+  retry_count: number; // Incremented per retry
+  max_retries: number; // Job-specific limit
+  created_at: ISO8601; // Server time
+  processing_started_at?: ISO8601;
 }
 ```
 
@@ -309,24 +320,26 @@ interface QueuedJob {
 
 ### 3. Audit Log Persistence (Clarification Q1: DB Only for Audit Events)
 
-**Decision**: Only audit events persisted to DB; request/attempt/worker logs ephemeral (stdout/stderr for container orchestration).
+**Decision**: Only audit events persisted to DB; request/attempt/worker logs ephemeral
+(stdout/stderr for container orchestration).
 
 **Rationale**:
 
 - Stability-first: Reduced database load
 - Scalability: Log volume decoupled from database throughput
-- Compliance: Audit trail immutable; ephemeral logs handled by log aggregation service (future infrastructure)
+- Compliance: Audit trail immutable; ephemeral logs handled by log aggregation service (future
+  infrastructure)
 - Cost: Offload storage to log aggregation backend (ELK, Datadog, CloudWatch)
 
 **Audit Events (4 Types + Extensions)**:
 
 ```typescript
 enum AuditEventType {
-  LICENSE_CHANGE = 'LICENSE_CHANGE',
-  TENANT_PROVISION = 'TENANT_PROVISION',
-  SCHEMA_UPGRADE = 'SCHEMA_UPGRADE',
-  ROLE_CHANGE = 'ROLE_CHANGE',
-  USER_ROLE_ASSIGNMENT = 'USER_ROLE_ASSIGNMENT',
+  LICENSE_CHANGE = "LICENSE_CHANGE",
+  TENANT_PROVISION = "TENANT_PROVISION",
+  SCHEMA_UPGRADE = "SCHEMA_UPGRADE",
+  ROLE_CHANGE = "ROLE_CHANGE",
+  USER_ROLE_ASSIGNMENT = "USER_ROLE_ASSIGNMENT",
 }
 ```
 
@@ -384,17 +397,17 @@ const redactionPatterns = {
   email: /([a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,})/gi,
   ssn: /\d{3}-\d{2}-\d{4}/g,
   creditCard: /\d{4}[\s-]?\d{4}[\s-]?\d{4}[\s-]?\d{4}/g,
-}
+};
 
 // Redaction applied during serialization
 Pino.serializers.redact = (obj) => {
-  const redactedObj = JSON.parse(JSON.stringify(obj))
+  const redactedObj = JSON.parse(JSON.stringify(obj));
   Object.entries(redactionPatterns).forEach(([key, pattern]) => {
-    const jsonStr = JSON.stringify(redactedObj)
-    redactedObj = JSON.parse(jsonStr.replace(pattern, '[REDACTED]'))
-  })
-  return redactedObj
-}
+    const jsonStr = JSON.stringify(redactedObj);
+    redactedObj = JSON.parse(jsonStr.replace(pattern, "[REDACTED]"));
+  });
+  return redactedObj;
+};
 ```
 
 **Layer 2 – Call-Site Redaction**:
@@ -402,10 +415,10 @@ Pino.serializers.redact = (obj) => {
 ```typescript
 // Developer explicitly redacts at log call site
 logger.info({
-  event: 'user_created',
+  event: "user_created",
   user_email: maskEmail(email), // maskEmail returns ***@***.***
-  password_hash: '[REDACTED]', // Explicit developer responsibility
-})
+  password_hash: "[REDACTED]", // Explicit developer responsibility
+});
 ```
 
 **Redaction Markers**:
@@ -420,7 +433,8 @@ logger.info({
 
 ### 5. Job Payload Integrity (Clarification Q5: SHA256 Hash for Mutation Detection)
 
-**Decision**: Compute SHA256 hash of job payload at enqueue and retry; warn if hash differs during retry (non-blocking).
+**Decision**: Compute SHA256 hash of job payload at enqueue and retry; warn if hash differs during
+retry (non-blocking).
 
 **Rationale**:
 
@@ -474,7 +488,8 @@ await processJob(receivedJob);
 **Logging**:
 
 - Match: `{ event: 'payload_integrity_verified', job_id, request_id }`
-- Mismatch: `{ event: 'config_mutation_detected', original_hash, current_hash, severity: 'warning' }`
+- Mismatch:
+  `{ event: 'config_mutation_detected', original_hash, current_hash, severity: 'warning' }`
 
 ---
 
@@ -632,11 +647,11 @@ await processJob(receivedJob);
 
 ```typescript
 const logger = pino({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.LOG_LEVEL || "info",
   transport:
-    process.env.NODE_ENV === 'production'
+    process.env.NODE_ENV === "production"
       ? undefined // Direct to stdout (container handles routing)
-      : pino.transport({ target: 'pino-pretty', options: { colorize: true } }),
+      : pino.transport({ target: "pino-pretty", options: { colorize: true } }),
   serializers: {
     req: (r) => ({
       method: r.method,
@@ -645,7 +660,7 @@ const logger = pino({
     }),
     res: (r) => ({ statusCode: r.statusCode }),
   },
-})
+});
 ```
 
 ---
@@ -887,7 +902,8 @@ Worker Background Jobs
 4. **License Middleware**: Must execute before observability context binding (immutable)
 5. **Audit Service**: Optional for non-critical paths, mandatory for license/schema events
 
-**No Circular Dependencies**: Logger is pure (no side effects on data models); audit service writes only (no reads from hot path).
+**No Circular Dependencies**: Logger is pure (no side effects on data models); audit service writes
+only (no reads from hot path).
 
 ---
 
@@ -901,13 +917,23 @@ Worker Background Jobs
 4. Implement Redaction middleware (regex patterns)
 5. Write unit tests (logger, request ID, redaction)
 
-**Phase 2: Services + API Integration** 6. Implement Audit service (transactional audit_log writes) 7. Integrate logger into route handlers 8. Integrate audit recording into critical paths (license, tenant provisioning, schema upgrades) 9. Write integration tests (full request lifecycle)
+**Phase 2: Services + API Integration** 6. Implement Audit service (transactional audit_log
+writes) 7. Integrate logger into route handlers 8. Integrate audit recording into critical paths
+(license, tenant provisioning, schema upgrades) 9. Write integration tests (full request lifecycle)
 
-**Phase 3: Worker Integration** 10. Implement Worker logger integration (same Pino pattern) 11. Implement Job envelope structure (with job_id, payload_hash) 12. Implement Job lifecycle logging (received, started, completed, failed) 13. Implement payload hash computation + verification 14. Write worker tests (job tracking, dual ID, payload integrity)
+**Phase 3: Worker Integration** 10. Implement Worker logger integration (same Pino pattern) 11.
+Implement Job envelope structure (with job_id, payload_hash) 12. Implement Job lifecycle logging
+(received, started, completed, failed) 13. Implement payload hash computation + verification 14.
+Write worker tests (job tracking, dual ID, payload integrity)
 
-**Phase 4: Audit Trail & Error Standardization** 15. Implement audit_log table migration (master DB) 16. Implement error response standardization middleware 17. Write snapshot tests (audit log format, error responses)
+**Phase 4: Audit Trail & Error Standardization** 15. Implement audit_log table migration (master
+DB) 16. Implement error response standardization middleware 17. Write snapshot tests (audit log
+format, error responses)
 
-**Phase 5: Testing & Hardening** 18. Write comprehensive integration tests (end-to-end flows) 19. Write concurrency tests (simultaneous requests) 20. Verify middleware order (immutable, per constitution) 21. Verify no cross-tenant log pollution 22. Verify sensitive data redaction effectiveness
+**Phase 5: Testing & Hardening** 18. Write comprehensive integration tests (end-to-end flows) 19.
+Write concurrency tests (simultaneous requests) 20. Verify middleware order (immutable, per
+constitution) 21. Verify no cross-tenant log pollution 22. Verify sensitive data redaction
+effectiveness
 
 ---
 
@@ -972,7 +998,8 @@ Worker Background Jobs
 - [x] Error responses standardized (no stack traces to client)
 - [x] Unit + integration + worker tests >= 50 scenarios
 - [x] Middleware order unchanged (license before observability)
-- [x] All logs include required fields (timestamp, level, service, request_id, workspace_id on workspace-bound requests)
+- [x] All logs include required fields (timestamp, level, service, request_id, workspace_id on
+      workspace-bound requests)
 - [x] No cross-tenant log pollution (workspace_id isolation verified)
 - [x] Constitution compliance validated
 - [x] No architectural drift from ADRs
@@ -1024,8 +1051,8 @@ ios/ or android/
 └── [platform-specific structure: feature modules, UI flows, platform tests]
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: [Document the selected structure and reference the real directories captured
+above]
 
 ## Complexity Tracking
 

@@ -22,16 +22,20 @@
 
 ### Tenant Isolation Verification
 
-**Requirement**: No cross-tenant queries, tenant resolved from middleware context, connection pool per tenant
+**Requirement**: No cross-tenant queries, tenant resolved from middleware context, connection pool
+per tenant
 
 **Evidence**:
 
-- ✅ **File**: [apps/api/src/modules/schema/schema.service.ts](apps/api/src/modules/schema/schema.service.ts#L80-L150)
+- ✅ **File**:
+  [apps/api/src/modules/schema/schema.service.ts](apps/api/src/modules/schema/schema.service.ts#L80-L150)
   - Lines 85-90: Service validates `workspace_id` from tenant context (passed by middleware)
-  - Lines 95-110: Idempotency check calls `checkIdempotency(workspace_id, ...)` - NOT database singleton
+  - Lines 95-110: Idempotency check calls `checkIdempotency(workspace_id, ...)` - NOT database
+    singleton
   - Conclusion: Service receives pool from tenant resolver, no global DB access
 
-- ✅ **File**: [apps/api/src/middleware/tenant-resolver.ts](apps/api/src/middleware/tenant-resolver.ts)
+- ✅ **File**:
+  [apps/api/src/middleware/tenant-resolver.ts](apps/api/src/middleware/tenant-resolver.ts)
   - Pool initialization isolated to resolver: MAX size per workspace = 10 (hardened)
   - Prevents pool exhaustion across tenants
   - Conclusion: Proper isolation enforced
@@ -42,12 +46,14 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/api/src/modules/schema/schema.service.ts](apps/api/src/modules/schema/schema.service.ts#L140-L150)
+- ✅ **File**:
+  [apps/api/src/modules/schema/schema.service.ts](apps/api/src/modules/schema/schema.service.ts#L140-L150)
   - Line 145: `await queue.enqueue('INIT_TENANT_SCHEMA', workerPayload)` - API only enqueues
   - No `client.query()` for schema operations (separation of concerns)
   - Conclusion: Authority properly delegated to worker
 
-- ✅ **File**: [apps/worker/src/tasks/init-tenant-schema.ts](apps/worker/src/tasks/init-tenant-schema.ts)
+- ✅ **File**:
+  [apps/worker/src/tasks/init-tenant-schema.ts](apps/worker/src/tasks/init-tenant-schema.ts)
   - Worker executes DDL (CREATE TABLE, triggers)
   - API does NOT execute DDL
   - Conclusion: Authority separation enforced
@@ -64,7 +70,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/worker/src/tasks/init-tenant-schema.ts](apps/worker/src/tasks/init-tenant-schema.ts#L127-L240)
+- ✅ **File**:
+  [apps/worker/src/tasks/init-tenant-schema.ts](apps/worker/src/tasks/init-tenant-schema.ts#L127-L240)
   - Line 127: `await client.query('BEGIN TRANSACTION ISOLATION LEVEL READ COMMITTED')`
   - Lines 130-200: All schema operations execute within transaction
   - Line 238: `await client.query('COMMIT')` - explicit commit
@@ -77,7 +84,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/worker/src/tasks/init-tenant-schema.ts](apps/worker/src/tasks/init-tenant-schema.ts#L119-L137)
+- ✅ **File**:
+  [apps/worker/src/tasks/init-tenant-schema.ts](apps/worker/src/tasks/init-tenant-schema.ts#L119-L137)
   - Line 119: `SET LOCAL lock_timeout = '5s'` (per-connection isolation)
   - Line 121: `SET LOCAL statement_timeout = '30000'` (milliseconds)
   - Line 137: `LOCK TABLE schema_version IN ACCESS EXCLUSIVE MODE`
@@ -89,7 +97,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/worker/src/tasks/init-tenant-schema.ts](apps/worker/src/tasks/init-tenant-schema.ts#L260-L280)
+- ✅ **File**:
+  [apps/worker/src/tasks/init-tenant-schema.ts](apps/worker/src/tasks/init-tenant-schema.ts#L260-L280)
   - Lines 264-270: Catch block explicitly calls `ROLLBACK` on error
   - Error logged with correlation ID
   - Function returns RETRY status (eligible for exponential backoff)
@@ -107,12 +116,15 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/api/tests/integration/schema-provisioning-flow.integration.test.ts](apps/api/tests/integration/schema-provisioning-flow.integration.test.ts#L477-L507)
-  - Lines 488-495: Cache hit/miss test with `redis.setex(key, 24 * 60 * 60, value)` - 24h TTL confirmed
+- ✅ **File**:
+  [apps/api/tests/integration/schema-provisioning-flow.integration.test.ts](apps/api/tests/integration/schema-provisioning-flow.integration.test.ts#L477-L507)
+  - Lines 488-495: Cache hit/miss test with `redis.setex(key, 24 * 60 * 60, value)` - 24h TTL
+    confirmed
   - Lines 498-503: TTL verification: `redis.ttl()` returns value in range [0, 86400]
   - Conclusion: 24-hour TTL configured and tested
 
-- ✅ **Implementation**: [apps/api/src/modules/schema/schema.service.ts](apps/api/src/modules/schema/schema.service.ts#L95-L110)
+- ✅ **Implementation**:
+  [apps/api/src/modules/schema/schema.service.ts](apps/api/src/modules/schema/schema.service.ts#L95-L110)
   - Lines 105-110: Checks Redis cache first
   - Returns same `task_id` if cache hit (idempotent replay)
   - Conclusion: Redis caching enforced
@@ -123,7 +135,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/api/src/modules/schema/schema.service.ts](apps/api/src/modules/schema/schema.service.ts#L95-L120)
+- ✅ **File**:
+  [apps/api/src/modules/schema/schema.service.ts](apps/api/src/modules/schema/schema.service.ts#L95-L120)
   - Lines 115-120: If Redis fails, falls back to DB check
   - Checks `idempotent_records` table for existing provisioning
   - Same task_id returned even if Redis down
@@ -135,7 +148,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/api/tests/integration/schema-provisioning-flow.integration.test.ts](apps/api/tests/integration/schema-provisioning-flow.integration.test.ts#L168-L204)
+- ✅ **File**:
+  [apps/api/tests/integration/schema-provisioning-flow.integration.test.ts](apps/api/tests/integration/schema-provisioning-flow.integration.test.ts#L168-L204)
   - Lines 175-180: First request returns task_id1
   - Lines 192-200: Second request (same key) returns task_id2
   - Line 202: Assertion: `expect(taskId2).toBe(taskId1)` - idempotent replay enforced
@@ -153,14 +167,16 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/worker/src/config/task-configs.ts](apps/worker/src/config/task-configs.ts#L51-L55)
+- ✅ **File**:
+  [apps/worker/src/config/task-configs.ts](apps/worker/src/config/task-configs.ts#L51-L55)
   - Database-level uniqueness: `UNIQUE(version)` constraint on schema_version table
   - Line 50: `LOCK TABLE schema_version IN ACCESS EXCLUSIVE MODE`
   - Only first worker task acquires lock and completes
   - Subsequent requests hit unique constraint or return cached task_id
   - Conclusion: Schema lock + unique constraint prevent duplicates
 
-- ✅ **File**: [apps/api/tests/integration/schema-provisioning-flow.integration.test.ts](apps/api/tests/integration/schema-provisioning-flow.integration.test.ts#L303-L335)
+- ✅ **File**:
+  [apps/api/tests/integration/schema-provisioning-flow.integration.test.ts](apps/api/tests/integration/schema-provisioning-flow.integration.test.ts#L303-L335)
   - Lines 303-335: Concurrent provisioning test with 5 workspaces
   - All tasks enqueued and processed
   - No duplicate schema initializations
@@ -172,7 +188,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/worker/src/tasks/init-tenant-schema.ts](apps/worker/src/tasks/init-tenant-schema.ts#L119)
+- ✅ **File**:
+  [apps/worker/src/tasks/init-tenant-schema.ts](apps/worker/src/tasks/init-tenant-schema.ts#L119)
   - Line 119: `SET LOCAL lock_timeout = '5s'` - connection-level timeout
   - PostgreSQL kills query if lock not acquired within 5 seconds
   - Task escalated to DLQ with status RETRY (not permanent escalation)
@@ -190,7 +207,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/api/src/middleware/schema-version.ts](apps/api/src/middleware/schema-version.ts)
+- ✅ **File**:
+  [apps/api/src/middleware/schema-version.ts](apps/api/src/middleware/schema-version.ts)
   - Gets actual schema version from tenant DB
   - Gets expected version from license.product_version_compatibility
   - Returns 503 if actual < expected (migration needed)
@@ -216,7 +234,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/worker/src/tasks/init-tenant-schema.ts](apps/worker/src/tasks/init-tenant-schema.ts#L166-L195)
+- ✅ **File**:
+  [apps/worker/src/tasks/init-tenant-schema.ts](apps/worker/src/tasks/init-tenant-schema.ts#L166-L195)
   - Lines 170-172: Read baseline schema from disk
   - Line 174: Calculate SHA256: `const calculatedChecksum = calculateSHA256(schemaFilePath)`
   - Lines 176-183: Compare with payload: `if (calculatedChecksum !== schema_file_checksum)`
@@ -229,12 +248,14 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/worker/src/config/task-configs.ts](apps/worker/src/config/task-configs.ts#L45-L50)
+- ✅ **File**:
+  [apps/worker/src/config/task-configs.ts](apps/worker/src/config/task-configs.ts#L45-L50)
   - Line 48: `skipRetryOn: ['tampering_detected', 'lock_timeout_exceeded']`
   - Tampering_detected → skip all retries, escalate immediately to DLQ
   - Conclusion: Security incident protocol enforced
 
-- ✅ **File**: [apps/worker/src/config/task-configs.ts](apps/worker/src/config/task-configs.ts#L128-L171)
+- ✅ **File**:
+  [apps/worker/src/config/task-configs.ts](apps/worker/src/config/task-configs.ts#L128-L171)
   - Lines 140-144: determineTaskAction() checks tampering_detected flag
   - If true → return 'DLQ' (no retry)
   - Conclusion: No-retry enforcement verified
@@ -245,7 +266,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/worker/src/config/task-configs.ts](apps/worker/src/config/task-configs.ts#L45-L50)
+- ✅ **File**:
+  [apps/worker/src/config/task-configs.ts](apps/worker/src/config/task-configs.ts#L45-L50)
   - Line 48: `skipRetryOn: ['tampering_detected', 'lock_timeout_exceeded']`
   - Lock timeout → immediate DLQ escalation
   - No exponential backoff on suspicious activity
@@ -275,7 +297,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [packages/domain-core/src/monitoring/provisioning-metrics.ts](packages/domain-core/src/monitoring/provisioning-metrics.ts#L25-L190)
+- ✅ **File**:
+  [packages/domain-core/src/monitoring/provisioning-metrics.ts](packages/domain-core/src/monitoring/provisioning-metrics.ts#L25-L190)
   - Line 27: METRIC_ACTIVE_REQUESTS (gauge)
   - Line 37: METRIC_REQUESTS_TOTAL (counter)
   - Line 49: METRIC_API_LATENCY_MS (histogram with buckets)
@@ -296,7 +319,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/worker/src/tasks/init-tenant-schema.ts](apps/worker/src/tasks/init-tenant-schema.ts)
+- ✅ **File**:
+  [apps/worker/src/tasks/init-tenant-schema.ts](apps/worker/src/tasks/init-tenant-schema.ts)
   - Logs use structured format with correlation_id, workspace_id, task_id
   - Timestamps included automatically
   - Service name: 'ProvisioningMetrics' (logger context)
@@ -308,7 +332,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [packages/domain-core/src/monitoring/provisioning-metrics.ts](packages/domain-core/src/monitoring/provisioning-metrics.ts#L400-L500)
+- ✅ **File**:
+  [packages/domain-core/src/monitoring/provisioning-metrics.ts](packages/domain-core/src/monitoring/provisioning-metrics.ts#L400-L500)
   - Dashboard title: "Schema Provisioning - Performance & Health"
   - Panel 1: Provisioning Success Rate (%)
   - Panel 2: API Latency Percentiles (p50, p95, p99)
@@ -328,7 +353,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [packages/domain-core/src/monitoring/provisioning-metrics.ts](packages/domain-core/src/monitoring/provisioning-metrics.ts#L525-L562)
+- ✅ **File**:
+  [packages/domain-core/src/monitoring/provisioning-metrics.ts](packages/domain-core/src/monitoring/provisioning-metrics.ts#L525-L562)
   - Alert 1: HighDLQEscalations (critical, threshold: > 10 in 5m)
   - Alert 2: TamperingDetected (critical, threshold: > 0 in 1m) - SECURITY INCIDENT
   - Alert 3: PoolExhaustion (critical, threshold: > 95% in 2m)
@@ -348,7 +374,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/worker/tests/load-testing.test.ts](apps/worker/tests/load-testing.test.ts#L1-L100)
+- ✅ **File**:
+  [apps/worker/tests/load-testing.test.ts](apps/worker/tests/load-testing.test.ts#L1-L100)
   - Load test 1 (100 concurrent): Throughput target = 10+ requests/sec
   - Load test 2 (pool saturation): Handles 15 concurrent with pool size 10
   - Load test 3 (lock timeout): 5-second timeout enforced
@@ -362,7 +389,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/worker/tests/load-testing.test.ts](apps/worker/tests/load-testing.test.ts#L150-L250)
+- ✅ **File**:
+  [apps/worker/tests/load-testing.test.ts](apps/worker/tests/load-testing.test.ts#L150-L250)
   - Memory test included (allocation, garbage collection, leak detection)
   - Pool prevents unbounded connection growth (max 10 per workspace)
   - Retry backoff (2s, 4s, 8s) prevents thundering herd
@@ -374,7 +402,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/api/src/middleware/tenant-resolver.ts](apps/api/src/middleware/tenant-resolver.ts)
+- ✅ **File**:
+  [apps/api/src/middleware/tenant-resolver.ts](apps/api/src/middleware/tenant-resolver.ts)
   - Pool initialization: `max: 10` per workspace (hardened)
   - Comment: "Hardened limit - prevents pool exhaustion"
   - Pool monitoring: utilization tracked in metrics
@@ -393,7 +422,8 @@
 
 **Evidence**:
 
-- ✅ **File**: [apps/worker/tests/queue-processor.test.ts](apps/worker/tests/queue-processor.test.ts)
+- ✅ **File**:
+  [apps/worker/tests/queue-processor.test.ts](apps/worker/tests/queue-processor.test.ts)
   - 15 unit test scenarios covering:
     - Test 1-3: Retry logic (exponential backoff, delay calculation)
     - Test 4-6: Max retries exceeded (DLQ escalation)
@@ -404,11 +434,13 @@
 
 ### Integration Tests Passing (9 Scenarios)
 
-**Requirement**: End-to-end flow, idempotency, version validation, concurrent requests, failure handling
+**Requirement**: End-to-end flow, idempotency, version validation, concurrent requests, failure
+handling
 
 **Evidence**:
 
-- ✅ **File**: [apps/api/tests/integration/schema-provisioning-flow.integration.test.ts](apps/api/tests/integration/schema-provisioning-flow.integration.test.ts)
+- ✅ **File**:
+  [apps/api/tests/integration/schema-provisioning-flow.integration.test.ts](apps/api/tests/integration/schema-provisioning-flow.integration.test.ts)
   - Scenario 1: End-to-end provisioning (API 202 → Worker SUCCESS)
   - Scenario 2: Idempotency (same key returns same task_id)
   - Scenario 3: Already initialized (409 Conflict)
@@ -456,17 +488,22 @@
 
 **Evidence**:
 
-- ✅ **File**: [specs/runtime/002B-tenant-baseline-schema/DLQ_RECOVERY_RUNBOOK.md](specs/runtime/002B-tenant-baseline-schema/DLQ_RECOVERY_RUNBOOK.md)
+- ✅ **File**:
+  [specs/runtime/002B-tenant-baseline-schema/DLQ_RECOVERY_RUNBOOK.md](specs/runtime/002B-tenant-baseline-schema/DLQ_RECOVERY_RUNBOOK.md)
   - Procedure 1: CRITICAL tampering detected
-    - Steps: 1) Check checksum, 2) Verify schema file, 3) Report security incident, 4) Restore from backup
+    - Steps: 1) Check checksum, 2) Verify schema file, 3) Report security incident, 4) Restore from
+      backup
   - Procedure 2: CRITICAL lock timeout
-    - Steps: 1) Check for stuck migrations, 2) Kill long-running queries, 3) Restart worker, 4) Retry from DLQ
+    - Steps: 1) Check for stuck migrations, 2) Kill long-running queries, 3) Restart worker, 4)
+      Retry from DLQ
   - Procedure 3: WARN max retries exceeded
-    - Steps: 1) Check error logs, 2) Manual validation, 3) Add to manual review queue, 4) Notify admin
+    - Steps: 1) Check error logs, 2) Manual validation, 3) Add to manual review queue, 4) Notify
+      admin
   - Procedure 4: INFO transient failure
     - Steps: 1) Check network/DB connection, 2) Auto-retry with exponential backoff, 3) Monitor DLQ
   - Procedure 5: Manual retry procedure
-    - Steps: 1) Query DLQ table, 2) Verify problem resolved, 3) Call retryFromDLQ API, 4) Monitor task completion
+    - Steps: 1) Query DLQ table, 2) Verify problem resolved, 3) Call retryFromDLQ API, 4) Monitor
+      task completion
   - Conclusion: Operations team has clear recovery playbook
 
 ### Rollback Tested
@@ -505,7 +542,8 @@
 
 ### No Architectural Drift from Phase 3 Spec
 
-**Requirement**: Implementation matches spec.md design (multi-tenancy, authority separation, transaction safety)
+**Requirement**: Implementation matches spec.md design (multi-tenancy, authority separation,
+transaction safety)
 
 **Evidence**:
 
@@ -653,7 +691,8 @@
 
 **Verification Date**: 2026-02-20  
 **Verified By**: AI Assistant (GitHub Copilot)  
-**Verification Method**: Systematic code inspection + integration test review + architecture compliance check  
+**Verification Method**: Systematic code inspection + integration test review + architecture
+compliance check  
 **Confidence Level**: HIGH (all gates independently verified)
 
 **Status**: Ready for merge to `develop` branch

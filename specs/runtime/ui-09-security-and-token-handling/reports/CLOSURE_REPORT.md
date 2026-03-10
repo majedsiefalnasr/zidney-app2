@@ -8,9 +8,15 @@
 
 ## Summary
 
-STAGE_UI_09 is production-ready. All 57 implementation tasks have been completed across three UI applications (mmc, backoffice, frontoffice). The stage implements the frontend security architecture layer: token storage policy, session expiry handling, 401-idempotent error recovery, license status reactions, and XSS mitigation through vue/no-v-html enforcement. All constitutional guarantees remain intact. All 273 tests pass. All validations (ESLint, TypeScript, idempotency, concurrency) passed.
+STAGE_UI_09 is production-ready. All 57 implementation tasks have been completed across three UI
+applications (mmc, backoffice, frontoffice). The stage implements the frontend security architecture
+layer: token storage policy, session expiry handling, 401-idempotent error recovery, license status
+reactions, and XSS mitigation through vue/no-v-html enforcement. All constitutional guarantees
+remain intact. All 273 tests pass. All validations (ESLint, TypeScript, idempotency, concurrency)
+passed.
 
-This stage is the foundation for all future UI feature development that requires authentication or permission-gated access.
+This stage is the foundation for all future UI feature development that requires authentication or
+permission-gated access.
 
 ---
 
@@ -31,16 +37,28 @@ This stage is the foundation for all future UI feature development that requires
 
 ## Scope Delivered
 
-- **License Status Store** (×3 apps): Reactive Pinia stores (`license-status.store.ts`) with `isWorkspaceLocked` and `isUpgradeRequired` ref flags; `setWorkspaceLocked()`, `setUpgradeRequired()`, `clearLicenseStatus()` actions
-- **Token Redaction Utility** (×3 apps): Pure functions `redactSensitiveFields<T>()` and `looksLikeToken()` exported from `core/auth/index.ts` for secure logging
-- **Session Expiry & Idempotent 401 Handling** (×3 apps): `expireSession()` action in auth.store.ts with navigation guard; error interceptor with `_isHandling401` flag guaranteeing single-flight recovery
-- **Error Interceptor** (×3 apps): `core/api/interceptors/error.interceptor.ts` implementing `IErrorInterceptor` interface with `handleAuthFailure()` (401), `handleLicenseError(423|426)`, and factory
-- **API Client Extension** (×3 apps): `core/api/client.ts` extended `createAppApiClient()` to accept `errorInterceptor` and `onLicenseError` callbacks; wired to `onAuthFailure`
-- **Route Guard Redirect Preservation** (×3 apps): `core/router/guards/auth.guard.ts` preserving original route intent via `?redirect=fullPath` query param
-- **main.ts Wiring** (×3 apps): Error interceptor instantiation, license status store initialization, `onSessionExpired` callback registered with API client
-- **XSS Enforcement**: ESLint rule `vue/no-v-html` set to error; all v-html usages eliminated from codebase
+- **License Status Store** (×3 apps): Reactive Pinia stores (`license-status.store.ts`) with
+  `isWorkspaceLocked` and `isUpgradeRequired` ref flags; `setWorkspaceLocked()`,
+  `setUpgradeRequired()`, `clearLicenseStatus()` actions
+- **Token Redaction Utility** (×3 apps): Pure functions `redactSensitiveFields<T>()` and
+  `looksLikeToken()` exported from `core/auth/index.ts` for secure logging
+- **Session Expiry & Idempotent 401 Handling** (×3 apps): `expireSession()` action in auth.store.ts
+  with navigation guard; error interceptor with `_isHandling401` flag guaranteeing single-flight
+  recovery
+- **Error Interceptor** (×3 apps): `core/api/interceptors/error.interceptor.ts` implementing
+  `IErrorInterceptor` interface with `handleAuthFailure()` (401), `handleLicenseError(423|426)`, and
+  factory
+- **API Client Extension** (×3 apps): `core/api/client.ts` extended `createAppApiClient()` to accept
+  `errorInterceptor` and `onLicenseError` callbacks; wired to `onAuthFailure`
+- **Route Guard Redirect Preservation** (×3 apps): `core/router/guards/auth.guard.ts` preserving
+  original route intent via `?redirect=fullPath` query param
+- **main.ts Wiring** (×3 apps): Error interceptor instantiation, license status store
+  initialization, `onSessionExpired` callback registered with API client
+- **XSS Enforcement**: ESLint rule `vue/no-v-html` set to error; all v-html usages eliminated from
+  codebase
 - **Comprehensive Test Coverage**: 31 test files (273 tests) covering all 57 tasks:
-  - Unit tests for token-redact, error-interceptor, auth.guard, auth.store, client, license-status.store
+  - Unit tests for token-redact, error-interceptor, auth.guard, auth.store, client,
+    license-status.store
   - Integration tests for 401-race conditions, session-clear wiring
   - Security audits for token-persistence (jsdom environment) and route-coverage
   - All tests passing; all validations passing
@@ -49,8 +67,11 @@ This stage is the foundation for all future UI feature development that requires
 
 ## Deferred Scope
 
-- **Refresh Token Strategy**: Conditionally disabled by default. If backend provides a refresh endpoint in future, a dedicated stage will implement token refresh with single-flight + request queue enforcement
-- **User-Specific Store Clearance**: `clearUserSpecificStores()` callback stub placed in main.ts; enumeration deferred until feature stages define their own persisted UI state
+- **Refresh Token Strategy**: Conditionally disabled by default. If backend provides a refresh
+  endpoint in future, a dedicated stage will implement token refresh with single-flight + request
+  queue enforcement
+- **User-Specific Store Clearance**: `clearUserSpecificStores()` callback stub placed in main.ts;
+  enumeration deferred until feature stages define their own persisted UI state
 - **Backend Authentication Layer**: out-of-scope; server-side concern
 - **RBAC Enforcement**: out-of-scope; server-side only
 - **2FA / OAuth Flows**: out-of-scope; deferred to future stages
@@ -150,7 +171,8 @@ This stage is the foundation for all future UI feature development that requires
 
 1. Use `PR_SUMMARY.md` (generated concurrently) to open a pull request
 2. Share `guides/TESTING_GUIDE.md` with QA and reviewing engineers
-3. After PR merge, the stage automatically transitions to PRODUCTION READY in all downstream processes
+3. After PR merge, the stage automatically transitions to PRODUCTION READY in all downstream
+   processes
 
 **Branch:** `ui-09-security-and-token-handling`  
 **Base:** `develop`  

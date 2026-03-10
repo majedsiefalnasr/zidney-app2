@@ -1,9 +1,8 @@
 # STAGE_INFRA_07_MODULE_BOUNDARIES
 
-**Branch:** `spec/infra-007-module-boundaries`
-**Phase:** 01_PLATFORM_FOUNDATION
-**Stage File:** `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_07_MODULE_BOUNDARIES.md`
-**Initiated:** 2026-03-08T00:00:00.000Z
+**Branch:** `spec/infra-007-module-boundaries` **Phase:** 01_PLATFORM_FOUNDATION **Stage File:**
+`specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_07_MODULE_BOUNDARIES.md` **Initiated:**
+2026-03-08T00:00:00.000Z
 
 ## Workflow Progress
 

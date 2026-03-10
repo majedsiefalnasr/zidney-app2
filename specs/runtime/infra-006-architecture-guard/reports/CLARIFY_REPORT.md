@@ -8,17 +8,21 @@
 
 ## Summary
 
-Ambiguity scan performed against `spec.md`. No `[NEEDS CLARIFICATION]` markers were found. All specification requirements are deterministic based on the existing codebase state.
+Ambiguity scan performed against `spec.md`. No `[NEEDS CLARIFICATION]` markers were found. All
+specification requirements are deterministic based on the existing codebase state.
 
-All 8 architectural audit dimensions were evaluated. Every dimension is either explicitly addressed in the spec or declared not applicable with rationale. No open questions remain.
+All 8 architectural audit dimensions were evaluated. Every dimension is either explicitly addressed
+in the spec or declared not applicable with rationale. No open questions remain.
 
-A `## Clarifications / Session 2026-03-08` section has been appended to `spec.md` documenting the audit outcome.
+A `## Clarifications / Session 2026-03-08` section has been appended to `spec.md` documenting the
+audit outcome.
 
 ---
 
 ## Inputs Reviewed
 
-- `specs/runtime/infra-006-architecture-guard/spec.md` (including all sections and the appended `## Clarifications`)
+- `specs/runtime/infra-006-architecture-guard/spec.md` (including all sections and the appended
+  `## Clarifications`)
 
 ---
 
@@ -38,7 +42,8 @@ None
 
 ## Spec Updates Applied
 
-- Appended `## Clarifications / Session 2026-03-08` section to `spec.md` documenting all audit dimension findings and confirming readiness for planning
+- Appended `## Clarifications / Session 2026-03-08` section to `spec.md` documenting all audit
+  dimension findings and confirming readiness for planning
 
 ---
 

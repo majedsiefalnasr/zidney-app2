@@ -5,16 +5,19 @@
 **Status**: Draft  
 **Phase**: 01 – Platform Foundation  
 **Stage**: STAGE_02B_TENANT_BASELINE_SCHEMA  
-**Input**: Define mandatory baseline schema for every tenant database with strict normalization, referential integrity, and audit field requirements
+**Input**: Define mandatory baseline schema for every tenant database with strict normalization,
+referential integrity, and audit field requirements
 
 ---
 
 ## Feature Overview
 
-This feature defines the immutable baseline schema that every tenant database MUST start with. It establishes:
+This feature defines the immutable baseline schema that every tenant database MUST start with. It
+establishes:
 
 - Mandatory global table rules (audit fields, ID constraints)
-- Strict table definitions across 10 logical layers (Identity, Academic Structure, Classification, Exam Engine, Runtime, Commercial, Communication, Media, Ads, System)
+- Strict table definitions across 10 logical layers (Identity, Academic Structure, Classification,
+  Exam Engine, Runtime, Commercial, Communication, Media, Ads, System)
 - Referential integrity constraints with explicit ON DELETE policies
 - Schema versioning mechanism
 - Migration authority and enforcement
@@ -67,7 +70,8 @@ This feature defines the immutable baseline schema that every tenant database MU
 - **Master Database**: Contains only MMC global data (workspaces, licenses, audit log exports)
 - **Tenant Databases**: 1 per workspace, contains ALL business tables defined in this spec
 - **Connection Pool**: In-memory map: `{tenant_slug}: {connection_pool_instance}`
-- **No Cross-Tenant Joins**: Enforced at schema level (foreign keys self-referential within database)
+- **No Cross-Tenant Joins**: Enforced at schema level (foreign keys self-referential within
+  database)
 - **No Shared Global IDs**: Each tenant has independent sequence for any non-UUID IDs
 
 ### New Tables Introduced
@@ -75,9 +79,11 @@ This feature defines the immutable baseline schema that every tenant database MU
 **Global Tables (present in every tenant DB)**:
 
 1. **Identity Layer**: users, roles, role_permissions
-2. **Academic Structure**: divisions, departments, groups, hierarchy_nodes, teams, semesters, subjects, lessons
+2. **Academic Structure**: divisions, departments, groups, hierarchy_nodes, teams, semesters,
+   subjects, lessons
 3. **Classification**: categories, category_values, tags, mcq_baskets
-4. **Exam Engine**: mcq_questions, traditional_questions, mcq_exams, traditional_exams, scheduled_exams
+4. **Exam Engine**: mcq_questions, traditional_questions, mcq_exams, traditional_exams,
+   scheduled_exams
 5. **Runtime**: attempts, attempt_answers, attempt_events
 6. **Commercial**: subscriptions, invoices, promocodes, subscription_events
 7. **Communication**: notifications, feedback, system_feedback
@@ -428,13 +434,17 @@ Every database operation MUST log:
 
 **Why P1**: Without baseline schema, no tenant can function. Critical path for SaaS onboarding.
 
-**Independent Test**: Provision single workspace, verify all 38–40 tables exist with correct structure
+**Independent Test**: Provision single workspace, verify all 38–40 tables exist with correct
+structure
 
 **Acceptance Scenarios**:
 
-1. **Given** workspace provisioning initiated, **When** provisioning service executes schema initialization, **Then** all tables created with correct column types, indexes, and constraints
-2. **Given** schema creation in progress, **When** transaction fails (e.g., FS disk full), **Then** entire transaction rolled back and database left empty
-3. **Given** repeated provisioning request (idempotent), **When** called twice with same idempotency key, **Then** returns same response without creating duplicate tables
+1. **Given** workspace provisioning initiated, **When** provisioning service executes schema
+   initialization, **Then** all tables created with correct column types, indexes, and constraints
+2. **Given** schema creation in progress, **When** transaction fails (e.g., FS disk full), **Then**
+   entire transaction rolled back and database left empty
+3. **Given** repeated provisioning request (idempotent), **When** called twice with same idempotency
+   key, **Then** returns same response without creating duplicate tables
 
 ---
 
@@ -446,13 +456,17 @@ Every database operation MUST log:
 
 **Why P1**: Compliance, grading integrity, fraud detection depend on immutable audit trail
 
-**Independent Test**: Submit attempt answers → verify attempt_events appended → verify no events can be modified
+**Independent Test**: Submit attempt answers → verify attempt_events appended → verify no events can
+be modified
 
 **Acceptance Scenarios**:
 
-1. **Given** attempt in progress, **When** student submits answer, **Then** event inserted into attempt_events with server time and event_type
-2. **Given** event in attempt_events, **When** attempted to UPDATE (e.g., change event_type), **Then** trigger fires and UPDATE rejected
-3. **Given** multiple events in sequence, **When** fetched, **Then** submission_order reflects chronological order and is queryable
+1. **Given** attempt in progress, **When** student submits answer, **Then** event inserted into
+   attempt_events with server time and event_type
+2. **Given** event in attempt_events, **When** attempted to UPDATE (e.g., change event_type),
+   **Then** trigger fires and UPDATE rejected
+3. **Given** multiple events in sequence, **When** fetched, **Then** submission_order reflects
+   chronological order and is queryable
 
 ---
 
@@ -464,13 +478,17 @@ Every database operation MUST log:
 
 **Why P1**: Prevents fraud (exam admins changing answers mid-exam), ensures fair grading
 
-**Independent Test**: Create attempt → capture configuration snapshot → modify live exam config → verify attempt uses snapshot
+**Independent Test**: Create attempt → capture configuration snapshot → modify live exam config →
+verify attempt uses snapshot
 
 **Acceptance Scenarios**:
 
-1. **Given** exam created with 5 questions, **When** attempt started, **Then** question_list_snapshot captures all 5 questions in original order
-2. **Given** attempt in progress, **When** admin deletes 1 question from live exam, **Then** attempt still sees original 5 questions from snapshot
-3. **Given** attempt submitted, **When** grading worker processes, **Then** uses configuration_snapshot and grading_config_snapshot (never live exam config)
+1. **Given** exam created with 5 questions, **When** attempt started, **Then**
+   question_list_snapshot captures all 5 questions in original order
+2. **Given** attempt in progress, **When** admin deletes 1 question from live exam, **Then** attempt
+   still sees original 5 questions from snapshot
+3. **Given** attempt submitted, **When** grading worker processes, **Then** uses
+   configuration_snapshot and grading_config_snapshot (never live exam config)
 
 ---
 
@@ -486,9 +504,12 @@ Every database operation MUST log:
 
 **Acceptance Scenarios**:
 
-1. **Given** user with active attempts, **When** DELETE executed on users table, **Then** FK constraint rejects (ON DELETE RESTRICT)
-2. **Given** exam with questions, **When** DELETE executed on exams table, **Then** constraint allows (ON DELETE CASCADE) if question orphaning acceptable
-3. **Given** foreign key created, **When** insert with non-existent parent ID, **Then** constraint rejects
+1. **Given** user with active attempts, **When** DELETE executed on users table, **Then** FK
+   constraint rejects (ON DELETE RESTRICT)
+2. **Given** exam with questions, **When** DELETE executed on exams table, **Then** constraint
+   allows (ON DELETE CASCADE) if question orphaning acceptable
+3. **Given** foreign key created, **When** insert with non-existent parent ID, **Then** constraint
+   rejects
 
 ---
 
@@ -500,13 +521,17 @@ Every database operation MUST log:
 
 **Why P2**: Prevents version mismatch bugs, enables graceful migration
 
-**Independent Test**: Generate mismatch between product version and schema version → verify rejection
+**Independent Test**: Generate mismatch between product version and schema version → verify
+rejection
 
 **Acceptance Scenarios**:
 
-1. **Given** product version 1.2.0, **When** tenant schema version 1.0.0, **Then** automatic migration triggered OR request rejected with 503
-2. **Given** tenant schema version 2.0.0, **When** product version 1.2.0, **Then** request rejected with 409 (schema too new)
-3. **Given** schema version table, **When** queried, **Then** exactly 1 row returned with version, applied_at, checksum
+1. **Given** product version 1.2.0, **When** tenant schema version 1.0.0, **Then** automatic
+   migration triggered OR request rejected with 503
+2. **Given** tenant schema version 2.0.0, **When** product version 1.2.0, **Then** request rejected
+   with 409 (schema too new)
+3. **Given** schema version table, **When** queried, **Then** exactly 1 row returned with version,
+   applied_at, checksum
 
 ---
 
@@ -514,7 +539,8 @@ Every database operation MUST log:
 
 - **Large Data Set**: 1 million rows in mcq_questions → verify indexes prevent table scans
 - **Long-Running Migration**: Migration takes > 5 minutes → verify connection doesn't timeout
-- **Concurrent Attempts**: 100 concurrent users submitting answers simultaneously → verify no race conditions
+- **Concurrent Attempts**: 100 concurrent users submitting answers simultaneously → verify no race
+  conditions
 - **Clock Skew**: Client 5 minutes behind server → verify server time overrides client
 - **Failed Soft Delete**: is_deleted flag corruption → queries must still work (use COALESCE)
 
@@ -524,26 +550,45 @@ Every database operation MUST log:
 
 ### Functional Requirements
 
-- **FR-001**: System MUST create all 38–40 baseline tables on tenant provisioning with identical schema (version 1.0.0)
-- **FR-002**: Each table MUST include mandatory audit fields: id (UUID), created_at, updated_at, created_by, updated_by, is_deleted
+- **FR-001**: System MUST create all 38–40 baseline tables on tenant provisioning with identical
+  schema (version 1.0.0)
+- **FR-002**: Each table MUST include mandatory audit fields: id (UUID), created_at, updated_at,
+  created_by, updated_by, is_deleted
 - **FR-003**: System MUST enforce no composite primary keys; all tables use single UUID primary key
-- **FR-004**: System MUST create indexes on all foreign keys and frequently accessed columns automatically during provisioning
-- **FR-005**: System MUST enforce referential integrity via foreign key constraints with explicit ON DELETE policies (RESTRICT, CASCADE, or SET NULL)
-- **FR-006**: Soft delete MUST be the only delete mechanism for runtime data; hard deletes forbidden via schema trigger
-- **FR-007**: System MUST maintain exactly one schema_version row per tenant database tracking semantic version, applied_at timestamp, and migration checksum
-- **FR-008**: Attempt_events table MUST be append-only; no UPDATEs or DELETEs allowed via immutability trigger
-- **FR-009**: Attempts table MUST snapshot exam configuration, question list, and grading rules at start (immutable JSONB fields)
-- **FR-010**: All timestamps MUST be server-authoritative (PostgreSQL now()); client time never used for audit or deadline validation
-- **FR-011**: Attempt submission MUST be transactional: all attempt_answers inserted + status updated atomically or rolled back entirely
-- **FR-012**: Duplicate attempt submissions MUST be detected via idempotency key and return cached response without re-grading
-- **FR-013**: System MUST validate schema_version compatibility with product_version before allowing workspace operations
-- **FR-014**: Subscriptions table MUST enforce unique active subscription per user via unique constraint
-- **FR-015**: Invoices table MUST use numeric type (not float) for financial calculations; states MUST be explicit ENUM (PENDING, PAID, FAILED, REFUNDED)
-- **FR-016**: All database connections MUST originate from tenant resolver context; no direct DB instantiation allowed
-- **FR-017**: License validation MUST reject workspace requests if license status is SOFT_LOCKED (423) or ARCHIVED (403)
-- **FR-018**: Schema initialization MUST be idempotent: repeated provisioning with same idempotency key returns same response
-- **FR-019**: Migration execution MUST lock schema_version, apply changes transactionally, and rollback entire transaction on any failure
-- **FR-020**: Audit_logs table (if included) MUST be append-only and never included in soft-delete queries
+- **FR-004**: System MUST create indexes on all foreign keys and frequently accessed columns
+  automatically during provisioning
+- **FR-005**: System MUST enforce referential integrity via foreign key constraints with explicit ON
+  DELETE policies (RESTRICT, CASCADE, or SET NULL)
+- **FR-006**: Soft delete MUST be the only delete mechanism for runtime data; hard deletes forbidden
+  via schema trigger
+- **FR-007**: System MUST maintain exactly one schema_version row per tenant database tracking
+  semantic version, applied_at timestamp, and migration checksum
+- **FR-008**: Attempt_events table MUST be append-only; no UPDATEs or DELETEs allowed via
+  immutability trigger
+- **FR-009**: Attempts table MUST snapshot exam configuration, question list, and grading rules at
+  start (immutable JSONB fields)
+- **FR-010**: All timestamps MUST be server-authoritative (PostgreSQL now()); client time never used
+  for audit or deadline validation
+- **FR-011**: Attempt submission MUST be transactional: all attempt_answers inserted + status
+  updated atomically or rolled back entirely
+- **FR-012**: Duplicate attempt submissions MUST be detected via idempotency key and return cached
+  response without re-grading
+- **FR-013**: System MUST validate schema_version compatibility with product_version before allowing
+  workspace operations
+- **FR-014**: Subscriptions table MUST enforce unique active subscription per user via unique
+  constraint
+- **FR-015**: Invoices table MUST use numeric type (not float) for financial calculations; states
+  MUST be explicit ENUM (PENDING, PAID, FAILED, REFUNDED)
+- **FR-016**: All database connections MUST originate from tenant resolver context; no direct DB
+  instantiation allowed
+- **FR-017**: License validation MUST reject workspace requests if license status is SOFT_LOCKED
+  (423) or ARCHIVED (403)
+- **FR-018**: Schema initialization MUST be idempotent: repeated provisioning with same idempotency
+  key returns same response
+- **FR-019**: Migration execution MUST lock schema_version, apply changes transactionally, and
+  rollback entire transaction on any failure
+- **FR-020**: Audit_logs table (if included) MUST be append-only and never included in soft-delete
+  queries
 
 ### Key Entities
 
@@ -564,18 +609,28 @@ Every database operation MUST log:
 
 ### Measurable Outcomes
 
-- **SC-001**: New tenant provisioning completes in < 5 seconds (all 38–40 tables created with indexes)
-- **SC-002**: Referential integrity constraints prevent 100% of orphaned record attempts (any insert/delete violating FK rejected)
-- **SC-003**: Soft delete recovery queries return consistent results (is_deleted filtering works on 100% of queries)
-- **SC-004**: Attempt submission transaction completes atomically: no partial states observable (all-or-nothing semantics)
-- **SC-005**: Schema version validation prevents 100% of product↔schema version mismatches (incompatible requests rejected before execution)
+- **SC-001**: New tenant provisioning completes in < 5 seconds (all 38–40 tables created with
+  indexes)
+- **SC-002**: Referential integrity constraints prevent 100% of orphaned record attempts (any
+  insert/delete violating FK rejected)
+- **SC-003**: Soft delete recovery queries return consistent results (is_deleted filtering works on
+  100% of queries)
+- **SC-004**: Attempt submission transaction completes atomically: no partial states observable
+  (all-or-nothing semantics)
+- **SC-005**: Schema version validation prevents 100% of product↔schema version mismatches
+  (incompatible requests rejected before execution)
 - **SC-006**: Attempt_events immutability enforced 100%: no updates/deletes allowed on event records
-- **SC-007**: Server time enforcement reduces clock-skew bugs to 0 (all timestamps from PostgreSQL now())
+- **SC-007**: Server time enforcement reduces clock-skew bugs to 0 (all timestamps from PostgreSQL
+  now())
 - **SC-008**: Idempotent provisioning and submission prevent 100% of duplicate-execution bugs
-- **SC-009**: Migration rollback restores pre-migration state within 100% accuracy (no partial migrations)
-- **SC-010**: Database-per-tenant isolation verified: cross-tenant queries rejected at connection pool level
-- **SC-011**: License enforcement blocks soft-locked/archived workspaces with < 100ms latency penalty
-- **SC-012**: Audit trail completeness: 100% of user actions traceable via created_by, updated_by, attempt_events
+- **SC-009**: Migration rollback restores pre-migration state within 100% accuracy (no partial
+  migrations)
+- **SC-010**: Database-per-tenant isolation verified: cross-tenant queries rejected at connection
+  pool level
+- **SC-011**: License enforcement blocks soft-locked/archived workspaces with < 100ms latency
+  penalty
+- **SC-012**: Audit trail completeness: 100% of user actions traceable via created_by, updated_by,
+  attempt_events
 
 ---
 
@@ -593,7 +648,8 @@ Every database operation MUST log:
 
 ## Explicit Non-Goals
 
-- **NO**: Tenant-specific schema customization at DB level (all customization via configuration tables)
+- **NO**: Tenant-specific schema customization at DB level (all customization via configuration
+  tables)
 - **NO**: Hard delete mechanism for runtime data (soft delete only)
 - **NO**: Automatic schema rollback across versions (rollback = restore snapshot)
 - **NO**: Multi-tenant row-based isolation (database-per-tenant is exclusive model)
@@ -626,7 +682,8 @@ Every database operation MUST log:
 ### Snapshot Tests Required
 
 - ✅ schema_version table structure: verify exact columns and constraints
-- ✅ Audit fields: verify all business tables have id, created_at, updated_at, created_by, updated_by, is_deleted
+- ✅ Audit fields: verify all business tables have id, created_at, updated_at, created_by,
+  updated_by, is_deleted
 - ✅ Index definitions: verify indexes on all FK columns
 
 ### Isolation Tests Required
@@ -675,7 +732,8 @@ No violations detected. This specification adheres to:
 - ✅ Snapshot attempt integrity (ADR-0002)
 - ✅ Server-authoritative time (ADR-0006)
 - ✅ Version compatibility enforcement (ADR-0007)
-- ✅ Multi-tenancy isolation rules (hard rule: no row-based, no shared tables, no cross-tenant access)
+- ✅ Multi-tenancy isolation rules (hard rule: no row-based, no shared tables, no cross-tenant
+  access)
 - ✅ License enforcement middleware (mandatory)
 - ✅ Transaction boundaries (all-or-nothing semantics)
 - ✅ Idempotency strategy (provisioning, submission)
@@ -701,5 +759,6 @@ No violations detected. This specification adheres to:
 
 - **SC-001**: [Measurable metric, e.g., "Users can complete account creation in under 2 minutes"]
 - **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
-- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
+- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on
+  first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]

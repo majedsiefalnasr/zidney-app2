@@ -58,9 +58,8 @@ Constitutional Compliance:
 - ✅ Rate limiting: Redis-backed with fail-open fallback
 - ✅ Deployment safety: Zero-downtime migration verified
 
-Notes:
-Backend implementation complete. No structural backend modifications allowed.
-Documentation generated. Awaiting pre-closure review before deployment gates.
+Notes: Backend implementation complete. No structural backend modifications allowed. Documentation
+generated. Awaiting pre-closure review before deployment gates.
 
 ---
 
@@ -172,12 +171,12 @@ Modules are **hardcoded enum** (not free-text, not database-configurable):
 
 ```typescript
 enum Module {
-  MCQ = 'MCQ',
-  TRADITIONAL_EXAMS = 'TRADITIONAL_EXAMS',
-  EXERCISES = 'EXERCISES',
-  LIBRARY = 'LIBRARY',
-  LIVES = 'LIVES',
-  FORUM = 'FORUM',
+  MCQ = "MCQ",
+  TRADITIONAL_EXAMS = "TRADITIONAL_EXAMS",
+  EXERCISES = "EXERCISES",
+  LIBRARY = "LIBRARY",
+  LIVES = "LIVES",
+  FORUM = "FORUM",
 }
 ```
 
@@ -343,7 +342,8 @@ GET /products?status=INACTIVE    → INACTIVE products only
 GET /products?status=all         → Both ACTIVE and INACTIVE
 ```
 
-**Rationale:** License creation flows must not accidentally reference inactive products. Default ACTIVE-only prevents operational mistakes.
+**Rationale:** License creation flows must not accidentally reference inactive products. Default
+ACTIVE-only prevents operational mistakes.
 
 **Impact:**
 
@@ -359,16 +359,18 @@ GET /products?status=all         → Both ACTIVE and INACTIVE
 
 ```typescript
 enum Module {
-  MCQ = 'MCQ',
-  TRADITIONAL_EXAMS = 'TRADITIONAL_EXAMS',
-  EXERCISES = 'EXERCISES',
-  LIBRARY = 'LIBRARY',
-  LIVES = 'LIVES',
-  FORUM = 'FORUM',
+  MCQ = "MCQ",
+  TRADITIONAL_EXAMS = "TRADITIONAL_EXAMS",
+  EXERCISES = "EXERCISES",
+  LIBRARY = "LIBRARY",
+  LIVES = "LIVES",
+  FORUM = "FORUM",
 }
 ```
 
-**Rationale:** Modules directly affect provisioning, RBAC, and schema assumptions. Dynamic registration would break deterministic provisioning and constitutional guarantees. Module introduction requires version control and migration binding.
+**Rationale:** Modules directly affect provisioning, RBAC, and schema assumptions. Dynamic
+registration would break deterministic provisioning and constitutional guarantees. Module
+introduction requires version control and migration binding.
 
 **Impact:**
 
@@ -403,12 +405,13 @@ enum Module {
 
 ```typescript
 function getProductName(product: Product, language: string): string {
-  if (language === 'ar' && product.name.ar) return product.name.ar
-  return product.name.en // Always has fallback
+  if (language === "ar" && product.name.ar) return product.name.ar;
+  return product.name.en; // Always has fallback
 }
 ```
 
-**Rationale:** Zidney already supports EN/AR directionality. English as canonical fallback preserves deterministic rendering and prevents null UI states.
+**Rationale:** Zidney already supports EN/AR directionality. English as canonical fallback preserves
+deterministic rendering and prevents null UI states.
 
 **Impact:**
 
@@ -442,7 +445,8 @@ FOREIGN KEY (product_id) REFERENCES products(id) ON DELETE RESTRICT;
 - ❌ Licenses exist → 409 Conflict response
 - ✅ Soft alternative: Change status to INACTIVE (preserves history)
 
-**Rationale:** If licenses exist, product is part of financial/contractual record. Hard delete + 409 conflict keeps lifecycle explicit and clean. Avoids soft delete ambiguity in provisioning.
+**Rationale:** If licenses exist, product is part of financial/contractual record. Hard delete + 409
+conflict keeps lifecycle explicit and clean. Avoids soft delete ambiguity in provisioning.
 
 **Impact:**
 
@@ -496,7 +500,8 @@ Response schema:
 - By date range: from_date, to_date (ISO 8601)
 - Future: By performed_by user_id
 
-**Rationale:** MMC is compliance-facing. Product changes impact licenses, pricing, modules, legal scope. Audit visibility must be queryable for transparency and debugging.
+**Rationale:** MMC is compliance-facing. Product changes impact licenses, pricing, modules, legal
+scope. Audit visibility must be queryable for transparency and debugging.
 
 **Impact:**
 
@@ -541,8 +546,7 @@ Stage complete when:
 
 Products define what institutions purchase.
 
-If product configuration mutates retroactively,
-commercial trust collapses.
+If product configuration mutates retroactively, commercial trust collapses.
 
 Product version isolation must be stable before:
 

@@ -8,7 +8,12 @@
 
 ## Summary
 
-All mandatory validation checks passed for the TRANSLATION_SYSTEM stage (T001–T028). Unit tests cover business logic across 4 test files (72 tests). Integration test files are created for all API flows. No lint errors in translation-scoped files (warnings only). No type errors in the translation implementation. Migration file is syntactically valid. Pre-existing test failure in `tests/unit/mmc/auth.service.test.ts` (ERR_MODULE_NOT_FOUND for `@zidney/api-client`) is unrelated to this stage.
+All mandatory validation checks passed for the TRANSLATION_SYSTEM stage (T001–T028). Unit tests
+cover business logic across 4 test files (72 tests). Integration test files are created for all API
+flows. No lint errors in translation-scoped files (warnings only). No type errors in the translation
+implementation. Migration file is syntactically valid. Pre-existing test failure in
+`tests/unit/mmc/auth.service.test.ts` (ERR_MODULE_NOT_FOUND for `@zidney/api-client`) is unrelated
+to this stage.
 
 ---
 

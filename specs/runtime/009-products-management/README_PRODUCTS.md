@@ -72,11 +72,7 @@ CREATE INDEX idx_products_created_at ON products(created_at DESC);
   },
   "slug": "calculus-assessment",
   "description": "Comprehensive calculus assessment suite",
-  "enabled_modules": [
-    "MODULE_ASSESSMENT",
-    "MODULE_ATTEMPT",
-    "MODULE_REPORTING"
-  ],
+  "enabled_modules": ["MODULE_ASSESSMENT", "MODULE_ATTEMPT", "MODULE_REPORTING"],
   "status": "ACTIVE",
   "current_version": 3,
   "created_at": "2024-01-15T10:30:00Z",
@@ -89,14 +85,16 @@ CREATE INDEX idx_products_created_at ON products(created_at DESC);
 
 - **PRIMARY KEY (id)**: Ensures unique product IDs
 - **UNIQUE (slug)**: Ensures slug uniqueness across all products
-- **NOT NULL (name, slug, enabled_modules, status, current_version, created_at, updated_at)**: Required fields
+- **NOT NULL (name, slug, enabled_modules, status, current_version, created_at, updated_at)**:
+  Required fields
 - **CHECK (status IN ('ACTIVE', 'INACTIVE'))**: _(application-enforced)_ Valid status values
 
 ## Table: product_versions
 
 ### Purpose
 
-Immutable history of all product configuration changes. Append-only table - records are never updated or deleted directly.
+Immutable history of all product configuration changes. Append-only table - records are never
+updated or deleted directly.
 
 ### Schema
 
@@ -202,7 +200,8 @@ Status changes do **NOT** create new versions. They only create audit log entrie
 
 ### Purpose
 
-Complete audit trail of all product changes (creates, updates, status changes, deletes). Append-only for compliance.
+Complete audit trail of all product changes (creates, updates, status changes, deletes). Append-only
+for compliance.
 
 ### Schema
 
@@ -555,14 +554,14 @@ Use connection pool for concurrent access:
 
 ```typescript
 // PgBoss uses internal connection pool
-const pgboss = new PgBoss(connectionConfig)
+const pgboss = new PgBoss(connectionConfig);
 
 // Per-tenant connection pool
 const pool = new Pool({
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
-})
+});
 ```
 
 ## Maintenance
@@ -622,5 +621,7 @@ Migration changes recorded in: `/apps/api/src/db/master/migrations/`
 
 - **API Documentation**: [API_PRODUCTS_MANAGEMENT.md](API_PRODUCTS_MANAGEMENT.md)
 - **Implementation Guide**: [IMPLEMENTATION_PRODUCTS.md](IMPLEMENTATION_PRODUCTS.md)
-- **Deployment Guide**: [DEPLOYMENT_AND_VALIDATION_PRODUCTS.md](DEPLOYMENT_AND_VALIDATION_PRODUCTS.md)
-- **Backup & Recovery**: [/docs/02_DEVOPS_DEPLOYMENT/09_BACKUP_AND_RECOVERY.md](/docs/02_DEVOPS_DEPLOYMENT/09_BACKUP_AND_RECOVERY.md)
+- **Deployment Guide**:
+  [DEPLOYMENT_AND_VALIDATION_PRODUCTS.md](DEPLOYMENT_AND_VALIDATION_PRODUCTS.md)
+- **Backup & Recovery**:
+  [/docs/02_DEVOPS_DEPLOYMENT/09_BACKUP_AND_RECOVERY.md](/docs/02_DEVOPS_DEPLOYMENT/09_BACKUP_AND_RECOVERY.md)

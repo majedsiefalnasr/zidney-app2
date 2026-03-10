@@ -2,7 +2,9 @@
 
 ## Purpose
 
-Platform Control Panel — the administrative SPA for Zidney's Master Management Console (MMC). Provides internal operators with tools to manage workspaces, licenses, products, and global platform configuration.
+Platform Control Panel — the administrative SPA for Zidney's Master Management Console (MMC).
+Provides internal operators with tools to manage workspaces, licenses, products, and global platform
+configuration.
 
 ---
 

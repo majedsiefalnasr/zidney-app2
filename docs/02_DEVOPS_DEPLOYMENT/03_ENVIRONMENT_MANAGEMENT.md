@@ -177,8 +177,7 @@ API must validate on startup:
 - NODE_ENV correctly set
 - Platform schema version defined
 
-If validation fails:
-→ Application must refuse to boot.
+If validation fails: → Application must refuse to boot.
 
 ---
 

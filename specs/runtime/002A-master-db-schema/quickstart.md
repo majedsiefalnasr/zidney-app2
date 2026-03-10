@@ -8,7 +8,9 @@
 
 ## Overview
 
-This quick start guide explains how the master database schema is structured and used in Zidney's architecture. The master database is the **control plane** — it manages products, licenses, and tenant metadata, but never stores runtime data.
+This quick start guide explains how the master database schema is structured and used in Zidney's
+architecture. The master database is the **control plane** — it manages products, licenses, and
+tenant metadata, but never stores runtime data.
 
 ---
 

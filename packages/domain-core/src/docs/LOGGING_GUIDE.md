@@ -8,7 +8,8 @@
 
 ## Overview
 
-All services in `packages/domain-core/src/services/` must use structured logging with the `packages/logger` utility. No `console.log` allowed in production code.
+All services in `packages/domain-core/src/services/` must use structured logging with the
+`packages/logger` utility. No `console.log` allowed in production code.
 
 ---
 
@@ -18,13 +19,13 @@ All services in `packages/domain-core/src/services/` must use structured logging
 
 ```typescript
 // services/member.service.ts
-import { Logger } from '@zidney/logger'
+import { Logger } from "@zidney/logger";
 
 export class MemberService {
-  private logger = new Logger('MemberService')
+  private logger = new Logger("MemberService");
 
   constructor() {
-    this.logger.info('MemberService initialized')
+    this.logger.info("MemberService initialized");
   }
 }
 ```
@@ -203,18 +204,18 @@ Example:
 
 ```typescript
 // ❌ WRONG
-this.logger.info('User login', {
-  email: 'user@example.com',
-  password: 'SecurePass123!',
-  token: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...',
-})
+this.logger.info("User login", {
+  email: "user@example.com",
+  password: "SecurePass123!",
+  token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
+});
 
 // ✅ CORRECT
-this.logger.info('User login', {
-  user_id: 'abc-123',
+this.logger.info("User login", {
+  user_id: "abc-123",
   token_version: 1,
-  correlation_id: 'xyz-789',
-})
+  correlation_id: "xyz-789",
+});
 ```
 
 ---
@@ -232,42 +233,42 @@ this.logger.info('User login', {
 ## Implementation Template
 
 ```typescript
-import { Logger } from '@zidney/logger'
+import { Logger } from "@zidney/logger";
 
 export class MyService {
-  private logger = new Logger('MyService')
-  private context: RequestContext // Injected with correlation_id
+  private logger = new Logger("MyService");
+  private context: RequestContext; // Injected with correlation_id
 
   async myOperation(entityId: UUID, data: any): Promise<Result> {
-    const correlationId = this.context.correlationId
-    const startTime = Date.now()
+    const correlationId = this.context.correlationId;
+    const startTime = Date.now();
 
     try {
-      this.logger.info('Operation started', {
+      this.logger.info("Operation started", {
         correlation_id: correlationId,
-        operation: 'my_operation',
+        operation: "my_operation",
         entity_id: entityId,
-      })
+      });
 
-      const result = await this.doWork(entityId, data)
+      const result = await this.doWork(entityId, data);
 
-      this.logger.info('Operation completed', {
+      this.logger.info("Operation completed", {
         correlation_id: correlationId,
         entity_id: entityId,
         duration_ms: Date.now() - startTime,
-      })
+      });
 
-      return result
+      return result;
     } catch (error) {
-      this.logger.error('Operation failed', {
+      this.logger.error("Operation failed", {
         correlation_id: correlationId,
         entity_id: entityId,
         error_code: error.code,
         error_message: error.message,
         duration_ms: Date.now() - startTime,
-      })
+      });
 
-      throw error
+      throw error;
     }
   }
 }
@@ -280,19 +281,19 @@ export class MyService {
 Verify logs in tests:
 
 ```typescript
-it('should log member creation', async () => {
-  const logSpy = jest.spyOn(logger, 'info')
+it("should log member creation", async () => {
+  const logSpy = jest.spyOn(logger, "info");
 
-  await memberService.createMember('john@example.com', 'john_doe', roleId)
+  await memberService.createMember("john@example.com", "john_doe", roleId);
 
   expect(logSpy).toHaveBeenCalledWith(
-    'Member created successfully',
+    "Member created successfully",
     expect.objectContaining({
       correlation_id: expect.any(String),
       member_id: expect.any(String),
-    })
-  )
-})
+    }),
+  );
+});
 ```
 
 ---

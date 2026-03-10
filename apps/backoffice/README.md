@@ -2,7 +2,9 @@
 
 ## Purpose
 
-Institution Control Panel — the administrative SPA for institution-level operators. Enables institution admins to manage their workspace's exams, question banks, enrollments, reports, and white-label configuration.
+Institution Control Panel — the administrative SPA for institution-level operators. Enables
+institution admins to manage their workspace's exams, question banks, enrollments, reports, and
+white-label configuration.
 
 ---
 
@@ -68,6 +70,7 @@ bun run test:e2e:backoffice
 - **No business logic** — all domain operations are delegated to the API
 - **No DB imports** — does not access database schemas or backend logic
 - **No environment variable access** outside of `import.meta.env.VITE_*`
-- **White-label customization is visual only** — logo, brand tokens, favicon, email branding; no behavioral customization
+- **White-label customization is visual only** — logo, brand tokens, favicon, email branding; no
+  behavioral customization
 - **Tenant-scoped** — all API calls include workspace slug; cross-tenant data access is forbidden
 - **Import rule**: may import from `packages/*`, must not import from other `apps/*`

@@ -12,9 +12,14 @@
 
 ## Executive Summary
 
-The License Management stage specification demonstrates **strong architectural design** with explicit performance constraints defined. However, **implementation is not yet started** (stage status: DRAFT), so this audit validates the **specification against performance requirements**, not production code.
+The License Management stage specification demonstrates **strong architectural design** with
+explicit performance constraints defined. However, **implementation is not yet started** (stage
+status: DRAFT), so this audit validates the **specification against performance requirements**, not
+production code.
 
-**Key Finding:** Stage specification contains comprehensive performance rules, but **lacks explicit SLA targets and measurable concurrency validation criteria**. Specification must be hardened before implementation begins.
+**Key Finding:** Stage specification contains comprehensive performance rules, but **lacks explicit
+SLA targets and measurable concurrency validation criteria**. Specification must be hardened before
+implementation begins.
 
 | Criterion               | Status         | Finding                                                                      |
 | ----------------------- | -------------- | ---------------------------------------------------------------------------- |
@@ -64,7 +69,8 @@ The License Management stage specification demonstrates **strong architectural d
 
 **Finding:** Index strategy is sound. No performance risk identified.
 
-**Concern:** Specification does NOT include index on `(workspace_slug)` UNIQUE constraint itself—PostgreSQL automatically creates this for UNIQUE but should be explicitly documented.
+**Concern:** Specification does NOT include index on `(workspace_slug)` UNIQUE constraint
+itself—PostgreSQL automatically creates this for UNIQUE but should be explicitly documented.
 
 ---
 
@@ -119,7 +125,9 @@ SELECT * FROM licenses WHERE workspace_slug = ?
 
 - ✅ Workspace_slug UNIQUE constraint ensures single row
 - ✅ No full scan
-- ⚠️ **Race condition risk:** Multiple requests for same workspace simultaneously may both detect expired soft-lock and attempt transition. Specification mentions "atomic SELECT FOR UPDATE" but not implemented in spec code examples.
+- ⚠️ **Race condition risk:** Multiple requests for same workspace simultaneously may both detect
+  expired soft-lock and attempt transition. Specification mentions "atomic SELECT FOR UPDATE" but
+  not implemented in spec code examples.
 
 **Recommendation:** Use explicit locking:
 
@@ -143,7 +151,9 @@ SELECT COUNT(*) FROM {tenant_db}.students WHERE organization_id = ?
 
 - ✅ Relies on student table index (organization_id)
 - ✅ COUNT(\*) is O(n) but necessary for limit enforcement
-- ⚠️ **Performance concern:** Under high concurrency (500 concurrent students registering), COUNT queries may pile up and lock limit enforcement table. Recommend: Cache student/staff counts in tenant_registry with 5-minute TTL.
+- ⚠️ **Performance concern:** Under high concurrency (500 concurrent students registering), COUNT
+  queries may pile up and lock limit enforcement table. Recommend: Cache student/staff counts in
+  tenant_registry with 5-minute TTL.
 
 ---
 
@@ -187,7 +197,8 @@ Request 2: ARCHIVE (SOFT_LOCKED → ARCHIVED)
 Both acquire FOR UPDATE...
 ```
 
-**Issue:** Specification doesn't explicitly require SELECT FOR UPDATE in plan report code examples. Implementation MUST add locking.
+**Issue:** Specification doesn't explicitly require SELECT FOR UPDATE in plan report code examples.
+Implementation MUST add locking.
 
 **Recommendation:**
 
@@ -213,7 +224,8 @@ Both acquire FOR UPDATE...
 
 **Finding:** No performance risk. Lazy evaluation is optimal for license engine.
 
-**Verification Needed:** Integration test confirming auto-transition occurs exactly once with concurrent requests.
+**Verification Needed:** Integration test confirming auto-transition occurs exactly once with
+concurrent requests.
 
 ---
 
@@ -234,12 +246,14 @@ Total window: 2 + 4 + 8 + 16 + 32 = 62 seconds
 **Implementation Found:**
 
 ```typescript
-RETRY_BACKOFF_MS: [1000, 2000, 4000, 8000, 16000] // 1s, 2s, 4s, 8s, 16s
+RETRY_BACKOFF_MS: [1000, 2000, 4000, 8000, 16000]; // 1s, 2s, 4s, 8s, 16s
 ```
 
 **Finding:** ✅ Exponential backoff correctly implemented.
 
-**Jitter Status:** ⚠️ Config shows no jitter value. Specification mentions "Add 0-20% random jitter to avoid thundering herd" but not implemented in config. **Action Required:** Add jitter to retry strategy.
+**Jitter Status:** ⚠️ Config shows no jitter value. Specification mentions "Add 0-20% random jitter
+to avoid thundering herd" but not implemented in config. **Action Required:** Add jitter to retry
+strategy.
 
 **Thundering Herd Scenario:**
 
@@ -263,7 +277,7 @@ RETRY_BACKOFF_MS: [1000, 2000, 4000, 8000, 16000] // 1s, 2s, 4s, 8s, 16s
 **Recommendation:** ✅ Add jitter config:
 
 ```typescript
-RETRY_JITTER_PERCENT: 20 // 0-20% random jitter
+RETRY_JITTER_PERCENT: 20; // 0-20% random jitter
 ```
 
 ---
@@ -276,7 +290,8 @@ RETRY_JITTER_PERCENT: 20 // 0-20% random jitter
 - ✅ CSRF token cache: 1h TTL
 - ⚠️ **Product metadata cache: NOT SPECIFIED**
 
-**Expected Cache Usage:** Product metadata (enabled_modules, status, name) loaded on license GET/list
+**Expected Cache Usage:** Product metadata (enabled_modules, status, name) loaded on license
+GET/list
 
 - Current plan: No explicit cache shown
 - Risk: License list endpoint performs 1 product JOIN per row (50 rows = 50 JOINs)
@@ -286,7 +301,7 @@ RETRY_JITTER_PERCENT: 20 // 0-20% random jitter
 
 1. Add product metadata cache layer:
    ```typescript
-   const PRODUCT_CACHE_TTL = 3600 // 1 hour
+   const PRODUCT_CACHE_TTL = 3600; // 1 hour
    ```
 2. Cache key: `product:{product_id}:{version}`
 3. Invalidate on product update
@@ -309,7 +324,7 @@ const DEFAULT_POOL_CONFIG: PoolConfig = {
   max: 20, // 20 connections per tenant database
   idleTimeoutMillis: 900000, // 15 min
   connectionTimeoutMillis: 30000, // 30 sec
-}
+};
 ```
 
 **Analysis:**
@@ -338,7 +353,8 @@ Scenario: 500 concurrent students across 10 workspaces
 Result: ~30 students must queue (300ms+ latency)
 ```
 
-**Recommendation:** Increase to 30-40 connections per tenant if supporting 5000+ concurrent students, OR implement read replicas.
+**Recommendation:** Increase to 30-40 connections per tenant if supporting 5000+ concurrent
+students, OR implement read replicas.
 
 **Master DB Concern:** License queries during peak load (100s of concurrent MMC requests):
 
@@ -366,16 +382,17 @@ WHERE organization_id = ?  -- Scoped query
 Found in code:
 
 ```typescript
-const counter = new StudentStaffCounter()
-currentCount = await counter.countStudents(tenantDb, options.workspace_id)
-const canAdd = counter.canAddStudent(currentCount, limit)
+const counter = new StudentStaffCounter();
+currentCount = await counter.countStudents(tenantDb, options.workspace_id);
+const canAdd = counter.canAddStudent(currentCount, limit);
 ```
 
 **Analysis:**
 
 - ✅ Uses COUNT(\*) with organization_id filter (not full scan)
 - ✅ Scoped to workspace_id (tenant isolation)
-- ⚠️ **No index verification:** Implementation must ensure student table has index on (organization_id)
+- ⚠️ **No index verification:** Implementation must ensure student table has index on
+  (organization_id)
 
 **Performance Impact:**
 
@@ -390,7 +407,8 @@ Scenario: 1000 student registrations in parallel
 **Recommendation:**
 
 - ✅ Ensure index: `CREATE INDEX idx_students_org ON students(organization_id);`
-- ⚠️ Implement caching: Cache student count in tenant_registry with 5-min TTL (refreshed after registration)
+- ⚠️ Implement caching: Cache student count in tenant_registry with 5-min TTL (refreshed after
+  registration)
 - ✅ Add test: 500 concurrent registrations; measure p95 latency (target: <200ms)
 
 ---
@@ -437,7 +455,8 @@ p99 (with retries)      | ~62000ms (62 seconds) if one retry needed
 
 **Finding:** Median provisioning ~8 seconds is well under 30s SLA target. ✅
 
-**Risk:** If provisioning job queue saturates, new provisioning jobs may queue for several seconds before starting. At 100/min throughput with 5-8 second job duration:
+**Risk:** If provisioning job queue saturates, new provisioning jobs may queue for several seconds
+before starting. At 100/min throughput with 5-8 second job duration:
 
 ```
 Concurrency = throughput × duration
@@ -445,7 +464,8 @@ Concurrency = throughput × duration
             ≈ 13 concurrent jobs
 ```
 
-Since worker config shows `MAX_CONCURRENT_JOBS: 1`, this means provisioning queue will grow to 13 jobs deep at steady state, resulting in:
+Since worker config shows `MAX_CONCURRENT_JOBS: 1`, this means provisioning queue will grow to 13
+jobs deep at steady state, resulting in:
 
 ```
 Queuing latency = queue_depth × job_duration
@@ -454,7 +474,8 @@ Queuing latency = queue_depth × job_duration
                 = p95 latency ~110 seconds
 ```
 
-**⚠️ CRITICAL FINDING:** With sequential job processing (MAX_CONCURRENT_JOBS: 1), provisioning SLA is violated under load.
+**⚠️ CRITICAL FINDING:** With sequential job processing (MAX_CONCURRENT_JOBS: 1), provisioning SLA
+is violated under load.
 
 **Recommendation:**
 
@@ -473,8 +494,8 @@ Queuing latency = queue_depth × job_duration
 **Current Configuration:**
 
 ```typescript
-MAX_CONCURRENT_JOBS: 1 // Sequential processing
-JOB_TIMEOUT_MS: 300000 // 5 minutes per job
+MAX_CONCURRENT_JOBS: 1; // Sequential processing
+JOB_TIMEOUT_MS: 300000; // 5 minutes per job
 ```
 
 **Throughput Calculation:**
@@ -710,7 +731,8 @@ wrk -t4 -c10 -d10s --script=idempotent-provision.lua http://worker.local/handle
 
 **Files to Update:**
 
-- `/specs/phases/02_PLATFORM_MMC/STAGE_10_LICENSES.md` – Add SLA targets, formalize Select FOR UPDATE
+- `/specs/phases/02_PLATFORM_MMC/STAGE_10_LICENSES.md` – Add SLA targets, formalize Select FOR
+  UPDATE
 - `/specs/runtime/010-licenses-management/tasks.md` – Add performance test tasks
 - `/apps/worker/src/config/worker-config.ts` – Increase MAX_CONCURRENT_JOBS, add jitter config
 - `/apps/api/src/db/master/migrations/*` – Add GIN index for ILIKE

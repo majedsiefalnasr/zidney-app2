@@ -8,9 +8,14 @@
 
 ## Summary
 
-Technical plan generated for ENV Configuration stage. The implementation establishes a factory-based environment configuration strategy across all 3 Zidney frontend apps using `createEnvConfig(overrides?)` with `Object.freeze()` immutability. Shared TypeScript interfaces in `packages/types` (type-only, zero runtime). Per-app implementation in `core/config/` directory. ESLint AST-based lint rule for `import.meta.env` enforcement.
+Technical plan generated for ENV Configuration stage. The implementation establishes a factory-based
+environment configuration strategy across all 3 Zidney frontend apps using
+`createEnvConfig(overrides?)` with `Object.freeze()` immutability. Shared TypeScript interfaces in
+`packages/types` (type-only, zero runtime). Per-app implementation in `core/config/` directory.
+ESLint AST-based lint rule for `import.meta.env` enforcement.
 
-Guardian validation: Architecture Checker **PASS**, API Designer **PASS** — both with conditions to address during implementation.
+Guardian validation: Architecture Checker **PASS**, API Designer **PASS** — both with conditions to
+address during implementation.
 
 ---
 
@@ -82,8 +87,10 @@ Guardian validation: Architecture Checker **PASS**, API Designer **PASS** — bo
 
 ### Conditions to Address During Implementation
 
-1. **feature-flags.ts must not read import.meta.env directly** — Route all env reads through env.ts per D3
-2. **normalizeAppEnv must handle unrecognized values** — All mode helpers should return false for unknown modes per spec US3/AS4
+1. **feature-flags.ts must not read import.meta.env directly** — Route all env reads through env.ts
+   per D3
+2. **normalizeAppEnv must handle unrecognized values** — All mode helpers should return false for
+   unknown modes per spec US3/AS4
 3. **createFeatureFlags must use its parameter** — Accept overrides for testability
 4. **Add standalone featureFlags export** to app-config.ts per contract
 5. **Document MODE → VITE_APP_ENV migration** in implementation tasks

@@ -1,14 +1,15 @@
 # Clarify Report — STAGE_UI_00_RUNTIME_ARCHITECTURE
 
-**Step:** 2 — Clarify
-**Timestamp:** 2026-02-28T00:20:00Z
-**Status:** COMPLETE
+**Step:** 2 — Clarify **Timestamp:** 2026-02-28T00:20:00Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-5 clarification questions scanned and resolved during the ambiguity audit. All resolutions applied via best-practice defaults — no user input required. The single `[NEEDS CLARIFICATION]` marker from Step 1 was resolved and removed. The MMC migration delta table was expanded to include explicit per-file mappings for all 23 files found in the actual MMC `src/`. Spec is ready for planning.
+5 clarification questions scanned and resolved during the ambiguity audit. All resolutions applied
+via best-practice defaults — no user input required. The single `[NEEDS CLARIFICATION]` marker from
+Step 1 was resolved and removed. The MMC migration delta table was expanded to include explicit
+per-file mappings for all 23 files found in the actual MMC `src/`. Spec is ready for planning.
 
 ---
 
@@ -38,11 +39,14 @@ None — 0 unresolved markers remaining.
 
 ## Spec Updates Applied
 
-- Removed `[NEEDS CLARIFICATION]` marker from §8.3 (Frontoffice guard pipeline — AttemptGuard deferred)
-- §5.2 FR-06: Sub-requirement added — refresh failure path defined (`AUTH_REFRESH_FAILED`, store clear, login redirect)
+- Removed `[NEEDS CLARIFICATION]` marker from §8.3 (Frontoffice guard pipeline — AttemptGuard
+  deferred)
+- §5.2 FR-06: Sub-requirement added — refresh failure path defined (`AUTH_REFRESH_FAILED`, store
+  clear, login redirect)
 - §5.6 FR-26: `NormalizedError` sealed at 3 fields; `fieldErrors` deferral noted
 - §5.6 FR-28: Network error handling clarified — no retry, `NETWORK_ERROR` code, httpStatus: 0
-- §8.1 MMC Delta: Table expanded from generic rule to explicit per-file/per-folder mappings for full `apps/mmc/src/` inventory
+- §8.1 MMC Delta: Table expanded from generic rule to explicit per-file/per-folder mappings for full
+  `apps/mmc/src/` inventory
 - `### Session 2026-02-28` appended to spec.md
 
 ---

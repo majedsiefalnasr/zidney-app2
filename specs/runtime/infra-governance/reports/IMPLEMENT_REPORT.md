@@ -1,10 +1,8 @@
 # Implementation Report: Infrastructure Governance
 
-**Stage:** STAGE_INFRA_GOVERNANCE
-**Date:** 2026-03-05
-**Branch:** infra-governance
-**Implementer:** GitHub Copilot (Claude Sonnet 4.6)
-**Tasks Completed:** 21 / 22 (T022 deferred — manual GitHub action required)
+**Stage:** STAGE_INFRA_GOVERNANCE **Date:** 2026-03-05 **Branch:** infra-governance **Implementer:**
+GitHub Copilot (Claude Sonnet 4.6) **Tasks Completed:** 21 / 22 (T022 deferred — manual GitHub
+action required)
 
 ---
 
@@ -60,7 +58,8 @@ coverage: {
 },
 ```
 
-**Coverage gap note:** Coverage thresholds cannot be verified clean until pre-existing test failures are resolved. See `audits/VALIDATION_REPORT.md` for full gap analysis.
+**Coverage gap note:** Coverage thresholds cannot be verified clean until pre-existing test failures
+are resolved. See `audits/VALIDATION_REPORT.md` for full gap analysis.
 
 ---
 
@@ -72,9 +71,9 @@ coverage: {
 
 ```mjs
 export default {
-  '*.{ts,tsx,vue}': ['eslint --fix', 'prettier --write'],
-  '*.{md,json}': ['prettier --write'],
-}
+  "*.{ts,tsx,vue}": ["eslint --fix", "prettier --write"],
+  "*.{md,json}": ["prettier --write"],
+};
 ```
 
 ---
@@ -121,7 +120,8 @@ bun run test:unit
 
 **Task:** T007 artifact
 
-Lockfile updated automatically by `bun install` when adding the three new devDependencies. Must be committed alongside `package.json`.
+Lockfile updated automatically by `bun install` when adding the three new devDependencies. Must be
+committed alongside `package.json`.
 
 ---
 
@@ -134,8 +134,8 @@ Lockfile updated automatically by `bun install` when adding the three new devDep
 **T011 — QUICK_MODE constant at line 32:**
 
 ```ts
-const ROOT = process.cwd()
-const QUICK_MODE = process.argv.includes('--quick') // ← added at line 32
+const ROOT = process.cwd();
+const QUICK_MODE = process.argv.includes("--quick"); // ← added at line 32
 ```
 
 **T012 — mkdirSync guards:**
@@ -143,22 +143,26 @@ const QUICK_MODE = process.argv.includes('--quick') // ← added at line 32
 ```ts
 // Before:
 if (!existsSync(REPORT_DIR)) {
-  mkdirSync(REPORT_DIR, { recursive: true })
+  mkdirSync(REPORT_DIR, { recursive: true });
 }
 // ... (5 blocks)
 
 // After:
 if (!QUICK_MODE && !existsSync(REPORT_DIR)) {
-  mkdirSync(REPORT_DIR, { recursive: true })
+  mkdirSync(REPORT_DIR, { recursive: true });
 }
 // ... (all 5 blocks guarded)
 ```
 
 **T013 — writeFileSync wrapped in if (!QUICK_MODE) block:**
 
-All file write operations (infra-audit-report.json, dependency-graph.json, dependency-graph-ai.json, dependency-graph.mmd, architecture-graph.mmd, history file, ARCHITECTURE_DASHBOARD.md, ARCHITECTURE_HEATMAP.md, ARCHITECTURE_CONTEXT.json, ARCHITECTURE_CONTRACT.json, architecture-graph.html) are wrapped in a single `if (!QUICK_MODE) { ... }` block.
+All file write operations (infra-audit-report.json, dependency-graph.json, dependency-graph-ai.json,
+dependency-graph.mmd, architecture-graph.mmd, history file, ARCHITECTURE_DASHBOARD.md,
+ARCHITECTURE_HEATMAP.md, ARCHITECTURE_CONTEXT.json, ARCHITECTURE_CONTRACT.json,
+architecture-graph.html) are wrapped in a single `if (!QUICK_MODE) { ... }` block.
 
-Violation scan variables (circularDependencies, depViolations, layerViolations, architectureDrift, architectureScore) are computed regardless of QUICK_MODE.
+Violation scan variables (circularDependencies, depViolations, layerViolations, architectureDrift,
+architectureScore) are computed regardless of QUICK_MODE.
 
 **T014 — Enforcement block extended:**
 
@@ -174,10 +178,10 @@ if (CI_MODE || QUICK_MODE) {
 
 ```ts
 // Before (useless escape):
-edge.from.replace(/[\/-]/g, '_')
+edge.from.replace(/[\/-]/g, "_");
 
 // After (fixed):
-edge.from.replace(/[/-]/g, '_')
+edge.from.replace(/[/-]/g, "_");
 ```
 
 ---
@@ -186,13 +190,16 @@ edge.from.replace(/[/-]/g, '_')
 
 **Tasks:** T015, T016, T017, T018, T019, T020
 
-**T015 — Removed monolithic `e2e-tests` job** (was lines 173-246, merged all 3 apps into one job with sequential test runs)
+**T015 — Removed monolithic `e2e-tests` job** (was lines 173-246, merged all 3 apps into one job
+with sequential test runs)
 
 **T016-T018 — Added 3 separate per-app E2E jobs:**
 
 - `e2e-mmc`: needs `integration-tests`, port 5173, uploads `apps/mmc/playwright-report/` on failure
-- `e2e-backoffice`: needs `integration-tests`, port 5174, uploads `apps/backoffice/playwright-report/` on failure
-- `e2e-frontoffice`: needs `integration-tests`, port 5175, uploads `apps/frontoffice/playwright-report/` on failure
+- `e2e-backoffice`: needs `integration-tests`, port 5174, uploads
+  `apps/backoffice/playwright-report/` on failure
+- `e2e-frontoffice`: needs `integration-tests`, port 5175, uploads
+  `apps/frontoffice/playwright-report/` on failure
 
 Each job:
 
@@ -259,7 +266,8 @@ typecheck ───────────────────────�
 5. Enable "Require branches to be up to date before merging"
 6. Save the rule
 
-**Note:** These status checks will only appear in the dropdown after the first CI run that includes the new jobs has completed. Push the branch and create a PR to trigger the first run.
+**Note:** These status checks will only appear in the dropdown after the first CI run that includes
+the new jobs has completed. Push the branch and create a PR to trigger the first run.
 
 ---
 

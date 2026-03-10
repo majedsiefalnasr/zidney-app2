@@ -1,9 +1,6 @@
 chore({{STAGE_DIR_NAME}}): complete specify step
 
-Step: Specify (1/7)
-Stage: {{STAGE_NAME}}
-Phase: {{PHASE_NAME}}
-Status: DRAFT
+Step: Specify (1/7) Stage: {{STAGE_NAME}} Phase: {{PHASE_NAME}} Status: DRAFT
 
 What was specified:
 

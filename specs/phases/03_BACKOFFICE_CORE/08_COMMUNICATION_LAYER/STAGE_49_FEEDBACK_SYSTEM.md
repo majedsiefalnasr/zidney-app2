@@ -3,7 +3,8 @@
 Phase: 3 – Backoffice Core  
 Domain: Communication Layer  
 Status: Mandatory  
-Scope: Structured collection, storage, categorization, and analysis of user feedback within a workspace
+Scope: Structured collection, storage, categorization, and analysis of user feedback within a
+workspace
 
 ---
 
@@ -205,5 +206,4 @@ Stage complete when:
 
 ---
 
-Next stage:
-STAGE_50_SYSTEM_FEEDBACK
+Next stage: STAGE_50_SYSTEM_FEEDBACK

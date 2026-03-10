@@ -26,13 +26,23 @@
 
 ## 3. Executive Summary
 
-- **Problem solved**: Environment configuration was inconsistent across MMC, Backoffice, and Frontoffice — each app accessed `import.meta.env` directly in scattered locations with no type safety, no immutability, and no centralized validation.
-- **Solution**: Established a three-file config pattern (`env.ts` → `feature-flags.ts` → `app-config.ts`) with shared TypeScript interfaces, `Object.freeze` immutability, and factory functions for testability.
-- **Architectural boundary**: Only touches frontend `core/config/` layer and `packages/types`. No backend, API, database, or infrastructure changes.
-- **Safety**: All config objects are frozen. ESLint `no-restricted-syntax` rule prevents future `import.meta.env` access outside `env.ts`. Missing `VITE_API_BASE_URL` fails fast before app mount.
-- **Constitutional guarantees**: Import boundaries preserved (`apps/*` → `packages/*` only). Feature flags scoped to UI display only. No secrets exposed. No `console.log` in production path.
-- **Testing**: 105 unit tests across 12 files covering factories, helpers, immutability, edge cases, and app boot behavior.
-- **Backoffice extension**: Supports optional `workspaceSlug` for development convenience without breaking the shared contract.
+- **Problem solved**: Environment configuration was inconsistent across MMC, Backoffice, and
+  Frontoffice — each app accessed `import.meta.env` directly in scattered locations with no type
+  safety, no immutability, and no centralized validation.
+- **Solution**: Established a three-file config pattern (`env.ts` → `feature-flags.ts` →
+  `app-config.ts`) with shared TypeScript interfaces, `Object.freeze` immutability, and factory
+  functions for testability.
+- **Architectural boundary**: Only touches frontend `core/config/` layer and `packages/types`. No
+  backend, API, database, or infrastructure changes.
+- **Safety**: All config objects are frozen. ESLint `no-restricted-syntax` rule prevents future
+  `import.meta.env` access outside `env.ts`. Missing `VITE_API_BASE_URL` fails fast before app
+  mount.
+- **Constitutional guarantees**: Import boundaries preserved (`apps/*` → `packages/*` only). Feature
+  flags scoped to UI display only. No secrets exposed. No `console.log` in production path.
+- **Testing**: 105 unit tests across 12 files covering factories, helpers, immutability, edge cases,
+  and app boot behavior.
+- **Backoffice extension**: Supports optional `workspaceSlug` for development convenience without
+  breaking the shared contract.
 
 ---
 
@@ -143,7 +153,8 @@ bunx vitest run apps/mmc/tests/unit/core/env-config.test.ts \
 
 ## 12. Stage Lifecycle Verification
 
-- [x] Stage Status updated in `specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_05_ENV_CONFIGURATION.md`
+- [x] Stage Status updated in
+      `specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_05_ENV_CONFIGURATION.md`
 - [x] .workflow-state.json updated to `PRODUCTION READY`
 - [x] README.md progress table complete
 - [x] All 7 step reports generated in `reports/`
@@ -154,7 +165,8 @@ bunx vitest run apps/mmc/tests/unit/core/env-config.test.ts \
 
 - [x] Safe for staging
 - [x] Safe for production
-- [x] No feature flags required (feature flags in this PR are a delivered feature, not a deployment gate)
+- [x] No feature flags required (feature flags in this PR are a delivered feature, not a deployment
+      gate)
 - [x] Runbook updated (N/A — no operational changes)
 
 ---
@@ -167,7 +179,9 @@ Risk Level:
 - [ ] Medium
 - [ ] High
 
-Explain why: Frontend-only stage with zero backend, database, or infrastructure impact. All config objects are immutable. Compile-time ESLint enforcement prevents regressions. Factory pattern ensures testability. Deployment is standard static asset replacement with < 1 minute rollback.
+Explain why: Frontend-only stage with zero backend, database, or infrastructure impact. All config
+objects are immutable. Compile-time ESLint enforcement prevents regressions. Factory pattern ensures
+testability. Deployment is standard static asset replacement with < 1 minute rollback.
 
 ---
 
@@ -177,9 +191,7 @@ This PR maintains Zidney architectural integrity and complies with Hard Mode gov
 
 All workflow steps completed. All reports generated. Stage lifecycle updated.
 
-**Files changed:** 47 (14 new, 33 modified)
-**Tests:** 105 pass, 0 fail
-**Lint:** 0 errors
+**Files changed:** 47 (14 new, 33 modified) **Tests:** 105 pass, 0 fail **Lint:** 0 errors
 **TypeScript:** 0 new errors
 
 Reviewer Sign-off:

@@ -1,8 +1,10 @@
 # Zidney
 
-A production‑grade **B2B2C white‑label educational SaaS platform** designed for multi‑tenant exam systems, learning platforms, and institutional deployments.
+A production‑grade **B2B2C white‑label educational SaaS platform** designed for multi‑tenant exam
+systems, learning platforms, and institutional deployments.
 
-This repository is a **governed monorepo** built for **AI‑assisted development, strict architectural boundaries, and scalable runtime services**.
+This repository is a **governed monorepo** built for **AI‑assisted development, strict architectural
+boundaries, and scalable runtime services**.
 
 ---
 
@@ -220,7 +222,8 @@ WORKER --> LOGGER
 WORKER --> REDIS
 ```
 
-This diagram illustrates the **allowed dependency direction** between layers. Lower layers must never depend on higher layers.
+This diagram illustrates the **allowed dependency direction** between layers. Lower layers must
+never depend on higher layers.
 
 ---
 
@@ -349,7 +352,8 @@ bun run arch:generate
 
 ## Linting & Formatting
 
-Zidney uses **[Biome](https://biomejs.dev/)** as its unified linting and formatting tool, replacing ESLint and Prettier.
+Zidney uses **[Biome](https://biomejs.dev/)** as its unified linting and formatting tool, replacing
+ESLint and Prettier.
 
 ### VS Code Setup
 
@@ -522,7 +526,8 @@ AI tools should **never generate code without loading this context first**.
 
 ## GitNexus Knowledge Graph (Optional)
 
-The repository can be indexed using **GitNexus** to build a semantic knowledge graph of the codebase.
+The repository can be indexed using **GitNexus** to build a semantic knowledge graph of the
+codebase.
 
 Example usage:
 

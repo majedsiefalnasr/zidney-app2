@@ -8,7 +8,13 @@
 
 ## Summary
 
-STAGE_UI_06_STATE_MANAGEMENT is complete and production-ready. All 42 tasks were implemented, validated, and committed. The stage delivered a complete Pinia 2 state management layer across MMC, Backoffice, and Frontoffice applications — including store infrastructure, persistence configuration, namespaced store IDs, import firewalls, structured logging, and comprehensive test coverage. All validation criteria passed with no stage-introduced lint or type errors. Eight categories of validation fixes were applied during the Step 6.5 gate before marking the stage closed.
+STAGE_UI_06_STATE_MANAGEMENT is complete and production-ready. All 42 tasks were implemented,
+validated, and committed. The stage delivered a complete Pinia 2 state management layer across MMC,
+Backoffice, and Frontoffice applications — including store infrastructure, persistence
+configuration, namespaced store IDs, import firewalls, structured logging, and comprehensive test
+coverage. All validation criteria passed with no stage-introduced lint or type errors. Eight
+categories of validation fixes were applied during the Step 6.5 gate before marking the stage
+closed.
 
 ---
 
@@ -29,19 +35,30 @@ STAGE_UI_06_STATE_MANAGEMENT is complete and production-ready. All 42 tasks were
 
 ## Scope Delivered
 
-- **Pinia plugin registration**: `pinia-plugin-persistedstate@^4.2.0` installed and bootstrapped in `apps/mmc/src/main.ts`, `apps/backoffice/src/main.ts`, `apps/frontoffice/src/main.ts`
-- **Auth store ID namespacing**: `auth` → `mmc-auth` (MMC), `backoffice-auth` (Backoffice), `frontoffice-auth` (Frontoffice) — no cross-app ID collision
-- **New stores — MMC**: `app.store.ts` (sidebarCollapsed, theme, locale with persistence), `ui.store.ts` (modals, drawers, overlay), `notification.store.ts` (notification queue)
-- **New stores — Backoffice**: `app.store.ts`, `ui.store.ts`, `notification.store.ts`, `workspace.store.ts` (loadWorkspace with pending guard + structured logging + AppError handling)
+- **Pinia plugin registration**: `pinia-plugin-persistedstate@^4.2.0` installed and bootstrapped in
+  `apps/mmc/src/main.ts`, `apps/backoffice/src/main.ts`, `apps/frontoffice/src/main.ts`
+- **Auth store ID namespacing**: `auth` → `mmc-auth` (MMC), `backoffice-auth` (Backoffice),
+  `frontoffice-auth` (Frontoffice) — no cross-app ID collision
+- **New stores — MMC**: `app.store.ts` (sidebarCollapsed, theme, locale with persistence),
+  `ui.store.ts` (modals, drawers, overlay), `notification.store.ts` (notification queue)
+- **New stores — Backoffice**: `app.store.ts`, `ui.store.ts`, `notification.store.ts`,
+  `workspace.store.ts` (loadWorkspace with pending guard + structured logging + AppError handling)
 - **New stores — Frontoffice**: `app.store.ts`, `ui.store.ts`, `notification.store.ts`
 - **Barrel updates**: `index.ts` exports updated in all three apps
-- **ESLint import firewall**: `no-restricted-imports` rule for `@zidney/api-client` in `apps/**/*.{vue,ts}` (ignores: `core/state/**`, `core/api/**`, `core/auth/**`)
-- **Test infrastructure**: `store-test-helper.ts` (`useIsolatedPinia()`) created in all three apps + root `tests/unit/`
+- **ESLint import firewall**: `no-restricted-imports` rule for `@zidney/api-client` in
+  `apps/**/*.{vue,ts}` (ignores: `core/state/**`, `core/api/**`, `core/auth/**`)
+- **Test infrastructure**: `store-test-helper.ts` (`useIsolatedPinia()`) created in all three apps +
+  root `tests/unit/`
 - **Unit tests**: 109 store unit tests across 12 test files (MMC 27, Backoffice 46, Frontoffice 36)
-- **Integration tests**: `pinia-bootstrap.test.ts` for all three apps (35 tests total: BackO 16, FrontO 12, MMC 7)
-- **Global CI tests**: `store-id-uniqueness.test.ts` (3 tests, all 13 store IDs unique at runtime), `no-console-in-stores.test.ts` (5 tests, no console.log, AppError via createAppError)
-- **Store cycle detection**: `scripts/check-store-cycles.ts` via `madge`; `check:store-cycles` script in `package.json`; zero circular dependencies confirmed in all three apps
-- **Observability**: `workspace.store.ts` uses `@zidney/logger` with structured logging including `service`, `error_code`, and `internal_message` fields; inner error detail never surfaces to client
+- **Integration tests**: `pinia-bootstrap.test.ts` for all three apps (35 tests total: BackO 16,
+  FrontO 12, MMC 7)
+- **Global CI tests**: `store-id-uniqueness.test.ts` (3 tests, all 13 store IDs unique at runtime),
+  `no-console-in-stores.test.ts` (5 tests, no console.log, AppError via createAppError)
+- **Store cycle detection**: `scripts/check-store-cycles.ts` via `madge`; `check:store-cycles`
+  script in `package.json`; zero circular dependencies confirmed in all three apps
+- **Observability**: `workspace.store.ts` uses `@zidney/logger` with structured logging including
+  `service`, `error_code`, and `internal_message` fields; inner error detail never surfaces to
+  client
 
 ---
 
@@ -81,7 +98,12 @@ STAGE_UI_06_STATE_MANAGEMENT is complete and production-ready. All 42 tasks were
 
 Risk Level: `LOW`
 
-Justification: This is a purely additive, frontend-only stage. No database schema changes were made. No API endpoints were changed. No authentication or authorization logic was modified. All new stores are isolated per app (database-per-tenant model is preserved). The only changes to existing files were: `main.ts` (Pinia plugin registration), `auth.store.ts` (ID rename), `index.ts` (barrel exports), `eslint.config.mjs` (ESLint firewall), and `vitest.config.ts` (test alias). Pre-existing type errors in `guards/index.ts` scope are unchanged baseline issues.
+Justification: This is a purely additive, frontend-only stage. No database schema changes were made.
+No API endpoints were changed. No authentication or authorization logic was modified. All new stores
+are isolated per app (database-per-tenant model is preserved). The only changes to existing files
+were: `main.ts` (Pinia plugin registration), `auth.store.ts` (ID rename), `index.ts` (barrel
+exports), `eslint.config.mjs` (ESLint firewall), and `vitest.config.ts` (test alias). Pre-existing
+type errors in `guards/index.ts` scope are unchanged baseline issues.
 
 ---
 

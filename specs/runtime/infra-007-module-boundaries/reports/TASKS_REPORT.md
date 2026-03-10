@@ -8,7 +8,12 @@
 
 ## Summary
 
-23 atomic tasks generated across 8 sequential phases. Tasks cover the full implementation plan: creating `docs/architecture/module-boundaries.json`, extending `scripts/ai-guard.ts` with 14 backward-compatible constructs, updating `package.json` and `.github/workflows/ci.yml`, enhancing `scripts/infra-audit.ts` for FR-008, writing unit + static tests, and final validation gates. Two parallel execution opportunities identified: T014‖T015 (different files) and T017‖T018 (different test files).
+23 atomic tasks generated across 8 sequential phases. Tasks cover the full implementation plan:
+creating `docs/architecture/module-boundaries.json`, extending `scripts/ai-guard.ts` with 14
+backward-compatible constructs, updating `package.json` and `.github/workflows/ci.yml`, enhancing
+`scripts/infra-audit.ts` for FR-008, writing unit + static tests, and final validation gates. Two
+parallel execution opportunities identified: T014‖T015 (different files) and T017‖T018 (different
+test files).
 
 ---
 
@@ -56,7 +61,8 @@ Not applicable — INFRA governance stage. No database writes. No HTTP endpoints
 
 ## Idempotency Tasks
 
-Not applicable — INFRA governance stage. `bun run ai-guard` is a read-only validation script; running multiple times produces identical output.
+Not applicable — INFRA governance stage. `bun run ai-guard` is a read-only validation script;
+running multiple times produces identical output.
 
 ---
 

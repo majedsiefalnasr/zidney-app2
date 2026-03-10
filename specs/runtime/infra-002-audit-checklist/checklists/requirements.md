@@ -59,4 +59,7 @@ No `[NEEDS CLARIFICATION]` markers were present in `spec.md`. No resolution requ
 
 **COMPLETE**
 
-The specification is internally consistent, fully covers the stage scope defined in `specs/phases/01_PLATFORM_FOUNDATION/INFRA_AUDIT_CHECKLIST.md`, enforces the READ-ONLY constraint throughout, gates the successor stage correctly, and contains no unresolved ambiguities. The stage may proceed to the Clarify step.
+The specification is internally consistent, fully covers the stage scope defined in
+`specs/phases/01_PLATFORM_FOUNDATION/INFRA_AUDIT_CHECKLIST.md`, enforces the READ-ONLY constraint
+throughout, gates the successor stage correctly, and contains no unresolved ambiguities. The stage
+may proceed to the Clarify step.

@@ -9,7 +9,8 @@
 
 ## Documentation Reorganization Complete
 
-All MMC Phase 8 (Polish) documentation files have been reorganized into proper `docs/` subdirectories with corrected, accurate content (replacing placeholder/generic templates).
+All MMC Phase 8 (Polish) documentation files have been reorganized into proper `docs/`
+subdirectories with corrected, accurate content (replacing placeholder/generic templates).
 
 ### Files Created & Reorganized
 

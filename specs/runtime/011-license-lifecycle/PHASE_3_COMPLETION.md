@@ -8,7 +8,8 @@
 
 ## Executive Summary
 
-**Phase 3: License Lifecycle API Routes** has been successfully implemented with all 9 REST endpoints fully functional, tested, and production-ready.
+**Phase 3: License Lifecycle API Routes** has been successfully implemented with all 9 REST
+endpoints fully functional, tested, and production-ready.
 
 ---
 
@@ -74,7 +75,8 @@
 - **Purpose:** Retrieve license details with snapshot metadata
 - **Auth:** Admin required
 - **Validation:** UUID
-- **Response:** 200 with license + snapshot (if archived) + user_count + storage_used_gb + schema_version
+- **Response:** 200 with license + snapshot (if archived) + user_count + storage_used_gb +
+  schema_version
 - **Placeholder:** user_count + storage_used_gb deferred to Phase 4 (tenant DB queries)
 - **Errors:** 403 (not admin), 404 (not found)
 
@@ -93,7 +95,8 @@
 - **Purpose:** Query background job progress (QUEUED|RUNNING|COMPLETED|FAILED)
 - **Auth:** Admin required
 - **Validation:** Valid UUIDs
-- **Response:** 200 with job_status { job_id, job_name, status, progress (0-100), current_step, estimated_time_remaining_seconds }
+- **Response:** 200 with job_status { job_id, job_name, status, progress (0-100), current_step,
+  estimated_time_remaining_seconds }
 - **Placeholder:** Redis job queue queries deferred to Phase 4
 - **Errors:** 403 (not admin), 404 (job not found)
 
@@ -153,8 +156,8 @@ Duration  324ms
 
 ```typescript
 function isAdmin(ctx: Context): boolean {
-  const userRole = ctx.get('user_role')
-  return userRole === 'mmc_admin' || userRole === 'super_admin'
+  const userRole = ctx.get("user_role");
+  return userRole === "mmc_admin" || userRole === "super_admin";
 }
 ```
 
@@ -162,9 +165,8 @@ function isAdmin(ctx: Context): boolean {
 
 ```typescript
 function isValidUuid(uuid: string): boolean {
-  const uuidRegex =
-    /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i
-  return uuidRegex.test(uuid)
+  const uuidRegex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
+  return uuidRegex.test(uuid);
 }
 ```
 
@@ -172,7 +174,7 @@ function isValidUuid(uuid: string): boolean {
 
 ```typescript
 function getActorId(ctx: Context): string {
-  return ctx.get('user_id') || ctx.get('actor_id') || 'system'
+  return ctx.get("user_id") || ctx.get("actor_id") || "system";
 }
 ```
 
@@ -218,7 +220,8 @@ The following functionality is marked as TODO for Phase 4 (Middleware & Access C
 | storage_used_gb         | T022       | Requires snapshot size aggregation            | Returns 0 (placeholder)     |
 | Job queue queries       | T024       | Requires Redis/job table integration          | Returns sample status       |
 
-All placeholders follow the correct API contract and will be replaced with real implementation in Phase 4.
+All placeholders follow the correct API contract and will be replaced with real implementation in
+Phase 4.
 
 ---
 

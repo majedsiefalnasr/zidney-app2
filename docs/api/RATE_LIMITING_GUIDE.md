@@ -2,7 +2,8 @@
 
 ## Overview
 
-Rate limiting is enforced per MMC admin and per license to prevent abuse, ensure fair resource allocation, and protect infrastructure.
+Rate limiting is enforced per MMC admin and per license to prevent abuse, ensure fair resource
+allocation, and protect infrastructure.
 
 **Implementation:** Token bucket algorithm (sliding window)  
 **Storage:** Redis with atomic increments  
@@ -188,63 +189,60 @@ mmc-rate-limit:{user_id}:{license_id}:delete → Counter (300s TTL)
 
 ```typescript
 async function rateLimitMiddleware(c: Context, next: () => Promise<void>) {
-  const userId = c.get('user').id
-  const correlationId = c.get('correlation_id')
+  const userId = c.get("user").id;
+  const correlationId = c.get("correlation_id");
 
-  const endpoint = c.req.path
-  const method = c.req.method
+  const endpoint = c.req.path;
+  const method = c.req.method;
 
   // Determine rate limit tier & key
-  let key: string
-  let limit: number
-  let ttl: number = 60
+  let key: string;
+  let limit: number;
+  let ttl: number = 60;
 
-  if (method === 'POST' && endpoint.includes('/licenses?$')) {
-    key = `mmc-rate-limit:${userId}:create_edit`
-    limit = 10
-  } else if (method === 'GET' && endpoint.includes('/licenses?$')) {
-    key = `mmc-rate-limit:${userId}:list`
-    limit = 30
-  } else if (method === 'GET' && endpoint.match(/\/licenses\/[^/]+$/)) {
-    key = `mmc-rate-limit:${userId}:detail`
-    limit = 60
+  if (method === "POST" && endpoint.includes("/licenses?$")) {
+    key = `mmc-rate-limit:${userId}:create_edit`;
+    limit = 10;
+  } else if (method === "GET" && endpoint.includes("/licenses?$")) {
+    key = `mmc-rate-limit:${userId}:list`;
+    limit = 30;
+  } else if (method === "GET" && endpoint.match(/\/licenses\/[^/]+$/)) {
+    key = `mmc-rate-limit:${userId}:detail`;
+    limit = 60;
   } else if (
-    method === 'POST' &&
+    method === "POST" &&
     endpoint.match(/\/licenses\/[^/]+\/(soft-lock|unlock|archive|restore)/)
   ) {
-    const licenseId = extractLicenseId(endpoint)
-    key = `mmc-rate-limit:${licenseId}:transitions`
-    limit = 5
-  } else if (
-    method === 'POST' &&
-    endpoint.match(/\/licenses\/[^/]+\/retry-provisioning/)
-  ) {
-    const licenseId = extractLicenseId(endpoint)
-    key = `mmc-rate-limit:${licenseId}:retries`
-    limit = 3
-  } else if (method === 'DELETE' && endpoint.match(/\/licenses\/[^/]+$/)) {
-    const licenseId = extractLicenseId(endpoint)
-    key = `mmc-rate-limit:${userId}:${licenseId}:delete`
-    limit = 1
-    ttl = 300 // 5 minutes
+    const licenseId = extractLicenseId(endpoint);
+    key = `mmc-rate-limit:${licenseId}:transitions`;
+    limit = 5;
+  } else if (method === "POST" && endpoint.match(/\/licenses\/[^/]+\/retry-provisioning/)) {
+    const licenseId = extractLicenseId(endpoint);
+    key = `mmc-rate-limit:${licenseId}:retries`;
+    limit = 3;
+  } else if (method === "DELETE" && endpoint.match(/\/licenses\/[^/]+$/)) {
+    const licenseId = extractLicenseId(endpoint);
+    key = `mmc-rate-limit:${userId}:${licenseId}:delete`;
+    limit = 1;
+    ttl = 300; // 5 minutes
   }
 
   // Check rate limit
-  const count = await redis.incr(key)
+  const count = await redis.incr(key);
   if (count === 1) {
-    await redis.expire(key, ttl)
+    await redis.expire(key, ttl);
   }
 
   if (count > limit) {
-    const retryAfter = await redis.ttl(key)
-    c.res.headers.set('Retry-After', String(retryAfter))
+    const retryAfter = await redis.ttl(key);
+    c.res.headers.set("Retry-After", String(retryAfter));
 
     return c.json(
       {
         success: false,
         data: null,
         error: {
-          code: 'RATE_LIMIT_EXCEEDED',
+          code: "RATE_LIMIT_EXCEEDED",
           message: `${limit} requests per ${ttl} seconds allowed`,
           details: {
             limit,
@@ -254,19 +252,16 @@ async function rateLimitMiddleware(c: Context, next: () => Promise<void>) {
           },
         },
       },
-      { status: 429 }
-    )
+      { status: 429 },
+    );
   }
 
   // Attach rate limit info to response
-  c.res.headers.set('X-RateLimit-Limit', String(limit))
-  c.res.headers.set('X-RateLimit-Remaining', String(Math.max(0, limit - count)))
-  c.res.headers.set(
-    'X-RateLimit-Reset',
-    String(Math.ceil(Date.now() / 1000) + ttl)
-  )
+  c.res.headers.set("X-RateLimit-Limit", String(limit));
+  c.res.headers.set("X-RateLimit-Remaining", String(Math.max(0, limit - count)));
+  c.res.headers.set("X-RateLimit-Reset", String(Math.ceil(Date.now() / 1000) + ttl));
 
-  await next()
+  await next();
 }
 ```
 

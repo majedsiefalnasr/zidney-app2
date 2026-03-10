@@ -11,7 +11,8 @@
 
 ## Executive Summary
 
-Comprehensive security audit of the MMC Dashboard API and Frontend has been completed. All critical security requirements have been verified and passed:
+Comprehensive security audit of the MMC Dashboard API and Frontend has been completed. All critical
+security requirements have been verified and passed:
 
 - ✅ **No PII/Secrets in Logs**: All audit logs validated for data protection compliance
 - ✅ **No Secrets in Responses**: All API responses sanitized of sensitive data
@@ -32,7 +33,8 @@ Comprehensive security audit of the MMC Dashboard API and Frontend has been comp
 
 #### Requirement: No PII in Logs
 
-**Evidence**: Structured logging implementation in `apps/api/src/middleware/dashboard-logging.middleware.ts`
+**Evidence**: Structured logging implementation in
+`apps/api/src/middleware/dashboard-logging.middleware.ts`
 
 ```typescript
 // Verified logged fields (safe):
@@ -158,9 +160,9 @@ const query = `
   SELECT COUNT(*) FILTER (WHERE status = 'ACTIVE') as active_licenses
   FROM licenses
   WHERE workspace_id = $1 AND deleted_at IS NULL
-`
+`;
 // Usage:
-const result = await client.query(query, [workspace_id])
+const result = await client.query(query, [workspace_id]);
 // workspace_id is bound as parameter, NOT interpolated
 ```
 
@@ -177,14 +179,14 @@ const query = `
     AND r.created_at < $3
   ORDER BY total_revenue DESC
   LIMIT $4
-`
+`;
 // Usage:
 const result = await client.query(query, [
   workspace_id, // $1 - bound parameter
   date_from, // $2 - bound parameter
   date_to, // $3 - bound parameter
   limit, // $4 - bound parameter
-])
+]);
 ```
 
 #### Endpoint 3: GET /geographic
@@ -199,11 +201,11 @@ const query = `
   WHERE workspace_id = $1 AND created_at > $2
   GROUP BY billing_country
   LIMIT $3 OFFSET $4
-`
+`;
 // sort_by field is validated against enum BEFORE query construction
-const valid_sort_fields = ['revenue', 'license_count']
+const valid_sort_fields = ["revenue", "license_count"];
 if (!valid_sort_fields.includes(sort_by)) {
-  throw new ValidationError('Invalid sort field')
+  throw new ValidationError("Invalid sort field");
 }
 ```
 
@@ -217,14 +219,14 @@ const query = `
   LEFT JOIN affiliate_usages u ON a.id = u.affiliate_id
   WHERE a.workspace_id = $1 AND a.status = $2
   LIMIT $3 OFFSET $4
-`
+`;
 // Usage:
 const result = await client.query(query, [
   workspace_id, // $1
   status, // $2 - enum validated
   limit, // $3 - type-checked
   offset, // $4 - type-checked
-])
+]);
 ```
 
 #### Endpoint 5: GET /trends
@@ -241,9 +243,9 @@ const query = `
     GROUP BY DATE_TRUNC('month', created_at)
   )
   SELECT * FROM monthly_data ORDER BY month DESC
-`
+`;
 // Usage:
-const result = await client.query(query, [workspace_id])
+const result = await client.query(query, [workspace_id]);
 ```
 
 #### Endpoint 6: POST /export
@@ -261,7 +263,7 @@ const query = `
     AND r.created_at BETWEEN $2 AND $3
   ORDER BY r.created_at DESC
   LIMIT $4 OFFSET $5
-`
+`;
 // Usage (streaming):
 const stream = client.query(query, [
   workspace_id, // $1
@@ -269,7 +271,7 @@ const stream = client.query(query, [
   date_to, // $3
   limit, // $4
   offset, // $5
-])
+]);
 ```
 
 **Validation**: SQL Injection Scanner Results
@@ -312,34 +314,34 @@ const stream = client.query(query, [
 
 ```typescript
 // Step 1: Token Validation
-const token = request.headers.authorization?.replace('Bearer ', '')
+const token = request.headers.authorization?.replace("Bearer ", "");
 if (!token) {
-  return { status: 401, error: 'UNAUTHORIZED' }
+  return { status: 401, error: "UNAUTHORIZED" };
 }
-const decoded = jwt.verify(token, JWT_SECRET)
-const user_id = decoded.sub
+const decoded = jwt.verify(token, JWT_SECRET);
+const user_id = decoded.sub;
 
 // Step 2: License Lookup
 const license = await master_db.query(
-  'SELECT * FROM licenses WHERE workspace_id = $1 AND deleted_at IS NULL',
-  [workspace_id]
-)
+  "SELECT * FROM licenses WHERE workspace_id = $1 AND deleted_at IS NULL",
+  [workspace_id],
+);
 if (!license) {
-  return { status: 404, error: 'LICENSE_NOT_FOUND' }
+  return { status: 404, error: "LICENSE_NOT_FOUND" };
 }
 
 // Step 3: License Status Check
-if (license.status === 'SOFT_LOCKED') {
-  return { status: 423, error: 'LICENSE_SOFT_LOCKED' }
+if (license.status === "SOFT_LOCKED") {
+  return { status: 423, error: "LICENSE_SOFT_LOCKED" };
 }
-if (license.status === 'ARCHIVED') {
-  return { status: 403, error: 'PERMISSION_DENIED' }
+if (license.status === "ARCHIVED") {
+  return { status: 403, error: "PERMISSION_DENIED" };
 }
 
 // Step 4: Permission Check (critical)
-const user_permissions = decoded.permissions || []
-if (!user_permissions.includes('reporting.view')) {
-  return { status: 403, error: 'PERMISSION_DENIED' }
+const user_permissions = decoded.permissions || [];
+if (!user_permissions.includes("reporting.view")) {
+  return { status: 403, error: "PERMISSION_DENIED" };
 }
 
 // If all checks pass → request proceeds
@@ -554,9 +556,9 @@ Test 4: Cache poisoning attempt
 ```typescript
 // ✅ Allowed Origins (whitelist only)
 const allowedOrigins = [
-  'https://mmc.dashboard.example.com', // Production
-  'https://staging-mmc.dashboard.example.com', // Staging
-]
+  "https://mmc.dashboard.example.com", // Production
+  "https://staging-mmc.dashboard.example.com", // Staging
+];
 
 // ❌ NOT allowed:
 // - '*' (wildcard)
@@ -564,24 +566,20 @@ const allowedOrigins = [
 // - 'file://' protocols
 
 // ✅ Allowed Methods
-const allowedMethods = ['GET', 'POST', 'OPTIONS']
+const allowedMethods = ["GET", "POST", "OPTIONS"];
 
 // ✅ Allowed Headers (whitelist)
-const allowedHeaders = ['Content-Type', 'Authorization']
+const allowedHeaders = ["Content-Type", "Authorization"];
 
 // ✅ NOT allowed headers:
 // - Custom internal headers
 // - Admin-only headers (no exposure)
 
 // ✅ Credentials
-credentials: true // Allow cookies/auth headers
+credentials: true; // Allow cookies/auth headers
 
 // ✅ Exposed Headers
-const exposedHeaders = [
-  'X-RateLimit-Limit',
-  'X-RateLimit-Remaining',
-  'X-RateLimit-Reset',
-]
+const exposedHeaders = ["X-RateLimit-Limit", "X-RateLimit-Remaining", "X-RateLimit-Reset"];
 
 // ❌ NOT exposed:
 // - Authorization header
@@ -786,7 +784,8 @@ Test 6: Export payload size
 **Reviewer**: Zidney Security Team  
 **Verdict**: ✅ **APPROVED FOR PRODUCTION**
 
-All critical and high-risk security requirements have been verified and passed. The MMC Dashboard API is secure and ready for production deployment.
+All critical and high-risk security requirements have been verified and passed. The MMC Dashboard
+API is secure and ready for production deployment.
 
 ### Approved By
 
@@ -812,6 +811,7 @@ All critical and high-risk security requirements have been verified and passed. 
 
 ---
 
-_This security review was conducted as part of T072 (Manual Security Review Sign-Off) - Phase 4 Integration & Validation._  
+_This security review was conducted as part of T072 (Manual Security Review Sign-Off) - Phase 4
+Integration & Validation._  
 _All findings documented. Ready for production deployment._  
 _Last updated: 2026-02-27_

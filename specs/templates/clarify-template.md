@@ -246,5 +246,4 @@ The AI must end with:
 
 “Compliant with Zidney Constitution v1.2.0 — Clarify gate passed.”
 
-If not compliant:
-AI must stop and describe violation.
+If not compliant: AI must stop and describe violation.

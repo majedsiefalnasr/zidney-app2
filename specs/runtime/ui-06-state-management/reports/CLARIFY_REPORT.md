@@ -1,25 +1,21 @@
 # Clarify Report — STAGE_UI_06_STATE_MANAGEMENT
 
-**Step:** 2 — Clarify
-**Timestamp:** 2026-03-03T00:00:00.000Z
-**Status:** COMPLETE
+**Step:** 2 — Clarify **Timestamp:** 2026-03-03T00:00:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-6 clarification questions were identified and resolved. The 1 known `[NEEDS CLARIFICATION]`
-marker from Step 1 (concurrent async loading state shape) was resolved, plus 5 additional
-targeted ambiguities were identified and resolved autonomously. All clarifications were appended
-to `spec.md` as `## Clarifications / ### Session 2026-03-03`. No open items remain. Planning is
-authorized.
+6 clarification questions were identified and resolved. The 1 known `[NEEDS CLARIFICATION]` marker
+from Step 1 (concurrent async loading state shape) was resolved, plus 5 additional targeted
+ambiguities were identified and resolved autonomously. All clarifications were appended to `spec.md`
+as `## Clarifications / ### Session 2026-03-03`. No open items remain. Planning is authorized.
 
 ---
 
 ## Inputs Reviewed
 
-- `specs/runtime/ui-06-state-management/spec.md` (including `## Clarifications`, Session
-  2026-03-03)
+- `specs/runtime/ui-06-state-management/spec.md` (including `## Clarifications`, Session 2026-03-03)
 
 ---
 
@@ -44,8 +40,8 @@ None.
 
 ## Spec Updates Applied
 
-- **FR-016** updated: base contract now reads — each store exposes `isLoading: boolean` as
-  primary loading signal; stores with multi-action concurrency additionally expose
+- **FR-016** updated: base contract now reads — each store exposes `isLoading: boolean` as primary
+  loading signal; stores with multi-action concurrency additionally expose
   `pending: Record<string, boolean>` per action
 - **FR-018** updated: `clearError()` action explicitly required alongside auto-reset behavior
 - **FR-030** updated: `$reset()` required on ALL stores (not just feature stores)

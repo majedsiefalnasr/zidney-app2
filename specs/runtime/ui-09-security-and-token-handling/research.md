@@ -9,13 +9,16 @@
 
 ## Research Scope
 
-Investigate the existing auth layer across MMC, Backoffice, and Frontoffice to determine what is already implemented, what must be added, and what must be modified to satisfy STAGE_UI_09's requirements.
+Investigate the existing auth layer across MMC, Backoffice, and Frontoffice to determine what is
+already implemented, what must be added, and what must be modified to satisfy STAGE_UI_09's
+requirements.
 
 ---
 
 ## Finding 1: Auth Store Architecture (STAGE_UI_01 Foundation)
 
-**Decision**: All three apps (MMC, Backoffice, Frontoffice) share an identical auth layer structure created in STAGE_UI_01_AUTH_MODULE. There is no per-app divergence.
+**Decision**: All three apps (MMC, Backoffice, Frontoffice) share an identical auth layer structure
+created in STAGE_UI_01_AUTH_MODULE. There is no per-app divergence.
 
 **Parallel structure confirmed in all three apps:**
 
@@ -42,7 +45,8 @@ core/
     types.ts
 ```
 
-**Rationale**: STAGE_UI_09 is directly additive to STAGE_UI_01. No new architecture baseline is required; the existing factory pattern is preserved and extended.
+**Rationale**: STAGE_UI_09 is directly additive to STAGE_UI_01. No new architecture baseline is
+required; the existing factory pattern is preserved and extended.
 
 ---
 
@@ -53,12 +57,14 @@ core/
 **Evidence** (`apps/mmc/src/core/auth/token-manager.ts`):
 
 ```typescript
-const _token = ref<string | null>(null) // Vue reactive ref — not persisted
+const _token = ref<string | null>(null); // Vue reactive ref — not persisted
 ```
 
-- Token lives exclusively in a reactive `ref<string | null>` inside the `createTokenManager` closure.
+- Token lives exclusively in a reactive `ref<string | null>` inside the `createTokenManager`
+  closure.
 - No `localStorage`, `sessionStorage`, `IndexedDB`, or cookie writes exist.
-- The internal ref is not exported — only the interface (`getToken`, `setToken`, `clearToken`, `hasToken`) is exposed.
+- The internal ref is not exported — only the interface (`getToken`, `setToken`, `clearToken`,
+  `hasToken`) is exposed.
 - Token value is never logged; only metadata (`Access token stored in memory`) is logged.
 
 **STAGE_UI_09 action**: Document compliance. No code changes needed for token storage.
@@ -67,24 +73,26 @@ const _token = ref<string | null>(null) // Vue reactive ref — not persisted
 
 ## Finding 3: Authorization Header Injection — Already Compliant
 
-**Decision**: FR-SEC-04 and FR-SEC-05 are already satisfied by `packages/api-client/src/interceptors.ts` wired through `core/api/client.ts`.
+**Decision**: FR-SEC-04 and FR-SEC-05 are already satisfied by
+`packages/api-client/src/interceptors.ts` wired through `core/api/client.ts`.
 
 **Evidence** (`packages/api-client/src/interceptors.ts`):
 
 ```typescript
 export function applyAuthHeader(
   headers: Record<string, string>,
-  getAccessToken: () => string | null
+  getAccessToken: () => string | null,
 ): void {
-  const token = getAccessToken()
+  const token = getAccessToken();
   if (token) {
-    headers['Authorization'] = `Bearer ${token}`
+    headers["Authorization"] = `Bearer ${token}`;
   }
 }
 ```
 
 - Injection is centralised in the shared package — exactly one location in the codebase.
-- When `getAccessToken()` returns `null`, the header is omitted entirely — `Bearer undefined` is impossible.
+- When `getAccessToken()` returns `null`, the header is omitted entirely — `Bearer undefined` is
+  impossible.
 - Wired in `core/api/client.ts` via `getAccessToken: () => tokenManager.getToken()`.
 
 **STAGE_UI_09 action**: Document compliance. No code changes needed for header injection.
@@ -93,7 +101,8 @@ export function applyAuthHeader(
 
 ## Finding 4: Pinia Auth Store — Already Present, One Gap
 
-**Decision**: The `core/state/auth.store.ts` factory exists in all three apps and satisfies most requirements of FR-SEC-10 through FR-SEC-13.
+**Decision**: The `core/state/auth.store.ts` factory exists in all three apps and satisfies most
+requirements of FR-SEC-10 through FR-SEC-13.
 
 **Confirmed capabilities**:
 
@@ -105,15 +114,21 @@ export function applyAuthHeader(
 - `setSession(accessToken, profile)` — establishes session post-login
 - Logout is idempotent (isLoading guard + isAuthenticated guard)
 
-**Gap identified**: The `authError` field can carry a `AUTH_SESSION_EXPIRED` code, and the login page can read this to display the "session expired" message. This pattern is already type-safe (AuthErrorCode union includes `AUTH_SESSION_EXPIRED`). The session-expired notification requires no new store — it uses the existing `authError` mechanism.
+**Gap identified**: The `authError` field can carry a `AUTH_SESSION_EXPIRED` code, and the login
+page can read this to display the "session expired" message. This pattern is already type-safe
+(AuthErrorCode union includes `AUTH_SESSION_EXPIRED`). The session-expired notification requires no
+new store — it uses the existing `authError` mechanism.
 
-**STAGE_UI_09 action**: No structural changes to `auth.store.ts`. The session-expired notification is dispatched by setting `authError` before logout redirect.
+**STAGE_UI_09 action**: No structural changes to `auth.store.ts`. The session-expired notification
+is dispatched by setting `authError` before logout redirect.
 
 ---
 
 ## Finding 5: 401 Handling — Partially Implemented, Critical Gap
 
-**Decision**: The single-flight guard for 401 storms is already implemented in `packages/api-client/src/client.ts`. The critical missing piece is the **authenticated-session-only trigger** (FR-SEC-07).
+**Decision**: The single-flight guard for 401 storms is already implemented in
+`packages/api-client/src/client.ts`. The critical missing piece is the **authenticated-session-only
+trigger** (FR-SEC-07).
 
 **Existing behaviour** (`packages/api-client/src/client.ts`):
 
@@ -136,17 +151,26 @@ async function handle401(...) {
 }
 ```
 
-**Gap**: `config.onAuthFailure()` is currently wired as `() => authStore.logout()` unconditionally. FR-SEC-07 requires it fires **only when `authStore.isAuthenticated === true`** at the time the 401 is received. A 401 on `/auth/login` (wrong credentials) must pass through to the caller without triggering logout or redirect.
+**Gap**: `config.onAuthFailure()` is currently wired as `() => authStore.logout()` unconditionally.
+FR-SEC-07 requires it fires **only when `authStore.isAuthenticated === true`** at the time the 401
+is received. A 401 on `/auth/login` (wrong credentials) must pass through to the caller without
+triggering logout or redirect.
 
-**Rationale**: The `refreshPromise !== null` guard already maps to FR-SEC-08's `isHandling401` requirement. The package-level single-flight guarantee is sufficient. The only gap is the `isAuthenticated` condition check at the `onAuthFailure` call site in `core/api/client.ts`.
+**Rationale**: The `refreshPromise !== null` guard already maps to FR-SEC-08's `isHandling401`
+requirement. The package-level single-flight guarantee is sufficient. The only gap is the
+`isAuthenticated` condition check at the `onAuthFailure` call site in `core/api/client.ts`.
 
-**STAGE_UI_09 action**: Modify `core/api/client.ts` in all three apps to wrap `authStore.logout()` with an `isAuthenticated` check before calling it. Add `isHandling401` closure boolean in the factory for the no-refresh default case (when backend has no refresh endpoint, 401 should immediately trigger the session-expiry flow if authenticated).
+**STAGE_UI_09 action**: Modify `core/api/client.ts` in all three apps to wrap `authStore.logout()`
+with an `isAuthenticated` check before calling it. Add `isHandling401` closure boolean in the
+factory for the no-refresh default case (when backend has no refresh endpoint, 401 should
+immediately trigger the session-expiry flow if authenticated).
 
 ---
 
 ## Finding 6: Router Guards — Already Present, One Extension Needed
 
-**Decision**: `core/router/guards/auth.guard.ts` implements FR-SEC-14, FR-SEC-15, FR-SEC-16. The optional route redirect preservation (FR-SEC-09) is not yet implemented.
+**Decision**: `core/router/guards/auth.guard.ts` implements FR-SEC-14, FR-SEC-15, FR-SEC-16. The
+optional route redirect preservation (FR-SEC-09) is not yet implemented.
 
 **Confirmed** (`createAuthGuard` in all three apps):
 
@@ -155,26 +179,42 @@ async function handle401(...) {
 - Uses `getIsAuthenticated()` callback only — no JWT decoding → FR-SEC-15 ✅
 - Returns `RouteLocationRaw` (redirect object), never calls `router.push()` directly → ✅
 
-**Gap**: The redirect to login does not currently preserve the intended destination. FR-SEC-09 (optional) says the pre-expiry route should be preserved for post-login return. This means passing `{ name: options.loginRouteName, query: { redirect: to.path } }` on the unauthenticated redirect.
+**Gap**: The redirect to login does not currently preserve the intended destination. FR-SEC-09
+(optional) says the pre-expiry route should be preserved for post-login return. This means passing
+`{ name: options.loginRouteName, query: { redirect: to.path } }` on the unauthenticated redirect.
 
-**STAGE_UI_09 action**: Extend `createAuthGuard` in all three apps to pass `redirect` query param on unauthenticated redirects. Also extend `createAuthGuardOptions` type to include an `enableRedirectPreservation?: boolean` flag for opt-in control.
+**STAGE_UI_09 action**: Extend `createAuthGuard` in all three apps to pass `redirect` query param on
+unauthenticated redirects. Also extend `createAuthGuardOptions` type to include an
+`enableRedirectPreservation?: boolean` flag for opt-in control.
 
 ---
 
 ## Finding 7: 423 / 426 Handling — Not Yet Implemented
 
-**Decision**: HTTP 423 and 426 responses are currently passed through `normalizeResponseError` in `packages/api-client/src/http-error.ts` as generic non-ok errors. No application-level 423/426 interception exists.
+**Decision**: HTTP 423 and 426 responses are currently passed through `normalizeResponseError` in
+`packages/api-client/src/http-error.ts` as generic non-ok errors. No application-level 423/426
+interception exists.
 
-**Evidence** (`packages/api-client/src/http-error.ts`): The `ErrorCodes` constant contains `NETWORK_ERROR`, `REQUEST_TIMEOUT`, `REQUEST_CANCELLED`, `RATE_LIMITED`, `AUTH_REFRESH_FAILED`, `INVALID_RESPONSE`, `UNKNOWN_ERROR` — no `WORKSPACE_LOCKED` or `UPGRADE_REQUIRED` codes.
+**Evidence** (`packages/api-client/src/http-error.ts`): The `ErrorCodes` constant contains
+`NETWORK_ERROR`, `REQUEST_TIMEOUT`, `REQUEST_CANCELLED`, `RATE_LIMITED`, `AUTH_REFRESH_FAILED`,
+`INVALID_RESPONSE`, `UNKNOWN_ERROR` — no `WORKSPACE_LOCKED` or `UPGRADE_REQUIRED` codes.
 
-**Design decision**: 423/426 responses should be handled at the app-level API client factory (`core/api/client.ts`) via an `onHttpStatusError` callback pattern, or via extending the `ClientConfig` interface in packages/api-client. Since the spec says no cross-package changes without ADR review, the safest approach is:
+**Design decision**: 423/426 responses should be handled at the app-level API client factory
+(`core/api/client.ts`) via an `onHttpStatusError` callback pattern, or via extending the
+`ClientConfig` interface in packages/api-client. Since the spec says no cross-package changes
+without ADR review, the safest approach is:
 
-- Add a `onLicenseError?: (status: 423 | 426) => void` callback to `createAppApiClient` in each app's `core/api/client.ts`
-- Wire it to a `core/api/interceptors/error.interceptor.ts` handler that triggers appropriate UI state
+- Add a `onLicenseError?: (status: 423 | 426) => void` callback to `createAppApiClient` in each
+  app's `core/api/client.ts`
+- Wire it to a `core/api/interceptors/error.interceptor.ts` handler that triggers appropriate UI
+  state
 
-**Rationale**: Avoids modifying the shared `packages/api-client` package (which would affect API layer and worker). App-level interception via callback injection is consistent with the existing `onAuthFailure` pattern.
+**Rationale**: Avoids modifying the shared `packages/api-client` package (which would affect API
+layer and worker). App-level interception via callback injection is consistent with the existing
+`onAuthFailure` pattern.
 
-**STAGE_UI_09 action**: Create `core/api/interceptors/error.interceptor.ts` in each app. Extend `createAppApiClient` signature to accept `onLicenseError` callback.
+**STAGE_UI_09 action**: Create `core/api/interceptors/error.interceptor.ts` in each app. Extend
+`createAppApiClient` signature to accept `onLicenseError` callback.
 
 ---
 
@@ -182,9 +222,12 @@ async function handle401(...) {
 
 **Decision**: No `token-redact.ts` utility exists in any app's `core/auth/` directory.
 
-**Gap**: FR-SEC-03 states tokens must never appear in logs — not even partial/truncated form. The existing code already avoids logging tokens, but there is no reusable utility to scrub token values from arbitrary log objects. Tests for this utility are required.
+**Gap**: FR-SEC-03 states tokens must never appear in logs — not even partial/truncated form. The
+existing code already avoids logging tokens, but there is no reusable utility to scrub token values
+from arbitrary log objects. Tests for this utility are required.
 
-**STAGE_UI_09 action**: Create `core/auth/token-redact.ts` in all three apps. Pure function, no framework dependencies.
+**STAGE_UI_09 action**: Create `core/auth/token-redact.ts` in all three apps. Pure function, no
+framework dependencies.
 
 ---
 
@@ -199,17 +242,22 @@ async function handle401(...) {
 - `vue: ^3.x` ✅
 - `@pinia/testing: ^0.1.6` (devDependency) ✅
 
-All security functionality can be implemented with existing packages. No new npm dependencies are required.
+All security functionality can be implemented with existing packages. No new npm dependencies are
+required.
 
 ---
 
 ## Finding 10: XSS Mitigation — Documentation Only
 
-**Decision**: No code changes needed for XSS mitigation in STAGE_UI_09. Vue 3's template compiler provides escaping by default. The `v-html` lint rule (`vue/no-v-html`) is enforced via ESLint config.
+**Decision**: No code changes needed for XSS mitigation in STAGE_UI_09. Vue 3's template compiler
+provides escaping by default. The `v-html` lint rule (`vue/no-v-html`) is enforced via ESLint
+config.
 
-**Evidence**: `eslint.config.mjs` at workspace root uses `eslint-plugin-vue`. The `vue/no-v-html` rule is enforceable via ESLint.
+**Evidence**: `eslint.config.mjs` at workspace root uses `eslint-plugin-vue`. The `vue/no-v-html`
+rule is enforceable via ESLint.
 
-**STAGE_UI_09 action**: Document baseline rule. Confirm lint configuration covers `vue/no-v-html`. No new code files needed.
+**STAGE_UI_09 action**: Document baseline rule. Confirm lint configuration covers `vue/no-v-html`.
+No new code files needed.
 
 ---
 
@@ -242,4 +290,5 @@ All changes are:
 2. Modifications to call-site wiring in `core/api/client.ts` (not the shared package)
 3. Extensions to existing factory function signatures (backward-compatible)
 
-The existing Trust Chain (Isolation → License → Authentication → Attempt → Runtime → Frontoffice) is unaffected. No database changes, no backend changes, no package-level structural changes.
+The existing Trust Chain (Isolation → License → Authentication → Attempt → Runtime → Frontoffice) is
+unaffected. No database changes, no backend changes, no package-level structural changes.

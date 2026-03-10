@@ -374,7 +374,8 @@ X-Correlation-ID: <request-uuid>
 
 **Behavior**:
 
-- If identical `Idempotency-Key` received within 24 hours, return cached response (same license_id, same status)
+- If identical `Idempotency-Key` received within 24 hours, return cached response (same license_id,
+  same status)
 - Response includes header: `Idempotent-Replay: true` (if response from cache)
 - Dedup key: `idempotency:<Idempotency-Key>`
 
@@ -414,7 +415,8 @@ Response: 200 OK
 2. No key, but workspace_slug matches existing license? → Return 409 Conflict
 3. New workspace_slug? → Normal provisioning flow
 
-**Summary**: API handles request dedup (Idempotency-Key); Worker ensures provisioning idempotency (license_id lock + state checks)
+**Summary**: API handles request dedup (Idempotency-Key); Worker ensures provisioning idempotency
+(license_id lock + state checks)
 
 ---
 

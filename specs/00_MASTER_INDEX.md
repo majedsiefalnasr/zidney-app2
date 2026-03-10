@@ -2,8 +2,7 @@
 
 This document defines the complete execution roadmap.
 
-Stage numbering is global and sequential.
-No stage resets across phases.
+Stage numbering is global and sequential. No stage resets across phases.
 
 ---
 

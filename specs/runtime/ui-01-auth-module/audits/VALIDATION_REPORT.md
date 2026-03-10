@@ -177,7 +177,10 @@ Verified in `auth.store.ts` for all 3 apps and confirmed by `auth.store.test.ts`
 | Migration validation    | N/A      | UI stage — no schema changes                     |
 | Snapshot grading test   | N/A      | Auth module — no grading logic                   |
 
-**Note:** Backoffice and Frontoffice implementations replicate the MMC pattern. The core business logic (token-manager, refresh-manager) is identical and covered by MMC unit tests. Per-app integration would require adding vitest configs to those apps, which is a separate infrastructure task.
+**Note:** Backoffice and Frontoffice implementations replicate the MMC pattern. The core business
+logic (token-manager, refresh-manager) is identical and covered by MMC unit tests. Per-app
+integration would require adding vitest configs to those apps, which is a separate infrastructure
+task.
 
 ---
 

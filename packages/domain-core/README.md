@@ -2,7 +2,9 @@
 
 ## Purpose
 
-Core business logic library for the Zidney platform. Contains all domain services as pure functions organized by bounded context: authentication, tenant management, licenses, attempt engine, and RBAC rule enforcement.
+Core business logic library for the Zidney platform. Contains all domain services as pure functions
+organized by bounded context: authentication, tenant management, licenses, attempt engine, and RBAC
+rule enforcement.
 
 ---
 
@@ -10,8 +12,10 @@ Core business logic library for the Zidney platform. Contains all domain service
 
 - **Authentication**: token issuance, verification, role extraction
 - **Tenant management**: workspace resolution, connection pool lifecycle
-- **License lifecycle**: state machine transitions (PENDING → ACTIVE → SOFT_LOCKED → ARCHIVED), limit enforcement
-- **Attempt engine**: attempt creation with configuration snapshot, answer recording, submission idempotency
+- **License lifecycle**: state machine transitions (PENDING → ACTIVE → SOFT_LOCKED → ARCHIVED),
+  limit enforcement
+- **Attempt engine**: attempt creation with configuration snapshot, answer recording, submission
+  idempotency
 - **RBAC**: role-based access control rule evaluation (mmc_admin, institution_admin, staff, student)
 
 ---
@@ -52,8 +56,10 @@ Does not access environment variables directly — callers inject config depende
 - **Pure functions only** — no HTTP handlers, no framework dependencies
 - **No direct DB access** — receives a `PoolClient` or `QueryRunner` injected by the API layer
 - **License state transitions are enforced here** — not in route handlers
-- **Attempt configuration snapshot is immutable** — set at creation, never re-read from live exam config
-- **Import rule**: may import from `packages/types`, `packages/logger`, `packages/validation`; must not import from `apps/*`
+- **Attempt configuration snapshot is immutable** — set at creation, never re-read from live exam
+  config
+- **Import rule**: may import from `packages/types`, `packages/logger`, `packages/validation`; must
+  not import from `apps/*`
 
 ---
 
@@ -61,23 +67,23 @@ Does not access environment variables directly — callers inject config depende
 
 ```typescript
 // Authentication
-import { createAuthService } from '@zidney/domain-core/auth'
+import { createAuthService } from "@zidney/domain-core/auth";
 // → signToken, verifyToken, hashPassword, comparePassword
 
 // License management
-import { createLicenseService } from '@zidney/domain-core/licenses'
+import { createLicenseService } from "@zidney/domain-core/licenses";
 // → createLicense, softLock, archive, restore, validateLimits, transitionState
 
 // Tenant resolution
-import { createTenantResolver } from '@zidney/domain-core/tenants'
+import { createTenantResolver } from "@zidney/domain-core/tenants";
 // → resolveBySlug, resolveById, getConnectionPool
 
 // Attempt engine
-import { createAttemptService } from '@zidney/domain-core/attempts'
+import { createAttemptService } from "@zidney/domain-core/attempts";
 // → startAttempt, recordAnswer, submitAttempt, finalizeAttempt
 
 // RBAC
-import { createRbacService } from '@zidney/domain-core/rbac'
+import { createRbacService } from "@zidney/domain-core/rbac";
 // → can, assertCan, RbacPolicy, Role
 ```
 

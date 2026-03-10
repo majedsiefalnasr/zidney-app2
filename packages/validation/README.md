@@ -2,7 +2,9 @@
 
 ## Purpose
 
-Zod-based request validation schema library for the Zidney platform. Centralizes all API input schemas so they can be shared between the API layer (for request parsing) and front-end stores (for pre-flight validation).
+Zod-based request validation schema library for the Zidney platform. Centralizes all API input
+schemas so they can be shared between the API layer (for request parsing) and front-end stores (for
+pre-flight validation).
 
 ---
 
@@ -62,22 +64,18 @@ import {
   workspaceSlugSchema,
   startAttemptSchema,
   submitAttemptSchema,
-} from '@zidney/validation'
-import type {
-  CreateLicenseInput,
-  UpdateLimitsInput,
-  PaginationParams,
-} from '@zidney/validation'
+} from "@zidney/validation";
+import type { CreateLicenseInput, UpdateLimitsInput, PaginationParams } from "@zidney/validation";
 
 // Parse and validate a request body
-const result = createLicenseSchema.safeParse(requestBody)
+const result = createLicenseSchema.safeParse(requestBody);
 if (!result.success) {
   return {
     success: false,
-    error: { code: 'VALIDATION_ERROR', message: result.error.message },
-  }
+    error: { code: "VALIDATION_ERROR", message: result.error.message },
+  };
 }
-const input: CreateLicenseInput = result.data
+const input: CreateLicenseInput = result.data;
 ```
 
 **Exports**: All schema objects (suffixed `Schema`) and their inferred `Input` / `Params` types.

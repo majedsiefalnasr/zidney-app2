@@ -4,13 +4,46 @@
 
 ## Stage Status
 
-Status: DRAFT
+Status: PRODUCTION READY Risk Level: LOW Closure Date: 2026-03-10
+
+Implementation: COMPLETE Tasks: 12 / 12 completed
+
+Scope Closed:
+
+- Prettier (Markdown only) — `.prettierrc`, `.prettierignore` updated, 955 project .md files
+  auto-formatted as formatting baseline
+- yamllint (YAML validation) — `.yamllint`, lint-staged entry with graceful fallback
+- actionlint (GitHub Workflows) — lint-staged entry, pre-push full scan with graceful skip
+- `lint-staged.config.mjs` — 4 entries (md/code/yaml/workflows) with JSDoc + dual-layer note
+- `package.json` — 3 validation scripts (format:check:md, validate:yaml, validate:workflows)
+- `.husky/pre-push` — actionlint full-scan block inserted before Final Summary
+- Unit tests — 21 tests passing (11 spec cases; T5 expanded to 8 per-glob sub-tests)
+
+Deferred Scope:
+
+- CI pipeline job definitions
+- Per-package biome.json overrides
+- Lint rule governance (STAGE_INFRA_05 scope)
+- TypeScript migration of existing files
+
+Constitutional Compliance:
+
+- ADR-0001 Database-per-tenant isolation enforced (N/A — tooling stage)
+- ADR-0002 Snapshot immutability enforced (N/A — no attempt engine)
+- ADR-0006 Server-authoritative time enforced (N/A — no time logic)
+- ADR-0007 Version compatibility enforced (N/A — no workspace routes)
+- ADR-0008 Semantic versioning enforced
+- Architecture score 100/100 — zero layer violations (pre-commit hook verified)
+
+Notes: Stage is production ready. No structural backend modifications allowed. Modifications require
+a new migration stage.
 
 ---
 
 ## Purpose
 
-Establish a deterministic, fast, and AI-safe linting and formatting pipeline for the Zidney monorepo.
+Establish a deterministic, fast, and AI-safe linting and formatting pipeline for the Zidney
+monorepo.
 
 This stage introduces a **Hybrid Lint/Format Architecture** where:
 
@@ -33,14 +66,13 @@ The goal is to provide:
 
 Modern monorepos often suffer from:
 
-• multiple overlapping linters
-• slow formatting pipelines
-• inconsistent formatting rules
-• AI-generated code violating lint rules
+• multiple overlapping linters • slow formatting pipelines • inconsistent formatting rules •
+AI-generated code violating lint rules
 
 Using both **ESLint + Prettier** typically leads to duplication and performance overhead.
 
-Biome solves most of these issues, but it does **not fully support every file type** in the Zidney repository.
+Biome solves most of these issues, but it does **not fully support every file type** in the Zidney
+repository.
 
 Therefore a **hybrid approach** is required.
 
@@ -220,9 +252,11 @@ Target runtime:
 
 ## lint-staged Integration (Required for Performance)
 
-To guarantee extremely fast pre‑commit execution in a large monorepo, the pipeline MUST use **lint-staged**.
+To guarantee extremely fast pre‑commit execution in a large monorepo, the pipeline MUST use
+**lint-staged**.
 
-Running formatters across the entire repository would violate the performance target defined in this stage.
+Running formatters across the entire repository would violate the performance target defined in this
+stage.
 
 Instead, only **staged files** are processed.
 
@@ -286,21 +320,21 @@ This replaces running multiple formatting commands manually.
 | Full repository scan              | 0.5–3 seconds    |
 | lint‑staged incremental execution | **50–150 ms**    |
 
-This design ensures the Zidney repository maintains **sub‑second commits even as the monorepo grows**.
+This design ensures the Zidney repository maintains **sub‑second commits even as the monorepo
+grows**.
 
 ---
 
 ### Governance Rule
 
-AI agents implementing this stage **must not** run Biome or Prettier across the full repository during pre‑commit.
+AI agents implementing this stage **must not** run Biome or Prettier across the full repository
+during pre‑commit.
 
 All formatting and linting MUST be executed through `lint-staged`.
 
 Full‑repository validation belongs only to:
 
-• CI pipelines
-• pre‑push hooks
-• architecture audit scripts
+• CI pipelines • pre‑push hooks • architecture audit scripts
 
 ---
 
@@ -308,9 +342,7 @@ Full‑repository validation belongs only to:
 
 The pre‑push hook performs stricter validation:
 
-• full Biome lint
-• architecture guard
-• infra audit
+• full Biome lint • architecture guard • infra audit
 
 Commands:
 

@@ -1,16 +1,14 @@
 # Testing Guide — Infrastructure Governance
 
-**Stage:** Infrastructure Governance
-**Phase:** 01_PLATFORM_FOUNDATION
-**Stage Directory:** `specs/runtime/infra-governance/`
-**Generated On:** 2026-03-05
+**Stage:** Infrastructure Governance **Phase:** 01_PLATFORM_FOUNDATION **Stage Directory:**
+`specs/runtime/infra-governance/` **Generated On:** 2026-03-05
 
 ---
 
 ## Purpose
 
-This guide explains how to validate the infrastructure governance tooling changes introduced in
-this stage. It is intended for engineers reviewing the PR and QA engineers performing end-to-end
+This guide explains how to validate the infrastructure governance tooling changes introduced in this
+stage. It is intended for engineers reviewing the PR and QA engineers performing end-to-end
 validation of the commit hook system, CI pipeline, and coverage tooling.
 
 ---
@@ -24,14 +22,14 @@ apps.
 
 After this stage:
 
-- Every `git commit` runs lint-staged (per-file ESLint + Prettier), the AI architecture guard,
-  and `infra-audit --quick` (architecture score gate)
+- Every `git commit` runs lint-staged (per-file ESLint + Prettier), the AI architecture guard, and
+  `infra-audit --quick` (architecture score gate)
 - Every `git push` runs the full unit test suite to prevent broken pushes
 - Coverage reports are generated with the v8 provider with thresholds defined (relaxed via
   `failOnError: false` until the clean baseline is measured)
 - CI runs E2E for each app (mmc, backoffice, frontoffice) in fully isolated jobs
-- `scripts/infra-audit.ts` accepts a `--quick` / `-q` flag completing in seconds instead of the
-  full 30+ second deep audit
+- `scripts/infra-audit.ts` accepts a `--quick` / `-q` flag completing in seconds instead of the full
+  30+ second deep audit
 
 ---
 
@@ -127,16 +125,15 @@ infra-audit on every commit.
    - `AI Guard: architecture validation passed.` (ai-guard)
    - `[INFRA AUDIT] Starting...` and `Architecture score: 100 / 100` (infra-audit --quick)
 
-Expected:
-Commit succeeds. All three hook steps complete without error. The commit appears in `git log`.
+Expected: Commit succeeds. All three hook steps complete without error. The commit appears in
+`git log`.
 
 Troubleshooting:
 
 - If `husky: command not found` → run `bun install` to re-trigger the `prepare` script which
   installs hooks.
-- If `lint-staged` fails on ESLint errors → these are pre-existing errors. The pre-commit hook
-  runs lint-staged with `--fix`, so fixable issues auto-fix. Non-fixable errors will block the
-  commit.
+- If `lint-staged` fails on ESLint errors → these are pre-existing errors. The pre-commit hook runs
+  lint-staged with `--fix`, so fixable issues auto-fix. Non-fixable errors will block the commit.
 - Undo the test commit: `git reset --soft HEAD~1` then `git restore apps/api/src/index.ts`
 
 ---
@@ -153,22 +150,21 @@ Troubleshooting:
    - Alternatively, inspect what the pre-push hook would do by running `bun run test:unit` directly.
 5. Observe: `bun run test:unit` runs all unit tests.
 
-Expected:
-All unit tests pass (exit 0). The push is not blocked. If any unit test fails → push is blocked
-with a clear exit code 1 from the hook.
+Expected: All unit tests pass (exit 0). The push is not blocked. If any unit test fails → push is
+blocked with a clear exit code 1 from the hook.
 
 Troubleshooting:
 
-- If tests fail, run `bun run test:unit 2>&1 | grep -E "FAIL|Error"` to identify the failing
-  test file.
+- If tests fail, run `bun run test:unit 2>&1 | grep -E "FAIL|Error"` to identify the failing test
+  file.
 - Undo the test commit: `git reset --soft HEAD~1` then `git restore package.json`
 
 ---
 
 ### Scenario 3 — infra-audit `--quick` Flag Performance (Edge Case)
 
-**Purpose:** Verify that `scripts/infra-audit.ts --quick` exits quickly and scores correctly
-without running the full deep audit.
+**Purpose:** Verify that `scripts/infra-audit.ts --quick` exits quickly and scores correctly without
+running the full deep audit.
 
 1. Run the full audit (baseline timing): `time bun run scripts/infra-audit.ts`
 2. Run the quick audit: `time bun run scripts/infra-audit.ts --quick`
@@ -178,7 +174,8 @@ Expected:
 
 - Full audit: typically 15–40 seconds depending on codebase size.
 - Quick audit (`--quick`): exits in under 5 seconds.
-- Both should output `Architecture score: 100 / 100` (or the current score — must not drop below 90).
+- Both should output `Architecture score: 100 / 100` (or the current score — must not drop below
+  90).
 - Quick audit exits with code 0.
 
 Troubleshooting:
@@ -226,9 +223,9 @@ Each E2E job must:
 
 ## Multi-Tenant Isolation Verification
 
-Not applicable for this stage. The Infrastructure Governance stage is tooling-only and introduces
-no application code, database access, API endpoints, or tenant-scoped logic. There is no
-test-isolation scenario to run.
+Not applicable for this stage. The Infrastructure Governance stage is tooling-only and introduces no
+application code, database access, API endpoints, or tenant-scoped logic. There is no test-isolation
+scenario to run.
 
 ---
 

@@ -1,9 +1,7 @@
 # IMPLEMENT REPORT — STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
 
-**Stage**: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
-**Phase**: 06_UI_APPLICATION_RUNTIME
-**Branch**: `ui-07-layout-system-integration`
-**Completed**: 2026-03-06
+**Stage**: STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION **Phase**: 06_UI_APPLICATION_RUNTIME **Branch**:
+`ui-07-layout-system-integration` **Completed**: 2026-03-06
 
 ---
 
@@ -29,7 +27,9 @@ All 56 tasks marked `[X]` in `tasks.md`.
 
 ### Phase 1 — Store Foundation (T001–T009)
 
-All 9 store tasks completed. `ui.store.ts` augmented with `sidebarCollapsed`, `isMobile`, `toggleSidebar`, `setMobile`, `$reset` in all 3 apps. `auth.store.ts` augmented with `resolvedPermissions`, `buildResolvedPermissions` in all 3 apps.
+All 9 store tasks completed. `ui.store.ts` augmented with `sidebarCollapsed`, `isMobile`,
+`toggleSidebar`, `setMobile`, `$reset` in all 3 apps. `auth.store.ts` augmented with
+`resolvedPermissions`, `buildResolvedPermissions` in all 3 apps.
 
 ### Phase 2 — Router Meta Types (T010–T012)
 
@@ -37,23 +37,31 @@ All 9 store tasks completed. `ui.store.ts` augmented with `sidebarCollapsed`, `i
 
 ### Phase 3 — Navigation Configs (T013–T015)
 
-`apps/mmc/src/core/navigation/index.ts`, `apps/backoffice/src/core/navigation/index.ts`, `apps/frontoffice/src/core/navigation/index.ts` created with typed `NavigationConfig[]` and `NavigationGroup` exports.
+`apps/mmc/src/core/navigation/index.ts`, `apps/backoffice/src/core/navigation/index.ts`,
+`apps/frontoffice/src/core/navigation/index.ts` created with typed `NavigationConfig[]` and
+`NavigationGroup` exports.
 
 ### Phase 4 — Composables (T016)
 
-`useBreakpoint.ts` created in all 3 apps. Registers resize listener, calls `setMobile()` on boot and on resize, removes listener on `onUnmounted`.
+`useBreakpoint.ts` created in all 3 apps. Registers resize listener, calls `setMobile()` on boot and
+on resize, removes listener on `onUnmounted`.
 
 ### Phase 5 — App Shell (T017–T031)
 
-`AppHeader.vue`, `AppSidebar.vue`, `AppLayout.vue` created in all 3 apps. `App.vue` updated in all 3 apps to use conditional layout shell. `standaloneLayout: true` set on auth/error routes in all 3 routers. Frontoffice hideSidebar support implemented.
+`AppHeader.vue`, `AppSidebar.vue`, `AppLayout.vue` created in all 3 apps. `App.vue` updated in all 3
+apps to use conditional layout shell. `standaloneLayout: true` set on auth/error routes in all 3
+routers. Frontoffice hideSidebar support implemented.
 
 ### Phase 6a — BackofficeLayout Removal (T032–T033)
 
-`apps/backoffice/src/layouts/BackofficeLayout.vue` deleted. Wrapper import removed from 4 backoffice view files (Dashboard, CreateRolePage, RoleDetailPage, RolesListPage).
+`apps/backoffice/src/layouts/BackofficeLayout.vue` deleted. Wrapper import removed from 4 backoffice
+view files (Dashboard, CreateRolePage, RoleDetailPage, RolesListPage).
 
 ### Phase 6b — SidebarLayout Reactive Prop Fix (T055)
 
-`packages/ui-system/src/components/Layout/SidebarLayout.vue` updated: `collapsed` prop now uses `watch` to sync into internal `isCollapsed` ref rather than one-time `ref(props.defaultCollapsed)`. Badge/Button imports corrected to relative paths (post-implementation fix).
+`packages/ui-system/src/components/Layout/SidebarLayout.vue` updated: `collapsed` prop now uses
+`watch` to sync into internal `isCollapsed` ref rather than one-time `ref(props.defaultCollapsed)`.
+Badge/Button imports corrected to relative paths (post-implementation fix).
 
 ### Phase 7 — Unit Tests (T034–T048, T052–T054)
 
@@ -68,7 +76,8 @@ All 9 store tasks completed. `ui.store.ts` augmented with `sidebarCollapsed`, `i
 
 ### Phase 8 — Integration Tests (T049–T051)
 
-`app-layout.integration.test.ts` created in all 3 apps. Tests: App.vue shell mounting, standaloneLayout bypass, backdrop toggle, Frontoffice hideSidebar behavior.
+`app-layout.integration.test.ts` created in all 3 apps. Tests: App.vue shell mounting,
+standaloneLayout bypass, backdrop toggle, Frontoffice hideSidebar behavior.
 
 ### Phase 9 — CI Validation (T056)
 
@@ -80,10 +89,14 @@ Lint and type-check verified on stage-scoped files. All gates pass.
 
 Four issues found during validation and resolved before commit:
 
-1. **SidebarLayout relative imports** — `@shadcn-vue/ui/badge` and `@shadcn-vue/ui/button` changed to `'../shadcn-vue/badge'` and `'../shadcn-vue/button'`.
-2. **`@shadcn-vue/ui` alias** — Added to `apps/{mmc,backoffice,frontoffice}/vitest.config.ts` pointing to `packages/ui-system/src/components/shadcn-vue`.
-3. **`lib/utils.ts`** — Created in `apps/backoffice/src/lib/` and `apps/frontoffice/src/lib/` (matches existing `apps/mmc/src/lib/utils.ts`).
-4. **`AppSidebar` test stub** — `sidebarLayoutStub.template` updated in all 3 `AppSidebar.test.ts` files to include `<slot name="footer" />`.
+1. **SidebarLayout relative imports** — `@shadcn-vue/ui/badge` and `@shadcn-vue/ui/button` changed
+   to `'../shadcn-vue/badge'` and `'../shadcn-vue/button'`.
+2. **`@shadcn-vue/ui` alias** — Added to `apps/{mmc,backoffice,frontoffice}/vitest.config.ts`
+   pointing to `packages/ui-system/src/components/shadcn-vue`.
+3. **`lib/utils.ts`** — Created in `apps/backoffice/src/lib/` and `apps/frontoffice/src/lib/`
+   (matches existing `apps/mmc/src/lib/utils.ts`).
+4. **`AppSidebar` test stub** — `sidebarLayoutStub.template` updated in all 3 `AppSidebar.test.ts`
+   files to include `<slot name="footer" />`.
 
 ---
 

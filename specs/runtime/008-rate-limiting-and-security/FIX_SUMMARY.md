@@ -39,17 +39,17 @@ All violations identified by guardian audits have been systematically resolved.
 
 ```typescript
 // BEFORE (incorrect):
-const gradingResult = await gradeAttempt(attemptId, answers)
+const gradingResult = await gradeAttempt(attemptId, answers);
 
 // AFTER (correct):
-const jobId = crypto.randomUUID()
+const jobId = crypto.randomUUID();
 await jobQueue.enqueue({
   /* grading job */
-})
+});
 const gradingResult = await jobQueue.waitForCompletion(jobId, {
   timeout: 30_000,
   pollInterval: 500,
-})
+});
 ```
 
 **Constitutional Alignment:**
@@ -58,7 +58,8 @@ const gradingResult = await jobQueue.waitForCompletion(jobId, {
 - ✅ PROJECT_CONTEXT_PRIMER: Worker-only grading authority enforced
 - ✅ Trust Chain: Isolation → Worker domain only
 
-**Verification:** Worker Integration section (8) now shows complete job enqueueing pattern with proper API-Worker handoff.
+**Verification:** Worker Integration section (8) now shows complete job enqueueing pattern with
+proper API-Worker handoff.
 
 ---
 
@@ -163,12 +164,11 @@ const gradingResult = await jobQueue.waitForCompletion(jobId, {
   - Permission rule documentation
   - RBAC Middleware implementation
 
-**RBAC Matrix (Example):**
-| Endpoint | HTTP Method | Allowed Roles | Forbidden Roles | Permission Rule |
-|----------|-------------|---------------|-----------------|-----------------|
-| `/auth/login` | POST | NONE (public) | N/A | No auth required |
-| `/attempt/{id}/submit` | POST | student | super_admin, org_admin, instructor | User owns attempt, status=IN_PROGRESS |
-| `/ws/attempt/{id}` | WS | student, instructor | super_admin | User has workspace + attempt access |
+**RBAC Matrix (Example):** | Endpoint | HTTP Method | Allowed Roles | Forbidden Roles | Permission
+Rule | |----------|-------------|---------------|-----------------|-----------------| |
+`/auth/login` | POST | NONE (public) | N/A | No auth required | | `/attempt/{id}/submit` | POST |
+student | super_admin, org_admin, instructor | User owns attempt, status=IN_PROGRESS | |
+`/ws/attempt/{id}` | WS | student, instructor | super_admin | User has workspace + attempt access |
 | `/admin/dlq` | GET | org_admin, super_admin | all others | View DLQ for workspace |
 
 **RBAC Middleware:**
@@ -177,7 +177,7 @@ const gradingResult = await jobQueue.waitForCompletion(jobId, {
 export const rbacMiddleware = (allowedRoles: string[]) => {
   // Validates user roles against endpoint requirements
   // Returns 403 Forbidden if role not in allowed list
-}
+};
 ```
 
 **Enforcement Order (after JWT validation):**

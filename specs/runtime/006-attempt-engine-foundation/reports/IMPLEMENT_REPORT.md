@@ -9,7 +9,10 @@
 
 ## Executive Summary
 
-The implementation phase has successfully delivered the **critical foundation layer** of the Attempt Engine. All database, type system, and core domain logic are production-ready. The remaining work consists of API routes (6), worker integration (7), and comprehensive testing (17) — all following established patterns from the foundation.
+The implementation phase has successfully delivered the **critical foundation layer** of the Attempt
+Engine. All database, type system, and core domain logic are production-ready. The remaining work
+consists of API routes (6), worker integration (7), and comprehensive testing (17) — all following
+established patterns from the foundation.
 
 **Delivery Status:** Phase A complete (100%) | Phases B-G in progress
 
@@ -106,38 +109,38 @@ enum QuestionType {
 
 // Core Interfaces
 interface Attempt {
-  id: string // UUID
-  workspace_id: string
-  user_id: string
-  attempt_type: DeliveryType
-  exam_id: string
+  id: string; // UUID
+  workspace_id: string;
+  user_id: string;
+  attempt_type: DeliveryType;
+  exam_id: string;
 
   // Snapshots (immutable after start)
-  question_snapshot: QuestionSnapshot[]
-  question_order: string[] // Question IDs in order
-  grading_config_snapshot: GradingConfig
-  mode: AttemptMode
-  flags_snapshot: AttemptFlags
-  time_limit_snapshot: number // seconds
-  exam_version: string
-  expected_schema_version: string
-  expected_product_version: string
+  question_snapshot: QuestionSnapshot[];
+  question_order: string[]; // Question IDs in order
+  grading_config_snapshot: GradingConfig;
+  mode: AttemptMode;
+  flags_snapshot: AttemptFlags;
+  time_limit_snapshot: number; // seconds
+  exam_version: string;
+  expected_schema_version: string;
+  expected_product_version: string;
 
   // Timing
-  started_at: Date // Server NOW()
-  submitted_at?: Date // Server NOW() upon submission
-  finalized_at?: Date // Server NOW() upon grading complete
-  server_start_time: string // ISO string for client validation
+  started_at: Date; // Server NOW()
+  submitted_at?: Date; // Server NOW() upon submission
+  finalized_at?: Date; // Server NOW() upon grading complete
+  server_start_time: string; // ISO string for client validation
 
   // State
-  status: AttemptStatus
-  score?: number
-  passed?: boolean
-  result_snapshot?: ResultSnapshot
+  status: AttemptStatus;
+  score?: number;
+  passed?: boolean;
+  result_snapshot?: ResultSnapshot;
 
   // Audit
-  created_at: Date
-  updated_at: Date
+  created_at: Date;
+  updated_at: Date;
 }
 ```
 
@@ -149,10 +152,10 @@ Thread-safe, per-workspace database connection pooling:
 
 ```typescript
 class TenantConnectionPool {
-  private pools: Map<string, ConnectionPool>
+  private pools: Map<string, ConnectionPool>;
 
   constructor() {
-    this.pools = new Map()
+    this.pools = new Map();
   }
 
   async getConnection(workspaceId: string): Promise<PoolClient> {
@@ -162,22 +165,18 @@ class TenantConnectionPool {
         database: process.env.DB_NAME,
         // Per-tenant credentials (future enhancement)
         max: 5, // 5 connections per tenant
-      })
-      this.pools.set(workspaceId, pool)
+      });
+      this.pools.set(workspaceId, pool);
     }
-    return this.pools.get(workspaceId)!.connect()
+    return this.pools.get(workspaceId)!.connect();
   }
 
-  async execute<T>(
-    workspaceId: string,
-    query: string,
-    params: any[]
-  ): Promise<T[]> {
-    const client = await this.getConnection(workspaceId)
+  async execute<T>(workspaceId: string, query: string, params: any[]): Promise<T[]> {
+    const client = await this.getConnection(workspaceId);
     try {
-      return (await client.query(query, params)).rows
+      return (await client.query(query, params)).rows;
     } finally {
-      client.release()
+      client.release();
     }
   }
 }
@@ -213,7 +212,7 @@ const queries = {
     FOR UPDATE SKIP LOCKED NOWAIT;
   `,
   // ... 7 more queries
-}
+};
 ```
 
 ✅ Zero SQL injection risk | Parameterized throughout | Per-warehouse filtering
@@ -225,30 +224,29 @@ Schema and product version compatibility matrices:
 ```typescript
 const versionMatrix = {
   schema_compatibility: {
-    '1.0.0': { can_read: ['1.0.0'], can_write: '1.0.0' },
-    '1.1.0': { can_read: ['1.0.0', '1.1.0'], can_write: '1.1.0' },
-    '2.0.0': { can_read: ['1.1.0', '2.0.0'], can_write: '2.0.0' },
+    "1.0.0": { can_read: ["1.0.0"], can_write: "1.0.0" },
+    "1.1.0": { can_read: ["1.0.0", "1.1.0"], can_write: "1.1.0" },
+    "2.0.0": { can_read: ["1.1.0", "2.0.0"], can_write: "2.0.0" },
   },
 
   product_compatibility: {
-    '24.1.0': { min_schema: '1.0.0', max_schema: '1.1.0' },
-    '24.2.0': { min_schema: '1.1.0', max_schema: '2.0.0' },
+    "24.1.0": { min_schema: "1.0.0", max_schema: "1.1.0" },
+    "24.2.0": { min_schema: "1.1.0", max_schema: "2.0.0" },
   },
-}
+};
 
 function isVersionCompatible(
   attempt_schema: string,
   attempt_product: string,
   current_schema: string,
-  current_product: string
+  current_product: string,
 ): boolean {
-  const schemaCompat = versionMatrix.schema_compatibility[current_schema]
-  const productCompat = versionMatrix.product_compatibility[current_product]
+  const schemaCompat = versionMatrix.schema_compatibility[current_schema];
+  const productCompat = versionMatrix.product_compatibility[current_product];
 
   return (
-    schemaCompat.can_read.includes(attempt_schema) &&
-    attempt_product >= productCompat.min_schema
-  )
+    schemaCompat.can_read.includes(attempt_schema) && attempt_product >= productCompat.min_schema
+  );
 }
 ```
 
@@ -260,28 +258,28 @@ Extract workspace from URL, validate license, inject into request context:
 
 ```typescript
 export async function tenantResolver(ctx: Context, next: () => Promise<void>) {
-  const subdomain = ctx.request.hostname.split('.')[0]
-  const pathMatch = ctx.request.path.match(/^\/workspace\/([a-z0-9-]+)/)
+  const subdomain = ctx.request.hostname.split(".")[0];
+  const pathMatch = ctx.request.path.match(/^\/workspace\/([a-z0-9-]+)/);
 
-  const workspaceSlug = subdomain !== 'api' ? subdomain : pathMatch?.[1]
+  const workspaceSlug = subdomain !== "api" ? subdomain : pathMatch?.[1];
 
   if (!workspaceSlug) {
-    ctx.status = 400
+    ctx.status = 400;
     ctx.body = {
       success: false,
-      error: { code: 'INVALID_TENANT', message: 'Workspace not found' },
-    }
-    return
+      error: { code: "INVALID_TENANT", message: "Workspace not found" },
+    };
+    return;
   }
 
   // Store in context for downstream middleware
   ctx.state.workspace = {
     slug: workspaceSlug,
     db: await tenantPool.getConnection(workspaceSlug),
-  }
+  };
 
-  ctx.set('X-Workspace-Id', workspaceSlug)
-  await next()
+  ctx.set("X-Workspace-Id", workspaceSlug);
+  await next();
 }
 ```
 
@@ -297,17 +295,14 @@ Deterministic snapshot capture at attempt start:
 
 ```typescript
 class SnapshotBuilder {
-  async buildSnapshot(
-    exam: Exam,
-    workspace: Workspace
-  ): Promise<AttemptSnapshot> {
+  async buildSnapshot(exam: Exam, workspace: Workspace): Promise<AttemptSnapshot> {
     // 1. Resolve all questions
-    const questions = await this.resolveQuestions(exam)
+    const questions = await this.resolveQuestions(exam);
 
     // 2. Shuffle if required (deterministic PRNG seeded by exam.seed)
     const shuffled = exam.shuffle_questions
       ? this.deterministicShuffle(questions, exam.shuffle_seed)
-      : questions
+      : questions;
 
     // 3. Capture grading config
     const gradingConfig = {
@@ -316,7 +311,7 @@ class SnapshotBuilder {
       question_weights: exam.question_weights,
       time_limit: exam.time_limit_seconds,
       negative_marking: exam.negative_marking_config,
-    }
+    };
 
     return {
       question_snapshot: questions,
@@ -324,18 +319,18 @@ class SnapshotBuilder {
       grading_config_snapshot: gradingConfig,
       mode: exam.exam_mode,
       captured_at: new Date(),
-    }
+    };
   }
 
   private deterministicShuffle(items: any[], seed: number): any[] {
     // PRNG algorithm ensures same order for same seed
-    const seededRandom = this.seededRandomGenerator(seed)
-    const shuffled = [...items]
+    const seededRandom = this.seededRandomGenerator(seed);
+    const shuffled = [...items];
     for (let i = shuffled.length - 1; i > 0; i--) {
-      const j = Math.floor(seededRandom() * (i + 1))
-      ;[shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]]
+      const j = Math.floor(seededRandom() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
     }
-    return shuffled
+    return shuffled;
   }
 }
 ```
@@ -348,38 +343,31 @@ Safe exam loading with eligibility and prerequisite checks:
 
 ```typescript
 class ExamLoader {
-  async loadExam(
-    examId: string,
-    userId: string,
-    workspaceId: string
-  ): Promise<Exam> {
+  async loadExam(examId: string, userId: string, workspaceId: string): Promise<Exam> {
     const exam = await this.db.query<Exam>(
       `
       SELECT * FROM exams WHERE id = $1 AND workspace_id = $2
     `,
-      [examId, workspaceId]
-    )
+      [examId, workspaceId],
+    );
 
-    if (!exam) throw new NotFoundError('Exam not found')
+    if (!exam) throw new NotFoundError("Exam not found");
 
     // Check eligibility
-    const enrolled = await this.checkEnrollment(userId, examId)
-    if (!enrolled) throw new ForbiddenError('Not enrolled in this exam')
+    const enrolled = await this.checkEnrollment(userId, examId);
+    if (!enrolled) throw new ForbiddenError("Not enrolled in this exam");
 
     // Check prerequisites
-    const prereqsMet = await this.checkPrerequisites(
-      userId,
-      exam.prerequisite_exams
-    )
-    if (!prereqsMet) throw new ForbiddenError('Prerequisites not met')
+    const prereqsMet = await this.checkPrerequisites(userId, exam.prerequisite_exams);
+    if (!prereqsMet) throw new ForbiddenError("Prerequisites not met");
 
     // Check attempt limits
-    const attemptCount = await this.countAttempts(userId, examId)
+    const attemptCount = await this.countAttempts(userId, examId);
     if (attemptCount >= exam.max_attempts) {
-      throw new ForbiddenError('Attempt limit reached')
+      throw new ForbiddenError("Attempt limit reached");
     }
 
-    return exam
+    return exam;
   }
 }
 ```
@@ -395,48 +383,44 @@ class ScoreEngine {
   computeScore(
     attempt: Attempt,
     studentResponses: StudentResponse[],
-    snapshot: AttemptSnapshot
+    snapshot: AttemptSnapshot,
   ): GradingResult {
-    let totalScore = 0
-    const questionScores: QuestionScore[] = []
+    let totalScore = 0;
+    const questionScores: QuestionScore[] = [];
 
     // Score each question using snapshot
     for (const question of snapshot.question_snapshot) {
-      const response = studentResponses.find(
-        (r) => r.question_id === question.id
-      )
-      let score = 0
+      const response = studentResponses.find((r) => r.question_id === question.id);
+      let score = 0;
 
       switch (question.type) {
         case QuestionType.MULTIPLE_CHOICE:
-          score =
-            response?.selected === question.correct_answer ? question.points : 0
-          break
+          score = response?.selected === question.correct_answer ? question.points : 0;
+          break;
 
         case QuestionType.TRUE_FALSE:
-          score =
-            response?.selected === question.correct_answer ? question.points : 0
-          break
+          score = response?.selected === question.correct_answer ? question.points : 0;
+          break;
 
         case QuestionType.FILL_BLANK:
           score = this.matchFillBlank(response?.text, question.correct_answers)
             ? question.points
-            : 0
-          break
+            : 0;
+          break;
 
         // ... 3 more question types
       }
 
-      totalScore += score
-      questionScores.push({ question_id: question.id, score })
+      totalScore += score;
+      questionScores.push({ question_id: question.id, score });
     }
 
     // Apply grading config
-    const config = snapshot.grading_config_snapshot
-    const finalScore = (totalScore / this.totalPossiblePoints(snapshot)) * 100
-    const passed = finalScore >= config.passing_score
+    const config = snapshot.grading_config_snapshot;
+    const finalScore = (totalScore / this.totalPossiblePoints(snapshot)) * 100;
+    const passed = finalScore >= config.passing_score;
 
-    return { total_score: finalScore, passed, question_scores }
+    return { total_score: finalScore, passed, question_scores };
   }
 }
 ```
@@ -737,7 +721,8 @@ The **Attempt Engine Foundation is solid and production-ready**. The 22 complete
 6. ✅ **Idempotency infrastructure** (triple-layer protection)
 7. ✅ **Version compatibility** (forward-only migrations)
 
-The remaining 50 tasks follow established patterns and can be implemented in parallel across API, Worker, and Testing phases.
+The remaining 50 tasks follow established patterns and can be implemented in parallel across API,
+Worker, and Testing phases.
 
 ---
 

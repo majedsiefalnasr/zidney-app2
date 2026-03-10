@@ -6,7 +6,8 @@
 
 ## Overview
 
-This stage has no database entities. All entities are TypeScript-only compile-time and runtime types representing immutable configuration objects.
+This stage has no database entities. All entities are TypeScript-only compile-time and runtime types
+representing immutable configuration objects.
 
 ---
 
@@ -26,8 +27,10 @@ The core environment configuration object. One instance per app lifetime. Frozen
 ### Validation Rules
 
 - `apiBaseUrl` MUST be a non-empty string. Missing/empty → synchronous throw before mount.
-- `appEnv` MUST be one of the three allowed values. Unrecognized value → defaults to `'development'`.
-- `appName` is informational. Defaults to app identifier if missing (e.g., `'mmc'`, `'backoffice'`, `'frontoffice'`).
+- `appEnv` MUST be one of the three allowed values. Unrecognized value → defaults to
+  `'development'`.
+- `appName` is informational. Defaults to app identifier if missing (e.g., `'mmc'`, `'backoffice'`,
+  `'frontoffice'`).
 - `debugMode` normalized from string: `"true"` → `true`, all else → `false`.
 
 ### Immutability
@@ -38,7 +41,8 @@ The core environment configuration object. One instance per app lifetime. Frozen
 
 ## Entity: EnvConfig (Backoffice Extension)
 
-Backoffice extends the base config with optional workspace-scoped fields for development convenience.
+Backoffice extends the base config with optional workspace-scoped fields for development
+convenience.
 
 ### Additional Fields
 
@@ -107,7 +111,8 @@ Composite configuration exposed as the public API. This is what application code
 ### Notes
 
 - Mode helpers are standalone exported functions, not methods on the config object.
-- `getApiBase()` is a function (not a property) to allow future resolution logic without breaking callers.
+- `getApiBase()` is a function (not a property) to allow future resolution logic without breaking
+  callers.
 - All helpers are pure functions of the frozen `env` object.
 
 ---
@@ -120,10 +125,10 @@ Located in `packages/types/src/env-config.ts`.
 
 ```typescript
 export interface ZidneyEnvConfig {
-  readonly apiBaseUrl: string
-  readonly appEnv: 'development' | 'staging' | 'production'
-  readonly appName: string
-  readonly debugMode: boolean
+  readonly apiBaseUrl: string;
+  readonly appEnv: "development" | "staging" | "production";
+  readonly appName: string;
+  readonly debugMode: boolean;
 }
 ```
 
@@ -131,7 +136,7 @@ export interface ZidneyEnvConfig {
 
 ```typescript
 export interface ZidneyFeatureFlags {
-  readonly enableDebugPanel: boolean
+  readonly enableDebugPanel: boolean;
 }
 ```
 
@@ -139,8 +144,8 @@ export interface ZidneyFeatureFlags {
 
 ```typescript
 export interface ZidneyAppConfig {
-  readonly env: ZidneyEnvConfig
-  readonly flags: ZidneyFeatureFlags
+  readonly env: ZidneyEnvConfig;
+  readonly flags: ZidneyFeatureFlags;
 }
 ```
 
@@ -155,7 +160,8 @@ export interface ZidneyAppConfig {
 
 ## State Transitions
 
-None. Configuration is immutable after initialization. There are no state machines or lifecycle transitions.
+None. Configuration is immutable after initialization. There are no state machines or lifecycle
+transitions.
 
 ## Relationships
 

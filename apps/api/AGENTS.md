@@ -66,8 +66,7 @@ API MUST:
 - Never allow cross-tenant joins
 - Never allow manual tenant override from request body
 
-No service may instantiate its own DB connection.
-All DB access must come from request context.
+No service may instantiate its own DB connection. All DB access must come from request context.
 
 ---
 
@@ -83,8 +82,7 @@ Must enforce:
 - DELETED → 404
 - PROVISIONING → restricted
 
-Soft lock expiration must be validated at runtime.
-Auto-transition to ARCHIVED when expired.
+Soft lock expiration must be validated at runtime. Auto-transition to ARCHIVED when expired.
 
 Student and staff limits must be:
 
@@ -126,8 +124,7 @@ API must:
 - Enforce token_version invalidation
 - Reject expired tokens
 
-RBAC rules live server-side only.
-Frontend must not compute permissions.
+RBAC rules live server-side only. Frontend must not compute permissions.
 
 ---
 
@@ -164,14 +161,8 @@ API must never operate on outdated schema.
 
 All errors MUST follow:
 
-{
-success: false,
-error: {
-code: "ERROR_CODE",
-message: "Human readable message"
-},
-request_id: "uuid"
-}
+{ success: false, error: { code: "ERROR_CODE", message: "Human readable message" }, request_id:
+"uuid" }
 
 API must:
 
@@ -191,8 +182,7 @@ Every request must include:
 - user_id (if authenticated)
 - attempt_id (if applicable)
 
-Structured logs only.
-No console.log.
+Structured logs only. No console.log.
 
 Critical events must be logged:
 

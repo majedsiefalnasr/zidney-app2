@@ -30,7 +30,8 @@
 
 ### Ambiguity
 
-If Redis cache expires between commit and write (member creation idempotency), could a second POST request execute the POST logic again and create a duplicate?
+If Redis cache expires between commit and write (member creation idempotency), could a second POST
+request execute the POST logic again and create a duplicate?
 
 ### Resolution (Option C: Hybrid)
 
@@ -50,7 +51,8 @@ Execution Flow:
      → No data loss, deterministic deduplication
 ```
 
-**Guarantee:** UNIQUE(username) and UNIQUE(email) prevent actual duplicate even if both cache and request_log miss (backend fault tolerance).
+**Guarantee:** UNIQUE(username) and UNIQUE(email) prevent actual duplicate even if both cache and
+request_log miss (backend fault tolerance).
 
 **Impact:** Race window eliminated; determinism restored; aligns with financial-grade standards.
 
@@ -60,7 +62,8 @@ Execution Flow:
 
 ### Ambiguity
 
-When role permissions change (e.g., can_edit=false→true), are ALL affected members' token_version increments committed in a single transaction?
+When role permissions change (e.g., can_edit=false→true), are ALL affected members' token_version
+increments committed in a single transaction?
 
 ### Resolution
 
@@ -86,7 +89,8 @@ COMMIT;
 - Rollback: Neither change applied; consistency maintained
 - No partial state possible
 
-**Session Impact:** Within <100ms, all affected members' active tokens trigger 401 UNAUTHORIZED on next API call (middleware validates token_version against DB).
+**Session Impact:** Within <100ms, all affected members' active tokens trigger 401 UNAUTHORIZED on
+next API call (middleware validates token_version against DB).
 
 ---
 
@@ -225,10 +229,10 @@ What are the exact bcrypt/Argon2 parameters to use?
 **Implementation:**
 
 ```typescript
-import bcrypt from 'bcryptjs' // or native bcrypt
+import bcrypt from "bcryptjs"; // or native bcrypt
 
-const hashed = await bcrypt.hash(plaintext, 12)
-const match = await bcrypt.compare(plaintext, hashed) // Timing-safe
+const hashed = await bcrypt.hash(plaintext, 12);
+const match = await bcrypt.compare(plaintext, hashed); // Timing-safe
 ```
 
 **No Override Per Request:** All SSO flows, API setups, and batch operations use these parameters.
@@ -237,12 +241,16 @@ const match = await bcrypt.compare(plaintext, hashed) // Timing-safe
 
 ## Constitutional Alignment
 
-✅ **Q1 (Idempotency):** Aligns with ADR-0009 (Attempt Integrity) — deterministic deduplication ensures exactly-once semantics  
+✅ **Q1 (Idempotency):** Aligns with ADR-0009 (Attempt Integrity) — deterministic deduplication
+ensures exactly-once semantics  
 ✅ **Q2 (Token Cascade):** Aligns with ADR-0006 (Runtime Execution) — atomic session invalidation  
-✅ **Q3 (Permission Determinism):** Aligns with AGENTS.md (Attempt Engine Integrity) — no runtime policy evaluation  
+✅ **Q3 (Permission Determinism):** Aligns with AGENTS.md (Attempt Engine Integrity) — no runtime
+policy evaluation  
 ✅ **Q4 (Error Contract):** Aligns with ADR-0011 (Error Handling) — structured responses  
-✅ **Q5 (Invitation Edge Case):** Aligns with ADR-0003 (Master DB) — no assumption of uniqueness except where enforced  
-✅ **Q6 (Password Hashing):** Aligns with ADR-0005 (Security Model) — no plaintext, deterministic hashing
+✅ **Q5 (Invitation Edge Case):** Aligns with ADR-0003 (Master DB) — no assumption of uniqueness
+except where enforced  
+✅ **Q6 (Password Hashing):** Aligns with ADR-0005 (Security Model) — no plaintext, deterministic
+hashing
 
 ---
 
@@ -250,7 +258,8 @@ const match = await bcrypt.compare(plaintext, hashed) // Timing-safe
 
 - ✅ All ambiguities have testable resolutions
 - ✅ No inference or implicit behavior remains
-- ✅ Edge cases (cache failures, FK conflicts, duplicate emails, role deletion, token expiry) covered
+- ✅ Edge cases (cache failures, FK conflicts, duplicate emails, role deletion, token expiry)
+  covered
 - ✅ All resolutions constitutional compliant
 - ✅ Specification updated in-place with clarifications section
 

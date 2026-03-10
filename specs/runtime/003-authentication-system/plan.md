@@ -118,41 +118,41 @@ This plan does NOT introduce new architecture. It operationalizes existing gover
 
 ```typescript
 handler: async (c) => {
-  const { email, password } = await c.req.json()
+  const { email, password } = await c.req.json();
 
   // Validate input
-  if (!email || email.length > 256) throw ValidationError()
-  if (!password || password.length < 8) throw ValidationError()
+  if (!email || email.length > 256) throw ValidationError();
+  if (!password || password.length < 8) throw ValidationError();
 
   // Resolve workspace & license (from middleware)
-  const workspaceId = c.get('workspace_id')
-  const license = c.get('license')
-  const correlationId = c.get('correlation_id')
-  const tenantDb = c.get('tenant_db')
+  const workspaceId = c.get("workspace_id");
+  const license = c.get("license");
+  const correlationId = c.get("correlation_id");
+  const tenantDb = c.get("tenant_db");
 
   // Transaction: REPEATABLE READ with row lock
-  await tenantDb.transaction('repeatable_read', async (trx) => {
+  await tenantDb.transaction("repeatable_read", async (trx) => {
     // 1. Fetch user with row lock
     const user = await trx
       .select()
       .from(users)
       .where(eq(users.email, email))
-      .for('update')
-      .then((rows) => rows[0])
+      .for("update")
+      .then((rows) => rows[0]);
 
     // Check account lock (or hash dummy if user not found)
     if (!user) {
       // Security: Hash dummy password to prevent timing attack
-      await hashPassword('')
+      await hashPassword("");
       // Log failed attempt
       await tenantDb.insert(login_attempts).values({
         email,
         success: false,
-        ip_address: c.req.header('x-forwarded-for'),
-        user_agent: c.req.header('user-agent'),
-        error_reason: 'user_not_found',
-      })
-      throw InvalidCredentialsError()
+        ip_address: c.req.header("x-forwarded-for"),
+        user_agent: c.req.header("user-agent"),
+        error_reason: "user_not_found",
+      });
+      throw InvalidCredentialsError();
     }
 
     if (user.locked_until && user.locked_until > new Date()) {
@@ -160,24 +160,24 @@ handler: async (c) => {
       await tenantDb.insert(login_attempts).values({
         email,
         success: false,
-        user_agent: c.req.header('user-agent'),
-        error_reason: 'account_locked',
-        ip_address: c.req.header('x-forwarded-for'),
-      })
-      throw AccountLockedError(429)
+        user_agent: c.req.header("user-agent"),
+        error_reason: "account_locked",
+        ip_address: c.req.header("x-forwarded-for"),
+      });
+      throw AccountLockedError(429);
     }
 
     // 2. Verify password
-    const passwordMatch = await verifyPassword(password, user.password_hash)
+    const passwordMatch = await verifyPassword(password, user.password_hash);
     if (!passwordMatch) {
       // Log failed attempt
       await tenantDb.insert(login_attempts).values({
         email,
         success: false,
-        ip_address: c.req.header('x-forwarded-for'),
-        user_agent: c.req.header('user-agent'),
-        error_reason: 'invalid_password',
-      })
+        ip_address: c.req.header("x-forwarded-for"),
+        user_agent: c.req.header("user-agent"),
+        error_reason: "invalid_password",
+      });
 
       // Check failure count
       const recentFailures = await tenantDb
@@ -187,40 +187,40 @@ handler: async (c) => {
           and(
             eq(login_attempts.email, email),
             eq(login_attempts.success, false),
-            gt(login_attempts.created_at, sql`NOW() - INTERVAL '15 minutes'`)
-          )
+            gt(login_attempts.created_at, sql`NOW() - INTERVAL '15 minutes'`),
+          ),
         )
-        .then((rows) => rows[0].count)
+        .then((rows) => rows[0].count);
 
       // Lock account if threshold reached (during same transaction)
       if (recentFailures >= 5) {
         await tenantDb
           .update(users)
           .set({ locked_until: sql`NOW() + INTERVAL '30 minutes'` })
-          .where(eq(users.id, user.id))
+          .where(eq(users.id, user.id));
 
         await tenantDb.insert(audit_logs).values({
-          event_type: 'account_locked',
+          event_type: "account_locked",
           user_id: null,
           workspace_id: workspaceId,
           correlation_id: correlationId,
-          ip_address: c.req.header('x-forwarded-for'),
-          user_agent: c.req.header('user-agent'),
-          result: 'FAILURE',
+          ip_address: c.req.header("x-forwarded-for"),
+          user_agent: c.req.header("user-agent"),
+          result: "FAILURE",
           details: { attempt_count: recentFailures },
-        })
+        });
       }
 
-      throw InvalidCredentialsError()
+      throw InvalidCredentialsError();
     }
 
     // 3. Generate JWT
-    const schemaVersion = c.get('schema_version')
-    const now = new Date()
-    const expiresAt = new Date(now.getTime() + 15 * 60 * 1000) // 15 minutes
+    const schemaVersion = c.get("schema_version");
+    const now = new Date();
+    const expiresAt = new Date(now.getTime() + 15 * 60 * 1000); // 15 minutes
 
     const token = await signJWT({
-      scope: 'BACKOFFICE',
+      scope: "BACKOFFICE",
       workspace_id: workspaceId,
       user_id: user.id,
       role: user.role,
@@ -229,7 +229,7 @@ handler: async (c) => {
       product_version: license.product_version,
       issued_at: now.toISOString(),
       expires_at: expiresAt.toISOString(),
-    })
+    });
 
     // 4. Update user & log success
     await tenantDb
@@ -237,31 +237,31 @@ handler: async (c) => {
       .set({
         last_login: now,
       })
-      .where(eq(users.id, user.id))
+      .where(eq(users.id, user.id));
 
     await tenantDb.insert(login_attempts).values({
       email,
       success: true,
-      ip_address: c.req.header('x-forwarded-for'),
-      user_agent: c.req.header('user-agent'),
+      ip_address: c.req.header("x-forwarded-for"),
+      user_agent: c.req.header("user-agent"),
       created_at: now,
-    })
+    });
 
     await tenantDb.insert(audit_logs).values({
-      event_type: 'login_success',
+      event_type: "login_success",
       user_id: user.id,
       workspace_id: workspaceId,
       correlation_id: correlationId,
-      ip_address: c.req.header('x-forwarded-for'),
-      user_agent: c.req.header('user-agent'),
-      result: 'SUCCESS',
+      ip_address: c.req.header("x-forwarded-for"),
+      user_agent: c.req.header("user-agent"),
+      result: "SUCCESS",
       details: {
         token_version: user.token_version,
         schema_version: schemaVersion,
         product_version: license.product_version,
       },
       timestamp: now,
-    })
+    });
 
     // 5. Return token
     return c.json(
@@ -278,10 +278,10 @@ handler: async (c) => {
         },
         error: null,
       },
-      200
-    )
-  })
-}
+      200,
+    );
+  });
+};
 ```
 
 #### JWT Validation Middleware (New)
@@ -290,90 +290,88 @@ Applied to all protected routes (not login/logout):
 
 ```typescript
 const jwtValidationMiddleware = async (c, next) => {
-  const authHeader = c.req.header('authorization')
-  if (!authHeader?.startsWith('Bearer ')) {
-    throw UnauthorizedError('No token provided')
+  const authHeader = c.req.header("authorization");
+  if (!authHeader?.startsWith("Bearer ")) {
+    throw UnauthorizedError("No token provided");
   }
 
-  const token = authHeader.slice(7)
+  const token = authHeader.slice(7);
 
   // 1. Verify signature
-  const claims = await verifyJWT(token, JWT_SECRET)
+  const claims = await verifyJWT(token, JWT_SECRET);
 
   // 2. Check expiration
-  const expiresAt = new Date(claims.expires_at)
+  const expiresAt = new Date(claims.expires_at);
   if (new Date() > expiresAt) {
     await auditLog({
-      event_type: 'token_invalid',
-      reason: 'expired',
-      correlation_id: c.get('correlation_id'),
-    })
-    throw UnauthorizedError('Token expired')
+      event_type: "token_invalid",
+      reason: "expired",
+      correlation_id: c.get("correlation_id"),
+    });
+    throw UnauthorizedError("Token expired");
   }
 
   // 3. Validate scope
-  const allowedScopes = c.get('allowed_scopes') || []
+  const allowedScopes = c.get("allowed_scopes") || [];
   if (!allowedScopes.includes(claims.scope)) {
-    throw UnauthorizedError('Scope not allowed')
+    throw UnauthorizedError("Scope not allowed");
   }
 
   // 4. For tenant tokens, validate workspace_id
-  if (claims.scope !== 'MMC') {
-    const resolvedWorkspaceId = c.get('workspace_id')
+  if (claims.scope !== "MMC") {
+    const resolvedWorkspaceId = c.get("workspace_id");
     if (claims.workspace_id !== resolvedWorkspaceId) {
       await auditLog({
-        event_type: 'workspace_mismatch',
-        correlation_id: c.get('correlation_id'),
+        event_type: "workspace_mismatch",
+        correlation_id: c.get("correlation_id"),
         details: {
           token_workspace_id: claims.workspace_id,
           resolved_workspace_id: resolvedWorkspaceId,
         },
-      })
-      throw UnauthorizedError('Token workspace mismatch')
+      });
+      throw UnauthorizedError("Token workspace mismatch");
     }
   }
 
   // 5. Check token_version
-  const tenantDb = c.get('tenant_db')
+  const tenantDb = c.get("tenant_db");
   const user = await tenantDb
     .select({ token_version: users.token_version })
     .from(users)
     .where(eq(users.id, claims.user_id))
-    .then((rows) => rows[0])
+    .then((rows) => rows[0]);
 
   if (!user || user.token_version !== claims.token_version) {
     await auditLog({
-      event_type: 'token_version_mismatch',
-      correlation_id: c.get('correlation_id'),
+      event_type: "token_version_mismatch",
+      correlation_id: c.get("correlation_id"),
       details: {
         token_version: claims.token_version,
         user_token_version: user?.token_version,
       },
-    })
-    throw UnauthorizedError('Token invalidated')
+    });
+    throw UnauthorizedError("Token invalidated");
   }
 
   // 6. Check schema_version
-  const schemaVersion = c.get('schema_version')
+  const schemaVersion = c.get("schema_version");
   if (claims.schema_version !== schemaVersion) {
-    throw UpgradeRequiredError('Schema version mismatch', 426)
+    throw UpgradeRequiredError("Schema version mismatch", 426);
   }
 
   // 7. Check product_version compatibility
-  const license = c.get('license')
-  if (
-    !isProductVersionCompatible(claims.product_version, license.product_version)
-  ) {
-    throw UpgradeRequiredError('Product version incompatible', 426)
+  const license = c.get("license");
+  if (!isProductVersionCompatible(claims.product_version, license.product_version)) {
+    throw UpgradeRequiredError("Product version incompatible", 426);
   }
 
   // Attach claims to context
-  c.set('user_id', claims.user_id)
-  c.set('user_scope', claims.scope)
-  c.set('user_claims', claims)
+  c.set("user_id", claims.user_id);
+  c.set("user_scope", claims.scope);
+  c.set("user_claims", claims);
 
-  await next()
-}
+  await next();
+};
 ```
 
 #### Error Response Contract (Updated)
@@ -421,14 +419,11 @@ const jwtValidationMiddleware = async (c, next) => {
 
 export async function hashPassword(password: string): Promise<string> {
   // bcrypt with 12 rounds
-  return bcrypt.hash(password, 12)
+  return bcrypt.hash(password, 12);
 }
 
-export async function verifyPassword(
-  password: string,
-  hash: string
-): Promise<boolean> {
-  return bcrypt.compare(password, hash)
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
 }
 ```
 
@@ -438,31 +433,28 @@ export async function verifyPassword(
 // packages/domain-core/auth/jwt.ts
 
 export interface JWTClaims {
-  scope: 'MMC' | 'BACKOFFICE' | 'FRONTOFFICE'
-  workspace_id?: string
-  user_id: string
-  role?: string
-  token_version: number
-  schema_version?: string
-  product_version?: string
-  division_id?: string
-  subscription_status?: string
-  issued_at: string
-  expires_at: string
+  scope: "MMC" | "BACKOFFICE" | "FRONTOFFICE";
+  workspace_id?: string;
+  user_id: string;
+  role?: string;
+  token_version: number;
+  schema_version?: string;
+  product_version?: string;
+  division_id?: string;
+  subscription_status?: string;
+  issued_at: string;
+  expires_at: string;
 }
 
 export async function signJWT(claims: JWTClaims): Promise<string> {
   return jwt.sign(claims, JWT_SECRET, {
-    algorithm: 'HS256',
-    expiresIn: '15m',
-  })
+    algorithm: "HS256",
+    expiresIn: "15m",
+  });
 }
 
-export async function verifyJWT(
-  token: string,
-  secret: string
-): Promise<JWTClaims> {
-  return jwt.verify(token, secret) as JWTClaims
+export async function verifyJWT(token: string, secret: string): Promise<JWTClaims> {
+  return jwt.verify(token, secret) as JWTClaims;
 }
 ```
 
@@ -474,25 +466,20 @@ export async function verifyJWT(
 export async function evaluatePermission(
   userId: string,
   requiredPermission: string,
-  tenantDb: Database
+  tenantDb: Database,
 ): Promise<boolean> {
   const userWithPermissions = await tenantDb
     .select()
     .from(users)
     .leftJoin(user_roles, eq(users.id, user_roles.user_id))
-    .leftJoin(
-      role_permissions,
-      eq(user_roles.role_id, role_permissions.role_id)
-    )
-    .where(eq(users.id, userId))
+    .leftJoin(role_permissions, eq(user_roles.role_id, role_permissions.role_id))
+    .where(eq(users.id, userId));
 
-  if (!userWithPermissions.length) return false
+  if (!userWithPermissions.length) return false;
 
-  const permissions = userWithPermissions
-    .map((r) => r.role_permission?.permission)
-    .filter(Boolean)
+  const permissions = userWithPermissions.map((r) => r.role_permission?.permission).filter(Boolean);
 
-  return permissions.includes(requiredPermission)
+  return permissions.includes(requiredPermission);
 }
 ```
 
@@ -500,27 +487,27 @@ export async function evaluatePermission(
 
 ```typescript
 export interface AuthenticatedUser {
-  id: string
-  email: string
-  role: 'ADMIN' | 'STAFF' | 'INSTRUCTOR' | 'STUDENT'
-  workspace_id?: string
-  division_id?: string
-  token_version: number
+  id: string;
+  email: string;
+  role: "ADMIN" | "STAFF" | "INSTRUCTOR" | "STUDENT";
+  workspace_id?: string;
+  division_id?: string;
+  token_version: number;
 }
 
 export interface LoginRequest {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface LoginResponse {
-  token: string
-  expires_in: number
+  token: string;
+  expires_in: number;
   user: {
-    id: string
-    email: string
-    role: string
-  }
+    id: string;
+    email: string;
+    role: string;
+  };
 }
 ```
 
@@ -533,7 +520,7 @@ export interface LoginResponse {
 ```typescript
 // apps/frontoffice/src/stores/auth.ts (Pinia store)
 
-export const useAuthStore = defineStore('auth', {
+export const useAuthStore = defineStore("auth", {
   state: () => ({
     token: null as string | null,
     user: null as AuthUser | null,
@@ -544,60 +531,60 @@ export const useAuthStore = defineStore('auth', {
   getters: {
     isAuthenticated: (state) => !!state.token,
     hasExpired: (state) => {
-      if (!state.token) return false
+      if (!state.token) return false;
       // Note: Only for UX hint, NOT for security
-      const claims = jwtDecode(state.token)
-      return new Date(claims.expires_at) < new Date()
+      const claims = jwtDecode(state.token);
+      return new Date(claims.expires_at) < new Date();
     },
   },
 
   actions: {
     async login(email: string, password: string) {
-      this.loading = true
-      this.error = null
+      this.loading = true;
+      this.error = null;
       try {
-        const response = await fetch('/frontoffice/auth/student-login', {
-          method: 'POST',
-          headers: { 'content-type': 'application/json' },
+        const response = await fetch("/frontoffice/auth/student-login", {
+          method: "POST",
+          headers: { "content-type": "application/json" },
           body: JSON.stringify({ email, password }),
-        })
+        });
 
         if (!response.ok) {
-          const errorData = await response.json()
-          throw new Error(errorData.error.message)
+          const errorData = await response.json();
+          throw new Error(errorData.error.message);
         }
 
-        const data = await response.json()
+        const data = await response.json();
 
         // Store token in memory ONLY (not localStorage)
-        this.token = data.data.token
-        this.user = data.data.user
+        this.token = data.data.token;
+        this.user = data.data.user;
       } catch (err) {
-        this.error = err.message
+        this.error = err.message;
       } finally {
-        this.loading = false
+        this.loading = false;
       }
     },
 
     async logout() {
-      if (!this.token) return
+      if (!this.token) return;
 
       try {
-        await fetch('/frontoffice/auth/logout', {
-          method: 'POST',
+        await fetch("/frontoffice/auth/logout", {
+          method: "POST",
           headers: { authorization: `Bearer ${this.token}` },
-        })
+        });
       } finally {
-        this.token = null
-        this.user = null
+        this.token = null;
+        this.user = null;
       }
     },
 
     getAuthHeader(): Record<string, string> {
-      return this.token ? { authorization: `Bearer ${this.token}` } : {}
+      return this.token ? { authorization: `Bearer ${this.token}` } : {};
     },
   },
-})
+});
 ```
 
 #### API Interceptor (Add Token Automatically)
@@ -606,31 +593,31 @@ export const useAuthStore = defineStore('auth', {
 // apps/frontoffice/src/api/client.ts
 
 export function createApiClient() {
-  const authStore = useAuthStore()
+  const authStore = useAuthStore();
 
   return new FetchClient({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
     onRequest: (request) => {
-      const headers = authStore.getAuthHeader()
+      const headers = authStore.getAuthHeader();
       return {
         ...request,
         headers: { ...request.headers, ...headers },
-      }
+      };
     },
     onResponseError: (response) => {
       if (response.status === 401) {
         // Token invalid/expired
-        authStore.logout()
+        authStore.logout();
         // Redirect to login
-        window.location.href = '/login'
+        window.location.href = "/login";
       }
       if (response.status === 426) {
         // Schema version mismatch → force re-login
-        authStore.logout()
-        window.location.href = '/login?reason=upgrade_required'
+        authStore.logout();
+        window.location.href = "/login?reason=upgrade_required";
       }
     },
-  })
+  });
 }
 ```
 
@@ -945,11 +932,11 @@ Replay: Same result
 #### Point 1: On Token Issuance (Login)
 
 ```typescript
-const schemaVersion = workspace.schema_version
+const schemaVersion = workspace.schema_version;
 const token = signJWT({
   ...claims,
   schema_version: schemaVersion,
-})
+});
 ```
 
 **Requirement:** Capture current workspace schema_version in token.
@@ -961,7 +948,7 @@ const token = signJWT({
 ```typescript
 // In JWT validation middleware
 if (token.schema_version !== workspace.schema_version) {
-  throw UpgradeRequiredError('Schema version mismatch', 426)
+  throw UpgradeRequiredError("Schema version mismatch", 426);
 }
 ```
 
@@ -980,43 +967,33 @@ if (token.schema_version !== workspace.schema_version) {
 #### Point 1: On Token Issuance (Login)
 
 ```typescript
-const productVersion = license.product_version
+const productVersion = license.product_version;
 const token = signJWT({
   ...claims,
   product_version: productVersion,
-})
+});
 ```
 
 #### Point 2: On Every Authenticated Request
 
 ```typescript
 // In JWT validation middleware
-const isCompatible = isProductVersionCompatible(
-  token.product_version,
-  license.product_version
-)
+const isCompatible = isProductVersionCompatible(token.product_version, license.product_version);
 
 if (!isCompatible) {
-  throw UpgradeRequiredError('Product version incompatible', 426)
+  throw UpgradeRequiredError("Product version incompatible", 426);
 }
 ```
 
 #### Compatibility Algorithm (SemVer)
 
 ```typescript
-function isProductVersionCompatible(
-  tokenVersion: string,
-  runtimeVersion: string
-): boolean {
-  const [tokenMajor, tokenMinor, tokenPatch] = tokenVersion
-    .split('.')
-    .map(Number)
-  const [runtimeMajor, runtimeMinor, runtimePatch] = runtimeVersion
-    .split('.')
-    .map(Number)
+function isProductVersionCompatible(tokenVersion: string, runtimeVersion: string): boolean {
+  const [tokenMajor, tokenMinor, tokenPatch] = tokenVersion.split(".").map(Number);
+  const [runtimeMajor, runtimeMinor, runtimePatch] = runtimeVersion.split(".").map(Number);
 
   // Same major version → compatible
-  return tokenMajor === runtimeMajor
+  return tokenMajor === runtimeMajor;
 }
 ```
 
@@ -1053,7 +1030,7 @@ expires_at = NOW() + INTERVAL '15 minutes'
 
 ```typescript
 if (new Date() > new Date(token.expires_at)) {
-  throw UnauthorizedError('Token expired', 401)
+  throw UnauthorizedError("Token expired", 401);
 }
 ```
 
@@ -1071,7 +1048,7 @@ locked_until = NOW() + INTERVAL '30 minutes'
 
 ```typescript
 if (user.locked_until && user.locked_until > new Date()) {
-  throw AccountLockedError('Account locked', 423)
+  throw AccountLockedError("Account locked", 423);
 }
 ```
 
@@ -1174,15 +1151,15 @@ WHERE created_at > NOW() - INTERVAL '15 minutes'
 
 ```typescript
 // Middleware 1: Correlation ID
-if (!c.req.header('x-correlation-id')) {
-  const correlationId = generateUUID()
-  c.set('correlation_id', correlationId)
+if (!c.req.header("x-correlation-id")) {
+  const correlationId = generateUUID();
+  c.set("correlation_id", correlationId);
 } else {
-  c.set('correlation_id', c.req.header('x-correlation-id'))
+  c.set("correlation_id", c.req.header("x-correlation-id"));
 }
 
 // Add to response header
-c.header('x-correlation-id', c.get('correlation_id'))
+c.header("x-correlation-id", c.get("correlation_id"));
 ```
 
 ### Metrics (Prometheus)
@@ -1192,21 +1169,21 @@ Critical path metrics to emit:
 ```typescript
 // Counter: Login attempts
 authLoginAttempts.inc({
-  result: 'success' | 'failure',
-  workspace: 'workspace-id',
-})
+  result: "success" | "failure",
+  workspace: "workspace-id",
+});
 
 // Histogram: Login duration
-authLoginDuration.observe({ workspace: 'workspace-id' }, durationMs / 1000)
+authLoginDuration.observe({ workspace: "workspace-id" }, durationMs / 1000);
 
 // Counter: Token validations
 authTokenValidation.inc({
-  result: 'valid' | 'invalid' | 'expired',
-  workspace: 'workspace-id',
-})
+  result: "valid" | "invalid" | "expired",
+  workspace: "workspace-id",
+});
 
 // Gauge: Locked accounts
-authLockedAccounts.set({ workspace: 'workspace-id' }, countLockedUsers)
+authLockedAccounts.set({ workspace: "workspace-id" }, countLockedUsers);
 ```
 
 ### Error Logging (Structured)
@@ -1214,17 +1191,17 @@ authLockedAccounts.set({ workspace: 'workspace-id' }, countLockedUsers)
 ```typescript
 // On error in login transaction
 logger.error({
-  event_type: 'login_failed',
-  error_code: 'INVALID_CREDENTIALS',
+  event_type: "login_failed",
+  error_code: "INVALID_CREDENTIALS",
   workspace_id: workspaceId,
   correlation_id: correlationId,
   email: email,
   ip_address: ipAddress,
   error: {
-    message: 'Password verification failed',
+    message: "Password verification failed",
     stack: error.stack,
   },
-})
+});
 ```
 
 ---
@@ -1417,8 +1394,8 @@ UPDATE users SET locked_until = NOW() + INTERVAL '30 minutes'
 
 ```javascript
 // DO NOT DO THIS
-if (user.role === 'ADMIN') {
-  showAdminButton()
+if (user.role === "ADMIN") {
+  showAdminButton();
 }
 ```
 
@@ -1430,9 +1407,9 @@ if (user.role === 'ADMIN') {
 
 ```typescript
 // ALWAYS DO THIS (in API route handler)
-const permission = await evaluatePermission(userId, 'exams.delete', tenantDb)
+const permission = await evaluatePermission(userId, "exams.delete", tenantDb);
 if (!permission) {
-  throw ForbiddenError('Permission denied', 403)
+  throw ForbiddenError("Permission denied", 403);
 }
 ```
 
@@ -1495,9 +1472,9 @@ Attacker tries emails to determine if user exists.
 ```typescript
 if (!user) {
   // Still perform password hash (costs ~100ms)
-  await hashPassword('')
+  await hashPassword("");
   // Return same error
-  throw InvalidCredentialsError()
+  throw InvalidCredentialsError();
 }
 ```
 
@@ -1528,13 +1505,11 @@ if (!user) {
 **Route declares allowed scopes:**
 
 ```typescript
-const studentRoutes = hono
-  .use(validateScope(['FRONTOFFICE']))
-  .post('/login', studentLoginHandler)
+const studentRoutes = hono.use(validateScope(["FRONTOFFICE"])).post("/login", studentLoginHandler);
 
 const staffRoutes = hono
-  .use(validateScope(['BACKOFFICE', 'ADMIN']))
-  .post('/login', staffLoginHandler)
+  .use(validateScope(["BACKOFFICE", "ADMIN"]))
+  .post("/login", staffLoginHandler);
 ```
 
 **Middleware validates scope:**
@@ -1542,12 +1517,12 @@ const staffRoutes = hono
 ```typescript
 function validateScope(allowedScopes) {
   return (c, next) => {
-    const scope = c.get('user_scope')
+    const scope = c.get("user_scope");
     if (!allowedScopes.includes(scope)) {
-      throw UnauthorizedError('Scope not allowed', 401)
+      throw UnauthorizedError("Scope not allowed", 401);
     }
-    return next()
-  }
+    return next();
+  };
 }
 ```
 
@@ -1559,7 +1534,7 @@ function validateScope(allowedScopes) {
 
 ```typescript
 if (token.workspace_id !== resolvedWorkspaceId) {
-  throw UnauthorizedError('Token workspace mismatch', 401)
+  throw UnauthorizedError("Token workspace mismatch", 401);
 }
 ```
 

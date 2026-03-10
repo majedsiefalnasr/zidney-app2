@@ -1,11 +1,9 @@
 # Implementation Plan: Infrastructure & Governance Alignment
 
-**Branch**: `infra-003-alignment`
-**Date**: 2026-03-04
-**Stage**: STAGE_INFRA_03_ALIGNMENT
-**Status**: READY FOR IMPLEMENTATION
-**Research Input**: `specs/runtime/infra-003-alignment/research.md`
-**Spec Input**: `specs/runtime/infra-003-alignment/spec.md`
+**Branch**: `infra-003-alignment` **Date**: 2026-03-04 **Stage**: STAGE_INFRA_03_ALIGNMENT
+**Status**: READY FOR IMPLEMENTATION **Research Input**:
+`specs/runtime/infra-003-alignment/research.md` **Spec Input**:
+`specs/runtime/infra-003-alignment/spec.md`
 
 ---
 
@@ -29,21 +27,25 @@
 
 ## Transaction Boundaries & Idempotency
 
-**N/A for this stage.** This is an infrastructure and tooling alignment stage. There are no database transactions, tenant operations, or attempt engine interactions. All changes are:
+**N/A for this stage.** This is an infrastructure and tooling alignment stage. There are no database
+transactions, tenant operations, or attempt engine interactions. All changes are:
 
 - File system operations (create/modify config files, documentation, test directories)
 - Package installation (devDependencies only)
 - CI workflow creation
 
-All operations are inherently idempotent: re-running them produces the same result as running them once.
+All operations are inherently idempotent: re-running them produces the same result as running them
+once.
 
 ---
 
 ## Error Handling Strategy
 
-**N/A for production code.** This stage does not introduce new application error handling paths. However:
+**N/A for production code.** This stage does not introduce new application error handling paths.
+However:
 
-- Playwright smoke tests must handle the case where the dev server is not running: test pre-condition must be documented
+- Playwright smoke tests must handle the case where the dev server is not running: test
+  pre-condition must be documented
 - Flaky test quarantine must document the error/reason in the `// QUARANTINE:` comment
 - CI pipeline failures on lint/type-check are by design (gates, not bugs)
 
@@ -63,7 +65,8 @@ All operations are inherently idempotent: re-running them produces the same resu
 | Phase 7 | T007     | README creation                           |
 | Phase 8 | T008     | CI pipeline preparation                   |
 
-**Execution order**: Sequential. T002 must complete before T003 (e2e dirs must exist). T004 must complete before T008 (lint script must work). T006 can be done in parallel with T005.
+**Execution order**: Sequential. T002 must complete before T003 (e2e dirs must exist). T004 must
+complete before T008 (lint script must work). T006 can be done in parallel with T005.
 
 ---
 
@@ -71,13 +74,17 @@ All operations are inherently idempotent: re-running them produces the same resu
 
 ### Goal
 
-Replace the current monolithic `vitest.config.ts` root config with a Vitest `projects`-based orchestrator. Each app/package retains a minimal `vitest.config.ts` with only environment, setupFiles, and env vars.
+Replace the current monolithic `vitest.config.ts` root config with a Vitest `projects`-based
+orchestrator. Each app/package retains a minimal `vitest.config.ts` with only environment,
+setupFiles, and env vars.
 
 ### Current State
 
-- Root `vitest.config.ts`: monolithic, uses `test: { environment: 'node', globals: true, setupFiles, coverage }` — NOT using projects
+- Root `vitest.config.ts`: monolithic, uses
+  `test: { environment: 'node', globals: true, setupFiles, coverage }` — NOT using projects
 - 5 disconnected configs (see research.md §1)
-- `apps/api` and `apps/worker` have NO vitest configs; their tests run via root config using root test dirs (`tests/unit/`, `tests/integration/`)
+- `apps/api` and `apps/worker` have NO vitest configs; their tests run via root config using root
+  test dirs (`tests/unit/`, `tests/integration/`)
 
 ### Architecture Decision
 
@@ -85,8 +92,10 @@ The root vitest config will become the **projects orchestrator**:
 
 - `apps/*` and `packages/*` participate via their own minimal `vitest.config.ts` files
 - Coverage config stays centralized in root only
-- Root `resolve.alias` and `plugins` are **removed** from root (they were needed for flat mode; per-project configs handle their own resolution)
-- The root `tests/` directory (containing integration, unit, security, etc.) continues to be managed via the root config itself, which also functions as one of the projects
+- Root `resolve.alias` and `plugins` are **removed** from root (they were needed for flat mode;
+  per-project configs handle their own resolution)
+- The root `tests/` directory (containing integration, unit, security, etc.) continues to be managed
+  via the root config itself, which also functions as one of the projects
 
 ### Step-by-step Actions
 
@@ -129,7 +138,9 @@ Create minimal config:
 - Include patterns for `apps/api/tests/**/*.test.ts`
 - Resolve aliases for `@zidney/*` packages
 
-**Note**: Currently `apps/api` tests live in `apps/api/tests/` AND some tests are in the root `tests/` dir (the root tests are API-focused integration tests). The root `tests/` project entry will continue to handle root-level tests.
+**Note**: Currently `apps/api` tests live in `apps/api/tests/` AND some tests are in the root
+`tests/` dir (the root tests are API-focused integration tests). The root `tests/` project entry
+will continue to handle root-level tests.
 
 **Step 1.6 — Create `apps/worker/vitest.config.ts`**
 
@@ -153,17 +164,19 @@ Create minimal `vitest.config.ts` for each of:
 - `packages/ui-system/`
 - `packages/validation/`
 
-All use: `environment: 'node'`, `globals: true`, `include: ['tests/unit/**/*.spec.ts', 'tests/unit/**/*.test.ts']`
+All use: `environment: 'node'`, `globals: true`,
+`include: ['tests/unit/**/*.spec.ts', 'tests/unit/**/*.test.ts']`
 
 **Step 1.8 — Reduce `packages/api-client/vitest.config.ts` to minimal override**
 
-Keep: `test.environment` (node), `test.globals: true`, resolve alias `@` → `src`
-Remove: custom `test.include` (root projects glob handles discovery)
+Keep: `test.environment` (node), `test.globals: true`, resolve alias `@` → `src` Remove: custom
+`test.include` (root projects glob handles discovery)
 
 **Step 1.9 — Update root `package.json` scripts**
 
 Update `test` script: `"vitest run"` stays but now discovers via projects  
-Update `test:unit`: `"vitest run --project api-client --project domain-core ..."` (or leave pattern-based)  
+Update `test:unit`: `"vitest run --project api-client --project domain-core ..."` (or leave
+pattern-based)  
 Confirm `test:coverage` still works: centralized coverage via root config
 
 ### Files to Create/Modify
@@ -198,7 +211,8 @@ Confirm `test:coverage` still works: centralized coverage via root config
 
 ### Goal
 
-Ensure all apps have `tests/unit/`, `tests/integration/`, `tests/e2e/`. Ensure all packages have `tests/unit/`. Use `.gitkeep` for empty directories.
+Ensure all apps have `tests/unit/`, `tests/integration/`, `tests/e2e/`. Ensure all packages have
+`tests/unit/`. Use `.gitkeep` for empty directories.
 
 ### Required Directory Creations
 
@@ -208,7 +222,8 @@ Ensure all apps have `tests/unit/`, `tests/integration/`, `tests/e2e/`. Ensure a
 - `apps/backoffice/tests/e2e/.gitkeep`
 - `apps/frontoffice/tests/e2e/.gitkeep`
 
-**Note**: `apps/mmc/tests/e2e/` already exists. `apps/worker` does not need `tests/e2e/` (non-UI app; worker has no browser interface).
+**Note**: `apps/mmc/tests/e2e/` already exists. `apps/worker` does not need `tests/e2e/` (non-UI
+app; worker has no browser interface).
 
 **Apps — verify existing dirs**:
 
@@ -228,9 +243,14 @@ Ensure all apps have `tests/unit/`, `tests/integration/`, `tests/e2e/`. Ensure a
 
 ### Test File Relocation
 
-- `packages/api-client/tests/adapters/` — these are adapter tests; consider moving to `tests/unit/adapters/` if they are pure unit tests; investigate before moving
-- `packages/domain-core/tests/license/` — license domain tests; move to `tests/unit/license/` to conform to structure
-- Root `tests/` dir structure: currently has `unit/`, `integration/`, `security/`, `smoke/`, `load/`, `performance/`, `static/`, `contract/`, `edge-cases/` — this non-standard structure is intentional for the root tests and is NOT changed (root tests are API-focused infrastructure tests, not module unit tests)
+- `packages/api-client/tests/adapters/` — these are adapter tests; consider moving to
+  `tests/unit/adapters/` if they are pure unit tests; investigate before moving
+- `packages/domain-core/tests/license/` — license domain tests; move to `tests/unit/license/` to
+  conform to structure
+- Root `tests/` dir structure: currently has `unit/`, `integration/`, `security/`, `smoke/`,
+  `load/`, `performance/`, `static/`, `contract/`, `edge-cases/` — this non-standard structure is
+  intentional for the root tests and is NOT changed (root tests are API-focused infrastructure
+  tests, not module unit tests)
 
 ### Files to Create
 
@@ -260,7 +280,8 @@ Ensure all apps have `tests/unit/`, `tests/integration/`, `tests/e2e/`. Ensure a
 
 ### Goal
 
-Install Playwright. Create per-app configs for MMC, Backoffice, Frontoffice. Create a shared smoke test. Exclude Playwright from Vitest discovery.
+Install Playwright. Create per-app configs for MMC, Backoffice, Frontoffice. Create a shared smoke
+test. Exclude Playwright from Vitest discovery.
 
 ### Dependencies to Install
 
@@ -278,20 +299,20 @@ bunx playwright install --with-deps chromium
 **`apps/mmc/playwright.config.ts`**:
 
 ```typescript
-import { defineConfig, devices } from '@playwright/test'
+import { defineConfig, devices } from "@playwright/test";
 
 export default defineConfig({
-  testDir: './tests/e2e',
+  testDir: "./tests/e2e",
   fullyParallel: false,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
-  reporter: [['list'], ['html', { open: 'never' }]],
+  reporter: [["list"], ["html", { open: "never" }]],
   use: {
-    baseURL: process.env.MMC_BASE_URL ?? 'http://localhost:5173',
-    trace: 'on-first-retry',
+    baseURL: process.env.MMC_BASE_URL ?? "http://localhost:5173",
+    trace: "on-first-retry",
   },
-  projects: [{ name: 'chromium', use: { ...devices['Desktop Chrome'] } }],
-})
+  projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
+});
 ```
 
 **`apps/backoffice/playwright.config.ts`**:
@@ -311,13 +332,13 @@ export default defineConfig({
 **`apps/mmc/tests/e2e/smoke.spec.ts`**:
 
 ```typescript
-import { test, expect } from '@playwright/test'
+import { test, expect } from "@playwright/test";
 
-test('MMC app loads without errors', async ({ page }) => {
-  await page.goto('/')
-  await expect(page).not.toHaveTitle(/error/i)
-  await expect(page.locator('body')).toBeVisible()
-})
+test("MMC app loads without errors", async ({ page }) => {
+  await page.goto("/");
+  await expect(page).not.toHaveTitle(/error/i);
+  await expect(page.locator("body")).toBeVisible();
+});
 ```
 
 Create equivalent smoke tests for:
@@ -327,7 +348,11 @@ Create equivalent smoke tests for:
 
 ### Root-Level Shared Smoke Test
 
-**`tests/e2e/app-load.spec.ts`**: This file is referenced in FR-014. Since it's in the root `tests/e2e/` dir, it should test all 3 apps. However, each app runs from a different base URL. The recommended approach is to create individual smoke tests per app (above) and add a simple marker test at `tests/e2e/app-load.spec.ts` that documents the pattern without requiring a specific base URL.
+**`tests/e2e/app-load.spec.ts`**: This file is referenced in FR-014. Since it's in the root
+`tests/e2e/` dir, it should test all 3 apps. However, each app runs from a different base URL. The
+recommended approach is to create individual smoke tests per app (above) and add a simple marker
+test at `tests/e2e/app-load.spec.ts` that documents the pattern without requiring a specific base
+URL.
 
 ### Vitest Exclusion
 
@@ -336,13 +361,15 @@ Add to root `vitest.config.ts` exclude patterns:
 ```typescript
 exclude: [
   ...configDefaults.exclude,
-  '**/*.spec.ts', // Excludes Playwright .spec.ts files
-  '**/playwright.config.*', // Excludes Playwright config files
-  '**/tests/e2e/**', // Excludes all e2e directories
-]
+  "**/*.spec.ts", // Excludes Playwright .spec.ts files
+  "**/playwright.config.*", // Excludes Playwright config files
+  "**/tests/e2e/**", // Excludes all e2e directories
+];
 ```
 
-**Note**: Vitest and Playwright use distinct file extensions by convention (`.test.ts` vs `.spec.ts`) but this is NOT enforced consistently in this repo (some unit tests use `.spec.ts`). The exclude must be scoped to `tests/e2e/` directories specifically.
+**Note**: Vitest and Playwright use distinct file extensions by convention (`.test.ts` vs
+`.spec.ts`) but this is NOT enforced consistently in this repo (some unit tests use `.spec.ts`). The
+exclude must be scoped to `tests/e2e/` directories specifically.
 
 ### Root package.json Scripts
 
@@ -384,7 +411,8 @@ Add:
 
 ### Goal
 
-Install Prettier. Install eslint-config-prettier. Add to root ESLint flat config. Add format scripts. Create `.prettierrc`.
+Install Prettier. Install eslint-config-prettier. Add to root ESLint flat config. Add format
+scripts. Create `.prettierrc`.
 
 ### Dependencies to Install
 
@@ -401,18 +429,20 @@ Create `prettier.config.mjs` at repo root:
 export default {
   semi: false,
   singleQuote: true,
-  trailingComma: 'es5',
+  trailingComma: "es5",
   printWidth: 100,
   tabWidth: 2,
   useTabs: false,
   bracketSpacing: true,
-  arrowParens: 'always',
-  endOfLine: 'lf',
+  arrowParens: "always",
+  endOfLine: "lf",
   plugins: [],
-}
+};
 ```
 
-**Note**: These rules are consistent with TypeScript/Vue codebases. If team has an existing informal style preference, adjust before finalizing. The key constraint is `singleQuote: true` and `semi: false` which is a common Vue/TypeScript convention.
+**Note**: These rules are consistent with TypeScript/Vue codebases. If team has an existing informal
+style preference, adjust before finalizing. The key constraint is `singleQuote: true` and
+`semi: false` which is a common Vue/TypeScript convention.
 
 ### `.prettierignore`
 
@@ -443,9 +473,17 @@ import eslintConfigPrettier from 'eslint-config-prettier'
 eslintConfigPrettier,
 ```
 
-**Important**: `eslint-config-prettier` must be the final entry in the flat config array. It disables all ESLint rules that conflict with Prettier's formatting (e.g., `indent`, `semi`, `quotes`, `max-len`, etc.). It does NOT affect non-formatting rules.
+**Important**: `eslint-config-prettier` must be the final entry in the flat config array. It
+disables all ESLint rules that conflict with Prettier's formatting (e.g., `indent`, `semi`,
+`quotes`, `max-len`, etc.). It does NOT affect non-formatting rules.
 
-**Review required**: Check if any currently active ESLint rules in `eslint.config.mjs` are formatting rules that `eslint-config-prettier` will disable. If a disabled rule was being used for correctness (not formatting), it must be re-enabled explicitly with a comment. Current ESLint config has rules: `no-console`, `@typescript-eslint/no-explicit-any`, `@typescript-eslint/ban-ts-comment`, `@typescript-eslint/no-unused-vars`, `@typescript-eslint/no-require-imports`, `import-x/no-restricted-paths`, `no-restricted-imports`, `no-restricted-globals`, `vue/no-v-html` — none of these are formatting rules, so eslint-config-prettier should not disable any of them.
+**Review required**: Check if any currently active ESLint rules in `eslint.config.mjs` are
+formatting rules that `eslint-config-prettier` will disable. If a disabled rule was being used for
+correctness (not formatting), it must be re-enabled explicitly with a comment. Current ESLint config
+has rules: `no-console`, `@typescript-eslint/no-explicit-any`, `@typescript-eslint/ban-ts-comment`,
+`@typescript-eslint/no-unused-vars`, `@typescript-eslint/no-require-imports`,
+`import-x/no-restricted-paths`, `no-restricted-imports`, `no-restricted-globals`, `vue/no-v-html` —
+none of these are formatting rules, so eslint-config-prettier should not disable any of them.
 
 ### Root package.json Scripts
 
@@ -499,9 +537,9 @@ If not immediately stabilizable → quarantine:
 ```typescript
 // QUARANTINE: Race condition in HTTP retry mock timing. Needs fake timer refactor.
 // Tracking ref: INFRA-003-FLAKY-001
-it.skip('retries on network failure', async () => {
+it.skip("retries on network failure", async () => {
   // ... existing test body
-})
+});
 ```
 
 **File 2: `apps/worker/tests/load-testing.test.ts`**
@@ -509,19 +547,22 @@ it.skip('retries on network failure', async () => {
 Investigation steps:
 
 1. Determine if this is a performance/load test (timing-sensitive by nature)
-2. If it's a load test that cannot be deterministic → it belongs in `test:performance` not `test:unit` or `test:integration`
+2. If it's a load test that cannot be deterministic → it belongs in `test:performance` not
+   `test:unit` or `test:integration`
 3. Check if it should be moved to `apps/worker/tests/load/` (load-specific dir already exists)
-4. If it asserts wall-clock timing (`expect(duration).toBeLessThan(1000)`) → likely cannot be stabilized in unit test context
+4. If it asserts wall-clock timing (`expect(duration).toBeLessThan(1000)`) → likely cannot be
+   stabilized in unit test context
 
 If stabilization feasible → fix  
-If load test by nature and not suitable for unit runner → move to `tests/load/` and document; quarantine in current location:
+If load test by nature and not suitable for unit runner → move to `tests/load/` and document;
+quarantine in current location:
 
 ```typescript
 // QUARANTINE: Load test with wall-clock timing assertions. Moved to tests/load/.
 // Tracking ref: INFRA-003-FLAKY-002
-it.skip('processes 100 jobs in under 5 seconds', async () => {
+it.skip("processes 100 jobs in under 5 seconds", async () => {
   // ...
-})
+});
 ```
 
 ### Pattern Rule (for all quarantined tests)
@@ -564,7 +605,8 @@ Review all 10 files with skip markers. Either re-enable or annotate with documen
 
 ### Action Pattern
 
-**If re-enabling**: Remove `.skip`, verify test passes, commit with message explaining what was fixed.
+**If re-enabling**: Remove `.skip`, verify test passes, commit with message explaining what was
+fixed.
 
 **If keeping as skip with documented reason**:
 
@@ -574,10 +616,12 @@ it.skip('description', () => { ... })
 ```
 
 **Special case — `DataTable.spec.ts`**:  
-This file is both skipped AND excluded in the root vitest config (`configDefaults.exclude`). Both markers must be addressed together:
+This file is both skipped AND excluded in the root vitest config (`configDefaults.exclude`). Both
+markers must be addressed together:
 
 1. If test is re-enabled → remove the `exclude` entry from root `vitest.config.ts`
-2. If test remains skipped → remove the `exclude` entry from root `vitest.config.ts` (let the test runner see it; the `it.skip` handles suppression), and add `// SKIP REASON:` comment
+2. If test remains skipped → remove the `exclude` entry from root `vitest.config.ts` (let the test
+   runner see it; the `it.skip` handles suppression), and add `// SKIP REASON:` comment
 
 ### Validation Check: V005
 
@@ -592,12 +636,15 @@ This file is both skipped AND excluded in the root vitest config (`configDefault
 
 ### Goal
 
-Create README files for all 11 missing directories; rewrite 2 incomplete ones. All must include required sections.
+Create README files for all 11 missing directories; rewrite 2 incomplete ones. All must include
+required sections.
 
 ### Required Sections for All READMEs
 
-**Apps**: Purpose, Responsibilities, Dependencies, How to Run Tests, Environment Variables, Known Boundaries  
-**Packages**: Purpose, Responsibilities, Dependencies, **Public API**, How to Run Tests, Environment Variables, Known Boundaries
+**Apps**: Purpose, Responsibilities, Dependencies, How to Run Tests, Environment Variables, Known
+Boundaries  
+**Packages**: Purpose, Responsibilities, Dependencies, **Public API**, How to Run Tests, Environment
+Variables, Known Boundaries
 
 ### Files to Create/Modify
 
@@ -619,31 +666,47 @@ Create README files for all 11 missing directories; rewrite 2 incomplete ones. A
 
 ### README Content Summary (per app/package)
 
-**`apps/api/README.md`**: Bun + Hono backend. Tenant resolver + license middleware chain. PostgreSQL per-tenant DB. REST API. Tests: `apps/api/tests/` + root `tests/`. Env vars: DB_HOST, DB_PORT, DB_MASTER_NAME, REDIS_URL, JWT_SECRET, etc.
+**`apps/api/README.md`**: Bun + Hono backend. Tenant resolver + license middleware chain. PostgreSQL
+per-tenant DB. REST API. Tests: `apps/api/tests/` + root `tests/`. Env vars: DB_HOST, DB_PORT,
+DB_MASTER_NAME, REDIS_URL, JWT_SECRET, etc.
 
-**`apps/worker/README.md`**: Background job processor. Redis-backed queue. Grading, provisioning, DLQ handling. Tests: `apps/worker/tests/`. Env vars: REDIS_URL, WORKER_CONCURRENCY, etc.
+**`apps/worker/README.md`**: Background job processor. Redis-backed queue. Grading, provisioning,
+DLQ handling. Tests: `apps/worker/tests/`. Env vars: REDIS_URL, WORKER_CONCURRENCY, etc.
 
-**`apps/mmc/README.md`**: Platform control panel (Vue 3 SPA). Workspace and license management UI. Tests: Vitest unit/integration via `apps/mmc/vitest.config.ts`. Playwright E2E via `apps/mmc/playwright.config.ts`. Env vars: VITE_API_BASE_URL.
+**`apps/mmc/README.md`**: Platform control panel (Vue 3 SPA). Workspace and license management UI.
+Tests: Vitest unit/integration via `apps/mmc/vitest.config.ts`. Playwright E2E via
+`apps/mmc/playwright.config.ts`. Env vars: VITE_API_BASE_URL.
 
-**`apps/backoffice/README.md`**: Institution control panel (Vue 3 SPA). Exam and student management UI. Tests: similar to MMC. Env vars: VITE_API_BASE_URL, VITE_WORKSPACE_SLUG.
+**`apps/backoffice/README.md`**: Institution control panel (Vue 3 SPA). Exam and student management
+UI. Tests: similar to MMC. Env vars: VITE_API_BASE_URL, VITE_WORKSPACE_SLUG.
 
-**`apps/frontoffice/README.md`**: Student runtime (Vue 3 SPA). Exam taking and result viewing. Tests: similar to MMC. Env vars: VITE_API_BASE_URL, VITE_WORKSPACE_SLUG.
+**`apps/frontoffice/README.md`**: Student runtime (Vue 3 SPA). Exam taking and result viewing.
+Tests: similar to MMC. Env vars: VITE_API_BASE_URL, VITE_WORKSPACE_SLUG.
 
-**`packages/types/README.md`**: Shared TypeScript type definitions. Enums, API types, license types, job types. Public API: all exported types. No dependencies on other `@zidney/*` packages.
+**`packages/types/README.md`**: Shared TypeScript type definitions. Enums, API types, license types,
+job types. Public API: all exported types. No dependencies on other `@zidney/*` packages.
 
-**`packages/logger/README.md`**: Structured logger abstraction. Enforces required log fields (timestamp, level, service, workspace_slug, etc.). Public API: `createLogger(service)`, `Logger` interface.
+**`packages/logger/README.md`**: Structured logger abstraction. Enforces required log fields
+(timestamp, level, service, workspace_slug, etc.). Public API: `createLogger(service)`, `Logger`
+interface.
 
-**`packages/config/README.md`**: Configuration utilities. Environment variable parsing and validation. Public API: config schema exports.
+**`packages/config/README.md`**: Configuration utilities. Environment variable parsing and
+validation. Public API: config schema exports.
 
-**`packages/redis-utils/README.md`**: Redis algorithms and schema utilities. Rate limiting, lock patterns, queue helpers. Public API: algorithm functions, schema validators.
+**`packages/redis-utils/README.md`**: Redis algorithms and schema utilities. Rate limiting, lock
+patterns, queue helpers. Public API: algorithm functions, schema validators.
 
-**`packages/ui-system/README.md`**: Shared shadcn-vue component library. Vue 3 + Tailwind v4. DataTable, Dialogs, Forms, Filters, Layout components. Public API: all exported components.
+**`packages/ui-system/README.md`**: Shared shadcn-vue component library. Vue 3 + Tailwind v4.
+DataTable, Dialogs, Forms, Filters, Layout components. Public API: all exported components.
 
-**`packages/api-client/README.md`**: HTTP client adapter for Zidney APIs. Used by Vue app stores only (not directly in components). Public API: `createApiClient()`, adapter interfaces.
+**`packages/api-client/README.md`**: HTTP client adapter for Zidney APIs. Used by Vue app stores
+only (not directly in components). Public API: `createApiClient()`, adapter interfaces.
 
-**`packages/domain-core/README.md`**: Core business logic. Auth, tenants, licenses, attempts, RBAC, products, audit, versioning. Pure functions only. Public API: all domain service exports.
+**`packages/domain-core/README.md`**: Core business logic. Auth, tenants, licenses, attempts, RBAC,
+products, audit, versioning. Pure functions only. Public API: all domain service exports.
 
-**`packages/validation/README.md`**: Zod-based validation schemas for request validation. Public API: all exported schemas.
+**`packages/validation/README.md`**: Zod-based validation schemas for request validation. Public
+API: all exported schemas.
 
 ### Validation Check: V007
 
@@ -658,7 +721,8 @@ Create README files for all 11 missing directories; rewrite 2 incomplete ones. A
 
 ### Goal
 
-Create GitHub Actions CI workflow supporting: lint → type-check → unit tests → integration tests → E2E tests. No coverage thresholds enforced.
+Create GitHub Actions CI workflow supporting: lint → type-check → unit tests → integration tests →
+E2E tests. No coverage thresholds enforced.
 
 ### CI File Location
 
@@ -668,14 +732,17 @@ Create: `.github/workflows/ci.yml`
 
 ### CI Workflow Design
 
-> **Package Manager Note**: The repo uses `bun` (only `bun.lock` exists; `pnpm-lock.yaml` is absent). The `packageManager` field in `package.json` references pnpm but is not honoured — bun is the canonical install tool for this repo. All CI steps must use `bun`. The `packageManager` field discrepancy is logged as a TODO for a future housekeeping stage.
+> **Package Manager Note**: The repo uses `bun` (only `bun.lock` exists; `pnpm-lock.yaml` is
+> absent). The `packageManager` field in `package.json` references pnpm but is not honoured — bun is
+> the canonical install tool for this repo. All CI steps must use `bun`. The `packageManager` field
+> discrepancy is logged as a TODO for a future housekeeping stage.
 
 ```yaml
 name: CI
 
 on:
   push:
-    branches: [main, develop, 'infra-*', 'feature/*']
+    branches: [main, develop, "infra-*", "feature/*"]
   pull_request:
     branches: [main, develop]
 
@@ -728,19 +795,13 @@ jobs:
           POSTGRES_PASSWORD: zidney
           POSTGRES_DB: zidney_master
         options: >-
-          --health-cmd pg_isready
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
         ports:
           - 5432:5432
       redis:
         image: redis:7-alpine
         options: >-
-          --health-cmd "redis-cli ping"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
+          --health-cmd "redis-cli ping" --health-interval 10s --health-timeout 5s --health-retries 5
         ports:
           - 6379:6379
     steps:
@@ -938,34 +999,48 @@ bun add -D @playwright/test prettier eslint-config-prettier
 
 ### Risk 1 — Vitest Projects Migration (HIGH)
 
-**Risk**: Migrating from monolithic to projects-based Vitest config may break test discovery or resolution.  
-**Mitigation**: Run `bun run test` in dry-run mode after each config change. Keep original config as `.vitest.config.ts.bak` until all tests pass.  
+**Risk**: Migrating from monolithic to projects-based Vitest config may break test discovery or
+resolution.  
+**Mitigation**: Run `bun run test` in dry-run mode after each config change. Keep original config as
+`.vitest.config.ts.bak` until all tests pass.  
 **Trigger**: If any test that previously passed now fails after the migration.
 
 ### Risk 2 — Vue Plugin per-project Isolation (MEDIUM)
 
-**Risk**: In Vitest projects mode, Vue SFC parsing requires `@vitejs/plugin-vue` in each per-app config. If the plugin version differs between app node_modules, parsing errors may occur.  
-**Mitigation**: Verify `@vitejs/plugin-vue` version consistency across `apps/mmc`, `apps/backoffice`, `apps/frontoffice` before proceeding with T001.
+**Risk**: In Vitest projects mode, Vue SFC parsing requires `@vitejs/plugin-vue` in each per-app
+config. If the plugin version differs between app node_modules, parsing errors may occur.  
+**Mitigation**: Verify `@vitejs/plugin-vue` version consistency across `apps/mmc`,
+`apps/backoffice`, `apps/frontoffice` before proceeding with T001.
 
 ### Risk 3 — Root `tests/` vs App `tests/` Test Discovery Overlap (MEDIUM)
 
-**Risk**: The root `tests/` directory contains API/worker integration tests that currently run via the monolithic root config. After migration to projects, these tests must not be double-discovered (once by root project entry, once by app project entry).  
-**Mitigation**: Scope per-app vitest config `include` patterns tightly to `apps/<app>/tests/**` only. Root project entry covers `tests/**` only.
+**Risk**: The root `tests/` directory contains API/worker integration tests that currently run via
+the monolithic root config. After migration to projects, these tests must not be double-discovered
+(once by root project entry, once by app project entry).  
+**Mitigation**: Scope per-app vitest config `include` patterns tightly to `apps/<app>/tests/**`
+only. Root project entry covers `tests/**` only.
 
 ### Risk 4 — `DataTable.spec.ts` Exclude Conflict (LOW)
 
-**Risk**: `packages/ui-system/tests/unit/DataTable.spec.ts` is currently in the root vitest config's `exclude` list. If the test is re-enabled during T006 without removing this exclude, it will appear to pass the CI check but will silently never run.  
-**Mitigation**: T006 task 6 (DataTable) must simultaneously remove the root config exclude AND address the `it.skip` marker.
+**Risk**: `packages/ui-system/tests/unit/DataTable.spec.ts` is currently in the root vitest config's
+`exclude` list. If the test is re-enabled during T006 without removing this exclude, it will appear
+to pass the CI check but will silently never run.  
+**Mitigation**: T006 task 6 (DataTable) must simultaneously remove the root config exclude AND
+address the `it.skip` marker.
 
 ### Risk 5 — No CI Before This Stage (MEDIUM)
 
-**Risk**: No historical CI baseline exists. The first CI run may fail on pre-existing issues (not regressions from this stage).  
-**Mitigation**: First CI run should be treated as a baseline-capture run. All failures should be triaged as pre-existing before attributing them to this stage's changes.
+**Risk**: No historical CI baseline exists. The first CI run may fail on pre-existing issues (not
+regressions from this stage).  
+**Mitigation**: First CI run should be treated as a baseline-capture run. All failures should be
+triaged as pre-existing before attributing them to this stage's changes.
 
 ### Risk 6 — pnpm vs bun discrepancy (LOW)
 
-**Risk**: The root `package.json` `packageManager` field specifies `pnpm@10.12.2` but repo scripts use `bun run`. CI uses pnpm for caching efficiency.  
-**Mitigation**: Document both pnpm (CI) and bun (local dev) as valid runners. Ensure `pnpm run` commands in CI are equivalent to `bun run` commands locally.
+**Risk**: The root `package.json` `packageManager` field specifies `pnpm@10.12.2` but repo scripts
+use `bun run`. CI uses pnpm for caching efficiency.  
+**Mitigation**: Document both pnpm (CI) and bun (local dev) as valid runners. Ensure `pnpm run`
+commands in CI are equivalent to `bun run` commands locally.
 
 ---
 

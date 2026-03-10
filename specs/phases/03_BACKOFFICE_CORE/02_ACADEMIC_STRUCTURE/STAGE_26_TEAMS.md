@@ -200,5 +200,4 @@ Stage complete when:
 
 ---
 
-Next:
-STAGE_27_SEMESTERS
+Next: STAGE_27_SEMESTERS

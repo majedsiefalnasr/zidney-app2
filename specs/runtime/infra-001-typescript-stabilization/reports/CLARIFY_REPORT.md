@@ -1,14 +1,15 @@
 # Clarify Report — STAGE_INFRA_01_TYPESCRIPT_STABILIZATION
 
-**Step:** 2 — Clarify
-**Timestamp:** 2026-02-27T00:02:00Z
-**Status:** COMPLETE
+**Step:** 2 — Clarify **Timestamp:** 2026-02-27T00:02:00Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Five targeted clarifications were identified and resolved for the TypeScript Infrastructure Stabilization stage. All ambiguities were in the area of implementation strategy and tooling policy — none were constitutional or isolation concerns. All decisions are encoded directly in `spec.md` under `## Clarifications / ### Session 2026-02-27`.
+Five targeted clarifications were identified and resolved for the TypeScript Infrastructure
+Stabilization stage. All ambiguities were in the area of implementation strategy and tooling policy
+— none were constitutional or isolation concerns. All decisions are encoded directly in `spec.md`
+under `## Clarifications / ### Session 2026-02-27`.
 
 Zero unresolved items. Planning is authorized.
 
@@ -16,7 +17,8 @@ Zero unresolved items. Planning is authorized.
 
 ## Inputs Reviewed
 
-- `specs/runtime/infra-001-typescript-stabilization/spec.md` (including `## Clarifications / ### Session 2026-02-27`)
+- `specs/runtime/infra-001-typescript-stabilization/spec.md` (including
+  `## Clarifications / ### Session 2026-02-27`)
 
 ---
 
@@ -40,10 +42,13 @@ None.
 
 ## Spec Updates Applied
 
-- Appended `## Clarifications / ### Session 2026-02-27` to `specs/runtime/infra-001-typescript-stabilization/spec.md`
+- Appended `## Clarifications / ### Session 2026-02-27` to
+  `specs/runtime/infra-001-typescript-stabilization/spec.md`
 - CL-01 through CL-05 fully encoded with question, decision, and rationale
-- FR-07 (test file type compliance) is now clarified to allow `tsconfig.test.json` override for `noUnusedLocals`/`noUnusedParameters` only
-- FR-09 (ts-ignore policy) now has an explicit format requirement: `// ts-ignore: <reason> [<issue-ref>]`
+- FR-07 (test file type compliance) is now clarified to allow `tsconfig.test.json` override for
+  `noUnusedLocals`/`noUnusedParameters` only
+- FR-09 (ts-ignore policy) now has an explicit format requirement:
+  `// ts-ignore: <reason> [<issue-ref>]`
 
 ---
 

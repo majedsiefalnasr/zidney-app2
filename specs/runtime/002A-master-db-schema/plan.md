@@ -16,7 +16,8 @@
 **Related Spec File**: [spec.md](spec.md)  
 **Related ADR**: ADR-0001-database-per-tenant.md
 
-This plan implements the authoritative schema for `master_db` as the control plane of Zidney. Plan strictly adheres to stage scope and does not modify architecture.
+This plan implements the authoritative schema for `master_db` as the control plane of Zidney. Plan
+strictly adheres to stage scope and does not modify architecture.
 
 ---
 
@@ -40,7 +41,8 @@ No exceptions required.
 
 No API endpoints introduced in this stage. This is schema-only.
 
-Rationale: Schema is foundational; API operations on this schema will be implemented in subsequent features (license provisioning, MMC authentication, etc.).
+Rationale: Schema is foundational; API operations on this schema will be implemented in subsequent
+features (license provisioning, MMC authentication, etc.).
 
 ### Worker Layer
 
@@ -151,7 +153,8 @@ COMMIT;
 
 **Atomicity Guarantee**: All-or-nothing: Either entire schema is created or no changes persist
 
-**Rollback Behavior**: Automatic rollback on any error; database snapshot restore only for manual rollback (per ADR-0008)
+**Rollback Behavior**: Automatic rollback on any error; database snapshot restore only for manual
+rollback (per ADR-0008)
 
 ---
 
@@ -159,7 +162,8 @@ COMMIT;
 
 **Idempotency**: Not applicable for DDL operations.
 
-Rationale: Schema creation is not a repeatable operation. DDL is naturally protected by database constraints:
+Rationale: Schema creation is not a repeatable operation. DDL is naturally protected by database
+constraints:
 
 - Duplicate `CREATE TABLE` fails with "table already exists"
 - Migration system prevents re-execution via `_schema_migrations` tracking table
@@ -183,7 +187,8 @@ Rationale: Schema creation is not a repeatable operation. DDL is naturally prote
 
 1. Migration system reads `platform_schema_version` table at runtime startup
 2. Tenant resolver middleware validates `schema_version` from `tenants_registry` table
-3. API middleware compares tenant `schema_version` against `platform_schema_version.minimum_supported_version`
+3. API middleware compares tenant `schema_version` against
+   `platform_schema_version.minimum_supported_version`
 
 **Validation Logic**:
 
@@ -204,7 +209,8 @@ On API request:
 **Backward Compatibility**:
 
 - Schema is versioned forward-only
-- New tenants inherit `schema_version` from `platform_schema_version.current_version` at provisioning
+- New tenants inherit `schema_version` from `platform_schema_version.current_version` at
+  provisioning
 - Existing tenants validated against `minimum_supported_version`
 
 ---
@@ -308,7 +314,8 @@ ALTER TABLE tenants_registry ADD CONSTRAINT fk_tenants_registry_license_id
   ON UPDATE CASCADE;
 ```
 
-**Rationale for RESTRICT**: Product deletion or license deletion should fail if referenced, preventing accidental orphaning of infrastructure metadata.
+**Rationale for RESTRICT**: Product deletion or license deletion should fail if referenced,
+preventing accidental orphaning of infrastructure metadata.
 
 ### Unique Constraints
 
@@ -500,16 +507,16 @@ describe('Master DB Isolation', () => {
 **Target**: Atomicity enforcement
 
 ```typescript
-describe('Transaction Rollback', () => {
-  test('Partial migration failure rolls back all changes', async () => {
+describe("Transaction Rollback", () => {
+  test("Partial migration failure rolls back all changes", async () => {
     // Simulate FK constraint error mid-transaction
     // Verify all DDL reverted
-  })
+  });
 
-  test('Database state consistent after rollback', async () => {
+  test("Database state consistent after rollback", async () => {
     // Verify no orphaned tables or indexes
-  })
-})
+  });
+});
 ```
 
 ### Version Enforcement Test
@@ -580,7 +587,8 @@ Deploy v1.0.0 (schema) → Issues detected → Restore v0.9.9 snapshot → Redep
 
 2. **`tenants_registry` stores infrastructure metadata only**
    - No business logic in this table
-   - Only columns: id, license_id, workspace_slug, db name/host/port/user/password, schema_version, product_version, timestamps
+   - Only columns: id, license_id, workspace_slug, db name/host/port/user/password, schema_version,
+     product_version, timestamps
    - Verification: Schema constraint review
 
 3. **No business logic in master_db**

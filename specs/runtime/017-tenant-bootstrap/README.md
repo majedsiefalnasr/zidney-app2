@@ -1,9 +1,8 @@
 # TENANT_BOOTSTRAP
 
-**Branch:** `017-tenant-bootstrap`
-**Phase:** 03_BACKOFFICE_CORE/01_FOUNDATION
-**Stage File:** `specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_17_TENANT_BOOTSTRAP.md`
-**Initiated:** 2026-02-28T00:00:00Z
+**Branch:** `017-tenant-bootstrap` **Phase:** 03_BACKOFFICE_CORE/01_FOUNDATION **Stage File:**
+`specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_17_TENANT_BOOTSTRAP.md` **Initiated:**
+2026-02-28T00:00:00Z
 
 ## Workflow Progress
 

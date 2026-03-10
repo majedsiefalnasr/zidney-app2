@@ -9,7 +9,9 @@
 
 ## Overview
 
-All 5 critical clarifications have been resolved. Answers integrate seamlessly with Constitutional requirements and maintain architectural integrity across database isolation, snapshot immutability, server-authoritative timing, and version enforcement.
+All 5 critical clarifications have been resolved. Answers integrate seamlessly with Constitutional
+requirements and maintain architectural integrity across database isolation, snapshot immutability,
+server-authoritative timing, and version enforcement.
 
 **Clarification Document:** [clarify.md](clarify.md)  
 **Answers Recorded:** ✅ Yes  
@@ -43,7 +45,8 @@ All 5 critical clarifications have been resolved. Answers integrate seamlessly w
 **Key Points:**
 
 - Hybrid approach matches Zidney's idempotency standard (Redis fast-path + DB fallback)
-- UNIQUE constraint on (attempt_id, submission_sequence) prevents duplicates even if infrastructure crashes
+- UNIQUE constraint on (attempt_id, submission_sequence) prevents duplicates even if infrastructure
+  crashes
 - Worker replays safe due to transaction + unique guard
 - Maintains database-per-tenant isolation
 
@@ -161,7 +164,9 @@ With all clarifications resolved, technical planning can proceed with full confi
 
 ## Overview
 
-The clarification phase has identified 5 critical ambiguities that must be resolved before proceeding to technical planning. These ambiguities affect transaction semantics, reliability, performance, compliance, and behavior during edge cases.
+The clarification phase has identified 5 critical ambiguities that must be resolved before
+proceeding to technical planning. These ambiguities affect transaction semantics, reliability,
+performance, compliance, and behavior during edge cases.
 
 **Clarification Document:** [clarify.md](clarify.md)
 
@@ -173,19 +178,21 @@ The clarification phase has identified 5 critical ambiguities that must be resol
 
 **Area:** Transaction Boundaries & Failure Recovery
 
-**Ambiguity:**
-When a submission is received, the system must:
+**Ambiguity:** When a submission is received, the system must:
 
 1. Record the submission status
 2. Enqueue a grading job for the worker
 3. Return success to the client
 
-**Unresolved:** If step 2 (job enqueue) fails, should the submission status roll back, or should the submission be stranded waiting for a retry?
+**Unresolved:** If step 2 (job enqueue) fails, should the submission status roll back, or should the
+submission be stranded waiting for a retry?
 
 **Specific Questions:**
 
-- If Redis enqueue fails (e.g., Redis down), should the submission status revert from SUBMITTED to IN_PROGRESS?
-- Or should the submission stay SUBMITTED and rely on a background reconciliation job to retry enqueuing?
+- If Redis enqueue fails (e.g., Redis down), should the submission status revert from SUBMITTED to
+  IN_PROGRESS?
+- Or should the submission stay SUBMITTED and rely on a background reconciliation job to retry
+  enqueuing?
 - What is the maximum retry window before an attempt is marked FAILED?
 
 **Impact:**
@@ -216,18 +223,20 @@ Rationale:
 
 **Area:** Reliability & Safety
 
-**Ambiguity:**
-The spec defines idempotency keys for double-submission protection, but does not specify:
+**Ambiguity:** The spec defines idempotency keys for double-submission protection, but does not
+specify:
 
 - Where the idempotency state is stored (in-memory map? database table? Redis?)
 - For how long duplicate submissions are accepted (5 seconds? 1 minute? until submission finalizes?)
 - Whether idempotency keys are per-workspace or global
 
-**Unresolved:** If a student submits twice within 100ms (network retry), how is the duplicate detected and rejected?
+**Unresolved:** If a student submits twice within 100ms (network retry), how is the duplicate
+detected and rejected?
 
 **Specific Questions:**
 
-- Is idempotency key state stored in: [a] PostgreSQL idempotency_keys table, [b] Redis with expiry, or [c] in-memory map per API instance?
+- Is idempotency key state stored in: [a] PostgreSQL idempotency_keys table, [b] Redis with expiry,
+  or [c] in-memory map per API instance?
 - What is the TTL for idempotency keys? (e.g., keep for 24 hours? 1 hour? until attempt finalized?)
 - Are idempotency keys workspace-scoped or global across all attempts?
 - If API instance crashes, is idempotency state recovered?
@@ -264,21 +273,23 @@ Crash Recovery Strategy:
 
 **Area:** Performance & Scalability
 
-**Ambiguity:**
-The spec mentions "optimistic locking" but does not specify:
+**Ambiguity:** The spec mentions "optimistic locking" but does not specify:
 
 - Whether to use row-level pessimistic locks (SELECT FOR UPDATE) or optimistic version columns
 - What to do if a lock acquisition times out
 - How to handle high-contention scenarios (e.g., 10,000 students submitting within 1 second)
 
-**Unresolved:** For a high-volume exam (10,000 students), should the system prefer responsiveness or consistency?
+**Unresolved:** For a high-volume exam (10,000 students), should the system prefer responsiveness or
+consistency?
 
 **Specific Questions:**
 
 - Use [a] pessimistic locking (SELECT FOR UPDATE), [b] optimistic versioning (ETag), or [c] hybrid?
-- If lock acquisition times out (e.g., > 5 seconds), should the transaction: retry, fail immediately, or queue?
+- If lock acquisition times out (e.g., > 5 seconds), should the transaction: retry, fail
+  immediately, or queue?
 - What is the lock timeout duration?
-- For attempt_progress updates during the exam, should they use locks or accept eventual consistency?
+- For attempt_progress updates during the exam, should they use locks or accept eventual
+  consistency?
 
 **Impact:**
 
@@ -317,8 +328,7 @@ Rationale:
 
 **Area:** Version Enforcement & Upgrades
 
-**Ambiguity:**
-The spec requires version checks but doesn't specify WHEN they occur:
+**Ambiguity:** The spec requires version checks but doesn't specify WHEN they occur:
 
 - At attempt creation?
 - At submission?
@@ -329,8 +339,10 @@ The spec requires version checks but doesn't specify WHEN they occur:
 
 **Specific Questions:**
 
-- Are version checks performed at: [a] creation only, [b] submission only, [c] grading only, or [d] all three?
-- If schema version changes while attempt is IN_PROGRESS, should the submission: [a] fail (reject attempt), [b] use original snapshot (proceed), [c] migrate attempt?
+- Are version checks performed at: [a] creation only, [b] submission only, [c] grading only, or [d]
+  all three?
+- If schema version changes while attempt is IN_PROGRESS, should the submission: [a] fail (reject
+  attempt), [b] use original snapshot (proceed), [c] migrate attempt?
 - What is the upgrade window? (e.g., "no version changes during active exam windows"?)
 - How are "in-flight" attempts (submitted but not yet graded) handled during schema migrations?
 
@@ -370,8 +382,8 @@ Rationale:
 
 **Area:** Compliance & Behavior
 
-**Ambiguity:**
-License middleware validates at attempt start, but doesn't specify what happens if license state changes mid-attempt:
+**Ambiguity:** License middleware validates at attempt start, but doesn't specify what happens if
+license state changes mid-attempt:
 
 - If workspace moves from ACTIVE → SOFT_LOCKED during an attempt, should the submission be rejected?
 - If license expires during an exam, should the student's work be discarded?
@@ -380,9 +392,13 @@ License middleware validates at attempt start, but doesn't specify what happens 
 
 **Specific Questions:**
 
-- If attempt starts when license is ACTIVE, but submission occurs when license is SOFT_LOCKED, should the submission: [a] proceed (locked-in at start), [b] fail (license check at submission), [c] queue for manual review?
-- If workspace is ARCHIVED during an active exam, should: [a] all in-flight attempts be aborted, [b] only new attempts be rejected (existing ones continue), [c] require admin approval to grade?
-- Should license check happen at: [a] creation only, [b] submission only, [c] grading only, or [d] all three?
+- If attempt starts when license is ACTIVE, but submission occurs when license is SOFT_LOCKED,
+  should the submission: [a] proceed (locked-in at start), [b] fail (license check at submission),
+  [c] queue for manual review?
+- If workspace is ARCHIVED during an active exam, should: [a] all in-flight attempts be aborted, [b]
+  only new attempts be rejected (existing ones continue), [c] require admin approval to grade?
+- Should license check happen at: [a] creation only, [b] submission only, [c] grading only, or [d]
+  all three?
 - What is the reconciliation window if license changes? (e.g., 5 minute grace period?)
 
 **Impact:**
@@ -392,7 +408,8 @@ License middleware validates at attempt start, but doesn't specify what happens 
 - Affects business logic (what if license lapses but exam is in progress?)
 - Affects audit trail requirements
 
-**References:** spec.md sections on License Enforcement, Failure Modes (License Enforcement), Isolation Impact Analysis
+**References:** spec.md sections on License Enforcement, Failure Modes (License Enforcement),
+Isolation Impact Analysis
 
 **Answer Template:**
 
@@ -422,7 +439,8 @@ Rationale:
 
 ## Clarification Process
 
-To resolve these ambiguities, please provide answers to all 5 questions above in the following format:
+To resolve these ambiguities, please provide answers to all 5 questions above in the following
+format:
 
 ### Submission Process
 
@@ -436,14 +454,16 @@ To resolve these ambiguities, please provide answers to all 5 questions above in
 Once answers are recorded, I will:
 
 1. Amend [clarify.md](clarify.md) with your answers
-2. Update [spec.md](spec.md) to incorporate clarifications into Transaction Boundaries, Failure Modes, and Enforcement sections
+2. Update [spec.md](spec.md) to incorporate clarifications into Transaction Boundaries, Failure
+   Modes, and Enforcement sections
 3. Update Stage Status to `CLARIFIED`
 4. Mark `clarifications_resolved = true` in workflow state
 5. Proceed automatically to Step 3 – Plan
 
 ### Timeline
 
-These clarifications are BLOCKING for the planning phase. No technical planning can proceed until all 5 items are resolved.
+These clarifications are BLOCKING for the planning phase. No technical planning can proceed until
+all 5 items are resolved.
 
 ---
 

@@ -1,8 +1,6 @@
 # STAGE 34 – MCQ Question Model
 
-Phase: 03_BACKOFFICE_CORE
-Domain: 04_EXAM_ENGINE_CORE
-Database: Tenant DB
+Phase: 03_BACKOFFICE_CORE Domain: 04_EXAM_ENGINE_CORE Database: Tenant DB
 
 ---
 
@@ -256,8 +254,7 @@ Stage complete when:
 
 MCQ model must remain normalized.
 
-No JSON answer storage allowed.
-No denormalized option arrays.
+No JSON answer storage allowed. No denormalized option arrays.
 
 All relations must use foreign keys.
 

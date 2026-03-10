@@ -1,12 +1,8 @@
 chore({{STAGE_DIR_NAME}}): complete clarify step
 
-Step: Clarify (2/7)
-Stage: {{STAGE_NAME}}
-Phase: {{PHASE_NAME}}
-Status: DRAFT
+Step: Clarify (2/7) Stage: {{STAGE_NAME}} Phase: {{PHASE_NAME}} Status: DRAFT
 
-Ambiguities resolved: {{CLARIFICATION_COUNT}}
-Risk level assessed: {{RISK_LEVEL}}
+Ambiguities resolved: {{CLARIFICATION_COUNT}} Risk level assessed: {{RISK_LEVEL}}
 
 Key clarifications:
 

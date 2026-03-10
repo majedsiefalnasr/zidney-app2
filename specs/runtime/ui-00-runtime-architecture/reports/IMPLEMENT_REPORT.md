@@ -8,9 +8,16 @@
 
 ## Summary
 
-All 161 tasks completed across 6 phases. The implementation established the full runtime architecture foundation for three Vue 3 apps: MMC (delta migration from flat structure to module hierarchy), Backoffice (new scaffold from scratch), and Frontoffice (new scaffold from scratch). The core layer — environment config, error normalizer, token store, API client with refresh queue, route guards, Pinia state, `useAuth` composable, router, and application bootstrap — is now consistent and independently testable across all three apps.
+All 161 tasks completed across 6 phases. The implementation established the full runtime
+architecture foundation for three Vue 3 apps: MMC (delta migration from flat structure to module
+hierarchy), Backoffice (new scaffold from scratch), and Frontoffice (new scaffold from scratch). The
+core layer — environment config, error normalizer, token store, API client with refresh queue, route
+guards, Pinia state, `useAuth` composable, router, and application bootstrap — is now consistent and
+independently testable across all three apps.
 
-Validation gate passed: 196 tests pass (MMC: 64, Backoffice: 70, Frontoffice: 62). ESLint zero errors. TypeScript zero errors. Vite builds complete for all three apps. 12 bugs discovered and fixed during TDD implementation.
+Validation gate passed: 196 tests pass (MMC: 64, Backoffice: 70, Frontoffice: 62). ESLint zero
+errors. TypeScript zero errors. Vite builds complete for all three apps. 12 bugs discovered and
+fixed during TDD implementation.
 
 ---
 

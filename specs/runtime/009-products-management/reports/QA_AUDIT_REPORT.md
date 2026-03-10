@@ -90,7 +90,8 @@ Phase scope: 14 functional implementation phases with 79 atomic tasks
 
 ### Requirement
 
-No cross-tenant access possible. Products exclusively in master_db (shared database). Zero cross-tenant data leakage.
+No cross-tenant access possible. Products exclusively in master_db (shared database). Zero
+cross-tenant data leakage.
 
 ### Specification Analysis
 
@@ -166,7 +167,8 @@ Tenant isolation properly architected. Tests specified in Phase 10.
 
 ### Requirement
 
-Role-based authorization enforced. Unauthorized roles receive 403. Audit endpoints require AUDIT_READ scope.
+Role-based authorization enforced. Unauthorized roles receive 403. Audit endpoints require
+AUDIT_READ scope.
 
 ### Specification Analysis
 
@@ -280,7 +282,8 @@ Future Dependency: License Engine (Stage 10) will reference products → enable 
 
 ### Requirement
 
-Concurrent operations are safe. Duplicate requests handled correctly. No lost updates. Version increments are atomic.
+Concurrent operations are safe. Duplicate requests handled correctly. No lost updates. Version
+increments are atomic.
 
 ### Specification Analysis
 
@@ -444,7 +447,8 @@ All API responses are immediate (201/200/204/4xx within request-response cycle).
 
 ### Requirement
 
-Migration tested in test environment. Backward compatibility confirmed. Destructive changes documented. No data loss.
+Migration tested in test environment. Backward compatibility confirmed. Destructive changes
+documented. No data loss.
 
 ### Specification Analysis
 
@@ -814,23 +818,23 @@ Concurrency Edge Cases:
 **Required Tests:** (T059 – Transaction rollback)
 
 ```typescript
-describe('Transaction Atomicity', () => {
-  it('should rollback createProduct if audit log insert fails', () => {
+describe("Transaction Atomicity", () => {
+  it("should rollback createProduct if audit log insert fails", () => {
     // Simulate: product + version insert succeeds, audit log fails
     // Expected: Rollback entire transaction
     // Verify: Product table empty after failure
-  })
+  });
 
-  it('should preserve version immutability on failed update', () => {
+  it("should preserve version immutability on failed update", () => {
     // Attempt update where version record insert fails
     // Expected: Product.current_version unchanged
-  })
+  });
 
-  it('should prevent partial state after delete failure', () => {
+  it("should prevent partial state after delete failure", () => {
     // Delete with constraint violation
     // Expected: Product fully intact
-  })
-})
+  });
+});
 ```
 
 **Assertion Count:** 3+ atomicity assertions
@@ -842,17 +846,17 @@ describe('Transaction Atomicity', () => {
 **Required Tests:** (T068-T069 – Load tests)
 
 ```typescript
-describe('Concurrency Safety', () => {
-  it('should increment version correctly with 10 concurrent updates', () => {
+describe("Concurrency Safety", () => {
+  it("should increment version correctly with 10 concurrent updates", () => {
     // 10 simultaneous PUT requests to same product
     // Expected: Versions 1→2→3...→11 (no skips, no duplicates)
-  })
+  });
 
-  it('should enforce slug uniqueness under 10 concurrent creates', () => {
+  it("should enforce slug uniqueness under 10 concurrent creates", () => {
     // 10 simultaneous POST with same slug
     // Expected: 1 success (201), 9 failures (409)
-  })
-})
+  });
+});
 ```
 
 **Assertion Count:** 4+ concurrency assertions
@@ -864,17 +868,17 @@ describe('Concurrency Safety', () => {
 **Required Tests:** (T060 – RBAC, tenant isolation)
 
 ```typescript
-describe('RBAC Enforcement', () => {
-  it('should reject non-admin user (403)', () => {
+describe("RBAC Enforcement", () => {
+  it("should reject non-admin user (403)", () => {
     // POST /products with user role (not admin)
     // Expected: 403 FORBIDDEN
-  })
+  });
 
-  it('should reject audit log without AUDIT_READ (403)', () => {
+  it("should reject audit log without AUDIT_READ (403)", () => {
     // GET /products/:id/audit-log without AUDIT_READ scope
     // Expected: 403 FORBIDDEN
-  })
-})
+  });
+});
 ```
 
 **Assertion Count:** 4+ RBAC assertions

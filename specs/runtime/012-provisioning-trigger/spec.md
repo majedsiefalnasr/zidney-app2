@@ -12,7 +12,11 @@
 
 ### What Is Being Built
 
-A provisioning trigger system that allows MMC (Master Management Console) to safely delegate tenant database creation, initialization, and activation to an asynchronous Provisioning Worker. MMC creates a license record and enqueues a provisioning job; the Provisioning Worker independently creates the tenant database, runs migrations, seeds data, creates the admin account, and activates the workspace.
+A provisioning trigger system that allows MMC (Master Management Console) to safely delegate tenant
+database creation, initialization, and activation to an asynchronous Provisioning Worker. MMC
+creates a license record and enqueues a provisioning job; the Provisioning Worker independently
+creates the tenant database, runs migrations, seeds data, creates the admin account, and activates
+the workspace.
 
 ### Why It Matters
 
@@ -38,7 +42,8 @@ A provisioning trigger system that allows MMC (Master Management Console) to saf
 ✅ **No direct DB instantiation**: Worker writes only through authenticated pool manager.  
 ✅ **No snapshot integrity violations**: N/A — provisioning creates data, not at attempt level.  
 ✅ **No transaction boundary weakening**: All provisioning operations are atomic or compensating.  
-✅ **No version enforcement bypass**: schema_version and product_version checked before provisioning.
+✅ **No version enforcement bypass**: schema_version and product_version checked before
+provisioning.
 
 **Compliance Status**: ✅ Fully compliant with Zidney Constitution v1.2.0
 
@@ -77,7 +82,8 @@ No cross-tenant joins. No shared student/attempt tables touched.
 - If status = PROVISION_FAILED → Block (503 Service Unavailable)
 - If status = ACTIVE → Allow (200 OK)
 
-**Isolation Guarantee**: ✅ Only licensed, authorized workspaces can access their data. Unprovisioned workspaces are blocked.
+**Isolation Guarantee**: ✅ Only licensed, authorized workspaces can access their data.
+Unprovisioned workspaces are blocked.
 
 ---
 
@@ -107,7 +113,8 @@ Before Provisioning Worker starts:
    - Extract product_version (e.g., "2.5.0")
 
 2. **Compare against platform**
-   - If schema_version < platform.schema_version → Run forward migrations (includes all versions in range)
+   - If schema_version < platform.schema_version → Run forward migrations (includes all versions in
+     range)
    - If product_version mismatch detected → Log warning (not blocking for initial provisioning)
 
 3. **Apply migrations up to schema_version**
@@ -221,7 +228,8 @@ If Worker receives duplicate job (same license_id):
 3. If no but license.status = ACTIVE → Return success
 4. If license.status = PENDING_PROVISION → Retry provisioning (may find orphan DB, clean it first)
 
-**Duplicate Delivery Protection**: Use Redis distributed lock keyed by license_id with 30-second TTL. Only one Worker instance can provision a given license concurrently.
+**Duplicate Delivery Protection**: Use Redis distributed lock keyed by license_id with 30-second
+TTL. Only one Worker instance can provision a given license concurrently.
 
 ### Failure Handling & Rollback Paths
 
@@ -751,15 +759,23 @@ This specification does NOT address:
 
 ## Assumptions
 
-1. **Single PostgreSQL Instance**: Only one PostgreSQL server per deployment. Multi-database deployments handled in future stages.
-2. **Redis Queue Persistent**: Redis is configured with AOF (append-only file) persistence, so jobs survive restarts.
-3. **Distributed Lock**: Redis SETNX used for distributed lock (alternative: DB-based lock via advisory locks).
-4. **Credential Management**: DB credentials stored in Docker secrets or environment variables; never logged.
-5. **Slug Validation Upstream**: MMC validates workspace slug before enqueue; Worker re-validates as defensive check.
-6. **Admin Email Valid**: MMC ensures admin email is valid before enqueue (future: add email verification).
-7. **Seed Data Static**: Baseline roles, permissions, divisions don't change during provisioning (versioned in migrations).
+1. **Single PostgreSQL Instance**: Only one PostgreSQL server per deployment. Multi-database
+   deployments handled in future stages.
+2. **Redis Queue Persistent**: Redis is configured with AOF (append-only file) persistence, so jobs
+   survive restarts.
+3. **Distributed Lock**: Redis SETNX used for distributed lock (alternative: DB-based lock via
+   advisory locks).
+4. **Credential Management**: DB credentials stored in Docker secrets or environment variables;
+   never logged.
+5. **Slug Validation Upstream**: MMC validates workspace slug before enqueue; Worker re-validates as
+   defensive check.
+6. **Admin Email Valid**: MMC ensures admin email is valid before enqueue (future: add email
+   verification).
+7. **Seed Data Static**: Baseline roles, permissions, divisions don't change during provisioning
+   (versioned in migrations).
 8. **NTP Sync**: All Worker pods sync via NTP; no manual time adjustments.
-9. **No Partial Provisioning**: Once license.status = ACTIVE, provisioning is considered complete (no incremental steps can be added mid-way).
+9. **No Partial Provisioning**: Once license.status = ACTIVE, provisioning is considered complete
+   (no incremental steps can be added mid-way).
 
 ---
 
@@ -787,34 +803,43 @@ No exceptions or modifications to Zidney architecture required.
 
 **Q1: Worker network-partition + lock TTL**
 
-Scenario: Worker acquires distributed lock (30s TTL), proceeds with provisioning, then loses connectivity to master_db after 45s (mid-provision).
+Scenario: Worker acquires distributed lock (30s TTL), proceeds with provisioning, then loses
+connectivity to master_db after 45s (mid-provision).
 
-**A1:** C) Worker attempts reconnect with exponential backoff up to 60s; if still disconnected, roll back, release lock, mark `PROVISION_FAILED`, and re-enqueue for retry. This preserves safety while avoiding indefinite lock extension.
+**A1:** C) Worker attempts reconnect with exponential backoff up to 60s; if still disconnected, roll
+back, release lock, mark `PROVISION_FAILED`, and re-enqueue for retry. This preserves safety while
+avoiding indefinite lock extension.
 
 **Q2: Seed data initialization scope**
 
 Should seed data be platform-generic, tenant-specific, or hybrid?
 
-**A2:** C) Hybrid: platform-generic baseline plus tenant-specific optional hooks (e.g., locale or tenant feature flags). Default seeds are platform-generic; hooks allow later tenant customization during provisioning.
+**A2:** C) Hybrid: platform-generic baseline plus tenant-specific optional hooks (e.g., locale or
+tenant feature flags). Default seeds are platform-generic; hooks allow later tenant customization
+during provisioning.
 
 **Q3: Admin account initial credential handling**
 
 How should initial admin credentials be handled/delivered?
 
-**A3:** D) Worker creates an admin placeholder and MMC triggers an invite flow where the admin sets their password. Worker does not email or return raw credentials.
+**A3:** D) Worker creates an admin placeholder and MMC triggers an invite flow where the admin sets
+their password. Worker does not email or return raw credentials.
 
 **Q4: Database-creation failure rollback semantics**
 
 If DROP/CREATE fails mid-recovery, what is desired behavior?
 
-**A4:** B) Attempt automatic retries for DROP/create with exponential backoff (N attempts) then mark `PROVISION_FAILED`. Operator remediation is allowed after retries fail.
+**A4:** B) Attempt automatic retries for DROP/create with exponential backoff (N attempts) then mark
+`PROVISION_FAILED`. Operator remediation is allowed after retries fail.
 
 **Q5: Concurrent provisioning requests for same workspace_slug**
 
 How should duplicate/concurrent requests be handled?
 
-**A5:** A) Deduplicate at enqueue time (by `license_id`/slug) — drop duplicates so a single job is processed; processing remains idempotent.
+**A5:** A) Deduplicate at enqueue time (by `license_id`/slug) — drop duplicates so a single job is
+processed; processing remains idempotent.
 
 ---
 
-All clarifications recorded above have been resolved and incorporated into the specification. No further `[NEEDS CLARIFICATION]` markers remain.
+All clarifications recorded above have been resolved and incorporated into the specification. No
+further `[NEEDS CLARIFICATION]` markers remain.

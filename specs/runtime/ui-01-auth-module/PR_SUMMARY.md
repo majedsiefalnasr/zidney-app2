@@ -26,14 +26,24 @@
 
 ## 3. Executive Summary
 
-- Implements the complete auth runtime module across all three front-end applications (MMC, Backoffice, Frontoffice): token manager, refresh manager, auth service, Pinia auth store, route guard, API client wiring, and bootstrap sequence
-- Access tokens are memory-only — no localStorage, no sessionStorage, no cookies written by JavaScript — ensuring XSS cannot extract tokens from persistent storage
-- Single-flight refresh lock (`let inFlight: Promise<void> | null = null`) prevents token amplification: concurrent 401s trigger exactly one refresh call
-- Creation-order circular dependency between the auth store and the refresh manager is safely broken via a lazy accessor pattern (`getRefreshManager: () => IRefreshManager | null`) — no module-level circular imports
-- Logout is unconditional: state is cleared regardless of backend response, ensuring users cannot be trapped in an authenticated state by a network failure
-- `isLoading` is set to `false` only after `router.push()` resolves (MEDIUM-02 compliance), preventing a double-logout race condition
-- All constitutional guarantees remain intact: no DB access from UI, no JWT decoding, no Date.now() for expiry, no cross-app imports, structured logging throughout
-- 143 unit and integration tests pass; TypeScript exits 0 for all three apps; lint exits 0; all security greps clean
+- Implements the complete auth runtime module across all three front-end applications (MMC,
+  Backoffice, Frontoffice): token manager, refresh manager, auth service, Pinia auth store, route
+  guard, API client wiring, and bootstrap sequence
+- Access tokens are memory-only — no localStorage, no sessionStorage, no cookies written by
+  JavaScript — ensuring XSS cannot extract tokens from persistent storage
+- Single-flight refresh lock (`let inFlight: Promise<void> | null = null`) prevents token
+  amplification: concurrent 401s trigger exactly one refresh call
+- Creation-order circular dependency between the auth store and the refresh manager is safely broken
+  via a lazy accessor pattern (`getRefreshManager: () => IRefreshManager | null`) — no module-level
+  circular imports
+- Logout is unconditional: state is cleared regardless of backend response, ensuring users cannot be
+  trapped in an authenticated state by a network failure
+- `isLoading` is set to `false` only after `router.push()` resolves (MEDIUM-02 compliance),
+  preventing a double-logout race condition
+- All constitutional guarantees remain intact: no DB access from UI, no JWT decoding, no Date.now()
+  for expiry, no cross-app imports, structured logging throughout
+- 143 unit and integration tests pass; TypeScript exits 0 for all three apps; lint exits 0; all
+  security greps clean
 
 ---
 
@@ -93,10 +103,12 @@
 
 ## 9. Testing Coverage
 
-- [x] Unit tests — 70 tests across token-manager, refresh-manager, auth-store, auth-guard, auth-service
+- [x] Unit tests — 70 tests across token-manager, refresh-manager, auth-store, auth-guard,
+      auth-service
 - [x] Integration tests — 28 tests: concurrent refresh (5), session init (10), logout flow (13)
 - [x] Edge cases covered — second logout, refresh failure, network error, concurrent 401s
-- [x] Concurrency scenarios — `concurrent-refresh.test.ts`: 5 parallel calls → `refreshFn` called once
+- [x] Concurrency scenarios — `concurrent-refresh.test.ts`: 5 parallel calls → `refreshFn` called
+      once
 
 Test Command:
 
@@ -126,7 +138,8 @@ Expected: **12 files, 143 tests — all pass**
 
 ## 12. Stage Lifecycle Verification
 
-- [x] Stage Status updated → `PRODUCTION READY` in `specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_01_AUTH_MODULE.md`
+- [x] Stage Status updated → `PRODUCTION READY` in
+      `specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_01_AUTH_MODULE.md`
 - [x] `.workflow-state.json` updated → `current_step: stage_production_ready`
 - [x] README.md progress table complete — all 7 steps ✅
 - [x] All 7 step reports generated in `reports/` and `audits/`
@@ -146,7 +159,9 @@ Expected: **12 files, 143 tests — all pass**
 
 **Risk Level:** Medium
 
-Previous `core/guards/` and `token-store.ts` files are deleted. Any existing code that imported from those paths will break. Review imports across the codebase before merge to confirm no other modules referenced these deleted files.
+Previous `core/guards/` and `token-store.ts` files are deleted. Any existing code that imported from
+those paths will break. Review imports across the codebase before merge to confirm no other modules
+referenced these deleted files.
 
 ---
 

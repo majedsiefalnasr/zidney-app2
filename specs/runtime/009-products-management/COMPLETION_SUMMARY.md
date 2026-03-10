@@ -462,7 +462,8 @@ apps/api/src/db/master/migrations/
 
 **Verification Steps:**
 
-1. Run all 9 test suites: `npm run test -- tests/integration/products tests/unit/products tests/contract/products tests/load/products`
+1. Run all 9 test suites:
+   `npm run test -- tests/integration/products tests/unit/products tests/contract/products tests/load/products`
 2. Verify all tests pass
 3. Check code coverage meets >95% target
 4. Review documentation in staging environment

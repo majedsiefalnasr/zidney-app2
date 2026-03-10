@@ -12,7 +12,8 @@
 
 - [x] No implementation details (languages, frameworks, APIs)
 - [x] Focused on user value and business needs
-- [x] Written for non-technical stakeholders (user stories section) and technical reviewers (enforcement model)
+- [x] Written for non-technical stakeholders (user stories section) and technical reviewers
+      (enforcement model)
 - [x] All mandatory sections completed
 
 ---
@@ -33,7 +34,8 @@
 ## Feature Readiness
 
 - [x] All functional requirements (FR-001 through FR-023) have clear acceptance criteria
-- [x] User scenarios cover primary flows (assignment, disabling, permission update, no-role case, management view)
+- [x] User scenarios cover primary flows (assignment, disabling, permission update, no-role case,
+      management view)
 - [x] Feature meets measurable outcomes defined in Success Criteria (SC-001 through SC-010)
 - [x] No implementation details leak into specification
 
@@ -79,7 +81,8 @@
 
 ## Audit & Observability Completeness
 
-- [x] All required audit fields defined (`user_id`, `role_id`, `module`, `action`, `timestamp`, `request_id`, `workspace_slug`)
+- [x] All required audit fields defined (`user_id`, `role_id`, `module`, `action`, `timestamp`,
+      `request_id`, `workspace_slug`)
 - [x] Audit immutability rule stated
 - [x] Audit written transactionally with mutation
 - [x] Structured log fields aligned with platform logging standard
@@ -101,7 +104,8 @@
 ## Assumptions & Non-Goals
 
 - [x] All assumptions documented with rationale
-- [x] Non-goals explicitly listed (per-user overrides, division-scoped RBAC, role hierarchy, UI, student model, MMC RBAC)
+- [x] Non-goals explicitly listed (per-user overrides, division-scoped RBAC, role hierarchy, UI,
+      student model, MMC RBAC)
 - [x] Phase 3 scope is clear; Phase 4+ extensions named and deferred
 
 ---
@@ -116,7 +120,13 @@ No items require spec updates before `/speckit.clarify` or `/speckit.plan`.
 
 ## Notes
 
-- The spec deliberately uses nullable `role_id` on `staff_users` to enable safe migration. Reviewers should confirm this aligns with the existing `staff_users` migration history before planning begins.
-- Audit log placement in the tenant DB (vs. a centralized audit service) was a deliberate isolation-preserving decision. If a future ADR introduces a platform-wide audit aggregator, this spec will need a follow-up stage.
-- Cache invalidation strategy (synchronous vs. event-based) is left as an implementation detail for the plan phase; the spec only mandates the observable behavior (immediate effect on next request).
-- Module key strings are application-validated; if the platform later adopts a DB-level enum for modules, a migration stage will be required.
+- The spec deliberately uses nullable `role_id` on `staff_users` to enable safe migration. Reviewers
+  should confirm this aligns with the existing `staff_users` migration history before planning
+  begins.
+- Audit log placement in the tenant DB (vs. a centralized audit service) was a deliberate
+  isolation-preserving decision. If a future ADR introduces a platform-wide audit aggregator, this
+  spec will need a follow-up stage.
+- Cache invalidation strategy (synchronous vs. event-based) is left as an implementation detail for
+  the plan phase; the spec only mandates the observable behavior (immediate effect on next request).
+- Module key strings are application-validated; if the platform later adopts a DB-level enum for
+  modules, a migration stage will be required.

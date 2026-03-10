@@ -245,5 +245,4 @@ The plan must end with:
 
 “Implementation plan compliant with Zidney Constitution v1.2.0 — No violations detected.”
 
-If violation exists:
-Plan must stop and describe conflict.
+If violation exists: Plan must stop and describe conflict.

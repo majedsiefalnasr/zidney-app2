@@ -1,8 +1,6 @@
 ## ZIDNEY – TEAM ENGINEERING GUIDELINES
 
-Version: 1.0
-Status: Mandatory Compliance
-Applies To: All Engineers & AI Agents
+Version: 1.0 Status: Mandatory Compliance Applies To: All Engineers & AI Agents
 
 ---
 

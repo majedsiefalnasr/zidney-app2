@@ -8,7 +8,8 @@
 
 ## Overview
 
-This document defines the 4-step Go/No-Go validation gate before production deployment. All tests must pass with 0 failures.
+This document defines the 4-step Go/No-Go validation gate before production deployment. All tests
+must pass with 0 failures.
 
 **Total estimated time**: 2-3 hours  
 **Recommended**: Run in staging environment before production promote  

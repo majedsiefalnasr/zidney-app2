@@ -1,18 +1,16 @@
 # Testing Guide — INFRA_AUDIT_CHECKLIST
 
-**Stage:** INFRA_AUDIT_CHECKLIST
-**Phase:** 01_PLATFORM_FOUNDATION
-**Stage Directory:** infra-002-audit-checklist
-**Generated On:** 2026-03-04T00:00:00.000Z
+**Stage:** INFRA_AUDIT_CHECKLIST **Phase:** 01_PLATFORM_FOUNDATION **Stage Directory:**
+infra-002-audit-checklist **Generated On:** 2026-03-04T00:00:00.000Z
 
 ---
 
 ## Purpose
 
-This guide explains how to validate the infrastructure audit implementation end-to-end.
-The INFRA_AUDIT_CHECKLIST stage is **read-only** — it produces no new runtime behavior,
-only documentation and tooling. Testing focuses on verifying the audit script execution,
-report accuracy, and readiness for STAGE_INFRA_GOVERNANCE.
+This guide explains how to validate the infrastructure audit implementation end-to-end. The
+INFRA_AUDIT_CHECKLIST stage is **read-only** — it produces no new runtime behavior, only
+documentation and tooling. Testing focuses on verifying the audit script execution, report accuracy,
+and readiness for STAGE_INFRA_GOVERNANCE.
 
 ---
 
@@ -225,7 +223,8 @@ bun run lint -- scripts/infra-audit.ts
 
 1. Open [specs/runtime/infra-002-audit-checklist/reports/GAP_REPORT.md](../reports/GAP_REPORT.md)
 2. Scan for section headers: US1–US8 (Vitest, Tests, ESLint, CI, Bun, READMEs, Tech Debt, Readiness)
-3. For each section, verify at least ONE specific finding is listed (e.g., "5 Vitest configs at root, apps, packages; no workspace config")
+3. For each section, verify at least ONE specific finding is listed (e.g., "5 Vitest configs at
+   root, apps, packages; no workspace config")
 
 **Expected:**
 
@@ -239,7 +238,8 @@ bun run lint -- scripts/infra-audit.ts
 
 **Steps:**
 
-1. Open [specs/runtime/infra-002-audit-checklist/reports/RISK_CLASSIFICATION.md](../reports/RISK_CLASSIFICATION.md)
+1. Open
+   [specs/runtime/infra-002-audit-checklist/reports/RISK_CLASSIFICATION.md](../reports/RISK_CLASSIFICATION.md)
 2. Check the risk matrix table
 3. Verify all 6 governance areas are marked as "NEEDS WORK" (per CL7 readiness thresholds)
 
@@ -254,9 +254,11 @@ bun run lint -- scripts/infra-audit.ts
 
 **Steps:**
 
-1. Open [specs/runtime/infra-002-audit-checklist/reports/SAFE_ROLLOUT_PLAN.md](../reports/SAFE_ROLLOUT_PLAN.md)
+1. Open
+   [specs/runtime/infra-002-audit-checklist/reports/SAFE_ROLLOUT_PLAN.md](../reports/SAFE_ROLLOUT_PLAN.md)
 2. Find section: "Prerequisites for STAGE_INFRA_GOVERNANCE"
-3. Verify at least ONE item states: "This audit (INFRA_AUDIT_CHECKLIST) must reach status PRODUCTION READY"
+3. Verify at least ONE item states: "This audit (INFRA_AUDIT_CHECKLIST) must reach status PRODUCTION
+   READY"
 
 **Expected:**
 
@@ -270,7 +272,8 @@ bun run lint -- scripts/infra-audit.ts
 - ✅ GAP_REPORT.md: 8 sections, ≥1 finding per section, specific file paths cited
 - ✅ RISK_CLASSIFICATION.md: All 6 areas marked according to spec thresholds
 - ✅ SAFE_ROLLOUT_PLAN.md: References this audit as prerequisite for STAGE_INFRA_GOVERNANCE
-- ✅ PR_SUMMARY.md: Uses actual counts from infra-audit-report.json (e.g., "5 Vitest configs", "116 test files")
+- ✅ PR_SUMMARY.md: Uses actual counts from infra-audit-report.json (e.g., "5 Vitest configs", "116
+  test files")
 
 ---
 

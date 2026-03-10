@@ -1,9 +1,6 @@
 chore({{STAGE_DIR_NAME}}): complete plan step
 
-Step: Plan (3/7)
-Stage: {{STAGE_NAME}}
-Phase: {{PHASE_NAME}}
-Status: DRAFT
+Step: Plan (3/7) Stage: {{STAGE_NAME}} Phase: {{PHASE_NAME}} Status: DRAFT
 
 Technical scope:
 

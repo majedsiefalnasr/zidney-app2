@@ -3,7 +3,8 @@
 Phase: DevOps & Operational Safety  
 Scope: Runtime health validation, observability baseline, and failure alerting
 
-This document defines the minimum monitoring and health guarantees required before production deployment.
+This document defines the minimum monitoring and health guarantees required before production
+deployment.
 
 ---
 
@@ -13,8 +14,7 @@ The backend must expose the following endpoints:
 
 ### GET /health
 
-Purpose:
-Basic liveness probe for container orchestration.
+Purpose: Basic liveness probe for container orchestration.
 
 Must return:
 
@@ -30,8 +30,7 @@ This endpoint is used by Docker and reverse proxy health checks.
 
 ### GET /health/ready
 
-Purpose:
-Readiness probe for infrastructure validation.
+Purpose: Readiness probe for infrastructure validation.
 
 Must validate:
 
@@ -50,8 +49,7 @@ If any dependency fails:
 
 ### GET /health/tenant/:slug
 
-Purpose:
-Tenant-specific runtime validation.
+Purpose: Tenant-specific runtime validation.
 
 Must validate:
 

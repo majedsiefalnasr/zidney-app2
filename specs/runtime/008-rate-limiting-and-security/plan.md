@@ -10,7 +10,8 @@
 
 ## Executive Summary
 
-This technical design plan provides the complete architectural blueprint for implementing Rate Limiting & Security across Zidney. It details:
+This technical design plan provides the complete architectural blueprint for implementing Rate
+Limiting & Security across Zidney. It details:
 
 - **Database schema changes** required for idempotent submission
 - **API layer middleware stack** with enforcement order
@@ -197,91 +198,91 @@ ALTER TABLE attempts ADD COLUMN (
 #### File: `apps/api/src/db/tenant/migrations/0008_add_idempotent_submission.ts`
 
 ```typescript
-import { sql } from 'drizzle-orm'
-import type { Migration } from '../migration.types'
+import { sql } from "drizzle-orm";
+import type { Migration } from "../migration.types";
 
 export const migration: Migration = {
-  id: '0008_add_idempotent_submission',
-  version: '1.1.0', // MINOR bump (backward compatible)
-  description: 'Add idempotent submission support to attempts table',
+  id: "0008_add_idempotent_submission",
+  version: "1.1.0", // MINOR bump (backward compatible)
+  description: "Add idempotent submission support to attempts table",
 
   up: async (db) => {
     // Add new columns
     await db.schema
-      .alterTable('attempts')
-      .addColumn('idempotent_submission_key', 'uuid', (col) =>
-        col.defaultTo(sql`gen_random_uuid()`)
+      .alterTable("attempts")
+      .addColumn("idempotent_submission_key", "uuid", (col) =>
+        col.defaultTo(sql`gen_random_uuid()`),
       )
-      .addColumn('submission_cached_result', 'jsonb')
-      .addColumn('submission_cached_at', 'timestamp with time zone')
-      .execute()
+      .addColumn("submission_cached_result", "jsonb")
+      .addColumn("submission_cached_at", "timestamp with time zone")
+      .execute();
 
     // Create index for lookups
     await db.schema
-      .createIndex('idx_attempt_idempotent_key')
-      .on('attempts')
-      .column('id')
-      .column('idempotent_submission_key')
+      .createIndex("idx_attempt_idempotent_key")
+      .on("attempts")
+      .column("id")
+      .column("idempotent_submission_key")
       .unique()
-      .execute()
+      .execute();
 
     // Create index for submission audit
     await db.schema
-      .createIndex('idx_attempt_cached_result')
-      .on('attempts')
-      .column('workspace_id')
-      .column('created_at')
+      .createIndex("idx_attempt_cached_result")
+      .on("attempts")
+      .column("workspace_id")
+      .column("created_at")
       .where(sql`submission_cached_at IS NOT NULL`)
-      .execute()
+      .execute();
   },
 
   down: async (db) => {
     // Drop indexes
-    await db.schema.dropIndex('idx_attempt_cached_result').execute()
-    await db.schema.dropIndex('idx_attempt_idempotent_key').execute()
+    await db.schema.dropIndex("idx_attempt_cached_result").execute();
+    await db.schema.dropIndex("idx_attempt_idempotent_key").execute();
 
     // Drop columns
     await db.schema
-      .alterTable('attempts')
-      .dropColumn('submission_cached_at')
-      .dropColumn('submission_cached_result')
-      .dropColumn('idempotent_submission_key')
-      .execute()
+      .alterTable("attempts")
+      .dropColumn("submission_cached_at")
+      .dropColumn("submission_cached_result")
+      .dropColumn("idempotent_submission_key")
+      .execute();
   },
 
-  checksum: 'sha256:...', // Generated during migration validation
-  createdAt: '2026-02-19T00:00:00Z',
-}
+  checksum: "sha256:...", // Generated during migration validation
+  createdAt: "2026-02-19T00:00:00Z",
+};
 ```
 
 #### File: `apps/api/src/db/master/migrations/0005_schema_version_increment.ts`
 
 ```typescript
-import type { Migration } from '../migration.types'
+import type { Migration } from "../migration.types";
 
 export const migration: Migration = {
-  id: '0005_schema_version_increment',
-  version: '1.1.0',
-  description: 'Increment schema version for rate limiting feature',
+  id: "0005_schema_version_increment",
+  version: "1.1.0",
+  description: "Increment schema version for rate limiting feature",
 
   up: async (db) => {
     // Update schema_version on each tenant DB
     // This runs during platform initialization
     await db
-      .update('schema_versions')
-      .set({ version: '1.1.0', updated_at: new Date() })
+      .update("schema_versions")
+      .set({ version: "1.1.0", updated_at: new Date() })
       .where(sql`version < '1.1.0'`)
-      .execute()
+      .execute();
   },
 
   down: async () => {
     // Downgrade handled by provision service
-    throw new Error('Cannot downgrade schema version')
+    throw new Error("Cannot downgrade schema version");
   },
 
-  checksum: 'sha256:...',
-  createdAt: '2026-02-19T00:00:00Z',
-}
+  checksum: "sha256:...",
+  createdAt: "2026-02-19T00:00:00Z",
+};
 ```
 
 ### Indexes Required
@@ -350,55 +351,53 @@ Every API endpoint enforces role-based access control according to the following
 ```typescript
 export const rbacMiddleware = (allowedRoles: string[]) => {
   return async (c: Context, next: Next) => {
-    const requestId = c.state.requestId
-    const decoded = c.state.jwtDecoded // From JWT auth middleware
+    const requestId = c.state.requestId;
+    const decoded = c.state.jwtDecoded; // From JWT auth middleware
 
     if (!decoded) {
       return c.json(
         {
           error: {
-            code: 'UNAUTHORIZED',
-            message: 'Authentication required',
+            code: "UNAUTHORIZED",
+            message: "Authentication required",
             details: null,
             correlationId: requestId,
           },
         },
-        401
-      )
+        401,
+      );
     }
 
-    const userRoles = decoded.roles || []
-    const hasRequiredRole = allowedRoles.some((role) =>
-      userRoles.includes(role)
-    )
+    const userRoles = decoded.roles || [];
+    const hasRequiredRole = allowedRoles.some((role) => userRoles.includes(role));
 
     if (!hasRequiredRole) {
       logger.warn({
-        event: 'rbac_denied',
+        event: "rbac_denied",
         correlation_id: requestId,
         user_id: decoded.sub,
         user_roles: userRoles,
         required_roles: allowedRoles,
         endpoint: c.req.path,
-      })
+      });
 
       return c.json(
         {
           error: {
-            code: 'FORBIDDEN',
-            message: `This action requires one of: ${allowedRoles.join(', ')}`,
+            code: "FORBIDDEN",
+            message: `This action requires one of: ${allowedRoles.join(", ")}`,
             details: { required_roles: allowedRoles, user_roles: userRoles },
             correlationId: requestId,
           },
         },
-        403
-      )
+        403,
+      );
     }
 
-    c.state.jwtDecoded = decoded
-    await next()
-  }
-}
+    c.state.jwtDecoded = decoded;
+    await next();
+  };
+};
 ```
 
 ### RBAC Enforcement Order
@@ -427,7 +426,7 @@ Middleware must execute in this order:
 ```typescript
 // Handler signature
 handler: async (c: Context) => {
-  const body = await c.req.json()
+  const body = await c.req.json();
 
   // Middleware has already:
   // 1. Assigned correlation_id to c.state.requestId
@@ -436,31 +435,31 @@ handler: async (c: Context) => {
   // 4. Enforced schema version
   // 5. Checked rate limits (would return 429 here if exceeded)
 
-  const { email, password } = body
+  const { email, password } = body;
 
   // Proceed with authentication logic
   // ... login logic ...
 
-  return c.json({ success: true, data: { token } })
-}
+  return c.json({ success: true, data: { token } });
+};
 
 // Middleware chain
 route.post(
-  '/auth/login',
+  "/auth/login",
   correlationIdMiddleware(),
   tenantResolverMiddleware(),
   licenseEnforcementMiddleware(),
   schemaVersionMiddleware(),
   rateLimitMiddleware({
-    endpoints: ['auth:login'],
+    endpoints: ["auth:login"],
     limits: {
-      'auth:ip': { rate: 5, window: 60_000 },
-      'auth:user': { rate: 5, window: 60_000 },
-      'auth:workspace': { rate: 10, window: 60_000 },
+      "auth:ip": { rate: 5, window: 60_000 },
+      "auth:user": { rate: 5, window: 60_000 },
+      "auth:workspace": { rate: 10, window: 60_000 },
     },
   }),
-  loginHandler
-)
+  loginHandler,
+);
 ```
 
 **Rate Limit Keys:**
@@ -503,48 +502,45 @@ Content-Type: application/json
 
 ```typescript
 handler: async (c: Context) => {
-  const requestId = c.state.requestId
-  const workspace = c.state.workspace
-  const userId = c.state.userId
+  const requestId = c.state.requestId;
+  const workspace = c.state.workspace;
+  const userId = c.state.userId;
 
-  const { attemptId } = c.req.param()
-  const body = await c.req.json()
-  const { answers, idempotency_key } = body
+  const { attemptId } = c.req.param();
+  const body = await c.req.json();
+  const { answers, idempotency_key } = body;
 
   // Validate attempt exists and belongs to user
   const attempt = await db.attempts.findOne({
     where: { id: attemptId, workspace_id: workspace.id, user_id: userId },
-  })
+  });
 
-  if (!attempt) return c.json({ error: 'ATTEMPT_NOT_FOUND' }, 404)
-  if (attempt.status !== 'IN_PROGRESS')
-    return c.json({ error: 'ATTEMPT_NOT_IN_PROGRESS' }, 409)
+  if (!attempt) return c.json({ error: "ATTEMPT_NOT_FOUND" }, 404);
+  if (attempt.status !== "IN_PROGRESS") return c.json({ error: "ATTEMPT_NOT_IN_PROGRESS" }, 409);
 
   // Fast path: Check Redis cache
-  const cacheKey = `idempotent:attempt:${attemptId}:${idempotency_key}`
-  const cached = await redis.get(cacheKey)
+  const cacheKey = `idempotent:attempt:${attemptId}:${idempotency_key}`;
+  const cached = await redis.get(cacheKey);
 
   if (cached) {
     logger.info({
-      event: 'idempotent_submission_cache_hit',
+      event: "idempotent_submission_cache_hit",
       correlation_id: requestId,
       workspace_id: workspace.id,
       attempt_id: attemptId,
       cache_age_ms: Date.now() - JSON.parse(cached).cached_at,
-    })
-    return c.json({ success: true, data: JSON.parse(cached) })
+    });
+    return c.json({ success: true, data: JSON.parse(cached) });
   }
 
   // DB transaction: Safe path
   const result = await db.transaction(async (trx) => {
     // Acquire row lock
-    const lockedAttempt = await trx.attempts
-      .findOne({ where: { id: attemptId } })
-      .forUpdate()
+    const lockedAttempt = await trx.attempts.findOne({ where: { id: attemptId } }).forUpdate();
 
     // Verify still in progress
-    if (lockedAttempt.status !== 'IN_PROGRESS') {
-      throw new Error('ATTEMPT_STATE_CHANGED')
+    if (lockedAttempt.status !== "IN_PROGRESS") {
+      throw new Error("ATTEMPT_STATE_CHANGED");
     }
 
     // Check if idempotency key already processed
@@ -554,24 +550,24 @@ handler: async (c: Context) => {
       WHERE id = ${attemptId}
         AND idempotent_submission_key = ${idempotency_key}
       LIMIT 1
-    `)
+    `);
 
     if (existing.length > 0) {
       logger.info({
-        event: 'idempotent_submission_db_hit',
+        event: "idempotent_submission_db_hit",
         correlation_id: requestId,
         workspace_id: workspace.id,
         attempt_id: attemptId,
-      })
-      return existing[0].submission_cached_result
+      });
+      return existing[0].submission_cached_result;
     }
 
     // Step 4: Enqueue grading job to Worker (asynchronous)
     // WORKER-ONLY AUTHORITY: Worker is sole grading executor
-    const jobId = crypto.randomUUID()
+    const jobId = crypto.randomUUID();
     await jobQueue.enqueue({
       job_id: jobId,
-      type: 'grade_attempt',
+      type: "grade_attempt",
       workspace_id: workspace.id,
       workspace_slug: workspace.slug,
       attempt_id: attemptId,
@@ -584,60 +580,60 @@ handler: async (c: Context) => {
       },
       created_at: new Date(),
       scheduled_for: new Date(), // Execute immediately
-    })
+    });
 
     logger.info({
-      event: 'grading_job_enqueued',
+      event: "grading_job_enqueued",
       correlation_id: requestId,
       workspace_id: workspace.id,
       attempt_id: attemptId,
       job_id: jobId,
-    })
+    });
 
     // Step 5: Wait for worker to complete (with timeout)
     // API does NOT grade; only orchestrates the worker job
     const gradingResult = await jobQueue.waitForCompletion(jobId, {
       timeout: 30_000, // 30 second max wait
       pollInterval: 500, // Check every 500ms
-    })
+    });
 
     if (!gradingResult) {
       // Worker timeout: return 504 Gateway Timeout
       logger.warn({
-        event: 'grading_job_timeout',
+        event: "grading_job_timeout",
         correlation_id: requestId,
         attempt_id: attemptId,
         job_id: jobId,
-      })
+      });
 
       // Worker will continue processing; result will appear later
       // For now, return error to client
       return c.json(
         {
           error: {
-            code: 'GRADING_TIMEOUT',
-            message: 'Grading took too long. Please refresh to check status.',
+            code: "GRADING_TIMEOUT",
+            message: "Grading took too long. Please refresh to check status.",
             details: { estimated_wait_ms: 30000 },
             correlationId: requestId,
           },
         },
-        504
-      )
+        504,
+      );
     }
 
     // Step 6: Store result (worker has processed; API just persists)
     await trx.attempts.update(
       { id: attemptId },
       {
-        status: 'COMPLETED',
+        status: "COMPLETED",
         submission_cached_result: gradingResult,
         submission_cached_at: new Date(),
         idempotent_submission_key: idempotency_key,
-      }
-    )
+      },
+    );
 
-    return gradingResult
-  })
+    return gradingResult;
+  });
 
   // Cache in Redis (24h TTL)
   await redis.setex(
@@ -646,33 +642,33 @@ handler: async (c: Context) => {
     JSON.stringify({
       ...result,
       cached_at: Date.now(),
-    })
-  )
+    }),
+  );
 
   logger.info({
-    event: 'attempt_submission_successful',
+    event: "attempt_submission_successful",
     correlation_id: requestId,
     workspace_id: workspace.id,
     attempt_id: attemptId,
     user_id: userId,
     duration_ms: Date.now() - startTime,
-  })
+  });
 
-  return c.json({ success: true, data: result })
-}
+  return c.json({ success: true, data: result });
+};
 
 route.post(
-  '/attempt/:id/submit',
+  "/attempt/:id/submit",
   correlationIdMiddleware(),
   tenantResolverMiddleware(),
   licenseEnforcementMiddleware(),
   schemaVersionMiddleware(),
   rateLimitMiddleware({
-    endpoints: ['attempt:submit'],
-    limits: { 'attempt:submit': { rate: 1, window: 60_000 } },
+    endpoints: ["attempt:submit"],
+    limits: { "attempt:submit": { rate: 1, window: 60_000 } },
   }),
-  submitHandler
-)
+  submitHandler,
+);
 ```
 
 **Request Validation:**
@@ -683,28 +679,28 @@ const submitSchema = z.object({
     z.object({
       question_id: z.string().uuid(),
       answer: z.unknown(),
-    })
+    }),
   ),
   idempotency_key: z
     .string()
     .uuid()
     .optional()
     .transform((v) => v || crypto.randomUUID()),
-})
+});
 
 // Reject if missing idempotency_key
 if (!idempotency_key) {
   return c.json(
     {
       error: {
-        code: 'MISSING_IDEMPOTENCY_KEY',
-        message: 'idempotency_key is required for attempt submission (UUID v4)',
+        code: "MISSING_IDEMPOTENCY_KEY",
+        message: "idempotency_key is required for attempt submission (UUID v4)",
         details: null,
         correlationId: requestId,
       },
     },
-    400
-  )
+    400,
+  );
 }
 ```
 
@@ -714,96 +710,96 @@ if (!idempotency_key) {
 
 ```typescript
 handler: async (c: Context) => {
-  const workspace = c.state.workspace
-  const userId = c.state.userId
-  const { attemptId } = c.req.param()
+  const workspace = c.state.workspace;
+  const userId = c.state.userId;
+  const { attemptId } = c.req.param();
 
   // Extract JWT from Authorization header
-  const authHeader = c.req.headers.get('Authorization')
-  const token = authHeader?.replace('Bearer ', '')
+  const authHeader = c.req.headers.get("Authorization");
+  const token = authHeader?.replace("Bearer ", "");
 
   if (!token) {
     return c.websocket({
-      onOpen: (ws) => ws.close(1008, 'No authorization token'),
-    })
+      onOpen: (ws) => ws.close(1008, "No authorization token"),
+    });
   }
 
   // Validate JWT
-  let decoded
+  let decoded;
   try {
-    decoded = await verifyJWT(token)
+    decoded = await verifyJWT(token);
   } catch (e) {
     return c.websocket({
-      onOpen: (ws) => ws.close(1008, 'Invalid token'),
-    })
+      onOpen: (ws) => ws.close(1008, "Invalid token"),
+    });
   }
 
   // Cross-check workspace and attempt
   if (decoded.workspace_id !== workspace.id) {
     return c.websocket({
-      onOpen: (ws) => ws.close(1008, 'Workspace mismatch'),
-    })
+      onOpen: (ws) => ws.close(1008, "Workspace mismatch"),
+    });
   }
 
   if (decoded.attempt_id !== attemptId) {
     return c.websocket({
-      onOpen: (ws) => ws.close(1008, 'Attempt ID mismatch'),
-    })
+      onOpen: (ws) => ws.close(1008, "Attempt ID mismatch"),
+    });
   }
 
   // Check rate limiting: max 1 connection per user per attempt
-  const connectionKey = `rate:ws:${userId}:${attemptId}`
-  const existingConnection = await redis.get(connectionKey)
+  const connectionKey = `rate:ws:${userId}:${attemptId}`;
+  const existingConnection = await redis.get(connectionKey);
 
   if (existingConnection) {
     return c.websocket({
-      onOpen: (ws) => ws.close(4029, 'Only one connection per attempt allowed'),
-    })
+      onOpen: (ws) => ws.close(4029, "Only one connection per attempt allowed"),
+    });
   }
 
   // Accept connection
   return c.websocket({
     onOpen: (ws) => {
       logger.info({
-        event: 'ws_connection_opened',
+        event: "ws_connection_opened",
         attempt_id: attemptId,
         user_id: userId,
-      })
+      });
 
       // Mark connection in Redis
-      redis.setex(connectionKey, 30 * 60, '1') // 30 minute max session
+      redis.setex(connectionKey, 30 * 60, "1"); // 30 minute max session
 
       // Start heartbeat
       const heartbeatInterval = setInterval(() => {
-        ws.send(JSON.stringify({ type: 'pong' }))
-      }, 30_000)
+        ws.send(JSON.stringify({ type: "pong" }));
+      }, 30_000);
 
       // Store references for cleanup
-      ws._heartbeatInterval = heartbeatInterval
-      ws._connectionKey = connectionKey
+      ws._heartbeatInterval = heartbeatInterval;
+      ws._connectionKey = connectionKey;
     },
 
     onMessage: (ws, message) => {
-      const msg = JSON.parse(message)
+      const msg = JSON.parse(message);
 
       // Rate limit: 100 messages/60s
-      const rateLimitKey = `rate:ws:msg:${userId}:${attemptId}`
+      const rateLimitKey = `rate:ws:msg:${userId}:${attemptId}`;
       // Implement sliding window (details in Redis Schema section)
 
-      if (msg.type === 'ping') {
-        ws.send(JSON.stringify({ type: 'pong' }))
-      } else if (msg.type === 'answer_change') {
+      if (msg.type === "ping") {
+        ws.send(JSON.stringify({ type: "pong" }));
+      } else if (msg.type === "answer_change") {
         // Broadcast to client (no persistence needed)
-        logger.debug({ event: 'ws_answer_change', attempt_id: attemptId })
+        logger.debug({ event: "ws_answer_change", attempt_id: attemptId });
       }
     },
 
     onClose: (ws) => {
-      logger.info({ event: 'ws_connection_closed', attempt_id: attemptId })
+      logger.info({ event: "ws_connection_closed", attempt_id: attemptId });
 
       // Cleanup
-      clearInterval(ws._heartbeatInterval)
-      redis.del(ws._connectionKey)
+      clearInterval(ws._heartbeatInterval);
+      redis.del(ws._connectionKey);
 
       // Auto-finalize if connection lost for 30+ seconds
       // (Handled by scheduler, not here)
@@ -811,23 +807,23 @@ handler: async (c: Context) => {
 
     onError: (ws, error) => {
       logger.error({
-        event: 'ws_error',
+        event: "ws_error",
         attempt_id: attemptId,
         error: error.message,
-      })
-      ws.close(1011, 'Internal error')
+      });
+      ws.close(1011, "Internal error");
     },
-  })
-}
+  });
+};
 
 route.get(
-  '/ws/attempt/:id',
+  "/ws/attempt/:id",
   correlationIdMiddleware(),
   tenantResolverMiddleware(),
   licenseEnforcementMiddleware(),
   // Note: Rate limiting applied INSIDE the WebSocket handler
-  wsHandler
-)
+  wsHandler,
+);
 ```
 
 **WebSocket Close Codes:**
@@ -908,8 +904,8 @@ All Redis keys follow the pattern: `{prefix}:{endpoint}:{identifier}`
 - Purpose: Fast replay of duplicate submissions
 - Example: `idempotent:attempt:a1b2c3d4:uuid-v4` → `{"score":85,"cached_at":1645215600000}`
 
-**Storage Size:** ~500 bytes per cached result
-**Expected Volume:** 1M cached submissions × 500 bytes = 500MB per day (reasonable for typical workload)
+**Storage Size:** ~500 bytes per cached result **Expected Volume:** 1M cached submissions × 500
+bytes = 500MB per day (reasonable for typical workload)
 
 ### WebSocket Connection Tracking
 
@@ -1014,15 +1010,15 @@ notify-keyspace-events Ex
 ```typescript
 // Runs hourly to clean stale keys
 async function cleanupStaleKeys() {
-  const keys = await redis.keys('zidney:tenant:*:rate:*:lock:*')
+  const keys = await redis.keys("zidney:tenant:*:rate:*:lock:*");
   for (const key of keys) {
-    const ttl = await redis.ttl(key)
+    const ttl = await redis.ttl(key);
     if (ttl === -1) {
       // No expiration set
-      await redis.del(key)
+      await redis.del(key);
     }
   }
-  logger.info({ event: 'redis_cleanup_complete', keys_checked: keys.length })
+  logger.info({ event: "redis_cleanup_complete", keys_checked: keys.length });
 }
 ```
 
@@ -1074,197 +1070,193 @@ Response
 // Middleware 1: Correlation ID
 export const correlationIdMiddleware = () => {
   return async (c: Context, next: Next) => {
-    let requestId = c.req.headers.get('X-Request-ID')
+    let requestId = c.req.headers.get("X-Request-ID");
     if (!requestId) {
-      requestId = crypto.randomUUID()
+      requestId = crypto.randomUUID();
     }
 
-    c.state.requestId = requestId
-    c.state.startTime = Date.now()
+    c.state.requestId = requestId;
+    c.state.startTime = Date.now();
 
-    await next()
+    await next();
 
     // Add to response headers
-    c.header('X-Request-ID', requestId)
-  }
-}
+    c.header("X-Request-ID", requestId);
+  };
+};
 
 // Middleware 2: Tenant Resolver
 export const tenantResolverMiddleware = () => {
   return async (c: Context, next: Next) => {
-    const requestId = c.state.requestId
+    const requestId = c.state.requestId;
 
     // Extract workspace from subdomain or path
-    const host = c.req.headers.get('Host')
-    const subdomain = host?.split('.')[0]
-    const path = c.req.path.split('/')[1]
+    const host = c.req.headers.get("Host");
+    const subdomain = host?.split(".")[0];
+    const path = c.req.path.split("/")[1];
 
-    const workspaceSlug = subdomain || path
+    const workspaceSlug = subdomain || path;
 
     // Resolve workspace
     const workspace = await db.workspaces.findOne({
       where: { slug: workspaceSlug },
-    })
+    });
 
     if (!workspace) {
       logger.warn({
-        event: 'workspace_not_found',
+        event: "workspace_not_found",
         correlation_id: requestId,
         workspace_slug: workspaceSlug,
-      })
-      return c.json({ error: 'WORKSPACE_NOT_FOUND' }, 404)
+      });
+      return c.json({ error: "WORKSPACE_NOT_FOUND" }, 404);
     }
 
-    c.state.workspace = workspace
+    c.state.workspace = workspace;
 
-    await next()
-  }
-}
+    await next();
+  };
+};
 
 // Middleware 3: License Enforcement
 export const licenseEnforcementMiddleware = () => {
   return async (c: Context, next: Next) => {
-    const requestId = c.state.requestId
-    const workspace = c.state.workspace
+    const requestId = c.state.requestId;
+    const workspace = c.state.workspace;
 
     // Fetch license
     const license = await db.licenses.findOne({
       where: { workspace_id: workspace.id },
-    })
+    });
 
     if (!license) {
       logger.warn({
-        event: 'license_not_found',
+        event: "license_not_found",
         correlation_id: requestId,
         workspace_id: workspace.id,
-      })
-      return c.json({ error: 'WORKSPACE_ARCHIVED' }, 403)
+      });
+      return c.json({ error: "WORKSPACE_ARCHIVED" }, 403);
     }
 
     // Check status
-    if (license.status === 'SOFT_LOCKED') {
+    if (license.status === "SOFT_LOCKED") {
       logger.info({
-        event: 'license_soft_locked',
+        event: "license_soft_locked",
         correlation_id: requestId,
         workspace_id: workspace.id,
-      })
+      });
       return c.json(
         {
           error: {
-            code: 'SOFT_LOCKED',
-            message: 'Workspace maintenance in progress',
-            details: { status: 'SOFT_LOCKED', next_check_seconds: 300 },
+            code: "SOFT_LOCKED",
+            message: "Workspace maintenance in progress",
+            details: { status: "SOFT_LOCKED", next_check_seconds: 300 },
             correlationId: requestId,
           },
         },
-        423
-      )
+        423,
+      );
     }
 
-    if (license.status === 'ARCHIVED') {
+    if (license.status === "ARCHIVED") {
       return c.json(
         {
           error: {
-            code: 'ARCHIVED',
-            message: 'Workspace is archived',
+            code: "ARCHIVED",
+            message: "Workspace is archived",
             details: null,
             correlationId: requestId,
           },
         },
-        403
-      )
+        403,
+      );
     }
 
-    c.state.license = license
+    c.state.license = license;
 
-    await next()
-  }
-}
+    await next();
+  };
+};
 
 // Middleware 4: Schema Version
 export const schemaVersionMiddleware = () => {
   return async (c: Context, next: Next) => {
-    const workspace = c.state.workspace
-    const requestId = c.state.requestId
+    const workspace = c.state.workspace;
+    const requestId = c.state.requestId;
 
     // Get schema version for this tenant
-    const schema = await db
-      .tenantDb(workspace.id)
-      .query.schemaVersion.findFirst()
+    const schema = await db.tenantDb(workspace.id).query.schemaVersion.findFirst();
 
-    const appVersion = '1.1.0' // App supports this version
-    const tenantVersion = schema?.version || '1.0.0'
+    const appVersion = "1.1.0"; // App supports this version
+    const tenantVersion = schema?.version || "1.0.0";
 
     if (!isCompatible(tenantVersion, appVersion)) {
       logger.warn({
-        event: 'schema_version_incompatible',
+        event: "schema_version_incompatible",
         correlation_id: requestId,
         workspace_id: workspace.id,
         tenant_version: tenantVersion,
         app_version: appVersion,
-      })
+      });
       return c.json(
         {
           error: {
-            code: 'SCHEMA_INCOMPATIBLE',
-            message: 'Workspace needs upgrade',
+            code: "SCHEMA_INCOMPATIBLE",
+            message: "Workspace needs upgrade",
             details: {
               tenant_version: tenantVersion,
               app_version: appVersion,
-              action: 'contact_administrator',
+              action: "contact_administrator",
             },
             correlationId: requestId,
           },
         },
-        426
-      )
+        426,
+      );
     }
 
-    c.state.schemaVersion = tenantVersion
+    c.state.schemaVersion = tenantVersion;
 
-    await next()
-  }
-}
+    await next();
+  };
+};
 
 // Middleware 5: Rate Limiting
 export const rateLimitMiddleware = (config: RateLimitConfig) => {
   return async (c: Context, next: Next) => {
-    const requestId = c.state.requestId
-    const workspace = c.state.workspace
-    const route = c.req.path
+    const requestId = c.state.requestId;
+    const workspace = c.state.workspace;
+    const route = c.req.path;
 
     // Determine which rate limit applies to this route
-    const limitKey = config.endpoints.find((ep) =>
-      route.includes(ep.split(':')[0])
-    )
+    const limitKey = config.endpoints.find((ep) => route.includes(ep.split(":")[0]));
 
     if (!limitKey) {
       // Route has no rate limit, proceed
-      await next()
-      return
+      await next();
+      return;
     }
 
-    const limit = config.limits[limitKey]
-    const identifiers = getIdentifiers(c, workspace) // IP, user_id, workspace_id
+    const limit = config.limits[limitKey];
+    const identifiers = getIdentifiers(c, workspace); // IP, user_id, workspace_id
 
     // Check rate limits
     for (const [type, id] of Object.entries(identifiers)) {
-      const counter = await redis.get(`rate:${limitKey}:${type}:${id}`)
-      const count = parseInt(counter || '0')
+      const counter = await redis.get(`rate:${limitKey}:${type}:${id}`);
+      const count = parseInt(counter || "0");
 
       if (count >= limit.rate) {
         logger.warn({
-          event: 'rate_limit_exceeded',
+          event: "rate_limit_exceeded",
           correlation_id: requestId,
           workspace_id: workspace.id,
           endpoint: limitKey,
           count,
           limit: limit.rate,
-        })
+        });
         return c.json(
           {
             error: {
-              code: 'RATE_LIMIT_EXCEEDED',
+              code: "RATE_LIMIT_EXCEEDED",
               message: `Too many requests (${limit.rate}/${limit.window}ms)`,
               details: {
                 limit: limit.rate,
@@ -1275,21 +1267,21 @@ export const rateLimitMiddleware = (config: RateLimitConfig) => {
               correlationId: requestId,
             },
           },
-          429
-        )
+          429,
+        );
       }
     }
 
     // Increment counters
     for (const [type, id] of Object.entries(identifiers)) {
-      const key = `rate:${limitKey}:${type}:${id}`
-      await redis.incr(key)
-      await redis.expire(key, Math.ceil(limit.window / 1000))
+      const key = `rate:${limitKey}:${type}:${id}`;
+      await redis.incr(key);
+      await redis.expire(key, Math.ceil(limit.window / 1000));
     }
 
-    await next()
-  }
-}
+    await next();
+  };
+};
 ```
 
 ---
@@ -1309,20 +1301,18 @@ async function submitAttempt(
   db: Database,
   attemptId: string,
   answers: Answer[],
-  idempotencyKey: string
+  idempotencyKey: string,
 ): Promise<GradingResult> {
-  const startTime = Date.now()
+  const startTime = Date.now();
 
   return await db.transaction(
     async (trx) => {
       // Step 1: Acquire exclusive lock on attempt row
-      const attempt = await trx.attempts
-        .findOne({ where: { id: attemptId } })
-        .forUpdate() // SQL: SELECT ... FOR UPDATE
+      const attempt = await trx.attempts.findOne({ where: { id: attemptId } }).forUpdate(); // SQL: SELECT ... FOR UPDATE
 
       // Step 2: Verify state hasn't changed
-      if (attempt.status !== 'IN_PROGRESS') {
-        throw new Error(`ATTEMPT_STATE_CHANGED: status=${attempt.status}`)
+      if (attempt.status !== "IN_PROGRESS") {
+        throw new Error(`ATTEMPT_STATE_CHANGED: status=${attempt.status}`);
       }
 
       // Step 3: Check if idempotency key already processed
@@ -1332,44 +1322,44 @@ async function submitAttempt(
       ) {
         // Duplicate detected—return cached result
         logger.info({
-          event: 'duplicate_submission_detected',
+          event: "duplicate_submission_detected",
           attempt_id: attemptId,
           duplicate_age_ms: Date.now() - attempt.submission_cached_at.getTime(),
-        })
-        return attempt.submission_cached_result
+        });
+        return attempt.submission_cached_result;
       }
 
       // Step 4: Execute grading logic
-      const gradingResult = await gradeAttempt(attemptId, answers, trx)
+      const gradingResult = await gradeAttempt(attemptId, answers, trx);
 
       // Step 5: Update attempt with result
       await trx.attempts.update(
         { id: attemptId },
         {
-          status: 'COMPLETED',
+          status: "COMPLETED",
           submission_cached_result: gradingResult,
           submission_cached_at: new Date(),
           idempotent_submission_key: idempotencyKey,
           final_score: gradingResult.score,
-        }
-      )
+        },
+      );
 
       // Step 6: Insert audit record
       await trx.attemptAudit.insert({
         attempt_id: attemptId,
-        event_type: 'SUBMISSION',
+        event_type: "SUBMISSION",
         details: { score: gradingResult.score },
         created_at: new Date(),
-      })
+      });
 
       // Transaction commits here (implicit)
-      return gradingResult
+      return gradingResult;
     },
     {
-      isolationLevel: 'SERIALIZABLE',
+      isolationLevel: "SERIALIZABLE",
       timeout: 5000, // 5 second timeout
-    }
-  )
+    },
+  );
 }
 ```
 
@@ -1396,11 +1386,11 @@ async function lockUserAccount(
   db: Database,
   userId: string,
   workspaceId: string,
-  reason: string
+  reason: string,
 ): Promise<void> {
   // No transaction needed—Redis lock is atomic
-  const lockKey = `lock:user:account:${userId}:${workspaceId}`
-  const lockUntil = new Date(Date.now() + 60_000) // 1 minute
+  const lockKey = `lock:user:account:${userId}:${workspaceId}`;
+  const lockUntil = new Date(Date.now() + 60_000); // 1 minute
 
   const result = await redis.set(
     lockKey,
@@ -1408,16 +1398,16 @@ async function lockUserAccount(
     {
       EX: 60, // 60 second TTL
       NX: true, // Only if doesn't exist
-    }
-  )
+    },
+  );
 
   if (result === null) {
     logger.info({
-      event: 'user_already_locked',
+      event: "user_already_locked",
       user_id: userId,
       workspace_id: workspaceId,
-    })
-    return // Already locked by another process
+    });
+    return; // Already locked by another process
   }
 
   // Also update DB audit log (non-critical, may lose if failure)
@@ -1425,14 +1415,14 @@ async function lockUserAccount(
     .insert({
       user_id: userId,
       workspace_id: workspaceId,
-      event: 'ACCOUNT_LOCKED',
+      event: "ACCOUNT_LOCKED",
       details: { reason, locked_until: lockUntil },
       created_at: new Date(),
     })
     .catch((err) => {
-      logger.error({ event: 'audit_log_insert_failed', error: err.message })
+      logger.error({ event: "audit_log_insert_failed", error: err.message });
       // Continue—audit log is not critical
-    })
+    });
 }
 ```
 
@@ -1452,27 +1442,23 @@ async function updateLicenseStatus(
   db: Database,
   licenseId: string,
   newStatus: LicenseStatus,
-  meta: object
+  meta: object,
 ): Promise<void> {
   return await db.transaction(
     async (trx) => {
       // Step 1: Acquire lock on license row
-      const license = await trx.licenses
-        .findOne({ where: { id: licenseId } })
-        .forUpdate()
+      const license = await trx.licenses.findOne({ where: { id: licenseId } }).forUpdate();
 
       // Step 2: Validate state transition
       if (!isValidTransition(license.status, newStatus)) {
-        throw new Error(
-          `INVALID_STATUS_TRANSITION: ${license.status}→${newStatus}`
-        )
+        throw new Error(`INVALID_STATUS_TRANSITION: ${license.status}→${newStatus}`);
       }
 
       // Step 3: Update license
       await trx.licenses.update(
         { id: licenseId },
-        { status: newStatus, updated_at: new Date(), meta }
-      )
+        { status: newStatus, updated_at: new Date(), meta },
+      );
 
       // Step 4: Insert audit record
       await trx.licenseAudit.insert({
@@ -1480,26 +1466,26 @@ async function updateLicenseStatus(
         old_status: license.status,
         new_status: newStatus,
         changed_at: new Date(),
-      })
+      });
 
       // Step 5: Update schema version if needed
-      if (newStatus === 'ACTIVE') {
+      if (newStatus === "ACTIVE") {
         const workspace = await trx.workspaces.findOne({
           where: { id: license.workspace_id },
-        })
+        });
 
         await trx.tenantDb(workspace.id).raw(sql`
           UPDATE schema_versions SET version = '1.1.0' WHERE version < '1.1.0'
-        `)
+        `);
       }
 
-      return
+      return;
     },
     {
-      isolationLevel: 'SERIALIZABLE',
+      isolationLevel: "SERIALIZABLE",
       timeout: 10000,
-    }
-  )
+    },
+  );
 }
 ```
 
@@ -1564,23 +1550,23 @@ When a client submits answers:
 
 ```typescript
 interface GradeAttemptJob {
-  job_id: string // UUID
-  type: 'grade_attempt'
-  workspace_id: string
-  workspace_slug: string
-  attempt_id: string
-  user_id: string
-  correlation_id: string // Propagate from API request
+  job_id: string; // UUID
+  type: "grade_attempt";
+  workspace_id: string;
+  workspace_slug: string;
+  attempt_id: string;
+  user_id: string;
+  correlation_id: string; // Propagate from API request
   payload: {
-    attempt_id: string
-    answers: Answer[]
-    idempotency_key: string
-    config?: ExamConfig // Optional overrides
-  }
-  created_at: Date
-  scheduled_for: Date // When to execute
-  retry_count?: number
-  max_retries?: number
+    attempt_id: string;
+    answers: Answer[];
+    idempotency_key: string;
+    config?: ExamConfig; // Optional overrides
+  };
+  created_at: Date;
+  scheduled_for: Date; // When to execute
+  retry_count?: number;
+  max_retries?: number;
 }
 ```
 
@@ -1590,10 +1576,10 @@ interface GradeAttemptJob {
 // Inside POST /attempt/{id}/submit handler
 // After acquiring lock but BEFORE grading
 
-const jobId = crypto.randomUUID()
+const jobId = crypto.randomUUID();
 const job: GradeAttemptJob = {
   job_id: jobId,
-  type: 'grade_attempt',
+  type: "grade_attempt",
   workspace_id: workspace.id,
   workspace_slug: workspace.slug,
   attempt_id: attemptId,
@@ -1607,24 +1593,24 @@ const job: GradeAttemptJob = {
   created_at: new Date(),
   scheduled_for: new Date(),
   max_retries: 3,
-}
+};
 
 // Enqueue to Redis (job queue)
-await jobQueue.enqueue(job)
+await jobQueue.enqueue(job);
 
 logger.info({
-  event: 'grading_job_enqueued',
+  event: "grading_job_enqueued",
   correlation_id: requestId,
   job_id: jobId,
   workspace_id: workspace.id,
   attempt_id: attemptId,
-})
+});
 
 // Wait for completion or timeout
 const gradingResult = await jobQueue.waitForCompletion(jobId, {
   timeout: 30_000, // 30 seconds max
   pollInterval: 500,
-})
+});
 ```
 
 ### Job Processing (Worker Layer)
@@ -1632,81 +1618,78 @@ const gradingResult = await jobQueue.waitForCompletion(jobId, {
 ```typescript
 // In worker process
 
-async function processGradeAttemptJob(
-  job: GradeAttemptJob
-): Promise<GradingResult> {
-  const { job_id, workspace_id, attempt_id, user_id, correlation_id, payload } =
-    job
+async function processGradeAttemptJob(job: GradeAttemptJob): Promise<GradingResult> {
+  const { job_id, workspace_id, attempt_id, user_id, correlation_id, payload } = job;
 
-  const startTime = Date.now()
+  const startTime = Date.now();
 
   try {
     logger.info({
-      event: 'grading_job_started',
+      event: "grading_job_started",
       correlation_id,
       job_id,
       workspace_id,
       attempt_id,
-    })
+    });
 
     // Step 1: Acquire tenant DB connection
-    const tenantDb = getOrCreateTenantDb(workspace_id)
+    const tenantDb = getOrCreateTenantDb(workspace_id);
 
     // Step 2: Load exam configuration and questions
     const exam = await tenantDb.exams.findOne({
       where: { id: attempt_id },
       // Use SNAPSHOT from attempt, not live config
-    })
+    });
 
     // Step 3: Execute grading logic
     const gradingResult = await gradeAttempt(
       tenantDb,
       attempt_id,
       payload.answers,
-      exam.grading_config
-    )
+      exam.grading_config,
+    );
 
     // Step 4: Store graded result in DB
     await tenantDb.attempts.update(
       { id: attempt_id },
       {
-        status: 'COMPLETED',
+        status: "COMPLETED",
         final_score: gradingResult.score,
         grading_result: gradingResult,
         graded_at: new Date(),
-      }
-    )
+      },
+    );
 
     // Step 5: Insert audit log
     await tenantDb.attemptAudit.insert({
       attempt_id,
-      event: 'GRADING_COMPLETE',
+      event: "GRADING_COMPLETE",
       details: { score: gradingResult.score },
       created_at: new Date(),
-    })
+    });
 
     logger.info({
-      event: 'grading_job_completed',
+      event: "grading_job_completed",
       correlation_id,
       job_id,
       workspace_id,
       attempt_id,
       score: gradingResult.score,
       duration_ms: Date.now() - startTime,
-    })
+    });
 
     // Step 6: Store result in Redis for API to retrieve
-    const resultKey = `job:result:${job_id}`
+    const resultKey = `job:result:${job_id}`;
     await redis.setex(
       resultKey,
       3600, // 1 hour TTL
-      JSON.stringify(gradingResult)
-    )
+      JSON.stringify(gradingResult),
+    );
 
-    return gradingResult
+    return gradingResult;
   } catch (error) {
     logger.error({
-      event: 'grading_job_failed',
+      event: "grading_job_failed",
       correlation_id,
       job_id,
       workspace_id,
@@ -1714,9 +1697,9 @@ async function processGradeAttemptJob(
       error_message: error.message,
       error_code: error.code,
       duration_ms: Date.now() - startTime,
-    })
+    });
 
-    throw error // Let retry handler catch this
+    throw error; // Let retry handler catch this
   }
 }
 ```
@@ -1727,42 +1710,42 @@ For long-running grading, worker can notify API via callback:
 
 ```typescript
 // After grading completes, worker POSTs result back to API
-await fetch('https://api.example.com/internal/jobs/' + jobId + '/complete', {
-  method: 'POST',
+await fetch("https://api.example.com/internal/jobs/" + jobId + "/complete", {
+  method: "POST",
   headers: {
-    'Content-Type': 'application/json',
-    'X-Internal-Token': process.env.INTERNAL_API_KEY,
+    "Content-Type": "application/json",
+    "X-Internal-Token": process.env.INTERNAL_API_KEY,
   },
   body: JSON.stringify({
     job_id: jobId,
     result: gradingResult,
     completed_at: new Date(),
   }),
-})
+});
 
 logger.info({
-  event: 'job_completion_callback_sent',
+  event: "job_completion_callback_sent",
   job_id: jobId,
-})
+});
 ```
 
 API endpoint to receive callback:
 
 ```typescript
-route.post('/internal/jobs/:jobId/complete', async (c) => {
-  const jobId = c.req.param('jobId')
-  const { result, completed_at } = await c.req.json()
+route.post("/internal/jobs/:jobId/complete", async (c) => {
+  const jobId = c.req.param("jobId");
+  const { result, completed_at } = await c.req.json();
 
   // Store result in Redis for waiting requests
-  await redis.setex(`job:result:${jobId}`, 3600, JSON.stringify(result))
+  await redis.setex(`job:result:${jobId}`, 3600, JSON.stringify(result));
 
   logger.info({
-    event: 'job_completion_received',
+    event: "job_completion_received",
     job_id: jobId,
-  })
+  });
 
-  return c.json({ success: true })
-})
+  return c.json({ success: true });
+});
 ```
 
 #### Schema
@@ -1820,50 +1803,50 @@ CREATE TABLE dlq_resolutions (
 
 ```typescript
 async function processJob(job: Job): Promise<void> {
-  const { job_id, type, workspace_id, data, retry_count = 0 } = job
-  const maxRetries = 3
+  const { job_id, type, workspace_id, data, retry_count = 0 } = job;
+  const maxRetries = 3;
 
   try {
     // Execute job
-    await executeJob(type, data)
+    await executeJob(type, data);
 
     logger.info({
-      event: 'job_completed',
+      event: "job_completed",
       job_id,
       job_type: type,
       workspace_id,
       retry_count,
       duration_ms: Date.now() - job.created_at.getTime(),
-    })
+    });
   } catch (error) {
-    retry_count++
+    retry_count++;
 
     logger.error({
-      event: 'job_failed',
+      event: "job_failed",
       job_id,
       job_type: type,
       workspace_id,
       retry_count,
       error_message: error.message,
       error_code: error.code,
-    })
+    });
 
     if (retry_count >= maxRetries) {
       // Move to DLQ
-      await moveToDLQ(job, error, retry_count)
+      await moveToDLQ(job, error, retry_count);
 
       // Alert ops team
       await sendAlert({
-        level: 'high',
+        level: "high",
         message: `Job ${job_id} moved to DLQ after ${maxRetries} retries`,
         workspace_id,
-      })
+      });
 
-      return
+      return;
     }
 
     // Calculate exponential backoff
-    const backoffMs = Math.pow(2, retry_count - 1) * 1000 // 1s, 2s, 4s
+    const backoffMs = Math.pow(2, retry_count - 1) * 1000; // 1s, 2s, 4s
 
     // Re-enqueue with backoff
     await jobQueue.enqueue(
@@ -1872,23 +1855,19 @@ async function processJob(job: Job): Promise<void> {
         retry_count,
         scheduled_for: new Date(Date.now() + backoffMs),
       },
-      { delay: backoffMs }
-    )
+      { delay: backoffMs },
+    );
 
     logger.info({
-      event: 'job_requeued',
+      event: "job_requeued",
       job_id,
       retry_count,
       backoff_ms: backoffMs,
-    })
+    });
   }
 }
 
-async function moveToDLQ(
-  job: Job,
-  error: Error,
-  finalRetryCount: number
-): Promise<void> {
+async function moveToDLQ(job: Job, error: Error, finalRetryCount: number): Promise<void> {
   await db.deadLetterQueue.insert({
     job_id: job.job_id,
     job_type: job.type,
@@ -1908,7 +1887,7 @@ async function moveToDLQ(
     first_attempted_at: new Date(),
     last_attempted_at: new Date(),
     moved_to_dlq_at: new Date(),
-  })
+  });
 }
 ```
 
@@ -2276,23 +2255,20 @@ X-Request-ID: {correlation-id}
 ```typescript
 export const securityHeadersMiddleware = () => {
   return async (c: Context, next: Next) => {
-    await next()
+    await next();
 
     // Always set security headers
+    c.header("Strict-Transport-Security", "max-age=31536000; includeSubDomains; preload");
+    c.header("X-Content-Type-Options", "nosniff");
+    c.header("X-Frame-Options", "DENY");
+    c.header("Referrer-Policy", "strict-origin-when-cross-origin");
     c.header(
-      'Strict-Transport-Security',
-      'max-age=31536000; includeSubDomains; preload'
-    )
-    c.header('X-Content-Type-Options', 'nosniff')
-    c.header('X-Frame-Options', 'DENY')
-    c.header('Referrer-Policy', 'strict-origin-when-cross-origin')
-    c.header(
-      'Content-Security-Policy',
-      "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'"
-    )
-    c.header('X-Request-ID', c.state.requestId)
-  }
-}
+      "Content-Security-Policy",
+      "default-src 'self'; script-src 'self' 'wasm-unsafe-eval'; style-src 'self' 'unsafe-inline'",
+    );
+    c.header("X-Request-ID", c.state.requestId);
+  };
+};
 ```
 
 ### CORS Configuration
@@ -2301,21 +2277,21 @@ export const securityHeadersMiddleware = () => {
 
 ```typescript
 const corsConfig =
-  process.env.NODE_ENV === 'development'
+  process.env.NODE_ENV === "development"
     ? {
-        origin: ['http://localhost:3000', 'http://localhost:3001'],
+        origin: ["http://localhost:3000", "http://localhost:3001"],
         credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
       }
     : {
-        origin: 'https://app.example.com',
+        origin: "https://app.example.com",
         credentials: true,
-        methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-        allowedHeaders: ['Content-Type', 'Authorization', 'X-CSRF-Token'],
-      }
+        methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+        allowedHeaders: ["Content-Type", "Authorization", "X-CSRF-Token"],
+      };
 
-app.use(cors(corsConfig))
+app.use(cors(corsConfig));
 ```
 
 **Rule:** Never allow `Access-Control-Allow-Origin: *` with credentials.
@@ -2346,42 +2322,42 @@ Set-Cookie: __csrf_token={token}; Path=/; HttpOnly; Secure; SameSite=Strict; Max
 export const csrfMiddleware = () => {
   return async (c: Context, next: Next) => {
     // Only validate for state-changing requests (POST, PUT, DELETE)
-    if (!['POST', 'PUT', 'DELETE'].includes(c.req.method)) {
-      await next()
-      return
+    if (!["POST", "PUT", "DELETE"].includes(c.req.method)) {
+      await next();
+      return;
     }
 
     // Skip for pure API routes (JWT-only)
-    if (c.req.path.startsWith('/api/')) {
-      await next()
-      return
+    if (c.req.path.startsWith("/api/")) {
+      await next();
+      return;
     }
 
-    const headerToken = c.req.headers.get('X-CSRF-Token')
-    const cookieToken = c.cookies.get('__csrf_token')
+    const headerToken = c.req.headers.get("X-CSRF-Token");
+    const cookieToken = c.cookies.get("__csrf_token");
 
     if (!headerToken || !cookieToken || headerToken !== cookieToken) {
       logger.warn({
-        event: 'csrf_validation_failed',
+        event: "csrf_validation_failed",
         correlation_id: c.state.requestId,
         has_header: !!headerToken,
         has_cookie: !!cookieToken,
         match: headerToken === cookieToken,
-      })
+      });
       return c.json(
         {
           error: {
-            code: 'CSRF_VALIDATION_FAILED',
-            message: 'CSRF token invalid',
+            code: "CSRF_VALIDATION_FAILED",
+            message: "CSRF token invalid",
           },
         },
-        403
-      )
+        403,
+      );
     }
 
-    await next()
-  }
-}
+    await next();
+  };
+};
 ```
 
 ---
@@ -2559,98 +2535,94 @@ response.header('X-Request-ID', correlationId);
 **File:** `apps/api/tests/unit/rate-limiter.test.ts`
 
 ```typescript
-describe('Rate Limiter', () => {
-  describe('sliding window counter', () => {
-    test('increments counter on first request', async () => {
-      const counter = await getRateLimitCounter('test:key')
-      expect(counter).toBe(1)
-    })
+describe("Rate Limiter", () => {
+  describe("sliding window counter", () => {
+    test("increments counter on first request", async () => {
+      const counter = await getRateLimitCounter("test:key");
+      expect(counter).toBe(1);
+    });
 
-    test('expires after TTL', async () => {
-      await setRateLimitCounter('test:key', 5, 1000) // 1 sec TTL
-      await sleep(1100)
-      const counter = await getRateLimitCounter('test:key')
-      expect(counter).toBe(0)
-    })
+    test("expires after TTL", async () => {
+      await setRateLimitCounter("test:key", 5, 1000); // 1 sec TTL
+      await sleep(1100);
+      const counter = await getRateLimitCounter("test:key");
+      expect(counter).toBe(0);
+    });
 
-    test('multiple keys independent', async () => {
-      await incrementRateLimit('key1', 5)
-      await incrementRateLimit('key2', 3)
-      expect(await getRateLimit('key1')).toBe(5)
-      expect(await getRateLimit('key2')).toBe(3)
-    })
-  })
+    test("multiple keys independent", async () => {
+      await incrementRateLimit("key1", 5);
+      await incrementRateLimit("key2", 3);
+      expect(await getRateLimit("key1")).toBe(5);
+      expect(await getRateLimit("key2")).toBe(3);
+    });
+  });
 
-  describe('limit enforcement', () => {
-    test('allows requests within limit', async () => {
+  describe("limit enforcement", () => {
+    test("allows requests within limit", async () => {
       for (let i = 0; i < 5; i++) {
-        const result = await checkRateLimit('auth:ip:192.168.1.1', {
+        const result = await checkRateLimit("auth:ip:192.168.1.1", {
           rate: 5,
           window: 60_000,
-        })
-        expect(result.allowed).toBe(true)
+        });
+        expect(result.allowed).toBe(true);
       }
-    })
+    });
 
-    test('rejects request over limit', async () => {
+    test("rejects request over limit", async () => {
       for (let i = 0; i < 5; i++) {
-        await checkRateLimit('auth:ip:192.168.1.1', { rate: 5, window: 60_000 })
+        await checkRateLimit("auth:ip:192.168.1.1", { rate: 5, window: 60_000 });
       }
-      const result = await checkRateLimit('auth:ip:192.168.1.1', {
+      const result = await checkRateLimit("auth:ip:192.168.1.1", {
         rate: 5,
         window: 60_000,
-      })
-      expect(result.allowed).toBe(false)
-      expect(result.retryAfterMs).toBeCloseTo(60_000, -3)
-    })
-  })
-})
+      });
+      expect(result.allowed).toBe(false);
+      expect(result.retryAfterMs).toBeCloseTo(60_000, -3);
+    });
+  });
+});
 ```
 
 **File:** `apps/api/tests/unit/idempotency.test.ts`
 
 ```typescript
-describe('Idempotent Submission', () => {
-  test('duplicate submission returns cached result', async () => {
-    const attemptId = 'test-attempt'
-    const idempotencyKey = 'uuid-v4'
-    const answers = [{ question_id: 'q1', answer: 'A' }]
+describe("Idempotent Submission", () => {
+  test("duplicate submission returns cached result", async () => {
+    const attemptId = "test-attempt";
+    const idempotencyKey = "uuid-v4";
+    const answers = [{ question_id: "q1", answer: "A" }];
 
-    const result1 = await submitAttempt(attemptId, idempotencyKey, answers)
-    const result2 = await submitAttempt(attemptId, idempotencyKey, answers)
+    const result1 = await submitAttempt(attemptId, idempotencyKey, answers);
+    const result2 = await submitAttempt(attemptId, idempotencyKey, answers);
 
-    expect(result1).toEqual(result2)
-    expect(result1.score).toBe(result2.score)
-  })
+    expect(result1).toEqual(result2);
+    expect(result1.score).toBe(result2.score);
+  });
 
-  test('different idempotency key processes normally', async () => {
-    const attemptId = 'test-attempt'
-    const key1 = 'key-1'
-    const key2 = 'key-2'
-    const answers = [{ question_id: 'q1', answer: 'A' }]
+  test("different idempotency key processes normally", async () => {
+    const attemptId = "test-attempt";
+    const key1 = "key-1";
+    const key2 = "key-2";
+    const answers = [{ question_id: "q1", answer: "A" }];
 
-    const result1 = await submitAttempt(attemptId, key1, answers)
-    const result2 = await submitAttempt(attemptId, key2, answers)
+    const result1 = await submitAttempt(attemptId, key1, answers);
+    const result2 = await submitAttempt(attemptId, key2, answers);
 
     // Different keys should not interfere
-    expect(result1.attempt_id).not.toEqual(result2.attempt_id)
-  })
+    expect(result1.attempt_id).not.toEqual(result2.attempt_id);
+  });
 
-  test('duplicate submission with different answers returns original', async () => {
-    const attemptId = 'test-attempt'
-    const key = 'dedup-key'
+  test("duplicate submission with different answers returns original", async () => {
+    const attemptId = "test-attempt";
+    const key = "dedup-key";
 
-    const result1 = await submitAttempt(attemptId, key, [
-      { question_id: 'q1', answer: 'A' },
-    ])
-    const result2 = await submitAttempt(attemptId, key, [
-      { question_id: 'q1', answer: 'B' },
-    ])
+    const result1 = await submitAttempt(attemptId, key, [{ question_id: "q1", answer: "A" }]);
+    const result2 = await submitAttempt(attemptId, key, [{ question_id: "q1", answer: "B" }]);
 
     // Should return original grading, not re-grade
-    expect(result1.score).toBe(result2.score)
-  })
-})
+    expect(result1.score).toBe(result2.score);
+  });
+});
 ```
 
 ### Integration Tests
@@ -2658,49 +2630,49 @@ describe('Idempotent Submission', () => {
 **File:** `apps/api/tests/integration/auth-rate-limit.test.ts`
 
 ```typescript
-describe('Authentication Rate Limiting (E2E)', () => {
-  test('locks account after 5 failed attempts', async () => {
-    const email = 'user@example.com'
+describe("Authentication Rate Limiting (E2E)", () => {
+  test("locks account after 5 failed attempts", async () => {
+    const email = "user@example.com";
 
     // 5 failed attempts
     for (let i = 0; i < 5; i++) {
-      const response = await fetch('/auth/login', {
-        method: 'POST',
-        body: { email, password: 'wrong' },
-      })
-      expect(response.status).toBe(401)
+      const response = await fetch("/auth/login", {
+        method: "POST",
+        body: { email, password: "wrong" },
+      });
+      expect(response.status).toBe(401);
     }
 
     // 6th attempt should be rejected
-    const response = await fetch('/auth/login', {
-      method: 'POST',
-      body: { email, password: 'correct' },
-    })
-    expect(response.status).toBe(429)
-    expect(response.body.error.code).toBe('RATE_LIMIT_EXCEEDED')
-  })
+    const response = await fetch("/auth/login", {
+      method: "POST",
+      body: { email, password: "correct" },
+    });
+    expect(response.status).toBe(429);
+    expect(response.body.error.code).toBe("RATE_LIMIT_EXCEEDED");
+  });
 
-  test('different IP not limited by same user lock', async () => {
-    const email = 'user@example.com'
+  test("different IP not limited by same user lock", async () => {
+    const email = "user@example.com";
 
     // 5 failed attempts from IP1
     for (let i = 0; i < 5; i++) {
-      await fetch('/auth/login', {
-        method: 'POST',
-        body: { email, password: 'wrong' },
-        headers: { 'X-Forwarded-For': '192.168.1.1' },
-      })
+      await fetch("/auth/login", {
+        method: "POST",
+        body: { email, password: "wrong" },
+        headers: { "X-Forwarded-For": "192.168.1.1" },
+      });
     }
 
     // IP2 should not be limited by IP1's attempts
-    const response = await fetch('/auth/login', {
-      method: 'POST',
-      body: { email, password: 'wrong' },
-      headers: { 'X-Forwarded-For': '192.168.1.2' },
-    })
-    expect(response.status).toBe(401)
-  })
-})
+    const response = await fetch("/auth/login", {
+      method: "POST",
+      body: { email, password: "wrong" },
+      headers: { "X-Forwarded-For": "192.168.1.2" },
+    });
+    expect(response.status).toBe(401);
+  });
+});
 ```
 
 **File:** `apps/api/tests/integration/attempt-submission.test.ts`
@@ -2745,72 +2717,60 @@ describe('Attempt Submission Idempotency (E2E)', () => {
 **File:** `apps/api/tests/integration/websocket.test.ts`
 
 ```typescript
-describe('WebSocket Security (E2E)', () => {
-  test('unauthorized connection rejected', async () => {
-    const ws = new WebSocket('ws://localhost:3000/ws/attempt/123')
+describe("WebSocket Security (E2E)", () => {
+  test("unauthorized connection rejected", async () => {
+    const ws = new WebSocket("ws://localhost:3000/ws/attempt/123");
 
     await new Promise((resolve) => {
-      ws.addEventListener('close', (event) => {
-        expect(event.code).toBe(1008) // Policy violation
-        resolve(undefined)
-      })
-    })
-  })
+      ws.addEventListener("close", (event) => {
+        expect(event.code).toBe(1008); // Policy violation
+        resolve(undefined);
+      });
+    });
+  });
 
-  test('one connection per attempt enforced', async () => {
-    const token = generateToken()
-    const ws1 = await connectWebSocket(
-      'ws://localhost:3000/ws/attempt/123',
-      token
-    )
-    const ws2 = await connectWebSocket(
-      'ws://localhost:3000/ws/attempt/123',
-      token
-    )
+  test("one connection per attempt enforced", async () => {
+    const token = generateToken();
+    const ws1 = await connectWebSocket("ws://localhost:3000/ws/attempt/123", token);
+    const ws2 = await connectWebSocket("ws://localhost:3000/ws/attempt/123", token);
 
     await new Promise((resolve) => {
-      ws1.addEventListener('close', resolve)
-    })
+      ws1.addEventListener("close", resolve);
+    });
 
-    expect(ws1.readyState).toBe(WebSocket.CLOSED)
-    expect(ws2.readyState).toBe(WebSocket.OPEN)
-  })
+    expect(ws1.readyState).toBe(WebSocket.CLOSED);
+    expect(ws2.readyState).toBe(WebSocket.OPEN);
+  });
 
-  test('message rate limit enforced', async () => {
-    const ws = await connectWebSocket(
-      'ws://localhost:3000/ws/attempt/123',
-      generateToken()
-    )
+  test("message rate limit enforced", async () => {
+    const ws = await connectWebSocket("ws://localhost:3000/ws/attempt/123", generateToken());
 
     // Send 110 messages rapidly
     for (let i = 0; i < 110; i++) {
-      ws.send(JSON.stringify({ type: 'ping' }))
+      ws.send(JSON.stringify({ type: "ping" }));
     }
 
     await new Promise((resolve) => {
-      ws.addEventListener('close', (event) => {
-        expect(event.code).toBe(4029) // Rate limit
-        resolve(undefined)
-      })
-    })
-  })
+      ws.addEventListener("close", (event) => {
+        expect(event.code).toBe(4029); // Rate limit
+        resolve(undefined);
+      });
+    });
+  });
 
-  test('heartbeat timeout disconnects', async () => {
-    const ws = await connectWebSocket(
-      'ws://localhost:3000/ws/attempt/123',
-      generateToken()
-    )
+  test("heartbeat timeout disconnects", async () => {
+    const ws = await connectWebSocket("ws://localhost:3000/ws/attempt/123", generateToken());
 
     // Wait 31+ seconds without heartbeat
-    await sleep(31_000)
+    await sleep(31_000);
 
     await new Promise((resolve) => {
-      ws.addEventListener('close', resolve)
-    })
+      ws.addEventListener("close", resolve);
+    });
 
-    expect(ws.readyState).toBe(WebSocket.CLOSED)
-  })
-})
+    expect(ws.readyState).toBe(WebSocket.CLOSED);
+  });
+});
 ```
 
 ### Load Testing
@@ -2818,12 +2778,12 @@ describe('WebSocket Security (E2E)', () => {
 **File:** `apps/api/tests/load/rate-limiter-load.ts`
 
 ```typescript
-import { performance } from 'perf_hooks'
+import { performance } from "perf_hooks";
 
 async function loadTestRateLimiter() {
-  const concurrency = 100
-  const duration = 60_000 // 60 seconds
-  const startTime = Date.now()
+  const concurrency = 100;
+  const duration = 60_000; // 60 seconds
+  const startTime = Date.now();
 
   const results = {
     totalRequests: 0,
@@ -2831,45 +2791,44 @@ async function loadTestRateLimiter() {
     rateLimitedRequests: 0,
     avgLatencyMs: 0,
     latencies: <number[]>[],
-  }
+  };
 
   const makeRequest = async () => {
-    const start = performance.now()
-    const response = await fetch('/auth/login', {
-      method: 'POST',
-      body: { email: `user-${Math.random()}@example.com`, password: 'test' },
-    })
-    const latency = performance.now() - start
+    const start = performance.now();
+    const response = await fetch("/auth/login", {
+      method: "POST",
+      body: { email: `user-${Math.random()}@example.com`, password: "test" },
+    });
+    const latency = performance.now() - start;
 
-    results.latencies.push(latency)
-    results.totalRequests++
+    results.latencies.push(latency);
+    results.totalRequests++;
 
     if (response.status === 429) {
-      results.rateLimitedRequests++
+      results.rateLimitedRequests++;
     } else if (response.status === 401) {
-      results.successfulRequests++
+      results.successfulRequests++;
     }
-  }
+  };
 
   // Run concurrent requests
   while (Date.now() - startTime < duration) {
-    const batch = []
+    const batch = [];
     for (let i = 0; i < concurrency; i++) {
-      batch.push(makeRequest())
+      batch.push(makeRequest());
     }
-    await Promise.all(batch)
+    await Promise.all(batch);
   }
 
-  results.avgLatencyMs =
-    results.latencies.reduce((a, b) => a + b) / results.latencies.length
+  results.avgLatencyMs = results.latencies.reduce((a, b) => a + b) / results.latencies.length;
 
-  console.log('Load Test Results:')
-  console.log(`Total Requests: ${results.totalRequests}`)
-  console.log(`Successful: ${results.successfulRequests}`)
-  console.log(`Rate Limited: ${results.rateLimitedRequests}`)
-  console.log(`Avg Latency: ${results.avgLatencyMs.toFixed(2)}ms`)
-  console.log(`P95 Latency: ${percentile(results.latencies, 95)}ms`)
-  console.log(`P99 Latency: ${percentile(results.latencies, 99)}ms`)
+  console.log("Load Test Results:");
+  console.log(`Total Requests: ${results.totalRequests}`);
+  console.log(`Successful: ${results.successfulRequests}`);
+  console.log(`Rate Limited: ${results.rateLimitedRequests}`);
+  console.log(`Avg Latency: ${results.avgLatencyMs.toFixed(2)}ms`);
+  console.log(`P95 Latency: ${percentile(results.latencies, 95)}ms`);
+  console.log(`P99 Latency: ${percentile(results.latencies, 99)}ms`);
 }
 ```
 
@@ -2878,53 +2837,47 @@ async function loadTestRateLimiter() {
 **File:** `apps/api/tests/concurrency/concurrent-submission.test.ts`
 
 ```typescript
-describe('Concurrent Submission Safety', () => {
-  test('concurrent submissions from same user handled safely', async () => {
-    const attemptId = 'test-attempt'
-    const userId = 'test-user'
+describe("Concurrent Submission Safety", () => {
+  test("concurrent submissions from same user handled safely", async () => {
+    const attemptId = "test-attempt";
+    const userId = "test-user";
 
     // Start 10 concurrent submissions
-    const promises = []
+    const promises = [];
     for (let i = 0; i < 10; i++) {
-      promises.push(
-        submitAttempt(attemptId, `key-${i}`, [
-          { question_id: 'q1', answer: 'A' },
-        ])
-      )
+      promises.push(submitAttempt(attemptId, `key-${i}`, [{ question_id: "q1", answer: "A" }]));
     }
 
-    const results = await Promise.all(promises)
+    const results = await Promise.all(promises);
 
     // All should succeed without deadlock
-    expect(results).toHaveLength(10)
+    expect(results).toHaveLength(10);
 
     // All should have same score (same grading)
-    const scores = results.map((r) => r.score)
-    expect(new Set(scores).size).toBe(1) // All identical scores
-  })
+    const scores = results.map((r) => r.score);
+    expect(new Set(scores).size).toBe(1); // All identical scores
+  });
 
-  test('concurrent duplicate submissions handled correctly', async () => {
-    const attemptId = 'test-attempt'
-    const key = 'dedup-key' // Same key
+  test("concurrent duplicate submissions handled correctly", async () => {
+    const attemptId = "test-attempt";
+    const key = "dedup-key"; // Same key
 
     // Start 5 concurrent submissions with same idempotency key
-    const promises = []
+    const promises = [];
     for (let i = 0; i < 5; i++) {
-      promises.push(
-        submitAttempt(attemptId, key, [{ question_id: 'q1', answer: 'A' }])
-      )
+      promises.push(submitAttempt(attemptId, key, [{ question_id: "q1", answer: "A" }]));
     }
 
-    const results = await Promise.all(promises)
+    const results = await Promise.all(promises);
 
     // All should return same result
-    expect(results).toHaveLength(5)
-    const firstResult = results[0]
+    expect(results).toHaveLength(5);
+    const firstResult = results[0];
     for (const result of results) {
-      expect(result).toEqual(firstResult)
+      expect(result).toEqual(firstResult);
     }
-  })
-})
+  });
+});
 ```
 
 ### Security Testing
@@ -2932,29 +2885,29 @@ describe('Concurrent Submission Safety', () => {
 **File:** `apps/api/tests/security/rate-limit-bypass.test.ts`
 
 ```typescript
-describe('Rate Limit Bypass Attempts', () => {
-  test('timing attack cannot bypass rate limit', async () => {
+describe("Rate Limit Bypass Attempts", () => {
+  test("timing attack cannot bypass rate limit", async () => {
     // Attempt to bypass by changing request timing
-    const timedRequests = []
+    const timedRequests = [];
     for (let i = 0; i < 6; i++) {
       timedRequests.push(
-        fetch('/auth/login', {
-          method: 'POST',
-          body: { email: 'user@example.com', password: 'wrong' },
+        fetch("/auth/login", {
+          method: "POST",
+          body: { email: "user@example.com", password: "wrong" },
           headers: {
-            'X-Forwarded-For': `192.168.${Math.floor(Math.random() * 255)}.1`,
+            "X-Forwarded-For": `192.168.${Math.floor(Math.random() * 255)}.1`,
           },
-        })
-      )
+        }),
+      );
     }
 
-    const responses = await Promise.all(timedRequests)
-    const rateLimitedCount = responses.filter((r) => r.status === 429).length
+    const responses = await Promise.all(timedRequests);
+    const rateLimitedCount = responses.filter((r) => r.status === 429).length;
 
     // At least one should be rate limited (depending on IP distribution)
-    expect(rateLimitedCount).toBeGreaterThan(0)
-  })
-})
+    expect(rateLimitedCount).toBeGreaterThan(0);
+  });
+});
 ```
 
 ---
@@ -2979,37 +2932,53 @@ This technical design does NOT cover:
 
 ### Compliance Checklist
 
-✅ **Isolation:** No cross-tenant rate limit state sharing. Each workspace has separate Redis keys with tenant-aware naming.
+✅ **Isolation:** No cross-tenant rate limit state sharing. Each workspace has separate Redis keys
+with tenant-aware naming.
 
-✅ **License Enforcement:** Rate limiting middleware executes AFTER license validation. Soft-locked workspaces receive 423 before rate checks.
+✅ **License Enforcement:** Rate limiting middleware executes AFTER license validation. Soft-locked
+workspaces receive 423 before rate checks.
 
-✅ **Grading Authority:** Worker remains sole authority. Idempotency prevents duplicate submissions but doesn't change grading logic.
+✅ **Grading Authority:** Worker remains sole authority. Idempotency prevents duplicate submissions
+but doesn't change grading logic.
 
-✅ **Direct DB Instantiation:** Rate limiter uses centralized Redis pool (initialized at boot), not tenant-specific connections.
+✅ **Direct DB Instantiation:** Rate limiter uses centralized Redis pool (initialized at boot), not
+tenant-specific connections.
 
-✅ **Snapshot Integrity:** Idempotent submission mechanism protects attempt snapshots via FOR UPDATE lock + UNIQUE constraint.
+✅ **Snapshot Integrity:** Idempotent submission mechanism protects attempt snapshots via FOR UPDATE
+lock + UNIQUE constraint.
 
-✅ **Transaction Boundaries:** All critical writes use SERIALIZABLE isolation with clear lock strategy.
+✅ **Transaction Boundaries:** All critical writes use SERIALIZABLE isolation with clear lock
+strategy.
 
-✅ **Version Enforcement:** Schema version check happens before rate limiting. Idempotent columns required at schema_version 1.1.0+.
+✅ **Version Enforcement:** Schema version check happens before rate limiting. Idempotent columns
+required at schema_version 1.1.0+.
 
-✅ **Versioning Backward Compatibility:** Old attempts without idempotent columns handled gracefully. Feature flag tied to schema version.
+✅ **Versioning Backward Compatibility:** Old attempts without idempotent columns handled
+gracefully. Feature flag tied to schema version.
 
-✅ **Attempt Engine Immutability:** Rate limiting doesn't modify attempt configuration. Snapshot integrity preserved.
+✅ **Attempt Engine Immutability:** Rate limiting doesn't modify attempt configuration. Snapshot
+integrity preserved.
 
-✅ **Server-Authoritative Time:** All deadline checks use server time. Client time ignored for authority.
+✅ **Server-Authoritative Time:** All deadline checks use server time. Client time ignored for
+authority.
 
-✅ **No Secrets Exposed:** Passwords, tokens, and credentials never logged. Mask sensitive data in all outputs.
+✅ **No Secrets Exposed:** Passwords, tokens, and credentials never logged. Mask sensitive data in
+all outputs.
 
-✅ **Audit Trail:** All security events logged with correlation ID, workspace context, and timestamp.
+✅ **Audit Trail:** All security events logged with correlation ID, workspace context, and
+timestamp.
 
-✅ **Multi-Tenancy Database Isolation:** Each tenant's rate limit state in separate Redis keys. No shared buckets across tenants.
+✅ **Multi-Tenancy Database Isolation:** Each tenant's rate limit state in separate Redis keys. No
+shared buckets across tenants.
 
-✅ **Middleware Order Immutable:** Correlation ID → Tenant Resolver → License → Schema Version → Rate Limit. No exceptions.
+✅ **Middleware Order Immutable:** Correlation ID → Tenant Resolver → License → Schema Version →
+Rate Limit. No exceptions.
 
-✅ **Worker Resilience:** Dead-letter queue captures failures. Retry strategy prevents cascade failures. Max 3 retries with exponential backoff.
+✅ **Worker Resilience:** Dead-letter queue captures failures. Retry strategy prevents cascade
+failures. Max 3 retries with exponential backoff.
 
-✅ **Error Responses Consistent:** All errors follow standardized JSON structure with error code and human-readable message.
+✅ **Error Responses Consistent:** All errors follow standardized JSON structure with error code and
+human-readable message.
 
 ---
 

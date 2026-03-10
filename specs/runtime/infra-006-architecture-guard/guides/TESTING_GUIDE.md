@@ -1,17 +1,15 @@
 # Testing Guide — STAGE_INFRA_06_ARCHITECTURE_GUARD
 
-**Stage:** STAGE_INFRA_06_ARCHITECTURE_GUARD
-**Phase:** 01_PLATFORM_FOUNDATION
-**Stage Directory:** infra-006-architecture-guard
-**Generated On:** 2026-03-08
+**Stage:** STAGE_INFRA_06_ARCHITECTURE_GUARD **Phase:** 01_PLATFORM_FOUNDATION **Stage Directory:**
+infra-006-architecture-guard **Generated On:** 2026-03-08
 
 ---
 
 ## Purpose
 
-This guide explains how to validate the implementation for STAGE_INFRA_06_ARCHITECTURE_GUARD.
-Use it to run tests, verify the architecture guard CLI, and confirm that the pre-commit hook
-continues to enforce all boundary rules.
+This guide explains how to validate the implementation for STAGE_INFRA_06_ARCHITECTURE_GUARD. Use it
+to run tests, verify the architecture guard CLI, and confirm that the pre-commit hook continues to
+enforce all boundary rules.
 
 ---
 
@@ -27,8 +25,8 @@ Key outcomes:
 - The 7 core validation functions inside `ai-guard.ts` are now covered by 37 automated unit tests
 - `docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json` is now validated by 7 static tests
   that assert the contract correctly encodes all required boundary rules
-- The `import.meta.main` guard ensures `ai-guard.ts` can be imported in tests without triggering
-  the full pre-commit scan side effect
+- The `import.meta.main` guard ensures `ai-guard.ts` can be imported in tests without triggering the
+  full pre-commit scan side effect
 
 ---
 
@@ -77,8 +75,7 @@ Expected: `37 passed | 7 passed | 0 failed`
 bun run vitest run tests/unit/ai-guard/ai-guard-validation.test.ts
 ```
 
-Expected: `37 passed | 0 failed`
-7 describe blocks should all show green:
+Expected: `37 passed | 0 failed` 7 describe blocks should all show green:
 
 - `extractImports`
 - `detectModule`
@@ -94,8 +91,8 @@ Expected: `37 passed | 0 failed`
 bun run vitest run tests/static/05-architecture-guard.test.ts
 ```
 
-Expected: `7 passed | 0 failed`
-ARCHITECTURE_CONTRACT.json must encode all 4 required boundary rules.
+Expected: `7 passed | 0 failed` ARCHITECTURE_CONTRACT.json must encode all 4 required boundary
+rules.
 
 ### Run architecture guard manually
 
@@ -103,8 +100,8 @@ ARCHITECTURE_CONTRACT.json must encode all 4 required boundary rules.
 bun run arch:guard
 ```
 
-Expected: `AI Guard: architecture validation passed.`
-If there are violations, the guard will list them and exit with code 1.
+Expected: `AI Guard: architecture validation passed.` If there are violations, the guard will list
+them and exit with code 1.
 
 ### Run full infrastructure audit
 
@@ -125,13 +122,12 @@ Expected: architecture score `100 / 100`, `Governance checks passed.`
 1. Create a temporary file in `apps/api/src/`:
    ```typescript
    // temp-violation.ts
-   import {something} from 'apps/mmc/src/services/test'
+   import { something } from "apps/mmc/src/services/test";
    ```
 2. Stage it: `git add apps/api/src/temp-violation.ts`
 3. Attempt a commit: `git commit -m "test violation"`
 
-Expected:
-The commit is rejected. Terminal output includes:
+Expected: The commit is rejected. Terminal output includes:
 
 ```
 AI Guard: Architecture violations detected.
@@ -139,8 +135,8 @@ AI Guard: Architecture violations detected.
 Commit rejected by Zidney AI Guard.
 ```
 
-Troubleshooting: If the commit succeeds, verify `.husky/pre-commit` contains the ai-guard step.
-Run `cat .husky/pre-commit` and confirm `bun scripts/ai-guard.ts` is present.
+Troubleshooting: If the commit succeeds, verify `.husky/pre-commit` contains the ai-guard step. Run
+`cat .husky/pre-commit` and confirm `bun scripts/ai-guard.ts` is present.
 
 ---
 
@@ -172,11 +168,10 @@ import.
 file-system scan.
 
 1. Run: `bun run vitest run tests/unit/ai-guard/ai-guard-validation.test.ts --reporter=verbose`
-2. Observe: the test suite should complete without any file-system errors or "changed files"
-   output.
+2. Observe: the test suite should complete without any file-system errors or "changed files" output.
 
-Expected:
-All 37 tests pass. No `[AI-Guard]` or `[INFRA AUDIT]` output is printed during the test run.
+Expected: All 37 tests pass. No `[AI-Guard]` or `[INFRA AUDIT]` output is printed during the test
+run.
 
 ---
 
@@ -194,15 +189,15 @@ All 37 tests pass. No `[AI-Guard]` or `[INFRA AUDIT]` output is printed during t
 
 ## Multi-Tenant Isolation Verification
 
-Not applicable. This stage contains no API routes, no database access, and no tenant-scoped
-logic. All changes are confined to development tooling (tests + CLI script).
+Not applicable. This stage contains no API routes, no database access, and no tenant-scoped logic.
+All changes are confined to development tooling (tests + CLI script).
 
 ---
 
 ## Structured Log Verification
 
-Not applicable for this stage. The architecture guard outputs structured console messages
-(not application logs) when violations are detected. No `console.log` was introduced.
+Not applicable for this stage. The architecture guard outputs structured console messages (not
+application logs) when violations are detected. No `console.log` was introduced.
 
 ---
 

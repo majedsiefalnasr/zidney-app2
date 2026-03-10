@@ -26,9 +26,8 @@ Examples:
 - Question Source
 - Cognitive Skill
 
-Category is NOT a content hierarchy.
-Category is NOT a subject replacement.
-Category is NOT a division structure.
+Category is NOT a content hierarchy. Category is NOT a subject replacement. Category is NOT a
+division structure.
 
 Category represents a classification axis.
 
@@ -36,12 +35,9 @@ Category represents a classification axis.
 
 ## Conceptual Model
 
-Category (dimension)
-→ Category Values (dimension values)
-→ Assigned to questions
+Category (dimension) → Category Values (dimension values) → Assigned to questions
 
-Categories define structure.
-Category Values define selectable options.
+Categories define structure. Category Values define selectable options.
 
 Example:
 
@@ -89,8 +85,8 @@ Unique constraint:
 
 Purpose:
 
-Restricts category availability to specific subjects.
-If empty → category applies globally to all subjects.
+Restricts category availability to specific subjects. If empty → category applies globally to all
+subjects.
 
 ---
 
@@ -108,8 +104,7 @@ Unique constraint:
 
 Purpose:
 
-Restricts category availability to specific divisions.
-If empty → category applies to all divisions.
+Restricts category availability to specific divisions. If empty → category applies to all divisions.
 
 ---
 
@@ -214,5 +209,4 @@ Stage is complete when:
 
 ---
 
-Next stage:
-STAGE_31_CATEGORY_VALUES
+Next stage: STAGE_31_CATEGORY_VALUES

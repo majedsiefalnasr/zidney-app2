@@ -39,8 +39,7 @@
 
 ## 4. Workflow Completion Evidence
 
-Stage Directory:
-specs/runtime/<STAGE_DIR_NAME>/
+Stage Directory: specs/runtime/<STAGE_DIR_NAME>/
 
 | Step      | Status      | Report Link                                                |
 | --------- | ----------- | ---------------------------------------------------------- |
@@ -143,8 +142,7 @@ bun test
 - [ ] No architecture drift detected
 - [ ] Architecture diagrams regenerated
 
-Architecture diagrams:
-docs/architecture/ARCHITECTURE_DIAGRAMS.md
+Architecture diagrams: docs/architecture/ARCHITECTURE_DIAGRAMS.md
 
 Commands:
 
@@ -224,6 +222,7 @@ bun scripts/ai-guard.ts
 bun test
 ```
 
-This ensures that Zidney's architecture, governance, and testing guarantees remain intact before merging.
+This ensures that Zidney's architecture, governance, and testing guarantees remain intact before
+merging.
 
 ---

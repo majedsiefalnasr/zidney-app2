@@ -1,10 +1,9 @@
 # Runtime Execution Rules
 
-Phase Alignment: Runtime & Attempt Engine
-Applies To: API, Worker, Frontoffice
+Phase Alignment: Runtime & Attempt Engine Applies To: API, Worker, Frontoffice
 
-This document defines non-negotiable runtime guarantees for Zidney.
-All attempt execution must comply.
+This document defines non-negotiable runtime guarantees for Zidney. All attempt execution must
+comply.
 
 ---
 

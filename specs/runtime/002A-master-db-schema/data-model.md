@@ -48,7 +48,8 @@ Represents a sellable product type with versioning and module configuration.
 
 Represents a purchased product instance bound to a workspace with lifecycle management.
 
-**Purpose**: Control workspace access, enforce usage limits, and manage product version compatibility.
+**Purpose**: Control workspace access, enforce usage limits, and manage product version
+compatibility.
 
 **Fields**:
 
@@ -106,15 +107,18 @@ ARCHIVED
   ↓ (unarchive) → ACTIVE
 ```
 
-**Authority Rule**: `licenses` is the single source of truth for lifecycle state. No other table duplicates status.
+**Authority Rule**: `licenses` is the single source of truth for lifecycle state. No other table
+duplicates status.
 
 ---
 
 ## Entity: Tenant Registry
 
-Stores infrastructure metadata for tenant database connectivity. Does NOT hold lifecycle state (that is in `licenses`).
+Stores infrastructure metadata for tenant database connectivity. Does NOT hold lifecycle state (that
+is in `licenses`).
 
-**Purpose**: Enable tenant resolver to connect to correct database instance without reading business logic.
+**Purpose**: Enable tenant resolver to connect to correct database instance without reading business
+logic.
 
 **Fields**:
 
@@ -149,7 +153,8 @@ Stores infrastructure metadata for tenant database connectivity. Does NOT hold l
 - `schema_version` and `product_version` must follow semantic versioning
 - `db_password_encrypted` must be encrypted (never stored in plain text)
 
-**Architectural Rule**: This table stores ONLY infrastructure metadata. It does NOT store lifecycle state. The resolver:
+**Architectural Rule**: This table stores ONLY infrastructure metadata. It does NOT store lifecycle
+state. The resolver:
 
 1. Looks up `tenants_registry` by `workspace_slug` for connection details
 2. Looks up `licenses` by `workspace_slug` for status enforcement
@@ -161,7 +166,8 @@ Stores infrastructure metadata for tenant database connectivity. Does NOT hold l
 
 Represents platform-internal users for MMC (Master Management Console) with RBAC.
 
-**Purpose**: Control access to master database operations (product management, license provisioning).
+**Purpose**: Control access to master database operations (product management, license
+provisioning).
 
 **Fields**:
 
@@ -255,7 +261,8 @@ mmc_users (standalone)
 platform_schema_version (standalone, single row)
 ```
 
-**Isolation**: Master DB contains NO tenant runtime data (students, attempts, exams, etc.). These tables are control plane only.
+**Isolation**: Master DB contains NO tenant runtime data (students, attempts, exams, etc.). These
+tables are control plane only.
 
 ---
 

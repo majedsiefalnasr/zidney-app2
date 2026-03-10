@@ -8,7 +8,9 @@
 
 ## Overview
 
-The Worker is a background job processor that handles asynchronous grading operations for submitted exam attempts. It decouples grading from API request cycles, enabling deterministic scoring without blocking UI interactions.
+The Worker is a background job processor that handles asynchronous grading operations for submitted
+exam attempts. It decouples grading from API request cycles, enabling deterministic scoring without
+blocking UI interactions.
 
 ### Architecture
 
@@ -45,18 +47,18 @@ Failed Job? → DLQ (dead_letter_queue table)
 
 ```typescript
 interface GradingJob {
-  id: UUID // Job UUID
-  workspace_id: UUID // Tenant ID
-  attempt_id: UUID // Attempt to grade
-  user_id: UUID // Exam taker
-  status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED' | 'DEAD_LETTER'
-  result_data: JSONB | null // Grading result when COMPLETED
-  error_message: string | null // Error reason if FAILED
-  error_stack: string | null // Stack trace
-  retry_count: integer // Number of retries attempted
-  created_at: timestamp // Redis time
-  started_at: timestamp | null // Worker pickup time
-  completed_at: timestamp | null // Completion time
+  id: UUID; // Job UUID
+  workspace_id: UUID; // Tenant ID
+  attempt_id: UUID; // Attempt to grade
+  user_id: UUID; // Exam taker
+  status: "PENDING" | "PROCESSING" | "COMPLETED" | "FAILED" | "DEAD_LETTER";
+  result_data: JSONB | null; // Grading result when COMPLETED
+  error_message: string | null; // Error reason if FAILED
+  error_stack: string | null; // Stack trace
+  retry_count: integer; // Number of retries attempted
+  created_at: timestamp; // Redis time
+  started_at: timestamp | null; // Worker pickup time
+  completed_at: timestamp | null; // Completion time
 }
 ```
 
@@ -123,34 +125,34 @@ async function gradeAttempt(
   attempt: Attempt,
   questionSnapshot: Question[],
   gradingConfigSnapshot: GradingConfig,
-  progressData: ProgressRecord[]
+  progressData: ProgressRecord[],
 ): Promise<GradingResult> {
-  const scores = []
-  const feedbacks = []
-  let totalScore = 0
+  const scores = [];
+  const feedbacks = [];
+  let totalScore = 0;
 
   for (const question of questionSnapshot) {
     // NEVER read live question data
     // ONLY use snapshot
-    const userResponse = findProgressByQuestionId(progressData, question.id)
+    const userResponse = findProgressByQuestionId(progressData, question.id);
 
     const scored = scoreQuestion(
       question, // Frozen snapshot
       userResponse, // User's answer
-      gradingConfigSnapshot.scoringAlgorithm
-    )
+      gradingConfigSnapshot.scoringAlgorithm,
+    );
 
     scores.push({
       question_id: question.id,
       score: scored.points,
       max_score: question.points,
       feedback: scored.feedback,
-    })
+    });
 
-    totalScore += scored.points
+    totalScore += scored.points;
   }
 
-  const passed = totalScore / maxScore >= gradingConfigSnapshot.passThreshold
+  const passed = totalScore / maxScore >= gradingConfigSnapshot.passThreshold;
 
   return {
     total_score: totalScore,
@@ -158,7 +160,7 @@ async function gradeAttempt(
     passed: passed,
     question_scores: scores,
     grading_timestamp: NOW(),
-  }
+  };
 }
 ```
 
@@ -312,23 +314,23 @@ Every job transitions logged:
 ### SIGTERM Handling
 
 ```typescript
-process.on('SIGTERM', async () => {
-  console.log('SIGTERM received, shutting down gracefully...')
+process.on("SIGTERM", async () => {
+  console.log("SIGTERM received, shutting down gracefully...");
 
   // 1. Stop accepting new jobs
-  stopConsumer()
+  stopConsumer();
 
   // 2. Wait for current job to finish (max 30 seconds)
   if (currentJob) {
-    await withTimeout(finishCurrentJob(), 30000)
+    await withTimeout(finishCurrentJob(), 30000);
   }
 
   // 3. Release database connection
-  await db.disconnect()
+  await db.disconnect();
 
   // 4. Exit
-  process.exit(0)
-})
+  process.exit(0);
+});
 ```
 
 **In Kubernetes:**
@@ -348,7 +350,7 @@ kubectl delete pod zidney-worker-abc123 --grace-period=30
 ### Docker Compose (Development)
 
 ```yaml
-version: '3.9'
+version: "3.9"
 
 services:
   worker:
@@ -392,17 +394,17 @@ spec:
             - name: REDIS_URL
               valueFrom: { secretKeyRef: { name: redis, key: url } }
             - name: MAX_CONCURRENT_JOBS
-              value: '1'
+              value: "1"
           resources:
             requests:
-              cpu: '1'
-              memory: '1Gi'
+              cpu: "1"
+              memory: "1Gi"
             limits:
-              cpu: '2'
-              memory: '2Gi'
+              cpu: "2"
+              memory: "2Gi"
           livenessProbe:
             exec:
-              command: ['curl', 'http://localhost:3001/health']
+              command: ["curl", "http://localhost:3001/health"]
             initialDelaySeconds: 10
             periodSeconds: 30
 ```
@@ -424,37 +426,33 @@ spec:
 
 ```typescript
 // Unit test: Same input → Same output 100x
-const attempt = createTestAttempt()
-const snapshot = captureSnapshot(attempt)
-const questions = snapshot.questionSnapshot
-const config = snapshot.gradingConfigSnapshot
+const attempt = createTestAttempt();
+const snapshot = captureSnapshot(attempt);
+const questions = snapshot.questionSnapshot;
+const config = snapshot.gradingConfigSnapshot;
 
-const results = []
+const results = [];
 for (let i = 0; i < 100; i++) {
-  const result = await scoreEngine.grade(questions, config, userResponses)
-  results.push(result.total_score)
+  const result = await scoreEngine.grade(questions, config, userResponses);
+  results.push(result.total_score);
 }
 
 // All results should be identical
-expect(new Set(results).size).toBe(1) // All same
-expect(results[0]).toBe(18) // Expected score
+expect(new Set(results).size).toBe(1); // All same
+expect(results[0]).toBe(18); // Expected score
 ```
 
 ### Snapshot Immutability Test
 
 ```typescript
 // Verify snapshot is never modified
-const before = JSON.stringify(snapshot)
+const before = JSON.stringify(snapshot);
 
 // This should NOT change snapshot
-await scoreEngine.grade(
-  snapshot.questionSnapshot,
-  snapshot.gradingConfigSnapshot,
-  userResponses
-)
+await scoreEngine.grade(snapshot.questionSnapshot, snapshot.gradingConfigSnapshot, userResponses);
 
-const after = JSON.stringify(snapshot)
-expect(after).toBe(before) // Unchanged
+const after = JSON.stringify(snapshot);
+expect(after).toBe(before); // Unchanged
 ```
 
 ---

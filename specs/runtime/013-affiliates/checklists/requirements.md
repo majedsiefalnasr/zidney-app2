@@ -11,7 +11,8 @@
 ## Content Quality
 
 - [x] No implementation details (languages, frameworks, APIs)
-  - Spec describes WHAT (affiliate system manages discounts, tracks usage) not HOW (no Hono routes, no Drizzle schema definition, no specific library mention beyond architectural layer)
+  - Spec describes WHAT (affiliate system manages discounts, tracks usage) not HOW (no Hono routes,
+    no Drizzle schema definition, no specific library mention beyond architectural layer)
   - SQL examples are pseudo-code, not actual migration SQL
 
 - [x] Focused on user value and business needs
@@ -52,7 +53,8 @@
 - [x] Requirements are testable and unambiguous
   - "Promo code matches uppercase alphanumeric pattern" → testable regex
   - "Usage limit total enforced transactionally" → testable via concurrent purchase test
-  - "Discount amount rounded to 2 decimals deterministically" → testable via ROUND() function behavior verification
+  - "Discount amount rounded to 2 decimals deterministically" → testable via ROUND() function
+    behavior verification
   - "Status=INACTIVE codes rejected" → testable via API test with INACTIVE affiliate
   - "Affiliate record locked during purchase" → testable via lock duration test
 
@@ -78,17 +80,20 @@
   **Scenario 2: Client Purchases License with Valid Code**
   - Actor: Client purchasing license
   - Action: License purchase endpoint called with promo_code="SPRING25"
-  - Expected: Discount applied (10%), usage count incremented to 1, audit log created, purchase succeeds
+  - Expected: Discount applied (10%), usage count incremented to 1, audit log created, purchase
+    succeeds
 
   **Scenario 3: Concurrent Purchases Same Code**
   - Actor: Multiple clients simultaneously
   - Action: 50 clients purchase within 1 second with same promo code
-  - Expected: All 50 purchases succeed, usage count exactly 50, no race condition, all discounts applied correctly
+  - Expected: All 50 purchases succeed, usage count exactly 50, no race condition, all discounts
+    applied correctly
 
   **Scenario 4: Usage Limit Exceeded**
   - Actor: Admin sets limit to 2, Client attempts 3rd purchase
   - Action: 3rd purchase with same code
-  - Expected: Purchase rejected with HTTP 400, specific error "AFFILIATE_USAGE_LIMIT_EXCEEDED", usage count remains 2
+  - Expected: Purchase rejected with HTTP 400, specific error "AFFILIATE_USAGE_LIMIT_EXCEEDED",
+    usage count remains 2
 
   **Scenario 5: Expired Code**
   - Actor: Client purchases after code end_date
@@ -101,14 +106,21 @@
   - Expected: Database constraint prevents modification, error returned
 
 - [x] Edge cases are identified
-  - **Promo Code Uniqueness**: If admin tries to create code "SPRING25" and it already exists → Unique constraint violation → HTTP 409 Conflict
-  - **Invalid Percentages**: If admin tries to create affiliate with discount_percentage = 150 → Constraint violation → HTTP 400
+  - **Promo Code Uniqueness**: If admin tries to create code "SPRING25" and it already exists →
+    Unique constraint violation → HTTP 409 Conflict
+  - **Invalid Percentages**: If admin tries to create affiliate with discount_percentage = 150 →
+    Constraint violation → HTTP 400
   - **Date Range Violation**: If start_date >= end_date → Constraint violation → HTTP 400
-  - **Concurrent Lock Timeout**: If 2000 simultaneous purchases lock same affiliate → PostgreSQL timeout after 30s → HTTP 409 Conflict for excess
-  - **Connection Loss Mid-Transaction**: If DB connection drops during affiliate_usages insert → Transaction rolled back → usage_count not incremented
-  - **Promo Code Immutability Attempt**: If admin tries to update "SPRING25" to "SUMMER25" → Update fails, immutability enforced → HTTP 400 "Cannot modify immutable field"
-  - **Massive Base Amount**: $99,999,999.99 with 0.01% commission → Still precise NUMERIC calc → Result: $9,999.99... (exact)
-  - **Rounding Precision**: 1/3 cent scenario: base=$100, percentage=0.33% → discount=$0.33 (after ROUND) → testable
+  - **Concurrent Lock Timeout**: If 2000 simultaneous purchases lock same affiliate → PostgreSQL
+    timeout after 30s → HTTP 409 Conflict for excess
+  - **Connection Loss Mid-Transaction**: If DB connection drops during affiliate_usages insert →
+    Transaction rolled back → usage_count not incremented
+  - **Promo Code Immutability Attempt**: If admin tries to update "SPRING25" to "SUMMER25" → Update
+    fails, immutability enforced → HTTP 400 "Cannot modify immutable field"
+  - **Massive Base Amount**: $99,999,999.99 with 0.01% commission → Still precise NUMERIC calc →
+    Result: $9,999.99... (exact)
+  - **Rounding Precision**: 1/3 cent scenario: base=$100, percentage=0.33% → discount=$0.33 (after
+    ROUND) → testable
 
 - [x] Scope is clearly bounded
 
@@ -168,7 +180,8 @@
   **Primary Flow - Admin Creates and Manages Affiliate**:
   1. Admin logs into MMC
   2. Navigates to Affiliate Management
-  3. Creates new affiliate: code="EARLYBIRD", discount=15%, commission=3%, limit=500 uses, valid Jan 1-Dec 31
+  3. Creates new affiliate: code="EARLYBIRD", discount=15%, commission=3%, limit=500 uses, valid Jan
+     1-Dec 31
   4. Saves successfully
   5. Code appears in affiliate list
   6. Admin views usage report: 0 usages, $0 discount, $0 commission

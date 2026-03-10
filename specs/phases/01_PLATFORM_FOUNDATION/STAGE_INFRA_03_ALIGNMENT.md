@@ -8,14 +8,11 @@ Status: DESIGN SPECIFICATION
 
 ## Stage Status
 
-Status: PRODUCTION READY
-Risk Level: LOW
-Last Updated: 2026-03-04T02:15:00.000Z
-Step: 8 / 8 (Closure complete)
+Status: PRODUCTION READY Risk Level: LOW Last Updated: 2026-03-04T02:15:00.000Z Step: 8 / 8 (Closure
+complete)
 
-Implementation: COMPLETE (72/72 tasks)
-Validation: PASS (0 new failures, 0 lint/type errors, CI/CD 8/8 gates)
-Constitutional Compliance: 100%
+Implementation: COMPLETE (72/72 tasks) Validation: PASS (0 new failures, 0 lint/type errors, CI/CD
+8/8 gates) Constitutional Compliance: 100%
 
 Scope Closed:
 
@@ -41,20 +38,23 @@ Constitutional Compliance:
 - No cross-tenant joins, no global DB singleton
 - All changes are devDependency/tooling scope only
 
-Notes:
-Backend implementation complete. No structural backend modifications allowed.
-Modifications require a new migration stage.
+Notes: Backend implementation complete. No structural backend modifications allowed. Modifications
+require a new migration stage.
 
 ---
 
 # 1. Purpose
 
-This stage prepares the Zidney monorepo to safely enforce the governance rules defined in **STAGE_INFRA_GOVERNANCE**.
+This stage prepares the Zidney monorepo to safely enforce the governance rules defined in
+**STAGE_INFRA_GOVERNANCE**.
 
-The previous **INFRA_AUDIT_CHECKLIST** revealed structural inconsistencies across the repository (testing architecture, Vitest configuration fragmentation, missing documentation, and tooling misalignment).
+The previous **INFRA_AUDIT_CHECKLIST** revealed structural inconsistencies across the repository
+(testing architecture, Vitest configuration fragmentation, missing documentation, and tooling
+misalignment).
 
 This stage **does not enforce governance yet**.  
-Instead it **aligns the repository structure** so enforcement can occur without breaking CI or developer workflow.
+Instead it **aligns the repository structure** so enforcement can occur without breaking CI or
+developer workflow.
 
 This is a **transitional stage between audit and enforcement**.
 
@@ -103,8 +103,7 @@ Zidney testing architecture must follow this hierarchy.
 
 Location:
 
-packages/_/tests/unit
-apps/_/tests/unit
+packages/_/tests/unit apps/_/tests/unit
 
 Characteristics:
 
@@ -148,9 +147,7 @@ Each app must own its own E2E environment.
 
 Example:
 
-apps/mmc/tests/e2e
-apps/backoffice/tests/e2e
-apps/frontoffice/tests/e2e
+apps/mmc/tests/e2e apps/backoffice/tests/e2e apps/frontoffice/tests/e2e
 
 Tool:
 
@@ -291,7 +288,8 @@ This stage only ensures CI **can support this structure**.
 
 # 11. Task Breakdown (Implementation Guidance)
 
-This section provides an execution-ready task list so an implementation AI or developer can apply the alignment safely and incrementally.
+This section provides an execution-ready task list so an implementation AI or developer can apply
+the alignment safely and incrementally.
 
 Tasks must be executed **in order** unless explicitly marked as parallelizable.
 

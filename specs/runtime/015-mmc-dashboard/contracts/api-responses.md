@@ -9,7 +9,8 @@
 
 ## Overview
 
-This document defines the request/response schemas for all 6 MMC Dashboard endpoints using TypeScript + Zod type definitions.
+This document defines the request/response schemas for all 6 MMC Dashboard endpoints using
+TypeScript + Zod type definitions.
 
 All schemas follow the standard response format:
 
@@ -28,7 +29,7 @@ All schemas follow the standard response format:
 ### Standard Response Wrapper
 
 ```typescript
-import { z } from 'zod'
+import { z } from "zod";
 
 export const StandardResponseSchema = z.object({
   success: z.boolean(),
@@ -39,16 +40,16 @@ export const StandardResponseSchema = z.object({
       message: z.string(),
     })
     .nullable(),
-})
+});
 
 export type StandardResponse<T = any> = {
-  success: boolean
-  data: T | null
+  success: boolean;
+  data: T | null;
   error: {
-    code: string
-    message: string
-  } | null
-}
+    code: string;
+    message: string;
+  } | null;
+};
 ```
 
 ### Common Error Codes
@@ -56,22 +57,22 @@ export type StandardResponse<T = any> = {
 ```typescript
 export enum DashboardErrorCode {
   // Authorization Errors
-  UNAUTHORIZED = 'UNAUTHORIZED',
-  PERMISSION_DENIED = 'PERMISSION_DENIED',
-  LICENSE_LOCKED = 'LICENSE_LOCKED',
+  UNAUTHORIZED = "UNAUTHORIZED",
+  PERMISSION_DENIED = "PERMISSION_DENIED",
+  LICENSE_LOCKED = "LICENSE_LOCKED",
 
   // Validation Errors
-  INVALID_DATE_RANGE = 'INVALID_DATE_RANGE',
-  INVALID_LIMIT = 'INVALID_LIMIT',
-  INVALID_PAGE_SIZE = 'INVALID_PAGE_SIZE',
-  INVALID_SORT_BY = 'INVALID_SORT_BY',
+  INVALID_DATE_RANGE = "INVALID_DATE_RANGE",
+  INVALID_LIMIT = "INVALID_LIMIT",
+  INVALID_PAGE_SIZE = "INVALID_PAGE_SIZE",
+  INVALID_SORT_BY = "INVALID_SORT_BY",
 
   // Business Logic Errors
-  PAYLOAD_TOO_LARGE = 'PAYLOAD_TOO_LARGE',
-  SCHEMA_INCOMPATIBLE = 'SCHEMA_INCOMPATIBLE',
+  PAYLOAD_TOO_LARGE = "PAYLOAD_TOO_LARGE",
+  SCHEMA_INCOMPATIBLE = "SCHEMA_INCOMPATIBLE",
 
   // Server Errors
-  INTERNAL_ERROR = 'INTERNAL_ERROR',
+  INTERNAL_ERROR = "INTERNAL_ERROR",
 }
 ```
 
@@ -116,9 +117,9 @@ Return platform-wide license counts, current month & YTD revenue at a glance.
 ```typescript
 export const SummaryRequestSchema = z.object({
   // No query parameters
-})
+});
 
-export type SummaryRequest = z.infer<typeof SummaryRequestSchema>
+export type SummaryRequest = z.infer<typeof SummaryRequestSchema>;
 ```
 
 **Example Request**:
@@ -146,15 +147,15 @@ export const SummaryDataSchema = z.object({
     last_month: z.number().int(), // 2210025 (cents: $22,100.25)
   }),
   snapshot_at: z.string().datetime(), // ISO 8601
-})
+});
 
-export type SummaryData = z.infer<typeof SummaryDataSchema>
+export type SummaryData = z.infer<typeof SummaryDataSchema>;
 
 export const SummaryResponseSchema = StandardResponseSchema.extend({
   data: SummaryDataSchema.nullable(),
-})
+});
 
-export type SummaryResponse = z.infer<typeof SummaryResponseSchema>
+export type SummaryResponse = z.infer<typeof SummaryResponseSchema>;
 ```
 
 **Example Response**:
@@ -237,19 +238,17 @@ Return top 5 products by revenue with growth metrics.
 export const RevenueBreakdownQuerySchema = z.object({
   date_from: z.string().date().optional(), // ISO date "2025-02-26"
   date_to: z.string().date().optional(),
-})
+});
 
-export type RevenueBreakdownQuery = z.infer<typeof RevenueBreakdownQuerySchema>
+export type RevenueBreakdownQuery = z.infer<typeof RevenueBreakdownQuerySchema>;
 
 // Validation: date_to >= date_from
-export const validateRevenueBreakdownQuery = (
-  query: RevenueBreakdownQuery
-): boolean => {
+export const validateRevenueBreakdownQuery = (query: RevenueBreakdownQuery): boolean => {
   if (query.date_from && query.date_to) {
-    return new Date(query.date_to) >= new Date(query.date_from)
+    return new Date(query.date_to) >= new Date(query.date_from);
   }
-  return true
-}
+  return true;
+};
 ```
 
 **Example Request**:
@@ -270,7 +269,7 @@ export const ProductRevenueSchema = z.object({
   revenue_previous_period: z.number().int(), // 7500000 (cents: $75,000.00)
   growth_percent: z.number(), // 9.33 (percent as decimal 9.33)
   license_count: z.number().int().min(0),
-})
+});
 
 export const RevenueBreakdownDataSchema = z.object({
   products: z.array(ProductRevenueSchema),
@@ -279,17 +278,15 @@ export const RevenueBreakdownDataSchema = z.object({
     from: z.string().date(),
     to: z.string().date(),
   }),
-})
+});
 
-export type RevenueBreakdownData = z.infer<typeof RevenueBreakdownDataSchema>
+export type RevenueBreakdownData = z.infer<typeof RevenueBreakdownDataSchema>;
 
 export const RevenueBreakdownResponseSchema = StandardResponseSchema.extend({
   data: RevenueBreakdownDataSchema.nullable(),
-})
+});
 
-export type RevenueBreakdownResponse = z.infer<
-  typeof RevenueBreakdownResponseSchema
->
+export type RevenueBreakdownResponse = z.infer<typeof RevenueBreakdownResponseSchema>;
 ```
 
 **Example Response**:
@@ -355,11 +352,11 @@ Return revenue and license counts grouped by billing country.
 export const GeographicQuerySchema = z.object({
   date_from: z.string().date().optional(),
   date_to: z.string().date().optional(),
-  sort_by: z.enum(['revenue', 'license_count']).optional(), // default: 'revenue'
+  sort_by: z.enum(["revenue", "license_count"]).optional(), // default: 'revenue'
   limit: z.number().int().min(1).max(100).optional(), // default: 50
-})
+});
 
-export type GeographicQuery = z.infer<typeof GeographicQuerySchema>
+export type GeographicQuery = z.infer<typeof GeographicQuerySchema>;
 ```
 
 **Example Request**:
@@ -379,22 +376,22 @@ export const CountryRevenueSchema = z.object({
   revenue: z.number().int(), // 9500050 (cents: $95,000.50)
   license_count: z.number().int().min(0),
   avg_revenue_per_license: z.number().multipleOf(0.01), // 146.15 (USD per license)
-})
+});
 
 export const GeographicDataSchema = z.object({
   countries: z.array(CountryRevenueSchema),
   total_revenue: z.number().int(), // cents
   total_countries: z.number().int().min(0),
   queried_countries: z.number().int().min(0),
-})
+});
 
-export type GeographicData = z.infer<typeof GeographicDataSchema>
+export type GeographicData = z.infer<typeof GeographicDataSchema>;
 
 export const GeographicResponseSchema = StandardResponseSchema.extend({
   data: GeographicDataSchema.nullable(),
-})
+});
 
-export type GeographicResponse = z.infer<typeof GeographicResponseSchema>
+export type GeographicResponse = z.infer<typeof GeographicResponseSchema>;
 ```
 
 **Example Response**:
@@ -456,13 +453,13 @@ Return top affiliates by commission with usage metrics and pagination.
 export const AffiliatesQuerySchema = z.object({
   date_from: z.string().date().optional(),
   date_to: z.string().date().optional(),
-  sort_by: z.enum(['commission', 'usage_count', 'name']).optional(), // default: 'commission'
-  status: z.enum(['ACTIVE', 'INACTIVE', 'ALL']).optional(), // default: 'ACTIVE'
+  sort_by: z.enum(["commission", "usage_count", "name"]).optional(), // default: 'commission'
+  status: z.enum(["ACTIVE", "INACTIVE", "ALL"]).optional(), // default: 'ACTIVE'
   page: z.number().int().min(1).optional(), // default: 1
   page_size: z.number().int().min(1).max(100).optional(), // default: 50
-})
+});
 
-export type AffiliatesQuery = z.infer<typeof AffiliatesQuerySchema>
+export type AffiliatesQuery = z.infer<typeof AffiliatesQuerySchema>;
 ```
 
 **Example Request**:
@@ -479,32 +476,32 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 export const AffiliateMetricsSchema = z.object({
   affiliate_id: z.string().uuid(),
   name: z.string(),
-  status: z.enum(['ACTIVE', 'INACTIVE', 'SUSPENDED']),
+  status: z.enum(["ACTIVE", "INACTIVE", "SUSPENDED"]),
   total_commission: z.number().int(), // 1550050 (cents: $15,500.50)
   usage_count: z.number().int().min(0),
   avg_commission_per_usage: z.number().multipleOf(0.01), // 44.29 (USD per usage)
   last_activity: z.string().datetime(),
-})
+});
 
 export const PaginationSchema = z.object({
   page: z.number().int().min(1),
   page_size: z.number().int().min(1).max(100),
   total_affiliates: z.number().int().min(0),
   total_pages: z.number().int().min(0),
-})
+});
 
 export const AffiliatesDataSchema = z.object({
   affiliates: z.array(AffiliateMetricsSchema),
   pagination: PaginationSchema,
-})
+});
 
-export type AffiliatesData = z.infer<typeof AffiliatesDataSchema>
+export type AffiliatesData = z.infer<typeof AffiliatesDataSchema>;
 
 export const AffiliatesResponseSchema = StandardResponseSchema.extend({
   data: AffiliatesDataSchema.nullable(),
-})
+});
 
-export type AffiliatesResponse = z.infer<typeof AffiliatesResponseSchema>
+export type AffiliatesResponse = z.infer<typeof AffiliatesResponseSchema>;
 ```
 
 **Example Response**:
@@ -572,10 +569,10 @@ Return monthly license and revenue trends for 12-month growth visualization.
 ```typescript
 export const TrendsQuerySchema = z.object({
   months: z.number().int().min(1).max(12).optional(), // default: 12
-  metric: z.enum(['license_count', 'revenue', 'both']).optional(), // default: 'both'
-})
+  metric: z.enum(["license_count", "revenue", "both"]).optional(), // default: 'both'
+});
 
-export type TrendsQuery = z.infer<typeof TrendsQuerySchema>
+export type TrendsQuery = z.infer<typeof TrendsQuerySchema>;
 ```
 
 **Example Request**:
@@ -594,28 +591,28 @@ export const MonthlyTrendSchema = z.object({
   license_count: z.number().int().min(0),
   revenue: z.number().int(), // 22000000 (cents: $220,000.00)
   mrr: z.number().int(), // 22000000 (cents: MRR $220,000.00)
-})
+});
 
 export const TrendsSummarySchema = z.object({
   total_license_growth: z.number().int(), // net increase
   total_license_growth_percent: z.number(), // 13.64 (percent as decimal)
   total_revenue_growth: z.number().int(), // 6765075 (cents: $67,650.75)
   total_revenue_growth_percent: z.number(), // 30.72 (percent as decimal)
-})
+});
 
 export const TrendsDataSchema = z.object({
   trends: z.array(MonthlyTrendSchema),
   summary: TrendsSummarySchema,
   period_months: z.number().int().min(1).max(12),
-})
+});
 
-export type TrendsData = z.infer<typeof TrendsDataSchema>
+export type TrendsData = z.infer<typeof TrendsDataSchema>;
 
 export const TrendsResponseSchema = StandardResponseSchema.extend({
   data: TrendsDataSchema.nullable(),
-})
+});
 
-export type TrendsResponse = z.infer<typeof TrendsResponseSchema>
+export type TrendsResponse = z.infer<typeof TrendsResponseSchema>;
 ```
 
 **Example Response**:
@@ -662,13 +659,13 @@ Export dashboard metrics as CSV file (subject to 50,000 row limit).
 
 ```typescript
 export const ExportRequestSchema = z.object({
-  section: z.enum(['geographic', 'affiliates', 'revenue_breakdown']),
+  section: z.enum(["geographic", "affiliates", "revenue_breakdown"]),
   date_from: z.string().date().optional(),
   date_to: z.string().date().optional(),
-  format: z.enum(['csv']).optional(), // default: 'csv'
-})
+  format: z.enum(["csv"]).optional(), // default: 'csv'
+});
 
-export type ExportRequest = z.infer<typeof ExportRequestSchema>
+export type ExportRequest = z.infer<typeof ExportRequestSchema>;
 ```
 
 **Example Request**:
@@ -707,9 +704,9 @@ CA,Canada,28500.00,145,196.55
 export const ExportResponseSchema = z.object({
   // Response is binary stream, not JSON
   // Headers indicate content-type and filename
-})
+});
 
-export type ExportResponse = Blob // Binary stream
+export type ExportResponse = Blob; // Binary stream
 ```
 
 ### Error Response (413 Payload Too Large)
@@ -783,21 +780,21 @@ export const ErrorResponseSchema = StandardResponseSchema.extend({
   success: z.literal(false),
   error: z.object({
     code: z.enum([
-      'UNAUTHORIZED',
-      'PERMISSION_DENIED',
-      'LICENSE_LOCKED',
-      'INVALID_DATE_RANGE',
-      'INVALID_LIMIT',
-      'INVALID_PAGE_SIZE',
-      'PAYLOAD_TOO_LARGE',
-      'SCHEMA_INCOMPATIBLE',
-      'INTERNAL_ERROR',
+      "UNAUTHORIZED",
+      "PERMISSION_DENIED",
+      "LICENSE_LOCKED",
+      "INVALID_DATE_RANGE",
+      "INVALID_LIMIT",
+      "INVALID_PAGE_SIZE",
+      "PAYLOAD_TOO_LARGE",
+      "SCHEMA_INCOMPATIBLE",
+      "INTERNAL_ERROR",
     ]),
     message: z.string().min(1),
   }),
-})
+});
 
-export type ErrorResponse = z.infer<typeof ErrorResponseSchema>
+export type ErrorResponse = z.infer<typeof ErrorResponseSchema>;
 ```
 
 **HTTP Status Mapping**:
@@ -859,7 +856,8 @@ X-RateLimit-Reset: 1645881600
 - Geographic endpoint: 1000 req/hour per user
 - Affiliates endpoint: 1000 req/hour per user
 - Trends endpoint: 1000 req/hour per user (cached, low resource)
-- Export endpoint: 100 req/hour per user (more restrictive due to resource intensity & 50k row streaming)
+- Export endpoint: 100 req/hour per user (more restrictive due to resource intensity & 50k row
+  streaming)
 
 **Export Endpoint Rate Limit Headers**:
 
@@ -910,47 +908,42 @@ X-Workspace-Slug: mmc  (optional, inferred from MMC context)
 ```typescript
 // Route handler: apps/api/src/routes/mmc/dashboard/summary.ts
 
-import { Hono } from 'hono'
-import {
-  SummaryResponseSchema,
-  type SummaryResponse,
-} from '@zidney/dashboard-contracts'
+import { Hono } from "hono";
+import { SummaryResponseSchema, type SummaryResponse } from "@zidney/dashboard-contracts";
 
-export const summaryRoute = new Hono<{ Bindings: AppBindings }>()
+export const summaryRoute = new Hono<{ Bindings: AppBindings }>();
 
-summaryRoute.get('/summary', async (ctx) => {
+summaryRoute.get("/summary", async (ctx) => {
   try {
     // Fetch data
-    const data = await fetchSummary(masterDb)
+    const data = await fetchSummary(masterDb);
 
     // Validate response schema
     const validated = SummaryResponseSchema.safeParse({
       success: true,
       data,
       error: null,
-    })
+    });
 
     if (!validated.success) {
-      throw new Error(
-        `Response schema validation failed: ${JSON.stringify(validated.error)}`
-      )
+      throw new Error(`Response schema validation failed: ${JSON.stringify(validated.error)}`);
     }
 
-    return ctx.json(validated.data)
+    return ctx.json(validated.data);
   } catch (error) {
     return ctx.json(
       {
         success: false,
         data: null,
         error: {
-          code: 'INTERNAL_ERROR',
-          message: 'Failed to retrieve dashboard summary',
+          code: "INTERNAL_ERROR",
+          message: "Failed to retrieve dashboard summary",
         },
       },
-      500
-    )
+      500,
+    );
   }
-})
+});
 ```
 
 ### Client-Side (Frontend)
@@ -958,58 +951,47 @@ summaryRoute.get('/summary', async (ctx) => {
 ```typescript
 // Dashboard API client: apps/mmc/src/services/dashboard-api.ts
 
-import {
-  SummaryResponse,
-  RevenueBreakdownResponse,
-} from '@zidney/dashboard-contracts'
+import { SummaryResponse, RevenueBreakdownResponse } from "@zidney/dashboard-contracts";
 
 export const dashboardApi = {
   async getSummary(): Promise<SummaryResponse> {
-    const response = await fetch('/api/mmc/dashboard/summary', {
+    const response = await fetch("/api/mmc/dashboard/summary", {
       headers: {
         Authorization: `Bearer ${getToken()}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-    })
+    });
 
-    const data: SummaryResponse = await response.json()
-
-    if (!response.ok) {
-      throw new Error(data.error?.message || 'Failed to fetch summary')
-    }
-
-    return data
-  },
-
-  async getRevenueBreakdown(
-    dateFrom?: string,
-    dateTo?: string
-  ): Promise<RevenueBreakdownResponse> {
-    const params = new URLSearchParams()
-    if (dateFrom) params.append('date_from', dateFrom)
-    if (dateTo) params.append('date_to', dateTo)
-
-    const response = await fetch(
-      `/api/mmc/dashboard/revenue-breakdown?${params}`,
-      {
-        headers: {
-          Authorization: `Bearer ${getToken()}`,
-          'Content-Type': 'application/json',
-        },
-      }
-    )
-
-    const data: RevenueBreakdownResponse = await response.json()
+    const data: SummaryResponse = await response.json();
 
     if (!response.ok) {
-      throw new Error(
-        data.error?.message || 'Failed to fetch revenue breakdown'
-      )
+      throw new Error(data.error?.message || "Failed to fetch summary");
     }
 
-    return data
+    return data;
   },
-}
+
+  async getRevenueBreakdown(dateFrom?: string, dateTo?: string): Promise<RevenueBreakdownResponse> {
+    const params = new URLSearchParams();
+    if (dateFrom) params.append("date_from", dateFrom);
+    if (dateTo) params.append("date_to", dateTo);
+
+    const response = await fetch(`/api/mmc/dashboard/revenue-breakdown?${params}`, {
+      headers: {
+        Authorization: `Bearer ${getToken()}`,
+        "Content-Type": "application/json",
+      },
+    });
+
+    const data: RevenueBreakdownResponse = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error?.message || "Failed to fetch revenue breakdown");
+    }
+
+    return data;
+  },
+};
 ```
 
 ---

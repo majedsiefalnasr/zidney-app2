@@ -11,7 +11,9 @@
 
 ## 🎯 Overview
 
-This PR introduces a production-ready, tenant-isolated **Role & Permission System (RBAC v2)** for the Backoffice. The implementation adds fine-grained, transactional, cache-aware access control to all Backoffice operations.
+This PR introduces a production-ready, tenant-isolated **Role & Permission System (RBAC v2)** for
+the Backoffice. The implementation adds fine-grained, transactional, cache-aware access control to
+all Backoffice operations.
 
 **Key Delivered:**
 
@@ -59,11 +61,13 @@ bun test tests/unit/rbac/ tests/integration/rbac/ tests/integration/backoffice/r
 
 ### Permission Model
 
-- **10 Modules:** dashboard, licenses, settings, staff_management, roles, submissions, gradebook, reports, audit_logs, system_config
+- **10 Modules:** dashboard, licenses, settings, staff_management, roles, submissions, gradebook,
+  reports, audit_logs, system_config
 - **4 Actions:** view, create, edit, delete
 - **Boolean Flags:** Stored per role + module as fine-grained permissions
 - **Deny-by-Default:** Missing permission = rejection (403 Forbidden)
-- **Server-Authoritative:** All permission checks execute server-side; no client-side bypass possible
+- **Server-Authoritative:** All permission checks execute server-side; no client-side bypass
+  possible
 
 ### Request Flow
 
@@ -330,7 +334,8 @@ All endpoints require:
 
 - [ ] All 62 tests passing locally: `bun test tests/unit/rbac tests/integration/rbac`
 - [ ] TypeScript clean: `tsc --noEmit`
-- [ ] SQL migration syntax verified: `apps/api/src/db/tenant/migrations/20260302_001_rbac_role_permissions_complete.ts`
+- [ ] SQL migration syntax verified:
+      `apps/api/src/db/tenant/migrations/20260302_001_rbac_role_permissions_complete.ts`
 - [ ] Redis key pattern tested (rbac_v2:\* invalidation)
 - [ ] Database snapshot taken for all tenants before deployment
 - [ ] Tested in staging environment for 1 full QA cycle
@@ -383,11 +388,20 @@ All endpoints require:
 
 ## 📚 Documentation
 
-- **Testing Guide:** [guides/TESTING_GUIDE.md](specs/runtime/021-role-permission-system/guides/TESTING_GUIDE.md) — Manual test scenarios + troubleshooting
-- **Implementation Report:** [reports/IMPLEMENT_REPORT.md](specs/runtime/021-role-permission-system/reports/IMPLEMENT_REPORT.md) — All 22 tasks, 62 tests
-- **Validation Report:** [audits/VALIDATION_REPORT.md](specs/runtime/021-role-permission-system/audits/VALIDATION_REPORT.md) — TypeScript, lint, migration, idempotency evidence
-- **Closure Report:** [reports/CLOSURE_REPORT.md](specs/runtime/021-role-permission-system/reports/CLOSURE_REPORT.md) — Full workflow summary + ADR compliance
-- **Permission Model Reference:** See `packages/domain-core/src/rbac/permission-registry.ts` (SINGLE SOURCE OF TRUTH)
+- **Testing Guide:**
+  [guides/TESTING_GUIDE.md](specs/runtime/021-role-permission-system/guides/TESTING_GUIDE.md) —
+  Manual test scenarios + troubleshooting
+- **Implementation Report:**
+  [reports/IMPLEMENT_REPORT.md](specs/runtime/021-role-permission-system/reports/IMPLEMENT_REPORT.md)
+  — All 22 tasks, 62 tests
+- **Validation Report:**
+  [audits/VALIDATION_REPORT.md](specs/runtime/021-role-permission-system/audits/VALIDATION_REPORT.md)
+  — TypeScript, lint, migration, idempotency evidence
+- **Closure Report:**
+  [reports/CLOSURE_REPORT.md](specs/runtime/021-role-permission-system/reports/CLOSURE_REPORT.md) —
+  Full workflow summary + ADR compliance
+- **Permission Model Reference:** See `packages/domain-core/src/rbac/permission-registry.ts` (SINGLE
+  SOURCE OF TRUTH)
 - **API Spec:** All 9 endpoints documented in [REST Endpoints](#-rest-endpoints) above
 
 ---

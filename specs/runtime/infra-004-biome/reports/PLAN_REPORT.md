@@ -1,18 +1,17 @@
 # Plan Report — STAGE_INFRA_04_BIOME
 
-**Step:** 3 — Plan
-**Stage:** STAGE_INFRA_04_BIOME
-**Phase:** 01_PLATFORM_FOUNDATION
-**Branch:** spec/infra-004-biome
-**Generated:** 2026-03-06T00:00:00.000Z
+**Step:** 3 — Plan **Stage:** STAGE_INFRA_04_BIOME **Phase:** 01_PLATFORM_FOUNDATION **Branch:**
+spec/infra-004-biome **Generated:** 2026-03-06T00:00:00.000Z
 
 ---
 
 ## Summary
 
-Technical plan complete for Biome unified linting and formatting engine. Guardian validations passed.
+Technical plan complete for Biome unified linting and formatting engine. Guardian validations
+passed.
 
-**Outcome:** PASS — plan.md and research.md written, both guardians returned VERDICT: PASS, task generation authorized.
+**Outcome:** PASS — plan.md and research.md written, both guardians returned VERDICT: PASS, task
+generation authorized.
 
 ---
 
@@ -30,8 +29,10 @@ Technical plan complete for Biome unified linting and formatting engine. Guardia
 - No forbidden dependencies
 - No ARCHITECTURE_MAP.json changes required
 - No ADR violations
-- Defense-in-depth note: ESLint per-app import restrictions removed (AI-Guard remains as single enforcement layer — acceptable)
-- `apps/worker/src/observability/structured-logger.ts` must be evaluated in Pass 2 for logger-bridge override vs. migration
+- Defense-in-depth note: ESLint per-app import restrictions removed (AI-Guard remains as single
+  enforcement layer — acceptable)
+- `apps/worker/src/observability/structured-logger.ts` must be evaluated in Pass 2 for logger-bridge
+  override vs. migration
 
 **API Designer key findings:**
 
@@ -39,7 +40,8 @@ Technical plan complete for Biome unified linting and formatting engine. Guardia
 - Error response format preserved
 - All 5 auth middleware files: logging swap only
 - `noConsole: "error"` rule strengthens AGENTS.md logging discipline
-- Group A (mandatory replacement) vs Group B (suppression acceptable) separation is architecturally sound
+- Group A (mandatory replacement) vs Group B (suppression acceptable) separation is architecturally
+  sound
 
 ---
 
@@ -109,11 +111,14 @@ Technical plan complete for Biome unified linting and formatting engine. Guardia
 
 ### Packages to Remove (8 ESLint + 1 Prettier)
 
-`eslint`, `@eslint/js`, `typescript-eslint`, `eslint-plugin-vue`, `@vue/eslint-config-typescript`, `eslint-plugin-playwright`, `@typescript-eslint/parser`, `@typescript-eslint/eslint-plugin`, `prettier`
+`eslint`, `@eslint/js`, `typescript-eslint`, `eslint-plugin-vue`, `@vue/eslint-config-typescript`,
+`eslint-plugin-playwright`, `@typescript-eslint/parser`, `@typescript-eslint/eslint-plugin`,
+`prettier`
 
 ### Config Files to Delete
 
-`eslint.config.mjs`, `apps/backoffice/eslint.config.js`, `apps/frontoffice/eslint.config.js`, `apps/mmc/eslint.config.js`, `prettier.config.mjs`, `.prettierrc`
+`eslint.config.mjs`, `apps/backoffice/eslint.config.js`, `apps/frontoffice/eslint.config.js`,
+`apps/mmc/eslint.config.js`, `prettier.config.mjs`, `.prettierrc`
 
 ### CI Update (`ci.yml` lint job)
 

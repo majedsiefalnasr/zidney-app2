@@ -1,10 +1,8 @@
 # Research: Infrastructure & Governance Alignment — Current State Analysis
 
-**Branch**: `infra-003-alignment`
-**Date**: 2026-03-04
-**Author**: SpecKit Phase 0 — Research Agent
-**Stage**: STAGE_INFRA_03_ALIGNMENT
-**Audit Source**: `infra-audit-report.json` (git SHA: `dfe11008e4c6f6459bd36abe77d7d6f66b1a8483`)
+**Branch**: `infra-003-alignment` **Date**: 2026-03-04 **Author**: SpecKit Phase 0 — Research Agent
+**Stage**: STAGE_INFRA_03_ALIGNMENT **Audit Source**: `infra-audit-report.json` (git SHA:
+`dfe11008e4c6f6459bd36abe77d7d6f66b1a8483`)
 
 ---
 
@@ -21,16 +19,20 @@
 | `packages/api-client/vitest.config.ts` | unset (default) | `true`  | none                     | NO            | Simple config with `include: ['tests/**/*.test.ts']` |
 
 **No apps have `vitest.config.ts` for**: `apps/api`, `apps/worker`  
-**No packages have `vitest.config.ts` for**: `domain-core`, `logger`, `config`, `redis-utils`, `types`, `ui-system`, `validation`
+**No packages have `vitest.config.ts` for**: `domain-core`, `logger`, `config`, `redis-utils`,
+`types`, `ui-system`, `validation`
 
 ### Root Config Analysis
 
 The root `vitest.config.ts`:
 
 - Does **NOT** use Vitest `projects` configuration — it is a monolithic flat `test` block
-- Manually aliases `hono`, `pg`, `bcrypt`, `redis`, `pinia`, `vue-router`, `vue`, and all `@zidney/*` packages
-- Sets `environment: 'node'` globally — incompatible with `jsdom` tests from UI apps when run from root
-- Centralizes coverage reporters (text, json, html) but has NO coverage directory or threshold configuration
+- Manually aliases `hono`, `pg`, `bcrypt`, `redis`, `pinia`, `vue-router`, `vue`, and all
+  `@zidney/*` packages
+- Sets `environment: 'node'` globally — incompatible with `jsdom` tests from UI apps when run from
+  root
+- Centralizes coverage reporters (text, json, html) but has NO coverage directory or threshold
+  configuration
 - Excludes `packages/ui-system/tests/unit/DataTable.spec.ts` via `configDefaults.exclude`
 - **Does not reference per-app vitest.config.ts files** — they are currently standalone / orphaned
 
@@ -46,7 +48,10 @@ All three configs have identical structure:
 
 ### Key Gap
 
-The root config and per-app configs are **completely disconnected**. Running `bun run test` from root uses the monolithic root config and sets `environment: 'node'` globally, which would break UI tests. Per-app configs can only be invoked by navigating into each app directory independently. There is no unified projects-based runner.
+The root config and per-app configs are **completely disconnected**. Running `bun run test` from
+root uses the monolithic root config and sets `environment: 'node'` globally, which would break UI
+tests. Per-app configs can only be invoked by navigating into each app directory independently.
+There is no unified projects-based runner.
 
 ---
 
@@ -77,7 +82,8 @@ The root config and per-app configs are **completely disconnected**. Running `bu
 
 ### Summary
 
-Only `apps/mmc` has a complete test directory structure. All other apps are missing `e2e/`. Six packages are missing `tests/unit/` entirely.
+Only `apps/mmc` has a complete test directory structure. All other apps are missing `e2e/`. Six
+packages are missing `tests/unit/` entirely.
 
 ---
 
@@ -102,7 +108,8 @@ Only `apps/mmc` has a complete test directory structure. All other apps are miss
   - `apps/mmc/eslint.config.js` — flat config (per-app)
   - `apps/frontoffice/eslint.config.js` — flat config (per-app)
   - `apps/backoffice/eslint.config.js` — flat config (per-app)
-- Root config is the authoritative config with full rule set (XSS, import firewall, api-client boundaries, etc.)
+- Root config is the authoritative config with full rule set (XSS, import firewall, api-client
+  boundaries, etc.)
 - Audit confirms: `"prettierConflictRisk": "NEEDS_ALIGNMENT"`
 
 ### Prettier
@@ -150,7 +157,9 @@ Only `apps/mmc` has a complete test directory structure. All other apps are miss
 | `apps/api/tests/integration/tenant-resolver.test.ts`       | App                                               |
 | `apps/worker/tests/unit/provisioning/provisioning.test.ts` | App                                               |
 
-**Note**: `packages/ui-system/tests/unit/DataTable.spec.ts` is both skipped AND currently excluded from the root vitest config via `configDefaults.exclude`. Any re-enablement requires removing this exclude entry as well.
+**Note**: `packages/ui-system/tests/unit/DataTable.spec.ts` is both skipped AND currently excluded
+from the root vitest config via `configDefaults.exclude`. Any re-enablement requires removing this
+exclude entry as well.
 
 ---
 
@@ -163,7 +172,8 @@ Only `apps/mmc` has a complete test directory structure. All other apps are miss
 | `packages/api-client/tests/client.test.ts` | Network mock timing; likely uses fake timers or async waterfalls      |
 | `apps/worker/tests/load-testing.test.ts`   | Load/timing-dependent test; wall-clock or concurrency non-determinism |
 
-**Detection method**: `STATIC_SCAN_ONLY` — actual runtime flakiness has not been confirmed by 3-consecutive-run validation. Investigation is required during T005 implementation.
+**Detection method**: `STATIC_SCAN_ONLY` — actual runtime flakiness has not been confirmed by
+3-consecutive-run validation. Investigation is required during T005 implementation.
 
 ---
 
@@ -208,13 +218,19 @@ Only `apps/mmc` has a complete test directory structure. All other apps are miss
 
 **Risk level reported by audit**: `HIGH`
 
-Root cause: The root vitest config uses hardcoded module aliases that resolve app-level `node_modules` (hono, pg, bcrypt, redis, pinia, vue-router, vue). When migrating to a projects-based config:
+Root cause: The root vitest config uses hardcoded module aliases that resolve app-level
+`node_modules` (hono, pg, bcrypt, redis, pinia, vue-router, vue). When migrating to a projects-based
+config:
 
 - Per-project configs must either inherit or re-declare these aliases
 - OR the root config retains `resolve.alias` as a shared context
-- The `environment: 'node'` at root must NOT override jsdom in per-app configs — this is the key risk
+- The `environment: 'node'` at root must NOT override jsdom in per-app configs — this is the key
+  risk
 
-**Decision** (from clarification Q1): Per-app `vitest.config.ts` files are **kept as minimal overrides** with only `environment`, `setupFiles`, and `env` fields. The root config becomes the projects orchestrator with coverage centralized. Per-app aliases and plugins are retained at the app level since the projects model allows per-project resolution.
+**Decision** (from clarification Q1): Per-app `vitest.config.ts` files are **kept as minimal
+overrides** with only `environment`, `setupFiles`, and `env` fields. The root config becomes the
+projects orchestrator with coverage centralized. Per-app aliases and plugins are retained at the app
+level since the projects model allows per-project resolution.
 
 ---
 
@@ -234,8 +250,11 @@ Root cause: The root vitest config uses hardcoded module aliases that resolve ap
 
 ## 11. Open Investigation Items (for T005 execution)
 
-1. **`packages/api-client/tests/client.test.ts`** — Inspect for race conditions, fake timer usage, unresolved promises
-2. **`apps/worker/tests/load-testing.test.ts`** — Inspect for wall-clock timing assertions (`setTimeout`, `Date.now()` comparisons), verify if it should be excluded from standard test run and placed under `test:performance`
+1. **`packages/api-client/tests/client.test.ts`** — Inspect for race conditions, fake timer usage,
+   unresolved promises
+2. **`apps/worker/tests/load-testing.test.ts`** — Inspect for wall-clock timing assertions
+   (`setTimeout`, `Date.now()` comparisons), verify if it should be excluded from standard test run
+   and placed under `test:performance`
 
 ---
 

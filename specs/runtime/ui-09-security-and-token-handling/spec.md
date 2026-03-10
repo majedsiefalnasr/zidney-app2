@@ -8,7 +8,10 @@
 
 ## Feature Overview
 
-This stage defines the frontend security architecture shared across all three UI applications: **MMC**, **Backoffice**, and **Frontoffice**. It standardises how authentication tokens are stored, transported, expired, and cleared — and how each application protects users and data from common web vulnerabilities.
+This stage defines the frontend security architecture shared across all three UI applications:
+**MMC**, **Backoffice**, and **Frontoffice**. It standardises how authentication tokens are stored,
+transported, expired, and cleared — and how each application protects users and data from common web
+vulnerabilities.
 
 **In scope:**
 
@@ -30,7 +33,8 @@ This stage defines the frontend security architecture shared across all three UI
 - OAuth / social login flows
 
 **Applications affected:** MMC, Backoffice, Frontoffice  
-**Backend dependency:** None — this stage only defines how the UI _consumes and protects_ auth state already provided by the backend.
+**Backend dependency:** None — this stage only defines how the UI _consumes and protects_ auth state
+already provided by the backend.
 
 ---
 
@@ -104,7 +108,9 @@ License middleware on the backend remains mandatory. The UI is a passive consume
 | Browser cookie (UI-managed)       | ❌ Never                                                              |
 | HttpOnly cookie (backend-managed) | Permitted if backend controls it — UI makes no manual storage attempt |
 
-**Consequence of in-memory storage:** the token is cleared on page refresh, which is the intended behaviour. Users must re-authenticate after a full page reload unless the backend provides an alternative session mechanism (outside scope of this stage).
+**Consequence of in-memory storage:** the token is cleared on page refresh, which is the intended
+behaviour. Users must re-authenticate after a full page reload unless the backend provides an
+alternative session mechanism (outside scope of this stage).
 
 ### Token Treatment
 
@@ -119,7 +125,8 @@ Tokens must be treated as **opaque strings** at all times. The UI must not:
 
 ## Authorization Header Injection
 
-Every outbound HTTP request to the Zidney API must carry the access token in the `Authorization` header. This injection must be **centralised in the API client interceptor**.
+Every outbound HTTP request to the Zidney API must carry the access token in the `Authorization`
+header. This injection must be **centralised in the API client interceptor**.
 
 **Required header format:**
 
@@ -129,40 +136,48 @@ Authorization: Bearer <access_token>
 
 **Rules:**
 
-- Header injection must occur in a single place (API client request interceptor), never inside individual components or composables.
-- If no token is present in the auth store, the interceptor must omit the `Authorization` header entirely — it must not send `Bearer undefined` or `Bearer null`.
+- Header injection must occur in a single place (API client request interceptor), never inside
+  individual components or composables.
+- If no token is present in the auth store, the interceptor must omit the `Authorization` header
+  entirely — it must not send `Bearer undefined` or `Bearer null`.
 - No component may manually construct or append an `Authorization` header.
 - No service layer may duplicate header injection logic.
 
-This ensures the token lifecycle is managed in one place and any future changes (e.g., switching token types) affect only the interceptor.
+This ensures the token lifecycle is managed in one place and any future changes (e.g., switching
+token types) affect only the interceptor.
 
 ---
 
 ## Session Expiry and 401 Handling
 
-When the API returns a `401 Unauthorized` response, the UI must follow a **standardised, non-retrying flow**:
+When the API returns a `401 Unauthorized` response, the UI must follow a **standardised,
+non-retrying flow**:
 
 1. Clear the auth store (token, user identity, session metadata)
 2. Clear any user-specific UI state that was derived from the authenticated session
 3. Redirect the user to the login page
 4. Display a "Session expired — please sign in again" notification
-5. Optionally preserve the originally intended route so the user can be redirected back after successful re-authentication
+5. Optionally preserve the originally intended route so the user can be redirected back after
+   successful re-authentication
 
 **Prohibited behaviours:**
 
 - Infinite retry loops on 401
 - Silent retry without user notification
 - Redirect loops (guard → 401 → guard)
-- Attempting a token refresh unless a refresh strategy is explicitly enabled (see Refresh Strategy section)
+- Attempting a token refresh unless a refresh strategy is explicitly enabled (see Refresh Strategy
+  section)
 - Ignoring a 401 and allowing the user to continue in a broken authenticated state
 
-All 401 interception logic must reside in the API client response interceptor — not in individual page components.
+All 401 interception logic must reside in the API client response interceptor — not in individual
+page components.
 
 ---
 
 ## Refresh Strategy
 
-Token refresh is **conditional**. It must only be implemented if the backend provides a refresh token mechanism.
+Token refresh is **conditional**. It must only be implemented if the backend provides a refresh
+token mechanism.
 
 **When refresh is enabled:**
 
@@ -188,12 +203,14 @@ A 401 immediately triggers the standard expiry flow: clear state, redirect to lo
 
 ## Secure Logout
 
-Logout is a critical security boundary. When a user initiates logout, the following must occur atomically from the user's perspective:
+Logout is a critical security boundary. When a user initiates logout, the following must occur
+atomically from the user's perspective:
 
 1. The auth store is cleared (access token, user identity, workspace context, session metadata)
 2. All user-specific persisted UI state (preferences, cached view data tied to the user) is cleared
 3. The user is redirected to the login page
-4. Optionally, a backend logout endpoint is called to invalidate the server-side session (fire-and-forget; UI logout is not blocked by backend response)
+4. Optionally, a backend logout endpoint is called to invalidate the server-side session
+   (fire-and-forget; UI logout is not blocked by backend response)
 
 **Logout must never:**
 
@@ -223,7 +240,8 @@ All protected routes must be guarded at the router level. Guards must enforce th
 | License validity check   | ❌ Not in guards                                                          | ❌ Not in guards                   |
 | Workspace access check   | ❌ Not in guards                                                          | ❌ Not in guards                   |
 
-All decisions beyond "is a token present?" must be validated by backend responses, not by guard logic.
+All decisions beyond "is a token present?" must be validated by backend responses, not by guard
+logic.
 
 ---
 
@@ -241,7 +259,9 @@ The frontend must rely on Vue's built-in template escaping as the primary XSS de
 | No bypassing Vue's template compiler       | All templates must go through the standard Vue compilation pipeline                               |
 | Third-party rich text content              | Must be rendered through a sanitized renderer only                                                |
 
-If a product feature requires rendering user-generated HTML (e.g., exam question rich text), the owning stage must specify the approved sanitization library and policy. This stage establishes the baseline rule.
+If a product feature requires rendering user-generated HTML (e.g., exam question rich text), the
+owning stage must specify the approved sanitization library and policy. This stage establishes the
+baseline rule.
 
 ---
 
@@ -254,7 +274,8 @@ CSRF risk depends on the authentication transport the backend uses:
 | Pure JWT bearer header (no cookies) | CSRF risk is minimised; standard header-based protection applies                                                                          |
 | HttpOnly cookie (backend-managed)   | API client must send `credentials: include`; CSRF token must be handled via a secure request header; CSRF token must never appear in logs |
 
-Regardless of transport, the UI must never expose CSRF tokens in logs, state, or to third-party scripts.
+Regardless of transport, the UI must never expose CSRF tokens in logs, state, or to third-party
+scripts.
 
 ---
 
@@ -273,13 +294,15 @@ The following data types must never be persisted to any browser storage:
 
 - Must be cleared on logout (not just on page navigation)
 - Must be redacted or omitted in structured logs
-- Must not be exposed to analytics, error monitoring, or third-party tools without explicit scrubbing
+- Must not be exposed to analytics, error monitoring, or third-party tools without explicit
+  scrubbing
 
 ---
 
 ## Security Logic Placement
 
-All authentication and security logic must reside in `core/auth/`. No component, page, or layout may contain auth logic directly.
+All authentication and security logic must reside in `core/auth/`. No component, page, or layout may
+contain auth logic directly.
 
 | Responsibility             | Location                                                                                              |
 | -------------------------- | ----------------------------------------------------------------------------------------------------- |
@@ -300,9 +323,11 @@ Components must call auth store actions; they must not replicate auth logic inli
 
 **Given** a user has successfully authenticated  
 **When** they navigate to any protected area  
-**Then** the auth store holds the token in memory and the API client injects the Authorization header on all subsequent requests
+**Then** the auth store holds the token in memory and the API client injects the Authorization
+header on all subsequent requests
 
-**Acceptance:** All API requests from the session carry the correct Authorization header without any component-level intervention.
+**Acceptance:** All API requests from the session carry the correct Authorization header without any
+component-level intervention.
 
 ---
 
@@ -310,9 +335,11 @@ Components must call auth store actions; they must not replicate auth logic inli
 
 **Given** a user is actively using the application  
 **When** the API returns a 401 response to any request  
-**Then** the auth state is cleared, the user is redirected to login, and a "session expired" message is displayed
+**Then** the auth state is cleared, the user is redirected to login, and a "session expired" message
+is displayed
 
-**Acceptance:** No component triggers the expiry flow independently; it is handled once by the response interceptor. No redirect loops occur.
+**Acceptance:** No component triggers the expiry flow independently; it is handled once by the
+response interceptor. No redirect loops occur.
 
 ---
 
@@ -320,9 +347,11 @@ Components must call auth store actions; they must not replicate auth logic inli
 
 **Given** a user is authenticated  
 **When** they trigger the logout action  
-**Then** the auth store is cleared, user-specific UI state is cleared, and the user is redirected to login
+**Then** the auth store is cleared, user-specific UI state is cleared, and the user is redirected to
+login
 
-**Acceptance:** After logout, no token or user data remains accessible in the Pinia store. Revisiting a protected route redirects to login.
+**Acceptance:** After logout, no token or user data remains accessible in the Pinia store.
+Revisiting a protected route redirects to login.
 
 ---
 
@@ -330,7 +359,8 @@ Components must call auth store actions; they must not replicate auth logic inli
 
 **Given** a user has an active in-memory session  
 **When** they refresh the browser  
-**Then** the token is lost (in-memory only), the user is redirected to login on next protected route visit
+**Then** the token is lost (in-memory only), the user is redirected to login on next protected route
+visit
 
 **Acceptance:** No token survives a page refresh. The behaviour is deliberate and documented.
 
@@ -340,7 +370,8 @@ Components must call auth store actions; they must not replicate auth logic inli
 
 **Given** a workspace has been soft-locked by the platform  
 **When** the API returns 423  
-**Then** the UI displays a locked message and does not attempt to override, retry, or cache the response
+**Then** the UI displays a locked message and does not attempt to override, retry, or cache the
+response
 
 **Acceptance:** 423 responses always result in a user-visible locked state message. No retry occurs.
 
@@ -352,7 +383,8 @@ Components must call auth store actions; they must not replicate auth logic inli
 **When** a user attempts to access a protected route directly (e.g., via URL)  
 **Then** the router guard redirects them to the login page
 
-**Acceptance:** No protected page is rendered without a valid in-memory token. Redirect preserves the intended destination for post-login return.
+**Acceptance:** No protected page is rendered without a valid in-memory token. Redirect preserves
+the intended destination for post-login return.
 
 ---
 
@@ -362,7 +394,8 @@ Components must call auth store actions; they must not replicate auth logic inli
 **When** that content contains HTML or script tags  
 **Then** Vue's template escaping prevents execution; `v-html` is only used with sanitized content
 
-**Acceptance:** No unsanitized HTML is rendered via `v-html` anywhere in the codebase. Linting enforces this where tooling allows.
+**Acceptance:** No unsanitized HTML is rendered via `v-html` anywhere in the codebase. Linting
+enforces this where tooling allows.
 
 ---
 
@@ -371,48 +404,65 @@ Components must call auth store actions; they must not replicate auth logic inli
 ### Token Storage
 
 - **FR-SEC-01**: The access token must be stored exclusively in the in-memory Pinia auth store.
-- **FR-SEC-02**: The access token must never be written to `localStorage`, `sessionStorage`, `IndexedDB`, or any browser-managed cookie by UI code.
+- **FR-SEC-02**: The access token must never be written to `localStorage`, `sessionStorage`,
+  `IndexedDB`, or any browser-managed cookie by UI code.
 - **FR-SEC-03**: Tokens must not appear in structured logs in full or partial form.
 
 ### Authorization Header Injection
 
-- **FR-SEC-04**: The API client must inject the `Authorization: Bearer <token>` header on all requests to the Zidney API via a single centralised interceptor.
-- **FR-SEC-05**: If no token is present, the interceptor must omit the Authorization header entirely.
+- **FR-SEC-04**: The API client must inject the `Authorization: Bearer <token>` header on all
+  requests to the Zidney API via a single centralised interceptor.
+- **FR-SEC-05**: If no token is present, the interceptor must omit the Authorization header
+  entirely.
 - **FR-SEC-06**: No component, composable, or service may manually append an Authorization header.
 
 ### 401 Handling
 
-- **FR-SEC-07**: A 401 response from the API must trigger the standard expiry flow (clear auth store → clear user UI state → redirect to login → show session-expired notification) **only when `auth.store.isAuthenticated === true` at the time the response is received**. A 401 received while the user is not authenticated (e.g., wrong credentials on the login endpoint) must be passed through to the calling code as a normal error without triggering the logout or redirect flow.
-- **FR-SEC-08**: The 401 handling must be idempotent — multiple concurrent 401 responses must not produce multiple redirects or multiple logout executions. A boolean guard flag (`isHandling401`) must be set by the interceptor on the first qualifying 401; all subsequent 401 responses while the flag is `true` are dropped silently without re-entering the logout flow.
+- **FR-SEC-07**: A 401 response from the API must trigger the standard expiry flow (clear auth store
+  → clear user UI state → redirect to login → show session-expired notification) **only when
+  `auth.store.isAuthenticated === true` at the time the response is received**. A 401 received while
+  the user is not authenticated (e.g., wrong credentials on the login endpoint) must be passed
+  through to the calling code as a normal error without triggering the logout or redirect flow.
+- **FR-SEC-08**: The 401 handling must be idempotent — multiple concurrent 401 responses must not
+  produce multiple redirects or multiple logout executions. A boolean guard flag (`isHandling401`)
+  must be set by the interceptor on the first qualifying 401; all subsequent 401 responses while the
+  flag is `true` are dropped silently without re-entering the logout flow.
 - **FR-SEC-09**: The intended pre-expiry route must optionally be preserved for post-login redirect.
 
 ### Logout
 
-- **FR-SEC-10**: Logout must clear the auth store including the access token, user identity, and all session metadata.
+- **FR-SEC-10**: Logout must clear the auth store including the access token, user identity, and all
+  session metadata.
 - **FR-SEC-11**: Logout must clear all user-specific UI state stored in Pinia or component memory.
 - **FR-SEC-12**: After logout, the user must be redirected to the login page.
-- **FR-SEC-13**: Logout must execute completely regardless of whether the optional backend logout endpoint is reachable.
+- **FR-SEC-13**: Logout must execute completely regardless of whether the optional backend logout
+  endpoint is reachable.
 
 ### Route Guards
 
 - **FR-SEC-14**: All protected routes must be covered by router-level authentication guards.
-- **FR-SEC-15**: Guards must check `auth.store.isAuthenticated` only; they must not decode JWT claims or check permissions.
+- **FR-SEC-15**: Guards must check `auth.store.isAuthenticated` only; they must not decode JWT
+  claims or check permissions.
 - **FR-SEC-16**: Unauthenticated access to a protected route must redirect to login.
 
 ### XSS Mitigation
 
-- **FR-SEC-17**: `v-html` must only be used when content has been processed through an approved sanitization function.
+- **FR-SEC-17**: `v-html` must only be used when content has been processed through an approved
+  sanitization function.
 - **FR-SEC-18**: Dynamic script injection is prohibited.
 - **FR-SEC-19**: All user-facing content must be rendered through Vue's template system by default.
 
 ### License Response Handling
 
-- **FR-SEC-20**: A 423 response must display a workspace-locked message; no retry or override is permitted.
-- **FR-SEC-21**: A 426 response must display an upgrade-required message; no retry or override is permitted.
+- **FR-SEC-20**: A 423 response must display a workspace-locked message; no retry or override is
+  permitted.
+- **FR-SEC-21**: A 426 response must display an upgrade-required message; no retry or override is
+  permitted.
 
 ### Security Logic Placement
 
-- **FR-SEC-22**: All authentication and session security logic must reside in `core/auth/`; none may be inlined in components.
+- **FR-SEC-22**: All authentication and session security logic must reside in `core/auth/`; none may
+  be inlined in components.
 
 ---
 
@@ -435,12 +485,18 @@ Components must call auth store actions; they must not replicate auth logic inli
 
 ## Assumptions
 
-1. The backend issues a JWT-format access token, but the UI treats it as an opaque string — no decoding occurs.
-2. Token refresh is disabled by default. If the backend enables a refresh endpoint in a future stage, `core/auth/refresh.ts` will be activated following the policy in this spec.
+1. The backend issues a JWT-format access token, but the UI treats it as an opaque string — no
+   decoding occurs.
+2. Token refresh is disabled by default. If the backend enables a refresh endpoint in a future
+   stage, `core/auth/refresh.ts` will be activated following the policy in this spec.
 3. The backend manages its own authentication endpoints; this stage covers only the UI boundary.
-4. HttpOnly cookies are not used in the current implementation. If the backend switches to HttpOnly cookies, the token storage policy section must be revisited via a new stage.
-5. "User-specific UI state" refers to any Pinia store slice that is populated as a result of an authenticated session (e.g., user profile, workspace preferences, cached exam lists). Global, non-user-specific UI state (e.g., theme preference) is out of scope for logout clearing.
-6. The sanitization library for `v-html` use cases will be specified per feature that requires rich text rendering; this stage establishes the baseline rule only.
+4. HttpOnly cookies are not used in the current implementation. If the backend switches to HttpOnly
+   cookies, the token storage policy section must be revisited via a new stage.
+5. "User-specific UI state" refers to any Pinia store slice that is populated as a result of an
+   authenticated session (e.g., user profile, workspace preferences, cached exam lists). Global,
+   non-user-specific UI state (e.g., theme preference) is out of scope for logout clearing.
+6. The sanitization library for `v-html` use cases will be specified per feature that requires rich
+   text rendering; this stage establishes the baseline rule only.
 
 ---
 
@@ -459,7 +515,8 @@ Components must call auth store actions; they must not replicate auth logic inli
 
 ## Test Strategy
 
-All security layer behaviour must be testable without a real backend connection. Tests must use mock API responses.
+All security layer behaviour must be testable without a real backend connection. Tests must use mock
+API responses.
 
 | Test Category                      | Coverage Required                                                                  |
 | ---------------------------------- | ---------------------------------------------------------------------------------- |
@@ -482,12 +539,48 @@ All tests must pass in CI without network access to a live backend.
 
 ### Session 2026-03-01
 
-- **Q: What mechanism enforces idempotency for concurrent 401 responses (FR-SEC-08)?** → **Auto-resolved.** A boolean guard flag `isHandling401` must be set by the interceptor on the first qualifying 401. While the flag is `true`, all subsequent 401 responses are silently dropped — no additional logout executions or redirects. The flag is reset only after the redirect to login completes. This is the standard single-flight guard pattern for Vue/Axios response interceptors. FR-SEC-08 has been updated to encode this mechanism directly. _Rationale: derivable from standard interceptor design and the idempotency requirement already present in the spec._
+- **Q: What mechanism enforces idempotency for concurrent 401 responses (FR-SEC-08)?** →
+  **Auto-resolved.** A boolean guard flag `isHandling401` must be set by the interceptor on the
+  first qualifying 401. While the flag is `true`, all subsequent 401 responses are silently dropped
+  — no additional logout executions or redirects. The flag is reset only after the redirect to login
+  completes. This is the standard single-flight guard pattern for Vue/Axios response interceptors.
+  FR-SEC-08 has been updated to encode this mechanism directly. _Rationale: derivable from standard
+  interceptor design and the idempotency requirement already present in the spec._
 
-- **Q: In the default no-refresh scenario, what happens to in-flight requests that receive 401 responses after the first one has already triggered logout?** → **Auto-resolved.** Once `isHandling401` is `true`, the interceptor must immediately reject all subsequent 401 responses as a cancelled/failed promise without re-entering the logout flow. Callers receive a rejected promise; no retry and no second redirect occurs. This is a corollary of FR-SEC-08's idempotency requirement and standard interceptor drop-on-flag behaviour. _Rationale: derivable from FR-SEC-08 and standard Vue/Axios interceptor patterns._
+- **Q: In the default no-refresh scenario, what happens to in-flight requests that receive 401
+  responses after the first one has already triggered logout?** → **Auto-resolved.** Once
+  `isHandling401` is `true`, the interceptor must immediately reject all subsequent 401 responses as
+  a cancelled/failed promise without re-entering the logout flow. Callers receive a rejected
+  promise; no retry and no second redirect occurs. This is a corollary of FR-SEC-08's idempotency
+  requirement and standard interceptor drop-on-flag behaviour. _Rationale: derivable from FR-SEC-08
+  and standard Vue/Axios interceptor patterns._
 
-- **Q: Does FR-SEC-03's prohibition on logging tokens "in full or partial form" include truncated representations (e.g., last 4 characters, first 8 characters)?** → **Auto-resolved.** The Constitutional token-opacity rule treats tokens as fully opaque strings with zero-tolerance exposure in logs. No substring, prefix, suffix, or truncated form may appear in any structured log entry. The only safe log representation is complete omission (e.g., `"token": "[REDACTED]"` with no token characters present). _Rationale: Constitutional constraint (tokens are opaque strings); OWASP Logging Cheat Sheet — credential-class values must be entirely excluded from logs, not partially masked._
+- **Q: Does FR-SEC-03's prohibition on logging tokens "in full or partial form" include truncated
+  representations (e.g., last 4 characters, first 8 characters)?** → **Auto-resolved.** The
+  Constitutional token-opacity rule treats tokens as fully opaque strings with zero-tolerance
+  exposure in logs. No substring, prefix, suffix, or truncated form may appear in any structured log
+  entry. The only safe log representation is complete omission (e.g., `"token": "[REDACTED]"` with
+  no token characters present). _Rationale: Constitutional constraint (tokens are opaque strings);
+  OWASP Logging Cheat Sheet — credential-class values must be entirely excluded from logs, not
+  partially masked._
 
-- **Q: FR-SEC-07 stated "Any 401 response from the API" triggers the session-expiry flow — does this include 401 responses from unauthenticated requests such as a login endpoint rejecting wrong credentials?** → **Auto-resolved with spec amendment.** The word "Any" was overly broad and would cause incorrect behaviour: a user who types the wrong password would be redirected away from the login page before they could correct it. The session-expiry flow must only fire when `auth.store.isAuthenticated === true` at the time the 401 is received. A 401 on any unauthenticated request must pass through to the calling code as a normal error. FR-SEC-07 and the Success Criteria "Consistent 401 behaviour" row have been updated accordingly. _Rationale: OWASP Authentication Cheat Sheet; standard interceptor guard pattern; implied by the spec's own session-expiry framing; Vue security guide._
+- **Q: FR-SEC-07 stated "Any 401 response from the API" triggers the session-expiry flow — does this
+  include 401 responses from unauthenticated requests such as a login endpoint rejecting wrong
+  credentials?** → **Auto-resolved with spec amendment.** The word "Any" was overly broad and would
+  cause incorrect behaviour: a user who types the wrong password would be redirected away from the
+  login page before they could correct it. The session-expiry flow must only fire when
+  `auth.store.isAuthenticated === true` at the time the 401 is received. A 401 on any
+  unauthenticated request must pass through to the calling code as a normal error. FR-SEC-07 and the
+  Success Criteria "Consistent 401 behaviour" row have been updated accordingly. _Rationale: OWASP
+  Authentication Cheat Sheet; standard interceptor guard pattern; implied by the spec's own
+  session-expiry framing; Vue security guide._
 
-- **Q: Are 423 (Locked) and 426 (Upgrade Required) response handling behaviours differentiated per application (MMC vs Backoffice vs Frontoffice), or is the same display-and-halt behaviour applied uniformly?** → **Auto-resolved.** The same behaviour applies uniformly across all three applications: display the relevant message, no retry, no override, no cached flag. No per-application differentiation is needed at this stage. Frontoffice-specific concerns (e.g., how a mid-exam 423 interacts with attempt state) are the responsibility of the Frontoffice exam runtime stage, not STAGE*UI_09. \_Rationale: the spec's own License & Version Enforcement table lists uniform behaviour with no per-app differentiation; "Applications affected: MMC, Backoffice, Frontoffice" with identical handling rules.*
+- **Q: Are 423 (Locked) and 426 (Upgrade Required) response handling behaviours differentiated per
+  application (MMC vs Backoffice vs Frontoffice), or is the same display-and-halt behaviour applied
+  uniformly?** → **Auto-resolved.** The same behaviour applies uniformly across all three
+  applications: display the relevant message, no retry, no override, no cached flag. No
+  per-application differentiation is needed at this stage. Frontoffice-specific concerns (e.g., how
+  a mid-exam 423 interacts with attempt state) are the responsibility of the Frontoffice exam
+  runtime stage, not STAGE*UI_09. \_Rationale: the spec's own License & Version Enforcement table
+  lists uniform behaviour with no per-app differentiation; "Applications affected: MMC, Backoffice,
+  Frontoffice" with identical handling rules.*

@@ -8,7 +8,13 @@
 
 ## Summary
 
-All 26 tasks were completed successfully. The module boundary enforcement system is fully implemented: `docs/architecture/module-boundaries.json` defines 13 modules across 4 layers with a complete dependency matrix and 4 cross-cutting rules. `scripts/ai-guard.ts` has been extended with 5+ exported functions that enforce these boundaries at pre-commit and CI time. `scripts/infra-audit.ts` now uses `module-boundaries.json` as the authoritative source for undeclared-module detection. The CI pipeline was extended with a `module-boundary-validation` step and a dedicated `test:unit:boundaries` CI step covering 43 new tests.
+All 26 tasks were completed successfully. The module boundary enforcement system is fully
+implemented: `docs/architecture/module-boundaries.json` defines 13 modules across 4 layers with a
+complete dependency matrix and 4 cross-cutting rules. `scripts/ai-guard.ts` has been extended with
+5+ exported functions that enforce these boundaries at pre-commit and CI time.
+`scripts/infra-audit.ts` now uses `module-boundaries.json` as the authoritative source for
+undeclared-module detection. The CI pipeline was extended with a `module-boundary-validation` step
+and a dedicated `test:unit:boundaries` CI step covering 43 new tests.
 
 ---
 
@@ -16,7 +22,8 @@ All 26 tasks were completed successfully. The module boundary enforcement system
 
 - `specs/runtime/infra-007-module-boundaries/tasks.md` — 26 tasks, all executed
 - `specs/runtime/infra-007-module-boundaries/plan.md` — Phase 1–8 implementation design
-- `specs/runtime/infra-007-module-boundaries/spec.md` — FR-001 through FR-012, NFR-001 through NFR-004
+- `specs/runtime/infra-007-module-boundaries/spec.md` — FR-001 through FR-012, NFR-001 through
+  NFR-004
 - `specs/runtime/infra-007-module-boundaries/audits/ANALYZE_REPORT.md` — APPROVED (attempt 6)
 - `specs/runtime/infra-007-module-boundaries/audits/VALIDATION_REPORT.md` — all gates PASS
 

@@ -278,20 +278,15 @@ Download event must log:
 
 ## Failure Cases
 
-If license not ACTIVE:
-→ 423 or 403
+If license not ACTIVE: → 423 or 403
 
-If subscription expired:
-→ 403
+If subscription expired: → 403
 
-If file not found:
-→ 404
+If file not found: → 404
 
-If division mismatch:
-→ 403
+If division mismatch: → 403
 
-If package does not include Library:
-→ 403
+If package does not include Library: → 403
 
 All errors must follow platform error standard.
 

@@ -9,7 +9,8 @@
 
 ## EXECUTIVE SUMMARY
 
-This report documents the implementation progress for **STAGE_06_ATTEMPT_ENGINE_FOUNDATION**, a 72-task infrastructure stage for Zidney's exam delivery engine.
+This report documents the implementation progress for **STAGE_06_ATTEMPT_ENGINE_FOUNDATION**, a
+72-task infrastructure stage for Zidney's exam delivery engine.
 
 ### What Has Been Implemented
 

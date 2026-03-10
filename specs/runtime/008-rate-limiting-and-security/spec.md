@@ -18,7 +18,8 @@ This specification establishes enforceable security and abuse-prevention mechani
 - **Worker processing** from failure cascades and poisoned jobs
 - **Sensitive administrative actions** from unauthorized or rate-limited abuse
 
-This stage is critical to platform stability and institutional trust. It's a foundational requirement before progressing to Phase 2 (MMC) and beyond.
+This stage is critical to platform stability and institutional trust. It's a foundational
+requirement before progressing to Phase 2 (MMC) and beyond.
 
 **Scope Phase:** 01_PLATFORM_FOUNDATION  
 **Affects:** Authentication, Attempt Engine, WebSocket, Worker, API Gateway, Observability
@@ -27,19 +28,26 @@ This stage is critical to platform stability and institutional trust. It's a fou
 
 ## Constitutional Compliance Declaration
 
-✅ **Isolation:** No cross-tenant rate limit state sharing. Each workspace's attempt limits are tracked separately via tenant-aware Redis keys.
+✅ **Isolation:** No cross-tenant rate limit state sharing. Each workspace's attempt limits are
+tracked separately via tenant-aware Redis keys.
 
-✅ **License Enforcement:** Rate limiting is applied AFTER license middleware validates status. Soft-locked workspaces receive 423 before rate limits are checked.
+✅ **License Enforcement:** Rate limiting is applied AFTER license middleware validates status.
+Soft-locked workspaces receive 423 before rate limits are checked.
 
-✅ **Grading Authority:** No grading changes. Worker remains sole authority. Rate limiting only prevents submission spam—doesn't change grading logic.
+✅ **Grading Authority:** No grading changes. Worker remains sole authority. Rate limiting only
+prevents submission spam—doesn't change grading logic.
 
-✅ **Direct DB Instantiation:** Rate limiter uses centralized Redis pool (initialized at platform boot), not tenant-specific connections. Tenant context is in Redis key prefix only.
+✅ **Direct DB Instantiation:** Rate limiter uses centralized Redis pool (initialized at platform
+boot), not tenant-specific connections. Tenant context is in Redis key prefix only.
 
-✅ **Snapshot Integrity:** Idempotent submission mechanism protects attempt snapshot. Double submissions return cached result without re-grading.
+✅ **Snapshot Integrity:** Idempotent submission mechanism protects attempt snapshot. Double
+submissions return cached result without re-grading.
 
-✅ **Transaction Boundaries:** Submission idempotency enforced via DB transaction with FOR UPDATE lock + Redis cache verification.
+✅ **Transaction Boundaries:** Submission idempotency enforced via DB transaction with FOR UPDATE
+lock + Redis cache verification.
 
-✅ **Version Enforcement:** Rate limits and idempotency patterns activate only when schema_version and product_version are compatible.
+✅ **Version Enforcement:** Rate limits and idempotency patterns activate only when schema_version
+and product_version are compatible.
 
 **Compliance Status:** ✅ **Compliant with Zidney Constitution v1.2.0 — No violations detected.**
 
@@ -49,7 +57,8 @@ This stage is critical to platform stability and institutional trust. It's a fou
 
 ### Session 2026-02-19
 
-- Q1: Cache Coherence (Redis vs Database Authority) → A: Database is authoritative source, Redis is performance cache only
+- Q1: Cache Coherence (Redis vs Database Authority) → A: Database is authoritative source, Redis is
+  performance cache only
 
 ---
 
@@ -68,10 +77,13 @@ This stage is critical to platform stability and institutional trust. It's a fou
 ### Tenant Isolation Guarantees
 
 1. **Rate limit keys are namespaced:** `rate:{endpoint}:{key}` never crosses workspace boundaries
-2. **Submission idempotency is per-attempt:** `idempotent:attempt:{attempt_id}` is unique per attempt (which is tenant-scoped)
-3. **JWT validation includes workspace_id:** Tokens without matching workspace_id are rejected at middleware
+2. **Submission idempotency is per-attempt:** `idempotent:attempt:{attempt_id}` is unique per
+   attempt (which is tenant-scoped)
+3. **JWT validation includes workspace_id:** Tokens without matching workspace_id are rejected at
+   middleware
 4. **All rate limit checks happen AFTER tenant resolver:** No tenant bypass possible
-5. **No shared rate limit bucket across tenants:** Each `/workspace/admin` or `/workspace/{id}/submit` has workspace-specific counter
+5. **No shared rate limit bucket across tenants:** Each `/workspace/admin` or
+   `/workspace/{id}/submit` has workspace-specific counter
 
 ### Resolver Middleware Usage
 
@@ -109,8 +121,10 @@ Rate limiting is enforced at this sequence:
 
 ### Version Enforcement
 
-- **schema_version:** Rate limiter validates schema version supports idempotent submission (requires `idempotent_submission_key` column in `attempts` table)
-- **product_version:** Rate limiter respects product version; older clients may have different rate limits applied
+- **schema_version:** Rate limiter validates schema version supports idempotent submission (requires
+  `idempotent_submission_key` column in `attempts` table)
+- **product_version:** Rate limiter respects product version; older clients may have different rate
+  limits applied
 
 If schema incompatible → Return 426 at schema enforcement middleware (not rate limiter).
 
@@ -145,7 +159,8 @@ No new tables required. Rate limiting state lives in:
 ### Migration Requirements
 
 1. **Version bump:** MINOR version bump (schema_version incremented)
-2. **Backward compatibility:** Old attempts without `idempotent_submission_key` are populated via migration with unique UUIDs
+2. **Backward compatibility:** Old attempts without `idempotent_submission_key` are populated via
+   migration with unique UUIDs
 3. **Safe rollback:** Schema version tied to feature flag; old API versions can ignore columns
 
 ---
@@ -1015,12 +1030,16 @@ This specification does NOT:
 Feature is complete and successful when:
 
 1. ✅ **Login brute force is blocked:** 5 failed attempts lock user for 1+ minute
-2. ✅ **Duplicate submissions rejected safely:** Duplicate attempt submit returns cached result in < 100ms
+2. ✅ **Duplicate submissions rejected safely:** Duplicate attempt submit returns cached result in <
+   100ms
 3. ✅ **Attempt restart spam blocked:** User cannot restart same attempt >5 times/min
-4. ✅ **WebSocket authenticated and throttled:** Unauthorized connections rejected; message rate enforced
+4. ✅ **WebSocket authenticated and throttled:** Unauthorized connections rejected; message rate
+   enforced
 5. ✅ **Cross-workspace requests rejected:** Token workspace_id mismatch returns 403
-6. ✅ **Rate limiter tested under load:** Handles 10x concurrent requests without performance degradation
-7. ✅ **Dead-letter queue tested:** Failed worker jobs move to DLQ correctly; ops can inspect failures
+6. ✅ **Rate limiter tested under load:** Handles 10x concurrent requests without performance
+   degradation
+7. ✅ **Dead-letter queue tested:** Failed worker jobs move to DLQ correctly; ops can inspect
+   failures
 8. ✅ **No secrets visible in logs:** Audit reveals zero credential leaks
 9. ✅ **All rate-limited endpoints return 429 with Retry-After:** HTTP contract enforced
 10. ✅ **Idempotency latency < 100ms:** Cache hits achieve sub-100ms response time
@@ -1033,14 +1052,18 @@ Feature is complete and successful when:
 
 This specification assumes:
 
-1. **Redis is available** at boot time (not optional). If Redis is unavailable, API cannot start (fail-fast).
-2. **Database schema version incremented** before code deployment. Migration runs before feature activation.
+1. **Redis is available** at boot time (not optional). If Redis is unavailable, API cannot start
+   (fail-fast).
+2. **Database schema version incremented** before code deployment. Migration runs before feature
+   activation.
 3. **JWT secrets already implemented** from Phase 1. This stage adds JWT validation rules only.
 4. **Attempt table already exists** with `id`, `user_id`, `workspace_id`, `status` columns.
-5. **Observability (structured logging) already implemented** from STAGE_07. Logs use existing Pino abstraction.
+5. **Observability (structured logging) already implemented** from STAGE_07. Logs use existing Pino
+   abstraction.
 6. **Tenant resolver middleware already exists** from STAGE_02. All endpoints use it.
 7. **License enforcement already exists** from STAGE_04. All endpoints validate license status.
-8. **Token expiration already enforced** in authentication middleware. Rate limiter assumes valid JWT before checking limits.
+8. **Token expiration already enforced** in authentication middleware. Rate limiter assumes valid
+   JWT before checking limits.
 
 ---
 

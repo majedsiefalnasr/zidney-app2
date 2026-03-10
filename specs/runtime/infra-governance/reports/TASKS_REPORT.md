@@ -1,14 +1,14 @@
 # Tasks Report — Infra Governance
 
-**Step:** 4 — Tasks
-**Timestamp:** 2026-03-05T00:04:00.000Z
-**Status:** COMPLETE
+**Step:** 4 — Tasks **Timestamp:** 2026-03-05T00:04:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-22 atomic, dependency-ordered tasks were generated for the Infra Governance stage. All tasks are tooling and CI infrastructure changes — no application code, no database access, no API routes. Tasks are grouped into 7 execution phases with two parallel slots (T005/T006 and T009/T010).
+22 atomic, dependency-ordered tasks were generated for the Infra Governance stage. All tasks are
+tooling and CI infrastructure changes — no application code, no database access, no API routes.
+Tasks are grouped into 7 execution phases with two parallel slots (T005/T006 and T009/T010).
 
 ---
 
@@ -43,8 +43,10 @@ Not applicable — this stage introduces no database writes.
 
 ## Idempotency Tasks
 
-- **T011–T014** — `scripts/infra-audit.ts` `--quick` flag: the quick mode execution path must be idempotent (no filesystem side effects on repeated invocations from pre-commit)
-- **T009** — `.husky/pre-commit`: `lint-staged` auto-fix + re-stage behavior is idempotent (ESLint `--fix` applied to the same file produces the same result)
+- **T011–T014** — `scripts/infra-audit.ts` `--quick` flag: the quick mode execution path must be
+  idempotent (no filesystem side effects on repeated invocations from pre-commit)
+- **T009** — `.husky/pre-commit`: `lint-staged` auto-fix + re-stage behavior is idempotent (ESLint
+  `--fix` applied to the same file produces the same result)
 
 ---
 

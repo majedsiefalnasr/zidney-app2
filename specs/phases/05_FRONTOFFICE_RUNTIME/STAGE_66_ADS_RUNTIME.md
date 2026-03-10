@@ -30,8 +30,7 @@ Ads are a workspace-controlled monetization and engagement feature.
 
 This stage covers runtime behavior only.
 
-Ad creation and configuration are defined in:
-STAGE_51_ADS_ENGINE
+Ad creation and configuration are defined in: STAGE_51_ADS_ENGINE
 
 ---
 

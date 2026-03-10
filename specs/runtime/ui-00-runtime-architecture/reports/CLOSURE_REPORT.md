@@ -8,11 +8,15 @@
 
 ## Summary
 
-Stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` is production ready. All 161 tasks completed across 6 phases. 196 unit tests pass (MMC: 64, Backoffice: 70, Frontoffice: 62). ESLint v9 exits 0 errors. TypeScript exits 0 errors on both `tsconfig.json` and `tsconfig.test.json`. Vite builds succeed for all three apps. Pre-closure CI checks fully unblocked:
+Stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` is production ready. All 161 tasks completed across 6
+phases. 196 unit tests pass (MMC: 64, Backoffice: 70, Frontoffice: 62). ESLint v9 exits 0 errors.
+TypeScript exits 0 errors on both `tsconfig.json` and `tsconfig.test.json`. Vite builds succeed for
+all three apps. Pre-closure CI checks fully unblocked:
 
 - ESLint migrated from v8 (`.eslintrc.json`) to v9 (`eslint.config.mjs`)
 - `tsconfig.json` paths restored (TypeScript `extends` path-replacement regression fixed)
-- `tsconfig.test.json` include scope narrowed to `apps/api/tests/` + `apps/worker/tests/` (UI apps have own tsconfigs)
+- `tsconfig.test.json` include scope narrowed to `apps/api/tests/` + `apps/worker/tests/` (UI apps
+  have own tsconfigs)
 
 ---
 
@@ -33,13 +37,22 @@ Stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` is production ready. All 161 tasks comp
 
 ## Scope Delivered
 
-- **Phase 1 (17 tasks):** `package.json`, `tsconfig.app.json`, `vite.config.ts`, `vitest.config.ts` for MMC (updated), Backoffice (new), Frontoffice (new)
-- **Phase 2 (43 tasks):** MMC delta migration — flat `src/components/` and `src/views/` reorganised into `src/modules/<domain>/` hierarchy; 20+ old files deleted; no functionality regressions
-- **Phase 3 (51 tasks):** Canonical core layer scaffolded identically in all three apps — `env.ts`, `error-normalizer.ts`, `token-store.ts`, `client.ts` (lazy getter + idempotent refresh queue), `auth.guard.ts`, `role.guard.ts`, `workspace.guard.ts` (MMC + Backoffice only), `router/index.ts`, `state/index.ts`, `auth/index.ts` (`useAuth`), `main.ts` with enforced boot order
-- **Phase 4 (6 tasks):** ESLint `import/no-restricted-paths` cross-app boundary rules in dedicated `eslint.config.js` per app
-- **Phase 5 (28 tasks):** 196 unit tests across 9–10 test files per app (100% of core layer coverage)
-- **Phase 6 (16 tasks):** Full validation gate — ESLint ✅, tsc per-app ✅, `vite build` all 3 apps ✅, vitest 196/196 ✅
-- **Post-implement fixes (3 commits):** ESLint v9 migration, `tsconfig.json` path restore, `tsconfig.test.json` scope narrowing
+- **Phase 1 (17 tasks):** `package.json`, `tsconfig.app.json`, `vite.config.ts`, `vitest.config.ts`
+  for MMC (updated), Backoffice (new), Frontoffice (new)
+- **Phase 2 (43 tasks):** MMC delta migration — flat `src/components/` and `src/views/` reorganised
+  into `src/modules/<domain>/` hierarchy; 20+ old files deleted; no functionality regressions
+- **Phase 3 (51 tasks):** Canonical core layer scaffolded identically in all three apps — `env.ts`,
+  `error-normalizer.ts`, `token-store.ts`, `client.ts` (lazy getter + idempotent refresh queue),
+  `auth.guard.ts`, `role.guard.ts`, `workspace.guard.ts` (MMC + Backoffice only), `router/index.ts`,
+  `state/index.ts`, `auth/index.ts` (`useAuth`), `main.ts` with enforced boot order
+- **Phase 4 (6 tasks):** ESLint `import/no-restricted-paths` cross-app boundary rules in dedicated
+  `eslint.config.js` per app
+- **Phase 5 (28 tasks):** 196 unit tests across 9–10 test files per app (100% of core layer
+  coverage)
+- **Phase 6 (16 tasks):** Full validation gate — ESLint ✅, tsc per-app ✅, `vite build` all 3 apps
+  ✅, vitest 196/196 ✅
+- **Post-implement fixes (3 commits):** ESLint v9 migration, `tsconfig.json` path restore,
+  `tsconfig.test.json` scope narrowing
 
 ---
 
@@ -78,7 +91,9 @@ Stage `STAGE_UI_00_RUNTIME_ARCHITECTURE` is production ready. All 161 tasks comp
 
 Risk Level: `LOW`
 
-Justification: This is a pure UI foundational stage. No database migrations. No API endpoint changes. No tenant isolation logic modified. The only risk surface is JavaScript runtime — fully covered by 196 unit tests and Vite build validation for all three apps.
+Justification: This is a pure UI foundational stage. No database migrations. No API endpoint
+changes. No tenant isolation logic modified. The only risk surface is JavaScript runtime — fully
+covered by 196 unit tests and Vite build validation for all three apps.
 
 ---
 

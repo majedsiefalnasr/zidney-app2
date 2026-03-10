@@ -40,7 +40,8 @@
 
 ### 🔴 Issue #3: Soft-Lock Grace Period Wrong (Business Logic Gap)
 
-- **Location**: [packages/domain-core/src/license/service.ts:220](packages/domain-core/src/license/service.ts#L220-L224)
+- **Location**:
+  [packages/domain-core/src/license/service.ts:220](packages/domain-core/src/license/service.ts#L220-L224)
 - **Problem**: Hardcoded to 7 days instead of 90 days per spec
 - **Fix**: Change `7` to `90` in setDate() call
 - **Impact**: Customers get incorrect grace period after payment failure
@@ -77,7 +78,8 @@
    - Add 4 negative tests
 
 2. ✋ **Fix Soft-Lock Grace Period** (5 min)
-   - File: [packages/domain-core/src/license/service.ts](packages/domain-core/src/license/service.ts#L220)
+   - File:
+     [packages/domain-core/src/license/service.ts](packages/domain-core/src/license/service.ts#L220)
    - Change `7` → `90` days
    - Add grace period validation test
 

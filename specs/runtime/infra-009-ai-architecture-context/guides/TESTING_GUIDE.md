@@ -9,7 +9,9 @@
 
 ## Overview
 
-This guide provides comprehensive testing procedures for the AI Architecture Context Layer — a system that generates machine-readable artifacts describing Zidney's architecture for consumption by AI agents (Copilot, GitNexus, SpecKit, Claude).
+This guide provides comprehensive testing procedures for the AI Architecture Context Layer — a
+system that generates machine-readable artifacts describing Zidney's architecture for consumption by
+AI agents (Copilot, GitNexus, SpecKit, Claude).
 
 **Testing Scope:**
 

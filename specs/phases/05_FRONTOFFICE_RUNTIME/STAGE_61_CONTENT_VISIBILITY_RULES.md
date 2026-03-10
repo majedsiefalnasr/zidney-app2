@@ -14,7 +14,8 @@ Status: DRAFT
 
 ## Objective
 
-Define strict runtime rules that determine which content a student can see and access in Frontoffice.
+Define strict runtime rules that determine which content a student can see and access in
+Frontoffice.
 
 This stage ensures:
 
@@ -258,5 +259,4 @@ Stage complete when:
 
 Content visibility defines academic trust.
 
-If students can see content outside their academic scope,
-Zidney fails institutional integrity.
+If students can see content outside their academic scope, Zidney fails institutional integrity.

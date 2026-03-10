@@ -8,7 +8,12 @@
 
 ## Summary
 
-All required validations executed and passed for the module-boundaries governance infrastructure stage. This stage adds purely non-runtime, read-only governance artifacts (a JSON schema document, governance script extensions, and static/unit tests). No runtime code was modified, no database migrations were added, no endpoints were changed, and no concurrency-critical paths were introduced. All 43 new tests pass. Lint and typecheck are clean. The AI guard script executes in 0.4s — well within the 30-second NFR-001 performance budget.
+All required validations executed and passed for the module-boundaries governance infrastructure
+stage. This stage adds purely non-runtime, read-only governance artifacts (a JSON schema document,
+governance script extensions, and static/unit tests). No runtime code was modified, no database
+migrations were added, no endpoints were changed, and no concurrency-critical paths were introduced.
+All 43 new tests pass. Lint and typecheck are clean. The AI guard script executes in 0.4s — well
+within the 30-second NFR-001 performance budget.
 
 ---
 
@@ -23,7 +28,8 @@ All required validations executed and passed for the module-boundaries governanc
 - `tests/unit/infra-audit/infra-audit-boundaries.test.ts` — 8 behavioral tests
 - `tests/unit/ai-guard/ai-guard-boundaries.test.ts` — 28 unit tests (scenarios a–n)
 - `package.json` — `"ai-guard"` and `"test:unit:boundaries"` scripts
-- `.github/workflows/ci.yml` — `module-boundary-validation` step + `Run module boundary unit tests` step
+- `.github/workflows/ci.yml` — `module-boundary-validation` step + `Run module boundary unit tests`
+  step
 
 ---
 
@@ -69,7 +75,8 @@ $ npx vitest run tests/unit/ai-guard/ai-guard-boundaries.test.ts
 - `resolveImportToModule()` maps import paths to declared modules
 - `matchesGlobPattern()` glob matching utility (scenarios c–e)
 - `validateLayerBoundaries()` detects forbidden layer violations (scenarios f–k)
-- Error cases: missing file, malformed JSON, unknown modules, cross-cutting rule enforcement (scenarios l–n)
+- Error cases: missing file, malformed JSON, unknown modules, cross-cutting rule enforcement
+  (scenarios l–n)
 
 ---
 
@@ -88,7 +95,8 @@ $ npx vitest run tests/unit/infra-audit/infra-audit-boundaries.test.ts
 
 **Tests cover FR-008 behavioral requirements:**
 
-- `findUndeclaredModulesFromBoundaries()` detects modules missing from module-boundaries.json under `packages/` and `apps/`
+- `findUndeclaredModulesFromBoundaries()` detects modules missing from module-boundaries.json under
+  `packages/` and `apps/`
 - `import.meta.main` guard prevents side effects when infra-audit.ts is imported as a module
 - Undeclared module detection across infrastructure, domain, runtime, and UI layers
 
@@ -110,7 +118,8 @@ $ npx vitest run tests/static/module-boundaries.test.ts
 **Tests cover:**
 
 - `docs/architecture/module-boundaries.json` exists and is valid JSON
-- Required top-level fields: `version`, `layers`, `allowed_dependencies`, `forbidden_dependencies`, `cross_cutting_rules`
+- Required top-level fields: `version`, `layers`, `allowed_dependencies`, `forbidden_dependencies`,
+  `cross_cutting_rules`
 - All 4 expected layers exist: `infrastructure`, `domain`, `runtime`, `ui`
 - All 13 modules are declared across layers
 - `allowed_dependencies` matrix is complete for all 4 layers
@@ -177,7 +186,8 @@ Found 0 errors.
 Exit code: 0
 ```
 
-The 11 warnings are all `any` type warnings in the pre-existing `scripts/infra-audit.ts` code. None of the newly written files produce any warnings. No errors in any file. Exit code 0.
+The 11 warnings are all `any` type warnings in the pre-existing `scripts/infra-audit.ts` code. None
+of the newly written files produce any warnings. No errors in any file. Exit code 0.
 
 ---
 
@@ -206,7 +216,8 @@ Exit code: 0
 Wall-clock: 0.4s
 ```
 
-Module-boundaries.json is successfully loaded, layer validation runs, repository passes all architecture rules.
+Module-boundaries.json is successfully loaded, layer validation runs, repository passes all
+architecture rules.
 
 ---
 
@@ -216,7 +227,8 @@ Module-boundaries.json is successfully loaded, layer validation runs, repository
 N/A — no database schema changes
 ```
 
-This stage does not introduce any new database tables, columns, indexes, or migrations. The master and tenant migration directories are untouched.
+This stage does not introduce any new database tables, columns, indexes, or migrations. The master
+and tenant migration directories are untouched.
 
 ---
 
@@ -226,7 +238,8 @@ This stage does not introduce any new database tables, columns, indexes, or migr
 N/A — read-only governance tool
 ```
 
-`ai-guard.ts` is a read-only analysis script. It has no write operations, no HTTP endpoints, and no state mutations. Idempotency validation is not applicable.
+`ai-guard.ts` is a read-only analysis script. It has no write operations, no HTTP endpoints, and no
+state mutations. Idempotency validation is not applicable.
 
 ---
 
@@ -236,7 +249,8 @@ N/A — read-only governance tool
 N/A — synchronous single-pass script
 ```
 
-`ai-guard.ts` is a single-threaded, synchronous governance script. It does not use workers, shared state, event queues, or concurrent I/O. Concurrency validation is not applicable.
+`ai-guard.ts` is a single-threaded, synchronous governance script. It does not use workers, shared
+state, event queues, or concurrent I/O. Concurrency validation is not applicable.
 
 ---
 
@@ -258,7 +272,8 @@ No failures. All validations passed.
 
 ## Skip Approvals
 
-No required validations were skipped. All conditional N/A entries are justified by the non-runtime scope of this stage.
+No required validations were skipped. All conditional N/A entries are justified by the non-runtime
+scope of this stage.
 
 | Check                   | Approval Source       | Reason                                     |
 | ----------------------- | --------------------- | ------------------------------------------ |
@@ -288,5 +303,6 @@ No required validations were skipped. All conditional N/A entries are justified 
 
 ## Next Step
 
-Proceed to Step 6.7 — Write Implement Report. _(Already complete — see `reports/IMPLEMENT_REPORT.md`)_  
+Proceed to Step 6.7 — Write Implement Report. _(Already complete — see
+`reports/IMPLEMENT_REPORT.md`)_  
 Next: Step 6.8 — Update Stage Status to `BACKEND CLOSED`.

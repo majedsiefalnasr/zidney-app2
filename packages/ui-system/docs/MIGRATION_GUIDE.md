@@ -27,23 +27,23 @@ npm install @zidney/ui-system vue@^3.3 tailwindcss@^3
 </template>
 
 <script setup lang="ts">
-import { DataTable } from '@zidney/ui-system'
-import { ref } from 'vue'
+import { DataTable } from "@zidney/ui-system";
+import { ref } from "vue";
 
-const items = ref([])
-const columns = [{ id: 'name', header: 'Name', accessor: 'name' }]
-const totalCount = ref(0)
-const paginationState = ref({ currentPage: 1, pageSize: 10, totalCount: 0 })
+const items = ref([]);
+const columns = [{ id: "name", header: "Name", accessor: "name" }];
+const totalCount = ref(0);
+const paginationState = ref({ currentPage: 1, pageSize: 10, totalCount: 0 });
 
 const onPageChange = ({ page, pageSize }) => {
-  fetchData(page, pageSize)
-}
+  fetchData(page, pageSize);
+};
 
 const fetchData = async (page, pageSize) => {
-  const { data, total } = await api.getItems(page, pageSize)
-  items.value = data
-  totalCount.value = total
-}
+  const { data, total } = await api.getItems(page, pageSize);
+  items.value = data;
+  totalCount.value = total;
+};
 </script>
 ```
 
@@ -89,17 +89,17 @@ const fetchData = async (page, pageSize) => {
 
 ```typescript
 const deleteUser = async (user) => {
-  await api.deleteUser(user.id)
-}
+  await api.deleteUser(user.id);
+};
 
 const rowActions = [
   {
-    id: 'delete',
-    label: 'Delete',
+    id: "delete",
+    label: "Delete",
     callback: deleteUser,
-    variant: 'destructive',
+    variant: "destructive",
   },
-]
+];
 
 // Component handles loading state, error display, 2s timeout
 ```
@@ -119,7 +119,7 @@ DataTable emits `@action-start` and `@action-end` for your refetch logic.
 **New:**
 
 ```typescript
-const { filters, serializeFilters } = useFilterBuilder([])
+const { filters, serializeFilters } = useFilterBuilder([]);
 
 // Component serializes to URL automatically
 // Overflow > 2000 chars? Falls back to localStorage
@@ -161,9 +161,9 @@ Enforces: Min 1 required language (LOCKED DECISION 5).
 
    ```typescript
    const handlePageChange = async (event) => {
-     const data = await api.getPage(event.page)
-     items.value = data
-   }
+     const data = await api.getPage(event.page);
+     items.value = data;
+   };
    ```
 
 2. **Use server mode for large datasets:**
@@ -203,13 +203,13 @@ Enforces: Min 1 required language (LOCKED DECISION 5).
 
    ```typescript
    // ❌ BAD
-   emittedData.name = 'modified' // Parent should clone
+   emittedData.name = "modified"; // Parent should clone
    ```
 
 4. **Don't skip required language validation**
    ```typescript
    // ❌ BAD
-   requiredLanguages: [] // Always enforce at least 1
+   requiredLanguages: []; // Always enforce at least 1
    ```
 
 ---
@@ -232,33 +232,33 @@ Enforces: Min 1 required language (LOCKED DECISION 5).
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { DataTable } from '@zidney/ui-system'
+import { ref } from "vue";
+import { DataTable } from "@zidney/ui-system";
 
-const auditLogs = ref([])
-const paginationState = ref({ currentPage: 1, pageSize: 10, totalCount: 0 })
+const auditLogs = ref([]);
+const paginationState = ref({ currentPage: 1, pageSize: 10, totalCount: 0 });
 
 const columns = [
-  { id: 'timestamp', header: 'Time', accessor: 'createdAt' },
-  { id: 'user', header: 'User', accessor: 'user.name' },
-  { id: 'action', header: 'Action', accessor: 'action' },
-  { id: 'status', header: 'Status', accessor: 'status' },
-]
+  { id: "timestamp", header: "Time", accessor: "createdAt" },
+  { id: "user", header: "User", accessor: "user.name" },
+  { id: "action", header: "Action", accessor: "action" },
+  { id: "status", header: "Status", accessor: "status" },
+];
 
 const onPageChange = async (event) => {
-  const { data, total } = await api.getAuditLogs(event.page, event.pageSize)
-  auditLogs.value = data
-  paginationState.value.totalCount = total
-}
+  const { data, total } = await api.getAuditLogs(event.page, event.pageSize);
+  auditLogs.value = data;
+  paginationState.value.totalCount = total;
+};
 
 const onSortChange = async (event) => {
   const { data } = await api.getAuditLogs(1, 10, {
     sortBy: event.column,
     sortDir: event.direction,
-  })
-  auditLogs.value = data
-  paginationState.value.currentPage = 1
-}
+  });
+  auditLogs.value = data;
+  paginationState.value.currentPage = 1;
+};
 </script>
 ```
 
@@ -286,51 +286,51 @@ const onSortChange = async (event) => {
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import { DataTable, AdvancedFilterBuilder } from '@zidney/ui-system'
+import { ref } from "vue";
+import { DataTable, AdvancedFilterBuilder } from "@zidney/ui-system";
 
-const licenses = ref([])
-const filters = ref([])
+const licenses = ref([]);
+const filters = ref([]);
 const filterFields = [
   {
-    id: 'status',
-    label: 'Status',
-    type: 'select',
-    operators: ['equals'],
-    options: [{ value: 'active', label: 'Active' }],
+    id: "status",
+    label: "Status",
+    type: "select",
+    operators: ["equals"],
+    options: [{ value: "active", label: "Active" }],
   },
-]
+];
 
-const columns = [{ id: 'name', header: 'License', accessor: 'name' }]
+const columns = [{ id: "name", header: "License", accessor: "name" }];
 
 const rowActions = [
-  { id: 'view', label: 'View', callback: viewLicense },
-  { id: 'edit', label: 'Edit', callback: editLicense },
+  { id: "view", label: "View", callback: viewLicense },
+  { id: "edit", label: "Edit", callback: editLicense },
   {
-    id: 'archive',
-    label: 'Archive',
+    id: "archive",
+    label: "Archive",
     callback: archiveLicense,
-    variant: 'destructive',
+    variant: "destructive",
   },
-]
+];
 
 const onFiltersChange = async (event) => {
-  filters.value = event.filters
+  filters.value = event.filters;
   // Re-fetch with new filters
-  const { data } = await api.getLicenses(1, 10, filters.value)
-  licenses.value = data
-}
+  const { data } = await api.getLicenses(1, 10, filters.value);
+  licenses.value = data;
+};
 
 const viewLicense = async (license) => {
-  await api.viewLicense(license.id)
-}
+  await api.viewLicense(license.id);
+};
 
 const onActionEnd = (event) => {
   if (event.success) {
     // Re-fetch list after action
-    loadLicenses()
+    loadLicenses();
   }
-}
+};
 </script>
 ```
 
@@ -344,12 +344,7 @@ const onActionEnd = (event) => {
     :row-actions="[{ id: 'edit', label: 'Edit', callback: openEditForm }]"
   />
 
-  <ModalFormLayout
-    :is-open="isEditOpen"
-    title="Edit User"
-    size="lg"
-    @submit="submitUserForm"
-  >
+  <ModalFormLayout :is-open="isEditOpen" title="Edit User" size="lg" @submit="submitUserForm">
     <MultiLanguageInputModal
       :languages="['en', 'es', 'fr']"
       :required-languages="['en']"
@@ -362,32 +357,28 @@ const onActionEnd = (event) => {
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
-import {
-  DataTable,
-  ModalFormLayout,
-  MultiLanguageInputModal,
-} from '@zidney/ui-system'
-import { useMultiLanguageForm } from '@zidney/ui-system/composables'
+import { ref } from "vue";
+import { DataTable, ModalFormLayout, MultiLanguageInputModal } from "@zidney/ui-system";
+import { useMultiLanguageForm } from "@zidney/ui-system/composables";
 
-const users = ref([])
-const isEditOpen = ref(false)
-const editingUser = ref(null)
+const users = ref([]);
+const isEditOpen = ref(false);
+const editingUser = ref(null);
 
-const { getAllValues, isValid } = useMultiLanguageForm(['en', 'es', 'fr'], 'en')
+const { getAllValues, isValid } = useMultiLanguageForm(["en", "es", "fr"], "en");
 
 const openEditForm = async (user) => {
-  editingUser.value = user
-  isEditOpen.value = true
-}
+  editingUser.value = user;
+  isEditOpen.value = true;
+};
 
 const submitUserForm = async () => {
-  if (!isValid.value) return
-  const values = getAllValues()
-  await api.updateUser(editingUser.value.id, values)
-  isEditOpen.value = false
-  loadUsers()
-}
+  if (!isValid.value) return;
+  const values = getAllValues();
+  await api.updateUser(editingUser.value.id, values);
+  isEditOpen.value = false;
+  loadUsers();
+};
 </script>
 ```
 

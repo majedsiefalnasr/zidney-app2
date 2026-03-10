@@ -1,9 +1,8 @@
 # Specification Quality Checklist: Module Boundary Enforcement
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-03-08
-**Feature**: [spec.md](../spec.md)
-**Stage**: STAGE_INFRA_07_MODULE_BOUNDARIES
+**Created**: 2026-03-08 **Feature**: [spec.md](../spec.md) **Stage**:
+STAGE_INFRA_07_MODULE_BOUNDARIES
 
 ---
 
@@ -22,7 +21,8 @@
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable (10 criteria with explicit verification method)
 - [x] All acceptance scenarios are defined
-- [x] Edge cases are identified (external npm packages, missing JSON, alias resolution, zero-dep modules)
+- [x] Edge cases are identified (external npm packages, missing JSON, alias resolution, zero-dep
+      modules)
 - [x] Scope is clearly bounded (in-scope and out-of-scope sections present)
 - [x] Dependencies and assumptions identified
 
@@ -72,7 +72,8 @@
 ## Boundary Map JSON
 
 - [x] `module-boundaries.json` schema defined in spec
-- [x] Schema includes `version`, `layers`, `allowed_dependencies`, `forbidden_dependencies`, `cross_cutting_rules`
+- [x] Schema includes `version`, `layers`, `allowed_dependencies`, `forbidden_dependencies`,
+      `cross_cutting_rules`
 - [x] File path documented (`docs/architecture/module-boundaries.json`)
 - [x] JSON structure is compatible with what `ai-guard.ts` and `infra-audit.ts` can consume
 - [x] Format complements (not replaces) existing `ARCHITECTURE_MAP.json`
@@ -81,8 +82,10 @@
 
 ## AI-Guard Integration
 
-- [x] AI-Guard loading sequence described (module-boundaries.json → ARCHITECTURE_MAP.json → ARCHITECTURE_CONTRACT.json)
-- [x] Validation steps described (per-file module resolution, layer lookup, import extraction, alias resolution, rule checks)
+- [x] AI-Guard loading sequence described (module-boundaries.json → ARCHITECTURE_MAP.json →
+      ARCHITECTURE_CONTRACT.json)
+- [x] Validation steps described (per-file module resolution, layer lookup, import extraction, alias
+      resolution, rule checks)
 - [x] Graceful fallback behavior when `module-boundaries.json` is missing described
 - [x] TypeScript alias resolution requirement documented (FR-006)
 - [x] Error output format specified (FR-012)
@@ -109,7 +112,8 @@
 
 ## Success Criteria Quality
 
-- [x] Success criteria are measurable (each includes "How Measured" column with specific verifiable action)
+- [x] Success criteria are measurable (each includes "How Measured" column with specific verifiable
+      action)
 - [x] Success criteria are implementation-agnostic where possible
 - [x] All 4 stage completion goals from the stage file are mapped to success criteria:
   - All modules classified into layers → SC-001
@@ -129,9 +133,12 @@
 
 ## Architecture Classification Decisions
 
-- [x] `packages/types` reclassification from `domain` → `infrastructure` is documented with rationale (Decision 2)
-- [x] `packages/api-client` reclassification from `infrastructure` → `ui` is documented with rationale (Decision 3)
-- [x] Both reclassifications address the discrepancy between `ARCHITECTURE_MAP.json` and the intent of this stage
+- [x] `packages/types` reclassification from `domain` → `infrastructure` is documented with
+      rationale (Decision 2)
+- [x] `packages/api-client` reclassification from `infrastructure` → `ui` is documented with
+      rationale (Decision 3)
+- [x] Both reclassifications address the discrepancy between `ARCHITECTURE_MAP.json` and the intent
+      of this stage
 
 ---
 
@@ -141,17 +148,20 @@
 - [x] No tenant isolation concerns addressed (correctly out of scope)
 - [x] No new npm packages introduced
 - [x] No migration files referenced
-- [x] Architecture modifications are allowed (INFRA stage) and all proposed changes are governance-only
+- [x] Architecture modifications are allowed (INFRA stage) and all proposed changes are
+      governance-only
 
 ---
 
 ## Notes
 
-All checklist items pass. The specification is complete and ready for the planning phase (`/speckit.plan`).
+All checklist items pass. The specification is complete and ready for the planning phase
+(`/speckit.plan`).
 
 Key decisions documented:
 
 1. `packages/types` is `infrastructure` (not `domain` as currently in ARCHITECTURE_MAP.json)
 2. `packages/api-client` is `ui` (not `infrastructure` as currently in ARCHITECTURE_MAP.json)
 3. `module-boundaries.json` complements rather than replaces `ARCHITECTURE_MAP.json`
-4. ai-guard.ts loading precedence: module-boundaries.json → ARCHITECTURE_MAP.json → ARCHITECTURE_CONTRACT.json
+4. ai-guard.ts loading precedence: module-boundaries.json → ARCHITECTURE_MAP.json →
+   ARCHITECTURE_CONTRACT.json

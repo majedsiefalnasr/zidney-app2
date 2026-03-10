@@ -1,8 +1,8 @@
 # Specification Quality Checklist: Monorepo Setup
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-02-15
-**Feature**: [specs/runtime/001-monorepo-setup/spec.md](specs/runtime/001-monorepo-setup/spec.md)
+**Created**: 2026-02-15 **Feature**:
+[specs/runtime/001-monorepo-setup/spec.md](specs/runtime/001-monorepo-setup/spec.md)
 
 ## Content Quality
 

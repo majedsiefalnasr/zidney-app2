@@ -435,9 +435,12 @@
 - **Operational issues**: [OPERATIONS_GUIDE.md](./docs/OPERATIONS_GUIDE.md)
 - **Disaster recovery**: [BACKUP_RECOVERY.md](./docs/BACKUP_RECOVERY.md)
 - **Monitoring setup**: [MONITORING.md](./docs/MONITORING.md)
-- **Deployment plan**: [DEPLOYMENT_CHECKLIST.md](./specs/runtime/002B-tenant-baseline-schema/DEPLOYMENT_CHECKLIST.md)
-- **Full report**: [STAGE_02B_COMPLETION_REPORT.md](./specs/runtime/002B-tenant-baseline-schema/STAGE_02B_COMPLETION_REPORT.md)
-- **This index**: [DELIVERABLES_INDEX.md](./specs/runtime/002B-tenant-baseline-schema/DELIVERABLES_INDEX.md)
+- **Deployment plan**:
+  [DEPLOYMENT_CHECKLIST.md](./specs/runtime/002B-tenant-baseline-schema/DEPLOYMENT_CHECKLIST.md)
+- **Full report**:
+  [STAGE_02B_COMPLETION_REPORT.md](./specs/runtime/002B-tenant-baseline-schema/STAGE_02B_COMPLETION_REPORT.md)
+- **This index**:
+  [DELIVERABLES_INDEX.md](./specs/runtime/002B-tenant-baseline-schema/DELIVERABLES_INDEX.md)
 
 ---
 

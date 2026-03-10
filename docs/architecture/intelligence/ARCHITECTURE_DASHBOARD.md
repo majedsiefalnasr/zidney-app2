@@ -1,7 +1,6 @@
 # Zidney Architecture Dashboard
 
-**Generated:** 2026-03-10T12:21:48.148Z
-**Git SHA:** 87a4d8420a1f99e35991645fbeb7fab382da1f44
+**Generated:** 2026-03-10T12:21:48.148Z **Git SHA:** 87a4d8420a1f99e35991645fbeb7fab382da1f44
 
 ## Architecture Score
 
@@ -11,14 +10,14 @@
 
 ## System Health
 
-| Metric | Value |
-|------|------|
-| Circular Dependencies | 0 |
-| Dependency Violations | 0 |
-| Layer Violations | 0 |
-| Architecture Drift | 0 |
-| Skipped Tests | 0 |
-| Flaky Tests | 0 |
+| Metric                | Value |
+| --------------------- | ----- |
+| Circular Dependencies | 0     |
+| Dependency Violations | 0     |
+| Layer Violations      | 0     |
+| Architecture Drift    | 0     |
+| Skipped Tests         | 0     |
+| Flaky Tests           | 0     |
 
 ## Test Distribution
 

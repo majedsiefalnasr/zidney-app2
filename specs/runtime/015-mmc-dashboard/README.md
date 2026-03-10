@@ -1,9 +1,7 @@
 # MMC Dashboard
 
-**Branch:** `015-mmc-dashboard`
-**Phase:** 02_PLATFORM_MMC
-**Stage File:** `specs/phases/02_PLATFORM_MMC/STAGE_15_MMC_DASHBOARD.md`
-**Initiated:** 2026-02-26T00:00:00Z
+**Branch:** `015-mmc-dashboard` **Phase:** 02_PLATFORM_MMC **Stage File:**
+`specs/phases/02_PLATFORM_MMC/STAGE_15_MMC_DASHBOARD.md` **Initiated:** 2026-02-26T00:00:00Z
 
 ## Workflow Progress
 

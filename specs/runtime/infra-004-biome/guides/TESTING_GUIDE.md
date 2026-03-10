@@ -58,7 +58,8 @@ git add -A && git commit -m "chore: apply Biome formatting"
 
 ### SC2: Lintability — No unresolved Linter Violations
 
-**Goal:** Confirm that all `noConsole`, `noUnusedImports`, `noDuplicateImports`, and structural violations are resolved.
+**Goal:** Confirm that all `noConsole`, `noUnusedImports`, `noDuplicateImports`, and structural
+violations are resolved.
 
 **Test Steps:**
 
@@ -92,7 +93,8 @@ grep -r "console\." apps/api/src/ apps/worker/src/ packages/domain-core/src/ \
 # Expected: No output (no unhandled console calls)
 ```
 
-**Acceptance:** @zidney/logger is the primary logging mechanism; migration runners and logger bridges use biome-ignore suppressions.
+**Acceptance:** @zidney/logger is the primary logging mechanism; migration runners and logger
+bridges use biome-ignore suppressions.
 
 ---
 
@@ -175,7 +177,8 @@ bun biome format --check .  # Should exit 0
 # Expected: Both commands exit with code 0
 ```
 
-**Acceptance:** CI workflow runs successfully; lint job in `.github/workflows/ci.yml` uses Biome commands.
+**Acceptance:** CI workflow runs successfully; lint job in `.github/workflows/ci.yml` uses Biome
+commands.
 
 ---
 
@@ -206,7 +209,8 @@ cat .vscode/extensions.json | grep biomejs.biome
 
 ### SC9: Logger Bridge Evaluation — Structured Logger is Preserved
 
-**Goal:** Verify that apps/worker/src/observability/structured-logger.ts and packages/domain-core/src/logging/master-db-logger.ts are correctly overridden or migrated.
+**Goal:** Verify that apps/worker/src/observability/structured-logger.ts and
+packages/domain-core/src/logging/master-db-logger.ts are correctly overridden or migrated.
 
 **Test Steps:**
 

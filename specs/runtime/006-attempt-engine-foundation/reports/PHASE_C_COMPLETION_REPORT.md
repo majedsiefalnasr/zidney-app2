@@ -217,10 +217,10 @@
 
 ```typescript
 // Correct pattern used throughout
-const attempt = await db.query(
-  `SELECT * FROM attempts WHERE id = $1 AND workspace_id = $2`,
-  [attemptId, workspaceId]
-)
+const attempt = await db.query(`SELECT * FROM attempts WHERE id = $1 AND workspace_id = $2`, [
+  attemptId,
+  workspaceId,
+]);
 ```
 
 ### ADR-0002: Snapshot Immutability
@@ -360,11 +360,8 @@ await db.query(`SELECT * FROM attempts WHERE id = $1 AND workspace_id = $2`, [..
 
 ### Ready for Phase D
 
-✅ All Phase C endpoints ready
-✅ Snapshot architecture proven
-✅ Idempotency layer working
-✅ Error handling standardized
-✅ Database queries optimized
+✅ All Phase C endpoints ready ✅ Snapshot architecture proven ✅ Idempotency layer working ✅ Error
+handling standardized ✅ Database queries optimized
 
 ---
 
@@ -418,8 +415,8 @@ npm run type-check
 2. **Register Routes in Main App**: Import and register routes
 
 ```typescript
-import registerStage06Routes from './routes/attempts/index-stage06'
-registerStage06Routes(app, logger)
+import registerStage06Routes from "./routes/attempts/index-stage06";
+registerStage06Routes(app, logger);
 ```
 
 3. **Integration Testing**: Test endpoints with full middleware stack
@@ -430,7 +427,8 @@ registerStage06Routes(app, logger)
 
 ## Summary
 
-Phase C successfully implements the API layer for attempt creation, progress tracking, and status retrieval. All endpoints are production-ready with:
+Phase C successfully implements the API layer for attempt creation, progress tracking, and status
+retrieval. All endpoints are production-ready with:
 
 - ✅ Complete business logic
 - ✅ Comprehensive validation

@@ -1,9 +1,7 @@
 # Specification Quality Checklist: Status Workflow Engine
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-03-01
-**Feature**: [spec.md](../spec.md)
-**Branch**: `020-status-workflow-engine`
+**Created**: 2026-03-01 **Feature**: [spec.md](../spec.md) **Branch**: `020-status-workflow-engine`
 **Stage**: STAGE_20_STATUS_WORKFLOW_ENGINE
 
 ---
@@ -17,7 +15,8 @@
 
 **Notes**:
 
-- The spec deliberately avoids mentioning Drizzle, Bun, Hono, or PostgreSQL. All storage and permission concepts are described in entity/behavior terms.
+- The spec deliberately avoids mentioning Drizzle, Bun, Hono, or PostgreSQL. All storage and
+  permission concepts are described in entity/behavior terms.
 - Timestamps are described as "server-authoritative" without referencing any clock API.
 
 ---
@@ -35,10 +34,13 @@
 
 **Notes**:
 
-- All [NEEDS CLARIFICATION] items were resolved inline using the stage spec and constitutional constraints.
+- All [NEEDS CLARIFICATION] items were resolved inline using the stage spec and constitutional
+  constraints.
 - FR-001 through FR-017 each map to at least one acceptance scenario or edge case.
-- SC-001 through SC-008 are expressed as measurable outcomes (percentages, counts) without referencing a specific technology.
-- Edge cases cover concurrent transitions, transaction rollback on log failure, missing entity, and initial state at creation.
+- SC-001 through SC-008 are expressed as measurable outcomes (percentages, counts) without
+  referencing a specific technology.
+- Edge cases cover concurrent transitions, transaction rollback on log failure, missing entity, and
+  initial state at creation.
 - Out of Scope section explicitly bounds Phase 3 limitations.
 - Assumptions A-001 through A-007 document all inferred decisions.
 
@@ -85,7 +87,12 @@
 
 ## Notes
 
-- The stage file is `DRAFT` status as of the date of this spec creation. Specification is the first required deliverable to advance stage status.
-- No ADR gaps were detected. The engine's generic/shared design aligns with the stated architectural principle "domain packages contain business logic, no entity-specific hardcoded logic."
-- The decision not to emit events on transition (see Out of Scope) was deferred per stage guidance; if event emission is required, it should be specified in a follow-on stage or an ADR.
-- Concurrent transition race condition handling (optimistic locking vs. serializable isolation) is a planning-phase decision, not a spec-phase decision. SC-006 defines the outcome requirement without prescribing the mechanism.
+- The stage file is `DRAFT` status as of the date of this spec creation. Specification is the first
+  required deliverable to advance stage status.
+- No ADR gaps were detected. The engine's generic/shared design aligns with the stated architectural
+  principle "domain packages contain business logic, no entity-specific hardcoded logic."
+- The decision not to emit events on transition (see Out of Scope) was deferred per stage guidance;
+  if event emission is required, it should be specified in a follow-on stage or an ADR.
+- Concurrent transition race condition handling (optimistic locking vs. serializable isolation) is a
+  planning-phase decision, not a spec-phase decision. SC-006 defines the outcome requirement without
+  prescribing the mechanism.

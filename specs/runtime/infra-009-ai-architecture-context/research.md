@@ -8,7 +8,8 @@
 
 ## Research Summary
 
-This document captures investigation findings that inform the technical plan. All clarifications from the specification have been resolved with approved answers.
+This document captures investigation findings that inform the technical plan. All clarifications
+from the specification have been resolved with approved answers.
 
 ---
 
@@ -67,7 +68,8 @@ This document captures investigation findings that inform the technical plan. Al
 | Directory structure    | ✅ Yes   | ✅ Yes            | ✅ Yes    | apps/ + packages/ follow conventions        |
 | AI guidance docs       | ✅ Yes   | ✅ Yes            | ✅ Yes    | Recent updates observed                     |
 
-**Decision:** Proceed with assumption that sources are valid. First artifact generation will validate.
+**Decision:** Proceed with assumption that sources are valid. First artifact generation will
+validate.
 
 ---
 
@@ -75,7 +77,8 @@ This document captures investigation findings that inform the technical plan. Al
 
 ### 2.1 Clarification Q1: Regeneration Strategy
 
-**Original Question:** Should artifact regeneration be fully automated in CI on every commit, or should developers regenerate locally before each commit?
+**Original Question:** Should artifact regeneration be fully automated in CI on every commit, or
+should developers regenerate locally before each commit?
 
 **Approved Answer:** **Option C — Both (Local + CI Validation)**
 
@@ -171,7 +174,8 @@ This document captures investigation findings that inform the technical plan. Al
 
 ### 2.4 Clarification Q4: Change Detection
 
-**Original Question:** Should artifact generation be triggered by source changes, or always run during build?
+**Original Question:** Should artifact generation be triggered by source changes, or always run
+during build?
 
 **Approved Answer:** **Intelligent Change Detection with Traceability**
 
@@ -441,11 +445,11 @@ Replace manual parsing with artifact loading:
 
 ```typescript
 // Before (current)
-const rules = JSON.parse(fs.readFileSync('docs/architecture/module-boundaries.json'))
+const rules = JSON.parse(fs.readFileSync("docs/architecture/module-boundaries.json"));
 
 // After (integrated)
-const brain = JSON.parse(fs.readFileSync('docs/ai/context/ai-architecture-brain.json'))
-const rules = brain.rules_active // Pre-computed, validated
+const brain = JSON.parse(fs.readFileSync("docs/ai/context/ai-architecture-brain.json"));
+const rules = brain.rules_active; // Pre-computed, validated
 ```
 
 **Benefits:**
@@ -455,7 +459,8 @@ const rules = brain.rules_active // Pre-computed, validated
 - Consistent with other tools
 - Single source of truth
 
-**Risk:** If artifact generation fails, ai-guard fails too. Mitigation: Fallback to module-boundaries.json parsing.
+**Risk:** If artifact generation fails, ai-guard fails too. Mitigation: Fallback to
+module-boundaries.json parsing.
 
 **Decision:** Integrate with ai-guard.ts with fallback mechanism.
 
@@ -473,12 +478,12 @@ After generating infra-audit-report.json, trigger ai-context generation:
 
 ```typescript
 // After infra-audit completes
-execSync('bun run generate:ai-context --force')
+execSync("bun run generate:ai-context --force");
 
 // Validate consistency
-const aiGraph = loadArtifact('docs/ai/context/ai-dependency-graph.json')
-const auditGraph = generateDependencyGraph(auditReport)
-validateConsistency(aiGraph, auditGraph)
+const aiGraph = loadArtifact("docs/ai/context/ai-dependency-graph.json");
+const auditGraph = generateDependencyGraph(auditReport);
+validateConsistency(aiGraph, auditGraph);
 ```
 
 **Benefits:**
@@ -488,7 +493,8 @@ validateConsistency(aiGraph, auditGraph)
 - Single command regenerates all governance artifacts
 - Audit trail of artifact generation
 
-**Risk:** Longer runtime for infra-audit if artifact generation slow. Mitigation: Performance targets enforced.
+**Risk:** Longer runtime for infra-audit if artifact generation slow. Mitigation: Performance
+targets enforced.
 
 **Decision:** Integrate with infra-audit.ts with performance monitoring.
 

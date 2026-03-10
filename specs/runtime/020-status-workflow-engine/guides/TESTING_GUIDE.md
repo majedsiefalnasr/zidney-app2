@@ -11,7 +11,9 @@
 
 This guide explains how to validate the implementation of the Status Workflow Engine end-to-end.
 
-The workflow engine is a reusable, deterministic state machine that manages entity lifecycle states (COMPLETED → UNDER_REVIEW → APPROVED → ENABLED) with audit immutability, granular permissions, and concurrency safety.
+The workflow engine is a reusable, deterministic state machine that manages entity lifecycle states
+(COMPLETED → UNDER_REVIEW → APPROVED → ENABLED) with audit immutability, granular permissions, and
+concurrency safety.
 
 ---
 
@@ -19,14 +21,22 @@ The workflow engine is a reusable, deterministic state machine that manages enti
 
 The Status Workflow Engine provides:
 
-- **Deterministic state transitions** — COMPLETED is the default initial state; transitions follow a strict state graph with forward (COMPLETED→UNDER_REVIEW→APPROVED→ENABLED) and backward (UNDER_REVIEW→COMPLETED, APPROVED→UNDER_REVIEW→COMPLETED) paths
-- **Granular permission enforcement** — Each transition requires a specific permission key (e.g., `subject.review`, `subject.approve`, `subject.return`)
-- **Backward transition justification** — Backward transitions (reversals) require a non-empty reason field to document the reversion
-- **Atomic transactions** — Five-step SELECT FOR UPDATE protocol ensures no concurrent state corruption
-- **Audit immutability** — All transitions are logged in an immutable audit table, protected by database trigger
-- **Multi-entity support** — Works with 7 entity types (subject, mcq_question, traditional_question, exam, topic, library_file, template)
+- **Deterministic state transitions** — COMPLETED is the default initial state; transitions follow a
+  strict state graph with forward (COMPLETED→UNDER_REVIEW→APPROVED→ENABLED) and backward
+  (UNDER_REVIEW→COMPLETED, APPROVED→UNDER_REVIEW→COMPLETED) paths
+- **Granular permission enforcement** — Each transition requires a specific permission key (e.g.,
+  `subject.review`, `subject.approve`, `subject.return`)
+- **Backward transition justification** — Backward transitions (reversals) require a non-empty
+  reason field to document the reversion
+- **Atomic transactions** — Five-step SELECT FOR UPDATE protocol ensures no concurrent state
+  corruption
+- **Audit immutability** — All transitions are logged in an immutable audit table, protected by
+  database trigger
+- **Multi-entity support** — Works with 7 entity types (subject, mcq_question, traditional_question,
+  exam, topic, library_file, template)
 - **Rate limiting** — 20 transitions per user per entity type per minute
-- **Observability** — Full structured logging with correlation IDs, workspace slugs, and actor tracking
+- **Observability** — Full structured logging with correlation IDs, workspace slugs, and actor
+  tracking
 
 ---
 
@@ -132,7 +142,8 @@ npx eslint packages/domain-core/src/workflow/ apps/api/src/modules/workflow/ app
 
 ### Scenario 1: Basic Forward Transition (COMPLETED → UNDER_REVIEW)
 
-**Objective:** Verify a user with `subject.review` permission can transition a subject from COMPLETED to UNDER_REVIEW.
+**Objective:** Verify a user with `subject.review` permission can transition a subject from
+COMPLETED to UNDER_REVIEW.
 
 ```bash
 # 1. Authenticate (get JWT token)
@@ -173,7 +184,8 @@ curl -X POST "http://localhost:3000/api/v1/backoffice/workspace/workflow/subject
 
 ### Scenario 2: Backward Transition with Justification (UNDER_REVIEW → COMPLETED)
 
-**Objective:** Verify a user with `subject.return` permission can reverse a subject from UNDER_REVIEW to COMPLETED, but only with a reason.
+**Objective:** Verify a user with `subject.return` permission can reverse a subject from
+UNDER_REVIEW to COMPLETED, but only with a reason.
 
 ```bash
 # 1. Call workflow transition with NO reason
@@ -239,7 +251,8 @@ curl -X POST "http://localhost:3000/api/v1/backoffice/workspace/workflow/subject
 
 ### Scenario 4: Invalid State Transition (400)
 
-**Objective:** Verify invalid state transitions (e.g., COMPLETED → APPROVED, skipping UNDER_REVIEW) return 400.
+**Objective:** Verify invalid state transitions (e.g., COMPLETED → APPROVED, skipping UNDER_REVIEW)
+return 400.
 
 ```bash
 # 1. Attempt to skip a state
@@ -338,7 +351,8 @@ done
 
 ### Scenario 8: Soft-Locked License Enforcement
 
-**Objective:** Verify API returns 423 when workspace license is soft-locked, BEFORE the workflow engine is invoked.
+**Objective:** Verify API returns 423 when workspace license is soft-locked, BEFORE the workflow
+engine is invoked.
 
 ```bash
 # 1. Configure test tenant with SOFT_LOCKED license (via admin tools)
@@ -373,7 +387,8 @@ After running all tests and scenarios:
 - [ ] Manual Scenario 6 confirms audit immutability (trigger prevents modification)
 - [ ] Manual Scenario 7 works for all 7 entity types
 - [ ] Manual Scenario 8 returns 423 (soft-locked license)
-- [ ] Structured logs contain all 6 required fields (workspace_slug, workspace_id, correlation_id, entity_type, entity_id, actor_id)
+- [ ] Structured logs contain all 6 required fields (workspace_slug, workspace_id, correlation_id,
+      entity_type, entity_id, actor_id)
 - [ ] No `console.log` statements in engine logs
 
 ---
@@ -383,7 +398,8 @@ After running all tests and scenarios:
 ### Issue: "Unknown entity type" (400)
 
 **Cause:** Entity type not in WORKFLOW_ENTITY_TYPES set.  
-**Fix:** Check entity type spelling matches one of: subject, mcq_question, traditional_question, exam, topic, library_file, template
+**Fix:** Check entity type spelling matches one of: subject, mcq_question, traditional_question,
+exam, topic, library_file, template
 
 ### Issue: "Modification of audit_logs tables is prohibited" (UPDATE/DELETE fails)
 

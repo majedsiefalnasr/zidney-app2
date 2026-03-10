@@ -26,12 +26,24 @@
 
 ## 3. Executive Summary
 
-- **What this PR delivers:** A complete Pinia 2 state management layer for MMC, Backoffice, and Frontoffice — including `pinia-plugin-persistedstate` bootstrap, `app`, `ui`, `notification`, and `workspace` stores, auth store ID namespacing, and an ESLint import firewall for `@zidney/api-client`
-- **Problem solved:** All three apps previously had bare, un-namespaced store IDs (`auth`) with no persistence setup and no cross-app isolation guarantee; this stage standardizes the state layer across the entire frontend
-- **Architectural boundary touched:** Vue 3 UI layer (`apps/*/src/core/state/`, `apps/*/src/main.ts`) — no API routes, no DB, no worker changes
-- **Why it is safe:** Frontend-only changes; no database schema modifications; no authentication or authorization logic altered; only `main.ts`, `auth.store.ts` (ID rename), `index.ts` (barrel), `vitest.config.ts` (test alias), and `eslint.config.mjs` (firewall) modified in existing files
-- **Constitutional guarantees intact:** Store IDs are globally unique (CI-enforced at runtime); auth tokens absent from persistence (integration test asserts); `console.log` absent from all stores (CI-enforced); `workspace.store.ts` uses `@zidney/logger` with structured logging; tenant isolation is unaffected (no DB layer involved)
-- **Validation:** 160+ tests pass; zero circular store dependencies; zero stage-introduced lint or type errors
+- **What this PR delivers:** A complete Pinia 2 state management layer for MMC, Backoffice, and
+  Frontoffice — including `pinia-plugin-persistedstate` bootstrap, `app`, `ui`, `notification`, and
+  `workspace` stores, auth store ID namespacing, and an ESLint import firewall for
+  `@zidney/api-client`
+- **Problem solved:** All three apps previously had bare, un-namespaced store IDs (`auth`) with no
+  persistence setup and no cross-app isolation guarantee; this stage standardizes the state layer
+  across the entire frontend
+- **Architectural boundary touched:** Vue 3 UI layer (`apps/*/src/core/state/`,
+  `apps/*/src/main.ts`) — no API routes, no DB, no worker changes
+- **Why it is safe:** Frontend-only changes; no database schema modifications; no authentication or
+  authorization logic altered; only `main.ts`, `auth.store.ts` (ID rename), `index.ts` (barrel),
+  `vitest.config.ts` (test alias), and `eslint.config.mjs` (firewall) modified in existing files
+- **Constitutional guarantees intact:** Store IDs are globally unique (CI-enforced at runtime); auth
+  tokens absent from persistence (integration test asserts); `console.log` absent from all stores
+  (CI-enforced); `workspace.store.ts` uses `@zidney/logger` with structured logging; tenant
+  isolation is unaffected (no DB layer involved)
+- **Validation:** 160+ tests pass; zero circular store dependencies; zero stage-introduced lint or
+  type errors
 
 ---
 
@@ -68,23 +80,29 @@
 - [x] No cross-workspace joins (N/A — frontend)
 - [x] No default DB fallback (N/A — frontend)
 - [x] All queries scoped to workspace_id (N/A — frontend)
-- [x] Structured logging (`workspace.store.ts` uses `@zidney/logger`; `no-console-in-stores.test.ts` CI-enforced)
-- [x] Error contract compliance (`workspace.store.ts` exposes only generic user-facing message; internal detail logged server-side only)
-- [x] Sensitive data not logged (auth tokens never persisted; internal error details logged only, never returned in state visible to user)
+- [x] Structured logging (`workspace.store.ts` uses `@zidney/logger`; `no-console-in-stores.test.ts`
+      CI-enforced)
+- [x] Error contract compliance (`workspace.store.ts` exposes only generic user-facing message;
+      internal detail logged server-side only)
+- [x] Sensitive data not logged (auth tokens never persisted; internal error details logged only,
+      never returned in state visible to user)
 
 ---
 
 ## 7. Transaction & Concurrency Safety
 
 - [x] All write operations wrapped appropriately (N/A — frontend state mutations only)
-- [x] Idempotency guarantees preserved (`workspace.store.ts` uses `pending` guard to prevent concurrent duplicate `loadWorkspace` calls)
-- [x] No race conditions introduced (pending guard ensures exactly-once semantics for concurrent store actions)
+- [x] Idempotency guarantees preserved (`workspace.store.ts` uses `pending` guard to prevent
+      concurrent duplicate `loadWorkspace` calls)
+- [x] No race conditions introduced (pending guard ensures exactly-once semantics for concurrent
+      store actions)
 
 ---
 
 ## 8. Observability & Monitoring
 
-- [x] Structured logging enforced (`workspace.store.ts`: `logger.warn` with `service`, `error_code`, `internal_message`)
+- [x] Structured logging enforced (`workspace.store.ts`: `logger.warn` with `service`, `error_code`,
+      `internal_message`)
 - [x] No console.log in any store file (CI-blocking test: `tests/unit/no-console-in-stores.test.ts`)
 - Correlation IDs: N/A for this stage (no API calls in scope)
 - Metrics: N/A for this stage
@@ -96,7 +114,8 @@
 - [x] Unit tests added: 109 store unit tests across 12 files (MMC 27, Backoffice 46, Frontoffice 36)
 - [x] Integration tests added: 35 pinia-bootstrap integration tests (BackO 16, FrontO 12, MMC 7)
 - [x] Global CI tests: 8 tests (`store-id-uniqueness` 3 + `no-console-in-stores` 5)
-- [x] Edge cases covered: `localStorage.setItem` throws `QuotaExceededError` (graceful handling), concurrent `loadWorkspace` calls (pending guard)
+- [x] Edge cases covered: `localStorage.setItem` throws `QuotaExceededError` (graceful handling),
+      concurrent `loadWorkspace` calls (pending guard)
 - [x] Store cycle detection: `scripts/check-store-cycles.ts` — zero cycles in all 3 apps
 
 **Test Commands:**
@@ -120,7 +139,8 @@ bun run lint && bun run typecheck
 ## 10. Migration Impact
 
 - [x] No database migrations required (frontend-only changes)
-- [x] Backward compatibility verified (auth store ID rename is internal; no external consumers of raw store IDs)
+- [x] Backward compatibility verified (auth store ID rename is internal; no external consumers of
+      raw store IDs)
 - [x] No rollback strategy needed (pure additive changes; reverting removes stores, no data loss)
 - [x] No untracked schema changes
 
@@ -132,13 +152,15 @@ bun run lint && bun run typecheck
 - [x] No architectural violations
 - [x] No cross-phase leakage
 - [x] No unauthorized stage modification
-- [x] ANALYZE_REPORT.md confirms APPROVED (after two audit cycles: initial BLOCKED → remediation → PASS)
+- [x] ANALYZE_REPORT.md confirms APPROVED (after two audit cycles: initial BLOCKED → remediation →
+      PASS)
 
 ---
 
 ## 12. Stage Lifecycle Verification
 
-- [x] Stage Status updated in `specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_06_STATE_MANAGEMENT.md` → PRODUCTION READY
+- [x] Stage Status updated in
+      `specs/phases/06_UI_APPLICATION_RUNTIME/STAGE_UI_06_STATE_MANAGEMENT.md` → PRODUCTION READY
 - [x] `.workflow-state.json` updated to `stage_production_ready`
 - [x] README.md progress table complete — all 8 steps ✅
 - [x] All step reports generated in `specs/runtime/ui-06-state-management/reports/`
@@ -161,7 +183,10 @@ Risk Level:
 
 - [x] Low
 
-Justification: Purely additive, frontend-only stage. No database schema changes, no API routes modified, no authentication/authorization logic altered. New stores are namespaced per app with no cross-app leakage. All existing functionality preserved. Auth store ID rename is internal to each app's Pinia instance; no external API contract change.
+Justification: Purely additive, frontend-only stage. No database schema changes, no API routes
+modified, no authentication/authorization logic altered. New stores are namespaced per app with no
+cross-app leakage. All existing functionality preserved. Auth store ID rename is internal to each
+app's Pinia instance; no external API contract change.
 
 ---
 

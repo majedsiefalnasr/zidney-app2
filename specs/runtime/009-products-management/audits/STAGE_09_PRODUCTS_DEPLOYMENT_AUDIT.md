@@ -19,7 +19,9 @@
 
 ## EXECUTIVE SUMMARY
 
-STAGE_09_PRODUCTS is a foundational MMC feature that introduces product entity management with immutable versioning and audit trail enforcement. The implementation is **architecturally sound**, **migration-safe**, and **zero-downtime compatible**.
+STAGE_09_PRODUCTS is a foundational MMC feature that introduces product entity management with
+immutable versioning and audit trail enforcement. The implementation is **architecturally sound**,
+**migration-safe**, and **zero-downtime compatible**.
 
 **Key Guarantees Verified:**
 
@@ -63,7 +65,8 @@ STAGE_09_PRODUCTS is a foundational MMC feature that introduces product entity m
 - ✅ Indexes optimized for expected query patterns
 - ✅ Constraints enforce business rules (slug uniqueness, status enum, module validation)
 - ✅ Timestamps use server-authoritative NOW() with TIMESTAMPTZ
-- ✅ Foreign keys properly defined with ON DELETE CASCADE (versions) and ON DELETE RESTRICT (future licenses)
+- ✅ Foreign keys properly defined with ON DELETE CASCADE (versions) and ON DELETE RESTRICT (future
+  licenses)
 
 #### Migration 2: Complete Schema & Audit Logs
 
@@ -210,7 +213,7 @@ Tenant DB (isolated, no product references)
 `productService.ts` imports:
 
 ```typescript
-import { PoolClient } from 'pg' // Master DB client only
+import { PoolClient } from "pg"; // Master DB client only
 // Zero references to tenant database connection patterns
 // Zero references to workspace_id in product queries
 ```
@@ -244,8 +247,7 @@ router.get('/products', ...,
 - ✅ No index modifications
 - ✅ No trigger additions to existing tables (except new products table)
 
-**License Table Impact (Future Stage 10):**
-When licenses added in future:
+**License Table Impact (Future Stage 10):** When licenses added in future:
 
 ```sql
 ALTER TABLE licenses
@@ -281,29 +283,29 @@ Structured logging calls found in:
 
 ```typescript
 // packages/logger/products/productsLogger.ts
-logger.info('products_list_success', {
+logger.info("products_list_success", {
   correlation_id: correlationId,
-  workspace_id: c.get('workspaceId'),
-  user_id: c.get('userId'),
+  workspace_id: c.get("workspaceId"),
+  user_id: c.get("userId"),
   count: result.items.length,
   total: result.total,
   duration_ms: Date.now() - startTime,
-})
+});
 
-logger.info('product_created_success', {
+logger.info("product_created_success", {
   correlation_id: correlationId,
   product_id: productId,
   user_id: userId,
   version: 1,
   duration_ms: Date.now() - startTime,
-})
+});
 
-logger.info('product_version_incremented', {
+logger.info("product_version_incremented", {
   product_id: productId,
   old_version: oldVersion,
   new_version: newVersion,
   duration_ms: Date.now() - startTime,
-})
+});
 ```
 
 **Required Log Fields Present:**
@@ -336,8 +338,8 @@ logger.info('product_version_incremented', {
 ```typescript
 // apps/api/src/utils/errorHandler.ts
 export function handleError(c: Context, error: AppError) {
-  logProductError(error.code, error.message)
-  return sendError(c, error)
+  logProductError(error.code, error.message);
+  return sendError(c, error);
 }
 
 // Logs to structured logger with correlation_id context
@@ -347,7 +349,7 @@ export function handleError(c: Context, error: AppError) {
 **Slow Operation Detection:**
 
 ```typescript
-logSlowOperation('updateProduct', duration)
+logSlowOperation("updateProduct", duration);
 // Automatically flags operations > 100ms (configurable)
 // Helps identify performance regressions in production
 ```
@@ -440,21 +442,18 @@ await client.query(
 slug: z.string()
   .min(2)
   .max(255)
-  .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/)
+  .regex(/^[a-z0-9]+(-[a-z0-9]+)*$/);
 // Only lowercase alphanumeric + dashes
 
 // Modules validation
-enabled_modules: z.array(z.nativeEnum(Module)).min(
-  1,
-  'At least one module required'
-)
+enabled_modules: z.array(z.nativeEnum(Module)).min(1, "At least one module required");
 // Strictly enum members only
 
 // Name validation
 name: z.object({
   en: z.string().min(1).max(255),
   ar: z.string().max(255).optional(),
-}).strict()
+}).strict();
 // English required, Arabic optional
 ```
 

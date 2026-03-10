@@ -6,7 +6,8 @@
 
 ## Schema Overview
 
-The products schema implements a three-table architecture for products, versioning, and audit logging:
+The products schema implements a three-table architecture for products, versioning, and audit
+logging:
 
 ```
 ┌─────────────────┐
@@ -163,7 +164,8 @@ CREATE INDEX idx_product_versions_version ON product_versions(version_number DES
 
 **Key Characteristics:**
 
-- **Append-Only Storage:** Version 1 created at product creation, Version 2 created if changes detected, etc.
+- **Append-Only Storage:** Version 1 created at product creation, Version 2 created if changes
+  detected, etc.
 - **Complete Snapshots:** Each version contains full configuration snapshot
 - **Linked to Audit:** `version_number` referenced in audit logs
 - **Query by Product:** Retrieve all versions of a product via `product_id`
@@ -297,31 +299,25 @@ STATUS_CHANGE action, version unchanged
 Algorithm in `computeFieldDiff()`:
 
 ```typescript
-function computeFieldDiff(
-  old: Product,
-  newData: UpdateProductInput
-): FieldDiff | null {
-  const changes = {}
+function computeFieldDiff(old: Product, newData: UpdateProductInput): FieldDiff | null {
+  const changes = {};
 
   if (JSON.stringify(old.name) !== JSON.stringify(newData.name)) {
-    changes.name = { old: old.name, new: newData.name }
+    changes.name = { old: old.name, new: newData.name };
   }
 
   if (old.description !== newData.description) {
-    changes.description = { old: old.description, new: newData.description }
+    changes.description = { old: old.description, new: newData.description };
   }
 
-  if (
-    JSON.stringify(old.enabled_modules) !==
-    JSON.stringify(newData.enabled_modules)
-  ) {
+  if (JSON.stringify(old.enabled_modules) !== JSON.stringify(newData.enabled_modules)) {
     changes.enabled_modules = {
       old: old.enabled_modules,
       new: newData.enabled_modules,
-    }
+    };
   }
 
-  return Object.keys(changes).length > 0 ? changes : null
+  return Object.keys(changes).length > 0 ? changes : null;
 }
 ```
 
@@ -538,4 +534,5 @@ All schema changes through migrations:
 
 - [API Documentation](../API_PRODUCTS_MANAGEMENT.md) - API reference
 - [Implementation Guide](../IMPLEMENTATION_PRODUCTS.md) - Code architecture
-- [Database Migration Policy](../01_ENGINEERING_GOVERNANCE/04_DATABASE_MIGRATION_POLICY.md) - Migration rules
+- [Database Migration Policy](../01_ENGINEERING_GOVERNANCE/04_DATABASE_MIGRATION_POLICY.md) -
+  Migration rules

@@ -8,7 +8,11 @@
 
 ## Summary
 
-Specification for the tenant-scoped entity-level translation system is complete. The spec covers the full domain: translations isolated per tenant DB, default-language strategy (base entity table only), deterministic API-layer fallback, language lifecycle management (add/remove/change default), coverage analytics, bulk management, audit logging, and scale requirements. All 42 functional requirements are traceable to 6 user stories. No `[NEEDS CLARIFICATION]` markers remain.
+Specification for the tenant-scoped entity-level translation system is complete. The spec covers the
+full domain: translations isolated per tenant DB, default-language strategy (base entity table
+only), deterministic API-layer fallback, language lifecycle management (add/remove/change default),
+coverage analytics, bulk management, audit logging, and scale requirements. All 42 functional
+requirements are traceable to 6 user stories. No `[NEEDS CLARIFICATION]` markers remain.
 
 ---
 
@@ -41,15 +45,26 @@ Specification for the tenant-scoped entity-level translation system is complete.
 
 42 functional requirements across 8 domains:
 
-- **Translation Storage** (FR-001–FR-005): Tenant-only storage, schema definition, unique constraint, required indexes, no default-language values
-- **Default Language Strategy** (FR-006–FR-008): Workspace settings source, read from base table only, reject default-language writes
-- **Fallback Logic** (FR-009–FR-013): API-layer only, translation row takes priority, deterministic base-table fallback, empty string + warning on invalid state, identical behavior across all entity types
-- **Language Management** (FR-014–FR-018): Settings-based language config, validate language on write, cascading deletion in same transaction, protect default language from removal, no auto-migration on default change
-- **Coverage Tracking** (FR-019–FR-023): Per `(entity_type, language_code)`, excludes default language, supports cache with invalidation, indexed-only queries, tenant-scoped cache
-- **Write Rules** (FR-024–FR-030): Upsert semantics, language validation, entity existence validation, transactional writes, server-authoritative `updated_at`, batch atomicity, idempotency
-- **Audit Logging** (FR-031–FR-035): Append-only per write, full audit fields including correlation_id, language-removal audit entries
-- **Performance & Scale** (FR-036–FR-039): No full-table scans, single-query batch loading, pagination with max page size, forward-compatible partitioning schema
-- **Access Control** (FR-040–FR-042): Tenant resolver first, license middleware required, staff-only writes
+- **Translation Storage** (FR-001–FR-005): Tenant-only storage, schema definition, unique
+  constraint, required indexes, no default-language values
+- **Default Language Strategy** (FR-006–FR-008): Workspace settings source, read from base table
+  only, reject default-language writes
+- **Fallback Logic** (FR-009–FR-013): API-layer only, translation row takes priority, deterministic
+  base-table fallback, empty string + warning on invalid state, identical behavior across all entity
+  types
+- **Language Management** (FR-014–FR-018): Settings-based language config, validate language on
+  write, cascading deletion in same transaction, protect default language from removal, no
+  auto-migration on default change
+- **Coverage Tracking** (FR-019–FR-023): Per `(entity_type, language_code)`, excludes default
+  language, supports cache with invalidation, indexed-only queries, tenant-scoped cache
+- **Write Rules** (FR-024–FR-030): Upsert semantics, language validation, entity existence
+  validation, transactional writes, server-authoritative `updated_at`, batch atomicity, idempotency
+- **Audit Logging** (FR-031–FR-035): Append-only per write, full audit fields including
+  correlation_id, language-removal audit entries
+- **Performance & Scale** (FR-036–FR-039): No full-table scans, single-query batch loading,
+  pagination with max page size, forward-compatible partitioning schema
+- **Access Control** (FR-040–FR-042): Tenant resolver first, license middleware required, staff-only
+  writes
 
 ---
 
@@ -79,9 +94,16 @@ None. All specification areas are fully resolved.
 
 ## Open Risks
 
-- **Scale path**: Partitioning by `language_code` or `entity_type` is forward-compatible per spec (FR-039) but not yet implemented — if tenant data volume grows faster than projected, partitioning must be introduced proactively.
-- **Coverage denominator accuracy**: Coverage calculation accuracy depends on domain layer correctly declaring all translatable fields per entity_type — if a domain layer updates its translatable field list without updating the denominator used in coverage queries, coverage percentages will be inaccurate.
-- **Entity deletion cascade**: The spec identifies orphaned translation cleanup on entity deletion (edge case) but defers strategy choice to the plan phase — this requires a decision between FK cascade vs. background cleanup job.
+- **Scale path**: Partitioning by `language_code` or `entity_type` is forward-compatible per spec
+  (FR-039) but not yet implemented — if tenant data volume grows faster than projected, partitioning
+  must be introduced proactively.
+- **Coverage denominator accuracy**: Coverage calculation accuracy depends on domain layer correctly
+  declaring all translatable fields per entity_type — if a domain layer updates its translatable
+  field list without updating the denominator used in coverage queries, coverage percentages will be
+  inaccurate.
+- **Entity deletion cascade**: The spec identifies orphaned translation cleanup on entity deletion
+  (edge case) but defers strategy choice to the plan phase — this requires a decision between FK
+  cascade vs. background cleanup job.
 
 ---
 

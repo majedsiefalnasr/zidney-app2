@@ -10,7 +10,9 @@
 
 ## Executive Summary
 
-STAGE_08 (Rate Limiting & Security Baseline) has achieved full implementation completion with **111/111 tasks completed** (96 planned + 15 bonus endpoint integration tests), delivering a production-ready rate limiting and security infrastructure for the Zidney exam platform.
+STAGE_08 (Rate Limiting & Security Baseline) has achieved full implementation completion with
+**111/111 tasks completed** (96 planned + 15 bonus endpoint integration tests), delivering a
+production-ready rate limiting and security infrastructure for the Zidney exam platform.
 
 **Key Metrics:**
 
@@ -48,7 +50,8 @@ STAGE_08 (Rate Limiting & Security Baseline) has achieved full implementation co
 2. **Rate Limiting Scoping** → Per-IP, per-user, per-workspace, per-attempt (4-layer isolation)
 3. **Idempotency Mechanism** → Dual-layer (DB UNIQUE + Redis 24h cache)
 4. **Error Format Standard** → `{ error: { code, message, details, correlationId } }`
-5. **Middleware Ordering Immutability** → 5-stage pipeline (correlation ID → tenant → license → schema version → rate limiting → RBAC → security headers)
+5. **Middleware Ordering Immutability** → 5-stage pipeline (correlation ID → tenant → license →
+   schema version → rate limiting → RBAC → security headers)
 
 **Status:** All ambiguities locked, 0 unresolved
 
@@ -86,25 +89,29 @@ STAGE_08 (Rate Limiting & Security Baseline) has achieved full implementation co
 **V1 (CRITICAL) — Grading Authority Contradiction:**
 
 - **Issue:** Plan §4 showed synchronous grading; Plan §8 + tasks showed worker enqueueing
-- **Fix:** Updated Plan §4 to show: `await jobQueue.enqueue(gradeJob)` → `await jobQueue.waitForCompletion(jobId, {timeout: 30_000})`
+- **Fix:** Updated Plan §4 to show: `await jobQueue.enqueue(gradeJob)` →
+  `await jobQueue.waitForCompletion(jobId, {timeout: 30_000})`
 - **Verification:** Lines 1605-1630 (API enqueueing), 1641-1700 (worker execution) verified correct
 
 **V2-V4 (HIGH) — Error Response Non-Compliance:**
 
 - **Issue:** Missing `correlationId` and `details` fields; format inconsistency across sections
-- **Fix:** Standardized all 10 HTTP error codes to: `{ error: { code, message, details, correlationId } }`
+- **Fix:** Standardized all 10 HTTP error codes to:
+  `{ error: { code, message, details, correlationId } }`
 - **Verification:** grep search confirmed zero legacy "success: false" format remains
 
 **V3 (HIGH) — RBAC Documentation Missing:**
 
 - **Issue:** No role-based access control matrix or middleware documented
-- **Fix:** Added SECTION 3 with 8-endpoint RBAC matrix (5 roles: student, proctor, admin, support, public)
+- **Fix:** Added SECTION 3 with 8-endpoint RBAC matrix (5 roles: student, proctor, admin, support,
+  public)
 - **Verification:** Plan lines 800-900 document complete RBAC enforcement
 
 **V5 (MEDIUM) — Worker Job Enqueueing Incomplete:**
 
 - **Issue:** Section 7 showed DLQ but not job handoff to worker
-- **Fix:** Added complete API layer job enqueueing code (lines 1605-1630) and worker processing code (lines 1641-1700)
+- **Fix:** Added complete API layer job enqueueing code (lines 1605-1630) and worker processing code
+  (lines 1641-1700)
 - **Verification:** Full callback chain documented
 
 **V6 (MEDIUM) — Correlation ID Gap:**
@@ -133,7 +140,8 @@ STAGE_08 (Rate Limiting & Security Baseline) has achieved full implementation co
 - T107-T111 (5 tasks): Documentation
 - T097-T113 (17 bonus tasks): Endpoint-specific integration tests
 
-**Dependencies:** 95%+ parallelizable (only 5-7 critical path gates: schema version → tenant DB updates)
+**Dependencies:** 95%+ parallelizable (only 5-7 critical path gates: schema version → tenant DB
+updates)
 
 ---
 
@@ -167,33 +175,44 @@ STAGE_08 (Rate Limiting & Security Baseline) has achieved full implementation co
 **Foundation Wave (T001-T030):**
 
 - ✅ 8 database migrations applied (schema version 1.0.0 → 1.1.0)
-- ✅ 4 Redis modules implemented (rate-limiting-schema, sliding-window, token-bucket, connection pool)
-- ✅ Idempotency: DB columns (idempotency_key UUID UNIQUE, submission_cached_result JSONB, submission_cached_at TIMESTAMP)
+- ✅ 4 Redis modules implemented (rate-limiting-schema, sliding-window, token-bucket, connection
+  pool)
+- ✅ Idempotency: DB columns (idempotency_key UUID UNIQUE, submission_cached_result JSONB,
+  submission_cached_at TIMESTAMP)
 
 **Core Wave (T031-T084):**
 
-- ✅ 7 middleware layers (correlation-id, tenant-resolver, license-enforcement, schema-version, rate-limiting, rbac, security-headers)
-- ✅ 20 API endpoints (auth login/logout/password-reset, attempt create/start/submit/status/result/audit-log/delete/list, WebSocket, admin DLQ/retry/discard)
-- ✅ 13 worker modules (job-queue, grade-attempt-processor, grader, result-persister, dlq-manager, retry-handler, etc.)
+- ✅ 7 middleware layers (correlation-id, tenant-resolver, license-enforcement, schema-version,
+  rate-limiting, rbac, security-headers)
+- ✅ 20 API endpoints (auth login/logout/password-reset, attempt
+  create/start/submit/status/result/audit-log/delete/list, WebSocket, admin DLQ/retry/discard)
+- ✅ 13 worker modules (job-queue, grade-attempt-processor, grader, result-persister, dlq-manager,
+  retry-handler, etc.)
 - ✅ 10 HTTP error codes with standardized response format + correlationId
 
 **Security & Observability Wave (T085-T106):**
 
-- ✅ 8 security modules (RBAC, CSRF tokens, JWT validation, security headers, CSP, HSTS, X-Frame-Options)
-- ✅ 8 logging modules (structured logging schema with sanitization, logger, correlation-id propagation, audit-logger, violation-audit, event-logger)
-- ✅ All logs include: timestamp, level, service, workspace_id, user_id, correlation_id, event, details
+- ✅ 8 security modules (RBAC, CSRF tokens, JWT validation, security headers, CSP, HSTS,
+  X-Frame-Options)
+- ✅ 8 logging modules (structured logging schema with sanitization, logger, correlation-id
+  propagation, audit-logger, violation-audit, event-logger)
+- ✅ All logs include: timestamp, level, service, workspace_id, user_id, correlation_id, event,
+  details
 
 **Testing & Documentation Wave (T107-T116):**
 
-- ✅ 19 test files (8 unit, 7 integration, 4 load, 4 security, 2 edge-case, 3 API endpoint, 1 test infrastructure)
+- ✅ 19 test files (8 unit, 7 integration, 4 load, 4 security, 2 edge-case, 3 API endpoint, 1 test
+  infrastructure)
 - ✅ 85+ test cases covering:
   - Rate limiting (LOGIN 5/min per IP, SUBMIT 1 per attempt, WEBSOCKET 1 msg/100ms)
   - Idempotency (duplicate submission returns cached result, DB UNIQUE prevents duplicates)
   - Middleware order (no rate limiting without license + schema version checks)
   - Worker grading (async job execution, result persistence in DB + Redis cache)
-  - Security (CSRF token validation, JWT workspace_id verification, SQL injection prevention, timing attack resilience)
+  - Security (CSRF token validation, JWT workspace_id verification, SQL injection prevention, timing
+    attack resilience)
   - Edge cases (attempt expiration → 410 GONE, concurrent idempotent submissions)
-  - Load (1000 concurrent logins, 500 submissions, 100+ WebSocket connections, 10k/sec Redis throughput)
+  - Load (1000 concurrent logins, 500 submissions, 100+ WebSocket connections, 10k/sec Redis
+    throughput)
 - ✅ 5 documentation files (OpenAPI 3.1 spec, architecture guides, runbooks, ADR, RBAC matrix)
 
 **Deliverables Summary:**
@@ -221,10 +240,12 @@ STAGE_08 (Rate Limiting & Security Baseline) has achieved full implementation co
 **Isolation → License → Authentication → Attempt → Runtime → Frontoffice**
 
 ✅ **Isolation:** Rate limiting keys namespaced per workspace_id (no cross-tenant sharing)  
-✅ **License:** Middleware #3 enforces license status before rate limiting (SOFT_LOCKED → 423, ARCHIVED → 403)  
+✅ **License:** Middleware #3 enforces license status before rate limiting (SOFT_LOCKED → 423,
+ARCHIVED → 403)  
 ✅ **Authentication:** JWT validated for workspace_id claim (immutable, authoritative)  
 ✅ **Attempt:** Config snapshotted at start, no live exam references during grading  
-✅ **Runtime:** Worker executes grading async, results stored in DB (durable) + Redis cache (fast retrieval)  
+✅ **Runtime:** Worker executes grading async, results stored in DB (durable) + Redis cache (fast
+retrieval)  
 ✅ **Frontoffice:** All responses include correlationId for observability
 
 ### Multi-Tenancy Model
@@ -401,7 +422,8 @@ All services use structured logging with required fields:
 - ✅ attempt-endpoints.test.ts — Create, start, submit, status, result
 - ✅ admin-endpoints.test.ts — DLQ inspect, retry, discard
 
-**Test Infrastructure:** test-helpers.ts with centralized fixtures, mock client builder, database seeders
+**Test Infrastructure:** test-helpers.ts with centralized fixtures, mock client builder, database
+seeders
 
 **Total Coverage:** 85+ test cases, 19 test files, ~2,500 LOC test code  
 **Pass Rate:** 100% (all tests passing, no flaky tests)
@@ -471,11 +493,15 @@ All services use structured logging with required fields:
 
 **Resolution:**
 
-- Updated Plan §4 to show: `await jobQueue.enqueue(gradeJob)` + `await jobQueue.waitForCompletion(jobId, {timeout: 30_000})`
-- Verified both guardian architects confirmed fix at specific lines (1605-1630 API, 1641-1700 worker)
-- Implementation correctly enqueues job to worker, worker executes grading async, result stored in DB + Redis cache
+- Updated Plan §4 to show: `await jobQueue.enqueue(gradeJob)` +
+  `await jobQueue.waitForCompletion(jobId, {timeout: 30_000})`
+- Verified both guardian architects confirmed fix at specific lines (1605-1630 API, 1641-1700
+  worker)
+- Implementation correctly enqueues job to worker, worker executes grading async, result stored in
+  DB + Redis cache
 
-**Constitutional Impact:** ADR-0002 (Snapshot Attempt Model) - Worker-only grading authority now enforced
+**Constitutional Impact:** ADR-0002 (Snapshot Attempt Model) - Worker-only grading authority now
+enforced
 
 ### Escalation 2: Error Response Format (HIGH)
 
@@ -501,7 +527,8 @@ All services use structured logging with required fields:
 
 **Resolution:**
 
-- Verified actual plan.md lines 1605-1630 (API job enqueueing) and 1641-1700 (worker execution) are correct
+- Verified actual plan.md lines 1605-1630 (API job enqueueing) and 1641-1700 (worker execution) are
+  correct
 - Guardian re-verification (both architects) confirmed PASS
 - Treated guardian verification as authoritative (correct decision)
 - Implementation proceeds with confidence

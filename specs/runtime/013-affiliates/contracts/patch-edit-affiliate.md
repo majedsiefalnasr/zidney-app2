@@ -249,7 +249,8 @@ PATCH /v1/mmc/affiliates/{id}
 ## Idempotency
 
 - **Not Idempotent**: Repeated identical PATCH requests will UPDATE and log multiple audit records
-- **Mitigation**: Retry logic should check if update already applied (compare updated_at or audit log)
+- **Mitigation**: Retry logic should check if update already applied (compare updated_at or audit
+  log)
 
 ---
 

@@ -2,7 +2,8 @@
 
 ## Overview
 
-This guide provides practical code examples for developers implementing and using the MMC Members & RBAC system.
+This guide provides practical code examples for developers implementing and using the MMC Members &
+RBAC system.
 
 ---
 
@@ -93,42 +94,42 @@ INSERT INTO mmc_members (id, username, email, password_hash, role_id, status, cr
 
 ```typescript
 // Frontend | TypeScript + Vue 3
-import { ref } from 'vue'
-import axios from 'axios'
+import { ref } from "vue";
+import axios from "axios";
 
-const username = ref('')
-const password = ref('')
-const loading = ref(false)
-const error = ref('')
+const username = ref("");
+const password = ref("");
+const loading = ref(false);
+const error = ref("");
 
 async function handleLogin() {
-  loading.value = true
-  error.value = ''
+  loading.value = true;
+  error.value = "";
 
   try {
-    const response = await axios.post('/mmc/auth/login', {
+    const response = await axios.post("/mmc/auth/login", {
       username: username.value,
       password: password.value,
-    })
+    });
 
     if (response.data.success) {
       // Store token in localStorage or secure cookie
-      localStorage.setItem('mmc_token', response.data.data.access_token)
-      localStorage.setItem('mmc_user', JSON.stringify(response.data.data.user))
+      localStorage.setItem("mmc_token", response.data.data.access_token);
+      localStorage.setItem("mmc_user", JSON.stringify(response.data.data.user));
 
       // Redirect to dashboard
-      window.location.href = '/mmc/dashboard'
+      window.location.href = "/mmc/dashboard";
     } else {
-      error.value = response.data.error.message
+      error.value = response.data.error.message;
     }
   } catch (err) {
     if (err.response?.status === 429) {
-      error.value = 'Too many login attempts. Try again in 1 hour.'
+      error.value = "Too many login attempts. Try again in 1 hour.";
     } else {
-      error.value = 'Invalid username or password'
+      error.value = "Invalid username or password";
     }
   } finally {
-    loading.value = false
+    loading.value = false;
   }
 }
 ```
@@ -137,27 +138,27 @@ async function handleLogin() {
 
 ```typescript
 // Frontend | TypeScript
-import axios from 'axios'
+import axios from "axios";
 
 // Create axios instance with default headers
 const mmc = axios.create({
-  baseURL: '/mmc',
+  baseURL: "/mmc",
   headers: {
-    'Content-Type': 'application/json',
+    "Content-Type": "application/json",
   },
-})
+});
 
 // Interceptor: Add token to all requests
 mmc.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('mmc_token')
+    const token = localStorage.getItem("mmc_token");
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.Authorization = `Bearer ${token}`;
     }
-    return config
+    return config;
   },
-  (error) => Promise.reject(error)
-)
+  (error) => Promise.reject(error),
+);
 
 // Interceptor: Handle 401 (expired/invalidated token)
 mmc.interceptors.response.use(
@@ -165,96 +166,96 @@ mmc.interceptors.response.use(
   (error) => {
     if (error.response?.status === 401) {
       // Session invalidated or token expired
-      localStorage.removeItem('mmc_token')
-      localStorage.removeItem('mmc_user')
-      window.location.href = '/mmc/login'
+      localStorage.removeItem("mmc_token");
+      localStorage.removeItem("mmc_user");
+      window.location.href = "/mmc/login";
     }
-    return Promise.reject(error)
-  }
-)
+    return Promise.reject(error);
+  },
+);
 
-export default mmc
+export default mmc;
 ```
 
 ### Example 3: Backend Token Verification (Hono Middleware)
 
 ```typescript
 // Backend | Hono + TypeScript
-import { Hono, Context } from 'hono'
-import jwt from '@hono/jwt'
-import { getLogger } from '@packages/logger'
+import { Hono, Context } from "hono";
+import jwt from "@hono/jwt";
+import { getLogger } from "@packages/logger";
 
-const app = new Hono()
-const log = getLogger('mmc-api')
+const app = new Hono();
+const log = getLogger("mmc-api");
 
 // Correlation ID middleware
-app.use('*', (c, next) => {
-  const correlationId = c.req.header('X-Correlation-ID') || crypto.randomUUID()
-  c.set('correlationId', correlationId)
-  c.set('logger', log.with({ correlation_id: correlationId }))
-  return next()
-})
+app.use("*", (c, next) => {
+  const correlationId = c.req.header("X-Correlation-ID") || crypto.randomUUID();
+  c.set("correlationId", correlationId);
+  c.set("logger", log.with({ correlation_id: correlationId }));
+  return next();
+});
 
 // JWT verification middleware
 app.use(
-  '/mmc/*',
+  "/mmc/*",
   jwt({
     secret: process.env.JWT_SECRET,
-    alg: 'HS256',
+    alg: "HS256",
     noVerify: false,
-  })
-)
+  }),
+);
 
 // Extended auth middleware: Check token_version + status
-app.use('/mmc/*', async (c, next) => {
-  const payload = c.get('jwtPayload')
-  const logger = c.get('logger')
+app.use("/mmc/*", async (c, next) => {
+  const payload = c.get("jwtPayload");
+  const logger = c.get("logger");
 
   // Reject cross-context tokens
   if (payload.workspace_id) {
-    logger.warn('cross_context_token_rejected')
-    return c.json({ error: 'Unauthorized' }, 401)
+    logger.warn("cross_context_token_rejected");
+    return c.json({ error: "Unauthorized" }, 401);
   }
 
   // Fetch member from DB
-  const db = getMasterPool()
+  const db = getMasterPool();
   const member = await db.queryOne(
-    'SELECT id, status, role_id, token_version FROM mmc_members WHERE id = ?',
-    [payload.sub]
-  )
+    "SELECT id, status, role_id, token_version FROM mmc_members WHERE id = ?",
+    [payload.sub],
+  );
 
   if (!member) {
-    logger.warn('member_not_found', { user_id: payload.sub })
-    return c.json({ error: 'Unauthorized' }, 401)
+    logger.warn("member_not_found", { user_id: payload.sub });
+    return c.json({ error: "Unauthorized" }, 401);
   }
 
-  if (member.status !== 'ACTIVE') {
-    logger.warn('member_disabled', { user_id: payload.sub })
-    return c.json({ error: 'Account disabled' }, 401)
+  if (member.status !== "ACTIVE") {
+    logger.warn("member_disabled", { user_id: payload.sub });
+    return c.json({ error: "Account disabled" }, 401);
   }
 
   // Check token_version (session invalidation)
   if (payload.token_version !== member.token_version) {
-    logger.info('session_invalidated', {
+    logger.info("session_invalidated", {
       user_id: payload.sub,
       jwt_version: payload.token_version,
       db_version: member.token_version,
-    })
-    return c.json({ error: 'Session invalidated; please re-login' }, 401)
+    });
+    return c.json({ error: "Session invalidated; please re-login" }, 401);
   }
 
   // Store context
-  c.set('mmc_user', {
+  c.set("mmc_user", {
     user_id: member.id,
     role_id: member.role_id,
     token_version: member.token_version,
-  })
+  });
 
-  logger.debug('auth_success', { user_id: payload.sub })
-  return next()
-})
+  logger.debug("auth_success", { user_id: payload.sub });
+  return next();
+});
 
-export default app
+export default app;
 ```
 
 ---
@@ -265,47 +266,41 @@ export default app
 
 ```typescript
 // Backend | Hono middleware
-import { Context } from 'hono'
+import { Context } from "hono";
 
 interface PermissionRequirement {
-  domain: string
-  action: 'view' | 'create' | 'edit' | 'delete'
+  domain: string;
+  action: "view" | "create" | "edit" | "delete";
 }
 
 // Route metadata: map routes to permissions
 const routePermissions: Map<string, PermissionRequirement> = new Map([
-  ['GET /mmc/members/:id', { domain: 'MEMBERS_MANAGEMENT', action: 'view' }],
-  ['POST /mmc/members', { domain: 'MEMBERS_MANAGEMENT', action: 'create' }],
-  ['PATCH /mmc/members/:id', { domain: 'MEMBERS_MANAGEMENT', action: 'edit' }],
-  [
-    'DELETE /mmc/members/:id',
-    { domain: 'MEMBERS_MANAGEMENT', action: 'delete' },
-  ],
-  ['GET /mmc/roles', { domain: 'MEMBERS_MANAGEMENT', action: 'view' }],
-  [
-    'PATCH /mmc/roles/:id/permissions',
-    { domain: 'MEMBERS_MANAGEMENT', action: 'edit' },
-  ],
-])
+  ["GET /mmc/members/:id", { domain: "MEMBERS_MANAGEMENT", action: "view" }],
+  ["POST /mmc/members", { domain: "MEMBERS_MANAGEMENT", action: "create" }],
+  ["PATCH /mmc/members/:id", { domain: "MEMBERS_MANAGEMENT", action: "edit" }],
+  ["DELETE /mmc/members/:id", { domain: "MEMBERS_MANAGEMENT", action: "delete" }],
+  ["GET /mmc/roles", { domain: "MEMBERS_MANAGEMENT", action: "view" }],
+  ["PATCH /mmc/roles/:id/permissions", { domain: "MEMBERS_MANAGEMENT", action: "edit" }],
+]);
 
 async function permissionMiddleware(c: Context, next: Function) {
-  const routeKey = `${c.req.method} ${c.req.path}`
-  const permission = routePermissions.get(routeKey)
+  const routeKey = `${c.req.method} ${c.req.path}`;
+  const permission = routePermissions.get(routeKey);
 
   if (!permission) {
     // No permission required (public or optional)
-    return next()
+    return next();
   }
 
-  const mmc_user = c.get('mmc_user')
-  const logger = c.get('logger')
-  const db = getMasterPool()
+  const mmc_user = c.get("mmc_user");
+  const logger = c.get("logger");
+  const db = getMasterPool();
 
   // Query permission matrix
   const perm = await db.queryOne(
-    'SELECT can_view, can_create, can_edit, can_delete FROM role_permissions WHERE role_id = ? AND domain = ?',
-    [mmc_user.role_id, permission.domain]
-  )
+    "SELECT can_view, can_create, can_edit, can_delete FROM role_permissions WHERE role_id = ? AND domain = ?",
+    [mmc_user.role_id, permission.domain],
+  );
 
   // Check permission bit
   const actionMap = {
@@ -313,45 +308,40 @@ async function permissionMiddleware(c: Context, next: Function) {
     create: perm?.can_create,
     edit: perm?.can_edit,
     delete: perm?.can_delete,
-  }
+  };
 
-  const hasPermission = actionMap[permission.action] ?? false
+  const hasPermission = actionMap[permission.action] ?? false;
 
   if (!hasPermission) {
-    logger.warn('permission_denied', {
+    logger.warn("permission_denied", {
       user_id: mmc_user.user_id,
       domain: permission.domain,
       action: permission.action,
-    })
+    });
 
     // Log audit entry
     await db.execute(
-      'INSERT INTO mmc_audit_log (actor_user_id, action_type, entity_type, correlation_id, timestamp) VALUES (?, ?, ?, ?, NOW())',
-      [
-        mmc_user.user_id,
-        'PERMISSION_CHECK_DENIED',
-        permission.domain,
-        c.get('correlationId'),
-      ]
-    )
+      "INSERT INTO mmc_audit_log (actor_user_id, action_type, entity_type, correlation_id, timestamp) VALUES (?, ?, ?, ?, NOW())",
+      [mmc_user.user_id, "PERMISSION_CHECK_DENIED", permission.domain, c.get("correlationId")],
+    );
 
     return c.json(
       {
         success: false,
         data: null,
         error: {
-          code: 'PERMISSION_DENIED',
+          code: "PERMISSION_DENIED",
           message: `Permission denied: ${permission.domain}.${permission.action}`,
         },
       },
-      403
-    )
+      403,
+    );
   }
 
-  return next()
+  return next();
 }
 
-export { permissionMiddleware, routePermissions }
+export { permissionMiddleware, routePermissions };
 ```
 
 ---
@@ -362,50 +352,48 @@ export { permissionMiddleware, routePermissions }
 
 ```typescript
 // Backend | Create member in service layer
-import bcrypt from 'bcrypt'
-import { MemberService } from '@packages/domain-core'
+import bcrypt from "bcrypt";
+import { MemberService } from "@packages/domain-core";
 
 class MemberService {
   constructor(private db: Pool) {}
 
   async createMember(
     data: {
-      username: string
-      email: string
-      password: string
-      role_id: string
+      username: string;
+      email: string;
+      password: string;
+      role_id: string;
     },
     actor_user_id: string,
-    correlation_id: string
+    correlation_id: string,
   ) {
     // Hash password
-    const hashedPassword = await bcrypt.hash(data.password, 12)
+    const hashedPassword = await bcrypt.hash(data.password, 12);
 
     // Transaction
     return this.db.transaction(async (tx) => {
       // Validate
-      const existingUsername = await tx.queryOne(
-        'SELECT id FROM mmc_members WHERE username = ?',
-        [data.username]
-      )
+      const existingUsername = await tx.queryOne("SELECT id FROM mmc_members WHERE username = ?", [
+        data.username,
+      ]);
       if (existingUsername) {
-        throw new Error('DUPLICATE_USERNAME')
+        throw new Error("DUPLICATE_USERNAME");
       }
 
-      const existingEmail = await tx.queryOne(
-        'SELECT id FROM mmc_members WHERE email = ?',
-        [data.email]
-      )
+      const existingEmail = await tx.queryOne("SELECT id FROM mmc_members WHERE email = ?", [
+        data.email,
+      ]);
       if (existingEmail) {
-        throw new Error('DUPLICATE_EMAIL')
+        throw new Error("DUPLICATE_EMAIL");
       }
 
-      const role = await tx.queryOne(
-        'SELECT id FROM roles WHERE id = ? AND status = ?',
-        [data.role_id, 'ACTIVE']
-      )
+      const role = await tx.queryOne("SELECT id FROM roles WHERE id = ? AND status = ?", [
+        data.role_id,
+        "ACTIVE",
+      ]);
       if (!role) {
-        throw new Error('INVALID_ROLE')
+        throw new Error("INVALID_ROLE");
       }
 
       // Create member
@@ -414,8 +402,8 @@ class MemberService {
          (username, email, password_hash, role_id, status, created_by, created_at, updated_at)
          VALUES (?, ?, ?, ?, 'ACTIVE', ?, NOW(), NOW())
          RETURNING *`,
-        [data.username, data.email, hashedPassword, data.role_id, actor_user_id]
-      )
+        [data.username, data.email, hashedPassword, data.role_id, actor_user_id],
+      );
 
       // Audit log
       await tx.execute(
@@ -424,34 +412,30 @@ class MemberService {
          VALUES (?, ?, ?, ?, ?, ?, NOW())`,
         [
           actor_user_id,
-          'MEMBER_CREATED',
-          'MEMBER',
+          "MEMBER_CREATED",
+          "MEMBER",
           member.id,
           JSON.stringify({ username: member.username, email: member.email }),
           correlation_id,
-        ]
-      )
+        ],
+      );
 
-      return member
-    })
+      return member;
+    });
   }
 }
 
 // Hono route
-app.post('/mmc/members', permissionMiddleware, async (c) => {
-  const data = await c.req.json()
-  const mmc_user = c.get('mmc_user')
-  const logger = c.get('logger')
+app.post("/mmc/members", permissionMiddleware, async (c) => {
+  const data = await c.req.json();
+  const mmc_user = c.get("mmc_user");
+  const logger = c.get("logger");
 
   try {
-    const memberService = new MemberService(getMasterPool())
-    const member = await memberService.createMember(
-      data,
-      mmc_user.user_id,
-      c.get('correlationId')
-    )
+    const memberService = new MemberService(getMasterPool());
+    const member = await memberService.createMember(data, mmc_user.user_id, c.get("correlationId"));
 
-    logger.info('member_created', { member_id: member.id })
+    logger.info("member_created", { member_id: member.id });
 
     return c.json(
       {
@@ -459,22 +443,22 @@ app.post('/mmc/members', permissionMiddleware, async (c) => {
         data: member,
         error: null,
       },
-      201
-    )
+      201,
+    );
   } catch (err) {
-    if (err.message === 'DUPLICATE_USERNAME') {
+    if (err.message === "DUPLICATE_USERNAME") {
       return c.json(
         {
           success: false,
           data: null,
-          error: { code: 'CONFLICT', message: 'Username already exists' },
+          error: { code: "CONFLICT", message: "Username already exists" },
         },
-        409
-      )
+        409,
+      );
     }
-    throw err
+    throw err;
   }
-})
+});
 ```
 
 ---
@@ -491,21 +475,19 @@ class RoleService {
   async updateRolePermissions(
     role_id: string,
     permissions: Array<{
-      domain: string
-      can_view: boolean
-      can_create: boolean
-      can_edit: boolean
-      can_delete: boolean
+      domain: string;
+      can_view: boolean;
+      can_create: boolean;
+      can_edit: boolean;
+      can_delete: boolean;
     }>,
     actor_user_id: string,
-    correlation_id: string
+    correlation_id: string,
   ) {
     return this.db.transaction(async (tx) => {
       // Verify role exists
-      const role = await tx.queryOne('SELECT id FROM roles WHERE id = ?', [
-        role_id,
-      ])
-      if (!role) throw new Error('ROLE_NOT_FOUND')
+      const role = await tx.queryOne("SELECT id FROM roles WHERE id = ?", [role_id]);
+      if (!role) throw new Error("ROLE_NOT_FOUND");
 
       // Update permissions
       for (const perm of permissions) {
@@ -513,28 +495,18 @@ class RoleService {
           `UPDATE role_permissions 
            SET can_view = ?, can_create = ?, can_edit = ?, can_delete = ?, updated_at = NOW()
            WHERE role_id = ? AND domain = ?`,
-          [
-            perm.can_view,
-            perm.can_create,
-            perm.can_edit,
-            perm.can_delete,
-            role_id,
-            perm.domain,
-          ]
-        )
+          [perm.can_view, perm.can_create, perm.can_edit, perm.can_delete, role_id, perm.domain],
+        );
       }
 
       // CASCADE: Increment token_version for all members with this role
-      const members = await tx.query(
-        'SELECT id FROM mmc_members WHERE role_id = ?',
-        [role_id]
-      )
+      const members = await tx.query("SELECT id FROM mmc_members WHERE role_id = ?", [role_id]);
 
       for (const member of members) {
         await tx.execute(
-          'UPDATE mmc_members SET token_version = token_version + 1, updated_at = NOW() WHERE id = ?',
-          [member.id]
-        )
+          "UPDATE mmc_members SET token_version = token_version + 1, updated_at = NOW() WHERE id = ?",
+          [member.id],
+        );
 
         // Audit log (one per member)
         await tx.execute(
@@ -544,34 +516,34 @@ class RoleService {
            VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
           [
             actor_user_id,
-            'PERMISSION_BATCH_UPDATED',
-            'MEMBER',
+            "PERMISSION_BATCH_UPDATED",
+            "MEMBER",
             member.id,
             JSON.stringify({ role_id }),
             JSON.stringify({ role_id, permissions_updated: true }),
             correlation_id,
-          ]
-        )
+          ],
+        );
       }
 
-      return { affected_members: members.length }
-    })
+      return { affected_members: members.length };
+    });
   }
 }
 
 // Hono route
-app.patch('/mmc/roles/:id/permissions', permissionMiddleware, async (c) => {
-  const role_id = c.req.param('id')
-  const { permissions } = await c.req.json()
-  const mmc_user = c.get('mmc_user')
+app.patch("/mmc/roles/:id/permissions", permissionMiddleware, async (c) => {
+  const role_id = c.req.param("id");
+  const { permissions } = await c.req.json();
+  const mmc_user = c.get("mmc_user");
 
-  const roleService = new RoleService(getMasterPool())
+  const roleService = new RoleService(getMasterPool());
   const result = await roleService.updateRolePermissions(
     role_id,
     permissions,
     mmc_user.user_id,
-    c.get('correlationId')
-  )
+    c.get("correlationId"),
+  );
 
   return c.json(
     {
@@ -584,9 +556,9 @@ app.patch('/mmc/roles/:id/permissions', permissionMiddleware, async (c) => {
       },
       error: null,
     },
-    200
-  )
-})
+    200,
+  );
+});
 ```
 
 ---
@@ -597,52 +569,45 @@ app.patch('/mmc/roles/:id/permissions', permissionMiddleware, async (c) => {
 
 ```typescript
 // Frontend | Vue 3 Composable
-import { ref, computed } from 'vue'
-import mmc from '@/api/mmc'
+import { ref, computed } from "vue";
+import mmc from "@/api/mmc";
 
 export function usePermissions() {
   const permissions = ref<
     Record<
       string,
       {
-        can_view: boolean
-        can_create: boolean
-        can_edit: boolean
-        can_delete: boolean
+        can_view: boolean;
+        can_create: boolean;
+        can_edit: boolean;
+        can_delete: boolean;
       }
     >
-  >({})
-  const loading = ref(false)
+  >({});
+  const loading = ref(false);
 
   async function fetchPermissions(domains: string[]) {
-    loading.value = true
+    loading.value = true;
     try {
-      const response = await mmc.get('/permissions/check', {
-        params: { domains: domains.join(',') },
-      })
-      permissions.value = response.data.data.permissions
-      sessionStorage.setItem(
-        'mmc_permissions',
-        JSON.stringify(permissions.value)
-      )
+      const response = await mmc.get("/permissions/check", {
+        params: { domains: domains.join(",") },
+      });
+      permissions.value = response.data.data.permissions;
+      sessionStorage.setItem("mmc_permissions", JSON.stringify(permissions.value));
     } finally {
-      loading.value = false
+      loading.value = false;
     }
   }
 
   // Helpers
-  const canViewMembers = computed(
-    () => permissions.value.MEMBERS_MANAGEMENT?.can_view ?? false
-  )
+  const canViewMembers = computed(() => permissions.value.MEMBERS_MANAGEMENT?.can_view ?? false);
   const canCreateMembers = computed(
-    () => permissions.value.MEMBERS_MANAGEMENT?.can_create ?? false
-  )
-  const canEditMembers = computed(
-    () => permissions.value.MEMBERS_MANAGEMENT?.can_edit ?? false
-  )
+    () => permissions.value.MEMBERS_MANAGEMENT?.can_create ?? false,
+  );
+  const canEditMembers = computed(() => permissions.value.MEMBERS_MANAGEMENT?.can_edit ?? false);
   const canDeleteMembers = computed(
-    () => permissions.value.MEMBERS_MANAGEMENT?.can_delete ?? false
-  )
+    () => permissions.value.MEMBERS_MANAGEMENT?.can_delete ?? false,
+  );
 
   return {
     permissions,
@@ -652,25 +617,25 @@ export function usePermissions() {
     canCreateMembers,
     canEditMembers,
     canDeleteMembers,
-  }
+  };
 }
 
 // Component usage
-import { usePermissions } from '@/composables/usePermissions'
+import { usePermissions } from "@/composables/usePermissions";
 
 export default {
   setup() {
-    const { permissions, canCreateMembers, fetchPermissions } = usePermissions()
+    const { permissions, canCreateMembers, fetchPermissions } = usePermissions();
 
     // On mount: fetch permissions once
     onMounted(() => {
-      fetchPermissions(['MEMBERS_MANAGEMENT', 'PRODUCT_MANAGEMENT'])
-    })
+      fetchPermissions(["MEMBERS_MANAGEMENT", "PRODUCT_MANAGEMENT"]);
+    });
 
     return {
       permissions,
       canCreateMembers,
-    }
+    };
   },
   template: `
     <div>
@@ -684,7 +649,7 @@ export default {
       </button>
     </div>
   `,
-}
+};
 ```
 
 ---
@@ -696,20 +661,16 @@ export default {
 ```typescript
 // Backend | Service layer
 class MemberService {
-  async disableMember(
-    member_id: string,
-    actor_user_id: string,
-    correlation_id: string
-  ) {
+  async disableMember(member_id: string, actor_user_id: string, correlation_id: string) {
     return this.db.transaction(async (tx) => {
       // Fetch current state
       const member = await tx.queryOne(
-        'SELECT id, status, token_version FROM mmc_members WHERE id = ?',
-        [member_id]
-      )
+        "SELECT id, status, token_version FROM mmc_members WHERE id = ?",
+        [member_id],
+      );
 
-      if (!member) throw new Error('NOT_FOUND')
-      if (member.status === 'DISABLED') throw new Error('ALREADY_DISABLED')
+      if (!member) throw new Error("NOT_FOUND");
+      if (member.status === "DISABLED") throw new Error("ALREADY_DISABLED");
 
       // Disable + increment token_version
       const updated = await tx.queryOne(
@@ -717,8 +678,8 @@ class MemberService {
          SET status = 'DISABLED', token_version = token_version + 1, updated_at = NOW()
          WHERE id = ?
          RETURNING *`,
-        [member_id]
-      )
+        [member_id],
+      );
 
       // Audit log
       await tx.execute(
@@ -728,23 +689,23 @@ class MemberService {
          VALUES (?, ?, ?, ?, ?, ?, ?, NOW())`,
         [
           actor_user_id,
-          'MEMBER_DISABLED',
-          'MEMBER',
+          "MEMBER_DISABLED",
+          "MEMBER",
           member_id,
           JSON.stringify({
             status: member.status,
             token_version: member.token_version,
           }),
           JSON.stringify({
-            status: 'DISABLED',
+            status: "DISABLED",
             token_version: updated.token_version,
           }),
           correlation_id,
-        ]
-      )
+        ],
+      );
 
-      return updated
-    })
+      return updated;
+    });
   }
 }
 ```
@@ -831,104 +792,89 @@ redis-cli GET "mmc:login_attempts:203.0.113.45"
 ### Unit Test: Permission Check
 
 ```typescript
-import { describe, it, expect, beforeEach } from 'vitest'
-import { checkPermission } from '@packages/domain-core'
+import { describe, it, expect, beforeEach } from "vitest";
+import { checkPermission } from "@packages/domain-core";
 
-describe('checkPermission', () => {
-  it('should allow action if permission bit is true', async () => {
-    const result = await checkPermission(
-      'role-admin-uuid',
-      'MEMBERS_MANAGEMENT',
-      'create',
-      db
-    )
-    expect(result).toBe(true)
-  })
+describe("checkPermission", () => {
+  it("should allow action if permission bit is true", async () => {
+    const result = await checkPermission("role-admin-uuid", "MEMBERS_MANAGEMENT", "create", db);
+    expect(result).toBe(true);
+  });
 
-  it('should deny action if permission bit is false', async () => {
-    const result = await checkPermission(
-      'role-sales-uuid',
-      'MEMBERS_MANAGEMENT',
-      'delete',
-      db
-    )
-    expect(result).toBe(false)
-  })
+  it("should deny action if permission bit is false", async () => {
+    const result = await checkPermission("role-sales-uuid", "MEMBERS_MANAGEMENT", "delete", db);
+    expect(result).toBe(false);
+  });
 
-  it('should deny action if permission row missing', async () => {
-    const result = await checkPermission(
-      'role-unknown-uuid',
-      'MEMBERS_MANAGEMENT',
-      'view',
-      db
-    )
-    expect(result).toBe(false)
-  })
-})
+  it("should deny action if permission row missing", async () => {
+    const result = await checkPermission("role-unknown-uuid", "MEMBERS_MANAGEMENT", "view", db);
+    expect(result).toBe(false);
+  });
+});
 ```
 
 ### Integration Test: Member Creation
 
 ```typescript
-import { describe, it, expect, beforeEach } from 'vitest'
-import axios from 'axios'
+import { describe, it, expect, beforeEach } from "vitest";
+import axios from "axios";
 
-describe('POST /mmc/members', () => {
-  let token: string
+describe("POST /mmc/members", () => {
+  let token: string;
 
   beforeEach(async () => {
     // Login as admin
-    const response = await axios.post('http://localhost:3000/mmc/auth/login', {
-      username: 'admin',
-      password: 'admin_password',
-    })
-    token = response.data.data.access_token
-  })
+    const response = await axios.post("http://localhost:3000/mmc/auth/login", {
+      username: "admin",
+      password: "admin_password",
+    });
+    token = response.data.data.access_token;
+  });
 
-  it('should create member with valid credentials', async () => {
+  it("should create member with valid credentials", async () => {
     const response = await axios.post(
-      'http://localhost:3000/mmc/members',
+      "http://localhost:3000/mmc/members",
       {
-        username: 'newuser',
-        email: 'newuser@example.com',
-        password: 'Password123!',
-        role_id: 'role-admin-uuid',
+        username: "newuser",
+        email: "newuser@example.com",
+        password: "Password123!",
+        role_id: "role-admin-uuid",
       },
-      { headers: { Authorization: `Bearer ${token}` } }
-    )
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
 
-    expect(response.status).toBe(201)
-    expect(response.data.success).toBe(true)
-    expect(response.data.data.username).toBe('newuser')
-  })
+    expect(response.status).toBe(201);
+    expect(response.data.success).toBe(true);
+    expect(response.data.data.username).toBe("newuser");
+  });
 
-  it('should reject duplicate username', async () => {
+  it("should reject duplicate username", async () => {
     await axios.post(
-      'http://localhost:3000/mmc/members',
+      "http://localhost:3000/mmc/members",
       {
-        username: 'duplicate',
-        email: 'first@example.com',
-        password: 'Password123!',
-        role_id: 'role-admin-uuid',
+        username: "duplicate",
+        email: "first@example.com",
+        password: "Password123!",
+        role_id: "role-admin-uuid",
       },
-      { headers: { Authorization: `Bearer ${token}` } }
-    )
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
 
     const response = await axios.post(
-      'http://localhost:3000/mmc/members',
+      "http://localhost:3000/mmc/members",
       {
-        username: 'duplicate',
-        email: 'second@example.com',
-        password: 'Password123!',
-        role_id: 'role-admin-uuid',
+        username: "duplicate",
+        email: "second@example.com",
+        password: "Password123!",
+        role_id: "role-admin-uuid",
       },
-      { headers: { Authorization: `Bearer ${token}` } }
-    )
+      { headers: { Authorization: `Bearer ${token}` } },
+    );
 
-    expect(response.status).toBe(409)
-    expect(response.data.error.code).toBe('CONFLICT')
-  })
-})
+    expect(response.status).toBe(409);
+    expect(response.data.error.code).toBe("CONFLICT");
+  });
+});
 ```
 
 ---

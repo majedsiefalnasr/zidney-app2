@@ -1,14 +1,16 @@
 # Clarify Report — STAGE_UI_03_ROUTER_AND_GUARDS
 
-**Step:** 2 — Clarify
-**Timestamp:** 2026-03-02T00:00:00.000Z
-**Status:** COMPLETE
+**Step:** 2 — Clarify **Timestamp:** 2026-03-02T00:00:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Ambiguity scan of `spec.md` identified 6 clarifications that removed implementation gaps around scope completeness, guard error-safety contracts, cross-app naming consistency, testability mechanics, and migration breaking-change scope. All clarifications were resolved using the stage file, existing app router code, and Zidney AGENTS.md. No open items remain. Stage is fully plannable.
+Ambiguity scan of `spec.md` identified 6 clarifications that removed implementation gaps around
+scope completeness, guard error-safety contracts, cross-app naming consistency, testability
+mechanics, and migration breaking-change scope. All clarifications were resolved using the stage
+file, existing app router code, and Zidney AGENTS.md. No open items remain. Stage is fully
+plannable.
 
 ---
 

@@ -9,21 +9,32 @@
 
 ## Purpose
 
-This guide explains how to validate the implementation for the frontend security layer end-to-end. It covers token lifecycle management, session expiry handling, 401-idempotent error recovery, license status reactions, and XSS mitigation across three applications: MMC, Backoffice, and Frontoffice.
+This guide explains how to validate the implementation for the frontend security layer end-to-end.
+It covers token lifecycle management, session expiry handling, 401-idempotent error recovery,
+license status reactions, and XSS mitigation across three applications: MMC, Backoffice, and
+Frontoffice.
 
 ---
 
 ## Summary of Delivered Behavior
 
-The stage standardizes frontend security across all three UI applications by centralizing token handling, session expiry recovery, and API error responses into a cohesive, reusable architecture.
+The stage standardizes frontend security across all three UI applications by centralizing token
+handling, session expiry recovery, and API error responses into a cohesive, reusable architecture.
 
 Key outcomes:
 
-- **Centralized Token Management**: Every API request carries the access token via a single Authorization header injection point in the API client interceptor — never manually constructed by components
-- **Idempotent 401 Recovery**: When a 401 response arrives, auth state is cleared exactly once and the user is redirected to login, regardless of how many concurrent 401s arrive (single-flight guard)
-- **License Status Reactions**: The UI displays appropriate messages for 423 (workspace locked) and 426 (upgrade required) responses without attempting to bypass them
-- **Secure XSS Prevention**: All `v-html` usages eliminated; ESLint rule enforced to prevent future regressions
-- **Structured Logging**: All token redaction happens in a pure utility before any log statement; no tokens exposed in logs
+- **Centralized Token Management**: Every API request carries the access token via a single
+  Authorization header injection point in the API client interceptor — never manually constructed by
+  components
+- **Idempotent 401 Recovery**: When a 401 response arrives, auth state is cleared exactly once and
+  the user is redirected to login, regardless of how many concurrent 401s arrive (single-flight
+  guard)
+- **License Status Reactions**: The UI displays appropriate messages for 423 (workspace locked) and
+  426 (upgrade required) responses without attempting to bypass them
+- **Secure XSS Prevention**: All `v-html` usages eliminated; ESLint rule enforced to prevent future
+  regressions
+- **Structured Logging**: All token redaction happens in a pure utility before any log statement; no
+  tokens exposed in logs
 
 ---
 
@@ -211,11 +222,13 @@ open coverage/index.html
 
 ### Scenario 1 — Token Storage Remains In-Memory (Persists Across Page Navigations, Lost On Refresh)
 
-**Purpose:** Verify that tokens are never persisted to localStorage, sessionStorage, or IndexedDB; they remain in-memory Pinia state only.
+**Purpose:** Verify that tokens are never persisted to localStorage, sessionStorage, or IndexedDB;
+they remain in-memory Pinia state only.
 
 1. Open DevTools → Application tab → Storage sections
 2. Sign in to the application
-3. Verify that `localStorage`, `sessionStorage`, and `IndexedDB` contain NO `token`, `accessToken`, or `auth_token` keys
+3. Verify that `localStorage`, `sessionStorage`, and `IndexedDB` contain NO `token`, `accessToken`,
+   or `auth_token` keys
 4. Navigate between pages within the app (e.g., dashboard → settings → dashboard)
 5. Verify token remains available (requests still work)
 6. Perform a full page refresh (`Cmd+R` / `Ctrl+F5`)
@@ -234,7 +247,8 @@ open coverage/index.html
 
 ### Scenario 2 — 401 Response Triggers Idempotent Logout Exactly Once
 
-**Purpose:** Verify that when the backend returns 401, the UI clears auth state and redirects exactly once, even if multiple concurrent requests receive 401.
+**Purpose:** Verify that when the backend returns 401, the UI clears auth state and redirects
+exactly once, even if multiple concurrent requests receive 401.
 
 **Setup:**
 
@@ -270,7 +284,8 @@ bun run vitest run tests/integration/*/auth/401-race.test.ts
 
 ### Scenario 3 — License Lock (423) Response Prevents User Action; Displays Message
 
-**Purpose:** Verify that a 423 Locked response from the backend triggers a license-locked message and prevents further action.
+**Purpose:** Verify that a 423 Locked response from the backend triggers a license-locked message
+and prevents further action.
 
 **Setup:**
 
@@ -297,7 +312,8 @@ bun run vitest run tests/integration/*/auth/401-race.test.ts
 
 ### Scenario 4 — Upgrade Required (426) Response Displays Upgrade Prompt
 
-**Purpose:** Verify that a 426 Upgrade Required response displays an upgrade prompt and prevents further action until upgrade.
+**Purpose:** Verify that a 426 Upgrade Required response displays an upgrade prompt and prevents
+further action until upgrade.
 
 **Setup:**
 
@@ -323,16 +339,17 @@ bun run vitest run tests/integration/*/auth/401-race.test.ts
 
 ### Scenario 5 — Token Redaction Prevents Accidental Logging
 
-**Purpose:** Verify that the `redactSensitiveFields()` utility prevents tokens from appearing in logs.
+**Purpose:** Verify that the `redactSensitiveFields()` utility prevents tokens from appearing in
+logs.
 
 **Steps:**
 
 1. Open DevTools → Console
 2. Call the redaction utility directly:
    ```javascript
-   import { redactSensitiveFields } from '@zidney/domain-core'
-   const logObject = { token: 'eyJhbGc...', action: 'login' }
-   console.log(redactSensitiveFields(logObject))
+   import { redactSensitiveFields } from "@zidney/domain-core";
+   const logObject = { token: "eyJhbGc...", action: "login" };
+   console.log(redactSensitiveFields(logObject));
    ```
 3. Verify output shows: `{ token: '[REDACTED]', action: 'login' }`
 4. Sign in and monitor logs during auth operations
@@ -340,7 +357,8 @@ bun run vitest run tests/integration/*/auth/401-race.test.ts
 
 **Expected:**
 
-- ✅ `redactSensitiveFields()` replaces `token`, `accessToken`, `refresh_token`, etc. with `[REDACTED]`
+- ✅ `redactSensitiveFields()` replaces `token`, `accessToken`, `refresh_token`, etc. with
+  `[REDACTED]`
 - ✅ No token appears in full in any log output
 - ✅ Non-sensitive fields remain intact
 
@@ -373,7 +391,8 @@ bun run vitest run tests/integration/*/auth/401-race.test.ts
 
 ### Scenario 7 — Route Guard Preserves Original Redirect Intent
 
-**Purpose:** Verify that when an unauthenticated user is redirected to login, the intended route is preserved so they can be sent back after signing in.
+**Purpose:** Verify that when an unauthenticated user is redirected to login, the intended route is
+preserved so they can be sent back after signing in.
 
 **Setup:**
 
@@ -450,7 +469,8 @@ bun run vitest run tests/unit/*/core/auth/token-persistence-audit.test.ts
 
 ### Route Import Fails in route-coverage-audit
 
-**Cause:** Router index file imports `@/modules/*/routes` but `@/` alias not defined in vitest root config
+**Cause:** Router index file imports `@/modules/*/routes` but `@/` alias not defined in vitest root
+config
 
 **Fix:**
 
@@ -490,7 +510,8 @@ bun run lint
 
 All of the following must be true to consider this stage successfully tested:
 
-- ✅ All 273 tests pass (`bun run vitest run tests/unit/{mmc,backoffice,frontoffice}/core tests/integration/{mmc,backoffice,frontoffice}/auth`)
+- ✅ All 273 tests pass
+  (`bun run vitest run tests/unit/{mmc,backoffice,frontoffice}/core tests/integration/{mmc,backoffice,frontoffice}/auth`)
 - ✅ ESLint shows 0 new errors (`bun run lint | grep error`)
 - ✅ TypeScript type-check passes (`bun run typecheck`)
 - ✅ Token is NOT persisted to browser storage (manual scenario 1)

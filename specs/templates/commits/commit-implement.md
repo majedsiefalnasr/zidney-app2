@@ -1,13 +1,9 @@
 feat({{STAGE_DIR_NAME}}): complete implement step
 
-Step: Implement (6/7)
-Stage: {{STAGE_NAME}}
-Phase: {{PHASE_NAME}}
-Status: BACKEND CLOSED
+Step: Implement (6/7) Stage: {{STAGE_NAME}} Phase: {{PHASE_NAME}} Status: BACKEND CLOSED
 
-Tasks completed: {{TASKS_COMPLETED}}/{{TASKS_TOTAL}}
-Deferred tasks: {{DEFERRED_COUNT}} ({{DEFERRED_JUSTIFICATION_SUMMARY}})
-Lines of code: ~{{LOC_ESTIMATE}}
+Tasks completed: {{TASKS_COMPLETED}}/{{TASKS_TOTAL}} Deferred tasks: {{DEFERRED_COUNT}}
+({{DEFERRED_JUSTIFICATION_SUMMARY}}) Lines of code: ~{{LOC_ESTIMATE}}
 
 Implementation scope:
 
@@ -23,8 +19,7 @@ Validations passed:
 - Type check: {{TYPECHECK_STATUS}}
 - Migration: {{MIGRATION_STATUS}}
 
-Files changed:
-{{FILES_CHANGED_LIST}}
+Files changed: {{FILES_CHANGED_LIST}}
 
 Artifacts:
 

@@ -9,7 +9,11 @@
 
 ## Executive Summary
 
-This plan provides a complete blueprint for implementing the four-state license lifecycle model (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED) with middleware enforcement, worker-based async operations, immutable audit trails, and MMC UI controls. The implementation preserves database-per-tenant isolation while implementing deterministic, transactional state transitions enforced at the Tenant Resolver middleware layer.
+This plan provides a complete blueprint for implementing the four-state license lifecycle model
+(ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED) with middleware enforcement, worker-based async operations,
+immutable audit trails, and MMC UI controls. The implementation preserves database-per-tenant
+isolation while implementing deterministic, transactional state transitions enforced at the Tenant
+Resolver middleware layer.
 
 **Key Design Principles**:
 
@@ -275,11 +279,11 @@ DELETE /licenses/{id}/delete/confirm
 **Core Methods**:
 
 ```typescript
-transitionToSoftLock(licenseId, reason, actorId)
-transitionToActive(licenseId, reason, actorId)
-transitionToArchived(licenseId, snapshotId, reason, actorId)
-restoreFromArchive(licenseId, actorId)
-transitionToDeleted(licenseId, confirmationHash, actorId)
+transitionToSoftLock(licenseId, reason, actorId);
+transitionToActive(licenseId, reason, actorId);
+transitionToArchived(licenseId, snapshotId, reason, actorId);
+restoreFromArchive(licenseId, actorId);
+transitionToDeleted(licenseId, confirmationHash, actorId);
 ```
 
 **Error Types**:
@@ -508,10 +512,9 @@ ALTER TABLE tenants_registry ADD COLUMN license_id UUID;
 
 ### Error Recovery
 
-**Soft Lock Failure**: Retry manually (idempotent)
-**Archive Failure**: Admin retries via UI (snapshot job retries)
-**Restore Failure**: Workspace remains ARCHIVED, admin retries
-**Deletion Failure**: Alert ops, manual recovery (grace period safeguard)
+**Soft Lock Failure**: Retry manually (idempotent) **Archive Failure**: Admin retries via UI
+(snapshot job retries) **Restore Failure**: Workspace remains ARCHIVED, admin retries **Deletion
+Failure**: Alert ops, manual recovery (grace period safeguard)
 
 ---
 
@@ -611,9 +614,8 @@ async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
 
 ### Job Type 1: snapshot_create
 
-**Trigger**: Manual archive action from MMC
-**Queue**: `queue:snapshot_create`
-**Max Retries**: 3 (1s → 2s → 4s backoff)
+**Trigger**: Manual archive action from MMC **Queue**: `queue:snapshot_create` **Max Retries**: 3
+(1s → 2s → 4s backoff)
 
 **Steps**:
 
@@ -623,16 +625,15 @@ async function licenseEnforcementMiddleware(ctx: Context, next: Next) {
 4. Mark snapshot status = CREATED
 5. Return snapshot_id to caller
 
-**SLA**: 10 minutes (size-dependent)
-**Failure**: Mark FAILED, alert admin, license remains SOFT_LOCKED
+**SLA**: 10 minutes (size-dependent) **Failure**: Mark FAILED, alert admin, license remains
+SOFT_LOCKED
 
 See [Worker Jobs Contract](contracts/worker-jobs.md) for full spec.
 
 ### Job Type 2: restore_from_archive
 
-**Trigger**: Manual restore action from MMC
-**Queue**: `queue:restore_from_archive`
-**Max Retries**: 3
+**Trigger**: Manual restore action from MMC **Queue**: `queue:restore_from_archive` **Max Retries**:
+3
 
 **Steps**:
 
@@ -643,14 +644,12 @@ See [Worker Jobs Contract](contracts/worker-jobs.md) for full spec.
 5. Run forward migrations (if needed)
 6. Update license: status = ACTIVE
 
-**SLA**: Size-based (5/15/30 minutes)
-**Failure**: Keep ARCHIVED, preserve snapshot, alert admin
+**SLA**: Size-based (5/15/30 minutes) **Failure**: Keep ARCHIVED, preserve snapshot, alert admin
 
 ### Job Type 3: delete_license
 
-**Trigger**: Confirmed deletion from MMC
-**Queue**: `queue:delete_license`
-**Max Retries**: 2 (only 2 for deletion, terminal operation)
+**Trigger**: Confirmed deletion from MMC **Queue**: `queue:delete_license` **Max Retries**: 2 (only
+2 for deletion, terminal operation)
 
 **Steps** (Transaction):
 
@@ -660,13 +659,12 @@ See [Worker Jobs Contract](contracts/worker-jobs.md) for full spec.
 4. Update license: status = DELETED
 5. Create deletion audit log entry
 
-**SLA**: 15 minutes
-**Failure**: Alert ops, manual recovery, grace period safeguard
+**SLA**: 15 minutes **Failure**: Alert ops, manual recovery, grace period safeguard
 
 ### Job Type 4: soft_lock_expiry_transition (Optional)
 
-**Trigger**: Scheduled job (hourly, optional optimization)
-**Purpose**: Proactively transition expired soft locks
+**Trigger**: Scheduled job (hourly, optional optimization) **Purpose**: Proactively transition
+expired soft locks
 
 **Note**: Middleware also performs this on-demand, so this job is optional.
 
@@ -842,24 +840,34 @@ See [Worker Jobs Contract](contracts/worker-jobs.md) for full spec.
 Location: `tests/integration/rbac-enforcement.test.ts`
 
 1. **Non-admin attempts soft-lock**: User without `mmc:license:lifecycle:write` → 403 Unauthorized
-2. **Workspace member (non-admin) attempts soft-lock**: Workspace staff !== MMC Admin → 403 Unauthorized
-3. **Cross-workspace admin attempts soft-lock**: Admin from Workspace A tries Workspace B license → 403 ADMIN_WORKSPACE_MISMATCH
+2. **Workspace member (non-admin) attempts soft-lock**: Workspace staff !== MMC Admin → 403
+   Unauthorized
+3. **Cross-workspace admin attempts soft-lock**: Admin from Workspace A tries Workspace B license →
+   403 ADMIN_WORKSPACE_MISMATCH
 4. **Anonymous request to soft-lock endpoint**: No auth header → 401 Unauthorized
 5. **Expired JWT attempts soft-lock**: Token past expiry → 401 Token Expired
-6. **2FA-unverified admin attempts deletion**: Admin without valid 2FA (> 5 min old) → 401 2FA_SESSION_EXPIRED
-7. **Admin with revoked license:lifecycle role attempts soft-lock**: After revocation → 403 Permission Denied
+6. **2FA-unverified admin attempts deletion**: Admin without valid 2FA (> 5 min old) → 401
+   2FA_SESSION_EXPIRED
+7. **Admin with revoked license:lifecycle role attempts soft-lock**: After revocation → 403
+   Permission Denied
 8. **Guest user attempts soft-lock**: Guest role → 403 Unauthorized
 
 **Tenant Isolation Test Cases** (6+ required by QA Guardian):
 
 Location: `tests/integration/tenant-isolation.test.ts`
 
-1. **Cross-workspace license access**: Query Workspace B's license_id from Workspace A context → 404 or empty results
-2. **Cross-workspace snapshot visibility**: List snapshots for Workspace B from Workspace A → No snapshots visible
-3. **Cross-workspace audit log access**: Query audit logs for Workspace B license from Workspace A → 403 Forbidden
-4. **Concurrent soft-lock on same license from different tenants**: Two workspaces attempt soft-lock simultaneously → Only one succeeds, second gets 409 Conflict
-5. **Restore in one tenant does not affect another**: Archive + Restore Workspace A; Workspace B license remains unchanged
-6. **Audit log correlation_id unique per workspace**: Soft-lock transitions in A and B have different correlation_id → Cannot trace cross-tenant
+1. **Cross-workspace license access**: Query Workspace B's license_id from Workspace A context → 404
+   or empty results
+2. **Cross-workspace snapshot visibility**: List snapshots for Workspace B from Workspace A → No
+   snapshots visible
+3. **Cross-workspace audit log access**: Query audit logs for Workspace B license from Workspace A →
+   403 Forbidden
+4. **Concurrent soft-lock on same license from different tenants**: Two workspaces attempt soft-lock
+   simultaneously → Only one succeeds, second gets 409 Conflict
+5. **Restore in one tenant does not affect another**: Archive + Restore Workspace A; Workspace B
+   license remains unchanged
+6. **Audit log correlation_id unique per workspace**: Soft-lock transitions in A and B have
+   different correlation_id → Cannot trace cross-tenant
 
 ### Worker Tests
 
@@ -1037,8 +1045,10 @@ Location: `tests/integration/tenant-isolation.test.ts`
 
 - MMC Admin users may bypass per-user rate limits (1 req/sec standard → unlimited for admins)
 - **Enforcement**: Check user.roles contains 'admin' (from JWT, never from request body)
-- **Logging**: Every bypass logged with X-Admin-Bypass: true response header and actor_id in audit log
-- **Non-Compliance**: Non-admin user cannot obtain bypass; privilege escalation attempt logged and alerted
+- **Logging**: Every bypass logged with X-Admin-Bypass: true response header and actor_id in audit
+  log
+- **Non-Compliance**: Non-admin user cannot obtain bypass; privilege escalation attempt logged and
+  alerted
 
 ### Cross-Workspace Authorization Validation
 
@@ -1046,8 +1056,10 @@ Location: `tests/integration/tenant-isolation.test.ts`
 
 - MMC Admin must have explicit workspace association (mmc_users.workspace_id)
 - All admin lifecycle operations validated: admin.workspace_id == license.workspace_id
-- **Enforcement**: Middleware checks before route; mismatch returns 403 Forbidden with error code ADMIN_WORKSPACE_MISMATCH
-- **JWT Constraint**: JWT tokens for lifecycle operations must NOT include workspace override parameter
+- **Enforcement**: Middleware checks before route; mismatch returns 403 Forbidden with error code
+  ADMIN_WORKSPACE_MISMATCH
+- **JWT Constraint**: JWT tokens for lifecycle operations must NOT include workspace override
+  parameter
 - **Audit**: Every admin transition includes admin.workspace_id in license_audit_logs for compliance
 
 ### 2FA Freshness Validation
@@ -1055,8 +1067,10 @@ Location: `tests/integration/tenant-isolation.test.ts`
 **Definition**:
 
 - 2FA re-authentication required within 5-minute window for delete/confirm operations
-- **Enforcement**: After user completes 2FA, set session flag two_fa_verified_at = now(); generate 2fa_verification_id = UUID (one-time use)
-- **Middleware Check**: On delete/confirm endpoint: verify (now() - session.two_fa_verified_at) <= 5 minutes; if older return 401 Unauthorized (2FA_SESSION_EXPIRED)
+- **Enforcement**: After user completes 2FA, set session flag two_fa_verified_at = now(); generate
+  2fa_verification_id = UUID (one-time use)
+- **Middleware Check**: On delete/confirm endpoint: verify (now() - session.two_fa_verified_at) <= 5
+  minutes; if older return 401 Unauthorized (2FA_SESSION_EXPIRED)
 - **Error Codes**: 2FA_NOT_VERIFIED (401), 2FA_SESSION_EXPIRED (401) included in response
 
 ### Worker Snapshot S3 Upload Authentication
@@ -1090,7 +1104,8 @@ Location: `tests/integration/tenant-isolation.test.ts`
 - Projected peak: 100 concurrent soft-lock renewals per second during grace period
 - **SLA**: p95 latency < 10ms (under high contention); p50 < 1ms (normal load)
 - **Lock Timeout**: 30-second max lock hold; exceeded locks aborted to prevent deadlock
-- **Index**: Partial index on (license_id, status) WHERE status IN ('SOFT_LOCKED', 'ACTIVE') optimizes lock acquisition
+- **Index**: Partial index on (license_id, status) WHERE status IN ('SOFT_LOCKED', 'ACTIVE')
+  optimizes lock acquisition
 
 ### Idempotency State Management
 
@@ -1098,9 +1113,12 @@ Location: `tests/integration/tenant-isolation.test.ts`
 
 - Idempotency-Key deduplication stored in Redis (not in-memory per API instance)
 - **Redis TTL**: 24 hours post-operation completion
-- **Composite Key**: {license_id}:{operation_type}:{idempotency_key} prevents cross-license collisions
-- **Fallback**: If Redis unavailable, fall back to database unique constraint on (license_id, idempotency_key, created_at)
-- **Success Response**: First request executes; subsequent identical requests return cached response within TTL window
+- **Composite Key**: {license_id}:{operation_type}:{idempotency_key} prevents cross-license
+  collisions
+- **Fallback**: If Redis unavailable, fall back to database unique constraint on (license_id,
+  idempotency_key, created_at)
+- **Success Response**: First request executes; subsequent identical requests return cached response
+  within TTL window
 
 ### Prepared Statement Caching
 
@@ -1119,9 +1137,12 @@ Location: `tests/integration/tenant-isolation.test.ts`
 
 **Automation Required**:
 
-- ❌ **Prevent modification of existing migration files**: Hash check on A001-A005; any UPDATE to existing migration fails CI
-- ❌ **Detect duplicate migration IDs**: If new migration named A001 committed, CI rejects (only forward migrations allowed: A006, A007, etc.)
-- ❌ **Forward-only validation**: Automated script scans migration files, rejects destructive operations (DROP TABLE, DELETE FROM, ALTER... DROP COLUMN)
+- ❌ **Prevent modification of existing migration files**: Hash check on A001-A005; any UPDATE to
+  existing migration fails CI
+- ❌ **Detect duplicate migration IDs**: If new migration named A001 committed, CI rejects (only
+  forward migrations allowed: A006, A007, etc.)
+- ❌ **Forward-only validation**: Automated script scans migration files, rejects destructive
+  operations (DROP TABLE, DELETE FROM, ALTER... DROP COLUMN)
 - ✅ **Transaction safety**: All migrations wrapped in PostgreSQL transaction; rollback on failure
 
 ### Structured Logging in Pipeline
@@ -1130,10 +1151,13 @@ Location: `tests/integration/tenant-isolation.test.ts`
 
 - All pipeline events (lint, test, migration, deploy) emit structured JSON logs with:
   - timestamp (ISO-8601), level (INFO|WARN|ERROR), service (zidney-ci)
-  - stage (lint|test|migration|deploy), correlation_id (UUID), event (migration_start|test_pass|deploy_phase_2)
+  - stage (lint|test|migration|deploy), correlation_id (UUID), event
+    (migration_start|test_pass|deploy_phase_2)
   - metadata: migration_id, duration_ms, schema_version_before/after, rows_affected, rows_affected
-- **No console.log in production code**: CI check rejects any console.log (use structured logger only)
-- **Correlation ID propagation**: All pipeline stages inherit correlation_id from initial workflow trigger
+- **No console.log in production code**: CI check rejects any console.log (use structured logger
+  only)
+- **Correlation ID propagation**: All pipeline stages inherit correlation_id from initial workflow
+  trigger
 
 ### T053 Deployment Validation Implementation
 
@@ -1152,7 +1176,8 @@ Location: `tests/integration/tenant-isolation.test.ts`
 
 **Specification**:
 
-- If migration A001-A005 fail: Execute reverse migrations (schema rollback) via migration revert script
+- If migration A001-A005 fail: Execute reverse migrations (schema rollback) via migration revert
+  script
 - If revert fails: Restore from snapshot backup of pre-deploy schema
 - **Testing**: Reverse migration scripts validated in CI (not just forward migrations)
 
@@ -1160,10 +1185,12 @@ Location: `tests/integration/tenant-isolation.test.ts`
 
 **Specification**:
 
-- Before Phase 2 backend service update: Gracefully pause new job submissions (set worker pause flag in Redis)
+- Before Phase 2 backend service update: Gracefully pause new job submissions (set worker pause flag
+  in Redis)
 - Allow in-flight jobs to complete (max 30-minute grace period, then force-kill)
 - After service update: Resume job submissions
-- **Rationale**: Prevents race conditions between old API code queuing jobs and new worker code processing
+- **Rationale**: Prevents race conditions between old API code queuing jobs and new worker code
+  processing
 
 ### Snapshot Restore Safe Rollback
 
@@ -1177,7 +1204,8 @@ Location: `tests/integration/tenant-isolation.test.ts`
 
 **Specification**:
 
-- T053 includes explicit cross-tenant test: Create 3 test licenses in different workspaces, attempt cross-workspace transitions, verify all fail with 403
+- T053 includes explicit cross-tenant test: Create 3 test licenses in different workspaces, attempt
+  cross-workspace transitions, verify all fail with 403
 - Test must pass before Phase 2 proceeds
 - **Gates**: Phase 2 blocked until smoke test PASS
 
@@ -1186,48 +1214,59 @@ Location: `tests/integration/tenant-isolation.test.ts`
 **Specification**:
 
 - A003 (license_audit_logs) expected to process 500k+ rows during migration
-- **Batch Size**: 10k rows per batch with 1-second pause between batches (prevents table lock escalation)
-- **Index Creation**: Indexes created CONCURRENTLY (PostgreSQL 8.4+) to avoid blocking reads during migration
+- **Batch Size**: 10k rows per batch with 1-second pause between batches (prevents table lock
+  escalation)
+- **Index Creation**: Indexes created CONCURRENTLY (PostgreSQL 8.4+) to avoid blocking reads during
+  migration
 - **SLA**: A003 must complete within 15-minute maintenance window
 
 ### Reverse Migration Procedures (Critical for Phase 1 Rollback)
 
 **Specification**:
 
-Each migration (A001-A005) must have documented reverse procedure. If Phase 1 deployment fails, these procedures execute in reverse order:
+Each migration (A001-A005) must have documented reverse procedure. If Phase 1 deployment fails,
+these procedures execute in reverse order:
 
 **Reverse A005** (`apps/api/src/db/master/migrations/A005_reverse.sql`):
 
 - DROP TRIGGER license_status_sync_trigger
 - DROP FUNCTION sync_license_status_to_registry()
-- ALTER TABLE tenants_registry DROP COLUMN license_status, DROP COLUMN license_id, DROP COLUMN sync_status, DROP COLUMN last_synced_at
+- ALTER TABLE tenants_registry DROP COLUMN license_status, DROP COLUMN license_id, DROP COLUMN
+  sync_status, DROP COLUMN last_synced_at
 - DROP INDEX idx_registry_license_status, idx_registry_license_id, idx_registry_last_synced_at
-- **Verification**: SELECT COUNT(\*) FROM tenants_registry COLUMNS - should have original column count
+- **Verification**: SELECT COUNT(\*) FROM tenants_registry COLUMNS - should have original column
+  count
 
 **Reverse A004** (`apps/api/src/db/master/migrations/A004_reverse.sql`):
 
 - DROP TABLE IF EXISTS license_deletion_confirmations CASCADE
-- **Verification**: SELECT \* FROM information_schema.tables WHERE table_name='license_deletion_confirmations' - should be empty
+- **Verification**: SELECT \* FROM information_schema.tables WHERE
+  table_name='license_deletion_confirmations' - should be empty
 
 **Reverse A003** (`apps/api/src/db/master/migrations/A003_reverse.sql`):
 
 - DROP TRIGGER audit_immutability_trigger
 - DROP FUNCTION prevent_audit_modification()
 - DROP TABLE IF EXISTS license_audit_logs CASCADE
-- **Verification**: SELECT \* FROM information_schema.tables WHERE table_name='license_audit_logs' - should be empty
+- **Verification**: SELECT \* FROM information_schema.tables WHERE table_name='license_audit_logs' -
+  should be empty
 
 **Reverse A002** (`apps/api/src/db/master/migrations/A002_reverse.sql`):
 
 - ALTER TABLE licenses DROP CONSTRAINT IF EXISTS fk_licenses_current_snapshot_id
 - DROP TABLE IF EXISTS snapshots CASCADE
-- **Verification**: SELECT \* FROM information_schema.tables WHERE table_name='snapshots' - should be empty
+- **Verification**: SELECT \* FROM information_schema.tables WHERE table_name='snapshots' - should
+  be empty
 
 **Reverse A001** (`apps/api/src/db/master/migrations/A001_reverse.sql`):
 
-- ALTER TABLE licenses DROP CONSTRAINT IF EXISTS chk_soft_lock_until_consistency, chk_archived_at_consistency, chk_deleted_at_consistency
-- ALTER TABLE licenses DROP COLUMN IF EXISTS soft_lock_until, archived_at, deleted_at, current_snapshot_id
+- ALTER TABLE licenses DROP CONSTRAINT IF EXISTS chk_soft_lock_until_consistency,
+  chk_archived_at_consistency, chk_deleted_at_consistency
+- ALTER TABLE licenses DROP COLUMN IF EXISTS soft_lock_until, archived_at, deleted_at,
+  current_snapshot_id
 - DROP INDEX IF EXISTS idx_licenses_soft_lock_until, idx_licenses_archived_at
-- **Verification**: SELECT column_name FROM information_schema.columns WHERE table_name='licenses' - should NOT include soft_lock_until, etc.
+- **Verification**: SELECT column_name FROM information_schema.columns WHERE table_name='licenses' -
+  should NOT include soft_lock_until, etc.
 
 **Rollback Trigger** (automatic if any migration fails):
 
@@ -1276,7 +1315,8 @@ Each migration (A001-A005) must have documented reverse procedure. If Phase 1 de
 
 ## Conclusion
 
-This plan provides a complete, production-ready blueprint for implementing the four-state license lifecycle model within Zidney's architectural constraints. The implementation prioritizes:
+This plan provides a complete, production-ready blueprint for implementing the four-state license
+lifecycle model within Zidney's architectural constraints. The implementation prioritizes:
 
 - **Isolation**: Database-per-tenant preserved throughout
 - **Determinism**: Middleware enforces on every request, no surprises
@@ -1284,4 +1324,5 @@ This plan provides a complete, production-ready blueprint for implementing the f
 - **Idempotency**: Restore/snapshot operations safe to retry
 - **Zero Data Loss**: Snapshots preserve all data, restore is all-or-nothing
 
-The phased deployment approach, comprehensive testing strategy, and detailed rollback plan ensure safe production deployment with minimal risk.
+The phased deployment approach, comprehensive testing strategy, and detailed rollback plan ensure
+safe production deployment with minimal risk.

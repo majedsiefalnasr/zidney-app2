@@ -1,0 +1,7 @@
+{
+  "parser": "markdown",
+  "printWidth": 100,
+  "proseWrap": "preserve",
+  "singleQuote": false,
+  "embeddedLanguageFormatting": "auto"
+}

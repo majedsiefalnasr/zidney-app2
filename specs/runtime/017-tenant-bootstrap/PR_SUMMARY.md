@@ -26,18 +26,20 @@
 
 ## 3. Executive Summary
 
-- **Bootstraps the backoffice SPA runtime** for all tenant workspaces: `GET /api/v1/backoffice/context`
-  and `WS /ws/backoffice` are the two new entry points for the backoffice application to initialise.
-- **Touches API middleware chain, new tenant migration, and new Vue 3 SPA app** — all within strictly
-  isolated boundaries: no cross-tenant access, no shared DB pools, no business logic in frontend.
-- **Safe to deploy**: migration is forward-only with `backoffice_` prefix; no existing STAGE_12 tables
-  (`roles`, `role_permissions`) are modified; `schema_version` auto-incremented by runner.
-- **Constitutional guarantees intact**: database-per-tenant preserved, license middleware runs before
-  all backoffice routes, server-authoritative time only, structured logging throughout.
+- **Bootstraps the backoffice SPA runtime** for all tenant workspaces:
+  `GET /api/v1/backoffice/context` and `WS /ws/backoffice` are the two new entry points for the
+  backoffice application to initialise.
+- **Touches API middleware chain, new tenant migration, and new Vue 3 SPA app** — all within
+  strictly isolated boundaries: no cross-tenant access, no shared DB pools, no business logic in
+  frontend.
+- **Safe to deploy**: migration is forward-only with `backoffice_` prefix; no existing STAGE_12
+  tables (`roles`, `role_permissions`) are modified; `schema_version` auto-incremented by runner.
+- **Constitutional guarantees intact**: database-per-tenant preserved, license middleware runs
+  before all backoffice routes, server-authoritative time only, structured logging throughout.
 - **All 8 guardians returned PASS** across Analyze (5 guardians) and Implement (CI/CD, Deployment
   Engineer, Docker Specialist) after remediation rounds.
-- **Dockerfile and nginx** hardened: `builder-deps` stage with Vite devDeps, SPA dist copied to nginx,
-  `/ws/backoffice` WS upgrade block, `/backoffice/` SPA try_files fallback, `STOPSIGNAL` fix.
+- **Dockerfile and nginx** hardened: `builder-deps` stage with Vite devDeps, SPA dist copied to
+  nginx, `/ws/backoffice` WS upgrade block, `/backoffice/` SPA try_files fallback, `STOPSIGNAL` fix.
 
 ---
 
@@ -100,7 +102,8 @@
 
 ## 9. Testing Coverage
 
-- [x] Unit tests added — 4 unit test files (license-enforcement, rbac-guard, module-guard, migration)
+- [x] Unit tests added — 4 unit test files (license-enforcement, rbac-guard, module-guard,
+      migration)
 - [x] Integration tests added — 3 integration test files (context, WS, isolation)
 - [x] Tenant isolation tests: cross-workspace access attempts verified
 - [x] Edge cases covered: soft-lock 423, archived 403, duplicate WS connection, missing permissions
@@ -123,7 +126,8 @@ bunx vitest run \
 
 ## 10. Migration Impact
 
-- [x] New migration included: `apps/api/src/db/tenant/migrations/20260228_001_tenant_rbac_skeleton.ts`
+- [x] New migration included:
+      `apps/api/src/db/tenant/migrations/20260228_001_tenant_rbac_skeleton.ts`
 - [x] Backward compatibility verified: `backoffice_` prefix avoids all STAGE_12 table collisions
 - [x] Rollback strategy: restore from pre-upgrade snapshot (per AGENTS.md migration rules)
 - [x] No untracked schema changes: only this migration file touches the tenant schema
@@ -151,7 +155,9 @@ New tables created:
 
 ## 12. Stage Lifecycle Verification
 
-- [x] Stage Status updated in `specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_17_TENANT_BOOTSTRAP.md` → PRODUCTION READY
+- [x] Stage Status updated in
+      `specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_17_TENANT_BOOTSTRAP.md` → PRODUCTION
+      READY
 - [x] `.workflow-state.json` updated to `PRODUCTION READY`
 - [x] README.md progress table complete (all 8 steps ✅)
 - [x] All 7 step reports generated in `reports/`
@@ -163,7 +169,8 @@ New tables created:
 - [x] Safe for staging (migration forward-only, no destructive ops)
 - [x] Safe for production (Docker image builds verified by Docker Specialist guardian)
 - [x] No feature flags required
-- [ ] Runbook update: add `/backoffice/` SPA endpoint and `/ws/backoffice` WS endpoint to ops runbook
+- [ ] Runbook update: add `/backoffice/` SPA endpoint and `/ws/backoffice` WS endpoint to ops
+      runbook
 
 ---
 
@@ -175,9 +182,9 @@ Risk Level:
 - [x] Medium
 - [ ] High
 
-Explain why: The change is broad (API + SPA + infra in one stage) but each component is well-isolated
-and tested. The `backoffice_` table prefix eliminates the only real risk (schema collision).
-Docker and nginx changes are verified by guardian. All 67 tests pass. ESLint 0 errors.
+Explain why: The change is broad (API + SPA + infra in one stage) but each component is
+well-isolated and tested. The `backoffice_` table prefix eliminates the only real risk (schema
+collision). Docker and nginx changes are verified by guardian. All 67 tests pass. ESLint 0 errors.
 
 ---
 
@@ -209,7 +216,8 @@ Reviewer Sign-off:
 **Modified API files:**
 
 - `apps/api/src/app.ts` (backoffice routes mounted, duplicate correlationId removed)
-- `apps/api/src/middleware/license-enforcement.ts` (structured logger, enabled_modules/product_version)
+- `apps/api/src/middleware/license-enforcement.ts` (structured logger,
+  enabled_modules/product_version)
 - `apps/api/src/middleware/rate-limit.middleware.ts` (ts-ignore description fix)
 
 **New SPA scaffold (15 files):**

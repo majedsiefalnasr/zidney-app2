@@ -1,6 +1,7 @@
 # AI Skills Contract — Zidney
 
-This document defines mandatory behavioral constraints for all AI agents generating code, specs, migrations, UI, or infrastructure changes in Zidney.
+This document defines mandatory behavioral constraints for all AI agents generating code, specs,
+migrations, UI, or infrastructure changes in Zidney.
 
 Violation of this contract is considered architectural failure.
 

@@ -6,7 +6,8 @@
 
 ## What This Stage Does
 
-Establishes a standardized, immutable environment configuration system across all three Zidney frontend apps (MMC, Backoffice, Frontoffice). After this stage:
+Establishes a standardized, immutable environment configuration system across all three Zidney
+frontend apps (MMC, Backoffice, Frontoffice). After this stage:
 
 - All environment variable access goes through `core/config/env.ts`
 - Mode helpers (`isDev`, `isProd`, `isStaging`) replace scattered string comparisons
@@ -42,11 +43,11 @@ packages/types/src/
 
 ```typescript
 // In any component or service:
-import { appConfig, isDev, isProd, getApiBase } from '@/core/config/app-config'
+import { appConfig, isDev, isProd, getApiBase } from "@/core/config/app-config";
 
 // Access values
-const baseUrl = getApiBase()
-const env = appConfig.env.appEnv
+const baseUrl = getApiBase();
+const env = appConfig.env.appEnv;
 
 // Conditional debug behavior
 if (isDev()) {
@@ -62,12 +63,12 @@ if (appConfig.flags.enableDebugPanel) {
 ### In Tests
 
 ```typescript
-import { createEnvConfig } from '@/core/config/env'
+import { createEnvConfig } from "@/core/config/env";
 
 const testConfig = createEnvConfig({
-  apiBaseUrl: 'http://test.local',
-  appEnv: 'development',
-})
+  apiBaseUrl: "http://test.local",
+  appEnv: "development",
+});
 
 // testConfig is a full EnvConfig object with defaults + overrides
 ```
@@ -78,11 +79,11 @@ const testConfig = createEnvConfig({
 
 ```typescript
 // FORBIDDEN — will fail lint:
-const url = import.meta.env.VITE_API_BASE_URL
+const url = import.meta.env.VITE_API_BASE_URL;
 
 // CORRECT:
-import { getApiBase } from '@/core/config/app-config'
-const url = getApiBase()
+import { getApiBase } from "@/core/config/app-config";
+const url = getApiBase();
 ```
 
 ---

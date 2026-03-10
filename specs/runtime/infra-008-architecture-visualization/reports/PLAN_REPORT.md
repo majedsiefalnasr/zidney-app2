@@ -1,14 +1,16 @@
 # Plan Report — STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION
 
-**Step:** 3 — Plan
-**Timestamp:** 2026-03-09T00:00:00.000Z
-**Status:** COMPLETE
+**Step:** 3 — Plan **Timestamp:** 2026-03-09T00:00:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-A complete 6-step implementation plan has been generated for the architecture visualization pipeline. The plan introduces `scripts/architecture/visualize.ts` — a standalone read-only script that converts existing audit output into curated Mermaid diagrams stored in `docs/architecture/visualization/`. No database, no API routes, no tenant logic — pure developer tooling.
+A complete 6-step implementation plan has been generated for the architecture visualization
+pipeline. The plan introduces `scripts/architecture/visualize.ts` — a standalone read-only script
+that converts existing audit output into curated Mermaid diagrams stored in
+`docs/architecture/visualization/`. No database, no API routes, no tenant logic — pure developer
+tooling.
 
 Guardian Plan Validation:
 
@@ -83,13 +85,16 @@ Guardian Plan Validation:
 
 ## Transaction Boundaries
 
-- Not applicable. No database writes. Script writes to filesystem only; OS-level atomicity is sufficient for documentation artifacts.
+- Not applicable. No database writes. Script writes to filesystem only; OS-level atomicity is
+  sufficient for documentation artifacts.
 
 ---
 
 ## Idempotency Strategy
 
-- Fully idempotent by design. Running `bun run arch:visualize` multiple times overwrites output files with identical content (byte-identical given the same input files). Output directory is created if missing.
+- Fully idempotent by design. Running `bun run arch:visualize` multiple times overwrites output
+  files with identical content (byte-identical given the same input files). Output directory is
+  created if missing.
 
 ---
 
@@ -110,8 +115,10 @@ Guardian Plan Validation:
 
 ## Open Risks
 
-- `dependency-graph.json` schema change by upstream `infra-audit.ts` update: mitigated by defensive JSON parsing
-- `packages/app` and `packages/ui` (unregistered modules) trigger heuristic fallback + warning: explicitly handled per Q2 clarification
+- `dependency-graph.json` schema change by upstream `infra-audit.ts` update: mitigated by defensive
+  JSON parsing
+- `packages/app` and `packages/ui` (unregistered modules) trigger heuristic fallback + warning:
+  explicitly handled per Q2 clarification
 
 ---
 

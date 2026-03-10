@@ -101,7 +101,8 @@ WHERE table_name = 'products' AND constraint_type = 'UNIQUE';
 **If migration fails:**
 
 - [ ] Stop deployment
-- [ ] Restore snapshot: `pg_restore -U postgres -d zidney_master /backups/zidney_master_2026_02_22_pre_stage09.dump`
+- [ ] Restore snapshot:
+      `pg_restore -U postgres -d zidney_master /backups/zidney_master_2026_02_22_pre_stage09.dump`
 - [ ] Investigate error
 - [ ] Escalate to database team
 
@@ -215,7 +216,8 @@ kubectl logs -f deployment/zidney-api-staging -n staging --tail=100 | grep ERROR
 
 **If staging tests fail:**
 
-- [ ] Rollback staging: `kubectl set image deployment/zidney-api-staging api=registry.example.com/zidney-api:1.9.0 -n staging`
+- [ ] Rollback staging:
+      `kubectl set image deployment/zidney-api-staging api=registry.example.com/zidney-api:1.9.0 -n staging`
 - [ ] Restore database snapshot
 - [ ] Investigate error logs
 - [ ] Fix and retry

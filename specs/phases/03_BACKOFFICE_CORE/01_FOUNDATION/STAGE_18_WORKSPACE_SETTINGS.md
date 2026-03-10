@@ -9,9 +9,7 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: PRODUCTION READY
-Risk Level: LOW
-Closure Date: 2026-02-28
+Status: PRODUCTION READY Risk Level: LOW Closure Date: 2026-02-28
 
 Scope Closed:
 
@@ -35,9 +33,8 @@ Constitutional Compliance:
 - ADR-0007 Version compatibility enforced
 - ADR-0008 Semantic versioning enforced
 
-Notes:
-Stage is production ready. No structural backend modifications allowed.
-Modifications require a new migration stage.
+Notes: Stage is production ready. No structural backend modifications allowed. Modifications require
+a new migration stage.
 
 ---
 
@@ -82,8 +79,7 @@ Settings must not:
 
 Recommended model:
 
-Single table:
-workspace_settings
+Single table: workspace_settings
 
 Structure:
 
@@ -164,8 +160,7 @@ Branding rules:
 - Must not alter permissions
 - Must not affect grading
 
-Color values must follow token-based system.
-No inline styling allowed.
+Color values must follow token-based system. No inline styling allowed.
 
 ---
 

@@ -84,8 +84,8 @@ Tenant provisioning must:
 
 Baseline schema must match latest stable release.
 
-Provisioning must never apply incremental history one-by-one.
-It must apply the full compiled baseline snapshot.
+Provisioning must never apply incremental history one-by-one. It must apply the full compiled
+baseline snapshot.
 
 ---
 

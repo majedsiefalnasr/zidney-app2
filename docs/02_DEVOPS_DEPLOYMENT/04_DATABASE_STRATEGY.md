@@ -1,8 +1,7 @@
 # Database Strategy
 
-Phase Alignment: Platform Foundation – Multi-Tenancy Core
-Scope: Database-per-tenant model, pooling, migrations, backups, and recovery
-Status: Enforced
+Phase Alignment: Platform Foundation – Multi-Tenancy Core Scope: Database-per-tenant model, pooling,
+migrations, backups, and recovery Status: Enforced
 
 ---
 
@@ -17,9 +16,8 @@ Single PostgreSQL instance containing:
 - workspace\_<slug_2>
 - workspace\_<slug_n>
 
-No row-based multi-tenancy is allowed.
-No shared tenant tables are allowed.
-No cross-database joins are allowed.
+No row-based multi-tenancy is allowed. No shared tenant tables are allowed. No cross-database joins
+are allowed.
 
 Isolation is enforced at database level.
 

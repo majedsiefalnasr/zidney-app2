@@ -2,7 +2,8 @@
 
 ## Purpose
 
-Shared Redis utility library providing rate limiting, distributed locking, and queue helper primitives used across the API and Worker services.
+Shared Redis utility library providing rate limiting, distributed locking, and queue helper
+primitives used across the API and Worker services.
 
 ---
 
@@ -62,29 +63,26 @@ import {
   enqueue,
   dequeue,
   peekQueue,
-} from '@zidney/redis-utils'
-import type {
-  RateLimitResult,
-  LockOptions,
-  QueueOptions,
-} from '@zidney/redis-utils'
+} from "@zidney/redis-utils";
+import type { RateLimitResult, LockOptions, QueueOptions } from "@zidney/redis-utils";
 
 // Rate limiting
 const limiter = createSlidingWindowRateLimiter(redis, {
   limit: 5,
   windowMs: 60_000,
-})
-const result: RateLimitResult = await limiter.check('user:123')
+});
+const result: RateLimitResult = await limiter.check("user:123");
 
 // Distributed locks
-const lock = await acquireLock(redis, 'provision:workspace:acme', {
+const lock = await acquireLock(redis, "provision:workspace:acme", {
   ttlMs: 30_000,
-})
-await releaseLock(redis, lock)
+});
+await releaseLock(redis, lock);
 
 // Queue operations
-await enqueue(redis, 'jobs:provision', jobPayload)
-const job = await dequeue(redis, 'jobs:provision')
+await enqueue(redis, "jobs:provision", jobPayload);
+const job = await dequeue(redis, "jobs:provision");
 ```
 
-**Exports**: `createSlidingWindowRateLimiter`, `createFixedWindowRateLimiter`, `acquireLock`, `releaseLock`, `enqueue`, `dequeue`, `peekQueue`, `RateLimitResult`, `LockOptions`, `QueueOptions`
+**Exports**: `createSlidingWindowRateLimiter`, `createFixedWindowRateLimiter`, `acquireLock`,
+`releaseLock`, `enqueue`, `dequeue`, `peekQueue`, `RateLimitResult`, `LockOptions`, `QueueOptions`

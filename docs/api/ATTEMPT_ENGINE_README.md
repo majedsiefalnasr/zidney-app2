@@ -8,7 +8,9 @@
 
 ## Overview
 
-The Attempt Engine API is the core exam and assignment attempt management system for Zidney. It provides database-per-tenant isolation, snapshot-based immutability, and pessimistic locking for safe concurrent exam environments.
+The Attempt Engine API is the core exam and assignment attempt management system for Zidney. It
+provides database-per-tenant isolation, snapshot-based immutability, and pessimistic locking for
+safe concurrent exam environments.
 
 ### Architecture at a Glance
 
@@ -71,7 +73,9 @@ An **attempt** is a single user's engagement with an exam or assignment from sta
 
 **Why Snapshots?**
 
-If exam configuration could change during grading, different users taking the same exam at nearly the same time could get different scores for identical responses. This breaks fairness and traceability.
+If exam configuration could change during grading, different users taking the same exam at nearly
+the same time could get different scores for identical responses. This breaks fairness and
+traceability.
 
 **Snapshot Guarantee:**
 
@@ -116,10 +120,10 @@ SELECT * FROM grading_configs WHERE exam_id = $1
 
 ```typescript
 // ✅ Correct
-const remainingTime = examDuration - (now() - attempt.created_at)
+const remainingTime = examDuration - (now() - attempt.created_at);
 
 // ❌ Wrong (data leak, cheating vector)
-const remainingTime = examDuration - (client_now - client_started_at)
+const remainingTime = examDuration - (client_now - client_started_at);
 ```
 
 ### 5. Submission Workflow & Idempotency
@@ -150,7 +154,8 @@ const remainingTime = examDuration - (client_now - client_started_at)
 
 **Why Idempotency?**
 
-If network fails after submission but before response, client doesn't know if it succeeded. Client retries with same idempotency key. Server returns same result, no double-grading.
+If network fails after submission but before response, client doesn't know if it succeeded. Client
+retries with same idempotency key. Server returns same result, no double-grading.
 
 **Three-Layer Idempotency:**
 
@@ -388,14 +393,14 @@ Every workspace-bound route must pass through:
 
 ```typescript
 app.post(
-  '/workspaces/:workspace_slug/attempts',
+  "/workspaces/:workspace_slug/attempts",
   correlationIdMiddleware,
   tenantResolverMiddleware,
   licenseValidatorMiddleware, // ← Cannot submit if SOFT_LOCKED
   authMiddleware,
   authorizationMiddleware,
-  createAttemptHandler // ← Route logic
-)
+  createAttemptHandler, // ← Route logic
+);
 ```
 
 ---
@@ -454,63 +459,63 @@ All requests logged with:
 
 ```typescript
 // 1. Create attempt
-const createRes = await fetch('/api/v1/attempts', {
-  method: 'POST',
+const createRes = await fetch("/api/v1/attempts", {
+  method: "POST",
   headers: {
     Authorization: `Bearer ${token}`,
-    'X-Correlation-ID': generateUUID(),
+    "X-Correlation-ID": generateUUID(),
   },
   body: JSON.stringify({
-    exam_id: '...',
-    attempt_mode: 'CHRONO',
+    exam_id: "...",
+    attempt_mode: "CHRONO",
   }),
-})
-const { id: attemptId } = await createRes.json()
+});
+const { id: attemptId } = await createRes.json();
 
 // 2. Show exam UI, autosave
 setInterval(() => {
   fetch(`/api/v1/attempts/${attemptId}/progress`, {
-    method: 'PATCH',
+    method: "PATCH",
     body: JSON.stringify({
       question_index: currentQuestion,
       response_data: userResponse,
     }),
-  })
-}, 30000) // Every 30 seconds
+  });
+}, 30000); // Every 30 seconds
 
 // 3. On submit, retry with backoff
 async function submitWithRetry(attemptId) {
-  const delays = [100, 200, 400]
+  const delays = [100, 200, 400];
   for (let i = 0; i < delays.length; i++) {
     try {
       return await fetch(`/api/v1/attempts/${attemptId}/submit`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'X-Idempotency-Key': generateUUID(),
+          "X-Idempotency-Key": generateUUID(),
         },
-      })
+      });
     } catch (e) {
       if (e.status === 409) {
-        await sleep(delays[i])
-        continue
+        await sleep(delays[i]);
+        continue;
       }
-      throw e
+      throw e;
     }
   }
 }
 
 // 4. Poll result
 async function pollResult(attemptId) {
-  const maxAttempts = 60
+  const maxAttempts = 60;
   for (let i = 0; i < maxAttempts; i++) {
-    const res = await fetch(`/api/v1/attempts/${attemptId}/result`)
+    const res = await fetch(`/api/v1/attempts/${attemptId}/result`);
     if (res.status === 200) {
-      return await res.json()
+      return await res.json();
     }
-    const retryAfter = res.headers.get('Retry-After') || 2
-    await sleep(parseInt(retryAfter) * 1000)
+    const retryAfter = res.headers.get("Retry-After") || 2;
+    await sleep(parseInt(retryAfter) * 1000);
   }
-  throw new Error('Grading timeout')
+  throw new Error("Grading timeout");
 }
 ```
 

@@ -9,9 +9,12 @@
 
 ## Overview
 
-The MMC Dashboard queries **master_db only**. This document specifies the complete schema requirements for all tables, indexes, and query patterns needed to support dashboard analytics operations.
+The MMC Dashboard queries **master_db only**. This document specifies the complete schema
+requirements for all tables, indexes, and query patterns needed to support dashboard analytics
+operations.
 
-All dashboard data derives from pre-existing master_db tables (products, licenses, affiliates, affiliate_usages, revenue_records) plus optional summary tables for performance optimization.
+All dashboard data derives from pre-existing master_db tables (products, licenses, affiliates,
+affiliate_usages, revenue_records) plus optional summary tables for performance optimization.
 
 ---
 
@@ -382,7 +385,8 @@ CREATE TABLE mmc_members (
 
 ## Part 2: Summary Tables (Optional Performance Optimization)
 
-These tables are **optional** and should be created only if performance testing shows need for precomputation.
+These tables are **optional** and should be created only if performance testing shows need for
+precomputation.
 
 ### Table 7: `revenue_summary_monthly` (Optional Materialized View)
 
@@ -706,17 +710,17 @@ SELECT amount FROM revenue_records WHERE id = $1;
 **Application Layer** (Display Rounding):
 
 ```typescript
-import Decimal from 'decimal.js'
+import Decimal from "decimal.js";
 
 function roundRevenue(value: string): string {
   // Parse stored value, round to 2 decimals (round-half-up)
-  return new Decimal(value).toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toString()
+  return new Decimal(value).toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toString();
 }
 
 // Example
-roundRevenue('95000.4567') // Returns: "95000.46"
-roundRevenue('100.005') // Returns: "100.01" (round-half-up)
-roundRevenue('100.004') // Returns: "100.00"
+roundRevenue("95000.4567"); // Returns: "95000.46"
+roundRevenue("100.005"); // Returns: "100.01" (round-half-up)
+roundRevenue("100.004"); // Returns: "100.00"
 ```
 
 ### Commission Calculation
@@ -735,7 +739,7 @@ WHERE affiliate_id = $1 AND created_at BETWEEN $2 AND $3;
 
 ```typescript
 // Application display rounding
-const displayCommission = roundRevenue(dbResult.total_commission)
+const displayCommission = roundRevenue(dbResult.total_commission);
 // Output: "15500.50"
 ```
 
@@ -746,32 +750,32 @@ function calculateAverage(sum: string, count: number): string {
   return new Decimal(sum)
     .dividedBy(new Decimal(count))
     .toDecimalPlaces(2, Decimal.ROUND_HALF_UP)
-    .toString()
+    .toString();
 }
 
 // Example: avg_revenue_per_license
-const avg = calculateAverage('95000.50', 650) // "146.15"
+const avg = calculateAverage("95000.50", 650); // "146.15"
 ```
 
 ### Growth Percentage
 
 ```typescript
 function calculateGrowthPercent(current: string, previous: string): string {
-  const curr = new Decimal(current)
-  const prev = new Decimal(previous)
+  const curr = new Decimal(current);
+  const prev = new Decimal(previous);
 
-  if (prev.isZero()) return '0.00' // Avoid divide by zero
+  if (prev.isZero()) return "0.00"; // Avoid divide by zero
 
   return curr
     .minus(prev)
     .dividedBy(prev)
     .times(100)
     .toDecimalPlaces(2, Decimal.ROUND_HALF_UP)
-    .toString()
+    .toString();
 }
 
 // Example
-calculateGrowthPercent('230000.00', '220000.00') // "4.55"
+calculateGrowthPercent("230000.00", "220000.00"); // "4.55"
 ```
 
 ---
@@ -939,7 +943,8 @@ Before schema changes:
 
 1. Dashboard metrics are **platform-level aggregate** (not per-workspace)
 2. Revenue and commission data sourced from `revenue_records` table
-3. For drilling into individual license/affiliate details, custom queries needed (outside dashboard scope)
+3. For drilling into individual license/affiliate details, custom queries needed (outside dashboard
+   scope)
 4. Audit trail: All dashboard access logged in `mmc_audit_log` table
 
 ---

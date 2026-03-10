@@ -68,11 +68,9 @@ Backend determines:
 
 ## Primary Routes
 
-Live sessions list:
-`/live`
+Live sessions list: `/live`
 
-Single session detail:
-`/live/:session_id`
+Single session detail: `/live/:session_id`
 
 All routes require:
 

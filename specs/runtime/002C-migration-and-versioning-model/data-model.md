@@ -1,6 +1,7 @@
 # Data Model: Migration & Versioning System
 
-**Purpose:** Define all versioning entities, migration tracking tables, and state management for the migration engine
+**Purpose:** Define all versioning entities, migration tracking tables, and state management for the
+migration engine
 
 **Version:** 1.0.0  
 **Created:** 2026-02-16  
@@ -107,7 +108,8 @@
   - `workspace_id` (UUID, FK → workspaces.id, NOT NULL): Which workspace backed up
   - `previous_schema_version` (VARCHAR 20, NOT NULL): Schema version before upgrade
   - `target_schema_version` (VARCHAR 20, NOT NULL): Schema version upgrade targeted
-  - `snapshot_location` (VARCHAR 512, NOT NULL): S3 path or blob URL (e.g., "s3://backups/workspace-123/snapshot-uuid.sql.gz")
+  - `snapshot_location` (VARCHAR 512, NOT NULL): S3 path or blob URL (e.g.,
+    "s3://backups/workspace-123/snapshot-uuid.sql.gz")
   - `snapshot_size_bytes` (BIGINT, NOT NULL): Uncompressed size for storage planning
   - `created_at` (TIMESTAMPTZ, DEFAULT now()): When snapshot taken
   - `expires_at` (TIMESTAMPTZ, NOT NULL): When snapshot can be deleted
@@ -207,7 +209,8 @@ All migration files must begin with:
 **Fields:**
 
 - `Migration`: Target schema version (must be parseable SemVer)
-- `Required Minimum Product Version`: Earliest product version allowed to run this migration (or "none")
+- `Required Minimum Product Version`: Earliest product version allowed to run this migration (or
+  "none")
 - `Breaking`: Set to `true` only if this migration requires MAJOR version bump
 - `Description`: Purpose of migration
 
@@ -473,8 +476,8 @@ Purpose: Detect file tampering or version drift
 
 ### Estimated Storage
 
-**per migration_registry record:** ~500 bytes (metadata only)
-**per upgrade_snapshots record:** ~200 bytes (metadata only, snapshot stored externally)
+**per migration_registry record:** ~500 bytes (metadata only) **per upgrade_snapshots record:** ~200
+bytes (metadata only, snapshot stored externally)
 
 **Retention:**
 

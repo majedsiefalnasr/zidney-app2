@@ -8,7 +8,11 @@
 
 ## Summary
 
-The module-boundaries governance stage is complete and production ready. All 26 tasks delivered. 43 new tests (all pass). AI guard script performs 0.4s under the 30-second budget. Architecture score: 100/100. All three pre-closure guardians (CI/CD, Deployment, Docker) returned PASS verdicts. Stage status shifted to BACKEND CLOSED after implement step; now finalized as PRODUCTION READY. No further modifications allowed without a new stage.
+The module-boundaries governance stage is complete and production ready. All 26 tasks delivered. 43
+new tests (all pass). AI guard script performs 0.4s under the 30-second budget. Architecture score:
+100/100. All three pre-closure guardians (CI/CD, Deployment, Docker) returned PASS verdicts. Stage
+status shifted to BACKEND CLOSED after implement step; now finalized as PRODUCTION READY. No further
+modifications allowed without a new stage.
 
 ---
 
@@ -29,23 +33,39 @@ The module-boundaries governance stage is complete and production ready. All 26 
 
 ## Scope Delivered
 
-- **`docs/architecture/module-boundaries.json`** — Machine-readable module boundary contract (13 modules, 4 layers: infrastructure, domain, runtime, ui; complete dependency matrix; 4 cross-cutting enforcement rules)
-- **`scripts/ai-guard.ts`** — Extended with 5 exported layer-boundary validation functions (loadModuleBoundaries, loadTsAliases, resolveImportToModule, matchesGlobPattern, validateLayerBoundaries); wired into runGuard() execution path
-- **`scripts/infra-audit.ts`** — New findUndeclaredModulesFromBoundaries() function; import.meta.main guard prevents side effects on module import; auto-discovers modules outside module-boundaries.json
-- **Static structure tests** — 7 tests validating module-boundaries.json schema, field completeness, layer existence, module declaration, dependency matrix coverage
-- **FR-008 behavioral tests** — 8 tests covering infra-audit integration (undeclared module detection across all layers)
-- **AI Guard unit tests** — 28 comprehensive tests covering all validation functions and error paths (scenarios a–n); includes module-boundaries.json load path, dependency violations, layer breaches, circular dependencies, cross-cutting rule enforcement
-- **Test integration** — `test:unit:boundaries` script added to package.json; CI step added to `.github/workflows/ci.yml` for automated execution
-- **Package management** — `ai-guard` script entry in package.json; proper pipeline integration in CI
-- **All 43 tests passing** — 7 static + 8 infra-audit + 28 ai-guard; zero failures; 100% coverage of module-boundaries.json contract
-- **Performance validated** — AI guard execution: 0.4s wall-clock (99% under 30-second NFR-004 budget)
+- **`docs/architecture/module-boundaries.json`** — Machine-readable module boundary contract (13
+  modules, 4 layers: infrastructure, domain, runtime, ui; complete dependency matrix; 4
+  cross-cutting enforcement rules)
+- **`scripts/ai-guard.ts`** — Extended with 5 exported layer-boundary validation functions
+  (loadModuleBoundaries, loadTsAliases, resolveImportToModule, matchesGlobPattern,
+  validateLayerBoundaries); wired into runGuard() execution path
+- **`scripts/infra-audit.ts`** — New findUndeclaredModulesFromBoundaries() function;
+  import.meta.main guard prevents side effects on module import; auto-discovers modules outside
+  module-boundaries.json
+- **Static structure tests** — 7 tests validating module-boundaries.json schema, field completeness,
+  layer existence, module declaration, dependency matrix coverage
+- **FR-008 behavioral tests** — 8 tests covering infra-audit integration (undeclared module
+  detection across all layers)
+- **AI Guard unit tests** — 28 comprehensive tests covering all validation functions and error paths
+  (scenarios a–n); includes module-boundaries.json load path, dependency violations, layer breaches,
+  circular dependencies, cross-cutting rule enforcement
+- **Test integration** — `test:unit:boundaries` script added to package.json; CI step added to
+  `.github/workflows/ci.yml` for automated execution
+- **Package management** — `ai-guard` script entry in package.json; proper pipeline integration in
+  CI
+- **All 43 tests passing** — 7 static + 8 infra-audit + 28 ai-guard; zero failures; 100% coverage of
+  module-boundaries.json contract
+- **Performance validated** — AI guard execution: 0.4s wall-clock (99% under 30-second NFR-004
+  budget)
 - **Architecture score: 100/100** — Zero drift, zero violations, zero dependencies breaches
 
 ---
 
 ## Deferred Scope
 
-**None** — All 26 tasks completed. Pre-existing non-blocking observations (11 Biome `any` warnings in infra-audit.ts, undeclared modules `packages/app` and `packages/ui`) documented but not blocking closure.
+**None** — All 26 tasks completed. Pre-existing non-blocking observations (11 Biome `any` warnings
+in infra-audit.ts, undeclared modules `packages/app` and `packages/ui`) documented but not blocking
+closure.
 
 ---
 
@@ -77,12 +97,18 @@ The module-boundaries governance stage is complete and production ready. All 26 
 
 **Justification:**
 
-1. **Scope isolation** — Pure governance infrastructure; no runtime code path changes; no database queries; no endpoint modifications; no worker jobs added
-2. **Blast radius** — Zero in production systems; governance validations run at pre-commit time only; infra-audit.ts executes read-only analysis
-3. **Performance** — AI guard 0.4s; well within NFR-004 budget; no production impact on request latency
-4. **Architecture safety** — Module-boundaries.json is a separate JSON schema; does not modify ARCHITECTURE_MAP.json; does not alter layer rules (independent governance layer)
-5. **Rollback simplicity** — All changes are additive (new files, function additions, test additions); rollback is revert-commit; no state cleanup required
-6. **Testing coverage** — 43 new tests; all pass; test coverage spans static validation, runtime behavior, error paths, and integration with existing scripts
+1. **Scope isolation** — Pure governance infrastructure; no runtime code path changes; no database
+   queries; no endpoint modifications; no worker jobs added
+2. **Blast radius** — Zero in production systems; governance validations run at pre-commit time
+   only; infra-audit.ts executes read-only analysis
+3. **Performance** — AI guard 0.4s; well within NFR-004 budget; no production impact on request
+   latency
+4. **Architecture safety** — Module-boundaries.json is a separate JSON schema; does not modify
+   ARCHITECTURE_MAP.json; does not alter layer rules (independent governance layer)
+5. **Rollback simplicity** — All changes are additive (new files, function additions, test
+   additions); rollback is revert-commit; no state cleanup required
+6. **Testing coverage** — 43 new tests; all pass; test coverage spans static validation, runtime
+   behavior, error paths, and integration with existing scripts
 7. **Guardian verdicts** — 3/3 pre-closure guardians PASS (CI/CD, Deployment, Docker)
 8. **Compliance** — All ADRs remain intact; no constitutional violations
 
@@ -131,7 +157,8 @@ The module-boundaries governance stage is complete and production ready. All 26 
 ## Next Step
 
 1. **Open PR** — Use [PR_SUMMARY.md](PR_SUMMARY.md) to create pull request to `develop` branch
-2. **Share with team** — Distribute [guides/TESTING_GUIDE.md](guides/TESTING_GUIDE.md) to reviewers and QA
+2. **Share with team** — Distribute [guides/TESTING_GUIDE.md](guides/TESTING_GUIDE.md) to reviewers
+   and QA
 3. **Merge** — After review approval, merge to develop (or main if deploying to production)
 4. **Monitor** — First CI run will validate governance rules against the merged state
 
@@ -139,6 +166,8 @@ The module-boundaries governance stage is complete and production ready. All 26 
 
 ## Stage File Update
 
-`specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_07_MODULE_BOUNDARIES.md` status: **PRODUCTION READY**
+`specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_07_MODULE_BOUNDARIES.md` status: **PRODUCTION
+READY**
 
-No further backend modifications allowed. Modifications require a new infrastructure/governance stage.
+No further backend modifications allowed. Modifications require a new infrastructure/governance
+stage.

@@ -2,13 +2,16 @@
 
 ## Purpose
 
-Shared TypeScript type definitions and enums for the entire Zidney platform. Serves as the single source of truth for all domain entity shapes, status enums, and role definitions used across `apps/*` and `packages/*`.
+Shared TypeScript type definitions and enums for the entire Zidney platform. Serves as the single
+source of truth for all domain entity shapes, status enums, and role definitions used across
+`apps/*` and `packages/*`.
 
 ---
 
 ## Responsibilities
 
-- Export TypeScript interfaces for all master-DB entities: `Product`, `License`, `TenantRegistry`, `MMCUser`, `PlatformSchemaVersion`
+- Export TypeScript interfaces for all master-DB entities: `Product`, `License`, `TenantRegistry`,
+  `MMCUser`, `PlatformSchemaVersion`
 - Export status enums: `LicenseStatus`, `MMCUserRole`, `AttemptStatus`, `WorkspaceStatus`
 - Export request/response wrapper types used by the API layer
 - Provide type utilities shared across domain packages
@@ -73,7 +76,7 @@ import type {
   // Utility types
   Paginated, // { items: T[], total: number, page: number, pageSize: number }
   WithTimestamps, // { created_at: Date, updated_at: Date }
-} from '@zidney/types'
+} from "@zidney/types";
 ```
 
 ---
@@ -91,7 +94,7 @@ import {
   PlatformSchemaVersion,
   LicenseStatus,
   MMCUserRole,
-} from '@zidney/types'
+} from "@zidney/types";
 ```
 
 ### Product
@@ -100,13 +103,13 @@ Application product definition.
 
 ```typescript
 interface Product {
-  id: string // UUID
-  name: string
-  slug: string // Globally unique identifier
-  description?: string
-  version: string // Semantic version: X.Y.Z
-  enabled_modules: Record<string, boolean> // Feature flags
-  created_at: Date
+  id: string; // UUID
+  name: string;
+  slug: string; // Globally unique identifier
+  description?: string;
+  version: string; // Semantic version: X.Y.Z
+  enabled_modules: Record<string, boolean>; // Feature flags
+  created_at: Date;
 }
 ```
 
@@ -134,22 +137,22 @@ License registry with workspace allocation.
 
 ```typescript
 interface License {
-  id: string // UUID
-  product_id: string // FK→products
-  workspace_slug: string // Globally unique
-  status: LicenseStatus // ACTIVE | SOFT_LOCKED | ARCHIVED
-  student_limit?: number // NULL = unlimited
-  staff_limit?: number // NULL = unlimited
-  soft_lock_until?: Date
-  archived_at?: Date
-  created_at: Date
-  updated_at: Date
+  id: string; // UUID
+  product_id: string; // FK→products
+  workspace_slug: string; // Globally unique
+  status: LicenseStatus; // ACTIVE | SOFT_LOCKED | ARCHIVED
+  student_limit?: number; // NULL = unlimited
+  staff_limit?: number; // NULL = unlimited
+  soft_lock_until?: Date;
+  archived_at?: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 
 enum LicenseStatus {
-  ACTIVE = 'ACTIVE',
-  SOFT_LOCKED = 'SOFT_LOCKED',
-  ARCHIVED = 'ARCHIVED',
+  ACTIVE = "ACTIVE",
+  SOFT_LOCKED = "SOFT_LOCKED",
+  ARCHIVED = "ARCHIVED",
 }
 ```
 
@@ -161,16 +164,16 @@ Tenant database connection metadata.
 
 ```typescript
 interface TenantRegistry {
-  id: string // UUID
-  license_id: string // FK→licenses
-  workspace_slug: string // Unique, matches license slug
-  db_host: string
-  db_port: number
-  db_name: string
-  db_user: string
-  db_password_encrypted: string // Encrypted at rest
-  created_at: Date
-  updated_at: Date
+  id: string; // UUID
+  license_id: string; // FK→licenses
+  workspace_slug: string; // Unique, matches license slug
+  db_host: string;
+  db_port: number;
+  db_name: string;
+  db_user: string;
+  db_password_encrypted: string; // Encrypted at rest
+  created_at: Date;
+  updated_at: Date;
 }
 ```
 
@@ -182,19 +185,19 @@ Master Management Console user account.
 
 ```typescript
 interface MMCUser {
-  id: number // Serial
-  email: string // Globally unique
-  password_hash: string // Bcrypt hash
-  role: MMCUserRole
-  last_login_at?: Date
-  created_at: Date
-  updated_at: Date
+  id: number; // Serial
+  email: string; // Globally unique
+  password_hash: string; // Bcrypt hash
+  role: MMCUserRole;
+  last_login_at?: Date;
+  created_at: Date;
+  updated_at: Date;
 }
 
 enum MMCUserRole {
-  ADMIN = 'admin',
-  OPERATOR = 'operator',
-  READ_ONLY = 'read_only',
+  ADMIN = "admin",
+  OPERATOR = "operator",
+  READ_ONLY = "read_only",
 }
 ```
 
@@ -206,10 +209,10 @@ Platform schema version tracking (single-row table).
 
 ```typescript
 interface PlatformSchemaVersion {
-  id: 1 // Always 1
-  current_version: string // X.Y.Z
-  minimum_supported_version: string // X.Y.Z
-  updated_at: Date
+  id: 1; // Always 1
+  current_version: string; // X.Y.Z
+  minimum_supported_version: string; // X.Y.Z
+  updated_at: Date;
 }
 ```
 
@@ -229,7 +232,7 @@ import {
   UpdateLicenseInput,
   UpdateTenantRegistryInput,
   UpdateMMCUserInput,
-} from '@zidney/types'
+} from "@zidney/types";
 ```
 
 ---
@@ -247,20 +250,20 @@ import {
   isLicenseSoftLocked,
   isLicenseArchived,
   canLicenseBeUsed,
-} from '@zidney/types'
+} from "@zidney/types";
 
 // Version parsing
-const version = parseVersion('1.5.3') // { major: 1, minor: 5, patch: 3 }
+const version = parseVersion("1.5.3"); // { major: 1, minor: 5, patch: 3 }
 
 // Version comparison
-compareVersions('1.5.0', '1.0.0') // 1 (first is greater)
+compareVersions("1.5.0", "1.0.0"); // 1 (first is greater)
 
 // Version compatibility check
-isVersionCompatible('1.5.0', '1.0.0') // true (1.5.0 >= 1.0.0)
+isVersionCompatible("1.5.0", "1.0.0"); // true (1.5.0 >= 1.0.0)
 
 // License state checking
-isLicenseActive(LicenseStatus.ACTIVE) // true
-canLicenseBeUsed(LicenseStatus.SOFT_LOCKED) // false
+isLicenseActive(LicenseStatus.ACTIVE); // true
+canLicenseBeUsed(LicenseStatus.SOFT_LOCKED); // false
 ```
 
 ---
@@ -270,20 +273,20 @@ canLicenseBeUsed(LicenseStatus.SOFT_LOCKED) // false
 All error codes and HTTP status mappings:
 
 ```typescript
-import { MasterDBErrorCode, getHTTPStatus } from '@zidney/types'
+import { MasterDBErrorCode, getHTTPStatus } from "@zidney/types";
 
 // Error code enumeration
 enum MasterDBErrorCode {
-  INVALID_REQUEST_BODY = 'INVALID_REQUEST_BODY', // 400
-  PRODUCT_NOT_FOUND = 'PRODUCT_NOT_FOUND', // 404
-  LICENSE_SOFT_LOCKED = 'LICENSE_SOFT_LOCKED', // 423
-  SCHEMA_VERSION_MISMATCH = 'SCHEMA_VERSION_MISMATCH', // 426
+  INVALID_REQUEST_BODY = "INVALID_REQUEST_BODY", // 400
+  PRODUCT_NOT_FOUND = "PRODUCT_NOT_FOUND", // 404
+  LICENSE_SOFT_LOCKED = "LICENSE_SOFT_LOCKED", // 423
+  SCHEMA_VERSION_MISMATCH = "SCHEMA_VERSION_MISMATCH", // 426
   // ... 28 total error codes
 }
 
 // Get HTTP status for error
-getHTTPStatus(MasterDBErrorCode.LICENSE_NOT_FOUND) // 404
-getHTTPStatus(MasterDBErrorCode.DATABASE_ERROR) // 500
+getHTTPStatus(MasterDBErrorCode.LICENSE_NOT_FOUND); // 404
+getHTTPStatus(MasterDBErrorCode.DATABASE_ERROR); // 500
 ```
 
 See [API_ERROR_CODES.md](../../docs/API_ERROR_CODES.md) for complete error reference.
@@ -352,29 +355,29 @@ import {
   hasAnyPermission,
   hasAllPermissions,
   getPermissions,
-} from '@zidney/types'
+} from "@zidney/types";
 
 // Permission enumeration
 enum MasterDBPermission {
-  CREATE_PRODUCT = 'create_product',
-  READ_PRODUCT = 'read_product',
-  UPDATE_PRODUCT = 'update_product',
-  DELETE_PRODUCT = 'delete_product',
+  CREATE_PRODUCT = "create_product",
+  READ_PRODUCT = "read_product",
+  UPDATE_PRODUCT = "update_product",
+  DELETE_PRODUCT = "delete_product",
   // ... 20+ permissions
 }
 
 // Check permissions
-hasPermission(MMCUserRole.ADMIN, MasterDBPermission.DELETE_PRODUCT) // true
-hasPermission(MMCUserRole.READ_ONLY, MasterDBPermission.CREATE_LICENSE) // false
+hasPermission(MMCUserRole.ADMIN, MasterDBPermission.DELETE_PRODUCT); // true
+hasPermission(MMCUserRole.READ_ONLY, MasterDBPermission.CREATE_LICENSE); // false
 
 // Check multiple permissions
 hasAllPermissions(MMCUserRole.OPERATOR, [
   MasterDBPermission.CREATE_LICENSE,
   MasterDBPermission.UPDATE_LICENSE,
-]) // true
+]); // true
 
 // Get all permissions for role
-const permissions = getPermissions(MMCUserRole.ADMIN)
+const permissions = getPermissions(MMCUserRole.ADMIN);
 ```
 
 **Role Permission Matrix**:
@@ -402,14 +405,14 @@ import {
   validateCreateLicenseInput,
   validateCreateTenantRegistryInput,
   validateCreateMMCUserInput,
-} from '@zidney/validation'
+} from "@zidney/validation";
 
 try {
-  const product = validateCreateProductInput(input)
+  const product = validateCreateProductInput(input);
   // input is now strongly typed
 } catch (error) {
   if (error instanceof ValidationError) {
-    console.error(`${error.code}: ${error.message}`)
+    console.error(`${error.code}: ${error.message}`);
     // error.code is MasterDBErrorCode
   }
 }
@@ -422,25 +425,25 @@ try {
 Logging utilities for master database operations:
 
 ```typescript
-import { MasterDBLogger } from '@zidney/domain-core/logging'
+import { MasterDBLogger } from "@zidney/domain-core/logging";
 
-const logger = new MasterDBLogger('my-service')
+const logger = new MasterDBLogger("my-service");
 
 // Info logging
 logger.info({
-  phase: 'startup',
-  message: 'Initializing master database',
-})
+  phase: "startup",
+  message: "Initializing master database",
+});
 
 // Error logging (with automatic correlation ID)
 logger.error({
-  phase: 'execution',
-  status: 'failed',
+  phase: "execution",
+  status: "failed",
   error: {
-    code: 'DATABASE_ERROR',
+    code: "DATABASE_ERROR",
     message: error.message,
   },
-})
+});
 
 // Outputs structured JSON:
 // {"timestamp":"2026-02-16T...","level":"INFO","service":"my-service",...}
@@ -453,44 +456,41 @@ logger.error({
 ### Creating a Product
 
 ```typescript
-import {
-  validateCreateProductInput,
-  createSuccessResponse,
-} from '@zidney/types'
+import { validateCreateProductInput, createSuccessResponse } from "@zidney/types";
 
 export async function createProduct(body: unknown) {
   // Validate input
-  const input = validateCreateProductInput(body)
+  const input = validateCreateProductInput(body);
 
   // Insert to database
-  const product = await db.products.create(input)
+  const product = await db.products.create(input);
 
   // Return response
-  return createSuccessResponse(product)
+  return createSuccessResponse(product);
 }
 ```
 
 ### Checking License State
 
 ```typescript
-import { isLicenseActive, canLicenseBeUsed, License } from '@zidney/types'
+import { isLicenseActive, canLicenseBeUsed, License } from "@zidney/types";
 
 function canUseLicense(license: License): boolean {
-  return canLicenseBeUsed(license.status)
+  return canLicenseBeUsed(license.status);
 }
 
 function isExpired(license: License): boolean {
-  return !isLicenseActive(license.status)
+  return !isLicenseActive(license.status);
 }
 ```
 
 ### Permission Checking
 
 ```typescript
-import { hasPermission, MasterDBPermission, MMCUserRole } from '@zidney/types'
+import { hasPermission, MasterDBPermission, MMCUserRole } from "@zidney/types";
 
 function canDeleteProduct(role: MMCUserRole): boolean {
-  return hasPermission(role, MasterDBPermission.DELETE_PRODUCT)
+  return hasPermission(role, MasterDBPermission.DELETE_PRODUCT);
 }
 ```
 

@@ -3,11 +3,14 @@
 **Feature Branch**: `002A-master-db-schema`  
 **Created**: 2026-02-16  
 **Status**: Draft  
-**Input**: User description: "Implement master database schema as defined in STAGE_02A_MASTER_DATABASE_SCHEMA"
+**Input**: User description: "Implement master database schema as defined in
+STAGE_02A_MASTER_DATABASE_SCHEMA"
 
 ## Feature Overview
 
-What is being built: Implementation of the master database schema for Zidney's control plane, including all required tables for product management, licensing, tenant registry, MMC users, and platform versioning.
+What is being built: Implementation of the master database schema for Zidney's control plane,
+including all required tables for product management, licensing, tenant registry, MMC users, and
+platform versioning.
 
 Phase: 01 – Platform Foundation  
 Stage: STAGE_02A_MASTER_DATABASE_SCHEMA  
@@ -46,7 +49,8 @@ No shared tenant data.
 
 ## License & Version Enforcement
 
-This feature establishes the schema foundation for license and version enforcement. Specific enforcement logic will be implemented in subsequent features.
+This feature establishes the schema foundation for license and version enforcement. Specific
+enforcement logic will be implemented in subsequent features.
 
 - License middleware required: For future operations on this schema
 - License states allowed: ACTIVE, SOFT_LOCKED, ARCHIVED (as defined in schema)
@@ -66,21 +70,20 @@ New tables:
 
 Modified tables: None
 
-Migration impact: Initial master database migration required
-Version bump required: Yes (initial schema_version)
-Backward compatibility strategy: N/A (initial schema)
+Migration impact: Initial master database migration required Version bump required: Yes (initial
+schema_version) Backward compatibility strategy: N/A (initial schema)
 
 Aligns with STAGE_02C_MIGRATION_AND_VERSIONING_MODEL.
 
 ## Transaction Boundaries
 
-Schema creation (DDL) operations are atomic by database design.
-No runtime transactions defined in this feature.
+Schema creation (DDL) operations are atomic by database design. No runtime transactions defined in
+this feature.
 
 ## Authoritative Time Usage
 
-All timestamp fields (created_at, updated_at, starts_at, expires_at, etc.) will use server-authoritative time.
-No client time involved.
+All timestamp fields (created_at, updated_at, starts_at, expires_at, etc.) will use
+server-authoritative time. No client time involved.
 
 ## Idempotency Strategy
 
@@ -90,7 +93,8 @@ N/A - Schema creation is not an endpoint operation.
 
 For future operations:
 
-- Structured log fields: timestamp, level, service, workspace_slug, workspace_id, user_id, correlation_id
+- Structured log fields: timestamp, level, service, workspace_slug, workspace_id, user_id,
+  correlation_id
 - request_id included: Yes
 - workspace_slug included: Yes (for tenant operations)
 - attempt_id included: N/A
@@ -159,11 +163,17 @@ N/A - Schema creation is not a runtime endpoint.
 
 ## Functional Requirements
 
-1. Create `products` table with fields: id (uuid, pk), name, slug (unique), description, version (semantic), enabled_modules (jsonb), created_at, updated_at
-2. Create `licenses` table with fields: id (uuid, pk), product_id (fk), workspace_slug (unique), student_limit, staff_limit, status, starts_at, expires_at, product_version, schema_version, soft_lock_until, archived_at, deleted_at, created_at, updated_at
-3. Create `tenants_registry` table with fields: id (uuid, pk), license_id (fk), workspace_slug (unique), db_name, db_host, db_port, db_user, db_password_encrypted, schema_version, product_version, created_at, updated_at
+1. Create `products` table with fields: id (uuid, pk), name, slug (unique), description, version
+   (semantic), enabled_modules (jsonb), created_at, updated_at
+2. Create `licenses` table with fields: id (uuid, pk), product_id (fk), workspace_slug (unique),
+   student_limit, staff_limit, status, starts_at, expires_at, product_version, schema_version,
+   soft_lock_until, archived_at, deleted_at, created_at, updated_at
+3. Create `tenants_registry` table with fields: id (uuid, pk), license_id (fk), workspace_slug
+   (unique), db_name, db_host, db_port, db_user, db_password_encrypted, schema_version,
+   product_version, created_at, updated_at
 4. Create `mmc_users` table with fields: id, email, password_hash, role, is_active, created_at
-5. Create `platform_schema_version` table with single row: id (1), current_version, minimum_supported_version, updated_at
+5. Create `platform_schema_version` table with single row: id (1), current_version,
+   minimum_supported_version, updated_at
 6. Implement initial migration script for master database
 7. Ensure all foreign key constraints are properly defined
 8. Ensure unique constraints on workspace_slug fields
@@ -207,19 +217,18 @@ N/A - Schema creation is not a runtime endpoint.
 
 ## Final Constitutional Compliance Statement
 
-Compliant with Zidney Constitution v1.2.0 — No violations detected.
-IMPORTANT: User stories should be PRIORITIZED as user journeys ordered by importance.
-Each user story/journey must be INDEPENDENTLY TESTABLE - meaning if you implement just ONE of them,
-you should still have a viable MVP (Minimum Viable Product) that delivers value.
+Compliant with Zidney Constitution v1.2.0 — No violations detected. IMPORTANT: User stories should
+be PRIORITIZED as user journeys ordered by importance. Each user story/journey must be INDEPENDENTLY
+TESTABLE - meaning if you implement just ONE of them, you should still have a viable MVP (Minimum
+Viable Product) that delivers value.
 
-Assign priorities (P1, P2, P3, etc.) to each story, where P1 is the most critical.
-Think of each story as a standalone slice of functionality that can be:
+Assign priorities (P1, P2, P3, etc.) to each story, where P1 is the most critical. Think of each
+story as a standalone slice of functionality that can be:
 
 - Developed independently
 - Tested independently
 - Deployed independently
-- Demonstrated to users independently
-  -->
+- Demonstrated to users independently -->
 
 ### User Story 1 - [Brief Title] (Priority: P1)
 
@@ -227,7 +236,8 @@ Think of each story as a standalone slice of functionality that can be:
 
 **Why this priority**: [Explain the value and why it has this priority level]
 
-**Independent Test**: [Describe how this can be tested independently - e.g., "Can be fully tested by [specific action] and delivers [specific value]"]
+**Independent Test**: [Describe how this can be tested independently - e.g., "Can be fully tested by
+[specific action] and delivers [specific value]"]
 
 **Acceptance Scenarios**:
 
@@ -293,7 +303,8 @@ Think of each story as a standalone slice of functionality that can be:
 
 _Example of marking unclear requirements:_
 
-- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified - email/password, SSO, OAuth?]
+- **FR-006**: System MUST authenticate users via [NEEDS CLARIFICATION: auth method not specified -
+  email/password, SSO, OAuth?]
 - **FR-007**: System MUST retain user data for [NEEDS CLARIFICATION: retention period not specified]
 
 ### Key Entities _(include if feature involves data)_
@@ -312,5 +323,6 @@ _Example of marking unclear requirements:_
 
 - **SC-001**: [Measurable metric, e.g., "Users can complete account creation in under 2 minutes"]
 - **SC-002**: [Measurable metric, e.g., "System handles 1000 concurrent users without degradation"]
-- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on first attempt"]
+- **SC-003**: [User satisfaction metric, e.g., "90% of users successfully complete primary task on
+  first attempt"]
 - **SC-004**: [Business metric, e.g., "Reduce support tickets related to [X] by 50%"]

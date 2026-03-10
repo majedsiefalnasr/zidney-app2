@@ -2,7 +2,9 @@
 
 ## Overview
 
-This document specifies the complete technical design for MMC Members & RBAC implementation. It covers API endpoints, middleware chain, service architecture, transaction boundaries, concurrency patterns, and deployment considerations.
+This document specifies the complete technical design for MMC Members & RBAC implementation. It
+covers API endpoints, middleware chain, service architecture, transaction boundaries, concurrency
+patterns, and deployment considerations.
 
 ---
 
@@ -405,7 +407,8 @@ BEGIN TRANSACTION SERIALIZABLE
 END TRANSACTION
 ```
 
-**Idempotency:** No re-execution if called twice with same values (PUT replaces, so idempotent by nature).
+**Idempotency:** No re-execution if called twice with same values (PUT replaces, so idempotent by
+nature).
 
 ---
 
@@ -448,7 +451,8 @@ BEGIN TRANSACTION SERIALIZABLE
 END TRANSACTION
 ```
 
-**Side Effect:** Member's active sessions immediately invalidated (token_version mismatch on next request).
+**Side Effect:** Member's active sessions immediately invalidated (token_version mismatch on next
+request).
 
 ---
 
@@ -872,7 +876,8 @@ FROM role_permissions
 WHERE role_id = ? AND domain IN (?, ?, ...)
 ```
 
-**Use Case:** Frontend can call this once after login to cache permissions and hide/show UI elements accordingly (UX optimization only; API still enforces).
+**Use Case:** Frontend can call this once after login to cache permissions and hide/show UI elements
+accordingly (UX optimization only; API still enforces).
 
 ---
 
@@ -931,19 +936,18 @@ services/
 export class MemberService {
   constructor(
     private db: Pool,
-    private auditService: AuditService
+    private auditService: AuditService,
   ) {}
 
   async createMember(data: CreateMemberInput, actor: UUID): Promise<Member> {
-    const hashedPassword = await bcrypt.hash(data.password, 12)
+    const hashedPassword = await bcrypt.hash(data.password, 12);
 
     return this.db.transaction(async (tx) => {
       // Validate
-      const existingUsername = await tx.queryOne(
-        'SELECT id FROM mmc_members WHERE username = ?',
-        [data.username]
-      )
-      if (existingUsername) throw new DuplicateUsernameError()
+      const existingUsername = await tx.queryOne("SELECT id FROM mmc_members WHERE username = ?", [
+        data.username,
+      ]);
+      if (existingUsername) throw new DuplicateUsernameError();
 
       // Create
       const member = await tx.queryOne(
@@ -951,31 +955,25 @@ export class MemberService {
          (username, email, password_hash, role_id, status, created_by, created_at, updated_at)
          VALUES (?, ?, ?, ?, 'ACTIVE', ?, NOW(), NOW())
          RETURNING *`,
-        [data.username, data.email, hashedPassword, data.role_id, actor]
-      )
+        [data.username, data.email, hashedPassword, data.role_id, actor],
+      );
 
       // Audit
-      await this.auditService.logAction(
-        actor,
-        'MEMBER_CREATED',
-        'MEMBER',
-        null,
-        { id: member.id, username: member.username }
-      )
+      await this.auditService.logAction(actor, "MEMBER_CREATED", "MEMBER", null, {
+        id: member.id,
+        username: member.username,
+      });
 
-      return member
-    })
+      return member;
+    });
   }
 
   async disableMember(id: UUID, actor: UUID): Promise<Member> {
     return this.db.transaction(async (tx) => {
       // Fetch current state
-      const member = await tx.queryOne(
-        'SELECT * FROM mmc_members WHERE id = ?',
-        [id]
-      )
-      if (!member) throw new NotFoundError()
-      if (member.status === 'DISABLED') throw new AlreadyDisabledError()
+      const member = await tx.queryOne("SELECT * FROM mmc_members WHERE id = ?", [id]);
+      if (!member) throw new NotFoundError();
+      if (member.status === "DISABLED") throw new AlreadyDisabledError();
 
       // Update
       const updated = await tx.queryOne(
@@ -983,20 +981,20 @@ export class MemberService {
          SET status = 'DISABLED', token_version = token_version + 1, updated_at = NOW()
          WHERE id = ?
          RETURNING *`,
-        [id]
-      )
+        [id],
+      );
 
       // Audit
       await this.auditService.logAction(
         actor,
-        'MEMBER_DISABLED',
-        'MEMBER',
+        "MEMBER_DISABLED",
+        "MEMBER",
         { status: member.status, token_version: member.token_version },
-        { status: updated.status, token_version: updated.token_version }
-      )
+        { status: updated.status, token_version: updated.token_version },
+      );
 
-      return updated
-    })
+      return updated;
+    });
   }
 }
 ```
@@ -1066,37 +1064,32 @@ Result: token_version = 7 (correct)
 ```typescript
 async function updateRolePermissions(roleId, newPermissions) {
   // Validate outside transaction
-  await validateRole(roleId)
-  await validatePermissions(newPermissions)
+  await validateRole(roleId);
+  await validatePermissions(newPermissions);
 
   // Short transaction for write
   for (let attempt = 0; attempt < 3; attempt++) {
     try {
       return await db.transaction(async (tx) => {
         // All writes here
-        await tx.execute('UPDATE roles SET ... WHERE id = ?', [roleId])
-        await tx.execute('UPDATE role_permissions SET ... WHERE role_id = ?', [
-          roleId,
-        ])
+        await tx.execute("UPDATE roles SET ... WHERE id = ?", [roleId]);
+        await tx.execute("UPDATE role_permissions SET ... WHERE role_id = ?", [roleId]);
         // Cascade
-        const members = await tx.query(
-          'SELECT id FROM mmc_members WHERE role_id = ?',
-          [roleId]
-        )
+        const members = await tx.query("SELECT id FROM mmc_members WHERE role_id = ?", [roleId]);
         for (const member of members) {
           await tx.execute(
-            'UPDATE mmc_members SET token_version = token_version + 1 WHERE id = ?',
-            [member.id]
-          )
+            "UPDATE mmc_members SET token_version = token_version + 1 WHERE id = ?",
+            [member.id],
+          );
         }
-      })
+      });
     } catch (e) {
-      if (e.code === 'DEADLOCK' && attempt < 2) {
+      if (e.code === "DEADLOCK" && attempt < 2) {
         // Exponential backoff
-        await sleep(Math.random() * 2 ** attempt * 100)
-        continue
+        await sleep(Math.random() * 2 ** attempt * 100);
+        continue;
       }
-      throw e
+      throw e;
     }
   }
 }
@@ -1222,24 +1215,22 @@ All logs emitted as JSON (Pino logger):
 const pool = new Pool({
   host: process.env.MASTER_DB_HOST,
   port: 5432,
-  database: 'master',
+  database: "master",
   user: process.env.MASTER_DB_USER,
   password: process.env.MASTER_DB_PASSWORD,
   max: 20,
   idleTimeoutMillis: 30000,
   connectionTimeoutMillis: 2000,
   connectionLimit: 20,
-})
+});
 ```
 
 ### Cache Strategy (Redis)
 
 **Purpose:** Idempotency cache (fast path)
 
-**Key Format:** `mmc:idempotency:{idempotency_key}`
-**Value:** Full API response (JSON serialized)
-**TTL:** 86400 seconds (24 hours)
-**Eviction Policy:** LRU
+**Key Format:** `mmc:idempotency:{idempotency_key}` **Value:** Full API response (JSON serialized)
+**TTL:** 86400 seconds (24 hours) **Eviction Policy:** LRU
 
 **Lookup Time:** < 5ms (expected; memcached-like performance)
 

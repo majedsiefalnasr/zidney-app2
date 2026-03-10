@@ -419,7 +419,8 @@ Combined      |   ~5-50  | Depends on # questions
 | Network         | 5%          | 95%      |
 | DB Connections  | 75/100      | 25%      |
 
-**Observation:** Database connections approaching limit first. Recommended increase to 200 for production.
+**Observation:** Database connections approaching limit first. Recommended increase to 200 for
+production.
 
 ---
 
@@ -506,7 +507,8 @@ STAGE 06 performance is **production-grade** with:
 - ✅ No memory leaks
 - ✅ 99.9%+ uptime capability
 
-**Recommendation:** Deploy to production with monitoring. Scale workers to 5+ in High-Availability setup.
+**Recommendation:** Deploy to production with monitoring. Scale workers to 5+ in High-Availability
+setup.
 
 ---
 

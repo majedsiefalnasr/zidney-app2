@@ -27,8 +27,8 @@ Integrate the MMC application with the Phase 06 runtime foundation and activate:
 - Workspace-agnostic header behavior
 - Global feedback integration
 
-This stage wires MMC into the standardized runtime architecture.
-It does NOT implement feature pages (Products, Licenses, Affiliates, etc.).
+This stage wires MMC into the standardized runtime architecture. It does NOT implement feature pages
+(Products, Licenses, Affiliates, etc.).
 
 ---
 
@@ -100,8 +100,7 @@ Requirements:
 - On 401 → redirect to login
 - On logout → clear state + redirect
 
-No role-based hiding in this stage.
-Only basic authenticated shell protection.
+No role-based hiding in this stage. Only basic authenticated shell protection.
 
 ---
 

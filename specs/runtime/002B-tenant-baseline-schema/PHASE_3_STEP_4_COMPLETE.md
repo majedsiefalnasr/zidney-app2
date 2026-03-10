@@ -9,7 +9,8 @@
 
 ## Executive Summary
 
-**Phase 3 Step 4 COMPLETE**: INIT_TENANT_SCHEMA worker task fully implemented with production-grade hardening, security-first retry logic, and comprehensive error handling.
+**Phase 3 Step 4 COMPLETE**: INIT_TENANT_SCHEMA worker task fully implemented with production-grade
+hardening, security-first retry logic, and comprehensive error handling.
 
 **Total Phase 3 Progress**: 4/5 steps complete
 
@@ -306,7 +307,8 @@ retryFromDLQ(dlqMessageId) → {
 | **ADR-0007** | Version enforcement       | Checksum validation + schema_version immutable             | ✅ PASS |
 | **ADR-0008** | Semantic versioning       | SHA256 checksum prevents tampering                         | ✅ PASS |
 
-**Compliance Statement**: ✅ All ADRs satisfied. No constitutional violations. Ready for integration.
+**Compliance Statement**: ✅ All ADRs satisfied. No constitutional violations. Ready for
+integration.
 
 ---
 
@@ -338,106 +340,98 @@ retryFromDLQ(dlqMessageId) → {
 **File**: `apps/worker/tests/tasks/init-tenant-schema.test.ts`
 
 ```typescript
-describe('initTenantSchema', () => {
+describe("initTenantSchema", () => {
   // Success path
-  test('✅ Should initialize tenant schema on first call', async () => {
+  test("✅ Should initialize tenant schema on first call", async () => {
     // Given: Valid payload + tenant pool
     // When: executeInitTenantSchema() called
     // Then: Returns SUCCESS + logs CRITICAL
-  })
+  });
 
   // Idempotency path
-  test('✅ Should return idempotency success if schema already exists', async () => {
+  test("✅ Should return idempotency success if schema already exists", async () => {
     // Given: schema_version table already populated
     // When: executeInitTenantSchema() called with idempotency check
     // Then: Returns SUCCESS (deterministic replay)
-  })
+  });
 
   // Tampering detection
-  test('❌ Should escalate to DLQ on checksum mismatch', async () => {
+  test("❌ Should escalate to DLQ on checksum mismatch", async () => {
     // Given: Payload checksum ≠ calculated checksum
     // When: executeInitTenantSchema() called
     // Then: Returns DLQ_ESCALATED + tampering_detected=true + NO RETRY
-  })
+  });
 
   // Lock timeout
-  test('❌ Should escalate to DLQ on lock timeout', async () => {
+  test("❌ Should escalate to DLQ on lock timeout", async () => {
     // Given: Another worker holds schema_version lock > 5s
     // When: executeInitTenantSchema() called
     // Then: Returns DLQ_ESCALATED + NO RETRY (suspicious)
-  })
+  });
 
   // Transient failure
-  test('⏳ Should retry on statement timeout', async () => {
+  test("⏳ Should retry on statement timeout", async () => {
     // Given: Schema SQL execution takes > 30s (simulated)
     // When: executeInitTenantSchema() called
     // Then: Returns RETRY + attempt=2 + backoffMs=2000
-  })
-})
+  });
+});
 
-describe('task-configs', () => {
-  test('✅ Should route SUCCESS → no action', () => {
+describe("task-configs", () => {
+  test("✅ Should route SUCCESS → no action", () => {
+    const action = determineTaskAction("INIT_TENANT_SCHEMA", { status: "SUCCESS" }, 1);
+    expect(action).toBe("SUCCESS");
+  });
+
+  test("✅ Should route tampering → DLQ immediately", () => {
     const action = determineTaskAction(
-      'INIT_TENANT_SCHEMA',
-      { status: 'SUCCESS' },
-      1
-    )
-    expect(action).toBe('SUCCESS')
-  })
+      "INIT_TENANT_SCHEMA",
+      { status: "FAILED", tampering_detected: true },
+      1,
+    );
+    expect(action).toBe("DLQ");
+  });
 
-  test('✅ Should route tampering → DLQ immediately', () => {
+  test("⏳ Should route transient failure → RETRY", () => {
     const action = determineTaskAction(
-      'INIT_TENANT_SCHEMA',
-      { status: 'FAILED', tampering_detected: true },
-      1
-    )
-    expect(action).toBe('DLQ')
-  })
+      "INIT_TENANT_SCHEMA",
+      { status: "RETRY", error: "timeout" },
+      1,
+    );
+    expect(action).toBe("RETRY");
+  });
 
-  test('⏳ Should route transient failure → RETRY', () => {
-    const action = determineTaskAction(
-      'INIT_TENANT_SCHEMA',
-      { status: 'RETRY', error: 'timeout' },
-      1
-    )
-    expect(action).toBe('RETRY')
-  })
+  test("❌ Should route max retries → DLQ", () => {
+    const action = determineTaskAction("INIT_TENANT_SCHEMA", { status: "RETRY" }, 4); // attempt 4 > maxRetries 3
+    expect(action).toBe("DLQ");
+  });
+});
 
-  test('❌ Should route max retries → DLQ', () => {
-    const action = determineTaskAction(
-      'INIT_TENANT_SCHEMA',
-      { status: 'RETRY' },
-      4
-    ) // attempt 4 > maxRetries 3
-    expect(action).toBe('DLQ')
-  })
-})
-
-describe('queue-processor', () => {
-  test('✅ Should process task and return SUCCESS', async () => {
+describe("queue-processor", () => {
+  test("✅ Should process task and return SUCCESS", async () => {
     // Given: Valid task, healthy pool
     // When: processor.processTask(task)
     // Then: task.status = 'SUCCESS'
-  })
+  });
 
-  test('⏳ Should schedule retry with exponential backoff', async () => {
+  test("⏳ Should schedule retry with exponential backoff", async () => {
     // Given: Task failed once
     // When: processor.scheduleRetry(task, result, 1)
     // Then: task.nextRetryAt = now + 2000ms
-  })
+  });
 
-  test('❌ Should route to DLQ after 3 failed retries', async () => {
+  test("❌ Should route to DLQ after 3 failed retries", async () => {
     // Given: Task attempted 4 times
     // When: processor.processTask(task with attempt=4)
     // Then: task.status = 'DLQ'
-  })
+  });
 
-  test('🔧 Should allow manual DLQ retry', async () => {
+  test("🔧 Should allow manual DLQ retry", async () => {
     // Given: Task in DLQ
     // When: processor.retryFromDLQ(taskId)
     // Then: Task removed from DLQ + requeued with attempt=1
-  })
-})
+  });
+});
 ```
 
 ### Integration Tests (Ready to Implement – Phase 3 Step 5)
@@ -445,33 +439,33 @@ describe('queue-processor', () => {
 **File**: `apps/api/tests/integration/provisioning-flow.integration.test.ts`
 
 ```typescript
-describe('End-to-End Tenant Provisioning', () => {
-  test('✅ Should provision tenant through full flow', async () => {
+describe("End-to-End Tenant Provisioning", () => {
+  test("✅ Should provision tenant through full flow", async () => {
     // 1. POST /schema/initialize → 202 QUEUED
     // 2. Worker dequeues task
     // 3. Baseline schema created
     // 4. schema_version inserted
     // 5. GET /schema/status → COMPLETED
     // 6. Next API request → passes schemaVersionMiddleware ✅
-  })
+  });
 
-  test('✅ Should handle idempotency on concurrent requests', async () => {
+  test("✅ Should handle idempotency on concurrent requests", async () => {
     // 1. POST /schema/initialize {idempotency_key: 'key-1'} → 202
     // 2. POST /schema/initialize {idempotency_key: 'key-1'} → 202 (same task_id)
     // 3. POST /schema/initialize {idempotency_key: 'key-2'} → 409 (already init)
-  })
+  });
 
-  test('❌ Should fail on license validation', async () => {
+  test("❌ Should fail on license validation", async () => {
     // 1. Workspace license = ARCHIVED
     // 2. POST /schema/initialize → 403 Forbidden (licenseMiddleware)
-  })
+  });
 
-  test('❌ Should fail on schema version mismatch', async () => {
+  test("❌ Should fail on schema version mismatch", async () => {
     // 1. Workspace schema_version = 0.9.0, product compatible = 1.0.0
     // 2. POST /schema/initialize → 503 (version mismatch)
     // 3. Worker automatically triggered to apply migration
-  })
-})
+  });
+});
 ```
 
 ---

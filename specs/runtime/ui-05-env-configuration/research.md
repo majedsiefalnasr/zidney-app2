@@ -6,7 +6,9 @@
 
 ## Research Task 1: Factory Function Pattern for Environment Configuration
 
-**Context**: The spec requires `createEnvConfig(overrides?)` — a factory function pattern that supports testability. The current codebase uses `resolveConfig()` + module-level `appConfig` singleton.
+**Context**: The spec requires `createEnvConfig(overrides?)` — a factory function pattern that
+supports testability. The current codebase uses `resolveConfig()` + module-level `appConfig`
+singleton.
 
 **Decision**: Adopt named factory function `createEnvConfig(overrides?)` that:
 
@@ -24,17 +26,23 @@
 
 **Alternatives considered**:
 
-- **vi.stubEnv pattern** (current): Requires `vi.resetModules()` and dynamic `import()` in every test. Fragile and couples tests to Vitest internals.
-- **Dependency injection via Vue provide/inject**: Over-engineered for static config. Would require Vue context in tests.
-- **Module-level mocking via `vi.mock()`**: Possible but less explicit. Factory gives callers full control.
+- **vi.stubEnv pattern** (current): Requires `vi.resetModules()` and dynamic `import()` in every
+  test. Fragile and couples tests to Vitest internals.
+- **Dependency injection via Vue provide/inject**: Over-engineered for static config. Would require
+  Vue context in tests.
+- **Module-level mocking via `vi.mock()`**: Possible but less explicit. Factory gives callers full
+  control.
 
 ---
 
 ## Research Task 2: ESLint Rule to Prohibit Direct `import.meta.env`
 
-**Context**: FR-002 requires lint enforcement to prevent `import.meta.env` outside `core/config/env.ts`. Current ESLint configs already have an `import/no-restricted-paths` zone attempting this but the zone-based approach has limitations for intra-file token matching.
+**Context**: FR-002 requires lint enforcement to prevent `import.meta.env` outside
+`core/config/env.ts`. Current ESLint configs already have an `import/no-restricted-paths` zone
+attempting this but the zone-based approach has limitations for intra-file token matching.
 
-**Decision**: Use `no-restricted-syntax` ESLint rule with AST selector targeting `MemberExpression` on `import.meta.env`. This is more precise than path-based restrictions.
+**Decision**: Use `no-restricted-syntax` ESLint rule with AST selector targeting `MemberExpression`
+on `import.meta.env`. This is more precise than path-based restrictions.
 
 **Implementation**:
 
@@ -60,14 +68,16 @@ Applied to all files **except** `core/config/env.ts` via ESLint file-level overr
 **Alternatives considered**:
 
 - **eslint-plugin-no-restricted-globals**: Doesn't cover `import.meta` patterns
-- **Path-based restriction only**: Current approach. Glob patterns for intra-file tokens are unreliable.
+- **Path-based restriction only**: Current approach. Glob patterns for intra-file tokens are
+  unreliable.
 - **Custom ESLint plugin**: Over-engineered for a single rule
 
 ---
 
 ## Research Task 3: Feature Flags Module Design
 
-**Context**: FR-005/FR-006 require a read-only feature flags module sourced from `VITE_` prefixed env vars. Flags must be boolean, frozen, and limited to UI display behavior.
+**Context**: FR-005/FR-006 require a read-only feature flags module sourced from `VITE_` prefixed
+env vars. Flags must be boolean, frozen, and limited to UI display behavior.
 
 **Decision**: Implement `core/config/feature-flags.ts` that:
 
@@ -93,9 +103,12 @@ Applied to all files **except** `core/config/env.ts` via ESLint file-level overr
 
 ## Research Task 4: Shared TypeScript Interface Location
 
-**Context**: FR-012 requires a shared TypeScript interface for multi-app consistency. The spec explicitly states "no shared runtime package" — each app implements independently.
+**Context**: FR-012 requires a shared TypeScript interface for multi-app consistency. The spec
+explicitly states "no shared runtime package" — each app implements independently.
 
-**Decision**: Place the shared interface in `packages/types/src/env-config.ts` and export from the package index. Each app imports the type (type-only import) and implements it. This is a **compile-time-only** dependency.
+**Decision**: Place the shared interface in `packages/types/src/env-config.ts` and export from the
+package index. Each app imports the type (type-only import) and implements it. This is a
+**compile-time-only** dependency.
 
 **Rationale**:
 
@@ -119,15 +132,15 @@ Applied to all files **except** `core/config/env.ts` via ESLint file-level overr
 
 **Decision**: Rely on Vite's built-in `.env` loading. No custom merging logic.
 
-**Findings**:
-Vite loads env files in this order (later wins):
+**Findings**: Vite loads env files in this order (later wins):
 
 1. `.env` — always loaded
 2. `.env.local` — always loaded, gitignored
 3. `.env.[mode]` — loaded for specified mode (development, staging, production)
 4. `.env.[mode].local` — loaded for specified mode, gitignored
 
-For staging mode: Vite needs `--mode staging` CLI flag. The `VITE_APP_ENV` variable is a custom application-level variable, separate from Vite's `MODE`.
+For staging mode: Vite needs `--mode staging` CLI flag. The `VITE_APP_ENV` variable is a custom
+application-level variable, separate from Vite's `MODE`.
 
 **Rationale**:
 
@@ -144,7 +157,8 @@ For staging mode: Vite needs `--mode staging` CLI flag. The `VITE_APP_ENV` varia
 
 ## Research Task 6: `app-config.ts` Aggregation Module
 
-**Context**: FR-014 requires an aggregation module that combines env config + feature flags into a single typed object.
+**Context**: FR-014 requires an aggregation module that combines env config + feature flags into a
+single typed object.
 
 **Decision**: Implement `core/config/app-config.ts` as the public API surface. This module:
 
@@ -170,14 +184,18 @@ For staging mode: Vite needs `--mode staging` CLI flag. The `VITE_APP_ENV` varia
 
 ## Research Task 7: Build-Time Validation of Required Variables
 
-**Context**: FR-010 requires startup failure on missing required vars. Edge cases mention build-time failure too.
+**Context**: FR-010 requires startup failure on missing required vars. Edge cases mention build-time
+failure too.
 
 **Decision**: Two-layer validation:
 
-1. **Runtime (synchronous in main.ts)**: `createEnvConfig()` throws if `VITE_API_BASE_URL` is missing or empty. This is the primary enforcement.
-2. **Build-time (.env.example documentation)**: Each app maintains `.env.example` documenting required variables. CI can validate presence via script.
+1. **Runtime (synchronous in main.ts)**: `createEnvConfig()` throws if `VITE_API_BASE_URL` is
+   missing or empty. This is the primary enforcement.
+2. **Build-time (.env.example documentation)**: Each app maintains `.env.example` documenting
+   required variables. CI can validate presence via script.
 
-No Vite plugin or custom build validation — the runtime throw in `main.ts` catches misconfiguration before any Vue code runs.
+No Vite plugin or custom build validation — the runtime throw in `main.ts` catches misconfiguration
+before any Vue code runs.
 
 **Rationale**:
 
@@ -189,4 +207,5 @@ No Vite plugin or custom build validation — the runtime throw in `main.ts` cat
 **Alternatives considered**:
 
 - **Vite plugin for env validation**: Over-engineered. Runtime check is sufficient.
-- **TypeScript type narrowing only**: Types don't exist at runtime. Missing vars would still be `undefined`.
+- **TypeScript type narrowing only**: Types don't exist at runtime. Missing vars would still be
+  `undefined`.

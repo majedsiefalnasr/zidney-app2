@@ -12,11 +12,15 @@
 ## Content Quality
 
 - [x] No implementation details (languages, frameworks, APIs) in requirement statements
-- [x] Focused on user value and business needs (auth runtime stories capture security and correctness value)
+- [x] Focused on user value and business needs (auth runtime stories capture security and
+      correctness value)
 - [x] Written for non-technical stakeholders (architectural stories use plain language; Section 4)
 - [x] All mandatory sections completed
 
-**Notes**: Section 4 uses "architectural stories" appropriate for a runtime foundation stage. All mandatory template sections are present. Interface definitions in Section 7 use TypeScript syntax for precision but are documented as interfaces, not implementation — consistent with precedent in STAGE_UI_00.
+**Notes**: Section 4 uses "architectural stories" appropriate for a runtime foundation stage. All
+mandatory template sections are present. Interface definitions in Section 7 use TypeScript syntax
+for precision but are documented as interfaces, not implementation — consistent with precedent in
+STAGE_UI_00.
 
 ---
 
@@ -25,13 +29,16 @@
 - [x] No [NEEDS CLARIFICATION] markers remain
 - [x] Requirements are testable and unambiguous
 - [x] Success criteria are measurable
-- [x] Success criteria are technology-agnostic (completion criteria in Section 10 describe observable behaviors, not framework internals)
+- [x] Success criteria are technology-agnostic (completion criteria in Section 10 describe
+      observable behaviors, not framework internals)
 - [x] All acceptance scenarios are defined
-- [x] Edge cases are identified (failed refresh, concurrent 401s, network errors during refresh, logout during pending request, second 401 after retry)
+- [x] Edge cases are identified (failed refresh, concurrent 401s, network errors during refresh,
+      logout during pending request, second 401 after retry)
 - [x] Scope is clearly bounded (Section 3 in/out-of-scope is explicit)
 - [x] Dependencies and assumptions identified (Section 9)
 
-**[NEEDS CLARIFICATION] Markers**: None — all aspects were resolved using reasonable defaults and constitutional constraints. Decisions made:
+**[NEEDS CLARIFICATION] Markers**: None — all aspects were resolved using reasonable defaults and
+constitutional constraints. Decisions made:
 
 | Decision                                       | Resolution Applied                                                                      | Rationale                                                                                                  |
 | ---------------------------------------------- | --------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -47,24 +54,31 @@
 - [x] All functional requirements have clear acceptance criteria (in-store Sections 4 and 10)
 - [x] User/architectural scenarios cover all three apps (MMC, Backoffice, Frontoffice — Section 8)
 - [x] Feature meets measurable outcomes defined in Completion Criteria (Section 10)
-- [x] No implementation details leak into specification (requirements describe WHAT not HOW at requirement level)
+- [x] No implementation details leak into specification (requirements describe WHAT not HOW at
+      requirement level)
 
 ---
 
 ## Architecture Compliance
 
 - [x] Database-per-tenant model preserved (UI stage — no DB access; confirms isolation unaffected)
-- [x] No business logic permitted in UI layer (NFR-02, Section 12 Non-Goals, Section 14 Layer Separation)
-- [x] Token storage strategy is secure (FR-10: memory-only; FR-03: no localStorage/sessionStorage/cookie writes)
-- [x] No JWT decoding for permissions or authentication state (FR-24, AS-02, Section 2 compliance row)
-- [x] Token expiry detection via 401 only — no client clock used (NFR-08 area; FR-02 notes; Section 2 compliance row)
+- [x] No business logic permitted in UI layer (NFR-02, Section 12 Non-Goals, Section 14 Layer
+      Separation)
+- [x] Token storage strategy is secure (FR-10: memory-only; FR-03: no
+      localStorage/sessionStorage/cookie writes)
+- [x] No JWT decoding for permissions or authentication state (FR-24, AS-02, Section 2 compliance
+      row)
+- [x] Token expiry detection via 401 only — no client clock used (NFR-08 area; FR-02 notes; Section
+      2 compliance row)
 - [x] Workspace slug derived from route only, never from token payload (Section 8.2)
-- [x] No cross-app imports declared (Section 14 Layer Separation; each app's core/auth/ is self-contained)
+- [x] No cross-app imports declared (Section 14 Layer Separation; each app's core/auth/ is
+      self-contained)
 - [x] Shared types directed to `packages/types` (Section 9.1 Dependencies)
 - [x] License enforcement remains server-side (Section 12, Section 2 compliance table)
 - [x] Attempt engine not modified (Section 12, Section 2 compliance table)
 - [x] Single-flight refresh prevents amplification under concurrent load (FR-13 to FR-17, AS-03)
-- [x] Logout is unconditional — state cleared even if backend call fails (FR-30, FR-35, FR-36, FR-37)
+- [x] Logout is unconditional — state cleared even if backend call fails (FR-30, FR-35, FR-36,
+      FR-37)
 - [x] Auth guard uses store state only — no JWT inspection (FR-24)
 - [x] Stage status is DRAFT — specification in progress (appropriate for this checkpoint)
 

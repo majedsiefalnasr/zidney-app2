@@ -7,21 +7,28 @@
 
 ## Summary
 
-Implement a tenant-level workspace configuration system with a single-row settings table using five JSONB columns (general, language, branding, payment, security), optimistic locking via `config_version`, immutable audit logging with full diff, encrypted payment credentials (AES-256-GCM), and group-level PUT API with standard Zidney middleware enforcement. All data lives exclusively in the tenant database. No worker is needed — all operations are synchronous CRUD.
+Implement a tenant-level workspace configuration system with a single-row settings table using five
+JSONB columns (general, language, branding, payment, security), optimistic locking via
+`config_version`, immutable audit logging with full diff, encrypted payment credentials
+(AES-256-GCM), and group-level PUT API with standard Zidney middleware enforcement. All data lives
+exclusively in the tenant database. No worker is needed — all operations are synchronous CRUD.
 
 ---
 
 ## Technical Context
 
 **Language/Version**: TypeScript (Bun runtime)  
-**Primary Dependencies**: Hono (HTTP), Drizzle ORM (PostgreSQL), Zod (validation), Pino (logging), Node.js `crypto` (AES-256-GCM)  
+**Primary Dependencies**: Hono (HTTP), Drizzle ORM (PostgreSQL), Zod (validation), Pino (logging),
+Node.js `crypto` (AES-256-GCM)  
 **Storage**: PostgreSQL (tenant database, database-per-tenant model)  
 **Testing**: Vitest (unit + integration)  
 **Target Platform**: Linux server (Docker)  
 **Project Type**: Web service (API layer)  
 **Performance Goals**: Settings retrieval < 50ms p95 (SC-005)  
-**Constraints**: Single-row table, optimistic locking, encrypted credentials never exposed, full audit trail  
-**Scale/Scope**: Per-tenant single-row — negligible storage. Audit log grows linearly with settings changes.
+**Constraints**: Single-row table, optimistic locking, encrypted credentials never exposed, full
+audit trail  
+**Scale/Scope**: Per-tenant single-row — negligible storage. Audit log grows linearly with settings
+changes.
 
 ---
 
@@ -106,7 +113,11 @@ tests/
     └── workspace-settings-contract.test.ts         # API contract verification
 ```
 
-**Structure Decision**: Module-based layout inside `apps/api/src/modules/workspace-settings/`. This follows the emerging pattern in the codebase where feature-specific logic is co-located (similar to `modules/attempt/`, `modules/csrf/`, `modules/schema/`). The Drizzle schema goes in `db/tenant/schemas/` alongside other tenant schemas. Migration goes in the standard tenant migrations directory.
+**Structure Decision**: Module-based layout inside `apps/api/src/modules/workspace-settings/`. This
+follows the emerging pattern in the codebase where feature-specific logic is co-located (similar to
+`modules/attempt/`, `modules/csrf/`, `modules/schema/`). The Drizzle schema goes in
+`db/tenant/schemas/` alongside other tenant schemas. Migration goes in the standard tenant
+migrations directory.
 
 ---
 
@@ -116,7 +127,8 @@ tests/
 
 **File**: `apps/api/src/db/tenant/migrations/20260228_002_workspace_settings_jsonb.ts`
 
-- ALTERs existing `workspace_settings` table to add JSONB columns + `config_version` + `singleton_key`
+- ALTERs existing `workspace_settings` table to add JSONB columns + `config_version` +
+  `singleton_key`
 - Creates `workspace_settings_audit` table
 - Migrates existing flat column values into JSONB structure
 - Replaces trigger-based singleton with CHECK + UNIQUE constraint
@@ -137,8 +149,10 @@ tests/
 
 Five Zod schemas — one per settings group:
 
-- `generalSettingsSchema` — app_name, timezone (IANA validated), date_format (enum), session_timeout_minutes
-- `languageSettingsSchema` — default_language, supported_languages (with cross-field validation: default must be in supported)
+- `generalSettingsSchema` — app_name, timezone (IANA validated), date_format (enum),
+  session_timeout_minutes
+- `languageSettingsSchema` — default_language, supported_languages (with cross-field validation:
+  default must be in supported)
 - `brandingSettingsSchema` — URLs, hex colors, optional nested objects
 - `paymentSettingsSchema` — boolean gateway toggle, provider, sentinel credential handling
 - `securitySettingsSchema` — analytics opt-in, login limits, password policy (future-ready)
@@ -166,7 +180,8 @@ Plus: `updateSettingsRequestSchema` — wraps group settings with `config_versio
   - INSERT if no row exists (auto-init)
   - Returns new `config_version` or throws `VersionConflictError`
 - `insertAuditEntry(db, entry): Promise<void>` — Append to audit table
-- `getAuditEntries(db, filters): Promise<{ items: AuditEntry[], nextCursor: string | null }>` — Cursor-based paginated query using (created_at, id) composite cursor
+- `getAuditEntries(db, filters): Promise<{ items: AuditEntry[], nextCursor: string | null }>` —
+  Cursor-based paginated query using (created_at, id) composite cursor
 
 All DB access uses the tenant pool from request context. No direct DB instantiation.
 
@@ -183,9 +198,11 @@ All DB access uses the tenant pool from request context. No direct DB instantiat
   5. Conditional UPDATE with version check
   6. Insert audit entry
   7. Return new config_version
-- `getSettingsAudit(ctx, filters)` — Cursor-based paginated audit retrieval (default limit: 20, max: 100)
+- `getSettingsAudit(ctx, filters)` — Cursor-based paginated audit retrieval (default limit: 20,
+  max: 100)
 
-All operations wrapped in database transactions. Structured logging with correlation_id + workspace_slug.
+All operations wrapped in database transactions. Structured logging with correlation_id +
+workspace_slug.
 
 ### Layer 7: Routes
 
@@ -195,8 +212,9 @@ All operations wrapped in database transactions. Structured logging with correla
 - `PUT /api/v1/backoffice/workspace/settings/:group` — Update specific group
 - `GET /api/v1/backoffice/workspace/settings/audit` — Read audit trail
 
-Registered under backoffice routes with full middleware chain:
-correlation ID → tenant resolver → license enforcement → schema version enforcement → rate limiting → auth (JWT) → RBAC (institution admin)
+Registered under backoffice routes with full middleware chain: correlation ID → tenant resolver →
+license enforcement → schema version enforcement → rate limiting → auth (JWT) → RBAC (institution
+admin)
 
 Path parameter `:group` validated against allowed enum.
 
@@ -255,7 +273,8 @@ workspace-settings.routes.ts
         └─→ workspace-settings.errors.ts
 ```
 
-No circular dependencies. No cross-app imports. Service depends only on packages (logger, validation) and local module files.
+No circular dependencies. No cross-app imports. Service depends only on packages (logger,
+validation) and local module files.
 
 ---
 

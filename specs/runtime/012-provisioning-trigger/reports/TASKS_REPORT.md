@@ -10,7 +10,8 @@
 
 ## Executive Summary
 
-Task decomposition complete. 82 atomic, dependency-ordered implementation tasks have been generated and are ready for assignment to development team.
+Task decomposition complete. 82 atomic, dependency-ordered implementation tasks have been generated
+and are ready for assignment to development team.
 
 **Total Tasks**: 82  
 **Parallelizable Tasks**: 28 [P]  
@@ -83,7 +84,8 @@ License creation and status polling endpoints with full validation, rate limitin
 
 ## Phase 3: Worker Layer (22 tasks)
 
-Background provisioning processor: database creation, migrations, seed data, admin setup, idempotency enforcement.
+Background provisioning processor: database creation, migrations, seed data, admin setup,
+idempotency enforcement.
 
 **Key Deliverables**:
 
@@ -241,7 +243,8 @@ PHASE 5 (Testing) [12 tasks, 2-3d]
 
 - **Single Developer**: Follow critical path (18-20 tasks) sequentially; parallelize within phase
 - **Pair**: Divide phases (Dev A: Phases 1-2; Dev B: Phases 3-4); meet on Phase 5 testing
-- **Team**: Assign Phase 1 to infra specialist → Phases 2-3 parallel → Phase 4 to DevOps → Phase 5 to QA
+- **Team**: Assign Phase 1 to infra specialist → Phases 2-3 parallel → Phase 4 to DevOps → Phase 5
+  to QA
 
 ### Risk Mitigation
 

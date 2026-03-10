@@ -2,7 +2,8 @@
 
 ## Purpose
 
-Typed HTTP client package for Vue stores and composables. Provides a unified, adapter-based API client that abstracts `fetch` details and makes it easy to mock HTTP in tests.
+Typed HTTP client package for Vue stores and composables. Provides a unified, adapter-based API
+client that abstracts `fetch` details and makes it easy to mock HTTP in tests.
 
 ---
 
@@ -46,7 +47,8 @@ None — base URL and token are provided by the consuming application at initial
 
 ## Known Boundaries
 
-- **No direct `fetch` usage** outside the `FetchAdapter` — all HTTP goes through the adapter interface
+- **No direct `fetch` usage** outside the `FetchAdapter` — all HTTP goes through the adapter
+  interface
 - Does not contain Vue or Pinia code — framework agnostic
 - Does not import backend schemas or domain logic
 - **Import rule**: may import from `packages/types` only; must not import from `apps/*`
@@ -56,9 +58,9 @@ None — base URL and token are provided by the consuming application at initial
 ## Public API
 
 ```typescript
-import { createApiClient } from '@zidney/api-client'
-import { FetchAdapter } from '@zidney/api-client/adapters'
-import type { ApiClient, ApiAdapter, ApiResponse } from '@zidney/api-client'
+import { createApiClient } from "@zidney/api-client";
+import { FetchAdapter } from "@zidney/api-client/adapters";
+import type { ApiClient, ApiAdapter, ApiResponse } from "@zidney/api-client";
 
 // Create a client instance (e.g., in a Pinia store)
 const client: ApiClient = createApiClient({
@@ -66,11 +68,11 @@ const client: ApiClient = createApiClient({
   adapter: new FetchAdapter(),
   getToken: () => authStore.token,
   onTokenRefresh: async () => authStore.refresh(),
-})
+});
 
 // Make typed API calls
-const response: ApiResponse<License[]> = await client.licenses.list()
-const exam = await client.exams.get(examId)
+const response: ApiResponse<License[]> = await client.licenses.list();
+const exam = await client.exams.get(examId);
 ```
 
 **Exports**:

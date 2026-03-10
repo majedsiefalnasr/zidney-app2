@@ -24,8 +24,7 @@ Semester is used for:
 - Reporting segmentation
 - Student enrollment classification
 
-Semester is not a division substitute.
-Division remains the primary academic isolation boundary.
+Semester is not a division substitute. Division remains the primary academic isolation boundary.
 
 ---
 
@@ -97,11 +96,7 @@ Future modules (MCQ, Traditional Exams, Library, Lives) may optionally filter by
 
 Filtering contract:
 
-WHERE
-(
-content.semester_id IS NULL
-OR content.semester_id = student.semester_id
-)
+WHERE ( content.semester_id IS NULL OR content.semester_id = student.semester_id )
 
 Division filtering must always execute before semester filtering.
 
@@ -175,5 +170,4 @@ Stage complete when:
 
 ---
 
-Next:
-STAGE_28_SUBJECTS
+Next: STAGE_28_SUBJECTS

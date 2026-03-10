@@ -1,8 +1,7 @@
 /\*\*
 
 - T058: API Documentation (OpenAPI/Swagger)
-- File: apps/api/docs/mmc-api.openapi.yaml or inline JSDoc comments
-  \*/
+- File: apps/api/docs/mmc-api.openapi.yaml or inline JSDoc comments \*/
 
 /\*\*
 
@@ -13,8 +12,7 @@
 -
 - All endpoints require authentication except:
 - - POST /auth/login
-- - POST /invitations/:token/accept
-    \*/
+- - POST /invitations/:token/accept \*/
 
 /\*\*
 
@@ -57,8 +55,7 @@
 - }
 - }
 -
-- Rate Limit: 5 per minute per IP
-  \*/
+- Rate Limit: 5 per minute per IP \*/
 
 /\*\*
 
@@ -74,8 +71,7 @@
 - "message": "Logged out successfully"
 - }
 -
-- Response 401: Invalid or expired token
-  \*/
+- Response 401: Invalid or expired token \*/
 
 /\*\*
 
@@ -105,8 +101,7 @@
 -
 - Response 401: Unauthenticated or token_version mismatch
 -
-- Rate Limit: 60 per minute
-  \*/
+- Rate Limit: 60 per minute \*/
 
 /\*\*
 
@@ -146,8 +141,7 @@
 - Response 403: Insufficient permission (missing MEMBERS_MANAGEMENT.create)
 - Response 409: Conflict (duplicate username or email)
 -
-- Rate Limit: 10 per minute
-  \*/
+- Rate Limit: 10 per minute \*/
 
 /\*\*
 
@@ -184,8 +178,7 @@
 - Response 403: Insufficient permission
 - Response 404: Member not found
 -
-- Rate Limit: 60 per minute
-  \*/
+- Rate Limit: 60 per minute \*/
 
 /\*\*
 
@@ -213,8 +206,7 @@
 - Response 404: Member not found
 - Response 409: Duplicate email
 -
-- Rate Limit: 20 per minute
-  \*/
+- Rate Limit: 20 per minute \*/
 
 /\*\*
 
@@ -240,8 +232,7 @@
 - Response 403: Insufficient permission
 - Response 404: Member not found
 -
-- Rate Limit: 5 per minute
-  \*/
+- Rate Limit: 5 per minute \*/
 
 /\*\*
 
@@ -271,8 +262,7 @@
 - Response 401: Unauthenticated
 - Response 403: Insufficient permission
 -
-- Rate Limit: 60 per minute
-  \*/
+- Rate Limit: 60 per minute \*/
 
 /\*\*
 
@@ -298,8 +288,7 @@
 - Response 403: Insufficient permission
 - Response 404: Role not found
 -
-- Rate Limit: 60 per minute
-  \*/
+- Rate Limit: 60 per minute \*/
 
 /\*\*
 
@@ -343,8 +332,7 @@
 - Response 403: Insufficient permission
 - Response 404: Role not found
 -
-- Rate Limit: 60 per minute
-  \*/
+- Rate Limit: 60 per minute \*/
 
 /\*\*
 
@@ -384,8 +372,7 @@
 - Response 403: Insufficient permission
 - Response 404: Role not found
 -
-- Rate Limit: 10 per minute
-  \*/
+- Rate Limit: 10 per minute \*/
 
 /\*\*
 
@@ -419,8 +406,7 @@
 - Response 403: Insufficient permission (missing MEMBERS_MANAGEMENT.create)
 - Response 409: Email already member or pending invitation exists
 -
-- Rate Limit: 20 per hour
-  \*/
+- Rate Limit: 20 per hour \*/
 
 /\*\*
 
@@ -461,8 +447,7 @@
 - Response 401: Unauthenticated
 - Response 403: Insufficient permission
 -
-- Rate Limit: 60 per minute
-  \*/
+- Rate Limit: 60 per minute \*/
 
 /\*\*
 
@@ -493,8 +478,7 @@
 - Response 400: Invalid password complexity
 - Response 401: Invalid token, token expired, or already accepted
 -
-- Rate Limit: 5 per day (per IP)
-  \*/
+- Rate Limit: 5 per day (per IP) \*/
 
 /\*\*
 
@@ -516,8 +500,7 @@
 - "master_db": "disconnected",
 - "redis": "disconnected",
 - "migrations_current": false
-- }
-  \*/
+- } \*/
 
 /\*\*
 
@@ -532,8 +515,7 @@
 - - 409 Conflict: Duplicate username/email, role has members, etc.
 - - 429 Too Many Requests: Rate limited
 - - 500 Internal Server Error: Unexpected error
-- - 503 Service Unavailable: DB/Redis not connected
-    \*/
+- - 503 Service Unavailable: DB/Redis not connected \*/
 
 /\*\*
 
@@ -552,7 +534,6 @@
 -     "code": "string (machine-readable error code)",
 -     "message": "string (human-readable message)"
 - }
-- }
-  \*/
+- } \*/
 
 export {}

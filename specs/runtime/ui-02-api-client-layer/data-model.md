@@ -1,11 +1,11 @@
 # Data Model: API Client Layer
 
-**Feature**: UI-02 API Client Layer
-**Date**: 2026-03-01
+**Feature**: UI-02 API Client Layer **Date**: 2026-03-01
 
 ---
 
-This stage has no database entities. All data structures are in-memory TypeScript types used for HTTP communication.
+This stage has no database entities. All data structures are in-memory TypeScript types used for
+HTTP communication.
 
 ---
 
@@ -29,7 +29,8 @@ The normalized error object consumed by all UI code.
 
 **State transitions**: None — AppError is immutable once created.
 
-**Relationships**: Created by error normalization pipeline in `http-error.ts`. Consumed by all UI feature modules.
+**Relationships**: Created by error normalization pipeline in `http-error.ts`. Consumed by all UI
+feature modules.
 
 ---
 
@@ -115,14 +116,16 @@ Output of `HttpAdapter.execute()`.
 
 ## Entity: ClientResponse\<T\>
 
-Successful response wrapper returned by client methods. Named `ClientResponse` to avoid collision with `@zidney/types` `ApiResponse`.
+Successful response wrapper returned by client methods. Named `ClientResponse` to avoid collision
+with `@zidney/types` `ApiResponse`.
 
 | Field     | Type   | Required | Description                       |
 | --------- | ------ | -------- | --------------------------------- |
 | `success` | `true` | ✅       | Literal `true` for type narrowing |
 | `data`    | `T`    | ✅       | Typed response payload            |
 
-**Relationship**: Aligns with backend `APIResponse<T>` contract from `packages/types/src/api-response.ts`.
+**Relationship**: Aligns with backend `APIResponse<T>` contract from
+`packages/types/src/api-response.ts`.
 
 ---
 

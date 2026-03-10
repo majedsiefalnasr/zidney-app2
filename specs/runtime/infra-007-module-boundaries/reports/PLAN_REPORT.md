@@ -8,9 +8,15 @@
 
 ## Summary
 
-Technical plan is complete for the Module Boundary Enforcement stage. The plan introduces a new `docs/architecture/module-boundaries.json` file as the primary, layer-first boundary map, extends `scripts/ai-guard.ts` with three constructs (`loadModuleBoundaries()`, `loadTsAliases()`, `validateLayerBoundaries()`), adds a `"ai-guard"` npm script, renames the CI step to `module-boundary-validation`, and enhances `infra-audit.ts` for undeclared module detection (FR-008).
+Technical plan is complete for the Module Boundary Enforcement stage. The plan introduces a new
+`docs/architecture/module-boundaries.json` file as the primary, layer-first boundary map, extends
+`scripts/ai-guard.ts` with three constructs (`loadModuleBoundaries()`, `loadTsAliases()`,
+`validateLayerBoundaries()`), adds a `"ai-guard"` npm script, renames the CI step to
+`module-boundary-validation`, and enhances `infra-audit.ts` for undeclared module detection
+(FR-008).
 
-Guardian validations passed: Zidney Architecture Checker (VERDICT: PASS) and Zidney API Designer (VERDICT: PASS).
+Guardian validations passed: Zidney Architecture Checker (VERDICT: PASS) and Zidney API Designer
+(VERDICT: PASS).
 
 ---
 
@@ -77,7 +83,8 @@ Not applicable — INFRA governance stage. No database writes. No HTTP transacti
 
 ## Idempotency Strategy
 
-Not applicable — INFRA governance stage. `ai-guard.ts` is a read-only validation script. Running it multiple times produces the same output.
+Not applicable — INFRA governance stage. `ai-guard.ts` is a read-only validation script. Running it
+multiple times produces the same output.
 
 ---
 
@@ -108,7 +115,8 @@ Not applicable — INFRA governance stage. `ai-guard.ts` is a read-only validati
 Key observations:
 
 - All 13 modules correctly classified across 4 layers (4+2+2+5)
-- `packages/types` → `infrastructure` and `packages/api-client` → `ui` reclassifications are architecturally sound
+- `packages/types` → `infrastructure` and `packages/api-client` → `ui` reclassifications are
+  architecturally sound
 - All 5 existing validators and 3 existing loaders preserved untouched
 - `loadTsAliases()` correctly merges both tsconfig files
 - 9 ADRs inspected — none affected
@@ -117,14 +125,17 @@ Key observations:
 
 Advisory notes received (non-blocking):
 
-- Potential `infrastructure → infrastructure` self-dependency violations may surface in Step 4 (SC-010 remediation handles this)
-- Potential `ui → domain` violations via `packages/validation` imports may surface (same SC-010 remediation path)
+- Potential `infrastructure → infrastructure` self-dependency violations may surface in Step 4
+  (SC-010 remediation handles this)
+- Potential `ui → domain` violations via `packages/validation` imports may surface (same SC-010
+  remediation path)
 
 ### Zidney API Designer
 
 **VERDICT: PASS**
 
-Confirmed: No HTTP APIs created or modified. `validateLayerBoundaries()` export signature is correct, stable, and pure-function. No hidden cross-service concerns.
+Confirmed: No HTTP APIs created or modified. `validateLayerBoundaries()` export signature is
+correct, stable, and pure-function. No hidden cross-service concerns.
 
 ---
 

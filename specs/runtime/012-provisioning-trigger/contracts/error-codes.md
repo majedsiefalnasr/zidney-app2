@@ -386,13 +386,13 @@ All error responses follow unified contract:
   expr: rate(provisioning_error_count[5m]) / rate(provisioning_total[5m]) > 0.05
   for: 5m
   annotations:
-    summary: '5%+ provisioning jobs failing. Check logs for error codes.'
+    summary: "5%+ provisioning jobs failing. Check logs for error codes."
 
 - alert: DLQBacklog
   expr: redis_dlq_size > 10
   for: 10m
   annotations:
-    summary: '{{$value}} jobs in DLQ. Operator intervention needed.'
+    summary: "{{$value}} jobs in DLQ. Operator intervention needed."
 ```
 
 ---
@@ -402,31 +402,28 @@ All error responses follow unified contract:
 ### Unit Tests
 
 ```typescript
-test('DATABASE_CREATION_FAILED should trigger retry', async () => {
+test("DATABASE_CREATION_FAILED should trigger retry", async () => {
   // Mock CREATE DATABASE to fail
-  jest.spyOn(db, 'query').mockRejectedValueOnce(new Error('permission denied'))
+  jest.spyOn(db, "query").mockRejectedValueOnce(new Error("permission denied"));
 
-  await provisionWorkspace(job)
+  await provisionWorkspace(job);
 
   // Verify job re-enqueued with retry_count incremented
   expect(redis.lpush).toHaveBeenCalledWith(
-    'provisioning:queue',
-    expect.objectContaining({ retry_count: 1 })
-  )
-})
+    "provisioning:queue",
+    expect.objectContaining({ retry_count: 1 }),
+  );
+});
 
-test('MIGRATION_FAILED should NOT retry', async () => {
+test("MIGRATION_FAILED should NOT retry", async () => {
   // Mock migration execution to fail
-  jest.spyOn(db, 'query').mockRejectedValueOnce(new Error('syntax error'))
+  jest.spyOn(db, "query").mockRejectedValueOnce(new Error("syntax error"));
 
-  await provisionWorkspace(job)
+  await provisionWorkspace(job);
 
   // Verify job enqueued to DLQ, not retry queue
-  expect(redis.lpush).toHaveBeenCalledWith(
-    'provisioning:dlq',
-    expect.any(String)
-  )
-})
+  expect(redis.lpush).toHaveBeenCalledWith("provisioning:dlq", expect.any(String));
+});
 ```
 
 ---

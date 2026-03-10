@@ -36,8 +36,8 @@
 
 ```typescript
 // Now fetches schema version and passes to validator
-const expectedSchemaVersion = workspaceSchema.rows[0]?.schema_version
-await validateJwtClaims(payload, resolvedWorkspaceId, expectedSchemaVersion)
+const expectedSchemaVersion = workspaceSchema.rows[0]?.schema_version;
+await validateJwtClaims(payload, resolvedWorkspaceId, expectedSchemaVersion);
 ```
 
 ---
@@ -51,7 +51,7 @@ await validateJwtClaims(payload, resolvedWorkspaceId, expectedSchemaVersion)
 
 ```typescript
 // Now uses proper transaction isolation
-await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
+await client.query("BEGIN ISOLATION LEVEL SERIALIZABLE");
 // ... with FOR UPDATE lock for atomic safety
 ```
 
@@ -276,7 +276,8 @@ This validation and sign-off is authorized by:
 
 🟢 **PRODUCTION READY**
 
-All critical security invariants have been verified, all identified issues have been remediated, and all tests are passing.
+All critical security invariants have been verified, all identified issues have been remediated, and
+all tests are passing.
 
 ---
 

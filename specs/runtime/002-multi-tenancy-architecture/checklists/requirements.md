@@ -1,8 +1,8 @@
 # Specification Quality Checklist: Implement multi-tenancy architecture for Zidney platform
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-02-15
-**Feature**: [specs/runtime/002-multi-tenancy-architecture/spec.md](specs/runtime/002-multi-tenancy-architecture/spec.md)
+**Created**: 2026-02-15 **Feature**:
+[specs/runtime/002-multi-tenancy-architecture/spec.md](specs/runtime/002-multi-tenancy-architecture/spec.md)
 
 ## Content Quality
 

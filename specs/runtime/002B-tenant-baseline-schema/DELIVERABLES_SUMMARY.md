@@ -270,8 +270,8 @@ Conclusion: ✅ PRODUCTION-READY
 ### Required Approvals
 
 - [ ] **Principal Engineer**: Review EXECUTIVE_SUMMARY.md + CRITICAL_REVIEW_RESOLUTION.md
-  - Signature required: ****\*\*\*\*****\_\_\_****\*\*\*\*****
-  - Date: ****\*\*\*\*****\_\_\_****\*\*\*\*****
+  - Signature required: \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
+  - Date: \***\*\*\*\*\*\*\***\_\_\_\***\*\*\*\*\*\*\***
 
 - [ ] **Dev Lead**: Confirm code compiles + tests pass
   - Status: ALL TESTS PASS ✅

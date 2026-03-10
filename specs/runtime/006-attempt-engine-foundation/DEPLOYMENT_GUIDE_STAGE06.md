@@ -279,7 +279,7 @@ docker logs -f zidney-worker
 **Docker Compose (Scaled):**
 
 ```yaml
-version: '3.9'
+version: "3.9"
 
 services:
   worker-1:
@@ -513,15 +513,15 @@ global:
   scrape_interval: 15s
 
 scrape_configs:
-  - job_name: 'zidney-api'
+  - job_name: "zidney-api"
     static_configs:
-      - targets: ['localhost:3000']
-    metrics_path: '/metrics'
+      - targets: ["localhost:3000"]
+    metrics_path: "/metrics"
 
-  - job_name: 'zidney-worker'
+  - job_name: "zidney-worker"
     static_configs:
-      - targets: ['localhost:3001']
-    metrics_path: '/metrics'
+      - targets: ["localhost:3001"]
+    metrics_path: "/metrics"
 ```
 
 ### 2. Key Alerts

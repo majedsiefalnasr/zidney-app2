@@ -1,16 +1,17 @@
 # Tasks Report — STAGE_UI_07_LAYOUT_SYSTEM_INTEGRATION
 
-**Step:** 4 — Tasks
-**Timestamp:** 2026-03-05T00:00:00Z
-**Status:** COMPLETE
+**Step:** 4 — Tasks **Timestamp:** 2026-03-05T00:00:00Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-51 atomic tasks generated across 13 phases covering the full Layout System Integration implementation for MMC, Backoffice, and Frontoffice. All tasks are dependency-ordered with 14 independent parallel groups identified.
+51 atomic tasks generated across 13 phases covering the full Layout System Integration
+implementation for MMC, Backoffice, and Frontoffice. All tasks are dependency-ordered with 14
+independent parallel groups identified.
 
-No dependency conflicts found. Four ordering concerns are documented below and accounted for in task sequencing.
+No dependency conflicts found. Four ordering concerns are documented below and accounted for in task
+sequencing.
 
 ---
 
@@ -45,22 +46,30 @@ No dependency conflicts found. Four ordering concerns are documented below and a
 
 ## Transactional Tasks
 
-Not applicable — layout layer performs no DB write operations. All state changes are pure in-memory Pinia store mutations.
+Not applicable — layout layer performs no DB write operations. All state changes are pure in-memory
+Pinia store mutations.
 
 ---
 
 ## Idempotency Tasks
 
-Not applicable — layout rendering and store state management are inherently idempotent. Multiple calls to `toggleSidebar()` or `setMobile()` produce consistent, predictable state.
+Not applicable — layout rendering and store state management are inherently idempotent. Multiple
+calls to `toggleSidebar()` or `setMobile()` produce consistent, predictable state.
 
 ---
 
 ## Ordering Concerns
 
-1. **T001 (MMC @zidney/ui-system) hard-blocks T002, T014, T017, T020, T023** — Backoffice and Frontoffice tasks can proceed in parallel while MMC waits.
-2. **T032/T033 strict ordering** — `BackofficeLayout.vue` (T032) must not be deleted until App.vue update (T027) and standalone routes (T030) are complete. Premature deletion breaks Backoffice routing.
-3. **RouteMeta augmentation before route file edits** — T029–T031 require T008–T010 to be in place; TypeScript strict mode will reject route meta assignments until the augmentation is registered.
-4. **`<router-view>` placement clarification** — AppLayout.vue contains its own `<router-view />`. App.vue must NOT pass `<router-view>` as a slot child to avoid dead slot content (architecture checker finding).
+1. **T001 (MMC @zidney/ui-system) hard-blocks T002, T014, T017, T020, T023** — Backoffice and
+   Frontoffice tasks can proceed in parallel while MMC waits.
+2. **T032/T033 strict ordering** — `BackofficeLayout.vue` (T032) must not be deleted until App.vue
+   update (T027) and standalone routes (T030) are complete. Premature deletion breaks Backoffice
+   routing.
+3. **RouteMeta augmentation before route file edits** — T029–T031 require T008–T010 to be in place;
+   TypeScript strict mode will reject route meta assignments until the augmentation is registered.
+4. **`<router-view>` placement clarification** — AppLayout.vue contains its own `<router-view />`.
+   App.vue must NOT pass `<router-view>` as a slot child to avoid dead slot content (architecture
+   checker finding).
 
 ---
 

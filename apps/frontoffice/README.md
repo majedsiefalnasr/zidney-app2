@@ -2,7 +2,9 @@
 
 ## Purpose
 
-Student Runtime SPA — the exam-taking interface for enrolled students. Provides a secure, real-time exam session with timer enforcement, question navigation, and submission flow. All answers and timing are server-authoritative.
+Student Runtime SPA — the exam-taking interface for enrolled students. Provides a secure, real-time
+exam session with timer enforcement, question navigation, and submission flow. All answers and
+timing are server-authoritative.
 
 ---
 
@@ -65,9 +67,12 @@ bun run test:e2e:frontoffice
 
 ## Known Boundaries
 
-- **Server time is authoritative** — never trust `Date.now()` for exam timing; always use server-issued timestamps
+- **Server time is authoritative** — never trust `Date.now()` for exam timing; always use
+  server-issued timestamps
 - **No client-side grading** — submission only; grading is finalized by the Worker
-- **Attempt configuration is immutable** — question list and grading config are snapshotted at attempt start and cannot change
-- **One WebSocket connection per user per attempt** — reconnects are handled gracefully but duplicate connections are rejected
+- **Attempt configuration is immutable** — question list and grading config are snapshotted at
+  attempt start and cannot change
+- **One WebSocket connection per user per attempt** — reconnects are handled gracefully but
+  duplicate connections are rejected
 - **No DB imports** — does not access database schemas
 - **Import rule**: may import from `packages/*`, must not import from other `apps/*`

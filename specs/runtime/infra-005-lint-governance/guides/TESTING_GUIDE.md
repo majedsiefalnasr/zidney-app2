@@ -1,7 +1,6 @@
 # Testing Guide: STAGE_INFRA_05_LINT_GOVERNANCE
 
-**Stage:** STAGE_INFRA_05_LINT_GOVERNANCE
-**Purpose:** Lint governance and architecture validation
+**Stage:** STAGE_INFRA_05_LINT_GOVERNANCE **Purpose:** Lint governance and architecture validation
 **Audience:** QA, developers, reviewers
 
 ---
@@ -88,7 +87,8 @@ rm /tmp/test-unreachable.ts
 
 ### Test 2: Vue Scaffold Suppressions
 
-**Objective:** Verify biome-ignore suppressions are in place and suppress only the expected violations.
+**Objective:** Verify biome-ignore suppressions are in place and suppress only the expected
+violations.
 
 **Check files:**
 
@@ -119,7 +119,8 @@ grep -n "biome-ignore" \
   apps/mmc/src/modules/licenses/components/LicenseDeletionDialog.vue
 ```
 
-**Expected pattern:** Comment appears **inside the try block**, as the **last statement before `} catch`** block.
+**Expected pattern:** Comment appears **inside the try block**, as the **last statement before
+`} catch`** block.
 
 ---
 
@@ -214,7 +215,8 @@ git reset HEAD
 
 ### Test 3: Simulate CI Environment
 
-**Objective:** Verify the CI workflow `.github/workflows/ci.yml` changes work in isolated environment.
+**Objective:** Verify the CI workflow `.github/workflows/ci.yml` changes work in isolated
+environment.
 
 **Prerequisites:**
 
@@ -362,11 +364,13 @@ rm test-bad-format.ts
 
 ### Biome-ignore Vue Suppressions
 
-**Issue:** 4 Vue scaffold files contain `noUnreachable` violations in try-catch blocks (placeholder code).
+**Issue:** 4 Vue scaffold files contain `noUnreachable` violations in try-catch blocks (placeholder
+code).
 
 **Status:** SUPPRESSED via `biome-ignore` comments, documented in source code with rationale.
 
-**Future resolution:** When scaffold code is replaced with actual implementation, remove `biome-ignore` comments and implement proper error handling.
+**Future resolution:** When scaffold code is replaced with actual implementation, remove
+`biome-ignore` comments and implement proper error handling.
 
 ---
 
@@ -389,19 +393,22 @@ rm test-bad-format.ts
 
 **Cause:** Staged files list is empty in non-CI environment.
 
-**Resolution:** Run `bun scripts/ai-guard.ts` directly without git staging, or run in CI environment where the fallback is active.
+**Resolution:** Run `bun scripts/ai-guard.ts` directly without git staging, or run in CI environment
+where the fallback is active.
 
 ### Issue: Biome lint shows warnings, not errors
 
 **Cause:** Some rules are at `warn` level, not `error`.
 
-**Resolution:** Warnings don't block commits. To promote a warning to error, modify `biome.json` and create a new INFRA stage.
+**Resolution:** Warnings don't block commits. To promote a warning to error, modify `biome.json` and
+create a new INFRA stage.
 
 ### Issue: Pre-commit hook hangs
 
 **Cause:** Rarely, `lint-staged` can deadlock on large file lists.
 
-**Resolution:** Use `git commit --no-verify -m "msg"` to bypass, then run `bun scripts/infra-audit.ts --fix-map` to recover.
+**Resolution:** Use `git commit --no-verify -m "msg"` to bypass, then run
+`bun scripts/infra-audit.ts --fix-map` to recover.
 
 ---
 

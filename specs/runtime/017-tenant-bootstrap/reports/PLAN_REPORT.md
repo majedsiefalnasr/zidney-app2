@@ -8,14 +8,20 @@
 
 ## Summary
 
-Technical plan for STAGE_17_TENANT_BOOTSTRAP is complete after three rounds of Architecture Checker remediation and three rounds of API Designer remediation. The plan covers:
+Technical plan for STAGE_17_TENANT_BOOTSTRAP is complete after three rounds of Architecture Checker
+remediation and three rounds of API Designer remediation. The plan covers:
 
-- A single forward-only tenant DDL migration creating 4 RBAC skeleton tables (`roles`, `role_permissions`, `staff_users`, `staff_user_roles`)
-- A new `GET /api/v1/backoffice/context` endpoint returning workspace config, user profile, and RBAC permissions
-- A WebSocket endpoint at `/ws/backoffice` with Redis-based license polling (30 s default, configurable)
-- A new `backoffice-rbac-guard` middleware with `createBackofficeRBACGuard(logger, resource, action)` signature
+- A single forward-only tenant DDL migration creating 4 RBAC skeleton tables (`roles`,
+  `role_permissions`, `staff_users`, `staff_user_roles`)
+- A new `GET /api/v1/backoffice/context` endpoint returning workspace config, user profile, and RBAC
+  permissions
+- A WebSocket endpoint at `/ws/backoffice` with Redis-based license polling (30 s default,
+  configurable)
+- A new `backoffice-rbac-guard` middleware with
+  `createBackofficeRBACGuard(logger, resource, action)` signature
 - A new `backoffice-module-guard` middleware for license module gating
-- Updates to the existing `license-enforcement.ts` to add `correlationId` to all non-ACTIVE error responses
+- Updates to the existing `license-enforcement.ts` to add `correlationId` to all non-ACTIVE error
+  responses
 - A new Vue 3 backoffice SPA scaffold under `apps/backoffice/src/`
 
 All Architecture Checker and API Designer guardian rounds returned **VERDICT: PASS**.
@@ -70,7 +76,8 @@ All Architecture Checker and API Designer guardian rounds returned **VERDICT: PA
 
 ## Transaction Boundaries
 
-- **RBAC migration:** entire DDL wrapped in a single `BEGIN … COMMIT` block — all 4 tables created atomically or none
+- **RBAC migration:** entire DDL wrapped in a single `BEGIN … COMMIT` block — all 4 tables created
+  atomically or none
 - **`GET /api/v1/backoffice/context`:** read-only tenant DB query; no write transaction needed
 - **WebSocket `onOpen`:** Redis `SET` for connection registry — atomic per Redis command
 - **WebSocket `onClose`/`onError`:** Redis `DEL` cleanup — idempotent
@@ -80,7 +87,8 @@ All Architecture Checker and API Designer guardian rounds returned **VERDICT: PA
 ## Idempotency Strategy
 
 - **Migration:** `CREATE TABLE IF NOT EXISTS` on all 4 tables — safe to run multiple times
-- **WS connection registry write:** `wsRedis.set(wsKey, '1', { EX: ttl })` — overwrite semantics; no duplicate-insert risk
+- **WS connection registry write:** `wsRedis.set(wsKey, '1', { EX: ttl })` — overwrite semantics; no
+  duplicate-insert risk
 - **Context endpoint:** pure read — inherently idempotent
 - **RBAC / module guard errors:** stateless — re-evaluation on every request
 
@@ -103,8 +111,12 @@ All Architecture Checker and API Designer guardian rounds returned **VERDICT: PA
 
 ## Open Risks
 
-- `license-enforcement.ts` pre-existing error shape lacks `correlationId`; this MUST be resolved as task API-04 in tasks.md — the plan explicitly mandates the update (UPDATE existing file note on line 241 of plan.md).
-- WebSocket Redis key TTL (`WS_POLL_MS * 3`) assumes the poll interval is reliably ≤ its env var; if the poll stalls, the TTL may expire before `onClose`. This is acceptable for the bootstrap phase — connections will need to re-authenticate on reconnect.
+- `license-enforcement.ts` pre-existing error shape lacks `correlationId`; this MUST be resolved as
+  task API-04 in tasks.md — the plan explicitly mandates the update (UPDATE existing file note on
+  line 241 of plan.md).
+- WebSocket Redis key TTL (`WS_POLL_MS * 3`) assumes the poll interval is reliably ≤ its env var; if
+  the poll stalls, the TTL may expire before `onClose`. This is acceptable for the bootstrap phase —
+  connections will need to re-authenticate on reconnect.
 
 ---
 

@@ -1,8 +1,7 @@
 # STAGE 02 – Multi-Tenancy Architecture
 
-Phase: 1 – Platform Foundation
-Status: Critical
-Scope: Database-per-tenant architecture & tenant resolution
+Phase: 1 – Platform Foundation Status: Critical Scope: Database-per-tenant architecture & tenant
+resolution
 
 ---
 
@@ -32,8 +31,7 @@ Constitutional Compliance:
 - No cross-tenant joins
 - No global tenant state
 
-Notes:
-Isolation layer is frozen. Any modification requires security review.
+Notes: Isolation layer is frozen. Any modification requires security review.
 
 ---
 
@@ -68,8 +66,7 @@ Postgres Instance
 └── workspace*<slug_n>
 ```
 
-Expected first-year scale:
-< 100 workspaces
+Expected first-year scale: < 100 workspaces
 
 Each workspace database:
 
@@ -187,42 +184,27 @@ License is source of truth for:
 
 4. Enforce License State
 
-ACTIVE → allow
-SOFT_LOCKED → 423 Locked
-ARCHIVED → 403 Forbidden
-DELETED → 404 Not Found
+ACTIVE → allow SOFT_LOCKED → 423 Locked ARCHIVED → 403 Forbidden DELETED → 404 Not Found
 
 5. Schema Version Enforcement
 
 Compare:
 
-tenant.schema_version
-platform.expected_schema_version
+tenant.schema_version platform.expected_schema_version
 
 If mismatch:
 
-→ 426 Upgrade Required
-→ Log critical error
-→ Block request
+→ 426 Upgrade Required → Log critical error → Block request
 
 6. Resolve Tenant DB Connection
 
-Use in-memory pool map:
-tenantPools = Map<workspaceId, Pool>
-If pool exists → reuse
-If not → create new pool
+Use in-memory pool map: tenantPools = Map<workspaceId, Pool> If pool exists → reuse If not → create
+new pool
 
 7. Attach Context
 
-req.context = {
-workspaceId,
-workspaceSlug,
-tenantDb,
-license,
-schemaVersion,
-productVersion,
-requestId
-}
+req.context = { workspaceId, workspaceSlug, tenantDb, license, schemaVersion, productVersion,
+requestId }
 
 All domain services must use DB from context only.
 
@@ -251,8 +233,7 @@ To prevent resource exhaustion:
 - Pool created lazily
 - Pool closed on graceful shutdown
 
-If pool count exceeds threshold:
-→ Log warning
+If pool count exceeds threshold: → Log warning
 
 ---
 
@@ -278,9 +259,7 @@ Each tenant DB must include:
 
 On every request:
 
-If mismatch:
-→ 426 Upgrade Required
-→ Block execution
+If mismatch: → 426 Upgrade Required → Block execution
 
 No partial compatibility allowed.
 
@@ -306,24 +285,19 @@ Workspace identity derived only from middleware.
 
 Tenant DB name:
 
-workspace\_<slug>
-Examples:
+workspace\_<slug> Examples:
 
 - workspace_almajed
 - workspace_university_x
 
-Slug immutable
-Database name immutable
+Slug immutable Database name immutable
 
 ---
 
 ## Failure Handling
 
-Workspace not found → 404
-Archived → 403
-Soft locked → 423
-Schema mismatch → 426
-DB connection failure → 503
+Workspace not found → 404 Archived → 403 Soft locked → 423 Schema mismatch → 426 DB connection
+failure → 503
 
 All logs must include:
 

@@ -103,10 +103,8 @@ The count query must:
 
 To prevent race conditions:
 
-- Use SELECT COUNT(\*) FOR UPDATE (if supported strategy)
-  OR
-- Use application-level advisory locking per workspace
-  OR
+- Use SELECT COUNT(\*) FOR UPDATE (if supported strategy) OR
+- Use application-level advisory locking per workspace OR
 - Use serializable isolation level (if required)
 
 The chosen strategy must guarantee:
@@ -131,10 +129,7 @@ Import must never:
 - Insert beyond limit
 - Silently truncate without reporting
 
-If remaining capacity is 10
-And batch size is 50
-→ Insert only 10
-→ Reject 40 with explicit report
+If remaining capacity is 10 And batch size is 50 → Insert only 10 → Reject 40 with explicit report
 
 ---
 

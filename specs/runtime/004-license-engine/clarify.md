@@ -11,7 +11,8 @@
 
 ## Session Summary
 
-**Objective**: Audit specification for ambiguities in transactions, idempotency, concurrency, version enforcement, middleware enforcement, security, error contracts, and isolation.
+**Objective**: Audit specification for ambiguities in transactions, idempotency, concurrency,
+version enforcement, middleware enforcement, security, error contracts, and isolation.
 
 **Result**: All critical ambiguities resolved. Specification now ready for planning phase.
 
@@ -26,7 +27,8 @@
 
 **Question**:
 
-> For student/staff limit enforcement (T2), which transactional lock mechanism prevents concurrent requests from both inserting the Nth student when limit=N?
+> For student/staff limit enforcement (T2), which transactional lock mechanism prevents concurrent
+> requests from both inserting the Nth student when limit=N?
 
 **Options**:
 
@@ -53,7 +55,8 @@
 
 **Question**:
 
-> How should idempotency keys be stored (database, Redis, or compute-on-demand) and what TTL should be used?
+> How should idempotency keys be stored (database, Redis, or compute-on-demand) and what TTL should
+> be used?
 
 **Options**:
 
@@ -67,7 +70,8 @@
 
 - State transitions: Redis cache; `idempotency:{license_id}:{target_state}:{request_id_hash}`
 - TTL: 24 hours (sufficient for retry windows; prevents stale responses)
-- Behavior: First submission stored; retries get cached response; after TTL expires, new request treated as fresh
+- Behavior: First submission stored; retries get cached response; after TTL expires, new request
+  treated as fresh
 - Snapshot dedup: Database query (checking recent snapshots within 1 hour)
 - Cache failure: Proceed without caching; best-effort idempotency
 
@@ -75,9 +79,11 @@
 
 ### Q3: Version Enforcement Direction & Forward Compatibility
 
-**Topic**: How version mismatches should be handled (strict, forward-compatible, backward-compatible)
+**Topic**: How version mismatches should be handled (strict, forward-compatible,
+backward-compatible)
 
-**Ambiguity**: Directional semantics not specified; could allow data corruption if implementation reverses logic
+**Ambiguity**: Directional semantics not specified; could allow data corruption if implementation
+reverses logic
 
 **Question**:
 
@@ -96,7 +102,8 @@
 
 **Clarification Integration** (License & Version Enforcement section):
 
-- Comparison: `IF tenant.schema_version >= license.expected_schema_version THEN allow (200) ELSE 426`
+- Comparison:
+  `IF tenant.schema_version >= license.expected_schema_version THEN allow (200) ELSE 426`
 - Semantics:
   - tenant > license: **Allowed** (tenant ahead; runtime handles old contract)
   - tenant = license: **Allowed** (exact match)
@@ -107,7 +114,8 @@
 
 ### Q4: Soft-Lock Auto-Expiry Timing & Precision
 
-**Topic**: When SOFT_LOCKED → ARCHIVED auto-transition should occur (every request, at auth, or cron)
+**Topic**: When SOFT_LOCKED → ARCHIVED auto-transition should occur (every request, at auth, or
+cron)
 
 **Ambiguity**: Check timing and race condition handling not defined
 
@@ -118,7 +126,8 @@
 
 **Options**:
 
-- A: Every request (fail-fast; user gets 403 immediately after expiry; race handled via SELECT FOR UPDATE)
+- A: Every request (fail-fast; user gets 403 immediately after expiry; race handled via SELECT FOR
+  UPDATE)
 - B: Auth only (medium cost; background cron handles stale sessions)
 - C: Cron job only (low cost; one check per minute per license)
 
@@ -140,15 +149,18 @@
 
 **Topic**: What specific error codes should be returned (generic vs granular)
 
-**Ambiguity**: Complete error code mapping not specified; implementation might use inconsistent codes
+**Ambiguity**: Complete error code mapping not specified; implementation might use inconsistent
+codes
 
 **Question**:
 
-> Should error codes be generic (LICENSE_BLOCKED for all restrictions) or granular (LICENSE_SOFT_LOCKED vs LICENSE_ARCHIVED)?
+> Should error codes be generic (LICENSE_BLOCKED for all restrictions) or granular
+> (LICENSE_SOFT_LOCKED vs LICENSE_ARCHIVED)?
 
 **Options**:
 
-- A: Granular codes (LICENSE_SOFT_LOCKED, LICENSE_ARCHIVED, LIMIT_EXCEEDED, SCHEMA_VERSION_MISMATCH, etc.)
+- A: Granular codes (LICENSE_SOFT_LOCKED, LICENSE_ARCHIVED, LIMIT_EXCEEDED, SCHEMA_VERSION_MISMATCH,
+  etc.)
 - B: Generic codes (LICENSE_BLOCKED, VERSION_ERROR, LIMIT_ERROR)
 - C: HTTP status codes only (no error_code field)
 

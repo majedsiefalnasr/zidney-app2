@@ -211,5 +211,4 @@ Tasks must end with:
 
 “Task set compliant with Zidney Constitution v1.2.0 — No violations detected.”
 
-If violation exists:
-Tasks must stop and describe issue.
+If violation exists: Tasks must stop and describe issue.

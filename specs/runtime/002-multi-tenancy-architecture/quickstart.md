@@ -1,7 +1,7 @@
 # Quickstart: Implement multi-tenancy architecture for Zidney platform
 
-**Date**: 2026-02-15
-**Feature**: [specs/runtime/002-multi-tenancy-architecture/spec.md](specs/runtime/002-multi-tenancy-architecture/spec.md)
+**Date**: 2026-02-15 **Feature**:
+[specs/runtime/002-multi-tenancy-architecture/spec.md](specs/runtime/002-multi-tenancy-architecture/spec.md)
 
 ## Overview
 
@@ -104,11 +104,11 @@ export const tenantResolver = async (c: Context, next: Next) => {
 In route handlers:
 
 ```typescript
-app.get('/api/workspace/:slug/exams', tenantResolver, async (c) => {
-  const tenant = c.get('tenant')
-  const result = await tenant.tenantDb.query('SELECT * FROM exams')
-  return c.json({ success: true, data: result.rows })
-})
+app.get("/api/workspace/:slug/exams", tenantResolver, async (c) => {
+  const tenant = c.get("tenant");
+  const result = await tenant.tenantDb.query("SELECT * FROM exams");
+  return c.json({ success: true, data: result.rows });
+});
 ```
 
 ## Testing
@@ -116,25 +116,25 @@ app.get('/api/workspace/:slug/exams', tenantResolver, async (c) => {
 ### Unit Tests
 
 ```typescript
-describe('Tenant Resolver', () => {
-  it('should resolve valid tenant', async () => {
+describe("Tenant Resolver", () => {
+  it("should resolve valid tenant", async () => {
     // Test middleware
-  })
+  });
 
-  it('should reject invalid license', async () => {
+  it("should reject invalid license", async () => {
     // Test enforcement
-  })
-})
+  });
+});
 ```
 
 ### Integration Tests
 
 ```typescript
-describe('Multi-tenancy Isolation', () => {
-  it('should not access other tenant data', async () => {
+describe("Multi-tenancy Isolation", () => {
+  it("should not access other tenant data", async () => {
     // Test isolation
-  })
-})
+  });
+});
 ```
 
 ## Troubleshooting

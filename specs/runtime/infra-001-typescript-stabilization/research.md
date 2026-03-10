@@ -1,14 +1,14 @@
 # Research: TypeScript Infrastructure Stabilization
 
-**Feature ID:** `infra-001-typescript-stabilization`
-**Generated:** 2026-02-27
-**Status:** COMPLETE — all NEEDS CLARIFICATION resolved
+**Feature ID:** `infra-001-typescript-stabilization` **Generated:** 2026-02-27 **Status:** COMPLETE
+— all NEEDS CLARIFICATION resolved
 
 ---
 
 ## Research Objective
 
-Audit the current TypeScript configuration state across the monorepo, enumerate actual error counts per package/area, and resolve all clarifications required before planning can proceed.
+Audit the current TypeScript configuration state across the monorepo, enumerate actual error counts
+per package/area, and resolve all clarifications required before planning can proceed.
 
 ---
 
@@ -18,7 +18,8 @@ Audit the current TypeScript configuration state across the monorepo, enumerate 
 
 **Findings:**
 
-Running `npx tsc --noEmit` from the repo root against `tsconfig.json` (which includes `apps/*/src/**/*`, `packages/*/src/**/*`, `tests/**/*`):
+Running `npx tsc --noEmit` from the repo root against `tsconfig.json` (which includes
+`apps/*/src/**/*`, `packages/*/src/**/*`, `tests/**/*`):
 
 **Total confirmed errors: 866**
 
@@ -56,15 +57,20 @@ Per-area breakdown:
 | `tests/integration/products/test_delete.ts`               | 25     |
 | `apps/api/src/middleware/dashboard-logging.middleware.ts` | 25     |
 
-**Decision:** Error baseline is confirmed at 866. Test files account for ~635 errors (~73% of total). Production source files account for ~231 errors (~27%). This confirms the priority ordering: fix production source first (Passes 1–4), test files last (Pass 5).
+**Decision:** Error baseline is confirmed at 866. Test files account for ~635 errors (~73% of
+total). Production source files account for ~231 errors (~27%). This confirms the priority ordering:
+fix production source first (Passes 1–4), test files last (Pass 5).
 
-**Rationale:** Test file errors are heavily concentrated in mmc unit/integration tests and are driven by mock type mismatches — these are easier to fix systematically once production types are stabilized. Fixing production code first prevents cascading re-fixes in tests.
+**Rationale:** Test file errors are heavily concentrated in mmc unit/integration tests and are
+driven by mock type mismatches — these are easier to fix systematically once production types are
+stabilized. Fixing production code first prevents cascading re-fixes in tests.
 
 ---
 
 ## Finding 2: tsconfig Inheritance — Current State
 
-**Question resolved:** Which packages have `strict: false`, `noImplicitAny: false`, or are missing `extends` to `tsconfig.base.json`?
+**Question resolved:** Which packages have `strict: false`, `noImplicitAny: false`, or are missing
+`extends` to `tsconfig.base.json`?
 
 ### Packages with `extends` correctly pointing to tsconfig.base.json
 
@@ -86,11 +92,17 @@ Per-area breakdown:
 | `packages/redis-utils` | Yes        | Has `src/` and `cache-client.ts` — no tsconfig |
 | `packages/types`       | Yes        | Has `src/` — no tsconfig                       |
 
-These three packages are included transitively in the root `tsconfig.json` via `packages/*/src/**/*` glob. They currently rely on root tsconfig settings with no local override. This is partially acceptable but means they have no explicit `include`/`exclude` scope and no local typecheck support.
+These three packages are included transitively in the root `tsconfig.json` via `packages/*/src/**/*`
+glob. They currently rely on root tsconfig settings with no local override. This is partially
+acceptable but means they have no explicit `include`/`exclude` scope and no local typecheck support.
 
-**Decision:** For `packages/redis-utils` and `packages/types`, create a minimal `tsconfig.json` that extends `tsconfig.base.json` and explicitly declares `include`/`exclude`. For `packages/config` (no source), skip tsconfig creation.
+**Decision:** For `packages/redis-utils` and `packages/types`, create a minimal `tsconfig.json` that
+extends `tsconfig.base.json` and explicitly declares `include`/`exclude`. For `packages/config` (no
+source), skip tsconfig creation.
 
-**Rationale:** Explicit tsconfigs allow package-local typecheck runs (`tsc -p packages/foo/tsconfig.json`), are required for IDE tooling, and make the inheritance chain auditable. Relying on glob pickup from root is fragile.
+**Rationale:** Explicit tsconfigs allow package-local typecheck runs
+(`tsc -p packages/foo/tsconfig.json`), are required for IDE tooling, and make the inheritance chain
+auditable. Relying on glob pickup from root is fragile.
 
 ### Packages with strict-weakening overrides
 
@@ -101,9 +113,13 @@ These three packages are included transitively in the root `tsconfig.json` via `
 | `packages/domain-core/tsconfig.json` | `noImplicitAny: false`, `noUnusedLocals: false`, `noUnusedParameters: false` | CRITICAL |
 | `packages/ui-system/tsconfig.json`   | `noUnusedLocals: false`, `noUnusedParameters: false`                         | MEDIUM   |
 
-**Decision:** Remove all weakening overrides. After removal, the 866 errors will become visible (many are currently suppressed by `strict: false` in `apps/api` and `noImplicitAny: false` in `packages/domain-core`). Fix errors in Pass 1–5 order; do not re-weaken.
+**Decision:** Remove all weakening overrides. After removal, the 866 errors will become visible
+(many are currently suppressed by `strict: false` in `apps/api` and `noImplicitAny: false` in
+`packages/domain-core`). Fix errors in Pass 1–5 order; do not re-weaken.
 
-**Rationale:** Some of the 866 errors may currently be invisible because `apps/api` has `strict: false` — meaning the actual post-override error count may be higher. The plan must account for this: enable strict first, count errors, then fix.
+**Rationale:** Some of the 866 errors may currently be invisible because `apps/api` has
+`strict: false` — meaning the actual post-override error count may be higher. The plan must account
+for this: enable strict first, count errors, then fix.
 
 ---
 
@@ -123,12 +139,17 @@ Current `tsconfig.base.json` compilerOptions audit:
 | `noFallthroughCasesInSwitch: true` | ✅ Required       | ✅ Present                            | None           |
 | `noUncheckedIndexedAccess: true`   | ✅ Required       | ❌ Missing                            | **Must add**   |
 
-**Decision:** Add `noImplicitAny: true`, `strictNullChecks: true`, and `noUncheckedIndexedAccess: true` explicitly to `tsconfig.base.json`.
+**Decision:** Add `noImplicitAny: true`, `strictNullChecks: true`, and
+`noUncheckedIndexedAccess: true` explicitly to `tsconfig.base.json`.
 
-- `noImplicitAny` and `strictNullChecks` are technically redundant with `strict: true` but are required explicitly per FR-01 for auditability.
-- `noUncheckedIndexedAccess` is **not** a sub-flag of `strict` and must be added separately. This will add array-index safety errors that do not currently appear.
+- `noImplicitAny` and `strictNullChecks` are technically redundant with `strict: true` but are
+  required explicitly per FR-01 for auditability.
+- `noUncheckedIndexedAccess` is **not** a sub-flag of `strict` and must be added separately. This
+  will add array-index safety errors that do not currently appear.
 
-**Risk note:** Adding `noUncheckedIndexedAccess: true` may introduce additional errors beyond the current 866. The plan must account for this — run typecheck after adding this flag specifically and record the delta before starting passes.
+**Risk note:** Adding `noUncheckedIndexedAccess: true` may introduce additional errors beyond the
+current 866. The plan must account for this — run typecheck after adding this flag specifically and
+record the delta before starting passes.
 
 ---
 
@@ -136,34 +157,45 @@ Current `tsconfig.base.json` compilerOptions audit:
 
 **Question resolved:** Is the `pnpm typecheck` script available at the monorepo root?
 
-**Finding:** The root `package.json` defines `"type-check"` (hyphenated), not `"typecheck"`. There is no `typecheck` alias.
+**Finding:** The root `package.json` defines `"type-check"` (hyphenated), not `"typecheck"`. There
+is no `typecheck` alias.
 
-The spec (FR-08, SC-01, scenarios) and stage file all reference `pnpm typecheck` as the canonical command.
+The spec (FR-08, SC-01, scenarios) and stage file all reference `pnpm typecheck` as the canonical
+command.
 
-**Decision:** Rename the root script from `"type-check"` to `"typecheck"` in `package.json`. This is a non-behavioral change (shell command alias only) that aligns the codebase with the spec contract.
+**Decision:** Rename the root script from `"type-check"` to `"typecheck"` in `package.json`. This is
+a non-behavioral change (shell command alias only) that aligns the codebase with the spec contract.
 
 **Alternatives considered:**
 
-- Add `"typecheck"` as an alias alongside `"type-check"` — rejected because having two names for the same command creates confusion.
+- Add `"typecheck"` as an alias alongside `"type-check"` — rejected because having two names for the
+  same command creates confusion.
 - Keep `"type-check"` and update spec — rejected because the spec is the authority.
 
-**Rationale:** The canonical command must match what CI, ADRs, and spec documents reference. Script rename is zero-risk and is a prerequisite for any CI configuration.
+**Rationale:** The canonical command must match what CI, ADRs, and spec documents reference. Script
+rename is zero-risk and is a prerequisite for any CI configuration.
 
 ---
 
 ## Finding 5: @ts-ignore Usage in Project Source
 
-**Question resolved:** Are there existing undocumented @ts-ignore suppressions in project source code?
+**Question resolved:** Are there existing undocumented @ts-ignore suppressions in project source
+code?
 
-**Finding:** The only file containing `@ts-ignore` or `@ts-expect-error` in project source (excluding `node_modules`) is:
+**Finding:** The only file containing `@ts-ignore` or `@ts-expect-error` in project source
+(excluding `node_modules`) is:
 
 - `tests/performance/mmc-dashboard/quality-gates.test.ts`
 
-Upon inspection, this file contains the string `// No bare @ts-ignore directives allowed` as a **test description** — not an actual suppression directive.
+Upon inspection, this file contains the string `// No bare @ts-ignore directives allowed` as a
+**test description** — not an actual suppression directive.
 
-**Decision:** Zero actual @ts-ignore suppressions currently exist in project source. The CL-05 format enforcement mechanism is a preventive gate, not a remediation task for existing violations.
+**Decision:** Zero actual @ts-ignore suppressions currently exist in project source. The CL-05
+format enforcement mechanism is a preventive gate, not a remediation task for existing violations.
 
-**Rationale:** This is a favorable baseline. The `@ts-ignore` policy (CL-05) needs to be implemented as a CI grep check and code review rule, but no backlog of existing undocumented suppressions exists.
+**Rationale:** This is a favorable baseline. The `@ts-ignore` policy (CL-05) needs to be implemented
+as a CI grep check and code review rule, but no backlog of existing undocumented suppressions
+exists.
 
 ---
 
@@ -184,15 +216,22 @@ Based on error distribution and the `strict: false` override in `apps/api`:
 | `packages/domain-core/src/licenses/index.ts`              | Implicit any             | Untyped license data structures           |
 | `tests/test-helpers.ts`                                   | Missing type import      | `expect` not in scope (vitest globals)    |
 
-**Decision:** Implicit any is the single largest error category, driven primarily by the `strict: false` override in `apps/api` and `noImplicitAny: false` in `packages/domain-core`. Removing these overrides and fixing the resulting errors is Pass 1's primary objective. The domain core must be fixed before API/worker because API and worker depend on domain types.
+**Decision:** Implicit any is the single largest error category, driven primarily by the
+`strict: false` override in `apps/api` and `noImplicitAny: false` in `packages/domain-core`.
+Removing these overrides and fixing the resulting errors is Pass 1's primary objective. The domain
+core must be fixed before API/worker because API and worker depend on domain types.
 
 ---
 
 ## Finding 7: tsconfig.base.json "9 options" Discrepancy
 
-**Question resolved:** The stage file says "9 strict compiler options" but FR-01 and the tsconfig block list 7. What are the 9?
+**Question resolved:** The stage file says "9 strict compiler options" but FR-01 and the tsconfig
+block list 7. What are the 9?
 
-**Finding:** The "9" referenced in the stage scope description appears to include all strict-relevant compiler options in context (including the pre-existing `noFallthroughCasesInSwitch`, `skipLibCheck`, etc.). FR-01 and STAGE_INFRA_01 tsconfig block are the authoritative source — they list 7 options:
+**Finding:** The "9" referenced in the stage scope description appears to include all
+strict-relevant compiler options in context (including the pre-existing
+`noFallthroughCasesInSwitch`, `skipLibCheck`, etc.). FR-01 and STAGE_INFRA_01 tsconfig block are the
+authoritative source — they list 7 options:
 
 1. `strict: true`
 2. `noImplicitAny: true`
@@ -202,7 +241,8 @@ Based on error distribution and the `strict: false` override in `apps/api`:
 6. `noFallthroughCasesInSwitch: true`
 7. `noUncheckedIndexedAccess: true`
 
-**Decision:** Implement exactly the 7 options specified in FR-01. The "9" in the stage scope description is a minor inconsistency; FR-01 is the authoritative specification.
+**Decision:** Implement exactly the 7 options specified in FR-01. The "9" in the stage scope
+description is a minor inconsistency; FR-01 is the authoritative specification.
 
 ---
 
@@ -210,9 +250,12 @@ Based on error distribution and the `strict: false` override in `apps/api`:
 
 ### TypeScript Version
 
-The root `package.json` pins `"typescript": "latest"`. For a stability-critical infrastructure stage, this is a risk.
+The root `package.json` pins `"typescript": "latest"`. For a stability-critical infrastructure
+stage, this is a risk.
 
-**Decision:** Note as a follow-up hardening item. During this stage, do not change the TypeScript version. Document the pin as a future hardening task. If a TypeScript upgrade causes additional errors during the passes, escalate before continuing.
+**Decision:** Note as a follow-up hardening item. During this stage, do not change the TypeScript
+version. Document the pin as a future hardening task. If a TypeScript upgrade causes additional
+errors during the passes, escalate before continuing.
 
 ### @types/pg
 
@@ -220,7 +263,8 @@ Already present in root `devDependencies` as `"@types/pg": "^8.16.0"`.
 
 ### Other @types packages
 
-No missing `@types` packages have been identified as root causes of the current 866 errors. The errors are in project code, not third-party type declarations.
+No missing `@types` packages have been identified as root causes of the current 866 errors. The
+errors are in project code, not third-party type declarations.
 
 ---
 

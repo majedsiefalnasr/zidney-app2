@@ -25,13 +25,16 @@
 - `packages/domain-core/src/license/resolver.ts` - LicenseResolver with Redis cache (5min TTL)
 - `packages/domain-core/src/license/validator.ts` - SemVer + forward-compatible version logic
 - `packages/domain-core/src/license/state-machine.ts` - State transitions (6 valid, 10+ blocked)
-- `packages/domain-core/src/license/limit-enforcer.ts` - StudentStaffCounter with soft-delete support
-- `packages/domain-core/src/license/service.ts` - createLicense + transitionLicenseState (SERIALIZABLE + SELECT FOR UPDATE)
+- `packages/domain-core/src/license/limit-enforcer.ts` - StudentStaffCounter with soft-delete
+  support
+- `packages/domain-core/src/license/service.ts` - createLicense + transitionLicenseState
+  (SERIALIZABLE + SELECT FOR UPDATE)
 - `packages/domain-core/src/license/index.ts` - Centralized exports
 
 **Middleware & Error Handling** (T008, T009, T032):
 
-- `apps/api/src/middleware/license-enforcement.ts` - 5-step validation (status → expiry → schema → product → context)
+- `apps/api/src/middleware/license-enforcement.ts` - 5-step validation (status → expiry → schema →
+  product → context)
 - `apps/api/src/responses/license-error-codes.ts` - 10 error codes (Clarification Q5)
 - `apps/api/src/responses/license-error-handler.ts` - Standardized response format
 
@@ -46,7 +49,8 @@
 
 **Worker Layer** (T022-T025):
 
-- `apps/worker/src/jobs/archive-snapshot.ts` - pg_dump → S3 upload → license update (1h idempotency dedup)
+- `apps/worker/src/jobs/archive-snapshot.ts` - pg_dump → S3 upload → license update (1h idempotency
+  dedup)
 - `apps/worker/src/config/queues.ts` - ARCHIVE_JOBS_QUEUE (concurrency=5, 3x retry, DLQ)
 - `apps/worker/src/index.ts` - Worker initialization + job handler registration
 
@@ -181,7 +185,8 @@ All 9 Zidney Constitution guarantees verified in implementation:
 12. `apps/api/src/responses/license-error-handler.ts` (60 LOC)
 13. `apps/worker/src/config/queues.ts` (120 LOC)
 14. `apps/worker/src/index.ts` (200 LOC)
-15. `apps/api/src/db/master/migrations/20260217_004_enhance_licenses_and_add_archive_snapshots.ts` (180 LOC)
+15. `apps/api/src/db/master/migrations/20260217_004_enhance_licenses_and_add_archive_snapshots.ts`
+    (180 LOC)
 
 ### Framework & Documentation
 
@@ -193,8 +198,8 @@ All 9 Zidney Constitution guarantees verified in implementation:
 
 ## 🧪 Testing Strategy
 
-**Currently**: Framework complete (fixtures, mocks, helpers)
-**To Do**: Implement test files per TEST_INDEX.md
+**Currently**: Framework complete (fixtures, mocks, helpers) **To Do**: Implement test files per
+TEST_INDEX.md
 
 ```
 T033-T039: Unit tests (21 total)
@@ -319,7 +324,8 @@ npm run build                      # Full build verification
 
 ## 🎉 Summary
 
-STAGE_04_LICENSE_ENGINE implementation reaches **82% completion** with all core infrastructure, API endpoints, and worker jobs production-ready and constitutional-compliant.
+STAGE_04_LICENSE_ENGINE implementation reaches **82% completion** with all core infrastructure, API
+endpoints, and worker jobs production-ready and constitutional-compliant.
 
 **Infrastructure Layer**: ✅ COMPLETE  
 **API Layer**: ✅ COMPLETE  

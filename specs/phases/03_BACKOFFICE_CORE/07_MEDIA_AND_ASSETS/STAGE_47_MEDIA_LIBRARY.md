@@ -36,8 +36,7 @@ Each workspace must have isolated storage namespace:
 Option A (Recommended):
 
 - Single object storage bucket
-- Prefix per workspace:
-  workspace/<slug>/
+- Prefix per workspace: workspace/<slug>/
 
 Option B:
 
@@ -45,8 +44,7 @@ Option B:
 
 For VPS-first architecture:
 
-- Local storage path:
-  /data/media/workspace\_<slug>/
+- Local storage path: /data/media/workspace\_<slug>/
 
 Must be abstracted via storage service layer.
 
@@ -271,8 +269,7 @@ Media integrity impacts:
 - Library
 - Branding
 
-If media tracking breaks,
-content integrity breaks.
+If media tracking breaks, content integrity breaks.
 
 This stage must be stable before:
 

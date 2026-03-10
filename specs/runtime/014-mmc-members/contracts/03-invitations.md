@@ -2,7 +2,8 @@
 
 ## Overview
 
-Invitation endpoints handle one-time token-based member onboarding: invitation creation, expiration enforcement, and account creation on acceptance.
+Invitation endpoints handle one-time token-based member onboarding: invitation creation, expiration
+enforcement, and account creation on acceptance.
 
 ---
 
@@ -268,7 +269,8 @@ BEGIN TRANSACTION SERIALIZABLE
 COMMIT
 ```
 
-**Idempotency:** Token can only be accepted once; re-submission fails with 401 (status no longer PENDING).
+**Idempotency:** Token can only be accepted once; re-submission fails with 401 (status no longer
+PENDING).
 
 ---
 
@@ -470,7 +472,8 @@ COMMIT
 
 - **PENDING:** Invitation created; token valid; user has not accepted (< 24h from creation)
 - **ACCEPTED:** User clicked link, created account; invitation "used up"
-- **EXPIRED:** Implicit state; if `expires_at < NOW()` and `status='PENDING'`, treat as expired on next read
+- **EXPIRED:** Implicit state; if `expires_at < NOW()` and `status='PENDING'`, treat as expired on
+  next read
 
 **Transitions:**
 

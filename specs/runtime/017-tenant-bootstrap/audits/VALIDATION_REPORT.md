@@ -8,7 +8,12 @@
 
 ## Summary
 
-All mandatory validation checks passed for STAGE_17_TENANT_BOOTSTRAP. 67 new stage tests pass across 7 test files (4 unit + 3 integration). Zero lint errors. Zero new TypeScript errors introduced by this stage. 1 pre-existing TypeScript error in `packages/domain-core` (unrelated, not introduced by this stage, confirmed via `git status`). Frontend dependencies installed (`bun install` in `apps/backoffice/`). 3 minor post-implementation fixes applied during validation (path resolution in isolation test, hono alias in vitest.config.ts, null guard in context handler).
+All mandatory validation checks passed for STAGE_17_TENANT_BOOTSTRAP. 67 new stage tests pass across
+7 test files (4 unit + 3 integration). Zero lint errors. Zero new TypeScript errors introduced by
+this stage. 1 pre-existing TypeScript error in `packages/domain-core` (unrelated, not introduced by
+this stage, confirmed via `git status`). Frontend dependencies installed (`bun install` in
+`apps/backoffice/`). 3 minor post-implementation fixes applied during validation (path resolution in
+isolation test, hono alias in vitest.config.ts, null guard in context handler).
 
 ---
 
@@ -80,7 +85,8 @@ bun run lint
 [All warnings are pre-existing no-explicit-any in test files — not introduced by this stage]
 ```
 
-Note: Initially 1 error (`@ts-ignore` missing description in `rate-limit.middleware.ts:544`). Fixed by adding required description format `[ts(2322)]`.
+Note: Initially 1 error (`@ts-ignore` missing description in `rate-limit.middleware.ts:544`). Fixed
+by adding required description format `[ts(2322)]`.
 
 ### Type Check
 
@@ -105,8 +111,10 @@ bunx vitest run tests/unit/db/migrations/tenant-rbac-skeleton.test.ts
 
 Migration test confirms:
 
-- 4 tables created: `backoffice_roles`, `backoffice_role_permissions`, `backoffice_staff_users`, `backoffice_staff_user_roles`
-- backoffice\_ prefix prevents collision with pre-existing `roles` and `role_permissions` tables from STAGE_12 baseline migrations
+- 4 tables created: `backoffice_roles`, `backoffice_role_permissions`, `backoffice_staff_users`,
+  `backoffice_staff_user_roles`
+- backoffice\_ prefix prevents collision with pre-existing `roles` and `role_permissions` tables
+  from STAGE_12 baseline migrations
 - 6 indexes covering all foreign keys
 - `down()` throws forward-only migration error (snapshot rollback only per ADR-0008)
 - Re-running migration is a no-op (IF NOT EXISTS guards)
@@ -114,12 +122,15 @@ Migration test confirms:
 
 ### Idempotency Replay Validation
 
-Covered by T028 scenario (j): `POST` with incremented `token_version` JWT → 401 UNAUTHORIZED, no data leaked.
-Also covered by T030 scenario (c): duplicate WS connection attempt → SET NX fails → second connection closed 1008 DUPLICATE_CONNECTION.
+Covered by T028 scenario (j): `POST` with incremented `token_version` JWT → 401 UNAUTHORIZED, no
+data leaked. Also covered by T030 scenario (c): duplicate WS connection attempt → SET NX fails →
+second connection closed 1008 DUPLICATE_CONNECTION.
 
 ### Concurrency Validation
 
-Covered by T030 scenario (c): two simultaneous WS upgrade requests using same user — atomic Redis SET NX guarantees exactly one connection accepted. Second connection closed before onOpen logic runs.
+Covered by T030 scenario (c): two simultaneous WS upgrade requests using same user — atomic Redis
+SET NX guarantees exactly one connection accepted. Second connection closed before onOpen logic
+runs.
 
 ---
 
@@ -137,7 +148,8 @@ Covered by T030 scenario (c): two simultaneous WS upgrade requests using same us
 
 ## Pre-Closure Guardian Remediation (Step 6.6 — Round 2)
 
-Applied after pre-closure guardian review. All 4 critical findings from Deployment Engineer + Docker Specialist resolved.
+Applied after pre-closure guardian review. All 4 critical findings from Deployment Engineer + Docker
+Specialist resolved.
 
 | #   | Guardian            | Finding ID     | Severity | Fix Applied                                                                                                                                                                                                                                                                                                                 |
 | --- | ------------------- | -------------- | -------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -150,7 +162,8 @@ Applied after pre-closure guardian review. All 4 critical findings from Deployme
 | 7   | Docker Specialist   | D-01           | MEDIUM   | Fixed `SIGNAL SIGTERM` → `STOPSIGNAL SIGTERM` in both `api` and `worker` Dockerfile stages.                                                                                                                                                                                                                                 |
 | 8   | App.ts (L-02)       | L-02           | LOW      | Removed duplicate `correlationIdMiddleware` from `/api/v1/backoffice/*` and `/ws/backoffice` specific chains (global `app.use('*', correlationIdMiddleware)` already covers all routes).                                                                                                                                    |
 
-**CI/CD Guardian Round 2:** VERDICT: PASS (all 3 Round 1 blocks resolved — see ANALYZE_REPORT.md round 2 section).
+**CI/CD Guardian Round 2:** VERDICT: PASS (all 3 Round 1 blocks resolved — see ANALYZE_REPORT.md
+round 2 section).
 
 ---
 

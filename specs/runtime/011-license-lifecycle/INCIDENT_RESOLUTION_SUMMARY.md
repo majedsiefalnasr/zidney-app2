@@ -220,8 +220,10 @@ The issue wasn't with subagents themselves — it was **delegating capabilities 
 ### Future Improvements
 
 **Option 1 (Short-term):** Document "Implementation Must Not Be Subagented"  
-**Option 2 (Medium-term):** Create hybrid subagent that returns task list → orchestrator executes each task  
-**Option 3 (Long-term):** Build integrated "Code Execution Environment" with bidirectional filesystem sync
+**Option 2 (Medium-term):** Create hybrid subagent that returns task list → orchestrator executes
+each task  
+**Option 3 (Long-term):** Build integrated "Code Execution Environment" with bidirectional
+filesystem sync
 
 **Implemented:** Option 1 (immediate) + begin research for Option 2
 
@@ -292,7 +294,8 @@ The issue wasn't with subagents themselves — it was **delegating capabilities 
 
 **Key Quote:**
 
-> "Show, don't tell. Every [X] mark in tasks.md is backed by real files in the filesystem and real test execution. No simulated completions, no sandboxed promises. Only evidence."
+> "Show, don't tell. Every [X] mark in tasks.md is backed by real files in the filesystem and real
+> test execution. No simulated completions, no sandboxed promises. Only evidence."
 
 **Incident Record:**
 

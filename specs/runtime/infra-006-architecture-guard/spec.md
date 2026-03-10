@@ -36,14 +36,19 @@ This is a pure **governance infrastructure stage**. It affects:
 
 ### What Is Being Built
 
-STAGE_INFRA_06_ARCHITECTURE_GUARD formalizes the **repository-level architecture protection system** for Zidney.
+STAGE_INFRA_06_ARCHITECTURE_GUARD formalizes the **repository-level architecture protection system**
+for Zidney.
 
 The foundation already exists. This stage completes it by:
 
-1. **Exposing `arch:guard` as a named CLI command** — so developers can manually run `bun run arch:guard` to validate architecture without using git
-2. **Adding comprehensive unit tests for `scripts/ai-guard.ts`** — the validation logic is untested; tests must exist for every rule category
-3. **Adding static architecture tests** — automated tests that assert layer rules and boundaries are expressed correctly in the contract
-4. **Verifying the Husky pre-commit hook** — document and validate the three-gate hook is correctly wired and tested
+1. **Exposing `arch:guard` as a named CLI command** — so developers can manually run
+   `bun run arch:guard` to validate architecture without using git
+2. **Adding comprehensive unit tests for `scripts/ai-guard.ts`** — the validation logic is untested;
+   tests must exist for every rule category
+3. **Adding static architecture tests** — automated tests that assert layer rules and boundaries are
+   expressed correctly in the contract
+4. **Verifying the Husky pre-commit hook** — document and validate the three-gate hook is correctly
+   wired and tested
 
 ### Current State (What Already Exists)
 
@@ -147,7 +152,9 @@ These stories describe the developer and platform engineer experience after this
 
 ### US-01: Developer CLI Access
 
-**As a developer**, I can run `bun run arch:guard` from the project root to validate the architecture of the full codebase before committing, so I can detect violations proactively without relying exclusively on the pre-commit hook.
+**As a developer**, I can run `bun run arch:guard` from the project root to validate the
+architecture of the full codebase before committing, so I can detect violations proactively without
+relying exclusively on the pre-commit hook.
 
 **Acceptance Criteria:**
 
@@ -157,17 +164,21 @@ These stories describe the developer and platform engineer experience after this
 
 ### US-02: Automated Pre-Commit Guard
 
-**As a developer**, when I commit code that violates architecture boundaries, the pre-commit hook automatically blocks my commit and explains exactly what rule was violated and where, so I can fix it immediately.
+**As a developer**, when I commit code that violates architecture boundaries, the pre-commit hook
+automatically blocks my commit and explains exactly what rule was violated and where, so I can fix
+it immediately.
 
 **Acceptance Criteria:**
 
-- Pre-commit hook blocks commit on: cross-app imports, packages→apps imports, forbidden layer imports, relative architecture leaks
+- Pre-commit hook blocks commit on: cross-app imports, packages→apps imports, forbidden layer
+  imports, relative architecture leaks
 - Violation message includes: file path, rule name, recommended fix
 - Hook exits 0 on clean, 1 on violation
 
 ### US-03: CI Architecture Gate
 
-**As a platform engineer**, all PRs are automatically validated against architecture rules before merge, so no architecture violations can enter the default branch undetected.
+**As a platform engineer**, all PRs are automatically validated against architecture rules before
+merge, so no architecture violations can enter the default branch undetected.
 
 **Acceptance Criteria:**
 
@@ -178,7 +189,8 @@ These stories describe the developer and platform engineer experience after this
 
 ### US-04: AI Code Protection
 
-**As a platform architect**, AI-generated code is validated through the same architecture rules as human-written code, so AI tools cannot silently introduce architecture violations.
+**As a platform architect**, AI-generated code is validated through the same architecture rules as
+human-written code, so AI tools cannot silently introduce architecture violations.
 
 **Acceptance Criteria:**
 
@@ -188,11 +200,14 @@ These stories describe the developer and platform engineer experience after this
 
 ### US-05: Violation Test Coverage
 
-**As a developer**, the architecture guard script has automated tests that verify every rule category works correctly, so I can trust that the guard catches real violations and does not produce false positives.
+**As a developer**, the architecture guard script has automated tests that verify every rule
+category works correctly, so I can trust that the guard catches real violations and does not produce
+false positives.
 
 **Acceptance Criteria:**
 
-- Unit tests cover: cross-app import detection, packages→apps detection, layer violation detection, relative leak detection, architecture map validation
+- Unit tests cover: cross-app import detection, packages→apps detection, layer violation detection,
+  relative leak detection, architecture map validation
 - Each test category has both a "should detect violation" case and a "should pass clean code" case
 - Tests run as part of `bun run test`
 
@@ -204,7 +219,9 @@ These stories describe the developer and platform engineer experience after this
 
 Add `"arch:guard": "bun scripts/ai-guard.ts"` to `package.json` `scripts` section.
 
-**Rationale:** Developers need a named, documented CLI entry point to run the architecture guard manually. Currently, the guard only runs via the Husky pre-commit hook (opaquely). A named script enables:
+**Rationale:** Developers need a named, documented CLI entry point to run the architecture guard
+manually. Currently, the guard only runs via the Husky pre-commit hook (opaquely). A named script
+enables:
 
 - Manual pre-push validation
 - CI pipeline step (by name)
@@ -259,13 +276,15 @@ Add inline comments to `.husky/pre-commit` explaining:
 - What happens on failure
 - How to debug a failing gate
 
-**Note:** The hook content is already correct and well-commented. Verify it matches the canonical form. No content changes needed — only verification.
+**Note:** The hook content is already correct and well-commented. Verify it matches the canonical
+form. No content changes needed — only verification.
 
 ---
 
 ## Observability Requirements
 
-This stage operates in developer tooling, not in the runtime API. Standard structured logging does not apply.
+This stage operates in developer tooling, not in the runtime API. Standard structured logging does
+not apply.
 
 However, ai-guard produces structured console output:
 
@@ -317,7 +336,8 @@ The only changes are in:
 ### Unit Tests
 
 - `tests/unit/ai-guard/ai-guard-validation.test.ts` — tests all validation functions
-- Fixture files in `tests/unit/ai-guard/fixtures/` — fake TypeScript source files with known import patterns
+- Fixture files in `tests/unit/ai-guard/fixtures/` — fake TypeScript source files with known import
+  patterns
 - Run via: `bun run test:unit` or `bun run test`
 
 ### Static Tests
@@ -342,11 +362,13 @@ The only changes are in:
 
 This stage explicitly does NOT:
 
-1. **Modify `scripts/ai-guard.ts` logic** — the implementation is correct and working; only tests are added
+1. **Modify `scripts/ai-guard.ts` logic** — the implementation is correct and working; only tests
+   are added
 2. **Modify `.husky/pre-commit`** — already correctly configured
 3. **Add new ADR decisions** — ADRs 0001–0009 already exist
 4. **Modify ARCHITECTURE_MAP.json or ARCHITECTURE_CONTRACT.json** — these are generated files
-5. **Add GitHub Actions CI workflow** — CI architecture governance workflow is covered in a later stage
+5. **Add GitHub Actions CI workflow** — CI architecture governance workflow is covered in a later
+   stage
 6. **Create architecture visualizations** — covered in STAGE_INFRA_08
 
 ---
@@ -355,7 +377,8 @@ This stage explicitly does NOT:
 
 ### Session 2026-03-08
 
-**Ambiguity scan result:** No ambiguities found. All specification requirements are deterministic based on existing codebase state.
+**Ambiguity scan result:** No ambiguities found. All specification requirements are deterministic
+based on existing codebase state.
 
 **Audit dimensions reviewed:**
 
@@ -370,7 +393,10 @@ This stage explicitly does NOT:
 | Error contract         | Defined: structured console output in ai-guard.ts |
 | Isolation boundaries   | N/A — no tenant-bound operations                  |
 
-**Conclusion:** No `[NEEDS CLARIFICATION]` markers. Spec is ready for planning. 7. **Implement drift detection snapshots** — covered in STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION 8. **Add module registration UI** — the `arch:add-module` CLI already exists 9. **Modify any apps/ source code** — this is an INFRA stage only
+**Conclusion:** No `[NEEDS CLARIFICATION]` markers. Spec is ready for planning. 7. **Implement drift
+detection snapshots** — covered in STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION 8. **Add module
+registration UI** — the `arch:add-module` CLI already exists 9. **Modify any apps/ source code** —
+this is an INFRA stage only
 
 ---
 
@@ -401,19 +427,23 @@ package.json                             ← add "arch:guard" script (FR-01)
 ### Key Implementation Details
 
 **Fixture files approach:**  
-Since `extractImports()` in `ai-guard.ts` reads actual file content and parses import statements using `readFileSync`, fixture files must contain real TypeScript import syntax. Tests should call the internal validation functions directly after extracting imports from fixtures.
+Since `extractImports()` in `ai-guard.ts` reads actual file content and parses import statements
+using `readFileSync`, fixture files must contain real TypeScript import syntax. Tests should call
+the internal validation functions directly after extracting imports from fixtures.
 
 **Test approach for `validateCrossAppImports`:**  
-The function signature is `validateCrossAppImports(fileModule, filePath, imports)`. Tests can call this directly with constructed arguments:
+The function signature is `validateCrossAppImports(fileModule, filePath, imports)`. Tests can call
+this directly with constructed arguments:
 
 ```ts
-const result = validateCrossAppImports('api', 'apps/api/src/test.ts', ['apps/mmc/src/foo'])
-expect(result).toHaveLength(1)
-expect(result[0]).toContain('Cross-app violation')
+const result = validateCrossAppImports("api", "apps/api/src/test.ts", ["apps/mmc/src/foo"]);
+expect(result).toHaveLength(1);
+expect(result[0]).toContain("Cross-app violation");
 ```
 
 **Static test for infra-audit:**  
-Use `execSync('bun scripts/infra-audit.ts --quick', { cwd: process.cwd() })` wrapped in try/catch. If exit code ≠ 0, test fails with the audit output.
+Use `execSync('bun scripts/infra-audit.ts --quick', { cwd: process.cwd() })` wrapped in try/catch.
+If exit code ≠ 0, test fails with the audit output.
 
 **`arch:guard` script placement in package.json:**  
 Add after `arch:fix` script in the scripts block:
@@ -463,5 +493,6 @@ This stage:
 - Does not introduce new tenant logic
 - Does not modify attempt engine
 - Does not introduce new UI components
-- Strictly follows Import Boundary Rules (tests import only from scripts/ and architecture intelligence files)
+- Strictly follows Import Boundary Rules (tests import only from scripts/ and architecture
+  intelligence files)
 - Aligns with all 9 ADRs by enforcing them, not modifying them

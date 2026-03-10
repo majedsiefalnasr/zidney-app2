@@ -36,12 +36,16 @@ No gate violations found. Implementation may proceed.
 
 The following files already exist with stub/partial implementations. This stage **modifies** them:
 
-- `apps/{mmc,backoffice,frontoffice}/src/core/api/client.ts` — has inline `onRefreshToken` / `onAuthFailure`; replaced by proper delegation
-- `apps/{mmc,backoffice,frontoffice}/src/core/auth/token-store.ts` — partial Pinia store; superseded by `auth.store.ts`
+- `apps/{mmc,backoffice,frontoffice}/src/core/api/client.ts` — has inline `onRefreshToken` /
+  `onAuthFailure`; replaced by proper delegation
+- `apps/{mmc,backoffice,frontoffice}/src/core/auth/token-store.ts` — partial Pinia store; superseded
+  by `auth.store.ts`
 - `apps/{mmc,backoffice,frontoffice}/src/core/auth/index.ts` — re-exports `useAuth` composable
-- `apps/{mmc,backoffice,frontoffice}/src/core/router/index.ts` — wires guards; updated to add `sessionInitialized` gate
+- `apps/{mmc,backoffice,frontoffice}/src/core/router/index.ts` — wires guards; updated to add
+  `sessionInitialized` gate
 - `apps/{mmc,backoffice,frontoffice}/src/main.ts` — updated to add `initSession` bootstrap sequence
-- `apps/mmc/src/core/guards/auth.guard.ts` — existing guard; replaced by `core/router/guards/auth.guard.ts`
+- `apps/mmc/src/core/guards/auth.guard.ts` — existing guard; replaced by
+  `core/router/guards/auth.guard.ts`
 
 The following files are **new**:
 
@@ -174,65 +178,69 @@ tests/integration/
 
 **Imports**: None (pure type definitions, no runtime imports)
 
-**Key constraint**: No import from `vue`, `pinia`, `vue-router`, or `@zidney/*`. This file must be importable in test environments without any framework setup.
+**Key constraint**: No import from `vue`, `pinia`, `vue-router`, or `@zidney/*`. This file must be
+importable in test environments without any framework setup.
 
 ---
 
 ### 3.2 `core/auth/token-manager.ts`
 
-**Purpose**: Holds the access token exclusively in reactive memory. The single source of truth for the token.
+**Purpose**: Holds the access token exclusively in reactive memory. The single source of truth for
+the token.
 
 **Exports**:
 
 ```typescript
 export interface ITokenManager {
-  getToken(): string | null
-  setToken(token: string): void
-  clearToken(): void
-  hasToken(): boolean
+  getToken(): string | null;
+  setToken(token: string): void;
+  clearToken(): void;
+  hasToken(): boolean;
 }
 
-export function createTokenManager(): ITokenManager
+export function createTokenManager(): ITokenManager;
 ```
 
 **Implementation Design**:
 
 ```typescript
-import { ref } from 'vue'
-import { createLogger } from '@zidney/logger'
+import { ref } from "vue";
+import { createLogger } from "@zidney/logger";
 
-const logger = createLogger('token-manager')
+const logger = createLogger("token-manager");
 
 export function createTokenManager(): ITokenManager {
-  const _token = ref<string | null>(null)
+  const _token = ref<string | null>(null);
 
   return {
     getToken(): string | null {
-      return _token.value
+      return _token.value;
     },
     setToken(token: string): void {
       // NEVER log token value
-      logger.debug('Access token stored in memory')
-      _token.value = token
+      logger.debug("Access token stored in memory");
+      _token.value = token;
     },
     clearToken(): void {
-      logger.debug('Access token cleared from memory')
-      _token.value = null
+      logger.debug("Access token cleared from memory");
+      _token.value = null;
     },
     hasToken(): boolean {
-      return _token.value !== null
+      return _token.value !== null;
     },
-  }
+  };
 }
 ```
 
 **Bootstrap** (in `main.ts`):
 
 ```typescript
-export const tokenManager = createTokenManager()
+export const tokenManager = createTokenManager();
 ```
 
-**Singleton pattern**: Created once in `main.ts`, passed to `createApiClient` and `createRefreshManager` via argument. Not a module-level singleton exported from this file — prevents import-time side effects and aids test isolation.
+**Singleton pattern**: Created once in `main.ts`, passed to `createApiClient` and
+`createRefreshManager` via argument. Not a module-level singleton exported from this file — prevents
+import-time side effects and aids test isolation.
 
 **Invariants**:
 
@@ -244,76 +252,78 @@ export const tokenManager = createTokenManager()
 
 ### 3.3 `core/auth/refresh-manager.ts`
 
-**Purpose**: Single-flight refresh orchestration. Guarantees exactly one parallel refresh HTTP call regardless of concurrent 401 triggers.
+**Purpose**: Single-flight refresh orchestration. Guarantees exactly one parallel refresh HTTP call
+regardless of concurrent 401 triggers.
 
 **Exports**:
 
 ```typescript
 export interface IRefreshManager {
-  refresh(): Promise<void>
-  isRefreshing(): boolean
+  refresh(): Promise<void>;
+  isRefreshing(): boolean;
 }
 
 export function createRefreshManager(
   refreshFn: () => Promise<string>,
   onLogout: () => void,
-  tokenManager: ITokenManager
-): IRefreshManager
+  tokenManager: ITokenManager,
+): IRefreshManager;
 ```
 
 **Implementation Design**:
 
 ```typescript
-import { createLogger } from '@zidney/logger'
-import type { ITokenManager } from './token-manager'
+import { createLogger } from "@zidney/logger";
+import type { ITokenManager } from "./token-manager";
 
-const logger = createLogger('refresh-manager')
+const logger = createLogger("refresh-manager");
 
 export function createRefreshManager(
   refreshFn: () => Promise<string>,
   onLogout: () => void,
-  tokenManager: ITokenManager
+  tokenManager: ITokenManager,
 ): IRefreshManager {
-  let inFlight: Promise<void> | null = null
+  let inFlight: Promise<void> | null = null;
 
   function refresh(): Promise<void> {
     if (inFlight !== null) {
-      logger.debug('Refresh already in flight — joining existing promise')
-      return inFlight
+      logger.debug("Refresh already in flight — joining existing promise");
+      return inFlight;
     }
 
-    logger.debug('Initiating new token refresh')
+    logger.debug("Initiating new token refresh");
 
     inFlight = refreshFn()
       .then((newToken: string) => {
-        tokenManager.setToken(newToken)
-        logger.info('Token refresh succeeded')
+        tokenManager.setToken(newToken);
+        logger.info("Token refresh succeeded");
       })
       .catch((err: unknown) => {
-        logger.error('Token refresh failed — triggering logout', {
-          error: err instanceof Error ? err.message : 'unknown',
-        })
-        onLogout()
-        return Promise.reject(err)
+        logger.error("Token refresh failed — triggering logout", {
+          error: err instanceof Error ? err.message : "unknown",
+        });
+        onLogout();
+        return Promise.reject(err);
       })
       .finally(() => {
-        inFlight = null
-      })
+        inFlight = null;
+      });
 
-    return inFlight
+    return inFlight;
   }
 
   function isRefreshing(): boolean {
-    return inFlight !== null
+    return inFlight !== null;
   }
 
-  return { refresh, isRefreshing }
+  return { refresh, isRefreshing };
 }
 ```
 
 **Single-Flight Guarantee**:
 
-- JavaScript's cooperative concurrency means `inFlight !== null` check + assignment before first `await` is atomic within the current microtask tick.
+- JavaScript's cooperative concurrency means `inFlight !== null` check + assignment before first
+  `await` is atomic within the current microtask tick.
 - All concurrent callers receive the same `Promise<void>` reference.
 - `finally` clears the lock after completion (success or failure).
 - `onLogout` is called exactly once inside `catch`.
@@ -327,71 +337,63 @@ export function createRefreshManager(
 
 ### 3.4 `core/auth/auth.service.ts`
 
-**Purpose**: All backend HTTP interactions for auth flow. Implements `IAuthService`. Created via factory to enable test injection.
+**Purpose**: All backend HTTP interactions for auth flow. Implements `IAuthService`. Created via
+factory to enable test injection.
 
 **Exports**:
 
 ```typescript
 export interface IAuthService {
-  login(credentials: LoginCredentials): Promise<LoginResponse>
-  logout(): Promise<void>
-  refreshToken(): Promise<{ accessToken: string }>
-  fetchProfile(): Promise<AuthUser>
+  login(credentials: LoginCredentials): Promise<LoginResponse>;
+  logout(): Promise<void>;
+  refreshToken(): Promise<{ accessToken: string }>;
+  fetchProfile(): Promise<AuthUser>;
 }
 
-export function createAuthService(apiClient: ApiClient): IAuthService
+export function createAuthService(apiClient: ApiClient): IAuthService;
 ```
 
 **Implementation Design**:
 
 ```typescript
-import { createLogger } from '@zidney/logger'
-import type { ApiClient } from '@/core/api/client'
-import type { AuthUser, LoginCredentials, LoginResponse } from './types'
+import { createLogger } from "@zidney/logger";
+import type { ApiClient } from "@/core/api/client";
+import type { AuthUser, LoginCredentials, LoginResponse } from "./types";
 
-const logger = createLogger('auth-service')
+const logger = createLogger("auth-service");
 
 export function createAuthService(apiClient: ApiClient): IAuthService {
   return {
     async login(credentials: LoginCredentials): Promise<LoginResponse> {
-      const result = await apiClient.post<LoginResponse>(
-        '/auth/login',
-        credentials
-      )
+      const result = await apiClient.post<LoginResponse>("/auth/login", credentials);
       // accessToken must never be logged — log only presence
-      logger.info('Login response received', { hasToken: true })
-      return result.data
+      logger.info("Login response received", { hasToken: true });
+      return result.data;
     },
 
     async logout(): Promise<void> {
       try {
-        await apiClient.post('/auth/logout', {})
-        logger.info('Backend logout completed')
+        await apiClient.post("/auth/logout", {});
+        logger.info("Backend logout completed");
       } catch (err: unknown) {
         // FR-30: logout always resolves — backend error is non-fatal
-        logger.warn(
-          'Backend logout failed — proceeding with local state teardown',
-          {
-            error: err instanceof Error ? err.message : 'unknown',
-          }
-        )
+        logger.warn("Backend logout failed — proceeding with local state teardown", {
+          error: err instanceof Error ? err.message : "unknown",
+        });
         // Intentionally swallowed — do not rethrow
       }
     },
 
     async refreshToken(): Promise<{ accessToken: string }> {
-      const result = await apiClient.post<{ accessToken: string }>(
-        '/auth/refresh',
-        {}
-      )
-      return result.data
+      const result = await apiClient.post<{ accessToken: string }>("/auth/refresh", {});
+      return result.data;
     },
 
     async fetchProfile(): Promise<AuthUser> {
-      const result = await apiClient.get<AuthUser>('/auth/me')
-      return result.data
+      const result = await apiClient.get<AuthUser>("/auth/me");
+      return result.data;
     },
-  }
+  };
 }
 ```
 
@@ -405,7 +407,8 @@ export function createAuthService(apiClient: ApiClient): IAuthService {
 
 ### 3.5 `core/state/auth.store.ts`
 
-**Purpose**: Pinia reactive auth state. Single source of truth for `isAuthenticated`, `user`, `isLoading`, `authError`. Delegates all network operations to the injected `IAuthService`.
+**Purpose**: Pinia reactive auth state. Single source of truth for `isAuthenticated`, `user`,
+`isLoading`, `authError`. Delegates all network operations to the injected `IAuthService`.
 
 **Exports**:
 
@@ -413,53 +416,55 @@ export function createAuthService(apiClient: ApiClient): IAuthService {
 export const useAuthStore: (
   authService: IAuthService,
   tokenManager: ITokenManager,
-  router: Router
-) => ReturnType<typeof _defineAuthStore>
+  router: Router,
+) => ReturnType<typeof _defineAuthStore>;
 ```
 
-> Note: The store uses a **factory-style definition** to accept injected dependencies instead of importing them as module-level singletons. This enables test isolation without module-level mocking.
+> Note: The store uses a **factory-style definition** to accept injected dependencies instead of
+> importing them as module-level singletons. This enables test isolation without module-level
+> mocking.
 
 **Full Implementation Design**:
 
 ```typescript
-import { defineStore } from 'pinia'
-import { ref } from 'vue'
-import { createLogger } from '@zidney/logger'
-import type { Router } from 'vue-router'
-import type { IAuthService } from '../auth/auth.service'
-import type { ITokenManager } from '../auth/token-manager'
-import type { IRefreshManager } from '../auth/refresh-manager'
-import type { AuthUser, AuthError, AuthStoreState } from '../auth/types'
+import { defineStore } from "pinia";
+import { ref } from "vue";
+import { createLogger } from "@zidney/logger";
+import type { Router } from "vue-router";
+import type { IAuthService } from "../auth/auth.service";
+import type { ITokenManager } from "../auth/token-manager";
+import type { IRefreshManager } from "../auth/refresh-manager";
+import type { AuthUser, AuthError, AuthStoreState } from "../auth/types";
 
-const logger = createLogger('auth-store')
+const logger = createLogger("auth-store");
 
 // Store ID constant — consistent across all three apps
-const AUTH_STORE_ID = 'auth' as const
+const AUTH_STORE_ID = "auth" as const;
 
 export function defineAuthStore(
   authService: IAuthService,
   tokenManager: ITokenManager,
   router: Router,
   loginRouteName: string,
-  getRefreshManager: () => IRefreshManager | null
+  getRefreshManager: () => IRefreshManager | null,
 ) {
   return defineStore(AUTH_STORE_ID, () => {
     // ── State ─────────────────────────────────────────────────────────────
-    const isAuthenticated = ref<boolean>(false)
-    const user = ref<AuthUser | null>(null)
-    const isLoading = ref<boolean>(false)
-    const authError = ref<AuthError | null>(null)
+    const isAuthenticated = ref<boolean>(false);
+    const user = ref<AuthUser | null>(null);
+    const isLoading = ref<boolean>(false);
+    const authError = ref<AuthError | null>(null);
 
     // ── Helpers ───────────────────────────────────────────────────────────
     function resetState(): void {
-      isAuthenticated.value = false
-      user.value = null
-      isLoading.value = false
-      authError.value = null
+      isAuthenticated.value = false;
+      user.value = null;
+      isLoading.value = false;
+      authError.value = null;
     }
 
-    function setError(code: AuthError['code'], message: string): void {
-      authError.value = { code, message }
+    function setError(code: AuthError["code"], message: string): void {
+      authError.value = { code, message };
     }
 
     // ── Actions ───────────────────────────────────────────────────────────
@@ -470,28 +475,25 @@ export function defineAuthStore(
      * Does NOT redirect on failure — user was not previously logged in.
      */
     async function initSession(): Promise<void> {
-      isLoading.value = true
-      authError.value = null
+      isLoading.value = true;
+      authError.value = null;
 
       try {
-        const { accessToken } = await authService.refreshToken()
-        tokenManager.setToken(accessToken)
-        const profile = await authService.fetchProfile()
-        user.value = profile
-        isAuthenticated.value = true
-        logger.info('Session initialized', { userId: profile.id })
+        const { accessToken } = await authService.refreshToken();
+        tokenManager.setToken(accessToken);
+        const profile = await authService.fetchProfile();
+        user.value = profile;
+        isAuthenticated.value = true;
+        logger.info("Session initialized", { userId: profile.id });
       } catch (err: unknown) {
-        logger.info(
-          'Session initialization failed — treating as unauthenticated',
-          {
-            error: err instanceof Error ? err.message : 'unknown',
-          }
-        )
+        logger.info("Session initialization failed — treating as unauthenticated", {
+          error: err instanceof Error ? err.message : "unknown",
+        });
         // FR-33: failure sets unauthenticated state — no redirect at this point
-        resetState()
-        setError('AUTH_INIT_FAILED', 'Session initialization failed')
+        resetState();
+        setError("AUTH_INIT_FAILED", "Session initialization failed");
       } finally {
-        isLoading.value = false
+        isLoading.value = false;
       }
     }
 
@@ -499,12 +501,12 @@ export function defineAuthStore(
      * FR-04: Called after successful login — receives token + profile from login response.
      */
     function setSession(accessToken: string, profile: AuthUser): void {
-      tokenManager.setToken(accessToken)
-      user.value = profile
-      isAuthenticated.value = true
-      isLoading.value = false
-      authError.value = null
-      logger.info('Session established', { userId: profile.id })
+      tokenManager.setToken(accessToken);
+      user.value = profile;
+      isAuthenticated.value = true;
+      isLoading.value = false;
+      authError.value = null;
+      logger.info("Session established", { userId: profile.id });
     }
 
     /**
@@ -513,18 +515,18 @@ export function defineAuthStore(
      * Returns true on successful refresh, false on failure (never throws).
      */
     async function refresh(): Promise<boolean> {
-      const rm = getRefreshManager()
+      const rm = getRefreshManager();
       if (!rm) {
-        logger.warn('refresh() called before refreshManager was initialized')
-        return false
+        logger.warn("refresh() called before refreshManager was initialized");
+        return false;
       }
       try {
-        await rm.refresh()
-        logger.debug('Token refreshed via store action')
-        return true
+        await rm.refresh();
+        logger.debug("Token refreshed via store action");
+        return true;
       } catch (err: unknown) {
-        logger.error('Token refresh failed via store action', { error: err })
-        return false
+        logger.error("Token refresh failed via store action", { error: err });
+        return false;
       }
     }
 
@@ -535,32 +537,32 @@ export function defineAuthStore(
     async function logout(): Promise<void> {
       // FR-36: idempotent guard
       if (!isAuthenticated.value && !isLoading.value) {
-        logger.debug('logout() called when already logged out — no-op')
-        return
+        logger.debug("logout() called when already logged out — no-op");
+        return;
       }
 
-      isLoading.value = true
+      isLoading.value = true;
 
       // Step 1: Backend logout (fire and forget — FR-30)
-      await authService.logout()
+      await authService.logout();
 
       // Step 2: Clear token from memory
-      tokenManager.clearToken()
+      tokenManager.clearToken();
 
       // Step 3: Reset all state
-      resetState()
+      resetState();
 
       // Step 4: Redirect to login
-      await router.push({ name: loginRouteName })
+      await router.push({ name: loginRouteName });
 
-      logger.info('User logged out')
+      logger.info("User logged out");
     }
 
     /**
      * FR-04: Clears the authError field.
      */
     function clearAuthError(): void {
-      authError.value = null
+      authError.value = null;
     }
 
     return {
@@ -575,8 +577,8 @@ export function defineAuthStore(
       refresh,
       logout,
       clearAuthError,
-    }
-  })
+    };
+  });
 }
 ```
 
@@ -587,7 +589,8 @@ export function defineAuthStore(
 - FR-06: No permission checks or role comparisons.
 - `loginRouteName` is injected at store definition time per app (MMC: `'mmc-login'`, etc.).
 - The store uses composition API (`defineStore(id, () => {...})`) for testability.
-- `logout()` `isLoading` is reset inside `resetState()` — guarantees clean state regardless of router outcome.
+- `logout()` `isLoading` is reset inside `resetState()` — guarantees clean state regardless of
+  router outcome.
 
 ---
 
@@ -599,70 +602,64 @@ export function defineAuthStore(
 
 ```typescript
 export interface AuthGuardOptions {
-  loginRouteName: string
-  dashboardRouteName: string
+  loginRouteName: string;
+  dashboardRouteName: string;
 }
 
 export function createAuthGuard(
   authStore: ReturnType<typeof defineAuthStore>,
-  options: AuthGuardOptions
-): NavigationGuard
+  options: AuthGuardOptions,
+): NavigationGuard;
 ```
 
 **Implementation Design**:
 
 ```typescript
-import type {
-  NavigationGuard,
-  RouteLocationNormalized,
-  RouteLocationRaw,
-} from 'vue-router'
-import { createLogger } from '@zidney/logger'
-import type { AuthGuardOptions } from './types'
+import type { NavigationGuard, RouteLocationNormalized, RouteLocationRaw } from "vue-router";
+import { createLogger } from "@zidney/logger";
+import type { AuthGuardOptions } from "./types";
 
-const logger = createLogger('auth-guard')
+const logger = createLogger("auth-guard");
 
 export function createAuthGuard(
   getIsAuthenticated: () => boolean,
-  options: AuthGuardOptions
+  options: AuthGuardOptions,
 ): NavigationGuard {
   return (to: RouteLocationNormalized): RouteLocationRaw | boolean => {
-    const isAuthenticated = getIsAuthenticated()
+    const isAuthenticated = getIsAuthenticated();
 
     // FR-23: requiresAuth logic
-    if (to.meta['requiresAuth'] === true) {
+    if (to.meta["requiresAuth"] === true) {
       if (!isAuthenticated) {
-        logger.debug('Auth guard: unauthenticated access to protected route', {
+        logger.debug("Auth guard: unauthenticated access to protected route", {
           route: to.name?.toString() ?? to.path,
-        })
-        return { name: options.loginRouteName }
+        });
+        return { name: options.loginRouteName };
       }
-      return true
+      return true;
     }
 
     // FR-23: guestOnly logic
-    if (to.meta['guestOnly'] === true) {
+    if (to.meta["guestOnly"] === true) {
       if (isAuthenticated) {
-        logger.debug(
-          'Auth guard: authenticated user accessing guest-only route',
-          {
-            route: to.name?.toString() ?? to.path,
-          }
-        )
-        return { name: options.dashboardRouteName }
+        logger.debug("Auth guard: authenticated user accessing guest-only route", {
+          route: to.name?.toString() ?? to.path,
+        });
+        return { name: options.dashboardRouteName };
       }
-      return true
+      return true;
     }
 
     // FR-23: no relevant meta — allow
-    return true
-  }
+    return true;
+  };
 }
 ```
 
 **Invariants**:
 
-- FR-24: Uses `getIsAuthenticated()` callback (passes `() => authStore.isAuthenticated`). No direct token manager access.
+- FR-24: Uses `getIsAuthenticated()` callback (passes `() => authStore.isAuthenticated`). No direct
+  token manager access.
 - FR-25: **Returns** redirect locations; never calls `router.push()`.
 - FR-26: No exceptions thrown — guard is a pure (sync) discriminator.
 - FR-27: `options.loginRouteName` and `options.dashboardRouteName` are app-specific.
@@ -672,7 +669,8 @@ export function createAuthGuard(
 
 ### 3.7 `core/api/client.ts` — Updated Wiring (CL-03)
 
-**Purpose**: Replace inline stub callbacks with proper `token-manager` and `refresh-manager` delegation.
+**Purpose**: Replace inline stub callbacks with proper `token-manager` and `refresh-manager`
+delegation.
 
 **Current (Stage 00 stub) → Replacement Pattern**:
 
@@ -705,15 +703,16 @@ onAuthFailure: () => {
 }
 ```
 
-**Key Change**: The `getApiClient()` singleton factory now accepts `tokenManager` and `refreshManager` as arguments rather than importing the legacy `token-store`.
+**Key Change**: The `getApiClient()` singleton factory now accepts `tokenManager` and
+`refreshManager` as arguments rather than importing the legacy `token-store`.
 
 ```typescript
 // Updated signature:
 export function createAppApiClient(
   tokenManager: ITokenManager,
   refreshManager: IRefreshManager,
-  onAuthFailure: () => void
-): ApiClient
+  onAuthFailure: () => void,
+): ApiClient;
 ```
 
 ---
@@ -726,94 +725,90 @@ export function createAppApiClient(
 
 ```typescript
 // 1. Config validation (throws early if misconfigured)
-import '@/core/config/app-config'
+import "@/core/config/app-config";
 
-import { createApp, ref } from 'vue'
-import { createPinia } from 'pinia'
-import App from './App.vue'
-import { createRouter, createWebHistory } from 'vue-router'
-import { routes } from '@/core/router/routes'
-import { appConfig } from '@/core/config/app-config'
-import { createTokenManager } from '@/core/auth/token-manager'
-import { createRefreshManager } from '@/core/auth/refresh-manager'
-import { createAuthService } from '@/core/auth/auth.service'
-import { createAppApiClient } from '@/core/api/client'
-import { defineAuthStore } from '@/core/state/auth.store'
-import { createAuthGuard } from '@/core/router/guards/auth.guard'
+import { createApp, ref } from "vue";
+import { createPinia } from "pinia";
+import App from "./App.vue";
+import { createRouter, createWebHistory } from "vue-router";
+import { routes } from "@/core/router/routes";
+import { appConfig } from "@/core/config/app-config";
+import { createTokenManager } from "@/core/auth/token-manager";
+import { createRefreshManager } from "@/core/auth/refresh-manager";
+import { createAuthService } from "@/core/auth/auth.service";
+import { createAppApiClient } from "@/core/api/client";
+import { defineAuthStore } from "@/core/state/auth.store";
+import { createAuthGuard } from "@/core/router/guards/auth.guard";
 
 // App-specific route name constants (per-app — NOT shared in core/auth/)
-const LOGIN_ROUTE = 'mmc-login' // 'bo-login' in backoffice, 'fo-login' in frontoffice
-const DASHBOARD_ROUTE = 'mmc-dashboard' // 'bo-dashboard' in backoffice, 'fo-home' in frontoffice
+const LOGIN_ROUTE = "mmc-login"; // 'bo-login' in backoffice, 'fo-login' in frontoffice
+const DASHBOARD_ROUTE = "mmc-dashboard"; // 'bo-dashboard' in backoffice, 'fo-home' in frontoffice
 
 // ── Step 1: Create Pinia ────────────────────────────────────────────────────
-const pinia = createPinia()
+const pinia = createPinia();
 
 // ── Step 2: Create Router (without guards yet) ─────────────────────────────
 const router = createRouter({
   history: createWebHistory(),
   routes,
-})
+});
 
 // ── Step 3: Create Token Manager ───────────────────────────────────────────
-const tokenManager = createTokenManager()
+const tokenManager = createTokenManager();
 
 // ── Step 4: Create Auth Service (needs api client — forward declare) ────────
 // apiClient is created next; authService references it by closure
-let apiClient: ReturnType<typeof createAppApiClient>
+let apiClient: ReturnType<typeof createAppApiClient>;
 
 const authService = createAuthService({
   post: (...args) => apiClient.post(...args),
   get: (...args) => apiClient.get(...args),
-})
+});
 
 // ── Step 5: Create Auth Store ──────────────────────────────────────────────
 // refreshManager is created in Step 6 — use lazy accessor to avoid creation-order circular dep
-let refreshManagerInstance: IRefreshManager | null = null
+let refreshManagerInstance: IRefreshManager | null = null;
 const useAuthStore = defineAuthStore(
   authService,
   tokenManager,
   router,
   LOGIN_ROUTE,
-  () => refreshManagerInstance
-)
-const authStore = useAuthStore(pinia)
+  () => refreshManagerInstance,
+);
+const authStore = useAuthStore(pinia);
 
 // ── Step 6: Create Refresh Manager (needs authStore.logout for onLogout) ───
 const refreshManager = createRefreshManager(
   () => authService.refreshToken().then((r) => r.accessToken),
   () => void authStore.logout(),
-  tokenManager
-)
-refreshManagerInstance = refreshManager // wire lazy accessor
+  tokenManager,
+);
+refreshManagerInstance = refreshManager; // wire lazy accessor
 
 // ── Step 7: Create API Client (wires token + refresh) ──────────────────────
-apiClient = createAppApiClient(
-  tokenManager,
-  refreshManager,
-  () => void authStore.logout()
-)
+apiClient = createAppApiClient(tokenManager, refreshManager, () => void authStore.logout());
 
 // ── Step 8: Register Auth Guard with sessionInitialized gate (CL-01) ────────
-const sessionInitialized = ref(false)
+const sessionInitialized = ref(false);
 const authGuard = createAuthGuard(() => authStore.isAuthenticated, {
   loginRouteName: LOGIN_ROUTE,
   dashboardRouteName: DASHBOARD_ROUTE,
-})
+});
 
 router.beforeEach(async (to, from) => {
   // CL-01: Gate — wait for initSession() to complete before evaluating guards
   if (!sessionInitialized.value) {
-    await authStore.initSession()
-    sessionInitialized.value = true
+    await authStore.initSession();
+    sessionInitialized.value = true;
   }
-  return authGuard(to, from)
-})
+  return authGuard(to, from);
+});
 
 // ── Step 9: Mount ──────────────────────────────────────────────────────────
-const app = createApp(App)
-app.use(pinia)
-app.use(router)
-app.mount('#app')
+const app = createApp(App);
+app.use(pinia);
+app.use(router);
+app.mount("#app");
 ```
 
 **Critical Ordering Rationale**:
@@ -838,7 +833,8 @@ app.mount('#app')
 | Login endpoint                       | `POST /auth/login`                      | `POST /auth/login`                      | `POST /auth/login`                       |
 | No workspace context in token module | ✅                                      | ✅ (workspace from route, not token)    | ✅                                       |
 
-**App-agnosticism rule enforced**: All app-specific values live in `main.ts` only — never inside `core/auth/`.
+**App-agnosticism rule enforced**: All app-specific values live in `main.ts` only — never inside
+`core/auth/`.
 
 ---
 
@@ -848,49 +844,49 @@ app.mount('#app')
 
 ```typescript
 // tests/unit/auth/setup.ts
-import { setActivePinia, createPinia } from 'pinia'
-import { createMemoryHistory, createRouter } from 'vue-router'
-import { vi } from 'vitest'
-import type { IAuthService } from '@/core/auth/auth.service'
-import type { AuthUser } from '@/core/auth/types'
+import { setActivePinia, createPinia } from "pinia";
+import { createMemoryHistory, createRouter } from "vue-router";
+import { vi } from "vitest";
+import type { IAuthService } from "@/core/auth/auth.service";
+import type { AuthUser } from "@/core/auth/types";
 
 export function createMockAuthService(): IAuthService {
   return {
     login: vi.fn(),
     logout: vi.fn().mockResolvedValue(undefined),
-    refreshToken: vi.fn().mockResolvedValue({ accessToken: 'mock-token' }),
+    refreshToken: vi.fn().mockResolvedValue({ accessToken: "mock-token" }),
     fetchProfile: vi.fn().mockResolvedValue<AuthUser>({
-      id: 'user-1',
-      email: 'test@example.com',
-      name: 'Test User',
-      role: 'admin',
+      id: "user-1",
+      email: "test@example.com",
+      name: "Test User",
+      role: "admin",
     }),
-  }
+  };
 }
 
 export function createTestRouter() {
   return createRouter({
     history: createMemoryHistory(),
     routes: [
-      { path: '/', name: 'home', component: {} },
+      { path: "/", name: "home", component: {} },
       {
-        path: '/login',
-        name: 'mmc-login',
+        path: "/login",
+        name: "mmc-login",
         component: {},
         meta: { guestOnly: true },
       },
       {
-        path: '/dashboard',
-        name: 'mmc-dashboard',
+        path: "/dashboard",
+        name: "mmc-dashboard",
         component: {},
         meta: { requiresAuth: true },
       },
     ],
-  })
+  });
 }
 
 export function setupTestPinia() {
-  setActivePinia(createPinia())
+  setActivePinia(createPinia());
 }
 ```
 
@@ -922,21 +918,17 @@ export function setupTestPinia() {
 
 ```typescript
 // Concurrency test pattern:
-it('issues exactly one refresh for 3 concurrent 401s', async () => {
-  const refreshFn = vi.fn().mockResolvedValue('new-token')
-  const rm = createRefreshManager(refreshFn, vi.fn(), tokenManager)
+it("issues exactly one refresh for 3 concurrent 401s", async () => {
+  const refreshFn = vi.fn().mockResolvedValue("new-token");
+  const rm = createRefreshManager(refreshFn, vi.fn(), tokenManager);
 
-  const [p1, p2, p3] = await Promise.allSettled([
-    rm.refresh(),
-    rm.refresh(),
-    rm.refresh(),
-  ])
+  const [p1, p2, p3] = await Promise.allSettled([rm.refresh(), rm.refresh(), rm.refresh()]);
 
-  expect(refreshFn).toHaveBeenCalledTimes(1)
-  expect(p1.status).toBe('fulfilled')
-  expect(p2.status).toBe('fulfilled')
-  expect(p3.status).toBe('fulfilled')
-})
+  expect(refreshFn).toHaveBeenCalledTimes(1);
+  expect(p1.status).toBe("fulfilled");
+  expect(p2.status).toBe("fulfilled");
+  expect(p3.status).toBe("fulfilled");
+});
 ```
 
 #### `auth.store.test.ts`
@@ -1026,7 +1018,8 @@ Scenario C (double logout):
 
 ### Files Being Superseded
 
-The following Stage 00 scaffolding files are **replaced** by this stage's implementation. They must be cleaned up:
+The following Stage 00 scaffolding files are **replaced** by this stage's implementation. They must
+be cleaned up:
 
 | Old File                                 | Status         | Replacement                                               |
 | ---------------------------------------- | -------------- | --------------------------------------------------------- |
@@ -1060,7 +1053,8 @@ The following Stage 00 scaffolding files are **replaced** by this stage's implem
 ### TypeScript Strict Mode Requirements
 
 - `strict: true` must remain in each app's `tsconfig.app.json`
-- No `any` in public interfaces of `types.ts`, `token-manager.ts`, `refresh-manager.ts`, `auth.service.ts`, `auth.store.ts`, `auth.guard.ts`
+- No `any` in public interfaces of `types.ts`, `token-manager.ts`, `refresh-manager.ts`,
+  `auth.service.ts`, `auth.store.ts`, `auth.guard.ts`
 - `unknown` used in catch clauses: `catch (err: unknown)` with `instanceof Error` narrowing
 - `void` used for fire-and-forget async calls: `void authStore.logout()`
 
@@ -1068,7 +1062,8 @@ The following Stage 00 scaffolding files are **replaced** by this stage's implem
 
 - `no-restricted-globals`: `fetch` must not be called in `core/auth/` — only via api client
 - `no-restricted-syntax`: no `console.log|warn|error` — use `@zidney/logger`
-- Token value must not appear in string template literals passed to logger calls (enforced by code review + grep CI check)
+- Token value must not appear in string template literals passed to logger calls (enforced by code
+  review + grep CI check)
 
 ### CI Verification Commands
 

@@ -86,8 +86,7 @@ PR without spec reference will be rejected.
 - Destructive migration requires ADR reference
 - Tenant migrations must respect snapshot guarantees
 
-See:
-`docs/01_ENGINEERING_GOVERNANCE/04_DATABASE_MIGRATION_POLICY.md`
+See: `docs/01_ENGINEERING_GOVERNANCE/04_DATABASE_MIGRATION_POLICY.md`
 
 ---
 

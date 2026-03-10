@@ -1,7 +1,6 @@
 # Research Findings: Monorepo Setup
 
-**Date**: 2026-02-15
-**Feature**: Monorepo Setup
+**Date**: 2026-02-15 **Feature**: Monorepo Setup
 
 ## Decision: Bun Workspaces Configuration
 
@@ -9,7 +8,8 @@
 
 **Decision**: Use single bun.lockb at root with workspace:\* dependencies
 
-**Rationale**: Ensures shared dependency graph, prevents version drift, allows atomic updates across packages
+**Rationale**: Ensures shared dependency graph, prevents version drift, allows atomic updates across
+packages
 
 **Alternatives considered**:
 
@@ -20,7 +20,8 @@
 
 **Task**: Research TypeScript path mapping for monorepo
 
-**Decision**: Configure @zidney/domain-core/_, @types/_, @zidney/validation/_, @zidney/ui/_, @zidney/config/\* aliases in tsconfig.base.json
+**Decision**: Configure @zidney/domain-core/_, @types/_, @zidney/validation/_, @zidney/ui/_,
+@zidney/config/\* aliases in tsconfig.base.json
 
 **Rationale**: Enables clean imports without deep relative paths, enforces package boundaries
 
@@ -35,7 +36,8 @@
 
 **Decision**: Use docker-compose.yml with health checks, persistent volumes for data
 
-**Rationale**: Provides consistent development environment, matches production infrastructure baseline
+**Rationale**: Provides consistent development environment, matches production infrastructure
+baseline
 
 **Alternatives considered**:
 
@@ -59,7 +61,8 @@
 
 **Task**: Research pre-commit setup for linting and type checking
 
-**Decision**: Use husky + lint-staged for pre-commit hooks running ESLint, TypeScript, and formatting
+**Decision**: Use husky + lint-staged for pre-commit hooks running ESLint, TypeScript, and
+formatting
 
 **Rationale**: Catches issues before commit, maintains code quality
 

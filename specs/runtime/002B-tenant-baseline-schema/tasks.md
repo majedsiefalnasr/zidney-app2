@@ -26,7 +26,8 @@
 - US5 (P2): Schema Versioning - 8 tasks
 - Infrastructure & Testing - 14 tasks
 
-**MVP Scope** (minimum viable): Phase 1 + Phase 2 + US1 + US5 (complete tenant provisioning with migration)
+**MVP Scope** (minimum viable): Phase 1 + Phase 2 + US1 + US5 (complete tenant provisioning with
+migration)
 
 ---
 
@@ -34,12 +35,18 @@
 
 ### Initialization & Project Structure
 
-- [x] T001 Create database migration directories in `apps/api/src/db/tenant/migrations/` and `apps/api/src/db/master/migrations/`
-- [x] T002 Create tenant schema SQL baseline file at `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql` (empty, to be populated)
-- [x] T003 Create PostgreSQL trigger functions file at `apps/api/src/db/tenant/migrations/v1.0.0/triggers.sql`
-- [x] T004 Create migration execution utilities in `packages/domain-core/src/migrations/migrate.ts` (checksums, versioning)
-- [x] T005 Create schema initialization task definition in `packages/domain-core/src/workers/tasks/init-tenant-schema.ts`
-- [x] T006 Create migration application task definition in `packages/domain-core/src/workers/tasks/apply-migration.ts`
+- [x] T001 Create database migration directories in `apps/api/src/db/tenant/migrations/` and
+      `apps/api/src/db/master/migrations/`
+- [x] T002 Create tenant schema SQL baseline file at
+      `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql` (empty, to be populated)
+- [x] T003 Create PostgreSQL trigger functions file at
+      `apps/api/src/db/tenant/migrations/v1.0.0/triggers.sql`
+- [x] T004 Create migration execution utilities in `packages/domain-core/src/migrations/migrate.ts`
+      (checksums, versioning)
+- [x] T005 Create schema initialization task definition in
+      `packages/domain-core/src/workers/tasks/init-tenant-schema.ts`
+- [x] T006 Create migration application task definition in
+      `packages/domain-core/src/workers/tasks/apply-migration.ts`
 - [x] T007 Verify PostgreSQL 14+ installed and `pgBouncer` connection pool available (local dev)
 - [x] T008 Verify Redis 6+ available for idempotency caching (local dev)
 
@@ -49,21 +56,25 @@
 
 ### Database Layer Setup
 
-- [x] T009 [P] Create `schema_version` table definition with single-row trigger in `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
-  - Columns: `version VARCHAR(20)`, `applied_at TIMESTAMPTZ`, `checksum VARCHAR(64)`, `UNIQUE(version)`
+- [x] T009 [P] Create `schema_version` table definition with single-row trigger in
+      `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
+  - Columns: `version VARCHAR(20)`, `applied_at TIMESTAMPTZ`, `checksum VARCHAR(64)`,
+    `UNIQUE(version)`
   - Trigger: Enforce max 1 row
   - Transactional: Yes
   - Idempotent: N/A (schema initialization)
   - Middleware dependency: None (internal table)
 
-- [x] T010 [P] Create PostgreSQL trigger function `raise_single_row_violation()` in `apps/api/src/db/tenant/migrations/v1.0.0/triggers.sql`
+- [x] T010 [P] Create PostgreSQL trigger function `raise_single_row_violation()` in
+      `apps/api/src/db/tenant/migrations/v1.0.0/triggers.sql`
   - Prevents multiple rows in schema_version
   - Raises EXCEPTION on INSERT when count > 0
   - Transactional: Yes (trigger context)
   - Idempotent: N/A
   - Middleware dependency: None
 
-- [x] T011 [P] Create PostgreSQL trigger function `raise_immutable_violation()` in `apps/api/src/db/tenant/migrations/v1.0.0/triggers.sql`
+- [x] T011 [P] Create PostgreSQL trigger function `raise_immutable_violation()` in
+      `apps/api/src/db/tenant/migrations/v1.0.0/triggers.sql`
   - Prevents UPDATE on immutable tables (attempt_events, audit_logs)
   - Raises EXCEPTION on UPDATE attempt
   - Transactional: Yes (trigger context)
@@ -89,7 +100,8 @@
   - Transactional: N/A (registry)
   - Idempotent: N/A
   - Middleware dependency: None
-  - **Hardening**: Enforce retry policy: DO NOT RETRY on checksum mismatch (flag: tampering_detected)
+  - **Hardening**: Enforce retry policy: DO NOT RETRY on checksum mismatch (flag:
+    tampering_detected)
 
 ### Middleware Foundation
 
@@ -119,7 +131,8 @@
   - Middleware dependency: Requires tenant resolver
   - Version enforcement: No
 
-- [x] T016 Create schema version validation middleware in `apps/api/src/middleware/schema-version.ts`
+- [x] T016 Create schema version validation middleware in
+      `apps/api/src/middleware/schema-version.ts`
   - Get tenant DB connection from pool
   - SELECT version FROM schema_version LIMIT 1
   - Get expected version from license.product_version_compatibility
@@ -137,68 +150,103 @@
 
 ### Schema Initialization Tables
 
-- [x] T017 [US1] Create Identity layer tables in `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
-  - `users` table: id (UUID PK), email, first_name, last_name, password_hash, is_active, created_at, updated_at, created_by, updated_by, is_deleted
-  - `roles` table: id, workspace_id, name, description, permissions_json, created_at, updated_at, created_by, updated_by, is_deleted
+- [x] T017 [US1] Create Identity layer tables in
+      `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
+  - `users` table: id (UUID PK), email, first_name, last_name, password_hash, is_active, created_at,
+    updated_at, created_by, updated_by, is_deleted
+  - `roles` table: id, workspace_id, name, description, permissions_json, created_at, updated_at,
+    created_by, updated_by, is_deleted
   - `role_permissions` table: id, role_id (FK RESTRICT), permission_code, created_at, created_by
   - Indexes: users(email), roles(workspace_id, name), role_permissions(role_id, permission_code)
   - Transactional: Yes (part of baseline init)
   - Idempotent: No (schema creation)
   - Middleware dependency: Tenant resolver required
 
-- [x] T018 [P] [US1] Create Academic Structure layer tables in `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
-  - `divisions` table: id, name, code, parent_division_id (FK SET NULL), is_active, created_at, updated_at, created_by, updated_by, is_deleted
-  - `departments` table: id, division_id (FK RESTRICT), name, code, is_active, created_at, updated_at, created_by, updated_by, is_deleted
-  - `groups` table: id, department_id (FK RESTRICT), name, code, capacity, is_active, created_at, updated_at, created_by, updated_by, is_deleted
+- [x] T018 [P] [US1] Create Academic Structure layer tables in
+      `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
+  - `divisions` table: id, name, code, parent_division_id (FK SET NULL), is_active, created_at,
+    updated_at, created_by, updated_by, is_deleted
+  - `departments` table: id, division_id (FK RESTRICT), name, code, is_active, created_at,
+    updated_at, created_by, updated_by, is_deleted
+  - `groups` table: id, department_id (FK RESTRICT), name, code, capacity, is_active, created_at,
+    updated_at, created_by, updated_by, is_deleted
   - `hierarchy_nodes`, `teams`, `semesters`, `subjects`, `lessons` tables (similar pattern)
   - Indexes: (division_id), (department_id), (group_id), (semester_id), (subject_id)
   - Transactional: Yes (part of baseline init)
   - Idempotent: No
   - Middleware dependency: None (internal schema)
 
-- [x] T019 [P] [US1] Create Classification layer tables in `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
-  - `categories` table: id, name, type, parent_category_id (FK SET NULL), is_active, created_at, updated_at, created_by, updated_by, is_deleted
-  - `category_values` table: id, category_id (FK CASCADE), value, display_order, is_active, created_at, updated_at, created_by, updated_by, is_deleted
-  - `tags` table: id, name, color_hex, is_active, created_at, updated_at, created_by, updated_by, is_deleted
-  - `mcq_baskets` table: id, name, description, question_count, is_active, created_at, updated_at, created_by, updated_by, is_deleted
+- [x] T019 [P] [US1] Create Classification layer tables in
+      `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
+  - `categories` table: id, name, type, parent_category_id (FK SET NULL), is_active, created_at,
+    updated_at, created_by, updated_by, is_deleted
+  - `category_values` table: id, category_id (FK CASCADE), value, display_order, is_active,
+    created_at, updated_at, created_by, updated_by, is_deleted
+  - `tags` table: id, name, color_hex, is_active, created_at, updated_at, created_by, updated_by,
+    is_deleted
+  - `mcq_baskets` table: id, name, description, question_count, is_active, created_at, updated_at,
+    created_by, updated_by, is_deleted
   - Indexes: (category_id), (tag keyword search), (mcq_baskets name)
   - Transactional: Yes (part of baseline init)
   - Idempotent: No
   - Middleware dependency: None
 
-- [x] T020 [P] [US1] Create Exam Engine layer tables in `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
-  - `mcq_questions` table: id, basket_id (FK RESTRICT), question_text, options_json, correct_option, difficulty, tags_json, created_at, updated_at, created_by, updated_by, is_deleted
-  - `traditional_questions` table: id, basket_id, question_text, solution_text, difficulty, tags_json, created_at, updated_at, created_by, updated_by, is_deleted
-  - `mcq_exams` table: id, name, duration_minutes, question_count, passing_score, created_at, updated_at, created_by, updated_by, is_deleted
-  - `traditional_exams` table: id, name, duration_minutes, created_at, updated_at, created_by, updated_by, is_deleted
-  - `scheduled_exams` table: id (FK to mcq/traditional exam), scheduled_at, timezone, created_at, updated_at, created_by, updated_by, is_deleted
+- [x] T020 [P] [US1] Create Exam Engine layer tables in
+      `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
+  - `mcq_questions` table: id, basket_id (FK RESTRICT), question_text, options_json, correct_option,
+    difficulty, tags_json, created_at, updated_at, created_by, updated_by, is_deleted
+  - `traditional_questions` table: id, basket_id, question_text, solution_text, difficulty,
+    tags_json, created_at, updated_at, created_by, updated_by, is_deleted
+  - `mcq_exams` table: id, name, duration_minutes, question_count, passing_score, created_at,
+    updated_at, created_by, updated_by, is_deleted
+  - `traditional_exams` table: id, name, duration_minutes, created_at, updated_at, created_by,
+    updated_by, is_deleted
+  - `scheduled_exams` table: id (FK to mcq/traditional exam), scheduled_at, timezone, created_at,
+    updated_at, created_by, updated_by, is_deleted
   - Indexes: (basket_id), (exam_id), (scheduled_at), (difficulty)
   - Transactional: Yes (part of baseline init)
   - Idempotent: No
   - Middleware dependency: None
 
-- [x] T021 [P] [US1] Create Runtime layer tables in `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
-  - `attempts` table: id (PK), exam_id (FK RESTRICT), user_id (FK RESTRICT), configuration_snapshot (JSONB), question_list_snapshot (JSONB), grading_config_snapshot (JSONB), status (ENUM), started_at, submitted_at, duration_seconds, submission_deadline_at, server_time_at_submission, created_at, updated_at, created_by, updated_by, is_deleted
+- [x] T021 [P] [US1] Create Runtime layer tables in
+      `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
+  - `attempts` table: id (PK), exam_id (FK RESTRICT), user_id (FK RESTRICT), configuration_snapshot
+    (JSONB), question_list_snapshot (JSONB), grading_config_snapshot (JSONB), status (ENUM),
+    started_at, submitted_at, duration_seconds, submission_deadline_at, server_time_at_submission,
+    created_at, updated_at, created_by, updated_by, is_deleted
   - Constraint: UNIQUE(exam_id, user_id, started_at)
   - Indexes: (exam_id), (user_id), (status), (submission_deadline_at)
   - Transactional: Yes (part of baseline init)
   - Idempotent: No
   - Middleware dependency: None
 
-- [x] T022 [P] [US1] Create Commercial + Communication + Media + Ads + Certificates + System layer tables in `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
-  - `subscriptions` table: id, user_id (FK), plan_type, status (ENUM ACTIVE/PAUSED/CANCELLED), started_at, expired_at, created_at, updated_at, created_by, updated_by, is_deleted
-  - `invoices` table: id, subscription_id (FK), amount, issued_at, due_at, paid_at, created_at, updated_at, created_by, updated_by, is_deleted
-  - `promocodes` table: id, code, discount_percent, valid_until, max_uses, used_count, created_at, updated_at, created_by, updated_by, is_deleted
-  - `subscription_events` table: id, subscription_id (FK), event_type, event_data_json, occurred_at, created_at, created_by
-  - `notifications` table: id, user_id (FK), message, is_read, created_at, updated_at, created_by, updated_by, is_deleted
-  - `feedback` table: id, user_id (FK), feedback_text, rating, created_at, updated_at, created_by, updated_by, is_deleted
-  - `system_feedback` table: id, feedback_text, created_at, updated_at, created_by, updated_by, is_deleted
-  - `media_files` table: id, file_name, file_size, mime_type, url, created_at, updated_at, created_by, updated_by, is_deleted
+- [x] T022 [P] [US1] Create Commercial + Communication + Media + Ads + Certificates + System layer
+      tables in `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
+  - `subscriptions` table: id, user_id (FK), plan_type, status (ENUM ACTIVE/PAUSED/CANCELLED),
+    started_at, expired_at, created_at, updated_at, created_by, updated_by, is_deleted
+  - `invoices` table: id, subscription_id (FK), amount, issued_at, due_at, paid_at, created_at,
+    updated_at, created_by, updated_by, is_deleted
+  - `promocodes` table: id, code, discount_percent, valid_until, max_uses, used_count, created_at,
+    updated_at, created_by, updated_by, is_deleted
+  - `subscription_events` table: id, subscription_id (FK), event_type, event_data_json, occurred_at,
+    created_at, created_by
+  - `notifications` table: id, user_id (FK), message, is_read, created_at, updated_at, created_by,
+    updated_by, is_deleted
+  - `feedback` table: id, user_id (FK), feedback_text, rating, created_at, updated_at, created_by,
+    updated_by, is_deleted
+  - `system_feedback` table: id, feedback_text, created_at, updated_at, created_by, updated_by,
+    is_deleted
+  - `media_files` table: id, file_name, file_size, mime_type, url, created_at, updated_at,
+    created_by, updated_by, is_deleted
   - `ads` table: id, content, is_active, created_at, updated_at, created_by, updated_by, is_deleted
-  - `certificates` table: id, user_id (FK), template_id (FK), issued_at, created_at, updated_at, created_by, updated_by, is_deleted
-  - `certificate_templates` table: id, name, template_html, created_at, updated_at, created_by, updated_by, is_deleted
-  - `translations` table: id, language_code, key, value, created_at, updated_at, created_by, updated_by, is_deleted
-  - `audit_logs` table (optional): id, table_name, record_id, action, change_data_json, created_at, created_by
+  - `certificates` table: id, user_id (FK), template_id (FK), issued_at, created_at, updated_at,
+    created_by, updated_by, is_deleted
+  - `certificate_templates` table: id, name, template_html, created_at, updated_at, created_by,
+    updated_by, is_deleted
+  - `translations` table: id, language_code, key, value, created_at, updated_at, created_by,
+    updated_by, is_deleted
+  - `audit_logs` table (optional): id, table_name, record_id, action, change_data_json, created_at,
+    created_by
   - All indexes on FK columns and frequently queried fields
   - Transactional: Yes (part of baseline init)
   - Idempotent: No
@@ -206,7 +254,8 @@
 
 ### Idempotency & Validation
 
-- [x] T023 [US1] Create idempotency key validation in `apps/api/src/modules/schema/schema.service.ts`
+- [x] T023 [US1] Create idempotency key validation in
+      `apps/api/src/modules/schema/schema.service.ts`
   - Check Redis cache: `schema-init:{workspace_id}:{idempotency_key}`
   - If hit (24h TTL) → return cached 202 response (idempotent replay)
   - If miss → check if schema_version table exists (fallback DB check for cache failure)
@@ -230,7 +279,8 @@
 
 ### API Endpoint Implementation
 
-- [x] T025 [US1] Create provisioning endpoint `POST /mmm/workspaces/:workspace_id/schema/initialize` in `apps/api/src/modules/schema/schema.controller.ts`
+- [x] T025 [US1] Create provisioning endpoint `POST /mmm/workspaces/:workspace_id/schema/initialize`
+      in `apps/api/src/modules/schema/schema.controller.ts`
   - Accept idempotency_key in request body (optional)
   - Apply middleware stack: tenant resolver → license → schema version validation
   - Call schema initialization service
@@ -242,7 +292,8 @@
   - Middleware dependency: All three (resolver, license, schema version)
   - Version enforcement: Yes
 
-- [x] T026 [US1] Create schema initialization service in `apps/api/src/modules/schema/schema.service.ts`
+- [x] T026 [US1] Create schema initialization service in
+      `apps/api/src/modules/schema/schema.service.ts`
   - Validate idempotency key (or generate UUID)
   - Generate task_id (UUID)
   - Enqueue INIT_TENANT_SCHEMA task in worker queue with:
@@ -251,7 +302,8 @@
     - idempotency_key
     - schema_version: "1.0.0"
     - schema_file_checksum: (calculated from baseline-schema.sql)
-  - Store in Redis: `schema-init:{workspace_id}:{idempotency_key}` → {task_id, status: QUEUED, created_at} (24h TTL)
+  - Store in Redis: `schema-init:{workspace_id}:{idempotency_key}` → {task_id, status: QUEUED,
+    created_at} (24h TTL)
   - Return {task_id, status: "QUEUED"}
   - Transactional: No (async task enqueue)
   - Idempotent: Yes (checked before enqueue)
@@ -260,8 +312,10 @@
 
 ### Worker Task Implementation
 
-- [x] T027 [US1] Create INIT_TENANT_SCHEMA worker task in `apps/worker/src/tasks/init-tenant-schema.ts`
-  - Accept task payload: {workspace_id, task_id, idempotency_key, schema_version, schema_file_checksum}
+- [x] T027 [US1] Create INIT_TENANT_SCHEMA worker task in
+      `apps/worker/src/tasks/init-tenant-schema.ts`
+  - Accept task payload: {workspace_id, task_id, idempotency_key, schema_version,
+    schema_file_checksum}
   - Get tenant database connection from pool (tenant resolver context)
   - Set transaction timeout: `SET LOCAL statement_timeout = 30000` (30s, prevents stuck migrations)
   - BEGIN TRANSACTION (READ COMMITTED isolation)
@@ -288,8 +342,11 @@
 
 ### Immutable Tables & Triggers
 
-- [x] T028 [US2] Create `attempt_events` table in `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
-  - id (UUID PK), attempt_id (FK CASCADE), event_type (ENUM: START, RESUME, PAUSE, ANSWER_SUBMIT, TIME_WARNING, SUBMIT_REQUEST, FINALIZED, GRADED, ARCHIVED), event_payload (JSONB), occurred_at (TIMESTAMPTZ), created_at, created_by
+- [x] T028 [US2] Create `attempt_events` table in
+      `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
+  - id (UUID PK), attempt_id (FK CASCADE), event_type (ENUM: START, RESUME, PAUSE, ANSWER_SUBMIT,
+    TIME_WARNING, SUBMIT_REQUEST, FINALIZED, GRADED, ARCHIVED), event_payload (JSONB), occurred_at
+    (TIMESTAMPTZ), created_at, created_by
   - NO updated_at, NO updated_by (immutable table indicator)
   - Index: (attempt_id), (event_type), (occurred_at)
   - Transactional: Yes (part of baseline init)
@@ -297,7 +354,8 @@
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T029 [US2] Apply immutability trigger to `attempt_events` table in `apps/api/src/db/tenant/migrations/v1.0.0/triggers.sql`
+- [x] T029 [US2] Apply immutability trigger to `attempt_events` table in
+      `apps/api/src/db/tenant/migrations/v1.0.0/triggers.sql`
   - Trigger: `enforce_attempt_events_immutable`
   - BEFORE UPDATE on attempt_events
   - EXECUTE FUNCTION raise_immutable_violation()
@@ -309,7 +367,8 @@
 
 ### Audit Logging Service
 
-- [x] T030 [US2] Create attempt event logger in `packages/domain-core/src/audit/attempt-event-logger.ts`
+- [x] T030 [US2] Create attempt event logger in
+      `packages/domain-core/src/audit/attempt-event-logger.ts`
   - Function: `logAttemptEvent(attemptId: UUID, eventType: string, payload?: object): Promise<void>`
   - INSERT into attempt_events table
   - Validates event_type is in allowed ENUM
@@ -324,7 +383,8 @@
 
 ### Integration Tests for Immutability
 
-- [x] T031 [US2] Add unit test for immutability trigger in `apps/api/tests/db/triggers/immutable-trigger.test.ts`
+- [x] T031 [US2] Add unit test for immutability trigger in
+      `apps/api/tests/db/triggers/immutable-trigger.test.ts`
   - Test: INSERT into attempt_events succeeds
   - Test: UPDATE on attempt_events raises constraint exception
   - Test: DELETE on attempt_events is allowed (soft delete via is_deleted)
@@ -333,7 +393,8 @@
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T032 [US2] Add integration test for audit trail in `apps/api/tests/integration/audit-trail.integration.test.ts`
+- [x] T032 [US2] Add integration test for audit trail in
+      `apps/api/tests/integration/audit-trail.integration.test.ts`
   - Test: Start attempt → attempt_events START event created
   - Test: Submit answer → attempt_events ANSWER_SUBMIT event created
   - Test: Submit attempt → attempt_events SUBMIT_REQUEST event created
@@ -351,7 +412,8 @@
 
 ### Snapshot Table Setup
 
-- [x] T033 [US3] Create `attempts` table with snapshot columns in `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
+- [x] T033 [US3] Create `attempts` table with snapshot columns in
+      `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
   - id (UUID PK), exam_id (FK RESTRICT), user_id (FK RESTRICT)
   - configuration_snapshot (JSONB NOT NULL): Exam configuration frozen at attempt start
   - question_list_snapshot (JSONB NOT NULL): Question order frozen at attempt start
@@ -366,8 +428,10 @@
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T034 [US3] Create `attempt_answers` table (append-only) in `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
-  - id (UUID PK), attempt_id (FK CASCADE), question_id (UUID, denormalized), submitted_answer (JSONB)
+- [x] T034 [US3] Create `attempt_answers` table (append-only) in
+      `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`
+  - id (UUID PK), attempt_id (FK CASCADE), question_id (UUID, denormalized), submitted_answer
+    (JSONB)
   - submitted_at, submission_order
   - created_at, updated_at, created_by, updated_by, is_deleted
   - Constraint: UNIQUE(attempt_id, question_id)
@@ -379,7 +443,8 @@
 
 ### Snapshot Capture Service
 
-- [x] T035 [US3] Create snapshot capture service in `packages/domain-core/src/attempts/snapshot-service.ts`
+- [x] T035 [US3] Create snapshot capture service in
+      `packages/domain-core/src/attempts/snapshot-service.ts`
   - Function: `captureExamSnapshot(examId: UUID): Promise<{config, questions, grading}>`
   - Query exam_engine tables for:
     - Exam configuration (from mcq_exams or traditional_exams)
@@ -391,7 +456,8 @@
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T036 [US3] Create attempt initialization service in `packages/domain-core/src/attempts/attempt-init.ts`
+- [x] T036 [US3] Create attempt initialization service in
+      `packages/domain-core/src/attempts/attempt-init.ts`
   - Function: `initializeAttempt(examId: UUID, userId: UUID): Promise<Attempt>`
   - Capture exam snapshot (configuration, questions, grading)
   - Generate started_at = NOW() (server-authoritative time)
@@ -409,7 +475,8 @@
 
 ### Snapshot Validation Tests
 
-- [x] T037 [US3] Add unit test for snapshot capture in `apps/api/tests/domain/snapshot-service.test.ts`
+- [x] T037 [US3] Add unit test for snapshot capture in
+      `apps/api/tests/domain/snapshot-service.test.ts`
   - Test: Capture snapshot from exam → returns config + questions + grading as JSONB
   - Test: Snapshot is consistent across calls (deterministic)
   - Test: Snapshot includes all required fields
@@ -418,7 +485,8 @@
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T038 [US3] Add integration test for snapshot immutability in `apps/api/tests/integration/snapshot-immutability.integration.test.ts`
+- [x] T038 [US3] Add integration test for snapshot immutability in
+      `apps/api/tests/integration/snapshot-immutability.integration.test.ts`
   - Setup: Create exam + question + create attempt
   - Modify exam question (add new option) in live exam
   - Query attempt → verify question_list_snapshot has OLD question (not new)
@@ -428,7 +496,8 @@
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T039 [US3] Add integration test for concurrent attempt snapshots in `apps/api/tests/integration/concurrent-snapshots.integration.test.ts`
+- [x] T039 [US3] Add integration test for concurrent attempt snapshots in
+      `apps/api/tests/integration/concurrent-snapshots.integration.test.ts`
   - Setup: Create exam
   - Concurrently (100 users): Initialize attempts on same exam
   - Verify: All 100 attempts have identical snapshots
@@ -444,51 +513,65 @@
 
 ### Foreign Key Constraints & ON DELETE Policies
 
-All following tasks create FK constraints with explicit ON DELETE policies in `apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`:
+All following tasks create FK constraints with explicit ON DELETE policies in
+`apps/api/src/db/tenant/migrations/v1.0.0/baseline-schema.sql`:
 
-- [x] T040 [P] [US4] Create FK constraints: roles → role_permissions (ON DELETE CASCADE), departments → divisions (ON DELETE RESTRICT), groups → departments (ON DELETE RESTRICT), hierarchy_nodes → divisions (ON DELETE CASCADE)
+- [x] T040 [P] [US4] Create FK constraints: roles → role_permissions (ON DELETE CASCADE),
+      departments → divisions (ON DELETE RESTRICT), groups → departments (ON DELETE RESTRICT),
+      hierarchy_nodes → divisions (ON DELETE CASCADE)
   - All in baseline schema SQL
   - Transactional: Yes
   - Idempotent: No
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T041 [P] [US4] Create FK constraints: lessons → subjects (ON DELETE RESTRICT), semesters → divisions (ON DELETE RESTRICT), subjects → semesters (ON DELETE RESTRICT), teams → departments (ON DELETE RESTRICT)
+- [x] T041 [P] [US4] Create FK constraints: lessons → subjects (ON DELETE RESTRICT), semesters →
+      divisions (ON DELETE RESTRICT), subjects → semesters (ON DELETE RESTRICT), teams → departments
+      (ON DELETE RESTRICT)
   - All in baseline schema SQL
   - Transactional: Yes
   - Idempotent: No
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T042 [P] [US4] Create FK constraints: categories on parent_category_id (ON DELETE SET NULL), category_values → categories (ON DELETE CASCADE), tags (self-referential if needed)
+- [x] T042 [P] [US4] Create FK constraints: categories on parent_category_id (ON DELETE SET NULL),
+      category_values → categories (ON DELETE CASCADE), tags (self-referential if needed)
   - All in baseline schema SQL
   - Transactional: Yes
   - Idempotent: No
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T043 [P] [US4] Create FK constraints: mcq_exams → mcq_baskets (ON DELETE RESTRICT), traditional_exams (no basket FK), scheduled_exams → mcq/traditional_exams (polymorphic, ON DELETE RESTRICT)
+- [x] T043 [P] [US4] Create FK constraints: mcq_exams → mcq_baskets (ON DELETE RESTRICT),
+      traditional_exams (no basket FK), scheduled_exams → mcq/traditional_exams (polymorphic, ON
+      DELETE RESTRICT)
   - All in baseline schema SQL
   - Transactional: Yes
   - Idempotent: No
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T044 [P] [US4] Create FK constraints: attempts → scheduled_exams (ON DELETE RESTRICT), attempts → users (ON DELETE RESTRICT), attempt_answers → attempts (ON DELETE CASCADE), attempt_events → attempts (ON DELETE CASCADE)
+- [x] T044 [P] [US4] Create FK constraints: attempts → scheduled_exams (ON DELETE RESTRICT),
+      attempts → users (ON DELETE RESTRICT), attempt_answers → attempts (ON DELETE CASCADE),
+      attempt_events → attempts (ON DELETE CASCADE)
   - All in baseline schema SQL
   - Transactional: Yes
   - Idempotent: No
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T045 [P] [US4] Create FK constraints: subscriptions → users (ON DELETE RESTRICT), invoices → subscriptions (ON DELETE CASCADE), promocodes (no parent), subscription_events → subscriptions (ON DELETE CASCADE)
+- [x] T045 [P] [US4] Create FK constraints: subscriptions → users (ON DELETE RESTRICT), invoices →
+      subscriptions (ON DELETE CASCADE), promocodes (no parent), subscription_events → subscriptions
+      (ON DELETE CASCADE)
   - All in baseline schema SQL
   - Transactional: Yes
   - Idempotent: No
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T046 [P] [US4] Create FK constraints: notifications → users (ON DELETE CASCADE), feedback → users (ON DELETE CASCADE), certificates → users (ON DELETE CASCADE), certificates → certificate_templates (ON DELETE RESTRICT)
+- [x] T046 [P] [US4] Create FK constraints: notifications → users (ON DELETE CASCADE), feedback →
+      users (ON DELETE CASCADE), certificates → users (ON DELETE CASCADE), certificates →
+      certificate_templates (ON DELETE RESTRICT)
   - All in baseline schema SQL
   - Transactional: Yes
   - Idempotent: No
@@ -497,7 +580,8 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
 
 ### FK Constraint Validation Tests
 
-- [x] T047 [US4] Add unit test for FK cascade delete in `apps/api/tests/db/constraints/fk-cascade.test.ts`
+- [x] T047 [US4] Add unit test for FK cascade delete in
+      `apps/api/tests/db/constraints/fk-cascade.test.ts`
   - Test: Delete parent (subscription) → child records (invoices, subscription_events) deleted
   - Test: Delete parent (attempt) → child records (attempt_answers, attempt_events) deleted
   - Test: Delete parent (exam) → child records (scheduled_exams, attempts) NOT deleted (RESTRICT)
@@ -506,7 +590,8 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T048 [US4] Add unit test for FK restrict policy in `apps/api/tests/db/constraints/fk-restrict.test.ts`
+- [x] T048 [US4] Add unit test for FK restrict policy in
+      `apps/api/tests/db/constraints/fk-restrict.test.ts`
   - Test: Attempt to delete exam with active attempts → constraint violation
   - Test: Attempt to delete division with departments → constraint violation
   - Test: Verify orphaned records prevented
@@ -515,7 +600,8 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T049 [US4] Add integration test for referential integrity during user operations in `apps/api/tests/integration/referential-integrity.integration.test.ts`
+- [x] T049 [US4] Add integration test for referential integrity during user operations in
+      `apps/api/tests/integration/referential-integrity.integration.test.ts`
   - Test: Create exam + question + attempt → all relationships valid
   - Test: Delete question → attempt_answers reference orphaned question_id (acceptable)
   - Test: Archive exam → no new attempts possible
@@ -524,7 +610,8 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T050 [US4] Add concurrency test for FK constraints in `apps/api/tests/integration/fk-concurrency.integration.test.ts`
+- [x] T050 [US4] Add concurrency test for FK constraints in
+      `apps/api/tests/integration/fk-concurrency.integration.test.ts`
   - Test: 50 concurrent attempt submissions on same exam → all FK validated
   - Test: Concurrent deletion of parent + insert of child → constraint prevents race condition
   - Test: No lost deletes or deadlocks
@@ -539,7 +626,8 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
 
 ### Version Bumping & Migration Management
 
-- [x] T051 [US5] Create version bumping utilities in `packages/domain-core/src/migrations/version-bump.ts`
+- [x] T051 [US5] Create version bumping utilities in
+      `packages/domain-core/src/migrations/version-bump.ts`
   - Function: `bumpVersion(currentVersion: string, changeType: 'major'|'minor'|'patch'): string`
   - Parse semantic version (follow ADR-0008)
   - Increment according to change type (major: 2.0.0, minor: 1.1.0, patch: 1.0.1)
@@ -550,8 +638,10 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T052 [US5] Create migration file generator in `packages/domain-core/src/migrations/migration-generator.ts`
-  - Function: `generateMigrationFile(version: string, changeType: string, sqlStatements: string[]): {filePath, checksum}`
+- [x] T052 [US5] Create migration file generator in
+      `packages/domain-core/src/migrations/migration-generator.ts`
+  - Function:
+    `generateMigrationFile(version: string, changeType: string, sqlStatements: string[]): {filePath, checksum}`
   - Create directory: `apps/api/src/db/tenant/migrations/v{version}/`
   - Create file: `apps/api/src/db/tenant/migrations/v{version}/migration.sql`
   - Combine all SQL statements with transaction wrapper (BEGIN TRANSACTION... COMMIT)
@@ -562,8 +652,10 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T053 [US5] Create migration validation service in `packages/domain-core/src/migrations/migration-validator.ts`
-  - Function: `validateMigration(fromVersion: string, toVersion: string): {valid: boolean, errors: string[]}`
+- [x] T053 [US5] Create migration validation service in
+      `packages/domain-core/src/migrations/migration-validator.ts`
+  - Function:
+    `validateMigration(fromVersion: string, toVersion: string): {valid: boolean, errors: string[]}`
   - Check version ordering (to > from)
   - Check backward compatibility (patch/minor OK, major → rollback only)
   - Check schema_version table ready for update
@@ -587,7 +679,8 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
   - Read migration file from disk: `apps/api/src/db/tenant/migrations/v{to_version}/migration.sql`
   - Calculate SHA256 checksum
   - Validate checksum matches payload:
-    - If mismatch → ABORT IMMEDIATELY, log CRITICAL "Migration checksum mismatch", send to DLQ with tampering_detected=true, **ENFORCE: DO NOT RETRY**
+    - If mismatch → ABORT IMMEDIATELY, log CRITICAL "Migration checksum mismatch", send to DLQ with
+      tampering_detected=true, **ENFORCE: DO NOT RETRY**
   - Execute migration SQL
   - Validate schema integrity (new tables/columns present)
   - UPDATE schema_version SET version={to_version}, applied_at=NOW(), checksum={recalculated}
@@ -598,10 +691,13 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
   - Middleware dependency: None
   - Version enforcement: Yes (validates versions)
   - On success: Log CRITICAL "Migration applied: workspace={workspace_id}, version={from}→{to}"
-  - On failure (non-checksum): Retry with exponential backoff (2s, 4s, 8s, max 3 retries ~5min); after 3 failures → DLQ
+  - On failure (non-checksum): Retry with exponential backoff (2s, 4s, 8s, max 3 retries ~5min);
+    after 3 failures → DLQ
 
-- [x] T055 [US5] Create migration enqueue utility in `apps/api/src/modules/schema/migration-enqueue.ts`
-  - Function: `enqueueMigration(workspace_id: UUID, from_version: string, to_version: string, filePath: string): Promise<string>`
+- [x] T055 [US5] Create migration enqueue utility in
+      `apps/api/src/modules/schema/migration-enqueue.ts`
+  - Function:
+    `enqueueMigration(workspace_id: UUID, from_version: string, to_version: string, filePath: string): Promise<string>`
   - Read migration file
   - Calculate SHA256 checksum
   - Enqueue APPLY_MIGRATION task with:
@@ -615,7 +711,8 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
 
 ### Version Mismatch Handling
 
-- [x] T056 [US5] Update schema version validation middleware to enqueue migrations in `apps/api/src/middleware/schema-version.ts`
+- [x] T056 [US5] Update schema version validation middleware to enqueue migrations in
+      `apps/api/src/middleware/schema-version.ts`
   - If actual_schema_version < expected_schema_version:
     - Check if migration already queued (Redis: `migration-in-progress:{workspace_id}`)
     - If queued → return 503 "Migration in progress"
@@ -630,10 +727,12 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
 
 ### Migration Failure Handling & DLQ
 
-- [x] T057 [US5] Create DLQ handler for migration failures in `apps/worker/src/dlq/migration-dlq-handler.ts`
+- [x] T057 [US5] Create DLQ handler for migration failures in
+      `apps/worker/src/dlq/migration-dlq-handler.ts`
   - Process failed migration from DLQ
   - Check tampering_detected flag:
-    - If true → log CRITICAL alert, do NOT retry (hardening: enforce flag check), escalate to security team
+    - If true → log CRITICAL alert, do NOT retry (hardening: enforce flag check), escalate to
+      security team
     - If false → log ERROR, create ticket for manual investigation
   - Extract workspace_id, version info
   - Update workspace status: mark as migration_failed (new flag)
@@ -655,7 +754,8 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
   - Middleware dependency: None
   - Version enforcement: No
 
-- [x] T059 [US5] Add integration test for schema version mismatch in `apps/api/tests/integration/schema-version-mismatch.integration.test.ts`
+- [x] T059 [US5] Add integration test for schema version mismatch in
+      `apps/api/tests/integration/schema-version-mismatch.integration.test.ts`
   - Setup: Create workspace with schema v1.0.0
   - Simulate product upgrade (license.product_version = 1.1.0)
   - Make request to workspace → 503 "Migration in progress"
@@ -674,7 +774,8 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
 
 ### Middleware Stack Integration
 
-- [x] T060 Create global middleware chain in `apps/api/src/app.ts` or `apps/api/src/middleware/index.ts`
+- [x] T060 Create global middleware chain in `apps/api/src/app.ts` or
+      `apps/api/src/middleware/index.ts`
   - Register tenant resolver middleware (first)
   - Register license validation middleware (second)
   - Register schema version validation middleware (third)
@@ -703,7 +804,8 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
 
 ### API Route Definition
 
-- [x] T063 Create schema initialization controller in `apps/api/src/modules/schema/schema.controller.ts`
+- [x] T063 Create schema initialization controller in
+      `apps/api/src/modules/schema/schema.controller.ts`
   - Route: POST /mmm/workspaces/:workspace_id/schema/initialize
   - Middleware: tenant resolver, license, schema version validation
   - Request body: { idempotency_key?: string, notify_on_complete?: string }
@@ -750,9 +852,12 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
 
 ### Structured Logging
 
-- [x] T067 Create structured logging utilities in `packages/domain-core/src/logging/structured-log.ts`
-  - Function: `logDatabaseOperation(op: {table, action, workspace_id, user_id, correlation_id, duration_ms, rows_affected, status}): void`
-  - Format: JSON with required fields (timestamp, level, service, correlation_id, workspace_slug, workspace_id, user_id, operation, table, rows_affected, duration_ms, status)
+- [x] T067 Create structured logging utilities in
+      `packages/domain-core/src/logging/structured-log.ts`
+  - Function:
+    `logDatabaseOperation(op: {table, action, workspace_id, user_id, correlation_id, duration_ms, rows_affected, status}): void`
+  - Format: JSON with required fields (timestamp, level, service, correlation_id, workspace_slug,
+    workspace_id, user_id, operation, table, rows_affected, duration_ms, status)
   - Log to stdout (for Docker JSON log driver)
   - Include function name + line number for debugging
   - Transactional: No (logging only)
@@ -771,7 +876,8 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
 ### Metrics & Monitoring
 
 - [x] T069 Create metrics collection in `packages/domain-core/src/metrics/metrics.ts`
-  - Counter: schema_initialization_total, schema_initialization_failures, migration_total, migration_failures
+  - Counter: schema_initialization_total, schema_initialization_failures, migration_total,
+    migration_failures
   - Gauge: migration_in_progress per workspace
   - Histogram: schema_initialization_duration_ms, migration_duration_ms
   - Transactional: No
@@ -790,7 +896,8 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
 
 ### Unit Tests (Already Partially Covered)
 
-- [x] T071 Add unit test for tenant resolver middleware in `apps/api/tests/middleware/tenant-resolver.test.ts`
+- [x] T071 Add unit test for tenant resolver middleware in
+      `apps/api/tests/middleware/tenant-resolver.test.ts`
   - Test: Valid slug → workspace_id resolved
   - Test: Invalid slug → 404
   - Test: User not member → 401/403
@@ -803,7 +910,8 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
   - Test: ARCHIVED → 403
   - Test: License not found → 404
 
-- [x] T073 Add unit test for schema version middleware in `apps/api/tests/middleware/schema-version.test.ts`
+- [x] T073 Add unit test for schema version middleware in
+      `apps/api/tests/middleware/schema-version.test.ts`
   - Test: Versions match → proceed
   - Test: Actual > expected → 409
   - Test: Actual < expected + no migration queued → enqueue + 503
@@ -811,7 +919,8 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
 
 ### Integration Tests
 
-- [x] T074 Add end-to-end provisioning test in `apps/api/tests/integration/e2e-provisioning.integration.test.ts`
+- [x] T074 Add end-to-end provisioning test in
+      `apps/api/tests/integration/e2e-provisioning.integration.test.ts`
   - Setup: Create workspace in MMC
   - Call POST /mmm/workspaces/{id}/schema/initialize
   - Verify: 202 Accepted response with task_id
@@ -820,7 +929,8 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
   - Verify: schema_version set to 1.0.0
   - Call again (idempotent) → 409 Conflict or cached 202
 
-- [x] T075 Add end-to-end migration test in `apps/api/tests/integration/e2e-migration.integration.test.ts`
+- [x] T075 Add end-to-end migration test in
+      `apps/api/tests/integration/e2e-migration.integration.test.ts`
   - Setup: Tenant with schema v1.0.0
   - Simulate migration: v1.0.0 → v1.1.0 (add new column)
   - Update license.product_version_compatibility to v1.1.0
@@ -831,19 +941,22 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
 
 ### Isolation & Concurrency Tests
 
-- [x] T076 Add cross-tenant isolation test in `apps/api/tests/integration/cross-tenant-isolation.integration.test.ts`
+- [x] T076 Add cross-tenant isolation test in
+      `apps/api/tests/integration/cross-tenant-isolation.integration.test.ts`
   - Setup 2 workspaces: A and B
   - User from A attempts query on B → 403 Unauthorized
   - Both workspaces have independent schemas
   - Modifications in A do not affect B
 
-- [x] T077 Add concurrency test for schema initialization in `apps/api/tests/integration/concurrent-initialization.integration.test.ts`
+- [x] T077 Add concurrency test for schema initialization in
+      `apps/api/tests/integration/concurrent-initialization.integration.test.ts`
   - Setup: 10 workspaces
   - Call schema/initialize concurrently on all 10
   - Verify: All 10 complete successfully
   - Verify: Each has independent schema
 
-- [x] T078 Add concurrency test for attempt submission in `apps/api/tests/integration/concurrent-attempt-submission.integration.test.ts`
+- [x] T078 Add concurrency test for attempt submission in
+      `apps/api/tests/integration/concurrent-attempt-submission.integration.test.ts`
   - Setup: Exam + 100 users
   - Concurrently: 100 users submit attempt answers
   - Verify: All submissions succeed
@@ -889,8 +1002,10 @@ All following tasks create FK constraints with explicit ON DELETE policies in `a
 ### Monitoring & Alerting
 
 - [x] T083 Create monitoring dashboard configuration in `docs/MONITORING.md`
-  - Metrics to track: schema_initialization_duration, migration_duration, failed_migrations, tampering_detected
-  - Alerts: Migration failure (page on-call), Tampering detected (CRITICAL), Version mismatch lasting > 5min
+  - Metrics to track: schema_initialization_duration, migration_duration, failed_migrations,
+    tampering_detected
+  - Alerts: Migration failure (page on-call), Tampering detected (CRITICAL), Version mismatch
+    lasting > 5min
 
 ### Final Validation
 
@@ -954,7 +1069,8 @@ Documentation & Validation (T079–T085) [Final]
 - T017 (Identity tables) + T018 (Academic) + T019 (Classification) + T020 (Exam Engine)
 - All populate the same baseline-schema.sql file (can merge in final step)
 
-**Parallel Execution Opportunity 2** (User Stories): All 5 user stories (T049–T059) can technically run in parallel once foundational middleware ready (T009-T016), but data model dependencies suggest:
+**Parallel Execution Opportunity 2** (User Stories): All 5 user stories (T049–T059) can technically
+run in parallel once foundational middleware ready (T009-T016), but data model dependencies suggest:
 
 - US1 + US2 (provisioning + audit) prerequisite for US3 (snapshots)
 - US4 (referential integrity) independent, can start alongside US3
@@ -1013,7 +1129,8 @@ This task list adheres to **Zidney Constitution v1.2.0**:
 - ✅ **License Enforcement**: Middleware mandatory on all routes (T015)
 - ✅ **Transaction Boundaries**: All-or-nothing semantics (T027, T054)
 - ✅ **Idempotency**: Hybrid Redis + DB fallback (T023, T054)
-- ✅ **Audit Fields**: All tables have id, created_at, updated_at, created_by, updated_by, is_deleted (T017–T022)
+- ✅ **Audit Fields**: All tables have id, created_at, updated_at, created_by, updated_by,
+  is_deleted (T017–T022)
 - ✅ **Structured Logging**: Correlation IDs and JSON format (T067–T068)
 
 **No violations detected. Tasks are ready for implementation.**
@@ -1054,7 +1171,8 @@ This task list adheres to **Zidney Constitution v1.2.0**:
 
 Once all tasks completed:
 
-1. **Commit & Push**: `git add . && git commit -m "STAGE_02B: Tenant baseline schema implementation"` → Create PR
+1. **Commit & Push**:
+   `git add . && git commit -m "STAGE_02B: Tenant baseline schema implementation"` → Create PR
 2. **Code Review**: Verify constitutional compliance, test coverage, documentation
 3. **Merge**: To `develop` branch
 4. **Deployment**: Trigger CI/CD pipeline for staging environment

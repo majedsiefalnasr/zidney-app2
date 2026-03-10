@@ -2,7 +2,8 @@
 
 ## Overview
 
-This guide documents the database schema changes introduced by STAGE_10_LICENSES (Licenses Management).
+This guide documents the database schema changes introduced by STAGE_10_LICENSES (Licenses
+Management).
 
 **Total Migrations:** 6 forward-only migrations  
 **Estimated Runtime:** 2-5 seconds (no downtime required)  
@@ -36,7 +37,8 @@ This guide documents the database schema changes introduced by STAGE_10_LICENSES
 
 ## Migration 1: Create Licenses Table
 
-**File:** `apps/api/src/db/master/migrations/20260217_004_enhance_licenses_and_add_archive_snapshots.ts`
+**File:**
+`apps/api/src/db/master/migrations/20260217_004_enhance_licenses_and_add_archive_snapshots.ts`
 
 **SQL:**
 

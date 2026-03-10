@@ -9,13 +9,18 @@
 
 ## Purpose
 
-This guide explains how to validate the module-boundaries governance implementation end-to-end. All tests are automated and integrate into CI/CD.
+This guide explains how to validate the module-boundaries governance implementation end-to-end. All
+tests are automated and integrate into CI/CD.
 
 ---
 
 ## Summary of Delivered Behavior
 
-This stage introduces a machine-readable module-boundary contract (`docs/architecture/module-boundaries.json`) that enforces architectural layer separation and cross-cutting constraints at pre-commit time. The governance engine (ai-guard.ts + extended infra-audit.ts) validates every commit against the contract, catching architectural violations before they reach CI.
+This stage introduces a machine-readable module-boundary contract
+(`docs/architecture/module-boundaries.json`) that enforces architectural layer separation and
+cross-cutting constraints at pre-commit time. The governance engine (ai-guard.ts + extended
+infra-audit.ts) validates every commit against the contract, catching architectural violations
+before they reach CI.
 
 Key outcomes:
 
@@ -118,7 +123,8 @@ bun run test:unit:boundaries && bun run ai-guard && bun run tsc --noEmit && bun 
 
 ### Scenario 1 — Static Schema Validation
 
-**Purpose:** Verify that `docs/architecture/module-boundaries.json` is well-formed and contains all required fields.
+**Purpose:** Verify that `docs/architecture/module-boundaries.json` is well-formed and contains all
+required fields.
 
 **Run:**
 
@@ -135,7 +141,8 @@ npx vitest run tests/static/module-boundaries.test.ts
 **Concrete checks:**
 
 - File exists and is valid JSON
-- Top-level keys: `version`, `layers`, `allowed_dependencies`, `forbidden_dependencies`, `cross_cutting_rules`
+- Top-level keys: `version`, `layers`, `allowed_dependencies`, `forbidden_dependencies`,
+  `cross_cutting_rules`
 - Layer names: `infrastructure`, `domain`, `runtime`, `ui`
 - All 13 expected modules declared
 - Dependency matrix complete (4 rows × 4 columns)
@@ -144,7 +151,8 @@ npx vitest run tests/static/module-boundaries.test.ts
 
 **Troubleshooting:**
 
-- If "JSON parse error" → check JSON syntax: `bun run json.stringify docs/architecture/module-boundaries.json`
+- If "JSON parse error" → check JSON syntax:
+  `bun run json.stringify docs/architecture/module-boundaries.json`
 - If "missing field" → verify all required fields are present
 - If "unknown layer" → add missing layer to `layers` object
 
@@ -178,23 +186,29 @@ npx vitest run tests/unit/ai-guard/ai-guard-boundaries.test.ts
 
 **Concrete test cases:**
 
-- Scenario c: `import { logger } from '@zidney/logger'` → resolves to `packages/logger` → infrastructure layer ✅
-- Scenario f: `import { User } from '@zidney/domain-core'` in ui layer → violates layer rules → BLOCKED ✅
-- Scenario h: `import { Button } from 'apps/backoffice'` (cross-app) → violates cross-cutting rule → BLOCKED ✅
+- Scenario c: `import { logger } from '@zidney/logger'` → resolves to `packages/logger` →
+  infrastructure layer ✅
+- Scenario f: `import { User } from '@zidney/domain-core'` in ui layer → violates layer rules →
+  BLOCKED ✅
+- Scenario h: `import { Button } from 'apps/backoffice'` (cross-app) → violates cross-cutting rule →
+  BLOCKED ✅
 - Scenario j: malformed JSON → process.exit(1) with error message ✅
 - Scenario l: missing file → console.error + process.exit(1) ✅
 
 **Troubleshooting:**
 
-- If test "resolveImportToModule scenario X" fails → check TypeScript alias definitions in tsconfig.json
+- If test "resolveImportToModule scenario X" fails → check TypeScript alias definitions in
+  tsconfig.json
 - If "validateLayerBoundaries" fails → review allowed_dependencies matrix in module-boundaries.json
-- If "cross-cutting rule" test fails → check cross_cutting_rules array for correct pattern (glob vs. string)
+- If "cross-cutting rule" test fails → check cross_cutting_rules array for correct pattern (glob vs.
+  string)
 
 ---
 
 ### Scenario 3 — Infra-Audit Integration (Undeclared Modules)
 
-**Purpose:** Verify that `infra-audit.ts` detects modules under `packages/` and `apps/` that are not declared in module-boundaries.json.
+**Purpose:** Verify that `infra-audit.ts` detects modules under `packages/` and `apps/` that are not
+declared in module-boundaries.json.
 
 **Run:**
 
@@ -213,27 +227,33 @@ npx vitest run tests/unit/infra-audit/infra-audit-boundaries.test.ts
 - `findUndeclaredModulesFromBoundaries()` scans packages/ and apps/ directories
 - Detected modules compared against module-boundaries.json layers
 - Undeclared modules reported (informational in normal runs; blocking under --ci-strict)
-- `import.meta.main` guard prevents side effects when infra-audit.ts is imported as a module (not standalone)
+- `import.meta.main` guard prevents side effects when infra-audit.ts is imported as a module (not
+  standalone)
 
 **Concrete test cases:**
 
-- Infrastructure layer: packages/logger, packages/config, packages/types, packages/redis-utils → all declared ✅
+- Infrastructure layer: packages/logger, packages/config, packages/types, packages/redis-utils → all
+  declared ✅
 - Domain layer: packages/domain-core, packages/validation → all declared ✅
 - Runtime layer: apps/api, apps/worker → all declared ✅
-- UI layer: apps/mmc, apps/backoffice, apps/frontoffice, packages/ui-system, packages/api-client → all declared ✅
-- Undeclared: if a module exists in file system but not in module-boundaries.json → detected and reported ✅
+- UI layer: apps/mmc, apps/backoffice, apps/frontoffice, packages/ui-system, packages/api-client →
+  all declared ✅
+- Undeclared: if a module exists in file system but not in module-boundaries.json → detected and
+  reported ✅
 
 **Troubleshooting:**
 
 - If "undeclared module: packages/X" → add to appropriate layer in module-boundaries.json
-- If "import.meta.main guard" fails → verify import.meta idiom is supported in your Node/Bun version (v20+)
+- If "import.meta.main guard" fails → verify import.meta idiom is supported in your Node/Bun version
+  (v20+)
 - If "fs.readdirSync fails" → verify packages/ and apps/ directories exist
 
 ---
 
 ### Scenario 4 — AI Guard Runtime Execution (Performance)
 
-**Purpose:** Verify that `bun run ai-guard` loads module-boundaries.json and validates the current repository state successfully.
+**Purpose:** Verify that `bun run ai-guard` loads module-boundaries.json and validates the current
+repository state successfully.
 
 **Run:**
 
@@ -266,9 +286,12 @@ Wall-clock: ~0.4 seconds
 
 **Troubleshooting:**
 
-- If "module-boundaries.json not found" → verify file path: `ls docs/architecture/module-boundaries.json`
-- If "layer violation detected!" → run `git diff` to check recent changes; review module-boundaries.json rules
-- If "takes > 30s" → profile the script; likely cause is large number of files to scan or slow JSON parsing
+- If "module-boundaries.json not found" → verify file path:
+  `ls docs/architecture/module-boundaries.json`
+- If "layer violation detected!" → run `git diff` to check recent changes; review
+  module-boundaries.json rules
+- If "takes > 30s" → profile the script; likely cause is large number of files to scan or slow JSON
+  parsing
 
 ---
 
@@ -304,8 +327,10 @@ rm test-violation.ts
 **Troubleshooting:**
 
 - If Husky doesn't run → verify `.husky/pre-commit` exists and is executable
-- If ai-guard doesn't block → verify module-boundaries.json cross_cutting_rules array contains the pattern
-- If you can't revert the commit → use `git reset --soft HEAD~1` to undo the commit but keep changes staged
+- If ai-guard doesn't block → verify module-boundaries.json cross_cutting_rules array contains the
+  pattern
+- If you can't revert the commit → use `git reset --soft HEAD~1` to undo the commit but keep changes
+  staged
 
 ---
 
@@ -332,7 +357,8 @@ rm test-violation.ts
 
 **Troubleshooting:**
 
-- If CI step fails but local `bun run ai-guard` passes → check for OS-specific path issues (Windows vs. Unix paths)
+- If CI step fails but local `bun run ai-guard` passes → check for OS-specific path issues (Windows
+  vs. Unix paths)
 - If 43 tests don't run in CI → verify `test:unit:boundaries` script is defined in package.json
 - If timeout occurs → increase timeout threshold in workflows; investigate slow tests
 
@@ -372,7 +398,7 @@ If code accidentally imports across layers:
 
 ```typescript
 // In apps/mmc (ui layer)
-import {Domain} from '@zidney/domain-core' // domain layer
+import { Domain } from "@zidney/domain-core"; // domain layer
 // Result: BLOCKED by ai-guard at pre-commit
 ```
 

@@ -154,9 +154,9 @@ Example:
 
 ```ts
 enum AttemptStatus {
-  STARTED = 'STARTED',
-  SUBMITTED = 'SUBMITTED',
-  AUTO_SUBMITTED = 'AUTO_SUBMITTED',
+  STARTED = "STARTED",
+  SUBMITTED = "SUBMITTED",
+  AUTO_SUBMITTED = "AUTO_SUBMITTED",
 }
 ```
 
@@ -288,8 +288,7 @@ Any naming violation is considered architectural drift.
 
 Naming is part of architecture.
 
-If naming becomes inconsistent,
-the system becomes cognitively unstable,
-especially under AI-assisted development.
+If naming becomes inconsistent, the system becomes cognitively unstable, especially under
+AI-assisted development.
 
 Naming discipline is mandatory.

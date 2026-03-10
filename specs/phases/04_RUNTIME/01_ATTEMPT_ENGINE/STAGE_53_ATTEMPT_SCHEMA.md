@@ -200,8 +200,7 @@ Autosave must upsert based on (attempt_id, question_id).
 - Question snapshot creation must be atomic.
 - Submission must be idempotent.
 - No duplicate submission allowed.
-- Status transitions must be enforced via update condition:
-  WHERE status = 'IN_PROGRESS'
+- Status transitions must be enforced via update condition: WHERE status = 'IN_PROGRESS'
 
 ---
 

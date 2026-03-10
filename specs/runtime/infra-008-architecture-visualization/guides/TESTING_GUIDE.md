@@ -9,13 +9,16 @@
 
 ## Purpose
 
-This guide explains how to validate the architecture visualization implementation end-to-end. The stage introduces a new CLI tool (`arch:visualize`) that generates clean, human-readable Mermaid diagrams from Zidney's analyzed codebase structure.
+This guide explains how to validate the architecture visualization implementation end-to-end. The
+stage introduces a new CLI tool (`arch:visualize`) that generates clean, human-readable Mermaid
+diagrams from Zidney's analyzed codebase structure.
 
 ---
 
 ## Summary of Delivered Behavior
 
-The architecture visualization pipeline reads raw architecture audit data (from `scripts/infra-audit.ts`) and transforms it into three curated diagrams plus an explanatory README:
+The architecture visualization pipeline reads raw architecture audit data (from
+`scripts/infra-audit.ts`) and transforms it into three curated diagrams plus an explanatory README:
 
 Key outcomes:
 
@@ -100,7 +103,8 @@ bun run vitest run tests/unit/visualize/ tests/static/06-*
 bun run vitest run --coverage tests/unit/visualize/visualize.test.ts
 ```
 
-**Expected outcome**: All 14 unit tests pass (Test 1–14 in visualize.test.ts) + 6 static tests pass (6.1–6.6 in 06-\*.test.ts).
+**Expected outcome**: All 14 unit tests pass (Test 1–14 in visualize.test.ts) + 6 static tests pass
+(6.1–6.6 in 06-\*.test.ts).
 
 ---
 
@@ -117,7 +121,8 @@ bun run vitest run --coverage tests/unit/visualize/visualize.test.ts
 
 **Expected**:
 
-- Directory contains 4 files: `README.md`, `module-dependency-graph.mmd`, `layer-architecture-diagram.mmd`, `system-overview-diagram.mmd`
+- Directory contains 4 files: `README.md`, `module-dependency-graph.mmd`,
+  `layer-architecture-diagram.mmd`, `system-overview-diagram.mmd`
 - All 4 files have non-zero sizes (README >2KB, .mmd files 1–2KB)
 - Console output shows `[VISUALIZE] Done — 3 diagrams written to docs/architecture/visualization/`
 
@@ -197,12 +202,15 @@ Process exits with code 1
 bun run arch:audit && bun run arch:visualize
 ```
 
-- `infra-audit.ts` → generates `docs/architecture/graphs/dependency-graph.json` (machine-readable, unfiltered)
-- `arch:visualize` → reads that file and generates `docs/architecture/visualization/*.mmd` (human-readable, curated)
+- `infra-audit.ts` → generates `docs/architecture/graphs/dependency-graph.json` (machine-readable,
+  unfiltered)
+- `arch:visualize` → reads that file and generates `docs/architecture/visualization/*.mmd`
+  (human-readable, curated)
 
 ### Relationship to `ai-guard.ts`
 
-`arch:visualize` does **not** use `ai-guard.ts`. However, both tools read from `ARCHITECTURE_MAP.json`:
+`arch:visualize` does **not** use `ai-guard.ts`. However, both tools read from
+`ARCHITECTURE_MAP.json`:
 
 - `ai-guard.ts` → validates code against architecture rules
 - `arch:visualize` → uses architecture map to classify modules by layer in diagrams

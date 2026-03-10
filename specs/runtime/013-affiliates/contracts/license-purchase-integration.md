@@ -1,7 +1,9 @@
 # Contract: License Purchase Integration (Affiliate Code Validation)
 
-**Purpose**: Extend existing license purchase endpoint with optional affiliate code validation and discount application  
-**Endpoint**: `POST /v1/licenses/purchase` (existing endpoint, extended with optional affiliate logic)  
+**Purpose**: Extend existing license purchase endpoint with optional affiliate code validation and
+discount application  
+**Endpoint**: `POST /v1/licenses/purchase` (existing endpoint, extended with optional affiliate
+logic)  
 **Authentication**: Client authentication (existing)  
 **License Validation**: License middleware (existing)  
 **Rate Limit**: Existing rate limiting for license endpoint
@@ -10,7 +12,9 @@
 
 ## Overview
 
-The existing license purchase endpoint is extended to accept an optional `promo_code` parameter. If provided, the affiliate code is validated and discount applied transactionally. This integration maintains backward compatibility: license purchases without a promo code work exactly as before.
+The existing license purchase endpoint is extended to accept an optional `promo_code` parameter. If
+provided, the affiliate code is validated and discount applied transactionally. This integration
+maintains backward compatibility: license purchases without a promo code work exactly as before.
 
 ---
 
@@ -369,7 +373,7 @@ Response:
 
 ```typescript
 if (base_amount <= 0) {
-  throw new Error('INVALID_LICENSE_AMOUNT')
+  throw new Error("INVALID_LICENSE_AMOUNT");
 }
 ```
 
@@ -378,7 +382,7 @@ Prevents corrupt financial records from reaching affiliate system.
 ### 2. Discount Application
 
 ```typescript
-final_amount = base_amount - discount_amount
+final_amount = base_amount - discount_amount;
 // Always: discount_amount <= base_amount (enforced by calculations)
 ```
 
@@ -399,7 +403,7 @@ log.info({
   correlation_id: request.correlation_id, // Propagated throughout transaction
   license_id: created_license.id,
   affiliate_code_used: promo_code,
-})
+});
 ```
 
 ---

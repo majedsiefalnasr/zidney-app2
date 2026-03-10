@@ -1,14 +1,18 @@
 # Plan Report — STAGE_UI_09_SECURITY_AND_TOKEN_HANDLING
 
-**Step:** 3 — Plan
-**Timestamp:** 2026-03-01T00:00:00.000Z
-**Status:** COMPLETE
+**Step:** 3 — Plan **Timestamp:** 2026-03-01T00:00:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Technical plan for STAGE_UI_09_SECURITY_AND_TOKEN_HANDLING is complete and guardian-validated. Research confirmed that STAGE_UI_01 already established the compliant auth foundation (in-memory token manager, centralised Bearer injection, Pinia auth store, auth guard). This stage closes 6 specific gaps: authenticated-session-scoped 401 handling, app-level isHandling401 guard, 423/426 response handling, token redaction utility, redirect preservation on guard redirect, and `expireSession()` action. No new npm packages. No database changes. No ADR required. Both guardian validators (Architecture Checker + API Designer) returned VERDICT: PASS.
+Technical plan for STAGE_UI_09_SECURITY_AND_TOKEN_HANDLING is complete and guardian-validated.
+Research confirmed that STAGE_UI_01 already established the compliant auth foundation (in-memory
+token manager, centralised Bearer injection, Pinia auth store, auth guard). This stage closes 6
+specific gaps: authenticated-session-scoped 401 handling, app-level isHandling401 guard, 423/426
+response handling, token redaction utility, redirect preservation on guard redirect, and
+`expireSession()` action. No new npm packages. No database changes. No ADR required. Both guardian
+validators (Architecture Checker + API Designer) returned VERDICT: PASS.
 
 ---
 

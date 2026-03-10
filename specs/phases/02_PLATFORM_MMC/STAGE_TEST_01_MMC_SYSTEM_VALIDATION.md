@@ -8,7 +8,8 @@ Track: Backend + UI + Infrastructure
 
 ## Purpose
 
-This stage validates the **entire MMC platform stack** after all Phase 2 backend and UI stages are complete.
+This stage validates the **entire MMC platform stack** after all Phase 2 backend and UI stages are
+complete.
 
 It is not a unit-test stage.
 
@@ -41,8 +42,7 @@ Covers:
 - Dashboard
 - Shared UI system integration
 
-Does NOT modify business logic.
-Only validates.
+Does NOT modify business logic. Only validates.
 
 ---
 

@@ -11,7 +11,8 @@
 1. **Bun ≥ 1.0** installed: `bun --version`
 2. You are at the **repo root**: `cd /path/to/zidney-app2`
 3. Dependencies are installed: `bun install`
-4. Confirm `infra-audit-report.json` is in `.gitignore` (Phase 0 of the plan). If not, add it before running.
+4. Confirm `infra-audit-report.json` is in `.gitignore` (Phase 0 of the plan). If not, add it before
+   running.
 
 ---
 
@@ -21,7 +22,8 @@
 bun run scripts/infra-audit.ts
 ```
 
-This is the only command needed to execute the automated audit. It is **non-destructive** and **read-only** (except writing `infra-audit-report.json`).
+This is the only command needed to execute the automated audit. It is **non-destructive** and
+**read-only** (except writing `infra-audit-report.json`).
 
 ### What the script does
 
@@ -31,7 +33,8 @@ This is the only command needed to execute the automated audit. It is **non-dest
 4. Counts test files per app and package (unit, integration, spec).
 5. Detects Playwright config presence per app.
 6. Audits README presence and section completeness for all `apps/*` and `packages/*`.
-7. Scans test files for skipped (`.skip`, `.todo`, `xit`, `xdescribe`) and flaky (`.retry`, `// flaky`) markers.
+7. Scans test files for skipped (`.skip`, `.todo`, `xit`, `xdescribe`) and flaky (`.retry`,
+   `// flaky`) markers.
 8. Writes results to `infra-audit-report.json` at the repo root.
 
 ### Expected console output
@@ -69,7 +72,9 @@ If a secret-pattern file is encountered:
 | ------------------------- | --------- | -------------------------- | ----------------------------------------------------- |
 | `infra-audit-report.json` | Repo root | NO (ephemeral, gitignored) | Machine-readable audit data; re-generated on each run |
 
-> **Note:** The three written deliverables (Gap Report, Risk Classification, Safe Rollout Plan) are NOT produced by the script. They are authored manually in Phase 3 using the script's JSON output as source data.
+> **Note:** The three written deliverables (Gap Report, Risk Classification, Safe Rollout Plan) are
+> NOT produced by the script. They are authored manually in Phase 3 using the script's JSON output
+> as source data.
 
 ---
 
@@ -192,7 +197,8 @@ Each top-level section (§1–§8) maps to one audit goal:
 
 ### How to interpret findings
 
-Findings are rows where the current state deviates from the target governance posture. Every finding has:
+Findings are rows where the current state deviates from the target governance posture. Every finding
+has:
 
 - A **Gap ID** (e.g., `GAP-001`)
 - A **description** of the deviation
@@ -217,7 +223,8 @@ The readiness score table appears at the end of the Gap Report (§8) and has 6 r
 > - 1–3 areas NEEDS WORK → `PARTIAL — FIX REQUIRED`
 > - 4–6 areas NEEDS WORK → `NOT READY`
 
-A `PARTIAL — FIX REQUIRED` or `NOT READY` verdict means `STAGE_INFRA_GOVERNANCE` implementation **must not begin** until the referenced gaps are resolved.
+A `PARTIAL — FIX REQUIRED` or `NOT READY` verdict means `STAGE_INFRA_GOVERNANCE` implementation
+**must not begin** until the referenced gaps are resolved.
 
 ---
 
@@ -229,7 +236,8 @@ The script is **idempotent**. Re-running it at any time:
 - Produces fresh counts reflecting the current codebase state.
 - Does not modify any tracked file.
 
-To compare two audit runs, use `git stash` or copy `infra-audit-report.json` to a temporary location before re-running.
+To compare two audit runs, use `git stash` or copy `infra-audit-report.json` to a temporary location
+before re-running.
 
 ---
 

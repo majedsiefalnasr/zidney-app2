@@ -8,7 +8,9 @@
 
 ## Summary
 
-76 atomic tasks generated across 14 phases, covering all 10 user stories plus setup, migration, and polish phases. 28 tasks marked as parallelizable. MVP scope (P1 stories) = phases 1–6 (31 tasks). Task format validated: all follow `- [ ] [ID] [P?] [Story?] Description with file path`.
+76 atomic tasks generated across 14 phases, covering all 10 user stories plus setup, migration, and
+polish phases. 28 tasks marked as parallelizable. MVP scope (P1 stories) = phases 1–6 (31 tasks).
+Task format validated: all follow `- [ ] [ID] [P?] [Story?] Description with file path`.
 
 ---
 
@@ -46,13 +48,15 @@
 
 ## Transactional Tasks
 
-- N/A — This is a UI infrastructure package with no direct database writes. Backend owns all transaction boundaries.
+- N/A — This is a UI infrastructure package with no direct database writes. Backend owns all
+  transaction boundaries.
 
 ---
 
 ## Idempotency Tasks
 
-- T041–T044: Implement Idempotency-Key header support in interceptor pipeline (client-side header attachment only; enforcement is backend)
+- T041–T044: Implement Idempotency-Key header support in interceptor pipeline (client-side header
+  attachment only; enforcement is backend)
 
 ---
 

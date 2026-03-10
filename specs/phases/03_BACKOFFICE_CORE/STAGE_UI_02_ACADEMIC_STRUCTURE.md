@@ -81,8 +81,7 @@ UI must render hierarchy dynamically based on API-provided structure.
 
 ### 1️⃣ Academic Structure Overview Page
 
-Route Example:
-`/academic-structure`
+Route Example: `/academic-structure`
 
 Layout:
 

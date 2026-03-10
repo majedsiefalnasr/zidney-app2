@@ -1,16 +1,20 @@
 # Specify Report — STAGE_INFRA_08_ARCHITECTURE_VISUALIZATION
 
-**Step:** 1 — Specify
-**Timestamp:** 2026-03-09T00:00:00.000Z
-**Status:** COMPLETE
+**Step:** 1 — Specify **Timestamp:** 2026-03-09T00:00:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Specification generated for the Architecture Visualization stage. This is a pure infrastructure tooling stage that introduces a standalone `scripts/architecture/visualize.ts` script to convert raw audit output into curated, human-readable Mermaid diagrams stored in `docs/architecture/visualization/`. No database access, no tenant logic, no runtime changes — purely a developer tooling and documentation layer.
+Specification generated for the Architecture Visualization stage. This is a pure infrastructure
+tooling stage that introduces a standalone `scripts/architecture/visualize.ts` script to convert raw
+audit output into curated, human-readable Mermaid diagrams stored in
+`docs/architecture/visualization/`. No database access, no tenant logic, no runtime changes — purely
+a developer tooling and documentation layer.
 
-The spec is comprehensive (12 FRs, 3 developer scenarios, 6 acceptance scenarios, 12 unit tests, 8 measurable success criteria). All `[NEEDS CLARIFICATION]` markers have been resolved. Checklist at `checklists/requirements.md` shows all items passing.
+The spec is comprehensive (12 FRs, 3 developer scenarios, 6 acceptance scenarios, 12 unit tests, 8
+measurable success criteria). All `[NEEDS CLARIFICATION]` markers have been resolved. Checklist at
+`checklists/requirements.md` shows all items passing.
 
 ---
 
@@ -43,14 +47,21 @@ The spec is comprehensive (12 FRs, 3 developer scenarios, 6 acceptance scenarios
 
 - FR-001: Create `scripts/architecture/visualize.ts` as executable entry point
 - FR-002: Accept `--output-dir` CLI flag (default: `docs/architecture/visualization/`)
-- FR-003: Read primary input from `docs/architecture/graphs/dependency-graph.json`; exit 1 with clear message if missing
-- FR-004: Generate `module-dependency-graph.mmd` — top-level modules only, deduplicated edges, layer-annotated nodes
-- FR-005: Generate `layer-architecture-diagram.mmd` — four subgraph blocks, modules grouped by layer, inter-layer edges
-- FR-006: Generate `system-overview-diagram.mmd` — static trust-chain topology (MMC/Backoffice/Frontoffice → API → Worker → domain-core)
-- FR-007: Read secondary input from `docs/architecture/intelligence/ARCHITECTURE_MAP.json`; warn and apply heuristic fallback if missing
-- FR-008: Generate `docs/architecture/visualization/README.md` with diagram index, generation timestamp, and render instructions
+- FR-003: Read primary input from `docs/architecture/graphs/dependency-graph.json`; exit 1 with
+  clear message if missing
+- FR-004: Generate `module-dependency-graph.mmd` — top-level modules only, deduplicated edges,
+  layer-annotated nodes
+- FR-005: Generate `layer-architecture-diagram.mmd` — four subgraph blocks, modules grouped by
+  layer, inter-layer edges
+- FR-006: Generate `system-overview-diagram.mmd` — static trust-chain topology
+  (MMC/Backoffice/Frontoffice → API → Worker → domain-core)
+- FR-007: Read secondary input from `docs/architecture/intelligence/ARCHITECTURE_MAP.json`; warn and
+  apply heuristic fallback if missing
+- FR-008: Generate `docs/architecture/visualization/README.md` with diagram index, generation
+  timestamp, and render instructions
 - FR-009: Create output directory if it does not exist (no pre-condition required)
-- FR-010: Exit code 0 on success, exit code 1 on fatal error (missing primary input or unrecoverable parse error)
+- FR-010: Exit code 0 on success, exit code 1 on fatal error (missing primary input or unrecoverable
+  parse error)
 - FR-011: Add `arch:visualize` script entry to root `package.json`
 - FR-012: No new external npm dependencies — use Bun built-ins and Node built-ins only
 
@@ -79,8 +90,10 @@ None — all specification ambiguities resolved during authoring.
 
 ## Open Risks
 
-- `dependency-graph.json` schema could change if `infra-audit.ts` is updated without notice → mitigated by defensive JSON parsing with clear error messages
-- ARCHITECTURE_MAP.json heuristic fallback may misclassify new module types → acceptable risk; fallback produces usable (not perfect) output
+- `dependency-graph.json` schema could change if `infra-audit.ts` is updated without notice →
+  mitigated by defensive JSON parsing with clear error messages
+- ARCHITECTURE_MAP.json heuristic fallback may misclassify new module types → acceptable risk;
+  fallback produces usable (not perfect) output
 
 ---
 

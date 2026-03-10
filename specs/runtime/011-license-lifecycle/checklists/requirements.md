@@ -16,9 +16,12 @@
 
 **Notes**:
 
-- Specification uses business-layer terms (License Service, Provisioning Service) without prescribing implementation
+- Specification uses business-layer terms (License Service, Provisioning Service) without
+  prescribing implementation
 - Focused on institutional data protection and state determinism
-- All sections present: Executive Summary, Objectives, Scope, Constraints, Acceptance Criteria, User Scenarios, Key Entities, Success Criteria, Assumptions, Product Dependencies, Known Risks, Not Allowed
+- All sections present: Executive Summary, Objectives, Scope, Constraints, Acceptance Criteria, User
+  Scenarios, Key Entities, Success Criteria, Assumptions, Product Dependencies, Known Risks, Not
+  Allowed
 
 ---
 
@@ -35,11 +38,14 @@
 
 **Notes**:
 
-- **1 Clarification Present**: "Snapshot Location Finality" (Known Risks #1) - asks whether snapshot paths are deterministic or if location can be overridden. This is architectural, not blocking.
+- **1 Clarification Present**: "Snapshot Location Finality" (Known Risks #1) - asks whether snapshot
+  paths are deterministic or if location can be overridden. This is architectural, not blocking.
 - Testable requirements provide step-by-step test procedures
-- Measurable success criteria include quantitative targets: 100ms for transitions, 1ms resolver overhead, 10 minutes for snapshot
+- Measurable success criteria include quantitative targets: 100ms for transitions, 1ms resolver
+  overhead, 10 minutes for snapshot
 - All acceptance criteria numbered A1-A22 with explicit test procedures
-- Edge cases covered: concurrent transitions (A17), schema compatibility failures (A19), large snapshots (Performance & Limits)
+- Edge cases covered: concurrent transitions (A17), schema compatibility failures (A19), large
+  snapshots (Performance & Limits)
 - Scope includes In/Out sections with clear boundaries
 - Product dependencies and assumptions clearly mapped
 
@@ -54,10 +60,14 @@
 
 **Notes**:
 
-- Functional requirements (state transitions, soft lock, archival, restore, deletion) each have 1-4 acceptance criteria
-- User scenarios cover: payment lapse → soft lock, automatic expiration, snapshot/restore, permanent deletion, schema compatibility, concurrent transitions
-- Success criteria (12 items) cover all major feature areas: state enforcement, audit, UI, performance, idempotency
-- Specification uses business language: "institutional data protection," "workspace," "MMC admin," not "PostgreSQL," "Hono route," "Redis consumer," etc.
+- Functional requirements (state transitions, soft lock, archival, restore, deletion) each have 1-4
+  acceptance criteria
+- User scenarios cover: payment lapse → soft lock, automatic expiration, snapshot/restore, permanent
+  deletion, schema compatibility, concurrent transitions
+- Success criteria (12 items) cover all major feature areas: state enforcement, audit, UI,
+  performance, idempotency
+- Specification uses business language: "institutional data protection," "workspace," "MMC admin,"
+  not "PostgreSQL," "Hono route," "Redis consumer," etc.
 
 ---
 
@@ -75,8 +85,10 @@
 **Notes**:
 
 - Specification enforces trust chain: Isolation → License → Authentication (soft lock blocks auth)
-- Database-per-tenant preserved: snapshots are per-tenant, restore is per-tenant, deletion drops only tenant DB
-- License enforcement in middleware: resolver blocks SOFT_LOCKED/ARCHIVED/DELETED before route handler
+- Database-per-tenant preserved: snapshots are per-tenant, restore is per-tenant, deletion drops
+  only tenant DB
+- License enforcement in middleware: resolver blocks SOFT_LOCKED/ARCHIVED/DELETED before route
+  handler
 - Audit logs immutable: stored in master_db, no retroactive editing allowed
 - Server time: soft_lock_until, archived_at, deleted_at all set server-side
 - Isolation preserved: no cross-license state reads, no cross-tenant data access
@@ -105,9 +117,12 @@
 
 ### Question 1: Snapshot Path Determinism
 
-**Context**: Specification requires "snapshot_location" to be stored as URI in snapshot_metadata table (Key Entities section).
+**Context**: Specification requires "snapshot_location" to be stored as URI in snapshot_metadata
+table (Key Entities section).
 
-**What we need to know**: Are snapshot paths calculated deterministically at snapshot creation time (e.g., `s3://snapshots/{tenant_id}/{timestamp}.tar.gz`), or does the system store different locations for the same snapshot, potentially requiring manual reconciliation?
+**What we need to know**: Are snapshot paths calculated deterministically at snapshot creation time
+(e.g., `s3://snapshots/{tenant_id}/{timestamp}.tar.gz`), or does the system store different
+locations for the same snapshot, potentially requiring manual reconciliation?
 
 **Suggested Answers**:
 
@@ -120,7 +135,8 @@
 
 **Your choice**: _[To be provided after planning phase - not blocking specification]_
 
-**Impact if left unresolved**: Implementation may create path discrepancies during restore. For planning/design phase, assume Deterministic (Option A) unless clarified.
+**Impact if left unresolved**: Implementation may create path discrepancies during restore. For
+planning/design phase, assume Deterministic (Option A) unless clarified.
 
 ---
 
@@ -130,7 +146,8 @@
 - Single clarification item is architectural detail; does not block planning
 - All hard rules from AGENTS.md and PROJECT_CONTEXT_PRIMER.md incorporated
 - Acceptance criteria provide comprehensive test coverage (22 numbered items + edge cases)
-- Performance targets established (< 100ms transitions, < 1ms resolver overhead, < 10 minutes snapshot)
+- Performance targets established (< 100ms transitions, < 1ms resolver overhead, < 10 minutes
+  snapshot)
 - Audit and logging requirements explicit and aligned with Zidney standards
 
 ---

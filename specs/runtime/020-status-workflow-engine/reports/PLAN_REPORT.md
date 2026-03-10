@@ -1,14 +1,20 @@
 # Plan Report — STAGE_20_STATUS_WORKFLOW_ENGINE
 
-**Step:** 3 — Plan
-**Timestamp:** 2026-03-01T00:03:00.000Z
-**Status:** COMPLETE
+**Step:** 3 — Plan **Timestamp:** 2026-03-01T00:03:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Full technical plan generated for the Status Workflow Engine. The engine is a domain-package-layer service (`packages/domain-core/src/workflow/`) with API routes at `apps/api/src/modules/workflow/`. One tenant migration (`20260301_002_workflow_engine.ts`) creates the `workflow_logs` table and bumps `schema_version` from `1.2.0` to `1.3.0`. Two guardian validators ran (Architecture Checker + API Designer). Architecture Checker returned VERDICT: PASS with one high-priority logging defect. API Designer returned VERDICT: BLOCKED (V-001 error envelope, V-002 workspace_slug logging). Both defects were remediated in-plan before proceeding: `WorkflowContext` extended with `workspaceSlug`/`workspaceId`, error envelope updated to include `details` and `correlationId` in all error responses.
+Full technical plan generated for the Status Workflow Engine. The engine is a domain-package-layer
+service (`packages/domain-core/src/workflow/`) with API routes at `apps/api/src/modules/workflow/`.
+One tenant migration (`20260301_002_workflow_engine.ts`) creates the `workflow_logs` table and bumps
+`schema_version` from `1.2.0` to `1.3.0`. Two guardian validators ran (Architecture Checker + API
+Designer). Architecture Checker returned VERDICT: PASS with one high-priority logging defect. API
+Designer returned VERDICT: BLOCKED (V-001 error envelope, V-002 workspace_slug logging). Both
+defects were remediated in-plan before proceeding: `WorkflowContext` extended with
+`workspaceSlug`/`workspaceId`, error envelope updated to include `details` and `correlationId` in
+all error responses.
 
 ---
 
@@ -64,7 +70,8 @@ Full technical plan generated for the Status Workflow Engine. The engine is a do
 
 ## Transaction Boundaries
 
-- Transition execution: `BEGIN → SELECT FOR UPDATE → validate → UPDATE entity → INSERT workflow_logs → COMMIT`
+- Transition execution:
+  `BEGIN → SELECT FOR UPDATE → validate → UPDATE entity → INSERT workflow_logs → COMMIT`
 - On any failure in steps 4–10: `ROLLBACK` — no partial state reaches the database
 - No nested transactions; one client connection per transition call
 
@@ -72,9 +79,13 @@ Full technical plan generated for the Status Workflow Engine. The engine is a do
 
 ## Idempotency Strategy
 
-- **FR-017**: Duplicate transition on an entity already in `targetState` → `400 invalid_state_transition` (not silent success)
-- **Concurrent race**: `SELECT FOR UPDATE` ensures second concurrent caller sees post-commit state after lock release → returns `400 invalid_state_transition` or `409 workflow_conflict` depending on race outcome
-- Workflow logs are append-only — no deduplication required; idempotency is maintained by state validation, not by log uniqueness
+- **FR-017**: Duplicate transition on an entity already in `targetState` →
+  `400 invalid_state_transition` (not silent success)
+- **Concurrent race**: `SELECT FOR UPDATE` ensures second concurrent caller sees post-commit state
+  after lock release → returns `400 invalid_state_transition` or `409 workflow_conflict` depending
+  on race outcome
+- Workflow logs are append-only — no deduplication required; idempotency is maintained by state
+  validation, not by log uniqueness
 
 ---
 
@@ -106,7 +117,8 @@ Full technical plan generated for the Status Workflow Engine. The engine is a do
 
 ## Open Risks
 
-- `prevent_audit_modification()` DB function assumed to exist from prior migration (source migration not cited in plan — dependency implicit). This must be validated during implementation.
+- `prevent_audit_modification()` DB function assumed to exist from prior migration (source migration
+  not cited in plan — dependency implicit). This must be validated during implementation.
 
 ---
 

@@ -121,4 +121,6 @@ No critical violations detected. All 9 structural drift criteria pass. All 4 gua
 
 **Pre-implementation reminder (non-blocking):**
 
-- MEDIUM-02 from architecture review: `logout()` `isLoading: false` must be set AFTER `router.push()` resolves, not inside `resetState()`. Verify during T031–T033 (main.ts implementation) and T037 (store unit tests).
+- MEDIUM-02 from architecture review: `logout()` `isLoading: false` must be set AFTER
+  `router.push()` resolves, not inside `resetState()`. Verify during T031–T033 (main.ts
+  implementation) and T037 (store unit tests).

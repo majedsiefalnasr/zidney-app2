@@ -1,20 +1,19 @@
 # Validation Report — Infrastructure and Governance Alignment
 
-**Step:** 6.5 — Mandatory Validation Gate
-**Timestamp:** 2026-03-04T02:00:00Z
-**Status:** PASS (pre-existing failures isolated and documented)
+**Step:** 6.5 — Mandatory Validation Gate **Timestamp:** 2026-03-04T02:00:00Z **Status:** PASS
+(pre-existing failures isolated and documented)
 
 ---
 
 ## Summary
 
-All validation checks were executed. Zero failures were introduced by this stage. Pre-existing failures
-(71 test files, 95 tests; 10 lint errors; 2 TypeScript errors) exist on the `develop` base branch and are
-not caused by any changes in `infra-003-alignment`. The stage-scoped files pass all checks.
+All validation checks were executed. Zero failures were introduced by this stage. Pre-existing
+failures (71 test files, 95 tests; 10 lint errors; 2 TypeScript errors) exist on the `develop` base
+branch and are not caused by any changes in `infra-003-alignment`. The stage-scoped files pass all
+checks.
 
-Stage-scoped lint: **0 errors**
-Stage-scoped TypeScript: **0 errors**
-Unit tests (stage-scoped): **PASS** — test count unchanged post-T001 rewrite (regression gate confirmed)
+Stage-scoped lint: **0 errors** Stage-scoped TypeScript: **0 errors** Unit tests (stage-scoped):
+**PASS** — test count unchanged post-T001 rewrite (regression gate confirmed)
 
 ---
 

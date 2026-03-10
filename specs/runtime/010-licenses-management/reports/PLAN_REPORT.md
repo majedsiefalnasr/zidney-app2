@@ -36,7 +36,8 @@ Institution (Students, Exams, Data)
 ### Authority Layers
 
 1. **Product Layer:** Defines enabled modules, features, runtime behavior (STAGE_09_PRODUCTS)
-2. **License Layer:** Binds product to workspace, enforces commercial limits, manages lifecycle (STAGE_10_LICENSES) ← **This Stage**
+2. **License Layer:** Binds product to workspace, enforces commercial limits, manages lifecycle
+   (STAGE_10_LICENSES) ← **This Stage**
 3. **Tenant Layer:** Runs institution data, exams, students (Frontoffice/Worker)
 4. **Middleware Chain:** Enforces license status on every request
 
@@ -44,9 +45,12 @@ Institution (Students, Exams, Data)
 
 - **Isolation:** Database-per-tenant enforced (ADR-0001); License cannot be shared across workspaces
 - **Immutability:** product_id and workspace_slug locked at creation; audit trail preserved
-- **Status Authority:** License status (master_db) is definitive; tenants_registry mirrors it (never redefines it)
-- **Asynchronous Provisioning:** License creation and DB provisioning decoupled; prevents blocking MMC operations
-- **Version Binding:** schema_version and product_version snapshotted at license creation; immutable, enforced at runtime
+- **Status Authority:** License status (master_db) is definitive; tenants_registry mirrors it (never
+  redefines it)
+- **Asynchronous Provisioning:** License creation and DB provisioning decoupled; prevents blocking
+  MMC operations
+- **Version Binding:** schema_version and product_version snapshotted at license creation;
+  immutable, enforced at runtime
 
 ---
 
@@ -252,7 +256,8 @@ $$ LANGUAGE plpgsql;
 
 - No rollback for ENUM (PostgreSQL limitation); requires migration file note
 
-**Note:** ENUM values cannot be removed; database limitation. If PROVISION_FAILED needs removal, requires:
+**Note:** ENUM values cannot be removed; database limitation. If PROVISION_FAILED needs removal,
+requires:
 
 1. Migrate data to different column
 2. Drop type and recreate
@@ -344,7 +349,8 @@ CreateLicenseResponse {
 1. INSERT into licenses table (transactional)
 2. ENQUEUE provisioning job to Redis queue:
    - Job ID: license.id
-   - Payload: { license_id, workspace_slug, product_id, product_version, student_limit, staff_limit, default_language, uses_divisions }
+   - Payload: { license_id, workspace_slug, product_id, product_version, student_limit, staff_limit,
+     default_language, uses_divisions }
    - Retry policy: 5 max retries, 2s base exponential backoff (2s, 4s, 8s, 16s, 32s)
    - Timeout: 30 minutes (provisioning must complete or fail within 30m)
    - Dead-letter queue: On 5 failures, job moves to DLQ for manual investigation
@@ -366,7 +372,8 @@ CreateLicenseResponse {
 **Transaction Model:**
 
 - Insert into licenses (transactional)
-- Enqueue to Redis (separate operation, if fails, license created but queue missed → async retry mechanism or manual retry UI button)
+- Enqueue to Redis (separate operation, if fails, license created but queue missed → async retry
+  mechanism or manual retry UI button)
 
 ---
 
@@ -663,7 +670,8 @@ SoftLockResponse {
 
 1. Status transition: ACTIVE → SOFT_LOCKED
 2. Set `soft_lock_until` = now + grace_period_days
-3. All subsequent requests from this workspace: middleware checks status = SOFT_LOCKED, returns 403 (access denied)
+3. All subsequent requests from this workspace: middleware checks status = SOFT_LOCKED, returns 403
+   (access denied)
 4. Structured log event: `license_soft_locked`, correlation_id, license_id, grace_until, reason
 
 **Error Responses:**
@@ -777,7 +785,8 @@ ArchiveRequest {
    - **Job:** Snapshot tenant database
    - **Payload:** { license_id, workspace_slug, snapshot_type: 'archive' }
    - **Outcome:** Compressed backup stored in S3/durable storage, location recorded
-4. Mark tenant database as read-only (PRAGMA query_only = ON; or ALTER DATABASE SET default_transaction_read_only = ON;)
+4. Mark tenant database as read-only (PRAGMA query_only = ON; or ALTER DATABASE SET
+   default_transaction_read_only = ON;)
 5. Structured log event: `license_archived`, correlation_id, snapshot_initiated
 
 **Transaction Model:**
@@ -1064,35 +1073,35 @@ RetryProvisioningResponse {
 
 ```typescript
 interface LicenseMiddlewareContext {
-  workspace_slug: string // From tenant resolver
-  correlation_id: string // From correlation ID middleware
-  user_id?: string // From auth middleware
+  workspace_slug: string; // From tenant resolver
+  correlation_id: string; // From correlation ID middleware
+  user_id?: string; // From auth middleware
 }
 
 async function licenseLicenseMiddleware(context: LicenseMiddlewareContext) {
   // 1. Query master_db for license by workspace_slug
   const license = await masterDB.query(
-    'SELECT * FROM licenses WHERE workspace_slug = ? AND deleted_at IS NULL',
-    [context.workspace_slug]
-  )
+    "SELECT * FROM licenses WHERE workspace_slug = ? AND deleted_at IS NULL",
+    [context.workspace_slug],
+  );
 
   if (!license) {
-    LOGGER.warn('license_not_found', {
+    LOGGER.warn("license_not_found", {
       workspace_slug: context.workspace_slug,
       correlation_id: context.correlation_id,
-    })
-    throw new APIError(404, 'LICENSE_NOT_FOUND', 'Workspace not found')
+    });
+    throw new APIError(404, "LICENSE_NOT_FOUND", "Workspace not found");
   }
 
   // 2. Check status
-  const ALLOWED_STATUSES = ['ACTIVE']
+  const ALLOWED_STATUSES = ["ACTIVE"];
   if (!ALLOWED_STATUSES.includes(license.status)) {
-    LOGGER.warn('license_access_denied', {
+    LOGGER.warn("license_access_denied", {
       workspace_slug: context.workspace_slug,
       license_status: license.status,
       user_id: context.user_id,
       correlation_id: context.correlation_id,
-    })
+    });
 
     // Map status to HTTP code
     const statusCodeMap = {
@@ -1101,48 +1110,40 @@ async function licenseLicenseMiddleware(context: LicenseMiddlewareContext) {
       ARCHIVED: 403, // Forbidden (workspace archived)
       PROVISION_FAILED: 503, // Service Unavailable (provisioning error)
       DELETED: 404, // Not Found (no longer exists)
-    }
+    };
 
-    const code = statusCodeMap[license.status] || 403
-    throw new APIError(
-      code,
-      `LICENSE_${license.status}`,
-      `License is ${license.status}`
-    )
+    const code = statusCodeMap[license.status] || 403;
+    throw new APIError(code, `LICENSE_${license.status}`, `License is ${license.status}`);
   }
 
   // 3. Check soft-lock expiration (lazy evaluation)
-  if (license.status === 'SOFT_LOCKED' && license.soft_lock_until) {
+  if (license.status === "SOFT_LOCKED" && license.soft_lock_until) {
     if (NOW() > license.soft_lock_until) {
       // Auto-transition to ARCHIVED (first-come-first-serve atomicity)
       const updated = await ATOMICALLY_UPDATE(
         "UPDATE licenses SET status = 'ARCHIVED', archived_at = NOW() WHERE id = ? AND status = 'SOFT_LOCKED'",
-        license.id
-      )
+        license.id,
+      );
 
       if (updated.rows > 0) {
-        LOGGER.info('license_soft_lock_expired', {
+        LOGGER.info("license_soft_lock_expired", {
           license_id: license.id,
           workspace_slug: context.workspace_slug,
           correlation_id: context.correlation_id,
-        })
-        throw new APIError(
-          403,
-          'LICENSE_ARCHIVED',
-          'License grace period expired'
-        )
+        });
+        throw new APIError(403, "LICENSE_ARCHIVED", "License grace period expired");
       }
     }
   }
 
   // 4. Attach license to context for downstream handlers
-  context.license = license
+  context.license = license;
 
-  LOGGER.info('license_middleware_pass', {
+  LOGGER.info("license_middleware_pass", {
     license_id: license.id,
     workspace_slug: context.workspace_slug,
     correlation_id: context.correlation_id,
-  })
+  });
 }
 ```
 
@@ -1156,7 +1157,7 @@ async function licenseLicenseMiddleware(context: LicenseMiddlewareContext) {
 
 ```typescript
 // Apply to all tenant-bound routes
-app.use('/v1/tenant/*', licenseLicenseMiddleware)
+app.use("/v1/tenant/*", licenseLicenseMiddleware);
 ```
 
 ---
@@ -1173,15 +1174,15 @@ app.use('/v1/tenant/*', licenseLicenseMiddleware)
 
 ```typescript
 interface ProvisioningJobPayload {
-  license_id: UUID
-  workspace_slug: string
-  product_id: UUID
-  product_version: number // Snapshotted version
-  schema_version: number // Snapshotted platform schema version
-  student_limit: number | null
-  staff_limit: number | null
-  default_language: string
-  uses_divisions: boolean
+  license_id: UUID;
+  workspace_slug: string;
+  product_id: UUID;
+  product_version: number; // Snapshotted version
+  schema_version: number; // Snapshotted platform schema version
+  student_limit: number | null;
+  staff_limit: number | null;
+  default_language: string;
+  uses_divisions: boolean;
 }
 ```
 
@@ -1204,7 +1205,7 @@ Max Attempts: 6 (initial + 5 retries)
 **Jitter:** Add 0-20% random jitter to avoid thundering herd
 
 ```typescript
-const delay = baseDelay * (1 + Math.random() * 0.2)
+const delay = baseDelay * (1 + Math.random() * 0.2);
 ```
 
 **Timeout:** 30 minutes per job (fail if exceeds 1800s)
@@ -1376,7 +1377,8 @@ async function updateLicenseStatus(
 - First call: Creates database, sets status ACTIVE
 - Second call: Detects existing database, verifies license already ACTIVE, returns success (no-op)
 
-**Race Condition Protection:** Atomic status check in license table ensures only one provisioning path succeeds
+**Race Condition Protection:** Atomic status check in license table ensures only one provisioning
+path succeeds
 
 ---
 
@@ -1392,15 +1394,15 @@ async function updateLicenseStatus(
 **Snapshot Logic (API Create Handler):**
 
 ```typescript
-const platform_schema_version = await getPlatformSchemaVersion() // From config or version table
-const product = await productService.getById(request.product_id) // product.product_version
-const product_version = product.product_version
+const platform_schema_version = await getPlatformSchemaVersion(); // From config or version table
+const product = await productService.getById(request.product_id); // product.product_version
+const product_version = product.product_version;
 
 const license = await licenseService.create({
   ...request,
   schema_version: platform_schema_version,
   product_version: product_version,
-})
+});
 ```
 
 **Immutability:** Once created, these fields are NOT NULL and never updated
@@ -1411,28 +1413,28 @@ const license = await licenseService.create({
 
 ```typescript
 async function versionCompatibilityMiddleware(context) {
-  const license = context.license // From license middleware
-  const tenantDB = context.tenantDB // Tenant connection
+  const license = context.license; // From license middleware
+  const tenantDB = context.tenantDB; // Tenant connection
 
   // 1. Get current schema version from tenant
   const tenantSchemaVersion = await tenantDB.query(
-    'SELECT version FROM schema_version ORDER BY version DESC LIMIT 1'
-  )
+    "SELECT version FROM schema_version ORDER BY version DESC LIMIT 1",
+  );
 
   // 2. Check compatibility
   if (license.schema_version !== tenantSchemaVersion[0]?.version) {
-    LOGGER.warn('version_mismatch_detected', {
+    LOGGER.warn("version_mismatch_detected", {
       license_schema_version: license.schema_version,
       tenant_schema_version: tenantSchemaVersion[0]?.version,
       workspace_slug: context.workspace_slug,
       correlation_id: context.correlation_id,
-    })
+    });
 
     throw new APIError(
       426, // Upgrade Required
-      'SCHEMA_VERSION_MISMATCH',
-      'Tenant database requires upgrade. Please contact support.'
-    )
+      "SCHEMA_VERSION_MISMATCH",
+      "Tenant database requires upgrade. Please contact support.",
+    );
   }
 
   // 3. Check product version compatibility if applicable
@@ -1452,19 +1454,20 @@ When product updates:
 
 ### DBInitializer Matching
 
-**Requirement:** Tenant database schema_version must exactly match license.product_version and license.schema_version
+**Requirement:** Tenant database schema_version must exactly match license.product_version and
+license.schema_version
 
 **Validation (provisioning handler):**
 
 ```typescript
 // After migrations complete
-const expectedSchemaVersion = payload.schema_version
-const actualSchemaVersion = await getTenantSchemaVersion(tenantDB)
+const expectedSchemaVersion = payload.schema_version;
+const actualSchemaVersion = await getTenantSchemaVersion(tenantDB);
 
 if (expectedSchemaVersion !== actualSchemaVersion) {
   throw new ProvisioningError(
-    `Schema version mismatch: expected ${expectedSchemaVersion}, got ${actualSchemaVersion}`
-  )
+    `Schema version mismatch: expected ${expectedSchemaVersion}, got ${actualSchemaVersion}`,
+  );
 }
 ```
 
@@ -1478,16 +1481,16 @@ All API errors must conform to RFC 7807 Problem Details:
 
 ```typescript
 interface ErrorResponse {
-  success: false
-  data: null
+  success: false;
+  data: null;
   error: {
-    type: string // Error category (e.g., 'VALIDATION_ERROR')
-    title: string // Short human-readable title
-    status: number // HTTP status code
-    detail: string // Detailed message (may contain sanitized details)
-    instance?: string // Optional: correlation_id or request ID
-    code?: string // Optional: machine-readable error code
-  }
+    type: string; // Error category (e.g., 'VALIDATION_ERROR')
+    title: string; // Short human-readable title
+    status: number; // HTTP status code
+    detail: string; // Detailed message (may contain sanitized details)
+    instance?: string; // Optional: correlation_id or request ID
+    code?: string; // Optional: machine-readable error code
+  };
 }
 ```
 
@@ -1541,19 +1544,15 @@ interface ErrorResponse {
 
 ```typescript
 // Internal log (full context)
-LOGGER.error('provisioning_failed', {
+LOGGER.error("provisioning_failed", {
   error: error.message,
   stack: error.stack,
   query: failedQuery, // Actual SQL might be logged in non-prod
   database: connection_details,
-})
+});
 
 // Public response (sanitized)
-throw new APIError(
-  500,
-  'INTERNAL_ERROR',
-  'An unexpected error occurred. Please contact support.'
-)
+throw new APIError(500, "INTERNAL_ERROR", "An unexpected error occurred. Please contact support.");
 ```
 
 ---
@@ -1670,7 +1669,8 @@ All logs must be structured JSON (Pino target):
 
 ### No Console.log
 
-All logging must use structured logger abstraction (Pino or wrapper). Direct console.log() forbidden.
+All logging must use structured logger abstraction (Pino or wrapper). Direct console.log()
+forbidden.
 
 ---
 
@@ -1890,7 +1890,8 @@ All logging must use structured logger abstraction (Pino or wrapper). Direct con
 **Content:**
 
 - Title: "Soft Lock License"
-- Description: "Soft locking will block access to this workspace for 90 days while preserving data. Users will see an access denied message."
+- Description: "Soft locking will block access to this workspace for 90 days while preserving data.
+  Users will see an access denied message."
 - Grace Period Input: Number input (default 90, min 1, max 365 days)
 - Reason Input: Textarea (optional, for audit log)
 - Confirm button (red, destructive)
@@ -1908,12 +1909,14 @@ All logging must use structured logger abstraction (Pino or wrapper). Direct con
 **Content:**
 
 - Title: "Archive License"
-- Description: "Archiving will create a snapshot of the workspace and make it read-only. This can be restored later."
+- Description: "Archiving will create a snapshot of the workspace and make it read-only. This can be
+  restored later."
 - Reason Input: Textarea (optional)
 - Confirm button (red, destructive)
 - Cancel button
 
-**Warning:** "This action will trigger a snapshot job. The workspace will be unavailable briefly during snapshot."
+**Warning:** "This action will trigger a snapshot job. The workspace will be unavailable briefly
+during snapshot."
 
 ### 7. Status Colors & Icons
 
@@ -1942,29 +1945,23 @@ All logging must use structured logger abstraction (Pino or wrapper). Direct con
 ```typescript
 // File: apps/api/src/routes/licenses.ts
 
-import { Hono } from 'hono'
-import { licenseController } from '../controllers/licenses.controller'
-import { licenseMiddleware } from '../middleware/license.middleware'
+import { Hono } from "hono";
+import { licenseController } from "../controllers/licenses.controller";
+import { licenseMiddleware } from "../middleware/license.middleware";
 
-export const licensesRouter = new Hono()
+export const licensesRouter = new Hono();
 
 // MMC API Routes (no tenant middleware, uses MMC auth)
-licensesRouter.post('/v1/mmc/licenses', licenseController.create)
-licensesRouter.get('/v1/mmc/licenses', licenseController.list)
-licensesRouter.get('/v1/mmc/licenses/:id', licenseController.getDetail)
-licensesRouter.patch('/v1/mmc/licenses/:id', licenseController.edit)
-licensesRouter.post(
-  '/v1/mmc/licenses/:id/soft-lock',
-  licenseController.softLock
-)
-licensesRouter.post('/v1/mmc/licenses/:id/unlock', licenseController.unlock)
-licensesRouter.post('/v1/mmc/licenses/:id/archive', licenseController.archive)
-licensesRouter.post('/v1/mmc/licenses/:id/restore', licenseController.restore)
-licensesRouter.delete('/v1/mmc/licenses/:id', licenseController.delete)
-licensesRouter.post(
-  '/v1/mmc/licenses/:id/retry-provisioning',
-  licenseController.retryProvisioning
-)
+licensesRouter.post("/v1/mmc/licenses", licenseController.create);
+licensesRouter.get("/v1/mmc/licenses", licenseController.list);
+licensesRouter.get("/v1/mmc/licenses/:id", licenseController.getDetail);
+licensesRouter.patch("/v1/mmc/licenses/:id", licenseController.edit);
+licensesRouter.post("/v1/mmc/licenses/:id/soft-lock", licenseController.softLock);
+licensesRouter.post("/v1/mmc/licenses/:id/unlock", licenseController.unlock);
+licensesRouter.post("/v1/mmc/licenses/:id/archive", licenseController.archive);
+licensesRouter.post("/v1/mmc/licenses/:id/restore", licenseController.restore);
+licensesRouter.delete("/v1/mmc/licenses/:id", licenseController.delete);
+licensesRouter.post("/v1/mmc/licenses/:id/retry-provisioning", licenseController.retryProvisioning);
 ```
 
 ### Layer 2: Controllers (apps/api/src/controllers/licenses.controller.ts)
@@ -1982,14 +1979,14 @@ licensesRouter.post(
 export const licenseController = {
   async create(context: Context) {
     try {
-      const req = await context.req.json()
-      const result = await licenseService.create(req)
-      return context.json({ success: true, data: result, error: null }, 201)
+      const req = await context.req.json();
+      const result = await licenseService.create(req);
+      return context.json({ success: true, data: result, error: null }, 201);
     } catch (error) {
-      return handleError(context, error)
+      return handleError(context, error);
     }
   },
-}
+};
 ```
 
 ### Layer 3: Domain Services (packages/domain-core/src/licenses/license.service.ts)
@@ -2007,31 +2004,31 @@ export const licenseController = {
 export class LicenseService {
   async create(request: CreateLicenseRequest): Promise<License> {
     // Validation
-    validateSlug(request.workspace_slug)
-    const product = await this.productRepository.getById(request.product_id)
-    if (!product || product.status !== 'ACTIVE') {
-      throw new ValidationError('Product not active')
+    validateSlug(request.workspace_slug);
+    const product = await this.productRepository.getById(request.product_id);
+    if (!product || product.status !== "ACTIVE") {
+      throw new ValidationError("Product not active");
     }
 
     // Fetch platform versions
-    const schemaVersion = await this.getPlatformSchemaVersion()
-    const productVersion = product.product_version
+    const schemaVersion = await this.getPlatformSchemaVersion();
+    const productVersion = product.product_version;
 
     // Create license
     const license = await this.licenseRepository.create({
       ...request,
       schema_version: schemaVersion,
       product_version: productVersion,
-      status: 'PENDING_PROVISION',
-    })
+      status: "PENDING_PROVISION",
+    });
 
     // Enqueue provisioning job
-    await this.queue.enqueueProvisioningJob(license.id)
+    await this.queue.enqueueProvisioningJob(license.id);
 
     // Emit event
-    this.eventEmitter.emit('license:created', license)
+    this.eventEmitter.emit("license:created", license);
 
-    return license
+    return license;
   }
 }
 ```
@@ -2295,42 +2292,42 @@ apps/api/tests/integration/licenses/
 **Example:**
 
 ```typescript
-describe('License Lifecycle Integration', () => {
-  it('should complete full license creation → provisioning → ACTIVE flow', async () => {
+describe("License Lifecycle Integration", () => {
+  it("should complete full license creation → provisioning → ACTIVE flow", async () => {
     // 1. Create license via API
-    const createResp = await POST('/v1/mmc/licenses', {
+    const createResp = await POST("/v1/mmc/licenses", {
       product_id: PRODUCT_ID,
-      workspace_slug: 'test-corp',
-      workspace_name: 'Test Corp',
-    })
+      workspace_slug: "test-corp",
+      workspace_name: "Test Corp",
+    });
 
-    expect(createResp.status).toBe(201)
-    const license = createResp.body.data
-    expect(license.status).toBe('PENDING_PROVISION')
+    expect(createResp.status).toBe(201);
+    const license = createResp.body.data;
+    expect(license.status).toBe("PENDING_PROVISION");
 
     // 2. Provisioning job enqueued in Redis
-    const queuedJobs = await getQueuedJobs()
-    expect(queuedJobs).toContainObject({ license_id: license.id })
+    const queuedJobs = await getQueuedJobs();
+    expect(queuedJobs).toContainObject({ license_id: license.id });
 
     // 3. Execute provisioning worker
-    await processProvisioningJobs()
+    await processProvisioningJobs();
 
     // 4. License status transitions to ACTIVE
-    const updated = await GET(`/v1/mmc/licenses/${license.id}`)
-    expect(updated.body.data.status).toBe('ACTIVE')
+    const updated = await GET(`/v1/mmc/licenses/${license.id}`);
+    expect(updated.body.data.status).toBe("ACTIVE");
 
     // 5. Tenant database created and accessible
-    const tenantDB = await getTenantDB('test-corp')
-    expect(tenantDB).toBeDefined()
+    const tenantDB = await getTenantDB("test-corp");
+    expect(tenantDB).toBeDefined();
 
     // 6. tenants_registry updated
     const registry = await masterDB.query(
       `SELECT * FROM tenants_registry WHERE workspace_slug = ?`,
-      ['test-corp']
-    )
-    expect(registry.rows).toHaveLength(1)
-  })
-})
+      ["test-corp"],
+    );
+    expect(registry.rows).toHaveLength(1);
+  });
+});
 ```
 
 ### API Contract Tests
@@ -2338,27 +2335,27 @@ describe('License Lifecycle Integration', () => {
 **Purpose:** Validate API responses conform to expected schema
 
 ```typescript
-describe('License API Contracts', () => {
-  it('GET /v1/mmc/licenses/:id returns correct schema', async () => {
-    const resp = await GET(`/v1/mmc/licenses/${license.id}`)
+describe("License API Contracts", () => {
+  it("GET /v1/mmc/licenses/:id returns correct schema", async () => {
+    const resp = await GET(`/v1/mmc/licenses/${license.id}`);
 
     expect(resp.body).toMatchSchema({
       success: true,
       data: {
-        id: 'uuid',
-        product_id: 'uuid',
-        workspace_slug: 'string',
-        workspace_name: 'string',
-        status: 'enum:ACTIVE|SOFT_LOCKED|ARCHIVED|...',
-        student_limit: 'number|null',
-        staff_limit: 'number|null',
-        created_at: 'iso8601',
-        updated_at: 'iso8601',
+        id: "uuid",
+        product_id: "uuid",
+        workspace_slug: "string",
+        workspace_name: "string",
+        status: "enum:ACTIVE|SOFT_LOCKED|ARCHIVED|...",
+        student_limit: "number|null",
+        staff_limit: "number|null",
+        created_at: "iso8601",
+        updated_at: "iso8601",
       },
       error: null,
-    })
-  })
-})
+    });
+  });
+});
 ```
 
 ### E2E Tests (MMC UI)
@@ -2373,28 +2370,26 @@ tests/e2e/mmc/
 **Example:**
 
 ```typescript
-describe('MMC License Management', () => {
-  it('should create license via UI form', async () => {
+describe("MMC License Management", () => {
+  it("should create license via UI form", async () => {
     // Navigate to create page
-    await page.goto('http://mmc.local/licenses/new')
+    await page.goto("http://mmc.local/licenses/new");
 
     // Fill form
-    await page.fill('input[name="workspace_slug"]', 'test-acme')
-    await page.fill('input[name="workspace_name"]', 'Test ACME')
-    await page.selectOption('select[name="product_id"]', 'prod-123')
+    await page.fill('input[name="workspace_slug"]', "test-acme");
+    await page.fill('input[name="workspace_name"]', "Test ACME");
+    await page.selectOption('select[name="product_id"]', "prod-123");
 
     // Submit
-    await page.click('button:has-text("Create License")')
+    await page.click('button:has-text("Create License")');
 
     // Verify redirect to detail
-    await page.waitForURL('**/licenses/*')
+    await page.waitForURL("**/licenses/*");
 
     // Verify status badge shows PENDING_PROVISION
-    await expect(page.locator('[data-testid="status-badge"]')).toContainText(
-      'PENDING_PROVISION'
-    )
-  })
-})
+    await expect(page.locator('[data-testid="status-badge"]')).toContainText("PENDING_PROVISION");
+  });
+});
 ```
 
 ### Worker Job Tests
@@ -2455,13 +2450,13 @@ describe('Provisioning Job Handler', () => {
 
 ```typescript
 // ❌ Bad: N queries
-const licenses = await licenseRepository.list()
+const licenses = await licenseRepository.list();
 for (const license of licenses) {
-  const product = await productRepository.getById(license.product_id) // N queries
+  const product = await productRepository.getById(license.product_id); // N queries
 }
 
 // ✅ Good: 1 query with JOIN
-const licenses = await licenseRepository.listWithProductDetails()
+const licenses = await licenseRepository.listWithProductDetails();
 // SELECT licenses.*, products.name FROM licenses JOIN products...
 ```
 
@@ -2729,7 +2724,8 @@ Frontoffice (UI, student-visible)
 
 ## Summary
 
-This plan report provides a **complete, implementation-ready technical foundation** for STAGE_10_LICENSES. All 16 sections establish:
+This plan report provides a **complete, implementation-ready technical foundation** for
+STAGE_10_LICENSES. All 16 sections establish:
 
 1. **Architecture** — License as commercial activation layer binding Product → License → Workspace
 2. **Database** — 21-field schema with version integrity, status lifecycle, provisioning tracking
@@ -2741,13 +2737,16 @@ This plan report provides a **complete, implementation-ready technical foundatio
 8. **Error Handling** — RFC 7807 standard with sanitized/full logging distinction
 9. **Logging** — Structured JSON with correlation_id propagation, critical events tracked
 10. **UI** — MMC interface with list, detail, create, edit, and status modals
-11. **Implementation** — 7-layer architecture (routes, controllers, services, repositories, jobs, middleware, UI)
+11. **Implementation** — 7-layer architecture (routes, controllers, services, repositories, jobs,
+    middleware, UI)
 12. **Data Flows** — License creation → provisioning and student login → middleware check
 13. **Testing** — Unit, integration, API contract, E2E, and worker job test strategies
 14. **Performance** — Index strategy, query optimization, caching (5m TTL), concurrency control
 15. **Compliance** — Alignment with ADR-0001, -0005, -0006, -0007, -0008
-16. **Constitutional Mandates** — Validation of 8 core guarantees (isolation, versioning, immutability, multi-tenancy)
+16. **Constitutional Mandates** — Validation of 8 core guarantees (isolation, versioning,
+    immutability, multi-tenancy)
 
 **Status: READY FOR TASKS PHASE**
 
-All architectural decisions are locked. No major design changes without ADR approval. Next phase: Generate TASKS_REPORT.md with implementation task breakdowns, dependencies, and effort estimates.
+All architectural decisions are locked. No major design changes without ADR approval. Next phase:
+Generate TASKS_REPORT.md with implementation task breakdowns, dependencies, and effort estimates.

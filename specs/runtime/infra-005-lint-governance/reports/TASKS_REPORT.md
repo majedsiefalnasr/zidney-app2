@@ -11,9 +11,11 @@
 
 ## Summary
 
-Tasks generated from `plan.md` and `spec.md`. All 21 tasks are atomic, dependency-ordered, and scoped to the minimal 4-file change set identified in the plan.
+Tasks generated from `plan.md` and `spec.md`. All 21 tasks are atomic, dependency-ordered, and
+scoped to the minimal 4-file change set identified in the plan.
 
-No implementation tasks affect tenant isolation, business logic, database migrations, or any runtime application code — this stage is toolchain governance only.
+No implementation tasks affect tenant isolation, business logic, database migrations, or any runtime
+application code — this stage is toolchain governance only.
 
 ---
 
@@ -36,7 +38,8 @@ No implementation tasks affect tenant isolation, business logic, database migrat
 | Set A | T004, T009, T010 | All start after T003; touch independent files |
 | Set B | T014, T015       | Start after T013; independent commands        |
 
-**Sequential constraint:** T005 → T006 → T007 → T008 must run in order (same file: `.github/workflows/ci.yml`).
+**Sequential constraint:** T005 → T006 → T007 → T008 must run in order (same file:
+`.github/workflows/ci.yml`).
 
 ---
 

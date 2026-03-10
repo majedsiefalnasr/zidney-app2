@@ -6,7 +6,9 @@
 
 ## Overview
 
-The affiliate system uses three master_db tables to implement B2B promotional code management with financial tracking and audit logging. All tables enforce referential integrity and business rule constraints at the database level.
+The affiliate system uses three master_db tables to implement B2B promotional code management with
+financial tracking and audit logging. All tables enforce referential integrity and business rule
+constraints at the database level.
 
 ---
 
@@ -14,7 +16,8 @@ The affiliate system uses three master_db tables to implement B2B promotional co
 
 **Purpose**: Store affiliate program definitions and configuration  
 **Immutability**: promo_code immutable after insert; all other fields mutable  
-**Usage Pattern**: Frequently read during license purchase validation; infrequently written (admin operations)
+**Usage Pattern**: Frequently read during license purchase validation; infrequently written (admin
+operations)
 
 ### Schema
 
@@ -459,7 +462,8 @@ UPDATE affiliates SET usage_count = usage_count + 1 WHERE id = $1;
 
 - **Concurrent Transaction 1**: Acquires lock, validates, inserts usage, increments counter, commits
 - **Concurrent Transaction 2**: Waits for Transaction 1's lock release (default timeout ~30 seconds)
-- **Result**: Transaction 2 sees incremented counter from Transaction 1, checks limit again, proceeds or rejects
+- **Result**: Transaction 2 sees incremented counter from Transaction 1, checks limit again,
+  proceeds or rejects
 - **Safety**: No double-counting, deterministic behavior, audit trail captures both transactions
 
 ### Deadlock Prevention

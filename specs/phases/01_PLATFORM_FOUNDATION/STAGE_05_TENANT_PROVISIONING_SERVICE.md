@@ -61,14 +61,11 @@ No synchronous DB creation during API request is allowed.
 
 Before provisioning starts, system must acquire a distributed lock.
 
-Lock key:
-provisioning:<workspace_slug>
+Lock key: provisioning:<workspace_slug>
 
-Lock duration:
-Short-lived (e.g., 60 seconds, auto-renewable)
+Lock duration: Short-lived (e.g., 60 seconds, auto-renewable)
 
-If lock exists:
-→ Abort provisioning attempt.
+If lock exists: → Abort provisioning attempt.
 
 Prevents:
 

@@ -11,9 +11,11 @@
 
 ### Overview
 
-Implement immutable event logging for attempt lifecycle (START, RESUME, PAUSE, ANSWER_SUBMIT, TIME_WARNING, SUBMIT_REQUEST, FINALIZED, GRADED, ARCHIVED).
+Implement immutable event logging for attempt lifecycle (START, RESUME, PAUSE, ANSWER_SUBMIT,
+TIME_WARNING, SUBMIT_REQUEST, FINALIZED, GRADED, ARCHIVED).
 
-**Key Constraint**: `attempt_events` table is append-only. UPDATEs are blocked by trigger. No `updated_at` or `updated_by` columns.
+**Key Constraint**: `attempt_events` table is append-only. UPDATEs are blocked by trigger. No
+`updated_at` or `updated_by` columns.
 
 ### Task Breakdown
 
@@ -65,27 +67,27 @@ EXECUTE FUNCTION raise_immutable_violation();
 **File**: `packages/domain-core/src/audit/attempt-event-logger.ts`
 
 ```typescript
-import { createLogger } from '@logging'
-import { Pool, PoolClient } from 'pg'
+import { createLogger } from "@logging";
+import { Pool, PoolClient } from "pg";
 
-const logger = createLogger('AttemptEventLogger')
+const logger = createLogger("AttemptEventLogger");
 
 export type AttemptEventType =
-  | 'START'
-  | 'RESUME'
-  | 'PAUSE'
-  | 'ANSWER_SUBMIT'
-  | 'TIME_WARNING'
-  | 'SUBMIT_REQUEST'
-  | 'FINALIZED'
-  | 'GRADED'
-  | 'ARCHIVED'
+  | "START"
+  | "RESUME"
+  | "PAUSE"
+  | "ANSWER_SUBMIT"
+  | "TIME_WARNING"
+  | "SUBMIT_REQUEST"
+  | "FINALIZED"
+  | "GRADED"
+  | "ARCHIVED";
 
 export interface LogAttemptEventOptions {
-  attemptId: string
-  eventType: AttemptEventType
-  payload?: Record<string, any>
-  client?: PoolClient // Optional - use existing transaction
+  attemptId: string;
+  eventType: AttemptEventType;
+  payload?: Record<string, any>;
+  client?: PoolClient; // Optional - use existing transaction
 }
 
 /**
@@ -95,36 +97,33 @@ export interface LogAttemptEventOptions {
  * Sets occurred_at = NOW() (server-authoritative)
  * Retries on lock timeout with exponential backoff
  */
-export async function logAttemptEvent(
-  options: LogAttemptEventOptions,
-  pool: Pool
-): Promise<void> {
-  const { attemptId, eventType, payload = {}, client } = options
+export async function logAttemptEvent(options: LogAttemptEventOptions, pool: Pool): Promise<void> {
+  const { attemptId, eventType, payload = {}, client } = options;
 
   // Validate event_type
   const validEvents: AttemptEventType[] = [
-    'START',
-    'RESUME',
-    'PAUSE',
-    'ANSWER_SUBMIT',
-    'TIME_WARNING',
-    'SUBMIT_REQUEST',
-    'FINALIZED',
-    'GRADED',
-    'ARCHIVED',
-  ]
+    "START",
+    "RESUME",
+    "PAUSE",
+    "ANSWER_SUBMIT",
+    "TIME_WARNING",
+    "SUBMIT_REQUEST",
+    "FINALIZED",
+    "GRADED",
+    "ARCHIVED",
+  ];
 
   if (!validEvents.includes(eventType)) {
-    throw new Error(`Invalid event_type: ${eventType}`)
+    throw new Error(`Invalid event_type: ${eventType}`);
   }
 
   // Use provided client or get from pool
-  const conn = client || (await pool.connect())
+  const conn = client || (await pool.connect());
 
   try {
     // Retry logic: exponential backoff on lock timeout
-    let attempt = 0
-    let lastError: Error | null = null
+    let attempt = 0;
+    let lastError: Error | null = null;
 
     while (attempt < 3) {
       try {
@@ -132,39 +131,39 @@ export async function logAttemptEvent(
           `INSERT INTO attempt_events 
            (attempt_id, event_type, event_payload, occurred_at, created_at, created_by)
            VALUES ($1, $2, $3, now(), now(), current_user_id::uuid)`,
-          [attemptId, eventType, JSON.stringify(payload)]
-        )
+          [attemptId, eventType, JSON.stringify(payload)],
+        );
 
-        logger.info('Attempt event logged', {
+        logger.info("Attempt event logged", {
           attempt_id: attemptId,
           event_type: eventType,
           attempt_number: attempt + 1,
-        })
+        });
 
-        return
+        return;
       } catch (error: any) {
         // Lock timeout - retry
-        if (error.code === 'LOCK_TIMEOUT' && attempt < 2) {
-          const backoffMs = Math.pow(2, attempt) * 1000 // 1s, 2s, 4s
-          logger.warn('Lock timeout, retrying', {
+        if (error.code === "LOCK_TIMEOUT" && attempt < 2) {
+          const backoffMs = Math.pow(2, attempt) * 1000; // 1s, 2s, 4s
+          logger.warn("Lock timeout, retrying", {
             attempt: attempt + 1,
             backoff_ms: backoffMs,
-          })
-          await new Promise((r) => setTimeout(r, backoffMs))
-          attempt++
-          lastError = error
-          continue
+          });
+          await new Promise((r) => setTimeout(r, backoffMs));
+          attempt++;
+          lastError = error;
+          continue;
         }
 
-        throw error
+        throw error;
       }
     }
 
-    if (lastError) throw lastError
+    if (lastError) throw lastError;
   } finally {
     // Release connection if we got it from pool
     if (!client) {
-      ;(conn as any).release?.()
+      (conn as any).release?.();
     }
   }
 }
@@ -174,19 +173,17 @@ export async function logAttemptEvent(
  */
 export async function getAttemptEventHistory(
   attemptId: string,
-  pool: Pool
-): Promise<
-  Array<{ event_type: string; occurred_at: Date; event_payload: any }>
-> {
+  pool: Pool,
+): Promise<Array<{ event_type: string; occurred_at: Date; event_payload: any }>> {
   const result = await pool.query(
     `SELECT event_type, occurred_at, event_payload 
      FROM attempt_events 
      WHERE attempt_id = $1 
      ORDER BY occurred_at ASC`,
-    [attemptId]
-  )
+    [attemptId],
+  );
 
-  return result.rows
+  return result.rows;
 }
 ```
 
@@ -199,86 +196,82 @@ export async function getAttemptEventHistory(
 **File**: `apps/api/tests/db/triggers/immutable-trigger.test.ts`
 
 ```typescript
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { Pool } from 'pg'
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { Pool } from "pg";
 
-describe('Immutability Trigger Tests', () => {
-  let pool: Pool
-  let attemptId: string
+describe("Immutability Trigger Tests", () => {
+  let pool: Pool;
+  let attemptId: string;
 
   beforeAll(async () => {
     // Setup test database
-    pool = new Pool({ database: 'zidney_test' })
+    pool = new Pool({ database: "zidney_test" });
 
     // Create test attempt
     const result = await pool.query(
       `INSERT INTO attempts (exam_id, user_id, configuration_snapshot, question_list_snapshot, grading_config_snapshot, status)
        VALUES (gen_random_uuid(), gen_random_uuid(), '{}', '{}', '{}', 'IN_PROGRESS')
-       RETURNING id`
-    )
-    attemptId = result.rows[0].id
-  })
+       RETURNING id`,
+    );
+    attemptId = result.rows[0].id;
+  });
 
   afterAll(async () => {
-    await pool.end()
-  })
+    await pool.end();
+  });
 
-  it('✅ INSERT into attempt_events succeeds', async () => {
+  it("✅ INSERT into attempt_events succeeds", async () => {
     const result = await pool.query(
       `INSERT INTO attempt_events (attempt_id, event_type, event_payload, occurred_at, created_at, created_by)
        VALUES ($1, 'START', '{}', now(), now(), gen_random_uuid())
        RETURNING id`,
-      [attemptId]
-    )
+      [attemptId],
+    );
 
-    expect(result.rows.length).toBe(1)
-    expect(result.rows[0].id).toBeDefined()
-  })
+    expect(result.rows.length).toBe(1);
+    expect(result.rows[0].id).toBeDefined();
+  });
 
-  it('❌ UPDATE on attempt_events raises immutability violation', async () => {
+  it("❌ UPDATE on attempt_events raises immutability violation", async () => {
     // Insert event first
     const insertResult = await pool.query(
       `INSERT INTO attempt_events (attempt_id, event_type, event_payload, occurred_at, created_at, created_by)
        VALUES ($1, 'ANSWER_SUBMIT', '{"answer": 1}', now(), now(), gen_random_uuid())
        RETURNING id`,
-      [attemptId]
-    )
+      [attemptId],
+    );
 
-    const eventId = insertResult.rows[0].id
+    const eventId = insertResult.rows[0].id;
 
     // Try to update → should fail
     try {
-      await pool.query(
-        `UPDATE attempt_events SET event_payload = '{"answer": 2}' WHERE id = $1`,
-        [eventId]
-      )
+      await pool.query(`UPDATE attempt_events SET event_payload = '{"answer": 2}' WHERE id = $1`, [
+        eventId,
+      ]);
 
-      expect(true).toBe(false) // Should not reach here
+      expect(true).toBe(false); // Should not reach here
     } catch (error: any) {
-      expect(error.code).toBe('23514') // CHECK constraint violation
-      expect(error.message).toContain('immutability')
+      expect(error.code).toBe("23514"); // CHECK constraint violation
+      expect(error.message).toContain("immutability");
     }
-  })
+  });
 
-  it('✅ DELETE on attempt_events is allowed (soft delete)', async () => {
+  it("✅ DELETE on attempt_events is allowed (soft delete)", async () => {
     const result = await pool.query(
       `INSERT INTO attempt_events (attempt_id, event_type, event_payload, occurred_at, created_at, created_by)
        VALUES ($1, 'PAUSE', '{}', now(), now(), gen_random_uuid())
        RETURNING id`,
-      [attemptId]
-    )
+      [attemptId],
+    );
 
-    const eventId = result.rows[0].id
+    const eventId = result.rows[0].id;
 
     // Should allow delete
-    const deleteResult = await pool.query(
-      `DELETE FROM attempt_events WHERE id = $1`,
-      [eventId]
-    )
+    const deleteResult = await pool.query(`DELETE FROM attempt_events WHERE id = $1`, [eventId]);
 
-    expect(deleteResult.rowCount).toBe(1)
-  })
-})
+    expect(deleteResult.rowCount).toBe(1);
+  });
+});
 ```
 
 **Dependencies**: T029 (immutability trigger) ✅
@@ -290,124 +283,124 @@ describe('Immutability Trigger Tests', () => {
 **File**: `apps/api/tests/integration/audit-trail.integration.test.ts`
 
 ```typescript
-import { describe, it, expect, beforeAll } from 'vitest'
-import { Pool } from 'pg'
+import { describe, it, expect, beforeAll } from "vitest";
+import { Pool } from "pg";
 import {
   logAttemptEvent,
   getAttemptEventHistory,
-} from '@zidney/domain-core/src/audit/attempt-event-logger'
+} from "@zidney/domain-core/src/audit/attempt-event-logger";
 
-describe('Audit Trail Integration Tests', () => {
-  let pool: Pool
-  let examId: string
-  let userId: string
-  let attemptId: string
+describe("Audit Trail Integration Tests", () => {
+  let pool: Pool;
+  let examId: string;
+  let userId: string;
+  let attemptId: string;
 
   beforeAll(async () => {
-    pool = new Pool({ database: 'zidney_test' })
+    pool = new Pool({ database: "zidney_test" });
 
     // Create exam
     const examResult = await pool.query(
       `INSERT INTO mcq_exams (name, duration_minutes, question_count, passing_score)
        VALUES ('Audit Trail Test Exam', 60, 10, 70)
-       RETURNING id`
-    )
-    examId = examResult.rows[0].id
+       RETURNING id`,
+    );
+    examId = examResult.rows[0].id;
 
     // Create user
     const userResult = await pool.query(
       `INSERT INTO users (email, first_name, last_name, password_hash, is_active)
        VALUES ('test@example.com', 'Test', 'User', 'hash', true)
-       RETURNING id`
-    )
-    userId = userResult.rows[0].id
+       RETURNING id`,
+    );
+    userId = userResult.rows[0].id;
 
     // Create attempt
     const attemptResult = await pool.query(
       `INSERT INTO attempts (exam_id, user_id, configuration_snapshot, question_list_snapshot, grading_config_snapshot, status, started_at)
        VALUES ($1, $2, '{}', '{}', '{}', 'IN_PROGRESS', now())
        RETURNING id`,
-      [examId, userId]
-    )
-    attemptId = attemptResult.rows[0].id
-  })
+      [examId, userId],
+    );
+    attemptId = attemptResult.rows[0].id;
+  });
 
-  it('✅ Attempt START event is created', async () => {
+  it("✅ Attempt START event is created", async () => {
     await logAttemptEvent(
       {
         attemptId,
-        eventType: 'START',
-        payload: { started_by: 'system' },
+        eventType: "START",
+        payload: { started_by: "system" },
       },
-      pool
-    )
+      pool,
+    );
 
-    const history = await getAttemptEventHistory(attemptId, pool)
-    const startEvent = history.find((e) => e.event_type === 'START')
+    const history = await getAttemptEventHistory(attemptId, pool);
+    const startEvent = history.find((e) => e.event_type === "START");
 
-    expect(startEvent).toBeDefined()
-    expect(startEvent?.event_payload).toEqual({ started_by: 'system' })
-  })
+    expect(startEvent).toBeDefined();
+    expect(startEvent?.event_payload).toEqual({ started_by: "system" });
+  });
 
-  it('✅ Attempt ANSWER_SUBMIT events are created in order', async () => {
+  it("✅ Attempt ANSWER_SUBMIT events are created in order", async () => {
     await logAttemptEvent(
       {
         attemptId,
-        eventType: 'ANSWER_SUBMIT',
-        payload: { question_id: 'q1', answer: 1 },
+        eventType: "ANSWER_SUBMIT",
+        payload: { question_id: "q1", answer: 1 },
       },
-      pool
-    )
+      pool,
+    );
 
     await logAttemptEvent(
       {
         attemptId,
-        eventType: 'ANSWER_SUBMIT',
-        payload: { question_id: 'q2', answer: 2 },
+        eventType: "ANSWER_SUBMIT",
+        payload: { question_id: "q2", answer: 2 },
       },
-      pool
-    )
+      pool,
+    );
 
-    const history = await getAttemptEventHistory(attemptId, pool)
-    const submitEvents = history.filter((e) => e.event_type === 'ANSWER_SUBMIT')
+    const history = await getAttemptEventHistory(attemptId, pool);
+    const submitEvents = history.filter((e) => e.event_type === "ANSWER_SUBMIT");
 
-    expect(submitEvents.length).toBe(2)
-    expect(submitEvents[0].event_payload.question_id).toBe('q1')
-    expect(submitEvents[1].event_payload.question_id).toBe('q2')
-  })
+    expect(submitEvents.length).toBe(2);
+    expect(submitEvents[0].event_payload.question_id).toBe("q1");
+    expect(submitEvents[1].event_payload.question_id).toBe("q2");
+  });
 
-  it('✅ Complete attempt event lifecycle is immutable and ordered', async () => {
-    await logAttemptEvent({ attemptId, eventType: 'SUBMIT_REQUEST' }, pool)
-    await logAttemptEvent({ attemptId, eventType: 'FINALIZED' }, pool)
-    await logAttemptEvent({ attemptId, eventType: 'GRADED' }, pool)
+  it("✅ Complete attempt event lifecycle is immutable and ordered", async () => {
+    await logAttemptEvent({ attemptId, eventType: "SUBMIT_REQUEST" }, pool);
+    await logAttemptEvent({ attemptId, eventType: "FINALIZED" }, pool);
+    await logAttemptEvent({ attemptId, eventType: "GRADED" }, pool);
 
-    const history = await getAttemptEventHistory(attemptId, pool)
+    const history = await getAttemptEventHistory(attemptId, pool);
 
     // Verify event order
-    const eventTypes = history.map((e) => e.event_type)
-    expect(eventTypes).toContain('START')
-    expect(eventTypes).toContain('ANSWER_SUBMIT')
-    expect(eventTypes).toContain('SUBMIT_REQUEST')
-    expect(eventTypes).toContain('FINALIZED')
-    expect(eventTypes).toContain('GRADED')
-  })
+    const eventTypes = history.map((e) => e.event_type);
+    expect(eventTypes).toContain("START");
+    expect(eventTypes).toContain("ANSWER_SUBMIT");
+    expect(eventTypes).toContain("SUBMIT_REQUEST");
+    expect(eventTypes).toContain("FINALIZED");
+    expect(eventTypes).toContain("GRADED");
+  });
 
-  it('❌ Audit trail events cannot be modified', async () => {
-    const history = await getAttemptEventHistory(attemptId, pool)
-    const firstEvent = history[0]
+  it("❌ Audit trail events cannot be modified", async () => {
+    const history = await getAttemptEventHistory(attemptId, pool);
+    const firstEvent = history[0];
 
     // Try to update event
     try {
       await pool.query(
         `UPDATE attempt_events SET event_payload = '{"modified": true}' WHERE id = $1`,
-        [firstEvent.id]
-      )
-      expect(true).toBe(false) // Should not reach
+        [firstEvent.id],
+      );
+      expect(true).toBe(false); // Should not reach
     } catch (error: any) {
-      expect(error.code).toBe('23514')
+      expect(error.code).toBe("23514");
     }
-  })
-})
+  });
+});
 ```
 
 **Dependencies**: T030 (event logger), T029 (trigger) ✅
@@ -418,9 +411,11 @@ describe('Audit Trail Integration Tests', () => {
 
 ### Overview
 
-Implement snapshot capture at attempt start to freeze exam configuration, question list, and grading rules. Prevents live exam modifications from affecting in-progress attempts.
+Implement snapshot capture at attempt start to freeze exam configuration, question list, and grading
+rules. Prevents live exam modifications from affecting in-progress attempts.
 
-**Key Constraint**: Snapshots are stored as JSONB in `attempts` table. They are immutable (never updated).
+**Key Constraint**: Snapshots are stored as JSONB in `attempts` table. They are immutable (never
+updated).
 
 ### Task Breakdown
 
@@ -504,38 +499,38 @@ CREATE INDEX idx_attempt_answers_question_id ON attempt_answers(question_id);
 **File**: `packages/domain-core/src/attempts/snapshot-service.ts`
 
 ```typescript
-import { createLogger } from '@logging'
-import { Pool } from 'pg'
+import { createLogger } from "@logging";
+import { Pool } from "pg";
 
-const logger = createLogger('SnapshotService')
+const logger = createLogger("SnapshotService");
 
 export interface ExamSnapshot {
-  exam_id: string
-  exam_name: string
-  duration_minutes: number
-  question_count: number
-  passing_score: number
-  exam_type: 'mcq' | 'traditional'
-  captured_at: string
+  exam_id: string;
+  exam_name: string;
+  duration_minutes: number;
+  question_count: number;
+  passing_score: number;
+  exam_type: "mcq" | "traditional";
+  captured_at: string;
 }
 
 export interface QuestionSnapshot {
-  question_id: string
-  question_text: string
-  question_type: 'mcq' | 'traditional'
-  options?: Record<string, any> // For MCQ
-  solution?: string // For traditional
-  difficulty: string
-  tags: string[]
-  order: number // Position in exam
+  question_id: string;
+  question_text: string;
+  question_type: "mcq" | "traditional";
+  options?: Record<string, any>; // For MCQ
+  solution?: string; // For traditional
+  difficulty: string;
+  tags: string[];
+  order: number; // Position in exam
 }
 
 export interface GradingSnapshot {
-  passing_score: number
-  total_questions: number
-  grading_mode: 'auto' | 'manual'
-  partial_credit_enabled: boolean
-  captured_at: string
+  passing_score: number;
+  total_questions: number;
+  grading_mode: "auto" | "manual";
+  partial_credit_enabled: boolean;
+  captured_at: string;
 }
 
 /**
@@ -548,24 +543,24 @@ export interface GradingSnapshot {
  */
 export async function captureExamSnapshot(
   examId: string,
-  pool: Pool
+  pool: Pool,
 ): Promise<{
-  config: ExamSnapshot
-  questions: QuestionSnapshot[]
-  grading: GradingSnapshot
+  config: ExamSnapshot;
+  questions: QuestionSnapshot[];
+  grading: GradingSnapshot;
 }> {
   // Get exam configuration
   const examResult = await pool.query(
     `SELECT id, name, duration_minutes, question_count, passing_score 
      FROM mcq_exams WHERE id = $1`,
-    [examId]
-  )
+    [examId],
+  );
 
   if (examResult.rows.length === 0) {
-    throw new Error(`Exam not found: ${examId}`)
+    throw new Error(`Exam not found: ${examId}`);
   }
 
-  const exam = examResult.rows[0]
+  const exam = examResult.rows[0];
 
   // Get current question list with order
   const questionsResult = await pool.query(
@@ -574,33 +569,33 @@ export async function captureExamSnapshot(
      FROM mcq_questions 
      WHERE basket_id IN (SELECT basket_id FROM mcq_exams WHERE id = $1)
      ORDER BY created_at ASC`,
-    [examId]
-  )
+    [examId],
+  );
 
   const questions: QuestionSnapshot[] = questionsResult.rows.map((q) => ({
     question_id: q.id,
     question_text: q.question_text,
-    question_type: 'mcq',
+    question_type: "mcq",
     options: q.options_json,
     difficulty: q.difficulty,
     tags: q.tags_json || [],
     order: q.order_num,
-  }))
+  }));
 
   // Get grading configuration
   const gradingConfig: GradingSnapshot = {
     passing_score: exam.passing_score,
     total_questions: exam.question_count,
-    grading_mode: 'auto',
+    grading_mode: "auto",
     partial_credit_enabled: false,
     captured_at: new Date().toISOString(),
-  }
+  };
 
-  logger.info('Exam snapshot captured', {
+  logger.info("Exam snapshot captured", {
     exam_id: examId,
     question_count: questions.length,
     captured_at: gradingConfig.captured_at,
-  })
+  });
 
   return {
     config: {
@@ -609,12 +604,12 @@ export async function captureExamSnapshot(
       duration_minutes: exam.duration_minutes,
       question_count: exam.question_count,
       passing_score: exam.passing_score,
-      exam_type: 'mcq',
+      exam_type: "mcq",
       captured_at: new Date().toISOString(),
     },
     questions,
     grading: gradingConfig,
-  }
+  };
 }
 
 /**
@@ -622,29 +617,29 @@ export async function captureExamSnapshot(
  */
 export async function getAttemptSnapshot(
   attemptId: string,
-  pool: Pool
+  pool: Pool,
 ): Promise<{
-  config: ExamSnapshot
-  questions: QuestionSnapshot[]
-  grading: GradingSnapshot
+  config: ExamSnapshot;
+  questions: QuestionSnapshot[];
+  grading: GradingSnapshot;
 }> {
   const result = await pool.query(
     `SELECT configuration_snapshot, question_list_snapshot, grading_config_snapshot 
      FROM attempts WHERE id = $1`,
-    [attemptId]
-  )
+    [attemptId],
+  );
 
   if (result.rows.length === 0) {
-    throw new Error(`Attempt not found: ${attemptId}`)
+    throw new Error(`Attempt not found: ${attemptId}`);
   }
 
-  const attempt = result.rows[0]
+  const attempt = result.rows[0];
 
   return {
     config: attempt.configuration_snapshot,
     questions: attempt.question_list_snapshot,
     grading: attempt.grading_config_snapshot,
-  }
+  };
 }
 ```
 
@@ -657,29 +652,29 @@ export async function getAttemptSnapshot(
 **File**: `packages/domain-core/src/attempts/attempt-init.ts`
 
 ```typescript
-import { createLogger } from '@logging'
-import { Pool, PoolClient } from 'pg'
-import { captureExamSnapshot } from './snapshot-service'
-import { logAttemptEvent } from '../audit/attempt-event-logger'
+import { createLogger } from "@logging";
+import { Pool, PoolClient } from "pg";
+import { captureExamSnapshot } from "./snapshot-service";
+import { logAttemptEvent } from "../audit/attempt-event-logger";
 
-const logger = createLogger('AttemptInit')
+const logger = createLogger("AttemptInit");
 
 export interface AttemptCreateOptions {
-  examId: string
-  userId: string
-  client?: PoolClient
+  examId: string;
+  userId: string;
+  client?: PoolClient;
 }
 
 export interface Attempt {
-  id: string
-  exam_id: string
-  user_id: string
-  status: string
-  started_at: Date
-  submission_deadline_at: Date
-  configuration_snapshot: any
-  question_list_snapshot: any
-  grading_config_snapshot: any
+  id: string;
+  exam_id: string;
+  user_id: string;
+  status: string;
+  started_at: Date;
+  submission_deadline_at: Date;
+  configuration_snapshot: any;
+  question_list_snapshot: any;
+  grading_config_snapshot: any;
 }
 
 /**
@@ -694,20 +689,20 @@ export interface Attempt {
 export async function initializeAttempt(
   options: AttemptCreateOptions,
   pool: Pool,
-  userId: string
+  userId: string,
 ): Promise<Attempt> {
-  const { examId, client } = options
+  const { examId, client } = options;
 
   try {
     // Capture snapshot at this moment (server-authoritative time)
-    const snapshot = await captureExamSnapshot(examId, pool)
-    const startedAt = new Date()
+    const snapshot = await captureExamSnapshot(examId, pool);
+    const startedAt = new Date();
     const submissionDeadline = new Date(
-      startedAt.getTime() + snapshot.config.duration_minutes * 60 * 1000
-    )
+      startedAt.getTime() + snapshot.config.duration_minutes * 60 * 1000,
+    );
 
     // Use transaction if client provided
-    const conn = client || (await pool.connect())
+    const conn = client || (await pool.connect());
 
     try {
       // INSERT attempt with snapshots
@@ -725,51 +720,51 @@ export async function initializeAttempt(
           JSON.stringify(snapshot.config),
           JSON.stringify(snapshot.questions),
           JSON.stringify(snapshot.grading),
-          'IN_PROGRESS',
+          "IN_PROGRESS",
           startedAt,
           submissionDeadline,
           startedAt,
           userId,
-        ]
-      )
+        ],
+      );
 
-      const attempt = result.rows[0]
+      const attempt = result.rows[0];
 
       // Log START event
       await logAttemptEvent(
         {
           attemptId: attempt.id,
-          eventType: 'START',
+          eventType: "START",
           payload: {
             question_count: snapshot.config.question_count,
             duration_minutes: snapshot.config.duration_minutes,
           },
           client: conn,
         },
-        pool
-      )
+        pool,
+      );
 
-      logger.info('Attempt initialized with snapshots', {
+      logger.info("Attempt initialized with snapshots", {
         attempt_id: attempt.id,
         exam_id: examId,
         user_id: userId,
         question_count: snapshot.config.question_count,
         deadline: submissionDeadline.toISOString(),
-      })
+      });
 
-      return attempt as Attempt
+      return attempt as Attempt;
     } finally {
       if (!options.client) {
-        ;(conn as any).release?.()
+        (conn as any).release?.();
       }
     }
   } catch (error: any) {
-    logger.error('Failed to initialize attempt', {
+    logger.error("Failed to initialize attempt", {
       exam_id: examId,
       user_id: userId,
       error: error.message,
-    })
-    throw error
+    });
+    throw error;
   }
 }
 
@@ -779,28 +774,28 @@ export async function initializeAttempt(
 export async function getOrCreateAttempt(
   options: AttemptCreateOptions,
   pool: Pool,
-  userId: string
+  userId: string,
 ): Promise<Attempt> {
-  const { examId } = options
+  const { examId } = options;
 
   // Check if attempt exists
   const existing = await pool.query(
     `SELECT * FROM attempts 
      WHERE exam_id = $1 AND user_id = $2 AND status = 'IN_PROGRESS'
      LIMIT 1`,
-    [examId, userId]
-  )
+    [examId, userId],
+  );
 
   if (existing.rows.length > 0) {
-    logger.info('Attempt already in progress, returning existing', {
+    logger.info("Attempt already in progress, returning existing", {
       attempt_id: existing.rows[0].id,
       exam_id: examId,
       user_id: userId,
-    })
-    return existing.rows[0] as Attempt
+    });
+    return existing.rows[0] as Attempt;
   }
 
-  return initializeAttempt(options, pool, userId)
+  return initializeAttempt(options, pool, userId);
 }
 ```
 
@@ -813,73 +808,73 @@ export async function getOrCreateAttempt(
 **File**: `apps/api/tests/domain/snapshot-service.test.ts`
 
 ```typescript
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { Pool } from 'pg'
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import { Pool } from "pg";
 import {
   captureExamSnapshot,
   getAttemptSnapshot,
-} from '@zidney/domain-core/src/attempts/snapshot-service'
+} from "@zidney/domain-core/src/attempts/snapshot-service";
 
-describe('Snapshot Service Unit Tests', () => {
-  let pool: Pool
-  let examId: string
+describe("Snapshot Service Unit Tests", () => {
+  let pool: Pool;
+  let examId: string;
 
   beforeAll(async () => {
-    pool = new Pool({ database: 'zidney_test' })
+    pool = new Pool({ database: "zidney_test" });
 
     // Create exam
     const examResult = await pool.query(
       `INSERT INTO mcq_exams (name, duration_minutes, question_count, passing_score)
        VALUES ('Snapshot Test Exam', 60, 10, 70)
-       RETURNING id`
-    )
-    examId = examResult.rows[0].id
-  })
+       RETURNING id`,
+    );
+    examId = examResult.rows[0].id;
+  });
 
   afterAll(async () => {
-    await pool.end()
-  })
+    await pool.end();
+  });
 
-  it('✅ Capture snapshot returns config + questions + grading', async () => {
-    const snapshot = await captureExamSnapshot(examId, pool)
+  it("✅ Capture snapshot returns config + questions + grading", async () => {
+    const snapshot = await captureExamSnapshot(examId, pool);
 
-    expect(snapshot.config).toBeDefined()
-    expect(snapshot.questions).toBeDefined()
-    expect(snapshot.grading).toBeDefined()
+    expect(snapshot.config).toBeDefined();
+    expect(snapshot.questions).toBeDefined();
+    expect(snapshot.grading).toBeDefined();
 
-    expect(snapshot.config.exam_id).toBe(examId)
-    expect(snapshot.config.duration_minutes).toBe(60)
-    expect(snapshot.grading.passing_score).toBe(70)
-  })
+    expect(snapshot.config.exam_id).toBe(examId);
+    expect(snapshot.config.duration_minutes).toBe(60);
+    expect(snapshot.grading.passing_score).toBe(70);
+  });
 
-  it('✅ Snapshot is consistent across multiple calls', async () => {
-    const snap1 = await captureExamSnapshot(examId, pool)
-    const snap2 = await captureExamSnapshot(examId, pool)
+  it("✅ Snapshot is consistent across multiple calls", async () => {
+    const snap1 = await captureExamSnapshot(examId, pool);
+    const snap2 = await captureExamSnapshot(examId, pool);
 
     // Config should be identical
-    expect(snap1.config.exam_name).toBe(snap2.config.exam_name)
-    expect(snap1.config.duration_minutes).toBe(snap2.config.duration_minutes)
+    expect(snap1.config.exam_name).toBe(snap2.config.exam_name);
+    expect(snap1.config.duration_minutes).toBe(snap2.config.duration_minutes);
 
     // Questions should have same order and count
-    expect(snap1.questions.length).toBe(snap2.questions.length)
-  })
+    expect(snap1.questions.length).toBe(snap2.questions.length);
+  });
 
-  it('✅ Snapshot includes all required fields', async () => {
-    const snapshot = await captureExamSnapshot(examId, pool)
+  it("✅ Snapshot includes all required fields", async () => {
+    const snapshot = await captureExamSnapshot(examId, pool);
 
     // Config fields
-    expect(snapshot.config.exam_id).toBeDefined()
-    expect(snapshot.config.exam_name).toBeDefined()
-    expect(snapshot.config.duration_minutes).toBeDefined()
-    expect(snapshot.config.question_count).toBeDefined()
-    expect(snapshot.config.passing_score).toBeDefined()
-    expect(snapshot.config.captured_at).toBeDefined()
+    expect(snapshot.config.exam_id).toBeDefined();
+    expect(snapshot.config.exam_name).toBeDefined();
+    expect(snapshot.config.duration_minutes).toBeDefined();
+    expect(snapshot.config.question_count).toBeDefined();
+    expect(snapshot.config.passing_score).toBeDefined();
+    expect(snapshot.config.captured_at).toBeDefined();
 
     // Grading fields
-    expect(snapshot.grading.passing_score).toBeDefined()
-    expect(snapshot.grading.total_questions).toBeDefined()
-  })
-})
+    expect(snapshot.grading.passing_score).toBeDefined();
+    expect(snapshot.grading.total_questions).toBeDefined();
+  });
+});
 ```
 
 ---
@@ -889,76 +884,73 @@ describe('Snapshot Service Unit Tests', () => {
 **File**: `apps/api/tests/integration/snapshot-immutability.integration.test.ts`
 
 ```typescript
-import { describe, it, expect, beforeAll } from 'vitest'
-import { Pool } from 'pg'
-import { initializeAttempt } from '@zidney/domain-core/src/attempts/attempt-init'
-import { getAttemptSnapshot } from '@zidney/domain-core/src/attempts/snapshot-service'
+import { describe, it, expect, beforeAll } from "vitest";
+import { Pool } from "pg";
+import { initializeAttempt } from "@zidney/domain-core/src/attempts/attempt-init";
+import { getAttemptSnapshot } from "@zidney/domain-core/src/attempts/snapshot-service";
 
-describe('Snapshot Immutability Integration Tests', () => {
-  let pool: Pool
-  let examId: string
-  let userId: string
+describe("Snapshot Immutability Integration Tests", () => {
+  let pool: Pool;
+  let examId: string;
+  let userId: string;
 
   beforeAll(async () => {
-    pool = new Pool({ database: 'zidney_test' })
+    pool = new Pool({ database: "zidney_test" });
 
     // Create exam
     const examResult = await pool.query(
       `INSERT INTO mcq_exams (name, duration_minutes, question_count, passing_score)
        VALUES ('Immutability Test Exam', 60, 3, 70)
-       RETURNING id`
-    )
-    examId = examResult.rows[0].id
+       RETURNING id`,
+    );
+    examId = examResult.rows[0].id;
 
     // Create user
     const userResult = await pool.query(
       `INSERT INTO users (email, first_name, last_name, password_hash, is_active)
        VALUES ('test-snap@example.com', 'Test', 'User', 'hash', true)
-       RETURNING id`
-    )
-    userId = userResult.rows[0].id
-  })
+       RETURNING id`,
+    );
+    userId = userResult.rows[0].id;
+  });
 
-  it('✅ Modifying exam after attempt start does not affect snapshot', async () => {
+  it("✅ Modifying exam after attempt start does not affect snapshot", async () => {
     // Create attempt
-    const attempt = await initializeAttempt({ examId, userId }, pool, userId)
-    const originalSnapshot = await getAttemptSnapshot(attempt.id, pool)
+    const attempt = await initializeAttempt({ examId, userId }, pool, userId);
+    const originalSnapshot = await getAttemptSnapshot(attempt.id, pool);
 
-    expect(originalSnapshot.config.question_count).toBe(3)
+    expect(originalSnapshot.config.question_count).toBe(3);
 
     // Modify exam (add question)
-    await pool.query(`UPDATE mcq_exams SET question_count = 4 WHERE id = $1`, [
-      examId,
-    ])
+    await pool.query(`UPDATE mcq_exams SET question_count = 4 WHERE id = $1`, [examId]);
 
     // Retrieve attempt snapshot again
-    const unchangedSnapshot = await getAttemptSnapshot(attempt.id, pool)
+    const unchangedSnapshot = await getAttemptSnapshot(attempt.id, pool);
 
     // Snapshot should remain unchanged
-    expect(unchangedSnapshot.config.question_count).toBe(3)
-    expect(unchangedSnapshot).toEqual(originalSnapshot)
-  })
+    expect(unchangedSnapshot.config.question_count).toBe(3);
+    expect(unchangedSnapshot).toEqual(originalSnapshot);
+  });
 
-  it('✅ Grading configuration snapshot is immutable', async () => {
-    const attempt = await initializeAttempt({ examId, userId }, pool, userId)
-    const snapshot = await getAttemptSnapshot(attempt.id, pool)
+  it("✅ Grading configuration snapshot is immutable", async () => {
+    const attempt = await initializeAttempt({ examId, userId }, pool, userId);
+    const snapshot = await getAttemptSnapshot(attempt.id, pool);
 
     // Snapshots should not be updated after creation
     try {
-      await pool.query(
-        `UPDATE attempts SET grading_config_snapshot = '{}' WHERE id = $1`,
-        [attempt.id]
-      )
+      await pool.query(`UPDATE attempts SET grading_config_snapshot = '{}' WHERE id = $1`, [
+        attempt.id,
+      ]);
 
       // If we reach here, check that snapshot wasn't actually changed
       // (in production, trigger would prevent this)
-      expect(true).toBe(true)
+      expect(true).toBe(true);
     } catch (error: any) {
       // Expected: trigger prevents update
-      expect(error.code).toBe('23514')
+      expect(error.code).toBe("23514");
     }
-  })
-})
+  });
+});
 ```
 
 ---
@@ -968,28 +960,28 @@ describe('Snapshot Immutability Integration Tests', () => {
 **File**: `apps/api/tests/integration/concurrent-snapshots.integration.test.ts`
 
 ```typescript
-import { describe, it, expect, beforeAll } from 'vitest'
-import { Pool } from 'pg'
-import { initializeAttempt } from '@zidney/domain-core/src/attempts/attempt-init'
+import { describe, it, expect, beforeAll } from "vitest";
+import { Pool } from "pg";
+import { initializeAttempt } from "@zidney/domain-core/src/attempts/attempt-init";
 
-describe('Concurrent Snapshot Tests', () => {
-  let pool: Pool
-  let examId: string
+describe("Concurrent Snapshot Tests", () => {
+  let pool: Pool;
+  let examId: string;
 
   beforeAll(async () => {
-    pool = new Pool({ database: 'zidney_test' })
+    pool = new Pool({ database: "zidney_test" });
 
     // Create exam
     const examResult = await pool.query(
       `INSERT INTO mcq_exams (name, duration_minutes, question_count, passing_score)
        VALUES ('Concurrent Snapshot Test', 60, 10, 70)
-       RETURNING id`
-    )
-    examId = examResult.rows[0].id
-  })
+       RETURNING id`,
+    );
+    examId = examResult.rows[0].id;
+  });
 
-  it('✅ 100 concurrent attempts capture identical snapshots', async () => {
-    const userIds: string[] = []
+  it("✅ 100 concurrent attempts capture identical snapshots", async () => {
+    const userIds: string[] = [];
 
     // Create 100 users
     for (let i = 0; i < 100; i++) {
@@ -997,27 +989,25 @@ describe('Concurrent Snapshot Tests', () => {
         `INSERT INTO users (email, first_name, last_name, password_hash, is_active)
          VALUES ($1, 'User', $2, 'hash', true)
          RETURNING id`,
-        [`user${i}@test.com`, i.toString()]
-      )
-      userIds.push(result.rows[0].id)
+        [`user${i}@test.com`, i.toString()],
+      );
+      userIds.push(result.rows[0].id);
     }
 
     // Create 100 attempts concurrently
     const attempts = await Promise.all(
-      userIds.map((userId) =>
-        initializeAttempt({ examId, userId }, pool, userId)
-      )
-    )
+      userIds.map((userId) => initializeAttempt({ examId, userId }, pool, userId)),
+    );
 
     // Verify all have identical snapshots
-    const snapshots = attempts.map((a) => a.configuration_snapshot)
-    const firstSnapshot = snapshots[0]
+    const snapshots = attempts.map((a) => a.configuration_snapshot);
+    const firstSnapshot = snapshots[0];
 
     for (const snapshot of snapshots) {
-      expect(JSON.stringify(snapshot)).toBe(JSON.stringify(firstSnapshot))
+      expect(JSON.stringify(snapshot)).toBe(JSON.stringify(firstSnapshot));
     }
-  })
-})
+  });
+});
 ```
 
 ---

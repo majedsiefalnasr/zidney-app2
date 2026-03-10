@@ -28,21 +28,27 @@
 - ADR-0006: Runtime-authoritative time (enforced)
 - ADR-0008: Semantic versioning (enforced)
 
-**Stage Scope**: Implement license lifecycle, limit enforcement, middleware validation, archive snapshots
+**Stage Scope**: Implement license lifecycle, limit enforcement, middleware validation, archive
+snapshots
 
-**Plan Scope Boundary**: This plan includes ONLY STAGE_04 (License Engine). STAGE_05 (Tenant Provisioning) and STAGE_06 (Attempt Engine) handled separately.
+**Plan Scope Boundary**: This plan includes ONLY STAGE_04 (License Engine). STAGE_05 (Tenant
+Provisioning) and STAGE_06 (Attempt Engine) handled separately.
 
 ---
 
 ## Architectural Scope Confirmation
 
-✅ **No cross-tenant data access**: License table is master-only; tenant counts only via domain-core resolver  
+✅ **No cross-tenant data access**: License table is master-only; tenant counts only via domain-core
+resolver  
 ✅ **No middleware bypass**: License middleware mandatory on ALL workspace routes  
 ✅ **No direct DB instantiation**: All queries via domain-core license resolver  
-✅ **No grading outside Worker**: Grading not applicable (handled STAGE_06); this stage handles snapshots only  
+✅ **No grading outside Worker**: Grading not applicable (handled STAGE_06); this stage handles
+snapshots only  
 ✅ **No snapshot integrity weakening**: Archive transitions validated; snapshot state immutable  
-✅ **No version enforcement weakening**: Version fields stored in license; validated on every request  
-✅ **No layer boundary violation**: Frontend consumes API; no license logic in UI; worker handles snapshots
+✅ **No version enforcement weakening**: Version fields stored in license; validated on every
+request  
+✅ **No layer boundary violation**: Frontend consumes API; no license logic in UI; worker handles
+snapshots
 
 ---
 
@@ -282,10 +288,10 @@ No structural changes. Foreign key implicitly references `licenses(workspace_id)
 ```typescript
 export async function up(db: Database) {
   // Create licenses table
-  await db.query(`CREATE TABLE licenses (...)`)
+  await db.query(`CREATE TABLE licenses (...)`);
 
   // Create archive_snapshots table
-  await db.query(`CREATE TABLE archive_snapshots (...)`)
+  await db.query(`CREATE TABLE archive_snapshots (...)`);
 
   // Update schema_version in master_db control table
   await db.query(`
@@ -294,19 +300,19 @@ export async function up(db: Database) {
       schema_version = 2,
       updated_at = NOW()
     WHERE schema_name = 'master'
-  `)
+  `);
 }
 
 export async function down(db: Database) {
-  await db.query(`DROP TABLE IF EXISTS archive_snapshots`)
-  await db.query(`DROP TABLE IF EXISTS licenses`)
+  await db.query(`DROP TABLE IF EXISTS archive_snapshots`);
+  await db.query(`DROP TABLE IF EXISTS licenses`);
   await db.query(`
     UPDATE schema_control SET 
       version = '1.0.0', 
       schema_version = 1,
       updated_at = NOW()
     WHERE schema_name = 'master'
-  `)
+  `);
 }
 ```
 
@@ -357,7 +363,8 @@ COMMIT
 - Product not found → 400 (Bad Request)
 - DB error → 500 (Internal Server Error); caller retries
 
-**Idempotency**: Unique constraint on workspace_slug enforces idempotency (second insert fails with 409)
+**Idempotency**: Unique constraint on workspace_slug enforces idempotency (second insert fails
+with 409)
 
 ---
 
@@ -387,9 +394,11 @@ COMMIT
 - Lock timeout → ROLLBACK; return 503 (Service Unavailable)
 - Constraint violation → ROLLBACK; return 409 (Conflict)
 
-**Idempotency**: Caller must handle idempotency (deduplication via email + workspace_id); endpoint not idempotent
+**Idempotency**: Caller must handle idempotency (deduplication via email + workspace_id); endpoint
+not idempotent
 
-**Race Condition Prevention**: SELECT FOR UPDATE ensures only one request counts simultaneously; others wait and recount
+**Race Condition Prevention**: SELECT FOR UPDATE ensures only one request counts simultaneously;
+others wait and recount
 
 ---
 
@@ -469,8 +478,7 @@ COMMIT
 - PATCH /api/mmc/licenses/{id}/renew (SOFT_LOCKED → ACTIVE)
 
 **Idempotency Key Header**: `Idempotency-Key` (caller-provided UUID)  
-**Storage**: Redis cache
-**TTL**: 24 hours
+**Storage**: Redis cache **TTL**: 24 hours
 
 **Implementation Flow**:
 
@@ -487,7 +495,8 @@ COMMIT
 
 **Collision Handling**:
 
-- If two requests with same idempotency key but different payload → first payload wins; second gets cached response
+- If two requests with same idempotency key but different payload → first payload wins; second gets
+  cached response
 - Caller responsible for using consistent payloads with idempotency keys
 
 ### Worker Jobs (Deduplication)
@@ -505,7 +514,8 @@ LIMIT 1;
 
 **Behavior**:
 
-- If recent snapshot exists (timestamp within 1 hour) → skip dump, update license.snapshot_id, return success
+- If recent snapshot exists (timestamp within 1 hour) → skip dump, update license.snapshot_id,
+  return success
 - If no recent snapshot → execute dump, upload, store, update license
 
 ---
@@ -736,12 +746,12 @@ middleware: license_enforcement
 
 ```typescript
 // In license middleware or state transition handler
-await enqueueJob('archive-jobs', {
-  type: 'ARCHIVE_SNAPSHOT',
+await enqueueJob("archive-jobs", {
+  type: "ARCHIVE_SNAPSHOT",
   license_id: license.id,
   workspace_id: license.workspace_id,
   snapshot_timestamp: new Date().toISOString(),
-})
+});
 ```
 
 **Worker Processing**:
@@ -829,7 +839,8 @@ await enqueueJob('archive-jobs', {
 ✅ **RBAC Enforcement**: License state transitions require MMC role (server-side check)  
 ✅ **No Role Checks in Frontend**: UI consumes HTTP status codes; server enforces authorization  
 ✅ **No Secrets Exposed**: License data does not include payment tokens or keys  
-✅ **JWT Scope**: License validation tied to workspace_id from JWT; cross-workspace access impossible  
+✅ **JWT Scope**: License validation tied to workspace_id from JWT; cross-workspace access
+impossible  
 ✅ **Sensitive Data Not Logged**: Passwords, API keys, PII not in structured logs
 
 ---
@@ -939,7 +950,8 @@ await enqueueJob('archive-jobs', {
 
 ❌ **Product Pricing Model**: Handled in STAGE_09_PRODUCTS  
 ❌ **Billing & Invoicing**: Handled in STAGE_44_BILLING  
-❌ **Payment Integration**: Handled by integration layer (MMC receives "payment_success" events only)  
+❌ **Payment Integration**: Handled by integration layer (MMC receives "payment_success" events
+only)  
 ❌ **Grading Logic**: Handled by Worker, STAGE_06  
 ❌ **Attempt Engine**: Handled by STAGE_06  
 ❌ **Automated License Deletion**: Deletion requires manual admin confirmation  

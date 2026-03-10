@@ -1,9 +1,8 @@
 # STAGE_INFRA_05_LINT_GOVERNANCE
 
-**Branch:** `spec/infra-005-lint-governance`
-**Phase:** 01_PLATFORM_FOUNDATION
-**Stage File:** `specs/phases/01_platform_foundation/STAGE_INFRA_05_LINT_GOVERNANCE.md`
-**Initiated:** 2026-03-07T00:00:00.000Z
+**Branch:** `spec/infra-005-lint-governance` **Phase:** 01_PLATFORM_FOUNDATION **Stage File:**
+`specs/phases/01_platform_foundation/STAGE_INFRA_05_LINT_GOVERNANCE.md` **Initiated:**
+2026-03-07T00:00:00.000Z
 
 ## Workflow Progress
 

@@ -17,9 +17,12 @@ POST /api/backoffice/:workspaceSlug/workflow/:entityType/:entityId/transition
 ## Middleware Stack (applied in order before handler)
 
 1. **Tenant Resolver** — resolves `:workspaceSlug` to tenant DB connection; sets `c.get('tenantDb')`
-2. **License Validation** — validates workspace license status; returns `423` (SOFT_LOCKED), `403` (ARCHIVED), `404` (NOT FOUND)
-3. **Authentication** — validates JWT; sets `actorId` and `permissions[]` in request context; returns `401` on failure
-4. **Rate Limiting** — key: `workflow-transition:{actorId}:{entityType}`; limit: 20/minute; returns `429` on breach
+2. **License Validation** — validates workspace license status; returns `423` (SOFT_LOCKED), `403`
+   (ARCHIVED), `404` (NOT FOUND)
+3. **Authentication** — validates JWT; sets `actorId` and `permissions[]` in request context;
+   returns `401` on failure
+4. **Rate Limiting** — key: `workflow-transition:{actorId}:{entityType}`; limit: 20/minute; returns
+   `429` on breach
 
 ---
 
@@ -197,7 +200,9 @@ POST /api/backoffice/:workspaceSlug/workflow/:entityType/:entityId/transition
 
 ## Permission Identifier Convention
 
-The route handler resolves the actor's permissions from the JWT/RBAC context and passes them as `permissions: string[]` in `WorkflowContext`. The engine constructs the required permission identifier as:
+The route handler resolves the actor's permissions from the JWT/RBAC context and passes them as
+`permissions: string[]` in `WorkflowContext`. The engine constructs the required permission
+identifier as:
 
 ```
 {entity_type}.{action_key}
@@ -216,7 +221,9 @@ The route handler resolves the actor's permissions from the JWT/RBAC context and
 ## Idempotency Behaviour
 
 - If the entity is **already** in `target_state`: returns `400 invalid_state_transition` (FR-017).
-- If the exact same request is submitted twice simultaneously: `SELECT FOR UPDATE` serialises the two requests; the second observes the post-commit state and returns `400 invalid_state_transition`.
+- If the exact same request is submitted twice simultaneously: `SELECT FOR UPDATE` serialises the
+  two requests; the second observes the post-commit state and returns
+  `400 invalid_state_transition`.
 - There is **no silent success** on duplicate calls — every call attempts a genuine transition.
 
 ---

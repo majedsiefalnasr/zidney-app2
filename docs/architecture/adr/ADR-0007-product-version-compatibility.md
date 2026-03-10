@@ -108,8 +108,7 @@ Compatibility model:
 
 Runtime must contain a compatibility matrix mapping supported product versions.
 
-If product version is unsupported:
-→ Runtime execution must stop.
+If product version is unsupported: → Runtime execution must stop.
 
 ---
 

@@ -8,7 +8,10 @@
 
 ## Summary
 
-Clarification session identified and resolved 5 edge case design decisions around concurrency, financial precision, audit completeness, and data integrity. All clarifications have been appended to `spec.md` as a `## Clarifications` section. No unresolved [NEEDS CLARIFICATION] markers remain. Specification is locked and ready for planning.
+Clarification session identified and resolved 5 edge case design decisions around concurrency,
+financial precision, audit completeness, and data integrity. All clarifications have been appended
+to `spec.md` as a `## Clarifications` section. No unresolved [NEEDS CLARIFICATION] markers remain.
+Specification is locked and ready for planning.
 
 ---
 
@@ -43,15 +46,22 @@ Clarification session identified and resolved 5 edge case design decisions aroun
 
 Updates to specification:
 
-1. **Q1 Decision + Rationale**: Per-client limit validation enforced per-transaction with row locking. Second transaction rejects with `AFFILIATE_USAGE_LIMIT_PER_CLIENT_EXCEEDED` after first commits.
+1. **Q1 Decision + Rationale**: Per-client limit validation enforced per-transaction with row
+   locking. Second transaction rejects with `AFFILIATE_USAGE_LIMIT_PER_CLIENT_EXCEEDED` after first
+   commits.
 
-2. **Q2 Decision + Rationale**: All financial math uses NUMERIC(12,2) type with ROUND(amount, 2) in SQL. Calculation audit trail includes pre-rounding and post-rounding values.
+2. **Q2 Decision + Rationale**: All financial math uses NUMERIC(12,2) type with ROUND(amount, 2) in
+   SQL. Calculation audit trail includes pre-rounding and post-rounding values.
 
-3. **Q3 Decision + Rationale**: License purchase validates base_amount > 0 before affiliate validation. Invalid amounts rejected with HTTP 400 / `INVALID_LICENSE_AMOUNT`.
+3. **Q3 Decision + Rationale**: License purchase validates base_amount > 0 before affiliate
+   validation. Invalid amounts rejected with HTTP 400 / `INVALID_LICENSE_AMOUNT`.
 
-4. **Q4 Decision + Rationale**: `affiliate_usages.affiliate_id` has `ON DELETE RESTRICT`. Physical deletion forbidden if usages exist. Deactivation via `status = INACTIVE`.
+4. **Q4 Decision + Rationale**: `affiliate_usages.affiliate_id` has `ON DELETE RESTRICT`. Physical
+   deletion forbidden if usages exist. Deactivation via `status = INACTIVE`.
 
-5. **Q5 Decision + Rationale**: New table `affiliate_admin_audit(id, affiliate_id, admin_id, action, old_values, new_values, ip_address, created_at)` tracks all admin mutations transactionally.
+5. **Q5 Decision + Rationale**: New table
+   `affiliate_admin_audit(id, affiliate_id, admin_id, action, old_values, new_values, ip_address, created_at)`
+   tracks all admin mutations transactionally.
 
 ---
 

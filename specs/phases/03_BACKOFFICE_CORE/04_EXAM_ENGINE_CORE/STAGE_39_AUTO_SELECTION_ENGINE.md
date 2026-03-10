@@ -109,9 +109,8 @@ For each criteria block:
 
 1. Build base query:
 
-   WHERE subject_id = :subject
-   AND workflow_status = 'ENABLED'
-   AND division visibility rules satisfied
+   WHERE subject_id = :subject AND workflow_status = 'ENABLED' AND division visibility rules
+   satisfied
 
 2. Apply optional filters.
 
@@ -267,10 +266,8 @@ Stage is complete when:
 
 Auto selection defines exam fairness.
 
-If selection is non-deterministic, duplicated, or inconsistent,
-institutional trust is compromised.
+If selection is non-deterministic, duplicated, or inconsistent, institutional trust is compromised.
 
 This engine must be correct before grading logic proceeds.
 
-Next:
-STAGE_40_GRADING_CORE
+Next: STAGE_40_GRADING_CORE

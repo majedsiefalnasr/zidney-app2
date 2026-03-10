@@ -17,8 +17,7 @@ It connects:
 - Ads
 - Results & Certificates
 
-This phase does **NOT** introduce new domain models.
-It strictly consumes:
+This phase does **NOT** introduce new domain models. It strictly consumes:
 
 - Phase 3 (Backoffice data)
 - Phase 4 (Attempt Engine runtime)

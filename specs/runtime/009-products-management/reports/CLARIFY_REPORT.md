@@ -9,7 +9,8 @@
 
 ## Clarification Summary
 
-All 5 critical ambiguities have been resolved through targeted clarification questions. **All recommendations (Option A) were approved.**
+All 5 critical ambiguities have been resolved through targeted clarification questions. **All
+recommendations (Option A) were approved.**
 
 ---
 
@@ -26,8 +27,8 @@ INACTIVE products require explicit ?status=INACTIVE filter.
 
 **Reasoning (User):**
 
-> License creation and provisioning flows must not accidentally reference inactive products.
-> Default ACTIVE-only prevents operational mistakes and keeps pagination predictable.
+> License creation and provisioning flows must not accidentally reference inactive products. Default
+> ACTIVE-only prevents operational mistakes and keeps pagination predictable.
 
 **Specification Impact:**
 
@@ -74,12 +75,12 @@ New modules require code release + database migration.
 - ✅ Module list is **TypeScript enum** (not database table):
   ```typescript
   enum Module {
-    MCQ = 'MCQ',
-    TRADITIONAL_EXAMS = 'TRADITIONAL_EXAMS',
-    EXERCISES = 'EXERCISES',
-    LIBRARY = 'LIBRARY',
-    LIVES = 'LIVES',
-    FORUM = 'FORUM',
+    MCQ = "MCQ",
+    TRADITIONAL_EXAMS = "TRADITIONAL_EXAMS",
+    EXERCISES = "EXERCISES",
+    LIBRARY = "LIBRARY",
+    LIVES = "LIVES",
+    FORUM = "FORUM",
   }
   ```
 - ✅ Product.enabled_modules is validated against enum at all layers (API, domain, DB)
@@ -120,9 +121,8 @@ Supported languages initially: English (en) + Arabic (ar).
 
 **Reasoning (User):**
 
-> Zidney already supports EN/AR directionality.
-> English as canonical fallback preserves deterministic rendering and prevents null UI states.
-> Keeps schema simple while future-proofing.
+> Zidney already supports EN/AR directionality. English as canonical fallback preserves
+> deterministic rendering and prevents null UI states. Keeps schema simple while future-proofing.
 
 **Specification Impact:**
 
@@ -142,8 +142,8 @@ Supported languages initially: English (en) + Arabic (ar).
 - ✅ Fallback behavior:
   ```typescript
   function getProductName(product: Product, lang: string): string {
-    if (lang === 'ar' && product.name.ar) return product.name.ar
-    return product.name.en // Fallback to English
+    if (lang === "ar" && product.name.ar) return product.name.ar;
+    return product.name.en; // Fallback to English
   }
   ```
 - ✅ Future extensibility:
@@ -186,9 +186,9 @@ Product deletion is permanent and immediate (no grace period).
 
 **Reasoning (User):**
 
-> If licenses exist, product is part of historical financial/contractual record.
-> Soft delete introduces ambiguity in provisioning and compliance.
-> Hard delete + 409 conflict keeps lifecycle explicit and clean.
+> If licenses exist, product is part of historical financial/contractual record. Soft delete
+> introduces ambiguity in provisioning and compliance. Hard delete + 409 conflict keeps lifecycle
+> explicit and clean.
 
 **Specification Impact:**
 
@@ -222,7 +222,8 @@ Product deletion is permanent and immediate (no grace period).
   - Option 1: Delete audit logs too (hard delete cascade) — simplest
   - Option 2: Archive audit logs to archive table before delete — complex
   - **Decision: Hard cascade delete. If product deleted, history deleted too.**
-  - **Justification**: If product truly unused, not deleting history won't hurt (space cost negligible). If licenses exist, delete is prevented anyway.
+  - **Justification**: If product truly unused, not deleting history won't hurt (space cost
+    negligible). If licenses exist, delete is prevented anyway.
 
 ---
 
@@ -239,10 +240,9 @@ Access restricted to MMC admins with AUDIT_READ permission.
 
 **Reasoning (User):**
 
-> MMC is compliance-facing.
-> Product changes impact licenses, pricing, modules, and legal scope.
-> Audit visibility must be queryable for transparency and debugging.
-> Audit logs remain immutable and tenant-scoped.
+> MMC is compliance-facing. Product changes impact licenses, pricing, modules, and legal scope.
+> Audit visibility must be queryable for transparency and debugging. Audit logs remain immutable and
+> tenant-scoped.
 
 **Specification Impact:**
 
@@ -369,7 +369,8 @@ All decisions encoded in stage file.
 
 ### Gate Purpose
 
-Before implementation proceeds, the PLAN_REPORT.md API design was validated against 12 acceptance criteria. This gate ensures all architectural requirements are met before code generation.
+Before implementation proceeds, the PLAN_REPORT.md API design was validated against 12 acceptance
+criteria. This gate ensures all architectural requirements are met before code generation.
 
 ### Validation Results
 
@@ -544,4 +545,5 @@ Correlation ID in responses (already PASS)
 
 ---
 
-**Validator Recommendation:** All 4 issues are fixable and essential. Do not skip to implementation without addressing them.
+**Validator Recommendation:** All 4 issues are fixable and essential. Do not skip to implementation
+without addressing them.

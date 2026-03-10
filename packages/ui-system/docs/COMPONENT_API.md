@@ -6,7 +6,9 @@
 
 ## Overview
 
-The Zidney UI System (@zidney/ui-system) provides a collection of reusable, composable Vue 3 components and utilities for building data-driven applications. All components embrace white-label design, following ADR-0003 principles.
+The Zidney UI System (@zidney/ui-system) provides a collection of reusable, composable Vue 3
+components and utilities for building data-driven applications. All components embrace white-label
+design, following ADR-0003 principles.
 
 ---
 
@@ -18,22 +20,22 @@ Generic, pagination-agnostic data table component (LOCKED DECISION 1).
 
 ```typescript
 export interface DataTableProps<TRow = any> {
-  rows: TRow[]
-  columns: AnyColumnDef<TRow>[]
-  totalCount: number
-  paginationMode: 'server' | 'client' // Mandatory
-  paginationState: PaginationState
-  loading?: boolean
-  selectedRows?: string[]
-  rowActions?: RowAction<TRow>[]
-  sortState?: { column: string; direction: 'asc' | 'desc' }
-  filterState?: Filter[]
-  enableColumnVisibility?: boolean
-  enableRowSelection?: boolean
-  enableColumnSorting?: boolean
-  enableQuickFilter?: boolean
-  allowExport?: boolean
-  rowKey?: string | ((row: TRow) => string | number)
+  rows: TRow[];
+  columns: AnyColumnDef<TRow>[];
+  totalCount: number;
+  paginationMode: "server" | "client"; // Mandatory
+  paginationState: PaginationState;
+  loading?: boolean;
+  selectedRows?: string[];
+  rowActions?: RowAction<TRow>[];
+  sortState?: { column: string; direction: "asc" | "desc" };
+  filterState?: Filter[];
+  enableColumnVisibility?: boolean;
+  enableRowSelection?: boolean;
+  enableColumnSorting?: boolean;
+  enableQuickFilter?: boolean;
+  allowExport?: boolean;
+  rowKey?: string | ((row: TRow) => string | number);
 }
 ```
 
@@ -71,10 +73,10 @@ Multi-filter UI with URL overflow detection (LOCKED DECISION 3).
 
 ```typescript
 interface AdvancedFilterBuilderProps {
-  filters: Filter[]
-  availableFields: FilterField[]
-  filterSerializationMode: 'url' | 'localStorage'
-  maxFilters?: number
+  filters: Filter[];
+  availableFields: FilterField[];
+  filterSerializationMode: "url" | "localStorage";
+  maxFilters?: number;
 }
 ```
 
@@ -91,12 +93,12 @@ Form modal with per-language validation (LOCKED DECISION 5: Min 1 required langu
 
 ```typescript
 interface MultiLanguageInputModalProps {
-  isOpen: boolean
-  title: string
-  languages: Language[]
-  requiredLanguages: string[] // Min 1 enforced
-  initialValues?: Record<string, string>
-  validationRules?: Record<string, ValidationRule[]>
+  isOpen: boolean;
+  title: string;
+  languages: Language[];
+  requiredLanguages: string[]; // Min 1 enforced
+  initialValues?: Record<string, string>;
+  validationRules?: Record<string, ValidationRule[]>;
 }
 ```
 
@@ -145,7 +147,7 @@ const {
   isOverflowed,
   isPersistedExternally,
   toggleStorageFallback,
-} = useFilterBuilder([])
+} = useFilterBuilder([]);
 ```
 
 ### usePagination()
@@ -163,7 +165,7 @@ const {
   nextPage,
   previousPage,
   goToPage,
-} = usePagination()
+} = usePagination();
 ```
 
 ### useColumnVisibility()
@@ -171,8 +173,10 @@ const {
 Column visibility persistence.
 
 ```typescript
-const { visibleColumns, toggleColumn, showAll, hideAll, isColumnVisible } =
-  useColumnVisibility(['id', 'name', 'email'], { persistToLocalStorage: true })
+const { visibleColumns, toggleColumn, showAll, hideAll, isColumnVisible } = useColumnVisibility(
+  ["id", "name", "email"],
+  { persistToLocalStorage: true },
+);
 ```
 
 ### useMultiLanguageForm()
@@ -189,10 +193,10 @@ const {
   getAllValues,
   validateLanguage,
   switchLanguage,
-} = useMultiLanguageForm(['en', 'es'], 'en', {
-  requiredLanguages: ['en'],
-  validationRules: { en: [{ type: 'required', message: 'Required' }] },
-})
+} = useMultiLanguageForm(["en", "es"], "en", {
+  requiredLanguages: ["en"],
+  validationRules: { en: [{ type: "required", message: "Required" }] },
+});
 ```
 
 ---

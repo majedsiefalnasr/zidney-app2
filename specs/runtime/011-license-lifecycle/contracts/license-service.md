@@ -9,7 +9,9 @@
 
 ## Overview
 
-The License Service is the authoritative entry point for all license state transitions. It enforces the four-state model, validates transitions, and produces immutable audit logs. No direct SQL updates to licenses.status are allowed; all changes route through these methods.
+The License Service is the authoritative entry point for all license state transitions. It enforces
+the four-state model, validates transitions, and produces immutable audit logs. No direct SQL
+updates to licenses.status are allowed; all changes route through these methods.
 
 ---
 
@@ -40,7 +42,8 @@ async transitionToSoftLock(
 **Validation**:
 
 - License exists and status = ACTIVE
-- Reject if status ≠ ACTIVE with StateTransitionError: "Cannot soft lock a license that is not ACTIVE"
+- Reject if status ≠ ACTIVE with StateTransitionError: "Cannot soft lock a license that is not
+  ACTIVE"
 
 **Side Effects**:
 
@@ -207,7 +210,8 @@ async restoreFromArchive(
 
 - License exists and status = ARCHIVED
 - Snapshot exists, has status = CREATED, and size_bytes <= 500GB
-- Version compatibility: snapshot.version_tag matches current product schema_version (or is eligible for auto-migration)
+- Version compatibility: snapshot.version_tag matches current product schema_version (or is eligible
+  for auto-migration)
 - Reject if status ≠ ARCHIVED with StateTransitionError
 - Reject if snapshot.status ≠ CREATED with SnapshotFailedError
 
@@ -407,12 +411,12 @@ All errors follow Zidney standard envelope:
 
 ```typescript
 interface ErrorResponse {
-  success: false
-  data: null
+  success: false;
+  data: null;
   error: {
-    code: string // Machine-readable code
-    message: string // Human-readable message
-  }
+    code: string; // Machine-readable code
+    message: string; // Human-readable message
+  };
 }
 ```
 
@@ -476,7 +480,8 @@ Each transition logs structured JSON events:
 - **Renewal**: Re-renewing same license succeeds identically
 - **Archive**: Re-archiving same license succeeds identically (uses same snapshot)
 - **Restore**: Re-restoring same snapshot produces identical state (atomic restore)
-- **Delete**: Delete already deleted license returns error (not idempotent; prevents misunderstanding)
+- **Delete**: Delete already deleted license returns error (not idempotent; prevents
+  misunderstanding)
 
 ---
 

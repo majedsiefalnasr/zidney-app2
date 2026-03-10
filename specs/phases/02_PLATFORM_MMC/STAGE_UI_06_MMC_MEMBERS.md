@@ -33,8 +33,8 @@ This stage enables management of:
 - Role assignment
 - Member audit visibility (read-only)
 
-This stage does NOT implement authentication logic.
-It consumes backend APIs defined in STAGE_14_MMC_MEMBERS.
+This stage does NOT implement authentication logic. It consumes backend APIs defined in
+STAGE_14_MMC_MEMBERS.
 
 ---
 
@@ -52,8 +52,7 @@ The MMC Members UI must support:
 8. View member activity summary (if backend provides)
 9. View member audit log (read-only)
 
-No password management UI here (handled in auth module).
-No token management UI.
+No password management UI here (handled in auth module). No token management UI.
 
 ---
 
@@ -248,8 +247,7 @@ Display:
 
 Read-only.
 
-No editing.
-No deletion.
+No editing. No deletion.
 
 ---
 

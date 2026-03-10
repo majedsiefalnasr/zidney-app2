@@ -7,19 +7,27 @@
 
 ## Summary
 
-Implement a tenant-scoped, entity-level translation system that stores translated field values for non-default languages, resolves entity content with deterministic fallback to the default language, tracks coverage per entity type and language, and provides a full audit trail for all translation changes. The implementation introduces two new tenant DB tables (`translations`, `translation_audit_logs`), a domain-core translation service package, four new API endpoints under the backoffice route group, and one new worker job for async language drainage. Schema bumps from `1.1.0` to `1.2.0` (MINOR, additive per ADR-0008).
+Implement a tenant-scoped, entity-level translation system that stores translated field values for
+non-default languages, resolves entity content with deterministic fallback to the default language,
+tracks coverage per entity type and language, and provides a full audit trail for all translation
+changes. The implementation introduces two new tenant DB tables (`translations`,
+`translation_audit_logs`), a domain-core translation service package, four new API endpoints under
+the backoffice route group, and one new worker job for async language drainage. Schema bumps from
+`1.1.0` to `1.2.0` (MINOR, additive per ADR-0008).
 
 ## Technical Context
 
-**Language/Version**: TypeScript 5.x (Bun runtime for API and Worker)
-**Primary Dependencies**: Drizzle ORM (pg adapter), Hono (API routing), ioredis (coverage cache), @zidney/domain-core, @zidney/logger, @zidney/types
-**Storage**: PostgreSQL (tenant DB per workspace), Redis (optional coverage cache, tenant-scoped keys)
-**Testing**: Vitest (unit + integration), existing test infrastructure in `/tests/`
-**Target Platform**: Linux server (Bun runtime)
-**Project Type**: SaaS multi-tenant web service
-**Performance Goals**: Translation resolution ≤ 50ms p95 per entity; batch load in single DB round-trip (SC-002, SC-003); 5M rows per tenant within indexed 50ms target (SC-007)
-**Constraints**: No cross-tenant access; all writes transactional; audit log in same tx as write; server-authoritative timestamps; no FK cascades; no business logic in route handlers
-**Scale/Scope**: Up to 5M translation rows per tenant; up to 100 entities per batch load; up to 50 items per batch upsert
+**Language/Version**: TypeScript 5.x (Bun runtime for API and Worker) **Primary Dependencies**:
+Drizzle ORM (pg adapter), Hono (API routing), ioredis (coverage cache), @zidney/domain-core,
+@zidney/logger, @zidney/types **Storage**: PostgreSQL (tenant DB per workspace), Redis (optional
+coverage cache, tenant-scoped keys) **Testing**: Vitest (unit + integration), existing test
+infrastructure in `/tests/` **Target Platform**: Linux server (Bun runtime) **Project Type**: SaaS
+multi-tenant web service **Performance Goals**: Translation resolution ≤ 50ms p95 per entity; batch
+load in single DB round-trip (SC-002, SC-003); 5M rows per tenant within indexed 50ms target
+(SC-007) **Constraints**: No cross-tenant access; all writes transactional; audit log in same tx as
+write; server-authoritative timestamps; no FK cascades; no business logic in route handlers
+**Scale/Scope**: Up to 5M translation rows per tenant; up to 100 entities per batch load; up to 50
+items per batch upsert
 
 ## Constitution Check
 
@@ -44,7 +52,8 @@ _GATE: Must pass before Phase 0 research. Re-checked after Phase 1 design._
 | Migration forward-only       | PASS   | down() throws; one migration file for this feature                                                              |
 | Stage lifecycle              | PASS   | Spec Status is Draft with all clarifications resolved; requirements.md checklist 100% green                     |
 
-**Post-Design Re-check**: Constitution check passes after Phase 1 data model review. No violations found.
+**Post-Design Re-check**: Constitution check passes after Phase 1 data model review. No violations
+found.
 
 ---
 
@@ -110,7 +119,9 @@ tests/
     └── translation-api.contract.test.ts            [NEW]
 ```
 
-**Structure Decision**: Multi-app monorepo layout. Domain logic in `packages/domain-core/src/translation/`. API integration in `apps/api/src/modules/translation/`. Worker job in `apps/worker/src/jobs/`. Matches existing platform conventions.
+**Structure Decision**: Multi-app monorepo layout. Domain logic in
+`packages/domain-core/src/translation/`. API integration in `apps/api/src/modules/translation/`.
+Worker job in `apps/worker/src/jobs/`. Matches existing platform conventions.
 
 ---
 
@@ -120,7 +131,8 @@ tests/
 
 **Schema Version Bump**: `1.1.0` to `1.2.0` (MINOR per ADR-0008: additive new tables and indexes)
 
-**Transaction Boundary**: Single BEGIN/COMMIT wrapping all DDL. Any statement failure rolls back the entire migration.
+**Transaction Boundary**: Single BEGIN/COMMIT wrapping all DDL. Any statement failure rolls back the
+entire migration.
 
 ### Up Migration Steps (in order)
 
@@ -133,7 +145,8 @@ tests/
 7. `CREATE TABLE IF NOT EXISTS translation_audit_logs` — all columns per data-model.md Section 2
 8. `CREATE INDEX IF NOT EXISTS idx_tal_entity_created ON translation_audit_logs (workspace_id, entity_type, entity_id, created_at DESC, id DESC)`
 9. `CREATE INDEX IF NOT EXISTS idx_tal_language_created ON translation_audit_logs (workspace_id, language_code, created_at DESC)`
-10. `CREATE TRIGGER prevent_translation_audit_modification` — reuses existing `prevent_audit_modification()` function from v1.0.0/triggers.sql
+10. `CREATE TRIGGER prevent_translation_audit_modification` — reuses existing
+    `prevent_audit_modification()` function from v1.0.0/triggers.sql
 11. `COMMENT ON TABLE translation_audit_logs` — Stage: 019_TRANSLATION_SYSTEM
 12. `UPDATE schema_version SET version = '1.2.0', applied_at = NOW() WHERE version = '1.1.0'`
 
@@ -142,9 +155,9 @@ tests/
 ```typescript
 down: async () => {
   throw new Error(
-    'Translation system migration (1.1.0 to 1.2.0) is not reversible. Restore from snapshot.'
-  )
-}
+    "Translation system migration (1.1.0 to 1.2.0) is not reversible. Restore from snapshot.",
+  );
+};
 ```
 
 ### Migration Compliance Checklist
@@ -162,7 +175,9 @@ down: async () => {
 
 ### 2a. translation.types.ts
 
-Defines: `Translation`, `TranslationUpsert`, `TranslationCoverage`, `TranslationAuditEntry`, `TranslationOperationContext`, `ResolvedEntityTranslations`. Full definitions in data-model.md Section 3.
+Defines: `Translation`, `TranslationUpsert`, `TranslationCoverage`, `TranslationAuditEntry`,
+`TranslationOperationContext`, `ResolvedEntityTranslations`. Full definitions in data-model.md
+Section 3.
 
 ### 2b. translation.errors.ts
 
@@ -186,16 +201,18 @@ Defines `TRANSLATABLE_FIELDS` constant map. Initial entries:
 
 ```typescript
 export const TRANSLATABLE_FIELDS = {
-  subject: ['title', 'description'],
-  category: ['name', 'description'],
-  question: ['text', 'explanation'],
-  exam: ['title', 'description', 'instructions'],
-} as const satisfies Record<string, readonly string[]>
+  subject: ["title", "description"],
+  category: ["name", "description"],
+  question: ["text", "explanation"],
+  exam: ["title", "description", "instructions"],
+} as const satisfies Record<string, readonly string[]>;
 ```
 
 Helper functions: `getTranslatableFields(entityType)`, `isTranslatableEntityType(entityType)`.
 
-Coverage denominator = `TRANSLATABLE_FIELDS[entity_type].length` (pure function, zero DB overhead per Q5 clarification). To add a new entity type: update constant, bump domain-core minor version, no migration required.
+Coverage denominator = `TRANSLATABLE_FIELDS[entity_type].length` (pure function, zero DB overhead
+per Q5 clarification). To add a new entity type: update constant, bump domain-core minor version, no
+migration required.
 
 ### 2d. translation.service.ts
 
@@ -220,7 +237,8 @@ Key methods and transaction boundaries:
    - Base entity value also absent: return `''` and emit structured warning log (FR-012)
 4. Return `ResolvedEntityTranslations` with `fallback_fields` populated
 
-**Entity validator**: injected callback from caller. Avoids direct entity table coupling in domain package.
+**Entity validator**: injected callback from caller. Avoids direct entity table coupling in domain
+package.
 
 ### 2e. coverage.service.ts
 
@@ -232,7 +250,8 @@ Key methods:
 | `invalidateCoverage(workspaceId, entityType, languageCode, redis?)`               | Deletes specific per-(entity_type, language_code) cache key |
 | `invalidateWorkspaceCoverage(workspaceId, redis?)`                                | Deletes all coverage cache keys for workspace               |
 
-Redis cache key: `coverage:{workspace_id}:{entity_type}:{language_code}`. Cache TTL: 300s with hard invalidation on any write within scope.
+Redis cache key: `coverage:{workspace_id}:{entity_type}:{language_code}`. Cache TTL: 300s with hard
+invalidation on any write within scope.
 
 ---
 
@@ -254,15 +273,21 @@ All translation routes inherit this chain. No new middleware types required.
 - Auth: Staff permission
 - Body: Single `TranslationUpsert` OR `{ translations: TranslationUpsert[] }` (max 50 items)
 - Response: HTTP 200 for both create and update (idempotent per Q4 clarification; never 201)
-- Transaction: service layer opens transaction; all upserts + all audit log inserts committed atomically (FR-029)
-- Cache invalidation: `CoverageService.invalidateCoverage()` per `(entity_type, language_code)` after commit
+- Transaction: service layer opens transaction; all upserts + all audit log inserts committed
+  atomically (FR-029)
+- Cache invalidation: `CoverageService.invalidateCoverage()` per `(entity_type, language_code)`
+  after commit
 
 #### GET /api/workspaces/:slug/translations
 
-- Auth: Staff permission (inherited from backoffice middleware chain; note: if student-facing translation resolution is needed in the future, it must use a separate frontoffice route — not this endpoint)
-- Query: `entity_type` (req), `entity_id` (req), `language_code` (opt), `cursor` (opt), `page_size` (opt, max 50)
+- Auth: Staff permission (inherited from backoffice middleware chain; note: if student-facing
+  translation resolution is needed in the future, it must use a separate frontoffice route — not
+  this endpoint)
+- Query: `entity_type` (req), `entity_id` (req), `language_code` (opt), `cursor` (opt), `page_size`
+  (opt, max 50)
 - Mode A (language_code present): `resolveEntityTranslations()` — fields with fallback applied
-- Mode B (language_code absent): `listEntityTranslations()` — paginated raw rows for management panel
+- Mode B (language_code absent): `listEntityTranslations()` — paginated raw rows for management
+  panel
 
 #### GET /api/workspaces/:slug/translations/coverage
 
@@ -277,7 +302,8 @@ Modify `workspace-settings.service.ts`:
 
 1. `COUNT(*) FROM translations WHERE language_code = X`
 2. If count ≤ 10,000: sync delete in same tx + audit log entries + HTTP 200
-3. If count > 10,000: set `language_status[X]='removing'`, enqueue `DRAIN_LANGUAGE_TRANSLATIONS` job, return HTTP 409 with `LANGUAGE_REMOVAL_REQUIRES_ASYNC`
+3. If count > 10,000: set `language_status[X]='removing'`, enqueue `DRAIN_LANGUAGE_TRANSLATIONS`
+   job, return HTTP 409 with `LANGUAGE_REMOVAL_REQUIRES_ASYNC`
 
 ---
 
@@ -291,15 +317,15 @@ Modify `workspace-settings.service.ts`:
 
 ```typescript
 interface DrainLanguageTranslationsJob {
-  job_type: 'DRAIN_LANGUAGE_TRANSLATIONS'
-  workspace_id: string
-  workspace_slug: string
-  language_code: string
-  batch_size: number // default: 1000; configurable by operator
-  correlation_id: string
-  initiated_by_user_id: string
-  attempt?: number
-  created_at: string // ISO8601
+  job_type: "DRAIN_LANGUAGE_TRANSLATIONS";
+  workspace_id: string;
+  workspace_slug: string;
+  language_code: string;
+  batch_size: number; // default: 1000; configurable by operator
+  correlation_id: string;
+  initiated_by_user_id: string;
+  attempt?: number;
+  created_at: string; // ISO8601
 }
 ```
 
@@ -314,19 +340,24 @@ interface DrainLanguageTranslationsJob {
 4. Call `CoverageService.invalidateWorkspaceCoverage()` to clear Redis coverage cache
 5. Log `drain_complete` event
 
-**Idempotency**: Retry after crash continues from remaining rows. Final cleanup is idempotent (deleting absent JSONB key is a no-op).
+**Idempotency**: Retry after crash continues from remaining rows. Final cleanup is idempotent
+(deleting absent JSONB key is a no-op).
 
-**Concurrency guard**: `language_status[X]='removing'` prevents new translations to that language. `job-hash.ts` deduplication prevents duplicate drain jobs.
+**Concurrency guard**: `language_status[X]='removing'` prevents new translations to that language.
+`job-hash.ts` deduplication prevents duplicate drain jobs.
 
 ---
 
 ## Phase 5: workspace_settings Modifications
 
-**`workspace-settings.types.ts`**: Add `language_status?: Record<string, 'active' | 'removing'>` to `LanguageSettings` interface.
+**`workspace-settings.types.ts`**: Add `language_status?: Record<string, 'active' | 'removing'>` to
+`LanguageSettings` interface.
 
-**`workspace-settings.validation.ts`**: Add `language_status: z.record(z.enum(['active', 'removing'])).optional()` to `languageSettingsSchema`.
+**`workspace-settings.validation.ts`**: Add
+`language_status: z.record(z.enum(['active', 'removing'])).optional()` to `languageSettingsSchema`.
 
-**Write guard**: The public settings update API must NOT allow callers to set `language_status` directly. Written only by the language removal endpoint and the drain job completion handler.
+**Write guard**: The public settings update API must NOT allow callers to set `language_status`
+directly. Written only by the language removal endpoint and the drain job completion handler.
 
 ---
 
@@ -379,8 +410,9 @@ interface DrainLanguageTranslationsJob {
 
 ## Logging Requirements
 
-All log entries from translation and coverage service must include:
-`timestamp`, `level`, `service='translation'`, `workspace_slug`, `workspace_id`, `correlation_id`, `user_id` (undefined for worker), `entity_type`, `entity_id`, `field_name`, `language_code` (where applicable), `event`.
+All log entries from translation and coverage service must include: `timestamp`, `level`,
+`service='translation'`, `workspace_slug`, `workspace_id`, `correlation_id`, `user_id` (undefined
+for worker), `entity_type`, `entity_id`, `field_name`, `language_code` (where applicable), `event`.
 
 **Warning events**:
 
@@ -389,7 +421,9 @@ All log entries from translation and coverage service must include:
 
 `console.log` is forbidden (AGENTS.md). Use `@zidney/logger` exclusively.
 
-**Prohibited in logs**: `translated_value`, `previous_value`, and `new_value` MUST NOT appear in any structured log entry. These fields are persisted exclusively in the database (`translation_audit_logs`) and must not propagate to the logging layer.
+**Prohibited in logs**: `translated_value`, `previous_value`, and `new_value` MUST NOT appear in any
+structured log entry. These fields are persisted exclusively in the database
+(`translation_audit_logs`) and must not propagate to the logging layer.
 
 ---
 
@@ -544,28 +578,46 @@ No feature is complete unless all test categories pass (AGENTS.md).
 
 ## BLOCKED Items
 
-**None.** All clarifications are resolved. All architectural dependencies are available. Implementation may proceed immediately.
+**None.** All clarifications are resolved. All architectural dependencies are available.
+Implementation may proceed immediately.
 
 ---
 
 ## Key Architectural Decisions
 
-1. **Drizzle `onConflictDoUpdate` for upsert**: Targets `translations_composite_unique` constraint. Composite key `(entity_type, entity_id, field_name, language_code)` is the sole idempotency mechanism. No client-provided idempotency headers (Q4 clarification).
+1. **Drizzle `onConflictDoUpdate` for upsert**: Targets `translations_composite_unique` constraint.
+   Composite key `(entity_type, entity_id, field_name, language_code)` is the sole idempotency
+   mechanism. No client-provided idempotency headers (Q4 clarification).
 
-2. **Audit log in same transaction**: Upsert row and audit entry committed atomically. 100% write auditability guaranteed (SC-004). No separate audit flush step.
+2. **Audit log in same transaction**: Upsert row and audit entry committed atomically. 100% write
+   auditability guaranteed (SC-004). No separate audit flush step.
 
-3. **No FK cascade**: `translations` has no FK to entity tables. Entity deletions call `deleteEntityTranslations()` explicitly within the entity deletion transaction (Q1 clarification). Architecturally correct for multi-parent-table design.
+3. **No FK cascade**: `translations` has no FK to entity tables. Entity deletions call
+   `deleteEntityTranslations()` explicitly within the entity deletion transaction (Q1
+   clarification). Architecturally correct for multi-parent-table design.
 
-4. **Threshold-based async drain at 10,000 rows**: Language removal with >10,000 rows is rejected synchronously and delegated to the DRAIN worker job. Below threshold, synchronous in-transaction deletion proceeds (Q3 clarification).
+4. **Threshold-based async drain at 10,000 rows**: Language removal with >10,000 rows is rejected
+   synchronously and delegated to the DRAIN worker job. Below threshold, synchronous in-transaction
+   deletion proceeds (Q3 clarification).
 
-5. **Coverage denominator is a pure constant**: `TRANSLATABLE_FIELDS[entity_type].length` — zero DB overhead. Adding translatable fields requires a domain package code change, enforcing deliberate governance (Q5 clarification).
+5. **Coverage denominator is a pure constant**: `TRANSLATABLE_FIELDS[entity_type].length` — zero DB
+   overhead. Adding translatable fields requires a domain package code change, enforcing deliberate
+   governance (Q5 clarification).
 
-6. **Tenant-scoped coverage cache**: Redis key format `coverage:{workspace_id}:{entity_type}:{language_code}` — workspace_id is a mandatory prefix. Cross-tenant cache access is architecturally impossible (FR-023).
+6. **Tenant-scoped coverage cache**: Redis key format
+   `coverage:{workspace_id}:{entity_type}:{language_code}` — workspace_id is a mandatory prefix.
+   Cross-tenant cache access is architecturally impossible (FR-023).
 
-7. **`language_status` in workspace_settings JSONB**: No new DB column or table. Existing JSONB column absorbs the optional `language_status` field. Fully backward-compatible — absent key means active (Q3 clarification).
+7. **`language_status` in workspace_settings JSONB**: No new DB column or table. Existing JSONB
+   column absorbs the optional `language_status` field. Fully backward-compatible — absent key means
+   active (Q3 clarification).
 
-8. **HTTP 200 for both create and update**: Idempotent upsert never returns 201. The API does not distinguish first write from repeat write (Q4 clarification).
+8. **HTTP 200 for both create and update**: Idempotent upsert never returns 201. The API does not
+   distinguish first write from repeat write (Q4 clarification).
 
-9. **schema_version 1.1.0 to 1.2.0**: MINOR bump per ADR-0008. Single forward-only migration file `20260301_001_translation_system.ts`.
+9. **schema_version 1.1.0 to 1.2.0**: MINOR bump per ADR-0008. Single forward-only migration file
+   `20260301_001_translation_system.ts`.
 
-10. **Route registration under backoffice group**: Inherits established middleware chain (correlationId → tenantResolver → licenseEnforcement → schemaVersion → rateLimit → authentication). No new middleware types needed.
+10. **Route registration under backoffice group**: Inherits established middleware chain
+    (correlationId → tenantResolver → licenseEnforcement → schemaVersion → rateLimit →
+    authentication). No new middleware types needed.

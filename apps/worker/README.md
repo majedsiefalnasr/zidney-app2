@@ -2,7 +2,9 @@
 
 ## Purpose
 
-Background job processor for the Zidney platform. Handles asynchronous tasks that must not block the HTTP request cycle: tenant schema provisioning, attempt finalization, grading, snapshot jobs, and dead-letter queue (DLQ) management.
+Background job processor for the Zidney platform. Handles asynchronous tasks that must not block the
+HTTP request cycle: tenant schema provisioning, attempt finalization, grading, snapshot jobs, and
+dead-letter queue (DLQ) management.
 
 ---
 
@@ -46,7 +48,8 @@ bun run test:unit
 bun run vitest run --dir tests/load
 ```
 
-> Load tests (`tests/load/`, `tests/load-testing.test.ts`) are excluded from the standard unit runner. Run them explicitly with a full infrastructure stack.
+> Load tests (`tests/load/`, `tests/load-testing.test.ts`) are excluded from the standard unit
+> runner. Run them explicitly with a full infrastructure stack.
 
 ---
 

@@ -52,7 +52,8 @@
 
 ### Test Coverage
 
-**File**: [packages/domain-core/tests/license/isolation.test.ts](packages/domain-core/tests/license/isolation.test.ts)
+**File**:
+[packages/domain-core/tests/license/isolation.test.ts](packages/domain-core/tests/license/isolation.test.ts)
 
 | Test                                       | Status  | Details                                                          |
 | ------------------------------------------ | ------- | ---------------------------------------------------------------- |
@@ -64,13 +65,13 @@
 
 ```typescript
 // FROM: packages/domain-core/tests/license/isolation.test.ts:T050.2
-const aKey = `license:acme.edu`
-const bKey = `license:state-u.edu`
-const retrievedA = JSON.parse(mockRedis.get(aKey)!)
-const retrievedB = JSON.parse(mockRedis.get(bKey)!)
-expect(retrievedA.workspace_slug).toBe('acme.edu')
-expect(retrievedB.workspace_slug).toBe('state-u.edu')
-expect(retrievedA).not.toEqual(retrievedB) // ✅ ISOLATED
+const aKey = `license:acme.edu`;
+const bKey = `license:state-u.edu`;
+const retrievedA = JSON.parse(mockRedis.get(aKey)!);
+const retrievedB = JSON.parse(mockRedis.get(bKey)!);
+expect(retrievedA.workspace_slug).toBe("acme.edu");
+expect(retrievedB.workspace_slug).toBe("state-u.edu");
+expect(retrievedA).not.toEqual(retrievedB); // ✅ ISOLATED
 ```
 
 ### VERDICT: ✅ PASS
@@ -95,7 +96,8 @@ No cross-tenant vulnerabilities detected. Isolation layer is sound.
 > License creation routes require MMC role.
 
 **Current Code**:  
-[apps/api/src/routes/license-router.ts](apps/api/src/routes/license-router.ts#L29-L60) — `POST /api/mmc/licenses`
+[apps/api/src/routes/license-router.ts](apps/api/src/routes/license-router.ts#L29-L60) —
+`POST /api/mmc/licenses`
 
 ```typescript
 // NO RBAC CHECK implemented in route handler
@@ -155,7 +157,8 @@ licenseRouter.post('/mmc/licenses', async (ctx: Context) => {
 
 ### Tests Passing
 
-**File**: [packages/domain-core/tests/license/lifecycle.test.ts](packages/domain-core/tests/license/lifecycle.test.ts)
+**File**:
+[packages/domain-core/tests/license/lifecycle.test.ts](packages/domain-core/tests/license/lifecycle.test.ts)
 
 | Test                                         | Status  | Details                       |
 | -------------------------------------------- | ------- | ----------------------------- |
@@ -220,7 +223,9 @@ it('DELETED license is terminal (no further transitions)', ...)
 
 ### Tests Passing
 
-**File**: [packages/domain-core/tests/license/isolation.test.ts](packages/domain-core/tests/license/isolation.test.ts) (T046–T047)
+**File**:
+[packages/domain-core/tests/license/isolation.test.ts](packages/domain-core/tests/license/isolation.test.ts)
+(T046–T047)
 
 | Test                                              | Status  | Details                               |
 | ------------------------------------------------- | ------- | ------------------------------------- |
@@ -230,7 +235,8 @@ it('DELETED license is terminal (no further transitions)', ...)
 
 ### Implementation
 
-**Location**: [packages/domain-core/src/license/service.ts](packages/domain-core/src/license/service.ts)
+**Location**:
+[packages/domain-core/src/license/service.ts](packages/domain-core/src/license/service.ts)
 
 ```typescript
 // Create License: UNIQUE(workspace_slug) enforces idempotency
@@ -258,7 +264,8 @@ Idempotency correctly implemented at multiple layers (UNIQUE constraint + Redis 
 
 ### Tests Passing
 
-**File**: [packages/domain-core/tests/license/lifecycle.test.ts](packages/domain-core/tests/license/lifecycle.test.ts#L75-L99)
+**File**:
+[packages/domain-core/tests/license/lifecycle.test.ts](packages/domain-core/tests/license/lifecycle.test.ts#L75-L99)
 
 | Test                                        | Status  | Details                                      |
 | ------------------------------------------- | ------- | -------------------------------------------- |
@@ -267,7 +274,8 @@ Idempotency correctly implemented at multiple layers (UNIQUE constraint + Redis 
 
 ### Implementation
 
-**Location**: [apps/api/src/middleware/license-enforcement.ts](apps/api/src/middleware/license-enforcement.ts#L95-L145)
+**Location**:
+[apps/api/src/middleware/license-enforcement.ts](apps/api/src/middleware/license-enforcement.ts#L95-L145)
 
 ```typescript
 if (
@@ -290,7 +298,8 @@ if (
 
 #### 🟡 MISSING: Concurrent Expiration Requests
 
-**Issue**: No test verifies that two concurrent requests during soft-lock expiry don't trigger duplicate transitions.
+**Issue**: No test verifies that two concurrent requests during soft-lock expiry don't trigger
+duplicate transitions.
 
 **Scenario**:
 
@@ -310,14 +319,15 @@ it('Two concurrent requests during expiry → one transitions, second sees ARCHI
 
 **Issue**: Spec says "90-day grace window" but implementation sets 7 days.
 
-**Location**: [packages/domain-core/src/license/service.ts](packages/domain-core/src/license/service.ts#L219-L224)
+**Location**:
+[packages/domain-core/src/license/service.ts](packages/domain-core/src/license/service.ts#L219-L224)
 
 ```typescript
-if (target_state === 'SOFT_LOCKED') {
-  const softLockUntil = new Date()
-  softLockUntil.setDate(softLockUntil.getDate() + 7) // ❌ 7 days, not 90
-  updateQuery += `, soft_lock_until = $4`
-  updateParams.push(softLockUntil)
+if (target_state === "SOFT_LOCKED") {
+  const softLockUntil = new Date();
+  softLockUntil.setDate(softLockUntil.getDate() + 7); // ❌ 7 days, not 90
+  updateQuery += `, soft_lock_until = $4`;
+  updateParams.push(softLockUntil);
 }
 ```
 
@@ -347,7 +357,9 @@ it('Soft-lock does not expire before soft_lock_until', ...)
 
 ### Tests Passing
 
-**File**: [packages/domain-core/tests/license/state-machine.test.ts](packages/domain-core/tests/license/state-machine.test.ts) (16 tests)
+**File**:
+[packages/domain-core/tests/license/state-machine.test.ts](packages/domain-core/tests/license/state-machine.test.ts)
+(16 tests)
 
 | Test                                        | Status  | Details                                                           |
 | ------------------------------------------- | ------- | ----------------------------------------------------------------- |
@@ -357,7 +369,8 @@ it('Soft-lock does not expire before soft_lock_until', ...)
 
 ### Implementation
 
-**Location**: [packages/domain-core/src/license/state-machine.ts](packages/domain-core/src/license/state-machine.ts)
+**Location**:
+[packages/domain-core/src/license/state-machine.ts](packages/domain-core/src/license/state-machine.ts)
 
 ```typescript
 isValidTransition(from: LicenseStatus, to: LicenseStatus): boolean {
@@ -459,7 +472,8 @@ it('PENDING_PROVISION license blocks DB access', ...)
 
 ### Tests Passing
 
-**Location**: [apps/api/src/middleware/license-enforcement.ts](apps/api/src/middleware/license-enforcement.ts#L155–210)
+**Location**:
+[apps/api/src/middleware/license-enforcement.ts](apps/api/src/middleware/license-enforcement.ts#L155–210)
 
 | Test                                    | Status  | Details                                |
 | --------------------------------------- | ------- | -------------------------------------- |
@@ -472,23 +486,17 @@ it('PENDING_PROVISION license blocks DB access', ...)
 
 ```typescript
 // STEP 3: Validate schema version (forward-compatible)
-const schemaValid = await resolver.validateVersions(
-  workspace_slug,
-  tenant_schema_version
-)
+const schemaValid = await resolver.validateVersions(workspace_slug, tenant_schema_version);
 if (!schemaValid) {
-  return ctx.json(
-    { success: false, error: { code: 'SCHEMA_VERSION_MISMATCH' } },
-    { status: 426 }
-  )
+  return ctx.json({ success: false, error: { code: "SCHEMA_VERSION_MISMATCH" } }, { status: 426 });
 }
 
 // STEP 4: Validate product version
-const runtime_version = ctx.get('runtime_version') || '1.0.0'
+const runtime_version = ctx.get("runtime_version") || "1.0.0";
 const productValid = versionValidator.validateProductVersion(
   license.expected_product_version,
-  runtime_version
-)
+  runtime_version,
+);
 ```
 
 ### Coverage Gaps
@@ -515,7 +523,8 @@ Version enforcement correctly implemented. Minor gap in integration testing.
 
 ### Tests Passing
 
-**File**: [packages/domain-core/tests/license/limit-enforcer.test.ts](packages/domain-core/tests/license/limit-enforcer.test.ts)
+**File**:
+[packages/domain-core/tests/license/limit-enforcer.test.ts](packages/domain-core/tests/license/limit-enforcer.test.ts)
 
 | Test                                    | Status  | Details                   |
 | --------------------------------------- | ------- | ------------------------- |
@@ -545,12 +554,13 @@ it('Limit check wrapped in SELECT FOR UPDATE transaction', ...)
 it('Two concurrent requests at limit=1 → one succeeds, one blocked (402)', ...)
 ```
 
-**Existing Test**: [packages/domain-core/tests/license/concurrency.test.ts#T044.1](packages/domain-core/tests/license/concurrency.test.ts#L26-L75)
+**Existing Test**:
+[packages/domain-core/tests/license/concurrency.test.ts#T044.1](packages/domain-core/tests/license/concurrency.test.ts#L26-L75)
 
 ```typescript
-it('T044.1: Two concurrent users at limit=1 → one succeeds, one fails', async () => {
+it("T044.1: Two concurrent users at limit=1 → one succeeds, one fails", async () => {
   // ✅ This test exists and passes
-})
+});
 ```
 
 #### 🟡 MISSING: Integration Test in API Layer
@@ -599,7 +609,8 @@ it('Two concurrent staff additions at limit=0 → both blocked', ...)
 
 ### Tests Passing
 
-**File**: [packages/domain-core/tests/license/concurrency.test.ts](packages/domain-core/tests/license/concurrency.test.ts)
+**File**:
+[packages/domain-core/tests/license/concurrency.test.ts](packages/domain-core/tests/license/concurrency.test.ts)
 
 | Test                                             | Status  | Details                                     |
 | ------------------------------------------------ | ------- | ------------------------------------------- |
@@ -610,15 +621,16 @@ it('Two concurrent staff additions at limit=0 → both blocked', ...)
 
 ### Implementation
 
-**Location**: [packages/domain-core/src/license/service.ts](packages/domain-core/src/license/service.ts#L162–175)
+**Location**:
+[packages/domain-core/src/license/service.ts](packages/domain-core/src/license/service.ts#L162–175)
 
 ```typescript
 // Transaction with SERIALIZABLE isolation + SELECT FOR UPDATE
-await client.query('BEGIN ISOLATION LEVEL SERIALIZABLE')
+await client.query("BEGIN ISOLATION LEVEL SERIALIZABLE");
 const lockResult = await client.query(
-  'SELECT * FROM licenses WHERE id = $1 FOR UPDATE', // ✅ Row lock
-  [options.license_id]
-)
+  "SELECT * FROM licenses WHERE id = $1 FOR UPDATE", // ✅ Row lock
+  [options.license_id],
+);
 ```
 
 ### Coverage Gaps
@@ -635,7 +647,8 @@ it('10 concurrent requests at limit=2 → 8 blocked, 2 succeed', ...)
 
 ### VERDICT: ✅ PASS (95%)
 
-Concurrency correctly handled via SELECT FOR UPDATE and SERIALIZABLE isolation. No race condition vulnerabilities detected.
+Concurrency correctly handled via SELECT FOR UPDATE and SERIALIZABLE isolation. No race condition
+vulnerabilities detected.
 
 ---
 
@@ -659,21 +672,21 @@ Concurrency correctly handled via SELECT FOR UPDATE and SERIALIZABLE isolation. 
 // ✅ License table is authoritative source
 export async function getLicenseStatus(
   db: any,
-  workspace_id: string
+  workspace_id: string,
 ): Promise<LicenseStatus | null> {
   const result = await db
-    .select('license_status as status', 'updated_at')
-    .from('workspaces')
-    .where('id', '=', workspace_id)
-    .first()
-  return result || null
+    .select("license_status as status", "updated_at")
+    .from("workspaces")
+    .where("id", "=", workspace_id)
+    .first();
+  return result || null;
 }
 ```
 
 **Location 2**: Middleware checks license table
 
 ```typescript
-const license = await resolver.getLicenseBySlug(workspace_slug)
+const license = await resolver.getLicenseBySlug(workspace_slug);
 // ✅ Only checks licenses table (single source)
 ```
 
@@ -681,7 +694,8 @@ const license = await resolver.getLicenseBySlug(workspace_slug)
 
 #### 🟡 MISSING: Divergence Detection Test
 
-**Gap**: No test verifies that master_db.licenses.status and tenants_registry divergence is detected and handled.
+**Gap**: No test verifies that master_db.licenses.status and tenants_registry divergence is detected
+and handled.
 
 **Scenario**:
 
@@ -732,7 +746,8 @@ it('Concurrent request after transition sees new status', ...)
 
 ### Tests Passing
 
-**Location**: [apps/api/src/responses/license-error-codes.ts](apps/api/src/responses/license-error-codes.ts)
+**Location**:
+[apps/api/src/responses/license-error-codes.ts](apps/api/src/responses/license-error-codes.ts)
 
 | Error Code               | HTTP Status | RFC 7807 Format      | Test     |
 | ------------------------ | ----------- | -------------------- | -------- |
@@ -824,13 +839,13 @@ licenseRouter.post('/mmc/licenses', async (ctx: Context) => {
 **Fix**:
 
 ```typescript
-licenseRouter.post('/mmc/licenses', async (ctx: Context) => {
-  const userRole = ctx.get('user_role')
-  if (userRole !== 'mmc_admin') {
-    return ctx.json(toLicenseError('UNAUTHORIZED', 403), { status: 403 })
+licenseRouter.post("/mmc/licenses", async (ctx: Context) => {
+  const userRole = ctx.get("user_role");
+  if (userRole !== "mmc_admin") {
+    return ctx.json(toLicenseError("UNAUTHORIZED", 403), { status: 403 });
   }
   // ...
-})
+});
 ```
 
 **Tests Required**: 4 negative tests for RBAC
@@ -856,12 +871,13 @@ licenseRouter.post('/mmc/licenses', async (ctx: Context) => {
 
 ### 🔴 BLOCKER #3: Soft-Lock Grace Period Wrong
 
-**File**: [packages/domain-core/src/license/service.ts](packages/domain-core/src/license/service.ts#L220-L224)
+**File**:
+[packages/domain-core/src/license/service.ts](packages/domain-core/src/license/service.ts#L220-L224)
 
 **Issue**: Grace period hardcoded to 7 days instead of 90 days per spec.
 
 ```typescript
-softLockUntil.setDate(softLockUntil.getDate() + 7) // ❌ Should be 90
+softLockUntil.setDate(softLockUntil.getDate() + 7); // ❌ Should be 90
 ```
 
 **Impact**: Customers receive less grace period than intended after payment failure.
@@ -869,7 +885,7 @@ softLockUntil.setDate(softLockUntil.getDate() + 7) // ❌ Should be 90
 **Fix**:
 
 ```typescript
-softLockUntil.setDate(softLockUntil.getDate() + 90) // ✅
+softLockUntil.setDate(softLockUntil.getDate() + 90); // ✅
 ```
 
 ---

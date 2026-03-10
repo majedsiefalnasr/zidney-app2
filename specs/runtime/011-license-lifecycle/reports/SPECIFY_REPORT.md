@@ -8,7 +8,13 @@
 
 ## Summary
 
-Specification for License Lifecycle Operations has been extracted from stage file and formalized into executable requirement. The specification captures all four license states (ACTIVE, SOFT_LOCKED, ARCHIVED, DELETED), state transition rules, audit requirements, snapshot/restore workflows, and permanent deletion workflows. All lifecycle logic is middleware-enforced and single-source-of-truth (master_db licenses.status). 22 acceptance criteria defined covering state model, soft lock enforcement, archival, restoration, deletion, TTL management, audit logging, UI integration, error handling, data integrity, and security.
+Specification for License Lifecycle Operations has been extracted from stage file and formalized
+into executable requirement. The specification captures all four license states (ACTIVE,
+SOFT_LOCKED, ARCHIVED, DELETED), state transition rules, audit requirements, snapshot/restore
+workflows, and permanent deletion workflows. All lifecycle logic is middleware-enforced and
+single-source-of-truth (master_db licenses.status). 22 acceptance criteria defined covering state
+model, soft lock enforcement, archival, restoration, deletion, TTL management, audit logging, UI
+integration, error handling, data integrity, and security.
 
 ---
 
@@ -52,7 +58,8 @@ Specification for License Lifecycle Operations has been extracted from stage fil
 
 **Operations:**
 
-- Snapshot Creation: Captures schema_version, schema, RBAC, question library, grading config before archival
+- Snapshot Creation: Captures schema_version, schema, RBAC, question library, grading config before
+  archival
 - Restoration: Full schema restore from snapshot, version compatibility validated
 - Audit: Every transition logged immutably with actor, timestamp, reason, snapshot ref
 - TTL: Grace period 7 days → enforcement 90 days → permanent archival
@@ -70,7 +77,8 @@ Specification for License Lifecycle Operations has been extracted from stage fil
 
 **1 Snapshot Location Determinism** (Non-Blocking)
 
-- **Question:** Are snapshot storage paths deterministically calculated (e.g., `s3://snapshots/{tenant_id}/{timestamp}.tar.gz`) or configurable per workspace?
+- **Question:** Are snapshot storage paths deterministically calculated (e.g.,
+  `s3://snapshots/{tenant_id}/{timestamp}.tar.gz`) or configurable per workspace?
 - **Impact:** Minor — affects plan storage layer detail
 - **Default Assumption:** Deterministic paths (Option A)
 - **Status:** Can be resolved in Step 2 (Clarify) or deferred to planning if unambiguous
@@ -99,20 +107,24 @@ Specification for License Lifecycle Operations has been extracted from stage fil
 **1. Snapshot Storage Availability**
 
 - Risk: Snapshot creation fails → workspace stuck in SOFT_LOCKED indefinitely
-- Mitigation: Worker retry policy (max 3 retries) with exponential backoff; alert on persistent failure; admin manual action
+- Mitigation: Worker retry policy (max 3 retries) with exponential backoff; alert on persistent
+  failure; admin manual action
 
 **2. Concurrent State Transitions**
 
 - Risk: Two requests arrive during grace period → race to ARCHIVED
-- Mitigation: SELECT FOR UPDATE in License Service; state transition validates current state before write
+- Mitigation: SELECT FOR UPDATE in License Service; state transition validates current state before
+  write
 
 **3. Schema Incompatibility on Restore**
 
 - Risk: Snapshot schema_version incompatible with current product version
-- Mitigation: Version compatibility matrix checked before restore; admin notified; restore blocked with clear error
+- Mitigation: Version compatibility matrix checked before restore; admin notified; restore blocked
+  with clear error
 
 ---
 
 ## Next Step
 
-Proceed to Step 2 — Clarify. One non-blocking clarification identified (snapshot location determinism); can be resolved interactively or deferred to planning based on user preference.
+Proceed to Step 2 — Clarify. One non-blocking clarification identified (snapshot location
+determinism); can be resolved interactively or deferred to planning based on user preference.

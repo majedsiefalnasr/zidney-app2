@@ -49,8 +49,7 @@ Rules:
 - No network dependency
 - Pure logic isolation
 
-Coverage Target:
-Minimum 80% for core runtime modules:
+Coverage Target: Minimum 80% for core runtime modules:
 
 - attempt
 - grading
@@ -239,7 +238,6 @@ Zidney is an exam-centric, isolation-first system.
 
 Testing must reflect that.
 
-If isolation, grading, or license enforcement breaks,
-the platform fails.
+If isolation, grading, or license enforcement breaks, the platform fails.
 
 Testing is a structural requirement, not a quality enhancement.

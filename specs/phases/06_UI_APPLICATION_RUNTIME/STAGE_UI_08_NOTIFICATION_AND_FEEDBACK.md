@@ -32,8 +32,7 @@ This stage standardizes:
 
 This layer ensures consistent UX behavior for all API-driven interactions.
 
-This stage does NOT define business messages.
-It defines how messages are displayed and handled.
+This stage does NOT define business messages. It defines how messages are displayed and handled.
 
 ---
 

@@ -8,9 +8,14 @@
 
 ## Summary
 
-Specification for `STAGE_INFRA_07_MODULE_BOUNDARIES` is complete and production-grade. This INFRA stage formalizes explicit module ownership and dependency boundaries across the Zidney monorepo. The spec defines a machine-readable boundary map (`docs/architecture/module-boundaries.json`) consumed by `ai-guard.ts` and `infra-audit.ts`, with CI enforcement.
+Specification for `STAGE_INFRA_07_MODULE_BOUNDARIES` is complete and production-grade. This INFRA
+stage formalizes explicit module ownership and dependency boundaries across the Zidney monorepo. The
+spec defines a machine-readable boundary map (`docs/architecture/module-boundaries.json`) consumed
+by `ai-guard.ts` and `infra-audit.ts`, with CI enforcement.
 
-All 13 monorepo modules have been classified into four architectural layers. The complete boundary matrix is defined, `ai-guard.ts` loading sequence is described, and CI pipeline integration is specified. No `[NEEDS CLARIFICATION]` markers remain.
+All 13 monorepo modules have been classified into four architectural layers. The complete boundary
+matrix is defined, `ai-guard.ts` loading sequence is described, and CI pipeline integration is
+specified. No `[NEEDS CLARIFICATION]` markers remain.
 
 ---
 
@@ -40,24 +45,32 @@ All 13 monorepo modules have been classified into four architectural layers. The
 
 ## Functional Requirements Captured
 
-- **FR-001** — `docs/architecture/module-boundaries.json` must exist and be valid JSON after this stage
+- **FR-001** — `docs/architecture/module-boundaries.json` must exist and be valid JSON after this
+  stage
 - **FR-002** — All 13 modules classified into one of: `infrastructure` | `domain` | `runtime` | `ui`
-- **FR-003** — `ai-guard.ts` loads `module-boundaries.json` before `ARCHITECTURE_MAP.json`; module-boundaries.json takes precedence for layer rules
+- **FR-003** — `ai-guard.ts` loads `module-boundaries.json` before `ARCHITECTURE_MAP.json`;
+  module-boundaries.json takes precedence for layer rules
 - **FR-004** — `ai-guard.ts` blocks commits where `apps/*` imports another `apps/*` module
 - **FR-005** — `ai-guard.ts` blocks commits where `packages/*` imports `apps/*`
-- **FR-006** — `ai-guard.ts` blocks commits where a `ui` layer module imports a `domain` layer module
-- **FR-007** — `ai-guard.ts` blocks commits where a `domain` layer module imports a `runtime` or `ui` module
-- **FR-008** — `ai-guard.ts` warns (local) / errors (CI) for modules present in the repo but absent from `module-boundaries.json`
+- **FR-006** — `ai-guard.ts` blocks commits where a `ui` layer module imports a `domain` layer
+  module
+- **FR-007** — `ai-guard.ts` blocks commits where a `domain` layer module imports a `runtime` or
+  `ui` module
+- **FR-008** — `ai-guard.ts` warns (local) / errors (CI) for modules present in the repo but absent
+  from `module-boundaries.json`
 - **FR-009** — CI pipeline includes a `module-boundary-validation` step running `bun run ai-guard`
 - **FR-010** — `bun run ai-guard` exits 0 if no violations found, non-zero otherwise
-- **FR-011** — Violation output includes: module name, source layer, target layer, violation type, file path
-- **FR-012** — New module onboarding workflow documented: assign layer → add to `module-boundaries.json` → verify with `bun run ai-guard`
+- **FR-011** — Violation output includes: module name, source layer, target layer, violation type,
+  file path
+- **FR-012** — New module onboarding workflow documented: assign layer → add to
+  `module-boundaries.json` → verify with `bun run ai-guard`
 
 ---
 
 ## Clarifications Required
 
-None. All ambiguities were resolved from the stage file, existing tooling source code, `ARCHITECTURE_MAP.json`, and the Zidney Constitution.
+None. All ambiguities were resolved from the stage file, existing tooling source code,
+`ARCHITECTURE_MAP.json`, and the Zidney Constitution.
 
 ---
 

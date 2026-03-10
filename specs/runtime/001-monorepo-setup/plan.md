@@ -1,13 +1,18 @@
 # Implementation Plan: Monorepo Setup
 
-**Branch**: `001-monorepo-setup` | **Date**: 2026-02-15 | **Spec**: [specs/runtime/001-monorepo-setup/spec.md](specs/runtime/001-monorepo-setup/spec.md)
-**Input**: Feature specification from `/specs/runtime/001-monorepo-setup/spec.md`
+**Branch**: `001-monorepo-setup` | **Date**: 2026-02-15 | **Spec**:
+[specs/runtime/001-monorepo-setup/spec.md](specs/runtime/001-monorepo-setup/spec.md) **Input**:
+Feature specification from `/specs/runtime/001-monorepo-setup/spec.md`
 
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
+**Note**: This template is filled in by the `/speckit.plan` command. See
+`.specify/templates/commands/plan.md` for the execution workflow.
 
 ## Summary
 
-Establish a stable, scalable, AI-safe monorepo structure for Zidney, including repository structure, strict workspace boundaries, layering enforcement, Bun workspace configuration, TypeScript baseline, Docker infrastructure baseline, testing baseline, and linting discipline baseline. No business logic is implemented.
+Establish a stable, scalable, AI-safe monorepo structure for Zidney, including repository structure,
+strict workspace boundaries, layering enforcement, Bun workspace configuration, TypeScript baseline,
+Docker infrastructure baseline, testing baseline, and linting discipline baseline. No business logic
+is implemented.
 
 ## Technical Context
 
@@ -18,7 +23,8 @@ Establish a stable, scalable, AI-safe monorepo structure for Zidney, including r
 **Target Platform**: macOS/Linux development environment, Docker for infrastructure services  
 **Project Type**: Monorepo with 5 Vue apps, 1 API app, 1 worker app, 6 shared packages  
 **Performance Goals**: N/A (setup phase)  
-**Constraints**: Strict import boundaries (apps → packages only, packages → packages only), no business logic, no cross-layer violations  
+**Constraints**: Strict import boundaries (apps → packages only, packages → packages only), no
+business logic, no cross-layer violations  
 **Scale/Scope**: 5 apps, 6 packages, single lockfile, shared dependency graph
 
 ## Constitution Check
@@ -78,7 +84,9 @@ zidney/
 └── root configuration files
 ```
 
-**Structure Decision**: Monorepo with strict layering - UI layer (Vue apps) calls API layer (apps/api) calls Domain layer (packages/domain-core) calls Infrastructure layer (DB/Redis). Import boundaries enforced: apps import from packages only, packages import from packages only.
+**Structure Decision**: Monorepo with strict layering - UI layer (Vue apps) calls API layer
+(apps/api) calls Domain layer (packages/domain-core) calls Infrastructure layer (DB/Redis). Import
+boundaries enforced: apps import from packages only, packages import from packages only.
 
 ## Complexity Tracking
 

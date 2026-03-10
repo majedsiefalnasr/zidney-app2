@@ -2,7 +2,8 @@
 
 ## Architecture Overview
 
-The Products Management feature is implemented across three layers following Zidney's layered architecture:
+The Products Management feature is implemented across three layers following Zidney's layered
+architecture:
 
 ### Layer Stack
 
@@ -65,48 +66,41 @@ Pure business logic layer with no HTTP dependencies:
 export async function createProduct(
   dbClient,
   input: CreateProductInput,
-  userId: string
-): Promise<Product>
+  userId: string,
+): Promise<Product>;
 
 export async function updateProduct(
   dbClient,
   productId: string,
   updates: UpdateProductInput,
-  userId: string
-): Promise<Product>
+  userId: string,
+): Promise<Product>;
 
 export async function changeProductStatus(
   dbClient,
   productId: string,
   newStatus: ProductStatus,
-  userId: string
-): Promise<Product>
+  userId: string,
+): Promise<Product>;
 
 // Product queries
-export async function getProductById(
-  dbClient,
-  productId: string
-): Promise<Product>
+export async function getProductById(dbClient, productId: string): Promise<Product>;
 
-export async function getProductBySlug(dbClient, slug: string): Promise<Product>
+export async function getProductBySlug(dbClient, slug: string): Promise<Product>;
 
 export async function listProducts(
   dbClient,
-  options?: ListOptions
-): Promise<PaginatedResponse<Product>>
+  options?: ListOptions,
+): Promise<PaginatedResponse<Product>>;
 
 // Audit operations
 export async function getProductAuditLog(
   dbClient,
   productId: string,
-  options?: ListOptions
-): Promise<PaginatedResponse<AuditLogEntry>>
+  options?: ListOptions,
+): Promise<PaginatedResponse<AuditLogEntry>>;
 
-export async function deleteProduct(
-  dbClient,
-  productId: string,
-  userId: string
-): Promise<void>
+export async function deleteProduct(dbClient, productId: string, userId: string): Promise<void>;
 ```
 
 ### Type Definitions
@@ -115,49 +109,49 @@ export async function deleteProduct(
 
 ```typescript
 export interface Product {
-  id: string
-  name: ProductName
-  slug: string
-  description?: string | null
-  enabled_modules: ModuleEnum[]
-  status: ProductStatus
-  current_version: number
-  created_at: string
-  updated_at: string
+  id: string;
+  name: ProductName;
+  slug: string;
+  description?: string | null;
+  enabled_modules: ModuleEnum[];
+  status: ProductStatus;
+  current_version: number;
+  created_at: string;
+  updated_at: string;
 }
 
 export interface ProductVersion {
-  id: string
-  product_id: string
-  version_number: number
-  name: ProductName
-  slug: string
-  description?: string | null
-  enabled_modules: ModuleEnum[]
-  created_at: string
-  created_by: string
+  id: string;
+  product_id: string;
+  version_number: number;
+  name: ProductName;
+  slug: string;
+  description?: string | null;
+  enabled_modules: ModuleEnum[];
+  created_at: string;
+  created_by: string;
 }
 
 export interface AuditLogEntry {
-  id: string
-  product_id: string
-  action: AuditAction
-  timestamp: string
-  performed_by: string
-  previous_version?: number | null
-  new_version?: number | null
-  changed_fields?: Record<string, FieldChange> | null
+  id: string;
+  product_id: string;
+  action: AuditAction;
+  timestamp: string;
+  performed_by: string;
+  previous_version?: number | null;
+  new_version?: number | null;
+  changed_fields?: Record<string, FieldChange> | null;
 }
 
-export type ProductStatus = 'ACTIVE' | 'INACTIVE'
-export type AuditAction = 'CREATE' | 'UPDATE' | 'STATUS_CHANGE'
+export type ProductStatus = "ACTIVE" | "INACTIVE";
+export type AuditAction = "CREATE" | "UPDATE" | "STATUS_CHANGE";
 export type ModuleEnum =
-  | 'MODULE_ASSESSMENT'
-  | 'MODULE_ATTEMPT'
-  | 'MODULE_CONTENT'
-  | 'MODULE_REPORTING'
-  | 'MODULE_PROCTOR'
-  | 'MODULE_ANALYTICS'
+  | "MODULE_ASSESSMENT"
+  | "MODULE_ATTEMPT"
+  | "MODULE_CONTENT"
+  | "MODULE_REPORTING"
+  | "MODULE_PROCTOR"
+  | "MODULE_ANALYTICS";
 ```
 
 ## Database Schema
@@ -328,19 +322,13 @@ HTTP Response (200)
 ```typescript
 function validateProductName(name: ProductName): void {
   if (!name.en || name.en.length === 0) {
-    throw new ValidationError(
-      'INVALID_NAME_LOCALIZATION',
-      'English name required'
-    )
+    throw new ValidationError("INVALID_NAME_LOCALIZATION", "English name required");
   }
   if (name.en.length > 255) {
-    throw new ValidationError('INVALID_NAME_LOCALIZATION', 'Name too long')
+    throw new ValidationError("INVALID_NAME_LOCALIZATION", "Name too long");
   }
   if (name.ar && name.ar.length > 255) {
-    throw new ValidationError(
-      'INVALID_NAME_LOCALIZATION',
-      'Arabic name too long'
-    )
+    throw new ValidationError("INVALID_NAME_LOCALIZATION", "Arabic name too long");
   }
 }
 ```
@@ -355,22 +343,23 @@ function validateProductName(name: ProductName): void {
 
 ```typescript
 function validateSlug(slug: string): void {
-  const pattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/
+  const pattern = /^[a-z0-9]+(?:-[a-z0-9]+)*$/;
   if (!pattern.test(slug)) {
     throw new ValidationError(
-      'INVALID_SLUG_FORMAT',
-      'Slug must be lowercase alphanumeric with hyphens only'
-    )
+      "INVALID_SLUG_FORMAT",
+      "Slug must be lowercase alphanumeric with hyphens only",
+    );
   }
   if (slug.length > 255) {
-    throw new ValidationError('INVALID_SLUG_FORMAT', 'Slug too long')
+    throw new ValidationError("INVALID_SLUG_FORMAT", "Slug too long");
   }
 }
 ```
 
 ### Modules
 
-- **Valid values**: MODULE_ASSESSMENT, MODULE_ATTEMPT, MODULE_CONTENT, MODULE_REPORTING, MODULE_PROCTOR, MODULE_ANALYTICS
+- **Valid values**: MODULE_ASSESSMENT, MODULE_ATTEMPT, MODULE_CONTENT, MODULE_REPORTING,
+  MODULE_PROCTOR, MODULE_ANALYTICS
 - **Minimum**: 1 module required
 - **Maximum**: 6 modules
 - **Uniqueness**: No duplicates allowed
@@ -378,30 +367,27 @@ function validateSlug(slug: string): void {
 ```typescript
 function validateModulesEnum(modules: ModuleEnum[]): void {
   const validModules = [
-    'MODULE_ASSESSMENT',
-    'MODULE_ATTEMPT',
-    'MODULE_CONTENT',
-    'MODULE_REPORTING',
-    'MODULE_PROCTOR',
-    'MODULE_ANALYTICS',
-  ]
+    "MODULE_ASSESSMENT",
+    "MODULE_ATTEMPT",
+    "MODULE_CONTENT",
+    "MODULE_REPORTING",
+    "MODULE_PROCTOR",
+    "MODULE_ANALYTICS",
+  ];
 
   if (modules.length === 0) {
-    throw new ValidationError(
-      'INVALID_MODULE_ENUM',
-      'At least one module required'
-    )
+    throw new ValidationError("INVALID_MODULE_ENUM", "At least one module required");
   }
 
-  const seen = new Set<string>()
+  const seen = new Set<string>();
   for (const mod of modules) {
     if (!validModules.includes(mod)) {
-      throw new ValidationError('INVALID_MODULE_ENUM', `Invalid module: ${mod}`)
+      throw new ValidationError("INVALID_MODULE_ENUM", `Invalid module: ${mod}`);
     }
     if (seen.has(mod)) {
-      throw new ValidationError('INVALID_MODULE_ENUM', 'Duplicate module')
+      throw new ValidationError("INVALID_MODULE_ENUM", "Duplicate module");
     }
-    seen.add(mod)
+    seen.add(mod);
   }
 }
 ```
@@ -421,27 +407,27 @@ function validateModulesEnum(modules: ModuleEnum[]): void {
 
 ```typescript
 export type ModuleEnum =
-  | 'MODULE_ASSESSMENT'
-  | 'MODULE_ATTEMPT'
-  | 'MODULE_CONTENT'
-  | 'MODULE_REPORTING'
-  | 'MODULE_PROCTOR'
-  | 'MODULE_ANALYTICS'
-  | 'MODULE_NEW_FEATURE' // Add here
+  | "MODULE_ASSESSMENT"
+  | "MODULE_ATTEMPT"
+  | "MODULE_CONTENT"
+  | "MODULE_REPORTING"
+  | "MODULE_PROCTOR"
+  | "MODULE_ANALYTICS"
+  | "MODULE_NEW_FEATURE"; // Add here
 ```
 
 2. **Update validation** (`packages/domain-core/src/products/productService.ts`):
 
 ```typescript
 const validModules = [
-  'MODULE_ASSESSMENT',
-  'MODULE_ATTEMPT',
-  'MODULE_CONTENT',
-  'MODULE_REPORTING',
-  'MODULE_PROCTOR',
-  'MODULE_ANALYTICS',
-  'MODULE_NEW_FEATURE', // Add here
-]
+  "MODULE_ASSESSMENT",
+  "MODULE_ATTEMPT",
+  "MODULE_CONTENT",
+  "MODULE_REPORTING",
+  "MODULE_PROCTOR",
+  "MODULE_ANALYTICS",
+  "MODULE_NEW_FEATURE", // Add here
+];
 ```
 
 3. **Database schema already supports** (uses TEXT[]):
@@ -455,7 +441,7 @@ No migration needed for array column.
 ```typescript
 export interface Product {
   // ... existing fields
-  new_field?: string | null
+  new_field?: string | null;
 }
 ```
 
@@ -487,12 +473,12 @@ All errors follow the standard error format:
 
 ```typescript
 interface ErrorResponse {
-  success: false
-  data: null
+  success: false;
+  data: null;
   error: {
-    code: string
-    message: string
-  }
+    code: string;
+    message: string;
+  };
 }
 ```
 
@@ -514,16 +500,16 @@ All operations are logged with structured logging:
 
 ```typescript
 log({
-  level: 'info',
-  message: 'Product created',
-  service: 'products-api',
+  level: "info",
+  message: "Product created",
+  service: "products-api",
   workspace_id: ctx.workspaceId,
   workspace_slug: ctx.workspaceSlug,
   user_id: userId,
   correlation_id: ctx.correlationId,
   product_id: product.id,
   product_slug: product.slug,
-})
+});
 ```
 
 ## Performance Considerations
@@ -568,16 +554,16 @@ All multi-row operations use transactions:
 **Create**: Insert 3 rows atomically (products, product_versions, product_audit_logs)
 
 ```typescript
-const client = await dbClient.connect()
+const client = await dbClient.connect();
 try {
-  await client.query('BEGIN')
+  await client.query("BEGIN");
   // ... insert rows
-  await client.query('COMMIT')
+  await client.query("COMMIT");
 } catch (error) {
-  await client.query('ROLLBACK')
-  throw error
+  await client.query("ROLLBACK");
+  throw error;
 } finally {
-  client.release()
+  client.release();
 }
 ```
 
@@ -598,7 +584,8 @@ This implementation completes Stage 9 (Products Management Phase 1-9 + testing/d
 
 **Build on**: Current product service layer
 
-**Dependencies**: This stage's API endpoints, service functions, type definitions, and database schema.
+**Dependencies**: This stage's API endpoints, service functions, type definitions, and database
+schema.
 
 ### Integration Points for Stage 10
 
@@ -655,4 +642,5 @@ Comprehensive test coverage across three levels:
 - **API Documentation**: [API_PRODUCTS_MANAGEMENT.md](API_PRODUCTS_MANAGEMENT.md)
 - **OpenAPI Spec**: [products-management-api-spec.yaml](products-management-api-spec.yaml)
 - **Database Guide**: [README_PRODUCTS.md](../../runtime/009-products-management/README_PRODUCTS.md)
-- **Deployment Guide**: [DEPLOYMENT_AND_VALIDATION_PRODUCTS.md](../../runtime/009-products-management/DEPLOYMENT_AND_VALIDATION_PRODUCTS.md)
+- **Deployment Guide**:
+  [DEPLOYMENT_AND_VALIDATION_PRODUCTS.md](../../runtime/009-products-management/DEPLOYMENT_AND_VALIDATION_PRODUCTS.md)

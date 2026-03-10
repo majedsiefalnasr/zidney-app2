@@ -18,9 +18,7 @@ What problem does this solve?
 
 Specify exact spec reference:
 
-Phase:
-Stage:
-Spec file path:
+Phase: Stage: Spec file path:
 
 PRs without spec reference will be rejected.
 

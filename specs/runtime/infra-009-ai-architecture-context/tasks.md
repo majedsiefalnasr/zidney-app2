@@ -11,7 +11,9 @@
 
 ## Overview
 
-This task list implements the AI Architecture Context Layer — a set of 7 machine-readable JSON/Markdown artifacts that enable AI agents to understand and validate Zidney's architecture automatically.
+This task list implements the AI Architecture Context Layer — a set of 7 machine-readable
+JSON/Markdown artifacts that enable AI agents to understand and validate Zidney's architecture
+automatically.
 
 **Key Deliverables**:
 
@@ -61,11 +63,16 @@ Phase 4 (Deployment): T033-T035 (sequential, final delivery)
 
 ### Source System Discovery
 
-- [x] T001 Document ADR source structure and consumption patterns in specs/runtime/infra-009-ai-architecture-context/research.md ✅ COMPLETE
-- [x] T002 [P] Document module-boundaries.json format, validation rules, and update frequency in specs/runtime/infra-009-ai-architecture-context/research.md ✅ COMPLETE
-- [x] T003 Document infra-audit.ts outputs, schema structure, and dependency graph format in specs/runtime/infra-009-ai-architecture-context/research.md ✅ COMPLETE
-- [x] T004 Design complete artifact generation pipeline architecture with diagram in specs/runtime/infra-009-ai-architecture-context/research.md ✅ COMPLETE
-- [x] T005 Map data flows from sources to all 7 artifacts and final consumers in specs/runtime/infra-009-ai-architecture-context/research.md ✅ COMPLETE
+- [x] T001 Document ADR source structure and consumption patterns in
+      specs/runtime/infra-009-ai-architecture-context/research.md ✅ COMPLETE
+- [x] T002 [P] Document module-boundaries.json format, validation rules, and update frequency in
+      specs/runtime/infra-009-ai-architecture-context/research.md ✅ COMPLETE
+- [x] T003 Document infra-audit.ts outputs, schema structure, and dependency graph format in
+      specs/runtime/infra-009-ai-architecture-context/research.md ✅ COMPLETE
+- [x] T004 Design complete artifact generation pipeline architecture with diagram in
+      specs/runtime/infra-009-ai-architecture-context/research.md ✅ COMPLETE
+- [x] T005 Map data flows from sources to all 7 artifacts and final consumers in
+      specs/runtime/infra-009-ai-architecture-context/research.md ✅ COMPLETE
 
 ---
 
@@ -79,17 +86,25 @@ Phase 4 (Deployment): T033-T035 (sequential, final delivery)
 
 ### Type System & Schemas
 
-- [x] T006 Create TypeScript interface definitions for all 7 artifacts in packages/types/src/ai-context.ts with JSDoc documentation ✅ COMPLETE
-- [x] T007 Generate JSON schemas from TypeScript types using typescript-json-schema into docs/ai/context/schemas/ directory ✅ COMPLETE (automated)
+- [x] T006 Create TypeScript interface definitions for all 7 artifacts in
+      packages/types/src/ai-context.ts with JSDoc documentation ✅ COMPLETE
+- [x] T007 Generate JSON schemas from TypeScript types using typescript-json-schema into
+      docs/ai/context/schemas/ directory ✅ COMPLETE (automated)
 
 ### Design Specifications
 
-- [x] T008 [P] Design artifact generation script architecture with error handling in specs/runtime/infra-009-ai-architecture-context/data-model.md ✅ COMPLETE
-- [x] T009 [P] Design change detection mechanism with source hashing and freshness logic in specs/runtime/infra-009-ai-architecture-context/data-model.md ✅ COMPLETE
-- [x] T010 [P] Design AI tool integration contracts (Copilot, GitNexus, SpecKit, Claude) in specs/runtime/infra-009-ai-architecture-context/contracts/ai-tool-integration.md ✅ COMPLETE
-- [x] T011 [P] Design CI/CD integration with GitHub Actions workflow templates in specs/runtime/infra-009-ai-architecture-context/contracts/ci-integration.md ✅ COMPLETE
-- [x] T012 [P] Design code organization and module layout for scripts/ai-context/ directory in specs/runtime/infra-009-ai-architecture-context/data-model.md ✅ COMPLETE
-- [x] T013 Document key implementation decisions with rationale in specs/runtime/infra-009-ai-architecture-context/research.md ✅ COMPLETE
+- [x] T008 [P] Design artifact generation script architecture with error handling in
+      specs/runtime/infra-009-ai-architecture-context/data-model.md ✅ COMPLETE
+- [x] T009 [P] Design change detection mechanism with source hashing and freshness logic in
+      specs/runtime/infra-009-ai-architecture-context/data-model.md ✅ COMPLETE
+- [x] T010 [P] Design AI tool integration contracts (Copilot, GitNexus, SpecKit, Claude) in
+      specs/runtime/infra-009-ai-architecture-context/contracts/ai-tool-integration.md ✅ COMPLETE
+- [x] T011 [P] Design CI/CD integration with GitHub Actions workflow templates in
+      specs/runtime/infra-009-ai-architecture-context/contracts/ci-integration.md ✅ COMPLETE
+- [x] T012 [P] Design code organization and module layout for scripts/ai-context/ directory in
+      specs/runtime/infra-009-ai-architecture-context/data-model.md ✅ COMPLETE
+- [x] T013 Document key implementation decisions with rationale in
+      specs/runtime/infra-009-ai-architecture-context/research.md ✅ COMPLETE
 
 ---
 
@@ -103,25 +118,44 @@ Phase 4 (Deployment): T033-T035 (sequential, final delivery)
 
 ### Core Infrastructure
 
-- [x] T014 [P] Implement source-loader.ts to load and parse ADR files and module-boundaries.json in scripts/ai-context/source-loader.ts ✅ COMPLETE
-- [x] T015 [P] Implement schema-validator.ts with runtime validation for all 7 artifact schemas in scripts/ai-context/schema-validator.ts ✅ COMPLETE
-- [x] T016 Create docs/ai/context/schemas/ directory structure and documentation in docs/ai/context/schemas/README.md ✅ COMPLETE
+- [x] T014 [P] Implement source-loader.ts to load and parse ADR files and module-boundaries.json in
+      scripts/ai-context/source-loader.ts ✅ COMPLETE
+- [x] T015 [P] Implement schema-validator.ts with runtime validation for all 7 artifact schemas in
+      scripts/ai-context/schema-validator.ts ✅ COMPLETE
+- [x] T016 Create docs/ai/context/schemas/ directory structure and documentation in
+      docs/ai/context/schemas/README.md ✅ COMPLETE
 
 ### Artifact Builders (7 Builders - Parallelizable)
 
-- [x] T017 [P] Implement module-map-builder.ts to generate ai-module-map.json from directory scan and module-boundaries.json in scripts/ai-context/artifact-builders/module-map-builder.ts ✅ COMPLETE
-- [x] T018 [P] Implement layer-model-builder.ts to generate ai-layer-model.json from module-boundaries.json rules in scripts/ai-context/artifact-builders/layer-model-builder.ts ✅ COMPLETE
-- [x] T019 [P] Implement dependency-graph-builder.ts to generate ai-dependency-graph.json from infra-audit.ts output in scripts/ai-context/artifact-builders/dependency-graph-builder.ts ✅ COMPLETE
-- [x] T020 [P] Implement architecture-summary-builder.ts to generate ai-architecture-summary.md from ADRs and layer model in scripts/ai-context/artifact-builders/architecture-summary-builder.ts ✅ COMPLETE
-- [x] T021 [P] Implement runtime-map-builder.ts to generate ai-runtime-map.json from docker-compose and service definitions in scripts/ai-context/artifact-builders/runtime-map-builder.ts ✅ COMPLETE
-- [x] T022 [P] Implement architecture-brain-builder.ts to aggregate all data and generate ai-architecture-brain.json in scripts/ai-context/artifact-builders/architecture-brain-builder.ts ✅ COMPLETE
-- [x] T023 [P] Implement context-mini-builder.ts to generate lightweight ai-context-mini.json for fast loading in scripts/ai-context/artifact-builders/context-mini-builder.ts ✅ COMPLETE
+- [x] T017 [P] Implement module-map-builder.ts to generate ai-module-map.json from directory scan
+      and module-boundaries.json in scripts/ai-context/artifact-builders/module-map-builder.ts ✅
+      COMPLETE
+- [x] T018 [P] Implement layer-model-builder.ts to generate ai-layer-model.json from
+      module-boundaries.json rules in scripts/ai-context/artifact-builders/layer-model-builder.ts ✅
+      COMPLETE
+- [x] T019 [P] Implement dependency-graph-builder.ts to generate ai-dependency-graph.json from
+      infra-audit.ts output in scripts/ai-context/artifact-builders/dependency-graph-builder.ts ✅
+      COMPLETE
+- [x] T020 [P] Implement architecture-summary-builder.ts to generate ai-architecture-summary.md from
+      ADRs and layer model in scripts/ai-context/artifact-builders/architecture-summary-builder.ts
+      ✅ COMPLETE
+- [x] T021 [P] Implement runtime-map-builder.ts to generate ai-runtime-map.json from docker-compose
+      and service definitions in scripts/ai-context/artifact-builders/runtime-map-builder.ts ✅
+      COMPLETE
+- [x] T022 [P] Implement architecture-brain-builder.ts to aggregate all data and generate
+      ai-architecture-brain.json in
+      scripts/ai-context/artifact-builders/architecture-brain-builder.ts ✅ COMPLETE
+- [x] T023 [P] Implement context-mini-builder.ts to generate lightweight ai-context-mini.json for
+      fast loading in scripts/ai-context/artifact-builders/context-mini-builder.ts ✅ COMPLETE
 
 ### Orchestration & CLI
 
-- [x] T024 Implement artifact-generator.ts orchestrator to coordinate all builders with concurrency control in scripts/ai-context/artifact-generator.ts ✅ COMPLETE
-- [x] T025 Implement change-detector.ts with source hashing and freshness validation logic in scripts/ai-context/change-detector.ts ✅ COMPLETE
-- [x] T026 Implement generate-ai-context.ts entry point with CLI argument parsing and error handling in scripts/generate-ai-context.ts ✅ COMPLETE
+- [x] T024 Implement artifact-generator.ts orchestrator to coordinate all builders with concurrency
+      control in scripts/ai-context/artifact-generator.ts ✅ COMPLETE
+- [x] T025 Implement change-detector.ts with source hashing and freshness validation logic in
+      scripts/ai-context/change-detector.ts ✅ COMPLETE
+- [x] T026 Implement generate-ai-context.ts entry point with CLI argument parsing and error handling
+      in scripts/generate-ai-context.ts ✅ COMPLETE
 
 ---
 
@@ -135,19 +169,27 @@ Phase 4 (Deployment): T033-T035 (sequential, final delivery)
 
 ### System Integration
 
-- [x] T027 Integrate generate-ai-context with ai-guard.ts to load ai-architecture-brain.json in scripts/ai-guard.ts ✅ COMPLETE
-- [x] T028 Integrate generate-ai-context with infra-audit.ts to trigger and validate consistency in scripts/infra-audit.ts ✅ COMPLETE
+- [x] T027 Integrate generate-ai-context with ai-guard.ts to load ai-architecture-brain.json in
+      scripts/ai-guard.ts ✅ COMPLETE
+- [x] T028 Integrate generate-ai-context with infra-audit.ts to trigger and validate consistency in
+      scripts/infra-audit.ts ✅ COMPLETE
 
 ### Unit & Component Testing
 
-- [x] T029 [P] Implement unit tests for all artifact builders in tests/validation/ai-context-generation.test.ts with 80%+ code coverage ✅ COMPLETE
-- [x] T030 [P] Implement schema validation tests against fixtures in tests/validation/artifact-schema-validation.test.ts ✅ COMPLETE
+- [x] T029 [P] Implement unit tests for all artifact builders in
+      tests/validation/ai-context-generation.test.ts with 80%+ code coverage ✅ COMPLETE
+- [x] T030 [P] Implement schema validation tests against fixtures in
+      tests/validation/artifact-schema-validation.test.ts ✅ COMPLETE
 
 ### Integration & Performance Testing
 
-- [x] T031 Implement integration tests with real sources and actual validation in tests/integration/ai-context-integration.test.ts ✅ COMPLETE
-- [x] T032 Implement performance benchmarking tests to verify < 5s generation and < 15MB total size in tests/performance/ai-context-performance.test.ts ✅ COMPLETE
-- [x] T033 Execute manual AI tool integration testing (Copilot, GitNexus, SpecKit) and document results in specs/runtime/infra-009-ai-architecture-context/reports/ai-tool-testing.md ✅ COMPLETE
+- [x] T031 Implement integration tests with real sources and actual validation in
+      tests/integration/ai-context-integration.test.ts ✅ COMPLETE
+- [x] T032 Implement performance benchmarking tests to verify < 5s generation and < 15MB total size
+      in tests/performance/ai-context-performance.test.ts ✅ COMPLETE
+- [x] T033 Execute manual AI tool integration testing (Copilot, GitNexus, SpecKit) and document
+      results in specs/runtime/infra-009-ai-architecture-context/reports/ai-tool-testing.md ✅
+      COMPLETE
 
 ---
 
@@ -161,12 +203,17 @@ Phase 4 (Deployment): T033-T035 (sequential, final delivery)
 
 ### Documentation Suite
 
-- [x] T034 Create comprehensive documentation suite including README.md, USER_GUIDE.md, ARTIFACT_REFERENCE.md, INTEGRATION_GUIDE.md, and TROUBLESHOOTING.md in docs/ai/context/ directory ✅ COMPLETE
+- [x] T034 Create comprehensive documentation suite including README.md, USER_GUIDE.md,
+      ARTIFACT_REFERENCE.md, INTEGRATION_GUIDE.md, and TROUBLESHOOTING.md in docs/ai/context/
+      directory ✅ COMPLETE
 
 ### Operations & Deployment
 
-- [x] T035 Create runbooks for artifact regeneration, freshness validation, and troubleshooting in docs/ai/context/REFRESH_GUIDE.md ✅ COMPLETE
-- [x] T036 Deploy artifacts to production, validate freshness, integrate into CI/CD pipeline, and confirm all consumers can load artifacts successfully ✅ COMPLETE (Artifacts deployed to docs/ai/context/) ---
+- [x] T035 Create runbooks for artifact regeneration, freshness validation, and troubleshooting in
+      docs/ai/context/REFRESH_GUIDE.md ✅ COMPLETE
+- [x] T036 Deploy artifacts to production, validate freshness, integrate into CI/CD pipeline, and
+      confirm all consumers can load artifacts successfully ✅ COMPLETE (Artifacts deployed to
+      docs/ai/context/) ---
 
 ## 🎉 IMPLEMENTATION COMPLETE
 
@@ -322,7 +369,9 @@ Phase 4 (Deployment): T033-T035 (sequential, final delivery)
 
 ---
 
-The AI Architecture Context Layer is **live and operational**. All artifacts are generated, validated, and deployed. AI tools can now consume machine-readable architecture metadata for autonomous, architecture-aware code generation and validation.
+The AI Architecture Context Layer is **live and operational**. All artifacts are generated,
+validated, and deployed. AI tools can now consume machine-readable architecture metadata for
+autonomous, architecture-aware code generation and validation.
 
 ---
 
@@ -402,7 +451,8 @@ All 7 artifact builders can run in parallel after core infrastructure:
 **Parallel group 2**: T017, T018, T019, T020, T021, T022, T023 (each 3-4 hours)  
 **Sequential group 3**: T024, T025, T026 (orchestration, depends on builders)
 
-**Estimated parallel speedup**: 7 builders × 3.5 hours / sequential = ~8.75 hours vs. 24.5 hours serial = 2.8x faster
+**Estimated parallel speedup**: 7 builders × 3.5 hours / sequential = ~8.75 hours vs. 24.5 hours
+serial = 2.8x faster
 
 ### Phase 3 Parallelization
 
@@ -412,7 +462,8 @@ All tests can start after implementations:
 **Parallel group 2**: T029, T030, T031, T032 (tests, 2-3 hours each)  
 **Sequential group 3**: T033 (manual testing, 2-3 hours)
 
-**Estimated parallel speedup**: 4 test suites in parallel = ~3 hours vs. 8-10 hours serial = 2.7x faster
+**Estimated parallel speedup**: 4 test suites in parallel = ~3 hours vs. 8-10 hours serial = 2.7x
+faster
 
 ### Phase 4 Parallelization
 

@@ -1,7 +1,6 @@
 # Quickstart: Monorepo Setup
 
-**Date**: 2026-02-15
-**Feature**: Monorepo Setup
+**Date**: 2026-02-15 **Feature**: Monorepo Setup
 
 ## Prerequisites
 

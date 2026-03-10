@@ -8,7 +8,9 @@
 
 ## Summary
 
-All 57 implementation tasks completed across 5 user stories and 6 implementation phases. The security and token handling hardening is fully implemented in all 3 apps (mmc, backoffice, frontoffice). 31 test files pass with 273 tests. No deferred tasks.
+All 57 implementation tasks completed across 5 user stories and 6 implementation phases. The
+security and token handling hardening is fully implemented in all 3 apps (mmc, backoffice,
+frontoffice). 31 test files pass with 273 tests. No deferred tasks.
 
 ---
 
@@ -152,8 +154,10 @@ All 57 implementation tasks completed across 5 user stories and 6 implementation
 
 ## Open Risks
 
-- **Root-level `bun run typecheck`**: Pre-existing `@/*` multi-app path resolution warnings. Not introduced by this stage. App-level builds pass with exit 0. See VALIDATION_REPORT.md for details.
-- **Pre-existing `tests/unit/mmc/auth.service.test.ts`**: Cross-layer import of `hono/jwt` fails in root vitest. Pre-existing issue from STAGE_14_MMC_MEMBERS. Not in scope.
+- **Root-level `bun run typecheck`**: Pre-existing `@/*` multi-app path resolution warnings. Not
+  introduced by this stage. App-level builds pass with exit 0. See VALIDATION_REPORT.md for details.
+- **Pre-existing `tests/unit/mmc/auth.service.test.ts`**: Cross-layer import of `hono/jwt` fails in
+  root vitest. Pre-existing issue from STAGE_14_MMC_MEMBERS. Not in scope.
 
 ---
 

@@ -230,5 +230,4 @@ Stage is complete when:
 
 ---
 
-Next stage:
-STAGE_38_SCHEDULED_ENGINE
+Next stage: STAGE_38_SCHEDULED_ENGINE

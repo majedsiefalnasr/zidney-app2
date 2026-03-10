@@ -9,7 +9,10 @@
 
 ## Overview
 
-This directory contains the complete functional specification for the Zidney Migration & Versioning Model (STAGE_02C). The specification operationalizes ADR-0008 (Semantic Versioning Policy) and defines the deterministic schema evolution framework that guarantees institutional trust and multi-tenant consistency.
+This directory contains the complete functional specification for the Zidney Migration & Versioning
+Model (STAGE_02C). The specification operationalizes ADR-0008 (Semantic Versioning Policy) and
+defines the deterministic schema evolution framework that guarantees institutional trust and
+multi-tenant consistency.
 
 ---
 
@@ -50,7 +53,8 @@ This directory contains the complete functional specification for the Zidney Mig
 
 **Master DB Entities:**
 
-- `platform_settings` – Single-row system table tracking current and minimum supported schema versions
+- `platform_settings` – Single-row system table tracking current and minimum supported schema
+  versions
 - `migration_registry` – Immutable append-only audit log of all applied migrations
 - `tenants_registry` (modified) – Added `schema_version` column for fast compatibility checks
 - `upgrade_snapshots` – Metadata tracking for pre-upgrade database snapshots
@@ -260,7 +264,9 @@ Before proceeding to planning:
 
 ## Author Notes
 
-This specification formalizes the migration and versioning model that is foundational to Zidney's institutional trust guarantee. Every schema change across the platform flows through this system. Clarity, consistency, and strictness in this specification cascades to all subsequent stages.
+This specification formalizes the migration and versioning model that is foundational to Zidney's
+institutional trust guarantee. Every schema change across the platform flows through this system.
+Clarity, consistency, and strictness in this specification cascades to all subsequent stages.
 
 Key areas that require careful implementation:
 

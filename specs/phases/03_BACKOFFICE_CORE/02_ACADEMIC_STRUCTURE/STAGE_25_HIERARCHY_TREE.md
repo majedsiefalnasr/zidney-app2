@@ -169,5 +169,4 @@ Stage complete when:
 
 ---
 
-Next:
-STAGE_26_TEAMS
+Next: STAGE_26_TEAMS

@@ -3,39 +3,53 @@
 **Purpose**: Validate specification completeness and quality before proceeding to planning  
 **Created**: 2026-02-28  
 **Feature**: [spec.md](../spec.md)  
-**Stage File**: [STAGE_17_TENANT_BOOTSTRAP.md](../../../../specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_17_TENANT_BOOTSTRAP.md)
+**Stage File**:
+[STAGE_17_TENANT_BOOTSTRAP.md](../../../../specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_17_TENANT_BOOTSTRAP.md)
 
 ---
 
 ## Content Quality
 
 - [x] No implementation details (languages, frameworks, APIs)
-  - _Verified: spec describes WHAT must happen, not HOW it is coded. References to `packages/ui-system` and `packages/logger` are architectural constraints, not implementation choices._
+  - _Verified: spec describes WHAT must happen, not HOW it is coded. References to
+    `packages/ui-system` and `packages/logger` are architectural constraints, not implementation
+    choices._
 - [x] Focused on user value and business needs
   - _Verified: each user story anchors a functional requirement to a concrete user outcome._
 - [x] Written for non-technical stakeholders (where possible)
   - _Verified: user stories are in plain language; technical tables are clearly separated._
 - [x] All mandatory sections completed
-  - _Verified: Feature Overview, Constitutional Compliance, Isolation Analysis, User Stories, Functional Requirements, Non-Functional Requirements, License & Version Enforcement, Data Model, Transaction Boundaries, Idempotency, Observability, Rate Limiting, Layer Separation, Failure Modes, Test Strategy, Out of Scope, Dependencies, Acceptance Criteria, Assumptions, Non-Goals, Final Compliance Statement — all present._
+  - _Verified: Feature Overview, Constitutional Compliance, Isolation Analysis, User Stories,
+    Functional Requirements, Non-Functional Requirements, License & Version Enforcement, Data Model,
+    Transaction Boundaries, Idempotency, Observability, Rate Limiting, Layer Separation, Failure
+    Modes, Test Strategy, Out of Scope, Dependencies, Acceptance Criteria, Assumptions, Non-Goals,
+    Final Compliance Statement — all present._
 
 ---
 
 ## Requirement Completeness
 
 - [x] No [NEEDS CLARIFICATION] markers remain
-  - _All ambiguities were resolved using stated assumptions (see spec Assumptions section). No markers present in final spec._
+  - _All ambiguities were resolved using stated assumptions (see spec Assumptions section). No
+    markers present in final spec._
 - [x] Requirements are testable and unambiguous
-  - _Verified: each FR uses deterministic language ("must", "must not", specific HTTP codes, specific field names)._
+  - _Verified: each FR uses deterministic language ("must", "must not", specific HTTP codes,
+    specific field names)._
 - [x] Success criteria are measurable
-  - _Verified: acceptance criteria use Given/When/Then format with specific HTTP response codes and observable outcomes._
+  - _Verified: acceptance criteria use Given/When/Then format with specific HTTP response codes and
+    observable outcomes._
 - [x] Success criteria are technology-agnostic (no implementation details)
-  - _Verified: acceptance criteria describe observable behaviors; no framework names appear in AC text._
+  - _Verified: acceptance criteria describe observable behaviors; no framework names appear in AC
+    text._
 - [x] All acceptance scenarios are defined
-  - _Verified: 12 acceptance criteria covering all 8 validation criteria from the stage file, plus 4 additional (RBAC tables, WebSocket, UI system, token version) derived from stage sections 7–10._
+  - _Verified: 12 acceptance criteria covering all 8 validation criteria from the stage file, plus 4
+    additional (RBAC tables, WebSocket, UI system, token version) derived from stage sections 7–10._
 - [x] Edge cases are identified
-  - _Verified: unknown tenant slug (404), token_version invalidation, license transition during active WebSocket session, disabled module direct URL hit._
+  - _Verified: unknown tenant slug (404), token_version invalidation, license transition during
+    active WebSocket session, disabled module direct URL hit._
 - [x] Scope is clearly bounded
-  - _Verified: "Out of Scope" and "Explicit Non-Goals" sections enumerate 9 explicit exclusions aligned with stage file Section 13 (Not Allowed)._
+  - _Verified: "Out of Scope" and "Explicit Non-Goals" sections enumerate 9 explicit exclusions
+    aligned with stage file Section 13 (Not Allowed)._
 - [x] Dependencies and assumptions identified
   - _Verified: 5 upstream stage dependencies with rationale; 5 assumptions documented._
 
@@ -56,11 +70,14 @@
     - _FR-09 (Observability) → AC-07_
     - _FR-10 (Isolation Hard Stops) → AC-05_
 - [x] User scenarios cover primary flows
-  - _8 user stories covering: license gate, module navigation, RBAC, cross-workspace auth, limit display, observability, WebSocket, layout rendering._
+  - _8 user stories covering: license gate, module navigation, RBAC, cross-workspace auth, limit
+    display, observability, WebSocket, layout rendering._
 - [x] Feature meets measurable outcomes defined in Success Criteria
-  - _All 8 validation criteria from stage file Section 12 map to spec acceptance criteria (AC-01 through AC-08); 4 supplementary criteria (AC-09–AC-12) cover additional stage sections._
+  - _All 8 validation criteria from stage file Section 12 map to spec acceptance criteria (AC-01
+    through AC-08); 4 supplementary criteria (AC-09–AC-12) cover additional stage sections._
 - [x] No implementation details leak into specification
-  - _Verified: Vue 3, Hono, Drizzle, Bun — none appear in AC or FR text. Data model tables describe schema shape (business layer), not ORM syntax._
+  - _Verified: Vue 3, Hono, Drizzle, Bun — none appear in AC or FR text. Data model tables describe
+    schema shape (business layer), not ORM syntax._
 
 ---
 
@@ -106,7 +123,8 @@
 
 ## Notes
 
-All checklist items pass. No items require spec updates before proceeding to `/speckit.clarify` or `/speckit.plan`.
+All checklist items pass. No items require spec updates before proceeding to `/speckit.clarify` or
+`/speckit.plan`.
 
 **Resolved Ambiguities (no open items):**
 

@@ -10,7 +10,8 @@
 
 ## Executive Summary
 
-This validation stage establishes that the foundational Phase 01 platform architecture meets non-negotiable integrity requirements before promotion to PRODUCTION READY.
+This validation stage establishes that the foundational Phase 01 platform architecture meets
+non-negotiable integrity requirements before promotion to PRODUCTION READY.
 
 The stage validates:
 
@@ -33,7 +34,8 @@ The stage validates:
 
 #### Test 1.1: Cross-Tenant Data Access Rejection (CRITICAL)
 
-**Objective**: Verify that a user from Tenant A cannot access Tenant B's data, regardless of HTTP path manipulation.
+**Objective**: Verify that a user from Tenant A cannot access Tenant B's data, regardless of HTTP
+path manipulation.
 
 **Validation Steps**:
 
@@ -64,7 +66,8 @@ The stage validates:
 
 #### Test 1.2: Master Database Boundary Enforcement (CRITICAL)
 
-**Objective**: Verify that tenant runtime code never directly accesses master_db. All tenant operations route through resolver context.
+**Objective**: Verify that tenant runtime code never directly accesses master_db. All tenant
+operations route through resolver context.
 
 **Validation Steps**:
 
@@ -103,7 +106,8 @@ The stage validates:
 
 #### Test 1.3: Resolver Middleware Enforcement (CRITICAL)
 
-**Objective**: Verify that application refuses to start or fails safely if resolver middleware is removed/disabled.
+**Objective**: Verify that application refuses to start or fails safely if resolver middleware is
+removed/disabled.
 
 **Validation Steps**:
 
@@ -111,7 +115,8 @@ The stage validates:
 2. Attempt to start the API service with this configuration
 3. Expected behaviors:
    - Service startup **fails** with clear error message, OR
-   - Service starts but first request to any workspace route returns 500 with message: "Tenant context unavailable", OR
+   - Service starts but first request to any workspace route returns 500 with message: "Tenant
+     context unavailable", OR
    - Service starts but health check returns degraded state
 4. Verify error log contains message indicating resolver failure
 5. Verify no tenant routes are accessible without resolver active
@@ -133,7 +138,8 @@ The stage validates:
 
 #### Test 1.4: Workspace Slug Immutability in Context
 
-**Objective**: Verify that tenant workspace slug cannot be overridden from request body or URL manipulation.
+**Objective**: Verify that tenant workspace slug cannot be overridden from request body or URL
+manipulation.
 
 **Validation Steps**:
 
@@ -173,7 +179,8 @@ The stage validates:
 
 #### Test 2.1: Deterministic Database Creation (Idempotency)
 
-**Objective**: Verify that provisioning the same workspace twice results in exactly one database, with no duplicates or partial schemas.
+**Objective**: Verify that provisioning the same workspace twice results in exactly one database,
+with no duplicates or partial schemas.
 
 **Validation Steps**:
 
@@ -215,7 +222,8 @@ The stage validates:
 
 #### Test 2.2: Distributed Lock Enforcement Under Concurrency
 
-**Objective**: Verify that concurrent provisioning requests for the same workspace are serialized, preventing race conditions.
+**Objective**: Verify that concurrent provisioning requests for the same workspace are serialized,
+preventing race conditions.
 
 **Validation Steps**:
 
@@ -257,7 +265,8 @@ The stage validates:
 
 #### Test 2.3: Baseline Schema Integrity
 
-**Objective**: Verify that newly provisioned tenant database contains all required baseline tables and schema_version is correctly set.
+**Objective**: Verify that newly provisioned tenant database contains all required baseline tables
+and schema_version is correctly set.
 
 **Validation Steps**:
 
@@ -312,7 +321,8 @@ The stage validates:
 
 #### Test 3.1: License State Machine Integrity
 
-**Objective**: Verify license transitions follow the defined state machine; invalid transitions are rejected with 409 Conflict.
+**Objective**: Verify license transitions follow the defined state machine; invalid transitions are
+rejected with 409 Conflict.
 
 **State Machine Diagram**:
 
@@ -368,7 +378,8 @@ DELETED → (terminal, no exit)
 
 **Pass Criteria**:
 
-- ✅ Valid transitions (ACTIVE→SOFT_LOCKED, SOFT_LOCKED→ARCHIVED, SOFT_LOCKED→ACTIVE) succeed with 200
+- ✅ Valid transitions (ACTIVE→SOFT_LOCKED, SOFT_LOCKED→ARCHIVED, SOFT_LOCKED→ACTIVE) succeed with
+  200
 - ✅ Invalid transitions rejected with 409
 - ✅ State machine transitions reflected immediately in database
 - ✅ Workspace access permissions change correctly with license state
@@ -385,14 +396,16 @@ DELETED → (terminal, no exit)
 
 #### Test 3.2: Version Enforcement (Schema Compatibility)
 
-**Objective**: Verify that if tenant schema_version does not match license product_version, requests return 426 Upgrade Required.
+**Objective**: Verify that if tenant schema_version does not match license product_version, requests
+return 426 Upgrade Required.
 
 **Validation Steps**:
 
 1. Create workspace W4 with license pointing to Product v2.0.0
 2. Provision W4 with schema_version = 2.0.0
 3. Verify: any request to W4 returns 200 OK (versions match)
-4. **Simulate schema drift**: In test only, manually update tenant schema_version to 1.9.0 (old version)
+4. **Simulate schema drift**: In test only, manually update tenant schema_version to 1.9.0 (old
+   version)
 5. Make request to W4: GET `/api/workspaces/{W4}/students`
 6. Verify response code: **426 Upgrade Required** (not 200)
 7. Verify response body includes:
@@ -490,7 +503,8 @@ DELETED → (terminal, no exit)
 
 #### Test 4.1: Forward-Only Migration Check
 
-**Objective**: Verify no destructive SQL operations (DROP, DELETE, TRUNCATE) exist in migration files.
+**Objective**: Verify no destructive SQL operations (DROP, DELETE, TRUNCATE) exist in migration
+files.
 
 **Validation Steps**:
 
@@ -530,7 +544,8 @@ DELETED → (terminal, no exit)
 
 #### Test 4.2: Migration Hash Immutability
 
-**Objective**: Verify that modifying a historical migration file breaks CI/validation (hash check fails).
+**Objective**: Verify that modifying a historical migration file breaks CI/validation (hash check
+fails).
 
 **Validation Steps**:
 
@@ -630,7 +645,8 @@ DELETED → (terminal, no exit)
 2. User submits answer to attempt A1
 3. User re-submits same answer (same attempt A1, same question Q1, same answer data)
 4. Second submission should succeed with 200 (idempotent, no state change)
-5. If rate limit is also enforced on submissions, verify third distinct submission attempt within minute is rate-limited
+5. If rate limit is also enforced on submissions, verify third distinct submission attempt within
+   minute is rate-limited
 6. Verify submission endpoint honors idempotency first (same submission never rate-limited)
 
 **Pass Criteria**:
@@ -868,7 +884,8 @@ DELETED → (terminal, no exit)
 
 #### Test 7.1: Snapshot Immutability
 
-**Objective**: Verify that once an attempt is started, its configuration snapshot cannot be modified.
+**Objective**: Verify that once an attempt is started, its configuration snapshot cannot be
+modified.
 
 **Validation Steps**:
 
@@ -1035,15 +1052,16 @@ DELETED → (terminal, no exit)
 
 #### Test 8.1: Middleware Overhead < 1ms
 
-**Objective**: Verify that middleware chain (correlation ID, tenant resolver, license, schema version) adds < 1ms latency.
+**Objective**: Verify that middleware chain (correlation ID, tenant resolver, license, schema
+version) adds < 1ms latency.
 
 **Validation Steps**:
 
 1. Create a minimal test endpoint that does no work:
    ```typescript
-   app.get('/api/test/echo', (c) => {
-     return c.json({ message: 'ok' })
-   })
+   app.get("/api/test/echo", (c) => {
+     return c.json({ message: "ok" });
+   });
    ```
 2. Include all middlewares in this route:
    - Correlation ID middleware
@@ -1116,7 +1134,8 @@ DELETED → (terminal, no exit)
 
 #### Test 8.3: Provisioning Lock Resolution < 50ms
 
-**Objective**: Verify that distributed lock acquisition/release for provisioning completes in < 50ms.
+**Objective**: Verify that distributed lock acquisition/release for provisioning completes in <
+50ms.
 
 **Validation Steps**:
 
@@ -1240,7 +1259,8 @@ When all tests pass and checklist items verified:
 
 #### Clarification C1: Test Data Isolation Strategy
 
-**Resolved**: Each test creates its own prerequisites (workspaces, licenses, exams, students) and runs independently.
+**Resolved**: Each test creates its own prerequisites (workspaces, licenses, exams, students) and
+runs independently.
 
 **Rationale**: Isolation ensures:
 
@@ -1259,9 +1279,11 @@ When all tests pass and checklist items verified:
 
 #### Clarification C2: Test 2.2 Concurrency Behavior — Mandatory Requirement
 
-**Resolved**: When concurrent provisioning requests are made on the same workspace within race-condition window, the service MUST fail fast with a clear error message.
+**Resolved**: When concurrent provisioning requests are made on the same workspace within
+race-condition window, the service MUST fail fast with a clear error message.
 
-**Mandatory Behavior**: The second request is rejected at the distributed lock layer before any database modification occurs.
+**Mandatory Behavior**: The second request is rejected at the distributed lock layer before any
+database modification occurs.
 
 **Rationale**:
 
@@ -1297,7 +1319,8 @@ When all tests pass and checklist items verified:
 
 #### Clarification C4: License State Creation Mechanics
 
-**Resolved**: Licenses cannot be directly created in non-ACTIVE states. All licenses start in ACTIVE state.
+**Resolved**: Licenses cannot be directly created in non-ACTIVE states. All licenses start in ACTIVE
+state.
 
 **License State Transitions (Mandatory Flow)**:
 
@@ -1329,7 +1352,8 @@ When all tests pass and checklist items verified:
 - Area 7 (Attempt Engine): 3 tests
 - Area 8 (Performance): 3 tests
 
-**Rationale**: Each sub-test (e.g., 3.1a, 3.1b, 3.1c) is independently executable and verifiable. Granularity enables targeted debugging and partial test execution.
+**Rationale**: Each sub-test (e.g., 3.1a, 3.1b, 3.1c) is independently executable and verifiable.
+Granularity enables targeted debugging and partial test execution.
 
 **Updated Pass Criteria**: All 31 tests must PASS. Partial pass is not acceptable.
 

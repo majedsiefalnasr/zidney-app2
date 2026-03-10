@@ -11,7 +11,8 @@
 ### Infrastructure (T001-T009)
 
 - [x] Database migration (licenses + archive_snapshots tables)
-- [x] Domain-core modules (7 files: types, resolver, validator, state-machine, limit-enforcer, service, index)
+- [x] Domain-core modules (7 files: types, resolver, validator, state-machine, limit-enforcer,
+      service, index)
 - [x] License middleware (5-step validation)
 - [x] Error handling (10 error codes + response formatter)
 
@@ -44,9 +45,11 @@
 2. `packages/domain-core/src/license/service.ts` (350 LOC)
 3. `apps/api/src/utils/transaction-wrapper.ts` (280 LOC)
 
-**Priority 2 (Infrastructure)**: 4. `apps/api/src/middleware/license-enforcement.ts` (250 LOC) 5. `apps/worker/src/jobs/archive-snapshot.ts` (400 LOC)
+**Priority 2 (Infrastructure)**: 4. `apps/api/src/middleware/license-enforcement.ts` (250 LOC) 5.
+`apps/worker/src/jobs/archive-snapshot.ts` (400 LOC)
 
-**Priority 3 (Supporting)**: 6. `packages/domain-core/src/license/resolver.ts` (280 LOC) 7. `apps/worker/src/config/queues.ts` (120 LOC)
+**Priority 3 (Supporting)**: 6. `packages/domain-core/src/license/resolver.ts` (280 LOC) 7.
+`apps/worker/src/config/queues.ts` (120 LOC)
 
 ---
 

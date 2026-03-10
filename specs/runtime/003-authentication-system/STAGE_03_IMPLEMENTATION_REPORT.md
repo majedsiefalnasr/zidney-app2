@@ -9,7 +9,9 @@
 
 ## Executive Summary
 
-The authentication system has been successfully implemented with all critical infrastructure components. This document summarizes delivered code, architectural decisions, and guidance for completion of remaining routes and tests.
+The authentication system has been successfully implemented with all critical infrastructure
+components. This document summarizes delivered code, architectural decisions, and guidance for
+completion of remaining routes and tests.
 
 **Delivered Components:**
 
@@ -43,8 +45,7 @@ The authentication system has been successfully implemented with all critical in
 - `subscription_status` (VARCHAR 50) – Frontoffice-specific subscription state
 - `failed_login_count` (INTEGER, NOT NULL DEFAULT 0) – Brute force counter
 
-**Indexes:** 5 indexes for query optimization
-**Rollback:** Idempotent down() reverses all changes
+**Indexes:** 5 indexes for query optimization **Rollback:** Idempotent down() reverses all changes
 **Requirement:** Must run AFTER STAGE_02B (baseline schema exists)
 
 #### File: `apps/api/src/db/tenant/migrations/20260217_002_create_audit_logs.ts`
@@ -92,7 +93,8 @@ The authentication system has been successfully implemented with all critical in
 - RBAC types (Role, RolePermission, PermissionResult)
 - AuthErrorCode enum + AuthError class
 
-**Compliance:** Enforces architectural rules through types (no row-based multi-tenancy, workspace_id mandatory for tenant tokens, etc.)
+**Compliance:** Enforces architectural rules through types (no row-based multi-tenancy, workspace_id
+mandatory for tenant tokens, etc.)
 
 #### File: `packages/domain-core/src/auth/password.ts`
 
@@ -120,7 +122,8 @@ The authentication system has been successfully implemented with all critical in
 - `signFrontofficeToken(user, options)` → JWT token (scope: "FRONTOFFICE", includes division_id)
 - `verifyAndDecodeToken(token)` → Decoded payload
 - `extractTokenFromHeader(authHeader)` → Extract "Bearer <token>"
-- `validateJwtClaims(payload, expectedWorkspace, expectedSchema)` → Validates scope, workspace isolation, schema version
+- `validateJwtClaims(payload, expectedWorkspace, expectedSchema)` → Validates scope, workspace
+  isolation, schema version
 
 **Algorithm:** HS256 (HMAC with SHA-256)  
 **Token Lifetime:** 15 minutes (configurable via JWT_EXPIRES_IN env var)  
@@ -163,7 +166,8 @@ The authentication system has been successfully implemented with all critical in
 - `logSchemaMismatch()` – Token schema version incompatible
 
 **Format:** Structured JSON (Pino logger)  
-**Fields:** correlation_id, workspace_slug, user_id, event_type, result, timestamp, metadata, ip_address, user_agent  
+**Fields:** correlation_id, workspace_slug, user_id, event_type, result, timestamp, metadata,
+ip_address, user_agent  
 **Compliance:** GDPR retention, PCI DSS audit trail, distributed tracing support  
 **Queries:** Queryable by event type, workspace, user, correlation ID, result, timestamp
 
@@ -226,7 +230,8 @@ The authentication system has been successfully implemented with all critical in
 - Role changed
 - Admin revokes session
 
-**Critical:** When user.token_version increments in database, all old tokens become invalid instantly
+**Critical:** When user.token_version increments in database, all old tokens become invalid
+instantly
 
 #### File: `apps/api/src/middleware/auth/resolve-rbac.ts`
 
@@ -252,13 +257,13 @@ The authentication system has been successfully implemented with all critical in
 
 ```ts
 app.get(
-  '/exams/:id/grade',
+  "/exams/:id/grade",
   validateJwtMiddleware,
   validateTokenVersionMiddleware,
   resolveRbacMiddleware,
-  requirePermission('exam:grade'),
-  gradeExamHandler
-)
+  requirePermission("exam:grade"),
+  gradeExamHandler,
+);
 ```
 
 **Performance:** Live lookup (~5-10ms with indexes), prioritizes security over speed
@@ -406,8 +411,8 @@ When version changes:
 
 ```ts
 // Always takes same time (verifying real or dummy hash)
-const hash = user ? user.password_hash : generateDummyHash()
-const isValid = await verifyPassword(password, hash)
+const hash = user ? user.password_hash : generateDummyHash();
+const isValid = await verifyPassword(password, hash);
 ```
 
 ### 5. Transaction Safety with FOR UPDATE
@@ -523,13 +528,13 @@ All authenticated routes must enforce this order:
 ```ts
 // File: apps/api/src/routes/auth/{new-route}.ts
 
-import { Context } from 'hono'
+import { Context } from "hono";
 
 export async function newRouteHandler(c: Context) {
-  const correlationId = c.get('correlationId') || 'unknown'
-  const userId = c.get('userId')
-  const workspaceSlug = c.get('workspaceSlug')
-  const tenantDb = c.get('tenantDb')
+  const correlationId = c.get("correlationId") || "unknown";
+  const userId = c.get("userId");
+  const workspaceSlug = c.get("workspaceSlug");
+  const tenantDb = c.get("tenantDb");
 
   try {
     // STEP 1: Validate inputs from request body
@@ -547,8 +552,8 @@ export async function newRouteHandler(c: Context) {
         },
         error: null,
       },
-      200
-    )
+      200,
+    );
   } catch (error) {
     // Standard error handling
     return c.json(
@@ -556,12 +561,12 @@ export async function newRouteHandler(c: Context) {
         success: false,
         data: null,
         error: {
-          code: 'ERROR_CODE',
-          message: 'Error message',
+          code: "ERROR_CODE",
+          message: "Error message",
         },
       },
-      500
-    )
+      500,
+    );
   }
 }
 ```
@@ -582,7 +587,7 @@ if (!result.allowed) {
 ### Logging Auth Events
 
 ```ts
-import { logLoginSuccess, logPermissionDenied } from '@zidney/domain-core/auth'
+import { logLoginSuccess, logPermissionDenied } from "@zidney/domain-core/auth";
 
 // Log success
 await logLoginSuccess(
@@ -592,8 +597,8 @@ await logLoginSuccess(
   workspaceSlug,
   ipAddress,
   userAgent,
-  metadata
-)
+  metadata,
+);
 
 // Log failure
 await logPermissionDenied(
@@ -603,8 +608,8 @@ await logPermissionDenied(
   workspaceSlug,
   permission,
   role,
-  ipAddress
-)
+  ipAddress,
+);
 ```
 
 ---

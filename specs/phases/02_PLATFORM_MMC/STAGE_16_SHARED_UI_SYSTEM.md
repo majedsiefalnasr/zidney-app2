@@ -38,9 +38,8 @@ Architectural Compliance:
 
 Deferred Scope: None
 
-Notes:
-Stage is production ready. No structural backend modifications allowed.
-Modifications require a new migration stage. Ready for deployment.
+Notes: Stage is production ready. No structural backend modifications allowed. Modifications require
+a new migration stage. Ready for deployment.
 
 Deferred Scope:
 
@@ -55,8 +54,9 @@ Constitutional Compliance:
 - ✅ Code: Type safety enforced, layer separation maintained
 - ✅ Implementation prerequisites identified (Task 8A/9A setup)
 
-Notes:
-Drift analysis PASSED. 3 guardians verified (Security, Performance, QA). Code Reviewer identified normal implementation setup tasks (ESLint rules, test framework, directory scaffolding) - not specification blockers. Ready for implementation phase with guardrails in place.
+Notes: Drift analysis PASSED. 3 guardians verified (Security, Performance, QA). Code Reviewer
+identified normal implementation setup tasks (ESLint rules, test framework, directory scaffolding) -
+not specification blockers. Ready for implementation phase with guardrails in place.
 
 ---
 
@@ -218,8 +218,7 @@ Filters must:
 - Be restorable from local storage (app layer)
 - Not persist automatically inside shared package
 
-The UI package provides rendering only.
-State persistence belongs to app layer.
+The UI package provides rendering only. State persistence belongs to app layer.
 
 ---
 
@@ -253,10 +252,7 @@ All language configuration must be passed via props.
 
 All apps must use:
 
-AppLayout
-├── Sidebar
-├── TopBar
-└── MainContent
+AppLayout ├── Sidebar ├── TopBar └── MainContent
 
 Layout must support:
 

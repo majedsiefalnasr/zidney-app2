@@ -20,7 +20,8 @@
   - ADR-0007: Product Version Compatibility
   - ADR-0008: Semantic Versioning Policy
 
-**Scope**: Define immutable baseline schema for all tenant databases, enforce schema versioning, manage migrations via worker.
+**Scope**: Define immutable baseline schema for all tenant databases, enforce schema versioning,
+manage migrations via worker.
 
 **Blocked By**: None (foundation stage)
 
@@ -33,14 +34,17 @@
 **Constitutional Alignment Check** ✅
 
 - ✅ No cross-tenant data access: Each table isolated to single tenant database
-- ✅ No middleware bypass: All schema operations validated through tenant resolver + license middleware
+- ✅ No middleware bypass: All schema operations validated through tenant resolver + license
+  middleware
 - ✅ No direct DB instantiation: All connections obtained from tenant resolver context
 - ✅ No grading logic: Grading is Worker responsibility (deferred to STAGE_06)
 - ✅ No weakening snapshot integrity: Attempt snapshots immutable within schema version
 - ✅ No weakening version enforcement: Schema_version mandatory with checksum validation
-- ✅ No layer boundary violation: API creates schema (via worker), Worker applies migrations, Frontend consumes zero schema logic
+- ✅ No layer boundary violation: API creates schema (via worker), Worker applies migrations,
+  Frontend consumes zero schema logic
 - ✅ Database-per-tenant preserved: 1 database per workspace, single PostgreSQL instance
-- ✅ All writes transactional: Schema initialization, migrations, attempt submissions all use transactions
+- ✅ All writes transactional: Schema initialization, migrations, attempt submissions all use
+  transactions
 - ✅ Server-authoritative time: All timestamps from PostgreSQL now()
 
 **No ADR exceptions required.**
@@ -175,7 +179,8 @@ On failure (non-checksum):
 
 **Idempotency**: Unique constraint on schema_version(version) prevents re-applying same version
 
-**Concurrency Guard**: `LOCK schema_version` serializes migrations per tenant (max 1 migration at a time)
+**Concurrency Guard**: `LOCK schema_version` serializes migrations per tenant (max 1 migration at a
+time)
 
 **Timeout**: 30 seconds (most migrations << 1s)
 
@@ -217,7 +222,8 @@ On failure (non-checksum):
 
 **Responsibility**:
 
-1. Query master DB: `SELECT status, product_version_compatibility FROM licenses WHERE workspace_id=?`
+1. Query master DB:
+   `SELECT status, product_version_compatibility FROM licenses WHERE workspace_id=?`
 2. Validate status:
    - `SOFT_LOCKED` → return 423 ("Locked")
    - `ARCHIVED` → return 403 ("Forbidden")
@@ -241,7 +247,8 @@ On failure (non-checksum):
 2. Query tenant DB: `SELECT version FROM schema_version LIMIT 1`
 3. Get expected version from license.product_version_compatibility
 4. Compare versions:
-   - If `actual > expected`: Product outdated → return 409 ("Conflict: tenant schema too new for product")
+   - If `actual > expected`: Product outdated → return 409 ("Conflict: tenant schema too new for
+     product")
    - If `actual < expected`: Schema outdated → check if migration in-flight
      - If migration queued → return 503 ("Migration in progress")
      - If no migration → enqueue migration task, return 503
@@ -302,7 +309,8 @@ On failure (non-checksum):
 
 **schema_version Change**: Yes (set to 1.0.0 on initialization)
 
-**product_version Compatibility**: Initial baseline = 1.0.0 (future migrations bump schema_version per ADR-0008)
+**product_version Compatibility**: Initial baseline = 1.0.0 (future migrations bump schema_version
+per ADR-0008)
 
 ---
 
@@ -324,7 +332,8 @@ On failure (non-checksum):
 4. Calculate checksum
 5. INSERT schema_version row
 
-**Rollback Behavior**: Entire transaction rolls back on ANY failure (table creation, index creation, trigger creation, or schema_version insert)
+**Rollback Behavior**: Entire transaction rolls back on ANY failure (table creation, index creation,
+trigger creation, or schema_version insert)
 
 **Concurrency Protection**: First initialization per tenant (no concurrent schema creation)
 
@@ -351,7 +360,8 @@ On failure (non-checksum):
 
 **Rollback Behavior**: Entire transaction rolls back on ANY failure (including checksum mismatch)
 
-**Concurrency Protection**: `LOCK schema_version` serializes migrations per tenant (max 1 migration at time)
+**Concurrency Protection**: `LOCK schema_version` serializes migrations per tenant (max 1 migration
+at time)
 
 **Timeout**: 30 seconds
 
@@ -390,7 +400,8 @@ On failure (non-checksum):
 **Storage**:
 
 1. **Primary**: Redis cache key format: `schema-init:{workspace_id}:{idempotency_key}` with 24h TTL
-2. **Fallback**: Query tenant DB for schema_version table existence (if schema_version exists, already initialized)
+2. **Fallback**: Query tenant DB for schema_version table existence (if schema_version exists,
+   already initialized)
 
 **Replay-Safe**: Yes
 
@@ -801,7 +812,8 @@ Deferred to STAGE_06_ATTEMPT_ENGINE_FOUNDATION
 **File**: `apps/api/tests/integration/tenant-provisioning.test.ts`
 
 - [ ] End-to-end provisioning: POST /mmm/workspaces/{id}/schema/initialize → verify all tables exist
-- [ ] Transaction rollback: simulate disk full during schema creation → verify rollback, no partial schema
+- [ ] Transaction rollback: simulate disk full during schema creation → verify rollback, no partial
+      schema
 - [ ] Foreign key cascade/restrict: delete parent → verify child behavior matches ON DELETE policy
 - [ ] Schema version validation: product vs tenant version mismatch → verify rejection (409/503)
 - [ ] License soft-lock: attempt request with SOFT_LOCKED license → verify 423 response
@@ -813,14 +825,16 @@ Deferred to STAGE_06_ATTEMPT_ENGINE_FOUNDATION
 **File**: `apps/api/tests/snapshot/schema-baseline.snapshot.ts`
 
 - [ ] Schema_version table structure: verify exact columns (version, applied_at, checksum)
-- [ ] Audit fields on all tables: sample random tables → verify id, created_at, updated_at, created_by, updated_by, is_deleted present
+- [ ] Audit fields on all tables: sample random tables → verify id, created_at, updated_at,
+      created_by, updated_by, is_deleted present
 - [ ] Index definitions: verify indexes exist on all FK columns
 
 ### Isolation Tests Required
 
 **File**: `apps/api/tests/integration/isolation.test.ts`
 
-- [ ] Cross-tenant query prevention: tenant A → attempt to query tenant B data → verify rejection at pool level
+- [ ] Cross-tenant query prevention: tenant A → attempt to query tenant B data → verify rejection at
+      pool level
 - [ ] Connection pool isolation: verify separate pools per workspace
 - [ ] Tenant resolver: workspace slug resolution correct
 
@@ -837,7 +851,8 @@ Deferred to STAGE_06_ATTEMPT_ENGINE_FOUNDATION
 **File**: `apps/api/tests/integration/migrations.test.ts`
 
 - [ ] Checksum validation: calculate checksum → store → retrieve → verify match
-- [ ] Migration rollback: apply migration → simulate error → verify rollback restores pre-migration schema
+- [ ] Migration rollback: apply migration → simulate error → verify rollback restores pre-migration
+      schema
 - [ ] Version ordering: attempt downgrade → verify rejection
 
 ---

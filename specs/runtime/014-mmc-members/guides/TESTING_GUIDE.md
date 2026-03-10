@@ -143,7 +143,8 @@ Expected output: **✅ All tests pass (0 failures)**
    - POST /mmc/invitations/{token}/accept:
      - password=SecurePass456!
      - password_confirmation=SecurePass456!
-   - Expected: 201 Created, new member created, username auto-generated (newuser_xyzabc12), member status=ACTIVE
+   - Expected: 201 Created, new member created, username auto-generated (newuser_xyzabc12), member
+     status=ACTIVE
 
 3. **Login as New Member**
    - POST /mmc/auth/login: username=newuser_xyzabc12, password=SecurePass456!
@@ -289,7 +290,8 @@ npm run test -- tests/integration/mmc/concurrency.test.ts
      ```
 
 2. **Test 403 Permission Denied**
-   - Login as Sales Team, attempt: PATCH /mmc/roles/:id/permissions (requires can_edit on MEMBERS_MANAGEMENT)
+   - Login as Sales Team, attempt: PATCH /mmc/roles/:id/permissions (requires can_edit on
+     MEMBERS_MANAGEMENT)
    - Expected: 403 response:
      ```json
      {

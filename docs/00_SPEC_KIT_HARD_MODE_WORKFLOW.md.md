@@ -1,8 +1,6 @@
 # Zidney — SpecKit Hard Mode Workflow (Authoritative Guide)
 
-Version: 1.0
-Applies To: All Phases and Stages
-Authority: Constitution v1.2.0
+Version: 1.0 Applies To: All Phases and Stages Authority: Constitution v1.2.0
 
 ---
 
@@ -10,8 +8,7 @@ Authority: Constitution v1.2.0
 
 This document defines the mandatory SpecKit execution order for Zidney.
 
-No stage may be implemented outside this workflow.
-No shortcuts allowed.
+No stage may be implemented outside this workflow. No shortcuts allowed.
 
 ---
 
@@ -249,5 +246,4 @@ Stop implementation if:
 
 Constitution > Specs > Plan > Tasks > Code
 
-If code conflicts with Constitution,
-code must change — not the Constitution.
+If code conflicts with Constitution, code must change — not the Constitution.

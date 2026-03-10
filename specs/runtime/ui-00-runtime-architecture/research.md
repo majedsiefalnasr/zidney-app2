@@ -58,7 +58,11 @@ apps/mmc/src/
         └── LicenseListView.vue
 ```
 
-> **Note**: The spec §8.1 delta table says "13 files" for `src/components/licenses/`. The actual count is **18 files**. The clarification at §16 confirmed the table was updated with explicit per-file mappings. This research confirms 28 total component files across Dashboard/ (6), licenses/ (18), and root-level (4: AuditTrailViewer, JobStatusMonitor, LicenseDeletionDialog, LicenseDetailPage).
+> **Note**: The spec §8.1 delta table says "13 files" for `src/components/licenses/`. The actual
+> count is **18 files**. The clarification at §16 confirmed the table was updated with explicit
+> per-file mappings. This research confirms 28 total component files across Dashboard/ (6),
+> licenses/ (18), and root-level (4: AuditTrailViewer, JobStatusMonitor, LicenseDeletionDialog,
+> LicenseDetailPage).
 
 ### Complete Delta Map (MMC)
 
@@ -100,16 +104,19 @@ apps/mmc/src/
 | `src/components/JobStatusMonitor.vue`                        | `src/shared/components/JobStatusMonitor.vue`                         | MOVE (cross-cutting) |
 | `src/lib/utils.ts`                                           | `src/shared/utils/utils.ts`                                          | MOVE                 |
 
-**Directories to delete after migration**: `src/api/`, `src/stores/`, `src/views/`, `src/components/`, `src/lib/`
+**Directories to delete after migration**: `src/api/`, `src/stores/`, `src/views/`,
+`src/components/`, `src/lib/`
 
 **New directories to create** (MMC core layer, does not exist yet):
 
-- `src/core/api/`, `src/core/auth/`, `src/core/router/`, `src/core/guards/`, `src/core/state/`, `src/core/config/`, `src/core/errors/`
+- `src/core/api/`, `src/core/auth/`, `src/core/router/`, `src/core/guards/`, `src/core/state/`,
+  `src/core/config/`, `src/core/errors/`
 - `src/modules/dashboard/components/`, `src/modules/dashboard/views/`
 - `src/modules/licenses/components/`, `src/modules/licenses/views/`
 - `src/shared/components/`, `src/shared/composables/`, `src/shared/utils/`
 
-**Missing top-level entry files**: `main.ts` and `App.vue` are not found in `src/` root — these need to be verified or created.
+**Missing top-level entry files**: `main.ts` and `App.vue` are not found in `src/` root — these need
+to be verified or created.
 
 ---
 
@@ -196,14 +203,19 @@ packages/ui-system/src/
 
 ### What Already Exists for This Stage
 
-- ✅ Layout components: `AppLayout.vue`, `SidebarLayout.vue`, `TopBar.vue` — sufficient for app shell
-- ✅ Composables: `usePagination`, `useFilterBuilder`, `useColumnVisibility` — not needed for this scaffolding stage
+- ✅ Layout components: `AppLayout.vue`, `SidebarLayout.vue`, `TopBar.vue` — sufficient for app
+  shell
+- ✅ Composables: `usePagination`, `useFilterBuilder`, `useColumnVisibility` — not needed for this
+  scaffolding stage
 - ✅ Type foundations: column, common, component-props types
 
 ### What Needs to Be Added to `packages/ui-system` for This Stage
 
-- **Nothing required for core scaffolding**. The `core/` layer components (API client, router, guards, auth, config, error normalizer) are app-internal by design. They do not belong in `packages/ui-system`.
-- `packages/ui-system` is already consumed via `@zidney/ui` alias in mmc's `vite.config.ts`. Backoffice and frontoffice will need the same alias configured in their own `vite.config.ts`.
+- **Nothing required for core scaffolding**. The `core/` layer components (API client, router,
+  guards, auth, config, error normalizer) are app-internal by design. They do not belong in
+  `packages/ui-system`.
+- `packages/ui-system` is already consumed via `@zidney/ui` alias in mmc's `vite.config.ts`.
+  Backoffice and frontoffice will need the same alias configured in their own `vite.config.ts`.
 
 ---
 
@@ -222,14 +234,20 @@ resolve: {
 }
 ```
 
-**Assessment**: Vite alias for `@/` and `@zidney/ui` is already configured. ✅ No change needed to `vite.config.ts`.
+**Assessment**: Vite alias for `@/` and `@zidney/ui` is already configured. ✅ No change needed to
+`vite.config.ts`.
 
 **`tsconfig.json`** — Extends `../../tsconfig.base.json`. Does NOT define a local `@/` path alias.  
-**`tsconfig.base.json`** — Defines workspace-level paths (`@zidney/app/*`, `@zidney/ui/*`, etc.) but NOT `@/` per-app alias.
+**`tsconfig.base.json`** — Defines workspace-level paths (`@zidney/app/*`, `@zidney/ui/*`, etc.) but
+NOT `@/` per-app alias.
 
-**Gap**: The `@/` alias is known to Vite but NOT to TypeScript's resolver. This means `import X from '@/core/...'` will fail type checking.
+**Gap**: The `@/` alias is known to Vite but NOT to TypeScript's resolver. This means
+`import X from '@/core/...'` will fail type checking.
 
-**Decision**: Each app's `tsconfig.json` must add `"paths": { "@/*": ["./src/*"] }` and `"baseUrl": "."` to align TypeScript resolution with Vite runtime resolution. This is a required update to `apps/mmc/tsconfig.json`, `apps/backoffice/tsconfig.json`, and `apps/frontoffice/tsconfig.json`.
+**Decision**: Each app's `tsconfig.json` must add `"paths": { "@/*": ["./src/*"] }` and
+`"baseUrl": "."` to align TypeScript resolution with Vite runtime resolution. This is a required
+update to `apps/mmc/tsconfig.json`, `apps/backoffice/tsconfig.json`, and
+`apps/frontoffice/tsconfig.json`.
 
 ### Backoffice and Frontoffice
 
@@ -254,7 +272,9 @@ apps/mmc/tests/
 
 ### Impact Assessment
 
-These test files import from the current non-canonical paths (e.g., `../../src/api/dashboard-client`, `../../src/stores/dashboard-store`). After the delta migration, these imports will be broken.
+These test files import from the current non-canonical paths (e.g.,
+`../../src/api/dashboard-client`, `../../src/stores/dashboard-store`). After the delta migration,
+these imports will be broken.
 
 **Required updates**:
 
@@ -297,7 +317,8 @@ Same pattern applies to backoffice and frontoffice.
 | `vue-router` | `^4.0.0` (already present) | FR-09 specifies `createWebHistory` — v4 ✅           |
 | `vue`        | `^3.4.0` (already present) | Required minimum for Pinia strict mode compat        |
 
-**Decision**: Add `"pinia": "^2.2.0"` to `dependencies` in all three app `package.json` files. Add `@pinia/testing` to `devDependencies` for store unit testing.
+**Decision**: Add `"pinia": "^2.2.0"` to `dependencies` in all three app `package.json` files. Add
+`@pinia/testing` to `devDependencies` for store unit testing.
 
 ### For Backoffice and Frontoffice
 
@@ -341,15 +362,19 @@ Both apps need a fresh `package.json` with:
 
 ## R-08 — `packages/ui-system` Package Name vs Alias Discrepancy
 
-**Finding**: The npm package is named `@zidney/ui-system` but the Vite alias in `apps/mmc/vite.config.ts` resolves `@zidney/ui` directly to the source path. This bypasses the npm package resolution entirely and uses a direct filesystem path alias.
+**Finding**: The npm package is named `@zidney/ui-system` but the Vite alias in
+`apps/mmc/vite.config.ts` resolves `@zidney/ui` directly to the source path. This bypasses the npm
+package resolution entirely and uses a direct filesystem path alias.
 
-**Decision**: This pattern is intentional for monorepo development (avoids build step for ui-system during app development). All three apps should use the same alias pattern:
+**Decision**: This pattern is intentional for monorepo development (avoids build step for ui-system
+during app development). All three apps should use the same alias pattern:
 
 ```typescript
 { find: '@zidney/ui', replacement: resolve(__dirname, '../../packages/ui-system/src') }
 ```
 
-For production builds, apps should depend on `@zidney/ui-system` in `package.json` with `workspace:*` resolution.
+For production builds, apps should depend on `@zidney/ui-system` in `package.json` with
+`workspace:*` resolution.
 
 ---
 

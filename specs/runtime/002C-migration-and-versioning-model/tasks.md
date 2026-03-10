@@ -12,7 +12,9 @@
 
 ## Executive Summary
 
-This task list implements the complete migration and versioning engine for Zidney. Tasks are strictly ordered by dependency, with clear transactional and idempotency requirements per Zidney Constitution.
+This task list implements the complete migration and versioning engine for Zidney. Tasks are
+strictly ordered by dependency, with clear transactional and idempotency requirements per Zidney
+Constitution.
 
 **Key Execution Stages:**
 
@@ -44,7 +46,8 @@ This task list implements the complete migration and versioning engine for Zidne
 
 Create master_db bootstrap migration file that initializes:
 
-- `platform_settings` (singleton table, tracks current_schema_version, minimum_supported_schema_version)
+- `platform_settings` (singleton table, tracks current_schema_version,
+  minimum_supported_schema_version)
 - Insert initial record: current_schema_version = "1.0.0", minimum_supported = "1.0.0"
 
 **Acceptance Criteria:**
@@ -52,7 +55,9 @@ Create master_db bootstrap migration file that initializes:
 - ✓ File created at exact path
 - ✓ Uses `CREATE TABLE IF NOT EXISTS` (idempotent)
 - ✓ Includes migration header: `-- Migration: 1.0.0`
-- ✓ Includes required columns: id (UUID, PK), current_schema_version (VARCHAR 20), minimum_supported_schema_version (VARCHAR 20), updated_at (TIMESTAMPTZ), updated_by (UUID, NULLABLE)
+- ✓ Includes required columns: id (UUID, PK), current_schema_version (VARCHAR 20),
+  minimum_supported_schema_version (VARCHAR 20), updated_at (TIMESTAMPTZ), updated_by (UUID,
+  NULLABLE)
 - ✓ Singleton enforcement comment included
 - ✓ SQL is valid and parsable
 - ✓ Checksum can be computed (SHA-256)
@@ -75,14 +80,18 @@ Create master_db migration file that initializes:
 
 - `migration_registry` (immutable audit log, tracks all applied migrations per workspace)
 - UNIQUE constraint: (workspace_id, migration_file)
-- Indexes: workspace_id + applied_at DESC, status + applied_at DESC, workspace_id + target_schema_version
+- Indexes: workspace_id + applied_at DESC, status + applied_at DESC, workspace_id +
+  target_schema_version
 
 **Acceptance Criteria:**
 
 - ✓ File created at exact path
 - ✓ Uses `CREATE TABLE IF NOT EXISTS`
 - ✓ Includes migration header: `-- Migration: 1.0.0`
-- ✓ Columns: id (UUID, PK), workspace_id (UUID, FK), migration_file (VARCHAR 255), target_schema_version (VARCHAR 20), checksum (VARCHAR 64), applied_at (TIMESTAMPTZ), execution_time_ms (INT), status (VARCHAR 20 CHECK), error_message (TEXT NULLABLE), operator_id (UUID NULLABLE), snapshot_id (UUID NULLABLE)
+- ✓ Columns: id (UUID, PK), workspace_id (UUID, FK), migration_file (VARCHAR 255),
+  target_schema_version (VARCHAR 20), checksum (VARCHAR 64), applied_at (TIMESTAMPTZ),
+  execution_time_ms (INT), status (VARCHAR 20 CHECK), error_message (TEXT NULLABLE), operator_id
+  (UUID NULLABLE), snapshot_id (UUID NULLABLE)
 - ✓ UNIQUE(workspace_id, migration_file) constraint enforced
 - ✓ All 3 indexes created with IF NOT EXISTS
 - ✓ SQL is valid and parsable
@@ -112,7 +121,10 @@ Create master_db migration file that initializes:
 - ✓ File created at exact path
 - ✓ Uses `CREATE TABLE IF NOT EXISTS`
 - ✓ Includes migration header: `-- Migration: 1.0.0`
-- ✓ Columns: id (UUID, PK), workspace_id (UUID, FK), previous_schema_version (VARCHAR 20), target_schema_version (VARCHAR 20), snapshot_location (VARCHAR 512 UNIQUE), snapshot_size_bytes (BIGINT), created_at (TIMESTAMPTZ), expires_at (TIMESTAMPTZ), retention_policy (VARCHAR 50 CHECK), restored_at (TIMESTAMPTZ NULLABLE)
+- ✓ Columns: id (UUID, PK), workspace_id (UUID, FK), previous_schema_version (VARCHAR 20),
+  target_schema_version (VARCHAR 20), snapshot_location (VARCHAR 512 UNIQUE), snapshot_size_bytes
+  (BIGINT), created_at (TIMESTAMPTZ), expires_at (TIMESTAMPTZ), retention_policy (VARCHAR 50 CHECK),
+  restored_at (TIMESTAMPTZ NULLABLE)
 - ✓ CHECK constraint on retention_policy: IN ('MANUAL', 'AUTO_DELETE_30D')
 - ✓ Both indexes created with IF NOT EXISTS
 - ✓ SQL is valid and parsable
@@ -163,7 +175,8 @@ Create tenant_db migration file that initializes:
 Create master_db migration file that modifies existing `tenants_registry` table:
 
 - ADD COLUMN schema_version (VARCHAR 20, DEFAULT '1.0.0', NOT NULL)
-- Rationale: Cache tenant schema version for fast compatibility checks (source of truth remains tenant_db)
+- Rationale: Cache tenant schema version for fast compatibility checks (source of truth remains
+  tenant_db)
 - Create index: (schema_version) for batch version discovery
 
 **Acceptance Criteria:**
@@ -172,7 +185,8 @@ Create master_db migration file that modifies existing `tenants_registry` table:
 - ✓ Includes migration header: `-- Target Schema Version: 1.0.0.1 (patch bump for STAGE_02C)`
 - ✓ Uses `ALTER TABLE ... ADD COLUMN IF NOT EXISTS schema_version ...`
 - ✓ Default value: '1.0.0'
-- ✓ Create index: `CREATE INDEX IF NOT EXISTS idx_tenants_registry_schema_version ON tenants_registry(schema_version)`
+- ✓ Create index:
+  `CREATE INDEX IF NOT EXISTS idx_tenants_registry_schema_version ON tenants_registry(schema_version)`
 - ✓ SQL is valid and parsable
 - ✓ Comment explains cache pattern
 
@@ -263,7 +277,8 @@ Implement migration file validation functions:
 
 - `extractMigrationHeader(sqlContent: string) → {targetVersion, requiredProductVersion, isBreaking}`
   - Parses SQL comments at top of file
-  - Extracts: `-- Migration: X.Y.Z`, `-- Required Minimum Product Version: X.Y.Z`, `-- Breaking: true/false`
+  - Extracts: `-- Migration: X.Y.Z`, `-- Required Minimum Product Version: X.Y.Z`,
+    `-- Breaking: true/false`
   - Throws on missing required headers
 - `calculateChecksum(fileContent: string) → string`
   - SHA-256 of file content (hex string)
@@ -313,11 +328,9 @@ Workflow:
 
 1. Load all migration files from `apps/api/src/db/master/migrations/` in alphabetical order
 2. BEGIN transaction
-3. For each migration file:
-   a. Checksum validation (compare with known good value or file integrity check)
-   b. Execute SQL against master_db
-   c. Record execution in app-level registry (not DB during boot, at least initially)
-   d. On error: ROLLBACK, throw error (app refuses to boot)
+3. For each migration file: a. Checksum validation (compare with known good value or file integrity
+   check) b. Execute SQL against master_db c. Record execution in app-level registry (not DB during
+   boot, at least initially) d. On error: ROLLBACK, throw error (app refuses to boot)
 4. After all succeed: UPDATE platform_settings.current_schema_version = latest_version
 5. COMMIT
 6. Log completion with correlation_id
@@ -370,19 +383,16 @@ Workflow:
    - If SOFT_LOCKED: Skip migration (logged as SUCCESS, no error)
    - If ARCHIVED: ROLLBACK, throw error
 4. Load migration files from `apps/api/src/db/tenant/migrations/` (not tenant-specific, global list)
-5. For each migration up to target_schema_version:
-   a. Check migration_registry (UNIQUE(workspace_id, migration_file))
+5. For each migration up to target_schema_version: a. Check migration_registry (UNIQUE(workspace_id,
+   migration_file))
    - If already SUCCESS: Skip (idempotent)
-   - If already FAILED: Re-execute (allow retry)
-     b. Validate checksum
-     c. Validate product_version compatibility (from migration header)
-     d. Execute SQL against tenant_db (within transaction)
-     e. INSERT migration_registry record {workspace_id, migration_file, status: SUCCESS}
-     f. On error: ROLLBACK entire transaction, record status: FAILED
-6. After all migrations:
-   a. UPDATE tenant_db.schema_version SET version = target_version
-   b. UPDATE master_db.tenants_registry SET schema_version = target_version
-   c. (Optional) UPDATE master_db.licenses SET product_version = ? (if required)
+   - If already FAILED: Re-execute (allow retry) b. Validate checksum c. Validate product_version
+     compatibility (from migration header) d. Execute SQL against tenant_db (within transaction) e.
+     INSERT migration_registry record {workspace_id, migration_file, status: SUCCESS} f. On error:
+     ROLLBACK entire transaction, record status: FAILED
+6. After all migrations: a. UPDATE tenant_db.schema_version SET version = target_version b. UPDATE
+   master_db.tenants_registry SET schema_version = target_version c. (Optional) UPDATE
+   master_db.licenses SET product_version = ? (if required)
 7. COMMIT
 8. Log completion with structured JSON
 
@@ -405,7 +415,8 @@ Error handling:
 - ✓ Both schema_version tables updated atomically
 - ✓ Idempotency enforced: replay-safe operations
 - ✓ Structured logging with correlation_id, workspace_slug, workspace_id
-- ✓ Integration tests cover: success, license change, syntax error, product version incompatible, rollback scenarios
+- ✓ Integration tests cover: success, license change, syntax error, product version incompatible,
+  rollback scenarios
 
 ---
 
@@ -434,7 +445,8 @@ Workflow:
    - Note: Storage layer implementation is separate (DevOps responsibility)
    - This function orchestrates the call
 5. Record metadata in master_db.upgrade_snapshots:
-   - {id, workspace_id, previous_schema_version, target_schema_version, snapshot_location, snapshot_size_bytes, created_at, expires_at, retention_policy}
+   - {id, workspace_id, previous_schema_version, target_schema_version, snapshot_location,
+     snapshot_size_bytes, created_at, expires_at, retention_policy}
    - expires_at = now() + 30 days (for AUTO_DELETE_30D)
 6. Return snapshot record (with snapshot_id for job reference)
 
@@ -461,7 +473,8 @@ Error handling:
 ### Task 12: Integrate Version Check into Tenant Resolver
 
 **Scope:** Runtime blocking of incompatible requests  
-**File:** `packages/domain-core/src/tenant-resolver/version-check.ts` (new file added to existing resolver)  
+**File:** `packages/domain-core/src/tenant-resolver/version-check.ts` (new file added to existing
+resolver)  
 **Layer:** Domain Core (tenant resolver)  
 **Transactional:** NO (read-only check)  
 **Idempotent:** YES (no state change)  
@@ -567,7 +580,8 @@ Implement functions:
 
 **Description:**
 
-Implement function: `validateProductVersionCompatibility(migrationFile, license) → void | throws Error`
+Implement function:
+`validateProductVersionCompatibility(migrationFile, license) → void | throws Error`
 
 Workflow:
 
@@ -1050,8 +1064,8 @@ Logic:
    - If already in progress or completed: Return cached response / status
 4. Proceed to handler
 
-Note: Worker layer enforces actual deduplication via DB constraint.
-API layer provides early exit for duplicate submissions.
+Note: Worker layer enforces actual deduplication via DB constraint. API layer provides early exit
+for duplicate submissions.
 
 **Acceptance Criteria:**
 
@@ -1129,7 +1143,8 @@ interface SchemaMigrationJob {
 
 **Description:**
 
-Implement function: `acquireWorkspaceLock(workspace_id, masterDb) → Promise<LockHandle | throws Error>`
+Implement function:
+`acquireWorkspaceLock(workspace_id, masterDb) → Promise<LockHandle | throws Error>`
 
 Logic:
 
@@ -1142,7 +1157,7 @@ Logic:
 Lock release (called in finally block):
 
 ```typescript
-function releaseWorkspaceLock(lockHandle): void
+function releaseWorkspaceLock(lockHandle): void;
 // Lock auto-released on transaction commit/rollback
 // Explicit release not needed (database handles)
 ```
@@ -1262,7 +1277,8 @@ BEGIN TRANSACTION
 - ✓ Proper rollback on any failure
 - ✓ Idempotency enforced: UNIQUE(workspace_id, migration_file)
 - ✓ Structured logging: migration_file, execution_time_ms, status, error (if failed)
-- ✓ Integration tests: success, syntax error, checksum mismatch, product version incompatible, rollback scenarios
+- ✓ Integration tests: success, syntax error, checksum mismatch, product version incompatible,
+  rollback scenarios
 
 ---
 
@@ -1477,10 +1493,9 @@ Workflow:
 4. Restore database from snapshot
    - Call storage system (DevOps layer) to retrieve and restore
    - Execute: `pg_restore -d tenant_db snapshot_location`
-5. BEGIN transaction
-   a. UPDATE tenant_db.schema_version SET version = previous_schema_version
-   b. UPDATE master_db.tenants_registry SET schema_version = previous_schema_version
-   c. UPDATE master_db.upgrade_snapshots SET restored_at = now() WHERE id = snapshot_id
+5. BEGIN transaction a. UPDATE tenant_db.schema_version SET version = previous_schema_version b.
+   UPDATE master_db.tenants_registry SET schema_version = previous_schema_version c. UPDATE
+   master_db.upgrade_snapshots SET restored_at = now() WHERE id = snapshot_id
 6. COMMIT
 7. Release lock
 8. Log: event = "snapshot_restored", schema_version (previous)
@@ -1502,7 +1517,8 @@ Error handling:
 - ✓ Snapshot metadata updated (restored_at timestamp)
 - ✓ Lock released properly
 - ✓ Structured logging: snapshot_id, previous_version, status
-- ✓ Integration tests: success, snapshot not found, cross-tenant prevention, restore failure scenarios
+- ✓ Integration tests: success, snapshot not found, cross-tenant prevention, restore failure
+  scenarios
 
 ---
 
@@ -1870,7 +1886,8 @@ Document queries for Prometheus/Grafana dashboard:
 
 Queries:
 
-1. Upgrade success rate (24h): `rate(schema_migration_success_total[24h]) / rate(schema_migration_attempts_total[24h])`
+1. Upgrade success rate (24h):
+   `rate(schema_migration_success_total[24h]) / rate(schema_migration_attempts_total[24h])`
 2. Average upgrade duration: `avg(schema_migration_duration_ms)`
 3. Failed upgrades (24h): `increase(schema_migration_failure_total[24h])`
 4. Workspaces by schema version: `count by (workspace_id) (workspace_schema_version)`
@@ -2317,7 +2334,8 @@ Test 1: Request blocked (incompatible version)
 
 1. GET /api/exam/list (any workspace request)
    - Assert 426 UPGRADE REQUIRED
-   - Error: {code: SCHEMA_VERSION_MISMATCH, message: "Workspace schema version 1.0.0 below minimum supported 2.0.0..."}
+   - Error: {code: SCHEMA_VERSION_MISMATCH, message: "Workspace schema version 1.0.0 below minimum
+     supported 2.0.0..."}
 
 Test 2: Upgrade to v2.0.0
 
@@ -2395,7 +2413,8 @@ Test 3: Request succeeds (version now compatible)
 - **Estimated Duration:** 10–14 development days (with parallelization)
 - **Critical Path:** Infrastructure → Domain Core → API + Worker → Testing
 - **Risk Areas:** Transaction semantics, snapshot integration, Worker job reliability
-- **Quality Gates:** All unit tests ≥ 95% coverage; all integration tests passing; zero architectural exceptions
+- **Quality Gates:** All unit tests ≥ 95% coverage; all integration tests passing; zero
+  architectural exceptions
 
 ---
 

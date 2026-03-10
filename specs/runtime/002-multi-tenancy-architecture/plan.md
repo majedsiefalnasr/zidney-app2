@@ -1,9 +1,11 @@
 # Implementation Plan: [FEATURE]
 
-**Branch**: `002-multi-tenancy-architecture` | **Date**: 2026-02-15 | **Spec**: [specs/runtime/002-multi-tenancy-architecture/spec.md](specs/runtime/002-multi-tenancy-architecture/spec.md)
+**Branch**: `002-multi-tenancy-architecture` | **Date**: 2026-02-15 | **Spec**:
+[specs/runtime/002-multi-tenancy-architecture/spec.md](specs/runtime/002-multi-tenancy-architecture/spec.md)
 **Input**: Feature specification from `/specs/runtime/002-multi-tenancy-architecture/spec.md`
 
-**Note**: This template is filled in by the `/speckit.plan` command. See `.specify/templates/commands/plan.md` for the execution workflow.
+**Note**: This template is filled in by the `/speckit.plan` command. See
+`.specify/templates/commands/plan.md` for the execution workflow.
 
 ## Summary
 
@@ -92,8 +94,8 @@ ios/ or android/
 └── [platform-specific structure: feature modules, UI flows, platform tests]
 ```
 
-**Structure Decision**: [Document the selected structure and reference the real
-directories captured above]
+**Structure Decision**: [Document the selected structure and reference the real directories captured
+above]
 
 ## Complexity Tracking
 

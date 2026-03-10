@@ -116,8 +116,7 @@ WebSocket must:
 
 - Authenticate using JWT
 - Validate workspace match
-- Subscribe user to:
-  workspace:{workspace_id}:user:{user_id}
+- Subscribe user to: workspace:{workspace_id}:user:{user_id}
 
 On notification creation:
 
@@ -292,7 +291,6 @@ Stage complete when:
 
 Notifications are a real-time trust signal.
 
-If notifications leak across tenants or fail silently,
-institutional confidence is damaged.
+If notifications leak across tenants or fail silently, institutional confidence is damaged.
 
 The notification system must be isolated, reliable, and observable.

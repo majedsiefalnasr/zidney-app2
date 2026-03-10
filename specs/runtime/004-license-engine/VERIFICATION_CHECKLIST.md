@@ -107,7 +107,8 @@
 
 - [x] Implemented in `transitionLicenseState()` (T016)
 - [x] Implemented in `createUserWithLimitCheck()` (T019)
-- [x] **Auto-transition on middleware protected by SELECT FOR UPDATE** (prevents duplicate transitions)
+- [x] **Auto-transition on middleware protected by SELECT FOR UPDATE** (prevents duplicate
+      transitions)
 - [x] Concurrency tests verify locking (T044)
 - **Status**: ✅ VERIFIED
 
@@ -325,4 +326,5 @@
 
 **FINAL STATUS: 🟢 PRODUCTION READY**
 
-All architectural guarantees maintained. No constitutional violations. Ready for merge → code review → deployment.
+All architectural guarantees maintained. No constitutional violations. Ready for merge → code review
+→ deployment.

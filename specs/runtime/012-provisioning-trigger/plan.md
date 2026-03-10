@@ -1,21 +1,30 @@
 # Implementation Plan: STAGE 12 – Provisioning Trigger
 
-**Branch**: `012-provisioning-trigger` | **Date**: 2026-02-24 | **Spec**: [specs/runtime/012-provisioning-trigger/spec.md](specs/runtime/012-provisioning-trigger/spec.md)
+**Branch**: `012-provisioning-trigger` | **Date**: 2026-02-24 | **Spec**:
+[specs/runtime/012-provisioning-trigger/spec.md](specs/runtime/012-provisioning-trigger/spec.md)
 **Input**: Feature specification from `/specs/runtime/012-provisioning-trigger/spec.md`
 
 ## Summary
 
-MMC creates license records and enqueues provisioning jobs to an asynchronous Worker. The Worker independently creates tenant databases, runs baseline migrations, seeds required configuration data, creates workspace admin accounts, and activates the workspace by transitioning license.status to ACTIVE. The system enforces database-per-tenant isolation, transactional consistency, idempotent retry behavior, and comprehensive structured logging with correlation IDs.
+MMC creates license records and enqueues provisioning jobs to an asynchronous Worker. The Worker
+independently creates tenant databases, runs baseline migrations, seeds required configuration data,
+creates workspace admin accounts, and activates the workspace by transitioning license.status to
+ACTIVE. The system enforces database-per-tenant isolation, transactional consistency, idempotent
+retry behavior, and comprehensive structured logging with correlation IDs.
 
-**Technical Approach**: Multi-stage async provisioning with distributed locks (Redis) for idempotency, transactional database operations for atomicity, and structured logging for observability. License middleware enforces access control at request boundary.
+**Technical Approach**: Multi-stage async provisioning with distributed locks (Redis) for
+idempotency, transactional database operations for atomicity, and structured logging for
+observability. License middleware enforces access control at request boundary.
 
 ---
 
 ## Technical Context
 
 **Language/Version**: TypeScript + Node.js (Bun runtime)  
-**Primary Dependencies**: Hono (API routing), Redis (queue + distributed locks), PostgreSQL (master + tenant DBs), Vitest (unit/integration testing)  
-**Storage**: PostgreSQL (database-per-tenant model), Redis (job queue, distributed locks, transient state)  
+**Primary Dependencies**: Hono (API routing), Redis (queue + distributed locks), PostgreSQL
+(master + tenant DBs), Vitest (unit/integration testing)  
+**Storage**: PostgreSQL (database-per-tenant model), Redis (job queue, distributed locks, transient
+state)  
 **Testing**: Vitest unit tests, integration test harness with DB setup/teardown  
 **Target Platform**: Linux/Docker (multi-worker deployment model)  
 **Project Type**: Backend microservice (Worker + API integration)  
@@ -43,7 +52,8 @@ MMC creates license records and enqueues provisioning jobs to an asynchronous Wo
 | Security baseline                 | ✅ Pass | JWT workspace scope; RBAC; structured logging; correlation IDs; no secrets in logs                |
 | Operational integrity             | ✅ Pass | All mutations in transactions; critical endpoints idempotent; structured logs with correlation_id |
 
-**Re-check Required After Phase 1**: No, all checks completed upfront. Design adheres to constitution.
+**Re-check Required After Phase 1**: No, all checks completed upfront. Design adheres to
+constitution.
 
 ---
 
@@ -161,7 +171,8 @@ apps/api/src/db/tenant/migrations/
 1. Master DB migrations applied first (one-time, not per-tenant)
 2. On provision: Tenant DB created → all migrations applied in order → schema_version recorded
 3. **Rollback Strategy**: Transaction rollback on failure; partial database dropped by Worker
-4. **Idempotency**: All migrations use `CREATE TABLE IF NOT EXISTS` pattern; checksum validation prevents re-application
+4. **Idempotency**: All migrations use `CREATE TABLE IF NOT EXISTS` pattern; checksum validation
+   prevents re-application
 
 ---
 
@@ -229,95 +240,90 @@ Response (409 Conflict):
 ```typescript
 // Worker job entry point
 async function provisionWorkspace(job: ProvisioningJob): Promise<void> {
-  const { license_id, workspace_slug, correlation_id } = job
+  const { license_id, workspace_slug, correlation_id } = job;
 
   // Step 1: Validate license exists and is in PENDING_PROVISION state
-  const license = await validateLicense(license_id)
-  if (!license || license.status !== 'PENDING_PROVISION') {
-    logger.info('License already provisioned or not found', {
+  const license = await validateLicense(license_id);
+  if (!license || license.status !== "PENDING_PROVISION") {
+    logger.info("License already provisioned or not found", {
       license_id,
       license_status: license?.status,
-    })
-    return // Idempotent success
+    });
+    return; // Idempotent success
   }
 
   // Step 2: Acquire distributed lock to prevent concurrent provisioning
-  const lockKey = `provision:license:${license_id}`
-  const lockAcquired = await acquireDistributedLock(lockKey, 30_000) // 30s TTL
+  const lockKey = `provision:license:${license_id}`;
+  const lockAcquired = await acquireDistributedLock(lockKey, 30_000); // 30s TTL
   if (!lockAcquired) {
-    logger.warn('Failed to acquire lock, retrying', { license_id })
-    await enqueueRetry(job)
-    return
+    logger.warn("Failed to acquire lock, retrying", { license_id });
+    await enqueueRetry(job);
+    return;
   }
 
   try {
     // Step 3: Validate slug uniqueness
-    const existingRegistry = await queryRegistry(license_id)
+    const existingRegistry = await queryRegistry(license_id);
     if (existingRegistry) {
-      logger.info('Registry entry exists, provisioning already complete', {
+      logger.info("Registry entry exists, provisioning already complete", {
         license_id,
-      })
-      return // Idempotent
+      });
+      return; // Idempotent
     }
 
     // Step 4: Create tenant database
-    const dbName = `workspace_${workspace_slug.replace(/-/g, '_')}`
-    await createDatabase(dbName)
+    const dbName = `workspace_${workspace_slug.replace(/-/g, "_")}`;
+    await createDatabase(dbName);
 
     // Step 5: Connect to tenant database and begin transaction
-    const tenantConn = await connectToTenant(dbName, license.schema_version)
+    const tenantConn = await connectToTenant(dbName, license.schema_version);
 
     await tenantConn.transaction(async (trx) => {
       // Step 6: Run baseline migrations
-      await applyMigrations(trx, license.schema_version)
+      await applyMigrations(trx, license.schema_version);
 
       // Step 7: Seed baseline data (hybrid approach per Q2)
-      await seedBaselineData(trx, license, job)
+      await seedBaselineData(trx, license, job);
 
       // Step 8: Create workspace admin account
-      await createAdminAccount(trx, job.admin_email, job.workspace_slug)
+      await createAdminAccount(trx, job.admin_email, job.workspace_slug);
 
       // Step 9: Insert tenants_registry entry on master DB (within transaction context)
-      const masterConn = await getPoolManager().getMasterPool()
+      const masterConn = await getPoolManager().getMasterPool();
       await masterConn.query(
         `INSERT INTO tenants_registry (license_id, workspace_slug, db_name, schema_version, created_at)
          VALUES ($1, $2, $3, $4, now())`,
-        [license_id, workspace_slug, dbName, license.schema_version]
-      )
-    }) // End transaction
+        [license_id, workspace_slug, dbName, license.schema_version],
+      );
+    }); // End transaction
 
     // Step 10: Update license status to ACTIVE
-    const masterConn = await getPoolManager().getMasterPool()
+    const masterConn = await getPoolManager().getMasterPool();
     await masterConn.query(
       `UPDATE licenses SET status = 'ACTIVE', provisioned_at = now()
        WHERE id = $1`,
-      [license_id]
-    )
+      [license_id],
+    );
 
     // Step 11: Release distributed lock
-    await releaseDistributedLock(lockKey)
+    await releaseDistributedLock(lockKey);
 
     // Step 12: Log structured success
-    logger.info('Provisioning completed successfully', {
+    logger.info("Provisioning completed successfully", {
       license_id,
       workspace_slug,
       db_name: dbName,
       duration_ms: Date.now() - job.enqueued_at,
       correlation_id,
-    })
+    });
   } catch (error) {
     // Handle failure: rollback, cleanup, mark PROVISION_FAILED
-    await handleProvisioningFailure(
-      license_id,
-      workspace_slug,
-      error,
-      correlation_id
-    )
+    await handleProvisioningFailure(license_id, workspace_slug, error, correlation_id);
   } finally {
     // Always release lock
     await releaseDistributedLock(lockKey).catch((err) =>
-      logger.error('Failed to release lock', { license_id, error: err.message })
-    )
+      logger.error("Failed to release lock", { license_id, error: err.message }),
+    );
   }
 }
 
@@ -326,37 +332,37 @@ async function handleProvisioningFailure(
   license_id: string,
   workspace_slug: string,
   error: Error,
-  correlation_id: string
+  correlation_id: string,
 ): Promise<void> {
-  const dbName = `workspace_${workspace_slug.replace(/-/g, '_')}`
+  const dbName = `workspace_${workspace_slug.replace(/-/g, "_")}`;
 
   // Attempt to clean up partial database with retries (per Q4)
-  let dropAttempts = 0
+  let dropAttempts = 0;
   while (dropAttempts < 3) {
     try {
-      await dropDatabase(dbName)
-      logger.info('Database dropped after failure', {
+      await dropDatabase(dbName);
+      logger.info("Database dropped after failure", {
         license_id,
         db_name: dbName,
-      })
-      break
+      });
+      break;
     } catch (dropError) {
-      dropAttempts++
+      dropAttempts++;
       if (dropAttempts < 3) {
-        const backoffMs = Math.pow(2, dropAttempts) * 1000 // Exponential backoff
-        await delay(backoffMs)
+        const backoffMs = Math.pow(2, dropAttempts) * 1000; // Exponential backoff
+        await delay(backoffMs);
       } else {
-        logger.error('Failed to drop database after max retries', {
+        logger.error("Failed to drop database after max retries", {
           license_id,
           db_name: dbName,
           error: dropError.message,
-        })
+        });
       }
     }
   }
 
   // Mark license as PROVISION_FAILED
-  const masterConn = await getPoolManager().getMasterPool()
+  const masterConn = await getPoolManager().getMasterPool();
   await masterConn.query(
     `UPDATE licenses 
      SET status = 'PROVISION_FAILED', 
@@ -364,16 +370,16 @@ async function handleProvisioningFailure(
          retry_count = retry_count + 1,
          last_provision_error = $1
      WHERE id = $2`,
-    [error.message.substring(0, 1024), license_id]
-  )
+    [error.message.substring(0, 1024), license_id],
+  );
 
-  logger.error('Provisioning failed', {
+  logger.error("Provisioning failed", {
     license_id,
     workspace_slug,
     error_message: error.message,
     error_code: classifyError(error),
     correlation_id,
-  })
+  });
 }
 ```
 
@@ -391,16 +397,16 @@ async function handleProvisioningFailure(
 
 ```typescript
 enum ProvisioningErrorCode {
-  LICENSE_NOT_FOUND = 'LICENSE_NOT_FOUND',
-  INVALID_LICENSE_STATUS = 'INVALID_LICENSE_STATUS',
-  INVALID_WORKSPACE_SLUG = 'INVALID_WORKSPACE_SLUG',
-  DATABASE_CREATION_FAILED = 'DATABASE_CREATION_FAILED',
-  MIGRATION_FAILED = 'MIGRATION_FAILED',
-  SEED_DATA_FAILED = 'SEED_DATA_FAILED',
-  ADMIN_ACCOUNT_FAILED = 'ADMIN_ACCOUNT_FAILED',
-  REGISTRY_INSERT_FAILED = 'REGISTRY_INSERT_FAILED',
-  LOCK_TIMEOUT = 'LOCK_TIMEOUT',
-  NETWORK_PARTITION = 'NETWORK_PARTITION',
+  LICENSE_NOT_FOUND = "LICENSE_NOT_FOUND",
+  INVALID_LICENSE_STATUS = "INVALID_LICENSE_STATUS",
+  INVALID_WORKSPACE_SLUG = "INVALID_WORKSPACE_SLUG",
+  DATABASE_CREATION_FAILED = "DATABASE_CREATION_FAILED",
+  MIGRATION_FAILED = "MIGRATION_FAILED",
+  SEED_DATA_FAILED = "SEED_DATA_FAILED",
+  ADMIN_ACCOUNT_FAILED = "ADMIN_ACCOUNT_FAILED",
+  REGISTRY_INSERT_FAILED = "REGISTRY_INSERT_FAILED",
+  LOCK_TIMEOUT = "LOCK_TIMEOUT",
+  NETWORK_PARTITION = "NETWORK_PARTITION",
 }
 
 // Each error type maps to recovery action
@@ -616,15 +622,15 @@ IF license.status = ACTIVE:
 
 ```typescript
 // Lock acquisition
-const lockKey = `provision:license:${license_id}`
-const lockValue = Date.now().toString() // Unique token
+const lockKey = `provision:license:${license_id}`;
+const lockValue = Date.now().toString(); // Unique token
 const lockAcquired = await redis.set(
   lockKey,
   lockValue,
-  'EX',
+  "EX",
   30, // 30-second TTL
-  'NX' // Only set if not exists
-)
+  "NX", // Only set if not exists
+);
 
 // Lock release (must use script to ensure owner releases)
 const luaScript = `
@@ -633,18 +639,18 @@ const luaScript = `
   else
     return 0
   end
-`
-await redis.eval(luaScript, 1, lockKey, lockValue)
+`;
+await redis.eval(luaScript, 1, lockKey, lockValue);
 
 // Retry on lock timeout
 if (!lockAcquired) {
-  const retries = job.retry_count || 0
+  const retries = job.retry_count || 0;
   if (retries < 3) {
-    const backoffMs = Math.pow(2, retries) * 1000 // 1s, 2s, 4s
-    await enqueueRetry(job, retries + 1, backoffMs)
+    const backoffMs = Math.pow(2, retries) * 1000; // 1s, 2s, 4s
+    await enqueueRetry(job, retries + 1, backoffMs);
   } else {
-    logger.error('Lock timeout max retries exceeded', { license_id })
-    await markProvisioningFailed(license_id, 'LOCK_TIMEOUT')
+    logger.error("Lock timeout max retries exceeded", { license_id });
+    await markProvisioningFailed(license_id, "LOCK_TIMEOUT");
   }
 }
 ```
@@ -654,49 +660,49 @@ if (!lockAcquired) {
 ```typescript
 // Primary idempotency check
 async function checkIdempotency(
-  license_id: string
-): Promise<'already_provisioned' | 'needs_provisioning' | 'needs_cleanup'> {
+  license_id: string,
+): Promise<"already_provisioned" | "needs_provisioning" | "needs_cleanup"> {
   // Check 1: Is there a registry entry?
-  const registryEntry = await queryRegistry(license_id)
+  const registryEntry = await queryRegistry(license_id);
   if (registryEntry) {
-    return 'already_provisioned' // Success
+    return "already_provisioned"; // Success
   }
 
   // Check 2: What's the license status?
-  const license = await queryLicense(license_id)
-  if (license.status === 'ACTIVE') {
-    return 'already_provisioned' // Shouldn't happen, but handle it
+  const license = await queryLicense(license_id);
+  if (license.status === "ACTIVE") {
+    return "already_provisioned"; // Shouldn't happen, but handle it
   }
 
-  if (license.status !== 'PENDING_PROVISION') {
-    return 'already_provisioned' // Different state (shouldn't happen)
+  if (license.status !== "PENDING_PROVISION") {
+    return "already_provisioned"; // Different state (shouldn't happen)
   }
 
   // Check 3: Does partial database exist?
-  const dbExists = await databaseExists(license.workspace_slug)
+  const dbExists = await databaseExists(license.workspace_slug);
   if (dbExists) {
-    return 'needs_cleanup' // Orphan database, clean it up first
+    return "needs_cleanup"; // Orphan database, clean it up first
   }
 
-  return 'needs_provisioning' // Normal path
+  return "needs_provisioning"; // Normal path
 }
 
 // During provisioning
-const status = await checkIdempotency(license_id)
+const status = await checkIdempotency(license_id);
 switch (status) {
-  case 'already_provisioned':
-    logger.info('License already provisioned', { license_id })
-    return // Exit successfully
+  case "already_provisioned":
+    logger.info("License already provisioned", { license_id });
+    return; // Exit successfully
 
-  case 'needs_cleanup':
-    logger.info('Cleaning up orphan database', { license_id })
-    await dropDatabase(license.workspace_slug)
+  case "needs_cleanup":
+    logger.info("Cleaning up orphan database", { license_id });
+    await dropDatabase(license.workspace_slug);
   // Fall through to provision
 
-  case 'needs_provisioning':
+  case "needs_provisioning":
     // Normal provisioning flow
     // ... (steps 1-11 from blueprint above)
-    return
+    return;
 }
 ```
 
@@ -718,15 +724,15 @@ switch (status) {
 // In API endpoint POST /mmc/licenses
 
 async function createLicense(req: Request): Promise<Response> {
-  const { workspace_slug, admin_email, product_id, uses_divisions } = req.body
+  const { workspace_slug, admin_email, product_id, uses_divisions } = req.body;
 
   // Validate input
-  validateWorkspaceSlug(workspace_slug)
+  validateWorkspaceSlug(workspace_slug);
 
   // Check uniqueness in registry
-  const existingRegistry = await queryRegistry(workspace_slug)
+  const existingRegistry = await queryRegistry(workspace_slug);
   if (existingRegistry) {
-    return error(409, 'WORKSPACE_SLUG_EXISTS')
+    return error(409, "WORKSPACE_SLUG_EXISTS");
   }
 
   // Create license record in master DB
@@ -735,46 +741,41 @@ async function createLicense(req: Request): Promise<Response> {
      (workspace_slug, product_id, schema_version, product_version, status)
      VALUES ($1, $2, $3, $4, 'PENDING_PROVISION')
      RETURNING *`,
-    [
-      workspace_slug,
-      product_id,
-      platform.schema_version,
-      platform.product_version,
-    ]
-  )
+    [workspace_slug, product_id, platform.schema_version, platform.product_version],
+  );
 
   // Enqueue provisioning job (with deduplication per Q5)
   const job = {
-    job_type: 'PROVISION_WORKSPACE',
+    job_type: "PROVISION_WORKSPACE",
     job_id: generateUUID(),
     license_id: license.id,
     workspace_slug,
     product_id,
     uses_divisions,
-    correlation_id: req.headers['x-correlation-id'],
+    correlation_id: req.headers["x-correlation-id"],
     enqueued_at: new Date().toISOString(),
     max_retries: 3,
-  }
+  };
 
   // Deduplicate at enqueue time by license_id (drop duplicates)
-  const existingJob = await redis.getex(`pending:license:${license.id}`)
+  const existingJob = await redis.getex(`pending:license:${license.id}`);
   if (existingJob) {
-    logger.warn('Duplicate enqueue detected, dropping new job', {
+    logger.warn("Duplicate enqueue detected, dropping new job", {
       license_id: license.id,
-    })
-    return success({ license_id: license.id, status: 'PENDING_PROVISION' })
+    });
+    return success({ license_id: license.id, status: "PENDING_PROVISION" });
   }
 
   // Enqueue to Redis queue
-  await redis.lpush('provisioning:queue', JSON.stringify(job))
-  await redis.setex(`pending:license:${license.id}`, 300, '1') // 5-min pending marker
+  await redis.lpush("provisioning:queue", JSON.stringify(job));
+  await redis.setex(`pending:license:${license.id}`, 300, "1"); // 5-min pending marker
 
   return success({
     license_id: license.id,
     workspace_slug,
-    status: 'PENDING_PROVISION',
+    status: "PENDING_PROVISION",
     job_id: job.job_id,
-  })
+  });
 }
 ```
 
@@ -786,38 +787,38 @@ async function createLicense(req: Request): Promise<Response> {
 async function consumeQueue(): Promise<void> {
   while (true) {
     try {
-      const jobJson = await redis.rpop('provisioning:queue', 'BLOCK', 10)
-      if (!jobJson) continue
+      const jobJson = await redis.rpop("provisioning:queue", "BLOCK", 10);
+      if (!jobJson) continue;
 
-      const job = JSON.parse(jobJson)
+      const job = JSON.parse(jobJson);
 
       try {
-        await provisionWorkspace(job)
+        await provisionWorkspace(job);
       } catch (error) {
-        logger.error('Job processing failed', {
+        logger.error("Job processing failed", {
           job_id: job.job_id,
           error: error.message,
-        })
+        });
 
         // Re-enqueue with retry logic
         if (job.retry_count < job.max_retries) {
-          const backoffMs = Math.pow(2, job.retry_count) * 1000
+          const backoffMs = Math.pow(2, job.retry_count) * 1000;
           await redis.delayed_push(
-            'provisioning:queue',
+            "provisioning:queue",
             JSON.stringify({ ...job, retry_count: (job.retry_count || 0) + 1 }),
-            backoffMs
-          )
+            backoffMs,
+          );
         } else {
           // Max retries exceeded, enqueue to DLQ
-          await enqueueToDLQ(job, error)
+          await enqueueToDLQ(job, error);
         }
       }
 
       // Clear pending marker
-      await redis.del(`pending:license:${job.license_id}`)
+      await redis.del(`pending:license:${job.license_id}`);
     } catch (error) {
-      logger.error('Queue consumer error', { error: error.message })
-      await delay(5000) // Back off before retrying
+      logger.error("Queue consumer error", { error: error.message });
+      await delay(5000); // Back off before retrying
     }
   }
 }
@@ -836,29 +837,29 @@ const dlqSchema = {
   retry_count: number,
   failed_at: timestamp,
   attempted_recovery: boolean,
-}
+};
 
 // DLQ consumer (runs on-demand or periodically)
 async function processDLQ(): Promise<void> {
-  const dlqJobs = await redis.lrange('provisioning:dlq', 0, -1)
+  const dlqJobs = await redis.lrange("provisioning:dlq", 0, -1);
 
   for (const jobJson of dlqJobs) {
-    const dlqEntry = JSON.parse(jobJson)
+    const dlqEntry = JSON.parse(jobJson);
 
     // Log for operator review
-    logger.error('DLQ entry requires operator intervention', {
+    logger.error("DLQ entry requires operator intervention", {
       license_id: dlqEntry.job.license_id,
       workspace_slug: dlqEntry.job.workspace_slug,
       error_code: dlqEntry.error_code,
       attempts: dlqEntry.retry_count,
-    })
+    });
 
     // Update license status to assist operator
     await masterDb.query(
       `UPDATE licenses SET status = 'PROVISION_FAILED', last_provision_error = $1
        WHERE id = $2`,
-      [dlqEntry.error, dlqEntry.job.license_id]
-    )
+      [dlqEntry.error, dlqEntry.job.license_id],
+    );
   }
 }
 ```
@@ -872,19 +873,19 @@ async function processDLQ(): Promise<void> {
 ```typescript
 // Logger middleware in API
 const logger = createStructuredLogger({
-  service: 'zidney-api',
+  service: "zidney-api",
   environment: process.env.NODE_ENV,
-})
+});
 
 app.use(async (req, res, next) => {
-  const correlation_id = req.headers['x-correlation-id'] || generateUUID()
+  const correlation_id = req.headers["x-correlation-id"] || generateUUID();
 
   // Store in context for downstream use
-  req.context = { correlation_id, user_id: req.user?.id }
+  req.context = { correlation_id, user_id: req.user?.id };
 
-  res.setHeader('x-correlation-id', correlation_id)
-  next()
-})
+  res.setHeader("x-correlation-id", correlation_id);
+  next();
+});
 
 // Logger instance with context
 function logWithContext(level, message, data) {
@@ -894,7 +895,7 @@ function logWithContext(level, message, data) {
     timestamp: new Date().toISOString(),
     ...data,
     correlation_id: req.context.correlation_id,
-  })
+  });
 }
 ```
 
@@ -904,16 +905,16 @@ function logWithContext(level, message, data) {
 // In provisioning job
 const job = {
   // ... other fields
-  correlation_id: req.headers['x-correlation-id'], // From API request
+  correlation_id: req.headers["x-correlation-id"], // From API request
   // ...
-}
+};
 
 // Worker receives job and logs with same correlation_id
-logger.info('Provisioning started', {
+logger.info("Provisioning started", {
   license_id: job.license_id,
   correlation_id: job.correlation_id, // Same trace across API→Queue→Worker
   workspace_slug: job.workspace_slug,
-})
+});
 
 // All logs under same correlation_id are grouped together
 // Enables end-to-end tracing: API request → Job enqueue → Worker execution → License update
@@ -948,27 +949,27 @@ logger.info('Provisioning started', {
 // Metrics exported to Prometheus
 
 // Histogram: provisioning duration
-metrics.histogramObserve('provisioning.duration_ms', duration, {
-  status: 'success|failure',
-  error_code: error?.code || 'none',
-})
+metrics.histogramObserve("provisioning.duration_ms", duration, {
+  status: "success|failure",
+  error_code: error?.code || "none",
+});
 
 // Counter: provisioning outcomes
-metrics.counterIncrement('provisioning.success_count')
-metrics.counterIncrement('provisioning.failure_count', 1, { error_code })
-metrics.counterIncrement('provisioning.retry_count', 1, { attempt: 2 })
+metrics.counterIncrement("provisioning.success_count");
+metrics.counterIncrement("provisioning.failure_count", 1, { error_code });
+metrics.counterIncrement("provisioning.retry_count", 1, { attempt: 2 });
 
 // Histogram: lock acquisition time
-metrics.histogramObserve('provisioning.lock_wait_ms', lockWaitTime)
+metrics.histogramObserve("provisioning.lock_wait_ms", lockWaitTime);
 
 // Gauge: current active workspaces (query tenants_registry)
-const activeWorkspaces = await queryRegistry('COUNT(*)')
-metrics.gaugeSet('tenants_registry.total_workspaces', activeWorkspaces)
+const activeWorkspaces = await queryRegistry("COUNT(*)");
+metrics.gaugeSet("tenants_registry.total_workspaces", activeWorkspaces);
 
 // Histogram: migration execution per step
-metrics.histogramObserve('provisioning.migration_duration_ms', migrationTime, {
-  migration: 'init_schema|baseline_data|divisions',
-})
+metrics.histogramObserve("provisioning.migration_duration_ms", migrationTime, {
+  migration: "init_schema|baseline_data|divisions",
+});
 ```
 
 ---
@@ -979,296 +980,273 @@ metrics.histogramObserve('provisioning.migration_duration_ms', migrationTime, {
 
 ```typescript
 // tests/unit/idempotency.test.ts
-describe('Idempotency Service', () => {
-  test('should detect already-provisioned license', async () => {
-    const license_id = 'uuid-123'
+describe("Idempotency Service", () => {
+  test("should detect already-provisioned license", async () => {
+    const license_id = "uuid-123";
     const registry_entry = {
       license_id,
-      workspace_slug: 'acme-2026',
-      db_name: 'workspace_acme_2026',
-    }
+      workspace_slug: "acme-2026",
+      db_name: "workspace_acme_2026",
+    };
 
     // Mock registry entry exists
-    jest.spyOn(registry, 'query').mockResolvedValueOnce([registry_entry])
+    jest.spyOn(registry, "query").mockResolvedValueOnce([registry_entry]);
 
-    const result = await checkIdempotency(license_id)
-    expect(result).toBe('already_provisioned')
-  })
+    const result = await checkIdempotency(license_id);
+    expect(result).toBe("already_provisioned");
+  });
 
-  test('should detect orphan database', async () => {
-    const license_id = 'uuid-123'
-    jest.spyOn(registry, 'query').mockResolvedValueOnce([]) // No registry entry
-    jest.spyOn(license, 'query').mockResolvedValueOnce({
-      status: 'PENDING_PROVISION',
-    })
-    jest.spyOn(database, 'exists').mockResolvedValueOnce(true) // DB exists
+  test("should detect orphan database", async () => {
+    const license_id = "uuid-123";
+    jest.spyOn(registry, "query").mockResolvedValueOnce([]); // No registry entry
+    jest.spyOn(license, "query").mockResolvedValueOnce({
+      status: "PENDING_PROVISION",
+    });
+    jest.spyOn(database, "exists").mockResolvedValueOnce(true); // DB exists
 
-    const result = await checkIdempotency(license_id)
-    expect(result).toBe('needs_cleanup')
-  })
-})
+    const result = await checkIdempotency(license_id);
+    expect(result).toBe("needs_cleanup");
+  });
+});
 
 // tests/unit/migration-version.test.ts
-describe('Migration Version Comparison', () => {
-  test('should apply all migrations up to license.schema_version', async () => {
-    const license = { schema_version: '1.2.0' }
+describe("Migration Version Comparison", () => {
+  test("should apply all migrations up to license.schema_version", async () => {
+    const license = { schema_version: "1.2.0" };
     const migrations = [
-      { version: '1.0.0', file: '001_init.sql' },
-      { version: '1.1.0', file: '002_add_divisions.sql' },
-      { version: '1.2.0', file: '003_add_settings.sql' },
-    ]
+      { version: "1.0.0", file: "001_init.sql" },
+      { version: "1.1.0", file: "002_add_divisions.sql" },
+      { version: "1.2.0", file: "003_add_settings.sql" },
+    ];
 
     const toApply = migrations.filter(
-      (m) => compareVersions(m.version, license.schema_version) <= 0
-    )
-    expect(toApply).toHaveLength(3)
-  })
-})
+      (m) => compareVersions(m.version, license.schema_version) <= 0,
+    );
+    expect(toApply).toHaveLength(3);
+  });
+});
 ```
 
 **Integration Test Scaffold**:
 
 ```typescript
 // tests/integration/full-provision.test.ts
-describe('Full Provisioning Flow', () => {
-  let masterDb, redis
+describe("Full Provisioning Flow", () => {
+  let masterDb, redis;
 
   beforeAll(async () => {
-    masterDb = await setupTestDatabase('master')
-    redis = await setupTestRedis()
-  })
+    masterDb = await setupTestDatabase("master");
+    redis = await setupTestRedis();
+  });
 
   afterEach(async () => {
-    await cleanupTenantDatabase('workspace_test_acme')
-    await redis.flushdb()
-  })
+    await cleanupTenantDatabase("workspace_test_acme");
+    await redis.flushdb();
+  });
 
-  test('should provision workspace end-to-end', async () => {
+  test("should provision workspace end-to-end", async () => {
     // Step 1: Create license via API
-    const postLicenseResponse = await api.post('/mmc/licenses', {
-      workspace_slug: 'test-acme',
-      admin_email: 'admin@acme.test',
-      product_id: 'product-123',
+    const postLicenseResponse = await api.post("/mmc/licenses", {
+      workspace_slug: "test-acme",
+      admin_email: "admin@acme.test",
+      product_id: "product-123",
       uses_divisions: true,
-      correlation_id: 'corr-123',
-    })
+      correlation_id: "corr-123",
+    });
 
-    const license_id = postLicenseResponse.data.license_id
-    expect(postLicenseResponse.status).toBe(200)
+    const license_id = postLicenseResponse.data.license_id;
+    expect(postLicenseResponse.status).toBe(200);
 
     // Step 2: Verify license created in PENDING_PROVISION state
-    const license = await masterDb.query(
-      'SELECT * FROM licenses WHERE id = ?',
-      [license_id]
-    )
-    expect(license.status).toBe('PENDING_PROVISION')
+    const license = await masterDb.query("SELECT * FROM licenses WHERE id = ?", [license_id]);
+    expect(license.status).toBe("PENDING_PROVISION");
 
     // Step 3: Job enqueued to Redis
-    const jobs = await redis.lrange('provisioning:queue', 0, -1)
-    expect(jobs.length).toBe(1)
+    const jobs = await redis.lrange("provisioning:queue", 0, -1);
+    expect(jobs.length).toBe(1);
 
     // Step 4: Process job (simulate Worker)
-    await provisionWorkspace(JSON.parse(jobs[0]))
+    await provisionWorkspace(JSON.parse(jobs[0]));
 
     // Step 5: Verify license now ACTIVE
-    const updatedLicense = await masterDb.query(
-      'SELECT * FROM licenses WHERE id = ?',
-      [license_id]
-    )
-    expect(updatedLicense.status).toBe('ACTIVE')
-    expect(updatedLicense.provisioned_at).not.toBeNull()
+    const updatedLicense = await masterDb.query("SELECT * FROM licenses WHERE id = ?", [
+      license_id,
+    ]);
+    expect(updatedLicense.status).toBe("ACTIVE");
+    expect(updatedLicense.provisioned_at).not.toBeNull();
 
     // Step 6: Verify registry entry created
-    const registry = await masterDb.query(
-      'SELECT * FROM tenants_registry WHERE license_id = ?',
-      [license_id]
-    )
-    expect(registry.workspace_slug).toBe('test-acme')
-    expect(registry.db_name).toBe('workspace_test_acme')
+    const registry = await masterDb.query("SELECT * FROM tenants_registry WHERE license_id = ?", [
+      license_id,
+    ]);
+    expect(registry.workspace_slug).toBe("test-acme");
+    expect(registry.db_name).toBe("workspace_test_acme");
 
     // Step 7: Verify tenant database created
-    const tenantDb = await connectToTenant('workspace_test_acme')
-    const schemaVersion = await tenantDb.query(
-      'SELECT version FROM schema_versions'
-    )
-    expect(schemaVersion.length).toBeGreaterThan(0)
+    const tenantDb = await connectToTenant("workspace_test_acme");
+    const schemaVersion = await tenantDb.query("SELECT version FROM schema_versions");
+    expect(schemaVersion.length).toBeGreaterThan(0);
 
     // Step 8: Verify admin user created
-    const admin = await tenantDb.query('SELECT * FROM users WHERE email = ?', [
-      'admin@acme.test',
-    ])
-    expect(admin.role_id).toBeTruthy()
-  })
+    const admin = await tenantDb.query("SELECT * FROM users WHERE email = ?", ["admin@acme.test"]);
+    expect(admin.role_id).toBeTruthy();
+  });
 
-  test('should handle failure recovery', async () => {
+  test("should handle failure recovery", async () => {
     // Enqueue job that will fail (e.g., bad workspace slug)
     const failingJob = {
-      job_id: 'job-123',
-      license_id: 'license-123',
-      workspace_slug: 'invalid@slug', // Invalid character
+      job_id: "job-123",
+      license_id: "license-123",
+      workspace_slug: "invalid@slug", // Invalid character
       // ...
-    }
+    };
 
-    await redis.lpush('provisioning:queue', JSON.stringify(failingJob))
+    await redis.lpush("provisioning:queue", JSON.stringify(failingJob));
 
     // Process (should catch validation error)
     await provisionWorkspace(failingJob).catch((err) => {
-      expect(err.message).toMatch(/INVALID_WORKSPACE_SLUG/)
-    })
+      expect(err.message).toMatch(/INVALID_WORKSPACE_SLUG/);
+    });
 
     // Verify license marked PROVISION_FAILED
-    const license = await masterDb.query(
-      'SELECT * FROM licenses WHERE id = ?',
-      ['license-123']
-    )
-    expect(license.status).toBe('PROVISION_FAILED')
-    expect(license.last_provision_error).toMatch(/invalid/i)
+    const license = await masterDb.query("SELECT * FROM licenses WHERE id = ?", ["license-123"]);
+    expect(license.status).toBe("PROVISION_FAILED");
+    expect(license.last_provision_error).toMatch(/invalid/i);
 
     // Verify job re-enqueued for retry
-    const jobs = await redis.lrange('provisioning:queue', 0, -1)
-    expect(jobs.length).toBe(1) // Re-enqueued
-  })
+    const jobs = await redis.lrange("provisioning:queue", 0, -1);
+    expect(jobs.length).toBe(1); // Re-enqueued
+  });
 
-  test('should block workspace access until ACTIVE', async () => {
+  test("should block workspace access until ACTIVE", async () => {
     // Create license (status=PENDING_PROVISION)
-    const license_id = await createLicense('test-acme')
+    const license_id = await createLicense("test-acme");
 
     // Attempt to access workspace
-    const loginResponse = await api.post('/login', {
-      email: 'user@acme.test',
-      workspace_slug: 'test-acme',
-    })
+    const loginResponse = await api.post("/login", {
+      email: "user@acme.test",
+      workspace_slug: "test-acme",
+    });
 
     // Should be blocked (423 Locked)
-    expect(loginResponse.status).toBe(423)
-    expect(loginResponse.data.error.code).toBe('WORKSPACE_LOCKED')
+    expect(loginResponse.status).toBe(423);
+    expect(loginResponse.data.error.code).toBe("WORKSPACE_LOCKED");
 
     // Provision workspace
-    const job = await redis.rpop('provisioning:queue')
-    await provisionWorkspace(JSON.parse(job))
+    const job = await redis.rpop("provisioning:queue");
+    await provisionWorkspace(JSON.parse(job));
 
     // Now login should work
-    const loginResponse2 = await api.post('/login', {
-      email: 'admin@acme.test',
-      workspace_slug: 'test-acme',
-    })
-    expect(loginResponse2.status).toBe(200)
-  })
-})
+    const loginResponse2 = await api.post("/login", {
+      email: "admin@acme.test",
+      workspace_slug: "test-acme",
+    });
+    expect(loginResponse2.status).toBe(200);
+  });
+});
 
 // tests/integration/concurrent-provision.test.ts
-describe('Concurrent Provisioning', () => {
-  test('should prevent concurrent provisioning of same license', async () => {
-    const license_id = 'license-123'
+describe("Concurrent Provisioning", () => {
+  test("should prevent concurrent provisioning of same license", async () => {
+    const license_id = "license-123";
 
     // Enqueue two identical provisioning jobs
-    const job1 = { license_id, workspace_slug: 'test-acme' /* ... */ }
-    const job2 = { license_id, workspace_slug: 'test-acme' /* ... */ }
+    const job1 = { license_id, workspace_slug: "test-acme" /* ... */ };
+    const job2 = { license_id, workspace_slug: "test-acme" /* ... */ };
 
-    await redis.lpush('provisioning:queue', JSON.stringify(job1))
-    await redis.lpush('provisioning:queue', JSON.stringify(job2))
+    await redis.lpush("provisioning:queue", JSON.stringify(job1));
+    await redis.lpush("provisioning:queue", JSON.stringify(job2));
 
     // Start two workers
     const [result1, result2] = await Promise.all([
       provisionWorkspace(job1),
       provisionWorkspace(job2),
-    ])
+    ]);
 
     // One should succeed, other should timeout on lock (and retry)
-    const license = await masterDb.query(
-      'SELECT * FROM licenses WHERE id = ?',
-      [license_id]
-    )
-    expect(license.status).toBe('ACTIVE') // Successfully provisioned once
+    const license = await masterDb.query("SELECT * FROM licenses WHERE id = ?", [license_id]);
+    expect(license.status).toBe("ACTIVE"); // Successfully provisioned once
 
     // Verify only one database created
-    const databases = await queryDatabases('%test_acme%')
-    expect(databases.length).toBe(1)
-  })
-})
+    const databases = await queryDatabases("%test_acme%");
+    expect(databases.length).toBe(1);
+  });
+});
 ```
 
 **Idempotency Replay Rig**:
 
 ```typescript
 // tests/integration/idempotency-replay.test.ts
-describe('Idempotency Replay Scenarios', () => {
-  test('should handle duplicate job delivery', async () => {
-    const license_id = 'license-123'
+describe("Idempotency Replay Scenarios", () => {
+  test("should handle duplicate job delivery", async () => {
+    const license_id = "license-123";
     const job = {
-      job_id: 'job-123', // Same job_id for both deliveries
+      job_id: "job-123", // Same job_id for both deliveries
       license_id,
-      workspace_slug: 'test-acme',
+      workspace_slug: "test-acme",
       /* ... */
-    }
+    };
 
     // First delivery: provisions workspace successfully
-    await provisionWorkspace(job)
+    await provisionWorkspace(job);
 
     // Verify ACTIVE
-    let license = await masterDb.query('SELECT * FROM licenses WHERE id = ?', [
-      license_id,
-    ])
-    expect(license.status).toBe('ACTIVE')
+    let license = await masterDb.query("SELECT * FROM licenses WHERE id = ?", [license_id]);
+    expect(license.status).toBe("ACTIVE");
 
     // Second delivery: same job (simulating queue redelivery)
-    await provisionWorkspace(job) // Should return early (idempotent)
+    await provisionWorkspace(job); // Should return early (idempotent)
 
     // Verify still ACTIVE (no re-provisioning)
-    license = await masterDb.query('SELECT * FROM licenses WHERE id = ?', [
-      license_id,
-    ])
-    expect(license.status).toBe('ACTIVE')
-    expect(license.provisioned_at).toStrictEqual(/* first attempt time */)
+    license = await masterDb.query("SELECT * FROM licenses WHERE id = ?", [license_id]);
+    expect(license.status).toBe("ACTIVE");
+    expect(license.provisioned_at).toStrictEqual(/* first attempt time */);
 
     // Verify only one database created
-    const databases = await queryDatabases('%test_acme%')
-    expect(databases.length).toBe(1)
-  })
+    const databases = await queryDatabases("%test_acme%");
+    expect(databases.length).toBe(1);
+  });
 
-  test('should clean up orphan database on retry', async () => {
-    const license_id = 'license-123'
-    const workspace_slug = 'test-acme'
+  test("should clean up orphan database on retry", async () => {
+    const license_id = "license-123";
+    const workspace_slug = "test-acme";
 
     // Simulate first attempt that created DB but failed before registry insert
-    await createDatabase(`workspace_${workspace_slug}`)
+    await createDatabase(`workspace_${workspace_slug}`);
 
     // Mark license PROVISION_FAILED
-    await masterDb.query('UPDATE licenses SET status = ? WHERE id = ?', [
-      'PROVISION_FAILED',
+    await masterDb.query("UPDATE licenses SET status = ? WHERE id = ?", [
+      "PROVISION_FAILED",
       license_id,
-    ])
+    ]);
 
     // Retry provisioning
     const job = {
-      job_id: 'job-123',
+      job_id: "job-123",
       license_id,
       workspace_slug,
       /* ... */
-    }
+    };
 
-    await provisionWorkspace(job)
+    await provisionWorkspace(job);
 
     // Verify:
     // 1. Database exists (recreated after cleanup)
-    const databases = await queryDatabases('%test_acme%')
-    expect(databases.length).toBe(1)
+    const databases = await queryDatabases("%test_acme%");
+    expect(databases.length).toBe(1);
 
     // 2. Registry entry created
-    const registry = await masterDb.query(
-      'SELECT * FROM tenants_registry WHERE license_id = ?',
-      [license_id]
-    )
-    expect(registry).toBeTruthy()
+    const registry = await masterDb.query("SELECT * FROM tenants_registry WHERE license_id = ?", [
+      license_id,
+    ]);
+    expect(registry).toBeTruthy();
 
     // 3. License ACTIVE
-    const license = await masterDb.query(
-      'SELECT * FROM licenses WHERE id = ?',
-      [license_id]
-    )
-    expect(license.status).toBe('ACTIVE')
-  })
-})
+    const license = await masterDb.query("SELECT * FROM licenses WHERE id = ?", [license_id]);
+    expect(license.status).toBe("ACTIVE");
+  });
+});
 ```
 
 ---
@@ -1281,106 +1259,98 @@ describe('Idempotency Replay Scenarios', () => {
 // Network partition recovery (Q1)
 async function executeWithReconnect(
   operation: () => Promise<any>,
-  timeoutMs = 60_000
+  timeoutMs = 60_000,
 ): Promise<any> {
-  const startTime = Date.now()
+  const startTime = Date.now();
 
   while (Date.now() - startTime < timeoutMs) {
     try {
-      return await operation()
+      return await operation();
     } catch (error) {
       if (isNetworkError(error)) {
-        const elapsedMs = Date.now() - startTime
+        const elapsedMs = Date.now() - startTime;
         if (elapsedMs < timeoutMs) {
-          const backoffMs = Math.min(1000, 100 * Math.pow(2, retryCount))
-          logger.warn('Network error, reconnecting...', {
+          const backoffMs = Math.min(1000, 100 * Math.pow(2, retryCount));
+          logger.warn("Network error, reconnecting...", {
             elapsed_ms: elapsedMs,
             backoff_ms: backoffMs,
-          })
-          await delay(backoffMs)
-          retryCount++
-          continue
+          });
+          await delay(backoffMs);
+          retryCount++;
+          continue;
         }
       }
-      throw error
+      throw error;
     }
   }
 
-  throw new Error('Network partition exceeded 60s timeout')
+  throw new Error("Network partition exceeded 60s timeout");
 }
 
 // Database drop/create retries (Q4)
-async function dropDatabaseWithRetry(
-  dbName: string,
-  maxRetries = 3
-): Promise<void> {
-  let lastError
+async function dropDatabaseWithRetry(dbName: string, maxRetries = 3): Promise<void> {
+  let lastError;
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
     try {
-      await masterDb.query(`DROP DATABASE IF EXISTS "${dbName}"`)
-      logger.info('Database dropped', { db_name: dbName, attempt: attempt + 1 })
-      return
+      await masterDb.query(`DROP DATABASE IF EXISTS "${dbName}"`);
+      logger.info("Database dropped", { db_name: dbName, attempt: attempt + 1 });
+      return;
     } catch (error) {
-      lastError = error
+      lastError = error;
       if (attempt < maxRetries - 1) {
-        const backoffMs = Math.pow(2, attempt + 1) * 1000 // 2s, 4s, 8s
-        logger.warn('DROP DATABASE failed, retrying...', {
+        const backoffMs = Math.pow(2, attempt + 1) * 1000; // 2s, 4s, 8s
+        logger.warn("DROP DATABASE failed, retrying...", {
           db_name: dbName,
           attempt: attempt + 1,
           backoff_ms: backoffMs,
           error: error.message,
-        })
-        await delay(backoffMs)
+        });
+        await delay(backoffMs);
       }
     }
   }
 
   // Max retries exceeded
-  logger.error('DROP DATABASE max retries exceeded', {
+  logger.error("DROP DATABASE max retries exceeded", {
     db_name: dbName,
     attempts: maxRetries,
     error: lastError.message,
-  })
+  });
 
-  throw new Error(
-    `Failed to drop database after ${maxRetries} attempts: ${lastError.message}`
-  )
+  throw new Error(`Failed to drop database after ${maxRetries} attempts: ${lastError.message}`);
 }
 
 // Job retry with exponential backoff
-async function enqueueRetryWithBackoff(
-  job: ProvisioningJob,
-  maxRetries = 3
-): Promise<void> {
-  const currentRetry = (job.retry_count || 0) + 1
+async function enqueueRetryWithBackoff(job: ProvisioningJob, maxRetries = 3): Promise<void> {
+  const currentRetry = (job.retry_count || 0) + 1;
 
   if (currentRetry > maxRetries) {
-    logger.error('Max job retries exceeded, enqueueing to DLQ', {
+    logger.error("Max job retries exceeded, enqueueing to DLQ", {
       job_id: job.job_id,
       license_id: job.license_id,
       attempts: currentRetry,
-    })
-    await enqueueToDLQ(job, 'MAX_RETRIES_EXCEEDED')
-    return
+    });
+    await enqueueToDLQ(job, "MAX_RETRIES_EXCEEDED");
+    return;
   }
 
-  const backoffMs = Math.pow(2, currentRetry - 1) * 1000 // 1s, 2s, 4s
-  const retryJob = { ...job, retry_count: currentRetry }
+  const backoffMs = Math.pow(2, currentRetry - 1) * 1000; // 1s, 2s, 4s
+  const retryJob = { ...job, retry_count: currentRetry };
 
   // Use delayed queue (Redis with expiry) or schedule with a scheduler
   await redis.zadd(
-    'provisioning:queue:scheduled',
+    "provisioning:queue:scheduled",
     Date.now() + backoffMs,
-    JSON.stringify(retryJob)
-  )
+    JSON.stringify(retryJob),
+  );
 
-  logger.info('Job enqueued for retry', {
+  logger.info("Job enqueued for retry", {
     job_id: job.job_id,
     license_id: job.license_id,
     retry_count: currentRetry,
     backoff_ms: backoffMs,
-  })
+  });
 }
 ```
 
@@ -1396,97 +1366,94 @@ async function enqueueRetryWithBackoff(
 async function seedBaselineData(
   trx: Transaction,
   license: License,
-  job: ProvisioningJob
+  job: ProvisioningJob,
 ): Promise<void> {
   // Phase 1: Platform-generic baseline (always)
-  await seedDefaultRoles(trx)
-  await seedDefaultPermissions(trx)
-  await seedDefaultSettings(trx, license)
+  await seedDefaultRoles(trx);
+  await seedDefaultPermissions(trx);
+  await seedDefaultSettings(trx, license);
 
   if (job.uses_divisions) {
-    await seedDefaultDivision(trx)
+    await seedDefaultDivision(trx);
   }
 
   // Phase 2: Tenant-specific hooks (optional)
   // Could be extended later with product_id-specific customizations
   // E.g., if product_id = 'lms', seed additional LMS-specific roles
-  if (license.product_id === 'lms') {
-    await seedLMSSpecificRoles(trx)
+  if (license.product_id === "lms") {
+    await seedLMSSpecificRoles(trx);
   }
 }
 
 async function seedDefaultRoles(trx: Transaction): Promise<void> {
   const roles = [
-    { name: 'ADMIN', description: 'Workspace administrator' },
-    { name: 'STAFF', description: 'Staff member' },
-    { name: 'STUDENT', description: 'Student' },
-    { name: 'SUPPORT', description: 'Support staff' },
-  ]
+    { name: "ADMIN", description: "Workspace administrator" },
+    { name: "STAFF", description: "Staff member" },
+    { name: "STUDENT", description: "Student" },
+    { name: "SUPPORT", description: "Support staff" },
+  ];
 
   for (const role of roles) {
     await trx.query(
       `INSERT INTO roles (name, description, created_at)
        VALUES ($1, $2, now())
        ON CONFLICT (name) DO NOTHING`,
-      [role.name, role.description]
-    )
+      [role.name, role.description],
+    );
   }
 }
 
 async function seedDefaultPermissions(trx: Transaction): Promise<void> {
   const permissions = [
-    { name: 'CREATE_EXAM', description: 'Create examinations' },
-    { name: 'GRADE_EXAM', description: 'Grade examinations' },
-    { name: 'VIEW_REPORTS', description: 'View analytics reports' },
-    { name: 'MANAGE_STUDENTS', description: 'Manage student accounts' },
-    { name: 'MANAGE_STAFF', description: 'Manage staff accounts' },
+    { name: "CREATE_EXAM", description: "Create examinations" },
+    { name: "GRADE_EXAM", description: "Grade examinations" },
+    { name: "VIEW_REPORTS", description: "View analytics reports" },
+    { name: "MANAGE_STUDENTS", description: "Manage student accounts" },
+    { name: "MANAGE_STAFF", description: "Manage staff accounts" },
     // ... more permissions
-  ]
+  ];
 
   for (const perm of permissions) {
     await trx.query(
       `INSERT INTO permissions (name, description, created_at)
        VALUES ($1, $2, now())
        ON CONFLICT (name) DO NOTHING`,
-      [perm.name, perm.description]
-    )
+      [perm.name, perm.description],
+    );
   }
 }
 
-async function seedDefaultSettings(
-  trx: Transaction,
-  license: License
-): Promise<void> {
+async function seedDefaultSettings(trx: Transaction, license: License): Promise<void> {
   const settings = [
     {
-      setting_key: 'STUDENT_LIMIT',
+      setting_key: "STUDENT_LIMIT",
       setting_value: license.student_limit.toString(),
-      value_type: 'number',
+      value_type: "number",
     },
     {
-      setting_key: 'STAFF_LIMIT',
+      setting_key: "STAFF_LIMIT",
       setting_value: license.staff_limit.toString(),
-      value_type: 'number',
+      value_type: "number",
     },
     {
-      setting_key: 'DEFAULT_LANGUAGE',
-      setting_value: 'en',
-      value_type: 'string',
+      setting_key: "DEFAULT_LANGUAGE",
+      setting_value: "en",
+      value_type: "string",
     },
     {
-      setting_key: 'TIMEZONE',
-      setting_value: 'UTC',
-      value_type: 'string',
+      setting_key: "TIMEZONE",
+      setting_value: "UTC",
+      value_type: "string",
     },
-  ]
+  ];
 
   for (const setting of settings) {
     await trx.query(
       `INSERT INTO workspace_settings (setting_key, setting_value, value_type, created_at, updated_at)
        VALUES ($1, $2, $3, now(), now())
        ON CONFLICT (setting_key) DO UPDATE SET setting_value = $2`,
-      [setting.setting_key, setting.setting_value, setting.value_type]
-    )
+      [setting.setting_key, setting.setting_value, setting.value_type],
+    );
   }
 }
 ```
@@ -1502,50 +1469,50 @@ async function seedDefaultSettings(
 async function createAdminAccount(
   trx: Transaction,
   admin_email: string,
-  workspace_slug: string
+  workspace_slug: string,
 ): Promise<string> {
   // Generate temporary password (will be overridden by invite)
-  const tempPassword = generateSecureRandomPassword()
-  const passwordHash = await bcrypt.hash(tempPassword, 12)
+  const tempPassword = generateSecureRandomPassword();
+  const passwordHash = await bcrypt.hash(tempPassword, 12);
 
   const result = await trx.query(
     `INSERT INTO users (email, first_name, last_name, password_hash, role_id, created_at, updated_at)
      SELECT $1, 'Admin', 'Placeholder', $2, id, now(), now()
      FROM roles WHERE name = 'ADMIN'
      RETURNING id`,
-    [admin_email, passwordHash]
-  )
+    [admin_email, passwordHash],
+  );
 
-  const admin_user_id = result.rows[0].id
+  const admin_user_id = result.rows[0].id;
 
-  logger.info('Admin account created', {
+  logger.info("Admin account created", {
     admin_email,
     admin_user_id,
     workspace_slug,
-    note: 'Password will be set via invite flow',
-  })
+    note: "Password will be set via invite flow",
+  });
 
-  return admin_user_id
+  return admin_user_id;
 }
 
 // After Worker finishes: MMC API triggers invite
 async function triggerAdminInvite(
   license_id: string,
   admin_email: string,
-  workspace_slug: string
+  workspace_slug: string,
 ): Promise<void> {
   // Verify provisioning is complete
-  const license = await masterDb.query(
-    'SELECT * FROM licenses WHERE id = ? AND status = ?',
-    [license_id, 'ACTIVE']
-  )
+  const license = await masterDb.query("SELECT * FROM licenses WHERE id = ? AND status = ?", [
+    license_id,
+    "ACTIVE",
+  ]);
 
   if (!license) {
-    throw new Error('License not yet ACTIVE')
+    throw new Error("License not yet ACTIVE");
   }
 
   // Generate invite token
-  const inviteToken = generateSecureToken()
+  const inviteToken = generateSecureToken();
   await redis.setex(
     `invite:${inviteToken}`,
     86400 * 7, // 7 days
@@ -1553,66 +1520,66 @@ async function triggerAdminInvite(
       admin_email,
       workspace_slug,
       expires_at: Date.now() + 86400 * 7 * 1000,
-    })
-  )
+    }),
+  );
 
   // Send invite email
   await emailService.send({
     to: admin_email,
     subject: `Invited to ${workspace_slug} workspace`,
-    template: 'admin-invite',
+    template: "admin-invite",
     context: {
       workspace_slug,
       invite_link: `https://app.zidney.com/invite/${inviteToken}`,
       expires_in_days: 7,
     },
-  })
+  });
 
-  logger.info('Admin invite sent', {
+  logger.info("Admin invite sent", {
     admin_email,
     workspace_slug,
-    invite_token: inviteToken.substring(0, 8) + '***',
-  })
+    invite_token: inviteToken.substring(0, 8) + "***",
+  });
 }
 
 // POST /invite/:token
 async function acceptInvite(req: Request): Promise<Response> {
-  const { token } = req.params
-  const { password } = req.body
+  const { token } = req.params;
+  const { password } = req.body;
 
   // Retrieve invite from Redis
-  const inviteJson = await redis.getdel(`invite:${token}`)
+  const inviteJson = await redis.getdel(`invite:${token}`);
   if (!inviteJson) {
-    return error(410, 'INVITE_EXPIRED_OR_INVALID')
+    return error(410, "INVITE_EXPIRED_OR_INVALID");
   }
 
-  const invite = JSON.parse(inviteJson)
-  const { admin_email, workspace_slug } = invite
+  const invite = JSON.parse(inviteJson);
+  const { admin_email, workspace_slug } = invite;
 
   // Connect to tenant database
   const registry = await masterDb.query(
-    'SELECT db_name FROM tenants_registry WHERE workspace_slug = ?',
-    [workspace_slug]
-  )
+    "SELECT db_name FROM tenants_registry WHERE workspace_slug = ?",
+    [workspace_slug],
+  );
 
-  const tenantDb = await getTenantPool(registry.db_name)
+  const tenantDb = await getTenantPool(registry.db_name);
 
   // Update admin user password
-  const passwordHash = await bcrypt.hash(password, 12)
-  await tenantDb.query(
-    'UPDATE users SET password_hash = ?, verified_at = now() WHERE email = ?',
-    [passwordHash, admin_email]
-  )
+  const passwordHash = await bcrypt.hash(password, 12);
+  await tenantDb.query("UPDATE users SET password_hash = ?, verified_at = now() WHERE email = ?", [
+    passwordHash,
+    admin_email,
+  ]);
 
-  logger.info('Admin account activated', {
+  logger.info("Admin account activated", {
     admin_email,
     workspace_slug,
-  })
+  });
 
   return success({
-    message: 'Admin account activated',
+    message: "Admin account activated",
     redirect_to: `/login?workspace=${workspace_slug}`,
-  })
+  });
 }
 ```
 
@@ -1626,60 +1593,56 @@ async function acceptInvite(req: Request): Promise<Response> {
 // Deduplication at enqueue time by license_id
 
 async function enqueueLicenseProvisioningJob(
-  jobPayload: ProvisioningJob
+  jobPayload: ProvisioningJob,
 ): Promise<{ enqueued: boolean; reason: string }> {
-  const { license_id, workspace_slug } = jobPayload
+  const { license_id, workspace_slug } = jobPayload;
 
   // Check if already pending
-  const pendingKey = `pending:license:${license_id}`
-  const alreadyPending = await redis.get(pendingKey)
+  const pendingKey = `pending:license:${license_id}`;
+  const alreadyPending = await redis.get(pendingKey);
 
   if (alreadyPending) {
-    logger.warn('Duplicate job dropped (already pending)', {
+    logger.warn("Duplicate job dropped (already pending)", {
       license_id,
       workspace_slug,
-    })
-    return { enqueued: false, reason: 'DUPLICATE_PENDING' }
+    });
+    return { enqueued: false, reason: "DUPLICATE_PENDING" };
   }
 
   // Check if already provisioned
-  const registry = await masterDb.query(
-    'SELECT * FROM tenants_registry WHERE license_id = ?',
-    [license_id]
-  )
+  const registry = await masterDb.query("SELECT * FROM tenants_registry WHERE license_id = ?", [
+    license_id,
+  ]);
 
   if (registry) {
-    logger.warn('Duplicate job dropped (already provisioned)', {
+    logger.warn("Duplicate job dropped (already provisioned)", {
       license_id,
       workspace_slug,
-    })
-    return { enqueued: false, reason: 'ALREADY_PROVISIONED' }
+    });
+    return { enqueued: false, reason: "ALREADY_PROVISIONED" };
   }
 
   // Check license status
-  const license = await masterDb.query(
-    'SELECT status FROM licenses WHERE id = ?',
-    [license_id]
-  )
+  const license = await masterDb.query("SELECT status FROM licenses WHERE id = ?", [license_id]);
 
-  if (license.status === 'ACTIVE' || license.status === 'PROVISION_FAILED') {
-    logger.warn('Duplicate job dropped (license not pending)', {
+  if (license.status === "ACTIVE" || license.status === "PROVISION_FAILED") {
+    logger.warn("Duplicate job dropped (license not pending)", {
       license_id,
       license_status: license.status,
-    })
-    return { enqueued: false, reason: 'LICENSE_NOT_PENDING' }
+    });
+    return { enqueued: false, reason: "LICENSE_NOT_PENDING" };
   }
 
   // Safe to enqueue
-  await redis.lpush('provisioning:queue', JSON.stringify(jobPayload))
-  await redis.setex(pendingKey, 600, '1') // 10-minute pending marker
+  await redis.lpush("provisioning:queue", JSON.stringify(jobPayload));
+  await redis.setex(pendingKey, 600, "1"); // 10-minute pending marker
 
-  logger.info('Job enqueued', {
+  logger.info("Job enqueued", {
     license_id,
     workspace_slug,
-  })
+  });
 
-  return { enqueued: true, reason: 'SUCCESS' }
+  return { enqueued: true, reason: "SUCCESS" };
 }
 ```
 
@@ -1692,13 +1655,13 @@ async function enqueueLicenseProvisioningJob(
 ```typescript
 // 1. At license creation (API endpoint)
 async function createLicense(req: Request): Promise<Response> {
-  const { workspace_slug, product_id /* ... */ } = req.body
+  const { workspace_slug, product_id /* ... */ } = req.body;
 
   // Get current platform version
   const platformVersion = {
-    schema_version: process.env.SCHEMA_VERSION || '1.2.0',
-    product_version: process.env.PRODUCT_VERSION || '1.0.0',
-  }
+    schema_version: process.env.SCHEMA_VERSION || "1.2.0",
+    product_version: process.env.PRODUCT_VERSION || "1.0.0",
+  };
 
   // Create license with platform version frozen
   const license = await masterDb.query(
@@ -1706,91 +1669,82 @@ async function createLicense(req: Request): Promise<Response> {
      (workspace_slug, product_id, schema_version, product_version, status, created_at)
      VALUES ($1, $2, $3, $4, 'PENDING_PROVISION', now())
      RETURNING *`,
-    [
-      workspace_slug,
-      product_id,
-      platformVersion.schema_version,
-      platformVersion.product_version,
-    ]
-  )
+    [workspace_slug, product_id, platformVersion.schema_version, platformVersion.product_version],
+  );
 
-  logger.info('License created with versions', {
+  logger.info("License created with versions", {
     license_id: license.id,
     schema_version: platformVersion.schema_version,
     product_version: platformVersion.product_version,
-  })
+  });
 
-  return success({ ...license })
+  return success({ ...license });
 }
 
 // 2. At worker provisioning start
 async function provisionWorkspace(job: ProvisioningJob): Promise<void> {
   const license = await masterDb.query(
-    'SELECT schema_version, product_version FROM licenses WHERE id = ?',
-    [job.license_id]
-  )
+    "SELECT schema_version, product_version FROM licenses WHERE id = ?",
+    [job.license_id],
+  );
 
   if (!license) {
-    throw new Error('LICENSE_NOT_FOUND')
+    throw new Error("LICENSE_NOT_FOUND");
   }
 
   // Validate schema version compatibility
-  const currentSchemaVersion = process.env.SCHEMA_VERSION
-  const licenseSchemaVersion = license.schema_version
+  const currentSchemaVersion = process.env.SCHEMA_VERSION;
+  const licenseSchemaVersion = license.schema_version;
 
   if (compareVersions(licenseSchemaVersion, currentSchemaVersion) > 0) {
     // License requires newer platform version
-    logger.error('License incompatible with platform', {
+    logger.error("License incompatible with platform", {
       license_schema_version: licenseSchemaVersion,
       platform_schema_version: currentSchemaVersion,
-    })
-    throw new Error('LICENSE_INCOMPATIBLE_SCHEMA')
+    });
+    throw new Error("LICENSE_INCOMPATIBLE_SCHEMA");
   }
 
-  logger.info('Schema version compatibility confirmed', {
+  logger.info("Schema version compatibility confirmed", {
     license_id: job.license_id,
     schema_version: licenseSchemaVersion,
-  })
+  });
 
   // Proceed with migrations up to license.schema_version
-  const migrationsToApply = await getMigrationsUpTo(licenseSchemaVersion)
+  const migrationsToApply = await getMigrationsUpTo(licenseSchemaVersion);
   // ... apply migrations
 }
 
 // 3. At workspace login (resolver middleware)
-async function licenseMiddleware(
-  req: Request,
-  res: Response,
-  next: NextFunction
-): Promise<void> {
-  const { workspace_slug } = req.params
+async function licenseMiddleware(req: Request, res: Response, next: NextFunction): Promise<void> {
+  const { workspace_slug } = req.params;
 
   // Resolve tenant
-  const license = await resolveTenantLicense(workspace_slug)
+  const license = await resolveTenantLicense(workspace_slug);
 
   if (!license) {
-    return error(404, 'WORKSPACE_NOT_FOUND')
+    return error(404, "WORKSPACE_NOT_FOUND");
   }
 
   // Check status
-  if (license.status === 'PENDING_PROVISION') {
-    return error(423, 'WORKSPACE_LOCKED', 'Workspace is being provisioned')
+  if (license.status === "PENDING_PROVISION") {
+    return error(423, "WORKSPACE_LOCKED", "Workspace is being provisioned");
   }
 
-  if (license.status === 'PROVISION_FAILED') {
-    return error(503, 'WORKSPACE_UNAVAILABLE', 'Workspace provisioning failed')
+  if (license.status === "PROVISION_FAILED") {
+    return error(503, "WORKSPACE_UNAVAILABLE", "Workspace provisioning failed");
   }
 
   // Check version compatibility
-  const currentSchemaVersion = process.env.SCHEMA_VERSION
+  const currentSchemaVersion = process.env.SCHEMA_VERSION;
   if (compareVersions(license.schema_version, currentSchemaVersion) > 0) {
-    return error(426, 'UPGRADE_REQUIRED', 'Workspace requires platform upgrade')
+    return error(426, "UPGRADE_REQUIRED", "Workspace requires platform upgrade");
   }
 
   // Validation passed
-  req.context.license = license
-  req.context.workspace_slug = workspace_slug
-  next()
+  req.context.license = license;
+  req.context.workspace_slug = workspace_slug;
+  next();
 }
 ```
 
@@ -1993,12 +1947,19 @@ tests/
 
 **Risk Flags for Guardian Audit**:
 
-1. **Distributed Lock TTL (30s)**: If worker hangs beyond 30s, lock released and duplicate provisioning possible. Mitigation: Worker implements timeout protection; lock extension not used (to avoid unbounded retry).
-2. **Network Partition (Q1)**: Reconnect up to 60s, then fail. If database becomes unreachable mid-transaction, partial state may exist. Mitigation: Worker detects partial DB and cleans up on retry.
-3. **Concurrent Job Handling**: If two jobs for same license_id are enqueued before dedup check, one will timeout on lock. Mitigation: Dedup at enqueue time (Q5) and distributed lock ensures safety.
-4. **Operator Intervention Required**: If DROP DATABASE fails after N retries, operator must manually remediate. Mitigation: Clear error logs and DLQ entries guide operator action.
+1. **Distributed Lock TTL (30s)**: If worker hangs beyond 30s, lock released and duplicate
+   provisioning possible. Mitigation: Worker implements timeout protection; lock extension not used
+   (to avoid unbounded retry).
+2. **Network Partition (Q1)**: Reconnect up to 60s, then fail. If database becomes unreachable
+   mid-transaction, partial state may exist. Mitigation: Worker detects partial DB and cleans up on
+   retry.
+3. **Concurrent Job Handling**: If two jobs for same license_id are enqueued before dedup check, one
+   will timeout on lock. Mitigation: Dedup at enqueue time (Q5) and distributed lock ensures safety.
+4. **Operator Intervention Required**: If DROP DATABASE fails after N retries, operator must
+   manually remediate. Mitigation: Clear error logs and DLQ entries guide operator action.
 
-**Testing Completeness**: ✅ Unit, integration, idempotency, and observability test scaffolds defined.
+**Testing Completeness**: ✅ Unit, integration, idempotency, and observability test scaffolds
+defined.
 
 No further escalation required. Design is complete and ready for implementation.
 

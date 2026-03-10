@@ -1,14 +1,16 @@
 # Plan Report — STAGE_UI_00_RUNTIME_ARCHITECTURE
 
-**Step:** 3 — Plan
-**Timestamp:** 2026-02-28T00:35:00Z
-**Status:** COMPLETE
+**Step:** 3 — Plan **Timestamp:** 2026-02-28T00:35:00Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-Technical plan produced for `STAGE_UI_00_RUNTIME_ARCHITECTURE`. This is a UI-only scaffolding stage covering all three frontend applications (MMC, Backoffice, Frontoffice). No backend changes, no database migrations, no API modifications. Guardian validation required 2 rounds: Round 1 blocked on `credentials: 'include'` missing from API client spec, API client consumption ambiguity, and ESLint deliverable gap. All issues remediated; both guardians returned VERDICT: PASS in Round 2.
+Technical plan produced for `STAGE_UI_00_RUNTIME_ARCHITECTURE`. This is a UI-only scaffolding stage
+covering all three frontend applications (MMC, Backoffice, Frontoffice). No backend changes, no
+database migrations, no API modifications. Guardian validation required 2 rounds: Round 1 blocked on
+`credentials: 'include'` missing from API client spec, API client consumption ambiguity, and ESLint
+deliverable gap. All issues remediated; both guardians returned VERDICT: PASS in Round 2.
 
 **Key discoveries from research:**
 
@@ -71,13 +73,16 @@ Technical plan produced for `STAGE_UI_00_RUNTIME_ARCHITECTURE`. This is a UI-onl
 
 ## Transaction Boundaries
 
-No write transactions in this stage. API client scaffolding only — no data mutations defined in this stage.
+No write transactions in this stage. API client scaffolding only — no data mutations defined in this
+stage.
 
 ---
 
 ## Idempotency Strategy
 
-No idempotency-sensitive operations in this stage. The `idempotencyInterceptor` is scaffolded as a capability (attaches `Idempotency-Key` when provided) but no endpoints requiring idempotency keys are implemented in this stage.
+No idempotency-sensitive operations in this stage. The `idempotencyInterceptor` is scaffolded as a
+capability (attaches `Idempotency-Key` when provided) but no endpoints requiring idempotency keys
+are implemented in this stage.
 
 ---
 

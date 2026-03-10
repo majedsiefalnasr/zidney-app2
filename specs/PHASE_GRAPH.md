@@ -23,8 +23,7 @@ flowchart TD
 
 ## How to View
 
-1. Install VSCode extension:
-   **Markdown Preview Mermaid Support**
+1. Install VSCode extension: **Markdown Preview Mermaid Support**
 2. Open `PHASE_GRAPH.md`
 3. Press: Cmd + Shift + V
 

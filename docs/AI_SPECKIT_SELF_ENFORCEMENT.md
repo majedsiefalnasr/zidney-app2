@@ -8,7 +8,8 @@
 
 ## Mandatory Validation Gate (NON-NEGOTIABLE)
 
-**EVERY TIME I generate or am about to create a SpecKit artifact** (plan.md, tasks.md, spec.md, \*\_REPORT.md), I MUST:
+**EVERY TIME I generate or am about to create a SpecKit artifact** (plan.md, tasks.md, spec.md,
+\*\_REPORT.md), I MUST:
 
 ### Step 1: Identify Artifact Type
 
@@ -174,7 +175,9 @@ If I violate the path rules and attempt to git add/commit, `.git/hooks/pre-commi
 
 - **Author:** GitHub Copilot (AI Agent)
 - **Date:** February 19, 2026
-- **Reason:** User requested prevention mechanism after detecting SpecKit artifact location violation
-- **Authority:** AGENTS.md > AI Behavioral Enforcement → "AI must not violate import/directory boundaries"
+- **Reason:** User requested prevention mechanism after detecting SpecKit artifact location
+  violation
+- **Authority:** AGENTS.md > AI Behavioral Enforcement → "AI must not violate import/directory
+  boundaries"
 
 This document is binding and self-referential: I am documenting my own governance constraints.

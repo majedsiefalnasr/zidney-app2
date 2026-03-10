@@ -71,7 +71,8 @@ Validation must use server time only.
 
 System must ensure:
 
-- No existing IN_PROGRESS attempt for same user + same exam (unless exam allows multiple concurrent attempts)
+- No existing IN_PROGRESS attempt for same user + same exam (unless exam allows multiple concurrent
+  attempts)
 - No attempt started during soft-lock state
 - No attempt started during ARCHIVED state
 

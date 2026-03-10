@@ -26,13 +26,20 @@
 
 ## 3. Executive Summary
 
-- Delivers a complete tenant-isolated multi-language translation system for Zidney exam entities (questions, exams, choices, passages)
-- Introduces `translations` and `translation_audit_logs` tables in the tenant DB schema via forward-only migration
-- Adds 3 new Backoffice API routes: `POST /translations`, `GET /translations`, `GET /translations/coverage`
-- Integrates language removal into workspace-settings: sync path (≤10,000 rows) and async DRAIN path (>10,000 rows)
-- Implements `DRAIN_LANGUAGE_TRANSLATIONS` worker job with per-batch transactions, audit logging, and Redis SCAN cache invalidation
-- All writes are idempotent; upsert uses `ON CONFLICT DO UPDATE`; DRAIN is re-entrant at any batch boundary
-- Constitutional guarantees preserved: database-per-tenant, server-authoritative time, license middleware, structured logging, no cross-tenant joins
+- Delivers a complete tenant-isolated multi-language translation system for Zidney exam entities
+  (questions, exams, choices, passages)
+- Introduces `translations` and `translation_audit_logs` tables in the tenant DB schema via
+  forward-only migration
+- Adds 3 new Backoffice API routes: `POST /translations`, `GET /translations`,
+  `GET /translations/coverage`
+- Integrates language removal into workspace-settings: sync path (≤10,000 rows) and async DRAIN path
+  (>10,000 rows)
+- Implements `DRAIN_LANGUAGE_TRANSLATIONS` worker job with per-batch transactions, audit logging,
+  and Redis SCAN cache invalidation
+- All writes are idempotent; upsert uses `ON CONFLICT DO UPDATE`; DRAIN is re-entrant at any batch
+  boundary
+- Constitutional guarantees preserved: database-per-tenant, server-authoritative time, license
+  middleware, structured logging, no cross-tenant joins
 
 ---
 
@@ -120,7 +127,8 @@ Expected: 72/72 tests pass.
 
 ## 10. Migration Impact
 
-- [x] New migrations included: `apps/api/src/db/tenant/migrations/20260301_001_translation_system.ts`
+- [x] New migrations included:
+      `apps/api/src/db/tenant/migrations/20260301_001_translation_system.ts`
 - [x] Backward compatibility verified (additive — new tables only)
 - [x] Rollback strategy defined: restore from snapshot per Zidney migration policy
 - [x] No untracked schema changes
@@ -139,7 +147,9 @@ Expected: 72/72 tests pass.
 
 ## 12. Stage Lifecycle Verification
 
-- [x] Stage Status updated in `specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_19_TRANSLATION_SYSTEM.md` → PRODUCTION READY
+- [x] Stage Status updated in
+      `specs/phases/03_BACKOFFICE_CORE/01_FOUNDATION/STAGE_19_TRANSLATION_SYSTEM.md` → PRODUCTION
+      READY
 - [x] `.workflow-state.json` updated to `PRODUCTION READY`, `tasks_completed: 28/28`
 - [x] `README.md` progress table complete (all steps ✅)
 - [x] All 7 step reports generated in `reports/`
@@ -163,7 +173,8 @@ Risk Level:
 - [x] Medium
 - [ ] High
 
-Reason: New DB tables and worker job. Risk mitigated by per-batch transactions, idempotency, and audit trail. No existing tables modified destructively.
+Reason: New DB tables and worker job. Risk mitigated by per-batch transactions, idempotency, and
+audit trail. No existing tables modified destructively.
 
 ---
 

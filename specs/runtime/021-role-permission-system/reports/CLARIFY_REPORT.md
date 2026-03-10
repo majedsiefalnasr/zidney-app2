@@ -1,15 +1,13 @@
 # Clarify Report — STAGE_21_ROLE_PERMISSION_SYSTEM
 
-**Step:** 2 — Clarify
-**Timestamp:** 2026-03-02T00:00:00.000Z
-**Status:** COMPLETE
+**Step:** 2 — Clarify **Timestamp:** 2026-03-02T00:00:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-The clarify step identified and resolved 5 architectural ambiguities in the specification. The
-spec was already well-structured; the clarifications closed edge cases in middleware binding,
+The clarify step identified and resolved 5 architectural ambiguities in the specification. The spec
+was already well-structured; the clarifications closed edge cases in middleware binding,
 cross-tenant security, mutation error contracts, transaction atomicity, and concurrent delete
 serialization. All clarifications are now appended to `spec.md` under
 `## Clarifications / ### Session 2026-03-02`. No items remain open. The spec is approved for
@@ -68,9 +66,9 @@ None.
 
 ## Open Risks
 
-1. **Route permission registry** — FR-024 is a new requirement that requires a clean mapping
-   of all Backoffice routes. Plan phase should account for this registry as a first-class
-   deliverable (missing routes fail closed → 403, but incomplete registry is a shipping risk).
+1. **Route permission registry** — FR-024 is a new requirement that requires a clean mapping of all
+   Backoffice routes. Plan phase should account for this registry as a first-class deliverable
+   (missing routes fail closed → 403, but incomplete registry is a shipping risk).
 2. **JWT workspace_id claim** — requires the auth issuance layer (from a prior stage) to embed
-   `workspace_id` in the JWT payload. Plan phase should confirm this claim is already emitted
-   by the existing auth stage.
+   `workspace_id` in the JWT payload. Plan phase should confirm this claim is already emitted by the
+   existing auth stage.

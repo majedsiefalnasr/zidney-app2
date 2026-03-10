@@ -163,9 +163,11 @@ Documentation (TBD):
 
 ## 📝 KEY IMPLEMENTATION NOTES
 
-1. **Deterministic Grading**: Score engine verified for determinism. Never use randomness, current time, or external calls in grading logic.
+1. **Deterministic Grading**: Score engine verified for determinism. Never use randomness, current
+   time, or external calls in grading logic.
 
-2. **Tenant Isolation**: All DB queries include `workspace_id`. Tenant resolver must run FIRST middleware. Use `req.tenantContext` for all workspace operations.
+2. **Tenant Isolation**: All DB queries include `workspace_id`. Tenant resolver must run FIRST
+   middleware. Use `req.tenantContext` for all workspace operations.
 
 3. **Middleware Chain**:
 
@@ -178,9 +180,11 @@ Documentation (TBD):
    6. ...business logic
    ```
 
-4. **Connection Pooling**: Use `getTenantDatabase(workspaceId, dbUrl)` not direct connections. Pool is cached; safe to call multiple times.
+4. **Connection Pooling**: Use `getTenantDatabase(workspaceId, dbUrl)` not direct connections. Pool
+   is cached; safe to call multiple times.
 
-5. **Structured Logging**: Every log must include `correlation_id` and `workspace_id`. No `console.log()` anywhere.
+5. **Structured Logging**: Every log must include `correlation_id` and `workspace_id`. No
+   `console.log()` anywhere.
 
 6. **Error Responses**: All errors use this format:
 
@@ -197,7 +201,8 @@ Documentation (TBD):
    }
    ```
 
-7. **Type Safety**: All business logic uses TypeScript. No `any` types. Run `tsc --noImplicitAny` before commit.
+7. **Type Safety**: All business logic uses TypeScript. No `any` types. Run `tsc --noImplicitAny`
+   before commit.
 
 ---
 

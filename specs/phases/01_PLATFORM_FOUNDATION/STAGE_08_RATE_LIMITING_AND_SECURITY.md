@@ -45,8 +45,8 @@ Constitutional Compliance:
 - Structured Logging: All logs include correlationId + workspace context ✅
 - RBAC Enforcement: 20 endpoints with role matrix ✅
 
-Notes:
-Backend implementation complete. All 12 Constitutional drift criteria verified PASS. No structural backend modifications allowed. Production-ready for closure review.
+Notes: Backend implementation complete. All 12 Constitutional drift criteria verified PASS. No
+structural backend modifications allowed. Production-ready for closure review.
 
 ---
 
@@ -204,8 +204,7 @@ Token must be rejected if:
 - Workspace mismatch
 - token_version mismatch
 
-Short-lived access tokens required.
-Refresh token rotation recommended.
+Short-lived access tokens required. Refresh token rotation recommended.
 
 ---
 

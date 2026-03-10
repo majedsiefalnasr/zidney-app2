@@ -9,20 +9,19 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: PRODUCTION READY
-Risk Level: LOW
-Closure Date: 2026-03-01T02:00:00.000Z
+Status: PRODUCTION READY Risk Level: LOW Closure Date: 2026-03-01T02:00:00.000Z
 
-Implementation: COMPLETE
-Tasks: 39 / 39 completed
+Implementation: COMPLETE Tasks: 39 / 39 completed
 
 Scope Delivered:
 
 - Workflow state machine: COMPLETED / UNDER_REVIEW / APPROVED / ENABLED (5-edge state graph)
 - Domain package: `packages/domain-core/src/workflow/` (4 files: states, types, errors, engine)
-- Tenant migration: 20260301_002_workflow_engine.ts (schema 1.2.0 → 1.3.0, immutability trigger, 3 indexes)
+- Tenant migration: 20260301_002_workflow_engine.ts (schema 1.2.0 → 1.3.0, immutability trigger, 3
+  indexes)
 - API module: `apps/api/src/modules/workflow/` (validation, context extraction)
-- API routes: `apps/api/src/routes/backoffice/workflow/` (POST :entityType/:entityId/transition + rate limit)
+- API routes: `apps/api/src/routes/backoffice/workflow/` (POST :entityType/:entityId/transition +
+  rate limit)
 - Test coverage: 41 unit tests + 16 integration tests, all passing
 - Database: workflow_logs table (immutable audit trail with trigger protection)
 - Observability: Structured logging with correlation IDs, workspace slugs, actor tracking
@@ -59,14 +58,16 @@ Quality Metrics:
 - Concurrent access: protected (row-level lock)
 - Audit trail: immutable (trigger prevents modification)
 
-Notes:
-Stage is production ready. All 39 implementation tasks complete. Comprehensive test coverage (57 tests). Constitutional compliance verified across 8 ADRs/rules. Zero breaking changes. Ready for staging deployment and QA validation.
+Notes: Stage is production ready. All 39 implementation tasks complete. Comprehensive test coverage
+(57 tests). Constitutional compliance verified across 8 ADRs/rules. Zero breaking changes. Ready for
+staging deployment and QA validation.
 
 ---
 
 ## Objective
 
-Implement a reusable, deterministic workflow engine that manages lifecycle states for tenant content entities.
+Implement a reusable, deterministic workflow engine that manages lifecycle states for tenant content
+entities.
 
 This workflow must be:
 
@@ -106,8 +107,7 @@ States (ordered):
 3. APPROVED
 4. ENABLED
 
-Default state on creation:
-COMPLETED
+Default state on creation: COMPLETED
 
 State progression is strictly linear unless explicitly reversed with permission.
 
@@ -131,8 +131,7 @@ Illegal transitions must return 400 (invalid_state_transition).
 
 Skipping states is not allowed.
 
-Example (invalid):
-COMPLETED → APPROVED
+Example (invalid): COMPLETED → APPROVED
 
 ---
 

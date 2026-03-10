@@ -322,5 +322,4 @@ Notifications must never:
 - Cause performance degradation
 - Break tenant isolation
 
-Notifications are asynchronous enhancements,
-not core runtime dependencies.
+Notifications are asynchronous enhancements, not core runtime dependencies.

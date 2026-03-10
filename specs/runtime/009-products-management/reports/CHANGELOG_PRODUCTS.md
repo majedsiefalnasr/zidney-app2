@@ -6,7 +6,8 @@
 
 #### Core Features
 
-- **Product Management API** - 7 RESTful endpoints for creating, reading, updating, and deleting products
+- **Product Management API** - 7 RESTful endpoints for creating, reading, updating, and deleting
+  products
   - POST /products - Create new product with version 1
   - GET /products - List products with pagination, filtering, and sorting
   - GET /products/{id} - Retrieve single product
@@ -15,7 +16,8 @@
   - DELETE /products/{id} - Delete product with cascade delete of versions and audit logs
   - GET /products/{id}/audit-log - Retrieve audit trail with pagination and filtering
 
-- **Product Service** - Core business logic layer (`packages/domain-core/src/products/productService.ts`)
+- **Product Service** - Core business logic layer
+  (`packages/domain-core/src/products/productService.ts`)
   - `createProduct()` - Create new product with initial version and audit log entry
   - `updateProduct()` - Update product with change detection and version management
   - `changeProductStatus()` - Toggle ACTIVE/INACTIVE status with audit logging
@@ -24,7 +26,8 @@
   - `listProducts()` - List with pagination, filtering, and sorting
   - `deleteProduct()` - Hard delete with cascade cleanup
   - `getProductAuditLog()` - Audit trail queries with filters and pagination
-  - Helper functions: `generateChangeSummary()`, `computeFieldDiff()`, `validateProductName()`, `validateSlug()`, `validateModulesEnum()`
+  - Helper functions: `generateChangeSummary()`, `computeFieldDiff()`, `validateProductName()`,
+    `validateSlug()`, `validateModulesEnum()`
 
 #### Data Model
 
@@ -90,11 +93,16 @@
 
 #### Documentation
 
-- **OpenAPI 3.0 Specification** - Complete API documentation with all endpoints, schemas, and examples (`docs/api/products-management-api-spec.yaml`)
-- **API Documentation** - Detailed guide with curl examples for each endpoint (`docs/api/API_PRODUCTS_MANAGEMENT.md`)
-- **Implementation Guide** - Architecture, data flows, and extension points (`docs/api/IMPLEMENTATION_PRODUCTS.md`)
-- **Database Schema Guide** - Table definitions, indexes, and common queries (`docs/runtime/009-products-management/README_PRODUCTS.md`)
-- **Deployment & Validation Guide** - Comprehensive deployment checklist and validation scripts (`docs/runtime/009-products-management/DEPLOYMENT_AND_VALIDATION_PRODUCTS.md`)
+- **OpenAPI 3.0 Specification** - Complete API documentation with all endpoints, schemas, and
+  examples (`docs/api/products-management-api-spec.yaml`)
+- **API Documentation** - Detailed guide with curl examples for each endpoint
+  (`docs/api/API_PRODUCTS_MANAGEMENT.md`)
+- **Implementation Guide** - Architecture, data flows, and extension points
+  (`docs/api/IMPLEMENTATION_PRODUCTS.md`)
+- **Database Schema Guide** - Table definitions, indexes, and common queries
+  (`docs/runtime/009-products-management/README_PRODUCTS.md`)
+- **Deployment & Validation Guide** - Comprehensive deployment checklist and validation scripts
+  (`docs/runtime/009-products-management/DEPLOYMENT_AND_VALIDATION_PRODUCTS.md`)
 
 #### Testing
 
@@ -236,4 +244,5 @@ Recommended next features:
 4. Add license usage tracking
 5. Create licensing dashboard in backoffice
 
-See [IMPLEMENTATION_PRODUCTS.md](../docs/api/IMPLEMENTATION_PRODUCTS.md#stage-10-handoff) for integration points.
+See [IMPLEMENTATION_PRODUCTS.md](../docs/api/IMPLEMENTATION_PRODUCTS.md#stage-10-handoff) for
+integration points.

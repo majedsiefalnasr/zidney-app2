@@ -1,20 +1,18 @@
 # STAGE 07 – Observability Baseline
 
-**Specification Document**
-**Version:** 1.0.0
-**Created:** 2026-02-18
-**Phase:** 01 – Platform Foundation
-**Stage:** STAGE_07_OBSERVABILITY_BASELINE
+**Specification Document** **Version:** 1.0.0 **Created:** 2026-02-18 **Phase:** 01 – Platform
+Foundation **Stage:** STAGE_07_OBSERVABILITY_BASELINE
 
 ---
 
 ## Feature Overview
 
-**What is being built:**
-A production-grade observability baseline for Zidney enabling comprehensive request tracing, attempt audit trails, worker job tracking, and structured error handling. Every request, attempt, and background operation will be traceable end-to-end.
+**What is being built:** A production-grade observability baseline for Zidney enabling comprehensive
+request tracing, attempt audit trails, worker job tracking, and structured error handling. Every
+request, attempt, and background operation will be traceable end-to-end.
 
-**Phase Context:**
-This feature belongs to Phase 01 – Platform Foundation as a critical infrastructure component that enables all downstream features to be observable and auditable.
+**Phase Context:** This feature belongs to Phase 01 – Platform Foundation as a critical
+infrastructure component that enables all downstream features to be observable and auditable.
 
 **Stage Dependency:**
 
@@ -47,7 +45,8 @@ This feature belongs to Phase 01 – Platform Foundation as a critical infrastru
 
 - **Q1: Log Persistence Strategy** → A: Only audit events to DB (request logs to stdout)
   - Structured JSON request/attempt logs routed to stdout/stderr for container orchestration
-  - Audit events (LICENSE_CHANGE, TENANT_PROVISION, SCHEMA_UPGRADE, ROLE_CHANGE) persisted to `audit_log` table
+  - Audit events (LICENSE_CHANGE, TENANT_PROVISION, SCHEMA_UPGRADE, ROLE_CHANGE) persisted to
+    `audit_log` table
   - Rationale: Stability-first; reduces database load; scales elastically with log volume
 
 - **Q2: Pino Logger Initialization** → A: Global singleton with `pino.child()`
@@ -58,12 +57,14 @@ This feature belongs to Phase 01 – Platform Foundation as a critical infrastru
 - **Q3: Request ID Propagation in Worker** → B: Dual IDs (request_id + job_id) with linkage
   - Separate `job_id` tracks job lifecycle independently (retries, dead-letter queue)
   - Job payload includes `request_id` field linking back to originating API request
-  - Rationale: End-to-end traceability for institutional audit; supports retry tracking and causality
+  - Rationale: End-to-end traceability for institutional audit; supports retry tracking and
+    causality
 
 - **Q4: Sensitive Data Redaction** → C: Defense in depth (logger middleware + call site)
   - Automatic redaction at middleware layer (catches 90% of PII/tokens)
   - Manual redaction at call site for edge cases (developer accountability)
-  - Rationale: Compliance-grade protection; prevents accidental leaks; aligns with OWASP best practices
+  - Rationale: Compliance-grade protection; prevents accidental leaks; aligns with OWASP best
+    practices
 
 - **Q5: Worker Job Payload Hash** → A: Integrity verification (detect config changes during retry)
   - Compute `job_payload_hash` (SHA256) at job enqueue and retry
@@ -76,19 +77,26 @@ This feature belongs to Phase 01 – Platform Foundation as a critical infrastru
 
 **Zidney Constitution v1.2.0 Alignment Audit:**
 
-✅ **No cross-tenant access:** Logs include `workspace_id` for isolation verification; no cross-tenant joins in logging pipelines; each tenant's logs remain workspace-scoped.
+✅ **No cross-tenant access:** Logs include `workspace_id` for isolation verification; no
+cross-tenant joins in logging pipelines; each tenant's logs remain workspace-scoped.
 
-✅ **No middleware bypass:** Logging is implemented as middleware layer after tenant resolver and license enforcement, preserving mandatory middleware order.
+✅ **No middleware bypass:** Logging is implemented as middleware layer after tenant resolver and
+license enforcement, preserving mandatory middleware order.
 
-✅ **No grading outside worker:** Observability mirrors attempt engine design; grading logs originate only from worker finalization layer.
+✅ **No grading outside worker:** Observability mirrors attempt engine design; grading logs
+originate only from worker finalization layer.
 
-✅ **No direct DB instantiation:** Logging layer uses no direct database connections; structured logger is in-memory event stream; logs are application-level only.
+✅ **No direct DB instantiation:** Logging layer uses no direct database connections; structured
+logger is in-memory event stream; logs are application-level only.
 
-✅ **Snapshot integrity preserved:** Observability does not modify snapshot taking or configuration; attempt snapshots remain immutable at attempt start.
+✅ **Snapshot integrity preserved:** Observability does not modify snapshot taking or configuration;
+attempt snapshots remain immutable at attempt start.
 
-✅ **Transaction boundaries unchanged:** No new transactions added; observability is side-effect logging orthogonal to transactional boundaries.
+✅ **Transaction boundaries unchanged:** No new transactions added; observability is side-effect
+logging orthogonal to transactional boundaries.
 
-✅ **Version enforcement intact:** Logging includes `schema_version` and `product_version` fields for diagnostic purposes but does not modify enforcement logic.
+✅ **Version enforcement intact:** Logging includes `schema_version` and `product_version` fields
+for diagnostic purposes but does not modify enforcement logic.
 
 ---
 
@@ -102,16 +110,17 @@ This feature belongs to Phase 01 – Platform Foundation as a critical infrastru
 
 **Tenant Resolution:**
 
-- Every log includes `workspace_id` extracted from request context (set by tenant resolver middleware).
+- Every log includes `workspace_id` extracted from request context (set by tenant resolver
+  middleware).
 - Worker jobs inherit `workspace_id` from request context or attempt record.
 - Audit logs are partitioned by workspace (workspace_id is primary isolation key).
 
 **Connection Pool:**
 
-- Observability adds no new database connections; uses existing tenant resolver pool for audit log writes only.
+- Observability adds no new database connections; uses existing tenant resolver pool for audit log
+  writes only.
 
-**Tenant Resolver Middleware Usage:**
-✅ Mandatory middleware order preserved:
+**Tenant Resolver Middleware Usage:** ✅ Mandatory middleware order preserved:
 
 1. Correlation ID → request_id generated
 2. Tenant resolver → workspace_id available
@@ -121,7 +130,8 @@ This feature belongs to Phase 01 – Platform Foundation as a critical infrastru
 
 **Shared Data Concerns:**
 
-- Request IDs are globally unique (UUIDs) but intentionally shared across all services for correlation.
+- Request IDs are globally unique (UUIDs) but intentionally shared across all services for
+  correlation.
 - Workspace IDs are isolated within workspace context; no global namespace conflict.
 - No shared tenant student/attempt tables; observability logs are separate storage.
 
@@ -146,8 +156,8 @@ This feature belongs to Phase 01 – Platform Foundation as a critical infrastru
 - Append-only; no update/delete operations from workspace users
 - Includes: timestamp, actor_id, action_type, previous_state, new_state, workspace_id
 
-**Compliance Statement:**
-✅ Tenant isolation is strengthened by audit logging; no isolation weakening detected. Dual storage model (ephemeral + audit) optimizes for stability and compliance.
+**Compliance Statement:** ✅ Tenant isolation is strengthened by audit logging; no isolation
+weakening detected. Dual storage model (ephemeral + audit) optimizes for stability and compliance.
 
 ---
 
@@ -156,7 +166,8 @@ This feature belongs to Phase 01 – Platform Foundation as a critical infrastru
 **License Middleware Interaction:**
 
 - Observability layer executes AFTER license middleware (per middleware order).
-- All workspace-bound routes already validated for license status before observability context is used.
+- All workspace-bound routes already validated for license status before observability context is
+  used.
 - License enforcement is not bypassed; observability adds logging on top of existing license gate.
 
 **License States Allowed:**
@@ -181,7 +192,8 @@ This feature belongs to Phase 01 – Platform Foundation as a critical infrastru
 **Product Version Compatibility:**
 
 - Observability logs include `product_version` field.
-- Backward-compatible log format (all fields optional except timestamp, level, service, environment, request_id).
+- Backward-compatible log format (all fields optional except timestamp, level, service, environment,
+  request_id).
 - Future log format changes use additive fields only.
 
 ---
@@ -249,30 +261,34 @@ Index: (workspace_id, timestamp DESC) for audit trail queries
 
 ## Transaction Boundaries
 
-**Transactions and Observability:**
-Observability is strictly side-effect logging. The following operations DO NOT require new transactions:
+**Transactions and Observability:** Observability is strictly side-effect logging. The following
+operations DO NOT require new transactions:
 
 1. **Request ID generation:** In-memory, no database access.
 2. **Log event creation:** In-memory JSON object, no database access.
 3. **Structured logger write:** In-memory buffer (Pino), flush to stdout/stderr.
-4. **Audit log write:** Uses existing tenant database connection; audit append is atomic (single INSERT).
+4. **Audit log write:** Uses existing tenant database connection; audit append is atomic (single
+   INSERT).
 
 **Idempotent Operations:**
 
-- Logging is idempotent by design: Logging same event twice produces correct audit trail (audit_log.id is unique).
+- Logging is idempotent by design: Logging same event twice produces correct audit trail
+  (audit_log.id is unique).
 - Request retries produce same request_id; logs can be deduplicated by request_id if needed.
 - Worker job retries increment retry_count in log; retry behavior is visible in logs.
 
 **Failure Handling:**
 
 - Logger failure (e.g., Pino buffer full): Graceful degradation (log to stderr, request continues).
-- Audit log write failure: Warning logged to structured logger; request completes (audit is secondary to request success).
+- Audit log write failure: Warning logged to structured logger; request completes (audit is
+  secondary to request success).
 - Worker job logging failure: Job retries not affected; logging is orthogonal to job execution.
 
 **Atomic Boundaries:**
 
 - Each service has its own atomic boundary:
-  - API: Request lifecycle (receive → complete) is atomic from client perspective; observability is side-effect.
+  - API: Request lifecycle (receive → complete) is atomic from client perspective; observability is
+    side-effect.
   - Worker: Job execution (receive → complete/fail) is atomic; logs are side-effect.
   - Audit: Audit log INSERT is atomic; ensures audit trail is always consistent.
 
@@ -323,8 +339,7 @@ Observability is strictly side-effect logging. The following operations DO NOT r
 
 ## Idempotency Strategy
 
-**Idempotent by Design:**
-Observability/logging is inherently idempotent:
+**Idempotent by Design:** Observability/logging is inherently idempotent:
 
 - Logging same event twice is safe (produces two audit log entries, both valid).
 - Duplicate request_id logs are deduplicatable by (request_id, event_type, timestamp).
@@ -348,14 +363,16 @@ Worker Job Log Deduplication:
 
 **Replay Behavior:**
 
-- Request retry with same request_id: Logs show two separate request timelines (both valid, can be deduplicated by client).
+- Request retry with same request_id: Logs show two separate request timelines (both valid, can be
+  deduplicated by client).
 - Worker job retry: Same job_id, increment attempt_number; logs show full job history.
 - Audit log append: Append-only; no replay risk (cannot update historical entries).
 
 **Double Submission Protection:**
 
 - Not required for observability (observability is logging, not state mutation).
-- Existing attempt submission uses idempotency key in STAGE_06; observability logs the idempotency event.
+- Existing attempt submission uses idempotency key in STAGE_06; observability logs the idempotency
+  event.
 - Logging double submission does not corrupt attempt state (attempt engine handled by STAGE_06).
 
 ---
@@ -457,17 +474,14 @@ Worker Job Log Deduplication:
 }
 ```
 
-**request_id Inclusion:**
-✅ Required on every log entry (top-level field).
+**request_id Inclusion:** ✅ Required on every log entry (top-level field).
 
-**workspace_slug Inclusion:**
-✅ Required on workspace-bound requests (for easy filtering in log aggregation).
+**workspace_slug Inclusion:** ✅ Required on workspace-bound requests (for easy filtering in log
+aggregation).
 
-**attempt_id Inclusion:**
-✅ Required on attempt lifecycle events and worker jobs.
+**attempt_id Inclusion:** ✅ Required on attempt lifecycle events and worker jobs.
 
-**Error Contract Compliance:**
-✅ All errors follow standard error response format:
+**Error Contract Compliance:** ✅ All errors follow standard error response format:
 
 ```json
 {
@@ -502,8 +516,7 @@ Worker Job Log Deduplication:
 
 ## Rate Limiting & Abuse Protection
 
-**Not Modified by Stage 07:**
-Rate limiting is handled in STAGE_08_RATE_LIMITING_AND_SECURITY.
+**Not Modified by Stage 07:** Rate limiting is handled in STAGE_08_RATE_LIMITING_AND_SECURITY.
 
 **Observability Role:**
 
@@ -845,7 +858,7 @@ const redactionPatterns = {
   email: /(\w+@\w+\.\w+)/g,
   ssn: /(\d{3}-\d{2}-\d{4})/g,
   creditCard: /(\d{4}[ -]?){3}\d{4}/g,
-}
+};
 // Replace matched patterns with redaction markers
 ```
 
@@ -855,10 +868,10 @@ When logging business logic, developers explicitly redact:
 
 ```typescript
 logger.info({
-  action: 'user_login',
+  action: "user_login",
   email: maskEmail(user.email), // manual redaction
-  password: '[REDACTED]', // developer responsibility
-})
+  password: "[REDACTED]", // developer responsibility
+});
 ```
 
 **Redaction Format:**
@@ -868,7 +881,8 @@ logger.info({
 - `phone` → `***-****` (partially masked)
 - `ssn`, `credit_card` → `***` (fully masked for PII)
 
-**Rationale:** Two-layer approach prevents accidental leaks; automatic layer catches 90% of PII; call-site layer ensures developer accountability.
+**Rationale:** Two-layer approach prevents accidental leaks; automatic layer catches 90% of PII;
+call-site layer ensures developer accountability.
 
 **Redaction Rules (Logger Middleware):**
 
@@ -893,8 +907,8 @@ logger.info({
 | Exam mode           | Yes                   | `mode: "practice"`                  | Non-sensitive metadata   |
 | Grade               | Yes (audit)           | `score: 85, max_score: 100`         | Legitimate audit data    |
 
-**Audit Exception:**
-Audit logs may include state changes with sensitive fields if required for compliance. These are specially marked and excluded from external aggregation.
+**Audit Exception:** Audit logs may include state changes with sensitive fields if required for
+compliance. These are specially marked and excluded from external aggregation.
 
 ---
 
@@ -956,16 +970,16 @@ Context object (per request):
 
 ```typescript
 type RequestContext = {
-  request_id: string // UUIDv4
-  workspace_id: string // UUIDv4
-  workspace_slug: string // e.g., "acme-university"
-  user_id?: string // UUIDv4 (nullable, anon requests)
-  license_status: 'ACTIVE' | 'SOFT_LOCKED' | 'ARCHIVED' | 'DELETED'
-  schema_version: number
-  product_version: string
-  timestamp_received: Date
-  correlation_id?: string // Same as request_id
-}
+  request_id: string; // UUIDv4
+  workspace_id: string; // UUIDv4
+  workspace_slug: string; // e.g., "acme-university"
+  user_id?: string; // UUIDv4 (nullable, anon requests)
+  license_status: "ACTIVE" | "SOFT_LOCKED" | "ARCHIVED" | "DELETED";
+  schema_version: number;
+  product_version: string;
+  timestamp_received: Date;
+  correlation_id?: string; // Same as request_id
+};
 ```
 
 Context is threaded through:
@@ -1083,7 +1097,8 @@ Why hash instead of full payload:
 - Payloads can be large (contains serialized attempt snapshot)
 - Hash allows verification without exposing data
 - At-a-glance audit (full payload available in Redis if needed)
-- **Integrity verification:** Hash is recomputed on retry; mismatch warns of config mutation (non-blocking)
+- **Integrity verification:** Hash is recomputed on retry; mismatch warns of config mutation
+  (non-blocking)
 
 ---
 
@@ -1094,41 +1109,27 @@ Why hash instead of full payload:
 ```typescript
 interface Logger {
   // Structured logging methods
-  debug(event: string, data?: Record<string, unknown>): void
-  info(event: string, data?: Record<string, unknown>): void
-  warn(event: string, data?: Record<string, unknown>): void
-  error(event: string, error?: Error, data?: Record<string, unknown>): void
-  fatal(event: string, error?: Error, data?: Record<string, unknown>): void
+  debug(event: string, data?: Record<string, unknown>): void;
+  info(event: string, data?: Record<string, unknown>): void;
+  warn(event: string, data?: Record<string, unknown>): void;
+  error(event: string, error?: Error, data?: Record<string, unknown>): void;
+  fatal(event: string, error?: Error, data?: Record<string, unknown>): void;
 
   // Audit logging
   audit(
     action: string,
     previousState: unknown,
     newState: unknown,
-    data?: Record<string, unknown>
-  ): void
+    data?: Record<string, unknown>,
+  ): void;
 
   // Worker job logging
-  jobStart(jobId: string, jobName: string, data?: Record<string, unknown>): void
-  jobComplete(
-    jobId: string,
-    jobName: string,
-    result: unknown,
-    duration: number
-  ): void
-  jobFail(
-    jobId: string,
-    jobName: string,
-    error: Error,
-    retryCount: number
-  ): void
+  jobStart(jobId: string, jobName: string, data?: Record<string, unknown>): void;
+  jobComplete(jobId: string, jobName: string, result: unknown, duration: number): void;
+  jobFail(jobId: string, jobName: string, error: Error, retryCount: number): void;
 
   // Attempt lifecycle logging
-  attemptEvent(
-    attemptId: string,
-    event: string,
-    data?: Record<string, unknown>
-  ): void
+  attemptEvent(attemptId: string, event: string, data?: Record<string, unknown>): void;
 }
 ```
 
@@ -1137,19 +1138,19 @@ interface Logger {
 The logger is implemented using Pino (Node.js structured logging library):
 
 ```typescript
-import pino from 'pino'
+import pino from "pino";
 
 const logger = pino({
-  level: process.env.LOG_LEVEL || 'info',
+  level: process.env.LOG_LEVEL || "info",
   transport: {
-    target: 'pino-pretty', // Dev: pretty-print
+    target: "pino-pretty", // Dev: pretty-print
     options: {
       colorize: true,
       singleLine: false,
-      ignore: 'pid,hostname',
+      ignore: "pid,hostname",
     },
   },
-})
+});
 
 // Usage:
 logger.info(
@@ -1159,8 +1160,8 @@ logger.info(
     attempt_id: attemptId,
     duration_ms: Date.now() - startTime,
   },
-  'attempt_submitted'
-)
+  "attempt_submitted",
+);
 
 // Output (JSON in prod, pretty-printed in dev):
 // JSON: {"level":30,"time":"...","request_id":"uuid","workspace_id":"uuid","attempt_id":"uuid","duration_ms":1234,"msg":"attempt_submitted"}
@@ -1172,13 +1173,13 @@ logger.info(
 
 ```typescript
 app.use(async (c, next) => {
-  const request_id = c.req.header('X-Request-ID') || generateUUID()
-  c.set('request_id', request_id)
-  c.set('timestamp_received', new Date())
+  const request_id = c.req.header("X-Request-ID") || generateUUID();
+  c.set("request_id", request_id);
+  c.set("timestamp_received", new Date());
 
-  await next()
+  await next();
 
-  const duration = Date.now() - c.get('timestamp_received')
+  const duration = Date.now() - c.get("timestamp_received");
   logger.info(
     {
       request_id,
@@ -1187,55 +1188,55 @@ app.use(async (c, next) => {
       status_code: c.res.status,
       duration_ms: duration,
     },
-    'request_completed'
-  )
-})
+    "request_completed",
+  );
+});
 ```
 
 **2. Tenant Resolver Middleware** (Adds workspace context)
 
 ```typescript
 app.use(async (c, next) => {
-  const workspace_id = await resolveWorkspaceTenant(c.req.url, env)
-  c.set('workspace_id', workspace_id)
-  c.set('workspace_slug', workspace.slug)
+  const workspace_id = await resolveWorkspaceTenant(c.req.url, env);
+  c.set("workspace_id", workspace_id);
+  c.set("workspace_slug", workspace.slug);
 
-  await next()
-})
+  await next();
+});
 ```
 
 **3. License Middleware** (Adds license status)
 
 ```typescript
 app.use(async (c, next) => {
-  const license = await checkLicense(c.get('workspace_id'))
-  c.set('license_status', license.status)
-  c.set('schema_version', license.schema_version)
+  const license = await checkLicense(c.get("workspace_id"));
+  c.set("license_status", license.status);
+  c.set("schema_version", license.schema_version);
 
-  if (license.status === 'SOFT_LOCKED') {
+  if (license.status === "SOFT_LOCKED") {
     logger.warn(
       {
-        request_id: c.get('request_id'),
-        workspace_id: c.get('workspace_id'),
-        license_status: 'SOFT_LOCKED',
+        request_id: c.get("request_id"),
+        workspace_id: c.get("workspace_id"),
+        license_status: "SOFT_LOCKED",
       },
-      'license_soft_locked_access_attempted'
-    )
+      "license_soft_locked_access_attempted",
+    );
     return c.json(
       {
         success: false,
         error: {
-          code: 'LICENSE_SOFT_LOCKED',
-          message: 'Workspace locked',
-          request_id: c.get('request_id'),
+          code: "LICENSE_SOFT_LOCKED",
+          message: "Workspace locked",
+          request_id: c.get("request_id"),
         },
       },
-      423
-    )
+      423,
+    );
   }
 
-  await next()
-})
+  await next();
+});
 ```
 
 **4. Observability Middleware** (Attaches logger context)
@@ -1244,17 +1245,17 @@ app.use(async (c, next) => {
 app.use(async (c, next) => {
   // Logger context includes all request metadata
   c.set(
-    'logger',
+    "logger",
     createScopedLogger({
-      request_id: c.get('request_id'),
-      workspace_id: c.get('workspace_id'),
-      service: 'api',
+      request_id: c.get("request_id"),
+      workspace_id: c.get("workspace_id"),
+      service: "api",
       environment: env.ENVIRONMENT,
-    })
-  )
+    }),
+  );
 
-  await next()
-})
+  await next();
+});
 ```
 
 ---
@@ -1285,22 +1286,22 @@ AUDIT_LOG_ENABLED=true  # Default: true in prod, false in dev
 
 ```typescript
 export const loggerConfig = {
-  level: process.env.LOG_LEVEL || 'info',
-  service: 'api',
-  environment: process.env.ENVIRONMENT || 'dev',
-  prettyPrint: process.env.ENVIRONMENT === 'dev',
-}
+  level: process.env.LOG_LEVEL || "info",
+  service: "api",
+  environment: process.env.ENVIRONMENT || "dev",
+  prettyPrint: process.env.ENVIRONMENT === "dev",
+};
 ```
 
 **apps/worker/src/config/logger.ts:**
 
 ```typescript
 export const loggerConfig = {
-  level: process.env.LOG_LEVEL || 'info',
-  service: 'worker',
-  environment: process.env.ENVIRONMENT || 'dev',
-  prettyPrint: process.env.ENVIRONMENT === 'dev',
-}
+  level: process.env.LOG_LEVEL || "info",
+  service: "worker",
+  environment: process.env.ENVIRONMENT || "dev",
+  prettyPrint: process.env.ENVIRONMENT === "dev",
+};
 ```
 
 ### Logger Factory
@@ -1309,7 +1310,7 @@ export const loggerConfig = {
 // packages/logger-utils/src/create-logger.ts
 
 export function createLogger(config: LoggerConfig): Logger {
-  const pino = pinoLogger(config)
+  const pino = pinoLogger(config);
 
   return {
     debug: (event, data) => pino.debug({ ...data, event }),
@@ -1320,7 +1321,7 @@ export function createLogger(config: LoggerConfig): Logger {
 
     audit: (action, prev, next, data) =>
       pino.info({
-        event: 'audit_log',
+        event: "audit_log",
         action_type: action,
         previous_state: prev,
         new_state: next,
@@ -1329,7 +1330,7 @@ export function createLogger(config: LoggerConfig): Logger {
 
     jobStart: (jobId, jobName, data) =>
       pino.info({
-        event: 'job_started',
+        event: "job_started",
         job_id: jobId,
         job_name: jobName,
         ...data,
@@ -1337,7 +1338,7 @@ export function createLogger(config: LoggerConfig): Logger {
 
     jobComplete: (jobId, jobName, result, duration) =>
       pino.info({
-        event: 'job_completed',
+        event: "job_completed",
         job_id: jobId,
         job_name: jobName,
         result,
@@ -1346,7 +1347,7 @@ export function createLogger(config: LoggerConfig): Logger {
 
     jobFail: (jobId, jobName, error, retryCount) =>
       pino.error({
-        event: 'job_failed',
+        event: "job_failed",
         job_id: jobId,
         job_name: jobName,
         error,
@@ -1359,7 +1360,7 @@ export function createLogger(config: LoggerConfig): Logger {
         attempt_id: attemptId,
         ...data,
       }),
-  }
+  };
 }
 ```
 
@@ -1368,11 +1369,10 @@ export function createLogger(config: LoggerConfig): Logger {
 ```typescript
 export function createScopedLogger(context: RequestContext): Logger {
   return {
-    debug: (event, data) =>
-      baseLogger.debug({ ...baseContext, ...data, event }),
+    debug: (event, data) => baseLogger.debug({ ...baseContext, ...data, event }),
     info: (event, data) => baseLogger.info({ ...baseContext, ...data, event }),
     // ... all methods automatically inject baseContext (request_id, workspace_id, etc.)
-  }
+  };
 }
 ```
 
@@ -1412,7 +1412,8 @@ export function createScopedLogger(context: RequestContext): Logger {
 3. Implement job_payload_hash computation at enqueue and retry time
 4. Add hash verification on job start (warn if mutated, don't block)
 5. Replace `console.log()` calls with `ctx.logger.info()`
-6. Deliverable: Worker logs are all structured JSON; dual ID traceability; payload integrity verified
+6. Deliverable: Worker logs are all structured JSON; dual ID traceability; payload integrity
+   verified
 
 **Phase 4: Audit Log Integration**
 
@@ -1465,49 +1466,78 @@ This stage explicitly does NOT:
 
 **Measurable Outcomes (All Technology-Agnostic):**
 
-1. **Request Traceability:** Every HTTP request can be traced end-to-end (from client request to database access to worker job completion) within < 100ms log aggregation latency. ✅ Verified by: Request arrives → Logs generated within same request lifecycle
+1. **Request Traceability:** Every HTTP request can be traced end-to-end (from client request to
+   database access to worker job completion) within < 100ms log aggregation latency. ✅ Verified by:
+   Request arrives → Logs generated within same request lifecycle
 
-2. **Attempt Auditability:** Every attempt state transition is logged and auditable. A complete audit trail from attempt start to finalization must be reconstructible within < 1 second query time. ✅ Verified by: Query attempt logs by attempt_id; verify state progression
+2. **Attempt Auditability:** Every attempt state transition is logged and auditable. A complete
+   audit trail from attempt start to finalization must be reconstructible within < 1 second query
+   time. ✅ Verified by: Query attempt logs by attempt_id; verify state progression
 
-3. **Worker Job Transparency:** Every background job can be traced from enqueue to completion with retry history visible. No silent job failures. ✅ Verified by: Job enqueue → logs recorded; job retries → retry_count incremented
+3. **Worker Job Transparency:** Every background job can be traced from enqueue to completion with
+   retry history visible. No silent job failures. ✅ Verified by: Job enqueue → logs recorded; job
+   retries → retry_count incremented
 
-4. **Error Context Preservation:** Every error includes request context (request_id, workspace_id, user_id) and internal details logged but not exposed to client. ✅ Verified by: Error response includes request_id; internal logs include stack trace
+4. **Error Context Preservation:** Every error includes request context (request_id, workspace_id,
+   user_id) and internal details logged but not exposed to client. ✅ Verified by: Error response
+   includes request_id; internal logs include stack trace
 
-5. **Workspace Isolation Verified:** Logs can be safely queried by workspace without cross-workspace pollution. Multi-tenant separation visible in logs. ✅ Verified by: Query logs by workspace_id; verify no other workspace data leaks
+5. **Workspace Isolation Verified:** Logs can be safely queried by workspace without cross-workspace
+   pollution. Multi-tenant separation visible in logs. ✅ Verified by: Query logs by workspace_id;
+   verify no other workspace data leaks
 
-6. **Sensitive Data Protection:** Passwords, tokens, PII never appear in logs. Audit logs pass redaction verification. ✅ Verified by: Parse all logs; verify no patterns matching password/token/PII
+6. **Sensitive Data Protection:** Passwords, tokens, PII never appear in logs. Audit logs pass
+   redaction verification. ✅ Verified by: Parse all logs; verify no patterns matching
+   password/token/PII
 
-7. **Log Format Consistency:** All services (API, Worker, MMC) use identical structured JSON format. No mixed formats. ✅ Verified by: Parse all logs as JSON; verify all have required fields
+7. **Log Format Consistency:** All services (API, Worker, MMC) use identical structured JSON format.
+   No mixed formats. ✅ Verified by: Parse all logs as JSON; verify all have required fields
 
-8. **Attempt Lifecycle Full Visibility:** Attempt started → progress saved → submitted → finalized events all logged and linked by attempt_id. No silent state changes. ✅ Verified by: List all attempt events for ID; verify complete state progression
+8. **Attempt Lifecycle Full Visibility:** Attempt started → progress saved → submitted → finalized
+   events all logged and linked by attempt_id. No silent state changes. ✅ Verified by: List all
+   attempt events for ID; verify complete state progression
 
-9. **Audit Trail Immutability:** Audit logs cannot be modified or deleted by workspace users. Historical timestamps are accurate. ✅ Verified by: Attempt audit log modification; verify permission denied
+9. **Audit Trail Immutability:** Audit logs cannot be modified or deleted by workspace users.
+   Historical timestamps are accurate. ✅ Verified by: Attempt audit log modification; verify
+   permission denied
 
-10. **Production Readiness:** No console.log() calls in production code. Zero silent failures in worker jobs. Health check reports logger health. ✅ Verified by: Grep for console calls; check health endpoint; monitor production logs
+10. **Production Readiness:** No console.log() calls in production code. Zero silent failures in
+    worker jobs. Health check reports logger health. ✅ Verified by: Grep for console calls; check
+    health endpoint; monitor production logs
 
 ---
 
 ## Assumptions
 
-1. **Pino Logger Selected:** Zidney uses Pino for structured JSON logging (assumed; can be substituted with compatible alternative like Winston if needed).
+1. **Pino Logger Selected:** Zidney uses Pino for structured JSON logging (assumed; can be
+   substituted with compatible alternative like Winston if needed).
 
-2. **Redis for Job Queue:** Worker jobs dispatched via Redis (per STAGE_06; assumed no change to job queue implementation).
+2. **Redis for Job Queue:** Worker jobs dispatched via Redis (per STAGE_06; assumed no change to job
+   queue implementation).
 
-3. **PostgreSQL Audit Log:** Audit logs stored in `audit_log` table in tenant database (per STAGE_02B; assumed provisioned during tenant setup).
+3. **PostgreSQL Audit Log:** Audit logs stored in `audit_log` table in tenant database (per
+   STAGE_02B; assumed provisioned during tenant setup).
 
-4. **Bun + Hono Stack:** API uses Bun runtime and Hono framework (per PROJECT_CONTEXT_PRIMER; assumed no change).
+4. **Bun + Hono Stack:** API uses Bun runtime and Hono framework (per PROJECT_CONTEXT_PRIMER;
+   assumed no change).
 
-5. **UUIDv4 for request_id:** Request IDs use UUIDv4 (or UUIDv7 for time-based ordering; both acceptable). Uniqueness guaranteed by UUID spec.
+5. **UUIDv4 for request_id:** Request IDs use UUIDv4 (or UUIDv7 for time-based ordering; both
+   acceptable). Uniqueness guaranteed by UUID spec.
 
-6. **Single Service Environment:** Dev/staging/prod determined by ENVIRONMENT variable (not per-request; assumed configuration-based).
+6. **Single Service Environment:** Dev/staging/prod determined by ENVIRONMENT variable (not
+   per-request; assumed configuration-based).
 
-7. **Log Output to stdout:** Logs written to stdout/stderr for container orchestration to capture (Docker/Kubernetes standard).
+7. **Log Output to stdout:** Logs written to stdout/stderr for container orchestration to capture
+   (Docker/Kubernetes standard).
 
-8. **No Real-Time Metrics Yet:** Metrics extracted from logs via aggregation service (not real-time metrics emitted during this stage).
+8. **No Real-Time Metrics Yet:** Metrics extracted from logs via aggregation service (not real-time
+   metrics emitted during this stage).
 
-9. **Synchronous Logger Writes:** Pino buffer is async but appears synchronous to request handler; slight performance cost acceptable for observability.
+9. **Synchronous Logger Writes:** Pino buffer is async but appears synchronous to request handler;
+   slight performance cost acceptable for observability.
 
-10. **Workspace-Scoped Audit Only:** Audit logs are per-workspace; no global audit log aggregation (infrastructure-level feature future phase).
+10. **Workspace-Scoped Audit Only:** Audit logs are per-workspace; no global audit log aggregation
+    (infrastructure-level feature future phase).
 
 ---
 
@@ -1520,10 +1550,12 @@ This stage explicitly does NOT:
 - ✅ Multi-tenancy isolation preserved: workspace_id in all logs; no cross-tenant access
 - ✅ Middleware order unchanged: Observability runs after tenant resolver + license middleware
 - ✅ No grading changes: Worker finalization untouched; observability adds logging only
-- ✅ No DB instantiation changes: No new database connections added; observability is application-layer logging
+- ✅ No DB instantiation changes: No new database connections added; observability is
+  application-layer logging
 - ✅ Snapshot integrity maintained: Observability does not modify attempt snapshots
 - ✅ Transaction boundaries intact: No new transactions; logging is side-effect only
-- ✅ Version enforcement preserved: Observability logs schema/product versions but does not modify enforcement
+- ✅ Version enforcement preserved: Observability logs schema/product versions but does not modify
+  enforcement
 - ✅ Audit trail for compliance: Audit logs provide institutional trust trail
 - ✅ No shared tenant tables: Audit logs per-workspace; no shared data structure
 - ✅ Error handling standardized: All errors follow standard format with request context

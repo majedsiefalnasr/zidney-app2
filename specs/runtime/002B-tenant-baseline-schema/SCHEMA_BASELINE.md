@@ -86,7 +86,8 @@ Three layers of immutability:
 
 #### `users`
 
-- **Columns**: id, email, name, profile_picture_url, is_active, created_at, updated_at, created_by, updated_by, is_deleted
+- **Columns**: id, email, name, profile_picture_url, is_active, created_at, updated_at, created_by,
+  updated_by, is_deleted
 - **Indexes**: (email), (is_active)
 - **Constraints**: UNIQUE(email), valid_email CHECK
 - **FK Dependencies**: role_assignments, subscriptions, notifications, etc.
@@ -176,7 +177,8 @@ Three layers of immutability:
 
 #### `mcq_questions`
 
-- **Columns**: id, basket_id, question_text, options_json, correct_option, difficulty, tags_json, audit fields
+- **Columns**: id, basket_id, question_text, options_json, correct_option, difficulty, tags_json,
+  audit fields
 - **FK**: basket_id → mcq_baskets(id) ON DELETE RESTRICT
 - **Type**: JSONB storage for flexible options structure
 
@@ -186,7 +188,8 @@ Three layers of immutability:
 
 #### `mcq_exams`
 
-- **Columns**: id, name, duration_minutes, question_count, passing_score, shuffle_questions, audit fields
+- **Columns**: id, name, duration_minutes, question_count, passing_score, shuffle_questions, audit
+  fields
 - **Children**: scheduled_exams, attempts
 
 #### `traditional_exams`
@@ -197,7 +200,8 @@ Three layers of immutability:
 
 - **Purpose**: Scheduled instances of exams
 - **Usage**: Polymorphic reference (exam_type + exam_id) to mcq_exams or traditional_exams
-- **Columns**: id, exam_type (ENUM: MCQ/TRADITIONAL), exam_id (UUID), scheduled_at, timezone, audit fields
+- **Columns**: id, exam_type (ENUM: MCQ/TRADITIONAL), exam_id (UUID), scheduled_at, timezone, audit
+  fields
 
 ---
 
@@ -227,7 +231,8 @@ Three layers of immutability:
   - **No updated_at/updated_by** (immutable marker)
 - **FK**: attempt_id → attempts(id) ON DELETE CASCADE
 - **Trigger**: prevent_attempt_events_update (blocks UPDATE)
-- **Event Types**: START, RESUME, PAUSE, ANSWER_SUBMIT, TIME_WARNING, SUBMIT_REQUEST, FINALIZED, GRADED, ARCHIVED
+- **Event Types**: START, RESUME, PAUSE, ANSWER_SUBMIT, TIME_WARNING, SUBMIT_REQUEST, FINALIZED,
+  GRADED, ARCHIVED
 
 ---
 
@@ -391,7 +396,8 @@ DELETE FROM attempts WHERE id = '...';  -- auto-deletes attempt_events
 }
 ```
 
-**Immutability Guarantee**: No UPDATE allowed during or after attempt. If exam is modified, new attempts get new snapshot.
+**Immutability Guarantee**: No UPDATE allowed during or after attempt. If exam is modified, new
+attempts get new snapshot.
 
 ### Schema Versioning
 
@@ -479,7 +485,6 @@ SELECT * FROM attempt_events WHERE attempt_id = $1 ORDER BY occurred_at
 
 ## Support & Operations
 
-For operational procedures, see [OPERATIONS.md](./OPERATIONS.md)
-For migration procedures, see [MIGRATIONS.md](./MIGRATIONS.md)
-For backup/recovery, see [BACKUP_RECOVERY.md](./BACKUP_RECOVERY.md)
+For operational procedures, see [OPERATIONS.md](./OPERATIONS.md) For migration procedures, see
+[MIGRATIONS.md](./MIGRATIONS.md) For backup/recovery, see [BACKUP_RECOVERY.md](./BACKUP_RECOVERY.md)
 For monitoring, see [MONITORING.md](./MONITORING.md)

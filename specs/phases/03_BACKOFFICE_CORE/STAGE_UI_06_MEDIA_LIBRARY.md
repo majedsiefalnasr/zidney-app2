@@ -1,7 +1,6 @@
 # STAGE_UI_06_MEDIA_LIBRARY
 
-Phase: 03_BACKOFFICE_CORE
-Track: UI (apps/backoffice)
+Phase: 03_BACKOFFICE_CORE Track: UI (apps/backoffice)
 
 Backend Dependency:
 

@@ -65,8 +65,7 @@ Release must be tagged:
 
 v<major>.<minor>.<patch>
 
-Example:
-v1.3.0
+Example: v1.3.0
 
 Tag must match runtime version.
 

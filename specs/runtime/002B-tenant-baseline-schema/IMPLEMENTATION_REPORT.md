@@ -9,7 +9,8 @@
 
 ## Executive Summary
 
-All 6 CRITICAL hardening items from PRINCIPAL_ENGINEER_FEEDBACK have been successfully implemented. The codebase now has production-grade safeguards for:
+All 6 CRITICAL hardening items from PRINCIPAL_ENGINEER_FEEDBACK have been successfully implemented.
+The codebase now has production-grade safeguards for:
 
 - ✅ Snapshot immutability (DB-level enforcement)
 - ✅ Idempotency protection (UNIQUE constraint + worker detection)
@@ -152,16 +153,16 @@ CREATE TABLE attempts (
 ```typescript
 // CRITICAL: Check if schema_version already exists
 const existingVersionResult = await client.query(
-  `SELECT version, applied_at FROM schema_version LIMIT 1`
-)
+  `SELECT version, applied_at FROM schema_version LIMIT 1`,
+);
 
 if (existingVersionResult.rows.length > 0) {
   // Schema already initialized - GRACEFUL EXIT
   return {
-    status: 'SUCCESS',
+    status: "SUCCESS",
     version: existingVersion.version,
     error: `Idempotent: Schema already initialized (version: ${existingVersion.version})`,
-  }
+  };
 }
 ```
 

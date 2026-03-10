@@ -1,22 +1,24 @@
 # Analyze Report — API Client Layer
 
-**Step:** 5 — Analyze (Drift Detector)
-**Timestamp:** 2026-02-28T22:30:00Z
-**Status:** APPROVED
+**Step:** 5 — Analyze (Drift Detector) **Timestamp:** 2026-02-28T22:30:00Z **Status:** APPROVED
 
 ---
 
 ## Summary
 
-Structural drift analysis identified 11 findings (F1–F11). Three HIGH/MEDIUM findings required spec corrections:
+Structural drift analysis identified 11 findings (F1–F11). Three HIGH/MEDIUM findings required spec
+corrections:
 
 1. FR-002 missing `put<T>` method → fixed
 2. FR-017 auto-generation semantics contradicted US9-AC2 → clarified
 3. FR-013 omitted PUT from idempotency scope → added
 
-Post-fix re-audit passed all criteria. All four guardian audits returned VERDICT: PASS. Code Reviewer initially returned BLOCKED with 4 high-priority contract alignment issues — all resolved via cross-artifact fixes:
+Post-fix re-audit passed all criteria. All four guardian audits returned VERDICT: PASS. Code
+Reviewer initially returned BLOCKED with 4 high-priority contract alignment issues — all resolved
+via cross-artifact fixes:
 
-1. Idempotency header changed from `X-Idempotency-Key` to `Idempotency-Key` (IETF standard, matches backend stage06 middleware)
+1. Idempotency header changed from `X-Idempotency-Key` to `Idempotency-Key` (IETF standard, matches
+   backend stage06 middleware)
 2. `ApiResponse<T>` renamed to `ClientResponse<T>` to avoid collision with `@zidney/types`
 3. `params` field added to `RequestConfig` for query string serialization
 4. Content-Type interceptor moved from Phase 12 to Phase 4 (T022) with Phase 12 as extraction
@@ -85,7 +87,8 @@ All findings resolved. No remaining violations.
 
 `APPROVED — Implementation authorized.`
 
-All structural drift findings resolved. All four guardian audits passed. Constitution compliance verified. Implementation gate is open.
+All structural drift findings resolved. All four guardian audits passed. Constitution compliance
+verified. Implementation gate is open.
 
 ---
 

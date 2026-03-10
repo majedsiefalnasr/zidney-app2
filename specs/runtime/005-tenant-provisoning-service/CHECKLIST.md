@@ -15,7 +15,8 @@
 - [x] Written for non-technical stakeholders (includes context but translatable)
 - [x] All mandatory sections completed
 
-**Notes:** Specification uses domain terminology (distributed lock, connection pool) appropriate for technical audience but explains business value at each section.
+**Notes:** Specification uses domain terminology (distributed lock, connection pool) appropriate for
+technical audience but explains business value at each section.
 
 ---
 
@@ -30,7 +31,9 @@
 - [x] Scope is clearly bounded (included/excluded sections explicit)
 - [x] Dependencies and assumptions identified
 
-**Notes:** All functional requirements map to specific success criteria. Edge cases: lock collision, partial failure, concurrent provision, retry all documented. Assumptions section explicit about external dependencies.
+**Notes:** All functional requirements map to specific success criteria. Edge cases: lock collision,
+partial failure, concurrent provision, retry all documented. Assumptions section explicit about
+external dependencies.
 
 ---
 
@@ -74,7 +77,8 @@
 - [x] Idempotency model applied
 - [x] Isolation guarantees strengthened
 
-**Mitigation:** Section 16 "Constitutional Compliance Statement" explicitly validates against all architecture standards. All constraints from AGENTS.md enforced in specification.
+**Mitigation:** Section 16 "Constitutional Compliance Statement" explicitly validates against all
+architecture standards. All constraints from AGENTS.md enforced in specification.
 
 ---
 

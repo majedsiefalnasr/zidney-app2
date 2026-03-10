@@ -215,8 +215,8 @@ groups:
           severity: critical
           team: security
         annotations:
-          summary: 'Migration tampering detected!'
-          description: 'Workspace {{ $labels.workspace_id }} failed checksum validation'
+          summary: "Migration tampering detected!"
+          description: "Workspace {{ $labels.workspace_id }} failed checksum validation"
 
       # WARNING: Migration stuck
       - alert: MigrationTimeout
@@ -226,18 +226,19 @@ groups:
           severity: warning
           team: database
         annotations:
-          summary: 'Migration stuck for > 10min'
-          description: 'Workspace {{ $labels.workspace_id }} migration timeout'
+          summary: "Migration stuck for > 10min"
+          description: "Workspace {{ $labels.workspace_id }} migration timeout"
 
       # WARNING: High initialization failure rate
       - alert: HighInitFailureRate
-        expr: (increase(schema_initialization_failures_total[5m]) / increase(schema_initialization_total[5m])) > 0.1
+        expr: (increase(schema_initialization_failures_total[5m]) /
+          increase(schema_initialization_total[5m])) > 0.1
         for: 5m
         labels:
           severity: warning
           team: platform
         annotations:
-          summary: 'Schema initialization failure rate > 10%'
+          summary: "Schema initialization failure rate > 10%"
 
       # INFO: DLQ pending review
       - alert: DLQPendingReview
@@ -247,7 +248,7 @@ groups:
           severity: info
           team: platform
         annotations:
-          summary: '{{ $value }} items pending in DLQ'
+          summary: "{{ $value }} items pending in DLQ"
 ```
 
 ---
@@ -428,14 +429,9 @@ cat dlq_items.json | jq '.reason' | sort | uniq -c
 
 ## Performance Baseline
 
-**Target Metrics**:
-| Operation | Target | Alert Threshold |
-| --- | --- | --- |
-| Schema init | < 5s | > 30s |
-| Migration | < 10s | > 60s |
-| API latency (p99) | < 200ms | > 1000ms |
-| DB query (p99) | < 100ms | > 500ms |
-| Connection pool usage | < 8/10 | > 9/10 |
+**Target Metrics**: | Operation | Target | Alert Threshold | | --- | --- | --- | | Schema init | <
+5s | > 30s | | Migration | < 10s | > 60s | | API latency (p99) | < 200ms | > 1000ms | | DB query
+(p99) | < 100ms | > 500ms | | Connection pool usage | < 8/10 | > 9/10 |
 
 **Recommended Scaling**:
 

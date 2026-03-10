@@ -95,7 +95,8 @@
 
 - Baseline-first strategy (T001–T003) correctly addresses highest regression risk
 - All 4 acceptance criteria files have validation tasks (T013–T021)
-- **Advisory gap:** No YAML syntax validation task for `ci.yml` changes — noted low risk since YAML is manually written to spec
+- **Advisory gap:** No YAML syntax validation task for `ci.yml` changes — noted low risk since YAML
+  is manually written to spec
 - Pre-commit hook change is cosmetic; T018 provides adequate validation
 
 ### Zidney Code Reviewer
@@ -111,9 +112,13 @@
 
 ### REM-01 (HIGH) — Documentation Path Conflict: ✅ RESOLVED
 
-The original `tasks.md` T010 specified `docs/governance/LINT_GOVERNANCE.md` — a path that conflicted with `plan.md` §8 which specifies `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md`.
+The original `tasks.md` T010 specified `docs/governance/LINT_GOVERNANCE.md` — a path that conflicted
+with `plan.md` §8 which specifies `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md`.
 
-**Resolution applied:** Updated all 4 occurrences of `docs/governance/LINT_GOVERNANCE.md` in `tasks.md` to `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md` (T010, T020, suggested commit sequence, and completion criteria table). This aligns tasks with the authoritative plan and the existing governance directory structure.
+**Resolution applied:** Updated all 4 occurrences of `docs/governance/LINT_GOVERNANCE.md` in
+`tasks.md` to `docs/01_ENGINEERING_GOVERNANCE/lint-governance-model.md` (T010, T020, suggested
+commit sequence, and completion criteria table). This aligns tasks with the authoritative plan and
+the existing governance directory structure.
 
 ---
 
@@ -159,4 +164,5 @@ These items do not block implementation but should be addressed during execution
 
 ---
 
-_Implementation gate is OPEN. All 9 drift criteria and all 4 guardian verdicts PASSED. REM-01 resolved before implementation. REM-02–REM-05 addressed during task execution._
+_Implementation gate is OPEN. All 9 drift criteria and all 4 guardian verdicts PASSED. REM-01
+resolved before implementation. REM-02–REM-05 addressed during task execution._

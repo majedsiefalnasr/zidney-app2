@@ -79,7 +79,8 @@ If applicable:
 - Version bump required? (Yes/No)
 - Backward compatibility strategy
 
-Must align with project versioning strategy (see STAGE_02C_MIGRATION_AND_VERSIONING_MODEL or equivalent).
+Must align with project versioning strategy (see STAGE_02C_MIGRATION_AND_VERSIONING_MODEL or
+equivalent).
 
 ---
 
@@ -213,5 +214,4 @@ The AI must end with:
 
 “Compliant with Zidney Constitution v1.2.0 — No violations detected.”
 
-If not compliant:
-AI must stop and describe violation.
+If not compliant: AI must stop and describe violation.

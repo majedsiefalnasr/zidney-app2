@@ -8,7 +8,8 @@
 
 ## 🟢 VERDICT: PASS
 
-All 8 Docker audit requirements met. Infrastructure now supports production deployment of product management backend.
+All 8 Docker audit requirements met. Infrastructure now supports production deployment of product
+management backend.
 
 | Criterion               | Result                               |
 | ----------------------- | ------------------------------------ |
@@ -244,9 +245,11 @@ See: `terraform/k8s/` for Kubernetes manifests (out of scope for single VPS)
 ## References
 
 - **Audit Report:** [DOCKER_AUDIT_STAGE_09_PRODUCTS.md](DOCKER_AUDIT_STAGE_09_PRODUCTS.md)
-- **Architecture:** [docs/02_DEVOPS_DEPLOYMENT/02_DOCKER_ARCHITECTURE.md](docs/02_DEVOPS_DEPLOYMENT/02_DOCKER_ARCHITECTURE.md)
+- **Architecture:**
+  [docs/02_DEVOPS_DEPLOYMENT/02_DOCKER_ARCHITECTURE.md](docs/02_DEVOPS_DEPLOYMENT/02_DOCKER_ARCHITECTURE.md)
 - **Docker Policy:** [docker/AGENTS.md](docker/AGENTS.md)
-- **Stage Spec:** [specs/phases/02_PLATFORM_MMC/STAGE_09_PRODUCTS.md](specs/phases/02_PLATFORM_MMC/STAGE_09_PRODUCTS.md)
+- **Stage Spec:**
+  [specs/phases/02_PLATFORM_MMC/STAGE_09_PRODUCTS.md](specs/phases/02_PLATFORM_MMC/STAGE_09_PRODUCTS.md)
 
 ---
 

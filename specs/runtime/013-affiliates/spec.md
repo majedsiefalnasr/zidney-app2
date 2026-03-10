@@ -9,7 +9,10 @@
 
 ## Feature Overview
 
-Implement a master_db-only affiliate system that enables platform administrators to create and manage promotional codes for B2B commercial license purchases. The affiliate system tracks usage, enforces financial integrity, calculates discounts and commissions, and maintains audit records for revenue reporting.
+Implement a master_db-only affiliate system that enables platform administrators to create and
+manage promotional codes for B2B commercial license purchases. The affiliate system tracks usage,
+enforces financial integrity, calculates discounts and commissions, and maintains audit records for
+revenue reporting.
 
 **What is being built:**
 
@@ -66,7 +69,8 @@ Implement a master_db-only affiliate system that enables platform administrators
 - Migration is forward-only, idempotent, and transactional
 - Not schema-breaking (backward compatible reads)
 
-**No Violations Detected**: Affiliate system adheres strictly to database-per-tenant model, license enforcement chain, and transactional boundaries without weakening any foundational principle.
+**No Violations Detected**: Affiliate system adheres strictly to database-per-tenant model, license
+enforcement chain, and transactional boundaries without weakening any foundational principle.
 
 ---
 
@@ -81,7 +85,8 @@ Implement a master_db-only affiliate system that enables platform administrators
 **Tenant Resolution**:
 
 - Affiliate operations are administrative (MMC level)
-- Affiliate enforcement happens during license purchase (master_db transaction within license context)
+- Affiliate enforcement happens during license purchase (master_db transaction within license
+  context)
 - No tenant resolver needed for affiliate CRUD (admin-only endpoints)
 - License purchase flow uses existing tenant resolver for license validation
 
@@ -195,7 +200,8 @@ License remains in client tenant_db (unchanged)
 - FOREIGN KEY (client_id) → clients(id)
 - FOREIGN KEY (license_id) → licenses(id)
 
-**Immutability Rule**: No UPDATE or DELETE operations allowed on affiliate_usages records. Only INSERT for audit trail.
+**Immutability Rule**: No UPDATE or DELETE operations allowed on affiliate_usages records. Only
+INSERT for audit trail.
 
 ---
 
@@ -213,19 +219,17 @@ License remains in client tenant_db (unchanged)
 
 1. Begin transaction with isolation level `SERIALIZABLE`
 2. Load license record (validates all license requirements - already done by middleware)
-3. If `promo_code` provided:
-   a. `SELECT affiliates WHERE promo_code = $1 FOR UPDATE` (row lock, pessimistic)
-   b. Validate `status = ACTIVE` (reject if INACTIVE)
-   c. Validate `current_timestamp BETWEEN start_date AND end_date` (temporal validity)
-   d. Validate `usage_count < usage_limit_total` (if limit set, else skip)
-   e. Count existing usages for this client+affiliate pair:
+3. If `promo_code` provided: a. `SELECT affiliates WHERE promo_code = $1 FOR UPDATE` (row lock,
+   pessimistic) b. Validate `status = ACTIVE` (reject if INACTIVE) c. Validate
+   `current_timestamp BETWEEN start_date AND end_date` (temporal validity) d. Validate
+   `usage_count < usage_limit_total` (if limit set, else skip) e. Count existing usages for this
+   client+affiliate pair:
    - `SELECT COUNT(*) FROM affiliate_usages WHERE affiliate_id = $1 AND client_id = $2`
-   - Validate count < `usage_limit_per_client` (if limit set, else skip)
-     f. Calculate: `discount_amount = base_amount * discount_percentage / 100`
-     g. Calculate: `commission_amount = base_amount * commission_percentage / 100`
-     h. Both calculations: Round to 2 decimals using `ROUND(value, 2)` (deterministic)
-     i. Insert `affiliate_usages` record with discount_amount, commission_amount
-     j. Update `affiliates.usage_count = usage_count + 1`
+   - Validate count < `usage_limit_per_client` (if limit set, else skip) f. Calculate:
+     `discount_amount = base_amount * discount_percentage / 100` g. Calculate:
+     `commission_amount = base_amount * commission_percentage / 100` h. Both calculations: Round to
+     2 decimals using `ROUND(value, 2)` (deterministic) i. Insert `affiliate_usages` record with
+     discount_amount, commission_amount j. Update `affiliates.usage_count = usage_count + 1`
 4. Apply discount to license purchase amount (if applicable)
 5. Complete license purchase (existing logic - create license record, etc.)
 6. Commit transaction
@@ -236,9 +240,12 @@ License remains in client tenant_db (unchanged)
 - Concurrency conflict (locked row timeout) → ROLLBACK, return HTTP 409 (Conflict)
 - Database error → ROLLBACK, return HTTP 500 with correlation ID for investigation
 
-**Constraint Enforcement**: All constraints via database CHECK constraints and UNIQUE / FOREIGN KEY constraints (not application-layer validation only).
+**Constraint Enforcement**: All constraints via database CHECK constraints and UNIQUE / FOREIGN KEY
+constraints (not application-layer validation only).
 
-**Idempotency**: Affiliate code application itself is idempotent (no second application of same code during same transaction). License purchase endpoint already implements idempotency via unique constraint on purchase ID.
+**Idempotency**: Affiliate code application itself is idempotent (no second application of same code
+during same transaction). License purchase endpoint already implements idempotency via unique
+constraint on purchase ID.
 
 ---
 
@@ -259,7 +266,8 @@ License remains in client tenant_db (unchanged)
 - Every usages record immutably captures input values and calculated values
 - Audit logs include affiliate_id, discount_amount, commission_amount, license_id
 - Any dispute: audit log is authoritative source of truth
-- Calculation reversibility: `discount_percentage = (discount_amount * 100) / base_amount` must equal original percentage (within rounding precision)
+- Calculation reversibility: `discount_percentage = (discount_amount * 100) / base_amount` must
+  equal original percentage (within rounding precision)
 
 ---
 
@@ -335,7 +343,8 @@ SELECT * FROM affiliates WHERE promo_code = $1 FOR UPDATE;
 
 ### Numeric Calculation Edge Case
 
-- Extreme base amounts or percentages still use NUMERIC (no overflow risk as NUMERIC handles arbitrary precision)
+- Extreme base amounts or percentages still use NUMERIC (no overflow risk as NUMERIC handles
+  arbitrary precision)
 - Rounding always deterministic
 - No floating-point errors possible
 
@@ -500,12 +509,18 @@ Error codes:
 
 This feature does NOT include:
 
-- **Workspace-level promo codes**: Affiliate system is B2B commercial only (master_db). Workspace-level promotional codes are handled separately in Backoffice phase.
-- **Student subscription discounts**: Affiliate system applies only to B2B license purchases, not student plans.
-- **Dynamic discount recalculation**: Once a license is purchased with an affiliate code, the discount is immutable (no retroactive adjustments).
-- **Affiliate payout system**: This stage implements tracking only. Payouts/accounting are handled by separate financial operations.
-- **Email notifications for affiliate usage**: Notification system is handled by worker/alert system (separate stage).
-- **Oauth/external affiliate networks**: Only internal platform-managed affiliates; no third-party integration in this stage.
+- **Workspace-level promo codes**: Affiliate system is B2B commercial only (master_db).
+  Workspace-level promotional codes are handled separately in Backoffice phase.
+- **Student subscription discounts**: Affiliate system applies only to B2B license purchases, not
+  student plans.
+- **Dynamic discount recalculation**: Once a license is purchased with an affiliate code, the
+  discount is immutable (no retroactive adjustments).
+- **Affiliate payout system**: This stage implements tracking only. Payouts/accounting are handled
+  by separate financial operations.
+- **Email notifications for affiliate usage**: Notification system is handled by worker/alert system
+  (separate stage).
+- **Oauth/external affiliate networks**: Only internal platform-managed affiliates; no third-party
+  integration in this stage.
 
 ---
 
@@ -575,7 +590,8 @@ This feature does NOT include:
 ## Final Constitutional Compliance Statement
 
 **Isolation**: ✓ Master_db only, no tenant data access  
-**License Enforcement**: ✓ Existing framework unchanged, affiliate enforced within purchase transaction  
+**License Enforcement**: ✓ Existing framework unchanged, affiliate enforced within purchase
+transaction  
 **Attempt Engine**: ✓ Untouched, remains pristine  
 **Transactional Boundaries**: ✓ Single atomic transaction with row locking  
 **Server Authority**: ✓ Server time validates affiliate windows, not client time  
@@ -583,7 +599,8 @@ This feature does NOT include:
 **Error Handling**: ✓ Structured error responses per standard  
 **Observability**: ✓ Structured logging with correlation ID tracking  
 **Layer Separation**: ✓ UI/API/Domain properly isolated  
-**Idempotency**: ✓ License purchase already idempotent; affiliate code validation is atomic within transaction
+**Idempotency**: ✓ License purchase already idempotent; affiliate code validation is atomic within
+transaction
 
 **Compliant with Zidney Constitution v1.2.0 — No violations detected.**
 
@@ -591,7 +608,8 @@ This feature does NOT include:
 
 ## References
 
-- [STAGE_13_AFFILIATES.md](../../phases/02_PLATFORM_MMC/STAGE_13_AFFILIATES.md) - Stage requirements document
+- [STAGE_13_AFFILIATES.md](../../phases/02_PLATFORM_MMC/STAGE_13_AFFILIATES.md) - Stage requirements
+  document
 - [PROJECT_CONTEXT_PRIMER.md](../../../docs/PROJECT_CONTEXT_PRIMER.md) - Architectural context
 - [ADR-0006: Server Time Authoritative](../../architecture/adr/adr-0006-server-time-authoritative.md)
 - [ADR-0008: Semantic Versioning](../../architecture/adr/adr-0008-semantic-versioning.md)
@@ -606,13 +624,19 @@ This feature does NOT include:
 
 #### Q1: Per-Client Limit Under Concurrent Purchases
 
-**Q**: When a client reaches their per-client usage limit (e.g., limit=2, already used 2x), and they attempt two simultaneous purchases with the same affiliate code, what should happen?
+**Q**: When a client reaches their per-client usage limit (e.g., limit=2, already used 2x), and they
+attempt two simultaneous purchases with the same affiliate code, what should happen?
 
 **Decision: Option C (Reject Second After First Commits)**
 
-**Rationale**: Transactional integrity and safety-first principle. Each transaction acquires row lock, checks limit, and either commits or rejects. The second transaction sees the incremented counter post-commit from the first transaction and rejects with `AFFILIATE_USAGE_LIMIT_PER_CLIENT_EXCEEDED`. This is deterministic, auditable, and safe.
+**Rationale**: Transactional integrity and safety-first principle. Each transaction acquires row
+lock, checks limit, and either commits or rejects. The second transaction sees the incremented
+counter post-commit from the first transaction and rejects with
+`AFFILIATE_USAGE_LIMIT_PER_CLIENT_EXCEEDED`. This is deterministic, auditable, and safe.
 
-**Spec Update**: Per-client limit validation occurs within the transaction after acquiring `SELECT ... FOR UPDATE` lock. If limit exceeded, transaction rolls back and client receives HTTP 429 (Too Many Requests) or 400 (Bad Request with AFFILIATE_LIMIT_EXCEEDED code).
+**Spec Update**: Per-client limit validation occurs within the transaction after acquiring
+`SELECT ... FOR UPDATE` lock. If limit exceeded, transaction rolls back and client receives HTTP 429
+(Too Many Requests) or 400 (Bad Request with AFFILIATE_LIMIT_EXCEEDED code).
 
 ---
 
@@ -624,43 +648,60 @@ This feature does NOT include:
 
 **Decision: NUMERIC(12,2) with ROUND(amount, 2) deterministic rounding**
 
-**Rationale**: Zidney requires deterministic financial calculations. NUMERIC(12,2) natively supports 2-decimal precision. All calculations use: `ROUND(base_amount * percentage / 100, 2)`. This produces consistent, reproducible results across all systems and is auditable.
+**Rationale**: Zidney requires deterministic financial calculations. NUMERIC(12,2) natively supports
+2-decimal precision. All calculations use: `ROUND(base_amount * percentage / 100, 2)`. This produces
+consistent, reproducible results across all systems and is auditable.
 
-**Spec Update**: All discount_amount and commission_amount fields are NUMERIC(12,2). Application layer MUST use database SQL functions for rounding (not floating-point math in code). Calculation audit trail includes the raw multiplied value before rounding and the rounded result.
+**Spec Update**: All discount_amount and commission_amount fields are NUMERIC(12,2). Application
+layer MUST use database SQL functions for rounding (not floating-point math in code). Calculation
+audit trail includes the raw multiplied value before rounding and the rounded result.
 
 ---
 
 #### Q3: Zero or Negative Base Amounts
 
-**Q**: If license purchase provides base_amount = 0 or negative (data corruption), can an affiliate code still be applied and usage tracked?
+**Q**: If license purchase provides base_amount = 0 or negative (data corruption), can an affiliate
+code still be applied and usage tracked?
 
 **Decision: Reject as Invalid (HTTP 400 Bad Request)**
 
-**Rationale**: Financial integrity. Zero or negative amounts indicate a data error upstream. Affiliate code should not be applied to invalid transactions. Rejects cleanly, audit logs the validation error, and prevents corrupted financial records.
+**Rationale**: Financial integrity. Zero or negative amounts indicate a data error upstream.
+Affiliate code should not be applied to invalid transactions. Rejects cleanly, audit logs the
+validation error, and prevents corrupted financial records.
 
-**Spec Update**: License purchase endpoint validates base_amount > 0 before affiliate validation. If violated, returns HTTP 400 with error code `INVALID_LICENSE_AMOUNT`.
+**Spec Update**: License purchase endpoint validates base_amount > 0 before affiliate validation. If
+violated, returns HTTP 400 with error code `INVALID_LICENSE_AMOUNT`.
 
 ---
 
 #### Q4: Affiliate Deletion During Transaction
 
-**Q**: Can an affiliate record be deleted from the database while a license purchase transaction is in-flight and has acquired a lock on the affiliate row?
+**Q**: Can an affiliate record be deleted from the database while a license purchase transaction is
+in-flight and has acquired a lock on the affiliate row?
 
 **Decision: Prevent via ON DELETE RESTRICT Foreign Key Constraint**
 
-**Rationale**: Audit trail and referential integrity. Affiliate records MUST NOT be deleted if affiliate_usages records exist. Soft delete via status field is the only allowed "deletion" path (logical delete, not physical). This prevents race conditions and maintains audit trail completeness.
+**Rationale**: Audit trail and referential integrity. Affiliate records MUST NOT be deleted if
+affiliate_usages records exist. Soft delete via status field is the only allowed "deletion" path
+(logical delete, not physical). This prevents race conditions and maintains audit trail
+completeness.
 
-**Spec Update**: affiliate_usages.affiliate_id has `ON DELETE RESTRICT` constraint. Physical deletion of affiliates is forbidden if usages exist. Deactivation happens via `status = INACTIVE`, not deletion.
+**Spec Update**: affiliate_usages.affiliate_id has `ON DELETE RESTRICT` constraint. Physical
+deletion of affiliates is forbidden if usages exist. Deactivation happens via `status = INACTIVE`,
+not deletion.
 
 ---
 
 #### Q5: Admin Action Audit Trail
 
-**Q**: When an admin edits or disables an affiliate, should these actions be logged separately from usage tracking?
+**Q**: When an admin edits or disables an affiliate, should these actions be logged separately from
+usage tracking?
 
 **Decision: Yes — Separate Admin Audit Log Table**
 
-**Rationale**: Distinguish user/admin actions from customer usage tracking. Enables compliance reporting (who changed what when) and incident investigation. Audit trail is comprehensive and forensically complete.
+**Rationale**: Distinguish user/admin actions from customer usage tracking. Enables compliance
+reporting (who changed what when) and incident investigation. Audit trail is comprehensive and
+forensically complete.
 
 **Spec Update**: New table `affiliate_admin_audit` tracks all admin mutations:
 
@@ -681,7 +722,8 @@ All admin operations (create, update, disable) log to this table transactionally
 
 ### Session 2026-02-25 (Part 2 — Security Clarifications)
 
-**Scope**: Architectural clarifications for API boundary, admin authentication, and input validation.
+**Scope**: Architectural clarifications for API boundary, admin authentication, and input
+validation.
 
 #### Q6: Admin Endpoint Placement & Tenant Resolver Handling
 
@@ -703,18 +745,21 @@ And for the chosen option, how is tenant resolver handled?
 
 **Spec Update**:
 
-- Affiliate CRUD endpoints do NOT use tenant resolver (these are admin/MMC operations, not workspace-bound)
+- Affiliate CRUD endpoints do NOT use tenant resolver (these are admin/MMC operations, not
+  workspace-bound)
 - Middleware chain: `Authenticate(MMC Token) → RBAC(Admin Role Check) → Route Handler`
 - MMC UI authenticates using MMC-generated JWT token (signed with shared secret)
 - No tenant context required; all operations scoped to master_db only
 - Error responses return HTTP 403 if user lacks ADMIN role
-- Routes: `POST /api/v1/mmc/affiliates`, `GET /api/v1/mmc/affiliates`, `PATCH /api/v1/mmc/affiliates/:id`, etc.
+- Routes: `POST /api/v1/mmc/affiliates`, `GET /api/v1/mmc/affiliates`,
+  `PATCH /api/v1/mmc/affiliates/:id`, etc.
 
 ---
 
 #### Q7: MMC Token Validation Strategy
 
-**Q**: Token generation, signing, validation mechanism — issuer, format, signing, expiry, rotation, validation middleware location?
+**Q**: Token generation, signing, validation mechanism — issuer, format, signing, expiry, rotation,
+validation middleware location?
 
 **Decision: JWT-based Admin Token Strategy (HS256)**
 
@@ -729,11 +774,14 @@ And for the chosen option, how is tenant resolver handled?
 **Spec Update**:
 
 - **Token Generation**: MMC service generates tokens on successful admin login
-- **Format**: JWT (HS256) with standard claims: `iss: "mmc"`, `exp: <unix_timestamp>`, `aud: "api"`, `sub: <admin_id>`, `scope: "admin"`
+- **Format**: JWT (HS256) with standard claims: `iss: "mmc"`, `exp: <unix_timestamp>`, `aud: "api"`,
+  `sub: <admin_id>`, `scope: "admin"`
 - **Signing Method**: Symmetric (HS256) using shared secret between MMC and API
-- **Shared Secret**: Configured via environment variable `MMC_JWT_SECRET` (rotated every 90 days per security policy; rotation doesn't invalidate existing tokens, only affects NEW tokens)
+- **Shared Secret**: Configured via environment variable `MMC_JWT_SECRET` (rotated every 90 days per
+  security policy; rotation doesn't invalidate existing tokens, only affects NEW tokens)
 - **Expiry**: 24 hours standard for admin sessions
-- **Validation Middleware**: NEW file at `apps/api/src/middleware/auth/mmc-token-validator.ts` (non-tenant-resolver auth chain)
+- **Validation Middleware**: NEW file at `apps/api/src/middleware/auth/mmc-token-validator.ts`
+  (non-tenant-resolver auth chain)
 - **Validation Logic**:
   - Parse JWT header and verify signature using shared secret
   - Check `exp` timestamp (reject if expired)
@@ -742,13 +790,15 @@ And for the chosen option, how is tenant resolver handled?
   - Check `scope` includes "admin"
   - Extract `admin_id` from `sub` claim
   - Reject on any failure: HTTP 401 (Unauthorized)
-- **Implementation Task**: REQUIRED explicit task in plan.md (marked as blocking affiliate route deployment)
+- **Implementation Task**: REQUIRED explicit task in plan.md (marked as blocking affiliate route
+  deployment)
 
 ---
 
 #### Q8: Promo Code Input Validation in License Purchase
 
-**Q**: Optional `promo_code` parameter in license purchase endpoint — validation schema, location, normalization?
+**Q**: Optional `promo_code` parameter in license purchase endpoint — validation schema, location,
+normalization?
 
 **Decision: Strict Schema Validation with Normalization**
 
@@ -762,14 +812,18 @@ And for the chosen option, how is tenant resolver handled?
 **Spec Update**:
 
 - **Zod Schema**: `z.string().trim().toUpperCase().min(3).max(50).regex(/^[A-Z0-9]+$/)`
-- **Validation Location**: License purchase handler at `apps/api/src/routes/licenses/purchase.ts` (existing license endpoint extension)
+- **Validation Location**: License purchase handler at `apps/api/src/routes/licenses/purchase.ts`
+  (existing license endpoint extension)
 - **Validation Results**:
   - Valid: Alphanumeric, 3–50 characters, uppercase
   - Rejected: Non-alphanumeric chars, < 3 chars, > 50 chars
-- **Error Handling**: HTTP 400 with error code `INVALID_PROMO_CODE` and user-facing message: "Promo code must be 3–50 characters, alphanumeric only"
+- **Error Handling**: HTTP 400 with error code `INVALID_PROMO_CODE` and user-facing message: "Promo
+  code must be 3–50 characters, alphanumeric only"
 - **Normalization**: Input automatically trimmed + converted to uppercase before database query
-- **Affiliation Logic**: After Zod validation passes, promo code checked against `affiliates` table using transactional usage flow (existing flow applies)
-- **Security Note**: Validates BEFORE database query to prevent malformed input from reaching SQL layer
+- **Affiliation Logic**: After Zod validation passes, promo code checked against `affiliates` table
+  using transactional usage flow (existing flow applies)
+- **Security Note**: Validates BEFORE database query to prevent malformed input from reaching SQL
+  layer
 
 ---
 

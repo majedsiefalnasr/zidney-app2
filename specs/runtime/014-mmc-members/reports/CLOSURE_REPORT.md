@@ -52,11 +52,16 @@ This stage delivers a complete internal MMC member management system with:
 **Artifacts:**
 
 - `apps/api/src/db/master/migrations/20260225_001_create_roles.ts` — Roles table (id, name, status)
-- `apps/api/src/db/master/migrations/20260225_002_create_mmc_members.ts` — Members table (id, username, email, password_hash, role_id, status, token_version)
-- `apps/api/src/db/master/migrations/20260225_003_create_role_permissions.ts` — Permission matrix (role_id, domain, can_view/create/edit/delete)
-- `apps/api/src/db/master/migrations/20260225_004_create_mmc_member_invitations.ts` — Invitations table (email, token_hash, role_id, expires_at)
-- `apps/api/src/db/master/migrations/20260225_005_create_mmc_audit_log.ts` — Immutable audit log (append-only)
-- `apps/api/src/db/master/migrations/20260225_006_seed_roles_and_permissions.ts` — Seed data (3 default roles, 7 permission domains)
+- `apps/api/src/db/master/migrations/20260225_002_create_mmc_members.ts` — Members table (id,
+  username, email, password_hash, role_id, status, token_version)
+- `apps/api/src/db/master/migrations/20260225_003_create_role_permissions.ts` — Permission matrix
+  (role_id, domain, can_view/create/edit/delete)
+- `apps/api/src/db/master/migrations/20260225_004_create_mmc_member_invitations.ts` — Invitations
+  table (email, token_hash, role_id, expires_at)
+- `apps/api/src/db/master/migrations/20260225_005_create_mmc_audit_log.ts` — Immutable audit log
+  (append-only)
+- `apps/api/src/db/master/migrations/20260225_006_seed_roles_and_permissions.ts` — Seed data (3
+  default roles, 7 permission domains)
 
 **Validation:**
 
@@ -72,8 +77,10 @@ This stage delivers a complete internal MMC member management system with:
 **Artifacts:**
 
 - `apps/api/src/middleware/correlation-id.middleware.ts` — UUID generation/propagation
-- `apps/api/src/middleware/mmc-auth.middleware.ts` — JWT validation, token_version check, workspace_id rejection
-- `apps/api/src/middleware/mmc-permission.middleware.ts` — Permission enforcement (role_permissions query)
+- `apps/api/src/middleware/mmc-auth.middleware.ts` — JWT validation, token_version check,
+  workspace_id rejection
+- `apps/api/src/middleware/mmc-permission.middleware.ts` — Permission enforcement (role_permissions
+  query)
 - `packages/domain-core/src/errors/index.ts` — Standard error envelope (success, data, error)
 - `packages/domain-core/src/services/audit.service.ts` — Immutable audit logging
 - `apps/api/src/middleware/request-logger.middleware.ts` — Structured JSON logging
@@ -116,7 +123,8 @@ This stage delivers a complete internal MMC member management system with:
 **Artifacts:**
 
 - `packages/domain-core/src/services/role.service.ts` — Role management, cascading permissions
-- `packages/domain-core/src/services/permission.service.ts` — Permission evaluation (no runtime logic)
+- `packages/domain-core/src/services/permission.service.ts` — Permission evaluation (no runtime
+  logic)
 - `apps/api/src/routes/roles.routes.ts` — 6 API endpoints
 - `packages/types/src/permissions.ts` — 7 permission domains enum
 
@@ -382,6 +390,7 @@ This stage delivers a complete internal MMC member management system with:
 
 ## Conclusion
 
-**STAGE_14_MMC_MEMBERS is production-ready.** All requirements met, all tests passing, all validations passed, all documentation complete.
+**STAGE_14_MMC_MEMBERS is production-ready.** All requirements met, all tests passing, all
+validations passed, all documentation complete.
 
 Status: 🟢 **APPROVED FOR PRODUCTION DEPLOYMENT**

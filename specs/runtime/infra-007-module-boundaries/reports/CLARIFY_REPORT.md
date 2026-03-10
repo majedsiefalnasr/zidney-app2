@@ -8,7 +8,11 @@
 
 ## Summary
 
-5 implementation-critical ambiguities were identified and fully resolved through codebase analysis. This included inspecting `ai-guard.ts`, `infra-audit.ts`, `ARCHITECTURE_MAP.json`, `tsconfig.json`, `tsconfig.base.json`, and `ci.yml`. All resolutions are grounded in existing code — no assumptions made. Spec updated in-place with a `## Clarifications / Session 2026-03-08` section. Ready for technical planning.
+5 implementation-critical ambiguities were identified and fully resolved through codebase analysis.
+This included inspecting `ai-guard.ts`, `infra-audit.ts`, `ARCHITECTURE_MAP.json`, `tsconfig.json`,
+`tsconfig.base.json`, and `ci.yml`. All resolutions are grounded in existing code — no assumptions
+made. Spec updated in-place with a `## Clarifications / Session 2026-03-08` section. Ready for
+technical planning.
 
 ---
 
@@ -45,8 +49,10 @@ None. All implementation-critical ambiguities resolved.
 ## Spec Updates Applied
 
 - Appended `## Clarifications / Session 2026-03-08` section to `spec.md` with 5 Q&A pairs
-- Updated `module-boundaries.json` schema section to reflect schema-distinctness from `ARCHITECTURE_MAP.json`
-- Clarified `ai-guard.ts` structural changes required (3 new additions, existing validators preserved)
+- Updated `module-boundaries.json` schema section to reflect schema-distinctness from
+  `ARCHITECTURE_MAP.json`
+- Clarified `ai-guard.ts` structural changes required (3 new additions, existing validators
+  preserved)
 - Confirmed alias resolution must use `loadTsAliases()` from `infra-audit.ts`
 - Confirmed existing violations are always errors, never warnings
 - Confirmed CI step insertion point and missing `"ai-guard"` npm script
@@ -70,7 +76,8 @@ None. All implementation-critical ambiguities resolved.
 
 ## Open Risks
 
-None beyond those captured in SPECIFY_REPORT.md. Clarifications added mitigation detail for R3 (alias resolution now resolved via `loadTsAliases()` reuse).
+None beyond those captured in SPECIFY_REPORT.md. Clarifications added mitigation detail for R3
+(alias resolution now resolved via `loadTsAliases()` reuse).
 
 ---
 

@@ -8,7 +8,8 @@
 
 ## Overview
 
-This contract defines the TypeScript interfaces that serve as the single source of truth for all AI context artifacts. These types are the API surface between:
+This contract defines the TypeScript interfaces that serve as the single source of truth for all AI
+context artifacts. These types are the API surface between:
 
 1. **Generation code** (scripts/ai-context/)
 2. **Artifacts** (docs/ai/context/)
@@ -26,7 +27,7 @@ This contract defines the TypeScript interfaces that serve as the single source 
  * Current version: 1.0.0
  * Used for compatibility checking by consumer tools
  */
-type SchemaVersion = string
+type SchemaVersion = string;
 ```
 
 **Invariants:**
@@ -45,13 +46,13 @@ type SchemaVersion = string
  * Enables debugging stale or inconsistent artifacts
  */
 type SourceMetadata = {
-  adr_directory_hash?: string // SHA256 of docs/architecture/adr/
-  adr_directory_last_modified?: string // ISO-8601 timestamp
-  module_boundaries_hash?: string // SHA256 of module-boundaries.json
-  module_boundaries_modified?: string // ISO-8601 timestamp
-  infra_audit_timestamp?: string // ISO-8601 of last audit run
-  artifact_generated_timestamp?: string // ISO-8601 of generation
-}
+  adr_directory_hash?: string; // SHA256 of docs/architecture/adr/
+  adr_directory_last_modified?: string; // ISO-8601 timestamp
+  module_boundaries_hash?: string; // SHA256 of module-boundaries.json
+  module_boundaries_modified?: string; // ISO-8601 timestamp
+  infra_audit_timestamp?: string; // ISO-8601 of last audit run
+  artifact_generated_timestamp?: string; // ISO-8601 of generation
+};
 ```
 
 **Usage:**
@@ -66,9 +67,9 @@ type SourceMetadata = {
 
 ```typescript
 type ArchitectureLayer = {
-  name: 'ui' | 'runtime' | 'domain' | 'infrastructure'
-  description: string
-}
+  name: "ui" | "runtime" | "domain" | "infrastructure";
+  description: string;
+};
 ```
 
 **Valid Layers:**
@@ -86,9 +87,9 @@ type ArchitectureLayer = {
 
 ```typescript
 type LayerRule = {
-  imports_allowed: string[] // Whitelist of allowed imports
-  imports_forbidden: string[] // Blacklist of forbidden imports
-}
+  imports_allowed: string[]; // Whitelist of allowed imports
+  imports_forbidden: string[]; // Blacklist of forbidden imports
+};
 ```
 
 **Usage:**
@@ -133,22 +134,22 @@ interface AIArchitectureSummary {
  * Update Frequency: When modules added/removed or layers change
  */
 interface AIModuleMap {
-  schema_version: SchemaVersion
-  generated_at: string // ISO-8601
+  schema_version: SchemaVersion;
+  generated_at: string; // ISO-8601
   source_metadata: {
-    module_boundaries_hash: string
-    module_boundaries_modified?: string
-    audit_timestamp?: string
-  }
-  modules: Record<string, ModuleEntry>
+    module_boundaries_hash: string;
+    module_boundaries_modified?: string;
+    audit_timestamp?: string;
+  };
+  modules: Record<string, ModuleEntry>;
 }
 
 interface ModuleEntry {
-  layer: 'ui' | 'runtime' | 'domain' | 'infrastructure'
-  type: 'application' | 'package'
-  description: string
-  path: string
-  dependencies?: string[]
+  layer: "ui" | "runtime" | "domain" | "infrastructure";
+  type: "application" | "package";
+  description: string;
+  path: string;
+  dependencies?: string[];
 }
 ```
 
@@ -176,13 +177,13 @@ interface ModuleEntry {
  * Consumers: Architecture validators, AI agents
  */
 interface AILayerModel {
-  schema_version: SchemaVersion
-  generated_at: string // ISO-8601
+  schema_version: SchemaVersion;
+  generated_at: string; // ISO-8601
   source_metadata: {
-    module_boundaries_hash: string
-  }
-  layers: ArchitectureLayer[]
-  rules: Record<string, LayerRule>
+    module_boundaries_hash: string;
+  };
+  layers: ArchitectureLayer[];
+  rules: Record<string, LayerRule>;
 }
 ```
 
@@ -205,11 +206,11 @@ interface AILayerModel {
 
 ```typescript
 type DependencyViolation = {
-  from: string // Source module path
-  to: string // Target module path
-  reason: string // Why this is a violation
-  severity: 'error' | 'warning' // Blocking or warning-only
-}
+  from: string; // Source module path
+  to: string; // Target module path
+  reason: string; // Why this is a violation
+  severity: "error" | "warning"; // Blocking or warning-only
+};
 ```
 
 **Usage:**
@@ -229,21 +230,21 @@ type DependencyViolation = {
  * Consumers: Impact analysis, refactoring tools, GitNexus
  */
 interface AIDependencyGraph {
-  schema_version: SchemaVersion
-  generated_at: string // ISO-8601
+  schema_version: SchemaVersion;
+  generated_at: string; // ISO-8601
   source_metadata: {
-    infra_audit_timestamp: string
-  }
+    infra_audit_timestamp: string;
+  };
   modules: Record<
     string,
     {
-      dependencies: string[]
-      layer: string
-      type: 'app' | 'package'
+      dependencies: string[];
+      layer: string;
+      type: "app" | "package";
     }
-  >
-  reverse_dependencies: Record<string, string[]>
-  violations?: DependencyViolation[]
+  >;
+  reverse_dependencies: Record<string, string[]>;
+  violations?: DependencyViolation[];
 }
 ```
 
@@ -266,13 +267,13 @@ interface AIDependencyGraph {
 
 ```typescript
 type ServiceDefinition = {
-  module: string // Source module (e.g., "apps/api")
-  runtime: string // Runtime env (e.g., "Bun")
-  framework: string // Framework (e.g., "Hono")
-  depends_on: string[] // External deps (e.g., ["postgres", "redis"])
-  port?: number
-  environment?: Record<string, string>
-}
+  module: string; // Source module (e.g., "apps/api")
+  runtime: string; // Runtime env (e.g., "Bun")
+  framework: string; // Framework (e.g., "Hono")
+  depends_on: string[]; // External deps (e.g., ["postgres", "redis"])
+  port?: number;
+  environment?: Record<string, string>;
+};
 ```
 
 **Usage:**
@@ -292,9 +293,9 @@ type ServiceDefinition = {
  * Purpose: Service → Module traceability
  */
 interface AIRuntimeMap {
-  schema_version: SchemaVersion
-  generated_at: string // ISO-8601
-  services: Record<string, ServiceDefinition>
+  schema_version: SchemaVersion;
+  generated_at: string; // ISO-8601
+  services: Record<string, ServiceDefinition>;
 }
 ```
 
@@ -315,11 +316,11 @@ interface AIRuntimeMap {
 
 ```typescript
 type ArchitectureMetadata = {
-  total_modules: number
-  layer_distribution: Record<string, number>
-  total_dependencies: number
-  violations_found: number
-}
+  total_modules: number;
+  layer_distribution: Record<string, number>;
+  total_dependencies: number;
+  violations_found: number;
+};
 ```
 
 **Usage:**
@@ -340,21 +341,21 @@ type ArchitectureMetadata = {
  * Purpose: Single source for complete architecture context
  */
 interface AIArchitectureBrain {
-  schema_version: SchemaVersion
-  generated_at: string // ISO-8601
-  metadata: ArchitectureMetadata
+  schema_version: SchemaVersion;
+  generated_at: string; // ISO-8601
+  metadata: ArchitectureMetadata;
   module_assignments: Record<
     string,
     {
-      layer: string
-      type: string
-      risk_level: 'LOW' | 'MEDIUM' | 'HIGH'
+      layer: string;
+      type: string;
+      risk_level: "LOW" | "MEDIUM" | "HIGH";
     }
-  >
-  dependency_graph: AIDependencyGraph
-  rules_active: Record<string, LayerRule>
-  violations: DependencyViolation[]
-  architecture_score: number // 0-100
+  >;
+  dependency_graph: AIDependencyGraph;
+  rules_active: Record<string, LayerRule>;
+  violations: DependencyViolation[];
+  architecture_score: number; // 0-100
 }
 ```
 
@@ -383,18 +384,18 @@ interface AIArchitectureBrain {
  * Purpose: <1KB context for quick initial load
  */
 interface AIContextMini {
-  schema_version: SchemaVersion
-  generated_at: string // ISO-8601
+  schema_version: SchemaVersion;
+  generated_at: string; // ISO-8601
   layers: Array<{
-    name: string
-    description: string
-  }>
-  module_to_layer: Record<string, string>
-  key_constraints: string[]
+    name: string;
+    description: string;
+  }>;
+  module_to_layer: Record<string, string>;
+  key_constraints: string[];
   forbidden_dependencies: Array<{
-    from: string
-    to: string
-  }>
+    from: string;
+    to: string;
+  }>;
 }
 ```
 
@@ -438,9 +439,9 @@ class ModuleMapBuilder {
 ```typescript
 // Write artifacts with full type safety
 async function writeArtifacts(artifacts: {
-  moduleMap: AIModuleMap
-  layerModel: AILayerModel
-  dependencyGraph: AIDependencyGraph
+  moduleMap: AIModuleMap;
+  layerModel: AILayerModel;
+  dependencyGraph: AIDependencyGraph;
   // ... all 7 artifacts
 }): Promise<void> {
   // Write JSON with indentation for readability
@@ -460,15 +461,15 @@ async function writeArtifacts(artifacts: {
 ```typescript
 // Load with validation
 async function loadArtifact<T>(path: string, schema: JSONSchema): Promise<T> {
-  const content = await fs.readFile(path, 'utf-8')
-  const json = JSON.parse(content)
+  const content = await fs.readFile(path, "utf-8");
+  const json = JSON.parse(content);
 
   // Validate against schema
-  const valid = validate(json, schema)
-  if (!valid) throw new SchemaError()
+  const valid = validate(json, schema);
+  if (!valid) throw new SchemaError();
 
   // Return as typed
-  return json as T
+  return json as T;
 }
 ```
 
@@ -488,11 +489,11 @@ async function loadArtifact<T>(path: string, schema: JSONSchema): Promise<T> {
 // ai-guard.ts loads and uses artifact
 async function validateImports() {
   const brain = await loadArtifact<AIArchitectureBrain>(
-    'docs/ai/context/ai-architecture-brain.json'
-  )
+    "docs/ai/context/ai-architecture-brain.json",
+  );
 
   // Use rules from artifact
-  const rules = brain.rules_active // Type: Record<string, LayerRule>
+  const rules = brain.rules_active; // Type: Record<string, LayerRule>
 
   // Validate staged files
 }
@@ -512,16 +513,16 @@ async function validateImports() {
 // infra-audit.ts generates and validates consistency
 async function audit() {
   // Generate infra-audit-report
-  const report = generateAudit()
+  const report = generateAudit();
 
   // Trigger artifact generation
-  execSync('bun run generate:ai-context')
+  execSync("bun run generate:ai-context");
 
   // Load generated artifact
-  const graph = await loadArtifact<AIDependencyGraph>('docs/ai/context/ai-dependency-graph.json')
+  const graph = await loadArtifact<AIDependencyGraph>("docs/ai/context/ai-dependency-graph.json");
 
   // Validate consistency
-  compareGraphs(report.dependencies, graph)
+  compareGraphs(report.dependencies, graph);
 }
 ```
 
@@ -538,10 +539,10 @@ async function audit() {
 ```typescript
 // GitNexus loads artifact for impact analysis
 async function analyzeImpact(module: string): Promise<BlastRadius> {
-  const graph = await loadArtifact<AIDependencyGraph>('docs/ai/context/ai-dependency-graph.json')
+  const graph = await loadArtifact<AIDependencyGraph>("docs/ai/context/ai-dependency-graph.json");
 
   // Query reverse dependencies
-  const dependents = graph.reverse_dependencies[module]
+  const dependents = graph.reverse_dependencies[module];
 
   // Return impact
 }

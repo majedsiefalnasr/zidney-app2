@@ -9,19 +9,24 @@
 
 ## Purpose
 
-This guide explains how to validate the auth module implementation end-to-end. It is intended for developers reviewing the PR or QA engineers validating behavior before merge.
+This guide explains how to validate the auth module implementation end-to-end. It is intended for
+developers reviewing the PR or QA engineers validating behavior before merge.
 
 ---
 
 ## Summary of Delivered Behavior
 
-The auth module wires session lifecycle (login, refresh, logout) across all three front-end apps — MMC, Backoffice, and Frontoffice — using a factory-based architecture that keeps app-level routing isolated from core auth logic.
+The auth module wires session lifecycle (login, refresh, logout) across all three front-end apps —
+MMC, Backoffice, and Frontoffice — using a factory-based architecture that keeps app-level routing
+isolated from core auth logic.
 
 Key outcomes:
 
 - Access tokens live in memory only — no cookies, no localStorage, no sessionStorage writes
-- A single concurrent 401 triggers exactly one refresh call; all other in-flight requests wait on it (single-flight lock)
-- Route guards block unauthenticated access and redirect authenticated users away from guest-only pages
+- A single concurrent 401 triggers exactly one refresh call; all other in-flight requests wait on it
+  (single-flight lock)
+- Route guards block unauthenticated access and redirect authenticated users away from guest-only
+  pages
 - Logout unconditionally clears state even if the backend call fails
 - Session is initialized at app bootstrap (`main.ts`) before any route navigation resolves
 
@@ -175,9 +180,11 @@ find apps/ -name "token-store.ts"
 2. Enter valid credentials and submit
 3. Observe redirect to the authenticated dashboard
 4. Open DevTools → Application tab → confirm no new entries in localStorage or sessionStorage
-5. Open DevTools → Network tab → confirm subsequent API requests include `Authorization: Bearer <token>` header
+5. Open DevTools → Network tab → confirm subsequent API requests include
+   `Authorization: Bearer <token>` header
 
-**Expected:** User is authenticated, token is carried in request headers, zero persistent storage writes.
+**Expected:** User is authenticated, token is carried in request headers, zero persistent storage
+writes.
 
 ---
 
@@ -219,7 +226,8 @@ find apps/ -name "token-store.ts"
 3. Observe the API client automatically retrying with a new token
 4. Confirm the user is not logged out and the action succeeds
 
-**Expected:** Single transparent refresh; user sees no interruption. Only one refresh call even if multiple concurrent requests hit 401 simultaneously.
+**Expected:** Single transparent refresh; user sees no interruption. Only one refresh call even if
+multiple concurrent requests hit 401 simultaneously.
 
 ---
 
@@ -233,7 +241,8 @@ find apps/ -name "token-store.ts"
 2. Ensure the refresh endpoint returns 401 or 403
 3. Trigger any API call from the authenticated UI
 
-**Expected:** Auth fails → `onAuthFailure` fires → `authStore.logout()` called → state cleared → user redirected to login.
+**Expected:** Auth fails → `onAuthFailure` fires → `authStore.logout()` called → state cleared →
+user redirected to login.
 
 ---
 
@@ -258,7 +267,8 @@ find apps/ -name "token-store.ts"
 
 **Steps:**
 
-1. Call logout programmatically twice in rapid succession (can be tested via browser console: `window.__auth?.logout(); window.__auth?.logout()`)
+1. Call logout programmatically twice in rapid succession (can be tested via browser console:
+   `window.__auth?.logout(); window.__auth?.logout()`)
 2. Observe only one navigation event and one backend call
 
 **Expected:** Second logout call is a no-op (`isLoading` guard). No double navigation. No errors.
@@ -274,7 +284,8 @@ find apps/ -name "token-store.ts"
 1. Reload the app (hard refresh `Cmd+Shift+R`)
 2. Observe the page load behavior
 
-**Expected:** `initSession()` in `main.ts` restores the session before router guards run. No flash of the login page for an already-authenticated user.
+**Expected:** `initSession()` in `main.ts` restores the session before router guards run. No flash
+of the login page for an already-authenticated user.
 
 ---
 

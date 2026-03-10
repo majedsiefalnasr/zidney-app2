@@ -1,22 +1,25 @@
 # Analyze Report — Infra Governance
 
-**Step:** 5 — Analyze (Drift Detector)
-**Timestamp:** 2026-03-05T01:00:00.000Z
-**Status:** APPROVED
+**Step:** 5 — Analyze (Drift Detector) **Timestamp:** 2026-03-05T01:00:00.000Z **Status:** APPROVED
 
 ---
 
 ## Summary
 
-Full structural drift analysis completed across two audit rounds. Round 1 returned APPROVED (9/9) from `speckit.analyze` but BLOCKED from Code Reviewer (CRITICAL: QUICK_MODE ReferenceError) and QA Engineer (HIGH: hook ordering, coverage baseline). Four targeted remediations were applied to `tasks.md` and `plan.md`. Round 2 returned APPROVED from all sources with `drift_passed = true`.
+Full structural drift analysis completed across two audit rounds. Round 1 returned APPROVED (9/9)
+from `speckit.analyze` but BLOCKED from Code Reviewer (CRITICAL: QUICK_MODE ReferenceError) and QA
+Engineer (HIGH: hook ordering, coverage baseline). Four targeted remediations were applied to
+`tasks.md` and `plan.md`. Round 2 returned APPROVED from all sources with `drift_passed = true`.
 
 ---
 
 ## Inputs Reviewed
 
-- `specs/runtime/infra-governance/spec.md` — 12 FRs, Constitutional Compliance Declaration, Clarifications
+- `specs/runtime/infra-governance/spec.md` — 12 FRs, Constitutional Compliance Declaration,
+  Clarifications
 - `specs/runtime/infra-governance/plan.md` — 7 work items T001–T007, Implementation Sequence
-- `specs/runtime/infra-governance/tasks.md` — 22 atomic tasks, Dependency Order, Parallel Execution Map
+- `specs/runtime/infra-governance/tasks.md` — 22 atomic tasks, Dependency Order, Parallel Execution
+  Map
 - Guardian outputs from Step 5.1A (Round 1 + Round 2)
 
 ---
@@ -78,7 +81,8 @@ No unresolved violations remain.
 | NEW-F3 — T007 plan/tasks ID collision      | OPEN (LOW, traceability only)  |
 | NF-2 — T012–T014 line refs shift +1        | OPEN (LOW, informational)      |
 
-All remaining OPEN items are LOW severity, documentation-only, and do not affect implementation correctness.
+All remaining OPEN items are LOW severity, documentation-only, and do not affect implementation
+correctness.
 
 ---
 
@@ -96,8 +100,7 @@ All remaining OPEN items are LOW severity, documentation-only, and do not affect
 - MEDIUM findings: 2 (NF-1 resolved; pre-existing security config concerns — non-blocking)
 - LOW findings: 3 (documentation quality — non-blocking)
 
-`drift_passed = true`
-`implementation_allowed = true`
+`drift_passed = true` `implementation_allowed = true`
 
 ---
 

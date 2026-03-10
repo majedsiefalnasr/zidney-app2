@@ -10,7 +10,9 @@
 
 ## Summary
 
-This PR delivers the **AI Architecture Context Layer** — a comprehensive system that generates machine-readable artifacts describing Zidney's architecture for consumption by AI agents (Copilot, GitNexus, SpecKit, Claude).
+This PR delivers the **AI Architecture Context Layer** — a comprehensive system that generates
+machine-readable artifacts describing Zidney's architecture for consumption by AI agents (Copilot,
+GitNexus, SpecKit, Claude).
 
 **Key Metrics:**
 
@@ -74,7 +76,8 @@ AI agents (Copilot, Claude, GitNexus) need to understand Zidney's architecture t
 - Trace dependency impact before refactoring
 - Ensure governance compliance automatically
 
-Without structured AI context, agent-generated code can violate architecture rules without detection.
+Without structured AI context, agent-generated code can violate architecture rules without
+detection.
 
 ### Solution
 
@@ -120,7 +123,8 @@ Machine-readable architecture context enables:
 
 ### Key Decisions
 
-1. **TypeScript as Source of Truth** — Types in packages/types/src/ai-context.ts auto-generate JSON schemas
+1. **TypeScript as Source of Truth** — Types in packages/types/src/ai-context.ts auto-generate JSON
+   schemas
 2. **SHA256 Change Detection** — Smart detection prevents unnecessary regeneration
 3. **7 Focused Artifacts** — Reduces context window per tool, enables incremental loading
 4. **Governance-Only Scope** — Zero runtime impact, zero data model changes
@@ -191,7 +195,8 @@ Machine-readable architecture context enables:
 
 ### Modified Files (1)
 
-- `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_09_AI_ARCHITECTURE_CONTEXT.md` — Stage status updated
+- `specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_09_AI_ARCHITECTURE_CONTEXT.md` — Stage status
+  updated
 
 ### Statistics
 

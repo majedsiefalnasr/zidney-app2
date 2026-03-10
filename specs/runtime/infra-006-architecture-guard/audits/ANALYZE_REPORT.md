@@ -8,7 +8,10 @@
 
 ## Summary
 
-Full constitutional compliance audit performed across all three artifacts (`spec.md`, `plan.md`, `tasks.md`). The stage is governance-tooling–only — it introduces no API routes, no database access, no Worker jobs, and no UI code. All 9 drift criteria pass. Four composite guardians return PASS. Implementation is authorized.
+Full constitutional compliance audit performed across all three artifacts (`spec.md`, `plan.md`,
+`tasks.md`). The stage is governance-tooling–only — it introduces no API routes, no database access,
+no Worker jobs, and no UI code. All 9 drift criteria pass. Four composite guardians return PASS.
+Implementation is authorized.
 
 ---
 
@@ -66,7 +69,8 @@ None.
 
 `APPROVED — Implementation authorized.`
 
-All 9 constitutional criteria pass. All 4 guardians return PASS. `drift_passed = true`. `implementation_allowed = true`.
+All 9 constitutional criteria pass. All 4 guardians return PASS. `drift_passed = true`.
+`implementation_allowed = true`.
 
 ---
 

@@ -1,8 +1,7 @@
 # Specification Quality Checklist: Tenant Baseline Schema
 
 **Purpose**: Validate specification completeness and quality before proceeding to planning
-**Created**: 2026-02-16
-**Feature**: [spec.md](../spec.md)
+**Created**: 2026-02-16 **Feature**: [spec.md](../spec.md)
 
 ---
 
@@ -13,7 +12,9 @@
 - [x] Written for non-technical stakeholders
 - [x] All mandatory sections completed
 
-**Notes**: Specification uses clear terminology (tables, schemas, transactions) appropriate for DBAs and architects. No TypeScript, SQL dialect specifics, or ORM references that would lock to implementation.
+**Notes**: Specification uses clear terminology (tables, schemas, transactions) appropriate for DBAs
+and architects. No TypeScript, SQL dialect specifics, or ORM references that would lock to
+implementation.
 
 ---
 

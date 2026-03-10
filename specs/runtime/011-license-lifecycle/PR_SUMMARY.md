@@ -9,9 +9,13 @@
 
 ## 📋 Summary
 
-This PR introduces the complete **License Lifecycle** feature for Zidney's Platform MMC (Master Management Console). The implementation spans 10 phases covering database schema, domain services, RESTful APIs, async workers, audit logging, admin UI, comprehensive testing, and deployment infrastructure.
+This PR introduces the complete **License Lifecycle** feature for Zidney's Platform MMC (Master
+Management Console). The implementation spans 10 phases covering database schema, domain services,
+RESTful APIs, async workers, audit logging, admin UI, comprehensive testing, and deployment
+infrastructure.
 
-**All 58 tasks completed (100%).** Implementation is production-ready with full type safety, structured logging, comprehensive error handling, and multi-tenant safety verified.
+**All 58 tasks completed (100%).** Implementation is production-ready with full type safety,
+structured logging, comprehensive error handling, and multi-tenant safety verified.
 
 ---
 
@@ -85,7 +89,8 @@ Previously completed (referenced in this PR for context):
 
 - `packages/domain-core/src/logging/audit-handler.ts` — Immutable audit log recording
 - `packages/domain-core/src/logging/audit-reader.ts` — Paginated audit trail queries
-- `packages/domain-core/src/logging/audit-purge.ts` — Compliance-aware purge (LEGAL_COMPLIANCE role only)
+- `packages/domain-core/src/logging/audit-purge.ts` — Compliance-aware purge (LEGAL_COMPLIANCE role
+  only)
 
 **Features:**
 

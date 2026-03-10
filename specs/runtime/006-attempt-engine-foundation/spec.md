@@ -10,7 +10,10 @@
 
 ## Executive Summary
 
-This specification defines the Attempt Engine, the unified, immutable attempt execution model that guarantees academic integrity through snapshot isolation, server-authoritative enforcement, and worker-based grading. The Attempt Engine is Zidney's foundational layer for all exam delivery modes (MCQ Assessment, MCQ Exam, MCQ Scheduled, Topic Exam, Exercise Exam, Traditional Scheduled).
+This specification defines the Attempt Engine, the unified, immutable attempt execution model that
+guarantees academic integrity through snapshot isolation, server-authoritative enforcement, and
+worker-based grading. The Attempt Engine is Zidney's foundational layer for all exam delivery modes
+(MCQ Assessment, MCQ Exam, MCQ Scheduled, Topic Exam, Exercise Exam, Traditional Scheduled).
 
 The engine ensures:
 
@@ -26,7 +29,9 @@ The engine ensures:
 
 ### What Is Being Built
 
-A unified **Attempt Engine** that manages the entire lifecycle of an exam attempt from initialization through grading finalization. This is not a new feature module—it is the academic credibility foundation upon which all exam delivery modes depend.
+A unified **Attempt Engine** that manages the entire lifecycle of an exam attempt from
+initialization through grading finalization. This is not a new feature module—it is the academic
+credibility foundation upon which all exam delivery modes depend.
 
 ### Components
 
@@ -252,7 +257,8 @@ IF attempt.expected_product_version not in SUPPORTED_RANGE
 - Max attempts per exam per user (lifetime)
 - Max total exam attempts per license
 
-**Enforcement**: Checked at attempt creation time. If exceeded → return HTTP 429 (Too Many Requests).
+**Enforcement**: Checked at attempt creation time. If exceeded → return HTTP 429 (Too Many
+Requests).
 
 ---
 
@@ -420,7 +426,8 @@ If any step fails within the transaction:
 - No partial attempt record created
 - Return error to client with structured error response
 
-**Retry Policy**: Idempotent. Client can retry with same arguments; duplicate-key constraint prevents double-insertion.
+**Retry Policy**: Idempotent. Client can retry with same arguments; duplicate-key constraint
+prevents double-insertion.
 
 ---
 
@@ -437,9 +444,11 @@ BEGIN TRANSACTION;
 COMMIT;
 ```
 
-**Idempotency**: Upsert operation is idempotent. Replay of the same answer produces identical result.
+**Idempotency**: Upsert operation is idempotent. Replay of the same answer produces identical
+result.
 
-**Concurrency**: Client sends all progress updates; multiple clients can submit answers for different questions without conflict.
+**Concurrency**: Client sends all progress updates; multiple clients can submit answers for
+different questions without conflict.
 
 ---
 
@@ -558,7 +567,8 @@ COMMIT;
 | Grading          | attempt_id + finalized_at                    | Finalization lock; return existing result if already FINALIZED  |
 | Expiration       | attempt_id + EXPIRED status                  | Status check before update; skip if already processed           |
 
-**Replay Behavior**: If a client sends the same request twice, the system returns identical results (no duplicates, no state drift).
+**Replay Behavior**: If a client sends the same request twice, the system returns identical results
+(no duplicates, no state drift).
 
 ---
 
@@ -566,7 +576,8 @@ COMMIT;
 
 ### Server-Only Time Validation (ADR-0006)
 
-**Principle**: All time-based decisions are made by the server using server clocks only. Client time is never trusted.
+**Principle**: All time-based decisions are made by the server using server clocks only. Client time
+is never trusted.
 
 ### Time Sources
 
@@ -646,7 +657,8 @@ All mutable operations must be safe to execute multiple times with identical out
 
 **Idempotency techniques used**:
 
-1. **Unique Constraints**: Prevent duplicate attempts for same (workspace_id, user_id, exam_id) tuple
+1. **Unique Constraints**: Prevent duplicate attempts for same (workspace_id, user_id, exam_id)
+   tuple
 2. **FOR UPDATE Locks**: Serialize concurrent submissions/grading
 3. **Status Guards**: Check status before state transitions
 4. **UPSERT Operations**: Answer progress updates use INSERT...ON CONFLICT
@@ -767,7 +779,8 @@ All error responses must follow standard format:
 1. **Duplicate Submission Prevention**: FOR UPDATE lock prevents concurrent submissions
 2. **Attempt Rate Limit**: Soft limit enforced by license (max N attempts per exam per user)
 3. **Worker Queue Protection**: Max queue depth = 10,000 jobs; reject new jobs if exceeded
-4. **Progress Batching**: Client sends answer updates every 5-10 seconds minimum (by client design, not server enforcement)
+4. **Progress Batching**: Client sends answer updates every 5-10 seconds minimum (by client design,
+   not server enforcement)
 
 ---
 
@@ -878,7 +891,8 @@ All error responses must follow standard format:
 
 #### Failure: Deadlock During Submission
 
-**Scenario**: Two workers attempt to grade same attempt simultaneously (shouldn't happen, but protect anyway).
+**Scenario**: Two workers attempt to grade same attempt simultaneously (shouldn't happen, but
+protect anyway).
 
 **Detection**: PostgreSQL deadlock error (error code 40P01).
 
@@ -895,7 +909,8 @@ All error responses must follow standard format:
 
 #### Failure: Schema Version Incompatible
 
-**Scenario**: Product upgraded, but attempt was created on old schema. Grading code expects new schema columns.
+**Scenario**: Product upgraded, but attempt was created on old schema. Grading code expects new
+schema columns.
 
 **Detection**: Worker checks `attempt.expected_schema_version` before grading.
 
@@ -1060,17 +1075,17 @@ All error responses must follow standard format:
 ### Transaction Rollback Test
 
 ```typescript
-describe('Transaction Rollback Protection', () => {
-  test('Attempt creation rollback if snapshot fails', async () => {
+describe("Transaction Rollback Protection", () => {
+  test("Attempt creation rollback if snapshot fails", async () => {
     // Simulate snapshot failure mid-transaction
     // Assert: No partial attempt record persists
-  })
+  });
 
-  test('Submission rollback if enqueue fails', async () => {
+  test("Submission rollback if enqueue fails", async () => {
     // Simulate job enqueue failure
     // Assert: Attempt remains IN_PROGRESS; no orphaned SUBMITTED state
-  })
-})
+  });
+});
 ```
 
 ---
@@ -1078,29 +1093,27 @@ describe('Transaction Rollback Protection', () => {
 ### Idempotency Test
 
 ```typescript
-describe('Idempotency Guarantees', () => {
-  test('Resubmit same attempt twice → same result', async () => {
-    await submit(attempt_id)
-    const result1 = await waitForGrading()
+describe("Idempotency Guarantees", () => {
+  test("Resubmit same attempt twice → same result", async () => {
+    await submit(attempt_id);
+    const result1 = await waitForGrading();
 
     // Simulate network retry; call submit again
-    await submit(attempt_id)
-    const result2 = await waitForGrading()
+    await submit(attempt_id);
+    const result2 = await waitForGrading();
 
-    expect(result1).toEqual(result2)
-  })
+    expect(result1).toEqual(result2);
+  });
 
-  test('Replay answer update → no duplicate progress rows', async () => {
-    const answer = { question_id, user_answer: 'A' }
-    await updateAnswer(answer)
-    await updateAnswer(answer) // Replay
+  test("Replay answer update → no duplicate progress rows", async () => {
+    const answer = { question_id, user_answer: "A" };
+    await updateAnswer(answer);
+    await updateAnswer(answer); // Replay
 
-    const count = await db.query(
-      'SELECT COUNT(*) FROM attempt_progress WHERE attempt_id = ?'
-    )
-    expect(count).toBe(expectedQuestionCount)
-  })
-})
+    const count = await db.query("SELECT COUNT(*) FROM attempt_progress WHERE attempt_id = ?");
+    expect(count).toBe(expectedQuestionCount);
+  });
+});
 ```
 
 ---
@@ -1108,20 +1121,20 @@ describe('Idempotency Guarantees', () => {
 ### Version Compatibility Test
 
 ```typescript
-describe('Version Compatibility Enforcement', () => {
-  test('Reject attempt start if schema_version incompatible', async () => {
+describe("Version Compatibility Enforcement", () => {
+  test("Reject attempt start if schema_version incompatible", async () => {
     // Create workspace with schema_version = 0
     // Attempt to start exam with MIN_SUPPORTED_SCHEMA = 1
     // Assert: HTTP 426 Upgrade Required
-  })
+  });
 
-  test('Reject grading if product_version incompatible', async () => {
+  test("Reject grading if product_version incompatible", async () => {
     // Create attempt with product_version = "0.9.0"
     // Runtime = "2.0.0", MAX_SUPPORTED = "1.5.0"
     // Worker attempts grading
     // Assert: Mark FINALIZED with error; do not corrupt grading
-  })
-})
+  });
+});
 ```
 
 ---
@@ -1129,13 +1142,13 @@ describe('Version Compatibility Enforcement', () => {
 ### Isolation Test
 
 ```typescript
-describe('Multi-Tenant Isolation', () => {
-  test('Attempt in workspace A not visible to workspace B', async () => {
+describe("Multi-Tenant Isolation", () => {
+  test("Attempt in workspace A not visible to workspace B", async () => {
     // Create attempt in workspace A
     // Query workspace B DB
     // Assert: Attempt not found
-  })
-})
+  });
+});
 ```
 
 ---
@@ -1143,17 +1156,17 @@ describe('Multi-Tenant Isolation', () => {
 ### Concurrency Test
 
 ```typescript
-describe('Concurrency Safety', () => {
-  test('Concurrent submissions prevented by FOR UPDATE lock', async () => {
-    const p1 = submit(attempt_id)
-    const p2 = submit(attempt_id)
+describe("Concurrency Safety", () => {
+  test("Concurrent submissions prevented by FOR UPDATE lock", async () => {
+    const p1 = submit(attempt_id);
+    const p2 = submit(attempt_id);
 
-    const [result1, result2] = await Promise.all([p1, p2])
+    const [result1, result2] = await Promise.all([p1, p2]);
 
     // One succeeds, one returns Idempotent/Conflict
-    expect([result1, result2]).toContainEqual(idempotentResponse)
-  })
-})
+    expect([result1, result2]).toContainEqual(idempotentResponse);
+  });
+});
 ```
 
 ---
@@ -1218,37 +1231,52 @@ This specification **IS FULLY COMPLIANT** with the Zidney Constitution v1.2.0.
 
 ### Compliance Verification
 
-✅ **ADR-0001 (Database-per-Tenant)**: Attempt and progress tables reside in tenant database. No shared tables. Tenant resolved via subdomain/slug before database access.
+✅ **ADR-0001 (Database-per-Tenant)**: Attempt and progress tables reside in tenant database. No
+shared tables. Tenant resolved via subdomain/slug before database access.
 
-✅ **ADR-0002 (Snapshot Attempt Model)**: Snapshot captured at attempt start. Grading references snapshot only. No live exam configuration lookups during grading. Snapshot is immutable.
+✅ **ADR-0002 (Snapshot Attempt Model)**: Snapshot captured at attempt start. Grading references
+snapshot only. No live exam configuration lookups during grading. Snapshot is immutable.
 
-✅ **ADR-0003 (White-Label Visual Only)**: Attempt model is agnostic to branding. Theme and branding applied at Frontoffice rendering layer only.
+✅ **ADR-0003 (White-Label Visual Only)**: Attempt model is agnostic to branding. Theme and branding
+applied at Frontoffice rendering layer only.
 
-✅ **ADR-0004 (Single Runtime Engine)**: Single attempts table supports all delivery modes (MCQ, Traditional, etc.). No separate module-specific attempt tables.
+✅ **ADR-0004 (Single Runtime Engine)**: Single attempts table supports all delivery modes (MCQ,
+Traditional, etc.). No separate module-specific attempt tables.
 
-✅ **ADR-0005 (Upgrade Opt-In)**: Version compatibility checks enforced. Incompatible versions rejected before execution. Upgrades are explicit via MMC.
+✅ **ADR-0005 (Upgrade Opt-In)**: Version compatibility checks enforced. Incompatible versions
+rejected before execution. Upgrades are explicit via MMC.
 
-✅ **ADR-0006 (Runtime Authoritative Time)**: Server time only. Client timer is visual. All deadline validation uses PostgreSQL NOW(). No client time trusted.
+✅ **ADR-0006 (Runtime Authoritative Time)**: Server time only. Client timer is visual. All deadline
+validation uses PostgreSQL NOW(). No client time trusted.
 
-✅ **ADR-0007 (Product Version Compatibility)**: Each attempt stores expected_schema_version and expected_product_version. Grading validates compatibility.
+✅ **ADR-0007 (Product Version Compatibility)**: Each attempt stores expected_schema_version and
+expected_product_version. Grading validates compatibility.
 
-✅ **ADR-0008 (Semantic Versioning)**: Schema migration versioning follows semantic versioning. Version bumps explicit. Rollback via snapshot only.
+✅ **ADR-0008 (Semantic Versioning)**: Schema migration versioning follows semantic versioning.
+Version bumps explicit. Rollback via snapshot only.
 
-✅ **License Enforcement**: License middleware required before all workspace-bound operations. License states (ACTIVE, SOFT_LOCKED, ARCHIVED) enforced per rules.
+✅ **License Enforcement**: License middleware required before all workspace-bound operations.
+License states (ACTIVE, SOFT_LOCKED, ARCHIVED) enforced per rules.
 
-✅ **Multi-Tenancy Isolation**: No cross-tenant joins. Connection pool per workspace_id. Tenant resolver acts as first middleware step.
+✅ **Multi-Tenancy Isolation**: No cross-tenant joins. Connection pool per workspace_id. Tenant
+resolver acts as first middleware step.
 
-✅ **No Client-Side Grading**: All grading deferred to worker. API contains zero score computation logic. Frontoffice has zero grading responsibility.
+✅ **No Client-Side Grading**: All grading deferred to worker. API contains zero score computation
+logic. Frontoffice has zero grading responsibility.
 
-✅ **Transaction Boundaries**: All mutable operations transactional. Submission, grading, and answer progress use appropriate locking and rollback.
+✅ **Transaction Boundaries**: All mutable operations transactional. Submission, grading, and answer
+progress use appropriate locking and rollback.
 
-✅ **Idempotency**: All operations safe to replay. Duplicate submission returns cached result. Duplicate grading returns cached result.
+✅ **Idempotency**: All operations safe to replay. Duplicate submission returns cached result.
+Duplicate grading returns cached result.
 
-✅ **Layer Separation**: Frontoffice = UI only. API = routing + validation. Worker = grading. MMC = licensing. No layer violations.
+✅ **Layer Separation**: Frontoffice = UI only. API = routing + validation. Worker = grading. MMC =
+licensing. No layer violations.
 
 ### Conflict Assessment
 
-**No conflicts detected.** This specification enforces all Constitutional requirements without exception.
+**No conflicts detected.** This specification enforces all Constitutional requirements without
+exception.
 
 ---
 
@@ -1265,4 +1293,5 @@ This specification **IS FULLY COMPLIANT** with the Zidney Constitution v1.2.0.
 
 **SPECIFICATION COMPLETE**
 
-This document is the formal specification for STAGE_06_ATTEMPT_ENGINE_FOUNDATION and is ready to proceed to the Planning phase.
+This document is the formal specification for STAGE_06_ATTEMPT_ENGINE_FOUNDATION and is ready to
+proceed to the Planning phase.

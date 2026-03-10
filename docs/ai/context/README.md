@@ -20,7 +20,8 @@
 
 ## Overview
 
-The **AI Context Layer** provides machine-readable architecture metadata to enable AI agents (Copilot, GitNexus, SpecKit, Claude) to understand and validate Zidney's architecture.
+The **AI Context Layer** provides machine-readable architecture metadata to enable AI agents
+(Copilot, GitNexus, SpecKit, Claude) to understand and validate Zidney's architecture.
 
 ### What It Provides
 
@@ -111,7 +112,7 @@ bun run generate:ai-context --verbose
 Load the lightweight artifact first:
 
 ```typescript
-import mini from './docs/ai/context/ai-context-mini.json'
+import mini from "./docs/ai/context/ai-context-mini.json";
 
 // Use mini context (~100KB) for fast loading
 // Falls back to full artifacts for detailed analysis
@@ -122,7 +123,7 @@ import mini from './docs/ai/context/ai-context-mini.json'
 Load the dependency graph:
 
 ```typescript
-import depGraph from './docs/ai/context/ai-dependency-graph.json'
+import depGraph from "./docs/ai/context/ai-dependency-graph.json";
 
 // Use for blast radius analysis
 // Use for impact assessment before refactoring
@@ -133,7 +134,7 @@ import depGraph from './docs/ai/context/ai-dependency-graph.json'
 Load the architecture brain:
 
 ```typescript
-import brain from './docs/ai/context/ai-architecture-brain.json'
+import brain from "./docs/ai/context/ai-architecture-brain.json";
 
 // Use for compliance checking
 // Use for violation detection
@@ -369,8 +370,7 @@ Copilot loads mini context automatically:
 ```markdown
 <!-- In .copilot-instructions.md or similar -->
 
-Load AI context from: docs/ai/context/ai-context-mini.json
-for architecture-aware suggestions
+Load AI context from: docs/ai/context/ai-context-mini.json for architecture-aware suggestions
 ```
 
 #### For SpecKit

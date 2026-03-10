@@ -3,14 +3,15 @@
 **Status**: Phase 4 Integration Complete ✅  
 **Date**: February 27, 2026  
 **Version**: 2.0  
-**Target Environment**: Production
-**Sign-Off**: T071 (Performance Baseline Documentation)
+**Target Environment**: Production **Sign-Off**: T071 (Performance Baseline Documentation)
 
 ---
 
 ## Executive Summary
 
-This document captures the complete performance baseline for the MMC Dashboard including Phase 1-4 deliverables. All 6 endpoints have been verified to meet the <300ms latency SLA with proper indexing, caching, and structured logging in place.
+This document captures the complete performance baseline for the MMC Dashboard including Phase 1-4
+deliverables. All 6 endpoints have been verified to meet the <300ms latency SLA with proper
+indexing, caching, and structured logging in place.
 
 **✅ Performance SLA Compliance**: ALL CRITERIA PASSED
 
@@ -62,7 +63,8 @@ WHERE l.workspace_id = $1 AND l.deleted_at IS NULL
 
 **Query**: Top 5 products by revenue
 
-**EXPLAIN ANALYZE**: ✅ Index Scan `idx_revenue_records_product_created` - **52.67 ms execution time**
+**EXPLAIN ANALYZE**: ✅ Index Scan `idx_revenue_records_product_created` - **52.67 ms execution
+time**
 
 - Index Cond: (workspace_id = $1 AND created_at > NOW() - '1 year')
 - Seq Scans: 0 ✅
@@ -77,7 +79,8 @@ WHERE l.workspace_id = $1 AND l.deleted_at IS NULL
 
 **Query**: Revenue by country with pagination
 
-**EXPLAIN ANALYZE**: ✅ Index Scan `idx_revenue_records_billing_country` - **38.56 ms execution time**
+**EXPLAIN ANALYZE**: ✅ Index Scan `idx_revenue_records_billing_country` - **38.56 ms execution
+time**
 
 - Index Cond: (workspace_id = $1 AND created_at > NOW() - '6 months')
 - Seq Scans: 0 ✅
@@ -92,7 +95,8 @@ WHERE l.workspace_id = $1 AND l.deleted_at IS NULL
 
 **Query**: Affiliate leaderboard with usage metrics
 
-**EXPLAIN ANALYZE**: ✅ Index Scans `idx_affiliates_status` + `idx_affiliate_usages_affiliate_created` - **28.78 ms execution time**
+**EXPLAIN ANALYZE**: ✅ Index Scans `idx_affiliates_status` +
+`idx_affiliate_usages_affiliate_created` - **28.78 ms execution time**
 
 - Index Cond 1: (workspace_id = $1)
 - Index Cond 2: (created_at > NOW() - '3 months')
@@ -108,7 +112,8 @@ WHERE l.workspace_id = $1 AND l.deleted_at IS NULL
 
 **Query**: Revenue trends over 12 months
 
-**EXPLAIN ANALYZE**: ✅ Index Scan with CTE `idx_revenue_records_created_at` - **68.89 ms execution time**
+**EXPLAIN ANALYZE**: ✅ Index Scan with CTE `idx_revenue_records_created_at` - **68.89 ms execution
+time**
 
 - Index Cond: (workspace_id = $1 AND created_at > NOW() - '12 months')
 - Seq Scans: 0 ✅
@@ -123,7 +128,8 @@ WHERE l.workspace_id = $1 AND l.deleted_at IS NULL
 
 **Query**: Full dataset export with streaming
 
-**EXPLAIN ANALYZE**: ✅ Index Scan `idx_revenue_records_billing_country` - **156.89 ms execution time** (for 5k row batch)
+**EXPLAIN ANALYZE**: ✅ Index Scan `idx_revenue_records_billing_country` - **156.89 ms execution
+time** (for 5k row batch)
 
 - Index Cond: (workspace_id = $1 AND created_at BETWEEN $2 AND $3)
 - Seq Scans: 0 ✅
@@ -207,7 +213,8 @@ Results:
 
 ### Cache Invalidation Events
 
-- **Revenue Record Created**: Invalidate /summary, /revenue-breakdown, /trends, /geographic (<100ms latency)
+- **Revenue Record Created**: Invalidate /summary, /revenue-breakdown, /trends, /geographic (<100ms
+  latency)
 - **Affiliate Usage Created**: Invalidate /affiliates (<80ms latency)
 - **License Status Changed**: Invalidate /summary (immediate on-request validation)
 

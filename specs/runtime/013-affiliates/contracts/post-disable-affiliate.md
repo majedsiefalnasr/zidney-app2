@@ -4,7 +4,8 @@
 **Authentication**: MMC service token + admin RBAC  
 **Authorization**: `affiliates:delete` permission  
 **Rate Limit**: Standard admin endpoint limit (~100 req/min per admin)  
-**Soft Delete**: Changes status to INACTIVE; promo code remains in database; usage records persist for audit
+**Soft Delete**: Changes status to INACTIVE; promo code remains in database; usage records persist
+for audit
 
 ---
 
@@ -156,7 +157,8 @@ Empty body or optional reason (if audit requires):
 
 ## Idempotency
 
-- **Not Idempotent**: First disable succeeds (status changes), second disable fails with 400 (already inactive)
+- **Not Idempotent**: First disable succeeds (status changes), second disable fails with 400
+  (already inactive)
 - **Mitigation**: Client can catch 400 and treat as successful (idempotent error handling)
 
 ---
@@ -184,7 +186,8 @@ The endpoint does NOT physically delete the affiliate record. Reasons:
 2. **Compliance**: Financial records must remain immutable
 3. **Data Recovery**: Soft delete allows easy restoration if accidentally disabled
 
-If physical deletion is ever needed, it must go through a formal data retention/compliance review process.
+If physical deletion is ever needed, it must go through a formal data retention/compliance review
+process.
 
 ---
 

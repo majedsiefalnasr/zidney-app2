@@ -12,13 +12,11 @@
 
 This task set operationalizes [plan.md](./plan.md) into atomic, sequenced implementation work.
 
-**Compliance Validation:**
-✅ Plan complies with Zidney Constitution v1.2.0  
+**Compliance Validation:** ✅ Plan complies with Zidney Constitution v1.2.0  
 ✅ No architectural violations exist  
 ✅ Stage scope is respected (Phase 1, Auth only)
 
-**Non-Goals Confirmation:**
-✗ Does NOT introduce new architecture  
+**Non-Goals Confirmation:** ✗ Does NOT introduce new architecture  
 ✗ Does NOT bypass middleware  
 ✗ Does NOT touch unrelated layers  
 ✗ Does NOT modify unrelated stages
@@ -52,8 +50,7 @@ These tasks prepare schema and configuration. **No business logic.**
 **Version Enforcement:** N/A (master DB)  
 **License Middleware:** N/A (infrastructure)
 
-**Description:**
-Create the mmc_users table in master_db for platform-level authentication.
+**Description:** Create the mmc_users table in master_db for platform-level authentication.
 
 **SQL Content:**
 
@@ -102,8 +99,8 @@ COMMIT;
 **Version Enforcement:** YES (schema_version incremented)  
 **License Middleware:** N/A (infrastructure)
 
-**Description:**
-Create 6 auth tables in tenant_db: users, user_roles, roles, role_permissions, login_attempts, audit_logs.
+**Description:** Create 6 auth tables in tenant_db: users, user_roles, roles, role_permissions,
+login_attempts, audit_logs.
 
 **SQL Content:**
 
@@ -238,8 +235,7 @@ UPDATE schema_metadata SET schema_version = '1.1.0' WHERE version_type = 'tenant
 **Version Enforcement:** N/A (seed data)  
 **License Middleware:** N/A (infrastructure)
 
-**Description:**
-Insert default roles (ADMIN, INSTRUCTOR, STAFF) with standard permissions.
+**Description:** Insert default roles (ADMIN, INSTRUCTOR, STAFF) with standard permissions.
 
 **SQL Content:**
 
@@ -329,8 +325,7 @@ COMMIT;
 **Version Enforcement:** YES  
 **License Middleware:** N/A (infrastructure)
 
-**Description:**
-Update schema_metadata.schema_version from 1.0.0 to 1.1.0 after migration.
+**Description:** Update schema_metadata.schema_version from 1.0.0 to 1.1.0 after migration.
 
 **Content:**  
 Already included in INFRA-002. No separate task needed.
@@ -346,8 +341,7 @@ Already included in INFRA-002. No separate task needed.
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Add JWT_SECRET to .env.example for developers.
+**Description:** Add JWT_SECRET to .env.example for developers.
 
 **Content:**
 
@@ -388,26 +382,22 @@ These tasks create pure business logic (no HTTP, no DB instantiation outside of 
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Export `hashPassword()` and `verifyPassword()` functions using bcrypt.
+**Description:** Export `hashPassword()` and `verifyPassword()` functions using bcrypt.
 
 **Pseudo-code:**
 
 ```typescript
-import bcrypt from 'bcrypt'
+import bcrypt from "bcrypt";
 
 export async function hashPassword(password: string): Promise<string> {
   if (!password || password.length < 8 || password.length > 256) {
-    throw new Error('Invalid password length')
+    throw new Error("Invalid password length");
   }
-  return bcrypt.hash(password, 12)
+  return bcrypt.hash(password, 12);
 }
 
-export async function verifyPassword(
-  password: string,
-  hash: string
-): Promise<boolean> {
-  return bcrypt.compare(password, hash)
+export async function verifyPassword(password: string, hash: string): Promise<boolean> {
+  return bcrypt.compare(password, hash);
 }
 ```
 
@@ -431,34 +421,27 @@ export async function verifyPassword(
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Export `signJWT()` and `verifyJWT()` functions with JWTClaims interface.
+**Description:** Export `signJWT()` and `verifyJWT()` functions with JWTClaims interface.
 
 **Interface:**
 
 ```typescript
 export interface JWTClaims {
-  scope: 'MMC' | 'BACKOFFICE' | 'FRONTOFFICE'
-  workspace_id?: string
-  user_id: string
-  role?: string
-  token_version: number
-  schema_version?: string
-  product_version?: string
-  division_id?: string
-  subscription_status?: string
-  issued_at: string
-  expires_at: string
+  scope: "MMC" | "BACKOFFICE" | "FRONTOFFICE";
+  workspace_id?: string;
+  user_id: string;
+  role?: string;
+  token_version: number;
+  schema_version?: string;
+  product_version?: string;
+  division_id?: string;
+  subscription_status?: string;
+  issued_at: string;
+  expires_at: string;
 }
 
-export async function signJWT(
-  claims: JWTClaims,
-  secret: string
-): Promise<string>
-export async function verifyJWT(
-  token: string,
-  secret: string
-): Promise<JWTClaims>
+export async function signJWT(claims: JWTClaims, secret: string): Promise<string>;
+export async function verifyJWT(token: string, secret: string): Promise<JWTClaims>;
 ```
 
 **Acceptance Criteria:**
@@ -481,8 +464,8 @@ export async function verifyJWT(
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Export `evaluatePermission()` function for backend endpoints to check user permissions.
+**Description:** Export `evaluatePermission()` function for backend endpoints to check user
+permissions.
 
 **Pseudo-code:**
 
@@ -526,43 +509,42 @@ export async function evaluatePermission(
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Export TypeScript interfaces for auth types.
+**Description:** Export TypeScript interfaces for auth types.
 
 **Content:**
 
 ```typescript
 export interface AuthenticatedUser {
-  id: string
-  email: string
-  role: 'ADMIN' | 'STAFF' | 'INSTRUCTOR' | 'STUDENT'
-  workspace_id?: string
-  division_id?: string
-  token_version: number
+  id: string;
+  email: string;
+  role: "ADMIN" | "STAFF" | "INSTRUCTOR" | "STUDENT";
+  workspace_id?: string;
+  division_id?: string;
+  token_version: number;
 }
 
 export interface LoginRequest {
-  email: string
-  password: string
+  email: string;
+  password: string;
 }
 
 export interface LoginResponse {
-  token: string
-  expires_in: number
+  token: string;
+  expires_in: number;
   user: {
-    id: string
-    email: string
-    role: string
-  }
+    id: string;
+    email: string;
+    role: string;
+  };
 }
 
 export interface ErrorResponse {
-  success: false
-  data: null
+  success: false;
+  data: null;
   error: {
-    code: string
-    message: string
-  }
+    code: string;
+    message: string;
+  };
 }
 
 // etc.
@@ -592,19 +574,18 @@ These tasks create HTTP routes, middleware, and transaction wrapping.
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Create middleware that extracts or generates correlation ID.
+**Description:** Create middleware that extracts or generates correlation ID.
 
 **Pseudo-code:**
 
 ```typescript
 export function correlationIdMiddleware() {
   return async (c: Context, next: Next) => {
-    const correlationId = c.req.header('x-correlation-id') || generateUUID()
-    c.set('correlation_id', correlationId)
-    c.header('x-correlation-id', correlationId)
-    await next()
-  }
+    const correlationId = c.req.header("x-correlation-id") || generateUUID();
+    c.set("correlation_id", correlationId);
+    c.header("x-correlation-id", correlationId);
+    await next();
+  };
 }
 ```
 
@@ -627,8 +608,7 @@ export function correlationIdMiddleware() {
 **Version Enforcement:** YES (validates schema_version, product_version)  
 **License Middleware:** YES (validates license status)
 
-**Description:**
-Create middleware that validates JWT on protected routes:
+**Description:** Create middleware that validates JWT on protected routes:
 
 1. Extract token from Authorization header
 2. Verify signature
@@ -644,59 +624,51 @@ Create middleware that validates JWT on protected routes:
 ```typescript
 export function jwtValidationMiddleware() {
   return async (c: Context, next: Next) => {
-    const authHeader = c.req.header('authorization')
-    if (!authHeader?.startsWith('Bearer ')) {
-      throw UnauthorizedError('No token provided')
+    const authHeader = c.req.header("authorization");
+    if (!authHeader?.startsWith("Bearer ")) {
+      throw UnauthorizedError("No token provided");
     }
 
-    const token = authHeader.slice(7)
-    const claims = await verifyJWT(token, JWT_SECRET)
+    const token = authHeader.slice(7);
+    const claims = await verifyJWT(token, JWT_SECRET);
 
     // Validate expiration
     if (new Date() > new Date(claims.expires_at)) {
-      await auditLog({ event_type: 'token_invalid', reason: 'expired' })
-      throw UnauthorizedError('Token expired')
+      await auditLog({ event_type: "token_invalid", reason: "expired" });
+      throw UnauthorizedError("Token expired");
     }
 
     // Validate workspace_id (for tenant tokens)
-    if (claims.scope !== 'MMC') {
-      if (claims.workspace_id !== c.get('workspace_id')) {
-        await auditLog({ event_type: 'workspace_mismatch' })
-        throw UnauthorizedError('Token workspace mismatch')
+    if (claims.scope !== "MMC") {
+      if (claims.workspace_id !== c.get("workspace_id")) {
+        await auditLog({ event_type: "workspace_mismatch" });
+        throw UnauthorizedError("Token workspace mismatch");
       }
     }
 
     // Validate token_version
-    const user = await db
-      .select()
-      .from(users)
-      .where(eq(users.id, claims.user_id))
+    const user = await db.select().from(users).where(eq(users.id, claims.user_id));
     if (!user.length || user[0].token_version !== claims.token_version) {
-      await auditLog({ event_type: 'token_version_mismatch' })
-      throw UnauthorizedError('Token invalidated')
+      await auditLog({ event_type: "token_version_mismatch" });
+      throw UnauthorizedError("Token invalidated");
     }
 
     // Validate schema_version
-    if (claims.schema_version !== c.get('schema_version')) {
-      throw UpgradeRequiredError('Schema version mismatch')
+    if (claims.schema_version !== c.get("schema_version")) {
+      throw UpgradeRequiredError("Schema version mismatch");
     }
 
     // Validate product_version
-    if (
-      !isProductVersionCompatible(
-        claims.product_version,
-        license.product_version
-      )
-    ) {
-      throw UpgradeRequiredError('Product version incompatible')
+    if (!isProductVersionCompatible(claims.product_version, license.product_version)) {
+      throw UpgradeRequiredError("Product version incompatible");
     }
 
-    c.set('user_id', claims.user_id)
-    c.set('user_scope', claims.scope)
-    c.set('user_claims', claims)
+    c.set("user_id", claims.user_id);
+    c.set("user_scope", claims.scope);
+    c.set("user_claims", claims);
 
-    await next()
-  }
+    await next();
+  };
 }
 ```
 
@@ -722,64 +694,60 @@ export function jwtValidationMiddleware() {
 **Version Enforcement:** N/A (MMC, master DB only)  
 **License Middleware:** N/A (N/A for MMC)
 
-**Description:**
-Implement `POST /mmc/auth/login` endpoint for platform admin login.
+**Description:** Implement `POST /mmc/auth/login` endpoint for platform admin login.
 
 **Route Handler:**
 
 ```typescript
-router.post('/mmc/auth/login', async (c) => {
-  const { email, password } = await c.req.json()
+router.post("/mmc/auth/login", async (c) => {
+  const { email, password } = await c.req.json();
 
   // Input validation
-  validateEmail(email)
-  validatePassword(password)
+  validateEmail(email);
+  validatePassword(password);
 
   // Transaction: REPEATABLE READ, row lock
-  return dbMaster.transaction('repeatable_read', async (trx) => {
+  return dbMaster.transaction("repeatable_read", async (trx) => {
     // 1. Fetch user with row lock
     const user = await trx
       .select()
       .from(mmc_users)
       .where(eq(mmc_users.email, email))
-      .for('update')
-      .limit(1)
+      .for("update")
+      .limit(1);
 
     if (!user.length) {
       // Security: hash dummy password (constant time)
-      await hashPassword('')
-      throw InvalidCredentialsError()
+      await hashPassword("");
+      throw InvalidCredentialsError();
     }
 
     // 2. Verify password
-    const match = await verifyPassword(password, user[0].password_hash)
+    const match = await verifyPassword(password, user[0].password_hash);
     if (!match) {
-      throw InvalidCredentialsError()
+      throw InvalidCredentialsError();
     }
 
     // 3. Generate JWT
     const token = await signJWT({
-      scope: 'MMC',
+      scope: "MMC",
       user_id: user[0].id,
       role: user[0].role,
       token_version: user[0].token_version,
       issued_at: new Date().toISOString(),
       expires_at: new Date(Date.now() + 15 * 60 * 1000).toISOString(),
-    })
+    });
 
     // 4. Update last_login
-    await trx
-      .update(mmc_users)
-      .set({ last_login: new Date() })
-      .where(eq(mmc_users.id, user[0].id))
+    await trx.update(mmc_users).set({ last_login: new Date() }).where(eq(mmc_users.id, user[0].id));
 
     // 5. Log success
     logger.info({
-      event_type: 'login_success',
+      event_type: "login_success",
       user_id: user[0].id,
-      correlation_id: c.get('correlation_id'),
-      result: 'SUCCESS',
-    })
+      correlation_id: c.get("correlation_id"),
+      result: "SUCCESS",
+    });
 
     return c.json(
       {
@@ -791,10 +759,10 @@ router.post('/mmc/auth/login', async (c) => {
         },
         error: null,
       },
-      200
-    )
-  })
-})
+      200,
+    );
+  });
+});
 ```
 
 **Acceptance Criteria:**
@@ -820,8 +788,7 @@ router.post('/mmc/auth/login', async (c) => {
 **Version Enforcement:** YES (schema_version, product_version in token)  
 **License Middleware:** YES (ACTIVE required)
 
-**Description:**
-Implement `POST /backoffice/auth/login` endpoint for staff/instructor login.
+**Description:** Implement `POST /backoffice/auth/login` endpoint for staff/instructor login.
 
 **Route Handler:** (See plan.md for detailed implementation)
 
@@ -854,8 +821,7 @@ Implement `POST /backoffice/auth/login` endpoint for staff/instructor login.
 **Version Enforcement:** YES  
 **License Middleware:** YES
 
-**Description:**
-Implement `POST /frontoffice/auth/student-login` endpoint for student login.
+**Description:** Implement `POST /frontoffice/auth/student-login` endpoint for student login.
 
 **Key Differences from Backoffice:**
 
@@ -916,55 +882,50 @@ router.post('/frontoffice/auth/student-login', async (c) => {
 **Version Enforcement:** N/A  
 **License Middleware:** YES (for tenant routes)
 
-**Description:**
-Implement logout endpoints that invalidate the current token by incrementing token_version.
+**Description:** Implement logout endpoints that invalidate the current token by incrementing
+token_version.
 
 **Route Handler:**
 
 ```typescript
-router.post('/backoffice/auth/logout', jwtValidationMiddleware, async (c) => {
-  const userId = c.get('user_id')
-  const correlationId = c.get('correlation_id')
+router.post("/backoffice/auth/logout", jwtValidationMiddleware, async (c) => {
+  const userId = c.get("user_id");
+  const correlationId = c.get("correlation_id");
 
-  return dbTenant.transaction('repeatable_read', async (trx) => {
+  return dbTenant.transaction("repeatable_read", async (trx) => {
     // 1. Fetch user with row lock
-    const user = await trx
-      .select()
-      .from(users)
-      .where(eq(users.id, userId))
-      .for('update')
-      .limit(1)
+    const user = await trx.select().from(users).where(eq(users.id, userId)).for("update").limit(1);
 
     if (!user.length) {
-      throw UnauthorizedError('User not found')
+      throw UnauthorizedError("User not found");
     }
 
     // 2. Increment token_version (invalidates all tokens)
     await trx
       .update(users)
       .set({ token_version: sql`token_version + 1` })
-      .where(eq(users.id, userId))
+      .where(eq(users.id, userId));
 
     // 3. Log logout
     await trx.insert(audit_logs).values({
-      event_type: 'token_invalidation',
+      event_type: "token_invalidation",
       user_id: userId,
       workspace_id: workspaceId,
       correlation_id: correlationId,
-      result: 'SUCCESS',
+      result: "SUCCESS",
       timestamp: new Date(),
-    })
-  })
+    });
+  });
 
   return c.json(
     {
       success: true,
-      data: { message: 'Logged out' },
+      data: { message: "Logged out" },
       error: null,
     },
-    200
-  )
-})
+    200,
+  );
+});
 ```
 
 **Acceptance Criteria:**
@@ -992,8 +953,8 @@ router.post('/backoffice/auth/logout', jwtValidationMiddleware, async (c) => {
 **Version Enforcement:** N/A  
 **License Middleware:** YES (for tenant routes)
 
-**Description:**
-Implement logout-all endpoints that invalidate ALL tokens for a user (admin + self-service).
+**Description:** Implement logout-all endpoints that invalidate ALL tokens for a user (admin +
+self-service).
 
 **Route Handler:** (Same as LOGOUT, but called via admin API or authenticated endpoint)
 
@@ -1017,8 +978,7 @@ Implement logout-all endpoints that invalidate ALL tokens for a user (admin + se
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Create error handler that converts all thrown errors to standard error contract.
+**Description:** Create error handler that converts all thrown errors to standard error contract.
 
 **Error Mapping:**
 
@@ -1066,8 +1026,7 @@ InternalError → 500 + INTERNAL_ERROR
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Create protected router composition that applies full middleware stack in order:
+**Description:** Create protected router composition that applies full middleware stack in order:
 
 ```typescript
 // apps/api/src/routes/index.ts
@@ -1077,15 +1036,15 @@ const protectedRouter = new Hono()
   .use(correlationIdMiddleware())
   .use(tenantResolverMiddleware()) // Skip for MMC
   .use(licenseEnforcementMiddleware()) // Skip for MMC login
-  .use(schemaValidationMiddleware()) // Skip for MMC
+  .use(schemaValidationMiddleware()); // Skip for MMC
 
 // Add protected routes to routers
 function addProtectedRoutes(app: Hono) {
   // Backoffice routes
-  app.route('/backoffice', backofficeRouter.bind(protectedRouter))
+  app.route("/backoffice", backofficeRouter.bind(protectedRouter));
 
   // Frontoffice routes
-  app.route('/frontoffice', frontofficeRouter.bind(protectedRouter))
+  app.route("/frontoffice", frontofficeRouter.bind(protectedRouter));
 }
 ```
 
@@ -1109,8 +1068,7 @@ function addProtectedRoutes(app: Hono) {
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Create Zod schemas for login/logout request validation.
+**Description:** Create Zod schemas for login/logout request validation.
 
 **Schemas:**
 
@@ -1118,9 +1076,9 @@ Create Zod schemas for login/logout request validation.
 export const loginSchema = z.object({
   email: z.string().email().max(256),
   password: z.string().min(8).max(256),
-})
+});
 
-export const logoutSchema = z.object({}) // No body required
+export const logoutSchema = z.object({}); // No body required
 ```
 
 **Acceptance Criteria:**
@@ -1142,20 +1100,20 @@ export const logoutSchema = z.object({}) // No body required
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Create rate limiter for login endpoints (prevent brute force).
+**Description:** Create rate limiter for login endpoints (prevent brute force).
 
 **Configuration:**
 
 ```typescript
 export const loginRateLimiter = createRateLimiter({
-  key: (c) => c.req.header('x-forwarded-for') || 'unknown',
+  key: (c) => c.req.header("x-forwarded-for") || "unknown",
   limit: 20, // attempts
   window: 15 * 60 * 1000, // 15 minutes
-})
+});
 ```
 
-**Note:** Per-email rate limiting happens in-database (via login_attempts table). IP-based rate limiting is optional (can be at gateway level).
+**Note:** Per-email rate limiting happens in-database (via login_attempts table). IP-based rate
+limiting is optional (can be at gateway level).
 
 **Acceptance Criteria:**
 
@@ -1181,45 +1139,44 @@ These tasks create UI state management and API integration (JS only, no HTML/CSS
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Create Pinia store for authentication state management.
+**Description:** Create Pinia store for authentication state management.
 
 **Store Actions:**
 
 ```typescript
-export const useAuthStore = defineStore('auth', () => {
-  const token = ref<string | null>(null)
-  const user = ref<AuthN | null>(null)
+export const useAuthStore = defineStore("auth", () => {
+  const token = ref<string | null>(null);
+  const user = ref<AuthN | null>(null);
 
   const login = async (email: string, password: string) => {
-    const response = await fetch('/frontoffice/auth/student-login', {
-      method: 'POST',
+    const response = await fetch("/frontoffice/auth/student-login", {
+      method: "POST",
       body: JSON.stringify({ email, password }),
-    })
+    });
 
-    if (!response.ok) throw new Error(await response.text())
+    if (!response.ok) throw new Error(await response.text());
 
-    const data = await response.json()
-    token.value = data.data.token // Store in memory ONLY
-    user.value = data.data.user
-  }
+    const data = await response.json();
+    token.value = data.data.token; // Store in memory ONLY
+    user.value = data.data.user;
+  };
 
   const logout = async () => {
-    if (!token.value) return
-    await fetch('/frontoffice/auth/logout', {
-      method: 'POST',
+    if (!token.value) return;
+    await fetch("/frontoffice/auth/logout", {
+      method: "POST",
       headers: { Authorization: `Bearer ${token.value}` },
-    })
-    token.value = null
-    user.value = null
-  }
+    });
+    token.value = null;
+    user.value = null;
+  };
 
   const getAuthHeader = () => {
-    return token.value ? { Authorization: `Bearer ${token.value}` } : {}
-  }
+    return token.value ? { Authorization: `Bearer ${token.value}` } : {};
+  };
 
-  return { token, user, login, logout, getAuthHeader }
-})
+  return { token, user, login, logout, getAuthHeader };
+});
 ```
 
 **Acceptance Criteria:**
@@ -1242,34 +1199,34 @@ export const useAuthStore = defineStore('auth', () => {
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Create HTTP client that automatically adds Authorization header and handles auth errors.
+**Description:** Create HTTP client that automatically adds Authorization header and handles auth
+errors.
 
 **Interceptor Logic:**
 
 ```typescript
 export function createAuthenticatedClient() {
-  const authStore = useAuthStore()
+  const authStore = useAuthStore();
 
   return new FetchClient({
     baseUrl: import.meta.env.VITE_API_BASE_URL,
     async onRequest(request) {
-      const headers = authStore.getAuthHeader()
-      return { ...request, headers: { ...request.headers, ...headers } }
+      const headers = authStore.getAuthHeader();
+      return { ...request, headers: { ...request.headers, ...headers } };
     },
     async onResponseError(response) {
       if (response.status === 401) {
         // Token invalid/expired → force logout
-        authStore.logout()
-        window.location.href = '/login'
+        authStore.logout();
+        window.location.href = "/login";
       }
       if (response.status === 426) {
         // Schema version mismatch → force logout
-        authStore.logout()
-        window.location.href = '/login?reason=upgrade_required'
+        authStore.logout();
+        window.location.href = "/login?reason=upgrade_required";
       }
     },
-  })
+  });
 }
 ```
 
@@ -1292,8 +1249,7 @@ export function createAuthenticatedClient() {
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Create login form component using shadcn-vue + Tailwind v4.
+**Description:** Create login form component using shadcn-vue + Tailwind v4.
 
 **Note:** Logic-free component - only collect email/password, call auth store.
 
@@ -1304,12 +1260,7 @@ Create login form component using shadcn-vue + Tailwind v4.
   <div class="login-container">
     <form @submit.prevent="handleLogin">
       <input v-model="email" type="email" placeholder="Email" required />
-      <input
-        v-model="password"
-        type="password"
-        placeholder="Password"
-        required
-      />
+      <input v-model="password" type="password" placeholder="Password" required />
       <button type="submit" :disabled="loading">Login</button>
       <p v-if="error" class="error">{{ error }}</p>
     </form>
@@ -1317,27 +1268,27 @@ Create login form component using shadcn-vue + Tailwind v4.
 </template>
 
 <script setup>
-import { ref } from 'vue'
-import { useAuthStore } from '@/stores/auth'
+import { ref } from "vue";
+import { useAuthStore } from "@/stores/auth";
 
-const email = ref('')
-const password = ref('')
-const loading = ref(false)
-const error = ref('')
-const authStore = useAuthStore()
+const email = ref("");
+const password = ref("");
+const loading = ref(false);
+const error = ref("");
+const authStore = useAuthStore();
 
 const handleLogin = async () => {
-  loading.value = true
-  error.value = ''
+  loading.value = true;
+  error.value = "";
   try {
-    await authStore.login(email.value, password.value)
+    await authStore.login(email.value, password.value);
     // Redirect happens via router guard
   } catch (err) {
-    error.value = err.message
+    error.value = err.message;
   } finally {
-    loading.value = false
+    loading.value = false;
   }
-}
+};
 </script>
 ```
 
@@ -1362,28 +1313,27 @@ const handleLogin = async () => {
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Create router guards to protect routes from unauthenticated access.
+**Description:** Create router guards to protect routes from unauthenticated access.
 
 **Guard Logic:**
 
 ```typescript
 export function setupAuthGuard(router: Router) {
   router.beforeEach((to, from, next) => {
-    const authStore = useAuthStore()
+    const authStore = useAuthStore();
 
     // Public routes (login, about, etc.)
-    if (['login', 'public'].includes(to.name)) {
-      return next()
+    if (["login", "public"].includes(to.name)) {
+      return next();
     }
 
     // Protected routes require auth
     if (!authStore.token) {
-      return next({ name: 'login', query: { redirect: to.fullPath } })
+      return next({ name: "login", query: { redirect: to.fullPath } });
     }
 
-    next()
-  })
+    next();
+  });
 }
 ```
 
@@ -1412,8 +1362,7 @@ These tasks add logging, metrics, and observability infrastructure.
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Create auth-specific logger that emits structured JSON events with proper schema.
+**Description:** Create auth-specific logger that emits structured JSON events with proper schema.
 
 **Logger:**
 
@@ -1421,9 +1370,9 @@ Create auth-specific logger that emits structured JSON events with proper schema
 export function logAuthEvent(event: AuthEvent) {
   const log = {
     timestamp: new Date().toISOString(),
-    level: event.result === 'SUCCESS' ? 'info' : 'warn',
-    service: 'auth',
-    version: '1.0.0',
+    level: event.result === "SUCCESS" ? "info" : "warn",
+    service: "auth",
+    version: "1.0.0",
     correlation_id: event.correlation_id,
     workspace_id: event.workspace_id,
     workspace_slug: event.workspace_slug,
@@ -1435,9 +1384,9 @@ export function logAuthEvent(event: AuthEvent) {
     result: event.result,
     details: event.details,
     duration_ms: event.duration_ms,
-  }
+  };
 
-  logger.log(log) // Pino structured logger
+  logger.log(log); // Pino structured logger
 }
 ```
 
@@ -1461,38 +1410,37 @@ export function logAuthEvent(event: AuthEvent) {
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Create Prometheus metrics for authentication critical path.
+**Description:** Create Prometheus metrics for authentication critical path.
 
 **Metrics:**
 
 ```typescript
 export const authMetrics = {
   loginAttempts: new Counter({
-    name: 'auth_login_attempts_total',
-    help: 'Total login attempts',
-    labelNames: ['result', 'workspace'],
+    name: "auth_login_attempts_total",
+    help: "Total login attempts",
+    labelNames: ["result", "workspace"],
   }),
 
   loginDuration: new Histogram({
-    name: 'auth_login_duration_seconds',
-    help: 'Login endpoint duration',
-    labelNames: ['workspace'],
+    name: "auth_login_duration_seconds",
+    help: "Login endpoint duration",
+    labelNames: ["workspace"],
     buckets: [0.1, 0.5, 1, 2, 5],
   }),
 
   tokenValidation: new Counter({
-    name: 'auth_token_validation_total',
-    help: 'JWT validations',
-    labelNames: ['result', 'workspace'],
+    name: "auth_token_validation_total",
+    help: "JWT validations",
+    labelNames: ["result", "workspace"],
   }),
 
   accountLocks: new Counter({
-    name: 'auth_account_lock_total',
-    help: 'Account locks triggered',
-    labelNames: ['workspace'],
+    name: "auth_account_lock_total",
+    help: "Account locks triggered",
+    labelNames: ["workspace"],
   }),
-}
+};
 ```
 
 **Acceptance Criteria:**
@@ -1515,26 +1463,25 @@ export const authMetrics = {
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Create middleware that measures request duration and emits metrics/logs.
+**Description:** Create middleware that measures request duration and emits metrics/logs.
 
 **Middleware:**
 
 ```typescript
 export function timingMiddleware() {
   return async (c: Context, next: Next) => {
-    const start = performance.now()
+    const start = performance.now();
 
-    await next()
+    await next();
 
-    const duration = performance.now() - start
-    c.header('x-duration-ms', duration.toString())
+    const duration = performance.now() - start;
+    c.header("x-duration-ms", duration.toString());
 
     authMetrics.loginDuration.observe(
-      { workspace: c.get('workspace_id') || 'mmc' },
-      duration / 1000
-    )
-  }
+      { workspace: c.get("workspace_id") || "mmc" },
+      duration / 1000,
+    );
+  };
 }
 ```
 
@@ -1562,8 +1509,7 @@ These tasks create unit and integration tests.
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Test password hashing and verification functions.
+**Description:** Test password hashing and verification functions.
 
 **Test Cases:**
 
@@ -1593,8 +1539,7 @@ Test password hashing and verification functions.
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Test JWT signing and verification.
+**Description:** Test JWT signing and verification.
 
 **Test Cases:**
 
@@ -1624,8 +1569,7 @@ Test JWT signing and verification.
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Test permission evaluation logic (mocked database).
+**Description:** Test permission evaluation logic (mocked database).
 
 **Test Cases:**
 
@@ -1654,8 +1598,7 @@ Test permission evaluation logic (mocked database).
 **Version Enforcement:** YES (tests include schema_version)  
 **License Middleware:** YES (tests include license status)
 
-**Description:**
-Test complete login flow end-to-end.
+**Description:** Test complete login flow end-to-end.
 
 **Test Scenarios:**
 
@@ -1689,8 +1632,7 @@ Test complete login flow end-to-end.
 **Version Enforcement:** N/A  
 **License Middleware:** YES
 
-**Description:**
-Test logout and logout-all flows.
+**Description:** Test logout and logout-all flows.
 
 **Test Scenarios:**
 
@@ -1720,8 +1662,7 @@ Test logout and logout-all flows.
 **Version Enforcement:** N/A  
 **License Middleware:** YES
 
-**Description:**
-Test concurrent login and account lock race conditions.
+**Description:** Test concurrent login and account lock race conditions.
 
 **Test Scenarios:**
 
@@ -1752,8 +1693,7 @@ Test concurrent login and account lock race conditions.
 **Version Enforcement:** N/A  
 **License Middleware:** YES
 
-**Description:**
-Test error response contract compliance.
+**Description:** Test error response contract compliance.
 
 **Test Scenarios:**
 
@@ -1786,8 +1726,7 @@ Test error response contract compliance.
 **Version Enforcement:** N/A  
 **License Middleware:** YES
 
-**Description:**
-Test audit log events are generated.
+**Description:** Test audit log events are generated.
 
 **Test Scenarios:**
 
@@ -1821,8 +1760,7 @@ Test audit log events are generated.
 **Version Enforcement:** YES  
 **License Middleware:** YES
 
-**Description:**
-Test schema and product version enforcement.
+**Description:** Test schema and product version enforcement.
 
 **Test Scenarios:**
 
@@ -1852,8 +1790,7 @@ Test schema and product version enforcement.
 **Version Enforcement:** N/A  
 **License Middleware:** YES
 
-**Description:**
-Test workspace isolation enforcement (tokens cannot cross workspaces).
+**Description:** Test workspace isolation enforcement (tokens cannot cross workspaces).
 
 **Test Scenarios:**
 
@@ -1882,8 +1819,7 @@ Test workspace isolation enforcement (tokens cannot cross workspaces).
 **Version Enforcement:** N/A  
 **License Middleware:** YES
 
-**Description:**
-Test student division isolation (students cannot access other divisions).
+**Description:** Test student division isolation (students cannot access other divisions).
 
 **Test Scenarios:**
 
@@ -1893,7 +1829,8 @@ Test student division isolation (students cannot access other divisions).
 ✓ Different Division: Student accesses exams in different division → 403
 ```
 
-**Note:** Actual route handlers implement division check (future task). This tests route-level enforcement exists.
+**Note:** Actual route handlers implement division check (future task). This tests route-level
+enforcement exists.
 
 **Acceptance Criteria:**
 
@@ -1917,35 +1854,30 @@ These tasks add security validations and hardening.
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Create middleware that validates user has required permission.
+**Description:** Create middleware that validates user has required permission.
 
 **Middleware:**
 
 ```typescript
 export function requirePermission(permission: string) {
   return async (c: Context, next: Next) => {
-    const userId = c.get('user_id')
-    if (!userId) throw UnauthorizedError('Not authenticated')
+    const userId = c.get("user_id");
+    if (!userId) throw UnauthorizedError("Not authenticated");
 
-    const allowed = await evaluatePermission(userId, permission, db)
+    const allowed = await evaluatePermission(userId, permission, db);
     if (!allowed) {
-      throw ForbiddenError('Permission denied')
+      throw ForbiddenError("Permission denied");
     }
 
-    await next()
-  }
+    await next();
+  };
 }
 ```
 
 **Usage:**
 
 ```typescript
-router.delete(
-  '/exams/:id',
-  requirePermission('exams.delete'),
-  deleteExamHandler
-)
+router.delete("/exams/:id", requirePermission("exams.delete"), deleteExamHandler);
 ```
 
 **Acceptance Criteria:**
@@ -1966,11 +1898,9 @@ router.delete(
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Ensure login endpoint doesn't reveal if email exists (timing attack).
+**Description:** Ensure login endpoint doesn't reveal if email exists (timing attack).
 
-**Implementation:**
-Already implemented in login route (DOMAIN-001 prerequisite):
+**Implementation:** Already implemented in login route (DOMAIN-001 prerequisite):
 
 - If user not found → hash dummy password (costs ~100ms)
 - Return same error message as password mismatch
@@ -1995,8 +1925,7 @@ Already implemented in login route (DOMAIN-001 prerequisite):
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Verify all DB queries use parameterized statements (ORM protection).
+**Description:** Verify all DB queries use parameterized statements (ORM protection).
 
 **Verification:**
 
@@ -2021,8 +1950,7 @@ Verify all DB queries use parameterized statements (ORM protection).
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Ensure frontend doesn't render user input unsafely.
+**Description:** Ensure frontend doesn't render user input unsafely.
 
 **Vue Template Safe:**
 
@@ -2051,19 +1979,18 @@ Ensure frontend doesn't render user input unsafely.
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Configure CORS to allow only trusted origins.
+**Description:** Configure CORS to allow only trusted origins.
 
 **Configuration:**
 
 ```typescript
 export function corsMiddleware() {
   return cors({
-    origin: process.env.ALLOWED_ORIGINS?.split(',') || 'http://localhost:3000',
+    origin: process.env.ALLOWED_ORIGINS?.split(",") || "http://localhost:3000",
     credentials: true,
-    methods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowedHeaders: ['content-type', 'authorization', 'x-correlation-id'],
-  })
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["content-type", "authorization", "x-correlation-id"],
+  });
 }
 ```
 
@@ -2089,8 +2016,7 @@ export function corsMiddleware() {
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Generate cryptographically secure JWT secret for production.
+**Description:** Generate cryptographically secure JWT secret for production.
 
 **Command:**
 
@@ -2118,8 +2044,7 @@ openssl rand -base64 32
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Ensure all servers have NTP running and clock is synced.
+**Description:** Ensure all servers have NTP running and clock is synced.
 
 **Check:**
 
@@ -2146,8 +2071,7 @@ timedatectl  # Show time sync status (systemd)
 **Version Enforcement:** N/A  
 **License Middleware:** N/A
 
-**Description:**
-Document migration execution order and rollback procedure.
+**Description:** Document migration execution order and rollback procedure.
 
 **Steps:**
 

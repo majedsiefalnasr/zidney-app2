@@ -1,14 +1,16 @@
 # Plan Report — Infra Governance
 
-**Step:** 3 — Plan
-**Timestamp:** 2026-03-05T00:03:00.000Z
-**Status:** COMPLETE
+**Step:** 3 — Plan **Timestamp:** 2026-03-05T00:03:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
-The technical plan for the Infra Governance stage has been completed and validated. Research identified 11 pre-existing gaps against the 12 functional requirements. The plan produces 7 targeted work items (T001–T007) that are additive, backward-compatible, and do not modify any existing passing tests or architectural runtime behavior. Guardian validation returned **VERDICT: PASS** from both the Architecture Checker and (N/A for this tooling stage) the API Designer.
+The technical plan for the Infra Governance stage has been completed and validated. Research
+identified 11 pre-existing gaps against the 12 functional requirements. The plan produces 7 targeted
+work items (T001–T007) that are additive, backward-compatible, and do not modify any existing
+passing tests or architectural runtime behavior. Guardian validation returned **VERDICT: PASS** from
+both the Architecture Checker and (N/A for this tooling stage) the API Designer.
 
 ---
 
@@ -80,7 +82,9 @@ Not applicable — this stage introduces no database writes.
 
 ## Idempotency Strategy
 
-Not applicable — no API endpoints. The pre-commit scripts (`ai-guard.ts`, `infra-audit.ts --quick`) must be idempotent (re-running produces the same result without side effects). This is verified in T006.
+Not applicable — no API endpoints. The pre-commit scripts (`ai-guard.ts`, `infra-audit.ts --quick`)
+must be idempotent (re-running produces the same result without side effects). This is verified in
+T006.
 
 ---
 
@@ -91,14 +95,18 @@ Not applicable — no API endpoints. The pre-commit scripts (`ai-guard.ts`, `inf
 | Zidney Architecture Checker | ✅ PASS       | No architectural violations; 2 high-priority recommendations (coverage gap for API, duplicate test runs) |
 | Zidney API Designer         | ✅ N/A / PASS | No API endpoints introduced — not applicable                                                             |
 
-**Key recommendation accepted:** T006 implementation must explicitly guard `mkdirSync` blocks (lines ~41–57 of `infra-audit.ts`) with `if (!QUICK_MODE)` — not just `writeFileSync` calls.
+**Key recommendation accepted:** T006 implementation must explicitly guard `mkdirSync` blocks (lines
+~41–57 of `infra-audit.ts`) with `if (!QUICK_MODE)` — not just `writeFileSync` calls.
 
 ---
 
 ## Open Risks
 
-- **Coverage gap for `apps/api`** — the `test:unit` script excludes `apps/api` because its vitest config mixes unit and integration tests. API backend coverage is not threshold-enforced in this stage. A follow-on stage must address this.
-- **wait-on may not be in devDependencies** — T007 references `bunx wait-on`; this should be added to devDependencies and installed via lockfile before use.
+- **Coverage gap for `apps/api`** — the `test:unit` script excludes `apps/api` because its vitest
+  config mixes unit and integration tests. API backend coverage is not threshold-enforced in this
+  stage. A follow-on stage must address this.
+- **wait-on may not be in devDependencies** — T007 references `bunx wait-on`; this should be added
+  to devDependencies and installed via lockfile before use.
 
 ---
 

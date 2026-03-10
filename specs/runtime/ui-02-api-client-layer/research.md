@@ -1,15 +1,15 @@
 # Research: API Client Layer
 
-**Feature**: UI-02 API Client Layer
-**Date**: 2026-03-01
-**Status**: Complete — all unknowns resolved
+**Feature**: UI-02 API Client Layer **Date**: 2026-03-01 **Status**: Complete — all unknowns
+resolved
 
 ---
 
 ## R-1: Shared Package Location
 
-**Decision**: `packages/api-client` — new standalone package
-**Rationale**: HTTP client is framework-agnostic (no Vue dependency). Existing `packages/ui-system` is tightly coupled to Vue 3 + shadcn-vue components. Separate package:
+**Decision**: `packages/api-client` — new standalone package **Rationale**: HTTP client is
+framework-agnostic (no Vue dependency). Existing `packages/ui-system` is tightly coupled to Vue 3 +
+shadcn-vue components. Separate package:
 
 - Keeps dependency graph clean (zero deps)
 - Can be independently versioned
@@ -18,8 +18,10 @@
 
 **Alternatives considered**:
 
-1. `packages/ui-system/src/core/api/` — rejected: pollutes Vue component package with HTTP infrastructure
-2. Inline in each app's `core/api/` (current state) — rejected: produces identical code duplication across 3 apps (confirmed: all three `client.ts` files are identical)
+1. `packages/ui-system/src/core/api/` — rejected: pollutes Vue component package with HTTP
+   infrastructure
+2. Inline in each app's `core/api/` (current state) — rejected: produces identical code duplication
+   across 3 apps (confirmed: all three `client.ts` files are identical)
 
 ---
 
@@ -29,7 +31,8 @@
 
 **Rationale**:
 
-- Current approach passes `fetchFn: typeof fetch` as parameter — insufficient for mocking response headers (e.g., `Retry-After`), abort behavior, and timeout simulation
+- Current approach passes `fetchFn: typeof fetch` as parameter — insufficient for mocking response
+  headers (e.g., `Retry-After`), abort behavior, and timeout simulation
 - Single method avoids over-abstraction; all HTTP semantics captured in request/response objects
 - Adapter owns: URL construction, body serialization, timeout enforcement, signal propagation
 - Client owns: interceptor pipeline, error normalization, auth refresh
@@ -38,12 +41,12 @@
 
 ```typescript
 interface AdapterRequest {
-  url: string
-  method: 'GET' | 'POST' | 'PUT' | 'PATCH' | 'DELETE'
-  headers: Record<string, string>
-  body?: string // Already JSON.stringify'd
-  signal?: AbortSignal
-  timeout: number // ms, 0 = no timeout
+  url: string;
+  method: "GET" | "POST" | "PUT" | "PATCH" | "DELETE";
+  headers: Record<string, string>;
+  body?: string; // Already JSON.stringify'd
+  signal?: AbortSignal;
+  timeout: number; // ms, 0 = no timeout
 }
 ```
 
@@ -51,50 +54,53 @@ interface AdapterRequest {
 
 ```typescript
 interface AdapterResponse {
-  status: number
-  headers: Record<string, string> // Flattened from Headers object
-  body: unknown // Already JSON.parsed
-  ok: boolean
+  status: number;
+  headers: Record<string, string>; // Flattened from Headers object
+  body: unknown; // Already JSON.parsed
+  ok: boolean;
 }
 ```
 
 **Alternatives considered**:
 
-1. Multi-method interface (`get()`, `post()`, etc.) — rejected: duplicates client's typed methods; adapter is transport-only
+1. Multi-method interface (`get()`, `post()`, etc.) — rejected: duplicates client's typed methods;
+   adapter is transport-only
 2. Wrapping `fetch` Response directly — rejected: leaks browser API; hard to mock in tests
-3. Axios-style interceptor chain on adapter — rejected: over-engineering; client handles interceptor logic
+3. Axios-style interceptor chain on adapter — rejected: over-engineering; client handles interceptor
+   logic
 
 ---
 
 ## R-3: Timeout Implementation Strategy
 
-**Decision**: Adapter-level timeout using `AbortController` with `AbortSignal.timeout()` where available, fallback to manual `setTimeout` + `abort()`
+**Decision**: Adapter-level timeout using `AbortController` with `AbortSignal.timeout()` where
+available, fallback to manual `setTimeout` + `abort()`
 
 **Rationale**:
 
-- `AbortSignal.timeout(ms)` is available in all modern browsers (Chrome 103+, Firefox 100+, Safari 16+)
+- `AbortSignal.timeout(ms)` is available in all modern browsers (Chrome 103+, Firefox 100+, Safari
+  16+)
 - Fallback ensures compatibility with older test environments
-- Both caller-provided `signal` and timeout signal combined via `AbortSignal.any()` (or manual combination)
+- Both caller-provided `signal` and timeout signal combined via `AbortSignal.any()` (or manual
+  combination)
 - Default: 30,000ms (30 seconds) per spec FR-024
 
 **Implementation approach**:
 
 ```typescript
-function createTimeoutSignal(
-  timeout: number,
-  userSignal?: AbortSignal
-): AbortSignal {
-  const signals: AbortSignal[] = []
-  if (timeout > 0) signals.push(AbortSignal.timeout(timeout))
-  if (userSignal) signals.push(userSignal)
-  return signals.length > 1 ? AbortSignal.any(signals) : signals[0]!
+function createTimeoutSignal(timeout: number, userSignal?: AbortSignal): AbortSignal {
+  const signals: AbortSignal[] = [];
+  if (timeout > 0) signals.push(AbortSignal.timeout(timeout));
+  if (userSignal) signals.push(userSignal);
+  return signals.length > 1 ? AbortSignal.any(signals) : signals[0]!;
 }
 ```
 
 **Alternatives considered**:
 
 1. `Promise.race` with timeout — rejected: doesn't abort the actual fetch; wastes resources
-2. Manual `setTimeout` only — rejected: `AbortSignal.timeout()` is cleaner and garbage-collects automatically
+2. Manual `setTimeout` only — rejected: `AbortSignal.timeout()` is cleaner and garbage-collects
+   automatically
 
 ---
 
@@ -113,37 +119,37 @@ function createTimeoutSignal(
 
 ```typescript
 interface AppError {
-  code: string
-  message: string
-  httpStatus: number
-  isNetworkError: boolean
-  retryAfter?: number // seconds, from Retry-After header on 429
+  code: string;
+  message: string;
+  httpStatus: number;
+  isNetworkError: boolean;
+  retryAfter?: number; // seconds, from Retry-After header on 429
 }
 ```
 
-**Error mapping table**:
-| Scenario | code | httpStatus | isNetworkError | retryAfter |
-|----------|------|------------|----------------|------------|
-| Network failure (DNS, connection reset) | `NETWORK_ERROR` | 0 | `true` | — |
-| Request timeout (30s exceeded) | `REQUEST_TIMEOUT` | 0 | `true` | — |
-| User cancellation (AbortSignal) | `REQUEST_CANCELLED` | 0 | `false` | — |
-| Backend structured error `{ success: false, error: { code, message } }` | backend code | HTTP status | `false` | — |
-| 429 with Retry-After header | `RATE_LIMITED` | 429 | `false` | parsed value |
-| 429 without Retry-After | `RATE_LIMITED` | 429 | `false` | `undefined` |
-| Unexpected response shape | `UNKNOWN_ERROR` | HTTP status | `false` | — |
-| JSON parse failure on response | `INVALID_RESPONSE` | HTTP status | `false` | — |
-| Auth refresh failure | `AUTH_REFRESH_FAILED` | 401 | `false` | — |
+**Error mapping table**: | Scenario | code | httpStatus | isNetworkError | retryAfter |
+|----------|------|------------|----------------|------------| | Network failure (DNS, connection
+reset) | `NETWORK_ERROR` | 0 | `true` | — | | Request timeout (30s exceeded) | `REQUEST_TIMEOUT` | 0
+| `true` | — | | User cancellation (AbortSignal) | `REQUEST_CANCELLED` | 0 | `false` | — | | Backend
+structured error `{ success: false, error: { code, message } }` | backend code | HTTP status |
+`false` | — | | 429 with Retry-After header | `RATE_LIMITED` | 429 | `false` | parsed value | | 429
+without Retry-After | `RATE_LIMITED` | 429 | `false` | `undefined` | | Unexpected response shape |
+`UNKNOWN_ERROR` | HTTP status | `false` | — | | JSON parse failure on response | `INVALID_RESPONSE`
+| HTTP status | `false` | — | | Auth refresh failure | `AUTH_REFRESH_FAILED` | 401 | `false` | — |
 
 **Alternatives considered**:
 
-1. Class-based `AppError extends Error` — rejected: prototype chain issues in monorepo, breaks structured clone
-2. Union type with discriminated variants — rejected: over-complex for consumer; single flat object with flags is simpler
+1. Class-based `AppError extends Error` — rejected: prototype chain issues in monorepo, breaks
+   structured clone
+2. Union type with discriminated variants — rejected: over-complex for consumer; single flat object
+   with flags is simpler
 
 ---
 
 ## R-5: 401 Single-Flight Refresh Design
 
-**Decision**: Keep the current proven pattern with queue-based single-flight, but extract it into the shared `interceptors.ts`
+**Decision**: Keep the current proven pattern with queue-based single-flight, but extract it into
+the shared `interceptors.ts`
 
 **Current implementation analysis** (identical in all 3 apps):
 
@@ -170,7 +176,8 @@ interface AppError {
 
 ## R-6: Lint Rule for Direct fetch/axios Prevention
 
-**Decision**: Add `no-restricted-imports` and `no-restricted-globals` ESLint rules targeting `fetch`, `axios`, `got`, `ky`, `node-fetch`
+**Decision**: Add `no-restricted-imports` and `no-restricted-globals` ESLint rules targeting
+`fetch`, `axios`, `got`, `ky`, `node-fetch`
 
 **Implementation**:
 
@@ -195,11 +202,13 @@ interface AppError {
 }
 ```
 
-**Scope**: Only in `apps/*/src/**` — `packages/api-client/src/adapters/fetch-adapter.ts` is exempted since it IS the fetch wrapper.
+**Scope**: Only in `apps/*/src/**` — `packages/api-client/src/adapters/fetch-adapter.ts` is exempted
+since it IS the fetch wrapper.
 
 **Alternatives considered**:
 
-1. Custom ESLint plugin — rejected: `no-restricted-imports` + `no-restricted-globals` are built-in and sufficient
+1. Custom ESLint plugin — rejected: `no-restricted-imports` + `no-restricted-globals` are built-in
+   and sufficient
 2. Only documentation enforcement — rejected: not machine-enforceable; violations will slip through
 
 ---
@@ -212,22 +221,21 @@ interface AppError {
 
 ```typescript
 interface ClientConfig {
-  baseUrl: string // From env.ts apiBaseUrl
-  defaultTimeout: number // 30000 (or override)
-  getAccessToken: () => string | null // From auth store
-  onRefreshToken: () => Promise<string> // Calls refresh endpoint
-  onAuthFailure: () => void // Navigate to login
+  baseUrl: string; // From env.ts apiBaseUrl
+  defaultTimeout: number; // 30000 (or override)
+  getAccessToken: () => string | null; // From auth store
+  onRefreshToken: () => Promise<string>; // Calls refresh endpoint
+  onAuthFailure: () => void; // Navigate to login
 }
 ```
 
-**Per-app mapping**:
-| App | baseUrl source | Auth store |
-|-----|---------------|------------|
-| MMC | `appConfig.env.apiBaseUrl` (platform API) | `useAuthStore()` |
-| Backoffice | `appConfig.env.apiBaseUrl` (workspace-scoped) | `useAuthStore()` |
-| Frontoffice | `appConfig.env.apiBaseUrl` (student runtime) | `useAuthStore()` |
+**Per-app mapping**: | App | baseUrl source | Auth store | |-----|---------------|------------| |
+MMC | `appConfig.env.apiBaseUrl` (platform API) | `useAuthStore()` | | Backoffice |
+`appConfig.env.apiBaseUrl` (workspace-scoped) | `useAuthStore()` | | Frontoffice |
+`appConfig.env.apiBaseUrl` (student runtime) | `useAuthStore()` |
 
-**No env.ts changes needed** — all three apps already have `VITE_API_BASE_URL` and `createEnvConfig()`.
+**No env.ts changes needed** — all three apps already have `VITE_API_BASE_URL` and
+`createEnvConfig()`.
 
 ---
 
@@ -237,13 +245,13 @@ interface ClientConfig {
 
 ```typescript
 class MockAdapter implements HttpAdapter {
-  private responses: AdapterResponse[] = []
-  private requests: AdapterRequest[] = []
+  private responses: AdapterResponse[] = [];
+  private requests: AdapterRequest[] = [];
 
-  enqueue(response: Partial<AdapterResponse>): void // Add response to queue
-  async execute(request: AdapterRequest): Promise<AdapterResponse> // Dequeue next response
-  getRequests(): AdapterRequest[] // Inspect sent requests
-  reset(): void // Clear state
+  enqueue(response: Partial<AdapterResponse>): void; // Add response to queue
+  async execute(request: AdapterRequest): Promise<AdapterResponse>; // Dequeue next response
+  getRequests(): AdapterRequest[]; // Inspect sent requests
+  reset(): void; // Clear state
 }
 ```
 
@@ -256,7 +264,8 @@ class MockAdapter implements HttpAdapter {
 
 **Alternatives considered**:
 
-1. `msw` (Mock Service Worker) — rejected: heavy dependency; operates at network level which is more than needed for unit tests
+1. `msw` (Mock Service Worker) — rejected: heavy dependency; operates at network level which is more
+   than needed for unit tests
 2. `vi.fn()` spies — rejected: loses type safety; can't simulate sequential responses cleanly
 
 ---

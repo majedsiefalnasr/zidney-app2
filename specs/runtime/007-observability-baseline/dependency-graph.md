@@ -455,8 +455,8 @@ Tasks grouped by execution level (can execute at same time within level):
 
 ### Rule 1: No Skips
 
-Every task must complete before downstream tasks start.
-Exception: Test tasks (can run with stub implementations)
+Every task must complete before downstream tasks start. Exception: Test tasks (can run with stub
+implementations)
 
 ### Rule 2: Hard Ordering
 
@@ -468,18 +468,18 @@ Tasks within a chain cannot be reordered:
 
 ### Rule 3: Parallel Independence
 
-Parallelizable tasks (T002 ∥ T003 ∥ T004) must not share state.
-Verification: No cross-task file writes, no shared references.
+Parallelizable tasks (T002 ∥ T003 ∥ T004) must not share state. Verification: No cross-task file
+writes, no shared references.
 
 ### Rule 4: Test After Implementation
 
-All Phase 5 tests depend on Phase 1-4 implementation.
-Exception: Can write test stubs before implementation.
+All Phase 5 tests depend on Phase 1-4 implementation. Exception: Can write test stubs before
+implementation.
 
 ### Rule 5: Phase Gating
 
-Phases execute in order: 1 → 2 → 3 → 4 → 5
-Exception: Phase 5 tests can start after Phase 4 kickoff (not complete).
+Phases execute in order: 1 → 2 → 3 → 4 → 5 Exception: Phase 5 tests can start after Phase 4 kickoff
+(not complete).
 
 ---
 

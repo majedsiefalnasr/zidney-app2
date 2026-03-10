@@ -8,7 +8,9 @@
 
 ## Summary
 
-29 atomic tasks generated for STAGE_17_TENANT_BOOTSTRAP across 6 execution phases. Tasks are ordered by compilation and runtime dependency. 15 frontend scaffold tasks, 5 API backend tasks (middleware + routes + wiring), 1 migration task, 2 type package tasks, and 5 test tasks.
+29 atomic tasks generated for STAGE_17_TENANT_BOOTSTRAP across 6 execution phases. Tasks are ordered
+by compilation and runtime dependency. 15 frontend scaffold tasks, 5 API backend tasks (middleware +
+routes + wiring), 1 migration task, 2 type package tasks, and 5 test tasks.
 
 ---
 
@@ -39,16 +41,20 @@
 
 ## Transactional Tasks
 
-- **T003** (migration): entire DDL in single `BEGIN … COMMIT` block — 4 tables created atomically or none, `IF NOT EXISTS` on every statement
-- **T007** (context route): read-only tenant DB query — no write transaction required (inherently safe)
-- **T008** (ws.ts): Redis SET/DEL operations are atomic per command — no multi-key transaction required
+- **T003** (migration): entire DDL in single `BEGIN … COMMIT` block — 4 tables created atomically or
+  none, `IF NOT EXISTS` on every statement
+- **T007** (context route): read-only tenant DB query — no write transaction required (inherently
+  safe)
+- **T008** (ws.ts): Redis SET/DEL operations are atomic per command — no multi-key transaction
+  required
 
 ---
 
 ## Idempotency Tasks
 
 - **T003**: `CREATE TABLE IF NOT EXISTS` on all 4 tables — safe to re-run multiple times
-- **T008**: Redis `wsRedis.set(wsKey, '1', { EX: ttl })` overwrite semantics — no duplicate-insert risk; `DEL` in `onClose` is idempotent
+- **T008**: Redis `wsRedis.set(wsKey, '1', { EX: ttl })` overwrite semantics — no duplicate-insert
+  risk; `DEL` in `onClose` is idempotent
 
 ---
 
@@ -80,7 +86,8 @@
 
 ## Open Risks
 
-- T009 (app.ts wiring) is the highest-risk task — any import error in T004–T008 will block it. Implementation must proceed in phase order.
+- T009 (app.ts wiring) is the highest-risk task — any import error in T004–T008 will block it.
+  Implementation must proceed in phase order.
 - T025 (RBAC guard test) and T026 (module guard test) depend on T005 and T006 completing first.
 - The `checklists/requirements.md` must be fully reviewed before Step 6 (Implement) begins.
 

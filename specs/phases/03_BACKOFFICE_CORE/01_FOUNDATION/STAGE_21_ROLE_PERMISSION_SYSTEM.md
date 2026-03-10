@@ -9,23 +9,25 @@ Database: Tenant DB only
 
 ## Stage Status
 
-Status: PRODUCTION READY
-Risk Level: LOW
-Closure Date: 2026-03-02
-Last Updated: 2026-03-02T16:00:00.000Z
+Status: PRODUCTION READY Risk Level: LOW Closure Date: 2026-03-02 Last Updated:
+2026-03-02T16:00:00.000Z
 
-Implementation: COMPLETE
-Tasks: 22 / 22 completed
+Implementation: COMPLETE Tasks: 22 / 22 completed
 
 Scope Closed:
 
-- Tenant migration: backoffice_roles, backoffice_role_module_permissions, rbac_audit_logs; schema_version 1.3.0 → 1.4.0
-- Drizzle schemas: backoffice-roles, backoffice-role-module-permissions, rbac-audit-logs, backoffice-staff-users (role_id, division_ids)
-- Domain-core package: rbac.types.ts, rbac.service.ts, rbac.audit.ts, permission-registry.ts (10 modules × 4 actions)
-- Permission guard v2: cache-first (rbac_v2:), SCAN cursor invalidation, starts at step 2 (workspace_id assertion is chain-level)
+- Tenant migration: backoffice_roles, backoffice_role_module_permissions, rbac_audit_logs;
+  schema_version 1.3.0 → 1.4.0
+- Drizzle schemas: backoffice-roles, backoffice-role-module-permissions, rbac-audit-logs,
+  backoffice-staff-users (role_id, division_ids)
+- Domain-core package: rbac.types.ts, rbac.service.ts, rbac.audit.ts, permission-registry.ts (10
+  modules × 4 actions)
+- Permission guard v2: cache-first (rbac_v2:), SCAN cursor invalidation, starts at step 2
+  (workspace_id assertion is chain-level)
 - 9 REST endpoints: CRUD roles + permissions + staff role assignment + module list
 - Vue pages: RolesListPage, CreateRolePage, RoleDetailPage + usePermission composable
-- 62 tests passing: 18 unit (rbac.service) + 20 unit (permission-registry) + 18 integration (routes) + 6 integration (version-compat)
+- 62 tests passing: 18 unit (rbac.service) + 20 unit (permission-registry) + 18 integration
+  (routes) + 6 integration (version-compat)
 
 Deferred Scope:
 
@@ -58,8 +60,8 @@ Phase Artifacts:
 - Testing Guide: specs/runtime/021-role-permission-system/guides/TESTING_GUIDE.md
 - PR Summary: specs/runtime/021-role-permission-system/PR_SUMMARY.md
 
-Notes:
-Stage is production ready. Ready for PR review and deployment. Testing guide available for QA teams.
+Notes: Stage is production ready. Ready for PR review and deployment. Testing guide available for QA
+teams.
 
 ---
 

@@ -12,7 +12,10 @@
 
 ### 1.1 Purpose
 
-The Tenant Provisioning Service is the foundational, non-public internal service responsible for establishing the complete database-per-tenant isolation model at the physical infrastructure level. It automates the lifecycle of tenant workspace databases—creation, initialization, archiving, restoration, and permanent deletion—while guaranteeing:
+The Tenant Provisioning Service is the foundational, non-public internal service responsible for
+establishing the complete database-per-tenant isolation model at the physical infrastructure level.
+It automates the lifecycle of tenant workspace databases—creation, initialization, archiving,
+restoration, and permanent deletion—while guaranteeing:
 
 - **Isolation Integrity:** Each tenant database is fully isolated with no cross-tenant access
 - **Deterministic State:** Provisioning is idempotent and transactionally safe
@@ -23,11 +26,14 @@ The Tenant Provisioning Service is the foundational, non-public internal service
 
 **Trust Chain Position:** Isolation → License → Authentication → Attempt → Runtime → Frontoffice
 
-This service operates at the **Isolation layer**, the foundational trust boundary. It establishes the physical database boundary that all subsequent authentication, licensing, runtime, and frontoffice operations depend upon.
+This service operates at the **Isolation layer**, the foundational trust boundary. It establishes
+the physical database boundary that all subsequent authentication, licensing, runtime, and
+frontoffice operations depend upon.
 
 **Phase Dependency:**
 
-- Requires: STAGE_02_MULTI_TENANCY_ARCHITECTURE, STAGE_02C_MIGRATION_AND_VERSIONING_MODEL, STAGE_04_LICENSE_ENGINE
+- Requires: STAGE_02_MULTI_TENANCY_ARCHITECTURE, STAGE_02C_MIGRATION_AND_VERSIONING_MODEL,
+  STAGE_04_LICENSE_ENGINE
 - Enables: STAGE_06_ATTEMPT_ENGINE_FOUNDATION, all tenant-bound operations
 
 ### 1.3 Scope
@@ -60,20 +66,28 @@ This service operates at the **Isolation layer**, the foundational trust boundar
 
 ### 2.1 Mandatory Alignment Confirmation
 
-✅ **No cross-tenant access:** All databases accessed exclusively through tenant-specific connection pools resolved from provenance.  
-✅ **No middleware bypass:** License and tenant validation required before any workspace operation.  
+✅ **No cross-tenant access:** All databases accessed exclusively through tenant-specific connection
+pools resolved from provenance.  
+✅ **No middleware bypass:** License and tenant validation required before any workspace
+operation.  
 ✅ **No grading outside worker:** Provisioning logic executes exclusively in worker, not API.  
-✅ **No direct DB instantiation:** All connections obtained through tenant resolver context or provisioning service.  
-✅ **No snapshot integrity weakening:** Configuration snapshots immutable post-provisioning (handled in STAGE_06).  
+✅ **No direct DB instantiation:** All connections obtained through tenant resolver context or
+provisioning service.  
+✅ **No snapshot integrity weakening:** Configuration snapshots immutable post-provisioning (handled
+in STAGE_06).  
 ✅ **No transaction boundary weakening:** Provisioning atomic at system level.  
-✅ **No version enforcement weakening:** Schema version compatibility enforced at middleware (STAGE_02C, STAGE_04).
+✅ **No version enforcement weakening:** Schema version compatibility enforced at middleware
+(STAGE_02C, STAGE_04).
 
 ### 2.2 Architecture Boundary Preservation
 
-- **Database-per-Tenant Isolation (ADR-0001):** Preserved. Each workspace gets distinct database with full schema isolation.
-- **Worker Authority (PROJECT_CONTEXT_PRIMER):** Preserved. Provisioning executes in worker process only, never API.
+- **Database-per-Tenant Isolation (ADR-0001):** Preserved. Each workspace gets distinct database
+  with full schema isolation.
+- **Worker Authority (PROJECT_CONTEXT_PRIMER):** Preserved. Provisioning executes in worker process
+  only, never API.
 - **Semantic Versioning (ADR-0008):** Preserved. Schema version tracked and validated per tenant.
-- **License Enforcement (ADR-0007):** Preserved. License middleware validates before workspace access.
+- **License Enforcement (ADR-0007):** Preserved. License middleware validates before workspace
+  access.
 
 ✅ **No ADR conflicts detected.**
 
@@ -83,13 +97,16 @@ This service operates at the **Isolation layer**, the foundational trust boundar
 
 ### Overview
 
-This section documents all critical ambiguities resolved during clarification phase. Five questions were addressed, each with implementation implications for the provisioning architecture. All questions are fully resolved and have been integrated into subsequent specification sections.
+This section documents all critical ambiguities resolved during clarification phase. Five questions
+were addressed, each with implementation implications for the provisioning architecture. All
+questions are fully resolved and have been integrated into subsequent specification sections.
 
 ---
 
 ### Q1: PostgreSQL Isolation Level — Resolved ✅
 
-**Question:** Should tenant databases operate at specific isolation levels to prevent concurrent modification conflicts?
+**Question:** Should tenant databases operate at specific isolation levels to prevent concurrent
+modification conflicts?
 
 **Answer:** REPEATABLE READ
 
@@ -113,7 +130,8 @@ This section documents all critical ambiguities resolved during clarification ph
 
 ### Q2: Connection Pool Registration Timing — Resolved ✅
 
-**Question:** Should tenant connection pools be registered into the in-memory map before or after schema initialization completes?
+**Question:** Should tenant connection pools be registered into the in-memory map before or after
+schema initialization completes?
 
 **Answer:** After baseline schema completes
 
@@ -127,7 +145,8 @@ This section documents all critical ambiguities resolved during clarification ph
 
 **Implementation Impact:**
 
-- Provisioning flow: Create DB → Run migrations → Seed baseline data → Verify schema_version table exists → THEN register pool in map
+- Provisioning flow: Create DB → Run migrations → Seed baseline data → Verify schema_version table
+  exists → THEN register pool in map
 - Pool availability becomes explicit signal: "Database is ready for application use"
 - Tenant resolver returns 503 Service Unavailable if pool not yet registered (provisioning window)
 - Integration test: Verify pool registration cannot race with first application request
@@ -143,7 +162,8 @@ This section documents all critical ambiguities resolved during clarification ph
 
 **Reasoning:**
 
-- Production: Docker Secrets prevent credential rotation breaking running containers mid-provisioning
+- Production: Docker Secrets prevent credential rotation breaking running containers
+  mid-provisioning
 - Development: Environment variables enable local testing without secrets infrastructure complexity
 - Credentials never logged or exposed to frontend or client
 - Provisioning service account credentials stored once at startup (immutable for session duration)
@@ -151,12 +171,15 @@ This section documents all critical ambiguities resolved during clarification ph
 
 **Implementation Impact:**
 
-- Provisioning service loads credentials from PROVISIONING_DB_USER / PROVISIONING_DB_PASSWORD environment at startup
-- Per-tenant credentials created transactionally during provisioning, stored in secrets manager externally (not in DB)
+- Provisioning service loads credentials from PROVISIONING_DB_USER / PROVISIONING_DB_PASSWORD
+  environment at startup
+- Per-tenant credentials created transactionally during provisioning, stored in secrets manager
+  externally (not in DB)
 - Worker container runs with secrets volume mounted: `/run/secrets/provisioning_db_password`
 - Dev environment: `.env` file with unencrypted credentials for local testing
 - Credential injection: Never from request body (security boundary preserved)
-- Credential rotation procedure: Update Docker secrets → Drain existing workers → Restart workers with new secrets
+- Credential rotation procedure: Update Docker secrets → Drain existing workers → Restart workers
+  with new secrets
 - Audit: Log credential access events (not content) with correlation_id for security tracking
 
 ---
@@ -178,19 +201,23 @@ This section documents all critical ambiguities resolved during clarification ph
 
 **Implementation Impact:**
 
-- Provisioning worker: Check license_id exists and status is CREATED/PROVISIONING before any DB operations
+- Provisioning worker: Check license_id exists and status is CREATED/PROVISIONING before any DB
+  operations
 - Pool registration: Occurs only after license status transitioned to ACTIVE (transactional)
 - API requests: License middleware validates before tenant resolver runs (strict ordering)
 - Middleware stack: License check → Tenant resolution → Schema version check → Route handler
-- Example flow: License created → Job queued → Worker validates license → Provision → License→ACTIVE → Pool registered → API requests allowed
-- Validation: Attempt API call to non-licensed workspace returns 404 (license not found) or 423 (soft-locked)
+- Example flow: License created → Job queued → Worker validates license → Provision → License→ACTIVE
+  → Pool registered → API requests allowed
+- Validation: Attempt API call to non-licensed workspace returns 404 (license not found) or 423
+  (soft-locked)
 - Guard rail: Cannot register pool if license is not ACTIVE (enforced in provisioning code)
 
 ---
 
 ### Q5: Crash Recovery & Idempotency Mechanism — Resolved ✅
 
-**Question:** How should the system detect and recover from crashes during provisioning (e.g., worker dies mid-migration)?
+**Question:** How should the system detect and recover from crashes during provisioning (e.g.,
+worker dies mid-migration)?
 
 **Answer:** Explicit State Checkpoint Table
 
@@ -217,11 +244,16 @@ This section documents all critical ambiguities resolved during clarification ph
   );
   CREATE INDEX idx_provisioning_checkpoints_step ON provisioning_checkpoints(step_ordinal DESC);
   ```
-- Worker writes checkpoint after each critical step: database_created, migration_001_applied, migration_002_applied, seed_completed, registry_created
-- On worker crash: New worker acquires lock (old lock expired after 60s), reads latest checkpoint, resumes from next step
-- Example: If worker crashes after migration_003 applied, retry worker sees checkpoint, skips to migration_004
-- Recovery job (background): Scan checkpoints older than 1 hour; if provisioning job still in progress, escalate to ops team
-- Validation test: Simulate worker crash → Verify retry resumes correctly → Confirm zero migrations replayed → Confirm final state consistent
+- Worker writes checkpoint after each critical step: database_created, migration_001_applied,
+  migration_002_applied, seed_completed, registry_created
+- On worker crash: New worker acquires lock (old lock expired after 60s), reads latest checkpoint,
+  resumes from next step
+- Example: If worker crashes after migration_003 applied, retry worker sees checkpoint, skips to
+  migration_004
+- Recovery job (background): Scan checkpoints older than 1 hour; if provisioning job still in
+  progress, escalate to ops team
+- Validation test: Simulate worker crash → Verify retry resumes correctly → Confirm zero migrations
+  replayed → Confirm final state consistent
 
 ---
 
@@ -303,7 +335,8 @@ This section documents all critical ambiguities resolved during clarification ph
 
 ### 4.1 License Middleware Integration
 
-**Requirement:** License validation is mandatory before provisioning starts and before any workspace operation.
+**Requirement:** License validation is mandatory before provisioning starts and before any workspace
+operation.
 
 **Flow:**
 
@@ -313,7 +346,8 @@ This section documents all critical ambiguities resolved during clarification ph
 4. License middleware validates: `PROVISIONING` state allowed → continue
 5. Provisioning completes
 6. License transitioned to `ACTIVE`
-7. All subsequent workspace requests validate: license must be `ACTIVE` (not `SOFT_LOCKED`, `ARCHIVED`, `DELETED`)
+7. All subsequent workspace requests validate: license must be `ACTIVE` (not `SOFT_LOCKED`,
+   `ARCHIVED`, `DELETED`)
 
 **License States:**
 
@@ -341,7 +375,8 @@ This section documents all critical ambiguities resolved during clarification ph
 1. During provisioning, create `schema_version` table in tenant DB
 2. Insert row: `current_schema_version` = baseline version (e.g., `1.0.0`)
 3. Store `expected_schema_version` in license metadata
-4. On every workspace request: Validate tenant `schema_version.current_schema_version` ≥ minimum required
+4. On every workspace request: Validate tenant `schema_version.current_schema_version` ≥ minimum
+   required
 5. On schema upgrade: Increment `current_schema_version` via migration (STAGE_02C)
 
 **Compatibility Rule:**
@@ -352,7 +387,8 @@ This section documents all critical ambiguities resolved during clarification ph
 
 ### 4.3 Product Version Compatibility
 
-**Requirement:** Product version compatibility is stored in license metadata but DEFERRED for enforcement to STAGE_06.
+**Requirement:** Product version compatibility is stored in license metadata but DEFERRED for
+enforcement to STAGE_06.
 
 **STAGE_05 Scope:**
 
@@ -367,7 +403,9 @@ This section documents all critical ambiguities resolved during clarification ph
 - On license middleware execution: Validate `license.product_version` in compatible range
 - If incompatible → Reject (426 Upgrade Required)
 
-**Rationale:** Product version enforcement is a runtime behavioral check, not a provisioning concern. STAGE_05 focuses on infrastructure provisioning; STAGE_06 handles runtime version compatibility.
+**Rationale:** Product version enforcement is a runtime behavioral check, not a provisioning
+concern. STAGE_05 focuses on infrastructure provisioning; STAGE_06 handles runtime version
+compatibility.
 
 ✅ **License stored with product_version metadata for future STAGE_06 enforcement.**
 
@@ -623,9 +661,12 @@ CREATE TABLE tenants_registry (
 
 **Idempotence Rules:**
 
-1. **Database Existence Check:** If `workspace_<slug>` exists and in registry → Skip creation, validate consistency
-2. **Migration Checksum:** Each migration has immutable checksum; if already applied (in schema_migrations), skip
-3. **Registry Uniqueness:** If registry entry exists with same license_id → Skip write (already exists)
+1. **Database Existence Check:** If `workspace_<slug>` exists and in registry → Skip creation,
+   validate consistency
+2. **Migration Checksum:** Each migration has immutable checksum; if already applied (in
+   schema_migrations), skip
+3. **Registry Uniqueness:** If registry entry exists with same license_id → Skip write (already
+   exists)
 4. **Seed Idempotency:** Seed operations use upsert (INSERT ... ON CONFLICT DO NOTHING)
 
 **Example Retry Scenario:**
@@ -686,8 +727,10 @@ Attempt 2: Lock ✓ (retry acquired) → Check DB exists ✓ → Check migration
 
 **Transaction Boundaries:**
 
-1. **Schema Creation Transaction:** All baseline migrations in single transaction (auto-rollback on any failure)
-2. **Registry + License Transaction:** Registry entry + license status update in single master DB transaction
+1. **Schema Creation Transaction:** All baseline migrations in single transaction (auto-rollback on
+   any failure)
+2. **Registry + License Transaction:** Registry entry + license status update in single master DB
+   transaction
 3. **Seed Transaction:** All seed operations in single transaction
 
 **Atomicity Guarantee:** Either full system state updated, or full rollback (no partial state).
@@ -717,7 +760,8 @@ Attempt 2: Lock ✓ (retry acquired) → Check DB exists ✓ → Check migration
 
 **Result:** Either fully provisioned or fully rolled back (no in-between state).
 
-**Registry Consistency:** If registry entry exists but database missing → Mark license FAILED (critical bug in ops job).
+**Registry Consistency:** If registry entry exists but database missing → Mark license FAILED
+(critical bug in ops job).
 
 ### 6.8 Performance & Scalability
 
@@ -746,7 +790,8 @@ Attempt 2: Lock ✓ (retry acquired) → Check DB exists ✓ → Check migration
 
 **Validation Rules:**
 
-- **Slug Format:** Regex `^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$` (lowercase, alphanumeric, dash, 3-50 chars)
+- **Slug Format:** Regex `^[a-z0-9][a-z0-9-]{1,48}[a-z0-9]$` (lowercase, alphanumeric, dash, 3-50
+  chars)
 - **Slug Uniqueness:** Checked against `tenants_registry` before creation
 - **License Association:** Validate license_id matches slug in job payload
 
@@ -854,7 +899,8 @@ Attempt 2: Lock ✓ (retry acquired) → Check DB exists ✓ → Check migration
 
 **Implications:**
 
-- Provisioning must complete before any license validation (no DB to validate against yet in early flow)
+- Provisioning must complete before any license validation (no DB to validate against yet in early
+  flow)
 - Provisioning success enables subsequent license checks
 - Any corruption in provisioning breaks entire trust chain
 
@@ -1368,14 +1414,19 @@ Runtime Version 1.0.0:
 
 ### Assumptions
 
-1. **External Snapshot Storage Exists:** Backup infrastructure (S3, Azure Blob, etc.) is provisioned by DevOps
-2. **PostgreSQL Instance Configured:** Single PostgreSQL instance exists with provisioner credentials
+1. **External Snapshot Storage Exists:** Backup infrastructure (S3, Azure Blob, etc.) is provisioned
+   by DevOps
+2. **PostgreSQL Instance Configured:** Single PostgreSQL instance exists with provisioner
+   credentials
 3. **Redis Instance Exists:** Redis cluster for job queue, locks, caching
 4. **Idempotency via UPSERT:** Application code uses INSERT ... ON CONFLICT for seed operations
 5. **No Dynamic SQL:** Slug always parameterized, never string-interpolated
-6. **Server Clock Synchronized:** All server clocks NTP-synchronized for distributed lock TTL reliability
-7. **Migration Checksums Immutable:** Once a migration checksum is published, it never changes (immutability contract)
-8. **No Direct DB Access Outside Provisioning:** Application always uses connection pools, never raw connections
+6. **Server Clock Synchronized:** All server clocks NTP-synchronized for distributed lock TTL
+   reliability
+7. **Migration Checksums Immutable:** Once a migration checksum is published, it never changes
+   (immutability contract)
+8. **No Direct DB Access Outside Provisioning:** Application always uses connection pools, never raw
+   connections
 
 ---
 

@@ -1,8 +1,6 @@
 # API Endpoint Contracts: Translation System
 
-**Feature Branch**: `019-translation-system`
-**Date**: 2026-03-01
-**Stage**: Phase 1 Design
+**Feature Branch**: `019-translation-system` **Date**: 2026-03-01 **Stage**: Phase 1 Design
 
 ---
 
@@ -56,13 +54,13 @@ const TranslationUpsertItemSchema = z.object({
   field_name: z.string().min(1).max(100),
   language_code: z.string().min(2).max(10),
   translated_value: z.string(), // empty string '' is valid; null is not
-})
+});
 
-const SingleUpsertSchema = TranslationUpsertItemSchema
+const SingleUpsertSchema = TranslationUpsertItemSchema;
 
 const BatchUpsertSchema = z.object({
   translations: z.array(TranslationUpsertItemSchema).min(1).max(50),
-})
+});
 ```
 
 ### Response: Success (HTTP 200)
@@ -149,7 +147,8 @@ HTTP 200 is returned for both create and update (idempotent — no 201).
 
 ## GET /api/workspaces/:slug/translations
 
-**Purpose**: Resolve entity translations with fallback (Mode A) OR list translation management panel rows (Mode B)
+**Purpose**: Resolve entity translations with fallback (Mode A) OR list translation management panel
+rows (Mode B)
 
 ### Mode A: Resolution (language_code present)
 
@@ -266,12 +265,12 @@ All errors conform to the platform standard:
 
 ```typescript
 interface ErrorResponse {
-  success: false
-  data: null
+  success: false;
+  data: null;
   error: {
-    code: string // One of TranslationErrorCode constants
-    message: string
-  }
+    code: string; // One of TranslationErrorCode constants
+    message: string;
+  };
 }
 ```
 
@@ -279,8 +278,8 @@ interface ErrorResponse {
 
 ```typescript
 interface SuccessResponse<T> {
-  success: true
-  data: T
-  error: null
+  success: true;
+  data: T;
+  error: null;
 }
 ```

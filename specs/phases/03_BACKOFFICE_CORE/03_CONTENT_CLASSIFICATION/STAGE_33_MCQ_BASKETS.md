@@ -1,8 +1,6 @@
 # STAGE 33 – MCQ BASKETS
 
-Phase: 03_BACKOFFICE_CORE
-Domain: 03_CONTENT_CLASSIFICATION
-Database: Tenant DB
+Phase: 03_BACKOFFICE_CORE Domain: 03_CONTENT_CLASSIFICATION Database: Tenant DB
 
 ---
 
@@ -14,7 +12,8 @@ Status: DRAFT
 
 ## Objective
 
-Implement Basket as a structured MCQ grouping tool used for exam composition and automatic question selection.
+Implement Basket as a structured MCQ grouping tool used for exam composition and automatic question
+selection.
 
 Basket purpose:
 
@@ -134,9 +133,7 @@ Selection priority:
 
 Basket filter must use indexed query:
 
-WHERE question_id IN (
-SELECT question_id FROM mcq_basket_questions WHERE basket_id = ?
-)
+WHERE question_id IN ( SELECT question_id FROM mcq_basket_questions WHERE basket_id = ? )
 
 No N+1 queries allowed.
 
@@ -169,8 +166,6 @@ Stage complete when:
 
 ## Architectural Notes
 
-Basket is runtime grouping layer.
-It must remain lightweight and indexed.
+Basket is runtime grouping layer. It must remain lightweight and indexed.
 
-Basket must not introduce cross-tenant logic.
-All operations must remain tenant-scoped.
+Basket must not introduce cross-tenant logic. All operations must remain tenant-scoped.

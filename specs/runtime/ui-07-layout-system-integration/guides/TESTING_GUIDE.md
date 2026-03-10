@@ -9,22 +9,30 @@
 
 ## Purpose
 
-This guide explains how to validate the unified layout system implementation end-to-end. The stage delivers an application shell architecture (AppLayout, AppSidebar, AppHeader) that all authenticated views render inside, plus responsive breakpoint detection and collapsible sidebar state management.
+This guide explains how to validate the unified layout system implementation end-to-end. The stage
+delivers an application shell architecture (AppLayout, AppSidebar, AppHeader) that all authenticated
+views render inside, plus responsive breakpoint detection and collapsible sidebar state management.
 
 ---
 
 ## Summary of Delivered Behavior
 
-A standardized application shell layer available to all three Zidney frontend applications (MMC, Backoffice, Frontoffice). Every authenticated view automatically renders inside this consistent shell without implementing layout logic locally.
+A standardized application shell layer available to all three Zidney frontend applications (MMC,
+Backoffice, Frontoffice). Every authenticated view automatically renders inside this consistent
+shell without implementing layout logic locally.
 
 Key outcomes:
 
 - **Responsive Layout Shell** — AppHeader, AppSidebar, AppLayout components deployed to all 3 apps
-- **Reactive Sidebar State** — Collapsible/toggle behavior backed by shared Pinia store (sidebarCollapsed, isMobile, toggleSidebar, setMobile)
-- **Permission-Aware Navigation** — Auth store resolves permissions; resolvedPermissions + buildResolvedPermissions available to views
+- **Reactive Sidebar State** — Collapsible/toggle behavior backed by shared Pinia store
+  (sidebarCollapsed, isMobile, toggleSidebar, setMobile)
+- **Permission-Aware Navigation** — Auth store resolves permissions; resolvedPermissions +
+  buildResolvedPermissions available to views
 - **Breakpoint Detection** — useBreakpoint composable detects mobile/desktop transitions
-- **Router Meta Support** — New RouteMeta flags (standaloneLayout, hideSidebar) control layout presence per route
-- **Integration Tested** — 21 test files verify store mutations, route rendering, component integration, and responsive behavior
+- **Router Meta Support** — New RouteMeta flags (standaloneLayout, hideSidebar) control layout
+  presence per route
+- **Integration Tested** — 21 test files verify store mutations, route rendering, component
+  integration, and responsive behavior
 
 ---
 
@@ -51,8 +59,10 @@ Key outcomes:
 
 **Stores Extended (3 apps):**
 
-- apps/{mmc,backoffice,frontoffice}/src/core/state/ui.store.ts (added sidebarCollapsed, isMobile, toggleSidebar, setMobile, $reset)
-- apps/{mmc,backoffice,frontoffice}/src/core/state/auth.store.ts (added resolvedPermissions, buildResolvedPermissions)
+- apps/{mmc,backoffice,frontoffice}/src/core/state/ui.store.ts (added sidebarCollapsed, isMobile,
+  toggleSidebar, setMobile, $reset)
+- apps/{mmc,backoffice,frontoffice}/src/core/state/auth.store.ts (added resolvedPermissions,
+  buildResolvedPermissions)
 
 **Router Updated (3 apps):**
 
@@ -144,7 +154,8 @@ Expected outcome: All tests pass with 162 assertions; zero lint/typecheck errors
 2. Open browser to http://localhost:5173
 3. Log in with valid credentials (use test credential from your local setup)
 4. Navigate to any authenticated route (dashboard, settings, etc.)
-5. Observe: header visible at top with workspace name + user menu; sidebar visible on left with navigation; content area shows the page
+5. Observe: header visible at top with workspace name + user menu; sidebar visible on left with
+   navigation; content area shows the page
 
 Expected:
 
@@ -334,4 +345,5 @@ For issues or questions during testing:
 1. Check test output in console for specific assertion failures
 2. Review IMPLEMENT_REPORT.md for implementation details
 3. Review spec.md for feature intent
-4. Check Git history for commit messages (feat(ui-07-layout-system-integration): complete implement step)
+4. Check Git history for commit messages (feat(ui-07-layout-system-integration): complete implement
+   step)

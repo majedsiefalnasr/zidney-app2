@@ -8,12 +8,15 @@
 
 ## Summary
 
-Targeted clarification session resolved 3 critical API boundary and security architectural gaps identified by drift analysis. All clarifications address the 2/9 criteria failures:
+Targeted clarification session resolved 3 critical API boundary and security architectural gaps
+identified by drift analysis. All clarifications address the 2/9 criteria failures:
 
 1. **API Boundary Violations** → Clarified admin endpoint placement, RBAC, token validation strategy
-2. **Security Vulnerabilities** → Locked promo code validation, token infrastructure, and MMC authentication
+2. **Security Vulnerabilities** → Locked promo code validation, token infrastructure, and MMC
+   authentication
 
-All clarifications appended to `spec.md` under "Clarifications → Session 2026-02-25 (Part 2 — Security Clarifications)".
+All clarifications appended to `spec.md` under "Clarifications → Session 2026-02-25 (Part 2 —
+Security Clarifications)".
 
 ---
 
@@ -107,6 +110,7 @@ After clarifications are locked in spec.md, run speckit.plan to:
 
 ✅ **Approved for Plan Security Tightening Pass**
 
-All 3 critical architectural gaps have explicit clarifications. Specification is now precise enough for plan.md to define all necessary implementation tasks.
+All 3 critical architectural gaps have explicit clarifications. Specification is now precise enough
+for plan.md to define all necessary implementation tasks.
 
 Next: Run `/speckit.plan` with security tightening scope.

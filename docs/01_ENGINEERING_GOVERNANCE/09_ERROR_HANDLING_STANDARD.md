@@ -20,15 +20,8 @@ No raw or inconsistent error responses are allowed.
 
 All API errors MUST follow this structure:
 
-{
-"success": false,
-"error": {
-"code": "ERROR_CODE",
-"message": "Human readable message",
-"correlationId": "uuid",
-"details": null
-}
-}
+{ "success": false, "error": { "code": "ERROR_CODE", "message": "Human readable message",
+"correlationId": "uuid", "details": null } }
 
 Rules:
 
@@ -46,16 +39,9 @@ No stack traces returned to client.
 
 Standard mappings:
 
-400 – Validation error
-401 – Unauthorized
-403 – Forbidden
-404 – Not found
-409 – Conflict
-423 – License soft-locked
-426 – Upgrade required
-429 – Rate limit exceeded
-500 – Internal server error
-503 – Service unavailable
+400 – Validation error 401 – Unauthorized 403 – Forbidden 404 – Not found 409 – Conflict 423 –
+License soft-locked 426 – Upgrade required 429 – Rate limit exceeded 500 – Internal server error 503
+– Service unavailable
 
 HTTP status and error.code must align logically.
 
@@ -71,18 +57,9 @@ Error codes must:
 
 Examples:
 
-AUTH_INVALID_CREDENTIALS
-AUTH_TOKEN_EXPIRED
-TENANT_NOT_FOUND
-TENANT_ARCHIVED
-LICENSE_SOFT_LOCKED
-LICENSE_LIMIT_REACHED
-ATTEMPT_ALREADY_SUBMITTED
-ATTEMPT_NOT_FOUND
-SUBSCRIPTION_REQUIRED
-SCHEMA_VERSION_MISMATCH
-RATE_LIMIT_EXCEEDED
-INTERNAL_ERROR
+AUTH_INVALID_CREDENTIALS AUTH_TOKEN_EXPIRED TENANT_NOT_FOUND TENANT_ARCHIVED LICENSE_SOFT_LOCKED
+LICENSE_LIMIT_REACHED ATTEMPT_ALREADY_SUBMITTED ATTEMPT_NOT_FOUND SUBSCRIPTION_REQUIRED
+SCHEMA_VERSION_MISMATCH RATE_LIMIT_EXCEEDED INTERNAL_ERROR
 
 No dynamic error codes allowed.
 
@@ -129,9 +106,7 @@ Validation errors must:
 
 Example:
 
-VALIDATION_FAILED
-INVALID_INPUT
-MISSING_REQUIRED_FIELD
+VALIDATION_FAILED INVALID_INPUT MISSING_REQUIRED_FIELD
 
 Frontend must not rely on raw DB messages.
 

@@ -1,22 +1,20 @@
 # Specify Report — STAGE_UI_06_STATE_MANAGEMENT
 
-**Step:** 1 — Specify
-**Timestamp:** 2026-03-03T00:00:00.000Z
-**Status:** COMPLETE
+**Step:** 1 — Specify **Timestamp:** 2026-03-03T00:00:00.000Z **Status:** COMPLETE
 
 ---
 
 ## Summary
 
 Specification drafted for the UI State Management Architecture stage. This stage defines the
-standardized runtime contract for Pinia-based stores across all three Zidney frontend
-applications (MMC, Backoffice, Frontoffice). The spec covers store architecture, API interaction
-chain enforcement, cross-store communication rules, persistence policy, security constraints,
-testability requirements, and per-app scope boundaries.
+standardized runtime contract for Pinia-based stores across all three Zidney frontend applications
+(MMC, Backoffice, Frontoffice). The spec covers store architecture, API interaction chain
+enforcement, cross-store communication rules, persistence policy, security constraints, testability
+requirements, and per-app scope boundaries.
 
 37 functional requirements across 8 domains were captured. 5 user stories were drafted with full
-acceptance scenarios. 1 `[NEEDS CLARIFICATION]` marker was identified and must be resolved in
-Step 2 before planning proceeds.
+acceptance scenarios. 1 `[NEEDS CLARIFICATION]` marker was identified and must be resolved in Step 2
+before planning proceeds.
 
 ---
 
@@ -112,10 +110,10 @@ Step 2 before planning proceeds.
 
 ## Clarifications Required
 
-- **[NEEDS CLARIFICATION — Concurrent Async Loading State Shape]**: Should stores with
-  multiple concurrent async operations use a single `isLoading: boolean` flag, or a per-action
-  pending map (`pending: Record<string, boolean>`)? This determines the standard loading state
-  shape across all stores and must be resolved before planning.
+- **[NEEDS CLARIFICATION — Concurrent Async Loading State Shape]**: Should stores with multiple
+  concurrent async operations use a single `isLoading: boolean` flag, or a per-action pending map
+  (`pending: Record<string, boolean>`)? This determines the standard loading state shape across all
+  stores and must be resolved before planning.
 
 ---
 

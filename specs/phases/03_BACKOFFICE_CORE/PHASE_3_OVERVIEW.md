@@ -282,5 +282,4 @@ Only then may Phase 4 begin.
 
 ---
 
-Next Phase:
-04_RUNTIME
+Next Phase: 04_RUNTIME

@@ -1,15 +1,13 @@
 # Closure Report — TENANT_BOOTSTRAP
 
-**Step:** 7 — Closure
-**Timestamp:** 2026-02-28T18:00:00Z
-**Status:** PRODUCTION READY
+**Step:** 7 — Closure **Timestamp:** 2026-02-28T18:00:00Z **Status:** PRODUCTION READY
 
 ---
 
 ## Summary
 
-Stage 17 (Tenant Bootstrap) is complete and production ready. All 31 tasks were implemented across
-7 phases covering the full backoffice runtime bootstrap: tenant-resolved context endpoint, license
+Stage 17 (Tenant Bootstrap) is complete and production ready. All 31 tasks were implemented across 7
+phases covering the full backoffice runtime bootstrap: tenant-resolved context endpoint, license
 enforcement middleware, RBAC + module guard middleware, tenant RBAC skeleton migration, Vue 3 SPA
 scaffold, and supporting infrastructure (Dockerfile multi-stage build, nginx WS + SPA routing). All
 6 guardians returned PASS after remediation. 67 automated tests pass. ESLint 0 errors.
@@ -35,21 +33,21 @@ scaffold, and supporting infrastructure (Dockerfile multi-stage build, nginx WS 
 
 - **GET /api/v1/backoffice/context** — Returns workspace identity, license data, enabled modules,
   product version and staff user profile; protected by license + RBAC middleware stack
-- **WS /ws/backoffice** — WebSocket endpoint with atomic Redis `SET NX` connection guard
-  (max 1 connection per user per attempt)
-- **License enforcement middleware** — Validates workspace status (SOFT_LOCKED → 423,
-  ARCHIVED → 403), injects `enabled_modules` and `product_version` into Hono context
-- **Backoffice RBAC guard** — Redis-cached permission check with PostgreSQL fallback;
-  queries `backoffice_staff_user_roles` + `backoffice_role_permissions` (all `backoffice_` prefix)
-- **Backoffice module guard** — Validates module availability against `enabled_modules`
-  context set; warns via structured logger on access denied
+- **WS /ws/backoffice** — WebSocket endpoint with atomic Redis `SET NX` connection guard (max 1
+  connection per user per attempt)
+- **License enforcement middleware** — Validates workspace status (SOFT_LOCKED → 423, ARCHIVED →
+  403), injects `enabled_modules` and `product_version` into Hono context
+- **Backoffice RBAC guard** — Redis-cached permission check with PostgreSQL fallback; queries
+  `backoffice_staff_user_roles` + `backoffice_role_permissions` (all `backoffice_` prefix)
+- **Backoffice module guard** — Validates module availability against `enabled_modules` context set;
+  warns via structured logger on access denied
 - **Tenant RBAC skeleton migration** — `20260228_001_tenant_rbac_skeleton.ts`, forward-only DDL,
   creates 4 tables with `backoffice_` prefix to avoid collision with STAGE_12 baseline tables
 - **Vue 3 SPA scaffold** — `apps/backoffice/` with Pinia context store, Vue Router v4 with
   navigation guards, WS plugin, `BackofficeLayout`, Dashboard/WorkspaceLocked/WorkspaceForbidden
   views, `useBackofficeContext` composable
-- **Dockerfile multi-stage** — Added `builder-deps` stage (full deps incl. Vite), SPA build
-  step, nginx `COPY --from=builder dist /usr/share/nginx/html/backoffice/`, `STOPSIGNAL` fix
+- **Dockerfile multi-stage** — Added `builder-deps` stage (full deps incl. Vite), SPA build step,
+  nginx `COPY --from=builder dist /usr/share/nginx/html/backoffice/`, `STOPSIGNAL` fix
 - **nginx routing** — `/ws/backoffice` WS upgrade location + `/backoffice/` SPA alias with
   `try_files` fallback and asset immutable caching
 
@@ -119,10 +117,10 @@ scaffold, and supporting infrastructure (Dockerfile multi-stage build, nginx WS 
 **Risk Level:** MEDIUM
 
 **Justification:** The stage introduces a new SPA application, new middleware chain, and a new
-migration. All are well-tested and isolated. The `backoffice_` table prefix was adopted to
-avoid collision risk with STAGE_12 baseline tables. Docker and nginx changes are infrastructure-
-scoped and have been validated by the Docker Specialist guardian. Risk is medium (not low) due to
-the breadth of changes across API, frontend, and infrastructure layers.
+migration. All are well-tested and isolated. The `backoffice_` table prefix was adopted to avoid
+collision risk with STAGE_12 baseline tables. Docker and nginx changes are infrastructure- scoped
+and have been validated by the Docker Specialist guardian. Risk is medium (not low) due to the
+breadth of changes across API, frontend, and infrastructure layers.
 
 ---
 

@@ -190,8 +190,7 @@ Student deletion must:
 - Preserve certificate records
 - Preserve audit logs
 
-If student has attempts:
-→ Hard deletion prohibited  
+If student has attempts: → Hard deletion prohibited  
 → Use DISABLED status
 
 ---

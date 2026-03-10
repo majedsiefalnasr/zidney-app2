@@ -9,9 +9,11 @@
 
 ## Overview
 
-This guide provides step-by-step instructions for implementing the MMC Dashboard from specification through production deployment.
+This guide provides step-by-step instructions for implementing the MMC Dashboard from specification
+through production deployment.
 
-The implementation is divided into 5 phases spanning 5 development days. Each phase builds progressively and can be tested independently.
+The implementation is divided into 5 phases spanning 5 development days. Each phase builds
+progressively and can be tested independently.
 
 ---
 
@@ -96,23 +98,23 @@ node scripts/seed-dashboard-test-data.js
  * - CSV export formatting
  */
 
-export * from './metrics'
-export * from './calculations'
-export * from './validators'
-export * from './csv-generator'
+export * from "./metrics";
+export * from "./calculations";
+export * from "./validators";
+export * from "./csv-generator";
 ```
 
 **File**: `packages/domain-core/mmc-dashboard/metrics.ts`
 
 ```typescript
-import Decimal from 'decimal.js'
-import { Pool } from 'pg'
+import Decimal from "decimal.js";
+import { Pool } from "pg";
 
 export interface LicenseMetrics {
-  total: number
-  active: number
-  soft_locked: number
-  archived: number
+  total: number;
+  active: number;
+  soft_locked: number;
+  archived: number;
 }
 
 export async function getLicenseMetrics(pool: Pool): Promise<LicenseMetrics> {
@@ -123,23 +125,23 @@ export async function getLicenseMetrics(pool: Pool): Promise<LicenseMetrics> {
     FROM licenses
     WHERE deleted_at IS NULL
     GROUP BY status
-  `)
+  `);
 
   const metrics: LicenseMetrics = {
     total: 0,
     active: 0,
     soft_locked: 0,
     archived: 0,
-  }
+  };
 
   for (const row of result.rows) {
-    metrics.total += row.count
-    if (row.status === 'ACTIVE') metrics.active = row.count
-    else if (row.status === 'SOFT_LOCKED') metrics.soft_locked = row.count
-    else if (row.status === 'ARCHIVED') metrics.archived = row.count
+    metrics.total += row.count;
+    if (row.status === "ACTIVE") metrics.active = row.count;
+    else if (row.status === "SOFT_LOCKED") metrics.soft_locked = row.count;
+    else if (row.status === "ARCHIVED") metrics.archived = row.count;
   }
 
-  return metrics
+  return metrics;
 }
 
 export async function getRevenueMetrics(pool: Pool) {
@@ -163,19 +165,17 @@ export async function getRevenueMetrics(pool: Pool) {
         AND created_at < DATE_TRUNC('month', NOW())
         AND deleted_at IS NULL
     `),
-  ])
+  ]);
 
   return {
-    this_month: roundRevenue(thisMonth.rows[0]?.revenue || '0'),
-    this_year: roundRevenue(thisYear.rows[0]?.revenue || '0'),
-    last_month: roundRevenue(lastMonth.rows[0]?.revenue || '0'),
-  }
+    this_month: roundRevenue(thisMonth.rows[0]?.revenue || "0"),
+    this_year: roundRevenue(thisYear.rows[0]?.revenue || "0"),
+    last_month: roundRevenue(lastMonth.rows[0]?.revenue || "0"),
+  };
 }
 
 export function roundRevenue(value: string | number): string {
-  return new Decimal(value || 0)
-    .toDecimalPlaces(2, Decimal.ROUND_HALF_UP)
-    .toString()
+  return new Decimal(value || 0).toDecimalPlaces(2, Decimal.ROUND_HALF_UP).toString();
 }
 ```
 
@@ -184,22 +184,19 @@ export function roundRevenue(value: string | number): string {
 ```typescript
 export async function* generateCsvStream(rows: any[], headers: string[]) {
   // Emit headers
-  yield headers.join(',') + '\n'
+  yield headers.join(",") + "\n";
 
   // Emit rows
   for (const row of rows) {
     const values = headers.map((header) => {
-      const value = row[header]
+      const value = row[header];
       // Escape CSV values (quote if contains comma or quote)
-      if (
-        typeof value === 'string' &&
-        (value.includes(',') || value.includes('"'))
-      ) {
-        return `"${value.replace(/"/g, '""')}"`
+      if (typeof value === "string" && (value.includes(",") || value.includes('"'))) {
+        return `"${value.replace(/"/g, '""')}"`;
       }
-      return value || ''
-    })
-    yield values.join(',') + '\n'
+      return value || "";
+    });
+    yield values.join(",") + "\n";
   }
 }
 ```
@@ -209,40 +206,37 @@ export async function* generateCsvStream(rows: any[], headers: string[]) {
 **File**: `apps/api/src/middleware/permission.middleware.ts`
 
 ```typescript
-import { Context, MiddlewareHandler } from 'hono'
-import type { Logger } from '@zidney/logger'
-import type { Pool } from 'pg'
+import { Context, MiddlewareHandler } from "hono";
+import type { Logger } from "@zidney/logger";
+import type { Pool } from "pg";
 
 interface PermissionContext extends Context {
-  user?: { id: string }
-  correlation_id?: string
+  user?: { id: string };
+  correlation_id?: string;
 }
 
-export function createPermissionMiddleware(
-  masterDb: Pool,
-  logger: Logger
-): MiddlewareHandler {
+export function createPermissionMiddleware(masterDb: Pool, logger: Logger): MiddlewareHandler {
   return async (ctx: PermissionContext, next) => {
     try {
-      const user = ctx.user
+      const user = ctx.user;
 
       if (!user) {
         logger.warn({
-          event: 'permission_check_failed',
-          reason: 'no_user',
+          event: "permission_check_failed",
+          reason: "no_user",
           correlation_id: ctx.correlation_id,
-        })
+        });
         return ctx.json(
           {
             success: false,
             data: null,
             error: {
-              code: 'UNAUTHORIZED',
-              message: 'User authentication required',
+              code: "UNAUTHORIZED",
+              message: "User authentication required",
             },
           },
-          401
-        )
+          401,
+        );
       }
 
       // Query for reporting.view permission (with workspace_id from tenant resolver context)
@@ -250,86 +244,86 @@ export function createPermissionMiddleware(
       const result = await masterDb.query(
         `SELECT role_id FROM mmc_members 
          WHERE user_id = $1 AND workspace_id = $2 AND deleted_at IS NULL LIMIT 1`,
-        [user.id, workspaceId] // workspaceId from tenant resolver context
-      )
+        [user.id, workspaceId], // workspaceId from tenant resolver context
+      );
 
       if (result.rows.length === 0) {
         logger.info({
-          event: 'permission_check_failed',
-          reason: 'not_mmc_member',
+          event: "permission_check_failed",
+          reason: "not_mmc_member",
           user_id: user.id,
           correlation_id: ctx.correlation_id,
-        })
+        });
         return ctx.json(
           {
             success: false,
             data: null,
             error: {
-              code: 'PERMISSION_DENIED',
-              message: 'reporting.view permission required to access dashboard',
+              code: "PERMISSION_DENIED",
+              message: "reporting.view permission required to access dashboard",
             },
           },
-          403
-        )
+          403,
+        );
       }
 
-      const roleId = result.rows[0].role_id
+      const roleId = result.rows[0].role_id;
 
       // Check if role has reporting.view permission
       const permResult = await masterDb.query(
         `SELECT permission_id FROM role_permissions 
          WHERE role_id = $1 
          AND permission_name = 'reporting.view'`,
-        [roleId]
-      )
+        [roleId],
+      );
 
       if (permResult.rows.length === 0) {
         logger.info({
-          event: 'permission_check_failed',
-          reason: 'permission_denied',
+          event: "permission_check_failed",
+          reason: "permission_denied",
           user_id: user.id,
           role_id: roleId,
           correlation_id: ctx.correlation_id,
-        })
+        });
         return ctx.json(
           {
             success: false,
             data: null,
             error: {
-              code: 'PERMISSION_DENIED',
-              message: 'reporting.view permission required to access dashboard',
+              code: "PERMISSION_DENIED",
+              message: "reporting.view permission required to access dashboard",
             },
           },
-          403
-        )
+          403,
+        );
       }
 
       logger.info({
-        event: 'permission_check_passed',
+        event: "permission_check_passed",
         user_id: user.id,
         correlation_id: ctx.correlation_id,
-      })
+      });
 
-      await next()
+      await next();
     } catch (error) {
       logger.error({
-        event: 'permission_check_error',
+        event: "permission_check_error",
         error: error instanceof Error ? error.message : String(error),
         correlation_id: ctx.correlation_id,
-      })
+      });
       return ctx.json(
         {
           success: false,
           data: null,
           error: {
-            code: 'INTERNAL_ERROR',
-            message: 'Failed to check permissions',
+            code: "INTERNAL_ERROR",
+            message: "Failed to check permissions",
           },
         },
-        500
-      )
+        500,
+      );
     }
-  }
+  };
 }
 ```
 
@@ -338,111 +332,108 @@ export function createPermissionMiddleware(
 **File**: `apps/api/src/routes/mmc/dashboard/routes.ts`
 
 ```typescript
-import { Hono } from 'hono'
-import { Context } from 'hono'
-import type { Pool } from 'pg'
-import type { Logger } from '@zidney/logger'
-import { createPermissionMiddleware } from '@zidney/middleware/permission.middleware'
-import { licenseEnforcementMiddleware } from '@zidney/middleware/license-enforcement.middleware'
+import { Hono } from "hono";
+import { Context } from "hono";
+import type { Pool } from "pg";
+import type { Logger } from "@zidney/logger";
+import { createPermissionMiddleware } from "@zidney/middleware/permission.middleware";
+import { licenseEnforcementMiddleware } from "@zidney/middleware/license-enforcement.middleware";
 import {
   getLicenseMetrics,
   getRevenueMetrics,
   SummaryResponse,
-} from '@zidney/domain-core/mmc-dashboard'
+} from "@zidney/domain-core/mmc-dashboard";
 
 export interface DashboardBindings {
-  masterDb: Pool
-  logger: Logger
-  redisClient: any
+  masterDb: Pool;
+  logger: Logger;
+  redisClient: any;
 }
 
-const dashboardRoutes = new Hono<{ Bindings: DashboardBindings }>()
+const dashboardRoutes = new Hono<{ Bindings: DashboardBindings }>();
 
 // Apply middleware chain
-dashboardRoutes.use(licenseEnforcementMiddleware)
-dashboardRoutes.use(createPermissionMiddleware)
+dashboardRoutes.use(licenseEnforcementMiddleware);
+dashboardRoutes.use(createPermissionMiddleware);
 
 /**
  * GET /api/mmc/dashboard/summary
  * Returns license counts and revenue snapshot
  */
-dashboardRoutes.get(
-  '/summary',
-  async (ctx: Context<{ Bindings: DashboardBindings }>) => {
-    try {
-      const { masterDb, logger, redisClient } = ctx.env
-      const correlationId = ctx.get('correlation_id')
+dashboardRoutes.get("/summary", async (ctx: Context<{ Bindings: DashboardBindings }>) => {
+  try {
+    const { masterDb, logger, redisClient } = ctx.env;
+    const correlationId = ctx.get("correlation_id");
 
-      const cacheKey = `mmc:dashboard:summary:mmc`
+    const cacheKey = `mmc:dashboard:summary:mmc`;
 
-      // Check cache
-      const cached = await redisClient.get(cacheKey)
-      if (cached) {
-        logger.info({
-          event: 'dashboard_cache_hit',
-          endpoint: '/summary',
-          correlation_id: correlationId,
-        })
-        ctx.header('X-Cache', 'HIT')
-        return ctx.json({
-          success: true,
-          data: JSON.parse(cached),
-          error: null,
-        })
-      }
-
-      // Fetch from database
-      const [licenses, revenue] = await Promise.all([
-        getLicenseMetrics(masterDb),
-        getRevenueMetrics(masterDb),
-      ])
-
-      const data = {
-        licenses,
-        revenue,
-        snapshot_at: new Date().toISOString(),
-      }
-
-      // Cache for 5 minutes
-      await redisClient.setex(cacheKey, 300, JSON.stringify(data))
-
-      ctx.header('X-Cache', 'MISS')
-      ctx.header('Cache-Control', 'max-age=300, public')
-
+    // Check cache
+    const cached = await redisClient.get(cacheKey);
+    if (cached) {
       logger.info({
-        event: 'dashboard_query_executed',
-        endpoint: '/summary',
-        response_time_ms: 45, // Placeholder
+        event: "dashboard_cache_hit",
+        endpoint: "/summary",
         correlation_id: correlationId,
-      })
-
+      });
+      ctx.header("X-Cache", "HIT");
       return ctx.json({
         success: true,
-        data,
+        data: JSON.parse(cached),
         error: null,
-      })
-    } catch (error) {
-      ctx.env.logger.error({
-        event: 'dashboard_error',
-        endpoint: '/summary',
-        error: error instanceof Error ? error.message : String(error),
-        correlation_id: ctx.get('correlation_id'),
-      })
-
-      return ctx.json(
-        {
-          success: false,
-          data: null,
-          error: {
-            code: 'INTERNAL_ERROR',
-            message: 'Failed to retrieve dashboard summary',
-          },
-        },
-        500
-      )
+      });
     }
+
+    // Fetch from database
+    const [licenses, revenue] = await Promise.all([
+      getLicenseMetrics(masterDb),
+      getRevenueMetrics(masterDb),
+    ]);
+
+    const data = {
+      licenses,
+      revenue,
+      snapshot_at: new Date().toISOString(),
+    };
+
+    // Cache for 5 minutes
+    await redisClient.setex(cacheKey, 300, JSON.stringify(data));
+
+    ctx.header("X-Cache", "MISS");
+    ctx.header("Cache-Control", "max-age=300, public");
+
+    logger.info({
+      event: "dashboard_query_executed",
+      endpoint: "/summary",
+      response_time_ms: 45, // Placeholder
+      correlation_id: correlationId,
+    });
+
+    return ctx.json({
+      success: true,
+      data,
+      error: null,
+    });
+  } catch (error) {
+    ctx.env.logger.error({
+      event: "dashboard_error",
+      endpoint: "/summary",
+      error: error instanceof Error ? error.message : String(error),
+      correlation_id: ctx.get("correlation_id"),
+    });
+
+    return ctx.json(
+      {
+        success: false,
+        data: null,
+        error: {
+          code: "INTERNAL_ERROR",
+          message: "Failed to retrieve dashboard summary",
+        },
+      },
+      500,
+    );
   }
-)
+});
 
 /**
  * Implement remaining endpoints (revenue-breakdown, geographic, affiliates, trends, export)
@@ -454,7 +445,7 @@ dashboardRoutes.get(
  * 5. Log with correlation_id
  */
 
-export default dashboardRoutes
+export default dashboardRoutes;
 ```
 
 ### Step 1.4: Create Database Indexes
@@ -462,10 +453,9 @@ export default dashboardRoutes
 **File**: `apps/api/src/db/master/migrations/20260226_010_create_dashboard_indexes.ts`
 
 ```typescript
-import { PoolClient } from 'pg'
+import { PoolClient } from "pg";
 
-export const description =
-  'Create indexes for MMC Dashboard performance optimization'
+export const description = "Create indexes for MMC Dashboard performance optimization";
 
 export async function up(client: PoolClient): Promise<void> {
   // Licenses indexes
@@ -473,7 +463,7 @@ export async function up(client: PoolClient): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_licenses_status ON licenses(status);
     CREATE INDEX IF NOT EXISTS idx_licenses_deleted_at ON licenses(deleted_at);
     CREATE INDEX IF NOT EXISTS idx_licenses_workspace_slug ON licenses(workspace_slug);
-  `)
+  `);
 
   // Revenue records indexes
   await client.query(`
@@ -484,7 +474,7 @@ export async function up(client: PoolClient): Promise<void> {
       ON revenue_records(product_id, created_at);
     CREATE INDEX IF NOT EXISTS idx_revenue_records_country_created 
       ON revenue_records(billing_country, created_at);
-  `)
+  `);
 
   // Affiliates and usages indexes
   await client.query(`
@@ -494,10 +484,10 @@ export async function up(client: PoolClient): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_affiliate_usages_created_at ON affiliate_usages(created_at);
     CREATE INDEX IF NOT EXISTS idx_affiliate_usages_affiliate_created 
       ON affiliate_usages(affiliate_id, created_at);
-  `)
+  `);
 
   await client.query(`INSERT INTO _schema_migrations (migration_name, executed_at)
-    VALUES ('20260226_010_create_dashboard_indexes', NOW())`)
+    VALUES ('20260226_010_create_dashboard_indexes', NOW())`);
 }
 
 export async function down(client: PoolClient): Promise<void> {
@@ -516,7 +506,7 @@ export async function down(client: PoolClient): Promise<void> {
     DROP INDEX IF EXISTS idx_affiliate_usages_affiliate_id;
     DROP INDEX IF EXISTS idx_affiliate_usages_created_at;
     DROP INDEX IF EXISTS idx_affiliate_usages_affiliate_created;
-  `)
+  `);
 }
 ```
 
@@ -550,35 +540,35 @@ Each should:
 **File**: `apps/api/tests/unit/mmc-dashboard/metrics.test.ts`
 
 ```typescript
-import { describe, it, expect } from 'vitest'
+import { describe, it, expect } from "vitest";
 import {
   roundRevenue,
   getLicenseMetrics,
   calculateGrowthPercent,
-} from '@zidney/domain-core/mmc-dashboard'
+} from "@zidney/domain-core/mmc-dashboard";
 
-describe('Dashboard Metrics', () => {
-  describe('Revenue Rounding', () => {
-    it('should round revenue to 2 decimals using round-half-up', () => {
-      expect(roundRevenue('100.445')).toBe('100.45')
-      expect(roundRevenue('100.005')).toBe('100.01')
-      expect(roundRevenue('100.004')).toBe('100.00')
-      expect(roundRevenue('95000.4567')).toBe('95000.46')
-    })
-  })
+describe("Dashboard Metrics", () => {
+  describe("Revenue Rounding", () => {
+    it("should round revenue to 2 decimals using round-half-up", () => {
+      expect(roundRevenue("100.445")).toBe("100.45");
+      expect(roundRevenue("100.005")).toBe("100.01");
+      expect(roundRevenue("100.004")).toBe("100.00");
+      expect(roundRevenue("95000.4567")).toBe("95000.46");
+    });
+  });
 
-  describe('Growth Calculation', () => {
-    it('should calculate growth percentage correctly', () => {
-      const growth = calculateGrowthPercent('230000.00', '220000.00')
-      expect(growth).toBe('4.55')
-    })
+  describe("Growth Calculation", () => {
+    it("should calculate growth percentage correctly", () => {
+      const growth = calculateGrowthPercent("230000.00", "220000.00");
+      expect(growth).toBe("4.55");
+    });
 
-    it('should handle zero previous value', () => {
-      const growth = calculateGrowthPercent('100.00', '0.00')
-      expect(growth).toBe('0.00') // Avoid divide by zero
-    })
-  })
-})
+    it("should handle zero previous value", () => {
+      const growth = calculateGrowthPercent("100.00", "0.00");
+      expect(growth).toBe("0.00"); // Avoid divide by zero
+    });
+  });
+});
 ```
 
 ### Step 2.2: Integration Tests
@@ -586,58 +576,58 @@ describe('Dashboard Metrics', () => {
 **File**: `apps/api/tests/integration/mmc-dashboard/endpoints.test.ts`
 
 ```typescript
-import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import request from 'supertest'
-import app from '@zidney/api'
-import { masterDb, testData } from '@zidney/tests/fixtures'
+import { describe, it, expect, beforeAll, afterAll } from "vitest";
+import request from "supertest";
+import app from "@zidney/api";
+import { masterDb, testData } from "@zidney/tests/fixtures";
 
-describe('Dashboard Endpoints', () => {
+describe("Dashboard Endpoints", () => {
   beforeAll(async () => {
     // Seed test data
-    await testData.seedLicenses(masterDb, 1250)
-    await testData.seedRevenueRecords(masterDb, 10000)
-  })
+    await testData.seedLicenses(masterDb, 1250);
+    await testData.seedRevenueRecords(masterDb, 10000);
+  });
 
   afterAll(async () => {
     // Cleanup
-    await masterDb.query('DELETE FROM revenue_records WHERE 1=1')
-    await masterDb.query('DELETE FROM licenses WHERE 1=1')
-  })
+    await masterDb.query("DELETE FROM revenue_records WHERE 1=1");
+    await masterDb.query("DELETE FROM licenses WHERE 1=1");
+  });
 
-  describe('GET /api/mmc/dashboard/summary', () => {
-    it('should return 200 with license counts and revenue', async () => {
+  describe("GET /api/mmc/dashboard/summary", () => {
+    it("should return 200 with license counts and revenue", async () => {
       const response = await request(app)
-        .get('/api/mmc/dashboard/summary')
-        .set('Authorization', `Bearer ${testData.adminToken}`)
+        .get("/api/mmc/dashboard/summary")
+        .set("Authorization", `Bearer ${testData.adminToken}`);
 
-      expect(response.status).toBe(200)
-      expect(response.body.success).toBe(true)
-      expect(response.body.data.licenses).toBeDefined()
-      expect(response.body.data.revenue).toBeDefined()
-    })
+      expect(response.status).toBe(200);
+      expect(response.body.success).toBe(true);
+      expect(response.body.data.licenses).toBeDefined();
+      expect(response.body.data.revenue).toBeDefined();
+    });
 
-    it('should return 403 if permission missing', async () => {
+    it("should return 403 if permission missing", async () => {
       const response = await request(app)
-        .get('/api/mmc/dashboard/summary')
-        .set('Authorization', `Bearer ${testData.limitedUserToken}`)
+        .get("/api/mmc/dashboard/summary")
+        .set("Authorization", `Bearer ${testData.limitedUserToken}`);
 
-      expect(response.status).toBe(403)
-      expect(response.body.error.code).toBe('PERMISSION_DENIED')
-    })
+      expect(response.status).toBe(403);
+      expect(response.body.error.code).toBe("PERMISSION_DENIED");
+    });
 
-    it('should respond in under 300ms', async () => {
-      const start = Date.now()
+    it("should respond in under 300ms", async () => {
+      const start = Date.now();
       await request(app)
-        .get('/api/mmc/dashboard/summary')
-        .set('Authorization', `Bearer ${testData.adminToken}`)
-      const elapsed = Date.now() - start
+        .get("/api/mmc/dashboard/summary")
+        .set("Authorization", `Bearer ${testData.adminToken}`);
+      const elapsed = Date.now() - start;
 
-      expect(elapsed).toBeLessThan(300)
-    })
-  })
+      expect(elapsed).toBeLessThan(300);
+    });
+  });
 
   // Repeat for all 6 endpoints
-})
+});
 ```
 
 ### Step 2.3: Performance Tests
@@ -645,32 +635,30 @@ describe('Dashboard Endpoints', () => {
 **File**: `apps/api/tests/performance/mmc-dashboard/concurrent.test.ts`
 
 ```typescript
-import { describe, it, expect } from 'vitest'
-import request from 'supertest'
-import app from '@zidney/api'
+import { describe, it, expect } from "vitest";
+import request from "supertest";
+import app from "@zidney/api";
 
-describe('Dashboard Concurrent Load', () => {
-  it('should handle 100 concurrent requests within 300ms', async () => {
+describe("Dashboard Concurrent Load", () => {
+  it("should handle 100 concurrent requests within 300ms", async () => {
     const requests = Array.from({ length: 100 }, (_, i) =>
       request(app)
-        .get('/api/mmc/dashboard/summary')
-        .set('Authorization', `Bearer ${generateTestToken(i)}`)
-    )
+        .get("/api/mmc/dashboard/summary")
+        .set("Authorization", `Bearer ${generateTestToken(i)}`),
+    );
 
-    const start = Date.now()
-    const results = await Promise.all(requests)
-    const duration = Date.now() - start
+    const start = Date.now();
+    const results = await Promise.all(requests);
+    const duration = Date.now() - start;
 
-    const successful = results.filter((r) => r.status === 200).length
-    const maxLatency = Math.max(
-      ...results.map((r) => parseInt(r.headers['x-response-time']))
-    )
+    const successful = results.filter((r) => r.status === 200).length;
+    const maxLatency = Math.max(...results.map((r) => parseInt(r.headers["x-response-time"])));
 
-    expect(successful).toBe(100)
-    expect(maxLatency).toBeLessThan(300)
-    expect(duration).toBeLessThan(1000) // All 100 complete within 1 second
-  })
-})
+    expect(successful).toBe(100);
+    expect(maxLatency).toBeLessThan(300);
+    expect(duration).toBeLessThan(1000); // All 100 complete within 1 second
+  });
+});
 ```
 
 ### Step 2.4: Run All Tests
@@ -702,21 +690,21 @@ npm run lint
 
 ```vue
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
-import { useQuery } from '@tanstack/vue-query'
-import CommercialHealth from '@/components/dashboard/CommercialHealth.vue'
-import GeographicDistribution from '@/components/dashboard/GeographicDistribution.vue'
-import AffiliateLeaderboard from '@/components/dashboard/AffiliateLeaderboard.vue'
-import GrowthTrends from '@/components/dashboard/GrowthTrends.vue'
+import { ref, onMounted } from "vue";
+import { useQuery } from "@tanstack/vue-query";
+import CommercialHealth from "@/components/dashboard/CommercialHealth.vue";
+import GeographicDistribution from "@/components/dashboard/GeographicDistribution.vue";
+import AffiliateLeaderboard from "@/components/dashboard/AffiliateLeaderboard.vue";
+import GrowthTrends from "@/components/dashboard/GrowthTrends.vue";
 
-const loading = ref(true)
-const error = ref<string | null>(null)
+const loading = ref(true);
+const error = ref<string | null>(null);
 
 // Fetch summary data
 const { data: summary } = useQuery({
-  queryKey: ['dashboard-summary'],
+  queryKey: ["dashboard-summary"],
   queryFn: () => dashboardApi.getSummary(),
-})
+});
 
 onMounted(async () => {
   try {
@@ -724,14 +712,13 @@ onMounted(async () => {
     await Promise.all([
       summary,
       // ... other queries
-    ])
-    loading.value = false
+    ]);
+    loading.value = false;
   } catch (err) {
-    error.value =
-      err instanceof Error ? err.message : 'Failed to load dashboard'
-    loading.value = false
+    error.value = err instanceof Error ? err.message : "Failed to load dashboard";
+    loading.value = false;
   }
-})
+});
 </script>
 
 <template>
@@ -773,28 +760,28 @@ onMounted(async () => {
 
 ```vue
 <script setup lang="ts">
-import { computed } from 'vue'
-import type { SummaryData } from '@zidney/dashboard-contracts'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
+import { computed } from "vue";
+import type { SummaryData } from "@zidney/dashboard-contracts";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface Props {
-  data?: SummaryData
+  data?: SummaryData;
 }
 
-defineProps<Props>()
+defineProps<Props>();
 
 const formattedData = computed(() => {
-  if (!props.data) return null
+  if (!props.data) return null;
 
   return {
     ...props.data,
     revenue: {
-      this_month: `$${parseFloat(props.data.revenue.this_month).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-      this_year: `$${parseFloat(props.data.revenue.this_year).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
-      last_month: `$${parseFloat(props.data.revenue.last_month).toLocaleString('en-US', { minimumFractionDigits: 2 })}`,
+      this_month: `$${parseFloat(props.data.revenue.this_month).toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
+      this_year: `$${parseFloat(props.data.revenue.this_year).toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
+      last_month: `$${parseFloat(props.data.revenue.last_month).toLocaleString("en-US", { minimumFractionDigits: 2 })}`,
     },
-  }
-})
+  };
+});
 </script>
 
 <template>
@@ -837,62 +824,55 @@ import type {
   GeographicResponse,
   AffiliatesResponse,
   TrendsResponse,
-} from '@zidney/dashboard-contracts'
+} from "@zidney/dashboard-contracts";
 
-const BASE_URL = '/api/mmc/dashboard'
+const BASE_URL = "/api/mmc/dashboard";
 
 export const dashboardApi = {
   async getSummary(): Promise<SummaryResponse> {
     const response = await fetch(`${BASE_URL}/summary`, {
       headers: {
         Authorization: `Bearer ${getAuthToken()}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-    })
+    });
 
-    const data: SummaryResponse = await response.json()
+    const data: SummaryResponse = await response.json();
 
     if (!response.ok) {
-      throw new Error(
-        data.error?.message || 'Failed to fetch dashboard summary'
-      )
+      throw new Error(data.error?.message || "Failed to fetch dashboard summary");
     }
 
-    return data
+    return data;
   },
 
-  async getRevenueBreakdown(
-    dateFrom?: string,
-    dateTo?: string
-  ): Promise<RevenueBreakdownResponse> {
-    const params = new URLSearchParams()
-    if (dateFrom) params.append('date_from', dateFrom)
-    if (dateTo) params.append('date_to', dateTo)
+  async getRevenueBreakdown(dateFrom?: string, dateTo?: string): Promise<RevenueBreakdownResponse> {
+    const params = new URLSearchParams();
+    if (dateFrom) params.append("date_from", dateFrom);
+    if (dateTo) params.append("date_to", dateTo);
 
     const response = await fetch(`${BASE_URL}/revenue-breakdown?${params}`, {
       headers: {
         Authorization: `Bearer ${getAuthToken()}`,
-        'Content-Type': 'application/json',
+        "Content-Type": "application/json",
       },
-    })
+    });
 
-    const data: RevenueBreakdownResponse = await response.json()
+    const data: RevenueBreakdownResponse = await response.json();
 
     if (!response.ok) {
-      throw new Error(
-        data.error?.message || 'Failed to fetch revenue breakdown'
-      )
+      throw new Error(data.error?.message || "Failed to fetch revenue breakdown");
     }
 
-    return data
+    return data;
   },
 
   // Implement remaining methods (geographic, affiliates, trends, export)
-}
+};
 
 function getAuthToken(): string {
   // Retrieve from localStorage or auth context
-  return localStorage.getItem('auth_token') || ''
+  return localStorage.getItem("auth_token") || "";
 }
 ```
 
@@ -1057,56 +1037,51 @@ curl -H "Authorization: Bearer $PROD_TOKEN_ADMIN" \
 **File**: `scripts/seed-dashboard-test-data.js`
 
 ```javascript
-const { Pool } = require('pg')
+const { Pool } = require("pg");
 
 const pool = new Pool({
   connectionString:
     process.env.TEST_MASTER_DB_URL ||
-    'postgresql://postgres:password@localhost:5432/master_db_test',
-})
+    "postgresql://postgres:password@localhost:5432/master_db_test",
+});
 
 async function seed() {
-  const client = await pool.connect()
+  const client = await pool.connect();
 
   try {
     // Insert 1,250 licenses
-    const licenseIds = []
+    const licenseIds = [];
     for (let i = 0; i < 1250; i++) {
-      const status = i < 1200 ? 'ACTIVE' : i < 1235 ? 'SOFT_LOCKED' : 'ARCHIVED'
+      const status = i < 1200 ? "ACTIVE" : i < 1235 ? "SOFT_LOCKED" : "ARCHIVED";
       const result = await client.query(
         `INSERT INTO licenses (product_id, workspace_slug, status, created_at)
          VALUES ($1, $2, $3, NOW() - INTERVAL '${Math.random() * 365} days')
          RETURNING id`,
-        ['prod-uuid', `workspace-${i}`, status]
-      )
-      licenseIds.push(result.rows[0].id)
+        ["prod-uuid", `workspace-${i}`, status],
+      );
+      licenseIds.push(result.rows[0].id);
     }
 
     // Insert 10,000 revenue records
     for (let i = 0; i < 10000; i++) {
-      const amount = (Math.random() * 1000 + 100).toFixed(4)
-      const daysAgo = Math.floor(Math.random() * 365)
+      const amount = (Math.random() * 1000 + 100).toFixed(4);
+      const daysAgo = Math.floor(Math.random() * 365);
       await client.query(
         `INSERT INTO revenue_records 
          (license_id, product_id, amount, billing_country, created_at)
          VALUES ($1, $2, $3, $4, NOW() - INTERVAL '${daysAgo} days')`,
-        [
-          licenseIds[i % 1250],
-          'prod-uuid',
-          amount,
-          ['US', 'GB', 'CA', 'DE', 'FR'][i % 5],
-        ]
-      )
+        [licenseIds[i % 1250], "prod-uuid", amount, ["US", "GB", "CA", "DE", "FR"][i % 5]],
+      );
     }
 
-    console.log('✓ Seeded 1,250 licenses and 10,000 revenue records')
+    console.log("✓ Seeded 1,250 licenses and 10,000 revenue records");
   } finally {
-    client.release()
-    pool.end()
+    client.release();
+    pool.end();
   }
 }
 
-seed().catch(console.error)
+seed().catch(console.error);
 ```
 
 ### Environment Variables

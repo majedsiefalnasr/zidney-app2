@@ -8,10 +8,7 @@ Scope: Affiliate promo codes for license-level sales
 
 ## Stage Status
 
-Status: PRODUCTION READY
-Risk Level: LOW
-Closure Date: 2026-02-25
-Last Updated: 2026-02-25T14:50:00Z
+Status: PRODUCTION READY Risk Level: LOW Closure Date: 2026-02-25 Last Updated: 2026-02-25T14:50:00Z
 
 Implementation Complete:
 
@@ -71,8 +68,8 @@ No Structural Backend Modifications Allowed:
 - Financial determinism guaranteed
 - Drift analysis gate pending
 
-Notes:
-Atomic task set generated. All 43 tasks locked and ready. Drift analysis gate pending before implementation.
+Notes: Atomic task set generated. All 43 tasks locked and ready. Drift analysis gate pending before
+implementation.
 
 Implement Affiliate system at MMC level.
 
@@ -173,8 +170,7 @@ Promo code must:
 - Be globally unique
 - Be immutable
 
-Affiliate must not auto-apply.
-Must be explicitly provided during license purchase.
+Affiliate must not auto-apply. Must be explicitly provided during license purchase.
 
 ---
 
@@ -360,7 +356,8 @@ Financial integrity is mandatory.
 
 **Implementation Details:**
 
-- Affiliate CRUD endpoints do NOT use tenant resolver (these are admin/MMC operations, not workspace-bound)
+- Affiliate CRUD endpoints do NOT use tenant resolver (these are admin/MMC operations, not
+  workspace-bound)
 - Middleware chain: `Authenticate(MMC Token) → RBAC(Admin Role Check) → Route Handler`
 - MMC UI authenticates using MMC-generated JWT token (signed with shared secret)
 - No tenant context required; all operations scoped to master_db only
@@ -375,9 +372,11 @@ Financial integrity is mandatory.
 - **Token Generation:** MMC service generates tokens on successful admin login
 - **Format:** JWT (HS256) with industry-standard claims (iss, exp, aud, sub, scope)
 - **Signing Method:** Symmetric (HS256) using shared secret between MMC and API
-- **Shared Secret:** Configured via environment variable `MMC_JWT_SECRET` (rotated every 90 days per security policy)
+- **Shared Secret:** Configured via environment variable `MMC_JWT_SECRET` (rotated every 90 days per
+  security policy)
 - **Expiry:** 24 hours standard for admin sessions
-- **Validation Middleware:** NEW file at `apps/api/src/middleware/auth/mmc-token-validator.ts` (non-tenant-resolver auth chain)
+- **Validation Middleware:** NEW file at `apps/api/src/middleware/auth/mmc-token-validator.ts`
+  (non-tenant-resolver auth chain)
 - **Validation Logic:**
   - Verify JWT signature using shared secret
   - Check expiry timestamp
@@ -385,7 +384,8 @@ Financial integrity is mandatory.
   - Check role scope includes "admin"
   - Reject on any signature failure, expiry, or invalid claim
 - **Error Response:** HTTP 401 (Unauthorized) for token failures
-- **Implementation Task:** Must be explicit task in plan.md (marked as blocking affiliate route deployment)
+- **Implementation Task:** Must be explicit task in plan.md (marked as blocking affiliate route
+  deployment)
 
 #### Q3: Promo Code Input Validation in License Purchase
 
@@ -394,11 +394,13 @@ Financial integrity is mandatory.
 **Implementation Details:**
 
 - **Zod Schema:** `z.string().trim().toUpperCase().min(3).max(50).regex(/^[A-Z0-9]+$/)`
-- **Validation Location:** License purchase handler at `apps/api/src/routes/licenses/purchase.ts` (existing license domain)
+- **Validation Location:** License purchase handler at `apps/api/src/routes/licenses/purchase.ts`
+  (existing license domain)
 - **Validation Results:**
   - **Valid:** Alphanumeric, 3–50 characters, uppercase
   - **Rejected:** Non-alphanumeric chars, < 3 chars, > 50 chars, mixed case
 - **Error Handling:** HTTP 400 with error code `INVALID_PROMO_CODE`
 - **Normalization:** Input automatically trimmed + converted to uppercase before validation
-- **Affiliation Logic:** After validation passes, promo code checked against affiliates table (existing transactional usage flow applies)
+- **Affiliation Logic:** After validation passes, promo code checked against affiliates table
+  (existing transactional usage flow applies)
 - **User Feedback:** Clear error message: "Promo code must be 3–50 characters, alphanumeric only"

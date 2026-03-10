@@ -30,9 +30,12 @@
 
 ### Phase 1: Database Infrastructure (T001)
 
-- **File**: `apps/api/src/db/master/migrations/20260217_004_enhance_licenses_and_add_archive_snapshots.ts`
-- **Purpose**: Create licenses + archive_snapshots tables with all required columns, indexes, constraints
-- **Details**: Transactional DDL, forward-compatible version bump (1.0.0 → 1.1.0), atomic up/down functions
+- **File**:
+  `apps/api/src/db/master/migrations/20260217_004_enhance_licenses_and_add_archive_snapshots.ts`
+- **Purpose**: Create licenses + archive_snapshots tables with all required columns, indexes,
+  constraints
+- **Details**: Transactional DDL, forward-compatible version bump (1.0.0 → 1.1.0), atomic up/down
+  functions
 
 ### Phase 2: Domain-Core Modules (T002-T007)
 
@@ -249,7 +252,8 @@ Template ready; needs:
 
 ### Database
 
-1. `apps/api/src/db/master/migrations/20260217_004_enhance_licenses_and_add_archive_snapshots.ts` (180 LOC)
+1. `apps/api/src/db/master/migrations/20260217_004_enhance_licenses_and_add_archive_snapshots.ts`
+   (180 LOC)
 
 ### Domain-Core
 
@@ -370,7 +374,8 @@ TOTAL: ~3 hours to MVP
 - **Critical Path Remaining**: Endpoint wiring (T016-T020) + key tests (T033-T044)
 - **Estimated Time to Production**: 18 hours (full scope) or 3 hours (MVP)
 
-**Recommendation**: Proceed with test implementation (T033-T044) to reach production-ready milestone.
+**Recommendation**: Proceed with test implementation (T033-T044) to reach production-ready
+milestone.
 
 ---
 
@@ -378,13 +383,22 @@ TOTAL: ~3 hours to MVP
 
 **Priority 1 (Core Logic)**:
 
-1. [packages/domain-core/src/license/service.ts](packages/domain-core/src/license/service.ts) - Service functions + transactions
+1. [packages/domain-core/src/license/service.ts](packages/domain-core/src/license/service.ts) -
+   Service functions + transactions
 2. [apps/api/src/routes/license-router.ts](apps/api/src/routes/license-router.ts) - API endpoints
-3. [apps/api/src/utils/transaction-wrapper.ts](apps/api/src/utils/transaction-wrapper.ts) - Limit enforcement
+3. [apps/api/src/utils/transaction-wrapper.ts](apps/api/src/utils/transaction-wrapper.ts) - Limit
+   enforcement
 
-**Priority 2 (Infrastructure)**: 4. [apps/api/src/middleware/license-enforcement.ts](apps/api/src/middleware/license-enforcement.ts) - Middleware validation 5. [apps/worker/src/jobs/archive-snapshot.ts](apps/worker/src/jobs/archive-snapshot.ts) - Worker job
+**Priority 2 (Infrastructure)**: 4.
+[apps/api/src/middleware/license-enforcement.ts](apps/api/src/middleware/license-enforcement.ts) -
+Middleware validation 5.
+[apps/worker/src/jobs/archive-snapshot.ts](apps/worker/src/jobs/archive-snapshot.ts) - Worker job
 
-**Priority 3 (Framework)**: 6. [packages/domain-core/tests/license/fixtures.ts](packages/domain-core/tests/license/fixtures.ts) - Test utilities 7. [packages/domain-core/tests/TEST_INDEX.md](packages/domain-core/tests/TEST_INDEX.md) - Test organization
+**Priority 3 (Framework)**: 6.
+[packages/domain-core/tests/license/fixtures.ts](packages/domain-core/tests/license/fixtures.ts) -
+Test utilities 7.
+[packages/domain-core/tests/TEST_INDEX.md](packages/domain-core/tests/TEST_INDEX.md) - Test
+organization
 
 ---
 

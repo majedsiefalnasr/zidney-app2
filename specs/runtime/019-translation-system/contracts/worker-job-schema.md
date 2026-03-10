@@ -1,16 +1,14 @@
 # Worker Job Schema: Translation System
 
-**Feature Branch**: `019-translation-system`
-**Date**: 2026-03-01
-**Stage**: Phase 1 Design
+**Feature Branch**: `019-translation-system` **Date**: 2026-03-01 **Stage**: Phase 1 Design
 
 ---
 
 ## DRAIN_LANGUAGE_TRANSLATIONS Job
 
-**Registered in**: `packages/types/job-envelope.ts` (add to job union)
-**Handler**: `apps/worker/src/jobs/drain-language-translations.ts`
-**Queue**: Standard worker job queue (same as existing jobs)
+**Registered in**: `packages/types/job-envelope.ts` (add to job union) **Handler**:
+`apps/worker/src/jobs/drain-language-translations.ts` **Queue**: Standard worker job queue (same as
+existing jobs)
 
 ### Trigger Conditions
 
@@ -26,35 +24,35 @@ Below the threshold, deletion is synchronous and this job is NOT enqueued.
 ```typescript
 interface DrainLanguageTranslationsJob {
   /** Job type discriminator — must be exactly this string */
-  job_type: 'DRAIN_LANGUAGE_TRANSLATIONS'
+  job_type: "DRAIN_LANGUAGE_TRANSLATIONS";
 
   /** Tenant workspace identifier (UUID) */
-  workspace_id: string
+  workspace_id: string;
 
   /** Tenant workspace slug — used to resolve tenant DB connection */
-  workspace_slug: string
+  workspace_slug: string;
 
   /** ISO 639-1 language code being drained (e.g. 'fr', 'es') */
-  language_code: string
+  language_code: string;
 
   /**
    * Rows to delete per batch iteration.
    * Default: 1000. Configurable by operator at enqueue time.
    * Minimum: 100. Maximum: 5000.
    */
-  batch_size: number
+  batch_size: number;
 
   /** Correlation ID from the HTTP request that triggered the removal */
-  correlation_id: string
+  correlation_id: string;
 
   /** User ID of the staff member who initiated the language removal */
-  initiated_by_user_id: string
+  initiated_by_user_id: string;
 
   /** Retry attempt number — incremented by worker infrastructure on retry */
-  attempt?: number
+  attempt?: number;
 
   /** ISO8601 timestamp when job was created (set at enqueue time) */
-  created_at: string
+  created_at: string;
 }
 ```
 
@@ -128,12 +126,15 @@ interface DrainLanguageTranslationsJob {
 
 ### Concurrency Safety
 
-Only one `DRAIN_LANGUAGE_TRANSLATIONS` job per `(workspace_id, language_code)` should be active at a time.
+Only one `DRAIN_LANGUAGE_TRANSLATIONS` job per `(workspace_id, language_code)` should be active at a
+time.
 
 Guards:
 
-1. `language_status[language_code] = 'removing'` in workspace_settings — the language removal endpoint rejects new removal requests for languages already in `'removing'` state (returns 409).
-2. Job deduplication via `job-hash.ts` (existing worker infrastructure) — the hash key is `{workspace_id}:{language_code}:drain`.
+1. `language_status[language_code] = 'removing'` in workspace_settings — the language removal
+   endpoint rejects new removal requests for languages already in `'removing'` state (returns 409).
+2. Job deduplication via `job-hash.ts` (existing worker infrastructure) — the hash key is
+   `{workspace_id}:{language_code}:drain`.
 
 ### State Lifecycle
 
@@ -158,7 +159,8 @@ Drain complete:
 
 ### API Response When Job Is Enqueued
 
-The language removal endpoint returns HTTP 409 (not 202) to signal the caller that the language was removed from settings but translation row cleanup is async:
+The language removal endpoint returns HTTP 409 (not 202) to signal the caller that the language was
+removed from settings but translation row cleanup is async:
 
 ```json
 {
@@ -171,4 +173,6 @@ The language removal endpoint returns HTTP 409 (not 202) to signal the caller th
 }
 ```
 
-The language is immediately removed from `supported_languages` in workspace_settings — no new translations can be saved in that language once the 409 is returned. The drain job only purges the existing rows.
+The language is immediately removed from `supported_languages` in workspace_settings — no new
+translations can be saved in that language once the 409 is returned. The drain job only purges the
+existing rows.

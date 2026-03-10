@@ -171,5 +171,4 @@ Stage is complete when:
 
 ---
 
-Next stage:
-STAGE_33_MCQ_BASKETS
+Next stage: STAGE_33_MCQ_BASKETS

@@ -8,9 +8,8 @@ Stack:
 - Tailwind v4
 - shadcn-vue
 
-MMC = Platform-level control plane.
-MMC operates on master_db only.
-MMC never accesses tenant databases directly.
+MMC = Platform-level control plane. MMC operates on master_db only. MMC never accesses tenant
+databases directly.
 
 ---
 
@@ -18,8 +17,7 @@ MMC never accesses tenant databases directly.
 
 MMC belongs to:
 
-Platform Layer
-(Not workspace layer)
+Platform Layer (Not workspace layer)
 
 Trust chain position:
 
@@ -65,8 +63,8 @@ MMC MUST NOT:
 - Derive business decisions from UI state
 - Simulate license state transitions on client side
 
-All lifecycle, provisioning, and versioning logic lives exclusively in API.
-MMC is a visual control layer only.
+All lifecycle, provisioning, and versioning logic lives exclusively in API. MMC is a visual control
+layer only.
 
 ---
 
@@ -89,7 +87,8 @@ State transitions triggered only via API endpoints.
 
 ## Provisioning Behavior
 
-When creating a License: 1. License created in PROVISIONING state 2. Provisioning job queued 3. MMC shows pending status 4. Poll or subscribe to status updates 5. Only ACTIVE allows access link
+When creating a License: 1. License created in PROVISIONING state 2. Provisioning job queued 3. MMC
+shows pending status 4. Poll or subscribe to status updates 5. Only ACTIVE allows access link
 
 MMC must never assume DB exists until ACTIVE confirmed.
 
@@ -150,9 +149,8 @@ Strict rules:
 - No theme overrides outside token system
 - No cross-app UI imports
 
-MMC uses platform theme only.
-White-label theming does NOT apply to MMC.
-All layout primitives must come from shared ui-system package.
+MMC uses platform theme only. White-label theming does NOT apply to MMC. All layout primitives must
+come from shared ui-system package.
 
 ---
 
@@ -214,8 +212,7 @@ AI MUST:
 - Respect import boundaries
 - Keep MMC as pure control plane
 
-If AI output violates isolation, lifecycle authority,
-or UI system contract — it must be rejected.
+If AI output violates isolation, lifecycle authority, or UI system contract — it must be rejected.
 
 ---
 

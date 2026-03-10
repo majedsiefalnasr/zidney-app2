@@ -1,6 +1,7 @@
 # Zidney AI Engineering Rules
 
-This document defines the **mandatory engineering rules that AI coding assistants must follow** when generating or modifying code inside the Zidney repository.
+This document defines the **mandatory engineering rules that AI coding assistants must follow** when
+generating or modifying code inside the Zidney repository.
 
 These rules apply to:
 
@@ -10,13 +11,15 @@ These rules apply to:
 - SpecKit agents
 - Any autonomous or semi‑autonomous AI development tool
 
-Violations of these rules will be rejected by the **AI Guard**, **Infra Audit**, and **CI Architecture Governance pipeline**.
+Violations of these rules will be rejected by the **AI Guard**, **Infra Audit**, and **CI
+Architecture Governance pipeline**.
 
 ---
 
 # 1. Read Architecture Before Coding
 
-Before generating or modifying code, the AI **must read and respect** the Zidney architecture contract:
+Before generating or modifying code, the AI **must read and respect** the Zidney architecture
+contract:
 
 docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json
 
@@ -84,7 +87,8 @@ worker → ui-system
 packages → apps
 ```
 
-If the AI attempts to generate these imports, it must refuse and propose an alternative architecture.
+If the AI attempts to generate these imports, it must refuse and propose an alternative
+architecture.
 
 ---
 

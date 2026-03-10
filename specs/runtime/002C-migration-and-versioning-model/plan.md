@@ -20,7 +20,9 @@
 
 ### Stage Charter
 
-This stage builds the deterministic, auditable skeleton that enforces forward-only schema evolution across the entire platform. It operationalizes ADR-0008 and prevents schema drift through strict version enforcement at every layer:
+This stage builds the deterministic, auditable skeleton that enforces forward-only schema evolution
+across the entire platform. It operationalizes ADR-0008 and prevents schema drift through strict
+version enforcement at every layer:
 
 - **Platform layer:** Tracks current version and minimum-supported threshold
 - **Tenant layer:** Single source of truth per workspace
@@ -38,12 +40,14 @@ All subsequent feature development depends on this stage.
 
 Explicit confirmations:
 
-- ✓ **No cross-tenant data access** — All migrations scoped to master (global) or single tenant (workspace_id)
+- ✓ **No cross-tenant data access** — All migrations scoped to master (global) or single tenant
+  (workspace_id)
 - ✓ **No middleware bypass** — License middleware mandatory before any upgrade execution
 - ✓ **No direct DB instantiation** — All connections via tenant resolver or master pool
 - ✓ **No grading logic outside Worker** — Upgrade snapshots managed by Worker only
 - ✓ **No weakening of snapshot integrity** — Snapshots atomic, transactional, immutable
-- ✓ **No weakening of version enforcement** — Runtime refuses incompatible schemas (426 contract enforced)
+- ✓ **No weakening of version enforcement** — Runtime refuses incompatible schemas (426 contract
+  enforced)
 - ✓ **No layer boundary violation** — UI/API/Domain/Worker separated per constitution
 - ✓ **No roll-forward without version bump** — SemVer strictly enforced in all write operations
 - ✓ **No manual schema edits** — All schema changes via immutable migration files only
@@ -792,7 +796,8 @@ BEGIN TRANSACTION
 
 **Isolation Level:** SERIALIZABLE (strict; prevents concurrent tenant writes)
 
-**Rollback Behavior:** Entire upgrade reverted; workspace remains on previous version; snapshot retained
+**Rollback Behavior:** Entire upgrade reverted; workspace remains on previous version; snapshot
+retained
 
 ---
 
@@ -842,7 +847,8 @@ Scenario: User clicks "Upgrade" button twice
 
 ### Migration File Idempotency
 
-**Constraint:** All SQL statements in migration files must be idempotent (safe to replay multiple times)
+**Constraint:** All SQL statements in migration files must be idempotent (safe to replay multiple
+times)
 
 **Safe Patterns:**
 
@@ -2103,11 +2109,13 @@ Retry:
 
 ## Next Steps (Task Generation)
 
-This plan establishes the architectural foundation for implementation. The implementation will be broken into smaller, dependency-ordered tasks by the task generation agent.
+This plan establishes the architectural foundation for implementation. The implementation will be
+broken into smaller, dependency-ordered tasks by the task generation agent.
 
 **Key implementation dependencies:**
 
-1. ✓ Schema objects created (platform_settings, migration_registry, snapshot_registry, schema_version table)
+1. ✓ Schema objects created (platform_settings, migration_registry, snapshot_registry,
+   schema_version table)
 2. ✓ Version validation library (SemVer parsing, compatibility checks)
 3. ✓ Tenant resolver integration (schema_version checks at request time)
 4. ✓ Migration runner (master and tenant execution engines)

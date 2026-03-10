@@ -125,41 +125,41 @@ if (userRole === 'org_admin') {
 // File: apps/api/src/middleware/rbac.ts
 
 middleware.use(async (c, next) => {
-  const endpoint = c.req.path
-  const method = c.req.method
-  const userRoles = extractRolesFromJWT(c)
+  const endpoint = c.req.path;
+  const method = c.req.method;
+  const userRoles = extractRolesFromJWT(c);
 
-  const allowedRoles = getEndpointRoles(endpoint, method)
+  const allowedRoles = getEndpointRoles(endpoint, method);
 
-  const hasPermission = userRoles.some((role) => allowedRoles.includes(role))
+  const hasPermission = userRoles.some((role) => allowedRoles.includes(role));
 
   if (!hasPermission) {
     // Log RBAC denial
     logger.warn({
-      event: 'rbac_denial',
+      event: "rbac_denial",
       endpoint,
       user_id: c.state.userId,
       user_roles: userRoles,
       required_roles: allowedRoles,
       correlation_id: c.state.correlationId,
-    })
+    });
 
     return c.json(
       {
         success: false,
         data: null,
         error: {
-          code: 'FORBIDDEN',
-          message: 'Insufficient permissions',
+          code: "FORBIDDEN",
+          message: "Insufficient permissions",
           correlationId: c.state.correlationId,
         },
       },
-      403
-    )
+      403,
+    );
   }
 
-  await next()
-})
+  await next();
+});
 ```
 
 ### 2. Route Handler Layer (Business Logic)
@@ -168,41 +168,38 @@ middleware.use(async (c, next) => {
 // File: apps/api/src/modules/attempt/handlers.ts
 
 export async function getAttempt(c: Context) {
-  const attemptId = c.req.param('id')
-  const userId = c.state.user_id
-  const userRole = c.state.roles[0]
+  const attemptId = c.req.param("id");
+  const userId = c.state.user_id;
+  const userRole = c.state.roles[0];
 
-  const attempt = await db.query(
-    'SELECT * FROM attempts WHERE id = ?',
-    attemptId
-  )
+  const attempt = await db.query("SELECT * FROM attempts WHERE id = ?", attemptId);
 
   // Additional ownership check for students
-  if (userRole === 'student' && attempt.user_id !== userId) {
+  if (userRole === "student" && attempt.user_id !== userId) {
     return c.json(
       {
         success: false,
         error: {
-          code: 'FORBIDDEN',
+          code: "FORBIDDEN",
           message: "Cannot access other user's attempt",
         },
       },
-      403
-    )
+      403,
+    );
   }
 
   // Proctor checks their supervision relationship
-  if (userRole === 'proctor' && attempt.proctor_id !== userId) {
+  if (userRole === "proctor" && attempt.proctor_id !== userId) {
     logger.warn({
-      event: 'proctor_unauthorized_access',
+      event: "proctor_unauthorized_access",
       attempt_id: attemptId,
       proctor_id: userId,
       assigned_proctor: attempt.proctor_id,
-    })
-    return c.json({ success: false, error: { code: 'FORBIDDEN' } }, 403)
+    });
+    return c.json({ success: false, error: { code: "FORBIDDEN" } }, 403);
   }
 
-  return c.json({ success: true, data: attempt })
+  return c.json({ success: true, data: attempt });
 }
 ```
 
@@ -214,23 +211,23 @@ export async function getAttempt(c: Context) {
 export async function getAttemptWithRBAC(
   attemptId: string,
   userId: string,
-  userRole: 'student' | 'proctor' | 'admin'
+  userRole: "student" | "proctor" | "admin",
 ): Promise<Attempt | null> {
-  if (userRole === 'student') {
+  if (userRole === "student") {
     // Only own attempts
-    return await db.query(
-      'SELECT * FROM attempts WHERE id = ? AND user_id = ?',
-      [attemptId, userId]
-    )
-  } else if (userRole === 'proctor') {
+    return await db.query("SELECT * FROM attempts WHERE id = ? AND user_id = ?", [
+      attemptId,
+      userId,
+    ]);
+  } else if (userRole === "proctor") {
     // Proctored students
-    return await db.query(
-      'SELECT * FROM attempts WHERE id = ? AND proctor_id = ?',
-      [attemptId, userId]
-    )
-  } else if (userRole === 'admin') {
+    return await db.query("SELECT * FROM attempts WHERE id = ? AND proctor_id = ?", [
+      attemptId,
+      userId,
+    ]);
+  } else if (userRole === "admin") {
     // All workspace attempts
-    return await db.query('SELECT * FROM attempts WHERE id = ?', [attemptId])
+    return await db.query("SELECT * FROM attempts WHERE id = ?", [attemptId]);
   }
 }
 ```
@@ -279,11 +276,11 @@ All RBAC decisions logged:
 ```typescript
 // File: packages/types/src/roles.ts
 export enum UserRole {
-  STUDENT = 'student',
-  PROCTOR = 'proctor',
-  ADMIN = 'admin',
-  ORG_ADMIN = 'org_admin',
-  SUPER_ADMIN = 'super_admin',
+  STUDENT = "student",
+  PROCTOR = "proctor",
+  ADMIN = "admin",
+  ORG_ADMIN = "org_admin",
+  SUPER_ADMIN = "super_admin",
   // NEW_ROLE = 'new_role'  // Add here
 }
 ```
@@ -293,16 +290,16 @@ export enum UserRole {
 ```typescript
 // File: apps/api/src/config/rbac-config.ts
 const endpointRoles = {
-  'GET /admin/workspace/{id}/new-endpoint': ['admin', 'org_admin'],
+  "GET /admin/workspace/{id}/new-endpoint": ["admin", "org_admin"],
   // Or new_role if needed
-}
+};
 ```
 
 ### Step 3: Add Conditional Checks
 
 ```typescript
 // File: apps/api/src/modules/*/handler.ts
-if (userRole === 'new_role') {
+if (userRole === "new_role") {
   // Handle new role logic
 }
 ```
@@ -311,17 +308,17 @@ if (userRole === 'new_role') {
 
 ```typescript
 // File: apps/api/tests/unit/rbac.test.ts
-it('should allow new_role to access endpoint', () => {
+it("should allow new_role to access endpoint", () => {
   const result = enforcer.checkPermission(
     {
-      roles: ['new_role'],
-      endpoint: '...',
+      roles: ["new_role"],
+      endpoint: "...",
     },
-    allowedRoles
-  )
+    allowedRoles,
+  );
 
-  expect(result.allowed).toBe(true)
-})
+  expect(result.allowed).toBe(true);
+});
 ```
 
 ### Step 5: Update Documentation

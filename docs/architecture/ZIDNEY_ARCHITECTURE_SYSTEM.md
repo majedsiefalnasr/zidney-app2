@@ -2,9 +2,11 @@
 
 ## Overview
 
-This document defines the **complete architecture governance system** for the Zidney platform. It acts as the central reference for both human developers and AI agents working in the repository.
+This document defines the **complete architecture governance system** for the Zidney platform. It
+acts as the central reference for both human developers and AI agents working in the repository.
 
-Zidney is designed as an **AI-governed monorepo**, where architecture rules are enforced automatically through tooling, CI pipelines, and machine-readable metadata.
+Zidney is designed as an **AI-governed monorepo**, where architecture rules are enforced
+automatically through tooling, CI pipelines, and machine-readable metadata.
 
 This document links together:
 
@@ -287,4 +289,5 @@ With this architecture governance system in place:
 - AI-generated code respects system design
 - architectural drift becomes detectable
 
-Zidney becomes a **self-governing architecture platform**, where system structure is continuously validated and preserved.
+Zidney becomes a **self-governing architecture platform**, where system structure is continuously
+validated and preserved.

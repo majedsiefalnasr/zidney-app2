@@ -27,13 +27,18 @@
 
 **Constitutional Compliance: ✅ FULL COMPLIANCE**
 
-- ✅ **No cross-tenant data access**: All tables tenant-isolated; tenant resolved via slug before DB access
+- ✅ **No cross-tenant data access**: All tables tenant-isolated; tenant resolved via slug before DB
+  access
 - ✅ **No middleware bypass**: License middleware required on all workspace-bound routes
 - ✅ **No direct DB instantiation**: Tenant DB obtained via connection pool manager
-- ✅ **No grading logic outside Worker**: API layer contains zero score computation; delegated entirely to worker
-- ✅ **No weakening of snapshot integrity**: Snapshot immutable after creation; grading uses snapshot only
-- ✅ **No weakening of version enforcement**: Schema and product versions validated at creation, submission, and grading
-- ✅ **No layer boundary violations**: Frontoffice UI-only; API routing/validation; Worker pure compute; MMC licensing
+- ✅ **No grading logic outside Worker**: API layer contains zero score computation; delegated
+  entirely to worker
+- ✅ **No weakening of snapshot integrity**: Snapshot immutable after creation; grading uses
+  snapshot only
+- ✅ **No weakening of version enforcement**: Schema and product versions validated at creation,
+  submission, and grading
+- ✅ **No layer boundary violations**: Frontoffice UI-only; API routing/validation; Worker pure
+  compute; MMC licensing
 - ✅ **No exceptions to Constitutional rules**: This plan enforces all mandatory constraints
 
 ---
@@ -52,7 +57,8 @@
 
 **Middleware Used**:
 
-1. `tenantResolver` → Resolve workspace from slug; validate subdomain/path; obtain tenant DB connection
+1. `tenantResolver` → Resolve workspace from slug; validate subdomain/path; obtain tenant DB
+   connection
 2. `licenseMiddleware` → Validate license status (ACTIVE check); enforce version compatibility
 3. `correlationIdMiddleware` → Generate/propagate correlation_id; attach to request context
 
@@ -66,7 +72,8 @@
 
 - **Attempt Creation**: Single transaction; all snapshots inserted atomically; no partial records
 - **Progress Update**: Upsert operation; idempotent by design; no transaction blocking required
-- **Submission**: Pessimistic lock (FOR UPDATE); atomically update status + enqueue job; rollback if enqueue fails
+- **Submission**: Pessimistic lock (FOR UPDATE); atomically update status + enqueue job; rollback if
+  enqueue fails
 - **Result Retrieval**: Read-only; no transaction required
 
 ---
@@ -77,7 +84,8 @@
 
 **Job Type**: `GRADE_ATTEMPT`
 
-**Idempotency Mechanism**: Attempt status check before grading + UNIQUE constraint on (attempt_id + finalized_at)
+**Idempotency Mechanism**: Attempt status check before grading + UNIQUE constraint on (attempt_id +
+finalized_at)
 
 **Transaction Usage**: Pessimistic lock (FOR UPDATE) + atomic status update + result write
 
@@ -106,9 +114,11 @@
 - Call `POST /api/workspaces/:slug/attempts/:id/submit` to submit
 - Poll `GET /api/workspaces/:slug/attempts/:id/result` after submission
 
-**Forbidden Responsibilities**: Zero business logic; no grading; no time enforcement; no configuration override
+**Forbidden Responsibilities**: Zero business logic; no grading; no time enforcement; no
+configuration override
 
-**Constraints**: Client timer is visual only; server time is authoritative; all attempts server-time validated
+**Constraints**: Client timer is visual only; server time is authoritative; all attempts server-time
+validated
 
 ---
 
@@ -123,7 +133,8 @@
 **In Scope**:
 
 - Version compatibility checks use license.product_version
-- Instance configuration loaded from MMC (MIN_SUPPORTED_SCHEMA_VERSION, CURRENT_SCHEMA_VERSION, etc.)
+- Instance configuration loaded from MMC (MIN_SUPPORTED_SCHEMA_VERSION, CURRENT_SCHEMA_VERSION,
+  etc.)
 
 ---
 
@@ -977,38 +988,38 @@ Attempt 4: FAIL
 export function tenantResolver() {
   return async (req, res, next) => {
     // 1. Extract slug from path or subdomain
-    const slug = req.params.slug || extractSubdomainSlug(req.hostname)
+    const slug = req.params.slug || extractSubdomainSlug(req.hostname);
 
     if (!slug) {
       return res.status(400).json({
         success: false,
-        error: { code: 'INVALID_WORKSPACE', message: 'Workspace not found' },
-      })
+        error: { code: "INVALID_WORKSPACE", message: "Workspace not found" },
+      });
     }
 
     // 2. Query master DB for workspace
     const workspace = await master.query(
-      'SELECT id, schema_version FROM workspaces WHERE slug = ? LIMIT 1',
-      [slug]
-    )
+      "SELECT id, schema_version FROM workspaces WHERE slug = ? LIMIT 1",
+      [slug],
+    );
 
     if (!workspace) {
       return res.status(404).json({
         success: false,
-        error: { code: 'WORKSPACE_NOT_FOUND', message: 'Workspace not found' },
-      })
+        error: { code: "WORKSPACE_NOT_FOUND", message: "Workspace not found" },
+      });
     }
 
     // 3. Obtain tenant DB connection pool
-    const tenantDb = await getTenantDatabaseConnection(workspace.id)
+    const tenantDb = await getTenantDatabaseConnection(workspace.id);
 
     // 4. Attach to request context
-    req.workspace = workspace
-    req.tenantDb = tenantDb
-    req.workspaceId = workspace.id
+    req.workspace = workspace;
+    req.tenantDb = tenantDb;
+    req.workspaceId = workspace.id;
 
-    next()
-  }
+    next();
+  };
 }
 ```
 
@@ -1032,8 +1043,8 @@ export function tenantResolver() {
 
 ```typescript
 interface LicenseMiddlewareOptions {
-  required?: 'ACTIVE' | 'ANY' // Default: 'ACTIVE'
-  allowSoftLocked?: boolean // Default: false
+  required?: "ACTIVE" | "ANY"; // Default: 'ACTIVE'
+  allowSoftLocked?: boolean; // Default: false
 }
 ```
 
@@ -1042,87 +1053,87 @@ interface LicenseMiddlewareOptions {
 ```typescript
 export function licenseMiddleware(opts = {}) {
   return async (req, res, next) => {
-    const { workspaceId, tenantDb } = req
+    const { workspaceId, tenantDb } = req;
 
     // 1. Query master DB for license
     const license = await master.query(
-      'SELECT id, status, product_version FROM licenses WHERE workspace_id = ? LIMIT 1',
-      [workspaceId]
-    )
+      "SELECT id, status, product_version FROM licenses WHERE workspace_id = ? LIMIT 1",
+      [workspaceId],
+    );
 
     if (!license) {
       return res.status(404).json({
         success: false,
-        error: { code: 'LICENSE_NOT_FOUND', message: 'License not found' },
-      })
+        error: { code: "LICENSE_NOT_FOUND", message: "License not found" },
+      });
     }
 
     // 2. Validate license status
-    if (license.status === 'ARCHIVED') {
+    if (license.status === "ARCHIVED") {
       return res.status(403).json({
         success: false,
         error: {
-          code: 'WORKSPACE_ARCHIVED',
-          message: 'Workspace is archived. No new operations allowed.',
+          code: "WORKSPACE_ARCHIVED",
+          message: "Workspace is archived. No new operations allowed.",
           status: 403,
         },
-      })
+      });
     }
 
-    if (license.status === 'SOFT_LOCKED') {
+    if (license.status === "SOFT_LOCKED") {
       return res.status(423).json({
         success: false,
         error: {
-          code: 'WORKSPACE_SOFT_LOCKED',
-          message: 'Workspace license is soft-locked.',
+          code: "WORKSPACE_SOFT_LOCKED",
+          message: "Workspace license is soft-locked.",
           status: 423,
         },
-      })
+      });
     }
 
-    if (license.status !== 'ACTIVE' && opts.required === 'ACTIVE') {
+    if (license.status !== "ACTIVE" && opts.required === "ACTIVE") {
       return res.status(503).json({
         success: false,
         error: {
-          code: 'LICENSE_INVALID',
-          message: 'License status invalid',
+          code: "LICENSE_INVALID",
+          message: "License status invalid",
           status: 503,
         },
-      })
+      });
     }
 
     // 3. Validate version compatibility
-    const workspace = req.workspace
-    const MIN_SCHEMA_VERSION = 1
-    const MIN_PRODUCT_VERSION = '1.0.0'
+    const workspace = req.workspace;
+    const MIN_SCHEMA_VERSION = 1;
+    const MIN_PRODUCT_VERSION = "1.0.0";
 
     if (workspace.schema_version < MIN_SCHEMA_VERSION) {
       return res.status(426).json({
         success: false,
         error: {
-          code: 'SCHEMA_VERSION_INCOMPATIBLE',
+          code: "SCHEMA_VERSION_INCOMPATIBLE",
           message: `Schema version ${workspace.schema_version} is not supported`,
           status: 426,
         },
-      })
+      });
     }
 
     if (!isProductVersionCompatible(license.product_version)) {
       return res.status(426).json({
         success: false,
         error: {
-          code: 'PRODUCT_VERSION_INCOMPATIBLE',
+          code: "PRODUCT_VERSION_INCOMPATIBLE",
           message: `Product version ${license.product_version} is not supported`,
           status: 426,
         },
-      })
+      });
     }
 
     // 4. Attach to request context
-    req.license = license
+    req.license = license;
 
-    next()
-  }
+    next();
+  };
 }
 ```
 
@@ -1156,21 +1167,19 @@ export function correlationIdMiddleware() {
   return (req, res, next) => {
     // 1. Check for existing correlation_id in headers
     const correlationId =
-      req.headers['x-correlation-id'] ||
-      req.headers['correlation-id'] ||
-      generateUUID()
+      req.headers["x-correlation-id"] || req.headers["correlation-id"] || generateUUID();
 
     // 2. Attach to request
-    req.correlationId = correlationId
+    req.correlationId = correlationId;
 
     // 3. Attach to response headers
-    res.set('X-Correlation-ID', correlationId)
+    res.set("X-Correlation-ID", correlationId);
 
     // 4. Attach to logger context
-    logger.setContext({ correlation_id: correlationId })
+    logger.setContext({ correlation_id: correlationId });
 
-    next()
-  }
+    next();
+  };
 }
 ```
 
@@ -1180,7 +1189,8 @@ export function correlationIdMiddleware() {
 - Response header: `X-Correlation-ID`
 - Log field: `correlation_id`
 
-**Propagation**: All downstream calls (worker jobs, DB queries, external APIs) include correlation_id
+**Propagation**: All downstream calls (worker jobs, DB queries, external APIs) include
+correlation_id
 
 ---
 
@@ -1202,65 +1212,62 @@ export function correlationIdMiddleware() {
 export function idempotencyMiddleware(opts = {}) {
   return async (req, res, next) => {
     // 1. Determine if operation is idempotent
-    if (!['POST', 'PUT', 'PATCH', 'DELETE'].includes(req.method)) {
-      return next() // GET is always safe
+    if (!["POST", "PUT", "PATCH", "DELETE"].includes(req.method)) {
+      return next(); // GET is always safe
     }
 
     // 2. Extract idempotency key from header or generate one
     const idempotencyKey =
-      req.headers['idempotency-key'] ||
-      `${req.method}:${req.path}:${req.user?.id}:${Date.now()}`
+      req.headers["idempotency-key"] || `${req.method}:${req.path}:${req.user?.id}:${Date.now()}`;
 
     if (!idempotencyKey) {
-      return next()
+      return next();
     }
 
     // 3. Check Redis cache first
-    let cachedResponse = await redis.get(`idempotency:${idempotencyKey}`)
+    let cachedResponse = await redis.get(`idempotency:${idempotencyKey}`);
 
     if (cachedResponse) {
-      return res.status(cachedResponse.status).json(cachedResponse.body)
+      return res.status(cachedResponse.status).json(cachedResponse.body);
     }
 
     // 4. Check database fallback
     const idempotencyRecord = await req.tenantDb.query(
-      'SELECT response_body, response_status FROM submission_idempotency_keys WHERE idempotency_key = ? AND expires_at > NOW() LIMIT 1',
-      [idempotencyKey]
-    )
+      "SELECT response_body, response_status FROM submission_idempotency_keys WHERE idempotency_key = ? AND expires_at > NOW() LIMIT 1",
+      [idempotencyKey],
+    );
 
     if (idempotencyRecord) {
-      return res
-        .status(idempotencyRecord.response_status)
-        .json(idempotencyRecord.response_body)
+      return res.status(idempotencyRecord.response_status).json(idempotencyRecord.response_body);
     }
 
     // 5. Intercept response to cache it
-    const originalJson = res.json.bind(res)
+    const originalJson = res.json.bind(res);
     res.json = function (data) {
-      const status = res.statusCode
+      const status = res.statusCode;
 
       // Cache in Redis
       redis.setex(
         `idempotency:${idempotencyKey}`,
         24 * 60 * 60, // 24 hour TTL
-        { status, body: data }
-      )
+        { status, body: data },
+      );
 
       // Cache in database
       req.tenantDb
-        .query('INSERT INTO submission_idempotency_keys (...) VALUES (...)', [
+        .query("INSERT INTO submission_idempotency_keys (...) VALUES (...)", [
           req.workspaceId,
           idempotencyKey,
           status,
           JSON.stringify(data),
         ])
-        .catch((err) => logger.warn('Idempotency DB cache failed', err))
+        .catch((err) => logger.warn("Idempotency DB cache failed", err));
 
-      return originalJson(data)
-    }
+      return originalJson(data);
+    };
 
-    next()
-  }
+    next();
+  };
 }
 ```
 
@@ -1363,7 +1370,8 @@ BEGIN TRANSACTION;
 COMMIT;
 ```
 
-**Concurrency**: Multiple clients updating different questions happen in parallel (no lock contention)
+**Concurrency**: Multiple clients updating different questions happen in parallel (no lock
+contention)
 
 **Idempotency**: Replaying same answer update produces identical result (last-write-wins)
 
@@ -2298,77 +2306,77 @@ ORDER BY created_at DESC;
 **Test Cases**:
 
 ```typescript
-describe('Unit: Attempt Engine', () => {
-  describe('Snapshot Creation', () => {
-    test('should capture all question metadata in snapshot', () => {
-      const exam = buildMockExam()
-      const snapshot = createQuestionSnapshot(exam)
+describe("Unit: Attempt Engine", () => {
+  describe("Snapshot Creation", () => {
+    test("should capture all question metadata in snapshot", () => {
+      const exam = buildMockExam();
+      const snapshot = createQuestionSnapshot(exam);
 
-      expect(snapshot).toHaveProperty('questions')
-      expect(snapshot.questions[0]).toHaveProperty('id')
-      expect(snapshot.questions[0]).toHaveProperty('text')
-      expect(snapshot.questions[0]).toHaveProperty('correct_answer')
-    })
+      expect(snapshot).toHaveProperty("questions");
+      expect(snapshot.questions[0]).toHaveProperty("id");
+      expect(snapshot.questions[0]).toHaveProperty("text");
+      expect(snapshot.questions[0]).toHaveProperty("correct_answer");
+    });
 
-    test('should serialize snapshot as valid JSON', () => {
-      const snapshot = createQuestionSnapshot(exam)
-      const serialized = JSON.stringify(snapshot)
-      const deserialized = JSON.parse(serialized)
+    test("should serialize snapshot as valid JSON", () => {
+      const snapshot = createQuestionSnapshot(exam);
+      const serialized = JSON.stringify(snapshot);
+      const deserialized = JSON.parse(serialized);
 
-      expect(deserialized).toEqual(snapshot)
-    })
-  })
+      expect(deserialized).toEqual(snapshot);
+    });
+  });
 
-  describe('Version Compatibility', () => {
-    test('should reject schema_version < MIN_SUPPORTED', () => {
-      const attempt = { expected_schema_version: 0 }
-      const result = validateCompatibility(attempt)
+  describe("Version Compatibility", () => {
+    test("should reject schema_version < MIN_SUPPORTED", () => {
+      const attempt = { expected_schema_version: 0 };
+      const result = validateCompatibility(attempt);
 
-      expect(result.compatible).toBe(false)
-      expect(result.reason).toBe('SCHEMA_VERSION_INCOMPATIBLE')
-    })
+      expect(result.compatible).toBe(false);
+      expect(result.reason).toBe("SCHEMA_VERSION_INCOMPATIBLE");
+    });
 
-    test('should accept schema_version == CURRENT', () => {
+    test("should accept schema_version == CURRENT", () => {
       const attempt = {
         expected_schema_version: 1,
-        expected_product_version: '1.0.0',
-      }
-      const result = validateCompatibility(attempt)
+        expected_product_version: "1.0.0",
+      };
+      const result = validateCompatibility(attempt);
 
-      expect(result.compatible).toBe(true)
-    })
-  })
+      expect(result.compatible).toBe(true);
+    });
+  });
 
-  describe('License State Checking', () => {
-    test('should block attempt creation if license SOFT_LOCKED', () => {
-      const license = { status: 'SOFT_LOCKED' }
-      const result = checkLicenseAllowsCreation(license)
+  describe("License State Checking", () => {
+    test("should block attempt creation if license SOFT_LOCKED", () => {
+      const license = { status: "SOFT_LOCKED" };
+      const result = checkLicenseAllowsCreation(license);
 
-      expect(result.allowed).toBe(false)
-      expect(result.statusCode).toBe(423)
-    })
+      expect(result.allowed).toBe(false);
+      expect(result.statusCode).toBe(423);
+    });
 
-    test('should allow submission if license SOFT_LOCKED', () => {
-      const license = { status: 'SOFT_LOCKED' }
-      const result = checkLicenseAllowsSubmission(license)
+    test("should allow submission if license SOFT_LOCKED", () => {
+      const license = { status: "SOFT_LOCKED" };
+      const result = checkLicenseAllowsSubmission(license);
 
-      expect(result.allowed).toBe(true)
-    })
-  })
+      expect(result.allowed).toBe(true);
+    });
+  });
 
-  describe('Score Calculation', () => {
-    test('should compute score deterministically', () => {
-      const questions = buildMockQuestions()
-      const answers = buildMockAnswers(questions)
-      const gradingConfig = buildMockGradingConfig()
+  describe("Score Calculation", () => {
+    test("should compute score deterministically", () => {
+      const questions = buildMockQuestions();
+      const answers = buildMockAnswers(questions);
+      const gradingConfig = buildMockGradingConfig();
 
-      const score1 = computeScore(questions, answers, gradingConfig)
-      const score2 = computeScore(questions, answers, gradingConfig)
+      const score1 = computeScore(questions, answers, gradingConfig);
+      const score2 = computeScore(questions, answers, gradingConfig);
 
-      expect(score1).toBe(score2)
-    })
-  })
-})
+      expect(score1).toBe(score2);
+    });
+  });
+});
 ```
 
 ---
@@ -2382,105 +2390,96 @@ describe('Unit: Attempt Engine', () => {
 **Test Cases**:
 
 ```typescript
-describe('Integration: Attempt Flow', () => {
-  describe('Create → Submit → Grade Flow', () => {
-    test('should create attempt with snapshot', async () => {
+describe("Integration: Attempt Flow", () => {
+  describe("Create → Submit → Grade Flow", () => {
+    test("should create attempt with snapshot", async () => {
       const res = await POST(`/api/workspaces/acme/attempts`, {
-        exam_id: 'exam-123',
-      })
+        exam_id: "exam-123",
+      });
 
-      expect(res.status).toBe(201)
-      expect(res.body.data).toHaveProperty('attempt_id')
-      expect(res.body.data).toHaveProperty('questions')
-    })
+      expect(res.status).toBe(201);
+      expect(res.body.data).toHaveProperty("attempt_id");
+      expect(res.body.data).toHaveProperty("questions");
+    });
 
-    test('should save progress updates', async () => {
-      const attempt = await createAttempt()
+    test("should save progress updates", async () => {
+      const attempt = await createAttempt();
 
-      const res = await POST(
-        `/api/workspaces/acme/attempts/${attempt.id}/progress`,
-        {
-          responses: [
-            {
-              question_id: attempt.questions[0].id,
-              user_answer: { selected_option: 'A' },
-              flagged: false,
-            },
-          ],
-        }
-      )
+      const res = await POST(`/api/workspaces/acme/attempts/${attempt.id}/progress`, {
+        responses: [
+          {
+            question_id: attempt.questions[0].id,
+            user_answer: { selected_option: "A" },
+            flagged: false,
+          },
+        ],
+      });
 
-      expect(res.status).toBe(200)
-      expect(res.body.data.responses_saved).toBe(1)
-    })
+      expect(res.status).toBe(200);
+      expect(res.body.data.responses_saved).toBe(1);
+    });
 
-    test('should submit attempt and enqueue grading', async () => {
-      const attempt = await createAttempt()
+    test("should submit attempt and enqueue grading", async () => {
+      const attempt = await createAttempt();
 
-      const res = await POST(
-        `/api/workspaces/acme/attempts/${attempt.id}/submit`,
-        {
-          submission_reason: 'MANUAL_SUBMIT',
-        }
-      )
+      const res = await POST(`/api/workspaces/acme/attempts/${attempt.id}/submit`, {
+        submission_reason: "MANUAL_SUBMIT",
+      });
 
-      expect(res.status).toBe(200)
-      expect(res.body.data.status).toBe('SUBMITTED')
+      expect(res.status).toBe(200);
+      expect(res.body.data.status).toBe("SUBMITTED");
 
       // Wait for worker to grade
-      await waitForGrading(attempt.id)
+      await waitForGrading(attempt.id);
 
-      const final = await GET(`/api/workspaces/acme/attempts/${attempt.id}`)
-      expect(final.body.data.status).toBe('FINALIZED')
-      expect(final.body.data).toHaveProperty('score')
-      expect(final.body.data).toHaveProperty('passed')
-    })
-  })
+      const final = await GET(`/api/workspaces/acme/attempts/${attempt.id}`);
+      expect(final.body.data.status).toBe("FINALIZED");
+      expect(final.body.data).toHaveProperty("score");
+      expect(final.body.data).toHaveProperty("passed");
+    });
+  });
 
-  describe('License Enforcement', () => {
-    test('should block attempt creation if license SOFT_LOCKED', async () => {
+  describe("License Enforcement", () => {
+    test("should block attempt creation if license SOFT_LOCKED", async () => {
       const res = await POST(
         `/api/workspaces/acme/attempts`,
         {
-          exam_id: 'exam-123',
+          exam_id: "exam-123",
         },
-        { license_status: 'SOFT_LOCKED' }
-      )
+        { license_status: "SOFT_LOCKED" },
+      );
 
-      expect(res.status).toBe(423)
-      expect(res.body.error.code).toBe('WORKSPACE_SOFT_LOCKED')
-    })
+      expect(res.status).toBe(423);
+      expect(res.body.error.code).toBe("WORKSPACE_SOFT_LOCKED");
+    });
 
-    test('should allow submission if license SOFT_LOCKED', async () => {
-      const attempt = await createAttempt({ license_status: 'ACTIVE' })
+    test("should allow submission if license SOFT_LOCKED", async () => {
+      const attempt = await createAttempt({ license_status: "ACTIVE" });
 
       // Simulate license transition
-      await transitionLicense('SOFT_LOCKED')
+      await transitionLicense("SOFT_LOCKED");
 
-      const res = await POST(
-        `/api/workspaces/acme/attempts/${attempt.id}/submit`,
-        {}
-      )
+      const res = await POST(`/api/workspaces/acme/attempts/${attempt.id}/submit`, {});
 
-      expect(res.status).toBe(200)
-    })
-  })
+      expect(res.status).toBe(200);
+    });
+  });
 
-  describe('Version Compatibility', () => {
-    test('should reject attempt creation if schema_version incompatible', async () => {
+  describe("Version Compatibility", () => {
+    test("should reject attempt creation if schema_version incompatible", async () => {
       const res = await POST(
         `/api/workspaces/acme/attempts`,
         {
-          exam_id: 'exam-123',
+          exam_id: "exam-123",
         },
-        { schema_version: 0 }
-      )
+        { schema_version: 0 },
+      );
 
-      expect(res.status).toBe(426)
-      expect(res.body.error.code).toBe('SCHEMA_VERSION_INCOMPATIBLE')
-    })
-  })
-})
+      expect(res.status).toBe(426);
+      expect(res.body.error.code).toBe("SCHEMA_VERSION_INCOMPATIBLE");
+    });
+  });
+});
 ```
 
 ---
@@ -2531,52 +2530,52 @@ describe('Integration: Transactions', () => {
 **File**: `apps/api/tests/integration/idempotency.test.ts`
 
 ```typescript
-describe('Integration: Idempotency', () => {
-  test('should return same result on duplicate submission', async () => {
-    const attempt = await createAttempt()
+describe("Integration: Idempotency", () => {
+  test("should return same result on duplicate submission", async () => {
+    const attempt = await createAttempt();
 
     const res1 = await POST(
       `/api/workspaces/acme/attempts/${attempt.id}/submit`,
       {},
-      { headers: { 'idempotency-key': 'submission-1' } }
-    )
+      { headers: { "idempotency-key": "submission-1" } },
+    );
 
-    expect(res1.status).toBe(200)
-    const result1 = res1.body.data
+    expect(res1.status).toBe(200);
+    const result1 = res1.body.data;
 
     // Duplicate submission
     const res2 = await POST(
       `/api/workspaces/acme/attempts/${attempt.id}/submit`,
       {},
-      { headers: { 'idempotency-key': 'submission-1' } }
-    )
+      { headers: { "idempotency-key": "submission-1" } },
+    );
 
-    expect(res2.status).toBe(200)
-    const result2 = res2.body.data
+    expect(res2.status).toBe(200);
+    const result2 = res2.body.data;
 
-    expect(result1.attempt_id).toBe(result2.attempt_id)
-    expect(result1.status).toBe(result2.status)
-  })
+    expect(result1.attempt_id).toBe(result2.attempt_id);
+    expect(result1.status).toBe(result2.status);
+  });
 
-  test('should prevent duplicate grading jobs', async () => {
-    const attempt = await createAttempt()
+  test("should prevent duplicate grading jobs", async () => {
+    const attempt = await createAttempt();
 
     // Submit twice
-    await POST(`/api/workspaces/acme/attempts/${attempt.id}/submit`, {})
-    await POST(`/api/workspaces/acme/attempts/${attempt.id}/submit`, {})
+    await POST(`/api/workspaces/acme/attempts/${attempt.id}/submit`, {});
+    await POST(`/api/workspaces/acme/attempts/${attempt.id}/submit`, {});
 
-    await waitForGrading(attempt.id)
+    await waitForGrading(attempt.id);
 
     // Verify grading happened once
     const jobCount = await db.query(
-      'SELECT COUNT(*) FROM job_log WHERE attempt_id = ? AND job_type = ?',
-      [attempt.id, 'GRADE_ATTEMPT']
-    )
+      "SELECT COUNT(*) FROM job_log WHERE attempt_id = ? AND job_type = ?",
+      [attempt.id, "GRADE_ATTEMPT"],
+    );
 
     // Should be at most 1 grading job (may be retried, but same atomic outcome)
-    expect(jobCount).toBeLessThanOrEqual(2) // Initial + 1 potential retry
-  })
-})
+    expect(jobCount).toBeLessThanOrEqual(2); // Initial + 1 potential retry
+  });
+});
 ```
 
 ---
@@ -2586,43 +2585,41 @@ describe('Integration: Idempotency', () => {
 **File**: `apps/api/tests/integration/concurrency.test.ts`
 
 ```typescript
-describe('Integration: Concurrency', () => {
-  test('should serialize concurrent submissions', async () => {
-    const attempt = await createAttempt()
+describe("Integration: Concurrency", () => {
+  test("should serialize concurrent submissions", async () => {
+    const attempt = await createAttempt();
 
     // 10 concurrent submissions
     const promises = Array(10)
       .fill(null)
-      .map(() => POST(`/api/workspaces/acme/attempts/${attempt.id}/submit`, {}))
+      .map(() => POST(`/api/workspaces/acme/attempts/${attempt.id}/submit`, {}));
 
-    const results = await Promise.all(promises)
+    const results = await Promise.all(promises);
 
     // One should succeed; others should conflict or be idempotent
-    const successes = results.filter((r) => r.status === 200)
-    const conflicts = results.filter((r) => r.status === 409)
-    const idempotents = results.filter(
-      (r) => r.status === 200 && r.body.data.cached
-    )
+    const successes = results.filter((r) => r.status === 200);
+    const conflicts = results.filter((r) => r.status === 409);
+    const idempotents = results.filter((r) => r.status === 200 && r.body.data.cached);
 
-    expect(successes.length + conflicts.length + idempotents.length).toBe(10)
-    expect(successes.length).toBeGreaterThanOrEqual(1)
-  })
+    expect(successes.length + conflicts.length + idempotents.length).toBe(10);
+    expect(successes.length).toBeGreaterThanOrEqual(1);
+  });
 
-  test('should prevent concurrent grading', async () => {
-    const attempt = await createAttempt()
-    await submitAttempt(attempt)
+  test("should prevent concurrent grading", async () => {
+    const attempt = await createAttempt();
+    await submitAttempt(attempt);
 
     // Simulate 2 workers attempting to grade
-    const grade1 = gradeWorkflow(attempt.id)
-    const grade2 = gradeWorkflow(attempt.id)
+    const grade1 = gradeWorkflow(attempt.id);
+    const grade2 = gradeWorkflow(attempt.id);
 
-    const results = await Promise.all([grade1, grade2])
+    const results = await Promise.all([grade1, grade2]);
 
     // One should succeed; other should skip (idempotent)
-    const gradings = results.filter((r) => r.graded === true)
-    expect(gradings).toHaveLength(1)
-  })
-})
+    const gradings = results.filter((r) => r.graded === true);
+    expect(gradings).toHaveLength(1);
+  });
+});
 ```
 
 ---
@@ -2632,32 +2629,31 @@ describe('Integration: Concurrency', () => {
 **File**: `apps/api/tests/integration/isolation.test.ts`
 
 ```typescript
-describe('Integration: Multi-Tenant Isolation', () => {
-  test('should not access attempts from other workspace', async () => {
-    const attempt1 = await createAttempt({ workspace: 'workspace-1' })
+describe("Integration: Multi-Tenant Isolation", () => {
+  test("should not access attempts from other workspace", async () => {
+    const attempt1 = await createAttempt({ workspace: "workspace-1" });
 
     // Try to access from workspace-2
-    const res = await GET(
-      `/api/workspaces/workspace-2/attempts/${attempt1.id}`,
-      { token: getTokenForWorkspace('workspace-2') }
-    )
+    const res = await GET(`/api/workspaces/workspace-2/attempts/${attempt1.id}`, {
+      token: getTokenForWorkspace("workspace-2"),
+    });
 
-    expect(res.status).toBe(404)
-    expect(res.body.error.code).toBe('ATTEMPT_NOT_FOUND')
-  })
+    expect(res.status).toBe(404);
+    expect(res.body.error.code).toBe("ATTEMPT_NOT_FOUND");
+  });
 
-  test('should not leak attempt metadata across workspaces', async () => {
-    const attempt1 = await createAttempt({ workspace: 'workspace-1' })
+  test("should not leak attempt metadata across workspaces", async () => {
+    const attempt1 = await createAttempt({ workspace: "workspace-1" });
 
     // Workspace-2 common query
     const res = await GET(`/api/workspaces/workspace-2/attempts`, {
-      token: getTokenForWorkspace('workspace-2'),
-    })
+      token: getTokenForWorkspace("workspace-2"),
+    });
 
-    const attemptIds = res.body.data.attempts.map((a) => a.id)
-    expect(attemptIds).not.toContain(attempt1.id)
-  })
-})
+    const attemptIds = res.body.data.attempts.map((a) => a.id);
+    expect(attemptIds).not.toContain(attempt1.id);
+  });
+});
 ```
 
 ---
@@ -2667,33 +2663,33 @@ describe('Integration: Multi-Tenant Isolation', () => {
 **File**: `apps/api/tests/integration/versioning.test.ts`
 
 ```typescript
-describe('Integration: Version Compatibility', () => {
-  test('should reject attempt creation if schema outdated', async () => {
+describe("Integration: Version Compatibility", () => {
+  test("should reject attempt creation if schema outdated", async () => {
     const res = await POST(
       `/api/workspaces/acme/attempts`,
       {
-        exam_id: 'exam-123',
+        exam_id: "exam-123",
       },
-      { workspace_schema_version: 0 }
-    )
+      { workspace_schema_version: 0 },
+    );
 
-    expect(res.status).toBe(426)
-  })
+    expect(res.status).toBe(426);
+  });
 
-  test('should grade attempt with mismatched schema version', async () => {
-    const attempt = await createAttempt({ expected_schema_version: 0 })
-    await submitAttempt(attempt)
+  test("should grade attempt with mismatched schema version", async () => {
+    const attempt = await createAttempt({ expected_schema_version: 0 });
+    await submitAttempt(attempt);
 
-    await waitForGrading(attempt.id)
+    await waitForGrading(attempt.id);
 
-    const final = await GET(`/api/workspaces/acme/attempts/${attempt.id}`)
+    const final = await GET(`/api/workspaces/acme/attempts/${attempt.id}`);
 
     // Should mark as error; no crash
-    expect(final.body.data.status).toBe('FINALIZED')
-    expect(final.body.data.score).toBe(0)
-    expect(final.body.data.error_reason).toBe('Schema version incompatible')
-  })
-})
+    expect(final.body.data.status).toBe("FINALIZED");
+    expect(final.body.data.score).toBe(0);
+    expect(final.body.data.error_reason).toBe("Schema version incompatible");
+  });
+});
 ```
 
 ---
@@ -2703,13 +2699,16 @@ describe('Integration: Version Compatibility', () => {
 ### Hard Constraints
 
 1. **No Cross-Tenant Data Access**: All queries scoped to workspace_id; no joins across workspaces
-2. **Snapshot Immutability**: Snapshot frozen after creation; grading reads snapshot only (never live exam config)
+2. **Snapshot Immutability**: Snapshot frozen after creation; grading reads snapshot only (never
+   live exam config)
 3. **Server-Authoritative Time**: All deadlines enforced by server; client time decorative only
 4. **Transactional Writes**: Submission and grading fully ACID; rollback on failure
 5. **Worker-Only Grading**: API contains zero score computation; delegated entirely to worker
-6. **No Weakening of Versioning**: Version mismatch fails gracefully (error result); no silent corruption
+6. **No Weakening of Versioning**: Version mismatch fails gracefully (error result); no silent
+   corruption
 7. **No Client-Side Grading**: Client cannot compute scores; cannot override snapshot
-8. **Single Attempt Rule Enforcement**: At most one IN_PROGRESS per exam per user (if enabled); DB constraint enforces
+8. **Single Attempt Rule Enforcement**: At most one IN_PROGRESS per exam per user (if enabled); DB
+   constraint enforces
 
 ### Non-Goals (Deferred to Future Stages)
 
@@ -2818,4 +2817,5 @@ describe('Integration: Version Compatibility', () => {
 
 **PLAN COMPLETE AND APPROVED**
 
-This document is production-ready and defines all requirements for STAGE_06_ATTEMPT_ENGINE_FOUNDATION implementation.
+This document is production-ready and defines all requirements for
+STAGE_06_ATTEMPT_ENGINE_FOUNDATION implementation.

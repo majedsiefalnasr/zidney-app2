@@ -8,7 +8,11 @@
 
 ## Summary
 
-The specification for the UI Authentication Runtime Module is complete. The spec defines the frontend auth engine shared across all three Zidney applications (MMC, Backoffice, Frontoffice). It covers 40 functional requirements, 8 non-functional requirements, 7 architectural stories, and 7 typed interface definitions. All constitutional constraints are compliant. No `[NEEDS CLARIFICATION]` markers remain — 4 pre-emptive decisions were made and documented.
+The specification for the UI Authentication Runtime Module is complete. The spec defines the
+frontend auth engine shared across all three Zidney applications (MMC, Backoffice, Frontoffice). It
+covers 40 functional requirements, 8 non-functional requirements, 7 architectural stories, and 7
+typed interface definitions. All constitutional constraints are compliant. No
+`[NEEDS CLARIFICATION]` markers remain — 4 pre-emptive decisions were made and documented.
 
 ---
 
@@ -40,9 +44,11 @@ The specification for the UI Authentication Runtime Module is complete. The spec
 - FR-AC-01 to FR-AC-04: API client integration (interceptor injects token, 401 triggers refresh)
 - FR-AG-01 to FR-AG-06: Auth guard (requiresAuth, guestOnly, no JWT decode, redirect contract)
 - FR-AS-01 to FR-AS-04: Auth service composable (login, logout, initSession, getMe)
-- FR-SI-01 to FR-SI-03: Session initialization (page reload, unauthenticated fallback, no browser storage)
+- FR-SI-01 to FR-SI-03: Session initialization (page reload, unauthenticated fallback, no browser
+  storage)
 - FR-LO-01 to FR-LO-04: Logout (backend call, memory clear, state reset, redirect)
-- FR-EH-01 to FR-EH-03: Error handling (auth error typed, refresh failure → logout, network error distinction)
+- FR-EH-01 to FR-EH-03: Error handling (auth error typed, refresh failure → logout, network error
+  distinction)
 
 ---
 
@@ -71,8 +77,10 @@ None — all 4 potential ambiguities were resolved pre-emptively during specific
 
 ## Open Risks
 
-- Refresh flow correctness under high-concurrency (concurrent 401 burst) — mitigated by required integration test scenario FR-RM-05
-- `initSession()` call timing across three apps must be consistent — mitigated by documenting call site in spec and requiring app bootstrap test
+- Refresh flow correctness under high-concurrency (concurrent 401 burst) — mitigated by required
+  integration test scenario FR-RM-05
+- `initSession()` call timing across three apps must be consistent — mitigated by documenting call
+  site in spec and requiring app bootstrap test
 
 ---
 

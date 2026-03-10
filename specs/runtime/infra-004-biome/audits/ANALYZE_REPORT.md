@@ -8,13 +8,13 @@
 
 ## Summary
 
-Step 5 required two remediation rounds before all audits passed. The first round
-(speckit.analyze BLOCKED) produced 4 BLOCK findings requiring 4 new tasks (T042–T045).
-The second round (Code Reviewer BLOCKED) produced 2 BLOCK findings requiring targeted
-corrections to `--apply-unsafe` usage and ADR-0008 pin assumptions.
+Step 5 required two remediation rounds before all audits passed. The first round (speckit.analyze
+BLOCKED) produced 4 BLOCK findings requiring 4 new tasks (T042–T045). The second round (Code
+Reviewer BLOCKED) produced 2 BLOCK findings requiring targeted corrections to `--apply-unsafe` usage
+and ADR-0008 pin assumptions.
 
-All violations have been resolved. All 7 guardians (speckit.analyze + 4 composite) return
-VERDICT: PASS. Implementation gate is **OPEN**.
+All violations have been resolved. All 7 guardians (speckit.analyze + 4 composite) return VERDICT:
+PASS. Implementation gate is **OPEN**.
 
 ---
 
@@ -103,10 +103,9 @@ All 5 audit passes returned PASS. Drift gate: PASS. Constitutional compliance: C
 
 `APPROVED — Implementation authorized.`
 
-All specification, plan, and task artifacts are internally consistent, constitutionally
-compliant, and free of architectural drift. The Zidney architecture trust chain is
-preserved. No cross-tenant, license-middleware, or attempt-engine concerns apply to this
-toolchain-only stage.
+All specification, plan, and task artifacts are internally consistent, constitutionally compliant,
+and free of architectural drift. The Zidney architecture trust chain is preserved. No cross-tenant,
+license-middleware, or attempt-engine concerns apply to this toolchain-only stage.
 
 ---
 

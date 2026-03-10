@@ -173,10 +173,7 @@ Invoice status transition must be atomic.
 
 Example:
 
-UPDATE invoices
-SET status = 'PAID'
-WHERE id = ?
-AND status = 'PENDING'
+UPDATE invoices SET status = 'PAID' WHERE id = ? AND status = 'PENDING'
 
 If affected rows = 0:
 
@@ -225,8 +222,7 @@ Subscription status must:
 - Restrict dashboard access when expired.
 - Allow certificate viewing even when expired.
 
-Billing must not directly modify student permissions.
-It updates subscription state only.
+Billing must not directly modify student permissions. It updates subscription state only.
 
 ---
 

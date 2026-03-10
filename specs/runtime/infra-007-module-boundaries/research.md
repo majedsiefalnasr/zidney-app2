@@ -2,7 +2,8 @@
 
 **Generated**: 2026-03-08  
 **Status**: Complete — all NEEDS CLARIFICATION items resolved  
-**Based on**: Direct file inspection of ai-guard.ts, infra-audit.ts, ARCHITECTURE_MAP.json, tsconfig.json, tsconfig.base.json, ci.yml
+**Based on**: Direct file inspection of ai-guard.ts, infra-audit.ts, ARCHITECTURE_MAP.json,
+tsconfig.json, tsconfig.base.json, ci.yml
 
 ---
 
@@ -15,53 +16,55 @@
 ### Imports (Current)
 
 ```typescript
-import {execSync} from 'node:child_process'
-import {readFileSync} from 'node:fs'
+import { execSync } from "node:child_process";
+import { readFileSync } from "node:fs";
 ```
 
-**Gap**: `existsSync` is NOT currently imported. The new `loadTsAliases()` function requires it. The import line must be extended to:
+**Gap**: `existsSync` is NOT currently imported. The new `loadTsAliases()` function requires it. The
+import line must be extended to:
 
 ```typescript
-import {existsSync, readFileSync} from 'node:fs'
+import { existsSync, readFileSync } from "node:fs";
 ```
 
 ### Constants (Current)
 
 ```typescript
-const CONTRACT_PATH = 'docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json'
-const ARCH_MAP_PATH = 'docs/architecture/intelligence/ARCHITECTURE_MAP.json'
-const AI_BRAIN_PATH = 'docs/ai/context/ai-architecture-brain.json'
+const CONTRACT_PATH = "docs/architecture/intelligence/ARCHITECTURE_CONTRACT.json";
+const ARCH_MAP_PATH = "docs/architecture/intelligence/ARCHITECTURE_MAP.json";
+const AI_BRAIN_PATH = "docs/ai/context/ai-architecture-brain.json";
 ```
 
-All are relative paths, resolved from `process.cwd()` (repo root). Pattern is consistent — `BOUNDARIES_PATH` must follow the same convention.
+All are relative paths, resolved from `process.cwd()` (repo root). Pattern is consistent —
+`BOUNDARIES_PATH` must follow the same convention.
 
 ### Types (Current)
 
 ```typescript
 type ArchitectureContract = {
-  dependencyRules?: {forbidden?: Record<string, string[]>}
-  layerRules?: {forbidden?: Record<string, string[]>}
-}
+  dependencyRules?: { forbidden?: Record<string, string[]> };
+  layerRules?: { forbidden?: Record<string, string[]> };
+};
 
 type ArchitectureMap = {
   modules?: Record<
     string,
     {
-      layer?: string
-      allowed_dependencies?: string[]
-      forbidden_dependencies?: string[]
+      layer?: string;
+      allowed_dependencies?: string[];
+      forbidden_dependencies?: string[];
     }
-  >
-}
+  >;
+};
 
 type ArchitectureBrain = {
   rules?: {
-    dependencyRules?: {forbidden?: Record<string, string[]>}
-    layerRules?: {forbidden?: Record<string, string[]>}
-  }
-  modules?: string[]
-  edges?: {from: string; to: string}[]
-}
+    dependencyRules?: { forbidden?: Record<string, string[]> };
+    layerRules?: { forbidden?: Record<string, string[]> };
+  };
+  modules?: string[];
+  edges?: { from: string; to: string }[];
+};
 ```
 
 ### Loader Functions (Current)
@@ -72,7 +75,8 @@ type ArchitectureBrain = {
 | `loadArchitectureMap()`   | returns `{}`      | returns `{}`        |
 | `loadArchitectureBrain()` | returns `null`    | returns `null`      |
 
-New `loadModuleBoundaries()` uses a mixed strategy: startup warning + graceful fallback if missing (NFR-003); hard `process.exit(1)` if malformed (FR-001 + clarification).
+New `loadModuleBoundaries()` uses a mixed strategy: startup warning + graceful fallback if missing
+(NFR-003); hard `process.exit(1)` if malformed (FR-001 + clarification).
 
 ### File Scanning — `getChangedFiles()`
 
@@ -81,7 +85,8 @@ New `loadModuleBoundaries()` uses a mixed strategy: startup warning + graceful f
 3. Filters to `.ts`, `.tsx`, `.vue` extensions
 4. Returns empty array on error
 
-**Implication**: In CI, all tracked source files are scanned. `validateLayerBoundaries` will run against every file in the monorepo when no staged changes exist.
+**Implication**: In CI, all tracked source files are scanned. `validateLayerBoundaries` will run
+against every file in the monorepo when no staged changes exist.
 
 ### Import Extraction — `extractImports(filePath)`
 
@@ -93,14 +98,14 @@ Does NOT resolve aliases.
 
 ```typescript
 // From a raw import specifier → module short-name (e.g., "logger", "api")
-detectModule(importPath)
+detectModule(importPath);
 
 // From a file path → module short-name
-detectFileModule(file)
+detectFileModule(file);
 
 // From a raw specifier/path → full module path (e.g., "packages/logger", "apps/api")
 // BUG: @zidney/ui/* → "packages/ui" (wrong - should be "packages/ui-system")
-resolveModulePath(module)
+resolveModulePath(module);
 ```
 
 ### Existing Validator Functions (5 total — ALL PRESERVED)
@@ -130,11 +135,17 @@ validateBranchNaming(changedFiles)
 
 ### Brain Integration — `getModuleDepsFromBrain(modulePath, brain)`
 
-When `ai-architecture-brain.json` is available AND the brain's `edges` include the current module, the imports list is replaced by the brain's edge graph. This means `validateLayerBoundaries` must also support brain-sourced module paths (which are already in `packages/xxx` format, not raw import strings).
+When `ai-architecture-brain.json` is available AND the brain's `edges` include the current module,
+the imports list is replaced by the brain's edge graph. This means `validateLayerBoundaries` must
+also support brain-sourced module paths (which are already in `packages/xxx` format, not raw import
+strings).
 
-**Critical observation**: When brain is used, imports are already resolved to module paths like `"packages/logger"`. The raw `extractImports` result is only used for `validateRelativeLeaks`. This affects how `validateLayerBoundaries` must call `resolveImportToModule()`:
+**Critical observation**: When brain is used, imports are already resolved to module paths like
+`"packages/logger"`. The raw `extractImports` result is only used for `validateRelativeLeaks`. This
+affects how `validateLayerBoundaries` must call `resolveImportToModule()`:
 
-- Brain-sourced deps: already in `packages/xxx` or `apps/xxx` format → `resolveImportToModule` should pass through directly
+- Brain-sourced deps: already in `packages/xxx` or `apps/xxx` format → `resolveImportToModule`
+  should pass through directly
 - Raw source imports: may be `@zidney/xxx` or relative → need alias resolution
 
 ### runGuard() Orchestration (Current)
@@ -166,11 +177,17 @@ function runGuard() {
 ### Hook Points for New Functions
 
 1. **After constants** (line ~80): Insert `BOUNDARIES_PATH` constant
-2. **After `ArchitectureBrain` type** (line ~70): Insert `TsAliasMap` interface + `ModuleBoundaries` type
-3. **After `loadArchitectureBrain()`** (line ~100): Insert `loadModuleBoundaries()` + `loadTsAliases()`
-4. **After `validateRelativeLeaks()`** (line ~280): Insert `getLayerForModule()`, `resolveImportToModule()`, `matchesGlobPattern()`, `ruleMatchesSource()`, `ruleMatchesTarget()`, `validateLayerBoundaries()`
-5. **Inside `runGuard()`** — after `loadArchitectureMap()`: Insert `loadModuleBoundaries()` + `loadTsAliases()` calls
-6. **Inside `runGuard()` file loop** — after `archMapViolations` collected: Insert `validateLayerBoundaries` call
+2. **After `ArchitectureBrain` type** (line ~70): Insert `TsAliasMap` interface + `ModuleBoundaries`
+   type
+3. **After `loadArchitectureBrain()`** (line ~100): Insert `loadModuleBoundaries()` +
+   `loadTsAliases()`
+4. **After `validateRelativeLeaks()`** (line ~280): Insert `getLayerForModule()`,
+   `resolveImportToModule()`, `matchesGlobPattern()`, `ruleMatchesSource()`, `ruleMatchesTarget()`,
+   `validateLayerBoundaries()`
+5. **Inside `runGuard()`** — after `loadArchitectureMap()`: Insert `loadModuleBoundaries()` +
+   `loadTsAliases()` calls
+6. **Inside `runGuard()` file loop** — after `archMapViolations` collected: Insert
+   `validateLayerBoundaries` call
 
 ---
 
@@ -180,72 +197,75 @@ function runGuard() {
 
 ```typescript
 interface TsAliasMap {
-  alias: string // Cleaned alias key with /* stripped, e.g., "@zidney/logger"
-  target: string // First target entry with /* stripped, e.g., "packages/logger/src/index.ts"
+  alias: string; // Cleaned alias key with /* stripped, e.g., "@zidney/logger"
+  target: string; // First target entry with /* stripped, e.g., "packages/logger/src/index.ts"
 }
 
-function loadTsAliases(): TsAliasMap[]
+function loadTsAliases(): TsAliasMap[];
 ```
 
 ### Current Behavior in infra-audit.ts
 
 ```typescript
-const paths = [join(ROOT, 'tsconfig.json'), join(ROOT, 'tsconfig.base.json')]
+const paths = [join(ROOT, "tsconfig.json"), join(ROOT, "tsconfig.base.json")];
 
 for (const p of paths) {
-  if (!existsSync(p)) continue
+  if (!existsSync(p)) continue;
   try {
-    const json = JSON.parse(readFileSync(p, 'utf-8'))
-    const pathsConfig = json?.compilerOptions?.paths
-    if (!pathsConfig) continue
+    const json = JSON.parse(readFileSync(p, "utf-8"));
+    const pathsConfig = json?.compilerOptions?.paths;
+    if (!pathsConfig) continue;
 
-    const aliases: TsAliasMap[] = []
+    const aliases: TsAliasMap[] = [];
     for (const key of Object.keys(pathsConfig)) {
-      const cleanKey = key.replace('/*', '') // "@zidney/ui/*"  → "@zidney/ui"
-      const target = pathsConfig[key][0]?.replace('/*', '') // "packages/ui-system/src/*" → "packages/ui-system/src"
-      if (target) aliases.push({alias: cleanKey, target})
+      const cleanKey = key.replace("/*", ""); // "@zidney/ui/*"  → "@zidney/ui"
+      const target = pathsConfig[key][0]?.replace("/*", ""); // "packages/ui-system/src/*" → "packages/ui-system/src"
+      if (target) aliases.push({ alias: cleanKey, target });
     }
-    return aliases // Returns FIRST successful parse (tsconfig.json wins)
+    return aliases; // Returns FIRST successful parse (tsconfig.json wins)
   } catch {}
 }
-return []
+return [];
 ```
 
 ### Known Gap with Current Implementation
 
-`infra-audit.ts` returns aliases from the FIRST successfully-parsed tsconfig only (tsconfig.json). This means `@zidney/api-client` (defined only in `tsconfig.base.json`) is NOT in the alias map.
+`infra-audit.ts` returns aliases from the FIRST successfully-parsed tsconfig only (tsconfig.json).
+This means `@zidney/api-client` (defined only in `tsconfig.base.json`) is NOT in the alias map.
 
-Since `ai-guard.ts` must resolve `@zidney/api-client` to detect violations when a `ui` module is wrongly imported by a `runtime` module, the implementation in `ai-guard.ts` must read **both** tsconfig files and merge them (tsconfig.json entries take precedence for conflicts).
+Since `ai-guard.ts` must resolve `@zidney/api-client` to detect violations when a `ui` module is
+wrongly imported by a `runtime` module, the implementation in `ai-guard.ts` must read **both**
+tsconfig files and merge them (tsconfig.json entries take precedence for conflicts).
 
 ### Corrected Pattern for ai-guard.ts
 
 ```typescript
 function loadTsAliases(): TsAliasMap[] {
-  const configs = ['tsconfig.json', 'tsconfig.base.json']
-  const result: TsAliasMap[] = []
-  const seen = new Set<string>()
+  const configs = ["tsconfig.json", "tsconfig.base.json"];
+  const result: TsAliasMap[] = [];
+  const seen = new Set<string>();
 
   for (const configFile of configs) {
     try {
-      if (!existsSync(configFile)) continue
-      const json = JSON.parse(readFileSync(configFile, 'utf-8'))
-      const pathsConfig = json?.compilerOptions?.paths
-      if (!pathsConfig) continue
+      if (!existsSync(configFile)) continue;
+      const json = JSON.parse(readFileSync(configFile, "utf-8"));
+      const pathsConfig = json?.compilerOptions?.paths;
+      if (!pathsConfig) continue;
 
       for (const key of Object.keys(pathsConfig)) {
-        const cleanKey = key.replace('/*', '')
-        if (seen.has(cleanKey)) continue // tsconfig.json takes precedence
-        const rawTarget = pathsConfig[key][0]
-        if (!rawTarget) continue
-        const cleanTarget = rawTarget.replace('/*', '')
-        seen.add(cleanKey)
-        result.push({alias: cleanKey, target: cleanTarget})
+        const cleanKey = key.replace("/*", "");
+        if (seen.has(cleanKey)) continue; // tsconfig.json takes precedence
+        const rawTarget = pathsConfig[key][0];
+        if (!rawTarget) continue;
+        const cleanTarget = rawTarget.replace("/*", "");
+        seen.add(cleanKey);
+        result.push({ alias: cleanKey, target: cleanTarget });
       }
     } catch {
       // Ignore parse errors
     }
   }
-  return result
+  return result;
 }
 ```
 
@@ -258,7 +278,8 @@ The `target` field after stripping contains paths like:
 - `apps/mmc/src` → normalize to `apps/mmc`
 - `./apps/mmc/src` → normalize to `apps/mmc` (strip leading `./`)
 
-The normalizer in `resolveImportToModule()` must split on `/` and take the first two segments where `[0]` is `packages` or `apps`.
+The normalizer in `resolveImportToModule()` must split on `/` and take the first two segments where
+`[0]` is `packages` or `apps`.
 
 ### Complete Alias Table (After Merging Both Configs)
 
@@ -286,7 +307,8 @@ The normalizer in `resolveImportToModule()` must split on `/` and take the first
 | `@zidney/api-client`                  | `packages/api-client/src/index.ts`            | `packages/api-client` (**base only**) |
 | `@zidney/api-client/*`                | `packages/api-client/src`                     | `packages/api-client` (**base only**) |
 
-Aliases prefixed with `@zidney/app/`, `@zidney/package/`, and `@/` are wildcard multi-targets and are skipped during module resolution (canot determine a single canonical module path from them).
+Aliases prefixed with `@zidney/app/`, `@zidney/package/`, and `@/` are wildcard multi-targets and
+are skipped during module resolution (canot determine a single canonical module path from them).
 
 ---
 
@@ -294,7 +316,9 @@ Aliases prefixed with `@zidney/app/`, `@zidney/package/`, and `@/` are wildcard 
 
 ### Source of Classification
 
-Module classifications are derived from the spec (FR-002: "13 modules and their required layer assignments") and the spec's Architecture Decisions, which make two corrections to `ARCHITECTURE_MAP.json`:
+Module classifications are derived from the spec (FR-002: "13 modules and their required layer
+assignments") and the spec's Architecture Decisions, which make two corrections to
+`ARCHITECTURE_MAP.json`:
 
 | Module                 | ARCHITECTURE_MAP.json (current) | module-boundaries.json (authoritative) | Change                 |
 | ---------------------- | ------------------------------- | -------------------------------------- | ---------------------- |
@@ -312,7 +336,8 @@ Module classifications are derived from the spec (FR-002: "13 modules and their 
 | `apps/backoffice`      | `ui`                            | `ui`                                   | —                      |
 | `apps/frontoffice`     | `ui`                            | `ui`                                   | —                      |
 
-`ARCHITECTURE_MAP.json` is NOT modified by this stage. The two classification mismatches are resolved by `module-boundaries.json` being the authoritative source (loaded first by `ai-guard.ts`).
+`ARCHITECTURE_MAP.json` is NOT modified by this stage. The two classification mismatches are
+resolved by `module-boundaries.json` being the authoritative source (loaded first by `ai-guard.ts`).
 
 ### Layer Dependency Matrix (from spec FR-003)
 
@@ -323,16 +348,24 @@ runtime        → domain, infrastructure
 ui             → ui, infrastructure
 ```
 
-**Observation on `ui → ui`**: `ui` modules may import from other `ui` modules (e.g., `apps/mmc` may import from `packages/ui-system` or `packages/api-client`). This enables the frontend apps to use the shared component and API client packages.
+**Observation on `ui → ui`**: `ui` modules may import from other `ui` modules (e.g., `apps/mmc` may
+import from `packages/ui-system` or `packages/api-client`). This enables the frontend apps to use
+the shared component and API client packages.
 
-**Why `domain` is not in `ui.allowed_dependencies`**: The cross_cutting_rule `ui_no_domain_packages` explicitly blocks `ui` → `packages/domain-core` and `ui` → `packages/validation`. Since `domain` is absent from `ui.allowed_dependencies`, all domain packages are implicitly forbidden for UI modules. The cross_cutting_rule is belt-and-suspenders for human readability.
+**Why `domain` is not in `ui.allowed_dependencies`**: The cross_cutting_rule `ui_no_domain_packages`
+explicitly blocks `ui` → `packages/domain-core` and `ui` → `packages/validation`. Since `domain` is
+absent from `ui.allowed_dependencies`, all domain packages are implicitly forbidden for UI modules.
+The cross_cutting_rule is belt-and-suspenders for human readability.
 
 ### Cross-Cutting Rules (from spec)
 
-1. **`packages_no_apps`**: Any package importing from any app (source: `packages/*`, target: `apps/*`)
-2. **`no_cross_app_imports`**: Any app importing from another app (source: `apps/*`, target: `apps/*`) — also covered by existing `validateCrossAppImports()`
+1. **`packages_no_apps`**: Any package importing from any app (source: `packages/*`, target:
+   `apps/*`)
+2. **`no_cross_app_imports`**: Any app importing from another app (source: `apps/*`, target:
+   `apps/*`) — also covered by existing `validateCrossAppImports()`
 3. **`runtime_no_ui_system`**: `apps/api` or `apps/worker` importing `packages/ui-system`
-4. **`ui_no_domain_packages`**: Any `ui`-layer module importing `packages/domain-core` or `packages/validation`
+4. **`ui_no_domain_packages`**: Any `ui`-layer module importing `packages/domain-core` or
+   `packages/validation`
 
 ---
 
@@ -341,21 +374,25 @@ ui             → ui, infrastructure
 ### What ARCHITECTURE_MAP.json Currently Has
 
 - 13 modules, all present
-- Fields per module: `layer`, `description`, `criticality`, `allowed_dependencies`, `forbidden_dependencies`
-- `allowed_dependencies` is `[]` for ALL modules (positive allow-lists not used — enforcement is via `forbidden_dependencies` only)
+- Fields per module: `layer`, `description`, `criticality`, `allowed_dependencies`,
+  `forbidden_dependencies`
+- `allowed_dependencies` is `[]` for ALL modules (positive allow-lists not used — enforcement is via
+  `forbidden_dependencies` only)
 - `forbidden_dependencies` is partially specified:
   - Most packages: `["apps/*"]` or `["apps/*", "packages/ui-system"]`
   - `packages/types`: `["apps/*"]`
   - `packages/api-client`: `["apps/*"]`
   - `apps/mmc`, `apps/frontoffice`, `apps/backoffice`: `["apps/*"]`
   - `apps/api`, `apps/worker`: `["apps/*", "packages/ui-system"]`
-- Has rich per-module metadata: `description`, `criticality` — NOT replicated in `module-boundaries.json`
+- Has rich per-module metadata: `description`, `criticality` — NOT replicated in
+  `module-boundaries.json`
 
 ### What module-boundaries.json Adds/Corrects
 
 - **Layer-first schema** (fundamentally different structure)
 - **Corrected classifications** for `packages/types` and `packages/api-client`
-- **Explicit full layer dependency matrix** (positive allow-lists + negative forbidden-lists per layer)
+- **Explicit full layer dependency matrix** (positive allow-lists + negative forbidden-lists per
+  layer)
 - **Structured cross_cutting_rules** array (machine-processable, not just per-module string lists)
 - **13-module coverage** without the metadata noise (no `description`, `criticality`)
 
@@ -364,10 +401,14 @@ ui             → ui, infrastructure
 `ai-guard.ts` loading order:
 
 1. Load `module-boundaries.json` → provides layer classification + layer rules (authoritative)
-2. Load `ARCHITECTURE_MAP.json` → provides per-module `forbidden_dependencies` overrides (supplement)
+2. Load `ARCHITECTURE_MAP.json` → provides per-module `forbidden_dependencies` overrides
+   (supplement)
 3. Load `ARCHITECTURE_CONTRACT.json` / brain → provides contract-level rules (fallback)
 
-For any module with a layer classification in `module-boundaries.json`, that classification wins over `ARCHITECTURE_MAP.json`. The `validateArchitectureMap()` validator (existing, unchanged) continues to run and enforces per-module `forbidden_dependencies` from `ARCHITECTURE_MAP.json` as an additional layer of defense.
+For any module with a layer classification in `module-boundaries.json`, that classification wins
+over `ARCHITECTURE_MAP.json`. The `validateArchitectureMap()` validator (existing, unchanged)
+continues to run and enforces per-module `forbidden_dependencies` from `ARCHITECTURE_MAP.json` as an
+additional layer of defense.
 
 ---
 
@@ -377,7 +418,7 @@ For any module with a layer classification in `module-boundaries.json`, that cla
 
 ```yaml
 arch-guard:
-  name: 'AI-Guard — Architecture Boundaries'
+  name: "AI-Guard — Architecture Boundaries"
   runs-on: ubuntu-latest
   timeout-minutes: 5
   needs: [lint, typecheck]
@@ -394,13 +435,18 @@ arch-guard:
       run: bun scripts/ai-guard.ts
 ```
 
-**Required change**: Rename step `"Run AI-Guard architecture check"` → `"module-boundary-validation"`. Also update `run:` from `bun scripts/ai-guard.ts` to `bun run ai-guard` to use the new package.json script.
+**Required change**: Rename step `"Run AI-Guard architecture check"` →
+`"module-boundary-validation"`. Also update `run:` from `bun scripts/ai-guard.ts` to
+`bun run ai-guard` to use the new package.json script.
 
-**Job placement is already correct**: `arch-guard` job runs after `lint` and `typecheck`, and before `unit-tests` (which has `needs: [lint, typecheck, arch-guard]`). This satisfies FR-009 with zero structural changes to the job graph.
+**Job placement is already correct**: `arch-guard` job runs after `lint` and `typecheck`, and before
+`unit-tests` (which has `needs: [lint, typecheck, arch-guard]`). This satisfies FR-009 with zero
+structural changes to the job graph.
 
 ### `.github/workflows/architecture-governance.yml`
 
-Has step `"Run Zidney AI Guard"` that runs `bun scripts/ai-guard.ts`. This step does not need renaming (the spec only specifies renaming in `ci.yml`'s `arch-guard` job).
+Has step `"Run Zidney AI Guard"` that runs `bun scripts/ai-guard.ts`. This step does not need
+renaming (the spec only specifies renaming in `ci.yml`'s `arch-guard` job).
 
 ---
 

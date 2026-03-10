@@ -29,7 +29,8 @@
 
 ### Foundation Layer
 
-- [x] T001 Create test directory structure matching test types in `tests/unit/`, `tests/integration/`, `tests/static/`, `tests/performance/`
+- [x] T001 Create test directory structure matching test types in `tests/unit/`,
+      `tests/integration/`, `tests/static/`, `tests/performance/`
 - [x] T002 Create shared test helpers file: `tests/test-helpers.ts` with:
   - `InMemoryPool` class for mocked Database connections (unit tests)
   - `InstrumentedRedisClient` class for mocked Redis (unit tests)
@@ -153,7 +154,8 @@
 
 ### CI Configuration
 
-- [x] T017 [P] Create GitHub Actions workflow (or equivalent CI): `.github/workflows/test-stage-001.yml` with:
+- [x] T017 [P] Create GitHub Actions workflow (or equivalent CI):
+      `.github/workflows/test-stage-001.yml` with:
   - **Job 1**: Unit tests (Vitest --run, ~15 min)
   - **Job 2**: Integration tests (Docker + Vitest, ~30 min, parallel to Job 1)
   - **Job 3**: Static analysis (Vitest, ~5 min, parallel to Jobs 1-2)
@@ -167,7 +169,8 @@
 
 **Goal**: Verify that cross-tenant data access is impossible; users cannot access other workspaces
 
-**Independent Test**: All 4 tests must pass to prove tenant isolation is enforced at both API and database layers
+**Independent Test**: All 4 tests must pass to prove tenant isolation is enforced at both API and
+database layers
 
 **Duration**: ~20 minutes (unit 8 min + integration 12 min)
 
@@ -175,7 +178,8 @@
 
 ### Unit Tests (Tests 1.1-1.4 with mocks)
 
-- [x] T018 Create unit test file: `tests/unit/01-tenant-isolation.test.ts` with describe block "Area 1: Tenant Isolation (Unit)"
+- [x] T018 Create unit test file: `tests/unit/01-tenant-isolation.test.ts` with describe block "Area
+      1: Tenant Isolation (Unit)"
 
 - [x] T019 [P] [Area 1] Test 1.1 unit implementation:
   - Cross-tenant data access rejection test
@@ -206,7 +210,8 @@
 
 ### Integration Tests (Tests 1.1-1.4 with real database)
 
-- [x] T023 Create integration test file: `tests/integration/01-tenant-isolation.test.ts` with describe block "Area 1: Tenant Isolation (Integration)"
+- [x] T023 Create integration test file: `tests/integration/01-tenant-isolation.test.ts` with
+      describe block "Area 1: Tenant Isolation (Integration)"
 
 - [x] T024 [Area 1] Create multi-workspace setup helper:
   - Function `setupMultiWorkspaceTest(masterDb, tenantPoolMap)` in test file
@@ -224,7 +229,8 @@
   - In `tests/integration/01-tenant-isolation.test.ts`
 
 - [x] T026 [Area 1] Test 1.2 integration implementation (same as unit but with real connections):
-  - Verify resolver chain executes in correct order: correlation → resolver → license → schema → handler
+  - Verify resolver chain executes in correct order: correlation → resolver → license → schema →
+    handler
   - In `tests/integration/01-tenant-isolation.test.ts`
 
 - [x] T027 [Area 1] Test 1.3 integration implementation (same as unit):
@@ -248,7 +254,8 @@
 
 **Goal**: Verify deterministic, idempotent, race-condition-safe workspace provisioning
 
-**Independent Test**: Provisioning can be triggered 5x concurrently and result is 1 database, complete schema
+**Independent Test**: Provisioning can be triggered 5x concurrently and result is 1 database,
+complete schema
 
 **Duration**: ~15 minutes (integration only, no unit)
 
@@ -256,7 +263,8 @@
 
 ### Integration Tests (Tests 2.1-2.3, real database + concurrency)
 
-- [x] T030 Create provisioning test file: `tests/integration/02-provisioning.test.ts` with describe block "Area 2: Provisioning Validation"
+- [x] T030 Create provisioning test file: `tests/integration/02-provisioning.test.ts` with describe
+      block "Area 2: Provisioning Validation"
 
 - [x] T031 [Area 2] Test 2.1 implementation:
   - Deterministic database creation (idempotency)
@@ -281,7 +289,8 @@
   - Baseline schema integrity after provisioning
   - Provision new workspace
   - Connect to tenant database, verify all required tables present:
-    - users, roles, permissions, students, staff, attempts, submissions, questions_snapshot, schema_version
+    - users, roles, permissions, students, staff, attempts, submissions, questions_snapshot,
+      schema_version
   - Verify foreign keys, unique constraints, NOT NULL constraints
   - Verify schema_version row exists with semantic version (X.Y.Z) and recent timestamp
   - In `tests/integration/02-provisioning.test.ts`
@@ -300,7 +309,8 @@
 
 **Goal**: Verify license state machine, version enforcement, limit enforcement
 
-**Independent Test**: License state transitions, version mismatches, and limit breaches all handled correctly
+**Independent Test**: License state transitions, version mismatches, and limit breaches all handled
+correctly
 
 **Duration**: ~25 minutes (9 unit sub-tests + integration)
 
@@ -308,7 +318,8 @@
 
 ### Unit Tests (Tests 3.1a-e, 3.2, 3.3a-c)
 
-- [x] T035 Create license engine unit test file: `tests/unit/03-license-engine.test.ts` with describe block "Area 3: License Engine Validation"
+- [x] T035 Create license engine unit test file: `tests/unit/03-license-engine.test.ts` with
+      describe block "Area 3: License Engine Validation"
 
 #### Test 3.1: License State Machine (5 sub-tests)
 
@@ -391,7 +402,8 @@
 
 ### Integration Tests (License enforcement with real database context)
 
-- [x] T045 Create license engine integration test file: `tests/integration/03-license-engine.test.ts`
+- [x] T045 Create license engine integration test file:
+      `tests/integration/03-license-engine.test.ts`
 
 - [x] T046 [Area 3] Integration test:
   - All 3.1a-e state transitions with real database
@@ -424,7 +436,8 @@
 
 ### Static Analysis Tests (Tests 4.1-4.3, file-based)
 
-- [x] T049 Create migration discipline test file: `tests/static/04-migration-discipline.test.ts` with describe block "Area 4: Migration Discipline Validation"
+- [x] T049 Create migration discipline test file: `tests/static/04-migration-discipline.test.ts`
+      with describe block "Area 4: Migration Discipline Validation"
 
 - [x] T050 [Area 4] Test 4.1 implementation:
   - Forward-only migration check
@@ -475,7 +488,8 @@
 
 ### Unit Tests (Tests 5.1a-c, 5.2 with mocks)
 
-- [x] T054 Create rate limiting unit test file: `tests/unit/05-rate-limiting.test.ts` with describe block "Area 5: Rate Limiting Validation"
+- [x] T054 Create rate limiting unit test file: `tests/unit/05-rate-limiting.test.ts` with describe
+      block "Area 5: Rate Limiting Validation"
 
 #### Test 5.1: Threshold Enforcement
 
@@ -555,7 +569,8 @@
 
 ### Integration Tests (Tests 6.1-6.2 with real logging)
 
-- [x] T062 Create observability test file: `tests/integration/06-observability.test.ts` with describe block "Area 6: Observability Validation"
+- [x] T062 Create observability test file: `tests/integration/06-observability.test.ts` with
+      describe block "Area 6: Observability Validation"
 
 #### Test 6.1: Structured Logging Compliance
 
@@ -600,7 +615,8 @@
     - `instance: [request path]`
     - `error_code: [custom code]`
   - Assert: All error responses consistent format
-  - Assert: No unstructured error responses (no "message" or "code" at root without RFC 7807 wrapper)
+  - Assert: No unstructured error responses (no "message" or "code" at root without RFC 7807
+    wrapper)
   - In `tests/integration/06-observability.test.ts`
 
 **Checkpoint**: All 2 observability tests PASS ✅
@@ -619,7 +635,8 @@
 
 ### Integration Tests (Tests 7.1-7.3 with real attempt lifecycle)
 
-- [x] T065 Create attempt engine test file: `tests/integration/07-attempt-engine.test.ts` with describe block "Area 7: Attempt Engine Validation"
+- [x] T065 Create attempt engine test file: `tests/integration/07-attempt-engine.test.ts` with
+      describe block "Area 7: Attempt Engine Validation"
 
 #### Test 7.1: Snapshot Immutability
 
@@ -680,7 +697,8 @@
 
 ### Performance Tests (Tests 8.1-8.3 with load tools)
 
-- [x] T069 Create performance test file: `tests/performance/08-performance-baseline.test.ts` with describe block "Area 8: Performance Baseline"
+- [x] T069 Create performance test file: `tests/performance/08-performance-baseline.test.ts` with
+      describe block "Area 8: Performance Baseline"
 
 #### Test 8.1: Middleware Overhead
 

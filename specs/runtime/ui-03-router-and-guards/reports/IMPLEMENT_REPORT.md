@@ -15,15 +15,17 @@ router and guard pipeline across all three frontend applications (MMC, Backoffic
 - All router factories converted to `createAppRouter(history?)` pattern.
 - New guard modules created: `auth.guard.ts`, `role.guard.ts`, `feature-flag.guard.ts` (all apps),
   `workspace.guard.ts` (Backoffice only).
-- `registerGuards(router, options)` orchestrator created for each app — pipeline order enforced per spec.
+- `registerGuards(router, options)` orchestrator created for each app — pipeline order enforced per
+  spec.
 - Legacy RouteMeta fields (`guestOnly`, `requiredRole`, `requiredModule`) fully migrated to
   canonical fields (`public`, `roles`, `requiresWorkspace`).
 - All co-located unit tests (`__tests__/*.spec.ts`) and integration tests written and passing.
 - Post-implementation validation fixes applied: vitest config includes, `@zidney/logger` aliases,
   login/home route stubs, and integration test guard-invocation pattern corrected.
 
-**Final validation state:** 63/63 tasks complete · TypeScript: 0 errors · Lint: 0 new errors ·
-MMC: 169/169 tests pass · Backoffice (new code): 34/34 tests pass · Frontoffice (new code): 26/26 tests pass.
+**Final validation state:** 63/63 tasks complete · TypeScript: 0 errors · Lint: 0 new errors · MMC:
+169/169 tests pass · Backoffice (new code): 34/34 tests pass · Frontoffice (new code): 26/26 tests
+pass.
 
 ---
 
@@ -181,11 +183,10 @@ MMC: 169/169 tests pass · Backoffice (new code): 34/34 tests pass · Frontoffic
 | `apps/frontoffice/tests/integration/core/router/router.test.ts`         | Integration | 6 tests: `createAppRouter` route-resolve (4) + `registerGuards` guard behavior (2) |
 | `apps/mmc/tests/unit/auth/auth.guard.test.ts`                           | Unit        | Updated from legacy positional API to new options-object API (9 tests)             |
 
-**Note on integration test pattern:** jsdom does not resolve Vue Router
-navigation correctly when components are lazy-loaded. All integration guard
-behavior tests use direct guard factory invocation (`guard(to, from, next)`)
-rather than `router.push()` — this avoids infinite navigation hangs in jsdom
-and validates guard logic without testing the router's navigation queue.
+**Note on integration test pattern:** jsdom does not resolve Vue Router navigation correctly when
+components are lazy-loaded. All integration guard behavior tests use direct guard factory invocation
+(`guard(to, from, next)`) rather than `router.push()` — this avoids infinite navigation hangs in
+jsdom and validates guard logic without testing the router's navigation queue.
 
 ---
 
@@ -228,9 +229,9 @@ and validates guard logic without testing the router's navigation queue.
 
 ## Open Risks
 
-- `apps/backoffice/src/composables/usePermission.ts` and associated page files contain 9 pre-existing
-  lint errors (from commit `ae83ecc`, STAGE_021). These are out of scope for this stage and are
-  tracked separately.
+- `apps/backoffice/src/composables/usePermission.ts` and associated page files contain 9
+  pre-existing lint errors (from commit `ae83ecc`, STAGE_021). These are out of scope for this stage
+  and are tracked separately.
 - `createFeatureFlagGuard()` is a stub. Implementation requires a separate stage when the Feature
   Flag service is ready (TODO marker placed per spec §4.5).
 

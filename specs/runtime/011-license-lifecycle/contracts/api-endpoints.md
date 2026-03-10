@@ -76,7 +76,7 @@ All responses follow standard:
 
 ```typescript
 {
-  reason: string // (required) Business reason for soft lock
+  reason: string; // (required) Business reason for soft lock
 }
 ```
 
@@ -130,7 +130,7 @@ All responses follow standard:
 
 ```typescript
 {
-  reason: string // (required) Business reason for renewal
+  reason: string; // (required) Business reason for renewal
 }
 ```
 
@@ -215,8 +215,7 @@ All responses follow standard:
 }
 ```
 
-**Response** (200 OK - Complete):
-If snapshot already captured:
+**Response** (200 OK - Complete): If snapshot already captured:
 
 ```typescript
 {
@@ -674,7 +673,8 @@ If snapshot already captured:
 - `X-Correlation-ID: {uuid}` (optional; auto-generated if missing)
 - `Accept: application/json` (recommended for all requests)
 - `Idempotency-Key: {uuid}` (required for all POST endpoints; prevents duplicate operations)
-- `X-2FA-Verified: {timestamp}` (for delete operations; timestamp of 2FA verification, must be < 5 min old)
+- `X-2FA-Verified: {timestamp}` (for delete operations; timestamp of 2FA verification, must be < 5
+  min old)
 
 ### Response Headers
 
@@ -697,7 +697,8 @@ For delete endpoints requiring 2FA:
 4. Server validates: current_time - header_time < 5 minutes
 5. If expired: return 401 Unauthorized with message "2FA session expired; re-authenticate"
 
-**Alternative (recommended for MMC)**: Use secure cookie flag `__session-2fa-verified` (HTTP-only, secure) set by auth endpoint, automatically sent by browser.
+**Alternative (recommended for MMC)**: Use secure cookie flag `__session-2fa-verified` (HTTP-only,
+secure) set by auth endpoint, automatically sent by browser.
 
 ---
 
@@ -716,7 +717,8 @@ For delete endpoints requiring 2FA:
 - Admin accounts bypass state transition limits (allow unlimited soft-lock/renew)
 - Admin accounts bypass deletion rate limit (allow immediate retry if failed)
 - Admin accounts bypass job polling limits
-- Implementation: Check `user.role == 'admin'` in rate limiting middleware; skip counter for admin users
+- Implementation: Check `user.role == 'admin'` in rate limiting middleware; skip counter for admin
+  users
 
 **Response Headers for Admins**:
 
@@ -783,4 +785,5 @@ Future endpoints for webhook subscriptions:
 
 - `POST /webhooks/subscribe` - Subscribe to license state change events
 - `POST /webhooks/test` - Send test webhook
-- Response formats: license_transitioned, snapshot_created, restoration_completed, deletion_confirmed
+- Response formats: license_transitioned, snapshot_created, restoration_completed,
+  deletion_confirmed

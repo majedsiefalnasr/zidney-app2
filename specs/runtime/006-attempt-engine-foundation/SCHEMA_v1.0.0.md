@@ -9,7 +9,8 @@
 
 ## Overview
 
-The Attempt Engine schema supports database-per-tenant isolation with deterministic, immutable attempt grading. All tables are tenant-scoped (include `workspace_id`).
+The Attempt Engine schema supports database-per-tenant isolation with deterministic, immutable
+attempt grading. All tables are tenant-scoped (include `workspace_id`).
 
 ### Entity Relationship Diagram
 
@@ -490,7 +491,8 @@ gunzip -c /backups/zidney_tenant1_20260218.sql.gz | psql zidney_tenant1
 SELECT COUNT(*) FROM attempts;
 ```
 
-**Note:** Schema migrations are forward-only. Code rollback via container image is the supported approach.
+**Note:** Schema migrations are forward-only. Code rollback via container image is the supported
+approach.
 
 ---
 

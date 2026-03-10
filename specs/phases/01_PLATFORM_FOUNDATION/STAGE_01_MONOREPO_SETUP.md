@@ -1,8 +1,6 @@
 # STAGE 01 – Monorepo Setup
 
-Phase: 1 – Platform Foundation
-Status: Mandatory
-Scope: Repository & Environment Structure Only
+Phase: 1 – Platform Foundation Status: Mandatory Scope: Repository & Environment Structure Only
 Freeze Level: Architectural Contract
 
 ---
@@ -32,8 +30,7 @@ Constitutional Compliance:
 - No cross-app imports
 - No business logic introduced
 
-Notes:
-This stage is structurally frozen. Changes require architectural review.
+Notes: This stage is structurally frozen. Changes require architectural review.
 
 ---
 
@@ -133,13 +130,8 @@ Violation = architectural failure.
 
 Strict layering must be enforced:
 
-UI (Vue apps)
-↓
-API Layer (apps/api)
-↓
-Domain Layer (packages/domain-core)
-↓
-Infrastructure Layer (DB, Redis, External Services)
+UI (Vue apps) ↓ API Layer (apps/api) ↓ Domain Layer (packages/domain-core) ↓ Infrastructure Layer
+(DB, Redis, External Services)
 
 Rules:
 
@@ -191,8 +183,7 @@ Docker must run:
 
 API and worker may run:
 
-- Inside Docker
-  OR
+- Inside Docker OR
 - Directly via Bun for development
 
 Production must use Docker for all services.
@@ -221,8 +212,7 @@ Rules:
 
 - Every package must support unit tests
 - apps/api must support integration tests
-- Test folders:
-  **tests**/
+- Test folders: **tests**/
 
 Coverage command must exist at root.
 
@@ -276,8 +266,7 @@ Worker must:
 - Process test job
 - Log structured JSON output
 
-No grading logic.
-No provisioning logic yet.
+No grading logic. No provisioning logic yet.
 
 ---
 
@@ -329,8 +318,7 @@ This stage builds skeleton only.
 
 ## Stability Principle
 
-If Stage 01 is weak,
-all future phases will require refactoring.
+If Stage 01 is weak, all future phases will require refactoring.
 
 This stage must be clean and frozen before proceeding to:
 
