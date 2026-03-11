@@ -9,18 +9,20 @@ those introduced by AI-assisted development.
 ## Stage Status
 
 Status: DRAFT
-Step: specify
+Step: clarify
 Risk Level: LOW
-Last Updated: 2026-03-11T13:20:30Z
+Last Updated: 2026-03-11T13:25:00Z
 
-Scope Defined:
+Scope Clarified:
 
-- 8-layer governance architecture specified
-- 8 functional requirements mapped to layers
-- 4 non-functional requirements with targets
-- 11 in-scope items, 6 out-of-scope items clearly defined
-- Constitutional compliance verified (zero violations)
-- Testing strategy with 4 concrete scenarios
+- 8-layer governance architecture fully specified
+- 5 clarification questions resolved
+- Guard script timing: mandatory in CI only (Q1)
+- Domain exceptions: formalized allow-list with registry (Q2)
+- Validation boundary: all external data at API entry, <100ms latency (Q3)
+- AI governance: identical enforcement for all code (Q4)
+- Layer sequencing: sequential 1→8, MVP = Layers 1+5 (Q5)
+- Constitutional compliance revalidated (zero violations)
 
 Deferred Scope:
 
@@ -29,12 +31,13 @@ Deferred Scope:
 
 Constitutional Compliance:
 
-- Specification drafted — constitutional audit pending
+- Specification clarified — constitutional audit passing
 - Zero database, security, or architecture changes
 - Pure governance layer with no runtime impact
+- All 5 clarifications remain within governance scope
 
 Notes:
-Specification complete. Clarification step pending.
+Specification unambiguated. Technical planning authorized.
 
 ---
 
@@ -195,14 +198,19 @@ Never rely on implicit inference for public APIs.
 
 # Layer 5 — Runtime Validation
 
-External data must be validated before entering the domain layer.
+External data must be validated at **API entry point or service boundary** before entering the domain layer.
+
+**Validation Ownership Model:**
+
+- **Endpoint team** owns schema definition for their domain
+- **Central validation team** owns enforcement infrastructure (`packages/validation`)
 
 External sources include:
 
-- API responses
-- database results
-- message queues
-- environment variables
+- API responses (validated at HTTP boundary)
+- database results (validated at repository layer)
+- message queues (validated at worker entry point)
+- environment variables (validated at service initialization)
 
 External data must be typed as:
 
@@ -229,6 +237,12 @@ Forbidden pattern:
 ```
 const user = data as User
 ```
+
+**Performance Targets:**
+
+- Critical paths (exam submission, grading, question retrieval) must achieve <100ms additional latency from validation
+- Non-critical paths: validation overhead acceptable up to <500ms
+- Measure and baseline validation overhead on current critical submission path
 
 ---
 

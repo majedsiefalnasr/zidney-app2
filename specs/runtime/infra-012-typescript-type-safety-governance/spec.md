@@ -871,3 +871,151 @@ Type safety governance is a **one-way system**—it should not be rolled back on
 ---
 
 Compliant with Zidney Constitution v1.2.0 — No violations detected.
+
+---
+
+## Clarifications
+
+### Session 2026-03-11
+
+This section documents clarification questions resolved during the specification phase. These answers remove ambiguities and provide concrete implementation guidance for all 8 governance layers.
+
+---
+
+### Q1: Guard Script Execution Timing & Developer Friction
+
+**Question**: When does the guard script run, and can developers opt-out?
+
+**Specification Gap**: The spec mentioned guard script as "optional for developers, enforced in CI" but didn't explicitly define the enforcement model.
+
+**Resolution**:
+
+- **Guard script is mandatory in CI only**
+- Pre-commit hook is optional for developers
+- CI serves as the hard enforcement gate
+- Developers cannot commit invalid code that reaches CI
+
+**Impact on Implementation**:
+
+- Do NOT create a mandatory pre-commit hook (would slow local development)
+- Guard script MUST run in CI pipeline with zero exceptions
+- CI failure blocks PR merge
+- Local development remains fast; enforcement happens at CI boundary
+
+---
+
+### Q2: Domain Layer Exception Allow-Lists
+
+**Question**: How are exceptions to the "zero `any` in domain-core" rule managed?
+
+**Specification Gap**: The spec stated zero exceptions but provided no mechanism for legitimate exemptions (legacy code, type system limitations).
+
+**Resolution**:
+
+- **Formalized allow-list with approval process**
+- Create `packages/domain-core/ALLOWED_ANY_EXCEPTIONS.json` registry
+- Each exception entry includes: file path, reason, approver, date, sunset clause
+- Guard script reads this registry and recognizes approved exceptions
+- Exception changes are committed to git (auditable history)
+
+**Impact on Implementation**:
+
+- Schema for ALLOWED_ANY_EXCEPTIONS.json: `{ "path": string, "reason": string, "approver": string, "date": ISO8601, "sunsetDate": ISO8601 | null }`
+- Guard script must check this registry before flagging a violation
+- Exceptions have optional sunset dates (self-reminding for future cleanup)
+- Creates audit trail for all exemptions
+
+---
+
+### Q3: External Data Validation & Runtime Boundary
+
+**Question**: When and where must external data be validated?
+
+**Specification Gap**: The spec referenced "packages/validation" but didn't define validation scope, timing, or responsibility.
+
+**Resolution**:
+
+- **Strict boundary validation with shared ownership**
+- Validate ALL external data (API responses, DB results, message queues, environment variables) at API entry point or service boundary
+- Endpoint team owns schema definition (what constitutes valid data)
+- Central validation team owns enforcement infrastructure (the validator tools)
+- Measure latency baseline: validation overhead must not exceed 100ms on critical paths (e.g., exam submission)
+- Validation overhead is NOT waivable for performance reasons
+
+**Impact on Implementation**:
+
+- Every API endpoint must define input schema (using packages/validation)
+- Database query results must be validated before passing to domain layer
+- Queue messages must be validated before processing
+- Environment variables must be validated on startup
+- Integration tests must verify <100ms validation latency on critical paths
+
+---
+
+### Q4: AI Governance Integration & Violation Escalation
+
+**Question**: How are AI-generated type violations handled differently from human code?
+
+**Specification Gap**: The spec referenced AI governance rules but didn't clarify enforcement model.
+
+**Resolution**:
+
+- **Identical hard-block enforcement for AI and human code**
+- AI code and human code are treated identically at CI
+- Type violations hard-block all PRs (no exceptions, no warnings)
+- No special escalation path or learning loop
+- Enforcement must apply uniformly across all contributors
+
+**Impact on Implementation**:
+
+- Do NOT create special handling for AI violations
+- Guard script treats all code violations the same
+- AI governance rules must be enforced via same CI gates as human code
+- Documentation and learning analysis can happen post-CI, but enforcement must be uniform
+
+---
+
+### Q5: Layer Implementation Sequencing & Interdependencies
+
+**Question**: Can layers be implemented in parallel, or must they be sequential?
+
+**Specification Gap**: The spec defined 8 layers but never specified implementation order or dependencies.
+
+**Resolution**:
+
+- **Sequential dependency chain**
+- Layers must be implemented in strict order: Layer 1 → Layer 2 → ... → Layer 8
+- Each downstream layer depends on upstream layers being stable and complete
+- Example: TypeScript strict mode (Layer 1) must be complete before Biome linting (Layer 2) can be deployed
+- Example: Guard script (Layer 3) must exist before CI enforcement (Layer 4) can validate it
+- **MVP enforcement**: Layers 1 + 5 (strict types + runtime validation)
+  - Layer 1 (TypeScript strict mode)
+  - Layer 5 (CI type-check enforcement)
+  - All other layers (2, 3, 4, 6, 7, 8) deferred post-MVP
+
+**Impact on Implementation**:
+
+- Task execution must follow strict order
+- No parallel work on different layers
+- MVP implementation focuses only on Layers 1 + 5
+- After MVP is stable, Layer 2 (Biome) can be added
+- Continue adding layers sequentially: 3 → 4 → 6 → 7 → 8
+- Each layer addition must be validated before next layer begins
+
+---
+
+## Summary of Clarifications
+
+All 5 clarification questions have been resolved:
+
+| Question                | Resolution                                      | Impact                              |
+| ----------------------- | ----------------------------------------------- | ----------------------------------- |
+| Q1: Guard Script Timing | Mandatory in CI only; optional pre-commit       | Fast local dev; hard CI enforcement |
+| Q2: Domain Exceptions   | Formalized allow-list with registry             | Auditable, sunset-able exemptions   |
+| Q3: Validation Boundary | All data validated at API entry; <100ms latency | Strict external data handling       |
+| Q4: AI Governance       | Identical enforcement for all code              | No special paths; uniform severity  |
+| Q5: Layer Sequencing    | Sequential order; MVP = Layers 1+5              | Clear implementation roadmap        |
+
+**Status**: ✅ **Specification un-ambiguated. Ready for planning phase.**
+
+---
