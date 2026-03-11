@@ -23,12 +23,21 @@
 import type { Logger } from '@zidney/logger'
 import type { Context, MiddlewareHandler } from 'hono'
 
+interface RedisLike {
+  get: (key: string) => Promise<string | null>
+  setex: (key: string, ttlSeconds: number, value: string) => Promise<unknown>
+}
+
+interface TenantDbLike {
+  query: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>
+}
+
 export interface IdempotencyKey {
   key: string
   workspace_id: string
   attempt_id?: string
   response_status: number
-  response_body: any
+  response_body: unknown
   created_at: Date
   expires_at: Date
 }
@@ -49,7 +58,10 @@ export interface IdempotencyKey {
  * - PostgreSQL unavailable: Log warning, proceed without cache (risky but continues)
  * - Invalid idempotency key format: Continue without caching
  */
-export function createIdempotencyMiddlewareStage06(logger: Logger, redis?: any): MiddlewareHandler {
+export function createIdempotencyMiddlewareStage06(
+  logger: Logger,
+  redis?: RedisLike
+): MiddlewareHandler {
   return async (c: Context, next) => {
     const correlation_id = c.get('correlationId') || 'unknown'
     const tenant = c.get('tenant')
@@ -191,12 +203,12 @@ export function createIdempotencyMiddlewareStage06(logger: Logger, redis?: any):
  * ```
  */
 export async function cacheIdempotentResponse(
-  redis: any,
-  tenantDb: any,
+  redis: RedisLike | undefined,
+  tenantDb: TenantDbLike | undefined,
   workspace_id: string,
   idempotency_key: string,
   status_code: number,
-  response_body: any,
+  response_body: unknown,
   logger: Logger,
   correlation_id: string,
   attempt_id?: string

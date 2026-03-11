@@ -155,7 +155,7 @@ export async function createAttemptHandler(c: Context) {
   }
 
   // 5. Build immutable snapshots
-  const questionSnapshot = buildQuestionSnapshot(questions as any)
+  const questionSnapshot = buildQuestionSnapshot(questions as unknown)
   const gradingConfigSnapshot = buildGradingConfigSnapshot(exam)
   const flagsSnapshot = buildFlagsSnapshot(exam)
 

@@ -46,7 +46,7 @@ app.get('/ws/attempt/:id', async (c) => {
     }
 
     const token = authHeader.substring(7)
-    let claims: any = null
+    let claims: unknown = null
 
     try {
       claims = await Jwt.verify(
@@ -136,7 +136,7 @@ app.get('/ws/attempt/:id', async (c) => {
     })
 
     // Upgrade to WebSocket
-    return (c as any).upgrade((ws: any) => {
+    return (c as unknown).upgrade((ws: unknown) => {
       let heartbeatInterval: NodeJS.Timeout | null = null
       let heartbeatTimeout: NodeJS.Timeout | null = null
       const messageTimestamps: number[] = []
@@ -172,7 +172,7 @@ app.get('/ws/attempt/:id', async (c) => {
       }
 
       // Message handler
-      ws.onmessage = async (event: any) => {
+      ws.onmessage = async (event: unknown) => {
         try {
           // Clear heartbeat timeout on message
           if (heartbeatTimeout) {
@@ -199,8 +199,11 @@ app.get('/ws/attempt/:id', async (c) => {
           messageTimestamps.push(now)
 
           // Remove messages older than 60 seconds
-          while (messageTimestamps.length > 0 && messageTimestamps[0]! < now - 60000) {
+          while ((messageTimestamps[0] ?? now) < now - 60000) {
             messageTimestamps.shift()
+            if (messageTimestamps.length === 0) {
+              break
+            }
           }
 
           // Check burst limit (10 messages in last 1 second)

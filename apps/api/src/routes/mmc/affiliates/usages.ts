@@ -125,7 +125,7 @@ export async function getAffiliateUsagesHandler(c: Context) {
       data: response,
       error: null,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[AFFILIATE] Get usages error:', { error })
 
     c.status(500)

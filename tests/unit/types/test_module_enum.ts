@@ -81,7 +81,7 @@ describe('T064: Module Enum Unit Tests', () => {
     })
 
     it('should not have duplicates', () => {
-      const counted = VALID_MODULES.reduce((acc: any, mod) => {
+      const counted = VALID_MODULES.reduce<Record<string, number>>((acc, mod) => {
         acc[mod] = (acc[mod] || 0) + 1
         return acc
       }, {})
@@ -107,7 +107,7 @@ describe('T064: Module Enum Unit Tests', () => {
       const combinations = [[VALID_MODULES[0]], [VALID_MODULES[0], VALID_MODULES[1]], VALID_MODULES]
 
       for (const combo of combinations) {
-        expect(combo.every((m) => VALID_MODULES.includes(m!))).toBe(true)
+        expect(combo.every((m) => typeof m === 'string' && VALID_MODULES.includes(m))).toBe(true)
       }
     })
   })

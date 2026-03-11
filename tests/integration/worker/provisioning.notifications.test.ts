@@ -134,7 +134,9 @@ describe('T106: Async Notification Chain - Events', () => {
       { event: 'provisioning:completed', status: 'success', correlationId },
     ]
 
-    events.forEach((evt) => eventBus.push(evt))
+    events.forEach((evt) => {
+      eventBus.push(evt)
+    })
 
     // All events should have correlation ID
     const allHaveCorrelationId = eventBus.every((evt) => evt.correlationId === correlationId)

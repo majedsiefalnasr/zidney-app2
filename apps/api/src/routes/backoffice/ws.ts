@@ -40,12 +40,12 @@ const logger = createLogger('backoffice-ws')
 
 // WS license poll interval: env var, clamped 5 000–120 000 ms, default 30 000 ms
 const WS_POLL_MS = Math.min(
-  Math.max(parseInt(process.env['WS_LICENSE_POLL_INTERVAL_MS'] ?? '30000', 10), 5000),
+  Math.max(parseInt(process.env.WS_LICENSE_POLL_INTERVAL_MS ?? '30000', 10), 5000),
   120000
 )
 
 // Max consecutive poll failures before fail-closed (M-01)
-const MAX_POLL_FAILURES = parseInt(process.env['WS_MAX_POLL_FAILURES'] ?? '3', 10)
+const MAX_POLL_FAILURES = parseInt(process.env.WS_MAX_POLL_FAILURES ?? '3', 10)
 
 // F-01: Module-scoped shared Redis client — shared across ALL connections on this process.
 // Never created per-connection; never closed per-connection.

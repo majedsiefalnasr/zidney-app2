@@ -86,7 +86,7 @@ export class DashboardError extends Error {
     public statusCode: number,
     public errorCode: string,
     public message: string,
-    public context?: Record<string, any>
+    public context?: Record<string, unknown>
   ) {
     super(message)
     this.name = 'DashboardError'
@@ -127,7 +127,7 @@ function logError(
   status: number,
   errorCode: string,
   message: string,
-  context: any,
+  context: DashboardLogContext,
   originalError?: Error
 ): void {
   const logData = {
@@ -250,7 +250,7 @@ export function throwDashboardError(
   statusCode: number,
   errorCode: string,
   message: string,
-  context?: Record<string, any>
+  context?: DashboardLogContext
 ): never {
   throw new DashboardError(statusCode, errorCode, message, context)
 }
@@ -272,4 +272,13 @@ export function createErrorResponse(code: string, message: string): ErrorRespons
     data: null,
     error: { code, message },
   }
+}
+interface DashboardLogContext {
+  req?: {
+    header?: (name: string) => string | undefined
+    path?: string
+    method?: string
+  }
+  user?: { id?: string }
+  workspace?: { id?: string }
 }

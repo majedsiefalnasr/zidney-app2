@@ -111,23 +111,33 @@ export async function createAffiliateHandler(c: Context) {
       data: affiliate,
       error: null,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[AFFILIATE] Create error:', { error })
+    const errorCode =
+      error && typeof error === 'object' && 'code' in error
+        ? String((error as { code?: unknown }).code)
+        : undefined
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : error && typeof error === 'object' && 'message' in error
+          ? String((error as { message?: unknown }).message)
+          : String(error)
 
-    if (error.code === 'VALIDATION_ERROR') {
+    if (errorCode === 'VALIDATION_ERROR') {
       c.status(400)
       return c.json({
         success: false,
         data: null,
         error: {
-          code: error.code,
-          message: error.message,
+          code: errorCode,
+          message: errorMessage,
         },
       })
     }
 
     // Constraint violations (UNIQUE, CHECK, etc.)
-    if (error.code === '23505') {
+    if (errorCode === '23505') {
       // Unique violation
       c.status(400)
       return c.json({
@@ -141,7 +151,7 @@ export async function createAffiliateHandler(c: Context) {
       })
     }
 
-    if (error.code === '23514') {
+    if (errorCode === '23514') {
       // Check constraint violation
       c.status(400)
       return c.json({

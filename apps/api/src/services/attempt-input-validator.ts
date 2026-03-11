@@ -20,6 +20,44 @@
 import type { Logger } from '@zidney/logger'
 import type { Pool, PoolClient } from 'pg'
 
+interface ExamValidationRecord {
+  id: string
+  name: string
+  status: string
+  version: number
+  mode: string
+  time_limit_seconds: number | null
+  allow_multiple_attempts: boolean
+  pass_score_percentage: number
+  total_points: number
+  randomize_questions: boolean
+  randomize_options: boolean
+  show_correct_answers: boolean
+  review_allowed: boolean
+  hints_allowed: boolean
+  one_question_per_page: boolean
+  certificate_enabled: boolean
+}
+
+interface QuestionSnapshotQuestion {
+  id: string
+}
+
+interface QuestionSnapshotPayload {
+  questions: QuestionSnapshotQuestion[]
+}
+
+interface CreateAttemptRequestBody {
+  exam_id?: string
+  attempt_mode?: string
+  notes?: string
+}
+
+interface ProgressUpdateRequestBody {
+  question_index?: number
+  user_response?: Record<string, unknown>
+}
+
 /**
  * Validation result interface
  */
@@ -35,7 +73,7 @@ export interface ValidationResult<T> {
  * @param db - Tenant database connection
  * @param workspaceId - Workspace UUID
  * @param examId - Exam UUID
- * @returns Promise<ValidationResult<any>>
+ * @returns Promise<ValidationResult<ExamValidationRecord>>
  */
 export async function validateExamExists(
   db: PoolClient | Pool,
@@ -43,7 +81,7 @@ export async function validateExamExists(
   examId: string,
   logger: Logger,
   correlationId: string
-): Promise<ValidationResult<any>> {
+): Promise<ValidationResult<ExamValidationRecord>> {
   try {
     const result = await db.query(
       `
@@ -70,7 +108,7 @@ export async function validateExamExists(
       }
     }
 
-    const exam = result.rows[0]
+    const exam = result.rows[0] as ExamValidationRecord
 
     if (exam.status !== 'ACTIVE') {
       logger.warn('Exam validation failed: not active', {
@@ -107,7 +145,7 @@ export async function validateExamExists(
  * @param userId - User UUID
  * @param examId - Exam UUID
  * @param allowMultipleAttempts - Whether multiple attempts allowed
- * @returns Promise<ValidationResult<any>>
+ * @returns Promise<ValidationResult<{ enrolled: boolean }>>
  */
 export async function validateUserEligibility(
   db: PoolClient | Pool,
@@ -117,7 +155,7 @@ export async function validateUserEligibility(
   allowMultipleAttempts: boolean,
   logger: Logger,
   correlationId: string
-): Promise<ValidationResult<any>> {
+): Promise<ValidationResult<{ enrolled: boolean }>> {
   try {
     // Check for in-progress attempt (can't start if one already in progress)
     const inProgressResult = await db.query(
@@ -220,20 +258,26 @@ export async function validateUserEligibility(
  *
  * @param questionId - Question UUID
  * @param questionSnapshot - Question snapshot from attempt
- * @returns ValidationResult<any>
+ * @returns ValidationResult<QuestionSnapshotQuestion>
  */
 export function validateQuestionInSnapshot(
   questionId: string,
-  questionSnapshot: any
-): ValidationResult<any> {
-  if (!questionSnapshot || !questionSnapshot.questions) {
+  questionSnapshot: unknown
+): ValidationResult<QuestionSnapshotQuestion> {
+  if (
+    !questionSnapshot ||
+    typeof questionSnapshot !== 'object' ||
+    !('questions' in questionSnapshot) ||
+    !Array.isArray((questionSnapshot as { questions?: unknown }).questions)
+  ) {
     return {
       valid: false,
       errors: ['Invalid question snapshot'],
     }
   }
 
-  const question = questionSnapshot.questions.find((q: any) => q.id === questionId)
+  const typedSnapshot = questionSnapshot as QuestionSnapshotPayload
+  const question = typedSnapshot.questions.find((q) => q.id === questionId)
 
   if (!question) {
     return {
@@ -252,9 +296,11 @@ export function validateQuestionInSnapshot(
  * Validate request body format for create attempt
  *
  * @param body - Request body
- * @returns ValidationResult<any>
+ * @returns ValidationResult<CreateAttemptRequestBody>
  */
-export function validateCreateAttemptRequestFormat(body: any): ValidationResult<any> {
+export function validateCreateAttemptRequestFormat(
+  body: CreateAttemptRequestBody
+): ValidationResult<CreateAttemptRequestBody> {
   const errors: string[] = []
 
   if (!body.exam_id) {
@@ -292,9 +338,11 @@ export function validateCreateAttemptRequestFormat(body: any): ValidationResult<
  * Validate progress update request format
  *
  * @param body - Request body
- * @returns ValidationResult<any>
+ * @returns ValidationResult<ProgressUpdateRequestBody>
  */
-export function validateProgressUpdateRequestFormat(body: any): ValidationResult<any> {
+export function validateProgressUpdateRequestFormat(
+  body: ProgressUpdateRequestBody
+): ValidationResult<ProgressUpdateRequestBody> {
   const errors: string[] = []
 
   if (!body.question_index && body.question_index !== 0) {
@@ -322,13 +370,13 @@ export function validateProgressUpdateRequestFormat(body: any): ValidationResult
  * @param startedAt - Attempt start timestamp
  * @param timeLimitSeconds - Time limit in seconds
  * @param mode - Attempt mode
- * @returns ValidationResult<any>
+ * @returns ValidationResult<{ time_remaining_seconds: number | null }>
  */
 export function validateTimeNotExceeded(
   startedAt: Date,
   timeLimitSeconds: number | null | undefined,
   mode: string
-): ValidationResult<any> {
+): ValidationResult<{ time_remaining_seconds: number | null }> {
   // RELAX mode has no time limit
   if (mode === 'RELAX' || !timeLimitSeconds) {
     return {

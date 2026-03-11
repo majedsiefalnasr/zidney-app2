@@ -20,7 +20,7 @@
 import * as productService from '@zidney/domain-core/products/productService'
 import { createLogger } from '@zidney/logger'
 import { AppError, ErrorCodes } from '@zidney/types/errors/ErrorCodes'
-import type { ProductStatus } from '@zidney/types/products/Product'
+import type { AuditLogQueryFilters, ProductStatus } from '@zidney/types/products/Product'
 import {
   AuditLogQueryFiltersSchema,
   ChangeProductStatusSchema,
@@ -172,7 +172,11 @@ router.get(
       }
 
       // Call domain service
-      const result = await productService.getProductAuditLog(client, productId, filters as any)
+      const result = await productService.getProductAuditLog(
+        client,
+        productId,
+        filters as AuditLogQueryFilters
+      )
 
       // Log successful operation
       logger.info('audit_log_get_success', {

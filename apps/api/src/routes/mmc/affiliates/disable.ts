@@ -79,7 +79,7 @@ export async function disableAffiliateHandler(c: Context) {
       data: updated,
       error: null,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[AFFILIATE] Disable error:', { error })
 
     c.status(500)

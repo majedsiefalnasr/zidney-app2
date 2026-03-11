@@ -29,7 +29,10 @@ import type { Context, Next } from 'hono'
 import { getRedisClient } from '../infrastructure/redis'
 import { MiddlewareStage, recordMiddlewareExecution } from './middleware-chain'
 
-export async function rateLimitingMiddleware(c: Context, next: Next): Promise<Response | void> {
+export async function rateLimitingMiddleware(
+  c: Context,
+  next: Next
+): Promise<Response | undefined> {
   const correlationId = c.state.correlationId || 'unknown'
   const workspace = c.state.workspace
   const endpoint = `${c.req.method} ${c.req.path}`

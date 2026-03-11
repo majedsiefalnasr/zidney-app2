@@ -14,7 +14,7 @@ import type { TranslationOperationContext } from '@zidney/domain-core'
 import { languageSettingsInternalSchema } from '../workspace-settings/workspace-settings.validation'
 
 interface DbClient {
-  query: <T = any>(
+  query: <T = unknown>(
     sql: string,
     params?: unknown[]
   ) => Promise<{ rows: T[]; rowCount: number | null }>
@@ -28,7 +28,7 @@ interface DbClient {
  * Throws if settings row does not exist or is malformed.
  */
 export async function buildTranslationContext(
-  c: any
+  c: unknown
 ): Promise<{ ctx: TranslationOperationContext; db: DbClient }> {
   const tenant = c.get('tenant')
   const staffUser = c.get('staff_user')

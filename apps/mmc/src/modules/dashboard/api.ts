@@ -1,4 +1,4 @@
-import type { AxiosInstance } from 'axios'
+import type { AxiosError, AxiosInstance, AxiosResponse } from 'axios'
 import axios from 'axios'
 
 /**
@@ -100,8 +100,8 @@ export class DashboardClient {
 
     // Add response interceptor for error handling
     this.client.interceptors.response.use(
-      (response: any) => response,
-      (error: any) => {
+      (response: AxiosResponse) => response,
+      (error: AxiosError<{ error?: { message?: string } }>) => {
         // Map backend error codes to user-friendly messages
         if (error.response) {
           const status = error.response.status
@@ -125,7 +125,7 @@ export class DashboardClient {
               throw new Error('Server error. Please try again later.')
             default:
               throw new Error(
-                error.response.data?.error?.message || 'Failed to fetch dashboard data'
+                error.response.data?.error?.message ?? 'Failed to fetch dashboard data'
               )
           }
         }

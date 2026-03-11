@@ -32,6 +32,6 @@
       "jsonwebtoken": ["./tests/shims/jsonwebtoken"]
     }
   },
-  "include": ["tests/**/*", "packages/*/tests/**/*"],
-  "exclude": ["node_modules", "dist", "apps/*/tests/**/*"]
+  "include": ["tests/**/*", "packages/*/tests/**/*", "apps/*/src/vite-env.d.ts"],
+  "exclude": ["node_modules", "dist", "apps/*/tests/**/*", "tests/unit/ai-guard/fixtures/**/*"]
 }

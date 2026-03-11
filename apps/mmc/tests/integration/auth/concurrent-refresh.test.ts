@@ -55,7 +55,9 @@ describe('concurrent token refresh — single-flight guarantee', () => {
 
     // All 5 must have resolved successfully
     expect(results.length).toBe(5)
-    results.forEach((r) => expect(r).toBeUndefined())
+    results.forEach((r) => {
+      expect(r).toBeUndefined()
+    })
   })
 
   it('tokenManager.getToken() returns new token after concurrent burst', async () => {

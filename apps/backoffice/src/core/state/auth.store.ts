@@ -68,7 +68,7 @@ export function defineAuthStore(
     }
 
     function buildResolvedPermissions(profile: AuthUser): Record<string, boolean> {
-      const perms = (profile as any).permissions
+      const perms = (profile as AuthUser & { permissions?: unknown }).permissions
       if (!perms) return {}
       if (Array.isArray(perms)) {
         return Object.fromEntries(perms.map((p: string) => [p, true]))

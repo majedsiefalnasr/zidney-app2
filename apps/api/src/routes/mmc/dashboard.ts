@@ -480,7 +480,7 @@ export function createDashboardRouter() {
       }
 
       // Calculate growth percentages
-      const products = currentResult.rows.map((row: any) => {
+      const products = currentResult.rows.map((row: Record<string, unknown>) => {
         const currentRevenue = row.total_revenue_cents || 0
         const prevRevenue = previousRevenue.get(row.product_id) || 0
         const growthPercent =
@@ -502,7 +502,7 @@ export function createDashboardRouter() {
       // Build response data
       const now = new Date().toISOString()
       const totalRevenue = products.reduce(
-        (sum: number, p: any) => sum + (p.total_revenue_cents || 0),
+        (sum: number, p: Record<string, unknown>) => sum + (p.total_revenue_cents || 0),
         0
       )
 
@@ -746,7 +746,7 @@ export function createDashboardRouter() {
       })
 
       // Format response data
-      const countries = dataResult.rows.map((row: any) => {
+      const countries = dataResult.rows.map((row: Record<string, unknown>) => {
         // Resolve country code to name (simple mapping)
         const countryNames: Record<string, string> = {
           US: 'United States',
@@ -776,11 +776,11 @@ export function createDashboardRouter() {
       // Build response data
       const now = new Date().toISOString()
       const totalRevenue = countries.reduce(
-        (sum: number, c: any) => sum + (c.total_revenue_cents || 0),
+        (sum: number, c: Record<string, unknown>) => sum + (c.total_revenue_cents || 0),
         0
       )
       const totalLicenses = countries.reduce(
-        (sum: number, c: any) => sum + (c.license_count || 0),
+        (sum: number, c: Record<string, unknown>) => sum + (c.license_count || 0),
         0
       )
 
@@ -1053,7 +1053,7 @@ export function createDashboardRouter() {
       })
 
       // Format response data
-      const affiliates = dataResult.rows.map((row: any, index: number) => ({
+      const affiliates = dataResult.rows.map((row: Record<string, unknown>, index: number) => ({
         affiliate_id: row.affiliate_id,
         affiliate_name: row.affiliate_name,
         status: row.status,
@@ -1066,7 +1066,7 @@ export function createDashboardRouter() {
 
       const totalCount = countResult.rows[0]?.count || 0
       const totalCommission = affiliates.reduce(
-        (sum: number, a: any) => sum + (a.total_commission_cents || 0),
+        (sum: number, a: Record<string, unknown>) => sum + (a.total_commission_cents || 0),
         0
       )
 
@@ -1286,7 +1286,7 @@ export function createDashboardRouter() {
       })
 
       // Format periods with growth rates
-      const periods: any[] = []
+      const periods: Array<Record<string, unknown>> = []
       let previousRevenue = 0
       let previousLicenses = 0
 
@@ -1333,17 +1333,28 @@ export function createDashboardRouter() {
       const licenseSeries = periods.map((p) => p.license_count)
 
       // Calculate summary statistics
-      const totalRevenue = periods.reduce((sum: number, p: any) => sum + p.revenue_cents, 0)
-      const totalLicenses = periods.reduce((sum: number, p: any) => sum + p.license_count, 0)
+      const totalRevenue = periods.reduce(
+        (sum: number, p: Record<string, unknown>) => sum + p.revenue_cents,
+        0
+      )
+      const totalLicenses = periods.reduce(
+        (sum: number, p: Record<string, unknown>) => sum + p.license_count,
+        0
+      )
       const avgGrowthPercent =
         periods.length > 1
-          ? periods.slice(1).reduce((sum: number, p: any) => sum + p.revenue_growth_percent, 0) /
+          ? periods
+              .slice(1)
+              .reduce(
+                (sum: number, p: Record<string, unknown>) => sum + p.revenue_growth_percent,
+                0
+              ) /
             (periods.length - 1)
           : 0
 
       // Build response data
       const now = new Date().toISOString()
-      const responseData: any = {
+      const responseData: Record<string, unknown> = {
         periods,
         summary: {
           total_revenue_cents: totalRevenue,
@@ -1502,7 +1513,7 @@ export function createDashboardRouter() {
       }
 
       // Parse request body
-      let body: any = {}
+      let body: Record<string, unknown> = {}
       try {
         const rawBody = await c.req.text()
         if (rawBody) {
@@ -1604,7 +1615,7 @@ export function createDashboardRouter() {
 
       const countResult = await Promise.race([masterDb.query(countQuery), timeoutPromise])
 
-      const rowCount = (countResult as any).rows[0]?.count || 0
+      const rowCount = (countResult as { rows: Array<Record<string, unknown>> }).rows[0]?.count || 0
 
       // Check if export exceeds row limit
       const MAX_EXPORT_ROWS = 50000
@@ -1632,7 +1643,7 @@ export function createDashboardRouter() {
 
       // Build and execute export query with timeout
       let exportQuery = ''
-      const params: any[] = []
+      const params: unknown[] = []
 
       switch (section) {
         case 'geographic':
@@ -1701,7 +1712,7 @@ export function createDashboardRouter() {
       // Execute export query with timeout
       const dataResult = await Promise.race([masterDb.query(exportQuery, params), timeoutPromise])
 
-      const rows = (dataResult as any).rows || []
+      const rows = (dataResult as { rows: Array<Record<string, unknown>> }).rows || []
 
       // Log successful query execution
       logger.debug('DASHBOARD_QUERY_EXECUTED', {

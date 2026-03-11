@@ -35,7 +35,7 @@ import { auditCursorSchema } from './workspace-settings.validation'
 
 /** Database client interface — matches pg PoolClient or Pool */
 interface DbClient {
-  query: <T = any>(
+  query: <T = unknown>(
     sql: string,
     params?: unknown[]
   ) => Promise<{ rows: T[]; rowCount: number | null }>
@@ -99,7 +99,7 @@ export async function upsertSettings(
   )
 
   if (updateResult.rows.length > 0) {
-    return { config_version: (updateResult.rows[0] as any).config_version }
+    return { config_version: (updateResult.rows[0] as unknown).config_version }
   }
 
   // Check if row exists but version mismatch
@@ -133,7 +133,7 @@ export async function upsertSettings(
     [jsonData]
   )
 
-  return { config_version: (insertResult.rows[0] as any).config_version }
+  return { config_version: (insertResult.rows[0] as unknown).config_version }
 }
 
 // ---------------------------------------------------------------------------
@@ -249,7 +249,10 @@ export async function getAuditEntries(
 
   let nextCursor: string | null = null
   if (hasMore && items.length > 0) {
-    const lastItem = items[items.length - 1]!
+    const lastItem = items[items.length - 1]
+    if (!lastItem) {
+      return { items, nextCursor }
+    }
     const cursorPayload: AuditCursor = {
       created_at:
         lastItem.created_at instanceof Date

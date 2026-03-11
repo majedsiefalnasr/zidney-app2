@@ -38,7 +38,7 @@ const baseCtx: TranslationOperationContext = {
   supported_languages: ['en', 'ar', 'fr'],
 }
 
-function createMockDb(queryResponses: Record<string, any> = {}) {
+function createMockDb(queryResponses: Record<string, unknown> = {}) {
   const queryLog: Array<{ sql: string; params?: unknown[] }> = []
 
   const db = {
@@ -84,12 +84,12 @@ describe('upsertTranslations', () => {
       },
     ]
 
-    await expect(
-      upsertTranslations(db as any, baseCtx, items, alwaysExistsValidator)
-    ).rejects.toThrow(TranslationError)
+    await expect(upsertTranslations(db, baseCtx, items, alwaysExistsValidator)).rejects.toThrow(
+      TranslationError
+    )
 
     await expect(
-      upsertTranslations(db as any, baseCtx, items, alwaysExistsValidator)
+      upsertTranslations(db, baseCtx, items, alwaysExistsValidator)
     ).rejects.toMatchObject({
       code: TRANSLATION_ERROR_CODES.UNKNOWN_ENTITY_TYPE,
     })
@@ -108,7 +108,7 @@ describe('upsertTranslations', () => {
     ]
 
     await expect(
-      upsertTranslations(db as any, baseCtx, items, alwaysExistsValidator)
+      upsertTranslations(db, baseCtx, items, alwaysExistsValidator)
     ).rejects.toMatchObject({
       code: TRANSLATION_ERROR_CODES.UNSUPPORTED_LANGUAGE,
     })
@@ -127,7 +127,7 @@ describe('upsertTranslations', () => {
     ]
 
     await expect(
-      upsertTranslations(db as any, baseCtx, items, alwaysExistsValidator)
+      upsertTranslations(db, baseCtx, items, alwaysExistsValidator)
     ).rejects.toMatchObject({
       code: TRANSLATION_ERROR_CODES.DEFAULT_LANGUAGE_WRITE,
     })
@@ -149,9 +149,7 @@ describe('upsertTranslations', () => {
       },
     ]
 
-    await expect(
-      upsertTranslations(db as any, ctx, items, alwaysExistsValidator)
-    ).rejects.toMatchObject({
+    await expect(upsertTranslations(db, ctx, items, alwaysExistsValidator)).rejects.toMatchObject({
       code: TRANSLATION_ERROR_CODES.UNSUPPORTED_LANGUAGE,
     })
   })
@@ -169,7 +167,7 @@ describe('upsertTranslations', () => {
     ]
 
     await expect(
-      upsertTranslations(db as any, baseCtx, items, alwaysExistsValidator)
+      upsertTranslations(db, baseCtx, items, alwaysExistsValidator)
     ).rejects.toMatchObject({
       code: TRANSLATION_ERROR_CODES.INVALID_FIELD_NAME,
     })
@@ -188,7 +186,7 @@ describe('upsertTranslations', () => {
     ]
 
     await expect(
-      upsertTranslations(db as any, baseCtx, items, neverExistsValidator)
+      upsertTranslations(db, baseCtx, items, neverExistsValidator)
     ).rejects.toMatchObject({
       code: TRANSLATION_ERROR_CODES.ENTITY_NOT_FOUND,
     })
@@ -220,7 +218,7 @@ describe('upsertTranslations', () => {
       },
     ]
 
-    const result = await upsertTranslations(db as any, baseCtx, items, alwaysExistsValidator)
+    const result = await upsertTranslations(db, baseCtx, items, alwaysExistsValidator)
 
     expect(result).toHaveLength(1)
     expect(result[0]).toMatchObject({
@@ -232,13 +230,11 @@ describe('upsertTranslations', () => {
   })
 
   it('rolls back transaction on error', async () => {
-    let callCount = 0
     const queries: Array<{ sql: string }> = []
     const db = {
       _queryLog: queries,
       query: vi.fn(async (sql: string) => {
         queries.push({ sql })
-        callCount++
         if (sql.includes('BEGIN')) return { rows: [], rowCount: 0 }
         if (sql.includes('COMMIT')) return { rows: [], rowCount: 0 }
         if (sql.includes('ROLLBACK')) return { rows: [], rowCount: 0 }
@@ -257,9 +253,9 @@ describe('upsertTranslations', () => {
       },
     ]
 
-    await expect(
-      upsertTranslations(db as any, baseCtx, items, alwaysExistsValidator)
-    ).rejects.toThrow('DB error')
+    await expect(upsertTranslations(db, baseCtx, items, alwaysExistsValidator)).rejects.toThrow(
+      'DB error'
+    )
 
     const rollbackCalled = queries.some((q) => q.sql.includes('ROLLBACK'))
     expect(rollbackCalled).toBe(true)
@@ -276,7 +272,7 @@ describe('resolveEntityTranslations', () => {
     const baseFields = { text: 'Question text', explanation: 'Explanation' }
 
     const result = await resolveEntityTranslations(
-      db as any,
+      db,
       baseCtx,
       'question',
       'q-001',
@@ -300,7 +296,7 @@ describe('resolveEntityTranslations', () => {
       },
     })
 
-    const result = await resolveEntityTranslations(db as any, baseCtx, 'question', 'q-001', 'ar', {
+    const result = await resolveEntityTranslations(db, baseCtx, 'question', 'q-001', 'ar', {
       text: 'Question text',
       explanation: 'Explanation',
     })
@@ -318,7 +314,7 @@ describe('resolveEntityTranslations', () => {
       },
     })
 
-    const result = await resolveEntityTranslations(db as any, baseCtx, 'question', 'q-001', 'ar', {
+    const result = await resolveEntityTranslations(db, baseCtx, 'question', 'q-001', 'ar', {
       text: 'Question text',
       explanation: 'Fallback explanation',
     })
@@ -336,7 +332,7 @@ describe('resolveEntityTranslations', () => {
     })
 
     const result = await resolveEntityTranslations(
-      db as any,
+      db,
       baseCtx,
       'question',
       'q-001',
@@ -356,7 +352,7 @@ describe('resolveEntityTranslations', () => {
 describe('batchLoadTranslations', () => {
   it('returns empty map for empty entity IDs array', async () => {
     const db = createMockDb()
-    const result = await batchLoadTranslations(db as any, 'question', [], 'ar')
+    const result = await batchLoadTranslations(db, 'question', [], 'ar')
     expect(result.size).toBe(0)
     expect(db.query).not.toHaveBeenCalled()
   })
@@ -385,7 +381,7 @@ describe('batchLoadTranslations', () => {
       },
     })
 
-    const result = await batchLoadTranslations(db as any, 'question', ['q-001', 'q-002'], 'ar')
+    const result = await batchLoadTranslations(db, 'question', ['q-001', 'q-002'], 'ar')
 
     expect(result.get('q-001')?.get('text')).toBe('سؤال ١')
     expect(result.get('q-001')?.get('explanation')).toBe('شرح ١')
@@ -414,7 +410,7 @@ describe('listEntityTranslations', () => {
       'FROM translations': { rows: rows.slice(0, 21), rowCount: 21 },
     })
 
-    const result = await listEntityTranslations(db as any, {
+    const result = await listEntityTranslations(db, {
       entityType: 'question',
       entityId: 'q-001',
       pageSize: 20,
@@ -440,7 +436,7 @@ describe('listEntityTranslations', () => {
       'FROM translations': { rows, rowCount: 5 },
     })
 
-    const result = await listEntityTranslations(db as any, {
+    const result = await listEntityTranslations(db, {
       entityType: 'question',
       entityId: 'q-001',
       pageSize: 20,
@@ -455,7 +451,7 @@ describe('listEntityTranslations', () => {
       'FROM translations': { rows: [], rowCount: 0 },
     })
 
-    const result = await listEntityTranslations(db as any, {
+    await listEntityTranslations(db, {
       entityType: 'question',
       entityId: 'q-001',
       pageSize: 100, // Over the max
@@ -478,7 +474,7 @@ describe('deleteEntityTranslations', () => {
       'DELETE FROM translations': { rows: [], rowCount: 0 },
     })
 
-    const count = await deleteEntityTranslations(db as any, baseCtx, 'question', 'q-nonexistent')
+    const count = await deleteEntityTranslations(db, baseCtx, 'question', 'q-nonexistent')
 
     expect(count).toBe(0)
   })
@@ -497,7 +493,7 @@ describe('deleteEntityTranslations', () => {
       'DELETE FROM translations': { rows: deletedRows, rowCount: 1 },
     })
 
-    const count = await deleteEntityTranslations(db as any, baseCtx, 'question', 'q-001')
+    const count = await deleteEntityTranslations(db, baseCtx, 'question', 'q-001')
 
     expect(count).toBe(1)
 
@@ -530,7 +526,7 @@ describe('deleteLanguageTranslations', () => {
       'DELETE FROM translations': { rows: deletedRows, rowCount: 1 },
     })
 
-    const result = await deleteLanguageTranslations(db as any, baseCtx, 'ar')
+    const result = await deleteLanguageTranslations(db, baseCtx, 'ar')
 
     expect(result).toHaveLength(1)
 

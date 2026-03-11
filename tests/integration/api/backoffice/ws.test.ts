@@ -31,7 +31,7 @@ interface WsEvent {
 
 interface MockWs {
   send: ReturnType<typeof vi.fn>
-  close: ReturnType<typeof vi.fn>
+  close: ReturnType<typeof vi.fn<[number, string], void>>
   events: WsEvent[]
 }
 

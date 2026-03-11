@@ -271,31 +271,31 @@ describe('validateLayerBoundaries null-boundaries guard (i)', () => {
 /* ─────────────────────────────────────────────────────────────────────────── */
 
 describe('loadModuleBoundaries — mocked fs', () => {
-  let exitSpy: ReturnType<typeof vi.spyOn>
+  let exitSpy: any
 
   beforeEach(() => {
-    exitSpy = vi.spyOn(process, 'exit').mockImplementation((_code?: number) => {
-      throw new Error(`process.exit called with code ${_code}`)
-    })
+    exitSpy = vi
+      .spyOn(process, 'exit')
+      .mockImplementation((_code?: string | number | null | undefined) => {
+        throw new Error(`process.exit called with code ${_code}`)
+      })
   })
 
   afterEach(() => {
-    exitSpy.mockRestore()
+    exitSpy?.mockRestore()
     vi.clearAllMocks()
   })
 
   it('(j) malformed JSON → process.exit(1)', () => {
     vi.mocked(existsSync).mockReturnValueOnce(true)
-    vi.mocked(readFileSync).mockReturnValueOnce('{broken json invalid' as unknown as Buffer)
+    vi.mocked(readFileSync).mockReturnValueOnce('{broken json invalid')
     expect(() => loadModuleBoundaries()).toThrow('process.exit called with code 1')
     expect(exitSpy).toHaveBeenCalledWith(1)
   })
 
   it('(k) structurally invalid JSON (missing layers) → process.exit(1)', () => {
     vi.mocked(existsSync).mockReturnValueOnce(true)
-    vi.mocked(readFileSync).mockReturnValueOnce(
-      JSON.stringify({ version: '1.0' }) as unknown as Buffer
-    )
+    vi.mocked(readFileSync).mockReturnValueOnce(JSON.stringify({ version: '1.0' }))
     expect(() => loadModuleBoundaries()).toThrow('process.exit called with code 1')
     expect(exitSpy).toHaveBeenCalledWith(1)
   })
@@ -308,7 +308,7 @@ describe('loadModuleBoundaries — mocked fs', () => {
         layers: ['infrastructure', 'domain'],
         allowed_dependencies: {},
         forbidden_dependencies: {},
-      }) as unknown as Buffer
+      })
     )
     expect(() => loadModuleBoundaries()).toThrow('process.exit called with code 1')
     expect(exitSpy).toHaveBeenCalledWith(1)
@@ -322,9 +322,7 @@ describe('loadModuleBoundaries — mocked fs', () => {
       forbidden_dependencies: { infrastructure: ['domain'] },
     }
     vi.mocked(existsSync).mockReturnValueOnce(true)
-    vi.mocked(readFileSync).mockReturnValueOnce(
-      JSON.stringify(validBoundaries) as unknown as Buffer
-    )
+    vi.mocked(readFileSync).mockReturnValueOnce(JSON.stringify(validBoundaries))
     const result = loadModuleBoundaries()
     expect(result).not.toBeNull()
     expect(result?.layers).toBeDefined()
@@ -366,8 +364,8 @@ describe('loadTsAliases — file parsing and merge behavior (l)', () => {
   it('(l) merges aliases from both tsconfig files', () => {
     vi.mocked(existsSync).mockReturnValue(true)
     vi.mocked(readFileSync)
-      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_JSON as unknown as Buffer)
-      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_BASE_JSON as unknown as Buffer)
+      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_JSON)
+      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_BASE_JSON)
 
     const aliases = loadTsAliases()
     const aliasKeys = aliases.map((a) => a.alias)
@@ -380,8 +378,8 @@ describe('loadTsAliases — file parsing and merge behavior (l)', () => {
   it('(l) tsconfig.json wins on key conflict with tsconfig.base.json', () => {
     vi.mocked(existsSync).mockReturnValue(true)
     vi.mocked(readFileSync)
-      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_JSON as unknown as Buffer)
-      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_BASE_JSON as unknown as Buffer)
+      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_JSON)
+      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_BASE_JSON)
 
     const aliases = loadTsAliases()
     const loggerAlias = aliases.find((a) => a.alias === '@zidney/logger')
@@ -393,8 +391,8 @@ describe('loadTsAliases — file parsing and merge behavior (l)', () => {
   it('(l) /* is stripped from alias keys and target values', () => {
     vi.mocked(existsSync).mockReturnValue(true)
     vi.mocked(readFileSync)
-      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_JSON as unknown as Buffer)
-      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_BASE_JSON as unknown as Buffer)
+      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_JSON)
+      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_BASE_JSON)
 
     const aliases = loadTsAliases()
     for (const { alias, target } of aliases) {
@@ -406,8 +404,8 @@ describe('loadTsAliases — file parsing and merge behavior (l)', () => {
   it('(l) result is deduplicated (no duplicate alias keys)', () => {
     vi.mocked(existsSync).mockReturnValue(true)
     vi.mocked(readFileSync)
-      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_JSON as unknown as Buffer)
-      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_BASE_JSON as unknown as Buffer)
+      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_JSON)
+      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_BASE_JSON)
 
     const aliases = loadTsAliases()
     const aliasKeys = aliases.map((a) => a.alias)
@@ -422,7 +420,7 @@ describe('loadTsAliases — file parsing and merge behavior (l)', () => {
       .mockImplementationOnce(() => {
         throw new Error('ENOENT: file not found')
       })
-      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_BASE_JSON as unknown as Buffer)
+      .mockReturnValueOnce(SYNTHETIC_TSCONFIG_BASE_JSON)
 
     const aliases = loadTsAliases()
     // Should still return aliases from the second file (tsconfig.base.json)

@@ -50,8 +50,6 @@ export class HealthCheckService {
   private queueName: string
   private dlqName: string
   private startTime: number
-  // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
-  private _lastJobProcessedAt: string | null = null
 
   constructor(masterDb: Pool, redis: Redis, queueName: string, dlqName: string) {
     this.masterDb = masterDb
@@ -168,7 +166,7 @@ export class HealthCheckService {
       // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const now = Date.now()
       // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
-      const lastProcessedTime = lastProcessed ? parseInt(lastProcessed) : null
+      const lastProcessedTime = lastProcessed ? parseInt(lastProcessed, 10) : null
       // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const timeSinceLastJob = lastProcessedTime ? now - lastProcessedTime : null
 
@@ -185,7 +183,7 @@ export class HealthCheckService {
         queue_depth: queueDepth,
         dlq_depth: dlqDepth,
         last_job_processed_at: lastProcessed
-          ? new Date(parseInt(lastProcessed)).toISOString()
+          ? new Date(parseInt(lastProcessed, 10)).toISOString()
           : undefined,
       }
     } catch (error) {
@@ -202,8 +200,6 @@ export class HealthCheckService {
   setJobProcessed(): void {
     // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const timestamp = Date.now()
-    // @ts-expect-error: LOGIC-BUG: should be _lastJobProcessedAt - see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
-    this.lastJobProcessedAt = new Date(timestamp).toISOString()
     // Store in Redis for distributed health checks
     this.redis.set(`${this.queueName}:last_processed_at`, String(timestamp)).catch((error) => {
       logger.error('Failed to update job processed timestamp:', { error })

@@ -94,7 +94,7 @@ export async function getAttemptStatusHandler(c: Context) {
   }
 
   // 3. Build response based on status
-  let responseData: any = {
+  let responseData: unknown = {
     id: attemptId,
     workspace_id: workspace.id,
     user_id: attempt.user_id,

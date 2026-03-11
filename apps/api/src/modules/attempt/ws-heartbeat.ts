@@ -170,8 +170,12 @@ export class WebSocketHeartbeatMonitor {
    * Clean up all active heartbeats
    */
   cleanup(): void {
-    this.intervals.forEach((interval) => clearInterval(interval))
-    this.timeouts.forEach((timeout) => clearTimeout(timeout))
+    this.intervals.forEach((interval) => {
+      clearInterval(interval)
+    })
+    this.timeouts.forEach((timeout) => {
+      clearTimeout(timeout)
+    })
     this.intervals.clear()
     this.timeouts.clear()
     this.missedPings.clear()

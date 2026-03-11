@@ -16,17 +16,17 @@ export interface ErrorResponse {
   error: {
     code: string
     message: string
-    details?: Record<string, any>
+    details?: Record<string, unknown>
   }
 }
 
-export interface SuccessResponse<T = any> {
+export interface SuccessResponse<T = unknown> {
   success: true
   data: T
   error: null
 }
 
-export type ApiResponse<T = any> = SuccessResponse<T> | ErrorResponse
+export type ApiResponse<T = unknown> = SuccessResponse<T> | ErrorResponse
 
 /**
  * Format error for API response
@@ -34,7 +34,7 @@ export type ApiResponse<T = any> = SuccessResponse<T> | ErrorResponse
 export function formatError(
   code: ErrorCode,
   message: string,
-  details?: Record<string, any>
+  details?: Record<string, unknown>
 ): ErrorResponse {
   return {
     success: false,
@@ -50,7 +50,7 @@ export function formatError(
 /**
  * Format success response
  */
-export function formatSuccess<T = any>(data: T): SuccessResponse<T> {
+export function formatSuccess<T = unknown>(data: T): SuccessResponse<T> {
   return {
     success: true,
     data,
@@ -64,7 +64,7 @@ export function formatSuccess<T = any>(data: T): SuccessResponse<T> {
 export async function handleError(
   c: Context,
   error: unknown,
-  context?: Partial<{ code: ErrorCode; details: Record<string, any> }>
+  context?: Partial<{ code: ErrorCode; details: Record<string, unknown> }>
 ) {
   const correlationId = getCorrelationId(c)
   const code = context?.code || ErrorCode.INTERNAL_ERROR
@@ -87,7 +87,7 @@ export async function handleError(
   })
 
   // Return standardized error response
-  c.status(statusCode as any)
+  c.status(statusCode as unknown)
   c.header('x-correlation-id', correlationId)
   return c.json(formatError(code, message, context?.details))
 }
@@ -99,7 +99,7 @@ export class ApiError extends Error {
   constructor(
     public code: ErrorCode,
     message: string,
-    public details?: Record<string, any>
+    public details?: Record<string, unknown>
   ) {
     super(message)
     this.name = 'ApiError'

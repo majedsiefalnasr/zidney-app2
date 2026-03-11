@@ -71,12 +71,25 @@ export function createAuthContextMiddlewareStage06(logger: Logger): MiddlewareHa
         )
       }
 
-      const token = token_match[1]!
+      const token = token_match[1]
+      if (!token) {
+        return c.json(
+          {
+            success: false,
+            data: null,
+            error: {
+              code: 'UNAUTHORIZED',
+              message: 'Invalid authentication token',
+            },
+          },
+          401
+        )
+      }
 
       // TODO: Implement JWT verification
       // For now, assume token is pre-verified by upstream (e.g., API Gateway)
       // In production, use: jwt.verify(token, jwtSecret)
-      let decoded: any
+      let decoded: Record<string, unknown>
 
       try {
         // Placeholder: Assume token is valid

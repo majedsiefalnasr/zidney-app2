@@ -40,10 +40,10 @@ interface InputQuestion {
   text: string
   type: string
   options?: string[]
-  correct_answer: any
+  correct_answer: unknown
   points: number
   difficulty?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
 }
 
 /**
@@ -68,7 +68,7 @@ export function buildQuestionSnapshot(questions: InputQuestion[]): QuestionSnaps
     return {
       id: q.id,
       text: q.text,
-      type: q.type as any,
+      type: q.type as unknown,
       options: q.options ? [...q.options] : undefined, // Deep copy
       correct_answer: JSON.parse(JSON.stringify(q.correct_answer)), // Deep copy
       points: q.points,
@@ -96,7 +96,7 @@ export function buildQuestionSnapshot(questions: InputQuestion[]): QuestionSnaps
  * @param examConfig - Exam configuration object
  * @returns GradingConfigSnapshot
  */
-export function buildGradingConfigSnapshot(examConfig: any): GradingConfigSnapshot {
+export function buildGradingConfigSnapshot(examConfig: unknown): GradingConfigSnapshot {
   if (!examConfig) {
     throw new Error('Exam config required for grading snapshot')
   }
@@ -130,7 +130,7 @@ export function buildGradingConfigSnapshot(examConfig: any): GradingConfigSnapsh
  * @param examConfig - Exam configuration object
  * @returns FlagsSnapshot
  */
-export function buildFlagsSnapshot(examConfig: any): FlagsSnapshot {
+export function buildFlagsSnapshot(examConfig: unknown): FlagsSnapshot {
   return {
     review_allowed: examConfig.review_allowed ?? true,
     hints_allowed: examConfig.hints_allowed ?? false,
@@ -166,7 +166,12 @@ export function shuffleQuestions(questionIds: string[], seed?: string): string[]
   // Fisher-Yates algorithm
   for (let i = shuffled.length - 1; i > 0; i--) {
     const j = Math.floor(rng() * (i + 1))
-    ;[shuffled[i], shuffled[j]] = [shuffled[j]!, shuffled[i]!]
+    const current = shuffled[i]
+    const swap = shuffled[j]
+    if (current !== undefined && swap !== undefined) {
+      shuffled[i] = swap
+      shuffled[j] = current
+    }
   }
 
   logger.debug('Questions shuffled', {

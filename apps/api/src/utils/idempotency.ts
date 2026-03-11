@@ -61,7 +61,7 @@ export class IdempotencyManager {
             statusCode: parsed.statusCode,
           }
         }
-      } catch (err) {
+      } catch {
         // Redis error; fall through to DB
       }
     }
@@ -83,7 +83,7 @@ export class IdempotencyManager {
           statusCode: row.response_status,
         }
       }
-    } catch (err) {
+    } catch {
       // DB error; treat as not cached
     }
 

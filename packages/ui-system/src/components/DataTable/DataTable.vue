@@ -115,7 +115,7 @@
                 <Button
                   v-for="action in rowActions"
                   :key="action.id"
-                  :variant="(action.variant as any) || 'outline'"
+                  :variant="action.variant || 'outline'"
                   size="sm"
                   :disabled="
                     isActionLoading(getRowKey(row), action.id) ||
@@ -179,8 +179,8 @@ import { computed, ref, watch } from 'vue'
 interface Column {
   id: string
   header: string
-  accessor?: keyof any
-  cell?: any
+  accessor?: string
+  cell?: unknown
   size?: string
   enableSorting?: boolean
 }
@@ -193,14 +193,14 @@ interface RowAction {
 }
 
 interface Props {
-  rows: any[]
+  rows: Record<string, unknown>[]
   columns: Column[]
   rowActions?: RowAction[]
   paginationMode?: 'server' | 'client' | false
   enableRowSelection?: boolean
   enableColumnSorting?: boolean
   loading?: boolean
-  rowKey?: keyof any | string
+  rowKey?: string
   currentPage?: number
   pageSize?: number
 }
@@ -259,16 +259,16 @@ const totalPages = computed(() => Math.ceil(props.rows.length / pageSize.value))
 
 // UTILITY METHODS
 
-const getRowKey = (row: any): string => {
+const getRowKey = (row: Record<string, unknown>): string => {
   const key = props.rowKey as string
   return String(row[key] || '')
 }
 
 const isRowSelected = (rowKey: string): boolean => selectedRows.value.has(rowKey)
 
-const getCellValue = (row: any, column: Column): any => {
+const getCellValue = (row: Record<string, unknown>, column: Column): unknown => {
   if (column.accessor) {
-    return row[column.accessor as string]
+    return row[column.accessor]
   }
   return row[column.id]
 }
@@ -291,7 +291,7 @@ const handleSelectAll = (checked: boolean): void => {
   emit('selectAll', checked)
 }
 
-const handleSelectRow = (row: any, checked: boolean) => {
+const handleSelectRow = (row: Record<string, unknown>, checked: boolean) => {
   const key = getRowKey(row)
   if (checked) {
     selectedRows.value.add(key)
@@ -310,18 +310,20 @@ const handleSort = (columnId: string): void => {
   emit('sort', columnId, newDirection)
 }
 
-const executeAction = async (row: any, action: RowAction) => {
+const executeAction = async (row: Record<string, unknown>, action: RowAction) => {
   const rowKey = getRowKey(row)
   if (!actionLoading.value.has(rowKey)) {
     actionLoading.value.set(rowKey, new Set())
   }
-  actionLoading.value.get(rowKey)!.add(action.id)
+  const rowActionSet = actionLoading.value.get(rowKey)
+  if (!rowActionSet) return
+  rowActionSet.add(action.id)
 
   try {
     emit('action', rowKey, action.id)
     await new Promise((resolve) => setTimeout(resolve, 500))
   } finally {
-    actionLoading.value.get(rowKey)!.delete(action.id)
+    rowActionSet.delete(action.id)
   }
 }
 

@@ -19,6 +19,12 @@ import {
 } from '@zidney/types/jobs/provisioning-job'
 import type { Redis } from 'ioredis'
 
+type ProvisionLogger = {
+  logStep?: (step: string, message: string, meta?: Record<string, unknown>) => void
+  logError?: (message: string, error: Error, meta?: Record<string, unknown>) => void
+  logWarn?: (message: string, meta?: Record<string, unknown>) => void
+}
+
 /**
  * Enqueue Result
  */
@@ -35,13 +41,13 @@ export interface EnqueueResult {
 export class ProvisionEnqueueService {
   private redis: Redis
   private queueName: string
-  private logger?: any
+  private logger?: ProvisionLogger
 
   constructor(
     redis: Redis,
     // @ts-expect-error: LOGIC-BUG: QUEUE_NAMES not exported from types/jobs/provisioning-job — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
     queueName: string = QUEUE_NAMES.JOBS,
-    logger?: any
+    logger?: ProvisionLogger
   ) {
     this.redis = redis
     this.queueName = queueName
@@ -163,7 +169,10 @@ export class ProvisionEnqueueService {
 /**
  * Factory to create enqueue service
  */
-export function createProvisionEnqueueService(redis: Redis, logger?: any): ProvisionEnqueueService {
+export function createProvisionEnqueueService(
+  redis: Redis,
+  logger?: ProvisionLogger
+): ProvisionEnqueueService {
   // @ts-expect-error: LOGIC-BUG: QUEUE_NAMES not exported from types/jobs/provisioning-job — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
   return new ProvisionEnqueueService(redis, QUEUE_NAMES.JOBS, logger)
 }

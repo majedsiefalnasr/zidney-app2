@@ -29,7 +29,7 @@ export async function listAffiliatesHandler(c: Context) {
 
     // Build WHERE clause
     const whereClauses = []
-    const params: any[] = []
+    const params: unknown[] = []
     let paramIndex = 1
 
     if (validated.status) {
@@ -50,7 +50,7 @@ export async function listAffiliatesHandler(c: Context) {
       paramIndex++
     }
 
-    const whereClause = whereClauses.length > 0 ? 'WHERE ' + whereClauses.join(' AND ') : ''
+    const whereClause = whereClauses.length > 0 ? `WHERE ${whereClauses.join(' AND ')}` : ''
 
     // Get total count
     const countQuery = `SELECT COUNT(*) as count FROM affiliates ${whereClause}`
@@ -89,17 +89,27 @@ export async function listAffiliatesHandler(c: Context) {
       data: response,
       error: null,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[AFFILIATE] List error:', { error })
+    const errorCode =
+      error && typeof error === 'object' && 'code' in error
+        ? String((error as { code?: unknown }).code)
+        : undefined
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : error && typeof error === 'object' && 'message' in error
+          ? String((error as { message?: unknown }).message)
+          : String(error)
 
-    if (error.code === 'VALIDATION_ERROR') {
+    if (errorCode === 'VALIDATION_ERROR') {
       c.status(400)
       return c.json({
         success: false,
         data: null,
         error: {
-          code: error.code,
-          message: error.message,
+          code: errorCode,
+          message: errorMessage,
         },
       })
     }

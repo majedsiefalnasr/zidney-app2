@@ -42,7 +42,7 @@ import type { Context, Next } from 'hono'
  * Reason: Fail fast if workspace not licensed
  */
 export function validateLicenseMiddleware() {
-  return async (c: Context, next: Next): Promise<Response | void> => {
+  return async (c: Context, next: Next): Promise<Response | undefined> => {
     const correlationId = c.get('correlationId') || 'unknown'
 
     try {
@@ -64,7 +64,7 @@ export function validateLicenseMiddleware() {
       }
 
       if (!masterDb) {
-        c.status(500 as any)
+        c.status(500)
         return c.json({
           success: false,
           data: null,
@@ -89,7 +89,7 @@ export function validateLicenseMiddleware() {
         const userId = c.get('userId')
         await logLicenseBlocked(correlationId, workspaceSlug, 'NO_LICENSE', 403, userId)
 
-        c.status(403 as any)
+        c.status(403)
         return c.json({
           success: false,
           data: null,
@@ -115,7 +115,7 @@ export function validateLicenseMiddleware() {
         const userId = c.get('userId')
         await logLicenseBlocked(correlationId, workspaceSlug, licenseStatus, 423, userId)
 
-        c.status(423 as any)
+        c.status(423)
         return c.json({
           success: false,
           data: null,
@@ -132,7 +132,7 @@ export function validateLicenseMiddleware() {
         const userId = c.get('userId')
         await logLicenseBlocked(correlationId, workspaceSlug, licenseStatus, 403, userId)
 
-        c.status(403 as any)
+        c.status(403)
         return c.json({
           success: false,
           data: null,
@@ -147,7 +147,7 @@ export function validateLicenseMiddleware() {
       const userId = c.get('userId')
       await logLicenseBlocked(correlationId, workspaceSlug, licenseStatus, 403, userId)
 
-      c.status(403 as any)
+      c.status(403)
       return c.json({
         success: false,
         data: null,
@@ -158,7 +158,7 @@ export function validateLicenseMiddleware() {
       })
     } catch (error) {
       logger.error('License validation error:', { error })
-      c.status(500 as any)
+      c.status(500)
       return c.json({
         success: false,
         data: null,

@@ -62,8 +62,6 @@ export const useFrontofficeNotificationStore = defineStore('frontoffice-notifica
 // ── HMR (development only) ────────────────────────────────────────────────────
 import { acceptHMRUpdate } from 'pinia'
 
-if ((import.meta as any).hot) {
-  ;(import.meta as any).hot.accept(
-    acceptHMRUpdate(useFrontofficeNotificationStore, (import.meta as any).hot)
-  )
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useFrontofficeNotificationStore, import.meta.hot))
 }

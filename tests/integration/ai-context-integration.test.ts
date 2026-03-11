@@ -4,7 +4,7 @@
  * Path: tests/integration/ai-context-integration.test.ts
  */
 
-import { rm } from 'node:fs/promises'
+import { readFile, rm } from 'node:fs/promises'
 import { join } from 'node:path'
 import { beforeAll, describe, expect, it } from 'vitest'
 import { generateAllArtifacts } from '../../scripts/ai-context/artifact-generator'

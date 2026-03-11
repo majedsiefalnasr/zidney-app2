@@ -101,7 +101,7 @@ export function getErrorStatusCode(errorCode: string): number {
  * 5. Return standardized response to client
  */
 export function errorHandlerMiddleware() {
-  return async (c: Context, next: Next): Promise<Response | void> => {
+  return async (c: Context, next: Next): Promise<Response | undefined> => {
     try {
       await next()
 
@@ -114,7 +114,7 @@ export function errorHandlerMiddleware() {
     } catch (error) {
       // Caught an error during route processing
       const requestId = c.get('request_id') as string
-      const logger = c.get('logger') as any
+      const logger = c.get('logger') as { error: (payload: unknown) => void } | undefined
 
       // Determine error code and HTTP status
       let errorCode: string = ErrorCodes.INTERNAL_SERVER_ERROR
@@ -189,7 +189,7 @@ export function errorHandlerMiddleware() {
       }
 
       // Return standardized error response (no stack trace to client)
-      c.status(statusCode as any)
+      c.status(statusCode as 400 | 401 | 403 | 404 | 409 | 422 | 423 | 426 | 429 | 500)
       return c.json({
         success: false,
         data: null,
@@ -305,7 +305,11 @@ export function createErrorResponse(errorCode: string, message: string): Standar
  * Legacy error handler middleware for Express-style error handling
  * Maps custom errors to standard responses
  */
-export function legacyErrorHandlerMiddleware(err: any, req: any, res: any) {
+export function legacyErrorHandlerMiddleware(
+  err: { errorCode?: string; code?: string; message?: string; statusCode?: number },
+  req: { headers: Record<string, string | string[] | undefined> },
+  res: { status: (code: number) => { json: (body: unknown) => void } }
+) {
   const correlation_id = req.headers['x-correlation-id'] || 'unknown'
 
   // Extract error code and message

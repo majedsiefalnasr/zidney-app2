@@ -24,7 +24,7 @@ export interface FilterField {
   label: string
   type: FilterFieldType
   operators: FilterOperator[]
-  options?: Array<{ value: any; label: string }>
+  options?: Array<{ value: unknown; label: string }>
   placeholder?: string
   description?: string
 }
@@ -32,7 +32,7 @@ export interface FilterField {
 export interface Filter {
   fieldId: string
   operator: FilterOperator
-  value: any | [any, any] // [min, max] for 'between'
+  value: unknown | [unknown, unknown] // [min, max] for 'between'
 }
 
 export interface FilterGroup {
@@ -67,7 +67,7 @@ export interface Language {
 // Validation Types
 export interface ValidationRule {
   type: string
-  validate: (value: any) => string | null
+  validate: (value: unknown) => string | null
   message?: string
 }
 
@@ -91,7 +91,7 @@ export interface RowSelectionState {
 }
 
 // Event Types
-export interface EventPayload<T = any> {
+export interface EventPayload<T = unknown> {
   timestamp: number
   source: string
   data?: T
@@ -128,7 +128,7 @@ export type ButtonSize = 'sm' | 'md' | 'lg' | 'xl'
 export interface FormField {
   name: string
   type: string
-  value: any
+  value: unknown
   error?: string
   required?: boolean
   disabled?: boolean
@@ -159,7 +159,7 @@ export interface ApiResponse<T> {
 // Async State
 export type AsyncState = 'idle' | 'loading' | 'success' | 'error'
 
-export interface AsyncOperation<T = any> {
+export interface AsyncOperation<T = unknown> {
   state: AsyncState
   data: T | null
   error: Error | null
@@ -169,11 +169,18 @@ export interface AsyncOperation<T = any> {
 }
 
 // Utility Types
-export type Accessor<TRow = any> = string | ((row: TRow) => any)
+export type Accessor<TRow = unknown, TValue = unknown> = string | ((row: TRow) => TValue)
 
-export type CellRenderer<TRow = any> = (props: { value: any; row: TRow; column: any }) => any
+export type CellRenderer<TRow = unknown, TValue = unknown> = (props: {
+  value: TValue
+  row: TRow
+  column: unknown
+}) => unknown
 
-export type HeaderRenderer<_TRow = any> = (props: { column: any; table: any }) => any
+export type HeaderRenderer<_TRow = unknown> = (props: {
+  column: unknown
+  table: unknown
+}) => unknown
 
 // Discriminated Unions for Type Safety
 export type DataTableViewMode = 'table' | 'grid' | 'list'

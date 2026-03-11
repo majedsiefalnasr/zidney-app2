@@ -65,7 +65,7 @@ async function runJwtValidation(
   c: Context,
   next: Next,
   requiredScope?: JwtScope
-): Promise<Response | void> {
+): Promise<Response | undefined> {
   try {
     // Extract token from "Bearer <token>" header
     const authHeader = c.req.header('Authorization')
@@ -78,7 +78,7 @@ async function runJwtValidation(
     if (requiredScope) {
       const tokenScope = normalizeScope(payload.scope)
       if (tokenScope !== requiredScope) {
-        c.status(401 as any)
+        c.status(401)
         return c.json({
           success: false,
           data: null,
@@ -114,9 +114,12 @@ async function runJwtValidation(
     await validateJwtClaims(payload, resolvedWorkspaceId, expectedSchemaVersion)
 
     // Add `email` for legacy route handlers that still read authPayload.email.
+    const email =
+      'email' in payload && typeof payload.email === 'string' ? payload.email : payload.user_email
+
     const authPayload = {
       ...payload,
-      email: (payload as any).email ?? payload.user_email,
+      email,
     }
 
     // Attach to context for downstream middleware
@@ -131,7 +134,9 @@ async function runJwtValidation(
   } catch (error) {
     // Convert auth errors to standard response
     if (error instanceof AuthError) {
-      c.status((error.statusCode || 401) as any)
+      c.status(
+        (error.statusCode || 401) as 400 | 401 | 403 | 404 | 409 | 422 | 423 | 426 | 429 | 500
+      )
       return c.json({
         success: false,
         data: null,
@@ -143,7 +148,7 @@ async function runJwtValidation(
     }
 
     // Unexpected error
-    c.status(500 as any)
+    c.status(500)
     return c.json({
       success: false,
       data: null,
@@ -173,7 +178,7 @@ async function runJwtValidation(
  * - correlationId: From middleware chain
  */
 export function validateJwtMiddleware(requiredScope?: JwtScope) {
-  return async (c: Context, next: Next): Promise<Response | void> =>
+  return async (c: Context, next: Next): Promise<Response | undefined> =>
     runJwtValidation(c, next, requiredScope)
 }
 

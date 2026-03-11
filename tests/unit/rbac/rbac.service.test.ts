@@ -59,7 +59,7 @@ describe('evaluatePermission()', () => {
    */
 
   it('denies when user is not found in DB', async () => {
-    const db = { query: vi.fn(async () => ({ rows: [], rowCount: 0 })) }
+    const db: any = { query: vi.fn(async () => ({ rows: [], rowCount: 0 })) }
     const result = await evaluatePermission({
       db,
       user_id: 'nonexistent-user',
@@ -70,7 +70,7 @@ describe('evaluatePermission()', () => {
   })
 
   it('denies when user.is_active = false', async () => {
-    const db = {
+    const db: any = {
       query: vi.fn(async (sql: string) => {
         if (sql.includes('backoffice_staff_users')) {
           return {
@@ -98,7 +98,7 @@ describe('evaluatePermission()', () => {
   })
 
   it('denies when user has no role_id assigned', async () => {
-    const db = {
+    const db: any = {
       query: vi.fn(async (sql: string) => {
         if (sql.includes('backoffice_staff_users')) {
           return {
@@ -126,7 +126,7 @@ describe('evaluatePermission()', () => {
   })
 
   it('denies when role is DISABLED', async () => {
-    const db = {
+    const db: any = {
       query: vi.fn(async (sql: string) => {
         if (sql.includes('backoffice_staff_users')) {
           return {
@@ -157,7 +157,7 @@ describe('evaluatePermission()', () => {
   })
 
   it('denies when permission row is missing for module', async () => {
-    const db = {
+    const db: any = {
       query: vi.fn(async (sql: string) => {
         if (sql.includes('backoffice_staff_users')) {
           return {
@@ -191,7 +191,7 @@ describe('evaluatePermission()', () => {
   })
 
   it('allows view when permission row has can_view=true', async () => {
-    const db = {
+    const db: any = {
       query: vi.fn(async (sql: string) => {
         if (sql.includes('backoffice_staff_users')) {
           return {
@@ -225,7 +225,7 @@ describe('evaluatePermission()', () => {
   })
 
   it('denies create when can_view=true but can_create=false', async () => {
-    const db = {
+    const db: any = {
       query: vi.fn(async (sql: string) => {
         if (sql.includes('backoffice_staff_users')) {
           return {
@@ -259,7 +259,7 @@ describe('evaluatePermission()', () => {
   })
 
   it('denies all actions when all flags are false', async () => {
-    const db = {
+    const db: any = {
       query: vi.fn(async (sql: string) => {
         if (sql.includes('backoffice_staff_users')) {
           return {
@@ -329,7 +329,7 @@ describe('createRole()', () => {
 
     await expect(
       createRole(
-        { query: queryFn },
+        { query: queryFn as any },
         { workspace_id: 'ws-1', name: 'MyRole', description: null },
         AUDIT_CTX
       )
@@ -362,7 +362,7 @@ describe('createRole()', () => {
     })
 
     const role = await createRole(
-      { query: queryFn },
+      { query: queryFn as any },
       { workspace_id: 'ws-1', name: 'New Role', description: null },
       AUDIT_CTX
     )
@@ -384,7 +384,7 @@ describe('createRole()', () => {
 
     await expect(
       createRole(
-        { query: queryFn },
+        { query: queryFn as any },
         { workspace_id: 'ws-1', name: 'Fail Role', description: null },
         AUDIT_CTX
       )
@@ -423,7 +423,7 @@ describe('deleteRole()', () => {
       return { rows: [], rowCount: 0 }
     })
 
-    await expect(deleteRole({ query: queryFn }, ROLE_ID, AUDIT_CTX)).rejects.toMatchObject({
+    await expect(deleteRole({ query: queryFn as any }, ROLE_ID, AUDIT_CTX)).rejects.toMatchObject({
       code: 'ROLE_HAS_ACTIVE_USERS',
     })
   })
@@ -434,11 +434,11 @@ describe('deleteRole()', () => {
       if (sql.includes('FOR UPDATE')) return { rows: [], rowCount: 0 }
       return { rows: [], rowCount: 0 }
     })
-    await expect(deleteRole({ query: queryFn }, 'nonexistent-id', AUDIT_CTX)).rejects.toMatchObject(
-      {
-        code: 'ROLE_NOT_FOUND',
-      }
-    )
+    await expect(
+      deleteRole({ query: queryFn as any }, 'nonexistent-id', AUDIT_CTX)
+    ).rejects.toMatchObject({
+      code: 'ROLE_NOT_FOUND',
+    })
   })
 
   it('rolls back and no audit log on tx failure — no orphan rows (SC-005)', async () => {
@@ -452,7 +452,7 @@ describe('deleteRole()', () => {
       return { rows: [], rowCount: 0 }
     })
 
-    await expect(deleteRole({ query: queryFn }, ROLE_ID, AUDIT_CTX)).rejects.toThrow()
+    await expect(deleteRole({ query: queryFn as any }, ROLE_ID, AUDIT_CTX)).rejects.toThrow()
 
     expect(queryCalls).toContain('ROLLBACK')
     expect(queryCalls).not.toContain('COMMIT')
@@ -472,7 +472,7 @@ describe('deleteRole()', () => {
       return { rows: [], rowCount: 0 }
     })
 
-    await deleteRole({ query: queryFn }, ROLE_ID, AUDIT_CTX)
+    await deleteRole({ query: queryFn as any }, ROLE_ID, AUDIT_CTX)
 
     expect(queryCalls).toContain('COMMIT')
     expect(queryCalls).not.toContain('ROLLBACK')
@@ -492,7 +492,7 @@ describe('writeRbacAuditLog()', () => {
    */
 
   it('throws on invalid audit action (allowlist validation)', async () => {
-    const db = { query: vi.fn(async () => ({ rows: [], rowCount: 1 })) }
+    const db: any = { query: vi.fn(async () => ({ rows: [], rowCount: 1 })) }
     await expect(
       writeRbacAuditLog(db, {
         action: 'INVALID_ACTION' as any,
@@ -508,7 +508,7 @@ describe('writeRbacAuditLog()', () => {
   it('writes audit log entry with valid CREATE_ROLE action', async () => {
     const queryFn = vi.fn(async () => ({ rows: [], rowCount: 1 }))
     await writeRbacAuditLog(
-      { query: queryFn },
+      { query: queryFn as any },
       {
         action: 'CREATE_ROLE',
         user_id: 'user-1',
@@ -533,7 +533,7 @@ describe('writeRbacAuditLog()', () => {
     // writeRbacAuditLog catches DB errors and never rethrows (immutability contract)
     await expect(
       writeRbacAuditLog(
-        { query: queryFn },
+        { query: queryFn as any },
         {
           action: 'DELETE_ROLE',
           user_id: 'user-1',

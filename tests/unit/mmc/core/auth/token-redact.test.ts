@@ -24,7 +24,9 @@ function assertNoTokenInLogArgs(value: unknown, path = 'root'): void {
     return
   }
   if (Array.isArray(value)) {
-    value.forEach((item, i) => assertNoTokenInLogArgs(item, `${path}[${i}]`))
+    value.forEach((item, i) => {
+      assertNoTokenInLogArgs(item, `${path}[${i}]`)
+    })
     return
   }
   if (typeof value === 'object' && value !== null) {

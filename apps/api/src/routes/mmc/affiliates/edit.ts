@@ -63,7 +63,7 @@ export async function editAffiliateHandler(c: Context) {
     const current = currentResult.rows[0]
 
     // Prepare update values (only specified fields)
-    const updates: Record<string, any> = {}
+    const updates: Record<string, unknown> = {}
 
     if (validated.discount_percentage !== undefined) {
       if (!validatePercentageRange(validated.discount_percentage)) {
@@ -164,17 +164,27 @@ export async function editAffiliateHandler(c: Context) {
       data: updated,
       error: null,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('[AFFILIATE] Edit error:', { error })
+    const errorCode =
+      error && typeof error === 'object' && 'code' in error
+        ? String((error as { code?: unknown }).code)
+        : undefined
+    const errorMessage =
+      error instanceof Error
+        ? error.message
+        : error && typeof error === 'object' && 'message' in error
+          ? String((error as { message?: unknown }).message)
+          : String(error)
 
-    if (error.code === 'VALIDATION_ERROR') {
+    if (errorCode === 'VALIDATION_ERROR') {
       c.status(400)
       return c.json({
         success: false,
         data: null,
         error: {
-          code: error.code,
-          message: error.message,
+          code: errorCode,
+          message: errorMessage,
         },
       })
     }

@@ -59,7 +59,7 @@ if (!QUICK_MODE && !existsSync(AI_CONTEXT_DIR)) {
 /* ARCHITECTURE MAP loader (AI context)                                       */
 /* -------------------------------------------------------------------------- */
 
-function loadArchitectureMap() {
+function loadArchitectureMap(): ArchitectureMap | null {
   const path = join(ROOT, 'docs', 'architecture', 'intelligence', 'ARCHITECTURE_MAP.json')
 
   if (!existsSync(path)) return null
@@ -76,6 +76,17 @@ function loadArchitectureMap() {
 /* -------------------------------------------------------------------------- */
 
 type ModuleBoundariesForAudit = { layers: Record<string, string[]> }
+interface ArchitectureMapModule {
+  layer?: string
+  criticality?: string
+  allowed_dependencies?: string[]
+  forbidden_dependencies?: string[]
+}
+
+interface ArchitectureMap {
+  layers?: string[]
+  modules?: Record<string, ArchitectureMapModule>
+}
 
 /**
  * Identifies modules present in discoveredNodes that are not declared in the
@@ -266,8 +277,12 @@ function isValidModulePath(path: string): boolean {
   // Valid monorepo module paths are: packages/<name> or apps/<name>
   // Must have exactly 2 segments
   const parts = path.split('/')
+  const moduleName = parts[1]
   return (
-    parts.length === 2 && (parts[0] === 'packages' || parts[0] === 'apps') && parts[1].length > 0
+    parts.length === 2 &&
+    (parts[0] === 'packages' || parts[0] === 'apps') &&
+    typeof moduleName === 'string' &&
+    moduleName.length > 0
   )
 }
 
@@ -554,6 +569,7 @@ function countTests(files: Map<string, string>): TestCounts {
     if (isTest && rel.match(/^apps\/[^/]+\/tests\/unit/)) {
       unit++
       const app = rel.split('/')[1]
+      if (!app) continue
       perApp[app] ??= { unit: 0, integration: 0, spec: 0 }
       perApp[app].unit++
     }
@@ -561,6 +577,7 @@ function countTests(files: Map<string, string>): TestCounts {
     if (isTest && rel.match(/tests\/integration/)) {
       integration++
       const app = rel.split('/')[1]
+      if (!app) continue
       perApp[app] ??= { unit: 0, integration: 0, spec: 0 }
       perApp[app].integration++
     }
@@ -568,7 +585,7 @@ function countTests(files: Map<string, string>): TestCounts {
     if (isSpec) {
       spec++
       const app = rel.split('/')[1]
-      if (rel.startsWith('apps/')) {
+      if (rel.startsWith('apps/') && app) {
         perApp[app] ??= { unit: 0, integration: 0, spec: 0 }
         perApp[app].spec++
       }
@@ -607,7 +624,11 @@ function checkSections(content: string) {
 
 function scanReadmes() {
   const dirs = ['apps', 'packages']
-  const results: any[] = []
+  const results: Array<{
+    directory: string
+    hasReadme: boolean
+    sections?: Record<string, string>
+  }> = []
 
   for (const base of dirs) {
     const root = join(ROOT, base)
@@ -686,8 +707,21 @@ function scanTestStability(files: Map<string, string>) {
 /* -------------------------------------------------------------------------- */
 
 function scanDependencyBoundaries(files: Map<string, string>) {
-  const violations: any[] = []
-  const seen = new Map<string, any>() // Deduplicate by (module→module) pair
+  const violations: Array<{
+    file: string
+    importPath: string
+    rule: string
+    examples: string[]
+  }> = []
+  const seen = new Map<
+    string,
+    {
+      file: string
+      importPath: string
+      rule: string
+      examples: string[]
+    }
+  >() // Deduplicate by (module→module) pair
 
   for (const [rel, full] of files) {
     if (!rel.endsWith('.ts') && !rel.endsWith('.js')) continue
@@ -702,6 +736,7 @@ function scanDependencyBoundaries(files: Map<string, string>) {
 
     for (const m of imports) {
       const imp = m[1]
+      if (!imp) continue
 
       if (
         DEP_RULES.forbidPackagesImportingApps &&
@@ -799,6 +834,7 @@ function scanCircularDependencies(files: Map<string, string>) {
 
     for (const m of imports) {
       const imp = m[1]
+      if (!imp) continue
 
       const target = resolveImportTarget(imp, rel)
 
@@ -817,9 +853,12 @@ function scanCircularDependencies(files: Map<string, string>) {
       const cyclePath = path.slice(cycleStart).concat(node)
 
       for (let i = 0; i < cyclePath.length - 1; i++) {
+        const from = cyclePath[i]
+        const to = cyclePath[i + 1]
+        if (!from || !to) continue
         cycles.push({
-          from: cyclePath[i],
-          to: cyclePath[i + 1],
+          from,
+          to,
         })
       }
 
@@ -881,6 +920,7 @@ function scanLayerViolations(files: Map<string, string>) {
 
     for (const m of imports) {
       const imp = m[1]
+      if (!imp) continue
 
       if (
         rel.startsWith(LAYER_RULES.forbidUiImportingDomain.source) &&
@@ -917,7 +957,10 @@ function scanLayerViolations(files: Map<string, string>) {
   return violations
 }
 
-function scanArchitectureMapViolations(files: Map<string, string>, architectureMap: any | null) {
+function scanArchitectureMapViolations(
+  files: Map<string, string>,
+  architectureMap: ArchitectureMap | null
+) {
   const violations: ArchitectureMapViolation[] = []
   const seen = new Set<string>() // Deduplicate by (module→target|rule)
 
@@ -952,6 +995,7 @@ function scanArchitectureMapViolations(files: Map<string, string>, architectureM
 
     for (const m of imports) {
       const imp = m[1]
+      if (!imp) continue
       const target = resolveImportTarget(imp, rel)
 
       if (!target) continue
@@ -1074,6 +1118,7 @@ function buildDependencyGraph(files: Map<string, string>): DependencyGraph {
 
     for (const m of imports) {
       const imp = m[1]
+      if (!imp) continue
 
       const target = resolveImportTarget(imp, rel)
 
@@ -1119,7 +1164,7 @@ function exportAIGraph(graph: DependencyGraph): AIDependencyGraphVizLegacy {
 
   const nodes = graph.nodes.map((n) => ({
     id: n,
-    type: n.startsWith('packages/') ? 'package' : 'app',
+    type: (n.startsWith('packages/') ? 'package' : 'app') as 'package' | 'app',
   }))
 
   return {
@@ -1224,12 +1269,18 @@ export function generateDependencyGraph(): void {
         continue
       }
 
-      let match: RegExpExecArray | null
       IMPORT_RE.lastIndex = 0
-      while ((match = IMPORT_RE.exec(content)) !== null) {
-        const dep = resolveToModuleKey(match[1], moduleKey)
+      for (;;) {
+        const match = IMPORT_RE.exec(content)
+        if (!match) break
+
+        const specifier = match[1]
+        if (!specifier) {
+          continue
+        }
+        const dep = resolveToModuleKey(specifier, moduleKey)
         if (dep && dep !== moduleKey) {
-          forwardDeps[moduleKey].add(dep)
+          forwardDeps[moduleKey]?.add(dep)
         }
       }
     }
@@ -1239,7 +1290,7 @@ export function generateDependencyGraph(): void {
   const modules: AIDependencyGraph['modules'] = {}
   for (const moduleKey of moduleKeys) {
     modules[moduleKey] = {
-      dependencies: [...forwardDeps[moduleKey]],
+      dependencies: [...(forwardDeps[moduleKey] ?? new Set<string>())],
       layer: getModuleLayer(moduleKey),
       type: moduleKey.startsWith('apps/') ? 'app' : 'package',
     }
@@ -1248,7 +1299,7 @@ export function generateDependencyGraph(): void {
   // Build reverse_dependencies by inverting forward deps
   const reverseDeps: AIDependencyGraph['reverse_dependencies'] = {}
   for (const sourceModule of moduleKeys) {
-    for (const dep of forwardDeps[sourceModule]) {
+    for (const dep of forwardDeps[sourceModule] ?? new Set<string>()) {
       if (!reverseDeps[dep]) reverseDeps[dep] = []
       if (!reverseDeps[dep].includes(sourceModule)) {
         reverseDeps[dep].push(sourceModule)
@@ -1491,6 +1542,7 @@ function runMain() {
       if (files.length < 2) return null
 
       const previousFile = files[files.length - 2]
+      if (!previousFile) return null
       const previous = JSON.parse(readFileSync(join(ARCH_HISTORY_DIR, previousFile), 'utf-8'))
 
       return previous.architectureScore ?? null
@@ -1552,14 +1604,14 @@ function runMain() {
 
       const layerModel = {
         layers: architectureMap.layers ?? [],
-        modules: Object.entries(modules).map(([name, m]: any) => ({
+        modules: Object.entries(modules).map(([name, m]) => ({
           module: name,
           layer: m.layer ?? 'unknown',
           criticality: m.criticality ?? 'unknown',
         })),
       }
 
-      const moduleMap = Object.entries(modules).map(([name, m]: any) => ({
+      const moduleMap = Object.entries(modules).map(([name, m]) => ({
         module: name,
         layer: m.layer ?? null,
         allowedDependencies: m.allowed_dependencies ?? [],
@@ -1585,7 +1637,7 @@ function runMain() {
       const runtimeMap: Record<string, string[]> = {}
 
       if (architectureMap?.modules) {
-        for (const [name, _mod] of Object.entries(architectureMap.modules as any)) {
+        for (const [name] of Object.entries(architectureMap.modules)) {
           if (!name.startsWith('apps/')) continue
 
           const runtimeName = name.replace('apps/', '')
@@ -1609,7 +1661,7 @@ function runMain() {
 
       for (const edge of dependencyGraph.edges) {
         runtimeDependents[edge.to] ??= []
-        runtimeDependents[edge.to].push(edge.from)
+        runtimeDependents[edge.to]?.push(edge.from)
       }
 
       writeFileSync(
@@ -1621,7 +1673,7 @@ function runMain() {
       /* Architecture Diff (compare previous audit graph)              */
       /* ------------------------------------------------------------- */
 
-      let architectureDiff: any = null
+      let architectureDiff: { addedEdges: string[]; removedEdges: string[] } | null = null
 
       try {
         const history = readdirSync(ARCH_HISTORY_DIR)
@@ -1630,11 +1682,18 @@ function runMain() {
 
         if (history.length >= 2) {
           const previousFile = history[history.length - 2]
+          if (!previousFile) {
+            throw new Error('Missing previous audit file')
+          }
 
-          const previous = JSON.parse(readFileSync(join(ARCH_HISTORY_DIR, previousFile), 'utf-8'))
+          const previous = JSON.parse(
+            readFileSync(join(ARCH_HISTORY_DIR, previousFile), 'utf-8')
+          ) as {
+            dependencyGraph?: { edges?: Array<{ from: string; to: string }> }
+          }
 
-          const prevEdges = new Set(
-            (previous.dependencyGraph?.edges ?? []).map((e: any) => `${e.from}->${e.to}`)
+          const prevEdges = new Set<string>(
+            (previous.dependencyGraph?.edges ?? []).map((e) => `${e.from}->${e.to}`)
           )
 
           const newEdges = new Set(dependencyGraph.edges.map((e) => `${e.from}->${e.to}`))
@@ -1930,7 +1989,7 @@ Generated: ${new Date().toISOString()}
 |------|------|
 ${Object.entries(moduleRisk)
   .sort((a, b) => {
-    const order: any = { HIGH: 3, MEDIUM: 2, LOW: 1 }
+    const order: Record<'HIGH' | 'MEDIUM' | 'LOW', number> = { HIGH: 3, MEDIUM: 2, LOW: 1 }
     return order[b[1]] - order[a[1]]
   })
   .map(([m, r]) => `| ${m} | ${r} |`)

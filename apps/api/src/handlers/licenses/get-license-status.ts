@@ -17,6 +17,10 @@ import { getLicenseHttpStatus, LicenseStatus } from '@zidney/types/licenses/lice
 import type { Context } from 'hono'
 import { createErrorResponse, createLicenseStatusResponse } from './license-response'
 
+function asStatusCode(status: number): Parameters<Context['status']>[0] {
+  return status as Parameters<Context['status']>[0]
+}
+
 /**
  * License Status Handler
  */
@@ -27,7 +31,7 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
 
   if (!licenseId) {
     const error = getErrorDetails(ProvisioningErrorCode.LICENSE_NOT_FOUND)
-    c.status(error.httpStatus as any)
+    c.status(asStatusCode(error.httpStatus))
     return c.json(
       createErrorResponse(ProvisioningErrorCode.LICENSE_NOT_FOUND, 'License ID is required')
     )
@@ -47,7 +51,7 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
       })
 
       const error = getErrorDetails(ProvisioningErrorCode.LICENSE_NOT_FOUND)
-      c.status(error.httpStatus as any)
+      c.status(asStatusCode(error.httpStatus))
       return c.json(
         createErrorResponse(
           ProvisioningErrorCode.LICENSE_NOT_FOUND,
@@ -62,7 +66,7 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
     })
 
     // Build response
-    const licenseData = license as any
+    const licenseData = license as LicenseStatusData
     const response = createLicenseStatusResponse(
       licenseData.id,
       licenseData.workspace_slug,
@@ -76,7 +80,7 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
     )
 
     // Set appropriate HTTP status based on license state
-    const httpStatus = (getLicenseHttpStatus(licenseData.status as LicenseStatus) || 200) as any
+    const httpStatus = getLicenseHttpStatus(licenseData.status as LicenseStatus) || 200
 
     // Add headers
     c.header('X-Correlation-ID', correlationId)
@@ -89,7 +93,7 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
       c.header('Retry-After', '30')
     }
 
-    c.status(httpStatus)
+    c.status(asStatusCode(httpStatus))
     return c.json(response)
   } catch (error) {
     logger?.logError(
@@ -98,7 +102,7 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
     )
 
     const generalError = getErrorDetails(ProvisioningErrorCode.PROVISION_FAILED)
-    c.status(generalError.httpStatus as any)
+    c.status(asStatusCode(generalError.httpStatus))
     return c.json(
       createErrorResponse(
         ProvisioningErrorCode.PROVISION_FAILED,
@@ -111,7 +115,7 @@ export async function getLicenseStatusHandler(c: Context): Promise<Response> {
 /**
  * Query license by ID from master database
  */
-async function queryLicenseById(licenseId: string): Promise<Record<string, unknown> | null> {
+async function queryLicenseById(licenseId: string): Promise<LicenseStatusData | null> {
   const db = require('../../db.ts').getDb()
 
   const result = await db.query(

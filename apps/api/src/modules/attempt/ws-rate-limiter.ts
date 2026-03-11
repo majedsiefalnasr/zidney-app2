@@ -79,7 +79,8 @@ export class WebSocketRateLimiter {
         let retryAfterMs = this.windowSizeMs
         if (oldestMessage.length >= 1) {
           // Get the score of the oldest message
-          const score = await redis.zScore(key, oldestMessage[0]!)
+          const oldest = oldestMessage[0]
+          const score = oldest ? await redis.zScore(key, oldest) : null
           if (score !== null) {
             retryAfterMs = Number(score) + this.windowSizeMs - now
           }

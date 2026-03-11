@@ -10,6 +10,7 @@
  */
 
 import { listEntityTranslations } from '@zidney/domain-core'
+import type { Context } from 'hono'
 
 import { buildTranslationContext } from '../../../modules/translation/translation.context'
 import { GetTranslationsQuerySchema } from '../../../modules/translation/translation.validation'
@@ -18,7 +19,7 @@ import { handleTranslationError } from './post-upsert'
 /**
  * GET /translations?entity_type=...&entity_id=...&cursor=...&page_size=...
  */
-export async function handleGetTranslations(c: any): Promise<Response> {
+export async function handleGetTranslations(c: Context): Promise<Response> {
   try {
     const { db } = await buildTranslationContext(c)
 
@@ -52,7 +53,7 @@ export async function handleGetTranslations(c: any): Promise<Response> {
 
     const { entity_type, entity_id, cursor, page_size } = parseResult.data
 
-    const result = await listEntityTranslations(db as any, {
+    const result = await listEntityTranslations(db, {
       entityType: entity_type,
       entityId: entity_id,
       cursor,

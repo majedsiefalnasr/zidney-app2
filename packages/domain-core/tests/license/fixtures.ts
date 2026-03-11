@@ -109,6 +109,7 @@ export const testFixtures = {
  */
 export class MockDatabaseClient {
   private queries: { sql: string; params: any[] }[] = []
+  private transactionActive = false
   private mockedResults: Array<{
     matcher: string | RegExp
     rows: any[] | null

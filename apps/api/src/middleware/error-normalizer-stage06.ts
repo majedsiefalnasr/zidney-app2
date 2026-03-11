@@ -223,7 +223,7 @@ export function createErrorNormalizerStage06(
       })
     }
 
-    c.status(http_status as any)
+    c.status(http_status as 400 | 401 | 403 | 404 | 409 | 422 | 423 | 426 | 429 | 500)
     return c.json(normalized_error)
   }
 }

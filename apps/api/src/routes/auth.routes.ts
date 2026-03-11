@@ -247,7 +247,7 @@ export function createAuthRouter(
       const correlationId = context.correlationId
       const domainsParam = ctx.req.query('domains')
 
-      let permissions: any[] = []
+      let permissions: Awaited<ReturnType<PermissionService['getPermissionsForDomains']>> = []
 
       if (domainsParam) {
         // Filter by requested domains

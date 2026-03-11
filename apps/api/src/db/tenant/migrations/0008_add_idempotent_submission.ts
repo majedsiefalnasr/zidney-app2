@@ -47,7 +47,6 @@ export const migration: MigrationConfig = {
         sql`ALTER TABLE attempts ADD COLUMN IF NOT EXISTS submission_cached_at TIMESTAMP WITH TIME ZONE`
       )
 
-      // biome-ignore lint/suspicious/noConsole: migration runner output
       console.log(`[${correlationId}][${workspaceId}] Added idempotency columns to attempts table`)
     }
   },
@@ -66,7 +65,6 @@ export const migration: MigrationConfig = {
 
     await db.execute(sql`ALTER TABLE attempts DROP COLUMN IF EXISTS submission_cached_at CASCADE`)
 
-    // biome-ignore lint/suspicious/noConsole: migration runner output
     console.log(`[${correlationId}] Removed idempotency columns from attempts table`)
   },
 }

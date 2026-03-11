@@ -155,8 +155,14 @@ describe('Store ID Uniqueness (SC-010, FR-032)', () => {
       useFrontofficeAppStore().$id,
     ]
 
-    mmcIds.forEach((id) => expect(id).toMatch(/^mmc-/))
-    boIds.forEach((id) => expect(id).toMatch(/^backoffice-/))
-    foIds.forEach((id) => expect(id).toMatch(/^frontoffice-/))
+    mmcIds.forEach((id) => {
+      expect(id).toMatch(/^mmc-/)
+    })
+    boIds.forEach((id) => {
+      expect(id).toMatch(/^backoffice-/)
+    })
+    foIds.forEach((id) => {
+      expect(id).toMatch(/^frontoffice-/)
+    })
   })
 })

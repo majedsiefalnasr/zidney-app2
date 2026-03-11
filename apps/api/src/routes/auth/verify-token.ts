@@ -56,9 +56,6 @@ const verifySchema = z.object({
   scope: z.enum(['mmc', 'backoffice', 'frontoffice']),
 })
 
-// @ts-expect-error: TS6196 - unused type declaration [INFRA-001]
-type VerifyRequest = z.infer<typeof verifySchema>
-
 /**
  * Verify token validity
  *

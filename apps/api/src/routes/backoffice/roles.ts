@@ -48,7 +48,7 @@ import {
   updateRolePermissions,
 } from '@zidney/domain-core/rbac'
 import { createLogger } from '@zidney/logger'
-import { Hono } from 'hono'
+import { type Context, Hono } from 'hono'
 
 import {
   createPermissionGuard,
@@ -79,7 +79,7 @@ const MODULE_DISPLAY_NAMES: Record<PermissionModule, string> = {
 // Helpers
 // ---------------------------------------------------------------------------
 
-function getRequestContext(c: any) {
+function getRequestContext(c: Context<BackofficeEnv>) {
   const correlationId: string = (c.get('correlationId') as string) || 'unknown'
   const tenant = c.get('tenant') as {
     id: string
@@ -103,7 +103,12 @@ function auditCtx(correlationId: string, userId: string | null, workspaceSlug: s
   }
 }
 
-function errorResponse(c: any, status: number, code: string, correlationId: string) {
+function errorResponse(
+  c: Context<BackofficeEnv>,
+  status: number,
+  code: string,
+  correlationId: string
+) {
   return c.json(
     {
       success: false as const,

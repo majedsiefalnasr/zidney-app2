@@ -236,7 +236,7 @@ export async function errorHandlerMiddleware(c: Context, next: Next) {
       )
 
       // Send error response (sanitized)
-      c.status(statusCode as any)
+      c.status(statusCode as 400 | 401 | 403 | 404 | 409 | 422 | 423 | 426 | 429 | 500)
       return c.json({
         success: false,
         data: null,
@@ -264,7 +264,7 @@ export async function errorHandlerMiddleware(c: Context, next: Next) {
       )
 
       // Send sanitized response
-      c.status(statusCode as any)
+      c.status(statusCode as 400 | 401 | 403 | 404 | 409 | 422 | 423 | 426 | 429 | 500)
       return c.json({
         success: false,
         data: null,

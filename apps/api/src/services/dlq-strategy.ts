@@ -27,6 +27,13 @@
 import { createLogger, type Logger } from '@zidney/logger'
 import type { Pool, PoolClient } from 'pg'
 
+type RedisQueueLike = {
+  lPush: (key: string, value: string) => Promise<unknown>
+  lRange: (key: string, start: number, stop: number) => Promise<string[]>
+  del: (key: string) => Promise<unknown>
+  rPush: (key: string, ...values: string[]) => Promise<unknown>
+}
+
 /**
  * DLQ entry structure
  */
@@ -37,7 +44,7 @@ export interface DLQEntry {
   error_message: string
   timestamp: string // ISO
   retry_count: number
-  diagnostics?: Record<string, any>
+  diagnostics?: Record<string, unknown>
 }
 
 /**
@@ -59,13 +66,13 @@ export interface DLQEntry {
  */
 export async function moveToDLQ(
   db: PoolClient | Pool,
-  queue: any | null,
+  queue: RedisQueueLike | null,
   jobId: string,
   attemptId: string,
   workspaceId: string,
   errorMessage: string,
   retryCount: number,
-  diagnostics?: Record<string, any>,
+  diagnostics?: Record<string, unknown>,
   logger?: Logger
 ): Promise<void> {
   const log = logger || createLogger('dlq-strategy')
@@ -154,7 +161,7 @@ export async function moveToDLQ(
  * @returns Promise<DLQEntry[]>
  */
 export async function getDLQJobs(
-  queue: any | null,
+  queue: RedisQueueLike | null,
   workspaceId: string,
   logger: Logger,
   limit: number = 100
@@ -214,7 +221,7 @@ export async function getDLQJobs(
  */
 export async function retryDLQJob(
   db: PoolClient | Pool,
-  queue: any | null,
+  queue: RedisQueueLike | null,
   jobId: string,
   workspaceId: string,
   logger: Logger
@@ -293,7 +300,7 @@ export async function retryDLQJob(
  * @param logger - Logger instance
  */
 export async function clearDLQEntry(
-  queue: any | null,
+  queue: RedisQueueLike | null,
   workspaceId: string,
   jobId: string,
   logger: Logger
@@ -314,7 +321,7 @@ export async function clearDLQEntry(
     const entries = await queue.lRange(queueKey, 0, -1)
     const filtered = entries.filter((entry: string) => {
       try {
-        const parsed = JSON.parse(entry)
+        const parsed = JSON.parse(entry) as { job_id?: string }
         return parsed.job_id !== jobId
       } catch {
         return true // Keep unparseable entries

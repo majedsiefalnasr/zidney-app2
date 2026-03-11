@@ -123,12 +123,13 @@ export function createSchemaVersionMiddleware(
       const elapsedMs = Date.now() - startTime
 
       // Compare versions
-      const isCompatible = compareVersions(schemaVersion!, minRequiredVersion) >= 0
+      const resolvedSchemaVersion = schemaVersion ?? '0.0.0'
+      const isCompatible = compareVersions(resolvedSchemaVersion, minRequiredVersion) >= 0
 
       logger.debug('Schema version check', {
         correlation_id: correlationId,
         workspace_slug: workspaceSlug,
-        schema_version: schemaVersion,
+        schema_version: resolvedSchemaVersion,
         required_version: minRequiredVersion,
         is_compatible: isCompatible,
         from_cache: fromCache,
@@ -151,9 +152,9 @@ export function createSchemaVersionMiddleware(
             data: null,
             error: {
               code: 'SCHEMA_INCOMPATIBLE',
-              message: `Schema version upgrade required. Current: ${schemaVersion}, Required: >= ${minRequiredVersion}`,
+              message: `Schema version upgrade required. Current: ${resolvedSchemaVersion}, Required: >= ${minRequiredVersion}`,
               details: {
-                current_schema_version: schemaVersion,
+                current_schema_version: resolvedSchemaVersion,
                 required_schema_version: minRequiredVersion,
                 upgrade_required: true,
               },
@@ -170,9 +171,9 @@ export function createSchemaVersionMiddleware(
       }
 
       // Version compatible - attach to context and proceed
-      c.set('schema_version', schemaVersion)
+      c.set('schema_version', resolvedSchemaVersion)
       c.set('schema_version_context', {
-        schema_version: schemaVersion,
+        schema_version: resolvedSchemaVersion,
         is_compatible: true,
       } as SchemaVersionContext)
 
@@ -228,8 +229,10 @@ export function compareVersions(version1: string, version2: string): number {
 
   // Compare each part
   for (let i = 0; i < maxLength; i++) {
-    if (v1Parts[i]! > v2Parts[i]!) return 1
-    if (v1Parts[i]! < v2Parts[i]!) return -1
+    const part1 = v1Parts[i] ?? 0
+    const part2 = v2Parts[i] ?? 0
+    if (part1 > part2) return 1
+    if (part1 < part2) return -1
   }
 
   // Same version

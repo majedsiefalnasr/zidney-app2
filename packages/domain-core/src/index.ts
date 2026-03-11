@@ -32,6 +32,7 @@ export * from './tenant-resolver/version-check'
 // Translation system (Stage 019)
 export * from './translation/coverage.service'
 export * from './translation/translatable-fields'
+export type { TranslationErrorCode } from './translation/translation.errors'
 // Translation errors — named imports to avoid conflicts with workflow errors
 export {
   batchValidationFailed,
@@ -41,7 +42,6 @@ export {
   TRANSLATION_ERROR_CODES,
   TRANSLATION_ERROR_HTTP_STATUS,
   TranslationError,
-  TranslationErrorCode,
   unsupportedLanguage,
 } from './translation/translation.errors'
 export * from './translation/translation.service'

@@ -189,7 +189,7 @@ export function corsMiddleware(corsConfig: CORSConfig = CORS_DEV_CONFIG) {
       }
 
       // Set CORS headers
-      c.header('Access-Control-Allow-Origin', origin!)
+      c.header('Access-Control-Allow-Origin', origin || '')
       c.header('Access-Control-Allow-Methods', corsConfig.allowedMethods.join(', '))
       c.header('Access-Control-Allow-Headers', corsConfig.allowedHeaders.join(', '))
       c.header('Access-Control-Expose-Headers', corsConfig.exposedHeaders.join(', '))

@@ -41,7 +41,7 @@
 
 import type { PermissionAction, PermissionModule } from '@zidney/domain-core/rbac'
 import type { Logger } from '@zidney/logger'
-import type { MiddlewareHandler } from 'hono'
+import type { Context, MiddlewareHandler } from 'hono'
 import type { Redis } from 'ioredis'
 
 // ---------------------------------------------------------------------------
@@ -52,7 +52,7 @@ interface TenantContext {
   id: string
   slug: string
   pool: {
-    query: <T = any>(
+    query: <T = unknown>(
       sql: string,
       params?: unknown[]
     ) => Promise<{ rows: T[]; rowCount: number | null }>
@@ -79,7 +79,7 @@ interface PermissionRow {
 // Forbidden response helper
 // ---------------------------------------------------------------------------
 
-function forbidden(c: any, correlationId: string): Response {
+function forbidden(c: Context, correlationId: string): Response {
   return c.json(
     {
       success: false,
@@ -191,7 +191,10 @@ export function createPermissionGuard(
       })
       return forbidden(c, correlationId)
     }
-    const user = userResult.rows[0]!
+    const user = userResult.rows[0]
+    if (!user) {
+      return forbidden(c, correlationId)
+    }
 
     // -- Step 3: Check is_active --
     if (!user.is_active) {
@@ -254,7 +257,7 @@ export function createPermissionGuard(
 
     // Check per-request cache first
     if (requestCache.has(requestCacheKey)) {
-      hasPermission = requestCache.get(requestCacheKey)!
+      hasPermission = requestCache.get(requestCacheKey)
     } else {
       // Check Redis cache
       const redisCacheKey = `rbac_v2:${tenant.id}:${userId}:${module}:${action}`

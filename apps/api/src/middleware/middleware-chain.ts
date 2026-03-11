@@ -136,9 +136,12 @@ export function recordMiddlewareExecution(
   stage: MiddlewareStage
 ): (c: Context, next: Next) => Promise<void> {
   return async (c: Context, next: Next) => {
-    const chain = (c as any).state?.middlewareChain || createMiddlewareChain()
+    const stateful = c as Context & {
+      state?: { middlewareChain?: MiddlewareChain; [key: string]: unknown }
+    }
+    const chain = stateful.state?.middlewareChain || createMiddlewareChain()
     chain.recordExecution(stage)
-    ;(c as any).state = { ...(c as any).state, middlewareChain: chain }
+    stateful.state = { ...(stateful.state || {}), middlewareChain: chain }
     await next()
   }
 }

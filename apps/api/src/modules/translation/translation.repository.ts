@@ -25,7 +25,7 @@ import type { Translation, TranslationAuditEntry } from '@zidney/domain-core'
 // ---------------------------------------------------------------------------
 
 interface DbClient {
-  query: <T = any>(
+  query: <T = unknown>(
     sql: string,
     params?: unknown[]
   ) => Promise<{ rows: T[]; rowCount: number | null }>

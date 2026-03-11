@@ -31,7 +31,16 @@ export interface TenantContextStage06 {
   schema_version: number
   license_id: string
   organization_id: string
-  pool: any // Database pool (actual type depends on DB driver)
+  pool: unknown // Database pool (actual type depends on DB driver)
+}
+
+interface RegistryEntryStage06 {
+  id: string
+  workspace_slug: string
+  database_name: string
+  schema_version: number
+  license_id: string
+  organization_id: string
 }
 
 /**
@@ -50,7 +59,10 @@ export interface TenantContextStage06 {
  * - poolManager: Tenant pool manager (getTenantDatabase, etc.)
  * - masterDb: Master DB connection (for tenant registry query)  [attached by setup]
  */
-export function createTenantResolverStage06(logger: Logger, poolManager?: any): MiddlewareHandler {
+export function createTenantResolverStage06(
+  logger: Logger,
+  poolManager?: { getTenantPool?: (workspaceId: string) => Promise<unknown> }
+): MiddlewareHandler {
   return async (c: Context, next) => {
     const correlation_id = c.get('correlationId') || 'unknown'
 
@@ -98,7 +110,7 @@ export function createTenantResolverStage06(logger: Logger, poolManager?: any): 
       }
 
       // Query master registry
-      let registry_entry
+      let registry_entry: RegistryEntryStage06 | null = null
       try {
         const result = await masterDb.query(
           `
@@ -157,11 +169,11 @@ export function createTenantResolverStage06(logger: Logger, poolManager?: any): 
       }
 
       // Get or create tenant database connection pool
-      let pool
+      let pool: unknown = null
       try {
         if (poolManager) {
           // Use pool manager to get/create pool
-          pool = await poolManager.getTenantPool(registry_entry.id)
+          pool = await poolManager.getTenantPool?.(registry_entry.id)
         } else {
           // Fallback: try to get pool from cache (advanced usage)
           pool = c.get('poolCache')?.get(registry_entry.id)
@@ -268,8 +280,8 @@ function extractSlugFromRequest(c: Context): string | null {
     // Extract subdomain (first part before first dot)
     const parts = host.split('.')
     if (parts.length >= 3) {
-      const subdomain = parts[0]!
-      if (isValidSlug(subdomain)) {
+      const subdomain = parts[0]
+      if (subdomain && isValidSlug(subdomain)) {
         return subdomain
       }
     }

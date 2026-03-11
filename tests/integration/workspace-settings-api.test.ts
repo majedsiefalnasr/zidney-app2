@@ -101,20 +101,17 @@ function createTestApp(overrides: {
         return { rows: [], rowCount: 0 }
       }),
     }
-
-    c.set('tenant', {
+    ;(c as any).set('tenant', {
       id: '550e8400-e29b-41d4-a716-446655440000',
       slug: 'test-uni',
       schema_version: 2,
       pool: mockPool,
     })
-
-    c.set('staff_user', {
+    ;(c as any).set('staff_user', {
       user_id: 'user-001',
       role: overrides.role || 'institution_admin',
     })
-
-    c.set('correlationId', 'corr-test-001')
+    ;(c as any).set('correlationId', 'corr-test-001')
 
     await next()
   })

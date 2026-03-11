@@ -93,7 +93,7 @@ export function getCorrelationId(c: Context): string {
 export function logWithCorrelation(
   message: string,
   level: 'info' | 'warn' | 'error' | 'debug' = 'info',
-  context?: any
+  context?: Record<string, unknown>
 ): void {
   logger[level](message, { service: 'api', ...(context || {}) })
 }

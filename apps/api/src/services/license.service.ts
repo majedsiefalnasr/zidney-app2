@@ -6,6 +6,24 @@
 
 import { recordLicenseChange } from './audit.service'
 
+type QueryBuilder = {
+  select: (...fields: string[]) => QueryBuilder
+  from: (table: string) => QueryBuilder
+  where: (field: string, op: string, value: string) => QueryBuilder
+  first: () => Promise<LicenseStatus | null>
+  update: (values: Record<string, unknown>) => Promise<unknown>
+}
+
+type TransactionDb = {
+  select: (...fields: string[]) => QueryBuilder
+  from: (table: string) => QueryBuilder
+  where: (field: string, op: string, value: string) => QueryBuilder
+  first: () => Promise<LicenseStatus | null>
+  transaction: (fn: (trx: TransactionQuery) => Promise<void>) => Promise<void>
+}
+
+type TransactionQuery = QueryBuilder & ((table: string) => QueryBuilder)
+
 export interface LicenseStatus {
   status: 'ACTIVE' | 'SOFT_LOCKED' | 'ARCHIVED' | 'DELETED'
   updated_at: string
@@ -25,13 +43,13 @@ export interface LicenseStatus {
  * @throws Error if either license update or audit recording fails
  */
 export async function updateLicenseStatus(
-  db: any,
+  db: TransactionDb,
   workspace_id: string,
   new_status: 'ACTIVE' | 'SOFT_LOCKED' | 'ARCHIVED' | 'DELETED',
   actor_id?: string,
   reason?: string
 ): Promise<void> {
-  await db.transaction(async (trx: any) => {
+  await db.transaction(async (trx: TransactionQuery) => {
     // Fetch current license status before change
     const currentLicense = await trx
       .select('license_status as status', 'updated_at')
@@ -52,7 +70,7 @@ export async function updateLicenseStatus(
     })
 
     // Record audit event (within same transaction)
-    const metadata: Record<string, any> = {
+    const metadata: Record<string, unknown> = {
       timestamp: new Date().toISOString(),
     }
     if (reason) {
@@ -78,7 +96,7 @@ export async function updateLicenseStatus(
  * @returns Current license status or null if workspace not found
  */
 export async function getLicenseStatus(
-  db: any,
+  db: TransactionDb,
   workspace_id: string
 ): Promise<LicenseStatus | null> {
   const result = await db

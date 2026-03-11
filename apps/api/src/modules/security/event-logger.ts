@@ -49,7 +49,7 @@ export interface SecurityEvent {
   target_resource?: string
   correlation_id?: string
   timestamp: Date
-  additional_context?: Record<string, any>
+  additional_context?: Record<string, unknown>
 }
 
 /**
@@ -299,7 +299,7 @@ export async function logSchemaVersionMismatch(params: {
   await logSecurityEvent({
     event_type: 'schema_mismatch',
     severity:
-      `${Math.abs(params.serverVersion - params.clientVersion) > 10 ? 'high' : 'medium'}` as any,
+      `${Math.abs(params.serverVersion - params.clientVersion) > 10 ? 'high' : 'medium'}` as unknown,
     source_ip: params.sourceIp,
     workspace_id: params.workspaceId,
     workspace_slug: params.workspaceSlug,

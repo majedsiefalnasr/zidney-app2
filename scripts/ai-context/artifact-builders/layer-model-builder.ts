@@ -4,14 +4,14 @@
  * Path: scripts/ai-context/artifact-builders/layer-model-builder.ts
  */
 
-import type { AILayerModel } from '../../../packages/types/src/ai-context'
+import type { AILayerModel, LayerType } from '../../../packages/types/src/ai-context'
 import type { SourceMetadata } from '../source-loader'
 
 export async function buildLayerModel(metadata: SourceMetadata): Promise<AILayerModel> {
   const boundaries = metadata.moduleBoundaries
 
   // Convert layers from object format (if present) to array format
-  let layersArray: Array<{ name: string; description: string; order: number }>
+  let layersArray: Array<{ name: LayerType; description: string; order: number }>
 
   if (
     boundaries.layers &&
@@ -27,13 +27,17 @@ export async function buildLayerModel(metadata: SourceMetadata): Promise<AILayer
     }
 
     layersArray = Object.entries(boundaries.layers).map(([name, _modules], index) => ({
-      name,
+      name: name as LayerType,
       description: `${name.charAt(0).toUpperCase() + name.slice(1)} layer`,
       order: layerOrder[name] || index + 1,
     }))
   } else if (Array.isArray(boundaries.layers)) {
     // Already in array format
-    layersArray = boundaries.layers
+    layersArray = boundaries.layers.map((layer, index) => ({
+      name: layer.name as LayerType,
+      description: layer.description,
+      order: layer.order ?? index + 1,
+    }))
   } else {
     // Fallback to default layers
     layersArray = [
@@ -51,7 +55,7 @@ export async function buildLayerModel(metadata: SourceMetadata): Promise<AILayer
       module_boundaries_hash: metadata.sourceHash,
     },
     layers: layersArray.map((l) => ({
-      name: (l.name || 'unknown') as string,
+      name: l.name,
       description: l.description || '',
       order: l.order,
     })),

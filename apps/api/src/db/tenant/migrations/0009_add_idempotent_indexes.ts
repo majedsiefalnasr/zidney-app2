@@ -41,7 +41,6 @@ export const migration: MigrationConfig = {
           WHERE submission_cached_at IS NOT NULL`
     )
 
-    // biome-ignore lint/suspicious/noConsole: migration runner output
     console.log(`[${correlationId}] Created idempotency indexes on attempts table`)
   },
 
@@ -51,7 +50,6 @@ export const migration: MigrationConfig = {
     await db.execute(sql`DROP INDEX IF EXISTS idx_attempt_idempotent_key CASCADE`)
     await db.execute(sql`DROP INDEX IF EXISTS idx_attempt_cached_result CASCADE`)
 
-    // biome-ignore lint/suspicious/noConsole: migration runner output
     console.log(`[${correlationId}] Dropped idempotency indexes from attempts table`)
   },
 }

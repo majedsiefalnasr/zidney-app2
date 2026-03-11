@@ -29,6 +29,10 @@ import {
 } from './license-response'
 import type { CreateLicenseRequest } from './validate-license-request'
 
+function asStatusCode(status: number): Parameters<Context['status']>[0] {
+  return status as Parameters<Context['status']>[0]
+}
+
 /**
  * License Creation Handler
  */
@@ -62,11 +66,11 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
 
       // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const error = getErrorDetails(ProvisioningErrorCode.WORKSPACE_SLUG_EXISTS)
+      c.status(asStatusCode(error.httpStatus))
       return c.json(
         createErrorResponse(ProvisioningErrorCode.WORKSPACE_SLUG_EXISTS, error.message, {
           slug: request.workspace_slug,
-        }),
-        error.httpStatus as any
+        })
       )
     }
 
@@ -84,7 +88,7 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
 
       // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const error = getErrorDetails(ProvisioningErrorCode.INVALID_PRODUCT_ID)
-      c.status(error.httpStatus as any)
+      c.status(asStatusCode(error.httpStatus))
       return c.json(createErrorResponse(ProvisioningErrorCode.INVALID_PRODUCT_ID, error.message))
     }
 
@@ -171,7 +175,7 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
 
       // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
       const error = getErrorDetails(ProvisioningErrorCode.JOB_ENQUEUE_FAILED)
-      c.status(error.httpStatus as any)
+      c.status(asStatusCode(error.httpStatus))
       return c.json(createErrorResponse(ProvisioningErrorCode.JOB_ENQUEUE_FAILED, error.message))
     }
 
@@ -212,7 +216,7 @@ export async function createLicenseHandler(c: Context): Promise<Response> {
 
     // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
     const generalError = getErrorDetails(ProvisioningErrorCode.PROVISION_FAILED)
-    c.status(generalError.httpStatus as any)
+    c.status(asStatusCode(generalError.httpStatus))
     return c.json(createErrorResponse(ProvisioningErrorCode.PROVISION_FAILED, generalError.message))
   }
 }

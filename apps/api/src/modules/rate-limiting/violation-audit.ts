@@ -141,7 +141,7 @@ export async function getRecentViolations(
 /**
  * Get aggregated violation patterns for a limit type
  */
-export async function getViolationPatterns(limitType: string): Promise<Map<string, any>> {
+export async function getViolationPatterns(limitType: string): Promise<Map<string, unknown>> {
   const key = `ratelimit:patterns:${limitType}`
 
   const data = await redis.hGetAll(key)

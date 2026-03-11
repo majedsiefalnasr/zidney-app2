@@ -28,7 +28,7 @@ export interface IdempotencyRecord {
   status: 'QUEUED' | 'COMPLETED' | 'FAILED'
   created_at: Date
   completed_at?: Date
-  response?: any
+  response?: unknown
 }
 
 /**
@@ -201,7 +201,7 @@ export async function markIdempotencyComplete(
   idempotency_key: string,
   task_id: string,
   status: 'COMPLETED' | 'FAILED',
-  response: any,
+  response: unknown,
   redis: RedisClient | null
 ): Promise<void> {
   try {

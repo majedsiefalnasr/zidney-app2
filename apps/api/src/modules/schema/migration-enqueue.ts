@@ -1,6 +1,6 @@
+import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 import { logger } from '@zidney/logger'
-import { createHash } from 'crypto'
-import { readFileSync } from 'fs'
 
 /**
  * T055: Migration Enqueue Utility
@@ -35,7 +35,7 @@ export async function enqueueMigration(options: {
   fromVersion: string
   toVersion: string
   filePath: string
-  redisClient?: any // Redis client for task publishing
+  redisClient?: unknown // Redis client for task publishing
   taskQueue?: string // Custom queue name (default: schema-migration)
 }): Promise<string> {
   const {
@@ -69,7 +69,7 @@ export async function enqueueMigration(options: {
     try {
       await redisClient.lpush(taskQueue, JSON.stringify(migrationTask))
       logger.info(`[MIGRATION] Task enqueued: ${taskId} (${fromVersion} → ${toVersion})`)
-    } catch (err: any) {
+    } catch (err: unknown) {
       logger.error(`[MIGRATION] Failed to enqueue: ${err.message}`)
       throw new Error(`Failed to enqueue migration: ${err.message}`)
     }
@@ -89,7 +89,7 @@ export async function trackMigrationProgress(options: {
   taskId: string
   workspaceId: string
   status: 'PENDING' | 'IN_PROGRESS' | 'COMPLETED' | 'FAILED'
-  redisClient?: any
+  redisClient?: unknown
 }): Promise<void> {
   const { taskId, workspaceId, status, redisClient } = options
 
@@ -105,7 +105,7 @@ export async function trackMigrationProgress(options: {
 export async function getMigrationStatus(options: {
   taskId: string
   workspaceId: string
-  redisClient?: any
+  redisClient?: unknown
 }): Promise<string | null> {
   const { taskId, workspaceId, redisClient } = options
 
@@ -122,7 +122,7 @@ export async function getMigrationStatus(options: {
  */
 export async function isMigrationInProgress(options: {
   workspaceId: string
-  redisClient?: any
+  redisClient?: unknown
 }): Promise<boolean> {
   const { workspaceId, redisClient } = options
 
@@ -141,7 +141,7 @@ export async function isMigrationInProgress(options: {
 export async function setMigrationInProgress(options: {
   workspaceId: string
   taskId: string
-  redisClient?: any
+  redisClient?: unknown
   ttl?: number // Default 24h
 }): Promise<void> {
   const { workspaceId, taskId, redisClient, ttl = 86400 } = options
@@ -157,7 +157,7 @@ export async function setMigrationInProgress(options: {
  */
 export async function clearMigrationInProgress(options: {
   workspaceId: string
-  redisClient?: any
+  redisClient?: unknown
 }): Promise<void> {
   const { workspaceId, redisClient } = options
 

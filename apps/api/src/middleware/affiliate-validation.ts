@@ -101,7 +101,7 @@ export async function validateListAffiliatesRequest(query: unknown) {
 /**
  * Helper to map validation errors to affiliate error codes
  */
-export function mapValidationErrorToAffiliateError(error: any): {
+export function mapValidationErrorToAffiliateError(error: { message?: string }): {
   code: string
   message: string
 } {

@@ -354,7 +354,7 @@ export async function dashboardLoggingMiddleware(c: Context, next: Next): Promis
 function extractEndpointName(path: string): string {
   // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const match = path.match(/\/dashboard\/([a-z-]+)/)
-  return match ? match[1]! : 'unknown'
+  return match?.[1] ?? 'unknown'
 }
 
 /**
@@ -398,7 +398,7 @@ export function calculateCacheHitRatio(hits: number, total: number): number {
  * }))
  * ```
  */
-export function createMetricsEvent(data: Record<string, any>): Record<string, any> {
+export function createMetricsEvent(data: Record<string, unknown>): Record<string, unknown> {
   return {
     timestamp: new Date().toISOString(),
     level: 'info',

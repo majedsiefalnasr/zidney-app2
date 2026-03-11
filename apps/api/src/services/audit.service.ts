@@ -1,6 +1,27 @@
 import { logger } from '@zidney/logger'
 import { v4 as uuidv4 } from 'uuid'
 
+type JsonObject = Record<string, unknown>
+type AuditActionType = 'LICENSE_CHANGE' | 'TENANT_PROVISION' | 'SCHEMA_UPGRADE' | 'ROLE_CHANGE'
+type AuditInsertRecord = {
+  id: string
+  workspace_id: string
+  actor_id?: string
+  action_type: AuditActionType
+  previous_state: JsonObject | null
+  new_state: JsonObject | null
+  metadata: JsonObject | null
+  created_at: Date
+}
+type AuditTransaction = {
+  insert: (table: string) => {
+    values: (record: AuditInsertRecord) => Promise<unknown>
+  }
+}
+type AuditDb = {
+  transaction: (fn: (trx: AuditTransaction) => Promise<void>) => Promise<void>
+}
+
 /**
  * Audit Service - Records critical events for compliance and accountability.
  *
@@ -20,11 +41,11 @@ import { v4 as uuidv4 } from 'uuid'
 export interface AuditEventRecord {
   id: string
   workspace_id: string
-  action_type: 'LICENSE_CHANGE' | 'TENANT_PROVISION' | 'SCHEMA_UPGRADE' | 'ROLE_CHANGE'
+  action_type: AuditActionType
   actor_id?: string
-  previous_state?: Record<string, any>
-  new_state?: Record<string, any>
-  metadata?: Record<string, any>
+  previous_state?: JsonObject
+  new_state?: JsonObject
+  metadata?: JsonObject
   created_at: Date
 }
 
@@ -42,15 +63,15 @@ export interface AuditEventRecord {
  * @param metadata - Optional metadata (request_id, reason, etc.)
  */
 export async function recordLicenseChange(
-  db: any,
+  db: AuditDb,
   workspace_id: string,
   actor_id: string | undefined,
-  previousState: Record<string, any>,
-  newState: Record<string, any>,
-  metadata?: Record<string, any>
+  previousState: JsonObject,
+  newState: JsonObject,
+  metadata?: JsonObject
 ): Promise<void> {
   try {
-    await db.transaction(async (trx: any) => {
+    await db.transaction(async (trx: AuditTransaction) => {
       await trx.insert('audit_log').values({
         id: uuidv4(),
         workspace_id,
@@ -86,14 +107,14 @@ export async function recordLicenseChange(
  * @param metadata - Optional metadata (request_id, etc.)
  */
 export async function recordTenantProvisioned(
-  db: any,
+  db: AuditDb,
   workspace_id: string,
   actor_id: string | undefined,
-  tenantConfig: Record<string, any>,
-  metadata?: Record<string, any>
+  tenantConfig: JsonObject,
+  metadata?: JsonObject
 ): Promise<void> {
   try {
-    await db.transaction(async (trx: any) => {
+    await db.transaction(async (trx: AuditTransaction) => {
       await trx.insert('audit_log').values({
         id: uuidv4(),
         workspace_id,
@@ -128,15 +149,15 @@ export async function recordTenantProvisioned(
  * @param metadata - Optional metadata (request_id, migration_name, etc.)
  */
 export async function recordSchemaUpgrade(
-  db: any,
+  db: AuditDb,
   workspace_id: string,
   actor_id: string | undefined,
   fromVersion: number,
   toVersion: number,
-  metadata?: Record<string, any>
+  metadata?: JsonObject
 ): Promise<void> {
   try {
-    await db.transaction(async (trx: any) => {
+    await db.transaction(async (trx: AuditTransaction) => {
       await trx.insert('audit_log').values({
         id: uuidv4(),
         workspace_id,
@@ -172,16 +193,16 @@ export async function recordSchemaUpgrade(
  * @param metadata - Optional metadata (request_id, etc.)
  */
 export async function recordRoleChange(
-  db: any,
+  db: AuditDb,
   workspace_id: string,
   actor_id: string | undefined,
   userId: string,
   previousRole: string | null,
   newRole: string,
-  metadata?: Record<string, any>
+  metadata?: JsonObject
 ): Promise<void> {
   try {
-    await db.transaction(async (trx: any) => {
+    await db.transaction(async (trx: AuditTransaction) => {
       await trx.insert('audit_log').values({
         id: uuidv4(),
         workspace_id,

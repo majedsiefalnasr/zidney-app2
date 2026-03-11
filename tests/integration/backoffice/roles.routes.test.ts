@@ -233,20 +233,19 @@ function createTestApp(options?: {
       del: vi.fn(async () => 1),
       scan: vi.fn(async () => ['0', []]),
     }
-
-    c.set('tenant', {
+    ;(c as any).set('tenant', {
       id: options?.tenantId ?? TENANT_A_ID,
       slug: 'test-workspace',
       schema_version: options?.schemaVersion ?? '1.4.0',
       pool,
       redis: redisMock as any,
     })
-    c.set('authPayload', {
+    ;(c as any).set('authPayload', {
       user_id: options?.userId ?? USER_ID,
       workspace_id: options?.tenantId ?? TENANT_A_ID,
     })
-    c.set('userId', options?.userId ?? USER_ID)
-    c.set('correlationId', 'corr-test-001')
+    ;(c as any).set('userId', options?.userId ?? USER_ID)
+    ;(c as any).set('correlationId', 'corr-test-001')
 
     await next()
   })

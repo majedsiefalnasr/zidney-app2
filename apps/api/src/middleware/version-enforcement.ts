@@ -72,11 +72,11 @@ export async function versionEnforcementMiddleware(ctx: Context, next: Next) {
             result: 'pass',
           })
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         logger.warn('Schema version check failed (non-blocking)', {
           correlation_id: correlationId,
           action: 'version_check_schema_error',
-          error_message: error.message,
+          error_message: error instanceof Error ? error.message : String(error),
         })
         // Continue; schema version check is informational
       }
@@ -118,11 +118,11 @@ export async function versionEnforcementMiddleware(ctx: Context, next: Next) {
     // STEP 3: Proceed to next middleware
     // ===========================================================================
     return await next()
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error('Version enforcement middleware error', {
       correlation_id: correlationId,
       action: 'version_enforcement_error',
-      error_message: error.message,
+      error_message: error instanceof Error ? error.message : String(error),
     })
 
     return ctx.json(toLicenseError('INTERNAL_ERROR'), { status: 500 })

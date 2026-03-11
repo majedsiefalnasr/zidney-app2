@@ -44,6 +44,7 @@ import { validateSubmissionContent } from '../../services/submission-validator'
 export async function submitAttemptHandler(c: Context) {
   const correlationId = c.get('correlationId') || 'unknown'
   const workspace = c.get('workspace')
+  const workspaceId: string | undefined = workspace?.id
   const user = c.get('user') as UserContextStage06
   const tenantDb = c.get('tenantDb') as PoolClient | Pool
   const redis = c.get('redis') || null
@@ -52,6 +53,14 @@ export async function submitAttemptHandler(c: Context) {
   const startTime = Date.now()
 
   try {
+    if (!workspaceId) {
+      throw {
+        code: 'WORKSPACE_CONTEXT_MISSING',
+        message: 'Workspace context missing',
+        status: 500,
+      }
+    }
+
     const { id: attemptId = '' } = c.req.param()
     const idempotencyKey = c.req.header('x-idempotency-key') || 'no-key'
 
@@ -190,7 +199,7 @@ export async function submitAttemptHandler(c: Context) {
     const idempotencyResult = await validateSubmissionIdempotency(
       tenantDb,
       redis,
-      workspace.id!,
+      workspaceId,
       attemptId,
       idempotencyKey,
       logger,
@@ -268,7 +277,7 @@ export async function submitAttemptHandler(c: Context) {
     const result = await executeWithLockRetry(
       tenantDb,
       attemptId,
-      workspace.id!,
+      workspaceId,
       async (lockedAttempt) => {
         // Inside lock: re-verify attempt status (double-check after lock)
         if (
@@ -277,8 +286,8 @@ export async function submitAttemptHandler(c: Context) {
           lockedAttempt.status === 'EXPIRED'
         ) {
           const err = new Error(`Attempt is ${lockedAttempt.status}`)
-          ;(err as any).code = 'ATTEMPT_INVALID_STATE'
-          ;(err as any).statusCode = 409
+          ;(err as unknown).code = 'ATTEMPT_INVALID_STATE'
+          ;(err as unknown).statusCode = 409
           throw err
         }
 
@@ -345,7 +354,7 @@ export async function submitAttemptHandler(c: Context) {
           tenantDb,
           redis,
           attemptId,
-          workspace.id!,
+          workspaceId,
           user.id,
           logger,
           correlationId
@@ -381,7 +390,7 @@ export async function submitAttemptHandler(c: Context) {
           tenantDb,
           redis,
           workspace.id,
-          attemptId!,
+          attemptId,
           idempotencyKey,
           submissionSequence,
           202,
@@ -439,7 +448,7 @@ export async function submitAttemptHandler(c: Context) {
       workspace_id: workspace.id,
       user_id: user.id,
       error: err instanceof Error ? err.message : String(err),
-      code: (err as any).code,
+      code: (err as unknown).code,
     })
     throw err
   }

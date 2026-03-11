@@ -59,11 +59,11 @@ const changePasswordSchema = z
     new_password: z.string().min(8, 'Password must be at least 8 characters'),
     confirm_password: z.string(),
   })
-  .refine((data: any) => data.new_password === data.confirm_password, {
+  .refine((data) => data.new_password === data.confirm_password, {
     message: 'Passwords do not match',
     path: ['confirm_password'],
   })
-  .refine((data: any) => data.current_password !== data.new_password, {
+  .refine((data) => data.current_password !== data.new_password, {
     message: 'New password must be different from current password',
     path: ['new_password'],
   })

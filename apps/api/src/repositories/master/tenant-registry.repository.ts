@@ -3,7 +3,11 @@ import { drizzle } from 'drizzle-orm/postgres-js'
 import postgres from 'postgres'
 
 // Assume master DB connection
-const masterClient = postgres(process.env.DATABASE_URL!)
+const databaseUrl = process.env.DATABASE_URL
+if (!databaseUrl) {
+  throw new Error('DATABASE_URL is required')
+}
+const masterClient = postgres(databaseUrl)
 const masterDb = drizzle(masterClient)
 
 // Define schema (simplified)

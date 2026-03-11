@@ -40,7 +40,7 @@ export const workspaceSettingsRouter = new Hono<BackofficeEnv>()
 // Helper: Extract SettingsRequestContext from Hono context
 // ---------------------------------------------------------------------------
 
-function extractContext(c: any): SettingsRequestContext {
+function extractContext(c: unknown): SettingsRequestContext {
   const tenant = c.get('tenant')
   const staffUser = c.get('staff_user')
   const correlationId = c.get('correlationId') || 'unknown'
@@ -169,7 +169,7 @@ workspaceSettingsRouter.put('/settings/:group', async (c) => {
 // Error Handler
 // ---------------------------------------------------------------------------
 
-function handleSettingsError(c: any, err: unknown) {
+function handleSettingsError(c: unknown, err: unknown) {
   const correlationId = c.get('correlationId') || 'unknown'
 
   if (err instanceof WorkspaceSettingsError) {

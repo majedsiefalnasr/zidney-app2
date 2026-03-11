@@ -1,8 +1,11 @@
 import { defineStore } from 'pinia'
 import { computed, ref } from 'vue'
 import type {
+  AffiliateData,
   AffiliatesResponse,
+  GeographicCountry,
   GeographicResponse,
+  ProductRevenue,
   RevenueBreakdownResponse,
   SummaryResponse,
   TrendsResponse,
@@ -70,7 +73,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     if (!revenueBreakdown.value) return null
     return {
       ...revenueBreakdown.value,
-      topProducts: revenueBreakdown.value.topProducts.map((p: any) => ({
+      topProducts: revenueBreakdown.value.topProducts.map((p: ProductRevenue) => ({
         ...p,
         revenue: (p.revenue / 100).toFixed(2),
       })),
@@ -83,7 +86,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     if (!geographic.value) return null
     return {
       ...geographic.value,
-      countries: geographic.value.countries.map((c: any) => ({
+      countries: geographic.value.countries.map((c: GeographicCountry) => ({
         ...c,
         revenue: (c.revenue / 100).toFixed(2),
       })),
@@ -96,7 +99,7 @@ export const useDashboardStore = defineStore('dashboard', () => {
     if (!affiliates.value) return null
     return {
       ...affiliates.value,
-      affiliates: affiliates.value.affiliates.map((a: any) => ({
+      affiliates: affiliates.value.affiliates.map((a: AffiliateData) => ({
         ...a,
         totalRevenue: (a.totalRevenue / 100).toFixed(2),
       })),
@@ -203,9 +206,22 @@ export const useDashboardStore = defineStore('dashboard', () => {
   }
 
   // Actions - Export Data
-  const exportData = async (section: string, options: any = {}) => {
+  const exportData = async (
+    section: 'summary' | 'revenue' | 'geographic' | 'affiliates' | 'all',
+    options: {
+      format?: 'csv' | 'xlsx' | 'json'
+      dateRange?: { start: string; end: string }
+      includeData?: {
+        summary?: boolean
+        products?: boolean
+        geographic?: boolean
+        affiliates?: boolean
+        trends?: boolean
+      }
+    } = {}
+  ) => {
     try {
-      await dashboardClient.exportData(section as any, options)
+      await dashboardClient.exportData(section, options)
     } catch (error) {
       // biome-ignore lint/suspicious/noConsole: frontend error boundary
       console.error('Export error:', error)

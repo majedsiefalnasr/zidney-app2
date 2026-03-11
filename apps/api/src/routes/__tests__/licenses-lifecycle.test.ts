@@ -52,7 +52,7 @@ function createMockContext(_overrides = {}) {
     get: vi.fn(),
     set: vi.fn(),
     json: vi.fn((data, opts) => ({ data, opts })),
-    status: vi.fn(function (this: any) {
+    status: vi.fn(function (this: unknown) {
       return this
     }),
   } as unknown as Context
@@ -79,14 +79,14 @@ describe('License Lifecycle Routes (Phase 3)', () => {
         soft_lock_until: new Date(Date.now() + 90 * 24 * 3600 * 1000),
       }
 
-      ;(transitionToSoftLock as any).mockResolvedValue({
+      ;(transitionToSoftLock as unknown).mockResolvedValue({
         success: true,
         license: mockLicense,
         previous_state: 'ACTIVE',
       })
 
       // Verify service method is available and properly mocked
-      const result = await (transitionToSoftLock as any)(
+      const result = await (transitionToSoftLock as unknown)(
         {},
         'lic-123',
         'payment_pending',
@@ -114,7 +114,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
       ctx.req.param = vi.fn().mockReturnValue('lic-123')
       ctx.get = vi.fn((key) => {
         const map = { user_role: 'staff' }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
 
       // Non-admin should be rejected at auth check
@@ -155,9 +155,9 @@ describe('License Lifecycle Routes (Phase 3)', () => {
           user_role: 'mmc_admin',
           user_id: 'user-456',
         }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
-      ;(transitionToActive as any).mockResolvedValue({
+      ;(transitionToActive as unknown).mockResolvedValue({
         success: true,
         license: mockLicense,
         previous_state: 'SOFT_LOCKED',
@@ -167,7 +167,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
     })
 
     it('should return 400 if license is not SOFT_LOCKED', async () => {
-      ;(transitionToActive as any).mockResolvedValue({
+      ;(transitionToActive as unknown).mockResolvedValue({
         success: false,
         error_code: 'INVALID_STATE_TRANSITION',
         http_status: 400,
@@ -180,7 +180,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
       const ctx = createMockContext()
       ctx.get = vi.fn((key) => {
         const map = { user_role: 'student' }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
 
       expect(ctx.get('user_role')).not.toBe('mmc_admin')
@@ -200,7 +200,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
           correlation_id: 'corr-123',
           user_role: 'mmc_admin',
         }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
 
       // Archive should return 202 with job details
@@ -211,7 +211,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
       const ctx = createMockContext()
       ctx.get = vi.fn((key) => {
         const map = { user_role: 'student' }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
 
       expect(ctx.get('user_role')).not.toBe('mmc_admin')
@@ -247,9 +247,9 @@ describe('License Lifecycle Routes (Phase 3)', () => {
           user_role: 'mmc_admin',
           user_id: 'user-456',
         }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
-      ;(restoreFromArchive as any).mockResolvedValue({
+      ;(restoreFromArchive as unknown).mockResolvedValue({
         success: true,
         license: mockLicense,
       })
@@ -258,7 +258,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
     })
 
     it('should return 400 if license is not ARCHIVED', async () => {
-      ;(restoreFromArchive as any).mockResolvedValue({
+      ;(restoreFromArchive as unknown).mockResolvedValue({
         success: false,
         error_code: 'INVALID_STATE_TRANSITION',
         http_status: 400,
@@ -291,7 +291,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
           user_role: 'mmc_admin',
           '2fa_verified': true,
         }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
 
       // Should return confirmation phrase
@@ -306,7 +306,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
           user_role: 'mmc_admin',
           '2fa_verified': false,
         }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
 
       expect(ctx.get('2fa_verified')).toBe(false)
@@ -316,7 +316,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
       const ctx = createMockContext()
       ctx.get = vi.fn((key) => {
         const map = { user_role: 'student' }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
 
       expect(ctx.get('user_role')).not.toBe('mmc_admin')
@@ -355,9 +355,9 @@ describe('License Lifecycle Routes (Phase 3)', () => {
           user_id: 'user-456',
           '2fa_verified': true,
         }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
-      ;(transitionToDeleted as any).mockResolvedValue({
+      ;(transitionToDeleted as unknown).mockResolvedValue({
         success: true,
         license: mockLicense,
       })
@@ -366,7 +366,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
     })
 
     it('should return 403 for incorrect confirmation phrase', async () => {
-      ;(transitionToDeleted as any).mockResolvedValue({
+      ;(transitionToDeleted as unknown).mockResolvedValue({
         success: false,
         error_code: 'INVALID_CONFIRMATION',
         http_status: 403,
@@ -376,7 +376,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
     })
 
     it('should return 400 for expired confirmation', async () => {
-      ;(transitionToDeleted as any).mockResolvedValue({
+      ;(transitionToDeleted as unknown).mockResolvedValue({
         success: false,
         error_code: 'CONFIRMATION_EXPIRED',
         http_status: 410,
@@ -392,7 +392,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
           user_role: 'mmc_admin',
           '2fa_verified': false,
         }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
 
       expect(ctx.get('2fa_verified')).toBe(false)
@@ -434,7 +434,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
           },
           user_role: 'mmc_admin',
         }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
 
       // Should include snapshot metadata in response
@@ -452,7 +452,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
           },
           user_role: 'mmc_admin',
         }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
 
       // Should return 404
@@ -463,7 +463,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
       const ctx = createMockContext()
       ctx.get = vi.fn((key) => {
         const map = { user_role: 'student' }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
 
       expect(ctx.get('user_role')).not.toBe('mmc_admin')
@@ -492,7 +492,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
       ctx.req.param = vi.fn().mockReturnValue('lic-123')
       ctx.req.query = vi.fn().mockImplementation((key?: string) => {
         const map = { limit: '50', offset: '0' }
-        return key ? (map as any)[key] : map
+        return key ? (map as unknown)[key] : map
       }) as typeof ctx.req.query
       ctx.get = vi.fn((key) => {
         const map = {
@@ -517,7 +517,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
           },
           user_role: 'mmc_admin',
         }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
 
       expect(ctx.req.param('licenseId')).toBe('lic-123')
@@ -527,7 +527,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
       const ctx = createMockContext()
       ctx.req.query = vi.fn().mockImplementation((key?: string) => {
         const map = { limit: '100', offset: '50' }
-        return key ? (map as any)[key] : map
+        return key ? (map as unknown)[key] : map
       }) as typeof ctx.req.query
 
       // Limit should be capped at 1000
@@ -539,7 +539,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
       const ctx = createMockContext()
       ctx.get = vi.fn((key) => {
         const map = { user_role: 'student' }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
 
       expect(ctx.get('user_role')).not.toBe('mmc_admin')
@@ -560,7 +560,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
       const ctx = createMockContext()
       ctx.req.query = vi.fn().mockImplementation((key?: string) => {
         const map = { limit: '5000', offset: '0' }
-        return key ? (map as any)[key] : map
+        return key ? (map as unknown)[key] : map
       }) as typeof ctx.req.query
 
       // Should cap limit
@@ -578,14 +578,14 @@ describe('License Lifecycle Routes (Phase 3)', () => {
       const ctx = createMockContext()
       ctx.req.param = vi.fn().mockImplementation((key) => {
         const map = { licenseId: 'lic-123', jobId: 'job-123' }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
       ctx.get = vi.fn((key) => {
         const map = {
           correlation_id: 'corr-123',
           user_role: 'mmc_admin',
         }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
 
       // Should return job status
@@ -614,7 +614,7 @@ describe('License Lifecycle Routes (Phase 3)', () => {
       const ctx = createMockContext()
       ctx.get = vi.fn((key) => {
         const map = { user_role: 'student' }
-        return (map as any)[key]
+        return (map as unknown)[key]
       })
 
       expect(ctx.get('user_role')).not.toBe('mmc_admin')

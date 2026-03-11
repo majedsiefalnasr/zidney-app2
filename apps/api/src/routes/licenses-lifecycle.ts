@@ -47,6 +47,13 @@ function isAdmin(ctx: Context): boolean {
   return userRole === 'mmc_admin' || userRole === 'super_admin'
 }
 
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message
+  }
+  return String(error)
+}
+
 // ============================================================================
 // POST /api/v1/licenses/{licenseId}/soft-lock
 // Task T016: Transition ACTIVE → SOFT_LOCKED
@@ -59,7 +66,7 @@ licensesLifecycleRouter.post('/api/v1/licenses/:licenseId/soft-lock', async (ctx
   const masterDb = ctx.get('master_db')
   // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const licenseId = ctx.req.param('licenseId')
-  let body: any
+  let body: Record<string, unknown>
 
   try {
     // Auth check
@@ -153,13 +160,13 @@ licensesLifecycleRouter.post('/api/v1/licenses/:licenseId/soft-lock', async (ctx
       },
       { status: 200 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       {
         correlation_id: correlationId,
         action: 'soft_lock_error',
         license_id: licenseId,
-        error_message: error.message,
+        error_message: getErrorMessage(error),
       },
       'Soft-lock operation failed'
     )
@@ -179,7 +186,7 @@ licensesLifecycleRouter.post('/api/v1/licenses/:licenseId/renew', async (ctx: Co
   const masterDb = ctx.get('master_db')
   // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const licenseId = ctx.req.param('licenseId')
-  let body: any
+  let body: Record<string, unknown>
 
   try {
     // Auth check
@@ -270,13 +277,13 @@ licensesLifecycleRouter.post('/api/v1/licenses/:licenseId/renew', async (ctx: Co
       },
       { status: 200 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       {
         correlation_id: correlationId,
         action: 'renew_error',
         license_id: licenseId,
-        error_message: error.message,
+        error_message: getErrorMessage(error),
       },
       'Renew operation failed'
     )
@@ -349,13 +356,13 @@ licensesLifecycleRouter.post('/api/v1/licenses/:licenseId/archive', async (ctx: 
       },
       { status: 202 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       {
         correlation_id: correlationId,
         action: 'archive_error',
         license_id: licenseId,
-        error_message: error.message,
+        error_message: getErrorMessage(error),
       },
       'Archive operation failed'
     )
@@ -375,7 +382,7 @@ licensesLifecycleRouter.post('/api/v1/licenses/:licenseId/restore', async (ctx: 
   const masterDb = ctx.get('master_db')
   // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const licenseId = ctx.req.param('licenseId')
-  let body: any
+  let body: Record<string, unknown>
 
   try {
     // Auth check
@@ -468,13 +475,13 @@ licensesLifecycleRouter.post('/api/v1/licenses/:licenseId/restore', async (ctx: 
       },
       { status: 202 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       {
         correlation_id: correlationId,
         action: 'restore_error',
         license_id: licenseId,
-        error_message: error.message,
+        error_message: getErrorMessage(error),
       },
       'Restore operation failed'
     )
@@ -568,13 +575,13 @@ licensesLifecycleRouter.post(
         },
         { status: 200 }
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error(
         {
           correlation_id: correlationId,
           action: 'delete_initiate_error',
           license_id: licenseId,
-          error_message: error.message,
+          error_message: getErrorMessage(error),
         },
         'Delete initiation failed'
       )
@@ -595,7 +602,7 @@ licensesLifecycleRouter.post('/api/v1/licenses/:licenseId/delete/confirm', async
   const masterDb = ctx.get('master_db')
   // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const licenseId = ctx.req.param('licenseId')
-  let body: any
+  let body: Record<string, unknown>
 
   try {
     // Auth check - requires admin + 2FA re-verification
@@ -706,13 +713,13 @@ licensesLifecycleRouter.post('/api/v1/licenses/:licenseId/delete/confirm', async
       },
       { status: 202 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       {
         correlation_id: correlationId,
         action: 'delete_confirm_error',
         license_id: licenseId,
-        error_message: error.message,
+        error_message: getErrorMessage(error),
       },
       'Delete confirmation failed'
     )
@@ -830,13 +837,13 @@ licensesLifecycleRouter.get('/api/v1/licenses/:licenseId', async (ctx: Context) 
       },
       { status: 200 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       {
         correlation_id: correlationId,
         action: 'license_get_error',
         license_id: licenseId,
-        error_message: error.message,
+        error_message: getErrorMessage(error),
       },
       'License retrieval failed'
     )
@@ -934,13 +941,13 @@ licensesLifecycleRouter.get('/api/v1/licenses/:licenseId/audit-trail', async (ct
       },
       { status: 200 }
     )
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       {
         correlation_id: correlationId,
         action: 'audit_trail_error',
         license_id: licenseId,
-        error_message: error.message,
+        error_message: getErrorMessage(error),
       },
       'Audit trail retrieval failed'
     )
@@ -1021,14 +1028,14 @@ licensesLifecycleRouter.get(
         },
         { status: 200 }
       )
-    } catch (error: any) {
+    } catch (error: unknown) {
       logger.error(
         {
           correlation_id: correlationId,
           action: 'job_status_error',
           license_id: licenseId,
           job_id: jobId,
-          error_message: error.message,
+          error_message: getErrorMessage(error),
         },
         'Job status retrieval failed'
       )

@@ -48,6 +48,7 @@ import type { ITokenManager } from '../../../../../apps/backoffice/src/core/auth
 function makeTokenManager(token: string | null = null): ITokenManager {
   return {
     getToken: vi.fn(() => token),
+    hasToken: vi.fn(() => token !== null),
     setToken: vi.fn(),
     clearToken: vi.fn(),
   }

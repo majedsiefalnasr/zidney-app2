@@ -26,6 +26,7 @@ import {
   upsertTranslations,
 } from '@zidney/domain-core'
 import { createLogger } from '@zidney/logger'
+import type { Context } from 'hono'
 
 import { buildTranslationContext } from '../../../modules/translation/translation.context'
 import { BatchUpsertSchema } from '../../../modules/translation/translation.validation'
@@ -59,7 +60,7 @@ const entityValidator: EntityValidator = async (db, entityType, entityId) => {
  * Upsert up to 50 translation items atomically.
  * Returns HTTP 200 for both creates and updates (Q4).
  */
-export async function handlePostUpsert(c: any): Promise<Response> {
+export async function handlePostUpsert(c: Context): Promise<Response> {
   try {
     const { ctx, db } = await buildTranslationContext(c)
     const redis = c.get('tenant')?.redis
@@ -133,7 +134,7 @@ export async function handlePostUpsert(c: any): Promise<Response> {
 /**
  * Shared error handler for translation routes.
  */
-export function handleTranslationError(c: any, err: unknown): Response {
+export function handleTranslationError(c: Context, err: unknown): Response {
   if (err instanceof TranslationError) {
     const status = err.httpStatus as 404 | 409 | 422
     return c.json(

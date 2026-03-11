@@ -1,5 +1,5 @@
 /**
- * Unit tests for apps/mmc/src/core/router/guards/auth.guard.ts — redirect preservation
+ * Unit tests for apps/mmc/src/core/guards/auth.guard.ts — redirect preservation
  * Covers FR-SEC-09, FR-SEC-16, PF-03 (redirect loop guard).
  *
  * Stage: STAGE_UI_09_SECURITY_AND_TOKEN_HANDLING
@@ -7,7 +7,7 @@
  */
 import { describe, expect, it } from 'vitest'
 import type { RouteLocationNormalized } from 'vue-router'
-import { createAuthGuard } from '../../../../../../apps/mmc/src/core/router/guards/auth.guard'
+import { createAuthGuard } from '../../../../../../apps/mmc/src/core/guards/auth.guard'
 
 function makeRoute(overrides: Partial<RouteLocationNormalized> = {}): RouteLocationNormalized {
   return {
@@ -31,7 +31,8 @@ describe('createAuthGuard — redirect preservation (mmc)', () => {
   // ── Unauthenticated access to protected route ────────────────────────────
 
   it('unauthenticated access → redirect includes query.redirect === to.fullPath', () => {
-    const guard = createAuthGuard(() => false, {
+    const guard = createAuthGuard({
+      isAuthenticated: () => false,
       loginRouteName: LOGIN_ROUTE,
       dashboardRouteName: DASHBOARD_ROUTE,
     })
@@ -48,10 +49,11 @@ describe('createAuthGuard — redirect preservation (mmc)', () => {
   })
 
   it('preserveRedirect: false option → redirect has no query param', () => {
-    const guard = createAuthGuard(() => false, {
+    const guard = createAuthGuard({
+      isAuthenticated: () => false,
       loginRouteName: LOGIN_ROUTE,
       dashboardRouteName: DASHBOARD_ROUTE,
-      preserveRedirect: false,
+      isSafeRedirect: () => false,
     })
     const to = makeRoute({ fullPath: '/some-page', name: 'some-page' })
     const result = guard(to, makeRoute(), () => {})
@@ -60,14 +62,15 @@ describe('createAuthGuard — redirect preservation (mmc)', () => {
   })
 
   it('preserveRedirect omitted (default) → behaves identically to preserveRedirect: true', () => {
-    const guardDefault = createAuthGuard(() => false, {
+    const guardDefault = createAuthGuard({
+      isAuthenticated: () => false,
       loginRouteName: LOGIN_ROUTE,
       dashboardRouteName: DASHBOARD_ROUTE,
     })
-    const guardExplicit = createAuthGuard(() => false, {
+    const guardExplicit = createAuthGuard({
+      isAuthenticated: () => false,
       loginRouteName: LOGIN_ROUTE,
       dashboardRouteName: DASHBOARD_ROUTE,
-      preserveRedirect: true,
     })
     const to = makeRoute({ fullPath: '/any-page', name: 'any-page' })
     expect(guardDefault(to, makeRoute(), () => {})).toEqual(
@@ -78,7 +81,8 @@ describe('createAuthGuard — redirect preservation (mmc)', () => {
   // ── Authenticated access ─────────────────────────────────────────────────
 
   it('authenticated access to protected route → navigation passes through without redirect', () => {
-    const guard = createAuthGuard(() => true, {
+    const guard = createAuthGuard({
+      isAuthenticated: () => true,
       loginRouteName: LOGIN_ROUTE,
       dashboardRouteName: DASHBOARD_ROUTE,
     })
@@ -90,7 +94,8 @@ describe('createAuthGuard — redirect preservation (mmc)', () => {
   // ── PF-03: redirect loop guard ───────────────────────────────────────────
 
   it('accessing login route directly while unauthenticated → passes through without redirect loop', () => {
-    const guard = createAuthGuard(() => false, {
+    const guard = createAuthGuard({
+      isAuthenticated: () => false,
       loginRouteName: LOGIN_ROUTE,
       dashboardRouteName: DASHBOARD_ROUTE,
     })
@@ -107,7 +112,8 @@ describe('createAuthGuard — redirect preservation (mmc)', () => {
   // ── guestOnly route: authenticated user → redirect to dashboard ──────────
 
   it('authenticated user accessing guest-only route → redirect to dashboard', () => {
-    const guard = createAuthGuard(() => true, {
+    const guard = createAuthGuard({
+      isAuthenticated: () => true,
       loginRouteName: LOGIN_ROUTE,
       dashboardRouteName: DASHBOARD_ROUTE,
     })
@@ -123,7 +129,8 @@ describe('createAuthGuard — redirect preservation (mmc)', () => {
   // ── Public route: all users pass through ────────────────────────────────
 
   it('public route (no requiresAuth, no guestOnly) → navigation passes through', () => {
-    const guard = createAuthGuard(() => false, {
+    const guard = createAuthGuard({
+      isAuthenticated: () => false,
       loginRouteName: LOGIN_ROUTE,
       dashboardRouteName: DASHBOARD_ROUTE,
     })

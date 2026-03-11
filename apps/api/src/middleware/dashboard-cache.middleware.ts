@@ -46,7 +46,7 @@ import type { Context, Next } from 'hono'
  */
 function extractEndpointName(path: string): string {
   const match = path.match(/\/dashboard\/([a-z-]+)/)
-  return match ? match[1]! : 'unknown'
+  return match?.[1] ?? 'unknown'
 }
 
 /**
@@ -168,10 +168,10 @@ export async function dashboardCacheMiddleware(c: Context, next: Next): Promise<
 
   // Store response body for caching
   const originalJson = c.json.bind(c)
-  let responseData: any = null
+  let responseData: unknown = null
   let responseStatus: number = 200
 
-  c.json = function (data: any, initResponse?: number | ResponseInit) {
+  c.json = function (data: unknown, initResponse?: number | ResponseInit) {
     responseData = data
     if (typeof initResponse === 'number') {
       responseStatus = initResponse

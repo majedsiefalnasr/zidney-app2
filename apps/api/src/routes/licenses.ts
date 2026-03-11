@@ -27,6 +27,10 @@ import { requireContentType, validateRequest } from '../middleware/validate-requ
 import type { ProvisionEnqueueService } from '../services/provision-enqueue-service'
 import { CreateLicenseRequestSchema } from './licenses/validate-license-request'
 
+type ProvisionLogger = {
+  logError?: (message: string, error: Error) => void
+}
+
 /**
  * Create license routes
  *
@@ -38,7 +42,7 @@ import { CreateLicenseRequestSchema } from './licenses/validate-license-request'
 export function createLicenseRoutes(
   redis: Redis,
   enqueueService: ProvisionEnqueueService,
-  logger?: any
+  logger?: ProvisionLogger
 ): Hono {
   const router = new Hono()
 
@@ -155,7 +159,7 @@ export function mountLicenseRoutes(
   app: Hono,
   redis: Redis,
   enqueueService: ProvisionEnqueueService,
-  logger?: any,
+  logger?: ProvisionLogger,
   prefix: string = '/v1/mmc'
 ): void {
   const licensesRouter = createLicenseRoutes(redis, enqueueService, logger)

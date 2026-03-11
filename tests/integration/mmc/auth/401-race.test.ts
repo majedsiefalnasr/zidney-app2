@@ -19,17 +19,17 @@ vi.mock('@zidney/logger', () => ({
 
 describe('401 storm guard (mmc) — FR-SEC-08', () => {
   let onSessionExpiredCount: number
-  let onSessionExpired: (() => Promise<void>) & ReturnType<typeof vi.fn>
-  let getIsAuthenticated: (() => boolean) & ReturnType<typeof vi.fn>
+  let onSessionExpired: ReturnType<typeof vi.fn<[], Promise<void>>>
+  let getIsAuthenticated: ReturnType<typeof vi.fn<[], boolean>>
 
   beforeEach(() => {
     onSessionExpiredCount = 0
-    onSessionExpired = vi.fn(async () => {
+    onSessionExpired = vi.fn<[], Promise<void>>(async () => {
       onSessionExpiredCount++
       // Simulate async work (e.g., router navigation + store update)
       await new Promise<void>((resolve) => setTimeout(resolve, 10))
     })
-    getIsAuthenticated = vi.fn(() => true) as any
+    getIsAuthenticated = vi.fn<[], boolean>(() => true)
   })
 
   it('fires onSessionExpired exactly once when 3 concurrent 401 responses arrive', async () => {

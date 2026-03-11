@@ -7,13 +7,33 @@
 import { v4 as uuidv4 } from 'uuid'
 import { recordTenantProvisioned } from './audit.service'
 
+type JsonObject = Record<string, unknown>
+
+type QueryBuilder = {
+  select: (...fields: string[]) => QueryBuilder
+  from: (table: string) => QueryBuilder
+  where: (field: string, op: string, value: string) => QueryBuilder
+  first: () => Promise<Record<string, unknown> | null>
+  update: (values: Record<string, unknown>) => Promise<unknown>
+}
+
+type TransactionQuery = {
+  insert: (table: string) => {
+    values: (values: Record<string, unknown>) => Promise<unknown>
+  }
+} & QueryBuilder
+
+type ProvisioningDb = QueryBuilder & {
+  transaction: (fn: (trx: TransactionQuery) => Promise<void>) => Promise<void>
+}
+
 export interface TenantConfig {
   name: string
   slug: string
   product_version: string
   schema_version: number
   plan?: string
-  metadata?: Record<string, any>
+  metadata?: JsonObject
 }
 
 export interface ProvisionedTenant {
@@ -38,14 +58,14 @@ export interface ProvisionedTenant {
  * @throws Error if provisioning fails at any step
  */
 export async function createTenantWorkspace(
-  db: any,
+  db: ProvisioningDb,
   tenant_config: TenantConfig,
   actor_id?: string,
-  metadata?: Record<string, any>
+  metadata?: JsonObject
 ): Promise<ProvisionedTenant> {
   const workspace_id = uuidv4()
 
-  await db.transaction(async (trx: any) => {
+  await db.transaction(async (trx: TransactionQuery) => {
     // Step 1: Create workspace record
     const now = new Date()
     await trx.insert('workspaces').values({
@@ -60,7 +80,7 @@ export async function createTenantWorkspace(
     })
 
     // Step 2: Record provisioning event in audit trail (within same transaction)
-    const auditMetadata: Record<string, any> = { timestamp: now.toISOString() }
+    const auditMetadata: JsonObject = { timestamp: now.toISOString() }
     if (metadata) {
       Object.assign(auditMetadata, metadata)
     }
@@ -92,7 +112,7 @@ export async function createTenantWorkspace(
  * @returns Tenant configuration or null if not found
  */
 export async function getTenantByWorkspaceId(
-  db: any,
+  db: ProvisioningDb,
   workspace_id: string
 ): Promise<Partial<TenantConfig> | null> {
   const result = await db
@@ -112,7 +132,7 @@ export async function getTenantByWorkspaceId(
  * @returns Tenant configuration with workspace_id or null if not found
  */
 export async function getTenantBySlug(
-  db: any,
+  db: ProvisioningDb,
   slug: string
 ): Promise<(Partial<TenantConfig> & { workspace_id: string }) | null> {
   const result = await db
@@ -131,7 +151,7 @@ export async function getTenantBySlug(
  * @param slug - Tenant slug to check
  * @returns true if slug is taken, false if available
  */
-export async function isSlugTaken(db: any, slug: string): Promise<boolean> {
+export async function isSlugTaken(db: ProvisioningDb, slug: string): Promise<boolean> {
   const result = await db.select('id').from('workspaces').where('slug', '=', slug).first()
 
   return !!result

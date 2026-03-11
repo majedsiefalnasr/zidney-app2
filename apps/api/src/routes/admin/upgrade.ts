@@ -14,7 +14,7 @@ const logger = createLogger('upgrade-routes')
 
 export interface AppDependencies {
   masterDb: Pool
-  jobQueue: any // Job queue service
+  jobQueue: unknown // Job queue service
 }
 
 /**
@@ -136,7 +136,7 @@ async function handlePostUpgrade(c: Context, deps: AppDependencies) {
       },
       202
     )
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error('Failed to queue upgrade', {
       correlation_id: correlationId,
       workspace_id: workspaceId,
@@ -204,7 +204,7 @@ async function handleGetUpgrade(c: Context, deps: AppDependencies) {
       },
       200
     )
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error('Failed to retrieve upgrade status', {
       workspace_id: workspaceId,
       upgrade_id: upgradeId,
@@ -334,7 +334,7 @@ async function handlePostRollback(c: Context, deps: AppDependencies) {
       },
       202
     )
-  } catch (err: any) {
+  } catch (err: unknown) {
     logger.error('Failed to queue rollback', {
       workspace_id: workspaceId,
       upgrade_id: upgradeId,

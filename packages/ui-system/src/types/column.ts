@@ -7,20 +7,20 @@ import type { VNode } from 'vue'
 import type { Accessor } from './common'
 
 // Generic contexts for type-safe rendering
-export interface HeaderContext<TRow = any> {
+export interface HeaderContext<TRow = unknown> {
   column: ColumnDef<TRow>
   table: DataTableInstance<TRow>
 }
 
-export interface CellContext<TRow = any> {
+export interface CellContext<TRow = unknown> {
   row: TRow
   column: ColumnDef<TRow>
-  value: any
+  value: unknown
   table: DataTableInstance<TRow>
 }
 
 // Base column definition
-export interface ColumnDef<TRow = any> {
+export interface ColumnDef<TRow = unknown> {
   id: string
   header?: string | ((context: HeaderContext<TRow>) => VNode | string)
   accessor?: Accessor<TRow>
@@ -31,24 +31,24 @@ export interface ColumnDef<TRow = any> {
   size?: number
   minSize?: number
   maxSize?: number
-  meta?: Record<string, any>
+  meta?: Record<string, unknown>
 }
 
 // Discriminated union: Primitive columns may omit accessor (inferred from id)
-export type PrimitiveColumnDef<TRow = any> = Omit<ColumnDef<TRow>, 'accessor'> & {
+export type PrimitiveColumnDef<TRow = unknown> = Omit<ColumnDef<TRow>, 'accessor'> & {
   accessor?: Accessor<TRow>
 }
 
 // Discriminated union: Computed columns require explicit accessor
-export type ComputedColumnDef<TRow = any> = ColumnDef<TRow> & {
+export type ComputedColumnDef<TRow = unknown> = ColumnDef<TRow> & {
   accessor: Accessor<TRow>
 }
 
 // Union for use in component props
-export type AnyColumnDef<TRow = any> = PrimitiveColumnDef<TRow> | ComputedColumnDef<TRow>
+export type AnyColumnDef<TRow = unknown> = PrimitiveColumnDef<TRow> | ComputedColumnDef<TRow>
 
 // Column group for multi-level headers
-export interface ColumnGroup<TRow = any> {
+export interface ColumnGroup<TRow = unknown> {
   id: string
   header: string
   columns: AnyColumnDef<TRow>[]
@@ -63,7 +63,7 @@ export interface ColumnState {
 }
 
 // DataTable instance for context
-export interface DataTableInstance<TRow = any> {
+export interface DataTableInstance<TRow = unknown> {
   rows: TRow[]
   columns: AnyColumnDef<TRow>[]
   sortState?: { column: string; direction: 'asc' | 'desc' }
@@ -91,8 +91,8 @@ export interface PinnedColumns {
 }
 
 // Accessor utility types
-export type AccessorValue<TRow, TAcc = Accessor<TRow>> = TAcc extends (row: any) => infer V
+export type AccessorValue<TRow, TAcc = Accessor<TRow>> = TAcc extends (row: TRow) => infer V
   ? V
   : TAcc extends string
-    ? any
+    ? unknown
     : never

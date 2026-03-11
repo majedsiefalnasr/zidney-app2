@@ -18,7 +18,7 @@ const emit = defineEmits<{
   'update:modelValue': AcceptableValue
 }>()
 
-const modelValue = useVModel(props, 'modelValue', emit, {
+const model = useVModel(props, 'modelValue', emit, {
   passive: true,
   defaultValue: '',
 })
@@ -33,7 +33,7 @@ const delegatedProps = reactiveOmit(props, 'class')
   >
     <select
       v-bind="{ ...$attrs, ...delegatedProps }"
-      v-model="modelValue"
+      v-model="model"
       data-slot="native-select"
       :class="
         cn(

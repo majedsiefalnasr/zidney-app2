@@ -45,7 +45,7 @@ import type { Context, Next } from 'hono'
  * 4. If mismatch → 401 Unauthorized (token invalidated)
  */
 export function validateTokenVersionMiddleware(_scope?: string) {
-  return async (c: Context, next: Next): Promise<Response | void> => {
+  return async (c: Context, next: Next): Promise<Response | undefined> => {
     const correlationId = c.get('correlationId') || 'unknown'
 
     try {
@@ -58,7 +58,7 @@ export function validateTokenVersionMiddleware(_scope?: string) {
 
       const authPayload = c.get('authPayload')
       if (!authPayload) {
-        c.status(401 as any)
+        c.status(401)
         return c.json({
           success: false,
           data: null,
@@ -74,7 +74,7 @@ export function validateTokenVersionMiddleware(_scope?: string) {
       const tenantDb = c.get('tenantDb')
 
       if (!tenantDb) {
-        c.status(500 as any)
+        c.status(500)
         return c.json({
           success: false,
           data: null,
@@ -93,7 +93,7 @@ export function validateTokenVersionMiddleware(_scope?: string) {
 
       if (result.rows.length === 0) {
         // User not found or inactive
-        c.status(401 as any)
+        c.status(401)
         return c.json({
           success: false,
           data: null,
@@ -121,7 +121,7 @@ export function validateTokenVersionMiddleware(_scope?: string) {
           c.req.header('X-Forwarded-For') || c.req.header('X-Real-IP')
         )
 
-        c.status(401 as any)
+        c.status(401)
         return c.json({
           success: false,
           data: null,
@@ -137,7 +137,7 @@ export function validateTokenVersionMiddleware(_scope?: string) {
       return
     } catch (error) {
       logger.error('Token version validation error:', { error })
-      c.status(500 as any)
+      c.status(500)
       return c.json({
         success: false,
         data: null,

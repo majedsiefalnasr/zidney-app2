@@ -23,9 +23,7 @@
 
 import { executeTransition, WorkflowError } from '@zidney/domain-core'
 import { createLogger } from '@zidney/logger'
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type HonoContext = any
+import type { Context } from 'hono'
 
 import { buildWorkflowContext } from '../../../modules/workflow/workflow.context'
 import { TransitionRequestSchema } from '../../../modules/workflow/workflow.validation'
@@ -38,7 +36,7 @@ const logger = createLogger('workflow-routes')
  * Validates request, builds WorkflowContext, calls executeTransition,
  * returns standard success or error envelope.
  */
-export async function handlePostTransition(c: HonoContext): Promise<Response> {
+export async function handlePostTransition(c: Context): Promise<Response> {
   const entityType = c.req.param('entityType') as string
   const entityId = c.req.param('entityId') as string
   const db = c.get('tenant')?.pool

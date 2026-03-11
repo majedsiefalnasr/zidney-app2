@@ -18,6 +18,7 @@ import {
   getHttpStatus,
 } from '@zidney/types/errors/ErrorCodes'
 import type { Context } from 'hono'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 const logger = createLogger('api')
 
@@ -88,7 +89,7 @@ export function handleError(c: Context, error: Error | AppError): Response {
     },
   }
 
-  return c.json(response, statusCode as any)
+  return c.json(response, statusCode as ContentfulStatusCode)
 }
 
 /**

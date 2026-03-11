@@ -12,6 +12,7 @@ import type {
   AILayerModel,
   AIModuleMap,
   AIRuntimeMap,
+  LayerType,
 } from '../../packages/types/src/ai-context'
 import {
   validateArchitectureBrain,
@@ -53,7 +54,7 @@ describe('Schema Validation', () => {
         modules: {},
       }
 
-      const errors = validateModuleMap(invalidMap)
+      const errors = validateModuleMap(invalidMap as unknown as AIModuleMap)
       expect(errors.length).toBeGreaterThan(0)
       expect(errors.some((e) => e.path === '$.schema_version')).toBeTruthy()
     })
@@ -72,7 +73,7 @@ describe('Schema Validation', () => {
         },
       }
 
-      const errors = validateModuleMap(invalidMap)
+      const errors = validateModuleMap(invalidMap as unknown as AIModuleMap)
       expect(errors.length).toBeGreaterThan(0)
     })
   })
@@ -113,7 +114,7 @@ describe('Schema Validation', () => {
           module_boundaries_hash: 'abc123',
         },
         layers: validLayers.map((name) => ({
-          name: name as string,
+          name: name as LayerType,
           description: `${name} layer`,
         })),
         rules: {},

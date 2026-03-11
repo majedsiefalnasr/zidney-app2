@@ -11,6 +11,7 @@
  */
 
 import type { Context } from 'hono'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 /**
  * Success API response
@@ -106,21 +107,21 @@ export function listResponse<T>(
  * Send success response from Hono context
  */
 export function sendSuccess<T>(c: Context, data: T, status: number = 200): Response {
-  return c.json(successResponse(data), status as any)
+  return c.json(successResponse(data), status as ContentfulStatusCode)
 }
 
 /**
  * Send created response (201)
  */
 export function sendCreated<T>(c: Context, data: T): Response {
-  return c.json(successResponse(data), 201 as any)
+  return c.json(successResponse(data), 201)
 }
 
 /**
  * Send no content response (204)
  */
 export function sendNoContent(c: Context): Response {
-  return c.text('', 204 as any)
+  return c.text('', 204)
 }
 
 /**
@@ -133,7 +134,7 @@ export function sendError(
   status: number = 400,
   details?: Record<string, unknown>
 ): Response {
-  return c.json(errorResponse(code, message, details), status as any)
+  return c.json(errorResponse(code, message, details), status as ContentfulStatusCode)
 }
 
 /**
@@ -151,7 +152,7 @@ export function sendList<T>(
     success: true,
     data: listResponse(items, total, limit, offset),
   }
-  return c.json(response, status as any)
+  return c.json(response, status as ContentfulStatusCode)
 }
 
 /**

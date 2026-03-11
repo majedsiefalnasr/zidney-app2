@@ -66,16 +66,15 @@ function createTestApp(options: { rows?: any[]; dbError?: boolean } = {}) {
         return { rows: [], rowCount: 0 }
       }),
     }
-
-    c.set('tenant', {
+    ;(c as any).set('tenant', {
       id: 'ws-001',
       slug: 'test-workspace',
       schema_version: 2,
       pool: mockPool,
       redis: null,
     })
-    c.set('staff_user', { user_id: 'user-001', role: 'institution_admin' })
-    c.set('correlationId', 'corr-001')
+    ;(c as any).set('staff_user', { user_id: 'user-001', role: 'institution_admin' })
+    ;(c as any).set('correlationId', 'corr-001')
     await next()
   })
 

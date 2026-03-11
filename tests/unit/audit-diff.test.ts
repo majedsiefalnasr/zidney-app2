@@ -50,7 +50,7 @@ describe('computeSettingsDiff', () => {
     )
 
     expect(diff).toHaveLength(1)
-    expect(diff[0]).toEqual({
+    expect(diff[0]!).toEqual({
       field: 'logo_url',
       old_value: null,
       new_value: 'https://cdn.example.com/logo.png',
@@ -65,7 +65,7 @@ describe('computeSettingsDiff', () => {
     )
 
     expect(diff).toHaveLength(1)
-    expect(diff[0]).toEqual({
+    expect(diff[0]!).toEqual({
       field: 'logo_url',
       old_value: 'https://cdn.example.com/logo.png',
       new_value: null,
@@ -112,7 +112,7 @@ describe('computeSettingsDiff', () => {
     )
 
     expect(diff).toHaveLength(1)
-    expect(diff[0]).toEqual({
+    expect(diff[0]!).toEqual({
       field: 'encrypted_api_key',
       old_value: null,
       new_value: '[REDACTED]',
@@ -128,7 +128,7 @@ describe('computeSettingsDiff', () => {
     )
 
     expect(diff).toHaveLength(1)
-    expect(diff[0]).toEqual({
+    expect(diff[0]!).toEqual({
       field: 'encrypted_api_key',
       old_value: '[REDACTED]',
       new_value: null,
@@ -143,9 +143,9 @@ describe('computeSettingsDiff', () => {
     )
 
     expect(diff).toHaveLength(1)
-    expect(diff[0].field).toBe('supported_languages')
-    expect(diff[0].old_value).toEqual(['ar', 'en'])
-    expect(diff[0].new_value).toEqual(['ar', 'en', 'fr'])
+    expect(diff[0]!.field).toBe('supported_languages')
+    expect(diff[0]!.old_value).toEqual(['ar', 'en'])
+    expect(diff[0]!.new_value).toEqual(['ar', 'en', 'fr'])
   })
 
   it('detects nested object changes (seo_metadata)', () => {
@@ -160,7 +160,7 @@ describe('computeSettingsDiff', () => {
     )
 
     expect(diff).toHaveLength(1)
-    expect(diff[0].field).toBe('seo_metadata')
+    expect(diff[0]!.field).toBe('seo_metadata')
   })
 
   it('returns empty diff when old === new', () => {
@@ -188,7 +188,7 @@ describe('computeSettingsDiff', () => {
     )
 
     expect(diff).toHaveLength(1)
-    expect(diff[0]).toEqual({
+    expect(diff[0]!).toEqual({
       field: 'encrypted_api_key',
       old_value: '[REDACTED]',
       new_value: '[REDACTED]',
@@ -205,7 +205,7 @@ describe('computeSettingsDiff', () => {
     )
 
     expect(diff).toHaveLength(1)
-    expect(diff[0]).toEqual({
+    expect(diff[0]!).toEqual({
       field: 'session_timeout_minutes',
       old_value: null,
       new_value: 45,
@@ -220,7 +220,7 @@ describe('computeSettingsDiff', () => {
     )
 
     expect(diff).toHaveLength(1)
-    expect(diff[0]).toEqual({
+    expect(diff[0]!).toEqual({
       field: 'session_timeout_minutes',
       old_value: 45,
       new_value: null,

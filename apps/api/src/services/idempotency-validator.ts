@@ -26,6 +26,22 @@
 import type { Logger } from '@zidney/logger'
 import type { Pool, PoolClient } from 'pg'
 
+type RedisLike = {
+  get: (key: string) => Promise<string | null>
+  setEx: (key: string, ttlSeconds: number, value: string) => Promise<unknown>
+}
+
+type AttemptStateError = Error & {
+  code: 'ATTEMPT_NOT_FOUND' | 'ATTEMPT_INVALID_STATE'
+  statusCode: 404 | 409
+}
+
+interface CachedResponseData {
+  data?: {
+    job_id?: string
+  }
+}
+
 /**
  * Idempotency check result
  */
@@ -50,7 +66,7 @@ export interface IdempotencyCheckResult {
  */
 export async function validateSubmissionIdempotency(
   db: PoolClient | Pool,
-  redis: any | null,
+  redis: RedisLike | null,
   workspaceId: string,
   attemptId: string,
   idempotencyKey: string,
@@ -69,7 +85,10 @@ export async function validateSubmissionIdempotency(
 
     if (cachedResponse) {
       try {
-        const cached = JSON.parse(cachedResponse)
+        const cached = JSON.parse(cachedResponse) as {
+          job_id?: string
+          submission_sequence?: number
+        }
         logger.info('Idempotency cache hit (Redis)', {
           correlation_id: correlationId,
           workspace_id: workspaceId,
@@ -110,7 +129,12 @@ export async function validateSubmissionIdempotency(
   )
 
   if (dbResult.rows.length > 0) {
-    const cachedRecord = dbResult.rows[0]
+    const cachedRecord = dbResult.rows[0] as {
+      id: string
+      submission_sequence: number
+      response_status: number
+      response_body?: CachedResponseData
+    }
 
     logger.info('Idempotency cache hit (PostgreSQL)', {
       correlation_id: correlationId,
@@ -162,13 +186,13 @@ export async function validateSubmissionIdempotency(
   )
 
   if (attemptResult.rows.length === 0) {
-    const err = new Error('Attempt not found')
-    ;(err as any).code = 'ATTEMPT_NOT_FOUND'
-    ;(err as any).statusCode = 404
+    const err = new Error('Attempt not found') as AttemptStateError
+    err.code = 'ATTEMPT_NOT_FOUND'
+    err.statusCode = 404
     throw err
   }
 
-  const attempt = attemptResult.rows[0]
+  const attempt = attemptResult.rows[0] as { id: string; status: string }
 
   // Check if attempt is in valid state for new submission
   if (
@@ -176,9 +200,9 @@ export async function validateSubmissionIdempotency(
     attempt.status === 'EXPIRED' ||
     attempt.status === 'ABORTED'
   ) {
-    const err = new Error(`Cannot submit; attempt is ${attempt.status}`)
-    ;(err as any).code = 'ATTEMPT_INVALID_STATE'
-    ;(err as any).statusCode = 409
+    const err = new Error(`Cannot submit; attempt is ${attempt.status}`) as AttemptStateError
+    err.code = 'ATTEMPT_INVALID_STATE'
+    err.statusCode = 409
     throw err
   }
 
@@ -217,13 +241,13 @@ export async function validateSubmissionIdempotency(
  */
 export async function storeSubmissionIdempotencyKey(
   db: PoolClient | Pool,
-  redis: any | null,
+  redis: RedisLike | null,
   workspaceId: string,
   attemptId: string,
   idempotencyKey: string,
   submissionSequence: number,
   responseStatus: number,
-  responseBody: Record<string, any>,
+  responseBody: Record<string, unknown>,
   logger: Logger,
   correlationId: string
 ): Promise<void> {

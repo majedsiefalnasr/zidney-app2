@@ -9,14 +9,14 @@ import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createErrorInterceptor } from '../../../../../../apps/mmc/src/core/api/interceptors/error.interceptor'
 
 describe('createErrorInterceptor (mmc)', () => {
-  let getIsAuthenticated: ReturnType<typeof vi.fn>
-  let onSessionExpired: ReturnType<typeof vi.fn>
-  let onLicenseError: ReturnType<typeof vi.fn>
+  let getIsAuthenticated: ReturnType<typeof vi.fn<[], boolean>>
+  let onSessionExpired: ReturnType<typeof vi.fn<[], Promise<void>>>
+  let onLicenseError: ReturnType<typeof vi.fn<[number], void>>
 
   beforeEach(() => {
-    getIsAuthenticated = vi.fn().mockReturnValue(false) as unknown as () => boolean
-    onSessionExpired = vi.fn().mockResolvedValue(undefined) as unknown as () => Promise<void>
-    onLicenseError = vi.fn()
+    getIsAuthenticated = vi.fn<[], boolean>().mockReturnValue(false)
+    onSessionExpired = vi.fn<[], Promise<void>>().mockResolvedValue(undefined)
+    onLicenseError = vi.fn<[number], void>()
   })
 
   function makeInterceptor() {

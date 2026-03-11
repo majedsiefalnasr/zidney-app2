@@ -35,7 +35,14 @@ export interface ValidationOptions {
  * Create validation middleware for Zod schema
  */
 export function validateRequest<_T>(
-  schema: any,
+  schema: {
+    safeParse: (data: unknown) =>
+      | { success: true; data: _T }
+      | {
+          success: false
+          error: { issues: Array<{ path: Array<string | number>; message: string }> }
+        }
+  },
   options: ValidationOptions = {}
 ): (c: Context, next: Next) => Promise<Response | undefined> {
   return async (c: Context, next: Next) => {
@@ -101,7 +108,9 @@ export function createCustomValidator<T>(
           ProvisioningErrorCode.INVALID_WORKSPACE_SLUG
         const errorDetails = getErrorDetails(errorCode)
 
-        c.status(errorDetails.httpStatus as any)
+        c.status(
+          errorDetails.httpStatus as 400 | 401 | 403 | 404 | 409 | 422 | 423 | 426 | 429 | 500 | 503
+        )
         return c.json(
           createErrorResponse(
             errorCode,

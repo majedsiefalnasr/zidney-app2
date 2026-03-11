@@ -21,6 +21,39 @@ import { LicenseStatus as LicenseStatusEnum } from './types'
 
 const CACHE_TTL_SECONDS = 300
 
+interface LicenseRow {
+  id: string
+  product_id: string
+  workspace_id: string
+  workspace_slug: string
+  student_limit: number
+  staff_limit: number
+  status: LicenseStatus
+  soft_lock_until: string | Date | null
+  archived_at: string | Date | null
+  deleted_at: string | Date | null
+  expected_schema_version: string
+  expected_product_version: string
+  created_at: string | Date
+  updated_at: string | Date
+}
+
+interface MasterDbLike {
+  query(sql: string, params?: unknown[]): Promise<{ rows: LicenseRow[] }>
+}
+
+interface RedisLike {
+  get(key: string): Promise<string | null>
+  setex(key: string, seconds: number, value: string): Promise<unknown>
+  del(key: string): Promise<unknown>
+}
+
+interface LoggerLike {
+  debug(message: string, meta?: Record<string, unknown>): void
+  warn(message: string, meta?: Record<string, unknown>): void
+  error(message: string, meta?: Record<string, unknown>): void
+}
+
 /**
  * LicenseResolver class
  *
@@ -33,11 +66,11 @@ const CACHE_TTL_SECONDS = 300
  * All queries parameterized (no SQL injection risk).
  */
 export class LicenseResolver {
-  private masterDb: any // Database interface
-  private redis: any // Redis interface
-  private logger: any // Logger interface
+  private masterDb: MasterDbLike
+  private redis: RedisLike
+  private logger: LoggerLike
 
-  constructor(masterDb: any, redis: any, logger: any) {
+  constructor(masterDb: MasterDbLike, redis: RedisLike, logger: LoggerLike) {
     this.masterDb = masterDb
     this.redis = redis
     this.logger = logger
@@ -296,10 +329,13 @@ export class LicenseResolver {
     const match = version.match(/^(\d+)\.(\d+)\.(\d+)/)
     if (!match) return null
 
+    const [, majorStr, minorStr, patchStr] = match
+    if (!majorStr || !minorStr || !patchStr) return null
+
     return {
-      major: parseInt(match[1]!, 10),
-      minor: parseInt(match[2]!, 10),
-      patch: parseInt(match[3]!, 10),
+      major: parseInt(majorStr, 10),
+      minor: parseInt(minorStr, 10),
+      patch: parseInt(patchStr, 10),
     }
   }
 
@@ -326,7 +362,7 @@ export class LicenseResolver {
    * @param row - Database row
    * @returns License object with proper types
    */
-  private mapRowToLicense(row: any): License {
+  private mapRowToLicense(row: LicenseRow): License {
     return {
       id: row.id,
       product_id: row.product_id,

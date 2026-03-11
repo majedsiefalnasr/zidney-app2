@@ -56,12 +56,12 @@ export interface QuestionData {
   text: string
   type: string
   options?: string[]
-  correct_answer: any
+  correct_answer: unknown
   points: number
   difficulty?: string
   hints?: string[]
   explanation?: string
-  metadata?: Record<string, any>
+  metadata?: Record<string, unknown>
   created_at: Date
   updated_at: Date
 }
@@ -309,7 +309,7 @@ export async function validateUserEligibility(
  * @param exam - Exam config
  * @returns Grading configuration object
  */
-export function getExamGradingConfig(exam: ExamConfig): Record<string, any> {
+export function getExamGradingConfig(exam: ExamConfig): Record<string, unknown> {
   return {
     pass_score_percentage: exam.pass_score_percentage,
     total_points: exam.total_points,
@@ -382,7 +382,7 @@ export async function canUserTakeExam(
  *
  * @private
  */
-function parseExamRow(row: any): ExamConfig {
+function parseExamRow(row: unknown): ExamConfig {
   return {
     id: row.id,
     workspace_id: row.workspace_id,
@@ -413,7 +413,7 @@ function parseExamRow(row: any): ExamConfig {
  *
  * @private
  */
-function parseQuestionRow(row: any): QuestionData {
+function parseQuestionRow(row: unknown): QuestionData {
   return {
     id: row.id,
     exam_id: row.exam_id,

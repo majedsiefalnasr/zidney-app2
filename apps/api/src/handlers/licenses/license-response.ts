@@ -7,6 +7,7 @@
  */
 
 import type { LicenseStatus } from '@zidney/types/licenses/license-state'
+import type { Context } from 'hono'
 
 /**
  * License Creation Response (200 OK)
@@ -188,7 +189,7 @@ export function createErrorResponse(
 /**
  * Get validated data from context body
  */
-export function getValidatedData<T>(c: any): T {
+export function getValidatedData<T>(c: Pick<Context, 'get'>): T {
   return c.get('validatedBody') as T
 }
 

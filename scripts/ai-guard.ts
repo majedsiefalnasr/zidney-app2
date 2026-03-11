@@ -303,7 +303,10 @@ export function extractImports(filePath: string): string[] {
     let match
 
     while ((match = importRegex.exec(content))) {
-      matches.push(match[1])
+      const captured = match[1]
+      if (captured) {
+        matches.push(captured)
+      }
     }
 
     return matches
@@ -318,11 +321,11 @@ export function detectModule(importPath: string): string | null {
   }
 
   if (importPath.startsWith('packages/')) {
-    return importPath.split('/')[1]
+    return importPath.split('/')[1] ?? null
   }
 
   if (importPath.startsWith('apps/')) {
-    return importPath.split('/')[1]
+    return importPath.split('/')[1] ?? null
   }
 
   return null
@@ -330,11 +333,11 @@ export function detectModule(importPath: string): string | null {
 
 export function detectFileModule(file: string): string | null {
   if (file.startsWith('packages/')) {
-    return file.split('/')[1]
+    return file.split('/')[1] ?? null
   }
 
   if (file.startsWith('apps/')) {
-    return file.split('/')[1]
+    return file.split('/')[1] ?? null
   }
 
   return null
@@ -653,8 +656,9 @@ export function parseArgs(): GuardConfig {
 
   let explicitModules: string[] | null = null
   const modulesIdx = args.indexOf('--modules')
-  if (modulesIdx !== -1 && args[modulesIdx + 1]) {
-    explicitModules = args[modulesIdx + 1]
+  const modulesArg = modulesIdx !== -1 ? args[modulesIdx + 1] : undefined
+  if (modulesArg) {
+    explicitModules = modulesArg
       .split(',')
       .map((m) => m.trim())
       .filter(Boolean)

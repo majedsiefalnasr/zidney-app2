@@ -18,6 +18,35 @@ import { sql } from 'drizzle-orm'
 import type { Logger } from 'pino'
 import { v4 as uuidv4 } from 'uuid'
 
+type SqlExecutor = {
+  execute: <T = Record<string, unknown>>(query: unknown) => Promise<{ rows: T[] }>
+}
+
+interface AffiliateRow {
+  id: string
+  promo_code: string
+  discount_percentage: string
+  commission_percentage: string
+  status: string
+  start_date: string | Date
+  end_date: string | Date | null
+  usage_count: number
+  usage_limit_total: number | null
+  usage_limit_per_client: number | null
+}
+
+interface CountRow {
+  count: string
+}
+
+interface DiscountRow {
+  discount: string
+}
+
+interface CommissionRow {
+  commission: string
+}
+
 interface AffiliateDiscount {
   affiliateId: string
   promoCode: string
@@ -33,6 +62,10 @@ interface AffiliateValidationError {
   code: AffiliateErrorCode
   message: string
   httpStatus: number
+}
+
+function isAffiliateValidationError(error: unknown): error is AffiliateValidationError {
+  return Boolean(error) && typeof error === 'object' && 'code' in error && 'httpStatus' in error
 }
 
 export class AffiliateService {
@@ -64,7 +97,7 @@ export class AffiliateService {
     clientId: string,
     baseAmount: string,
     licenseId: string,
-    tx: any,
+    tx: SqlExecutor,
     correlationId: string
   ): Promise<AffiliateDiscount> {
     try {
@@ -105,7 +138,7 @@ export class AffiliateService {
         } as AffiliateValidationError
       }
 
-      const affiliate = affiliateResult.rows[0]
+      const affiliate = affiliateResult.rows[0] as AffiliateRow
       const affiliateId = affiliate.id
 
       // 2. VALIDATE STATUS
@@ -276,7 +309,7 @@ export class AffiliateService {
         finalAmount,
       }
     } catch (error) {
-      if ((error as any).code && (error as any).httpStatus) {
+      if (isAffiliateValidationError(error)) {
         throw error
       }
       this.logger.error(
@@ -300,11 +333,11 @@ export class AffiliateService {
    * @private
    */
   private async countPerClientUsage(
-    tx: any,
+    tx: SqlExecutor,
     affiliateId: string,
     clientId: string
   ): Promise<number> {
-    const result = await tx.execute(
+    const result = await tx.execute<CountRow>(
       sql`
         SELECT COUNT(*) as count
         FROM affiliate_usages
@@ -320,11 +353,11 @@ export class AffiliateService {
    * @private
    */
   private async calculateDiscount(
-    tx: any,
+    tx: SqlExecutor,
     baseAmount: string,
     discountPercentage: string
   ): Promise<string> {
-    const result = await tx.execute(
+    const result = await tx.execute<DiscountRow>(
       sql`
         SELECT ROUND(${baseAmount}::NUMERIC * ${discountPercentage}::NUMERIC / 100, 2) as discount
       `
@@ -337,11 +370,11 @@ export class AffiliateService {
    * @private
    */
   private async calculateCommission(
-    tx: any,
+    tx: SqlExecutor,
     baseAmount: string,
     commissionPercentage: string
   ): Promise<string> {
-    const result = await tx.execute(
+    const result = await tx.execute<CommissionRow>(
       sql`
         SELECT ROUND(${baseAmount}::NUMERIC * ${commissionPercentage}::NUMERIC / 100, 2) as commission
       `
@@ -357,7 +390,7 @@ export class AffiliateService {
     affiliateId: string,
     page: number = 1,
     limit: number = 20,
-    tx: any
+    tx: SqlExecutor
   ) {
     const offset = (page - 1) * limit
 

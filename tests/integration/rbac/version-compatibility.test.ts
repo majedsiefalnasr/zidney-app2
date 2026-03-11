@@ -45,8 +45,8 @@ function createVersionTestApp(tenantSchemaVersion: string) {
     const tenantVersion = tenantSchemaVersion
 
     // Version gate — 426 if schema version is incompatible
-    const [tenantMajor, tenantMinor] = tenantVersion.split('.').map(Number)
-    const [reqMajor, reqMinor] = STAGE_21_REQUIRED_VERSION.split('.').map(Number)
+    const [tenantMajor = 0, tenantMinor = 0] = tenantVersion.split('.').map(Number)
+    const [reqMajor = 0, reqMinor = 0] = STAGE_21_REQUIRED_VERSION.split('.').map(Number)
 
     const isCompatible =
       tenantMajor > reqMajor || (tenantMajor === reqMajor && tenantMinor >= reqMinor)
@@ -85,16 +85,16 @@ function createVersionTestApp(tenantSchemaVersion: string) {
       },
     }
 
-    c.set('tenant', {
+    ;(c as any).set('tenant', {
       id: 'tenant-v14',
       slug: 'compat-test',
       schema_version: tenantSchemaVersion,
       pool: pool as any,
       redis: undefined,
     })
-    c.set('authPayload', { user_id: 'user-001', workspace_id: 'tenant-v14' })
-    c.set('userId', 'user-001')
-    c.set('correlationId', 'corr-compat-001')
+    ;(c as any).set('authPayload', { user_id: 'user-001', workspace_id: 'tenant-v14' })
+    ;(c as any).set('userId', 'user-001')
+    ;(c as any).set('correlationId', 'corr-compat-001')
 
     await next()
   })
@@ -189,6 +189,8 @@ describe('STAGE_21 Migration — Version Compatibility', () => {
     const migration = await import(
       '../../../apps/api/src/db/tenant/migrations/20260302_001_rbac_role_permissions_complete'
     )
-    await expect(migration.down()).rejects.toThrow()
+    await expect(
+      migration.down({ query: async () => ({ rows: [], rowCount: 0 }) } as any)
+    ).rejects.toThrow()
   })
 })

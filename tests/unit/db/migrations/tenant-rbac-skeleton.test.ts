@@ -46,7 +46,7 @@ function makeTestDb(shouldFail = false) {
       // Track tables
       const tableMatch = sql.match(/CREATE TABLE IF NOT EXISTS (\w+)/i)
       if (tableMatch) {
-        tablesCreated.push(tableMatch[1].toLowerCase())
+        tablesCreated.push(tableMatch[1]!.toLowerCase())
       }
 
       // Track indexes
@@ -54,7 +54,7 @@ function makeTestDb(shouldFail = false) {
         sql.match(/CREATE INDEX IF NOT EXISTS (\w+)/i) ??
         sql.match(/CREATE UNIQUE INDEX IF NOT EXISTS (\w+)/i)
       if (indexMatch) {
-        indexesCreated.push(indexMatch[1].toLowerCase())
+        indexesCreated.push(indexMatch[1]!.toLowerCase())
       }
 
       return { rows: [] }

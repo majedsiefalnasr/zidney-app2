@@ -10,7 +10,7 @@ import { AuditService } from '@zidney/domain-core/src/services/audit.service.js'
 import { InvitationService } from '@zidney/domain-core/src/services/invitation.service.js'
 // @ts-expect-error: LOGIC-BUG: @zidney/domain-core subpath imports require .js extension alias — see INFRA-001-LOGIC-09 [INFRA-001-LOGIC-09]
 import { EmailService } from '@zidney/domain-core/src/utils/email.js'
-import type { CreateInvitationRequest } from '@zidney/types'
+import type { CreateInvitationRequest, InvitationWithMemberData } from '@zidney/types'
 import {
   mmc_member_invitations,
   mmc_members,
@@ -395,7 +395,7 @@ export function createInvitationsRoutes(): Hono {
 
       return ctx.json(
         successResponse({
-          invitations: invitations.map((inv: any) => ({
+          invitations: invitations.map((inv: InvitationWithMemberData) => ({
             id: inv.id,
             email: inv.email,
             role_id: inv.role_id,

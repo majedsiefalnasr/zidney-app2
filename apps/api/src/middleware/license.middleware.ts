@@ -23,9 +23,16 @@ import type { Context, MiddlewareHandler } from 'hono'
 import type { Pool } from 'pg'
 
 interface LicenseMiddlewareContext extends Context {
-  license?: any
+  license?: Record<string, unknown>
   correlation_id?: string
   workspaceSlug?: string
+}
+
+interface LicenseRow {
+  id: string
+  status: LicenseStatus
+  soft_lock_until: string | null
+  [key: string]: unknown
 }
 
 export function createLicenseMiddleware(masterDb: Pool, logger: Logger): MiddlewareHandler {
@@ -49,7 +56,7 @@ export function createLicenseMiddleware(masterDb: Pool, logger: Logger): Middlew
       `,
         [workspaceSlug]
       )
-      const license = licenseResult.rows[0] as any
+      const license = licenseResult.rows[0] as LicenseRow | undefined
 
       if (!license) {
         throw new LicenseNotFoundError()
@@ -74,7 +81,7 @@ export function createLicenseMiddleware(masterDb: Pool, logger: Logger): Middlew
         `,
           [LicenseStatus.ARCHIVED, license.id, LicenseStatus.SOFT_LOCKED]
         )
-        const updated = updatedResult.rows[0] as any
+        const updated = updatedResult.rows[0] as LicenseRow | undefined
 
         if (updated) {
           logger.info({
@@ -102,7 +109,10 @@ export function createLicenseMiddleware(masterDb: Pool, logger: Logger): Middlew
 
       // Validate status is in accessible list
       if (!ACCESSIBLE_STATUSES.includes(status)) {
-        const statusBlockMap: Record<LicenseStatus, any> = {
+        const statusBlockMap: Record<
+          LicenseStatus,
+          { status: 200 | 403 | 404 | 503; code: string; message: string }
+        > = {
           [LicenseStatus.PENDING_PROVISION]: {
             status: 503,
             code: 'LICENSE_PENDING_PROVISION',
@@ -145,7 +155,7 @@ export function createLicenseMiddleware(masterDb: Pool, logger: Logger): Middlew
           correlation_id: ctx.correlation_id,
         })
 
-        ctx.status(response.status as any)
+        ctx.status(response.status)
         return ctx.json({
           success: false,
           data: null,
@@ -169,16 +179,22 @@ export function createLicenseMiddleware(masterDb: Pool, logger: Logger): Middlew
 
       // Pass to next middleware
       return next()
-    } catch (error: any) {
+    } catch (error: unknown) {
+      const err = error as {
+        message?: string
+        code?: string
+        httpStatus?: number
+        toResponse?: () => unknown
+      }
       logger.error({
         event: 'license_middleware_error',
-        error_message: error.message,
-        error_code: error.code,
+        error_message: err.message,
+        error_code: err.code,
         correlation_id: ctx.correlation_id,
       })
 
       if (error instanceof LicenseError) {
-        ctx.status(error.httpStatus as any)
+        ctx.status(error.httpStatus as 400 | 401 | 403 | 404 | 409 | 422 | 423 | 426 | 429 | 500)
         return ctx.json(error.toResponse())
       }
 

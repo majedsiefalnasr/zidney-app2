@@ -194,7 +194,7 @@ export async function createUserWithLimitCheck(
       action: 'user_creation_transaction_error',
       workspace_id: options.workspace_id,
       role: options.role,
-      error_message: error.message,
+      error_message: error instanceof Error ? error.message : String(error),
     })
 
     return {
@@ -243,7 +243,7 @@ export async function softDeleteUser(tenantDb: Pool, user_id: string): Promise<T
     logger.error('User soft-delete failed', {
       action: 'user_soft_delete_error',
       user_id,
-      error_message: error.message,
+      error_message: error instanceof Error ? error.message : String(error),
     })
 
     return {

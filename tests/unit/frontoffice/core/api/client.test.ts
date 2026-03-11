@@ -48,6 +48,7 @@ import type { ITokenManager } from '../../../../../apps/frontoffice/src/core/aut
 function makeTokenManager(token: string | null = null): ITokenManager {
   return {
     getToken: vi.fn(() => token),
+    hasToken: vi.fn(() => token !== null),
     setToken: vi.fn(),
     clearToken: vi.fn(),
   }

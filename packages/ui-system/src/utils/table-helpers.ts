@@ -25,7 +25,7 @@ export function clampPage(page: number, totalPages: number): number {
  * Extract row key/ID from row object
  * Handles both direct property access and custom extraction
  */
-export function extractRowKey<TRow = any>(
+export function extractRowKey<TRow = unknown>(
   row: TRow,
   keyExtractor?: (r: TRow) => string | number
 ): string | number {
@@ -43,7 +43,7 @@ export function extractRowKey<TRow = any>(
   // Try common ID properties
   const idProperties = ['id', '_id', 'key', 'uuid', 'uid', 'rowId']
   for (const prop of idProperties) {
-    const value = (row as any)[prop]
+    const value = (row as Record<string, unknown>)[prop]
     if (value !== undefined && value !== null) {
       return String(value)
     }
@@ -57,7 +57,7 @@ export function extractRowKey<TRow = any>(
  * Sort rows by column accessor
  * Supports both property paths and custom accessors
  */
-export function sortRows<TRow = any>(
+export function sortRows<TRow = unknown>(
   rows: TRow[],
   column: string,
   direction: SortDirection,
@@ -66,8 +66,8 @@ export function sortRows<TRow = any>(
   if (!rows.length) return rows
 
   const sorted = [...rows].sort((a, b) => {
-    let valueA: any
-    let valueB: any
+    let valueA: unknown
+    let valueB: unknown
 
     // Extract values using accessor
     if (typeof accessor === 'function') {
@@ -109,15 +109,16 @@ export function sortRows<TRow = any>(
  * Get nested property value from object
  * Supports dot notation: "user.address.city"
  */
-export function getNestedValue(obj: any, path: string): any {
+export function getNestedValue(obj: unknown, path: string): unknown {
   if (!obj || !path) return undefined
 
   const keys = path.split('.')
-  let current = obj
+  let current: unknown = obj
 
   for (const key of keys) {
     if (current == null) return undefined
-    current = current[key]
+    if (typeof current !== 'object') return undefined
+    current = (current as Record<string, unknown>)[key]
   }
 
   return current
@@ -127,28 +128,31 @@ export function getNestedValue(obj: any, path: string): any {
  * Set nested property value on object
  * Supports dot notation, creates intermediate objects if needed
  */
-export function setNestedValue(obj: any, path: string, value: any): void {
-  if (!obj || !path) return
+export function setNestedValue(obj: Record<string, unknown>, path: string, value: unknown): void {
+  if (!path) return
 
   const keys = path.split('.')
-  let current = obj
+  let current: Record<string, unknown> = obj
 
   for (let i = 0; i < keys.length - 1; i++) {
-    const key = keys[i]!
-    if (!(key in current) || typeof current[key] !== 'object') {
+    const key = keys[i]
+    if (!key) continue
+    if (!(key in current) || typeof current[key] !== 'object' || current[key] === null) {
       current[key] = {}
     }
-    current = current[key]
+    current = current[key] as Record<string, unknown>
   }
 
-  current[keys[keys.length - 1]!] = value
+  const lastKey = keys[keys.length - 1]
+  if (!lastKey) return
+  current[lastKey] = value
 }
 
 /**
  * Filter rows by column value
  * Handles type coercion and comparison
  */
-export function filterRowsByColumn<TRow = any>(
+export function filterRowsByColumn<TRow = unknown>(
   rows: TRow[],
   column: string,
   query: string,
@@ -169,7 +173,7 @@ export function filterRowsByColumn<TRow = any>(
  * Paginate rows array
  * Returns slice for given page and page size
  */
-export function paginateRows<TRow = any>(
+export function paginateRows<TRow = unknown>(
   rows: TRow[],
   currentPage: number,
   pageSize: number
@@ -186,7 +190,7 @@ export function paginateRows<TRow = any>(
  * Type coercion for filter comparisons
  * Ensures values are comparable based on field type
  */
-export function coerceValue(value: any, fieldType: FilterFieldType): any {
+export function coerceValue(value: unknown, fieldType: FilterFieldType): unknown {
   if (value === null || value === undefined) return null
 
   switch (fieldType) {
@@ -197,7 +201,7 @@ export function coerceValue(value: any, fieldType: FilterFieldType): any {
 
     case 'number': {
       const num = Number(value)
-      return isNaN(num) ? value : num
+      return Number.isNaN(num) ? value : num
     }
 
     case 'boolean':
@@ -210,7 +214,7 @@ export function coerceValue(value: any, fieldType: FilterFieldType): any {
     case 'date':
       if (value instanceof Date) return value
       try {
-        return new Date(value)
+        return new Date(value as string | number)
       } catch {
         return value
       }
@@ -223,7 +227,11 @@ export function coerceValue(value: any, fieldType: FilterFieldType): any {
 /**
  * Compare two values based on field type
  */
-export function compareValues(valueA: any, valueB: any, fieldType: FilterFieldType): number {
+export function compareValues(
+  valueA: unknown,
+  valueB: unknown,
+  fieldType: FilterFieldType
+): number {
   const a = coerceValue(valueA, fieldType)
   const b = coerceValue(valueB, fieldType)
 
@@ -249,7 +257,7 @@ export function compareValues(valueA: any, valueB: any, fieldType: FilterFieldTy
 /**
  * Get row selection state utilities
  */
-export function selectAllRows<TRow = any>(
+export function selectAllRows<TRow = unknown>(
   rows: TRow[],
   keyExtractor?: (r: TRow) => string | number
 ): Set<string | number> {
@@ -283,9 +291,9 @@ export function isRowSelected(selected: Set<string | number>, rowKey: string | n
 
 export function getSelectedRows(
   selected: Set<string | number>,
-  rows: any[],
-  keyExtractor?: (r: any) => string | number
-): any[] {
+  rows: unknown[],
+  keyExtractor?: (r: unknown) => string | number
+): unknown[] {
   return rows.filter((row) => {
     const key = extractRowKey(row, keyExtractor)
     return selected.has(key)

@@ -36,7 +36,11 @@ function makeValidJob(
     job_id: 'job-test-001',
     request_id: 'req-test-001',
     workspace_id: 'ws-001',
-    job_name: 'DRAIN_LANGUAGE_TRANSLATIONS',
+    job_name: 'DRAIN_LANGUAGE_TRANSLATIONS' as const,
+    payload_hash: 'hash-test-001',
+    retry_count: 0,
+    max_retries: 3,
+    created_at: new Date().toISOString(),
     payload: {
       workspace_slug: 'test-workspace',
       language_code: 'ar',
@@ -239,7 +243,8 @@ describe('handleDrainLanguageTranslationsJob — happy path', () => {
     // SCAN should be called for coverage invalidation
     expect(redis.scan).toHaveBeenCalled()
     const scanCall = (redis.scan as ReturnType<typeof vi.fn>).mock.calls[0]
-    expect(scanCall[2]).toContain('coverage:ws-001:')
+    expect(scanCall).toBeDefined()
+    expect(scanCall?.[2]).toContain('coverage:ws-001:')
   })
 
   it('processes two full batches when first DELETE returns batch_size rows', async () => {

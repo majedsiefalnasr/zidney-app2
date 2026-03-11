@@ -9,9 +9,9 @@ import type { Language } from './common'
 export interface ValidationRule {
   id?: string
   type: string
-  validate: (value: any) => string | null // Returns error message or null
+  validate: (value: unknown) => string | null // Returns error message or null
   message?: string
-  parameters?: Record<string, any>
+  parameters?: Record<string, unknown>
 }
 
 // Specific validation rules
@@ -40,7 +40,7 @@ export interface EmailRule extends ValidationRule {
 
 export interface CustomRule extends ValidationRule {
   type: 'custom'
-  parameters: { validate: (value: any) => string | null }
+  parameters: { validate: (value: unknown) => string | null }
 }
 
 // Union type for common rules
@@ -58,7 +58,7 @@ export interface ValidationError {
   field: string
   message: string
   code?: string
-  value?: any
+  value?: unknown
   rule?: ValidationRule
 }
 
@@ -97,7 +97,7 @@ export interface MultiLanguageValidationResult {
 
 // Async validation support
 export interface AsyncValidationRule extends ValidationRule {
-  validateAsync: (value: any) => Promise<string | null>
+  validateAsync: (value: unknown) => Promise<string | null>
 }
 
 // Debounced validation
@@ -109,15 +109,15 @@ export interface DebouncedValidationConfig {
 
 // Validator class for reusability
 export interface Validator {
-  validate: (value: any, rules: ValidationRule[]) => ValidationResult
-  validateAsync: (value: any, rules: ValidationRule[]) => Promise<ValidationResult>
+  validate: (value: unknown, rules: ValidationRule[]) => ValidationResult
+  validateAsync: (value: unknown, rules: ValidationRule[]) => Promise<ValidationResult>
 }
 
 // Validation context
 export interface ValidationContext {
   fieldName: string
-  fieldValue: any
-  allValues?: Record<string, any>
+  fieldValue: unknown
+  allValues?: Record<string, unknown>
   language?: string
 }
 

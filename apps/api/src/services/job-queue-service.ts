@@ -27,6 +27,22 @@
 import type { Logger } from '@zidney/logger'
 import type { Pool, PoolClient } from 'pg'
 
+type QueueLike = {
+  lPush: (key: string, value: string) => Promise<unknown>
+}
+
+interface GradingJobRecord {
+  id: string
+  attempt_id: string
+  status: string
+  created_at: string | Date
+  started_at: string | Date | null
+  completed_at: string | Date | null
+  error_message: string | null
+  retry_count: number
+  result_data: Record<string, unknown> | null
+}
+
 /**
  * Job payload structure
  */
@@ -58,7 +74,7 @@ export interface GradingJobPayload {
  */
 export async function enqueueGradingJob(
   db: PoolClient | Pool,
-  queue: any | null,
+  queue: QueueLike | null,
   attemptId: string,
   workspaceId: string,
   userId: string,
@@ -157,7 +173,7 @@ export async function getJobStatus(
   jobId: string,
   workspaceId: string,
   logger: Logger
-): Promise<any> {
+): Promise<GradingJobRecord | null> {
   try {
     const result = await db.query(
       `
@@ -196,7 +212,7 @@ export async function getJobByAttemptId(
   attemptId: string,
   workspaceId: string,
   logger: Logger
-): Promise<any> {
+): Promise<GradingJobRecord | null> {
   try {
     const result = await db.query(
       `
@@ -276,7 +292,7 @@ export async function markJobCompleted(
   db: PoolClient | Pool,
   jobId: string,
   workspaceId: string,
-  resultData: Record<string, any>,
+  resultData: Record<string, unknown>,
   logger: Logger
 ): Promise<void> {
   try {

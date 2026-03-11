@@ -62,8 +62,6 @@ export const useBackofficeNotificationStore = defineStore('backoffice-notificati
 // ── HMR (development only) ────────────────────────────────────────────────────
 import { acceptHMRUpdate } from 'pinia'
 
-if ((import.meta as any).hot) {
-  ;(import.meta as any).hot.accept(
-    acceptHMRUpdate(useBackofficeNotificationStore, (import.meta as any).hot)
-  )
+if (import.meta.hot) {
+  import.meta.hot.accept(acceptHMRUpdate(useBackofficeNotificationStore, import.meta.hot))
 }

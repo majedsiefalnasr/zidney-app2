@@ -273,7 +273,7 @@ export async function getAttemptResultHandler(c: Context) {
       workspace_id: workspace.id,
       user_id: user.id,
       error: err instanceof Error ? err.message : String(err),
-      code: (err as any).code,
+      code: (err as unknown).code,
     })
     throw err
   }

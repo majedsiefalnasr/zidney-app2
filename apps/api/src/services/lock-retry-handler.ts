@@ -31,6 +31,26 @@
 import { createLogger } from '@zidney/logger'
 import type { Pool, PoolClient } from 'pg'
 
+type AttemptLockRecord = Record<string, unknown> & { id: string }
+
+type LockError = Error & {
+  code?: string
+  statusCode?: number
+}
+
+function getLockErrorMeta(error: unknown): { code?: string; message: string } {
+  if (error instanceof Error) {
+    return { code: (error as LockError).code, message: error.message }
+  }
+  if (error && typeof error === 'object') {
+    const code = 'code' in error ? String((error as { code?: unknown }).code) : undefined
+    const message =
+      'message' in error ? String((error as { message?: unknown }).message) : String(error)
+    return { code, message }
+  }
+  return { message: String(error) }
+}
+
 /**
  * Options for lock retry execution
  */
@@ -62,7 +82,7 @@ export async function executeWithLockRetry<T>(
   db: PoolClient | Pool,
   attemptId: string,
   workspaceId: string,
-  operation: (attempt: any) => Promise<T>,
+  operation: (attempt: AttemptLockRecord) => Promise<T>,
   options: LockRetryOptions = {}
 ): Promise<T> {
   const logger = createLogger('lock-retry-handler')
@@ -100,13 +120,13 @@ export async function executeWithLockRetry<T>(
 
       if (lockResult.rows.length === 0) {
         // Attempt not found
-        const error = new Error('Attempt not found')
-        ;(error as any).code = 'ATTEMPT_NOT_FOUND'
-        ;(error as any).statusCode = 404
+        const error = new Error('Attempt not found') as LockError
+        error.code = 'ATTEMPT_NOT_FOUND'
+        error.statusCode = 404
         throw error
       }
 
-      const attemptRecord = lockResult.rows[0]
+      const attemptRecord = lockResult.rows[0] as AttemptLockRecord
 
       // Lock acquired; execute operation
       logger.debug('Pessimistic lock acquired', {
@@ -130,8 +150,8 @@ export async function executeWithLockRetry<T>(
       lastError = err as Error
 
       // Check if error is lock timeout (PostgreSQL error code 40P01)
-      const pgError = err as any
-      if (pgError.code === '40P01' || pgError.message?.includes('deadlock')) {
+      const pgError = getLockErrorMeta(err)
+      if (pgError.code === '40P01' || pgError.message.includes('deadlock')) {
         logger.warn('Lock timeout (40P01)', {
           correlation_id: correlationId,
           workspace_id: workspaceId,
@@ -143,9 +163,9 @@ export async function executeWithLockRetry<T>(
         // Continue to retry
         if (attempt === maxRetries - 1) {
           // Last retry exhausted
-          const error = new Error(`Lock timeout after ${maxRetries} retries`)
-          ;(error as any).code = 'ATTEMPT_LOCKED'
-          ;(error as any).statusCode = 409
+          const error = new Error(`Lock timeout after ${maxRetries} retries`) as LockError
+          error.code = 'ATTEMPT_LOCKED'
+          error.statusCode = 409
           throw error
         }
       } else {

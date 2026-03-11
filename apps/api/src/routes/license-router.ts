@@ -4,6 +4,28 @@ import { type Context, Hono } from 'hono'
 import { toLicenseError } from '../responses/license-error-handler'
 
 const logger = createLogger('license-router')
+type JsonObject = Record<string, unknown>
+type MasterDbClient = {
+  query: <T = Record<string, unknown>>(sql: string, params?: unknown[]) => Promise<{ rows: T[] }>
+}
+type StatusCode = 400 | 401 | 403 | 404 | 409 | 422 | 500 | 503
+
+function getErrorCode(error: unknown): string | undefined {
+  if (error && typeof error === 'object' && 'code' in error) {
+    return String((error as { code?: unknown }).code)
+  }
+  return undefined
+}
+
+function getErrorMessage(error: unknown): string {
+  if (error instanceof Error) {
+    return error.message
+  }
+  if (error && typeof error === 'object' && 'message' in error) {
+    return String((error as { message?: unknown }).message)
+  }
+  return String(error)
+}
 
 /**
  * License Router
@@ -24,13 +46,15 @@ export const licenseRouter = new Hono()
  */
 licenseRouter.post('/mmc/licenses', async (ctx: Context) => {
   const correlationId = ctx.get('correlation_id')
-  const masterDb = ctx.get('master_db')
-  let body: any
+  const masterDb = ctx.get('master_db') as MasterDbClient
+  let body: JsonObject = {}
 
   try {
     // Extract request body
-    body = await ctx.req.json()
-    const { product_id, workspace_id, workspace_slug } = body
+    body = (await ctx.req.json()) as JsonObject
+    const product_id = typeof body.product_id === 'string' ? body.product_id : undefined
+    const workspace_id = typeof body.workspace_id === 'string' ? body.workspace_id : undefined
+    const workspace_slug = typeof body.workspace_slug === 'string' ? body.workspace_slug : undefined
 
     // Validate input
     if (!product_id || !workspace_id || !workspace_slug) {
@@ -72,14 +96,14 @@ licenseRouter.post('/mmc/licenses', async (ctx: Context) => {
       data: result,
       error: null,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     // Handle duplicate workspace_slug
-    if (error.code === '23505' || error.message?.includes('unique')) {
+    if (getErrorCode(error) === '23505' || getErrorMessage(error).includes('unique')) {
       logger.warn(
         {
           correlation_id: correlationId,
           action: 'license_create_duplicate',
-          workspace_slug: body?.workspace_slug,
+          workspace_slug: typeof body.workspace_slug === 'string' ? body.workspace_slug : undefined,
           error_code: 'WORKSPACE_ALREADY_EXISTS',
         },
         'Duplicate workspace slug'
@@ -93,7 +117,7 @@ licenseRouter.post('/mmc/licenses', async (ctx: Context) => {
       {
         correlation_id: correlationId,
         action: 'license_create_error',
-        error_message: error.message,
+        error_message: getErrorMessage(error),
       },
       'License creation failed'
     )
@@ -113,7 +137,7 @@ licenseRouter.post('/mmc/licenses', async (ctx: Context) => {
  */
 licenseRouter.get('/mmc/licenses/:license_id', async (ctx: Context) => {
   const correlationId = ctx.get('correlation_id')
-  const masterDb = ctx.get('master_db')
+  const masterDb = ctx.get('master_db') as MasterDbClient
   const license_id = ctx.req.param('license_id')
 
   try {
@@ -153,13 +177,13 @@ licenseRouter.get('/mmc/licenses/:license_id', async (ctx: Context) => {
       data: license,
       error: null,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       {
         correlation_id: correlationId,
         action: 'license_get_error',
         license_id,
-        error_message: error.message,
+        error_message: getErrorMessage(error),
       },
       'License retrieval failed'
     )
@@ -180,12 +204,13 @@ licenseRouter.get('/mmc/licenses/:license_id', async (ctx: Context) => {
  */
 licenseRouter.patch('/mmc/licenses/:license_id/state', async (ctx: Context) => {
   const correlationId = ctx.get('correlation_id')
-  const masterDb = ctx.get('master_db')
+  const masterDb = ctx.get('master_db') as MasterDbClient
   const license_id = ctx.req.param('license_id')
 
   try {
-    const body = await ctx.req.json()
-    const { target_state, reason } = body
+    const body = (await ctx.req.json()) as JsonObject
+    const target_state = typeof body.target_state === 'string' ? body.target_state : ''
+    const reason = typeof body.reason === 'string' ? body.reason : undefined
 
     // Validate target state
     const validStates = ['ACTIVE', 'SOFT_LOCKED', 'ARCHIVED', 'DELETED']
@@ -224,8 +249,8 @@ licenseRouter.patch('/mmc/licenses/:license_id/state', async (ctx: Context) => {
         'License transition failed'
       )
       const errorCode = result.error_code || 'INTERNAL_ERROR'
-      const status = result.http_status || 500
-      ctx.status(status as any)
+      const status = (result.http_status || 500) as StatusCode
+      ctx.status(status)
       return ctx.json(toLicenseError(errorCode))
     }
 
@@ -246,13 +271,13 @@ licenseRouter.patch('/mmc/licenses/:license_id/state', async (ctx: Context) => {
       data: result.license,
       error: null,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       {
         correlation_id: correlationId,
         action: 'license_transition_error',
         license_id,
-        error_message: error.message,
+        error_message: getErrorMessage(error),
       },
       'License transition failed'
     )
@@ -272,7 +297,7 @@ licenseRouter.patch('/mmc/licenses/:license_id/state', async (ctx: Context) => {
  */
 licenseRouter.get('/admin/workspace/:workspace_id/license', async (ctx: Context) => {
   const correlationId = ctx.get('correlation_id')
-  const masterDb = ctx.get('master_db')
+  const masterDb = ctx.get('master_db') as MasterDbClient
   const workspace_id = ctx.req.param('workspace_id')
 
   try {
@@ -313,13 +338,13 @@ licenseRouter.get('/admin/workspace/:workspace_id/license', async (ctx: Context)
       data: license,
       error: null,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       {
         correlation_id: correlationId,
         action: 'workspace_license_retrieve_error',
         workspace_id,
-        error_message: error.message,
+        error_message: getErrorMessage(error),
       },
       'Workspace license retrieval failed'
     )
@@ -341,7 +366,7 @@ licenseRouter.get('/admin/workspace/:workspace_id/license', async (ctx: Context)
  */
 licenseRouter.delete('/mmc/licenses/:license_id', async (ctx: Context) => {
   const correlationId = ctx.get('correlation_id')
-  const masterDb = ctx.get('master_db')
+  const masterDb = ctx.get('master_db') as MasterDbClient
   const license_id = ctx.req.param('license_id')
   const userRole = ctx.get('user_role') // Would be set by auth middleware
 
@@ -363,8 +388,9 @@ licenseRouter.delete('/mmc/licenses/:license_id', async (ctx: Context) => {
     }
 
     // Extract request body
-    const body = await ctx.req.json()
-    const { confirm_deletion, reason } = body
+    const body = (await ctx.req.json()) as JsonObject
+    const confirm_deletion = body.confirm_deletion === true
+    const reason = typeof body.reason === 'string' ? body.reason : undefined
 
     // Call domain service (transactional)
     const result = await deleteLicense(masterDb, license_id, confirm_deletion)
@@ -380,8 +406,8 @@ licenseRouter.delete('/mmc/licenses/:license_id', async (ctx: Context) => {
         'License deletion failed'
       )
       const errorCode = result.error_code || 'INTERNAL_ERROR'
-      const status = result.http_status || 500
-      ctx.status(status as any)
+      const status = (result.http_status || 500) as StatusCode
+      ctx.status(status)
       return ctx.json(toLicenseError(errorCode))
     }
 
@@ -406,13 +432,13 @@ licenseRouter.delete('/mmc/licenses/:license_id', async (ctx: Context) => {
       },
       error: null,
     })
-  } catch (error: any) {
+  } catch (error: unknown) {
     logger.error(
       {
         correlation_id: correlationId,
         action: 'license_delete_error',
         license_id,
-        error_message: error.message,
+        error_message: getErrorMessage(error),
       },
       'License deletion error'
     )

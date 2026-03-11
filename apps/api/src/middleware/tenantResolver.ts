@@ -23,17 +23,33 @@ export interface TenantContext {
   organization_id: number
 }
 
+interface TenantRegistryEntry {
+  id: number
+  license_id: number
+  workspace_slug: string
+  database_name: string
+  expected_schema_version: string
+  is_active: boolean
+  archived_at: string | null
+  organization_id: number
+}
+
 /**
  * TenantResolver: Responsible for resolving workspace slug and returning connection pool
  */
 export class TenantResolver {
   private master_pool: Pool
   private pool_map: Map<string, Pool> = new Map()
-  private registry_cache: Map<string, any> = new Map()
+  private registry_cache: Map<string, { data: TenantRegistryEntry | null; timestamp: number }> =
+    new Map()
   private cache_ttl_ms: number = 5 * 60 * 1000 // 5 minutes
 
   constructor(master_pool: Pool) {
     this.master_pool = master_pool
+  }
+
+  private typeGuardEntry(value: unknown): value is TenantRegistryEntry {
+    return !!value && typeof value === 'object' && 'id' in value
   }
 
   /**
@@ -48,7 +64,7 @@ export class TenantResolver {
       const parts = host.split('.')
       if (parts.length >= 3) {
         // Return first part as slug (e.g., acme-university.zidney.app → acme-university)
-        return parts[0]!
+        return parts[0] || null
       }
     }
 
@@ -56,7 +72,7 @@ export class TenantResolver {
     const path = c.req.path
     const path_match = path.match(/^\/workspace\/([a-z0-9-]+)/)
     if (path_match) {
-      return path_match[1]!
+      return path_match[1] || null
     }
 
     // Try URL parameter
@@ -72,7 +88,7 @@ export class TenantResolver {
    * Query master database for tenant registry entry
    * Returns: { license_id, database_name, expected_schema_version, is_active }
    */
-  private async getRegistryEntry(slug: string): Promise<any> {
+  private async getRegistryEntry(slug: string): Promise<TenantRegistryEntry | null> {
     // Check cache first
     const cache_key = `registry:${slug}`
     const cached = this.registry_cache.get(cache_key)
@@ -98,6 +114,9 @@ export class TenantResolver {
         }
 
         const entry = result.rows[0]
+        if (!this.typeGuardEntry(entry)) {
+          return null
+        }
 
         // Cache result
         this.registry_cache.set(cache_key, {

@@ -130,8 +130,8 @@ function createMockClient(options: {
 function createMockDb(options: Parameters<typeof createMockClient>[0] = {}) {
   const client = createMockClient(options)
   const db: DbClient = {
-    query: vi.fn(),
-    connect: vi.fn(async () => client),
+    query: vi.fn() as unknown as DbClient['query'],
+    connect: vi.fn(async () => client) as unknown as DbClient['connect'],
   }
   return { db, client }
 }
@@ -166,7 +166,7 @@ describe('T012 — executeTransition: valid COMPLETED→UNDER_REVIEW', () => {
 
     await executeTransition(db, ctx)
 
-    const calls = client._queryLog.map((q) => q.sql.split(/\s+/)[0]!.toUpperCase())
+    const calls = client._queryLog.map((q) => q.sql.split(/\s+/)[0]?.toUpperCase() ?? '')
     const beginIdx = calls.indexOf('BEGIN')
     const select = client._queryLog.findIndex((q) => /FOR UPDATE/i.test(q.sql))
     const update = client._queryLog.findIndex((q) => /^UPDATE/i.test(q.sql.trim()))
@@ -415,7 +415,7 @@ describe('T027 — executeTransition: workflow_logs INSERT fields', () => {
     expect(insertCall).toBeDefined()
 
     // Verify required params: [entityType, entityId, previousState, newState, changedBy, reason]
-    expect(insertCall!.params).toEqual([
+    expect(insertCall?.params).toEqual([
       'subject', // entity_type
       BASE_ENTITY_ID, // entity_id
       WorkflowState.COMPLETED, // previous_state
@@ -442,7 +442,7 @@ describe('T027 — executeTransition: workflow_logs INSERT fields', () => {
     await executeTransition(db, ctx)
 
     const insertCall = client._queryLog.find((q) => /INSERT INTO workflow_logs/i.test(q.sql))
-    expect(insertCall!.params![5]).toBeNull()
+    expect(insertCall?.params?.[5]).toBeNull()
   })
 })
 

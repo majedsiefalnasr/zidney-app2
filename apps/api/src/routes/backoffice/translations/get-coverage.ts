@@ -11,6 +11,7 @@
  */
 
 import { getCoverage } from '@zidney/domain-core'
+import type { Context } from 'hono'
 
 import { buildTranslationContext } from '../../../modules/translation/translation.context'
 import { GetCoverageQuerySchema } from '../../../modules/translation/translation.validation'
@@ -19,7 +20,7 @@ import { handleTranslationError } from './post-upsert'
 /**
  * GET /translations/coverage?entity_type=...&language_code=...
  */
-export async function handleGetCoverage(c: any): Promise<Response> {
+export async function handleGetCoverage(c: Context): Promise<Response> {
   try {
     const { ctx, db } = await buildTranslationContext(c)
     const redis = c.get('tenant')?.redis
@@ -52,7 +53,7 @@ export async function handleGetCoverage(c: any): Promise<Response> {
     const { entity_type, language_code } = parseResult.data
 
     const coverage = await getCoverage(
-      db as any,
+      db,
       ctx.workspace_id,
       entity_type,
       language_code,

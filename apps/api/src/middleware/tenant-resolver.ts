@@ -4,7 +4,30 @@ import { config } from '../config/index'
 import { TenantPoolManager } from '../db/tenant/pool-manager'
 import { TenantRegistryRepository } from '../repositories/master/tenant-registry.repository'
 
-export async function tenantResolver(c: any, next: any) {
+interface ResolverContext {
+  get: (key: string) => string
+  set: (key: string, value: unknown) => void
+  status: (code: number) => void
+  json: (body: unknown) => unknown
+  req: {
+    header: (name: string) => string | undefined
+    path: string
+  }
+}
+
+interface RegistryRecord {
+  id: string
+  schema_version: string
+  [key: string]: unknown
+}
+
+interface LicenseRecord {
+  status: string
+  product_version: string
+  [key: string]: unknown
+}
+
+export async function tenantResolver(c: ResolverContext, next: () => Promise<void>) {
   const correlationId = c.get('correlationId')
   const slug = extractWorkspaceSlug(c)
 
@@ -45,8 +68,8 @@ export async function tenantResolver(c: any, next: any) {
     logResolution(slug, correlationId)
 
     await next()
-  } catch (error: any) {
-    const code = error.message
+  } catch (error: unknown) {
+    const code = error instanceof Error ? error.message : 'INTERNAL_ERROR'
     const status = getStatusCode(code)
     c.status(status)
     return c.json(formatError(code, slug, correlationId))
@@ -94,10 +117,10 @@ function getErrorMessage(code: string): string {
   }
 }
 
-const registryCache = new Map<string, { data: any; timestamp: number }>()
+const registryCache = new Map<string, { data: RegistryRecord | null; timestamp: number }>()
 const CACHE_TTL = 60 * 1000 // 60 seconds
 
-export function extractWorkspaceSlug(c: any): string | null {
+export function extractWorkspaceSlug(c: ResolverContext): string | null {
   // Check subdomain: <slug>.zidney.com
   const host = c.req.header('host')
   if (host) {
@@ -135,7 +158,7 @@ async function loadLicense(slug: string) {
   return await repo.findLicenseByWorkspaceSlug(slug)
 }
 
-function enforceSchemaVersion(registry: any) {
+function enforceSchemaVersion(registry: RegistryRecord) {
   // Assume current schema version is known
   const currentSchemaVersion = '1.0.0'
   if (registry.schema_version !== currentSchemaVersion) {
@@ -143,7 +166,7 @@ function enforceSchemaVersion(registry: any) {
   }
 }
 
-export function enforceLicenseStatus(license: any) {
+export function enforceLicenseStatus(license: LicenseRecord) {
   if (license.status === 'SOFT_LOCKED') {
     throw new Error('LICENSE_BLOCKED')
   }
@@ -155,7 +178,7 @@ export function enforceLicenseStatus(license: any) {
   }
 }
 
-function enforceProductVersion(license: any) {
+function enforceProductVersion(license: LicenseRecord) {
   if (!semver.satisfies(config.platformProductVersion, license.product_version)) {
     throw new Error('VERSION_MISMATCH')
   }
@@ -170,7 +193,7 @@ function enforceProductVersion(license: any) {
  * - Logs warning when pool approaches limit (>8 connections)
  * - Prevents cascade failures from connection exhaustion
  */
-function getOrCreatePool(registry: any) {
+function getOrCreatePool(registry: RegistryRecord) {
   const pool = TenantPoolManager.getOrCreatePool(registry)
 
   // Hardening: Monitor pool usage

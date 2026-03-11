@@ -23,12 +23,18 @@ import type { Logger } from '@zidney/logger'
 import type { QuestionSnapshot, QuestionSnapshotContainer } from '@zidney/types/attempt'
 import { QuestionType } from '@zidney/types/attempt'
 
+type ResponseObject = Record<string, unknown>
+
+function isResponseObject(value: unknown): value is ResponseObject {
+  return typeof value === 'object' && value !== null && !Array.isArray(value)
+}
+
 /**
  * Submission content for validation
  */
 export interface SubmissionContentItem {
   question_index: number
-  user_response: any
+  user_response: unknown
 }
 
 /**
@@ -148,7 +154,7 @@ export function validateSubmissionContent(
  * @returns string[] - Array of error messages (empty if valid)
  */
 function validateSubmissionItem(
-  item: any,
+  item: unknown,
   questions: QuestionSnapshot[],
   index: number,
   logger: Logger,
@@ -157,17 +163,21 @@ function validateSubmissionItem(
   const errors: string[] = []
 
   // Validate item is object
-  if (typeof item !== 'object' || item === null) {
+  if (!isResponseObject(item)) {
     errors.push(`Item ${index}: must be an object, got ${typeof item}`)
     return errors
   }
+  const typedItem = item as {
+    question_index?: unknown
+    user_response?: unknown
+  }
 
   // Validate required fields
-  if (item.question_index === undefined) {
+  if (typedItem.question_index === undefined) {
     errors.push(`Item ${index}: missing question_index`)
   }
 
-  if (item.user_response === undefined) {
+  if (typedItem.user_response === undefined) {
     errors.push(`Item ${index}: missing user_response`)
   }
 
@@ -176,15 +186,20 @@ function validateSubmissionItem(
   }
 
   // Validate question_index is valid
-  if (item.question_index < 0 || item.question_index >= questions.length) {
+  const questionIndex = typedItem.question_index
+  if (typeof questionIndex !== 'number' || questionIndex < 0 || questionIndex >= questions.length) {
     errors.push(
-      `Item ${index}: question_index ${item.question_index} out of range [0-${questions.length - 1}]`
+      `Item ${index}: question_index ${String(questionIndex)} out of range [0-${questions.length - 1}]`
     )
     return errors
   }
 
-  const question = questions[item.question_index]!
-  const response = item.user_response
+  const question = questions[questionIndex]
+  if (!question) {
+    errors.push(`Item ${index}: question_index ${questionIndex} not found`)
+    return errors
+  }
+  const response = typedItem.user_response
 
   // Validate response against question type
   const typeErrors = validateResponseType(response, question, logger, correlationId)
@@ -196,7 +211,7 @@ function validateSubmissionItem(
     if (!allowedFields.includes(key)) {
       logger.warn('Submission item has extra field', {
         correlation_id: correlationId,
-        question_index: item.question_index,
+        question_index: questionIndex,
         extra_field: key,
       })
       // Don't error; just warn (forward compatibility)
@@ -216,7 +231,7 @@ function validateSubmissionItem(
  * @returns string[] - Array of error messages (empty if valid)
  */
 function validateResponseType(
-  response: any,
+  response: unknown,
   question: QuestionSnapshot,
   logger: Logger,
   correlationId: string
@@ -229,7 +244,7 @@ function validateResponseType(
   }
 
   // Response must be object
-  if (typeof response !== 'object' || Array.isArray(response)) {
+  if (!isResponseObject(response)) {
     errors.push(`Invalid response for Q${question.id}: must be object or null`)
     return errors
   }
@@ -263,7 +278,7 @@ function validateResponseType(
 /**
  * Validate MCQ response
  */
-function validateMcqResponse(response: any, question: QuestionSnapshot): string[] {
+function validateMcqResponse(response: ResponseObject, question: QuestionSnapshot): string[] {
   const errors: string[] = []
 
   // MCQ response should have selected_option or selected
@@ -287,7 +302,7 @@ function validateMcqResponse(response: any, question: QuestionSnapshot): string[
     if (!Array.isArray(response.selected)) {
       errors.push(`MCQ Q${question.id}: selected must be array`)
     } else {
-      for (const option of response.selected) {
+      for (const option of response.selected as unknown[]) {
         if (typeof option !== 'string') {
           errors.push(`MCQ Q${question.id}: selected contains non-string`)
         } else if (question.options && !question.options.includes(option)) {
@@ -303,7 +318,7 @@ function validateMcqResponse(response: any, question: QuestionSnapshot): string[
 /**
  * Validate true/false response
  */
-function validateTrueFalseResponse(response: any, question: QuestionSnapshot): string[] {
+function validateTrueFalseResponse(response: ResponseObject, question: QuestionSnapshot): string[] {
   if (typeof response.selected !== 'boolean') {
     return [`True/False Q${question.id}: selected must be boolean`]
   }
@@ -313,7 +328,10 @@ function validateTrueFalseResponse(response: any, question: QuestionSnapshot): s
 /**
  * Validate short answer response
  */
-function validateShortAnswerResponse(response: any, question: QuestionSnapshot): string[] {
+function validateShortAnswerResponse(
+  response: ResponseObject,
+  question: QuestionSnapshot
+): string[] {
   const errors: string[] = []
 
   if (!('text' in response)) {
@@ -331,7 +349,7 @@ function validateShortAnswerResponse(response: any, question: QuestionSnapshot):
 /**
  * Validate essay response
  */
-function validateEssayResponse(response: any, question: QuestionSnapshot): string[] {
+function validateEssayResponse(response: ResponseObject, question: QuestionSnapshot): string[] {
   const errors: string[] = []
 
   if (!('text' in response)) {
@@ -354,7 +372,7 @@ function validateEssayResponse(response: any, question: QuestionSnapshot): strin
 /**
  * Validate match response
  */
-function validateMatchResponse(response: any, question: QuestionSnapshot): string[] {
+function validateMatchResponse(response: ResponseObject, question: QuestionSnapshot): string[] {
   const errors: string[] = []
 
   if (!('matches' in response)) {
@@ -367,8 +385,8 @@ function validateMatchResponse(response: any, question: QuestionSnapshot): strin
     return errors
   }
 
-  for (const match of response.matches) {
-    if (typeof match !== 'object' || !('from' in match) || !('to' in match)) {
+  for (const match of response.matches as unknown[]) {
+    if (typeof match !== 'object' || match === null || !('from' in match) || !('to' in match)) {
       errors.push(`Match Q${question.id}: each match must have from and to fields`)
     }
   }
@@ -379,7 +397,7 @@ function validateMatchResponse(response: any, question: QuestionSnapshot): strin
 /**
  * Validate fill-blank response
  */
-function validateFillBlankResponse(response: any, question: QuestionSnapshot): string[] {
+function validateFillBlankResponse(response: ResponseObject, question: QuestionSnapshot): string[] {
   const errors: string[] = []
 
   if (!('text' in response)) {
@@ -397,7 +415,7 @@ function validateFillBlankResponse(response: any, question: QuestionSnapshot): s
 /**
  * Validate ordering response
  */
-function validateOrderingResponse(response: any, question: QuestionSnapshot): string[] {
+function validateOrderingResponse(response: ResponseObject, question: QuestionSnapshot): string[] {
   const errors: string[] = []
 
   if (!('order' in response)) {
@@ -410,7 +428,7 @@ function validateOrderingResponse(response: any, question: QuestionSnapshot): st
     return errors
   }
 
-  for (const item of response.order) {
+  for (const item of response.order as unknown[]) {
     if (typeof item !== 'string') {
       errors.push(`Ordering Q${question.id}: order items must be strings`)
       break

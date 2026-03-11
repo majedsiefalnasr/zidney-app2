@@ -56,7 +56,7 @@ const logger = createLogger('workspace-settings')
 // ---------------------------------------------------------------------------
 
 interface DbClient {
-  query: <T = any>(
+  query: <T = unknown>(
     sql: string,
     params?: unknown[]
   ) => Promise<{ rows: T[]; rowCount: number | null }>
@@ -75,7 +75,7 @@ export interface SettingsRequestContext {
    * Optional Redis client (ioredis) — required for async language removal (DRAIN job enqueue).
    * Provided by backoffice route handler via tenant.redis.
    */
-  redis?: any
+  redis?: unknown
 }
 
 /** Row count threshold for sync vs async language removal (FR-034) */
@@ -401,7 +401,7 @@ export async function updateSettingsGroup(
     // Load current settings within transaction for diff computation
     const currentRow = await repository.getSettings(ctx.db)
     const currentGroupSettings = currentRow
-      ? ((currentRow as any)[`${group}_settings`] as Record<string, unknown>)
+      ? ((currentRow as unknown)[`${group}_settings`] as Record<string, unknown>)
       : {}
 
     // For payment group: apply sentinel pattern and encrypt credentials

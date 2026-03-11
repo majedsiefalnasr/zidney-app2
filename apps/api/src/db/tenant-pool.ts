@@ -13,7 +13,7 @@
  */
 
 import { createLogger } from '@zidney/logger'
-import { Pool, type PoolClient } from 'pg'
+import { Pool, type PoolClient, type QueryResult } from 'pg'
 
 const logger = createLogger('tenant-pool')
 
@@ -212,7 +212,7 @@ export async function queryTenantDatabase(
   tenantDatabaseUrl: string,
   query: string,
   values: (string | number | boolean | null)[] = []
-): Promise<Record<string, unknown>> {
+): Promise<QueryResult<Record<string, unknown>>> {
   const pool = await getTenantDatabase(workspaceId, tenantDatabaseUrl)
   return pool.query(query, values)
 }

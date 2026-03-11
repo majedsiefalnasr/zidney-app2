@@ -19,6 +19,9 @@ import { createClient } from 'redis'
  */
 
 type RedisClientType = ReturnType<typeof createClient>
+type RedisInitContext = {
+  correlationId?: string
+}
 
 let redisClient: RedisClientType | null = null
 
@@ -26,7 +29,7 @@ let redisClient: RedisClientType | null = null
  * Initialize Redis connection pool
  * Called once during app boot
  */
-export async function initializeRedisPool(context?: any): Promise<RedisClientType> {
+export async function initializeRedisPool(context?: RedisInitContext): Promise<RedisClientType> {
   const correlationId = context?.correlationId || 'system'
 
   if (redisClient) {
@@ -39,7 +42,7 @@ export async function initializeRedisPool(context?: any): Promise<RedisClientTyp
     redisClient = createClient({
       socket: {
         host: process.env.REDIS_HOST || 'localhost',
-        port: parseInt(process.env.REDIS_PORT || '6379'),
+        port: parseInt(process.env.REDIS_PORT || '6379', 10),
         reconnectStrategy: (retries: number) => {
           if (retries > 10) {
             logger.error(`[${correlationId}] Redis connection retries exhausted`)
@@ -49,7 +52,7 @@ export async function initializeRedisPool(context?: any): Promise<RedisClientTyp
           return Math.min(retries * 100, 3000)
         },
       },
-      database: parseInt(process.env.REDIS_DB || '0'),
+      database: parseInt(process.env.REDIS_DB || '0', 10),
       password: process.env.REDIS_PASSWORD || undefined,
     })
 
@@ -104,7 +107,7 @@ export function getRedisClient(): RedisClientType {
  * Close Redis connection
  * Called during app shutdown
  */
-export async function closeRedisPool(context?: any): Promise<void> {
+export async function closeRedisPool(context?: RedisInitContext): Promise<void> {
   const correlationId = context?.correlationId || 'system'
 
   if (!redisClient) {

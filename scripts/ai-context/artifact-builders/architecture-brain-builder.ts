@@ -57,7 +57,7 @@ export async function buildArchitectureBrain(
     dependencies,
     violations,
     metrics: {
-      max_severity: violations.length > 0 ? violations[0].severity : 'none',
+      max_severity: violations[0]?.severity ?? 'none',
       compliance_percentage: Math.round(compliancePercentage),
       violating_modules: Array.from(violatingModules),
     },

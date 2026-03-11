@@ -68,7 +68,10 @@ function extractSlugFromSubdomain(host: string): string | null {
     return null
   }
 
-  const subdomain = parts[0]!
+  const subdomain = parts[0]
+  if (!subdomain) {
+    return null
+  }
 
   // Skip reserved subdomains
   if (['api', 'mmc', 'www', 'admin', 'support', 'docs'].includes(subdomain)) {

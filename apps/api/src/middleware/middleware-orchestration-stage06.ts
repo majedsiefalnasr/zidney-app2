@@ -57,9 +57,14 @@ export function registerMiddlewareStackStage06(
   app: Hono,
   logger: Logger,
   dependencies: {
-    redis?: any
-    masterDb?: any
-    tenantPoolManager?: any
+    redis?: {
+      get: (key: string) => Promise<string | null>
+      setex: (key: string, ttl: number, value: string) => Promise<unknown>
+    }
+    masterDb?: {
+      query: (sql: string, params?: unknown[]) => Promise<{ rows: Record<string, unknown>[] }>
+    }
+    tenantPoolManager?: unknown
   }
 ) {
   // =========================================================================

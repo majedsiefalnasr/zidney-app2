@@ -182,7 +182,7 @@ export function validateDependencyGraph(artifact: AIDependencyGraph): Validation
   if (artifact.violations && Array.isArray(artifact.violations)) {
     for (let i = 0; i < artifact.violations.length; i++) {
       const v = artifact.violations[i]
-      if (!v.from || !v.to) {
+      if (!v || !v.from || !v.to) {
         errors.push({
           path: `$.violations[${i}]`,
           message: "Violation must have 'from' and 'to' fields",
@@ -336,20 +336,18 @@ export function validateAllArtifacts(artifacts: {
   const startTime = performance.now()
   const results: { [key: string]: ValidationResult } = {}
 
-  const validators: Array<
-    [string, string, (artifact: Record<string, unknown>) => ValidationError[]]
-  > = [
-    ['ai-module-map.json', 'module_map', validateModuleMap],
-    ['ai-layer-model.json', 'layer_model', validateLayerModel],
-    ['ai-dependency-graph.json', 'dependency_graph', validateDependencyGraph],
-    ['ai-runtime-map.json', 'runtime_map', validateRuntimeMap],
-    ['ai-architecture-brain.json', 'architecture_brain', validateArchitectureBrain],
-    ['ai-context-mini.json', 'context_mini', validateContextMini],
-  ]
+  const validators: Array<[string, keyof typeof artifacts, (artifact: any) => ValidationError[]]> =
+    [
+      ['ai-module-map.json', 'module_map', validateModuleMap],
+      ['ai-layer-model.json', 'layer_model', validateLayerModel],
+      ['ai-dependency-graph.json', 'dependency_graph', validateDependencyGraph],
+      ['ai-runtime-map.json', 'runtime_map', validateRuntimeMap],
+      ['ai-architecture-brain.json', 'architecture_brain', validateArchitectureBrain],
+      ['ai-context-mini.json', 'context_mini', validateContextMini],
+    ]
 
   for (const [name, artifactKey, validator] of validators) {
-    // biome-ignore lint/suspicious/noExplicitAny: Dynamic property access requires any
-    const artifact = (artifacts as any)[artifactKey]
+    const artifact = artifacts[artifactKey]
 
     if (!artifact) {
       results[name] = {

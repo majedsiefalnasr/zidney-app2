@@ -39,7 +39,7 @@ export interface SchemaInitResponse {
 export interface WorkerQueueTask {
   id: string
   type: 'INIT_TENANT_SCHEMA'
-  payload: any
+  payload: unknown
   created_at: Date
   status: 'PENDING' | 'PROCESSING' | 'COMPLETED' | 'FAILED'
 }
@@ -49,7 +49,7 @@ export interface WorkerQueueTask {
  * Implementation can use Bull, RabbitMQ, etc.
  */
 export interface WorkerQueue {
-  enqueue(taskType: string, payload: any): Promise<string>
+  enqueue(taskType: string, payload: unknown): Promise<string>
 }
 
 /**
@@ -180,7 +180,7 @@ export async function getSchemaInitStatus(
   task_id: string,
   _redis: RedisClient | null,
   pool: Pool
-): Promise<any> {
+): Promise<unknown> {
   // @ts-expect-error: TS6133 - declared but never read [INFRA-001]
   const logger = createLogger('getSchemaInitStatus')
 

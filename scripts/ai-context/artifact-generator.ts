@@ -15,7 +15,7 @@ import { buildModuleMap } from './artifact-builders/module-map-builder'
 import { buildRuntimeMap } from './artifact-builders/runtime-map-builder'
 import { validateAllArtifacts } from './schema-validator'
 import { loadSourceMetadata } from './source-loader'
-import type { GenerationResult } from './types'
+import type { GenerationError, GenerationResult } from './types'
 
 export interface OrchestratorOptions {
   repoRoot: string
@@ -28,8 +28,8 @@ export async function generateAllArtifacts(
   options: OrchestratorOptions
 ): Promise<GenerationResult> {
   const startTime = performance.now()
-  const errors = []
-  const warnings = []
+  const errors: GenerationError[] = []
+  const warnings: GenerationError[] = []
   const artifacts: string[] = []
 
   try {
@@ -90,7 +90,7 @@ export async function generateAllArtifacts(
                 code: 'VALIDATION_FAILED',
                 message: `${name}: ${err.message}`,
                 context: { artifact: name, path: err.path },
-                severity: 'error',
+                severity: 'error' as const,
               })
             }
           }
@@ -156,7 +156,7 @@ export async function generateAllArtifacts(
           code: 'GENERATION_FAILED',
           message: `Artifact generation failed: ${String(err)}`,
           context: { error: err },
-          severity: 'error',
+          severity: 'error' as const,
         },
       ],
       warnings,

@@ -23,7 +23,7 @@ export async function mmcTokenValidator(c: Context, next: Next): Promise<Respons
 
   if (!authHeader) {
     const error = getErrorDetails(ProvisioningErrorCode.UNAUTHORIZED_SERVICE)
-    c.status(error.httpStatus as any)
+    c.status(error.httpStatus as 401 | 403 | 404 | 429 | 500 | 503)
     return c.json(
       createErrorResponse(
         ProvisioningErrorCode.UNAUTHORIZED_SERVICE,
@@ -36,7 +36,7 @@ export async function mmcTokenValidator(c: Context, next: Next): Promise<Respons
   const parts = authHeader.split(' ')
   if (parts.length !== 2 || parts[0]?.toLowerCase() !== 'bearer') {
     const error = getErrorDetails(ProvisioningErrorCode.UNAUTHORIZED_SERVICE)
-    c.status(error.httpStatus as any)
+    c.status(error.httpStatus as 401 | 403 | 404 | 429 | 500 | 503)
     return c.json(
       createErrorResponse(
         ProvisioningErrorCode.UNAUTHORIZED_SERVICE,
@@ -45,13 +45,23 @@ export async function mmcTokenValidator(c: Context, next: Next): Promise<Respons
     )
   }
 
-  const token = parts[1]!
+  const token = parts[1]
+  if (!token) {
+    const error = getErrorDetails(ProvisioningErrorCode.UNAUTHORIZED_SERVICE)
+    c.status(error.httpStatus as 401 | 403 | 404 | 429 | 500 | 503)
+    return c.json(
+      createErrorResponse(
+        ProvisioningErrorCode.UNAUTHORIZED_SERVICE,
+        'Invalid Authorization header format; expected: Bearer <token>'
+      )
+    )
+  }
   const expectedToken = process.env.MMC_SERVICE_TOKEN || 'dev-token-not-set'
 
   // Constant-time comparison to prevent timing attacks
   if (!constantTimeCompare(token, expectedToken)) {
     const error = getErrorDetails(ProvisioningErrorCode.UNAUTHORIZED_SERVICE)
-    c.status(error.httpStatus as any)
+    c.status(error.httpStatus as 401 | 403 | 404 | 429 | 500 | 503)
     return c.json(
       createErrorResponse(
         ProvisioningErrorCode.UNAUTHORIZED_SERVICE,

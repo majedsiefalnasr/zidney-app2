@@ -46,7 +46,7 @@ function getClientIP(c: Context): string {
   // Check for proxy headers first
   const forwarded = c.req.header('x-forwarded-for')
   if (forwarded) {
-    return forwarded.split(',')[0]!.trim()
+    return forwarded.split(',')[0]?.trim() || 'unknown'
   }
 
   const xRealIP = c.req.header('x-real-ip')
@@ -65,7 +65,7 @@ export function rateLimitProvisioningMiddleware(
   redis: Redis,
   config: RateLimitConfig = DEFAULT_RATE_LIMIT_CONFIG
 ) {
-  return async (c: Context, next: Next): Promise<Response | void> => {
+  return async (c: Context, next: Next): Promise<Response | undefined> => {
     const clientIP = getClientIP(c)
     const key = `${config.keyPrefix}${clientIP}`
 
@@ -91,7 +91,7 @@ export function rateLimitProvisioningMiddleware(
       if (current > config.maxRequests) {
         const error = getErrorDetails(ProvisioningErrorCode.RATE_LIMIT_EXCEEDED)
 
-        c.status(error.httpStatus as any)
+        c.status(error.httpStatus as 401 | 403 | 404 | 429 | 500 | 503)
         c.header('Retry-After', String(Math.ceil(ttl)))
         c.header('X-RateLimit-Limit', String(config.maxRequests))
         c.header('X-RateLimit-Remaining', '0')
@@ -147,7 +147,7 @@ export function inMemoryRateLimitMiddleware(config: RateLimitConfig = DEFAULT_RA
     }
   }, config.windowSeconds * 1000)
 
-  return async (c: Context, next: Next): Promise<Response | void> => {
+  return async (c: Context, next: Next): Promise<Response | undefined> => {
     const clientIP = getClientIP(c)
     const key = `${config.keyPrefix}${clientIP}`
     const now = Date.now()
@@ -180,7 +180,7 @@ export function inMemoryRateLimitMiddleware(config: RateLimitConfig = DEFAULT_RA
 
       const secondsRemaining = Math.ceil((expiresAt - now) / 1000)
 
-      c.status(error.httpStatus as any)
+      c.status(error.httpStatus as 401 | 403 | 404 | 429 | 500 | 503)
       c.header('Retry-After', String(secondsRemaining))
       c.header('X-RateLimit-Limit', String(config.maxRequests))
       c.header('X-RateLimit-Remaining', '0')

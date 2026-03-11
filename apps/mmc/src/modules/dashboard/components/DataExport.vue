@@ -141,6 +141,7 @@ import {
   Loader,
   TrendingUp,
 } from 'lucide-vue-next'
+import type { Component } from 'vue'
 import { ref } from 'vue'
 import { Button, Card, CardContent, Checkbox, Label } from '@/components/ui'
 
@@ -148,7 +149,7 @@ interface ExportOption {
   id: string
   label: string
   description: string
-  icon: any
+  icon: Component
   color: string
 }
 
@@ -254,7 +255,7 @@ const handleExport = async () => {
     statusMessage.value = null
 
     // Build export payload
-    const exportPayload: Record<string, any> = {
+    const exportPayload: Record<string, unknown> = {
       section: selectedOption.value,
       format: exportFormat.value,
     }

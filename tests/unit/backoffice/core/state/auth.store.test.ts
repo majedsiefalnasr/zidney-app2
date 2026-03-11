@@ -28,6 +28,7 @@ function makeTokenManager(token: string | null = null): ITokenManager {
   let _token = token
   return {
     getToken: vi.fn(() => _token),
+    hasToken: vi.fn(() => _token !== null),
     setToken: vi.fn((t: string) => {
       _token = t
     }),

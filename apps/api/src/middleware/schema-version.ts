@@ -181,7 +181,9 @@ export const schemaVersionMiddleware: MiddlewareHandler = async (ctx: Context, n
  * Get current schema version from tenant database (stub)
  * TODO: Implement actual DB query
  */
-async function getCurrentSchemaVersion(_tenant: any): Promise<SchemaVersionInfo | null> {
+async function getCurrentSchemaVersion(
+  _tenant: Record<string, unknown>
+): Promise<SchemaVersionInfo | null> {
   // Stub implementation
   throw new Error('Not implemented')
 }

@@ -78,15 +78,15 @@ async function loadADRs(adrDir: string): Promise<ADRFile[]> {
       const match = file.match(/adr-(\d+)/)
       if (!match) continue
 
-      const number = parseInt(match[1], 10)
+      const number = parseInt(match[1] ?? '0', 10)
       const content = await readFile(join(adrDir, file), 'utf-8')
       const titleMatch = content.match(/^# ADR-\d+: (.+)$/m)
       const statusMatch = content.match(/## Status\n\n(.+)$/m)
 
       adrFiles.push({
         number,
-        title: titleMatch ? titleMatch[1] : file,
-        status: statusMatch ? statusMatch[1] : 'unknown',
+        title: titleMatch?.[1] ?? file,
+        status: statusMatch?.[1] ?? 'unknown',
         path: join(adrDir, file),
         content,
       })
@@ -179,6 +179,9 @@ async function loadDockerServices(composePath: string): Promise<DockerService[]>
 
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i]
+      if (!line) {
+        continue
+      }
 
       if (line.match(/^\s{2}[a-z0-9_]+:/) && !line.includes('image:')) {
         // New service definition
@@ -187,7 +190,7 @@ async function loadDockerServices(composePath: string): Promise<DockerService[]>
           currentService = { name: serviceName }
         }
       } else if (line.match(/^\s{4}image:/) && currentService) {
-        currentService.image = line.split(':')[1]?.trim() || ''
+        currentService.image = line.split(':')[1]?.trim() ?? ''
       } else if (line.match(/^\s{2}[a-z0-9_]+:/) || line.trim() === '') {
         if (currentService?.name) {
           services.push(currentService as DockerService)
