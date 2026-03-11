@@ -66,3 +66,6 @@ Thumbs.db
 .secrets
 .vars
 .gitnexus
+
+# AI context — ephemeral generated artifacts (not committed)
+docs/ai/context/architecture-impact-report.json

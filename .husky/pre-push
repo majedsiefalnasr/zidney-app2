@@ -23,7 +23,7 @@ fi
 # ── Architecture Governance (blocking) ──────────────────────────────────────
 # Full architecture validation (not quick mode)
 echo "Running architecture governance validation..."
-bun scripts/ai-guard.ts
+bun scripts/ai-guard.ts --full
 
 
 # ── Infrastructure Audit (full) ─────────────────────────────────────────────

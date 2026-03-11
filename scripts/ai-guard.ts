@@ -18,7 +18,8 @@
  */
 
 import { execSync } from 'node:child_process'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readdirSync, readFileSync } from 'node:fs'
+import type { AIDependencyGraph } from '../packages/types/src/ai-context'
 
 function getCurrentBranch(): string {
   try {
@@ -114,6 +115,35 @@ const ARCH_MAP_PATH = 'docs/architecture/intelligence/ARCHITECTURE_MAP.json'
 const AI_BRAIN_PATH = 'docs/ai/context/ai-architecture-brain.json'
 
 const BOUNDARIES_PATH = 'docs/architecture/module-boundaries.json'
+
+const GRAPH_PATH = 'docs/ai/context/ai-dependency-graph.json'
+
+const EXPECTED_SCHEMA_VERSION = '2'
+
+const DEFAULT_MAX_AGE_HOURS = 24
+
+export interface GuardConfig {
+  mode: 'full' | 'incremental'
+  explicitModules: string[] | null
+  outputJson: boolean
+}
+
+export type GraphLoadResult =
+  | { graph: AIDependencyGraph }
+  | { graph: null; reason: 'missing' | 'corrupt' | 'stale' | 'schema_mismatch' }
+
+export interface ArchitectureImpactReport {
+  run_id: string
+  timestamp: string
+  validation_mode: 'incremental' | 'full'
+  modules_validated: number
+  modules_skipped: number
+  skipped_unmapped_files: string[]
+  fallback_reason: string | null
+  verdict: 'pass' | 'fail'
+  violations: string[]
+  duration_ms: number
+}
 
 function loadContract(): ArchitectureContract {
   const raw = readFileSync(CONTRACT_PATH, 'utf-8')
@@ -613,6 +643,401 @@ function validateBranchNaming(changedFiles: string[]): void {
   }
 }
 
+/* -------------------------------------------------------------------------- */
+/* Incremental Guard — new utilities (T005–T010)                              */
+/* -------------------------------------------------------------------------- */
+
+export function parseArgs(): GuardConfig {
+  const args = process.argv.slice(2)
+  const mode: 'full' | 'incremental' = args.includes('--incremental') ? 'incremental' : 'full'
+
+  let explicitModules: string[] | null = null
+  const modulesIdx = args.indexOf('--modules')
+  if (modulesIdx !== -1 && args[modulesIdx + 1]) {
+    explicitModules = args[modulesIdx + 1]
+      .split(',')
+      .map((m) => m.trim())
+      .filter(Boolean)
+  }
+
+  const outputJson = args.includes('--output') && args[args.indexOf('--output') + 1] === 'json'
+
+  return { mode, explicitModules, outputJson }
+}
+
+export function loadDependencyGraph(): GraphLoadResult {
+  if (!existsSync(GRAPH_PATH)) {
+    return { graph: null, reason: 'missing' }
+  }
+
+  let parsed: unknown
+  try {
+    parsed = JSON.parse(readFileSync(GRAPH_PATH, 'utf-8'))
+  } catch {
+    return { graph: null, reason: 'corrupt' }
+  }
+
+  const raw = parsed as Record<string, unknown>
+
+  if (raw.schema_version !== EXPECTED_SCHEMA_VERSION) {
+    return { graph: null, reason: 'schema_mismatch' }
+  }
+
+  const maxAgeHours =
+    typeof process.env.ARCH_GRAPH_MAX_AGE_HOURS === 'string'
+      ? Number(process.env.ARCH_GRAPH_MAX_AGE_HOURS)
+      : DEFAULT_MAX_AGE_HOURS
+
+  if (!raw.generated_at || typeof raw.generated_at !== 'string') {
+    return { graph: null, reason: 'stale' }
+  }
+
+  const generatedAt = new Date(raw.generated_at).getTime()
+  const ageMs = Date.now() - generatedAt
+  if (Number.isNaN(ageMs) || ageMs > maxAgeHours * 3_600_000) {
+    return { graph: null, reason: 'stale' }
+  }
+
+  return { graph: raw as unknown as AIDependencyGraph }
+}
+
+export function mapToModules(
+  files: string[],
+  moduleKeys: string[]
+): { modules: Set<string>; skipped: string[] } {
+  const modules = new Set<string>()
+  const skipped: string[] = []
+
+  for (const file of files) {
+    // Longest-prefix match
+    let matched: string | null = null
+    for (const key of moduleKeys) {
+      if (file === key || file.startsWith(key + '/')) {
+        if (!matched || key.length > matched.length) {
+          matched = key
+        }
+      }
+    }
+    if (matched) {
+      modules.add(matched)
+    } else {
+      skipped.push(file)
+    }
+  }
+
+  return { modules, skipped }
+}
+
+export function detectNewModules(moduleKeys: string[]): boolean {
+  const keySet = new Set(moduleKeys)
+  for (const prefix of ['apps', 'packages']) {
+    const dir = prefix
+    if (!existsSync(dir)) continue
+    const entries = readdirSync(dir, { withFileTypes: true })
+    for (const entry of entries) {
+      if (!entry.isDirectory()) continue
+      const modulePath = `${prefix}/${entry.name}`
+      if (!keySet.has(modulePath)) return true
+    }
+  }
+  return false
+}
+
+export function computeImpactScope(changed: Set<string>, graph: AIDependencyGraph): Set<string> {
+  const scope = new Set<string>(changed)
+  const queue = [...changed]
+
+  while (queue.length > 0) {
+    const module = queue.pop()!
+    const dependents = graph.reverse_dependencies[module] ?? []
+    for (const dep of dependents) {
+      if (!scope.has(dep)) {
+        scope.add(dep)
+        queue.push(dep)
+      }
+    }
+  }
+
+  return scope
+}
+
+type ValidationResult = {
+  fallback_reason: string | null
+  verdict: 'pass' | 'fail'
+  violations: string[]
+  modules_validated: number
+  modules_skipped: number
+  skipped_unmapped_files: string[]
+}
+
+function runFullScanWithReason(
+  fallbackReason: string | null,
+  stagedFiles: string[]
+): ValidationResult {
+  // Run full guard logic — capture violations by delegating to the existing scan
+  const violations: string[] = []
+  const archMap = loadArchitectureMap()
+  const brain = loadArchitectureBrain()
+  const boundaries = loadModuleBoundaries()
+  const aliases = loadTsAliases()
+  const contract = brain?.rules
+    ? { dependencyRules: brain.rules.dependencyRules, layerRules: brain.rules.layerRules }
+    : loadContract()
+
+  for (const file of stagedFiles) {
+    if (!existsSync(file)) continue
+    const fileModule = detectFileModule(file)
+    if (!fileModule) continue
+
+    const rawImports = extractImports(file)
+    let imports = rawImports
+    if (brain) {
+      const modulePath = resolveModulePath(file)
+      if (modulePath) {
+        const brainDeps = getModuleDepsFromBrain(modulePath, brain)
+        if (brainDeps.length > 0) imports = brainDeps
+      }
+    }
+
+    const archMapViolations = validateArchitectureMap(file, fileModule, imports, archMap)
+    const layerBoundaryViolations = boundaries
+      ? validateLayerBoundaries(file, imports, boundaries, aliases)
+      : []
+    const crossAppViolations = validateCrossAppImports(fileModule, file, imports)
+    const relativeLeakViolations = validateRelativeLeaks(file, rawImports)
+    const dependencyViolations = validateRules(
+      'Dependency',
+      fileModule,
+      imports,
+      contract.dependencyRules?.forbidden
+    )
+    const layerViolations = validateRules(
+      'Layer',
+      fileModule,
+      imports,
+      contract.layerRules?.forbidden
+    )
+
+    violations.push(
+      ...dependencyViolations.map((v) => `${file}: ${v}`),
+      ...layerViolations.map((v) => `${file}: ${v}`),
+      ...crossAppViolations.map((v) => `${file}: ${v}`),
+      ...relativeLeakViolations.map((v) => `${file}: ${v}`),
+      ...archMapViolations.map((v) => `${file}: ${v}`),
+      ...layerBoundaryViolations.map((v) => `${file}: ${v}`)
+    )
+  }
+
+  return {
+    fallback_reason: fallbackReason,
+    verdict: violations.length > 0 ? 'fail' : 'pass',
+    violations,
+    modules_validated: stagedFiles.length,
+    modules_skipped: 0,
+    skipped_unmapped_files: [],
+  }
+}
+
+export async function runIncremental(config: GuardConfig): Promise<ValidationResult> {
+  const stagedEnv = process.env.STAGED_FILES ?? ''
+  const stagedFiles = stagedEnv
+    .split('\n')
+    .map((f) => f.trim())
+    .filter(Boolean)
+
+  if (stagedFiles.length === 0) {
+    console.log('AI Guard (incremental): no staged files — skipping.')
+    process.exit(0)
+  }
+
+  const archMap = loadArchitectureMap()
+  const moduleKeys = Object.keys(archMap?.modules ?? {})
+
+  // Check fallback triggers
+  const mapChanged = stagedFiles.some(
+    (f) => f.endsWith('ARCHITECTURE_MAP.json') || f.includes('docs/architecture/intelligence/')
+  )
+
+  if (mapChanged) {
+    console.log('AI Guard (incremental): ARCHITECTURE_MAP changed — running full scan.')
+    const result = runFullScanWithReason('map_changed', stagedFiles)
+    finalizeResult(result, config)
+    return result
+  }
+
+  if (detectNewModules(moduleKeys)) {
+    console.log('AI Guard (incremental): new module detected — running full scan.')
+    const result = runFullScanWithReason('new_module_detected', stagedFiles)
+    finalizeResult(result, config)
+    return result
+  }
+
+  let loadResult = loadDependencyGraph()
+
+  if (loadResult.graph === null) {
+    if (loadResult.reason === 'missing') {
+      console.log('AI Guard (incremental): graph missing — regenerating...')
+      try {
+        execSync('bun scripts/infra-audit.ts --generate-graph', { stdio: 'inherit' })
+      } catch {
+        console.warn(
+          'AI Guard (incremental): graph regeneration failed — falling back to full scan.'
+        )
+        const result = runFullScanWithReason('graph_missing', stagedFiles)
+        finalizeResult(result, config)
+        return result
+      }
+      const retry = loadDependencyGraph()
+      if (retry.graph === null) {
+        const result = runFullScanWithReason('graph_missing', stagedFiles)
+        finalizeResult(result, config)
+        return result
+      }
+      loadResult = retry
+    } else if (loadResult.reason === 'stale') {
+      console.log('AI Guard (incremental): graph stale — running full scan.')
+      const result = runFullScanWithReason('graph_stale', stagedFiles)
+      finalizeResult(result, config)
+      return result
+    } else {
+      // 'corrupt' or 'schema_mismatch' — do not attempt regen
+      console.log(
+        `AI Guard (incremental): graph unusable (${loadResult.reason}) — running full scan.`
+      )
+      const result = runFullScanWithReason('graph_unusable', stagedFiles)
+      finalizeResult(result, config)
+      return result
+    }
+  }
+
+  // loadResult.graph is non-null
+  const graph = loadResult.graph
+
+  let scope: Set<string>
+  const skippedFiles: string[] = []
+
+  if (config.explicitModules) {
+    scope = new Set(config.explicitModules)
+  } else {
+    const mapped = mapToModules(stagedFiles, moduleKeys)
+    skippedFiles.push(...mapped.skipped)
+    scope = computeImpactScope(mapped.modules, graph)
+  }
+
+  if (scope.size >= moduleKeys.length) {
+    console.log('AI Guard (incremental): full scope — running full scan.')
+    const result = runFullScanWithReason('full_scope', stagedFiles)
+    finalizeResult(result, config)
+    return result
+  }
+
+  // Incremental: validate only files in affected scope
+  const scopedFiles = stagedFiles.filter((f) => {
+    const matched = moduleKeys.find((k) => f === k || f.startsWith(k + '/'))
+    return matched ? scope.has(matched) : false
+  })
+
+  console.log(
+    `AI Guard (incremental): validating ${scope.size} module(s): ${[...scope].join(', ')}`
+  )
+
+  const violations: string[] = []
+  const archMapForIncremental = archMap
+  const brain = loadArchitectureBrain()
+  const boundaries = loadModuleBoundaries()
+  const aliases = loadTsAliases()
+  const contract = brain?.rules
+    ? { dependencyRules: brain.rules.dependencyRules, layerRules: brain.rules.layerRules }
+    : loadContract()
+
+  for (const file of scopedFiles) {
+    if (!existsSync(file)) continue
+    const fileModule = detectFileModule(file)
+    if (!fileModule) continue
+
+    const rawImports = extractImports(file)
+    let imports = rawImports
+    if (brain) {
+      const modulePath = resolveModulePath(file)
+      if (modulePath) {
+        const brainDeps = getModuleDepsFromBrain(modulePath, brain)
+        if (brainDeps.length > 0) imports = brainDeps
+      }
+    }
+
+    const archMapViolations = validateArchitectureMap(
+      file,
+      fileModule,
+      imports,
+      archMapForIncremental
+    )
+    const layerBoundaryViolations = boundaries
+      ? validateLayerBoundaries(file, imports, boundaries, aliases)
+      : []
+    const crossAppViolations = validateCrossAppImports(fileModule, file, imports)
+    const relativeLeakViolations = validateRelativeLeaks(file, rawImports)
+    const dependencyViolations = validateRules(
+      'Dependency',
+      fileModule,
+      imports,
+      contract.dependencyRules?.forbidden
+    )
+    const layerViolations = validateRules(
+      'Layer',
+      fileModule,
+      imports,
+      contract.layerRules?.forbidden
+    )
+
+    violations.push(
+      ...dependencyViolations.map((v) => `${file}: ${v}`),
+      ...layerViolations.map((v) => `${file}: ${v}`),
+      ...crossAppViolations.map((v) => `${file}: ${v}`),
+      ...relativeLeakViolations.map((v) => `${file}: ${v}`),
+      ...archMapViolations.map((v) => `${file}: ${v}`),
+      ...layerBoundaryViolations.map((v) => `${file}: ${v}`)
+    )
+  }
+
+  const result: ValidationResult = {
+    fallback_reason: null,
+    verdict: violations.length > 0 ? 'fail' : 'pass',
+    violations,
+    modules_validated: scope.size,
+    modules_skipped: moduleKeys.length - scope.size,
+    skipped_unmapped_files: skippedFiles,
+  }
+  finalizeResult(result, config)
+  return result
+}
+
+function finalizeResult(result: ValidationResult, config: GuardConfig): void {
+  if (result.violations.length > 0) {
+    console.error('\nAI Guard: Architecture violations detected\n')
+    for (const v of result.violations) {
+      console.error(' -', v)
+    }
+    console.error('\nCommit rejected by Zidney AI Guard. Fix architecture violations.')
+    process.exit(1)
+  }
+
+  if (config.outputJson) {
+    const report: ArchitectureImpactReport = {
+      run_id: `${Date.now()}`,
+      timestamp: new Date().toISOString(),
+      validation_mode: config.mode === 'incremental' ? 'incremental' : 'full',
+      modules_validated: result.modules_validated,
+      modules_skipped: result.modules_skipped,
+      skipped_unmapped_files: result.skipped_unmapped_files,
+      fallback_reason: result.fallback_reason,
+      verdict: result.verdict,
+      violations: result.violations,
+      duration_ms: 0,
+    }
+    console.log(JSON.stringify(report, null, 2))
+  }
+}
+
 function runGuard() {
   const changedFiles = getChangedFiles()
 
@@ -733,5 +1158,10 @@ function runGuard() {
 
 // Only execute when run directly (not when imported for unit testing)
 if ((import.meta as { main?: boolean }).main) {
-  runGuard()
+  const config = parseArgs()
+  if (config.mode === 'incremental') {
+    runIncremental(config)
+  } else {
+    runGuard()
+  }
 }
