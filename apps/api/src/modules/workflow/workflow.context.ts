@@ -19,11 +19,8 @@
  */
 
 import { randomUUID } from 'node:crypto'
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-type HonoContext = unknown
-
 import type { WorkflowState } from '@zidney/domain-core'
+import type { Context } from 'hono'
 
 import type { TransitionRequestBody } from './workflow.validation'
 
@@ -31,15 +28,14 @@ import type { TransitionRequestBody } from './workflow.validation'
  * Build a WorkflowContext from the Hono request context (c) and
  * validated request body, plus the entity route parameters.
  *
- * @param c          - Hono context (typed as unknown to remain compatible
- *                     with BackofficeEnv without direct import)
+ * @param c          - Hono context
  * @param entityType - From :entityType path param
  * @param entityId   - From :entityId path param
  * @param body       - Validated TransitionRequestBody
  * @returns WorkflowContext ready for executeTransition()
  */
 export function buildWorkflowContext(
-  c: HonoContext,
+  c: Context,
   entityType: string,
   entityId: string,
   body: TransitionRequestBody

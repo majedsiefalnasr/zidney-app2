@@ -758,7 +758,7 @@ function scanDependencyBoundaries(files: Map<string, string>) {
         } else {
           // Track additional file examples
           const existing = seen.get(key)
-          if (existing.examples.length < 3) {
+          if (existing && existing.examples.length < 3) {
             existing.examples.push(rel)
           }
         }
@@ -789,7 +789,7 @@ function scanDependencyBoundaries(files: Map<string, string>) {
             violations.push(violation)
           } else {
             const existing = seen.get(key)
-            if (existing.examples.length < 3) {
+            if (existing && existing.examples.length < 3) {
               existing.examples.push(rel)
             }
           }
@@ -1227,7 +1227,9 @@ export function generateDependencyGraph(): void {
 
   // Determine the layer for a module from the architecture map
   function getModuleLayer(modulePath: string): string {
-    return archMap.modules[modulePath]?.layer ?? 'unknown'
+    return archMap && archMap.modules
+      ? (archMap.modules[modulePath]?.layer ?? 'unknown')
+      : 'unknown'
   }
 
   // Recursively enumerate .ts/.tsx/.vue files, excluding node_modules and test files
@@ -1498,7 +1500,6 @@ function runMain() {
 
       architectureMap.modules[m] = {
         layer,
-        description: '',
         criticality: 'core',
         allowed_dependencies: [],
         forbidden_dependencies: [],

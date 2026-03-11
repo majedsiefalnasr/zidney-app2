@@ -43,25 +43,31 @@ function createMockDb(queryResponses: Record<string, unknown> = {}) {
 
   const db = {
     _queryLog: queryLog,
-    query: vi.fn(async (sql: string, params?: unknown[]) => {
+    query: vi.fn(async <T = unknown>(sql: string, params?: unknown[]) => {
       queryLog.push({ sql, params })
 
       if (sql.includes('BEGIN') || sql.includes('COMMIT') || sql.includes('ROLLBACK')) {
-        return { rows: [], rowCount: 0 }
+        return { rows: [], rowCount: 0 } as { rows: T[]; rowCount: number | null }
       }
 
       // Match query override by keyword
       for (const [keyword, response] of Object.entries(queryResponses)) {
         if (sql.includes(keyword)) {
-          return response
+          return response as { rows: T[]; rowCount: number | null }
         }
       }
 
-      return { rows: [], rowCount: 0 }
+      return { rows: [], rowCount: 0 } as { rows: T[]; rowCount: number | null }
     }),
   }
 
-  return db
+  return db as unknown as {
+    _queryLog: Array<{ sql: string; params?: unknown[] }>
+    query: <T = unknown>(
+      sql: string,
+      params?: unknown[]
+    ) => Promise<{ rows: T[]; rowCount: number | null }>
+  }
 }
 
 const alwaysExistsValidator: EntityValidator = async () => true

@@ -7,13 +7,21 @@ import type { AdapterRequest, AdapterResponse, HttpAdapter } from '../types'
 function createFetchAdapterImpl(): HttpAdapter {
   return {
     async execute(request: AdapterRequest): Promise<AdapterResponse> {
-      const response = await globalThis.fetch(request.url, {
+      const fetchOptions: RequestInit = {
         method: request.method,
         headers: request.headers,
-        body: request.body,
-        signal: request.signal,
         credentials: 'include',
-      })
+      }
+
+      if (request.body !== undefined) {
+        fetchOptions.body = request.body
+      }
+
+      if (request.signal !== undefined) {
+        fetchOptions.signal = request.signal
+      }
+
+      const response = await globalThis.fetch(request.url, fetchOptions)
 
       // Flatten headers to Record<string, string> with lowercase keys
       const headers: Record<string, string> = {}

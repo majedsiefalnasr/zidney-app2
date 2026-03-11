@@ -54,7 +54,7 @@ export const useBackofficeAppStore = defineStore(
     persist: {
       pick: ['sidebarCollapsed', 'theme', 'locale'],
     },
-  }
+  } as any
 )
 
 // ── HMR (development only) ────────────────────────────────────────────────────
