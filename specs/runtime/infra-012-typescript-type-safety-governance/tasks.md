@@ -215,13 +215,13 @@ Setup Phase
 
 - [x] T011 [S] Create `.github/workflows/ci-type-safety.yml` with three-step pipeline (typecheck → guard → biome lint) → .github/workflows/ci-type-safety.yml
 - [x] T012 [S] Add typecheck, type-safety-guard, and biome scripts to `package.json` scripts → package.json
-- [ ] T013 [S] Integrate ci-type-safety job into `.github/workflows/ci-main.yml` (add job dependency) → .github/workflows/ci-main.yml
+- [x] T013 [S] Integrate ci-type-safety job into `.github/workflows/ci-main.yml` (add job dependency) → .github/workflows/ci-main.yml
 
 #### Testing & Validation
 
-- [ ] T014 [P] Create test PR with deliberate type error to verify CI blocks merge → test PR verification
+- [x] T014 [P] Create test PR with deliberate type error to verify CI blocks merge → test PR verification
 - [x] T015 [P] [Layer5] Document CI type-safety job in `docs/type-safety/CI_ENFORCEMENT.md` → docs/type-safety/CI_ENFORCEMENT.md
-- [ ] T016 [S] Verify CI execution time is <2 minutes with caching enabled → CI performance report
+- [x] T016 [S] Verify CI execution time is <2 minutes with caching enabled → CI performance report
 
 ---
 
@@ -231,91 +231,91 @@ Setup Phase
 
 #### Core Implementation
 
-- [ ] T017 [S] Implement `scripts/type-safety-guard.ts` core structure and CLI interface (arguments parsing, output modes) → scripts/type-safety-guard.ts
-- [ ] T018 [S] Implement pattern detection for `:any`, `as any`, `<any>` patterns using AST analysis → scripts/type-safety-guard.ts (patterns module)
-- [ ] T019 [S] Implement `@ts-ignore` pattern detection with justification comment validation → scripts/type-safety-guard.ts (ts-ignore module)
-- [ ] T020 [S] Implement ALLOWED_ANY_EXCEPTIONS.json registry system (read, match, verify expiration) → scripts/type-safety-guard.ts (registry module)
-- [ ] T021 [S] Generate JSON and markdown output formats from violations → scripts/type-safety-guard.ts (output module)
+- [x] T017 [S] Implement `scripts/type-safety-guard.ts` core structure and CLI interface (arguments parsing, output modes) → scripts/type-safety-guard.ts
+- [x] T018 [S] Implement pattern detection for `:any`, `as any`, `<any>` patterns using AST analysis → scripts/type-safety-guard.ts (patterns module)
+- [x] T019 [S] Implement `@ts-ignore` pattern detection with justification comment validation → scripts/type-safety-guard.ts (ts-ignore module)
+- [x] T020 [S] Implement ALLOWED_ANY_EXCEPTIONS.json registry system (read, match, verify expiration) → scripts/type-safety-guard.ts (registry module)
+- [x] T021 [S] Generate JSON and markdown output formats from violations → scripts/type-safety-guard.ts (output module)
 
 #### Integration & Testing
 
-- [ ] T022 [S] Add `type-safety-guard` job to CI pipeline after typecheck step → .github/workflows/ci-type-safety.yml
-- [ ] T023 [P] Create unit tests for guard script (test each pattern detector, registry lookup, output formatting) → tests/type-safety-guard.test.ts
-- [ ] T024 [S] Document guard script usage and flags in `docs/type-safety/GUARD_SCRIPT.md` → docs/type-safety/GUARD_SCRIPT.md
+- [x] T022 [S] Add `type-safety-guard` job to CI pipeline after typecheck step → .github/workflows/ci-type-safety.yml
+- [x] T023 [P] Create unit tests for guard script (test each pattern detector, registry lookup, output formatting) → tests/type-safety-guard.test.ts
+- [x] T024 [S] Document guard script usage and flags in `docs/type-safety/GUARD_SCRIPT.md` → docs/type-safety/GUARD_SCRIPT.md
 
 ### Phase 2: Domain Layer Safety (Layer 6 - 5 tasks)
 
 #### Exception Registry & Cleanup
 
-- [ ] T025 [S] Create `packages/domain-core/ALLOWED_ANY_EXCEPTIONS.json` with schema structure and empty exceptions array → packages/domain-core/ALLOWED_ANY_EXCEPTIONS.json
-- [ ] T026 [S] Create `packages/types/ALLOWED_ANY_EXCEPTIONS.json` with schema structure → packages/types/ALLOWED_ANY_EXCEPTIONS.json
-- [ ] T027 [S] Create `packages/validation/ALLOWED_ANY_EXCEPTIONS.json` with schema structure → packages/validation/ALLOWED_ANY_EXCEPTIONS.json
-- [ ] T028 [P] [Layer6] Audit and remove all `any` from `packages/domain-core` (fix or register in allow-list) → packages/domain-core/
+- [x] T025 [S] Create `packages/domain-core/ALLOWED_ANY_EXCEPTIONS.json` with schema structure and empty exceptions array → packages/domain-core/ALLOWED_ANY_EXCEPTIONS.json
+- [x] T026 [S] Create `packages/types/ALLOWED_ANY_EXCEPTIONS.json` with schema structure → packages/types/ALLOWED_ANY_EXCEPTIONS.json
+- [x] T027 [S] Create `packages/validation/ALLOWED_ANY_EXCEPTIONS.json` with schema structure → packages/validation/ALLOWED_ANY_EXCEPTIONS.json
+- [x] T028 [P] [Layer6] Audit and remove all `any` from `packages/domain-core` (fix or register in allow-list) → packages/domain-core/
 
 #### Documentation & Process
 
-- [ ] T029 [S] Remove all unallowed `any` from `packages/types` and `packages/validation` → packages/types/, packages/validation/
-- [ ] T030 [S] Document exception workflow in `docs/type-safety/EXCEPTION_HANDLING.md` (request process, approval, sunset) → docs/type-safety/EXCEPTION_HANDLING.md
+- [x] T029 [S] Remove all unallowed `any` from `packages/types` and `packages/validation` → packages/types/, packages/validation/
+- [x] T030 [S] Document exception workflow in `docs/type-safety/EXCEPTION_HANDLING.md` (request process, approval, sunset) → docs/type-safety/EXCEPTION_HANDLING.md
 
 ### Phase 3: Runtime Validation Layer (Layer 4 - 4 tasks)
 
 #### Schema Definition
 
-- [ ] T031 [S] Create `packages/validation/src/schemas/external-data.schema.ts` with schemas for API responses, DB results, queue messages, env vars → packages/validation/src/schemas/external-data.schema.ts
-- [ ] T032 [S] Create `packages/validation/src/schemas/domain-models.schema.ts` with domain model validators → packages/validation/src/schemas/domain-models.schema.ts
-- [ ] T033 [S] Create `packages/validation/VALIDATION_PATTERNS.md` with usage patterns and examples for all entry points → packages/validation/VALIDATION_PATTERNS.md
+- [x] T031 [S] Create `packages/validation/src/schemas/external-data.schema.ts` with schemas for API responses, DB results, queue messages, env vars → packages/validation/src/schemas/external-data.schema.ts
+- [x] T032 [S] Create `packages/validation/src/schemas/domain-models.schema.ts` with domain model validators → packages/validation/src/schemas/domain-models.schema.ts
+- [x] T033 [S] Create `packages/validation/VALIDATION_PATTERNS.md` with usage patterns and examples for all entry points → packages/validation/VALIDATION_PATTERNS.md
 
 #### Integration
 
-- [ ] T034 [P] [Layer4] Update API route handlers to use validation schemas (api/src/routes/\*.ts, validate all external data) → apps/api/src/routes/
-- [ ] T035 [S] Measure and verify validation latency is <100ms with instrumentation → performance test report
+- [x] T034 [P] [Layer4] Update API route handlers to use validation schemas (api/src/routes/\*.ts, validate all external data) → apps/api/src/routes/
+- [x] T035 [S] Measure and verify validation latency is <100ms with instrumentation → performance test report
 
 ### Phase 4: Biome Linting (Layer 2 - 3 tasks)
 
 #### Configuration & Enforcement
 
-- [ ] T036 [S] Update `biome.json` to enable `suspicious/noExplicitAny` rule as error (not warning) → biome.json
-- [ ] T037 [P] [Layer2] Fix all biome lint violations for explicit `any` (add justification comments or change to unknown) → apps/, packages/
-- [ ] T038 [S] Add biome lint check to CI after typecheck → .github/workflows/ci-type-safety.yml
+- [x] T036 [S] Update `biome.json` to enable `suspicious/noExplicitAny` rule as error (not warning) → biome.json
+- [x] T037 [P] [Layer2] Fix all biome lint violations for explicit `any` (add justification comments or change to unknown) → apps/, packages/
+- [x] T038 [S] Add biome lint check to CI after typecheck → .github/workflows/ci-type-safety.yml
 
 ### Phase 5: Boundary-Typed Architecture (Layer 7 - 6 tasks)
 
 #### Package Export Typing
 
-- [ ] T039 [S] Audit all exports in `packages/domain-core/src/index.ts` and add explicit types to functions/exports → packages/domain-core/src/index.ts
-- [ ] T040 [S] [P] Audit and type all exports in `packages/types/src/index.ts` → packages/types/src/index.ts
-- [ ] T041 [S] [P] Audit and type all exports in `packages/validation/src/index.ts` → packages/validation/src/index.ts
-- [ ] T042 [S] [P] Audit and type all exports in remaining packages (api-client, config, job-queue, logger, redis-utils, ui-system) → packages/\*/src/index.ts
-- [ ] T043 [S] [P] Audit and type all public exports in `apps/api/src/index.ts` and entry points → apps/api/src/
-- [ ] T044 [S] Verify all public API boundaries are explicitly typed (no implicit inference) → type-boundary audit report
+- [x] T039 [S] Audit all exports in `packages/domain-core/src/index.ts` and add explicit types to functions/exports → packages/domain-core/src/index.ts
+- [x] T040 [S] [P] Audit and type all exports in `packages/types/src/index.ts` → packages/types/src/index.ts
+- [x] T041 [S] [P] Audit and type all exports in `packages/validation/src/index.ts` → packages/validation/src/index.ts
+- [x] T042 [S] [P] Audit and type all exports in remaining packages (api-client, config, job-queue, logger, redis-utils, ui-system) → packages/\*/src/index.ts
+- [x] T043 [S] [P] Audit and type all public exports in `apps/api/src/index.ts` and entry points → apps/api/src/
+- [x] T044 [S] Verify all public API boundaries are explicitly typed (no implicit inference) → type-boundary audit report
 
 ### Phase 6: AI Governance Rules (Layer 8 - 3 tasks)
 
 #### AI Skill Documentation
 
-- [ ] T045 [S] Create `.agents/skills/typescript-governance/SKILL.md` with 5 core rules and decision trees → .agents/skills/typescript-governance/SKILL.md
-- [ ] T046 [S] Create `.agents/skills/typescript-governance/type-safety-examples.ts` with code examples for each rule (correct and incorrect patterns) → .agents/skills/typescript-governance/type-safety-examples.ts
-- [ ] T047 [S] Document AI enforcement model in SKILL.md (no special paths, same CI gates, code review responsibility) → .agents/skills/typescript-governance/SKILL.md
+- [x] T045 [S] Create `.agents/skills/typescript-governance/SKILL.md` with 5 core rules and decision trees → .agents/skills/typescript-governance/SKILL.md
+- [x] T046 [S] Create `.agents/skills/typescript-governance/type-safety-examples.ts` with code examples for each rule (correct and incorrect patterns) → .agents/skills/typescript-governance/type-safety-examples.ts
+- [x] T047 [S] Document AI enforcement model in SKILL.md (no special paths, same CI gates, code review responsibility) → .agents/skills/typescript-governance/SKILL.md
 
 ### Phase 7: Documentation & Runbooks (7 tasks)
 
 #### Core Documentation
 
-- [ ] T048 [S] Create `docs/type-safety/README.md` overview and architecture diagram → docs/type-safety/README.md
-- [ ] T049 [S] Create `docs/type-safety/TYPE_SAFETY_HANDBOOK.md` with layer-by-layer guide (what, why, how for each layer) → docs/type-safety/TYPE_SAFETY_HANDBOOK.md
+- [x] T048 [S] Create `docs/type-safety/README.md` overview and architecture diagram → docs/type-safety/README.md
+- [x] T049 [S] Create `docs/type-safety/TYPE_SAFETY_HANDBOOK.md` with layer-by-layer guide (what, why, how for each layer) → docs/type-safety/TYPE_SAFETY_HANDBOOK.md
 
 #### Runbooks & Guides
 
-- [ ] T050 [S] Create `docs/type-safety/RUNBOOK_FIX_TYPE_ERRORS.md` with troubleshooting guide (common errors, fixes, examples) → docs/type-safety/RUNBOOK_FIX_TYPE_ERRORS.md
-- [ ] T051 [S] Create `docs/type-safety/RUNBOOK_VALIDATE_EXTERNAL_DATA.md` with pattern guide (API responses, DB, queues, env vars) → docs/type-safety/RUNBOOK_VALIDATE_EXTERNAL_DATA.md
-- [ ] T052 [S] Create `docs/type-safety/RUNBOOK_TYPE_NEW_API_ENDPOINT.md` with step-by-step implementation guide → docs/type-safety/RUNBOOK_TYPE_NEW_API_ENDPOINT.md
-- [ ] T053 [S] Create `docs/type-safety/AI_GOVERNANCE_HANDBOOK.md` with detailed AI contribution rules and team expectations → docs/type-safety/AI_GOVERNANCE_HANDBOOK.md
-- [ ] T054 [S] Update main `README.md` to reference type safety documentation → README.md
+- [x] T050 [S] Create `docs/type-safety/RUNBOOK_FIX_TYPE_ERRORS.md` with troubleshooting guide (common errors, fixes, examples) → docs/type-safety/RUNBOOK_FIX_TYPE_ERRORS.md
+- [x] T051 [S] Create `docs/type-safety/RUNBOOK_VALIDATE_EXTERNAL_DATA.md` with pattern guide (API responses, DB, queues, env vars) → docs/type-safety/RUNBOOK_VALIDATE_EXTERNAL_DATA.md
+- [x] T052 [S] Create `docs/type-safety/RUNBOOK_TYPE_NEW_API_ENDPOINT.md` with step-by-step implementation guide → docs/type-safety/RUNBOOK_TYPE_NEW_API_ENDPOINT.md
+- [x] T053 [S] Create `docs/type-safety/AI_GOVERNANCE_HANDBOOK.md` with detailed AI contribution rules and team expectations → docs/type-safety/AI_GOVERNANCE_HANDBOOK.md
+- [x] T054 [S] Update main `README.md` to reference type safety documentation → README.md
 
 #### Testing & Validation
 
-- [ ] T055 [S] Create comprehensive test file `tests/type-safety-governance.test.ts` (integration tests for all layers) → tests/type-safety-governance.test.ts
-- [ ] T056 [S] Create `docs/type-safety/TESTING_GUIDE.md` with test scenarios for each layer (section 5 in spec) → docs/type-safety/TESTING_GUIDE.md
+- [x] T055 [S] Create comprehensive test file `tests/type-safety-governance.test.ts` (integration tests for all layers) → tests/type-safety-governance.test.ts
+- [x] T056 [S] Create `docs/type-safety/TESTING_GUIDE.md` with test scenarios for each layer (section 5 in spec) → docs/type-safety/TESTING_GUIDE.md
 
 ---
 

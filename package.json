@@ -50,7 +50,8 @@
     "arch:guard": "bun scripts/ai-guard.ts",
     "arch:validate-brain": "bun scripts/validate-architecture-brain.ts",
     "arch:visualize": "bun scripts/architecture/visualize.ts",
-    "type-safety-guard": "echo 'Type-safety-guard script (Phase 1 - Post-MVP: Implement after MVP completion)'",
+    "type-safety-guard": "bun scripts/type-safety-guard.ts",
+    "validate:types": "bun typecheck && bun type-safety-guard --json",
     "ai-context:generate": "bun scripts/generate-ai-context.ts",
     "ai-context:refresh": "bun scripts/generate-ai-context.ts --force",
     "ai-context:validate": "bun scripts/generate-ai-context.ts --validate"
@@ -77,5 +78,8 @@
     "vue-router": "4.6.4",
     "wait-on": "^9.0.4",
     "yaml-lint": "^1.7.0"
+  },
+  "dependencies": {
+    "@types/bun": "^1.3.10"
   }
 }
