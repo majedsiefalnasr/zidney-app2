@@ -193,21 +193,21 @@ Setup Phase
 
 ### Setup & Prerequisite Tasks
 
-- [ ] T001 Verify specification artifacts exist and are current → README verification
-- [ ] T002 Create feature branch `feature/infra-012-typescript-type-safety` → git branch check
+- [x] T001 Verify specification artifacts exist and are current → README verification
+- [x] T002 Create feature branch `feature/infra-012-typescript-type-safety` → git branch check
 
 ### Layer 1: TypeScript Strict Mode (8 tasks)
 
 #### Configuration & Migration
 
-- [ ] T003 [S] Update `tsconfig.base.json` to enable strict mode (strict: true, noImplicitAny, noUncheckedIndexedAccess, exactOptionalPropertyTypes) → tsconfig.base.json
-- [ ] T004 [S] Update root `tsconfig.json` to inherit strict base config → tsconfig.json
-- [ ] T005 [P] [Layer1] Fix type errors in `apps/api/src/**/*.ts` (run bun typecheck, fix implicit any, missing types) → apps/api/src/
-- [ ] T006 [P] [Layer1] Fix type errors in `packages/domain-core/src/**/*.ts` → packages/domain-core/src/
-- [ ] T007 [P] [Layer1] Fix type errors in `packages/validation/src/**/*.ts` → packages/validation/src/
-- [ ] T008 [P] [Layer1] Fix type errors in `packages/types/src/**/*.ts` → packages/types/src/
-- [ ] T009 [P] [Layer1] Fix type errors in remaining `apps/` and `packages/` (frontoffice, backoffice, mmc, worker, etc.) → apps/, packages/
-- [ ] T010 [S] Verify `bun typecheck` passes on full monorepo without errors → verification output
+- [x] T003 [S] Update `tsconfig.base.json` to enable strict mode (strict: true, noImplicitAny, noUncheckedIndexedAccess, exactOptionalPropertyTypes) → tsconfig.base.json
+- [x] T004 [S] Update root `tsconfig.json` to inherit strict base config → tsconfig.json
+- [x] T005 [P] [Layer1] Fix type errors in `apps/api/src/**/*.ts` (run bun typecheck, fix implicit any, missing types) → apps/api/src/
+- [x] T006 [P] [Layer1] Fix type errors in `packages/domain-core/src/**/*.ts` → packages/domain-core/src/
+- [x] T007 [P] [Layer1] Fix type errors in `packages/validation/src/**/*.ts` → packages/validation/src/
+- [x] T008 [P] [Layer1] Fix type errors in `packages/types/src/**/*.ts` → packages/types/src/
+- [x] T009 [P] [Layer1] Fix type errors in remaining `apps/` and `packages/` (frontoffice, backoffice, mmc, worker, etc.) → apps/, packages/
+- [x] T010 [S] Verify `bun typecheck` passes on full monorepo without errors → verification output
 
 ### Layer 5: CI Enforcement (6 tasks)
 
