@@ -20,6 +20,7 @@
 import { execSync } from 'node:child_process'
 import { existsSync, mkdirSync, readdirSync, readFileSync, statSync, writeFileSync } from 'node:fs'
 import { basename, join, relative } from 'node:path'
+import type { AIDependencyGraph } from '../packages/types/src/ai-context'
 
 const ROOT = process.cwd()
 const QUICK_MODE = process.argv.includes('--quick')
@@ -1017,7 +1018,7 @@ interface DependencyGraph {
   edges: { from: string; to: string }[]
 }
 
-interface AIDependencyGraph {
+interface AIDependencyGraphVizLegacy {
   nodes: { id: string; type: 'package' | 'app' }[]
   edges: { from: string; to: string }[]
   centrality: Record<string, number>
@@ -1113,7 +1114,7 @@ function computeCentrality(graph: DependencyGraph) {
   return counts
 }
 
-function exportAIGraph(graph: DependencyGraph): AIDependencyGraph {
+function exportAIGraph(graph: DependencyGraph): AIDependencyGraphVizLegacy {
   const centrality = computeCentrality(graph)
 
   const nodes = graph.nodes.map((n) => ({
@@ -1126,6 +1127,154 @@ function exportAIGraph(graph: DependencyGraph): AIDependencyGraph {
     edges: graph.edges,
     centrality,
   }
+}
+
+/* -------------------------------------------------------------------------- */
+/* Canonical dependency graph generation (schema v2 — AIDependencyGraph)     */
+/* -------------------------------------------------------------------------- */
+
+/**
+ * Generates docs/ai/context/ai-dependency-graph.json conforming to the
+ * canonical `AIDependencyGraph` schema (schema_version: "2").
+ *
+ * Called when `--generate-graph` CLI flag is present. Produces an object-map
+ * format (not nodes/edges arrays) suitable for incremental guard consumption.
+ */
+export function generateDependencyGraph(): void {
+  const archMap = loadArchitectureMap()
+  if (!archMap || !archMap.modules) {
+    console.error('[GEN-GRAPH] ARCHITECTURE_MAP.json not found or invalid — aborting')
+    process.exit(1)
+  }
+
+  const moduleKeys: string[] = Object.keys(archMap.modules)
+
+  // Import regex: matches ES module static imports (from "..." or from '...')
+  const IMPORT_RE = /from\s+['"]([^'"]+)['"]/g
+
+  // Resolve a raw import specifier to a monorepo module key, or null if external/unresolvable
+  function resolveToModuleKey(specifier: string, fromModule: string): string | null {
+    // Relative imports: resolve against the importing module path
+    if (specifier.startsWith('.')) {
+      // Normalise to a module root: e.g. "../../packages/logger/src/util" → "packages/logger"
+      const parts = fromModule.split('/')
+      const resolved = [...parts.slice(0, -1), ...specifier.split('/')]
+      const normalized: string[] = []
+      for (const seg of resolved) {
+        if (seg === '..') normalized.pop()
+        else if (seg !== '.') normalized.push(seg)
+      }
+      const joined = normalized.join('/')
+      return moduleKeys.find((k) => joined === k || joined.startsWith(k + '/')) ?? null
+    }
+    // Workspace package aliases (e.g. @zidney/types → packages/types)
+    if (specifier.startsWith('@zidney/')) {
+      const name = specifier.replace('@zidney/', '')
+      const candidate = `packages/${name}`
+      return moduleKeys.includes(candidate) ? candidate : null
+    }
+    // Direct module-path references (e.g. apps/api, packages/logger)
+    const direct = moduleKeys.find((k) => specifier === k || specifier.startsWith(k + '/'))
+    if (direct) return direct
+    // External package (not a monorepo module)
+    return null
+  }
+
+  // Determine the layer for a module from the architecture map
+  function getModuleLayer(modulePath: string): string {
+    return archMap.modules[modulePath]?.layer ?? 'unknown'
+  }
+
+  // Recursively enumerate .ts/.tsx/.vue files, excluding node_modules and test files
+  function enumerateSourceFiles(dir: string): string[] {
+    const results: string[] = []
+    if (!existsSync(dir)) return results
+    const entries = readdirSync(dir, { withFileTypes: true })
+    for (const entry of entries) {
+      if (entry.name === 'node_modules') continue
+      const fullPath = join(dir, entry.name)
+      if (entry.isDirectory()) {
+        results.push(...enumerateSourceFiles(fullPath))
+      } else if (
+        /\.(ts|tsx|vue)$/.test(entry.name) &&
+        !/\.(test|spec)\.(ts|tsx)$/.test(entry.name)
+      ) {
+        results.push(fullPath)
+      }
+    }
+    return results
+  }
+
+  // Build forward dependencies: modulePath → Set<dependencyModulePath>
+  const forwardDeps: Record<string, Set<string>> = {}
+  for (const moduleKey of moduleKeys) {
+    forwardDeps[moduleKey] = new Set()
+  }
+
+  for (const moduleKey of moduleKeys) {
+    const moduleDir = join(ROOT, moduleKey)
+    if (!existsSync(moduleDir)) continue
+
+    const sourceFiles = enumerateSourceFiles(moduleDir)
+    for (const filePath of sourceFiles) {
+      let content: string
+      try {
+        content = readFileSync(filePath, 'utf-8')
+      } catch {
+        continue
+      }
+
+      let match: RegExpExecArray | null
+      IMPORT_RE.lastIndex = 0
+      while ((match = IMPORT_RE.exec(content)) !== null) {
+        const dep = resolveToModuleKey(match[1], moduleKey)
+        if (dep && dep !== moduleKey) {
+          forwardDeps[moduleKey].add(dep)
+        }
+      }
+    }
+  }
+
+  // Build modules map (forward deps as arrays)
+  const modules: AIDependencyGraph['modules'] = {}
+  for (const moduleKey of moduleKeys) {
+    modules[moduleKey] = {
+      dependencies: [...forwardDeps[moduleKey]],
+      layer: getModuleLayer(moduleKey),
+      type: moduleKey.startsWith('apps/') ? 'app' : 'package',
+    }
+  }
+
+  // Build reverse_dependencies by inverting forward deps
+  const reverseDeps: AIDependencyGraph['reverse_dependencies'] = {}
+  for (const sourceModule of moduleKeys) {
+    for (const dep of forwardDeps[sourceModule]) {
+      if (!reverseDeps[dep]) reverseDeps[dep] = []
+      if (!reverseDeps[dep].includes(sourceModule)) {
+        reverseDeps[dep].push(sourceModule)
+      }
+    }
+  }
+
+  const now = new Date().toISOString()
+  const output: AIDependencyGraph = {
+    schema_version: '2',
+    generated_at: now,
+    source_metadata: {
+      infra_audit_timestamp: now,
+    },
+    modules,
+    reverse_dependencies: reverseDeps,
+  }
+
+  if (!existsSync(AI_CONTEXT_DIR)) {
+    mkdirSync(AI_CONTEXT_DIR, { recursive: true })
+  }
+
+  const outPath = join(AI_CONTEXT_DIR, 'ai-dependency-graph.json')
+  writeFileSync(outPath, JSON.stringify(output, null, 2) + '\n', 'utf-8')
+  console.log(`[GEN-GRAPH] Written: ${outPath}`)
+  console.log(`[GEN-GRAPH] Modules: ${moduleKeys.length}`)
 }
 
 /* -------------------------------------------------------------------------- */
@@ -1232,6 +1381,7 @@ function computeArchitectureScore(params: {
 
 const CI_MODE = process.argv.includes('--ci')
 const CI_STRICT = process.argv.includes('--ci-strict')
+const GENERATE_GRAPH_MODE = process.argv.includes('--generate-graph')
 const ARCH_SCORE_THRESHOLD = 85
 
 /* -------------------------------------------------------------------------- */
@@ -1239,6 +1389,10 @@ const ARCH_SCORE_THRESHOLD = 85
 /* -------------------------------------------------------------------------- */
 
 if ((import.meta as { main?: boolean }).main) {
+  if (GENERATE_GRAPH_MODE) {
+    generateDependencyGraph()
+    process.exit(0)
+  }
   runMain()
 }
 

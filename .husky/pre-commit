@@ -17,8 +17,16 @@ FORMAT_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|js|jsx|mjs|vue|json|md)
 
 if [ -n "$FORMAT_FILES" ]; then
   echo "Formatting staged files…"
-  echo "$FORMAT_FILES" | xargs -r bun run format
-  echo "$FORMAT_FILES" | xargs -r git add
+  echo "$FORMAT_FILES" | while IFS= read -r file; do
+    [ -z "$file" ] && continue
+
+    case "$file" in
+      *.md) bunx prettier --write "$file" ;;
+      *) bun biome format --write "$file" ;;
+    esac
+
+    git add -- "$file"
+  done
 fi
 
 # ── Staged-file quality gates (lint-staged + Biome lint) ───────────────────
@@ -40,15 +48,9 @@ CODE_FILES=$(echo "$STAGED_FILES" | grep -E '\.(ts|tsx|js|jsx|mjs|vue)$' || true
 if [ -n "$CODE_FILES" ]; then
   echo "Running architecture governance checks…"
 
-  # Run guards in parallel for faster commits
-  bun scripts/ai-guard.ts &
-  PID_AI=$!
-
-  bun scripts/infra-audit.ts --quick &
-  PID_INFRA=$!
-
-  wait $PID_AI
-  wait $PID_INFRA
+  # Incremental guard: validate only modules affected by staged files (<200ms)
+  _GUARD_STAGED=$(git diff --cached --name-only)
+  STAGED_FILES="$_GUARD_STAGED" bun scripts/ai-guard.ts --incremental
 else
   echo "Skipping architecture checks (no code files changed)"
 fi
