@@ -213,14 +213,14 @@ Setup Phase
 
 #### GitHub Actions Workflow
 
-- [ ] T011 [S] Create `.github/workflows/ci-type-safety.yml` with three-step pipeline (typecheck → guard → biome lint) → .github/workflows/ci-type-safety.yml
-- [ ] T012 [S] Add typecheck, type-safety-guard, and biome scripts to `package.json` scripts → package.json
+- [x] T011 [S] Create `.github/workflows/ci-type-safety.yml` with three-step pipeline (typecheck → guard → biome lint) → .github/workflows/ci-type-safety.yml
+- [x] T012 [S] Add typecheck, type-safety-guard, and biome scripts to `package.json` scripts → package.json
 - [ ] T013 [S] Integrate ci-type-safety job into `.github/workflows/ci-main.yml` (add job dependency) → .github/workflows/ci-main.yml
 
 #### Testing & Validation
 
 - [ ] T014 [P] Create test PR with deliberate type error to verify CI blocks merge → test PR verification
-- [ ] T015 [P] [Layer5] Document CI type-safety job in `docs/type-safety/CI_ENFORCEMENT.md` → docs/type-safety/CI_ENFORCEMENT.md
+- [x] T015 [P] [Layer5] Document CI type-safety job in `docs/type-safety/CI_ENFORCEMENT.md` → docs/type-safety/CI_ENFORCEMENT.md
 - [ ] T016 [S] Verify CI execution time is <2 minutes with caching enabled → CI performance report
 
 ---

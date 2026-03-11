@@ -50,6 +50,7 @@
     "arch:guard": "bun scripts/ai-guard.ts",
     "arch:validate-brain": "bun scripts/validate-architecture-brain.ts",
     "arch:visualize": "bun scripts/architecture/visualize.ts",
+    "type-safety-guard": "echo 'Type-safety-guard script (Phase 1 - Post-MVP: Implement after MVP completion)'",
     "ai-context:generate": "bun scripts/generate-ai-context.ts",
     "ai-context:refresh": "bun scripts/generate-ai-context.ts --force",
     "ai-context:validate": "bun scripts/generate-ai-context.ts --validate"
