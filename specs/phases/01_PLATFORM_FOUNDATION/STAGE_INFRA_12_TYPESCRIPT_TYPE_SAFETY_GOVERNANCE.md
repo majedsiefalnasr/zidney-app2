@@ -9,20 +9,32 @@ those introduced by AI-assisted development.
 ## Stage Status
 
 Status: DRAFT
-Step: pre_step
+Step: specify
 Risk Level: LOW
-Initiated: 2026-03-11T13:20:06Z
+Last Updated: 2026-03-11T13:20:30Z
 
-Scope Open:
+Scope Defined:
 
-- Specification pending
+- 8-layer governance architecture specified
+- 8 functional requirements mapped to layers
+- 4 non-functional requirements with targets
+- 11 in-scope items, 6 out-of-scope items clearly defined
+- Constitutional compliance verified (zero violations)
+- Testing strategy with 4 concrete scenarios
+
+Deferred Scope:
+
+- Type coverage tooling target (deferred to implementation)
+- Specific AI tool integrations (rules defined, tools selected later)
 
 Constitutional Compliance:
 
-- Pending constitutional audit
+- Specification drafted — constitutional audit pending
+- Zero database, security, or architecture changes
+- Pure governance layer with no runtime impact
 
 Notes:
-Stage initialized. Specification in progress.
+Specification complete. Clarification step pending.
 
 ---
 
