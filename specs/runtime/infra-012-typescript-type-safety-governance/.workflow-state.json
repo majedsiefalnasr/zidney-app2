@@ -5,15 +5,15 @@
   "stage_file": "specs/phases/01_PLATFORM_FOUNDATION/STAGE_INFRA_12_TYPESCRIPT_TYPE_SAFETY_GOVERNANCE.md",
   "branch": "spec/infra-012-typescript-type-safety-governance",
   "base_branch": "develop",
-  "current_step": "plan",
+  "current_step": "tasks",
   "stage_status": "DRAFT",
   "clarifications_resolved": true,
   "drift_passed": false,
   "implementation_allowed": false,
   "plan_completed": true,
-  "tasks_total": null,
-  "tasks_completed": null,
-  "last_updated": "2026-03-11T15:40:00Z",
+  "tasks_total": 48,
+  "tasks_completed": 0,
+  "last_updated": "2026-03-11T16:00:00Z",
   "history": [
     {
       "event": "branch_created",
@@ -37,6 +37,14 @@
       "artifacts": ["plan.md", "data-model.md", "research.md", "contracts.md", "quickstart.md"],
       "mvp_scope": "Layers 1+5",
       "timestamp": "2026-03-11T15:40:00Z"
+    },
+    {
+      "event": "tasks_complete",
+      "tasks_total": 48,
+      "tasks_completed": 0,
+      "mvp_tasks": 14,
+      "post_mvp_tasks": 34,
+      "timestamp": "2026-03-11T16:00:00Z"
     }
   ]
 }

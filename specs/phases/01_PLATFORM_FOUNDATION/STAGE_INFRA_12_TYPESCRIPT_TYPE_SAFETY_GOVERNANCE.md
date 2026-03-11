@@ -9,35 +9,45 @@ those introduced by AI-assisted development.
 ## Stage Status
 
 Status: DRAFT
-Step: clarify
+Step: tasks
 Risk Level: LOW
-Last Updated: 2026-03-11T13:25:00Z
+Last Updated: 2026-03-11T16:00:00Z
 
-Scope Clarified:
+Tasks Generated:
 
-- 8-layer governance architecture fully specified
-- 5 clarification questions resolved
-- Guard script timing: mandatory in CI only (Q1)
-- Domain exceptions: formalized allow-list with registry (Q2)
-- Validation boundary: all external data at API entry, <100ms latency (Q3)
-- AI governance: identical enforcement for all code (Q4)
-- Layer sequencing: sequential 1→8, MVP = Layers 1+5 (Q5)
-- Constitutional compliance revalidated (zero violations)
+- Total: 48 atomic tasks
+- MVP (Layers 1+5): 14 tasks (Phase 0) — 40 hours estimated, 1-2 weeks delivery
+- Post-MVP (Layers 2-8): 34 tasks (Phases 1-7) — 150 hours estimated, deferred until MVP stable
+- Parallel Opportunities: 28 tasks can run concurrently (type fixes, CI setup, documentation)
+- Test Scenarios: 5 comprehensive test scenarios mapped to governance layers
+
+Task Breakdown by Layer:
+
+- Foundation: 2 setup tasks
+- Layer 1 (TypeScript Strict): 8 tasks → tsconfig.json strict mode + type fixes
+- Layer 5 (CI Enforcement): 6 tasks → GitHub Actions CI gate for typecheck + guard + biome
+- Layer 3 (Guard Script): 6 tasks [deferred]
+- Layer 6 (Domain Layer): 5 tasks [deferred]
+- Layer 4 (Validation): 4 tasks [deferred]
+- Layer 2 (Biome Lint): 3 tasks [deferred]
+- Layer 7 (Boundary Typing): 6 tasks [deferred]
+- Layer 8 (AI Governance): 3 tasks [deferred]
+- Documentation: 7 tasks [deferred]
 
 Deferred Scope:
 
-- Type coverage tooling target (deferred to implementation)
-- Specific AI tool integrations (rules defined, tools selected later)
+- Layers 2-4 (post-MVP Phase 2) — 27 tasks
+- Layers 6-8 (post-MVP Phase 3) — 7 tasks
 
 Constitutional Compliance:
 
-- Specification clarified — constitutional audit passing
-- Zero database, security, or architecture changes
-- Pure governance layer with no runtime impact
-- All 5 clarifications remain within governance scope
+- Task set compliant — drift analysis required before implementation
+- All 48 tasks respect type safety governance scope
+- Sequential layer dependencies enforced
+- MVP path clear and unblocked
 
 Notes:
-Specification unambiguated. Technical planning authorized.
+Atomic task set generated. Drift analysis gate pending.
 
 ---
 
