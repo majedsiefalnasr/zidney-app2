@@ -9,6 +9,20 @@ those introduced by AI-assisted development.
 ## Stage Status
 
 Status: DRAFT
+Step: pre_step
+Risk Level: LOW
+Initiated: 2026-03-11T13:20:06Z
+
+Scope Open:
+
+- Specification pending
+
+Constitutional Compliance:
+
+- Pending constitutional audit
+
+Notes:
+Stage initialized. Specification in progress.
 
 ---
 
