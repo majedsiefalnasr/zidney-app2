@@ -49,6 +49,7 @@ import {
 } from '@zidney/domain-core/rbac'
 import { createLogger } from '@zidney/logger'
 import { type Context, Hono } from 'hono'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 import {
   createPermissionGuard,
@@ -80,18 +81,10 @@ const MODULE_DISPLAY_NAMES: Record<PermissionModule, string> = {
 // ---------------------------------------------------------------------------
 
 function getRequestContext(c: Context<BackofficeEnv>) {
-  const correlationId: string = (c.get('correlationId') as string) || 'unknown'
-  const tenant = c.get('tenant') as {
-    id: string
-    slug: string
-    pool: {
-      query: <T>(sql: string, params?: unknown[]) => Promise<{ rows: T[]; rowCount: number | null }>
-    }
-    redis?: import('ioredis').Redis
-  }
-  const authPayload = c.get('authPayload') as { user_id?: string } | undefined
-  const userId: string | null =
-    authPayload?.user_id ?? (c.get('userId') as string | undefined) ?? null
+  const correlationId: string = c.get('correlationId')
+  const tenant = c.get('tenant')
+  const staffUser = c.get('staff_user')
+  const userId: string | null = staffUser?.user_id ?? null
   return { correlationId, tenant, userId }
 }
 
@@ -119,7 +112,7 @@ function errorResponse(
         correlationId,
       },
     },
-    status
+    status as ContentfulStatusCode
   )
 }
 

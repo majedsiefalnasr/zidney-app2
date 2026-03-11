@@ -19,6 +19,7 @@
 
 import { computeJobPayloadHash } from '@zidney/domain-core'
 import { createLogger } from '@zidney/logger'
+import type { Redis } from 'ioredis'
 
 import {
   countTranslationsForLanguage,
@@ -75,7 +76,7 @@ export interface SettingsRequestContext {
    * Optional Redis client (ioredis) — required for async language removal (DRAIN job enqueue).
    * Provided by backoffice route handler via tenant.redis.
    */
-  redis?: unknown
+  redis?: Redis
 }
 
 /** Row count threshold for sync vs async language removal (FR-034) */
@@ -363,6 +364,9 @@ export async function updateSettingsGroup(
               created_at: new Date().toISOString(),
             }
             try {
+              if (!ctx.redis) {
+                throw new Error('Redis client not available for job enqueue')
+              }
               await ctx.redis.lpush('queue:DRAIN_LANGUAGE_TRANSLATIONS', JSON.stringify(envelope))
               logger.info({
                 event: 'drain_language_job_enqueued',
@@ -401,7 +405,10 @@ export async function updateSettingsGroup(
     // Load current settings within transaction for diff computation
     const currentRow = await repository.getSettings(ctx.db)
     const currentGroupSettings = currentRow
-      ? ((currentRow as unknown)[`${group}_settings`] as Record<string, unknown>)
+      ? (((currentRow as unknown as Record<string, unknown>)[`${group}_settings`] as Record<
+          string,
+          unknown
+        >) ?? {})
       : {}
 
     // For payment group: apply sentinel pattern and encrypt credentials

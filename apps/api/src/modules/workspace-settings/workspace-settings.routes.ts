@@ -24,7 +24,9 @@
  */
 
 import { createLogger } from '@zidney/logger'
+import type { Context } from 'hono'
 import { Hono } from 'hono'
+import type { ContentfulStatusCode } from 'hono/utils/http-status'
 
 import type { BackofficeEnv } from '../../routes/backoffice/types'
 import { InvalidSettingsGroupError, WorkspaceSettingsError } from './workspace-settings.errors'
@@ -40,7 +42,7 @@ export const workspaceSettingsRouter = new Hono<BackofficeEnv>()
 // Helper: Extract SettingsRequestContext from Hono context
 // ---------------------------------------------------------------------------
 
-function extractContext(c: unknown): SettingsRequestContext {
+function extractContext(c: Context<BackofficeEnv>): SettingsRequestContext {
   const tenant = c.get('tenant')
   const staffUser = c.get('staff_user')
   const correlationId = c.get('correlationId') || 'unknown'
@@ -169,7 +171,7 @@ workspaceSettingsRouter.put('/settings/:group', async (c) => {
 // Error Handler
 // ---------------------------------------------------------------------------
 
-function handleSettingsError(c: unknown, err: unknown) {
+function handleSettingsError(c: Context<BackofficeEnv>, err: unknown) {
   const correlationId = c.get('correlationId') || 'unknown'
 
   if (err instanceof WorkspaceSettingsError) {
@@ -179,7 +181,7 @@ function handleSettingsError(c: unknown, err: unknown) {
       error_message: err.message,
     })
 
-    return c.json(err.toResponse(), err.statusCode)
+    return c.json(err.toResponse(), err.statusCode as ContentfulStatusCode)
   }
 
   // Unexpected error

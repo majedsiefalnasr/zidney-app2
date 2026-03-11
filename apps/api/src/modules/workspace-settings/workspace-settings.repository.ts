@@ -87,7 +87,7 @@ export async function upsertSettings(
   const jsonData = JSON.stringify(data)
 
   // Try UPDATE first with optimistic locking
-  const updateResult = await db.query(
+  const updateResult = await db.query<{ config_version: number }>(
     `UPDATE workspace_settings
      SET ${columnName} = $1::jsonb,
          config_version = $2 + 1,
@@ -99,7 +99,7 @@ export async function upsertSettings(
   )
 
   if (updateResult.rows.length > 0) {
-    return { config_version: (updateResult.rows[0] as unknown).config_version }
+    return { config_version: updateResult.rows[0]!.config_version }
   }
 
   // Check if row exists but version mismatch
@@ -113,7 +113,7 @@ export async function upsertSettings(
   }
 
   // No row exists → INSERT with ON CONFLICT for race safety
-  const insertResult = await db.query(
+  const insertResult = await db.query<{ config_version: number }>(
     `INSERT INTO workspace_settings (
        singleton_key, config_version,
        organization_name,
@@ -133,7 +133,7 @@ export async function upsertSettings(
     [jsonData]
   )
 
-  return { config_version: (insertResult.rows[0] as unknown).config_version }
+  return { config_version: insertResult.rows[0]!.config_version }
 }
 
 // ---------------------------------------------------------------------------

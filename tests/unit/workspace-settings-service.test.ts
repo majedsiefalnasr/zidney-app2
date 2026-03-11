@@ -26,10 +26,17 @@ const TEST_ENCRYPTION_KEY = 'a1b2c3d4e5f6a7b8c9d0e1f2a3b4c5d6e7f8a9b0c1d2e3f4a5b
 // Mock DB helpers
 // ---------------------------------------------------------------------------
 
-function createMockDb(overrides: Partial<Record<string, unknown>> = {}) {
+function createMockDb(
+  overrides: {
+    settings?: unknown
+    auditEntries?: unknown[]
+    noSettings?: boolean
+    versionConflict?: boolean
+  } = {}
+) {
   const queries: Array<{ sql: string; params?: unknown[] }> = []
 
-  const mockSettings = overrides.settings ?? {
+  const mockSettings = (overrides.settings ?? {
     id: '550e8400-e29b-41d4-a716-446655440000',
     singleton_key: 'SETTINGS',
     config_version: 3,
@@ -49,57 +56,67 @@ function createMockDb(overrides: Partial<Record<string, unknown>> = {}) {
     security_settings: {},
     created_at: new Date('2026-02-28T10:00:00.000Z'),
     updated_at: new Date('2026-02-28T10:30:00.000Z'),
-  }
+  }) as unknown as { config_version: number }
 
   const db = {
-    query: vi.fn(async (sql: string, params?: unknown[]) => {
+    query: vi.fn(async <T = unknown>(sql: string, params?: unknown[]) => {
       queries.push({ sql, params })
 
       if (sql.includes('BEGIN') || sql.includes('COMMIT') || sql.includes('ROLLBACK')) {
-        return { rows: [], rowCount: 0 }
+        return { rows: [], rowCount: 0 } as { rows: T[]; rowCount: number | null }
       }
 
       if (sql.includes('SELECT') && sql.includes('workspace_settings_audit')) {
+        const auditEntries = (overrides.auditEntries || []) as unknown[]
         return {
-          rows: overrides.auditEntries || [],
-          rowCount: (overrides.auditEntries || []).length,
-        }
+          rows: auditEntries as T[],
+          rowCount: auditEntries.length,
+        } as { rows: T[]; rowCount: number | null }
       }
 
       if (sql.includes('SELECT') && sql.includes('workspace_settings')) {
         if (overrides.noSettings) {
-          return { rows: [], rowCount: 0 }
+          return { rows: [], rowCount: 0 } as { rows: T[]; rowCount: number | null }
         }
-        return { rows: [mockSettings], rowCount: 1 }
+        return { rows: [mockSettings] as T[], rowCount: 1 } as {
+          rows: T[]
+          rowCount: number | null
+        }
       }
 
       if (sql.includes('UPDATE') && sql.includes('workspace_settings')) {
         if (overrides.versionConflict) {
-          return { rows: [], rowCount: 0 }
+          return { rows: [], rowCount: 0 } as { rows: T[]; rowCount: number | null }
         }
         return {
-          rows: [{ config_version: (mockSettings.config_version || 3) + 1 }],
+          rows: [{ config_version: (mockSettings.config_version || 3) + 1 }] as T[],
           rowCount: 1,
-        }
+        } as { rows: T[]; rowCount: number | null }
       }
 
       if (sql.includes('INSERT') && sql.includes('workspace_settings_audit')) {
-        return { rows: [], rowCount: 1 }
+        return { rows: [], rowCount: 1 } as { rows: T[]; rowCount: number | null }
       }
 
       if (sql.includes('INSERT') && sql.includes('workspace_settings')) {
         return {
-          rows: [{ config_version: 1 }],
+          rows: [{ config_version: 1 }] as T[],
           rowCount: 1,
-        }
+        } as { rows: T[]; rowCount: number | null }
       }
 
-      return { rows: [], rowCount: 0 }
+      return { rows: [], rowCount: 0 } as { rows: T[]; rowCount: number | null }
     }),
     _queries: queries,
   }
 
-  return db
+  return db as unknown as {
+    query: <T = unknown>(
+      sql: string,
+      params?: unknown[]
+    ) => Promise<{ rows: T[]; rowCount: number | null }>
+    _queries: Array<{ sql: string; params?: unknown[] }>
+  }
 }
 
 function createMockContext(
@@ -169,9 +186,11 @@ describe('getWorkspaceSettings', () => {
     const result = await getWorkspaceSettings(ctx)
 
     // Credentials NOT returned
-    expect((result.payment_settings as Record<string, unknown>).encrypted_api_key).toBeUndefined()
     expect(
-      (result.payment_settings as Record<string, unknown>).encrypted_secret_key
+      (result.payment_settings as unknown as Record<string, unknown>).encrypted_api_key
+    ).toBeUndefined()
+    expect(
+      (result.payment_settings as unknown as Record<string, unknown>).encrypted_secret_key
     ).toBeUndefined()
     // Boolean sentinels returned
     expect(result.payment_settings.has_api_key).toBe(true)

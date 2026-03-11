@@ -11,6 +11,7 @@
  */
 
 import type { TranslationOperationContext } from '@zidney/domain-core'
+import type { Context } from 'hono'
 import { languageSettingsInternalSchema } from '../workspace-settings/workspace-settings.validation'
 
 interface DbClient {
@@ -28,7 +29,7 @@ interface DbClient {
  * Throws if settings row does not exist or is malformed.
  */
 export async function buildTranslationContext(
-  c: unknown
+  c: Context
 ): Promise<{ ctx: TranslationOperationContext; db: DbClient }> {
   const tenant = c.get('tenant')
   const staffUser = c.get('staff_user')
