@@ -17,16 +17,13 @@ flowchart TD
   subgraph infrastructure["Infrastructure Layer"]
     packages_api_client["packages/api-client"]
     packages_config["packages/config"]
+    packages_job_queue["packages/job-queue"]
     packages_logger["packages/logger"]
     packages_redis_utils["packages/redis-utils"]
   end
-  subgraph unknown["Unknown Layer"]
-    packages_app["packages/app"]
-    packages_ui["packages/ui"]
-  end
 
-  apps_api --> packages_app
   apps_api --> packages_domain_core
+  apps_api --> packages_job_queue
   apps_api --> packages_logger
   apps_api --> packages_redis_utils
   apps_api --> packages_types
@@ -40,14 +37,15 @@ flowchart TD
   apps_mmc --> packages_api_client
   apps_mmc --> packages_logger
   apps_mmc --> packages_types
-  apps_mmc --> packages_ui
+  apps_mmc --> packages_ui_system
   apps_worker --> packages_domain_core
+  apps_worker --> packages_job_queue
   apps_worker --> packages_logger
   apps_worker --> packages_types
-  packages_domain_core --> packages_app
   packages_domain_core --> packages_logger
   packages_domain_core --> packages_types
   packages_domain_core --> packages_validation
+  packages_job_queue --> packages_logger
   packages_redis_utils --> packages_logger
   packages_validation --> packages_logger
   packages_validation --> packages_types
