@@ -1,8 +1,23 @@
 #!/usr/bin/env bun
 
-import { globSync } from 'bun'
+import { readdir, readFile } from 'node:fs/promises'
+import { join } from 'node:path'
 
 // Types
+interface AllowedException {
+  file: string
+  line: number
+  pattern: string
+  justification: string
+  sunsetDate?: string
+  approved_by: string
+  approved_date: string
+}
+
+interface AllowedExceptions {
+  exceptions: AllowedException[]
+}
+
 interface Violation {
   file: string
   line: number
@@ -26,19 +41,81 @@ function parseArgs(): CliArgs {
   }
 }
 
-// Collect TypeScript files from repository
-function collectTypeScriptFiles(): string[] {
-  const patterns = ['apps/**/*.ts', 'apps/**/*.tsx', 'packages/**/*.ts', 'packages/**/*.tsx']
+// Load allowed exceptions from all registry files
+async function loadAllowedExceptions(): Promise<Map<string, AllowedException[]>> {
+  const exceptionMap = new Map<string, AllowedException[]>()
+  const registryFiles = [
+    'scripts/ALLOWED_ANY_EXCEPTIONS.json',
+    'packages/domain-core/ALLOWED_ANY_EXCEPTIONS.json',
+    'packages/types/ALLOWED_ANY_EXCEPTIONS.json',
+    'packages/validation/ALLOWED_ANY_EXCEPTIONS.json',
+  ]
 
-  const allFiles = new Set<string>()
-  for (const pattern of patterns) {
-    const files = globSync(pattern)
-    for (const f of files) {
-      allFiles.add(f)
+  for (const registryFile of registryFiles) {
+    try {
+      const content = await readFile(registryFile, 'utf-8')
+      const data = JSON.parse(content) as AllowedExceptions
+      for (const exception of data.exceptions) {
+        const key = `${exception.file}:${exception.line}:${exception.pattern}`
+        if (!exceptionMap.has(exception.file)) {
+          exceptionMap.set(exception.file, [])
+        }
+        exceptionMap.get(exception.file)!.push(exception)
+      }
+    } catch {
+      // Registry file not found or cannot be read - skip it
     }
   }
 
-  return Array.from(allFiles)
+  return exceptionMap
+}
+
+// Check if a violation is allowed
+function isAllowed(
+  violation: Violation,
+  allowedExceptions: Map<string, AllowedException[]>
+): boolean {
+  const fileExceptions = allowedExceptions.get(violation.file)
+  if (!fileExceptions) return false
+
+  return fileExceptions.some(
+    (exc) => exc.line === violation.line && exc.pattern === violation.pattern
+  )
+}
+
+// Recursively collect TypeScript files
+async function collectTypeScriptFiles(): Promise<string[]> {
+  const files: string[] = []
+  const dirs = ['apps', 'packages']
+
+  async function walkDir(dir: string): Promise<void> {
+    try {
+      const entries = await readdir(dir, { withFileTypes: true })
+      for (const entry of entries) {
+        const fullPath = join(dir, entry.name)
+        if (entry.isDirectory() && !entry.name.startsWith('.') && entry.name !== 'tests') {
+          await walkDir(fullPath)
+        } else if (
+          entry.isFile() &&
+          (entry.name.endsWith('.ts') || entry.name.endsWith('.tsx')) &&
+          !entry.name.endsWith('.test.ts') &&
+          !entry.name.endsWith('.test.tsx') &&
+          !entry.name.endsWith('.spec.ts') &&
+          !entry.name.endsWith('.spec.tsx')
+        ) {
+          files.push(fullPath)
+        }
+      }
+    } catch {
+      // Skip inaccessible directories
+    }
+  }
+
+  for (const dir of dirs) {
+    await walkDir(dir)
+  }
+
+  return files
 }
 
 // Scan files for type safety violations
@@ -174,21 +251,25 @@ function outputMarkdown(violations: Violation[]): void {
 // Main entry point
 async function main(): Promise<void> {
   const args = parseArgs()
-  const files = collectTypeScriptFiles()
+  const files = await collectTypeScriptFiles()
   const violations = await scanForViolations(files)
+  const allowedExceptions = await loadAllowedExceptions()
+
+  // Filter out allowed violations
+  const unapprovedViolations = violations.filter((v) => !isAllowed(v, allowedExceptions))
 
   switch (args.output) {
     case 'json':
-      outputJSON(violations)
+      outputJSON(unapprovedViolations)
       break
     case 'markdown':
-      outputMarkdown(violations)
+      outputMarkdown(unapprovedViolations)
       break
     default:
-      outputText(violations)
+      outputText(unapprovedViolations)
   }
 
-  if (violations.length > 0 && !args.noExitError) {
+  if (unapprovedViolations.length > 0 && !args.noExitError) {
     process.exit(1)
   }
 }
